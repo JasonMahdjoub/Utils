@@ -1,12 +1,12 @@
 /*
  * Utils is created and developped by Jason MAHDJOUB (jason.mahdjoub@distri-mind.fr) at 2016.
- * MadKitGroup extension was developped by Jason Mahdjoub. 
+ * Utils was developped by Jason Mahdjoub. 
  * Individual contributors are indicated by the @authors tag.
  * 
  * This file is part of Utils.
  * 
  * This is free software; you can redistribute it and/or modify it under the
- * terms of the GNU General Public License Lesser as published by the Free
+ * terms of the GNU Lesser General Public License as published by the Free
  * Software Foundation; either version 3.0 of the License.
  * 
  * This software is distributed in the hope that it will be useful, but WITHOUT
@@ -19,6 +19,7 @@
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA, or see the FSF
  * site: http://www.fsf.org.
  */
+
 package com.distrimind.util.harddrive;
 
 import java.io.File;
