@@ -20,7 +20,7 @@ public class ZipDependency extends BinaryDependency
 	this(name, new ZipSourceDependancy(jar_file_dependency, getDefaultSourceExcludeRegex(), getDefaultSourceIncludeRegex()),_subpackage,license, jar_file_dependency, getDefaultBinaryExcludeRegex(), getDefaultBinaryIncludeRegex());
     }
     
-    public ZipDependency(String name, ZipSourceDependancy source_code, Package _subpackage, License license, File jar_file_dependency, String _exclude_regex, String _include_regex)
+    public ZipDependency(String name, SourceDependancy source_code, Package _subpackage, License license, File jar_file_dependency, String _exclude_regex, String _include_regex)
     {
 	super(name, source_code, _subpackage, license,_exclude_regex, _include_regex);
 	if (jar_file_dependency==null)

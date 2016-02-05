@@ -39,11 +39,24 @@ public final class FileTools {
 	 * @param folderPath A folder path.
 	 */
 	public static void checkFolder(File folderPath) {
-		if (!(folderPath.isDirectory())) {
+		if (!(folderPath.exists())) {
 		    folderPath.mkdir();
 		}
 	}
- 
+
+	/**
+	 * Check if a specified file path is a folder and create a folder if it does
+	 * not exist.
+	 * 
+	 * @param folderPath A folder path.
+	 */
+	public static void checkFolderRecursive(File folderPath) {
+		if (!(folderPath.exists())) {
+		    checkFolderRecursive(folderPath.getParentFile());
+		    folderPath.mkdir();
+		}
+	}
+  
 	/**
 	 * Delete a directory.
 	 * 
@@ -285,7 +298,7 @@ public final class FileTools {
 		    continue;
 		if (entry.isDirectory())
 		{
-		    new File(_directory_dst, entry.getName()).mkdir();
+		    checkFolderRecursive(new File(_directory_dst, entry.getName()));
 		}
 		else
 		{
@@ -294,7 +307,9 @@ public final class FileTools {
 	             byte data[] = new byte[BUFFER];
 	             // write the files to the disk
 	             //System.out.println("Extracting: " +new File(_directory_dst, entry.getName()));
-	             FileOutputStream fos = new FileOutputStream(new File(_directory_dst, entry.getName()));
+	             File f=new File(_directory_dst, entry.getName());
+	             checkFolderRecursive(f.getParentFile());
+	             FileOutputStream fos = new FileOutputStream(f);
 	             dest = new BufferedOutputStream(fos, BUFFER);
 	             while ((count = zis.read(data, 0, BUFFER)) 
 	               != -1) {
@@ -305,7 +320,10 @@ public final class FileTools {
 	          }
 	    }
 	    zis.close();
+	    
 	}
+	
+	
 	
 	private static boolean matchString(String s, String regex_exclude, String regex_include)
 	{

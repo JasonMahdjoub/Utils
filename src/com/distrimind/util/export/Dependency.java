@@ -1,7 +1,5 @@
 package com.distrimind.util.export;
 
-import java.util.regex.Pattern;
-
 import com.distrimind.util.properties.XMLProperties;
 
 public class Dependency extends XMLProperties
@@ -38,12 +36,14 @@ public class Dependency extends XMLProperties
     
     public static String getRegexMatchPackage(Package p)
     {
-	return Pattern.quote(p.getName());
+	return mixRegexes(".*"+p.getName().replace(".", "/")+".*", ".*"+p.getName().replace(".", "\\\\")+".*");
     }
+    
+    
 
     public static String getRegexMatchClass(Class<?> c)
     {
-	return Pattern.quote(c.getCanonicalName());
+	return mixRegexes(".*"+c.getCanonicalName().replace(".", "/")+".*", ".*"+c.getCanonicalName().replace(".", "\\\\")+".*");
     }
     
     public static String mixRegexes(String regex1, String regex2, String ...regexes)
