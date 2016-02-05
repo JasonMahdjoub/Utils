@@ -32,7 +32,7 @@ class Export
 		org.apache.commons.net.SocketClient.class.getPackage(), 
 		new License(new File("/home/jason/projets/commons-net-3.4/LICENSE.txt")), new File("/home/jason/projets/commons-net-3.4/commons-net-3.4.jar"), null, null));
 
-	exports.setProject(new JavaProjectDependency(root_dir, bin_dir, root_package, new License(License.PredefinedLicense.GNU_LGPL_v3_0), 
+	exports.setProject(new JavaProjectDependency(root_dir, bin_dir, root_package, Utils.LICENSE, 
 		new JavaProjectSourceDependency(src_dir, Dependency.getRegexMatchClass(Export.class), null), "com/distrimind/util/build.txt", 
 		null, "Utils is a set of tools that can be useful in every context of development", 
 		Utils.VERSION,

@@ -3,6 +3,7 @@ package com.distrimind.util;
 import java.io.InputStream;
 import java.util.Calendar;
 
+import com.distrimind.util.export.License;
 import com.distrimind.util.version.Description;
 import com.distrimind.util.version.Person;
 import com.distrimind.util.version.PersonDeveloper;
@@ -11,7 +12,7 @@ import com.distrimind.util.version.Version;
 public class Utils
 {
     public static final Version VERSION;
-    
+    public static final License LICENSE=new License(License.PredefinedLicense.GNU_LGPL_v3_0);
     static
     {
 	Calendar c=Calendar.getInstance();
