@@ -33,6 +33,8 @@ import java.sql.Date;
 import java.time.LocalTime;
 import java.util.logging.Level;
 
+import javax.lang.model.SourceVersion;
+
 /**
  * 
  * @author Jason Mahdjoub
@@ -142,6 +144,10 @@ public class DefaultXMLObjectParser extends AbstractXMLObjectParser
 		    return Void.TYPE;
 		return new InetSocketAddress(InetAddress.getByName(split[0]), Integer.parseInt(split[1]));
 	    }
+	    else if (field_type==SourceVersion.class)
+	    {
+		return SourceVersion.valueOf(nodeValue);
+	    }
 	    return Void.TYPE;
     }
 
@@ -223,6 +229,10 @@ public class DefaultXMLObjectParser extends AbstractXMLObjectParser
 	    {
 		InetSocketAddress isa=(InetSocketAddress)object;
 		return isa.getAddress().toString()+":"+isa.getPort();
+	    }
+	    else if (field_type==SourceVersion.class)
+	    {
+		return object.toString();
 	    }
 	    else 
 		return null;

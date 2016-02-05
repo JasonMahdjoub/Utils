@@ -89,7 +89,7 @@ public class SystemFunctions
     
     /**
      * Gets the speed in bytes of the given network interface 
-     * @param network_interface
+     * @param network_interface the network interface to test
      * @return the speed in byte of the given network interface or -1 if the speed couldn't be got.
      */
     public static long getNetworkInterfaceSpeed(NetworkInterface network_interface)

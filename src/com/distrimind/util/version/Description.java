@@ -27,9 +27,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-
 import com.distrimind.util.properties.XMLProperties;
 import com.distrimind.util.version.Version.Type;
 
@@ -117,31 +114,6 @@ public class Description extends XMLProperties
 	}
 	s.append("</ul>");
 	return s.toString();
-    }
-
-    @Override
-    public Node getRootNode(Document _document)
-    {
-	for (int i=0;i<_document.getChildNodes().getLength();i++)
-	{
-	    Node n=_document.getChildNodes().item(i);
-	    if (n.getNodeName().equals(Version.class.getName()))
-		return n;
-	}
-	return null;
-    }
-	
-
-    @Override
-    public Node createOrGetRootNode(Document _document)
-    {
-	Node res=getRootNode(_document);
-	if (res==null)
-	{
-	    res=_document.createElement(Version.class.getName());
-	    _document.appendChild(res);
-	}
-	return res;
     }
 
 }

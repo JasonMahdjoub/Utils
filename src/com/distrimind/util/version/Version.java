@@ -27,6 +27,15 @@ import java.awt.Component;
 import java.awt.FlowLayout;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -37,9 +46,6 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
 
 import com.distrimind.util.properties.XMLProperties;
 
@@ -313,28 +319,47 @@ public class Version extends XMLProperties
 	getJFrame().setVisible(true);
     }
 
-    @Override
-    public Node getRootNode(Document _document)
+    public void loadBuildNumber(File buildFile) throws NumberFormatException, IOException
     {
-	for (int i=0;i<_document.getChildNodes().getLength();i++)
+	//load build file
+	try(FileInputStream is=new FileInputStream(buildFile))
 	{
-	    Node n=_document.getChildNodes().item(i);
-	    if (n.getNodeName().equals(Version.class.getName()))
-		return n;
+	    loadBuildNumber(is);
 	}
-	return null;
     }
-	
 
-    @Override
-    public Node createOrGetRootNode(Document _document)
+    public void loadBuildNumber(InputStream inputStream) throws NumberFormatException, IOException
     {
-	Node res=getRootNode(_document);
-	if (res==null)
+	try(InputStreamReader isr=new InputStreamReader(inputStream))
 	{
-	    res=_document.createElement(Version.class.getName());
-	    _document.appendChild(res);
+	    try (BufferedReader bf=new BufferedReader(isr))
+	    {
+		setBuildNumber(Integer.parseInt(bf.readLine()));
+	    }
 	}
-	return res;
     }
+    
+    public void incrementBuildNumber()
+    {
+	this.m_build_number++;
+    }
+    
+    public void saveBuildNumber(File buildFile) throws IOException
+    {
+	
+	try(FileOutputStream fos=new FileOutputStream(buildFile))
+	{
+	    saveBuildNumber(fos);
+	}
+    }
+    
+    public void saveBuildNumber(OutputStream outputStream) throws NumberFormatException, IOException
+    {
+	try(OutputStreamWriter osw=new OutputStreamWriter(outputStream))
+	{
+	    osw.write(Integer.toString(getBuildNumber()));
+	}
+    }
+   
+    
 }

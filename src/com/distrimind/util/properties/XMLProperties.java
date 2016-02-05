@@ -63,6 +63,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+
 /**
  * This interface enable to partially serialize/deserialize classes that implements the current interface, in order to produce an XML file.
  * The managed types are all the primitive types, {@link String} class, {@link Date} class, {@link LocalTime} class, {@link Class} class, {@link Level} class, {@link Map} class, {@link List} class, {@link URI} class, {@link URL} class, {@link File} class, and all classes that implements this interface.
@@ -106,9 +107,9 @@ public abstract class XMLProperties implements Cloneable, Serializable
     
     /**
      * Load properties from an XML file
-     * @param xml_file
-     * @throws XMLPropertiesParseException
-     * @throws IOException
+     * @param xml_file the file to load
+     * @throws XMLPropertiesParseException if a problem parsing occurs
+     * @throws IOException of a IO problem occurs
      */
     public void load(File xml_file) throws XMLPropertiesParseException, IOException
     {
@@ -126,8 +127,11 @@ public abstract class XMLProperties implements Cloneable, Serializable
     /**
      * return the DOM from an xml file.
      * 
-     * @param xmlFile
+     * @param xmlFile the file to load
      * @return the DOM from an xml file or <code>null</code> if not found or invalid
+     * @throws SAXException if a problem of XML parse/load occurs
+     * @throws IOException of a IO problem occurs
+     * @throws ParserConfigurationException if a problem of XML parse occurs
      */
     public static Document getDOM(File xmlFile) throws SAXException,IOException,ParserConfigurationException{
 	try (final InputStream is = new FileInputStream(xmlFile)) {
@@ -138,8 +142,11 @@ public abstract class XMLProperties implements Cloneable, Serializable
     /**
      * return the DOM from an xml file.
      * 
-     * @param xmlFile
+     * @param stream the stream to read
      * @return the DOM from an xml file or <code>null</code> if not found or invalid
+     * @throws SAXException if a problem of XML parse/load occurs
+     * @throws IOException of a IO problem occurs
+     * @throws ParserConfigurationException if a problem of XML parse occurs
      */
     public static Document getDOM(InputStream stream) throws SAXException,IOException,ParserConfigurationException{
 	try
@@ -154,8 +161,8 @@ public abstract class XMLProperties implements Cloneable, Serializable
 
     /**
      * Load properties from an XML document
-     * @param document
-     * @throws XMLPropertiesParseException
+     * @param document the document to load
+     * @throws XMLPropertiesParseException if a problem of XML parse occurs
      */
     public void load(Document document) throws XMLPropertiesParseException
     {
@@ -177,19 +184,39 @@ public abstract class XMLProperties implements Cloneable, Serializable
 	read(document, nl.item(0).getChildNodes());
     }
     
-    /**
-     * 
-     * @param document the document
-     * @return the root document node, or null if this node does not exists
-     */
-    public abstract Node getRootNode(Document document);
     
     /**
+     * 
+     * @param _document the document
+     * @return the root document node, or null if this node does not exists
+     */
+    public Node getRootNode(Document _document)
+    {
+	for (int i=0;i<_document.getChildNodes().getLength();i++)
+	{
+	    Node n=_document.getChildNodes().item(i);
+	    if (n.getNodeName().equals(this.getClass().getName()))
+		return n;
+	}
+	return null;
+    }
+	
+
+    /**
      * Create and get root node 
-     * @param document
+     * @param _document the document
      * @return the root node
      */
-    public abstract Node createOrGetRootNode(Document document);
+    public Node createOrGetRootNode(Document _document)
+    {
+	Node res=getRootNode(_document);
+	if (res==null)
+	{
+	    res=_document.createElement(this.getClass().getName());
+	    _document.appendChild(res);
+	}
+	return res;
+    }
     
     void read(Document document, NodeList node_list) throws XMLPropertiesParseException
     {
@@ -532,8 +559,8 @@ public abstract class XMLProperties implements Cloneable, Serializable
     
     /**
      * Save properties into an XML file
-     * @param xml_file
-     * @throws XMLPropertiesParseException
+     * @param xml_file the file to save
+     * @throws XMLPropertiesParseException if a problem of XML parse occurs
      */
     public void save(File xml_file) throws XMLPropertiesParseException
     {
@@ -565,8 +592,8 @@ public abstract class XMLProperties implements Cloneable, Serializable
     
     /**
      * Save properties into an XML document
-     * @param doc
-     * @throws XMLPropertiesParseException
+     * @param doc the document
+     * @throws XMLPropertiesParseException if a problem of XML parse occurs
      */
     public void save(Document doc) throws XMLPropertiesParseException
     {
@@ -861,8 +888,8 @@ public abstract class XMLProperties implements Cloneable, Serializable
      * 
      * if one property does not exists, put the value into the free string properties returned by {@link #getFreeStringProperties()}.
      * 
-     * @param properties
-     * @throws IllegalArgumentException
+     * @param properties the properties
+     * @throws IllegalArgumentException if a problem of parse occurs
      */
     public void loadFromProperties(Properties properties) throws IllegalArgumentException
     {

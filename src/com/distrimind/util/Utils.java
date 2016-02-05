@@ -1,0 +1,45 @@
+package com.distrimind.util;
+
+import java.io.InputStream;
+import java.util.Calendar;
+
+import com.distrimind.util.version.Description;
+import com.distrimind.util.version.Person;
+import com.distrimind.util.version.PersonDeveloper;
+import com.distrimind.util.version.Version;
+
+public class Utils
+{
+    public static final Version VERSION;
+    
+    static
+    {
+	Calendar c=Calendar.getInstance();
+	c.set(2016, 1, 4);
+	Calendar c2=Calendar.getInstance();
+	c.set(2016, 1, 4);
+    	VERSION=new Version("Utils", 1,0,0, Version.Type.Stable, 0, c.getTime(), c2.getTime());
+	try
+	{
+	
+	    InputStream is=Utils.class.getResourceAsStream("build.txt");
+	    VERSION.loadBuildNumber(is);
+	
+	    VERSION.addCreator(new Person("mahdjoub", "jason"));
+	    c=Calendar.getInstance();
+	    c.set(2016, 1, 4);
+	    VERSION.addDeveloper(new PersonDeveloper("mahdjoub", "jason", c.getTime()));
+	
+	    c=Calendar.getInstance();
+	    c.set(2016, 1, 4);
+	    Description d=new Description(1,6,2,Version.Type.Beta, 1, c.getTime());
+	    d.addItem("Realeasing first version of Utils");
+	    VERSION.addDescription(d);
+	}
+	catch(Exception e)
+	{
+	    e.printStackTrace();
+	}
+    }
+    
+}
