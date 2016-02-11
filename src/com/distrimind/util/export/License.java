@@ -89,7 +89,8 @@ public class License
 	GNU_GPL_v2("GNU_GPL_License_v2.txt"),
 	GNU_GPL_v3("GNU_GPL_License_v3.txt"),
 	GNU_LGPL_v2_1("GNU_LGPL_License_v2.1.txt"),
-	GNU_LGPL_v3_0("GNU_LGPL_License_v3.0.txt");
+	GNU_LGPL_v3_0("GNU_LGPL_License_v3.0.txt"),
+	APACHE_LICENSE_V2_0("Apache_License_V2.0.txt");
 	
 	protected final String fileName;
 	

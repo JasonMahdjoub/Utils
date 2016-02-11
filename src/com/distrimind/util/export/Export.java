@@ -198,6 +198,9 @@ public class Export
 	exports.getTemporaryDirectory().mkdir();
 	File tmpexport=new File(exports.getTemporaryDirectory(), "export");
 	tmpexport.mkdir();
+	File tmpbin=new File(exports.getTemporaryDirectory(), "bin");
+	tmpbin.mkdir();
+	
 	for (File f : exports.getProject().getAdditionalFilesAndDirectoriesToExport())
 	{
 	    if (f.exists())
@@ -205,19 +208,22 @@ public class Export
 		if (f.isDirectory())
 		{
 		    FileTools.copyFolderToFolder(f, tmpexport, true);
+		    FileTools.copyFolderToFolder(f, tmpbin, true);
 		}
-		else
+		else if (f.isFile())
 		{
 		    File d=new File(tmpexport, f.getName());
 		    FileTools.copy(f, d);
+		    d=new File(tmpbin, f.getName());
+		    FileTools.copy(f, d);
 		}
 	    }
+	    else
+		throw new IllegalArgumentException("Impossible to find the additional file "+f.getAbsolutePath());
 	}
 	
 	
 	//prepare dependencies
-	File tmpbin=new File(exports.getTemporaryDirectory(), "bin");
-	tmpbin.mkdir();
 	File tmpsrc=null;
 	if (exportScenario.source_code_export_type.equals(Exports.SourceCodeExportType.SOURCE_CODE_IN_JAR_FILE))
 	{
