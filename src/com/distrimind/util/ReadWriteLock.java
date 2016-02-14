@@ -24,9 +24,6 @@ package com.distrimind.util;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * 
@@ -43,33 +40,27 @@ public class ReadWriteLock{
      private int writeAccesses    = 0;
      private Thread writingThread = null;
 
-     private ReentrantLock lock=new ReentrantLock(true);
-     private Condition cannotContinue=lock.newCondition();
+     //private ReentrantLock lock=new ReentrantLock(true);
+     //private Condition cannotContinue=lock.newCondition();
 
      public void tryLockRead() throws InterruptedException{
-	 this.tryLockRead(-1, TimeUnit.MILLISECONDS);
+	 this.tryLockRead(-1);
      }
-     public void tryLockRead(long timeout_ms) throws InterruptedException{
-	 this.tryLockRead(timeout_ms, TimeUnit.MILLISECONDS);
-     }
-    public void tryLockRead(long timeout, TimeUnit unit) throws InterruptedException{
-	      try
+    public void tryLockRead(long timeout_ms) throws InterruptedException{
+	
+	      synchronized(this)
 	      {
-		  lock.lock();
 		  Thread callingThread = Thread.currentThread();
 		  while(! canGrantReadAccess(callingThread)){
-			if (timeout<0)
-			    cannotContinue.await();
+		      
+			if (timeout_ms<0)
+			    wait();
 			else
-			    cannotContinue.await(timeout, unit);
+			    wait(timeout_ms);
 
 		  }
 
 		  readingThreads.put(callingThread, new Integer((getReadAccessCount(callingThread) + 1)));
-	      }
-	      finally
-	      {
-		  lock.unlock();
 	      }
 	    }
     
@@ -140,9 +131,9 @@ public class ReadWriteLock{
 
 
     public void unlockRead(){
-	try
+	synchronized(this)
 	{
-	    lock.lock();
+	    
 	    Thread callingThread = Thread.currentThread();
 	    if(!isReader(callingThread)){
 		throw new IllegalMonitorStateException("Calling Thread does not" +
@@ -157,60 +148,45 @@ public class ReadWriteLock{
 	    { 
 		readingThreads.put(callingThread, new Integer((accessCount -1))); 
 	    }
-	    cannotContinue.signalAll();
+	    notifyAll();
 	}
-	finally
-	{
-	    lock.unlock();
-	}
-	
     }
 
     public int tryLockWrite() throws InterruptedException{
-	return this.tryLockWrite(-1, TimeUnit.MILLISECONDS);
+	return this.tryLockWrite(-1);
     }
     public int tryLockWrite(long timeout_ms) throws InterruptedException{
-	return this.tryLockWrite(timeout_ms, TimeUnit.MILLISECONDS);
-    }
-    public int tryLockWrite(long timeout, TimeUnit unit) throws InterruptedException{
-	Thread callingThread = Thread.currentThread();
-	try
+	synchronized(this)
 	{
-	    lock.lock(); 
-	    ++writeRequests;
-	    while(! canGrantWriteAccess(callingThread)){
-		if (timeout<0)
-		    cannotContinue.await();
-		else
-		    cannotContinue.await(timeout, unit);
+	    Thread callingThread = Thread.currentThread();
+	    try
+	    {
+		++writeRequests;
+		while(! canGrantWriteAccess(callingThread)){
+		    if (timeout_ms<0)
+			wait();
+		    else
+			wait(timeout_ms);
+		}
+		--writeRequests;
+		writingThread = callingThread;
+		return ++writeAccesses;
 	    }
-	    --writeRequests;
-	    writingThread = callingThread;
-	    return ++writeAccesses;
-	}
-	catch(InterruptedException e)
-	{
-	    --writeRequests;
-	    cannotContinue.signalAll();
-	    throw e;
-	}
-	finally
-	{
-	    lock.unlock();
+	    catch(InterruptedException e)
+	    {
+		--writeRequests;
+		notifyAll();
+		throw e;
+	    }
 	}
     }
 
     @Override
     public String toString()
     {
-	try
+	synchronized(this)
 	{
-	    lock.lock();
 	    return "Locker["+(writingThread==null?(writeAccesses+" Write"):(writeAccesses+" x "+writingThread.toString()))+","+(readingThreads.size()==0?"NoReads":(readingThreads.size()+" Reads"))+"]";
-	}
-	finally
-	{
-	    lock.unlock();
 	}
     }
     
@@ -229,9 +205,8 @@ public class ReadWriteLock{
     }
 
     public void unlockWrite(){
-	try
+	synchronized(this)
 	{
-	    lock.lock();
 	    if(!isWriter(Thread.currentThread())){
 		throw new IllegalMonitorStateException("Calling Thread does not hold the write lock on this ReadWriteLock");
 	    }
@@ -242,38 +217,24 @@ public class ReadWriteLock{
 	    if (writeAccesses<0)
 		throw new IllegalMonitorStateException("The number of  unlock is greater than the number of locks");
 	    
-	    cannotContinue.signalAll();
-	}
-	finally
-	{
-	    lock.unlock();
+	    notifyAll();
 	}
 	    
     }
     public void unlockWriteAndLockRead()
     {
-	try
+	synchronized(this)
 	{
-	    lock.lock();
 	    unlockWrite();
 	    lockRead();
-	}
-	finally
-	{
-	    lock.unlock();
 	}
     }
     public void unlockReadAndLockWrite()
     {
-	try
+	synchronized(this)
 	{
-	    lock.lock();
 	    unlockRead();
 	    lockWrite();
-	}
-	finally
-	{
-	    lock.unlock();
 	}
     }
 

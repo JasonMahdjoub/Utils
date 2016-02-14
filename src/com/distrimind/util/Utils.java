@@ -18,8 +18,8 @@ public class Utils
 	Calendar c=Calendar.getInstance();
 	c.set(2016, 1, 4);
 	Calendar c2=Calendar.getInstance();
-	c.set(2016, 1, 4);
-    	VERSION=new Version("Utils", 1,0,0, Version.Type.Stable, 0, c.getTime(), c2.getTime());
+	c.set(2016, 1, 14);
+    	VERSION=new Version("Utils", 1,1,0, Version.Type.Stable, 0, c.getTime(), c2.getTime());
 	try
 	{
 	
@@ -32,8 +32,14 @@ public class Utils
 	    VERSION.addDeveloper(new PersonDeveloper("mahdjoub", "jason", c.getTime()));
 	
 	    c=Calendar.getInstance();
+	    c.set(2016, 1, 14);
+	    Description d=new Description(1,1,0,Version.Type.Stable, 0, c.getTime());
+	    d.addItem("Adding some internal modifications to ReadWriteLocker");
+	    VERSION.addDescription(d);
+
+	    c=Calendar.getInstance();
 	    c.set(2016, 1, 4);
-	    Description d=new Description(1,6,2,Version.Type.Beta, 1, c.getTime());
+	    d=new Description(1,0,0,Version.Type.Stable, 0, c.getTime());
 	    d.addItem("Realeasing first version of Utils");
 	    VERSION.addDescription(d);
 	}
