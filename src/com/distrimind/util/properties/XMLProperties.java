@@ -75,7 +75,7 @@ import org.xml.sax.SAXException;
  * 
  * 
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 1.1
  * @since Utils 1.0
  *
  */
@@ -250,7 +250,9 @@ public abstract class XMLProperties implements Cloneable, Serializable
 	int mod=field.getModifiers();
 	if (Modifier.isFinal(mod) || Modifier.isTransient(mod) || Modifier.isNative(mod) || Modifier.isStatic(mod))
 	    return false;
-	return true;
+	return XMLProperties.class.isAssignableFrom(field.getType())
+		|| default_xml_object_parser_instance.isValid(field.getType()) 
+		|| (optional_xml_object_parser_instance!=null && optional_xml_object_parser_instance.isValid(field.getType()));
     }
     
     String getElementValue(Document document, Node node) throws XMLPropertiesParseException

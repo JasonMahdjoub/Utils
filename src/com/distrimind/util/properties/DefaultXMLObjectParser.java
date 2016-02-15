@@ -38,12 +38,41 @@ import javax.lang.model.SourceVersion;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 1.1
  * @since Utils 1.0
  */
 public class DefaultXMLObjectParser extends AbstractXMLObjectParser
 {
 
+    /**
+     * {@inheritDoc} 
+     */
+    @Override
+    public boolean isValid(Class<?> field_type)
+    {
+	return field_type==Boolean.class 
+		|| field_type==Byte.class 
+		|| field_type==Short.class  
+		|| field_type==Integer.class  
+		|| field_type==Long.class  
+		|| field_type==Float.class  
+		|| field_type==Double.class  
+		|| field_type==Character.class
+		|| field_type==String.class
+		|| field_type==Class.class
+		|| field_type==Date.class
+		|| field_type==File.class
+		|| field_type==URL.class
+		|| field_type==URI.class
+		|| field_type==LocalTime.class
+		|| field_type==Level.class
+		|| field_type==InetAddress.class
+		|| field_type==Inet4Address.class
+		|| field_type==Inet6Address.class
+		|| field_type==InetSocketAddress.class
+		|| field_type==SourceVersion.class;
+    }
+    
     /**
      * {@inheritDoc}
      */

@@ -18,8 +18,8 @@ public class Utils
 	Calendar c=Calendar.getInstance();
 	c.set(2016, 1, 4);
 	Calendar c2=Calendar.getInstance();
-	c.set(2016, 1, 14);
-    	VERSION=new Version("Utils", 1,1,0, Version.Type.Stable, 0, c.getTime(), c2.getTime());
+	c.set(2016, 1, 15);
+    	VERSION=new Version("Utils", 1,2,0, Version.Type.Stable, 0, c.getTime(), c2.getTime());
 	try
 	{
 	
@@ -32,8 +32,15 @@ public class Utils
 	    VERSION.addDeveloper(new PersonDeveloper("mahdjoub", "jason", c.getTime()));
 	
 	    c=Calendar.getInstance();
+	    c.set(2016, 1, 15);
+	    Description d=new Description(1,2,0,Version.Type.Stable, 0, c.getTime());
+	    d.addItem("Adding function AbstractXMLObjectParser.isValid(Class)");
+	    d.addItem("Correcting export bug : temporary files were not deleted.");
+	    VERSION.addDescription(d);
+	    
+	    c=Calendar.getInstance();
 	    c.set(2016, 1, 14);
-	    Description d=new Description(1,1,0,Version.Type.Stable, 0, c.getTime());
+	    d=new Description(1,1,0,Version.Type.Stable, 0, c.getTime());
 	    d.addItem("Adding some internal modifications to ReadWriteLocker");
 	    VERSION.addDescription(d);
 

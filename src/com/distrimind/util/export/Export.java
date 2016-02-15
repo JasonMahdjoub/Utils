@@ -197,6 +197,8 @@ public class Export
 	}
 	exports.getTemporaryDirectory().mkdir();
 	File tmpexport=new File(exports.getTemporaryDirectory(), "export");
+	if (tmpexport.exists() && tmpexport.isDirectory())
+	    FileTools.deleteDirectory(tmpexport);
 	tmpexport.mkdir();
 	File tmpbin=new File(exports.getTemporaryDirectory(), "bin");
 	tmpbin.mkdir();
@@ -244,7 +246,7 @@ public class Export
 	File metainf=new File(tmpbin, "META-INF");
 	File metainfsource=new File(tmpsrc, "META-INF");
 	
-	if (exports.getProject().getDependencies()!=null)
+	if (exports.getProject().getDependencies()!=null && exportScenario.include_dependancies)
 	{
 	    for (BinaryDependency d : exports.getProject().getDependencies())
 	    {
@@ -362,6 +364,7 @@ public class Export
 		sendToWebSite();
 	    }
 	}
+	FileTools.deleteDirectory(tmpexport);
 	
     }
     
