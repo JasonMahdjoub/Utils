@@ -21,7 +21,6 @@
  */
 package com.distrimind.util;
 
-import java.io.Serializable;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.Enumeration;
@@ -35,7 +34,7 @@ import java.util.Enumeration;
  * @since Utils 1.0
  * 
  */
-public abstract class AbstractDecentralizedIDGenerator implements Serializable
+public abstract class AbstractDecentralizedIDGenerator extends AbstractDecentralizedID
 {
 	/**
      * 
@@ -147,4 +146,14 @@ public abstract class AbstractDecentralizedIDGenerator implements Serializable
 	    return worker_id_and_sequence;
 	}
 	
+	@Override
+	public byte[] getBytes()
+	{
+	    long ts=getTimeStamp();
+	    long wid=getWorkerIDAndSequence();
+	    byte res[]=new byte[16];
+	    Bits.putLong(res, 0, ts);
+	    Bits.putLong(res, 8, wid);
+	    return res;
+	}
 }

@@ -56,7 +56,7 @@ public class RenforcedDecentralizedIDGenerator extends AbstractDecentralizedIDGe
     {
 	synchronized (AbstractDecentralizedIDGenerator.class) {
 	    short tmp = 0;
-	    try (RandomAccessFile raf=new RandomAccessFile(new File(System.getProperty("java.io.tmpdir"), "RDIDG_MDK"), "rw"); final FileChannel channel = raf.getChannel();final FileLock lock = channel.lock();) {
+	    try (RandomAccessFile raf=new RandomAccessFile(new File(System.getProperty("java.io.tmpdir"), "RDIDG_UTILS_DISTRIMIND"), "rw"); final FileChannel channel = raf.getChannel();final FileLock lock = channel.lock();) {
 		final ByteBuffer b = ByteBuffer.allocate(2);
 		channel.read(b, 0);
 		tmp=((short) (b.getShort(0) + 1));
