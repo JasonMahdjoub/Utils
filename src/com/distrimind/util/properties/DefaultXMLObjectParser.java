@@ -35,6 +35,12 @@ import java.util.logging.Level;
 
 import javax.lang.model.SourceVersion;
 
+import com.distrimind.util.crypto.ASymmetricEncryptionType;
+import com.distrimind.util.crypto.MessageDigestType;
+import com.distrimind.util.crypto.SignatureType;
+import com.distrimind.util.crypto.SymmetricSecretKeyType;
+import com.distrimind.util.crypto.SymmetricEncryptionType;
+
 /**
  * 
  * @author Jason Mahdjoub
@@ -70,7 +76,13 @@ public class DefaultXMLObjectParser extends AbstractXMLObjectParser
 		|| field_type==Inet4Address.class
 		|| field_type==Inet6Address.class
 		|| field_type==InetSocketAddress.class
-		|| field_type==SourceVersion.class;
+		|| field_type==SourceVersion.class
+		|| field_type==ASymmetricEncryptionType.class
+		|| field_type==MessageDigestType.class
+		|| field_type==SymmetricEncryptionType.class
+		|| field_type==SignatureType.class
+		|| field_type==SymmetricSecretKeyType.class;
+	
     }
     
     /**
@@ -177,6 +189,27 @@ public class DefaultXMLObjectParser extends AbstractXMLObjectParser
 	    {
 		return SourceVersion.valueOf(nodeValue);
 	    }
+	    else if (field_type==ASymmetricEncryptionType.class)
+	    {
+		return ASymmetricEncryptionType.valueOf(nodeValue); 
+	    }
+	    else if (field_type==SymmetricEncryptionType.class)
+	    {
+		return SymmetricEncryptionType.valueOf(nodeValue); 
+	    }
+	    else if (field_type==SignatureType.class)
+	    {
+		return SignatureType.valueOf(nodeValue); 
+	    }
+	    else if (field_type==MessageDigestType.class)
+	    {
+		return MessageDigestType.valueOf(nodeValue); 
+	    }
+	    else if (field_type==SymmetricSecretKeyType.class)
+	    {
+		return SymmetricSecretKeyType.valueOf(nodeValue); 
+	    }
+	    
 	    return Void.TYPE;
     }
 
@@ -262,6 +295,26 @@ public class DefaultXMLObjectParser extends AbstractXMLObjectParser
 	    else if (field_type==SourceVersion.class)
 	    {
 		return object.toString();
+	    }
+	    else if (field_type==ASymmetricEncryptionType.class)
+	    {
+		return object.toString(); 
+	    }
+	    else if (field_type==SymmetricEncryptionType.class)
+	    {
+		return object.toString(); 
+	    }
+	    else if (field_type==SignatureType.class)
+	    {
+		return object.toString(); 
+	    }
+	    else if (field_type==MessageDigestType.class)
+	    {
+		return object.toString(); 
+	    }
+	    else if (field_type==SymmetricSecretKeyType.class)
+	    {
+		return object.toString(); 
 	    }
 	    else 
 		return null;

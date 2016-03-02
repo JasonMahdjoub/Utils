@@ -33,7 +33,7 @@ import com.distrimind.util.version.Version;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 1.3
+ * @version 1.4
  */
 public class Utils
 {
@@ -44,8 +44,8 @@ public class Utils
 	Calendar c=Calendar.getInstance();
 	c.set(2016, 1, 4);
 	Calendar c2=Calendar.getInstance();
-	c.set(2016, 1, 22);
-    	VERSION=new Version("Utils", 1,3,0, Version.Type.Stable, 0, c.getTime(), c2.getTime());
+	c.set(2016, 2, 1);
+    	VERSION=new Version("Utils", 1,4,0, Version.Type.Stable, 0, c.getTime(), c2.getTime());
 	try
 	{
 	
@@ -58,8 +58,20 @@ public class Utils
 	    VERSION.addDeveloper(new PersonDeveloper("mahdjoub", "jason", c.getTime()));
 	
 	    c=Calendar.getInstance();
+	    c.set(2016, 2, 1);
+	    Description d=new Description(1,4,0,Version.Type.Stable, 0, c.getTime());
+	    d.addItem("Adding encreyption utilities");
+	    VERSION.addDescription(d);
+
+	    c=Calendar.getInstance();
+	    c.set(2016, 1, 24);
+	    d=new Description(1,3,1,Version.Type.Stable, 0, c.getTime());
+	    d.addItem("Set Bits static functions public");
+	    VERSION.addDescription(d);
+
+	    c=Calendar.getInstance();
 	    c.set(2016, 1, 22);
-	    Description d=new Description(1,3,0,Version.Type.Stable, 0, c.getTime());
+	    d=new Description(1,3,0,Version.Type.Stable, 0, c.getTime());
 	    d.addItem("Adding SecuredDecentralizedID class");
 	    VERSION.addDescription(d);
 

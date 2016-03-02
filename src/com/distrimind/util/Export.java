@@ -35,6 +35,7 @@ import com.distrimind.util.export.JavaProjectDependency;
 import com.distrimind.util.export.JavaProjectSourceDependency;
 import com.distrimind.util.export.License;
 import com.distrimind.util.export.Exports.ExportProperties;
+import com.distrimind.util.tests.CryptoTests;
 
 /**
  * 
@@ -59,12 +60,13 @@ class Export
 		org.apache.commons.net.SocketClient.class.getPackage(), 
 		new License(new File("/home/jason/projets/commons-net-3.4/LICENSE.txt")), new File("/home/jason/projets/commons-net-3.4/commons-net-3.4.jar"), null, null));
 
+	String regexMath=Dependency.mixRegexes(Dependency.getRegexMatchClass(Export.class), Dependency.getRegexMatchPackage(CryptoTests.class.getPackage()));
 	exports.setProject(new JavaProjectDependency(root_dir, bin_dir, root_package, Utils.LICENSE, 
-		new JavaProjectSourceDependency(src_dir, Dependency.getRegexMatchClass(Export.class), null), "com/distrimind/util/build.txt", 
+		new JavaProjectSourceDependency(src_dir, regexMath, null), "com/distrimind/util/build.txt", 
 		null, "Utils is a set of tools that can be useful in every context of development", 
 		Utils.VERSION,
 		dependencies,null,
-		Dependency.getRegexMatchClass(Export.class), null));
+		regexMath, null));
 	
 	
 	
