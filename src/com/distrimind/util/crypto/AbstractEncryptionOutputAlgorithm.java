@@ -21,7 +21,6 @@
  */
 package com.distrimind.util.crypto;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -31,7 +30,6 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 
 import javax.crypto.Cipher;
-import javax.crypto.CipherInputStream;
 import javax.crypto.CipherOutputStream;
 import javax.crypto.NoSuchPaddingException;
 
@@ -39,13 +37,13 @@ import javax.crypto.NoSuchPaddingException;
  * 
  * @author Jason Mahdjoub
  * @version 1.0
- * @since Utils 1.4
+ * @since Utils 1.5
  */
-public abstract class AbstractEncryptionAlgorithm
+public abstract class AbstractEncryptionOutputAlgorithm
 {
     protected final Cipher cipher;
     
-    protected AbstractEncryptionAlgorithm(Cipher cipher)
+    protected AbstractEncryptionOutputAlgorithm(Cipher cipher)
     {
 	if (cipher==null)
 	    throw new NullPointerException("cipher");
@@ -60,7 +58,6 @@ public abstract class AbstractEncryptionAlgorithm
     
     
     public abstract void initCipherForEncrypt(Cipher cipher) throws InvalidKeyException, InvalidAlgorithmParameterException;
-    public abstract void initCipherForDecrypt(Cipher cipher) throws InvalidKeyException, InvalidAlgorithmParameterException;
     
     protected abstract Cipher getCipherInstance() throws NoSuchAlgorithmException, NoSuchPaddingException;
     
@@ -101,49 +98,6 @@ public abstract class AbstractEncryptionAlgorithm
 	    encode(bytes, off, len, baos);
 	    return baos.toByteArray();
 	}
-    }
-    public byte[] decode(byte[] bytes) throws InvalidKeyException, InvalidAlgorithmParameterException, IOException
-    {
-	return decode(bytes, 0, bytes.length);
-    }
-    public byte[] decode(byte[] bytes, int off, int len) throws InvalidKeyException, InvalidAlgorithmParameterException, IOException
-    {
-	try(ByteArrayInputStream bais=new ByteArrayInputStream(bytes, off, len))
-	{
-	    return decode(bais);
-	}
-    }
-    
-    public byte[] decode(InputStream is) throws InvalidKeyException, InvalidAlgorithmParameterException, IOException
-    {
-	try(ByteArrayOutputStream baos=new ByteArrayOutputStream())
-	{
-	    this.decode(is, baos);
-	    return baos.toByteArray();
-	}
-    }
-    
-    public void decode(InputStream is, OutputStream os) throws InvalidKeyException, InvalidAlgorithmParameterException, IOException
-    {
-	initCipherForDecrypt(cipher);
-	
-	try(CipherInputStream cis=new CipherInputStream(is, cipher))
-	{
-	    int read=-1;
-	    do
-	    {
-		read=cis.read();
-		if (read!=-1)
-		    os.write(read);
-	    }while (read!=-1);
-	}
-    }
-    
-    public CipherInputStream getCipherInputStream(InputStream is) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException
-    {
-	Cipher c=getCipherInstance();
-	initCipherForDecrypt(c);
-	return new CipherInputStream(is, c);
     }
     
     public CipherOutputStream getCipherOutputStream(OutputStream os) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException

@@ -24,22 +24,26 @@ package com.distrimind.util.tests;
 import java.io.IOException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
-import java.security.Key;
 import java.security.KeyPair;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.Signature;
 import java.security.SignatureException;
+import java.security.spec.InvalidKeySpecException;
+import java.util.Random;
 
 import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKey;
 
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import com.distrimind.util.Bits;
 import com.distrimind.util.crypto.ASymmetricEncryptionAlgorithm;
 import com.distrimind.util.crypto.ASymmetricEncryptionType;
+import com.distrimind.util.crypto.PeerToPeerASymmetricSecretMessageExchanger;
 import com.distrimind.util.crypto.MessageDigestType;
 import com.distrimind.util.crypto.SignatureType;
 import com.distrimind.util.crypto.SymmetricEncryptionAlgorithm;
@@ -48,7 +52,7 @@ import com.distrimind.util.crypto.SymmetricEncryptionType;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 1.2
  * @since Utils 1.4
  */
 public class CryptoTests
@@ -56,7 +60,7 @@ public class CryptoTests
     private static final String messagesToEncrypt[]={"sdfknhdfikdng dlkg nfsdkijng ", "edfknz gfjét  ", "dfkjndeifhzreufghbergerjognbvolserdbgnv"};
     
     
-    @Test(dataProvider = "provideDataForASymetricEncryptions")
+    @Test(dataProvider = "provideDataForASymetricEncryptions", dependsOnMethods={"testASymmetricKeyPairEncoding"})
     public void testASymetricEncryptions(ASymmetricEncryptionType type) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IOException, SignatureException
     {
 	System.out.println("Testing "+type);
@@ -81,6 +85,64 @@ public class CryptoTests
 	}
 	
     }
+
+    @Test(dataProvider = "provideDataForASymetricEncryptions", dependsOnMethods={"testASymmetricKeyPairEncoding"})
+    public void testASymmetricSecretMessageExchanger(ASymmetricEncryptionType type) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IOException, IllegalAccessException, InvalidKeySpecException
+    {
+	System.out.println("Testing ASymmetricSecretMessageExchanger "+type);
+	SecureRandom rand=new SecureRandom();
+	KeyPair kpd=type.getKeyPairGenerator(rand).generateKeyPair();
+	KeyPair kpl=type.getKeyPairGenerator(rand).generateKeyPair();
+	
+	PeerToPeerASymmetricSecretMessageExchanger algoLocal=new PeerToPeerASymmetricSecretMessageExchanger(type, kpl.getPublic());
+	PeerToPeerASymmetricSecretMessageExchanger algoDistant=new PeerToPeerASymmetricSecretMessageExchanger(type, kpd.getPublic());
+	algoLocal.setDistantPublicKey(algoDistant.encodeMyPublicKey());
+	algoDistant.setDistantPublicKey(algoLocal.encodeMyPublicKey());
+	
+	
+	
+	for (String m : messagesToEncrypt)
+	{
+	    byte[] localCrypt=algoLocal.encode(m.getBytes());
+	    Assert.assertTrue(algoDistant.verifyDistantMessage(m.getBytes(), localCrypt));
+	    
+	    byte[] distantCrypt=algoDistant.encode(m.getBytes());
+	    Assert.assertTrue(algoLocal.verifyDistantMessage(m.getBytes(), distantCrypt));
+	}
+	
+    }
+
+    @Test(invocationCount = 20)
+    public void testEncodeAndSeparateEncoding()
+    {
+	Random rand=new Random(System.currentTimeMillis());
+	byte[] t1=new byte[rand.nextInt(100)+20];
+	byte[] t2=new byte[rand.nextInt(100)+20];
+	byte[] encoded=Bits.concateEncodingWithShortSizedTabs(t1, t2);
+	byte[][] decoded=Bits.separateEncodingsWithShortSizedTabs(encoded);
+	Assert.assertEquals(t1, decoded[0]);
+	Assert.assertEquals(t2, decoded[1]);
+	encoded=Bits.concateEncodingWithIntSizedTabs(t1, t2);
+	decoded=Bits.separateEncodingsWithIntSizedTabs(encoded);
+	Assert.assertEquals(t1, decoded[0]);
+	Assert.assertEquals(t2, decoded[1]);
+    }
+    
+    @Test(dataProvider = "provideDataForASymetricEncryptions",dependsOnMethods="testEncodeAndSeparateEncoding")
+    public void testASymmetricKeyPairEncoding(ASymmetricEncryptionType type) throws NoSuchAlgorithmException, InvalidKeySpecException
+    {
+	System.out.println("Testing ASymmetricKeyPairEncoding "+type);
+	SecureRandom rand=new SecureRandom();
+	KeyPair kpd=type.getKeyPairGenerator(rand).generateKeyPair();
+	
+	Assert.assertEquals(ASymmetricEncryptionType.decodePublicKey(ASymmetricEncryptionType.encodePublicKey(kpd.getPublic())), kpd.getPublic());
+	Assert.assertEquals(ASymmetricEncryptionType.decodePrivateKey(ASymmetricEncryptionType.encodePrivateKey(kpd.getPrivate())), kpd.getPrivate());
+	KeyPair decodedkp=ASymmetricEncryptionType.decodeKeyPair(ASymmetricEncryptionType.encodeKeyPair(kpd));
+	Assert.assertEquals(decodedkp.getPrivate(), kpd.getPrivate());
+	Assert.assertEquals(decodedkp.getPublic(), kpd.getPublic());
+    }
+    
+    
 
     @DataProvider(name = "provideDataForASymetricEncryptions")
     public Object[][] provideDataForASymetricEncryptions()
@@ -140,11 +202,11 @@ public class CryptoTests
     }
     
     
-    @Test(dataProvider = "provideDataForSymetricEncryptions")
+    @Test(dataProvider = "provideDataForSymetricEncryptions", dependsOnMethods="testSecretKeyEncoding")
     public void testSymetricEncryptions(SymmetricEncryptionType type) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IOException
     {
 	System.out.println("Testing "+type);
-	Key key=type.getKeyGenerator(new SecureRandom()).generateKey();
+	SecretKey key=type.getKeyGenerator(new SecureRandom()).generateKey();
 	
 	SymmetricEncryptionAlgorithm algoDistant=new SymmetricEncryptionAlgorithm(type,  key, new SecureRandom());
 	SymmetricEncryptionAlgorithm algoLocal=new SymmetricEncryptionAlgorithm(type,key, new SecureRandom(), algoDistant.getIV());
@@ -168,6 +230,15 @@ public class CryptoTests
 	    Assert.assertEquals(md.length(), m.length(), "Testing size "+type);
 	    Assert.assertEquals(md, m,"Testing "+type);
 	}
+	
+    }
+    @Test(dataProvider = "provideDataForSymetricEncryptions",dependsOnMethods="testEncodeAndSeparateEncoding")
+    public void testSecretKeyEncoding(SymmetricEncryptionType type) throws NoSuchAlgorithmException
+    {
+	System.out.println("Testing "+type);
+	SecretKey key=type.getKeyGenerator(new SecureRandom()).generateKey();
+	
+	Assert.assertEquals(SymmetricEncryptionType.decodeSecretKey(SymmetricEncryptionType.encodeSecretKey(key)), key);
 	
     }
     
@@ -197,7 +268,7 @@ public class CryptoTests
 	ASymmetricEncryptionAlgorithm algoLocalAS=new ASymmetricEncryptionAlgorithm(astype, kpl, kpd.getPublic());
 	
 	
-	Key localKey=stype.getKeyGenerator(new SecureRandom()).generateKey();
+	SecretKey localKey=stype.getKeyGenerator(new SecureRandom()).generateKey();
 
 	SymmetricEncryptionAlgorithm algoLocalS=new SymmetricEncryptionAlgorithm(stype, localKey, rand);
 	byte[] localEncryptedKey=algoLocalS.encodeKeyAndIvParameter(algoLocalAS);

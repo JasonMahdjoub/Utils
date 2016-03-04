@@ -27,12 +27,16 @@ import java.security.SecureRandom;
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
+
+import com.distrimind.util.Bits;
 
 /**
  * List of symmetric encryption algorithms
  * 
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 1.1
  * @since Utils 1.4
  */
 public enum SymmetricEncryptionType
@@ -104,5 +108,20 @@ public enum SymmetricEncryptionType
 	KeyGenerator kg=KeyGenerator.getInstance(algorithmName);
 	kg.init(keySizeBits, random);
 	return kg;
+    }
+    
+    public static byte[] encodeSecretKey(SecretKey key)
+    {
+	return Bits.concateEncodingWithShortSizedTabs(key.getAlgorithm().getBytes(), key.getEncoded());
+    }
+    
+    public static SecretKey decodeSecretKey(byte[] encodedSecretKey)
+    {
+	return decodeSecretKey(encodedSecretKey, 0, encodedSecretKey.length);
+    }
+    public static SecretKey decodeSecretKey(byte[] encodedSecretKey, int off, int len)
+    {
+	byte[][] parts=Bits.separateEncodingsWithShortSizedTabs(encodedSecretKey, off, len);
+	return new SecretKeySpec(parts[1], new String(parts[0]));
     }
 }

@@ -21,17 +21,26 @@
  */
 package com.distrimind.util.crypto;
 
+import java.security.KeyFactory;
+import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.security.SecureRandom;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 
 import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
 
+import com.distrimind.util.Bits;
+
 /**
  * List of asymmetric encryption algorithms
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 1.1
  * @since Utils 1.4
  */
 public enum ASymmetricEncryptionType
@@ -102,9 +111,50 @@ public enum ASymmetricEncryptionType
     }
     
     
+    public static byte[] encodePublicKey(PublicKey key)
+    {
+	return Bits.concateEncodingWithShortSizedTabs(key.getAlgorithm().getBytes(), key.getEncoded());
+	/*X509EncodedKeySpec pubKeySpec = new X509EncodedKeySpec(key.getEncoded());
+	return Bits.concateEncodingWithShortSizedTabs(key.getAlgorithm().getBytes(), pubKeySpec.getEncoded());*/
+    }
     
+    static public PublicKey decodePublicKey(byte[] encodedKey) throws NoSuchAlgorithmException, InvalidKeySpecException
+    {
+	byte[][] parts=Bits.separateEncodingsWithShortSizedTabs(encodedKey);
+	X509EncodedKeySpec pubKeySpec = new X509EncodedKeySpec(parts[1]);
+	KeyFactory kf=KeyFactory.getInstance(new String(parts[0]));
+	return kf.generatePublic(pubKeySpec);
+    }
     
+    static public byte[] encodePrivateKey(PrivateKey key)
+    {
+	return Bits.concateEncodingWithShortSizedTabs(key.getAlgorithm().getBytes(), key.getEncoded());
+	/*PKCS8EncodedKeySpec pkcsKeySpec=new PKCS8EncodedKeySpec(key.getEncoded());
+	return Bits.concateEncodingWithShortSizedTabs(key.getAlgorithm().getBytes(), pkcsKeySpec.getEncoded());*/
+    }
     
+    public static PrivateKey decodePrivateKey(byte[] encodedKey) throws NoSuchAlgorithmException, InvalidKeySpecException
+    {
+	byte[][] parts=Bits.separateEncodingsWithShortSizedTabs(encodedKey);
+	PKCS8EncodedKeySpec pkcsKeySpec=new PKCS8EncodedKeySpec(parts[1]);
+	KeyFactory kf=KeyFactory.getInstance(new String(parts[0]));
+	return kf.generatePrivate(pkcsKeySpec);
+    }
+    
+    public static byte[] encodeKeyPair(KeyPair keyPair)
+    {
+	return Bits.concateEncodingWithShortSizedTabs(encodePublicKey(keyPair.getPublic()), encodePrivateKey(keyPair.getPrivate()));
+    }
+    
+    public static KeyPair decodeKeyPair(byte[] encodedKeyPair) throws NoSuchAlgorithmException, InvalidKeySpecException
+    {
+	return decodeKeyPair(encodedKeyPair, 0, encodedKeyPair.length);
+    }
+    public static KeyPair decodeKeyPair(byte[] encodedKeyPair, int off, int len) throws NoSuchAlgorithmException, InvalidKeySpecException
+    {
+	byte[][] parts=Bits.separateEncodingsWithShortSizedTabs(encodedKeyPair, off, len);
+	return new KeyPair(decodePublicKey(parts[0]), decodePrivateKey(parts[1]));
+    }
     
 
 }

@@ -24,33 +24,34 @@ package com.distrimind.util.crypto;
 import java.io.IOException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
-import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 
 import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
+
+import com.distrimind.util.Bits;
 
 /**
  * 
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 1.1
  * @since Utils 1.4
  */
-public class SymmetricEncryptionAlgorithm extends AbstractEncryptionAlgorithm
+public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm
 {
-    private final Key key;
+    private final SecretKey key;
     private final IvParameterSpec ivParameter;
     private final SymmetricEncryptionType type;
     
-    public SymmetricEncryptionAlgorithm(SymmetricEncryptionType type, Key key, SecureRandom random) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException
+    public SymmetricEncryptionAlgorithm(SymmetricEncryptionType type, SecretKey key, SecureRandom random) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException
     {
 	this(type, key, random, null);
     }
 
-    public SymmetricEncryptionAlgorithm(SymmetricEncryptionType type, Key key, SecureRandom random, IvParameterSpec ivParameter) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException
+    public SymmetricEncryptionAlgorithm(SymmetricEncryptionType type, SecretKey key, SecureRandom random, IvParameterSpec ivParameter) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException
     {
 	super(type.getCipherInstance());
 	this.type=type;
@@ -71,8 +72,9 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionAlgorithm
     public static SymmetricEncryptionAlgorithm getInstance(SymmetricEncryptionType type, SecureRandom random, byte[] cryptedKeyAndIV, ASymmetricEncryptionAlgorithm asalgo) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IOException
     {
 	byte[] keyAndIV=asalgo.decode(cryptedKeyAndIV);
-	Key k = new SecretKeySpec(keyAndIV, 0, type.getKeySizeBytes(), type.getAlgorithmName());
-	IvParameterSpec iv=new IvParameterSpec(keyAndIV, type.getKeySizeBytes(), keyAndIV.length-(type.getKeySizeBytes()));
+	byte[][] parts=Bits.separateEncodingsWithShortSizedTabs(keyAndIV);
+	SecretKey k = SymmetricEncryptionType.decodeSecretKey(parts[0]);
+	IvParameterSpec iv=new IvParameterSpec(parts[1]);
 	return new SymmetricEncryptionAlgorithm(type, k, random, iv);
     }
     
@@ -98,7 +100,7 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionAlgorithm
 	return type;
     }
     
-    public Key getKey()
+    public SecretKey getKey()
     {
 	return key;
     }
@@ -110,12 +112,9 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionAlgorithm
     
     public byte[] encodeKeyAndIvParameter(ASymmetricEncryptionAlgorithm asalgo) throws InvalidKeyException, InvalidAlgorithmParameterException, IOException
     {
-	byte[] k=key.getEncoded();
+	byte[] k=SymmetricEncryptionType.encodeSecretKey(key);
 	byte[]iv=ivParameter.getIV();
-	byte[] toEncode=new byte[k.length+iv.length];
-	System.arraycopy(k, 0, toEncode, 0, k.length);
-	System.arraycopy(iv, 0, toEncode, k.length, iv.length);
-	return asalgo.encode(toEncode);
+	return asalgo.encode(Bits.concateEncodingWithShortSizedTabs(k, iv));
 	
     }
 }

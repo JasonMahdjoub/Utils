@@ -24,6 +24,7 @@
  */
 package com.distrimind.util;
 
+import com.distrimind.util.sizeof.ObjectSizer;
 
 /**
  * Utility methods for packing/unpacking primitive values in/out of byte arrays
@@ -114,5 +115,59 @@ public class Bits {
 
     public static void putDouble(byte[] b, int off, double val) {
         putLong(b, off, Double.doubleToLongBits(val));
+    }
+    
+    public static byte[] concateEncodingWithShortSizedTabs(byte part1[], byte[] part2)
+    {
+	short sizePart1=(short)part1.length;
+	byte[] res=new byte[part2.length+part1.length+ObjectSizer.sizeOf(sizePart1)];
+	Bits.putShort(res, 0, sizePart1);
+	System.arraycopy(part1, 0, res, ObjectSizer.sizeOf(sizePart1), sizePart1);
+	System.arraycopy(part2, 0, res, ObjectSizer.sizeOf(sizePart1)+sizePart1, part2.length);
+	return res;
+    }
+    
+    public static byte[][] separateEncodingsWithShortSizedTabs(byte[] concatedEncodedElement)
+    {
+	return separateEncodingsWithShortSizedTabs(concatedEncodedElement, 0, concatedEncodedElement.length);
+    }
+    public static byte[][] separateEncodingsWithShortSizedTabs(byte[] concatedEncodedElement, int off, int len)
+    {
+	short sizePar1=Bits.getShort(concatedEncodedElement, off);
+	byte[] part1=new byte[sizePar1];
+	byte[] part2=new byte[len-ObjectSizer.sizeOf(sizePar1)-sizePar1];
+	System.arraycopy(concatedEncodedElement, off+ObjectSizer.sizeOf(sizePar1), part1, 0, sizePar1);
+	System.arraycopy(concatedEncodedElement, off+ObjectSizer.sizeOf(sizePar1)+sizePar1, part2, 0, part2.length);
+	byte[][] res=new byte[2][];
+	res[0]=part1;
+	res[1]=part2;
+	return res;
+    }
+    
+    public static byte[] concateEncodingWithIntSizedTabs(byte part1[], byte[] part2)
+    {
+	int sizePart1=part1.length;
+	byte[] res=new byte[part2.length+part1.length+ObjectSizer.sizeOf(sizePart1)];
+	Bits.putInt(res, 0, sizePart1);
+	System.arraycopy(part1, 0, res, ObjectSizer.sizeOf(sizePart1), sizePart1);
+	System.arraycopy(part2, 0, res, ObjectSizer.sizeOf(sizePart1)+sizePart1, part2.length);
+	return res;
+    }
+    
+    public static byte[][] separateEncodingsWithIntSizedTabs(byte[] concatedEncodedElement)
+    {
+	return separateEncodingsWithIntSizedTabs(concatedEncodedElement, 0, concatedEncodedElement.length);
+    }
+    public static byte[][] separateEncodingsWithIntSizedTabs(byte[] concatedEncodedElement, int off, int len)
+    {
+	int sizePar1=Bits.getInt(concatedEncodedElement, off);
+	byte[] part1=new byte[sizePar1];
+	byte[] part2=new byte[len-ObjectSizer.sizeOf(sizePar1)-sizePar1];
+	System.arraycopy(concatedEncodedElement, off+ObjectSizer.sizeOf(sizePar1), part1, 0, sizePar1);
+	System.arraycopy(concatedEncodedElement, off+ObjectSizer.sizeOf(sizePar1)+sizePar1, part2, 0, part2.length);
+	byte[][] res=new byte[2][];
+	res[0]=part1;
+	res[1]=part2;
+	return res;
     }
 }

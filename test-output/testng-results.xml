@@ -1,35 +1,93 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testng-results skipped="0" failed="0" total="55" passed="55">
+<testng-results skipped="0" failed="0" total="84" passed="84">
   <reporter-output>
   </reporter-output>
-  <suite name="Default suite" duration-ms="196419" started-at="2016-03-02T15:33:07Z" finished-at="2016-03-02T15:36:23Z">
+  <suite name="Default suite" duration-ms="229238" started-at="2016-03-04T08:30:06Z" finished-at="2016-03-04T08:33:55Z">
     <groups>
     </groups>
-    <test name="Default test" duration-ms="196419" started-at="2016-03-02T15:33:07Z" finished-at="2016-03-02T15:36:23Z">
+    <test name="Default test" duration-ms="229238" started-at="2016-03-04T08:30:06Z" finished-at="2016-03-04T08:33:55Z">
       <class name="com.distrimind.util.tests.CryptoTests">
-        <test-method status="PASS" signature="testASymetricEncryptions(com.distrimind.util.crypto.ASymmetricEncryptionType)[pri:0, instance:com.distrimind.util.tests.CryptoTests@22a71081]" name="testASymetricEncryptions" duration-ms="24774" started-at="2016-03-02T16:33:07Z" data-provider="provideDataForASymetricEncryptions" finished-at="2016-03-02T16:33:32Z">
-          <params>
-            <param index="0">
-              <value>
-                <![CDATA[RSA]]>
-              </value>
-            </param>
-          </params>
+        <test-method status="PASS" signature="testEncodeAndSeparateEncoding()[pri:0, instance:com.distrimind.util.tests.CryptoTests@3930015a]" name="testEncodeAndSeparateEncoding" duration-ms="10" started-at="2016-03-04T09:30:06Z" finished-at="2016-03-04T09:30:06Z">
           <reporter-output>
           </reporter-output>
-        </test-method> <!-- testASymetricEncryptions -->
-        <test-method status="PASS" signature="testASymetricEncryptions(com.distrimind.util.crypto.ASymmetricEncryptionType)[pri:0, instance:com.distrimind.util.tests.CryptoTests@22a71081]" name="testASymetricEncryptions" duration-ms="9910" started-at="2016-03-02T16:33:32Z" data-provider="provideDataForASymetricEncryptions" finished-at="2016-03-02T16:33:42Z">
-          <params>
-            <param index="0">
-              <value>
-                <![CDATA[DEFAULT]]>
-              </value>
-            </param>
-          </params>
+        </test-method> <!-- testEncodeAndSeparateEncoding -->
+        <test-method status="PASS" signature="testEncodeAndSeparateEncoding()[pri:0, instance:com.distrimind.util.tests.CryptoTests@3930015a]" name="testEncodeAndSeparateEncoding" duration-ms="1" started-at="2016-03-04T09:30:06Z" finished-at="2016-03-04T09:30:06Z">
           <reporter-output>
           </reporter-output>
-        </test-method> <!-- testASymetricEncryptions -->
-        <test-method status="PASS" signature="testMessageDigest(com.distrimind.util.crypto.MessageDigestType)[pri:0, instance:com.distrimind.util.tests.CryptoTests@22a71081]" name="testMessageDigest" duration-ms="1" started-at="2016-03-02T16:33:42Z" data-provider="provideMessageDigestType" finished-at="2016-03-02T16:33:42Z">
+        </test-method> <!-- testEncodeAndSeparateEncoding -->
+        <test-method status="PASS" signature="testEncodeAndSeparateEncoding()[pri:0, instance:com.distrimind.util.tests.CryptoTests@3930015a]" name="testEncodeAndSeparateEncoding" duration-ms="1" started-at="2016-03-04T09:30:06Z" finished-at="2016-03-04T09:30:06Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- testEncodeAndSeparateEncoding -->
+        <test-method status="PASS" signature="testEncodeAndSeparateEncoding()[pri:0, instance:com.distrimind.util.tests.CryptoTests@3930015a]" name="testEncodeAndSeparateEncoding" duration-ms="1" started-at="2016-03-04T09:30:06Z" finished-at="2016-03-04T09:30:06Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- testEncodeAndSeparateEncoding -->
+        <test-method status="PASS" signature="testEncodeAndSeparateEncoding()[pri:0, instance:com.distrimind.util.tests.CryptoTests@3930015a]" name="testEncodeAndSeparateEncoding" duration-ms="1" started-at="2016-03-04T09:30:06Z" finished-at="2016-03-04T09:30:06Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- testEncodeAndSeparateEncoding -->
+        <test-method status="PASS" signature="testEncodeAndSeparateEncoding()[pri:0, instance:com.distrimind.util.tests.CryptoTests@3930015a]" name="testEncodeAndSeparateEncoding" duration-ms="0" started-at="2016-03-04T09:30:06Z" finished-at="2016-03-04T09:30:06Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- testEncodeAndSeparateEncoding -->
+        <test-method status="PASS" signature="testEncodeAndSeparateEncoding()[pri:0, instance:com.distrimind.util.tests.CryptoTests@3930015a]" name="testEncodeAndSeparateEncoding" duration-ms="0" started-at="2016-03-04T09:30:06Z" finished-at="2016-03-04T09:30:06Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- testEncodeAndSeparateEncoding -->
+        <test-method status="PASS" signature="testEncodeAndSeparateEncoding()[pri:0, instance:com.distrimind.util.tests.CryptoTests@3930015a]" name="testEncodeAndSeparateEncoding" duration-ms="0" started-at="2016-03-04T09:30:06Z" finished-at="2016-03-04T09:30:06Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- testEncodeAndSeparateEncoding -->
+        <test-method status="PASS" signature="testEncodeAndSeparateEncoding()[pri:0, instance:com.distrimind.util.tests.CryptoTests@3930015a]" name="testEncodeAndSeparateEncoding" duration-ms="0" started-at="2016-03-04T09:30:06Z" finished-at="2016-03-04T09:30:06Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- testEncodeAndSeparateEncoding -->
+        <test-method status="PASS" signature="testEncodeAndSeparateEncoding()[pri:0, instance:com.distrimind.util.tests.CryptoTests@3930015a]" name="testEncodeAndSeparateEncoding" duration-ms="1" started-at="2016-03-04T09:30:06Z" finished-at="2016-03-04T09:30:06Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- testEncodeAndSeparateEncoding -->
+        <test-method status="PASS" signature="testEncodeAndSeparateEncoding()[pri:0, instance:com.distrimind.util.tests.CryptoTests@3930015a]" name="testEncodeAndSeparateEncoding" duration-ms="0" started-at="2016-03-04T09:30:06Z" finished-at="2016-03-04T09:30:06Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- testEncodeAndSeparateEncoding -->
+        <test-method status="PASS" signature="testEncodeAndSeparateEncoding()[pri:0, instance:com.distrimind.util.tests.CryptoTests@3930015a]" name="testEncodeAndSeparateEncoding" duration-ms="1" started-at="2016-03-04T09:30:06Z" finished-at="2016-03-04T09:30:06Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- testEncodeAndSeparateEncoding -->
+        <test-method status="PASS" signature="testEncodeAndSeparateEncoding()[pri:0, instance:com.distrimind.util.tests.CryptoTests@3930015a]" name="testEncodeAndSeparateEncoding" duration-ms="0" started-at="2016-03-04T09:30:06Z" finished-at="2016-03-04T09:30:06Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- testEncodeAndSeparateEncoding -->
+        <test-method status="PASS" signature="testEncodeAndSeparateEncoding()[pri:0, instance:com.distrimind.util.tests.CryptoTests@3930015a]" name="testEncodeAndSeparateEncoding" duration-ms="1" started-at="2016-03-04T09:30:06Z" finished-at="2016-03-04T09:30:06Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- testEncodeAndSeparateEncoding -->
+        <test-method status="PASS" signature="testEncodeAndSeparateEncoding()[pri:0, instance:com.distrimind.util.tests.CryptoTests@3930015a]" name="testEncodeAndSeparateEncoding" duration-ms="0" started-at="2016-03-04T09:30:06Z" finished-at="2016-03-04T09:30:06Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- testEncodeAndSeparateEncoding -->
+        <test-method status="PASS" signature="testEncodeAndSeparateEncoding()[pri:0, instance:com.distrimind.util.tests.CryptoTests@3930015a]" name="testEncodeAndSeparateEncoding" duration-ms="1" started-at="2016-03-04T09:30:06Z" finished-at="2016-03-04T09:30:06Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- testEncodeAndSeparateEncoding -->
+        <test-method status="PASS" signature="testEncodeAndSeparateEncoding()[pri:0, instance:com.distrimind.util.tests.CryptoTests@3930015a]" name="testEncodeAndSeparateEncoding" duration-ms="0" started-at="2016-03-04T09:30:06Z" finished-at="2016-03-04T09:30:06Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- testEncodeAndSeparateEncoding -->
+        <test-method status="PASS" signature="testEncodeAndSeparateEncoding()[pri:0, instance:com.distrimind.util.tests.CryptoTests@3930015a]" name="testEncodeAndSeparateEncoding" duration-ms="1" started-at="2016-03-04T09:30:06Z" finished-at="2016-03-04T09:30:06Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- testEncodeAndSeparateEncoding -->
+        <test-method status="PASS" signature="testEncodeAndSeparateEncoding()[pri:0, instance:com.distrimind.util.tests.CryptoTests@3930015a]" name="testEncodeAndSeparateEncoding" duration-ms="0" started-at="2016-03-04T09:30:06Z" finished-at="2016-03-04T09:30:06Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- testEncodeAndSeparateEncoding -->
+        <test-method status="PASS" signature="testEncodeAndSeparateEncoding()[pri:0, instance:com.distrimind.util.tests.CryptoTests@3930015a]" name="testEncodeAndSeparateEncoding" duration-ms="0" started-at="2016-03-04T09:30:06Z" finished-at="2016-03-04T09:30:06Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- testEncodeAndSeparateEncoding -->
+        <test-method status="PASS" signature="testMessageDigest(com.distrimind.util.crypto.MessageDigestType)[pri:0, instance:com.distrimind.util.tests.CryptoTests@3930015a]" name="testMessageDigest" duration-ms="1" started-at="2016-03-04T09:30:06Z" data-provider="provideMessageDigestType" finished-at="2016-03-04T09:30:06Z">
           <params>
             <param index="0">
               <value>
@@ -40,7 +98,7 @@
           <reporter-output>
           </reporter-output>
         </test-method> <!-- testMessageDigest -->
-        <test-method status="PASS" signature="testMessageDigest(com.distrimind.util.crypto.MessageDigestType)[pri:0, instance:com.distrimind.util.tests.CryptoTests@22a71081]" name="testMessageDigest" duration-ms="0" started-at="2016-03-02T16:33:42Z" data-provider="provideMessageDigestType" finished-at="2016-03-02T16:33:42Z">
+        <test-method status="PASS" signature="testMessageDigest(com.distrimind.util.crypto.MessageDigestType)[pri:0, instance:com.distrimind.util.tests.CryptoTests@3930015a]" name="testMessageDigest" duration-ms="1" started-at="2016-03-04T09:30:06Z" data-provider="provideMessageDigestType" finished-at="2016-03-04T09:30:06Z">
           <params>
             <param index="0">
               <value>
@@ -51,7 +109,7 @@
           <reporter-output>
           </reporter-output>
         </test-method> <!-- testMessageDigest -->
-        <test-method status="PASS" signature="testMessageDigest(com.distrimind.util.crypto.MessageDigestType)[pri:0, instance:com.distrimind.util.tests.CryptoTests@22a71081]" name="testMessageDigest" duration-ms="0" started-at="2016-03-02T16:33:42Z" data-provider="provideMessageDigestType" finished-at="2016-03-02T16:33:42Z">
+        <test-method status="PASS" signature="testMessageDigest(com.distrimind.util.crypto.MessageDigestType)[pri:0, instance:com.distrimind.util.tests.CryptoTests@3930015a]" name="testMessageDigest" duration-ms="1" started-at="2016-03-04T09:30:06Z" data-provider="provideMessageDigestType" finished-at="2016-03-04T09:30:06Z">
           <params>
             <param index="0">
               <value>
@@ -62,7 +120,7 @@
           <reporter-output>
           </reporter-output>
         </test-method> <!-- testMessageDigest -->
-        <test-method status="PASS" signature="testMessageDigest(com.distrimind.util.crypto.MessageDigestType)[pri:0, instance:com.distrimind.util.tests.CryptoTests@22a71081]" name="testMessageDigest" duration-ms="2" started-at="2016-03-02T16:33:42Z" data-provider="provideMessageDigestType" finished-at="2016-03-02T16:33:42Z">
+        <test-method status="PASS" signature="testMessageDigest(com.distrimind.util.crypto.MessageDigestType)[pri:0, instance:com.distrimind.util.tests.CryptoTests@3930015a]" name="testMessageDigest" duration-ms="1" started-at="2016-03-04T09:30:06Z" data-provider="provideMessageDigestType" finished-at="2016-03-04T09:30:06Z">
           <params>
             <param index="0">
               <value>
@@ -73,7 +131,7 @@
           <reporter-output>
           </reporter-output>
         </test-method> <!-- testMessageDigest -->
-        <test-method status="PASS" signature="testMessageDigest(com.distrimind.util.crypto.MessageDigestType)[pri:0, instance:com.distrimind.util.tests.CryptoTests@22a71081]" name="testMessageDigest" duration-ms="1" started-at="2016-03-02T16:33:42Z" data-provider="provideMessageDigestType" finished-at="2016-03-02T16:33:42Z">
+        <test-method status="PASS" signature="testMessageDigest(com.distrimind.util.crypto.MessageDigestType)[pri:0, instance:com.distrimind.util.tests.CryptoTests@3930015a]" name="testMessageDigest" duration-ms="2" started-at="2016-03-04T09:30:06Z" data-provider="provideMessageDigestType" finished-at="2016-03-04T09:30:06Z">
           <params>
             <param index="0">
               <value>
@@ -84,7 +142,7 @@
           <reporter-output>
           </reporter-output>
         </test-method> <!-- testMessageDigest -->
-        <test-method status="PASS" signature="testMessageDigest(com.distrimind.util.crypto.MessageDigestType)[pri:0, instance:com.distrimind.util.tests.CryptoTests@22a71081]" name="testMessageDigest" duration-ms="1" started-at="2016-03-02T16:33:42Z" data-provider="provideMessageDigestType" finished-at="2016-03-02T16:33:42Z">
+        <test-method status="PASS" signature="testMessageDigest(com.distrimind.util.crypto.MessageDigestType)[pri:0, instance:com.distrimind.util.tests.CryptoTests@3930015a]" name="testMessageDigest" duration-ms="1" started-at="2016-03-04T09:30:06Z" data-provider="provideMessageDigestType" finished-at="2016-03-04T09:30:06Z">
           <params>
             <param index="0">
               <value>
@@ -95,7 +153,800 @@
           <reporter-output>
           </reporter-output>
         </test-method> <!-- testMessageDigest -->
-        <test-method status="PASS" signature="testSymetricEncryptions(com.distrimind.util.crypto.SymmetricEncryptionType)[pri:0, instance:com.distrimind.util.tests.CryptoTests@22a71081]" name="testSymetricEncryptions" duration-ms="21" started-at="2016-03-02T16:33:42Z" data-provider="provideDataForSymetricEncryptions" finished-at="2016-03-02T16:33:42Z">
+        <test-method status="PASS" signature="testSignatures(com.distrimind.util.crypto.ASymmetricEncryptionType, com.distrimind.util.crypto.SignatureType, int)[pri:0, instance:com.distrimind.util.tests.CryptoTests@3930015a]" name="testSignatures" duration-ms="119" started-at="2016-03-04T09:30:06Z" data-provider="provideDataForSignatureTest" finished-at="2016-03-04T09:30:06Z">
+          <params>
+            <param index="0">
+              <value>
+                <![CDATA[RSA]]>
+              </value>
+            </param>
+            <param index="1">
+              <value>
+                <![CDATA[SHA1withRSA]]>
+              </value>
+            </param>
+            <param index="2">
+              <value>
+                <![CDATA[1024]]>
+              </value>
+            </param>
+          </params>
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- testSignatures -->
+        <test-method status="PASS" signature="testSignatures(com.distrimind.util.crypto.ASymmetricEncryptionType, com.distrimind.util.crypto.SignatureType, int)[pri:0, instance:com.distrimind.util.tests.CryptoTests@3930015a]" name="testSignatures" duration-ms="216" started-at="2016-03-04T09:30:06Z" data-provider="provideDataForSignatureTest" finished-at="2016-03-04T09:30:06Z">
+          <params>
+            <param index="0">
+              <value>
+                <![CDATA[RSA]]>
+              </value>
+            </param>
+            <param index="1">
+              <value>
+                <![CDATA[SHA1withRSA]]>
+              </value>
+            </param>
+            <param index="2">
+              <value>
+                <![CDATA[2048]]>
+              </value>
+            </param>
+          </params>
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- testSignatures -->
+        <test-method status="PASS" signature="testSignatures(com.distrimind.util.crypto.ASymmetricEncryptionType, com.distrimind.util.crypto.SignatureType, int)[pri:0, instance:com.distrimind.util.tests.CryptoTests@3930015a]" name="testSignatures" duration-ms="598" started-at="2016-03-04T09:30:06Z" data-provider="provideDataForSignatureTest" finished-at="2016-03-04T09:30:07Z">
+          <params>
+            <param index="0">
+              <value>
+                <![CDATA[RSA]]>
+              </value>
+            </param>
+            <param index="1">
+              <value>
+                <![CDATA[SHA1withRSA]]>
+              </value>
+            </param>
+            <param index="2">
+              <value>
+                <![CDATA[3072]]>
+              </value>
+            </param>
+          </params>
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- testSignatures -->
+        <test-method status="PASS" signature="testSignatures(com.distrimind.util.crypto.ASymmetricEncryptionType, com.distrimind.util.crypto.SignatureType, int)[pri:0, instance:com.distrimind.util.tests.CryptoTests@3930015a]" name="testSignatures" duration-ms="2078" started-at="2016-03-04T09:30:07Z" data-provider="provideDataForSignatureTest" finished-at="2016-03-04T09:30:09Z">
+          <params>
+            <param index="0">
+              <value>
+                <![CDATA[RSA]]>
+              </value>
+            </param>
+            <param index="1">
+              <value>
+                <![CDATA[SHA1withRSA]]>
+              </value>
+            </param>
+            <param index="2">
+              <value>
+                <![CDATA[4096]]>
+              </value>
+            </param>
+          </params>
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- testSignatures -->
+        <test-method status="PASS" signature="testSignatures(com.distrimind.util.crypto.ASymmetricEncryptionType, com.distrimind.util.crypto.SignatureType, int)[pri:0, instance:com.distrimind.util.tests.CryptoTests@3930015a]" name="testSignatures" duration-ms="43" started-at="2016-03-04T09:30:09Z" data-provider="provideDataForSignatureTest" finished-at="2016-03-04T09:30:09Z">
+          <params>
+            <param index="0">
+              <value>
+                <![CDATA[RSA]]>
+              </value>
+            </param>
+            <param index="1">
+              <value>
+                <![CDATA[SHA256withRSA]]>
+              </value>
+            </param>
+            <param index="2">
+              <value>
+                <![CDATA[1024]]>
+              </value>
+            </param>
+          </params>
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- testSignatures -->
+        <test-method status="PASS" signature="testSignatures(com.distrimind.util.crypto.ASymmetricEncryptionType, com.distrimind.util.crypto.SignatureType, int)[pri:0, instance:com.distrimind.util.tests.CryptoTests@3930015a]" name="testSignatures" duration-ms="115" started-at="2016-03-04T09:30:09Z" data-provider="provideDataForSignatureTest" finished-at="2016-03-04T09:30:09Z">
+          <params>
+            <param index="0">
+              <value>
+                <![CDATA[RSA]]>
+              </value>
+            </param>
+            <param index="1">
+              <value>
+                <![CDATA[SHA256withRSA]]>
+              </value>
+            </param>
+            <param index="2">
+              <value>
+                <![CDATA[2048]]>
+              </value>
+            </param>
+          </params>
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- testSignatures -->
+        <test-method status="PASS" signature="testSignatures(com.distrimind.util.crypto.ASymmetricEncryptionType, com.distrimind.util.crypto.SignatureType, int)[pri:0, instance:com.distrimind.util.tests.CryptoTests@3930015a]" name="testSignatures" duration-ms="514" started-at="2016-03-04T09:30:09Z" data-provider="provideDataForSignatureTest" finished-at="2016-03-04T09:30:09Z">
+          <params>
+            <param index="0">
+              <value>
+                <![CDATA[RSA]]>
+              </value>
+            </param>
+            <param index="1">
+              <value>
+                <![CDATA[SHA256withRSA]]>
+              </value>
+            </param>
+            <param index="2">
+              <value>
+                <![CDATA[3072]]>
+              </value>
+            </param>
+          </params>
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- testSignatures -->
+        <test-method status="PASS" signature="testSignatures(com.distrimind.util.crypto.ASymmetricEncryptionType, com.distrimind.util.crypto.SignatureType, int)[pri:0, instance:com.distrimind.util.tests.CryptoTests@3930015a]" name="testSignatures" duration-ms="3930" started-at="2016-03-04T09:30:09Z" data-provider="provideDataForSignatureTest" finished-at="2016-03-04T09:30:13Z">
+          <params>
+            <param index="0">
+              <value>
+                <![CDATA[RSA]]>
+              </value>
+            </param>
+            <param index="1">
+              <value>
+                <![CDATA[SHA256withRSA]]>
+              </value>
+            </param>
+            <param index="2">
+              <value>
+                <![CDATA[4096]]>
+              </value>
+            </param>
+          </params>
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- testSignatures -->
+        <test-method status="PASS" signature="testSignatures(com.distrimind.util.crypto.ASymmetricEncryptionType, com.distrimind.util.crypto.SignatureType, int)[pri:0, instance:com.distrimind.util.tests.CryptoTests@3930015a]" name="testSignatures" duration-ms="100" started-at="2016-03-04T09:30:13Z" data-provider="provideDataForSignatureTest" finished-at="2016-03-04T09:30:13Z">
+          <params>
+            <param index="0">
+              <value>
+                <![CDATA[RSA]]>
+              </value>
+            </param>
+            <param index="1">
+              <value>
+                <![CDATA[SHA384withRSA]]>
+              </value>
+            </param>
+            <param index="2">
+              <value>
+                <![CDATA[1024]]>
+              </value>
+            </param>
+          </params>
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- testSignatures -->
+        <test-method status="PASS" signature="testSignatures(com.distrimind.util.crypto.ASymmetricEncryptionType, com.distrimind.util.crypto.SignatureType, int)[pri:0, instance:com.distrimind.util.tests.CryptoTests@3930015a]" name="testSignatures" duration-ms="353" started-at="2016-03-04T09:30:13Z" data-provider="provideDataForSignatureTest" finished-at="2016-03-04T09:30:14Z">
+          <params>
+            <param index="0">
+              <value>
+                <![CDATA[RSA]]>
+              </value>
+            </param>
+            <param index="1">
+              <value>
+                <![CDATA[SHA384withRSA]]>
+              </value>
+            </param>
+            <param index="2">
+              <value>
+                <![CDATA[2048]]>
+              </value>
+            </param>
+          </params>
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- testSignatures -->
+        <test-method status="PASS" signature="testSignatures(com.distrimind.util.crypto.ASymmetricEncryptionType, com.distrimind.util.crypto.SignatureType, int)[pri:0, instance:com.distrimind.util.tests.CryptoTests@3930015a]" name="testSignatures" duration-ms="972" started-at="2016-03-04T09:30:14Z" data-provider="provideDataForSignatureTest" finished-at="2016-03-04T09:30:15Z">
+          <params>
+            <param index="0">
+              <value>
+                <![CDATA[RSA]]>
+              </value>
+            </param>
+            <param index="1">
+              <value>
+                <![CDATA[SHA384withRSA]]>
+              </value>
+            </param>
+            <param index="2">
+              <value>
+                <![CDATA[3072]]>
+              </value>
+            </param>
+          </params>
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- testSignatures -->
+        <test-method status="PASS" signature="testSignatures(com.distrimind.util.crypto.ASymmetricEncryptionType, com.distrimind.util.crypto.SignatureType, int)[pri:0, instance:com.distrimind.util.tests.CryptoTests@3930015a]" name="testSignatures" duration-ms="5978" started-at="2016-03-04T09:30:15Z" data-provider="provideDataForSignatureTest" finished-at="2016-03-04T09:30:21Z">
+          <params>
+            <param index="0">
+              <value>
+                <![CDATA[RSA]]>
+              </value>
+            </param>
+            <param index="1">
+              <value>
+                <![CDATA[SHA384withRSA]]>
+              </value>
+            </param>
+            <param index="2">
+              <value>
+                <![CDATA[4096]]>
+              </value>
+            </param>
+          </params>
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- testSignatures -->
+        <test-method status="PASS" signature="testSignatures(com.distrimind.util.crypto.ASymmetricEncryptionType, com.distrimind.util.crypto.SignatureType, int)[pri:0, instance:com.distrimind.util.tests.CryptoTests@3930015a]" name="testSignatures" duration-ms="73" started-at="2016-03-04T09:30:21Z" data-provider="provideDataForSignatureTest" finished-at="2016-03-04T09:30:21Z">
+          <params>
+            <param index="0">
+              <value>
+                <![CDATA[RSA]]>
+              </value>
+            </param>
+            <param index="1">
+              <value>
+                <![CDATA[SHA512withRSA]]>
+              </value>
+            </param>
+            <param index="2">
+              <value>
+                <![CDATA[1024]]>
+              </value>
+            </param>
+          </params>
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- testSignatures -->
+        <test-method status="PASS" signature="testSignatures(com.distrimind.util.crypto.ASymmetricEncryptionType, com.distrimind.util.crypto.SignatureType, int)[pri:0, instance:com.distrimind.util.tests.CryptoTests@3930015a]" name="testSignatures" duration-ms="398" started-at="2016-03-04T09:30:21Z" data-provider="provideDataForSignatureTest" finished-at="2016-03-04T09:30:21Z">
+          <params>
+            <param index="0">
+              <value>
+                <![CDATA[RSA]]>
+              </value>
+            </param>
+            <param index="1">
+              <value>
+                <![CDATA[SHA512withRSA]]>
+              </value>
+            </param>
+            <param index="2">
+              <value>
+                <![CDATA[2048]]>
+              </value>
+            </param>
+          </params>
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- testSignatures -->
+        <test-method status="PASS" signature="testSignatures(com.distrimind.util.crypto.ASymmetricEncryptionType, com.distrimind.util.crypto.SignatureType, int)[pri:0, instance:com.distrimind.util.tests.CryptoTests@3930015a]" name="testSignatures" duration-ms="1671" started-at="2016-03-04T09:30:21Z" data-provider="provideDataForSignatureTest" finished-at="2016-03-04T09:30:23Z">
+          <params>
+            <param index="0">
+              <value>
+                <![CDATA[RSA]]>
+              </value>
+            </param>
+            <param index="1">
+              <value>
+                <![CDATA[SHA512withRSA]]>
+              </value>
+            </param>
+            <param index="2">
+              <value>
+                <![CDATA[3072]]>
+              </value>
+            </param>
+          </params>
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- testSignatures -->
+        <test-method status="PASS" signature="testSignatures(com.distrimind.util.crypto.ASymmetricEncryptionType, com.distrimind.util.crypto.SignatureType, int)[pri:0, instance:com.distrimind.util.tests.CryptoTests@3930015a]" name="testSignatures" duration-ms="5133" started-at="2016-03-04T09:30:23Z" data-provider="provideDataForSignatureTest" finished-at="2016-03-04T09:30:28Z">
+          <params>
+            <param index="0">
+              <value>
+                <![CDATA[RSA]]>
+              </value>
+            </param>
+            <param index="1">
+              <value>
+                <![CDATA[SHA512withRSA]]>
+              </value>
+            </param>
+            <param index="2">
+              <value>
+                <![CDATA[4096]]>
+              </value>
+            </param>
+          </params>
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- testSignatures -->
+        <test-method status="PASS" signature="testSignatures(com.distrimind.util.crypto.ASymmetricEncryptionType, com.distrimind.util.crypto.SignatureType, int)[pri:0, instance:com.distrimind.util.tests.CryptoTests@3930015a]" name="testSignatures" duration-ms="34" started-at="2016-03-04T09:30:28Z" data-provider="provideDataForSignatureTest" finished-at="2016-03-04T09:30:28Z">
+          <params>
+            <param index="0">
+              <value>
+                <![CDATA[DEFAULT]]>
+              </value>
+            </param>
+            <param index="1">
+              <value>
+                <![CDATA[SHA1withRSA]]>
+              </value>
+            </param>
+            <param index="2">
+              <value>
+                <![CDATA[1024]]>
+              </value>
+            </param>
+          </params>
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- testSignatures -->
+        <test-method status="PASS" signature="testSignatures(com.distrimind.util.crypto.ASymmetricEncryptionType, com.distrimind.util.crypto.SignatureType, int)[pri:0, instance:com.distrimind.util.tests.CryptoTests@3930015a]" name="testSignatures" duration-ms="248" started-at="2016-03-04T09:30:28Z" data-provider="provideDataForSignatureTest" finished-at="2016-03-04T09:30:28Z">
+          <params>
+            <param index="0">
+              <value>
+                <![CDATA[DEFAULT]]>
+              </value>
+            </param>
+            <param index="1">
+              <value>
+                <![CDATA[SHA1withRSA]]>
+              </value>
+            </param>
+            <param index="2">
+              <value>
+                <![CDATA[2048]]>
+              </value>
+            </param>
+          </params>
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- testSignatures -->
+        <test-method status="PASS" signature="testSignatures(com.distrimind.util.crypto.ASymmetricEncryptionType, com.distrimind.util.crypto.SignatureType, int)[pri:0, instance:com.distrimind.util.tests.CryptoTests@3930015a]" name="testSignatures" duration-ms="442" started-at="2016-03-04T09:30:28Z" data-provider="provideDataForSignatureTest" finished-at="2016-03-04T09:30:29Z">
+          <params>
+            <param index="0">
+              <value>
+                <![CDATA[DEFAULT]]>
+              </value>
+            </param>
+            <param index="1">
+              <value>
+                <![CDATA[SHA1withRSA]]>
+              </value>
+            </param>
+            <param index="2">
+              <value>
+                <![CDATA[3072]]>
+              </value>
+            </param>
+          </params>
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- testSignatures -->
+        <test-method status="PASS" signature="testSignatures(com.distrimind.util.crypto.ASymmetricEncryptionType, com.distrimind.util.crypto.SignatureType, int)[pri:0, instance:com.distrimind.util.tests.CryptoTests@3930015a]" name="testSignatures" duration-ms="9667" started-at="2016-03-04T09:30:29Z" data-provider="provideDataForSignatureTest" finished-at="2016-03-04T09:30:38Z">
+          <params>
+            <param index="0">
+              <value>
+                <![CDATA[DEFAULT]]>
+              </value>
+            </param>
+            <param index="1">
+              <value>
+                <![CDATA[SHA1withRSA]]>
+              </value>
+            </param>
+            <param index="2">
+              <value>
+                <![CDATA[4096]]>
+              </value>
+            </param>
+          </params>
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- testSignatures -->
+        <test-method status="PASS" signature="testSignatures(com.distrimind.util.crypto.ASymmetricEncryptionType, com.distrimind.util.crypto.SignatureType, int)[pri:0, instance:com.distrimind.util.tests.CryptoTests@3930015a]" name="testSignatures" duration-ms="49" started-at="2016-03-04T09:30:38Z" data-provider="provideDataForSignatureTest" finished-at="2016-03-04T09:30:39Z">
+          <params>
+            <param index="0">
+              <value>
+                <![CDATA[DEFAULT]]>
+              </value>
+            </param>
+            <param index="1">
+              <value>
+                <![CDATA[SHA256withRSA]]>
+              </value>
+            </param>
+            <param index="2">
+              <value>
+                <![CDATA[1024]]>
+              </value>
+            </param>
+          </params>
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- testSignatures -->
+        <test-method status="PASS" signature="testSignatures(com.distrimind.util.crypto.ASymmetricEncryptionType, com.distrimind.util.crypto.SignatureType, int)[pri:0, instance:com.distrimind.util.tests.CryptoTests@3930015a]" name="testSignatures" duration-ms="230" started-at="2016-03-04T09:30:39Z" data-provider="provideDataForSignatureTest" finished-at="2016-03-04T09:30:39Z">
+          <params>
+            <param index="0">
+              <value>
+                <![CDATA[DEFAULT]]>
+              </value>
+            </param>
+            <param index="1">
+              <value>
+                <![CDATA[SHA256withRSA]]>
+              </value>
+            </param>
+            <param index="2">
+              <value>
+                <![CDATA[2048]]>
+              </value>
+            </param>
+          </params>
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- testSignatures -->
+        <test-method status="PASS" signature="testSignatures(com.distrimind.util.crypto.ASymmetricEncryptionType, com.distrimind.util.crypto.SignatureType, int)[pri:0, instance:com.distrimind.util.tests.CryptoTests@3930015a]" name="testSignatures" duration-ms="1207" started-at="2016-03-04T09:30:39Z" data-provider="provideDataForSignatureTest" finished-at="2016-03-04T09:30:40Z">
+          <params>
+            <param index="0">
+              <value>
+                <![CDATA[DEFAULT]]>
+              </value>
+            </param>
+            <param index="1">
+              <value>
+                <![CDATA[SHA256withRSA]]>
+              </value>
+            </param>
+            <param index="2">
+              <value>
+                <![CDATA[3072]]>
+              </value>
+            </param>
+          </params>
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- testSignatures -->
+        <test-method status="PASS" signature="testSignatures(com.distrimind.util.crypto.ASymmetricEncryptionType, com.distrimind.util.crypto.SignatureType, int)[pri:0, instance:com.distrimind.util.tests.CryptoTests@3930015a]" name="testSignatures" duration-ms="9118" started-at="2016-03-04T09:30:40Z" data-provider="provideDataForSignatureTest" finished-at="2016-03-04T09:30:49Z">
+          <params>
+            <param index="0">
+              <value>
+                <![CDATA[DEFAULT]]>
+              </value>
+            </param>
+            <param index="1">
+              <value>
+                <![CDATA[SHA256withRSA]]>
+              </value>
+            </param>
+            <param index="2">
+              <value>
+                <![CDATA[4096]]>
+              </value>
+            </param>
+          </params>
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- testSignatures -->
+        <test-method status="PASS" signature="testSignatures(com.distrimind.util.crypto.ASymmetricEncryptionType, com.distrimind.util.crypto.SignatureType, int)[pri:0, instance:com.distrimind.util.tests.CryptoTests@3930015a]" name="testSignatures" duration-ms="30" started-at="2016-03-04T09:30:49Z" data-provider="provideDataForSignatureTest" finished-at="2016-03-04T09:30:49Z">
+          <params>
+            <param index="0">
+              <value>
+                <![CDATA[DEFAULT]]>
+              </value>
+            </param>
+            <param index="1">
+              <value>
+                <![CDATA[SHA384withRSA]]>
+              </value>
+            </param>
+            <param index="2">
+              <value>
+                <![CDATA[1024]]>
+              </value>
+            </param>
+          </params>
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- testSignatures -->
+        <test-method status="PASS" signature="testSignatures(com.distrimind.util.crypto.ASymmetricEncryptionType, com.distrimind.util.crypto.SignatureType, int)[pri:0, instance:com.distrimind.util.tests.CryptoTests@3930015a]" name="testSignatures" duration-ms="436" started-at="2016-03-04T09:30:49Z" data-provider="provideDataForSignatureTest" finished-at="2016-03-04T09:30:50Z">
+          <params>
+            <param index="0">
+              <value>
+                <![CDATA[DEFAULT]]>
+              </value>
+            </param>
+            <param index="1">
+              <value>
+                <![CDATA[SHA384withRSA]]>
+              </value>
+            </param>
+            <param index="2">
+              <value>
+                <![CDATA[2048]]>
+              </value>
+            </param>
+          </params>
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- testSignatures -->
+        <test-method status="PASS" signature="testSignatures(com.distrimind.util.crypto.ASymmetricEncryptionType, com.distrimind.util.crypto.SignatureType, int)[pri:0, instance:com.distrimind.util.tests.CryptoTests@3930015a]" name="testSignatures" duration-ms="1004" started-at="2016-03-04T09:30:50Z" data-provider="provideDataForSignatureTest" finished-at="2016-03-04T09:30:51Z">
+          <params>
+            <param index="0">
+              <value>
+                <![CDATA[DEFAULT]]>
+              </value>
+            </param>
+            <param index="1">
+              <value>
+                <![CDATA[SHA384withRSA]]>
+              </value>
+            </param>
+            <param index="2">
+              <value>
+                <![CDATA[3072]]>
+              </value>
+            </param>
+          </params>
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- testSignatures -->
+        <test-method status="PASS" signature="testSignatures(com.distrimind.util.crypto.ASymmetricEncryptionType, com.distrimind.util.crypto.SignatureType, int)[pri:0, instance:com.distrimind.util.tests.CryptoTests@3930015a]" name="testSignatures" duration-ms="1939" started-at="2016-03-04T09:30:51Z" data-provider="provideDataForSignatureTest" finished-at="2016-03-04T09:30:52Z">
+          <params>
+            <param index="0">
+              <value>
+                <![CDATA[DEFAULT]]>
+              </value>
+            </param>
+            <param index="1">
+              <value>
+                <![CDATA[SHA384withRSA]]>
+              </value>
+            </param>
+            <param index="2">
+              <value>
+                <![CDATA[4096]]>
+              </value>
+            </param>
+          </params>
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- testSignatures -->
+        <test-method status="PASS" signature="testSignatures(com.distrimind.util.crypto.ASymmetricEncryptionType, com.distrimind.util.crypto.SignatureType, int)[pri:0, instance:com.distrimind.util.tests.CryptoTests@3930015a]" name="testSignatures" duration-ms="36" started-at="2016-03-04T09:30:52Z" data-provider="provideDataForSignatureTest" finished-at="2016-03-04T09:30:53Z">
+          <params>
+            <param index="0">
+              <value>
+                <![CDATA[DEFAULT]]>
+              </value>
+            </param>
+            <param index="1">
+              <value>
+                <![CDATA[SHA512withRSA]]>
+              </value>
+            </param>
+            <param index="2">
+              <value>
+                <![CDATA[1024]]>
+              </value>
+            </param>
+          </params>
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- testSignatures -->
+        <test-method status="PASS" signature="testSignatures(com.distrimind.util.crypto.ASymmetricEncryptionType, com.distrimind.util.crypto.SignatureType, int)[pri:0, instance:com.distrimind.util.tests.CryptoTests@3930015a]" name="testSignatures" duration-ms="953" started-at="2016-03-04T09:30:53Z" data-provider="provideDataForSignatureTest" finished-at="2016-03-04T09:30:53Z">
+          <params>
+            <param index="0">
+              <value>
+                <![CDATA[DEFAULT]]>
+              </value>
+            </param>
+            <param index="1">
+              <value>
+                <![CDATA[SHA512withRSA]]>
+              </value>
+            </param>
+            <param index="2">
+              <value>
+                <![CDATA[2048]]>
+              </value>
+            </param>
+          </params>
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- testSignatures -->
+        <test-method status="PASS" signature="testSignatures(com.distrimind.util.crypto.ASymmetricEncryptionType, com.distrimind.util.crypto.SignatureType, int)[pri:0, instance:com.distrimind.util.tests.CryptoTests@3930015a]" name="testSignatures" duration-ms="1683" started-at="2016-03-04T09:30:53Z" data-provider="provideDataForSignatureTest" finished-at="2016-03-04T09:30:55Z">
+          <params>
+            <param index="0">
+              <value>
+                <![CDATA[DEFAULT]]>
+              </value>
+            </param>
+            <param index="1">
+              <value>
+                <![CDATA[SHA512withRSA]]>
+              </value>
+            </param>
+            <param index="2">
+              <value>
+                <![CDATA[3072]]>
+              </value>
+            </param>
+          </params>
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- testSignatures -->
+        <test-method status="PASS" signature="testSignatures(com.distrimind.util.crypto.ASymmetricEncryptionType, com.distrimind.util.crypto.SignatureType, int)[pri:0, instance:com.distrimind.util.tests.CryptoTests@3930015a]" name="testSignatures" duration-ms="2868" started-at="2016-03-04T09:30:55Z" data-provider="provideDataForSignatureTest" finished-at="2016-03-04T09:30:58Z">
+          <params>
+            <param index="0">
+              <value>
+                <![CDATA[DEFAULT]]>
+              </value>
+            </param>
+            <param index="1">
+              <value>
+                <![CDATA[SHA512withRSA]]>
+              </value>
+            </param>
+            <param index="2">
+              <value>
+                <![CDATA[4096]]>
+              </value>
+            </param>
+          </params>
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- testSignatures -->
+        <test-method status="PASS" signature="testASymmetricKeyPairEncoding(com.distrimind.util.crypto.ASymmetricEncryptionType)[pri:0, instance:com.distrimind.util.tests.CryptoTests@3930015a]" name="testASymmetricKeyPairEncoding" duration-ms="11781" started-at="2016-03-04T09:30:58Z" data-provider="provideDataForASymetricEncryptions" depends-on-methods="com.distrimind.util.tests.CryptoTests.testEncodeAndSeparateEncoding" finished-at="2016-03-04T09:31:10Z">
+          <params>
+            <param index="0">
+              <value>
+                <![CDATA[RSA]]>
+              </value>
+            </param>
+          </params>
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- testASymmetricKeyPairEncoding -->
+        <test-method status="PASS" signature="testASymmetricKeyPairEncoding(com.distrimind.util.crypto.ASymmetricEncryptionType)[pri:0, instance:com.distrimind.util.tests.CryptoTests@3930015a]" name="testASymmetricKeyPairEncoding" duration-ms="6554" started-at="2016-03-04T09:31:10Z" data-provider="provideDataForASymetricEncryptions" depends-on-methods="com.distrimind.util.tests.CryptoTests.testEncodeAndSeparateEncoding" finished-at="2016-03-04T09:31:16Z">
+          <params>
+            <param index="0">
+              <value>
+                <![CDATA[DEFAULT]]>
+              </value>
+            </param>
+          </params>
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- testASymmetricKeyPairEncoding -->
+        <test-method status="PASS" signature="testSecretKeyEncoding(com.distrimind.util.crypto.SymmetricEncryptionType)[pri:0, instance:com.distrimind.util.tests.CryptoTests@3930015a]" name="testSecretKeyEncoding" duration-ms="153" started-at="2016-03-04T09:31:16Z" data-provider="provideDataForSymetricEncryptions" depends-on-methods="com.distrimind.util.tests.CryptoTests.testEncodeAndSeparateEncoding" finished-at="2016-03-04T09:31:17Z">
+          <params>
+            <param index="0">
+              <value>
+                <![CDATA[AES]]>
+              </value>
+            </param>
+          </params>
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- testSecretKeyEncoding -->
+        <test-method status="PASS" signature="testSecretKeyEncoding(com.distrimind.util.crypto.SymmetricEncryptionType)[pri:0, instance:com.distrimind.util.tests.CryptoTests@3930015a]" name="testSecretKeyEncoding" duration-ms="2" started-at="2016-03-04T09:31:17Z" data-provider="provideDataForSymetricEncryptions" depends-on-methods="com.distrimind.util.tests.CryptoTests.testEncodeAndSeparateEncoding" finished-at="2016-03-04T09:31:17Z">
+          <params>
+            <param index="0">
+              <value>
+                <![CDATA[DES]]>
+              </value>
+            </param>
+          </params>
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- testSecretKeyEncoding -->
+        <test-method status="PASS" signature="testSecretKeyEncoding(com.distrimind.util.crypto.SymmetricEncryptionType)[pri:0, instance:com.distrimind.util.tests.CryptoTests@3930015a]" name="testSecretKeyEncoding" duration-ms="1" started-at="2016-03-04T09:31:17Z" data-provider="provideDataForSymetricEncryptions" depends-on-methods="com.distrimind.util.tests.CryptoTests.testEncodeAndSeparateEncoding" finished-at="2016-03-04T09:31:17Z">
+          <params>
+            <param index="0">
+              <value>
+                <![CDATA[DESede]]>
+              </value>
+            </param>
+          </params>
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- testSecretKeyEncoding -->
+        <test-method status="PASS" signature="testSecretKeyEncoding(com.distrimind.util.crypto.SymmetricEncryptionType)[pri:0, instance:com.distrimind.util.tests.CryptoTests@3930015a]" name="testSecretKeyEncoding" duration-ms="0" started-at="2016-03-04T09:31:17Z" data-provider="provideDataForSymetricEncryptions" depends-on-methods="com.distrimind.util.tests.CryptoTests.testEncodeAndSeparateEncoding" finished-at="2016-03-04T09:31:17Z">
+          <params>
+            <param index="0">
+              <value>
+                <![CDATA[Blowfish]]>
+              </value>
+            </param>
+          </params>
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- testSecretKeyEncoding -->
+        <test-method status="PASS" signature="testSecretKeyEncoding(com.distrimind.util.crypto.SymmetricEncryptionType)[pri:0, instance:com.distrimind.util.tests.CryptoTests@3930015a]" name="testSecretKeyEncoding" duration-ms="0" started-at="2016-03-04T09:31:17Z" data-provider="provideDataForSymetricEncryptions" depends-on-methods="com.distrimind.util.tests.CryptoTests.testEncodeAndSeparateEncoding" finished-at="2016-03-04T09:31:17Z">
+          <params>
+            <param index="0">
+              <value>
+                <![CDATA[DEFAULT]]>
+              </value>
+            </param>
+          </params>
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- testSecretKeyEncoding -->
+        <test-method status="PASS" signature="testASymetricEncryptions(com.distrimind.util.crypto.ASymmetricEncryptionType)[pri:0, instance:com.distrimind.util.tests.CryptoTests@3930015a]" name="testASymetricEncryptions" duration-ms="8532" started-at="2016-03-04T09:31:17Z" data-provider="provideDataForASymetricEncryptions" depends-on-methods="com.distrimind.util.tests.CryptoTests.testASymmetricKeyPairEncoding" finished-at="2016-03-04T09:31:25Z">
+          <params>
+            <param index="0">
+              <value>
+                <![CDATA[RSA]]>
+              </value>
+            </param>
+          </params>
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- testASymetricEncryptions -->
+        <test-method status="PASS" signature="testASymetricEncryptions(com.distrimind.util.crypto.ASymmetricEncryptionType)[pri:0, instance:com.distrimind.util.tests.CryptoTests@3930015a]" name="testASymetricEncryptions" duration-ms="3964" started-at="2016-03-04T09:31:25Z" data-provider="provideDataForASymetricEncryptions" depends-on-methods="com.distrimind.util.tests.CryptoTests.testASymmetricKeyPairEncoding" finished-at="2016-03-04T09:31:29Z">
+          <params>
+            <param index="0">
+              <value>
+                <![CDATA[DEFAULT]]>
+              </value>
+            </param>
+          </params>
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- testASymetricEncryptions -->
+        <test-method status="PASS" signature="testASymmetricSecretMessageExchanger(com.distrimind.util.crypto.ASymmetricEncryptionType)[pri:0, instance:com.distrimind.util.tests.CryptoTests@3930015a]" name="testASymmetricSecretMessageExchanger" duration-ms="7312" started-at="2016-03-04T09:31:29Z" data-provider="provideDataForASymetricEncryptions" depends-on-methods="com.distrimind.util.tests.CryptoTests.testASymmetricKeyPairEncoding" finished-at="2016-03-04T09:31:36Z">
+          <params>
+            <param index="0">
+              <value>
+                <![CDATA[RSA]]>
+              </value>
+            </param>
+          </params>
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- testASymmetricSecretMessageExchanger -->
+        <test-method status="PASS" signature="testASymmetricSecretMessageExchanger(com.distrimind.util.crypto.ASymmetricEncryptionType)[pri:0, instance:com.distrimind.util.tests.CryptoTests@3930015a]" name="testASymmetricSecretMessageExchanger" duration-ms="12657" started-at="2016-03-04T09:31:36Z" data-provider="provideDataForASymetricEncryptions" depends-on-methods="com.distrimind.util.tests.CryptoTests.testASymmetricKeyPairEncoding" finished-at="2016-03-04T09:31:49Z">
+          <params>
+            <param index="0">
+              <value>
+                <![CDATA[DEFAULT]]>
+              </value>
+            </param>
+          </params>
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- testASymmetricSecretMessageExchanger -->
+        <test-method status="PASS" signature="testSymetricEncryptions(com.distrimind.util.crypto.SymmetricEncryptionType)[pri:0, instance:com.distrimind.util.tests.CryptoTests@3930015a]" name="testSymetricEncryptions" duration-ms="8" started-at="2016-03-04T09:31:49Z" data-provider="provideDataForSymetricEncryptions" depends-on-methods="com.distrimind.util.tests.CryptoTests.testSecretKeyEncoding" finished-at="2016-03-04T09:31:49Z">
           <params>
             <param index="0">
               <value>
@@ -106,7 +957,7 @@
           <reporter-output>
           </reporter-output>
         </test-method> <!-- testSymetricEncryptions -->
-        <test-method status="PASS" signature="testSymetricEncryptions(com.distrimind.util.crypto.SymmetricEncryptionType)[pri:0, instance:com.distrimind.util.tests.CryptoTests@22a71081]" name="testSymetricEncryptions" duration-ms="6" started-at="2016-03-02T16:33:42Z" data-provider="provideDataForSymetricEncryptions" finished-at="2016-03-02T16:33:42Z">
+        <test-method status="PASS" signature="testSymetricEncryptions(com.distrimind.util.crypto.SymmetricEncryptionType)[pri:0, instance:com.distrimind.util.tests.CryptoTests@3930015a]" name="testSymetricEncryptions" duration-ms="5" started-at="2016-03-04T09:31:49Z" data-provider="provideDataForSymetricEncryptions" depends-on-methods="com.distrimind.util.tests.CryptoTests.testSecretKeyEncoding" finished-at="2016-03-04T09:31:49Z">
           <params>
             <param index="0">
               <value>
@@ -117,7 +968,7 @@
           <reporter-output>
           </reporter-output>
         </test-method> <!-- testSymetricEncryptions -->
-        <test-method status="PASS" signature="testSymetricEncryptions(com.distrimind.util.crypto.SymmetricEncryptionType)[pri:0, instance:com.distrimind.util.tests.CryptoTests@22a71081]" name="testSymetricEncryptions" duration-ms="5" started-at="2016-03-02T16:33:42Z" data-provider="provideDataForSymetricEncryptions" finished-at="2016-03-02T16:33:42Z">
+        <test-method status="PASS" signature="testSymetricEncryptions(com.distrimind.util.crypto.SymmetricEncryptionType)[pri:0, instance:com.distrimind.util.tests.CryptoTests@3930015a]" name="testSymetricEncryptions" duration-ms="4" started-at="2016-03-04T09:31:49Z" data-provider="provideDataForSymetricEncryptions" depends-on-methods="com.distrimind.util.tests.CryptoTests.testSecretKeyEncoding" finished-at="2016-03-04T09:31:49Z">
           <params>
             <param index="0">
               <value>
@@ -128,7 +979,7 @@
           <reporter-output>
           </reporter-output>
         </test-method> <!-- testSymetricEncryptions -->
-        <test-method status="PASS" signature="testSymetricEncryptions(com.distrimind.util.crypto.SymmetricEncryptionType)[pri:0, instance:com.distrimind.util.tests.CryptoTests@22a71081]" name="testSymetricEncryptions" duration-ms="8" started-at="2016-03-02T16:33:42Z" data-provider="provideDataForSymetricEncryptions" finished-at="2016-03-02T16:33:42Z">
+        <test-method status="PASS" signature="testSymetricEncryptions(com.distrimind.util.crypto.SymmetricEncryptionType)[pri:0, instance:com.distrimind.util.tests.CryptoTests@3930015a]" name="testSymetricEncryptions" duration-ms="9" started-at="2016-03-04T09:31:49Z" data-provider="provideDataForSymetricEncryptions" depends-on-methods="com.distrimind.util.tests.CryptoTests.testSecretKeyEncoding" finished-at="2016-03-04T09:31:49Z">
           <params>
             <param index="0">
               <value>
@@ -139,7 +990,7 @@
           <reporter-output>
           </reporter-output>
         </test-method> <!-- testSymetricEncryptions -->
-        <test-method status="PASS" signature="testSymetricEncryptions(com.distrimind.util.crypto.SymmetricEncryptionType)[pri:0, instance:com.distrimind.util.tests.CryptoTests@22a71081]" name="testSymetricEncryptions" duration-ms="1" started-at="2016-03-02T16:33:42Z" data-provider="provideDataForSymetricEncryptions" finished-at="2016-03-02T16:33:42Z">
+        <test-method status="PASS" signature="testSymetricEncryptions(com.distrimind.util.crypto.SymmetricEncryptionType)[pri:0, instance:com.distrimind.util.tests.CryptoTests@3930015a]" name="testSymetricEncryptions" duration-ms="2" started-at="2016-03-04T09:31:49Z" data-provider="provideDataForSymetricEncryptions" depends-on-methods="com.distrimind.util.tests.CryptoTests.testSecretKeyEncoding" finished-at="2016-03-04T09:31:49Z">
           <params>
             <param index="0">
               <value>
@@ -150,679 +1001,7 @@
           <reporter-output>
           </reporter-output>
         </test-method> <!-- testSymetricEncryptions -->
-        <test-method status="PASS" signature="testSignatures(com.distrimind.util.crypto.ASymmetricEncryptionType, com.distrimind.util.crypto.SignatureType, int)[pri:0, instance:com.distrimind.util.tests.CryptoTests@22a71081]" name="testSignatures" duration-ms="35" started-at="2016-03-02T16:33:42Z" data-provider="provideDataForSignatureTest" finished-at="2016-03-02T16:33:42Z">
-          <params>
-            <param index="0">
-              <value>
-                <![CDATA[RSA]]>
-              </value>
-            </param>
-            <param index="1">
-              <value>
-                <![CDATA[SHA1withRSA]]>
-              </value>
-            </param>
-            <param index="2">
-              <value>
-                <![CDATA[1024]]>
-              </value>
-            </param>
-          </params>
-          <reporter-output>
-          </reporter-output>
-        </test-method> <!-- testSignatures -->
-        <test-method status="PASS" signature="testSignatures(com.distrimind.util.crypto.ASymmetricEncryptionType, com.distrimind.util.crypto.SignatureType, int)[pri:0, instance:com.distrimind.util.tests.CryptoTests@22a71081]" name="testSignatures" duration-ms="166" started-at="2016-03-02T16:33:42Z" data-provider="provideDataForSignatureTest" finished-at="2016-03-02T16:33:42Z">
-          <params>
-            <param index="0">
-              <value>
-                <![CDATA[RSA]]>
-              </value>
-            </param>
-            <param index="1">
-              <value>
-                <![CDATA[SHA1withRSA]]>
-              </value>
-            </param>
-            <param index="2">
-              <value>
-                <![CDATA[2048]]>
-              </value>
-            </param>
-          </params>
-          <reporter-output>
-          </reporter-output>
-        </test-method> <!-- testSignatures -->
-        <test-method status="PASS" signature="testSignatures(com.distrimind.util.crypto.ASymmetricEncryptionType, com.distrimind.util.crypto.SignatureType, int)[pri:0, instance:com.distrimind.util.tests.CryptoTests@22a71081]" name="testSignatures" duration-ms="2068" started-at="2016-03-02T16:33:42Z" data-provider="provideDataForSignatureTest" finished-at="2016-03-02T16:33:44Z">
-          <params>
-            <param index="0">
-              <value>
-                <![CDATA[RSA]]>
-              </value>
-            </param>
-            <param index="1">
-              <value>
-                <![CDATA[SHA1withRSA]]>
-              </value>
-            </param>
-            <param index="2">
-              <value>
-                <![CDATA[3072]]>
-              </value>
-            </param>
-          </params>
-          <reporter-output>
-          </reporter-output>
-        </test-method> <!-- testSignatures -->
-        <test-method status="PASS" signature="testSignatures(com.distrimind.util.crypto.ASymmetricEncryptionType, com.distrimind.util.crypto.SignatureType, int)[pri:0, instance:com.distrimind.util.tests.CryptoTests@22a71081]" name="testSignatures" duration-ms="2793" started-at="2016-03-02T16:33:44Z" data-provider="provideDataForSignatureTest" finished-at="2016-03-02T16:33:47Z">
-          <params>
-            <param index="0">
-              <value>
-                <![CDATA[RSA]]>
-              </value>
-            </param>
-            <param index="1">
-              <value>
-                <![CDATA[SHA1withRSA]]>
-              </value>
-            </param>
-            <param index="2">
-              <value>
-                <![CDATA[4096]]>
-              </value>
-            </param>
-          </params>
-          <reporter-output>
-          </reporter-output>
-        </test-method> <!-- testSignatures -->
-        <test-method status="PASS" signature="testSignatures(com.distrimind.util.crypto.ASymmetricEncryptionType, com.distrimind.util.crypto.SignatureType, int)[pri:0, instance:com.distrimind.util.tests.CryptoTests@22a71081]" name="testSignatures" duration-ms="25" started-at="2016-03-02T16:33:47Z" data-provider="provideDataForSignatureTest" finished-at="2016-03-02T16:33:47Z">
-          <params>
-            <param index="0">
-              <value>
-                <![CDATA[RSA]]>
-              </value>
-            </param>
-            <param index="1">
-              <value>
-                <![CDATA[SHA256withRSA]]>
-              </value>
-            </param>
-            <param index="2">
-              <value>
-                <![CDATA[1024]]>
-              </value>
-            </param>
-          </params>
-          <reporter-output>
-          </reporter-output>
-        </test-method> <!-- testSignatures -->
-        <test-method status="PASS" signature="testSignatures(com.distrimind.util.crypto.ASymmetricEncryptionType, com.distrimind.util.crypto.SignatureType, int)[pri:0, instance:com.distrimind.util.tests.CryptoTests@22a71081]" name="testSignatures" duration-ms="693" started-at="2016-03-02T16:33:47Z" data-provider="provideDataForSignatureTest" finished-at="2016-03-02T16:33:47Z">
-          <params>
-            <param index="0">
-              <value>
-                <![CDATA[RSA]]>
-              </value>
-            </param>
-            <param index="1">
-              <value>
-                <![CDATA[SHA256withRSA]]>
-              </value>
-            </param>
-            <param index="2">
-              <value>
-                <![CDATA[2048]]>
-              </value>
-            </param>
-          </params>
-          <reporter-output>
-          </reporter-output>
-        </test-method> <!-- testSignatures -->
-        <test-method status="PASS" signature="testSignatures(com.distrimind.util.crypto.ASymmetricEncryptionType, com.distrimind.util.crypto.SignatureType, int)[pri:0, instance:com.distrimind.util.tests.CryptoTests@22a71081]" name="testSignatures" duration-ms="505" started-at="2016-03-02T16:33:47Z" data-provider="provideDataForSignatureTest" finished-at="2016-03-02T16:33:48Z">
-          <params>
-            <param index="0">
-              <value>
-                <![CDATA[RSA]]>
-              </value>
-            </param>
-            <param index="1">
-              <value>
-                <![CDATA[SHA256withRSA]]>
-              </value>
-            </param>
-            <param index="2">
-              <value>
-                <![CDATA[3072]]>
-              </value>
-            </param>
-          </params>
-          <reporter-output>
-          </reporter-output>
-        </test-method> <!-- testSignatures -->
-        <test-method status="PASS" signature="testSignatures(com.distrimind.util.crypto.ASymmetricEncryptionType, com.distrimind.util.crypto.SignatureType, int)[pri:0, instance:com.distrimind.util.tests.CryptoTests@22a71081]" name="testSignatures" duration-ms="2091" started-at="2016-03-02T16:33:48Z" data-provider="provideDataForSignatureTest" finished-at="2016-03-02T16:33:50Z">
-          <params>
-            <param index="0">
-              <value>
-                <![CDATA[RSA]]>
-              </value>
-            </param>
-            <param index="1">
-              <value>
-                <![CDATA[SHA256withRSA]]>
-              </value>
-            </param>
-            <param index="2">
-              <value>
-                <![CDATA[4096]]>
-              </value>
-            </param>
-          </params>
-          <reporter-output>
-          </reporter-output>
-        </test-method> <!-- testSignatures -->
-        <test-method status="PASS" signature="testSignatures(com.distrimind.util.crypto.ASymmetricEncryptionType, com.distrimind.util.crypto.SignatureType, int)[pri:0, instance:com.distrimind.util.tests.CryptoTests@22a71081]" name="testSignatures" duration-ms="85" started-at="2016-03-02T16:33:50Z" data-provider="provideDataForSignatureTest" finished-at="2016-03-02T16:33:50Z">
-          <params>
-            <param index="0">
-              <value>
-                <![CDATA[RSA]]>
-              </value>
-            </param>
-            <param index="1">
-              <value>
-                <![CDATA[SHA384withRSA]]>
-              </value>
-            </param>
-            <param index="2">
-              <value>
-                <![CDATA[1024]]>
-              </value>
-            </param>
-          </params>
-          <reporter-output>
-          </reporter-output>
-        </test-method> <!-- testSignatures -->
-        <test-method status="PASS" signature="testSignatures(com.distrimind.util.crypto.ASymmetricEncryptionType, com.distrimind.util.crypto.SignatureType, int)[pri:0, instance:com.distrimind.util.tests.CryptoTests@22a71081]" name="testSignatures" duration-ms="1007" started-at="2016-03-02T16:33:50Z" data-provider="provideDataForSignatureTest" finished-at="2016-03-02T16:33:51Z">
-          <params>
-            <param index="0">
-              <value>
-                <![CDATA[RSA]]>
-              </value>
-            </param>
-            <param index="1">
-              <value>
-                <![CDATA[SHA384withRSA]]>
-              </value>
-            </param>
-            <param index="2">
-              <value>
-                <![CDATA[2048]]>
-              </value>
-            </param>
-          </params>
-          <reporter-output>
-          </reporter-output>
-        </test-method> <!-- testSignatures -->
-        <test-method status="PASS" signature="testSignatures(com.distrimind.util.crypto.ASymmetricEncryptionType, com.distrimind.util.crypto.SignatureType, int)[pri:0, instance:com.distrimind.util.tests.CryptoTests@22a71081]" name="testSignatures" duration-ms="331" started-at="2016-03-02T16:33:51Z" data-provider="provideDataForSignatureTest" finished-at="2016-03-02T16:33:51Z">
-          <params>
-            <param index="0">
-              <value>
-                <![CDATA[RSA]]>
-              </value>
-            </param>
-            <param index="1">
-              <value>
-                <![CDATA[SHA384withRSA]]>
-              </value>
-            </param>
-            <param index="2">
-              <value>
-                <![CDATA[3072]]>
-              </value>
-            </param>
-          </params>
-          <reporter-output>
-          </reporter-output>
-        </test-method> <!-- testSignatures -->
-        <test-method status="PASS" signature="testSignatures(com.distrimind.util.crypto.ASymmetricEncryptionType, com.distrimind.util.crypto.SignatureType, int)[pri:0, instance:com.distrimind.util.tests.CryptoTests@22a71081]" name="testSignatures" duration-ms="4838" started-at="2016-03-02T16:33:51Z" data-provider="provideDataForSignatureTest" finished-at="2016-03-02T16:33:56Z">
-          <params>
-            <param index="0">
-              <value>
-                <![CDATA[RSA]]>
-              </value>
-            </param>
-            <param index="1">
-              <value>
-                <![CDATA[SHA384withRSA]]>
-              </value>
-            </param>
-            <param index="2">
-              <value>
-                <![CDATA[4096]]>
-              </value>
-            </param>
-          </params>
-          <reporter-output>
-          </reporter-output>
-        </test-method> <!-- testSignatures -->
-        <test-method status="PASS" signature="testSignatures(com.distrimind.util.crypto.ASymmetricEncryptionType, com.distrimind.util.crypto.SignatureType, int)[pri:0, instance:com.distrimind.util.tests.CryptoTests@22a71081]" name="testSignatures" duration-ms="79" started-at="2016-03-02T16:33:56Z" data-provider="provideDataForSignatureTest" finished-at="2016-03-02T16:33:56Z">
-          <params>
-            <param index="0">
-              <value>
-                <![CDATA[RSA]]>
-              </value>
-            </param>
-            <param index="1">
-              <value>
-                <![CDATA[SHA512withRSA]]>
-              </value>
-            </param>
-            <param index="2">
-              <value>
-                <![CDATA[1024]]>
-              </value>
-            </param>
-          </params>
-          <reporter-output>
-          </reporter-output>
-        </test-method> <!-- testSignatures -->
-        <test-method status="PASS" signature="testSignatures(com.distrimind.util.crypto.ASymmetricEncryptionType, com.distrimind.util.crypto.SignatureType, int)[pri:0, instance:com.distrimind.util.tests.CryptoTests@22a71081]" name="testSignatures" duration-ms="282" started-at="2016-03-02T16:33:56Z" data-provider="provideDataForSignatureTest" finished-at="2016-03-02T16:33:57Z">
-          <params>
-            <param index="0">
-              <value>
-                <![CDATA[RSA]]>
-              </value>
-            </param>
-            <param index="1">
-              <value>
-                <![CDATA[SHA512withRSA]]>
-              </value>
-            </param>
-            <param index="2">
-              <value>
-                <![CDATA[2048]]>
-              </value>
-            </param>
-          </params>
-          <reporter-output>
-          </reporter-output>
-        </test-method> <!-- testSignatures -->
-        <test-method status="PASS" signature="testSignatures(com.distrimind.util.crypto.ASymmetricEncryptionType, com.distrimind.util.crypto.SignatureType, int)[pri:0, instance:com.distrimind.util.tests.CryptoTests@22a71081]" name="testSignatures" duration-ms="1840" started-at="2016-03-02T16:33:57Z" data-provider="provideDataForSignatureTest" finished-at="2016-03-02T16:33:58Z">
-          <params>
-            <param index="0">
-              <value>
-                <![CDATA[RSA]]>
-              </value>
-            </param>
-            <param index="1">
-              <value>
-                <![CDATA[SHA512withRSA]]>
-              </value>
-            </param>
-            <param index="2">
-              <value>
-                <![CDATA[3072]]>
-              </value>
-            </param>
-          </params>
-          <reporter-output>
-          </reporter-output>
-        </test-method> <!-- testSignatures -->
-        <test-method status="PASS" signature="testSignatures(com.distrimind.util.crypto.ASymmetricEncryptionType, com.distrimind.util.crypto.SignatureType, int)[pri:0, instance:com.distrimind.util.tests.CryptoTests@22a71081]" name="testSignatures" duration-ms="4269" started-at="2016-03-02T16:33:58Z" data-provider="provideDataForSignatureTest" finished-at="2016-03-02T16:34:03Z">
-          <params>
-            <param index="0">
-              <value>
-                <![CDATA[RSA]]>
-              </value>
-            </param>
-            <param index="1">
-              <value>
-                <![CDATA[SHA512withRSA]]>
-              </value>
-            </param>
-            <param index="2">
-              <value>
-                <![CDATA[4096]]>
-              </value>
-            </param>
-          </params>
-          <reporter-output>
-          </reporter-output>
-        </test-method> <!-- testSignatures -->
-        <test-method status="PASS" signature="testSignatures(com.distrimind.util.crypto.ASymmetricEncryptionType, com.distrimind.util.crypto.SignatureType, int)[pri:0, instance:com.distrimind.util.tests.CryptoTests@22a71081]" name="testSignatures" duration-ms="51" started-at="2016-03-02T16:34:03Z" data-provider="provideDataForSignatureTest" finished-at="2016-03-02T16:34:03Z">
-          <params>
-            <param index="0">
-              <value>
-                <![CDATA[DEFAULT]]>
-              </value>
-            </param>
-            <param index="1">
-              <value>
-                <![CDATA[SHA1withRSA]]>
-              </value>
-            </param>
-            <param index="2">
-              <value>
-                <![CDATA[1024]]>
-              </value>
-            </param>
-          </params>
-          <reporter-output>
-          </reporter-output>
-        </test-method> <!-- testSignatures -->
-        <test-method status="PASS" signature="testSignatures(com.distrimind.util.crypto.ASymmetricEncryptionType, com.distrimind.util.crypto.SignatureType, int)[pri:0, instance:com.distrimind.util.tests.CryptoTests@22a71081]" name="testSignatures" duration-ms="359" started-at="2016-03-02T16:34:03Z" data-provider="provideDataForSignatureTest" finished-at="2016-03-02T16:34:03Z">
-          <params>
-            <param index="0">
-              <value>
-                <![CDATA[DEFAULT]]>
-              </value>
-            </param>
-            <param index="1">
-              <value>
-                <![CDATA[SHA1withRSA]]>
-              </value>
-            </param>
-            <param index="2">
-              <value>
-                <![CDATA[2048]]>
-              </value>
-            </param>
-          </params>
-          <reporter-output>
-          </reporter-output>
-        </test-method> <!-- testSignatures -->
-        <test-method status="PASS" signature="testSignatures(com.distrimind.util.crypto.ASymmetricEncryptionType, com.distrimind.util.crypto.SignatureType, int)[pri:0, instance:com.distrimind.util.tests.CryptoTests@22a71081]" name="testSignatures" duration-ms="1380" started-at="2016-03-02T16:34:03Z" data-provider="provideDataForSignatureTest" finished-at="2016-03-02T16:34:05Z">
-          <params>
-            <param index="0">
-              <value>
-                <![CDATA[DEFAULT]]>
-              </value>
-            </param>
-            <param index="1">
-              <value>
-                <![CDATA[SHA1withRSA]]>
-              </value>
-            </param>
-            <param index="2">
-              <value>
-                <![CDATA[3072]]>
-              </value>
-            </param>
-          </params>
-          <reporter-output>
-          </reporter-output>
-        </test-method> <!-- testSignatures -->
-        <test-method status="PASS" signature="testSignatures(com.distrimind.util.crypto.ASymmetricEncryptionType, com.distrimind.util.crypto.SignatureType, int)[pri:0, instance:com.distrimind.util.tests.CryptoTests@22a71081]" name="testSignatures" duration-ms="9236" started-at="2016-03-02T16:34:05Z" data-provider="provideDataForSignatureTest" finished-at="2016-03-02T16:34:14Z">
-          <params>
-            <param index="0">
-              <value>
-                <![CDATA[DEFAULT]]>
-              </value>
-            </param>
-            <param index="1">
-              <value>
-                <![CDATA[SHA1withRSA]]>
-              </value>
-            </param>
-            <param index="2">
-              <value>
-                <![CDATA[4096]]>
-              </value>
-            </param>
-          </params>
-          <reporter-output>
-          </reporter-output>
-        </test-method> <!-- testSignatures -->
-        <test-method status="PASS" signature="testSignatures(com.distrimind.util.crypto.ASymmetricEncryptionType, com.distrimind.util.crypto.SignatureType, int)[pri:0, instance:com.distrimind.util.tests.CryptoTests@22a71081]" name="testSignatures" duration-ms="75" started-at="2016-03-02T16:34:14Z" data-provider="provideDataForSignatureTest" finished-at="2016-03-02T16:34:14Z">
-          <params>
-            <param index="0">
-              <value>
-                <![CDATA[DEFAULT]]>
-              </value>
-            </param>
-            <param index="1">
-              <value>
-                <![CDATA[SHA256withRSA]]>
-              </value>
-            </param>
-            <param index="2">
-              <value>
-                <![CDATA[1024]]>
-              </value>
-            </param>
-          </params>
-          <reporter-output>
-          </reporter-output>
-        </test-method> <!-- testSignatures -->
-        <test-method status="PASS" signature="testSignatures(com.distrimind.util.crypto.ASymmetricEncryptionType, com.distrimind.util.crypto.SignatureType, int)[pri:0, instance:com.distrimind.util.tests.CryptoTests@22a71081]" name="testSignatures" duration-ms="175" started-at="2016-03-02T16:34:14Z" data-provider="provideDataForSignatureTest" finished-at="2016-03-02T16:34:14Z">
-          <params>
-            <param index="0">
-              <value>
-                <![CDATA[DEFAULT]]>
-              </value>
-            </param>
-            <param index="1">
-              <value>
-                <![CDATA[SHA256withRSA]]>
-              </value>
-            </param>
-            <param index="2">
-              <value>
-                <![CDATA[2048]]>
-              </value>
-            </param>
-          </params>
-          <reporter-output>
-          </reporter-output>
-        </test-method> <!-- testSignatures -->
-        <test-method status="PASS" signature="testSignatures(com.distrimind.util.crypto.ASymmetricEncryptionType, com.distrimind.util.crypto.SignatureType, int)[pri:0, instance:com.distrimind.util.tests.CryptoTests@22a71081]" name="testSignatures" duration-ms="4100" started-at="2016-03-02T16:34:14Z" data-provider="provideDataForSignatureTest" finished-at="2016-03-02T16:34:18Z">
-          <params>
-            <param index="0">
-              <value>
-                <![CDATA[DEFAULT]]>
-              </value>
-            </param>
-            <param index="1">
-              <value>
-                <![CDATA[SHA256withRSA]]>
-              </value>
-            </param>
-            <param index="2">
-              <value>
-                <![CDATA[3072]]>
-              </value>
-            </param>
-          </params>
-          <reporter-output>
-          </reporter-output>
-        </test-method> <!-- testSignatures -->
-        <test-method status="PASS" signature="testSignatures(com.distrimind.util.crypto.ASymmetricEncryptionType, com.distrimind.util.crypto.SignatureType, int)[pri:0, instance:com.distrimind.util.tests.CryptoTests@22a71081]" name="testSignatures" duration-ms="4293" started-at="2016-03-02T16:34:18Z" data-provider="provideDataForSignatureTest" finished-at="2016-03-02T16:34:22Z">
-          <params>
-            <param index="0">
-              <value>
-                <![CDATA[DEFAULT]]>
-              </value>
-            </param>
-            <param index="1">
-              <value>
-                <![CDATA[SHA256withRSA]]>
-              </value>
-            </param>
-            <param index="2">
-              <value>
-                <![CDATA[4096]]>
-              </value>
-            </param>
-          </params>
-          <reporter-output>
-          </reporter-output>
-        </test-method> <!-- testSignatures -->
-        <test-method status="PASS" signature="testSignatures(com.distrimind.util.crypto.ASymmetricEncryptionType, com.distrimind.util.crypto.SignatureType, int)[pri:0, instance:com.distrimind.util.tests.CryptoTests@22a71081]" name="testSignatures" duration-ms="30" started-at="2016-03-02T16:34:22Z" data-provider="provideDataForSignatureTest" finished-at="2016-03-02T16:34:22Z">
-          <params>
-            <param index="0">
-              <value>
-                <![CDATA[DEFAULT]]>
-              </value>
-            </param>
-            <param index="1">
-              <value>
-                <![CDATA[SHA384withRSA]]>
-              </value>
-            </param>
-            <param index="2">
-              <value>
-                <![CDATA[1024]]>
-              </value>
-            </param>
-          </params>
-          <reporter-output>
-          </reporter-output>
-        </test-method> <!-- testSignatures -->
-        <test-method status="PASS" signature="testSignatures(com.distrimind.util.crypto.ASymmetricEncryptionType, com.distrimind.util.crypto.SignatureType, int)[pri:0, instance:com.distrimind.util.tests.CryptoTests@22a71081]" name="testSignatures" duration-ms="91" started-at="2016-03-02T16:34:22Z" data-provider="provideDataForSignatureTest" finished-at="2016-03-02T16:34:23Z">
-          <params>
-            <param index="0">
-              <value>
-                <![CDATA[DEFAULT]]>
-              </value>
-            </param>
-            <param index="1">
-              <value>
-                <![CDATA[SHA384withRSA]]>
-              </value>
-            </param>
-            <param index="2">
-              <value>
-                <![CDATA[2048]]>
-              </value>
-            </param>
-          </params>
-          <reporter-output>
-          </reporter-output>
-        </test-method> <!-- testSignatures -->
-        <test-method status="PASS" signature="testSignatures(com.distrimind.util.crypto.ASymmetricEncryptionType, com.distrimind.util.crypto.SignatureType, int)[pri:0, instance:com.distrimind.util.tests.CryptoTests@22a71081]" name="testSignatures" duration-ms="1689" started-at="2016-03-02T16:34:23Z" data-provider="provideDataForSignatureTest" finished-at="2016-03-02T16:34:24Z">
-          <params>
-            <param index="0">
-              <value>
-                <![CDATA[DEFAULT]]>
-              </value>
-            </param>
-            <param index="1">
-              <value>
-                <![CDATA[SHA384withRSA]]>
-              </value>
-            </param>
-            <param index="2">
-              <value>
-                <![CDATA[3072]]>
-              </value>
-            </param>
-          </params>
-          <reporter-output>
-          </reporter-output>
-        </test-method> <!-- testSignatures -->
-        <test-method status="PASS" signature="testSignatures(com.distrimind.util.crypto.ASymmetricEncryptionType, com.distrimind.util.crypto.SignatureType, int)[pri:0, instance:com.distrimind.util.tests.CryptoTests@22a71081]" name="testSignatures" duration-ms="15150" started-at="2016-03-02T16:34:24Z" data-provider="provideDataForSignatureTest" finished-at="2016-03-02T16:34:39Z">
-          <params>
-            <param index="0">
-              <value>
-                <![CDATA[DEFAULT]]>
-              </value>
-            </param>
-            <param index="1">
-              <value>
-                <![CDATA[SHA384withRSA]]>
-              </value>
-            </param>
-            <param index="2">
-              <value>
-                <![CDATA[4096]]>
-              </value>
-            </param>
-          </params>
-          <reporter-output>
-          </reporter-output>
-        </test-method> <!-- testSignatures -->
-        <test-method status="PASS" signature="testSignatures(com.distrimind.util.crypto.ASymmetricEncryptionType, com.distrimind.util.crypto.SignatureType, int)[pri:0, instance:com.distrimind.util.tests.CryptoTests@22a71081]" name="testSignatures" duration-ms="30" started-at="2016-03-02T16:34:39Z" data-provider="provideDataForSignatureTest" finished-at="2016-03-02T16:34:39Z">
-          <params>
-            <param index="0">
-              <value>
-                <![CDATA[DEFAULT]]>
-              </value>
-            </param>
-            <param index="1">
-              <value>
-                <![CDATA[SHA512withRSA]]>
-              </value>
-            </param>
-            <param index="2">
-              <value>
-                <![CDATA[1024]]>
-              </value>
-            </param>
-          </params>
-          <reporter-output>
-          </reporter-output>
-        </test-method> <!-- testSignatures -->
-        <test-method status="PASS" signature="testSignatures(com.distrimind.util.crypto.ASymmetricEncryptionType, com.distrimind.util.crypto.SignatureType, int)[pri:0, instance:com.distrimind.util.tests.CryptoTests@22a71081]" name="testSignatures" duration-ms="162" started-at="2016-03-02T16:34:39Z" data-provider="provideDataForSignatureTest" finished-at="2016-03-02T16:34:40Z">
-          <params>
-            <param index="0">
-              <value>
-                <![CDATA[DEFAULT]]>
-              </value>
-            </param>
-            <param index="1">
-              <value>
-                <![CDATA[SHA512withRSA]]>
-              </value>
-            </param>
-            <param index="2">
-              <value>
-                <![CDATA[2048]]>
-              </value>
-            </param>
-          </params>
-          <reporter-output>
-          </reporter-output>
-        </test-method> <!-- testSignatures -->
-        <test-method status="PASS" signature="testSignatures(com.distrimind.util.crypto.ASymmetricEncryptionType, com.distrimind.util.crypto.SignatureType, int)[pri:0, instance:com.distrimind.util.tests.CryptoTests@22a71081]" name="testSignatures" duration-ms="795" started-at="2016-03-02T16:34:40Z" data-provider="provideDataForSignatureTest" finished-at="2016-03-02T16:34:40Z">
-          <params>
-            <param index="0">
-              <value>
-                <![CDATA[DEFAULT]]>
-              </value>
-            </param>
-            <param index="1">
-              <value>
-                <![CDATA[SHA512withRSA]]>
-              </value>
-            </param>
-            <param index="2">
-              <value>
-                <![CDATA[3072]]>
-              </value>
-            </param>
-          </params>
-          <reporter-output>
-          </reporter-output>
-        </test-method> <!-- testSignatures -->
-        <test-method status="PASS" signature="testSignatures(com.distrimind.util.crypto.ASymmetricEncryptionType, com.distrimind.util.crypto.SignatureType, int)[pri:0, instance:com.distrimind.util.tests.CryptoTests@22a71081]" name="testSignatures" duration-ms="5031" started-at="2016-03-02T16:34:40Z" data-provider="provideDataForSignatureTest" finished-at="2016-03-02T16:34:45Z">
-          <params>
-            <param index="0">
-              <value>
-                <![CDATA[DEFAULT]]>
-              </value>
-            </param>
-            <param index="1">
-              <value>
-                <![CDATA[SHA512withRSA]]>
-              </value>
-            </param>
-            <param index="2">
-              <value>
-                <![CDATA[4096]]>
-              </value>
-            </param>
-          </params>
-          <reporter-output>
-          </reporter-output>
-        </test-method> <!-- testSignatures -->
-        <test-method status="PASS" signature="testHybridEncryptions(com.distrimind.util.crypto.ASymmetricEncryptionType, com.distrimind.util.crypto.SymmetricEncryptionType)[pri:0, instance:com.distrimind.util.tests.CryptoTests@22a71081]" name="testHybridEncryptions" duration-ms="7075" started-at="2016-03-02T16:34:45Z" data-provider="provideDataForHybridEncryptions" depends-on-methods="com.distrimind.util.tests.CryptoTests.testSymetricEncryptions, com.distrimind.util.tests.CryptoTests.testASymetricEncryptions" finished-at="2016-03-02T16:34:52Z">
+        <test-method status="PASS" signature="testHybridEncryptions(com.distrimind.util.crypto.ASymmetricEncryptionType, com.distrimind.util.crypto.SymmetricEncryptionType)[pri:0, instance:com.distrimind.util.tests.CryptoTests@3930015a]" name="testHybridEncryptions" duration-ms="3820" started-at="2016-03-04T09:31:49Z" data-provider="provideDataForHybridEncryptions" depends-on-methods="com.distrimind.util.tests.CryptoTests.testSymetricEncryptions, com.distrimind.util.tests.CryptoTests.testASymetricEncryptions" finished-at="2016-03-04T09:31:53Z">
           <params>
             <param index="0">
               <value>
@@ -838,7 +1017,7 @@
           <reporter-output>
           </reporter-output>
         </test-method> <!-- testHybridEncryptions -->
-        <test-method status="PASS" signature="testHybridEncryptions(com.distrimind.util.crypto.ASymmetricEncryptionType, com.distrimind.util.crypto.SymmetricEncryptionType)[pri:0, instance:com.distrimind.util.tests.CryptoTests@22a71081]" name="testHybridEncryptions" duration-ms="8614" started-at="2016-03-02T16:34:52Z" data-provider="provideDataForHybridEncryptions" depends-on-methods="com.distrimind.util.tests.CryptoTests.testSymetricEncryptions, com.distrimind.util.tests.CryptoTests.testASymetricEncryptions" finished-at="2016-03-02T16:35:01Z">
+        <test-method status="PASS" signature="testHybridEncryptions(com.distrimind.util.crypto.ASymmetricEncryptionType, com.distrimind.util.crypto.SymmetricEncryptionType)[pri:0, instance:com.distrimind.util.tests.CryptoTests@3930015a]" name="testHybridEncryptions" duration-ms="7122" started-at="2016-03-04T09:31:53Z" data-provider="provideDataForHybridEncryptions" depends-on-methods="com.distrimind.util.tests.CryptoTests.testSymetricEncryptions, com.distrimind.util.tests.CryptoTests.testASymetricEncryptions" finished-at="2016-03-04T09:32:00Z">
           <params>
             <param index="0">
               <value>
@@ -854,7 +1033,7 @@
           <reporter-output>
           </reporter-output>
         </test-method> <!-- testHybridEncryptions -->
-        <test-method status="PASS" signature="testHybridEncryptions(com.distrimind.util.crypto.ASymmetricEncryptionType, com.distrimind.util.crypto.SymmetricEncryptionType)[pri:0, instance:com.distrimind.util.tests.CryptoTests@22a71081]" name="testHybridEncryptions" duration-ms="7600" started-at="2016-03-02T16:35:01Z" data-provider="provideDataForHybridEncryptions" depends-on-methods="com.distrimind.util.tests.CryptoTests.testSymetricEncryptions, com.distrimind.util.tests.CryptoTests.testASymetricEncryptions" finished-at="2016-03-02T16:35:09Z">
+        <test-method status="PASS" signature="testHybridEncryptions(com.distrimind.util.crypto.ASymmetricEncryptionType, com.distrimind.util.crypto.SymmetricEncryptionType)[pri:0, instance:com.distrimind.util.tests.CryptoTests@3930015a]" name="testHybridEncryptions" duration-ms="33659" started-at="2016-03-04T09:32:00Z" data-provider="provideDataForHybridEncryptions" depends-on-methods="com.distrimind.util.tests.CryptoTests.testSymetricEncryptions, com.distrimind.util.tests.CryptoTests.testASymetricEncryptions" finished-at="2016-03-04T09:32:34Z">
           <params>
             <param index="0">
               <value>
@@ -870,7 +1049,7 @@
           <reporter-output>
           </reporter-output>
         </test-method> <!-- testHybridEncryptions -->
-        <test-method status="PASS" signature="testHybridEncryptions(com.distrimind.util.crypto.ASymmetricEncryptionType, com.distrimind.util.crypto.SymmetricEncryptionType)[pri:0, instance:com.distrimind.util.tests.CryptoTests@22a71081]" name="testHybridEncryptions" duration-ms="12581" started-at="2016-03-02T16:35:09Z" data-provider="provideDataForHybridEncryptions" depends-on-methods="com.distrimind.util.tests.CryptoTests.testSymetricEncryptions, com.distrimind.util.tests.CryptoTests.testASymetricEncryptions" finished-at="2016-03-02T16:35:21Z">
+        <test-method status="PASS" signature="testHybridEncryptions(com.distrimind.util.crypto.ASymmetricEncryptionType, com.distrimind.util.crypto.SymmetricEncryptionType)[pri:0, instance:com.distrimind.util.tests.CryptoTests@3930015a]" name="testHybridEncryptions" duration-ms="18810" started-at="2016-03-04T09:32:34Z" data-provider="provideDataForHybridEncryptions" depends-on-methods="com.distrimind.util.tests.CryptoTests.testSymetricEncryptions, com.distrimind.util.tests.CryptoTests.testASymetricEncryptions" finished-at="2016-03-04T09:32:52Z">
           <params>
             <param index="0">
               <value>
@@ -886,7 +1065,7 @@
           <reporter-output>
           </reporter-output>
         </test-method> <!-- testHybridEncryptions -->
-        <test-method status="PASS" signature="testHybridEncryptions(com.distrimind.util.crypto.ASymmetricEncryptionType, com.distrimind.util.crypto.SymmetricEncryptionType)[pri:0, instance:com.distrimind.util.tests.CryptoTests@22a71081]" name="testHybridEncryptions" duration-ms="18783" started-at="2016-03-02T16:35:21Z" data-provider="provideDataForHybridEncryptions" depends-on-methods="com.distrimind.util.tests.CryptoTests.testSymetricEncryptions, com.distrimind.util.tests.CryptoTests.testASymetricEncryptions" finished-at="2016-03-02T16:35:40Z">
+        <test-method status="PASS" signature="testHybridEncryptions(com.distrimind.util.crypto.ASymmetricEncryptionType, com.distrimind.util.crypto.SymmetricEncryptionType)[pri:0, instance:com.distrimind.util.tests.CryptoTests@3930015a]" name="testHybridEncryptions" duration-ms="10299" started-at="2016-03-04T09:32:52Z" data-provider="provideDataForHybridEncryptions" depends-on-methods="com.distrimind.util.tests.CryptoTests.testSymetricEncryptions, com.distrimind.util.tests.CryptoTests.testASymetricEncryptions" finished-at="2016-03-04T09:33:03Z">
           <params>
             <param index="0">
               <value>
@@ -902,7 +1081,7 @@
           <reporter-output>
           </reporter-output>
         </test-method> <!-- testHybridEncryptions -->
-        <test-method status="PASS" signature="testHybridEncryptions(com.distrimind.util.crypto.ASymmetricEncryptionType, com.distrimind.util.crypto.SymmetricEncryptionType)[pri:0, instance:com.distrimind.util.tests.CryptoTests@22a71081]" name="testHybridEncryptions" duration-ms="7466" started-at="2016-03-02T16:35:40Z" data-provider="provideDataForHybridEncryptions" depends-on-methods="com.distrimind.util.tests.CryptoTests.testSymetricEncryptions, com.distrimind.util.tests.CryptoTests.testASymetricEncryptions" finished-at="2016-03-02T16:35:48Z">
+        <test-method status="PASS" signature="testHybridEncryptions(com.distrimind.util.crypto.ASymmetricEncryptionType, com.distrimind.util.crypto.SymmetricEncryptionType)[pri:0, instance:com.distrimind.util.tests.CryptoTests@3930015a]" name="testHybridEncryptions" duration-ms="13306" started-at="2016-03-04T09:33:03Z" data-provider="provideDataForHybridEncryptions" depends-on-methods="com.distrimind.util.tests.CryptoTests.testSymetricEncryptions, com.distrimind.util.tests.CryptoTests.testASymetricEncryptions" finished-at="2016-03-04T09:33:16Z">
           <params>
             <param index="0">
               <value>
@@ -918,7 +1097,7 @@
           <reporter-output>
           </reporter-output>
         </test-method> <!-- testHybridEncryptions -->
-        <test-method status="PASS" signature="testHybridEncryptions(com.distrimind.util.crypto.ASymmetricEncryptionType, com.distrimind.util.crypto.SymmetricEncryptionType)[pri:0, instance:com.distrimind.util.tests.CryptoTests@22a71081]" name="testHybridEncryptions" duration-ms="6253" started-at="2016-03-02T16:35:48Z" data-provider="provideDataForHybridEncryptions" depends-on-methods="com.distrimind.util.tests.CryptoTests.testSymetricEncryptions, com.distrimind.util.tests.CryptoTests.testASymetricEncryptions" finished-at="2016-03-02T16:35:54Z">
+        <test-method status="PASS" signature="testHybridEncryptions(com.distrimind.util.crypto.ASymmetricEncryptionType, com.distrimind.util.crypto.SymmetricEncryptionType)[pri:0, instance:com.distrimind.util.tests.CryptoTests@3930015a]" name="testHybridEncryptions" duration-ms="7296" started-at="2016-03-04T09:33:16Z" data-provider="provideDataForHybridEncryptions" depends-on-methods="com.distrimind.util.tests.CryptoTests.testSymetricEncryptions, com.distrimind.util.tests.CryptoTests.testASymetricEncryptions" finished-at="2016-03-04T09:33:23Z">
           <params>
             <param index="0">
               <value>
@@ -934,7 +1113,7 @@
           <reporter-output>
           </reporter-output>
         </test-method> <!-- testHybridEncryptions -->
-        <test-method status="PASS" signature="testHybridEncryptions(com.distrimind.util.crypto.ASymmetricEncryptionType, com.distrimind.util.crypto.SymmetricEncryptionType)[pri:0, instance:com.distrimind.util.tests.CryptoTests@22a71081]" name="testHybridEncryptions" duration-ms="9277" started-at="2016-03-02T16:35:54Z" data-provider="provideDataForHybridEncryptions" depends-on-methods="com.distrimind.util.tests.CryptoTests.testSymetricEncryptions, com.distrimind.util.tests.CryptoTests.testASymetricEncryptions" finished-at="2016-03-02T16:36:03Z">
+        <test-method status="PASS" signature="testHybridEncryptions(com.distrimind.util.crypto.ASymmetricEncryptionType, com.distrimind.util.crypto.SymmetricEncryptionType)[pri:0, instance:com.distrimind.util.tests.CryptoTests@3930015a]" name="testHybridEncryptions" duration-ms="8237" started-at="2016-03-04T09:33:23Z" data-provider="provideDataForHybridEncryptions" depends-on-methods="com.distrimind.util.tests.CryptoTests.testSymetricEncryptions, com.distrimind.util.tests.CryptoTests.testASymetricEncryptions" finished-at="2016-03-04T09:33:32Z">
           <params>
             <param index="0">
               <value>
@@ -950,7 +1129,7 @@
           <reporter-output>
           </reporter-output>
         </test-method> <!-- testHybridEncryptions -->
-        <test-method status="PASS" signature="testHybridEncryptions(com.distrimind.util.crypto.ASymmetricEncryptionType, com.distrimind.util.crypto.SymmetricEncryptionType)[pri:0, instance:com.distrimind.util.tests.CryptoTests@22a71081]" name="testHybridEncryptions" duration-ms="13875" started-at="2016-03-02T16:36:03Z" data-provider="provideDataForHybridEncryptions" depends-on-methods="com.distrimind.util.tests.CryptoTests.testSymetricEncryptions, com.distrimind.util.tests.CryptoTests.testASymetricEncryptions" finished-at="2016-03-02T16:36:17Z">
+        <test-method status="PASS" signature="testHybridEncryptions(com.distrimind.util.crypto.ASymmetricEncryptionType, com.distrimind.util.crypto.SymmetricEncryptionType)[pri:0, instance:com.distrimind.util.tests.CryptoTests@3930015a]" name="testHybridEncryptions" duration-ms="6022" started-at="2016-03-04T09:33:32Z" data-provider="provideDataForHybridEncryptions" depends-on-methods="com.distrimind.util.tests.CryptoTests.testSymetricEncryptions, com.distrimind.util.tests.CryptoTests.testASymetricEncryptions" finished-at="2016-03-04T09:33:38Z">
           <params>
             <param index="0">
               <value>
@@ -966,7 +1145,7 @@
           <reporter-output>
           </reporter-output>
         </test-method> <!-- testHybridEncryptions -->
-        <test-method status="PASS" signature="testHybridEncryptions(com.distrimind.util.crypto.ASymmetricEncryptionType, com.distrimind.util.crypto.SymmetricEncryptionType)[pri:0, instance:com.distrimind.util.tests.CryptoTests@22a71081]" name="testHybridEncryptions" duration-ms="6373" started-at="2016-03-02T16:36:17Z" data-provider="provideDataForHybridEncryptions" depends-on-methods="com.distrimind.util.tests.CryptoTests.testSymetricEncryptions, com.distrimind.util.tests.CryptoTests.testASymetricEncryptions" finished-at="2016-03-02T16:36:23Z">
+        <test-method status="PASS" signature="testHybridEncryptions(com.distrimind.util.crypto.ASymmetricEncryptionType, com.distrimind.util.crypto.SymmetricEncryptionType)[pri:0, instance:com.distrimind.util.tests.CryptoTests@3930015a]" name="testHybridEncryptions" duration-ms="17373" started-at="2016-03-04T09:33:38Z" data-provider="provideDataForHybridEncryptions" depends-on-methods="com.distrimind.util.tests.CryptoTests.testSymetricEncryptions, com.distrimind.util.tests.CryptoTests.testASymetricEncryptions" finished-at="2016-03-04T09:33:55Z">
           <params>
             <param index="0">
               <value>

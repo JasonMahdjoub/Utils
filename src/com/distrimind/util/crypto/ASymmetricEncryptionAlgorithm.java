@@ -34,10 +34,10 @@ import javax.crypto.NoSuchPaddingException;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 1.1
  * @since Utils 1.4
  */
-public class ASymmetricEncryptionAlgorithm extends AbstractEncryptionAlgorithm
+public class ASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm
 {
     private final KeyPair myKeyPair;
     private final PublicKey distantPublicKey;
@@ -52,6 +52,13 @@ public class ASymmetricEncryptionAlgorithm extends AbstractEncryptionAlgorithm
     public ASymmetricEncryptionAlgorithm(ASymmetricEncryptionType type, Signature signature, KeyPair myKeyPair, PublicKey distantPublicKey) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException
     {
 	super(type.getCipherInstance());
+	if (signature==null)
+	    throw new NullPointerException("signature");
+	if (myKeyPair==null)
+	    throw new NullPointerException("myKeyPair");
+	if (distantPublicKey==null)
+	    throw new NullPointerException("distantPublicKey");
+	
 	this.type=type;
 	this.myKeyPair=myKeyPair;
 	this.distantPublicKey=distantPublicKey;

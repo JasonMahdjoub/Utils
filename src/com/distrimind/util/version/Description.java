@@ -34,7 +34,7 @@ import com.distrimind.util.version.Version.Type;
  * Represents the description of program version
  * @author Jason Mahdjoub
  * @version 1.0
- * @since Utils 1.0
+ * @since Utils 1.5
  * @see Version
  */
 public class Description extends XMLProperties
