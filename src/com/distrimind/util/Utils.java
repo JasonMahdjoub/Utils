@@ -44,7 +44,7 @@ public class Utils
 	Calendar c=Calendar.getInstance();
 	c.set(2016, 1, 4);
 	Calendar c2=Calendar.getInstance();
-	c.set(2016, 2, 3);
+	c.set(2016, 2, 9);
     	VERSION=new Version("Utils", 1,5,0, Version.Type.Stable, 0, c.getTime(), c2.getTime());
 	try
 	{
@@ -58,11 +58,12 @@ public class Utils
 	    VERSION.addDeveloper(new PersonDeveloper("mahdjoub", "jason", c.getTime()));
 	
 	    c=Calendar.getInstance();
-	    c.set(2016, 2, 3);
+	    c.set(2016, 2, 9);
 	    Description d=new Description(1,5,0,Version.Type.Stable, 0, c.getTime());
 	    d.addItem("Adding PeerToPeerASymmetricSecretMessageExchanger class");
 	    d.addItem("Adding ObjectSizer class (determins sizeof each java object instance)");
 	    d.addItem("Adding keys encoding");
+	    d.addItem("Adding decentralized id encoding/decoding");
 	    VERSION.addDescription(d);
 
 	    c=Calendar.getInstance();

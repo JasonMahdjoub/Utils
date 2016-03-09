@@ -115,4 +115,13 @@ public class ASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm
 	return this.signature.verify(signature, offs, lens);
     }
     
+    public KeyPair getMyKeyPair()
+    {
+	return this.myKeyPair;
+    }
+    
+    public PublicKey getDistantPublicKey()
+    {
+	return this.distantPublicKey;
+    }
 }

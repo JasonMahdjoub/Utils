@@ -38,10 +38,27 @@ public class DecentralizedIDGenerator extends AbstractDecentralizedIDGenerator
     
     private static final AtomicInteger sequencer=new AtomicInteger(0);
     
+    public DecentralizedIDGenerator()
+    {
+	super();
+    }
+    
+    DecentralizedIDGenerator(long timestamp, long work_id_sequence)
+    {
+	super(timestamp, work_id_sequence);
+    }
+    
+    
     @Override
     protected short getNewSequence()
     {
 	return (short)sequencer.incrementAndGet();
+    }
+
+    @Override
+    byte getType()
+    {
+	return AbstractDecentralizedID.DECENTRALIZED_ID_GENERATOR_TYPE;
     }
 
 }

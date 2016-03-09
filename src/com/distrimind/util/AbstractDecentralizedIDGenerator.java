@@ -25,6 +25,8 @@ import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.Enumeration;
 
+import com.distrimind.util.sizeof.ObjectSizer;
+
 
 /**
  * This class represents a unique identifier.
@@ -97,6 +99,11 @@ public abstract class AbstractDecentralizedIDGenerator extends AbstractDecentral
 	    worker_id_and_sequence=LOCAL_MAC & (((long)getNewSequence())<<48);
 	}
 	
+	AbstractDecentralizedIDGenerator(long timestamp, long work_id_sequence)
+	{
+	    this.timestamp=timestamp;
+	    this.worker_id_and_sequence=work_id_sequence;
+	}
 	
 	protected abstract short getNewSequence();
 	
@@ -151,9 +158,12 @@ public abstract class AbstractDecentralizedIDGenerator extends AbstractDecentral
 	{
 	    long ts=getTimeStamp();
 	    long wid=getWorkerIDAndSequence();
-	    byte res[]=new byte[16];
-	    Bits.putLong(res, 0, ts);
-	    Bits.putLong(res, 8, wid);
+	    int sizeLong=ObjectSizer.sizeOf(ts);
+	    byte res[]=new byte[sizeLong*2+1];
+	    res[0]=getType();
+	    Bits.putLong(res, 1, ts);
+	    Bits.putLong(res, sizeLong+1, wid);
 	    return res;
 	}
+	
 }

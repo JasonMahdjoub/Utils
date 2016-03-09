@@ -24,6 +24,8 @@ package com.distrimind.util;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+import com.distrimind.util.sizeof.ObjectSizer;
+
 /**
  * This class represents a unique identifier.
  * Uniqueness is guaranteed over the network.
@@ -61,13 +63,23 @@ public class SecuredDecentralizedID extends AbstractDecentralizedID
     private final long id1, id2, id3, id4;
     public SecuredDecentralizedID(AbstractDecentralizedIDGenerator generator)
     {
-	message_digest.update(generator.getBytes());
-	byte []id=message_digest.digest();
-	id1=Bits.getLong(id, 0);
-	id2=Bits.getLong(id, 8);
-	id3=Bits.getLong(id, 16);
-	id4=Bits.getLong(id, 24);
-	message_digest.reset();
+	synchronized(message_digest)
+	{
+	    message_digest.update(generator.getBytes());
+	    byte []id=message_digest.digest();
+	    id1=Bits.getLong(id, 0);
+	    id2=Bits.getLong(id, 8);
+	    id3=Bits.getLong(id, 16);
+	    id4=Bits.getLong(id, 24);
+	    message_digest.reset();
+	}
+    }
+    SecuredDecentralizedID(long id1, long id2, long id3, long id4)
+    {
+	this.id1=id1;
+	this.id2=id2;
+	this.id3=id3;
+	this.id4=id4;
     }
 
     @Override
@@ -107,12 +119,20 @@ public class SecuredDecentralizedID extends AbstractDecentralizedID
     @Override
     public byte[] getBytes()
     {
-	byte res[]=new byte[32];
-	Bits.putLong(res, 0, id1);
-	Bits.putLong(res, 8, id2);
-	Bits.putLong(res, 16, id3);
-	Bits.putLong(res, 24, id4);
+	int sizeLong=ObjectSizer.sizeOf(id1);
+	byte res[]=new byte[sizeLong*4+1];
+	res[0]=getType();
+	Bits.putLong(res, 1, id1);
+	Bits.putLong(res, sizeLong+1, id2);
+	Bits.putLong(res, sizeLong*2+1, id3);
+	Bits.putLong(res, sizeLong*3+1, id4);
 	return res;
+    }
+    
+    @Override
+    byte getType()
+    {
+	return AbstractDecentralizedID.SECURED_DECENTRALIZED_ID_TYPE;
     }
     
 }

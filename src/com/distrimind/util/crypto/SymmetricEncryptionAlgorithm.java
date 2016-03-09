@@ -100,7 +100,7 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm
 	return type;
     }
     
-    public SecretKey getKey()
+    public SecretKey getSecretKey()
     {
 	return key;
     }
@@ -117,4 +117,5 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm
 	return asalgo.encode(Bits.concateEncodingWithShortSizedTabs(k, iv));
 	
     }
+    
 }

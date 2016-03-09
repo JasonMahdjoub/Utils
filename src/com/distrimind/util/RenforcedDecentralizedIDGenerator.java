@@ -49,7 +49,10 @@ public class RenforcedDecentralizedIDGenerator extends AbstractDecentralizedIDGe
     {
 	super();
     }
-    
+    RenforcedDecentralizedIDGenerator(long timestamp, long work_id_sequence)
+    {
+	super(timestamp, work_id_sequence);
+    }
     
     @Override
     protected short getNewSequence()
@@ -69,5 +72,12 @@ public class RenforcedDecentralizedIDGenerator extends AbstractDecentralizedIDGe
 	    return tmp;
 	}
     }
+    
+    @Override
+    byte getType()
+    {
+	return AbstractDecentralizedID.RENFORCED_DECENTRALIZED_ID_GENERATOR_TYPE;
+    }
+    
 
 }
