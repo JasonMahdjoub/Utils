@@ -22,6 +22,7 @@
 package com.distrimind.util;
 
 import java.io.File;
+import java.net.URL;
 import java.util.ArrayList;
 
 import javax.lang.model.SourceVersion;
@@ -100,7 +101,7 @@ class Export
 	javaProjectSource.setTestSuiteSource(root_dir, src_tests_dir, root_tests_package, 
 		dependencies, null, new TestSuite(new TestNGFile(CryptoTests.class)));
 	
-	
+	javaProjectSource.setGitHUBLink(new URL("https://github.com/JazZ51/Utils.git"));
 	exports.setProject(javaProjectSource);
 	
 	
