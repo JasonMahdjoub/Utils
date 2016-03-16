@@ -31,47 +31,81 @@ import com.distrimind.util.export.Dependency;
 import com.distrimind.util.export.Exports;
 import com.distrimind.util.export.JarDependency;
 import com.distrimind.util.export.JarSourceDependancy;
-import com.distrimind.util.export.JavaProjectDependency;
-import com.distrimind.util.export.JavaProjectSourceDependency;
+import com.distrimind.util.export.JavaProjectSource;
 import com.distrimind.util.export.License;
+import com.distrimind.util.export.TestNGFile;
+import com.distrimind.util.export.License.PredefinedLicense;
+import com.distrimind.util.export.TestSuite;
 import com.distrimind.util.export.Exports.ExportProperties;
 import com.distrimind.util.tests.CryptoTests;
 
 /**
  * 
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 1.1
  * @since Utils 1.0
  */
 class Export
 {
+    
    
     static void export() throws Exception
     {
 	Exports exports=new Exports();
 	File root_dir=new File("/home/jason/git_projects/Utils");
-	File bin_dir=new File(root_dir, "bin");
-	File src_dir=new File(root_dir, "src");
-	Package root_package=Export.class.getPackage();
 	
+	File src_dir=new File(root_dir, "src");
+	File src_tests_dir=new File(root_dir, "Tests");
+	Package root_package=Export.class.getPackage();
+	Package root_tests_package=CryptoTests.class.getPackage();
+	
+	License[] licenses={new License(new File("/home/jason/projets/commons-net-3.4/LICENSE.txt"))};
 	ArrayList<BinaryDependency> dependencies=new ArrayList<BinaryDependency>();
 	dependencies.add(new JarDependency("commons-net", 
 		new JarSourceDependancy(new File("/home/jason/projets/commons-net-3.4/commons-net-3.4-sources.jar"), null, null),
 		org.apache.commons.net.SocketClient.class.getPackage(), 
-		new License(new File("/home/jason/projets/commons-net-3.4/LICENSE.txt")), new File("/home/jason/projets/commons-net-3.4/commons-net-3.4.jar"), null, null));
+		licenses, new File("/home/jason/projets/commons-net-3.4/commons-net-3.4.jar"), null, null));
 
-	String regexMath=Dependency.mixRegexes(Dependency.getRegexMatchClass(Export.class), Dependency.getRegexMatchPackage(CryptoTests.class.getPackage()));
-	exports.setProject(new JavaProjectDependency(root_dir, bin_dir, root_package, Utils.LICENSE, 
-		new JavaProjectSourceDependency(src_dir, regexMath, null), "com/distrimind/util/build.txt", 
+	licenses=new License[1];
+	licenses[0]=Utils.LICENSE;
+	String regexMath=Dependency.mixRegexes(Dependency.getRegexMatchClass(Export.class), Dependency.getRegexMatchPackage(root_tests_package));
+	JavaProjectSource javaProjectSource=new JavaProjectSource(root_dir, src_dir, root_package, licenses, 
+		"com/distrimind/util/build.txt", 
 		null, "Utils is a set of tools that can be useful in every context of development", 
-		Utils.VERSION,
-		dependencies,null,
-		regexMath, null));
+		Utils.VERSION, SourceVersion.RELEASE_7,
+		dependencies,null,new File("/usr/lib/jvm/default-java-7"),
+		regexMath, null);
+	
+	dependencies=new ArrayList<BinaryDependency>();
+	licenses=new License[1];
+	licenses[0]=new License(PredefinedLicense.APACHE_LICENSE_V2_0);
+	dependencies.add(new JarDependency("TestNG", 
+		org.testng.TestNG.class.getPackage(), 
+		licenses, new File("/home/jason/.eclipse/org.eclipse.platform_4.5.2_1473617060_linux_gtk_x86_64/plugins/org.testng.eclipse_6.9.10.201512240000/lib/testng.jar")));
+	dependencies.add(new JarDependency("TestNG-jcommander", 
+		org.testng.TestNG.class.getPackage(), 
+		licenses, new File("/home/jason/.eclipse/org.eclipse.platform_4.5.2_1473617060_linux_gtk_x86_64/plugins/org.testng.eclipse_6.9.10.201512240000/lib/jcommander.jar")));
+	dependencies.add(new JarDependency("TestNG-snakeyaml", 
+		org.testng.TestNG.class.getPackage(), 
+		licenses, new File("/home/jason/.eclipse/org.eclipse.platform_4.5.2_1473617060_linux_gtk_x86_64/plugins/org.testng.eclipse_6.9.10.201512240000/lib/snakeyaml.jar")));
+	dependencies.add(new JarDependency("TestNG-bsh-2.0b4", 
+		org.testng.TestNG.class.getPackage(), 
+		licenses, new File("/home/jason/.eclipse/org.eclipse.platform_4.5.2_1473617060_linux_gtk_x86_64/plugins/org.testng.eclipse_6.9.10.201512240000/lib/bsh-2.0b4.jar")));
+	licenses=new License[1];
+	licenses[0]=new License(PredefinedLicense.ECLIPSE_PUBLIC_LICENSE_V1_0);
+	dependencies.add(new JarDependency("JUnit", 
+		org.testng.TestNG.class.getPackage(), 
+		licenses, new File("/opt/eclipse/plugins/org.junit_4.12.0.v201504281640/junit.jar")));
+	
+	javaProjectSource.setTestSuiteSource(root_dir, src_tests_dir, root_tests_package, 
+		dependencies, null, new TestSuite(new TestNGFile(CryptoTests.class)));
+	
+	
+	exports.setProject(javaProjectSource);
 	
 	
 	
 	exports.setExportDirectory(new File(root_dir, "exports"));
-	exports.setJavaVersion(SourceVersion.RELEASE_7);
 	exports.setTemporaryDirectory(new File(root_dir, ".tmp_export"));
 	ArrayList<ExportProperties> export_properties=new ArrayList<>();
 	export_properties.add(new ExportProperties(true, Exports.SourceCodeExportType.SOURCE_CODE_IN_SEPERATE_FILE, true));

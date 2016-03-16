@@ -33,7 +33,7 @@ import com.distrimind.util.version.Version;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 1.5
+ * @version 1.6
  */
 public class Utils
 {
@@ -44,8 +44,8 @@ public class Utils
 	Calendar c=Calendar.getInstance();
 	c.set(2016, 1, 4);
 	Calendar c2=Calendar.getInstance();
-	c.set(2016, 2, 9);
-    	VERSION=new Version("Utils", 1,5,0, Version.Type.Stable, 0, c.getTime(), c2.getTime());
+	c.set(2016, 2, 15);
+    	VERSION=new Version("Utils", 1,6,0, Version.Type.Stable, 0, c.getTime(), c2.getTime());
 	try
 	{
 	
@@ -58,8 +58,15 @@ public class Utils
 	    VERSION.addDeveloper(new PersonDeveloper("mahdjoub", "jason", c.getTime()));
 	
 	    c=Calendar.getInstance();
+	    c.set(2016, 2, 15);
+	    Description d=new Description(1,6,0,Version.Type.Stable, 0, c.getTime());
+	    d.addItem("Adding unit tests possibility for project export tools");
+	    d.addItem("Adding unit compilation for project export tools");
+	    d.addItem("Adding new licences");
+
+	    c=Calendar.getInstance();
 	    c.set(2016, 2, 9);
-	    Description d=new Description(1,5,0,Version.Type.Stable, 0, c.getTime());
+	    d=new Description(1,5,0,Version.Type.Stable, 0, c.getTime());
 	    d.addItem("Adding PeerToPeerASymmetricSecretMessageExchanger class");
 	    d.addItem("Adding ObjectSizer class (determins sizeof each java object instance)");
 	    d.addItem("Adding keys encoding");

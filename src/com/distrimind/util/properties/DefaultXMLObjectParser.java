@@ -30,7 +30,7 @@ import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URL;
 import java.sql.Date;
-import java.time.LocalTime;
+import java.util.List;
 import java.util.logging.Level;
 
 import javax.lang.model.SourceVersion;
@@ -70,7 +70,6 @@ public class DefaultXMLObjectParser extends AbstractXMLObjectParser
 		|| field_type==File.class
 		|| field_type==URL.class
 		|| field_type==URI.class
-		|| field_type==LocalTime.class
 		|| field_type==Level.class
 		|| field_type==InetAddress.class
 		|| field_type==Inet4Address.class
@@ -81,7 +80,10 @@ public class DefaultXMLObjectParser extends AbstractXMLObjectParser
 		|| field_type==MessageDigestType.class
 		|| field_type==SymmetricEncryptionType.class
 		|| field_type==SignatureType.class
-		|| field_type==SymmetricSecretKeyType.class;
+		|| field_type==SymmetricSecretKeyType.class
+		|| List.class.isAssignableFrom(field_type)
+		|| XMLProperties.class.isAssignableFrom(field_type)
+		|| field_type.isPrimitive();
 	
     }
     
@@ -149,10 +151,6 @@ public class DefaultXMLObjectParser extends AbstractXMLObjectParser
 	    else if (field_type==URI.class)
 	    {
 		return new URI(nodeValue);
-	    }
-	    else if (field_type==LocalTime.class)
-	    {
-		return LocalTime.parse(nodeValue);
 	    }
 	    else if (field_type==Level.class)
 	    {
@@ -274,10 +272,6 @@ public class DefaultXMLObjectParser extends AbstractXMLObjectParser
 	    else if (field_type==URI.class)
 	    {
 		return object.toString();
-	    }
-	    else if (field_type==LocalTime.class)
-	    {
-		return object.toString();		
 	    }
 	    else if (field_type==Level.class)
 	    {

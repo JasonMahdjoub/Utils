@@ -35,12 +35,14 @@ import java.lang.reflect.ParameterizedType;
 import java.net.URI;
 import java.net.URL;
 import java.sql.Date;
-import java.time.LocalTime;
+import java.util.AbstractList;
+import java.util.AbstractSequentialList;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.function.BiConsumer;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.regex.Matcher;
@@ -64,9 +66,10 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 
+
 /**
  * This interface enable to partially serialize/deserialize classes that implements the current interface, in order to produce an XML file.
- * The managed types are all the primitive types, {@link String} class, {@link Date} class, {@link LocalTime} class, {@link Class} class, {@link Level} class, {@link Map} class, {@link List} class, {@link URI} class, {@link URL} class, {@link File} class, and all classes that implements this interface.
+ * The managed types are all the primitive types, {@link String} class, {@link Date} class, {@link Class} class, {@link Level} class, {@link Map} class, {@link List} class, {@link URI} class, {@link URL} class, {@link File} class, and all classes that implements this interface.
  * 
  * Arrays are not already managed.
  * 
@@ -123,6 +126,28 @@ public abstract class XMLProperties implements Cloneable, Serializable
 	    throw new XMLPropertiesParseException(e, "Impossible to read the XML file "+xml_file);
 	}
     }
+
+    /**
+     * Load properties from an XML input stream
+     * @param is the input stream
+     * @throws XMLPropertiesParseException if a problem parsing occurs
+     * @throws IOException of a IO problem occurs
+     */
+    public void load(InputStream is) throws XMLPropertiesParseException, IOException
+    {
+	try
+	{
+	    if (is==null)
+		throw new NullPointerException("is");
+	    Document d=getDOM(is);	
+	    load(d);
+	}
+	catch(SAXException | ParserConfigurationException e)
+	{
+	    throw new XMLPropertiesParseException(e, "Impossible to read the given input stream !");
+	}
+    }
+    
     
     /**
      * return the DOM from an xml file.
@@ -166,12 +191,19 @@ public abstract class XMLProperties implements Cloneable, Serializable
      */
     public void load(Document document) throws XMLPropertiesParseException
     {
+	if (document==null)
+	    throw new NullPointerException("document");
+	
 	Node n=getRootNode(document);
+	if (n==null || n.getChildNodes()==null)
+	    throw new XMLPropertiesParseException("Impossible to find the node named "+this.getClass().getCanonicalName());
+
 	NodeList nl=null;
+	
 	for (int i=0;i<n.getChildNodes().getLength();i++)
 	{
 	    Node sn=n.getChildNodes().item(i);
-	    if (sn.getNodeName().equals(this.getClass().getCanonicalName()))
+	    if (sn!=null && sn.getNodeName().equals(this.getClass().getCanonicalName()))
 	    {
 		nl=sn.getChildNodes();
 		break;
@@ -181,7 +213,7 @@ public abstract class XMLProperties implements Cloneable, Serializable
 	    throw new XMLPropertiesParseException("Impossible to find the node named "+this.getClass().getCanonicalName());
 	/*else if (nl.getLength()>1)
 	    throw new XMLPropertiesParseException("The node named "+this.getClass().getCanonicalName()+" must be defined only one time");*/
-	read(document, nl.item(0).getChildNodes());
+	read(document, nl);
     }
     
     
@@ -220,8 +252,6 @@ public abstract class XMLProperties implements Cloneable, Serializable
     
     void read(Document document, NodeList node_list) throws XMLPropertiesParseException
     {
-
-	
 	for (int i=0;i<node_list.getLength();i++)
 	{
 	    Node node=node_list.item(i);
@@ -344,7 +374,6 @@ public abstract class XMLProperties implements Cloneable, Serializable
    
 	    //deal with map
 	    
-	    
 	    try
 	    {
 		
@@ -360,8 +389,8 @@ public abstract class XMLProperties implements Cloneable, Serializable
 		    m=newInstance;
 		}
 		
-		Class<?> key_map_class= (Class<?>) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
-		Class<?> value_map_class= (Class<?>) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[1];
+		/*Class<?> key_map_class= (Class<?>) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
+		Class<?> value_map_class= (Class<?>) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[1];*/
 		
 	        NodeList node_list=node.getChildNodes();
 	        for (int i=0;i<node_list.getLength();i++)
@@ -383,6 +412,9 @@ public abstract class XMLProperties implements Cloneable, Serializable
 	        	
 	        	if (keyn!=null && valuen!=null)
 	        	{
+	        	    Class<?> key_map_class= Class.forName(keyn.getAttributes().getNamedItem("ElementType").getNodeValue());
+	        	    Class<?> value_map_class= Class.forName(valuen.getAttributes().getNamedItem("ElementType").getNodeValue());
+	        	    
 	        	    Object okey=getValue(document, field.getName(), key_map_class, keyn);
 	        	    Object ovalue=getValue(document, field.getName(), value_map_class, valuen);
 
@@ -393,7 +425,7 @@ public abstract class XMLProperties implements Cloneable, Serializable
 	        }
 	        
 	    }
-	    catch (InstantiationException | IllegalAccessException | DOMException e)
+	    catch (InstantiationException | IllegalAccessException | DOMException | ClassNotFoundException e)
 	    {
 		throw new XMLPropertiesParseException(e, "Impossible to read the type "+type.getName());
 	    }
@@ -406,11 +438,6 @@ public abstract class XMLProperties implements Cloneable, Serializable
 	    try
 	    {
 		List<Object> l=null;
-		if (Modifier.isAbstract(type.getModifiers()))
-		{
-		    return;
-		}
-		else
 		{
 		    if (type.isArray())
 		    {
@@ -418,21 +445,31 @@ public abstract class XMLProperties implements Cloneable, Serializable
 		    }
 		    else
 		    {
-			@SuppressWarnings("unchecked")
-			List<Object> newInstance = (List<Object>)type.newInstance();
-			l=newInstance;
+			
+			if (Modifier.isAbstract(type.getModifiers()))
+			{
+			    if (AbstractSequentialList.class.isAssignableFrom(type))
+				l = new LinkedList<>();
+			    else if (AbstractList.class.isAssignableFrom(type))
+				l = new ArrayList<>();
+			}
+			else
+			{
+			    @SuppressWarnings("unchecked")
+			    List<Object> newInstance = (List<Object>)type.newInstance();
+			    l=newInstance;
+			}
 		    }
 		}
 		
-	        Class<?> element_list_class= (Class<?>) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
-	        
+	        //Class<?> element_list_class= (Class<?>) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
 	        NodeList node_list=node.getChildNodes();
 	        for (int i=0;i<node_list.getLength();i++)
 	        {
 	            Node n=node_list.item(i);
-	            
 	            if (n.getNodeName().equals("ElementList"))
 	            {
+	        	Class<?> element_list_class= Class.forName(n.getAttributes().getNamedItem("ElementType").getNodeValue());	        	
 	        	Object o=getValue(document, field.getName(), element_list_class, n);
 	        	if (!(o!=null && o instanceof Void))
 	        	    l.add(o);
@@ -448,7 +485,7 @@ public abstract class XMLProperties implements Cloneable, Serializable
 	        }
 	        
 	    }
-	    catch (InstantiationException | IllegalAccessException | DOMException e)
+	    catch (InstantiationException | IllegalAccessException | DOMException | ClassNotFoundException e)
 	    {
 		throw new XMLPropertiesParseException(e, "Impossible to read the type "+type.getName());
 	    }
@@ -468,7 +505,8 @@ public abstract class XMLProperties implements Cloneable, Serializable
 			boolean found_default_constructor=false;
 			for (Constructor<?> c : type.getDeclaredConstructors())
 			{
-			    if (c.getParameters().length==0)
+			    
+			    if (c.getTypeParameters().length==0)
 			    {
 				found_default_constructor=true;
 				break;
@@ -660,16 +698,20 @@ public abstract class XMLProperties implements Cloneable, Serializable
 	            attr_key.setValue(key_map_class.getCanonicalName());
 	            key.setAttributeNode(attr_key);*/
 		    elementM.appendChild(key);
-		    if (setTextContent(document, key, field.getName(), key_map_class, entry.getKey()))
+		    Object k=entry.getKey();
+		    if (setTextContent(document, key, field.getName(), k==null?key_map_class:k.getClass(), k))
 		    {
+			key.setAttribute("ElementType", k==null?key_map_class.getCanonicalName():k.getClass().getCanonicalName());
 			Element value=document.createElement("value");
 		        /*Attr attr_value=document.createAttribute("type");
 		        attr_value.setValue(value_map_class.getCanonicalName());
 		        key.setAttributeNode(attr_value);*/
 
 			elementM.appendChild(value);
-			if (setTextContent(document, value, field.getName(), value_map_class, entry.getValue()))
+			Object v=entry.getValue();
+			if (setTextContent(document, value, field.getName(), v==null?value_map_class:v.getClass(), v))
 			{
+			    value.setAttribute("ElementType", v==null?value_map_class.getCanonicalName():v.getClass().getCanonicalName());
 			    element.appendChild(elementM);
 			}
 		    }
@@ -700,11 +742,13 @@ public abstract class XMLProperties implements Cloneable, Serializable
 	        for (Object o : l)
 	        {
 	            Element elemL=document.createElement("ElementList");
+	            
 	            /*Attr attr=document.createAttribute("type");
 	            attr.setValue(o.getClass().getCanonicalName());
 	            elemL.setAttributeNode(attr);*/
-	            if (setTextContent(document, elemL, field.getName(), element_list_class, o))
+	            if (setTextContent(document, elemL, field.getName(), o==null?element_list_class:o.getClass(), o))
 	            {
+	        	elemL.setAttribute("ElementType", o==null?element_list_class.getCanonicalName():o.getClass().getCanonicalName());
 	        	element.appendChild(elemL);
 	            }
 	        }
@@ -850,7 +894,6 @@ public abstract class XMLProperties implements Cloneable, Serializable
     {
 	try
 	{
-	    
 	    if (object==null)
 	    {
 		node.setTextContent(null);
@@ -895,20 +938,16 @@ public abstract class XMLProperties implements Cloneable, Serializable
      */
     public void loadFromProperties(Properties properties) throws IllegalArgumentException
     {
-	properties.forEach(new BiConsumer<Object, Object>() {
-	    
-	    @Override
-	    public void accept(Object _t, Object _u)
-	    {
-		String key=(String)_t;
-		String value=(String)_u;
+	for (Entry<Object, Object> e : properties.entrySet())
+	{
+		String key=(String)e.getKey();
+		String value=(String)e.getValue();
 		
 		if (!XMLProperties.this.setField(XMLProperties.this, key.split("\\."), 0, value))
 		{
 		    getFreeStringProperties().put(key, value);
 		}
-	    }
-	}); 
+	}
     }
 
     

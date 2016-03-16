@@ -1,3 +1,24 @@
+/*
+ * Utils is created and developped by Jason MAHDJOUB (jason.mahdjoub@distri-mind.fr) at 2016.
+ * Utils was developped by Jason Mahdjoub. 
+ * Individual contributors are indicated by the @authors tag.
+ * 
+ * This file is part of Utils.
+ * 
+ * This is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License as published by the Free
+ * Software Foundation; either version 3.0 of the License.
+ * 
+ * This software is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
+ * details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this software; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA, or see the FSF
+ * site: http://www.fsf.org.
+ */
 package com.distrimind.util.export;
 
 import java.io.File;
@@ -7,16 +28,34 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 import com.distrimind.util.FileTools;
+import com.distrimind.util.properties.XMLProperties;
 
-public class License
+/**
+ * 
+ * @author Jason Mahdjoub
+ * @version 1.2
+ * @since Utils 1.0
+ */
+public class License extends XMLProperties
 {
     
-    private final PredefinedLicense predefined_license;
-    private final File personal_license_file;
-    private final StringBuffer personal_license; 
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -7612318979584347160L;
+    
+    private PredefinedLicense predefined_license;
+    private File personal_license_file;
+    private String personal_license; 
+
+    public License()
+    {
+	super(null);
+    }
 
     public License(PredefinedLicense predefined_license)
     {
+	super(null);
 	if (predefined_license==null)
 	    throw new NullPointerException("predefined_license");
 	this.predefined_license=predefined_license;
@@ -26,6 +65,7 @@ public class License
 
     public License(File personal_license_file)
     {
+	super(null);
 	if (personal_license_file==null)
 	    throw new NullPointerException("personal_license_file");
 	predefined_license=null;
@@ -33,8 +73,9 @@ public class License
 	personal_license=null;
     }
 
-    public License(StringBuffer licence)
+    public License(String licence)
     {
+	super(null);
 	if (licence==null)
 	    throw new NullPointerException("licence");
 	predefined_license=null;
@@ -58,7 +99,7 @@ public class License
 	{
 	    try(FileOutputStream output=new FileOutputStream(file))
 	    {
-		output.write(personal_license.toString().getBytes());
+		output.write(personal_license.getBytes());
 	    }
 	}
 	else if (personal_license_file!=null)
@@ -90,7 +131,9 @@ public class License
 	GNU_GPL_v3("GNU_GPL_License_v3.txt"),
 	GNU_LGPL_v2_1("GNU_LGPL_License_v2.1.txt"),
 	GNU_LGPL_v3_0("GNU_LGPL_License_v3.0.txt"),
-	APACHE_LICENSE_V2_0("Apache_License_V2.0.txt");
+	APACHE_LICENSE_V2_0("Apache_License_v2.0.txt"),
+	ECLIPSE_PUBLIC_LICENSE_V1_0("Eclipse_Public_License_v1.0.txt"),
+	ECLIPSE_REDISTRIBUTION_LICENSE_V1_0("Eclipse_Redistribution_License_v1.0.txt");
 	
 	protected final String fileName;
 	

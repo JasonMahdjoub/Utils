@@ -97,5 +97,4 @@ public class SystemFunctions
 	return NITools.getInstance().getNetworkInterfaceSpeed(network_interface);
     }
     
-
 }

@@ -47,6 +47,10 @@ public class PersonDeveloper extends Person
 	super(_name, _first_name);
 	m_date_begin_development=_date_begin_development;
     }
+    public PersonDeveloper()
+    {
+	
+    }
     
     public Date getDateBeginDevelopment()
     {

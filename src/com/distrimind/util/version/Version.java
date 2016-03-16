@@ -59,7 +59,7 @@ import com.distrimind.util.properties.XMLProperties;
  * @see Person
  * @see PersonDeveloper
  */
-public class Version extends XMLProperties
+public class Version extends XMLProperties implements Comparable<Version>
 {
     /**
      * 
@@ -361,5 +361,9 @@ public class Version extends XMLProperties
 	}
     }
    
-    
+    @Override
+    public int compareTo(Version b)
+    {
+	return this.m_build_number-b.m_build_number;
+    }
 }

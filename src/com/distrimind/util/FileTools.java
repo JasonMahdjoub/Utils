@@ -13,6 +13,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
@@ -23,6 +24,7 @@ import org.apache.commons.net.ftp.FTPListParseEngine;
  
 /**
  * FileTool is a class which provides some methods used to work on Files and Folders.
+ * 
  */
 public final class FileTools {
  
@@ -198,6 +200,7 @@ public final class FileTools {
 						copyFolderToFolder(tf, relatedPath+ "/" + tf.getName(), sourceFolder,destinationFolder, regex_exclude, regex_include);
 					    } else if (tf.isFile()) {
 						// If it is a file.
+						FileTools.checkFolderRecursive(pf.getParentFile());
 						copy(tf, pf);
 					    } else {
 						throw new IOException("Messages.file_problem + tf.getAbsolutePath()");
@@ -325,11 +328,11 @@ public final class FileTools {
 	
 	
 	
-	private static boolean matchString(String s, String regex_exclude, String regex_include)
+	public static boolean matchString(String s, String regex_exclude, String regex_include)
 	{
-	    if (regex_include!=null && !s.matches(regex_include))
+	    if (regex_include!=null && !Pattern.compile(regex_include).matcher(s).find())
 		return false;
-	    if (regex_exclude!=null && s.matches(regex_exclude))
+	    if (regex_exclude!=null && Pattern.compile(regex_exclude).matcher(s).find())
 		return false;
 	    return true;
 	}

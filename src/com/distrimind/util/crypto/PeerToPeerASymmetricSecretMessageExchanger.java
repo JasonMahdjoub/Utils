@@ -32,9 +32,6 @@ import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Random;
-import java.util.stream.DoubleStream;
-import java.util.stream.IntStream;
-import java.util.stream.LongStream;
 
 import javax.crypto.Cipher;
 import javax.crypto.CipherOutputStream;
@@ -240,55 +237,6 @@ public class PeerToPeerASymmetricSecretMessageExchanger
 	@Override
 	public double nextGaussian() {
 	    return random.nextGaussian();
-	}
-	@Override
-	public IntStream ints(long streamSize) {
-	    return random.ints(streamSize);
-	}
-	@Override
-	public IntStream ints() {
-	    return random.ints();
-	}
-	@Override
-	public IntStream ints(long streamSize, int randomNumberOrigin, int randomNumberBound)
-	{
-	    return random.ints(streamSize, randomNumberOrigin, randomNumberBound);
-	}
-	@Override
-	public IntStream ints(int randomNumberOrigin, int randomNumberBound) {
-	    return random.ints(randomNumberOrigin, randomNumberBound);
-	}
-	@Override
-	public LongStream longs(long streamSize) {
-	    return random.longs(streamSize);
-	}
-	@Override
-	public LongStream longs() {
-	    return random.longs();
-	}
-	@Override
-	public LongStream longs(long streamSize, long randomNumberOrigin, long randomNumberBound) {
-	    return random.longs(streamSize, randomNumberOrigin, randomNumberBound);
-	}
-	@Override
-	public LongStream longs(long randomNumberOrigin, long randomNumberBound) {
-	    return random.longs(randomNumberOrigin, randomNumberBound);
-	}
-	@Override
-	public DoubleStream doubles(long streamSize) {
-	    return random.doubles();
-	}
-	@Override
-	public DoubleStream doubles() {
-	    return random.doubles();
-	}
-	@Override
-	public DoubleStream doubles(long streamSize, double randomNumberOrigin, double randomNumberBound) {
-	    return random.doubles(streamSize, randomNumberOrigin, randomNumberBound);
-	}
-	@Override
-	public DoubleStream doubles(double randomNumberOrigin, double randomNumberBound) {
-	    return random.doubles(randomNumberOrigin, randomNumberBound);
 	}
     }
     
