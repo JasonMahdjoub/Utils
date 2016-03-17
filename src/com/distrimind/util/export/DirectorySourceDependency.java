@@ -44,14 +44,14 @@ public class DirectorySourceDependency extends SourceDependancy
     {
 	
     }
-    public DirectorySourceDependency(File directory)
+    public DirectorySourceDependency(boolean includeToDoc, File directory)
     {
-	this(directory, getDefaultSourceExcludeRegex(), getDefaultSourceIncludeRegex());
+	this(includeToDoc, directory, getDefaultSourceExcludeRegex(), getDefaultSourceIncludeRegex());
     }
     
-    public DirectorySourceDependency(File directory, String _exclude_regex, String _include_regex)
+    public DirectorySourceDependency(boolean includeToDoc, File directory, String _exclude_regex, String _include_regex)
     {
-	super(_exclude_regex, _include_regex);
+	super(includeToDoc, _exclude_regex, _include_regex);
 	if (directory==null)
 	    throw new NullPointerException("directory");
 	if (!directory.exists())
@@ -69,5 +69,11 @@ public class DirectorySourceDependency extends SourceDependancy
 	
     }
 
+    @Override
+    String getAntSetFile()
+    {
+	return "<fileset dir=\""+directory.getAbsolutePath()+"\" includes=\"**/*.java\"></fileset>";
+    }
+    
     
 }

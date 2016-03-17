@@ -66,6 +66,29 @@ public class JavaProjectSource extends SourceDependancy
     private File jdkDirectory;
     private URL projectWebSite;
     private URL gitHUBLink;
+    private boolean verbose=false;
+    private boolean debugMode=false;
+    
+    public boolean isDebugMode()
+    {
+        return debugMode;
+    }
+
+    public void setDebugMode(boolean _debugMode)
+    {
+        debugMode = _debugMode;
+    }
+
+    public boolean isVerbose()
+    {
+        return verbose;
+    }
+
+    public void setVerbose(boolean _verbose)
+    {
+        verbose = _verbose;
+    }
+
     public URL getGitHUBLink()
     {
         return gitHUBLink;
@@ -109,7 +132,7 @@ public class JavaProjectSource extends SourceDependancy
     
     public JavaProjectSource(File root_directory, File source_directory, Package representedPackage, License licenses[], String relativeBuildFile, Class<?> main_class, String description, Version version, SourceVersion javaVersion, ArrayList<BinaryDependency> dependencies, ArrayList<File> additional_directories_and_files_to_export, File jdkDirectory, String _exclude_regex, String _include_regex)
     {
-	super(_exclude_regex, _include_regex);
+	super(true, _exclude_regex, _include_regex);
 	if (source_directory==null)
 	    throw new NullPointerException("source_directory");
 	if (!source_directory.exists())
@@ -176,6 +199,7 @@ public class JavaProjectSource extends SourceDependancy
 	_additional_dependencies.addAll(this.dependencies);
 	FileTools.copy(getBuildFilePath(this.source_directory), getBuildFilePath(_source_directory));
 	testSuiteSource=new TestSuiteSource(root_directory, _source_directory, _representedPackage, licenses, relativeBuildFile, "Test suite of "+projectName, this.version, javaVersion, _additional_dependencies, _additional_directories_and_files_to_export, suite, jdkDirectory, _exclude_regex, _include_regex);
+	testSuiteSource.setDebugMode(true);
     }
     
     public File getBuildFilePath(File _destination_root)
@@ -233,7 +257,7 @@ public class JavaProjectSource extends SourceDependancy
 		+ "	<property name=\"javacexec\" location=\"${jdk}/bin/javac\" />"
 		+ "	<property name=\"ant.build.javac.source\" value=\"1."+javaVersion.ordinal()+"\"/>"
 		+ "	<property name=\"ant.build.javac.target\" value=\"1."+javaVersion.ordinal()+"\"/>"
-		+ "	<javac compiler=\"javac1."+javaVersion.ordinal()+"\" executable=\"${javacexec}\" includeAntRuntime=\"false\" srcdir=\""+_src.getAbsoluteFile()+"\" destdir=\""+_dst.getAbsolutePath()+"\" classpathref=\"classpath\" target=\"1."+javaVersion.ordinal()+"\" encoding=\""+encoding+"\" bootclasspath=\"${toString:lib.path.ref}\">"
+		+ "	<javac compiler=\"javac1."+javaVersion.ordinal()+"\" executable=\"${javacexec}\" includeAntRuntime=\"false\" srcdir=\""+_src.getAbsoluteFile()+"\" destdir=\""+_dst.getAbsolutePath()+"\" classpathref=\"classpath\" target=\"1."+javaVersion.ordinal()+"\" encoding=\""+encoding+"\" bootclasspath=\"${toString:lib.path.ref}\""+(debugMode?" debug=\"true\" debuglevel=\"vars\"":"")+">"
 		+ "	</javac>"		
 		+ "</target>"
 		+ "</project>";
@@ -244,7 +268,7 @@ public class JavaProjectSource extends SourceDependancy
 	
 	    String command="ant -buildfile "+xmlFile.getAbsolutePath();
 	
-	    if (Export.execExternalProcess(command,_src, false, true)!=0)
+	    if (Export.execExternalProcess(command,_src, isVerbose(), true)!=0)
 		return false;
 	}
 	finally
@@ -265,35 +289,18 @@ public class JavaProjectSource extends SourceDependancy
 	return antXMLbuild;
     }
     
-
-    boolean compileDoc(File _src, File _dst) throws IOException, InterruptedException
+    private String getAntJavadocBuild(File _src, File _dst, boolean includeDependencies) throws IOException
     {
-	if (_src==null)
-	    throw new NullPointerException("_src");
-	if (_dst==null)
-	    throw new NullPointerException("_dst");
-
-	if (!_dst.exists())
-	    FileTools.checkFolderRecursive(_dst);
-	if (!_dst.isDirectory())
-	    throw new IllegalArgumentException("_dst must be a directory");
-	if (!_src.exists())
-	    throw new IllegalArgumentException("_src doest not exist !");
-	if (!_src.isDirectory())
-	    throw new IllegalArgumentException("_src must be a directory");
-	
-	//String classPath=getClassPath();
 	String antXMLbuild="<project name=\""+projectName+"\" default=\"compile\">"
 		+ "<path id=\"classpath\">";
-	antXMLbuild+=getAntSetFile();		
-	if (projectName.equals("Utils"))
+	if (includeDependencies)
 	{
-	    for (BinaryDependency bd : this.testSuiteSource.getDependencies())
+	    for (BinaryDependency bd : getDependencies())
 	    {
-		    antXMLbuild+=bd.getAntSetFile();
+		if (bd.getSourceCode()!=null && bd.getSourceCode().isIncludedToDoc())
+		    antXMLbuild+=bd.getSourceCode().getAntSetFile();
 	    }
 	}
-	
 	String HTMLMadkitLink="", HTMLGitHUBLink="";
 	if (projectWebSite!=null)
 	{
@@ -319,7 +326,7 @@ public class JavaProjectSource extends SourceDependancy
 		+ "	<property name=\"javadocexec\" location=\"${jdk}/bin/javadoc\" />"
 		+ "	<property name=\"ant.build.javac.source\" value=\"1."+javaVersion.ordinal()+"\"/>"
 		+ "	<property name=\"ant.build.javac.target\" value=\"1."+javaVersion.ordinal()+"\"/>"
-		+ "	<javadoc sourcepath=\""+_src.getAbsoluteFile()+"\" destdir=\""+_dst.getAbsoluteFile()+"\" classpathref=\"classpath\" failonwarning=\"true\" access=\"protected\" docfilessubdirs=\"true\" author=\"true\" version=\"true\" use=\"true\" linksource=\"no\" windowtitle=\""+projectName+"\" encoding=\""+encoding+"\">"
+		+ "	<javadoc sourcepath=\""+_src.getAbsoluteFile()+"\" destdir=\""+_dst.getAbsoluteFile()+"\" classpathref=\"classpath\" access=\"protected\" docfilessubdirs=\"true\" author=\"true\" version=\"true\" use=\"true\" linksource=\"no\" windowtitle=\""+projectName+"\" encoding=\""+encoding+"\">"
 		+ "		<doctitle>"
 		+ "			<![CDATA[<h1>"+projectName+"</h1><h2>"+description+"</h2>]]>"
 		+ "		</doctitle>"
@@ -353,14 +360,46 @@ public class JavaProjectSource extends SourceDependancy
 		+ "	</javadoc>"		
 		+ "</target>"
 		+ "</project>";
+	return antXMLbuild;
+    }
+    
+    boolean compileDoc(File _src, File _dst) throws IOException, InterruptedException
+    {
+	if (_src==null)
+	    throw new NullPointerException("_src");
+	if (_dst==null)
+	    throw new NullPointerException("_dst");
+
+	if (!_dst.exists())
+	    FileTools.checkFolderRecursive(_dst);
+	if (!_dst.isDirectory())
+	    throw new IllegalArgumentException("_dst must be a directory");
+	if (!_src.exists())
+	    throw new IllegalArgumentException("_src doest not exist !");
+	if (!_src.isDirectory())
+	    throw new IllegalArgumentException("_src must be a directory");
+
 	File xmlFile=new File(_src, "build.xml");
 	try
 	{
-	    createAntBuildXMLFile(xmlFile, antXMLbuild);
+	    createAntBuildXMLFile(xmlFile, getAntJavadocBuild(_src, _dst, false));
 	
 	    String command="ant -buildfile "+xmlFile.getAbsolutePath();
 	
-	    return Export.execExternalProcess(command,_src, false, true)==0;
+	    boolean ok=Export.execExternalProcess(command,_src, isVerbose(), true)==0;
+	    if (ok)
+	    {
+		xmlFile.delete();
+		createAntBuildXMLFile(xmlFile, getAntJavadocBuild(_src, _dst, true));
+			
+		command="ant -buildfile "+xmlFile.getAbsolutePath();
+		
+		Export.execExternalProcess(command,_src, false, true);
+		return true;
+		
+	    }
+	    else
+		return false;
 	    
 	}
 	finally

@@ -44,16 +44,17 @@ public class ZipSourceDependancy extends SourceDependancy
     public ZipSourceDependancy()
     {
 	
+	
     }
     
-    public ZipSourceDependancy(File _jar_file)
+    public ZipSourceDependancy(boolean includeToDoc, File _jar_file)
     {
-	this(_jar_file, getDefaultSourceExcludeRegex(), getDefaultSourceIncludeRegex());
+	this(includeToDoc, _jar_file, getDefaultSourceExcludeRegex(), getDefaultSourceIncludeRegex());
     }
     
-    public ZipSourceDependancy(File _jar_file, String _exclude_regex, String _include_regex)
+    public ZipSourceDependancy(boolean includeToDoc, File _jar_file, String _exclude_regex, String _include_regex)
     {
-	super(_exclude_regex, _include_regex);
+	super(includeToDoc, _exclude_regex, _include_regex);
 	if (_jar_file==null)
 	    throw new NullPointerException("_jar_file");
 	if (!_jar_file.exists())
@@ -71,5 +72,12 @@ public class ZipSourceDependancy extends SourceDependancy
     {
 	return source_file;
     }
+
+    @Override
+    String getAntSetFile()
+    {
+	return "<fileset file=\""+source_file.getAbsolutePath()+"\"></fileset>";
+    }
+    
     
 }

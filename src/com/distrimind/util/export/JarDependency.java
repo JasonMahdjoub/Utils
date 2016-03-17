@@ -43,7 +43,7 @@ public class JarDependency extends ZipDependency
         
     public JarDependency(String name, Package _subpackage, License licenses [], File _jar_file_dependency)
     {
-	this(name, new JarSourceDependancy(_jar_file_dependency, getDefaultSourceExcludeRegex(), getDefaultSourceIncludeRegex()), _subpackage,licenses, _jar_file_dependency, getDefaultBinaryExcludeRegex(), getDefaultBinaryIncludeRegex());
+	this(name, new JarSourceDependancy(false, _jar_file_dependency, getDefaultSourceExcludeRegex(), getDefaultSourceIncludeRegex()), _subpackage,licenses, _jar_file_dependency, getDefaultBinaryExcludeRegex(), getDefaultBinaryIncludeRegex());
     }
     public JarDependency(String _name, SourceDependancy _source_code, Package _subpackage, License licenses[], File _jar_file_dependency, String _exclude_regex, String _include_regex)
     {

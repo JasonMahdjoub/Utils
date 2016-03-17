@@ -63,7 +63,7 @@ class Export
 	License[] licenses={new License(new File("/home/jason/projets/commons-net-3.4/LICENSE.txt"))};
 	ArrayList<BinaryDependency> dependencies=new ArrayList<BinaryDependency>();
 	dependencies.add(new JarDependency("commons-net", 
-		new JarSourceDependancy(new File("/home/jason/projets/commons-net-3.4/commons-net-3.4-sources.jar"), null, null),
+		new JarSourceDependancy(false, new File("/home/jason/projets/commons-net-3.4/commons-net-3.4-sources.jar"), null, null),
 		org.apache.commons.net.SocketClient.class.getPackage(), 
 		licenses, new File("/home/jason/projets/commons-net-3.4/commons-net-3.4.jar"), null, null));
 

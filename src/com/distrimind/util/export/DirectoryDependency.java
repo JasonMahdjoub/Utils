@@ -78,7 +78,7 @@ public class DirectoryDependency extends BinaryDependency
     @Override
     String getAntSetFile()
     {
-	return "<fileset dir=\""+directory.getAbsolutePath()+"\"></fileset>";
+	return "<fileset dir=\""+directory.getAbsolutePath()+"\" includes=\"**/*.class\"></fileset>";
     }
 
 }
