@@ -69,7 +69,7 @@ public class Exports extends XMLProperties
     private String ftpUrl=null;
     private int ftpPort=0;
     private ArrayList<ExportProperties> exportsSenarios=null;
-    private boolean concernsRootProject=true;
+    boolean concernsRootProject=true;
     private final ArrayList<File> exportFiles=new ArrayList<>();
     
     public JavaProjectSource getProject()
@@ -273,10 +273,14 @@ public class Exports extends XMLProperties
 		    System.in.read(b);
 		    if (b[0]=='y' || b[0]=='Y')
 		    {
-			testOK=Export.execExternalProcess("java -jar "+testSuiteExports.getExportedFiles().get(0),null, true, true)==0;
+			testOK=Export.execExternalProcess("java -jar "+testSuiteExports.getExportedFiles().get(0)+"",null, true, true)==0;
 			if (!testOK)
 			    testSuiteExports.getExportedFiles().get(0).delete();
+			else
+			    System.out.println("\nTests exported to "+testSuiteExports.getExportedFiles().get(0));
 		    }
+		    else
+			System.out.println("\nTests exported to "+testSuiteExports.getExportedFiles().get(0));
 		    testSuiteSource.getDependencies().remove(dependency);
 		}
 		finally

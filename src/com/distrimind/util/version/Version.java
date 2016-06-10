@@ -66,7 +66,7 @@ import com.distrimind.util.properties.XMLProperties;
  * Represent the description of all versions of a software, including the current version
  * 
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 1.1
  * @since Utils 1.0
  * @see Description
  * @see Person
@@ -99,6 +99,7 @@ public class Version extends XMLProperties implements Comparable<Version>
     private int m_build_number=1;
     
     private String m_program_name=null;
+    private String m_short_program_name;
     
     ArrayList<Person> m_creators=new ArrayList<Person>();
     ArrayList<PersonDeveloper> m_developers=new ArrayList<PersonDeveloper>();
@@ -106,14 +107,16 @@ public class Version extends XMLProperties implements Comparable<Version>
 
     protected Version()
     {
-	this("", 0,0,0,Type.Alpha, 0, new Date(), new Date());
+	this("", "", 0,0,0,Type.Alpha, 0, new Date(), new Date());
     }
     
-    public Version(String _program_name, int _major, int _minor, int _revision, Type _type, int _alpha_beta_version, Date _date_start_project, Date _date_end_project)
+    public Version(String _program_name, String shortProgramName, int _major, int _minor, int _revision, Type _type, int _alpha_beta_version, Date _date_start_project, Date _date_end_project)
     {
 	super(null);
 	if (_program_name==null)
 	    throw new NullPointerException("_program_name");
+	if (shortProgramName==null)
+	    throw new NullPointerException("shortProgramName");
 	if (_type==null)
 	    throw new NullPointerException("_type");
 	if (_date_start_project==null)
@@ -129,6 +132,7 @@ public class Version extends XMLProperties implements Comparable<Version>
 	m_date_start_project=_date_start_project;
 	m_date_end_project=_date_end_project;
 	m_program_name=_program_name;
+	m_short_program_name=shortProgramName;
     }
     
     public int getMajor()
@@ -197,6 +201,11 @@ public class Version extends XMLProperties implements Comparable<Version>
     {
 	return m_program_name;
     }
+    
+    public String getShortProgramName()
+    {
+	return m_short_program_name;
+    }
     public void addDescription(Description _d)
     {
 	if (_d==null)
@@ -213,16 +222,20 @@ public class Version extends XMLProperties implements Comparable<Version>
 	return Integer.toString(m_major)+"."+Integer.toString(m_minor)+"."+Integer.toString(m_revision)+" "+m_type+((m_type.equals(Type.Alpha) || m_type.equals(Type.Beta))?" "+Integer.toString(m_alpha_beta_version):"")+" (Build: "+Integer.toString(m_build_number)+")";
     }
     
-    public String getHeadFileName()
+    public String getFileHeadVersion()
     {
-	return getProgramName()+"-"+
-		Integer.toString(getMajor())+
+	return Integer.toString(getMajor())+
 		"."+
 		Integer.toString(getMinor())+
 		"."+
 		Integer.toString(getRevision())+"-"+
 		getType()+
 		((getType().equals(Version.Type.Beta) || getType().equals(Version.Type.Alpha))?Integer.toString(getAlphaBetaVersion()):"");	
+    }
+
+    public String getFileHeadName()
+    {
+	return getShortProgramName().replace(" ", "")+"-"+getFileHeadVersion();	
     }
     
     @Override

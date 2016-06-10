@@ -58,7 +58,7 @@ public class Utils
 	c.set(2016, 1, 4);
 	Calendar c2=Calendar.getInstance();
 	c.set(2016, 06, 30);
-    	VERSION=new Version("Utils", 1,6,1, Version.Type.Stable, 0, c.getTime(), c2.getTime());
+    	VERSION=new Version("Utils", "Utils", 1,6,1, Version.Type.Stable, 0, c.getTime(), c2.getTime());
 	try
 	{
 	

@@ -114,9 +114,14 @@ public class Export
 	fw.close();
     }*/
     
+    private String getHeadFileName()
+    {
+	return exports.getProject().getVersion().getShortProgramName()+(exports.concernsRootProject?"-":"-Tests-")+exports.getProject().getVersion().getFileHeadVersion();
+    }
+    
     private String getJarFileName()
     {
-	return exports.getProject().getVersion().getHeadFileName()+
+	return getHeadFileName()+
 		(exportScenario.include_dependancies?"_withDependencies":"")+
 		(exportScenario.source_code_export_type.equals(Exports.SourceCodeExportType.SOURCE_CODE_IN_JAR_FILE)?"_withSource":"")+
 		".jar";
@@ -124,7 +129,7 @@ public class Export
     
     private String getZipFileName()
     {
-	return exports.getProject().getVersion().getHeadFileName()+
+	return getHeadFileName()+
 		(exportScenario.include_dependancies?"_withDependencies":"")+
 		(exportScenario.source_code_export_type.equals(Exports.SourceCodeExportType.SOURCE_CODE_IN_JAR_FILE) || exportScenario.source_code_export_type.equals(Exports.SourceCodeExportType.SOURCE_CODE_IN_SEPERATE_FILE)?"_withSource":"")+
 		(exportScenario.include_documentation?"_withDocumentation":"")+
