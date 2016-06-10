@@ -1,0 +1,27 @@
+<suite name="TestAll">
+	
+	<test name="testDencentralizedIDGenerator">  
+		<classes>
+		    <class name="com.distrimind.util.tests.DecentralizedIDTests" />
+		</classes>
+	</test>
+	
+	<test name="testProperties">  
+		<classes>
+		    <class name="com.distrimind.util.tests.properties.TestProperties" />
+		</classes>
+	</test>
+	
+	<test name="testCyrpto">
+		<classes>
+			<class name="com.distrimind.util.tests.crypto.CryptoTests" />
+		</classes>
+	</test>
+
+	<test name="testVersion">
+		<classes>
+			<class name="com.distrimind.util.tests.version.VersionTests" />
+		</classes>
+	</test>
+	
+</suite>

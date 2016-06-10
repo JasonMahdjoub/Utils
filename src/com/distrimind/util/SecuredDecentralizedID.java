@@ -1,29 +1,45 @@
 /*
- * Utils is created and developped by Jason MAHDJOUB (jason.mahdjoub@distri-mind.fr) at 2016.
- * Utils was developped by Jason Mahdjoub. 
- * Individual contributors are indicated by the @authors tag.
- * 
- * This file is part of Utils.
- * 
- * This is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License as published by the Free
- * Software Foundation; either version 3.0 of the License.
- * 
- * This software is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
- * details.
- * 
- * You should have received a copy of the GNU Lesser General Public License
- * along with this software; if not, write to the Free Software Foundation,
- * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA, or see the FSF
- * site: http://www.fsf.org.
+Copyright or © or Copr. Jason Mahdjoub (04/02/2016)
+
+jason.mahdjoub@distri-mind.fr
+
+This software (Utils) is a computer program whose purpose is to give several kind of tools for developers 
+(ciphers, XML readers, decentralized id generators, etc.).
+
+This software is governed by the CeCILL-C license under French law and
+abiding by the rules of distribution of free software.  You can  use, 
+modify and/ or redistribute the software under the terms of the CeCILL-C
+license as circulated by CEA, CNRS and INRIA at the following URL
+"http://www.cecill.info". 
+
+As a counterpart to the access to the source code and  rights to copy,
+modify and redistribute granted by the license, users are provided only
+with a limited warranty  and the software's author,  the holder of the
+economic rights,  and the successive licensors  have only  limited
+liability. 
+
+In this respect, the user's attention is drawn to the risks associated
+with loading,  using,  modifying and/or developing or reproducing the
+software by the user in light of its specific status of free software,
+that may mean  that it is complicated to manipulate,  and  that  also
+therefore means  that it is reserved for developers  and  experienced
+professionals having in-depth computer knowledge. Users are therefore
+encouraged to load and test the software's suitability as regards their
+requirements in conditions enabling the security of their systems and/or 
+data to be ensured and,  more generally, to use and operate it in the 
+same conditions as regards security. 
+
+The fact that you are presently reading this means that you have had
+knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.util.concurrent.atomic.AtomicReference;
 
+import com.distrimind.util.crypto.MessageDigestType;
 import com.distrimind.util.sizeof.ObjectSizer;
 
 /**
@@ -43,43 +59,106 @@ public class SecuredDecentralizedID extends AbstractDecentralizedID
     private static final long serialVersionUID = 4728193961114275589L;
     
     
-    private static final MessageDigest message_digest;
+    private static final AtomicReference<MessageDigest> message_digest=new AtomicReference<>(null);
+    public static final MessageDigestType DEFAULT_MESSAGE_DIGEST_TYPE=MessageDigestType.SHA_256;
     
-    static
+    private static MessageDigest getDefaultMessageDigestInstance() throws NoSuchAlgorithmException
     {
-	MessageDigest m=null;
-	try
+	MessageDigest md=message_digest.get();
+	if (md==null)
 	{
-	    m=MessageDigest.getInstance("SHA-256");
+	    synchronized(message_digest)
+	    {
+		md=message_digest.get();
+		if (md==null)
+		{
+		    md=DEFAULT_MESSAGE_DIGEST_TYPE.getMessageDigestInstance();
+		    message_digest.set(md);
+		}
+	    }
 	}
-	catch (NoSuchAlgorithmException e)
+	return md;
+    }
+    private final long[] idLongs;
+    private final int hashCode;
+
+    public SecuredDecentralizedID(MessageDigestType messageDigestType, AbstractDecentralizedIDGenerator generator, SecureRandom rand) throws NoSuchAlgorithmException
+    {
+	this(messageDigestType.getMessageDigestInstance(), generator, rand);
+    }
+    public SecuredDecentralizedID(AbstractDecentralizedIDGenerator generator, SecureRandom rand) throws NoSuchAlgorithmException
+    {
+	this(getDefaultMessageDigestInstance(), generator, rand);
+    }
+    public SecuredDecentralizedID(MessageDigest messageDigest, AbstractDecentralizedIDGenerator generator, SecureRandom rand)
+    {
+	if (messageDigest==null)
+	    throw new NullPointerException("messageDigest");
+	if (generator==null)
+	    throw new NullPointerException("generator");
+	if (rand==null)
+	    throw new NullPointerException("rand");
+	synchronized(messageDigest)
 	{
-	    e.printStackTrace();
-	    System.exit(-1);
+	    long v=1l;
+	    final int sizeLong=ObjectSizer.sizeOf(v);
+	    byte[] idbytes=new byte[sizeLong*2];
+	    Bits.putLong(idbytes, 0, generator.getWorkerIDAndSequence());
+	    Bits.putLong(idbytes, sizeLong, generator.getTimeStamp());
+		    
+	    byte[] salt=null;
+	    int size=Math.max(messageDigest.getDigestLength(), idbytes.length)-idbytes.length;
+	    if (size>=0)
+		salt=new byte[size];
+	    else
+		salt=new byte[0];
+	    
+	    rand.nextBytes(salt);
+	    
+	    messageDigest.update(idbytes);
+	    messageDigest.update(salt);
+	    
+	    byte []id=messageDigest.digest();
+	    size=id.length/sizeLong;
+	    int mod=id.length%sizeLong;
+	    if (mod>0)
+		++size;
+	    idLongs=new long[size];
+	    for (int i=0;(((i+1)*sizeLong)-1)<id.length;i++)
+	    {
+		idLongs[i]=Bits.getLong(id, i*sizeLong);
+	    }
+	    if (mod>0)
+	    {
+		idbytes=new byte[sizeLong];
+		for (int i=0;i<mod;i++)
+		    idbytes[i]=id[size+i];
+		for (int i=mod;i<sizeLong;i++)
+		{
+		    idbytes[i]=0;
+		}
+		idLongs[idLongs.length-1]=Bits.getLong(idbytes, 0);
+	    }
+	    hashCode=computeHashCode(idLongs);
 	}
-	message_digest=m;
     }
     
-    private final long id1, id2, id3, id4;
-    public SecuredDecentralizedID(AbstractDecentralizedIDGenerator generator)
+    SecuredDecentralizedID(long idLongs[])
     {
-	synchronized(message_digest)
-	{
-	    message_digest.update(generator.getBytes());
-	    byte []id=message_digest.digest();
-	    id1=Bits.getLong(id, 0);
-	    id2=Bits.getLong(id, 8);
-	    id3=Bits.getLong(id, 16);
-	    id4=Bits.getLong(id, 24);
-	    message_digest.reset();
-	}
+	if (idLongs==null)
+	    throw new NullPointerException("idLongs");
+	if (idLongs.length==0)
+	    throw new IllegalArgumentException("idLongs.lendth");
+	this.idLongs=idLongs;
+	this.hashCode=computeHashCode(idLongs);
     }
-    SecuredDecentralizedID(long id1, long id2, long id3, long id4)
+    
+    private static int computeHashCode(long idLongs[])
     {
-	this.id1=id1;
-	this.id2=id2;
-	this.id3=id3;
-	this.id4=id4;
+	int hc=0;
+	for (int i=0;i<idLongs.length;i++)
+	    hc+=idLongs[i];
+	return hc;
     }
 
     @Override
@@ -92,7 +171,16 @@ public class SecuredDecentralizedID extends AbstractDecentralizedID
 	if (_obj instanceof SecuredDecentralizedID)
 	{
 	    SecuredDecentralizedID sid=(SecuredDecentralizedID)_obj;
-	    return sid.id1==this.id1 && sid.id2==this.id2 && sid.id3==this.id3 && sid.id4==this.id4;
+	    if (sid.idLongs==null)
+		return false;
+	    if (sid.idLongs.length!=idLongs.length)
+		return false;
+	    for (int i=0;i<idLongs.length;i++)
+	    {
+		if (idLongs[i]!=sid.idLongs[i])
+		    return false;
+	    }
+	    return true;
 	}
 	return false;
     }
@@ -101,31 +189,52 @@ public class SecuredDecentralizedID extends AbstractDecentralizedID
     {
 	if (sid==null)
 	    return false;
-	return sid.id1==this.id1 && sid.id2==this.id2 && sid.id3==this.id3 && sid.id4==this.id4;
+	if (sid.idLongs==null)
+	    return false;
+	if (sid.idLongs.length!=idLongs.length)
+	    return false;
+	for (int i=0;i<idLongs.length;i++)
+	{
+	    if (idLongs[i]!=sid.idLongs[i])
+		return false;
+	}
+	return true;
     }
 
     @Override
     public int hashCode()
     {
-	return (int)(id1+id2+id3+id4);
+	return hashCode;
     }
 
     @Override
     public String toString()
     {
-	return "SecuredDecentralizedID["+id1+";"+id2+";"+id3+";"+id4+"]";
+	StringBuffer res=new StringBuffer("SecuredDecentralizedID[");
+	boolean first=true;
+	for (int i=0;i<idLongs.length;i++)
+	{
+	    if (first)
+		first=false;
+	    else
+		res.append(",");
+	    res.append(idLongs[i]);
+	}
+	res.append("]");
+	return res.toString();
     }
 
     @Override
     public byte[] getBytes()
     {
-	int sizeLong=ObjectSizer.sizeOf(id1);
-	byte res[]=new byte[sizeLong*4+1];
+	int sizeLong=ObjectSizer.sizeOf(idLongs[0]);
+	byte res[]=new byte[idLongs.length*sizeLong+1];
 	res[0]=getType();
-	Bits.putLong(res, 1, id1);
-	Bits.putLong(res, sizeLong+1, id2);
-	Bits.putLong(res, sizeLong*2+1, id3);
-	Bits.putLong(res, sizeLong*3+1, id4);
+	
+	for (int i=0;i<idLongs.length;i++)
+	{
+	    Bits.putLong(res, i*sizeLong+1,idLongs[i]);
+	}
 	return res;
     }
     

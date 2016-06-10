@@ -1,23 +1,36 @@
 /*
- * Utils is created and developped by Jason MAHDJOUB (jason.mahdjoub@distri-mind.fr) at 2016.
- * Utils was developped by Jason Mahdjoub. 
- * Individual contributors are indicated by the @authors tag.
- * 
- * This file is part of Utils.
- * 
- * This is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License as published by the Free
- * Software Foundation; either version 3.0 of the License.
- * 
- * This software is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
- * details.
- * 
- * You should have received a copy of the GNU Lesser General Public License
- * along with this software; if not, write to the Free Software Foundation,
- * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA, or see the FSF
- * site: http://www.fsf.org.
+Copyright or © or Copr. Jason Mahdjoub (04/02/2016)
+
+jason.mahdjoub@distri-mind.fr
+
+This software (Utils) is a computer program whose purpose is to give several kind of tools for developers 
+(ciphers, XML readers, decentralized id generators, etc.).
+
+This software is governed by the CeCILL-C license under French law and
+abiding by the rules of distribution of free software.  You can  use, 
+modify and/ or redistribute the software under the terms of the CeCILL-C
+license as circulated by CEA, CNRS and INRIA at the following URL
+"http://www.cecill.info". 
+
+As a counterpart to the access to the source code and  rights to copy,
+modify and redistribute granted by the license, users are provided only
+with a limited warranty  and the software's author,  the holder of the
+economic rights,  and the successive licensors  have only  limited
+liability. 
+
+In this respect, the user's attention is drawn to the risks associated
+with loading,  using,  modifying and/or developing or reproducing the
+software by the user in light of its specific status of free software,
+that may mean  that it is complicated to manipulate,  and  that  also
+therefore means  that it is reserved for developers  and  experienced
+professionals having in-depth computer knowledge. Users are therefore
+encouraged to load and test the software's suitability as regards their
+requirements in conditions enabling the security of their systems and/or 
+data to be ensured and,  more generally, to use and operate it in the 
+same conditions as regards security. 
+
+The fact that you are presently reading this means that you have had
+knowledge of the CeCILL-C license and that you accept its terms.
  */
 
 
@@ -30,14 +43,15 @@ import java.io.InputStream;
 import java.io.Serializable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.net.URI;
 import java.net.URL;
 import java.sql.Date;
-import java.util.AbstractList;
 import java.util.AbstractSequentialList;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -92,6 +106,7 @@ public abstract class XMLProperties implements Cloneable, Serializable
 
     static DefaultXMLObjectParser default_xml_object_parser_instance=new DefaultXMLObjectParser();
     AbstractXMLObjectParser optional_xml_object_parser_instance;
+    private Properties freeStringProperties=null;
     
     protected XMLProperties(AbstractXMLObjectParser _optional_xml_object_parser_instance)
     {
@@ -105,7 +120,9 @@ public abstract class XMLProperties implements Cloneable, Serializable
      */
     public Properties getFreeStringProperties()
     {
-	return new Properties();
+	if (freeStringProperties==null)
+	    freeStringProperties=new Properties();
+	return freeStringProperties;
     }
     
     /**
@@ -281,6 +298,8 @@ public abstract class XMLProperties implements Cloneable, Serializable
 	if (Modifier.isFinal(mod) || Modifier.isTransient(mod) || Modifier.isNative(mod) || Modifier.isStatic(mod))
 	    return false;
 	return XMLProperties.class.isAssignableFrom(field.getType())
+		|| Map.class.isAssignableFrom(field.getType())
+		|| List.class.isAssignableFrom(field.getType())
 		|| default_xml_object_parser_instance.isValid(field.getType()) 
 		|| (optional_xml_object_parser_instance!=null && optional_xml_object_parser_instance.isValid(field.getType()));
     }
@@ -335,7 +354,23 @@ public abstract class XMLProperties implements Cloneable, Serializable
 		return null;
 	    if (XMLProperties.class.isAssignableFrom(field_type))
 	    {
-		XMLProperties e=(XMLProperties)field_type.newInstance();
+		Constructor<?> default_constructor=null;
+		for (Constructor<?> c : field_type.getDeclaredConstructors())
+		{
+		    
+		    if (c.getParameterTypes().length==0)
+		    {
+			default_constructor=c;
+			default_constructor.setAccessible(true);
+			break;
+		    }
+		}
+		if (default_constructor==null)
+		{
+		    throw new XMLPropertiesParseException("The class "+field_type.getCanonicalName()+" must have a default constructor ");
+		}
+		
+		XMLProperties e=(XMLProperties)default_constructor.newInstance();
 		if (e.optional_xml_object_parser_instance==null)
 		    e.optional_xml_object_parser_instance=optional_xml_object_parser_instance;
 		e.read(document, n.getChildNodes());
@@ -376,11 +411,10 @@ public abstract class XMLProperties implements Cloneable, Serializable
 	    
 	    try
 	    {
-		
 		Map<Object, Object> m=null;
 		if (Modifier.isAbstract(type.getModifiers()))
 		{
-		    return;
+		    m=new HashMap<Object, Object>();
 		}
 		else
 		{
@@ -400,10 +434,12 @@ public abstract class XMLProperties implements Cloneable, Serializable
 	            {
 	        	Node keyn=null;
 	        	Node valuen=null;
-	        	for (int j=0;j<n.getChildNodes().getLength() || (keyn!=null && valuen!=null);j++)
+	        	NodeList ne=n.getChildNodes();
+	        	
+	        	for (int j=0;j<ne.getLength() && !(keyn!=null && valuen!=null);j++)
 	        	{
-	        	    Node n2=n.getChildNodes().item(j);
-
+	        	    Node n2=ne.item(j);
+	        	    
 	        	    if (n2.getNodeName().equals("key"))
 	        		keyn=n2;
 	        	    else if (n2.getNodeName().equals("value"))
@@ -418,11 +454,15 @@ public abstract class XMLProperties implements Cloneable, Serializable
 	        	    Object okey=getValue(document, field.getName(), key_map_class, keyn);
 	        	    Object ovalue=getValue(document, field.getName(), value_map_class, valuen);
 
-	        	    if (!(okey!=null && okey instanceof Void) && !(ovalue!=null && ovalue instanceof Void))
+	        	    
+	        	    if (!(okey!=null && okey==Void.TYPE) && !(ovalue!=null && ovalue==Void.TYPE))
+	        	    {
 	        		m.put(okey, ovalue);
+	        	    }
 	        	}
 	            }	            
 	        }
+	        field.set(this, m);
 	        
 	    }
 	    catch (InstantiationException | IllegalAccessException | DOMException | ClassNotFoundException e)
@@ -450,7 +490,7 @@ public abstract class XMLProperties implements Cloneable, Serializable
 			{
 			    if (AbstractSequentialList.class.isAssignableFrom(type))
 				l = new LinkedList<>();
-			    else if (AbstractList.class.isAssignableFrom(type))
+			    else
 				l = new ArrayList<>();
 			}
 			else
@@ -471,7 +511,7 @@ public abstract class XMLProperties implements Cloneable, Serializable
 	            {
 	        	Class<?> element_list_class= Class.forName(n.getAttributes().getNamedItem("ElementType").getNodeValue());	        	
 	        	Object o=getValue(document, field.getName(), element_list_class, n);
-	        	if (!(o!=null && o instanceof Void))
+	        	if (!(o!=null && o==Void.TYPE))
 	        	    l.add(o);
 	            }
 	        }
@@ -502,29 +542,30 @@ public abstract class XMLProperties implements Cloneable, Serializable
 		XMLProperties p = (XMLProperties)field.get(this);
 		if (p==null)
 		{
-			boolean found_default_constructor=false;
+			Constructor<?> default_constructor=null;
 			for (Constructor<?> c : type.getDeclaredConstructors())
 			{
 			    
-			    if (c.getTypeParameters().length==0)
+			    if (c.getParameterTypes().length==0)
 			    {
-				found_default_constructor=true;
+				default_constructor=c;
+				default_constructor.setAccessible(true);
 				break;
 			    }
 			}
-			if (!found_default_constructor)
+			if (default_constructor==null)
 			{
 			    throw new XMLPropertiesParseException("The class "+type.getCanonicalName()+" must have a default constructor ");
 			}
 		    
-		    p=(XMLProperties)type.newInstance();
+		    p=(XMLProperties)default_constructor.newInstance();
 		    field.set(this, p);
 		}
 		if (p.optional_xml_object_parser_instance==null)
 		    p.optional_xml_object_parser_instance=optional_xml_object_parser_instance;
 		p.read(document, node.getChildNodes());
 	    }
-	    catch (InstantiationException | IllegalAccessException e)
+	    catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e)
 	    {
 		throw new XMLPropertiesParseException(e, "Impossible to read the type "+type.getName());
 	    }
@@ -584,7 +625,7 @@ public abstract class XMLProperties implements Cloneable, Serializable
 	    try
 	    {
 		Object o=getValue(document, field.getName(), type, node);
-		if (!(o!=null && o instanceof Void))
+		if (!(o!=null && o==Void.TYPE))
 		    field.set(this, o);
 	    }
 	    catch(IllegalArgumentException | IllegalAccessException | DOMException e)
@@ -670,7 +711,20 @@ public abstract class XMLProperties implements Cloneable, Serializable
     void writeField(Document document, Node parent_element, Field field) throws XMLPropertiesParseException
     {
 	Class<?> type=field.getType();
-	if (Map.class.isAssignableFrom(type))
+	if (optional_xml_object_parser_instance!=null && optional_xml_object_parser_instance.isValid(type))
+	{
+	    try
+	    {
+		Element element=document.createElement(field.getName());
+		if (setTextContent(document, element, field.getName(), field.getType(), field.get(this)))
+		    parent_element.appendChild(element);
+	    }
+	    catch(IllegalArgumentException | IllegalAccessException | DOMException e)
+	    {
+		throw new XMLPropertiesParseException(e, "Impossible read the field "+field.getName());
+	    }
+	}
+	else if (Map.class.isAssignableFrom(type))
 	{
 	    
 	    //deal with map
@@ -685,9 +739,6 @@ public abstract class XMLProperties implements Cloneable, Serializable
 		    return;
 		Element element=document.createElement(field.getName());
 		
-		Class<?> key_map_class= (Class<?>) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
-		Class<?> value_map_class= (Class<?>) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[1];
-		
 		Iterator<Map.Entry<Object, Object>> it=m.entrySet().iterator();
 		while (it.hasNext())
 		{
@@ -699,9 +750,9 @@ public abstract class XMLProperties implements Cloneable, Serializable
 	            key.setAttributeNode(attr_key);*/
 		    elementM.appendChild(key);
 		    Object k=entry.getKey();
-		    if (setTextContent(document, key, field.getName(), k==null?key_map_class:k.getClass(), k))
+		    if (setTextContent(document, key, field.getName(), k==null?null:k.getClass(), k))
 		    {
-			key.setAttribute("ElementType", k==null?key_map_class.getCanonicalName():k.getClass().getCanonicalName());
+			key.setAttribute("ElementType", k==null?null:k.getClass().getCanonicalName());
 			Element value=document.createElement("value");
 		        /*Attr attr_value=document.createAttribute("type");
 		        attr_value.setValue(value_map_class.getCanonicalName());
@@ -709,9 +760,9 @@ public abstract class XMLProperties implements Cloneable, Serializable
 
 			elementM.appendChild(value);
 			Object v=entry.getValue();
-			if (setTextContent(document, value, field.getName(), v==null?value_map_class:v.getClass(), v))
+			if (setTextContent(document, value, field.getName(), v==null?null:v.getClass(), v))
 			{
-			    value.setAttribute("ElementType", v==null?value_map_class.getCanonicalName():v.getClass().getCanonicalName());
+			    value.setAttribute("ElementType", v==null?null:v.getClass().getCanonicalName());
 			    element.appendChild(elementM);
 			}
 		    }
@@ -974,8 +1025,20 @@ public abstract class XMLProperties implements Cloneable, Serializable
         		    {
         			if (XMLProperties.class.isAssignableFrom(f.getType()))
         			{
+        			    boolean toreload=false;
         			    XMLProperties i=(XMLProperties)f.get(instance);
-        			    return setField(i, keys, current_index+1, value);
+        			    if (i==null)
+        			    {
+        				toreload=true;
+        				Constructor<?> construct=f.getType().getDeclaredConstructor();
+        				construct.setAccessible(true);
+        				i=(XMLProperties) construct.newInstance();
+        			    }
+        			    
+        			    boolean ok=setField(i, keys, current_index+1, value);
+        			    if (ok && toreload)
+        				f.set(instance, i);
+        			    return ok;
         			}
         			else 
         			    return false;
@@ -987,12 +1050,13 @@ public abstract class XMLProperties implements Cloneable, Serializable
         	}
         	return false;
 	}
-	catch(IllegalAccessException e)
+	catch(IllegalAccessException | InstantiationException | NoSuchMethodException | SecurityException | InvocationTargetException e)
 	{
 	    throw new IllegalArgumentException(e);
 	}
     }
     
+    @SuppressWarnings("unchecked")
     void setField(Field field, String value) throws IllegalArgumentException
     {
 	try
@@ -1049,24 +1113,26 @@ public abstract class XMLProperties implements Cloneable, Serializable
 		{
 		    
 		    Class<?> element_list_class= (Class<?>) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
-		    @SuppressWarnings("unchecked")
-		    List<Object> l=(List<Object>)field_type.newInstance();
+		    List<Object> l=null;
+		    
+		    if (Modifier.isAbstract(field_type.getModifiers()))
+			l=new ArrayList<>();
+		    else
+			l=(List<Object>)field_type.newInstance();
 		    
 		    
-		    Pattern p=Pattern.compile("\\{(.*)\\}");
-		    Matcher m=p.matcher(value);
-		    if (m.find())
+		    if (value.startsWith("{") && value.endsWith("}"))
 		    {
-			value=m.group(1);
-		    }
-		    for (String v : value.split(";"))
-		    {
-			Object o=getValue(element_list_class, v);
-			if (o!=null && !(o instanceof Void))
-			    l.add(o);
-		    }
+			value=value.substring(1, value.length()-1);
+			for (String v : value.split(";"))
+			{
+			    Object o=getValue(element_list_class, v);
+			    if (o!=null && o!=Void.TYPE)
+				l.add(o);
+			}
 		    
-		    field.set(this, l);
+			field.set(this, l);
+		    }
 		}
 		    
 		
@@ -1074,36 +1140,54 @@ public abstract class XMLProperties implements Cloneable, Serializable
 	    else if (Map.class.isAssignableFrom(field_type))
 	    {
 		
-		@SuppressWarnings("unchecked")
-		Map<Object, Object> m=(Map<Object, Object>) field_type.newInstance();
-		
-		Class<?> key_map_class= (Class<?>) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
-		Class<?> value_map_class= (Class<?>) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[1];
-		
-		    Pattern p=Pattern.compile("{(.*)}");
-		    Matcher match=p.matcher(value);
-		    if (match.find())
+		Map<Object, Object> m=null;
+		if (!value.equals("null"))
+		{
+		    if (Modifier.isAbstract(field_type.getModifiers()))
 		    {
-			value=match.group(1);
+			m=new HashMap<Object, Object>();
 		    }
-		    for (String v : value.split(";"))
+		    else
 		    {
-			String split[]=v.split(":");
-			Object ok=getValue(key_map_class, split[0]);
-			if (ok!=null && !(ok instanceof Void))
+			Map<Object, Object> newInstance = (Map<Object, Object>)field_type.newInstance();
+			m=newInstance;
+		    }
+
+		
+		    if (value.startsWith("{") && value.endsWith("}"))
+		    {
+			value=value.substring(1, value.length()-1);
+			for (String v : value.split(";"))
 			{
-			    Object ov=getValue(value_map_class, split[1]);
-			    if (ov!=null && !(ov instanceof Void))
-				m.put(ok, ov);
-			}
+			    String split[]=v.split(":");
+			    if (split.length==4 && !split[0].equals("null"))
+			    {
+				Class<?> key_map_class= (Class<?>) Class.forName(split[0]);
+				Class<?> value_map_class=null;
+				if (!split[2].equals("null"))
+				    value_map_class= (Class<?>) Class.forName(split[2]);
+			
+				Object ok=getValue(key_map_class, split[1]);
+				if (ok==null || ok!=Void.TYPE)
+				{
+				    Object ov=null;
+				    if (value_map_class!=null)
+					ov=getValue(value_map_class, split[3]);
+				    if (ov==null || ov!=Void.TYPE)
+					m.put(ok, ov);
+				}
+			    }
 			    
+			}
+			
 		    }
+		}
 		field.set(this, m);
 	    }
 	    else
 	    {
 		Object o=getValue(field_type, value);
-		if (o==null || !(o instanceof Void))
+		if (o==null || !(o==Void.TYPE))
 		    field.set(this, o);
 	    }
 	}
@@ -1178,9 +1262,6 @@ public abstract class XMLProperties implements Cloneable, Serializable
 			    buffer.append("null");
 			else
 			{
-			    Class<?> key_map_class= (Class<?>) ((ParameterizedType) f.getGenericType()).getActualTypeArguments()[0];
-			    Class<?> value_map_class= (Class<?>) ((ParameterizedType) f.getGenericType()).getActualTypeArguments()[1];
-			    
 			    buffer.append("{");
 			    Map<?, ?> m=(Map<?, ?>)o;
 			    boolean first=true;
@@ -1189,9 +1270,9 @@ public abstract class XMLProperties implements Cloneable, Serializable
 				String ks=null,vs=null;
 				
 				if (e.getKey()!=null)
-				    ks=getString(key_map_class, e.getKey());
+				    ks=getString(e.getKey().getClass(), e.getKey());
 				if (e.getValue()!=null)
-				    ks=getString(value_map_class, e.getValue());
+				    vs=getString(e.getValue().getClass(), e.getValue());
 
 				if (ks!=null)
 				{
@@ -1199,8 +1280,14 @@ public abstract class XMLProperties implements Cloneable, Serializable
 					first=false;
 				    else
 					buffer.append(";");
-				    
+				    buffer.append(e.getKey().getClass().getCanonicalName());
+				    buffer.append(":");
 				    buffer.append(ks);
+				    buffer.append(":");
+				    if (vs==null)
+					buffer.append("null");
+				    else
+					buffer.append(e.getValue().getClass().getCanonicalName());
 				    buffer.append(":");
 				    buffer.append(vs);
 				}

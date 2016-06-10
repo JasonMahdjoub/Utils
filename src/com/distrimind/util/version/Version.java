@@ -1,23 +1,36 @@
 /*
- * Utils is created and developped by Jason MAHDJOUB (jason.mahdjoub@distri-mind.fr) at 2016.
- * MadKitGroup extension was developped by Jason Mahdjoub. 
- * Individual contributors are indicated by the @authors tag.
- * 
- * This file is part of Utils.
- * 
- * This is free software; you can redistribute it and/or modify it under the
- * terms of the GNU General Public License Lesser as published by the Free
- * Software Foundation; either version 3.0 of the License.
- * 
- * This software is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
- * details.
- * 
- * You should have received a copy of the GNU Lesser General Public License
- * along with this software; if not, write to the Free Software Foundation,
- * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA, or see the FSF
- * site: http://www.fsf.org.
+Copyright or © or Copr. Jason Mahdjoub (04/02/2016)
+
+jason.mahdjoub@distri-mind.fr
+
+This software (Utils) is a computer program whose purpose is to give several kind of tools for developers 
+(ciphers, XML readers, decentralized id generators, etc.).
+
+This software is governed by the CeCILL-C license under French law and
+abiding by the rules of distribution of free software.  You can  use, 
+modify and/ or redistribute the software under the terms of the CeCILL-C
+license as circulated by CEA, CNRS and INRIA at the following URL
+"http://www.cecill.info". 
+
+As a counterpart to the access to the source code and  rights to copy,
+modify and redistribute granted by the license, users are provided only
+with a limited warranty  and the software's author,  the holder of the
+economic rights,  and the successive licensors  have only  limited
+liability. 
+
+In this respect, the user's attention is drawn to the risks associated
+with loading,  using,  modifying and/or developing or reproducing the
+software by the user in light of its specific status of free software,
+that may mean  that it is complicated to manipulate,  and  that  also
+therefore means  that it is reserved for developers  and  experienced
+professionals having in-depth computer knowledge. Users are therefore
+encouraged to load and test the software's suitability as regards their
+requirements in conditions enabling the security of their systems and/or 
+data to be ensured and,  more generally, to use and operate it in the 
+same conditions as regards security. 
+
+The fact that you are presently reading this means that you have had
+knowledge of the CeCILL-C license and that you accept its terms.
  */
 
 package com.distrimind.util.version;
@@ -91,7 +104,7 @@ public class Version extends XMLProperties implements Comparable<Version>
     ArrayList<PersonDeveloper> m_developers=new ArrayList<PersonDeveloper>();
     ArrayList<Description> m_descriptions=new ArrayList<Description>();
 
-    public Version()
+    protected Version()
     {
 	this("", 0,0,0,Type.Alpha, 0, new Date(), new Date());
     }
@@ -99,6 +112,15 @@ public class Version extends XMLProperties implements Comparable<Version>
     public Version(String _program_name, int _major, int _minor, int _revision, Type _type, int _alpha_beta_version, Date _date_start_project, Date _date_end_project)
     {
 	super(null);
+	if (_program_name==null)
+	    throw new NullPointerException("_program_name");
+	if (_type==null)
+	    throw new NullPointerException("_type");
+	if (_date_start_project==null)
+	    throw new NullPointerException("_date_start_project");
+	if (_date_end_project==null)
+	    throw new NullPointerException("_date_end_project");
+	
 	m_major=_major;
 	m_minor=_minor;
 	m_revision=_revision;
@@ -152,10 +174,14 @@ public class Version extends XMLProperties implements Comparable<Version>
     
     public void addCreator(Person p)
     {
+	if (p==null)
+	    throw new NullPointerException("p");
 	m_creators.add(p);
     }
     public void addDeveloper(PersonDeveloper p)
     {
+	if (p==null)
+	    throw new NullPointerException("p");
 	m_developers.add(p);
     }
     public ArrayList<Person> getCreators()
@@ -173,6 +199,8 @@ public class Version extends XMLProperties implements Comparable<Version>
     }
     public void addDescription(Description _d)
     {
+	if (_d==null)
+	    throw new NullPointerException("_d");
 	m_descriptions.add(_d);
     }
     public ArrayList<Description> getDescriptions()
@@ -184,6 +212,19 @@ public class Version extends XMLProperties implements Comparable<Version>
     {
 	return Integer.toString(m_major)+"."+Integer.toString(m_minor)+"."+Integer.toString(m_revision)+" "+m_type+((m_type.equals(Type.Alpha) || m_type.equals(Type.Beta))?" "+Integer.toString(m_alpha_beta_version):"")+" (Build: "+Integer.toString(m_build_number)+")";
     }
+    
+    public String getHeadFileName()
+    {
+	return getProgramName()+"-"+
+		Integer.toString(getMajor())+
+		"."+
+		Integer.toString(getMinor())+
+		"."+
+		Integer.toString(getRevision())+"-"+
+		getType()+
+		((getType().equals(Version.Type.Beta) || getType().equals(Version.Type.Alpha))?Integer.toString(getAlphaBetaVersion()):"");	
+    }
+    
     @Override
     public String toString()
     {
@@ -346,6 +387,8 @@ public class Version extends XMLProperties implements Comparable<Version>
     
     public void saveBuildNumber(File buildFile) throws IOException
     {
+	if (buildFile==null)
+	    throw new NullPointerException("buildFile");
 	
 	try(FileOutputStream fos=new FileOutputStream(buildFile))
 	{
@@ -364,6 +407,9 @@ public class Version extends XMLProperties implements Comparable<Version>
     @Override
     public int compareTo(Version b)
     {
+	if (b==null)
+	    throw new NullPointerException("b");
+	
 	return this.m_build_number-b.m_build_number;
     }
 }

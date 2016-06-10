@@ -1,9 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
 <suite name="Failed suite [TestAll]">
-  <test name="testCrypto">
+  <test name="testProperties(failed)">
     <classes>
-      <class name="com.distrimind.util.tests.CryptoTests"/>
+      <class name="com.distrimind.util.tests.properties.TestProperties">
+        <methods>
+          <include name="testPropertiesXMLSave" invocation-numbers="1 2 3 4 5 6 7 8 9"/>
+          <include name="testPropertiesExport" invocation-numbers="1 2 3 4 5 6 7 8 9"/>
+        </methods>
+      </class> <!-- com.distrimind.util.tests.properties.TestProperties -->
     </classes>
-  </test> <!-- testCrypto -->
+  </test> <!-- testProperties(failed) -->
 </suite> <!-- Failed suite [TestAll] -->

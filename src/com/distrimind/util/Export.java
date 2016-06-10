@@ -1,23 +1,36 @@
 /*
- * Utils is created and developped by Jason MAHDJOUB (jason.mahdjoub@distri-mind.fr) at 2016.
- * Utils was developped by Jason Mahdjoub. 
- * Individual contributors are indicated by the @authors tag.
- * 
- * This file is part of Utils.
- * 
- * This is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License as published by the Free
- * Software Foundation; either version 3.0 of the License.
- * 
- * This software is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
- * details.
- * 
- * You should have received a copy of the GNU Lesser General Public License
- * along with this software; if not, write to the Free Software Foundation,
- * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA, or see the FSF
- * site: http://www.fsf.org.
+Copyright or © or Copr. Jason Mahdjoub (04/02/2016)
+
+jason.mahdjoub@distri-mind.fr
+
+This software (Utils) is a computer program whose purpose is to give several kind of tools for developers 
+(ciphers, XML readers, decentralized id generators, etc.).
+
+This software is governed by the CeCILL-C license under French law and
+abiding by the rules of distribution of free software.  You can  use, 
+modify and/ or redistribute the software under the terms of the CeCILL-C
+license as circulated by CEA, CNRS and INRIA at the following URL
+"http://www.cecill.info". 
+
+As a counterpart to the access to the source code and  rights to copy,
+modify and redistribute granted by the license, users are provided only
+with a limited warranty  and the software's author,  the holder of the
+economic rights,  and the successive licensors  have only  limited
+liability. 
+
+In this respect, the user's attention is drawn to the risks associated
+with loading,  using,  modifying and/or developing or reproducing the
+software by the user in light of its specific status of free software,
+that may mean  that it is complicated to manipulate,  and  that  also
+therefore means  that it is reserved for developers  and  experienced
+professionals having in-depth computer knowledge. Users are therefore
+encouraged to load and test the software's suitability as regards their
+requirements in conditions enabling the security of their systems and/or 
+data to be ensured and,  more generally, to use and operate it in the 
+same conditions as regards security. 
+
+The fact that you are presently reading this means that you have had
+knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util;
 
@@ -36,9 +49,10 @@ import com.distrimind.util.export.JavaProjectSource;
 import com.distrimind.util.export.License;
 import com.distrimind.util.export.TestNGFile;
 import com.distrimind.util.export.License.PredefinedLicense;
+import com.distrimind.util.tests.EmptyClass;
+import com.distrimind.util.tests.crypto.CryptoTests;
 import com.distrimind.util.export.TestSuite;
 import com.distrimind.util.export.Exports.ExportProperties;
-import com.distrimind.util.tests.CryptoTests;
 
 /**
  * 
@@ -80,18 +94,19 @@ class Export
 	dependencies=new ArrayList<BinaryDependency>();
 	licenses=new License[1];
 	licenses[0]=new License(PredefinedLicense.APACHE_LICENSE_V2_0);
+	String testNGDir=".eclipse/org.eclipse.platform_4.5.2_1473617060_linux_gtk_x86_64/plugins/org.testng.eclipse_6.9.11.201604020423/lib";
 	dependencies.add(new JarDependency("TestNG", 
 		org.testng.TestNG.class.getPackage(), 
-		licenses, new File("/home/jason/.eclipse/org.eclipse.platform_4.5.2_1473617060_linux_gtk_x86_64/plugins/org.testng.eclipse_6.9.10.201512240000/lib/testng.jar")));
+		licenses, new File("/home/jason/"+testNGDir+"/testng.jar")));
 	dependencies.add(new JarDependency("TestNG-jcommander", 
 		org.testng.TestNG.class.getPackage(), 
-		licenses, new File("/home/jason/.eclipse/org.eclipse.platform_4.5.2_1473617060_linux_gtk_x86_64/plugins/org.testng.eclipse_6.9.10.201512240000/lib/jcommander.jar")));
+		licenses, new File("/home/jason/"+testNGDir+"/jcommander.jar")));
 	dependencies.add(new JarDependency("TestNG-snakeyaml", 
 		org.testng.TestNG.class.getPackage(), 
-		licenses, new File("/home/jason/.eclipse/org.eclipse.platform_4.5.2_1473617060_linux_gtk_x86_64/plugins/org.testng.eclipse_6.9.10.201512240000/lib/snakeyaml.jar")));
+		licenses, new File("/home/jason/"+testNGDir+"/snakeyaml.jar")));
 	dependencies.add(new JarDependency("TestNG-bsh-2.0b4", 
 		org.testng.TestNG.class.getPackage(), 
-		licenses, new File("/home/jason/.eclipse/org.eclipse.platform_4.5.2_1473617060_linux_gtk_x86_64/plugins/org.testng.eclipse_6.9.10.201512240000/lib/bsh-2.0b4.jar")));
+		licenses, new File("/home/jason/"+testNGDir+"/bsh-2.0b4.jar")));
 	licenses=new License[1];
 	licenses[0]=new License(PredefinedLicense.ECLIPSE_PUBLIC_LICENSE_V1_0);
 	dependencies.add(new JarDependency("JUnit", 
@@ -99,9 +114,10 @@ class Export
 		licenses, new File("/opt/eclipse/plugins/org.junit_4.12.0.v201504281640/junit.jar")));
 	
 	javaProjectSource.setTestSuiteSource(root_dir, src_tests_dir, root_tests_package, 
-		dependencies, null, new TestSuite(new TestNGFile(CryptoTests.class)));
+		dependencies, null, new TestSuite(new TestNGFile(EmptyClass.class.getPackage(), "AllTestsNG.xml")));
 	
 	javaProjectSource.setGitHUBLink(new URL("https://github.com/JazZ51/Utils.git"));
+	//javaProjectSource.setVerbose(true);
 	exports.setProject(javaProjectSource);
 	
 	
