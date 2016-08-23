@@ -43,8 +43,10 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 
+import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.CipherInputStream;
+import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
 /**
@@ -58,23 +60,47 @@ public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOu
     protected AbstractEncryptionIOAlgorithm(Cipher cipher)
     {
 	super(cipher);
+	
+    }
+    
+    public int getOutputSizeForDecryption(int inputLen) throws InvalidKeyException, InvalidAlgorithmParameterException
+    {
+	initCipherForDecrypt(cipher);
+	int maxBlockSize=getMaxBlockSizeForDecoding();
+	if (maxBlockSize==Integer.MAX_VALUE)
+	    return cipher.getOutputSize(inputLen);
+	int div=inputLen/maxBlockSize;
+	int mod=inputLen%maxBlockSize;
+	int res=0;
+	if (div>0)
+	    res+=cipher.getOutputSize(maxBlockSize)*div;
+	if (mod>0)
+	    res+=cipher.getOutputSize(mod);
+	return res;
     }
     
     public abstract void initCipherForDecrypt(Cipher cipher) throws InvalidKeyException, InvalidAlgorithmParameterException;
     
-    public byte[] decode(byte[] bytes) throws InvalidKeyException, InvalidAlgorithmParameterException, IOException
+    public byte[] decode(byte[] bytes) throws InvalidKeyException, InvalidAlgorithmParameterException, IOException, IllegalBlockSizeException, BadPaddingException
     {
 	return decode(bytes, 0, bytes.length);
     }
-    public byte[] decode(byte[] bytes, int off, int len) throws InvalidKeyException, InvalidAlgorithmParameterException, IOException
+    public byte[] decode(byte[] bytes, int off, int len) throws InvalidKeyException, InvalidAlgorithmParameterException, IOException, IllegalBlockSizeException, BadPaddingException
     {
+	if (len<0 || off<0)
+	    throw new IllegalArgumentException("bytes.length="+bytes.length+", off="+off+", len="+len);
+	if (off>bytes.length)
+	    throw new IllegalArgumentException("bytes.length="+bytes.length+", off="+off+", len="+len);
+	if (off+len>bytes.length)
+	    throw new IllegalArgumentException("bytes.length="+bytes.length+", off="+off+", len="+len);
+	
 	try(ByteArrayInputStream bais=new ByteArrayInputStream(bytes, off, len))
 	{
 	    return decode(bais);
 	}
     }
     
-    public byte[] decode(InputStream is) throws InvalidKeyException, InvalidAlgorithmParameterException, IOException
+    public byte[] decode(InputStream is) throws InvalidKeyException, InvalidAlgorithmParameterException, IOException, IllegalBlockSizeException, BadPaddingException
     {
 	try(ByteArrayOutputStream baos=new ByteArrayOutputStream())
 	{
@@ -82,12 +108,41 @@ public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOu
 	    return baos.toByteArray();
 	}
     }
+
+    public abstract int getMaxBlockSizeForDecoding();
     
-    public void decode(InputStream is, OutputStream os) throws InvalidKeyException, InvalidAlgorithmParameterException, IOException
+    public void decode(InputStream is, OutputStream os) throws InvalidKeyException, InvalidAlgorithmParameterException, IOException, IllegalBlockSizeException, BadPaddingException
     {
+	
 	initCipherForDecrypt(cipher);
 	
-	try(CipherInputStream cis=new CipherInputStream(is, cipher))
+	int maxBlockSize=getMaxBlockSizeForDecoding();
+	int blockACC=0;
+	byte[] buffer=new byte[BUFFER_SIZE];
+	boolean finish=false;
+	while (!finish)
+	{
+	    blockACC=0;
+	    do
+	    {
+		int nb=Math.min(BUFFER_SIZE, maxBlockSize-blockACC);
+		int size=is.read(buffer, 0, nb);
+		if (size>0)
+		{
+		    os.write(cipher.update(buffer, 0, size));
+		    blockACC+=size;
+		}
+		if (nb!=size || size<=0)
+		    finish=true;
+	    } while ((blockACC<maxBlockSize || maxBlockSize==Integer.MAX_VALUE) && !finish);
+	    if (blockACC!=0)
+		os.write(cipher.doFinal());
+	}
+	
+	os.flush();
+	
+	
+	/*try(CipherInputStream cis=new CipherInputStream(is, cipher))
 	{
 	    int read=-1;
 	    do
@@ -96,7 +151,7 @@ public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOu
 		if (read!=-1)
 		    os.write(read);
 	    }while (read!=-1);
-	}
+	}*/
     }
     
     public CipherInputStream getCipherInputStream(InputStream is) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException

@@ -58,29 +58,43 @@ import com.distrimind.util.Bits;
  */
 public enum ASymmetricEncryptionType
 {
-    RSA("RSA", "ECB","OAEPWithSHA-256AndMGF1Padding", SignatureType.SHA256withRSA, (short)4096),
-    DEFAULT(RSA);    
+    RSA_OAEPWithSHA256AndMGF1Padding("RSA", "ECB","OAEPWithSHA-256AndMGF1Padding", SignatureType.SHA256withRSA, (short)4096, (short)66),
+    RSA_PKCS1Padding("RSA", "ECB","PKCS1Padding", SignatureType.SHA256withRSA, (short)4096, (short)11),
+    DEFAULT(RSA_OAEPWithSHA256AndMGF1Padding);    
     
     private final String algorithmName;
     private final String blockMode;
     private final String padding;
     private final SignatureType signature;
     private final short keySize;
+    private final short blockSizeDecrement;
     
     private ASymmetricEncryptionType(ASymmetricEncryptionType type)
     {
-	this(type.algorithmName, type.blockMode, type.padding, type.signature, type.keySize);
+	this(type.algorithmName, type.blockMode, type.padding, type.signature, type.keySize, type.blockSizeDecrement);
     }
     
     
-    private ASymmetricEncryptionType(String algorithmName, String blockMode, String padding, SignatureType signature, short keySize)
+    private ASymmetricEncryptionType(String algorithmName, String blockMode, String padding, SignatureType signature, short keySize, short blockSizeDecrement)
     {
 	this.algorithmName=algorithmName;
 	this.blockMode=blockMode;
 	this.padding=padding;
 	this.signature=signature;
 	this.keySize=keySize;
+	this.blockSizeDecrement=blockSizeDecrement;
     }
+    
+    public int getDefaultMaxBlockSize()
+    {
+	return keySize/8-blockSizeDecrement;
+    }
+    
+    public int getMaxBlockSize(int keySize)
+    {
+	return keySize/8-blockSizeDecrement;
+    }
+    
     
     public String getAlgorithmName()
     {
@@ -99,7 +113,10 @@ public enum ASymmetricEncryptionType
     
     public Cipher getCipherInstance() throws NoSuchAlgorithmException, NoSuchPaddingException
     {
-	return Cipher.getInstance(algorithmName+"/"+blockMode+"/"+padding);
+	String name=algorithmName;
+	if ((blockMode!=null && !blockMode.equals("")) && (padding!=null && !padding.equals("")))
+	    name+="/"+blockMode+"/"+padding;
+	return Cipher.getInstance(name);
     }
     
     public KeyPairGenerator getKeyPairGenerator(SecureRandom random) throws NoSuchAlgorithmException
@@ -124,14 +141,14 @@ public enum ASymmetricEncryptionType
     }
     
     
-    public static byte[] encodePublicKey(PublicKey key)
+    static byte[] encodePublicKey(PublicKey key)
     {
 	return Bits.concateEncodingWithShortSizedTabs(key.getAlgorithm().getBytes(), key.getEncoded());
 	/*X509EncodedKeySpec pubKeySpec = new X509EncodedKeySpec(key.getEncoded());
 	return Bits.concateEncodingWithShortSizedTabs(key.getAlgorithm().getBytes(), pubKeySpec.getEncoded());*/
     }
     
-    static public PublicKey decodePublicKey(byte[] encodedKey) throws NoSuchAlgorithmException, InvalidKeySpecException
+    static PublicKey decodePublicKey(byte[] encodedKey) throws NoSuchAlgorithmException, InvalidKeySpecException
     {
 	byte[][] parts=Bits.separateEncodingsWithShortSizedTabs(encodedKey);
 	X509EncodedKeySpec pubKeySpec = new X509EncodedKeySpec(parts[1]);
@@ -139,14 +156,14 @@ public enum ASymmetricEncryptionType
 	return kf.generatePublic(pubKeySpec);
     }
     
-    static public byte[] encodePrivateKey(PrivateKey key)
+    static byte[] encodePrivateKey(PrivateKey key)
     {
 	return Bits.concateEncodingWithShortSizedTabs(key.getAlgorithm().getBytes(), key.getEncoded());
 	/*PKCS8EncodedKeySpec pkcsKeySpec=new PKCS8EncodedKeySpec(key.getEncoded());
 	return Bits.concateEncodingWithShortSizedTabs(key.getAlgorithm().getBytes(), pkcsKeySpec.getEncoded());*/
     }
     
-    public static PrivateKey decodePrivateKey(byte[] encodedKey) throws NoSuchAlgorithmException, InvalidKeySpecException
+    static PrivateKey decodePrivateKey(byte[] encodedKey) throws NoSuchAlgorithmException, InvalidKeySpecException
     {
 	byte[][] parts=Bits.separateEncodingsWithShortSizedTabs(encodedKey);
 	PKCS8EncodedKeySpec pkcsKeySpec=new PKCS8EncodedKeySpec(parts[1]);
@@ -154,20 +171,28 @@ public enum ASymmetricEncryptionType
 	return kf.generatePrivate(pkcsKeySpec);
     }
     
-    public static byte[] encodeKeyPair(KeyPair keyPair)
+    static byte[] encodeKeyPair(KeyPair keyPair)
     {
 	return Bits.concateEncodingWithShortSizedTabs(encodePublicKey(keyPair.getPublic()), encodePrivateKey(keyPair.getPrivate()));
     }
     
-    public static KeyPair decodeKeyPair(byte[] encodedKeyPair) throws NoSuchAlgorithmException, InvalidKeySpecException
+    static KeyPair decodeKeyPair(byte[] encodedKeyPair) throws NoSuchAlgorithmException, InvalidKeySpecException
     {
 	return decodeKeyPair(encodedKeyPair, 0, encodedKeyPair.length);
     }
-    public static KeyPair decodeKeyPair(byte[] encodedKeyPair, int off, int len) throws NoSuchAlgorithmException, InvalidKeySpecException
+    static KeyPair decodeKeyPair(byte[] encodedKeyPair, int off, int len) throws NoSuchAlgorithmException, InvalidKeySpecException
     {
 	byte[][] parts=Bits.separateEncodingsWithShortSizedTabs(encodedKeyPair, off, len);
 	return new KeyPair(decodePublicKey(parts[0]), decodePrivateKey(parts[1]));
     }
-    
+    static ASymmetricEncryptionType valueOf(int ordinal) throws IllegalArgumentException
+    {
+	for(ASymmetricEncryptionType a : values())
+	{
+	    if (a.ordinal()==ordinal)
+		return a;
+	}
+	throw new IllegalArgumentException();
+    }
 
 }

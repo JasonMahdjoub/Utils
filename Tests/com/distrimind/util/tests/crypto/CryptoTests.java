@@ -46,55 +46,144 @@ import java.security.SignatureException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Random;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
-import javax.crypto.SecretKey;
 
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.distrimind.util.Bits;
-import com.distrimind.util.crypto.ASymmetricEncryptionAlgorithm;
+import com.distrimind.util.crypto.P2PASymmetricEncryptionAlgorithm;
 import com.distrimind.util.crypto.ASymmetricEncryptionType;
-import com.distrimind.util.crypto.PeerToPeerASymmetricSecretMessageExchanger;
+import com.distrimind.util.crypto.ASymmetricKeyPair;
+import com.distrimind.util.crypto.ASymmetricPrivateKey;
+import com.distrimind.util.crypto.ASymmetricPublicKey;
+import com.distrimind.util.crypto.ClientASymmetricEncryptionAlgorithm;
+import com.distrimind.util.crypto.P2PASymmetricSecretMessageExchanger;
+import com.distrimind.util.crypto.ServerASymmetricEncryptionAlgorithm;
 import com.distrimind.util.crypto.MessageDigestType;
 import com.distrimind.util.crypto.SignatureType;
 import com.distrimind.util.crypto.SymmetricEncryptionAlgorithm;
 import com.distrimind.util.crypto.SymmetricEncryptionType;
+import com.distrimind.util.crypto.SymmetricSecretKey;
 
 /**
  * 
  * @author Jason Mahdjoub
- * @version 1.3
+ * @version 1.4
  * @since Utils 1.4
  */
 public class CryptoTests
 {
-    private static final String messagesToEncrypt[]={"sdfknhdfikdng dlkg nfsdkijng ", "edfknz gfjét  ", "dfkjndeifhzreufghbergerjognbvolserdbgnv"};
-    private static final String salt="fsdg35bg1;:2653.";
+    private static final byte[] messagesToEncrypt[];
+    private static final byte salt[];
+    static 
+    {
+	Random rand=new Random(System.currentTimeMillis());
+	messagesToEncrypt=new byte[30][];
+	for (int i=0;i<messagesToEncrypt.length;i++)
+	{
+	    byte[] b=new byte[rand.nextInt(50)+10000];
+	    for (int j=0;j<b.length;j++)
+		b[j]=(byte)rand.nextInt();
+		
+	    messagesToEncrypt[i]=b;
+	}
+	salt=new byte[rand.nextInt(10)+30];
+	for (int j=0;j<salt.length;j++)
+	    salt[j]=(byte)rand.nextInt();
+	
+    }
     
     @Test(dataProvider = "provideDataForASymetricEncryptions", dependsOnMethods={"testASymmetricKeyPairEncoding"})
-    public void testASymetricEncryptions(ASymmetricEncryptionType type) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IOException, SignatureException
+    public void testClientServerASymetricEncryptions(ASymmetricEncryptionType type) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IOException, SignatureException, IllegalBlockSizeException, BadPaddingException
     {
 	System.out.println("Testing "+type);
 	SecureRandom rand=new SecureRandom();
-	KeyPair kpd=type.getKeyPairGenerator(rand).generateKeyPair();
-	KeyPair kpl=type.getKeyPairGenerator(rand).generateKeyPair();
-	ASymmetricEncryptionAlgorithm algoDistant=new ASymmetricEncryptionAlgorithm(type, kpd, kpl.getPublic());
-	ASymmetricEncryptionAlgorithm algoLocal=new ASymmetricEncryptionAlgorithm(type, kpl, kpd.getPublic());
+	ASymmetricKeyPair kp=ASymmetricKeyPair.generate(rand, type);
+	ClientASymmetricEncryptionAlgorithm algoClient=new ClientASymmetricEncryptionAlgorithm(kp.getASymmetricPublicKey());
+	ServerASymmetricEncryptionAlgorithm algoServer=new ServerASymmetricEncryptionAlgorithm(kp);
 	
-	for (String m : messagesToEncrypt)
+	for (byte m []: messagesToEncrypt)
 	{
-	    String md=new String(algoDistant.decode(algoLocal.encode(m.getBytes())));
-	    Assert.assertEquals(md.length(), m.length(), "Testing size "+type);
+	    byte[] encodedBytes=algoClient.encode(m);
+	    Assert.assertEquals(encodedBytes.length, algoClient.getOutputSizeForEncryption(m.length));
+	    byte[] decodedBytes=algoServer.decode(encodedBytes);
+	    Assert.assertEquals(m, decodedBytes);
+	    byte[] signature=algoServer.getSignerAlgorithm().sign(m);
+	    Assert.assertTrue(algoClient.getSignatureCheckerAlgorithm().verify(m, signature));
+
+	    int off=rand.nextInt(15);
+	    int size=m.length;
+	    size-=rand.nextInt(15)+off;
+	    
+	    
+	    encodedBytes=algoClient.encode(m, off, size);
+	    Assert.assertEquals(encodedBytes.length, algoClient.getOutputSizeForEncryption(size));
+	    decodedBytes=algoServer.decode(encodedBytes);
+	    for (int i=0;i<size;i++)
+		Assert.assertEquals(decodedBytes[i], m[i+off]);
+
+	    signature=algoServer.getSignerAlgorithm().sign(m, off, size);
+	    Assert.assertTrue(algoClient.getSignatureCheckerAlgorithm().verify(m, off, size, signature, 0, signature.length));
+	
+	}
+	
+    }
+
+    @Test(dataProvider = "provideDataForASymetricEncryptions", dependsOnMethods={"testASymmetricKeyPairEncoding"})
+    public void testP2PASymetricEncryptions(ASymmetricEncryptionType type) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IOException, SignatureException, IllegalBlockSizeException, BadPaddingException
+    {
+	System.out.println("Testing "+type);
+	SecureRandom rand=new SecureRandom();
+	ASymmetricKeyPair kpd=ASymmetricKeyPair.generate(rand, type);
+	ASymmetricKeyPair kpl=ASymmetricKeyPair.generate(rand, type);
+	P2PASymmetricEncryptionAlgorithm algoDistant=new P2PASymmetricEncryptionAlgorithm(kpd, kpl.getASymmetricPublicKey());
+	P2PASymmetricEncryptionAlgorithm algoLocal=new P2PASymmetricEncryptionAlgorithm(kpl, kpd.getASymmetricPublicKey());
+	
+	for (byte m [] : messagesToEncrypt)
+	{
+	    byte[] encoded=algoLocal.encode(m);
+	    Assert.assertEquals(encoded.length, algoLocal.getOutputSizeForEncryption(m.length));
+	    byte md[]=algoDistant.decode(encoded);
+	    Assert.assertEquals(md.length, m.length, "Testing size "+type);
 	    Assert.assertEquals(md, m, "Testing "+type);
 	    
-	    md=new String(algoLocal.decode(algoDistant.encode(m.getBytes())));
-	    Assert.assertEquals(md.length(), m.length(), "Testing size "+type);
+	    encoded=algoDistant.encode(m);
+	    Assert.assertEquals(encoded.length, algoLocal.getOutputSizeForEncryption(m.length));
+	    md=algoLocal.decode(encoded);
+	    
+	    Assert.assertEquals(md.length, m.length, "Testing size "+type);
 	    Assert.assertEquals(md, m, "Testing "+type);
 	    
-	    byte[] sign=algoLocal.sign(m.getBytes());
-	    Assert.assertTrue(algoDistant.verify(m.getBytes(), sign));
+	    byte[] sign=algoLocal.getSignerAlgorithm().sign(m);
+	    Assert.assertTrue(algoDistant.getSignatureCheckerAlgorithm().verify(m, sign));
+
+	    int off=rand.nextInt(15);
+	    int size=m.length;
+	    size-=rand.nextInt(15)+off;
+	    
+	    
+	    encoded=algoLocal.encode(m, off, size);
+	    Assert.assertEquals(encoded.length, algoLocal.getOutputSizeForEncryption(size));
+	    md=algoDistant.decode(encoded);
+	    Assert.assertEquals(md.length, size, "Testing size "+type);
+	    for (int i=0;i<size;i++)
+		Assert.assertEquals(md[i], m[i+off]);
+	    
+	    encoded=algoDistant.encode(m, off, size);
+	    Assert.assertEquals(encoded.length, algoLocal.getOutputSizeForEncryption(size));
+	    md=algoLocal.decode(encoded);
+	    
+	    Assert.assertEquals(md.length, size, "Testing size "+type);
+	    for (int i=0;i<size;i++)
+		Assert.assertEquals(md[i], m[i+off]);
+	    
+	    sign=algoLocal.getSignerAlgorithm().sign(m, off, size);
+	    Assert.assertTrue(algoDistant.getSignatureCheckerAlgorithm().verify(m, off, size, sign, 0, sign.length));
+	
 	}
 	
     }
@@ -104,34 +193,34 @@ public class CryptoTests
     {
 	System.out.println("Testing ASymmetricSecretMessageExchanger "+type);
 	SecureRandom rand=new SecureRandom();
-	KeyPair kpd=type.getKeyPairGenerator(rand).generateKeyPair();
-	KeyPair kpl=type.getKeyPairGenerator(rand).generateKeyPair();
+	ASymmetricKeyPair kpd=ASymmetricKeyPair.generate(rand, type);
+	ASymmetricKeyPair kpl=ASymmetricKeyPair.generate(rand, type);
 	
-	PeerToPeerASymmetricSecretMessageExchanger algoLocal=new PeerToPeerASymmetricSecretMessageExchanger(type, kpl.getPublic());
-	PeerToPeerASymmetricSecretMessageExchanger algoDistant=new PeerToPeerASymmetricSecretMessageExchanger(type, kpd.getPublic());
+	P2PASymmetricSecretMessageExchanger algoLocal=new P2PASymmetricSecretMessageExchanger(kpl.getASymmetricPublicKey());
+	P2PASymmetricSecretMessageExchanger algoDistant=new P2PASymmetricSecretMessageExchanger(kpd.getASymmetricPublicKey());
 	algoLocal.setDistantPublicKey(algoDistant.encodeMyPublicKey());
 	algoDistant.setDistantPublicKey(algoLocal.encodeMyPublicKey());
 	
 	
 	
-	for (String m : messagesToEncrypt)
+	for (byte[] m : messagesToEncrypt)
 	{
-	    byte[] localCrypt=algoLocal.encode(m.getBytes(), salt.getBytes());
+	    byte[] localCrypt=algoLocal.encode(m, salt);
 	    
-	    Assert.assertTrue(algoDistant.verifyDistantMessage(m.getBytes(), salt.getBytes(), localCrypt));
+	    Assert.assertTrue(algoDistant.verifyDistantMessage(m, salt, localCrypt));
 	    
-	    byte[] distantCrypt=algoDistant.encode(m.getBytes(), salt.getBytes());
-	    Assert.assertTrue(algoLocal.verifyDistantMessage(m.getBytes(), salt.getBytes(), distantCrypt));
+	    byte[] distantCrypt=algoDistant.encode(m, salt);
+	    Assert.assertTrue(algoLocal.verifyDistantMessage(m, salt, distantCrypt));
 	}
 	
-	for (String m : messagesToEncrypt)
+	for (byte [] m : messagesToEncrypt)
 	{
-	    byte[] localCrypt=algoLocal.encode(m.getBytes(), null);
+	    byte[] localCrypt=algoLocal.encode(m, null);
 	    
-	    Assert.assertTrue(algoDistant.verifyDistantMessage(m.getBytes(), null, localCrypt));
+	    Assert.assertTrue(algoDistant.verifyDistantMessage(m, null, localCrypt));
 	    
-	    byte[] distantCrypt=algoDistant.encode(m.getBytes(), null);
-	    Assert.assertTrue(algoLocal.verifyDistantMessage(m.getBytes(), null, distantCrypt));
+	    byte[] distantCrypt=algoDistant.encode(m, null);
+	    Assert.assertTrue(algoLocal.verifyDistantMessage(m, null, distantCrypt));
 	}
     }
 
@@ -156,13 +245,14 @@ public class CryptoTests
     {
 	System.out.println("Testing ASymmetricKeyPairEncoding "+type);
 	SecureRandom rand=new SecureRandom();
-	KeyPair kpd=type.getKeyPairGenerator(rand).generateKeyPair();
+	ASymmetricKeyPair kpd=ASymmetricKeyPair.generate(rand, type);
+
 	
-	Assert.assertEquals(ASymmetricEncryptionType.decodePublicKey(ASymmetricEncryptionType.encodePublicKey(kpd.getPublic())), kpd.getPublic());
-	Assert.assertEquals(ASymmetricEncryptionType.decodePrivateKey(ASymmetricEncryptionType.encodePrivateKey(kpd.getPrivate())), kpd.getPrivate());
-	KeyPair decodedkp=ASymmetricEncryptionType.decodeKeyPair(ASymmetricEncryptionType.encodeKeyPair(kpd));
-	Assert.assertEquals(decodedkp.getPrivate(), kpd.getPrivate());
-	Assert.assertEquals(decodedkp.getPublic(), kpd.getPublic());
+	Assert.assertEquals(ASymmetricPublicKey.decode(kpd.getASymmetricPublicKey().encode()), kpd.getASymmetricPublicKey());
+	Assert.assertEquals(ASymmetricPrivateKey.decode(kpd.getASymmetricPrivateKey().encode()), kpd.getASymmetricPrivateKey());
+	Assert.assertEquals(ASymmetricKeyPair.decode(kpd.encode()), kpd);
+	Assert.assertEquals(ASymmetricKeyPair.decode(kpd.encode()).getASymmetricPrivateKey(), kpd.getASymmetricPrivateKey());
+	Assert.assertEquals(ASymmetricKeyPair.decode(kpd.encode()).getASymmetricPublicKey(), kpd.getASymmetricPublicKey());
     }
     
     
@@ -225,43 +315,74 @@ public class CryptoTests
     }
     
     
-    @Test(dataProvider = "provideDataForSymetricEncryptions", dependsOnMethods="testSecretKeyEncoding")
-    public void testSymetricEncryptions(SymmetricEncryptionType type) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IOException
+    @Test(invocationCount=10, dataProvider = "provideDataForSymetricEncryptions", dependsOnMethods="testSecretKeyEncoding")
+    public void testSymetricEncryptions(SymmetricEncryptionType type) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IOException, IllegalBlockSizeException, BadPaddingException
     {
 	System.out.println("Testing "+type);
-	SecretKey key=type.getKeyGenerator(new SecureRandom()).generateKey();
+	SecureRandom random=new SecureRandom();
+	SymmetricSecretKey key=SymmetricSecretKey.generate(random, type);
 	
-	SymmetricEncryptionAlgorithm algoDistant=new SymmetricEncryptionAlgorithm(type,  key, new SecureRandom());
-	SymmetricEncryptionAlgorithm algoLocal=new SymmetricEncryptionAlgorithm(type,key, new SecureRandom(), algoDistant.getIV());
-	
-	for (String m : messagesToEncrypt)
+	SymmetricEncryptionAlgorithm algoDistant=new SymmetricEncryptionAlgorithm(key, random);
+	SymmetricEncryptionAlgorithm algoLocal=new SymmetricEncryptionAlgorithm(key, random);
+	Random rand=new Random(System.currentTimeMillis());
+	for (byte[] m : messagesToEncrypt)
 	{
-	    byte encrypted[]=algoLocal.encode(m.getBytes());
-	    Assert.assertEquals(encrypted.length, algoLocal.getOutputSize(m.getBytes().length));
-	    Assert.assertTrue(encrypted.length>=m.getBytes().length);
+	    byte encrypted[]=algoLocal.encode(m);
+	    Assert.assertEquals(encrypted.length, algoLocal.getOutputSizeForEncryption(m.length));
+	    Assert.assertTrue(encrypted.length>=m.length);
 	    byte decrypted[]=algoDistant.decode(encrypted);
-	    Assert.assertEquals(decrypted.length, m.getBytes().length, "Testing size "+type);
-	    Assert.assertEquals(decrypted, m.getBytes(), "Testing "+type);
-	    String md=new String(algoDistant.decode(encrypted));
-	    Assert.assertEquals(md.length(), m.length(), "Testing size "+type);
+	    Assert.assertEquals(decrypted.length, m.length, "Testing size "+type);
+	    Assert.assertEquals(decrypted, m, "Testing "+type);
+	    byte []md=decrypted;
+	    Assert.assertEquals(md.length, m.length, "Testing size "+type);
 	    Assert.assertEquals(md, m,"Testing "+type);
 	    
-	    encrypted=algoDistant.encode(m.getBytes());
-	    Assert.assertEquals(encrypted.length, algoDistant.getOutputSize(m.getBytes().length));
-	    Assert.assertTrue(encrypted.length>=m.getBytes().length);
-	    md=new String(algoLocal.decode(encrypted));
-	    Assert.assertEquals(md.length(), m.length(), "Testing size "+type);
+	    encrypted=algoDistant.encode(m);
+	    Assert.assertEquals(encrypted.length, algoDistant.getOutputSizeForEncryption(m.length));
+	    Assert.assertTrue(encrypted.length>=m.length);
+	    md=algoLocal.decode(encrypted);
+	    Assert.assertEquals(md.length, m.length, "Testing size "+type);
 	    Assert.assertEquals(md, m,"Testing "+type);
+
+	    int off=rand.nextInt(15);
+	    int size=m.length;
+	    size-=rand.nextInt(15)+off;
+	    
+	    encrypted=algoLocal.encode(m, off, size);
+	    Assert.assertEquals(encrypted.length, algoLocal.getOutputSizeForEncryption(size));
+	    Assert.assertTrue(encrypted.length>=size);
+	    decrypted=algoDistant.decode(encrypted);
+	    Assert.assertEquals(decrypted.length, size, "Testing size "+type);
+	    for (int i=0;i<decrypted.length;i++)
+		Assert.assertEquals(decrypted[i], m[i+off]);
+	    
+	    md=algoDistant.decode(encrypted);
+	    
+	    Assert.assertEquals(md.length, size, "Testing size "+type);
+	    for (int i=0;i<md.length;i++)
+		Assert.assertEquals(md[i], m[i+off]);
+	    
+	    encrypted=algoDistant.encode(m, off, size);
+	    Assert.assertEquals(encrypted.length, algoDistant.getOutputSizeForEncryption(size));
+	    Assert.assertTrue(encrypted.length>=size);
+	    md=algoLocal.decode(encrypted);
+	    Assert.assertEquals(md.length, size, "Testing size "+type);
+	    for (int i=0;i<md.length;i++)
+		Assert.assertEquals(md[i], m[i+off]);
+
+	
 	}
 	
     }
     @Test(dataProvider = "provideDataForSymetricEncryptions",dependsOnMethods="testEncodeAndSeparateEncoding")
-    public void testSecretKeyEncoding(SymmetricEncryptionType type) throws NoSuchAlgorithmException
+    public void testSecretKeyEncoding(SymmetricEncryptionType type) throws NoSuchAlgorithmException, InvalidKeyException, NoSuchPaddingException, InvalidAlgorithmParameterException
     {
 	System.out.println("Testing "+type);
-	SecretKey key=type.getKeyGenerator(new SecureRandom()).generateKey();
-	
-	Assert.assertEquals(SymmetricEncryptionType.decodeSecretKey(SymmetricEncryptionType.encodeSecretKey(key)), key);
+	SecureRandom random=new SecureRandom();
+	SymmetricSecretKey key=SymmetricSecretKey.generate(random, type);
+	Assert.assertEquals(SymmetricSecretKey.decode(key.encode()), key);
+	new SymmetricEncryptionAlgorithm(key, random);
+	Assert.assertEquals(SymmetricSecretKey.decode(key.encode()), key);
 	
     }
     
@@ -279,33 +400,33 @@ public class CryptoTests
 	return res;
     }
 
-    @Test(dataProvider = "provideDataForHybridEncryptions", dependsOnMethods={"testSymetricEncryptions", "testASymetricEncryptions"})
-    public void testHybridEncryptions(ASymmetricEncryptionType astype, SymmetricEncryptionType stype) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IOException
+    @Test(dataProvider = "provideDataForHybridEncryptions", dependsOnMethods={"testSymetricEncryptions", "testP2PASymetricEncryptions"})
+    public void testHybridEncryptions(ASymmetricEncryptionType astype, SymmetricEncryptionType stype) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IOException, IllegalBlockSizeException, BadPaddingException
     {
 	System.out.println("Testing "+astype+"/"+stype);
 	SecureRandom rand=new SecureRandom();
-	KeyPair kpd=astype.getKeyPairGenerator(rand).generateKeyPair();
-	KeyPair kpl=astype.getKeyPairGenerator(rand).generateKeyPair();
+	ASymmetricKeyPair kpd=ASymmetricKeyPair.generate(rand, astype);
+	ASymmetricKeyPair kpl=ASymmetricKeyPair.generate(rand, astype);
 	
-	ASymmetricEncryptionAlgorithm algoDistantAS=new ASymmetricEncryptionAlgorithm(astype, kpd, kpl.getPublic());
-	ASymmetricEncryptionAlgorithm algoLocalAS=new ASymmetricEncryptionAlgorithm(astype, kpl, kpd.getPublic());
+	P2PASymmetricEncryptionAlgorithm algoDistantAS=new P2PASymmetricEncryptionAlgorithm(kpd, kpl.getASymmetricPublicKey());
+	P2PASymmetricEncryptionAlgorithm algoLocalAS=new P2PASymmetricEncryptionAlgorithm(kpl, kpd.getASymmetricPublicKey());
 	
 	
-	SecretKey localKey=stype.getKeyGenerator(new SecureRandom()).generateKey();
+	SymmetricSecretKey localKey=SymmetricSecretKey.generate(rand, stype);
 
-	SymmetricEncryptionAlgorithm algoLocalS=new SymmetricEncryptionAlgorithm(stype, localKey, rand);
+	SymmetricEncryptionAlgorithm algoLocalS=new SymmetricEncryptionAlgorithm(localKey, rand);
 	byte[] localEncryptedKey=algoLocalS.encodeKeyAndIvParameter(algoLocalAS);
-	SymmetricEncryptionAlgorithm algoDistantS=SymmetricEncryptionAlgorithm.getInstance(stype, rand, localEncryptedKey, algoDistantAS);
+	SymmetricEncryptionAlgorithm algoDistantS=SymmetricEncryptionAlgorithm.getInstance(rand, localEncryptedKey, algoDistantAS);
 	
 	
-	for (String m : messagesToEncrypt)
+	for (byte[] m : messagesToEncrypt)
 	{
-	    String md=new String(algoDistantS.decode(algoLocalS.encode(m.getBytes())));
-	    Assert.assertEquals(md.length(), m.length(), "Testing size "+astype+"/"+stype);
+	    byte[] md=algoDistantS.decode(algoLocalS.encode(m));
+	    Assert.assertEquals(md.length, m.length, "Testing size "+astype+"/"+stype);
 	    Assert.assertEquals(md, m,"Testing "+astype+"/"+stype);
 	    
-	    md=new String(algoLocalS.decode(algoDistantS.encode(m.getBytes())));
-	    Assert.assertEquals(md.length(), m.length(), "Testing size "+astype+"/"+stype);
+	    md=algoLocalS.decode(algoDistantS.encode(m));
+	    Assert.assertEquals(md.length, m.length, "Testing size "+astype+"/"+stype);
 	    Assert.assertEquals(md, m,"Testing "+astype+"/"+stype);
 	}
 	
@@ -335,11 +456,11 @@ public class CryptoTests
 	System.out.println("Testing message digest "+type);
 	
 	MessageDigest md=type.getMessageDigestInstance();
-	for (String m : messagesToEncrypt)
+	for (byte[] m : messagesToEncrypt)
 	{
-	    byte b1[]=md.digest(m.getBytes());
+	    byte b1[]=md.digest(m);
 	    md.reset();
-	    byte b2[]=md.digest(m.getBytes());
+	    byte b2[]=md.digest(m);
 	    Assert.assertEquals(b1, b2);
 	}
 	

@@ -54,7 +54,17 @@ class DefaultNITools extends NITools
     @Override
     public long getNetworkInterfaceSpeed(NetworkInterface _network_interface)
     {
-	return -1;
+	try
+	{
+	    if (_network_interface.isLoopback())
+		return Long.MAX_VALUE;
+	    else
+		return -1;
+	}
+	catch(Exception e)
+	{
+	    return -1;
+	}
     }
 
 }

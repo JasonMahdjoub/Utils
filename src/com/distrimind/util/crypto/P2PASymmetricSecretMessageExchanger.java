@@ -41,7 +41,6 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Random;
@@ -54,74 +53,70 @@ import javax.crypto.NoSuchPaddingException;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 1.2
  * @since Utils 1.4.1
  */
-public class PeerToPeerASymmetricSecretMessageExchanger
+public class P2PASymmetricSecretMessageExchanger
 {
-    private final PublicKey myPublicKey;
+    private final ASymmetricPublicKey myPublicKey;
     private final ASymmetricEncryptionType type;
-    private PeerToPeerASymmetricSecretMessageExchanger distantMessageEncoder;
+    private P2PASymmetricSecretMessageExchanger distantMessageEncoder;
     private final FakeSecureRandom random;
     private final Cipher cipher;
     private final MessageDigest messageDigest;
     private final MessageDigestType messageDigestType;
     
-    public PeerToPeerASymmetricSecretMessageExchanger(MessageDigestType messageDigestType, ASymmetricEncryptionType aSymmetricEncryptionType, PublicKey myPublicKey, byte[] distantPublicKey) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidKeySpecException, InvalidAlgorithmParameterException
+    public P2PASymmetricSecretMessageExchanger(MessageDigestType messageDigestType, ASymmetricPublicKey myPublicKey, byte[] distantPublicKey) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidKeySpecException, InvalidAlgorithmParameterException
     {
-	if (aSymmetricEncryptionType==null)
-	    throw new NullPointerException("type");
 	if (messageDigestType==null)
 	    throw new NullPointerException("messageDigestType");
 	if (myPublicKey==null)
 	    throw new NullPointerException("myPublicKey");
 	
-	this.type=aSymmetricEncryptionType;
+	this.type=myPublicKey.getAlgorithmType();
 	this.myPublicKey=myPublicKey;
 
 	if (distantPublicKey!=null)
 	    setDistantPublicKey(distantPublicKey);
 	random=new FakeSecureRandom();
-	cipher=getCipherInstancePriv(aSymmetricEncryptionType);
+	cipher=getCipherInstancePriv(type);
 	this.messageDigestType=messageDigestType;
 	this.messageDigest=messageDigestType.getMessageDigestInstance();
 	this.messageDigest.reset();
     }
 
-    public PeerToPeerASymmetricSecretMessageExchanger(MessageDigestType messageDigestType, ASymmetricEncryptionType aSymmetricEncryptionType, PublicKey myPublicKey) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, InvalidKeySpecException
+    public P2PASymmetricSecretMessageExchanger(MessageDigestType messageDigestType, ASymmetricPublicKey myPublicKey) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, InvalidKeySpecException
     {
-	this(messageDigestType, aSymmetricEncryptionType, myPublicKey, null);
+	this(messageDigestType, myPublicKey, null);
     }
 
-    public PeerToPeerASymmetricSecretMessageExchanger(ASymmetricEncryptionType aSymmetricEncryptionType, PublicKey myPublicKey) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, InvalidKeySpecException
+    public P2PASymmetricSecretMessageExchanger(ASymmetricPublicKey myPublicKey) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, InvalidKeySpecException
     {
-	this(MessageDigestType.DEFAULT, aSymmetricEncryptionType, myPublicKey);
-    }
-    public PeerToPeerASymmetricSecretMessageExchanger(PublicKey myPublicKey) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, InvalidKeySpecException
-    {
-	this(ASymmetricEncryptionType.DEFAULT, myPublicKey);
+	this(MessageDigestType.SHA_512, myPublicKey);
     }
     
     public void setDistantPublicKey(byte[] distantPublicKeyAndIV) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeySpecException, InvalidKeyException, InvalidAlgorithmParameterException
     {
-	distantMessageEncoder=new PeerToPeerASymmetricSecretMessageExchanger(messageDigestType, type, ASymmetricEncryptionType.decodePublicKey(distantPublicKeyAndIV));
+	distantMessageEncoder=new P2PASymmetricSecretMessageExchanger(messageDigestType, ASymmetricPublicKey.decode(distantPublicKeyAndIV));
 	if (myPublicKey.equals(distantMessageEncoder.myPublicKey))
 	    throw new IllegalArgumentException("Local public key equals distant public key");
     }
     
-    private void initCipherForEncrypt(byte data[], int off, int len, byte[] salt, int offset_salt, int len_salt) throws InvalidKeyException
+    private byte[] initCipherForEncrypt(byte data[], int off, int len, byte[] salt, int offset_salt, int len_salt) throws InvalidKeyException
     {
 	messageDigest.update(data, off, len);
 	if (salt!=null)
 	    messageDigest.update(salt, offset_salt, len_salt);
-	random.setSeed(messageDigest.digest());
-	cipher.init(Cipher.ENCRYPT_MODE, myPublicKey, random);
+	byte[] res=messageDigest.digest();
+	random.setSeed(res);
+	cipher.init(Cipher.ENCRYPT_MODE, myPublicKey.getPublicKey(), random);
 	messageDigest.reset();
+	return res;
     }
     
     public byte[] encodeMyPublicKey()
     {
-	return ASymmetricEncryptionType.encodePublicKey(myPublicKey);
+	return myPublicKey.encode();
     }
 
     private static Cipher getCipherInstancePriv(ASymmetricEncryptionType type) throws NoSuchAlgorithmException, NoSuchPaddingException
@@ -152,13 +147,12 @@ public class PeerToPeerASymmetricSecretMessageExchanger
 	    throw new IllegalArgumentException("salt");
 	
 	
-	initCipherForEncrypt(message, offset, len, salt, offset_salt, len_salt);
+	message=initCipherForEncrypt(message, offset, len, salt, offset_salt, len_salt);
 	try(ByteArrayOutputStream baos=new ByteArrayOutputStream())
 	{
 	    try (CipherOutputStream cos=new CipherOutputStream(baos, cipher))
 	    {
-		cos.write(message, offset, len);
-		cos.write(salt, offset_salt, len_salt);
+		cos.write(message, 0, message.length);
 	    }
 	    return baos.toByteArray();
 	}
@@ -204,11 +198,11 @@ public class PeerToPeerASymmetricSecretMessageExchanger
 	return true;
     }
     
-    public PublicKey getMyPublicKey()
+    public ASymmetricPublicKey getMyPublicKey()
     {
 	return myPublicKey;
     }
-    public PublicKey getDistantPublicKey()
+    public ASymmetricPublicKey getDistantPublicKey()
     {
 	if (distantMessageEncoder==null)
 	    return null;

@@ -34,6 +34,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util;
 
+import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -80,7 +81,7 @@ public class SecuredDecentralizedID extends AbstractDecentralizedID
 	return md;
     }
     private final long[] idLongs;
-    private final int hashCode;
+    private transient int hashCode;
 
     public SecuredDecentralizedID(MessageDigestType messageDigestType, AbstractDecentralizedIDGenerator generator, SecureRandom rand) throws NoSuchAlgorithmException
     {
@@ -142,6 +143,13 @@ public class SecuredDecentralizedID extends AbstractDecentralizedID
 	    hashCode=computeHashCode(idLongs);
 	}
     }
+    
+    private void readObject(java.io.ObjectInputStream in)throws IOException, ClassNotFoundException
+    {
+	in.defaultReadObject();
+	hashCode=computeHashCode(idLongs);
+    }
+    
     
     SecuredDecentralizedID(long idLongs[])
     {

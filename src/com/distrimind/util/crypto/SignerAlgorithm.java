@@ -35,67 +35,44 @@ knowledge of the CeCILL-C license and that you accept its terms.
 package com.distrimind.util.crypto;
 
 import java.security.InvalidKeyException;
-import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
-import java.security.PublicKey;
 import java.security.Signature;
 import java.security.SignatureException;
-
-import javax.crypto.Cipher;
-import javax.crypto.NoSuchPaddingException;
 
 /**
  * 
  * @author Jason Mahdjoub
  * @version 1.1
- * @since Utils 1.4
+ * @since Utils 1.7
  */
-public class ASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm
+public class SignerAlgorithm
 {
-    private final KeyPair myKeyPair;
-    private final PublicKey distantPublicKey;
+    private final ASymmetricPrivateKey localPrivateKey;
     private final Signature signature;
-    private final ASymmetricEncryptionType type;
     
-    public ASymmetricEncryptionAlgorithm(ASymmetricEncryptionType type, KeyPair myKeyPair, PublicKey distantPublicKey) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException
+    public SignerAlgorithm(ASymmetricPrivateKey localPrivateKey) throws NoSuchAlgorithmException
     {
-	this(type, type.getDefaultSignatureAlgorithm().getSignatureInstance(), myKeyPair, distantPublicKey);
+	this(localPrivateKey.getAlgorithmType().getDefaultSignatureAlgorithm().getSignatureInstance(), localPrivateKey);
     }
     
-    public ASymmetricEncryptionAlgorithm(ASymmetricEncryptionType type, Signature signature, KeyPair myKeyPair, PublicKey distantPublicKey) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException
+    public SignerAlgorithm(SignatureType type, ASymmetricPrivateKey localPrivateKey) throws NoSuchAlgorithmException
     {
-	super(type.getCipherInstance());
+	this(type.getSignatureInstance(), localPrivateKey);
+    }
+
+    public SignerAlgorithm(Signature signature, ASymmetricPrivateKey localPrivateKey)
+    {
 	if (signature==null)
 	    throw new NullPointerException("signature");
-	if (myKeyPair==null)
-	    throw new NullPointerException("myKeyPair");
-	if (distantPublicKey==null)
-	    throw new NullPointerException("distantPublicKey");
-	
-	this.type=type;
-	this.myKeyPair=myKeyPair;
-	this.distantPublicKey=distantPublicKey;
+	if (localPrivateKey==null)
+	    throw new NullPointerException("localPrivateKey");
+	this.localPrivateKey=localPrivateKey;
 	this.signature=signature;
-	initCipherForEncrypt(this.cipher);
     }
-
-    @Override
-    public void initCipherForEncrypt(Cipher _cipher) throws InvalidKeyException
+    
+    public ASymmetricPrivateKey getLocalPrivateKey()
     {
-	_cipher.init(Cipher.ENCRYPT_MODE, distantPublicKey);
-	
-    }
-
-    @Override
-    public void initCipherForDecrypt(Cipher _cipher) throws InvalidKeyException
-    {
-	_cipher.init(Cipher.DECRYPT_MODE, myKeyPair.getPrivate());
-    }
-
-    @Override
-    protected Cipher getCipherInstance() throws NoSuchAlgorithmException, NoSuchPaddingException
-    {
-	return type.getCipherInstance();
+	return localPrivateKey;
     }
     
     public byte[] sign(byte bytes[]) throws InvalidKeyException, SignatureException
@@ -104,37 +81,22 @@ public class ASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm
     }
     public byte[] sign(byte bytes[], int off, int len) throws InvalidKeyException, SignatureException
     {
-	signature.initSign(myKeyPair.getPrivate());
+	signature.initSign(localPrivateKey.getPrivateKey());
 	signature.update(bytes, off, len);
 	return signature.sign();
     }
 
     public void sign(byte message[], int offm, int lenm, byte signature[], int off_sig, int len_sig) throws InvalidKeyException, SignatureException
     {
-	this.signature.initSign(myKeyPair.getPrivate());
+	this.signature.initSign(localPrivateKey.getPrivateKey());
 	this.signature.update(message, offm, lenm);
 	this.signature.sign(signature, off_sig, len_sig);
     }
     
-    public boolean verify(byte message[], byte signature[]) throws SignatureException, InvalidKeyException
+    public Signature getSignature()
     {
-	return this.verify(message, 0, message.length, signature, 0, signature.length);
-    }
-    public boolean verify(byte message[], int offm, int lenm, byte signature[], int offs, int lens) throws SignatureException, InvalidKeyException
-    {
-	this.signature.initVerify(distantPublicKey);
-	this.signature.update(message, offm, lenm);
-	
-	return this.signature.verify(signature, offs, lens);
+	return signature;
     }
     
-    public KeyPair getMyKeyPair()
-    {
-	return this.myKeyPair;
-    }
     
-    public PublicKey getDistantPublicKey()
-    {
-	return this.distantPublicKey;
-    }
 }

@@ -62,7 +62,7 @@ class WindowsNITools extends NITools
 	try
 	{
 	    if (_network_interface.isLoopback())
-		return -1;
+		return Long.MAX_VALUE;
 	    Process p=null;
 	    //TODO check compatibility with Vista and Seven
 	    if (OSValidator.getOSVersion().toLowerCase().contains("vista"))

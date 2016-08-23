@@ -152,7 +152,7 @@ public class PropertiesExample extends XMLProperties
 	inetSocketAddressV4=new InetSocketAddress(inetAddressV4, rand.nextInt(5000));
 	inetSocketAddressV6=new InetSocketAddress(inetAddressV6, rand.nextInt(5000));
 	sourceVersion=SourceVersion.RELEASE_3;
-	typeEncryption=ASymmetricEncryptionType.RSA;
+	typeEncryption=ASymmetricEncryptionType.RSA_OAEPWithSHA256AndMGF1Padding;
 	messageDigestType=MessageDigestType.SHA;
 	symmetricSecretKeyType=SymmetricSecretKeyType.DESede;
 	className=SubProperties.class;

@@ -41,7 +41,7 @@ import java.security.Signature;
  * List of signature algorithms
  * 
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 1.1
  * @since Utils 1.4
  */
 public enum SignatureType

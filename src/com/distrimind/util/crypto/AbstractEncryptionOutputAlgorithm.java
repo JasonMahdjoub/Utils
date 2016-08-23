@@ -42,8 +42,10 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 
+import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.CipherOutputStream;
+import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
 /**
@@ -54,6 +56,8 @@ import javax.crypto.NoSuchPaddingException;
  */
 public abstract class AbstractEncryptionOutputAlgorithm
 {
+    final static int BUFFER_SIZE=1024; 
+    
     protected final Cipher cipher;
     
     protected AbstractEncryptionOutputAlgorithm(Cipher cipher)
@@ -63,9 +67,21 @@ public abstract class AbstractEncryptionOutputAlgorithm
 	this.cipher=cipher;
     }
     
-    public int getOutputSize(int inputLen)
+    public int getOutputSizeForEncryption(int inputLen) throws InvalidKeyException, InvalidAlgorithmParameterException
     {
-	return cipher.getOutputSize(inputLen);
+	
+	initCipherForEncrypt(cipher);
+	int maxBlockSize=getMaxBlockSizeForEncoding();
+	if (maxBlockSize==Integer.MAX_VALUE)
+	    return cipher.getOutputSize(inputLen);
+	int div=inputLen/maxBlockSize;
+	int mod=inputLen%maxBlockSize;
+	int res=0;
+	if (div>0)
+	    res+=cipher.getOutputSize(maxBlockSize)*div;
+	if (mod>0)
+	    res+=cipher.getOutputSize(mod);
+	return res;
     }
 
     
@@ -74,10 +90,38 @@ public abstract class AbstractEncryptionOutputAlgorithm
     
     protected abstract Cipher getCipherInstance() throws NoSuchAlgorithmException, NoSuchPaddingException;
     
-    public void encode(InputStream is, OutputStream os) throws InvalidKeyException, IOException, InvalidAlgorithmParameterException
+    public void encode(InputStream is, OutputStream os) throws InvalidKeyException, IOException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException
     {
 	initCipherForEncrypt(cipher);
-	try(CipherOutputStream cos=new CipherOutputStream(os, cipher))
+	
+	int maxBlockSize=getMaxBlockSizeForEncoding();
+	
+	byte[] buffer=new byte[BUFFER_SIZE];
+	boolean finish=false;
+	while (!finish)
+	{
+	    
+	    int blockACC=0;
+	    do
+	    {
+		int nb=Math.min(BUFFER_SIZE, maxBlockSize-blockACC);
+		int size=is.read(buffer, 0, nb);
+		if (size>0)
+		{
+		    os.write(cipher.update(buffer, 0, size));
+		    blockACC+=size;
+		}
+		if (nb!=size || size<=0)
+		    finish=true;
+	    } while ((blockACC<maxBlockSize || maxBlockSize==Integer.MAX_VALUE) && !finish);
+	    if (blockACC!=0)
+		os.write(cipher.doFinal());
+	}
+	
+	os.flush();
+	
+	
+	/*try(CipherOutputStream cos=new CipherOutputStream(os, cipher))
 	{
 	    int read=-1;
 	    do
@@ -87,26 +131,53 @@ public abstract class AbstractEncryptionOutputAlgorithm
 		    cos.write(read);
 		
 	    } while (read!=-1);
-	}
+	}*/
     }
+    
+    public abstract int getMaxBlockSizeForEncoding();
 
-    public void encode(byte[] bytes, int off, int len, OutputStream os) throws InvalidKeyException, IOException, InvalidAlgorithmParameterException
+    public void encode(byte[] bytes, int off, int len, OutputStream os) throws InvalidKeyException, IOException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException
     {
+	if (len<0 || off<0)
+	    throw new IllegalArgumentException("bytes.length="+bytes.length+", off="+off+", len="+len);
+	if (off>bytes.length)
+	    throw new IllegalArgumentException("bytes.length="+bytes.length+", off="+off+", len="+len);
+	if (off+len>bytes.length)
+	    throw new IllegalArgumentException("bytes.length="+bytes.length+", off="+off+", len="+len);
 	initCipherForEncrypt(cipher);
-	try(CipherOutputStream cos=new CipherOutputStream(os, cipher))
+	
+	int maxBlockSize=getMaxBlockSizeForEncoding();
+	
+	while (len>0)
+	{
+	    int size=0;
+	    if (maxBlockSize==Integer.MAX_VALUE)
+		size=len;
+	    else
+		size=Math.min(len, maxBlockSize);
+	    
+	    os.write(cipher.doFinal(bytes, off, size));
+	    off+=size;
+	    len-=size;
+	}
+	
+	os.flush();
+
+	/*try(CipherOutputStream cos=new CipherOutputStream(os, cipher))
 	{
 	    cos.write(bytes, off, len);
-	}
+	}*/
 	
     }
 
-    public byte[] encode(byte[] bytes) throws InvalidKeyException, IOException, InvalidAlgorithmParameterException
+    public byte[] encode(byte[] bytes) throws InvalidKeyException, IOException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException
     {
 	return encode(bytes, 0, bytes.length);
     }
-    public byte[] encode(byte[] bytes, int off, int len) throws InvalidKeyException, IOException, InvalidAlgorithmParameterException
+    public byte[] encode(byte[] bytes, int off, int len) throws InvalidKeyException, IOException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException
     {
-	try(ByteArrayOutputStream baos=new ByteArrayOutputStream(getOutputSize(len)))
+	
+	try(ByteArrayOutputStream baos=new ByteArrayOutputStream(getOutputSizeForEncryption(len)))
 	{
 	    encode(bytes, off, len, baos);
 	    return baos.toByteArray();

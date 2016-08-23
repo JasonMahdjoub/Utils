@@ -59,7 +59,7 @@ class LinuxNITools extends NITools
 	try
 	{
 	    if (_network_interface.isLoopback())
-		return -1;
+		return Long.MAX_VALUE;
 	    Process p=Runtime.getRuntime().exec("ethtool "+_network_interface.getName());
 	    long res=-1;
 	    try(InputStreamReader isr=new InputStreamReader(p.getInputStream()))

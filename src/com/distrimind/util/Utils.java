@@ -57,8 +57,8 @@ public class Utils
 	Calendar c=Calendar.getInstance();
 	c.set(2016, 1, 4);
 	Calendar c2=Calendar.getInstance();
-	c.set(2016, 06, 30);
-    	VERSION=new Version("Utils", "Utils", 1,6,1, Version.Type.Stable, 0, c.getTime(), c2.getTime());
+	c.set(2016, 6, 27);
+    	VERSION=new Version("Utils", "Utils", 1,7,1, Version.Type.Stable, 0, c.getTime(), c2.getTime());
 	try
 	{
 	
@@ -71,8 +71,26 @@ public class Utils
 	    VERSION.addDeveloper(new PersonDeveloper("mahdjoub", "jason", c.getTime()));
 	
 	    c=Calendar.getInstance();
+	    c.set(2016, 6, 27);
+	    Description d=new Description(1,7,1,Version.Type.Stable, 0, c.getTime());
+	    d.addItem("Correcting a bug for loop back network interface speed");
+	    d.addItem("Correcting a bug for P2PASymmetricSecretMessageExchanger");
+	    d.addItem("Correcting a bug big data asymmetric encryption");
+	    d.addItem("Adding symmetric et asymmetric keys encapsulation");
+
+	    c=Calendar.getInstance();
+	    c.set(2016, 6, 4);
+	    d=new Description(1,7,0,Version.Type.Stable, 0, c.getTime());
+	    d.addItem("Renaming class ASymmetricEncryptionAlgorithm to P2PASymmetricEncryptionAlgorithm");
+	    d.addItem("Adding class SignatureCheckerAlgorithm");
+	    d.addItem("Adding class SignerAlgorithm");
+	    d.addItem("Adding class ClientASymmetricEncryptionAlgorithm");
+	    d.addItem("Adding class ServerASymmetricEncryptionAlgorithm");
+	    d.addItem("Updating to Common-Net 3.5");
+
+	    c=Calendar.getInstance();
 	    c.set(2016, 5, 10);
-	    Description d=new Description(1,6,0,Version.Type.Stable, 0, c.getTime());
+	    d=new Description(1,6,1,Version.Type.Stable, 0, c.getTime());
 	    d.addItem("Correcting bug into XMLProperties class");
 	    d.addItem("Adding tests for XMLProperties class");
 	    d.addItem("Changing license to CECILL-C.");

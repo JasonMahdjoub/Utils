@@ -1,14 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
-<suite name="Failed suite [TestAll]">
-  <test name="testProperties(failed)">
+<suite verbose="5" name="Failed suite [TestAll]">
+  <test name="testCyrpto(failed)">
     <classes>
-      <class name="com.distrimind.util.tests.properties.TestProperties">
+      <class name="com.distrimind.util.tests.crypto.CryptoTests">
         <methods>
-          <include name="testPropertiesXMLSave" invocation-numbers="1 2 3 4 5 6 7 8 9"/>
-          <include name="testPropertiesExport" invocation-numbers="1 2 3 4 5 6 7 8 9"/>
+          <include name="testSecretKeyEncoding" invocation-numbers="3 1 2 4 0"/>
+          <include name="testSymetricEncryptions"/>
+          <include name="testEncodeAndSeparateEncoding"/>
+          <include name="testASymmetricKeyPairEncoding"/>
+          <include name="testP2PASymetricEncryptions"/>
+          <include name="testHybridEncryptions"/>
         </methods>
-      </class> <!-- com.distrimind.util.tests.properties.TestProperties -->
+      </class> <!-- com.distrimind.util.tests.crypto.CryptoTests -->
     </classes>
-  </test> <!-- testProperties(failed) -->
+  </test> <!-- testCyrpto(failed) -->
 </suite> <!-- Failed suite [TestAll] -->

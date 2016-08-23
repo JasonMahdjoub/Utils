@@ -1,4 +1,6 @@
-Note : A French translation is given after the English version
+Note : A French version of this license is available after the given English version.
+The official license to take into account is the French license version. 
+The English license version is just for information and cannot be legal.  
 
   CeCILL FREE SOFTWARE LICENSE AGREEMENT
 
@@ -519,6 +521,7 @@ disagreements or disputes shall be referred to the Paris Courts having
 jurisdiction, by the more diligent Party.
 
 
+------------------------------------------------------------------------
 
 
   CONTRAT DE LICENCE DE LOGICIEL LIBRE CeCILL

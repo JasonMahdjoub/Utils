@@ -49,7 +49,7 @@ import com.distrimind.util.Bits;
  * List of symmetric encryption algorithms
  * 
  * @author Jason Mahdjoub
- * @version 1.1
+ * @version 1.2
  * @since Utils 1.4
  */
 public enum SymmetricEncryptionType
@@ -123,18 +123,29 @@ public enum SymmetricEncryptionType
 	return kg;
     }
     
-    public static byte[] encodeSecretKey(SecretKey key)
+    static byte[] encodeSecretKey(SecretKey key)
     {
 	return Bits.concateEncodingWithShortSizedTabs(key.getAlgorithm().getBytes(), key.getEncoded());
     }
     
-    public static SecretKey decodeSecretKey(byte[] encodedSecretKey)
+    static SecretKey decodeSecretKey(byte[] encodedSecretKey)
     {
 	return decodeSecretKey(encodedSecretKey, 0, encodedSecretKey.length);
     }
-    public static SecretKey decodeSecretKey(byte[] encodedSecretKey, int off, int len)
+    static SecretKey decodeSecretKey(byte[] encodedSecretKey, int off, int len)
     {
 	byte[][] parts=Bits.separateEncodingsWithShortSizedTabs(encodedSecretKey, off, len);
 	return new SecretKeySpec(parts[1], new String(parts[0]));
     }
+
+    static SymmetricEncryptionType valueOf(int ordinal) throws IllegalArgumentException
+    {
+	for(SymmetricEncryptionType a : values())
+	{
+	    if (a.ordinal()==ordinal)
+		return a;
+	}
+	throw new IllegalArgumentException();
+    }
+    
 }
