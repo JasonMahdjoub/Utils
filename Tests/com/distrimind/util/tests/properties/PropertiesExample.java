@@ -40,6 +40,8 @@ import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -54,9 +56,14 @@ import javax.lang.model.SourceVersion;
 
 import org.testng.Assert;
 
+import com.distrimind.util.DecentralizedIDGenerator;
 import com.distrimind.util.Utils;
 import com.distrimind.util.crypto.ASymmetricEncryptionType;
+import com.distrimind.util.crypto.ASymmetricKeyPair;
+import com.distrimind.util.crypto.ASymmetricPrivateKey;
+import com.distrimind.util.crypto.ASymmetricPublicKey;
 import com.distrimind.util.crypto.MessageDigestType;
+import com.distrimind.util.crypto.SymmetricSecretKey;
 import com.distrimind.util.crypto.SymmetricSecretKeyType;
 import com.distrimind.util.properties.AbstractXMLObjectParser;
 import com.distrimind.util.properties.XMLProperties;
@@ -117,13 +124,18 @@ public class PropertiesExample extends XMLProperties
     
     SubProperties subProperties=null;
     Version version=null;
+    SymmetricSecretKey secretKey=null;
+    ASymmetricKeyPair keyPair=null;
+    ASymmetricPrivateKey privateKey=null;
+    ASymmetricPublicKey publicKey=null;
+    DecentralizedIDGenerator decentralizedId=null;
     
     protected PropertiesExample(AbstractXMLObjectParser _optional_xml_object_parser_instance)
     {
 	super(_optional_xml_object_parser_instance);
     }
     
-    void generateValues() throws MalformedURLException, UnknownHostException
+    void generateValues() throws MalformedURLException, UnknownHostException, NoSuchAlgorithmException
     {
 	Random rand=new Random(System.currentTimeMillis());
 	intValue=rand.nextInt();
@@ -178,6 +190,12 @@ public class PropertiesExample extends XMLProperties
 	calendar=Calendar.getInstance();
 	calendar.setTime(new Date(rand.nextLong()));
 	version=Utils.VERSION;
+	SecureRandom random=new SecureRandom();
+	secretKey=SymmetricSecretKey.generate(random);
+	keyPair=ASymmetricKeyPair.generate(random, ASymmetricEncryptionType.DEFAULT, (short)1024);
+	privateKey=keyPair.getASymmetricPrivateKey();
+	publicKey=keyPair.getASymmetricPublicKey();
+	decentralizedId=new DecentralizedIDGenerator();
     }
     
     private static String[] strings={"sfdg","fdgdg","bjf", "fsgh", "hlqoit"}; 
@@ -275,6 +293,17 @@ public class PropertiesExample extends XMLProperties
 		return false;
 	    if (!equals(calendar, pe.calendar))
 		return false;
+	    if (!equals(secretKey, pe.secretKey))
+		return false;
+	    if (!equals(keyPair, pe.keyPair))
+		return false;
+	    if (!equals(privateKey, pe.privateKey))
+		return false;
+	    if (!equals(publicKey, pe.publicKey))
+		return false;
+	    if (!equals(decentralizedId, pe.decentralizedId))
+		return false;
+	    
 	    
 	    Assert.assertFalse(version==null^pe.version==null);
 	    if (version==null^pe.version==null)

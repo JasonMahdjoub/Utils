@@ -51,11 +51,16 @@ import java.util.logging.Level;
 
 import javax.lang.model.SourceVersion;
 
+import com.distrimind.util.AbstractDecentralizedID;
 import com.distrimind.util.crypto.ASymmetricEncryptionType;
+import com.distrimind.util.crypto.ASymmetricKeyPair;
+import com.distrimind.util.crypto.ASymmetricPrivateKey;
+import com.distrimind.util.crypto.ASymmetricPublicKey;
 import com.distrimind.util.crypto.MessageDigestType;
 import com.distrimind.util.crypto.SignatureType;
 import com.distrimind.util.crypto.SymmetricSecretKeyType;
 import com.distrimind.util.crypto.SymmetricEncryptionType;
+import com.distrimind.util.crypto.SymmetricSecretKey;
 
 /**
  * 
@@ -97,6 +102,11 @@ public class DefaultXMLObjectParser extends AbstractXMLObjectParser
 		|| field_type==SymmetricEncryptionType.class
 		|| field_type==SignatureType.class
 		|| field_type==SymmetricSecretKeyType.class
+		|| field_type==SymmetricSecretKey.class
+		|| field_type==ASymmetricPrivateKey.class
+		|| field_type==ASymmetricPublicKey.class
+		|| field_type==ASymmetricKeyPair.class
+		|| AbstractDecentralizedID.class.isAssignableFrom(field_type)
 		|| List.class.isAssignableFrom(field_type)
 		|| XMLProperties.class.isAssignableFrom(field_type)
 		|| field_type.isPrimitive()
@@ -240,6 +250,24 @@ public class DefaultXMLObjectParser extends AbstractXMLObjectParser
 	    {
 		return SymmetricSecretKeyType.valueOf(nodeValue); 
 	    }
+	    else if (field_type==SymmetricSecretKey.class)
+	    {
+		return SymmetricSecretKey.valueOf(nodeValue); 
+	    }
+	    else if (field_type==ASymmetricPrivateKey.class)
+	    {
+		return ASymmetricPrivateKey.valueOf(nodeValue); 
+	    }
+	    else if (field_type==ASymmetricPublicKey.class)
+	    {
+		return ASymmetricPublicKey.valueOf(nodeValue); 
+	    }
+	    else if (field_type==ASymmetricKeyPair.class)
+	    {
+		return ASymmetricKeyPair.valueOf(nodeValue); 
+	    }
+	    else if (AbstractDecentralizedID.class.isAssignableFrom(field_type))
+		return AbstractDecentralizedID.valueOf(nodeValue);
 	    
 	    return Void.TYPE;
     }
@@ -348,6 +376,24 @@ public class DefaultXMLObjectParser extends AbstractXMLObjectParser
 	    {
 		return object.toString(); 
 	    }
+	    else if (field_type==SymmetricSecretKey.class)
+	    {
+		return object.toString(); 
+	    }
+	    else if (field_type==ASymmetricPrivateKey.class)
+	    {
+		return object.toString(); 
+	    }
+	    else if (field_type==ASymmetricPublicKey.class)
+	    {
+		return object.toString(); 
+	    }
+	    else if (field_type==ASymmetricKeyPair.class)
+	    {
+		return object.toString(); 
+	    }
+	    else if (AbstractDecentralizedID.class.isAssignableFrom(field_type))
+		return object.toString();
 	    else 
 		return null;
     }

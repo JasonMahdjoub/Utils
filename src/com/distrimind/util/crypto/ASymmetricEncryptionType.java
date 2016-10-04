@@ -123,7 +123,7 @@ public enum ASymmetricEncryptionType
     {
 	return getKeyPairGenerator(random, keySize);
     }
-    public KeyPairGenerator getKeyPairGenerator(SecureRandom random, int keySize) throws NoSuchAlgorithmException
+    public KeyPairGenerator getKeyPairGenerator(SecureRandom random, short keySize) throws NoSuchAlgorithmException
     {
 	KeyPairGenerator kgp=KeyPairGenerator.getInstance(algorithmName);
 	kgp.initialize(keySize, random);

@@ -142,10 +142,6 @@ public abstract class AbstractDecentralizedIDGenerator extends AbstractDecentral
 	    return (int)(timestamp+worker_id_and_sequence);
 	}
 	
-	@Override public String toString()
-	{
-	    return "DecentralizedID["+getTimeStamp()+";"+getWorkerID()+";"+getSequenceID()+"]";
-	}
 	
 	public long getTimeStamp()
 	{

@@ -40,6 +40,8 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 
+import org.apache.commons.net.util.Base64;
+
 import com.distrimind.util.Bits;
 
 /**
@@ -85,6 +87,18 @@ public class ASymmetricKeyPair implements Serializable
     {
 	return keySize;
     }
+    @Override
+    public String toString()
+    {
+	return Base64.encodeBase64String(encode());
+    }
+    
+    public static ASymmetricKeyPair valueOf(String key) throws NoSuchAlgorithmException, InvalidKeySpecException, IllegalArgumentException
+    {
+	return decode(Base64.decodeBase64(key));
+    }
+    
+    
     
     @Override
     public boolean equals(Object o)

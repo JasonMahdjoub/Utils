@@ -127,6 +127,7 @@ public class Bits {
         putLong(b, off, Double.doubleToLongBits(val));
     }
     
+    
     public static byte[] concateEncodingWithShortSizedTabs(byte part1[], byte[] part2)
     {
 	short sizePart1=(short)part1.length;

@@ -189,38 +189,52 @@ public class CryptoTests
     }
 
     @Test(dataProvider = "provideDataForASymetricEncryptions", dependsOnMethods={"testASymmetricKeyPairEncoding"})
-    public void testASymmetricSecretMessageExchanger(ASymmetricEncryptionType type) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IOException, IllegalAccessException, InvalidKeySpecException
+    public void testASymmetricSecretMessageExchanger(ASymmetricEncryptionType type) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IOException, IllegalAccessException, InvalidKeySpecException, IllegalBlockSizeException, BadPaddingException
     {
 	System.out.println("Testing ASymmetricSecretMessageExchanger "+type);
 	SecureRandom rand=new SecureRandom();
-	ASymmetricKeyPair kpd=ASymmetricKeyPair.generate(rand, type);
-	ASymmetricKeyPair kpl=ASymmetricKeyPair.generate(rand, type);
+	for (short keySize=1024;keySize<=4096;keySize+=1024)
+	{
+	ASymmetricKeyPair kpd=ASymmetricKeyPair.generate(rand, type, keySize);
+	ASymmetricKeyPair kpl=ASymmetricKeyPair.generate(rand, type, keySize);
 	
 	P2PASymmetricSecretMessageExchanger algoLocal=new P2PASymmetricSecretMessageExchanger(kpl.getASymmetricPublicKey());
 	P2PASymmetricSecretMessageExchanger algoDistant=new P2PASymmetricSecretMessageExchanger(kpd.getASymmetricPublicKey());
 	algoLocal.setDistantPublicKey(algoDistant.encodeMyPublicKey());
 	algoDistant.setDistantPublicKey(algoLocal.encodeMyPublicKey());
 	
-	
+	byte[] falseMessage=new byte[10];
+	rand.nextBytes(falseMessage);
 	
 	for (byte[] m : messagesToEncrypt)
 	{
 	    byte[] localCrypt=algoLocal.encode(m, salt);
-	    
+	    Assert.assertTrue(localCrypt.length!=0);
 	    Assert.assertTrue(algoDistant.verifyDistantMessage(m, salt, localCrypt));
+	    Assert.assertFalse(algoDistant.verifyDistantMessage(m, salt, falseMessage));
+	    Assert.assertFalse(algoDistant.verifyDistantMessage(falseMessage, salt, localCrypt));
 	    
 	    byte[] distantCrypt=algoDistant.encode(m, salt);
+	    Assert.assertTrue(distantCrypt.length!=0);
 	    Assert.assertTrue(algoLocal.verifyDistantMessage(m, salt, distantCrypt));
+	    Assert.assertFalse(algoLocal.verifyDistantMessage(m, salt, falseMessage));
+	    Assert.assertFalse(algoLocal.verifyDistantMessage(falseMessage, salt, distantCrypt));
 	}
 	
 	for (byte [] m : messagesToEncrypt)
 	{
 	    byte[] localCrypt=algoLocal.encode(m, null);
-	    
+	    Assert.assertTrue(localCrypt.length!=0);	    
 	    Assert.assertTrue(algoDistant.verifyDistantMessage(m, null, localCrypt));
+	    Assert.assertFalse(algoDistant.verifyDistantMessage(m, null, falseMessage));
+	    Assert.assertFalse(algoDistant.verifyDistantMessage(falseMessage, null, localCrypt));
 	    
 	    byte[] distantCrypt=algoDistant.encode(m, null);
+	    Assert.assertTrue(distantCrypt.length!=0);
 	    Assert.assertTrue(algoLocal.verifyDistantMessage(m, null, distantCrypt));
+	    Assert.assertFalse(algoLocal.verifyDistantMessage(m, null, falseMessage));
+	    Assert.assertFalse(algoLocal.verifyDistantMessage(falseMessage, null, distantCrypt));
+	}
 	}
     }
 
@@ -276,7 +290,7 @@ public class CryptoTests
     {
 	System.out.println("Testing signature : "+type+"/"+sigType+"/"+keySize);
 	SecureRandom rand=new SecureRandom();
-	KeyPair kpd=type.getKeyPairGenerator(rand, keySize).generateKeyPair();
+	KeyPair kpd=type.getKeyPairGenerator(rand, (short)keySize).generateKeyPair();
 	byte[] m=new byte[10];
 	rand.nextBytes(m);
 	

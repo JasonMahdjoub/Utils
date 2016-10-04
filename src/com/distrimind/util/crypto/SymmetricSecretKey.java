@@ -42,6 +42,8 @@ import java.util.Arrays;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 
+import org.apache.commons.net.util.Base64;
+
 import com.distrimind.util.Bits;
 
 /**
@@ -92,6 +94,16 @@ public class SymmetricSecretKey implements Serializable
 	return secretKey.hashCode();
     }
     
+    @Override
+    public String toString()
+    {
+	return Base64.encodeBase64String(encode());
+    }
+    
+    public static SymmetricSecretKey valueOf(String key)
+    {
+	return decode(Base64.decodeBase64(key));
+    }
     
     void setIvParameterSpec(IvParameterSpec ivParameter)
     {

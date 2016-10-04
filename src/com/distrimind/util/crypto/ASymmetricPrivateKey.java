@@ -39,6 +39,8 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.spec.InvalidKeySpecException;
 
+import org.apache.commons.net.util.Base64;
+
 import com.distrimind.util.Bits;
 
 /**
@@ -91,6 +93,18 @@ public class ASymmetricPrivateKey implements Serializable
 	return privateKey.hashCode();
     }
 
+    @Override
+    public String toString()
+    {
+	return Base64.encodeBase64String(encode());
+    }
+    
+    
+    public static ASymmetricPrivateKey valueOf(String key) throws NoSuchAlgorithmException, InvalidKeySpecException
+    {
+	return decode(Base64.decodeBase64(key));
+    }
+    
     
     public ASymmetricEncryptionType getAlgorithmType()
     {

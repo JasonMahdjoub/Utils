@@ -57,7 +57,8 @@ public class RenforcedDecentralizedIDGenerator extends AbstractDecentralizedIDGe
      * 
      */
     private static final long serialVersionUID = 4279383128706805738L;
-
+    static final String ToStringHead="RenforcedDecentralizedID";
+    
     public RenforcedDecentralizedIDGenerator()
     {
 	super();
@@ -92,5 +93,20 @@ public class RenforcedDecentralizedIDGenerator extends AbstractDecentralizedIDGe
 	return AbstractDecentralizedID.RENFORCED_DECENTRALIZED_ID_GENERATOR_TYPE;
     }
     
+	@Override public String toString()
+	{
+	    return ToStringHead+"["+getTimeStamp()+";"+getWorkerID()+";"+getSequenceID()+"]";
+	}
 
+	public static RenforcedDecentralizedIDGenerator valueOf(String value)
+	{
+	    AbstractDecentralizedID res=AbstractDecentralizedID.valueOf(value);
+	    if (res instanceof RenforcedDecentralizedIDGenerator)
+	    {
+		return (RenforcedDecentralizedIDGenerator)res;
+	    }
+	    else
+		throw new IllegalArgumentException("Invalid format : "+value);
+	}
+	
 }

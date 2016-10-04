@@ -45,8 +45,9 @@ import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Random;
 
+import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
-import javax.crypto.CipherOutputStream;
+import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
 
@@ -125,13 +126,13 @@ public class P2PASymmetricSecretMessageExchanger
     }
 
     
-    public byte[] encode(byte[] message, byte[] salt) throws IOException, InvalidKeyException
+    public byte[] encode(byte[] message, byte[] salt) throws IOException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException
     {
 	if (salt==null)
 	    salt=new byte[0];
 	return encode(message, 0, message.length, salt, 0, salt.length);
     }
-    public byte[] encode(byte[] message, int offset, int len, byte[] salt, int offset_salt, int len_salt) throws IOException, InvalidKeyException
+    public byte[] encode(byte[] message, int offset, int len, byte[] salt, int offset_salt, int len_salt) throws IOException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException
     {
 	if (message==null)
 	    throw new NullPointerException("message");
@@ -146,19 +147,33 @@ public class P2PASymmetricSecretMessageExchanger
 	if (salt.length-offset_salt<len_salt)
 	    throw new IllegalArgumentException("salt");
 	
-	
 	message=initCipherForEncrypt(message, offset, len, salt, offset_salt, len_salt);
+	
+	int maxBlockSize=myPublicKey.getMaxBlockSize();
+	
+	boolean finish=false;
+	offset=0;
 	try(ByteArrayOutputStream baos=new ByteArrayOutputStream())
 	{
-	    try (CipherOutputStream cos=new CipherOutputStream(baos, cipher))
+	    while (!finish)
 	    {
-		cos.write(message, 0, message.length);
+	    
+		int size=Math.min(maxBlockSize, message.length-offset);
+		if (size>0)
+		{
+		    baos.write(cipher.doFinal(message, offset, size));
+		    offset+=size;
+		}
+		if (size<=0)
+		    finish=true;
 	    }
+	    baos.flush();
 	    return baos.toByteArray();
 	}
+	
     }
     
-    public boolean verifyDistantMessage(byte[] originalMessage, byte[] salt,byte[] distantMessage) throws InvalidKeyException, IOException, IllegalAccessException
+    public boolean verifyDistantMessage(byte[] originalMessage, byte[] salt,byte[] distantMessage) throws InvalidKeyException, IOException, IllegalAccessException, IllegalBlockSizeException, BadPaddingException
     {
 	if (salt==null)
 	    salt=new byte[0];
@@ -166,7 +181,7 @@ public class P2PASymmetricSecretMessageExchanger
     }
     
     
-    public boolean verifyDistantMessage(byte[] originalMessage, int offo, int leno, byte[] salt, int offset_salt, int len_salt,byte[] distantMessage, int offd, int lend) throws InvalidKeyException, IOException, IllegalAccessException
+    public boolean verifyDistantMessage(byte[] originalMessage, int offo, int leno, byte[] salt, int offset_salt, int len_salt,byte[] distantMessage, int offd, int lend) throws InvalidKeyException, IOException, IllegalAccessException, IllegalBlockSizeException, BadPaddingException
     {
 	if (originalMessage==null)
 	    throw new NullPointerException("message");

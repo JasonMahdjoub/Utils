@@ -62,6 +62,7 @@ public class SecuredDecentralizedID extends AbstractDecentralizedID
     
     private static final AtomicReference<MessageDigest> message_digest=new AtomicReference<>(null);
     public static final MessageDigestType DEFAULT_MESSAGE_DIGEST_TYPE=MessageDigestType.SHA_256;
+    static final String ToStringHead="SecuredDecentralizedID";
     
     private static MessageDigest getDefaultMessageDigestInstance() throws NoSuchAlgorithmException
     {
@@ -146,8 +147,23 @@ public class SecuredDecentralizedID extends AbstractDecentralizedID
     
     private void readObject(java.io.ObjectInputStream in)throws IOException, ClassNotFoundException
     {
-	in.defaultReadObject();
-	hashCode=computeHashCode(idLongs);
+	try
+	{
+	    in.defaultReadObject();
+	    hashCode=computeHashCode(idLongs);
+	}
+	catch(IOException e)
+	{
+	    throw e;
+	}
+	catch(ClassNotFoundException e)
+	{
+	    throw e;
+	}
+	catch(Exception e)
+	{
+	    throw new IOException(e);
+	}
     }
     
     
@@ -218,14 +234,14 @@ public class SecuredDecentralizedID extends AbstractDecentralizedID
     @Override
     public String toString()
     {
-	StringBuffer res=new StringBuffer("SecuredDecentralizedID[");
+	StringBuffer res=new StringBuffer(ToStringHead+"[");
 	boolean first=true;
 	for (int i=0;i<idLongs.length;i++)
 	{
 	    if (first)
 		first=false;
 	    else
-		res.append(",");
+		res.append(";");
 	    res.append(idLongs[i]);
 	}
 	res.append("]");
@@ -251,5 +267,15 @@ public class SecuredDecentralizedID extends AbstractDecentralizedID
     {
 	return AbstractDecentralizedID.SECURED_DECENTRALIZED_ID_TYPE;
     }
+	public static SecuredDecentralizedID valueOf(String value)
+	{
+	    AbstractDecentralizedID res=AbstractDecentralizedID.valueOf(value);
+	    if (res instanceof SecuredDecentralizedID)
+	    {
+		return (SecuredDecentralizedID)res;
+	    }
+	    else
+		throw new IllegalArgumentException("Invalid format : "+value);
+	}
     
 }

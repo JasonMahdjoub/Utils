@@ -57,8 +57,8 @@ public class Utils
 	Calendar c=Calendar.getInstance();
 	c.set(2016, 1, 4);
 	Calendar c2=Calendar.getInstance();
-	c.set(2016, 6, 27);
-    	VERSION=new Version("Utils", "Utils", 1,7,1, Version.Type.Stable, 0, c.getTime(), c2.getTime());
+	c.set(2016, 8, 15);
+    	VERSION=new Version("Utils", "Utils", 1,7,2, Version.Type.Stable, 0, c.getTime(), c2.getTime());
 	try
 	{
 	
@@ -71,8 +71,17 @@ public class Utils
 	    VERSION.addDeveloper(new PersonDeveloper("mahdjoub", "jason", c.getTime()));
 	
 	    c=Calendar.getInstance();
-	    c.set(2016, 6, 27);
-	    Description d=new Description(1,7,1,Version.Type.Stable, 0, c.getTime());
+	    c.set(2016, 8, 15);
+	    Description d=new Description(1,7,2,Version.Type.Stable, 0, c.getTime());
+	    d.addItem("Correcting a bug for P2PASymmetricSecretMessageExchanger");
+	    d.addItem("Adding toString and valueOf functions for crypto keys");
+	    d.addItem("Possibility to put crypto keys in XMLProperties class");
+	    d.addItem("Adding 'valueOf' for Decentralized IDs");
+	    d.addItem("Decentralized IDs are exportable into XML Properties");
+
+	    c=Calendar.getInstance();
+	    c.set(2016, 7, 23);
+	    d=new Description(1,7,1,Version.Type.Stable, 0, c.getTime());
 	    d.addItem("Correcting a bug for loop back network interface speed");
 	    d.addItem("Correcting a bug for P2PASymmetricSecretMessageExchanger");
 	    d.addItem("Correcting a bug big data asymmetric encryption");

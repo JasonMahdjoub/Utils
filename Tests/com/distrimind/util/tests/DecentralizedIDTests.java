@@ -77,6 +77,7 @@ public class DecentralizedIDTests
 	}
     }
 
+    
     @Test
     public void testDecentralizedID() throws NoSuchAlgorithmException
     {
@@ -92,7 +93,29 @@ public class DecentralizedIDTests
 	for (int i=0;i<numberofTests;i++)
 	{
 	    testEquals(type, rand, new DecentralizedIDGenerator(), new DecentralizedIDGenerator());
+	    
 	}
+    }
+    void testToStringAndValueOf(DecentralizedIDGenerator value)
+    {
+	Assert.assertEquals(DecentralizedIDGenerator.valueOf(value.toString()), value);
+    }
+    
+    void testToStringAndValueOf(RenforcedDecentralizedIDGenerator value)
+    {
+	Assert.assertEquals(RenforcedDecentralizedIDGenerator.valueOf(value.toString()), value);
+    }
+    void testToStringAndValueOf(SecuredDecentralizedID value)
+    {
+	Assert.assertEquals(SecuredDecentralizedID.valueOf(value.toString()), value);
+    }
+    
+    @Test
+    public void testToStringAndValueOf() throws NoSuchAlgorithmException
+    {
+	testToStringAndValueOf(new DecentralizedIDGenerator());
+	testToStringAndValueOf(new RenforcedDecentralizedIDGenerator());
+	testToStringAndValueOf(new SecuredDecentralizedID(new DecentralizedIDGenerator(), new SecureRandom()));
     }
     
     private void testEquals(MessageDigestType type, SecureRandom rand, AbstractDecentralizedIDGenerator id1, AbstractDecentralizedIDGenerator id2) throws NoSuchAlgorithmException

@@ -1,18 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
-<suite verbose="5" name="Failed suite [TestAll]">
-  <test name="testCyrpto(failed)">
+<suite guice-stage="DEVELOPMENT" name="Failed suite [Default suite]">
+  <test name="Default test(failed)">
     <classes>
-      <class name="com.distrimind.util.tests.crypto.CryptoTests">
+      <class name="com.distrimind.util.tests.DecentralizedIDTests">
         <methods>
-          <include name="testSecretKeyEncoding" invocation-numbers="3 1 2 4 0"/>
-          <include name="testSymetricEncryptions"/>
-          <include name="testEncodeAndSeparateEncoding"/>
-          <include name="testASymmetricKeyPairEncoding"/>
-          <include name="testP2PASymetricEncryptions"/>
-          <include name="testHybridEncryptions"/>
+          <include name="testToStringAndValueOf"/>
         </methods>
-      </class> <!-- com.distrimind.util.tests.crypto.CryptoTests -->
+      </class> <!-- com.distrimind.util.tests.DecentralizedIDTests -->
     </classes>
-  </test> <!-- testCyrpto(failed) -->
-</suite> <!-- Failed suite [TestAll] -->
+  </test> <!-- Default test(failed) -->
+</suite> <!-- Failed suite [Default suite] -->

@@ -35,6 +35,8 @@ knowledge of the CeCILL-C license and that you accept its terms.
 package com.distrimind.util;
 
 import java.io.Serializable;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.distrimind.util.sizeof.ObjectSizer;
 
@@ -103,6 +105,52 @@ public abstract class AbstractDecentralizedID implements Serializable
 		    throw new IllegalArgumentException("Unkown type");
 	    }
 	    
+	}
+	
+	public static AbstractDecentralizedID valueOf(String value)
+	{
+	    if (value.startsWith(DecentralizedIDGenerator.ToStringHead+"["))
+	    {
+		Pattern p=Pattern.compile("(-?\\d*);(-?\\d*);(-?\\d*)");
+		Matcher m=p.matcher(value.subSequence(DecentralizedIDGenerator.ToStringHead.length()+1, value.length()-1));
+		if (m.matches() && m.groupCount()==3)
+		{
+		    long timeStamp=Long.parseLong(m.group(1));
+		    long workerID=Long.parseLong(m.group(2));
+		    long sequenceID=Long.parseLong(m.group(3));
+		    
+		    return new DecentralizedIDGenerator(timeStamp, workerID | (sequenceID<<48));
+		}
+	    }
+	    if (value.startsWith(RenforcedDecentralizedIDGenerator.ToStringHead+"["))
+	    {
+		Pattern p=Pattern.compile("(-?\\d*);(-?\\d*);(-?\\d*)");
+		Matcher m=p.matcher(value.subSequence(RenforcedDecentralizedIDGenerator.ToStringHead.length()+1, value.length()-1));
+		if (m.matches() && m.groupCount()==3)
+		{
+		    long timeStamp=Long.parseLong(m.group(1));
+		    long workerID=Long.parseLong(m.group(2));
+		    long sequenceID=Long.parseLong(m.group(3));
+		    
+		    return new RenforcedDecentralizedIDGenerator(timeStamp, workerID | (sequenceID<<48));
+		}
+	    }
+	    if (value.startsWith(SecuredDecentralizedID.ToStringHead+"["))
+	    {
+		Pattern p=Pattern.compile(";");
+		String values[]=p.split(value.subSequence(SecuredDecentralizedID.ToStringHead.length()+1, value.length()-1));
+		if (values.length>=1)
+		{
+		    long[] vals=new long[values.length];
+		    for (int i=0;i<vals.length;i++)
+		    {
+			vals[i]=Long.parseLong(values[i]);
+		    }
+		    
+		    return new SecuredDecentralizedID(vals);
+		}
+	    }
+	    throw new IllegalArgumentException("Invalid value format : "+value);
 	}
     
 }

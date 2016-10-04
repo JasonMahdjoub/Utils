@@ -38,6 +38,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.UnknownHostException;
+import java.security.NoSuchAlgorithmException;
 import java.util.Properties;
 
 import org.testng.Assert;
@@ -87,7 +88,7 @@ public class TestProperties
     }
     
     @DataProvider(name = "getPropertiesExample")
-    PropertiesExample[][] getPropertiesExample() throws MalformedURLException, UnknownHostException
+    PropertiesExample[][] getPropertiesExample() throws MalformedURLException, UnknownHostException, NoSuchAlgorithmException
     {
 	PropertiesExample[][] res=new PropertiesExample[100][];
 	res[0]=new PropertiesExample[]{new PropertiesExample(null)};

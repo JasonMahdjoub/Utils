@@ -39,6 +39,8 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
 
+import org.apache.commons.net.util.Base64;
+
 import com.distrimind.util.Bits;
 
 /**
@@ -70,6 +72,19 @@ public class ASymmetricPublicKey implements Serializable
 	this.keySize=keySize;
 	this.type=type;
     }
+    
+    @Override
+    public String toString()
+    {
+	return Base64.encodeBase64String(encode());
+    }
+    
+    public static ASymmetricPublicKey valueOf(String key) throws NoSuchAlgorithmException, InvalidKeySpecException
+    {
+	return decode(Base64.decodeBase64(key));
+    }
+    
+    
     
     @Override
     public boolean equals(Object o)
