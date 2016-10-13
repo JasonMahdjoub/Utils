@@ -68,12 +68,12 @@ public class P2PASymmetricSecretMessageExchanger
     private final MessageDigestType messageDigestType;
     private final PasswordHashType passwordHashType;
     private int hashIterationsNumber=PasswordHash.DEFAULT_NB_ITERATIONS;
-    int getHashIterationsNumber()
+    public int getHashIterationsNumber()
     {
         return hashIterationsNumber;
     }
 
-    void setHashIterationsNumber(int _hashIterationsNumber)
+    public void setHashIterationsNumber(int _hashIterationsNumber)
     {
         hashIterationsNumber = _hashIterationsNumber;
         if (distantMessageEncoder!=null)
