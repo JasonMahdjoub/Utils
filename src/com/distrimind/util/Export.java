@@ -49,8 +49,6 @@ import com.distrimind.util.export.JavaProjectSource;
 import com.distrimind.util.export.License;
 import com.distrimind.util.export.TestNGFile;
 import com.distrimind.util.export.License.PredefinedLicense;
-import com.distrimind.util.tests.EmptyClass;
-import com.distrimind.util.tests.crypto.CryptoTests;
 import com.distrimind.util.export.TestSuite;
 import com.distrimind.util.export.Exports.ExportProperties;
 
@@ -71,8 +69,10 @@ class Export
 	
 	File src_dir=new File(root_dir, "src");
 	File src_tests_dir=new File(root_dir, "Tests");
+	if (!root_dir.exists() || !src_dir.exists() || !src_tests_dir.exists())
+	    throw new IllegalAccessError();
 	Package root_package=Export.class.getPackage();
-	Package root_tests_package=CryptoTests.class.getPackage();
+	Package root_tests_package=DecentralizedIDTests.class.getPackage();
 	
 	License[] licenses={new License(new File("/home/jason/projets/commons-net-3.5/LICENSE.txt"))};
 	ArrayList<BinaryDependency> dependencies=new ArrayList<BinaryDependency>();
@@ -83,7 +83,7 @@ class Export
 
 	licenses=new License[1];
 	licenses[0]=Utils.LICENSE;
-	String regexMath=Dependency.mixRegexes(Dependency.getRegexMatchClass(Export.class), Dependency.getRegexMatchPackage(root_tests_package));
+	String regexMath=Dependency.getRegexMatchClass(Export.class);
 	JavaProjectSource javaProjectSource=new JavaProjectSource(root_dir, src_dir, root_package, licenses, 
 		"com/distrimind/util/build.txt", 
 		null, "Utils is a set of tools that can be useful in every context of development", 
@@ -115,10 +115,11 @@ class Export
 	
 	javaProjectSource.setTestSuiteSource(root_dir, src_tests_dir, root_tests_package, 
 		dependencies, null, new TestSuite(new TestNGFile(EmptyClass.class.getPackage(), "AllTestsNG.xml")));
-	
+	javaProjectSource.getAdditionalFilesAndDirectoriesToExport().add(new File(root_dir, "LICENSE_BCRYPT"));
 	javaProjectSource.setGitHUBLink(new URL("https://github.com/JazZ51/Utils.git"));
 	//javaProjectSource.setVerbose(true);
 	exports.setProject(javaProjectSource);
+	
 	
 	
 	

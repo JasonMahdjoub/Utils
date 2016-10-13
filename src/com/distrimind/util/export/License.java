@@ -147,6 +147,7 @@ public class License extends XMLProperties
 	APACHE_LICENSE_V2_0("Apache_License_v2.0.txt"),
 	ECLIPSE_PUBLIC_LICENSE_V1_0("Eclipse_Public_License_v1.0.txt"),
 	ECLIPSE_REDISTRIBUTION_LICENSE_V1_0("Eclipse_Redistribution_License_v1.0.txt");
+
 	
 	protected final String fileName;
 	

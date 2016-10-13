@@ -54,7 +54,7 @@ import javax.crypto.NoSuchPaddingException;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 1.2
+ * @version 1.3
  * @since Utils 1.4.1
  */
 public class P2PASymmetricSecretMessageExchanger
@@ -66,14 +66,28 @@ public class P2PASymmetricSecretMessageExchanger
     private final Cipher cipher;
     private final MessageDigest messageDigest;
     private final MessageDigestType messageDigestType;
-    
-    public P2PASymmetricSecretMessageExchanger(MessageDigestType messageDigestType, ASymmetricPublicKey myPublicKey, byte[] distantPublicKey) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidKeySpecException, InvalidAlgorithmParameterException
+    private final PasswordHashType passwordHashType;
+    private int hashIterationsNumber=PasswordHash.DEFAULT_NB_ITERATIONS;
+    int getHashIterationsNumber()
+    {
+        return hashIterationsNumber;
+    }
+
+    void setHashIterationsNumber(int _hashIterationsNumber)
+    {
+        hashIterationsNumber = _hashIterationsNumber;
+        if (distantMessageEncoder!=null)
+            distantMessageEncoder.setHashIterationsNumber(_hashIterationsNumber);
+    }
+
+    public P2PASymmetricSecretMessageExchanger(MessageDigestType messageDigestType, PasswordHashType passwordHashType, ASymmetricPublicKey myPublicKey, byte[] distantPublicKey) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidKeySpecException, InvalidAlgorithmParameterException
     {
 	if (messageDigestType==null)
 	    throw new NullPointerException("messageDigestType");
 	if (myPublicKey==null)
 	    throw new NullPointerException("myPublicKey");
-	
+	if (passwordHashType==null)
+	    throw new NullPointerException("passwordHashType");
 	this.type=myPublicKey.getAlgorithmType();
 	this.myPublicKey=myPublicKey;
 
@@ -84,35 +98,75 @@ public class P2PASymmetricSecretMessageExchanger
 	this.messageDigestType=messageDigestType;
 	this.messageDigest=messageDigestType.getMessageDigestInstance();
 	this.messageDigest.reset();
+	this.passwordHashType=passwordHashType;
     }
 
-    public P2PASymmetricSecretMessageExchanger(MessageDigestType messageDigestType, ASymmetricPublicKey myPublicKey) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, InvalidKeySpecException
+    public P2PASymmetricSecretMessageExchanger(MessageDigestType messageDigestType, PasswordHashType passwordHashType, ASymmetricPublicKey myPublicKey) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, InvalidKeySpecException
     {
-	this(messageDigestType, myPublicKey, null);
+	this(messageDigestType, passwordHashType, myPublicKey, null);
     }
 
     public P2PASymmetricSecretMessageExchanger(ASymmetricPublicKey myPublicKey) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, InvalidKeySpecException
     {
-	this(MessageDigestType.SHA_512, myPublicKey);
+	this(MessageDigestType.SHA_512, PasswordHashType.DEFAULT, myPublicKey);
     }
     
     public void setDistantPublicKey(byte[] distantPublicKeyAndIV) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeySpecException, InvalidKeyException, InvalidAlgorithmParameterException
     {
-	distantMessageEncoder=new P2PASymmetricSecretMessageExchanger(messageDigestType, ASymmetricPublicKey.decode(distantPublicKeyAndIV));
+	distantMessageEncoder=new P2PASymmetricSecretMessageExchanger(messageDigestType, passwordHashType, ASymmetricPublicKey.decode(distantPublicKeyAndIV));
 	if (myPublicKey.equals(distantMessageEncoder.myPublicKey))
 	    throw new IllegalArgumentException("Local public key equals distant public key");
+	distantMessageEncoder.setHashIterationsNumber(getHashIterationsNumber());
     }
     
-    private byte[] initCipherForEncrypt(byte data[], int off, int len, byte[] salt, int offset_salt, int len_salt) throws InvalidKeyException
+    private byte[] hashMessage(byte data[], int off, int len, byte[] salt, int offset_salt, int len_salt, boolean messageIsKey) throws NoSuchAlgorithmException, InvalidKeySpecException
     {
+	if (!messageIsKey && salt!=null && len_salt>0)
+	{
+	    byte s[]=new byte[len_salt];
+	    System.arraycopy(salt, offset_salt, s, 0, len_salt);
+	    data=passwordHashType.hash(data, off, len, s, hashIterationsNumber);
+	    off=0;
+	    len=data.length;
+	}
 	messageDigest.update(data, off, len);
-	if (salt!=null)
+	if (messageIsKey && salt!=null && len_salt>0)
 	    messageDigest.update(salt, offset_salt, len_salt);
-	byte[] res=messageDigest.digest();
-	random.setSeed(res);
+	return messageDigest.digest();
+    }
+    
+    private byte[] hashMessage(char password[], byte[] salt, int offset_salt, int len_salt) throws NoSuchAlgorithmException, InvalidKeySpecException
+    {
+	if (salt==null)
+	    throw new NullPointerException("salt can't be null when the message is a password (and not a secret key) !");
+	if (salt.length==0)
+	    throw new NullPointerException("salt can't be empty when the message is a password (and not a secret key) !");
+	
+	if (salt!=null && len_salt>0)
+	{
+	    byte s[]=new byte[len_salt];
+	    System.arraycopy(salt, offset_salt, s, 0, len_salt);
+	    byte[] res=passwordHashType.hash(password, s, hashIterationsNumber);
+	    return hashMessage(res, 0, res.length, null, -1, -1, true);
+	}
+	else
+	{
+	    byte[] res=new byte[password.length*2];
+	    for (int i=0;i<password.length;i++)
+	    {
+		res[i*2]=(byte)(password[i] & 0xFF);
+		res[i*2+1]=(byte)((password[i]>>8) & 0xFF);
+	    }
+	    return res;
+	}
+	    
+    }
+    
+    private void initCipherForEncrypt(byte hashedMessage[]) throws InvalidKeyException
+    {
+	random.setSeed(hashedMessage);
 	cipher.init(Cipher.ENCRYPT_MODE, myPublicKey.getPublicKey(), random);
 	messageDigest.reset();
-	return res;
     }
     
     public byte[] encodeMyPublicKey()
@@ -126,28 +180,23 @@ public class P2PASymmetricSecretMessageExchanger
     }
 
     
-    public byte[] encode(byte[] message, byte[] salt) throws IOException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException
+    public byte[] encode(byte[] message, byte[] salt, boolean messageIsKey) throws IOException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException
     {
 	if (salt==null)
 	    salt=new byte[0];
-	return encode(message, 0, message.length, salt, 0, salt.length);
+	return encode(message, 0, message.length, salt, 0, salt.length, messageIsKey);
     }
-    public byte[] encode(byte[] message, int offset, int len, byte[] salt, int offset_salt, int len_salt) throws IOException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException
+    public byte[] encode(byte[] message, int offset, int len, byte[] salt, int offset_salt, int len_salt, boolean messageIsKey) throws IOException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException
     {
 	if (message==null)
 	    throw new NullPointerException("message");
 	if (message.length-offset<len)
 	    throw new IllegalArgumentException("message");
-	if (salt==null)
-	{
-	    salt=new byte[0];
-	    offset_salt=0;
-	    len_salt=0;
-	}
-	if (salt.length-offset_salt<len_salt)
+	if (salt!=null && salt.length-offset_salt<len_salt)
 	    throw new IllegalArgumentException("salt");
 	
-	message=initCipherForEncrypt(message, offset, len, salt, offset_salt, len_salt);
+	message=hashMessage(message, offset, len, salt, offset_salt, len_salt, messageIsKey);
+	initCipherForEncrypt(message);
 	
 	int maxBlockSize=myPublicKey.getMaxBlockSize();
 	
@@ -172,16 +221,108 @@ public class P2PASymmetricSecretMessageExchanger
 	}
 	
     }
-    
-    public boolean verifyDistantMessage(byte[] originalMessage, byte[] salt,byte[] distantMessage) throws InvalidKeyException, IOException, IllegalAccessException, IllegalBlockSizeException, BadPaddingException
+    public byte[] encode(String message, byte[] salt) throws IOException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException
+    {
+	return encode(message.toCharArray(), salt);
+    }
+    public byte[] encode(char[] message, byte[] salt) throws IOException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException
     {
 	if (salt==null)
 	    salt=new byte[0];
-	return this.verifyDistantMessage(originalMessage, 0, originalMessage.length, salt, 0, salt.length, distantMessage, 0, distantMessage.length);
+	return encode(message, salt, 0, salt.length);
+    }
+    public byte[] encode(String message, byte[] salt, int offset_salt, int len_salt) throws IOException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException
+    {
+	return encode(message.toCharArray(), salt, offset_salt, len_salt);
+    }
+    public byte[] encode(char[] message, byte[] salt, int offset_salt, int len_salt) throws IOException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException
+    {
+	if (message==null)
+	    throw new NullPointerException("message");
+	if (salt==null)
+	{
+	    salt=new byte[0];
+	    offset_salt=0;
+	    len_salt=0;
+	}
+	if (salt.length-offset_salt<len_salt)
+	    throw new IllegalArgumentException("salt");
+	
+	byte hashedMessage[]=hashMessage(message, salt, offset_salt, len_salt);
+	initCipherForEncrypt(hashedMessage);
+	
+	int maxBlockSize=myPublicKey.getMaxBlockSize();
+	
+	boolean finish=false;
+	int offset=0;
+	try(ByteArrayOutputStream baos=new ByteArrayOutputStream())
+	{
+	    while (!finish)
+	    {
+	    
+		int size=Math.min(maxBlockSize, hashedMessage.length-offset);
+		if (size>0)
+		{
+		    baos.write(cipher.doFinal(hashedMessage, offset, size));
+		    offset+=size;
+		}
+		if (size<=0)
+		    finish=true;
+	    }
+	    baos.flush();
+	    return baos.toByteArray();
+	}
+	
     }
     
+    public boolean verifyDistantMessage(byte[] originalMessage, byte[] salt,byte[] distantMessage, boolean messageIsKey) throws InvalidKeyException, IOException, IllegalAccessException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException
+    {
+	if (salt==null)
+	    salt=new byte[0];
+	return this.verifyDistantMessage(originalMessage, 0, originalMessage.length, salt, 0, salt.length, distantMessage, 0, distantMessage.length, messageIsKey);
+    }
+    public boolean verifyDistantMessage(char[] originalMessage, byte[] salt,byte[] distantMessage) throws InvalidKeyException, IOException, IllegalAccessException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException
+    {
+	if (salt==null)
+	    salt=new byte[0];
+	return this.verifyDistantMessage(originalMessage, salt, 0, salt.length, distantMessage, 0, distantMessage.length);
+    }
+    public boolean verifyDistantMessage(String originalMessage, byte[] salt,byte[] distantMessage) throws InvalidKeyException, IOException, IllegalAccessException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException
+    {
+	return this.verifyDistantMessage(originalMessage.toCharArray(), salt, distantMessage);
+    }
     
-    public boolean verifyDistantMessage(byte[] originalMessage, int offo, int leno, byte[] salt, int offset_salt, int len_salt,byte[] distantMessage, int offd, int lend) throws InvalidKeyException, IOException, IllegalAccessException, IllegalBlockSizeException, BadPaddingException
+    public boolean verifyDistantMessage(char[] originalMessage, byte[] salt, int offset_salt, int len_salt,byte[] distantMessage, int offd, int lend) throws InvalidKeyException, IOException, IllegalAccessException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException
+    {
+	if (originalMessage==null)
+	    throw new NullPointerException("message");
+	if (distantMessage==null)
+	    throw new NullPointerException("distantMessage");
+	if (distantMessage.length-offd<lend)
+	    throw new IllegalArgumentException("distantMessage");
+	if (salt==null)
+	{
+	    salt=new byte[0];
+	    offset_salt=0;
+	    len_salt=0;
+	}
+	if (salt.length-offset_salt<len_salt)
+	    throw new IllegalArgumentException("salt");
+
+	if (distantMessageEncoder==null)
+	    throw new IllegalAccessException("You must set the distant public key before calling this function ! ");
+	byte[] oc=distantMessageEncoder.encode(originalMessage, salt, offset_salt, len_salt);
+	if (oc.length!=lend)
+	    return false;
+	for (int i=0;i<lend;i++)
+	{
+	    if (oc[i]!=distantMessage[i+offd])
+		return false;
+	}
+	return true;
+    }
+    
+    public boolean verifyDistantMessage(byte[] originalMessage, int offo, int leno, byte[] salt, int offset_salt, int len_salt,byte[] distantMessage, int offd, int lend, boolean messageIsKey) throws InvalidKeyException, IOException, IllegalAccessException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException
     {
 	if (originalMessage==null)
 	    throw new NullPointerException("message");
@@ -202,7 +343,8 @@ public class P2PASymmetricSecretMessageExchanger
 
 	if (distantMessageEncoder==null)
 	    throw new IllegalAccessException("You must set the distant public key before calling this function ! ");
-	byte[] oc=distantMessageEncoder.encode(originalMessage, offo, leno, salt, offset_salt, len_salt);
+	byte[] oc=distantMessageEncoder.encode(originalMessage, offo, leno, salt, offset_salt, len_salt, messageIsKey);
+	
 	if (oc.length!=lend)
 	    return false;
 	for (int i=0;i<lend;i++)

@@ -3,11 +3,13 @@
 <suite guice-stage="DEVELOPMENT" name="Failed suite [Default suite]">
   <test name="Default test(failed)">
     <classes>
-      <class name="com.distrimind.util.tests.DecentralizedIDTests">
+      <class name="com.distrimind.util.crypto.CryptoTests">
         <methods>
-          <include name="testToStringAndValueOf"/>
+          <include name="testEncodeAndSeparateEncoding"/>
+          <include name="testASymmetricSecretMessageExchanger" invocation-numbers="1 2 0"/>
+          <include name="testASymmetricKeyPairEncoding"/>
         </methods>
-      </class> <!-- com.distrimind.util.tests.DecentralizedIDTests -->
+      </class> <!-- com.distrimind.util.crypto.CryptoTests -->
     </classes>
   </test> <!-- Default test(failed) -->
 </suite> <!-- Failed suite [Default suite] -->

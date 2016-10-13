@@ -225,6 +225,10 @@ public class JavaProjectSource extends SourceDependancy
     public void copySourceToFolder(File _folder) throws IOException
     {
 	FileTools.copyFolderToFolder(source_directory, _folder, false, this.exclude_regex, this.include_regex);
+	if (!getBuildFilePath(source_directory).exists())
+	    throw new IllegalAccessError("The build file "+getBuildFilePath(source_directory)+" does not exists !");
+	if (!getBuildFilePath(_folder).exists())
+	    throw new IllegalAccessError("The build file "+getBuildFilePath(_folder)+" does not exists !");
     }
     
     public File getSourceDirectory()
