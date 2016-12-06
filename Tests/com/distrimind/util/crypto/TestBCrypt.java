@@ -17,8 +17,6 @@ package com.distrimind.util.crypto;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import com.distrimind.util.crypto.BCrypt;
-
 /**
  * JUnit unit tests for BCrypt routines
  * @author Damien Miller

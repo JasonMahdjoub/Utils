@@ -65,7 +65,10 @@ public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOu
     
     public int getOutputSizeForDecryption(int inputLen) throws InvalidKeyException, InvalidAlgorithmParameterException
     {
-	initCipherForDecrypt(cipher);
+	initCipherForDecrypt(cipher, null);
+	if (includeIV())
+	    inputLen-=cipher.getIV().length;
+
 	int maxBlockSize=getMaxBlockSizeForDecoding();
 	if (maxBlockSize==Integer.MAX_VALUE)
 	    return cipher.getOutputSize(inputLen);
@@ -79,7 +82,7 @@ public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOu
 	return res;
     }
     
-    public abstract void initCipherForDecrypt(Cipher cipher) throws InvalidKeyException, InvalidAlgorithmParameterException;
+    public abstract void initCipherForDecrypt(Cipher cipher, byte[] iv) throws InvalidKeyException, InvalidAlgorithmParameterException;
     
     public byte[] decode(byte[] bytes) throws InvalidKeyException, InvalidAlgorithmParameterException, IOException, IllegalBlockSizeException, BadPaddingException
     {
@@ -113,8 +116,15 @@ public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOu
     
     public void decode(InputStream is, OutputStream os) throws InvalidKeyException, InvalidAlgorithmParameterException, IOException, IllegalBlockSizeException, BadPaddingException
     {
+	byte[] iv=null;
+	if (includeIV())
+	{
+	    iv=new byte[cipher.getBlockSize()];
+	    if (is.read(iv)!=iv.length)
+		throw new IOException();
+	}
 	
-	initCipherForDecrypt(cipher);
+	initCipherForDecrypt(cipher, iv);
 	
 	int maxBlockSize=getMaxBlockSizeForDecoding();
 	int blockACC=0;
@@ -154,10 +164,18 @@ public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOu
 	}*/
     }
     
-    public CipherInputStream getCipherInputStream(InputStream is) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException
+    public CipherInputStream getCipherInputStream(InputStream is) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IOException
     {
 	Cipher c=getCipherInstance();
-	initCipherForDecrypt(c);
+	byte[] iv=null;
+	if (includeIV())
+	{
+	    iv=new byte[c.getBlockSize()];
+	    if (is.read(iv)!=iv.length)
+		throw new IOException();
+	}
+	
+	initCipherForDecrypt(c, iv);
 	return new CipherInputStream(is, c);
     }
 

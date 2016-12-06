@@ -56,51 +56,62 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm
 {
     private final SymmetricSecretKey key;
     private final SymmetricEncryptionType type;
+    private final SecureRandom random;
     
-    public SymmetricEncryptionAlgorithm(SymmetricSecretKey key, SecureRandom random) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException
+    public SymmetricEncryptionAlgorithm(SymmetricSecretKey key, SecureRandomType randomType, byte[] randomSeed) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException
     {
 	super(key.getAlgorithmType().getCipherInstance());
 	this.type=key.getAlgorithmType();
 	this.key=key;
-	
-	if (this.key.getIvParameterSpec()==null)
-	{
-	    this.cipher.init(Cipher.ENCRYPT_MODE, this.key.getSecretKey(), random);
-	    this.key.setIvParameterSpec(new IvParameterSpec(this.cipher.getIV()));
-	}
-	else
-	{
-	    this.cipher.init(Cipher.ENCRYPT_MODE, this.key.getSecretKey(), this.key.getIvParameterSpec(), random);
-	}
-    }
-
-    public static SymmetricEncryptionAlgorithm getInstance(SecureRandom random, byte[] cryptedKeyAndIV, P2PASymmetricEncryptionAlgorithm asalgo) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IOException, IllegalBlockSizeException, BadPaddingException
-    {
-	byte[] keyAndIV=asalgo.decode(cryptedKeyAndIV);
-	return getInstance(random, keyAndIV);
-    }
-
-    private static SymmetricEncryptionAlgorithm getInstance(SecureRandom random, byte[] decryptedKeyAndIV) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException
-    {
-	return new SymmetricEncryptionAlgorithm(SymmetricSecretKey.decode(decryptedKeyAndIV), random);
+	this.random=randomType.getInstance();
+	if (randomSeed!=null)
+	    this.random.setSeed(randomSeed);
+	this.cipher.init(Cipher.ENCRYPT_MODE, this.key.getSecretKey(), generateIV());
     }
     
-    public static SymmetricEncryptionAlgorithm getInstance(SecureRandom random, byte[] cryptedKeyAndIV, ServerASymmetricEncryptionAlgorithm asalgo) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IOException, IllegalBlockSizeException, BadPaddingException
+    
+    private IvParameterSpec generateIV()
     {
-	byte[] keyAndIV=asalgo.decode(cryptedKeyAndIV);
-	return getInstance(random, keyAndIV);
+	byte[] iv=new byte[cipher.getBlockSize()];
+	random.nextBytes(iv);
+	return new IvParameterSpec(iv);
+    }
+
+    public static SymmetricEncryptionAlgorithm getInstance(SecureRandomType randomType, byte[] seed, byte[] cryptedKey, P2PASymmetricEncryptionAlgorithm asalgo) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IOException, IllegalBlockSizeException, BadPaddingException
+    {
+	byte[] key=asalgo.decode(cryptedKey);
+	return getInstance(randomType, seed, key);
+    }
+
+    private static SymmetricEncryptionAlgorithm getInstance(SecureRandomType randomType, byte[] seed, byte[] decryptedKey) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException
+    {
+	return new SymmetricEncryptionAlgorithm(SymmetricSecretKey.decode(decryptedKey), randomType, seed);
+    }
+    
+    public static SymmetricEncryptionAlgorithm getInstance(SecureRandomType randomType, byte[] seed, byte[] cryptedKey, ServerASymmetricEncryptionAlgorithm asalgo) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IOException, IllegalBlockSizeException, BadPaddingException
+    {
+	byte[] key=asalgo.decode(cryptedKey);
+	return getInstance(randomType, seed, key);
     }
 
     @Override 
     public void initCipherForEncrypt(Cipher cipher) throws InvalidKeyException, InvalidAlgorithmParameterException
     {
-	cipher.init(Cipher.ENCRYPT_MODE, key.getSecretKey(), key.getIvParameterSpec());
+	cipher.init(Cipher.ENCRYPT_MODE, key.getSecretKey(), generateIV());
+    }
+    @Override 
+    public void initCipherForEncryptAndNotChangeIV(Cipher cipher) throws InvalidKeyException
+    {
+	cipher.init(Cipher.ENCRYPT_MODE, key.getSecretKey());
     }
     
     @Override 
-    public void initCipherForDecrypt(Cipher cipher) throws InvalidKeyException, InvalidAlgorithmParameterException
+    public void initCipherForDecrypt(Cipher cipher, byte[]iv) throws InvalidKeyException, InvalidAlgorithmParameterException
     {
-	cipher.init(Cipher.DECRYPT_MODE, key.getSecretKey(), key.getIvParameterSpec());
+	if (iv!=null)
+	    cipher.init(Cipher.DECRYPT_MODE, key.getSecretKey(), new IvParameterSpec(iv));
+	else
+	    cipher.init(Cipher.DECRYPT_MODE, key.getSecretKey());
     }
     
     @Override
@@ -119,14 +130,14 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm
 	return key;
     }
     
-    public byte[] encodeKeyAndIvParameter(P2PASymmetricEncryptionAlgorithm asalgo) throws InvalidKeyException, InvalidAlgorithmParameterException, IOException, IllegalBlockSizeException, BadPaddingException
+    public byte[] encodeKey(P2PASymmetricEncryptionAlgorithm asalgo) throws InvalidKeyException, InvalidAlgorithmParameterException, IOException, IllegalBlockSizeException, BadPaddingException
     {
 	return asalgo.encode(key.encode());
 	
     }
     
     
-    public byte[] encodeKeyAndIvParameter(ClientASymmetricEncryptionAlgorithm asalgo) throws InvalidKeyException, InvalidAlgorithmParameterException, IOException, IllegalBlockSizeException, BadPaddingException
+    public byte[] encodeKey(ClientASymmetricEncryptionAlgorithm asalgo) throws InvalidKeyException, InvalidAlgorithmParameterException, IOException, IllegalBlockSizeException, BadPaddingException
     {
 	return asalgo.encode(key.encode());
 	
@@ -141,5 +152,18 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm
     public int getMaxBlockSizeForDecoding()
     {
 	return key.getMaxBlockSize();
+    }
+
+
+
+    @Override
+    protected boolean includeIV()
+    {
+	return true;
+    }
+    
+    public int getBlockSize()
+    {
+	return cipher.getBlockSize();
     }
 }

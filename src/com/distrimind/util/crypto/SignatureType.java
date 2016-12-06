@@ -46,6 +46,7 @@ import java.security.Signature;
  */
 public enum SignatureType
 {
+    @Deprecated
     SHA1withRSA("SHA1withRSA"),
     SHA256withRSA("SHA256withRSA"),
     SHA384withRSA("SHA384withRSA"),

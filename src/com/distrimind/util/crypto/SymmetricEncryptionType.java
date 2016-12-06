@@ -55,12 +55,18 @@ import com.distrimind.util.Bits;
 public enum SymmetricEncryptionType
 {
     
-    AES("AES", "CBC","PKCS5Padding", (short)128),
+    AES("AES", "CBC","PKCS5Padding", (short)128),//TODO see for OCB and/or GCM mode (limit to 64Gb for the same couple key/iv)
+    @Deprecated
     DES("DES","CBC", "PKCS5Padding", (short)56, (short)8),
+    @Deprecated
     DESede("DESede","CBC", "PKCS5Padding", (short)168, (short)24),
+    @Deprecated
     Blowfish("Blowfish","CBC", "PKCS5Padding", (short)128),
-    DEFAULT(AES);
+   //GNU_TwoFish
     
+    DEFAULT(AES);
+    //TODO voir si ajout de GNU crypto ou de Twofish
+    //TODO revoir la regenération de l'IV
     private final String algorithmName;
     private final String blockMode;
     private final String padding;
@@ -122,6 +128,7 @@ public enum SymmetricEncryptionType
 	kg.init(keySizeBits, random);
 	return kg;
     }
+ 
     
     static byte[] encodeSecretKey(SecretKey key)
     {

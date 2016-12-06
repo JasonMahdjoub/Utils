@@ -57,8 +57,8 @@ public class Utils
 	Calendar c=Calendar.getInstance();
 	c.set(2016, 1, 4);
 	Calendar c2=Calendar.getInstance();
-	c.set(2016, 9, 13);
-    	VERSION=new Version("Utils", "Utils", 1,8,0, Version.Type.Stable, 0, c.getTime(), c2.getTime());
+	c.set(2016, 11, 6);
+    	VERSION=new Version("Utils", "Utils", 1,9,0, Version.Type.Stable, 0, c.getTime(), c2.getTime());
 	try
 	{
 	
@@ -71,8 +71,14 @@ public class Utils
 	    VERSION.addDeveloper(new PersonDeveloper("mahdjoub", "jason", c.getTime()));
 	
 	    c=Calendar.getInstance();
-	    c.set(2016, 9, 13);
+	    c.set(2016, 11, 6);
 	    Description d=new Description(1,8,0,Version.Type.Stable, 0, c.getTime());
+	    d.addItem("Correcting a bug with the use of IV parameter. Now, the IV parameter is generated for each encryption.");
+	    d.addItem("Adding class SecureRandomType.");
+
+	    c=Calendar.getInstance();
+	    c.set(2016, 9, 13);
+	    d=new Description(1,8,0,Version.Type.Stable, 0, c.getTime());
 	    d.addItem("Adding password hash (PBKDF and bcrypt)");
 
 	    c=Calendar.getInstance();

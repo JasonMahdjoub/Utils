@@ -413,8 +413,8 @@ public class CryptoTests
 	SecureRandom random=new SecureRandom();
 	SymmetricSecretKey key=SymmetricSecretKey.generate(random, type);
 	
-	SymmetricEncryptionAlgorithm algoDistant=new SymmetricEncryptionAlgorithm(key, random);
-	SymmetricEncryptionAlgorithm algoLocal=new SymmetricEncryptionAlgorithm(key, random);
+	SymmetricEncryptionAlgorithm algoDistant=new SymmetricEncryptionAlgorithm(key, SecureRandomType.DEFAULT, null);
+	SymmetricEncryptionAlgorithm algoLocal=new SymmetricEncryptionAlgorithm(key, SecureRandomType.DEFAULT, null);
 	Random rand=new Random(System.currentTimeMillis());
 	for (byte[] m : messagesToEncrypt)
 	{
@@ -472,7 +472,7 @@ public class CryptoTests
 	SecureRandom random=new SecureRandom();
 	SymmetricSecretKey key=SymmetricSecretKey.generate(random, type);
 	Assert.assertEquals(SymmetricSecretKey.decode(key.encode()), key);
-	new SymmetricEncryptionAlgorithm(key, random);
+	new SymmetricEncryptionAlgorithm(key, SecureRandomType.DEFAULT, null);
 	Assert.assertEquals(SymmetricSecretKey.decode(key.encode()), key);
 	
     }
@@ -505,9 +505,9 @@ public class CryptoTests
 	
 	SymmetricSecretKey localKey=SymmetricSecretKey.generate(rand, stype);
 
-	SymmetricEncryptionAlgorithm algoLocalS=new SymmetricEncryptionAlgorithm(localKey, rand);
-	byte[] localEncryptedKey=algoLocalS.encodeKeyAndIvParameter(algoLocalAS);
-	SymmetricEncryptionAlgorithm algoDistantS=SymmetricEncryptionAlgorithm.getInstance(rand, localEncryptedKey, algoDistantAS);
+	SymmetricEncryptionAlgorithm algoLocalS=new SymmetricEncryptionAlgorithm(localKey, SecureRandomType.DEFAULT, null);
+	byte[] localEncryptedKey=algoLocalS.encodeKey(algoLocalAS);
+	SymmetricEncryptionAlgorithm algoDistantS=SymmetricEncryptionAlgorithm.getInstance(SecureRandomType.DEFAULT, null, localEncryptedKey, algoDistantAS);
 	
 	
 	for (byte[] m : messagesToEncrypt)

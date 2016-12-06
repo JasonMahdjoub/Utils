@@ -77,7 +77,7 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 	this.signatureChecker=new SignatureCheckerAlgorithm(signatureType, distantPublicKey);
 	//initCipherForEncrypt(this.cipher);
 	this.maxBlockSizeForEncoding=myKeyPair.getMaxBlockSize();
-	initCipherForDecrypt(this.cipher);
+	initCipherForDecrypt(this.cipher, null);
 	this.maxBlockSizeForDecoding=cipher.getOutputSize(this.maxBlockSizeForEncoding);
     }
     
@@ -89,12 +89,17 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
     @Override
     public void initCipherForEncrypt(Cipher _cipher) throws InvalidKeyException
     {
+	initCipherForEncryptAndNotChangeIV(_cipher);
+    }
+    @Override
+    public void initCipherForEncryptAndNotChangeIV(Cipher _cipher) throws InvalidKeyException
+    {
 	_cipher.init(Cipher.ENCRYPT_MODE, distantPublicKey.getPublicKey());
 	
     }
 
     @Override
-    public void initCipherForDecrypt(Cipher _cipher) throws InvalidKeyException
+    public void initCipherForDecrypt(Cipher _cipher, byte[] iv) throws InvalidKeyException
     {
 	_cipher.init(Cipher.DECRYPT_MODE, myKeyPair.getASymmetricPrivateKey().getPrivateKey());
     }
@@ -134,6 +139,12 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
     public int getMaxBlockSizeForDecoding()
     {
 	return maxBlockSizeForDecoding;
+    }
+
+    @Override
+    protected boolean includeIV()
+    {
+	return false;
     }
     
 }

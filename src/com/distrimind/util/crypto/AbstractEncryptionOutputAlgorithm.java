@@ -70,10 +70,15 @@ public abstract class AbstractEncryptionOutputAlgorithm
     public int getOutputSizeForEncryption(int inputLen) throws InvalidKeyException, InvalidAlgorithmParameterException
     {
 	
-	initCipherForEncrypt(cipher);
+	initCipherForEncryptAndNotChangeIV(cipher);
 	int maxBlockSize=getMaxBlockSizeForEncoding();
 	if (maxBlockSize==Integer.MAX_VALUE)
-	    return cipher.getOutputSize(inputLen);
+	{
+	    if(includeIV())
+		return cipher.getOutputSize(inputLen)+cipher.getIV().length;
+	    else
+		return cipher.getOutputSize(inputLen);
+	}
 	int div=inputLen/maxBlockSize;
 	int mod=inputLen%maxBlockSize;
 	int res=0;
@@ -81,12 +86,15 @@ public abstract class AbstractEncryptionOutputAlgorithm
 	    res+=cipher.getOutputSize(maxBlockSize)*div;
 	if (mod>0)
 	    res+=cipher.getOutputSize(mod);
+	if(includeIV())
+	    res+=cipher.getIV().length;
 	return res;
     }
 
-    
+    protected abstract boolean includeIV();
     
     public abstract void initCipherForEncrypt(Cipher cipher) throws InvalidKeyException, InvalidAlgorithmParameterException;
+    public abstract void initCipherForEncryptAndNotChangeIV(Cipher cipher) throws InvalidKeyException, InvalidAlgorithmParameterException;
     
     protected abstract Cipher getCipherInstance() throws NoSuchAlgorithmException, NoSuchPaddingException;
     
@@ -95,7 +103,9 @@ public abstract class AbstractEncryptionOutputAlgorithm
 	initCipherForEncrypt(cipher);
 	
 	int maxBlockSize=getMaxBlockSizeForEncoding();
-	
+
+	if (includeIV())
+	    os.write(cipher.getIV());
 	byte[] buffer=new byte[BUFFER_SIZE];
 	boolean finish=false;
 	while (!finish)
@@ -145,6 +155,9 @@ public abstract class AbstractEncryptionOutputAlgorithm
 	if (off+len>bytes.length)
 	    throw new IllegalArgumentException("bytes.length="+bytes.length+", off="+off+", len="+len);
 	initCipherForEncrypt(cipher);
+
+	if (includeIV())
+	    os.write(cipher.getIV());
 	
 	int maxBlockSize=getMaxBlockSizeForEncoding();
 	
@@ -184,10 +197,13 @@ public abstract class AbstractEncryptionOutputAlgorithm
 	}
     }
     
-    public CipherOutputStream getCipherOutputStream(OutputStream os) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException
+    public CipherOutputStream getCipherOutputStream(OutputStream os) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException, IOException
     {
 	Cipher c=getCipherInstance();
 	initCipherForEncrypt(c);
+	if (includeIV())
+	    os.write(c.getIV());
+
 	return new CipherOutputStream(os, c);
     }
     

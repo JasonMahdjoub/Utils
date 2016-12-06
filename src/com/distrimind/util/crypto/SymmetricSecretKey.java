@@ -37,10 +37,8 @@ package com.distrimind.util.crypto;
 import java.io.Serializable;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.util.Arrays;
 
 import javax.crypto.SecretKey;
-import javax.crypto.spec.IvParameterSpec;
 
 import org.apache.commons.net.util.Base64;
 
@@ -61,9 +59,8 @@ public class SymmetricSecretKey implements Serializable
     private static final long serialVersionUID = -1811177031909192919L;
     private final SecretKey secretKey;
     private final SymmetricEncryptionType type;
-    private IvParameterSpec ivParameter;
     
-    private SymmetricSecretKey(SymmetricEncryptionType type, SecretKey secretKey, IvParameterSpec ivParameter)
+    private SymmetricSecretKey(SymmetricEncryptionType type, SecretKey secretKey)
     {
 	if (type==null)
 	    throw new NullPointerException("type");
@@ -72,7 +69,6 @@ public class SymmetricSecretKey implements Serializable
 	
 	this.secretKey=secretKey;
 	this.type=type;
-	this.ivParameter=ivParameter;
     }
     @Override
     public boolean equals(Object o)
@@ -84,7 +80,7 @@ public class SymmetricSecretKey implements Serializable
 	if (o instanceof SymmetricSecretKey)
 	{
 	    SymmetricSecretKey other=((SymmetricSecretKey) o);
-	    return secretKey.equals(other.secretKey) && type==other.type && ((ivParameter==null && other.ivParameter==null) || (ivParameter!=null && other.ivParameter!=null && Arrays.equals(ivParameter.getIV(), other.ivParameter.getIV())));
+	    return secretKey.equals(other.secretKey) && type==other.type;
 	}
 	return false;
     }
@@ -103,16 +99,6 @@ public class SymmetricSecretKey implements Serializable
     public static SymmetricSecretKey valueOf(String key)
     {
 	return decode(Base64.decodeBase64(key));
-    }
-    
-    void setIvParameterSpec(IvParameterSpec ivParameter)
-    {
-	this.ivParameter=ivParameter;
-    }
-    
-    IvParameterSpec getIvParameterSpec()
-    {
-	return ivParameter;
     }
     public SymmetricEncryptionType getAlgorithmType()
     {
@@ -135,26 +121,24 @@ public class SymmetricSecretKey implements Serializable
     
     public byte[] encode()
     {
-	byte iv[]=ivParameter==null?new byte[0]:ivParameter.getIV();
 	byte[] tab=new byte[4];
 	Bits.putInt(tab, 0, type.ordinal());
-	return Bits.concateEncodingWithShortSizedTabs(tab, Bits.concateEncodingWithShortSizedTabs(iv, SymmetricEncryptionType.encodeSecretKey(secretKey)));
+	return Bits.concateEncodingWithShortSizedTabs(tab, SymmetricEncryptionType.encodeSecretKey(secretKey));
     }
     
     public static SymmetricSecretKey decode(byte[] b) throws IllegalArgumentException
     {
 	byte[][] res=Bits.separateEncodingsWithShortSizedTabs(b);
-	byte[][] res2=Bits.separateEncodingsWithShortSizedTabs(res[1]);
-	return new SymmetricSecretKey(SymmetricEncryptionType.valueOf(Bits.getInt(res[0], 0)), SymmetricEncryptionType.decodeSecretKey(res2[1]), res2[0].length==0?null:new IvParameterSpec(res2[0]));
+	return new SymmetricSecretKey(SymmetricEncryptionType.valueOf(Bits.getInt(res[0], 0)), SymmetricEncryptionType.decodeSecretKey(res[1]));
     }
     
     public static SymmetricSecretKey generate(SecureRandom random, SymmetricEncryptionType type) throws NoSuchAlgorithmException
     {
-	return new SymmetricSecretKey(type, type.getKeyGenerator(random).generateKey(), null);
+	return new SymmetricSecretKey(type, type.getKeyGenerator(random).generateKey());
     }
 
     public static SymmetricSecretKey generate(SecureRandom random) throws NoSuchAlgorithmException
     {
-	return new SymmetricSecretKey(SymmetricEncryptionType.DEFAULT, SymmetricEncryptionType.DEFAULT.getKeyGenerator(random).generateKey(), null);
+	return new SymmetricSecretKey(SymmetricEncryptionType.DEFAULT, SymmetricEncryptionType.DEFAULT.getKeyGenerator(random).generateKey());
     }
 }

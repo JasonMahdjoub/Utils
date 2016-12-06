@@ -3,16 +3,16 @@
 <suite verbose="5" name="Failed suite [TestAll]">
   <test name="testCyrpto(failed)">
     <classes>
-      <class name="com.distrimind.util.tests.crypto.CryptoTests">
+      <class name="com.distrimind.util.crypto.CryptoTests">
         <methods>
-          <include name="testSecretKeyEncoding" invocation-numbers="3 1 2 4 0"/>
-          <include name="testSymetricEncryptions"/>
           <include name="testEncodeAndSeparateEncoding"/>
-          <include name="testASymmetricKeyPairEncoding"/>
           <include name="testP2PASymetricEncryptions"/>
+          <include name="testASymmetricKeyPairEncoding"/>
           <include name="testHybridEncryptions"/>
+          <include name="testSecretKeyEncoding"/>
+          <include name="testSymetricEncryptions" invocation-numbers="1 3 4 0 2 4 0 1 3 2 1 2 3 0 4 2 3 4 1 0 1 3 0 2 4 0 1 3 2 4 2 1 0 3 4 0 1 3 2 4 0 1 3 2 4 1 3 2 4 0"/>
         </methods>
-      </class> <!-- com.distrimind.util.tests.crypto.CryptoTests -->
+      </class> <!-- com.distrimind.util.crypto.CryptoTests -->
     </classes>
   </test> <!-- testCyrpto(failed) -->
 </suite> <!-- Failed suite [TestAll] -->

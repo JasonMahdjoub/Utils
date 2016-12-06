@@ -81,9 +81,15 @@ public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutpu
     @Override
     public void initCipherForEncrypt(Cipher _cipher) throws InvalidKeyException
     {
+	initCipherForEncryptAndNotChangeIV(_cipher);
+    }
+    @Override
+    public void initCipherForEncryptAndNotChangeIV(Cipher _cipher) throws InvalidKeyException
+    {
 	_cipher.init(Cipher.ENCRYPT_MODE, distantPublicKey.getPublicKey());
 	
     }
+    
 
     @Override
     protected Cipher getCipherInstance() throws NoSuchAlgorithmException, NoSuchPaddingException
@@ -105,6 +111,12 @@ public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutpu
     public int getMaxBlockSizeForEncoding()
     {
 	return maxBlockSize;
+    }
+
+    @Override
+    protected boolean includeIV()
+    {
+	return false;
     }
 
 }
