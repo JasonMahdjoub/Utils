@@ -57,15 +57,16 @@ import javax.crypto.NoSuchPaddingException;
  */
 public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOutputAlgorithm
 {
+    private final byte nullIV[];
     protected AbstractEncryptionIOAlgorithm(Cipher cipher)
     {
 	super(cipher);
-	
+	nullIV=new byte[cipher.getBlockSize()];
     }
     
     public int getOutputSizeForDecryption(int inputLen) throws InvalidKeyException, InvalidAlgorithmParameterException
     {
-	initCipherForDecrypt(cipher, null);
+	initCipherForDecrypt(cipher, nullIV);
 	if (includeIV())
 	    inputLen-=cipher.getIV().length;
 

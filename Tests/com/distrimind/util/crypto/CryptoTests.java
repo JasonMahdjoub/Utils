@@ -40,6 +40,7 @@ import java.security.InvalidKeyException;
 import java.security.KeyPair;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.SecureRandom;
 import java.security.Signature;
 import java.security.SignatureException;
@@ -407,7 +408,7 @@ public class CryptoTests
     
     
     @Test(invocationCount=10, dataProvider = "provideDataForSymetricEncryptions", dependsOnMethods="testSecretKeyEncoding")
-    public void testSymetricEncryptions(SymmetricEncryptionType type) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IOException, IllegalBlockSizeException, BadPaddingException
+    public void testSymetricEncryptions(SymmetricEncryptionType type) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IOException, IllegalBlockSizeException, BadPaddingException, NoSuchProviderException
     {
 	System.out.println("Testing "+type);
 	SecureRandom random=new SecureRandom();
@@ -466,7 +467,7 @@ public class CryptoTests
 	
     }
     @Test(dataProvider = "provideDataForSymetricEncryptions",dependsOnMethods="testEncodeAndSeparateEncoding")
-    public void testSecretKeyEncoding(SymmetricEncryptionType type) throws NoSuchAlgorithmException, InvalidKeyException, NoSuchPaddingException, InvalidAlgorithmParameterException
+    public void testSecretKeyEncoding(SymmetricEncryptionType type) throws NoSuchAlgorithmException, InvalidKeyException, NoSuchPaddingException, InvalidAlgorithmParameterException, NoSuchProviderException
     {
 	System.out.println("Testing "+type);
 	SecureRandom random=new SecureRandom();
@@ -492,7 +493,7 @@ public class CryptoTests
     }
 
     @Test(dataProvider = "provideDataForHybridEncryptions", dependsOnMethods={"testSymetricEncryptions", "testP2PASymetricEncryptions"})
-    public void testHybridEncryptions(ASymmetricEncryptionType astype, SymmetricEncryptionType stype) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IOException, IllegalBlockSizeException, BadPaddingException
+    public void testHybridEncryptions(ASymmetricEncryptionType astype, SymmetricEncryptionType stype) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IOException, IllegalBlockSizeException, BadPaddingException, NoSuchProviderException
     {
 	System.out.println("Testing "+astype+"/"+stype);
 	SecureRandom rand=new SecureRandom();
