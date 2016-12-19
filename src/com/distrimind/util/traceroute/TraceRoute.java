@@ -42,9 +42,9 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import com.distrimind.util.OSValidator;
 
-
 /**
- * Class that enables a trace route considering an {@link InetAddress}, independently from current OS running. 
+ * Class that enables a trace route considering an {@link InetAddress},
+ * independently from current OS running.
  * 
  * @author Jason Mahdjoub
  * @version 1.0
@@ -54,60 +54,19 @@ import com.distrimind.util.OSValidator;
 public abstract class TraceRoute
 {
 
-    TraceRoute()
-    {
-	
-    }
-    
-    /**
-     * Tracks the route packets taken from an IP network on their way to a given {@link InetAddress}.
-     *  
-     * @param _ia the host name to trace
-     * @return a ordered list of {@link InetAddress} (the route packet).
-     */
-    public List<InetAddress> tracePath(InetAddress _ia)
-    {
-	return this.tracePath(_ia, -1, -1);
-    }
+    private static final AtomicReference<TraceRoute> instance = new AtomicReference<>();
 
-    /**
-     * Tracks the route packets taken from an IP network on their way to a given {@link InetAddress}.
-     *  
-     * @param _ia the host name to trace
-     * @param depth Specifies the maximum number of hops 
-     * @return a ordered list of {@link InetAddress} (the route packet).
-     */
-    public List<InetAddress> tracePath(InetAddress _ia, int depth)
-    {
-	return this.tracePath(_ia, depth, -1);
-    }
-
-    /**
-     * Tracks the route packets taken from an IP network on their way to a given {@link InetAddress}.
-     *  
-     * @param _ia the host name to trace
-     * @param depth Specifies the maximum number of hops 
-     * @param time_out_ms Set the time (in milliseconds) to wait for a response to a probe. 
-     * @return a ordered list of {@link InetAddress} (the route packet). Some elements can be <code>null</code> references if no reply was given by some servers.
-     */
-    public abstract List<InetAddress> tracePath(InetAddress _ia, int depth, int time_out_ms);
-    
-    
-    
-    
-    private static final AtomicReference<TraceRoute> instance=new AtomicReference<>();
-    
     /**
      * 
      * @return a unique instance of TraceRoute
      */
     public static TraceRoute getInstance()
     {
-	if (instance.get()==null)
+	if (instance.get() == null)
 	{
-	    synchronized(instance)
+	    synchronized (instance)
 	    {
-		if (instance.get()==null)
+		if (instance.get() == null)
 		{
 		    if (OSValidator.isLinux())
 			instance.set(new LinuxTraceRoute());
@@ -122,12 +81,63 @@ public abstract class TraceRoute
 	}
 	return instance.get();
     }
- 
+
     public static void main(String args[]) throws UnknownHostException
     {
-	for (InetAddress ia : getInstance().tracePath(InetAddress.getByName("192.168.0.14"), -1, -1))
+	for (InetAddress ia : getInstance()
+		.tracePath(InetAddress.getByName("192.168.0.14"), -1, -1))
 	    System.out.println(ia);
-	
+
     }
-    
+
+    TraceRoute()
+    {
+
+    }
+
+    /**
+     * Tracks the route packets taken from an IP network on their way to a given
+     * {@link InetAddress}.
+     * 
+     * @param _ia
+     *            the host name to trace
+     * @return a ordered list of {@link InetAddress} (the route packet).
+     */
+    public List<InetAddress> tracePath(InetAddress _ia)
+    {
+	return this.tracePath(_ia, -1, -1);
+    }
+
+    /**
+     * Tracks the route packets taken from an IP network on their way to a given
+     * {@link InetAddress}.
+     * 
+     * @param _ia
+     *            the host name to trace
+     * @param depth
+     *            Specifies the maximum number of hops
+     * @return a ordered list of {@link InetAddress} (the route packet).
+     */
+    public List<InetAddress> tracePath(InetAddress _ia, int depth)
+    {
+	return this.tracePath(_ia, depth, -1);
+    }
+
+    /**
+     * Tracks the route packets taken from an IP network on their way to a given
+     * {@link InetAddress}.
+     * 
+     * @param _ia
+     *            the host name to trace
+     * @param depth
+     *            Specifies the maximum number of hops
+     * @param time_out_ms
+     *            Set the time (in milliseconds) to wait for a response to a
+     *            probe.
+     * @return a ordered list of {@link InetAddress} (the route packet). Some
+     *         elements can be <code>null</code> references if no reply was
+     *         given by some servers.
+     */
+    public abstract List<InetAddress> tracePath(InetAddress _ia, int depth, int time_out_ms);
+
 }

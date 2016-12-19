@@ -37,6 +37,7 @@ package com.distrimind.util.properties;
 
 /**
  * This object enables to convert an object to XML node content, and conversely.
+ * 
  * @author Jason Mahdjoub
  * @version 1.1
  * @since Utils 1.0
@@ -44,28 +45,38 @@ package com.distrimind.util.properties;
 public abstract class AbstractXMLObjectParser
 {
     /**
-     * Convert the XML node content to an object
-     * @param field_type the object type
-     * @param nodeValue the XML node content
-     * @return the corresponding object
-     * @throws Exception if a problem occurs
-     */
-    public abstract Object convertXMLToObject(Class<?> field_type, String nodeValue) throws Exception;
-    
-    /**
      * Convert an object to a XML node content
-     * @param field_type the object type
-     * @param object the object to convert
+     * 
+     * @param field_type
+     *            the object type
+     * @param object
+     *            the object to convert
      * @return the XML node content
-     * @throws Exception if a problem occurs
+     * @throws Exception
+     *             if a problem occurs
      */
     public abstract String convertObjectToXML(Class<?> field_type, Object object) throws Exception;
-    
+
+    /**
+     * Convert the XML node content to an object
+     * 
+     * @param field_type
+     *            the object type
+     * @param nodeValue
+     *            the XML node content
+     * @return the corresponding object
+     * @throws Exception
+     *             if a problem occurs
+     */
+    public abstract Object convertXMLToObject(Class<?> field_type, String nodeValue) throws Exception;
+
     /**
      * Tells if the given object type is managed by this class
-     * @param field_type the object type
+     * 
+     * @param field_type
+     *            the object type
      * @return true if the field type is managed by this class
      */
     public abstract boolean isValid(Class<?> field_type);
-    
+
 }

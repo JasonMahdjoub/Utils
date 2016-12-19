@@ -45,6 +45,7 @@ import com.distrimind.util.version.Version.Type;
 
 /**
  * Represents the description of program version
+ * 
  * @author Jason Mahdjoub
  * @version 1.0
  * @since Utils 1.5
@@ -52,76 +53,90 @@ import com.distrimind.util.version.Version.Type;
  */
 public class Description extends XMLProperties
 {
-    
+
     /**
      * 
      */
     private static final long serialVersionUID = -5480559682819518935L;
-    
-    
-    private ArrayList<String> m_items=new ArrayList<String>();
-    private int m_major=0;
-    private int m_minor=0;
-    private int m_revision=0;
-    private Version.Type m_type=null;
-    private int m_alpha_beta_version=0;
+
+    private ArrayList<String> m_items = new ArrayList<String>();
+
+    private int m_major = 0;
+
+    private int m_minor = 0;
+
+    private int m_revision = 0;
+
+    private Version.Type m_type = null;
+
+    private int m_alpha_beta_version = 0;
+
     private Date m_date;
-    
+
     protected Description()
     {
-	this(0,0,0,Version.Type.Alpha, 0, new Date());
+	this(0, 0, 0, Version.Type.Alpha, 0, new Date());
     }
+
     public Description(int _major, int _minor, int _revision, Version.Type _type, int _alpha_beta_version, Date _date)
     {
 	super(null);
-	if (_date==null)
+	if (_date == null)
 	    throw new NullPointerException("_date");
-	m_major=_major;
-	m_minor=_minor;
-	m_revision=_revision;
-	m_type=_type;
-	m_alpha_beta_version=_alpha_beta_version;
-	m_date=_date;
+	m_major = _major;
+	m_minor = _minor;
+	m_revision = _revision;
+	m_type = _type;
+	m_alpha_beta_version = _alpha_beta_version;
+	m_date = _date;
     }
-    public int getMajor()
+
+    public void addItem(String d)
     {
-	return m_major;
+	if (d == null)
+	    throw new NullPointerException(d);
+	m_items.add(d);
     }
-    public int getMinor()
+
+    @Override
+    public boolean equals(Object o)
     {
-	return m_minor;
+	if (o == null)
+	    return false;
+	if (o == this)
+	    return true;
+	if (o instanceof Description)
+	{
+	    Description d = (Description) o;
+	    return d.m_alpha_beta_version == m_alpha_beta_version
+		    && d.m_date.equals(m_date) && d.m_items.equals(m_items)
+		    && d.m_major == m_major && d.m_minor == m_minor
+		    && d.m_revision == m_revision && d.m_type.equals(m_type);
+	}
+	return false;
     }
-    public int getRevision()
-    {
-	return m_revision;
-    }
-    public Type getType()
-    {
-	return m_type;
-    }
-    
+
     public int getAlphaBetaVersion()
     {
 	return m_alpha_beta_version;
     }
+
     public Date getDate()
     {
 	return m_date;
     }
-    public void addItem(String d)
-    {
-	if (d==null)
-	    throw new NullPointerException(d);
-	m_items.add(d);
-    }
-    public ArrayList<String> getItems()
-    {
-	return m_items;
-    }
+
     public String getHTML()
     {
-	StringBuffer s=new StringBuffer();
-	s.append("<BR><H2>"+m_major+"."+m_minor+"."+m_revision+" "+m_type+((m_type.equals(Type.Alpha) || m_type.equals(Type.Beta))?" "+Integer.toString(m_alpha_beta_version):"")+" ("+DateFormat.getDateInstance(DateFormat.SHORT, Locale.FRANCE).format(m_date)+")</H2>");
+	StringBuffer s = new StringBuffer();
+	s.append("<BR><H2>" + m_major + "." + m_minor + "." + m_revision + " "
+		+ m_type
+		+ ((m_type.equals(Type.Alpha) || m_type.equals(Type.Beta))
+			? " " + Integer.toString(m_alpha_beta_version) : "")
+		+ " ("
+		+ DateFormat.getDateInstance(DateFormat.SHORT, Locale.FRANCE)
+			.format(m_date)
+		+ ")</H2>");
 	s.append("<ul>");
 	for (String d : m_items)
 	{
@@ -133,18 +148,28 @@ public class Description extends XMLProperties
 	return s.toString();
     }
 
-    @Override
-    public boolean equals(Object o)
+    public ArrayList<String> getItems()
     {
-	if (o==null)
-	    return false;
-	if (o==this)
-	    return true;
-	if (o instanceof Description)
-	{
-	    Description d=(Description)o;
-	    return d.m_alpha_beta_version==m_alpha_beta_version && d.m_date.equals(m_date) && d.m_items.equals(m_items) && d.m_major==m_major && d.m_minor==m_minor && d.m_revision==m_revision && d.m_type.equals(m_type);
-	}
-	return false;
+	return m_items;
+    }
+
+    public int getMajor()
+    {
+	return m_major;
+    }
+
+    public int getMinor()
+    {
+	return m_minor;
+    }
+
+    public int getRevision()
+    {
+	return m_revision;
+    }
+
+    public Type getType()
+    {
+	return m_type;
     }
 }

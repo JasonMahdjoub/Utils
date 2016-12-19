@@ -39,86 +39,138 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-
-import javax.crypto.BadPaddingException;
+import gnu.vm.java.security.InvalidKeyException;
+import gnu.vm.java.security.NoSuchAlgorithmException;
+import gnu.vm.java.security.NoSuchProviderException;
+import gnu.vm.java.security.spec.InvalidKeySpecException;
+import gnu.vm.javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
-import javax.crypto.CipherInputStream;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
+import gnu.vm.javax.crypto.IllegalBlockSizeException;
+import gnu.vm.javax.crypto.NoSuchPaddingException;
 
 /**
  * 
  * @author Jason Mahdjoub
- * @version 1.1
+ * @version 2.0
  * @since Utils 1.7.0
  */
 public class ServerASymmetricEncryptionAlgorithm
 {
     private final ASymmetricKeyPair myKeyPair;
+
     private final SignerAlgorithm signer;
+
     private final ASymmetricEncryptionType type;
-    private final Cipher cipher;
+
+    private final AbstractCipher cipher;
+
     private final SignatureType signatureType;
+
     private final int maxBlockSize;
-    
-    public ServerASymmetricEncryptionAlgorithm(ASymmetricKeyPair myKeyPair) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException
+
+    public ServerASymmetricEncryptionAlgorithm(ASymmetricKeyPair myKeyPair) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidKeySpecException, NoSuchProviderException
     {
-	this(myKeyPair.getAlgorithmType().getDefaultSignatureAlgorithm(), myKeyPair);
+	this(myKeyPair.getAlgorithmType().getDefaultSignatureAlgorithm(),
+		myKeyPair);
     }
 
-    public ServerASymmetricEncryptionAlgorithm(SignatureType signatureType, ASymmetricKeyPair myKeyPair) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException
+    public ServerASymmetricEncryptionAlgorithm(SignatureType signatureType, ASymmetricKeyPair myKeyPair) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidKeySpecException, NoSuchProviderException
     {
-	
-	if (signatureType==null)
+
+	if (signatureType == null)
 	    throw new NullPointerException("signatureType");
-	if (myKeyPair==null)
+	if (myKeyPair == null)
 	    throw new NullPointerException("myKeyPair");
-	
-	this.type=myKeyPair.getAlgorithmType();
-	this.myKeyPair=myKeyPair;
-	this.signatureType=signatureType;
-	this.signer=new SignerAlgorithm(signatureType, myKeyPair.getASymmetricPrivateKey());
-	cipher=type.getCipherInstance();
-	cipher.init(Cipher.ENCRYPT_MODE, myKeyPair.getASymmetricPublicKey().getPublicKey());
-	maxBlockSize=cipher.getOutputSize(myKeyPair.getMaxBlockSize());
+
+	this.type = myKeyPair.getAlgorithmType();
+	this.myKeyPair = myKeyPair;
+	this.signatureType = signatureType;
+	this.signer = new SignerAlgorithm(signatureType,
+		myKeyPair.getASymmetricPrivateKey());
+	cipher = type.getCipherInstance();
+	cipher.init(Cipher.ENCRYPT_MODE, myKeyPair.getASymmetricPublicKey());
+	maxBlockSize = cipher.getOutputSize(myKeyPair.getMaxBlockSize());
 	initCipherForDecrypt(cipher);
     }
-    
-    public int getOutputSizeForDecryption(int inputLen) throws InvalidKeyException
-    {
-	initCipherForDecrypt(cipher);
-	int maxBlockSize=getMaxBlockSizeForDecoding();
-	int div=inputLen/maxBlockSize;
-	int mod=inputLen%maxBlockSize;
-	int res=0;
-	if (div>0)
-	    res+=cipher.getOutputSize(maxBlockSize)*div;
-	if (mod>0)
-	    res+=cipher.getOutputSize(mod);
-	return res;
-    }
-    
-    public SignatureType getSignatureType()
-    {
-	return signatureType;
-    }
-    
 
-    public void initCipherForDecrypt(Cipher _cipher) throws InvalidKeyException
+    public byte[] decode(byte[] bytes) throws InvalidKeyException, IOException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException
     {
-	_cipher.init(Cipher.DECRYPT_MODE, myKeyPair.getASymmetricPrivateKey().getPrivateKey());
+	return decode(bytes, 0, bytes.length);
     }
 
-    protected Cipher getCipherInstance() throws NoSuchAlgorithmException, NoSuchPaddingException
+    public byte[] decode(byte[] bytes, int off, int len) throws InvalidKeyException, IOException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException
+    {
+	try (ByteArrayInputStream bais = new ByteArrayInputStream(bytes, off,
+		len))
+	{
+	    return decode(bais);
+	}
+    }
+
+    public byte[] decode(InputStream is) throws InvalidKeyException, IOException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException
+    {
+	try (ByteArrayOutputStream baos = new ByteArrayOutputStream())
+	{
+	    this.decode(is, baos);
+	    return baos.toByteArray();
+	}
+    }
+
+    public void decode(InputStream is, OutputStream os) throws InvalidKeyException, IOException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException
+    {
+	// initCipherForDecrypt(cipher);
+
+	int maxBlockSize = getMaxBlockSizeForDecoding();
+
+	byte[] buffer = new byte[AbstractEncryptionOutputAlgorithm.BUFFER_SIZE];
+	boolean finish = false;
+
+	while (!finish)
+	{
+	    initCipherForDecrypt(cipher);
+	    int blockACC = 0;
+	    do
+	    {
+		int nb = Math.min(AbstractEncryptionOutputAlgorithm.BUFFER_SIZE,
+			maxBlockSize - blockACC);
+		int size = is.read(buffer, 0, nb);
+		if (size > 0)
+		{
+		    os.write(cipher.update(buffer, 0, size));
+		    blockACC += size;
+
+		}
+		if (nb != size || size <= 0)
+		    finish = true;
+	    } while (blockACC < maxBlockSize && !finish);
+	    if (blockACC != 0)
+		os.write(cipher.doFinal());
+	}
+
+	os.flush();
+
+	/*
+	 * try(CipherInputStream cis=new CipherInputStream(is, cipher)) { int
+	 * read=-1; do { read=cis.read(); if (read!=-1) os.write(read); }while
+	 * (read!=-1); }
+	 */
+    }
+
+    public InputStream getCipherInputStream(InputStream is) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidKeySpecException, NoSuchProviderException
+    {
+	AbstractCipher c = getCipherInstance();
+	initCipherForDecrypt(c);
+	return c.getCipherInputStream(is);
+    }
+
+    protected AbstractCipher getCipherInstance() throws NoSuchAlgorithmException, NoSuchPaddingException
     {
 	return type.getCipherInstance();
     }
-    
-    public SignerAlgorithm getSignerAlgorithm()
+
+    public int getMaxBlockSizeForDecoding()
     {
-	return signer;
+	return maxBlockSize;
     }
 
     public ASymmetricKeyPair getMyKeyPair()
@@ -126,82 +178,33 @@ public class ServerASymmetricEncryptionAlgorithm
 	return this.myKeyPair;
     }
 
-    
-    public byte[] decode(byte[] bytes) throws InvalidKeyException, IOException, IllegalBlockSizeException, BadPaddingException
+    public int getOutputSizeForDecryption(int inputLen) throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException
     {
-	return decode(bytes, 0, bytes.length);
+	initCipherForDecrypt(cipher);
+	int maxBlockSize = getMaxBlockSizeForDecoding();
+	int div = inputLen / maxBlockSize;
+	int mod = inputLen % maxBlockSize;
+	int res = 0;
+	if (div > 0)
+	    res += cipher.getOutputSize(maxBlockSize) * div;
+	if (mod > 0)
+	    res += cipher.getOutputSize(mod);
+	return res;
     }
-    public byte[] decode(byte[] bytes, int off, int len) throws InvalidKeyException, IOException, IllegalBlockSizeException, BadPaddingException
+
+    public SignatureType getSignatureType()
     {
-	try(ByteArrayInputStream bais=new ByteArrayInputStream(bytes, off, len))
-	{
-	    return decode(bais);
-	}
+	return signatureType;
     }
-    
-    public byte[] decode(InputStream is) throws InvalidKeyException, IOException, IllegalBlockSizeException, BadPaddingException
+
+    public SignerAlgorithm getSignerAlgorithm()
     {
-	try(ByteArrayOutputStream baos=new ByteArrayOutputStream())
-	{
-	    this.decode(is, baos);
-	    return baos.toByteArray();
-	}
+	return signer;
     }
-    
-    public int getMaxBlockSizeForDecoding()
+
+    public void initCipherForDecrypt(AbstractCipher _cipher) throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException
     {
-	return maxBlockSize;
+	_cipher.init(Cipher.DECRYPT_MODE, myKeyPair.getASymmetricPrivateKey());
     }
-    public void decode(InputStream is, OutputStream os) throws InvalidKeyException, IOException, IllegalBlockSizeException, BadPaddingException
-    {
-	//initCipherForDecrypt(cipher);
-	
-	int maxBlockSize=getMaxBlockSizeForDecoding();
-	
-	byte[] buffer=new byte[AbstractEncryptionOutputAlgorithm.BUFFER_SIZE];
-	boolean finish=false;
-	
-	while (!finish)
-	{
-	    initCipherForDecrypt(cipher);
-	    int blockACC=0;
-	    do
-	    {
-		int nb=Math.min(AbstractEncryptionOutputAlgorithm.BUFFER_SIZE, maxBlockSize-blockACC);
-		int size=is.read(buffer, 0, nb);
-		if (size>0)
-		{
-		    os.write(cipher.update(buffer, 0, size));
-		    blockACC+=size;
-		    
-		}
-		if (nb!=size || size<=0)
-		    finish=true;
-	    } while (blockACC<maxBlockSize && !finish);
-	    if (blockACC!=0)
-		os.write(cipher.doFinal());
-	}
-	
-	os.flush();
-	
-	/*try(CipherInputStream cis=new CipherInputStream(is, cipher))
-	{
-	    int read=-1;
-	    do
-	    {
-		read=cis.read();
-		if (read!=-1)
-		    os.write(read);
-	    }while (read!=-1);
-	}*/
-    }
-    
-    public CipherInputStream getCipherInputStream(InputStream is) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException
-    {
-	Cipher c=getCipherInstance();
-	initCipherForDecrypt(c);
-	return new CipherInputStream(is, c);
-    }
-    
-    
+
 }

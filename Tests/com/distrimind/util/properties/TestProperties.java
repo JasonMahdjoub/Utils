@@ -38,7 +38,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.UnknownHostException;
-import java.security.NoSuchAlgorithmException;
 import java.util.Properties;
 
 import org.testng.Assert;
@@ -46,6 +45,8 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.distrimind.util.properties.XMLPropertiesParseException;
+
+import gnu.vm.java.security.NoSuchProviderException;
 
 /**
  * 
@@ -55,52 +56,54 @@ import com.distrimind.util.properties.XMLPropertiesParseException;
  */
 public class TestProperties
 {
-    @Test (dataProvider = "getPropertiesExample")
+    @DataProvider(name = "getPropertiesExample")
+    PropertiesExample[][] getPropertiesExample() throws MalformedURLException, UnknownHostException, gnu.vm.java.security.NoSuchAlgorithmException, NoSuchProviderException
+    {
+	PropertiesExample[][] res = new PropertiesExample[100][];
+	res[0] = new PropertiesExample[] { new PropertiesExample(null) };
+	for (int i = 1; i < res.length; i++)
+	{
+	    PropertiesExample pe = new PropertiesExample(null);
+	    pe.generateValues();
+	    res[i] = new PropertiesExample[] { pe };
+	}
+
+	return res;
+
+    }
+
+    @Test
+    void testFreeProperties()
+    {
+	Properties p = new Properties();
+	p.put("freeProp", "valueFreeProp");
+	PropertiesExample pe = new PropertiesExample(null);
+	pe.loadFromProperties(p);
+	Assert.assertTrue(pe.getFreeStringProperties().containsKey("freeProp"));
+	Assert.assertEquals("valueFreeProp",
+		pe.getFreeStringProperties().get("freeProp"));
+    }
+
+    @Test(dataProvider = "getPropertiesExample")
+    public void testPropertiesExport(PropertiesExample pe)
+    {
+	Properties p = pe.convertToStringProperties();
+	PropertiesExample pe2 = new PropertiesExample(null);
+	pe2.loadFromProperties(p);
+	pe.equals(pe2);
+	Assert.assertEquals(pe2, pe);
+    }
+
+    @Test(dataProvider = "getPropertiesExample")
     public void testPropertiesXMLSave(PropertiesExample pe) throws XMLPropertiesParseException, IOException
     {
-	File f=new File("propertiesExemple.xml");
+	File f = new File("propertiesExemple.xml");
 	pe.save(f);
-	PropertiesExample pe2=new PropertiesExample(null);
+	PropertiesExample pe2 = new PropertiesExample(null);
 	pe2.load(f);
 	pe.equals(pe2);
 	Assert.assertEquals(pe2, pe);
 	f.delete();
     }
-    
-    @Test (dataProvider = "getPropertiesExample")
-    public void testPropertiesExport(PropertiesExample pe)
-    {
-	Properties p=pe.convertToStringProperties();
-	PropertiesExample pe2=new PropertiesExample(null);
-	pe2.loadFromProperties(p);
-	pe.equals(pe2);
-	Assert.assertEquals(pe2, pe);
-    }
-    
-    @Test void testFreeProperties()
-    {
-	Properties p=new Properties();
-	p.put("freeProp", "valueFreeProp");
-	PropertiesExample pe=new PropertiesExample(null);
-	pe.loadFromProperties(p);
-	Assert.assertTrue(pe.getFreeStringProperties().containsKey("freeProp"));
-	Assert.assertEquals("valueFreeProp", pe.getFreeStringProperties().get("freeProp"));
-    }
-    
-    @DataProvider(name = "getPropertiesExample")
-    PropertiesExample[][] getPropertiesExample() throws MalformedURLException, UnknownHostException, NoSuchAlgorithmException
-    {
-	PropertiesExample[][] res=new PropertiesExample[100][];
-	res[0]=new PropertiesExample[]{new PropertiesExample(null)};
-	for (int i=1;i<res.length;i++)
-	{
-	    PropertiesExample pe=new PropertiesExample(null);
-	    pe.generateValues();
-	    res[i]=new PropertiesExample[]{pe};
-	}
-	
-	return res;   
-		    
-    }
-    
+
 }

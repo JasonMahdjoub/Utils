@@ -38,8 +38,10 @@ package com.distrimind.util.version;
 import java.text.DateFormat;
 import java.util.Date;
 import java.util.Locale;
+
 /**
  * Represents a person developing a software
+ * 
  * @author Jason Mahdjoub
  * @version 1.0
  * @since Utils 1.0
@@ -52,44 +54,51 @@ public class PersonDeveloper extends Person
      * 
      */
     private static final long serialVersionUID = 6519819432111179436L;
-    
+
     private Date m_date_begin_development;
-    
-    public PersonDeveloper(String _name, String _first_name, Date _date_begin_development)
-    {
-	super(_name, _first_name);
-	if (_date_begin_development==null)
-	    throw new NullPointerException("_date_begin_development");
-	m_date_begin_development=_date_begin_development;
-    }
 
     protected PersonDeveloper()
     {
-	this("","",new Date());
+	this("", "", new Date());
     }
+
+    public PersonDeveloper(String _name, String _first_name, Date _date_begin_development)
+    {
+	super(_name, _first_name);
+	if (_date_begin_development == null)
+	    throw new NullPointerException("_date_begin_development");
+	m_date_begin_development = _date_begin_development;
+    }
+
+    @Override
+    public boolean equals(Object o)
+    {
+	if (o == null)
+	    return false;
+	if (o == this)
+	    return true;
+	if (o instanceof PersonDeveloper)
+	{
+	    PersonDeveloper p = ((PersonDeveloper) o);
+	    return m_first_name.equals(p.m_first_name)
+		    && m_name.equals(p.m_name) && m_date_begin_development
+			    .equals(p.m_date_begin_development);
+	}
+	return false;
+    }
+
     public Date getDateBeginDevelopment()
     {
 	return m_date_begin_development;
     }
-    
-    @Override public String toString()
-    {
-	return m_first_name+" "+m_name+" (Entred in the team at "+DateFormat.getDateInstance(DateFormat.SHORT, Locale.FRANCE).format(m_date_begin_development)+")";
-    }
+
     @Override
-    public boolean equals(Object o)
+    public String toString()
     {
-	if (o==null)
-	    return false;
-	if (o==this)
-	    return true;
-	if (o instanceof PersonDeveloper)
-	{
-	    PersonDeveloper p=((PersonDeveloper) o);
-	    return m_first_name.equals(p.m_first_name) && m_name.equals(p.m_name) && m_date_begin_development.equals(p.m_date_begin_development);
-	}
-	return false;
+	return m_first_name + " " + m_name + " (Entred in the team at "
+		+ DateFormat.getDateInstance(DateFormat.SHORT, Locale.FRANCE)
+			.format(m_date_begin_development)
+		+ ")";
     }
-   
-    
+
 }

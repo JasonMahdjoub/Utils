@@ -34,69 +34,68 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.Signature;
-import java.security.SignatureException;
+import gnu.vm.java.security.spec.InvalidKeySpecException;
 
 /**
  * 
  * @author Jason Mahdjoub
- * @version 1.1
+ * @version 2.0
  * @since Utils 1.7
  */
 public class SignerAlgorithm
 {
     private final ASymmetricPrivateKey localPrivateKey;
-    private final Signature signature;
-    
-    public SignerAlgorithm(ASymmetricPrivateKey localPrivateKey) throws NoSuchAlgorithmException
+
+    private final AbstractSignature signature;
+
+    public SignerAlgorithm(AbstractSignature signature, ASymmetricPrivateKey localPrivateKey)
     {
-	this(localPrivateKey.getAlgorithmType().getDefaultSignatureAlgorithm().getSignatureInstance(), localPrivateKey);
+	if (signature == null)
+	    throw new NullPointerException("signature");
+	if (localPrivateKey == null)
+	    throw new NullPointerException("localPrivateKey");
+	this.localPrivateKey = localPrivateKey;
+	this.signature = signature;
     }
-    
-    public SignerAlgorithm(SignatureType type, ASymmetricPrivateKey localPrivateKey) throws NoSuchAlgorithmException
+
+    public SignerAlgorithm(ASymmetricPrivateKey localPrivateKey) throws gnu.vm.java.security.NoSuchAlgorithmException
+    {
+	this(localPrivateKey.getAlgorithmType().getDefaultSignatureAlgorithm()
+		.getSignatureInstance(), localPrivateKey);
+    }
+
+    public SignerAlgorithm(SignatureType type, ASymmetricPrivateKey localPrivateKey) throws gnu.vm.java.security.NoSuchAlgorithmException
     {
 	this(type.getSignatureInstance(), localPrivateKey);
     }
 
-    public SignerAlgorithm(Signature signature, ASymmetricPrivateKey localPrivateKey)
-    {
-	if (signature==null)
-	    throw new NullPointerException("signature");
-	if (localPrivateKey==null)
-	    throw new NullPointerException("localPrivateKey");
-	this.localPrivateKey=localPrivateKey;
-	this.signature=signature;
-    }
-    
     public ASymmetricPrivateKey getLocalPrivateKey()
     {
 	return localPrivateKey;
     }
-    
-    public byte[] sign(byte bytes[]) throws InvalidKeyException, SignatureException
+
+    public AbstractSignature getSignature()
+    {
+	return signature;
+    }
+
+    public byte[] sign(byte bytes[]) throws gnu.vm.java.security.InvalidKeyException, gnu.vm.java.security.SignatureException, gnu.vm.java.security.NoSuchAlgorithmException, InvalidKeySpecException
     {
 	return this.sign(bytes, 0, bytes.length);
     }
-    public byte[] sign(byte bytes[], int off, int len) throws InvalidKeyException, SignatureException
+
+    public byte[] sign(byte bytes[], int off, int len) throws gnu.vm.java.security.InvalidKeyException, gnu.vm.java.security.SignatureException, gnu.vm.java.security.NoSuchAlgorithmException, InvalidKeySpecException
     {
-	signature.initSign(localPrivateKey.getPrivateKey());
+	signature.initSign(localPrivateKey);
 	signature.update(bytes, off, len);
 	return signature.sign();
     }
 
-    public void sign(byte message[], int offm, int lenm, byte signature[], int off_sig, int len_sig) throws InvalidKeyException, SignatureException
+    public void sign(byte message[], int offm, int lenm, byte signature[], int off_sig, int len_sig) throws gnu.vm.java.security.InvalidKeyException, gnu.vm.java.security.SignatureException, gnu.vm.java.security.NoSuchAlgorithmException, InvalidKeySpecException
     {
-	this.signature.initSign(localPrivateKey.getPrivateKey());
+	this.signature.initSign(localPrivateKey);
 	this.signature.update(message, offm, lenm);
 	this.signature.sign(signature, off_sig, len_sig);
     }
-    
-    public Signature getSignature()
-    {
-	return signature;
-    }
-    
-    
+
 }

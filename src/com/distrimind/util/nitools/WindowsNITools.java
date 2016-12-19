@@ -45,17 +45,16 @@ import com.distrimind.util.OSValidator;
  * 
  * @author Jason Mahdjoub
  * @version 1.0
- * @since Utils 1.0 
+ * @since Utils 1.0
  *
  */
 class WindowsNITools extends NITools
 {
     WindowsNITools()
     {
-	
+
     }
-    
-    
+
     @Override
     public long getNetworkInterfaceSpeed(NetworkInterface _network_interface)
     {
@@ -63,58 +62,63 @@ class WindowsNITools extends NITools
 	{
 	    if (_network_interface.isLoopback())
 		return Long.MAX_VALUE;
-	    Process p=null;
-	    //TODO check compatibility with Vista and Seven
+	    Process p = null;
+	    // TODO check compatibility with Vista and Seven
 	    if (OSValidator.getOSVersion().toLowerCase().contains("vista"))
-		p=Runtime.getRuntime().exec("wmic NIC where \"NetEnabled=true\" get \"InterfaceIndex,Speed\"");
+		p = Runtime.getRuntime().exec(
+			"wmic NIC where \"NetEnabled=true\" get \"InterfaceIndex,Speed\"");
 	    else
-		p=Runtime.getRuntime().exec("wmic NIC where NetEnabled=true get InterfaceIndex,Speed");
-	    
-	    long res=-1;
-	    try(InputStreamReader isr=new InputStreamReader(p.getInputStream()))
+		p = Runtime.getRuntime().exec(
+			"wmic NIC where NetEnabled=true get InterfaceIndex,Speed");
+
+	    long res = -1;
+	    try (InputStreamReader isr = new InputStreamReader(
+		    p.getInputStream()))
 	    {
-		try(BufferedReader input =new BufferedReader(isr))
+		try (BufferedReader input = new BufferedReader(isr))
 		{
 		    String line = null;
-		    boolean first=true;
-		    while (res==-1 && (line = input.readLine())!=null)
+		    boolean first = true;
+		    while (res == -1 && (line = input.readLine()) != null)
 		    {
 			if (first)
 			{
-			    first=false;
+			    first = false;
 			    continue;
 			}
-			
-			String split[]=line.split(" ");
-			String index=null;
-			int i=0;
-			for (;i<split.length-1;i++)
+
+			String split[] = line.split(" ");
+			String index = null;
+			int i = 0;
+			for (; i < split.length - 1; i++)
 			{
-			    if (split[i].length()>0)
+			    if (split[i].length() > 0)
 			    {
-				index=split[i];
+				index = split[i];
 				break;
 			    }
 			}
-			if (index!=null)
+			if (index != null)
 			{
 			    try
 			    {
-				if (Integer.parseInt(split[0])==_network_interface.getIndex())
+				if (Integer.parseInt(
+					split[0]) == _network_interface
+						.getIndex())
 				{
-				    for (int j=split.length-1;j>i;j--)
+				    for (int j = split.length - 1; j > i; j--)
 				    {
-					if (split[j].length()!=0)
+					if (split[j].length() != 0)
 					{
-					    res=readLong(split[j]);
+					    res = readLong(split[j]);
 					    break;
 					}
 				    }
 				}
 			    }
-			    catch(Exception e)
+			    catch (Exception e)
 			    {
-				
+
 			    }
 			}
 		    }
@@ -129,7 +133,5 @@ class WindowsNITools extends NITools
 	    return -1;
 	}
     }
-    
-    
 
 }

@@ -34,8 +34,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util;
 
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
+import gnu.vm.java.security.NoSuchAlgorithmException;
 import java.util.EnumSet;
 
 import org.testng.Assert;
@@ -47,7 +46,11 @@ import com.distrimind.util.AbstractDecentralizedIDGenerator;
 import com.distrimind.util.DecentralizedIDGenerator;
 import com.distrimind.util.RenforcedDecentralizedIDGenerator;
 import com.distrimind.util.SecuredDecentralizedID;
+import com.distrimind.util.crypto.AbstractSecureRandom;
 import com.distrimind.util.crypto.MessageDigestType;
+import com.distrimind.util.crypto.SecureRandomType;
+
+import gnu.vm.java.security.NoSuchProviderException;
 
 /**
  * 
@@ -57,120 +60,140 @@ import com.distrimind.util.crypto.MessageDigestType;
  */
 public class DecentralizedIDTests
 {
-    private static final int numberofTests=2000;
-    
-    @Test
-    public void testRenforcedDecentralizedID() throws NoSuchAlgorithmException
+    private static final int numberofTests = 2000;
+
+    @DataProvider(name = "getDEncetralizedIDs", parallel = true)
+    public Object[][] getDEncetralizedIDs() throws NoSuchAlgorithmException, NoSuchProviderException
     {
-	SecureRandom rand=new SecureRandom();
-	for (MessageDigestType type : EnumSet.allOf(MessageDigestType.class))
+	Object[][] res = new Object[numberofTests][];
+	AbstractSecureRandom rand = SecureRandomType.DEFAULT.getInstance();
+	for (int i = 0; i < res.length; i++)
 	{
-	    testRenforcedDecentralizedID(type, rand);
+	    switch ((int) Math.random() * 4)
+	    {
+		case 0:
+		    res[i] = new Object[] { new DecentralizedIDGenerator() };
+		    break;
+		case 1:
+		    res[i] = new Object[] {
+			    new RenforcedDecentralizedIDGenerator() };
+		    break;
+		case 2:
+		    res[i] = new Object[] { new SecuredDecentralizedID(
+			    new RenforcedDecentralizedIDGenerator(), rand) };
+		    break;
+		case 3:
+		    res[i] = new Object[] { new SecuredDecentralizedID(
+			    new DecentralizedIDGenerator(), rand) };
+		    break;
+	    }
 	}
-    }
-    
-    public void testRenforcedDecentralizedID(MessageDigestType type, SecureRandom rand) throws NoSuchAlgorithmException 
-    {
-	for (int i=0;i<numberofTests;i++)
-	{
-	    testEquals(type, rand, new RenforcedDecentralizedIDGenerator(), new RenforcedDecentralizedIDGenerator());
-	}
+	return res;
     }
 
-    
     @Test
-    public void testDecentralizedID() throws NoSuchAlgorithmException
+    public void testDecentralizedID() throws NoSuchAlgorithmException, NoSuchProviderException
     {
-	SecureRandom rand=new SecureRandom();
+	AbstractSecureRandom rand = SecureRandomType.DEFAULT.getInstance();
 	for (MessageDigestType type : EnumSet.allOf(MessageDigestType.class))
 	{
 	    testDecentralizedID(type, rand);
 	}
     }
-    
-    public void testDecentralizedID(MessageDigestType type, SecureRandom rand) throws NoSuchAlgorithmException 
+
+    public void testDecentralizedID(MessageDigestType type, AbstractSecureRandom rand) throws NoSuchAlgorithmException
     {
-	for (int i=0;i<numberofTests;i++)
+	for (int i = 0; i < numberofTests; i++)
 	{
-	    testEquals(type, rand, new DecentralizedIDGenerator(), new DecentralizedIDGenerator());
-	    
+	    testEquals(type, rand, new DecentralizedIDGenerator(),
+		    new DecentralizedIDGenerator());
+
 	}
     }
-    void testToStringAndValueOf(DecentralizedIDGenerator value)
-    {
-	Assert.assertEquals(DecentralizedIDGenerator.valueOf(value.toString()), value);
-    }
-    
-    void testToStringAndValueOf(RenforcedDecentralizedIDGenerator value)
-    {
-	Assert.assertEquals(RenforcedDecentralizedIDGenerator.valueOf(value.toString()), value);
-    }
-    void testToStringAndValueOf(SecuredDecentralizedID value)
-    {
-	Assert.assertEquals(SecuredDecentralizedID.valueOf(value.toString()), value);
-    }
-    
-    @Test
-    public void testToStringAndValueOf() throws NoSuchAlgorithmException
-    {
-	testToStringAndValueOf(new DecentralizedIDGenerator());
-	testToStringAndValueOf(new RenforcedDecentralizedIDGenerator());
-	testToStringAndValueOf(new SecuredDecentralizedID(new DecentralizedIDGenerator(), new SecureRandom()));
-    }
-    
-    private void testEquals(MessageDigestType type, SecureRandom rand, AbstractDecentralizedIDGenerator id1, AbstractDecentralizedIDGenerator id2) throws NoSuchAlgorithmException
+
+    private void testEquals(MessageDigestType type, AbstractSecureRandom rand, AbstractDecentralizedIDGenerator id1, AbstractDecentralizedIDGenerator id2) throws gnu.vm.java.security.NoSuchAlgorithmException
     {
 	Assert.assertNotEquals(id1, id2);
-	SecuredDecentralizedID sid1=new SecuredDecentralizedID(type, id1, rand);
-	SecuredDecentralizedID sid2=new SecuredDecentralizedID(type, id2, rand);
+	SecuredDecentralizedID sid1 = new SecuredDecentralizedID(type, id1,
+		rand);
+	SecuredDecentralizedID sid2 = new SecuredDecentralizedID(type, id2,
+		rand);
 	Assert.assertNotEquals(sid1, sid2);
-	Assert.assertNotEquals(AbstractDecentralizedID.instanceOf(id1.getBytes()), AbstractDecentralizedID.instanceOf(id2.getBytes()));
-	Assert.assertNotEquals(AbstractDecentralizedID.instanceOf(sid1.getBytes()), AbstractDecentralizedID.instanceOf(sid2.getBytes()));
+	Assert.assertNotEquals(
+		AbstractDecentralizedID.instanceOf(id1.getBytes()),
+		AbstractDecentralizedID.instanceOf(id2.getBytes()));
+	Assert.assertNotEquals(
+		AbstractDecentralizedID.instanceOf(sid1.getBytes()),
+		AbstractDecentralizedID.instanceOf(sid2.getBytes()));
     }
-    
+
+    @Test(dataProvider = "getDEncetralizedIDs", dependsOnMethods = "testToBytes")
+    public void testNotEquals(AbstractDecentralizedID id) throws NoSuchAlgorithmException, NoSuchProviderException
+    {
+	AbstractSecureRandom rand = SecureRandomType.DEFAULT.getInstance();
+	Assert.assertNotEquals(id, new DecentralizedIDGenerator());
+	Assert.assertNotEquals(id, new RenforcedDecentralizedIDGenerator());
+	Assert.assertNotEquals(id, new SecuredDecentralizedID(
+		new DecentralizedIDGenerator(), rand));
+	Assert.assertNotEquals(id, new SecuredDecentralizedID(
+		new RenforcedDecentralizedIDGenerator(), rand));
+    }
+
+    @Test
+    public void testRenforcedDecentralizedID() throws NoSuchAlgorithmException, NoSuchProviderException
+    {
+	AbstractSecureRandom rand = SecureRandomType.DEFAULT.getInstance();
+	for (MessageDigestType type : EnumSet.allOf(MessageDigestType.class))
+	{
+	    testRenforcedDecentralizedID(type, rand);
+	}
+    }
+
+    public void testRenforcedDecentralizedID(MessageDigestType type, AbstractSecureRandom rand) throws NoSuchAlgorithmException
+    {
+	for (int i = 0; i < numberofTests; i++)
+	{
+	    testEquals(type, rand, new RenforcedDecentralizedIDGenerator(),
+		    new RenforcedDecentralizedIDGenerator());
+	}
+    }
+
     @Test(dataProvider = "getDEncetralizedIDs")
     public void testToBytes(AbstractDecentralizedID id)
     {
-	byte[] bytes=id.getBytes();
-	AbstractDecentralizedID id2=AbstractDecentralizedID.instanceOf(bytes);
+	byte[] bytes = id.getBytes();
+	AbstractDecentralizedID id2 = AbstractDecentralizedID.instanceOf(bytes);
 	Assert.assertEquals(id, id2);
 	Assert.assertEquals(id.hashCode(), id2.hashCode());
 	Assert.assertEquals(bytes, id2.getBytes());
     }
-    
-    @Test(dataProvider = "getDEncetralizedIDs", dependsOnMethods="testToBytes")
-    public void testNotEquals(AbstractDecentralizedID id) throws NoSuchAlgorithmException
+
+    @Test
+    public void testToStringAndValueOf() throws gnu.vm.java.security.NoSuchAlgorithmException, NoSuchProviderException
     {
-	SecureRandom rand=new SecureRandom();
-	Assert.assertNotEquals(id, new DecentralizedIDGenerator());
-	Assert.assertNotEquals(id, new RenforcedDecentralizedIDGenerator());
-	Assert.assertNotEquals(id, new SecuredDecentralizedID(new DecentralizedIDGenerator(), rand));
-	Assert.assertNotEquals(id, new SecuredDecentralizedID(new RenforcedDecentralizedIDGenerator(), rand));
+	testToStringAndValueOf(new DecentralizedIDGenerator());
+	testToStringAndValueOf(new RenforcedDecentralizedIDGenerator());
+	testToStringAndValueOf(
+		new SecuredDecentralizedID(new DecentralizedIDGenerator(),
+			SecureRandomType.DEFAULT.getInstance()));
     }
-    
-    @DataProvider(name = "getDEncetralizedIDs", parallel = true)
-    public Object[][] getDEncetralizedIDs() throws NoSuchAlgorithmException
+
+    void testToStringAndValueOf(DecentralizedIDGenerator value)
     {
-	Object[][] res=new Object[numberofTests][];
-	SecureRandom rand=new SecureRandom();
-	for (int i=0;i<res.length;i++)
-	{
-	    switch((int)Math.random()*4)
-	    {
-		case 0:
-		    res[i]=new Object[]{new DecentralizedIDGenerator()};
-		    break;
-		case 1:
-		    res[i]=new Object[]{new RenforcedDecentralizedIDGenerator()};
-		    break;
-		case 2:
-		    res[i]=new Object[]{new SecuredDecentralizedID(new RenforcedDecentralizedIDGenerator(), rand)};
-		    break;
-		case 3:
-		    res[i]=new Object[]{new SecuredDecentralizedID(new DecentralizedIDGenerator(), rand)};
-		    break;
-	    }
-	}
-	return res;
+	Assert.assertEquals(DecentralizedIDGenerator.valueOf(value.toString()),
+		value);
+    }
+
+    void testToStringAndValueOf(RenforcedDecentralizedIDGenerator value)
+    {
+	Assert.assertEquals(
+		RenforcedDecentralizedIDGenerator.valueOf(value.toString()),
+		value);
+    }
+
+    void testToStringAndValueOf(SecuredDecentralizedID value)
+    {
+	Assert.assertEquals(SecuredDecentralizedID.valueOf(value.toString()),
+		value);
     }
 }

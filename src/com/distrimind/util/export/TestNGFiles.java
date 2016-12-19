@@ -51,22 +51,19 @@ public class TestNGFiles extends AbstractUnitTests
      * 
      */
     private static final long serialVersionUID = 83704142776151122L;
-    
-    
+
     private ArrayList<TestNGFile> tests;
-    
+
     public TestNGFiles()
     {
-	
-    }
-    
-    
-    public TestNGFiles(Collection<TestNGFile> tests)
-    {
-	this.tests=new ArrayList<>();
-	this.tests.addAll(tests);
+
     }
 
+    public TestNGFiles(Collection<TestNGFile> tests)
+    {
+	this.tests = new ArrayList<>();
+	this.tests.addAll(tests);
+    }
 
     @Override
     public boolean executeTestsFromJarFile(File _jarFile) throws Exception
@@ -89,6 +86,5 @@ public class TestNGFiles extends AbstractUnitTests
 	}
 	return true;
     }
-    
-    
+
 }

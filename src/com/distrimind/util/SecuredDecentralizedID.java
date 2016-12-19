@@ -35,17 +35,20 @@ knowledge of the CeCILL-C license and that you accept its terms.
 package com.distrimind.util;
 
 import java.io.IOException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
+import gnu.vm.java.security.NoSuchAlgorithmException;
+
+import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicReference;
 
+import com.distrimind.util.crypto.AbstractMessageDigest;
+import com.distrimind.util.crypto.AbstractSecureRandom;
 import com.distrimind.util.crypto.MessageDigestType;
 import com.distrimind.util.sizeof.ObjectSizer;
 
 /**
- * This class represents a unique identifier.
- * Uniqueness is guaranteed over the network.
+ * This class represents a unique identifier. Uniqueness is guaranteed over the
+ * network.
+ * 
  * @author Jason Mahdjoub
  * @version 1.0
  * @since Utils 1.3
@@ -58,171 +61,183 @@ public class SecuredDecentralizedID extends AbstractDecentralizedID
      * 
      */
     private static final long serialVersionUID = 4728193961114275589L;
-    
-    
-    private static final AtomicReference<MessageDigest> message_digest=new AtomicReference<>(null);
-    public static final MessageDigestType DEFAULT_MESSAGE_DIGEST_TYPE=MessageDigestType.SHA_256;
-    static final String ToStringHead="SecuredDecentralizedID";
-    
-    private static MessageDigest getDefaultMessageDigestInstance() throws NoSuchAlgorithmException
+
+    private static final AtomicReference<AbstractMessageDigest> message_digest = new AtomicReference<>(
+	    null);
+
+    public static final MessageDigestType DEFAULT_MESSAGE_DIGEST_TYPE = MessageDigestType.SHA_256;
+
+    static final String ToStringHead = "SecuredDecentralizedID";
+
+    private static int computeHashCode(long idLongs[])
     {
-	MessageDigest md=message_digest.get();
-	if (md==null)
+	return Arrays.hashCode(idLongs);
+    }
+
+    private static AbstractMessageDigest getDefaultMessageDigestInstance() throws NoSuchAlgorithmException
+    {
+	AbstractMessageDigest md = message_digest.get();
+	if (md == null)
 	{
-	    synchronized(message_digest)
+	    synchronized (message_digest)
 	    {
-		md=message_digest.get();
-		if (md==null)
+		md = message_digest.get();
+		if (md == null)
 		{
-		    md=DEFAULT_MESSAGE_DIGEST_TYPE.getMessageDigestInstance();
+		    md = DEFAULT_MESSAGE_DIGEST_TYPE.getMessageDigestInstance();
 		    message_digest.set(md);
 		}
 	    }
 	}
 	return md;
     }
+
+    public static SecuredDecentralizedID valueOf(String value)
+    {
+	AbstractDecentralizedID res = AbstractDecentralizedID.valueOf(value);
+	if (res instanceof SecuredDecentralizedID)
+	{
+	    return (SecuredDecentralizedID) res;
+	}
+	else
+	    throw new IllegalArgumentException("Invalid format : " + value);
+    }
+
     private final long[] idLongs;
+
     private transient int hashCode;
 
-    public SecuredDecentralizedID(MessageDigestType messageDigestType, AbstractDecentralizedIDGenerator generator, SecureRandom rand) throws NoSuchAlgorithmException
-    {
-	this(messageDigestType.getMessageDigestInstance(), generator, rand);
-    }
-    public SecuredDecentralizedID(AbstractDecentralizedIDGenerator generator, SecureRandom rand) throws NoSuchAlgorithmException
+    public SecuredDecentralizedID(AbstractDecentralizedIDGenerator generator, AbstractSecureRandom rand) throws NoSuchAlgorithmException
     {
 	this(getDefaultMessageDigestInstance(), generator, rand);
     }
-    public SecuredDecentralizedID(MessageDigest messageDigest, AbstractDecentralizedIDGenerator generator, SecureRandom rand)
+
+    public SecuredDecentralizedID(AbstractMessageDigest messageDigest, AbstractDecentralizedIDGenerator generator, AbstractSecureRandom rand)
     {
-	if (messageDigest==null)
+	if (messageDigest == null)
 	    throw new NullPointerException("messageDigest");
-	if (generator==null)
+	if (generator == null)
 	    throw new NullPointerException("generator");
-	if (rand==null)
+	if (rand == null)
 	    throw new NullPointerException("rand");
-	synchronized(messageDigest)
+	synchronized (messageDigest)
 	{
-	    long v=1l;
-	    final int sizeLong=ObjectSizer.sizeOf(v);
-	    byte[] idbytes=new byte[sizeLong*2];
+	    
+	    long v = 1l;
+	    final int sizeLong = ObjectSizer.sizeOf(v);
+	    byte[] idbytes = new byte[sizeLong * 2];
 	    Bits.putLong(idbytes, 0, generator.getWorkerIDAndSequence());
 	    Bits.putLong(idbytes, sizeLong, generator.getTimeStamp());
-		    
-	    byte[] salt=null;
-	    int size=Math.max(messageDigest.getDigestLength(), idbytes.length)-idbytes.length;
-	    if (size>=0)
-		salt=new byte[size];
+
+	    byte[] salt = null;
+	    int size = Math.max(messageDigest.getDigestLength(), idbytes.length)
+		    - idbytes.length;
+	    if (size >= 0)
+		salt = new byte[size];
 	    else
-		salt=new byte[0];
-	    
+		salt = new byte[0];
 	    rand.nextBytes(salt);
-	    
 	    messageDigest.update(idbytes);
 	    messageDigest.update(salt);
-	    
-	    byte []id=messageDigest.digest();
-	    size=id.length/sizeLong;
-	    int mod=id.length%sizeLong;
-	    if (mod>0)
+
+	    byte[] id = messageDigest.digest();
+	    size = id.length / sizeLong;
+	    int mod = id.length % sizeLong;
+	    if (mod > 0)
 		++size;
-	    idLongs=new long[size];
-	    for (int i=0;(((i+1)*sizeLong)-1)<id.length;i++)
+	    idLongs = new long[size];
+	    for (int i = 0; (((i + 1) * sizeLong) - 1) < id.length; i++)
 	    {
-		idLongs[i]=Bits.getLong(id, i*sizeLong);
+		idLongs[i] = Bits.getLong(id, i * sizeLong);
 	    }
-	    if (mod>0)
+	    if (mod > 0)
 	    {
-		idbytes=new byte[sizeLong];
-		for (int i=0;i<mod;i++)
-		    idbytes[i]=id[size+i];
-		for (int i=mod;i<sizeLong;i++)
+		idbytes = new byte[sizeLong];
+		for (int i = 0; i < mod; i++)
+		    idbytes[i] = id[size + i];
+		for (int i = mod; i < sizeLong; i++)
 		{
-		    idbytes[i]=0;
+		    idbytes[i] = 0;
 		}
-		idLongs[idLongs.length-1]=Bits.getLong(idbytes, 0);
+		idLongs[idLongs.length - 1] = Bits.getLong(idbytes, 0);
 	    }
-	    hashCode=computeHashCode(idLongs);
+	    hashCode = computeHashCode(idLongs);
 	}
     }
-    
-    private void readObject(java.io.ObjectInputStream in)throws IOException, ClassNotFoundException
-    {
-	try
-	{
-	    in.defaultReadObject();
-	    hashCode=computeHashCode(idLongs);
-	}
-	catch(IOException e)
-	{
-	    throw e;
-	}
-	catch(ClassNotFoundException e)
-	{
-	    throw e;
-	}
-	catch(Exception e)
-	{
-	    throw new IOException(e);
-	}
-    }
-    
-    
+
     SecuredDecentralizedID(long idLongs[])
     {
-	if (idLongs==null)
+	if (idLongs == null)
 	    throw new NullPointerException("idLongs");
-	if (idLongs.length==0)
+	if (idLongs.length == 0)
 	    throw new IllegalArgumentException("idLongs.lendth");
-	this.idLongs=idLongs;
-	this.hashCode=computeHashCode(idLongs);
+	this.idLongs = idLongs;
+	this.hashCode = computeHashCode(idLongs);
     }
-    
-    private static int computeHashCode(long idLongs[])
+
+    public SecuredDecentralizedID(MessageDigestType messageDigestType, AbstractDecentralizedIDGenerator generator, AbstractSecureRandom rand) throws NoSuchAlgorithmException
     {
-	int hc=0;
-	for (int i=0;i<idLongs.length;i++)
-	    hc+=idLongs[i];
-	return hc;
+	this(messageDigestType.getMessageDigestInstance(), generator, rand);
     }
 
     @Override
     public boolean equals(Object _obj)
     {
-	if (_obj==null)
+	if (_obj == null)
 	    return false;
-	if (_obj==this)
+	if (_obj == this)
 	    return true;
 	if (_obj instanceof SecuredDecentralizedID)
 	{
-	    SecuredDecentralizedID sid=(SecuredDecentralizedID)_obj;
-	    if (sid.idLongs==null)
+	    SecuredDecentralizedID sid = (SecuredDecentralizedID) _obj;
+	    if (sid.idLongs == null)
 		return false;
-	    if (sid.idLongs.length!=idLongs.length)
+	    if (sid.idLongs.length != idLongs.length)
 		return false;
-	    for (int i=0;i<idLongs.length;i++)
+	    for (int i = 0; i < idLongs.length; i++)
 	    {
-		if (idLongs[i]!=sid.idLongs[i])
+		if (idLongs[i] != sid.idLongs[i])
 		    return false;
 	    }
 	    return true;
 	}
 	return false;
     }
-    
+
     public boolean equals(SecuredDecentralizedID sid)
     {
-	if (sid==null)
+	if (sid == null)
 	    return false;
-	if (sid.idLongs==null)
+	if (sid.idLongs == null)
 	    return false;
-	if (sid.idLongs.length!=idLongs.length)
+	if (sid.idLongs.length != idLongs.length)
 	    return false;
-	for (int i=0;i<idLongs.length;i++)
+	for (int i = 0; i < idLongs.length; i++)
 	{
-	    if (idLongs[i]!=sid.idLongs[i])
+	    if (idLongs[i] != sid.idLongs[i])
 		return false;
 	}
 	return true;
+    }
+
+    @Override
+    public byte[] getBytes()
+    {
+	int sizeLong = ObjectSizer.sizeOf(idLongs[0]);
+	byte res[] = new byte[idLongs.length * sizeLong + 1];
+	res[0] = getType();
+
+	for (int i = 0; i < idLongs.length; i++)
+	{
+	    Bits.putLong(res, i * sizeLong + 1, idLongs[i]);
+	}
+	return res;
+    }
+
+    @Override
+    byte getType()
+    {
+	return AbstractDecentralizedID.SECURED_DECENTRALIZED_ID_TYPE;
     }
 
     @Override
@@ -231,15 +246,36 @@ public class SecuredDecentralizedID extends AbstractDecentralizedID
 	return hashCode;
     }
 
+    private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException
+    {
+	try
+	{
+	    in.defaultReadObject();
+	    hashCode = computeHashCode(idLongs);
+	}
+	catch (IOException e)
+	{
+	    throw e;
+	}
+	catch (ClassNotFoundException e)
+	{
+	    throw e;
+	}
+	catch (Exception e)
+	{
+	    throw new IOException(e);
+	}
+    }
+
     @Override
     public String toString()
     {
-	StringBuffer res=new StringBuffer(ToStringHead+"[");
-	boolean first=true;
-	for (int i=0;i<idLongs.length;i++)
+	StringBuffer res = new StringBuffer(ToStringHead + "[");
+	boolean first = true;
+	for (int i = 0; i < idLongs.length; i++)
 	{
 	    if (first)
-		first=false;
+		first = false;
 	    else
 		res.append(";");
 	    res.append(idLongs[i]);
@@ -248,34 +284,4 @@ public class SecuredDecentralizedID extends AbstractDecentralizedID
 	return res.toString();
     }
 
-    @Override
-    public byte[] getBytes()
-    {
-	int sizeLong=ObjectSizer.sizeOf(idLongs[0]);
-	byte res[]=new byte[idLongs.length*sizeLong+1];
-	res[0]=getType();
-	
-	for (int i=0;i<idLongs.length;i++)
-	{
-	    Bits.putLong(res, i*sizeLong+1,idLongs[i]);
-	}
-	return res;
-    }
-    
-    @Override
-    byte getType()
-    {
-	return AbstractDecentralizedID.SECURED_DECENTRALIZED_ID_TYPE;
-    }
-	public static SecuredDecentralizedID valueOf(String value)
-	{
-	    AbstractDecentralizedID res=AbstractDecentralizedID.valueOf(value);
-	    if (res instanceof SecuredDecentralizedID)
-	    {
-		return (SecuredDecentralizedID)res;
-	    }
-	    else
-		throw new IllegalArgumentException("Invalid format : "+value);
-	}
-    
 }

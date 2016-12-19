@@ -38,174 +38,171 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-
-import javax.crypto.BadPaddingException;
-import javax.crypto.Cipher;
-import javax.crypto.CipherOutputStream;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
+import gnu.vm.java.security.InvalidAlgorithmParameterException;
+import gnu.vm.java.security.NoSuchAlgorithmException;
+import gnu.vm.java.security.NoSuchProviderException;
+import gnu.vm.java.security.spec.InvalidKeySpecException;
 
 /**
  * 
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 2.0
  * @since Utils 1.5
  */
 public abstract class AbstractEncryptionOutputAlgorithm
 {
-    final static int BUFFER_SIZE=1024; 
+    final static int BUFFER_SIZE = 1024;
+
+    protected final AbstractCipher cipher;
+    final byte nullIV[];
     
-    protected final Cipher cipher;
     
-    protected AbstractEncryptionOutputAlgorithm(Cipher cipher)
+    protected AbstractEncryptionOutputAlgorithm(AbstractCipher cipher)
     {
-	if (cipher==null)
+	if (cipher == null)
 	    throw new NullPointerException("cipher");
-	this.cipher=cipher;
-    }
-    
-    public int getOutputSizeForEncryption(int inputLen) throws InvalidKeyException, InvalidAlgorithmParameterException
-    {
-	
-	initCipherForEncryptAndNotChangeIV(cipher);
-	int maxBlockSize=getMaxBlockSizeForEncoding();
-	if (maxBlockSize==Integer.MAX_VALUE)
-	{
-	    if(includeIV())
-		return cipher.getOutputSize(inputLen)+cipher.getIV().length;
-	    else
-		return cipher.getOutputSize(inputLen);
-	}
-	int div=inputLen/maxBlockSize;
-	int mod=inputLen%maxBlockSize;
-	int res=0;
-	if (div>0)
-	    res+=cipher.getOutputSize(maxBlockSize)*div;
-	if (mod>0)
-	    res+=cipher.getOutputSize(mod);
-	if(includeIV())
-	    res+=cipher.getIV().length;
-	return res;
+	this.cipher = cipher;
+	nullIV = new byte[cipher.getBlockSize()];
     }
 
-    protected abstract boolean includeIV();
-    
-    public abstract void initCipherForEncrypt(Cipher cipher) throws InvalidKeyException, InvalidAlgorithmParameterException;
-    public abstract void initCipherForEncryptAndNotChangeIV(Cipher cipher) throws InvalidKeyException, InvalidAlgorithmParameterException;
-    
-    protected abstract Cipher getCipherInstance() throws NoSuchAlgorithmException, NoSuchPaddingException;
-    
-    public void encode(InputStream is, OutputStream os) throws InvalidKeyException, IOException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException
-    {
-	initCipherForEncrypt(cipher);
-	
-	int maxBlockSize=getMaxBlockSizeForEncoding();
-
-	if (includeIV())
-	    os.write(cipher.getIV());
-	byte[] buffer=new byte[BUFFER_SIZE];
-	boolean finish=false;
-	while (!finish)
-	{
-	    
-	    int blockACC=0;
-	    do
-	    {
-		int nb=Math.min(BUFFER_SIZE, maxBlockSize-blockACC);
-		int size=is.read(buffer, 0, nb);
-		if (size>0)
-		{
-		    os.write(cipher.update(buffer, 0, size));
-		    blockACC+=size;
-		}
-		if (nb!=size || size<=0)
-		    finish=true;
-	    } while ((blockACC<maxBlockSize || maxBlockSize==Integer.MAX_VALUE) && !finish);
-	    if (blockACC!=0)
-		os.write(cipher.doFinal());
-	}
-	
-	os.flush();
-	
-	
-	/*try(CipherOutputStream cos=new CipherOutputStream(os, cipher))
-	{
-	    int read=-1;
-	    do
-	    {
-		read=is.read();
-		if (read!=-1)
-		    cos.write(read);
-		
-	    } while (read!=-1);
-	}*/
-    }
-    
-    public abstract int getMaxBlockSizeForEncoding();
-
-    public void encode(byte[] bytes, int off, int len, OutputStream os) throws InvalidKeyException, IOException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException
-    {
-	if (len<0 || off<0)
-	    throw new IllegalArgumentException("bytes.length="+bytes.length+", off="+off+", len="+len);
-	if (off>bytes.length)
-	    throw new IllegalArgumentException("bytes.length="+bytes.length+", off="+off+", len="+len);
-	if (off+len>bytes.length)
-	    throw new IllegalArgumentException("bytes.length="+bytes.length+", off="+off+", len="+len);
-	initCipherForEncrypt(cipher);
-
-	if (includeIV())
-	    os.write(cipher.getIV());
-	
-	int maxBlockSize=getMaxBlockSizeForEncoding();
-	
-	while (len>0)
-	{
-	    int size=0;
-	    if (maxBlockSize==Integer.MAX_VALUE)
-		size=len;
-	    else
-		size=Math.min(len, maxBlockSize);
-	    
-	    os.write(cipher.doFinal(bytes, off, size));
-	    off+=size;
-	    len-=size;
-	}
-	
-	os.flush();
-
-	/*try(CipherOutputStream cos=new CipherOutputStream(os, cipher))
-	{
-	    cos.write(bytes, off, len);
-	}*/
-	
-    }
-
-    public byte[] encode(byte[] bytes) throws InvalidKeyException, IOException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException
+    public byte[] encode(byte[] bytes) throws gnu.vm.java.security.InvalidKeyException, IOException, InvalidAlgorithmParameterException, gnu.vm.javax.crypto.BadPaddingException, IllegalStateException, gnu.vm.javax.crypto.IllegalBlockSizeException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException
     {
 	return encode(bytes, 0, bytes.length);
     }
-    public byte[] encode(byte[] bytes, int off, int len) throws InvalidKeyException, IOException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException
+
+    public byte[] encode(byte[] bytes, int off, int len) throws gnu.vm.java.security.InvalidKeyException, IOException, InvalidAlgorithmParameterException, IllegalStateException, gnu.vm.javax.crypto.IllegalBlockSizeException, gnu.vm.javax.crypto.BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException
     {
-	
-	try(ByteArrayOutputStream baos=new ByteArrayOutputStream(getOutputSizeForEncryption(len)))
+	try (ByteArrayOutputStream baos = new ByteArrayOutputStream(
+		getOutputSizeForEncryption(len)))
 	{
 	    encode(bytes, off, len, baos);
 	    return baos.toByteArray();
 	}
     }
-    
-    public CipherOutputStream getCipherOutputStream(OutputStream os) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException, IOException
+
+    public void encode(byte[] bytes, int off, int len, OutputStream os) throws gnu.vm.java.security.InvalidKeyException, IOException, InvalidAlgorithmParameterException, IllegalStateException, gnu.vm.javax.crypto.IllegalBlockSizeException, gnu.vm.javax.crypto.BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException
     {
-	Cipher c=getCipherInstance();
+	if (len < 0 || off < 0)
+	    throw new IllegalArgumentException("bytes.length=" + bytes.length
+		    + ", off=" + off + ", len=" + len);
+	if (off > bytes.length)
+	    throw new IllegalArgumentException("bytes.length=" + bytes.length
+		    + ", off=" + off + ", len=" + len);
+	if (off + len > bytes.length)
+	    throw new IllegalArgumentException("bytes.length=" + bytes.length
+		    + ", off=" + off + ", len=" + len);
+
+	initCipherForEncrypt(cipher);
+	if (includeIV())
+	    os.write(cipher.getIV());
+	int maxBlockSize = getMaxBlockSizeForEncoding();
+	while (len > 0)
+	{
+	    int size = 0;
+	    if (maxBlockSize == Integer.MAX_VALUE)
+		size = len;
+	    else
+		size = Math.min(len, maxBlockSize);
+
+	    os.write(cipher.doFinal(bytes, off, size));
+	    off += size;
+	    len -= size;
+	}
+	os.flush();
+	
+	/*
+	 * try(CipherOutputStream cos=new CipherOutputStream(os, cipher)) {
+	 * cos.write(bytes, off, len); }
+	 */
+
+    }
+
+    public void encode(InputStream is, OutputStream os) throws gnu.vm.java.security.InvalidKeyException, IOException, InvalidAlgorithmParameterException, IllegalStateException, gnu.vm.javax.crypto.IllegalBlockSizeException, gnu.vm.javax.crypto.BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException
+    {
+	initCipherForEncrypt(cipher);
+
+	int maxBlockSize = getMaxBlockSizeForEncoding();
+
+	if (includeIV())
+	    os.write(cipher.getIV());
+	byte[] buffer = new byte[BUFFER_SIZE];
+	boolean finish = false;
+	while (!finish)
+	{
+
+	    int blockACC = 0;
+	    do
+	    {
+		int nb = Math.min(BUFFER_SIZE, maxBlockSize - blockACC);
+		int size = is.read(buffer, 0, nb);
+		if (size > 0)
+		{
+		    os.write(cipher.update(buffer, 0, size));
+		    blockACC += size;
+		}
+		if (nb != size || size <= 0)
+		    finish = true;
+	    } while ((blockACC < maxBlockSize
+		    || maxBlockSize == Integer.MAX_VALUE) && !finish);
+	    if (blockACC != 0)
+		os.write(cipher.doFinal());
+	}
+
+	os.flush();
+
+	/*
+	 * try(CipherOutputStream cos=new CipherOutputStream(os, cipher)) { int
+	 * read=-1; do { read=is.read(); if (read!=-1) cos.write(read);
+	 * 
+	 * } while (read!=-1); }
+	 */
+    }
+
+    protected abstract AbstractCipher getCipherInstance() throws gnu.vm.java.security.NoSuchAlgorithmException, gnu.vm.javax.crypto.NoSuchPaddingException;
+
+    public OutputStream getCipherOutputStream(OutputStream os) throws gnu.vm.java.security.InvalidKeyException, gnu.vm.java.security.NoSuchAlgorithmException, gnu.vm.javax.crypto.NoSuchPaddingException, InvalidAlgorithmParameterException, IOException, InvalidKeySpecException, NoSuchProviderException
+    {
+	AbstractCipher c = getCipherInstance();
 	initCipherForEncrypt(c);
 	if (includeIV())
 	    os.write(c.getIV());
 
-	return new CipherOutputStream(os, c);
+	return c.getCipherOutputStream(os);
     }
-    
+
+    public abstract int getMaxBlockSizeForEncoding();
+
+    public int getOutputSizeForEncryption(int inputLen) throws gnu.vm.java.security.InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException
+    {
+	initCipherForEncryptAndNotChangeIV(cipher);
+	int maxBlockSize = getMaxBlockSizeForEncoding();
+	if (maxBlockSize == Integer.MAX_VALUE)
+	{
+	    if (includeIV())
+	    {
+		return cipher.getOutputSize(inputLen) + cipher.getBlockSize();
+	    }
+	    else
+	    {
+		return cipher.getOutputSize(inputLen);
+	    }
+	}
+	int div = inputLen / maxBlockSize;
+	int mod = inputLen % maxBlockSize;
+	int res = 0;
+	if (div > 0)
+	    res += cipher.getOutputSize(maxBlockSize) * div;
+	if (mod > 0)
+	    res += cipher.getOutputSize(mod);
+	if (includeIV())
+	    res += cipher.getBlockSize();
+	return res;
+    }
+
+    protected abstract boolean includeIV();
+
+    public abstract void initCipherForEncrypt(AbstractCipher cipher) throws gnu.vm.java.security.InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException;
+
+    public abstract void initCipherForEncryptAndNotChangeIV(AbstractCipher cipher) throws gnu.vm.java.security.InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException;
 
 }

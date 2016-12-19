@@ -33,7 +33,6 @@ The fact that you are presently reading this means that you have had
 knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-
 package com.distrimind.util;
 
 /**
@@ -46,137 +45,158 @@ package com.distrimind.util;
 public final class Timer
 {
     private long m_previous_time;
-    private boolean m_stoped=true;
-    private boolean m_paused=false;
+
+    private boolean m_stoped = true;
+
+    private boolean m_paused = false;
+
     private long m_previous_pause_time;
-    
+
     public Timer()
     {
     }
-    
+
     public Timer(boolean _start)
     {
-	if (_start) play();
+	if (_start)
+	    play();
     }
-    
+
+    public long getDeltaMili()
+    {
+	if (m_stoped)
+	    return 0;
+	long res;
+	if (m_paused)
+	    res = m_previous_pause_time - m_previous_time;
+	else
+	    res = System.currentTimeMillis() - m_previous_time;
+	m_previous_time += res;
+	return res;
+    }
+
+    public double getDeltaMilid()
+    {
+	if (m_stoped)
+	    return 0.0f;
+	float res;
+	if (m_paused)
+	    res = m_previous_pause_time - m_previous_time;
+	else
+	    res = System.currentTimeMillis() - m_previous_time;
+	m_previous_time += res;
+	return res;
+    }
+
+    public float getDeltaMilif()
+    {
+	if (m_stoped)
+	    return 0.0f;
+	float res;
+	if (m_paused)
+	    res = m_previous_pause_time - m_previous_time;
+	else
+	    res = System.currentTimeMillis() - m_previous_time;
+	m_previous_time += res;
+	return res;
+    }
+
+    public long getMili()
+    {
+	if (m_stoped)
+	    return 0;
+	if (m_paused)
+	    return m_previous_pause_time - m_previous_time;
+	else
+	    return System.currentTimeMillis() - m_previous_time;
+    }
+
+    public double getMilid()
+    {
+	if (m_stoped)
+	    return 0;
+	if (m_paused)
+	    return m_previous_pause_time - m_previous_time;
+	else
+	    return System.currentTimeMillis() - m_previous_time;
+    }
+
+    public float getMilif()
+    {
+	if (m_stoped)
+	    return 0;
+	if (m_paused)
+	    return m_previous_pause_time - m_previous_time;
+	else
+	    return System.currentTimeMillis() - m_previous_time;
+    }
+
+    public boolean isPaused()
+    {
+	return m_paused;
+    }
+
+    public boolean isStoped()
+    {
+	return m_stoped;
+    }
+
+    public void pause()
+    {
+	if (!m_paused && !m_stoped)
+	{
+	    m_paused = true;
+	    m_previous_pause_time = System.currentTimeMillis();
+	}
+    }
+
+    public void play()
+    {
+	if (m_stoped)
+	{
+	    m_stoped = false;
+	    m_previous_time = System.currentTimeMillis();
+	}
+	else if (m_paused)
+	{
+	    m_previous_time += System.currentTimeMillis()
+		    - m_previous_pause_time;
+	    m_paused = false;
+	}
+    }
+
+    public void reset()
+    {
+	if (m_paused)
+	{
+	    m_previous_time = m_previous_pause_time;
+	}
+	else
+	{
+	    m_previous_time = System.currentTimeMillis();
+	}
+    }
+
     public void setMilli(long ms)
     {
 	if (!m_stoped)
 	{
 	    if (m_paused)
 	    {
-		m_previous_time=m_previous_pause_time-ms;
+		m_previous_time = m_previous_pause_time - ms;
 	    }
 	    else
 	    {
-		m_previous_time=System.currentTimeMillis()-ms;
+		m_previous_time = System.currentTimeMillis() - ms;
 	    }
 	}
-	    
+
     }
-    
-    public void play()
-    {
-	if (m_stoped)
-	{
-	    m_stoped=false;
-	    m_previous_time=System.currentTimeMillis();
-	}
-	else if (m_paused)
-	{
-	    m_previous_time+=System.currentTimeMillis()-m_previous_pause_time;
-	    m_paused=false;
-	}
-    }
-    
+
     public void stop()
     {
-	m_stoped=true;
-	m_paused=false;
+	m_stoped = true;
+	m_paused = false;
     }
-    public void pause()
-    {
-	if (!m_paused && !m_stoped)
-	{
-	    m_paused=true;
-	    m_previous_pause_time=System.currentTimeMillis();
-	}
-    }
-    public void reset()
-    {
-	if (m_paused)
-	{
-	    m_previous_time=m_previous_pause_time;
-	}
-	else
-	{
-	    m_previous_time=System.currentTimeMillis();
-	}
-    }
-    public boolean isPaused()
-    {
-	return m_paused;
-    }
-    public boolean isStoped()
-    {
-	return m_stoped;
-    }
-    
-    
-    public long getMili()
-    {
-	if (m_stoped) return 0;
-	if (m_paused) return m_previous_pause_time-m_previous_time;
-	else return System.currentTimeMillis()-m_previous_time;
-    }
-    public float getMilif()
-    {
-	if (m_stoped) return 0;
-	if (m_paused) return m_previous_pause_time-m_previous_time;
-	else return System.currentTimeMillis()-m_previous_time;
-    }
-    public double getMilid()
-    {
-	if (m_stoped) return 0;
-	if (m_paused) return m_previous_pause_time-m_previous_time;
-	else return System.currentTimeMillis()-m_previous_time;
-    }
-    
-    public long getDeltaMili()
-    {
-	if (m_stoped) return 0;
-	long res;
-	if (m_paused) 
-	    res=m_previous_pause_time-m_previous_time;
-	else 
-	    res=System.currentTimeMillis()-m_previous_time;
-	m_previous_time+=res;
-	return res;
-    }
-    public float getDeltaMilif()
-    {
-	if (m_stoped) return 0.0f;
-	float res;
-	if (m_paused) 
-	    res=m_previous_pause_time-m_previous_time;
-	else 
-	    res=System.currentTimeMillis()-m_previous_time;
-	m_previous_time+=res;
-	return res;
-    }
-    
-    public double getDeltaMilid()
-    {
-	if (m_stoped) return 0.0f;
-	float res;
-	if (m_paused) 
-	    res=m_previous_pause_time-m_previous_time;
-	else 
-	    res=System.currentTimeMillis()-m_previous_time;
-	m_previous_time+=res;
-	return res;
-    }
-    
-    
-    
+
 }

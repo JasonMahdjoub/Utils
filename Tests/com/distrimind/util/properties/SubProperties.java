@@ -48,21 +48,22 @@ public class SubProperties extends XMLProperties
      * 
      */
     private static final long serialVersionUID = -2732460552740079500L;
-    String value=null;
-    
+
+    String value = null;
+
     protected SubProperties()
     {
 	super(null);
     }
 
-    @Override 
+    @Override
     public boolean equals(Object o)
     {
-	if (o==null)
+	if (o == null)
 	    return false;
 	if (o instanceof SubProperties)
 	    return PropertiesExample.equals(((SubProperties) o).value, value);
 	return false;
     }
-    
+
 }

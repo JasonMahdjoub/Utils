@@ -35,6 +35,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
 package com.distrimind.util.export;
 
 import com.distrimind.util.properties.XMLProperties;
+
 /**
  * 
  * @author Jason Mahdjoub
@@ -44,16 +45,11 @@ import com.distrimind.util.properties.XMLProperties;
 
 public abstract class Dependency extends XMLProperties
 {
-    
+
     /**
      * 
      */
     private static final long serialVersionUID = -184485775056554728L;
-
-    protected Dependency()
-    {
-	super(null);
-    }
 
     public static String getDefaultBinaryExcludeRegex()
     {
@@ -64,6 +60,7 @@ public abstract class Dependency extends XMLProperties
     {
 	return null;
     }
+
     public static String getDefaultSourceExcludeRegex()
     {
 	return "\\.class$";
@@ -73,22 +70,22 @@ public abstract class Dependency extends XMLProperties
     {
 	return null;
     }
-    
-    public static String getRegexMatchPackage(Package p)
-    {
-	return mixRegexes(".*"+p.getName().replace(".", "/")+".*", ".*"+p.getName().replace(".", "\\\\")+".*");
-    }
-    
-    
 
     public static String getRegexMatchClass(Class<?> c)
     {
-	return mixRegexes(".*"+c.getCanonicalName().replace(".", "/")+".*", ".*"+c.getCanonicalName().replace(".", "\\\\")+".*");
+	return mixRegexes(".*" + c.getCanonicalName().replace(".", "/") + ".*",
+		".*" + c.getCanonicalName().replace(".", "\\\\") + ".*");
     }
-    
-    public static String mixRegexes(String regex1, String regex2, String ...regexes)
+
+    public static String getRegexMatchPackage(Package p)
     {
-	StringBuffer sb=new StringBuffer();
+	return mixRegexes(".*" + p.getName().replace(".", "/") + ".*",
+		".*" + p.getName().replace(".", "\\\\") + ".*");
+    }
+
+    public static String mixRegexes(String regex1, String regex2, String... regexes)
+    {
+	StringBuffer sb = new StringBuffer();
 	sb.append(regex1);
 	sb.append("|");
 	sb.append(regex2);
@@ -98,6 +95,11 @@ public abstract class Dependency extends XMLProperties
 	    sb.append(s);
 	}
 	return sb.toString();
+    }
+
+    protected Dependency()
+    {
+	super(null);
     }
 
 }

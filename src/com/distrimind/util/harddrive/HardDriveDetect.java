@@ -41,8 +41,9 @@ import java.util.concurrent.atomic.AtomicReference;
 import com.distrimind.util.OSValidator;
 
 /**
- * Class giving a unique hard drive identifier, considering a folder, independently from the current OS.
- *    
+ * Class giving a unique hard drive identifier, considering a folder,
+ * independently from the current OS.
+ * 
  * @author Jason Mahdjoub
  * @version 1.0
  * @since Utils 1.0
@@ -52,34 +53,21 @@ public abstract class HardDriveDetect
     /**
      * Default hard drive identifier
      */
-    public static final String DEFAULT_HARD_DRIVE_IDENTIFIER="DEFAULT_HARD_DRIVE_IDENTIFIER";
-    
-    HardDriveDetect()
-    {
-	
-    }
-    
-    /**
-     * Returns a unique hard drive identifier considering a file
-     * 
-     * @param _file a file contained into the hard drive
-     * @return the hard drive identifier or {@link HardDriveDetect#DEFAULT_HARD_DRIVE_IDENTIFIER} if the hard drive identifier couldn't be found. 
-     */
-    public abstract String getHardDriveIdentifier(File _file);
-    
-    private static final AtomicReference<HardDriveDetect> instance=new AtomicReference<>();
-    
+    public static final String DEFAULT_HARD_DRIVE_IDENTIFIER = "DEFAULT_HARD_DRIVE_IDENTIFIER";
+
+    private static final AtomicReference<HardDriveDetect> instance = new AtomicReference<>();
+
     /**
      * 
      * @return a unique {@link HardDriveDetect} instance
      */
     public static HardDriveDetect getInstance()
     {
-	if (instance.get()==null)
+	if (instance.get() == null)
 	{
-	    synchronized(instance)
+	    synchronized (instance)
 	    {
-		if (instance.get()==null)
+		if (instance.get() == null)
 		{
 		    if (OSValidator.isLinux())
 			instance.set(new LinuxHardDriveDetect());
@@ -94,9 +82,26 @@ public abstract class HardDriveDetect
 	}
 	return instance.get();
     }
-    
+
     public static void main(String args[])
     {
-	System.out.println(getInstance().getHardDriveIdentifier(new File(args[0])));
+	System.out.println(
+		getInstance().getHardDriveIdentifier(new File(args[0])));
     }
+
+    HardDriveDetect()
+    {
+
+    }
+
+    /**
+     * Returns a unique hard drive identifier considering a file
+     * 
+     * @param _file
+     *            a file contained into the hard drive
+     * @return the hard drive identifier or
+     *         {@link HardDriveDetect#DEFAULT_HARD_DRIVE_IDENTIFIER} if the hard
+     *         drive identifier couldn't be found.
+     */
+    public abstract String getHardDriveIdentifier(File _file);
 }

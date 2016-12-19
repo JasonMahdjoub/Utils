@@ -41,16 +41,16 @@ import java.net.NetworkInterface;
  * 
  * @author Jason Mahdjoub
  * @version 1.0
- * @since Utils 1.0 
+ * @since Utils 1.0
  *
  */
 class DefaultNITools extends NITools
 {
     DefaultNITools()
     {
-	
+
     }
-    
+
     @Override
     public long getNetworkInterfaceSpeed(NetworkInterface _network_interface)
     {
@@ -61,7 +61,7 @@ class DefaultNITools extends NITools
 	    else
 		return -1;
 	}
-	catch(Exception e)
+	catch (Exception e)
 	{
 	    return -1;
 	}

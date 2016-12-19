@@ -39,7 +39,6 @@ import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.List;
 
-
 /**
  * 
  * @author Jason Mahdjoub
@@ -51,9 +50,9 @@ class DefaultTraceRoute extends TraceRoute
 {
     DefaultTraceRoute()
     {
-	
+
     }
-    
+
     @Override
     public List<InetAddress> tracePath(InetAddress _ia, int _depth, int _time_out_ms)
     {

@@ -43,8 +43,9 @@ import java.util.concurrent.atomic.AtomicReference;
 import com.distrimind.util.OSValidator;
 
 /**
- * Class that gives tools for network interfaces, independently from current OS running.
- *     
+ * Class that gives tools for network interfaces, independently from current OS
+ * running.
+ * 
  * @author Jason Mahdjoub
  * @version 1.0
  * @since Utils 1.0
@@ -52,36 +53,28 @@ import com.distrimind.util.OSValidator;
  */
 public abstract class NITools
 {
-    NITools()
-    {
-	
-    }
-    /**
-     * Gets the speed in bytes of the given network interface 
-     * @param network_interface the network interface to test
-     * @return the speed in byte of the given network interface or -1 if the speed couldn't be got.
-     */
-    public abstract long getNetworkInterfaceSpeed(NetworkInterface network_interface);
-    
-    
-    private static final AtomicReference<NITools> instance=new AtomicReference<>();
-    
+    private static final AtomicReference<NITools> instance = new AtomicReference<>();
+
     /**
      * 
      * @return a unique instance of TraceRoute
      */
     public static NITools getInstance()
     {
-	if (instance.get()==null)
+	if (instance.get() == null)
 	{
-	    synchronized(instance)
+	    synchronized (instance)
 	    {
-		if (instance.get()==null)
+		if (instance.get() == null)
 		{
 		    if (OSValidator.isLinux())
 			instance.set(new LinuxNITools());
-		    else if (OSValidator.isWindows() && !OSValidator.getOSVersion().toLowerCase().contains("windows xp"))
-			instance.set(new WindowsNITools());//TODO see for Windows XP compatibility
+		    else if (OSValidator.isWindows()
+			    && !OSValidator.getOSVersion().toLowerCase()
+				    .contains("windows xp"))
+			instance.set(new WindowsNITools());// TODO see for
+							   // Windows XP
+							   // compatibility
 		    else if (OSValidator.isMac())
 			instance.set(new MacOSXNITools());
 		    else
@@ -91,40 +84,59 @@ public abstract class NITools
 	}
 	return instance.get();
     }
-    
-    
+
+    public static void main(String args[]) throws SocketException
+    {
+	Enumeration<NetworkInterface> e = NetworkInterface
+		.getNetworkInterfaces();
+	while (e.hasMoreElements())
+	{
+	    NetworkInterface ni = e.nextElement();
+	    System.out.print(ni.getName() + " : ");
+	    System.out.println(getInstance().getNetworkInterfaceSpeed(ni));
+	}
+
+    }
+
+    NITools()
+    {
+
+    }
+
+    /**
+     * Gets the speed in bytes of the given network interface
+     * 
+     * @param network_interface
+     *            the network interface to test
+     * @return the speed in byte of the given network interface or -1 if the
+     *         speed couldn't be got.
+     */
+    public abstract long getNetworkInterfaceSpeed(NetworkInterface network_interface);
+
     long readLong(String value)
     {
 	if (value.toLowerCase().endsWith("kb/s"))
 	{
-	    return Long.parseLong(value.substring(0, value.length()-4))*1000L;
+	    return Long.parseLong(value.substring(0, value.length() - 4))
+		    * 1000L;
 	}
 	else if (value.toLowerCase().endsWith("mb/s"))
 	{
-	    return Long.parseLong(value.substring(0, value.length()-4))*1000000L;
+	    return Long.parseLong(value.substring(0, value.length() - 4))
+		    * 1000000L;
 	}
-	else if(value.toLowerCase().endsWith("gb/s"))
+	else if (value.toLowerCase().endsWith("gb/s"))
 	{
-	    return Long.parseLong(value.substring(0, value.length()-4))*1000000000L;
+	    return Long.parseLong(value.substring(0, value.length() - 4))
+		    * 1000000000L;
 	}
-	else if(value.toLowerCase().endsWith("tb/s"))
+	else if (value.toLowerCase().endsWith("tb/s"))
 	{
-	    return Long.parseLong(value.substring(0, value.length()-4))*1000000000000L;
+	    return Long.parseLong(value.substring(0, value.length() - 4))
+		    * 1000000000000L;
 	}
 	else
 	    return Long.parseLong(value);
     }
-    
-    public static void main(String args[]) throws SocketException
-    {
-	Enumeration<NetworkInterface> e=NetworkInterface.getNetworkInterfaces();
-	while (e.hasMoreElements())
-	{
-	    NetworkInterface ni=e.nextElement();
-	    System.out.print(ni.getName()+" : ");
-	    System.out.println(getInstance().getNetworkInterfaceSpeed(ni));	    
-	}
-	
-    }
-    
+
 }

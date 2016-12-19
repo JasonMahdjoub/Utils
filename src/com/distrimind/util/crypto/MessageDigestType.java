@@ -40,38 +40,59 @@ import java.security.NoSuchAlgorithmException;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 2.0
  * @since Utils 1.4
  */
 public enum MessageDigestType
 {
-    MD5("MD5"),
-    SHA("SHA"),
-    SHA_256("SHA-256"),
-    SHA_384("SHA-384"),
-    SHA_512("SHA-512"),
-    DEFAULT(SHA_256);
-    
+    @Deprecated
+    MD5("MD5", false), @Deprecated
+    SHA("SHA", false), SHA_256("SHA-256", false), SHA_384("SHA-384", false), SHA_512("SHA-512", false), GNU_SHA_256("SHA-256", true), GNU_SHA_384("SHA-384", true), GNU_SHA_512("SHA-512", true), GNU_WHIRLPOOL("WHIRLPOOL", true), DEFAULT(SHA_256);
+
     private final String algorithmName;
-    
+
+    private final boolean gnuVersion;
+
     private MessageDigestType(MessageDigestType type)
     {
-	this(type.algorithmName);
+	this(type.algorithmName, type.gnuVersion);
     }
-    
-    private MessageDigestType(String algorithmName)
+
+    private MessageDigestType(String algorithmName, boolean gnuVersion)
     {
-	this.algorithmName=algorithmName;
+	this.algorithmName = algorithmName;
+	this.gnuVersion = gnuVersion;
     }
-    
+
     public String getAlgorithmName()
     {
 	return algorithmName;
     }
-    
-    public MessageDigest getMessageDigestInstance() throws NoSuchAlgorithmException
+
+    public AbstractMessageDigest getMessageDigestInstance() throws gnu.vm.java.security.NoSuchAlgorithmException
     {
-	return MessageDigest.getInstance(algorithmName);
+	if (gnuVersion)
+	{
+	    return new GnuMessageDigest(gnu.vm.java.security.MessageDigest
+		    .getInstance(algorithmName));
+	}
+	else
+	{
+	    try
+	    {
+		return new JavaNativeMessageDigest(
+			MessageDigest.getInstance(algorithmName));
+	    }
+	    catch (NoSuchAlgorithmException e)
+	    {
+		throw new gnu.vm.java.security.NoSuchAlgorithmException(e);
+	    }
+	}
     }
-    
+
+    public boolean isGNUVersion()
+    {
+	return gnuVersion;
+    }
+
 }

@@ -34,108 +34,170 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
-import java.io.Serializable;
-import java.security.NoSuchAlgorithmException;
+import java.io.IOException;
 import java.security.PrivateKey;
-import java.security.spec.InvalidKeySpecException;
-
-import org.apache.commons.net.util.Base64;
+import java.util.Arrays;
 
 import com.distrimind.util.Bits;
+
+import gnu.java.util.Base64;
 
 /**
  * 
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 2.0
  * @since Utils 1.7.1
  */
-public class ASymmetricPrivateKey implements Serializable
+public class ASymmetricPrivateKey implements UtilKey
 {
     /**
      * 
      */
     private static final long serialVersionUID = 1279365581082538490L;
-    
-    private final PrivateKey privateKey;
+
+    public static ASymmetricPrivateKey decode(byte[] b)
+    {
+	byte[][] res = Bits.separateEncodingsWithShortSizedTabs(b);
+	return new ASymmetricPrivateKey(
+		ASymmetricEncryptionType.valueOf(Bits.getInt(res[0], 2)),
+		res[1], Bits.getShort(res[0], 0));
+    }
+
+    public static ASymmetricPrivateKey valueOf(String key) throws IOException
+    {
+	return decode(Base64.decode(key));
+    }
+
+    // private final PrivateKey privateKey;
+    private final byte[] privateKey;
+
     private final short keySize;
+
     private final ASymmetricEncryptionType type;
-    
+
+    private final int hashCode;
+
+    private volatile transient PrivateKey nativePrivateKey;
+
+    private volatile transient gnu.vm.java.security.PrivateKey gnuPrivateKey;
+
+    ASymmetricPrivateKey(ASymmetricEncryptionType type, byte privateKey[], short keySize)
+    {
+	if (type == null)
+	    throw new NullPointerException("type");
+	if (privateKey == null)
+	    throw new NullPointerException("privateKey");
+	if (keySize < 1024)
+	    throw new IllegalArgumentException("keySize");
+	this.privateKey = privateKey;
+	this.keySize = keySize;
+	this.type = type;
+	hashCode = Arrays.hashCode(privateKey);
+    }
+
+    ASymmetricPrivateKey(ASymmetricEncryptionType type, gnu.vm.java.security.PrivateKey privateKey, short keySize)
+    {
+	if (type == null)
+	    throw new NullPointerException("type");
+	if (privateKey == null)
+	    throw new NullPointerException("privateKey");
+	if (keySize < 1024)
+	    throw new IllegalArgumentException("keySize");
+	this.privateKey = ASymmetricEncryptionType.encodePrivateKey(privateKey);
+	this.keySize = keySize;
+	this.type = type;
+	hashCode = Arrays.hashCode(this.privateKey);
+    }
+
     ASymmetricPrivateKey(ASymmetricEncryptionType type, PrivateKey privateKey, short keySize)
     {
-	if (type==null)
+	if (type == null)
 	    throw new NullPointerException("type");
-	if (privateKey==null)
+	if (privateKey == null)
 	    throw new NullPointerException("privateKey");
-	if (keySize<1024)
+	if (keySize < 1024)
 	    throw new IllegalArgumentException("keySize");
-	this.privateKey=privateKey;
-	this.keySize=keySize;
-	this.type=type;
+	if (type.isGNUVersion())
+	    throw new IllegalAccessError();
+	this.privateKey = ASymmetricEncryptionType.encodePrivateKey(privateKey);
+	this.keySize = keySize;
+	this.type = type;
+	hashCode = Arrays.hashCode(this.privateKey);
     }
-    
+
+    public byte[] encode()
+    {
+	byte[] tab = new byte[6];
+	Bits.putShort(tab, 0, keySize);
+	Bits.putInt(tab, 2, type.ordinal());
+	return Bits.concateEncodingWithShortSizedTabs(tab, privateKey);
+    }
+
     @Override
     public boolean equals(Object o)
     {
-	if (o==null)
+	if (o == null)
 	    return false;
-	if (o==this)
+	if (o == this)
 	    return true;
 	if (o instanceof ASymmetricPrivateKey)
 	{
-	    ASymmetricPrivateKey other=(ASymmetricPrivateKey)o;
-	    return privateKey.equals(other.privateKey) && keySize==other.keySize && type==other.type;
+	    ASymmetricPrivateKey other = (ASymmetricPrivateKey) o;
+	    return keySize == other.keySize && type == other.type
+		    && Arrays.equals(privateKey, other.privateKey);
 	}
 	return false;
     }
+
+    public ASymmetricEncryptionType getAlgorithmType()
+    {
+	return type;
+    }
+
+    byte[] getBytesPrivateKey()
+    {
+	return privateKey;
+    }
+
+    public short getKeySize()
+    {
+	return keySize;
+    }
+
+    public int getMaxBlockSize()
+    {
+	return type.getMaxBlockSize(keySize);
+    }
+
     @Override
     public int hashCode()
     {
-	return privateKey.hashCode();
+	return hashCode;
+    }
+
+    @Override
+    public gnu.vm.java.security.PrivateKey toGnuKey() throws gnu.vm.java.security.NoSuchAlgorithmException, gnu.vm.java.security.spec.InvalidKeySpecException
+    {
+	if (gnuPrivateKey == null)
+	    gnuPrivateKey = ASymmetricEncryptionType
+		    .decodeGnuPrivateKey(privateKey);
+
+	return gnuPrivateKey;
+    }
+
+    @Override
+    public PrivateKey toJavaNativeKey() throws gnu.vm.java.security.NoSuchAlgorithmException, gnu.vm.java.security.spec.InvalidKeySpecException
+    {
+	if (nativePrivateKey == null)
+	    nativePrivateKey = ASymmetricEncryptionType
+		    .decodeNativePrivateKey(privateKey);
+
+	return nativePrivateKey;
     }
 
     @Override
     public String toString()
     {
-	return Base64.encodeBase64String(encode());
+	return Base64.encode(encode());
     }
-    
-    
-    public static ASymmetricPrivateKey valueOf(String key) throws NoSuchAlgorithmException, InvalidKeySpecException
-    {
-	return decode(Base64.decodeBase64(key));
-    }
-    
-    
-    public ASymmetricEncryptionType getAlgorithmType()
-    {
-	return type;
-    }
-    public int getMaxBlockSize()
-    {
-	return type.getMaxBlockSize(keySize);
-    }
-    
-    public PrivateKey getPrivateKey()
-    {
-	return privateKey;
-    }
-    
-    public short getKeySize()
-    {
-	return keySize;
-    }
-    public byte[] encode()
-    {
-	byte[] tab=new byte[6];
-	Bits.putShort(tab, 0, keySize);
-	Bits.putInt(tab, 2, type.ordinal());
-	return Bits.concateEncodingWithShortSizedTabs(tab, ASymmetricEncryptionType.encodePrivateKey(privateKey));
-    }
-    
-    public static ASymmetricPrivateKey decode(byte[] b) throws NoSuchAlgorithmException, InvalidKeySpecException
-    {
-	byte[][] res=Bits.separateEncodingsWithShortSizedTabs(b);
-	return new ASymmetricPrivateKey(ASymmetricEncryptionType.valueOf(Bits.getInt(res[0], 2)), ASymmetricEncryptionType.decodePrivateKey(res[1]), Bits.getShort(res[0], 0));
-    }
-
 }

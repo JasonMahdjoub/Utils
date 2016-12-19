@@ -40,7 +40,6 @@ import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
@@ -52,147 +51,303 @@ import com.distrimind.util.Bits;
 
 /**
  * List of asymmetric encryption algorithms
+ * 
  * @author Jason Mahdjoub
- * @version 1.1
+ * @version 2.0
  * @since Utils 1.4
  */
 public enum ASymmetricEncryptionType
 {
-    RSA_OAEPWithSHA256AndMGF1Padding("RSA", "ECB","OAEPWithSHA-256AndMGF1Padding", SignatureType.SHA256withRSA, (short)4096, (short)66),
-    RSA_PKCS1Padding("RSA", "ECB","PKCS1Padding", SignatureType.SHA256withRSA, (short)4096, (short)11),
-    DEFAULT(RSA_OAEPWithSHA256AndMGF1Padding);    
-    
+    RSA_OAEPWithSHA256AndMGF1Padding("RSA", "", "OAEPWithSHA-256AndMGF1Padding",SignatureType.SHA256withRSA, (short) 4096, (short) 66, false), 
+    RSA_PKCS1Padding("RSA", "", "PKCS1Padding", SignatureType.SHA256withRSA, (short) 4096, (short) 11,false),
+    //GNU_RSA_PKCS1Padding("RSA", "","PKCS1Padding",SignatureType.SHA256withRSA, (short)4096, (short)11, true),
+    DEFAULT(RSA_OAEPWithSHA256AndMGF1Padding);
+
+    static gnu.vm.java.security.KeyPair decodeGnuKeyPair(byte[] encodedKeyPair) throws gnu.vm.java.security.NoSuchAlgorithmException, gnu.vm.java.security.spec.InvalidKeySpecException
+    {
+	return decodeGnuKeyPair(encodedKeyPair, 0, encodedKeyPair.length);
+    }
+
+    static gnu.vm.java.security.KeyPair decodeGnuKeyPair(byte[] encodedKeyPair, int off, int len) throws gnu.vm.java.security.NoSuchAlgorithmException, gnu.vm.java.security.spec.InvalidKeySpecException
+    {
+	byte[][] parts = Bits
+		.separateEncodingsWithShortSizedTabs(encodedKeyPair, off, len);
+	return new gnu.vm.java.security.KeyPair(decodeGnuPublicKey(parts[0]),
+		decodeGnuPrivateKey(parts[1]));
+    }
+
+    static gnu.vm.java.security.PrivateKey decodeGnuPrivateKey(byte[] encodedKey) throws gnu.vm.java.security.NoSuchAlgorithmException, gnu.vm.java.security.spec.InvalidKeySpecException
+    {
+	byte[][] parts = Bits.separateEncodingsWithShortSizedTabs(encodedKey);
+	gnu.vm.java.security.spec.PKCS8EncodedKeySpec pkcsKeySpec = new gnu.vm.java.security.spec.PKCS8EncodedKeySpec(
+		parts[1]);
+	gnu.vm.java.security.KeyFactory kf = gnu.vm.java.security.KeyFactory
+		.getInstance(new String(parts[0]));
+	return kf.generatePrivate(pkcsKeySpec);
+    }
+
+    static gnu.vm.java.security.PublicKey decodeGnuPublicKey(byte[] encodedKey) throws gnu.vm.java.security.NoSuchAlgorithmException, gnu.vm.java.security.spec.InvalidKeySpecException
+    {
+	byte[][] parts = Bits.separateEncodingsWithShortSizedTabs(encodedKey);
+	gnu.vm.java.security.spec.X509EncodedKeySpec pubKeySpec = new gnu.vm.java.security.spec.X509EncodedKeySpec(
+		parts[1]);
+	gnu.vm.java.security.KeyFactory kf = gnu.vm.java.security.KeyFactory
+		.getInstance(new String(parts[0]));
+	return kf.generatePublic(pubKeySpec);
+    }
+
+    static KeyPair decodeNativeKeyPair(byte[] encodedKeyPair) throws gnu.vm.java.security.NoSuchAlgorithmException, gnu.vm.java.security.spec.InvalidKeySpecException
+    {
+	return decodeNativeKeyPair(encodedKeyPair, 0, encodedKeyPair.length);
+    }
+
+    static KeyPair decodeNativeKeyPair(byte[] encodedKeyPair, int off, int len) throws gnu.vm.java.security.NoSuchAlgorithmException, gnu.vm.java.security.spec.InvalidKeySpecException
+    {
+	byte[][] parts = Bits
+		.separateEncodingsWithShortSizedTabs(encodedKeyPair, off, len);
+	return new KeyPair(decodeNativePublicKey(parts[0]),
+		decodeNativePrivateKey(parts[1]));
+    }
+
+    static PrivateKey decodeNativePrivateKey(byte[] encodedKey) throws gnu.vm.java.security.NoSuchAlgorithmException, gnu.vm.java.security.spec.InvalidKeySpecException
+    {
+	try
+	{
+	    byte[][] parts = Bits
+		    .separateEncodingsWithShortSizedTabs(encodedKey);
+	    PKCS8EncodedKeySpec pkcsKeySpec = new PKCS8EncodedKeySpec(parts[1]);
+	    KeyFactory kf = KeyFactory.getInstance(new String(parts[0]));
+	    return kf.generatePrivate(pkcsKeySpec);
+	}
+	catch (NoSuchAlgorithmException e)
+	{
+	    throw new gnu.vm.java.security.NoSuchAlgorithmException(e);
+	}
+	catch (InvalidKeySpecException e)
+	{
+	    throw new gnu.vm.java.security.spec.InvalidKeySpecException(e);
+	}
+    }
+
+    static PublicKey decodeNativePublicKey(byte[] encodedKey) throws gnu.vm.java.security.NoSuchAlgorithmException, gnu.vm.java.security.spec.InvalidKeySpecException
+    {
+	try
+	{
+	    byte[][] parts = Bits
+		    .separateEncodingsWithShortSizedTabs(encodedKey);
+	    X509EncodedKeySpec pubKeySpec = new X509EncodedKeySpec(parts[1]);
+	    KeyFactory kf = KeyFactory.getInstance(new String(parts[0]));
+	    return kf.generatePublic(pubKeySpec);
+	}
+	catch (NoSuchAlgorithmException e)
+	{
+	    throw new gnu.vm.java.security.NoSuchAlgorithmException(e);
+	}
+	catch (InvalidKeySpecException e)
+	{
+	    throw new gnu.vm.java.security.spec.InvalidKeySpecException(e);
+	}
+
+    }
+
+    static byte[] encodeKeyPair(gnu.vm.java.security.KeyPair keyPair)
+    {
+	return Bits.concateEncodingWithShortSizedTabs(
+		encodePublicKey(keyPair.getPublic()),
+		encodePrivateKey(keyPair.getPrivate()));
+    }
+
+    static byte[] encodeKeyPair(KeyPair keyPair)
+    {
+	return Bits.concateEncodingWithShortSizedTabs(
+		encodePublicKey(keyPair.getPublic()),
+		encodePrivateKey(keyPair.getPrivate()));
+    }
+
+    static byte[] encodePrivateKey(gnu.vm.java.security.PrivateKey key)
+    {
+	return Bits.concateEncodingWithShortSizedTabs(
+		key.getAlgorithm().getBytes(), key.getEncoded());
+    }
+
+    static byte[] encodePrivateKey(PrivateKey key)
+    {
+	return Bits.concateEncodingWithShortSizedTabs(
+		key.getAlgorithm().getBytes(), key.getEncoded());
+    }
+
+    static byte[] encodePublicKey(gnu.vm.java.security.PublicKey key)
+    {
+	return Bits.concateEncodingWithShortSizedTabs(
+		key.getAlgorithm().getBytes(), key.getEncoded());
+	/*
+	 * X509EncodedKeySpec pubKeySpec = new
+	 * X509EncodedKeySpec(key.getEncoded()); return
+	 * Bits.concateEncodingWithShortSizedTabs(key.getAlgorithm().getBytes(),
+	 * pubKeySpec.getEncoded());
+	 */
+    }
+
+    static byte[] encodePublicKey(PublicKey key)
+    {
+	return Bits.concateEncodingWithShortSizedTabs(
+		key.getAlgorithm().getBytes(), key.getEncoded());
+	/*
+	 * X509EncodedKeySpec pubKeySpec = new
+	 * X509EncodedKeySpec(key.getEncoded()); return
+	 * Bits.concateEncodingWithShortSizedTabs(key.getAlgorithm().getBytes(),
+	 * pubKeySpec.getEncoded());
+	 */
+    }
+
+    static ASymmetricEncryptionType valueOf(int ordinal) throws IllegalArgumentException
+    {
+	for (ASymmetricEncryptionType a : values())
+	{
+	    if (a.ordinal() == ordinal)
+		return a;
+	}
+	throw new IllegalArgumentException();
+    }
+
     private final String algorithmName;
+
     private final String blockMode;
+
     private final String padding;
+
     private final SignatureType signature;
+
     private final short keySize;
+
     private final short blockSizeDecrement;
-    
+
+    private final boolean gnuVersion;
+
     private ASymmetricEncryptionType(ASymmetricEncryptionType type)
     {
-	this(type.algorithmName, type.blockMode, type.padding, type.signature, type.keySize, type.blockSizeDecrement);
+	this(type.algorithmName, type.blockMode, type.padding, type.signature,
+		type.keySize, type.blockSizeDecrement, type.gnuVersion);
     }
-    
-    
-    private ASymmetricEncryptionType(String algorithmName, String blockMode, String padding, SignatureType signature, short keySize, short blockSizeDecrement)
+
+    private ASymmetricEncryptionType(String algorithmName, String blockMode, String padding, SignatureType signature, short keySize, short blockSizeDecrement, boolean gnuVersion)
     {
-	this.algorithmName=algorithmName;
-	this.blockMode=blockMode;
-	this.padding=padding;
-	this.signature=signature;
-	this.keySize=keySize;
-	this.blockSizeDecrement=blockSizeDecrement;
+	this.algorithmName = algorithmName;
+	this.blockMode = blockMode;
+	this.padding = padding;
+	this.signature = signature;
+	this.keySize = keySize;
+	this.blockSizeDecrement = blockSizeDecrement;
+	this.gnuVersion = gnuVersion;
     }
-    
-    public int getDefaultMaxBlockSize()
-    {
-	return keySize/8-blockSizeDecrement;
-    }
-    
-    public int getMaxBlockSize(int keySize)
-    {
-	return keySize/8-blockSizeDecrement;
-    }
-    
-    
+
     public String getAlgorithmName()
     {
 	return algorithmName;
     }
-    
+
     public String getBlockMode()
     {
 	return blockMode;
     }
-    
-    public String getPadding()
+
+    public AbstractCipher getCipherInstance() throws gnu.vm.java.security.NoSuchAlgorithmException, gnu.vm.javax.crypto.NoSuchPaddingException
     {
-	return padding;
+	if (gnuVersion)
+	{
+	    String name = algorithmName;
+	    if ((blockMode != null && !blockMode.equals(""))
+		    && (padding != null && !padding.equals("")))
+		name += "/" + blockMode + "/" + padding;
+	    return new GnuCipher(gnu.vm.javax.crypto.Cipher.getInstance(name));
+	}
+	else
+	{
+	    try
+	    {
+		String name = algorithmName;
+		if ((blockMode != null && !blockMode.equals(""))
+			&& (padding != null && !padding.equals("")))
+		    name += "/" + blockMode + "/" + padding;
+		return new JavaNativeCipher(Cipher.getInstance(name));
+	    }
+	    catch (NoSuchAlgorithmException e)
+	    {
+		throw new gnu.vm.java.security.NoSuchAlgorithmException(e);
+	    }
+	    catch (NoSuchPaddingException e)
+	    {
+		throw new gnu.vm.javax.crypto.NoSuchPaddingException(
+			e.getMessage());
+	    }
+	}
     }
-    
-    public Cipher getCipherInstance() throws NoSuchAlgorithmException, NoSuchPaddingException
-    {
-	String name=algorithmName;
-	if ((blockMode!=null && !blockMode.equals("")) && (padding!=null && !padding.equals("")))
-	    name+="/"+blockMode+"/"+padding;
-	return Cipher.getInstance(name);
-    }
-    
-    public KeyPairGenerator getKeyPairGenerator(SecureRandom random) throws NoSuchAlgorithmException
-    {
-	return getKeyPairGenerator(random, keySize);
-    }
-    public KeyPairGenerator getKeyPairGenerator(SecureRandom random, short keySize) throws NoSuchAlgorithmException
-    {
-	KeyPairGenerator kgp=KeyPairGenerator.getInstance(algorithmName);
-	kgp.initialize(keySize, random);
-	return kgp;
-    }
-    
-    public SignatureType getDefaultSignatureAlgorithm()
-    {
-	return signature;
-    }
-    
+
     public short getDefaultKeySize()
     {
 	return keySize;
     }
-    
-    
-    static byte[] encodePublicKey(PublicKey key)
+
+    public int getDefaultMaxBlockSize()
     {
-	return Bits.concateEncodingWithShortSizedTabs(key.getAlgorithm().getBytes(), key.getEncoded());
-	/*X509EncodedKeySpec pubKeySpec = new X509EncodedKeySpec(key.getEncoded());
-	return Bits.concateEncodingWithShortSizedTabs(key.getAlgorithm().getBytes(), pubKeySpec.getEncoded());*/
+	return keySize / 8 - blockSizeDecrement;
     }
-    
-    static PublicKey decodePublicKey(byte[] encodedKey) throws NoSuchAlgorithmException, InvalidKeySpecException
+
+    public SignatureType getDefaultSignatureAlgorithm()
     {
-	byte[][] parts=Bits.separateEncodingsWithShortSizedTabs(encodedKey);
-	X509EncodedKeySpec pubKeySpec = new X509EncodedKeySpec(parts[1]);
-	KeyFactory kf=KeyFactory.getInstance(new String(parts[0]));
-	return kf.generatePublic(pubKeySpec);
+	return signature;
     }
-    
-    static byte[] encodePrivateKey(PrivateKey key)
+
+    public AbstractKeyPairGenerator getKeyPairGenerator(AbstractSecureRandom random) throws gnu.vm.java.security.NoSuchAlgorithmException
     {
-	return Bits.concateEncodingWithShortSizedTabs(key.getAlgorithm().getBytes(), key.getEncoded());
-	/*PKCS8EncodedKeySpec pkcsKeySpec=new PKCS8EncodedKeySpec(key.getEncoded());
-	return Bits.concateEncodingWithShortSizedTabs(key.getAlgorithm().getBytes(), pkcsKeySpec.getEncoded());*/
+	return getKeyPairGenerator(random, keySize);
     }
-    
-    static PrivateKey decodePrivateKey(byte[] encodedKey) throws NoSuchAlgorithmException, InvalidKeySpecException
+
+    public AbstractKeyPairGenerator getKeyPairGenerator(AbstractSecureRandom random, short keySize) throws gnu.vm.java.security.NoSuchAlgorithmException
     {
-	byte[][] parts=Bits.separateEncodingsWithShortSizedTabs(encodedKey);
-	PKCS8EncodedKeySpec pkcsKeySpec=new PKCS8EncodedKeySpec(parts[1]);
-	KeyFactory kf=KeyFactory.getInstance(new String(parts[0]));
-	return kf.generatePrivate(pkcsKeySpec);
-    }
-    
-    static byte[] encodeKeyPair(KeyPair keyPair)
-    {
-	return Bits.concateEncodingWithShortSizedTabs(encodePublicKey(keyPair.getPublic()), encodePrivateKey(keyPair.getPrivate()));
-    }
-    
-    static KeyPair decodeKeyPair(byte[] encodedKeyPair) throws NoSuchAlgorithmException, InvalidKeySpecException
-    {
-	return decodeKeyPair(encodedKeyPair, 0, encodedKeyPair.length);
-    }
-    static KeyPair decodeKeyPair(byte[] encodedKeyPair, int off, int len) throws NoSuchAlgorithmException, InvalidKeySpecException
-    {
-	byte[][] parts=Bits.separateEncodingsWithShortSizedTabs(encodedKeyPair, off, len);
-	return new KeyPair(decodePublicKey(parts[0]), decodePrivateKey(parts[1]));
-    }
-    static ASymmetricEncryptionType valueOf(int ordinal) throws IllegalArgumentException
-    {
-	for(ASymmetricEncryptionType a : values())
+	if (gnuVersion)
 	{
-	    if (a.ordinal()==ordinal)
-		return a;
+	    gnu.vm.java.security.KeyPairGenerator kgp = gnu.vm.java.security.KeyPairGenerator
+		    .getInstance(algorithmName);
+	    GnuKeyPairGenerator res = new GnuKeyPairGenerator(this, kgp);
+	    res.initialize(keySize, random);
+
+	    return res;
 	}
-	throw new IllegalArgumentException();
+	else
+	{
+	    try
+	    {
+		KeyPairGenerator kgp = KeyPairGenerator
+			.getInstance(algorithmName);
+		JavaNativeKeyPairGenerator res = new JavaNativeKeyPairGenerator(
+			this, kgp);
+		res.initialize(keySize, random);
+
+		return res;
+	    }
+	    catch (NoSuchAlgorithmException e)
+	    {
+		throw new gnu.vm.java.security.NoSuchAlgorithmException(e);
+	    }
+
+	}
+
+    }
+
+    public int getMaxBlockSize(int keySize)
+    {
+	return keySize / 8 - blockSizeDecrement;
+    }
+
+    public String getPadding()
+    {
+	return padding;
+    }
+
+    public boolean isGNUVersion()
+    {
+	return gnuVersion;
     }
 
 }

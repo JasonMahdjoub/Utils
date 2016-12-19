@@ -35,6 +35,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
 package com.distrimind.util.export;
 
 import java.io.File;
+
 /**
  * 
  * @author Jason Mahdjoub
@@ -49,19 +50,24 @@ public class JarDependency extends ZipDependency
      * 
      */
     private static final long serialVersionUID = -4487382904467263330L;
-    
+
     public JarDependency()
     {
-	
+
     }
-        
-    public JarDependency(String name, Package _subpackage, License licenses [], File _jar_file_dependency)
+
+    public JarDependency(String name, Package _subpackage, License licenses[], File _jar_file_dependency)
     {
-	this(name, new JarSourceDependancy(false, _jar_file_dependency, getDefaultSourceExcludeRegex(), getDefaultSourceIncludeRegex()), _subpackage,licenses, _jar_file_dependency, getDefaultBinaryExcludeRegex(), getDefaultBinaryIncludeRegex());
+	this(name, new JarSourceDependancy(false, _jar_file_dependency,
+		getDefaultSourceExcludeRegex(), getDefaultSourceIncludeRegex()),
+		_subpackage, licenses, _jar_file_dependency,
+		getDefaultBinaryExcludeRegex(), getDefaultBinaryIncludeRegex());
     }
+
     public JarDependency(String _name, SourceDependancy _source_code, Package _subpackage, License licenses[], File _jar_file_dependency, String _exclude_regex, String _include_regex)
     {
-	super(_name, _source_code, _subpackage, licenses,_jar_file_dependency, _exclude_regex,_include_regex);
+	super(_name, _source_code, _subpackage, licenses, _jar_file_dependency,
+		_exclude_regex, _include_regex);
     }
 
 }

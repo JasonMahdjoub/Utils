@@ -38,6 +38,7 @@ import java.io.File;
 import java.io.IOException;
 
 import com.distrimind.util.FileTools;
+
 /**
  * 
  * @author Jason Mahdjoub
@@ -51,48 +52,55 @@ public class DirectoryDependency extends BinaryDependency
      * 
      */
     private static final long serialVersionUID = 7990469461822747800L;
-    
+
     private File directory;
-    
+
     public DirectoryDependency()
     {
-	
+
     }
-    
+
     public DirectoryDependency(String _name, SourceDependancy _source_code, Package _subpackage, License[] _licenses, File directory)
     {
-	this(_name, _source_code, _subpackage, _licenses, directory, getDefaultBinaryExcludeRegex(), getDefaultBinaryIncludeRegex());
+	this(_name, _source_code, _subpackage, _licenses, directory,
+		getDefaultBinaryExcludeRegex(), getDefaultBinaryIncludeRegex());
     }
+
     public DirectoryDependency(String _name, SourceDependancy _source_code, Package _subpackage, License[] _licenses, File directory, String _exclude_regex, String _include_regex)
     {
 	super(_name, _source_code, _subpackage, _licenses, _exclude_regex,
 		_include_regex);
-	if (directory==null)
+	if (directory == null)
 	    throw new NullPointerException("directory");
 	if (!directory.exists())
-	    throw new IllegalArgumentException("The directory "+directory+" does not exists !");
+	    throw new IllegalArgumentException(
+		    "The directory " + directory + " does not exists !");
 	if (!directory.isDirectory())
-	    throw new IllegalArgumentException("The directory "+directory+" is not a directory !");
-	    
-	this.directory=directory;
-	
+	    throw new IllegalArgumentException(
+		    "The directory " + directory + " is not a directory !");
+
+	this.directory = directory;
+
     }
 
     @Override
     public void copyBinToFolder(File _folder) throws IOException
     {
 	FileTools.copyFolderToFolder(directory, _folder, false);
-	
+
     }
+
+    @Override
+    String getAntSetFile()
+    {
+	return "<fileset dir=\"" + directory.getAbsolutePath()
+		+ "\" includes=\"**/*.class\"></fileset>";
+    }
+
     @Override
     String getClassPath()
     {
 	return directory.getAbsolutePath();
-    }
-    @Override
-    String getAntSetFile()
-    {
-	return "<fileset dir=\""+directory.getAbsolutePath()+"\" includes=\"**/*.class\"></fileset>";
     }
 
 }

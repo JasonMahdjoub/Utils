@@ -58,7 +58,6 @@ import com.distrimind.util.crypto.ASymmetricPrivateKey;
 import com.distrimind.util.crypto.ASymmetricPublicKey;
 import com.distrimind.util.crypto.MessageDigestType;
 import com.distrimind.util.crypto.SignatureType;
-import com.distrimind.util.crypto.SymmetricSecretKeyType;
 import com.distrimind.util.crypto.SymmetricEncryptionType;
 import com.distrimind.util.crypto.SymmetricSecretKey;
 
@@ -72,352 +71,346 @@ public class DefaultXMLObjectParser extends AbstractXMLObjectParser
 {
 
     /**
-     * {@inheritDoc} 
+     * {@inheritDoc}
      */
     @Override
-    public boolean isValid(Class<?> field_type)
+    public String convertObjectToXML(Class<?> field_type, Object object) throws Exception
     {
-	return field_type==Boolean.class 
-		|| field_type==Byte.class 
-		|| field_type==Short.class  
-		|| field_type==Integer.class  
-		|| field_type==Long.class  
-		|| field_type==Float.class  
-		|| field_type==Double.class  
-		|| field_type==Character.class
-		|| field_type==String.class
-		|| field_type==Class.class
-		|| field_type==Date.class
-		|| field_type==File.class
-		|| field_type==URL.class
-		|| field_type==URI.class
-		|| field_type==Level.class
-		|| field_type==InetAddress.class
-		|| field_type==Inet4Address.class
-		|| field_type==Inet6Address.class
-		|| field_type==InetSocketAddress.class
-		|| field_type==SourceVersion.class
-		|| field_type==ASymmetricEncryptionType.class
-		|| field_type==MessageDigestType.class
-		|| field_type==SymmetricEncryptionType.class
-		|| field_type==SignatureType.class
-		|| field_type==SymmetricSecretKeyType.class
-		|| field_type==SymmetricSecretKey.class
-		|| field_type==ASymmetricPrivateKey.class
-		|| field_type==ASymmetricPublicKey.class
-		|| field_type==ASymmetricKeyPair.class
-		|| AbstractDecentralizedID.class.isAssignableFrom(field_type)
-		|| List.class.isAssignableFrom(field_type)
-		|| XMLProperties.class.isAssignableFrom(field_type)
-		|| field_type.isPrimitive()
-		|| Calendar.class.isAssignableFrom(field_type);
-		
-	
+	if (field_type == Boolean.class)
+	{
+	    return object.toString();
+	}
+	else if (field_type == Byte.class)
+	{
+	    return object.toString();
+	}
+	else if (field_type == Short.class)
+	{
+	    return object.toString();
+	}
+	else if (field_type == Integer.class)
+	{
+	    return object.toString();
+	}
+	else if (field_type == Long.class)
+	{
+	    return object.toString();
+	}
+	else if (field_type == Float.class)
+	{
+	    return object.toString();
+	}
+	else if (field_type == Double.class)
+	{
+	    return object.toString();
+	}
+	else if (field_type == Character.class)
+	{
+	    return object.toString();
+	}
+	else if (field_type == String.class)
+	{
+	    return (String) object;
+	}
+	else if (field_type == Class.class)
+	{
+	    return ((Class<?>) object).getCanonicalName();
+	}
+	else if (field_type == Date.class)
+	{
+	    return toString((Date) object);
+	}
+	else if (Calendar.class.isAssignableFrom(field_type))
+	{
+	    return toString(((Calendar) object).getTime()) + ";"
+		    + ((Calendar) object).getTimeZone().getID();
+	}
+	else if (field_type == File.class)
+	{
+	    return object.toString();
+	}
+	else if (field_type == URL.class)
+	{
+	    return object.toString();
+	}
+	else if (field_type == URI.class)
+	{
+	    return object.toString();
+	}
+	else if (field_type == Level.class)
+	{
+	    return object.toString();
+	}
+	else if (field_type == InetAddress.class
+		|| field_type == Inet4Address.class
+		|| field_type == Inet6Address.class)
+	{
+	    InetAddress ia = (InetAddress) object;
+	    return ia.getHostAddress();
+	}
+	else if (field_type == InetSocketAddress.class)
+	{
+	    InetSocketAddress isa = (InetSocketAddress) object;
+	    return isa.getAddress().getHostAddress() + ";" + isa.getPort();
+	}
+	else if (field_type == SourceVersion.class)
+	{
+	    return object.toString();
+	}
+	else if (field_type == ASymmetricEncryptionType.class)
+	{
+	    return object.toString();
+	}
+	else if (field_type == SymmetricEncryptionType.class)
+	{
+	    return object.toString();
+	}
+	else if (field_type == SignatureType.class)
+	{
+	    return object.toString();
+	}
+	else if (field_type == MessageDigestType.class)
+	{
+	    return object.toString();
+	}
+	/*
+	 * else if (field_type==SymmetricSecretKeyType.class) { return
+	 * object.toString(); }
+	 */
+	else if (field_type == SymmetricSecretKey.class)
+	{
+	    return object.toString();
+	}
+	else if (field_type == ASymmetricPrivateKey.class)
+	{
+	    return object.toString();
+	}
+	else if (field_type == ASymmetricPublicKey.class)
+	{
+	    return object.toString();
+	}
+	else if (field_type == ASymmetricKeyPair.class)
+	{
+	    return object.toString();
+	}
+	else if (AbstractDecentralizedID.class.isAssignableFrom(field_type))
+	    return object.toString();
+	else
+	    return null;
     }
-    
+
     /**
      * {@inheritDoc}
      */
     @Override
     public Object convertXMLToObject(Class<?> field_type, String nodeValue) throws Exception
     {
-	    if (nodeValue==null)
-		return null;
-	    nodeValue=nodeValue.trim();
-	    if (field_type==Boolean.class)
+	if (nodeValue == null)
+	    return null;
+	nodeValue = nodeValue.trim();
+	if (field_type == Boolean.class)
+	{
+	    return new Boolean(Boolean.parseBoolean(nodeValue));
+	}
+	else if (field_type == Byte.class)
+	{
+	    return new Byte(Byte.parseByte(nodeValue));
+	}
+	else if (field_type == Short.class)
+	{
+	    return new Short(Short.parseShort(nodeValue));
+	}
+	else if (field_type == Integer.class)
+	{
+	    return new Integer(Integer.parseInt(nodeValue));
+	}
+	else if (field_type == Long.class)
+	{
+	    return new Long(Long.parseLong(nodeValue));
+	}
+	else if (field_type == Float.class)
+	{
+	    return new Float(Float.parseFloat(nodeValue));
+	}
+	else if (field_type == Double.class)
+	{
+	    return new Double(Double.parseDouble(nodeValue));
+	}
+	else if (field_type == Character.class)
+	{
+	    return new Character(nodeValue.charAt(0));
+	}
+	else if (field_type == String.class)
+	{
+	    return nodeValue;
+	}
+	else if (field_type == Class.class)
+	{
+	    return Class.forName(nodeValue);
+	}
+	else if (field_type == Date.class)
+	{
+	    return parseDateString(nodeValue);
+	}
+	else if (Calendar.class.isAssignableFrom(field_type))
+	{
+	    String values[] = nodeValue.split(";");
+	    if (values.length != 2)
+		return Void.TYPE;
+	    else
 	    {
-		return new Boolean(Boolean.parseBoolean(nodeValue));
+		Date d = parseDateString(values[0]);
+		Calendar c = Calendar.getInstance();
+		c.setTimeZone(TimeZone.getTimeZone(values[1]));
+		c.setTime(d);
+		return c;
 	    }
-	    else if (field_type==Byte.class)
-	    {
-		return new Byte(Byte.parseByte(nodeValue));
-	    }
-	    else if (field_type==Short.class)
-	    {
-		return new Short(Short.parseShort(nodeValue));
-	    }
-	    else if (field_type==Integer.class)
-	    {
-		return new Integer(Integer.parseInt(nodeValue));
-	    }
-	    else if (field_type==Long.class)
-	    {
-		return new Long(Long.parseLong(nodeValue));
-	    }
-	    else if (field_type==Float.class)
-	    {
-		return new Float(Float.parseFloat(nodeValue));
-	    }
-	    else if (field_type==Double.class)
-	    {
-		return new Double(Double.parseDouble(nodeValue));		    
-	    }
-	    else if (field_type==Character.class)
-	    {
-		return new Character(nodeValue.charAt(0));
-	    }
-	    else if (field_type==String.class)
-	    {
-		return nodeValue;
-	    }
-	    else if (field_type==Class.class)
-	    {
-		return Class.forName(nodeValue);
-	    }
-	    else if (field_type==Date.class)
-	    {
-		return parseDateString(nodeValue);
-	    }
-	    else if (Calendar.class.isAssignableFrom(field_type))
-	    {
-		String values[]=nodeValue.split(";");
-		if (values.length!=2)
-		    return Void.TYPE;
-		else
-		{
-		    Date d=parseDateString(values[0]);
-		    Calendar c=Calendar.getInstance();
-		    c.setTimeZone(TimeZone.getTimeZone(values[1]));
-		    c.setTime(d);
-		    return c;
-		}
-		
-	    }
-	    else if (field_type==File.class)
-	    {
-		return new File(nodeValue);
-	    }
-	    else if (field_type==URL.class)
-	    {
-		return new URL(nodeValue);
-	    }
-	    else if (field_type==URI.class)
-	    {
-		return new URI(nodeValue);
-	    }
-	    else if (field_type==Level.class)
-	    {
-		return Level.parse(nodeValue);
-	    }
-	    else if (field_type==InetAddress.class)
-	    {
-		return InetAddress.getByName(nodeValue);
-	    }
-	    else if (field_type==Inet4Address.class)
-	    {
-		InetAddress res=InetAddress.getByName(nodeValue);
-		if (!(res instanceof Inet4Address))
-		    return Void.TYPE;
-		else
-		    return res;
-	    }
-	    else if (field_type==Inet6Address.class)
-	    {
-		InetAddress res=InetAddress.getByName(nodeValue);
-		if (!(res instanceof Inet6Address))
-		    return Void.TYPE;
-		else
-		    return res;
-	    }
-	    else if (field_type==InetSocketAddress.class)
-	    {
-		String split[]=nodeValue.split(";");
-		if (split.length!=2)
-		    return Void.TYPE;
-		return new InetSocketAddress(InetAddress.getByName(split[0]), Integer.parseInt(split[1]));
-	    }
-	    else if (field_type==SourceVersion.class)
-	    {
-		return SourceVersion.valueOf(nodeValue);
-	    }
-	    else if (field_type==ASymmetricEncryptionType.class)
-	    {
-		return ASymmetricEncryptionType.valueOf(nodeValue); 
-	    }
-	    else if (field_type==SymmetricEncryptionType.class)
-	    {
-		return SymmetricEncryptionType.valueOf(nodeValue); 
-	    }
-	    else if (field_type==SignatureType.class)
-	    {
-		return SignatureType.valueOf(nodeValue); 
-	    }
-	    else if (field_type==MessageDigestType.class)
-	    {
-		return MessageDigestType.valueOf(nodeValue); 
-	    }
-	    else if (field_type==SymmetricSecretKeyType.class)
-	    {
-		return SymmetricSecretKeyType.valueOf(nodeValue); 
-	    }
-	    else if (field_type==SymmetricSecretKey.class)
-	    {
-		return SymmetricSecretKey.valueOf(nodeValue); 
-	    }
-	    else if (field_type==ASymmetricPrivateKey.class)
-	    {
-		return ASymmetricPrivateKey.valueOf(nodeValue); 
-	    }
-	    else if (field_type==ASymmetricPublicKey.class)
-	    {
-		return ASymmetricPublicKey.valueOf(nodeValue); 
-	    }
-	    else if (field_type==ASymmetricKeyPair.class)
-	    {
-		return ASymmetricKeyPair.valueOf(nodeValue); 
-	    }
-	    else if (AbstractDecentralizedID.class.isAssignableFrom(field_type))
-		return AbstractDecentralizedID.valueOf(nodeValue);
-	    
-	    return Void.TYPE;
+
+	}
+	else if (field_type == File.class)
+	{
+	    return new File(nodeValue);
+	}
+	else if (field_type == URL.class)
+	{
+	    return new URL(nodeValue);
+	}
+	else if (field_type == URI.class)
+	{
+	    return new URI(nodeValue);
+	}
+	else if (field_type == Level.class)
+	{
+	    return Level.parse(nodeValue);
+	}
+	else if (field_type == InetAddress.class)
+	{
+	    return InetAddress.getByName(nodeValue);
+	}
+	else if (field_type == Inet4Address.class)
+	{
+	    InetAddress res = InetAddress.getByName(nodeValue);
+	    if (!(res instanceof Inet4Address))
+		return Void.TYPE;
+	    else
+		return res;
+	}
+	else if (field_type == Inet6Address.class)
+	{
+	    InetAddress res = InetAddress.getByName(nodeValue);
+	    if (!(res instanceof Inet6Address))
+		return Void.TYPE;
+	    else
+		return res;
+	}
+	else if (field_type == InetSocketAddress.class)
+	{
+	    String split[] = nodeValue.split(";");
+	    if (split.length != 2)
+		return Void.TYPE;
+	    return new InetSocketAddress(InetAddress.getByName(split[0]),
+		    Integer.parseInt(split[1]));
+	}
+	else if (field_type == SourceVersion.class)
+	{
+	    return SourceVersion.valueOf(nodeValue);
+	}
+	else if (field_type == ASymmetricEncryptionType.class)
+	{
+	    return ASymmetricEncryptionType.valueOf(nodeValue);
+	}
+	else if (field_type == SymmetricEncryptionType.class)
+	{
+	    return SymmetricEncryptionType.valueOf(nodeValue);
+	}
+	else if (field_type == SignatureType.class)
+	{
+	    return SignatureType.valueOf(nodeValue);
+	}
+	else if (field_type == MessageDigestType.class)
+	{
+	    return MessageDigestType.valueOf(nodeValue);
+	}
+	/*
+	 * else if (field_type==SymmetricSecretKeyType.class) { return
+	 * SymmetricSecretKeyType.valueOf(nodeValue); }
+	 */
+	else if (field_type == SymmetricSecretKey.class)
+	{
+	    return SymmetricSecretKey.valueOf(nodeValue);
+	}
+	else if (field_type == ASymmetricPrivateKey.class)
+	{
+	    return ASymmetricPrivateKey.valueOf(nodeValue);
+	}
+	else if (field_type == ASymmetricPublicKey.class)
+	{
+	    return ASymmetricPublicKey.valueOf(nodeValue);
+	}
+	else if (field_type == ASymmetricKeyPair.class)
+	{
+	    return ASymmetricKeyPair.valueOf(nodeValue);
+	}
+	else if (AbstractDecentralizedID.class.isAssignableFrom(field_type))
+	    return AbstractDecentralizedID.valueOf(nodeValue);
+
+	return Void.TYPE;
+    }
+
+    SimpleDateFormat getSimpleDateFormat()
+    {
+	SimpleDateFormat format = new SimpleDateFormat(
+		"yyyy:MM:dd HH:mm:ss:SSSS z");
+	format.setTimeZone(TimeZone.getTimeZone("GMT"));
+	return format;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public String convertObjectToXML(Class<?> field_type, Object object) throws Exception
+    public boolean isValid(Class<?> field_type)
     {
-	    if (field_type==Boolean.class)
-	    {
-		return object.toString();
-	    }
-	    else if (field_type==Byte.class)
-	    {
-		return object.toString();
-	    }
-	    else if (field_type==Short.class)
-	    {
-		return object.toString();
-	    }
-	    else if (field_type==Integer.class)
-	    {
-		return object.toString();
-	    }
-	    else if (field_type==Long.class)
-	    {
-		return object.toString();
-	    }
-	    else if (field_type==Float.class)
-	    {
-		return object.toString();
-	    }
-	    else if (field_type==Double.class)
-	    {
-		return object.toString();
-	    }
-	    else if (field_type==Character.class)
-	    {
-		return object.toString();
-	    }
-	    else if (field_type==String.class)
-	    {
-		return (String)object;
-	    }
-	    else if (field_type==Class.class)
-	    {
-		return ((Class<?>)object).getCanonicalName();
-	    }
-	    else if (field_type==Date.class)
-	    {
-		return toString((Date)object);
-	    }
-	    else if (Calendar.class.isAssignableFrom(field_type))
-	    {
-		return toString(((Calendar)object).getTime())+";"+((Calendar)object).getTimeZone().getID();
-	    }
-	    else if (field_type==File.class)
-	    {
-		return object.toString();
-	    }
-	    else if (field_type==URL.class)
-	    {
-		return object.toString();
-	    }
-	    else if (field_type==URI.class)
-	    {
-		return object.toString();
-	    }
-	    else if (field_type==Level.class)
-	    {
-		return object.toString();		
-	    }
-	    else if (field_type==InetAddress.class || field_type==Inet4Address.class || field_type==Inet6Address.class)
-	    {
-		InetAddress ia=(InetAddress)object;
-		return ia.getHostAddress();
-	    }
-	    else if (field_type==InetSocketAddress.class)
-	    {
-		InetSocketAddress isa=(InetSocketAddress)object;
-		return isa.getAddress().getHostAddress()+";"+isa.getPort();
-	    }
-	    else if (field_type==SourceVersion.class)
-	    {
-		return object.toString();
-	    }
-	    else if (field_type==ASymmetricEncryptionType.class)
-	    {
-		return object.toString(); 
-	    }
-	    else if (field_type==SymmetricEncryptionType.class)
-	    {
-		return object.toString(); 
-	    }
-	    else if (field_type==SignatureType.class)
-	    {
-		return object.toString(); 
-	    }
-	    else if (field_type==MessageDigestType.class)
-	    {
-		return object.toString(); 
-	    }
-	    else if (field_type==SymmetricSecretKeyType.class)
-	    {
-		return object.toString(); 
-	    }
-	    else if (field_type==SymmetricSecretKey.class)
-	    {
-		return object.toString(); 
-	    }
-	    else if (field_type==ASymmetricPrivateKey.class)
-	    {
-		return object.toString(); 
-	    }
-	    else if (field_type==ASymmetricPublicKey.class)
-	    {
-		return object.toString(); 
-	    }
-	    else if (field_type==ASymmetricKeyPair.class)
-	    {
-		return object.toString(); 
-	    }
-	    else if (AbstractDecentralizedID.class.isAssignableFrom(field_type))
-		return object.toString();
-	    else 
-		return null;
+	return field_type == Boolean.class || field_type == Byte.class
+		|| field_type == Short.class || field_type == Integer.class
+		|| field_type == Long.class || field_type == Float.class
+		|| field_type == Double.class || field_type == Character.class
+		|| field_type == String.class || field_type == Class.class
+		|| field_type == Date.class || field_type == File.class
+		|| field_type == URL.class || field_type == URI.class
+		|| field_type == Level.class || field_type == InetAddress.class
+		|| field_type == Inet4Address.class
+		|| field_type == Inet6Address.class
+		|| field_type == InetSocketAddress.class
+		|| field_type == SourceVersion.class
+		|| field_type == ASymmetricEncryptionType.class
+		|| field_type == MessageDigestType.class
+		|| field_type == SymmetricEncryptionType.class
+		|| field_type == SignatureType.class
+		// || field_type==SymmetricSecretKeyType.class
+		|| field_type == SymmetricSecretKey.class
+		|| field_type == ASymmetricPrivateKey.class
+		|| field_type == ASymmetricPublicKey.class
+		|| field_type == ASymmetricKeyPair.class
+		|| AbstractDecentralizedID.class.isAssignableFrom(field_type)
+		|| List.class.isAssignableFrom(field_type)
+		|| XMLProperties.class.isAssignableFrom(field_type)
+		|| field_type.isPrimitive()
+		|| Calendar.class.isAssignableFrom(field_type);
+
     }
 
-    SimpleDateFormat getSimpleDateFormat()
+    Date parseDateString(String d)
     {
-	SimpleDateFormat format=new SimpleDateFormat("yyyy:MM:dd HH:mm:ss:SSSS z");
-	format.setTimeZone(TimeZone.getTimeZone("GMT"));
-	return format;
+	return new Date(Long.parseLong(d));
+	// return getSimpleDateFormat().parse(d);
+
     }
-    
+
     String toString(Date d)
     {
-	//return getSimpleDateFormat().format(d);
+	// return getSimpleDateFormat().format(d);
 	return Long.toString(d.getTime());
     }
-    
-    Date parseDateString(String d) 
-    {
-	return new Date(Long.parseLong(d)); 
-	//return getSimpleDateFormat().parse(d);
-	
-    }
-    
-    
-    
+
 }

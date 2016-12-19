@@ -41,40 +41,62 @@ import java.security.Signature;
  * List of signature algorithms
  * 
  * @author Jason Mahdjoub
- * @version 1.1
+ * @version 2.0
  * @since Utils 1.4
  */
 public enum SignatureType
 {
     @Deprecated
-    SHA1withRSA("SHA1withRSA"),
-    SHA256withRSA("SHA256withRSA"),
-    SHA384withRSA("SHA384withRSA"),
-    SHA512withRSA("SHA512withRSA");
-    
+    SHA1withRSA("SHA1withRSA", false), SHA256withRSA("SHA256withRSA", false), SHA384withRSA("SHA384withRSA", false), SHA512withRSA("SHA512withRSA", false), GNU_SHA256withRSA("SHA256withRSA", true), GNU_SHA384withRSA("SHA384withRSA", true), GNU_SHA512withRSA("SHA512withRSA", true);
+
     private final String algorithmName;
-    
-    private SignatureType(String algorithmName)
+
+    private final boolean gnuVersion;
+
+    private SignatureType(String algorithmName, boolean gnuVersion)
     {
-	this.algorithmName=algorithmName;
+	this.algorithmName = algorithmName;
+	this.gnuVersion = gnuVersion;
     }
-    
+
     public String getAlgorithmName()
     {
 	return algorithmName;
     }
-    
-    public Signature getSignatureInstance() throws NoSuchAlgorithmException
+
+    public AbstractSignature getSignatureInstance() throws gnu.vm.java.security.NoSuchAlgorithmException
     {
-	return Signature.getInstance(algorithmName);
+	if (gnuVersion)
+	{
+	    return new GnuSignature(
+		    gnu.vm.java.security.Signature.getInstance(algorithmName));
+	}
+	else
+	{
+	    try
+	    {
+		return new JavaNativeSignature(
+			Signature.getInstance(algorithmName));
+	    }
+	    catch (NoSuchAlgorithmException e)
+	    {
+		throw new gnu.vm.java.security.NoSuchAlgorithmException(e);
+	    }
+	}
     }
-    
-    public int getSignatureSizeBytes(int keySize)
-    {
-	return keySize/8;
-    }
+
     public int getSignatureSizeBits(int keySize)
     {
 	return keySize;
+    }
+
+    public int getSignatureSizeBytes(int keySize)
+    {
+	return keySize / 8;
+    }
+
+    public boolean isGNUVersion()
+    {
+	return gnuVersion;
     }
 }

@@ -50,89 +50,23 @@ public abstract class BinaryDependency extends Dependency
      * 
      */
     private static final long serialVersionUID = -8201572367856505672L;
-    
-    private String name;
-    private SourceDependancy sourceCode;
 
-    private Package subpackage;
-    
-    protected String exclude_regex;
-    protected String include_regex;
-    private License licenses[];
+    private final static String possibleLicenseFileNames[] = {
+	    "COPYING,LICENSE,COPYING.TXT, LICENSE.TXT,COPYING.txt, LICENSE.txt,copying,license,copying.txt, license.txt" };
 
-    public BinaryDependency()
-    {
-	
-    }
-    
-    public BinaryDependency(String name, SourceDependancy source_code, Package _subpackage, License licenses[], String _exclude_regex, String _include_regex)
-    {
-	if (name==null)
-	    throw new NullPointerException("name");
-	if (_subpackage==null)
-	    throw new NullPointerException("_subpackage");
-	this.name=name;
-	this.sourceCode=source_code;
-	subpackage=_subpackage;
-	exclude_regex=_exclude_regex;
-	include_regex=_include_regex;
-	this.licenses=licenses;
-    }
-    
-    
-    public void copySourceToFolder(File _folder) throws IOException
-    {
-	if (sourceCode==null)
-	    throw new NullPointerException("sourceCode");
-	sourceCode.copySourceToFolder(_folder);
-    }
-    public abstract void copyBinToFolder(File _folder) throws IOException;
-    
-    public boolean hasSource()
-    {
-	return sourceCode!=null;
-    }
-    public SourceDependancy getSourceCode()
-    {
-	return sourceCode;
-    }
-    public String getName()
-    {
-	return name;
-    }
-    
-    public Package getPackage()
-    {
-	return subpackage;
-    }
-    
-    public License[] getLicenses()
-    {
-	return licenses;
-    }
-    
-    abstract String getClassPath();
-    abstract String getAntSetFile();
-    
-    private final static String possibleLicenseFileNames[]={"COPYING,LICENSE,COPYING.TXT, LICENSE.TXT,COPYING.txt, LICENSE.txt,copying,license,copying.txt, license.txt"};
-    
-    
-    public void exportLicences(File directory_destination) throws IOException
-    {
-	BinaryDependency.exportLicences(getName(), licenses, directory_destination, false);
-    }
     static void exportLicences(String projetName, License[] licenses, File directory_destination, boolean isProjectLicense) throws IOException
     {
 	if (!isProjectLicense)
 	{
-	    File license_file=new File(directory_destination, projetName+"_LICENSE");
+	    File license_file = new File(directory_destination,
+		    projetName + "_LICENSE");
 	    for (String s : possibleLicenseFileNames)
 	    {
-		File f=new File(directory_destination, s);
-	    
+		File f = new File(directory_destination, s);
+
 		if (f.exists() && f.isFile())
 		{
-		    if (licenses!=null && licenses.length>0)
+		    if (licenses != null && licenses.length > 0)
 		    {
 			f.delete();
 			break;
@@ -145,24 +79,104 @@ public abstract class BinaryDependency extends Dependency
 		}
 	    }
 	}
-	if (licenses!=null)
+	if (licenses != null)
 	{
-	    if (licenses.length==1)
+	    if (licenses.length == 1)
 	    {
-		licenses[0].generateLicenseFile(new File(directory_destination, projetName+"_LICENSE"));
+		licenses[0].generateLicenseFile(new File(directory_destination,
+			projetName + "_LICENSE"));
 		if (isProjectLicense)
-		    licenses[0].generateLicenseFile(new File(directory_destination, "LICENSE"));
+		    licenses[0].generateLicenseFile(
+			    new File(directory_destination, "LICENSE"));
 	    }
 	    else
 	    {
-		for (int i=0;i<licenses.length;i++)
+		for (int i = 0; i < licenses.length; i++)
 		{
-		    licenses[0].generateLicenseFile(new File(directory_destination, projetName+"_LICENSE_"+(i+1)));
+		    licenses[0]
+			    .generateLicenseFile(new File(directory_destination,
+				    projetName + "_LICENSE_" + (i + 1)));
 		    if (isProjectLicense)
-			licenses[0].generateLicenseFile(new File(directory_destination, "LICENSE_"+(i+1)));
+			licenses[0].generateLicenseFile(new File(
+				directory_destination, "LICENSE_" + (i + 1)));
 		}
 	    }
 	}
     }
-    
+
+    private String name;
+
+    private SourceDependancy sourceCode;
+
+    private Package subpackage;
+
+    protected String exclude_regex;
+
+    protected String include_regex;
+
+    private License licenses[];
+
+    public BinaryDependency()
+    {
+
+    }
+
+    public BinaryDependency(String name, SourceDependancy source_code, Package _subpackage, License licenses[], String _exclude_regex, String _include_regex)
+    {
+	if (name == null)
+	    throw new NullPointerException("name");
+	if (_subpackage == null)
+	    throw new NullPointerException("_subpackage");
+	this.name = name;
+	this.sourceCode = source_code;
+	subpackage = _subpackage;
+	exclude_regex = _exclude_regex;
+	include_regex = _include_regex;
+	this.licenses = licenses;
+    }
+
+    public abstract void copyBinToFolder(File _folder) throws IOException;
+
+    public void copySourceToFolder(File _folder) throws IOException
+    {
+	if (sourceCode == null)
+	    throw new NullPointerException("sourceCode");
+	sourceCode.copySourceToFolder(_folder);
+    }
+
+    public void exportLicences(File directory_destination) throws IOException
+    {
+	BinaryDependency.exportLicences(getName(), licenses,
+		directory_destination, false);
+    }
+
+    abstract String getAntSetFile();
+
+    abstract String getClassPath();
+
+    public License[] getLicenses()
+    {
+	return licenses;
+    }
+
+    public String getName()
+    {
+	return name;
+    }
+
+    public Package getPackage()
+    {
+	return subpackage;
+    }
+
+    public SourceDependancy getSourceCode()
+    {
+	return sourceCode;
+    }
+
+    public boolean hasSource()
+    {
+	return sourceCode != null;
+    }
+
 }

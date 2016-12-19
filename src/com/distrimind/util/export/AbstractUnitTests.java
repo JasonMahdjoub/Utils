@@ -52,14 +52,13 @@ public abstract class AbstractUnitTests extends XMLProperties
      */
     private static final long serialVersionUID = -2047193490331560140L;
 
-    
     public AbstractUnitTests()
     {
 	super(null);
     }
-    
-    
+
     public abstract boolean executeTestsFromJarFile(File jarFile) throws Exception;
+
     public abstract boolean executeTestsFromSystemClassLoader() throws Exception;
-    
+
 }

@@ -34,57 +34,61 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.Signature;
-import java.security.SignatureException;
+import gnu.vm.java.security.InvalidKeyException;
+import gnu.vm.java.security.NoSuchAlgorithmException;
+import gnu.vm.java.security.SignatureException;
+import gnu.vm.java.security.spec.InvalidKeySpecException;
 
 /**
  * 
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 2.0
  * @since Utils 1.7
  */
 public class SignatureCheckerAlgorithm
 {
     private final ASymmetricPublicKey distantPublicKey;
-    private final Signature signature;
-    
-    public SignatureCheckerAlgorithm(ASymmetricPublicKey distantPublicKey) throws NoSuchAlgorithmException
+
+    private final AbstractSignature signature;
+
+    public SignatureCheckerAlgorithm(AbstractSignature signature, ASymmetricPublicKey distantPublicKey)
     {
-	this(distantPublicKey.getAlgorithmType().getDefaultSignatureAlgorithm().getSignatureInstance(), distantPublicKey);
+	if (signature == null)
+	    throw new NullPointerException("signature");
+	if (distantPublicKey == null)
+	    throw new NullPointerException("distantPublicKey");
+	this.distantPublicKey = distantPublicKey;
+	this.signature = signature;
     }
-    
-    public SignatureCheckerAlgorithm(SignatureType type, ASymmetricPublicKey distantPublicKey) throws NoSuchAlgorithmException
+
+    public SignatureCheckerAlgorithm(ASymmetricPublicKey distantPublicKey) throws gnu.vm.java.security.NoSuchAlgorithmException
+    {
+	this(distantPublicKey.getAlgorithmType().getDefaultSignatureAlgorithm()
+		.getSignatureInstance(), distantPublicKey);
+    }
+
+    public SignatureCheckerAlgorithm(SignatureType type, ASymmetricPublicKey distantPublicKey) throws gnu.vm.java.security.NoSuchAlgorithmException
     {
 	this(type.getSignatureInstance(), distantPublicKey);
     }
 
-    public SignatureCheckerAlgorithm(Signature signature, ASymmetricPublicKey distantPublicKey)
-    {
-	if (signature==null)
-	    throw new NullPointerException("signature");
-	if (distantPublicKey==null)
-	    throw new NullPointerException("distantPublicKey");
-	this.distantPublicKey=distantPublicKey;
-	this.signature=signature;
-    }
-    
     public ASymmetricPublicKey getDistantPublicKey()
     {
 	return distantPublicKey;
     }
-    
-    public boolean verify(byte message[], byte signature[]) throws SignatureException, InvalidKeyException
+
+    public boolean verify(byte message[], byte signature[]) throws SignatureException, InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException
     {
-	return this.verify(message, 0, message.length, signature, 0, signature.length);
+	return this.verify(message, 0, message.length, signature, 0,
+		signature.length);
     }
-    public boolean verify(byte message[], int offm, int lenm, byte signature[], int offs, int lens) throws SignatureException, InvalidKeyException
+
+    public boolean verify(byte message[], int offm, int lenm, byte signature[], int offs, int lens) throws SignatureException, InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException
     {
-	this.signature.initVerify(distantPublicKey.getPublicKey());
+	this.signature.initVerify(distantPublicKey);
 	this.signature.update(message, offm, lenm);
-	
+
 	return this.signature.verify(signature, offs, lens);
     }
-    
+
 }

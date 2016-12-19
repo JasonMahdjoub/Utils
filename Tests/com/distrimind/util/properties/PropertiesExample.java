@@ -40,8 +40,6 @@ import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.UnknownHostException;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -62,12 +60,16 @@ import com.distrimind.util.crypto.ASymmetricEncryptionType;
 import com.distrimind.util.crypto.ASymmetricKeyPair;
 import com.distrimind.util.crypto.ASymmetricPrivateKey;
 import com.distrimind.util.crypto.ASymmetricPublicKey;
+import com.distrimind.util.crypto.AbstractSecureRandom;
 import com.distrimind.util.crypto.MessageDigestType;
+import com.distrimind.util.crypto.SecureRandomType;
+import com.distrimind.util.crypto.SymmetricEncryptionType;
 import com.distrimind.util.crypto.SymmetricSecretKey;
-import com.distrimind.util.crypto.SymmetricSecretKeyType;
 import com.distrimind.util.properties.AbstractXMLObjectParser;
 import com.distrimind.util.properties.XMLProperties;
 import com.distrimind.util.version.Version;
+
+import gnu.vm.java.security.NoSuchProviderException;
 
 /**
  * 
@@ -83,153 +85,131 @@ public class PropertiesExample extends XMLProperties
      */
     private static final long serialVersionUID = -569461229020640634L;
 
-    int intValue=0;
-    short shortValue=0;
-    byte byteValue=0;
-    boolean booleanValue=false;
-    long longValue=0;
-    float floatValue=0.0f;
-    double doubleValue=0.0f;
-    
-    Integer IntegerValue=null;
-    Short ShortValue=null;
-    Byte ByteValue=null;
-    Boolean BooleanValue=null;
-    Long LongValue=null;
-    Float FloatValue=null;
-    Double DoubleValue=null;
-    
-    String stringValue=null;
-    File fileValue=null;
-    URL urlValue=null;
-    Level levelValue=null;
-    InetAddress inetAddressV4=null;
-    InetAddress inetAddressV6=null;
-    InetSocketAddress inetSocketAddressV4=null;
-    InetSocketAddress inetSocketAddressV6=null;
-    SourceVersion sourceVersion=null;
-    ASymmetricEncryptionType typeEncryption=null;
-    MessageDigestType messageDigestType=null;
-    SymmetricSecretKeyType symmetricSecretKeyType=null; 
-    Class<?> className=null;
-    Date date=null;
-    Calendar calendar=null;
-    
-    Map<String, Integer> map=null;
-    HashMap<String, Integer> map2=null;
-    List<String> list=null;
-    List<String> list2=null;
-    ArrayList<String> list3=null;
-    LinkedList<String> list4=null;
-    
-    SubProperties subProperties=null;
-    Version version=null;
-    SymmetricSecretKey secretKey=null;
-    ASymmetricKeyPair keyPair=null;
-    ASymmetricPrivateKey privateKey=null;
-    ASymmetricPublicKey publicKey=null;
-    DecentralizedIDGenerator decentralizedId=null;
-    
+    private static String[] strings = { "sfdg", "fdgdg", "bjf", "fsgh",
+	    "hlqoit" };
+
+    public static boolean equals(Object o1, Object o2)
+    {
+	if (o1 == o2)
+	    return true;
+	if (o1 == null)
+	    return false;
+	Assert.assertEquals(o2, o1);
+	return o1.equals(o2);
+    }
+
+    int intValue = 0;
+
+    short shortValue = 0;
+
+    byte byteValue = 0;
+
+    boolean booleanValue = false;
+
+    long longValue = 0;
+
+    float floatValue = 0.0f;
+
+    double doubleValue = 0.0f;
+
+    Integer IntegerValue = null;
+
+    Short ShortValue = null;
+
+    Byte ByteValue = null;
+
+    Boolean BooleanValue = null;
+
+    Long LongValue = null;
+
+    Float FloatValue = null;
+
+    Double DoubleValue = null;
+
+    String stringValue = null;
+
+    File fileValue = null;
+
+    URL urlValue = null;
+
+    Level levelValue = null;
+
+    InetAddress inetAddressV4 = null;
+
+    InetAddress inetAddressV6 = null;
+
+    InetSocketAddress inetSocketAddressV4 = null;
+
+    InetSocketAddress inetSocketAddressV6 = null;
+
+    SourceVersion sourceVersion = null;
+
+    ASymmetricEncryptionType typeEncryption = null;
+
+    MessageDigestType messageDigestType = null;
+
+    Class<?> className = null;
+
+    Date date = null;
+
+    Calendar calendar = null;
+
+    Map<String, Integer> map = null;
+
+    HashMap<String, Integer> map2 = null;
+
+    List<String> list = null;
+
+    List<String> list2 = null;
+
+    ArrayList<String> list3 = null;
+
+    LinkedList<String> list4 = null;
+
+    SubProperties subProperties = null;
+
+    Version version = null;
+
+    SymmetricSecretKey secretKey = null;
+
+    ASymmetricKeyPair keyPair = null;
+
+    ASymmetricPrivateKey privateKey = null;
+
+    ASymmetricPublicKey publicKey = null;
+
+    DecentralizedIDGenerator decentralizedId = null;
+
     protected PropertiesExample(AbstractXMLObjectParser _optional_xml_object_parser_instance)
     {
 	super(_optional_xml_object_parser_instance);
     }
-    
-    void generateValues() throws MalformedURLException, UnknownHostException, NoSuchAlgorithmException
-    {
-	Random rand=new Random(System.currentTimeMillis());
-	intValue=rand.nextInt();
-	shortValue=(short)rand.nextInt();
-	byteValue=(byte)rand.nextInt();
-	booleanValue=rand.nextBoolean();
-	longValue=rand.nextLong();
-	floatValue=rand.nextFloat();
-	doubleValue=rand.nextDouble();
-	
-	IntegerValue=new Integer(rand.nextInt());
-	ShortValue=new Short((short)rand.nextInt());
-	ByteValue=new Byte((byte)rand.nextInt());
-	BooleanValue=new Boolean(rand.nextBoolean());
-	LongValue=new Long(rand.nextLong());
-	FloatValue=new Float(rand.nextFloat());
-	DoubleValue=new Double(rand.nextDouble());
-	
-	
-	stringValue=getString(rand);
-	fileValue=new File(getString(rand));
-	urlValue=new URL("http://"+getString(rand)+".com");
-	levelValue=rand.nextInt()%2==0?Level.CONFIG:Level.FINER;
-	inetAddressV4=InetAddress.getByName("125.54.47.55");
-	inetAddressV6=InetAddress.getByName("1242:1025:1258:1568:1224:1485:1569:2114");
-	inetSocketAddressV4=new InetSocketAddress(inetAddressV4, rand.nextInt(5000));
-	inetSocketAddressV6=new InetSocketAddress(inetAddressV6, rand.nextInt(5000));
-	sourceVersion=SourceVersion.RELEASE_3;
-	typeEncryption=ASymmetricEncryptionType.RSA_OAEPWithSHA256AndMGF1Padding;
-	messageDigestType=MessageDigestType.SHA;
-	symmetricSecretKeyType=SymmetricSecretKeyType.DESede;
-	className=SubProperties.class;
-	map=new HashMap<>();
-	for (int i=0;i<10;i++)
-	    map.put(getString(rand), new Integer(rand.nextInt()));
-	map2=(HashMap<String, Integer>)map;
-	list=new ArrayList<>();
-	for (int i=0;i<10;i++)
-	    list.add(getString(rand));
-	list2=new LinkedList<>();
-	for (int i=0;i<10;i++)
-	    list2.add(getString(rand));
-	list3=(ArrayList<String>)list;
-	list4=(LinkedList<String>)list2;
-	
-	subProperties=new SubProperties();
-	subProperties.value=getString(rand);
-	for (int i=0;i<10;i++)
-	    getFreeStringProperties().put(getString(rand), getString(rand));
-	
-	date=new Date(rand.nextLong());
-	calendar=Calendar.getInstance();
-	calendar.setTime(new Date(rand.nextLong()));
-	version=Utils.VERSION;
-	SecureRandom random=new SecureRandom();
-	secretKey=SymmetricSecretKey.generate(random);
-	keyPair=ASymmetricKeyPair.generate(random, ASymmetricEncryptionType.DEFAULT, (short)1024);
-	privateKey=keyPair.getASymmetricPrivateKey();
-	publicKey=keyPair.getASymmetricPublicKey();
-	decentralizedId=new DecentralizedIDGenerator();
-    }
-    
-    private static String[] strings={"sfdg","fdgdg","bjf", "fsgh", "hlqoit"}; 
-    
-    String getString(Random rand)
-    {
-	return strings[rand.nextInt(strings.length)];
-    }
-    
+
     @Override
     public boolean equals(Object o)
     {
-	if (o==null)
+	if (o == null)
 	    return false;
-	if (o==this)
+	if (o == this)
 	    return true;
 	if (o instanceof PropertiesExample)
 	{
-	    PropertiesExample pe=(PropertiesExample)o;
-	    if (intValue!=pe.intValue)
+	    PropertiesExample pe = (PropertiesExample) o;
+	    if (intValue != pe.intValue)
 		return false;
-	    if (shortValue!=pe.shortValue)
+	    if (shortValue != pe.shortValue)
 		return false;
-	    if (longValue!=pe.longValue)
+	    if (longValue != pe.longValue)
 		return false;
-	    if (byteValue!=pe.byteValue)
+	    if (byteValue != pe.byteValue)
 		return false;
-	    if (booleanValue!=pe.booleanValue)
+	    if (booleanValue != pe.booleanValue)
 		return false;
-	    if (floatValue!=pe.floatValue)
+	    if (floatValue != pe.floatValue)
 		return false;
-	    if (doubleValue!=pe.doubleValue)
+	    if (doubleValue != pe.doubleValue)
 		return false;
-	    
+
 	    if (!equals(IntegerValue, pe.IntegerValue))
 		return false;
 	    if (!equals(ShortValue, pe.ShortValue))
@@ -268,11 +248,9 @@ public class PropertiesExample extends XMLProperties
 		return false;
 	    if (!equals(messageDigestType, pe.messageDigestType))
 		return false;
-	    if (!equals(symmetricSecretKeyType, pe.symmetricSecretKeyType))
-		return false;
 	    if (!equals(subProperties, pe.subProperties))
 		return false;
-	    
+
 	    if (!equals(map, pe.map))
 		return false;
 	    if (!equals(map2, pe.map2))
@@ -287,7 +265,8 @@ public class PropertiesExample extends XMLProperties
 		return false;
 	    if (!equals(className, pe.className))
 		return false;
-	    if (!equals(getFreeStringProperties(), pe.getFreeStringProperties()))
+	    if (!equals(getFreeStringProperties(),
+		    pe.getFreeStringProperties()))
 		return false;
 	    if (!equals(date, pe.date))
 		return false;
@@ -303,39 +282,107 @@ public class PropertiesExample extends XMLProperties
 		return false;
 	    if (!equals(decentralizedId, pe.decentralizedId))
 		return false;
-	    
-	    
-	    Assert.assertFalse(version==null^pe.version==null);
-	    if (version==null^pe.version==null)
+
+	    Assert.assertFalse(version == null ^ pe.version == null);
+	    if (version == null ^ pe.version == null)
 	    {
-		Assert.assertEquals(version.getAlphaBetaVersion(), pe.version.getAlphaBetaVersion());
-		Assert.assertEquals(version.getBuildNumber(), pe.version.getBuildNumber());
+		Assert.assertEquals(version.getAlphaBetaVersion(),
+			pe.version.getAlphaBetaVersion());
+		Assert.assertEquals(version.getBuildNumber(),
+			pe.version.getBuildNumber());
 		Assert.assertEquals(version.getMajor(), pe.version.getMajor());
 		Assert.assertEquals(version.getMinor(), pe.version.getMinor());
-		Assert.assertEquals(version.getProgramName(), pe.version.getProgramName());
-		Assert.assertEquals(version.getRevision(), pe.version.getRevision());
-		Assert.assertEquals(version.getProjectEndDate(), pe.version.getProjectEndDate());
-		Assert.assertEquals(version.getProjectStartDate(), pe.version.getProjectStartDate());
+		Assert.assertEquals(version.getProgramName(),
+			pe.version.getProgramName());
+		Assert.assertEquals(version.getRevision(),
+			pe.version.getRevision());
+		Assert.assertEquals(version.getProjectEndDate(),
+			pe.version.getProjectEndDate());
+		Assert.assertEquals(version.getProjectStartDate(),
+			pe.version.getProjectStartDate());
 		Assert.assertEquals(version.getType(), pe.version.getType());
-		Assert.assertEquals(version.getDevelopers(), pe.version.getDevelopers());
-		Assert.assertEquals(version.getCreators(), pe.version.getCreators());
-		Assert.assertEquals(version.getDescriptions(), pe.version.getDescriptions());
+		Assert.assertEquals(version.getDevelopers(),
+			pe.version.getDevelopers());
+		Assert.assertEquals(version.getCreators(),
+			pe.version.getCreators());
+		Assert.assertEquals(version.getDescriptions(),
+			pe.version.getDescriptions());
 	    }
 	    return true;
 	}
 	else
 	    return false;
     }
-    public static boolean equals(Object o1, Object o2)
+
+    void generateValues() throws MalformedURLException, UnknownHostException, gnu.vm.java.security.NoSuchAlgorithmException, NoSuchProviderException
     {
-	if (o1==o2)
-	    return true;
-	if (o1==null)
-	    return false;
-	Assert.assertEquals(o2, o1);
-	return o1.equals(o2);
+	Random rand = new Random(System.currentTimeMillis());
+	intValue = rand.nextInt();
+	shortValue = (short) rand.nextInt();
+	byteValue = (byte) rand.nextInt();
+	booleanValue = rand.nextBoolean();
+	longValue = rand.nextLong();
+	floatValue = rand.nextFloat();
+	doubleValue = rand.nextDouble();
+
+	IntegerValue = new Integer(rand.nextInt());
+	ShortValue = new Short((short) rand.nextInt());
+	ByteValue = new Byte((byte) rand.nextInt());
+	BooleanValue = new Boolean(rand.nextBoolean());
+	LongValue = new Long(rand.nextLong());
+	FloatValue = new Float(rand.nextFloat());
+	DoubleValue = new Double(rand.nextDouble());
+
+	stringValue = getString(rand);
+	fileValue = new File(getString(rand));
+	urlValue = new URL("http://" + getString(rand) + ".com");
+	levelValue = rand.nextInt() % 2 == 0 ? Level.CONFIG : Level.FINER;
+	inetAddressV4 = InetAddress.getByName("125.54.47.55");
+	inetAddressV6 = InetAddress
+		.getByName("1242:1025:1258:1568:1224:1485:1569:2114");
+	inetSocketAddressV4 = new InetSocketAddress(inetAddressV4,
+		rand.nextInt(5000));
+	inetSocketAddressV6 = new InetSocketAddress(inetAddressV6,
+		rand.nextInt(5000));
+	sourceVersion = SourceVersion.RELEASE_3;
+	typeEncryption = ASymmetricEncryptionType.RSA_OAEPWithSHA256AndMGF1Padding;
+	messageDigestType = MessageDigestType.DEFAULT;
+	className = SubProperties.class;
+	map = new HashMap<>();
+	for (int i = 0; i < 10; i++)
+	    map.put(getString(rand), new Integer(rand.nextInt()));
+	map2 = (HashMap<String, Integer>) map;
+	list = new ArrayList<>();
+	for (int i = 0; i < 10; i++)
+	    list.add(getString(rand));
+	list2 = new LinkedList<>();
+	for (int i = 0; i < 10; i++)
+	    list2.add(getString(rand));
+	list3 = (ArrayList<String>) list;
+	list4 = (LinkedList<String>) list2;
+
+	subProperties = new SubProperties();
+	subProperties.value = getString(rand);
+	for (int i = 0; i < 10; i++)
+	    getFreeStringProperties().put(getString(rand), getString(rand));
+
+	date = new Date(rand.nextLong());
+	calendar = Calendar.getInstance();
+	calendar.setTime(new Date(rand.nextLong()));
+	version = Utils.VERSION;
+	AbstractSecureRandom random = SecureRandomType.DEFAULT.getInstance();
+	secretKey = SymmetricEncryptionType.DEFAULT.getKeyGenerator(random)
+		.generateKey();
+	keyPair = ASymmetricEncryptionType.DEFAULT
+		.getKeyPairGenerator(random, (short) 1024).generateKeyPair();
+	privateKey = keyPair.getASymmetricPrivateKey();
+	publicKey = keyPair.getASymmetricPublicKey();
+	decentralizedId = new DecentralizedIDGenerator();
     }
-    
-    
+
+    String getString(Random rand)
+    {
+	return strings[rand.nextInt(strings.length)];
+    }
 
 }

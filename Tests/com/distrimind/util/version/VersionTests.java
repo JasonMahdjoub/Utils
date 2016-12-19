@@ -47,12 +47,13 @@ import com.distrimind.util.Utils;
  */
 public class VersionTests
 {
-    @Test void testFunctions()
+    @Test
+    void testFunctions()
     {
 	Utils.VERSION.toString();
 	Utils.VERSION.toStringShort();
 	Utils.VERSION.convertToStringProperties();
 	Utils.VERSION.getHTMLCode();
-	
+
     }
 }

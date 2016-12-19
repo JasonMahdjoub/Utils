@@ -39,6 +39,7 @@ import com.distrimind.util.properties.XMLProperties;
 
 /**
  * Represents a Person participating to a software creation
+ * 
  * @author Jason Mahdjoub
  * @version 1.0
  * @since Utils 1.0
@@ -51,25 +52,43 @@ public class Person extends XMLProperties
      * 
      */
     private static final long serialVersionUID = 6907388594593576340L;
-    
+
     protected String m_name, m_first_name;
-    
+
     protected Person()
     {
-	this("","");
+	this("", "");
     }
+
     public Person(String _name, String _first_name)
     {
 	super(null);
-	if (_name==null)
+	if (_name == null)
 	    throw new NullPointerException("_name");
-	if (_first_name==null)
+	if (_first_name == null)
 	    throw new NullPointerException("_first_name");
-	m_name=_name.toUpperCase();
-	if (_first_name.length()>0)
-	    m_first_name=_first_name.substring(0,1).toUpperCase()+_first_name.substring(1).toLowerCase();
-	else 
-	    m_first_name="";
+	m_name = _name.toUpperCase();
+	if (_first_name.length() > 0)
+	    m_first_name = _first_name.substring(0, 1).toUpperCase()
+		    + _first_name.substring(1).toLowerCase();
+	else
+	    m_first_name = "";
+    }
+
+    @Override
+    public boolean equals(Object o)
+    {
+	if (o == null)
+	    return false;
+	if (o == this)
+	    return true;
+	if (o instanceof Person)
+	{
+	    Person p = ((Person) o);
+	    return m_first_name.equals(p.m_first_name)
+		    && m_name.equals(p.m_name);
+	}
+	return false;
     }
 
     public String getFirstName()
@@ -81,25 +100,11 @@ public class Person extends XMLProperties
     {
 	return m_name;
     }
-    
-    @Override public String toString()
-    {
-	return m_first_name+" "+m_name;
-    }
-    
+
     @Override
-    public boolean equals(Object o)
+    public String toString()
     {
-	if (o==null)
-	    return false;
-	if (o==this)
-	    return true;
-	if (o instanceof Person)
-	{
-	    Person p=((Person) o);
-	    return m_first_name.equals(p.m_first_name) && m_name.equals(p.m_name);
-	}
-	return false;
+	return m_first_name + " " + m_name;
     }
-    
+
 }

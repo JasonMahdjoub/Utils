@@ -63,7 +63,8 @@ import javax.swing.JScrollPane;
 import com.distrimind.util.properties.XMLProperties;
 
 /**
- * Represent the description of all versions of a software, including the current version
+ * Represent the description of all versions of a software, including the
+ * current version
  * 
  * @author Jason Mahdjoub
  * @version 1.1
@@ -74,232 +75,187 @@ import com.distrimind.util.properties.XMLProperties;
  */
 public class Version extends XMLProperties implements Comparable<Version>
 {
+    public enum Type
+    {
+	Stable, Alpha, Beta
+    }
+
     /**
      * 
      */
     private static final long serialVersionUID = -183708465780440306L;
 
+    private int m_major = 0;
 
-    public enum Type
-    {
-	Stable,
-	Alpha,
-	Beta
-    }
-    
-    
-    private int m_major=0;
-    private int m_minor=0;
-    private int m_revision=0;
-    private Type m_type=null;
-    private int m_alpha_beta_version=0;
-    
-    private Date m_date_start_project=null;
-    private Date m_date_end_project=null;
-    private int m_build_number=1;
-    
-    private String m_program_name=null;
+    private int m_minor = 0;
+
+    private int m_revision = 0;
+
+    private Type m_type = null;
+
+    private int m_alpha_beta_version = 0;
+
+    private Date m_date_start_project = null;
+
+    private Date m_date_end_project = null;
+
+    private int m_build_number = 1;
+
+    private String m_program_name = null;
+
     private String m_short_program_name;
-    
-    ArrayList<Person> m_creators=new ArrayList<Person>();
-    ArrayList<PersonDeveloper> m_developers=new ArrayList<PersonDeveloper>();
-    ArrayList<Description> m_descriptions=new ArrayList<Description>();
+
+    ArrayList<Person> m_creators = new ArrayList<Person>();
+
+    ArrayList<PersonDeveloper> m_developers = new ArrayList<PersonDeveloper>();
+
+    ArrayList<Description> m_descriptions = new ArrayList<Description>();
+
+    private JFrame m_frame = null;
 
     protected Version()
     {
-	this("", "", 0,0,0,Type.Alpha, 0, new Date(), new Date());
+	this("", "", 0, 0, 0, Type.Alpha, 0, new Date(), new Date());
     }
-    
+
     public Version(String _program_name, String shortProgramName, int _major, int _minor, int _revision, Type _type, int _alpha_beta_version, Date _date_start_project, Date _date_end_project)
     {
 	super(null);
-	if (_program_name==null)
+	if (_program_name == null)
 	    throw new NullPointerException("_program_name");
-	if (shortProgramName==null)
+	if (shortProgramName == null)
 	    throw new NullPointerException("shortProgramName");
-	if (_type==null)
+	if (_type == null)
 	    throw new NullPointerException("_type");
-	if (_date_start_project==null)
+	if (_date_start_project == null)
 	    throw new NullPointerException("_date_start_project");
-	if (_date_end_project==null)
+	if (_date_end_project == null)
 	    throw new NullPointerException("_date_end_project");
-	
-	m_major=_major;
-	m_minor=_minor;
-	m_revision=_revision;
-	m_type=_type;
-	m_alpha_beta_version=_alpha_beta_version;
-	m_date_start_project=_date_start_project;
-	m_date_end_project=_date_end_project;
-	m_program_name=_program_name;
-	m_short_program_name=shortProgramName;
+
+	m_major = _major;
+	m_minor = _minor;
+	m_revision = _revision;
+	m_type = _type;
+	m_alpha_beta_version = _alpha_beta_version;
+	m_date_start_project = _date_start_project;
+	m_date_end_project = _date_end_project;
+	m_program_name = _program_name;
+	m_short_program_name = shortProgramName;
     }
-    
-    public int getMajor()
+
+    public void addCreator(Person p)
     {
-	return m_major;
+	if (p == null)
+	    throw new NullPointerException("p");
+	m_creators.add(p);
     }
-    public int getMinor()
+
+    public void addDescription(Description _d)
     {
-	return m_minor;
+	if (_d == null)
+	    throw new NullPointerException("_d");
+	m_descriptions.add(_d);
     }
-    public int getRevision()
+
+    public void addDeveloper(PersonDeveloper p)
     {
-	return m_revision;
+	if (p == null)
+	    throw new NullPointerException("p");
+	m_developers.add(p);
     }
-    public Type getType()
+
+    @Override
+    public int compareTo(Version b)
     {
-	return m_type;
+	if (b == null)
+	    throw new NullPointerException("b");
+
+	return this.m_build_number - b.m_build_number;
     }
-    
+
     public int getAlphaBetaVersion()
     {
 	return m_alpha_beta_version;
     }
-    
-    public Date getProjectStartDate()
-    {
-	return m_date_start_project;
-    }
-    public Date getProjectEndDate()
-    {
-	return m_date_end_project;
-    }
-    
+
     public int getBuildNumber()
     {
 	return m_build_number;
     }
-    
-    public void setBuildNumber(int _buil_number)
-    {
-	m_build_number=_buil_number;
-    }
-    
-    public void addCreator(Person p)
-    {
-	if (p==null)
-	    throw new NullPointerException("p");
-	m_creators.add(p);
-    }
-    public void addDeveloper(PersonDeveloper p)
-    {
-	if (p==null)
-	    throw new NullPointerException("p");
-	m_developers.add(p);
-    }
+
     public ArrayList<Person> getCreators()
     {
 	return m_creators;
     }
-    public ArrayList<PersonDeveloper> getDevelopers()
-    {
-	return m_developers;
-    }
-    
-    public String getProgramName()
-    {
-	return m_program_name;
-    }
-    
-    public String getShortProgramName()
-    {
-	return m_short_program_name;
-    }
-    public void addDescription(Description _d)
-    {
-	if (_d==null)
-	    throw new NullPointerException("_d");
-	m_descriptions.add(_d);
-    }
+
     public ArrayList<Description> getDescriptions()
     {
 	return m_descriptions;
     }
-    
-    public String toStringShort()
+
+    public ArrayList<PersonDeveloper> getDevelopers()
     {
-	return Integer.toString(m_major)+"."+Integer.toString(m_minor)+"."+Integer.toString(m_revision)+" "+m_type+((m_type.equals(Type.Alpha) || m_type.equals(Type.Beta))?" "+Integer.toString(m_alpha_beta_version):"")+" (Build: "+Integer.toString(m_build_number)+")";
-    }
-    
-    public String getFileHeadVersion()
-    {
-	return Integer.toString(getMajor())+
-		"."+
-		Integer.toString(getMinor())+
-		"."+
-		Integer.toString(getRevision())+"-"+
-		getType()+
-		((getType().equals(Version.Type.Beta) || getType().equals(Version.Type.Alpha))?Integer.toString(getAlphaBetaVersion()):"");	
+	return m_developers;
     }
 
     public String getFileHeadName()
     {
-	return getShortProgramName().replace(" ", "")+"-"+getFileHeadVersion();	
+	return getShortProgramName().replace(" ", "") + "-"
+		+ getFileHeadVersion();
     }
-    
-    @Override
-    public String toString()
+
+    public String getFileHeadVersion()
     {
-	StringBuffer s=new StringBuffer();
-	s.append(m_program_name+" ");
-	s.append(toStringShort());
-	s.append("\n from "+DateFormat.getDateInstance(DateFormat.SHORT, Locale.FRANCE).format(m_date_start_project)+" to "+DateFormat.getDateInstance(DateFormat.SHORT, Locale.FRANCE).format(m_date_end_project));
-	if (m_creators.size()>0)
-	{
-		s.append("\n\n");
-		s.append("Creator(s) :");
-		for (Person p : m_creators)
-		{
-		    s.append("\n\t");
-		    s.append(p);
-		}
-	}
-	if (m_developers.size()>0)
-	{
-		s.append("\n\n");
-		s.append("Developer(s) :");
-		for (PersonDeveloper p : m_developers)
-		{
-		    s.append("\n\t");
-		    s.append(p);
-		}
-	}
-	return s.toString();
+	return Integer.toString(getMajor()) + "." + Integer.toString(getMinor())
+		+ "." + Integer.toString(getRevision()) + "-" + getType()
+		+ ((getType().equals(Version.Type.Beta)
+			|| getType().equals(Version.Type.Alpha))
+				? Integer.toString(getAlphaBetaVersion()) : "");
     }
+
     public String getHTMLCode()
     {
-	StringBuffer s=new StringBuffer();
+	StringBuffer s = new StringBuffer();
 	s.append("<html><table><tr><td><H1>");
-	s.append(m_program_name+"</H1>");
-	s.append(Integer.toString(m_major)+"."+Integer.toString(m_minor)+"."+Integer.toString(m_revision)+" "+m_type+((m_type.equals(Type.Alpha) || m_type.equals(Type.Beta))?" "+m_alpha_beta_version:"")+" (Build: "+m_build_number+")");
-	s.append(" (from "+DateFormat.getDateInstance(DateFormat.SHORT, Locale.FRANCE).format(m_date_start_project)+" to "+DateFormat.getDateInstance(DateFormat.SHORT, Locale.FRANCE).format(m_date_end_project)+")");
+	s.append(m_program_name + "</H1>");
+	s.append(Integer.toString(m_major) + "." + Integer.toString(m_minor)
+		+ "." + Integer.toString(m_revision) + " " + m_type
+		+ ((m_type.equals(Type.Alpha) || m_type.equals(Type.Beta))
+			? " " + m_alpha_beta_version : "")
+		+ " (Build: " + m_build_number + ")");
+	s.append(" (from "
+		+ DateFormat.getDateInstance(DateFormat.SHORT, Locale.FRANCE)
+			.format(m_date_start_project)
+		+ " to "
+		+ DateFormat.getDateInstance(DateFormat.SHORT, Locale.FRANCE)
+			.format(m_date_end_project)
+		+ ")");
 	s.append("</H1><BR>");
-	if (m_creators.size()>0)
+	if (m_creators.size() > 0)
 	{
-	    	s.append("<BR><BR>");
-		s.append("<H2>Creator(s) :</H2><ul>");
-		for (Person p : m_creators)
-		{
-		    s.append("<li>");
-		    s.append(p);
-		    s.append("</li>");
-		}
-		s.append("</ul>");
+	    s.append("<BR><BR>");
+	    s.append("<H2>Creator(s) :</H2><ul>");
+	    for (Person p : m_creators)
+	    {
+		s.append("<li>");
+		s.append(p);
+		s.append("</li>");
+	    }
+	    s.append("</ul>");
 	}
-	if (m_developers.size()>0)
+	if (m_developers.size() > 0)
 	{
-	    	s.append("<BR><BR>");
-		s.append("<H2>Developer(s) :</H2><ul>");
-		for (PersonDeveloper p : m_developers)
-		{
-		    s.append("<li>");
-		    s.append(p);
-		    s.append("</li>");
-		}
-		s.append("</ul>");
+	    s.append("<BR><BR>");
+	    s.append("<H2>Developer(s) :</H2><ul>");
+	    for (PersonDeveloper p : m_developers)
+	    {
+		s.append("<li>");
+		s.append(p);
+		s.append("</li>");
+	    }
+	    s.append("</ul>");
 	}
-	if (m_descriptions.size()>0)
+	if (m_descriptions.size() > 0)
 	{
 	    s.append("<BR>");
 	    for (Description d : m_descriptions)
@@ -308,75 +264,114 @@ public class Version extends XMLProperties implements Comparable<Version>
 		s.append(d.getHTML());
 	    }
 	}
-	
+
 	s.append("</td></tr></table></html>");
 
 	return s.toString();
     }
-    
-    private JFrame m_frame=null; 
-    
+
     public JFrame getJFrame()
     {
-	if (m_frame==null)
+	if (m_frame == null)
 	{
-        	final JFrame f=m_frame=new JFrame("About "+m_program_name);
-        	f.add(new JPanel(new BorderLayout()));
-        	JPanel ps=new JPanel(new FlowLayout(FlowLayout.CENTER));
-        	JButton b=new JButton("Close");
-        	b.addMouseListener(new MouseListener() {
-        	    
-        	    @Override
-        	    public void mouseReleased(MouseEvent _e)
-        	    {
-        	    }
-        	    
-        	    @Override
-        	    public void mousePressed(MouseEvent _e)
-        	    {
-        	    }
-        	    
-        	    @Override
-        	    public void mouseExited(MouseEvent _e)
-        	    {
-        	    }
-        	    
-        	    @Override
-        	    public void mouseEntered(MouseEvent _e)
-        	    {
-        	
-        	    }
-        	    
-        	    @Override
-        	    public void mouseClicked(MouseEvent _e)
-        	    {
-        		f.setVisible(false);
-        		
-        	    }
-        	});
-        	f.add(ps, BorderLayout.SOUTH);
-        	ps.add(b);
-        
-        	JLabel j=new JLabel(this.getHTMLCode().toString());
-        	j.setAlignmentY(Component.TOP_ALIGNMENT);
-        	JScrollPane scrollpane=new JScrollPane(j);
-        	scrollpane.getVerticalScrollBar().setUnitIncrement(15);
-        	scrollpane.setAlignmentY(Component.TOP_ALIGNMENT);
-        	f.add(scrollpane, BorderLayout.CENTER);
-        	f.setSize(800, 600);
-        	f.setResizable(false);
+	    final JFrame f = m_frame = new JFrame("About " + m_program_name);
+	    f.add(new JPanel(new BorderLayout()));
+	    JPanel ps = new JPanel(new FlowLayout(FlowLayout.CENTER));
+	    JButton b = new JButton("Close");
+	    b.addMouseListener(new MouseListener() {
+
+		@Override
+		public void mouseClicked(MouseEvent _e)
+		{
+		    f.setVisible(false);
+
+		}
+
+		@Override
+		public void mouseEntered(MouseEvent _e)
+		{
+
+		}
+
+		@Override
+		public void mouseExited(MouseEvent _e)
+		{
+		}
+
+		@Override
+		public void mousePressed(MouseEvent _e)
+		{
+		}
+
+		@Override
+		public void mouseReleased(MouseEvent _e)
+		{
+		}
+	    });
+	    f.add(ps, BorderLayout.SOUTH);
+	    ps.add(b);
+
+	    JLabel j = new JLabel(this.getHTMLCode().toString());
+	    j.setAlignmentY(Component.TOP_ALIGNMENT);
+	    JScrollPane scrollpane = new JScrollPane(j);
+	    scrollpane.getVerticalScrollBar().setUnitIncrement(15);
+	    scrollpane.setAlignmentY(Component.TOP_ALIGNMENT);
+	    f.add(scrollpane, BorderLayout.CENTER);
+	    f.setSize(800, 600);
+	    f.setResizable(false);
 	}
 	return m_frame;
     }
-    public void screenVersion()
+
+    public int getMajor()
     {
-	getJFrame().setVisible(true);
+	return m_major;
+    }
+
+    public int getMinor()
+    {
+	return m_minor;
+    }
+
+    public String getProgramName()
+    {
+	return m_program_name;
+    }
+
+    public Date getProjectEndDate()
+    {
+	return m_date_end_project;
+    }
+
+    public Date getProjectStartDate()
+    {
+	return m_date_start_project;
+    }
+
+    public int getRevision()
+    {
+	return m_revision;
+    }
+
+    public String getShortProgramName()
+    {
+	return m_short_program_name;
+    }
+
+    public Type getType()
+    {
+	return m_type;
+    }
+
+    public void incrementBuildNumber()
+    {
+	this.m_build_number++;
     }
 
     public void loadBuildNumber(File buildFile) throws NumberFormatException, IOException
     {
-	//load build file
-	try(FileInputStream is=new FileInputStream(buildFile))
+	// load build file
+	try (FileInputStream is = new FileInputStream(buildFile))
 	{
 	    loadBuildNumber(is);
 	}
@@ -384,45 +379,85 @@ public class Version extends XMLProperties implements Comparable<Version>
 
     public void loadBuildNumber(InputStream inputStream) throws NumberFormatException, IOException
     {
-	try(InputStreamReader isr=new InputStreamReader(inputStream))
+	try (InputStreamReader isr = new InputStreamReader(inputStream))
 	{
-	    try (BufferedReader bf=new BufferedReader(isr))
+	    try (BufferedReader bf = new BufferedReader(isr))
 	    {
 		setBuildNumber(Integer.parseInt(bf.readLine()));
 	    }
 	}
     }
-    
-    public void incrementBuildNumber()
-    {
-	this.m_build_number++;
-    }
-    
+
     public void saveBuildNumber(File buildFile) throws IOException
     {
-	if (buildFile==null)
+	if (buildFile == null)
 	    throw new NullPointerException("buildFile");
-	
-	try(FileOutputStream fos=new FileOutputStream(buildFile))
+
+	try (FileOutputStream fos = new FileOutputStream(buildFile))
 	{
 	    saveBuildNumber(fos);
 	}
     }
-    
+
     public void saveBuildNumber(OutputStream outputStream) throws NumberFormatException, IOException
     {
-	try(OutputStreamWriter osw=new OutputStreamWriter(outputStream))
+	try (OutputStreamWriter osw = new OutputStreamWriter(outputStream))
 	{
 	    osw.write(Integer.toString(getBuildNumber()));
 	}
     }
-   
-    @Override
-    public int compareTo(Version b)
+
+    public void screenVersion()
     {
-	if (b==null)
-	    throw new NullPointerException("b");
-	
-	return this.m_build_number-b.m_build_number;
+	getJFrame().setVisible(true);
+    }
+
+    public void setBuildNumber(int _buil_number)
+    {
+	m_build_number = _buil_number;
+    }
+
+    @Override
+    public String toString()
+    {
+	StringBuffer s = new StringBuffer();
+	s.append(m_program_name + " ");
+	s.append(toStringShort());
+	s.append("\n from "
+		+ DateFormat.getDateInstance(DateFormat.SHORT, Locale.FRANCE)
+			.format(m_date_start_project)
+		+ " to "
+		+ DateFormat.getDateInstance(DateFormat.SHORT, Locale.FRANCE)
+			.format(m_date_end_project));
+	if (m_creators.size() > 0)
+	{
+	    s.append("\n\n");
+	    s.append("Creator(s) :");
+	    for (Person p : m_creators)
+	    {
+		s.append("\n\t");
+		s.append(p);
+	    }
+	}
+	if (m_developers.size() > 0)
+	{
+	    s.append("\n\n");
+	    s.append("Developer(s) :");
+	    for (PersonDeveloper p : m_developers)
+	    {
+		s.append("\n\t");
+		s.append(p);
+	    }
+	}
+	return s.toString();
+    }
+
+    public String toStringShort()
+    {
+	return Integer.toString(m_major) + "." + Integer.toString(m_minor) + "."
+		+ Integer.toString(m_revision) + " " + m_type
+		+ ((m_type.equals(Type.Alpha) || m_type.equals(Type.Beta))
+			? " " + Integer.toString(m_alpha_beta_version) : "")
+		+ " (Build: " + Integer.toString(m_build_number) + ")";
     }
 }

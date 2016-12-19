@@ -53,47 +53,53 @@ class WindowsTraceRoute extends TraceRoute
 {
     WindowsTraceRoute()
     {
-	
+
     }
-    
+
     @Override
     public List<InetAddress> tracePath(InetAddress _ia, int depth, int time_out_ms)
     {
 	try
 	{
-	    ArrayList<InetAddress> res=new ArrayList<InetAddress>();
-	    if (depth>0)
+	    ArrayList<InetAddress> res = new ArrayList<InetAddress>();
+	    if (depth > 0)
 		++depth;
-	    Process p=Runtime.getRuntime().exec("tracert -d "+(depth<0?"":("-h "+depth+" "))+(time_out_ms<0?"":("-w "+(time_out_ms)+" "))+_ia.getHostAddress());
-	    
-	    try(InputStreamReader isr=new InputStreamReader(p.getInputStream()))
+	    Process p = Runtime.getRuntime().exec("tracert -d "
+		    + (depth < 0 ? "" : ("-h " + depth + " "))
+		    + (time_out_ms < 0 ? "" : ("-w " + (time_out_ms) + " "))
+		    + _ia.getHostAddress());
+
+	    try (InputStreamReader isr = new InputStreamReader(
+		    p.getInputStream()))
 	    {
-		try(BufferedReader input =new BufferedReader(isr))
+		try (BufferedReader input = new BufferedReader(isr))
 		{
-		    String line=null;
-		    
-		    Pattern pattern=Pattern.compile("^[1-9][0-9]*");
-		    
-		    while ((line = input.readLine())!=null)
+		    String line = null;
+
+		    Pattern pattern = Pattern.compile("^[1-9][0-9]*");
+
+		    while ((line = input.readLine()) != null)
 		    {
-			String split[]=line.split(" ");
-			String first_string=null;
-			for (int i=0;i<split.length;i++)
+			String split[] = line.split(" ");
+			String first_string = null;
+			for (int i = 0; i < split.length; i++)
 			{
-			    if (split[i].length()>0)
+			    if (split[i].length() > 0)
 			    {
-				first_string=split[i];
+				first_string = split[i];
 				break;
 			    }
 			}
-			
-			if (split.length>3 && pattern.matcher(first_string).matches())
+
+			if (split.length > 3
+				&& pattern.matcher(first_string).matches())
 			{
 			    try
 			    {
-				res.add(InetAddress.getByName(split[split.length-1]));
+				res.add(InetAddress
+					.getByName(split[split.length - 1]));
 			    }
-			    catch(Exception e)
+			    catch (Exception e)
 			    {
 				res.add(null);
 			    }
@@ -103,7 +109,7 @@ class WindowsTraceRoute extends TraceRoute
 	    }
 	    p.destroy();
 	    return res;
-	    
+
 	}
 	catch (Exception e)
 	{
@@ -111,6 +117,5 @@ class WindowsTraceRoute extends TraceRoute
 	    return null;
 	}
     }
-
 
 }

@@ -37,11 +37,12 @@ package com.distrimind.util;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * This class represents a unique identifier.
- * Uniqueness is guaranteed over the network.
+ * This class represents a unique identifier. Uniqueness is guaranteed over the
+ * network.
+ * 
  * @author Jason Mahdjoub
  * @version 1.0
- * @since Utils 1.0 
+ * @since Utils 1.0
  */
 public class DecentralizedIDGenerator extends AbstractDecentralizedIDGenerator
 {
@@ -49,24 +50,36 @@ public class DecentralizedIDGenerator extends AbstractDecentralizedIDGenerator
      * 
      */
     private static final long serialVersionUID = 5093130008197172104L;
-    
-    private static final AtomicInteger sequencer=new AtomicInteger(0);
-    static final String ToStringHead="DecentralizedID"; 
+
+    private static final AtomicInteger sequencer = new AtomicInteger(0);
+
+    static final String ToStringHead = "DecentralizedID";
+
+    public static DecentralizedIDGenerator valueOf(String value)
+    {
+	AbstractDecentralizedID res = AbstractDecentralizedID.valueOf(value);
+	if (res instanceof DecentralizedIDGenerator)
+	{
+	    return (DecentralizedIDGenerator) res;
+	}
+	else
+	    throw new IllegalArgumentException("Invalid format : " + value);
+    }
+
     public DecentralizedIDGenerator()
     {
 	super();
     }
-    
+
     DecentralizedIDGenerator(long timestamp, long work_id_sequence)
     {
 	super(timestamp, work_id_sequence);
     }
-    
-    
+
     @Override
     protected short getNewSequence()
     {
-	return (short)sequencer.incrementAndGet();
+	return (short) sequencer.incrementAndGet();
     }
 
     @Override
@@ -74,19 +87,12 @@ public class DecentralizedIDGenerator extends AbstractDecentralizedIDGenerator
     {
 	return AbstractDecentralizedID.DECENTRALIZED_ID_GENERATOR_TYPE;
     }
-	@Override public String toString()
-	{
-	    return ToStringHead+"["+getTimeStamp()+";"+getWorkerID()+";"+getSequenceID()+"]";
-	}
-	public static DecentralizedIDGenerator valueOf(String value)
-	{
-	    AbstractDecentralizedID res=AbstractDecentralizedID.valueOf(value);
-	    if (res instanceof DecentralizedIDGenerator)
-	    {
-		return (DecentralizedIDGenerator)res;
-	    }
-	    else
-		throw new IllegalArgumentException("Invalid format : "+value);
-	}
+
+    @Override
+    public String toString()
+    {
+	return ToStringHead + "[" + getTimeStamp() + ";" + getWorkerID() + ";"
+		+ getSequenceID() + "]";
+    }
 
 }

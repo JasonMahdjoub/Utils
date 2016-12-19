@@ -42,9 +42,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
-
 /**
- *    
+ * 
  * @author Jason Mahdjoub
  * @version 1.0
  * @since Utils 1.0
@@ -55,63 +54,73 @@ class LinuxHardDriveDetect extends UnixHardDriveDetect
 {
     LinuxHardDriveDetect()
     {
-	
+
     }
-    
+
+    @Override
+    long getTimeBeforeUpdate()
+    {
+	return 10000;
+    }
+
     @Override
     Partition scanPartitions()
     {
 	return scanPartitions(2);
     }
+
     Partition scanPartitions(int iteration)
     {
-	Partition root=new Partition();
-	if (iteration<=0)
+	Partition root = new Partition();
+	if (iteration <= 0)
 	    return root;
-	
-	File file=new File("/proc/mounts");
-	try(FileInputStream fis=new FileInputStream(file))
+
+	File file = new File("/proc/mounts");
+	try (FileInputStream fis = new FileInputStream(file))
 	{
-	    try(InputStreamReader isr=new InputStreamReader(fis))
+	    try (InputStreamReader isr = new InputStreamReader(fis))
 	    {
-		try(BufferedReader br=new BufferedReader(isr))
+		try (BufferedReader br = new BufferedReader(isr))
 		{
-		    String line=br.readLine();
-		    while (line!=null)
+		    String line = br.readLine();
+		    while (line != null)
 		    {
-			String values[]=line.split(" ");
-			if (values.length>1)
+			String values[] = line.split(" ");
+			if (values.length > 1)
 			{
-			    String id=values[0];
+			    String id = values[0];
 			    if (id.startsWith("/dev/"))
 			    {
 				try
 				{
-				    id=new File(id).getCanonicalPath();
-				    char last_char=id.charAt(id.length()-1);
-				    while (last_char>='0' && last_char<='9')
+				    id = new File(id).getCanonicalPath();
+				    char last_char = id.charAt(id.length() - 1);
+				    while (last_char >= '0' && last_char <= '9')
 				    {
-					id=id.substring(0, id.length()-1);
-					if (id.length()>0)
+					id = id.substring(0, id.length() - 1);
+					if (id.length() > 0)
 					{
-					    last_char=id.charAt(id.length()-1);
+					    last_char = id
+						    .charAt(id.length() - 1);
 					}
 					else
 					    break;
 				    }
-				    if (id.length()>1)
+				    if (id.length() > 1)
 				    {
 					try
 					{
-					    Partition p=new Partition(new File(id), new File(values[1]));
+					    Partition p = new Partition(
+						    new File(id),
+						    new File(values[1]));
 					    root.addPartition(p);
 					}
-					catch(Exception e)
+					catch (Exception e)
 					{
 					}
 				    }
 				}
-				catch(IOException e)
+				catch (IOException e)
 				{
 				}
 			    }
@@ -119,15 +128,16 @@ class LinuxHardDriveDetect extends UnixHardDriveDetect
 			    {
 				try
 				{
-				    Partition p=new Partition(new File(values[1]));
+				    Partition p = new Partition(
+					    new File(values[1]));
 				    root.addPartition(p);
 				}
-				catch(Exception e)
+				catch (Exception e)
 				{
 				}
 			    }
 			}
-			line=br.readLine();
+			line = br.readLine();
 		    }
 		}
 	    }
@@ -140,12 +150,6 @@ class LinuxHardDriveDetect extends UnixHardDriveDetect
 	    return scanPartitions(--iteration);
 	}
 	return root;
-    }
-
-    @Override
-    long getTimeBeforeUpdate()
-    {
-	return 10000;
     }
 
 }

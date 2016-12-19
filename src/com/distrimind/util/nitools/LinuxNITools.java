@@ -43,16 +43,16 @@ import java.net.NetworkInterface;
  * 
  * @author Jason Mahdjoub
  * @version 1.0
- * @since Utils 1.0 
+ * @since Utils 1.0
  *
  */
 class LinuxNITools extends NITools
 {
     LinuxNITools()
     {
-	
+
     }
-    
+
     @Override
     public long getNetworkInterfaceSpeed(NetworkInterface _network_interface)
     {
@@ -60,25 +60,27 @@ class LinuxNITools extends NITools
 	{
 	    if (_network_interface.isLoopback())
 		return Long.MAX_VALUE;
-	    Process p=Runtime.getRuntime().exec("ethtool "+_network_interface.getName());
-	    long res=-1;
-	    try(InputStreamReader isr=new InputStreamReader(p.getInputStream()))
+	    Process p = Runtime.getRuntime()
+		    .exec("ethtool " + _network_interface.getName());
+	    long res = -1;
+	    try (InputStreamReader isr = new InputStreamReader(
+		    p.getInputStream()))
 	    {
-		try(BufferedReader input =new BufferedReader(isr))
+		try (BufferedReader input = new BufferedReader(isr))
 		{
 		    String line = null;
-		    while (res==-1 && (line = input.readLine())!=null)
+		    while (res == -1 && (line = input.readLine()) != null)
 		    {
-			String split[]=line.split(" ");
-			for (int i=0;i<split.length-1;i++)
+			String split[] = line.split(" ");
+			for (int i = 0; i < split.length - 1; i++)
 			{
 			    if (split[i].contains("Speed:"))
 			    {
-				res=readLong(split[split.length-1]);
+				res = readLong(split[split.length - 1]);
 				break;
 			    }
 			}
-			
+
 		    }
 		}
 	    }

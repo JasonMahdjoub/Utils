@@ -33,7 +33,6 @@ The fact that you are presently reading this means that you have had
 knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-
 package com.distrimind.util;
 
 import java.io.File;
@@ -44,12 +43,13 @@ import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 
 /**
- * This class represents a unique identifier.
- * Uniqueness is guaranteed over the network. 
- * The 'reinforced' class denomination means that uniqueness is also guaranteed between different instances of MadKit into the same computer.   
+ * This class represents a unique identifier. Uniqueness is guaranteed over the
+ * network. The 'reinforced' class denomination means that uniqueness is also
+ * guaranteed between different instances of MadKit into the same computer.
+ * 
  * @author Jason Mahdjoub
  * @version 1.0
- * @since Utils 1.0 
+ * @since Utils 1.0
  */
 public class RenforcedDecentralizedIDGenerator extends AbstractDecentralizedIDGenerator
 {
@@ -57,56 +57,69 @@ public class RenforcedDecentralizedIDGenerator extends AbstractDecentralizedIDGe
      * 
      */
     private static final long serialVersionUID = 4279383128706805738L;
-    static final String ToStringHead="RenforcedDecentralizedID";
-    
+
+    static final String ToStringHead = "RenforcedDecentralizedID";
+
+    public static RenforcedDecentralizedIDGenerator valueOf(String value)
+    {
+	AbstractDecentralizedID res = AbstractDecentralizedID.valueOf(value);
+	if (res instanceof RenforcedDecentralizedIDGenerator)
+	{
+	    return (RenforcedDecentralizedIDGenerator) res;
+	}
+	else
+	    throw new IllegalArgumentException("Invalid format : " + value);
+    }
+
     public RenforcedDecentralizedIDGenerator()
     {
 	super();
     }
+
     RenforcedDecentralizedIDGenerator(long timestamp, long work_id_sequence)
     {
 	super(timestamp, work_id_sequence);
     }
-    
+
     @Override
     protected short getNewSequence()
     {
-	synchronized (AbstractDecentralizedIDGenerator.class) {
+	synchronized (AbstractDecentralizedIDGenerator.class)
+	{
 	    short tmp = 0;
-	    try (RandomAccessFile raf=new RandomAccessFile(new File(System.getProperty("java.io.tmpdir"), "RDIDG_UTILS_DISTRIMIND"), "rw"); final FileChannel channel = raf.getChannel();final FileLock lock = channel.lock();) {
+	    try (RandomAccessFile raf = new RandomAccessFile(
+		    new File(System.getProperty("java.io.tmpdir"),
+			    "RDIDG_UTILS_DISTRIMIND"),
+		    "rw");
+		    final FileChannel channel = raf.getChannel();
+		    final FileLock lock = channel.lock();)
+	    {
 		final ByteBuffer b = ByteBuffer.allocate(2);
 		channel.read(b, 0);
-		tmp=((short) (b.getShort(0) + 1));
+		tmp = ((short) (b.getShort(0) + 1));
 		b.putShort(0, tmp).rewind();
 		channel.write(b, 0);
-	    } catch (IOException e) {
+	    }
+	    catch (IOException e)
+	    {
 		e.printStackTrace();
 		tmp = (short) System.nanoTime();
 	    }
 	    return tmp;
 	}
     }
-    
+
     @Override
     byte getType()
     {
 	return AbstractDecentralizedID.RENFORCED_DECENTRALIZED_ID_GENERATOR_TYPE;
     }
-    
-	@Override public String toString()
-	{
-	    return ToStringHead+"["+getTimeStamp()+";"+getWorkerID()+";"+getSequenceID()+"]";
-	}
 
-	public static RenforcedDecentralizedIDGenerator valueOf(String value)
-	{
-	    AbstractDecentralizedID res=AbstractDecentralizedID.valueOf(value);
-	    if (res instanceof RenforcedDecentralizedIDGenerator)
-	    {
-		return (RenforcedDecentralizedIDGenerator)res;
-	    }
-	    else
-		throw new IllegalArgumentException("Invalid format : "+value);
-	}
-	
+    @Override
+    public String toString()
+    {
+	return ToStringHead + "[" + getTimeStamp() + ";" + getWorkerID() + ";"
+		+ getSequenceID() + "]";
+    }
+
 }

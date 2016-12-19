@@ -41,8 +41,9 @@ import java.util.regex.Pattern;
 import com.distrimind.util.sizeof.ObjectSizer;
 
 /**
- * This class represents a unique identifier.
- * Uniqueness is guaranteed over the network.
+ * This class represents a unique identifier. Uniqueness is guaranteed over the
+ * network.
+ * 
  * @author Jason Mahdjoub
  * @version 1.0
  * @since Utils 1.3
@@ -54,103 +55,127 @@ public abstract class AbstractDecentralizedID implements Serializable
      * 
      */
     private static final long serialVersionUID = 9204239435623960497L;
-    
-    
-    @Override public abstract boolean equals(Object obj);
-    @Override public abstract int hashCode();
-    @Override public abstract String toString();
-    public abstract byte[] getBytes();
-    abstract byte getType();
-    
-    static final byte DECENTRALIZED_ID_GENERATOR_TYPE=0;
-    static final byte RENFORCED_DECENTRALIZED_ID_GENERATOR_TYPE=1;
-    static final byte SECURED_DECENTRALIZED_ID_TYPE=2;
- 
+
+    static final byte DECENTRALIZED_ID_GENERATOR_TYPE = 0;
+
+    static final byte RENFORCED_DECENTRALIZED_ID_GENERATOR_TYPE = 1;
+
+    static final byte SECURED_DECENTRALIZED_ID_TYPE = 2;
+
     public static AbstractDecentralizedID instanceOf(byte[] bytes)
     {
 	return instanceOf(bytes, 0, bytes.length);
     }
-	public static AbstractDecentralizedID instanceOf(byte[] bytes, int off, int len)
+
+    public static AbstractDecentralizedID instanceOf(byte[] bytes, int off, int len)
+    {
+	if (bytes == null)
+	    throw new NullPointerException("bytes");
+	if (off >= bytes.length)
+	    throw new IllegalArgumentException();
+	if (off + len > bytes.length)
+	    throw new IllegalArgumentException();
+
+	byte type = bytes[off];
+	int sizeLong = ObjectSizer.sizeOf(1l);
+	int sizeByte = ObjectSizer.sizeOf(type);
+	switch (type)
 	{
-	    if (bytes==null)
-		throw new NullPointerException("bytes");
-	    if (off>=bytes.length)
-		throw new IllegalArgumentException();
-	    if (off+len>bytes.length)
-		throw new IllegalArgumentException();
-	    
-	    byte type=bytes[off];
-	    int sizeLong=ObjectSizer.sizeOf(1l);
-	    int sizeByte=ObjectSizer.sizeOf(type);
-	    switch(type)
+	    case AbstractDecentralizedID.DECENTRALIZED_ID_GENERATOR_TYPE:
+		if (len != sizeByte + sizeLong * 2)
+		    throw new IllegalArgumentException();
+		return new DecentralizedIDGenerator(
+			Bits.getLong(bytes, off + sizeByte),
+			Bits.getLong(bytes, off + sizeByte + sizeLong));
+	    case AbstractDecentralizedID.RENFORCED_DECENTRALIZED_ID_GENERATOR_TYPE:
+		if (len != sizeByte + sizeLong * 2)
+		    throw new IllegalArgumentException();
+		return new RenforcedDecentralizedIDGenerator(
+			Bits.getLong(bytes, off + sizeByte),
+			Bits.getLong(bytes, off + sizeByte + sizeLong));
+	    case AbstractDecentralizedID.SECURED_DECENTRALIZED_ID_TYPE:
 	    {
-		case AbstractDecentralizedID.DECENTRALIZED_ID_GENERATOR_TYPE:
-		    if (len!=sizeByte+sizeLong*2)
-			throw new IllegalArgumentException();
-		    return new DecentralizedIDGenerator(Bits.getLong(bytes, off+sizeByte), Bits.getLong(bytes, off+sizeByte+sizeLong));
-		case AbstractDecentralizedID.RENFORCED_DECENTRALIZED_ID_GENERATOR_TYPE:
-		    if (len!=sizeByte+sizeLong*2)
-			throw new IllegalArgumentException();
-		    return new RenforcedDecentralizedIDGenerator(Bits.getLong(bytes, off+sizeByte), Bits.getLong(bytes, off+sizeByte+sizeLong));
-		case AbstractDecentralizedID.SECURED_DECENTRALIZED_ID_TYPE:
-		{
-		    if ((len-sizeByte)%sizeLong!=0 || (len-sizeByte)/sizeLong<=0)
-			throw new IllegalArgumentException();
-		    long idLongs[]=new long[(len-sizeByte)/sizeLong];
-		    for (int i=0;i<idLongs.length;i++)
-			idLongs[i]=Bits.getLong(bytes, off+sizeByte+i*sizeLong);
-		    return new SecuredDecentralizedID(idLongs);
-		}
-		default:
-		    throw new IllegalArgumentException("Unkown type");
+		if ((len - sizeByte) % sizeLong != 0
+			|| (len - sizeByte) / sizeLong <= 0)
+		    throw new IllegalArgumentException();
+		long idLongs[] = new long[(len - sizeByte) / sizeLong];
+		for (int i = 0; i < idLongs.length; i++)
+		    idLongs[i] = Bits.getLong(bytes,
+			    off + sizeByte + i * sizeLong);
+		return new SecuredDecentralizedID(idLongs);
 	    }
-	    
+	    default:
+		throw new IllegalArgumentException("Unkown type");
 	}
-	
-	public static AbstractDecentralizedID valueOf(String value)
+
+    }
+
+    public static AbstractDecentralizedID valueOf(String value)
+    {
+	if (value.startsWith(DecentralizedIDGenerator.ToStringHead + "["))
 	{
-	    if (value.startsWith(DecentralizedIDGenerator.ToStringHead+"["))
+	    Pattern p = Pattern.compile("(-?\\d*);(-?\\d*);(-?\\d*)");
+	    Matcher m = p.matcher(value.subSequence(
+		    DecentralizedIDGenerator.ToStringHead.length() + 1,
+		    value.length() - 1));
+	    if (m.matches() && m.groupCount() == 3)
 	    {
-		Pattern p=Pattern.compile("(-?\\d*);(-?\\d*);(-?\\d*)");
-		Matcher m=p.matcher(value.subSequence(DecentralizedIDGenerator.ToStringHead.length()+1, value.length()-1));
-		if (m.matches() && m.groupCount()==3)
-		{
-		    long timeStamp=Long.parseLong(m.group(1));
-		    long workerID=Long.parseLong(m.group(2));
-		    long sequenceID=Long.parseLong(m.group(3));
-		    
-		    return new DecentralizedIDGenerator(timeStamp, workerID | (sequenceID<<48));
-		}
+		long timeStamp = Long.parseLong(m.group(1));
+		long workerID = Long.parseLong(m.group(2));
+		long sequenceID = Long.parseLong(m.group(3));
+
+		return new DecentralizedIDGenerator(timeStamp,
+			workerID | (sequenceID << 48));
 	    }
-	    if (value.startsWith(RenforcedDecentralizedIDGenerator.ToStringHead+"["))
-	    {
-		Pattern p=Pattern.compile("(-?\\d*);(-?\\d*);(-?\\d*)");
-		Matcher m=p.matcher(value.subSequence(RenforcedDecentralizedIDGenerator.ToStringHead.length()+1, value.length()-1));
-		if (m.matches() && m.groupCount()==3)
-		{
-		    long timeStamp=Long.parseLong(m.group(1));
-		    long workerID=Long.parseLong(m.group(2));
-		    long sequenceID=Long.parseLong(m.group(3));
-		    
-		    return new RenforcedDecentralizedIDGenerator(timeStamp, workerID | (sequenceID<<48));
-		}
-	    }
-	    if (value.startsWith(SecuredDecentralizedID.ToStringHead+"["))
-	    {
-		Pattern p=Pattern.compile(";");
-		String values[]=p.split(value.subSequence(SecuredDecentralizedID.ToStringHead.length()+1, value.length()-1));
-		if (values.length>=1)
-		{
-		    long[] vals=new long[values.length];
-		    for (int i=0;i<vals.length;i++)
-		    {
-			vals[i]=Long.parseLong(values[i]);
-		    }
-		    
-		    return new SecuredDecentralizedID(vals);
-		}
-	    }
-	    throw new IllegalArgumentException("Invalid value format : "+value);
 	}
-    
+	if (value.startsWith(
+		RenforcedDecentralizedIDGenerator.ToStringHead + "["))
+	{
+	    Pattern p = Pattern.compile("(-?\\d*);(-?\\d*);(-?\\d*)");
+	    Matcher m = p.matcher(value.subSequence(
+		    RenforcedDecentralizedIDGenerator.ToStringHead.length() + 1,
+		    value.length() - 1));
+	    if (m.matches() && m.groupCount() == 3)
+	    {
+		long timeStamp = Long.parseLong(m.group(1));
+		long workerID = Long.parseLong(m.group(2));
+		long sequenceID = Long.parseLong(m.group(3));
+
+		return new RenforcedDecentralizedIDGenerator(timeStamp,
+			workerID | (sequenceID << 48));
+	    }
+	}
+	if (value.startsWith(SecuredDecentralizedID.ToStringHead + "["))
+	{
+	    Pattern p = Pattern.compile(";");
+	    String values[] = p.split(value.subSequence(
+		    SecuredDecentralizedID.ToStringHead.length() + 1,
+		    value.length() - 1));
+	    if (values.length >= 1)
+	    {
+		long[] vals = new long[values.length];
+		for (int i = 0; i < vals.length; i++)
+		{
+		    vals[i] = Long.parseLong(values[i]);
+		}
+
+		return new SecuredDecentralizedID(vals);
+	    }
+	}
+	throw new IllegalArgumentException("Invalid value format : " + value);
+    }
+
+    @Override
+    public abstract boolean equals(Object obj);
+
+    public abstract byte[] getBytes();
+
+    abstract byte getType();
+
+    @Override
+    public abstract int hashCode();
+
+    @Override
+    public abstract String toString();
+
 }

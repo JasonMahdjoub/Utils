@@ -34,107 +34,76 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-
 import javax.crypto.Cipher;
-import javax.crypto.NoSuchPaddingException;
+
+import gnu.vm.java.security.InvalidKeyException;
+import gnu.vm.java.security.NoSuchAlgorithmException;
+import gnu.vm.java.security.NoSuchProviderException;
+import gnu.vm.java.security.spec.InvalidKeySpecException;
+import gnu.vm.javax.crypto.NoSuchPaddingException;
 
 /**
  * 
  * @author Jason Mahdjoub
- * @version 1.4
+ * @version 2.0
  * @since Utils 1.4
  */
 public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm
 {
     private final ASymmetricKeyPair myKeyPair;
+
     private final ASymmetricPublicKey distantPublicKey;
+
     private final SignerAlgorithm signer;
+
     private final SignatureCheckerAlgorithm signatureChecker;
+
     private final ASymmetricEncryptionType type;
+
     private final SignatureType signatureType;
+
     private final int maxBlockSizeForEncoding, maxBlockSizeForDecoding;
-    
-    public P2PASymmetricEncryptionAlgorithm(ASymmetricKeyPair myKeyPair, ASymmetricPublicKey distantPublicKey) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException
+
+    public P2PASymmetricEncryptionAlgorithm(ASymmetricKeyPair myKeyPair, ASymmetricPublicKey distantPublicKey) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidKeySpecException, NoSuchProviderException
     {
-	this(myKeyPair.getAlgorithmType().getDefaultSignatureAlgorithm(), myKeyPair, distantPublicKey);
+	this(myKeyPair.getAlgorithmType().getDefaultSignatureAlgorithm(),
+		myKeyPair, distantPublicKey);
     }
 
-    public P2PASymmetricEncryptionAlgorithm(SignatureType signatureType, ASymmetricKeyPair myKeyPair, ASymmetricPublicKey distantPublicKey) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException
+    public P2PASymmetricEncryptionAlgorithm(SignatureType signatureType, ASymmetricKeyPair myKeyPair, ASymmetricPublicKey distantPublicKey) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidKeySpecException, NoSuchProviderException
     {
 	super(myKeyPair.getAlgorithmType().getCipherInstance());
-	if (signatureType==null)
+	if (signatureType == null)
 	    throw new NullPointerException("signatureType");
-	if (distantPublicKey==null)
+	if (distantPublicKey == null)
 	    throw new NullPointerException("distantPublicKey");
-	
-	this.type=myKeyPair.getAlgorithmType();
-	this.myKeyPair=myKeyPair;
-	this.distantPublicKey=distantPublicKey;
-	this.signatureType=signatureType;
-	this.signer=new SignerAlgorithm(signatureType, myKeyPair.getASymmetricPrivateKey());
-	this.signatureChecker=new SignatureCheckerAlgorithm(signatureType, distantPublicKey);
-	//initCipherForEncrypt(this.cipher);
-	this.maxBlockSizeForEncoding=myKeyPair.getMaxBlockSize();
+
+	this.type = myKeyPair.getAlgorithmType();
+	this.myKeyPair = myKeyPair;
+	this.distantPublicKey = distantPublicKey;
+	this.signatureType = signatureType;
+	this.signer = new SignerAlgorithm(signatureType,
+		myKeyPair.getASymmetricPrivateKey());
+	this.signatureChecker = new SignatureCheckerAlgorithm(signatureType,
+		distantPublicKey);
+	// initCipherForEncrypt(this.cipher);
+	this.maxBlockSizeForEncoding = myKeyPair.getMaxBlockSize();
 	initCipherForDecrypt(this.cipher, null);
-	this.maxBlockSizeForDecoding=cipher.getOutputSize(this.maxBlockSizeForEncoding);
-    }
-    
-    public SignatureType getSignatureType()
-    {
-	return signatureType;
+	this.maxBlockSizeForDecoding = cipher
+		.getOutputSize(this.maxBlockSizeForEncoding);
     }
 
     @Override
-    public void initCipherForEncrypt(Cipher _cipher) throws InvalidKeyException
-    {
-	initCipherForEncryptAndNotChangeIV(_cipher);
-    }
-    @Override
-    public void initCipherForEncryptAndNotChangeIV(Cipher _cipher) throws InvalidKeyException
-    {
-	_cipher.init(Cipher.ENCRYPT_MODE, distantPublicKey.getPublicKey());
-	
-    }
-
-    @Override
-    public void initCipherForDecrypt(Cipher _cipher, byte[] iv) throws InvalidKeyException
-    {
-	_cipher.init(Cipher.DECRYPT_MODE, myKeyPair.getASymmetricPrivateKey().getPrivateKey());
-    }
-
-    @Override
-    protected Cipher getCipherInstance() throws NoSuchAlgorithmException, NoSuchPaddingException
+    protected AbstractCipher getCipherInstance() throws NoSuchAlgorithmException, NoSuchPaddingException
     {
 	return type.getCipherInstance();
     }
-    
-    public SignerAlgorithm getSignerAlgorithm()
-    {
-	return signer;
-    }
 
-    public SignatureCheckerAlgorithm getSignatureCheckerAlgorithm()
-    {
-	return signatureChecker;
-    }
-    
-    public ASymmetricKeyPair getMyKeyPair()
-    {
-	return this.myKeyPair;
-    }
-    
     public ASymmetricPublicKey getDistantPublicKey()
     {
 	return this.distantPublicKey;
     }
 
-    @Override
-    public int getMaxBlockSizeForEncoding()
-    {
-	return maxBlockSizeForEncoding;
-    }
     @Override
     public int getMaxBlockSizeForDecoding()
     {
@@ -142,9 +111,54 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
     }
 
     @Override
+    public int getMaxBlockSizeForEncoding()
+    {
+	return maxBlockSizeForEncoding;
+    }
+
+    public ASymmetricKeyPair getMyKeyPair()
+    {
+	return this.myKeyPair;
+    }
+
+    public SignatureCheckerAlgorithm getSignatureCheckerAlgorithm()
+    {
+	return signatureChecker;
+    }
+
+    public SignatureType getSignatureType()
+    {
+	return signatureType;
+    }
+
+    public SignerAlgorithm getSignerAlgorithm()
+    {
+	return signer;
+    }
+
+    @Override
     protected boolean includeIV()
     {
 	return false;
     }
-    
+
+    @Override
+    public void initCipherForDecrypt(AbstractCipher _cipher, byte[] iv) throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException
+    {
+	_cipher.init(Cipher.DECRYPT_MODE, myKeyPair.getASymmetricPrivateKey());
+    }
+
+    @Override
+    public void initCipherForEncrypt(AbstractCipher _cipher) throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException
+    {
+	initCipherForEncryptAndNotChangeIV(_cipher);
+    }
+
+    @Override
+    public void initCipherForEncryptAndNotChangeIV(AbstractCipher _cipher) throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException
+    {
+	_cipher.init(Cipher.ENCRYPT_MODE, distantPublicKey);
+
+    }
+
 }

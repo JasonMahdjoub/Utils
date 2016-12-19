@@ -34,20 +34,18 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.security.KeyPair;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
-import java.security.spec.InvalidKeySpecException;
-
-import org.apache.commons.net.util.Base64;
 
 import com.distrimind.util.Bits;
+
+import gnu.java.util.Base64;
 
 /**
  * 
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 2.0
  * @since Utils 1.7.1
  */
 public class ASymmetricKeyPair implements Serializable
@@ -56,108 +54,193 @@ public class ASymmetricKeyPair implements Serializable
      * 
      */
     private static final long serialVersionUID = -8249147431069134363L;
-    
-    private final KeyPair keyPair;
-    private final short keySize;
-    private final ASymmetricEncryptionType type;
-    
-    private ASymmetricKeyPair(ASymmetricEncryptionType type, KeyPair keyPair, short keySize)
+
+    public static ASymmetricKeyPair decode(byte[] b) throws IllegalArgumentException
     {
-	if (type==null)
-	    throw new NullPointerException("type");
-	if (keyPair==null)
-	    throw new NullPointerException("keyPair");
-	if (keySize<1024)
-	    throw new IllegalArgumentException("keySize");
-	
-	this.keyPair=keyPair;
-	this.keySize=keySize;
-	this.type=type;
+	byte[][] res1 = Bits.separateEncodingsWithIntSizedTabs(b);
+	byte[][] res2 = Bits.separateEncodingsWithShortSizedTabs(res1[0]);
+	ASymmetricEncryptionType type = ASymmetricEncryptionType
+		.valueOf(Bits.getInt(res2[0], 2));
+	short keySize = Bits.getShort(res2[0], 0);
+	return new ASymmetricKeyPair(type,
+		new ASymmetricPrivateKey(type, res1[1], keySize),
+		new ASymmetricPublicKey(type, res2[1], keySize), keySize);
     }
+
+    public static ASymmetricKeyPair valueOf(String key) throws IllegalArgumentException, IOException
+    {
+	return decode(Base64.decode(key));
+    }
+
+    private final ASymmetricPrivateKey privateKey;
+
+    private final ASymmetricPublicKey publicKey;
+
+    private final short keySize;
+
+    private final ASymmetricEncryptionType type;
+
+    private final int hashCode;
+
+    private transient volatile KeyPair nativeKeyPair;
+
+    private transient volatile gnu.vm.java.security.KeyPair gnuKeyPair;
+
+    ASymmetricKeyPair(ASymmetricEncryptionType type, ASymmetricPrivateKey privateKey, ASymmetricPublicKey publicKey, short keySize)
+    {
+	if (type == null)
+	    throw new NullPointerException("type");
+	if (privateKey == null)
+	    throw new NullPointerException("privateKey");
+	if (publicKey == null)
+	    throw new NullPointerException("publicKey");
+	if (keySize < 1024)
+	    throw new IllegalArgumentException("keySize");
+	this.privateKey = privateKey;
+	this.publicKey = publicKey;
+	this.keySize = keySize;
+	this.type = type;
+	hashCode = privateKey.hashCode() + publicKey.hashCode();
+    }
+
+    ASymmetricKeyPair(ASymmetricEncryptionType type, gnu.vm.java.security.KeyPair keyPair, short keySize)
+    {
+	if (type == null)
+	    throw new NullPointerException("type");
+	if (keyPair == null)
+	    throw new NullPointerException("keyPair");
+	if (keySize < 1024)
+	    throw new IllegalArgumentException("keySize");
+	privateKey = new ASymmetricPrivateKey(type, keyPair.getPrivate(),
+		keySize);
+	publicKey = new ASymmetricPublicKey(type, keyPair.getPublic(), keySize);
+	this.keySize = keySize;
+	this.type = type;
+	hashCode = privateKey.hashCode() + publicKey.hashCode();
+    }
+
+    ASymmetricKeyPair(ASymmetricEncryptionType type, KeyPair keyPair, short keySize)
+    {
+	if (type == null)
+	    throw new NullPointerException("type");
+	if (keyPair == null)
+	    throw new NullPointerException("keyPair");
+	if (keySize < 1024)
+	    throw new IllegalArgumentException("keySize");
+	privateKey = new ASymmetricPrivateKey(type, keyPair.getPrivate(),
+		keySize);
+	publicKey = new ASymmetricPublicKey(type, keyPair.getPublic(), keySize);
+	this.keySize = keySize;
+	this.type = type;
+	hashCode = privateKey.hashCode() + publicKey.hashCode();
+    }
+
+    public byte[] encode()
+    {
+	byte[] tab = new byte[6];
+	Bits.putShort(tab, 0, keySize);
+	Bits.putInt(tab, 2, type.ordinal());
+	return Bits.concateEncodingWithIntSizedTabs(
+		Bits.concateEncodingWithShortSizedTabs(tab,
+			publicKey.getBytesPublicKey()),
+		privateKey.getBytesPrivateKey());
+	// return Bits.concateEncodingWithShortSizedTabs(tab,
+	// ASymmetricEncryptionType.encodeKeyPair(toGnuKeyPair()));
+    }
+
+    @Override
+    public boolean equals(Object o)
+    {
+	if (o == null)
+	    return false;
+	if (o == this)
+	    return true;
+	if (o instanceof ASymmetricKeyPair)
+	{
+	    ASymmetricKeyPair other = ((ASymmetricKeyPair) o);
+	    return privateKey.equals(other.privateKey)
+		    && publicKey.equals(other.publicKey)
+		    && keySize == other.keySize && type == other.type;
+	}
+	return false;
+    }
+
     public ASymmetricEncryptionType getAlgorithmType()
     {
 	return type;
     }
-    public int getMaxBlockSize()
+
+    public ASymmetricPrivateKey getASymmetricPrivateKey()
     {
-	return type.getMaxBlockSize(keySize);
+	return privateKey;
     }
-    
+
+    public ASymmetricPublicKey getASymmetricPublicKey()
+    {
+	return publicKey;
+    }
+
     public short getKeySize()
     {
 	return keySize;
     }
-    @Override
-    public String toString()
+
+    public int getMaxBlockSize()
     {
-	return Base64.encodeBase64String(encode());
+	return type.getMaxBlockSize(keySize);
     }
-    
-    public static ASymmetricKeyPair valueOf(String key) throws NoSuchAlgorithmException, InvalidKeySpecException, IllegalArgumentException
-    {
-	return decode(Base64.decodeBase64(key));
-    }
-    
-    
-    
-    @Override
-    public boolean equals(Object o)
-    {
-	if (o==null)
-	    return false;
-	if (o==this)
-	    return true;
-	if (o instanceof ASymmetricKeyPair)
-	{
-	    ASymmetricKeyPair other=((ASymmetricKeyPair) o);
-	    return keyPair.getPublic().equals(other.keyPair.getPublic()) && keyPair.getPrivate().equals(other.keyPair.getPrivate()) && keySize==other.keySize && type==other.type;
-	}
-	return false;
-    }
+
     @Override
     public int hashCode()
     {
-	return keyPair.hashCode();
-    }
-    
-    public ASymmetricPublicKey getASymmetricPublicKey()
-    {
-	return new ASymmetricPublicKey(type, keyPair.getPublic(), keySize);
-    }
-    
-    public ASymmetricPrivateKey getASymmetricPrivateKey()
-    {
-	return new ASymmetricPrivateKey(type, keyPair.getPrivate(), keySize);
-    }
-    
-    public byte[] encode()
-    {
-	byte[] tab=new byte[6];
-	Bits.putShort(tab, 0, keySize);
-	Bits.putInt(tab, 2, type.ordinal());
-	return Bits.concateEncodingWithShortSizedTabs(tab, ASymmetricEncryptionType.encodeKeyPair(keyPair));
-    }
-    
-    public static ASymmetricKeyPair decode(byte[] b) throws NoSuchAlgorithmException, InvalidKeySpecException, IllegalArgumentException
-    {
-	byte[][] res=Bits.separateEncodingsWithShortSizedTabs(b);
-	return new ASymmetricKeyPair(ASymmetricEncryptionType.valueOf(Bits.getInt(res[0], 2)), ASymmetricEncryptionType.decodeKeyPair(res[1]), Bits.getShort(res[0], 0));
-    }
-    
-    public static ASymmetricKeyPair generate(SecureRandom random) throws NoSuchAlgorithmException
-    {
-	return generate(random, ASymmetricEncryptionType.DEFAULT, ASymmetricEncryptionType.DEFAULT.getDefaultKeySize());
+	return hashCode;
     }
 
-    public static ASymmetricKeyPair generate(SecureRandom random, ASymmetricEncryptionType type) throws NoSuchAlgorithmException
+    public gnu.vm.java.security.KeyPair toGnuKeyPair() throws gnu.vm.java.security.NoSuchAlgorithmException, gnu.vm.java.security.spec.InvalidKeySpecException
     {
-	return generate(random, type, type.getDefaultKeySize());
+	if (gnuKeyPair == null)
+	    gnuKeyPair = new gnu.vm.java.security.KeyPair(publicKey.toGnuKey(),
+		    privateKey.toGnuKey());
+
+	return gnuKeyPair;
     }
 
-    public static ASymmetricKeyPair generate(SecureRandom random, ASymmetricEncryptionType type, short keySize) throws NoSuchAlgorithmException
+    /*
+     * public static ASymmetricKeyPair generate(SecureRandom random) throws
+     * NoSuchAlgorithmException { return generate(random,
+     * ASymmetricEncryptionType.DEFAULT,
+     * ASymmetricEncryptionType.DEFAULT.getDefaultKeySize()); }
+     * 
+     * public static ASymmetricKeyPair generate(SecureRandom random,
+     * ASymmetricEncryptionType type) throws NoSuchAlgorithmException { return
+     * generate(random, type, type.getDefaultKeySize()); }
+     * 
+     * public static ASymmetricKeyPair generate(SecureRandom random,
+     * ASymmetricEncryptionType type, short keySize) throws
+     * NoSuchAlgorithmException { return new ASymmetricKeyPair(type,
+     * type.getKeyPairGenerator(random, keySize).generateKeyPair(), keySize); }
+     */
+
+    public KeyPair toJavaNativeKeyPair() throws gnu.vm.java.security.NoSuchAlgorithmException, gnu.vm.java.security.spec.InvalidKeySpecException
     {
-	return new ASymmetricKeyPair(type, type.getKeyPairGenerator(random, keySize).generateKeyPair(), keySize);
+	if (nativeKeyPair == null)
+	    nativeKeyPair = new KeyPair(publicKey.toJavaNativeKey(),
+		    privateKey.toJavaNativeKey());
+
+	return nativeKeyPair;
     }
-    
-    
+
+    @Override
+    public String toString()
+    {
+	try
+	{
+	    return Base64.encode(encode());
+	}
+	catch (Exception e)
+	{
+	    return e.toString();
+	}
+    }
+
 }

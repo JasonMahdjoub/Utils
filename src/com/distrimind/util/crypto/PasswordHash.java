@@ -34,9 +34,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
-import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
 
 import com.distrimind.util.Bits;
@@ -44,43 +42,31 @@ import com.distrimind.util.Bits;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 2.0
  * @since Utils 1.8
  *
  */
 public class PasswordHash
 {
+    final static int DEFAULT_SALT_SIZE = 24;
+
+    final static int DEFAULT_NB_ITERATIONS = 100000;
+
+    public static byte[] generateSalt(SecureRandom random, int saltSize)
+    {
+	byte[] res = new byte[saltSize];
+	random.nextBytes(res);
+	return res;
+    }
+
     private final PasswordHashType type;
+
     private final SecureRandom random;
-    final static int DEFAULT_SALT_SIZE=24;
-    final static int DEFAULT_NB_ITERATIONS=100000;
-    
+
     private int saltSize;
-    
-    int getSaltSize()
-    {
-        return saltSize;
-    }
-
-    void setSaltSize(int _saltSize)
-    {
-        saltSize = _saltSize;
-    }
-
-    int getHashIterationsNumber()
-    {
-        return hashIterationsNumber;
-    }
-
-    void setHashIterationsNumber(int _hashIterationsNumber)
-    {
-        hashIterationsNumber = _hashIterationsNumber;
-    }
-
-
 
     private int hashIterationsNumber;
-    
+
     public PasswordHash()
     {
 	this(PasswordHashType.DEFAULT);
@@ -90,84 +76,109 @@ public class PasswordHash
     {
 	this(type, new SecureRandom());
     }
+
     public PasswordHash(PasswordHashType type, SecureRandom random)
     {
-	this.type=type;
-	this.random=random;
-	this.saltSize=DEFAULT_SALT_SIZE;
-	this.hashIterationsNumber=DEFAULT_NB_ITERATIONS;
-    }
-    
-    public static byte[] generateSalt(SecureRandom random, int saltSize)
-    {
-	byte[] res=new byte[saltSize];
-	random.nextBytes(res);
-	return res;
-    }
-    
-    public byte[] hash(String password) throws NoSuchAlgorithmException, InvalidKeySpecException
-    {
-	return hash(password.toCharArray());
+	this.type = type;
+	this.random = random;
+	this.saltSize = DEFAULT_SALT_SIZE;
+	this.hashIterationsNumber = DEFAULT_NB_ITERATIONS;
     }
 
-    public byte[] hash(String password, byte[] staticAdditionalSalt) throws NoSuchAlgorithmException, InvalidKeySpecException
-    {
-	return hash(password.toCharArray(), staticAdditionalSalt);
-    }
-    
-    public byte[] hash(char[] password) throws NoSuchAlgorithmException, InvalidKeySpecException
-    {
-	return hash(password, null);
-    }
-    
-    private byte[] mixSaltWithStaticSalt(byte[] salt, byte[] staticAdditionalSalt)
-    {
-	if (staticAdditionalSalt!=null)
-	{
-	    byte[] res=new byte[salt.length+staticAdditionalSalt.length];
-	    System.arraycopy(salt, 0, res, 0, salt.length);
-	    System.arraycopy(staticAdditionalSalt, 0, res, salt.length, staticAdditionalSalt.length);
-	    return res;
-	}
-	return salt;
-    }
-    
-    public byte[] hash(char[] password, byte[] staticAdditionalSalt) throws NoSuchAlgorithmException, InvalidKeySpecException
-    {
-	if (password==null)
-	    throw new NullPointerException("password");
-	
-	byte[] generatedSalt=generateSalt(random, saltSize);
-	byte[] salt=mixSaltWithStaticSalt(generatedSalt, staticAdditionalSalt);
-	return Bits.concateEncodingWithShortSizedTabs(type.hash(password, salt, hashIterationsNumber), generatedSalt);
-    }
-    
-    public boolean checkValidHashedPassword(char password[], byte[] goodHash, byte[] staticAdditionalSalt)
-    {
-	try
-	{
-	    byte[][] separated=Bits.separateEncodingsWithShortSizedTabs(goodHash);
-	    byte[] generatedSalt=separated[1];
-	    byte[] salt=mixSaltWithStaticSalt(generatedSalt, staticAdditionalSalt);
-	
-	    return Arrays.equals(type.hash(password, salt, hashIterationsNumber), separated[0]);
-	}
-	catch(Exception e)
-	{
-	    return false;
-	}
-    }
     public boolean checkValidHashedPassword(char password[], byte[] goodHash)
     {
 	return this.checkValidHashedPassword(password, goodHash, null);
     }
-    public boolean checkValidHashedPassword(String password, byte[] goodHash, byte[] staticAdditionalSalt)
+
+    public boolean checkValidHashedPassword(char password[], byte[] goodHash, byte[] staticAdditionalSalt)
     {
-	return checkValidHashedPassword(password.toCharArray(), goodHash, staticAdditionalSalt);
+	try
+	{
+	    byte[][] separated = Bits
+		    .separateEncodingsWithShortSizedTabs(goodHash);
+	    byte[] generatedSalt = separated[1];
+	    byte[] salt = mixSaltWithStaticSalt(generatedSalt,
+		    staticAdditionalSalt);
+
+	    return Arrays.equals(
+		    type.hash(password, salt, hashIterationsNumber),
+		    separated[0]);
+	}
+	catch (Exception e)
+	{
+	    return false;
+	}
     }
+
     public boolean checkValidHashedPassword(String password, byte[] goodHash)
     {
 	return checkValidHashedPassword(password.toCharArray(), goodHash);
     }
-    
+
+    public boolean checkValidHashedPassword(String password, byte[] goodHash, byte[] staticAdditionalSalt)
+    {
+	return checkValidHashedPassword(password.toCharArray(), goodHash,
+		staticAdditionalSalt);
+    }
+
+    int getHashIterationsNumber()
+    {
+	return hashIterationsNumber;
+    }
+
+    int getSaltSize()
+    {
+	return saltSize;
+    }
+
+    public byte[] hash(char[] password) throws gnu.vm.java.security.NoSuchAlgorithmException, gnu.vm.java.security.spec.InvalidKeySpecException
+    {
+	return hash(password, null);
+    }
+
+    public byte[] hash(char[] password, byte[] staticAdditionalSalt) throws gnu.vm.java.security.NoSuchAlgorithmException, gnu.vm.java.security.spec.InvalidKeySpecException
+    {
+	if (password == null)
+	    throw new NullPointerException("password");
+
+	byte[] generatedSalt = generateSalt(random, saltSize);
+	byte[] salt = mixSaltWithStaticSalt(generatedSalt,
+		staticAdditionalSalt);
+	return Bits.concateEncodingWithShortSizedTabs(
+		type.hash(password, salt, hashIterationsNumber), generatedSalt);
+    }
+
+    public byte[] hash(String password) throws gnu.vm.java.security.NoSuchAlgorithmException, gnu.vm.java.security.spec.InvalidKeySpecException
+    {
+	return hash(password.toCharArray());
+    }
+
+    public byte[] hash(String password, byte[] staticAdditionalSalt) throws gnu.vm.java.security.NoSuchAlgorithmException, gnu.vm.java.security.spec.InvalidKeySpecException
+    {
+	return hash(password.toCharArray(), staticAdditionalSalt);
+    }
+
+    private byte[] mixSaltWithStaticSalt(byte[] salt, byte[] staticAdditionalSalt)
+    {
+	if (staticAdditionalSalt != null)
+	{
+	    byte[] res = new byte[salt.length + staticAdditionalSalt.length];
+	    System.arraycopy(salt, 0, res, 0, salt.length);
+	    System.arraycopy(staticAdditionalSalt, 0, res, salt.length,
+		    staticAdditionalSalt.length);
+	    return res;
+	}
+	return salt;
+    }
+
+    void setHashIterationsNumber(int _hashIterationsNumber)
+    {
+	hashIterationsNumber = _hashIterationsNumber;
+    }
+
+    void setSaltSize(int _saltSize)
+    {
+	saltSize = _saltSize;
+    }
+
 }

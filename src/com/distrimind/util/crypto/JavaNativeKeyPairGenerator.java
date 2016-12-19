@@ -34,49 +34,54 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.KeySpec;
-
-import javax.crypto.SecretKey;
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.PBEKeySpec;
-import javax.crypto.spec.SecretKeySpec;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
 
 /**
  * 
  * @author Jason Mahdjoub
  * @version 1.0
- * @since Utils 1.4
+ * @since Utils 2.0
  */
-public enum SymmetricSecretKeyType
+public final class JavaNativeKeyPairGenerator extends AbstractKeyPairGenerator
 {
-    DES("DES"),
-    DESede("DESede");
-    
-    private final String algorithm;
-    private final int keySize;
-    private SymmetricSecretKeyType(String algorithm)
+    private final KeyPairGenerator keyPairGenerator;
+
+    private short keySize = -1;
+
+    JavaNativeKeyPairGenerator(ASymmetricEncryptionType type, KeyPairGenerator keyPairGenerator)
     {
-	this.algorithm=algorithm;
-	this.keySize=256;
+	super(type);
+	this.keyPairGenerator = keyPairGenerator;
     }
-    
-    
-    public SecretKey getSecretKey(SymmetricEncryptionType encryption_type, String password, SecureRandom random) throws NoSuchAlgorithmException, InvalidKeySpecException
+
+    @Override
+    public ASymmetricKeyPair generateKeyPair()
     {
-	return getSecretKey(encryption_type, password.toCharArray(), random);
+	KeyPair kp = keyPairGenerator.generateKeyPair();
+
+	return new ASymmetricKeyPair(type, kp, keySize);
     }
-    
-    public SecretKey getSecretKey(SymmetricEncryptionType encryption_type, char password[], SecureRandom random) throws NoSuchAlgorithmException, InvalidKeySpecException
+
+    @Override
+    public String getAlgorithm()
     {
-	byte salt[]=new byte[20];
-	random.nextBytes(salt);
-	SecretKeyFactory factory = SecretKeyFactory.getInstance(algorithm);
-	KeySpec spec = new PBEKeySpec(password, salt, 65536, keySize);
-	SecretKey tmp = factory.generateSecret(spec);
-	SecretKey secret = new SecretKeySpec(tmp.getEncoded(),encryption_type.getAlgorithmName());
-	return secret;
+	return keyPairGenerator.getAlgorithm();
     }
+
+    @Override
+    public void initialize(short _keysize)
+    {
+	keyPairGenerator.initialize(_keysize);
+    }
+
+    @Override
+    public void initialize(short _keysize, AbstractSecureRandom _random)
+    {
+	keyPairGenerator.initialize(_keysize,
+		_random.getJavaNativeSecureRandom());
+	this.keySize = _keysize;
+
+    }
+
 }

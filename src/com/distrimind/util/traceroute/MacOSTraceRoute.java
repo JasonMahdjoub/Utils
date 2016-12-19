@@ -52,50 +52,65 @@ import java.util.regex.Pattern;
  */
 class MacOSTraceRoute extends TraceRoute
 {
+    public static void main(String args[]) throws UnknownHostException
+    {
+	for (InetAddress ia : new MacOSTraceRoute()
+		.tracePath(InetAddress.getByName("www.google.fr"), -1, -1))
+	    System.out.println(ia);
+	for (InetAddress ia : new MacOSTraceRoute()
+		.tracePath(InetAddress.getByName("www.google.fr"), 2, 4000))
+	    System.out.println(ia);
+    }
+
     MacOSTraceRoute()
     {
-	
+
     }
-    
+
     @Override
     public List<InetAddress> tracePath(InetAddress _ia, int depth, int time_out)
     {
 	try
 	{
-	    ArrayList<InetAddress> res=new ArrayList<InetAddress>();
-	    if (depth>0)
+	    ArrayList<InetAddress> res = new ArrayList<InetAddress>();
+	    if (depth > 0)
 		++depth;
-	    Process p=Runtime.getRuntime().exec("traceroute -n -I "+(depth<0?"":("-m "+depth+" "))+(time_out<0?"":("-w "+(time_out/1000)+" "))+_ia.getHostAddress());
-	    
-	    try(InputStreamReader isr=new InputStreamReader(p.getInputStream()))
+	    Process p = Runtime.getRuntime().exec("traceroute -n -I "
+		    + (depth < 0 ? "" : ("-m " + depth + " "))
+		    + (time_out < 0 ? "" : ("-w " + (time_out / 1000) + " "))
+		    + _ia.getHostAddress());
+
+	    try (InputStreamReader isr = new InputStreamReader(
+		    p.getInputStream()))
 	    {
-		try(BufferedReader input =new BufferedReader(isr))
+		try (BufferedReader input = new BufferedReader(isr))
 		{
-		    String line=null;
-		    
-		    Pattern pattern=Pattern.compile("^[1-9][0-9]*");
-		    while ((line = input.readLine())!=null)
+		    String line = null;
+
+		    Pattern pattern = Pattern.compile("^[1-9][0-9]*");
+		    while ((line = input.readLine()) != null)
 		    {
-			String split[]=line.split(" ");
-			String first_string=null;
-			int i=0;
-			for (;i<split.length;i++)
+			String split[] = line.split(" ");
+			String first_string = null;
+			int i = 0;
+			for (; i < split.length; i++)
 			{
-			    if (split[i].length()>0)
+			    if (split[i].length() > 0)
 			    {
-				first_string=split[i];
+				first_string = split[i];
 				break;
 			    }
 			}
-			    
-			if (split.length>3 && pattern.matcher(first_string).matches())
+
+			if (split.length > 3
+				&& pattern.matcher(first_string).matches())
 			{
-			    String ip=null;
-			    for (int j=i+1;j<split.length;j++)
+			    String ip = null;
+			    for (int j = i + 1; j < split.length; j++)
 			    {
-				if (split[j].length()>0)
+				if (split[j].length() > 0)
 				{
-				    ip=split[j];
+				    ip = split[j];
 				    break;
 				}
 			    }
@@ -103,7 +118,7 @@ class MacOSTraceRoute extends TraceRoute
 			    {
 				res.add(InetAddress.getByName(ip));
 			    }
-			    catch(Exception e)
+			    catch (Exception e)
 			    {
 				res.add(null);
 			    }
@@ -113,7 +128,7 @@ class MacOSTraceRoute extends TraceRoute
 	    }
 	    p.destroy();
 	    return res;
-	    
+
 	}
 	catch (Exception e)
 	{
@@ -122,12 +137,4 @@ class MacOSTraceRoute extends TraceRoute
 	}
     }
 
-    public static void main(String args[]) throws UnknownHostException
-    {
-	for (InetAddress ia : new MacOSTraceRoute().tracePath(InetAddress.getByName("www.google.fr"), -1, -1))
-	    System.out.println(ia);
-	for (InetAddress ia : new MacOSTraceRoute().tracePath(InetAddress.getByName("www.google.fr"), 2, 4000))
-	    System.out.println(ia);
-    }
-    
 }

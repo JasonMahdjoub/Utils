@@ -49,6 +49,7 @@ import java.lang.annotation.Target;
 
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface DontComputeSize {
+public @interface DontComputeSize
+{
     int depth() default 0;
 }

@@ -51,62 +51,71 @@ import java.util.List;
  */
 class LinuxTraceRoute extends TraceRoute
 {
+    public static void main(String args[]) throws UnknownHostException
+    {
+	for (InetAddress ia : new LinuxTraceRoute()
+		.tracePath(InetAddress.getByName("www.google.fr"), -1, -1))
+	    System.out.println(ia);
+    }
+
     LinuxTraceRoute()
     {
-	
+
     }
-    
+
     @Override
     public List<InetAddress> tracePath(InetAddress _ia, int depth, int time_out_ms)
     {
 	try
 	{
-	    ArrayList<InetAddress> res=new ArrayList<InetAddress>();
-	    
-	    Process p=Runtime.getRuntime().exec("mtr --raw -c 1 "+(time_out_ms<0?"":("--timeout "+time_out_ms/1000+" "))+_ia.getHostAddress());
-	    
-	    try(InputStreamReader isr=new InputStreamReader(p.getInputStream()))
+	    ArrayList<InetAddress> res = new ArrayList<InetAddress>();
+
+	    Process p = Runtime
+		    .getRuntime().exec(
+			    "mtr --raw -c 1 "
+				    + (time_out_ms < 0 ? ""
+					    : ("--timeout " + time_out_ms / 1000
+						    + " "))
+				    + _ia.getHostAddress());
+
+	    try (InputStreamReader isr = new InputStreamReader(
+		    p.getInputStream()))
 	    {
-		try(BufferedReader input =new BufferedReader(isr))
+		try (BufferedReader input = new BufferedReader(isr))
 		{
-		    String line=null;
-		    
-		    while ((line = input.readLine())!=null)
+		    String line = null;
+
+		    while ((line = input.readLine()) != null)
 		    {
-			    if (depth<0 || res.size()<depth)
+			if (depth < 0 || res.size() < depth)
+			{
+			    if (line.startsWith("h "))
 			    {
-				if (line.startsWith("h "))
+				try
 				{
-				    try
-				    {
-					res.add(InetAddress.getByName(line.split(" ")[2]));
-				    }
-				    catch(Exception e)
-				    {
-					res.add(null);
-				    }
+				    res.add(InetAddress
+					    .getByName(line.split(" ")[2]));
+				}
+				catch (Exception e)
+				{
+				    res.add(null);
 				}
 			    }
-			    else
-				break;
+			}
+			else
+			    break;
 		    }
-		    
+
 		}
 	    }
 	    p.destroy();
 	    return res;
-	    
+
 	}
 	catch (Exception e)
 	{
 	    e.printStackTrace();
 	    return null;
 	}
-    }
-    
-    public static void main(String args[]) throws UnknownHostException
-    {
-	for (InetAddress ia : new LinuxTraceRoute().tracePath(InetAddress.getByName("www.google.fr"), -1, -1))
-	    System.out.println(ia);
     }
 }

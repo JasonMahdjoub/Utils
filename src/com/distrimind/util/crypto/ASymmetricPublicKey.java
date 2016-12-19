@@ -34,108 +34,175 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
-import java.io.Serializable;
-import java.security.NoSuchAlgorithmException;
+import java.io.IOException;
 import java.security.PublicKey;
-import java.security.spec.InvalidKeySpecException;
-
-import org.apache.commons.net.util.Base64;
+import java.util.Arrays;
 
 import com.distrimind.util.Bits;
+
+import gnu.java.util.Base64;
 
 /**
  * 
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 2.0
  * @since Utils 1.7.1
  */
-public class ASymmetricPublicKey implements Serializable
+public class ASymmetricPublicKey implements UtilKey
 {
     /**
      * 
      */
     private static final long serialVersionUID = 1279365581082538490L;
-    
-    private final PublicKey publicKey;
+
+    public static ASymmetricPublicKey decode(byte[] b)
+    {
+	byte[][] res = Bits.separateEncodingsWithShortSizedTabs(b);
+	return new ASymmetricPublicKey(
+		ASymmetricEncryptionType.valueOf(Bits.getInt(res[0], 2)),
+		res[1], Bits.getShort(res[0], 0));
+    }
+
+    public static ASymmetricPublicKey valueOf(String key) throws IOException
+    {
+	return decode(Base64.decode(key));
+    }
+
+    // private final PublicKey publicKey;
+    private final byte[] publicKey;
+
     private final short keySize;
+
     private final ASymmetricEncryptionType type;
-    
+
+    private final int hashCode;
+
+    private volatile transient PublicKey nativePublicKey = null;
+
+    private volatile transient gnu.vm.java.security.PublicKey gnuPublicKey = null;
+
+    ASymmetricPublicKey(ASymmetricEncryptionType type, byte[] publicKey, short keySize)
+    {
+	if (type == null)
+	    throw new NullPointerException("type");
+	if (publicKey == null)
+	    throw new NullPointerException("publicKey");
+	if (keySize < 1024)
+	    throw new IllegalArgumentException("keySize");
+
+	this.publicKey = publicKey;
+	this.keySize = keySize;
+	this.type = type;
+	hashCode = Arrays.hashCode(this.publicKey);
+    }
+
+    ASymmetricPublicKey(ASymmetricEncryptionType type, gnu.vm.java.security.PublicKey publicKey, short keySize)
+    {
+	if (type == null)
+	    throw new NullPointerException("type");
+	if (publicKey == null)
+	    throw new NullPointerException("publicKey");
+	if (keySize < 1024)
+	    throw new IllegalArgumentException("keySize");
+
+	this.publicKey = ASymmetricEncryptionType.encodePublicKey(publicKey);
+	this.keySize = keySize;
+	this.type = type;
+	hashCode = Arrays.hashCode(this.publicKey);
+    }
+
     ASymmetricPublicKey(ASymmetricEncryptionType type, PublicKey publicKey, short keySize)
     {
-	if (type==null)
+	if (type == null)
 	    throw new NullPointerException("type");
-	if (publicKey==null)
+	if (publicKey == null)
 	    throw new NullPointerException("publicKey");
-	if (keySize<1024)
+	if (keySize < 1024)
 	    throw new IllegalArgumentException("keySize");
-	this.publicKey=publicKey;
-	this.keySize=keySize;
-	this.type=type;
+	if (type.isGNUVersion())
+	    throw new IllegalAccessError();
+
+	this.publicKey = ASymmetricEncryptionType.encodePublicKey(publicKey);
+	this.keySize = keySize;
+	this.type = type;
+	hashCode = Arrays.hashCode(this.publicKey);
     }
-    
-    @Override
-    public String toString()
+
+    public byte[] encode()
     {
-	return Base64.encodeBase64String(encode());
+	byte[] tab = new byte[6];
+	Bits.putShort(tab, 0, keySize);
+	Bits.putInt(tab, 2, type.ordinal());
+	return Bits.concateEncodingWithShortSizedTabs(tab, publicKey);
     }
-    
-    public static ASymmetricPublicKey valueOf(String key) throws NoSuchAlgorithmException, InvalidKeySpecException
-    {
-	return decode(Base64.decodeBase64(key));
-    }
-    
-    
-    
+
     @Override
     public boolean equals(Object o)
     {
-	if (o==null)
+	if (o == null)
 	    return false;
-	if (o==this)
+	if (o == this)
 	    return true;
 	if (o instanceof ASymmetricPublicKey)
 	{
-	    ASymmetricPublicKey other=(ASymmetricPublicKey)o;
-	    return publicKey.equals(other.publicKey) && keySize==other.keySize && type==other.type;
+
+	    ASymmetricPublicKey other = (ASymmetricPublicKey) o;
+	    return keySize == other.keySize && type == other.type
+		    && Arrays.equals(publicKey, other.publicKey);
 	}
 	return false;
     }
-    @Override
-    public int hashCode()
-    {
-	return publicKey.hashCode();
-    }
-    
+
     public ASymmetricEncryptionType getAlgorithmType()
     {
 	return type;
     }
-    public int getMaxBlockSize()
-    {
-	return type.getMaxBlockSize(keySize);
-    }
-    
-    public PublicKey getPublicKey()
+
+    byte[] getBytesPublicKey()
     {
 	return publicKey;
     }
-    
+
     public short getKeySize()
     {
 	return keySize;
     }
-    public byte[] encode()
+
+    public int getMaxBlockSize()
     {
-	byte[] tab=new byte[6];
-	Bits.putShort(tab, 0, keySize);
-	Bits.putInt(tab, 2, type.ordinal());
-	return Bits.concateEncodingWithShortSizedTabs(tab, ASymmetricEncryptionType.encodePublicKey(publicKey));
+	return type.getMaxBlockSize(keySize);
     }
-    
-    public static ASymmetricPublicKey decode(byte[] b) throws NoSuchAlgorithmException, InvalidKeySpecException
+
+    @Override
+    public int hashCode()
     {
-	byte[][] res=Bits.separateEncodingsWithShortSizedTabs(b);
-	return new ASymmetricPublicKey(ASymmetricEncryptionType.valueOf(Bits.getInt(res[0], 2)), ASymmetricEncryptionType.decodePublicKey(res[1]), Bits.getShort(res[0], 0));
+	return hashCode;
     }
-    
+
+    @Override
+    public gnu.vm.java.security.PublicKey toGnuKey() throws gnu.vm.java.security.NoSuchAlgorithmException, gnu.vm.java.security.spec.InvalidKeySpecException
+    {
+	if (gnuPublicKey == null)
+	    gnuPublicKey = ASymmetricEncryptionType
+		    .decodeGnuPublicKey(publicKey);
+
+	return gnuPublicKey;
+    }
+
+    @Override
+    public PublicKey toJavaNativeKey() throws gnu.vm.java.security.NoSuchAlgorithmException, gnu.vm.java.security.spec.InvalidKeySpecException
+    {
+	if (nativePublicKey == null)
+	    nativePublicKey = ASymmetricEncryptionType
+		    .decodeNativePublicKey(publicKey);
+
+	return nativePublicKey;
+    }
+
+    @Override
+    public String toString()
+    {
+	return Base64.encode(encode());
+    }
+
 }

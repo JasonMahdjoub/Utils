@@ -34,111 +34,171 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
-import java.io.Serializable;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
-
+import java.io.IOException;
+import java.util.Arrays;
 import javax.crypto.SecretKey;
-
-import org.apache.commons.net.util.Base64;
-
 import com.distrimind.util.Bits;
+import gnu.java.util.Base64;
 
 /**
  * 
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 2.0
  * @since Utils 1.7.1
  */
-public class SymmetricSecretKey implements Serializable
+public class SymmetricSecretKey implements UtilKey
 {
 
     /**
      * 
      */
     private static final long serialVersionUID = -1811177031909192919L;
-    private final SecretKey secretKey;
-    private final SymmetricEncryptionType type;
-    
-    private SymmetricSecretKey(SymmetricEncryptionType type, SecretKey secretKey)
+
+    public static SymmetricSecretKey decode(byte[] b) throws IllegalArgumentException
     {
-	if (type==null)
-	    throw new NullPointerException("type");
-	if (secretKey==null)
-	    throw new NullPointerException("secretKey");
-	
-	this.secretKey=secretKey;
-	this.type=type;
+	byte[][] res = Bits.separateEncodingsWithShortSizedTabs(b);
+	return new SymmetricSecretKey(
+		SymmetricEncryptionType.valueOf(Bits.getInt(res[0], 0)), res[1],
+		Bits.getShort(res[0], 4));
     }
+
+    public static SymmetricSecretKey valueOf(String key) throws IllegalArgumentException, IOException
+    {
+	return decode(Base64.decode(key));
+    }
+
+    private final byte[] secretKey;
+
+    private final short keySize;
+
+    private final SymmetricEncryptionType type;
+
+    private final int hashCode;
+
+    private transient SecretKey javaNativeSecretKey = null;
+
+    private transient gnu.vm.javax.crypto.SecretKey gnuSecretKey = null;
+
+    SymmetricSecretKey(SymmetricEncryptionType type, byte secretKey[], short keySize)
+    {
+	if (type == null)
+	    throw new NullPointerException("type");
+	if (secretKey == null)
+	    throw new NullPointerException("secretKey");
+	this.secretKey = secretKey;
+	this.keySize = keySize;
+	this.type = type;
+	hashCode = Arrays.hashCode(this.secretKey);
+    }
+
+    SymmetricSecretKey(SymmetricEncryptionType type, gnu.vm.javax.crypto.SecretKey secretKey, short keySize)
+    {
+	if (type == null)
+	    throw new NullPointerException("type");
+	if (secretKey == null)
+	    throw new NullPointerException("secretKey");
+	if (!type.isGNUVersion())
+	    throw new IllegalAccessError();
+	this.secretKey = SymmetricEncryptionType.encodeSecretKey(secretKey);
+	this.keySize = keySize;
+	this.type = type;
+	hashCode = Arrays.hashCode(this.secretKey);
+    }
+
+    SymmetricSecretKey(SymmetricEncryptionType type, SecretKey secretKey, short keySize)
+    {
+	if (type == null)
+	    throw new NullPointerException("type");
+	if (secretKey == null)
+	    throw new NullPointerException("secretKey");
+	if (type.isGNUVersion())
+	    throw new IllegalAccessError();
+	this.secretKey = SymmetricEncryptionType.encodeSecretKey(secretKey);
+	this.keySize = keySize;
+	this.type = type;
+	hashCode = Arrays.hashCode(this.secretKey);
+    }
+
+    public byte[] encode()
+    {
+	byte[] tab = new byte[6];
+	Bits.putInt(tab, 0, type.ordinal());
+	Bits.putShort(tab, 4, keySize);
+	return Bits.concateEncodingWithShortSizedTabs(tab, secretKey);
+    }
+
     @Override
     public boolean equals(Object o)
     {
-	if (o==null)
+	if (o == null)
 	    return false;
-	if (o==this)
+	if (o == this)
 	    return true;
 	if (o instanceof SymmetricSecretKey)
 	{
-	    SymmetricSecretKey other=((SymmetricSecretKey) o);
-	    return secretKey.equals(other.secretKey) && type==other.type;
+	    SymmetricSecretKey other = ((SymmetricSecretKey) o);
+	    return Arrays.equals(secretKey, other.secretKey)
+		    && type == other.type;
 	}
 	return false;
     }
-    @Override
-    public int hashCode()
-    {
-	return secretKey.hashCode();
-    }
-    
-    @Override
-    public String toString()
-    {
-	return Base64.encodeBase64String(encode());
-    }
-    
-    public static SymmetricSecretKey valueOf(String key)
-    {
-	return decode(Base64.decodeBase64(key));
-    }
+
     public SymmetricEncryptionType getAlgorithmType()
     {
 	return type;
     }
+
+    public short getKeySize()
+    {
+	return keySize;
+    }
+
     public int getMaxBlockSize()
     {
 	return Integer.MAX_VALUE;
     }
-    
-    public short getKeySize()
+
+    @Override
+    public int hashCode()
     {
-	return type.getKeySizeBytes();
-    }
-    
-    public SecretKey getSecretKey()
-    {
-	return secretKey;
-    }
-    
-    public byte[] encode()
-    {
-	byte[] tab=new byte[4];
-	Bits.putInt(tab, 0, type.ordinal());
-	return Bits.concateEncodingWithShortSizedTabs(tab, SymmetricEncryptionType.encodeSecretKey(secretKey));
-    }
-    
-    public static SymmetricSecretKey decode(byte[] b) throws IllegalArgumentException
-    {
-	byte[][] res=Bits.separateEncodingsWithShortSizedTabs(b);
-	return new SymmetricSecretKey(SymmetricEncryptionType.valueOf(Bits.getInt(res[0], 0)), SymmetricEncryptionType.decodeSecretKey(res[1]));
-    }
-    
-    public static SymmetricSecretKey generate(SecureRandom random, SymmetricEncryptionType type) throws NoSuchAlgorithmException
-    {
-	return new SymmetricSecretKey(type, type.getKeyGenerator(random).generateKey());
+	return hashCode;
     }
 
-    public static SymmetricSecretKey generate(SecureRandom random) throws NoSuchAlgorithmException
+    @Override
+    public gnu.vm.javax.crypto.SecretKey toGnuKey()
     {
-	return new SymmetricSecretKey(SymmetricEncryptionType.DEFAULT, SymmetricEncryptionType.DEFAULT.getKeyGenerator(random).generateKey());
+	if (gnuSecretKey == null)
+	    gnuSecretKey = SymmetricEncryptionType
+		    .decodeGnuSecretKey(secretKey);
+
+	return gnuSecretKey;
     }
+
+    @Override
+    public SecretKey toJavaNativeKey()
+    {
+	if (javaNativeSecretKey == null)
+	    javaNativeSecretKey = SymmetricEncryptionType
+		    .decodeNativeSecretKey(secretKey);
+
+	return javaNativeSecretKey;
+    }
+
+    @Override
+    public String toString()
+    {
+	return Base64.encode(encode());
+    }
+
+    /*
+     * public static SymmetricSecretKey generate(SecureRandom random,
+     * SymmetricEncryptionType type) throws NoSuchAlgorithmException { return
+     * new SymmetricSecretKey(type, type.getKeyGenerator(random).generateKey());
+     * }
+     * 
+     * public static SymmetricSecretKey generate(SecureRandom random) throws
+     * NoSuchAlgorithmException { return new
+     * SymmetricSecretKey(SymmetricEncryptionType.DEFAULT,
+     * SymmetricEncryptionType.DEFAULT.getKeyGenerator(random).generateKey()); }
+     */
 }

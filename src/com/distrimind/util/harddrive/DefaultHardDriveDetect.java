@@ -49,8 +49,9 @@ class DefaultHardDriveDetect extends HardDriveDetect
 
     DefaultHardDriveDetect()
     {
-	
+
     }
+
     @Override
     public String getHardDriveIdentifier(File _file)
     {

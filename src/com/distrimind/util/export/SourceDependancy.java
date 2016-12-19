@@ -36,6 +36,7 @@ package com.distrimind.util.export;
 
 import java.io.File;
 import java.io.IOException;
+
 /**
  * 
  * @author Jason Mahdjoub
@@ -44,36 +45,37 @@ import java.io.IOException;
  */
 public abstract class SourceDependancy extends Dependency
 {
-    
+
     /**
      * 
      */
     private static final long serialVersionUID = 8802651622337338561L;
 
     protected String exclude_regex;
+
     protected String include_regex;
+
     private boolean includeToDoc;
-    
+
     public SourceDependancy()
     {
-	
+
     }
 
-    
     public SourceDependancy(boolean includeToDoc, String _exclude_regex, String _include_regex)
     {
-	exclude_regex=_exclude_regex;
-	include_regex=_include_regex;
-	this.includeToDoc=includeToDoc;
+	exclude_regex = _exclude_regex;
+	include_regex = _include_regex;
+	this.includeToDoc = includeToDoc;
     }
-    
+
     public abstract void copySourceToFolder(File _folder) throws IOException;
-    
+
+    abstract String getAntSetFile();
+
     public boolean isIncludedToDoc()
     {
 	return includeToDoc;
     }
-    
-    abstract String getAntSetFile();
-    
+
 }

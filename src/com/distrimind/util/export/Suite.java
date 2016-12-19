@@ -43,7 +43,40 @@ import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement(name = "suite")
-public class Suite {
+public class Suite
+{
+
+    @XmlRootElement(name = "test")
+    public static class Test
+    {
+	private String name;
+
+	private List<TestClass> classes;
+
+	@XmlElementWrapper(name = "classes")
+	@XmlElement(name = "class")
+	public List<TestClass> getClasses()
+	{
+	    return classes;
+	}
+
+	@XmlAttribute
+	public String getName()
+	{
+	    return name;
+	}
+
+	public void setClasses(List<TestClass> _classes)
+	{
+	    classes = _classes;
+	}
+
+	public void setName(String _name)
+	{
+	    name = _name;
+	}
+
+    }
 
     @XmlRootElement(name = "class")
     public static class TestClass
@@ -60,89 +93,59 @@ public class Suite {
 	{
 	    name = _name;
 	}
-	
+
     }
-    
-    @XmlRootElement(name = "test")
-    public static class Test
-    {
-	private String name;
-	private List<TestClass> classes;
-	
-	@XmlElementWrapper(name = "classes")
-	@XmlElement(name = "class")
-	public List<TestClass> getClasses()
-	{
-	    return classes;
-	}
 
-	public void setClasses(List<TestClass> _classes)
-	{
-	    classes = _classes;
-	}
-
-	@XmlAttribute
-	public String getName()
-	{
-	    return name;
-	}
-
-	public void setName(String _name)
-	{
-	    name = _name;
-	}
-	
-	
-    }
-    
-    
     private String name;
+
     private String verbose = "1";
-    private boolean parallel =false;
+
+    private boolean parallel = false;
 
     private List<Test> testCases = new ArrayList<Test>();
 
-    
-    
     @XmlAttribute
-    public String getName() {
+    public String getName()
+    {
 	return name;
     }
 
-
-    public void setName(String name) {
-	this.name = name;
-    }
-
-    @XmlAttribute
-    public String getVerbose() {
-	return verbose;
-    }
-
-
-    public void setVerbose(String verbose) {
-	this.verbose = verbose;
-    }
-
-    @XmlAttribute
-    public boolean isParallel() {
-	return parallel;
-    }
-
-
-    public void setParallel(boolean parallel) {
-	this.parallel = parallel;
-    }
-
     @XmlElement(name = "test")
-    public List<Test> getTestCases() {
+    public List<Test> getTestCases()
+    {
 	return testCases;
     }
 
-    public void setTestCases(List<Test> testCases) {
+    @XmlAttribute
+    public String getVerbose()
+    {
+	return verbose;
+    }
+
+    @XmlAttribute
+    public boolean isParallel()
+    {
+	return parallel;
+    }
+
+    public void setName(String name)
+    {
+	this.name = name;
+    }
+
+    public void setParallel(boolean parallel)
+    {
+	this.parallel = parallel;
+    }
+
+    public void setTestCases(List<Test> testCases)
+    {
 	this.testCases = testCases;
     }
-    
-    
-    
+
+    public void setVerbose(String verbose)
+    {
+	this.verbose = verbose;
+    }
+
 }
