@@ -77,7 +77,7 @@ public abstract class AbstractSecureRandom extends SecureRandom
     @Override
     public abstract String getAlgorithm();
 
-    public abstract gnu.vm.java.security.SecureRandom getGnuSecureRandom();
+    public abstract gnu.vm.jgnu.security.SecureRandom getGnuSecureRandom();
 
     public abstract java.security.SecureRandom getJavaNativeSecureRandom();
 

@@ -38,7 +38,8 @@ import java.io.IOException;
 import java.util.Arrays;
 import javax.crypto.SecretKey;
 import com.distrimind.util.Bits;
-import gnu.java.util.Base64;
+
+import gnu.jgnu.util.Base64;
 
 /**
  * 
@@ -77,7 +78,7 @@ public class SymmetricSecretKey implements UtilKey
 
     private transient SecretKey javaNativeSecretKey = null;
 
-    private transient gnu.vm.javax.crypto.SecretKey gnuSecretKey = null;
+    private transient gnu.vm.jgnux.crypto.SecretKey gnuSecretKey = null;
 
     SymmetricSecretKey(SymmetricEncryptionType type, byte secretKey[], short keySize)
     {
@@ -91,7 +92,7 @@ public class SymmetricSecretKey implements UtilKey
 	hashCode = Arrays.hashCode(this.secretKey);
     }
 
-    SymmetricSecretKey(SymmetricEncryptionType type, gnu.vm.javax.crypto.SecretKey secretKey, short keySize)
+    SymmetricSecretKey(SymmetricEncryptionType type, gnu.vm.jgnux.crypto.SecretKey secretKey, short keySize)
     {
 	if (type == null)
 	    throw new NullPointerException("type");
@@ -165,7 +166,7 @@ public class SymmetricSecretKey implements UtilKey
     }
 
     @Override
-    public gnu.vm.javax.crypto.SecretKey toGnuKey()
+    public gnu.vm.jgnux.crypto.SecretKey toGnuKey()
     {
 	if (gnuSecretKey == null)
 	    gnuSecretKey = SymmetricEncryptionType

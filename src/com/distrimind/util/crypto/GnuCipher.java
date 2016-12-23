@@ -39,19 +39,19 @@ import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.ReadOnlyBufferException;
 
-import gnu.vm.java.security.InvalidAlgorithmParameterException;
-import gnu.vm.java.security.InvalidKeyException;
-import gnu.vm.java.security.NoSuchAlgorithmException;
-import gnu.vm.java.security.NoSuchProviderException;
-import gnu.vm.java.security.SecureRandom;
-import gnu.vm.java.security.spec.InvalidKeySpecException;
-import gnu.vm.javax.crypto.BadPaddingException;
-import gnu.vm.javax.crypto.Cipher;
-import gnu.vm.javax.crypto.CipherInputStream;
-import gnu.vm.javax.crypto.CipherOutputStream;
-import gnu.vm.javax.crypto.IllegalBlockSizeException;
-import gnu.vm.javax.crypto.ShortBufferException;
-import gnu.vm.javax.crypto.spec.IvParameterSpec;
+import gnu.vm.jgnu.security.InvalidAlgorithmParameterException;
+import gnu.vm.jgnu.security.InvalidKeyException;
+import gnu.vm.jgnu.security.NoSuchAlgorithmException;
+import gnu.vm.jgnu.security.NoSuchProviderException;
+import gnu.vm.jgnu.security.SecureRandom;
+import gnu.vm.jgnu.security.spec.InvalidKeySpecException;
+import gnu.vm.jgnux.crypto.BadPaddingException;
+import gnu.vm.jgnux.crypto.Cipher;
+import gnu.vm.jgnux.crypto.CipherInputStream;
+import gnu.vm.jgnux.crypto.CipherOutputStream;
+import gnu.vm.jgnux.crypto.IllegalBlockSizeException;
+import gnu.vm.jgnux.crypto.ShortBufferException;
+import gnu.vm.jgnux.crypto.spec.IvParameterSpec;
 
 /**
  * 

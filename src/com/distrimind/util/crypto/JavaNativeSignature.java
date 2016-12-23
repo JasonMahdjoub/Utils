@@ -35,12 +35,12 @@ knowledge of the CeCILL-C license and that you accept its terms.
 package com.distrimind.util.crypto;
 
 import java.nio.ByteBuffer;
-
-import gnu.vm.java.security.InvalidKeyException;
-import gnu.vm.java.security.NoSuchAlgorithmException;
 import java.security.Signature;
-import gnu.vm.java.security.SignatureException;
-import gnu.vm.java.security.spec.InvalidKeySpecException;
+
+import gnu.vm.jgnu.security.InvalidKeyException;
+import gnu.vm.jgnu.security.NoSuchAlgorithmException;
+import gnu.vm.jgnu.security.SignatureException;
+import gnu.vm.jgnu.security.spec.InvalidKeySpecException;
 
 /**
  * 

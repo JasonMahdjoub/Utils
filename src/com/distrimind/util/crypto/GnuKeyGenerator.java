@@ -34,7 +34,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
-import gnu.vm.javax.crypto.KeyGenerator;
+import gnu.vm.jgnux.crypto.KeyGenerator;
 
 /**
  * 

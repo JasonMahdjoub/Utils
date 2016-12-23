@@ -34,7 +34,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
-import gnu.vm.java.security.SecureRandom;
+import gnu.vm.jgnu.security.SecureRandom;
 
 /**
  * 

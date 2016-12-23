@@ -36,8 +36,8 @@ package com.distrimind.util.crypto;
 
 import java.nio.ByteBuffer;
 
-import gnu.vm.java.security.DigestException;
-import gnu.vm.java.security.MessageDigest;
+import gnu.vm.jgnu.security.DigestException;
+import gnu.vm.jgnu.security.MessageDigest;
 
 /**
  * 

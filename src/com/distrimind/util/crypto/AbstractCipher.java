@@ -39,14 +39,14 @@ import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.ReadOnlyBufferException;
 
-import gnu.vm.java.security.InvalidAlgorithmParameterException;
-import gnu.vm.java.security.InvalidKeyException;
-import gnu.vm.java.security.NoSuchAlgorithmException;
-import gnu.vm.java.security.NoSuchProviderException;
-import gnu.vm.java.security.spec.InvalidKeySpecException;
-import gnu.vm.javax.crypto.BadPaddingException;
-import gnu.vm.javax.crypto.IllegalBlockSizeException;
-import gnu.vm.javax.crypto.ShortBufferException;
+import gnu.vm.jgnu.security.InvalidAlgorithmParameterException;
+import gnu.vm.jgnu.security.InvalidKeyException;
+import gnu.vm.jgnu.security.NoSuchAlgorithmException;
+import gnu.vm.jgnu.security.NoSuchProviderException;
+import gnu.vm.jgnu.security.spec.InvalidKeySpecException;
+import gnu.vm.jgnux.crypto.BadPaddingException;
+import gnu.vm.jgnux.crypto.IllegalBlockSizeException;
+import gnu.vm.jgnux.crypto.ShortBufferException;
 
 /**
  * 
@@ -66,10 +66,10 @@ public abstract class AbstractCipher
      * @throws java.lang.IllegalStateException
      *             If this instance has not been initialized, or if a
      *             <tt>doFinal</tt> call has already been made.
-     * @throws gnu.vm.javax.crypto.IllegalBlockSizeException
+     * @throws gnu.vm.jgnux.crypto.IllegalBlockSizeException
      *             If this instance has no padding and the input is not a
      *             multiple of this cipher's block size.
-     * @throws gnu.vm.javax.crypto.BadPaddingException
+     * @throws gnu.vm.jgnux.crypto.BadPaddingException
      *             If this instance is decrypting and the padding bytes do not
      *             match this instance's padding scheme.
      */
@@ -85,10 +85,10 @@ public abstract class AbstractCipher
      * @throws java.lang.IllegalStateException
      *             If this instance has not been initialized, or if a
      *             <tt>doFinal</tt> call has already been made.
-     * @throws gnu.vm.javax.crypto.IllegalBlockSizeException
+     * @throws gnu.vm.jgnux.crypto.IllegalBlockSizeException
      *             If this instance has no padding and the input is not a
      *             multiple of this cipher's block size.
-     * @throws gnu.vm.javax.crypto.BadPaddingException
+     * @throws gnu.vm.jgnux.crypto.BadPaddingException
      *             If this instance is decrypting and the padding bytes do not
      *             match this instance's padding scheme.
      */
@@ -106,13 +106,13 @@ public abstract class AbstractCipher
      * @throws java.lang.IllegalStateException
      *             If this instance has not been initialized, or if a
      *             <tt>doFinal</tt> call has already been made.
-     * @throws gnu.vm.javax.crypto.IllegalBlockSizeException
+     * @throws gnu.vm.jgnux.crypto.IllegalBlockSizeException
      *             If this instance has no padding and the input is not a
      *             multiple of this cipher's block size.
-     * @throws gnu.vm.javax.crypto.BadPaddingException
+     * @throws gnu.vm.jgnux.crypto.BadPaddingException
      *             If this instance is decrypting and the padding bytes do not
      *             match this instance's padding scheme.
-     * @throws gnu.vm.javax.crypto.ShortBufferException
+     * @throws gnu.vm.jgnux.crypto.ShortBufferException
      *             If the output array is not large enough to hold the
      *             transformed bytes.
      */
@@ -132,10 +132,10 @@ public abstract class AbstractCipher
      * @throws java.lang.IllegalStateException
      *             If this instance has not been initialized, or if a
      *             <tt>doFinal</tt> call has already been made.
-     * @throws gnu.vm.javax.crypto.IllegalBlockSizeException
+     * @throws gnu.vm.jgnux.crypto.IllegalBlockSizeException
      *             If this instance has no padding and the input is not a
      *             multiple of this cipher's block size.
-     * @throws gnu.vm.javax.crypto.BadPaddingException
+     * @throws gnu.vm.jgnux.crypto.BadPaddingException
      *             If this instance is decrypting and the padding bytes do not
      *             match this instance's padding scheme.
      */
@@ -161,13 +161,13 @@ public abstract class AbstractCipher
      * @throws java.lang.IllegalStateException
      *             If this instance has not been initialized, or if a
      *             <tt>doFinal</tt> call has already been made.
-     * @throws gnu.vm.javax.crypto.IllegalBlockSizeException
+     * @throws gnu.vm.jgnux.crypto.IllegalBlockSizeException
      *             If this instance has no padding and the input is not a
      *             multiple of this cipher's block size.
-     * @throws gnu.vm.javax.crypto.BadPaddingException
+     * @throws gnu.vm.jgnux.crypto.BadPaddingException
      *             If this instance is decrypting and the padding bytes do not
      *             match this instance's padding scheme.
-     * @throws gnu.vm.javax.crypto.ShortBufferException
+     * @throws gnu.vm.jgnux.crypto.ShortBufferException
      *             If the output array is not large enough to hold the
      *             transformed bytes.
      */

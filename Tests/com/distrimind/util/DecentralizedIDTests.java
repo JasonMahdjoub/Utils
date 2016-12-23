@@ -34,7 +34,6 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util;
 
-import gnu.vm.java.security.NoSuchAlgorithmException;
 import java.util.EnumSet;
 
 import org.testng.Assert;
@@ -50,7 +49,8 @@ import com.distrimind.util.crypto.AbstractSecureRandom;
 import com.distrimind.util.crypto.MessageDigestType;
 import com.distrimind.util.crypto.SecureRandomType;
 
-import gnu.vm.java.security.NoSuchProviderException;
+import gnu.vm.jgnu.security.NoSuchAlgorithmException;
+import gnu.vm.jgnu.security.NoSuchProviderException;
 
 /**
  * 
@@ -111,7 +111,7 @@ public class DecentralizedIDTests
 	}
     }
 
-    private void testEquals(MessageDigestType type, AbstractSecureRandom rand, AbstractDecentralizedIDGenerator id1, AbstractDecentralizedIDGenerator id2) throws gnu.vm.java.security.NoSuchAlgorithmException
+    private void testEquals(MessageDigestType type, AbstractSecureRandom rand, AbstractDecentralizedIDGenerator id1, AbstractDecentralizedIDGenerator id2) throws gnu.vm.jgnu.security.NoSuchAlgorithmException
     {
 	Assert.assertNotEquals(id1, id2);
 	SecuredDecentralizedID sid1 = new SecuredDecentralizedID(type, id1,
@@ -169,7 +169,7 @@ public class DecentralizedIDTests
     }
 
     @Test
-    public void testToStringAndValueOf() throws gnu.vm.java.security.NoSuchAlgorithmException, NoSuchProviderException
+    public void testToStringAndValueOf() throws gnu.vm.jgnu.security.NoSuchAlgorithmException, NoSuchProviderException
     {
 	testToStringAndValueOf(new DecentralizedIDGenerator());
 	testToStringAndValueOf(new RenforcedDecentralizedIDGenerator());

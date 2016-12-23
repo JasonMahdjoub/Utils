@@ -95,12 +95,12 @@ class Export
 	dependencies.add(new JarDependency("GNU-Crypto",
 		new JarSourceDependancy(false,
 			new File(
-				"/home/jason/git_projects/Gnu-Crypt/GNU-Crypto/export/GNU-Crypto-0.99.jar"),
+				"/home/jason/git_projects/Gnu-Crypt/GNU-Crypto/export/GNU-Crypto-0.99a.jar"),
 			null, null),
 		gnu.Version.class.getPackage(),
 		licensesGnuCryto,
 		new File(
-			"/home/jason/git_projects/Gnu-Crypt/GNU-Crypto/export/GNU-Crypto-0.99.jar"),
+			"/home/jason/git_projects/Gnu-Crypt/GNU-Crypto/export/GNU-Crypto-0.99a.jar"),
 		null, null));
 	
 
@@ -112,7 +112,7 @@ class Export
 		"com/distrimind/util/build.txt", null,
 		"Utils is a set of tools that can be useful in every context of development",
 		Utils.VERSION, SourceVersion.RELEASE_7, dependencies, null,
-		new File("/usr/lib/jvm/default-java-7"), regexMath, null);
+		new File("/usr/lib/jvm/default-java"), regexMath, null);
 
 	dependencies = new ArrayList<BinaryDependency>();
 	licenses = new License[1];

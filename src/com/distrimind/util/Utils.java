@@ -59,8 +59,8 @@ public class Utils
 	Calendar c = Calendar.getInstance();
 	c.set(2016, 1, 4);
 	Calendar c2 = Calendar.getInstance();
-	c.set(2016, 11, 17);
-	VERSION = new Version("Utils", "Utils", 2, 0, 0, Version.Type.Stable, 0,
+	c.set(2016, 11, 23);
+	VERSION = new Version("Utils", "Utils", 2, 0, 1, Version.Type.Stable, 0,
 		c.getTime(), c2.getTime());
 	try
 	{
@@ -75,8 +75,14 @@ public class Utils
 		    new PersonDeveloper("mahdjoub", "jason", c.getTime()));
 
 	    c = Calendar.getInstance();
+	    c.set(2016, 11, 23);
+	    Description d = new Description(2, 0, 1, Version.Type.Stable, 0,
+		    c.getTime());
+	    d.addItem("Changing gnu cryto packages");
+
+	    c = Calendar.getInstance();
 	    c.set(2016, 11, 17);
-	    Description d = new Description(2, 0, 0, Version.Type.Stable, 0,
+	    d = new Description(2, 0, 0, Version.Type.Stable, 0,
 		    c.getTime());
 	    d.addItem("Including Gnu Crypto Algorithms.");
 

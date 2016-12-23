@@ -46,15 +46,15 @@ import java.security.SecureRandom;
  */
 public enum SecureRandomType
 {
-    DEFAULT(null, null, false), 
-    GNU_DEFAULT(null, null, true), 
     SHA1PRNG("SHA1PRNG", "SUN", false), 
     GNU_SHA1PRNG("SHA1PRNG", "GNU-Crypto", true), 
     GNU_SHA256PRNG("SHA-256PRNG", "GNU-Crypto", true), 
     GNU_SHA384PRNG("SHA-384PRNG", "GNU-Crypto", true), 
     GNU_SHA512PRNG("SHA-512PRNG", "GNU-Crypto", true), 
     GNU_WIRLPOOLPRNG("WHIRLPOOLPRNG","GNU-Crypto",true), 
-    SPEEDIEST(SHA1PRNG);
+    SPEEDIEST(SHA1PRNG),
+    DEFAULT(SPEEDIEST),
+    GNU_DEFAULT(GNU_SHA1PRNG);
 
     private final String algorithmeName;
 
@@ -74,16 +74,16 @@ public enum SecureRandomType
 	this.gnuVersion = gnuVersion;
     }
 
-    public AbstractSecureRandom getInstance() throws gnu.vm.java.security.NoSuchAlgorithmException, gnu.vm.java.security.NoSuchProviderException
+    public AbstractSecureRandom getInstance() throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.NoSuchProviderException
     {
 	if (gnuVersion)
 	{
 	    if (algorithmeName == null)
 		return new GnuSecureRandom(this,
-			new gnu.vm.java.security.SecureRandom());
+			new gnu.vm.jgnu.security.SecureRandom());
 	    else
 		return new GnuSecureRandom(this,
-			gnu.vm.java.security.SecureRandom
+			gnu.vm.jgnu.security.SecureRandom
 				.getInstance(algorithmeName));
 	}
 	else
@@ -98,25 +98,25 @@ public enum SecureRandomType
 	    }
 	    catch (NoSuchAlgorithmException e)
 	    {
-		throw new gnu.vm.java.security.NoSuchAlgorithmException(e);
+		throw new gnu.vm.jgnu.security.NoSuchAlgorithmException(e);
 	    }
 	    catch (NoSuchProviderException e)
 	    {
-		throw new gnu.vm.java.security.NoSuchProviderException(
+		throw new gnu.vm.jgnu.security.NoSuchProviderException(
 			e.getMessage());
 	    }
 	}
 
     }
 
-    public AbstractSecureRandom getInstance(byte[] seed) throws gnu.vm.java.security.NoSuchAlgorithmException, gnu.vm.java.security.NoSuchProviderException
+    public AbstractSecureRandom getInstance(byte[] seed) throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.NoSuchProviderException
     {
 	AbstractSecureRandom sr = getInstance();
 	sr.setSeed(seed);
 	return sr;
     }
 
-    public AbstractSecureRandom getInstance(long seed) throws gnu.vm.java.security.NoSuchAlgorithmException, gnu.vm.java.security.NoSuchProviderException
+    public AbstractSecureRandom getInstance(long seed) throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.NoSuchProviderException
     {
 	AbstractSecureRandom sr = getInstance();
 	sr.setSeed(seed);

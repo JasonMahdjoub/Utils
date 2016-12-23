@@ -44,8 +44,8 @@ import java.io.Serializable;
  */
 public interface UtilKey extends Serializable
 {
-    gnu.vm.java.security.Key toGnuKey() throws gnu.vm.java.security.NoSuchAlgorithmException, gnu.vm.java.security.spec.InvalidKeySpecException;
+    gnu.vm.jgnu.security.Key toGnuKey() throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException;
 
-    java.security.Key toJavaNativeKey() throws gnu.vm.java.security.NoSuchAlgorithmException, gnu.vm.java.security.spec.InvalidKeySpecException;
+    java.security.Key toJavaNativeKey() throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException;
 
 }

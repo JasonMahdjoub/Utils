@@ -80,7 +80,7 @@ public enum PasswordHashType
 	this.algorithmName = algorithmName;
     }
 
-    byte[] hash(byte data[], int off, int len, byte salt[], int iterations) throws gnu.vm.java.security.NoSuchAlgorithmException, gnu.vm.java.security.spec.InvalidKeySpecException
+    byte[] hash(byte data[], int off, int len, byte salt[], int iterations) throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException
     {
 	if (defaultOf != null)
 	    return defaultOf.hash(data, off, len, salt, iterations);
@@ -109,11 +109,11 @@ public enum PasswordHashType
 		}
 		catch (NoSuchAlgorithmException e)
 		{
-		    throw new gnu.vm.java.security.NoSuchAlgorithmException(e);
+		    throw new gnu.vm.jgnu.security.NoSuchAlgorithmException(e);
 		}
 		catch (InvalidKeySpecException e)
 		{
-		    throw new gnu.vm.java.security.spec.InvalidKeySpecException(
+		    throw new gnu.vm.jgnu.security.spec.InvalidKeySpecException(
 			    e);
 		}
 	    }
@@ -133,9 +133,9 @@ public enum PasswordHashType
 		if (size < password.length)
 		    password[size] = (char) (data[off + size * 2] & 0xFF);
 
-		gnu.vm.javax.crypto.spec.PBEKeySpec spec = new gnu.vm.javax.crypto.spec.PBEKeySpec(
+		gnu.vm.jgnux.crypto.spec.PBEKeySpec spec = new gnu.vm.jgnux.crypto.spec.PBEKeySpec(
 			password, salt, iterations, (hashLength) * 8);
-		gnu.vm.javax.crypto.SecretKeyFactory skf = gnu.vm.javax.crypto.SecretKeyFactory
+		gnu.vm.jgnux.crypto.SecretKeyFactory skf = gnu.vm.jgnux.crypto.SecretKeyFactory
 			.getInstance(algorithmName);
 		return skf.generateSecret(spec).getEncoded();
 	    }
@@ -160,7 +160,7 @@ public enum PasswordHashType
 	return null;
     }
 
-    byte[] hash(char password[], byte salt[], int iterations) throws gnu.vm.java.security.NoSuchAlgorithmException, gnu.vm.java.security.spec.InvalidKeySpecException
+    byte[] hash(char password[], byte salt[], int iterations) throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException
     {
 	if (defaultOf != null)
 	    return defaultOf.hash(password, salt, iterations);
@@ -179,11 +179,11 @@ public enum PasswordHashType
 		}
 		catch (NoSuchAlgorithmException e)
 		{
-		    throw new gnu.vm.java.security.NoSuchAlgorithmException(e);
+		    throw new gnu.vm.jgnu.security.NoSuchAlgorithmException(e);
 		}
 		catch (InvalidKeySpecException e)
 		{
-		    throw new gnu.vm.java.security.spec.InvalidKeySpecException(
+		    throw new gnu.vm.jgnu.security.spec.InvalidKeySpecException(
 			    e);
 		}
 
@@ -194,9 +194,9 @@ public enum PasswordHashType
 	    case GNU_PBKDF2WithHMacWhirlpool:
 	    case GNU_PBKDF2WithHmacSHA1:
 	    {
-		gnu.vm.javax.crypto.spec.PBEKeySpec spec = new gnu.vm.javax.crypto.spec.PBEKeySpec(
+		gnu.vm.jgnux.crypto.spec.PBEKeySpec spec = new gnu.vm.jgnux.crypto.spec.PBEKeySpec(
 			password, salt, iterations, (hashLength) * 8);
-		gnu.vm.javax.crypto.SecretKeyFactory skf = gnu.vm.javax.crypto.SecretKeyFactory
+		gnu.vm.jgnux.crypto.SecretKeyFactory skf = gnu.vm.jgnux.crypto.SecretKeyFactory
 			.getInstance(algorithmName);
 		return skf.generateSecret(spec).getEncoded();
 	    }

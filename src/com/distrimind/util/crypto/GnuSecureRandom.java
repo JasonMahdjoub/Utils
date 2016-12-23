@@ -36,7 +36,7 @@ package com.distrimind.util.crypto;
 
 import com.distrimind.util.crypto.P2PASymmetricSecretMessageExchanger.FakeSecureRandom;
 
-import gnu.vm.java.security.SecureRandom;
+import gnu.vm.jgnu.security.SecureRandom;
 
 /**
  * 

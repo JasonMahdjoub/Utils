@@ -38,10 +38,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import gnu.vm.java.security.InvalidAlgorithmParameterException;
-import gnu.vm.java.security.NoSuchAlgorithmException;
-import gnu.vm.java.security.NoSuchProviderException;
-import gnu.vm.java.security.spec.InvalidKeySpecException;
+
+import gnu.vm.jgnu.security.InvalidAlgorithmParameterException;
+import gnu.vm.jgnu.security.NoSuchAlgorithmException;
+import gnu.vm.jgnu.security.NoSuchProviderException;
+import gnu.vm.jgnu.security.spec.InvalidKeySpecException;
 
 /**
  * 
@@ -65,12 +66,12 @@ public abstract class AbstractEncryptionOutputAlgorithm
 	nullIV = new byte[cipher.getBlockSize()];
     }
 
-    public byte[] encode(byte[] bytes) throws gnu.vm.java.security.InvalidKeyException, IOException, InvalidAlgorithmParameterException, gnu.vm.javax.crypto.BadPaddingException, IllegalStateException, gnu.vm.javax.crypto.IllegalBlockSizeException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException
+    public byte[] encode(byte[] bytes) throws gnu.vm.jgnu.security.InvalidKeyException, IOException, InvalidAlgorithmParameterException, gnu.vm.jgnux.crypto.BadPaddingException, IllegalStateException, gnu.vm.jgnux.crypto.IllegalBlockSizeException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException
     {
 	return encode(bytes, 0, bytes.length);
     }
 
-    public byte[] encode(byte[] bytes, int off, int len) throws gnu.vm.java.security.InvalidKeyException, IOException, InvalidAlgorithmParameterException, IllegalStateException, gnu.vm.javax.crypto.IllegalBlockSizeException, gnu.vm.javax.crypto.BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException
+    public byte[] encode(byte[] bytes, int off, int len) throws gnu.vm.jgnu.security.InvalidKeyException, IOException, InvalidAlgorithmParameterException, IllegalStateException, gnu.vm.jgnux.crypto.IllegalBlockSizeException, gnu.vm.jgnux.crypto.BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException
     {
 	try (ByteArrayOutputStream baos = new ByteArrayOutputStream(
 		getOutputSizeForEncryption(len)))
@@ -80,7 +81,7 @@ public abstract class AbstractEncryptionOutputAlgorithm
 	}
     }
 
-    public void encode(byte[] bytes, int off, int len, OutputStream os) throws gnu.vm.java.security.InvalidKeyException, IOException, InvalidAlgorithmParameterException, IllegalStateException, gnu.vm.javax.crypto.IllegalBlockSizeException, gnu.vm.javax.crypto.BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException
+    public void encode(byte[] bytes, int off, int len, OutputStream os) throws gnu.vm.jgnu.security.InvalidKeyException, IOException, InvalidAlgorithmParameterException, IllegalStateException, gnu.vm.jgnux.crypto.IllegalBlockSizeException, gnu.vm.jgnux.crypto.BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException
     {
 	if (len < 0 || off < 0)
 	    throw new IllegalArgumentException("bytes.length=" + bytes.length
@@ -117,7 +118,7 @@ public abstract class AbstractEncryptionOutputAlgorithm
 
     }
 
-    public void encode(InputStream is, OutputStream os) throws gnu.vm.java.security.InvalidKeyException, IOException, InvalidAlgorithmParameterException, IllegalStateException, gnu.vm.javax.crypto.IllegalBlockSizeException, gnu.vm.javax.crypto.BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException
+    public void encode(InputStream is, OutputStream os) throws gnu.vm.jgnu.security.InvalidKeyException, IOException, InvalidAlgorithmParameterException, IllegalStateException, gnu.vm.jgnux.crypto.IllegalBlockSizeException, gnu.vm.jgnux.crypto.BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException
     {
 	initCipherForEncrypt(cipher);
 
@@ -158,9 +159,9 @@ public abstract class AbstractEncryptionOutputAlgorithm
 	 */
     }
 
-    protected abstract AbstractCipher getCipherInstance() throws gnu.vm.java.security.NoSuchAlgorithmException, gnu.vm.javax.crypto.NoSuchPaddingException;
+    protected abstract AbstractCipher getCipherInstance() throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnux.crypto.NoSuchPaddingException;
 
-    public OutputStream getCipherOutputStream(OutputStream os) throws gnu.vm.java.security.InvalidKeyException, gnu.vm.java.security.NoSuchAlgorithmException, gnu.vm.javax.crypto.NoSuchPaddingException, InvalidAlgorithmParameterException, IOException, InvalidKeySpecException, NoSuchProviderException
+    public OutputStream getCipherOutputStream(OutputStream os) throws gnu.vm.jgnu.security.InvalidKeyException, gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnux.crypto.NoSuchPaddingException, InvalidAlgorithmParameterException, IOException, InvalidKeySpecException, NoSuchProviderException
     {
 	AbstractCipher c = getCipherInstance();
 	initCipherForEncrypt(c);
@@ -172,7 +173,7 @@ public abstract class AbstractEncryptionOutputAlgorithm
 
     public abstract int getMaxBlockSizeForEncoding();
 
-    public int getOutputSizeForEncryption(int inputLen) throws gnu.vm.java.security.InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException
+    public int getOutputSizeForEncryption(int inputLen) throws gnu.vm.jgnu.security.InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException
     {
 	initCipherForEncryptAndNotChangeIV(cipher);
 	int maxBlockSize = getMaxBlockSizeForEncoding();
@@ -201,8 +202,8 @@ public abstract class AbstractEncryptionOutputAlgorithm
 
     protected abstract boolean includeIV();
 
-    public abstract void initCipherForEncrypt(AbstractCipher cipher) throws gnu.vm.java.security.InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException;
+    public abstract void initCipherForEncrypt(AbstractCipher cipher) throws gnu.vm.jgnu.security.InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException;
 
-    public abstract void initCipherForEncryptAndNotChangeIV(AbstractCipher cipher) throws gnu.vm.java.security.InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException;
+    public abstract void initCipherForEncryptAndNotChangeIV(AbstractCipher cipher) throws gnu.vm.jgnu.security.InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException;
 
 }

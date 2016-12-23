@@ -40,7 +40,7 @@ import java.security.KeyPair;
 
 import com.distrimind.util.Bits;
 
-import gnu.java.util.Base64;
+import gnu.jgnu.util.Base64;
 
 /**
  * 
@@ -84,7 +84,7 @@ public class ASymmetricKeyPair implements Serializable
 
     private transient volatile KeyPair nativeKeyPair;
 
-    private transient volatile gnu.vm.java.security.KeyPair gnuKeyPair;
+    private transient volatile gnu.vm.jgnu.security.KeyPair gnuKeyPair;
 
     ASymmetricKeyPair(ASymmetricEncryptionType type, ASymmetricPrivateKey privateKey, ASymmetricPublicKey publicKey, short keySize)
     {
@@ -103,7 +103,7 @@ public class ASymmetricKeyPair implements Serializable
 	hashCode = privateKey.hashCode() + publicKey.hashCode();
     }
 
-    ASymmetricKeyPair(ASymmetricEncryptionType type, gnu.vm.java.security.KeyPair keyPair, short keySize)
+    ASymmetricKeyPair(ASymmetricEncryptionType type, gnu.vm.jgnu.security.KeyPair keyPair, short keySize)
     {
 	if (type == null)
 	    throw new NullPointerException("type");
@@ -196,10 +196,10 @@ public class ASymmetricKeyPair implements Serializable
 	return hashCode;
     }
 
-    public gnu.vm.java.security.KeyPair toGnuKeyPair() throws gnu.vm.java.security.NoSuchAlgorithmException, gnu.vm.java.security.spec.InvalidKeySpecException
+    public gnu.vm.jgnu.security.KeyPair toGnuKeyPair() throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException
     {
 	if (gnuKeyPair == null)
-	    gnuKeyPair = new gnu.vm.java.security.KeyPair(publicKey.toGnuKey(),
+	    gnuKeyPair = new gnu.vm.jgnu.security.KeyPair(publicKey.toGnuKey(),
 		    privateKey.toGnuKey());
 
 	return gnuKeyPair;
@@ -221,7 +221,7 @@ public class ASymmetricKeyPair implements Serializable
      * type.getKeyPairGenerator(random, keySize).generateKeyPair(), keySize); }
      */
 
-    public KeyPair toJavaNativeKeyPair() throws gnu.vm.java.security.NoSuchAlgorithmException, gnu.vm.java.security.spec.InvalidKeySpecException
+    public KeyPair toJavaNativeKeyPair() throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException
     {
 	if (nativeKeyPair == null)
 	    nativeKeyPair = new KeyPair(publicKey.toJavaNativeKey(),

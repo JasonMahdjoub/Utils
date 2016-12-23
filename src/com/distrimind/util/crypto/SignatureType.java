@@ -64,12 +64,12 @@ public enum SignatureType
 	return algorithmName;
     }
 
-    public AbstractSignature getSignatureInstance() throws gnu.vm.java.security.NoSuchAlgorithmException
+    public AbstractSignature getSignatureInstance() throws gnu.vm.jgnu.security.NoSuchAlgorithmException
     {
 	if (gnuVersion)
 	{
 	    return new GnuSignature(
-		    gnu.vm.java.security.Signature.getInstance(algorithmName));
+		    gnu.vm.jgnu.security.Signature.getInstance(algorithmName));
 	}
 	else
 	{
@@ -80,7 +80,7 @@ public enum SignatureType
 	    }
 	    catch (NoSuchAlgorithmException e)
 	    {
-		throw new gnu.vm.java.security.NoSuchAlgorithmException(e);
+		throw new gnu.vm.jgnu.security.NoSuchAlgorithmException(e);
 	    }
 	}
     }

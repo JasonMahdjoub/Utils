@@ -69,7 +69,7 @@ import com.distrimind.util.properties.AbstractXMLObjectParser;
 import com.distrimind.util.properties.XMLProperties;
 import com.distrimind.util.version.Version;
 
-import gnu.vm.java.security.NoSuchProviderException;
+import gnu.vm.jgnu.security.NoSuchProviderException;
 
 /**
  * 
@@ -314,7 +314,7 @@ public class PropertiesExample extends XMLProperties
 	    return false;
     }
 
-    void generateValues() throws MalformedURLException, UnknownHostException, gnu.vm.java.security.NoSuchAlgorithmException, NoSuchProviderException
+    void generateValues() throws MalformedURLException, UnknownHostException, gnu.vm.jgnu.security.NoSuchAlgorithmException, NoSuchProviderException
     {
 	Random rand = new Random(System.currentTimeMillis());
 	intValue = rand.nextInt();

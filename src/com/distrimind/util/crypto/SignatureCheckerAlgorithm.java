@@ -34,10 +34,10 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
-import gnu.vm.java.security.InvalidKeyException;
-import gnu.vm.java.security.NoSuchAlgorithmException;
-import gnu.vm.java.security.SignatureException;
-import gnu.vm.java.security.spec.InvalidKeySpecException;
+import gnu.vm.jgnu.security.InvalidKeyException;
+import gnu.vm.jgnu.security.NoSuchAlgorithmException;
+import gnu.vm.jgnu.security.SignatureException;
+import gnu.vm.jgnu.security.spec.InvalidKeySpecException;
 
 /**
  * 
@@ -61,13 +61,13 @@ public class SignatureCheckerAlgorithm
 	this.signature = signature;
     }
 
-    public SignatureCheckerAlgorithm(ASymmetricPublicKey distantPublicKey) throws gnu.vm.java.security.NoSuchAlgorithmException
+    public SignatureCheckerAlgorithm(ASymmetricPublicKey distantPublicKey) throws gnu.vm.jgnu.security.NoSuchAlgorithmException
     {
 	this(distantPublicKey.getAlgorithmType().getDefaultSignatureAlgorithm()
 		.getSignatureInstance(), distantPublicKey);
     }
 
-    public SignatureCheckerAlgorithm(SignatureType type, ASymmetricPublicKey distantPublicKey) throws gnu.vm.java.security.NoSuchAlgorithmException
+    public SignatureCheckerAlgorithm(SignatureType type, ASymmetricPublicKey distantPublicKey) throws gnu.vm.jgnu.security.NoSuchAlgorithmException
     {
 	this(type.getSignatureInstance(), distantPublicKey);
     }

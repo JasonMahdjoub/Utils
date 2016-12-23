@@ -34,8 +34,8 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
-import gnu.vm.java.security.KeyPair;
-import gnu.vm.java.security.KeyPairGenerator;
+import gnu.vm.jgnu.security.KeyPair;
+import gnu.vm.jgnu.security.KeyPairGenerator;
 
 /**
  * 

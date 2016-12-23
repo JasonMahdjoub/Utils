@@ -34,11 +34,12 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
-import gnu.vm.java.security.NoSuchAlgorithmException;
-
 import javax.crypto.Cipher;
-import gnu.vm.javax.crypto.KeyGenerator;
-import gnu.vm.javax.crypto.NoSuchPaddingException;
+
+import gnu.vm.jgnu.security.NoSuchAlgorithmException;
+import gnu.vm.jgnux.crypto.KeyGenerator;
+import gnu.vm.jgnux.crypto.NoSuchPaddingException;
+
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
@@ -65,16 +66,16 @@ public enum SymmetricEncryptionType
     Blowfish("Blowfish", "CBC", "PKCS5Padding", (short) 128, false), GNU_AES("AES", "CBC", "PKCS5Padding", (short) 128, true), GNU_TWOFISH("TWOFISH", "CBC", "PKCS5Padding", (short) 128, true), GNU_SERPENT("Serpent", "CBC", "PKCS5Padding", (short) 128, true), GNU_ANUBIS("Anubis", "CBC", "PKCS5Padding", (short) 128, true), GNU_QUARE("Square", "CBC", "PKCS5Padding", (short) 128, true),
 
     DEFAULT(AES);
-    static gnu.vm.javax.crypto.SecretKey decodeGnuSecretKey(byte[] encodedSecretKey)
+    static gnu.vm.jgnux.crypto.SecretKey decodeGnuSecretKey(byte[] encodedSecretKey)
     {
 	return decodeGnuSecretKey(encodedSecretKey, 0, encodedSecretKey.length);
     }
 
-    static gnu.vm.javax.crypto.SecretKey decodeGnuSecretKey(byte[] encodedSecretKey, int off, int len)
+    static gnu.vm.jgnux.crypto.SecretKey decodeGnuSecretKey(byte[] encodedSecretKey, int off, int len)
     {
 	byte[][] parts = Bits.separateEncodingsWithShortSizedTabs(
 		encodedSecretKey, off, len);
-	return new gnu.vm.javax.crypto.spec.SecretKeySpec(parts[1],
+	return new gnu.vm.jgnux.crypto.spec.SecretKeySpec(parts[1],
 		new String(parts[0]));
     }
 
@@ -91,7 +92,7 @@ public enum SymmetricEncryptionType
 	return new SecretKeySpec(parts[1], new String(parts[0]));
     }
 
-    static byte[] encodeSecretKey(gnu.vm.javax.crypto.SecretKey key)
+    static byte[] encodeSecretKey(gnu.vm.jgnux.crypto.SecretKey key)
     {
 	return Bits.concateEncodingWithShortSizedTabs(
 		key.getAlgorithm().getBytes(), key.getEncoded());
@@ -163,7 +164,7 @@ public enum SymmetricEncryptionType
     {
 	if (gnuVersion)
 	{
-	    return new GnuCipher(gnu.vm.javax.crypto.Cipher.getInstance(
+	    return new GnuCipher(gnu.vm.jgnux.crypto.Cipher.getInstance(
 		    algorithmName + "/" + blockMode + "/" + padding));
 	}
 	else

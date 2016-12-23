@@ -34,7 +34,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
-import gnu.vm.java.security.spec.InvalidKeySpecException;
+import gnu.vm.jgnu.security.spec.InvalidKeySpecException;
 
 /**
  * 
@@ -58,13 +58,13 @@ public class SignerAlgorithm
 	this.signature = signature;
     }
 
-    public SignerAlgorithm(ASymmetricPrivateKey localPrivateKey) throws gnu.vm.java.security.NoSuchAlgorithmException
+    public SignerAlgorithm(ASymmetricPrivateKey localPrivateKey) throws gnu.vm.jgnu.security.NoSuchAlgorithmException
     {
 	this(localPrivateKey.getAlgorithmType().getDefaultSignatureAlgorithm()
 		.getSignatureInstance(), localPrivateKey);
     }
 
-    public SignerAlgorithm(SignatureType type, ASymmetricPrivateKey localPrivateKey) throws gnu.vm.java.security.NoSuchAlgorithmException
+    public SignerAlgorithm(SignatureType type, ASymmetricPrivateKey localPrivateKey) throws gnu.vm.jgnu.security.NoSuchAlgorithmException
     {
 	this(type.getSignatureInstance(), localPrivateKey);
     }
@@ -79,19 +79,19 @@ public class SignerAlgorithm
 	return signature;
     }
 
-    public byte[] sign(byte bytes[]) throws gnu.vm.java.security.InvalidKeyException, gnu.vm.java.security.SignatureException, gnu.vm.java.security.NoSuchAlgorithmException, InvalidKeySpecException
+    public byte[] sign(byte bytes[]) throws gnu.vm.jgnu.security.InvalidKeyException, gnu.vm.jgnu.security.SignatureException, gnu.vm.jgnu.security.NoSuchAlgorithmException, InvalidKeySpecException
     {
 	return this.sign(bytes, 0, bytes.length);
     }
 
-    public byte[] sign(byte bytes[], int off, int len) throws gnu.vm.java.security.InvalidKeyException, gnu.vm.java.security.SignatureException, gnu.vm.java.security.NoSuchAlgorithmException, InvalidKeySpecException
+    public byte[] sign(byte bytes[], int off, int len) throws gnu.vm.jgnu.security.InvalidKeyException, gnu.vm.jgnu.security.SignatureException, gnu.vm.jgnu.security.NoSuchAlgorithmException, InvalidKeySpecException
     {
 	signature.initSign(localPrivateKey);
 	signature.update(bytes, off, len);
 	return signature.sign();
     }
 
-    public void sign(byte message[], int offm, int lenm, byte signature[], int off_sig, int len_sig) throws gnu.vm.java.security.InvalidKeyException, gnu.vm.java.security.SignatureException, gnu.vm.java.security.NoSuchAlgorithmException, InvalidKeySpecException
+    public void sign(byte message[], int offm, int lenm, byte signature[], int off_sig, int len_sig) throws gnu.vm.jgnu.security.InvalidKeyException, gnu.vm.jgnu.security.SignatureException, gnu.vm.jgnu.security.NoSuchAlgorithmException, InvalidKeySpecException
     {
 	this.signature.initSign(localPrivateKey);
 	this.signature.update(message, offm, lenm);

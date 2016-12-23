@@ -34,13 +34,13 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
-import gnu.vm.java.security.InvalidKeyException;
-import gnu.vm.java.security.NoSuchAlgorithmException;
-import gnu.vm.java.security.NoSuchProviderException;
-import gnu.vm.java.security.spec.InvalidKeySpecException;
-
 import javax.crypto.Cipher;
-import gnu.vm.javax.crypto.NoSuchPaddingException;
+
+import gnu.vm.jgnu.security.InvalidKeyException;
+import gnu.vm.jgnu.security.NoSuchAlgorithmException;
+import gnu.vm.jgnu.security.NoSuchProviderException;
+import gnu.vm.jgnu.security.spec.InvalidKeySpecException;
+import gnu.vm.jgnux.crypto.NoSuchPaddingException;
 
 /**
  * 

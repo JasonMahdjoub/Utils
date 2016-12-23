@@ -36,11 +36,11 @@ package com.distrimind.util.crypto;
 
 import java.nio.ByteBuffer;
 
-import gnu.vm.java.security.InvalidKeyException;
-import gnu.vm.java.security.NoSuchAlgorithmException;
-import gnu.vm.java.security.Signature;
-import gnu.vm.java.security.SignatureException;
-import gnu.vm.java.security.spec.InvalidKeySpecException;
+import gnu.vm.jgnu.security.InvalidKeyException;
+import gnu.vm.jgnu.security.NoSuchAlgorithmException;
+import gnu.vm.jgnu.security.Signature;
+import gnu.vm.jgnu.security.SignatureException;
+import gnu.vm.jgnu.security.spec.InvalidKeySpecException;
 
 /**
  * 

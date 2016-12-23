@@ -40,7 +40,7 @@ import java.util.Arrays;
 
 import com.distrimind.util.Bits;
 
-import gnu.java.util.Base64;
+import gnu.jgnu.util.Base64;
 
 /**
  * 
@@ -79,7 +79,7 @@ public class ASymmetricPrivateKey implements UtilKey
 
     private volatile transient PrivateKey nativePrivateKey;
 
-    private volatile transient gnu.vm.java.security.PrivateKey gnuPrivateKey;
+    private volatile transient gnu.vm.jgnu.security.PrivateKey gnuPrivateKey;
 
     ASymmetricPrivateKey(ASymmetricEncryptionType type, byte privateKey[], short keySize)
     {
@@ -95,7 +95,7 @@ public class ASymmetricPrivateKey implements UtilKey
 	hashCode = Arrays.hashCode(privateKey);
     }
 
-    ASymmetricPrivateKey(ASymmetricEncryptionType type, gnu.vm.java.security.PrivateKey privateKey, short keySize)
+    ASymmetricPrivateKey(ASymmetricEncryptionType type, gnu.vm.jgnu.security.PrivateKey privateKey, short keySize)
     {
 	if (type == null)
 	    throw new NullPointerException("type");
@@ -176,7 +176,7 @@ public class ASymmetricPrivateKey implements UtilKey
     }
 
     @Override
-    public gnu.vm.java.security.PrivateKey toGnuKey() throws gnu.vm.java.security.NoSuchAlgorithmException, gnu.vm.java.security.spec.InvalidKeySpecException
+    public gnu.vm.jgnu.security.PrivateKey toGnuKey() throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException
     {
 	if (gnuPrivateKey == null)
 	    gnuPrivateKey = ASymmetricEncryptionType
@@ -186,7 +186,7 @@ public class ASymmetricPrivateKey implements UtilKey
     }
 
     @Override
-    public PrivateKey toJavaNativeKey() throws gnu.vm.java.security.NoSuchAlgorithmException, gnu.vm.java.security.spec.InvalidKeySpecException
+    public PrivateKey toJavaNativeKey() throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException
     {
 	if (nativePrivateKey == null)
 	    nativePrivateKey = ASymmetricEncryptionType

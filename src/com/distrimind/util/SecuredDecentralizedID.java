@@ -35,8 +35,6 @@ knowledge of the CeCILL-C license and that you accept its terms.
 package com.distrimind.util;
 
 import java.io.IOException;
-import gnu.vm.java.security.NoSuchAlgorithmException;
-
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -44,6 +42,8 @@ import com.distrimind.util.crypto.AbstractMessageDigest;
 import com.distrimind.util.crypto.AbstractSecureRandom;
 import com.distrimind.util.crypto.MessageDigestType;
 import com.distrimind.util.sizeof.ObjectSizer;
+
+import gnu.vm.jgnu.security.NoSuchAlgorithmException;
 
 /**
  * This class represents a unique identifier. Uniqueness is guaranteed over the

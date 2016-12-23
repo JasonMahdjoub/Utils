@@ -69,11 +69,11 @@ public enum MessageDigestType
 	return algorithmName;
     }
 
-    public AbstractMessageDigest getMessageDigestInstance() throws gnu.vm.java.security.NoSuchAlgorithmException
+    public AbstractMessageDigest getMessageDigestInstance() throws gnu.vm.jgnu.security.NoSuchAlgorithmException
     {
 	if (gnuVersion)
 	{
-	    return new GnuMessageDigest(gnu.vm.java.security.MessageDigest
+	    return new GnuMessageDigest(gnu.vm.jgnu.security.MessageDigest
 		    .getInstance(algorithmName));
 	}
 	else
@@ -85,7 +85,7 @@ public enum MessageDigestType
 	    }
 	    catch (NoSuchAlgorithmException e)
 	    {
-		throw new gnu.vm.java.security.NoSuchAlgorithmException(e);
+		throw new gnu.vm.jgnu.security.NoSuchAlgorithmException(e);
 	    }
 	}
     }

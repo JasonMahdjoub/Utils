@@ -131,12 +131,12 @@ public class PasswordHash
 	return saltSize;
     }
 
-    public byte[] hash(char[] password) throws gnu.vm.java.security.NoSuchAlgorithmException, gnu.vm.java.security.spec.InvalidKeySpecException
+    public byte[] hash(char[] password) throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException
     {
 	return hash(password, null);
     }
 
-    public byte[] hash(char[] password, byte[] staticAdditionalSalt) throws gnu.vm.java.security.NoSuchAlgorithmException, gnu.vm.java.security.spec.InvalidKeySpecException
+    public byte[] hash(char[] password, byte[] staticAdditionalSalt) throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException
     {
 	if (password == null)
 	    throw new NullPointerException("password");
@@ -148,12 +148,12 @@ public class PasswordHash
 		type.hash(password, salt, hashIterationsNumber), generatedSalt);
     }
 
-    public byte[] hash(String password) throws gnu.vm.java.security.NoSuchAlgorithmException, gnu.vm.java.security.spec.InvalidKeySpecException
+    public byte[] hash(String password) throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException
     {
 	return hash(password.toCharArray());
     }
 
-    public byte[] hash(String password, byte[] staticAdditionalSalt) throws gnu.vm.java.security.NoSuchAlgorithmException, gnu.vm.java.security.spec.InvalidKeySpecException
+    public byte[] hash(String password, byte[] staticAdditionalSalt) throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException
     {
 	return hash(password.toCharArray(), staticAdditionalSalt);
     }

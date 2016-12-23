@@ -35,9 +35,9 @@ knowledge of the CeCILL-C license and that you accept its terms.
 package com.distrimind.util.crypto;
 
 import java.nio.ByteBuffer;
-
-import gnu.vm.java.security.DigestException;
 import java.security.MessageDigest;
+
+import gnu.vm.jgnu.security.DigestException;
 
 /**
  * 
