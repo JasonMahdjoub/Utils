@@ -1,6 +1,13 @@
 <suite name="TestAll">
 	
-	<test name="testDencentralizedIDGenerator">  
+	<test name="testIDGeneratorInt">  
+		<classes>
+		    <class name="com.distrimind.util.IDGeneratorIntTests" />
+		</classes>
+	</test>
+	
+	
+		<test name="testDencentralizedIDGenerator">  
 		<classes>
 		    <class name="com.distrimind.util.DecentralizedIDTests" />
 		</classes>

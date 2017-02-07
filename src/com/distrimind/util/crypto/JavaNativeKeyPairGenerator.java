@@ -40,7 +40,7 @@ import java.security.KeyPairGenerator;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 1.1
  * @since Utils 2.0
  */
 public final class JavaNativeKeyPairGenerator extends AbstractKeyPairGenerator
@@ -48,6 +48,7 @@ public final class JavaNativeKeyPairGenerator extends AbstractKeyPairGenerator
     private final KeyPairGenerator keyPairGenerator;
 
     private short keySize = -1;
+    private long expirationTime=-1;
 
     JavaNativeKeyPairGenerator(ASymmetricEncryptionType type, KeyPairGenerator keyPairGenerator)
     {
@@ -60,7 +61,7 @@ public final class JavaNativeKeyPairGenerator extends AbstractKeyPairGenerator
     {
 	KeyPair kp = keyPairGenerator.generateKeyPair();
 
-	return new ASymmetricKeyPair(type, kp, keySize);
+	return new ASymmetricKeyPair(type, kp, keySize, expirationTime);
     }
 
     @Override
@@ -70,17 +71,21 @@ public final class JavaNativeKeyPairGenerator extends AbstractKeyPairGenerator
     }
 
     @Override
-    public void initialize(short _keysize)
+    public void initialize(short _keysize, long expirationTime)
     {
 	keyPairGenerator.initialize(_keysize);
+	this.keySize = _keysize;
+	this.expirationTime=expirationTime;
+	
     }
 
     @Override
-    public void initialize(short _keysize, AbstractSecureRandom _random)
+    public void initialize(short _keysize, long expirationTime, AbstractSecureRandom _random)
     {
 	keyPairGenerator.initialize(_keysize,
 		_random.getJavaNativeSecureRandom());
 	this.keySize = _keysize;
+	this.expirationTime=expirationTime;
 
     }
 

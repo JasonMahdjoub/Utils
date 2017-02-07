@@ -45,7 +45,7 @@ import gnu.jgnu.util.Base64;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 2.0
+ * @version 2.1
  * @since Utils 1.7.1
  */
 public class ASymmetricKeyPair implements Serializable
@@ -62,9 +62,10 @@ public class ASymmetricKeyPair implements Serializable
 	ASymmetricEncryptionType type = ASymmetricEncryptionType
 		.valueOf(Bits.getInt(res2[0], 2));
 	short keySize = Bits.getShort(res2[0], 0);
+	long expirationUTC=Bits.getLong(res2[0], 6);
 	return new ASymmetricKeyPair(type,
 		new ASymmetricPrivateKey(type, res1[1], keySize),
-		new ASymmetricPublicKey(type, res2[1], keySize), keySize);
+		new ASymmetricPublicKey(type, res2[1], keySize, expirationUTC), keySize);
     }
 
     public static ASymmetricKeyPair valueOf(String key) throws IllegalArgumentException, IOException
@@ -103,7 +104,7 @@ public class ASymmetricKeyPair implements Serializable
 	hashCode = privateKey.hashCode() + publicKey.hashCode();
     }
 
-    ASymmetricKeyPair(ASymmetricEncryptionType type, gnu.vm.jgnu.security.KeyPair keyPair, short keySize)
+    ASymmetricKeyPair(ASymmetricEncryptionType type, gnu.vm.jgnu.security.KeyPair keyPair, short keySize, long expirationUTC)
     {
 	if (type == null)
 	    throw new NullPointerException("type");
@@ -113,13 +114,13 @@ public class ASymmetricKeyPair implements Serializable
 	    throw new IllegalArgumentException("keySize");
 	privateKey = new ASymmetricPrivateKey(type, keyPair.getPrivate(),
 		keySize);
-	publicKey = new ASymmetricPublicKey(type, keyPair.getPublic(), keySize);
+	publicKey = new ASymmetricPublicKey(type, keyPair.getPublic(), keySize, expirationUTC);
 	this.keySize = keySize;
 	this.type = type;
 	hashCode = privateKey.hashCode() + publicKey.hashCode();
     }
 
-    ASymmetricKeyPair(ASymmetricEncryptionType type, KeyPair keyPair, short keySize)
+    ASymmetricKeyPair(ASymmetricEncryptionType type, KeyPair keyPair, short keySize, long expirationUTC)
     {
 	if (type == null)
 	    throw new NullPointerException("type");
@@ -129,7 +130,7 @@ public class ASymmetricKeyPair implements Serializable
 	    throw new IllegalArgumentException("keySize");
 	privateKey = new ASymmetricPrivateKey(type, keyPair.getPrivate(),
 		keySize);
-	publicKey = new ASymmetricPublicKey(type, keyPair.getPublic(), keySize);
+	publicKey = new ASymmetricPublicKey(type, keyPair.getPublic(), keySize, expirationUTC);
 	this.keySize = keySize;
 	this.type = type;
 	hashCode = privateKey.hashCode() + publicKey.hashCode();
@@ -137,9 +138,10 @@ public class ASymmetricKeyPair implements Serializable
 
     public byte[] encode()
     {
-	byte[] tab = new byte[6];
+	byte[] tab = new byte[14];
 	Bits.putShort(tab, 0, keySize);
 	Bits.putInt(tab, 2, type.ordinal());
+	Bits.putLong(tab, 6, publicKey.getTimeExpirationUTC());
 	return Bits.concateEncodingWithIntSizedTabs(
 		Bits.concateEncodingWithShortSizedTabs(tab,
 			publicKey.getBytesPublicKey()),
@@ -165,6 +167,12 @@ public class ASymmetricKeyPair implements Serializable
 	return false;
     }
 
+    
+    public long getTimeExpirationUTC()
+    {
+	return publicKey.getTimeExpirationUTC();
+    }
+    
     public ASymmetricEncryptionType getAlgorithmType()
     {
 	return type;

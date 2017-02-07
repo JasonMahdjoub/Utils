@@ -64,11 +64,16 @@ import com.distrimind.util.crypto.SymmetricSecretKey;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 1.1
+ * @version 1.2
  * @since Utils 1.0
  */
 public class DefaultXMLObjectParser extends AbstractXMLObjectParser
 {
+
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -6853594945240574230L;
 
     /**
      * {@inheritDoc}

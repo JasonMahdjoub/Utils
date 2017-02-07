@@ -46,7 +46,7 @@ import com.distrimind.util.version.Version;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 1.6
+ * @version 1.7
  */
 public class Utils
 {
@@ -59,8 +59,8 @@ public class Utils
 	Calendar c = Calendar.getInstance();
 	c.set(2016, 1, 4);
 	Calendar c2 = Calendar.getInstance();
-	c.set(2016, 11, 23);
-	VERSION = new Version("Utils", "Utils", 2, 0, 1, Version.Type.Stable, 0,
+	c.set(2017, 1, 7);
+	VERSION = new Version("Utils", "Utils", 2, 3, 0, Version.Type.Stable, 0,
 		c.getTime(), c2.getTime());
 	try
 	{
@@ -75,8 +75,26 @@ public class Utils
 		    new PersonDeveloper("mahdjoub", "jason", c.getTime()));
 
 	    c = Calendar.getInstance();
+	    c.set(2017, 1, 7);
+	    Description d = new Description(2, 3, 0, Version.Type.Stable, 0,
+		    c.getTime());
+	    d.addItem("AbstractXMLObjectParser is now serializable");
+
+	    c = Calendar.getInstance();
+	    c.set(2017, 0, 5);
+	    d = new Description(2, 2, 0, Version.Type.Stable, 0,
+		    c.getTime());
+	    d.addItem("Updating IDGeneratorInt class and fix memory leak problem");
+
+	    c = Calendar.getInstance();
+	    c.set(2016, 11, 31);
+	    d = new Description(2, 1, 0, Version.Type.Stable, 0,
+		    c.getTime());
+	    d.addItem("Adding expiration time for public keys");
+
+	    c = Calendar.getInstance();
 	    c.set(2016, 11, 23);
-	    Description d = new Description(2, 0, 1, Version.Type.Stable, 0,
+	    d = new Description(2, 0, 1, Version.Type.Stable, 0,
 		    c.getTime());
 	    d.addItem("Changing gnu cryto packages");
 
@@ -101,8 +119,7 @@ public class Utils
 	    c = Calendar.getInstance();
 	    c.set(2016, 8, 15);
 	    d = new Description(1, 7, 2, Version.Type.Stable, 0, c.getTime());
-	    d.addItem(
-		    "Correcting a bug for P2PASymmetricSecretMessageExchanger");
+	    d.addItem("Correcting a bug for P2PASymmetricSecretMessageExchanger");
 	    d.addItem("Adding toString and valueOf functions for crypto keys");
 	    d.addItem("Possibility to put crypto keys in XMLProperties class");
 	    d.addItem("Adding 'valueOf' for Decentralized IDs");

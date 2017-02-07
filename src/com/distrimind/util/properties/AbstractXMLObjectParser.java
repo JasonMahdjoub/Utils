@@ -35,15 +35,22 @@ knowledge of the CeCILL-C license and that you accept its terms.
 
 package com.distrimind.util.properties;
 
+import java.io.Serializable;
+
 /**
  * This object enables to convert an object to XML node content, and conversely.
  * 
  * @author Jason Mahdjoub
- * @version 1.1
+ * @version 1.2
  * @since Utils 1.0
  */
-public abstract class AbstractXMLObjectParser
+public abstract class AbstractXMLObjectParser implements Serializable
 {
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -684538962129630953L;
+
     /**
      * Convert an object to a XML node content
      * 

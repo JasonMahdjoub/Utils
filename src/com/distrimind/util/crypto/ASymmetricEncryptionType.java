@@ -53,13 +53,13 @@ import com.distrimind.util.Bits;
  * List of asymmetric encryption algorithms
  * 
  * @author Jason Mahdjoub
- * @version 2.0
+ * @version 2.1
  * @since Utils 1.4
  */
 public enum ASymmetricEncryptionType
 {
-    RSA_OAEPWithSHA256AndMGF1Padding("RSA", "", "OAEPWithSHA-256AndMGF1Padding",SignatureType.SHA256withRSA, (short) 4096, (short) 66, false), 
-    RSA_PKCS1Padding("RSA", "", "PKCS1Padding", SignatureType.SHA256withRSA, (short) 4096, (short) 11,false),
+    RSA_OAEPWithSHA256AndMGF1Padding("RSA", "", "OAEPWithSHA-256AndMGF1Padding",SignatureType.SHA256withRSA, (short) 4096, 31536000000l, (short) 66, false), 
+    RSA_PKCS1Padding("RSA", "", "PKCS1Padding", SignatureType.SHA256withRSA, (short) 4096, 31536000000l, (short) 11,false),
     //GNU_RSA_PKCS1Padding("RSA", "","PKCS1Padding",SignatureType.SHA256withRSA, (short)4096, (short)11, true),
     DEFAULT(RSA_OAEPWithSHA256AndMGF1Padding);
 
@@ -219,6 +219,8 @@ public enum ASymmetricEncryptionType
     private final SignatureType signature;
 
     private final short keySize;
+    
+    private final long expirationTimeMilis;
 
     private final short blockSizeDecrement;
 
@@ -227,10 +229,10 @@ public enum ASymmetricEncryptionType
     private ASymmetricEncryptionType(ASymmetricEncryptionType type)
     {
 	this(type.algorithmName, type.blockMode, type.padding, type.signature,
-		type.keySize, type.blockSizeDecrement, type.gnuVersion);
+		type.keySize, type.expirationTimeMilis, type.blockSizeDecrement, type.gnuVersion);
     }
 
-    private ASymmetricEncryptionType(String algorithmName, String blockMode, String padding, SignatureType signature, short keySize, short blockSizeDecrement, boolean gnuVersion)
+    private ASymmetricEncryptionType(String algorithmName, String blockMode, String padding, SignatureType signature, short keySize,long expirationTimeMilis, short blockSizeDecrement, boolean gnuVersion)
     {
 	this.algorithmName = algorithmName;
 	this.blockMode = blockMode;
@@ -239,6 +241,7 @@ public enum ASymmetricEncryptionType
 	this.keySize = keySize;
 	this.blockSizeDecrement = blockSizeDecrement;
 	this.gnuVersion = gnuVersion;
+	this.expirationTimeMilis=expirationTimeMilis;
     }
 
     public String getAlgorithmName()
@@ -300,17 +303,20 @@ public enum ASymmetricEncryptionType
 
     public AbstractKeyPairGenerator getKeyPairGenerator(AbstractSecureRandom random) throws gnu.vm.jgnu.security.NoSuchAlgorithmException
     {
-	return getKeyPairGenerator(random, keySize);
+	return getKeyPairGenerator(random, keySize, System.currentTimeMillis()+expirationTimeMilis);
     }
-
     public AbstractKeyPairGenerator getKeyPairGenerator(AbstractSecureRandom random, short keySize) throws gnu.vm.jgnu.security.NoSuchAlgorithmException
+    {
+	return getKeyPairGenerator(random, keySize, System.currentTimeMillis()+expirationTimeMilis);
+    }
+    public AbstractKeyPairGenerator getKeyPairGenerator(AbstractSecureRandom random, short keySize, long expirationTimeUTC) throws gnu.vm.jgnu.security.NoSuchAlgorithmException
     {
 	if (gnuVersion)
 	{
 	    gnu.vm.jgnu.security.KeyPairGenerator kgp = gnu.vm.jgnu.security.KeyPairGenerator
 		    .getInstance(algorithmName);
 	    GnuKeyPairGenerator res = new GnuKeyPairGenerator(this, kgp);
-	    res.initialize(keySize, random);
+	    res.initialize(keySize,expirationTimeUTC, random);
 
 	    return res;
 	}
@@ -322,7 +328,7 @@ public enum ASymmetricEncryptionType
 			.getInstance(algorithmName);
 		JavaNativeKeyPairGenerator res = new JavaNativeKeyPairGenerator(
 			this, kgp);
-		res.initialize(keySize, random);
+		res.initialize(keySize,expirationTimeUTC, random);
 
 		return res;
 	    }

@@ -45,7 +45,7 @@ import gnu.jgnu.util.Base64;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 2.0
+ * @version 2.1
  * @since Utils 1.7.1
  */
 public class ASymmetricPublicKey implements UtilKey
@@ -60,7 +60,7 @@ public class ASymmetricPublicKey implements UtilKey
 	byte[][] res = Bits.separateEncodingsWithShortSizedTabs(b);
 	return new ASymmetricPublicKey(
 		ASymmetricEncryptionType.valueOf(Bits.getInt(res[0], 2)),
-		res[1], Bits.getShort(res[0], 0));
+		res[1], Bits.getShort(res[0], 0), Bits.getLong(b, 6));
     }
 
     public static ASymmetricPublicKey valueOf(String key) throws IOException
@@ -76,12 +76,14 @@ public class ASymmetricPublicKey implements UtilKey
     private final ASymmetricEncryptionType type;
 
     private final int hashCode;
+    
+    private final long expirationUTC;
 
     private volatile transient PublicKey nativePublicKey = null;
 
     private volatile transient gnu.vm.jgnu.security.PublicKey gnuPublicKey = null;
 
-    ASymmetricPublicKey(ASymmetricEncryptionType type, byte[] publicKey, short keySize)
+    ASymmetricPublicKey(ASymmetricEncryptionType type, byte[] publicKey, short keySize, long expirationUTC)
     {
 	if (type == null)
 	    throw new NullPointerException("type");
@@ -94,9 +96,10 @@ public class ASymmetricPublicKey implements UtilKey
 	this.keySize = keySize;
 	this.type = type;
 	hashCode = Arrays.hashCode(this.publicKey);
+	this.expirationUTC=expirationUTC;
     }
 
-    ASymmetricPublicKey(ASymmetricEncryptionType type, gnu.vm.jgnu.security.PublicKey publicKey, short keySize)
+    ASymmetricPublicKey(ASymmetricEncryptionType type, gnu.vm.jgnu.security.PublicKey publicKey, short keySize, long expirationUTC)
     {
 	if (type == null)
 	    throw new NullPointerException("type");
@@ -109,9 +112,10 @@ public class ASymmetricPublicKey implements UtilKey
 	this.keySize = keySize;
 	this.type = type;
 	hashCode = Arrays.hashCode(this.publicKey);
+	this.expirationUTC=expirationUTC;
     }
 
-    ASymmetricPublicKey(ASymmetricEncryptionType type, PublicKey publicKey, short keySize)
+    ASymmetricPublicKey(ASymmetricEncryptionType type, PublicKey publicKey, short keySize, long expirationUTC)
     {
 	if (type == null)
 	    throw new NullPointerException("type");
@@ -126,13 +130,15 @@ public class ASymmetricPublicKey implements UtilKey
 	this.keySize = keySize;
 	this.type = type;
 	hashCode = Arrays.hashCode(this.publicKey);
+	this.expirationUTC=expirationUTC;
     }
 
     public byte[] encode()
     {
-	byte[] tab = new byte[6];
+	byte[] tab = new byte[14];
 	Bits.putShort(tab, 0, keySize);
 	Bits.putInt(tab, 2, type.ordinal());
+	Bits.putLong(tab, 6, expirationUTC);
 	return Bits.concateEncodingWithShortSizedTabs(tab, publicKey);
     }
 
@@ -173,6 +179,11 @@ public class ASymmetricPublicKey implements UtilKey
 	return type.getMaxBlockSize(keySize);
     }
 
+    public long getTimeExpirationUTC()
+    {
+	return expirationUTC;
+    }
+    
     @Override
     public int hashCode()
     {

@@ -39,7 +39,7 @@ import gnu.vm.jgnu.security.InvalidParameterException;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 1.1
  * @since Utils 2.0
  */
 public abstract class AbstractKeyPairGenerator
@@ -99,7 +99,7 @@ public abstract class AbstractKeyPairGenerator
      *                if the <code>keysize</code> is not supported by this
      *                KeyPairGenerator object.
      */
-    public abstract void initialize(short keysize);
+    public abstract void initialize(short keysize, long expirationTime);
 
     /**
      * Initializes the key pair generator for a certain keysize with the given
@@ -119,6 +119,6 @@ public abstract class AbstractKeyPairGenerator
      *
      * @since 1.2
      */
-    public abstract void initialize(short keysize, AbstractSecureRandom random);
+    public abstract void initialize(short keysize, long expirationTime, AbstractSecureRandom random);
 
 }

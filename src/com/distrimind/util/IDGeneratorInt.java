@@ -41,7 +41,7 @@ import java.io.Serializable;
  * Represent a set of unique identifiers until they are released.
  * 
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 1.1
  * @since Utils 1.0
  * 
  *
@@ -61,21 +61,26 @@ public final class IDGeneratorInt implements Serializable
 
     // private final int m_id_start;
     private int m_last_id;
+    private final int idStart;
 
     public IDGeneratorInt()
     {
-	// m_id_start=0;
-	m_reserve_max = 20;
-	m_ids = new int[m_reserve_max];
-	m_last_id = -1;
+	this(20, 0);
     }
 
+    int getRealTabSize()
+    {
+	return m_ids.length;
+    }
+    
+    public int getNumberOfMemorizedIds()
+    {
+	return m_size;
+    }
+    
     public IDGeneratorInt(int _id_start)
     {
-	// m_id_start=_id_start;
-	m_reserve_max = 20;
-	m_ids = new int[m_reserve_max];
-	m_last_id = _id_start - 1;
+	this(20, _id_start);
     }
 
     public IDGeneratorInt(int _reserve_max, int _id_start)
@@ -86,6 +91,7 @@ public final class IDGeneratorInt implements Serializable
 	m_reserve_max = _reserve_max;
 	m_ids = new int[m_reserve_max];
 	m_last_id = _id_start - 1;
+	idStart=_id_start;
     }
 
     public int getNewID()
@@ -157,23 +163,19 @@ public final class IDGeneratorInt implements Serializable
     public boolean removeID(int _val)
     {
 	int i;
-	for (i = 0; i < m_size && m_ids[i] <= _val; i++)
+	for (i = 0; i < m_size && m_ids[i] < _val; i++)
 	{
-	    if (m_ids[i] == _val)
-		break;
 	}
 	if (i < m_size && m_ids[i] == _val)
 	{
-	    if (i == m_size - 1)
-		m_last_id = _val - 1;
-
 	    if (getReserve() > m_reserve_max * 2)
 	    {
 		int[] ids = new int[m_size + m_reserve_max];
-		System.arraycopy(m_ids, 0, ids, 0, i);
+		if (i>0)
+		    System.arraycopy(m_ids, 0, ids, 0, i);
 		int s = m_size - i - 1;
 		if (s > 0)
-		    System.arraycopy(m_ids, i, ids, i + 1, s);
+		    System.arraycopy(m_ids, i+1, ids, i, s);
 		m_ids = ids;
 		--m_size;
 	    }
@@ -185,6 +187,10 @@ public final class IDGeneratorInt implements Serializable
 		}
 		--m_size;
 	    }
+	    if (m_size>0)
+		m_last_id=m_ids[m_size-1];
+	    else
+		m_last_id=idStart-1;
 	    return true;
 	}
 	return false;
