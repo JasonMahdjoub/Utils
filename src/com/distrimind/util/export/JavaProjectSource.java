@@ -426,14 +426,27 @@ public class JavaProjectSource extends SourceDependancy
 		+ "			]]>" + "		</bottom>"
 		+ "		<link offline=\"false\" href=\"http://docs.oracle.com/javase/"
 		+ javaVersion.ordinal() + "/docs/api/\" />"
-		+ (includeDependencies?(""):("<packageset dir=\""+_src.getAbsoluteFile()+"\" defaultexcludes=\"yes\">"
-			+ "<include name=\""+getRepresentedPackagePath()+"/**\"/>"
-			+ "</packageset>"))
+		+ (includeDependencies?(""):(getPackageSet(_src)))
 		+ "	</javadoc>"
 		+ "</target>" + "</project>";
 	return antXMLbuild;
     }
 
+    private String getPackageSet(File _src)
+    {
+	String res="<packageset dir=\""+_src.getAbsoluteFile()+"\" defaultexcludes=\"yes\">"
+		+ "<include name=\""+getRepresentedPackagePath(representedPackage)+"/**\"/>";
+	for (BinaryDependency bd : getDependencies())
+	{
+	    if (bd.getSourceCode() != null
+		    && bd.getSourceCode().isIncludedToDoc())
+		res+= "<include name=\""+getRepresentedPackagePath(bd.getPackage())+"/**\"/>";
+	}
+
+	res+="</packageset>";
+	return res;
+    }
+    
     @Override
     String getAntSetFile()
     {
@@ -450,9 +463,9 @@ public class JavaProjectSource extends SourceDependancy
 	return new File(_destination_root, this.relativeBuildFile);
     }
 
-    private String getRepresentedPackagePath()
+    private String getRepresentedPackagePath(Package p)
     {
-	return representedPackage.getName().replaceAll("\\.", "/"); 
+	return p.getName().replaceAll("\\.", "/"); 
     }
     
     public String getClassPath()
