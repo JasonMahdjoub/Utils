@@ -96,6 +96,12 @@ public class DirectoryDependency extends BinaryDependency
 	return "<fileset dir=\"" + directory.getAbsolutePath()
 		+ "\" includes=\"**/*.class\"></fileset>";
     }
+    @Override
+    String getAntSetFileToExclude()
+    {
+	return "<fileset dir=\"" + directory.getAbsolutePath()
+		+ "\" exclude=\"**/*.class\"></fileset>";
+    }
 
     @Override
     String getClassPath()

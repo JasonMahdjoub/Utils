@@ -59,8 +59,8 @@ public class Utils
 	Calendar c = Calendar.getInstance();
 	c.set(2016, 1, 4);
 	Calendar c2 = Calendar.getInstance();
-	c.set(2017, 1, 7);
-	VERSION = new Version("Utils", "Utils", 2, 3, 0, Version.Type.Stable, 0,
+	c.set(2017, 2, 4);
+	VERSION = new Version("Utils", "Utils", 2, 4, 0, Version.Type.Stable, 0,
 		c.getTime(), c2.getTime());
 	try
 	{
@@ -75,8 +75,15 @@ public class Utils
 		    new PersonDeveloper("mahdjoub", "jason", c.getTime()));
 
 	    c = Calendar.getInstance();
+	    c.set(2017, 2, 4);
+	    Description d = new Description(2, 4, 0, Version.Type.Stable, 0,
+		    c.getTime());
+	    d.addItem("Debugging documentation export");
+	    d.addItem("Updating common net to 3.6 version");
+
+	    c = Calendar.getInstance();
 	    c.set(2017, 1, 7);
-	    Description d = new Description(2, 3, 0, Version.Type.Stable, 0,
+	    d = new Description(2, 3, 0, Version.Type.Stable, 0,
 		    c.getTime());
 	    d.addItem("AbstractXMLObjectParser is now serializable");
 

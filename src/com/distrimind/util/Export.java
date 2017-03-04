@@ -74,17 +74,17 @@ class Export
 	Package root_tests_package = DecentralizedIDTests.class.getPackage();
 
 	License[] licenses = { new License(
-		new File("/home/jason/projets/commons-net-3.5/LICENSE.txt")) };
+		new File("/home/jason/projets/commons-net-3.6/LICENSE.txt")) };
 	ArrayList<BinaryDependency> dependencies = new ArrayList<BinaryDependency>();
 	dependencies.add(new JarDependency("commons-net",
 		new JarSourceDependancy(false,
 			new File(
-				"/home/jason/projets/commons-net-3.5/commons-net-3.5-sources.jar"),
+				"/home/jason/projets/commons-net-3.6/commons-net-3.6-sources.jar"),
 			null, null),
 		org.apache.commons.net.SocketClient.class.getPackage(),
 		licenses,
 		new File(
-			"/home/jason/projets/commons-net-3.5/commons-net-3.5.jar"),
+			"/home/jason/projets/commons-net-3.6/commons-net-3.6.jar"),
 		null, null));
 
 	

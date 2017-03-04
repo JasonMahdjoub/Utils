@@ -151,6 +151,7 @@ public abstract class BinaryDependency extends Dependency
     }
 
     abstract String getAntSetFile();
+    abstract String getAntSetFileToExclude();
 
     abstract String getClassPath();
 

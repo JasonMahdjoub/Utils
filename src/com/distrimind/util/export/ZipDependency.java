@@ -96,6 +96,12 @@ public class ZipDependency extends BinaryDependency
 	return "<fileset file=\"" + jar_dependency.getAbsolutePath()
 		+ "\"></fileset>";
     }
+    @Override
+    String getAntSetFileToExclude()
+    {
+	return "<fileset file=\"" + jar_dependency.getAbsolutePath()
+		+ "\"exclude=\"**/*.class\"></fileset>";
+    }
 
     @Override
     String getClassPath()

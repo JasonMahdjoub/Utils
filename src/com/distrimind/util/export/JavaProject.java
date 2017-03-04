@@ -122,6 +122,13 @@ public class JavaProject extends BinaryDependency
 	return "<fileset dir=\"" + this.binaries_directory.getAbsolutePath()
 		+ "\"></fileset>";
     }
+    @Override
+    String getAntSetFileToExclude()
+    {
+	// return ((JavaProjectSource)getSourceCode()).getAntSetFile();
+	return "<fileset dir=\"" + this.binaries_directory.getAbsolutePath()
+		+ "\" exclude=\"**/*.class\"></fileset>";
+    }
 
     public File getBinariesDirectory()
     {

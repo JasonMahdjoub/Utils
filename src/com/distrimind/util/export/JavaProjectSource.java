@@ -183,6 +183,7 @@ public class JavaProjectSource extends SourceDependancy
 	    throw new IllegalArgumentException("_src doest not exist !");
 	if (!_src.isDirectory())
 	    throw new IllegalArgumentException("_src must be a directory");
+	int sourceLength=_src.listFiles().length;
 
 	File xmlFile = new File(_src, "build.xml");
 	try
@@ -194,6 +195,7 @@ public class JavaProjectSource extends SourceDependancy
 
 	    boolean ok = Export.execExternalProcess(command, _src, isVerbose(),
 		    true) == 0;
+	    ok&=(sourceLength==0)?true:(_dst.listFiles().length!=0);
 	    if (ok)
 	    {
 		xmlFile.delete();
@@ -392,8 +394,9 @@ public class JavaProjectSource extends SourceDependancy
 		+ "	<property name=\"ant.build.javac.source\" value=\"1."
 		+ javaVersion.ordinal() + "\"/>"
 		+ "	<property name=\"ant.build.javac.target\" value=\"1."
-		+ javaVersion.ordinal() + "\"/>" + "	<javadoc sourcepath=\""
-		+ _src.getAbsoluteFile() + "\" destdir=\""
+		+ javaVersion.ordinal() + "\"/>" + "	<javadoc "
+		+ (includeDependencies?("sourcepath=\""+ _src.getAbsoluteFile() + "\" "):"")
+		+ "destdir=\""
 		+ _dst.getAbsoluteFile()
 		+ "\" classpathref=\"classpath\" access=\"protected\" docfilessubdirs=\"true\" author=\"true\" version=\"true\" use=\"true\" linksource=\"no\" windowtitle=\""
 		+ projectName + "\" encoding=\"" + encoding + "\">"
@@ -422,7 +425,11 @@ public class JavaProjectSource extends SourceDependancy
 		+ "</i>" + "				</p>"
 		+ "			]]>" + "		</bottom>"
 		+ "		<link offline=\"false\" href=\"http://docs.oracle.com/javase/"
-		+ javaVersion.ordinal() + "/docs/api/\" />" + "	</javadoc>"
+		+ javaVersion.ordinal() + "/docs/api/\" />"
+		+ (includeDependencies?(""):("<packageset dir=\""+_src.getAbsoluteFile()+"\" defaultexcludes=\"yes\">"
+			+ "<include name=\""+getRepresentedPackagePath()+"/**\"/>"
+			+ "</packageset>"))
+		+ "	</javadoc>"
 		+ "</target>" + "</project>";
 	return antXMLbuild;
     }
@@ -443,6 +450,11 @@ public class JavaProjectSource extends SourceDependancy
 	return new File(_destination_root, this.relativeBuildFile);
     }
 
+    private String getRepresentedPackagePath()
+    {
+	return representedPackage.getName().replaceAll("\\.", "/"); 
+    }
+    
     public String getClassPath()
     {
 	StringBuffer res = new StringBuffer("");

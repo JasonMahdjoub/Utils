@@ -61,6 +61,7 @@ public class Export
 	    p = runtime.exec(command);
 	else
 	    p = runtime.exec(command, null, working_directory);
+	
 	final Process process = p;
 	// Consommation de la sortie standard de l'application externe dans un
 	// Thread separe
@@ -127,8 +128,8 @@ public class Export
 		}
 	    }
 	}.start();
-	process.waitFor();
-	return process.exitValue();
+	
+	return process.waitFor();
     }
 
     private final Exports exports;
