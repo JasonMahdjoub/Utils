@@ -104,8 +104,9 @@ public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOu
 	if (includeIV())
 	{
 	    iv = new byte[cipher.getBlockSize()];
-	    if (is.read(iv) != iv.length)
-		throw new IOException();
+	    int read=is.read(iv);
+	    if ( read!= iv.length)
+		throw new IOException("read="+read+", iv.length="+iv.length);
 	}
 
 	initCipherForDecrypt(cipher, iv);

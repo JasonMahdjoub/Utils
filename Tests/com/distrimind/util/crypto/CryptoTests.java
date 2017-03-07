@@ -72,7 +72,7 @@ import com.distrimind.util.crypto.SymmetricSecretKey;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 1.4
+ * @version 1.5
  * @since Utils 1.4
  */
 public class CryptoTests
@@ -239,7 +239,7 @@ public class CryptoTests
     }
 
     @Test(dataProvider = "provideDataForASymetricEncryptions", dependsOnMethods = {
-	    "testASymmetricKeyPairEncoding" })
+	    "testASymmetricKeyPairEncoding", "testReadWriteDataPackaged" })
     public void testASymmetricSecretMessageExchanger(ASymmetricEncryptionType type) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IOException, IllegalAccessException, InvalidKeySpecException, IllegalBlockSizeException, BadPaddingException, NoSuchProviderException
     {
 	System.out.println("Testing ASymmetricSecretMessageExchanger " + type);
@@ -267,10 +267,8 @@ public class CryptoTests
 	    {
 		byte[] localCrypt = algoLocal.encode(m, salt, true);
 		Assert.assertTrue(localCrypt.length != 0);
-		Assert.assertTrue(algoDistant.verifyDistantMessage(m, salt,
-			localCrypt, true));
-		Assert.assertFalse(algoDistant.verifyDistantMessage(m, salt,
-			falseMessage, true));
+		Assert.assertTrue(algoDistant.verifyDistantMessage(m, salt, localCrypt, true));
+		Assert.assertFalse(algoDistant.verifyDistantMessage(m, salt, falseMessage, true));
 		Assert.assertFalse(algoDistant.verifyDistantMessage(
 			falseMessage, salt, localCrypt, true));
 
@@ -682,5 +680,22 @@ public class CryptoTests
 	}
 
     }
+    
+    
+    @Test(invocationCount=4000)
+    public void testReadWriteDataPackaged() throws NoSuchAlgorithmException, NoSuchProviderException, IOException
+    {
+	Random rand=new Random(System.currentTimeMillis());
+	byte originalBytes[]=new byte[50+rand.nextInt(10000)];
+	rand.nextBytes(originalBytes);
+	int randNb=rand.nextInt(10000);
+	byte encodedBytes[]=OutputDataPackagerWithRandomValues.encode(originalBytes, randNb);
+	Assert.assertTrue(randNb>=3?(encodedBytes.length>originalBytes.length):(encodedBytes.length==originalBytes.length));
+	byte decodedBytes[]=InputDataPackagedWithRandomValues.decode(encodedBytes);
+	Assert.assertEquals(decodedBytes.length, originalBytes.length);
+	for (int i=0;i<decodedBytes.length;i++)
+	    Assert.assertEquals(decodedBytes[i], originalBytes[i]);
+    }
+    
 
 }
