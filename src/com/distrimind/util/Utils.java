@@ -79,6 +79,7 @@ public class Utils
 	    Description d = new Description(2, 5, 0, Version.Type.Stable, 0,
 		    c.getTime());
 	    d.addItem("Improving and renforcing P2PAsymmetricSecretMessageExchanger");
+	    d.addItem("Additional manifest content possibility for projects export");
 
 	    c = Calendar.getInstance();
 	    c.set(2017, 2, 4);

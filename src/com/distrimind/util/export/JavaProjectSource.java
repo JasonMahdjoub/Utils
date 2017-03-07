@@ -103,11 +103,25 @@ public class JavaProjectSource extends SourceDependancy
 
     private File fileLogo;
 
+    private String additionalManifestContent=null;
+    
     public JavaProjectSource()
     {
 
     }
 
+    public void setAdditionalManifestContent(String content)
+    {
+	additionalManifestContent=content;
+	if (testSuiteSource!=null)
+	    testSuiteSource.setAdditionalManifestContent(content);
+    }
+    
+    public String getAdditionalManifestContent()
+    {
+	return additionalManifestContent;
+    }
+    
     public JavaProjectSource(File root_directory, File source_directory, Package representedPackage, License licenses[], String relativeBuildFile, Class<?> main_class, String description, Version version, SourceVersion javaVersion, ArrayList<BinaryDependency> dependencies, ArrayList<File> additional_directories_and_files_to_export, File jdkDirectory)
     {
 	this(root_directory, source_directory, representedPackage, licenses,
@@ -546,6 +560,8 @@ public class JavaProjectSource extends SourceDependancy
 	res += "\n";
 	if (main_class != null)
 	    res += "Main-Class: " + main_class.getCanonicalName() + "\n";
+	if (additionalManifestContent!=null)
+	    res+="\n"+additionalManifestContent;
 	return res;
     }
 
@@ -642,6 +658,8 @@ public class JavaProjectSource extends SourceDependancy
 		_additional_directories_and_files_to_export, suite,
 		jdkDirectory, _exclude_regex, _include_regex);
 	testSuiteSource.setDebugMode(true);
+	testSuiteSource.setAdditionalManifestContent(additionalManifestContent);
+	    
     }
 
     public void setVerbose(boolean _verbose)

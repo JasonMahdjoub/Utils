@@ -58,6 +58,7 @@ public class TestSuiteSource extends JavaProjectSource
 		javaVersion, _dependencies,
 		_additional_directories_and_files_to_export, jdkDirectory,
 		_exclude_regex, _include_regex);
+	
 	projectName = projectName + "-Tests";
 	if (suite == null)
 	    throw new NullPointerException("suite");
