@@ -35,6 +35,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
 package com.distrimind.util.crypto;
 
 import com.distrimind.util.Bits;
+import com.distrimind.util.sizeof.ObjectSizer;
 
 import gnu.vm.jgnu.security.NoSuchAlgorithmException;
 import gnu.vm.jgnu.security.NoSuchProviderException;
@@ -55,7 +56,7 @@ public class OutputDataPackagerWithRandomValues
     {
 	if (bytes==null)
 	    throw new NullPointerException("bytes");
-	OutputDataPackagerWithRandomValues o=new OutputDataPackagerWithRandomValues(bytes.length+Integer.BYTES, max_random_values_size, rand);
+	OutputDataPackagerWithRandomValues o=new OutputDataPackagerWithRandomValues(bytes.length+ObjectSizer.INT_FIELD_SIZE, max_random_values_size, rand);
 	o.writeInt(bytes.length);
 	o.writeData(bytes, 0, bytes.length);
 	o.finilizeTab();

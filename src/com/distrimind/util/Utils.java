@@ -59,8 +59,8 @@ public class Utils
 	Calendar c = Calendar.getInstance();
 	c.set(2016, 1, 4);
 	Calendar c2 = Calendar.getInstance();
-	c.set(2017, 2, 7);
-	VERSION = new Version("Utils", "Utils", 2, 5, 0, Version.Type.Stable, 0,
+	c.set(2017, 3, 4);
+	VERSION = new Version("Utils", "Utils", 2, 6, 0, Version.Type.Stable, 0,
 		c.getTime(), c2.getTime());
 	try
 	{
@@ -75,8 +75,15 @@ public class Utils
 		    new PersonDeveloper("mahdjoub", "jason", c.getTime()));
 
 	    c = Calendar.getInstance();
+	    c.set(2017, 3, 4);
+	    Description d = new Description(2, 6, 0, Version.Type.Stable, 0,
+		    c.getTime());
+	    d.addItem("Adding RegexTools class");
+	    d.addItem("JDK 7 compatible");
+
+	    c = Calendar.getInstance();
 	    c.set(2017, 2, 7);
-	    Description d = new Description(2, 5, 0, Version.Type.Stable, 0,
+	    d = new Description(2, 5, 0, Version.Type.Stable, 0,
 		    c.getTime());
 	    d.addItem("Improving and renforcing P2PAsymmetricSecretMessageExchanger");
 	    d.addItem("Additional manifest content possibility for projects export");

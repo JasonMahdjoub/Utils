@@ -38,6 +38,7 @@ import java.io.IOException;
 
 
 import com.distrimind.util.Bits;
+import com.distrimind.util.sizeof.ObjectSizer;
 
 /**
  * 
@@ -55,10 +56,10 @@ public class InputDataPackagedWithRandomValues
 	InputDataPackagedWithRandomValues i=new InputDataPackagedWithRandomValues(bytes);
 	byte res[]=i.getBytesArray();
 	int size=Bits.getInt(res, 0);
-	if (size>res.length-Integer.BYTES)
+	if (size>res.length-ObjectSizer.INT_FIELD_SIZE)
 	    throw new IOException("Invalid size");
 	byte[] res2=new byte[size];
-	System.arraycopy(res, Integer.BYTES, res2, 0, size);
+	System.arraycopy(res, ObjectSizer.INT_FIELD_SIZE, res2, 0, size);
 	return res2;
 	    
     }
@@ -120,6 +121,6 @@ public class InputDataPackagedWithRandomValues
 	}
 	static byte decodeRandomVal(byte val, byte maxBits)
 	{
-	    return (byte)(Byte.toUnsignedInt(val) & ((1<<maxBits)-1));
+	    return (byte)((val & 0xFF) & ((1<<maxBits)-1));
 	}
 }

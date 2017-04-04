@@ -1,15 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
-<suite guice-stage="DEVELOPMENT" name="Failed suite [Default suite]">
-  <test name="Default test(failed)">
+<suite verbose="5" name="Failed suite [TestAll]">
+  <test name="testCyrpto(failed)">
     <classes>
       <class name="com.distrimind.util.crypto.CryptoTests">
         <methods>
-          <include name="testASymmetricSecretMessageExchanger" invocation-numbers="1 2 0"/>
+          <include name="testASymmetricSecretMessageExchanger"/>
           <include name="testEncodeAndSeparateEncoding"/>
           <include name="testASymmetricKeyPairEncoding"/>
+          <include name="testReadWriteDataPackaged"/>
         </methods>
       </class> <!-- com.distrimind.util.crypto.CryptoTests -->
     </classes>
-  </test> <!-- Default test(failed) -->
-</suite> <!-- Failed suite [Default suite] -->
+  </test> <!-- testCyrpto(failed) -->
+</suite> <!-- Failed suite [TestAll] -->
