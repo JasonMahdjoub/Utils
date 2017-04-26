@@ -3,8 +3,9 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="Tests"/>
 	<classpathentry kind="con" path="org.testng.TESTNG_CONTAINER"/>
-	<classpathentry kind="lib" path="/home/jason/projets/commons-net-3.5/commons-net-3.5.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/GNU-Crypto"/>
+	<classpathentry kind="lib" path="/home/jason/projets/commons-net-3.6/commons-net-3.6.jar"/>
+	<classpathentry kind="lib" path="/home/jason/git_projects/Gnu-Crypt/GNU-Crypto/export/GNU-Crypto-0.99a.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/java-7-openjdk-amd64"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

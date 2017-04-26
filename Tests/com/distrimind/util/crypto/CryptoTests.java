@@ -475,7 +475,9 @@ public class CryptoTests
 	    byte b1[] = md.digest(m);
 	    md.reset();
 	    byte b2[] = md.digest(m);
+	    
 	    Assert.assertEquals(b1, b2);
+	    
 	}
 
     }
@@ -690,7 +692,8 @@ public class CryptoTests
 	rand.nextBytes(originalBytes);
 	int randNb=rand.nextInt(10000);
 	byte encodedBytes[]=OutputDataPackagerWithRandomValues.encode(originalBytes, randNb);
-	Assert.assertTrue(randNb>=3?(encodedBytes.length>originalBytes.length):(encodedBytes.length==originalBytes.length));
+	//Assert.assertTrue(encodedBytes.length>originalBytes.length);
+	Assert.assertTrue(randNb>=3?(encodedBytes.length>originalBytes.length):(encodedBytes.length==originalBytes.length+3));
 	byte decodedBytes[]=InputDataPackagedWithRandomValues.decode(encodedBytes);
 	Assert.assertEquals(decodedBytes.length, originalBytes.length);
 	for (int i=0;i<decodedBytes.length;i++)

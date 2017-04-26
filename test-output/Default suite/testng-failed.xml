@@ -5,9 +5,7 @@
     <classes>
       <class name="com.distrimind.util.crypto.CryptoTests">
         <methods>
-          <include name="testASymmetricSecretMessageExchanger" invocation-numbers="1 2 0"/>
-          <include name="testEncodeAndSeparateEncoding"/>
-          <include name="testASymmetricKeyPairEncoding"/>
+          <include name="testReadWriteDataPackaged"/>
         </methods>
       </class> <!-- com.distrimind.util.crypto.CryptoTests -->
     </classes>

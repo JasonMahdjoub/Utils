@@ -112,12 +112,12 @@ class Export
 		"com/distrimind/util/build.txt", null,
 		"Utils is a set of tools that can be useful in every context of development",
 		Utils.VERSION, SourceVersion.RELEASE_7, dependencies, null,
-		new File("/usr/lib/jvm/default-java"), regexMath, null);
+		new File("/usr/lib/jvm/java-7-openjdk-amd64"), regexMath, null);
 
 	dependencies = new ArrayList<BinaryDependency>();
 	licenses = new License[1];
 	licenses[0] = new License(PredefinedLicense.APACHE_LICENSE_V2_0);
-	String testNGDir = ".eclipse/org.eclipse.platform_4.6.2_1473617060_linux_gtk_x86_64/plugins/org.testng.eclipse_6.10.0.201612030230/lib/";
+	String testNGDir = ".eclipse/org.eclipse.platform_4.6.3_1473617060_linux_gtk_x86_64/plugins/org.testng.eclipse_6.10.0.201612030230/lib/";
 	dependencies.add(new JarDependency("TestNG",
 		org.testng.TestNG.class.getPackage(), licenses,
 		new File("/home/jason/" + testNGDir + "/testng.jar")));
