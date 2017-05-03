@@ -51,7 +51,10 @@ import java.util.logging.Level;
 
 import javax.lang.model.SourceVersion;
 
+import org.apache.commons.net.util.Base64;
+
 import com.distrimind.util.AbstractDecentralizedID;
+import com.distrimind.util.Bits;
 import com.distrimind.util.crypto.ASymmetricEncryptionType;
 import com.distrimind.util.crypto.ASymmetricKeyPair;
 import com.distrimind.util.crypto.ASymmetricPrivateKey;
@@ -81,7 +84,80 @@ public class DefaultXMLObjectParser extends AbstractXMLObjectParser
     @Override
     public String convertObjectToXML(Class<?> field_type, Object object) throws Exception
     {
-	if (field_type == Boolean.class)
+	if (field_type == byte[].class)
+	{
+	    return Base64.encodeBase64String((byte[])object);
+	}
+	else if (field_type == char[].class)
+	{
+	    return new String((char[])object);
+	}
+	else if (field_type == int[].class)
+	{
+	    if (object==null)
+		return null;
+	    int []tab=(int[])object;
+	    int s=Integer.SIZE/8;
+	    byte btab[]=new byte[tab.length*s];
+	    for (int i=0;i<tab.length;i++)
+		Bits.putInt(btab, i*s, tab[i]);
+	    return Base64.encodeBase64String(btab);
+	}
+	else if (field_type == short[].class)
+	{
+	    if (object==null)
+		return null;
+	    short []tab=(short[])object;
+	    int s=Short.SIZE/8;
+	    byte btab[]=new byte[tab.length*s];
+	    for (int i=0;i<tab.length;i++)
+		Bits.putShort(btab, i*s, tab[i]);
+	    return Base64.encodeBase64String(btab);
+	}
+	else if (field_type == float[].class)
+	{
+	    if (object==null)
+		return null;
+	    float []tab=(float[])object;
+	    int s=Float.SIZE/8;
+	    byte btab[]=new byte[tab.length*s];
+	    for (int i=0;i<tab.length;i++)
+		Bits.putFloat(btab, i*s, tab[i]);
+	    return Base64.encodeBase64String(btab);
+	}
+	else if (field_type == double[].class)
+	{
+	    if (object==null)
+		return null;
+	    double []tab=(double[])object;
+	    int s=Double.SIZE/8;
+	    byte btab[]=new byte[tab.length*s];
+	    for (int i=0;i<tab.length;i++)
+		Bits.putDouble(btab, i*s, tab[i]);
+	    return Base64.encodeBase64String(btab);
+	}
+	else if (field_type == long[].class)
+	{
+	    if (object==null)
+		return null;
+	    long []tab=(long[])object;
+	    int s=Double.SIZE/8;
+	    byte btab[]=new byte[tab.length*s];
+	    for (int i=0;i<tab.length;i++)
+		Bits.putLong(btab, i*s, tab[i]);
+	    return Base64.encodeBase64String(btab);
+	}
+	else if (field_type == boolean[].class)
+	{
+	    if (object==null)
+		return null;
+	    boolean []tab=(boolean[])object;
+	    byte btab[]=new byte[tab.length];
+	    for (int i=0;i<tab.length;i++)
+		btab[i]=tab[i]?(byte)1:(byte)0;
+	    return Base64.encodeBase64String(btab);
+	}
+	else if (field_type == Boolean.class)
 	{
 	    return object.toString();
 	}
@@ -213,7 +289,78 @@ public class DefaultXMLObjectParser extends AbstractXMLObjectParser
 	if (nodeValue == null)
 	    return null;
 	nodeValue = nodeValue.trim();
-	if (field_type == Boolean.class)
+	if (field_type == byte[].class)
+	{
+	    return Base64.decodeBase64(nodeValue);
+	}
+	else if (field_type == char[].class)
+	{
+	    return nodeValue.toCharArray();
+	}
+	else if (field_type == int[].class)
+	{
+	    byte[] btab=Base64.decodeBase64(nodeValue);
+	    int s=Integer.SIZE/8;
+	    if (btab.length%s!=0)
+		throw new XMLPropertiesParseException("Invalid tab data");
+	    int tab[]=new int[btab.length/s];
+	    for (int i=0;i<tab.length;i++)
+		tab[i]=Bits.getInt(btab, i*s);
+	    return tab;
+	}
+	else if (field_type == float[].class)
+	{
+	    byte[] btab=Base64.decodeBase64(nodeValue);
+	    int s=Float.SIZE/8;
+	    if (btab.length%s!=0)
+		throw new XMLPropertiesParseException("Invalid tab data");
+	    float tab[]=new float[btab.length/s];
+	    for (int i=0;i<tab.length;i++)
+		tab[i]=Bits.getFloat(btab, i*s);
+	    return tab;
+	}
+	else if (field_type == double[].class)
+	{
+	    byte[] btab=Base64.decodeBase64(nodeValue);
+	    int s=Double.SIZE/8;
+	    if (btab.length%s!=0)
+		throw new XMLPropertiesParseException("Invalid tab data");
+	    double tab[]=new double[btab.length/s];
+	    for (int i=0;i<tab.length;i++)
+		tab[i]=Bits.getDouble(btab, i*s);
+	    return tab;
+	}
+	else if (field_type == short[].class)
+	{
+	    byte[] btab=Base64.decodeBase64(nodeValue);
+	    int s=Short.SIZE/8;
+	    if (btab.length%s!=0)
+		throw new XMLPropertiesParseException("Invalid tab data");
+	    short tab[]=new short[btab.length/s];
+	    for (int i=0;i<tab.length;i++)
+		tab[i]=Bits.getShort(btab, i*s);
+	    return tab;
+	}
+	else if (field_type == long[].class)
+	{
+	    byte[] btab=Base64.decodeBase64(nodeValue);
+	    int s=Long.SIZE/8;
+	    if (btab.length%s!=0)
+		throw new XMLPropertiesParseException("Invalid tab data");
+	    long tab[]=new long[btab.length/s];
+	    for (int i=0;i<tab.length;i++)
+		tab[i]=Bits.getLong(btab, i*s);
+	    return tab;
+	}
+	else if (field_type == boolean[].class)
+	{
+	    byte[] btab=Base64.decodeBase64(nodeValue);
+	    boolean tab[]=new boolean[btab.length];
+	    for (int i=0;i<tab.length;i++)
+		tab[i]=btab[i]!=0;
+	    return tab;
+	}
+	else if (field_type == Boolean.class)
 	{
 	    return new Boolean(Boolean.parseBoolean(nodeValue));
 	}
@@ -385,6 +532,7 @@ public class DefaultXMLObjectParser extends AbstractXMLObjectParser
 		|| field_type == URL.class || field_type == URI.class
 		|| field_type == Level.class || field_type == InetAddress.class
 		|| field_type == Inet4Address.class
+		|| field_type == byte[].class || field_type == short[].class || field_type == char[].class || field_type == int[].class || field_type == long[].class || field_type == float[].class || field_type == double[].class || field_type == boolean[].class
 		|| field_type == Inet6Address.class
 		|| field_type == InetSocketAddress.class
 		|| field_type == SourceVersion.class

@@ -59,8 +59,8 @@ public class Utils
 	Calendar c = Calendar.getInstance();
 	c.set(2016, 1, 4);
 	Calendar c2 = Calendar.getInstance();
-	c.set(2017, 3, 24);
-	VERSION = new Version("Utils", "Utils", 2, 6, 1, Version.Type.Stable, 0,
+	c.set(2017, 4, 3);
+	VERSION = new Version("Utils", "Utils", 2, 7, 0, Version.Type.Stable, 0,
 		c.getTime(), c2.getTime());
 	try
 	{
@@ -75,8 +75,14 @@ public class Utils
 		    new PersonDeveloper("mahdjoub", "jason", c.getTime()));
 
 	    c = Calendar.getInstance();
+	    c.set(2017, 4, 3);
+	    Description d = new Description(2, 7, 0, Version.Type.Stable, 0,
+		    c.getTime());
+	    d.addItem("Adding primitive tab support for XML Properties");
+
+	    c = Calendar.getInstance();
 	    c.set(2017, 3, 24);
-	    Description d = new Description(2, 6, 1, Version.Type.Stable, 0,
+	    d = new Description(2, 6, 1, Version.Type.Stable, 0,
 		    c.getTime());
 	    d.addItem("JDK 7 compatible");
 	    d.addItem("Correcting a bug with testReadWriteDataPackaged in CryptoTests");
