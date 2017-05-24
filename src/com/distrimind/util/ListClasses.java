@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
@@ -26,7 +28,7 @@ public class ListClasses
 
     }
 
-    private static HashMap<Package, ArrayList<Class<?>>> cache = new HashMap<Package, ArrayList<Class<?>>>();
+    private static HashMap<Package, Set<Class<?>>> cache = new HashMap<Package, Set<Class<?>>>();
 
     /**
      * This method enables to list all classes contained into a given package
@@ -39,13 +41,13 @@ public class ListClasses
      * @throws IOException
      *             when an IO Exception occurs
      */
-    public static ArrayList<Class<?>> getClasses(Package _package) throws ClassNotFoundException, IOException
+    public static Set<Class<?>> getClasses(Package _package)
     {
-	ArrayList<Class<?>> classes = cache.get(_package);
+	Set<Class<?>> classes = cache.get(_package);
 	if (classes != null)
 	    return classes;
 	// creation of the list which will be returned
-	classes = new ArrayList<Class<?>>();
+	classes = new HashSet<Class<?>>();
 
 	// We get all CLASSPATH entries
 	String[] entries = System.getProperty("java.class.path")
@@ -93,9 +95,9 @@ public class ListClasses
      *            the package name
      * @return the list of classes
      */
-    private static ArrayList<Class<?>> processDirectory(File _directory, Package _package) throws ClassNotFoundException
+    private static Set<Class<?>> processDirectory(File _directory, Package _package)
     {
-	ArrayList<Class<?>> classes = new ArrayList<Class<?>>();
+	Set<Class<?>> classes = new HashSet<Class<?>>();
 
 	// we generate the absolute path of the package
 	ArrayList<String> repsPkg = splitPoint(_package.getName());
@@ -115,9 +117,17 @@ public class ListClasses
 	    // classes list.
 	    for (int i = 0; i < liste.length; i++)
 	    {
-		classes.add(Class.forName(
+		try
+		{
+		    classes.add(Class.forName(
 			_package.getName() + "." + liste[i].getName().substring(
 				0, liste[i].getName().length() - 6)));
+		}
+		catch(Exception e)
+		{
+		    
+		}
+	
 	    }
 	}
 
@@ -136,33 +146,48 @@ public class ListClasses
      * @throws IOException
      * @throws ClassNotFoundException
      */
-    private static ArrayList<Class<?>> processJar(File _jar_file, Package _package) throws IOException, ClassNotFoundException
+    private static Set<Class<?>> processJar(File _jar_file, Package _package) 
     {
-	ArrayList<Class<?>> classes = new ArrayList<Class<?>>();
+	Set<Class<?>> classes = new HashSet<Class<?>>();
 
-	JarFile jfile = new JarFile(_jar_file);
-	String pkgpath = _package.getName().replace(".", "/");
-
-	// for each jar entry
-	for (Enumeration<JarEntry> entries = jfile.entries(); entries
-		.hasMoreElements();)
+	try
 	{
-	    JarEntry element = entries.nextElement();
+	    JarFile jfile = new JarFile(_jar_file);
+	    String pkgpath = _package.getName().replace(".", "/");
 
-	    // if the name begins with the package path and ends with .class
-	    if (element.getName().startsWith(pkgpath)
-		    && element.getName().endsWith(".class"))
+	    // for each jar entry
+	    for (Enumeration<JarEntry> entries = jfile.entries(); entries
+		.hasMoreElements();)
 	    {
+		JarEntry element = entries.nextElement();
 
-		String class_name = element.getName().substring(
+		// if the name begins with the package path and ends with .class
+		if (element.getName().startsWith(pkgpath)
+		    && element.getName().endsWith(".class"))
+		{
+
+		    String class_name = element.getName().substring(
 			pkgpath.length() + 1, element.getName().length() - 6);
 
-		classes.add(
-			Class.forName(_package.getName() + "." + class_name));
+		
+		    try
+		    {
+			classes.add(Class.forName(_package.getName() + "." + class_name));
+		    }
+		    catch(Exception e)
+		    {
+		    
+		    }
+		
+		}
+	    
 	    }
-
+	    jfile.close();
 	}
-	jfile.close();
+	catch(Exception e)
+	{
+	    
+	}
 	return classes;
     }
 

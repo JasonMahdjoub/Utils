@@ -59,11 +59,12 @@ public class Utils
 	Calendar c = Calendar.getInstance();
 	c.set(2016, 1, 4);
 	Calendar c2 = Calendar.getInstance();
-	c.set(2017, 4, 3);
-	VERSION = new Version("Utils", "Utils", 2, 7, 0, Version.Type.Stable, 0,
+	c.set(2017, 4, 23);
+	VERSION = new Version("Utils", "Utils", 2, 7, 1, Version.Type.Stable, 0,
 		c.getTime(), c2.getTime());
 	try
 	{
+	    
 
 	    InputStream is = Utils.class.getResourceAsStream("build.txt");
 	    VERSION.loadBuildNumber(is);
@@ -75,79 +76,99 @@ public class Utils
 		    new PersonDeveloper("mahdjoub", "jason", c.getTime()));
 
 	    c = Calendar.getInstance();
+	    c.set(2017, 4, 23);
+	    Description d = new Description(2, 7, 1, Version.Type.Stable, 0,
+		    c.getTime());
+	    d.addItem("Altering ListClasses");
+	    VERSION.addDescription(d);
+
+	    c = Calendar.getInstance();
 	    c.set(2017, 4, 3);
-	    Description d = new Description(2, 7, 0, Version.Type.Stable, 0,
+	    d = new Description(2, 7, 0, Version.Type.Stable, 0,
 		    c.getTime());
 	    d.addItem("Adding primitive tab support for XML Properties");
-
+	    VERSION.addDescription(d);
+	    
 	    c = Calendar.getInstance();
 	    c.set(2017, 3, 24);
 	    d = new Description(2, 6, 1, Version.Type.Stable, 0,
 		    c.getTime());
 	    d.addItem("JDK 7 compatible");
 	    d.addItem("Correcting a bug with testReadWriteDataPackaged in CryptoTests");
-
+	    VERSION.addDescription(d);
+	    
 	    d = new Description(2, 6, 0, Version.Type.Stable, 0,
 		    c.getTime());
 	    d.addItem("Adding RegexTools class");
 	    d.addItem("JDK 7 compatible");
-
+	    VERSION.addDescription(d);
+	    
 	    c = Calendar.getInstance();
 	    c.set(2017, 2, 7);
 	    d = new Description(2, 5, 0, Version.Type.Stable, 0,
 		    c.getTime());
 	    d.addItem("Improving and renforcing P2PAsymmetricSecretMessageExchanger");
 	    d.addItem("Additional manifest content possibility for projects export");
-
+	    VERSION.addDescription(d);
+	    
 	    c = Calendar.getInstance();
 	    c.set(2017, 2, 4);
 	    d = new Description(2, 4, 0, Version.Type.Stable, 0,
 		    c.getTime());
 	    d.addItem("Debugging documentation export");
 	    d.addItem("Updating common net to 3.6 version");
-
+	    VERSION.addDescription(d);
+	    
 	    c = Calendar.getInstance();
 	    c.set(2017, 1, 7);
 	    d = new Description(2, 3, 0, Version.Type.Stable, 0,
 		    c.getTime());
 	    d.addItem("AbstractXMLObjectParser is now serializable");
-
+	    VERSION.addDescription(d);
+	    
+	    
 	    c = Calendar.getInstance();
 	    c.set(2017, 0, 5);
 	    d = new Description(2, 2, 0, Version.Type.Stable, 0,
 		    c.getTime());
 	    d.addItem("Updating IDGeneratorInt class and fix memory leak problem");
-
+	    VERSION.addDescription(d);
+	    
 	    c = Calendar.getInstance();
 	    c.set(2016, 11, 31);
 	    d = new Description(2, 1, 0, Version.Type.Stable, 0,
 		    c.getTime());
 	    d.addItem("Adding expiration time for public keys");
-
+	    VERSION.addDescription(d);
+	    
 	    c = Calendar.getInstance();
 	    c.set(2016, 11, 23);
 	    d = new Description(2, 0, 1, Version.Type.Stable, 0,
 		    c.getTime());
 	    d.addItem("Changing gnu cryto packages");
-
+	    VERSION.addDescription(d);
+	    
 	    c = Calendar.getInstance();
 	    c.set(2016, 11, 17);
 	    d = new Description(2, 0, 0, Version.Type.Stable, 0,
 		    c.getTime());
 	    d.addItem("Including Gnu Crypto Algorithms.");
-
+	    VERSION.addDescription(d);
+	    
 	    c = Calendar.getInstance();
 	    c.set(2016, 11, 6);
 	    d = new Description(1, 9, 0, Version.Type.Stable, 0, c.getTime());
 	    d.addItem(
 		    "Correcting a bug with the use of IV parameter. Now, the IV parameter is generated for each encryption.");
 	    d.addItem("Adding class SecureRandomType.");
-
+	    VERSION.addDescription(d);
+	    
 	    c = Calendar.getInstance();
 	    c.set(2016, 9, 13);
 	    d = new Description(1, 8, 0, Version.Type.Stable, 0, c.getTime());
 	    d.addItem("Adding password hash (PBKDF and bcrypt)");
-
+	    VERSION.addDescription(d);
+	    
 	    c = Calendar.getInstance();
 	    c.set(2016, 8, 15);
 	    d = new Description(1, 7, 2, Version.Type.Stable, 0, c.getTime());
@@ -156,7 +177,8 @@ public class Utils
 	    d.addItem("Possibility to put crypto keys in XMLProperties class");
 	    d.addItem("Adding 'valueOf' for Decentralized IDs");
 	    d.addItem("Decentralized IDs are exportable into XML Properties");
-
+	    VERSION.addDescription(d);
+	    
 	    c = Calendar.getInstance();
 	    c.set(2016, 7, 23);
 	    d = new Description(1, 7, 1, Version.Type.Stable, 0, c.getTime());
@@ -165,7 +187,8 @@ public class Utils
 		    "Correcting a bug for P2PASymmetricSecretMessageExchanger");
 	    d.addItem("Correcting a bug big data asymmetric encryption");
 	    d.addItem("Adding symmetric et asymmetric keys encapsulation");
-
+	    VERSION.addDescription(d);
+	    
 	    c = Calendar.getInstance();
 	    c.set(2016, 6, 4);
 	    d = new Description(1, 7, 0, Version.Type.Stable, 0, c.getTime());
@@ -176,7 +199,8 @@ public class Utils
 	    d.addItem("Adding class ClientASymmetricEncryptionAlgorithm");
 	    d.addItem("Adding class ServerASymmetricEncryptionAlgorithm");
 	    d.addItem("Updating to Common-Net 3.5");
-
+	    VERSION.addDescription(d);
+	    
 	    c = Calendar.getInstance();
 	    c.set(2016, 5, 10);
 	    d = new Description(1, 6, 1, Version.Type.Stable, 0, c.getTime());
@@ -187,14 +211,16 @@ public class Utils
 	    d.addItem("Adding salt management into SecuredIDGenerator class");
 	    d.addItem(
 		    "Adding salt management into PeerToPeerASymetricSecretMessageExanger class");
-
+	    VERSION.addDescription(d);
+	    
 	    c = Calendar.getInstance();
 	    c.set(2016, 2, 15);
 	    d = new Description(1, 6, 0, Version.Type.Stable, 0, c.getTime());
 	    d.addItem("Adding unit tests possibility for project export tools");
 	    d.addItem("Adding unit compilation for project export tools");
 	    d.addItem("Adding new licences");
-
+	    VERSION.addDescription(d);
+	    
 	    c = Calendar.getInstance();
 	    c.set(2016, 2, 9);
 	    d = new Description(1, 5, 0, Version.Type.Stable, 0, c.getTime());

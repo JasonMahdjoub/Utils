@@ -73,6 +73,10 @@ class Export
 	Package root_package = Export.class.getPackage();
 	Package root_tests_package = DecentralizedIDTests.class.getPackage();
 
+	System.out.println(Utils.VERSION);
+	System.out.println("Java version : "+System.getProperty("java.version"));
+	
+	
 	License[] licenses = { new License(
 		new File("/home/jason/projets/commons-net-3.6/LICENSE.txt")) };
 	ArrayList<BinaryDependency> dependencies = new ArrayList<BinaryDependency>();
