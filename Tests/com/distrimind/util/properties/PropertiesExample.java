@@ -166,7 +166,7 @@ public class PropertiesExample extends XMLProperties
 
     LinkedList<String> list4 = null;
 
-    SubProperties subProperties = null;
+    AbstractSubProperties subProperties = null;
 
     Version version = null;
 
@@ -180,6 +180,8 @@ public class PropertiesExample extends XMLProperties
 
     DecentralizedIDGenerator decentralizedId = null;
 
+    TestEnum testEnum=null;
+    
     protected PropertiesExample(AbstractXMLObjectParser _optional_xml_object_parser_instance)
     {
 	super(_optional_xml_object_parser_instance);
@@ -282,6 +284,8 @@ public class PropertiesExample extends XMLProperties
 		return false;
 	    if (!equals(decentralizedId, pe.decentralizedId))
 		return false;
+	    if (!equals(testEnum, pe.testEnum))
+		return false;
 
 	    Assert.assertFalse(version == null ^ pe.version == null);
 	    if (version == null ^ pe.version == null)
@@ -360,9 +364,10 @@ public class PropertiesExample extends XMLProperties
 	    list2.add(getString(rand));
 	list3 = (ArrayList<String>) list;
 	list4 = (LinkedList<String>) list2;
-
-	subProperties = new SubProperties();
-	subProperties.value = getString(rand);
+	SubProperties sb=new SubProperties();
+	sb.value = getString(rand);
+	subProperties =sb; 
+	
 	for (int i = 0; i < 10; i++)
 	    getFreeStringProperties().put(getString(rand), getString(rand));
 
@@ -378,6 +383,7 @@ public class PropertiesExample extends XMLProperties
 	privateKey = keyPair.getASymmetricPrivateKey();
 	publicKey = keyPair.getASymmetricPublicKey();
 	decentralizedId = new DecentralizedIDGenerator();
+	testEnum=Math.random()>0.5?TestEnum.ENUM1:TestEnum.ENUM2;
     }
 
     String getString(Random rand)

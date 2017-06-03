@@ -56,6 +56,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.regex.Matcher;
@@ -279,11 +280,9 @@ public abstract class XMLProperties implements Cloneable, Serializable
 			    XMLProperties xmlp = (XMLProperties) o;
 			    if (xmlp.optional_xml_object_parser_instance == null)
 				xmlp.optional_xml_object_parser_instance = optional_xml_object_parser_instance;
-			    for (Map.Entry<Object, Object> e : xmlp
-				    .convertToStringProperties().entrySet())
+			    for (Map.Entry<Object, Object> e : xmlp.convertToStringProperties().entrySet())
 			    {
-				res.put(f.getName() + "." + e.getKey(),
-					e.getValue());
+				res.put(o.getClass().getName()+"."+f.getName() + "." + e.getKey(),e.getValue());
 			    }
 			}
 		    }
@@ -663,10 +662,11 @@ public abstract class XMLProperties implements Cloneable, Serializable
 	    {
 		for (Field f : c.getDeclaredFields())
 		{
-		    if (f.getName().equals(node_name) && isValid(f))
+		    Class<?> type=equals(f, node_name);
+		    if (type!=null && isValid(f))
 		    {
 			f.setAccessible(true);
-			readField(document, f, node);
+			readField(document, f, type, node);
 			found = true;
 			break;
 		    }
@@ -676,9 +676,75 @@ public abstract class XMLProperties implements Cloneable, Serializable
 	}
     }
 
-    void readField(Document document, Field field, Node node) throws XMLPropertiesParseException
+    private Class<?> equals(Field f, String node_name)
     {
-	Class<?> type = field.getType();
+	if (f.getName().equals(node_name))
+	    return f.getType();
+	else if (XMLProperties.class.isAssignableFrom(f.getType()))
+	{
+	    try
+	    {
+		Class<?> c=Class.forName(node_name.substring(0, node_name.lastIndexOf(".")));
+		if (f.getType().isAssignableFrom(c))
+		    return c;
+		else
+		    return null;
+	    }
+	    catch(Exception e)
+	    {
+		return null;
+	    }
+	}
+	return null;
+    }
+    private Class<?> equals(Field f, String keys[], AtomicInteger keyOff)
+    {
+	if (keys.length-keyOff.get()<=0)
+	    return null;
+	
+	if (XMLProperties.class.isAssignableFrom(f.getType()))
+	{
+	    String fExplodedClass[]=f.getType().getName().split("\\.");
+	    
+	    if (keys.length-keyOff.get()-2<fExplodedClass.length)
+		return null;
+	    for (int s=keys.length-2;s>=fExplodedClass.length;s--)
+	    {
+		StringBuffer cs=new StringBuffer("");
+		for (int i=keyOff.get();i<s;i++)
+		{
+		    if (cs.length()>0)
+			cs.append(".");
+		    cs.append(keys[i]);
+		}
+		try
+		{
+		    Class<?> c=Class.forName(cs.toString());
+		    if (XMLProperties.class.isAssignableFrom(f.getType()) && f.getName().equals(keys[s]))
+		    {
+			keyOff.set(keyOff.get()+s+1);
+			return c;
+		    }
+		}
+		catch(Exception e)
+		{
+		    
+		}
+	    }
+	    
+	    return null;
+	}
+	else if (f.getName().equals(keys[keyOff.get()]))
+	{
+	    keyOff.set(keyOff.get()+1);
+	    return f.getType();
+	}
+	return null;
+    }
+    
+    void readField(Document document, Field field, Class<?> type, Node node) throws XMLPropertiesParseException
+    {
+	
 	if (Map.class.isAssignableFrom(type))
 	{
 
@@ -941,7 +1007,7 @@ public abstract class XMLProperties implements Cloneable, Serializable
 
 	}
     }
-
+    
     /**
      * Save properties into an XML document
      * 
@@ -1158,7 +1224,9 @@ public abstract class XMLProperties implements Cloneable, Serializable
 	    {
 		for (Field f : c.getDeclaredFields())
 		{
-		    if (f.getName().equals(keys[current_index]) && isValid(f))
+		    AtomicInteger off=new AtomicInteger(current_index);
+		    Class<?> type=equals(f, keys, off);
+		    if (type!=null && isValid(f))
 		    {
 			f.setAccessible(true);
 			if (current_index == keys.length - 1)
@@ -1169,7 +1237,7 @@ public abstract class XMLProperties implements Cloneable, Serializable
 			else
 			{
 			    if (XMLProperties.class
-				    .isAssignableFrom(f.getType()))
+				    .isAssignableFrom(type))
 			    {
 				boolean toreload = false;
 				XMLProperties i = (XMLProperties) f
@@ -1177,14 +1245,12 @@ public abstract class XMLProperties implements Cloneable, Serializable
 				if (i == null)
 				{
 				    toreload = true;
-				    Constructor<?> construct = f.getType()
-					    .getDeclaredConstructor();
+				    Constructor<?> construct = type.getDeclaredConstructor();
 				    construct.setAccessible(true);
 				    i = (XMLProperties) construct.newInstance();
 				}
 
-				boolean ok = setField(i, keys,
-					current_index + 1, value);
+				boolean ok = setField(i, keys, off.get(), value);
 				if (ok && toreload)
 				    f.set(instance, i);
 				return ok;
@@ -1417,7 +1483,7 @@ public abstract class XMLProperties implements Cloneable, Serializable
 		{
 		    if (p.optional_xml_object_parser_instance == null)
 			p.optional_xml_object_parser_instance = optional_xml_object_parser_instance;
-		    Element element = document.createElement(field.getName());
+		    Element element = document.createElement(p.getClass().getName()+"."+field.getName());
 		    if (p.write(document, element))
 			parent_element.appendChild(element);
 		}

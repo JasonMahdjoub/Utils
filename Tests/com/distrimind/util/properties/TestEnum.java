@@ -34,35 +34,14 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.properties;
 
-
 /**
  * 
  * @author Jason Mahdjoub
  * @version 1.0
- * @since Utils 1.6.1
+ * @since Utils 2.8.0
  */
-public class SubProperties extends AbstractSubProperties
+public enum TestEnum
 {
-    /**
-     * 
-     */
-    private static final long serialVersionUID = -2732460552740079500L;
-
-    String value = null;
-
-    protected SubProperties()
-    {
-	super(null);
-    }
-
-    @Override
-    public boolean equals(Object o)
-    {
-	if (o == null)
-	    return false;
-	if (o instanceof SubProperties)
-	    return PropertiesExample.equals(((SubProperties) o).value, value);
-	return false;
-    }
-
+    ENUM1,
+    ENUM2
 }

@@ -274,6 +274,10 @@ public class DefaultXMLObjectParser extends AbstractXMLObjectParser
 	{
 	    return object.toString();
 	}
+	else if (field_type.isEnum())
+	{
+	    return ((Enum<?>)object).name();
+	}
 	else if (AbstractDecentralizedID.class.isAssignableFrom(field_type))
 	    return object.toString();
 	else
@@ -503,10 +507,25 @@ public class DefaultXMLObjectParser extends AbstractXMLObjectParser
 	{
 	    return ASymmetricKeyPair.valueOf(nodeValue);
 	}
+	else if (field_type.isEnum())
+	{
+	    for (Enum<?> e : (Enum<?>[])field_type.getEnumConstants())
+	    {
+		if (e.name().equals(nodeValue))
+		    return e;
+	    }
+	    return null;
+	}
 	else if (AbstractDecentralizedID.class.isAssignableFrom(field_type))
 	    return AbstractDecentralizedID.valueOf(nodeValue);
 
 	return Void.TYPE;
+    }
+    
+    public enum test
+    {
+	test;
+	
     }
 
     SimpleDateFormat getSimpleDateFormat()
@@ -549,7 +568,8 @@ public class DefaultXMLObjectParser extends AbstractXMLObjectParser
 		|| List.class.isAssignableFrom(field_type)
 		|| XMLProperties.class.isAssignableFrom(field_type)
 		|| field_type.isPrimitive()
-		|| Calendar.class.isAssignableFrom(field_type);
+		|| Calendar.class.isAssignableFrom(field_type)
+		|| field_type.isEnum();
 
     }
 
