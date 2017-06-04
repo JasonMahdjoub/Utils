@@ -187,6 +187,7 @@ public class TestNGFile extends AbstractUnitTests
 	TestNG tng = new TestNG();
 	tng.setVerbose(5);
 	tng.setXmlSuites(suites);
+	tng.setJUnit(new Boolean(true));
 	tng.run();
 	return tng.getStatus() == 0;
     }
@@ -196,6 +197,7 @@ public class TestNGFile extends AbstractUnitTests
 	// Don't confuse : XmlSuite here, is the standard testNg class. our bean
 	// class is Suite
 	XmlSuite suite = new XmlSuite();
+	
 	suite.setName(s.getName());
 	for (com.distrimind.util.export.Suite.Test t : s.getTestCases())
 	{
@@ -221,6 +223,7 @@ public class TestNGFile extends AbstractUnitTests
 	TestNG tng = new TestNG();
 	tng.setVerbose(5);
 	tng.setXmlSuites(suites);
+	tng.setJUnit(new Boolean(true));
 
 	tng.run();
 	return tng.getStatus() == 0;
