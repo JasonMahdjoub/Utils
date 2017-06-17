@@ -187,7 +187,6 @@ public class TestNGFile extends AbstractUnitTests
 	TestNG tng = new TestNG();
 	tng.setVerbose(5);
 	tng.setXmlSuites(suites);
-	tng.setJUnit(new Boolean(true));
 	tng.run();
 	return tng.getStatus() == 0;
     }
@@ -223,7 +222,6 @@ public class TestNGFile extends AbstractUnitTests
 	TestNG tng = new TestNG();
 	tng.setVerbose(5);
 	tng.setXmlSuites(suites);
-	tng.setJUnit(new Boolean(true));
 
 	tng.run();
 	return tng.getStatus() == 0;

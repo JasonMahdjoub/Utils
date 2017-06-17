@@ -700,5 +700,33 @@ public class CryptoTests
 	    Assert.assertEquals(decodedBytes[i], originalBytes[i]);
     }
     
+    
+    @Test(invocationCount=100, dataProvider = "provideDataForEllipticCurveDiffieHellmanKeyExchanger", dependsOnMethods = "testMessageDigest")
+    public void testEllipticCurveDiffieHellmanKeyExchanger(EllipticCurveDiffieHellmanType type) throws java.security.NoSuchAlgorithmException, java.security.InvalidKeyException, java.security.spec.InvalidKeySpecException, NoSuchAlgorithmException
+    {
+	EllipticCurveDiffieHellmanAlgorithm peer1=type.getInstance();
+	EllipticCurveDiffieHellmanAlgorithm peer2=type.getInstance();
+	
+	byte[] publicKey1=peer1.generateAndGetPublicKey();
+	byte[] publicKey2=peer2.generateAndGetPublicKey();
+	peer1.setDistantPublicKey(publicKey2);
+	peer2.setDistantPublicKey(publicKey1);
+	Assert.assertEquals(peer1.getDerivedKey(), peer2.getDerivedKey());
+	
+    }
 
+    @DataProvider(name = "provideDataForEllipticCurveDiffieHellmanKeyExchanger", parallel = true)
+    public Object[][] provideDataForEllipticCurveDiffieHellmanKeyExchanger()
+    {
+	Object[][] res=new Object[EllipticCurveDiffieHellmanType.values().length][];
+	int index=0;
+	for (EllipticCurveDiffieHellmanType type : EllipticCurveDiffieHellmanType.values())
+	{
+	    res[index]=new Object[1];
+	    res[index++][0]=type;
+	}
+	return res;
+    }
+    
+    
 }

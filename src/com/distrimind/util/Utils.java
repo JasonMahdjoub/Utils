@@ -59,8 +59,8 @@ public class Utils
 	Calendar c = Calendar.getInstance();
 	c.set(2016, 1, 4);
 	Calendar c2 = Calendar.getInstance();
-	c.set(2017, 5, 1);
-	VERSION = new Version("Utils", "Utils", 2, 8, 0, Version.Type.Stable, 0,
+	c.set(2017, 5, 17);
+	VERSION = new Version("Utils", "Utils", 2, 9, 0, Version.Type.Stable, 0,
 		c.getTime(), c2.getTime());
 	try
 	{
@@ -76,9 +76,15 @@ public class Utils
 		    new PersonDeveloper("mahdjoub", "jason", c.getTime()));
 
 	    c = Calendar.getInstance();
-	    c.set(2017, 5, 1);
-	    Description d = new Description(2, 8, 0, Version.Type.Stable, 0,
+	    c.set(2017, 5, 17);
+	    Description d = new Description(2, 9, 0, Version.Type.Stable, 0,
 		    c.getTime());
+	    d.addItem("Adding Elliptic Curve Diffie-Hellman key exchange support");
+	    VERSION.addDescription(d);
+
+	    c = Calendar.getInstance();
+	    c.set(2017, 5, 1);
+	    d = new Description(2, 8, 0, Version.Type.Stable, 0,c.getTime());
 	    d.addItem("Managing enum type into XML properties");
 	    d.addItem("XML properties are able to manage abstract sub XML properties");
 	    VERSION.addDescription(d);
