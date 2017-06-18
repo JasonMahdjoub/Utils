@@ -76,10 +76,12 @@ public class Utils
 		    new PersonDeveloper("mahdjoub", "jason", c.getTime()));
 
 	    c = Calendar.getInstance();
-	    c.set(2017, 5, 17);
+	    c.set(2017, 5, 18);
 	    Description d = new Description(2, 9, 0, Version.Type.Stable, 0,
 		    c.getTime());
 	    d.addItem("Adding Elliptic Curve Diffie-Hellman key exchange support");
+	    d.addItem("Password Authenticated Key Exchange by Juggling (2008) algorithm");
+	    d.addItem("Adding Bouncy Castle algorithms");
 	    VERSION.addDescription(d);
 
 	    c = Calendar.getInstance();

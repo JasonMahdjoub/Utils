@@ -6,6 +6,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/GNU-Crypto"/>
 	<classpathentry kind="lib" path="/home/jason/projets/commons-net-3.6/commons-net-3.6.jar"/>
 	<classpathentry kind="lib" path="/home/jason/git_projects/Gnu-Crypt/GNU-Crypto/export/GNU-Crypto-0.99a.jar"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/java-7-openjdk-amd64"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

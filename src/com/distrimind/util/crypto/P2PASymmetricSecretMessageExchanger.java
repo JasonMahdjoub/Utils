@@ -175,17 +175,17 @@ public class P2PASymmetricSecretMessageExchanger
     
     private int hashIterationsNumber = PasswordHash.DEFAULT_NB_ITERATIONS;
 
-    public P2PASymmetricSecretMessageExchanger(ASymmetricPublicKey myPublicKey) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, InvalidKeySpecException
+    public P2PASymmetricSecretMessageExchanger(ASymmetricPublicKey myPublicKey) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, InvalidKeySpecException, NoSuchProviderException
     {
 	this(MessageDigestType.SHA_512, PasswordHashType.DEFAULT, myPublicKey);
     }
 
-    public P2PASymmetricSecretMessageExchanger(MessageDigestType messageDigestType, PasswordHashType passwordHashType, ASymmetricPublicKey myPublicKey) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, InvalidKeySpecException
+    public P2PASymmetricSecretMessageExchanger(MessageDigestType messageDigestType, PasswordHashType passwordHashType, ASymmetricPublicKey myPublicKey) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, InvalidKeySpecException, NoSuchProviderException
     {
 	this(messageDigestType, passwordHashType, myPublicKey, null);
     }
 
-    public P2PASymmetricSecretMessageExchanger(MessageDigestType messageDigestType, PasswordHashType passwordHashType, ASymmetricPublicKey myPublicKey, byte[] distantPublicKey) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidKeySpecException, InvalidAlgorithmParameterException
+    public P2PASymmetricSecretMessageExchanger(MessageDigestType messageDigestType, PasswordHashType passwordHashType, ASymmetricPublicKey myPublicKey, byte[] distantPublicKey) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidKeySpecException, InvalidAlgorithmParameterException, NoSuchProviderException
     {
 	if (messageDigestType == null)
 	    throw new NullPointerException("messageDigestType");
@@ -375,8 +375,8 @@ public class P2PASymmetricSecretMessageExchanger
 	{
 	    byte s[] = new byte[len_salt];
 	    System.arraycopy(salt, offset_salt, s, 0, len_salt);
-	    byte[] res = passwordHashType.hash(password, s,
-		    hashIterationsNumber);
+	    byte[] res = passwordHashType.hash(password, s, hashIterationsNumber);
+
 	    return hashMessage(messageDigest, res, 0, res.length, null, -1, -1, true);
 	}
 	else
@@ -387,7 +387,7 @@ public class P2PASymmetricSecretMessageExchanger
 		res[i * 2] = (byte) (password[i] & 0xFF);
 		res[i * 2 + 1] = (byte) ((password[i] >> 8) & 0xFF);
 	    }
-	    return res;
+	    return hashMessage(messageDigest, res, 0, res.length, null, -1, -1, true);
 	}
 
     }
@@ -399,7 +399,7 @@ public class P2PASymmetricSecretMessageExchanger
 	messageDigest.reset();
     }
 
-    public void setDistantPublicKey(byte[] distantPublicKeyAndIV) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeySpecException, InvalidKeyException, InvalidAlgorithmParameterException
+    public void setDistantPublicKey(byte[] distantPublicKeyAndIV) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeySpecException, InvalidKeyException, InvalidAlgorithmParameterException, NoSuchProviderException
     {
 	distantMessageEncoder = new P2PASymmetricSecretMessageExchanger(
 		messageDigestType, passwordHashType,

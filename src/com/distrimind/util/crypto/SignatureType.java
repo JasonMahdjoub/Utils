@@ -41,22 +41,31 @@ import java.security.Signature;
  * List of signature algorithms
  * 
  * @author Jason Mahdjoub
- * @version 2.0
+ * @version 3
  * @since Utils 1.4
  */
 public enum SignatureType
 {
     @Deprecated
-    SHA1withRSA("SHA1withRSA", false), SHA256withRSA("SHA256withRSA", false), SHA384withRSA("SHA384withRSA", false), SHA512withRSA("SHA512withRSA", false), GNU_SHA256withRSA("SHA256withRSA", true), GNU_SHA384withRSA("SHA384withRSA", true), GNU_SHA512withRSA("SHA512withRSA", true);
+    SHA1withRSA("SHA1withRSA", CodeProvider.SUN_ORACLE), 
+    SHA256withRSA("SHA256withRSA", CodeProvider.SUN_ORACLE), 
+    SHA384withRSA("SHA384withRSA", CodeProvider.SUN_ORACLE), 
+    SHA512withRSA("SHA512withRSA", CodeProvider.SUN_ORACLE), 
+    GNU_SHA256withRSA("SHA256withRSA", CodeProvider.GNU_CRYPTO), 
+    GNU_SHA384withRSA("SHA384withRSA", CodeProvider.GNU_CRYPTO), 
+    GNU_SHA512withRSA("SHA512withRSA", CodeProvider.GNU_CRYPTO),
+    BOUNCY_CASTLE_SHA256withRSA("SHA256withRSA", CodeProvider.BOUNCY_CASTLE), 
+    BOUNCY_CASTLE_SHA384withRSA("SHA384withRSA", CodeProvider.BOUNCY_CASTLE), 
+    BOUNCY_CASTLE_SHA512withRSA("SHA512withRSA", CodeProvider.BOUNCY_CASTLE);
 
     private final String algorithmName;
 
-    private final boolean gnuVersion;
+    private final CodeProvider codeProvider;
 
-    private SignatureType(String algorithmName, boolean gnuVersion)
+    private SignatureType(String algorithmName, CodeProvider codeProvider)
     {
 	this.algorithmName = algorithmName;
-	this.gnuVersion = gnuVersion;
+	this.codeProvider = codeProvider;
     }
 
     public String getAlgorithmName()
@@ -66,10 +75,23 @@ public enum SignatureType
 
     public AbstractSignature getSignatureInstance() throws gnu.vm.jgnu.security.NoSuchAlgorithmException
     {
-	if (gnuVersion)
+	if (codeProvider==CodeProvider.GNU_CRYPTO)
 	{
 	    return new GnuSignature(
 		    gnu.vm.jgnu.security.Signature.getInstance(algorithmName));
+	}
+	else if (codeProvider==CodeProvider.BOUNCY_CASTLE)
+	{
+	    
+	    try
+	    {
+		return new JavaNativeSignature(Signature.getInstance(algorithmName, CodeProvider.getBouncyProvider()));	    
+	    }
+	    catch (NoSuchAlgorithmException e)
+	    {
+		throw new gnu.vm.jgnu.security.NoSuchAlgorithmException(e);
+	    }
+	    
 	}
 	else
 	{
@@ -95,8 +117,8 @@ public enum SignatureType
 	return keySize / 8;
     }
 
-    public boolean isGNUVersion()
+    public CodeProvider getCodeProvider()
     {
-	return gnuVersion;
+	return codeProvider;
     }
 }

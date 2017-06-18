@@ -82,7 +82,7 @@ public class OutputDataPackagerWithRandomValues
 	    if (max_random_values_size>=min)
 		this.random_values_size=min+rand.nextInt(max_random_values_size-min+1);
 	    else
-		this.random_values_size=0;
+		this.random_values_size=min;
 	    random_values_size_remaining=this.random_values_size;
 	    tab=new byte[bufferSize+this.random_values_size];
 	    //data_size=tab.length-this.random_values_size;

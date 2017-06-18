@@ -98,7 +98,7 @@ public class SymmetricSecretKey implements UtilKey
 	    throw new NullPointerException("type");
 	if (secretKey == null)
 	    throw new NullPointerException("secretKey");
-	if (!type.isGNUVersion())
+	if (type.getCodeProvider()!=CodeProvider.GNU_CRYPTO)
 	    throw new IllegalAccessError();
 	this.secretKey = SymmetricEncryptionType.encodeSecretKey(secretKey);
 	this.keySize = keySize;
@@ -112,7 +112,7 @@ public class SymmetricSecretKey implements UtilKey
 	    throw new NullPointerException("type");
 	if (secretKey == null)
 	    throw new NullPointerException("secretKey");
-	if (type.isGNUVersion())
+	if (type.getCodeProvider()==CodeProvider.GNU_CRYPTO)
 	    throw new IllegalAccessError();
 	this.secretKey = SymmetricEncryptionType.encodeSecretKey(secretKey);
 	this.keySize = keySize;

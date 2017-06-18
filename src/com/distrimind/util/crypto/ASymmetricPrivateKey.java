@@ -117,7 +117,7 @@ public class ASymmetricPrivateKey implements UtilKey
 	    throw new NullPointerException("privateKey");
 	if (keySize < 1024)
 	    throw new IllegalArgumentException("keySize");
-	if (type.isGNUVersion())
+	if (type.getCodeProvider()==CodeProvider.GNU_CRYPTO)
 	    throw new IllegalAccessError();
 	this.privateKey = ASymmetricEncryptionType.encodePrivateKey(privateKey);
 	this.keySize = keySize;

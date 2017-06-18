@@ -105,8 +105,7 @@ public class DecentralizedIDTests
     {
 	for (int i = 0; i < numberofTests; i++)
 	{
-	    testEquals(type, rand, new DecentralizedIDGenerator(),
-		    new DecentralizedIDGenerator());
+	    testEquals(type, rand, new DecentralizedIDGenerator(),new DecentralizedIDGenerator());
 
 	}
     }
@@ -114,10 +113,8 @@ public class DecentralizedIDTests
     private void testEquals(MessageDigestType type, AbstractSecureRandom rand, AbstractDecentralizedIDGenerator id1, AbstractDecentralizedIDGenerator id2) throws gnu.vm.jgnu.security.NoSuchAlgorithmException
     {
 	Assert.assertNotEquals(id1, id2);
-	SecuredDecentralizedID sid1 = new SecuredDecentralizedID(type, id1,
-		rand);
-	SecuredDecentralizedID sid2 = new SecuredDecentralizedID(type, id2,
-		rand);
+	SecuredDecentralizedID sid1 = new SecuredDecentralizedID(type, id1,rand);
+	SecuredDecentralizedID sid2 = new SecuredDecentralizedID(type, id2,rand);
 	Assert.assertNotEquals(sid1, sid2);
 	Assert.assertNotEquals(
 		AbstractDecentralizedID.instanceOf(id1.getBytes()),
@@ -153,8 +150,7 @@ public class DecentralizedIDTests
     {
 	for (int i = 0; i < numberofTests; i++)
 	{
-	    testEquals(type, rand, new RenforcedDecentralizedIDGenerator(),
-		    new RenforcedDecentralizedIDGenerator());
+	    testEquals(type, rand, new RenforcedDecentralizedIDGenerator(),new RenforcedDecentralizedIDGenerator());
 	}
     }
 

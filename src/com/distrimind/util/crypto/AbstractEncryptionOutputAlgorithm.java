@@ -63,7 +63,10 @@ public abstract class AbstractEncryptionOutputAlgorithm
 	if (cipher == null)
 	    throw new NullPointerException("cipher");
 	this.cipher = cipher;
-	nullIV = new byte[cipher.getBlockSize()];
+	if (includeIV())
+	    nullIV = new byte[cipher.getBlockSize()];
+	else
+	    nullIV=null;
     }
 
     public byte[] encode(byte[] bytes) throws gnu.vm.jgnu.security.InvalidKeyException, IOException, InvalidAlgorithmParameterException, gnu.vm.jgnux.crypto.BadPaddingException, IllegalStateException, gnu.vm.jgnux.crypto.IllegalBlockSizeException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException
@@ -159,7 +162,7 @@ public abstract class AbstractEncryptionOutputAlgorithm
 	 */
     }
 
-    protected abstract AbstractCipher getCipherInstance() throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnux.crypto.NoSuchPaddingException;
+    protected abstract AbstractCipher getCipherInstance() throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnux.crypto.NoSuchPaddingException, NoSuchProviderException;
 
     public OutputStream getCipherOutputStream(OutputStream os) throws gnu.vm.jgnu.security.InvalidKeyException, gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnux.crypto.NoSuchPaddingException, InvalidAlgorithmParameterException, IOException, InvalidKeySpecException, NoSuchProviderException
     {

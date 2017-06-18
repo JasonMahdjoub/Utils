@@ -34,6 +34,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
+
 import javax.crypto.Cipher;
 
 import gnu.vm.jgnu.security.NoSuchAlgorithmException;
@@ -55,16 +56,21 @@ import com.distrimind.util.Bits;
 public enum SymmetricEncryptionType
 {
 
-    AES("AES", "CBC", "PKCS5Padding", (short) 128, false), // TODO see for OCB
-							   // and/or GCM mode
-							   // (limit to 64Gb for
-							   // the same couple
-							   // key/iv)
+    AES("AES", "CBC", "PKCS5Padding", (short) 128, CodeProvider.SUN_ORACLE), // TODO see for OCB and/or GCM mode (limit to 64Gb for the same couple key/iv)
     @Deprecated
-    DES("DES", "CBC", "PKCS5Padding", (short) 56, (short) 8, false), @Deprecated
-    DESede("DESede", "CBC", "PKCS5Padding", (short) 168, (short) 24, false), @Deprecated
-    Blowfish("Blowfish", "CBC", "PKCS5Padding", (short) 128, false), GNU_AES("AES", "CBC", "PKCS5Padding", (short) 128, true), GNU_TWOFISH("TWOFISH", "CBC", "PKCS5Padding", (short) 128, true), GNU_SERPENT("Serpent", "CBC", "PKCS5Padding", (short) 128, true), GNU_ANUBIS("Anubis", "CBC", "PKCS5Padding", (short) 128, true), GNU_QUARE("Square", "CBC", "PKCS5Padding", (short) 128, true),
-
+    DES("DES", "CBC", "PKCS5Padding", (short) 56, (short) 8, CodeProvider.SUN_ORACLE), 
+    @Deprecated
+    DESede("DESede", "CBC", "PKCS5Padding", (short) 168, (short) 24, CodeProvider.SUN_ORACLE), 
+    @Deprecated
+    Blowfish("Blowfish", "CBC", "PKCS5Padding", (short) 128, CodeProvider.SUN_ORACLE), 
+    GNU_AES("AES", "CBC", "PKCS5Padding", (short) 128, CodeProvider.GNU_CRYPTO), 
+    GNU_TWOFISH("TWOFISH", "CBC", "PKCS5Padding", (short) 128, CodeProvider.GNU_CRYPTO), 
+    GNU_SERPENT("Serpent", "CBC", "PKCS5Padding", (short) 128, CodeProvider.GNU_CRYPTO), 
+    GNU_ANUBIS("Anubis", "CBC", "PKCS5Padding", (short) 128, CodeProvider.GNU_CRYPTO), 
+    GNU_QUARE("Square", "CBC", "PKCS5Padding", (short) 128, CodeProvider.GNU_CRYPTO),
+    BOUNCY_CASTLE_AES("AES", "CBC", "PKCS5Padding", (short) 128, CodeProvider.BOUNCY_CASTLE), 
+    BOUNCY_CASTLE_TWOFISH("TWOFISH", "CBC", "PKCS5Padding", (short) 128, CodeProvider.BOUNCY_CASTLE), 
+    BOUNCY_CASTLE_SERPENT("Serpent", "CBC", "PKCS5Padding", (short) 128, CodeProvider.BOUNCY_CASTLE), 
     DEFAULT(AES);
     static gnu.vm.jgnux.crypto.SecretKey decodeGnuSecretKey(byte[] encodedSecretKey)
     {
@@ -126,28 +132,28 @@ public enum SymmetricEncryptionType
 
     private final short keySizeBytes;
 
-    private final boolean gnuVersion;
+    private final CodeProvider codeProvider;
 
-    private SymmetricEncryptionType(String algorithmName, String blockMode, String padding, short keySizeBits, boolean gnuVersion)
+    private SymmetricEncryptionType(String algorithmName, String blockMode, String padding, short keySizeBits, CodeProvider codeProvider)
     {
 	this(algorithmName, blockMode, padding, keySizeBits,
-		(short) (keySizeBits / 8), gnuVersion);
+		(short) (keySizeBits / 8), codeProvider);
     }
 
-    private SymmetricEncryptionType(String algorithmName, String blockMode, String padding, short keySizeBits, short keySizeBytes, boolean gnuVersion)
+    private SymmetricEncryptionType(String algorithmName, String blockMode, String padding, short keySizeBits, short keySizeBytes, CodeProvider codeProvider)
     {
 	this.algorithmName = algorithmName;
 	this.blockMode = blockMode;
 	this.padding = padding;
 	this.keySizeBits = keySizeBits;
 	this.keySizeBytes = keySizeBytes;
-	this.gnuVersion = gnuVersion;
+	this.codeProvider = codeProvider;
     }
 
     private SymmetricEncryptionType(SymmetricEncryptionType type)
     {
 	this(type.algorithmName, type.blockMode, type.padding, type.keySizeBits,
-		type.keySizeBytes, type.gnuVersion);
+		type.keySizeBytes, type.codeProvider);
     }
 
     public String getAlgorithmName()
@@ -162,10 +168,25 @@ public enum SymmetricEncryptionType
 
     public AbstractCipher getCipherInstance() throws NoSuchAlgorithmException, NoSuchPaddingException
     {
-	if (gnuVersion)
+	if (codeProvider==CodeProvider.GNU_CRYPTO)
 	{
 	    return new GnuCipher(gnu.vm.jgnux.crypto.Cipher.getInstance(
 		    algorithmName + "/" + blockMode + "/" + padding));
+	}
+	else if (codeProvider==CodeProvider.BOUNCY_CASTLE)
+	{
+	    try
+	    {
+		return new JavaNativeCipher(Cipher.getInstance(algorithmName + "/" + blockMode + "/" + padding, CodeProvider.getBouncyProvider()));
+	    }
+	    catch (java.security.NoSuchAlgorithmException e)
+	    {
+		throw new NoSuchAlgorithmException(e);
+	    }
+	    catch (javax.crypto.NoSuchPaddingException e)
+	    {
+		throw new NoSuchPaddingException(e.getMessage());
+	    }
 	}
 	else
 	{
@@ -204,10 +225,23 @@ public enum SymmetricEncryptionType
     public AbstractKeyGenerator getKeyGenerator(AbstractSecureRandom random, short keySizeBits) throws NoSuchAlgorithmException
     {
 	AbstractKeyGenerator res = null;
-	if (gnuVersion)
+	if (codeProvider==CodeProvider.GNU_CRYPTO)
 	{
 	    res = new GnuKeyGenerator(this,
 		    KeyGenerator.getInstance(algorithmName));
+	}
+	else if (codeProvider==CodeProvider.BOUNCY_CASTLE)
+	{
+	    
+	    try
+	    {
+		res = new JavaNativeKeyGenerator(this,javax.crypto.KeyGenerator.getInstance(algorithmName, CodeProvider.getBouncyProvider()));
+	    }
+	    catch (java.security.NoSuchAlgorithmException e)
+	    {
+		throw new NoSuchAlgorithmException(e);
+	    }
+	    
 	}
 	else
 	{
@@ -231,9 +265,9 @@ public enum SymmetricEncryptionType
 	return padding;
     }
 
-    public boolean isGNUVersion()
+    public CodeProvider getCodeProvider()
     {
-	return gnuVersion;
+	return codeProvider;
     }
 
 }

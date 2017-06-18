@@ -46,22 +46,34 @@ import java.security.NoSuchAlgorithmException;
 public enum MessageDigestType
 {
     @Deprecated
-    MD5("MD5", false), @Deprecated
-    SHA("SHA", false), SHA_256("SHA-256", false), SHA_384("SHA-384", false), SHA_512("SHA-512", false), GNU_SHA_256("SHA-256", true), GNU_SHA_384("SHA-384", true), GNU_SHA_512("SHA-512", true), GNU_WHIRLPOOL("WHIRLPOOL", true), DEFAULT(SHA_256);
+    MD5("MD5", CodeProvider.SUN_ORACLE), @Deprecated
+    SHA("SHA", CodeProvider.SUN_ORACLE), 
+    SHA_256("SHA-256", CodeProvider.SUN_ORACLE), 
+    SHA_384("SHA-384", CodeProvider.SUN_ORACLE), 
+    SHA_512("SHA-512", CodeProvider.SUN_ORACLE), 
+    GNU_SHA_256("SHA-256", CodeProvider.GNU_CRYPTO), 
+    GNU_SHA_384("SHA-384", CodeProvider.GNU_CRYPTO), 
+    GNU_SHA_512("SHA-512", CodeProvider.GNU_CRYPTO), 
+    GNU_WHIRLPOOL("WHIRLPOOL", CodeProvider.GNU_CRYPTO), 
+    BOUNCY_CASTLE_SHA_256("SHA-256", CodeProvider.BOUNCY_CASTLE), 
+    BOUNCY_CASTLE_SHA_384("SHA-384", CodeProvider.BOUNCY_CASTLE), 
+    BOUNCY_CASTLE_SHA_512("SHA-512", CodeProvider.BOUNCY_CASTLE), 
+    BOUNCY_CASTLE_WHIRLPOOL("WHIRLPOOL", CodeProvider.BOUNCY_CASTLE), 
+    DEFAULT(SHA_256);
 
     private final String algorithmName;
 
-    private final boolean gnuVersion;
+    private final CodeProvider codeProvider;
 
     private MessageDigestType(MessageDigestType type)
     {
-	this(type.algorithmName, type.gnuVersion);
+	this(type.algorithmName, type.codeProvider);
     }
 
-    private MessageDigestType(String algorithmName, boolean gnuVersion)
+    private MessageDigestType(String algorithmName, CodeProvider codeProvider)
     {
 	this.algorithmName = algorithmName;
-	this.gnuVersion = gnuVersion;
+	this.codeProvider = codeProvider;
     }
 
     public String getAlgorithmName()
@@ -71,10 +83,22 @@ public enum MessageDigestType
 
     public AbstractMessageDigest getMessageDigestInstance() throws gnu.vm.jgnu.security.NoSuchAlgorithmException
     {
-	if (gnuVersion)
+	if (codeProvider==CodeProvider.GNU_CRYPTO)
 	{
 	    return new GnuMessageDigest(gnu.vm.jgnu.security.MessageDigest
 		    .getInstance(algorithmName));
+	}
+	else if (codeProvider==CodeProvider.BOUNCY_CASTLE)
+	{
+	    
+	    try
+	    {
+		return new JavaNativeMessageDigest(MessageDigest.getInstance(algorithmName, CodeProvider.getBouncyProvider()));
+	    }
+	    catch (NoSuchAlgorithmException e)
+	    {
+		throw new gnu.vm.jgnu.security.NoSuchAlgorithmException(e);
+	    }
 	}
 	else
 	{
@@ -90,9 +114,9 @@ public enum MessageDigestType
 	}
     }
 
-    public boolean isGNUVersion()
+    public CodeProvider getCodeProvider()
     {
-	return gnuVersion;
+	return codeProvider;
     }
 
 }

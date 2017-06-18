@@ -36,6 +36,7 @@ package com.distrimind.util.crypto;
 
 import java.io.IOException;
 import java.security.SecureRandom;
+import java.util.ArrayList;
 import java.util.Random;
 
 import gnu.vm.jgnu.security.InvalidAlgorithmParameterException;
@@ -48,6 +49,7 @@ import gnu.vm.jgnux.crypto.BadPaddingException;
 import gnu.vm.jgnux.crypto.IllegalBlockSizeException;
 import gnu.vm.jgnux.crypto.NoSuchPaddingException;
 
+import org.bouncycastle.crypto.CryptoException;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -212,13 +214,12 @@ public class CryptoTests
 	return res;
     }
 
-    @Test(dataProvider = "provideDataForASymetricEncryptions", dependsOnMethods = "testEncodeAndSeparateEncoding")
+    @Test(dataProvider = "provideDataForASymetricEncryptions", dependsOnMethods = "testSecureRandom")
     public void testASymmetricKeyPairEncoding(ASymmetricEncryptionType type) throws NoSuchAlgorithmException, NoSuchProviderException
     {
 	System.out.println("Testing ASymmetricKeyPairEncoding " + type);
 	AbstractSecureRandom rand = SecureRandomType.DEFAULT.getInstance();
-	ASymmetricKeyPair kpd = type.getKeyPairGenerator(rand)
-		.generateKeyPair();
+	ASymmetricKeyPair kpd = type.getKeyPairGenerator(rand).generateKeyPair();
 
 	Assert.assertEquals(
 		ASymmetricPublicKey
@@ -237,7 +238,7 @@ public class CryptoTests
 		ASymmetricKeyPair.decode(kpd.encode()).getASymmetricPublicKey(),
 		kpd.getASymmetricPublicKey());
     }
-
+    
     @Test(dataProvider = "provideDataForASymetricEncryptions", dependsOnMethods = {
 	    "testASymmetricKeyPairEncoding", "testReadWriteDataPackaged" })
     public void testASymmetricSecretMessageExchanger(ASymmetricEncryptionType type) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IOException, IllegalAccessException, InvalidKeySpecException, IllegalBlockSizeException, BadPaddingException, NoSuchProviderException
@@ -362,6 +363,126 @@ public class CryptoTests
 	    Assert.assertFalse(algoLocal.verifyDistantMessage(falsePassword,
 		    salt, distantCrypt));
 
+	}
+    }
+    
+    @DataProvider(name = "provideDataForP2PJPAKEPasswordExchanger", parallel = true)
+    public Object[][] provideDataForP2PJPAKEPasswordExchanger()
+    {
+	byte[] salt=new byte[]{(byte)21,(byte)5645,(byte)512,(byte)42310,(byte)24,(byte)0,(byte)1,(byte)1231,(byte)34};
+	
+	
+	Object[][] res=new Object[8][];
+	
+	res[0]=new Object[]{new Boolean(true), salt, new Boolean(true)};
+	res[1]=new Object[]{new Boolean(true), salt, new Boolean(false)};
+	res[2]=new Object[]{new Boolean(false), salt, new Boolean(false)};
+	res[3]=new Object[]{new Boolean(false), salt, new Boolean(true)};
+	res[4]=new Object[]{new Boolean(true), null, new Boolean(true)};
+	res[5]=new Object[]{new Boolean(true), null, new Boolean(false)};
+	res[6]=new Object[]{new Boolean(false), null, new Boolean(false)};
+	res[7]=new Object[]{new Boolean(false), null, new Boolean(true)};
+	
+	return res;
+    }
+    @Test(dataProvider = "provideDataForP2PJPAKEPasswordExchanger", dependsOnMethods = {"testMessageDigest", "testPasswordHash"})
+    public void testP2PJPAKEPasswordExchanger(boolean expectedVerify, byte[] salt, boolean messageIsKey) throws NoSuchAlgorithmException, IOException, InvalidKeySpecException, NoSuchProviderException, ClassNotFoundException
+    {
+	    char[] password= "password".toCharArray();
+	    char[] falsePassword = "falsePassword".toCharArray();
+	    
+	    
+	    
+	    P2PJPAKESecretMessageExchanger exchanger1=new P2PJPAKESecretMessageExchanger("participant id 1", password, salt, 0, salt==null?0:salt.length);
+	    P2PJPAKESecretMessageExchanger exchanger2=new P2PJPAKESecretMessageExchanger("participant id 2", expectedVerify?password:falsePassword, salt, 0, salt==null?0:salt.length);
+	    try
+	    {
+	
+		byte[] step11=exchanger1.getStep1Message();
+		byte[] step21=exchanger2.getStep1Message();
+		
+		byte[] step12=exchanger1.receiveStep1AndGetStep2Message(step21);
+		byte[] step22=exchanger2.receiveStep1AndGetStep2Message(step11);
+		
+		byte[] step13=exchanger1.receiveStep2AndGetStep3Message(step22);
+		byte[] step23=exchanger2.receiveStep2AndGetStep3Message(step12);
+		
+		exchanger1.receiveStep3(step23);
+		exchanger2.receiveStep3(step13);
+		
+		Assert.assertEquals(exchanger1.isPassworkOrKeyValid(), expectedVerify);
+		Assert.assertEquals(exchanger2.isPassworkOrKeyValid(), expectedVerify);
+	    }
+	    catch(CryptoException e)
+	    {
+		if (expectedVerify)
+		    Assert.fail("Unexpected exception", e);
+		Assert.assertFalse(exchanger1.isPassworkOrKeyValid());
+		Assert.assertFalse(exchanger2.isPassworkOrKeyValid());
+	    }
+    }
+    
+    @DataProvider(name = "provideDataForP2PJPAKESecretMessageExchanger", parallel = true)
+    public Object[][] provideDataForP2PJPAKESecretMessageExchanger()
+    {
+	byte[] salt=new byte[]{(byte)21,(byte)5645,(byte)512,(byte)42310,(byte)24,(byte)0,(byte)1,(byte)1231,(byte)34};
+	
+	
+	ArrayList<Object[]> res=new ArrayList<>();
+	
+	for (byte[] m : messagesToEncrypt)
+	{
+	    for (boolean expectedVerify : new boolean[]{true, false})
+	    {
+		for (byte[] s : new byte[][]{null, salt})
+		{
+		    for (boolean messageIsKey : new boolean[]{true, false})
+		    {
+			res.add(new Object[]{new Boolean(expectedVerify), new Boolean(messageIsKey), s, m});
+		    }
+		}
+	    }
+	}
+	Object[][] res2=new Object[res.size()][];
+	for (int i=0;i<res.size();i++)
+	    res2[i]=res.get(i);
+	return res2;
+    }
+    
+
+    
+    @Test(dataProvider = "provideDataForP2PJPAKESecretMessageExchanger", dependsOnMethods = {"testMessageDigest"})
+    public void testP2PJPAKESecretMessageExchanger(boolean expectedVerify, boolean messageIsKey, byte[] salt, byte []m) throws NoSuchAlgorithmException, IOException, InvalidKeySpecException, NoSuchProviderException, ClassNotFoundException
+    {
+	Random r = new Random(System.currentTimeMillis());
+	byte[] falseMessage = new byte[10];
+	r.nextBytes(falseMessage);
+
+	P2PJPAKESecretMessageExchanger exchanger1=new P2PJPAKESecretMessageExchanger("participant id 1", m, 0, m.length, salt, 0, salt==null?0:salt.length, messageIsKey);
+	P2PJPAKESecretMessageExchanger exchanger2=new P2PJPAKESecretMessageExchanger("participant id 2", expectedVerify?m:falseMessage, 0, (expectedVerify?m:falseMessage).length, salt, 0, salt==null?0:salt.length, messageIsKey);
+	try
+	{
+	
+	    byte[] step11=exchanger1.getStep1Message();
+	    byte[] step21=exchanger2.getStep1Message();
+	    byte[] step12=exchanger1.receiveStep1AndGetStep2Message(step21);
+	    byte[] step22=exchanger2.receiveStep1AndGetStep2Message(step11);
+		
+	    byte[] step13=exchanger1.receiveStep2AndGetStep3Message(step22);
+	    byte[] step23=exchanger2.receiveStep2AndGetStep3Message(step12);
+		
+	    exchanger1.receiveStep3(step23);
+	    exchanger2.receiveStep3(step13);
+		
+	    Assert.assertEquals(exchanger1.isPassworkOrKeyValid(), expectedVerify);
+	    Assert.assertEquals(exchanger2.isPassworkOrKeyValid(), expectedVerify);
+	}
+	catch(CryptoException e)
+	{
+	    if (expectedVerify)
+		Assert.fail("Unexpected exception", e);
+	    Assert.assertFalse(exchanger1.isPassworkOrKeyValid());
+	    Assert.assertFalse(exchanger2.isPassworkOrKeyValid());
 	}
     }
 
@@ -590,7 +711,7 @@ public class CryptoTests
     @Test(dataProvider = "provideDataForSignatureTest")
     public void testSignatures(ASymmetricEncryptionType type, SignatureType sigType, int keySize) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException, InvalidKeySpecException, NoSuchProviderException
     {
-	if (sigType.isGNUVersion() != type.isGNUVersion())
+	if (sigType.getCodeProvider() != type.getCodeProvider())
 	    return;
 	System.out.println(
 		"Testing signature : " + type + "/" + sigType + "/" + keySize);
@@ -693,7 +814,7 @@ public class CryptoTests
 	int randNb=rand.nextInt(10000);
 	byte encodedBytes[]=OutputDataPackagerWithRandomValues.encode(originalBytes, randNb);
 	//Assert.assertTrue(encodedBytes.length>originalBytes.length);
-	Assert.assertTrue(randNb>=3?(encodedBytes.length>originalBytes.length):(encodedBytes.length==originalBytes.length+3));
+	Assert.assertTrue(encodedBytes.length>=originalBytes.length, "invalid size : "+encodedBytes.length+" (originalBytes size="+originalBytes.length+", randNb="+randNb+") ");
 	byte decodedBytes[]=InputDataPackagedWithRandomValues.decode(encodedBytes);
 	Assert.assertEquals(decodedBytes.length, originalBytes.length);
 	for (int i=0;i<decodedBytes.length;i++)

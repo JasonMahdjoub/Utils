@@ -123,7 +123,7 @@ public class ASymmetricPublicKey implements UtilKey
 	    throw new NullPointerException("publicKey");
 	if (keySize < 1024)
 	    throw new IllegalArgumentException("keySize");
-	if (type.isGNUVersion())
+	if (type.getCodeProvider()==CodeProvider.GNU_CRYPTO)
 	    throw new IllegalAccessError();
 
 	this.publicKey = ASymmetricEncryptionType.encodePublicKey(publicKey);

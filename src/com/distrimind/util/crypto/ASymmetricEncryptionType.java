@@ -53,14 +53,16 @@ import com.distrimind.util.Bits;
  * List of asymmetric encryption algorithms
  * 
  * @author Jason Mahdjoub
- * @version 2.1
+ * @version 3.0
  * @since Utils 1.4
  */
 public enum ASymmetricEncryptionType
 {
-    RSA_OAEPWithSHA256AndMGF1Padding("RSA", "", "OAEPWithSHA-256AndMGF1Padding",SignatureType.SHA256withRSA, (short) 4096, 31536000000l, (short) 66, false), 
-    RSA_PKCS1Padding("RSA", "", "PKCS1Padding", SignatureType.SHA256withRSA, (short) 4096, 31536000000l, (short) 11,false),
-    //GNU_RSA_PKCS1Padding("RSA", "","PKCS1Padding",SignatureType.SHA256withRSA, (short)4096, (short)11, true),
+    RSA_OAEPWithSHA256AndMGF1Padding("RSA", "", "OAEPWithSHA-256AndMGF1Padding",SignatureType.SHA256withRSA, (short) 4096, 31536000000l, (short) 66, CodeProvider.SUN_ORACLE), 
+    RSA_PKCS1Padding("RSA", "", "PKCS1Padding", SignatureType.SHA256withRSA, (short) 4096, 31536000000l, (short) 11,CodeProvider.SUN_ORACLE),
+    //GNU_RSA_PKCS1Padding("RSA", "","PKCS1Padding",SignatureType.SHA256withRSA, (short)4096, (short)11, CodeProvider.GNU_CRYPTO),
+    //BOUNTYCASTLE_PKCS1Padding("RSA", "", "PKCS1Padding", SignatureType.BOUNCY_CASTLE_SHA256withRSA, (short) 4096, 31536000000l, (short) 11,CodeProvider.BOUNCY_CASTLE),
+    //BOUNTYCASTLE_OAEPWithSHA256AndMGF1Padding("RSA", "", "OAEPWithSHA-256AndMGF1Padding",SignatureType.BOUNCY_CASTLE_SHA256withRSA, (short) 4096, 31536000000l, (short) 66, CodeProvider.BOUNCY_CASTLE),
     DEFAULT(RSA_OAEPWithSHA256AndMGF1Padding);
 
     static gnu.vm.jgnu.security.KeyPair decodeGnuKeyPair(byte[] encodedKeyPair) throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException
@@ -111,6 +113,7 @@ public enum ASymmetricEncryptionType
 
     static PrivateKey decodeNativePrivateKey(byte[] encodedKey) throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException
     {
+	
 	try
 	{
 	    byte[][] parts = Bits
@@ -224,15 +227,18 @@ public enum ASymmetricEncryptionType
 
     private final short blockSizeDecrement;
 
-    private final boolean gnuVersion;
+    private final CodeProvider codeProvider;
+    
+    
+    
 
     private ASymmetricEncryptionType(ASymmetricEncryptionType type)
     {
 	this(type.algorithmName, type.blockMode, type.padding, type.signature,
-		type.keySize, type.expirationTimeMilis, type.blockSizeDecrement, type.gnuVersion);
+		type.keySize, type.expirationTimeMilis, type.blockSizeDecrement, type.codeProvider);
     }
 
-    private ASymmetricEncryptionType(String algorithmName, String blockMode, String padding, SignatureType signature, short keySize,long expirationTimeMilis, short blockSizeDecrement, boolean gnuVersion)
+    private ASymmetricEncryptionType(String algorithmName, String blockMode, String padding, SignatureType signature, short keySize,long expirationTimeMilis, short blockSizeDecrement, CodeProvider codeProvider)
     {
 	this.algorithmName = algorithmName;
 	this.blockMode = blockMode;
@@ -240,7 +246,7 @@ public enum ASymmetricEncryptionType
 	this.signature = signature;
 	this.keySize = keySize;
 	this.blockSizeDecrement = blockSizeDecrement;
-	this.gnuVersion = gnuVersion;
+	this.codeProvider = codeProvider;
 	this.expirationTimeMilis=expirationTimeMilis;
     }
 
@@ -256,13 +262,35 @@ public enum ASymmetricEncryptionType
 
     public AbstractCipher getCipherInstance() throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnux.crypto.NoSuchPaddingException
     {
-	if (gnuVersion)
+	if (codeProvider==CodeProvider.GNU_CRYPTO)
 	{
 	    String name = algorithmName;
 	    if ((blockMode != null && !blockMode.equals(""))
 		    && (padding != null && !padding.equals("")))
 		name += "/" + blockMode + "/" + padding;
 	    return new GnuCipher(gnu.vm.jgnux.crypto.Cipher.getInstance(name));
+	}
+	else if (codeProvider==CodeProvider.BOUNCY_CASTLE)
+	{
+	    
+	    try
+	    {
+		String name = algorithmName;
+		if ((blockMode != null && !blockMode.equals(""))
+			&& (padding != null && !padding.equals("")))
+		    name += "/" + blockMode + "/" + padding;
+		return new JavaNativeCipher(Cipher.getInstance(name, CodeProvider.getBouncyProvider()));
+	    }
+	    catch (NoSuchAlgorithmException e)
+	    {
+		throw new gnu.vm.jgnu.security.NoSuchAlgorithmException(e);
+	    }
+	    catch (NoSuchPaddingException e)
+	    {
+		throw new gnu.vm.jgnux.crypto.NoSuchPaddingException(
+			e.getMessage());
+	    }
+	    
 	}
 	else
 	{
@@ -311,7 +339,7 @@ public enum ASymmetricEncryptionType
     }
     public AbstractKeyPairGenerator getKeyPairGenerator(AbstractSecureRandom random, short keySize, long expirationTimeUTC) throws gnu.vm.jgnu.security.NoSuchAlgorithmException
     {
-	if (gnuVersion)
+	if (codeProvider==CodeProvider.GNU_CRYPTO)
 	{
 	    gnu.vm.jgnu.security.KeyPairGenerator kgp = gnu.vm.jgnu.security.KeyPairGenerator
 		    .getInstance(algorithmName);
@@ -319,6 +347,23 @@ public enum ASymmetricEncryptionType
 	    res.initialize(keySize,expirationTimeUTC, random);
 
 	    return res;
+	}
+	else if (codeProvider==CodeProvider.BOUNCY_CASTLE)
+	{
+	    
+	    try
+	    {
+		KeyPairGenerator kgp = KeyPairGenerator.getInstance(algorithmName, CodeProvider.getBouncyProvider());
+		JavaNativeKeyPairGenerator res = new JavaNativeKeyPairGenerator(
+			this, kgp);
+		res.initialize(keySize,expirationTimeUTC, random);
+
+		return res;
+	    }
+	    catch (NoSuchAlgorithmException e)
+	    {
+		throw new gnu.vm.jgnu.security.NoSuchAlgorithmException(e);
+	    }
 	}
 	else
 	{
@@ -351,9 +396,10 @@ public enum ASymmetricEncryptionType
 	return padding;
     }
 
-    public boolean isGNUVersion()
+    public CodeProvider getCodeProvider()
     {
-	return gnuVersion;
+	return codeProvider;
     }
 
+    
 }

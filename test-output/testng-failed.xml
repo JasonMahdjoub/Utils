@@ -5,7 +5,7 @@
     <classes>
       <class name="com.distrimind.util.crypto.CryptoTests">
         <methods>
-          <include name="testEllipticCurveDiffieHellmanKeyExchanger" invocation-numbers="2 0 1 3"/>
+          <include name="testP2PJPAKESecretMessageExchanger"/>
           <include name="testMessageDigest"/>
         </methods>
       </class> <!-- com.distrimind.util.crypto.CryptoTests -->

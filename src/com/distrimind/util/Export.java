@@ -40,8 +40,12 @@ import java.util.ArrayList;
 
 import javax.lang.model.SourceVersion;
 
+import org.bouncycastle.LICENSE;
+
 import com.distrimind.util.export.BinaryDependency;
 import com.distrimind.util.export.Dependency;
+import com.distrimind.util.export.DirectoryDependency;
+import com.distrimind.util.export.DirectorySourceDependency;
 import com.distrimind.util.export.Exports;
 import com.distrimind.util.export.JarDependency;
 import com.distrimind.util.export.JarSourceDependancy;
@@ -107,6 +111,17 @@ class Export
 			"/home/jason/git_projects/Gnu-Crypt/GNU-Crypto/export/GNU-Crypto-0.99a.jar"),
 		null, null));
 	
+	License[] licensesBountyCastle = { new License(new File("/home/jason/projets/bouncycastle/LICENSE.html"))};
+	dependencies.add(new DirectoryDependency("Bouncy-Castle",
+		new DirectorySourceDependency(false,
+			new File(
+				"/home/jason/git_projects/Utils/src"),
+			null, null),
+		LICENSE.class.getPackage(),
+		licensesBountyCastle,
+		new File(
+			"/home/jason/git_projects/Utils/bin"),
+		null, null));
 
 	licenses = new License[1];
 	licenses[0] = Utils.LICENSE;

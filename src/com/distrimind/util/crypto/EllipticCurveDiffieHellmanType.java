@@ -42,24 +42,29 @@ package com.distrimind.util.crypto;
  */
 public enum EllipticCurveDiffieHellmanType
 {
-    ECDH_128(128, 256, MessageDigestType.SHA_256),
-    ECDH_256(256, 256, MessageDigestType.SHA_256),
-    ECDH_384(256, 384, MessageDigestType.GNU_SHA_384),
+    ECDH_128(128, 256, MessageDigestType.SHA_256, CodeProvider.SUN_ORACLE),
+    ECDH_256(256, 256, MessageDigestType.SHA_256, CodeProvider.SUN_ORACLE),
+    ECDH_384(256, 384, MessageDigestType.SHA_384, CodeProvider.SUN_ORACLE),
+    BOUNCY_CASTLE_ECDH_128(128, 256, MessageDigestType.BOUNCY_CASTLE_SHA_256, CodeProvider.BOUNCY_CASTLE),
+    BOUNCY_CASTLE_ECDH_256(256, 256, MessageDigestType.BOUNCY_CASTLE_SHA_256, CodeProvider.BOUNCY_CASTLE),
+    BOUNCY_CASTLE_ECDH_384(256, 384, MessageDigestType.BOUNCY_CASTLE_SHA_384, CodeProvider.BOUNCY_CASTLE),
     DEFAULT(ECDH_384);
     
     private final int keySize;
     private final int ECDHKeySize;
     private final MessageDigestType messageDigestType;
+    private final CodeProvider codeProvider;
     
-    private EllipticCurveDiffieHellmanType(int keySize, int ECDHKeySize, MessageDigestType messageDigestType)
+    private EllipticCurveDiffieHellmanType(int keySize, int ECDHKeySize, MessageDigestType messageDigestType, CodeProvider codeProvider)
     {
 	this.keySize=keySize;
 	this.ECDHKeySize=ECDHKeySize;
 	this.messageDigestType=messageDigestType;
+	this.codeProvider=codeProvider;
     }
     private EllipticCurveDiffieHellmanType(EllipticCurveDiffieHellmanType other)
     {
-	this(other.keySize, other.ECDHKeySize, other.messageDigestType);
+	this(other.keySize, other.ECDHKeySize, other.messageDigestType, other.codeProvider);
     }
     public int getKeySize()
     {
@@ -77,5 +82,10 @@ public enum EllipticCurveDiffieHellmanType
     public EllipticCurveDiffieHellmanAlgorithm getInstance()
     {
 	return new EllipticCurveDiffieHellmanAlgorithm(this);
+    }
+    
+    public CodeProvider getCodeProvider()
+    {
+	return codeProvider;
     }
 }

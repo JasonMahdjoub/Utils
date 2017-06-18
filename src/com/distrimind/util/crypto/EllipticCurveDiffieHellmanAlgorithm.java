@@ -62,7 +62,7 @@ public class EllipticCurveDiffieHellmanAlgorithm
     private KeyPair myKeyPair;
     private byte[] myPublicKeyBytes;
     
-    public EllipticCurveDiffieHellmanAlgorithm(EllipticCurveDiffieHellmanType type)
+    EllipticCurveDiffieHellmanAlgorithm(EllipticCurveDiffieHellmanType type)
     {
 	if (type==null)
 	    throw new NullPointerException();
@@ -80,12 +80,20 @@ public class EllipticCurveDiffieHellmanAlgorithm
     public byte[] generateAndGetPublicKey() throws NoSuchAlgorithmException
     {
 	reset();
-	KeyPairGenerator kpg = KeyPairGenerator.getInstance("EC");
+	KeyPairGenerator kpg = null;
+	if (type.getCodeProvider()==CodeProvider.BOUNCY_CASTLE)
+	{
+	    kpg=KeyPairGenerator.getInstance("EC", CodeProvider.getBouncyProvider());
+	}
+	else
+	    kpg=KeyPairGenerator.getInstance("EC");
 	kpg.initialize(type.getECDHKeySize());
 	myKeyPair=kpg.generateKeyPair();
 	myPublicKeyBytes=myKeyPair.getPublic().getEncoded();
+	
 	return myPublicKeyBytes;
     }
+    
     
     
     public byte[] setDistantPublicKey(byte[] distantPublicKeyBytes) throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, gnu.vm.jgnu.security.NoSuchAlgorithmException
@@ -94,12 +102,24 @@ public class EllipticCurveDiffieHellmanAlgorithm
 	    throw new NullPointerException();
 	if (derivedKey!=null)
 	    throw new IllegalArgumentException("A key exchange process has already been begun. Use reset fonction before calling this function.");
-	KeyFactory kf = KeyFactory.getInstance("EC");
+	KeyFactory kf = null;
+	if (type.getCodeProvider()==CodeProvider.BOUNCY_CASTLE)
+	{
+	    kf=KeyFactory.getInstance("EC", CodeProvider.getBouncyProvider());
+	}
+	else
+	    kf=KeyFactory.getInstance("EC");
+	
 	X509EncodedKeySpec pkSpec = new X509EncodedKeySpec(distantPublicKeyBytes);
 	PublicKey distantPublicKey = kf.generatePublic(pkSpec);
 	
-
-	KeyAgreement ka = KeyAgreement.getInstance("ECDH");
+	
+	KeyAgreement ka = null;
+	if (type.getCodeProvider()==CodeProvider.BOUNCY_CASTLE)
+	    ka=KeyAgreement.getInstance("ECDH", CodeProvider.getBouncyProvider());
+	else
+	    ka=KeyAgreement.getInstance("ECDH");
+	
 	ka.init(myKeyPair.getPrivate());
 	ka.doPhase(distantPublicKey, true);
 	
@@ -148,5 +168,7 @@ public class EllipticCurveDiffieHellmanAlgorithm
     {
 	return derivedKey;
     }
+    
+    
 }
 
