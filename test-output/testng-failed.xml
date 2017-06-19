@@ -5,8 +5,10 @@
     <classes>
       <class name="com.distrimind.util.crypto.CryptoTests">
         <methods>
-          <include name="testP2PJPAKESecretMessageExchanger"/>
-          <include name="testMessageDigest"/>
+          <include name="testSecretKeyEncoding"/>
+          <include name="testEncodeAndSeparateEncoding"/>
+          <include name="testSymetricEncryptions"/>
+          <include name="testSymmetricSignatures" invocation-numbers="53 63 52 64 65 66 51 54 76 75 87 77 78 90 89 100 102 88 101 99"/>
         </methods>
       </class> <!-- com.distrimind.util.crypto.CryptoTests -->
     </classes>

@@ -58,8 +58,8 @@ import com.distrimind.util.Bits;
  */
 public enum ASymmetricEncryptionType
 {
-    RSA_OAEPWithSHA256AndMGF1Padding("RSA", "", "OAEPWithSHA-256AndMGF1Padding",SignatureType.SHA256withRSA, (short) 4096, 31536000000l, (short) 66, CodeProvider.SUN_ORACLE), 
-    RSA_PKCS1Padding("RSA", "", "PKCS1Padding", SignatureType.SHA256withRSA, (short) 4096, 31536000000l, (short) 11,CodeProvider.SUN_ORACLE),
+    RSA_OAEPWithSHA256AndMGF1Padding("RSA", "", "OAEPWithSHA-256AndMGF1Padding",ASymmetricSignatureType.SHA256withRSA, (short) 4096, 31536000000l, (short) 66, CodeProvider.SUN_ORACLE), 
+    RSA_PKCS1Padding("RSA", "", "PKCS1Padding", ASymmetricSignatureType.SHA256withRSA, (short) 4096, 31536000000l, (short) 11,CodeProvider.SUN_ORACLE),
     //GNU_RSA_PKCS1Padding("RSA", "","PKCS1Padding",SignatureType.SHA256withRSA, (short)4096, (short)11, CodeProvider.GNU_CRYPTO),
     //BOUNTYCASTLE_PKCS1Padding("RSA", "", "PKCS1Padding", SignatureType.BOUNCY_CASTLE_SHA256withRSA, (short) 4096, 31536000000l, (short) 11,CodeProvider.BOUNCY_CASTLE),
     //BOUNTYCASTLE_OAEPWithSHA256AndMGF1Padding("RSA", "", "OAEPWithSHA-256AndMGF1Padding",SignatureType.BOUNCY_CASTLE_SHA256withRSA, (short) 4096, 31536000000l, (short) 66, CodeProvider.BOUNCY_CASTLE),
@@ -219,7 +219,7 @@ public enum ASymmetricEncryptionType
 
     private final String padding;
 
-    private final SignatureType signature;
+    private final ASymmetricSignatureType signature;
 
     private final short keySize;
     
@@ -238,7 +238,7 @@ public enum ASymmetricEncryptionType
 		type.keySize, type.expirationTimeMilis, type.blockSizeDecrement, type.codeProvider);
     }
 
-    private ASymmetricEncryptionType(String algorithmName, String blockMode, String padding, SignatureType signature, short keySize,long expirationTimeMilis, short blockSizeDecrement, CodeProvider codeProvider)
+    private ASymmetricEncryptionType(String algorithmName, String blockMode, String padding, ASymmetricSignatureType signature, short keySize,long expirationTimeMilis, short blockSizeDecrement, CodeProvider codeProvider)
     {
 	this.algorithmName = algorithmName;
 	this.blockMode = blockMode;
@@ -324,7 +324,7 @@ public enum ASymmetricEncryptionType
 	return keySize / 8 - blockSizeDecrement;
     }
 
-    public SignatureType getDefaultSignatureAlgorithm()
+    public ASymmetricSignatureType getDefaultSignatureAlgorithm()
     {
 	return signature;
     }

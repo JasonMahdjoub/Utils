@@ -50,27 +50,27 @@ import com.distrimind.util.Bits;
  * List of symmetric encryption algorithms
  * 
  * @author Jason Mahdjoub
- * @version 2.0
+ * @version 2.1
  * @since Utils 1.4
  */
 public enum SymmetricEncryptionType
 {
 
-    AES("AES", "CBC", "PKCS5Padding", (short) 128, CodeProvider.SUN_ORACLE), // TODO see for OCB and/or GCM mode (limit to 64Gb for the same couple key/iv)
+    AES("AES", "CBC", "PKCS5Padding", (short) 128, CodeProvider.SUN_ORACLE, SymmetricSignatureType.HMAC_SHA_256), // TODO see for OCB and/or GCM mode (limit to 64Gb for the same couple key/iv)
     @Deprecated
-    DES("DES", "CBC", "PKCS5Padding", (short) 56, (short) 8, CodeProvider.SUN_ORACLE), 
+    DES("DES", "CBC", "PKCS5Padding", (short) 56, (short) 8, CodeProvider.SUN_ORACLE, SymmetricSignatureType.HMAC_SHA_256), 
     @Deprecated
-    DESede("DESede", "CBC", "PKCS5Padding", (short) 168, (short) 24, CodeProvider.SUN_ORACLE), 
+    DESede("DESede", "CBC", "PKCS5Padding", (short) 168, (short) 24, CodeProvider.SUN_ORACLE, SymmetricSignatureType.HMAC_SHA_256), 
     @Deprecated
-    Blowfish("Blowfish", "CBC", "PKCS5Padding", (short) 128, CodeProvider.SUN_ORACLE), 
-    GNU_AES("AES", "CBC", "PKCS5Padding", (short) 128, CodeProvider.GNU_CRYPTO), 
-    GNU_TWOFISH("TWOFISH", "CBC", "PKCS5Padding", (short) 128, CodeProvider.GNU_CRYPTO), 
-    GNU_SERPENT("Serpent", "CBC", "PKCS5Padding", (short) 128, CodeProvider.GNU_CRYPTO), 
-    GNU_ANUBIS("Anubis", "CBC", "PKCS5Padding", (short) 128, CodeProvider.GNU_CRYPTO), 
-    GNU_QUARE("Square", "CBC", "PKCS5Padding", (short) 128, CodeProvider.GNU_CRYPTO),
-    BOUNCY_CASTLE_AES("AES", "CBC", "PKCS5Padding", (short) 128, CodeProvider.BOUNCY_CASTLE), 
-    BOUNCY_CASTLE_TWOFISH("TWOFISH", "CBC", "PKCS5Padding", (short) 128, CodeProvider.BOUNCY_CASTLE), 
-    BOUNCY_CASTLE_SERPENT("Serpent", "CBC", "PKCS5Padding", (short) 128, CodeProvider.BOUNCY_CASTLE), 
+    Blowfish("Blowfish", "CBC", "PKCS5Padding", (short) 128, CodeProvider.SUN_ORACLE, SymmetricSignatureType.HMAC_SHA_256), 
+    GNU_AES("AES", "CBC", "PKCS5Padding", (short) 128, CodeProvider.GNU_CRYPTO, SymmetricSignatureType.BOUNCY_CASTLE_HMAC_SHA_256), 
+    GNU_TWOFISH("TWOFISH", "CBC", "PKCS5Padding", (short) 128, CodeProvider.GNU_CRYPTO, SymmetricSignatureType.BOUNCY_CASTLE_HMAC_SHA_256), 
+    GNU_SERPENT("Serpent", "CBC", "PKCS5Padding", (short) 128, CodeProvider.GNU_CRYPTO, SymmetricSignatureType.BOUNCY_CASTLE_HMAC_SHA_256), 
+    GNU_ANUBIS("Anubis", "CBC", "PKCS5Padding", (short) 128, CodeProvider.GNU_CRYPTO, SymmetricSignatureType.BOUNCY_CASTLE_HMAC_SHA_256), 
+    GNU_QUARE("Square", "CBC", "PKCS5Padding", (short) 128, CodeProvider.GNU_CRYPTO, SymmetricSignatureType.BOUNCY_CASTLE_HMAC_SHA_256),
+    BOUNCY_CASTLE_AES("AES", "CBC", "PKCS5Padding", (short) 128, CodeProvider.BOUNCY_CASTLE, SymmetricSignatureType.BOUNCY_CASTLE_HMAC_SHA_256), 
+    BOUNCY_CASTLE_TWOFISH("TWOFISH", "CBC", "PKCS5Padding", (short) 128, CodeProvider.BOUNCY_CASTLE, SymmetricSignatureType.BOUNCY_CASTLE_HMAC_SHA_256), 
+    BOUNCY_CASTLE_SERPENT("Serpent", "CBC", "PKCS5Padding", (short) 128, CodeProvider.BOUNCY_CASTLE, SymmetricSignatureType.BOUNCY_CASTLE_HMAC_SHA_256), 
     DEFAULT(AES);
     static gnu.vm.jgnux.crypto.SecretKey decodeGnuSecretKey(byte[] encodedSecretKey)
     {
@@ -133,14 +133,16 @@ public enum SymmetricEncryptionType
     private final short keySizeBytes;
 
     private final CodeProvider codeProvider;
+    
+    private final SymmetricSignatureType defaultSignature;
 
-    private SymmetricEncryptionType(String algorithmName, String blockMode, String padding, short keySizeBits, CodeProvider codeProvider)
+    private SymmetricEncryptionType(String algorithmName, String blockMode, String padding, short keySizeBits, CodeProvider codeProvider, SymmetricSignatureType defaultSignature)
     {
 	this(algorithmName, blockMode, padding, keySizeBits,
-		(short) (keySizeBits / 8), codeProvider);
+		(short) (keySizeBits / 8), codeProvider, defaultSignature);
     }
 
-    private SymmetricEncryptionType(String algorithmName, String blockMode, String padding, short keySizeBits, short keySizeBytes, CodeProvider codeProvider)
+    private SymmetricEncryptionType(String algorithmName, String blockMode, String padding, short keySizeBits, short keySizeBytes, CodeProvider codeProvider, SymmetricSignatureType defaultSignature)
     {
 	this.algorithmName = algorithmName;
 	this.blockMode = blockMode;
@@ -148,12 +150,13 @@ public enum SymmetricEncryptionType
 	this.keySizeBits = keySizeBits;
 	this.keySizeBytes = keySizeBytes;
 	this.codeProvider = codeProvider;
+	this.defaultSignature=defaultSignature;
     }
 
     private SymmetricEncryptionType(SymmetricEncryptionType type)
     {
 	this(type.algorithmName, type.blockMode, type.padding, type.keySizeBits,
-		type.keySizeBytes, type.codeProvider);
+		type.keySizeBytes, type.codeProvider, type.defaultSignature);
     }
 
     public String getAlgorithmName()
@@ -270,4 +273,8 @@ public enum SymmetricEncryptionType
 	return codeProvider;
     }
 
+    public SymmetricSignatureType getDefaultSignatureAlgorithm()
+    {
+	return defaultSignature;
+    }
 }

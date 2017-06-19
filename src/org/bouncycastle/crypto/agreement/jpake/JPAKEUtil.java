@@ -1,5 +1,9 @@
 package org.bouncycastle.crypto.agreement.jpake;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.math.BigInteger;
 import java.security.SecureRandom;
 
@@ -128,6 +132,7 @@ public class JPAKEUtil
     /**
      * Calculate a zero knowledge proof of x using Schnorr's signature.
      * The returned array has two elements {g^v, r = v-x*h} for x.
+     * @throws IOException 
      */
     public static BigInteger[] calculateZeroKnowledgeProof(
         BigInteger p,
@@ -135,9 +140,9 @@ public class JPAKEUtil
         BigInteger g,
         BigInteger gx,
         BigInteger x,
-        String participantId,
+        Serializable participantId,
         Digest digest,
-        SecureRandom random)
+        SecureRandom random) throws IOException
     {
         BigInteger[] zeroKnowledgeProof = new BigInteger[2];
 
@@ -159,8 +164,8 @@ public class JPAKEUtil
         BigInteger g,
         BigInteger gr,
         BigInteger gx,
-        String participantId,
-        Digest digest)
+        Serializable participantId,
+        Digest digest) throws IOException
     {
         digest.reset();
 
@@ -220,6 +225,7 @@ public class JPAKEUtil
      * is correct.
      *
      * @throws CryptoException if the zero knowledge proof is not correct
+     * @throws IOException 
      */
     public static void validateZeroKnowledgeProof(
         BigInteger p,
@@ -227,9 +233,9 @@ public class JPAKEUtil
         BigInteger g,
         BigInteger gx,
         BigInteger[] zeroKnowledgeProof,
-        String participantId,
+        Serializable participantId,
         Digest digest)
-        throws CryptoException
+        throws CryptoException, IOException
     {
 
         /* sig={g^v,r} */
@@ -276,7 +282,7 @@ public class JPAKEUtil
      *
      * @throws CryptoException if the participantId strings are equal.
      */
-    public static void validateParticipantIdsDiffer(String participantId1, String participantId2)
+    public static void validateParticipantIdsDiffer(Serializable participantId1, Serializable participantId2)
         throws CryptoException
     {
         if (participantId1.equals(participantId2))
@@ -296,7 +302,7 @@ public class JPAKEUtil
      *
      * @throws CryptoException if the participantId strings are equal.
      */
-    public static void validateParticipantIdsEqual(String expectedParticipantId, String actualParticipantId)
+    public static void validateParticipantIdsEqual(Serializable expectedParticipantId, Serializable actualParticipantId)
         throws CryptoException
     {
         if (!expectedParticipantId.equals(actualParticipantId))
@@ -343,16 +349,17 @@ public class JPAKEUtil
      * H = The given {@link Digest}
      * MacLen = length of MacTag
      * </pre>
+     * @throws IOException 
      */
     public static BigInteger calculateMacTag(
-        String participantId,
-        String partnerParticipantId,
+	    Serializable participantId,
+	    Serializable partnerParticipantId,
         BigInteger gx1,
         BigInteger gx2,
         BigInteger gx3,
         BigInteger gx4,
         BigInteger keyingMaterial,
-        Digest digest)
+        Digest digest) throws IOException
     {
         byte[] macKey = calculateMacKey(
             keyingMaterial,
@@ -408,10 +415,11 @@ public class JPAKEUtil
      *
      * @param partnerMacTag the MacTag received from the partner.
      * @throws CryptoException if the participantId strings are equal.
+     * @throws IOException 
      */
     public static void validateMacTag(
-        String participantId,
-        String partnerParticipantId,
+	    Serializable participantId,
+	    Serializable partnerParticipantId,
         BigInteger gx1,
         BigInteger gx2,
         BigInteger gx3,
@@ -419,7 +427,7 @@ public class JPAKEUtil
         BigInteger keyingMaterial,
         Digest digest,
         BigInteger partnerMacTag)
-        throws CryptoException
+        throws CryptoException, IOException
     {
         /*
          * Calculate the expected MacTag using the parameters as the partner
@@ -470,12 +478,20 @@ public class JPAKEUtil
         Arrays.fill(byteArray, (byte)0);
     }
 
-    private static void updateDigestIncludingSize(Digest digest, String string)
+    private static void updateDigestIncludingSize(Digest digest, Serializable string) throws IOException
     {
-        byte[] byteArray = Strings.toUTF8ByteArray(string);
-        digest.update(intToByteArray(byteArray.length), 0, 4);
-        digest.update(byteArray, 0, byteArray.length);
-        Arrays.fill(byteArray, (byte)0);
+	try(ByteArrayOutputStream baos=new ByteArrayOutputStream())
+	{
+	    try(ObjectOutputStream oos=new ObjectOutputStream(baos))
+	    {
+		oos.writeObject(string);
+	    }
+	    byte[] byteArray = baos.toByteArray();
+	    digest.update(intToByteArray(byteArray.length), 0, 4);
+	    digest.update(byteArray, 0, byteArray.length);
+	    Arrays.fill(byteArray, (byte)0);
+	}
+	
     }
 
     private static void updateMac(Mac mac, BigInteger bigInteger)
@@ -485,11 +501,18 @@ public class JPAKEUtil
         Arrays.fill(byteArray, (byte)0);
     }
 
-    private static void updateMac(Mac mac, String string)
+    private static void updateMac(Mac mac, Serializable value) throws IOException
     {
-        byte[] byteArray = Strings.toUTF8ByteArray(string);
-        mac.update(byteArray, 0, byteArray.length);
-        Arrays.fill(byteArray, (byte)0);
+	try(ByteArrayOutputStream baos=new ByteArrayOutputStream())
+	{
+	    try(ObjectOutputStream oos=new ObjectOutputStream(baos))
+	    {
+		oos.writeObject(value);
+	    }
+	    byte[] byteArray = baos.toByteArray();
+	    mac.update(byteArray, 0, byteArray.length);
+	    Arrays.fill(byteArray, (byte)0);
+	}
     }
 
     private static byte[] intToByteArray(int value)

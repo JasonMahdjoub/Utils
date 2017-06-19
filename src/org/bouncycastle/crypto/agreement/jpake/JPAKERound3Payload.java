@@ -27,7 +27,7 @@ public class JPAKERound3Payload implements Serializable
     /**
      * The id of the {@link JPAKEParticipant} who created/sent this payload.
      */
-    private final String participantId;
+    private final Serializable participantId;
 
     /**
      * The value of MacTag, as computed by round 3.
@@ -36,13 +36,13 @@ public class JPAKERound3Payload implements Serializable
      */
     private final BigInteger macTag;
 
-    public JPAKERound3Payload(String participantId, BigInteger magTag)
+    public JPAKERound3Payload(Serializable participantId, BigInteger magTag)
     {
         this.participantId = participantId;
         this.macTag = magTag;
     }
 
-    public String getParticipantId()
+    public Serializable getParticipantId()
     {
         return participantId;
     }

@@ -30,7 +30,7 @@ public class JPAKERound1Payload implements Serializable
     /**
      * The id of the {@link JPAKEParticipant} who created/sent this payload.
      */
-    private final String participantId;
+    private final Serializable participantId;
 
     /**
      * The value of g^x1
@@ -59,7 +59,7 @@ public class JPAKERound1Payload implements Serializable
     private final BigInteger[] knowledgeProofForX2;
 
     public JPAKERound1Payload(
-        String participantId,
+	    Serializable participantId,
         BigInteger gx1,
         BigInteger gx2,
         BigInteger[] knowledgeProofForX1,
@@ -78,7 +78,7 @@ public class JPAKERound1Payload implements Serializable
         this.knowledgeProofForX2 = Arrays.copyOf(knowledgeProofForX2, knowledgeProofForX2.length);
     }
 
-    public String getParticipantId()
+    public Serializable getParticipantId()
     {
         return participantId;
     }

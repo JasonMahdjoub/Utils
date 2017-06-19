@@ -40,6 +40,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.math.BigInteger;
 
 import org.bouncycastle.crypto.CryptoException;
@@ -58,7 +59,7 @@ import gnu.vm.jgnu.security.spec.InvalidKeySpecException;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 1.1
  * @since Utils 2.9.0
  */
 public class P2PJPAKESecretMessageExchanger
@@ -66,16 +67,16 @@ public class P2PJPAKESecretMessageExchanger
     private final JPAKEParticipant jpake; 
     private BigInteger keyMaterial;
     
-    public P2PJPAKESecretMessageExchanger(String participantID, char[] message) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException
+    public P2PJPAKESecretMessageExchanger(Serializable participantID, char[] message) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException
     {
 	this(participantID, message, null, -1, -1);
     }
-    public P2PJPAKESecretMessageExchanger(String participantID, byte[] message, boolean messageIsKey) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException
+    public P2PJPAKESecretMessageExchanger(Serializable participantID, byte[] message, boolean messageIsKey) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException
     {
 	this(participantID, message, 0, message.length, null, -1, -1, messageIsKey);
     }
     
-    public P2PJPAKESecretMessageExchanger(String participantID, char[] message, byte salt[], int offset_salt, int len_salt) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException
+    public P2PJPAKESecretMessageExchanger(Serializable participantID, char[] message, byte salt[], int offset_salt, int len_salt) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException
     {
 	if (message == null)
 	    throw new NullPointerException("message");
@@ -87,7 +88,7 @@ public class P2PJPAKESecretMessageExchanger
 	this.keyMaterial=null;
     }
     
-    public P2PJPAKESecretMessageExchanger(String participantID, byte[] message, int offset, int len, byte salt[], int offset_salt, int len_salt, boolean messageIsKey) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException
+    public P2PJPAKESecretMessageExchanger(Serializable participantID, byte[] message, int offset, int len, byte salt[], int offset_salt, int len_salt, boolean messageIsKey) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException
     {
 	if (message == null)
 	    throw new NullPointerException("message");

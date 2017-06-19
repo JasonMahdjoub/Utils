@@ -1,5 +1,7 @@
 package org.bouncycastle.crypto.agreement.jpake;
 
+import java.io.IOException;
+import java.io.Serializable;
 import java.math.BigInteger;
 import java.security.SecureRandom;
 
@@ -75,7 +77,7 @@ public class JPAKEParticipant
      * Unique identifier of this participant.
      * The two participants in the exchange must NOT share the same id.
      */
-    private final String participantId;
+    private final Serializable participantId;
 
     /**
      * Shared secret.  This only contains the secret between construction
@@ -104,7 +106,7 @@ public class JPAKEParticipant
     /**
      * The participantId of the other participant in this exchange.
      */
-    private String partnerParticipantId;
+    private Serializable partnerParticipantId;
 
     /**
      * Alice's x1 or Bob's x3.
@@ -157,7 +159,7 @@ public class JPAKEParticipant
      * @throws IllegalArgumentException if password is empty
      */
     public JPAKEParticipant(
-        String participantId,
+	    Serializable participantId,
         byte[] messageKeyOrPassword)
     {
         this(
@@ -184,7 +186,7 @@ public class JPAKEParticipant
      * @throws IllegalArgumentException if password is empty
      */
     public JPAKEParticipant(
-        String participantId,
+	Serializable participantId,
         byte[] messageKeyOrPassword,
         JPAKEPrimeOrderGroup group)
     {
@@ -215,7 +217,7 @@ public class JPAKEParticipant
      * @throws IllegalArgumentException if password is empty
      */
     public JPAKEParticipant(
-        String participantId,
+	    Serializable participantId,
         byte[] messageKeyOrPassword,
         JPAKEPrimeOrderGroup group,
         Digest digest,
@@ -270,8 +272,9 @@ public class JPAKEParticipant
      * Creates and returns the payload to send to the other participant during round 1.
      * <p>
      * After execution, the {@link #getState() state} will be  {@link #STATE_ROUND_1_CREATED}.
+     * @throws IOException 
      */
-    public JPAKERound1Payload createRound1PayloadToSend()
+    public JPAKERound1Payload createRound1PayloadToSend() throws IOException
     {
         if (this.state >= STATE_ROUND_1_CREATED)
         {
@@ -299,10 +302,11 @@ public class JPAKEParticipant
      * After execution, the {@link #getState() state} will be  {@link #STATE_ROUND_1_VALIDATED}.
      *
      * @throws CryptoException if validation fails.
+     * @throws IOException 
      * @throws IllegalStateException if called multiple times.
      */
     public void validateRound1PayloadReceived(JPAKERound1Payload round1PayloadReceived)
-        throws CryptoException
+        throws CryptoException, IOException
     {
         if (this.state >= STATE_ROUND_1_VALIDATED)
         {
@@ -329,10 +333,11 @@ public class JPAKEParticipant
      * {@link #validateRound1PayloadReceived(JPAKERound1Payload)} must be called prior to this method.
      * <p>
      * After execution, the {@link #getState() state} will be  {@link #STATE_ROUND_2_CREATED}.
+     * @throws IOException 
      *
      * @throws IllegalStateException if called prior to {@link #validateRound1PayloadReceived(JPAKERound1Payload)}, or multiple times
      */
-    public JPAKERound2Payload createRound2PayloadToSend()
+    public JPAKERound2Payload createRound2PayloadToSend() throws IOException
     {
         if (this.state >= STATE_ROUND_2_CREATED)
         {
@@ -365,10 +370,11 @@ public class JPAKEParticipant
      * After execution, the {@link #getState() state} will be  {@link #STATE_ROUND_2_VALIDATED}.
      *
      * @throws CryptoException if validation fails.
+     * @throws IOException 
      * @throws IllegalStateException if called prior to {@link #validateRound1PayloadReceived(JPAKERound1Payload)}, or multiple times
      */
     public void validateRound2PayloadReceived(JPAKERound2Payload round2PayloadReceived)
-        throws CryptoException
+        throws CryptoException, IOException
     {
         if (this.state >= STATE_ROUND_2_VALIDATED)
         {
@@ -467,9 +473,10 @@ public class JPAKEParticipant
      * After execution, the {@link #getState() state} will be  {@link #STATE_ROUND_3_CREATED}.
      *
      * @param keyingMaterial The keying material as returned from {@link #calculateKeyingMaterial()}.
+     * @throws IOException 
      * @throws IllegalStateException if called prior to {@link #calculateKeyingMaterial()}, or multiple times
      */
-    public JPAKERound3Payload createRound3PayloadToSend(BigInteger keyingMaterial)
+    public JPAKERound3Payload createRound3PayloadToSend(BigInteger keyingMaterial) throws IOException
     {
         if (this.state >= STATE_ROUND_3_CREATED)
         {
@@ -505,10 +512,11 @@ public class JPAKEParticipant
      * @param round3PayloadReceived The round 3 payload received from the other participant.
      * @param keyingMaterial The keying material as returned from {@link #calculateKeyingMaterial()}.
      * @throws CryptoException if validation fails.
+     * @throws IOException 
      * @throws IllegalStateException if called prior to {@link #calculateKeyingMaterial()}, or multiple times
      */
     public void validateRound3PayloadReceived(JPAKERound3Payload round3PayloadReceived, BigInteger keyingMaterial)
-        throws CryptoException
+        throws CryptoException, IOException
     {
         if (this.state >= STATE_ROUND_3_VALIDATED)
         {

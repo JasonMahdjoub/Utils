@@ -60,7 +60,7 @@ import com.distrimind.util.crypto.ASymmetricKeyPair;
 import com.distrimind.util.crypto.ASymmetricPrivateKey;
 import com.distrimind.util.crypto.ASymmetricPublicKey;
 import com.distrimind.util.crypto.MessageDigestType;
-import com.distrimind.util.crypto.SignatureType;
+import com.distrimind.util.crypto.ASymmetricSignatureType;
 import com.distrimind.util.crypto.SymmetricEncryptionType;
 import com.distrimind.util.crypto.SymmetricSecretKey;
 
@@ -246,7 +246,7 @@ public class DefaultXMLObjectParser extends AbstractXMLObjectParser
 	{
 	    return object.toString();
 	}
-	else if (field_type == SignatureType.class)
+	else if (field_type == ASymmetricSignatureType.class)
 	{
 	    return object.toString();
 	}
@@ -479,9 +479,9 @@ public class DefaultXMLObjectParser extends AbstractXMLObjectParser
 	{
 	    return SymmetricEncryptionType.valueOf(nodeValue);
 	}
-	else if (field_type == SignatureType.class)
+	else if (field_type == ASymmetricSignatureType.class)
 	{
-	    return SignatureType.valueOf(nodeValue);
+	    return ASymmetricSignatureType.valueOf(nodeValue);
 	}
 	else if (field_type == MessageDigestType.class)
 	{
@@ -558,7 +558,7 @@ public class DefaultXMLObjectParser extends AbstractXMLObjectParser
 		|| field_type == ASymmetricEncryptionType.class
 		|| field_type == MessageDigestType.class
 		|| field_type == SymmetricEncryptionType.class
-		|| field_type == SignatureType.class
+		|| field_type == ASymmetricSignatureType.class
 		// || field_type==SymmetricSecretKeyType.class
 		|| field_type == SymmetricSecretKey.class
 		|| field_type == ASymmetricPrivateKey.class

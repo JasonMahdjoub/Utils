@@ -54,13 +54,13 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 
     private final ASymmetricPublicKey distantPublicKey;
 
-    private final SignerAlgorithm signer;
+    private final ASymmetricSignerAlgorithm signer;
 
-    private final SignatureCheckerAlgorithm signatureChecker;
+    private final ASymmetricSignatureCheckerAlgorithm signatureChecker;
 
     private final ASymmetricEncryptionType type;
 
-    private final SignatureType signatureType;
+    private final ASymmetricSignatureType signatureType;
 
     private final int maxBlockSizeForEncoding, maxBlockSizeForDecoding;
 
@@ -70,7 +70,7 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 		myKeyPair, distantPublicKey);
     }
 
-    public P2PASymmetricEncryptionAlgorithm(SignatureType signatureType, ASymmetricKeyPair myKeyPair, ASymmetricPublicKey distantPublicKey) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidKeySpecException, NoSuchProviderException
+    public P2PASymmetricEncryptionAlgorithm(ASymmetricSignatureType signatureType, ASymmetricKeyPair myKeyPair, ASymmetricPublicKey distantPublicKey) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidKeySpecException, NoSuchProviderException
     {
 	super(myKeyPair.getAlgorithmType().getCipherInstance());
 	if (signatureType == null)
@@ -82,9 +82,9 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 	this.myKeyPair = myKeyPair;
 	this.distantPublicKey = distantPublicKey;
 	this.signatureType = signatureType;
-	this.signer = new SignerAlgorithm(signatureType,
+	this.signer = new ASymmetricSignerAlgorithm(signatureType,
 		myKeyPair.getASymmetricPrivateKey());
-	this.signatureChecker = new SignatureCheckerAlgorithm(signatureType,
+	this.signatureChecker = new ASymmetricSignatureCheckerAlgorithm(signatureType,
 		distantPublicKey);
 	// initCipherForEncrypt(this.cipher);
 	this.maxBlockSizeForEncoding = myKeyPair.getMaxBlockSize();
@@ -121,17 +121,17 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 	return this.myKeyPair;
     }
 
-    public SignatureCheckerAlgorithm getSignatureCheckerAlgorithm()
+    public ASymmetricSignatureCheckerAlgorithm getSignatureCheckerAlgorithm()
     {
 	return signatureChecker;
     }
 
-    public SignatureType getSignatureType()
+    public ASymmetricSignatureType getSignatureType()
     {
 	return signatureType;
     }
 
-    public SignerAlgorithm getSignerAlgorithm()
+    public ASymmetricSignerAlgorithm getSignerAlgorithm()
     {
 	return signer;
     }

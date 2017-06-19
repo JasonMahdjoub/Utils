@@ -59,8 +59,8 @@ public class Utils
 	Calendar c = Calendar.getInstance();
 	c.set(2016, 1, 4);
 	Calendar c2 = Calendar.getInstance();
-	c.set(2017, 5, 17);
-	VERSION = new Version("Utils", "Utils", 2, 9, 0, Version.Type.Stable, 0,
+	c.set(2017, 5, 19);
+	VERSION = new Version("Utils", "Utils", 2, 10, 0, Version.Type.Stable, 0,
 		c.getTime(), c2.getTime());
 	try
 	{
@@ -76,8 +76,16 @@ public class Utils
 		    new PersonDeveloper("mahdjoub", "jason", c.getTime()));
 
 	    c = Calendar.getInstance();
+	    c.set(2017, 5, 19);
+	    Description d = new Description(2, 10, 0, Version.Type.Stable, 0,
+		    c.getTime());
+	    d.addItem("Adding symmetric signture algorithms");
+	    d.addItem("Altereging P2PJPAKESecretMessageExchanger class");
+	    VERSION.addDescription(d);
+
+	    c = Calendar.getInstance();
 	    c.set(2017, 5, 18);
-	    Description d = new Description(2, 9, 0, Version.Type.Stable, 0,
+	    d = new Description(2, 9, 0, Version.Type.Stable, 0,
 		    c.getTime());
 	    d.addItem("Adding Elliptic Curve Diffie-Hellman key exchange support");
 	    d.addItem("Password Authenticated Key Exchange by Juggling (2008) algorithm");

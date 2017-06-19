@@ -52,11 +52,11 @@ public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutpu
 {
     private final ASymmetricPublicKey distantPublicKey;
 
-    private final SignatureCheckerAlgorithm signatureChecker;
+    private final ASymmetricSignatureCheckerAlgorithm signatureChecker;
 
     private final ASymmetricEncryptionType type;
 
-    private final SignatureType signatureType;
+    private final ASymmetricSignatureType signatureType;
 
     private final int maxBlockSize;
 
@@ -66,7 +66,7 @@ public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutpu
 		distantPublicKey);
     }
 
-    public ClientASymmetricEncryptionAlgorithm(SignatureType signatureType, ASymmetricPublicKey distantPublicKey) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidKeySpecException, NoSuchProviderException
+    public ClientASymmetricEncryptionAlgorithm(ASymmetricSignatureType signatureType, ASymmetricPublicKey distantPublicKey) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidKeySpecException, NoSuchProviderException
     {
 	super(distantPublicKey.getAlgorithmType().getCipherInstance());
 	if (signatureType == null)
@@ -75,7 +75,7 @@ public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutpu
 	this.type = distantPublicKey.getAlgorithmType();
 	this.distantPublicKey = distantPublicKey;
 	this.signatureType = signatureType;
-	this.signatureChecker = new SignatureCheckerAlgorithm(signatureType,
+	this.signatureChecker = new ASymmetricSignatureCheckerAlgorithm(signatureType,
 		distantPublicKey);
 	initCipherForEncrypt(this.cipher);
 	this.maxBlockSize = distantPublicKey.getMaxBlockSize();
@@ -98,12 +98,12 @@ public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutpu
 	return maxBlockSize;
     }
 
-    public SignatureCheckerAlgorithm getSignatureCheckerAlgorithm()
+    public ASymmetricSignatureCheckerAlgorithm getSignatureCheckerAlgorithm()
     {
 	return signatureChecker;
     }
 
-    public SignatureType getSignatureType()
+    public ASymmetricSignatureType getSignatureType()
     {
 	return signatureType;
     }

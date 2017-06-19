@@ -66,7 +66,7 @@ import com.distrimind.util.crypto.PasswordHash;
 import com.distrimind.util.crypto.PasswordHashType;
 import com.distrimind.util.crypto.ServerASymmetricEncryptionAlgorithm;
 import com.distrimind.util.crypto.MessageDigestType;
-import com.distrimind.util.crypto.SignatureType;
+import com.distrimind.util.crypto.ASymmetricSignatureType;
 import com.distrimind.util.crypto.SymmetricEncryptionAlgorithm;
 import com.distrimind.util.crypto.SymmetricEncryptionType;
 import com.distrimind.util.crypto.SymmetricSecretKey;
@@ -74,7 +74,7 @@ import com.distrimind.util.crypto.SymmetricSecretKey;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 1.5
+ * @version 1.6
  * @since Utils 1.4
  */
 public class CryptoTests
@@ -137,15 +137,15 @@ public class CryptoTests
 	return res;
     }
 
-    @DataProvider(name = "provideDataForSignatureTest", parallel = true)
-    public Object[][] provideDataForSignatureTest()
+    @DataProvider(name = "provideDataForASymmetricSignatureTest", parallel = true)
+    public Object[][] provideDataForASymmetricSignatureTest()
     {
 	Object[][] res = new Object[ASymmetricEncryptionType.values().length
-		* SignatureType.values().length * keySizes.length][];
+		* ASymmetricSignatureType.values().length * keySizes.length][];
 	int i = 0;
 	for (ASymmetricEncryptionType ast : ASymmetricEncryptionType.values())
 	{
-	    for (SignatureType st : SignatureType.values())
+	    for (ASymmetricSignatureType st : ASymmetricSignatureType.values())
 	    {
 		for (int keySize : keySizes)
 		{
@@ -159,6 +159,24 @@ public class CryptoTests
 	}
 	return res;
     }
+    @DataProvider(name = "provideDataForSymmetricSignatureTest", parallel = true)
+    public Object[][] provideDataForSymmetricSignatureTest()
+    {
+	Object[][] res = new Object[SymmetricEncryptionType.values().length * SymmetricSignatureType.values().length][];
+	int i = 0;
+	for (SymmetricEncryptionType ast : SymmetricEncryptionType.values())
+	{
+	    for (SymmetricSignatureType st : SymmetricSignatureType.values())
+	    {
+		Object o[] = new Object[2];
+		o[0] = ast;
+		o[1] = st;
+		res[i++] = o;
+	    }
+	}
+	return res;
+    }
+    
 
     @DataProvider(name = "provideDataForSymetricEncryptions", parallel = true)
     public Object[][] provideDataForSymetricEncryptions()
@@ -708,30 +726,60 @@ public class CryptoTests
 	random.nextBytes(new byte[100]);
     }
 
-    @Test(dataProvider = "provideDataForSignatureTest")
-    public void testSignatures(ASymmetricEncryptionType type, SignatureType sigType, int keySize) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException, InvalidKeySpecException, NoSuchProviderException
+    @Test(dataProvider = "provideDataForASymmetricSignatureTest")
+    public void testAsymmetricSignatures(ASymmetricEncryptionType type, ASymmetricSignatureType sigType, int keySize) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException, InvalidKeySpecException, NoSuchProviderException
     {
 	if (sigType.getCodeProvider() != type.getCodeProvider())
 	    return;
 	System.out.println(
-		"Testing signature : " + type + "/" + sigType + "/" + keySize);
+		"Testing asymmetric signature : " + type + "/" + sigType + "/" + keySize);
 	AbstractSecureRandom rand = SecureRandomType.DEFAULT.getInstance();
-	ASymmetricKeyPair kpd = type.getKeyPairGenerator(rand, (short) keySize)
-		.generateKeyPair();
+	ASymmetricKeyPair kpd = type.getKeyPairGenerator(rand, (short) keySize).generateKeyPair();
 	byte[] m = new byte[10];
 	rand.nextBytes(m);
 
-	AbstractSignature s = sigType.getSignatureInstance();
-	s.initSign(kpd.getASymmetricPrivateKey());
-	s.update(m);
-	byte[] sign = s.sign();
-	Assert.assertEquals(sign.length, type.getDefaultSignatureAlgorithm()
-		.getSignatureSizeBytes(keySize));
-	s.initVerify(kpd.getASymmetricPublicKey());
-	s.update(m);
-	Assert.assertTrue(s.verify(sign));
+	ASymmetricSignerAlgorithm signer=new ASymmetricSignerAlgorithm(sigType, kpd.getASymmetricPrivateKey());
+	byte[] signature=signer.sign(m);
+	
+	ASymmetricSignatureCheckerAlgorithm checker=new ASymmetricSignatureCheckerAlgorithm(sigType, kpd.getASymmetricPublicKey());
+	Assert.assertTrue(checker.verify(m, signature));
+	Assert.assertTrue(checker.verify(m, signature));
+	
+	for (int i=0;i<m.length;i++)
+	{
+	    m[i]=(byte)~m[i];
+	}
+	Assert.assertFalse(checker.verify(m, signature));
     }
 
+    @Test(dataProvider = "provideDataForSymmetricSignatureTest", dependsOnMethods={"testSymetricEncryptions"})
+    public void testSymmetricSignatures(SymmetricEncryptionType type, SymmetricSignatureType sigType) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException, InvalidKeySpecException, NoSuchProviderException
+    {
+	if (sigType.getCodeProvider() != type.getCodeProvider())
+	    return;
+	System.out.println(
+		"Testing symmetric signature : " + type + "/" + sigType);
+	AbstractSecureRandom rand = SecureRandomType.DEFAULT.getInstance();
+	SymmetricSecretKey secretKey=type.getKeyGenerator(rand).generateKey();
+	byte[] m = new byte[10];
+	rand.nextBytes(m);
+
+	SymmetricSignerAlgorithm signer=new SymmetricSignerAlgorithm(sigType, secretKey);
+	byte[] signature=signer.sign(m);
+	
+	SymmetricSignatureCheckerAlgorithm checker=new SymmetricSignatureCheckerAlgorithm(sigType, secretKey);
+	Assert.assertTrue(checker.verify(m, signature));
+	Assert.assertTrue(checker.verify(m, signature));
+	
+	for (int i=0;i<m.length;i++)
+	{
+	    m[i]=(byte)~m[i];
+	}
+	    
+	Assert.assertFalse(checker.verify(m, signature));
+    }
+    
+    
     @Test(invocationCount = 1, dataProvider = "provideDataForSymetricEncryptions", dependsOnMethods = "testSecretKeyEncoding")
     public void testSymetricEncryptions(SymmetricEncryptionType type) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IOException, IllegalBlockSizeException, BadPaddingException, NoSuchProviderException, InvalidKeySpecException
     {
