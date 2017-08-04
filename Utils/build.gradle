@@ -50,7 +50,7 @@ allprojects {
 
 sourceCompatibility = 1.7
 targetCompatibility=1.7
-version='2.11.0'
+version='2.11.1'
 
 task sourcesJar(type: Jar, dependsOn: classes) {
     classifier = 'sources'
@@ -79,9 +79,16 @@ jar {
 }
 
 test {
-     useTestNG {
-         suites 'src/test/java/com/distrimind/util/AllTestsNG.xml'
-     }
+     
+     // enable TestNG support (default is JUnit)
+   	useTestNG()
+   	// enable TestNG support (default is JUnit)
+   	include 'com/distrimind/util/**'
+   
+   // set heap size for the test JVM(s)
+   minHeapSize = "256m"
+   maxHeapSize = "1g"
+
  }
 
 publishing {
