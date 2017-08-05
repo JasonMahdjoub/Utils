@@ -55,7 +55,7 @@ public class Utils {
 		c.set(2016, 1, 4);
 		Calendar c2 = Calendar.getInstance();
 		c.set(2017, 7, 5);
-		VERSION = new Version("Utils", "Utils", 2, 11, 4, Version.Type.Stable, 0, c.getTime(), c2.getTime());
+		VERSION = new Version("Utils", "Utils", 2, 11, 5, Version.Type.Stable, 0, c.getTime(), c2.getTime());
 		try {
 
 			InputStream is = Utils.class.getResourceAsStream("build.txt");
@@ -69,7 +69,7 @@ public class Utils {
 
 			c = Calendar.getInstance();
 			c.set(2017, 7, 5);
-			Description d = new Description(2, 11, 4, Version.Type.Stable, 0, c.getTime());
+			Description d = new Description(2, 11, 5, Version.Type.Stable, 0, c.getTime());
 			d.addItem("Minimal corrections");
 			VERSION.addDescription(d);
 
