@@ -38,9 +38,9 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.security.KeyPair;
 
-import com.distrimind.util.Bits;
+import org.apache.commons.codec.binary.Base64;
 
-import gnu.jgnu.util.Base64;
+import com.distrimind.util.Bits;
 
 /**
  * 
@@ -65,7 +65,7 @@ public class ASymmetricKeyPair implements Serializable {
 	}
 
 	public static ASymmetricKeyPair valueOf(String key) throws IllegalArgumentException, IOException {
-		return decode(Base64.decode(key));
+		return decode(Base64.decodeBase64(key));
 	}
 
 	private final ASymmetricPrivateKey privateKey;
@@ -218,7 +218,7 @@ public class ASymmetricKeyPair implements Serializable {
 	@Override
 	public String toString() {
 		try {
-			return Base64.encode(encode());
+			return Base64.encodeBase64URLSafeString(encode());
 		} catch (Exception e) {
 			return e.toString();
 		}

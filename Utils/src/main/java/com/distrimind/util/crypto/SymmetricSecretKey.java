@@ -37,9 +37,11 @@ package com.distrimind.util.crypto;
 import java.io.IOException;
 import java.util.Arrays;
 import javax.crypto.SecretKey;
+
+import org.apache.commons.codec.binary.Base64;
+
 import com.distrimind.util.Bits;
 
-import gnu.jgnu.util.Base64;
 
 /**
  * 
@@ -61,7 +63,7 @@ public class SymmetricSecretKey implements UtilKey {
 	}
 
 	public static SymmetricSecretKey valueOf(String key) throws IllegalArgumentException, IOException {
-		return decode(Base64.decode(key));
+		return decode(Base64.decodeBase64(key));
 	}
 
 	private final byte[] secretKey;
@@ -168,7 +170,7 @@ public class SymmetricSecretKey implements UtilKey {
 
 	@Override
 	public String toString() {
-		return Base64.encode(encode());
+		return Base64.encodeBase64URLSafeString(encode());
 	}
 
 	/*

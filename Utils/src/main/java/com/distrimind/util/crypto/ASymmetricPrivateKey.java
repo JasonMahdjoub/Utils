@@ -38,9 +38,10 @@ import java.io.IOException;
 import java.security.PrivateKey;
 import java.util.Arrays;
 
+import org.apache.commons.codec.binary.Base64;
+
 import com.distrimind.util.Bits;
 
-import gnu.jgnu.util.Base64;
 
 /**
  * 
@@ -61,7 +62,7 @@ public class ASymmetricPrivateKey implements UtilKey {
 	}
 
 	public static ASymmetricPrivateKey valueOf(String key) throws IOException {
-		return decode(Base64.decode(key));
+		return decode(Base64.decodeBase64(key));
 	}
 
 	// private final PrivateKey privateKey;
@@ -179,6 +180,6 @@ public class ASymmetricPrivateKey implements UtilKey {
 
 	@Override
 	public String toString() {
-		return Base64.encode(encode());
+		return Base64.encodeBase64URLSafeString(encode());
 	}
 }

@@ -54,8 +54,8 @@ public class Utils {
 		Calendar c = Calendar.getInstance();
 		c.set(2016, 1, 4);
 		Calendar c2 = Calendar.getInstance();
-		c.set(2017, 7, 4);
-		VERSION = new Version("Utils", "Utils", 2, 11, 1, Version.Type.Stable, 0, c.getTime(), c2.getTime());
+		c.set(2017, 7, 5);
+		VERSION = new Version("Utils", "Utils", 2, 11, 4, Version.Type.Stable, 0, c.getTime(), c2.getTime());
 		try {
 
 			InputStream is = Utils.class.getResourceAsStream("build.txt");
@@ -68,8 +68,8 @@ public class Utils {
 			VERSION.addDeveloper(new PersonDeveloper("mahdjoub", "jason", c.getTime()));
 
 			c = Calendar.getInstance();
-			c.set(2017, 7, 4);
-			Description d = new Description(2, 11, 1, Version.Type.Stable, 0, c.getTime());
+			c.set(2017, 7, 5);
+			Description d = new Description(2, 11, 4, Version.Type.Stable, 0, c.getTime());
 			d.addItem("Minimal corrections");
 			VERSION.addDescription(d);
 
