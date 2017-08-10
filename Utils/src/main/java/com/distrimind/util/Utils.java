@@ -54,8 +54,8 @@ public class Utils {
 		Calendar c = Calendar.getInstance();
 		c.set(2016, 1, 4);
 		Calendar c2 = Calendar.getInstance();
-		c.set(2017, 7, 5);
-		VERSION = new Version("Utils", "Utils", 2, 11, 5, Version.Type.Stable, 0, c.getTime(), c2.getTime());
+		c.set(2017, 7, 10);
+		VERSION = new Version("Utils", "Utils", 2, 12, 0, Version.Type.Stable, 0, c.getTime(), c2.getTime());
 		try {
 
 			InputStream is = Utils.class.getResourceAsStream("build.txt");
@@ -68,8 +68,14 @@ public class Utils {
 			VERSION.addDeveloper(new PersonDeveloper("mahdjoub", "jason", c.getTime()));
 
 			c = Calendar.getInstance();
+			c.set(2017, 7, 10);
+			Description d = new Description(2, 12, 0, Version.Type.Stable, 0, c.getTime());
+			d.addItem("Enabling 256 bits SUN AES encryption");
+			VERSION.addDescription(d);
+
+			c = Calendar.getInstance();
 			c.set(2017, 7, 5);
-			Description d = new Description(2, 11, 5, Version.Type.Stable, 0, c.getTime());
+			d = new Description(2, 12, 0, Version.Type.Stable, 0, c.getTime());
 			d.addItem("Minimal corrections");
 			VERSION.addDescription(d);
 

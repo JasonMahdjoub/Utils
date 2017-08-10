@@ -47,7 +47,7 @@ allprojects {
 
 sourceCompatibility = 1.7
 targetCompatibility=1.7
-version='2.11.5'
+version='2.12.0'
 
 task sourcesJar(type: Jar, dependsOn: classes) {
     classifier = 'sources'

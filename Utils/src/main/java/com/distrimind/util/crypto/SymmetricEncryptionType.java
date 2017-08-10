@@ -54,21 +54,8 @@ import com.distrimind.util.Bits;
  */
 public enum SymmetricEncryptionType {
 
-	AES("AES", "CBC", "PKCS5Padding", (short) 128, CodeProvider.SUN_ORACLE, SymmetricSignatureType.HMAC_SHA_256), // TODO
-																													// see
-																													// for
-																													// OCB
-																													// and/or
-																													// GCM
-																													// mode
-																													// (limit
-																													// to
-																													// 64Gb
-																													// for
-																													// the
-																													// same
-																													// couple
-																													// key/iv)
+	AES_128("AES", "CBC", "PKCS5Padding", (short) 128, CodeProvider.SUN_ORACLE, SymmetricSignatureType.HMAC_SHA_256),
+	AES_256("AES", "CBC", "PKCS5Padding", (short) 256, CodeProvider.SUN_ORACLE, SymmetricSignatureType.HMAC_SHA_384),
 	@Deprecated
 	DES("DES", "CBC", "PKCS5Padding", (short) 56, (short) 8, CodeProvider.SUN_ORACLE,
 			SymmetricSignatureType.HMAC_SHA_256), @Deprecated
@@ -94,7 +81,7 @@ public enum SymmetricEncryptionType {
 																			"Serpent", "CBC", "PKCS5Padding",
 																			(short) 128, CodeProvider.BOUNCY_CASTLE,
 																			SymmetricSignatureType.BOUNCY_CASTLE_HMAC_SHA_256), DEFAULT(
-																					AES);
+																					AES_128);
 	static gnu.vm.jgnux.crypto.SecretKey decodeGnuSecretKey(byte[] encodedSecretKey) {
 		return decodeGnuSecretKey(encodedSecretKey, 0, encodedSecretKey.length);
 	}
