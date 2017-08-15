@@ -45,31 +45,44 @@ import java.security.SecureRandom;
  * @since Utils 2.0
  */
 public enum SecureRandomType {
-	SHA1PRNG("SHA1PRNG", "SUN", false), GNU_SHA1PRNG("SHA1PRNG", "GNU-Crypto", true), GNU_SHA256PRNG("SHA-256PRNG",
-			"GNU-Crypto", true), GNU_SHA384PRNG("SHA-384PRNG", "GNU-Crypto", true), GNU_SHA512PRNG("SHA-512PRNG",
-					"GNU-Crypto", true), GNU_WIRLPOOLPRNG("WHIRLPOOLPRNG", "GNU-Crypto",
-							true), SPEEDIEST(SHA1PRNG), DEFAULT(SPEEDIEST), GNU_DEFAULT(GNU_SHA1PRNG);
+	SHA1PRNG("SHA1PRNG", "SUN", false, true), GNU_SHA1PRNG("SHA1PRNG", "GNU-Crypto", true, true), GNU_SHA256PRNG("SHA-256PRNG",
+			"GNU-Crypto", true, true), GNU_SHA384PRNG("SHA-384PRNG", "GNU-Crypto", true, true), GNU_SHA512PRNG("SHA-512PRNG",
+					"GNU-Crypto", true, true), GNU_WIRLPOOLPRNG("WHIRLPOOLPRNG", "GNU-Crypto",
+							true, true), SPEEDIEST(SHA1PRNG), NativePRNGBlocking("NativePRNG", "SUN", false, true), GNU_DEFAULT(GNU_SHA1PRNG), 
+	GNU_FORTUNA("FORTUNA", "GNU-Crypto", true, false),DEFAULT(GNU_FORTUNA);
 
 	private final String algorithmeName;
 
 	private final String provider;
 
 	private final boolean gnuVersion;
+	
+	private final boolean needInitialSeed;
 
+	private volatile static FortunaSecureRandom fortunaSecureRandomSingleton=null;
+	
 	private SecureRandomType(SecureRandomType type) {
-		this(type.algorithmeName, type.provider, type.gnuVersion);
+		this(type.algorithmeName, type.provider, type.gnuVersion, type.needInitialSeed);
+	}
+	
+	boolean needInitialSeed()
+	{
+		return needInitialSeed;
 	}
 
-	private SecureRandomType(String algorithmName, String provider, boolean gnuVersion) {
+	private SecureRandomType(String algorithmName, String provider, boolean gnuVersion, boolean needInitialSeed) {
 		this.algorithmeName = algorithmName;
 		this.provider = provider;
 		this.gnuVersion = gnuVersion;
+		this.needInitialSeed=needInitialSeed;
 	}
 
 	public AbstractSecureRandom getInstance()
 			throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.NoSuchProviderException {
 		if (gnuVersion) {
-			if (algorithmeName == null)
+			if (this.algorithmeName.equals("FORTUNA"))
+				return getFortunaSecureRandomSingleton();
+			else if (algorithmeName == null)
 				return new GnuSecureRandom(this, new gnu.vm.jgnu.security.SecureRandom());
 			else
 				return new GnuSecureRandom(this, gnu.vm.jgnu.security.SecureRandom.getInstance(algorithmeName));
@@ -104,6 +117,19 @@ public enum SecureRandomType {
 
 	public boolean isGNUVersion() {
 		return gnuVersion;
+	}
+	
+	public static FortunaSecureRandom getFortunaSecureRandomSingleton() throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.NoSuchProviderException
+	{
+		if (fortunaSecureRandomSingleton==null)
+		{
+			synchronized(SecureRandomType.class)
+			{
+				if (fortunaSecureRandomSingleton==null)
+					fortunaSecureRandomSingleton=new FortunaSecureRandom();
+			}
+		}
+		return fortunaSecureRandomSingleton;
 	}
 
 }

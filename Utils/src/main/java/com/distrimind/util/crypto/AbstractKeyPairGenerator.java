@@ -39,7 +39,7 @@ import gnu.vm.jgnu.security.InvalidParameterException;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 1.1
+ * @version 1.2
  * @since Utils 2.0
  */
 public abstract class AbstractKeyPairGenerator {
@@ -61,7 +61,6 @@ public abstract class AbstractKeyPairGenerator {
 	 * This will generate a new key pair every time it is called.
 	 *
 	 * <p>
-	 * This method is functionally equivalent to {@link #genKeyPair() genKeyPair}.
 	 *
 	 * @return the generated key pair
 	 */
@@ -85,8 +84,6 @@ public abstract class AbstractKeyPairGenerator {
 	 * the installed providers supply an implementation of
 	 * <code>SecureRandom</code>, a system-provided source of randomness is used.)
 	 *
-	 * @param type
-	 *            the encryption type
 	 * @param keysize
 	 *            the keysize. This is an algorithm-specific metric, such as modulus
 	 *            length, specified in number of bits.
@@ -101,8 +98,6 @@ public abstract class AbstractKeyPairGenerator {
 	 * Initializes the key pair generator for a certain keysize with the given
 	 * source of randomness (and a default parameter set).
 	 *
-	 * @param type
-	 *            the encryption type
 	 * @param keysize
 	 *            the keysize. This is an algorithm-specific metric, such as modulus
 	 *            length, specified in number of bits.

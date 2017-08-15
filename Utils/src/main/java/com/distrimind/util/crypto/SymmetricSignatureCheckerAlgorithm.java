@@ -36,7 +36,9 @@ package com.distrimind.util.crypto;
 
 import gnu.vm.jgnu.security.InvalidKeyException;
 import gnu.vm.jgnu.security.NoSuchAlgorithmException;
+import gnu.vm.jgnu.security.SignatureException;
 import gnu.vm.jgnu.security.spec.InvalidKeySpecException;
+import gnu.vm.jgnux.crypto.ShortBufferException;
 
 /**
  * 
@@ -67,14 +69,27 @@ public class SymmetricSignatureCheckerAlgorithm extends AbstractSignatureChecker
 		return signer.getSecretKey();
 	}
 
+
+
 	@Override
-	public boolean verify(byte[] _message, int _offm, int _lenm, byte[] _signature, int _offs, int _lens)
-			throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException {
+	public void init() throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException {
+		signer.init();
+	}
+
+	@Override
+	public void update(byte[] message, int offm, int lenm) throws SignatureException {
+		signer.update(message, offm, lenm);
+		
+	}
+
+	@Override
+	public boolean verify(byte[] _signature, int _offs, int _lens)
+			throws SignatureException, InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, ShortBufferException, IllegalStateException {
 		if (_signature == null)
 			return false;
 		if (_lens > _signature.length - _offs)
 			return false;
-		byte[] mySignature = signer.sign(_message, _offm, _lenm);
+		byte[] mySignature = signer.getSignature();
 		if (mySignature.length != _lens)
 			return false;
 		for (int i = 0; i < mySignature.length; i++)

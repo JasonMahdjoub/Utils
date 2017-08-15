@@ -76,22 +76,27 @@ public class SymmetricSignerAlgorithm extends AbstractSignerAlgorithm {
 		return secretKey;
 	}
 
-	@Override
-	public byte[] sign(byte[] _bytes, int _off, int _len)
-			throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException {
-		mac.init(secretKey);
-		mac.update(_bytes, _off, _len);
 
-		return mac.doFinal();
+	@Override
+	public void init() throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException {
+		mac.init(secretKey);
 	}
 
 	@Override
-	public void sign(byte[] _message, int _offm, int _lenm, byte[] _signature, int _off_sig, int _len_sig)
-			throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, ShortBufferException,
-			IllegalStateException {
-		mac.init(secretKey);
-		mac.update(_message, _offm, _lenm);
-		mac.doFinal(_signature, _off_sig);
+	public void update(byte[] message, int offm, int lenm) {
+		mac.update(message, offm, lenm);
+		
+	}
+
+	@Override
+	public void getSignature(byte[] signature, int off_sig) throws ShortBufferException, IllegalStateException {
+		mac.doFinal(signature, off_sig);
+		
+	}
+
+	@Override
+	public int getMacLength() {
+		return mac.getMacLength();
 	}
 
 }

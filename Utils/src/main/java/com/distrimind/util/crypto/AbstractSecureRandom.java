@@ -49,12 +49,29 @@ public abstract class AbstractSecureRandom extends SecureRandom {
 	private static final long serialVersionUID = 8080761472279881205L;
 
 	private final SecureRandomType type;
-
-	AbstractSecureRandom(SecureRandomType type) {
+	private int dataGenerated=0;
+	private static final int maxDataGeneratedBeforeReseed=102400;
+	private final boolean regenerateSeed;
+	
+	AbstractSecureRandom(SecureRandomType type, boolean regenerateSeed) {
 		super(null, null);
 		this.type = type;
+		this.regenerateSeed=regenerateSeed;
 	}
 
+	protected void addDataProvided(int dataGenerated)
+	{
+		if (regenerateSeed)
+		{
+			this.dataGenerated+=dataGenerated;
+			if (this.dataGenerated>maxDataGeneratedBeforeReseed)
+			{
+				this.dataGenerated=0;
+				setSeed(generateSeed(20));
+			}
+		}
+	}
+	
 	/**
 	 * Returns the specified number of seed bytes.
 	 * 

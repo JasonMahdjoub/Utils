@@ -42,7 +42,7 @@ import gnu.vm.jgnu.security.spec.InvalidKeySpecException;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 2.0
+ * @version 2.1
  * @since Utils 1.7
  */
 public class ASymmetricSignatureCheckerAlgorithm extends AbstractSignatureCheckerAlgorithm {
@@ -74,11 +74,20 @@ public class ASymmetricSignatureCheckerAlgorithm extends AbstractSignatureChecke
 		return distantPublicKey;
 	}
 
-	public boolean verify(byte message[], int offm, int lenm, byte signature[], int offs, int lens)
-			throws SignatureException, InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException {
+	@Override
+	public void init() throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException {
 		this.signature.initVerify(distantPublicKey);
-		this.signature.update(message, offm, lenm);
+	}
 
+	@Override
+	public void update(byte[] message, int offm, int lenm) throws SignatureException {
+		this.signature.update(message, offm, lenm);
+		
+	}
+
+	@Override
+	public boolean verify(byte[] signature, int offs, int lens)
+			throws SignatureException, InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException {
 		return this.signature.verify(signature, offs, lens);
 	}
 

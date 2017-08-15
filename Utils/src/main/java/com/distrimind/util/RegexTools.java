@@ -40,7 +40,7 @@ package com.distrimind.util;
  * 
  * @author Jason Mahdjoub
  * 
- * @version 1.0
+ * @version 1.1
  * @since Utils 1.0
  *
  */
@@ -70,7 +70,7 @@ public class RegexTools {
 	 *            the character must be an upper case character
 	 * @param lowerCase
 	 *            the character must be lower case character
-	 * @return
+	 * @return the compiled regex
 	 */
 	public static String getRegexCharMatch(boolean latin, boolean greek, boolean internationalChars,
 			boolean punctuation, boolean spaceortab, boolean exDecimalDigit, boolean digit, boolean uppperCase,
@@ -134,9 +134,7 @@ public class RegexTools {
 	 *            minimum characters number
 	 * @param maxChars
 	 *            maximum characters number
-	 * @param additionalCharactersToInclude
-	 *            additional characters to include
-	 * @return
+	 * @return the compiled regex
 	 */
 	public static String getRegexTextMatchWithNoInjection(int minChars, int maxChars) {
 		return getRegexTextMatchWithNoInjection(minChars, maxChars, "[\\-\\.:'`;\\(\\)\\&]");
@@ -153,7 +151,7 @@ public class RegexTools {
 	 * @param additionalCharactersToInclude
 	 *            additional characters to include. The string must be surrounded
 	 *            with '[]' or '()'.
-	 * @return
+	 * @return the compiled regex
 	 */
 	public static String getRegexTextMatchWithNoInjection(int minChars, int maxChars,
 			String additionalCharactersToInclude) {

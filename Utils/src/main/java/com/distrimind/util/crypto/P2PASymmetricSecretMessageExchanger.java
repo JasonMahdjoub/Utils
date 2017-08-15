@@ -71,6 +71,7 @@ public class P2PASymmetricSecretMessageExchanger {
 			random = new Random();
 		}
 
+		
 		@Override
 		public byte[] generateSeed(int numBytes) {
 			return null;

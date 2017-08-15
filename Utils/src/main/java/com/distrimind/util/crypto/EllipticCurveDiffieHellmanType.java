@@ -41,38 +41,39 @@ package com.distrimind.util.crypto;
  * @since Utils 2.9
  */
 public enum EllipticCurveDiffieHellmanType {
-	ECDH_128(128, 256, MessageDigestType.SHA_256, CodeProvider.SUN_ORACLE), ECDH_256(256, 256,
-			MessageDigestType.SHA_256, CodeProvider.SUN_ORACLE), ECDH_384(256, 384, MessageDigestType.SHA_384,
-					CodeProvider.SUN_ORACLE), BOUNCY_CASTLE_ECDH_128(128, 256, MessageDigestType.BOUNCY_CASTLE_SHA_256,
-							CodeProvider.BOUNCY_CASTLE), BOUNCY_CASTLE_ECDH_256(256, 256,
+	ECDH_128((short) 128, (short) 256, MessageDigestType.SHA_256, CodeProvider.SUN_ORACLE), ECDH_256((short) 256,
+			(short) 256, MessageDigestType.SHA_256, CodeProvider.SUN_ORACLE), ECDH_384((short) 256, (short) 384,
+					MessageDigestType.SHA_384, CodeProvider.SUN_ORACLE), BOUNCY_CASTLE_ECDH_128((short) 128,
+							(short) 256, MessageDigestType.BOUNCY_CASTLE_SHA_256,
+							CodeProvider.BOUNCY_CASTLE), BOUNCY_CASTLE_ECDH_256((short) 256, (short) 256,
 									MessageDigestType.BOUNCY_CASTLE_SHA_256,
-									CodeProvider.BOUNCY_CASTLE), BOUNCY_CASTLE_ECDH_384(256, 384,
+									CodeProvider.BOUNCY_CASTLE), BOUNCY_CASTLE_ECDH_384((short) 256, (short) 384,
 											MessageDigestType.BOUNCY_CASTLE_SHA_384,
 											CodeProvider.BOUNCY_CASTLE), DEFAULT(ECDH_384);
 
-	private final int keySize;
-	private final int ECDHKeySize;
+	private final short keySizeBits;
+	private final short ECDHKeySizeBits;
 	private final MessageDigestType messageDigestType;
 	private final CodeProvider codeProvider;
 
-	private EllipticCurveDiffieHellmanType(int keySize, int ECDHKeySize, MessageDigestType messageDigestType,
-			CodeProvider codeProvider) {
-		this.keySize = keySize;
-		this.ECDHKeySize = ECDHKeySize;
+	private EllipticCurveDiffieHellmanType(short keySizeBits, short ECDHKeySizeBits,
+			MessageDigestType messageDigestType, CodeProvider codeProvider) {
+		this.keySizeBits = keySizeBits;
+		this.ECDHKeySizeBits = ECDHKeySizeBits;
 		this.messageDigestType = messageDigestType;
 		this.codeProvider = codeProvider;
 	}
 
 	private EllipticCurveDiffieHellmanType(EllipticCurveDiffieHellmanType other) {
-		this(other.keySize, other.ECDHKeySize, other.messageDigestType, other.codeProvider);
+		this(other.keySizeBits, other.ECDHKeySizeBits, other.messageDigestType, other.codeProvider);
 	}
 
-	public int getKeySize() {
-		return keySize;
+	public short getKeySizeBits() {
+		return keySizeBits;
 	}
 
-	public int getECDHKeySize() {
-		return ECDHKeySize;
+	public short getECDHKeySizeBits() {
+		return ECDHKeySizeBits;
 	}
 
 	public MessageDigestType getMessageDigestType() {

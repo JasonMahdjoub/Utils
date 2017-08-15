@@ -54,9 +54,9 @@ import com.distrimind.util.Bits;
  */
 public enum SymmetricEncryptionType {
 
-	AES_128("AES", "CBC", "PKCS5Padding", (short) 128, CodeProvider.SUN_ORACLE, SymmetricSignatureType.HMAC_SHA_256),
-	AES_256("AES", "CBC", "PKCS5Padding", (short) 256, CodeProvider.SUN_ORACLE, SymmetricSignatureType.HMAC_SHA_384),
-	@Deprecated
+	AES_128("AES", "CBC", "PKCS5Padding", (short) 128, CodeProvider.SUN_ORACLE,
+			SymmetricSignatureType.HMAC_SHA_256), AES_256("AES", "CBC", "PKCS5Padding", (short) 256,
+					CodeProvider.SUN_ORACLE, SymmetricSignatureType.HMAC_SHA_384), @Deprecated
 	DES("DES", "CBC", "PKCS5Padding", (short) 56, (short) 8, CodeProvider.SUN_ORACLE,
 			SymmetricSignatureType.HMAC_SHA_256), @Deprecated
 	DESede("DESede", "CBC", "PKCS5Padding", (short) 168, (short) 24, CodeProvider.SUN_ORACLE,
@@ -235,4 +235,20 @@ public enum SymmetricEncryptionType {
 	public SymmetricSignatureType getDefaultSignatureAlgorithm() {
 		return defaultSignature;
 	}
+
+	public SymmetricSecretKey getSymmetricSecretKey(byte[] secretKey) {
+		return this.getSymmetricSecretKey(secretKey, getDefaultKeySizeBits());
+	}
+
+	public SymmetricSecretKey getSymmetricSecretKey(byte[] secretKey, short keySizeBits) {
+		if (codeProvider == CodeProvider.BOUNCY_CASTLE || codeProvider == CodeProvider.SUN_ORACLE) {
+			return new SymmetricSecretKey(this, new SecretKeySpec(secretKey, getAlgorithmName()), keySizeBits);
+		} else if (getCodeProvider() == CodeProvider.GNU_CRYPTO) {
+			return new SymmetricSecretKey(this,
+					new gnu.vm.jgnux.crypto.spec.SecretKeySpec(secretKey, getAlgorithmName()), keySizeBits);
+		} else
+			throw new IllegalAccessError();
+
+	}
+
 }

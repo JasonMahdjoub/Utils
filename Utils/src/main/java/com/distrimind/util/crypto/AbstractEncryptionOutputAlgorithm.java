@@ -55,7 +55,7 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 
 	protected final AbstractCipher cipher;
 	final byte nullIV[];
-
+	
 	protected AbstractEncryptionOutputAlgorithm(AbstractCipher cipher) {
 		if (cipher == null)
 			throw new NullPointerException("cipher");
@@ -66,6 +66,7 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 			nullIV = null;
 	}
 
+	
 	public byte[] encode(byte[] bytes) throws gnu.vm.jgnu.security.InvalidKeyException, IOException,
 			InvalidAlgorithmParameterException, gnu.vm.jgnux.crypto.BadPaddingException, IllegalStateException,
 			gnu.vm.jgnux.crypto.IllegalBlockSizeException, NoSuchAlgorithmException, InvalidKeySpecException,

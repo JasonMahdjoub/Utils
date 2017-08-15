@@ -51,7 +51,7 @@ import gnu.vm.jgnux.crypto.ShortBufferException;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 1.1
  * @since Utils 2.0
  */
 public abstract class AbstractCipher {
@@ -206,9 +206,7 @@ public abstract class AbstractCipher {
 			throws ReadOnlyBufferException, ShortBufferException, BadPaddingException, IllegalBlockSizeException;
 
 	/**
-	 * Get the name that this cipher instance was created with; this is equivalent
-	 * to the "transformation" argument given to any of the {@link #getInstance()}
-	 * methods.
+	 * Get the name that this cipher instance was created with; 
 	 *
 	 * @return The cipher name.
 	 */
@@ -251,12 +249,6 @@ public abstract class AbstractCipher {
 	 * Initialize this cipher with the supplied key.
 	 * </p>
 	 *
-	 * <p>
-	 * The cipher will be initialized for encryption, decryption, key wrapping, or
-	 * key unwrapping, depending upon whether the <code>opmode</code> argument is
-	 * {@link #ENCRYPT_MODE}, {@link #DECRYPT_MODE}, {@link #WRAP_MODE}, or
-	 * {@link #UNWRAP_MODE}, respectively.
-	 * </p>
 	 *
 	 * <p>
 	 * If this cipher requires any random bytes (for example for an initilization
@@ -289,13 +281,6 @@ public abstract class AbstractCipher {
 	 * </p>
 	 *
 	 * <p>
-	 * The cipher will be initialized for encryption, decryption, key wrapping, or
-	 * key unwrapping, depending upon whether the <code>opmode</code> argument is
-	 * {@link #ENCRYPT_MODE}, {@link #DECRYPT_MODE}, {@link #WRAP_MODE}, or
-	 * {@link #UNWRAP_MODE}, respectively.
-	 * </p>
-	 *
-	 * <p>
 	 * A call to any of the <code>init</code> methods overrides the state of the
 	 * instance, and is equivalent to creating a new instance and calling its
 	 * <code>init</code> method.
@@ -320,12 +305,6 @@ public abstract class AbstractCipher {
 	 * Initialize this cipher with the supplied key.
 	 * </p>
 	 *
-	 * <p>
-	 * The cipher will be initialized for encryption, decryption, key wrapping, or
-	 * key unwrapping, depending upon whether the <code>opmode</code> argument is
-	 * {@link #ENCRYPT_MODE}, {@link #DECRYPT_MODE}, {@link #WRAP_MODE}, or
-	 * {@link #UNWRAP_MODE}, respectively.
-	 * </p>
 	 *
 	 * <p>
 	 * If this cipher requires any random bytes (for example for an initilization

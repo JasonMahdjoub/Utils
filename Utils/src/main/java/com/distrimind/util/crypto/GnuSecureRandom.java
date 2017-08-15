@@ -52,15 +52,17 @@ public class GnuSecureRandom extends AbstractSecureRandom {
 	private static final long serialVersionUID = -3972765139342047885L;
 
 	private final SecureRandom secureRandom;
-
+	
 	GnuSecureRandom(FakeSecureRandom random) {
-		super(SecureRandomType.GNU_DEFAULT);
+		super(SecureRandomType.GNU_DEFAULT, false);
 		this.secureRandom = random;
 	}
 
 	GnuSecureRandom(SecureRandomType _type, SecureRandom secureRandom) {
-		super(_type);
+		super(_type, true);
 		this.secureRandom = secureRandom;
+		if (_type.needInitialSeed())
+			nextBytes(new byte[20]);
 	}
 
 	@Override
@@ -86,7 +88,8 @@ public class GnuSecureRandom extends AbstractSecureRandom {
 	@Override
 	public void nextBytes(byte[] _bytes) {
 		secureRandom.nextBytes(_bytes);
-
+		if (_bytes!=null)
+			addDataProvided(_bytes.length);
 	}
 
 	@Override

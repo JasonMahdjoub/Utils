@@ -48,6 +48,7 @@ import gnu.vm.jgnu.security.spec.InvalidKeySpecException;
 import gnu.vm.jgnux.crypto.BadPaddingException;
 import gnu.vm.jgnux.crypto.IllegalBlockSizeException;
 import gnu.vm.jgnux.crypto.NoSuchPaddingException;
+import gnu.vm.jgnux.crypto.ShortBufferException;
 
 import org.bouncycastle.crypto.CryptoException;
 import org.testng.Assert;
@@ -437,7 +438,7 @@ public class CryptoTests {
 	public void testClientServerASymetricEncryptions(ASymmetricEncryptionType type)
 			throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,
 			InvalidAlgorithmParameterException, IOException, SignatureException, IllegalBlockSizeException,
-			BadPaddingException, NoSuchProviderException, InvalidKeySpecException {
+			BadPaddingException, NoSuchProviderException, InvalidKeySpecException, ShortBufferException, IllegalStateException {
 		System.out.println("Testing " + type);
 		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getInstance();
 		ASymmetricKeyPair kp = type.getKeyPairGenerator(rand, (short) 1024).generateKeyPair();
@@ -542,7 +543,7 @@ public class CryptoTests {
 	public void testP2PASymetricEncryptions(ASymmetricEncryptionType type)
 			throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,
 			InvalidAlgorithmParameterException, IOException, SignatureException, IllegalBlockSizeException,
-			BadPaddingException, NoSuchProviderException, InvalidKeySpecException {
+			BadPaddingException, NoSuchProviderException, InvalidKeySpecException, ShortBufferException, IllegalStateException {
 		System.out.println("Testing " + type);
 		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getInstance();
 		ASymmetricKeyPair kpd = type.getKeyPairGenerator(rand).generateKeyPair();
@@ -629,12 +630,25 @@ public class CryptoTests {
 	public void testSecureRandom(SecureRandomType type) throws NoSuchAlgorithmException, NoSuchProviderException {
 		AbstractSecureRandom random = type.getInstance();
 		random.nextBytes(new byte[100]);
+		if (type!=SecureRandomType.NativePRNGBlocking && type!=SecureRandomType.GNU_DEFAULT && type!=SecureRandomType.SPEEDIEST && type!=SecureRandomType.SHA1PRNG)
+		{
+			random.nextBytes(new byte[110000]);
+			random.nextBytes(new byte[110000]);
+			random.nextBytes(new byte[110000]);
+			random.nextBytes(new byte[110000]);
+			random.nextBytes(new byte[110000]);
+			random.nextBytes(new byte[110000]);
+			random.nextBytes(new byte[110000]);
+			random.nextBytes(new byte[110000]);
+			random.nextBytes(new byte[110000]);
+			random.nextBytes(new byte[110000]);
+		}
 	}
 
 	@Test(dataProvider = "provideDataForASymmetricSignatureTest")
 	public void testAsymmetricSignatures(ASymmetricEncryptionType type, ASymmetricSignatureType sigType, int keySize)
 			throws NoSuchAlgorithmException, InvalidKeyException, SignatureException, InvalidKeySpecException,
-			NoSuchProviderException {
+			NoSuchProviderException, ShortBufferException, IllegalStateException {
 		if (sigType.getCodeProvider() != type.getCodeProvider())
 			return;
 		System.out.println("Testing asymmetric signature : " + type + "/" + sigType + "/" + keySize);
@@ -660,7 +674,7 @@ public class CryptoTests {
 	@Test(dataProvider = "provideDataForSymmetricSignatureTest", dependsOnMethods = { "testSymetricEncryptions" })
 	public void testSymmetricSignatures(SymmetricEncryptionType type, SymmetricSignatureType sigType)
 			throws NoSuchAlgorithmException, InvalidKeyException, SignatureException, InvalidKeySpecException,
-			NoSuchProviderException {
+			NoSuchProviderException, ShortBufferException, IllegalStateException {
 		if (sigType.getCodeProvider() != type.getCodeProvider())
 			return;
 		System.out.println("Testing symmetric signature : " + type + "/" + sigType);
@@ -767,7 +781,9 @@ public class CryptoTests {
 	@Test(invocationCount = 100, dataProvider = "provideDataForEllipticCurveDiffieHellmanKeyExchanger", dependsOnMethods = "testMessageDigest")
 	public void testEllipticCurveDiffieHellmanKeyExchanger(EllipticCurveDiffieHellmanType type)
 			throws java.security.NoSuchAlgorithmException, java.security.InvalidKeyException,
-			java.security.spec.InvalidKeySpecException, NoSuchAlgorithmException {
+			java.security.spec.InvalidKeySpecException, NoSuchAlgorithmException, NoSuchProviderException,
+			InvalidKeyException, NoSuchPaddingException, InvalidAlgorithmParameterException, InvalidKeySpecException,
+			BadPaddingException, IllegalStateException, IllegalBlockSizeException, IOException {
 		EllipticCurveDiffieHellmanAlgorithm peer1 = type.getInstance();
 		EllipticCurveDiffieHellmanAlgorithm peer2 = type.getInstance();
 
@@ -775,7 +791,64 @@ public class CryptoTests {
 		byte[] publicKey2 = peer2.generateAndGetPublicKey();
 		peer1.setDistantPublicKey(publicKey2);
 		peer2.setDistantPublicKey(publicKey1);
-		Assert.assertEquals(peer1.getDerivedKey(), peer2.getDerivedKey());
+		Assert.assertEquals(peer1.getDerivedKey(SymmetricEncryptionType.DEFAULT),
+				peer2.getDerivedKey(SymmetricEncryptionType.DEFAULT));
+
+		SymmetricSecretKey key = peer1.getDerivedKey(SymmetricEncryptionType.DEFAULT);
+
+		SymmetricEncryptionAlgorithm algoDistant = new SymmetricEncryptionAlgorithm(key, SecureRandomType.DEFAULT,
+				null);
+		SymmetricEncryptionAlgorithm algoLocal = new SymmetricEncryptionAlgorithm(key, SecureRandomType.DEFAULT, null);
+
+		Random rand = new Random(System.currentTimeMillis());
+
+		for (byte[] m : messagesToEncrypt) {
+			byte encrypted[] = algoLocal.encode(m);
+			Assert.assertEquals(encrypted.length, algoLocal.getOutputSizeForEncryption(m.length), "length=" + m.length);
+
+			Assert.assertTrue(encrypted.length >= m.length);
+			byte decrypted[] = algoDistant.decode(encrypted);
+			Assert.assertEquals(decrypted.length, m.length, "Testing size " + type);
+			Assert.assertEquals(decrypted, m, "Testing " + type);
+			byte[] md = decrypted;
+			Assert.assertEquals(md.length, m.length, "Testing size " + type);
+			Assert.assertEquals(md, m, "Testing " + type);
+			encrypted = algoDistant.encode(m);
+			Assert.assertEquals(encrypted.length, algoDistant.getOutputSizeForEncryption(m.length));
+			Assert.assertTrue(encrypted.length >= m.length);
+			md = algoLocal.decode(encrypted);
+			Assert.assertEquals(md.length, m.length, "Testing size " + type);
+			Assert.assertEquals(md, m, "Testing " + type);
+
+			int off = rand.nextInt(15);
+			int size = m.length;
+			size -= rand.nextInt(15) + off;
+
+			encrypted = algoLocal.encode(m, off, size);
+
+			Assert.assertEquals(encrypted.length, algoLocal.getOutputSizeForEncryption(size));
+			Assert.assertTrue(encrypted.length >= size);
+			decrypted = algoDistant.decode(encrypted);
+			Assert.assertEquals(decrypted.length, size, "Testing size " + type);
+			for (int i = 0; i < decrypted.length; i++)
+				Assert.assertEquals(decrypted[i], m[i + off]);
+
+			md = algoDistant.decode(encrypted);
+
+			Assert.assertEquals(md.length, size, "Testing size " + type);
+			for (int i = 0; i < md.length; i++)
+				Assert.assertEquals(md[i], m[i + off]);
+
+			encrypted = algoDistant.encode(m, off, size);
+			Assert.assertEquals(encrypted.length, algoDistant.getOutputSizeForEncryption(size));
+			Assert.assertTrue(encrypted.length >= size);
+
+			md = algoLocal.decode(encrypted);
+			Assert.assertEquals(md.length, size, "Testing size " + type);
+			for (int i = 0; i < md.length; i++)
+				Assert.assertEquals(md[i], m[i + off]);
+
+		}
 
 	}
 

@@ -34,28 +34,67 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
+import gnu.vm.jgnu.security.InvalidKeyException;
+import gnu.vm.jgnu.security.NoSuchAlgorithmException;
+import gnu.vm.jgnu.security.SignatureException;
 import gnu.vm.jgnu.security.spec.InvalidKeySpecException;
 import gnu.vm.jgnux.crypto.ShortBufferException;
 
 /**
  * 
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 1.1
  * @since Utils 2.10.0
  */
 public abstract class AbstractSignerAlgorithm {
 	public byte[] sign(byte bytes[])
 			throws gnu.vm.jgnu.security.InvalidKeyException, gnu.vm.jgnu.security.SignatureException,
-			gnu.vm.jgnu.security.NoSuchAlgorithmException, InvalidKeySpecException {
+			gnu.vm.jgnu.security.NoSuchAlgorithmException, InvalidKeySpecException, ShortBufferException, IllegalStateException {
 		return sign(bytes, 0, bytes.length);
 	}
 
-	public abstract byte[] sign(byte bytes[], int off, int len)
+	public byte[] sign(byte bytes[], int off, int len)
 			throws gnu.vm.jgnu.security.InvalidKeyException, gnu.vm.jgnu.security.SignatureException,
-			gnu.vm.jgnu.security.NoSuchAlgorithmException, InvalidKeySpecException;
+			gnu.vm.jgnu.security.NoSuchAlgorithmException, InvalidKeySpecException, ShortBufferException, IllegalStateException
+	{
+		init();
+		update(bytes, off, len);
+		return getSignature();
+	}
 
-	public abstract void sign(byte message[], int offm, int lenm, byte signature[], int off_sig, int len_sig)
+	public void sign(byte message[], int offm, int lenm, byte signature[], int off_sig, int len_sig)
 			throws gnu.vm.jgnu.security.InvalidKeyException, gnu.vm.jgnu.security.SignatureException,
-			gnu.vm.jgnu.security.NoSuchAlgorithmException, InvalidKeySpecException, ShortBufferException;
+			gnu.vm.jgnu.security.NoSuchAlgorithmException, InvalidKeySpecException, ShortBufferException
+	{
+		init();
+		update(message, offm, lenm);
+		getSignature(signature, off_sig);
+		
+	}
+	
+	public abstract void init() throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException;
+	
+	public void update(byte message[]) throws SignatureException
+	{
+		update(message,0, message.length);
+	}
+	
+	public abstract void update(byte message[], int offm, int lenm) throws SignatureException ;
+	
+	public abstract void getSignature(byte signature[], int off_sig) throws ShortBufferException, IllegalStateException, SignatureException;
+	
+    /**
+     * Returns the length of the MAC in bytes.
+     *
+     * @return the MAC length in bytes.
+     */
+	public abstract int getMacLength();
+	
+	public byte[] getSignature() throws InvalidKeyException, SignatureException, NoSuchAlgorithmException, InvalidKeySpecException, ShortBufferException, IllegalStateException
+	{
+		byte[] res=new byte[getMacLength()];
+		getSignature(res, 0);
+		return res;
+	}
 
 }

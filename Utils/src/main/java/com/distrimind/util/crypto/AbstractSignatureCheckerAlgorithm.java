@@ -38,20 +38,48 @@ import gnu.vm.jgnu.security.InvalidKeyException;
 import gnu.vm.jgnu.security.NoSuchAlgorithmException;
 import gnu.vm.jgnu.security.SignatureException;
 import gnu.vm.jgnu.security.spec.InvalidKeySpecException;
+import gnu.vm.jgnux.crypto.ShortBufferException;
 
 /**
  * 
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 1.1
  * @since Utils 2.10.0
  */
 public abstract class AbstractSignatureCheckerAlgorithm {
+
+	public abstract void init() throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException;
+	
+	public void update(byte message[]) throws SignatureException
+	{
+		update(message,0, message.length);
+	}
+	
+	
+	public abstract void update(byte message[], int offm, int lenm) throws SignatureException ;
+
+	public boolean verify(byte signature[])
+			throws SignatureException, InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, ShortBufferException, IllegalStateException {
+		return this.verify(signature, 0, signature.length);
+	}
+
+	public abstract boolean verify(byte signature[], int offs, int lens)
+			throws SignatureException, InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, ShortBufferException, IllegalStateException;
+
 	public boolean verify(byte message[], byte signature[])
-			throws SignatureException, InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException {
+			throws SignatureException, InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, ShortBufferException, IllegalStateException {
 		return this.verify(message, 0, message.length, signature, 0, signature.length);
 	}
 
-	public abstract boolean verify(byte message[], int offm, int lenm, byte signature[], int offs, int lens)
-			throws SignatureException, InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException;
+	public boolean verify(byte message[], int offm, int lenm, byte signature[], int offs, int lens)
+			throws SignatureException, InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, ShortBufferException, IllegalStateException
+	{
+		init();
+		update(message, offm, lenm);
+		return verify(signature, offs, lens);
+	}
+	
 
+	
+	
 }

@@ -34,43 +34,48 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
+import gnu.vm.jgnu.security.InvalidKeyException;
+import gnu.vm.jgnu.security.NoSuchAlgorithmException;
+import gnu.vm.jgnu.security.SignatureException;
 import gnu.vm.jgnu.security.spec.InvalidKeySpecException;
+import gnu.vm.jgnux.crypto.ShortBufferException;
 
 /**
  * 
  * @author Jason Mahdjoub
- * @version 2.0
+ * @version 2.1
  * @since Utils 1.7
  */
 public class ASymmetricSignerAlgorithm extends AbstractSignerAlgorithm {
 	private final ASymmetricPrivateKey localPrivateKey;
-
 	private final AbstractSignature signature;
+	private final int macLength;
 
-	public ASymmetricSignerAlgorithm(AbstractSignature signature, ASymmetricPrivateKey localPrivateKey) {
+	ASymmetricSignerAlgorithm(ASymmetricSignatureType type, AbstractSignature signature, ASymmetricPrivateKey localPrivateKey) {
 		if (signature == null)
 			throw new NullPointerException("signature");
 		if (localPrivateKey == null)
 			throw new NullPointerException("localPrivateKey");
 		this.localPrivateKey = localPrivateKey;
 		this.signature = signature;
+		this.macLength = type.getSignatureSizeBytes(localPrivateKey.getKeySize());
 	}
 
 	public ASymmetricSignerAlgorithm(ASymmetricPrivateKey localPrivateKey)
 			throws gnu.vm.jgnu.security.NoSuchAlgorithmException {
-		this(localPrivateKey.getAlgorithmType().getDefaultSignatureAlgorithm().getSignatureInstance(), localPrivateKey);
+		this(localPrivateKey.getAlgorithmType().getDefaultSignatureAlgorithm(), localPrivateKey.getAlgorithmType().getDefaultSignatureAlgorithm().getSignatureInstance(), localPrivateKey);
 	}
 
 	public ASymmetricSignerAlgorithm(ASymmetricSignatureType type, ASymmetricPrivateKey localPrivateKey)
 			throws gnu.vm.jgnu.security.NoSuchAlgorithmException {
-		this(type.getSignatureInstance(), localPrivateKey);
+		this(localPrivateKey.getAlgorithmType().getDefaultSignatureAlgorithm(), type.getSignatureInstance(), localPrivateKey);
 	}
 
 	public ASymmetricPrivateKey getLocalPrivateKey() {
 		return localPrivateKey;
 	}
 
-	public AbstractSignature getSignature() {
+	public AbstractSignature getSignatureAlgorithm() {
 		return signature;
 	}
 
@@ -90,6 +95,26 @@ public class ASymmetricSignerAlgorithm extends AbstractSignerAlgorithm {
 		this.signature.initSign(localPrivateKey);
 		this.signature.update(message, offm, lenm);
 		this.signature.sign(signature, off_sig, len_sig);
+	}
+
+	@Override
+	public void init() throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException {
+		this.signature.initSign(localPrivateKey);
+	}
+
+	@Override
+	public void update(byte[] message, int offm, int lenm) throws SignatureException {
+		this.signature.update(message, offm, lenm);
+	}
+
+	@Override
+	public void getSignature(byte[] signature, int off_sig) throws ShortBufferException, IllegalStateException, SignatureException {
+		this.signature.sign(signature, off_sig, getMacLength());
+	}
+
+	@Override
+	public int getMacLength() {
+		return macLength;
 	}
 
 }

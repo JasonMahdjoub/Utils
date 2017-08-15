@@ -51,32 +51,32 @@ public final class JavaNativeSecureRandom extends AbstractSecureRandom {
 
 		protected GnuInterface() {
 			super(null, null);
+			
 		}
 
 		@Override
 		public byte[] generateSeed(int _numBytes) {
-			return secureRandom.generateSeed(_numBytes);
+			return JavaNativeSecureRandom.this.generateSeed(_numBytes);
 		}
 
 		@Override
 		public String getAlgorithm() {
-			return secureRandom.getAlgorithm();
+			return JavaNativeSecureRandom.this.getAlgorithm();
 		}
 
 		@Override
 		public void nextBytes(byte[] _bytes) {
-			secureRandom.nextBytes(_bytes);
-
+			JavaNativeSecureRandom.this.nextBytes(_bytes);
 		}
 
 		@Override
 		public void setSeed(byte[] _seed) {
-			secureRandom.setSeed(_seed);
+			JavaNativeSecureRandom.this.setSeed(_seed);
 		}
 
 		@Override
 		public void setSeed(long _seed) {
-			secureRandom.setSeed(_seed);
+			JavaNativeSecureRandom.this.setSeed(_seed);
 
 		}
 
@@ -92,13 +92,16 @@ public final class JavaNativeSecureRandom extends AbstractSecureRandom {
 	private final GnuInterface secureGnuRandom;
 
 	JavaNativeSecureRandom(SecureRandomType type, java.security.SecureRandom secureRandom) {
-		super(type);
+		super(type, true);
 		if (type == null)
 			throw new NullPointerException("type");
 		if (secureRandom == null)
 			throw new NullPointerException("secureRandom");
 		this.secureRandom = secureRandom;
 		this.secureGnuRandom = new GnuInterface();
+		if (type.needInitialSeed())
+			nextBytes(new byte[20]);
+		
 	}
 
 	@Override
@@ -124,6 +127,9 @@ public final class JavaNativeSecureRandom extends AbstractSecureRandom {
 	@Override
 	public void nextBytes(byte[] _bytes) {
 		secureRandom.nextBytes(_bytes);
+		if (_bytes!=null)
+			addDataProvided(_bytes.length);
+
 
 	}
 

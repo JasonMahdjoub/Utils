@@ -81,14 +81,14 @@ public class EllipticCurveDiffieHellmanAlgorithm {
 			kpg = KeyPairGenerator.getInstance("EC", CodeProvider.getBouncyProvider());
 		} else
 			kpg = KeyPairGenerator.getInstance("EC");
-		kpg.initialize(type.getECDHKeySize());
+		kpg.initialize(type.getECDHKeySizeBits());
 		myKeyPair = kpg.generateKeyPair();
 		myPublicKeyBytes = myKeyPair.getPublic().getEncoded();
 
 		return myPublicKeyBytes;
 	}
 
-	public byte[] setDistantPublicKey(byte[] distantPublicKeyBytes) throws NoSuchAlgorithmException,
+	public void setDistantPublicKey(byte[] distantPublicKeyBytes) throws NoSuchAlgorithmException,
 			InvalidKeySpecException, InvalidKeyException, gnu.vm.jgnu.security.NoSuchAlgorithmException {
 		if (distantPublicKeyBytes == null)
 			throw new NullPointerException();
@@ -124,19 +124,19 @@ public class EllipticCurveDiffieHellmanAlgorithm {
 		hash.update(keys.get(0));
 		hash.update(keys.get(1));
 
-		byte[] derivedKey = hash.digest();
-		if (type.getKeySize() == 128) {
+		derivedKey = hash.digest();
+		if (type.getKeySizeBits() == 128) {
 			byte[] tab = new byte[16];
 			System.arraycopy(derivedKey, 0, tab, 0, 16);
 			for (int i = 0; i < 16; i++)
 				tab[i] ^= derivedKey[i + 16];
-			if (type.getECDHKeySize() == 384)
+			if (type.getECDHKeySizeBits() == 384)
 				for (int i = 0; i < 16; i++)
 					tab[i] ^= derivedKey[i + 32];
 
 			derivedKey = tab;
-		} else if (type.getKeySize() == 256) {
-			if (type.getECDHKeySize() == 384) {
+		} else if (type.getKeySizeBits() == 256) {
+			if (type.getECDHKeySizeBits() == 384) {
 				byte[] tab = new byte[32];
 				System.arraycopy(derivedKey, 0, tab, 0, 32);
 				for (int i = 0; i < 16; i++)
@@ -146,11 +146,10 @@ public class EllipticCurveDiffieHellmanAlgorithm {
 		} else {
 			throw new IllegalAccessError();
 		}
-		return derivedKey;
 	}
 
-	public byte[] getDerivedKey() {
-		return derivedKey;
+	public SymmetricSecretKey getDerivedKey(SymmetricEncryptionType symmetricEncryptionType) {
+		return symmetricEncryptionType.getSymmetricSecretKey(derivedKey, type.getKeySizeBits());
 	}
 
 }
