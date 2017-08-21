@@ -54,8 +54,8 @@ public class Utils {
 		Calendar c = Calendar.getInstance();
 		c.set(2016, 1, 4);
 		Calendar c2 = Calendar.getInstance();
-		c.set(2017, 7, 15);
-		VERSION = new Version("Utils", "Utils", 2, 15, 0, Version.Type.Stable, 0, c.getTime(), c2.getTime());
+		c.set(2017, 7, 21);
+		VERSION = new Version("Utils", "Utils", 2, 15, 1, Version.Type.Stable, 0, c.getTime(), c2.getTime());
 		try {
 
 			InputStream is = Utils.class.getResourceAsStream("build.txt");
@@ -68,8 +68,14 @@ public class Utils {
 			VERSION.addDeveloper(new PersonDeveloper("mahdjoub", "jason", c.getTime()));
 
 			c = Calendar.getInstance();
+			c.set(2017, 7, 21);
+			Description d = new Description(2, 15, 1, Version.Type.Stable, 0, c.getTime());
+			d.addItem("Minimal corrections");
+			VERSION.addDescription(d);
+
+			c = Calendar.getInstance();
 			c.set(2017, 7, 15);
-			Description d = new Description(2, 15, 0, Version.Type.Stable, 0, c.getTime());
+			d = new Description(2, 15, 0, Version.Type.Stable, 0, c.getTime());
 			d.addItem("Add FortunaSecureRandom class");
 			d.addItem("Making FortunaSecureRandom default secured random generator");
 			d.addItem("Auto-reseed for all secured random generators");

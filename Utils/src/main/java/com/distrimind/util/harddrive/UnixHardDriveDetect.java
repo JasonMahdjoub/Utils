@@ -127,7 +127,6 @@ abstract class UnixHardDriveDetect extends HardDriveDetect {
 		previous_update.set(new Long(System.currentTimeMillis()));
 	}
 
-	@SuppressWarnings("synthetic-access")
 	@Override
 	public final String getHardDriveIdentifier(File _file) {
 		try {

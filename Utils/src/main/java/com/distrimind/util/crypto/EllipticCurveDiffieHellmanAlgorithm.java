@@ -74,77 +74,98 @@ public class EllipticCurveDiffieHellmanAlgorithm {
 		myPublicKeyBytes = null;
 	}
 
-	public byte[] generateAndGetPublicKey() throws NoSuchAlgorithmException {
-		reset();
-		KeyPairGenerator kpg = null;
-		if (type.getCodeProvider() == CodeProvider.BOUNCY_CASTLE) {
-			kpg = KeyPairGenerator.getInstance("EC", CodeProvider.getBouncyProvider());
-		} else
-			kpg = KeyPairGenerator.getInstance("EC");
-		kpg.initialize(type.getECDHKeySizeBits());
-		myKeyPair = kpg.generateKeyPair();
-		myPublicKeyBytes = myKeyPair.getPublic().getEncoded();
+	public byte[] generateAndGetPublicKey() throws gnu.vm.jgnu.security.NoSuchAlgorithmException  {
+		try
+		{
+			reset();
+			KeyPairGenerator kpg = null;
+			if (type.getCodeProvider() == CodeProvider.BOUNCY_CASTLE) {
+				kpg = KeyPairGenerator.getInstance("EC", CodeProvider.getBouncyProvider());
+			} else
+				kpg = KeyPairGenerator.getInstance("EC");
+			kpg.initialize(type.getECDHKeySizeBits());
+			myKeyPair = kpg.generateKeyPair();
+			myPublicKeyBytes = myKeyPair.getPublic().getEncoded();
 
-		return myPublicKeyBytes;
+			return myPublicKeyBytes;
+		}
+		catch(NoSuchAlgorithmException e)
+		{
+			throw new gnu.vm.jgnu.security.NoSuchAlgorithmException(e);
+		}
+			
 	}
 
-	public void setDistantPublicKey(byte[] distantPublicKeyBytes) throws NoSuchAlgorithmException,
-			InvalidKeySpecException, InvalidKeyException, gnu.vm.jgnu.security.NoSuchAlgorithmException {
-		if (distantPublicKeyBytes == null)
-			throw new NullPointerException();
-		if (derivedKey != null)
-			throw new IllegalArgumentException(
-					"A key exchange process has already been begun. Use reset fonction before calling this function.");
-		KeyFactory kf = null;
-		if (type.getCodeProvider() == CodeProvider.BOUNCY_CASTLE) {
-			kf = KeyFactory.getInstance("EC", CodeProvider.getBouncyProvider());
-		} else
-			kf = KeyFactory.getInstance("EC");
-
-		X509EncodedKeySpec pkSpec = new X509EncodedKeySpec(distantPublicKeyBytes);
-		PublicKey distantPublicKey = kf.generatePublic(pkSpec);
-
-		KeyAgreement ka = null;
-		if (type.getCodeProvider() == CodeProvider.BOUNCY_CASTLE)
-			ka = KeyAgreement.getInstance("ECDH", CodeProvider.getBouncyProvider());
-		else
-			ka = KeyAgreement.getInstance("ECDH");
-
-		ka.init(myKeyPair.getPrivate());
-		ka.doPhase(distantPublicKey, true);
-
-		byte[] sharedSecret = ka.generateSecret();
-
-		AbstractMessageDigest hash = type.getMessageDigestType().getMessageDigestInstance();
-		hash.update(sharedSecret);
-
-		List<ByteBuffer> keys = Arrays.asList(ByteBuffer.wrap(myPublicKeyBytes),
-				ByteBuffer.wrap(distantPublicKeyBytes));
-		Collections.sort(keys);
-		hash.update(keys.get(0));
-		hash.update(keys.get(1));
-
-		derivedKey = hash.digest();
-		if (type.getKeySizeBits() == 128) {
-			byte[] tab = new byte[16];
-			System.arraycopy(derivedKey, 0, tab, 0, 16);
-			for (int i = 0; i < 16; i++)
-				tab[i] ^= derivedKey[i + 16];
-			if (type.getECDHKeySizeBits() == 384)
+	public void setDistantPublicKey(byte[] distantPublicKeyBytes) throws 
+			gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.InvalidKeyException, gnu.vm.jgnu.security.spec.InvalidKeySpecException {
+		try
+		{
+			if (distantPublicKeyBytes == null)
+				throw new NullPointerException();
+			if (derivedKey != null)
+				throw new IllegalArgumentException(
+						"A key exchange process has already been begun. Use reset fonction before calling this function.");
+			KeyFactory kf = null;
+			if (type.getCodeProvider() == CodeProvider.BOUNCY_CASTLE) {
+				kf = KeyFactory.getInstance("EC", CodeProvider.getBouncyProvider());
+			} else
+				kf = KeyFactory.getInstance("EC");
+	
+			X509EncodedKeySpec pkSpec = new X509EncodedKeySpec(distantPublicKeyBytes);
+			PublicKey distantPublicKey = kf.generatePublic(pkSpec);
+	
+			KeyAgreement ka = null;
+			if (type.getCodeProvider() == CodeProvider.BOUNCY_CASTLE)
+				ka = KeyAgreement.getInstance("ECDH", CodeProvider.getBouncyProvider());
+			else
+				ka = KeyAgreement.getInstance("ECDH");
+	
+			ka.init(myKeyPair.getPrivate());
+			ka.doPhase(distantPublicKey, true);
+	
+			byte[] sharedSecret = ka.generateSecret();
+	
+			AbstractMessageDigest hash = type.getMessageDigestType().getMessageDigestInstance();
+			hash.update(sharedSecret);
+	
+			List<ByteBuffer> keys = Arrays.asList(ByteBuffer.wrap(myPublicKeyBytes),
+					ByteBuffer.wrap(distantPublicKeyBytes));
+			Collections.sort(keys);
+			hash.update(keys.get(0));
+			hash.update(keys.get(1));
+	
+			derivedKey = hash.digest();
+			if (type.getKeySizeBits() == 128) {
+				byte[] tab = new byte[16];
+				System.arraycopy(derivedKey, 0, tab, 0, 16);
 				for (int i = 0; i < 16; i++)
-					tab[i] ^= derivedKey[i + 32];
-
-			derivedKey = tab;
-		} else if (type.getKeySizeBits() == 256) {
-			if (type.getECDHKeySizeBits() == 384) {
-				byte[] tab = new byte[32];
-				System.arraycopy(derivedKey, 0, tab, 0, 32);
-				for (int i = 0; i < 16; i++)
-					tab[i] ^= derivedKey[i + 32];
+					tab[i] ^= derivedKey[i + 16];
+				if (type.getECDHKeySizeBits() == 384)
+					for (int i = 0; i < 16; i++)
+						tab[i] ^= derivedKey[i + 32];
+	
 				derivedKey = tab;
+			} else if (type.getKeySizeBits() == 256) {
+				if (type.getECDHKeySizeBits() == 384) {
+					byte[] tab = new byte[32];
+					System.arraycopy(derivedKey, 0, tab, 0, 32);
+					for (int i = 0; i < 16; i++)
+						tab[i] ^= derivedKey[i + 32];
+					derivedKey = tab;
+				}
+			} else {
+				throw new IllegalAccessError();
 			}
-		} else {
-			throw new IllegalAccessError();
+		}
+		catch(NoSuchAlgorithmException e)
+		{
+			throw new gnu.vm.jgnu.security.NoSuchAlgorithmException(e);
+		}
+		catch(InvalidKeyException e)
+		{
+			throw new gnu.vm.jgnu.security.InvalidKeyException(e);
+		} catch (InvalidKeySpecException e) {
+			throw new gnu.vm.jgnu.security.spec.InvalidKeySpecException(e);
 		}
 	}
 
