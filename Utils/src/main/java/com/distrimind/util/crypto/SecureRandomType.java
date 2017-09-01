@@ -45,11 +45,18 @@ import java.security.SecureRandom;
  * @since Utils 2.0
  */
 public enum SecureRandomType {
-	SHA1PRNG("SHA1PRNG", "SUN", false, true), GNU_SHA1PRNG("SHA1PRNG", "GNU-Crypto", true, true), GNU_SHA256PRNG("SHA-256PRNG",
-			"GNU-Crypto", true, true), GNU_SHA384PRNG("SHA-384PRNG", "GNU-Crypto", true, true), GNU_SHA512PRNG("SHA-512PRNG",
-					"GNU-Crypto", true, true), GNU_WIRLPOOLPRNG("WHIRLPOOLPRNG", "GNU-Crypto",
-							true, true), SPEEDIEST(SHA1PRNG), NativePRNGBlocking("NativePRNG", "SUN", false, true), GNU_DEFAULT(GNU_SHA1PRNG), 
-	GNU_FORTUNA("FORTUNA", "GNU-Crypto", true, false),DEFAULT(GNU_FORTUNA);
+	SHA1PRNG("SHA1PRNG", "SUN", false, true), 
+	GNU_SHA1PRNG("SHA1PRNG", "GNU-Crypto", true, true), 
+	GNU_SHA256PRNG("SHA-256PRNG", "GNU-Crypto", true, true), 
+	GNU_SHA384PRNG("SHA-384PRNG", "GNU-Crypto", true, true), 
+	GNU_SHA512PRNG("SHA-512PRNG","GNU-Crypto", true, true), 
+	GNU_WIRLPOOLPRNG("WHIRLPOOLPRNG", "GNU-Crypto", true, true), 
+	SPEEDIEST(SHA1PRNG), 
+	NativePRNGBlocking("NativePRNG", "SUN", false, true), 
+	DRBG_BOUNCYCASTLE("DRBG_BOUNCYCASTLE", "BOUNCY_CASTLE", false, true),
+	GNU_DEFAULT(GNU_SHA1PRNG), 
+	GNU_FORTUNA("FORTUNA", "GNU-Crypto", true, false),
+	DEFAULT(GNU_FORTUNA);
 
 	private final String algorithmeName;
 
@@ -87,6 +94,8 @@ public enum SecureRandomType {
 			else
 				return new GnuSecureRandom(this, gnu.vm.jgnu.security.SecureRandom.getInstance(algorithmeName));
 		} else {
+			if (this==DRBG_BOUNCYCASTLE)
+				return new BouncyCastleDRBGSecureRandom();
 			try {
 				if (algorithmeName == null)
 					return new JavaNativeSecureRandom(this, new SecureRandom());

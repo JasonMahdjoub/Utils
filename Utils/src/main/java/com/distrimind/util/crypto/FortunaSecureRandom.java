@@ -55,7 +55,7 @@ import gnu.vm.jgnu.security.SecureRandom;
  * This class is thread safe.
  * 
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 1.1
  * @since Utils 2.15
  */
 public class FortunaSecureRandom extends AbstractSecureRandom implements Serializable, IRandom, RandomEventListener{
@@ -66,7 +66,7 @@ public class FortunaSecureRandom extends AbstractSecureRandom implements Seriali
 	private static final long serialVersionUID = -512529549993096330L;
 	
 	private volatile FortunaImpl fortuna;
-	private transient final AbstractSecureRandom randomStrong,randomSHA1PRNG, randomGNU_SHA512PRNG;
+	private transient final AbstractSecureRandom randomStrong,randomSHA1PRNG, randomGNU_SHA512PRNG, drbg;
 	private transient final GnuInterface secureGnuRandom;
 	private transient final JavaNativeInterface secureJavaNativeRandom;
 	private transient boolean fortunaInitialized=false;
@@ -78,8 +78,10 @@ public class FortunaSecureRandom extends AbstractSecureRandom implements Seriali
 		randomStrong=SecureRandomType.NativePRNGBlocking.getInstance();
 		randomSHA1PRNG=SecureRandomType.SHA1PRNG.getInstance();
 		randomGNU_SHA512PRNG=SecureRandomType.GNU_SHA512PRNG.getInstance();
+		drbg=SecureRandomType.DRBG_BOUNCYCASTLE.getInstance();
 		secureGnuRandom=new GnuInterface();
 		secureJavaNativeRandom=new JavaNativeInterface();
+		
 	}
 
 	private FortunaImpl getFortunaInstance()
@@ -132,9 +134,11 @@ public class FortunaSecureRandom extends AbstractSecureRandom implements Seriali
 			randomSHA1PRNG.nextBytes(seedSHA1PRNG);
 			byte[] seedGNU_SHA512PRNG=new byte[numBytes];
 			randomGNU_SHA512PRNG.nextBytes(seedGNU_SHA512PRNG);
+			byte[] seedBouncyCastleDRBG=new byte[numBytes];
+			drbg.nextBytes(seedBouncyCastleDRBG);
 			byte[] seed=new byte[numBytes];
 			for (int i=0;i<numBytes;i++)
-				seed[i]=(byte)(seedStrong[i]^seedSHA1PRNG[i]^seedGNU_SHA512PRNG[i]);
+				seed[i]=(byte)(seedStrong[i]^seedSHA1PRNG[i]^seedGNU_SHA512PRNG[i]^seedBouncyCastleDRBG[i]);
 			return seed;
 		}
 	}
@@ -365,6 +369,10 @@ public class FortunaSecureRandom extends AbstractSecureRandom implements Seriali
 			tab=new byte[64];
 			randomGNU_SHA512PRNG.nextBytes(tab);
 			pool.update(tab);
+
+			tab=new byte[64];
+			drbg.nextBytes(tab);
+			pool.update(tab);
 		}
 
 		@Override public FortunaImpl clone() throws CloneNotSupportedException
@@ -372,7 +380,6 @@ public class FortunaSecureRandom extends AbstractSecureRandom implements Seriali
 			return (FortunaImpl) super.clone();
 		}
 	}
-
 
 
 }

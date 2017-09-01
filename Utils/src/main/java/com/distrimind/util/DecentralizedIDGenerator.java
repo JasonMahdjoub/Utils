@@ -34,6 +34,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util;
 
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -41,7 +42,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * network.
  * 
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 2.0
  * @since Utils 1.0
  */
 public class DecentralizedIDGenerator extends AbstractDecentralizedIDGenerator {
@@ -65,6 +66,10 @@ public class DecentralizedIDGenerator extends AbstractDecentralizedIDGenerator {
 	public DecentralizedIDGenerator() {
 		super();
 	}
+	
+	public DecentralizedIDGenerator(boolean useShortMacAddressAndRandomNumber) {
+		super(useShortMacAddressAndRandomNumber);
+	}
 
 	DecentralizedIDGenerator(long timestamp, long work_id_sequence) {
 		super(timestamp, work_id_sequence);
@@ -85,4 +90,8 @@ public class DecentralizedIDGenerator extends AbstractDecentralizedIDGenerator {
 		return ToStringHead + "[" + getTimeStamp() + ";" + getWorkerID() + ";" + getSequenceID() + "]";
 	}
 
+	public UUID getUUID()
+	{
+		return new UUID(getWorkerIDAndSequence(), getTimeStamp());
+	}
 }

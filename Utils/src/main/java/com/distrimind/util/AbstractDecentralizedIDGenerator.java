@@ -38,14 +38,20 @@ import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.Enumeration;
 
+import com.distrimind.util.crypto.AbstractSecureRandom;
+import com.distrimind.util.crypto.FortunaSecureRandom;
+import com.distrimind.util.crypto.MessageDigestType;
 import com.distrimind.util.sizeof.ObjectSizer;
+
+import gnu.vm.jgnu.security.NoSuchAlgorithmException;
+import gnu.vm.jgnu.security.NoSuchProviderException;
 
 /**
  * This class represents a unique identifier. Uniqueness is guaranteed over the
  * network.
  * 
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 2.0
  * @since Utils 1.0
  * 
  */
@@ -56,18 +62,37 @@ public abstract class AbstractDecentralizedIDGenerator extends AbstractDecentral
 	private static final long serialVersionUID = 478117044055632008L;
 
 	private final static transient long LOCAL_MAC;
+	private final static transient long SHORT_LOCAL_MAC;
+	private final static transient AbstractSecureRandom RANDOM;
 
 	static {
 		long result = 0;
 		long result2 = 0;
+		short resultShort=0;
+		AbstractSecureRandom random=null;
 		try {
 			final Enumeration<NetworkInterface> e = NetworkInterface.getNetworkInterfaces();
 			if (e != null) {
 				while (e.hasMoreElements()) {
 					final NetworkInterface ni = e.nextElement();
-
+						
+					
 					if (!ni.isLoopback()) {
-						long val = getHardwareAddress(ni.getHardwareAddress());
+						byte digestion256[]=MessageDigestType.BOUNCY_CASTLE_SHA3_256.getMessageDigestInstance().digest(ni.getHardwareAddress());
+						byte digestion64[]=new byte[8];
+						for (int i=0;i<8;i++)
+							digestion64[i]=(byte)(digestion256[i]^digestion256[i+8]^digestion256[i+16]^digestion256[i+24]);
+						byte digestion48[]=new byte[6];
+						for (int i=0;i<2;i++)
+							digestion48[i]=(byte)(digestion64[i]^digestion64[i+2]);
+						for (int i=2;i<6;i++)
+							digestion48[i]=digestion64[i+2];
+						byte digestion16[]=new byte[2];
+						for (int i=0;i<2;i++)
+							digestion16[i]=(byte)(digestion64[i]^digestion64[i+2]+digestion64[i+4]+digestion64[i+6]);
+						resultShort=Bits.getShort(digestion16, 0);
+						
+						long val = getHardwareAddress(digestion48);
 						if (val != 0 && val != 224)// is the current network
 						// interface is not a virtual
 						// interface
@@ -82,12 +107,15 @@ public abstract class AbstractDecentralizedIDGenerator extends AbstractDecentral
 					}
 				}
 			}
-		} catch (SocketException e1) {
+			random=new FortunaSecureRandom();
+		} catch (SocketException | NoSuchAlgorithmException | NoSuchProviderException e1) {
 			e1.printStackTrace();
 		}
 		if (result == 0)
 			result = result2;
 		LOCAL_MAC = result;
+		SHORT_LOCAL_MAC=0xFFFFl & resultShort;
+		RANDOM=random;
 	}
 
 	private static long getHardwareAddress(byte hardwareAddress[]) {
@@ -104,10 +132,22 @@ public abstract class AbstractDecentralizedIDGenerator extends AbstractDecentral
 	protected final long timestamp;
 
 	protected final long worker_id_and_sequence;
-
 	public AbstractDecentralizedIDGenerator() {
+		this(true);
+	}
+	public AbstractDecentralizedIDGenerator(boolean useShortMacAddressAndRandomNumber) {
 		timestamp = System.currentTimeMillis();
-		worker_id_and_sequence = LOCAL_MAC | (((long) getNewSequence()) << 48);
+		if (useShortMacAddressAndRandomNumber)
+		{
+			long r=0;
+			synchronized(RANDOM)
+			{
+				r=0xFFFFFFFFFFFFFFFFl & ((long)RANDOM.nextInt());
+			}
+			worker_id_and_sequence = SHORT_LOCAL_MAC | ((0xFFFFFFFFl & r)<<16) | ((0xFFFFl & getNewSequence()) << 48);
+		}
+		else
+			worker_id_and_sequence = LOCAL_MAC | ((0xFFFFl & getNewSequence()) << 48);
 	}
 
 	AbstractDecentralizedIDGenerator(long timestamp, long work_id_sequence) {
@@ -147,7 +187,7 @@ public abstract class AbstractDecentralizedIDGenerator extends AbstractDecentral
 	protected abstract short getNewSequence();
 
 	public short getSequenceID() {
-		return (short) (worker_id_and_sequence >>> 48 & ((1l << 16) - 1l));
+		return (short) ((worker_id_and_sequence >>> 48) & 0xFFFFl);
 	}
 
 	public long getTimeStamp() {
@@ -155,7 +195,7 @@ public abstract class AbstractDecentralizedIDGenerator extends AbstractDecentral
 	}
 
 	public long getWorkerID() {
-		return worker_id_and_sequence & ((1l << 48) - 1);
+		return worker_id_and_sequence & 0xFFFFFFFFFFFFl;
 	}
 
 	public long getWorkerIDAndSequence() {

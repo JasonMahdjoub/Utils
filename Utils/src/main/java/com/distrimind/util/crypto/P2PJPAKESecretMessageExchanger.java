@@ -57,7 +57,7 @@ import gnu.vm.jgnu.security.spec.InvalidKeySpecException;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 1.1
+ * @version 1.2
  * @since Utils 2.9.0
  */
 public class P2PJPAKESecretMessageExchanger {
@@ -81,7 +81,7 @@ public class P2PJPAKESecretMessageExchanger {
 		if (salt != null && salt.length - offset_salt < len_salt)
 			throw new IllegalArgumentException("salt");
 
-		byte[] m = hashMessage(MessageDigestType.BOUNCY_CASTLE_SHA_256.getMessageDigestInstance(), message, salt,
+		byte[] m = hashMessage(MessageDigestType.BOUNCY_CASTLE_SHA3_256.getMessageDigestInstance(), message, salt,
 				offset_salt, len_salt, PasswordHashType.BCRYPT, 10000);
 		jpake = new JPAKEParticipant(participantID, m, JPAKEPrimeOrderGroups.NIST_3072, new SHA512Digest(),
 				SecureRandomType.DEFAULT.getInstance());
@@ -98,7 +98,7 @@ public class P2PJPAKESecretMessageExchanger {
 		if (salt != null && salt.length - offset_salt < len_salt)
 			throw new IllegalArgumentException("salt");
 
-		byte[] m = hashMessage(MessageDigestType.BOUNCY_CASTLE_SHA_256.getMessageDigestInstance(), message, offset, len,
+		byte[] m = hashMessage(MessageDigestType.BOUNCY_CASTLE_SHA3_256.getMessageDigestInstance(), message, offset, len,
 				salt, offset_salt, len_salt, messageIsKey ? null : PasswordHashType.BCRYPT, 10000);
 		jpake = new JPAKEParticipant(participantID, m, JPAKEPrimeOrderGroups.NIST_3072, new SHA512Digest(),
 				SecureRandomType.DEFAULT.getInstance());

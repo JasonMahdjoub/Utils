@@ -48,7 +48,7 @@ import java.nio.channels.FileLock;
  * guaranteed between different instances of MadKit into the same computer.
  * 
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 2.0
  * @since Utils 1.0
  */
 public class RenforcedDecentralizedIDGenerator extends AbstractDecentralizedIDGenerator {
@@ -70,6 +70,11 @@ public class RenforcedDecentralizedIDGenerator extends AbstractDecentralizedIDGe
 	public RenforcedDecentralizedIDGenerator() {
 		super();
 	}
+	
+	public RenforcedDecentralizedIDGenerator(boolean useShortMacAddressAndRandomNumber) {
+		super(useShortMacAddressAndRandomNumber);
+	}
+
 
 	RenforcedDecentralizedIDGenerator(long timestamp, long work_id_sequence) {
 		super(timestamp, work_id_sequence);
@@ -84,9 +89,13 @@ public class RenforcedDecentralizedIDGenerator extends AbstractDecentralizedIDGe
 					final FileChannel channel = raf.getChannel();
 					final FileLock lock = channel.lock();) {
 				final ByteBuffer b = ByteBuffer.allocate(2);
-				channel.read(b, 0);
-				tmp = ((short) (b.getShort(0) + 1));
-				b.putShort(0, tmp).rewind();
+				if (channel.read(b, 0)<2)
+					tmp=0;
+				else
+					tmp = ((short) (b.getShort(0) + 1));
+				
+				b.putShort(0, tmp);
+				b.rewind();
 				channel.write(b, 0);
 			} catch (IOException e) {
 				e.printStackTrace();

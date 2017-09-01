@@ -68,16 +68,28 @@ public class DecentralizedIDTests {
 		for (int i = 0; i < res.length; i++) {
 			switch ((int) Math.random() * 4) {
 			case 0:
-				res[i] = new Object[] { new DecentralizedIDGenerator() };
+				res[i] = new Object[] { new DecentralizedIDGenerator(true) };
 				break;
 			case 1:
-				res[i] = new Object[] { new RenforcedDecentralizedIDGenerator() };
+				res[i] = new Object[] { new RenforcedDecentralizedIDGenerator(true) };
 				break;
 			case 2:
-				res[i] = new Object[] { new SecuredDecentralizedID(new RenforcedDecentralizedIDGenerator(), rand) };
+				res[i] = new Object[] { new SecuredDecentralizedID(new RenforcedDecentralizedIDGenerator(true), rand) };
 				break;
 			case 3:
-				res[i] = new Object[] { new SecuredDecentralizedID(new DecentralizedIDGenerator(), rand) };
+				res[i] = new Object[] { new SecuredDecentralizedID(new DecentralizedIDGenerator(true), rand) };
+				break;
+			case 4:
+				res[i] = new Object[] { new DecentralizedIDGenerator(false) };
+				break;
+			case 5:
+				res[i] = new Object[] { new RenforcedDecentralizedIDGenerator(false) };
+				break;
+			case 6:
+				res[i] = new Object[] { new SecuredDecentralizedID(new RenforcedDecentralizedIDGenerator(false), rand) };
+				break;
+			case 7:
+				res[i] = new Object[] { new SecuredDecentralizedID(new DecentralizedIDGenerator(false), rand) };
 				break;
 			}
 		}

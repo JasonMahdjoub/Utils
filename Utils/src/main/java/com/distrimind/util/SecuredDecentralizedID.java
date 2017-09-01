@@ -50,7 +50,7 @@ import gnu.vm.jgnu.security.NoSuchAlgorithmException;
  * network.
  * 
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 2.0
  * @since Utils 1.3
  * 
  */
@@ -63,7 +63,7 @@ public class SecuredDecentralizedID extends AbstractDecentralizedID {
 
 	private static final AtomicReference<AbstractMessageDigest> message_digest = new AtomicReference<>(null);
 
-	public static final MessageDigestType DEFAULT_MESSAGE_DIGEST_TYPE = MessageDigestType.SHA_256;
+	public static final MessageDigestType DEFAULT_MESSAGE_DIGEST_TYPE = MessageDigestType.BOUNCY_CASTLE_SHA3_256;
 
 	static final String ToStringHead = "SecuredDecentralizedID";
 

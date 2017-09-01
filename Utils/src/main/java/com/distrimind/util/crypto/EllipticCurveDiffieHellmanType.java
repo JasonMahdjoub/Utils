@@ -37,19 +37,17 @@ package com.distrimind.util.crypto;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 1.1
  * @since Utils 2.9
  */
 public enum EllipticCurveDiffieHellmanType {
-	ECDH_128((short) 128, (short) 256, MessageDigestType.SHA_256, CodeProvider.SUN_ORACLE), ECDH_256((short) 256,
-			(short) 256, MessageDigestType.SHA_256, CodeProvider.SUN_ORACLE), ECDH_384((short) 256, (short) 384,
-					MessageDigestType.SHA_384, CodeProvider.SUN_ORACLE), BOUNCY_CASTLE_ECDH_128((short) 128,
-							(short) 256, MessageDigestType.BOUNCY_CASTLE_SHA_256,
-							CodeProvider.BOUNCY_CASTLE), BOUNCY_CASTLE_ECDH_256((short) 256, (short) 256,
-									MessageDigestType.BOUNCY_CASTLE_SHA_256,
-									CodeProvider.BOUNCY_CASTLE), BOUNCY_CASTLE_ECDH_384((short) 256, (short) 384,
-											MessageDigestType.BOUNCY_CASTLE_SHA_384,
-											CodeProvider.BOUNCY_CASTLE), DEFAULT(ECDH_384);
+	ECDH_128((short) 128, (short) 256, MessageDigestType.BOUNCY_CASTLE_SHA3_256, CodeProvider.SUN_ORACLE), 
+	ECDH_256((short) 256, (short) 256, MessageDigestType.BOUNCY_CASTLE_SHA3_256, CodeProvider.SUN_ORACLE), 
+	ECDH_384((short) 256, (short) 384, MessageDigestType.BOUNCY_CASTLE_SHA3_384, CodeProvider.SUN_ORACLE), 
+	BOUNCY_CASTLE_ECDH_128((short) 128, (short) 256, MessageDigestType.BOUNCY_CASTLE_SHA3_256, CodeProvider.BOUNCY_CASTLE), 
+	BOUNCY_CASTLE_ECDH_256((short) 256, (short) 256, MessageDigestType.BOUNCY_CASTLE_SHA3_256, CodeProvider.BOUNCY_CASTLE), 
+	BOUNCY_CASTLE_ECDH_384((short) 256, (short) 384, MessageDigestType.BOUNCY_CASTLE_SHA3_384, CodeProvider.BOUNCY_CASTLE), 
+	DEFAULT(ECDH_384);
 
 	private final short keySizeBits;
 	private final short ECDHKeySizeBits;

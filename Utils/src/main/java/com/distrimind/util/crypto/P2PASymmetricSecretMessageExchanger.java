@@ -54,7 +54,7 @@ import gnu.vm.jgnux.crypto.NoSuchPaddingException;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 2.0
+ * @version 2.1
  * @since Utils 1.4.1
  */
 public class P2PASymmetricSecretMessageExchanger {
@@ -193,7 +193,7 @@ public class P2PASymmetricSecretMessageExchanger {
 		this.messageDigest = messageDigestType.getMessageDigestInstance();
 		this.messageDigest.reset();
 		this.passwordHashType = passwordHashType;
-		this.messageDigest256 = MessageDigestType.GNU_SHA_256.getMessageDigestInstance();
+		this.messageDigest256 = MessageDigestType.BOUNCY_CASTLE_SHA3_256.getMessageDigestInstance();
 	}
 
 	public byte[] encode(byte[] message, byte[] salt, boolean messageIsKey) throws IOException, InvalidKeyException,

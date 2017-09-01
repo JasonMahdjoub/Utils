@@ -632,16 +632,17 @@ public class CryptoTests {
 		random.nextBytes(new byte[100]);
 		if (type!=SecureRandomType.NativePRNGBlocking && type!=SecureRandomType.GNU_DEFAULT && type!=SecureRandomType.SPEEDIEST && type!=SecureRandomType.SHA1PRNG)
 		{
-			random.nextBytes(new byte[110000]);
-			random.nextBytes(new byte[110000]);
-			random.nextBytes(new byte[110000]);
-			random.nextBytes(new byte[110000]);
-			random.nextBytes(new byte[110000]);
-			random.nextBytes(new byte[110000]);
-			random.nextBytes(new byte[110000]);
-			random.nextBytes(new byte[110000]);
-			random.nextBytes(new byte[110000]);
-			random.nextBytes(new byte[110000]);
+			int nb=type==SecureRandomType.DRBG_BOUNCYCASTLE?260000/8:110000;
+			random.nextBytes(new byte[nb]);
+			random.nextBytes(new byte[nb]);
+			random.nextBytes(new byte[nb]);
+			random.nextBytes(new byte[nb]);
+			random.nextBytes(new byte[nb]);
+			random.nextBytes(new byte[nb]);
+			random.nextBytes(new byte[nb]);
+			random.nextBytes(new byte[nb]);
+			random.nextBytes(new byte[nb]);
+			random.nextBytes(new byte[nb]);
 		}
 	}
 
