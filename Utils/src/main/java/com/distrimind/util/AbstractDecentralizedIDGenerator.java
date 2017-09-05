@@ -38,6 +38,7 @@ import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.Enumeration;
 
+import com.distrimind.util.crypto.AbstractMessageDigest;
 import com.distrimind.util.crypto.AbstractSecureRandom;
 import com.distrimind.util.crypto.FortunaSecureRandom;
 import com.distrimind.util.crypto.MessageDigestType;
@@ -62,15 +63,19 @@ public abstract class AbstractDecentralizedIDGenerator extends AbstractDecentral
 	private static final long serialVersionUID = 478117044055632008L;
 
 	private final static transient long LOCAL_MAC;
-	private final static transient long SHORT_LOCAL_MAC;
+	//private final static transient long SHORT_LOCAL_MAC;
+	private final static transient byte SHORT_LOCAL_MAC_BYTES[];
 	private final static transient AbstractSecureRandom RANDOM;
-
+	private final static transient AbstractMessageDigest MESSAGE_DIGEST;
 	static {
 		long result = 0;
 		long result2 = 0;
-		short resultShort=0;
+		//short resultShort=0;
+		byte shortLocalMacBytes[]=new byte[6];
 		AbstractSecureRandom random=null;
+		AbstractMessageDigest messageDigest=null;
 		try {
+			messageDigest=MessageDigestType.BOUNCY_CASTLE_SHA3_256.getMessageDigestInstance();
 			final Enumeration<NetworkInterface> e = NetworkInterface.getNetworkInterfaces();
 			if (e != null) {
 				while (e.hasMoreElements()) {
@@ -78,7 +83,7 @@ public abstract class AbstractDecentralizedIDGenerator extends AbstractDecentral
 						
 					
 					if (!ni.isLoopback()) {
-						byte digestion256[]=MessageDigestType.BOUNCY_CASTLE_SHA3_256.getMessageDigestInstance().digest(ni.getHardwareAddress());
+						byte digestion256[]=messageDigest.digest(ni.getHardwareAddress());
 						byte digestion64[]=new byte[8];
 						for (int i=0;i<8;i++)
 							digestion64[i]=(byte)(digestion256[i]^digestion256[i+8]^digestion256[i+16]^digestion256[i+24]);
@@ -87,10 +92,13 @@ public abstract class AbstractDecentralizedIDGenerator extends AbstractDecentral
 							digestion48[i]=(byte)(digestion64[i]^digestion64[i+2]);
 						for (int i=2;i<6;i++)
 							digestion48[i]=digestion64[i+2];
-						byte digestion16[]=new byte[2];
+						//byte digestion16[]=new byte[2];
 						for (int i=0;i<2;i++)
-							digestion16[i]=(byte)(digestion64[i]^digestion64[i+2]+digestion64[i+4]+digestion64[i+6]);
-						resultShort=Bits.getShort(digestion16, 0);
+							shortLocalMacBytes[i]=(byte)(digestion64[i]^digestion64[i+2]+digestion64[i+4]+digestion64[i+6]);
+						
+						//resultShort=Bits.getShort(digestion16, 0);
+						/*shortLocalMacBytes[0]=digestion16[0];
+						shortLocalMacBytes[1]=digestion16[1];*/
 						
 						long val = getHardwareAddress(digestion48);
 						if (val != 0 && val != 224)// is the current network
@@ -114,8 +122,10 @@ public abstract class AbstractDecentralizedIDGenerator extends AbstractDecentral
 		if (result == 0)
 			result = result2;
 		LOCAL_MAC = result;
-		SHORT_LOCAL_MAC=0xFFFFl & resultShort;
+		//SHORT_LOCAL_MAC=0xFFFFl & resultShort;
 		RANDOM=random;
+		MESSAGE_DIGEST=messageDigest;
+		SHORT_LOCAL_MAC_BYTES=shortLocalMacBytes;
 	}
 
 	private static long getHardwareAddress(byte hardwareAddress[]) {
@@ -139,12 +149,26 @@ public abstract class AbstractDecentralizedIDGenerator extends AbstractDecentral
 		timestamp = System.currentTimeMillis();
 		if (useShortMacAddressAndRandomNumber)
 		{
-			long r=0;
+			//long r=0;
+			byte digestion256[]=null;
 			synchronized(RANDOM)
 			{
-				r=0xFFFFFFFFFFFFFFFFl & ((long)RANDOM.nextInt());
+				MESSAGE_DIGEST.reset();
+				MESSAGE_DIGEST.update(SHORT_LOCAL_MAC_BYTES, 0, 2);
+				byte[] r=new byte[4];
+				RANDOM.nextBytes(r);
+				MESSAGE_DIGEST.update(r, 0, 4);
+				digestion256=MESSAGE_DIGEST.digest();
+				
+				
+				
+				//r=0xFFFFFFFFFFFFFFFFl & ((long)RANDOM.nextInt());
 			}
-			worker_id_and_sequence = SHORT_LOCAL_MAC | ((0xFFFFFFFFl & r)<<16) | ((0xFFFFl & getNewSequence()) << 48);
+			digestion256[0]=0;
+			digestion256[1]=0;
+			
+			//worker_id_and_sequence = SHORT_LOCAL_MAC | ((0xFFFFFFFFl & r)<<16) | ((0xFFFFl & getNewSequence()) << 48);
+			worker_id_and_sequence = Bits.getLong(digestion256, 0) | ((0xFFFFl & getNewSequence()) << 48);
 		}
 		else
 			worker_id_and_sequence = LOCAL_MAC | ((0xFFFFl & getNewSequence()) << 48);

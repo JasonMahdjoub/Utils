@@ -62,7 +62,11 @@ public class DecentralizedIDGenerator extends AbstractDecentralizedIDGenerator {
 		} else
 			throw new IllegalArgumentException("Invalid format : " + value);
 	}
-
+	public DecentralizedIDGenerator(UUID uuid)
+	{
+		super(uuid.getLeastSignificantBits(), uuid.getMostSignificantBits());
+	}
+	
 	public DecentralizedIDGenerator() {
 		super();
 	}

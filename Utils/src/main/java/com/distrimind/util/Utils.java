@@ -54,8 +54,8 @@ public class Utils {
 		Calendar c = Calendar.getInstance();
 		c.set(2016, 1, 4);
 		Calendar c2 = Calendar.getInstance();
-		c.set(2017, 8, 1);
-		VERSION = new Version("Utils", "Utils", 2, 16, 0, Version.Type.Stable, 0, c.getTime(), c2.getTime());
+		c.set(2017, 8, 5);
+		VERSION = new Version("Utils", "Utils", 2, 16, 2, Version.Type.Stable, 0, c.getTime(), c2.getTime());
 		try {
 
 			InputStream is = Utils.class.getResourceAsStream("build.txt");
@@ -69,7 +69,14 @@ public class Utils {
 
 			c = Calendar.getInstance();
 			c.set(2017, 8, 1);
-			Description d = new Description(2, 16, 0, Version.Type.Stable, 0, c.getTime());
+			Description d = new Description(2, 16, 2, Version.Type.Stable, 0, c.getTime());
+			d.addItem("Renforcing MAC address anonymization");
+			d.addItem("Possibility to convert UUID to DencentelizedID");
+			VERSION.addDescription(d);
+
+			c = Calendar.getInstance();
+			c.set(2017, 8, 1);
+			d = new Description(2, 16, 0, Version.Type.Stable, 0, c.getTime());
 			d.addItem("Adding support for SHA3");
 			d.addItem("Dencentralized ID's use now anonymized MAC address and random numbers");
 			d.addItem("Adding NIST SP 800 support with DRBG_BOUNCYCASTLE SecureRandomType");
