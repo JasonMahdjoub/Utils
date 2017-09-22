@@ -42,7 +42,7 @@ import com.distrimind.util.Bits;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 2.0
+ * @version 2.1
  * @since Utils 1.8
  *
  */
@@ -74,10 +74,16 @@ public class PasswordHash {
 	}
 
 	public PasswordHash(PasswordHashType type, SecureRandom random) {
+		this(type, random, DEFAULT_SALT_SIZE, DEFAULT_NB_ITERATIONS);
+	}
+	public PasswordHash(PasswordHashType type, SecureRandom random, int hashIterationNumber) {
+		this(type, random, hashIterationNumber, DEFAULT_NB_ITERATIONS);
+	}
+	public PasswordHash(PasswordHashType type, SecureRandom random, int hashIterationNumber, int saltSize) {
 		this.type = type;
 		this.random = random;
-		this.saltSize = DEFAULT_SALT_SIZE;
-		this.hashIterationsNumber = DEFAULT_NB_ITERATIONS;
+		this.saltSize = hashIterationNumber;
+		this.hashIterationsNumber = saltSize;
 	}
 
 	public boolean checkValidHashedPassword(char password[], byte[] goodHash) {
@@ -104,11 +110,11 @@ public class PasswordHash {
 		return checkValidHashedPassword(password.toCharArray(), goodHash, staticAdditionalSalt);
 	}
 
-	int getHashIterationsNumber() {
+	public int getHashIterationsNumber() {
 		return hashIterationsNumber;
 	}
 
-	int getSaltSize() {
+	public int getSaltSize() {
 		return saltSize;
 	}
 
@@ -147,11 +153,11 @@ public class PasswordHash {
 		return salt;
 	}
 
-	void setHashIterationsNumber(int _hashIterationsNumber) {
+	public void setHashIterationsNumber(int _hashIterationsNumber) {
 		hashIterationsNumber = _hashIterationsNumber;
 	}
 
-	void setSaltSize(int _saltSize) {
+	public void setSaltSize(int _saltSize) {
 		saltSize = _saltSize;
 	}
 

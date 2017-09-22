@@ -54,34 +54,23 @@ import com.distrimind.util.Bits;
  */
 public enum SymmetricEncryptionType {
 
-	AES_128("AES", "CBC", "PKCS5Padding", (short) 128, CodeProvider.SUN_ORACLE,
-			SymmetricSignatureType.HMAC_SHA_256), AES_256("AES", "CBC", "PKCS5Padding", (short) 256,
-					CodeProvider.SUN_ORACLE, SymmetricSignatureType.HMAC_SHA_384), @Deprecated
-	DES("DES", "CBC", "PKCS5Padding", (short) 56, (short) 8, CodeProvider.SUN_ORACLE,
-			SymmetricSignatureType.HMAC_SHA_256), @Deprecated
-	DESede("DESede", "CBC", "PKCS5Padding", (short) 168, (short) 24, CodeProvider.SUN_ORACLE,
-			SymmetricSignatureType.HMAC_SHA_256), @Deprecated
-	Blowfish("Blowfish", "CBC", "PKCS5Padding", (short) 128, CodeProvider.SUN_ORACLE,
-			SymmetricSignatureType.HMAC_SHA_256), GNU_AES("AES", "CBC", "PKCS5Padding", (short) 128,
-					CodeProvider.GNU_CRYPTO, SymmetricSignatureType.BOUNCY_CASTLE_HMAC_SHA_256), GNU_TWOFISH("TWOFISH",
-							"CBC", "PKCS5Padding", (short) 128, CodeProvider.GNU_CRYPTO,
-							SymmetricSignatureType.BOUNCY_CASTLE_HMAC_SHA_256), GNU_SERPENT("Serpent", "CBC",
-									"PKCS5Padding", (short) 128, CodeProvider.GNU_CRYPTO,
-									SymmetricSignatureType.BOUNCY_CASTLE_HMAC_SHA_256), GNU_ANUBIS("Anubis", "CBC",
-											"PKCS5Padding", (short) 128, CodeProvider.GNU_CRYPTO,
-											SymmetricSignatureType.BOUNCY_CASTLE_HMAC_SHA_256), GNU_QUARE("Square",
-													"CBC", "PKCS5Padding", (short) 128, CodeProvider.GNU_CRYPTO,
-													SymmetricSignatureType.BOUNCY_CASTLE_HMAC_SHA_256), BOUNCY_CASTLE_AES(
-															"AES", "CBC", "PKCS5Padding", (short) 128,
-															CodeProvider.BOUNCY_CASTLE,
-															SymmetricSignatureType.BOUNCY_CASTLE_HMAC_SHA_256), BOUNCY_CASTLE_TWOFISH(
-																	"TWOFISH", "CBC", "PKCS5Padding", (short) 128,
-																	CodeProvider.BOUNCY_CASTLE,
-																	SymmetricSignatureType.BOUNCY_CASTLE_HMAC_SHA_256), BOUNCY_CASTLE_SERPENT(
-																			"Serpent", "CBC", "PKCS5Padding",
-																			(short) 128, CodeProvider.BOUNCY_CASTLE,
-																			SymmetricSignatureType.BOUNCY_CASTLE_HMAC_SHA_256), DEFAULT(
-																					AES_128);
+	AES_128("AES", "CBC", "PKCS5Padding", (short) 128, CodeProvider.SUN_ORACLE, SymmetricSignatureType.HMAC_SHA_256), 
+	AES_256("AES", "CBC", "PKCS5Padding", (short) 256, CodeProvider.SUN_ORACLE, SymmetricSignatureType.HMAC_SHA_384), 
+	@Deprecated
+	DES("DES", "CBC", "PKCS5Padding", (short) 56, (short) 8, CodeProvider.SUN_ORACLE, SymmetricSignatureType.HMAC_SHA_256), 
+	@Deprecated
+	DESede("DESede", "CBC", "PKCS5Padding", (short) 168, (short) 24, CodeProvider.SUN_ORACLE,SymmetricSignatureType.HMAC_SHA_256), 
+	@Deprecated
+	Blowfish("Blowfish", "CBC", "PKCS5Padding", (short) 128, CodeProvider.SUN_ORACLE, SymmetricSignatureType.HMAC_SHA_256), 
+	GNU_AES("AES", "CBC", "PKCS5Padding", (short) 128, CodeProvider.GNU_CRYPTO, SymmetricSignatureType.BOUNCY_CASTLE_HMAC_SHA_256), 
+	GNU_TWOFISH("TWOFISH","CBC", "PKCS5Padding", (short) 128, CodeProvider.GNU_CRYPTO, SymmetricSignatureType.BOUNCY_CASTLE_HMAC_SHA_256), 
+	GNU_SERPENT("Serpent", "CBC", "PKCS5Padding", (short) 128, CodeProvider.GNU_CRYPTO, SymmetricSignatureType.BOUNCY_CASTLE_HMAC_SHA_256), 
+	GNU_ANUBIS("Anubis", "CBC", "PKCS5Padding", (short) 128, CodeProvider.GNU_CRYPTO, SymmetricSignatureType.BOUNCY_CASTLE_HMAC_SHA_256), 
+	GNU_QUARE("Square", "CBC", "PKCS5Padding", (short) 128, CodeProvider.GNU_CRYPTO, SymmetricSignatureType.BOUNCY_CASTLE_HMAC_SHA_256), 
+	BOUNCY_CASTLE_AES("AES", "CBC", "PKCS5Padding", (short) 128, CodeProvider.BOUNCY_CASTLE, SymmetricSignatureType.BOUNCY_CASTLE_HMAC_SHA_256), 
+	BOUNCY_CASTLE_TWOFISH("TWOFISH", "CBC", "PKCS5Padding", (short) 128,CodeProvider.BOUNCY_CASTLE,SymmetricSignatureType.BOUNCY_CASTLE_HMAC_SHA_256), 
+	BOUNCY_CASTLE_SERPENT("Serpent", "CBC", "PKCS5Padding",(short) 128, CodeProvider.BOUNCY_CASTLE,SymmetricSignatureType.BOUNCY_CASTLE_HMAC_SHA_256), 
+	DEFAULT(AES_128);
 	static gnu.vm.jgnux.crypto.SecretKey decodeGnuSecretKey(byte[] encodedSecretKey) {
 		return decodeGnuSecretKey(encodedSecretKey, 0, encodedSecretKey.length);
 	}

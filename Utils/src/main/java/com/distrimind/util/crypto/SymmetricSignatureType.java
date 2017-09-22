@@ -45,12 +45,14 @@ import gnu.vm.jgnux.crypto.Mac;
  * @since Utils 2.10.0
  */
 public enum SymmetricSignatureType {
-	HMAC_SHA_256("HmacSHA256", CodeProvider.SUN_ORACLE), HMAC_SHA_384("HmacSHA384",
-			CodeProvider.SUN_ORACLE), HMAC_SHA_512("HmacSHA512", CodeProvider.SUN_ORACLE), BOUNCY_CASTLE_HMAC_SHA_256(
-					"HmacSHA256", CodeProvider.BOUNCY_CASTLE), BOUNCY_CASTLE_HMAC_SHA_384("HmacSHA384",
-							CodeProvider.BOUNCY_CASTLE), BOUNCY_CASTLE_HMAC_SHA_512("HmacSHA512",
-									CodeProvider.BOUNCY_CASTLE), BOUNCY_CASTLE_HMAC_WHIRLPOOL("HmacWHIRLPOOL",
-											CodeProvider.BOUNCY_CASTLE), DEFAULT(HMAC_SHA_256);
+	HMAC_SHA_256("HmacSHA256", CodeProvider.SUN_ORACLE), 
+	HMAC_SHA_384("HmacSHA384", CodeProvider.SUN_ORACLE), 
+	HMAC_SHA_512("HmacSHA512", CodeProvider.SUN_ORACLE), 
+	BOUNCY_CASTLE_HMAC_SHA_256("HmacSHA256", CodeProvider.BOUNCY_CASTLE), 
+	BOUNCY_CASTLE_HMAC_SHA_384("HmacSHA384", CodeProvider.BOUNCY_CASTLE), 
+	BOUNCY_CASTLE_HMAC_SHA_512("HmacSHA512", CodeProvider.BOUNCY_CASTLE), 
+	BOUNCY_CASTLE_HMAC_WHIRLPOOL("HmacWHIRLPOOL",CodeProvider.BOUNCY_CASTLE), 
+	DEFAULT(HMAC_SHA_256);
 
 	private final String algorithmName;
 	private final CodeProvider codeProvider;
