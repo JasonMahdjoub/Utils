@@ -42,6 +42,7 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.math.BigInteger;
 
+import org.apache.commons.codec.binary.Base64;
 import org.bouncycastle.crypto.CryptoException;
 import org.bouncycastle.crypto.agreement.jpake.JPAKEParticipant;
 import org.bouncycastle.crypto.agreement.jpake.JPAKEPrimeOrderGroups;
@@ -65,32 +66,61 @@ public class P2PJPAKESecretMessageExchanger {
 	private BigInteger keyMaterial;
 
 	public P2PJPAKESecretMessageExchanger(Serializable participantID, char[] message)
-			throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
+			throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException {
 		this(participantID, message, null, -1, -1);
 	}
 
 	public P2PJPAKESecretMessageExchanger(Serializable participantID, byte[] message, boolean messageIsKey)
-			throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
+			throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException {
 		this(participantID, message, 0, message.length, null, -1, -1, messageIsKey);
 	}
 
+	private char[] getHashedPassword(char[] message, byte salt[], int offset_salt, int len_salt) throws NoSuchAlgorithmException, InvalidKeySpecException
+	{
+		byte[] m = hashMessage(MessageDigestType.BOUNCY_CASTLE_SHA3_256.getMessageDigestInstance(), message, salt,
+				offset_salt, len_salt, PasswordHashType.BCRYPT, 10000);
+		return convertToChar(m);
+	}
+	private char[] getHashedPassword(byte[] message, int offset, int len, byte salt[], int offset_salt, int len_salt, boolean messageIsKey) throws NoSuchAlgorithmException, InvalidKeySpecException
+	{
+		byte[] m = hashMessage(MessageDigestType.BOUNCY_CASTLE_SHA3_256.getMessageDigestInstance(), message, offset, len,
+				salt, offset_salt, len_salt, messageIsKey ? null : PasswordHashType.BCRYPT, messageIsKey?1000:10000);
+		return convertToChar(m);
+	}
+	
+	private char[] convertToChar(byte[] m)
+	{
+		char[] res=new char[m.length];
+		for (int i=0;i<m.length;i++)
+			res[i]=(char)m[i];
+		return res;
+	}
+	
+	private String getParticipanIDString(Serializable participantID) throws IOException
+	{
+		try(ByteArrayOutputStream bais=new ByteArrayOutputStream();ObjectOutputStream oos=new ObjectOutputStream(bais))
+		{
+			oos.writeObject(participantID);
+			return Base64.encodeBase64URLSafeString(bais.toByteArray());
+		}
+	}
+	
 	public P2PJPAKESecretMessageExchanger(Serializable participantID, char[] message, byte salt[], int offset_salt,
-			int len_salt) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
+			int len_salt) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException {
 		if (message == null)
 			throw new NullPointerException("message");
 		if (salt != null && salt.length - offset_salt < len_salt)
 			throw new IllegalArgumentException("salt");
 
-		byte[] m = hashMessage(MessageDigestType.BOUNCY_CASTLE_SHA3_256.getMessageDigestInstance(), message, salt,
-				offset_salt, len_salt, PasswordHashType.BCRYPT, 10000);
-		jpake = new JPAKEParticipant(participantID, m, JPAKEPrimeOrderGroups.NIST_3072, new SHA512Digest(),
+		
+		jpake = new JPAKEParticipant(getParticipanIDString(participantID), getHashedPassword(message, salt, offset_salt, len_salt), JPAKEPrimeOrderGroups.NIST_3072, new SHA512Digest(),
 				SecureRandomType.DEFAULT.getInstance());
 		this.keyMaterial = null;
 	}
 
 	public P2PJPAKESecretMessageExchanger(Serializable participantID, byte[] message, int offset, int len, byte salt[],
 			int offset_salt, int len_salt, boolean messageIsKey)
-			throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
+			throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException {
 		if (message == null)
 			throw new NullPointerException("message");
 		if (message.length - offset < len)
@@ -98,9 +128,7 @@ public class P2PJPAKESecretMessageExchanger {
 		if (salt != null && salt.length - offset_salt < len_salt)
 			throw new IllegalArgumentException("salt");
 
-		byte[] m = hashMessage(MessageDigestType.BOUNCY_CASTLE_SHA3_256.getMessageDigestInstance(), message, offset, len,
-				salt, offset_salt, len_salt, messageIsKey ? null : PasswordHashType.BCRYPT, 10000);
-		jpake = new JPAKEParticipant(participantID, m, JPAKEPrimeOrderGroups.NIST_3072, new SHA512Digest(),
+		jpake = new JPAKEParticipant(getParticipanIDString(participantID), getHashedPassword(message, offset, len, salt, offset_salt, len_salt, messageIsKey), JPAKEPrimeOrderGroups.NIST_3072, new SHA512Digest(),
 				SecureRandomType.DEFAULT.getInstance());
 		this.keyMaterial = null;
 	}
@@ -145,7 +173,24 @@ public class P2PJPAKESecretMessageExchanger {
 			try (ObjectOutputStream oos = new ObjectOutputStream(baos)) {
 
 				JPAKERound1Payload toSerialize = jpake.createRound1PayloadToSend();
-				oos.writeObject(toSerialize);
+				oos.writeObject(toSerialize.getGx1());
+				oos.writeObject(toSerialize.getGx2());
+				BigInteger[] b=toSerialize.getKnowledgeProofForX1();
+				if (b==null)
+					oos.writeInt(0);
+				else
+					oos.writeInt(b.length);
+				for (BigInteger bi : b)
+					oos.writeObject(bi);
+				b=toSerialize.getKnowledgeProofForX2();
+				if (b==null)
+					oos.writeInt(0);
+				else
+					oos.writeInt(b.length);
+				for (BigInteger bi : b)
+					oos.writeObject(bi);
+				
+				oos.writeObject(toSerialize.getParticipantId());
 			}
 			return baos.toByteArray();
 		}
@@ -156,18 +201,54 @@ public class P2PJPAKESecretMessageExchanger {
 
 		try (ByteArrayInputStream bais = new ByteArrayInputStream(dataReceived)) {
 			try (ObjectInputStream ois = new ObjectInputStream(bais)) {
-				Object o = ois.readObject();
-				if (o instanceof JPAKERound1Payload) {
-					jpake.validateRound1PayloadReceived((JPAKERound1Payload) o);
-				} else
-					throw new CryptoException("o is not an instance of JPAKERound1Payload");
+				JPAKERound1Payload r1=null;
+				try
+				{
+					BigInteger gx1 = (BigInteger)ois.readObject();
+					BigInteger gx2 = (BigInteger)ois.readObject();
+					int size=ois.readInt();
+					BigInteger knowledgeProofForX1[]=null;
+					if (size>0)
+					{
+						if (size>100)
+							throw new CryptoException("illegal argument exception");
+						knowledgeProofForX1=new BigInteger[size];
+						for (int i=0;i<size;i++)
+							knowledgeProofForX1[i]=(BigInteger)ois.readObject();
+					}
+					size=ois.readInt();
+					BigInteger knowledgeProofForX2[]=null;
+					if (size>0)
+					{
+						if (size>100)
+							throw new CryptoException("illegal argument exception");
+						knowledgeProofForX2=new BigInteger[size];
+						for (int i=0;i<size;i++)
+							knowledgeProofForX2[i]=(BigInteger)ois.readObject();
+					}
+					String pid=(String)ois.readObject();
+					r1=new JPAKERound1Payload(pid, gx1, gx2, knowledgeProofForX1, knowledgeProofForX2);
+				}
+				catch(Exception e)
+				{
+					throw new CryptoException("data received is not a valid instance of JPAKERound1Payload", e);
+				}
+				jpake.validateRound1PayloadReceived(r1);
 			}
 		}
 		try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
 			try (ObjectOutputStream oos = new ObjectOutputStream(baos)) {
 
 				JPAKERound2Payload toSerialize = jpake.createRound2PayloadToSend();
-				oos.writeObject(toSerialize);
+				oos.writeObject(toSerialize.getA());
+				BigInteger[] b=toSerialize.getKnowledgeProofForX2s();
+				if (b==null)
+					oos.writeInt(0);
+				else
+					oos.writeInt(b.length);
+				for (BigInteger bi : b)
+					oos.writeObject(bi);
+				oos.writeObject(toSerialize.getParticipantId());
 			}
 			return baos.toByteArray();
 		}
@@ -177,11 +258,29 @@ public class P2PJPAKESecretMessageExchanger {
 			throws CryptoException, IOException, ClassNotFoundException {
 		try (ByteArrayInputStream bais = new ByteArrayInputStream(dataReceived)) {
 			try (ObjectInputStream ois = new ObjectInputStream(bais)) {
-				Object o = ois.readObject();
-				if (o instanceof JPAKERound2Payload) {
-					jpake.validateRound2PayloadReceived((JPAKERound2Payload) o);
-				} else
-					throw new CryptoException("o is not an instance of JPAKERound2Payload");
+				JPAKERound2Payload r2=null;
+				try
+				{
+					BigInteger A = (BigInteger)ois.readObject();
+					
+					int size=ois.readInt();
+					BigInteger knowledgeProofForX2s[]=null;
+					if (size>0)
+					{
+						if (size>100)
+							throw new CryptoException("illegal argument exception");
+						knowledgeProofForX2s=new BigInteger[size];
+						for (int i=0;i<size;i++)
+							knowledgeProofForX2s[i]=(BigInteger)ois.readObject();
+					}
+					String pid=(String)ois.readObject();
+					r2=new JPAKERound2Payload(pid, A, knowledgeProofForX2s);
+				}
+				catch(Exception e)
+				{
+					throw new CryptoException("data received is not a valid instance of JPAKERound2Payload", e);
+				}
+				jpake.validateRound2PayloadReceived(r2);
 			}
 		}
 		try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
@@ -189,7 +288,9 @@ public class P2PJPAKESecretMessageExchanger {
 
 				keyMaterial = jpake.calculateKeyingMaterial();
 				JPAKERound3Payload toSerialize = jpake.createRound3PayloadToSend(keyMaterial);
-				oos.writeObject(toSerialize);
+				
+				oos.writeObject(toSerialize.getMacTag());
+				oos.writeObject(toSerialize.getParticipantId());
 			}
 			return baos.toByteArray();
 		}
@@ -198,11 +299,19 @@ public class P2PJPAKESecretMessageExchanger {
 	public void receiveStep3(byte[] dataReceived) throws CryptoException, ClassNotFoundException, IOException {
 		try (ByteArrayInputStream bais = new ByteArrayInputStream(dataReceived)) {
 			try (ObjectInputStream ois = new ObjectInputStream(bais)) {
-				Object o = ois.readObject();
-				if (o instanceof JPAKERound3Payload) {
-					jpake.validateRound3PayloadReceived((JPAKERound3Payload) o, keyMaterial);
-				} else
-					throw new CryptoException("o is not an instance of JPAKERound3Payload");
+				JPAKERound3Payload r3=null;
+				try
+				{
+					BigInteger magTag = (BigInteger)ois.readObject();
+					String pid=(String)ois.readObject();
+					r3=new JPAKERound3Payload(pid, magTag);
+				}
+				catch(Exception e)
+				{
+					throw new CryptoException("data received is not a valid instance of JPAKERound2Payload", e);
+				}
+				
+				jpake.validateRound3PayloadReceived(r3, keyMaterial);
 			}
 		}
 
