@@ -40,6 +40,7 @@ import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
@@ -79,8 +80,9 @@ public class EllipticCurveDiffieHellmanAlgorithm {
 		{
 			reset();
 			KeyPairGenerator kpg = null;
-			if (type.getCodeProvider() == CodeProvider.BOUNCY_CASTLE) {
-				kpg = KeyPairGenerator.getInstance("EC", CodeProvider.getBouncyProvider());
+			if (type.getCodeProvider() == CodeProvider.BCFIPS) {
+				CodeProvider.ensureBouncyCastleProviderLoaded();
+				kpg = KeyPairGenerator.getInstance("EC", CodeProvider.BCFIPS.name());
 			} else
 				kpg = KeyPairGenerator.getInstance("EC");
 			kpg.initialize(type.getECDHKeySizeBits());
@@ -92,12 +94,14 @@ public class EllipticCurveDiffieHellmanAlgorithm {
 		catch(NoSuchAlgorithmException e)
 		{
 			throw new gnu.vm.jgnu.security.NoSuchAlgorithmException(e);
+		} catch (NoSuchProviderException e) {
+			throw new gnu.vm.jgnu.security.NoSuchAlgorithmException(e.getMessage());
 		}
 			
 	}
 
 	public void setDistantPublicKey(byte[] distantPublicKeyBytes) throws 
-			gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.InvalidKeyException, gnu.vm.jgnu.security.spec.InvalidKeySpecException {
+			gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.InvalidKeyException, gnu.vm.jgnu.security.spec.InvalidKeySpecException, gnu.vm.jgnu.security.NoSuchProviderException {
 		try
 		{
 			if (distantPublicKeyBytes == null)
@@ -106,8 +110,9 @@ public class EllipticCurveDiffieHellmanAlgorithm {
 				throw new IllegalArgumentException(
 						"A key exchange process has already been begun. Use reset fonction before calling this function.");
 			KeyFactory kf = null;
-			if (type.getCodeProvider() == CodeProvider.BOUNCY_CASTLE) {
-				kf = KeyFactory.getInstance("EC", CodeProvider.getBouncyProvider());
+			if (type.getCodeProvider() == CodeProvider.BCFIPS) {
+				CodeProvider.ensureBouncyCastleProviderLoaded();
+				kf = KeyFactory.getInstance("EC", CodeProvider.BCFIPS.name());
 			} else
 				kf = KeyFactory.getInstance("EC");
 	
@@ -115,8 +120,11 @@ public class EllipticCurveDiffieHellmanAlgorithm {
 			PublicKey distantPublicKey = kf.generatePublic(pkSpec);
 	
 			KeyAgreement ka = null;
-			if (type.getCodeProvider() == CodeProvider.BOUNCY_CASTLE)
-				ka = KeyAgreement.getInstance("ECDH", CodeProvider.getBouncyProvider());
+			if (type.getCodeProvider() == CodeProvider.BCFIPS)
+			{
+				CodeProvider.ensureBouncyCastleProviderLoaded();
+				ka = KeyAgreement.getInstance("ECDH", CodeProvider.BCFIPS.name());
+			}
 			else
 				ka = KeyAgreement.getInstance("ECDH");
 	
@@ -167,6 +175,9 @@ public class EllipticCurveDiffieHellmanAlgorithm {
 		} catch (InvalidKeySpecException e) {
 			throw new gnu.vm.jgnu.security.spec.InvalidKeySpecException(e);
 		}
+		catch (NoSuchProviderException e) {
+			throw new gnu.vm.jgnu.security.NoSuchAlgorithmException(e.getMessage());
+		}		
 	}
 
 	public SymmetricSecretKey getDerivedKey(SymmetricEncryptionType symmetricEncryptionType) {

@@ -96,7 +96,10 @@ public enum SymmetricKeyWrapperType {
 			{
 				javax.crypto.Cipher cipher=null;
 				if (provider.equals(CodeProvider.BCFIPS))
+				{
+					CodeProvider.ensureBouncyCastleProviderLoaded();
 					cipher=javax.crypto.Cipher.getInstance(algorithmName, provider.name());
+				}
 				else
 					cipher=javax.crypto.Cipher.getInstance(algorithmName);
 				cipher.init(javax.crypto.Cipher.WRAP_MODE, key.toJavaNativeKey());
@@ -152,7 +155,10 @@ public enum SymmetricKeyWrapperType {
 			{
 				javax.crypto.Cipher cipher=null;
 				if (provider.equals(CodeProvider.BCFIPS))
+				{
+					CodeProvider.ensureBouncyCastleProviderLoaded();
 					cipher=javax.crypto.Cipher.getInstance(algorithmName, provider.name());
+				}
 				else
 					cipher=javax.crypto.Cipher.getInstance(algorithmName);
 

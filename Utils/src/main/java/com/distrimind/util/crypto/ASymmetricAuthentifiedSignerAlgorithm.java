@@ -86,17 +86,17 @@ public class ASymmetricAuthentifiedSignerAlgorithm extends AbstractAuthentifiedS
 		try
 		{
 			boolean includeParameter=false;
-			if (type==ASymmetricAuthentifiedSignatureType.BOUNCY_CASTLE_SHA256withRSAandMGF1)
+			if (type==ASymmetricAuthentifiedSignatureType.BOUNCY_CASTLE_SHA256withRSAandMGF1_FIPS)
 			{
 				((JavaNativeSignature)signature).getSignature().setParameter(new PSSParameterSpec("SHA-256","MGF1",new MGF1ParameterSpec("SHA-256"),0, PSSParameterSpec.DEFAULT.getTrailerField()));
 				includeParameter=true;
 			}
-			else if (type==ASymmetricAuthentifiedSignatureType.BOUNCY_CASTLE_SHA384withRSAandMGF1)
+			else if (type==ASymmetricAuthentifiedSignatureType.BOUNCY_CASTLE_SHA384withRSAandMGF1_FIPS)
 			{
 				((JavaNativeSignature)signature).getSignature().setParameter(new PSSParameterSpec("SHA-384","MGF1",new MGF1ParameterSpec("SHA-384"),0, PSSParameterSpec.DEFAULT.getTrailerField()));
 				includeParameter=true;
 			}
-			else if (type==ASymmetricAuthentifiedSignatureType.BOUNCY_CASTLE_SHA512withRSAandMGF1)
+			else if (type==ASymmetricAuthentifiedSignatureType.BOUNCY_CASTLE_SHA512withRSAandMGF1_FIPS)
 			{
 				((JavaNativeSignature)signature).getSignature().setParameter(new PSSParameterSpec("SHA-512","MGF1",new MGF1ParameterSpec("SHA-512"),0, PSSParameterSpec.DEFAULT.getTrailerField()));
 				includeParameter=true;

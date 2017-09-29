@@ -110,7 +110,10 @@ public enum ASymmetricKeyWrapper {
 			{
 				javax.crypto.Cipher c=null;
 				if (provider.equals(CodeProvider.BCFIPS))
+				{
+					CodeProvider.ensureBouncyCastleProviderLoaded();
 					c=javax.crypto.Cipher.getInstance(algorithmName, provider.name());
+				}
 				else
 					c=javax.crypto.Cipher.getInstance(algorithmName);
 
@@ -188,7 +191,10 @@ public enum ASymmetricKeyWrapper {
 			{
 				javax.crypto.Cipher c=null;
 				if (provider.equals(CodeProvider.BCFIPS))
+				{
+					CodeProvider.ensureBouncyCastleProviderLoaded();
 					c=javax.crypto.Cipher.getInstance(algorithmName, provider.name());
+				}
 				else
 					c=javax.crypto.Cipher.getInstance(algorithmName);
 				byte[] wrapedKey=null;

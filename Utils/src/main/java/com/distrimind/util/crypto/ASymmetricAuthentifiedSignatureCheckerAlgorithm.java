@@ -82,7 +82,7 @@ public class ASymmetricAuthentifiedSignatureCheckerAlgorithm extends AbstractAut
 	@Override
 	public void init(byte[] signature, int offs, int lens)
 			throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, gnu.vm.jgnu.security.InvalidAlgorithmParameterException, gnu.vm.jgnu.security.spec.InvalidParameterSpecException, IOException {
-		if (type==ASymmetricAuthentifiedSignatureType.BOUNCY_CASTLE_SHA256withRSAandMGF1 || type==ASymmetricAuthentifiedSignatureType.BOUNCY_CASTLE_SHA384withRSAandMGF1 || type==ASymmetricAuthentifiedSignatureType.BOUNCY_CASTLE_SHA512withRSAandMGF1)
+		if (type==ASymmetricAuthentifiedSignatureType.BOUNCY_CASTLE_SHA256withRSAandMGF1_FIPS || type==ASymmetricAuthentifiedSignatureType.BOUNCY_CASTLE_SHA384withRSAandMGF1_FIPS || type==ASymmetricAuthentifiedSignatureType.BOUNCY_CASTLE_SHA512withRSAandMGF1_FIPS)
 		{
 			try {
 				byte[][] tmp=Bits.separateEncodingsWithIntSizedTabs(signature, offs, lens);
