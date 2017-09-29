@@ -70,6 +70,10 @@ public final class JavaNativeSignature extends AbstractSignature {
 		return signature.getProvider().getName();
 	}
 
+	Signature getSignature()
+	{
+		return signature;
+	}
 	@Override
 	public void initSign(ASymmetricPrivateKey _privateKey)
 			throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException {

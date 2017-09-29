@@ -53,13 +53,13 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 
 	private final ASymmetricPublicKey distantPublicKey;
 
-	private final ASymmetricSignerAlgorithm signer;
+	private final ASymmetricAuthentifiedSignerAlgorithm signer;
 
-	private final ASymmetricSignatureCheckerAlgorithm signatureChecker;
+	private final ASymmetricAuthentifiedSignatureCheckerAlgorithm signatureChecker;
 
 	private final ASymmetricEncryptionType type;
 
-	private final ASymmetricSignatureType signatureType;
+	private final ASymmetricAuthentifiedSignatureType signatureType;
 
 	private final int maxBlockSizeForEncoding, maxBlockSizeForDecoding;
 
@@ -69,7 +69,7 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 		this(myKeyPair.getAlgorithmType().getDefaultSignatureAlgorithm(), myKeyPair, distantPublicKey);
 	}
 
-	public P2PASymmetricEncryptionAlgorithm(ASymmetricSignatureType signatureType, ASymmetricKeyPair myKeyPair,
+	public P2PASymmetricEncryptionAlgorithm(ASymmetricAuthentifiedSignatureType signatureType, ASymmetricKeyPair myKeyPair,
 			ASymmetricPublicKey distantPublicKey) throws NoSuchAlgorithmException, NoSuchPaddingException,
 			InvalidKeyException, InvalidKeySpecException, NoSuchProviderException {
 		super(myKeyPair.getAlgorithmType().getCipherInstance());
@@ -82,8 +82,8 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 		this.myKeyPair = myKeyPair;
 		this.distantPublicKey = distantPublicKey;
 		this.signatureType = signatureType;
-		this.signer = new ASymmetricSignerAlgorithm(signatureType, myKeyPair.getASymmetricPrivateKey());
-		this.signatureChecker = new ASymmetricSignatureCheckerAlgorithm(signatureType, distantPublicKey);
+		this.signer = new ASymmetricAuthentifiedSignerAlgorithm(signatureType, myKeyPair.getASymmetricPrivateKey());
+		this.signatureChecker = new ASymmetricAuthentifiedSignatureCheckerAlgorithm(signatureType, distantPublicKey);
 		// initCipherForEncrypt(this.cipher);
 		this.maxBlockSizeForEncoding = myKeyPair.getMaxBlockSize();
 		initCipherForDecrypt(this.cipher, null);
@@ -113,15 +113,15 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 		return this.myKeyPair;
 	}
 
-	public ASymmetricSignatureCheckerAlgorithm getSignatureCheckerAlgorithm() {
+	public ASymmetricAuthentifiedSignatureCheckerAlgorithm getSignatureCheckerAlgorithm() {
 		return signatureChecker;
 	}
 
-	public ASymmetricSignatureType getSignatureType() {
+	public ASymmetricAuthentifiedSignatureType getSignatureType() {
 		return signatureType;
 	}
 
-	public ASymmetricSignerAlgorithm getSignerAlgorithm() {
+	public ASymmetricAuthentifiedSignerAlgorithm getSignerAlgorithm() {
 		return signer;
 	}
 

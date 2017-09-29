@@ -34,13 +34,14 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
+import gnu.vm.jgnu.security.InvalidAlgorithmParameterException;
 import gnu.vm.jgnu.security.KeyPair;
 import gnu.vm.jgnu.security.KeyPairGenerator;
 
 /**
  * 
  * @author Jason Mahdjoub
- * @version 1.1
+ * @version 2.0
  * @since Utils 2.0
  */
 public final class GnuKeyPairGenerator extends AbstractKeyPairGenerator {
@@ -53,12 +54,18 @@ public final class GnuKeyPairGenerator extends AbstractKeyPairGenerator {
 		super(type);
 		this.keyPairGenerator = keyPairGenerator;
 	}
+	GnuKeyPairGenerator(ASymmetricAuthentifiedSignatureType type, KeyPairGenerator keyPairGenerator) {
+		super(type);
+		this.keyPairGenerator = keyPairGenerator;
+	}
 
 	@Override
 	public ASymmetricKeyPair generateKeyPair() {
 		KeyPair kp = keyPairGenerator.generateKeyPair();
-
-		return new ASymmetricKeyPair(type, kp, keySize, expirationTime);
+		if (encryptionType==null)
+			return new ASymmetricKeyPair(signatureType, kp, keySize, expirationTime);
+		else
+			return new ASymmetricKeyPair(encryptionType, kp, keySize, expirationTime);
 	}
 
 	@Override
@@ -74,8 +81,9 @@ public final class GnuKeyPairGenerator extends AbstractKeyPairGenerator {
 	}
 
 	@Override
-	public void initialize(short _keysize, long expirationTime, AbstractSecureRandom _random) {
-		keyPairGenerator.initialize(_keysize, _random.getGnuSecureRandom());
+	public void initialize(short _keysize, long expirationTime, AbstractSecureRandom _random) throws InvalidAlgorithmParameterException {
+		
+		keyPairGenerator.initialize(new gnu.vm.jgnu.security.spec.RSAKeyGenParameterSpec(keySize, gnu.vm.jgnu.security.spec.RSAKeyGenParameterSpec.F4), _random.getGnuSecureRandom());
 		this.keySize = _keysize;
 		this.expirationTime = expirationTime;
 

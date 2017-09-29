@@ -34,8 +34,10 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
+import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
+import java.security.spec.RSAKeyGenParameterSpec;
 
 /**
  * 
@@ -53,12 +55,18 @@ public final class JavaNativeKeyPairGenerator extends AbstractKeyPairGenerator {
 		super(type);
 		this.keyPairGenerator = keyPairGenerator;
 	}
+	JavaNativeKeyPairGenerator(ASymmetricAuthentifiedSignatureType type, KeyPairGenerator keyPairGenerator) {
+		super(type);
+		this.keyPairGenerator = keyPairGenerator;
+	}
 
 	@Override
 	public ASymmetricKeyPair generateKeyPair() {
 		KeyPair kp = keyPairGenerator.generateKeyPair();
-
-		return new ASymmetricKeyPair(type, kp, keySize, expirationTime);
+		if (encryptionType==null)
+			return new ASymmetricKeyPair(signatureType, kp, keySize, expirationTime);
+		else
+			return new ASymmetricKeyPair(encryptionType, kp, keySize, expirationTime);
 	}
 
 	@Override
@@ -75,11 +83,23 @@ public final class JavaNativeKeyPairGenerator extends AbstractKeyPairGenerator {
 	}
 
 	@Override
-	public void initialize(short _keysize, long expirationTime, AbstractSecureRandom _random) {
-		keyPairGenerator.initialize(_keysize, _random.getJavaNativeSecureRandom());
+	public void initialize(short _keysize, long expirationTime, AbstractSecureRandom _random) throws gnu.vm.jgnu.security.InvalidAlgorithmParameterException {
+		try
+		{
+			if (signatureType!=null && signatureType.getKeyGeneratorAlgorithmName().equals(ASymmetricAuthentifiedSignatureType.BOUNCY_CASTLE_SHA384withECDSA_FIPS.getKeyGeneratorAlgorithmName()))
+				keyPairGenerator.initialize(keySize, _random.getJavaNativeSecureRandom());
+			else
+				keyPairGenerator.initialize(new RSAKeyGenParameterSpec(keySize, RSAKeyGenParameterSpec.F4), _random.getJavaNativeSecureRandom());
+		}
+		catch(InvalidAlgorithmParameterException e)
+		{
+			throw new gnu.vm.jgnu.security.InvalidAlgorithmParameterException(e);
+		}
 		this.keySize = _keysize;
 		this.expirationTime = expirationTime;
 
 	}
+	
+	
 
 }

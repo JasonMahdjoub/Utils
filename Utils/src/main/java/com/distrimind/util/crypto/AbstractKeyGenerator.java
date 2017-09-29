@@ -41,10 +41,16 @@ package com.distrimind.util.crypto;
  * @since Utils 2.0
  */
 public abstract class AbstractKeyGenerator {
-	protected final SymmetricEncryptionType type;
+	protected final SymmetricEncryptionType encryptionType;
+	protected final SymmetricAuthentifiedSignatureType signatureType;
 
 	AbstractKeyGenerator(SymmetricEncryptionType type) {
-		this.type = type;
+		this.encryptionType = type;
+		this.signatureType = null;
+	}
+	AbstractKeyGenerator(SymmetricAuthentifiedSignatureType type) {
+		this.encryptionType = null;
+		this.signatureType = type;
 	}
 
 	/**

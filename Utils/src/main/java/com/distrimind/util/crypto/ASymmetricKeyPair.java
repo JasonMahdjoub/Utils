@@ -45,7 +45,7 @@ import com.distrimind.util.Bits;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 2.1
+ * @version 3.0
  * @since Utils 1.7.1
  */
 public class ASymmetricKeyPair implements Serializable {
@@ -74,7 +74,8 @@ public class ASymmetricKeyPair implements Serializable {
 
 	private final short keySize;
 
-	private final ASymmetricEncryptionType type;
+	private final ASymmetricEncryptionType encryptionType;
+	private final ASymmetricAuthentifiedSignatureType signatureType;
 
 	private final int hashCode;
 
@@ -95,7 +96,9 @@ public class ASymmetricKeyPair implements Serializable {
 		this.privateKey = privateKey;
 		this.publicKey = publicKey;
 		this.keySize = keySize;
-		this.type = type;
+		this.encryptionType = type;
+		this.signatureType=null;
+
 		hashCode = privateKey.hashCode() + publicKey.hashCode();
 	}
 
@@ -110,7 +113,9 @@ public class ASymmetricKeyPair implements Serializable {
 		privateKey = new ASymmetricPrivateKey(type, keyPair.getPrivate(), keySize);
 		publicKey = new ASymmetricPublicKey(type, keyPair.getPublic(), keySize, expirationUTC);
 		this.keySize = keySize;
-		this.type = type;
+		this.encryptionType = type;
+		this.signatureType=null;
+
 		hashCode = privateKey.hashCode() + publicKey.hashCode();
 	}
 
@@ -124,15 +129,71 @@ public class ASymmetricKeyPair implements Serializable {
 		privateKey = new ASymmetricPrivateKey(type, keyPair.getPrivate(), keySize);
 		publicKey = new ASymmetricPublicKey(type, keyPair.getPublic(), keySize, expirationUTC);
 		this.keySize = keySize;
-		this.type = type;
+		this.encryptionType = type;
+		this.signatureType=null;
+
 		hashCode = privateKey.hashCode() + publicKey.hashCode();
 	}
 
+	ASymmetricKeyPair(ASymmetricAuthentifiedSignatureType type, ASymmetricPrivateKey privateKey, ASymmetricPublicKey publicKey,
+			short keySize) {
+		if (type == null)
+			throw new NullPointerException("type");
+		if (privateKey == null)
+			throw new NullPointerException("privateKey");
+		if (publicKey == null)
+			throw new NullPointerException("publicKey");
+		if (keySize < 1024)
+			throw new IllegalArgumentException("keySize");
+		this.privateKey = privateKey;
+		this.publicKey = publicKey;
+		this.keySize = keySize;
+		this.encryptionType = null;
+		this.signatureType=type;
+
+		hashCode = privateKey.hashCode() + publicKey.hashCode();
+	}
+
+	ASymmetricKeyPair(ASymmetricAuthentifiedSignatureType type, gnu.vm.jgnu.security.KeyPair keyPair, short keySize,
+			long expirationUTC) {
+		if (type == null)
+			throw new NullPointerException("type");
+		if (keyPair == null)
+			throw new NullPointerException("keyPair");
+		if (keySize < 1024)
+			throw new IllegalArgumentException("keySize");
+		privateKey = new ASymmetricPrivateKey(type, keyPair.getPrivate(), keySize);
+		publicKey = new ASymmetricPublicKey(type, keyPair.getPublic(), keySize, expirationUTC);
+		this.keySize = keySize;
+		this.encryptionType = null;
+		this.signatureType=type;
+
+		hashCode = privateKey.hashCode() + publicKey.hashCode();
+	}
+
+	ASymmetricKeyPair(ASymmetricAuthentifiedSignatureType type, KeyPair keyPair, short keySize, long expirationUTC) {
+		if (type == null)
+			throw new NullPointerException("type");
+		if (keyPair == null)
+			throw new NullPointerException("keyPair");
+		if (keySize < 1024)
+			throw new IllegalArgumentException("keySize");
+		privateKey = new ASymmetricPrivateKey(type, keyPair.getPrivate(), keySize);
+		publicKey = new ASymmetricPublicKey(type, keyPair.getPublic(), keySize, expirationUTC);
+		this.keySize = keySize;
+		this.encryptionType = null;
+		this.signatureType=type;
+
+		hashCode = privateKey.hashCode() + publicKey.hashCode();
+	}
+	
+	
 	public byte[] encode() {
-		byte[] tab = new byte[14];
+		byte[] tab = new byte[15];
 		Bits.putShort(tab, 0, keySize);
-		Bits.putInt(tab, 2, type.ordinal());
+		Bits.putInt(tab, 2, encryptionType==null?signatureType.ordinal():encryptionType.ordinal());
 		Bits.putLong(tab, 6, publicKey.getTimeExpirationUTC());
+		tab[14]=encryptionType==null?(byte)1:(byte)0;
 		return Bits.concateEncodingWithIntSizedTabs(
 				Bits.concateEncodingWithShortSizedTabs(tab, publicKey.getBytesPublicKey()),
 				privateKey.getBytesPrivateKey());
@@ -149,7 +210,7 @@ public class ASymmetricKeyPair implements Serializable {
 		if (o instanceof ASymmetricKeyPair) {
 			ASymmetricKeyPair other = ((ASymmetricKeyPair) o);
 			return privateKey.equals(other.privateKey) && publicKey.equals(other.publicKey) && keySize == other.keySize
-					&& type == other.type;
+					&& encryptionType == other.encryptionType && signatureType == other.signatureType;
 		}
 		return false;
 	}
@@ -158,8 +219,11 @@ public class ASymmetricKeyPair implements Serializable {
 		return publicKey.getTimeExpirationUTC();
 	}
 
-	public ASymmetricEncryptionType getAlgorithmType() {
-		return type;
+	public ASymmetricEncryptionType getEncryptionAlgorithmType() {
+		return encryptionType;
+	}
+	public ASymmetricAuthentifiedSignatureType getAuthentifiedSignatureAlgorithmType() {
+		return signatureType;
 	}
 
 	public ASymmetricPrivateKey getASymmetricPrivateKey() {
@@ -175,7 +239,10 @@ public class ASymmetricKeyPair implements Serializable {
 	}
 
 	public int getMaxBlockSize() {
-		return type.getMaxBlockSize(keySize);
+		if (encryptionType==null)
+			return signatureType.getMaxBlockSize(keySize);
+		else
+			return encryptionType.getMaxBlockSize(keySize);
 	}
 
 	@Override

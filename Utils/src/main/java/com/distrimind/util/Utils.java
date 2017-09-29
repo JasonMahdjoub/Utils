@@ -55,7 +55,7 @@ public class Utils {
 		c.set(2016, 1, 4);
 		Calendar c2 = Calendar.getInstance();
 		c.set(2017, 8, 21);
-		VERSION = new Version("Utils", "Utils", 2, 16, 3, Version.Type.Stable, 0, c.getTime(), c2.getTime());
+		VERSION = new Version("Utils", "Utils", 2, 17, 0, Version.Type.Stable, 0, c.getTime(), c2.getTime());
 		try {
 
 			InputStream is = Utils.class.getResourceAsStream("build.txt");
@@ -69,8 +69,10 @@ public class Utils {
 
 			c = Calendar.getInstance();
 			c.set(2017, 8, 21);
-			Description d = new Description(2, 16, 3, Version.Type.Stable, 0, c.getTime());
+			Description d = new Description(2, 17, 0, Version.Type.Stable, 0, c.getTime());
 			d.addItem("Minimal corrections into PasswordHash class");
+			d.addItem("Updating Bouncy Castle to 1.58 version");
+			d.addItem("FIPS compliant");
 			VERSION.addDescription(d);
 
 			c = Calendar.getInstance();

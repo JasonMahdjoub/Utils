@@ -57,8 +57,13 @@ public class ASymmetricPrivateKey implements UtilKey {
 
 	public static ASymmetricPrivateKey decode(byte[] b) {
 		byte[][] res = Bits.separateEncodingsWithShortSizedTabs(b);
-		return new ASymmetricPrivateKey(ASymmetricEncryptionType.valueOf(Bits.getInt(res[0], 2)), res[1],
+		if (res[0][6]==0)
+			return new ASymmetricPrivateKey(ASymmetricEncryptionType.valueOf(Bits.getInt(res[0], 2)), res[1],
 				Bits.getShort(res[0], 0));
+		else if (res[0][6]==1)
+			return new ASymmetricPrivateKey(ASymmetricAuthentifiedSignatureType.valueOf(Bits.getInt(res[0], 2)), res[1],
+					Bits.getShort(res[0], 0));
+		else throw new IllegalArgumentException();
 	}
 
 	public static ASymmetricPrivateKey valueOf(String key) throws IOException {
@@ -70,7 +75,8 @@ public class ASymmetricPrivateKey implements UtilKey {
 
 	private final short keySize;
 
-	private final ASymmetricEncryptionType type;
+	private ASymmetricEncryptionType encryptionType;
+	private ASymmetricAuthentifiedSignatureType signatureType;
 
 	private final int hashCode;
 
@@ -79,50 +85,88 @@ public class ASymmetricPrivateKey implements UtilKey {
 	private volatile transient gnu.vm.jgnu.security.PrivateKey gnuPrivateKey;
 
 	ASymmetricPrivateKey(ASymmetricEncryptionType type, byte privateKey[], short keySize) {
+		this(privateKey, keySize);
 		if (type == null)
 			throw new NullPointerException("type");
+		this.encryptionType = type;
+		this.signatureType=null;
+	}
+	ASymmetricPrivateKey(ASymmetricAuthentifiedSignatureType type, byte privateKey[], short keySize) {
+		this(privateKey, keySize);
+		if (type == null)
+			throw new NullPointerException("type");
+		this.encryptionType = null;
+		this.signatureType=type;
+	}
+
+	ASymmetricPrivateKey(ASymmetricEncryptionType type, gnu.vm.jgnu.security.PrivateKey privateKey, short keySize) {
+		this(privateKey, keySize);
+		if (type == null)
+			throw new NullPointerException("type");
+		this.encryptionType = type;
+		this.signatureType=null;
+	}
+	ASymmetricPrivateKey(ASymmetricAuthentifiedSignatureType type, gnu.vm.jgnu.security.PrivateKey privateKey, short keySize) {
+		this(privateKey, keySize);
+		if (type == null)
+			throw new NullPointerException("type");
+		this.encryptionType = null;
+		this.signatureType=type;
+	}
+
+	ASymmetricPrivateKey(ASymmetricEncryptionType type, PrivateKey privateKey, short keySize) {
+		this(privateKey, keySize);
+		if (type == null)
+			throw new NullPointerException("type");
+		if (type.getCodeProvider() == CodeProvider.GNU_CRYPTO)
+			throw new IllegalAccessError();
+		this.encryptionType = type;
+		this.signatureType=null;
+	}
+	ASymmetricPrivateKey(ASymmetricAuthentifiedSignatureType type, PrivateKey privateKey, short keySize) {
+		this(privateKey, keySize);
+		if (type == null)
+			throw new NullPointerException("type");
+		if (type.getCodeProvider() == CodeProvider.GNU_CRYPTO)
+			throw new IllegalAccessError();
+		this.encryptionType = null;
+		this.signatureType=type;
+	}
+	private ASymmetricPrivateKey(byte privateKey[], short keySize) {
 		if (privateKey == null)
 			throw new NullPointerException("privateKey");
 		if (keySize < 1024)
 			throw new IllegalArgumentException("keySize");
 		this.privateKey = privateKey;
 		this.keySize = keySize;
-		this.type = type;
 		hashCode = Arrays.hashCode(privateKey);
 	}
 
-	ASymmetricPrivateKey(ASymmetricEncryptionType type, gnu.vm.jgnu.security.PrivateKey privateKey, short keySize) {
-		if (type == null)
-			throw new NullPointerException("type");
+	private ASymmetricPrivateKey(gnu.vm.jgnu.security.PrivateKey privateKey, short keySize) {
 		if (privateKey == null)
 			throw new NullPointerException("privateKey");
 		if (keySize < 1024)
 			throw new IllegalArgumentException("keySize");
 		this.privateKey = ASymmetricEncryptionType.encodePrivateKey(privateKey);
 		this.keySize = keySize;
-		this.type = type;
 		hashCode = Arrays.hashCode(this.privateKey);
 	}
 
-	ASymmetricPrivateKey(ASymmetricEncryptionType type, PrivateKey privateKey, short keySize) {
-		if (type == null)
-			throw new NullPointerException("type");
+	private ASymmetricPrivateKey(PrivateKey privateKey, short keySize) {
 		if (privateKey == null)
 			throw new NullPointerException("privateKey");
 		if (keySize < 1024)
 			throw new IllegalArgumentException("keySize");
-		if (type.getCodeProvider() == CodeProvider.GNU_CRYPTO)
-			throw new IllegalAccessError();
 		this.privateKey = ASymmetricEncryptionType.encodePrivateKey(privateKey);
 		this.keySize = keySize;
-		this.type = type;
 		hashCode = Arrays.hashCode(this.privateKey);
 	}
 
 	public byte[] encode() {
-		byte[] tab = new byte[6];
+		byte[] tab = new byte[7];
 		Bits.putShort(tab, 0, keySize);
-		Bits.putInt(tab, 2, type.ordinal());
+		Bits.putInt(tab, 2, encryptionType==null?signatureType.ordinal():encryptionType.ordinal());
+		tab[6]=encryptionType==null?(byte)0:(byte)1;
 		return Bits.concateEncodingWithShortSizedTabs(tab, privateKey);
 	}
 
@@ -134,13 +178,16 @@ public class ASymmetricPrivateKey implements UtilKey {
 			return true;
 		if (o instanceof ASymmetricPrivateKey) {
 			ASymmetricPrivateKey other = (ASymmetricPrivateKey) o;
-			return keySize == other.keySize && type == other.type && Arrays.equals(privateKey, other.privateKey);
+			return keySize == other.keySize && encryptionType == other.encryptionType && signatureType == other.signatureType && Arrays.equals(privateKey, other.privateKey);
 		}
 		return false;
 	}
 
-	public ASymmetricEncryptionType getAlgorithmType() {
-		return type;
+	public ASymmetricEncryptionType getEncryptionAlgorithmType() {
+		return encryptionType;
+	}
+	public ASymmetricAuthentifiedSignatureType getAuthentifiedSignatureAlgorithmType() {
+		return signatureType;
 	}
 
 	byte[] getBytesPrivateKey() {
@@ -152,7 +199,10 @@ public class ASymmetricPrivateKey implements UtilKey {
 	}
 
 	public int getMaxBlockSize() {
-		return type.getMaxBlockSize(keySize);
+		if (encryptionType==null)
+			return signatureType.getMaxBlockSize(keySize);
+		else
+			return encryptionType.getMaxBlockSize(keySize);
 	}
 
 	@Override

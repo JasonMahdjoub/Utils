@@ -39,14 +39,20 @@ import gnu.vm.jgnu.security.InvalidParameterException;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 1.2
+ * @version 2.0
  * @since Utils 2.0
  */
 public abstract class AbstractKeyPairGenerator {
-	protected final ASymmetricEncryptionType type;
+	protected final ASymmetricEncryptionType encryptionType;
+	protected final ASymmetricAuthentifiedSignatureType signatureType;
 
 	AbstractKeyPairGenerator(ASymmetricEncryptionType type) {
-		this.type = type;
+		this.encryptionType = type;
+		this.signatureType=null;
+	}
+	AbstractKeyPairGenerator(ASymmetricAuthentifiedSignatureType type) {
+		this.encryptionType = null;
+		this.signatureType=type;
 	}
 
 	/**
@@ -110,6 +116,6 @@ public abstract class AbstractKeyPairGenerator {
 	 *
 	 * @since 1.2
 	 */
-	public abstract void initialize(short keysize, long expirationTime, AbstractSecureRandom random);
+	public abstract void initialize(short keysize, long expirationTime, AbstractSecureRandom random) throws gnu.vm.jgnu.security.InvalidAlgorithmParameterException;
 
 }

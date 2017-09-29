@@ -34,6 +34,8 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
+import java.io.IOException;
+
 import gnu.vm.jgnu.security.InvalidKeyException;
 import gnu.vm.jgnu.security.NoSuchAlgorithmException;
 import gnu.vm.jgnu.security.SignatureException;
@@ -43,19 +45,19 @@ import gnu.vm.jgnux.crypto.ShortBufferException;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 1.1
+ * @version 2.0
  * @since Utils 2.10.0
  */
-public abstract class AbstractSignerAlgorithm {
+public abstract class AbstractAuthentifiedSignerAlgorithm {
 	public byte[] sign(byte bytes[])
 			throws gnu.vm.jgnu.security.InvalidKeyException, gnu.vm.jgnu.security.SignatureException,
-			gnu.vm.jgnu.security.NoSuchAlgorithmException, InvalidKeySpecException, ShortBufferException, IllegalStateException {
+			gnu.vm.jgnu.security.NoSuchAlgorithmException, InvalidKeySpecException, ShortBufferException, IllegalStateException, gnu.vm.jgnu.security.InvalidAlgorithmParameterException, IOException {
 		return sign(bytes, 0, bytes.length);
 	}
 
 	public byte[] sign(byte bytes[], int off, int len)
 			throws gnu.vm.jgnu.security.InvalidKeyException, gnu.vm.jgnu.security.SignatureException,
-			gnu.vm.jgnu.security.NoSuchAlgorithmException, InvalidKeySpecException, ShortBufferException, IllegalStateException
+			gnu.vm.jgnu.security.NoSuchAlgorithmException, InvalidKeySpecException, ShortBufferException, IllegalStateException, gnu.vm.jgnu.security.InvalidAlgorithmParameterException, IOException
 	{
 		init();
 		update(bytes, off, len);

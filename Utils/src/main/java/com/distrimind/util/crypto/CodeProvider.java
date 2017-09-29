@@ -35,6 +35,8 @@ knowledge of the CeCILL-C license and that you accept its terms.
 package com.distrimind.util.crypto;
 
 import java.security.Provider;
+import java.security.Security;
+
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 /**
@@ -45,22 +47,23 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
  * @since Utils 2.9.0
  */
 public enum CodeProvider {
-	SUN_ORACLE, GNU_CRYPTO, BOUNCY_CASTLE;
+	SUN_ORACLE, GNU_CRYPTO, BCFIPS;
 
 	private static volatile Provider bouncyProvider = null;
 
-	static Provider getBouncyProvider() {
+	static void ensureBouncyCastleProviderLoaded() {
 
 		if (bouncyProvider == null) {
 
 			synchronized (CodeProvider.class) {
 				if (bouncyProvider == null) {
 					bouncyProvider = new BouncyCastleProvider();
+					Security.addProvider(bouncyProvider);
 				}
 			}
 		}
 
-		return bouncyProvider;
+		
 	}
 
 }

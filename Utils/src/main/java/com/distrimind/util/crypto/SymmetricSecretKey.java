@@ -58,8 +58,15 @@ public class SymmetricSecretKey implements UtilKey {
 
 	public static SymmetricSecretKey decode(byte[] b) throws IllegalArgumentException {
 		byte[][] res = Bits.separateEncodingsWithShortSizedTabs(b);
-		return new SymmetricSecretKey(SymmetricEncryptionType.valueOf(Bits.getInt(res[0], 0)), res[1],
-				Bits.getShort(res[0], 4));
+		if (res[0][0]==(byte)0)
+			return new SymmetricSecretKey(SymmetricEncryptionType.valueOf(Bits.getInt(res[0], 1)), res[1],
+				Bits.getShort(res[0], 5));
+		else if (res[0][0]==(byte)1)
+			return new SymmetricSecretKey(SymmetricAuthentifiedSignatureType.valueOf(Bits.getInt(res[0], 1)), res[1],
+					Bits.getShort(res[0], 5));
+		else
+			throw new IllegalArgumentException();
+			
 	}
 
 	public static SymmetricSecretKey valueOf(String key) throws IllegalArgumentException, IOException {
@@ -70,7 +77,8 @@ public class SymmetricSecretKey implements UtilKey {
 
 	private final short keySize;
 
-	private final SymmetricEncryptionType type;
+	private SymmetricEncryptionType encryptionType;
+	private SymmetricAuthentifiedSignatureType signatureType;
 
 	private final int hashCode;
 
@@ -79,46 +87,88 @@ public class SymmetricSecretKey implements UtilKey {
 	private transient gnu.vm.jgnux.crypto.SecretKey gnuSecretKey = null;
 
 	SymmetricSecretKey(SymmetricEncryptionType type, byte secretKey[], short keySize) {
+		this(secretKey, keySize);
 		if (type == null)
 			throw new NullPointerException("type");
+		this.encryptionType = type;
+		this.signatureType=null;
+	}
+	SymmetricSecretKey(SymmetricAuthentifiedSignatureType type, byte secretKey[], short keySize) {
+		this(secretKey, keySize);
+		if (type == null)
+			throw new NullPointerException("type");
+		this.encryptionType = null;
+		this.signatureType=type;
+	}
+
+	SymmetricSecretKey(SymmetricEncryptionType type, gnu.vm.jgnux.crypto.SecretKey secretKey, short keySize) {
+		this(secretKey, keySize);
+		if (type == null)
+			throw new NullPointerException("type");
+		if (type.getCodeProvider() != CodeProvider.GNU_CRYPTO)
+			throw new IllegalAccessError();
+		this.encryptionType = type;
+		this.signatureType=null;
+	}
+	SymmetricSecretKey(SymmetricAuthentifiedSignatureType type, gnu.vm.jgnux.crypto.SecretKey secretKey, short keySize) {
+		this(secretKey, keySize);
+		if (type == null)
+			throw new NullPointerException("type");
+		if (type.getCodeProvider() != CodeProvider.GNU_CRYPTO)
+			throw new IllegalAccessError();
+		this.encryptionType = null;
+		this.signatureType=type;
+	}
+
+	SymmetricSecretKey(SymmetricEncryptionType type, SecretKey secretKey, short keySize) {
+		this(secretKey, keySize);
+		if (type == null)
+			throw new NullPointerException("type");
+		if (type.getCodeProvider() == CodeProvider.GNU_CRYPTO)
+			throw new IllegalAccessError();
+		this.encryptionType = type;
+		this.signatureType=null;
+	}
+	SymmetricSecretKey(SymmetricAuthentifiedSignatureType type, SecretKey secretKey, short keySize) {
+		this(secretKey, keySize);
+		if (type == null)
+			throw new NullPointerException("type");
+		if (type.getCodeProvider() == CodeProvider.GNU_CRYPTO)
+			throw new IllegalAccessError();
+		this.encryptionType = null;
+		this.signatureType=type;
+	}
+	
+	
+	private SymmetricSecretKey(byte secretKey[], short keySize) {
 		if (secretKey == null)
 			throw new NullPointerException("secretKey");
 		this.secretKey = secretKey;
 		this.keySize = keySize;
-		this.type = type;
 		hashCode = Arrays.hashCode(this.secretKey);
 	}
 
-	SymmetricSecretKey(SymmetricEncryptionType type, gnu.vm.jgnux.crypto.SecretKey secretKey, short keySize) {
-		if (type == null)
-			throw new NullPointerException("type");
+	private SymmetricSecretKey(gnu.vm.jgnux.crypto.SecretKey secretKey, short keySize) {
 		if (secretKey == null)
 			throw new NullPointerException("secretKey");
-		if (type.getCodeProvider() != CodeProvider.GNU_CRYPTO)
-			throw new IllegalAccessError();
 		this.secretKey = SymmetricEncryptionType.encodeSecretKey(secretKey);
 		this.keySize = keySize;
-		this.type = type;
 		hashCode = Arrays.hashCode(this.secretKey);
 	}
 
-	SymmetricSecretKey(SymmetricEncryptionType type, SecretKey secretKey, short keySize) {
-		if (type == null)
-			throw new NullPointerException("type");
+	private SymmetricSecretKey(SecretKey secretKey, short keySize) {
 		if (secretKey == null)
 			throw new NullPointerException("secretKey");
-		if (type.getCodeProvider() == CodeProvider.GNU_CRYPTO)
-			throw new IllegalAccessError();
 		this.secretKey = SymmetricEncryptionType.encodeSecretKey(secretKey);
 		this.keySize = keySize;
-		this.type = type;
 		hashCode = Arrays.hashCode(this.secretKey);
 	}
 
 	public byte[] encode() {
-		byte[] tab = new byte[6];
-		Bits.putInt(tab, 0, type.ordinal());
-		Bits.putShort(tab, 4, keySize);
+		byte[] tab = new byte[7];
+		tab[0]=encryptionType==null?(byte)1:(byte)0;
+		Bits.putInt(tab, 1, encryptionType==null?signatureType.ordinal():encryptionType.ordinal());
+		Bits.putShort(tab, 5, keySize);
 		return Bits.concateEncodingWithShortSizedTabs(tab, secretKey);
 	}
 
@@ -130,13 +180,16 @@ public class SymmetricSecretKey implements UtilKey {
 			return true;
 		if (o instanceof SymmetricSecretKey) {
 			SymmetricSecretKey other = ((SymmetricSecretKey) o);
-			return Arrays.equals(secretKey, other.secretKey) && type == other.type;
+			return Arrays.equals(secretKey, other.secretKey) && encryptionType == other.encryptionType && signatureType == other.signatureType;
 		}
 		return false;
 	}
 
-	public SymmetricEncryptionType getAlgorithmType() {
-		return type;
+	public SymmetricEncryptionType getEncryptionAlgorithmType() {
+		return encryptionType;
+	}
+	public SymmetricAuthentifiedSignatureType getAuthentifiedSignatureAlgorithmType() {
+		return signatureType;
 	}
 
 	public short getKeySize() {

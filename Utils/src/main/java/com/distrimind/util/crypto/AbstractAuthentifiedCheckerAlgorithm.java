@@ -34,8 +34,11 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
+import java.io.IOException;
+
 import gnu.vm.jgnu.security.InvalidKeyException;
 import gnu.vm.jgnu.security.NoSuchAlgorithmException;
+import gnu.vm.jgnu.security.NoSuchProviderException;
 import gnu.vm.jgnu.security.SignatureException;
 import gnu.vm.jgnu.security.spec.InvalidKeySpecException;
 import gnu.vm.jgnux.crypto.ShortBufferException;
@@ -43,12 +46,16 @@ import gnu.vm.jgnux.crypto.ShortBufferException;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 1.1
+ * @version 2.0
  * @since Utils 2.10.0
  */
-public abstract class AbstractSignatureCheckerAlgorithm {
+public abstract class AbstractAuthentifiedCheckerAlgorithm {
 
-	public abstract void init() throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException;
+	public void init(byte signature[]) throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, NoSuchProviderException, gnu.vm.jgnu.security.InvalidAlgorithmParameterException, gnu.vm.jgnu.security.spec.InvalidParameterSpecException, IOException
+	{
+		init(signature, 0, signature.length);
+	}
+	public abstract void init(byte signature[], int offs, int lens) throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, NoSuchProviderException, gnu.vm.jgnu.security.InvalidAlgorithmParameterException, gnu.vm.jgnu.security.spec.InvalidParameterSpecException, IOException;
 	
 	public void update(byte message[]) throws SignatureException
 	{
@@ -58,26 +65,22 @@ public abstract class AbstractSignatureCheckerAlgorithm {
 	
 	public abstract void update(byte message[], int offm, int lenm) throws SignatureException ;
 
-	public boolean verify(byte signature[])
-			throws SignatureException, InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, ShortBufferException, IllegalStateException {
-		return this.verify(signature, 0, signature.length);
-	}
-
-	public abstract boolean verify(byte signature[], int offs, int lens)
-			throws SignatureException, InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, ShortBufferException, IllegalStateException;
+	public abstract boolean verify()
+			throws SignatureException, InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, ShortBufferException, IllegalStateException, IOException, NoSuchProviderException, gnu.vm.jgnu.security.InvalidAlgorithmParameterException, gnu.vm.jgnu.security.spec.InvalidParameterSpecException;
 
 	public boolean verify(byte message[], byte signature[])
-			throws SignatureException, InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, ShortBufferException, IllegalStateException {
+			throws SignatureException, InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, ShortBufferException, IllegalStateException, IOException, NoSuchProviderException, gnu.vm.jgnu.security.InvalidAlgorithmParameterException, gnu.vm.jgnu.security.spec.InvalidParameterSpecException {
 		return this.verify(message, 0, message.length, signature, 0, signature.length);
 	}
 
 	public boolean verify(byte message[], int offm, int lenm, byte signature[], int offs, int lens)
-			throws SignatureException, InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, ShortBufferException, IllegalStateException
+			throws SignatureException, InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, ShortBufferException, IllegalStateException, IOException, NoSuchProviderException, gnu.vm.jgnu.security.InvalidAlgorithmParameterException, gnu.vm.jgnu.security.spec.InvalidParameterSpecException
 	{
-		init();
+		init(signature, offs, lens);
 		update(message, offm, lenm);
-		return verify(signature, offs, lens);
+		return verify();
 	}
+	
 	
 
 	

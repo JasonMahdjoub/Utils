@@ -34,63 +34,65 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
-import java.security.NoSuchAlgorithmException;
-
-import gnu.vm.jgnux.crypto.Mac;
+import gnu.vm.jgnu.security.InvalidKeyException;
+import gnu.vm.jgnu.security.NoSuchAlgorithmException;
+import gnu.vm.jgnu.security.NoSuchProviderException;
+import gnu.vm.jgnu.security.spec.InvalidKeySpecException;
+import gnu.vm.jgnux.crypto.ShortBufferException;
 
 /**
  * 
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 2.0
  * @since Utils 2.10.0
  */
-public enum SymmetricSignatureType {
-	HMAC_SHA_256("HmacSHA256", CodeProvider.SUN_ORACLE), 
-	HMAC_SHA_384("HmacSHA384", CodeProvider.SUN_ORACLE), 
-	HMAC_SHA_512("HmacSHA512", CodeProvider.SUN_ORACLE), 
-	BOUNCY_CASTLE_HMAC_SHA_256("HmacSHA256", CodeProvider.BOUNCY_CASTLE), 
-	BOUNCY_CASTLE_HMAC_SHA_384("HmacSHA384", CodeProvider.BOUNCY_CASTLE), 
-	BOUNCY_CASTLE_HMAC_SHA_512("HmacSHA512", CodeProvider.BOUNCY_CASTLE), 
-	BOUNCY_CASTLE_HMAC_WHIRLPOOL("HmacWHIRLPOOL",CodeProvider.BOUNCY_CASTLE), 
-	DEFAULT(HMAC_SHA_256);
+public class SymmetricAuthentifiedSignerAlgorithm extends AbstractAuthentifiedSignerAlgorithm {
 
-	private final String algorithmName;
-	private final CodeProvider codeProvider;
+	private final AbstractMac mac;
+	private final SymmetricSecretKey secretKey;
 
-	private SymmetricSignatureType(String algorithmName, CodeProvider codeProvider) {
-		this.algorithmName = algorithmName;
-		this.codeProvider = codeProvider;
+	public SymmetricAuthentifiedSignerAlgorithm(AbstractMac mac, SymmetricSecretKey secretKey) {
+		if (mac == null)
+			throw new NullPointerException();
+		if (secretKey == null)
+			throw new NullPointerException();
+		this.mac = mac;
+		this.secretKey = secretKey;
 	}
 
-	private SymmetricSignatureType(SymmetricSignatureType other) {
-		this(other.algorithmName, other.codeProvider);
+	public SymmetricAuthentifiedSignerAlgorithm(SymmetricSecretKey secretKey) throws NoSuchAlgorithmException, NoSuchProviderException {
+		this(secretKey.getAuthentifiedSignatureAlgorithmType().getHMacInstance(), secretKey);
 	}
 
-	public String getAlgorithmName() {
-		return algorithmName;
+	public AbstractMac getMac() {
+		return mac;
 	}
 
-	public AbstractMac getHMacInstance() throws gnu.vm.jgnu.security.NoSuchAlgorithmException {
-		if (codeProvider == CodeProvider.GNU_CRYPTO) {
-			return new GnuMac(Mac.getInstance(algorithmName));
-		} else if (codeProvider == CodeProvider.BOUNCY_CASTLE) {
-
-			try {
-				return new JavaNativeMac(javax.crypto.Mac.getInstance(algorithmName, CodeProvider.getBouncyProvider()));
-			} catch (NoSuchAlgorithmException e) {
-				throw new gnu.vm.jgnu.security.NoSuchAlgorithmException(e);
-			}
-		} else {
-			try {
-				return new JavaNativeMac(javax.crypto.Mac.getInstance(algorithmName));
-			} catch (NoSuchAlgorithmException e) {
-				throw new gnu.vm.jgnu.security.NoSuchAlgorithmException(e);
-			}
-		}
+	public SymmetricSecretKey getSecretKey() {
+		return secretKey;
 	}
 
-	public CodeProvider getCodeProvider() {
-		return codeProvider;
+
+	@Override
+	public void init() throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException {
+		mac.init(secretKey);
+	}
+
+	@Override
+	public void update(byte[] message, int offm, int lenm) {
+		mac.update(message, offm, lenm);
+		
+	}
+
+	@Override
+	public void getSignature(byte[] signature, int off_sig) throws ShortBufferException, IllegalStateException {
+		mac.doFinal(signature, off_sig);
+		
+	}
+
+	@Override
+	public int getMacLength() {
+		return mac.getMacLength();
 	}
 
 }

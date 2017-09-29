@@ -37,6 +37,7 @@ package com.distrimind.util.crypto;
 import javax.crypto.Cipher;
 
 import gnu.vm.jgnu.security.NoSuchAlgorithmException;
+import gnu.vm.jgnu.security.NoSuchProviderException;
 import gnu.vm.jgnux.crypto.KeyGenerator;
 import gnu.vm.jgnux.crypto.NoSuchPaddingException;
 
@@ -54,23 +55,22 @@ import com.distrimind.util.Bits;
  */
 public enum SymmetricEncryptionType {
 
-	AES_128("AES", "CBC", "PKCS5Padding", (short) 128, CodeProvider.SUN_ORACLE, SymmetricSignatureType.HMAC_SHA_256), 
-	AES_256("AES", "CBC", "PKCS5Padding", (short) 256, CodeProvider.SUN_ORACLE, SymmetricSignatureType.HMAC_SHA_384), 
+	AES("AES", "CBC", "PKCS5Padding", (short) 128, CodeProvider.SUN_ORACLE, SymmetricAuthentifiedSignatureType.HMAC_SHA_256), 
 	@Deprecated
-	DES("DES", "CBC", "PKCS5Padding", (short) 56, (short) 8, CodeProvider.SUN_ORACLE, SymmetricSignatureType.HMAC_SHA_256), 
+	DES("DES", "CBC", "PKCS5Padding", (short) 56, (short) 8, CodeProvider.SUN_ORACLE, SymmetricAuthentifiedSignatureType.HMAC_SHA_256), 
 	@Deprecated
-	DESede("DESede", "CBC", "PKCS5Padding", (short) 168, (short) 24, CodeProvider.SUN_ORACLE,SymmetricSignatureType.HMAC_SHA_256), 
+	DESede("DESede", "CBC", "PKCS5Padding", (short) 168, (short) 24, CodeProvider.SUN_ORACLE,SymmetricAuthentifiedSignatureType.HMAC_SHA_256), 
 	@Deprecated
-	Blowfish("Blowfish", "CBC", "PKCS5Padding", (short) 128, CodeProvider.SUN_ORACLE, SymmetricSignatureType.HMAC_SHA_256), 
-	GNU_AES("AES", "CBC", "PKCS5Padding", (short) 128, CodeProvider.GNU_CRYPTO, SymmetricSignatureType.BOUNCY_CASTLE_HMAC_SHA_256), 
-	GNU_TWOFISH("TWOFISH","CBC", "PKCS5Padding", (short) 128, CodeProvider.GNU_CRYPTO, SymmetricSignatureType.BOUNCY_CASTLE_HMAC_SHA_256), 
-	GNU_SERPENT("Serpent", "CBC", "PKCS5Padding", (short) 128, CodeProvider.GNU_CRYPTO, SymmetricSignatureType.BOUNCY_CASTLE_HMAC_SHA_256), 
-	GNU_ANUBIS("Anubis", "CBC", "PKCS5Padding", (short) 128, CodeProvider.GNU_CRYPTO, SymmetricSignatureType.BOUNCY_CASTLE_HMAC_SHA_256), 
-	GNU_QUARE("Square", "CBC", "PKCS5Padding", (short) 128, CodeProvider.GNU_CRYPTO, SymmetricSignatureType.BOUNCY_CASTLE_HMAC_SHA_256), 
-	BOUNCY_CASTLE_AES("AES", "CBC", "PKCS5Padding", (short) 128, CodeProvider.BOUNCY_CASTLE, SymmetricSignatureType.BOUNCY_CASTLE_HMAC_SHA_256), 
-	BOUNCY_CASTLE_TWOFISH("TWOFISH", "CBC", "PKCS5Padding", (short) 128,CodeProvider.BOUNCY_CASTLE,SymmetricSignatureType.BOUNCY_CASTLE_HMAC_SHA_256), 
-	BOUNCY_CASTLE_SERPENT("Serpent", "CBC", "PKCS5Padding",(short) 128, CodeProvider.BOUNCY_CASTLE,SymmetricSignatureType.BOUNCY_CASTLE_HMAC_SHA_256), 
-	DEFAULT(AES_128);
+	Blowfish("Blowfish", "CBC", "PKCS5Padding", (short) 128, CodeProvider.SUN_ORACLE, SymmetricAuthentifiedSignatureType.HMAC_SHA_256), 
+	GNU_AES("AES", "CBC", "PKCS5Padding", (short) 128, CodeProvider.GNU_CRYPTO, SymmetricAuthentifiedSignatureType.BOUNCY_CASTLE_HMAC_SHA_256), 
+	GNU_TWOFISH("TWOFISH","CBC", "PKCS5Padding", (short) 128, CodeProvider.GNU_CRYPTO, SymmetricAuthentifiedSignatureType.BOUNCY_CASTLE_HMAC_SHA_256), 
+	GNU_SERPENT("Serpent", "CBC", "PKCS5Padding", (short) 128, CodeProvider.GNU_CRYPTO, SymmetricAuthentifiedSignatureType.BOUNCY_CASTLE_HMAC_SHA_256), 
+	GNU_ANUBIS("Anubis", "CBC", "PKCS5Padding", (short) 128, CodeProvider.GNU_CRYPTO, SymmetricAuthentifiedSignatureType.BOUNCY_CASTLE_HMAC_SHA_256), 
+	GNU_QUARE("Square", "CBC", "PKCS5Padding", (short) 128, CodeProvider.GNU_CRYPTO, SymmetricAuthentifiedSignatureType.BOUNCY_CASTLE_HMAC_SHA_256), 
+	BOUNCY_CASTLE_AES("AES", "CBC", "PKCS5Padding", (short) 128, CodeProvider.BCFIPS, SymmetricAuthentifiedSignatureType.BOUNCY_CASTLE_HMAC_SHA_256), 
+	BOUNCY_CASTLE_TWOFISH("TWOFISH", "CBC", "PKCS5Padding", (short) 128,CodeProvider.BCFIPS,SymmetricAuthentifiedSignatureType.BOUNCY_CASTLE_HMAC_SHA_256), 
+	BOUNCY_CASTLE_SERPENT("Serpent", "CBC", "PKCS5Padding",(short) 128, CodeProvider.BCFIPS,SymmetricAuthentifiedSignatureType.BOUNCY_CASTLE_HMAC_SHA_256), 
+	DEFAULT(AES);
 	static gnu.vm.jgnux.crypto.SecretKey decodeGnuSecretKey(byte[] encodedSecretKey) {
 		return decodeGnuSecretKey(encodedSecretKey, 0, encodedSecretKey.length);
 	}
@@ -119,15 +119,15 @@ public enum SymmetricEncryptionType {
 
 	private final CodeProvider codeProvider;
 
-	private final SymmetricSignatureType defaultSignature;
+	private final SymmetricAuthentifiedSignatureType defaultSignature;
 
 	private SymmetricEncryptionType(String algorithmName, String blockMode, String padding, short keySizeBits,
-			CodeProvider codeProvider, SymmetricSignatureType defaultSignature) {
+			CodeProvider codeProvider, SymmetricAuthentifiedSignatureType defaultSignature) {
 		this(algorithmName, blockMode, padding, keySizeBits, (short) (keySizeBits / 8), codeProvider, defaultSignature);
 	}
 
 	private SymmetricEncryptionType(String algorithmName, String blockMode, String padding, short keySizeBits,
-			short keySizeBytes, CodeProvider codeProvider, SymmetricSignatureType defaultSignature) {
+			short keySizeBytes, CodeProvider codeProvider, SymmetricAuthentifiedSignatureType defaultSignature) {
 		this.algorithmName = algorithmName;
 		this.blockMode = blockMode;
 		this.padding = padding;
@@ -150,19 +150,23 @@ public enum SymmetricEncryptionType {
 		return blockMode;
 	}
 
-	public AbstractCipher getCipherInstance() throws NoSuchAlgorithmException, NoSuchPaddingException {
+	public AbstractCipher getCipherInstance() throws NoSuchAlgorithmException, NoSuchPaddingException, NoSuchProviderException {
 		if (codeProvider == CodeProvider.GNU_CRYPTO) {
 			return new GnuCipher(
 					gnu.vm.jgnux.crypto.Cipher.getInstance(algorithmName + "/" + blockMode + "/" + padding));
-		} else if (codeProvider == CodeProvider.BOUNCY_CASTLE) {
+		} else if (codeProvider == CodeProvider.BCFIPS) {
 			try {
+				CodeProvider.ensureBouncyCastleProviderLoaded();
 				return new JavaNativeCipher(Cipher.getInstance(algorithmName + "/" + blockMode + "/" + padding,
-						CodeProvider.getBouncyProvider()));
+						"BCFIPS"));
 			} catch (java.security.NoSuchAlgorithmException e) {
 				throw new NoSuchAlgorithmException(e);
 			} catch (javax.crypto.NoSuchPaddingException e) {
 				throw new NoSuchPaddingException(e.getMessage());
 			}
+			catch (java.security.NoSuchProviderException e) {
+				throw new NoSuchProviderException(e.getMessage());
+			}			
 		} else {
 			try {
 				return new JavaNativeCipher(Cipher.getInstance(algorithmName + "/" + blockMode + "/" + padding));
@@ -183,23 +187,27 @@ public enum SymmetricEncryptionType {
 		return keySizeBytes;
 	}
 
-	public AbstractKeyGenerator getKeyGenerator(AbstractSecureRandom random) throws NoSuchAlgorithmException {
+	public AbstractKeyGenerator getKeyGenerator(AbstractSecureRandom random) throws NoSuchAlgorithmException, NoSuchProviderException {
 		return getKeyGenerator(random, keySizeBits);
 	}
 
 	public AbstractKeyGenerator getKeyGenerator(AbstractSecureRandom random, short keySizeBits)
-			throws NoSuchAlgorithmException {
+			throws NoSuchAlgorithmException, NoSuchProviderException {
 		AbstractKeyGenerator res = null;
 		if (codeProvider == CodeProvider.GNU_CRYPTO) {
 			res = new GnuKeyGenerator(this, KeyGenerator.getInstance(algorithmName));
-		} else if (codeProvider == CodeProvider.BOUNCY_CASTLE) {
+		} else if (codeProvider == CodeProvider.BCFIPS) {
 
 			try {
+				CodeProvider.ensureBouncyCastleProviderLoaded();
 				res = new JavaNativeKeyGenerator(this,
-						javax.crypto.KeyGenerator.getInstance(algorithmName, CodeProvider.getBouncyProvider()));
+						javax.crypto.KeyGenerator.getInstance(algorithmName, "BCFIPS"));
 			} catch (java.security.NoSuchAlgorithmException e) {
 				throw new NoSuchAlgorithmException(e);
 			}
+			catch (java.security.NoSuchProviderException e) {
+				throw new NoSuchProviderException(e.getMessage());
+			}			
 
 		} else {
 			try {
@@ -221,7 +229,7 @@ public enum SymmetricEncryptionType {
 		return codeProvider;
 	}
 
-	public SymmetricSignatureType getDefaultSignatureAlgorithm() {
+	public SymmetricAuthentifiedSignatureType getDefaultSignatureAlgorithm() {
 		return defaultSignature;
 	}
 
@@ -230,7 +238,7 @@ public enum SymmetricEncryptionType {
 	}
 
 	public SymmetricSecretKey getSymmetricSecretKey(byte[] secretKey, short keySizeBits) {
-		if (codeProvider == CodeProvider.BOUNCY_CASTLE || codeProvider == CodeProvider.SUN_ORACLE) {
+		if (codeProvider == CodeProvider.BCFIPS || codeProvider == CodeProvider.SUN_ORACLE) {
 			return new SymmetricSecretKey(this, new SecretKeySpec(secretKey, getAlgorithmName()), keySizeBits);
 		} else if (getCodeProvider() == CodeProvider.GNU_CRYPTO) {
 			return new SymmetricSecretKey(this,
@@ -239,5 +247,6 @@ public enum SymmetricEncryptionType {
 			throw new IllegalAccessError();
 
 	}
-
+	
+	
 }

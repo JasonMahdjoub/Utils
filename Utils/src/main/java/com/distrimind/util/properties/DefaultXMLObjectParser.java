@@ -60,7 +60,7 @@ import com.distrimind.util.crypto.ASymmetricKeyPair;
 import com.distrimind.util.crypto.ASymmetricPrivateKey;
 import com.distrimind.util.crypto.ASymmetricPublicKey;
 import com.distrimind.util.crypto.MessageDigestType;
-import com.distrimind.util.crypto.ASymmetricSignatureType;
+import com.distrimind.util.crypto.ASymmetricAuthentifiedSignatureType;
 import com.distrimind.util.crypto.SymmetricEncryptionType;
 import com.distrimind.util.crypto.SymmetricSecretKey;
 
@@ -186,7 +186,7 @@ public class DefaultXMLObjectParser extends AbstractXMLObjectParser {
 			return object.toString();
 		} else if (field_type == SymmetricEncryptionType.class) {
 			return object.toString();
-		} else if (field_type == ASymmetricSignatureType.class) {
+		} else if (field_type == ASymmetricAuthentifiedSignatureType.class) {
 			return object.toString();
 		} else if (field_type == MessageDigestType.class) {
 			return object.toString();
@@ -341,8 +341,8 @@ public class DefaultXMLObjectParser extends AbstractXMLObjectParser {
 			return ASymmetricEncryptionType.valueOf(nodeValue);
 		} else if (field_type == SymmetricEncryptionType.class) {
 			return SymmetricEncryptionType.valueOf(nodeValue);
-		} else if (field_type == ASymmetricSignatureType.class) {
-			return ASymmetricSignatureType.valueOf(nodeValue);
+		} else if (field_type == ASymmetricAuthentifiedSignatureType.class) {
+			return ASymmetricAuthentifiedSignatureType.valueOf(nodeValue);
 		} else if (field_type == MessageDigestType.class) {
 			return MessageDigestType.valueOf(nodeValue);
 		}
@@ -397,7 +397,7 @@ public class DefaultXMLObjectParser extends AbstractXMLObjectParser {
 				|| field_type == boolean[].class || field_type == Inet6Address.class
 				|| field_type == InetSocketAddress.class || field_type == SourceVersion.class
 				|| field_type == ASymmetricEncryptionType.class || field_type == MessageDigestType.class
-				|| field_type == SymmetricEncryptionType.class || field_type == ASymmetricSignatureType.class
+				|| field_type == SymmetricEncryptionType.class || field_type == ASymmetricAuthentifiedSignatureType.class
 				// || field_type==SymmetricSecretKeyType.class
 				|| field_type == SymmetricSecretKey.class || field_type == ASymmetricPrivateKey.class
 				|| field_type == ASymmetricPublicKey.class || field_type == ASymmetricKeyPair.class

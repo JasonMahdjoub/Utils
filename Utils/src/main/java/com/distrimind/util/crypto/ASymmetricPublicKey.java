@@ -46,7 +46,7 @@ import com.distrimind.util.Bits;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 2.1
+ * @version 3.0
  * @since Utils 1.7.1
  */
 public class ASymmetricPublicKey implements UtilKey {
@@ -57,8 +57,13 @@ public class ASymmetricPublicKey implements UtilKey {
 
 	public static ASymmetricPublicKey decode(byte[] b) {
 		byte[][] res = Bits.separateEncodingsWithShortSizedTabs(b);
-		return new ASymmetricPublicKey(ASymmetricEncryptionType.valueOf(Bits.getInt(res[0], 2)), res[1],
+		if (res[0][14]==0)
+			return new ASymmetricPublicKey(ASymmetricEncryptionType.valueOf(Bits.getInt(res[0], 2)), res[1],
 				Bits.getShort(res[0], 0), Bits.getLong(b, 6));
+		else if (res[0][14]==1)
+			return new ASymmetricPublicKey(ASymmetricAuthentifiedSignatureType.valueOf(Bits.getInt(res[0], 2)), res[1],
+					Bits.getShort(res[0], 0), Bits.getLong(b, 6));
+		else throw new IllegalArgumentException();
 	}
 
 	public static ASymmetricPublicKey valueOf(String key) throws IOException {
@@ -70,7 +75,9 @@ public class ASymmetricPublicKey implements UtilKey {
 
 	private final short keySize;
 
-	private final ASymmetricEncryptionType type;
+	private ASymmetricEncryptionType encryptionType;
+	private ASymmetricAuthentifiedSignatureType signatureType;
+
 
 	private final int hashCode;
 
@@ -81,8 +88,60 @@ public class ASymmetricPublicKey implements UtilKey {
 	private volatile transient gnu.vm.jgnu.security.PublicKey gnuPublicKey = null;
 
 	ASymmetricPublicKey(ASymmetricEncryptionType type, byte[] publicKey, short keySize, long expirationUTC) {
+		this(publicKey, keySize, expirationUTC);
 		if (type == null)
 			throw new NullPointerException("type");
+		this.encryptionType = type;
+		this.signatureType=null;
+	}
+	ASymmetricPublicKey(ASymmetricAuthentifiedSignatureType type, byte[] publicKey, short keySize, long expirationUTC) {
+		this(publicKey, keySize, expirationUTC);
+		if (type == null)
+			throw new NullPointerException("type");
+		this.encryptionType = null;
+		this.signatureType=type;
+	}
+
+	ASymmetricPublicKey(ASymmetricEncryptionType type, gnu.vm.jgnu.security.PublicKey publicKey, short keySize,
+			long expirationUTC) {
+		this(publicKey, keySize, expirationUTC);
+		if (type == null)
+			throw new NullPointerException("type");
+
+		this.encryptionType = type;
+		this.signatureType=null;
+	}
+	ASymmetricPublicKey(ASymmetricAuthentifiedSignatureType type, gnu.vm.jgnu.security.PublicKey publicKey, short keySize,
+			long expirationUTC) {
+		this(publicKey, keySize, expirationUTC);
+		if (type == null)
+			throw new NullPointerException("type");
+
+		this.encryptionType = null;
+		this.signatureType=type;
+	}
+
+	ASymmetricPublicKey(ASymmetricEncryptionType type, PublicKey publicKey, short keySize, long expirationUTC) {
+		this(publicKey, keySize, expirationUTC);
+		if (type == null)
+			throw new NullPointerException("type");
+		if (type.getCodeProvider() == CodeProvider.GNU_CRYPTO)
+			throw new IllegalAccessError();
+
+		this.encryptionType = type;
+		this.signatureType=null;
+	}
+	ASymmetricPublicKey(ASymmetricAuthentifiedSignatureType type, PublicKey publicKey, short keySize, long expirationUTC) {
+		this(publicKey, keySize, expirationUTC);
+		if (type == null)
+			throw new NullPointerException("type");
+		if (type.getCodeProvider() == CodeProvider.GNU_CRYPTO)
+			throw new IllegalAccessError();
+
+		this.encryptionType = null;
+		this.signatureType=type;
+	}
+	private ASymmetricPublicKey(byte[] publicKey, short keySize, long expirationUTC) {
 		if (publicKey == null)
 			throw new NullPointerException("publicKey");
 		if (keySize < 1024)
@@ -90,15 +149,12 @@ public class ASymmetricPublicKey implements UtilKey {
 
 		this.publicKey = publicKey;
 		this.keySize = keySize;
-		this.type = type;
 		hashCode = Arrays.hashCode(this.publicKey);
 		this.expirationUTC = expirationUTC;
 	}
 
-	ASymmetricPublicKey(ASymmetricEncryptionType type, gnu.vm.jgnu.security.PublicKey publicKey, short keySize,
+	private ASymmetricPublicKey(gnu.vm.jgnu.security.PublicKey publicKey, short keySize,
 			long expirationUTC) {
-		if (type == null)
-			throw new NullPointerException("type");
 		if (publicKey == null)
 			throw new NullPointerException("publicKey");
 		if (keySize < 1024)
@@ -106,33 +162,28 @@ public class ASymmetricPublicKey implements UtilKey {
 
 		this.publicKey = ASymmetricEncryptionType.encodePublicKey(publicKey);
 		this.keySize = keySize;
-		this.type = type;
 		hashCode = Arrays.hashCode(this.publicKey);
 		this.expirationUTC = expirationUTC;
 	}
 
-	ASymmetricPublicKey(ASymmetricEncryptionType type, PublicKey publicKey, short keySize, long expirationUTC) {
-		if (type == null)
-			throw new NullPointerException("type");
+	private ASymmetricPublicKey(PublicKey publicKey, short keySize, long expirationUTC) {
 		if (publicKey == null)
 			throw new NullPointerException("publicKey");
 		if (keySize < 1024)
 			throw new IllegalArgumentException("keySize");
-		if (type.getCodeProvider() == CodeProvider.GNU_CRYPTO)
-			throw new IllegalAccessError();
 
 		this.publicKey = ASymmetricEncryptionType.encodePublicKey(publicKey);
 		this.keySize = keySize;
-		this.type = type;
 		hashCode = Arrays.hashCode(this.publicKey);
 		this.expirationUTC = expirationUTC;
 	}
 
 	public byte[] encode() {
-		byte[] tab = new byte[14];
+		byte[] tab = new byte[15];
 		Bits.putShort(tab, 0, keySize);
-		Bits.putInt(tab, 2, type.ordinal());
+		Bits.putInt(tab, 2, encryptionType==null?signatureType.ordinal():encryptionType.ordinal());
 		Bits.putLong(tab, 6, expirationUTC);
+		tab[14]=encryptionType==null?(byte)1:(byte)0;
 		return Bits.concateEncodingWithShortSizedTabs(tab, publicKey);
 	}
 
@@ -145,13 +196,16 @@ public class ASymmetricPublicKey implements UtilKey {
 		if (o instanceof ASymmetricPublicKey) {
 
 			ASymmetricPublicKey other = (ASymmetricPublicKey) o;
-			return keySize == other.keySize && type == other.type && Arrays.equals(publicKey, other.publicKey);
+			return keySize == other.keySize && encryptionType == other.encryptionType && signatureType == other.signatureType && Arrays.equals(publicKey, other.publicKey);
 		}
 		return false;
 	}
 
-	public ASymmetricEncryptionType getAlgorithmType() {
-		return type;
+	public ASymmetricEncryptionType getEncryptionAlgorithmType() {
+		return encryptionType;
+	}
+	public ASymmetricAuthentifiedSignatureType getAuthentifiedSignatureAlgorithmType() {
+		return signatureType;
 	}
 
 	byte[] getBytesPublicKey() {
@@ -163,7 +217,10 @@ public class ASymmetricPublicKey implements UtilKey {
 	}
 
 	public int getMaxBlockSize() {
-		return type.getMaxBlockSize(keySize);
+		if (encryptionType==null)
+			return signatureType.getMaxBlockSize(keySize);
+		else
+			return encryptionType.getMaxBlockSize(keySize);
 	}
 
 	public long getTimeExpirationUTC() {

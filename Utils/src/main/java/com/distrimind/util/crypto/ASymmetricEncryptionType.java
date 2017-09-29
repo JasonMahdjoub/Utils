@@ -49,6 +49,9 @@ import javax.crypto.NoSuchPaddingException;
 
 import com.distrimind.util.Bits;
 
+import gnu.vm.jgnu.security.InvalidAlgorithmParameterException;
+import gnu.vm.jgnu.security.NoSuchProviderException;
+
 /**
  * List of asymmetric encryption algorithms
  * 
@@ -57,19 +60,13 @@ import com.distrimind.util.Bits;
  * @since Utils 1.4
  */
 public enum ASymmetricEncryptionType {
-	RSA_OAEPWithSHA256AndMGF1Padding("RSA", "", "OAEPWithSHA-256AndMGF1Padding", ASymmetricSignatureType.SHA256withRSA,
-			(short) 4096, 31536000000l, (short) 66, CodeProvider.SUN_ORACLE), RSA_PKCS1Padding("RSA", "",
-					"PKCS1Padding", ASymmetricSignatureType.SHA256withRSA, (short) 4096, 31536000000l, (short) 11,
+	RSA_OAEPWithSHA256AndMGF1Padding("RSA", "", "OAEPWithSHA-256AndMGF1Padding", ASymmetricAuthentifiedSignatureType.SHA384withRSA,
+			(short) 3072, 31536000000l, (short) 66, CodeProvider.SUN_ORACLE), 
+	RSA_PKCS1Padding("RSA", "", "PKCS1Padding", ASymmetricAuthentifiedSignatureType.SHA384withRSA, (short) 3072, 31536000000l, (short) 11,
 					CodeProvider.SUN_ORACLE),
-	// GNU_RSA_PKCS1Padding("RSA", "","PKCS1Padding",SignatureType.SHA256withRSA,
-	// (short)4096, (short)11, CodeProvider.GNU_CRYPTO),
-	// BOUNTYCASTLE_PKCS1Padding("RSA", "", "PKCS1Padding",
-	// SignatureType.BOUNCY_CASTLE_SHA256withRSA, (short) 4096, 31536000000l,
-	// (short) 11,CodeProvider.BOUNCY_CASTLE),
-	// BOUNTYCASTLE_OAEPWithSHA256AndMGF1Padding("RSA", "",
-	// "OAEPWithSHA-256AndMGF1Padding",SignatureType.BOUNCY_CASTLE_SHA256withRSA,
-	// (short) 4096, 31536000000l, (short) 66, CodeProvider.BOUNCY_CASTLE),
-	DEFAULT(RSA_OAEPWithSHA256AndMGF1Padding);
+	BOUNCY_CASTLE_RSA_OAEPPadding_FIPS("RSA", "NONE", "OAEPPadding", ASymmetricAuthentifiedSignatureType.BOUNCY_CASTLE_SHA384withRSAandMGF1_FIPS, (short) 3072, 31536000000l, (short) 11,
+			CodeProvider.SUN_ORACLE),
+	DEFAULT(BOUNCY_CASTLE_RSA_OAEPPadding_FIPS);
 
 	static gnu.vm.jgnu.security.KeyPair decodeGnuKeyPair(byte[] encodedKeyPair)
 			throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException {
@@ -185,13 +182,13 @@ public enum ASymmetricEncryptionType {
 		throw new IllegalArgumentException();
 	}
 
-	private final String algorithmName;
+	private final String signatureAlgorithmName;
 
 	private final String blockMode;
 
 	private final String padding;
 
-	private final ASymmetricSignatureType signature;
+	private final ASymmetricAuthentifiedSignatureType signature;
 
 	private final short keySize;
 
@@ -202,14 +199,14 @@ public enum ASymmetricEncryptionType {
 	private final CodeProvider codeProvider;
 
 	private ASymmetricEncryptionType(ASymmetricEncryptionType type) {
-		this(type.algorithmName, type.blockMode, type.padding, type.signature, type.keySize, type.expirationTimeMilis,
+		this(type.signatureAlgorithmName, type.blockMode, type.padding, type.signature, type.keySize, type.expirationTimeMilis,
 				type.blockSizeDecrement, type.codeProvider);
 	}
 
 	private ASymmetricEncryptionType(String algorithmName, String blockMode, String padding,
-			ASymmetricSignatureType signature, short keySize, long expirationTimeMilis, short blockSizeDecrement,
+			ASymmetricAuthentifiedSignatureType signature, short keySize, long expirationTimeMilis, short blockSizeDecrement,
 			CodeProvider codeProvider) {
-		this.algorithmName = algorithmName;
+		this.signatureAlgorithmName = algorithmName;
 		this.blockMode = blockMode;
 		this.padding = padding;
 		this.signature = signature;
@@ -220,7 +217,7 @@ public enum ASymmetricEncryptionType {
 	}
 
 	public String getAlgorithmName() {
-		return algorithmName;
+		return signatureAlgorithmName;
 	}
 
 	public String getBlockMode() {
@@ -228,28 +225,30 @@ public enum ASymmetricEncryptionType {
 	}
 
 	public AbstractCipher getCipherInstance()
-			throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnux.crypto.NoSuchPaddingException {
+			throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnux.crypto.NoSuchPaddingException, NoSuchProviderException {
 		if (codeProvider == CodeProvider.GNU_CRYPTO) {
-			String name = algorithmName;
+			String name = signatureAlgorithmName;
 			if ((blockMode != null && !blockMode.equals("")) && (padding != null && !padding.equals("")))
 				name += "/" + blockMode + "/" + padding;
 			return new GnuCipher(gnu.vm.jgnux.crypto.Cipher.getInstance(name));
-		} else if (codeProvider == CodeProvider.BOUNCY_CASTLE) {
-
+		} else if (codeProvider == CodeProvider.BCFIPS) {
+			CodeProvider.ensureBouncyCastleProviderLoaded();
 			try {
-				String name = algorithmName;
+				String name = signatureAlgorithmName;
 				if ((blockMode != null && !blockMode.equals("")) && (padding != null && !padding.equals("")))
 					name += "/" + blockMode + "/" + padding;
-				return new JavaNativeCipher(Cipher.getInstance(name, CodeProvider.getBouncyProvider()));
+				return new JavaNativeCipher(Cipher.getInstance(name, CodeProvider.BCFIPS.name()));
 			} catch (NoSuchAlgorithmException e) {
 				throw new gnu.vm.jgnu.security.NoSuchAlgorithmException(e);
 			} catch (NoSuchPaddingException e) {
 				throw new gnu.vm.jgnux.crypto.NoSuchPaddingException(e.getMessage());
+			} catch (java.security.NoSuchProviderException e) {
+				throw new NoSuchProviderException(e.getMessage());
 			}
 
 		} else {
 			try {
-				String name = algorithmName;
+				String name = signatureAlgorithmName;
 				if ((blockMode != null && !blockMode.equals("")) && (padding != null && !padding.equals("")))
 					name += "/" + blockMode + "/" + padding;
 				return new JavaNativeCipher(Cipher.getInstance(name));
@@ -269,43 +268,45 @@ public enum ASymmetricEncryptionType {
 		return keySize / 8 - blockSizeDecrement;
 	}
 
-	public ASymmetricSignatureType getDefaultSignatureAlgorithm() {
+	public ASymmetricAuthentifiedSignatureType getDefaultSignatureAlgorithm() {
 		return signature;
 	}
 
 	public AbstractKeyPairGenerator getKeyPairGenerator(AbstractSecureRandom random)
-			throws gnu.vm.jgnu.security.NoSuchAlgorithmException {
+			throws gnu.vm.jgnu.security.NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException {
 		return getKeyPairGenerator(random, keySize, System.currentTimeMillis() + expirationTimeMilis);
 	}
 
 	public AbstractKeyPairGenerator getKeyPairGenerator(AbstractSecureRandom random, short keySize)
-			throws gnu.vm.jgnu.security.NoSuchAlgorithmException {
+			throws gnu.vm.jgnu.security.NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException {
 		return getKeyPairGenerator(random, keySize, System.currentTimeMillis() + expirationTimeMilis);
 	}
 
 	public AbstractKeyPairGenerator getKeyPairGenerator(AbstractSecureRandom random, short keySize,
-			long expirationTimeUTC) throws gnu.vm.jgnu.security.NoSuchAlgorithmException {
+			long expirationTimeUTC) throws gnu.vm.jgnu.security.NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException {
 		if (codeProvider == CodeProvider.GNU_CRYPTO) {
 			gnu.vm.jgnu.security.KeyPairGenerator kgp = gnu.vm.jgnu.security.KeyPairGenerator
-					.getInstance(algorithmName);
+					.getInstance(signatureAlgorithmName);
 			GnuKeyPairGenerator res = new GnuKeyPairGenerator(this, kgp);
 			res.initialize(keySize, expirationTimeUTC, random);
 
 			return res;
-		} else if (codeProvider == CodeProvider.BOUNCY_CASTLE) {
-
+		} else if (codeProvider == CodeProvider.BCFIPS) {
+			CodeProvider.ensureBouncyCastleProviderLoaded();
 			try {
-				KeyPairGenerator kgp = KeyPairGenerator.getInstance(algorithmName, CodeProvider.getBouncyProvider());
+				KeyPairGenerator kgp = KeyPairGenerator.getInstance(signatureAlgorithmName, CodeProvider.BCFIPS.name());
 				JavaNativeKeyPairGenerator res = new JavaNativeKeyPairGenerator(this, kgp);
 				res.initialize(keySize, expirationTimeUTC, random);
 
 				return res;
 			} catch (NoSuchAlgorithmException e) {
 				throw new gnu.vm.jgnu.security.NoSuchAlgorithmException(e);
+			} catch (java.security.NoSuchProviderException e) {
+				throw new NoSuchProviderException(e.getMessage());
 			}
 		} else {
 			try {
-				KeyPairGenerator kgp = KeyPairGenerator.getInstance(algorithmName);
+				KeyPairGenerator kgp = KeyPairGenerator.getInstance(signatureAlgorithmName);
 				JavaNativeKeyPairGenerator res = new JavaNativeKeyPairGenerator(this, kgp);
 				res.initialize(keySize, expirationTimeUTC, random);
 
@@ -330,4 +331,5 @@ public enum ASymmetricEncryptionType {
 		return codeProvider;
 	}
 
+	
 }

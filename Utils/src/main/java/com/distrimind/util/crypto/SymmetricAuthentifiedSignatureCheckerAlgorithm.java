@@ -36,6 +36,7 @@ package com.distrimind.util.crypto;
 
 import gnu.vm.jgnu.security.InvalidKeyException;
 import gnu.vm.jgnu.security.NoSuchAlgorithmException;
+import gnu.vm.jgnu.security.NoSuchProviderException;
 import gnu.vm.jgnu.security.SignatureException;
 import gnu.vm.jgnu.security.spec.InvalidKeySpecException;
 import gnu.vm.jgnux.crypto.ShortBufferException;
@@ -46,23 +47,18 @@ import gnu.vm.jgnux.crypto.ShortBufferException;
  * @version 1.0
  * @since Utils 2.10.0
  */
-public class SymmetricSignatureCheckerAlgorithm extends AbstractSignatureCheckerAlgorithm {
+public class SymmetricAuthentifiedSignatureCheckerAlgorithm extends AbstractAuthentifiedCheckerAlgorithm {
 
-	private final SymmetricSignerAlgorithm signer;
-
-	public SymmetricSignatureCheckerAlgorithm(SymmetricSignerAlgorithm signer) {
+	private final SymmetricAuthentifiedSignerAlgorithm signer;
+	private byte[] signature=null;
+	public SymmetricAuthentifiedSignatureCheckerAlgorithm(SymmetricAuthentifiedSignerAlgorithm signer) {
 		if (signer == null)
 			throw new NullPointerException();
 		this.signer = signer;
 	}
 
-	public SymmetricSignatureCheckerAlgorithm(SymmetricSecretKey secretKey) throws NoSuchAlgorithmException {
-		this(new SymmetricSignerAlgorithm(secretKey));
-	}
-
-	public SymmetricSignatureCheckerAlgorithm(SymmetricSignatureType signatureType, SymmetricSecretKey secretKey)
-			throws NoSuchAlgorithmException {
-		this(new SymmetricSignerAlgorithm(signatureType, secretKey));
+	public SymmetricAuthentifiedSignatureCheckerAlgorithm(SymmetricSecretKey secretKey) throws NoSuchAlgorithmException, NoSuchProviderException {
+		this(new SymmetricAuthentifiedSignerAlgorithm(secretKey));
 	}
 
 	public SymmetricSecretKey getSecretKey() {
@@ -72,7 +68,11 @@ public class SymmetricSignatureCheckerAlgorithm extends AbstractSignatureChecker
 
 
 	@Override
-	public void init() throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException {
+	public void init(byte[] signature, int off, int len) throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException {
+		this.signature=new byte[len];
+		
+		System.arraycopy(signature, off, this.signature, 0, this.signature.length);
+
 		signer.init();
 	}
 
@@ -83,19 +83,24 @@ public class SymmetricSignatureCheckerAlgorithm extends AbstractSignatureChecker
 	}
 
 	@Override
-	public boolean verify(byte[] _signature, int _offs, int _lens)
+	public boolean verify()
 			throws SignatureException, InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, ShortBufferException, IllegalStateException {
-		if (_signature == null)
-			return false;
-		if (_lens > _signature.length - _offs)
-			return false;
-		byte[] mySignature = signer.getSignature();
-		if (mySignature.length != _lens)
-			return false;
-		for (int i = 0; i < mySignature.length; i++)
-			if (mySignature[i] != _signature[i + _offs])
+		try
+		{
+			if (signature == null)
 				return false;
-		return true;
+			byte[] mySignature = signer.getSignature();
+			if (mySignature.length != signature.length)
+				return false;
+			for (int i = 0; i < mySignature.length; i++)
+				if (mySignature[i] != signature[i])
+					return false;
+			return true;
+		}
+		finally
+		{
+			signature=null;
+		}
 	}
 
 }

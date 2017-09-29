@@ -34,8 +34,16 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
+import java.io.IOException;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.spec.MGF1ParameterSpec;
+import java.security.spec.PSSParameterSpec;
+
+import com.distrimind.util.Bits;
+
 import gnu.vm.jgnu.security.InvalidKeyException;
 import gnu.vm.jgnu.security.NoSuchAlgorithmException;
+import gnu.vm.jgnu.security.NoSuchProviderException;
 import gnu.vm.jgnu.security.SignatureException;
 import gnu.vm.jgnu.security.spec.InvalidKeySpecException;
 import gnu.vm.jgnux.crypto.ShortBufferException;
@@ -43,32 +51,24 @@ import gnu.vm.jgnux.crypto.ShortBufferException;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 2.1
+ * @version 4.0
  * @since Utils 1.7
  */
-public class ASymmetricSignerAlgorithm extends AbstractSignerAlgorithm {
+public class ASymmetricAuthentifiedSignerAlgorithm extends AbstractAuthentifiedSignerAlgorithm {
 	private final ASymmetricPrivateKey localPrivateKey;
 	private final AbstractSignature signature;
 	private final int macLength;
+	private final ASymmetricAuthentifiedSignatureType type;
 
-	ASymmetricSignerAlgorithm(ASymmetricSignatureType type, AbstractSignature signature, ASymmetricPrivateKey localPrivateKey) {
-		if (signature == null)
-			throw new NullPointerException("signature");
+	ASymmetricAuthentifiedSignerAlgorithm(ASymmetricPrivateKey localPrivateKey) throws NoSuchAlgorithmException, NoSuchProviderException {
 		if (localPrivateKey == null)
 			throw new NullPointerException("localPrivateKey");
+		type=localPrivateKey.getAuthentifiedSignatureAlgorithmType();
+		if (type==null)
+			throw new IllegalArgumentException("The given key is not destinated to a signature process");
 		this.localPrivateKey = localPrivateKey;
-		this.signature = signature;
+		this.signature = type.getSignatureInstance();
 		this.macLength = type.getSignatureSizeBytes(localPrivateKey.getKeySize());
-	}
-
-	public ASymmetricSignerAlgorithm(ASymmetricPrivateKey localPrivateKey)
-			throws gnu.vm.jgnu.security.NoSuchAlgorithmException {
-		this(localPrivateKey.getAlgorithmType().getDefaultSignatureAlgorithm(), localPrivateKey.getAlgorithmType().getDefaultSignatureAlgorithm().getSignatureInstance(), localPrivateKey);
-	}
-
-	public ASymmetricSignerAlgorithm(ASymmetricSignatureType type, ASymmetricPrivateKey localPrivateKey)
-			throws gnu.vm.jgnu.security.NoSuchAlgorithmException {
-		this(localPrivateKey.getAlgorithmType().getDefaultSignatureAlgorithm(), type.getSignatureInstance(), localPrivateKey);
 	}
 
 	public ASymmetricPrivateKey getLocalPrivateKey() {
@@ -82,11 +82,40 @@ public class ASymmetricSignerAlgorithm extends AbstractSignerAlgorithm {
 	@Override
 	public byte[] sign(byte bytes[], int off, int len)
 			throws gnu.vm.jgnu.security.InvalidKeyException, gnu.vm.jgnu.security.SignatureException,
-			gnu.vm.jgnu.security.NoSuchAlgorithmException, InvalidKeySpecException {
-		signature.initSign(localPrivateKey);
-		signature.update(bytes, off, len);
-		return signature.sign();
+			gnu.vm.jgnu.security.NoSuchAlgorithmException, InvalidKeySpecException, gnu.vm.jgnu.security.InvalidAlgorithmParameterException, IOException {
+		try
+		{
+			boolean includeParameter=false;
+			if (type==ASymmetricAuthentifiedSignatureType.BOUNCY_CASTLE_SHA256withRSAandMGF1)
+			{
+				((JavaNativeSignature)signature).getSignature().setParameter(new PSSParameterSpec("SHA-256","MGF1",new MGF1ParameterSpec("SHA-256"),0, PSSParameterSpec.DEFAULT.getTrailerField()));
+				includeParameter=true;
+			}
+			else if (type==ASymmetricAuthentifiedSignatureType.BOUNCY_CASTLE_SHA384withRSAandMGF1)
+			{
+				((JavaNativeSignature)signature).getSignature().setParameter(new PSSParameterSpec("SHA-384","MGF1",new MGF1ParameterSpec("SHA-384"),0, PSSParameterSpec.DEFAULT.getTrailerField()));
+				includeParameter=true;
+			}
+			else if (type==ASymmetricAuthentifiedSignatureType.BOUNCY_CASTLE_SHA512withRSAandMGF1)
+			{
+				((JavaNativeSignature)signature).getSignature().setParameter(new PSSParameterSpec("SHA-512","MGF1",new MGF1ParameterSpec("SHA-512"),0, PSSParameterSpec.DEFAULT.getTrailerField()));
+				includeParameter=true;
+			}
+			
+			signature.initSign(localPrivateKey);
+			signature.update(bytes, off, len);
+			byte[] s=signature.sign();
+			if (includeParameter)
+			{
+				return Bits.concateEncodingWithIntSizedTabs(s, ((JavaNativeSignature)signature).getSignature().getParameters().getEncoded());
+			}
+			else
+				return s;
+		} catch (InvalidAlgorithmParameterException e) {
+			throw new gnu.vm.jgnu.security.InvalidAlgorithmParameterException(e);
+		}
 	}
+		
 
 	@Override
 	public void sign(byte message[], int offm, int lenm, byte signature[], int off_sig, int len_sig)

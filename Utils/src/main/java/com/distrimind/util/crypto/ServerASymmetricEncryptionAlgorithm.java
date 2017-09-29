@@ -53,40 +53,33 @@ import gnu.vm.jgnux.crypto.NoSuchPaddingException;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 2.0
+ * @version 3.0
  * @since Utils 1.7.0
  */
 public class ServerASymmetricEncryptionAlgorithm {
 	private final ASymmetricKeyPair myKeyPair;
 
-	private final ASymmetricSignerAlgorithm signer;
+	private final ASymmetricAuthentifiedSignerAlgorithm signer;
 
 	private final ASymmetricEncryptionType type;
 
 	private final AbstractCipher cipher;
 
-	private final ASymmetricSignatureType signatureType;
+	private final ASymmetricAuthentifiedSignatureType signatureType;
 
 	private final int maxBlockSize;
 
-	public ServerASymmetricEncryptionAlgorithm(ASymmetricKeyPair myKeyPair) throws NoSuchAlgorithmException,
-			NoSuchPaddingException, InvalidKeyException, InvalidKeySpecException, NoSuchProviderException {
-		this(myKeyPair.getAlgorithmType().getDefaultSignatureAlgorithm(), myKeyPair);
-	}
-
-	public ServerASymmetricEncryptionAlgorithm(ASymmetricSignatureType signatureType, ASymmetricKeyPair myKeyPair)
+	public ServerASymmetricEncryptionAlgorithm(ASymmetricKeyPair myKeyPair)
 			throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidKeySpecException,
 			NoSuchProviderException {
 
-		if (signatureType == null)
-			throw new NullPointerException("signatureType");
 		if (myKeyPair == null)
 			throw new NullPointerException("myKeyPair");
 
-		this.type = myKeyPair.getAlgorithmType();
+		this.type = myKeyPair.getEncryptionAlgorithmType();
 		this.myKeyPair = myKeyPair;
-		this.signatureType = signatureType;
-		this.signer = new ASymmetricSignerAlgorithm(signatureType, myKeyPair.getASymmetricPrivateKey());
+		this.signatureType = myKeyPair.getAuthentifiedSignatureAlgorithmType();
+		this.signer = new ASymmetricAuthentifiedSignerAlgorithm(myKeyPair.getASymmetricPrivateKey());
 		cipher = type.getCipherInstance();
 		cipher.init(Cipher.ENCRYPT_MODE, myKeyPair.getASymmetricPublicKey());
 		maxBlockSize = cipher.getOutputSize(myKeyPair.getMaxBlockSize());
@@ -157,7 +150,7 @@ public class ServerASymmetricEncryptionAlgorithm {
 		return c.getCipherInputStream(is);
 	}
 
-	protected AbstractCipher getCipherInstance() throws NoSuchAlgorithmException, NoSuchPaddingException {
+	protected AbstractCipher getCipherInstance() throws NoSuchAlgorithmException, NoSuchPaddingException, NoSuchProviderException {
 		return type.getCipherInstance();
 	}
 
@@ -183,11 +176,11 @@ public class ServerASymmetricEncryptionAlgorithm {
 		return res;
 	}
 
-	public ASymmetricSignatureType getSignatureType() {
+	public ASymmetricAuthentifiedSignatureType getSignatureType() {
 		return signatureType;
 	}
 
-	public ASymmetricSignerAlgorithm getSignerAlgorithm() {
+	public ASymmetricAuthentifiedSignerAlgorithm getSignerAlgorithm() {
 		return signer;
 	}
 

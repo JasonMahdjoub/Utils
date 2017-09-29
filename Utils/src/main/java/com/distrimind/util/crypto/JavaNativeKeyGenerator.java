@@ -51,11 +51,20 @@ public class JavaNativeKeyGenerator extends AbstractKeyGenerator {
 		super(type);
 		this.keyGenerator = keyGenerator;
 	}
+	JavaNativeKeyGenerator(SymmetricAuthentifiedSignatureType type, KeyGenerator keyGenerator) {
+		super(type);
+		this.keyGenerator = keyGenerator;
+	}
 
 	@Override
 	public SymmetricSecretKey generateKey() {
-		return new SymmetricSecretKey(type, keyGenerator.generateKey(),
-				keySize < 0 ? type.getDefaultKeySizeBits() : keySize);
+		if (encryptionType==null)
+			return new SymmetricSecretKey(signatureType, keyGenerator.generateKey(),
+				keySize < 0 ? signatureType.getDefaultKeySizeBits() : keySize);
+		else
+			return new SymmetricSecretKey(encryptionType, keyGenerator.generateKey(),
+					keySize < 0 ? encryptionType.getDefaultKeySizeBits() : keySize);
+
 	}
 
 	@Override

@@ -38,6 +38,13 @@ import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.SecureRandom;
 
+import org.bouncycastle.crypto.CryptoServicesRegistrar;
+import org.bouncycastle.crypto.EntropySourceProvider;
+import org.bouncycastle.crypto.fips.FipsDRBG;
+import org.bouncycastle.crypto.util.BasicEntropySourceProvider;
+
+import com.distrimind.util.Bits;
+
 /**
  * 
  * @author Jason Mahdjoub
@@ -53,10 +60,11 @@ public enum SecureRandomType {
 	GNU_WIRLPOOLPRNG("WHIRLPOOLPRNG", "GNU-Crypto", true, true), 
 	SPEEDIEST(SHA1PRNG), 
 	NativePRNGBlocking("NativePRNG", "SUN", false, true), 
-	DRBG_BOUNCYCASTLE("DRBG_BOUNCYCASTLE", "BOUNCY_CASTLE", false, true),
+	BC_FIPS_APPROVED("BC_FIPS_APPROVED", "BOUNCY_CASTLE", false, false),
+	BC_FIPS_APPROVED_FOR_KEYS("BC_FIPS_APPROVED_FOR_KEYS", "BOUNCY_CASTLE", false, false),
+	DEFAULT_BC_FIPS_APPROVED("DEFAULT_BC_FIPS_APPROVED", "BOUNCY_CASTLE", false, false),
 	GNU_DEFAULT(GNU_SHA1PRNG), 
-	GNU_FORTUNA("FORTUNA", "GNU-Crypto", true, false),
-	DEFAULT(GNU_FORTUNA);
+	DEFAULT(DEFAULT_BC_FIPS_APPROVED);
 
 	private final String algorithmeName;
 
@@ -83,45 +91,122 @@ public enum SecureRandomType {
 		this.gnuVersion = gnuVersion;
 		this.needInitialSeed=needInitialSeed;
 	}
-
-	public AbstractSecureRandom getInstance()
+	
+	/**
+	 * 
+	 * @param nonce               value to use in DRBG construction.
+	 * @param personalizationString
+	 * @return the secure random
+	 * @throws gnu.vm.jgnu.security.NoSuchAlgorithmException if the algorithm was not found
+	 * @throws gnu.vm.jgnu.security.NoSuchProviderException if the provider was not found
+	 */
+	public AbstractSecureRandom getInstance(byte nonce[]) throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.NoSuchProviderException
+	{
+		return getInstance(nonce, (byte[])null);
+	}
+	
+	/**
+	 * 
+	 * @param nonce               value to use in DRBG construction.
+	 * @param personalizationString
+	 * @return the secure random
+	 * @throws gnu.vm.jgnu.security.NoSuchAlgorithmException if the algorithm was not found
+	 * @throws gnu.vm.jgnu.security.NoSuchProviderException if the provider was not found
+	 */
+	public AbstractSecureRandom getInstance(byte nonce[], String personalizationString) throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.NoSuchProviderException
+	{
+		return getInstance(nonce, personalizationString==null?null:personalizationString.getBytes());
+	}
+	
+	/**
+	 * 
+	 * @param nonce               value to use in DRBG construction.
+	 * @param personalizationString the personalisation string for the underlying DRBG.
+	 * @return the secure random
+	 * @throws gnu.vm.jgnu.security.NoSuchAlgorithmException if the algorithm was not found
+	 * @throws gnu.vm.jgnu.security.NoSuchProviderException 
+	 * @throws gnu.vm.jgnu.security.NoSuchProviderException if the provider was not found
+	 */
+	public AbstractSecureRandom getInstance(byte nonce[], byte[] personalizationString)
 			throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.NoSuchProviderException {
+		AbstractSecureRandom res=null;
 		if (gnuVersion) {
 			if (this.algorithmeName.equals("FORTUNA"))
-				return getFortunaSecureRandomSingleton();
+				res=getFortunaSecureRandomSingleton();
 			else if (algorithmeName == null)
-				return new GnuSecureRandom(this, new gnu.vm.jgnu.security.SecureRandom());
+				res=new GnuSecureRandom(this, new gnu.vm.jgnu.security.SecureRandom());
 			else
-				return new GnuSecureRandom(this, gnu.vm.jgnu.security.SecureRandom.getInstance(algorithmeName));
+				res=new GnuSecureRandom(this, gnu.vm.jgnu.security.SecureRandom.getInstance(algorithmeName));
 		} else {
-			if (this==DRBG_BOUNCYCASTLE)
-				return new BouncyCastleDRBGSecureRandom();
-			try {
-				if (algorithmeName == null)
-					return new JavaNativeSecureRandom(this, new SecureRandom());
-				else
-					return new JavaNativeSecureRandom(this, SecureRandom.getInstance(algorithmeName, provider));
-			} catch (NoSuchAlgorithmException e) {
-				throw new gnu.vm.jgnu.security.NoSuchAlgorithmException(e);
-			} catch (NoSuchProviderException e) {
-				throw new gnu.vm.jgnu.security.NoSuchProviderException(e.getMessage());
+			if (BC_FIPS_APPROVED.algorithmeName.equals(this.algorithmeName) || BC_FIPS_APPROVED_FOR_KEYS.algorithmeName.equals(this.algorithmeName))
+			{
+				CodeProvider.ensureBouncyCastleProviderLoaded();
+				if (nonce==null)
+				{
+					nonce=new byte[32];
+					SecureRandomType.SHA1PRNG.getInstance(null).nextBytes(nonce);
+				}
+
+				EntropySourceProvider entSource = new BasicEntropySourceProvider(new SecureRandom(), true);
+				FipsDRBG.Builder drgbBldr = FipsDRBG.SHA512_HMAC.fromEntropySource(entSource)
+						.setSecurityStrength(256)
+						.setEntropyBitsRequired(256);
+				if (personalizationString!=null)
+				{
+					drgbBldr=drgbBldr.setPersonalizationString(personalizationString);
+				}
+				SecureRandom sr=null;
+				res=new JavaNativeSecureRandom(this, sr=drgbBldr.build(nonce,BC_FIPS_APPROVED_FOR_KEYS.algorithmeName.equals(this.algorithmeName)), false);
+				if (BC_FIPS_APPROVED_FOR_KEYS.algorithmeName.equals(this.algorithmeName))
+					CryptoServicesRegistrar.setSecureRandom(sr);
+				return res;
+			}
+			else if (DEFAULT_BC_FIPS_APPROVED.algorithmeName.equals(this.algorithmeName))
+			{
+				CodeProvider.ensureBouncyCastleProviderLoaded();
+				if (nonce==null)
+				{
+					nonce=new byte[32];
+					SecureRandomType.SHA1PRNG.getInstance(null).nextBytes(nonce);
+				}
+
+				EntropySourceProvider entSource = new BasicEntropySourceProvider(new SecureRandom(), true);
+				FipsDRBG.Builder drgbBldr = FipsDRBG.SHA512.fromEntropySource(entSource)
+						.setSecurityStrength(256)
+						.setEntropyBitsRequired(256);
+				if (personalizationString!=null)
+				{
+					drgbBldr=drgbBldr.setPersonalizationString(personalizationString);
+				}
+				return new JavaNativeSecureRandom(this, drgbBldr.build(nonce,true), false);
+			}
+			else
+			{
+				try {
+					
+					if (algorithmeName == null)
+						res=new JavaNativeSecureRandom(this, new SecureRandom());
+					else
+						res=new JavaNativeSecureRandom(this, SecureRandom.getInstance(algorithmeName, provider));
+				} catch (NoSuchAlgorithmException e) {
+					throw new gnu.vm.jgnu.security.NoSuchAlgorithmException(e);
+				} catch (NoSuchProviderException e) {
+					throw new gnu.vm.jgnu.security.NoSuchProviderException(e.getMessage());
+				}
 			}
 		}
+		if (nonce!=null)
+			res.setSeed(nonce);
+		return res;
 
 	}
-
-	public AbstractSecureRandom getInstance(byte[] seed)
-			throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.NoSuchProviderException {
-		AbstractSecureRandom sr = getInstance();
-		sr.setSeed(seed);
-		return sr;
-	}
+	
 
 	public AbstractSecureRandom getInstance(long seed)
 			throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.NoSuchProviderException {
-		AbstractSecureRandom sr = getInstance();
-		sr.setSeed(seed);
-		return sr;
+		byte[] nonce=new byte[8];
+		Bits.putLong(nonce, 0, seed);
+		return getInstance(seed);
 	}
 
 	public boolean isGNUVersion() {
@@ -140,5 +225,16 @@ public enum SecureRandomType {
 		}
 		return fortunaSecureRandomSingleton;
 	}
-
+	
+	static
+	{
+		try
+		{
+			CryptoServicesRegistrar.setSecureRandom(DEFAULT.getInstance(null));
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+	}
 }

@@ -45,42 +45,33 @@ import gnu.vm.jgnux.crypto.NoSuchPaddingException;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 2.0
+ * @version 3.0
  * @since Utils 1.7
  */
 public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutputAlgorithm {
 	private final ASymmetricPublicKey distantPublicKey;
 
-	private final ASymmetricSignatureCheckerAlgorithm signatureChecker;
+	private final ASymmetricAuthentifiedSignatureCheckerAlgorithm signatureChecker;
 
 	private final ASymmetricEncryptionType type;
 
-	private final ASymmetricSignatureType signatureType;
+	private final ASymmetricAuthentifiedSignatureType signatureType;
 
 	private final int maxBlockSize;
 
-	public ClientASymmetricEncryptionAlgorithm(ASymmetricPublicKey distantPublicKey) throws NoSuchAlgorithmException,
-			NoSuchPaddingException, InvalidKeyException, InvalidKeySpecException, NoSuchProviderException {
-		this(distantPublicKey.getAlgorithmType().getDefaultSignatureAlgorithm(), distantPublicKey);
-	}
-
-	public ClientASymmetricEncryptionAlgorithm(ASymmetricSignatureType signatureType,
-			ASymmetricPublicKey distantPublicKey) throws NoSuchAlgorithmException, NoSuchPaddingException,
+	public ClientASymmetricEncryptionAlgorithm(ASymmetricPublicKey distantPublicKey) throws NoSuchAlgorithmException, NoSuchPaddingException,
 			InvalidKeyException, InvalidKeySpecException, NoSuchProviderException {
-		super(distantPublicKey.getAlgorithmType().getCipherInstance());
-		if (signatureType == null)
-			throw new NullPointerException("signatureType");
-
-		this.type = distantPublicKey.getAlgorithmType();
+		super(distantPublicKey.getEncryptionAlgorithmType().getCipherInstance());
+		this.type = distantPublicKey.getEncryptionAlgorithmType();
 		this.distantPublicKey = distantPublicKey;
-		this.signatureType = signatureType;
-		this.signatureChecker = new ASymmetricSignatureCheckerAlgorithm(signatureType, distantPublicKey);
+		this.signatureType = distantPublicKey.getAuthentifiedSignatureAlgorithmType();
+		this.signatureChecker = new ASymmetricAuthentifiedSignatureCheckerAlgorithm(distantPublicKey);
 		initCipherForEncrypt(this.cipher);
 		this.maxBlockSize = distantPublicKey.getMaxBlockSize();
 	}
 
 	@Override
-	protected AbstractCipher getCipherInstance() throws NoSuchAlgorithmException, NoSuchPaddingException {
+	protected AbstractCipher getCipherInstance() throws NoSuchAlgorithmException, NoSuchPaddingException, NoSuchProviderException {
 		return type.getCipherInstance();
 	}
 
@@ -93,11 +84,11 @@ public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutpu
 		return maxBlockSize;
 	}
 
-	public ASymmetricSignatureCheckerAlgorithm getSignatureCheckerAlgorithm() {
+	public ASymmetricAuthentifiedSignatureCheckerAlgorithm getSignatureCheckerAlgorithm() {
 		return signatureChecker;
 	}
 
-	public ASymmetricSignatureType getSignatureType() {
+	public ASymmetricAuthentifiedSignatureType getSignatureType() {
 		return signatureType;
 	}
 

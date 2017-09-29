@@ -92,7 +92,10 @@ public final class JavaNativeSecureRandom extends AbstractSecureRandom {
 	private final GnuInterface secureGnuRandom;
 
 	JavaNativeSecureRandom(SecureRandomType type, java.security.SecureRandom secureRandom) {
-		super(type, true);
+		this(type, secureRandom, true);
+	}
+	JavaNativeSecureRandom(SecureRandomType type, java.security.SecureRandom secureRandom, boolean automaticReseed) {
+		super(type, automaticReseed);
 		if (type == null)
 			throw new NullPointerException("type");
 		if (secureRandom == null)
