@@ -591,7 +591,7 @@ public class CryptoTests {
 	}
 
 	@Test(dataProvider = "providePasswordHashTypes")
-	public void testPasswordHash(PasswordHashType type) throws NoSuchAlgorithmException, InvalidKeySpecException {
+	public void testPasswordHash(PasswordHashType type) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
 		SecureRandom random = new SecureRandom();
 		PasswordHash ph = new PasswordHash(type, random);
 		String password = "password";

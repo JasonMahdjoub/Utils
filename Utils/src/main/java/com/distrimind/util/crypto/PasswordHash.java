@@ -39,6 +39,10 @@ import java.util.Arrays;
 
 import com.distrimind.util.Bits;
 
+import gnu.vm.jgnu.security.NoSuchAlgorithmException;
+import gnu.vm.jgnu.security.NoSuchProviderException;
+import gnu.vm.jgnu.security.spec.InvalidKeySpecException;
+
 /**
  * 
  * @author Jason Mahdjoub
@@ -64,6 +68,7 @@ public class PasswordHash {
 	private int saltSize;
 
 	private int hashIterationsNumber;
+	
 
 	public PasswordHash() {
 		this(PasswordHashType.DEFAULT);
@@ -72,6 +77,7 @@ public class PasswordHash {
 	public PasswordHash(PasswordHashType type) {
 		this(type, new SecureRandom());
 	}
+	
 
 	public PasswordHash(PasswordHashType type, SecureRandom random) {
 		this(type, random, DEFAULT_SALT_SIZE, DEFAULT_NB_ITERATIONS);
@@ -86,17 +92,21 @@ public class PasswordHash {
 		this.hashIterationsNumber = saltSize;
 	}
 
-	public boolean checkValidHashedPassword(char password[], byte[] goodHash) {
-		return this.checkValidHashedPassword(password, goodHash, null);
+	public boolean checkValidHashedPassword(char password[], byte[] goodHash, byte defaultHashLengthBytes) {
+		return this.checkValidHashedPassword(password, goodHash, null, defaultHashLengthBytes);
 	}
 
-	public boolean checkValidHashedPassword(char password[], byte[] goodHash, byte[] staticAdditionalSalt) {
+	public boolean checkValidHashedPassword(char password[], byte[] goodHash) {
+		return this.checkValidHashedPassword(password, goodHash, null, type.getDefaultHashLengthBytes());
+	}
+
+	public boolean checkValidHashedPassword(char password[], byte[] goodHash, byte[] staticAdditionalSalt, byte defaultHashLengthBytes) {
 		try {
 			byte[][] separated = Bits.separateEncodingsWithShortSizedTabs(goodHash);
 			byte[] generatedSalt = separated[1];
 			byte[] salt = mixSaltWithStaticSalt(generatedSalt, staticAdditionalSalt);
 
-			return Arrays.equals(type.hash(password, salt, hashIterationsNumber), separated[0]);
+			return Arrays.equals(type.hash(password, salt, hashIterationsNumber, defaultHashLengthBytes), separated[0]);
 		} catch (Exception e) {
 			return false;
 		}
@@ -105,9 +115,14 @@ public class PasswordHash {
 	public boolean checkValidHashedPassword(String password, byte[] goodHash) {
 		return checkValidHashedPassword(password.toCharArray(), goodHash);
 	}
-
+	public boolean checkValidHashedPassword(String password, byte[] goodHash, byte defaultHashLengthBytes) {
+		return checkValidHashedPassword(password.toCharArray(), goodHash, defaultHashLengthBytes);
+	}
 	public boolean checkValidHashedPassword(String password, byte[] goodHash, byte[] staticAdditionalSalt) {
-		return checkValidHashedPassword(password.toCharArray(), goodHash, staticAdditionalSalt);
+		return checkValidHashedPassword(password.toCharArray(), goodHash, staticAdditionalSalt, type.getDefaultHashLengthBytes());
+	}
+	public boolean checkValidHashedPassword(String password, byte[] goodHash, byte[] staticAdditionalSalt, byte defaultHashLengthBytes) {
+		return checkValidHashedPassword(password.toCharArray(), goodHash, staticAdditionalSalt, defaultHashLengthBytes);
 	}
 
 	public int getHashIterationsNumber() {
@@ -119,28 +134,42 @@ public class PasswordHash {
 	}
 
 	public byte[] hash(char[] password)
-			throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException {
-		return hash(password, null);
+			throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException, NoSuchProviderException {
+		return hash(password, null, type.getDefaultHashLengthBytes());
 	}
-
-	public byte[] hash(char[] password, byte[] staticAdditionalSalt)
-			throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException {
+	public byte[] hash(char[] password, byte defaultHashLengthBytes)
+			throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException, NoSuchProviderException {
+		return hash(password, null, defaultHashLengthBytes);
+	}
+	public byte[] hash(char[] password, byte[] staticAdditionalSalt) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException
+	{
+		return hash(password, staticAdditionalSalt, type.getDefaultHashLengthBytes());
+	}
+	public byte[] hash(char[] password, byte[] staticAdditionalSalt, byte defaultHashLengthBytes)
+			throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException, NoSuchProviderException {
 		if (password == null)
 			throw new NullPointerException("password");
 
 		byte[] generatedSalt = generateSalt(random, saltSize);
 		byte[] salt = mixSaltWithStaticSalt(generatedSalt, staticAdditionalSalt);
-		return Bits.concateEncodingWithShortSizedTabs(type.hash(password, salt, hashIterationsNumber), generatedSalt);
+		return Bits.concateEncodingWithShortSizedTabs(type.hash(password, salt, hashIterationsNumber, defaultHashLengthBytes), generatedSalt);
 	}
 
 	public byte[] hash(String password)
-			throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException {
+			throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException, NoSuchProviderException {
 		return hash(password.toCharArray());
 	}
-
-	public byte[] hash(String password, byte[] staticAdditionalSalt)
-			throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException {
-		return hash(password.toCharArray(), staticAdditionalSalt);
+	public byte[] hash(String password, byte defaultHashLengthBytes)
+			throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException, NoSuchProviderException {
+		return hash(password.toCharArray(), defaultHashLengthBytes);
+	}
+	public byte[] hash(String password, byte[] staticAdditionalSalt) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException
+	{
+		return hash(password, staticAdditionalSalt, type.getDefaultHashLengthBytes());
+	}
+	public byte[] hash(String password, byte[] staticAdditionalSalt, byte defaultHashLengthBytes)
+			throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException, NoSuchProviderException {
+		return hash(password.toCharArray(), staticAdditionalSalt, defaultHashLengthBytes);
 	}
 
 	private byte[] mixSaltWithStaticSalt(byte[] salt, byte[] staticAdditionalSalt) {

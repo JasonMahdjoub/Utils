@@ -35,8 +35,10 @@ knowledge of the CeCILL-C license and that you accept its terms.
 package com.distrimind.util.crypto;
 
 import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.spec.InvalidKeySpecException;
 
+import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 
@@ -50,13 +52,16 @@ import com.berry.BCrypt;
  *
  */
 public enum PasswordHashType {
-	PBKDF2WithHmacSHA1("PBKDF2WithHmacSHA1", (byte) 20), 
+	PBKDF2WithHmacSHA1("PBKDF2WithHmacSHA1", (byte) 32), 
 	BCRYPT("BCRYPT", (byte) 32), 
-	GNU_PBKDF2WithHmacSHA1("PBKDF2WithHMacSHA1", (byte) 20), 
-	GNU_PBKDF2WithHMacSHA256("PBKDF2WithHMacSHA256",(byte) 20), 
-	GNU_PBKDF2WithHMacSHA384("PBKDF2WithHMacSHA384", (byte) 20), 
-	GNU_PBKDF2WithHMacSHA512("PBKDF2WithHMacSHA512", (byte) 20), 
-	GNU_PBKDF2WithHMacWhirlpool("PBKDF2WithHMacWhirlpool",(byte) 20), 
+	GNU_PBKDF2WithHmacSHA1("PBKDF2WithHMacSHA1", (byte) 32), 
+	GNU_PBKDF2WithHMacSHA256("PBKDF2WithHMacSHA256",(byte) 32), 
+	GNU_PBKDF2WithHMacSHA384("PBKDF2WithHMacSHA384", (byte) 32), 
+	GNU_PBKDF2WithHMacSHA512("PBKDF2WithHMacSHA512", (byte) 32), 
+	GNU_PBKDF2WithHMacWhirlpool("PBKDF2WithHMacWhirlpool",(byte) 32),
+	BC_FIPS_PBKFD2WithHMacSHA256("HmacSHA256",(byte) 32),
+	BC_FIPS_PBKFD2WithHMacSHA384("HmacSHA384",(byte) 32),
+	BC_FIPS_PBKFD2WithHMacSHA512("HmacSHA512",(byte) 32),
 	DEFAULT(BCRYPT);
 
 	private final byte hashLength;
@@ -76,11 +81,15 @@ public enum PasswordHashType {
 		this.defaultOf = null;
 		this.algorithmName = algorithmName;
 	}
+	public byte getDefaultHashLengthBytes()
+	{
+		return hashLength;
+	}
 
-	byte[] hash(byte data[], int off, int len, byte salt[], int iterations)
-			throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException {
+	byte[] hash(byte data[], int off, int len, byte salt[], int iterations, byte hashLength)
+			throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException, gnu.vm.jgnu.security.NoSuchProviderException {
 		if (defaultOf != null)
-			return defaultOf.hash(data, off, len, salt, iterations);
+			return defaultOf.hash(data, off, len, salt, iterations, hashLength);
 		switch (this) {
 		case DEFAULT:
 		case PBKDF2WithHmacSHA1: {
@@ -132,15 +141,48 @@ public enum PasswordHashType {
 			salt = uniformizeSaltLength(salt, BCrypt.BCRYPT_SALT_LEN);
 			return B.crypt_raw(passwordb, salt, (int) Math.log(iterations), BCrypt.bf_crypt_ciphertext.clone());
 		}
+		case BC_FIPS_PBKFD2WithHMacSHA256:
+		case BC_FIPS_PBKFD2WithHMacSHA384:
+		case BC_FIPS_PBKFD2WithHMacSHA512:
+		{
+			try
+			{
+				int size = len / 2;
+				char[] password = new char[size + len % 2];
+				for (int i = 0; i < size; i++) {
+					password[i] = (char) ((data[off + i * 2] & 0xFF) & ((data[off + i * 2 + 1] << 8) & 0xFF));
+				}
+				if (size < password.length)
+					password[size] = (char) (data[off + size * 2] & 0xFF);
+	
+				SecretKeyFactory keyFact = SecretKeyFactory.getInstance(algorithmName,CodeProvider.BCFIPS.name());
+				
+				SecretKey hmacKey = keyFact.generateSecret(new PBEKeySpec(password,  salt,iterations,hashLength*8));
+				
+				return hmacKey.getEncoded();
+			}
+			catch(NoSuchProviderException e)
+			{
+				throw new gnu.vm.jgnu.security.NoSuchProviderException(e.getMessage());
+			}
+			catch(NoSuchAlgorithmException e)
+			{
+				throw new gnu.vm.jgnu.security.NoSuchAlgorithmException(e);
+			} catch (InvalidKeySpecException e) {
+				throw new gnu.vm.jgnu.security.spec.InvalidKeySpecException(e);
+			}
+		}
+			
+			
 
 		}
 		return null;
 	}
 
-	byte[] hash(char password[], byte salt[], int iterations)
-			throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException {
+	byte[] hash(char password[], byte salt[], int iterations, byte hashLength)
+			throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException, gnu.vm.jgnu.security.NoSuchProviderException {
 		if (defaultOf != null)
-			return defaultOf.hash(password, salt, iterations);
+			return defaultOf.hash(password, salt, iterations, hashLength);
 		switch (this) {
 		case DEFAULT:
 		case PBKDF2WithHmacSHA1: {
@@ -175,7 +217,30 @@ public enum PasswordHashType {
 			salt = uniformizeSaltLength(salt, BCrypt.BCRYPT_SALT_LEN);
 			return B.crypt_raw(passwordb, salt, (int) Math.log(iterations), BCrypt.bf_crypt_ciphertext.clone());
 		}
-
+		case BC_FIPS_PBKFD2WithHMacSHA256:
+		case BC_FIPS_PBKFD2WithHMacSHA384:
+		case BC_FIPS_PBKFD2WithHMacSHA512:
+		{
+			try
+			{
+	
+				SecretKeyFactory keyFact = SecretKeyFactory.getInstance(algorithmName,CodeProvider.BCFIPS.name());
+				
+				SecretKey hmacKey = keyFact.generateSecret(new PBEKeySpec(password,  salt,iterations,hashLength*8));
+				
+				return hmacKey.getEncoded();
+			}
+			catch(NoSuchProviderException e)
+			{
+				throw new gnu.vm.jgnu.security.NoSuchProviderException(e.getMessage());
+			}
+			catch(NoSuchAlgorithmException e)
+			{
+				throw new gnu.vm.jgnu.security.NoSuchAlgorithmException(e);
+			} catch (InvalidKeySpecException e) {
+				throw new gnu.vm.jgnu.security.spec.InvalidKeySpecException(e);
+			}
+		}
 		}
 		return null;
 	}

@@ -135,11 +135,11 @@ public class P2PJPAKESecretMessageExchanger {
 
 	private static byte[] hashMessage(AbstractMessageDigest messageDigest, byte data[], int off, int len, byte[] salt,
 			int offset_salt, int len_salt, PasswordHashType passwordHashType, int hashIterationsNumber)
-			throws NoSuchAlgorithmException, InvalidKeySpecException {
+			throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
 		if (passwordHashType != null && salt != null && len_salt > 0) {
 			byte s[] = new byte[len_salt];
 			System.arraycopy(salt, offset_salt, s, 0, len_salt);
-			data = passwordHashType.hash(data, off, len, s, hashIterationsNumber);
+			data = passwordHashType.hash(data, off, len, s, hashIterationsNumber, passwordHashType.getDefaultHashLengthBytes());
 			off = 0;
 			len = data.length;
 		}
@@ -151,11 +151,11 @@ public class P2PJPAKESecretMessageExchanger {
 
 	private static byte[] hashMessage(AbstractMessageDigest messageDigest, char password[], byte[] salt,
 			int offset_salt, int len_salt, PasswordHashType passwordHashType, int hashIterationsNumber)
-			throws NoSuchAlgorithmException, InvalidKeySpecException {
+			throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
 		if (salt != null && len_salt > 0) {
 			byte s[] = new byte[len_salt];
 			System.arraycopy(salt, offset_salt, s, 0, len_salt);
-			byte[] res = passwordHashType.hash(password, s, hashIterationsNumber);
+			byte[] res = passwordHashType.hash(password, s, hashIterationsNumber, passwordHashType.getDefaultHashLengthBytes());
 			return hashMessage(messageDigest, res, 0, res.length, null, -1, -1, null, 0);
 		} else {
 			byte[] res = new byte[password.length * 2];

@@ -351,11 +351,11 @@ public class P2PASymmetricSecretMessageExchanger {
 
 	private byte[] hashMessage(AbstractMessageDigest messageDigest, byte data[], int off, int len, byte[] salt,
 			int offset_salt, int len_salt, boolean messageIsKey)
-			throws NoSuchAlgorithmException, InvalidKeySpecException {
+			throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
 		if (!messageIsKey && salt != null && len_salt > 0) {
 			byte s[] = new byte[len_salt];
 			System.arraycopy(salt, offset_salt, s, 0, len_salt);
-			data = passwordHashType.hash(data, off, len, s, hashIterationsNumber);
+			data = passwordHashType.hash(data, off, len, s, hashIterationsNumber, passwordHashType.getDefaultHashLengthBytes());
 			off = 0;
 			len = data.length;
 		}
@@ -366,7 +366,7 @@ public class P2PASymmetricSecretMessageExchanger {
 	}
 
 	private byte[] hashMessage(AbstractMessageDigest messageDigest, char password[], byte[] salt, int offset_salt,
-			int len_salt) throws NoSuchAlgorithmException, InvalidKeySpecException {
+			int len_salt) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
 		if (salt == null)
 			throw new NullPointerException(
 					"salt can't be null when the message is a password (and not a secret key) !");
@@ -377,7 +377,7 @@ public class P2PASymmetricSecretMessageExchanger {
 		if (salt != null && len_salt > 0) {
 			byte s[] = new byte[len_salt];
 			System.arraycopy(salt, offset_salt, s, 0, len_salt);
-			byte[] res = passwordHashType.hash(password, s, hashIterationsNumber);
+			byte[] res = passwordHashType.hash(password, s, hashIterationsNumber, passwordHashType.getDefaultHashLengthBytes());
 
 			return hashMessage(messageDigest, res, 0, res.length, null, -1, -1, true);
 		} else {
@@ -416,7 +416,7 @@ public class P2PASymmetricSecretMessageExchanger {
 
 	public boolean verifyDistantMessage(byte[] originalMessage, byte[] salt, byte[] distantMessage,
 			boolean messageIsKey) throws InvalidKeyException, IOException, IllegalAccessException,
-			IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException {
+			IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
 		if (salt == null)
 			salt = new byte[0];
 		return this.verifyDistantMessage(originalMessage, 0, originalMessage.length, salt, 0, salt.length,
@@ -426,7 +426,7 @@ public class P2PASymmetricSecretMessageExchanger {
 	public boolean verifyDistantMessage(byte[] originalMessage, int offo, int leno, byte[] salt, int offset_salt,
 			int len_salt, byte[] distantMessage, int offd, int lend, boolean messageIsKey)
 			throws InvalidKeyException, IOException, IllegalAccessException, IllegalBlockSizeException,
-			BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException {
+			BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
 		if (originalMessage == null)
 			throw new NullPointerException("message");
 		if (originalMessage.length - offo < leno)
@@ -473,7 +473,7 @@ public class P2PASymmetricSecretMessageExchanger {
 
 	public boolean verifyDistantMessage(char[] originalMessage, byte[] salt, byte[] distantMessage)
 			throws InvalidKeyException, IOException, IllegalAccessException, IllegalStateException,
-			NoSuchAlgorithmException, InvalidKeySpecException, IllegalBlockSizeException, BadPaddingException {
+			NoSuchAlgorithmException, InvalidKeySpecException, IllegalBlockSizeException, BadPaddingException, NoSuchProviderException {
 		if (salt == null)
 			salt = new byte[0];
 		return this.verifyDistantMessage(originalMessage, salt, 0, salt.length, distantMessage, 0,
@@ -483,7 +483,7 @@ public class P2PASymmetricSecretMessageExchanger {
 	public boolean verifyDistantMessage(char[] originalMessage, byte[] salt, int offset_salt, int len_salt,
 			byte[] distantMessage, int offd, int lend)
 			throws IllegalAccessException, IllegalStateException, NoSuchAlgorithmException, InvalidKeySpecException,
-			InvalidKeyException, IllegalBlockSizeException, BadPaddingException, IOException {
+			InvalidKeyException, IllegalBlockSizeException, BadPaddingException, IOException, NoSuchProviderException {
 		if (originalMessage == null)
 			throw new NullPointerException("message");
 		if (distantMessage == null)
@@ -516,7 +516,7 @@ public class P2PASymmetricSecretMessageExchanger {
 
 	public boolean verifyDistantMessage(String originalMessage, byte[] salt, byte[] distantMessage)
 			throws InvalidKeyException, IOException, IllegalAccessException, IllegalBlockSizeException,
-			BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, IllegalStateException {
+			BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, IllegalStateException, NoSuchProviderException {
 		return this.verifyDistantMessage(originalMessage.toCharArray(), salt, distantMessage);
 	}
 
