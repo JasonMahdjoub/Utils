@@ -96,7 +96,7 @@ public enum ASymmetricKeyWrapper {
 		return algorithmName;
 	}	
 	
-	public byte[] oaepKeyWrapWithParameters(ASymmetricPublicKey publicKey, SymmetricSecretKey secretKey) throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, IllegalStateException, IllegalBlockSizeException, gnu.vm.jgnu.security.NoSuchProviderException, gnu.vm.jgnu.security.InvalidAlgorithmParameterException, IOException
+	public byte[] wrapKey(ASymmetricPublicKey publicKey, SymmetricSecretKey secretKey) throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, IllegalStateException, IllegalBlockSizeException, gnu.vm.jgnu.security.NoSuchProviderException, gnu.vm.jgnu.security.InvalidAlgorithmParameterException, IOException
 	{
 		if (provider.equals(CodeProvider.GNU_CRYPTO))
 		{
