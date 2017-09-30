@@ -34,7 +34,6 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
-import java.nio.ByteBuffer;
 import java.security.InvalidKeyException;
 import java.security.KeyFactory;
 import java.security.KeyPair;
@@ -44,9 +43,6 @@ import java.security.NoSuchProviderException;
 import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 
 import javax.crypto.KeyAgreement;
 
@@ -58,8 +54,8 @@ import javax.crypto.KeyAgreement;
  */
 public class EllipticCurveDiffieHellmanAlgorithm {
 	private final EllipticCurveDiffieHellmanType type;
-	private byte[] derivedKey;
-	private KeyPair myKeyPair;
+	private SymmetricSecretKey derivedKey;
+	private ASymmetricKeyPair myKeyPair;
 	private byte[] myPublicKeyBytes;
 
 	EllipticCurveDiffieHellmanAlgorithm(EllipticCurveDiffieHellmanType type) {
@@ -74,22 +70,26 @@ public class EllipticCurveDiffieHellmanAlgorithm {
 		myKeyPair = null;
 		myPublicKeyBytes = null;
 	}
-
-	public byte[] generateAndGetPublicKey() throws gnu.vm.jgnu.security.NoSuchAlgorithmException  {
+	public ASymmetricKeyPair generateAndSetKeyPair() throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException  {
+		return generateAndSetKeyPair(type.getECDHKeySizeBits(), System.currentTimeMillis()+(24*60*60*1000));
+	}
+	public ASymmetricKeyPair generateAndSetKeyPair(short keySize) throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException  {
+		return generateAndSetKeyPair(keySize, System.currentTimeMillis()+(24*60*60*1000));
+	}
+	public ASymmetricKeyPair generateAndSetKeyPair(short keySize, long expirationUTC) throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException  {
 		try
 		{
-			reset();
 			KeyPairGenerator kpg = null;
 			if (type.getCodeProvider() == CodeProvider.BCFIPS) {
 				CodeProvider.ensureBouncyCastleProviderLoaded();
 				kpg = KeyPairGenerator.getInstance("EC", CodeProvider.BCFIPS.name());
 			} else
 				kpg = KeyPairGenerator.getInstance("EC");
-			kpg.initialize(type.getECDHKeySizeBits());
-			myKeyPair = kpg.generateKeyPair();
-			myPublicKeyBytes = myKeyPair.getPublic().getEncoded();
+			kpg.initialize(keySize);
+			KeyPair kp=kpg.generateKeyPair();
+			setKeyPair(new ASymmetricKeyPair(ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA384withECDSA, kp, keySize, expirationUTC));
 
-			return myPublicKeyBytes;
+			return myKeyPair;
 		}
 		catch(NoSuchAlgorithmException e)
 		{
@@ -99,8 +99,27 @@ public class EllipticCurveDiffieHellmanAlgorithm {
 		}
 			
 	}
+	
+	public void setKeyPair(ASymmetricKeyPair keyPair) throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException
+	{
+		if (keyPair==null)
+			throw new NullPointerException("keyPair");
+		reset();
+		myKeyPair = keyPair;
+		myPublicKeyBytes = myKeyPair.getASymmetricPublicKey().toJavaNativeKey().getEncoded();
+	}
+	
+	public ASymmetricKeyPair getKeyPair()
+	{
+		return myKeyPair;
+	}
+	
+	public byte[] getEncodedPublicKey()
+	{
+		return myPublicKeyBytes;
+	}
 
-	public void setDistantPublicKey(byte[] distantPublicKeyBytes) throws 
+	public void setDistantPublicKey(byte[] distantPublicKeyBytes, SymmetricEncryptionType symmetricEncryptionType, short keySize) throws 
 			gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.InvalidKeyException, gnu.vm.jgnu.security.spec.InvalidKeySpecException, gnu.vm.jgnu.security.NoSuchProviderException {
 		try
 		{
@@ -128,42 +147,11 @@ public class EllipticCurveDiffieHellmanAlgorithm {
 			else
 				ka = KeyAgreement.getInstance("ECDH");
 	
-			ka.init(myKeyPair.getPrivate());
+			ka.init(myKeyPair.getASymmetricPrivateKey().toJavaNativeKey());
 			ka.doPhase(distantPublicKey, true);
+			
 	
-			byte[] sharedSecret = ka.generateSecret();
-	
-			AbstractMessageDigest hash = type.getMessageDigestType().getMessageDigestInstance();
-			hash.update(sharedSecret);
-	
-			List<ByteBuffer> keys = Arrays.asList(ByteBuffer.wrap(myPublicKeyBytes),
-					ByteBuffer.wrap(distantPublicKeyBytes));
-			Collections.sort(keys);
-			hash.update(keys.get(0));
-			hash.update(keys.get(1));
-	
-			derivedKey = hash.digest();
-			if (type.getKeySizeBits() == 128) {
-				byte[] tab = new byte[16];
-				System.arraycopy(derivedKey, 0, tab, 0, 16);
-				for (int i = 0; i < 16; i++)
-					tab[i] ^= derivedKey[i + 16];
-				if (type.getECDHKeySizeBits() == 384)
-					for (int i = 0; i < 16; i++)
-						tab[i] ^= derivedKey[i + 32];
-	
-				derivedKey = tab;
-			} else if (type.getKeySizeBits() == 256) {
-				if (type.getECDHKeySizeBits() == 384) {
-					byte[] tab = new byte[32];
-					System.arraycopy(derivedKey, 0, tab, 0, 32);
-					for (int i = 0; i < 16; i++)
-						tab[i] ^= derivedKey[i + 32];
-					derivedKey = tab;
-				}
-			} else {
-				throw new IllegalAccessError();
-			}
+			derivedKey = new SymmetricSecretKey(symmetricEncryptionType, ka.generateSecret(symmetricEncryptionType.getAlgorithmName()+"["+keySize+"]"), keySize);
 		}
 		catch(NoSuchAlgorithmException e)
 		{
@@ -180,8 +168,8 @@ public class EllipticCurveDiffieHellmanAlgorithm {
 		}		
 	}
 
-	public SymmetricSecretKey getDerivedKey(SymmetricEncryptionType symmetricEncryptionType) {
-		return symmetricEncryptionType.getSymmetricSecretKey(derivedKey, type.getKeySizeBits());
+	public SymmetricSecretKey getDerivedKey() {
+		return derivedKey;
 	}
 
 }

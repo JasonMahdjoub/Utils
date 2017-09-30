@@ -69,6 +69,7 @@ import com.distrimind.util.properties.AbstractXMLObjectParser;
 import com.distrimind.util.properties.XMLProperties;
 import com.distrimind.util.version.Version;
 
+import gnu.vm.jgnu.security.InvalidAlgorithmParameterException;
 import gnu.vm.jgnu.security.NoSuchProviderException;
 
 /**
@@ -301,7 +302,7 @@ public class PropertiesExample extends XMLProperties {
 	}
 
 	void generateValues() throws MalformedURLException, UnknownHostException,
-			gnu.vm.jgnu.security.NoSuchAlgorithmException, NoSuchProviderException {
+			gnu.vm.jgnu.security.NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException {
 		Random rand = new Random(System.currentTimeMillis());
 		intValue = rand.nextInt();
 		shortValue = (short) rand.nextInt();
@@ -354,7 +355,7 @@ public class PropertiesExample extends XMLProperties {
 		calendar = Calendar.getInstance();
 		calendar.setTime(new Date(rand.nextLong()));
 		version = Utils.VERSION;
-		AbstractSecureRandom random = SecureRandomType.DEFAULT.getInstance();
+		AbstractSecureRandom random = SecureRandomType.DEFAULT.getSingleton(null);
 		secretKey = SymmetricEncryptionType.DEFAULT.getKeyGenerator(random).generateKey();
 		keyPair = ASymmetricEncryptionType.DEFAULT.getKeyPairGenerator(random, (short) 1024).generateKeyPair();
 		privateKey = keyPair.getASymmetricPrivateKey();

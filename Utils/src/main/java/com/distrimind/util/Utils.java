@@ -73,6 +73,7 @@ public class Utils {
 			d.addItem("Minimal corrections into PasswordHash class");
 			d.addItem("Updating Bouncy Castle to 1.58 version");
 			d.addItem("FIPS compliant");
+			d.addItem("Add symmetric and asymmetric key wrappers classes");
 			VERSION.addDescription(d);
 
 			c = Calendar.getInstance();

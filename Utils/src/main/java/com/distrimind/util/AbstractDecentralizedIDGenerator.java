@@ -40,8 +40,8 @@ import java.util.Enumeration;
 
 import com.distrimind.util.crypto.AbstractMessageDigest;
 import com.distrimind.util.crypto.AbstractSecureRandom;
-import com.distrimind.util.crypto.FortunaSecureRandom;
 import com.distrimind.util.crypto.MessageDigestType;
+import com.distrimind.util.crypto.SecureRandomType;
 import com.distrimind.util.sizeof.ObjectSizer;
 
 import gnu.vm.jgnu.security.NoSuchAlgorithmException;
@@ -67,6 +67,8 @@ public abstract class AbstractDecentralizedIDGenerator extends AbstractDecentral
 	private final static transient byte SHORT_LOCAL_MAC_BYTES[];
 	private final static transient AbstractSecureRandom RANDOM;
 	private final static transient AbstractMessageDigest MESSAGE_DIGEST;
+	
+	
 	static {
 		long result = 0;
 		long result2 = 0;
@@ -75,7 +77,7 @@ public abstract class AbstractDecentralizedIDGenerator extends AbstractDecentral
 		AbstractSecureRandom random=null;
 		AbstractMessageDigest messageDigest=null;
 		try {
-			messageDigest=MessageDigestType.BOUNCY_CASTLE_SHA3_256.getMessageDigestInstance();
+			messageDigest=MessageDigestType.BC_FIPS_SHA3_256.getMessageDigestInstance();
 			final Enumeration<NetworkInterface> e = NetworkInterface.getNetworkInterfaces();
 			if (e != null) {
 				while (e.hasMoreElements()) {
@@ -115,7 +117,27 @@ public abstract class AbstractDecentralizedIDGenerator extends AbstractDecentral
 					}
 				}
 			}
-			random=new FortunaSecureRandom();
+			byte[] nonce=("Que(3) j(1)'aime(4) à(1) faire(5) apprendre ce nombre utile aux sages !\n" + 
+					"Immortel Archimède, artiste ingénieur,\n" + 
+					"Qui de ton jugement peut priser la valeur ?\n" + 
+					"Pour moi, ton problème eut de pareils avantages.\n" + 
+					"Jadis, mystérieux, un problème bloquait\n" + 
+					"Tout l'admirable procédé, l'œuvre grandiose\n" + 
+					"Que Pythagore découvrit aux anciens Grecs.\n" + 
+					"Ô quadrature ! Vieux tourment du philosophe\n" + 
+					"Insoluble rondeur, trop longtemps vous avez\n" + 
+					"Défié Pythagore et ses imitateurs.\n" + 
+					"Comment intégrer l'espace plan circulaire ?\n" + 
+					"Former un triangle auquel il équivaudra ?\n" + 
+					"Nouvelle invention : Archimède inscrira\n" + 
+					"Dedans un hexagone ; appréciera son aire\n" + 
+					"Fonction du rayon. Pas trop ne s'y tiendra :\n" + 
+					"Dédoublera chaque élément antérieur ;\n" + 
+					"Toujours de l'orbe calculée approchera ;\n" + 
+					"Définira limite ; enfin, l'arc, le limiteur\n" + 
+					"De cet inquiétant cercle, ennemi trop rebelle\n" + 
+					"Professeur, enseignez son problème avec zèle. ").getBytes();
+			random=SecureRandomType.DEFAULT_BC_FIPS_APPROVED.getSingleton(nonce);
 		} catch (SocketException | NoSuchAlgorithmException | NoSuchProviderException e1) {
 			e1.printStackTrace();
 		}

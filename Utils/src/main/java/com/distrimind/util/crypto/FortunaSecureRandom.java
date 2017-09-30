@@ -71,16 +71,23 @@ public class FortunaSecureRandom extends AbstractSecureRandom implements Seriali
 	private transient final JavaNativeInterface secureJavaNativeRandom;
 	private transient boolean fortunaInitialized=false;
 	private static final short initialGeneratedSeedSize=64;
+	private final byte nonce[], personalizationString[];
 	
-	public FortunaSecureRandom() throws NoSuchAlgorithmException, NoSuchProviderException {
-		super(SecureRandomType.GNU_FORTUNA, false);
+	public FortunaSecureRandom(byte nonce[]) throws NoSuchAlgorithmException, NoSuchProviderException {
+		this(nonce, null);
+	}
+	public FortunaSecureRandom(byte nonce[], byte [] personalizationString) throws NoSuchAlgorithmException, NoSuchProviderException {
+		super(null, false);
+		this.nonce=nonce;
+		this.personalizationString=personalizationString;
 		fortuna=null;
-		randomStrong=SecureRandomType.NativePRNGBlocking.getInstance();
-		randomSHA1PRNG=SecureRandomType.SHA1PRNG.getInstance();
-		randomGNU_SHA512PRNG=SecureRandomType.GNU_SHA512PRNG.getInstance();
-		drbg=SecureRandomType.DRBG_BOUNCYCASTLE.getInstance();
+		randomStrong=SecureRandomType.NativePRNGBlocking.getInstance(nonce, personalizationString);
+		randomSHA1PRNG=SecureRandomType.SHA1PRNG.getInstance(nonce, personalizationString);
+		randomGNU_SHA512PRNG=SecureRandomType.GNU_SHA512PRNG.getInstance(nonce, personalizationString);
+		drbg=SecureRandomType.DEFAULT_BC_FIPS_APPROVED.getInstance(nonce, personalizationString);
 		secureGnuRandom=new GnuInterface();
 		secureJavaNativeRandom=new JavaNativeInterface();
+		
 		
 	}
 
@@ -114,7 +121,7 @@ public class FortunaSecureRandom extends AbstractSecureRandom implements Seriali
 	{
 		try
 		{
-			FortunaSecureRandom res=new FortunaSecureRandom();
+			FortunaSecureRandom res=new FortunaSecureRandom(nonce, personalizationString);
 			res.fortuna=getFortunaInstance().clone();
 			return res;
 		}

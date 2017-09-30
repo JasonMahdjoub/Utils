@@ -86,7 +86,7 @@ public final class JavaNativeKeyPairGenerator extends AbstractKeyPairGenerator {
 	public void initialize(short _keysize, long expirationTime, AbstractSecureRandom _random) throws gnu.vm.jgnu.security.InvalidAlgorithmParameterException {
 		try
 		{
-			if (signatureType!=null && signatureType.getKeyGeneratorAlgorithmName().equals(ASymmetricAuthentifiedSignatureType.BOUNCY_CASTLE_SHA384withECDSA_FIPS.getKeyGeneratorAlgorithmName()))
+			if (signatureType!=null && signatureType.getKeyGeneratorAlgorithmName().equals(ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA384withECDSA.getKeyGeneratorAlgorithmName()))
 				keyPairGenerator.initialize(keySize, _random.getJavaNativeSecureRandom());
 			else
 				keyPairGenerator.initialize(new RSAKeyGenParameterSpec(keySize, RSAKeyGenParameterSpec.F4), _random.getJavaNativeSecureRandom());

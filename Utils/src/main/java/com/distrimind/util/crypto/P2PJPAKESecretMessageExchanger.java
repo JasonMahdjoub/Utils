@@ -58,32 +58,32 @@ import gnu.vm.jgnu.security.spec.InvalidKeySpecException;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 1.2
+ * @version 2.0
  * @since Utils 2.9.0
  */
 public class P2PJPAKESecretMessageExchanger {
 	private final JPAKEParticipant jpake;
 	private BigInteger keyMaterial;
 
-	public P2PJPAKESecretMessageExchanger(Serializable participantID, char[] message)
+	public P2PJPAKESecretMessageExchanger(AbstractSecureRandom secureRandom, Serializable participantID, char[] message)
 			throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException {
-		this(participantID, message, null, -1, -1);
+		this(secureRandom, participantID, message, null, -1, -1);
 	}
 
-	public P2PJPAKESecretMessageExchanger(Serializable participantID, byte[] message, boolean messageIsKey)
+	public P2PJPAKESecretMessageExchanger(AbstractSecureRandom secureRandom, Serializable participantID, byte[] message, boolean messageIsKey)
 			throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException {
-		this(participantID, message, 0, message.length, null, -1, -1, messageIsKey);
+		this(secureRandom, participantID, message, 0, message.length, null, -1, -1, messageIsKey);
 	}
 
-	private char[] getHashedPassword(char[] message, byte salt[], int offset_salt, int len_salt) throws NoSuchAlgorithmException, InvalidKeySpecException
+	private char[] getHashedPassword(char[] message, byte salt[], int offset_salt, int len_salt) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException
 	{
-		byte[] m = hashMessage(MessageDigestType.BOUNCY_CASTLE_SHA3_256.getMessageDigestInstance(), message, salt,
+		byte[] m = hashMessage(MessageDigestType.BC_FIPS_SHA3_256.getMessageDigestInstance(), message, salt,
 				offset_salt, len_salt, PasswordHashType.BCRYPT, 10000);
 		return convertToChar(m);
 	}
-	private char[] getHashedPassword(byte[] message, int offset, int len, byte salt[], int offset_salt, int len_salt, boolean messageIsKey) throws NoSuchAlgorithmException, InvalidKeySpecException
+	private char[] getHashedPassword(byte[] message, int offset, int len, byte salt[], int offset_salt, int len_salt, boolean messageIsKey) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException
 	{
-		byte[] m = hashMessage(MessageDigestType.BOUNCY_CASTLE_SHA3_256.getMessageDigestInstance(), message, offset, len,
+		byte[] m = hashMessage(MessageDigestType.BC_FIPS_SHA3_256.getMessageDigestInstance(), message, offset, len,
 				salt, offset_salt, len_salt, messageIsKey ? null : PasswordHashType.BCRYPT, messageIsKey?1000:10000);
 		return convertToChar(m);
 	}
@@ -105,7 +105,7 @@ public class P2PJPAKESecretMessageExchanger {
 		}
 	}
 	
-	public P2PJPAKESecretMessageExchanger(Serializable participantID, char[] message, byte salt[], int offset_salt,
+	public P2PJPAKESecretMessageExchanger(AbstractSecureRandom secureRandom, Serializable participantID, char[] message, byte salt[], int offset_salt,
 			int len_salt) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException {
 		if (message == null)
 			throw new NullPointerException("message");
@@ -114,11 +114,11 @@ public class P2PJPAKESecretMessageExchanger {
 
 		
 		jpake = new JPAKEParticipant(getParticipanIDString(participantID), getHashedPassword(message, salt, offset_salt, len_salt), JPAKEPrimeOrderGroups.NIST_3072, new SHA512Digest(),
-				SecureRandomType.DEFAULT.getInstance());
+				secureRandom);
 		this.keyMaterial = null;
 	}
 
-	public P2PJPAKESecretMessageExchanger(Serializable participantID, byte[] message, int offset, int len, byte salt[],
+	public P2PJPAKESecretMessageExchanger(AbstractSecureRandom secureRandom, Serializable participantID, byte[] message, int offset, int len, byte salt[],
 			int offset_salt, int len_salt, boolean messageIsKey)
 			throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException {
 		if (message == null)
@@ -129,7 +129,7 @@ public class P2PJPAKESecretMessageExchanger {
 			throw new IllegalArgumentException("salt");
 
 		jpake = new JPAKEParticipant(getParticipanIDString(participantID), getHashedPassword(message, offset, len, salt, offset_salt, len_salt, messageIsKey), JPAKEPrimeOrderGroups.NIST_3072, new SHA512Digest(),
-				SecureRandomType.DEFAULT.getInstance());
+				secureRandom);
 		this.keyMaterial = null;
 	}
 

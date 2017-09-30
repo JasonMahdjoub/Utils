@@ -64,8 +64,8 @@ import gnu.vm.jgnux.crypto.SecretKey;
  */
 public enum ASymmetricKeyWrapper {
 
-	RSA_OAEP("RSA/NONE/OAEPPadding",CodeProvider.SUN_ORACLE, false),
-	RSA_OAEP_WITH_PARAMETERS("RSA/NONE/OAEPPadding",CodeProvider.SUN_ORACLE, true),
+	RSA_OAEP("RSA/NONE/OAEPPadding",CodeProvider.SUN, false),
+	RSA_OAEP_WITH_PARAMETERS("RSA/NONE/OAEPPadding",CodeProvider.SUN, true),
 	GNU_RSA_OAEP("RSA/NONE/OAEPPadding",CodeProvider.GNU_CRYPTO, false),
 	BOUNCY_CASTLE_RSA_OAEP_FIPS("RSA/NONE/OAEPPadding",CodeProvider.BCFIPS, false),
 	BOUNCY_CASTLE_RSA_OAEP_WITH_PARAMETERS_FIPS("RSA/NONE/OAEPPadding",CodeProvider.BCFIPS, true),

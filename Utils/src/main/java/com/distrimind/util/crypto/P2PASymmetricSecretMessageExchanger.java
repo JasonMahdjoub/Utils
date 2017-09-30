@@ -54,7 +54,7 @@ import gnu.vm.jgnux.crypto.NoSuchPaddingException;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 2.1
+ * @version 3.0
  * @since Utils 1.4.1
  */
 public class P2PASymmetricSecretMessageExchanger {
@@ -138,7 +138,7 @@ public class P2PASymmetricSecretMessageExchanger {
 	protected static BigInteger maxLongValue = BigInteger.valueOf(1).shiftLeft(63);
 
 	private static AbstractCipher getCipherInstancePriv(ASymmetricEncryptionType type)
-			throws NoSuchAlgorithmException, NoSuchPaddingException {
+			throws NoSuchAlgorithmException, NoSuchPaddingException, NoSuchProviderException {
 		return type.getCipherInstance();
 	}
 
@@ -149,6 +149,8 @@ public class P2PASymmetricSecretMessageExchanger {
 	private P2PASymmetricSecretMessageExchanger distantMessageEncoder;
 
 	private final GnuSecureRandom random;
+	
+	private final AbstractSecureRandom secureRandom; 
 
 	private final AbstractCipher cipher;
 
@@ -160,19 +162,19 @@ public class P2PASymmetricSecretMessageExchanger {
 
 	private int hashIterationsNumber = PasswordHash.DEFAULT_NB_ITERATIONS;
 
-	public P2PASymmetricSecretMessageExchanger(ASymmetricPublicKey myPublicKey)
+	public P2PASymmetricSecretMessageExchanger(AbstractSecureRandom secureRandom, ASymmetricPublicKey myPublicKey)
 			throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,
 			InvalidAlgorithmParameterException, InvalidKeySpecException, NoSuchProviderException {
-		this(MessageDigestType.SHA_512, PasswordHashType.DEFAULT, myPublicKey);
+		this(secureRandom, MessageDigestType.SHA_512, PasswordHashType.DEFAULT, myPublicKey);
 	}
 
-	public P2PASymmetricSecretMessageExchanger(MessageDigestType messageDigestType, PasswordHashType passwordHashType,
+	public P2PASymmetricSecretMessageExchanger(AbstractSecureRandom secureRandom, MessageDigestType messageDigestType, PasswordHashType passwordHashType,
 			ASymmetricPublicKey myPublicKey) throws NoSuchAlgorithmException, NoSuchPaddingException,
 			InvalidKeyException, InvalidAlgorithmParameterException, InvalidKeySpecException, NoSuchProviderException {
-		this(messageDigestType, passwordHashType, myPublicKey, null);
+		this(secureRandom, messageDigestType, passwordHashType, myPublicKey, null);
 	}
 
-	public P2PASymmetricSecretMessageExchanger(MessageDigestType messageDigestType, PasswordHashType passwordHashType,
+	public P2PASymmetricSecretMessageExchanger(AbstractSecureRandom secureRandom, MessageDigestType messageDigestType, PasswordHashType passwordHashType,
 			ASymmetricPublicKey myPublicKey, byte[] distantPublicKey)
 			throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidKeySpecException,
 			InvalidAlgorithmParameterException, NoSuchProviderException {
@@ -182,8 +184,11 @@ public class P2PASymmetricSecretMessageExchanger {
 			throw new NullPointerException("myPublicKey");
 		if (passwordHashType == null)
 			throw new NullPointerException("passwordHashType");
-		this.type = myPublicKey.getAlgorithmType();
+		if (secureRandom==null)
+			throw new NullPointerException("secureRandom");
+		this.type = myPublicKey.getEncryptionAlgorithmType();
 		this.myPublicKey = myPublicKey;
+		this.secureRandom=secureRandom;
 
 		if (distantPublicKey != null)
 			setDistantPublicKey(distantPublicKey);
@@ -193,7 +198,7 @@ public class P2PASymmetricSecretMessageExchanger {
 		this.messageDigest = messageDigestType.getMessageDigestInstance();
 		this.messageDigest.reset();
 		this.passwordHashType = passwordHashType;
-		this.messageDigest256 = MessageDigestType.BOUNCY_CASTLE_SHA3_256.getMessageDigestInstance();
+		this.messageDigest256 = MessageDigestType.BC_FIPS_SHA3_256.getMessageDigestInstance();
 	}
 
 	public byte[] encode(byte[] message, byte[] salt, boolean messageIsKey) throws IOException, InvalidKeyException,
@@ -254,12 +259,11 @@ public class P2PASymmetricSecretMessageExchanger {
 
 		byte randomSeed[] = new byte[16];
 		random.nextBytes(randomSeed);
-		SymmetricEncryptionAlgorithm sea = new SymmetricEncryptionAlgorithm(
+		SymmetricEncryptionAlgorithm sea = new SymmetricEncryptionAlgorithm(secureRandom,
 				new SymmetricSecretKey(SymmetricEncryptionType.GNU_TWOFISH,
 						new gnu.vm.jgnux.crypto.spec.SecretKeySpec(hashedMessage,
 								SymmetricEncryptionType.GNU_TWOFISH.getAlgorithmName()),
-						(short) 256),
-				SecureRandomType.DEFAULT, randomSeed);
+						(short) 256));
 		return sea.encode(OutputDataPackagerWithRandomValues.encode(encodedLevel2, encodedLevel2.length));
 	}
 
@@ -274,12 +278,11 @@ public class P2PASymmetricSecretMessageExchanger {
 
 		byte randomSeed[] = new byte[16];
 		random.nextBytes(randomSeed);
-		SymmetricEncryptionAlgorithm sea = new SymmetricEncryptionAlgorithm(
+		SymmetricEncryptionAlgorithm sea = new SymmetricEncryptionAlgorithm(secureRandom,
 				new SymmetricSecretKey(SymmetricEncryptionType.GNU_TWOFISH,
 						new gnu.vm.jgnux.crypto.spec.SecretKeySpec(hashedMessage,
 								SymmetricEncryptionType.GNU_TWOFISH.getAlgorithmName()),
-						(short) 256),
-				SecureRandomType.DEFAULT, randomSeed);
+						(short) 256));
 		byte[] v = sea.decode(encodedLevel1, off_encodedlevel1, len_encodedlevel1);
 		try {
 			return InputDataPackagedWithRandomValues.decode(v);
@@ -398,7 +401,7 @@ public class P2PASymmetricSecretMessageExchanger {
 	public void setDistantPublicKey(byte[] distantPublicKeyAndIV)
 			throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeySpecException, InvalidKeyException,
 			InvalidAlgorithmParameterException, NoSuchProviderException {
-		distantMessageEncoder = new P2PASymmetricSecretMessageExchanger(messageDigestType, passwordHashType,
+		distantMessageEncoder = new P2PASymmetricSecretMessageExchanger(secureRandom, messageDigestType, passwordHashType,
 				ASymmetricPublicKey.decode(distantPublicKeyAndIV));
 		if (myPublicKey.equals(distantMessageEncoder.myPublicKey))
 			throw new IllegalArgumentException("Local public key equals distant public key");

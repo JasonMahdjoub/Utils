@@ -49,21 +49,21 @@ import gnu.vm.jgnu.security.NoSuchProviderException;
  */
 public enum ASymmetricAuthentifiedSignatureType {
 	@Deprecated
-	SHA1withRSA("SHA1withRSA", "RSA", CodeProvider.SUN_ORACLE,(short) 3072, 31536000000l, (short) 11), 
-	SHA256withRSA("SHA256withRSA","RSA", CodeProvider.SUN_ORACLE,(short) 3072, 31536000000l, (short) 11), 
-	SHA384withRSA("SHA384withRSA", "RSA", CodeProvider.SUN_ORACLE,(short) 3072, 31536000000l, (short) 11), 
-	SHA512withRSA("SHA512withRSA", "RSA", CodeProvider.SUN_ORACLE,(short) 3072, 31536000000l, (short) 11), 
+	SHA1withRSA("SHA1withRSA", "RSA", CodeProvider.SUN,(short) 3072, 31536000000l, (short) 11), 
+	SHA256withRSA("SHA256withRSA","RSA", CodeProvider.SUN,(short) 3072, 31536000000l, (short) 11), 
+	SHA384withRSA("SHA384withRSA", "RSA", CodeProvider.SUN,(short) 3072, 31536000000l, (short) 11), 
+	SHA512withRSA("SHA512withRSA", "RSA", CodeProvider.SUN,(short) 3072, 31536000000l, (short) 11), 
 	GNU_SHA256withRSA("SHA256withRSA","RSA", CodeProvider.GNU_CRYPTO,(short) 3072, 31536000000l, (short) 11), 
 	GNU_SHA384withRSA("SHA384withRSA","RSA", CodeProvider.GNU_CRYPTO,(short) 3072, 31536000000l, (short) 11), 
 	GNU_SHA512withRSA("SHA512withRSA","RSA", CodeProvider.GNU_CRYPTO,(short) 3072, 31536000000l, (short) 11), 
-	BOUNCY_CASTLE_SHA256withRSA_FIPS("SHA256withRSA","RSA", CodeProvider.BCFIPS,(short) 3072, 31536000000l, (short) 11), 
-	BOUNCY_CASTLE_SHA384withRSA_FIPS("SHA384withRSA","RSA", CodeProvider.BCFIPS,(short) 3072, 31536000000l, (short) 11), 
-	BOUNCY_CASTLE_SHA512withRSA_FIPS("SHA512withRSA", "RSA", CodeProvider.BCFIPS,(short) 3072, 31536000000l, (short) 11),
-	BOUNCY_CASTLE_SHA256withRSAandMGF1_FIPS("SHA256withRSAandMGF1","RSA", CodeProvider.BCFIPS,(short) 3072, 31536000000l, (short) 11), 
-	BOUNCY_CASTLE_SHA384withRSAandMGF1_FIPS("SHA384withRSAandMGF1","RSA", CodeProvider.BCFIPS,(short) 3072, 31536000000l, (short) 11), 
-	BOUNCY_CASTLE_SHA512withRSAandMGF1_FIPS("SHA512withRSAandMGF1", "RSA", CodeProvider.BCFIPS,(short) 3072, 31536000000l, (short) 11),
-	BOUNCY_CASTLE_SHA384withECDSA_FIPS("SHA384withECDSA", "EC", CodeProvider.BCFIPS,(short) 3072, 31536000000l, (short) 11),
-	DEFAULT(BOUNCY_CASTLE_SHA384withRSAandMGF1_FIPS);
+	BC_FIPS_SHA256withRSA("SHA256withRSA","RSA", CodeProvider.BCFIPS,(short) 3072, 31536000000l, (short) 11), 
+	BC_FIPS_SHA384withRSA("SHA384withRSA","RSA", CodeProvider.BCFIPS,(short) 3072, 31536000000l, (short) 11), 
+	BC_FIPS_SHA512withRSA("SHA512withRSA", "RSA", CodeProvider.BCFIPS,(short) 3072, 31536000000l, (short) 11),
+	BC_FIPS_SHA256withRSAandMGF1("SHA256withRSAandMGF1","RSA", CodeProvider.BCFIPS,(short) 3072, 31536000000l, (short) 11), 
+	BC_FIPS_SHA384withRSAandMGF1("SHA384withRSAandMGF1","RSA", CodeProvider.BCFIPS,(short) 3072, 31536000000l, (short) 11), 
+	BC_FIPS_SHA512withRSAandMGF1("SHA512withRSAandMGF1", "RSA", CodeProvider.BCFIPS,(short) 3072, 31536000000l, (short) 11),
+	BC_FIPS_SHA384withECDSA("SHA384withECDSA", "EC", CodeProvider.BCFIPS,(short) 3072, 31536000000l, (short) 11),
+	DEFAULT(BC_FIPS_SHA384withRSAandMGF1);
 
 	private final String signatureAlgorithmName;
 	private final String keyGeneratorAlgorithmName;

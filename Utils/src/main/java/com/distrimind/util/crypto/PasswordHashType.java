@@ -50,11 +50,14 @@ import com.berry.BCrypt;
  *
  */
 public enum PasswordHashType {
-	PBKDF2WithHmacSHA1("PBKDF2WithHmacSHA1", (byte) 20), BCRYPT("BCRYPT", (byte) 32), GNU_PBKDF2WithHmacSHA1(
-			"PBKDF2WithHMacSHA1", (byte) 20), GNU_PBKDF2WithHMacSHA256("PBKDF2WithHMacSHA256",
-					(byte) 20), GNU_PBKDF2WithHMacSHA384("PBKDF2WithHMacSHA384", (byte) 20), GNU_PBKDF2WithHMacSHA512(
-							"PBKDF2WithHMacSHA512", (byte) 20), GNU_PBKDF2WithHMacWhirlpool("PBKDF2WithHMacWhirlpool",
-									(byte) 20), DEFAULT(BCRYPT);
+	PBKDF2WithHmacSHA1("PBKDF2WithHmacSHA1", (byte) 20), 
+	BCRYPT("BCRYPT", (byte) 32), 
+	GNU_PBKDF2WithHmacSHA1("PBKDF2WithHMacSHA1", (byte) 20), 
+	GNU_PBKDF2WithHMacSHA256("PBKDF2WithHMacSHA256",(byte) 20), 
+	GNU_PBKDF2WithHMacSHA384("PBKDF2WithHMacSHA384", (byte) 20), 
+	GNU_PBKDF2WithHMacSHA512("PBKDF2WithHMacSHA512", (byte) 20), 
+	GNU_PBKDF2WithHMacWhirlpool("PBKDF2WithHMacWhirlpool",(byte) 20), 
+	DEFAULT(BCRYPT);
 
 	private final byte hashLength;
 

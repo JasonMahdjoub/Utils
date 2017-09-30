@@ -51,8 +51,8 @@ import gnu.vm.jgnux.crypto.SecretKey;
  */
 public enum SymmetricKeyWrapperType {
 
-	AES("AESKW", CodeProvider.SUN_ORACLE),
-	AES_WITH_PADDING("AESKWP", CodeProvider.SUN_ORACLE),
+	AES("AESKW", CodeProvider.SUN),
+	AES_WITH_PADDING("AESKWP", CodeProvider.SUN),
 	GNU_AES("AESKW", CodeProvider.GNU_CRYPTO),
 	GNU_AES_WITH_PADDING("AESKWP", CodeProvider.GNU_CRYPTO),
 	BOUNCY_CASTLE_AES_FIPS("AESKW", CodeProvider.BCFIPS),

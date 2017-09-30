@@ -47,7 +47,7 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
  * @since Utils 2.9.0
  */
 public enum CodeProvider {
-	SUN_ORACLE, GNU_CRYPTO, BCFIPS;
+	SUN, GNU_CRYPTO, BCFIPS;
 
 	private static volatile Provider bouncyProvider = null;
 

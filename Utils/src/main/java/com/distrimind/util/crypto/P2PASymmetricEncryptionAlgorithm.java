@@ -66,24 +66,24 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 	public P2PASymmetricEncryptionAlgorithm(ASymmetricKeyPair myKeyPair, ASymmetricPublicKey distantPublicKey)
 			throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidKeySpecException,
 			NoSuchProviderException {
-		this(myKeyPair.getAlgorithmType().getDefaultSignatureAlgorithm(), myKeyPair, distantPublicKey);
+		this(myKeyPair.getEncryptionAlgorithmType().getDefaultSignatureAlgorithm(), myKeyPair, distantPublicKey);
 	}
 
 	public P2PASymmetricEncryptionAlgorithm(ASymmetricAuthentifiedSignatureType signatureType, ASymmetricKeyPair myKeyPair,
 			ASymmetricPublicKey distantPublicKey) throws NoSuchAlgorithmException, NoSuchPaddingException,
 			InvalidKeyException, InvalidKeySpecException, NoSuchProviderException {
-		super(myKeyPair.getAlgorithmType().getCipherInstance());
+		super(myKeyPair.getEncryptionAlgorithmType().getCipherInstance());
 		if (signatureType == null)
 			throw new NullPointerException("signatureType");
 		if (distantPublicKey == null)
 			throw new NullPointerException("distantPublicKey");
 
-		this.type = myKeyPair.getAlgorithmType();
+		this.type = myKeyPair.getEncryptionAlgorithmType();
 		this.myKeyPair = myKeyPair;
 		this.distantPublicKey = distantPublicKey;
 		this.signatureType = signatureType;
-		this.signer = new ASymmetricAuthentifiedSignerAlgorithm(signatureType, myKeyPair.getASymmetricPrivateKey());
-		this.signatureChecker = new ASymmetricAuthentifiedSignatureCheckerAlgorithm(signatureType, distantPublicKey);
+		this.signer = new ASymmetricAuthentifiedSignerAlgorithm(myKeyPair.getASymmetricPrivateKey());
+		this.signatureChecker = new ASymmetricAuthentifiedSignatureCheckerAlgorithm(distantPublicKey);
 		// initCipherForEncrypt(this.cipher);
 		this.maxBlockSizeForEncoding = myKeyPair.getMaxBlockSize();
 		initCipherForDecrypt(this.cipher, null);
@@ -91,7 +91,7 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 	}
 
 	@Override
-	protected AbstractCipher getCipherInstance() throws NoSuchAlgorithmException, NoSuchPaddingException {
+	protected AbstractCipher getCipherInstance() throws NoSuchAlgorithmException, NoSuchPaddingException, NoSuchProviderException {
 		return type.getCipherInstance();
 	}
 

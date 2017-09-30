@@ -61,12 +61,12 @@ import gnu.vm.jgnu.security.NoSuchProviderException;
  */
 public enum ASymmetricEncryptionType {
 	RSA_OAEPWithSHA256AndMGF1Padding("RSA", "", "OAEPWithSHA-256AndMGF1Padding", ASymmetricAuthentifiedSignatureType.SHA384withRSA,
-			(short) 3072, 31536000000l, (short) 66, CodeProvider.SUN_ORACLE), 
+			(short) 3072, 31536000000l, (short) 66, CodeProvider.SUN), 
 	RSA_PKCS1Padding("RSA", "", "PKCS1Padding", ASymmetricAuthentifiedSignatureType.SHA384withRSA, (short) 3072, 31536000000l, (short) 11,
-					CodeProvider.SUN_ORACLE),
-	BOUNCY_CASTLE_RSA_OAEPPadding_FIPS("RSA", "NONE", "OAEPPadding", ASymmetricAuthentifiedSignatureType.BOUNCY_CASTLE_SHA384withRSAandMGF1_FIPS, (short) 3072, 31536000000l, (short) 11,
-			CodeProvider.SUN_ORACLE),
-	DEFAULT(BOUNCY_CASTLE_RSA_OAEPPadding_FIPS);
+					CodeProvider.SUN),
+	BC_FIPS_RSA_OAEPPadding("RSA", "NONE", "OAEPPadding", ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA384withRSAandMGF1, (short) 3072, 31536000000l, (short) 11,
+			CodeProvider.SUN),
+	DEFAULT(BC_FIPS_RSA_OAEPPadding);
 
 	static gnu.vm.jgnu.security.KeyPair decodeGnuKeyPair(byte[] encodedKeyPair)
 			throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException {

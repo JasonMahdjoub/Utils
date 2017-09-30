@@ -37,6 +37,9 @@ package com.distrimind.util.crypto;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.SecureRandom;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.bouncycastle.crypto.CryptoServicesRegistrar;
 import org.bouncycastle.crypto.EntropySourceProvider;
@@ -52,29 +55,29 @@ import com.distrimind.util.Bits;
  * @since Utils 2.0
  */
 public enum SecureRandomType {
-	SHA1PRNG("SHA1PRNG", "SUN", false, true), 
-	GNU_SHA1PRNG("SHA1PRNG", "GNU-Crypto", true, true), 
-	GNU_SHA256PRNG("SHA-256PRNG", "GNU-Crypto", true, true), 
-	GNU_SHA384PRNG("SHA-384PRNG", "GNU-Crypto", true, true), 
-	GNU_SHA512PRNG("SHA-512PRNG","GNU-Crypto", true, true), 
-	GNU_WIRLPOOLPRNG("WHIRLPOOLPRNG", "GNU-Crypto", true, true), 
+	SHA1PRNG("SHA1PRNG", CodeProvider.SUN, false, true), 
+	GNU_SHA1PRNG("SHA1PRNG", CodeProvider.GNU_CRYPTO, true, true), 
+	GNU_SHA256PRNG("SHA-256PRNG", CodeProvider.GNU_CRYPTO, true, true), 
+	GNU_SHA384PRNG("SHA-384PRNG", CodeProvider.GNU_CRYPTO, true, true), 
+	GNU_SHA512PRNG("SHA-512PRNG",CodeProvider.GNU_CRYPTO, true, true), 
+	GNU_WIRLPOOLPRNG("WHIRLPOOLPRNG", CodeProvider.GNU_CRYPTO, true, true), 
 	SPEEDIEST(SHA1PRNG), 
-	NativePRNGBlocking("NativePRNG", "SUN", false, true), 
-	BC_FIPS_APPROVED("BC_FIPS_APPROVED", "BOUNCY_CASTLE", false, false),
-	BC_FIPS_APPROVED_FOR_KEYS("BC_FIPS_APPROVED_FOR_KEYS", "BOUNCY_CASTLE", false, false),
-	DEFAULT_BC_FIPS_APPROVED("DEFAULT_BC_FIPS_APPROVED", "BOUNCY_CASTLE", false, false),
+	NativePRNGBlocking("NativePRNG", CodeProvider.SUN, false, true), 
+	BC_FIPS_APPROVED("BC_FIPS_APPROVED", CodeProvider.BCFIPS, false, false),
+	BC_FIPS_APPROVED_FOR_KEYS("BC_FIPS_APPROVED_FOR_KEYS", CodeProvider.BCFIPS, false, false),
+	DEFAULT_BC_FIPS_APPROVED("DEFAULT_BC_FIPS_APPROVED", CodeProvider.BCFIPS, false, false),
 	GNU_DEFAULT(GNU_SHA1PRNG), 
 	DEFAULT(DEFAULT_BC_FIPS_APPROVED);
 
 	private final String algorithmeName;
 
-	private final String provider;
+	private final CodeProvider provider;
 
 	private final boolean gnuVersion;
 	
 	private final boolean needInitialSeed;
-
-	private volatile static FortunaSecureRandom fortunaSecureRandomSingleton=null;
+	
+	private static final Map<SecureRandomType, AbstractSecureRandom> singletons=Collections.synchronizedMap(new HashMap<SecureRandomType, AbstractSecureRandom>());
 	
 	private SecureRandomType(SecureRandomType type) {
 		this(type.algorithmeName, type.provider, type.gnuVersion, type.needInitialSeed);
@@ -85,7 +88,7 @@ public enum SecureRandomType {
 		return needInitialSeed;
 	}
 
-	private SecureRandomType(String algorithmName, String provider, boolean gnuVersion, boolean needInitialSeed) {
+	private SecureRandomType(String algorithmName, CodeProvider provider, boolean gnuVersion, boolean needInitialSeed) {
 		this.algorithmeName = algorithmName;
 		this.provider = provider;
 		this.gnuVersion = gnuVersion;
@@ -131,9 +134,7 @@ public enum SecureRandomType {
 			throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.NoSuchProviderException {
 		AbstractSecureRandom res=null;
 		if (gnuVersion) {
-			if (this.algorithmeName.equals("FORTUNA"))
-				res=getFortunaSecureRandomSingleton();
-			else if (algorithmeName == null)
+			if (algorithmeName == null)
 				res=new GnuSecureRandom(this, new gnu.vm.jgnu.security.SecureRandom());
 			else
 				res=new GnuSecureRandom(this, gnu.vm.jgnu.security.SecureRandom.getInstance(algorithmeName));
@@ -187,7 +188,7 @@ public enum SecureRandomType {
 					if (algorithmeName == null)
 						res=new JavaNativeSecureRandom(this, new SecureRandom());
 					else
-						res=new JavaNativeSecureRandom(this, SecureRandom.getInstance(algorithmeName, provider));
+						res=new JavaNativeSecureRandom(this, SecureRandom.getInstance(algorithmeName, provider.name()));
 				} catch (NoSuchAlgorithmException e) {
 					throw new gnu.vm.jgnu.security.NoSuchAlgorithmException(e);
 				} catch (NoSuchProviderException e) {
@@ -213,28 +214,67 @@ public enum SecureRandomType {
 		return gnuVersion;
 	}
 	
-	public static FortunaSecureRandom getFortunaSecureRandomSingleton() throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.NoSuchProviderException
+	public CodeProvider getProvider()
 	{
-		if (fortunaSecureRandomSingleton==null)
-		{
-			synchronized(SecureRandomType.class)
-			{
-				if (fortunaSecureRandomSingleton==null)
-					fortunaSecureRandomSingleton=new FortunaSecureRandom();
-			}
-		}
-		return fortunaSecureRandomSingleton;
+		return provider;
 	}
+	
+	
+	final static byte[] nonce=("La piethagore\n" + 
+			"dans le ciel bleu\n" + 
+			"décrit des figures\n" + 
+			"géométriques.\n" + 
+			"Acrobate émérite,\n" + 
+			"elle dessine en son vol\n" + 
+			"moult ellipses et paraboles.\n" + 
+			"D’ailleurs, pour être précis,\n" + 
+			"le carré de son aile vaut\n" + 
+			"la somme des carrés de ses petites pattes.\n" + 
+			"La piethagore est maternelle :\n" + 
+			"dans le tore du nid elle couve\n" + 
+			"ses œufs parfaitement sphériques,\n" + 
+			"à côté d’un compas en or\n" + 
+			"dérobé à la Castafiore.").getBytes();
 	
 	static
 	{
 		try
 		{
-			CryptoServicesRegistrar.setSecureRandom(DEFAULT.getInstance(null));
+			CryptoServicesRegistrar.setSecureRandom(DEFAULT.getInstance(nonce));
 		}
 		catch(Exception e)
 		{
 			e.printStackTrace();
 		}
 	}
+	
+	public AbstractSecureRandom getSingleton(byte nonce[]) throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.NoSuchProviderException
+	{
+		return getSingleton(nonce, null);
+	}
+	public AbstractSecureRandom getSingleton(byte nonce[], byte[] personalizationString) throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.NoSuchProviderException
+	{
+		return getSingleton(nonce, personalizationString, false);
+	}
+	public AbstractSecureRandom getSingleton(byte nonce[], byte[] personalizationString, boolean regenerate) throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.NoSuchProviderException
+	{
+		AbstractSecureRandom res=null;
+		if (!regenerate)
+			res=singletons.get(this);
+		if (res==null)
+		{
+			synchronized(singletons)
+			{
+				if (!regenerate)
+					res=singletons.get(this);
+				if (res==null)
+				{
+					res=this.getInstance(nonce, personalizationString);
+					singletons.put(this, res);
+				}
+			}
+		}
+		return res;
+	}
+	
 }

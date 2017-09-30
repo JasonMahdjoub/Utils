@@ -58,7 +58,7 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 			byte[] decryptedKey) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,
 			InvalidAlgorithmParameterException, NoSuchProviderException, IllegalArgumentException,
 			InvalidKeySpecException {
-		return new SymmetricEncryptionAlgorithm(SymmetricSecretKey.decode(decryptedKey), random);
+		return new SymmetricEncryptionAlgorithm(random, SymmetricSecretKey.decode(decryptedKey));
 	}
 
 	public static SymmetricEncryptionAlgorithm getInstance(AbstractSecureRandom random, byte[] cryptedKey,
@@ -83,7 +83,7 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 
 	private final AbstractSecureRandom random;
 
-	public SymmetricEncryptionAlgorithm(SymmetricSecretKey key, AbstractSecureRandom random)
+	public SymmetricEncryptionAlgorithm(AbstractSecureRandom random, SymmetricSecretKey key)
 			throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,
 			InvalidAlgorithmParameterException, NoSuchProviderException, InvalidKeySpecException {
 		super(key.getEncryptionAlgorithmType().getCipherInstance());

@@ -46,6 +46,7 @@ import org.testng.annotations.Test;
 
 import com.distrimind.util.properties.XMLPropertiesParseException;
 
+import gnu.vm.jgnu.security.InvalidAlgorithmParameterException;
 import gnu.vm.jgnu.security.NoSuchProviderException;
 
 /**
@@ -57,7 +58,7 @@ import gnu.vm.jgnu.security.NoSuchProviderException;
 public class TestProperties {
 	@DataProvider(name = "getPropertiesExample")
 	PropertiesExample[][] getPropertiesExample() throws MalformedURLException, UnknownHostException,
-			gnu.vm.jgnu.security.NoSuchAlgorithmException, NoSuchProviderException {
+			gnu.vm.jgnu.security.NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException {
 		PropertiesExample[][] res = new PropertiesExample[100][];
 		res[0] = new PropertiesExample[] { new PropertiesExample(null) };
 		for (int i = 1; i < res.length; i++) {

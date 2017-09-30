@@ -49,14 +49,14 @@ import gnu.vm.jgnux.crypto.Mac;
  * @since Utils 2.10.0
  */
 public enum SymmetricAuthentifiedSignatureType {
-	HMAC_SHA_256("HmacSHA256", CodeProvider.SUN_ORACLE, (short)128, (short)16), 
-	HMAC_SHA_384("HmacSHA384", CodeProvider.SUN_ORACLE, (short)128, (short)16), 
-	HMAC_SHA_512("HmacSHA512", CodeProvider.SUN_ORACLE, (short)128, (short)16), 
-	BOUNCY_CASTLE_HMAC_SHA_256("HmacSHA256", CodeProvider.BCFIPS, (short)128, (short)16), 
-	BOUNCY_CASTLE_HMAC_SHA_384("HmacSHA384", CodeProvider.BCFIPS, (short)128, (short)16), 
-	BOUNCY_CASTLE_HMAC_SHA_512("HmacSHA512", CodeProvider.BCFIPS, (short)128, (short)16), 
-	BOUNCY_CASTLE_HMAC_WHIRLPOOL("HmacWHIRLPOOL",CodeProvider.BCFIPS, (short)128, (short)16), 
-	DEFAULT(HMAC_SHA_256);
+	HMAC_SHA_256("HmacSHA256", CodeProvider.SUN, (short)128, (short)16), 
+	HMAC_SHA_384("HmacSHA384", CodeProvider.SUN, (short)128, (short)16), 
+	HMAC_SHA_512("HmacSHA512", CodeProvider.SUN, (short)128, (short)16), 
+	BC_FIPS_HMAC_SHA_256("HmacSHA256", CodeProvider.BCFIPS, (short)128, (short)16), 
+	BC_FIPS_HMAC_SHA_384("HmacSHA384", CodeProvider.BCFIPS, (short)128, (short)16), 
+	BC_FIPS_HMAC_SHA_512("HmacSHA512", CodeProvider.BCFIPS, (short)128, (short)16), 
+	BC_FIPS_HMAC_WHIRLPOOL("HmacWHIRLPOOL",CodeProvider.BCFIPS, (short)128, (short)16), 
+	DEFAULT(BC_FIPS_HMAC_SHA_256);
 
 	private final String algorithmName;
 	private final CodeProvider codeProvider;
@@ -161,7 +161,7 @@ public enum SymmetricAuthentifiedSignatureType {
 	}
 
 	public SymmetricSecretKey getSymmetricSecretKey(byte[] secretKey, short keySizeBits) {
-		if (codeProvider == CodeProvider.BCFIPS || codeProvider == CodeProvider.SUN_ORACLE) {
+		if (codeProvider == CodeProvider.BCFIPS || codeProvider == CodeProvider.SUN) {
 			return new SymmetricSecretKey(this, new SecretKeySpec(secretKey, getAlgorithmName()), keySizeBits);
 		} else if (getCodeProvider() == CodeProvider.GNU_CRYPTO) {
 			return new SymmetricSecretKey(this,

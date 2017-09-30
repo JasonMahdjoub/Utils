@@ -44,6 +44,7 @@ import com.distrimind.util.crypto.MessageDigestType;
 import com.distrimind.util.sizeof.ObjectSizer;
 
 import gnu.vm.jgnu.security.NoSuchAlgorithmException;
+import gnu.vm.jgnu.security.NoSuchProviderException;
 
 /**
  * This class represents a unique identifier. Uniqueness is guaranteed over the
@@ -63,7 +64,7 @@ public class SecuredDecentralizedID extends AbstractDecentralizedID {
 
 	private static final AtomicReference<AbstractMessageDigest> message_digest = new AtomicReference<>(null);
 
-	public static final MessageDigestType DEFAULT_MESSAGE_DIGEST_TYPE = MessageDigestType.BOUNCY_CASTLE_SHA3_256;
+	public static final MessageDigestType DEFAULT_MESSAGE_DIGEST_TYPE = MessageDigestType.BC_FIPS_SHA3_256;
 
 	static final String ToStringHead = "SecuredDecentralizedID";
 
@@ -71,7 +72,7 @@ public class SecuredDecentralizedID extends AbstractDecentralizedID {
 		return Arrays.hashCode(idLongs);
 	}
 
-	private static AbstractMessageDigest getDefaultMessageDigestInstance() throws NoSuchAlgorithmException {
+	private static AbstractMessageDigest getDefaultMessageDigestInstance() throws NoSuchAlgorithmException, NoSuchProviderException {
 		AbstractMessageDigest md = message_digest.get();
 		if (md == null) {
 			synchronized (message_digest) {
@@ -98,7 +99,7 @@ public class SecuredDecentralizedID extends AbstractDecentralizedID {
 	private transient int hashCode;
 
 	public SecuredDecentralizedID(AbstractDecentralizedIDGenerator generator, AbstractSecureRandom rand)
-			throws NoSuchAlgorithmException {
+			throws NoSuchAlgorithmException, NoSuchProviderException {
 		this(getDefaultMessageDigestInstance(), generator, rand);
 	}
 
@@ -160,7 +161,7 @@ public class SecuredDecentralizedID extends AbstractDecentralizedID {
 	}
 
 	public SecuredDecentralizedID(MessageDigestType messageDigestType, AbstractDecentralizedIDGenerator generator,
-			AbstractSecureRandom rand) throws NoSuchAlgorithmException {
+			AbstractSecureRandom rand) throws NoSuchAlgorithmException, NoSuchProviderException {
 		this(messageDigestType.getMessageDigestInstance(), generator, rand);
 	}
 

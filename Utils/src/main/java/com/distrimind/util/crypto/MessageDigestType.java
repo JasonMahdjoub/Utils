@@ -46,20 +46,20 @@ import java.security.NoSuchProviderException;
  */
 public enum MessageDigestType {
 	@Deprecated
-	MD5("MD5", CodeProvider.SUN_ORACLE), @Deprecated
-	SHA1("SHA", CodeProvider.SUN_ORACLE), 
-	SHA2_256("SHA-256", CodeProvider.SUN_ORACLE), 
-	SHA2_384("SHA-384",	CodeProvider.SUN_ORACLE), SHA_512("SHA-512", CodeProvider.SUN_ORACLE), 
+	MD5("MD5", CodeProvider.SUN), @Deprecated
+	SHA1("SHA", CodeProvider.SUN), 
+	SHA2_256("SHA-256", CodeProvider.SUN), 
+	SHA2_384("SHA-384",	CodeProvider.SUN), SHA_512("SHA-512", CodeProvider.SUN), 
 	GNU_SHA2_256("SHA-256", CodeProvider.GNU_CRYPTO), GNU_SHA_384("SHA-384", CodeProvider.GNU_CRYPTO), 
 	GNU_SHA2_512("SHA-512", CodeProvider.GNU_CRYPTO), GNU_WHIRLPOOL("WHIRLPOOL", CodeProvider.GNU_CRYPTO), 
-	BOUNCY_CASTLE_SHA2_256("SHA-256", CodeProvider.BCFIPS), 
-	BOUNCY_CASTLE_SHA2_384("SHA-384",CodeProvider.BCFIPS), 
-	BOUNCY_CASTLE_SHA2_512("SHA-512", CodeProvider.BCFIPS), 
-	BOUNCY_CASTLE_SHA3_256("SHA3-256", CodeProvider.BCFIPS), 
-	BOUNCY_CASTLE_SHA3_384("SHA3-384",CodeProvider.BCFIPS), 
-	BOUNCY_CASTLE_SHA3_512("SHA3-512", CodeProvider.BCFIPS), 
-	BOUNCY_CASTLE_WHIRLPOOL("WHIRLPOOL",CodeProvider.BCFIPS), 
-	DEFAULT(BOUNCY_CASTLE_SHA3_256);
+	BC_FIPS_SHA2_256("SHA-256", CodeProvider.BCFIPS), 
+	BC_FIPS_SHA2_384("SHA-384",CodeProvider.BCFIPS), 
+	BC_FIPS_SHA2_512("SHA-512", CodeProvider.BCFIPS), 
+	BC_FIPS_SHA3_256("SHA3-256", CodeProvider.BCFIPS), 
+	BC_FIPS_SHA3_384("SHA3-384",CodeProvider.BCFIPS), 
+	BC_FIPS_SHA3_512("SHA3-512", CodeProvider.BCFIPS), 
+	BC_FIPS_WHIRLPOOL("WHIRLPOOL",CodeProvider.BCFIPS), 
+	DEFAULT(BC_FIPS_SHA3_256);
 
 	private final String algorithmName;
 

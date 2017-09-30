@@ -41,29 +41,27 @@ package com.distrimind.util.crypto;
  * @since Utils 2.9
  */
 public enum EllipticCurveDiffieHellmanType {
-	ECDH_128((short) 128, (short) 256, MessageDigestType.BOUNCY_CASTLE_SHA3_256, CodeProvider.SUN_ORACLE), 
-	ECDH_256((short) 256, (short) 256, MessageDigestType.BOUNCY_CASTLE_SHA3_256, CodeProvider.SUN_ORACLE), 
-	ECDH_384((short) 256, (short) 384, MessageDigestType.BOUNCY_CASTLE_SHA3_384, CodeProvider.SUN_ORACLE), 
-	BOUNCY_CASTLE_ECDH_128((short) 128, (short) 256, MessageDigestType.BOUNCY_CASTLE_SHA3_256, CodeProvider.BOUNCY_CASTLE), 
-	BOUNCY_CASTLE_ECDH_256((short) 256, (short) 256, MessageDigestType.BOUNCY_CASTLE_SHA3_256, CodeProvider.BOUNCY_CASTLE), 
-	BOUNCY_CASTLE_ECDH_384((short) 256, (short) 384, MessageDigestType.BOUNCY_CASTLE_SHA3_384, CodeProvider.BOUNCY_CASTLE), 
+	ECDH_128((short) 128, (short) 3072, CodeProvider.SUN), 
+	ECDH_256((short) 256, (short) 3072, CodeProvider.SUN), 
+	ECDH_384((short) 256, (short) 3072, CodeProvider.SUN), 
+	BC_FIPS_ECDH_128((short) 128, (short) 3072, CodeProvider.BCFIPS), 
+	BC_FIPS_ECDH_256((short) 256, (short) 3072, CodeProvider.BCFIPS), 
+	BC_FIPS_ECDH_384((short) 256, (short) 3072, CodeProvider.BCFIPS), 
 	DEFAULT(ECDH_384);
 
 	private final short keySizeBits;
 	private final short ECDHKeySizeBits;
-	private final MessageDigestType messageDigestType;
 	private final CodeProvider codeProvider;
 
 	private EllipticCurveDiffieHellmanType(short keySizeBits, short ECDHKeySizeBits,
-			MessageDigestType messageDigestType, CodeProvider codeProvider) {
+			CodeProvider codeProvider) {
 		this.keySizeBits = keySizeBits;
 		this.ECDHKeySizeBits = ECDHKeySizeBits;
-		this.messageDigestType = messageDigestType;
 		this.codeProvider = codeProvider;
 	}
 
 	private EllipticCurveDiffieHellmanType(EllipticCurveDiffieHellmanType other) {
-		this(other.keySizeBits, other.ECDHKeySizeBits, other.messageDigestType, other.codeProvider);
+		this(other.keySizeBits, other.ECDHKeySizeBits, other.codeProvider);
 	}
 
 	public short getKeySizeBits() {
@@ -72,10 +70,6 @@ public enum EllipticCurveDiffieHellmanType {
 
 	public short getECDHKeySizeBits() {
 		return ECDHKeySizeBits;
-	}
-
-	public MessageDigestType getMessageDigestType() {
-		return messageDigestType;
 	}
 
 	public EllipticCurveDiffieHellmanAlgorithm getInstance() {

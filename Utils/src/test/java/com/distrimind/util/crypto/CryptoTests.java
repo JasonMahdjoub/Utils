@@ -45,6 +45,7 @@ import gnu.vm.jgnu.security.NoSuchAlgorithmException;
 import gnu.vm.jgnu.security.NoSuchProviderException;
 import gnu.vm.jgnu.security.SignatureException;
 import gnu.vm.jgnu.security.spec.InvalidKeySpecException;
+import gnu.vm.jgnu.security.spec.InvalidParameterSpecException;
 import gnu.vm.jgnux.crypto.BadPaddingException;
 import gnu.vm.jgnux.crypto.IllegalBlockSizeException;
 import gnu.vm.jgnux.crypto.NoSuchPaddingException;
@@ -207,9 +208,9 @@ public class CryptoTests {
 
 	@Test(dataProvider = "provideDataForASymetricEncryptions", dependsOnMethods = "testSecureRandom")
 	public void testASymmetricKeyPairEncoding(ASymmetricEncryptionType type)
-			throws NoSuchAlgorithmException, NoSuchProviderException {
+			throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException {
 		System.out.println("Testing ASymmetricKeyPairEncoding " + type);
-		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getInstance();
+		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getSingleton(null);
 		ASymmetricKeyPair kpd = type.getKeyPairGenerator(rand).generateKeyPair();
 
 		Assert.assertEquals(ASymmetricPublicKey.decode(kpd.getASymmetricPublicKey().encode()),
@@ -230,14 +231,14 @@ public class CryptoTests {
 			InvalidAlgorithmParameterException, IOException, IllegalAccessException, InvalidKeySpecException,
 			IllegalBlockSizeException, BadPaddingException, NoSuchProviderException {
 		System.out.println("Testing ASymmetricSecretMessageExchanger " + type);
-		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getInstance();
+		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getSingleton(null);
 		for (short keySize = 1024; keySize <= 4096; keySize += 1024) {
 			ASymmetricKeyPair kpd = type.getKeyPairGenerator(rand, keySize).generateKeyPair();
 			ASymmetricKeyPair kpl = type.getKeyPairGenerator(rand, keySize).generateKeyPair();
 
-			P2PASymmetricSecretMessageExchanger algoLocal = new P2PASymmetricSecretMessageExchanger(
+			P2PASymmetricSecretMessageExchanger algoLocal = new P2PASymmetricSecretMessageExchanger(rand,
 					kpl.getASymmetricPublicKey());
-			P2PASymmetricSecretMessageExchanger algoDistant = new P2PASymmetricSecretMessageExchanger(
+			P2PASymmetricSecretMessageExchanger algoDistant = new P2PASymmetricSecretMessageExchanger(rand,
 					kpd.getASymmetricPublicKey());
 			algoLocal.setDistantPublicKey(algoDistant.encodeMyPublicKey());
 			algoDistant.setDistantPublicKey(algoLocal.encodeMyPublicKey());
@@ -343,10 +344,10 @@ public class CryptoTests {
 			ClassNotFoundException {
 		char[] password = "password".toCharArray();
 		char[] falsePassword = "falsePassword".toCharArray();
-
-		P2PJPAKESecretMessageExchanger exchanger1 = new P2PJPAKESecretMessageExchanger("participant id 1", password,
+		AbstractSecureRandom random=SecureRandomType.DEFAULT.getSingleton(null);
+		P2PJPAKESecretMessageExchanger exchanger1 = new P2PJPAKESecretMessageExchanger(random, "participant id 1", password,
 				salt, 0, salt == null ? 0 : salt.length);
-		P2PJPAKESecretMessageExchanger exchanger2 = new P2PJPAKESecretMessageExchanger("participant id 2",
+		P2PJPAKESecretMessageExchanger exchanger2 = new P2PJPAKESecretMessageExchanger(random, "participant id 2",
 				expectedVerify ? password : falsePassword, salt, 0, salt == null ? 0 : salt.length);
 		try {
 
@@ -398,13 +399,13 @@ public class CryptoTests {
 	public void testP2PJPAKESecretMessageExchanger(boolean expectedVerify, boolean messageIsKey, byte[] salt, byte[] m)
 			throws NoSuchAlgorithmException, IOException, InvalidKeySpecException, NoSuchProviderException,
 			ClassNotFoundException {
-		Random r = new Random(System.currentTimeMillis());
+		AbstractSecureRandom r = SecureRandomType.DEFAULT.getSingleton(null);
 		byte[] falseMessage = new byte[10];
 		r.nextBytes(falseMessage);
 
-		P2PJPAKESecretMessageExchanger exchanger1 = new P2PJPAKESecretMessageExchanger("participant id 1", m, 0,
+		P2PJPAKESecretMessageExchanger exchanger1 = new P2PJPAKESecretMessageExchanger(r, "participant id 1", m, 0,
 				m.length, salt, 0, salt == null ? 0 : salt.length, messageIsKey);
-		P2PJPAKESecretMessageExchanger exchanger2 = new P2PJPAKESecretMessageExchanger("participant id 2",
+		P2PJPAKESecretMessageExchanger exchanger2 = new P2PJPAKESecretMessageExchanger(r, "participant id 2",
 				expectedVerify ? m : falseMessage, 0, (expectedVerify ? m : falseMessage).length, salt, 0,
 				salt == null ? 0 : salt.length, messageIsKey);
 		try {
@@ -434,9 +435,9 @@ public class CryptoTests {
 	public void testClientServerASymetricEncryptions(ASymmetricEncryptionType type)
 			throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,
 			InvalidAlgorithmParameterException, IOException, SignatureException, IllegalBlockSizeException,
-			BadPaddingException, NoSuchProviderException, InvalidKeySpecException, ShortBufferException, IllegalStateException {
+			BadPaddingException, NoSuchProviderException, InvalidKeySpecException, ShortBufferException, IllegalStateException, InvalidParameterSpecException {
 		System.out.println("Testing " + type);
-		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getInstance();
+		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getSingleton(null);
 		ASymmetricKeyPair kp = type.getKeyPairGenerator(rand, (short) 1024).generateKeyPair();
 		ClientASymmetricEncryptionAlgorithm algoClient = new ClientASymmetricEncryptionAlgorithm(
 				kp.getASymmetricPublicKey());
@@ -490,7 +491,7 @@ public class CryptoTests {
 			InvalidAlgorithmParameterException, IOException, IllegalBlockSizeException, BadPaddingException,
 			NoSuchProviderException, InvalidKeySpecException {
 		System.out.println("Testing " + astype + "/" + stype);
-		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getInstance();
+		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getSingleton(null);
 		ASymmetricKeyPair kpd = astype.getKeyPairGenerator(rand).generateKeyPair();
 		ASymmetricKeyPair kpl = astype.getKeyPairGenerator(rand).generateKeyPair();
 
@@ -500,12 +501,9 @@ public class CryptoTests {
 				kpd.getASymmetricPublicKey());
 
 		SymmetricSecretKey localKey = stype.getKeyGenerator(rand).generateKey();
-
-		SymmetricEncryptionAlgorithm algoLocalS = new SymmetricEncryptionAlgorithm(localKey, SecureRandomType.DEFAULT,
-				null);
+		SymmetricEncryptionAlgorithm algoLocalS = new SymmetricEncryptionAlgorithm(rand, localKey);
 		byte[] localEncryptedKey = algoLocalS.encodeKey(algoLocalAS);
-		SymmetricEncryptionAlgorithm algoDistantS = SymmetricEncryptionAlgorithm.getInstance(SecureRandomType.DEFAULT,
-				null, localEncryptedKey, algoDistantAS);
+		SymmetricEncryptionAlgorithm algoDistantS = SymmetricEncryptionAlgorithm.getInstance(rand, localEncryptedKey, algoDistantAS);
 
 		for (byte[] m : messagesToEncrypt) {
 			byte[] md = algoDistantS.decode(algoLocalS.encode(m));
@@ -520,7 +518,7 @@ public class CryptoTests {
 	}
 
 	@Test(dataProvider = "provideMessageDigestType")
-	public void testMessageDigest(MessageDigestType type) throws NoSuchAlgorithmException {
+	public void testMessageDigest(MessageDigestType type) throws NoSuchAlgorithmException, NoSuchProviderException {
 		System.out.println("Testing message digest " + type);
 
 		AbstractMessageDigest md = type.getMessageDigestInstance();
@@ -539,9 +537,9 @@ public class CryptoTests {
 	public void testP2PASymetricEncryptions(ASymmetricEncryptionType type)
 			throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,
 			InvalidAlgorithmParameterException, IOException, SignatureException, IllegalBlockSizeException,
-			BadPaddingException, NoSuchProviderException, InvalidKeySpecException, ShortBufferException, IllegalStateException {
+			BadPaddingException, NoSuchProviderException, InvalidKeySpecException, ShortBufferException, IllegalStateException, InvalidParameterSpecException {
 		System.out.println("Testing " + type);
-		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getInstance();
+		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getSingleton(null);
 		ASymmetricKeyPair kpd = type.getKeyPairGenerator(rand).generateKeyPair();
 		ASymmetricKeyPair kpl = type.getKeyPairGenerator(rand).generateKeyPair();
 		P2PASymmetricEncryptionAlgorithm algoDistant = new P2PASymmetricEncryptionAlgorithm(kpd,
@@ -614,21 +612,22 @@ public class CryptoTests {
 			InvalidKeyException, NoSuchPaddingException, InvalidAlgorithmParameterException, NoSuchProviderException,
 			IllegalArgumentException, InvalidKeySpecException {
 		System.out.println("Testing " + type);
-		AbstractSecureRandom random = SecureRandomType.DEFAULT.getInstance();
+		AbstractSecureRandom random = SecureRandomType.DEFAULT.getSingleton(null);
 		SymmetricSecretKey key = type.getKeyGenerator(random).generateKey();
 		Assert.assertEquals(SymmetricSecretKey.decode(key.encode()), key);
-		new SymmetricEncryptionAlgorithm(key, SecureRandomType.DEFAULT, null);
+		new SymmetricEncryptionAlgorithm(random, key);
 		Assert.assertEquals(SymmetricSecretKey.decode(key.encode()), key);
 
 	}
 
 	@Test(dataProvider = "provideSecureRandomType")
 	public void testSecureRandom(SecureRandomType type) throws NoSuchAlgorithmException, NoSuchProviderException {
-		AbstractSecureRandom random = type.getInstance();
+		AbstractSecureRandom random = type.getInstance(null, "parameter".getBytes());
+		random = type.getInstance("nonce".getBytes(), "parameter".getBytes());
 		random.nextBytes(new byte[100]);
 		if (type!=SecureRandomType.NativePRNGBlocking && type!=SecureRandomType.GNU_DEFAULT && type!=SecureRandomType.SPEEDIEST && type!=SecureRandomType.SHA1PRNG)
 		{
-			int nb=type==SecureRandomType.DRBG_BOUNCYCASTLE?260000/8:110000;
+			int nb=type.getProvider()==CodeProvider.BCFIPS?260000/8:110000;
 			random.nextBytes(new byte[nb]);
 			random.nextBytes(new byte[nb]);
 			random.nextBytes(new byte[nb]);
@@ -645,9 +644,9 @@ public class CryptoTests {
 	@Test(dataProvider = "provideDataForASymmetricSignatureTest")
 	public void testAsymmetricSignatures(ASymmetricAuthentifiedSignatureType sigType, int keySize)
 			throws NoSuchAlgorithmException, InvalidKeyException, SignatureException, InvalidKeySpecException,
-			NoSuchProviderException, ShortBufferException, IllegalStateException, InvalidAlgorithmParameterException {
+			NoSuchProviderException, ShortBufferException, IllegalStateException, InvalidAlgorithmParameterException, InvalidParameterSpecException, IOException {
 		System.out.println("Testing asymmetric signature : " + keySize);
-		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getInstance(null);
+		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getSingleton(null);
 		ASymmetricKeyPair kpd = sigType.getKeyPairGenerator(rand, (short) keySize).generateKeyPair();
 		byte[] m = new byte[10];
 		rand.nextBytes(m);
@@ -655,8 +654,7 @@ public class CryptoTests {
 		ASymmetricAuthentifiedSignerAlgorithm signer = new ASymmetricAuthentifiedSignerAlgorithm(kpd.getASymmetricPrivateKey());
 		byte[] signature = signer.sign(m);
 
-		ASymmetricAuthentifiedSignatureCheckerAlgorithm checker = new ASymmetricAuthentifiedSignatureCheckerAlgorithm(sigType,
-				kpd.getASymmetricPublicKey());
+		ASymmetricAuthentifiedSignatureCheckerAlgorithm checker = new ASymmetricAuthentifiedSignatureCheckerAlgorithm(kpd.getASymmetricPublicKey());
 		Assert.assertTrue(checker.verify(m, signature));
 		Assert.assertTrue(checker.verify(m, signature));
 
@@ -669,9 +667,9 @@ public class CryptoTests {
 	@Test(dataProvider = "provideDataForSymmetricSignatureTest", dependsOnMethods = { "testSymetricEncryptions" })
 	public void testSymmetricSignatures(SymmetricAuthentifiedSignatureType sigType)
 			throws NoSuchAlgorithmException, InvalidKeyException, SignatureException, InvalidKeySpecException,
-			NoSuchProviderException, ShortBufferException, IllegalStateException {
+			NoSuchProviderException, ShortBufferException, IllegalStateException, InvalidAlgorithmParameterException, InvalidParameterSpecException, IOException {
 		System.out.println("Testing symmetric signature : " + sigType);
-		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getInstance(null);
+		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getSingleton(null);
 		SymmetricSecretKey secretKey = sigType.getKeyGenerator(rand).generateKey();
 		byte[] m = new byte[10];
 		Random r=new Random(System.currentTimeMillis());
@@ -680,7 +678,7 @@ public class CryptoTests {
 		SymmetricAuthentifiedSignerAlgorithm signer = new SymmetricAuthentifiedSignerAlgorithm(secretKey);
 		byte[] signature = signer.sign(m);
 
-		SymmetricAuthentifiedSignatureCheckerAlgorithm checker = new SymmetricAuthentifiedSignatureCheckerAlgorithm(sigType, secretKey);
+		SymmetricAuthentifiedSignatureCheckerAlgorithm checker = new SymmetricAuthentifiedSignatureCheckerAlgorithm(secretKey);
 		Assert.assertTrue(checker.verify(m, signature));
 		Assert.assertTrue(checker.verify(m, signature));
 
@@ -696,13 +694,12 @@ public class CryptoTests {
 			NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IOException,
 			IllegalBlockSizeException, BadPaddingException, NoSuchProviderException, InvalidKeySpecException {
 		System.out.println("Testing " + type);
-		AbstractSecureRandom random = SecureRandomType.DEFAULT.getInstance();
+		AbstractSecureRandom random = SecureRandomType.DEFAULT.getSingleton(null);
 
 		SymmetricSecretKey key = type.getKeyGenerator(random).generateKey();
 
-		SymmetricEncryptionAlgorithm algoDistant = new SymmetricEncryptionAlgorithm(key, SecureRandomType.DEFAULT,
-				null);
-		SymmetricEncryptionAlgorithm algoLocal = new SymmetricEncryptionAlgorithm(key, SecureRandomType.DEFAULT, null);
+		SymmetricEncryptionAlgorithm algoDistant = new SymmetricEncryptionAlgorithm(random, key);
+		SymmetricEncryptionAlgorithm algoLocal = new SymmetricEncryptionAlgorithm(random, key);
 
 		Random rand = new Random(System.currentTimeMillis());
 
@@ -780,19 +777,21 @@ public class CryptoTests {
 			BadPaddingException, IllegalStateException, IllegalBlockSizeException, IOException {
 		EllipticCurveDiffieHellmanAlgorithm peer1 = type.getInstance();
 		EllipticCurveDiffieHellmanAlgorithm peer2 = type.getInstance();
+		peer1.generateAndSetKeyPair();
+		peer2.generateAndSetKeyPair();
+		
+		byte[] publicKey1 = peer1.getEncodedPublicKey();
+		byte[] publicKey2 = peer2.getEncodedPublicKey();
+		peer1.setDistantPublicKey(publicKey2, SymmetricEncryptionType.DEFAULT, (short)128);
+		peer2.setDistantPublicKey(publicKey1, SymmetricEncryptionType.DEFAULT, (short)128);
+		Assert.assertEquals(peer1.getDerivedKey(),peer2.getDerivedKey());
 
-		byte[] publicKey1 = peer1.generateAndGetPublicKey();
-		byte[] publicKey2 = peer2.generateAndGetPublicKey();
-		peer1.setDistantPublicKey(publicKey2);
-		peer2.setDistantPublicKey(publicKey1);
-		Assert.assertEquals(peer1.getDerivedKey(SymmetricEncryptionType.DEFAULT),
-				peer2.getDerivedKey(SymmetricEncryptionType.DEFAULT));
+		SymmetricSecretKey key = peer1.getDerivedKey();
+		
+		AbstractSecureRandom random=SecureRandomType.DEFAULT.getSingleton(null);
 
-		SymmetricSecretKey key = peer1.getDerivedKey(SymmetricEncryptionType.DEFAULT);
-
-		SymmetricEncryptionAlgorithm algoDistant = new SymmetricEncryptionAlgorithm(key, SecureRandomType.DEFAULT,
-				null);
-		SymmetricEncryptionAlgorithm algoLocal = new SymmetricEncryptionAlgorithm(key, SecureRandomType.DEFAULT, null);
+		SymmetricEncryptionAlgorithm algoDistant = new SymmetricEncryptionAlgorithm(random, key);
+		SymmetricEncryptionAlgorithm algoLocal = new SymmetricEncryptionAlgorithm(random, key);
 
 		Random rand = new Random(System.currentTimeMillis());
 
