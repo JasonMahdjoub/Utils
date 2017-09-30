@@ -87,7 +87,7 @@ public final class JavaNativeSecureRandom extends AbstractSecureRandom {
 	 */
 	private static final long serialVersionUID = -1795571548950369446L;
 
-	protected final java.security.SecureRandom secureRandom;
+	protected java.security.SecureRandom secureRandom;
 
 	private final GnuInterface secureGnuRandom;
 
@@ -100,8 +100,9 @@ public final class JavaNativeSecureRandom extends AbstractSecureRandom {
 			throw new NullPointerException("type");
 		if (secureRandom == null)
 			throw new NullPointerException("secureRandom");
-		this.secureRandom = secureRandom;
+		this.secureRandom=null;
 		this.secureGnuRandom = new GnuInterface();
+		this.secureRandom = secureRandom;
 		if (type.needInitialSeed())
 			nextBytes(new byte[20]);
 		
