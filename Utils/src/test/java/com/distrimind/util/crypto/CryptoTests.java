@@ -606,7 +606,69 @@ public class CryptoTests {
 		Assert.assertFalse(ph.checkValidHashedPassword(password, hashedValue));
 		Assert.assertFalse(ph.checkValidHashedPassword(invalidPassword, hashedValue, staticSalt));
 	}
+	@Test(dataProvider = "providePasswordKeyDerivationTypesForSymmetricEncryptions", dependsOnMethods="testPasswordHash")
+	public void testPasswordKeyDerivation(PasswordBasedKeyGenerationType derivationType, SymmetricEncryptionType encryptionType) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
+		String password = "password";
+		String invalidPassword = "invalid password";
+		Random r=new Random(System.currentTimeMillis());
+		byte[] salt=new byte[32];
+		r.nextBytes(salt);
+		SymmetricSecretKey key1=derivationType.derivateKey(password.toCharArray(), salt, encryptionType);
+		Assert.assertEquals(key1.getKeySize(), encryptionType.getDefaultKeySizeBits());
+		Assert.assertEquals(key1.getEncryptionAlgorithmType(), encryptionType);
+		Assert.assertEquals(key1.encode(), derivationType.derivateKey(password.toCharArray(), salt, encryptionType).encode());
+		Assert.assertNotEquals(key1.encode(), derivationType.derivateKey(invalidPassword.toCharArray(), salt, encryptionType).encode());
+	}
+	@Test(dataProvider = "providePasswordKeyDerivationTypesForSymmetricSignatures", dependsOnMethods="testPasswordHash")
+	public void testPasswordKeyDerivation(PasswordBasedKeyGenerationType derivationType, SymmetricAuthentifiedSignatureType signatureType) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
+		String password = "password";
+		String invalidPassword = "invalid password";
+		Random r=new Random(System.currentTimeMillis());
+		byte[] salt=new byte[32];
+		r.nextBytes(salt);
+		SymmetricSecretKey key1=derivationType.derivateKey(password.toCharArray(), salt, signatureType);
+		Assert.assertEquals(key1.getKeySize(), signatureType.getDefaultKeySizeBits());
+		Assert.assertEquals(key1.getAuthentifiedSignatureAlgorithmType(), signatureType);
+		Assert.assertEquals(key1.encode(), derivationType.derivateKey(password.toCharArray(), salt, signatureType).encode());
+		Assert.assertNotEquals(key1.encode(), derivationType.derivateKey(invalidPassword.toCharArray(), salt, signatureType).encode());
+	}
 
+	@DataProvider(name="providePasswordKeyDerivationTypesForSymmetricEncryptions", parallel=true)
+	public Object[][] providePasswordKeyDerivationTypesForSymmetricEncryptions()
+	{
+		Object[][] res=new Object[PasswordBasedKeyGenerationType.values().length+SymmetricEncryptionType.values().length][];
+		int index=0;
+		for (PasswordBasedKeyGenerationType p : PasswordBasedKeyGenerationType.values())
+		{
+			for (SymmetricEncryptionType s : SymmetricEncryptionType.values())
+			{
+				Object params[]=new Object[2];
+				params[0]=p;
+				params[1]=s;
+				res[index++]=params;
+			}
+		}
+		return res;
+	}
+	
+	@DataProvider(name="providePasswordKeyDerivationTypesForSymmetricSignatures", parallel=true)
+	public Object[][] providePasswordKeyDerivationTypesForSymmetricSignatures()
+	{
+		Object[][] res=new Object[PasswordBasedKeyGenerationType.values().length+SymmetricAuthentifiedSignatureType.values().length][];
+		int index=0;
+		for (PasswordBasedKeyGenerationType p : PasswordBasedKeyGenerationType.values())
+		{
+			for (SymmetricAuthentifiedSignatureType s : SymmetricAuthentifiedSignatureType.values())
+			{
+				Object params[]=new Object[2];
+				params[0]=p;
+				params[1]=s;
+				res[index++]=params;
+			}
+		}
+		return res;
+	}
+	
 	@Test(dataProvider = "provideDataForSymetricEncryptions", dependsOnMethods = "testEncodeAndSeparateEncoding")
 	public void testSecretKeyEncoding(SymmetricEncryptionType type) throws NoSuchAlgorithmException,
 			InvalidKeyException, NoSuchPaddingException, InvalidAlgorithmParameterException, NoSuchProviderException,
