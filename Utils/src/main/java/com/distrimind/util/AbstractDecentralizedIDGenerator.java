@@ -85,28 +85,29 @@ public abstract class AbstractDecentralizedIDGenerator extends AbstractDecentral
 						
 					
 					if (!ni.isLoopback()) {
-						byte digestion256[]=messageDigest.digest(ni.getHardwareAddress());
-						byte digestion64[]=new byte[8];
-						for (int i=0;i<8;i++)
-							digestion64[i]=(byte)(digestion256[i]^digestion256[i+8]^digestion256[i+16]^digestion256[i+24]);
-						byte digestion48[]=new byte[6];
-						for (int i=0;i<2;i++)
-							digestion48[i]=(byte)(digestion64[i]^digestion64[i+2]);
-						for (int i=2;i<6;i++)
-							digestion48[i]=digestion64[i+2];
-						//byte digestion16[]=new byte[2];
-						for (int i=0;i<2;i++)
-							shortLocalMacBytes[i]=(byte)(digestion64[i]^digestion64[i+2]+digestion64[i+4]+digestion64[i+6]);
 						
 						//resultShort=Bits.getShort(digestion16, 0);
 						/*shortLocalMacBytes[0]=digestion16[0];
 						shortLocalMacBytes[1]=digestion16[1];*/
 						
-						long val = getHardwareAddress(digestion48);
-						if (val != 0 && val != 224)// is the current network
-						// interface is not a virtual
-						// interface
+						long val = getHardwareAddress(ni.getHardwareAddress());
+						if (val != 0 && val != 224)// is the current network interface is not a virtual interface
 						{
+							byte digestion256[]=messageDigest.digest(ni.getHardwareAddress());
+							byte digestion64[]=new byte[8];
+							for (int i=0;i<8;i++)
+								digestion64[i]=(byte)(digestion256[i]^digestion256[i+8]^digestion256[i+16]^digestion256[i+24]);
+							byte digestion48[]=new byte[6];
+							for (int i=0;i<2;i++)
+								digestion48[i]=(byte)(digestion64[i]^digestion64[i+2]);
+							for (int i=2;i<6;i++)
+								digestion48[i]=digestion64[i+2];
+							//byte digestion16[]=new byte[2];
+							for (int i=0;i<2;i++)
+								shortLocalMacBytes[i]=(byte)(digestion64[i]^digestion64[i+2]+digestion64[i+4]+digestion64[i+6]);
+
+							
+							val = getHardwareAddress(digestion48);
 							if (ni.isPointToPoint()) {
 								result2 = val;
 							} else {
@@ -136,8 +137,8 @@ public abstract class AbstractDecentralizedIDGenerator extends AbstractDecentral
 					"Toujours de l'orbe calculée approchera ;\n" + 
 					"Définira limite ; enfin, l'arc, le limiteur\n" + 
 					"De cet inquiétant cercle, ennemi trop rebelle\n" + 
-					"Professeur, enseignez son problème avec zèle. ").getBytes();
-			random=SecureRandomType.DEFAULT_BC_FIPS_APPROVED.getSingleton(nonce);
+					"Professeur, enseignez son problème avec zèle. "+result).getBytes();
+			random=SecureRandomType.DEFAULT.getInstance(nonce);
 		} catch (SocketException | NoSuchAlgorithmException | NoSuchProviderException e1) {
 			e1.printStackTrace();
 		}

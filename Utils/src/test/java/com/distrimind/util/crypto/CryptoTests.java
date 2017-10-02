@@ -194,7 +194,7 @@ public class CryptoTests {
 		return res;
 	}
 
-	@DataProvider(name = "provideSecureRandomType", parallel = true)
+	@DataProvider(name = "provideSecureRandomType", parallel = false)
 	public Object[][] provideSecureRandomType() {
 		Object[][] res = new Object[SecureRandomType.values().length][];
 		int i = 0;
@@ -685,11 +685,14 @@ public class CryptoTests {
 	@Test(dataProvider = "provideSecureRandomType")
 	public void testSecureRandom(SecureRandomType type) throws NoSuchAlgorithmException, NoSuchProviderException {
 		AbstractSecureRandom random = type.getInstance(null, "parameter".getBytes());
-		random = type.getInstance("nonce".getBytes(), "parameter".getBytes());
-		random.nextBytes(new byte[100]);
-		if (type!=SecureRandomType.NativePRNGBlocking && type!=SecureRandomType.GNU_DEFAULT && type!=SecureRandomType.SPEEDIEST && type!=SecureRandomType.SHA1PRNG)
+		System.out.println("Test "+type);
+		random = type.getSingleton("nonce".getBytes(), "parameter".getBytes());
+		System.out.println(type+" instantiated");
+		random.nextBytes(new byte[10]);
+		if (type!=SecureRandomType.NativePRNG && type!=SecureRandomType.GNU_DEFAULT && type!=SecureRandomType.SHA1PRNG)
 		{
-			int nb=type.getProvider()==CodeProvider.BCFIPS?260000/8:110000;
+			
+			int nb= type.getProvider()!=CodeProvider.BCFIPS?110000:260000/8;
 			random.nextBytes(new byte[nb]);
 			random.nextBytes(new byte[nb]);
 			random.nextBytes(new byte[nb]);
@@ -701,6 +704,7 @@ public class CryptoTests {
 			random.nextBytes(new byte[nb]);
 			random.nextBytes(new byte[nb]);
 		}
+		System.out.println("End test "+type);
 	}
 
 	@Test(dataProvider = "provideDataForASymmetricSignatureTest")
@@ -726,8 +730,8 @@ public class CryptoTests {
 		Assert.assertFalse(checker.verify(m, signature));
 	}
 	
-	@Test(dataProvider="provideDataSymmetricKeyWrapperForEncryption", dependsOnMethods="testSecureRandom")
-	public void testSymmetricKeyWrapper(SymmetricKeyWrapperType typeWrapper, SymmetricEncryptionType asetype, SymmetricEncryptionType setype) throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, IllegalStateException, IllegalBlockSizeException, NoSuchProviderException, InvalidAlgorithmParameterException, IOException
+	@Test(dataProvider="provideDataSymmetricKeyWrapperForEncryption")
+	public void testSymmetricKeyWrapperForEncryption(SymmetricKeyWrapperType typeWrapper, SymmetricEncryptionType asetype, SymmetricEncryptionType setype) throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, IllegalStateException, IllegalBlockSizeException, NoSuchProviderException, InvalidAlgorithmParameterException, IOException
 	{
 		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getSingleton(null);
 		SymmetricSecretKey kp=asetype.getKeyGenerator(rand, (short)128).generateKey();
@@ -736,8 +740,8 @@ public class CryptoTests {
 		SymmetricSecretKey sk2=typeWrapper.unwrapKey(kp, wrappedKey, setype, (short)128);
 		Assert.assertEquals(sk.encode(), sk2.encode());
 	}
-	@Test(dataProvider="provideDataSymmetricKeyWrapperForSignature", dependsOnMethods="testSecureRandom")
-	public void testSymmetricKeyWrapper(SymmetricKeyWrapperType typeWrapper, SymmetricEncryptionType asetype, SymmetricAuthentifiedSignatureType setype) throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, IllegalStateException, IllegalBlockSizeException, NoSuchProviderException, InvalidAlgorithmParameterException, IOException
+	@Test(dataProvider="provideDataSymmetricKeyWrapperForSignature")
+	public void testSymmetricKeyWrapperForSignature(SymmetricKeyWrapperType typeWrapper, SymmetricEncryptionType asetype, SymmetricAuthentifiedSignatureType setype) throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, IllegalStateException, IllegalBlockSizeException, NoSuchProviderException, InvalidAlgorithmParameterException, IOException
 	{
 		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getSingleton(null);
 		SymmetricSecretKey kp=asetype.getKeyGenerator(rand, (short)128).generateKey();
@@ -746,12 +750,12 @@ public class CryptoTests {
 		SymmetricSecretKey sk2=typeWrapper.unwrapKey(kp, wrappedKey, setype, (short)128);
 		Assert.assertEquals(sk.encode(), sk2.encode());
 	}
-	@DataProvider(name="provideDataSymmetricKeyWrapperForEncryption", parallel=true)
+	@DataProvider(name="provideDataSymmetricKeyWrapperForEncryption", parallel=false)
 	public Object[][] provideDataSymmetricKeyWrapperForEncryption()
 	{
-		Object [][] res=new Object[ASymmetricKeyWrapper.values().length*SymmetricEncryptionType.values().length*SymmetricEncryptionType.values().length][];
+		Object [][] res=new Object[SymmetricKeyWrapperType.values().length*SymmetricEncryptionType.values().length*SymmetricEncryptionType.values().length][];
 		int index=0;
-		for (ASymmetricKeyWrapper akpw : ASymmetricKeyWrapper.values())
+		for (SymmetricKeyWrapperType akpw : SymmetricKeyWrapperType.values())
 		{
 			for (SymmetricEncryptionType aet : SymmetricEncryptionType.values())
 			{
@@ -770,9 +774,9 @@ public class CryptoTests {
 	@DataProvider(name="provideDataSymmetricKeyWrapperForSignature", parallel=true)
 	public Object[][] provideDataSymmetricKeyWrapperForSignature()
 	{
-		Object [][] res=new Object[ASymmetricKeyWrapper.values().length*SymmetricEncryptionType.values().length*SymmetricAuthentifiedSignatureType.values().length][];
+		Object [][] res=new Object[SymmetricKeyWrapperType.values().length*SymmetricEncryptionType.values().length*SymmetricAuthentifiedSignatureType.values().length][];
 		int index=0;
-		for (ASymmetricKeyWrapper akpw : ASymmetricKeyWrapper.values())
+		for (SymmetricKeyWrapperType akpw : SymmetricKeyWrapperType.values())
 		{
 			for (SymmetricEncryptionType aet : SymmetricEncryptionType.values())
 			{

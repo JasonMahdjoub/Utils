@@ -34,6 +34,8 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
+import gnu.vm.jgnu.security.NoSuchAlgorithmException;
+import gnu.vm.jgnu.security.NoSuchProviderException;
 import gnu.vm.jgnu.security.SecureRandom;
 
 /**
@@ -91,10 +93,10 @@ public final class JavaNativeSecureRandom extends AbstractSecureRandom {
 
 	private final GnuInterface secureGnuRandom;
 
-	JavaNativeSecureRandom(SecureRandomType type, java.security.SecureRandom secureRandom) {
-		this(type, secureRandom, true);
+	JavaNativeSecureRandom(SecureRandomType type, java.security.SecureRandom secureRandom) throws NoSuchAlgorithmException, NoSuchProviderException {
+		this(type, secureRandom, type.needInitialSeed());
 	}
-	JavaNativeSecureRandom(SecureRandomType type, java.security.SecureRandom secureRandom, boolean automaticReseed) {
+	JavaNativeSecureRandom(SecureRandomType type, java.security.SecureRandom secureRandom, boolean automaticReseed) throws NoSuchAlgorithmException, NoSuchProviderException {
 		super(type, automaticReseed);
 		if (type == null)
 			throw new NullPointerException("type");
@@ -104,7 +106,10 @@ public final class JavaNativeSecureRandom extends AbstractSecureRandom {
 		this.secureGnuRandom = new GnuInterface();
 		this.secureRandom = secureRandom;
 		if (type.needInitialSeed())
+		{
+			setSeed(SecureRandomType.tryToGenerateNativeNonBlockingSeed(55));
 			nextBytes(new byte[20]);
+		}
 		
 	}
 
@@ -130,22 +135,29 @@ public final class JavaNativeSecureRandom extends AbstractSecureRandom {
 
 	@Override
 	public void nextBytes(byte[] _bytes) {
-		secureRandom.nextBytes(_bytes);
-		if (_bytes!=null)
-			addDataProvided(_bytes.length);
-
-
+		synchronized(this)
+		{
+			secureRandom.nextBytes(_bytes);
+			if (_bytes!=null)
+				addDataProvided(_bytes.length);
+		}
 	}
 
 	@Override
 	public void setSeed(byte[] _seed) {
-		secureRandom.setSeed(_seed);
+		synchronized(this)
+		{
+			secureRandom.setSeed(_seed);
+		}
 	}
 
 	@Override
 	public void setSeed(long _seed) {
-		if (secureRandom != null)
-			secureRandom.setSeed(_seed);
+		synchronized(this)
+		{
+			if (secureRandom != null)
+				secureRandom.setSeed(_seed);
+		}
 	}
 
 }

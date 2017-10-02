@@ -37,6 +37,7 @@ package com.distrimind.util.crypto;
 import java.security.Provider;
 import java.security.Security;
 
+import org.bouncycastle.jcajce.provider.BouncyCastleFipsProvider;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 /**
@@ -47,9 +48,10 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
  * @since Utils 2.9.0
  */
 public enum CodeProvider {
-	SUN, GNU_CRYPTO, BCFIPS;
+	SUN, GNU_CRYPTO, BCFIPS, BC;
 
 	private static volatile Provider bouncyProvider = null;
+	private static volatile Provider bouncyProviderFIPS = null;
 
 	static void ensureBouncyCastleProviderLoaded() {
 
@@ -59,6 +61,8 @@ public enum CodeProvider {
 				if (bouncyProvider == null) {
 					bouncyProvider = new BouncyCastleProvider();
 					Security.addProvider(bouncyProvider);
+					bouncyProviderFIPS = new BouncyCastleFipsProvider();
+					Security.addProvider(bouncyProviderFIPS);
 				}
 			}
 		}

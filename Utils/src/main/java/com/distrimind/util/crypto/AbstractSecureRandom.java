@@ -36,6 +36,9 @@ package com.distrimind.util.crypto;
 
 import java.security.SecureRandom;
 
+import gnu.vm.jgnu.security.NoSuchProviderException;
+
+
 /**
  * 
  * @author Jason Mahdjoub
@@ -52,9 +55,9 @@ public abstract class AbstractSecureRandom extends SecureRandom {
 	private int dataGenerated=0;
 	private static final int maxDataGeneratedBeforeReseed=102400;
 	private final boolean regenerateSeed;
-	
+
 	AbstractSecureRandom(SecureRandomType type, boolean regenerateSeed) {
-		super(null, null);
+		super(new byte[8]);
 		this.type = type;
 		this.regenerateSeed=regenerateSeed;
 	}
@@ -67,7 +70,13 @@ public abstract class AbstractSecureRandom extends SecureRandom {
 			if (this.dataGenerated>maxDataGeneratedBeforeReseed)
 			{
 				this.dataGenerated=0;
-				setSeed(generateSeed(20));
+				
+				try {
+					setSeed(SecureRandomType.tryToGenerateNativeNonBlockingSeed(55));
+				} catch (gnu.vm.jgnu.security.NoSuchAlgorithmException | NoSuchProviderException e) {
+					setSeed(generateSeed(55));
+				}
+				nextBytes(new byte[20]);
 			}
 		}
 	}

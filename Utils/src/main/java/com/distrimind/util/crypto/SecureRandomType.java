@@ -34,12 +34,22 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.NetworkInterface;
+import java.net.URL;
+import java.security.AccessController;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
+import java.security.PrivilegedAction;
 import java.security.SecureRandom;
+import java.security.Security;
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.bouncycastle.crypto.CryptoServicesRegistrar;
 import org.bouncycastle.crypto.EntropySourceProvider;
@@ -47,6 +57,7 @@ import org.bouncycastle.crypto.fips.FipsDRBG;
 import org.bouncycastle.crypto.util.BasicEntropySourceProvider;
 
 import com.distrimind.util.Bits;
+import com.distrimind.util.OSValidator;
 
 /**
  * 
@@ -55,19 +66,22 @@ import com.distrimind.util.Bits;
  * @since Utils 2.0
  */
 public enum SecureRandomType {
+	//SUN_DEFAULT(null, CodeProvider.SUN, false, true ),
 	SHA1PRNG("SHA1PRNG", CodeProvider.SUN, false, true), 
 	GNU_SHA1PRNG("SHA1PRNG", CodeProvider.GNU_CRYPTO, true, true), 
 	GNU_SHA256PRNG("SHA-256PRNG", CodeProvider.GNU_CRYPTO, true, true), 
 	GNU_SHA384PRNG("SHA-384PRNG", CodeProvider.GNU_CRYPTO, true, true), 
 	GNU_SHA512PRNG("SHA-512PRNG",CodeProvider.GNU_CRYPTO, true, true), 
-	GNU_WIRLPOOLPRNG("WHIRLPOOLPRNG", CodeProvider.GNU_CRYPTO, true, true), 
-	SPEEDIEST(SHA1PRNG), 
-	NativePRNGBlocking("NativePRNG", CodeProvider.SUN, false, true), 
+	GNU_WIRLPOOLPRNG("WHIRLPOOLPRNG", CodeProvider.GNU_CRYPTO, true, true),
+	GNU_DEFAULT(GNU_SHA1PRNG),
+	SPEEDIEST(GNU_SHA512PRNG), 
+	NativePRNG("NativePRNG", CodeProvider.SUN, false, false),
 	BC_FIPS_APPROVED("BC_FIPS_APPROVED", CodeProvider.BCFIPS, false, false),
 	BC_FIPS_APPROVED_FOR_KEYS("BC_FIPS_APPROVED_FOR_KEYS", CodeProvider.BCFIPS, false, false),
 	DEFAULT_BC_FIPS_APPROVED("DEFAULT_BC_FIPS_APPROVED", CodeProvider.BCFIPS, false, false),
-	GNU_DEFAULT(GNU_SHA1PRNG), 
-	DEFAULT(DEFAULT_BC_FIPS_APPROVED);
+	FORTUNA_WITH_BC_FIPS_APPROVED("FORTUNA_WITH_BC_FIPS_APPROVED", CodeProvider.BC, false, false),
+	FORTUNA_WITH_BC_FIPS_APPROVED_FOR_KEYS("FORTUNA_WITH_BC_FIPS_APPROVED_FOR_KEYS", CodeProvider.BC, false, true),
+	DEFAULT(FORTUNA_WITH_BC_FIPS_APPROVED);
 
 	private final String algorithmeName;
 
@@ -142,16 +156,16 @@ public enum SecureRandomType {
 			if (BC_FIPS_APPROVED.algorithmeName.equals(this.algorithmeName) || BC_FIPS_APPROVED_FOR_KEYS.algorithmeName.equals(this.algorithmeName))
 			{
 				CodeProvider.ensureBouncyCastleProviderLoaded();
+				SecureRandom srSource=SecureRandomType.GNU_SHA512PRNG.getSingleton(null).getJavaNativeSecureRandom();
 				if (nonce==null)
 				{
-					nonce=new byte[32];
-					SecureRandomType.SHA1PRNG.getInstance(null).nextBytes(nonce);
+					nonce=SecureRandomType.nonce;
 				}
-
-				EntropySourceProvider entSource = new BasicEntropySourceProvider(new SecureRandom(), true);
+				EntropySourceProvider entSource = new BasicEntropySourceProvider(srSource, true);
 				FipsDRBG.Builder drgbBldr = FipsDRBG.SHA512_HMAC.fromEntropySource(entSource)
 						.setSecurityStrength(256)
 						.setEntropyBitsRequired(256);
+				
 				if (personalizationString!=null)
 				{
 					drgbBldr=drgbBldr.setPersonalizationString(personalizationString);
@@ -165,13 +179,13 @@ public enum SecureRandomType {
 			else if (DEFAULT_BC_FIPS_APPROVED.algorithmeName.equals(this.algorithmeName))
 			{
 				CodeProvider.ensureBouncyCastleProviderLoaded();
+				SecureRandom srSource=SecureRandomType.GNU_SHA512PRNG.getSingleton(null).getJavaNativeSecureRandom();
 				if (nonce==null)
 				{
-					nonce=new byte[32];
-					SecureRandomType.SHA1PRNG.getInstance(null).nextBytes(nonce);
+					nonce=SecureRandomType.nonce;
 				}
 
-				EntropySourceProvider entSource = new BasicEntropySourceProvider(new SecureRandom(), true);
+				EntropySourceProvider entSource = new BasicEntropySourceProvider(srSource, true);
 				FipsDRBG.Builder drgbBldr = FipsDRBG.SHA512.fromEntropySource(entSource)
 						.setSecurityStrength(256)
 						.setEntropyBitsRequired(256);
@@ -181,10 +195,15 @@ public enum SecureRandomType {
 				}
 				return new JavaNativeSecureRandom(this, drgbBldr.build(nonce,true), false);
 			}
+			else if (FORTUNA_WITH_BC_FIPS_APPROVED.algorithmeName.equals(algorithmeName)) {
+				return new FortunaSecureRandom(nonce, personalizationString, SHA1PRNG, BC_FIPS_APPROVED);
+			}
+			else if (FORTUNA_WITH_BC_FIPS_APPROVED_FOR_KEYS.algorithmeName.equals(algorithmeName)) {
+				return new FortunaSecureRandom(nonce, personalizationString, SHA1PRNG, BC_FIPS_APPROVED_FOR_KEYS);
+			}
 			else
 			{
 				try {
-					
 					if (algorithmeName == null)
 						res=new JavaNativeSecureRandom(this, new SecureRandom());
 					else
@@ -220,23 +239,71 @@ public enum SecureRandomType {
 	}
 	
 	
-	final static byte[] nonce=("La piethagore\n" + 
-			"dans le ciel bleu\n" + 
-			"décrit des figures\n" + 
-			"géométriques.\n" + 
-			"Acrobate émérite,\n" + 
-			"elle dessine en son vol\n" + 
-			"moult ellipses et paraboles.\n" + 
-			"D’ailleurs, pour être précis,\n" + 
-			"le carré de son aile vaut\n" + 
-			"la somme des carrés de ses petites pattes.\n" + 
-			"La piethagore est maternelle :\n" + 
-			"dans le tore du nid elle couve\n" + 
-			"ses œufs parfaitement sphériques,\n" + 
-			"à côté d’un compas en or\n" + 
-			"dérobé à la Castafiore.").getBytes();
+	final static byte[] nonce;
 	
 	static
+	{
+		long result = 0;
+		long result2=0;
+		try {
+			final Enumeration<NetworkInterface> e = NetworkInterface.getNetworkInterfaces();
+			if (e != null) {
+				while (e.hasMoreElements()) {
+					final NetworkInterface ni = e.nextElement();
+						
+					
+					if (!ni.isLoopback()) {
+						
+						long val = getHardwareAddress(ni.getHardwareAddress());
+						if (val != 0 && val != 224)
+						{
+							if (ni.isPointToPoint()) {
+								result2=val;
+							}
+							else {
+								result = val;
+								break;
+							}
+						}
+					}
+				}
+			}
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+		if (result==0)
+			result=result2;
+		nonce=("La piethagore\n" + 
+				"dans le ciel bleu\n" + 
+				"décrit des figures\n" + 
+				"géométriques.\n" + 
+				"Acrobate émérite,\n" + 
+				"elle dessine en son vol\n" + 
+				"moult ellipses et paraboles.\n" + 
+				"D’ailleurs, pour être précis,\n" + 
+				"le carré de son aile vaut\n" + 
+				"la somme des carrés de ses petites pattes.\n" + 
+				"La piethagore est maternelle :\n" + 
+				"dans le tore du nid elle couve\n" + 
+				"ses œufs parfaitement sphériques,\n" + 
+				"à côté d’un compas en or\n" + 
+				"dérobé à la Castafiore."+result).getBytes();
+	}
+	
+	private static long getHardwareAddress(byte hardwareAddress[]) {
+		long result = 0;
+		if (hardwareAddress != null) {
+			for (final byte value : hardwareAddress) {
+				result <<= 8;
+				result |= value & 255;
+			}
+		}
+		return result;
+	}
+	
+	/*static
 	{
 		try
 		{
@@ -246,7 +313,7 @@ public enum SecureRandomType {
 		{
 			e.printStackTrace();
 		}
-	}
+	}*/
 	
 	public AbstractSecureRandom getSingleton(byte nonce[]) throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.NoSuchProviderException
 	{
@@ -275,6 +342,65 @@ public enum SecureRandomType {
 			}
 		}
 		return res;
+	}
+	
+	static byte[] tryToGenerateNativeNonBlockingSeed(int size) throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.NoSuchProviderException
+	{
+		if (OSValidator.isLinux() || OSValidator.isUnix() || OSValidator.isSolaris() || OSValidator.isMac())
+		{
+			final AtomicReference<URL> randomSource=new AtomicReference<>();
+			AccessController.doPrivileged(new PrivilegedAction<Void>() {
+
+				@Override
+				public Void run() {
+					String s=null;
+					try
+					{
+						s=Security.getProperty("securerandom.source");
+						if (s!=null)
+							randomSource.set(new URL(s));
+					}
+					catch(MalformedURLException e)
+					{
+						
+					}
+					try
+					{
+						if (randomSource.get()==null)
+						{
+							s=Security.getProperty("java.security.egd");
+							if (s!=null)
+								randomSource.set(new URL(s));
+						}
+					}
+					catch(MalformedURLException e)
+					{
+						
+					}
+					return null;
+				}
+			});
+			if (randomSource.get()==null)
+				return NativePRNG.getSingleton(nonce).generateSeed(size);
+			else
+			{
+				try(InputStream is=randomSource.get().openStream())
+				{
+					byte res[]=new byte[size];
+					if (is.read(res)==size)
+					{
+						return res;
+					}
+				}
+				catch(IOException e)
+				{
+				}
+				return NativePRNG.getSingleton(nonce).generateSeed(size);						
+			}
+
+		}
+		else
+			return NativePRNG.getSingleton(nonce).generateSeed(size);
 	}
 	
 }

@@ -36,6 +36,8 @@ package com.distrimind.util.crypto;
 
 import com.distrimind.util.crypto.P2PASymmetricSecretMessageExchanger.FakeSecureRandom;
 
+import gnu.vm.jgnu.security.NoSuchAlgorithmException;
+import gnu.vm.jgnu.security.NoSuchProviderException;
 import gnu.vm.jgnu.security.SecureRandom;
 
 /**
@@ -53,16 +55,19 @@ public class GnuSecureRandom extends AbstractSecureRandom {
 
 	private final SecureRandom secureRandom;
 	
-	GnuSecureRandom(FakeSecureRandom random) {
+	GnuSecureRandom(FakeSecureRandom random) throws NoSuchAlgorithmException, NoSuchProviderException {
 		super(SecureRandomType.GNU_DEFAULT, false);
 		this.secureRandom = random;
 	}
 
-	GnuSecureRandom(SecureRandomType _type, SecureRandom secureRandom) {
+	GnuSecureRandom(SecureRandomType _type, SecureRandom secureRandom) throws NoSuchAlgorithmException, NoSuchProviderException {
 		super(_type, true);
 		this.secureRandom = secureRandom;
 		if (_type.needInitialSeed())
+		{
+			setSeed(SecureRandomType.tryToGenerateNativeNonBlockingSeed(55));
 			nextBytes(new byte[20]);
+		}
 	}
 
 	@Override
@@ -87,21 +92,30 @@ public class GnuSecureRandom extends AbstractSecureRandom {
 
 	@Override
 	public void nextBytes(byte[] _bytes) {
-		secureRandom.nextBytes(_bytes);
-		if (_bytes!=null)
-			addDataProvided(_bytes.length);
+		synchronized(this)
+		{
+			secureRandom.nextBytes(_bytes);
+			if (_bytes!=null)
+				addDataProvided(_bytes.length);
+		}
 	}
 
 	@Override
 	public void setSeed(byte[] _seed) {
-		secureRandom.setSeed(_seed);
+		synchronized(this)
+		{
+			secureRandom.setSeed(_seed);
+		}
 
 	}
 
 	@Override
 	public void setSeed(long _seed) {
-		if (secureRandom != null)
-			secureRandom.setSeed(_seed);
+		synchronized(this)
+		{
+			if (secureRandom != null)
+				secureRandom.setSeed(_seed);
+		}
 
 	}
 
