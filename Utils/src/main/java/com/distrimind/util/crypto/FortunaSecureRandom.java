@@ -67,6 +67,7 @@ public class FortunaSecureRandom extends AbstractSecureRandom implements Seriali
 	
 	private volatile FortunaImpl fortuna;
 	private transient final AbstractSecureRandom randoms[];
+	private transient final SecureRandomType types[];
 	private transient final GnuInterface secureGnuRandom;
 	private transient final JavaNativeInterface secureJavaNativeRandom;
 	private transient boolean fortunaInitialized=false;
@@ -89,6 +90,7 @@ public class FortunaSecureRandom extends AbstractSecureRandom implements Seriali
 		randoms=new AbstractSecureRandom[types.length];
 		for (int i=0;i<randoms.length;i++)
 			randoms[i]=types[i].getInstance(nonce, personalizationString);
+		this.types=types;
 		secureGnuRandom=new GnuInterface();
 		secureJavaNativeRandom=new JavaNativeInterface();
 	}
@@ -140,8 +142,23 @@ public class FortunaSecureRandom extends AbstractSecureRandom implements Seriali
 			byte[] seed=new byte[numBytes];
 			for (int i=0;i<randoms.length;i++)
 			{
-				byte[] s=new byte[numBytes];
-				randoms[i].nextBytes(s);
+				byte[] s=null;
+				if (types[i]==SecureRandomType.BC_FIPS_APPROVED 
+						|| types[i]==SecureRandomType.BC_FIPS_APPROVED_FOR_KEYS 
+						|| types[i]==SecureRandomType.DEFAULT_BC_FIPS_APPROVED 
+						|| types[i]==SecureRandomType.NativePRNG )
+					s=randoms[i].generateSeed(numBytes);
+				else
+				{
+					try
+					{
+						s=SecureRandomType.tryToGenerateNativeNonBlockingSeed(numBytes);
+					}
+					catch(Exception e)
+					{
+						s=randoms[i].generateSeed(numBytes);						
+					}
+				}
 				if (i==0)
 					for (int j=0;j<numBytes;j++)
 						seed[j]=s[i];
@@ -370,7 +387,7 @@ public class FortunaSecureRandom extends AbstractSecureRandom implements Seriali
 		{
 			for (int i=0;i<randoms.length;i++)
 			{
-				byte[] tab=new byte[32];
+				byte[] tab=new byte[20];
 				randoms[i].nextBytes(tab);
 				pool.update(tab);				
 			}
