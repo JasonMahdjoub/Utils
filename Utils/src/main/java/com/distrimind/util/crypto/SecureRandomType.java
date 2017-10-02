@@ -156,7 +156,7 @@ public enum SecureRandomType {
 			if (BC_FIPS_APPROVED.algorithmeName.equals(this.algorithmeName) || BC_FIPS_APPROVED_FOR_KEYS.algorithmeName.equals(this.algorithmeName))
 			{
 				CodeProvider.ensureBouncyCastleProviderLoaded();
-				SecureRandom srSource=SecureRandomType.GNU_SHA512PRNG.getSingleton(null).getJavaNativeSecureRandom();
+				SecureRandom srSource=SecureRandomType.GNU_SHA512PRNG.getSingleton(null);
 				if (nonce==null)
 				{
 					nonce=SecureRandomType.nonce;
@@ -179,7 +179,7 @@ public enum SecureRandomType {
 			else if (DEFAULT_BC_FIPS_APPROVED.algorithmeName.equals(this.algorithmeName))
 			{
 				CodeProvider.ensureBouncyCastleProviderLoaded();
-				SecureRandom srSource=SecureRandomType.GNU_SHA512PRNG.getSingleton(null).getJavaNativeSecureRandom();
+				SecureRandom srSource=SecureRandomType.GNU_SHA512PRNG.getSingleton(null);
 				if (nonce==null)
 				{
 					nonce=SecureRandomType.nonce;
