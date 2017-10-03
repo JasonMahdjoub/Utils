@@ -134,18 +134,30 @@ public class CryptoTests {
 	public Object[][] provideDataForASymmetricSignatureTest() {
 		Object[][] res = new Object[ASymmetricAuthentifiedSignatureType.values().length
 				* keySizes.length][];
-		int i = 0;
+		int index = 0;
 		
 		for (ASymmetricAuthentifiedSignatureType st : ASymmetricAuthentifiedSignatureType.values()) {
-			for (int keySize : keySizes) {
+			if (st.getSignatureAlgorithmName().equals(ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA384withECDSA.getSignatureAlgorithmName()))
+			{
 				Object o[] = new Object[2];
 				o[0] = st;
-				o[1] = new Integer(keySize);
-				res[i++] = o;
+				o[1] = new Integer(384);
+				res[index++] = o;
+			}
+			else
+			{
+				for (int keySize : keySizes) {
+					Object o[] = new Object[2];
+					o[0] = st;
+					o[1] = new Integer(keySize);
+					res[index++] = o;
+				}
 			}
 		}
-		
-		return res;
+		Object[][] res2=new Object[index][];
+		for (int i=0;i<index;i++)
+			res2[i]=res[i];
+		return res2;
 	}
 
 	@DataProvider(name = "provideDataForSymmetricSignatureTest", parallel = true)

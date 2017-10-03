@@ -135,7 +135,7 @@ public class ASymmetricPrivateKey implements UtilKey {
 	private ASymmetricPrivateKey(byte privateKey[], short keySize) {
 		if (privateKey == null)
 			throw new NullPointerException("privateKey");
-		if (keySize < 1024)
+		if (keySize < 384)
 			throw new IllegalArgumentException("keySize");
 		this.privateKey = privateKey;
 		this.keySize = keySize;
@@ -145,7 +145,7 @@ public class ASymmetricPrivateKey implements UtilKey {
 	private ASymmetricPrivateKey(gnu.vm.jgnu.security.PrivateKey privateKey, short keySize) {
 		if (privateKey == null)
 			throw new NullPointerException("privateKey");
-		if (keySize < 1024)
+		if (keySize < 384)
 			throw new IllegalArgumentException("keySize");
 		this.privateKey = ASymmetricEncryptionType.encodePrivateKey(privateKey);
 		this.keySize = keySize;
@@ -155,7 +155,7 @@ public class ASymmetricPrivateKey implements UtilKey {
 	private ASymmetricPrivateKey(PrivateKey privateKey, short keySize) {
 		if (privateKey == null)
 			throw new NullPointerException("privateKey");
-		if (keySize < 1024)
+		if (keySize < 384)
 			throw new IllegalArgumentException("keySize");
 		this.privateKey = ASymmetricEncryptionType.encodePrivateKey(privateKey);
 		this.keySize = keySize;
@@ -200,7 +200,7 @@ public class ASymmetricPrivateKey implements UtilKey {
 
 	public int getMaxBlockSize() {
 		if (encryptionType==null)
-			return signatureType.getMaxBlockSize(keySize);
+			throw new IllegalAccessError("This key should be used for signature");
 		else
 			return encryptionType.getMaxBlockSize(keySize);
 	}

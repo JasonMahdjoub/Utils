@@ -91,7 +91,7 @@ public class ASymmetricKeyPair implements Serializable {
 			throw new NullPointerException("privateKey");
 		if (publicKey == null)
 			throw new NullPointerException("publicKey");
-		if (keySize < 1024)
+		if (keySize < 384)
 			throw new IllegalArgumentException("keySize");
 		this.privateKey = privateKey;
 		this.publicKey = publicKey;
@@ -108,7 +108,7 @@ public class ASymmetricKeyPair implements Serializable {
 			throw new NullPointerException("type");
 		if (keyPair == null)
 			throw new NullPointerException("keyPair");
-		if (keySize < 1024)
+		if (keySize < 384)
 			throw new IllegalArgumentException("keySize");
 		privateKey = new ASymmetricPrivateKey(type, keyPair.getPrivate(), keySize);
 		publicKey = new ASymmetricPublicKey(type, keyPair.getPublic(), keySize, expirationUTC);
@@ -124,7 +124,7 @@ public class ASymmetricKeyPair implements Serializable {
 			throw new NullPointerException("type");
 		if (keyPair == null)
 			throw new NullPointerException("keyPair");
-		if (keySize < 1024)
+		if (keySize < 384)
 			throw new IllegalArgumentException("keySize");
 		privateKey = new ASymmetricPrivateKey(type, keyPair.getPrivate(), keySize);
 		publicKey = new ASymmetricPublicKey(type, keyPair.getPublic(), keySize, expirationUTC);
@@ -143,7 +143,7 @@ public class ASymmetricKeyPair implements Serializable {
 			throw new NullPointerException("privateKey");
 		if (publicKey == null)
 			throw new NullPointerException("publicKey");
-		if (keySize < 1024)
+		if (keySize < 384)
 			throw new IllegalArgumentException("keySize");
 		this.privateKey = privateKey;
 		this.publicKey = publicKey;
@@ -160,7 +160,7 @@ public class ASymmetricKeyPair implements Serializable {
 			throw new NullPointerException("type");
 		if (keyPair == null)
 			throw new NullPointerException("keyPair");
-		if (keySize < 1024)
+		if (keySize < 384)
 			throw new IllegalArgumentException("keySize");
 		privateKey = new ASymmetricPrivateKey(type, keyPair.getPrivate(), keySize);
 		publicKey = new ASymmetricPublicKey(type, keyPair.getPublic(), keySize, expirationUTC);
@@ -176,7 +176,7 @@ public class ASymmetricKeyPair implements Serializable {
 			throw new NullPointerException("type");
 		if (keyPair == null)
 			throw new NullPointerException("keyPair");
-		if (keySize < 1024)
+		if (keySize < 384)
 			throw new IllegalArgumentException("keySize");
 		privateKey = new ASymmetricPrivateKey(type, keyPair.getPrivate(), keySize);
 		publicKey = new ASymmetricPublicKey(type, keyPair.getPublic(), keySize, expirationUTC);
@@ -240,7 +240,7 @@ public class ASymmetricKeyPair implements Serializable {
 
 	public int getMaxBlockSize() {
 		if (encryptionType==null)
-			return signatureType.getMaxBlockSize(keySize);
+			throw new IllegalAccessError("This key should be used for signature");
 		else
 			return encryptionType.getMaxBlockSize(keySize);
 	}

@@ -83,7 +83,7 @@ public final class GnuKeyPairGenerator extends AbstractKeyPairGenerator {
 	@Override
 	public void initialize(short _keysize, long expirationTime, AbstractSecureRandom _random) throws InvalidAlgorithmParameterException {
 		
-		keyPairGenerator.initialize(new gnu.vm.jgnu.security.spec.RSAKeyGenParameterSpec(keySize, gnu.vm.jgnu.security.spec.RSAKeyGenParameterSpec.F4), _random.getGnuSecureRandom());
+		keyPairGenerator.initialize(keySize, _random.getGnuSecureRandom());
 		this.keySize = _keysize;
 		this.expirationTime = expirationTime;
 
