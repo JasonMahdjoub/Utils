@@ -82,8 +82,10 @@ public enum SymmetricKeyWrapperType {
 	
 	public byte[] wrapKey(SymmetricSecretKey key, SymmetricSecretKey keyToWrap) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalStateException, IllegalBlockSizeException, gnu.vm.jgnu.security.NoSuchProviderException
 	{
-		if ((key.getAuthentifiedSignatureAlgorithmType()!=null && !provider.equals(key.getAuthentifiedSignatureAlgorithmType().getCodeProvider())) || (key.getEncryptionAlgorithmType()!=null && !provider.equals(key.getEncryptionAlgorithmType().getCodeProvider()))
-				|| (keyToWrap.getAuthentifiedSignatureAlgorithmType()!=null && !provider.equals(keyToWrap.getAuthentifiedSignatureAlgorithmType().getCodeProvider())) || (keyToWrap.getEncryptionAlgorithmType()!=null && !provider.equals(keyToWrap.getEncryptionAlgorithmType().getCodeProvider())))
+		if ((key.getAuthentifiedSignatureAlgorithmType()!=null && ((provider==CodeProvider.GNU_CRYPTO)!=(key.getAuthentifiedSignatureAlgorithmType().getCodeProvider()==CodeProvider.GNU_CRYPTO))) 
+				|| (key.getEncryptionAlgorithmType()!=null  && ((provider==CodeProvider.GNU_CRYPTO)!=(key.getEncryptionAlgorithmType().getCodeProvider()==CodeProvider.GNU_CRYPTO)))
+				|| (keyToWrap.getAuthentifiedSignatureAlgorithmType()!=null && (provider==CodeProvider.GNU_CRYPTO)!=(keyToWrap.getAuthentifiedSignatureAlgorithmType().getCodeProvider()==CodeProvider.GNU_CRYPTO))
+				|| (keyToWrap.getEncryptionAlgorithmType()!=null && (provider==CodeProvider.GNU_CRYPTO)!=(keyToWrap.getEncryptionAlgorithmType().getCodeProvider()==CodeProvider.GNU_CRYPTO)))
 				throw new IllegalArgumentException("The keys must come from the same providers");
 		if (!algorithmName.startsWith(key.getEncryptionAlgorithmType().getAlgorithmName()))
 			throw new IllegalArgumentException("The key must be compatible with algorithm "+algorithmName);
@@ -141,10 +143,10 @@ public enum SymmetricKeyWrapperType {
 	}
 	private SymmetricSecretKey unwrapKey(SymmetricSecretKey key, byte[] keyToUnwrap, SymmetricEncryptionType encryptionType, SymmetricAuthentifiedSignatureType signatureType, short keySize) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalStateException, gnu.vm.jgnu.security.NoSuchProviderException
 	{
-		if ((encryptionType!=null && !provider.equals(encryptionType.getCodeProvider()))
-				|| (key.getEncryptionAlgorithmType()!=null && !provider.equals(key.getEncryptionAlgorithmType().getCodeProvider()))
-				|| (key.getAuthentifiedSignatureAlgorithmType()!=null && !provider.equals(key.getAuthentifiedSignatureAlgorithmType().getCodeProvider()))
-				|| (signatureType!=null && !provider.equals(signatureType.getCodeProvider())))
+		if ((key.getAuthentifiedSignatureAlgorithmType()!=null && ((provider==CodeProvider.GNU_CRYPTO)!=(key.getAuthentifiedSignatureAlgorithmType().getCodeProvider()==CodeProvider.GNU_CRYPTO))) 
+				|| (key.getEncryptionAlgorithmType()!=null  && ((provider==CodeProvider.GNU_CRYPTO)!=(key.getEncryptionAlgorithmType().getCodeProvider()==CodeProvider.GNU_CRYPTO)))
+				|| (encryptionType!=null && (provider==CodeProvider.GNU_CRYPTO)!=(encryptionType.getCodeProvider()==CodeProvider.GNU_CRYPTO))
+				|| (signatureType!=null && (provider==CodeProvider.GNU_CRYPTO)!=(signatureType.getCodeProvider()==CodeProvider.GNU_CRYPTO)))
 				throw new IllegalArgumentException("The keys must come from the same providers");
 		
 		if (provider.equals(CodeProvider.GNU_CRYPTO))

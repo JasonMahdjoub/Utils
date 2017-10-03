@@ -184,7 +184,7 @@ public enum ASymmetricEncryptionType {
 		throw new IllegalArgumentException();
 	}
 
-	private final String signatureAlgorithmName;
+	private final String algorithmName;
 
 	private final String blockMode;
 
@@ -201,14 +201,14 @@ public enum ASymmetricEncryptionType {
 	private final CodeProvider codeProvider;
 
 	private ASymmetricEncryptionType(ASymmetricEncryptionType type) {
-		this(type.signatureAlgorithmName, type.blockMode, type.padding, type.signature, type.keySize, type.expirationTimeMilis,
+		this(type.algorithmName, type.blockMode, type.padding, type.signature, type.keySize, type.expirationTimeMilis,
 				type.blockSizeDecrement, type.codeProvider);
 	}
 
 	private ASymmetricEncryptionType(String algorithmName, String blockMode, String padding,
 			ASymmetricAuthentifiedSignatureType signature, short keySize, long expirationTimeMilis, short blockSizeDecrement,
 			CodeProvider codeProvider) {
-		this.signatureAlgorithmName = algorithmName;
+		this.algorithmName = algorithmName;
 		this.blockMode = blockMode;
 		this.padding = padding;
 		this.signature = signature;
@@ -219,7 +219,7 @@ public enum ASymmetricEncryptionType {
 	}
 
 	public String getAlgorithmName() {
-		return signatureAlgorithmName;
+		return algorithmName;
 	}
 
 	public String getBlockMode() {
@@ -228,7 +228,7 @@ public enum ASymmetricEncryptionType {
 
 	public AbstractCipher getCipherInstance()
 			throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnux.crypto.NoSuchPaddingException, NoSuchProviderException {
-		String name = signatureAlgorithmName+"/" + blockMode + "/" + padding;
+		String name = algorithmName+"/" + blockMode + "/" + padding;
 		if (codeProvider == CodeProvider.GNU_CRYPTO) {
 			return new GnuCipher(gnu.vm.jgnux.crypto.Cipher.getInstance(name));
 		} else if (codeProvider == CodeProvider.BCFIPS || codeProvider == CodeProvider.BC) {
@@ -281,7 +281,7 @@ public enum ASymmetricEncryptionType {
 			long expirationTimeUTC) throws gnu.vm.jgnu.security.NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException {
 		if (codeProvider == CodeProvider.GNU_CRYPTO) {
 			gnu.vm.jgnu.security.KeyPairGenerator kgp = gnu.vm.jgnu.security.KeyPairGenerator
-					.getInstance(signatureAlgorithmName);
+					.getInstance(algorithmName);
 			GnuKeyPairGenerator res = new GnuKeyPairGenerator(this, kgp);
 			res.initialize(keySize, expirationTimeUTC, random);
 
@@ -289,7 +289,7 @@ public enum ASymmetricEncryptionType {
 		} else if (codeProvider == CodeProvider.BCFIPS) {
 			CodeProvider.ensureBouncyCastleProviderLoaded();
 			try {
-				KeyPairGenerator kgp = KeyPairGenerator.getInstance(signatureAlgorithmName, CodeProvider.BCFIPS.name());
+				KeyPairGenerator kgp = KeyPairGenerator.getInstance(algorithmName, CodeProvider.BCFIPS.name());
 				JavaNativeKeyPairGenerator res = new JavaNativeKeyPairGenerator(this, kgp);
 				res.initialize(keySize, expirationTimeUTC, random);
 
@@ -301,7 +301,7 @@ public enum ASymmetricEncryptionType {
 			}
 		} else {
 			try {
-				KeyPairGenerator kgp = KeyPairGenerator.getInstance(signatureAlgorithmName);
+				KeyPairGenerator kgp = KeyPairGenerator.getInstance(algorithmName);
 				JavaNativeKeyPairGenerator res = new JavaNativeKeyPairGenerator(this, kgp);
 				res.initialize(keySize, expirationTimeUTC, random);
 

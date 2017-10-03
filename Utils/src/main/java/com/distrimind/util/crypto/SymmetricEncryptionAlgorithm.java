@@ -34,8 +34,6 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
-import java.io.IOException;
-
 import javax.crypto.Cipher;
 
 import gnu.vm.jgnu.security.InvalidAlgorithmParameterException;
@@ -43,8 +41,6 @@ import gnu.vm.jgnu.security.InvalidKeyException;
 import gnu.vm.jgnu.security.NoSuchAlgorithmException;
 import gnu.vm.jgnu.security.NoSuchProviderException;
 import gnu.vm.jgnu.security.spec.InvalidKeySpecException;
-import gnu.vm.jgnux.crypto.BadPaddingException;
-import gnu.vm.jgnux.crypto.IllegalBlockSizeException;
 import gnu.vm.jgnux.crypto.NoSuchPaddingException;
 
 /**
@@ -54,28 +50,8 @@ import gnu.vm.jgnux.crypto.NoSuchPaddingException;
  * @since Utils 1.4
  */
 public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm {
-	private static SymmetricEncryptionAlgorithm getInstance(AbstractSecureRandom random,
-			byte[] decryptedKey) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,
-			InvalidAlgorithmParameterException, NoSuchProviderException, IllegalArgumentException,
-			InvalidKeySpecException {
-		return new SymmetricEncryptionAlgorithm(random, SymmetricSecretKey.decode(decryptedKey));
-	}
 
-	public static SymmetricEncryptionAlgorithm getInstance(AbstractSecureRandom random, byte[] cryptedKey,
-			P2PASymmetricEncryptionAlgorithm asalgo) throws NoSuchAlgorithmException, NoSuchPaddingException,
-			InvalidKeyException, InvalidAlgorithmParameterException, IOException, IllegalBlockSizeException,
-			BadPaddingException, NoSuchProviderException, IllegalArgumentException, InvalidKeySpecException {
-		byte[] key = asalgo.decode(cryptedKey);
-		return getInstance(random, key);
-	}
 
-	public static SymmetricEncryptionAlgorithm getInstance(AbstractSecureRandom random, byte[] cryptedKey,
-			ServerASymmetricEncryptionAlgorithm asalgo) throws NoSuchAlgorithmException, NoSuchPaddingException,
-			InvalidKeyException, InvalidAlgorithmParameterException, IOException, IllegalBlockSizeException,
-			BadPaddingException, NoSuchProviderException, IllegalArgumentException, InvalidKeySpecException {
-		byte[] key = asalgo.decode(cryptedKey);
-		return getInstance(random, key);
-	}
 
 	private final SymmetricSecretKey key;
 
@@ -91,20 +67,6 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 		this.key = key;
 		this.random = random;
 		this.cipher.init(Cipher.ENCRYPT_MODE, this.key, generateIV());
-	}
-
-	public byte[] encodeKey(ClientASymmetricEncryptionAlgorithm asalgo) throws InvalidKeyException,
-			InvalidAlgorithmParameterException, IOException, IllegalBlockSizeException, BadPaddingException,
-			IllegalStateException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
-		return asalgo.encode(key.encode());
-
-	}
-
-	public byte[] encodeKey(P2PASymmetricEncryptionAlgorithm asalgo) throws InvalidKeyException,
-			InvalidAlgorithmParameterException, IOException, IllegalBlockSizeException, BadPaddingException,
-			IllegalStateException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
-		return asalgo.encode(key.encode());
-
 	}
 
 	private byte[] generateIV() {

@@ -115,7 +115,9 @@ public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOu
 				int nb = Math.min(BUFFER_SIZE, maxBlockSize - blockACC);
 				int size = is.read(buffer, 0, nb);
 				if (size > 0) {
-					os.write(cipher.update(buffer, 0, size));
+					byte[] tab=cipher.update(buffer, 0, size);
+					if (tab!=null)
+						os.write(tab);
 					blockACC += size;
 				}
 				if (nb != size || size <= 0)

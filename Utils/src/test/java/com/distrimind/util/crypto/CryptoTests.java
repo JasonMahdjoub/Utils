@@ -118,16 +118,22 @@ public class CryptoTests {
 	public Object[][] provideDataForHybridEncryptions() {
 		Object[][] res = new Object[SymmetricEncryptionType.values().length
 				* ASymmetricEncryptionType.values().length][];
-		int i = 0;
+		int index = 0;
 		for (SymmetricEncryptionType vS : SymmetricEncryptionType.values()) {
 			for (ASymmetricEncryptionType vAS : ASymmetricEncryptionType.values()) {
-				Object o[] = new Object[2];
-				o[0] = vAS;
-				o[1] = vS;
-				res[i++] = o;
+				if ((vS.getCodeProvider()==CodeProvider.GNU_CRYPTO)==(vAS.getCodeProvider()==CodeProvider.GNU_CRYPTO))
+				{
+					Object o[] = new Object[2];
+					o[0] = vAS;
+					o[1] = vS;
+					res[index++] = o;
+				}
 			}
 		}
-		return res;
+		Object res2[][]=new Object[index][];
+		for (int i=0;i<index;i++)
+			res2[i]=res[i];
+		return res2;
 	}
 
 	@DataProvider(name = "provideDataForASymmetricSignatureTest", parallel = true)
@@ -491,26 +497,27 @@ public class CryptoTests {
 		Assert.assertEquals(t2, decoded[1]);
 	}
 
-	@Test(dataProvider = "provideDataForHybridEncryptions", dependsOnMethods = { "testSymetricEncryptions",
-			"testP2PASymetricEncryptions" })
+	@Test(dataProvider = "provideDataForHybridEncryptions", dependsOnMethods = { "testSymetricEncryptions","testP2PASymetricEncryptions" })
 	public void testHybridEncryptions(ASymmetricEncryptionType astype, SymmetricEncryptionType stype)
 			throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,
 			InvalidAlgorithmParameterException, IOException, IllegalBlockSizeException, BadPaddingException,
 			NoSuchProviderException, InvalidKeySpecException {
 		System.out.println("Testing " + astype + "/" + stype);
 		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getSingleton(null);
-		ASymmetricKeyPair kpd = astype.getKeyPairGenerator(rand).generateKeyPair();
-		ASymmetricKeyPair kpl = astype.getKeyPairGenerator(rand).generateKeyPair();
-
-		P2PASymmetricEncryptionAlgorithm algoDistantAS = new P2PASymmetricEncryptionAlgorithm(kpd,
-				kpl.getASymmetricPublicKey());
-		P2PASymmetricEncryptionAlgorithm algoLocalAS = new P2PASymmetricEncryptionAlgorithm(kpl,
-				kpd.getASymmetricPublicKey());
+		ASymmetricKeyPair kpd = astype.getKeyPairGenerator(rand, (short)1024).generateKeyPair();
 
 		SymmetricSecretKey localKey = stype.getKeyGenerator(rand).generateKey();
 		SymmetricEncryptionAlgorithm algoLocalS = new SymmetricEncryptionAlgorithm(rand, localKey);
-		byte[] localEncryptedKey = algoLocalS.encodeKey(algoLocalAS);
-		SymmetricEncryptionAlgorithm algoDistantS = SymmetricEncryptionAlgorithm.getInstance(rand, localEncryptedKey, algoDistantAS);
+		ASymmetricKeyWrapper kw=null;
+		if (astype.getCodeProvider()==CodeProvider.GNU_CRYPTO)
+			kw=ASymmetricKeyWrapper.GNU_RSA_OAEP;
+		else if (astype.getCodeProvider()==CodeProvider.SUN)
+			kw=ASymmetricKeyWrapper.RSA_OAEP_WITH_PARAMETERS;
+		else
+			kw=ASymmetricKeyWrapper.BC_FIPS_RSA_KTS_KTM;
+		byte[] localEncryptedKey = kw.wrapKey(rand, kpd.getASymmetricPublicKey(), localKey);
+		SymmetricSecretKey decryptedKey=kw.unwrapKey(kpd.getASymmetricPrivateKey(), localEncryptedKey, stype, stype.getDefaultKeySizeBits());
+		SymmetricEncryptionAlgorithm algoDistantS = new SymmetricEncryptionAlgorithm(rand, decryptedKey);
 
 		for (byte[] m : messagesToEncrypt) {
 			byte[] md = algoDistantS.decode(algoLocalS.encode(m));
@@ -547,8 +554,8 @@ public class CryptoTests {
 			BadPaddingException, NoSuchProviderException, InvalidKeySpecException, ShortBufferException, IllegalStateException, InvalidParameterSpecException {
 		System.out.println("Testing " + type);
 		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getSingleton(null);
-		ASymmetricKeyPair kpd = type.getKeyPairGenerator(rand).generateKeyPair();
-		ASymmetricKeyPair kpl = type.getKeyPairGenerator(rand).generateKeyPair();
+		ASymmetricKeyPair kpd = type.getKeyPairGenerator(rand, (short)1024).generateKeyPair();
+		ASymmetricKeyPair kpl = type.getKeyPairGenerator(rand, (short)1024).generateKeyPair();
 		P2PASymmetricEncryptionAlgorithm algoDistant = new P2PASymmetricEncryptionAlgorithm(kpd,
 				kpl.getASymmetricPublicKey());
 		P2PASymmetricEncryptionAlgorithm algoLocal = new P2PASymmetricEncryptionAlgorithm(kpl,
@@ -568,8 +575,6 @@ public class CryptoTests {
 			Assert.assertEquals(md.length, m.length, "Testing size " + type);
 			Assert.assertEquals(md, m, "Testing " + type);
 
-			byte[] sign = algoLocal.getSignerAlgorithm().sign(m);
-			Assert.assertTrue(algoDistant.getSignatureCheckerAlgorithm().verify(m, sign));
 
 			int off = rand.nextInt(15);
 			int size = m.length;
@@ -590,8 +595,6 @@ public class CryptoTests {
 			for (int i = 0; i < size; i++)
 				Assert.assertEquals(md[i], m[i + off]);
 
-			sign = algoLocal.getSignerAlgorithm().sign(m, off, size);
-			Assert.assertTrue(algoDistant.getSignatureCheckerAlgorithm().verify(m, off, size, sign, 0, sign.length));
 
 		}
 
@@ -774,7 +777,7 @@ public class CryptoTests {
 			{
 				for (SymmetricEncryptionType set : SymmetricEncryptionType.values())
 				{
-					if (akpw.getCodeProvider().equals(aet.getCodeProvider()) && akpw.getCodeProvider().equals(set.getCodeProvider())
+					if ((akpw.getCodeProvider()==CodeProvider.GNU_CRYPTO)==(aet.getCodeProvider()==CodeProvider.GNU_CRYPTO) && (akpw.getCodeProvider()==CodeProvider.GNU_CRYPTO)==(set.getCodeProvider()==CodeProvider.GNU_CRYPTO)
 							&& akpw.getAlgorithmName().startsWith(aet.getAlgorithmName()))
 					{
 						Object params[]=new Object[3];
@@ -802,7 +805,7 @@ public class CryptoTests {
 			{
 				for (SymmetricAuthentifiedSignatureType set : SymmetricAuthentifiedSignatureType.values())
 				{
-					if (akpw.getCodeProvider().equals(aet.getCodeProvider()) && akpw.getCodeProvider().equals(set.getCodeProvider())
+					if ((akpw.getCodeProvider()==CodeProvider.GNU_CRYPTO)==(aet.getCodeProvider()==CodeProvider.GNU_CRYPTO) && (akpw.getCodeProvider()==CodeProvider.GNU_CRYPTO)==(set.getCodeProvider()==CodeProvider.GNU_CRYPTO)
 							&& akpw.getAlgorithmName().startsWith(aet.getAlgorithmName()))
 					{
 						Object params[]=new Object[3];
@@ -827,7 +830,7 @@ public class CryptoTests {
 		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getSingleton(null);
 		ASymmetricKeyPair kp=asetype.getKeyPairGenerator(rand, (short)1024).generateKeyPair();
 		SymmetricSecretKey sk= setype.getKeyGenerator(rand, setype.getDefaultKeySizeBits()).generateKey();
-		byte[] wrappedKey=typeWrapper.wrapKey(kp.getASymmetricPublicKey(), sk);
+		byte[] wrappedKey=typeWrapper.wrapKey(rand, kp.getASymmetricPublicKey(), sk);
 		SymmetricSecretKey sk2=typeWrapper.unwrapKey(kp.getASymmetricPrivateKey(), wrappedKey, setype, setype.getDefaultKeySizeBits());
 		Assert.assertEquals(sk.getKeySize(), sk2.getKeySize());
 		Assert.assertEquals(sk.getAuthentifiedSignatureAlgorithmType(), sk2.getAuthentifiedSignatureAlgorithmType());
@@ -841,7 +844,7 @@ public class CryptoTests {
 		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getSingleton(null);
 		ASymmetricKeyPair kp=asetype.getKeyPairGenerator(rand, (short)1024).generateKeyPair();
 		SymmetricSecretKey sk= ssigtype.getKeyGenerator(rand, ssigtype.getDefaultKeySizeBits()).generateKey();
-		byte[] wrappedKey=typeWrapper.wrapKey(kp.getASymmetricPublicKey(), sk);
+		byte[] wrappedKey=typeWrapper.wrapKey(rand, kp.getASymmetricPublicKey(), sk);
 		SymmetricSecretKey sk2=typeWrapper.unwrapKey(kp.getASymmetricPrivateKey(), wrappedKey, ssigtype, ssigtype.getDefaultKeySizeBits());
 		Assert.assertEquals(sk.getKeySize(), sk2.getKeySize());
 		Assert.assertEquals(sk.getAuthentifiedSignatureAlgorithmType(), sk2.getAuthentifiedSignatureAlgorithmType());
@@ -861,7 +864,7 @@ public class CryptoTests {
 			{
 				for (SymmetricEncryptionType set : SymmetricEncryptionType.values())
 				{
-					if (akpw.getCodeProvider().equals(aet.getCodeProvider()) && akpw.getCodeProvider().equals(set.getCodeProvider()))
+					if ((akpw.getCodeProvider()==CodeProvider.GNU_CRYPTO)==(aet.getCodeProvider()==CodeProvider.GNU_CRYPTO) && (akpw.getCodeProvider()==CodeProvider.GNU_CRYPTO)==(set.getCodeProvider()==CodeProvider.GNU_CRYPTO))
 					{
 						Object params[]=new Object[3];
 						params[0]=akpw;
@@ -889,7 +892,7 @@ public class CryptoTests {
 			{
 				for (SymmetricAuthentifiedSignatureType set : SymmetricAuthentifiedSignatureType.values())
 				{
-					if (akpw.getCodeProvider().equals(aet.getCodeProvider()) && akpw.getCodeProvider().equals(set.getCodeProvider()))
+					if ((akpw.getCodeProvider()==CodeProvider.GNU_CRYPTO)==(aet.getCodeProvider()==CodeProvider.GNU_CRYPTO) && (akpw.getCodeProvider()==CodeProvider.GNU_CRYPTO)==(set.getCodeProvider()==CodeProvider.GNU_CRYPTO))
 					{						
 						Object params[]=new Object[3];
 						params[0]=akpw;
