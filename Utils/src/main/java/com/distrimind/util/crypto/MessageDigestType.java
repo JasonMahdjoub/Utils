@@ -58,8 +58,8 @@ public enum MessageDigestType {
 	BC_FIPS_SHA3_256("SHA3-256", CodeProvider.BCFIPS), 
 	BC_FIPS_SHA3_384("SHA3-384",CodeProvider.BCFIPS), 
 	BC_FIPS_SHA3_512("SHA3-512", CodeProvider.BCFIPS), 
-	BC_FIPS_WHIRLPOOL("WHIRLPOOL",CodeProvider.BCFIPS), 
-	DEFAULT(BC_FIPS_SHA3_256);
+	BC_WHIRLPOOL("WHIRLPOOL",CodeProvider.BC), 
+	DEFAULT(BC_FIPS_SHA3_384);
 
 	private final String algorithmName;
 
@@ -81,11 +81,10 @@ public enum MessageDigestType {
 	public AbstractMessageDigest getMessageDigestInstance() throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.NoSuchProviderException {
 		if (codeProvider == CodeProvider.GNU_CRYPTO) {
 			return new GnuMessageDigest(gnu.vm.jgnu.security.MessageDigest.getInstance(algorithmName));
-		} else if (codeProvider == CodeProvider.BCFIPS) {
+		} else if (codeProvider == CodeProvider.BCFIPS || codeProvider == CodeProvider.BC) {
 			CodeProvider.ensureBouncyCastleProviderLoaded();
 			try {
-				return new JavaNativeMessageDigest(
-						MessageDigest.getInstance(algorithmName, CodeProvider.BCFIPS.name()));
+				return new JavaNativeMessageDigest(MessageDigest.getInstance(algorithmName, codeProvider.name()));
 			} catch (NoSuchAlgorithmException e) {
 				throw new gnu.vm.jgnu.security.NoSuchAlgorithmException(e);
 			}

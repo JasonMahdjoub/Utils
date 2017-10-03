@@ -80,9 +80,9 @@ public class EllipticCurveDiffieHellmanAlgorithm {
 		try
 		{
 			KeyPairGenerator kpg = null;
-			if (type.getCodeProvider() == CodeProvider.BCFIPS) {
+			if (type.getCodeProvider() == CodeProvider.BCFIPS || type.getCodeProvider() == CodeProvider.BC) {
 				CodeProvider.ensureBouncyCastleProviderLoaded();
-				kpg = KeyPairGenerator.getInstance("EC", CodeProvider.BCFIPS.name());
+				kpg = KeyPairGenerator.getInstance("EC", type.getCodeProvider().name());
 			} else
 				kpg = KeyPairGenerator.getInstance("EC");
 			kpg.initialize(keySize);
@@ -129,9 +129,9 @@ public class EllipticCurveDiffieHellmanAlgorithm {
 				throw new IllegalArgumentException(
 						"A key exchange process has already been begun. Use reset fonction before calling this function.");
 			KeyFactory kf = null;
-			if (type.getCodeProvider() == CodeProvider.BCFIPS) {
+			if (type.getCodeProvider() == CodeProvider.BCFIPS || type.getCodeProvider() == CodeProvider.BC) {
 				CodeProvider.ensureBouncyCastleProviderLoaded();
-				kf = KeyFactory.getInstance("EC", CodeProvider.BCFIPS.name());
+				kf = KeyFactory.getInstance("EC", type.getCodeProvider().name());
 			} else
 				kf = KeyFactory.getInstance("EC");
 	

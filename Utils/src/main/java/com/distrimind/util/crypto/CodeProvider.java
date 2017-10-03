@@ -61,6 +61,13 @@ public enum CodeProvider {
 				if (bouncyProvider == null) {
 					bouncyProvider = new BouncyCastleProvider();
 					Security.addProvider(bouncyProvider);
+				}
+			}
+		}
+		if (bouncyProviderFIPS == null) {
+
+			synchronized (CodeProvider.class) {
+				if (bouncyProviderFIPS == null) {
 					bouncyProviderFIPS = new BouncyCastleFipsProvider();
 					Security.addProvider(bouncyProviderFIPS);
 				}

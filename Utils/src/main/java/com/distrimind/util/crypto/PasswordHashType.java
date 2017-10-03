@@ -145,6 +145,7 @@ public enum PasswordHashType {
 		case BC_FIPS_PBKFD2WithHMacSHA384:
 		case BC_FIPS_PBKFD2WithHMacSHA512:
 		{
+			CodeProvider.ensureBouncyCastleProviderLoaded();
 			try
 			{
 				int size = len / 2;
@@ -223,7 +224,7 @@ public enum PasswordHashType {
 		{
 			try
 			{
-	
+				CodeProvider.ensureBouncyCastleProviderLoaded();
 				SecretKeyFactory keyFact = SecretKeyFactory.getInstance(algorithmName,CodeProvider.BCFIPS.name());
 				
 				SecretKey hmacKey = keyFact.generateSecret(new PBEKeySpec(password,  salt,iterations,hashLength*8));

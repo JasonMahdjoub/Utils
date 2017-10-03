@@ -41,12 +41,12 @@ package com.distrimind.util.crypto;
  * @since Utils 2.9
  */
 public enum EllipticCurveDiffieHellmanType {
-	ECDH_128((short) 128, (short) 3072, CodeProvider.SUN), 
-	ECDH_256((short) 256, (short) 3072, CodeProvider.SUN), 
-	ECDH_384((short) 256, (short) 3072, CodeProvider.SUN), 
-	BC_FIPS_ECDH_128((short) 128, (short) 3072, CodeProvider.BCFIPS), 
-	BC_FIPS_ECDH_256((short) 256, (short) 3072, CodeProvider.BCFIPS), 
-	BC_FIPS_ECDH_384((short) 256, (short) 3072, CodeProvider.BCFIPS), 
+	ECDH_128((short) 128, (short) 384, CodeProvider.SUN), 
+	ECDH_256((short) 256, (short) 384, CodeProvider.SUN), 
+	ECDH_384((short) 256, (short) 384, CodeProvider.SUN), 
+	BC_FIPS_ECDH_128((short) 128, (short) 384, CodeProvider.BCFIPS), 
+	BC_FIPS_ECDH_256((short) 256, (short) 384, CodeProvider.BCFIPS), 
+	BC_FIPS_ECDH_384((short) 256, (short) 384, CodeProvider.BCFIPS), 
 	DEFAULT(ECDH_384);
 
 	private final short keySizeBits;
