@@ -59,13 +59,9 @@ import gnu.vm.jgnux.crypto.NoSuchPaddingException;
 public class ServerASymmetricEncryptionAlgorithm {
 	private final ASymmetricKeyPair myKeyPair;
 
-	private final ASymmetricAuthentifiedSignerAlgorithm signer;
-
 	private final ASymmetricEncryptionType type;
 
 	private final AbstractCipher cipher;
-
-	private final ASymmetricAuthentifiedSignatureType signatureType;
 
 	private final int maxBlockSize;
 
@@ -78,8 +74,6 @@ public class ServerASymmetricEncryptionAlgorithm {
 
 		this.type = myKeyPair.getEncryptionAlgorithmType();
 		this.myKeyPair = myKeyPair;
-		this.signatureType = myKeyPair.getAuthentifiedSignatureAlgorithmType();
-		this.signer = new ASymmetricAuthentifiedSignerAlgorithm(myKeyPair.getASymmetricPrivateKey());
 		cipher = type.getCipherInstance();
 		cipher.init(Cipher.ENCRYPT_MODE, myKeyPair.getASymmetricPublicKey());
 		maxBlockSize = cipher.getOutputSize(myKeyPair.getMaxBlockSize());
@@ -111,7 +105,10 @@ public class ServerASymmetricEncryptionAlgorithm {
 			throws InvalidKeyException, IOException, IllegalBlockSizeException, BadPaddingException,
 			NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
 		// initCipherForDecrypt(cipher);
-
+		if (is==null)
+			throw new NullPointerException();
+		if (os==null)
+			throw new NullPointerException();
 		int maxBlockSize = getMaxBlockSizeForDecoding();
 
 		byte[] buffer = new byte[AbstractEncryptionOutputAlgorithm.BUFFER_SIZE];
@@ -124,7 +121,9 @@ public class ServerASymmetricEncryptionAlgorithm {
 				int nb = Math.min(AbstractEncryptionOutputAlgorithm.BUFFER_SIZE, maxBlockSize - blockACC);
 				int size = is.read(buffer, 0, nb);
 				if (size > 0) {
-					os.write(cipher.update(buffer, 0, size));
+					byte[] tab=cipher.update(buffer, 0, size);
+					if (tab!=null)
+						os.write(tab);
 					blockACC += size;
 
 				}
@@ -174,14 +173,6 @@ public class ServerASymmetricEncryptionAlgorithm {
 		if (mod > 0)
 			res += cipher.getOutputSize(mod);
 		return res;
-	}
-
-	public ASymmetricAuthentifiedSignatureType getSignatureType() {
-		return signatureType;
-	}
-
-	public ASymmetricAuthentifiedSignerAlgorithm getSignerAlgorithm() {
-		return signer;
 	}
 
 	public void initCipherForDecrypt(AbstractCipher _cipher)

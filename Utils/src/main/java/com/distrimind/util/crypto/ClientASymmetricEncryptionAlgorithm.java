@@ -51,11 +51,7 @@ import gnu.vm.jgnux.crypto.NoSuchPaddingException;
 public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutputAlgorithm {
 	private final ASymmetricPublicKey distantPublicKey;
 
-	private final ASymmetricAuthentifiedSignatureCheckerAlgorithm signatureChecker;
-
 	private final ASymmetricEncryptionType type;
-
-	private final ASymmetricAuthentifiedSignatureType signatureType;
 
 	private final int maxBlockSize;
 
@@ -64,10 +60,9 @@ public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutpu
 		super(distantPublicKey.getEncryptionAlgorithmType().getCipherInstance());
 		this.type = distantPublicKey.getEncryptionAlgorithmType();
 		this.distantPublicKey = distantPublicKey;
-		this.signatureType = distantPublicKey.getAuthentifiedSignatureAlgorithmType();
-		this.signatureChecker = new ASymmetricAuthentifiedSignatureCheckerAlgorithm(distantPublicKey);
-		initCipherForEncrypt(this.cipher);
 		this.maxBlockSize = distantPublicKey.getMaxBlockSize();
+		initCipherForEncrypt(this.cipher);
+		
 	}
 
 	@Override
@@ -82,14 +77,6 @@ public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutpu
 	@Override
 	public int getMaxBlockSizeForEncoding() {
 		return maxBlockSize;
-	}
-
-	public ASymmetricAuthentifiedSignatureCheckerAlgorithm getSignatureCheckerAlgorithm() {
-		return signatureChecker;
-	}
-
-	public ASymmetricAuthentifiedSignatureType getSignatureType() {
-		return signatureType;
 	}
 
 	@Override

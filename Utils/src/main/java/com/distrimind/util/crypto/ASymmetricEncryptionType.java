@@ -60,13 +60,15 @@ import gnu.vm.jgnu.security.NoSuchProviderException;
  * @since Utils 1.4
  */
 public enum ASymmetricEncryptionType {
-	RSA_OAEPWithSHA256AndMGF1Padding("RSA", "", "OAEPWithSHA-256AndMGF1Padding", ASymmetricAuthentifiedSignatureType.SHA384withRSA,
+	RSA_OAEPWithSHA256AndMGF1Padding("RSA", "NONE", "OAEPwithSHA256andMGF1Padding", ASymmetricAuthentifiedSignatureType.SHA384withRSA,
 			(short) 3072, 31536000000l, (short) 66, CodeProvider.SUN), 
-	RSA_PKCS1Padding("RSA", "", "PKCS1Padding", ASymmetricAuthentifiedSignatureType.SHA384withRSA, (short) 3072, 31536000000l, (short) 11,
+	RSA_PKCS1Padding("RSA", "NONE", "PKCS1Padding", ASymmetricAuthentifiedSignatureType.SHA384withRSA, (short) 3072, 31536000000l, (short) 11,
 					CodeProvider.SUN),
-	BC_FIPS_RSA_OAEPPadding("RSA", "NONE", "OAEPPadding", ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA384withRSAandMGF1, (short) 3072, 31536000000l, (short) 11,
-			CodeProvider.BCFIPS),
-	DEFAULT(BC_FIPS_RSA_OAEPPadding);
+	BC_FIPS_RSA_OAEPWithSHA256AndMGF1Padding("RSA", "NONE", "OAEPwithSHA256andMGF1Padding", ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA384withRSAandMGF1, (short) 3072, 31536000000l, (short) 66,CodeProvider.BCFIPS),
+	BC_FIPS_RSA_PKCS1Padding("RSA", "NONE", "PKCS1Padding", ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA384withRSAandMGF1, (short) 3072, 31536000000l, (short) 11,CodeProvider.BCFIPS),
+	DEFAULT(BC_FIPS_RSA_OAEPWithSHA256AndMGF1Padding);
+	
+
 
 	static gnu.vm.jgnu.security.KeyPair decodeGnuKeyPair(byte[] encodedKeyPair)
 			throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException {
@@ -226,18 +228,14 @@ public enum ASymmetricEncryptionType {
 
 	public AbstractCipher getCipherInstance()
 			throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnux.crypto.NoSuchPaddingException, NoSuchProviderException {
+		String name = signatureAlgorithmName+"/" + blockMode + "/" + padding;
 		if (codeProvider == CodeProvider.GNU_CRYPTO) {
-			String name = signatureAlgorithmName;
-			if ((blockMode != null && !blockMode.equals("")) && (padding != null && !padding.equals("")))
-				name += "/" + blockMode + "/" + padding;
 			return new GnuCipher(gnu.vm.jgnux.crypto.Cipher.getInstance(name));
-		} else if (codeProvider == CodeProvider.BCFIPS) {
+		} else if (codeProvider == CodeProvider.BCFIPS || codeProvider == CodeProvider.BC) {
 			CodeProvider.ensureBouncyCastleProviderLoaded();
 			try {
-				String name = signatureAlgorithmName;
-				if ((blockMode != null && !blockMode.equals("")) && (padding != null && !padding.equals("")))
-					name += "/" + blockMode + "/" + padding;
-				return new JavaNativeCipher(Cipher.getInstance(name, CodeProvider.BCFIPS.name()));
+				
+				return new JavaNativeCipher(Cipher.getInstance(name, codeProvider.name()));
 			} catch (NoSuchAlgorithmException e) {
 				throw new gnu.vm.jgnu.security.NoSuchAlgorithmException(e);
 			} catch (NoSuchPaddingException e) {
@@ -248,9 +246,6 @@ public enum ASymmetricEncryptionType {
 
 		} else {
 			try {
-				String name = signatureAlgorithmName;
-				if ((blockMode != null && !blockMode.equals("")) && (padding != null && !padding.equals("")))
-					name += "/" + blockMode + "/" + padding;
 				return new JavaNativeCipher(Cipher.getInstance(name));
 			} catch (NoSuchAlgorithmException e) {
 				throw new gnu.vm.jgnu.security.NoSuchAlgorithmException(e);
@@ -265,7 +260,7 @@ public enum ASymmetricEncryptionType {
 	}
 
 	public int getDefaultMaxBlockSize() {
-		return keySize / 8 - blockSizeDecrement;
+		return getMaxBlockSize(keySize);
 	}
 
 	public ASymmetricAuthentifiedSignatureType getDefaultSignatureAlgorithm() {
@@ -318,7 +313,6 @@ public enum ASymmetricEncryptionType {
 		}
 
 	}
-
 	public int getMaxBlockSize(int keySize) {
 		return keySize / 8 - blockSizeDecrement;
 	}

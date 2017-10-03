@@ -439,6 +439,7 @@ public class CryptoTests {
 		System.out.println("Testing " + type);
 		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getSingleton(null);
 		ASymmetricKeyPair kp = type.getKeyPairGenerator(rand, (short) 1024).generateKeyPair();
+		
 		ClientASymmetricEncryptionAlgorithm algoClient = new ClientASymmetricEncryptionAlgorithm(
 				kp.getASymmetricPublicKey());
 		ServerASymmetricEncryptionAlgorithm algoServer = new ServerASymmetricEncryptionAlgorithm(kp);
@@ -448,8 +449,6 @@ public class CryptoTests {
 			Assert.assertEquals(encodedBytes.length, algoClient.getOutputSizeForEncryption(m.length));
 			byte[] decodedBytes = algoServer.decode(encodedBytes);
 			Assert.assertEquals(m, decodedBytes);
-			byte[] signature = algoServer.getSignerAlgorithm().sign(m);
-			Assert.assertTrue(algoClient.getSignatureCheckerAlgorithm().verify(m, signature));
 
 			int off = rand.nextInt(15);
 			int size = m.length;
@@ -460,10 +459,6 @@ public class CryptoTests {
 			decodedBytes = algoServer.decode(encodedBytes);
 			for (int i = 0; i < size; i++)
 				Assert.assertEquals(decodedBytes[i], m[i + off]);
-
-			signature = algoServer.getSignerAlgorithm().sign(m, off, size);
-			Assert.assertTrue(
-					algoClient.getSignatureCheckerAlgorithm().verify(m, off, size, signature, 0, signature.length));
 
 		}
 

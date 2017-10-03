@@ -66,7 +66,7 @@ public final class JavaNativeCipher extends AbstractCipher {
 
 	private SecureRandom getSecureRandom() throws NoSuchAlgorithmException, NoSuchProviderException {
 		if (random == null)
-			return setSecureRandom(SecureRandomType.BC_FIPS_APPROVED.getSingleton(SecureRandomType.nonce));
+			return setSecureRandom(SecureRandomType.FORTUNA_WITH_BC_FIPS_APPROVED.getSingleton(SecureRandomType.nonce));
 		return random;
 	}
 
