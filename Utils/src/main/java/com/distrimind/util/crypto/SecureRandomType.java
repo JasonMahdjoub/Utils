@@ -303,17 +303,17 @@ public enum SecureRandomType {
 		return result;
 	}
 	
-	/*static
+	static
 	{
 		try
 		{
-			CryptoServicesRegistrar.setSecureRandom(DEFAULT.getInstance(nonce));
+			CryptoServicesRegistrar.setSecureRandom(FORTUNA_WITH_BC_FIPS_APPROVED_FOR_KEYS.getInstance(nonce));
 		}
 		catch(Exception e)
 		{
 			e.printStackTrace();
 		}
-	}*/
+	}
 	
 	public AbstractSecureRandom getSingleton(byte nonce[]) throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.NoSuchProviderException
 	{
@@ -400,7 +400,9 @@ public enum SecureRandomType {
 
 		}
 		else
-			return NativePRNG.getSingleton(nonce).generateSeed(size);
+			return new SecureRandom().generateSeed(size);
 	}
+	
+	
 	
 }

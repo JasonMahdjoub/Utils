@@ -87,9 +87,9 @@ public final class JavaNativeKeyPairGenerator extends AbstractKeyPairGenerator {
 		try
 		{
 			if (signatureType!=null && signatureType.getKeyGeneratorAlgorithmName().equals(ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA384withECDSA.getKeyGeneratorAlgorithmName()))
-				keyPairGenerator.initialize(keySize, _random.getJavaNativeSecureRandom());
+				keyPairGenerator.initialize(_keysize, _random.getJavaNativeSecureRandom());
 			else
-				keyPairGenerator.initialize(new RSAKeyGenParameterSpec(keySize, RSAKeyGenParameterSpec.F4), _random.getJavaNativeSecureRandom());
+				keyPairGenerator.initialize(new RSAKeyGenParameterSpec(_keysize, RSAKeyGenParameterSpec.F4), _random.getJavaNativeSecureRandom());
 		}
 		catch(InvalidAlgorithmParameterException e)
 		{

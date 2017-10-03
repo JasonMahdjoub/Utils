@@ -108,7 +108,7 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 	}
 
 	private byte[] generateIV() {
-		byte[] iv = new byte[32];
+		byte[] iv = new byte[cipher.getBlockSize()];
 		random.nextBytes(iv);
 		return iv;
 	}

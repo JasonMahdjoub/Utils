@@ -65,7 +65,7 @@ public enum ASymmetricEncryptionType {
 	RSA_PKCS1Padding("RSA", "", "PKCS1Padding", ASymmetricAuthentifiedSignatureType.SHA384withRSA, (short) 3072, 31536000000l, (short) 11,
 					CodeProvider.SUN),
 	BC_FIPS_RSA_OAEPPadding("RSA", "NONE", "OAEPPadding", ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA384withRSAandMGF1, (short) 3072, 31536000000l, (short) 11,
-			CodeProvider.SUN),
+			CodeProvider.BCFIPS),
 	DEFAULT(BC_FIPS_RSA_OAEPPadding);
 
 	static gnu.vm.jgnu.security.KeyPair decodeGnuKeyPair(byte[] encodedKeyPair)

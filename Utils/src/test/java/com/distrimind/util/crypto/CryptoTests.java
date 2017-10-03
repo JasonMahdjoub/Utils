@@ -206,12 +206,12 @@ public class CryptoTests {
 		return res;
 	}
 
-	@Test(dataProvider = "provideDataForASymetricEncryptions", dependsOnMethods = "testSecureRandom")
+	@Test(dataProvider = "provideDataForASymetricEncryptions")
 	public void testASymmetricKeyPairEncoding(ASymmetricEncryptionType type)
 			throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException {
 		System.out.println("Testing ASymmetricKeyPairEncoding " + type);
 		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getSingleton(null);
-		ASymmetricKeyPair kpd = type.getKeyPairGenerator(rand).generateKeyPair();
+		ASymmetricKeyPair kpd = type.getKeyPairGenerator(rand, (short)1024).generateKeyPair();
 
 		Assert.assertEquals(ASymmetricPublicKey.decode(kpd.getASymmetricPublicKey().encode()),
 				kpd.getASymmetricPublicKey());
@@ -734,11 +734,14 @@ public class CryptoTests {
 	public void testSymmetricKeyWrapperForEncryption(SymmetricKeyWrapperType typeWrapper, SymmetricEncryptionType asetype, SymmetricEncryptionType setype) throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, IllegalStateException, IllegalBlockSizeException, NoSuchProviderException, InvalidAlgorithmParameterException, IOException
 	{
 		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getSingleton(null);
-		SymmetricSecretKey kp=asetype.getKeyGenerator(rand, (short)128).generateKey();
-		SymmetricSecretKey sk= setype.getKeyGenerator(rand, (short)128).generateKey();
+		SymmetricSecretKey kp=asetype.getKeyGenerator(rand, asetype.getDefaultKeySizeBits()).generateKey();
+		SymmetricSecretKey sk= setype.getKeyGenerator(rand, setype.getDefaultKeySizeBits()).generateKey();
 		byte[] wrappedKey=typeWrapper.wrapKey(kp, sk);
-		SymmetricSecretKey sk2=typeWrapper.unwrapKey(kp, wrappedKey, setype, (short)128);
-		Assert.assertEquals(sk.encode(), sk2.encode());
+		SymmetricSecretKey sk2=typeWrapper.unwrapKey(kp, wrappedKey, setype, setype.getDefaultKeySizeBits());
+		Assert.assertEquals(sk.getKeySize(), sk2.getKeySize());
+		Assert.assertEquals(sk.getAuthentifiedSignatureAlgorithmType(), sk2.getAuthentifiedSignatureAlgorithmType());
+		Assert.assertEquals(sk.getEncryptionAlgorithmType(), sk2.getEncryptionAlgorithmType());
+		Assert.assertEquals(sk.toJavaNativeKey().getEncoded(), sk2.toJavaNativeKey().getEncoded());
 	}
 	@Test(dataProvider="provideDataSymmetricKeyWrapperForSignature")
 	public void testSymmetricKeyWrapperForSignature(SymmetricKeyWrapperType typeWrapper, SymmetricEncryptionType asetype, SymmetricAuthentifiedSignatureType setype) throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, IllegalStateException, IllegalBlockSizeException, NoSuchProviderException, InvalidAlgorithmParameterException, IOException
@@ -748,7 +751,10 @@ public class CryptoTests {
 		SymmetricSecretKey sk= setype.getKeyGenerator(rand, (short)128).generateKey();
 		byte[] wrappedKey=typeWrapper.wrapKey(kp, sk);
 		SymmetricSecretKey sk2=typeWrapper.unwrapKey(kp, wrappedKey, setype, (short)128);
-		Assert.assertEquals(sk.encode(), sk2.encode());
+		Assert.assertEquals(sk.getKeySize(), sk2.getKeySize());
+		Assert.assertEquals(sk.getAuthentifiedSignatureAlgorithmType(), sk2.getAuthentifiedSignatureAlgorithmType());
+		Assert.assertEquals(sk.getEncryptionAlgorithmType(), sk2.getEncryptionAlgorithmType());
+		Assert.assertEquals(sk.toJavaNativeKey().getEncoded(), sk2.toJavaNativeKey().getEncoded());
 	}
 	@DataProvider(name="provideDataSymmetricKeyWrapperForEncryption", parallel=false)
 	public Object[][] provideDataSymmetricKeyWrapperForEncryption()
@@ -761,15 +767,22 @@ public class CryptoTests {
 			{
 				for (SymmetricEncryptionType set : SymmetricEncryptionType.values())
 				{
-					Object params[]=new Object[3];
-					params[0]=akpw;
-					params[1]=aet;
-					params[2]=set;
-					res[index++]=params;
+					if (akpw.getCodeProvider().equals(aet.getCodeProvider()) && akpw.getCodeProvider().equals(set.getCodeProvider())
+							&& akpw.getAlgorithmName().startsWith(aet.getAlgorithmName()))
+					{
+						Object params[]=new Object[3];
+						params[0]=akpw;
+						params[1]=aet;
+						params[2]=set;
+						res[index++]=params;
+					}
 				}
 			}
 		}
-		return res;
+		Object res2[][]=new Object[index][];
+		for (int i=0;i<index;i++)
+			res2[i]=res[i];
+		return res2;
 	}
 	@DataProvider(name="provideDataSymmetricKeyWrapperForSignature", parallel=true)
 	public Object[][] provideDataSymmetricKeyWrapperForSignature()
@@ -782,37 +795,52 @@ public class CryptoTests {
 			{
 				for (SymmetricAuthentifiedSignatureType set : SymmetricAuthentifiedSignatureType.values())
 				{
-					Object params[]=new Object[3];
-					params[0]=akpw;
-					params[1]=aet;
-					params[2]=set;
-					res[index++]=params;
+					if (akpw.getCodeProvider().equals(aet.getCodeProvider()) && akpw.getCodeProvider().equals(set.getCodeProvider())
+							&& akpw.getAlgorithmName().startsWith(aet.getAlgorithmName()))
+					{
+						Object params[]=new Object[3];
+						params[0]=akpw;
+						params[1]=aet;
+						params[2]=set;
+						res[index++]=params;
+					}
 				}
 			}
 		}
-		return res;
+		Object res2[][]=new Object[index][];
+		for (int i=0;i<index;i++)
+			res2[i]=res[i];
+		return res2;
 	}
 
 	
-	@Test(dataProvider="provideDataASymmetricKeyWrapperForEncryption", dependsOnMethods="testSecureRandom")
+	@Test(dataProvider="provideDataASymmetricKeyWrapperForEncryption")
 	public void testASymmetricKeyWrapper(ASymmetricKeyWrapper typeWrapper, ASymmetricEncryptionType asetype, SymmetricEncryptionType setype) throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, IllegalStateException, IllegalBlockSizeException, NoSuchProviderException, InvalidAlgorithmParameterException, IOException
 	{
 		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getSingleton(null);
 		ASymmetricKeyPair kp=asetype.getKeyPairGenerator(rand, (short)1024).generateKeyPair();
-		SymmetricSecretKey sk= setype.getKeyGenerator(rand, (short)128).generateKey();
+		SymmetricSecretKey sk= setype.getKeyGenerator(rand, setype.getDefaultKeySizeBits()).generateKey();
 		byte[] wrappedKey=typeWrapper.wrapKey(kp.getASymmetricPublicKey(), sk);
-		SymmetricSecretKey sk2=typeWrapper.unwrapKey(kp.getASymmetricPrivateKey(), wrappedKey, setype, (short)128);
-		Assert.assertEquals(sk.encode(), sk2.encode());
+		SymmetricSecretKey sk2=typeWrapper.unwrapKey(kp.getASymmetricPrivateKey(), wrappedKey, setype, setype.getDefaultKeySizeBits());
+		Assert.assertEquals(sk.getKeySize(), sk2.getKeySize());
+		Assert.assertEquals(sk.getAuthentifiedSignatureAlgorithmType(), sk2.getAuthentifiedSignatureAlgorithmType());
+		Assert.assertEquals(sk.getEncryptionAlgorithmType(), sk2.getEncryptionAlgorithmType());
+		Assert.assertEquals(sk.toJavaNativeKey().getEncoded(), sk2.toJavaNativeKey().getEncoded());
+
 	}
-	@Test(dataProvider="provideDataASymmetricKeyWrapperForSignature", dependsOnMethods="testSecureRandom")
+	@Test(dataProvider="provideDataASymmetricKeyWrapperForSignature")
 	public void testASymmetricKeyWrapper(ASymmetricKeyWrapper typeWrapper, ASymmetricEncryptionType asetype, SymmetricAuthentifiedSignatureType ssigtype) throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, IllegalStateException, IllegalBlockSizeException, NoSuchProviderException, InvalidAlgorithmParameterException, IOException
 	{
 		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getSingleton(null);
 		ASymmetricKeyPair kp=asetype.getKeyPairGenerator(rand, (short)1024).generateKeyPair();
-		SymmetricSecretKey sk= ssigtype.getKeyGenerator(rand, (short)128).generateKey();
+		SymmetricSecretKey sk= ssigtype.getKeyGenerator(rand, ssigtype.getDefaultKeySizeBits()).generateKey();
 		byte[] wrappedKey=typeWrapper.wrapKey(kp.getASymmetricPublicKey(), sk);
-		SymmetricSecretKey sk2=typeWrapper.unwrapKey(kp.getASymmetricPrivateKey(), wrappedKey, ssigtype, (short)128);
-		Assert.assertEquals(sk.encode(), sk2.encode());
+		SymmetricSecretKey sk2=typeWrapper.unwrapKey(kp.getASymmetricPrivateKey(), wrappedKey, ssigtype, ssigtype.getDefaultKeySizeBits());
+		Assert.assertEquals(sk.getKeySize(), sk2.getKeySize());
+		Assert.assertEquals(sk.getAuthentifiedSignatureAlgorithmType(), sk2.getAuthentifiedSignatureAlgorithmType());
+		Assert.assertEquals(sk.getEncryptionAlgorithmType(), sk2.getEncryptionAlgorithmType());
+		Assert.assertEquals(sk.toJavaNativeKey().getEncoded(), sk2.toJavaNativeKey().getEncoded());
+
 	}
 	
 	@DataProvider(name="provideDataASymmetricKeyWrapperForEncryption", parallel=true)
@@ -826,15 +854,22 @@ public class CryptoTests {
 			{
 				for (SymmetricEncryptionType set : SymmetricEncryptionType.values())
 				{
-					Object params[]=new Object[3];
-					params[0]=akpw;
-					params[1]=aet;
-					params[2]=set;
-					res[index++]=params;
+					if (akpw.getCodeProvider().equals(aet.getCodeProvider()) && akpw.getCodeProvider().equals(set.getCodeProvider()))
+					{
+						Object params[]=new Object[3];
+						params[0]=akpw;
+						params[1]=aet;
+						params[2]=set;
+						res[index++]=params;
+					}
 				}
 			}
 		}
-		return res;
+		Object res2[][]=new Object[index][];
+		for (int i=0;i<index;i++)
+			res2[i]=res[i];
+		return res2;
+
 	}
 	@DataProvider(name="provideDataASymmetricKeyWrapperForSignature", parallel=true)
 	public Object[][] provideDataASymmetricKeyWrapperForSignature()
@@ -847,15 +882,21 @@ public class CryptoTests {
 			{
 				for (SymmetricAuthentifiedSignatureType set : SymmetricAuthentifiedSignatureType.values())
 				{
-					Object params[]=new Object[3];
-					params[0]=akpw;
-					params[1]=aet;
-					params[2]=set;
-					res[index++]=params;
+					if (akpw.getCodeProvider().equals(aet.getCodeProvider()) && akpw.getCodeProvider().equals(set.getCodeProvider()))
+					{						
+						Object params[]=new Object[3];
+						params[0]=akpw;
+						params[1]=aet;
+						params[2]=set;
+						res[index++]=params;
+					}
 				}
 			}
 		}
-		return res;
+		Object res2[][]=new Object[index][];
+		for (int i=0;i<index;i++)
+			res2[i]=res[i];
+		return res2;
 	}
 
 	@Test(dataProvider = "provideDataForSymmetricSignatureTest", dependsOnMethods = { "testSymetricEncryptions" })

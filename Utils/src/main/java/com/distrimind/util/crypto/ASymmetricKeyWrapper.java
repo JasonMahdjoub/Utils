@@ -67,10 +67,10 @@ public enum ASymmetricKeyWrapper {
 	RSA_OAEP("RSA/NONE/OAEPPadding",CodeProvider.SUN, false),
 	RSA_OAEP_WITH_PARAMETERS("RSA/NONE/OAEPPadding",CodeProvider.SUN, true),
 	GNU_RSA_OAEP("RSA/NONE/OAEPPadding",CodeProvider.GNU_CRYPTO, false),
-	BOUNCY_CASTLE_RSA_OAEP_FIPS("RSA/NONE/OAEPPadding",CodeProvider.BCFIPS, false),
-	BOUNCY_CASTLE_RSA_OAEP_WITH_PARAMETERS_FIPS("RSA/NONE/OAEPPadding",CodeProvider.BCFIPS, true),
-	BOUNCY_CASTLE_RSA_KTS_KTM_FIPS("RSA-KTS-KEM-KWS",CodeProvider.BCFIPS, false),
-	DEFAULT(BOUNCY_CASTLE_RSA_KTS_KTM_FIPS);
+	BC_FIPS_RSA_OAEP("RSA/NONE/OAEPPadding",CodeProvider.BCFIPS, false),
+	BC_FIPS_RSA_OAEP_WITH_PARAMETERS("RSA/NONE/OAEPPadding",CodeProvider.BCFIPS, true),
+	BC_FIPS_RSA_KTS_KTM("RSA-KTS-KEM-KWS",CodeProvider.BCFIPS, false),
+	DEFAULT(BC_FIPS_RSA_KTS_KTM);
 	
 	private final String algorithmName;
 	private final CodeProvider provider;
@@ -96,13 +96,17 @@ public enum ASymmetricKeyWrapper {
 		return algorithmName;
 	}	
 	
-	public byte[] wrapKey(ASymmetricPublicKey publicKey, SymmetricSecretKey secretKey) throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, IllegalStateException, IllegalBlockSizeException, gnu.vm.jgnu.security.NoSuchProviderException, gnu.vm.jgnu.security.InvalidAlgorithmParameterException, IOException
+	public byte[] wrapKey(ASymmetricPublicKey publicKey, SymmetricSecretKey keyToWrap) throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, IllegalStateException, IllegalBlockSizeException, gnu.vm.jgnu.security.NoSuchProviderException, gnu.vm.jgnu.security.InvalidAlgorithmParameterException, IOException
 	{
+		if ((publicKey.getAuthentifiedSignatureAlgorithmType()!=null && !provider.equals(publicKey.getAuthentifiedSignatureAlgorithmType().getCodeProvider())) || (publicKey.getEncryptionAlgorithmType()!=null && !provider.equals(publicKey.getEncryptionAlgorithmType().getCodeProvider()))
+				|| (keyToWrap.getAuthentifiedSignatureAlgorithmType()!=null && !provider.equals(keyToWrap.getAuthentifiedSignatureAlgorithmType().getCodeProvider())) || (keyToWrap.getEncryptionAlgorithmType()!=null && !provider.equals(keyToWrap.getEncryptionAlgorithmType().getCodeProvider())))
+				throw new IllegalArgumentException("The keys must come from the same providers");
+		
 		if (provider.equals(CodeProvider.GNU_CRYPTO))
 		{
 			Cipher c = Cipher.getInstance(algorithmName);
 			c.init(Cipher.WRAP_MODE, publicKey.toGnuKey());
-			return c.wrap(secretKey.toGnuKey());
+			return c.wrap(keyToWrap.toGnuKey());
 		}
 		else
 		{
@@ -121,19 +125,19 @@ public enum ASymmetricKeyWrapper {
 				{
 					c.init(javax.crypto.Cipher.WRAP_MODE, publicKey.toJavaNativeKey(),
 							new OAEPParameterSpec("SHA-384","MGF1",new MGF1ParameterSpec("SHA-384"),PSource.PSpecified.DEFAULT));
-					byte[] wrapedKey=c.wrap(secretKey.toJavaNativeKey());
+					byte[] wrapedKey=c.wrap(keyToWrap.toJavaNativeKey());
 					byte[] encodedParameters=c.getParameters().getEncoded();
 					return Bits.concateEncodingWithShortSizedTabs(wrapedKey, encodedParameters);
 				}
-				else if (this.algorithmName.equals(BOUNCY_CASTLE_RSA_KTS_KTM_FIPS.algorithmName))
+				else if (this.algorithmName.equals(BC_FIPS_RSA_KTS_KTM.algorithmName))
 				{
 					c.init(javax.crypto.Cipher.WRAP_MODE, publicKey.toJavaNativeKey(), new KTSParameterSpec.Builder(NISTObjectIdentifiers.id_aes256_wrap.getId(),256).build());
-					return c.wrap(secretKey.toJavaNativeKey());
+					return c.wrap(keyToWrap.toJavaNativeKey());
 				}
 				else
 				{
 					c.init(javax.crypto.Cipher.WRAP_MODE, publicKey.toJavaNativeKey());
-					return c.wrap(secretKey.toJavaNativeKey());
+					return c.wrap(keyToWrap.toJavaNativeKey());
 				}
 				
 			}
@@ -173,6 +177,9 @@ public enum ASymmetricKeyWrapper {
 	}
 	private SymmetricSecretKey unwrapKey(ASymmetricPrivateKey privateKey, byte[] keyToUnwrap, SymmetricEncryptionType encryptionType, SymmetricAuthentifiedSignatureType signatureType, short keySize) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalStateException, gnu.vm.jgnu.security.NoSuchProviderException, InvalidKeySpecException, IOException, gnu.vm.jgnu.security.InvalidAlgorithmParameterException
 	{
+		if ((privateKey.getAuthentifiedSignatureAlgorithmType()!=null && !provider.equals(privateKey.getAuthentifiedSignatureAlgorithmType().getCodeProvider())) || (privateKey.getEncryptionAlgorithmType()!=null && !provider.equals(privateKey.getEncryptionAlgorithmType().getCodeProvider()))
+				|| (encryptionType!=null && !provider.equals(encryptionType.getCodeProvider())) || (signatureType!=null && !provider.equals(signatureType.getCodeProvider())))
+				throw new IllegalArgumentException("The keys must come from the same providers");
 		if (provider.equals(CodeProvider.GNU_CRYPTO))
 		{
 			Cipher c = Cipher.getInstance(algorithmName);
@@ -206,7 +213,7 @@ public enum ASymmetricKeyWrapper {
 					algorithmParameters.init(tmp[1]);
 					c.init(Cipher.UNWRAP_MODE, privateKey.toJavaNativeKey(), algorithmParameters);
 				}
-				else if (this.algorithmName.equals(BOUNCY_CASTLE_RSA_KTS_KTM_FIPS.algorithmName))
+				else if (this.algorithmName.equals(BC_FIPS_RSA_KTS_KTM.algorithmName))
 				{
 					wrapedKey=keyToUnwrap;
 					c.init(Cipher.UNWRAP_MODE, privateKey.toJavaNativeKey(), new KTSParameterSpec.Builder(NISTObjectIdentifiers.id_aes256_wrap.getId(),256).build());

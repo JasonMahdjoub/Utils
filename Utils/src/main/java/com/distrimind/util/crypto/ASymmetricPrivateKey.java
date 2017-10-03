@@ -57,10 +57,10 @@ public class ASymmetricPrivateKey implements UtilKey {
 
 	public static ASymmetricPrivateKey decode(byte[] b) {
 		byte[][] res = Bits.separateEncodingsWithShortSizedTabs(b);
-		if (res[0][6]==0)
+		if (res[0][6]==1)
 			return new ASymmetricPrivateKey(ASymmetricEncryptionType.valueOf(Bits.getInt(res[0], 2)), res[1],
 				Bits.getShort(res[0], 0));
-		else if (res[0][6]==1)
+		else if (res[0][6]==0)
 			return new ASymmetricPrivateKey(ASymmetricAuthentifiedSignatureType.valueOf(Bits.getInt(res[0], 2)), res[1],
 					Bits.getShort(res[0], 0));
 		else throw new IllegalArgumentException();

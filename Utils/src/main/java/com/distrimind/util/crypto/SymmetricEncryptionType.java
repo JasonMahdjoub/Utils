@@ -55,21 +55,21 @@ import com.distrimind.util.Bits;
  */
 public enum SymmetricEncryptionType {
 
-	AES("AES", "CBC", "PKCS5Padding", (short) 128, CodeProvider.SUN, SymmetricAuthentifiedSignatureType.HMAC_SHA_256), 
+	AES("AES", "CBC", "PKCS5Padding", (short) 128, CodeProvider.SUN, SymmetricAuthentifiedSignatureType.HMAC_SHA_384), 
 	@Deprecated
-	DES("DES", "CBC", "PKCS5Padding", (short) 56, (short) 8, CodeProvider.SUN, SymmetricAuthentifiedSignatureType.HMAC_SHA_256), 
+	DES("DES", "CBC", "PKCS5Padding", (short) 56, (short) 8, CodeProvider.SUN, SymmetricAuthentifiedSignatureType.HMAC_SHA_384), 
 	@Deprecated
-	DESede("DESede", "CBC", "PKCS5Padding", (short) 168, (short) 24, CodeProvider.SUN,SymmetricAuthentifiedSignatureType.HMAC_SHA_256), 
+	DESede("DESede", "CBC", "PKCS5Padding", (short) 168, (short) 24, CodeProvider.SUN,SymmetricAuthentifiedSignatureType.HMAC_SHA_384), 
 	@Deprecated
-	Blowfish("Blowfish", "CBC", "PKCS5Padding", (short) 128, CodeProvider.SUN, SymmetricAuthentifiedSignatureType.HMAC_SHA_256), 
-	GNU_AES("AES", "CBC", "PKCS5Padding", (short) 128, CodeProvider.GNU_CRYPTO, SymmetricAuthentifiedSignatureType.BC_FIPS_HMAC_SHA_256), 
-	GNU_TWOFISH("TWOFISH","CBC", "PKCS5Padding", (short) 128, CodeProvider.GNU_CRYPTO, SymmetricAuthentifiedSignatureType.BC_FIPS_HMAC_SHA_256), 
-	GNU_SERPENT("Serpent", "CBC", "PKCS5Padding", (short) 128, CodeProvider.GNU_CRYPTO, SymmetricAuthentifiedSignatureType.BC_FIPS_HMAC_SHA_256), 
-	GNU_ANUBIS("Anubis", "CBC", "PKCS5Padding", (short) 128, CodeProvider.GNU_CRYPTO, SymmetricAuthentifiedSignatureType.BC_FIPS_HMAC_SHA_256), 
-	GNU_QUARE("Square", "CBC", "PKCS5Padding", (short) 128, CodeProvider.GNU_CRYPTO, SymmetricAuthentifiedSignatureType.BC_FIPS_HMAC_SHA_256), 
-	BC_FIPS_AES("AES", "CBC", "PKCS5Padding", (short) 128, CodeProvider.BCFIPS, SymmetricAuthentifiedSignatureType.BC_FIPS_HMAC_SHA_256), 
-	TWOFISH("TWOFISH", "CBC", "PKCS5Padding", (short) 128,CodeProvider.BCFIPS,SymmetricAuthentifiedSignatureType.BC_FIPS_HMAC_SHA_256), 
-	SERPENT("Serpent", "CBC", "PKCS5Padding",(short) 128, CodeProvider.BCFIPS,SymmetricAuthentifiedSignatureType.BC_FIPS_HMAC_SHA_256), 
+	Blowfish("Blowfish", "CBC", "PKCS5Padding", (short) 128, CodeProvider.SUN, SymmetricAuthentifiedSignatureType.HMAC_SHA_384), 
+	GNU_AES("AES", "CBC", "PKCS5Padding", (short) 128, CodeProvider.GNU_CRYPTO, SymmetricAuthentifiedSignatureType.BC_FIPS_HMAC_SHA_384), 
+	GNU_TWOFISH("TWOFISH","CBC", "PKCS5Padding", (short) 128, CodeProvider.GNU_CRYPTO, SymmetricAuthentifiedSignatureType.BC_FIPS_HMAC_SHA_384), 
+	GNU_SERPENT("Serpent", "CBC", "PKCS5Padding", (short) 128, CodeProvider.GNU_CRYPTO, SymmetricAuthentifiedSignatureType.BC_FIPS_HMAC_SHA_384), 
+	GNU_ANUBIS("Anubis", "CBC", "PKCS5Padding", (short) 128, CodeProvider.GNU_CRYPTO, SymmetricAuthentifiedSignatureType.BC_FIPS_HMAC_SHA_384), 
+	GNU_QUARE("Square", "CBC", "PKCS5Padding", (short) 128, CodeProvider.GNU_CRYPTO, SymmetricAuthentifiedSignatureType.BC_FIPS_HMAC_SHA_384), 
+	BC_AES("AES", "CBC", "PKCS5Padding", (short) 128, CodeProvider.BC, SymmetricAuthentifiedSignatureType.BC_FIPS_HMAC_SHA_384), 
+	BC_TWOFISH("TWOFISH", "CBC", "PKCS5Padding", (short) 128,CodeProvider.BC,SymmetricAuthentifiedSignatureType.BC_FIPS_HMAC_SHA_384), 
+	BC_SERPENT("Serpent", "CBC", "PKCS5Padding",(short) 128, CodeProvider.BC,SymmetricAuthentifiedSignatureType.BC_FIPS_HMAC_SHA_384), 
 	DEFAULT(AES);
 	static gnu.vm.jgnux.crypto.SecretKey decodeGnuSecretKey(byte[] encodedSecretKey) {
 		return decodeGnuSecretKey(encodedSecretKey, 0, encodedSecretKey.length);
@@ -154,11 +154,11 @@ public enum SymmetricEncryptionType {
 		if (codeProvider == CodeProvider.GNU_CRYPTO) {
 			return new GnuCipher(
 					gnu.vm.jgnux.crypto.Cipher.getInstance(algorithmName + "/" + blockMode + "/" + padding));
-		} else if (codeProvider == CodeProvider.BCFIPS) {
+		} else if (codeProvider == CodeProvider.BCFIPS || codeProvider == CodeProvider.BC) {
 			try {
 				CodeProvider.ensureBouncyCastleProviderLoaded();
 				return new JavaNativeCipher(Cipher.getInstance(algorithmName + "/" + blockMode + "/" + padding,
-						"BCFIPS"));
+						codeProvider.name()));
 			} catch (java.security.NoSuchAlgorithmException e) {
 				throw new NoSuchAlgorithmException(e);
 			} catch (javax.crypto.NoSuchPaddingException e) {
@@ -196,12 +196,12 @@ public enum SymmetricEncryptionType {
 		AbstractKeyGenerator res = null;
 		if (codeProvider == CodeProvider.GNU_CRYPTO) {
 			res = new GnuKeyGenerator(this, KeyGenerator.getInstance(algorithmName));
-		} else if (codeProvider == CodeProvider.BCFIPS) {
+		} else if (codeProvider == CodeProvider.BCFIPS || codeProvider == CodeProvider.BC) {
 
 			try {
 				CodeProvider.ensureBouncyCastleProviderLoaded();
 				res = new JavaNativeKeyGenerator(this,
-						javax.crypto.KeyGenerator.getInstance(algorithmName, algorithmName.equals("AES")?"BCFIPS":"BC"));
+						javax.crypto.KeyGenerator.getInstance(algorithmName, codeProvider.name()));
 			} catch (java.security.NoSuchAlgorithmException e) {
 				throw new NoSuchAlgorithmException(e);
 			}
