@@ -54,8 +54,8 @@ public class Utils {
 		Calendar c = Calendar.getInstance();
 		c.set(2016, 1, 4);
 		Calendar c2 = Calendar.getInstance();
-		c.set(2017, 8, 21);
-		VERSION = new Version("Utils", "Utils", 2, 17, 0, Version.Type.Stable, 0, c.getTime(), c2.getTime());
+		c.set(2017, 9, 4);
+		VERSION = new Version("Utils", "Utils", 3, 0, 0, Version.Type.Stable, 0, c.getTime(), c2.getTime());
 		try {
 
 			InputStream is = Utils.class.getResourceAsStream("build.txt");
@@ -68,14 +68,15 @@ public class Utils {
 			VERSION.addDeveloper(new PersonDeveloper("mahdjoub", "jason", c.getTime()));
 
 			c = Calendar.getInstance();
-			c.set(2017, 8, 21);
-			Description d = new Description(2, 17, 0, Version.Type.Stable, 0, c.getTime());
+			c.set(2017, 9, 4);
+			Description d = new Description(3, 0, 0, Version.Type.Stable, 0, c.getTime());
 			d.addItem("Minimal corrections into PasswordHash class");
 			d.addItem("Updating Bouncy Castle to 1.58 version");
 			d.addItem("FIPS compliant");
 			d.addItem("Add symmetric and asymmetric key wrappers classes");
 			d.addItem("Add BCFIPS password hash algorithms");
 			d.addItem("Add password key derivation class");
+			d.addItem("Add generic aggreement protocol class");
 			VERSION.addDescription(d);
 
 			c = Calendar.getInstance();

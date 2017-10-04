@@ -78,7 +78,14 @@ public enum PasswordBasedKeyGenerationType {
 	}
 	public SymmetricSecretKey derivateKey(char[] password, byte[] salt, int iterationNumber, SymmetricEncryptionType type, short keySizeBits) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException
 	{
-		return new SymmetricSecretKey(type, new SecretKeySpec(passwordHashType.hash(password, salt, iterationNumber, (byte)(keySizeBits/8)), type.getAlgorithmName()), keySizeBits);
+		if (getCodeProvider()==CodeProvider.GNU_CRYPTO)
+		{
+			return new SymmetricSecretKey(type, new gnu.vm.jgnux.crypto.spec.SecretKeySpec(passwordHashType.hash(password, salt, iterationNumber, (byte)(keySizeBits/8)), type.getAlgorithmName()), keySizeBits);
+		}
+		else
+		{
+			return new SymmetricSecretKey(type, new SecretKeySpec(passwordHashType.hash(password, salt, iterationNumber, (byte)(keySizeBits/8)), type.getAlgorithmName()), keySizeBits);
+		}
 	}
 	public SymmetricSecretKey derivateKey(char[] password, byte[] salt, int iterationNumber, SymmetricAuthentifiedSignatureType type) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException
 	{
@@ -92,5 +99,10 @@ public enum PasswordBasedKeyGenerationType {
 	public SymmetricSecretKey derivateKey(char[] password, byte[] salt, int iterationNumber, SymmetricAuthentifiedSignatureType type, short keySizeBits) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException
 	{
 		return new SymmetricSecretKey(type, new SecretKeySpec(passwordHashType.hash(password, salt, iterationNumber, (byte)(keySizeBits/8)), type.getAlgorithmName()), keySizeBits);
+	}
+	
+	public CodeProvider getCodeProvider()
+	{
+		return passwordHashType.getCodeProvider();
 	}
 }

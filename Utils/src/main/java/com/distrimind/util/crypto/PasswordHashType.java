@@ -52,34 +52,41 @@ import com.berry.BCrypt;
  *
  */
 public enum PasswordHashType {
-	PBKDF2WithHmacSHA1("PBKDF2WithHmacSHA1", (byte) 32), 
-	BCRYPT("BCRYPT", (byte) 32), 
-	GNU_PBKDF2WithHmacSHA1("PBKDF2WithHMacSHA1", (byte) 32), 
-	GNU_PBKDF2WithHMacSHA256("PBKDF2WithHMacSHA256",(byte) 32), 
-	GNU_PBKDF2WithHMacSHA384("PBKDF2WithHMacSHA384", (byte) 32), 
-	GNU_PBKDF2WithHMacSHA512("PBKDF2WithHMacSHA512", (byte) 32), 
-	GNU_PBKDF2WithHMacWhirlpool("PBKDF2WithHMacWhirlpool",(byte) 32),
-	BC_FIPS_PBKFD2WithHMacSHA256("HmacSHA256",(byte) 32),
-	BC_FIPS_PBKFD2WithHMacSHA384("HmacSHA384",(byte) 32),
-	BC_FIPS_PBKFD2WithHMacSHA512("HmacSHA512",(byte) 32),
+	PBKDF2WithHmacSHA1("PBKDF2WithHmacSHA1", (byte) 32, CodeProvider.SUN), 
+	BCRYPT("BCRYPT", (byte) 32, CodeProvider.SUN), 
+	GNU_PBKDF2WithHmacSHA1("PBKDF2WithHMacSHA1", (byte) 32, CodeProvider.GNU_CRYPTO), 
+	GNU_PBKDF2WithHMacSHA256("PBKDF2WithHMacSHA256",(byte) 32, CodeProvider.GNU_CRYPTO), 
+	GNU_PBKDF2WithHMacSHA384("PBKDF2WithHMacSHA384", (byte) 32, CodeProvider.GNU_CRYPTO), 
+	GNU_PBKDF2WithHMacSHA512("PBKDF2WithHMacSHA512", (byte) 32, CodeProvider.GNU_CRYPTO), 
+	GNU_PBKDF2WithHMacWhirlpool("PBKDF2WithHMacWhirlpool",(byte) 32, CodeProvider.GNU_CRYPTO),
+	BC_FIPS_PBKFD2WithHMacSHA256("HmacSHA256",(byte) 32, CodeProvider.BCFIPS),
+	BC_FIPS_PBKFD2WithHMacSHA384("HmacSHA384",(byte) 32, CodeProvider.BCFIPS),
+	BC_FIPS_PBKFD2WithHMacSHA512("HmacSHA512",(byte) 32, CodeProvider.BCFIPS),
 	DEFAULT(BCRYPT);
 
 	private final byte hashLength;
 
-	private final PasswordHashType defaultOf;
+	private PasswordHashType defaultOf;
 
 	private final String algorithmName;
+	
+	private final CodeProvider codeProvider;
 
 	private PasswordHashType(PasswordHashType type) {
-		this.hashLength = type.hashLength;
+		this(type.algorithmName, type.hashLength, type.codeProvider);
 		this.defaultOf = type;
-		this.algorithmName = type.algorithmName;
 	}
 
-	private PasswordHashType(String algorithmName, byte hashLength) {
+	private PasswordHashType(String algorithmName, byte hashLength, CodeProvider codeProvider) {
 		this.hashLength = hashLength;
 		this.defaultOf = null;
 		this.algorithmName = algorithmName;
+		this.codeProvider=codeProvider;
+	}
+	
+	public CodeProvider getCodeProvider()
+	{
+		return codeProvider;
 	}
 	public byte getDefaultHashLengthBytes()
 	{
@@ -156,7 +163,7 @@ public enum PasswordHashType {
 				if (size < password.length)
 					password[size] = (char) (data[off + size * 2] & 0xFF);
 	
-				SecretKeyFactory keyFact = SecretKeyFactory.getInstance(algorithmName,CodeProvider.BCFIPS.name());
+				SecretKeyFactory keyFact = SecretKeyFactory.getInstance(algorithmName,codeProvider.name());
 				
 				SecretKey hmacKey = keyFact.generateSecret(new PBEKeySpec(password,  salt,iterations,hashLength*8));
 				

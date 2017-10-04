@@ -61,7 +61,7 @@ import gnu.vm.jgnu.security.spec.InvalidKeySpecException;
  * @version 2.0
  * @since Utils 2.9.0
  */
-public class P2PJPAKESecretMessageExchanger {
+public class P2PJPAKESecretMessageExchanger extends Agreement {
 	private final JPAKEParticipant jpake;
 	private BigInteger keyMaterial;
 
@@ -107,6 +107,7 @@ public class P2PJPAKESecretMessageExchanger {
 	
 	public P2PJPAKESecretMessageExchanger(AbstractSecureRandom secureRandom, Serializable participantID, char[] message, byte salt[], int offset_salt,
 			int len_salt) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException {
+		super(3, 3);
 		if (message == null)
 			throw new NullPointerException("message");
 		if (salt != null && salt.length - offset_salt < len_salt)
@@ -121,6 +122,7 @@ public class P2PJPAKESecretMessageExchanger {
 	public P2PJPAKESecretMessageExchanger(AbstractSecureRandom secureRandom, Serializable participantID, byte[] message, int offset, int len, byte salt[],
 			int offset_salt, int len_salt, boolean messageIsKey)
 			throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException {
+		super(3, 3);
 		if (message == null)
 			throw new NullPointerException("message");
 		if (message.length - offset < len)
@@ -168,157 +170,175 @@ public class P2PJPAKESecretMessageExchanger {
 
 	}
 
-	public byte[] getStep1Message() throws IOException {
-		try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-			try (ObjectOutputStream oos = new ObjectOutputStream(baos)) {
 
-				JPAKERound1Payload toSerialize = jpake.createRound1PayloadToSend();
-				oos.writeObject(toSerialize.getGx1());
-				oos.writeObject(toSerialize.getGx2());
-				BigInteger[] b=toSerialize.getKnowledgeProofForX1();
-				if (b==null)
-					oos.writeInt(0);
-				else
-					oos.writeInt(b.length);
-				for (BigInteger bi : b)
-					oos.writeObject(bi);
-				b=toSerialize.getKnowledgeProofForX2();
-				if (b==null)
-					oos.writeInt(0);
-				else
-					oos.writeInt(b.length);
-				for (BigInteger bi : b)
-					oos.writeObject(bi);
-				
-				oos.writeObject(toSerialize.getParticipantId());
-			}
-			return baos.toByteArray();
-		}
-	}
-
-	public byte[] receiveStep1AndGetStep2Message(byte[] dataReceived)
-			throws IOException, CryptoException, ClassNotFoundException {
-
-		try (ByteArrayInputStream bais = new ByteArrayInputStream(dataReceived)) {
-			try (ObjectInputStream ois = new ObjectInputStream(bais)) {
-				JPAKERound1Payload r1=null;
-				try
-				{
-					BigInteger gx1 = (BigInteger)ois.readObject();
-					BigInteger gx2 = (BigInteger)ois.readObject();
-					int size=ois.readInt();
-					BigInteger knowledgeProofForX1[]=null;
-					if (size>0)
-					{
-						if (size>100)
-							throw new CryptoException("illegal argument exception");
-						knowledgeProofForX1=new BigInteger[size];
-						for (int i=0;i<size;i++)
-							knowledgeProofForX1[i]=(BigInteger)ois.readObject();
-					}
-					size=ois.readInt();
-					BigInteger knowledgeProofForX2[]=null;
-					if (size>0)
-					{
-						if (size>100)
-							throw new CryptoException("illegal argument exception");
-						knowledgeProofForX2=new BigInteger[size];
-						for (int i=0;i<size;i++)
-							knowledgeProofForX2[i]=(BigInteger)ois.readObject();
-					}
-					String pid=(String)ois.readObject();
-					r1=new JPAKERound1Payload(pid, gx1, gx2, knowledgeProofForX1, knowledgeProofForX2);
-				}
-				catch(Exception e)
-				{
-					throw new CryptoException("data received is not a valid instance of JPAKERound1Payload", e);
-				}
-				jpake.validateRound1PayloadReceived(r1);
-			}
-		}
-		try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-			try (ObjectOutputStream oos = new ObjectOutputStream(baos)) {
-
-				JPAKERound2Payload toSerialize = jpake.createRound2PayloadToSend();
-				oos.writeObject(toSerialize.getA());
-				BigInteger[] b=toSerialize.getKnowledgeProofForX2s();
-				if (b==null)
-					oos.writeInt(0);
-				else
-					oos.writeInt(b.length);
-				for (BigInteger bi : b)
-					oos.writeObject(bi);
-				oos.writeObject(toSerialize.getParticipantId());
-			}
-			return baos.toByteArray();
-		}
-	}
-
-	public byte[] receiveStep2AndGetStep3Message(byte[] dataReceived)
-			throws CryptoException, IOException, ClassNotFoundException {
-		try (ByteArrayInputStream bais = new ByteArrayInputStream(dataReceived)) {
-			try (ObjectInputStream ois = new ObjectInputStream(bais)) {
-				JPAKERound2Payload r2=null;
-				try
-				{
-					BigInteger A = (BigInteger)ois.readObject();
-					
-					int size=ois.readInt();
-					BigInteger knowledgeProofForX2s[]=null;
-					if (size>0)
-					{
-						if (size>100)
-							throw new CryptoException("illegal argument exception");
-						knowledgeProofForX2s=new BigInteger[size];
-						for (int i=0;i<size;i++)
-							knowledgeProofForX2s[i]=(BigInteger)ois.readObject();
-					}
-					String pid=(String)ois.readObject();
-					r2=new JPAKERound2Payload(pid, A, knowledgeProofForX2s);
-				}
-				catch(Exception e)
-				{
-					throw new CryptoException("data received is not a valid instance of JPAKERound2Payload", e);
-				}
-				jpake.validateRound2PayloadReceived(r2);
-			}
-		}
-		try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-			try (ObjectOutputStream oos = new ObjectOutputStream(baos)) {
-
-				keyMaterial = jpake.calculateKeyingMaterial();
-				JPAKERound3Payload toSerialize = jpake.createRound3PayloadToSend(keyMaterial);
-				
-				oos.writeObject(toSerialize.getMacTag());
-				oos.writeObject(toSerialize.getParticipantId());
-			}
-			return baos.toByteArray();
-		}
-	}
-
-	public void receiveStep3(byte[] dataReceived) throws CryptoException, ClassNotFoundException, IOException {
-		try (ByteArrayInputStream bais = new ByteArrayInputStream(dataReceived)) {
-			try (ObjectInputStream ois = new ObjectInputStream(bais)) {
-				JPAKERound3Payload r3=null;
-				try
-				{
-					BigInteger magTag = (BigInteger)ois.readObject();
-					String pid=(String)ois.readObject();
-					r3=new JPAKERound3Payload(pid, magTag);
-				}
-				catch(Exception e)
-				{
-					throw new CryptoException("data received is not a valid instance of JPAKERound2Payload", e);
-				}
-				
-				jpake.validateRound3PayloadReceived(r3, keyMaterial);
-			}
-		}
-
-	}
-
-	public boolean isPassworkOrKeyValid() {
+	public boolean isAgreementProcessValidImpl() {
 		return jpake.getState() == JPAKEParticipant.STATE_ROUND_3_VALIDATED;
+	}
+
+	@Override
+	protected byte[] getDataToSend(int stepNumber) throws Exception {
+		switch(stepNumber)
+		{
+		case 0:
+			try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+				try (ObjectOutputStream oos = new ObjectOutputStream(baos)) {
+
+					JPAKERound1Payload toSerialize = jpake.createRound1PayloadToSend();
+					oos.writeObject(toSerialize.getGx1());
+					oos.writeObject(toSerialize.getGx2());
+					BigInteger[] b=toSerialize.getKnowledgeProofForX1();
+					if (b==null)
+						oos.writeInt(0);
+					else
+						oos.writeInt(b.length);
+					for (BigInteger bi : b)
+						oos.writeObject(bi);
+					b=toSerialize.getKnowledgeProofForX2();
+					if (b==null)
+						oos.writeInt(0);
+					else
+						oos.writeInt(b.length);
+					for (BigInteger bi : b)
+						oos.writeObject(bi);
+					
+					oos.writeObject(toSerialize.getParticipantId());
+				}
+				return baos.toByteArray();
+			}
+			
+		case 1:
+			try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+				try (ObjectOutputStream oos = new ObjectOutputStream(baos)) {
+
+					JPAKERound2Payload toSerialize = jpake.createRound2PayloadToSend();
+					oos.writeObject(toSerialize.getA());
+					BigInteger[] b=toSerialize.getKnowledgeProofForX2s();
+					if (b==null)
+						oos.writeInt(0);
+					else
+						oos.writeInt(b.length);
+					for (BigInteger bi : b)
+						oos.writeObject(bi);
+					oos.writeObject(toSerialize.getParticipantId());
+				}
+				return baos.toByteArray();
+			}
+			
+		case 2:
+			try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+				try (ObjectOutputStream oos = new ObjectOutputStream(baos)) {
+
+					keyMaterial = jpake.calculateKeyingMaterial();
+					JPAKERound3Payload toSerialize = jpake.createRound3PayloadToSend(keyMaterial);
+					
+					oos.writeObject(toSerialize.getMacTag());
+					oos.writeObject(toSerialize.getParticipantId());
+				}
+				return baos.toByteArray();
+			}
+			
+			default:
+				throw new IllegalAccessError();
+
+		}
+	}
+
+	@Override
+	protected void receiveData(int stepNumber, byte[] dataReceived) throws Exception {
+		switch(stepNumber)
+		{
+		case 0:
+			try (ByteArrayInputStream bais = new ByteArrayInputStream(dataReceived)) {
+				try (ObjectInputStream ois = new ObjectInputStream(bais)) {
+					JPAKERound1Payload r1=null;
+					try
+					{
+						BigInteger gx1 = (BigInteger)ois.readObject();
+						BigInteger gx2 = (BigInteger)ois.readObject();
+						int size=ois.readInt();
+						BigInteger knowledgeProofForX1[]=null;
+						if (size>0)
+						{
+							if (size>100)
+								throw new CryptoException("illegal argument exception");
+							knowledgeProofForX1=new BigInteger[size];
+							for (int i=0;i<size;i++)
+								knowledgeProofForX1[i]=(BigInteger)ois.readObject();
+						}
+						size=ois.readInt();
+						BigInteger knowledgeProofForX2[]=null;
+						if (size>0)
+						{
+							if (size>100)
+								throw new CryptoException("illegal argument exception");
+							knowledgeProofForX2=new BigInteger[size];
+							for (int i=0;i<size;i++)
+								knowledgeProofForX2[i]=(BigInteger)ois.readObject();
+						}
+						String pid=(String)ois.readObject();
+						r1=new JPAKERound1Payload(pid, gx1, gx2, knowledgeProofForX1, knowledgeProofForX2);
+					}
+					catch(Exception e)
+					{
+						throw new CryptoException("data received is not a valid instance of JPAKERound1Payload", e);
+					}
+					jpake.validateRound1PayloadReceived(r1);
+				}
+			}
+			break;
+		case 1:
+			try (ByteArrayInputStream bais = new ByteArrayInputStream(dataReceived)) {
+				try (ObjectInputStream ois = new ObjectInputStream(bais)) {
+					JPAKERound2Payload r2=null;
+					try
+					{
+						BigInteger A = (BigInteger)ois.readObject();
+						
+						int size=ois.readInt();
+						BigInteger knowledgeProofForX2s[]=null;
+						if (size>0)
+						{
+							if (size>100)
+								throw new CryptoException("illegal argument exception");
+							knowledgeProofForX2s=new BigInteger[size];
+							for (int i=0;i<size;i++)
+								knowledgeProofForX2s[i]=(BigInteger)ois.readObject();
+						}
+						String pid=(String)ois.readObject();
+						r2=new JPAKERound2Payload(pid, A, knowledgeProofForX2s);
+					}
+					catch(Exception e)
+					{
+						throw new CryptoException("data received is not a valid instance of JPAKERound2Payload", e);
+					}
+					jpake.validateRound2PayloadReceived(r2);
+				}
+			}
+			break;
+		case 2:
+			try (ByteArrayInputStream bais = new ByteArrayInputStream(dataReceived)) {
+				try (ObjectInputStream ois = new ObjectInputStream(bais)) {
+					JPAKERound3Payload r3=null;
+					try
+					{
+						BigInteger magTag = (BigInteger)ois.readObject();
+						String pid=(String)ois.readObject();
+						r3=new JPAKERound3Payload(pid, magTag);
+					}
+					catch(Exception e)
+					{
+						throw new CryptoException("data received is not a valid instance of JPAKERound2Payload", e);
+					}
+					
+					jpake.validateRound3PayloadReceived(r3, keyMaterial);
+				}
+			}
+			break;
+		default:
+			throw new IllegalAccessError();
+			
+			
+		}
 	}
 
 }

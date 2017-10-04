@@ -51,7 +51,6 @@ import gnu.vm.jgnux.crypto.IllegalBlockSizeException;
 import gnu.vm.jgnux.crypto.NoSuchPaddingException;
 import gnu.vm.jgnux.crypto.ShortBufferException;
 
-import org.bouncycastle.crypto.CryptoException;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -369,25 +368,70 @@ public class CryptoTests {
 				expectedVerify ? password : falsePassword, salt, 0, salt == null ? 0 : salt.length);
 		try {
 
-			byte[] step11 = exchanger1.getStep1Message();
-			byte[] step21 = exchanger2.getStep1Message();
+			byte[] step11 = exchanger1.getDataToSend();
+			byte[] step21 = exchanger2.getDataToSend();
 
-			byte[] step12 = exchanger1.receiveStep1AndGetStep2Message(step21);
-			byte[] step22 = exchanger2.receiveStep1AndGetStep2Message(step11);
+			Assert.assertFalse(exchanger1.isAgreementProcessValid());
+			Assert.assertFalse(exchanger2.isAgreementProcessValid());
+			Assert.assertFalse(exchanger1.hasFinishedReceiption());
+			Assert.assertFalse(exchanger2.hasFinishedReceiption());
+			Assert.assertFalse(exchanger1.hasFinishedSend());
+			Assert.assertFalse(exchanger2.hasFinishedSend());
 
-			byte[] step13 = exchanger1.receiveStep2AndGetStep3Message(step22);
-			byte[] step23 = exchanger2.receiveStep2AndGetStep3Message(step12);
+			exchanger1.receiveData(step21);
+			exchanger2.receiveData(step11);
 
-			exchanger1.receiveStep3(step23);
-			exchanger2.receiveStep3(step13);
+			Assert.assertFalse(exchanger1.isAgreementProcessValid());
+			Assert.assertFalse(exchanger2.isAgreementProcessValid());
+			Assert.assertFalse(exchanger1.hasFinishedReceiption());
+			Assert.assertFalse(exchanger2.hasFinishedReceiption());
+			Assert.assertFalse(exchanger1.hasFinishedSend());
+			Assert.assertFalse(exchanger2.hasFinishedSend());
+			
+			byte[] step12 = exchanger1.getDataToSend();
+			byte[] step22 = exchanger2.getDataToSend();
+			
+			Assert.assertFalse(exchanger1.isAgreementProcessValid());
+			Assert.assertFalse(exchanger2.isAgreementProcessValid());
+			Assert.assertFalse(exchanger1.hasFinishedReceiption());
+			Assert.assertFalse(exchanger2.hasFinishedReceiption());
+			Assert.assertFalse(exchanger1.hasFinishedSend());
+			Assert.assertFalse(exchanger2.hasFinishedSend());
 
-			Assert.assertEquals(exchanger1.isPassworkOrKeyValid(), expectedVerify);
-			Assert.assertEquals(exchanger2.isPassworkOrKeyValid(), expectedVerify);
-		} catch (CryptoException e) {
+			exchanger1.receiveData(step22);
+			exchanger2.receiveData(step12);
+
+			Assert.assertFalse(exchanger1.isAgreementProcessValid());
+			Assert.assertFalse(exchanger2.isAgreementProcessValid());
+			Assert.assertFalse(exchanger1.hasFinishedReceiption());
+			Assert.assertFalse(exchanger2.hasFinishedReceiption());
+			Assert.assertFalse(exchanger1.hasFinishedSend());
+			Assert.assertFalse(exchanger2.hasFinishedSend());
+
+			byte[] step13 = exchanger1.getDataToSend();
+			byte[] step23 = exchanger2.getDataToSend();
+
+			Assert.assertFalse(exchanger1.isAgreementProcessValid());
+			Assert.assertFalse(exchanger2.isAgreementProcessValid());
+			Assert.assertFalse(exchanger1.hasFinishedReceiption());
+			Assert.assertFalse(exchanger2.hasFinishedReceiption());
+			Assert.assertTrue(exchanger1.hasFinishedSend());
+			Assert.assertTrue(exchanger2.hasFinishedSend());
+			
+			exchanger1.receiveData(step23);
+			exchanger2.receiveData(step13);
+			
+			Assert.assertEquals(exchanger1.isAgreementProcessValid(), expectedVerify);
+			Assert.assertEquals(exchanger2.isAgreementProcessValid(), expectedVerify);
+			Assert.assertTrue(exchanger1.hasFinishedReceiption());
+			Assert.assertTrue(exchanger2.hasFinishedReceiption());
+			Assert.assertTrue(exchanger1.hasFinishedSend());
+			Assert.assertTrue(exchanger2.hasFinishedSend());
+		} catch (Exception e) {
 			if (expectedVerify)
 				Assert.fail("Unexpected exception", e);
-			Assert.assertFalse(exchanger1.isPassworkOrKeyValid());
-			Assert.assertFalse(exchanger2.isPassworkOrKeyValid());
+			Assert.assertFalse(exchanger1.isAgreementProcessValid());
+			Assert.assertFalse(exchanger2.isAgreementProcessValid());
 		}
 	}
 
@@ -428,24 +472,70 @@ public class CryptoTests {
 				salt == null ? 0 : salt.length, messageIsKey);
 		try {
 
-			byte[] step11 = exchanger1.getStep1Message();
-			byte[] step21 = exchanger2.getStep1Message();
-			byte[] step12 = exchanger1.receiveStep1AndGetStep2Message(step21);
-			byte[] step22 = exchanger2.receiveStep1AndGetStep2Message(step11);
+			byte[] step11 = exchanger1.getDataToSend();
+			byte[] step21 = exchanger2.getDataToSend();
 
-			byte[] step13 = exchanger1.receiveStep2AndGetStep3Message(step22);
-			byte[] step23 = exchanger2.receiveStep2AndGetStep3Message(step12);
+			Assert.assertFalse(exchanger1.isAgreementProcessValid());
+			Assert.assertFalse(exchanger2.isAgreementProcessValid());
+			Assert.assertFalse(exchanger1.hasFinishedReceiption());
+			Assert.assertFalse(exchanger2.hasFinishedReceiption());
+			Assert.assertFalse(exchanger1.hasFinishedSend());
+			Assert.assertFalse(exchanger2.hasFinishedSend());
 
-			exchanger1.receiveStep3(step23);
-			exchanger2.receiveStep3(step13);
+			exchanger1.receiveData(step21);
+			exchanger2.receiveData(step11);
 
-			Assert.assertEquals(exchanger1.isPassworkOrKeyValid(), expectedVerify);
-			Assert.assertEquals(exchanger2.isPassworkOrKeyValid(), expectedVerify);
-		} catch (CryptoException e) {
+			Assert.assertFalse(exchanger1.isAgreementProcessValid());
+			Assert.assertFalse(exchanger2.isAgreementProcessValid());
+			Assert.assertFalse(exchanger1.hasFinishedReceiption());
+			Assert.assertFalse(exchanger2.hasFinishedReceiption());
+			Assert.assertFalse(exchanger1.hasFinishedSend());
+			Assert.assertFalse(exchanger2.hasFinishedSend());
+			
+			byte[] step12 = exchanger1.getDataToSend();
+			byte[] step22 = exchanger2.getDataToSend();
+			
+			Assert.assertFalse(exchanger1.isAgreementProcessValid());
+			Assert.assertFalse(exchanger2.isAgreementProcessValid());
+			Assert.assertFalse(exchanger1.hasFinishedReceiption());
+			Assert.assertFalse(exchanger2.hasFinishedReceiption());
+			Assert.assertFalse(exchanger1.hasFinishedSend());
+			Assert.assertFalse(exchanger2.hasFinishedSend());
+
+			exchanger1.receiveData(step22);
+			exchanger2.receiveData(step12);
+
+			Assert.assertFalse(exchanger1.isAgreementProcessValid());
+			Assert.assertFalse(exchanger2.isAgreementProcessValid());
+			Assert.assertFalse(exchanger1.hasFinishedReceiption());
+			Assert.assertFalse(exchanger2.hasFinishedReceiption());
+			Assert.assertFalse(exchanger1.hasFinishedSend());
+			Assert.assertFalse(exchanger2.hasFinishedSend());
+
+			byte[] step13 = exchanger1.getDataToSend();
+			byte[] step23 = exchanger2.getDataToSend();
+
+			Assert.assertFalse(exchanger1.isAgreementProcessValid());
+			Assert.assertFalse(exchanger2.isAgreementProcessValid());
+			Assert.assertFalse(exchanger1.hasFinishedReceiption());
+			Assert.assertFalse(exchanger2.hasFinishedReceiption());
+			Assert.assertTrue(exchanger1.hasFinishedSend());
+			Assert.assertTrue(exchanger2.hasFinishedSend());
+			
+			exchanger1.receiveData(step23);
+			exchanger2.receiveData(step13);
+			
+			Assert.assertEquals(exchanger1.isAgreementProcessValid(), expectedVerify);
+			Assert.assertEquals(exchanger2.isAgreementProcessValid(), expectedVerify);
+			Assert.assertTrue(exchanger1.hasFinishedReceiption());
+			Assert.assertTrue(exchanger2.hasFinishedReceiption());
+			Assert.assertTrue(exchanger1.hasFinishedSend());
+			Assert.assertTrue(exchanger2.hasFinishedSend());
+		} catch (Exception e) {
 			if (expectedVerify)
 				Assert.fail("Unexpected exception", e);
-			Assert.assertFalse(exchanger1.isPassworkOrKeyValid());
-			Assert.assertFalse(exchanger2.isPassworkOrKeyValid());
+			Assert.assertFalse(exchanger1.isAgreementProcessValid());
+			Assert.assertFalse(exchanger2.isAgreementProcessValid());
 		}
 	}
 
@@ -606,6 +696,7 @@ public class CryptoTests {
 		PasswordHash ph = new PasswordHash(type, random);
 		String password = "password";
 		String invalidPassword = "invalid password";
+		ph.setHashIterationsNumber(100);
 		byte[] hashedValue = ph.hash(password);
 		Assert.assertTrue(ph.checkValidHashedPassword(password, hashedValue));
 		Assert.assertFalse(ph.checkValidHashedPassword(invalidPassword, hashedValue));
@@ -623,11 +714,11 @@ public class CryptoTests {
 		Random r=new Random(System.currentTimeMillis());
 		byte[] salt=new byte[32];
 		r.nextBytes(salt);
-		SymmetricSecretKey key1=derivationType.derivateKey(password.toCharArray(), salt, encryptionType);
+		SymmetricSecretKey key1=derivationType.derivateKey(password.toCharArray(), salt, 100, encryptionType);
 		Assert.assertEquals(key1.getKeySize(), encryptionType.getDefaultKeySizeBits());
 		Assert.assertEquals(key1.getEncryptionAlgorithmType(), encryptionType);
-		Assert.assertEquals(key1.encode(), derivationType.derivateKey(password.toCharArray(), salt, encryptionType).encode());
-		Assert.assertNotEquals(key1.encode(), derivationType.derivateKey(invalidPassword.toCharArray(), salt, encryptionType).encode());
+		Assert.assertEquals(key1.encode(), derivationType.derivateKey(password.toCharArray(), salt, 100, encryptionType).encode());
+		Assert.assertNotEquals(key1.encode(), derivationType.derivateKey(invalidPassword.toCharArray(), salt, 100, encryptionType).encode());
 	}
 	@Test(dataProvider = "providePasswordKeyDerivationTypesForSymmetricSignatures", dependsOnMethods="testPasswordHash")
 	public void testPasswordKeyDerivation(PasswordBasedKeyGenerationType derivationType, SymmetricAuthentifiedSignatureType signatureType) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
@@ -636,11 +727,11 @@ public class CryptoTests {
 		Random r=new Random(System.currentTimeMillis());
 		byte[] salt=new byte[32];
 		r.nextBytes(salt);
-		SymmetricSecretKey key1=derivationType.derivateKey(password.toCharArray(), salt, signatureType);
+		SymmetricSecretKey key1=derivationType.derivateKey(password.toCharArray(), salt, 100, signatureType);
 		Assert.assertEquals(key1.getKeySize(), signatureType.getDefaultKeySizeBits());
 		Assert.assertEquals(key1.getAuthentifiedSignatureAlgorithmType(), signatureType);
-		Assert.assertEquals(key1.encode(), derivationType.derivateKey(password.toCharArray(), salt, signatureType).encode());
-		Assert.assertNotEquals(key1.encode(), derivationType.derivateKey(invalidPassword.toCharArray(), salt, signatureType).encode());
+		Assert.assertEquals(key1.encode(), derivationType.derivateKey(password.toCharArray(), salt, 100, signatureType).encode());
+		Assert.assertNotEquals(key1.encode(), derivationType.derivateKey(invalidPassword.toCharArray(), salt, 100, signatureType).encode());
 	}
 
 	@DataProvider(name="providePasswordKeyDerivationTypesForSymmetricEncryptions", parallel=true)
@@ -652,13 +743,19 @@ public class CryptoTests {
 		{
 			for (SymmetricEncryptionType s : SymmetricEncryptionType.values())
 			{
-				Object params[]=new Object[2];
-				params[0]=p;
-				params[1]=s;
-				res[index++]=params;
+				if ((p.getCodeProvider()==CodeProvider.GNU_CRYPTO)==(s.getCodeProvider()==CodeProvider.GNU_CRYPTO))
+				{
+					Object params[]=new Object[2];
+					params[0]=p;
+					params[1]=s;
+					res[index++]=params;
+				}
 			}
 		}
-		return res;
+		Object res2[][]=new Object[index][];
+		for (int i=0;i<index;i++)
+			res2[i]=res[i];
+		return res2;
 	}
 	
 	@DataProvider(name="providePasswordKeyDerivationTypesForSymmetricSignatures", parallel=true)
@@ -670,13 +767,19 @@ public class CryptoTests {
 		{
 			for (SymmetricAuthentifiedSignatureType s : SymmetricAuthentifiedSignatureType.values())
 			{
-				Object params[]=new Object[2];
-				params[0]=p;
-				params[1]=s;
-				res[index++]=params;
+				if ((p.getCodeProvider()==CodeProvider.GNU_CRYPTO)==(s.getCodeProvider()==CodeProvider.GNU_CRYPTO))
+				{
+					Object params[]=new Object[2];
+					params[0]=p;
+					params[1]=s;
+					res[index++]=params;
+				}
 			}
 		}
-		return res;
+		Object res2[][]=new Object[index][];
+		for (int i=0;i<index;i++)
+			res2[i]=res[i];
+		return res2;
 	}
 	
 	@Test(dataProvider = "provideDataForSymetricEncryptions", dependsOnMethods = "testEncodeAndSeparateEncoding")
@@ -864,7 +967,7 @@ public class CryptoTests {
 			{
 				for (SymmetricEncryptionType set : SymmetricEncryptionType.values())
 				{
-					if ((akpw.getCodeProvider()==CodeProvider.GNU_CRYPTO)==(aet.getCodeProvider()==CodeProvider.GNU_CRYPTO) && (akpw.getCodeProvider()==CodeProvider.GNU_CRYPTO)==(set.getCodeProvider()==CodeProvider.GNU_CRYPTO))
+					if (akpw.getCodeProvider().equals(aet.getCodeProvider()) && akpw.getCodeProvider().equals(set.getCodeProvider()))
 					{
 						Object params[]=new Object[3];
 						params[0]=akpw;
@@ -892,7 +995,7 @@ public class CryptoTests {
 			{
 				for (SymmetricAuthentifiedSignatureType set : SymmetricAuthentifiedSignatureType.values())
 				{
-					if ((akpw.getCodeProvider()==CodeProvider.GNU_CRYPTO)==(aet.getCodeProvider()==CodeProvider.GNU_CRYPTO) && (akpw.getCodeProvider()==CodeProvider.GNU_CRYPTO)==(set.getCodeProvider()==CodeProvider.GNU_CRYPTO))
+					if (akpw.getCodeProvider().equals(aet.getCodeProvider()) && akpw.getCodeProvider().equals(set.getCodeProvider()))
 					{						
 						Object params[]=new Object[3];
 						params[0]=akpw;
