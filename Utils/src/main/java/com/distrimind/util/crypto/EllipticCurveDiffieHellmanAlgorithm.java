@@ -34,6 +34,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
+import java.nio.ByteBuffer;
 import java.security.InvalidKeyException;
 import java.security.KeyFactory;
 import java.security.KeyPair;
@@ -43,6 +44,9 @@ import java.security.NoSuchProviderException;
 import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 import javax.crypto.KeyAgreement;
 
@@ -150,8 +154,41 @@ public class EllipticCurveDiffieHellmanAlgorithm {
 			ka.init(myKeyPair.getASymmetricPrivateKey().toJavaNativeKey());
 			ka.doPhase(distantPublicKey, true);
 			
+			byte[] sharedSecret = ka.generateSecret();
+			
+			AbstractMessageDigest hash = type.getMessageDigestType().getMessageDigestInstance();
+			hash.update(sharedSecret);
 	
-			derivedKey = new SymmetricSecretKey(symmetricEncryptionType, ka.generateSecret(symmetricEncryptionType.getAlgorithmName()+"["+keySize+"]"), keySize);
+			List<ByteBuffer> keys = Arrays.asList(ByteBuffer.wrap(myPublicKeyBytes),
+					ByteBuffer.wrap(distantPublicKeyBytes));
+			Collections.sort(keys);
+			hash.update(keys.get(0));
+			hash.update(keys.get(1));
+	
+			byte[] derivedKey = hash.digest();
+			if (type.getKeySizeBits() == 128) {
+				byte[] tab = new byte[16];
+				System.arraycopy(derivedKey, 0, tab, 0, 16);
+				for (int i = 0; i < 16; i++)
+					tab[i] ^= derivedKey[i + 16];
+				if (type.getECDHKeySizeBits() == 384)
+					for (int i = 0; i < 16; i++)
+						tab[i] ^= derivedKey[i + 32];
+	
+				derivedKey = tab;
+			} else if (type.getKeySizeBits() == 256) {
+				if (type.getECDHKeySizeBits() == 384) {
+					byte[] tab = new byte[32];
+					System.arraycopy(derivedKey, 0, tab, 0, 32);
+					for (int i = 0; i < 16; i++)
+						tab[i] ^= derivedKey[i + 32];
+					derivedKey = tab;
+				}
+			} else {
+				throw new IllegalAccessError();
+			}
+			this.derivedKey=symmetricEncryptionType.getSymmetricSecretKey(derivedKey, type.getKeySizeBits());
+
 		}
 		catch(NoSuchAlgorithmException e)
 		{

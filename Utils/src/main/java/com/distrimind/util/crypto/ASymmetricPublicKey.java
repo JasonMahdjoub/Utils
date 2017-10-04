@@ -53,7 +53,7 @@ public class ASymmetricPublicKey implements UtilKey {
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 1279365581082538490L;
+	private static final long serialVersionUID = 1279365581082525690L;
 
 	public static ASymmetricPublicKey decode(byte[] b) {
 		byte[][] res = Bits.separateEncodingsWithShortSizedTabs(b);
@@ -144,7 +144,7 @@ public class ASymmetricPublicKey implements UtilKey {
 	private ASymmetricPublicKey(byte[] publicKey, short keySize, long expirationUTC) {
 		if (publicKey == null)
 			throw new NullPointerException("publicKey");
-		if (keySize < 384)
+		if (keySize < 256)
 			throw new IllegalArgumentException("keySize");
 
 		this.publicKey = publicKey;
@@ -157,7 +157,7 @@ public class ASymmetricPublicKey implements UtilKey {
 			long expirationUTC) {
 		if (publicKey == null)
 			throw new NullPointerException("publicKey");
-		if (keySize < 384)
+		if (keySize < 256)
 			throw new IllegalArgumentException("keySize");
 
 		this.publicKey = ASymmetricEncryptionType.encodePublicKey(publicKey);
@@ -169,7 +169,7 @@ public class ASymmetricPublicKey implements UtilKey {
 	private ASymmetricPublicKey(PublicKey publicKey, short keySize, long expirationUTC) {
 		if (publicKey == null)
 			throw new NullPointerException("publicKey");
-		if (keySize < 384)
+		if (keySize < 256)
 			throw new IllegalArgumentException("keySize");
 
 		this.publicKey = ASymmetricEncryptionType.encodePublicKey(publicKey);

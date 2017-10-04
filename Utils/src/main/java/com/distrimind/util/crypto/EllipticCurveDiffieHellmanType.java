@@ -41,27 +41,34 @@ package com.distrimind.util.crypto;
  * @since Utils 2.9
  */
 public enum EllipticCurveDiffieHellmanType {
-	ECDH_128((short) 128, (short) 384, CodeProvider.SUN), 
-	ECDH_256((short) 256, (short) 384, CodeProvider.SUN), 
-	ECDH_384((short) 256, (short) 384, CodeProvider.SUN), 
-	BC_FIPS_ECDH_128((short) 128, (short) 384, CodeProvider.BCFIPS), 
-	BC_FIPS_ECDH_256((short) 256, (short) 384, CodeProvider.BCFIPS), 
-	BC_FIPS_ECDH_384((short) 256, (short) 384, CodeProvider.BCFIPS), 
-	DEFAULT(ECDH_384);
+	ECDH_128((short) 128, (short) 256, CodeProvider.SUN, MessageDigestType.BC_FIPS_SHA3_256), 
+	ECDH_256((short) 256, (short) 256, CodeProvider.SUN, MessageDigestType.BC_FIPS_SHA3_256), 
+	ECDH_384((short) 256, (short) 384, CodeProvider.SUN, MessageDigestType.BC_FIPS_SHA3_384), 
+	BC_FIPS_ECDH_128((short) 128, (short) 256, CodeProvider.BCFIPS, MessageDigestType.BC_FIPS_SHA3_256), 
+	BC_FIPS_ECDH_256((short) 256, (short) 256, CodeProvider.BCFIPS, MessageDigestType.BC_FIPS_SHA3_256), 
+	BC_FIPS_ECDH_384((short) 256, (short) 384, CodeProvider.BCFIPS, MessageDigestType.BC_FIPS_SHA3_384), 
+	DEFAULT(BC_FIPS_ECDH_384);
 
 	private final short keySizeBits;
 	private final short ECDHKeySizeBits;
 	private final CodeProvider codeProvider;
+	private final MessageDigestType messageDigestType;
 
 	private EllipticCurveDiffieHellmanType(short keySizeBits, short ECDHKeySizeBits,
-			CodeProvider codeProvider) {
+			CodeProvider codeProvider, MessageDigestType messageDigestType) {
 		this.keySizeBits = keySizeBits;
 		this.ECDHKeySizeBits = ECDHKeySizeBits;
 		this.codeProvider = codeProvider;
+		this.messageDigestType=messageDigestType;
+	}
+	
+	public MessageDigestType getMessageDigestType()
+	{
+		return messageDigestType;
 	}
 
 	private EllipticCurveDiffieHellmanType(EllipticCurveDiffieHellmanType other) {
-		this(other.keySizeBits, other.ECDHKeySizeBits, other.codeProvider);
+		this(other.keySizeBits, other.ECDHKeySizeBits, other.codeProvider, other.messageDigestType);
 	}
 
 	public short getKeySizeBits() {
