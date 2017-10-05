@@ -34,22 +34,20 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.net.NetworkInterface;
-import java.net.URL;
 import java.security.AccessController;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.PrivilegedAction;
 import java.security.SecureRandom;
-import java.security.Security;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
 
 import org.bouncycastle.crypto.CryptoServicesRegistrar;
 import org.bouncycastle.crypto.EntropySourceProvider;
@@ -343,60 +341,45 @@ public enum SecureRandomType {
 		return res;
 	}
 	
-	static byte[] tryToGenerateNativeNonBlockingSeed(int size) throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.NoSuchProviderException
+	static private File getURandomPath()
+	{
+		return new File("/dev/urandom");
+	}
+	
+	static byte[] tryToGenerateNativeNonBlockingSeed(final int size) throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.NoSuchProviderException
 	{
 		if (OSValidator.isLinux() || OSValidator.isUnix() || OSValidator.isSolaris() || OSValidator.isMac())
 		{
-			final AtomicReference<URL> randomSource=new AtomicReference<>();
-			AccessController.doPrivileged(new PrivilegedAction<Void>() {
+			byte[] res=AccessController.doPrivileged(new PrivilegedAction<byte[]>() {
 
 				@Override
-				public Void run() {
-					String s=null;
+				public byte[] run() {
 					try
 					{
-						s=Security.getProperty("securerandom.source");
-						if (s!=null)
-							randomSource.set(new URL(s));
-					}
-					catch(MalformedURLException e)
-					{
+						File randomSource=getURandomPath();
 						
-					}
-					try
-					{
-						if (randomSource.get()==null)
-						{
-							s=Security.getProperty("java.security.egd");
-							if (s!=null)
-								randomSource.set(new URL(s));
+						byte[] buffer=new byte[size];
+						
+						try (InputStream in = new FileInputStream(randomSource)) {
+							in.read(buffer);
+							return buffer;
 						}
+						catch(IOException e)
+						{
+							e.printStackTrace();
+						}
+						return NativePRNG.getSingleton(nonce).generateSeed(size);						
 					}
-					catch(MalformedURLException e)
+					catch(Exception e)
 					{
-						
+						return null;
 					}
-					return null;
 				}
 			});
-			if (randomSource.get()==null)
-				return NativePRNG.getSingleton(nonce).generateSeed(size);
+			if (res==null)
+				return new SecureRandom().generateSeed(size);
 			else
-			{
-				try(InputStream is=randomSource.get().openStream())
-				{
-					byte res[]=new byte[size];
-					if (is.read(res)==size)
-					{
-						return res;
-					}
-				}
-				catch(IOException e)
-				{
-				}
-				return NativePRNG.getSingleton(nonce).generateSeed(size);						
-			}
-
+				return res;
 		}
 		else
 			return new SecureRandom().generateSeed(size);
