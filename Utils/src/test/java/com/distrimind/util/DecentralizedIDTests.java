@@ -64,7 +64,7 @@ public class DecentralizedIDTests {
 	@DataProvider(name = "getDEncetralizedIDs", parallel = true)
 	public Object[][] getDEncetralizedIDs() throws NoSuchAlgorithmException, NoSuchProviderException {
 		Object[][] res = new Object[numberofTests][];
-		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getInstance(null);
+		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getSingleton(null);
 		for (int i = 0; i < res.length; i++) {
 			switch ((int) Math.random() * 4) {
 			case 0:
@@ -98,7 +98,7 @@ public class DecentralizedIDTests {
 
 	@Test
 	public void testDecentralizedID() throws NoSuchAlgorithmException, NoSuchProviderException {
-		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getInstance(null);
+		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getSingleton(null);
 		for (MessageDigestType type : EnumSet.allOf(MessageDigestType.class)) {
 			testDecentralizedID(type, rand);
 		}
@@ -125,7 +125,7 @@ public class DecentralizedIDTests {
 
 	@Test(dataProvider = "getDEncetralizedIDs", dependsOnMethods = "testToBytes")
 	public void testNotEquals(AbstractDecentralizedID id) throws NoSuchAlgorithmException, NoSuchProviderException {
-		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getInstance(null);
+		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getSingleton(null);
 		Assert.assertNotEquals(id, new DecentralizedIDGenerator());
 		Assert.assertNotEquals(id, new RenforcedDecentralizedIDGenerator());
 		Assert.assertNotEquals(id, new SecuredDecentralizedID(new DecentralizedIDGenerator(), rand));
@@ -134,7 +134,7 @@ public class DecentralizedIDTests {
 
 	@Test
 	public void testRenforcedDecentralizedID() throws NoSuchAlgorithmException, NoSuchProviderException {
-		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getInstance(null);
+		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getSingleton(null);
 		for (MessageDigestType type : EnumSet.allOf(MessageDigestType.class)) {
 			testRenforcedDecentralizedID(type, rand);
 		}
@@ -161,7 +161,7 @@ public class DecentralizedIDTests {
 		testToStringAndValueOf(new DecentralizedIDGenerator());
 		testToStringAndValueOf(new RenforcedDecentralizedIDGenerator());
 		testToStringAndValueOf(
-				new SecuredDecentralizedID(new DecentralizedIDGenerator(), SecureRandomType.DEFAULT.getInstance(null)));
+				new SecuredDecentralizedID(new DecentralizedIDGenerator(), SecureRandomType.DEFAULT.getSingleton(null)));
 	}
 
 	void testToStringAndValueOf(DecentralizedIDGenerator value) {

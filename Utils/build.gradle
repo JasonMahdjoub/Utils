@@ -14,6 +14,7 @@ apply plugin: 'maven-publish'
 compileJava.options.fork = true
 compileJava.options.forkOptions.executable = "${javac}"
 
+
 eclipse {
     classpath {
        downloadSources=true
@@ -34,9 +35,9 @@ repositories {
 dependencies {
      testCompile 'org.testng:testng:+'
      compile(group:'com.berry', name: 'BCrypt', version: '1.3.1')
-     compile(group:'org.bouncycastle', name: 'bc-core', version: '1.58')
-     compile(group:'org.bouncycastle', name: 'bc-prov', version: '1.58')
-     compile(group:'org.bouncycastle', name: 'bc-fips', version: '1.0.0')
+     compile(group:'org.bouncycastle', name: 'bc-core', version: '1.59a')
+     compile(group:'org.bouncycastle', name: 'bc-prov', version: '1.59a')
+     compile(group:'org.bouncycastle', name: 'bc-fips', version: '1.0.4')
      compile(group:'gnu', name: 'Gnu-Crypt', version: '1.2.1')
      compile(group:'commons-codec', name: 'commons-codec', version: '1.10')
 }
@@ -50,7 +51,7 @@ allprojects {
 
 sourceCompatibility = 1.7
 targetCompatibility=1.7
-version='3.0.3'
+version='3.1.0'
 
 
 task sourcesJar(type: Jar, dependsOn: classes) {

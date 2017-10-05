@@ -34,6 +34,8 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
+import com.distrimind.util.crypto.P2PASymmetricSecretMessageExchanger.FakeSecureRandom;
+
 import gnu.vm.jgnu.security.NoSuchAlgorithmException;
 import gnu.vm.jgnu.security.NoSuchProviderException;
 import gnu.vm.jgnu.security.SecureRandom;
@@ -50,7 +52,7 @@ public final class JavaNativeSecureRandom extends AbstractSecureRandom {
 		 * 
 		 */
 		private static final long serialVersionUID = 4299616485652308411L;
-
+		
 		protected GnuInterface() {
 			super(null, null);
 			
@@ -68,17 +70,20 @@ public final class JavaNativeSecureRandom extends AbstractSecureRandom {
 
 		@Override
 		public void nextBytes(byte[] _bytes) {
-			JavaNativeSecureRandom.this.nextBytes(_bytes);
+			if (secureRandom!=null)
+				JavaNativeSecureRandom.this.nextBytes(_bytes);
 		}
 
 		@Override
 		public void setSeed(byte[] _seed) {
-			JavaNativeSecureRandom.this.setSeed(_seed);
+			if (secureRandom!=null)
+				JavaNativeSecureRandom.this.setSeed(_seed);
 		}
 
 		@Override
 		public void setSeed(long _seed) {
-			JavaNativeSecureRandom.this.setSeed(_seed);
+			if (secureRandom!=null)
+				JavaNativeSecureRandom.this.setSeed(_seed);
 
 		}
 
@@ -93,6 +98,11 @@ public final class JavaNativeSecureRandom extends AbstractSecureRandom {
 
 	private final GnuInterface secureGnuRandom;
 
+	JavaNativeSecureRandom(FakeSecureRandom random) throws NoSuchAlgorithmException, NoSuchProviderException {
+		this(SecureRandomType.DEFAULT, random, false);
+	}
+	
+	
 	JavaNativeSecureRandom(SecureRandomType type, java.security.SecureRandom secureRandom) throws NoSuchAlgorithmException, NoSuchProviderException {
 		this(type, secureRandom, type.needInitialSeed());
 	}

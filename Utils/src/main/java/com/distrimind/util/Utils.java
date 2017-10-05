@@ -55,7 +55,7 @@ public class Utils {
 		c.set(2016, 1, 4);
 		Calendar c2 = Calendar.getInstance();
 		c.set(2017, 9, 5);
-		VERSION = new Version("Utils", "Utils", 3, 0, 3, Version.Type.Stable, 0, c.getTime(), c2.getTime());
+		VERSION = new Version("Utils", "Utils", 3, 1, 0, Version.Type.Stable, 0, c.getTime(), c2.getTime());
 		try {
 
 			InputStream is = Utils.class.getResourceAsStream("build.txt");
@@ -69,7 +69,15 @@ public class Utils {
 
 			c = Calendar.getInstance();
 			c.set(2017, 9, 5);
-			Description d = new Description(3, 0, 3, Version.Type.Stable, 0, c.getTime());
+			Description d = new Description(3, 1, 0, Version.Type.Stable, 0, c.getTime());
+			d.addItem("Correcting a bug with seed generator");
+			d.addItem("Improving fortuna random speed");
+			d.addItem("Add native non blocking secure random");
+			VERSION.addDescription(d);
+
+			c = Calendar.getInstance();
+			c.set(2017, 9, 5);
+			d = new Description(3, 0, 5, Version.Type.Stable, 0, c.getTime());
 			d.addItem("Correcting a bug with seed generator");
 			VERSION.addDescription(d);
 

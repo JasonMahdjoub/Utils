@@ -90,7 +90,7 @@ public abstract class AbstractSecureRandom extends SecureRandom {
 	 * @return an array containing the seed bytes
 	 */
 	@Override
-	public abstract byte[] generateSeed(int numBytes);
+	public abstract byte[] generateSeed(int numBytes) ;
 
 	/**
 	 * Returns the algorithm name used or "unknown" when the algorithm used couldn't

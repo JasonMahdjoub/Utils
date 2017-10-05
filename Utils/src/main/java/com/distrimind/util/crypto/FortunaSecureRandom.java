@@ -67,13 +67,13 @@ public class FortunaSecureRandom extends AbstractSecureRandom implements Seriali
 	
 	private volatile FortunaImpl fortuna;
 	private transient final AbstractSecureRandom randoms[];
-	private transient final SecureRandomType types[];
+	//private transient final SecureRandomType types[];
 	private transient final GnuInterface secureGnuRandom;
 	private transient final JavaNativeInterface secureJavaNativeRandom;
 	private transient boolean fortunaInitialized=false;
 	private static final short initialGeneratedSeedSize=64;
 	private final byte nonce[], personalizationString[];
-	
+	private boolean initialized;
 	public FortunaSecureRandom(byte nonce[]) throws NoSuchAlgorithmException, NoSuchProviderException {
 		this(nonce, null);
 	}
@@ -90,9 +90,11 @@ public class FortunaSecureRandom extends AbstractSecureRandom implements Seriali
 		randoms=new AbstractSecureRandom[types.length];
 		for (int i=0;i<randoms.length;i++)
 			randoms[i]=types[i].getInstance(nonce, personalizationString);
-		this.types=types;
+		//this.types=types;
+		initialized=false;
 		secureGnuRandom=new GnuInterface();
 		secureJavaNativeRandom=new JavaNativeInterface();
+		initialized=true;
 	}
 
 	private FortunaImpl getFortunaInstance()
@@ -139,32 +141,21 @@ public class FortunaSecureRandom extends AbstractSecureRandom implements Seriali
 	public byte[] generateSeed(int numBytes) {
 		synchronized(this)
 		{
-			byte[] seed=new byte[numBytes];
+			byte[] seed;
+			try {
+				seed = SecureRandomType.tryToGenerateNativeNonBlockingSeed(numBytes);
+			} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
+				e.printStackTrace();
+				seed=new byte[numBytes];
+			}
+			byte[] s=null;
 			for (int i=0;i<randoms.length;i++)
 			{
-				byte[] s=null;
-				if (types[i]==SecureRandomType.BC_FIPS_APPROVED 
-						|| types[i]==SecureRandomType.BC_FIPS_APPROVED_FOR_KEYS 
-						|| types[i]==SecureRandomType.DEFAULT_BC_FIPS_APPROVED 
-						|| types[i]==SecureRandomType.NativePRNG )
-					s=randoms[i].generateSeed(numBytes);
-				else
-				{
-					try
-					{
-						s=SecureRandomType.tryToGenerateNativeNonBlockingSeed(numBytes);
-					}
-					catch(Exception e)
-					{
-						s=randoms[i].generateSeed(numBytes);						
-					}
-				}
-				if (i==0)
-					for (int j=0;j<numBytes;j++)
-						seed[j]=s[i];
-				else
-					for (int j=0;j<numBytes;j++)
-						seed[j]=(byte)(seed[i]^s[i]);
+				if (s==null)
+					s=new byte[numBytes];
+				randoms[i].nextBytes(s);
+				for (int j=0;j<numBytes;j++)
+					seed[j]=(byte)(seed[i]^s[i]);
 			}
 			return seed;
 		}
@@ -309,8 +300,9 @@ public class FortunaSecureRandom extends AbstractSecureRandom implements Seriali
 		 */
 		private static final long serialVersionUID = 4299616485652308411L;
 
+		
 		protected GnuInterface() {
-			super(null, null);
+			super(new byte[8]);
 			
 		}
 
@@ -326,17 +318,20 @@ public class FortunaSecureRandom extends AbstractSecureRandom implements Seriali
 
 		@Override
 		public void nextBytes(byte[] _bytes) {
-			FortunaSecureRandom.this.nextBytes(_bytes);
+			if (initialized)
+				FortunaSecureRandom.this.nextBytes(_bytes);
 		}
 
 		@Override
 		public void setSeed(byte[] _seed) {
-			FortunaSecureRandom.this.setSeed(_seed);
+			if (initialized)
+				FortunaSecureRandom.this.setSeed(_seed);
 		}
 
 		@Override
 		public void setSeed(long _seed) {
-			FortunaSecureRandom.this.setSeed(_seed);
+			if (initialized)
+				FortunaSecureRandom.this.setSeed(_seed);
 
 		}
 
@@ -346,9 +341,9 @@ public class FortunaSecureRandom extends AbstractSecureRandom implements Seriali
 		 * 
 		 */
 		private static final long serialVersionUID = 4299616485652308411L;
-
+		
 		protected JavaNativeInterface() {
-			super(null, null);
+			super(new byte[8]);
 			
 		}
 
@@ -364,17 +359,20 @@ public class FortunaSecureRandom extends AbstractSecureRandom implements Seriali
 
 		@Override
 		public void nextBytes(byte[] _bytes) {
-			FortunaSecureRandom.this.nextBytes(_bytes);
+			if (initialized)
+				FortunaSecureRandom.this.nextBytes(_bytes);
 		}
 
 		@Override
 		public void setSeed(byte[] _seed) {
-			FortunaSecureRandom.this.setSeed(_seed);
+			if (initialized)
+				FortunaSecureRandom.this.setSeed(_seed);
 		}
 
 		@Override
 		public void setSeed(long _seed) {
-			FortunaSecureRandom.this.setSeed(_seed);
+			if (initialized)
+				FortunaSecureRandom.this.setSeed(_seed);
 
 		}
 
@@ -390,6 +388,11 @@ public class FortunaSecureRandom extends AbstractSecureRandom implements Seriali
 				byte[] tab=new byte[20];
 				randoms[i].nextBytes(tab);
 				pool.update(tab);				
+			}
+			try {
+				pool.update(SecureRandomType.tryToGenerateNativeNonBlockingSeed(20));
+			} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
+				e.printStackTrace();
 			}
 		}
 

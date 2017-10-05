@@ -211,7 +211,7 @@ public class CryptoTests {
 		return res;
 	}
 
-	@DataProvider(name = "provideSecureRandomType", parallel = false)
+	@DataProvider(name = "provideSecureRandomType", parallel = true)
 	public Object[][] provideSecureRandomType() {
 		Object[][] res = new Object[SecureRandomType.values().length][];
 		int i = 0;
@@ -802,7 +802,7 @@ public class CryptoTests {
 		random = type.getSingleton("nonce".getBytes(), "parameter".getBytes());
 		System.out.println(type+" instantiated");
 		random.nextBytes(new byte[10]);
-		if (type!=SecureRandomType.NativePRNG && type!=SecureRandomType.GNU_DEFAULT && type!=SecureRandomType.SHA1PRNG)
+		if (type!=SecureRandomType.NativePRNG && type!=SecureRandomType.GNU_DEFAULT && type!=SecureRandomType.SHA1PRNG && type.getProvider()!=CodeProvider.BCFIPS)
 		{
 			
 			int nb= type.getProvider()!=CodeProvider.BCFIPS?110000:260000/8;

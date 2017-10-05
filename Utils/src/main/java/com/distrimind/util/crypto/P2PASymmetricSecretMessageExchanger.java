@@ -40,12 +40,12 @@ import java.math.BigInteger;
 import java.util.Random;
 
 import javax.crypto.Cipher;
+import javax.crypto.spec.SecretKeySpec;
 
 import gnu.vm.jgnu.security.InvalidAlgorithmParameterException;
 import gnu.vm.jgnu.security.InvalidKeyException;
 import gnu.vm.jgnu.security.NoSuchAlgorithmException;
 import gnu.vm.jgnu.security.NoSuchProviderException;
-import gnu.vm.jgnu.security.SecureRandom;
 import gnu.vm.jgnu.security.spec.InvalidKeySpecException;
 import gnu.vm.jgnux.crypto.BadPaddingException;
 import gnu.vm.jgnux.crypto.IllegalBlockSizeException;
@@ -58,7 +58,7 @@ import gnu.vm.jgnux.crypto.NoSuchPaddingException;
  * @since Utils 1.4.1
  */
 public class P2PASymmetricSecretMessageExchanger {
-	static class FakeSecureRandom extends SecureRandom {
+	static class FakeSecureRandom extends java.security.SecureRandom {
 
 		/**
 		 * 
@@ -68,6 +68,7 @@ public class P2PASymmetricSecretMessageExchanger {
 		private Random random = null;
 
 		protected FakeSecureRandom() {
+			super(new byte[8]);
 			random = new Random();
 		}
 
@@ -124,8 +125,11 @@ public class P2PASymmetricSecretMessageExchanger {
 
 		@Override
 		public void setSeed(byte[] seed) {
-			BigInteger num = new BigInteger(seed);
-			random.setSeed(num.mod(maxLongValue).longValue());
+			if (random!=null)
+			{
+				BigInteger num = new BigInteger(seed);
+				random.setSeed(num.mod(maxLongValue).longValue());
+			}
 		}
 
 		@Override
@@ -148,7 +152,7 @@ public class P2PASymmetricSecretMessageExchanger {
 
 	private P2PASymmetricSecretMessageExchanger distantMessageEncoder;
 
-	private final GnuSecureRandom random;
+	private final JavaNativeSecureRandom random;
 	
 	private final AbstractSecureRandom secureRandom; 
 
@@ -165,7 +169,7 @@ public class P2PASymmetricSecretMessageExchanger {
 	public P2PASymmetricSecretMessageExchanger(AbstractSecureRandom secureRandom, ASymmetricPublicKey myPublicKey)
 			throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,
 			InvalidAlgorithmParameterException, InvalidKeySpecException, NoSuchProviderException {
-		this(secureRandom, MessageDigestType.SHA_512, PasswordHashType.DEFAULT, myPublicKey);
+		this(secureRandom, MessageDigestType.BC_FIPS_SHA3_512, PasswordHashType.DEFAULT, myPublicKey);
 	}
 
 	public P2PASymmetricSecretMessageExchanger(AbstractSecureRandom secureRandom, MessageDigestType messageDigestType, PasswordHashType passwordHashType,
@@ -192,7 +196,7 @@ public class P2PASymmetricSecretMessageExchanger {
 
 		if (distantPublicKey != null)
 			setDistantPublicKey(distantPublicKey);
-		random = new GnuSecureRandom(new FakeSecureRandom());
+		random = new JavaNativeSecureRandom(new FakeSecureRandom());
 		cipher = getCipherInstancePriv(type);
 		this.messageDigestType = messageDigestType;
 		this.messageDigest = messageDigestType.getMessageDigestInstance();
@@ -260,9 +264,9 @@ public class P2PASymmetricSecretMessageExchanger {
 		byte randomSeed[] = new byte[16];
 		random.nextBytes(randomSeed);
 		SymmetricEncryptionAlgorithm sea = new SymmetricEncryptionAlgorithm(secureRandom,
-				new SymmetricSecretKey(SymmetricEncryptionType.GNU_TWOFISH,
-						new gnu.vm.jgnux.crypto.spec.SecretKeySpec(hashedMessage,
-								SymmetricEncryptionType.GNU_TWOFISH.getAlgorithmName()),
+				new SymmetricSecretKey(SymmetricEncryptionType.AES,
+						new SecretKeySpec(hashedMessage,
+								SymmetricEncryptionType.AES.getAlgorithmName()),
 						(short) 256));
 		return sea.encode(OutputDataPackagerWithRandomValues.encode(encodedLevel2, encodedLevel2.length));
 	}
@@ -279,9 +283,9 @@ public class P2PASymmetricSecretMessageExchanger {
 		byte randomSeed[] = new byte[16];
 		random.nextBytes(randomSeed);
 		SymmetricEncryptionAlgorithm sea = new SymmetricEncryptionAlgorithm(secureRandom,
-				new SymmetricSecretKey(SymmetricEncryptionType.GNU_TWOFISH,
-						new gnu.vm.jgnux.crypto.spec.SecretKeySpec(hashedMessage,
-								SymmetricEncryptionType.GNU_TWOFISH.getAlgorithmName()),
+				new SymmetricSecretKey(SymmetricEncryptionType.AES,
+						new SecretKeySpec(hashedMessage,
+								SymmetricEncryptionType.AES.getAlgorithmName()),
 						(short) 256));
 		byte[] v = sea.decode(encodedLevel1, off_encodedlevel1, len_encodedlevel1);
 		try {
