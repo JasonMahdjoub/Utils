@@ -51,7 +51,7 @@ import gnu.vm.jgnux.crypto.ShortBufferException;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 4.0
+ * @version 4.1
  * @since Utils 1.7
  */
 public class ASymmetricAuthentifiedSignerAlgorithm extends AbstractAuthentifiedSignerAlgorithm {
@@ -60,7 +60,7 @@ public class ASymmetricAuthentifiedSignerAlgorithm extends AbstractAuthentifiedS
 	private final int macLength;
 	private final ASymmetricAuthentifiedSignatureType type;
 
-	ASymmetricAuthentifiedSignerAlgorithm(ASymmetricPrivateKey localPrivateKey) throws NoSuchAlgorithmException, NoSuchProviderException {
+	public ASymmetricAuthentifiedSignerAlgorithm(ASymmetricPrivateKey localPrivateKey) throws NoSuchAlgorithmException, NoSuchProviderException {
 		if (localPrivateKey == null)
 			throw new NullPointerException("localPrivateKey");
 		type=localPrivateKey.getAuthentifiedSignatureAlgorithmType();

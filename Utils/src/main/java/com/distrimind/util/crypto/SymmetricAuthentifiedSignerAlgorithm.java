@@ -43,7 +43,7 @@ import gnu.vm.jgnux.crypto.ShortBufferException;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 2.0
+ * @version 2.1
  * @since Utils 2.10.0
  */
 public class SymmetricAuthentifiedSignerAlgorithm extends AbstractAuthentifiedSignerAlgorithm {
@@ -51,7 +51,7 @@ public class SymmetricAuthentifiedSignerAlgorithm extends AbstractAuthentifiedSi
 	private final AbstractMac mac;
 	private final SymmetricSecretKey secretKey;
 
-	public SymmetricAuthentifiedSignerAlgorithm(AbstractMac mac, SymmetricSecretKey secretKey) {
+	private SymmetricAuthentifiedSignerAlgorithm(AbstractMac mac, SymmetricSecretKey secretKey) {
 		if (mac == null)
 			throw new NullPointerException();
 		if (secretKey == null)

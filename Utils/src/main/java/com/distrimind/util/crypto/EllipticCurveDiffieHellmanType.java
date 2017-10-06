@@ -37,7 +37,7 @@ package com.distrimind.util.crypto;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 1.1
+ * @version 1.2
  * @since Utils 2.9
  */
 public enum EllipticCurveDiffieHellmanType {
@@ -79,8 +79,8 @@ public enum EllipticCurveDiffieHellmanType {
 		return ECDHKeySizeBits;
 	}
 
-	public EllipticCurveDiffieHellmanAlgorithm getInstance() {
-		return new EllipticCurveDiffieHellmanAlgorithm(this);
+	public EllipticCurveDiffieHellmanAlgorithm getInstance(AbstractSecureRandom randomForKeys) {
+		return new EllipticCurveDiffieHellmanAlgorithm(randomForKeys, this);
 	}
 
 	public CodeProvider getCodeProvider() {

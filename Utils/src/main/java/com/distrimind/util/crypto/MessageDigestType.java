@@ -41,43 +41,55 @@ import java.security.NoSuchProviderException;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 2.1
+ * @version 2.2
  * @since Utils 1.4
  */
 public enum MessageDigestType {
 	@Deprecated
-	MD5("MD5", CodeProvider.SUN), @Deprecated
-	SHA1("SHA", CodeProvider.SUN), 
-	SHA2_256("SHA-256", CodeProvider.SUN), 
-	SHA2_384("SHA-384",	CodeProvider.SUN), SHA_512("SHA-512", CodeProvider.SUN), 
-	GNU_SHA2_256("SHA-256", CodeProvider.GNU_CRYPTO), GNU_SHA_384("SHA-384", CodeProvider.GNU_CRYPTO), 
-	GNU_SHA2_512("SHA-512", CodeProvider.GNU_CRYPTO), GNU_WHIRLPOOL("WHIRLPOOL", CodeProvider.GNU_CRYPTO), 
-	BC_FIPS_SHA2_256("SHA-256", CodeProvider.BCFIPS), 
-	BC_FIPS_SHA2_384("SHA-384",CodeProvider.BCFIPS), 
-	BC_FIPS_SHA2_512("SHA-512", CodeProvider.BCFIPS), 
-	BC_FIPS_SHA3_256("SHA3-256", CodeProvider.BCFIPS), 
-	BC_FIPS_SHA3_384("SHA3-384",CodeProvider.BCFIPS), 
-	BC_FIPS_SHA3_512("SHA3-512", CodeProvider.BCFIPS), 
-	BC_WHIRLPOOL("WHIRLPOOL",CodeProvider.BC), 
+	MD5("MD5", CodeProvider.SUN, 128), 
+	@Deprecated
+	SHA1("SHA", CodeProvider.SUN, 160), 
+	SHA2_256("SHA-256", CodeProvider.SUN, 256), 
+	SHA2_384("SHA-384",	CodeProvider.SUN, 384), 
+	SHA2_512("SHA-512", CodeProvider.SUN, 512), 
+	GNU_SHA2_256("SHA-256", CodeProvider.GNU_CRYPTO, 256), 
+	GNU_SHA2_384("SHA-384", CodeProvider.GNU_CRYPTO, 384), 
+	GNU_SHA2_512("SHA-512", CodeProvider.GNU_CRYPTO, 512), 
+	GNU_WHIRLPOOL("WHIRLPOOL", CodeProvider.GNU_CRYPTO, 512), 
+	BC_FIPS_SHA2_256("SHA-256", CodeProvider.BCFIPS, 256), 
+	BC_FIPS_SHA2_384("SHA-384",CodeProvider.BCFIPS, 384), 
+	BC_FIPS_SHA2_512("SHA-512", CodeProvider.BCFIPS, 512), 
+	BC_FIPS_SHA3_256("SHA3-256", CodeProvider.BCFIPS, 256), 
+	BC_FIPS_SHA3_384("SHA3-384",CodeProvider.BCFIPS, 384), 
+	BC_FIPS_SHA3_512("SHA3-512", CodeProvider.BCFIPS, 512), 
+	BC_WHIRLPOOL("WHIRLPOOL",CodeProvider.BC, 512), 
 	DEFAULT(BC_FIPS_SHA3_384);
 
 	private final String algorithmName;
 
 	private final CodeProvider codeProvider;
+	
+	private final int digestLengthBits;
 
 	private MessageDigestType(MessageDigestType type) {
-		this(type.algorithmName, type.codeProvider);
+		this(type.algorithmName, type.codeProvider, type.digestLengthBits);
 	}
 
-	private MessageDigestType(String algorithmName, CodeProvider codeProvider) {
+	private MessageDigestType(String algorithmName, CodeProvider codeProvider, int digestLengthBits) {
 		this.algorithmName = algorithmName;
 		this.codeProvider = codeProvider;
+		this.digestLengthBits=digestLengthBits;
 	}
 
 	public String getAlgorithmName() {
 		return algorithmName;
 	}
 
+	public int getDigestLengthInBits()
+	{
+		return digestLengthBits;
+	}
+	
 	public AbstractMessageDigest getMessageDigestInstance() throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.NoSuchProviderException {
 		if (codeProvider == CodeProvider.GNU_CRYPTO) {
 			return new GnuMessageDigest(gnu.vm.jgnu.security.MessageDigest.getInstance(algorithmName));

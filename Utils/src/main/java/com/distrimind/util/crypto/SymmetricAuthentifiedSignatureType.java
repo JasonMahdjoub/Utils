@@ -45,35 +45,47 @@ import gnu.vm.jgnux.crypto.Mac;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 1.2
  * @since Utils 2.10.0
  */
 public enum SymmetricAuthentifiedSignatureType {
-	HMAC_SHA_256("HmacSHA256", CodeProvider.SUN, (short)128, (short)16), 
-	HMAC_SHA_384("HmacSHA384", CodeProvider.SUN, (short)128, (short)16), 
-	HMAC_SHA_512("HmacSHA512", CodeProvider.SUN, (short)128, (short)16), 
-	BC_FIPS_HMAC_SHA_256("HmacSHA256", CodeProvider.BCFIPS, (short)128, (short)16), 
-	BC_FIPS_HMAC_SHA_384("HmacSHA384", CodeProvider.BCFIPS, (short)128, (short)16), 
-	BC_FIPS_HMAC_SHA_512("HmacSHA512", CodeProvider.BCFIPS, (short)128, (short)16), 
-	BC_FIPS_HMAC_WHIRLPOOL("HmacWHIRLPOOL",CodeProvider.BCFIPS, (short)128, (short)16), 
+	HMAC_SHA_256("HmacSHA256", CodeProvider.SUN, (short)128, (short)16, MessageDigestType.SHA2_256), 
+	HMAC_SHA_384("HmacSHA384", CodeProvider.SUN, (short)128, (short)16, MessageDigestType.SHA2_384), 
+	HMAC_SHA_512("HmacSHA512", CodeProvider.SUN, (short)128, (short)16, MessageDigestType.SHA2_512), 
+	BC_FIPS_HMAC_SHA_256("HmacSHA256", CodeProvider.BCFIPS, (short)128, (short)16, MessageDigestType.BC_FIPS_SHA2_256), 
+	BC_FIPS_HMAC_SHA_384("HmacSHA384", CodeProvider.BCFIPS, (short)128, (short)16, MessageDigestType.BC_FIPS_SHA2_384), 
+	BC_FIPS_HMAC_SHA_512("HmacSHA512", CodeProvider.BCFIPS, (short)128, (short)16, MessageDigestType.BC_FIPS_SHA2_512), 
+	BC_FIPS_HMAC_WHIRLPOOL("HmacWHIRLPOOL",CodeProvider.BCFIPS, (short)128, (short)16, MessageDigestType.BC_WHIRLPOOL), 
 	DEFAULT(BC_FIPS_HMAC_SHA_256);
 
 	private final String algorithmName;
 	private final CodeProvider codeProvider;
 	private final short keySizeBits;
 	private final short keySizeBytes;
+	private final MessageDigestType messageDigestType;
 
-	private SymmetricAuthentifiedSignatureType(String algorithmName, CodeProvider codeProvider, short keySizeBits, short keySizeBytes) {
+	private SymmetricAuthentifiedSignatureType(String algorithmName, CodeProvider codeProvider, short keySizeBits, short keySizeBytes, MessageDigestType messageDigestType) {
 		this.algorithmName = algorithmName;
 		this.codeProvider = codeProvider;
 		this.keySizeBits=keySizeBits;
 		this.keySizeBytes=keySizeBytes;
+		this.messageDigestType=messageDigestType;
 	}
 
 	private SymmetricAuthentifiedSignatureType(SymmetricAuthentifiedSignatureType other) {
-		this(other.algorithmName, other.codeProvider, other.keySizeBits, other.keySizeBytes);
+		this(other.algorithmName, other.codeProvider, other.keySizeBits, other.keySizeBytes, other.messageDigestType);
 	}
 
+	public int getSignatureSizeInBits()
+	{
+		return messageDigestType.getDigestLengthInBits();
+	}
+	
+	public MessageDigestType getMessageDigestType()
+	{
+		return messageDigestType;
+	}
+	
 	public String getAlgorithmName() {
 		return algorithmName;
 	}
@@ -84,7 +96,7 @@ public enum SymmetricAuthentifiedSignatureType {
 		} else if (codeProvider == CodeProvider.BCFIPS) {
 			CodeProvider.ensureBouncyCastleProviderLoaded();
 			try {
-				return new JavaNativeMac(javax.crypto.Mac.getInstance(algorithmName, CodeProvider.BCFIPS.name()));
+				return new JavaNativeMac(javax.crypto.Mac.getInstance(algorithmName, codeProvider.name()));
 			} catch (java.security.NoSuchAlgorithmException e) {
 				throw new gnu.vm.jgnu.security.NoSuchAlgorithmException(e);
 			}

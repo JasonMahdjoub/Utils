@@ -44,14 +44,14 @@ import gnu.vm.jgnux.crypto.ShortBufferException;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 2.1
  * @since Utils 2.10.0
  */
 public class SymmetricAuthentifiedSignatureCheckerAlgorithm extends AbstractAuthentifiedCheckerAlgorithm {
 
 	private final SymmetricAuthentifiedSignerAlgorithm signer;
 	private byte[] signature=null;
-	public SymmetricAuthentifiedSignatureCheckerAlgorithm(SymmetricAuthentifiedSignerAlgorithm signer) {
+	private SymmetricAuthentifiedSignatureCheckerAlgorithm(SymmetricAuthentifiedSignerAlgorithm signer) {
 		if (signer == null)
 			throw new NullPointerException();
 		this.signer = signer;

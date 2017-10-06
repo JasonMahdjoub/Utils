@@ -548,7 +548,7 @@ public class CryptoTests {
 		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getSingleton(null);
 		ASymmetricKeyPair kp = type.getKeyPairGenerator(rand, (short) 1024).generateKeyPair();
 		
-		ClientASymmetricEncryptionAlgorithm algoClient = new ClientASymmetricEncryptionAlgorithm(
+		ClientASymmetricEncryptionAlgorithm algoClient = new ClientASymmetricEncryptionAlgorithm(rand,
 				kp.getASymmetricPublicKey());
 		ServerASymmetricEncryptionAlgorithm algoServer = new ServerASymmetricEncryptionAlgorithm(kp);
 
@@ -1123,8 +1123,9 @@ public class CryptoTests {
 			java.security.spec.InvalidKeySpecException, NoSuchAlgorithmException, NoSuchProviderException,
 			InvalidKeyException, NoSuchPaddingException, InvalidAlgorithmParameterException, InvalidKeySpecException,
 			BadPaddingException, IllegalStateException, IllegalBlockSizeException, IOException {
-		EllipticCurveDiffieHellmanAlgorithm peer1 = type.getInstance();
-		EllipticCurveDiffieHellmanAlgorithm peer2 = type.getInstance();
+		AbstractSecureRandom random = SecureRandomType.DEFAULT.getSingleton(null);
+		EllipticCurveDiffieHellmanAlgorithm peer1 = type.getInstance(random);
+		EllipticCurveDiffieHellmanAlgorithm peer2 = type.getInstance(random);
 		peer1.generateAndSetKeyPair();
 		peer2.generateAndSetKeyPair();
 		
@@ -1135,8 +1136,6 @@ public class CryptoTests {
 		Assert.assertEquals(peer1.getDerivedKey(),peer2.getDerivedKey());
 
 		SymmetricSecretKey key = peer1.getDerivedKey();
-		
-		AbstractSecureRandom random=SecureRandomType.DEFAULT.getSingleton(null);
 
 		SymmetricEncryptionAlgorithm algoDistant = new SymmetricEncryptionAlgorithm(random, key);
 		SymmetricEncryptionAlgorithm algoLocal = new SymmetricEncryptionAlgorithm(random, key);
@@ -1189,6 +1188,38 @@ public class CryptoTests {
 			for (int i = 0; i < md.length; i++)
 				Assert.assertEquals(md[i], m[i + off]);
 
+		}
+
+	}
+	@Test(invocationCount = 100, dataProvider = "provideDataForEllipticCurveDiffieHellmanKeyExchanger", dependsOnMethods = "testMessageDigest")
+	public void testEllipticCurveDiffieHellmanKeyExchangerForSignature(EllipticCurveDiffieHellmanType type)
+			throws java.security.NoSuchAlgorithmException, java.security.InvalidKeyException,
+			java.security.spec.InvalidKeySpecException, NoSuchAlgorithmException, NoSuchProviderException,
+			InvalidKeyException, NoSuchPaddingException, InvalidAlgorithmParameterException, InvalidKeySpecException,
+			BadPaddingException, IllegalStateException, IllegalBlockSizeException, IOException, SignatureException, ShortBufferException, InvalidParameterSpecException {
+		AbstractSecureRandom random = SecureRandomType.DEFAULT.getSingleton(null);
+		EllipticCurveDiffieHellmanAlgorithm peer1 = type.getInstance(random);
+		EllipticCurveDiffieHellmanAlgorithm peer2 = type.getInstance(random);
+		peer1.generateAndSetKeyPair();
+		peer2.generateAndSetKeyPair();
+		
+		byte[] publicKey1 = peer1.getEncodedPublicKey();
+		byte[] publicKey2 = peer2.getEncodedPublicKey();
+		peer1.setDistantPublicKey(publicKey2, SymmetricAuthentifiedSignatureType.DEFAULT, (short)128);
+		peer2.setDistantPublicKey(publicKey1, SymmetricAuthentifiedSignatureType.DEFAULT, (short)128);
+		Assert.assertEquals(peer1.getDerivedKey(),peer2.getDerivedKey());
+
+		SymmetricSecretKey key = peer1.getDerivedKey();
+
+		SymmetricAuthentifiedSignatureCheckerAlgorithm checker=new SymmetricAuthentifiedSignatureCheckerAlgorithm(key);
+		SymmetricAuthentifiedSignerAlgorithm signer=new SymmetricAuthentifiedSignerAlgorithm(key);
+
+		for (byte[] m : messagesToEncrypt) {
+			byte[] signature=signer.sign(m);
+			Assert.assertTrue(checker.verify(m, signature));
+			for (int i=0;i<signature.length;i++)
+				signature[i]=(byte)~signature[i];
+			Assert.assertFalse(checker.verify(m, signature));
 		}
 
 	}

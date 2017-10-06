@@ -170,8 +170,8 @@ public class P2PJPAKESecretMessageExchanger extends Agreement {
 
 	}
 
-
-	public boolean isAgreementProcessValidImpl() {
+	@Override
+	protected boolean isAgreementProcessValidImpl() {
 		return jpake.getState() == JPAKEParticipant.STATE_ROUND_3_VALIDATED;
 	}
 

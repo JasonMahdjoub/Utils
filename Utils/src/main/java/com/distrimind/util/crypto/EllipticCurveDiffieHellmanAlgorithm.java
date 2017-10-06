@@ -53,7 +53,7 @@ import javax.crypto.KeyAgreement;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 2.0
  * @since Utils 2.9
  */
 public class EllipticCurveDiffieHellmanAlgorithm {
@@ -61,11 +61,15 @@ public class EllipticCurveDiffieHellmanAlgorithm {
 	private SymmetricSecretKey derivedKey;
 	private ASymmetricKeyPair myKeyPair;
 	private byte[] myPublicKeyBytes;
+	private final AbstractSecureRandom randomForKeys;
 
-	EllipticCurveDiffieHellmanAlgorithm(EllipticCurveDiffieHellmanType type) {
+	EllipticCurveDiffieHellmanAlgorithm(AbstractSecureRandom randomForKeys, EllipticCurveDiffieHellmanType type) {
 		if (type == null)
 			throw new NullPointerException();
+		if (randomForKeys == null)
+			throw new NullPointerException();
 		this.type = type;
+		this.randomForKeys=randomForKeys;
 		reset();
 	}
 
@@ -89,7 +93,7 @@ public class EllipticCurveDiffieHellmanAlgorithm {
 				kpg = KeyPairGenerator.getInstance("EC", type.getCodeProvider().name());
 			} else
 				kpg = KeyPairGenerator.getInstance("EC");
-			kpg.initialize(keySize);
+			kpg.initialize(keySize, randomForKeys);
 			KeyPair kp=kpg.generateKeyPair();
 			setKeyPair(new ASymmetricKeyPair(ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA384withECDSA, kp, keySize, expirationUTC));
 
@@ -124,6 +128,14 @@ public class EllipticCurveDiffieHellmanAlgorithm {
 	}
 
 	public void setDistantPublicKey(byte[] distantPublicKeyBytes, SymmetricEncryptionType symmetricEncryptionType, short keySize) throws 
+	gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.InvalidKeyException, gnu.vm.jgnu.security.spec.InvalidKeySpecException, gnu.vm.jgnu.security.NoSuchProviderException {
+		setDistantPublicKey(distantPublicKeyBytes, symmetricEncryptionType, null, keySize);
+	}
+	public void setDistantPublicKey(byte[] distantPublicKeyBytes, SymmetricAuthentifiedSignatureType symmetricSignatureType, short keySize) throws 
+	gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.InvalidKeyException, gnu.vm.jgnu.security.spec.InvalidKeySpecException, gnu.vm.jgnu.security.NoSuchProviderException {
+		setDistantPublicKey(distantPublicKeyBytes, null, symmetricSignatureType, keySize);
+	}
+	private void setDistantPublicKey(byte[] distantPublicKeyBytes, SymmetricEncryptionType symmetricEncryptionType, SymmetricAuthentifiedSignatureType symmetricSignatureType, short keySize) throws 
 			gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.InvalidKeyException, gnu.vm.jgnu.security.spec.InvalidKeySpecException, gnu.vm.jgnu.security.NoSuchProviderException {
 		try
 		{
@@ -187,7 +199,10 @@ public class EllipticCurveDiffieHellmanAlgorithm {
 			} else {
 				throw new IllegalAccessError();
 			}
-			this.derivedKey=symmetricEncryptionType.getSymmetricSecretKey(derivedKey, type.getKeySizeBits());
+			if (symmetricEncryptionType==null)
+				this.derivedKey=symmetricSignatureType.getSymmetricSecretKey(derivedKey, type.getKeySizeBits());
+			else
+				this.derivedKey=symmetricEncryptionType.getSymmetricSecretKey(derivedKey, type.getKeySizeBits());
 
 		}
 		catch(NoSuchAlgorithmException e)
