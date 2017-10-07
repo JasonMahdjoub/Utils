@@ -49,40 +49,40 @@ import gnu.vm.jgnu.security.NoSuchProviderException;
  */
 public enum ASymmetricAuthentifiedSignatureType {
 	@Deprecated
-	SHA1withRSA("SHA1withRSA", "RSA", CodeProvider.SUN,(short) 3072, 31536000000l), 
-	SHA256withRSA("SHA256withRSA","RSA", CodeProvider.SUN,(short) 3072, 31536000000l), 
-	SHA384withRSA("SHA384withRSA", "RSA", CodeProvider.SUN,(short) 3072, 31536000000l), 
-	SHA512withRSA("SHA512withRSA", "RSA", CodeProvider.SUN,(short) 3072, 31536000000l),
-	SHA384withECDSA("SHA384withECDSA", "EC", CodeProvider.SUN,(short) 384, 31536000000l),
-	BC_FIPS_SHA256withRSA("SHA256withRSA","RSA", CodeProvider.BCFIPS,(short) 3072, 31536000000l), 
-	BC_FIPS_SHA384withRSA("SHA384withRSA","RSA", CodeProvider.BCFIPS,(short) 3072, 31536000000l), 
-	BC_FIPS_SHA512withRSA("SHA512withRSA", "RSA", CodeProvider.BCFIPS,(short) 3072, 31536000000l),
-	BC_FIPS_SHA256withRSAandMGF1("SHA256withRSAandMGF1","RSA", CodeProvider.BCFIPS,(short) 3072, 31536000000l), 
-	BC_FIPS_SHA384withRSAandMGF1("SHA384withRSAandMGF1","RSA", CodeProvider.BCFIPS,(short) 3072, 31536000000l), 
-	BC_FIPS_SHA512withRSAandMGF1("SHA512withRSAandMGF1", "RSA", CodeProvider.BCFIPS,(short) 3072, 31536000000l),
-	BC_FIPS_SHA384withECDSA("SHA384withECDSA", "EC", CodeProvider.BCFIPS,(short) 384, 31536000000l),
+	SHA1withRSA("SHA1withRSA", "RSA", CodeProvider.SunRsaSign,CodeProvider.SunRsaSign,(short) 3072, 31536000000l), 
+	SHA256withRSA("SHA256withRSA","RSA", CodeProvider.SunRsaSign,CodeProvider.SunRsaSign,(short) 3072, 31536000000l), 
+	SHA384withRSA("SHA384withRSA", "RSA", CodeProvider.SunRsaSign,CodeProvider.SunRsaSign,(short) 3072, 31536000000l), 
+	SHA512withRSA("SHA512withRSA", "RSA", CodeProvider.SunRsaSign,CodeProvider.SunRsaSign,(short) 3072, 31536000000l),
+	SHA384withECDSA("SHA384withECDSA", "EC", CodeProvider.SunEC,CodeProvider.SunEC,(short) 384, 31536000000l),
+	BC_FIPS_SHA256withRSA("SHA256withRSA","RSA", CodeProvider.BCFIPS,CodeProvider.BCFIPS,(short) 3072, 31536000000l), 
+	BC_FIPS_SHA384withRSA("SHA384withRSA","RSA", CodeProvider.BCFIPS,CodeProvider.BCFIPS,(short) 3072, 31536000000l), 
+	BC_FIPS_SHA512withRSA("SHA512withRSA", "RSA", CodeProvider.BCFIPS,CodeProvider.BCFIPS,(short) 3072, 31536000000l),
+	BC_FIPS_SHA256withRSAandMGF1("SHA256withRSAandMGF1","RSA", CodeProvider.BCFIPS,CodeProvider.BCFIPS,(short) 3072, 31536000000l), 
+	BC_FIPS_SHA384withRSAandMGF1("SHA384withRSAandMGF1","RSA", CodeProvider.BCFIPS,CodeProvider.BCFIPS,(short) 3072, 31536000000l), 
+	BC_FIPS_SHA512withRSAandMGF1("SHA512withRSAandMGF1", "RSA", CodeProvider.BCFIPS,CodeProvider.BCFIPS,(short) 3072, 31536000000l),
+	BC_FIPS_SHA384withECDSA("SHA384withECDSA", "EC", CodeProvider.BCFIPS,CodeProvider.BCFIPS,(short) 384, 31536000000l),
 	DEFAULT(BC_FIPS_SHA384withRSAandMGF1);
 
 	private final String signatureAlgorithmName;
 	private final String keyGeneratorAlgorithmName;
 
-	private final CodeProvider codeProvider;
+	private final CodeProvider codeProviderSignature, codeProviderKeyGenerator;
 	
 	private final short keySize;
 
 	private final long expirationTimeMilis;
+	
 
-
-
-	private ASymmetricAuthentifiedSignatureType(String signatureAlgorithmName, String keyGeneratorAlgorithmName, CodeProvider codeProvider, short keySize, long expirationTimeMilis) {
+	private ASymmetricAuthentifiedSignatureType(String signatureAlgorithmName, String keyGeneratorAlgorithmName, CodeProvider codeProviderSignature, CodeProvider codeProviderKeyGenerator, short keySize, long expirationTimeMilis) {
 		this.signatureAlgorithmName = signatureAlgorithmName;
 		this.keyGeneratorAlgorithmName=keyGeneratorAlgorithmName;
-		this.codeProvider = codeProvider;
+		this.codeProviderSignature = codeProviderSignature;
+		this.codeProviderKeyGenerator = codeProviderKeyGenerator;
 		this.keySize=keySize;
 		this.expirationTimeMilis=expirationTimeMilis;
 	}
 	private ASymmetricAuthentifiedSignatureType(ASymmetricAuthentifiedSignatureType other) {
-		this(other.signatureAlgorithmName, other.keyGeneratorAlgorithmName, other.codeProvider, other.keySize, other.expirationTimeMilis);
+		this(other.signatureAlgorithmName, other.keyGeneratorAlgorithmName, other.codeProviderSignature, other.codeProviderKeyGenerator, other.keySize, other.expirationTimeMilis);
 	}
 
 	public String getSignatureAlgorithmName() {
@@ -95,12 +95,12 @@ public enum ASymmetricAuthentifiedSignatureType {
 	}
 
 	public AbstractSignature getSignatureInstance() throws gnu.vm.jgnu.security.NoSuchAlgorithmException, NoSuchProviderException {
-		if (codeProvider == CodeProvider.GNU_CRYPTO) {
+		if (codeProviderSignature == CodeProvider.GNU_CRYPTO) {
 			return new GnuSignature(gnu.vm.jgnu.security.Signature.getInstance(signatureAlgorithmName));
-		} else if (codeProvider == CodeProvider.BCFIPS) {
+		} else if (codeProviderSignature == CodeProvider.BCFIPS) {
 			CodeProvider.ensureBouncyCastleProviderLoaded();
 			try {
-				Signature s=Signature.getInstance(signatureAlgorithmName, CodeProvider.BCFIPS.name());
+				Signature s=Signature.getInstance(signatureAlgorithmName, codeProviderSignature.name());
 					
 				return new JavaNativeSignature(s);
 			} catch (NoSuchAlgorithmException e) {
@@ -111,10 +111,12 @@ public enum ASymmetricAuthentifiedSignatureType {
 
 		} else {
 			try {
-				return new JavaNativeSignature(Signature.getInstance(signatureAlgorithmName));
+				return new JavaNativeSignature(Signature.getInstance(signatureAlgorithmName, codeProviderSignature.name()));
 			} catch (NoSuchAlgorithmException e) {
 				throw new gnu.vm.jgnu.security.NoSuchAlgorithmException(e);
-			}
+			}catch (java.security.NoSuchProviderException e) {
+				throw new NoSuchProviderException(e.getMessage());
+			} 
 		}
 	}
 
@@ -126,8 +128,11 @@ public enum ASymmetricAuthentifiedSignatureType {
 		return keySize / 8;
 	}
 
-	public CodeProvider getCodeProvider() {
-		return codeProvider;
+	public CodeProvider getCodeProviderForSignature() {
+		return codeProviderSignature;
+	}
+	public CodeProvider getCodeProviderForKeyGenerator() {
+		return codeProviderKeyGenerator;
 	}
 	static ASymmetricAuthentifiedSignatureType valueOf(int ordinal) throws IllegalArgumentException {
 		for (ASymmetricAuthentifiedSignatureType a : values()) {
@@ -151,13 +156,13 @@ public enum ASymmetricAuthentifiedSignatureType {
 
 	public AbstractKeyPairGenerator getKeyPairGenerator(AbstractSecureRandom random, short keySize,
 			long expirationTimeUTC) throws gnu.vm.jgnu.security.NoSuchAlgorithmException, NoSuchProviderException, gnu.vm.jgnu.security.InvalidAlgorithmParameterException {
-		if (codeProvider == CodeProvider.GNU_CRYPTO) {
+		if (codeProviderKeyGenerator == CodeProvider.GNU_CRYPTO) {
 			gnu.vm.jgnu.security.KeyPairGenerator kgp = gnu.vm.jgnu.security.KeyPairGenerator.getInstance(keyGeneratorAlgorithmName);
 			GnuKeyPairGenerator res = new GnuKeyPairGenerator(this, kgp);
 			res.initialize(keySize, expirationTimeUTC, random);
 
 			return res;
-		} else if (codeProvider == CodeProvider.BCFIPS) {
+		} else if (codeProviderKeyGenerator == CodeProvider.BCFIPS) {
 			CodeProvider.ensureBouncyCastleProviderLoaded();
 			try {
 				KeyPairGenerator kgp = KeyPairGenerator.getInstance(keyGeneratorAlgorithmName, CodeProvider.BCFIPS.name());
@@ -174,14 +179,16 @@ public enum ASymmetricAuthentifiedSignatureType {
 			} 
 		} else {
 			try {
-				KeyPairGenerator kgp = KeyPairGenerator.getInstance(keyGeneratorAlgorithmName);
+				KeyPairGenerator kgp = KeyPairGenerator.getInstance(keyGeneratorAlgorithmName, codeProviderKeyGenerator.name());
 				JavaNativeKeyPairGenerator res = new JavaNativeKeyPairGenerator(this, kgp);
 				res.initialize(keySize, expirationTimeUTC, random);
 
 				return res;
 			} catch (NoSuchAlgorithmException e) {
 				throw new gnu.vm.jgnu.security.NoSuchAlgorithmException(e);
-			}
+			}catch (java.security.NoSuchProviderException e) {
+				throw new NoSuchProviderException(e.getMessage());
+			} 
 
 		}
 

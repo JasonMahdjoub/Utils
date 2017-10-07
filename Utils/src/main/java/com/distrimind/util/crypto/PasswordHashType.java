@@ -44,6 +44,7 @@ import javax.crypto.spec.PBEKeySpec;
 
 import com.berry.BCrypt;
 
+
 /**
  * 
  * @author Jason Mahdjoub
@@ -52,7 +53,10 @@ import com.berry.BCrypt;
  *
  */
 public enum PasswordHashType {
-	PBKDF2WithHmacSHA1("PBKDF2WithHmacSHA1", (byte) 32, CodeProvider.SUN), 
+	PBKDF2WithHmacSHA1("PBKDF2WithHmacSHA1", (byte) 32, CodeProvider.SunJCE),
+	PBKDF2WithHMacSHA256("PBKDF2WithHMacSHA256", (byte) 32, CodeProvider.SunJCE),
+	PBKDF2WithHMacSHA384("PBKDF2WithHMacSHA384", (byte) 32, CodeProvider.SunJCE),
+	PBKDF2WithHMacSHA512("PBKDF2WithHMacSHA512", (byte) 32, CodeProvider.SunJCE),
 	BCRYPT("BCRYPT", (byte) 32, CodeProvider.SUN), 
 	GNU_PBKDF2WithHmacSHA1("PBKDF2WithHMacSHA1", (byte) 32, CodeProvider.GNU_CRYPTO), 
 	GNU_PBKDF2WithHMacSHA256("PBKDF2WithHMacSHA256",(byte) 32, CodeProvider.GNU_CRYPTO), 
@@ -64,6 +68,9 @@ public enum PasswordHashType {
 	BC_FIPS_PBKFD2WithHMacSHA512("HmacSHA512",(byte) 32, CodeProvider.BCFIPS),
 	DEFAULT(BCRYPT);
 
+	
+		
+	
 	private final byte hashLength;
 
 	private PasswordHashType defaultOf;
@@ -99,7 +106,10 @@ public enum PasswordHashType {
 			return defaultOf.hash(data, off, len, salt, iterations, hashLength);
 		switch (this) {
 		case DEFAULT:
-		case PBKDF2WithHmacSHA1: {
+		case PBKDF2WithHmacSHA1: 
+		case PBKDF2WithHMacSHA256:
+		case PBKDF2WithHMacSHA384:
+		case PBKDF2WithHMacSHA512:{
 			try {
 				int size = len / 2;
 				char[] password = new char[size + len % 2];
@@ -110,12 +120,16 @@ public enum PasswordHashType {
 					password[size] = (char) (data[off + size * 2] & 0xFF);
 
 				PBEKeySpec spec = new PBEKeySpec(password, salt, iterations, (hashLength) * 8);
-				SecretKeyFactory skf = SecretKeyFactory.getInstance(algorithmName);
+				SecretKeyFactory skf = SecretKeyFactory.getInstance(algorithmName, codeProvider.name());
 				return skf.generateSecret(spec).getEncoded();
 			} catch (NoSuchAlgorithmException e) {
 				throw new gnu.vm.jgnu.security.NoSuchAlgorithmException(e);
 			} catch (InvalidKeySpecException e) {
 				throw new gnu.vm.jgnu.security.spec.InvalidKeySpecException(e);
+			}
+			catch(NoSuchProviderException e)
+			{
+				throw new gnu.vm.jgnu.security.NoSuchProviderException(e.getMessage());
 			}
 		}
 		case GNU_PBKDF2WithHMacSHA256:
@@ -193,17 +207,23 @@ public enum PasswordHashType {
 			return defaultOf.hash(password, salt, iterations, hashLength);
 		switch (this) {
 		case DEFAULT:
-		case PBKDF2WithHmacSHA1: {
+		case PBKDF2WithHmacSHA1:
+		case PBKDF2WithHMacSHA256:
+		case PBKDF2WithHMacSHA384:
+		case PBKDF2WithHMacSHA512:{
 			try {
 				PBEKeySpec spec = new PBEKeySpec(password, salt, iterations, (hashLength) * 8);
-				SecretKeyFactory skf = SecretKeyFactory.getInstance(algorithmName);
+				SecretKeyFactory skf = SecretKeyFactory.getInstance(algorithmName, codeProvider.name());
 				return skf.generateSecret(spec).getEncoded();
 			} catch (NoSuchAlgorithmException e) {
 				throw new gnu.vm.jgnu.security.NoSuchAlgorithmException(e);
 			} catch (InvalidKeySpecException e) {
 				throw new gnu.vm.jgnu.security.spec.InvalidKeySpecException(e);
 			}
-
+			catch(NoSuchProviderException e)
+			{
+				throw new gnu.vm.jgnu.security.NoSuchProviderException(e.getMessage());
+			}
 		}
 		case GNU_PBKDF2WithHMacSHA256:
 		case GNU_PBKDF2WithHMacSHA384:

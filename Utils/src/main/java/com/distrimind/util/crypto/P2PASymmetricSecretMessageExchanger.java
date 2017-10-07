@@ -46,6 +46,7 @@ import gnu.vm.jgnu.security.InvalidAlgorithmParameterException;
 import gnu.vm.jgnu.security.InvalidKeyException;
 import gnu.vm.jgnu.security.NoSuchAlgorithmException;
 import gnu.vm.jgnu.security.NoSuchProviderException;
+import gnu.vm.jgnu.security.SecureRandom;
 import gnu.vm.jgnu.security.spec.InvalidKeySpecException;
 import gnu.vm.jgnux.crypto.BadPaddingException;
 import gnu.vm.jgnux.crypto.IllegalBlockSizeException;
@@ -58,24 +59,50 @@ import gnu.vm.jgnux.crypto.NoSuchPaddingException;
  * @since Utils 1.4.1
  */
 public class P2PASymmetricSecretMessageExchanger {
-	static class FakeSecureRandom extends java.security.SecureRandom {
+	static class FakeSecureRandom extends AbstractSecureRandom {
 
 		/**
 		 * 
 		 */
 		private static final long serialVersionUID = -3862260428441022619L;
 
-		private Random random = null;
-
+		private GnuInterface gnuRandom;
+		private boolean initialized;
 		protected FakeSecureRandom() {
-			super(new byte[8]);
-			random = new Random();
-		}
-
-		
-		@Override
-		public byte[] generateSeed(int numBytes) {
-			return null;
+			
+			super(new AbstractSecureRandomSpi(false) {
+				/**
+				 * 
+				 */
+				private static final long serialVersionUID = 6035266817848199010L;
+				Random random = new Random();
+				
+				@Override
+				protected void engineSetSeed(byte[] seed) {
+					if (random!=null)
+					{
+						byte s[]=new byte[seed.length+1];
+						s[0]=1;
+						System.arraycopy(seed, 0, s, 0, seed.length);
+						BigInteger num = new BigInteger(s);
+						random.setSeed(num.mod(maxLongValue).longValue());
+					}
+					
+				}
+				
+				@Override
+				protected void engineNextBytes(byte[] bytes) {
+					random.nextBytes(bytes);					
+				}
+				
+				@Override
+				protected byte[] engineGenerateSeed(int numBytes) {
+					return null;
+				}
+			}, null);
+			initialized=false;
+			gnuRandom=new GnuInterface();
+			initialized=true;
 		}
 
 		@Override
@@ -84,59 +111,55 @@ public class P2PASymmetricSecretMessageExchanger {
 		}
 
 		@Override
-		public boolean nextBoolean() {
-			return random.nextBoolean();
+		public SecureRandom getGnuSecureRandom() {
+			return gnuRandom;
 		}
 
 		@Override
-		synchronized public void nextBytes(byte[] bytes) {
-			random.nextBytes(bytes);
+		public java.security.SecureRandom getJavaNativeSecureRandom() {
+			return this;
 		}
+		
+		
+		
+		private class GnuInterface extends SecureRandom {
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 4299616485652308411L;
 
-		@Override
-		public double nextDouble() {
-			return random.nextDouble();
-		}
+			
+			protected GnuInterface() {
+				super(new gnu.vm.jgnu.security.SecureRandomSpi() {
+					
+					
+					/**
+					 * 
+					 */
+					private static final long serialVersionUID = 740095511171490031L;
 
-		@Override
-		public float nextFloat() {
-			return random.nextFloat();
-		}
-
-		@Override
-		public double nextGaussian() {
-			return random.nextGaussian();
-		}
-
-		@Override
-		public int nextInt() {
-			return random.nextInt();
-		}
-
-		@Override
-		public int nextInt(int bound) {
-			return random.nextInt(bound);
-		}
-
-		@Override
-		public long nextLong() {
-			return random.nextLong();
-		}
-
-		@Override
-		public void setSeed(byte[] seed) {
-			if (random!=null)
-			{
-				BigInteger num = new BigInteger(seed);
-				random.setSeed(num.mod(maxLongValue).longValue());
+					@Override
+					protected void engineSetSeed(byte[] seed) {
+						if (initialized)
+							FakeSecureRandom.this.secureRandomSpi.engineSetSeed(seed);
+					}
+					
+					@Override
+					protected void engineNextBytes(byte[] bytes) {
+						if (initialized)
+							FakeSecureRandom.this.secureRandomSpi.engineNextBytes(bytes);
+						
+					}
+					
+					@Override
+					protected byte[] engineGenerateSeed(int numBytes) {
+						return FakeSecureRandom.this.secureRandomSpi.engineGenerateSeed(numBytes);
+					}
+				}, null);
+				
 			}
-		}
-
-		@Override
-		public void setSeed(long seed) {
-			if (random != null)
-				random.setSeed(seed);
-		}
+		}	
+		
 	}
 
 	protected static BigInteger maxLongValue = BigInteger.valueOf(1).shiftLeft(63);
@@ -152,7 +175,7 @@ public class P2PASymmetricSecretMessageExchanger {
 
 	private P2PASymmetricSecretMessageExchanger distantMessageEncoder;
 
-	private final JavaNativeSecureRandom random;
+	private final AbstractSecureRandom random;
 	
 	private final AbstractSecureRandom secureRandom; 
 
@@ -196,7 +219,7 @@ public class P2PASymmetricSecretMessageExchanger {
 
 		if (distantPublicKey != null)
 			setDistantPublicKey(distantPublicKey);
-		random = new JavaNativeSecureRandom(new FakeSecureRandom());
+		random = new FakeSecureRandom();
 		cipher = getCipherInstancePriv(type);
 		this.messageDigestType = messageDigestType;
 		this.messageDigest = messageDigestType.getMessageDigestInstance();
@@ -261,8 +284,6 @@ public class P2PASymmetricSecretMessageExchanger {
 		hashedMessage = hashMessage(messageDigest256, hashedMessage, 0, hashedMessage.length, salt, offset_salt,
 				len_salt, false);
 
-		byte randomSeed[] = new byte[16];
-		random.nextBytes(randomSeed);
 		SymmetricEncryptionAlgorithm sea = new SymmetricEncryptionAlgorithm(secureRandom,
 				new SymmetricSecretKey(SymmetricEncryptionType.AES,
 						new SecretKeySpec(hashedMessage,
@@ -280,8 +301,6 @@ public class P2PASymmetricSecretMessageExchanger {
 		hashedMessage = hashMessage(messageDigest256, hashedMessage, 0, hashedMessage.length, salt, offset_salt,
 				len_salt, false);
 
-		byte randomSeed[] = new byte[16];
-		random.nextBytes(randomSeed);
 		SymmetricEncryptionAlgorithm sea = new SymmetricEncryptionAlgorithm(secureRandom,
 				new SymmetricSecretKey(SymmetricEncryptionType.AES,
 						new SecretKeySpec(hashedMessage,

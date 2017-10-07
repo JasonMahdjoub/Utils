@@ -34,47 +34,36 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.security.Provider;
-import java.security.Security;
-
-import org.bouncycastle.jcajce.provider.BouncyCastleFipsProvider;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 /**
- * List of asymmetric encryption algorithms
  * 
  * @author Jason Mahdjoub
  * @version 1.0
- * @since Utils 2.9.0
+ * @since Utils 3.2.0
  */
-public enum CodeProvider {
-	SUN, SunJCE, SunJSSE, SunRsaSign, SunEC, GNU_CRYPTO, BCFIPS, BC;
+class UtilsSecurityProvider extends Provider{
 
-	private static volatile Provider bouncyProvider = null;
-	private static volatile Provider bouncyProviderFIPS = null;
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -3275390505194228559L;
+	
+	static final String providerName=UtilsSecurityProvider.class.getSimpleName();
+	
+	UtilsSecurityProvider() {
+		super(providerName, 1.0, "Provider destinated to override default java secure random by a non native blocking secure random.");
+		AccessController.doPrivileged(new PrivilegedAction<Void>() {
 
-	static void ensureBouncyCastleProviderLoaded() {
-
-		if (bouncyProvider == null) {
-
-			synchronized (CodeProvider.class) {
-				if (bouncyProvider == null) {
-					bouncyProvider = new BouncyCastleProvider();
-					Security.insertProviderAt(bouncyProvider, Security.getProviders().length+1);
-				}
+			@Override
+			public Void run() {
+				put("SecureRandom.DEFAULT", NativeNonBlockingSecureRandom.Spi.class.getName());
+				return null;
 			}
-		}
-		if (bouncyProviderFIPS == null) {
-
-			synchronized (CodeProvider.class) {
-				if (bouncyProviderFIPS == null) {
-					bouncyProviderFIPS = new BouncyCastleFipsProvider();
-					Security.insertProviderAt(bouncyProviderFIPS, Security.getProviders().length+1);
-				}
-			}
-		}
-
-		
+		});
 	}
 
+	
 }

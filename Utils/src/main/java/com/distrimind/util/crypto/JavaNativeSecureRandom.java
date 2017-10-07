@@ -52,42 +52,38 @@ public final class JavaNativeSecureRandom extends AbstractSecureRandom {
 		 * 
 		 */
 		private static final long serialVersionUID = 4299616485652308411L;
+
 		
 		protected GnuInterface() {
-			super(null, null);
+			super(new gnu.vm.jgnu.security.SecureRandomSpi() {
+				
+				
+				/**
+				 * 
+				 */
+				private static final long serialVersionUID = 740095511171490031L;
+
+				@Override
+				protected void engineSetSeed(byte[] seed) {
+					if (initialized)
+						JavaNativeSecureRandom.this.secureRandomSpi.engineSetSeed(seed);
+				}
+				
+				@Override
+				protected void engineNextBytes(byte[] bytes) {
+					if (initialized)
+						JavaNativeSecureRandom.this.secureRandomSpi.engineNextBytes(bytes);
+					
+				}
+				
+				@Override
+				protected byte[] engineGenerateSeed(int numBytes) {
+					return JavaNativeSecureRandom.this.secureRandomSpi.engineGenerateSeed(numBytes);
+				}
+			}, null);
 			
 		}
-
-		@Override
-		public byte[] generateSeed(int _numBytes) {
-			return JavaNativeSecureRandom.this.generateSeed(_numBytes);
-		}
-
-		@Override
-		public String getAlgorithm() {
-			return JavaNativeSecureRandom.this.getAlgorithm();
-		}
-
-		@Override
-		public void nextBytes(byte[] _bytes) {
-			if (secureRandom!=null)
-				JavaNativeSecureRandom.this.nextBytes(_bytes);
-		}
-
-		@Override
-		public void setSeed(byte[] _seed) {
-			if (secureRandom!=null)
-				JavaNativeSecureRandom.this.setSeed(_seed);
-		}
-
-		@Override
-		public void setSeed(long _seed) {
-			if (secureRandom!=null)
-				JavaNativeSecureRandom.this.setSeed(_seed);
-
-		}
-
-	}
+	}	
 
 	/**
 	 * 
@@ -97,6 +93,7 @@ public final class JavaNativeSecureRandom extends AbstractSecureRandom {
 	protected java.security.SecureRandom secureRandom;
 
 	private final GnuInterface secureGnuRandom;
+	private boolean initialized;
 
 	JavaNativeSecureRandom(FakeSecureRandom random) throws NoSuchAlgorithmException, NoSuchProviderException {
 		this(SecureRandomType.DEFAULT, random, false);
@@ -106,31 +103,54 @@ public final class JavaNativeSecureRandom extends AbstractSecureRandom {
 	JavaNativeSecureRandom(SecureRandomType type, java.security.SecureRandom secureRandom) throws NoSuchAlgorithmException, NoSuchProviderException {
 		this(type, secureRandom, type.needInitialSeed());
 	}
-	JavaNativeSecureRandom(SecureRandomType type, java.security.SecureRandom secureRandom, boolean automaticReseed) throws NoSuchAlgorithmException, NoSuchProviderException {
-		super(type, automaticReseed);
+	JavaNativeSecureRandom(SecureRandomType type, final java.security.SecureRandom secureRandom, boolean automaticReseed) throws NoSuchAlgorithmException, NoSuchProviderException {
+		super(new AbstractSecureRandomSpi(automaticReseed) {
+			
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = -6399366557746420485L;
+
+			@Override
+			protected void engineSetSeed(byte[] seed) {
+				synchronized(secureRandom)
+				{
+					secureRandom.nextBytes(seed);
+					if (seed!=null)
+						addDataProvided(seed.length);
+				}
+				
+			}
+			
+			@Override
+			protected void engineNextBytes(byte[] _bytes) {
+				synchronized(secureRandom)
+				{
+					secureRandom.nextBytes(_bytes);
+					if (_bytes!=null)
+						addDataProvided(_bytes.length);
+				}
+				
+			}
+			
+			@Override
+			protected byte[] engineGenerateSeed(int numBytes) {
+				return secureRandom.generateSeed(numBytes);
+			}
+		}, type);
 		if (type == null)
 			throw new NullPointerException("type");
 		if (secureRandom == null)
 			throw new NullPointerException("secureRandom");
-		this.secureRandom=null;
+		initialized=false;
 		this.secureGnuRandom = new GnuInterface();
-		this.secureRandom = secureRandom;
+		initialized=true;
 		if (type.needInitialSeed())
 		{
-			setSeed(SecureRandomType.tryToGenerateNativeNonBlockingSeed(55));
+			setSeed(SecureRandomType.tryToGenerateNativeNonBlockingRandomBytes(55));
 			nextBytes(new byte[20]);
 		}
 		
-	}
-
-	@Override
-	public byte[] generateSeed(int _numBytes) {
-		return secureRandom.generateSeed(_numBytes);
-	}
-
-	@Override
-	public String getAlgorithm() {
-		return secureRandom.getAlgorithm();
 	}
 
 	@Override
@@ -140,34 +160,8 @@ public final class JavaNativeSecureRandom extends AbstractSecureRandom {
 
 	@Override
 	public java.security.SecureRandom getJavaNativeSecureRandom() {
-		return secureRandom;
+		return this;
 	}
 
-	@Override
-	public void nextBytes(byte[] _bytes) {
-		synchronized(this)
-		{
-			secureRandom.nextBytes(_bytes);
-			if (_bytes!=null)
-				addDataProvided(_bytes.length);
-		}
-	}
-
-	@Override
-	public void setSeed(byte[] _seed) {
-		synchronized(this)
-		{
-			secureRandom.setSeed(_seed);
-		}
-	}
-
-	@Override
-	public void setSeed(long _seed) {
-		synchronized(this)
-		{
-			if (secureRandom != null)
-				secureRandom.setSeed(_seed);
-		}
-	}
 
 }

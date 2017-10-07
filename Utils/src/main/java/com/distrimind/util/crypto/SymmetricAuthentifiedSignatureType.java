@@ -49,31 +49,34 @@ import gnu.vm.jgnux.crypto.Mac;
  * @since Utils 2.10.0
  */
 public enum SymmetricAuthentifiedSignatureType {
-	HMAC_SHA_256("HmacSHA256", CodeProvider.SUN, (short)128, (short)16, MessageDigestType.SHA2_256), 
-	HMAC_SHA_384("HmacSHA384", CodeProvider.SUN, (short)128, (short)16, MessageDigestType.SHA2_384), 
-	HMAC_SHA_512("HmacSHA512", CodeProvider.SUN, (short)128, (short)16, MessageDigestType.SHA2_512), 
-	BC_FIPS_HMAC_SHA_256("HmacSHA256", CodeProvider.BCFIPS, (short)128, (short)16, MessageDigestType.BC_FIPS_SHA2_256), 
-	BC_FIPS_HMAC_SHA_384("HmacSHA384", CodeProvider.BCFIPS, (short)128, (short)16, MessageDigestType.BC_FIPS_SHA2_384), 
-	BC_FIPS_HMAC_SHA_512("HmacSHA512", CodeProvider.BCFIPS, (short)128, (short)16, MessageDigestType.BC_FIPS_SHA2_512), 
-	BC_FIPS_HMAC_WHIRLPOOL("HmacWHIRLPOOL",CodeProvider.BCFIPS, (short)128, (short)16, MessageDigestType.BC_WHIRLPOOL), 
+	HMAC_SHA_256("HmacSHA256", CodeProvider.SunJCE, CodeProvider.SunJCE, (short)128, (short)16, MessageDigestType.SHA2_256), 
+	HMAC_SHA_384("HmacSHA384", CodeProvider.SunJCE, CodeProvider.SunJCE, (short)128, (short)16, MessageDigestType.SHA2_384), 
+	HMAC_SHA_512("HmacSHA512", CodeProvider.SunJCE, CodeProvider.SunJCE, (short)128, (short)16, MessageDigestType.SHA2_512), 
+	BC_FIPS_HMAC_SHA_256("HmacSHA256", CodeProvider.BCFIPS, CodeProvider.BCFIPS, (short)128, (short)16, MessageDigestType.BC_FIPS_SHA2_256), 
+	BC_FIPS_HMAC_SHA_384("HmacSHA384", CodeProvider.BCFIPS, CodeProvider.BCFIPS, (short)128, (short)16, MessageDigestType.BC_FIPS_SHA2_384), 
+	BC_FIPS_HMAC_SHA_512("HmacSHA512", CodeProvider.BCFIPS, CodeProvider.BCFIPS, (short)128, (short)16, MessageDigestType.BC_FIPS_SHA2_512), 
+	BC_FIPS_HMAC_WHIRLPOOL("HmacWHIRLPOOL",CodeProvider.BCFIPS, CodeProvider.BCFIPS, (short)128, (short)16, MessageDigestType.BC_WHIRLPOOL), 
 	DEFAULT(BC_FIPS_HMAC_SHA_256);
 
 	private final String algorithmName;
-	private final CodeProvider codeProvider;
+	private final CodeProvider codeProviderForSignature, codeProviderForKeyGenerator;
 	private final short keySizeBits;
 	private final short keySizeBytes;
 	private final MessageDigestType messageDigestType;
 
-	private SymmetricAuthentifiedSignatureType(String algorithmName, CodeProvider codeProvider, short keySizeBits, short keySizeBytes, MessageDigestType messageDigestType) {
+		
+	
+	private SymmetricAuthentifiedSignatureType(String algorithmName, CodeProvider codeProviderForSignature, CodeProvider codeProviderForKeyGenerator, short keySizeBits, short keySizeBytes, MessageDigestType messageDigestType) {
 		this.algorithmName = algorithmName;
-		this.codeProvider = codeProvider;
+		this.codeProviderForSignature = codeProviderForSignature;
+		this.codeProviderForKeyGenerator=codeProviderForKeyGenerator;
 		this.keySizeBits=keySizeBits;
 		this.keySizeBytes=keySizeBytes;
 		this.messageDigestType=messageDigestType;
 	}
 
 	private SymmetricAuthentifiedSignatureType(SymmetricAuthentifiedSignatureType other) {
-		this(other.algorithmName, other.codeProvider, other.keySizeBits, other.keySizeBytes, other.messageDigestType);
+		this(other.algorithmName, other.codeProviderForSignature, other.codeProviderForKeyGenerator, other.keySizeBits, other.keySizeBytes, other.messageDigestType);
 	}
 
 	public int getSignatureSizeInBits()
@@ -91,12 +94,12 @@ public enum SymmetricAuthentifiedSignatureType {
 	}
 
 	public AbstractMac getHMacInstance() throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.NoSuchProviderException {
-		if (codeProvider == CodeProvider.GNU_CRYPTO) {
+		if (codeProviderForSignature == CodeProvider.GNU_CRYPTO) {
 			return new GnuMac(Mac.getInstance(algorithmName));
-		} else if (codeProvider == CodeProvider.BCFIPS) {
+		} else if (codeProviderForSignature == CodeProvider.BCFIPS) {
 			CodeProvider.ensureBouncyCastleProviderLoaded();
 			try {
-				return new JavaNativeMac(javax.crypto.Mac.getInstance(algorithmName, codeProvider.name()));
+				return new JavaNativeMac(javax.crypto.Mac.getInstance(algorithmName, codeProviderForSignature.name()));
 			} catch (java.security.NoSuchAlgorithmException e) {
 				throw new gnu.vm.jgnu.security.NoSuchAlgorithmException(e);
 			}
@@ -106,15 +109,22 @@ public enum SymmetricAuthentifiedSignatureType {
 			}
 		} else {
 			try {
-				return new JavaNativeMac(javax.crypto.Mac.getInstance(algorithmName));
+				return new JavaNativeMac(javax.crypto.Mac.getInstance(algorithmName, codeProviderForSignature.name()));
 			} catch (java.security.NoSuchAlgorithmException e) {
 				throw new gnu.vm.jgnu.security.NoSuchAlgorithmException(e);
+			}
+			catch(java.security.NoSuchProviderException e)
+			{
+				throw new gnu.vm.jgnu.security.NoSuchProviderException(e.getMessage());
 			}
 		}
 	}
 
-	public CodeProvider getCodeProvider() {
-		return codeProvider;
+	public CodeProvider getCodeProviderForSignature() {
+		return codeProviderForSignature;
+	}
+	public CodeProvider getCodeProviderForKeyGenerator() {
+		return codeProviderForKeyGenerator;
 	}
 
 	public short getDefaultKeySizeBits() {
@@ -141,9 +151,9 @@ public enum SymmetricAuthentifiedSignatureType {
 	public AbstractKeyGenerator getKeyGenerator(AbstractSecureRandom random, short keySizeBits)
 			throws NoSuchAlgorithmException, NoSuchProviderException {
 		AbstractKeyGenerator res = null;
-		if (codeProvider == CodeProvider.GNU_CRYPTO) {
+		if (codeProviderForKeyGenerator == CodeProvider.GNU_CRYPTO) {
 			res = new GnuKeyGenerator(this, KeyGenerator.getInstance(algorithmName));
-		} else if (codeProvider == CodeProvider.BCFIPS) {
+		} else if (codeProviderForKeyGenerator == CodeProvider.BCFIPS) {
 
 			try {
 				CodeProvider.ensureBouncyCastleProviderLoaded();
@@ -157,9 +167,11 @@ public enum SymmetricAuthentifiedSignatureType {
 
 		} else {
 			try {
-				res = new JavaNativeKeyGenerator(this, javax.crypto.KeyGenerator.getInstance(algorithmName));
+				res = new JavaNativeKeyGenerator(this, javax.crypto.KeyGenerator.getInstance(algorithmName, codeProviderForKeyGenerator.name()));
 			} catch (java.security.NoSuchAlgorithmException e) {
 				throw new NoSuchAlgorithmException(e);
+			}catch (java.security.NoSuchProviderException e) {
+				throw new NoSuchProviderException(e.getMessage());
 			}
 		}
 		res.init(keySizeBits, random);
@@ -173,9 +185,9 @@ public enum SymmetricAuthentifiedSignatureType {
 	}
 
 	public SymmetricSecretKey getSymmetricSecretKey(byte[] secretKey, short keySizeBits) {
-		if (codeProvider == CodeProvider.BCFIPS || codeProvider == CodeProvider.SUN) {
+		if (codeProviderForKeyGenerator == CodeProvider.BCFIPS || codeProviderForKeyGenerator == CodeProvider.SunJCE) {
 			return new SymmetricSecretKey(this, new SecretKeySpec(secretKey, getAlgorithmName()), keySizeBits);
-		} else if (getCodeProvider() == CodeProvider.GNU_CRYPTO) {
+		} else if (codeProviderForKeyGenerator == CodeProvider.GNU_CRYPTO) {
 			return new SymmetricSecretKey(this,
 					new gnu.vm.jgnux.crypto.spec.SecretKeySpec(secretKey, getAlgorithmName()), keySizeBits);
 		} else

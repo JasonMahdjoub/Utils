@@ -34,6 +34,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
+
 import gnu.vm.jgnu.security.NoSuchAlgorithmException;
 import gnu.vm.jgnu.security.NoSuchProviderException;
 import gnu.vm.jgnu.security.SecureRandom;
@@ -50,43 +51,39 @@ public class NativeNonBlockingSecureRandom extends AbstractSecureRandom {
 		 * 
 		 */
 		private static final long serialVersionUID = 4299616485652308411L;
+
 		
 		protected GnuInterface() {
-			super(null, null);
+			super(new gnu.vm.jgnu.security.SecureRandomSpi() {
+				
+				
+				/**
+				 * 
+				 */
+				private static final long serialVersionUID = 740095511171490031L;
+
+				@Override
+				protected void engineSetSeed(byte[] seed) {
+					if (initialized)
+						NativeNonBlockingSecureRandom.this.secureRandomSpi.engineSetSeed(seed);
+				}
+				
+				@Override
+				protected void engineNextBytes(byte[] bytes) {
+					if (initialized)
+						NativeNonBlockingSecureRandom.this.secureRandomSpi.engineNextBytes(bytes);
+					
+				}
+				
+				@Override
+				protected byte[] engineGenerateSeed(int numBytes) {
+					return NativeNonBlockingSecureRandom.this.secureRandomSpi.engineGenerateSeed(numBytes);
+				}
+			}, null);
 			
-			
 		}
+	}	
 
-		@Override
-		public byte[] generateSeed(int _numBytes) {
-			return NativeNonBlockingSecureRandom.this.generateSeed(_numBytes);
-		}
-
-		@Override
-		public String getAlgorithm() {
-			return NativeNonBlockingSecureRandom.this.getAlgorithm();
-		}
-
-		@Override
-		public void nextBytes(byte[] _bytes) {
-			if (initialized)
-				NativeNonBlockingSecureRandom.this.nextBytes(_bytes);
-		}
-
-		@Override
-		public void setSeed(byte[] _seed) {
-			if (initialized)
-				NativeNonBlockingSecureRandom.this.setSeed(_seed);
-		}
-
-		@Override
-		public void setSeed(long _seed) {
-			if (initialized)
-				NativeNonBlockingSecureRandom.this.setSeed(_seed);
-
-		}
-
-	}
 
 	/**
 	 * 
@@ -96,28 +93,79 @@ public class NativeNonBlockingSecureRandom extends AbstractSecureRandom {
 	private final GnuInterface secureGnuRandom;
 	private boolean initialized;
 
-	NativeNonBlockingSecureRandom() throws NoSuchAlgorithmException, NoSuchProviderException {
-		super(SecureRandomType.NativeNonBlockingPRNG, false);
+	public static class Spi extends AbstractSecureRandomSpi
+	{
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 3887548046414173231L;
+		private final AbstractSecureRandom secureRandom;
+		public Spi() throws NoSuchAlgorithmException, NoSuchProviderException
+		{
+			super(false);
+			secureRandom=SecureRandomType.NativePRNGNonBlocking.getSingleton(null);
+		}
+		@Override
+		protected void engineSetSeed(byte[] seed) {
+			secureRandom.setSeed(seed);
+		}
+		
+		@Override
+		protected void engineNextBytes(byte[] bytes) {
+			secureRandom.nextBytes(bytes);
+		}
+		
+		@Override
+		protected byte[] engineGenerateSeed(int numBytes) {
+			return secureRandom.generateSeed(numBytes);
+		}
+		
+	}
+	
+	
+	public NativeNonBlockingSecureRandom() throws NoSuchAlgorithmException, NoSuchProviderException {
+		super(new AbstractSecureRandomSpi(false) {
+
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 7950985066895286085L;
+
+			@Override
+			protected void engineSetSeed(byte[] seed) {
+
+				
+				
+			}
+			
+			@Override
+			protected void engineNextBytes(byte[] bytes) {
+				try
+				{
+					SecureRandomType.tryToGenerateNativeNonBlockingRandomBytes(bytes);
+				}
+				catch(Exception e)
+				{
+					throw new IllegalAccessError(e.getMessage());
+				}
+				
+			}
+			
+			@Override
+			protected byte[] engineGenerateSeed(int numBytes) {
+				try
+				{
+					return SecureRandomType.NativePRNG.getSingleton(null).generateSeed(numBytes);
+				}
+				catch(Exception e)
+				{
+					throw new IllegalAccessError(e.getMessage());
+				}
+			}
+			}, SecureRandomType.NativePRNGNonBlocking);
 		initialized=false;
 		this.secureGnuRandom = new GnuInterface();
 		initialized=true;
-	}
-
-	@Override
-	public byte[] generateSeed(int _numBytes) {
-		try
-		{
-			return SecureRandomType.tryToGenerateNativeNonBlockingSeed(_numBytes);
-		}
-		catch(Exception e)
-		{
-			throw new IllegalAccessError(e.getMessage());
-		}
-	}
-
-	@Override
-	public String getAlgorithm() {
-		return SecureRandomType.NativeNonBlockingPRNG.name();
 	}
 
 	@Override
@@ -128,26 +176,6 @@ public class NativeNonBlockingSecureRandom extends AbstractSecureRandom {
 	@Override
 	public java.security.SecureRandom getJavaNativeSecureRandom() {
 		return this;
-	}
-
-	@Override
-	public void nextBytes(byte[] _bytes) {
-		try
-		{
-			SecureRandomType.tryToGenerateNativeNonBlockingSeed(_bytes);
-		}
-		catch(Exception e)
-		{
-			throw new IllegalAccessError(e.getMessage());
-		}
-	}
-
-	@Override
-	public void setSeed(byte[] _seed) {
-	}
-
-	@Override
-	public void setSeed(long _seed) {
 	}
 
 }

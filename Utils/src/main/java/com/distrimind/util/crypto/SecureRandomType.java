@@ -44,6 +44,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.PrivilegedAction;
 import java.security.SecureRandom;
+import java.security.Security;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -74,7 +75,7 @@ public enum SecureRandomType {
 	GNU_DEFAULT(GNU_SHA1PRNG),
 	SPEEDIEST(GNU_SHA512PRNG), 
 	NativePRNG("NativePRNG", CodeProvider.SUN, false, false),
-	NativeNonBlockingPRNG("NativeNonBlockingPRNG", CodeProvider.SUN, false, false),
+	NativePRNGNonBlocking("NativePRNGNonBlocking", CodeProvider.SUN, false, false),
 	BC_FIPS_APPROVED("BC_FIPS_APPROVED", CodeProvider.BCFIPS, false, false),
 	BC_FIPS_APPROVED_FOR_KEYS("BC_FIPS_APPROVED_FOR_KEYS", CodeProvider.BCFIPS, false, false),
 	DEFAULT_BC_FIPS_APPROVED("DEFAULT_BC_FIPS_APPROVED", CodeProvider.BCFIPS, false, false),
@@ -106,6 +107,11 @@ public enum SecureRandomType {
 		this.provider = provider;
 		this.gnuVersion = gnuVersion;
 		this.needInitialSeed=needInitialSeed;
+	}
+	
+	public String getAlgorithmName()
+	{
+		return algorithmeName;
 	}
 	
 	/**
@@ -153,7 +159,7 @@ public enum SecureRandomType {
 		} else {
 			if (BC_FIPS_APPROVED.algorithmeName.equals(this.algorithmeName) || BC_FIPS_APPROVED_FOR_KEYS.algorithmeName.equals(this.algorithmeName))
 			{
-				SecureRandom srSource=SecureRandomType.NativeNonBlockingPRNG.getSingleton(null);
+				SecureRandom srSource=SecureRandomType.NativePRNGNonBlocking.getSingleton(null);
 				if (nonce==null)
 				{
 					nonce=SecureRandomType.nonce;
@@ -172,7 +178,7 @@ public enum SecureRandomType {
 			}
 			else if (DEFAULT_BC_FIPS_APPROVED.algorithmeName.equals(this.algorithmeName))
 			{
-				SecureRandom srSource=SecureRandomType.NativeNonBlockingPRNG.getSingleton(null);
+				SecureRandom srSource=SecureRandomType.NativePRNGNonBlocking.getSingleton(null);
 				if (nonce==null)
 				{
 					nonce=SecureRandomType.nonce;
@@ -194,9 +200,28 @@ public enum SecureRandomType {
 			else if (FORTUNA_WITH_BC_FIPS_APPROVED_FOR_KEYS.algorithmeName.equals(algorithmeName)) {
 				return new FortunaSecureRandom(nonce, personalizationString, SHA1PRNG, BC_FIPS_APPROVED_FOR_KEYS);
 			}
-			else if (NativeNonBlockingPRNG.algorithmeName.equals(algorithmeName))
+			else if (NativePRNGNonBlocking.algorithmeName.equals(algorithmeName))
 			{
-				return new NativeNonBlockingSecureRandom();
+				double version;
+				try
+				{
+					version=Double.parseDouble(System.getProperty("java.specification.version"));
+				}
+				catch(Throwable t)
+				{
+					return new NativeNonBlockingSecureRandom();
+				}
+				if (version>=1.8)
+				{
+					try {
+						return new JavaNativeSecureRandom(NativePRNGNonBlocking, SecureRandom.getInstance(algorithmeName, "SUN"), false);
+					} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
+						return new NativeNonBlockingSecureRandom();
+					}
+				}
+				else
+					return new NativeNonBlockingSecureRandom();
+					
 			}
 			else
 			{
@@ -300,17 +325,7 @@ public enum SecureRandomType {
 		return result;
 	}
 	
-	static
-	{
-		try
-		{
-			CryptoServicesRegistrar.setSecureRandom(FORTUNA_WITH_BC_FIPS_APPROVED_FOR_KEYS.getSingleton(nonce));
-		}
-		catch(Exception e)
-		{
-			e.printStackTrace();
-		}
-	}
+	
 	
 	public AbstractSecureRandom getSingleton(byte nonce[]) throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.NoSuchProviderException
 	{
@@ -346,14 +361,58 @@ public enum SecureRandomType {
 		return new File("/dev/urandom");
 	}
 	
-	private static SecureRandom defaultNativeNonBlockingSeed=new SecureRandom();
-	static byte[] tryToGenerateNativeNonBlockingSeed(final int size) throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.NoSuchProviderException
+	private static volatile SecureRandom defaultNativeNonBlockingSeed=null;
+	private static SecureRandom getDefaultNativeNonBlockingSeedSingleton()
+	{
+		if (defaultNativeNonBlockingSeed==null)
+		{
+			synchronized(NativeNonBlockingSecureRandom.class)
+			{
+				if (defaultNativeNonBlockingSeed==null)
+				{
+					SecureRandom sr=null;
+					if (OSValidator.isLinux() || OSValidator.isUnix() || OSValidator.isSolaris() || OSValidator.isMac())
+					{
+						try {
+							sr=SecureRandom.getInstance("NativePRNG", "SUN");
+						} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
+							try
+							{
+								sr=SecureRandom.getInstance("SHA1PRNG", "SUN");
+							}
+							catch(NoSuchAlgorithmException | NoSuchProviderException e2)
+							{
+								e2.printStackTrace();
+								System.exit(-1);
+							}
+						}
+					}
+					else
+					{
+						try
+						{
+							sr=SecureRandom.getInstance("SHA1PRNG", "SUN");
+						}
+						catch(NoSuchAlgorithmException | NoSuchProviderException e2)
+						{
+							e2.printStackTrace();
+							System.exit(-1);
+						}
+					}
+					
+					defaultNativeNonBlockingSeed=sr;
+				}
+			}
+		}
+		return defaultNativeNonBlockingSeed;
+	}
+	static byte[] tryToGenerateNativeNonBlockingRandomBytes(final int size) throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.NoSuchProviderException
 	{
 		byte[] res=new byte[size];
-		tryToGenerateNativeNonBlockingSeed(res);
+		tryToGenerateNativeNonBlockingRandomBytes(res);
 		return res;
 	}
-	static void tryToGenerateNativeNonBlockingSeed(final byte[] buffer) throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.NoSuchProviderException
+	static void tryToGenerateNativeNonBlockingRandomBytes(final byte[] buffer) throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.NoSuchProviderException
 	{
 		if (OSValidator.isLinux() || OSValidator.isUnix() || OSValidator.isSolaris() || OSValidator.isMac())
 		{
@@ -361,27 +420,21 @@ public enum SecureRandomType {
 
 				@Override
 				public Void run() {
-					try
-					{
-						File randomSource=getURandomPath();
+						synchronized(NativeNonBlockingSecureRandom.class)
+						{
+							File randomSource=getURandomPath();
 						
-						try (InputStream in = new FileInputStream(randomSource)) {
-							in.read(buffer);
-							return null;
+							try (InputStream in = new FileInputStream(randomSource)) {
+								in.read(buffer);
+								return null;
+							}
+							catch(IOException e)
+							{
+								e.printStackTrace();
+							}
+							System.arraycopy(getDefaultNativeNonBlockingSeedSingleton().generateSeed(buffer.length), 0, buffer, 0, buffer.length);
 						}
-						catch(IOException e)
-						{
-							e.printStackTrace();
-						}
-						System.arraycopy(NativePRNG.getSingleton(nonce).generateSeed(buffer.length), 0, buffer, 0, buffer.length);
-					}
-					catch(Exception e)
-					{
-						synchronized(defaultNativeNonBlockingSeed)
-						{
-							System.arraycopy(defaultNativeNonBlockingSeed.generateSeed(buffer.length), 0, buffer, 0, buffer.length);
-						}
-					}
+
 					return null;
 				}
 			});
@@ -389,13 +442,24 @@ public enum SecureRandomType {
 		}
 		else
 		{
-			synchronized(defaultNativeNonBlockingSeed)
+			synchronized(NativeNonBlockingSecureRandom.class)
 			{
-				System.arraycopy(defaultNativeNonBlockingSeed.generateSeed(buffer.length), 0, buffer, 0, buffer.length);
+				System.arraycopy(getDefaultNativeNonBlockingSeedSingleton().generateSeed(buffer.length), 0, buffer, 0, buffer.length);
 			}
 		}
 	}
-	
-	
+
+	static
+	{
+		try
+		{
+			Security.insertProviderAt(new UtilsSecurityProvider(), 1);
+			CryptoServicesRegistrar.setSecureRandom(FORTUNA_WITH_BC_FIPS_APPROVED_FOR_KEYS.getSingleton(nonce));
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+	}
 	
 }

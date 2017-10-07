@@ -105,7 +105,7 @@ public class SymmetricSecretKey implements UtilKey {
 		this(secretKey, keySize);
 		if (type == null)
 			throw new NullPointerException("type");
-		if (type.getCodeProvider() != CodeProvider.GNU_CRYPTO)
+		if (type.getCodeProviderForEncryption() != CodeProvider.GNU_CRYPTO)
 			throw new IllegalAccessError();
 		this.encryptionType = type;
 		this.signatureType=null;
@@ -114,7 +114,7 @@ public class SymmetricSecretKey implements UtilKey {
 		this(secretKey, keySize);
 		if (type == null)
 			throw new NullPointerException("type");
-		if (type.getCodeProvider() != CodeProvider.GNU_CRYPTO)
+		if (type.getCodeProviderForSignature() != CodeProvider.GNU_CRYPTO)
 			throw new IllegalAccessError();
 		this.encryptionType = null;
 		this.signatureType=type;
@@ -124,7 +124,7 @@ public class SymmetricSecretKey implements UtilKey {
 		this(secretKey, keySize);
 		if (type == null)
 			throw new NullPointerException("type");
-		if (type.getCodeProvider() == CodeProvider.GNU_CRYPTO)
+		if (type.getCodeProviderForEncryption() == CodeProvider.GNU_CRYPTO)
 			throw new IllegalAccessError();
 		this.encryptionType = type;
 		this.signatureType=null;
@@ -133,7 +133,7 @@ public class SymmetricSecretKey implements UtilKey {
 		this(secretKey, keySize);
 		if (type == null)
 			throw new NullPointerException("type");
-		if (type.getCodeProvider() == CodeProvider.GNU_CRYPTO)
+		if (type.getCodeProviderForSignature() == CodeProvider.GNU_CRYPTO)
 			throw new IllegalAccessError();
 		this.encryptionType = null;
 		this.signatureType=type;

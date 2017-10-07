@@ -38,8 +38,6 @@ import java.io.Serializable;
 import java.util.Collections;
 import java.util.Map;
 
-import com.distrimind.util.Bits;
-
 import gnu.jgnu.security.hash.IMessageDigest;
 import gnu.jgnu.security.prng.IRandom;
 import gnu.jgnu.security.prng.LimitReachedException;
@@ -65,14 +63,12 @@ public class FortunaSecureRandom extends AbstractSecureRandom implements Seriali
 	 */
 	private static final long serialVersionUID = -512529549993096330L;
 	
-	private volatile FortunaImpl fortuna;
-	private transient final AbstractSecureRandom randoms[];
+	
 	//private transient final SecureRandomType types[];
 	private transient final GnuInterface secureGnuRandom;
-	private transient final JavaNativeInterface secureJavaNativeRandom;
-	private transient boolean fortunaInitialized=false;
+	
 	private static final short initialGeneratedSeedSize=64;
-	private final byte nonce[], personalizationString[];
+	
 	private boolean initialized;
 	public FortunaSecureRandom(byte nonce[]) throws NoSuchAlgorithmException, NoSuchProviderException {
 		this(nonce, null);
@@ -80,90 +76,161 @@ public class FortunaSecureRandom extends AbstractSecureRandom implements Seriali
 	public FortunaSecureRandom(byte nonce[], byte [] personalizationString) throws NoSuchAlgorithmException, NoSuchProviderException {
 		this(nonce, personalizationString, SecureRandomType.SHA1PRNG, SecureRandomType.GNU_SHA512PRNG);
 	}
+	
+	private static class RandomSpi extends AbstractSecureRandomSpi
+	{
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = -8786132962158601823L;
+		
+		private volatile FortunaImpl fortuna=null;
+		private transient boolean fortunaInitialized=false;
+		private transient final AbstractSecureRandom randoms[];
+		protected final byte nonce[], personalizationString[];
+
+		protected RandomSpi(byte nonce[], byte [] personalizationString, SecureRandomType ... types) throws NoSuchAlgorithmException, NoSuchProviderException
+		{
+			super(false);
+			this.nonce=nonce;
+			this.personalizationString=personalizationString;
+			fortuna=null;
+			if (types.length==0)
+				throw new IllegalArgumentException();
+			randoms=new AbstractSecureRandom[types.length];
+			for (int i=0;i<randoms.length;i++)
+				randoms[i]=types[i].getInstance(nonce, personalizationString);
+			
+		}
+		
+		
+		private FortunaImpl getFortunaInstance()
+		{
+			if (fortuna==null)
+			{
+				synchronized(this)
+				{
+					if (fortuna==null)
+					{
+						fortuna=new FortunaImpl();
+					}
+				}
+			}
+			if (!fortunaInitialized)
+			{
+				synchronized(this)
+				{
+					if (!fortunaInitialized)
+					{
+						fortuna.init(Collections.singletonMap((Object)Fortuna.SEED, engineGenerateSeed(initialGeneratedSeedSize)));
+						fortunaInitialized=true;
+					}
+				}
+			}
+			return fortuna;
+		}
+
+		@Override
+		protected void engineSetSeed(byte[] seed) {
+			if (seed==null)
+				throw new NullPointerException();
+			if (seed.length==0)
+				throw new IllegalArgumentException();
+			synchronized(this)
+			{
+				getFortunaInstance().setup(Collections.singletonMap((Object)Fortuna.SEED, seed));
+			}			
+		}
+
+		@Override
+		protected void engineNextBytes(byte[] bytes) {
+			synchronized(this)
+			{
+				try
+				{
+					getFortunaInstance().nextBytes(bytes);
+				}
+				catch(Exception e)
+				{
+					e.printStackTrace();
+					throw new IllegalAccessError();
+				}
+			}
+			
+		}
+
+		@Override
+		protected byte[] engineGenerateSeed(int numBytes) {
+			synchronized(this)
+			{
+				byte[] seed;
+				try {
+					seed = SecureRandomType.tryToGenerateNativeNonBlockingRandomBytes(numBytes);
+				} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
+					e.printStackTrace();
+					seed=new byte[numBytes];
+				}
+				byte[] s=null;
+				for (int i=0;i<randoms.length;i++)
+				{
+					if (s==null)
+						s=new byte[numBytes];
+					randoms[i].nextBytes(s);
+					for (int j=0;j<numBytes;j++)
+						seed[j]=(byte)(seed[i]^s[i]);
+				}
+				return seed;
+			}
+		}
+		
+		protected class FortunaImpl extends Fortuna
+		{
+			@Override
+			protected void refreshDigestWithRandomEvents(IMessageDigest pool)
+			{
+				for (int i=0;i<randoms.length;i++)
+				{
+					byte[] tab=new byte[20];
+					randoms[i].nextBytes(tab);
+					pool.update(tab);				
+				}
+				try {
+					pool.update(SecureRandomType.tryToGenerateNativeNonBlockingRandomBytes(20));
+				} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
+					e.printStackTrace();
+				}
+			}
+
+			@Override public FortunaImpl clone() throws CloneNotSupportedException
+			{
+				return (FortunaImpl) super.clone();
+			}
+		}
+		
+	}
+	
 	FortunaSecureRandom(byte nonce[], byte [] personalizationString, SecureRandomType ... types) throws NoSuchAlgorithmException, NoSuchProviderException {
-		super(null, false);
-		this.nonce=nonce;
-		this.personalizationString=personalizationString;
-		fortuna=null;
-		if (types.length==0)
-			throw new IllegalArgumentException();
-		randoms=new AbstractSecureRandom[types.length];
-		for (int i=0;i<randoms.length;i++)
-			randoms[i]=types[i].getInstance(nonce, personalizationString);
-		//this.types=types;
+		super(new RandomSpi(nonce, personalizationString, types),null);
+		
 		initialized=false;
 		secureGnuRandom=new GnuInterface();
-		secureJavaNativeRandom=new JavaNativeInterface();
 		initialized=true;
 	}
 
-	private FortunaImpl getFortunaInstance()
-	{
-		if (fortuna==null)
-		{
-			synchronized(this)
-			{
-				if (fortuna==null)
-				{
-					fortuna=new FortunaImpl();
-				}
-			}
-		}
-		if (!fortunaInitialized)
-		{
-			synchronized(this)
-			{
-				if (!fortunaInitialized)
-				{
-					fortuna.init(Collections.singletonMap((Object)Fortuna.SEED, generateSeed(initialGeneratedSeedSize)));
-					fortunaInitialized=true;
-				}
-			}
-		}
-		return fortuna;
-	}
 	@Override
 	public FortunaSecureRandom clone() throws CloneNotSupportedException
 	{
 		try
 		{
-			FortunaSecureRandom res=new FortunaSecureRandom(nonce, personalizationString);
-			res.fortuna=getFortunaInstance().clone();
+			RandomSpi rs=((FortunaSecureRandom.RandomSpi)this.secureRandomSpi);
+			FortunaSecureRandom res=new FortunaSecureRandom(rs.nonce, rs.personalizationString);
+			((FortunaSecureRandom.RandomSpi)res.secureRandomSpi).fortuna=rs.getFortunaInstance().clone();
 			return res;
 		}
 		catch(Exception e)
 		{
 			throw new CloneNotSupportedException(e.toString());
 		}
-	}
-	
-	@Override
-	public byte[] generateSeed(int numBytes) {
-		synchronized(this)
-		{
-			byte[] seed;
-			try {
-				seed = SecureRandomType.tryToGenerateNativeNonBlockingSeed(numBytes);
-			} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
-				e.printStackTrace();
-				seed=new byte[numBytes];
-			}
-			byte[] s=null;
-			for (int i=0;i<randoms.length;i++)
-			{
-				if (s==null)
-					s=new byte[numBytes];
-				randoms[i].nextBytes(s);
-				for (int j=0;j<numBytes;j++)
-					seed[j]=(byte)(seed[i]^s[i]);
-			}
-			return seed;
-		}
-	}
-
-	@Override
-	public String getAlgorithm() {
-		return getType().name();
 	}
 
 	@Override
@@ -173,23 +240,7 @@ public class FortunaSecureRandom extends AbstractSecureRandom implements Seriali
 
 	@Override
 	public java.security.SecureRandom getJavaNativeSecureRandom() {
-		return secureJavaNativeRandom;
-	}
-
-	@Override
-	public void nextBytes(byte[] bytes){
-		synchronized(this)
-		{
-			try
-			{
-				getFortunaInstance().nextBytes(bytes);
-			}
-			catch(Exception e)
-			{
-				e.printStackTrace();
-				throw new IllegalAccessError();
-			}
-		}
+		return this;
 	}
 	
 	public void setSeedAndNextBytes(byte[] seed, byte[] bytes)
@@ -201,34 +252,12 @@ public class FortunaSecureRandom extends AbstractSecureRandom implements Seriali
 		}
 	}
 
-	@Override
-	public void setSeed(byte[] seed) {
-		if (seed==null)
-			throw new NullPointerException();
-		if (seed.length==0)
-			throw new IllegalArgumentException();
-		synchronized(this)
-		{
-			getFortunaInstance().setup(Collections.singletonMap((Object)Fortuna.SEED, seed));
-		}
-	}
-
-	@Override
-	public void setSeed(long seed) {
-		
-		if (randoms!=null)
-		{
-			byte[] s=new byte[8];
-			Bits.putLong(s, 0, seed);
-			setSeed(s);
-		}
-	}
 	
 	@Override
 	public void addRandomByte(byte arg0) {
 		synchronized(this)
 		{
-			getFortunaInstance().addRandomByte(arg0);
+			((FortunaSecureRandom.RandomSpi)this.secureRandomSpi).getFortunaInstance().addRandomByte(arg0);
 		}
 		
 	}
@@ -237,7 +266,7 @@ public class FortunaSecureRandom extends AbstractSecureRandom implements Seriali
 	public void addRandomBytes(byte[] arg0) {
 		synchronized(this)
 		{
-			getFortunaInstance().addRandomBytes(arg0);
+			((FortunaSecureRandom.RandomSpi)this.secureRandomSpi).getFortunaInstance().addRandomBytes(arg0);
 		}
 		
 	}
@@ -246,7 +275,7 @@ public class FortunaSecureRandom extends AbstractSecureRandom implements Seriali
 	public void addRandomBytes(byte[] arg0, int arg1, int arg2) {
 		synchronized(this)
 		{
-			getFortunaInstance().addRandomBytes(arg0, arg1, arg2);
+			((FortunaSecureRandom.RandomSpi)this.secureRandomSpi).getFortunaInstance().addRandomBytes(arg0, arg1, arg2);
 		}
 	}
 
@@ -254,7 +283,7 @@ public class FortunaSecureRandom extends AbstractSecureRandom implements Seriali
 	public void init(Map<Object, ?> arg0) {
 		synchronized(this)
 		{
-			getFortunaInstance().init(arg0);
+			((FortunaSecureRandom.RandomSpi)this.secureRandomSpi).getFortunaInstance().init(arg0);
 		}
 		
 	}
@@ -263,7 +292,7 @@ public class FortunaSecureRandom extends AbstractSecureRandom implements Seriali
 	public String name() {
 		synchronized(this)
 		{
-			return getFortunaInstance().name();
+			return ((FortunaSecureRandom.RandomSpi)this.secureRandomSpi).getFortunaInstance().name();
 		}
 	}
 
@@ -271,7 +300,7 @@ public class FortunaSecureRandom extends AbstractSecureRandom implements Seriali
 	public byte nextByte() throws IllegalStateException, LimitReachedException {
 		synchronized(this)
 		{
-			return getFortunaInstance().nextByte();
+			return ((FortunaSecureRandom.RandomSpi)this.secureRandomSpi).getFortunaInstance().nextByte();
 		}
 	}
 
@@ -279,7 +308,7 @@ public class FortunaSecureRandom extends AbstractSecureRandom implements Seriali
 	public void nextBytes(byte[] arg0, int arg1, int arg2) throws IllegalStateException, LimitReachedException {
 		synchronized(this)
 		{
-			getFortunaInstance().nextBytes(arg0, arg1, arg2);
+			((FortunaSecureRandom.RandomSpi)this.secureRandomSpi).getFortunaInstance().nextBytes(arg0, arg1, arg2);
 		}
 				
 	}
@@ -287,7 +316,7 @@ public class FortunaSecureRandom extends AbstractSecureRandom implements Seriali
 	public void addRandomEvent(RandomEvent arg0) {
 		synchronized(this)
 		{
-			getFortunaInstance().addRandomEvent(arg0);
+			((FortunaSecureRandom.RandomSpi)this.secureRandomSpi).getFortunaInstance().addRandomEvent(arg0);
 		}
 		
 	}
@@ -302,105 +331,36 @@ public class FortunaSecureRandom extends AbstractSecureRandom implements Seriali
 
 		
 		protected GnuInterface() {
-			super(new byte[8]);
+			super(new gnu.vm.jgnu.security.SecureRandomSpi() {
+				
+				
+				/**
+				 * 
+				 */
+				private static final long serialVersionUID = 740095511171490031L;
+
+				@Override
+				protected void engineSetSeed(byte[] seed) {
+					if (initialized)
+						FortunaSecureRandom.this.secureRandomSpi.engineSetSeed(seed);
+				}
+				
+				@Override
+				protected void engineNextBytes(byte[] bytes) {
+					if (initialized)
+						FortunaSecureRandom.this.secureRandomSpi.engineNextBytes(bytes);
+					
+				}
+				
+				@Override
+				protected byte[] engineGenerateSeed(int numBytes) {
+					return FortunaSecureRandom.this.secureRandomSpi.engineGenerateSeed(numBytes);
+				}
+			}, null);
 			
 		}
-
-		@Override
-		public byte[] generateSeed(int _numBytes) {
-			return FortunaSecureRandom.this.generateSeed(_numBytes);
-		}
-
-		@Override
-		public String getAlgorithm() {
-			return FortunaSecureRandom.this.getAlgorithm();
-		}
-
-		@Override
-		public void nextBytes(byte[] _bytes) {
-			if (initialized)
-				FortunaSecureRandom.this.nextBytes(_bytes);
-		}
-
-		@Override
-		public void setSeed(byte[] _seed) {
-			if (initialized)
-				FortunaSecureRandom.this.setSeed(_seed);
-		}
-
-		@Override
-		public void setSeed(long _seed) {
-			if (initialized)
-				FortunaSecureRandom.this.setSeed(_seed);
-
-		}
-
-	}
-	private class JavaNativeInterface extends java.security.SecureRandom {
-		/**
-		 * 
-		 */
-		private static final long serialVersionUID = 4299616485652308411L;
-		
-		protected JavaNativeInterface() {
-			super(new byte[8]);
-			
-		}
-
-		@Override
-		public byte[] generateSeed(int _numBytes) {
-			return FortunaSecureRandom.this.generateSeed(_numBytes);
-		}
-
-		@Override
-		public String getAlgorithm() {
-			return FortunaSecureRandom.this.getAlgorithm();
-		}
-
-		@Override
-		public void nextBytes(byte[] _bytes) {
-			if (initialized)
-				FortunaSecureRandom.this.nextBytes(_bytes);
-		}
-
-		@Override
-		public void setSeed(byte[] _seed) {
-			if (initialized)
-				FortunaSecureRandom.this.setSeed(_seed);
-		}
-
-		@Override
-		public void setSeed(long _seed) {
-			if (initialized)
-				FortunaSecureRandom.this.setSeed(_seed);
-
-		}
-
 	}
 	
-	private class FortunaImpl extends Fortuna
-	{
-		@Override
-		protected void refreshDigestWithRandomEvents(IMessageDigest pool)
-		{
-			for (int i=0;i<randoms.length;i++)
-			{
-				byte[] tab=new byte[20];
-				randoms[i].nextBytes(tab);
-				pool.update(tab);				
-			}
-			try {
-				pool.update(SecureRandomType.tryToGenerateNativeNonBlockingSeed(20));
-			} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
-				e.printStackTrace();
-			}
-		}
-
-		@Override public FortunaImpl clone() throws CloneNotSupportedException
-		{
-			return (FortunaImpl) super.clone();
-		}
-	}
 
 
 }

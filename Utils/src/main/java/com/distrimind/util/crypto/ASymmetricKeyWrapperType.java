@@ -62,27 +62,29 @@ import gnu.vm.jgnux.crypto.SecretKey;
  * @version 1.0
  * @since Utils 1.17.0
  */
-public enum ASymmetricKeyWrapper {
+public enum ASymmetricKeyWrapperType {
 
-	RSA_OAEP("RSA/NONE/OAEPPadding",CodeProvider.SUN, false),
-	RSA_OAEP_WITH_PARAMETERS("RSA/NONE/OAEPPadding",CodeProvider.SUN, true),
+	RSA_OAEP("RSA/ECB/OAEPPadding",CodeProvider.SunJCE, false),
+	RSA_OAEP_WITH_PARAMETERS("RSA/ECB/OAEPPadding",CodeProvider.SunJCE, true),
 	GNU_RSA_OAEP("RSA/NONE/OAEPPadding",CodeProvider.GNU_CRYPTO, false),
 	BC_FIPS_RSA_OAEP("RSA/NONE/OAEPPadding",CodeProvider.BCFIPS, false),
 	BC_FIPS_RSA_OAEP_WITH_PARAMETERS("RSA/NONE/OAEPPadding",CodeProvider.BCFIPS, true),
 	BC_FIPS_RSA_KTS_KTM("RSA-KTS-KEM-KWS",CodeProvider.BCFIPS, false),
 	DEFAULT(BC_FIPS_RSA_KTS_KTM);
 	
+	
+	
 	private final String algorithmName;
 	private final CodeProvider provider;
 	private final boolean withParameters;
 	
-	private ASymmetricKeyWrapper(String algorithmName, CodeProvider provider, boolean withParameters) {
+	private ASymmetricKeyWrapperType(String algorithmName, CodeProvider provider, boolean withParameters) {
 		this.algorithmName = algorithmName;
 		this.provider = provider;
 		this.withParameters=withParameters;
 	}
 	
-	private ASymmetricKeyWrapper(ASymmetricKeyWrapper other)
+	private ASymmetricKeyWrapperType(ASymmetricKeyWrapperType other)
 	{
 		this(other.algorithmName, other.provider, other.withParameters);
 	}
@@ -98,10 +100,10 @@ public enum ASymmetricKeyWrapper {
 	
 	public byte[] wrapKey(AbstractSecureRandom random, ASymmetricPublicKey publicKey, SymmetricSecretKey keyToWrap) throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, IllegalStateException, IllegalBlockSizeException, gnu.vm.jgnu.security.NoSuchProviderException, gnu.vm.jgnu.security.InvalidAlgorithmParameterException, IOException
 	{
-		if ((publicKey.getAuthentifiedSignatureAlgorithmType()!=null && ((provider==CodeProvider.GNU_CRYPTO)!=(publicKey.getAuthentifiedSignatureAlgorithmType().getCodeProvider()==CodeProvider.GNU_CRYPTO))) 
-				|| (publicKey.getEncryptionAlgorithmType()!=null  && ((provider==CodeProvider.GNU_CRYPTO)!=(publicKey.getEncryptionAlgorithmType().getCodeProvider()==CodeProvider.GNU_CRYPTO)))
-				|| (keyToWrap.getAuthentifiedSignatureAlgorithmType()!=null && (provider==CodeProvider.GNU_CRYPTO)!=(keyToWrap.getAuthentifiedSignatureAlgorithmType().getCodeProvider()==CodeProvider.GNU_CRYPTO))
-				|| (keyToWrap.getEncryptionAlgorithmType()!=null && (provider==CodeProvider.GNU_CRYPTO)!=(keyToWrap.getEncryptionAlgorithmType().getCodeProvider()==CodeProvider.GNU_CRYPTO)))
+		if ((publicKey.getAuthentifiedSignatureAlgorithmType()!=null && ((provider==CodeProvider.GNU_CRYPTO)!=(publicKey.getAuthentifiedSignatureAlgorithmType().getCodeProviderForSignature()==CodeProvider.GNU_CRYPTO))) 
+				|| (publicKey.getEncryptionAlgorithmType()!=null  && ((provider==CodeProvider.GNU_CRYPTO)!=(publicKey.getEncryptionAlgorithmType().getCodeProviderForEncryption()==CodeProvider.GNU_CRYPTO)))
+				|| (keyToWrap.getAuthentifiedSignatureAlgorithmType()!=null && (provider==CodeProvider.GNU_CRYPTO)!=(keyToWrap.getAuthentifiedSignatureAlgorithmType().getCodeProviderForSignature()==CodeProvider.GNU_CRYPTO))
+				|| (keyToWrap.getEncryptionAlgorithmType()!=null && (provider==CodeProvider.GNU_CRYPTO)!=(keyToWrap.getEncryptionAlgorithmType().getCodeProviderForEncryption()==CodeProvider.GNU_CRYPTO)))
 				throw new IllegalArgumentException("The keys must come from the same providers");
 		
 		if (provider.equals(CodeProvider.GNU_CRYPTO))
@@ -118,10 +120,8 @@ public enum ASymmetricKeyWrapper {
 				if (provider.equals(CodeProvider.BCFIPS))
 				{
 					CodeProvider.ensureBouncyCastleProviderLoaded();
-					c=javax.crypto.Cipher.getInstance(algorithmName, provider.name());
 				}
-				else
-					c=javax.crypto.Cipher.getInstance(algorithmName);
+				c=javax.crypto.Cipher.getInstance(algorithmName, provider.name());
 
 				if (withParameters)
 				{
@@ -179,10 +179,10 @@ public enum ASymmetricKeyWrapper {
 	}
 	private SymmetricSecretKey unwrapKey(ASymmetricPrivateKey privateKey, byte[] keyToUnwrap, SymmetricEncryptionType encryptionType, SymmetricAuthentifiedSignatureType signatureType, short keySize) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalStateException, gnu.vm.jgnu.security.NoSuchProviderException, InvalidKeySpecException, IOException, gnu.vm.jgnu.security.InvalidAlgorithmParameterException
 	{
-		if ((privateKey.getAuthentifiedSignatureAlgorithmType()!=null && ((provider==CodeProvider.GNU_CRYPTO)!=(privateKey.getAuthentifiedSignatureAlgorithmType().getCodeProvider()==CodeProvider.GNU_CRYPTO))) 
-				|| (privateKey.getEncryptionAlgorithmType()!=null  && ((provider==CodeProvider.GNU_CRYPTO)!=(privateKey.getEncryptionAlgorithmType().getCodeProvider()==CodeProvider.GNU_CRYPTO)))
-				|| (encryptionType!=null && (provider==CodeProvider.GNU_CRYPTO)!=(encryptionType.getCodeProvider()==CodeProvider.GNU_CRYPTO))
-				|| (signatureType!=null && (provider==CodeProvider.GNU_CRYPTO)!=(signatureType.getCodeProvider()==CodeProvider.GNU_CRYPTO)))
+		if ((privateKey.getAuthentifiedSignatureAlgorithmType()!=null && ((provider==CodeProvider.GNU_CRYPTO)!=(privateKey.getAuthentifiedSignatureAlgorithmType().getCodeProviderForSignature()==CodeProvider.GNU_CRYPTO))) 
+				|| (privateKey.getEncryptionAlgorithmType()!=null  && ((provider==CodeProvider.GNU_CRYPTO)!=(privateKey.getEncryptionAlgorithmType().getCodeProviderForEncryption()==CodeProvider.GNU_CRYPTO)))
+				|| (encryptionType!=null && (provider==CodeProvider.GNU_CRYPTO)!=(encryptionType.getCodeProviderForEncryption()==CodeProvider.GNU_CRYPTO))
+				|| (signatureType!=null && (provider==CodeProvider.GNU_CRYPTO)!=(signatureType.getCodeProviderForSignature()==CodeProvider.GNU_CRYPTO)))
 				throw new IllegalArgumentException("The keys must come from the same providers");
 		if (provider.equals(CodeProvider.GNU_CRYPTO))
 		{
@@ -204,10 +204,10 @@ public enum ASymmetricKeyWrapper {
 				if (provider.equals(CodeProvider.BCFIPS))
 				{
 					CodeProvider.ensureBouncyCastleProviderLoaded();
-					c=javax.crypto.Cipher.getInstance(algorithmName, provider.name());
+					
 				}
-				else
-					c=javax.crypto.Cipher.getInstance(algorithmName);
+				c=javax.crypto.Cipher.getInstance(algorithmName, provider.name());
+
 				byte[] wrapedKey=null;
 				if (withParameters)
 				{

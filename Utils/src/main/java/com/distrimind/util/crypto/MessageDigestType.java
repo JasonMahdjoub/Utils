@@ -65,6 +65,7 @@ public enum MessageDigestType {
 	BC_WHIRLPOOL("WHIRLPOOL",CodeProvider.BC, 512), 
 	DEFAULT(BC_FIPS_SHA3_384);
 
+	
 	private final String algorithmName;
 
 	private final CodeProvider codeProvider;
@@ -107,9 +108,13 @@ public enum MessageDigestType {
 			
 		} else {
 			try {
-				return new JavaNativeMessageDigest(MessageDigest.getInstance(algorithmName));
+				return new JavaNativeMessageDigest(MessageDigest.getInstance(algorithmName, codeProvider.name()));
 			} catch (NoSuchAlgorithmException e) {
 				throw new gnu.vm.jgnu.security.NoSuchAlgorithmException(e);
+			}
+			catch(NoSuchProviderException e)
+			{
+				throw new gnu.vm.jgnu.security.NoSuchProviderException(e.getMessage());
 			}
 		}
 	}

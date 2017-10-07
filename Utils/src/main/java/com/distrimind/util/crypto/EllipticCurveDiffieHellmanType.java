@@ -34,6 +34,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
+
 /**
  * 
  * @author Jason Mahdjoub
@@ -41,9 +42,9 @@ package com.distrimind.util.crypto;
  * @since Utils 2.9
  */
 public enum EllipticCurveDiffieHellmanType {
-	ECDH_128((short) 128, (short) 256, CodeProvider.SUN, MessageDigestType.BC_FIPS_SHA3_256), 
-	ECDH_256((short) 256, (short) 256, CodeProvider.SUN, MessageDigestType.BC_FIPS_SHA3_256), 
-	ECDH_384((short) 256, (short) 384, CodeProvider.SUN, MessageDigestType.BC_FIPS_SHA3_384), 
+	ECDH_128((short) 128, (short) 256, CodeProvider.SunEC, MessageDigestType.BC_FIPS_SHA3_256), 
+	ECDH_256((short) 256, (short) 256, CodeProvider.SunEC, MessageDigestType.BC_FIPS_SHA3_256), 
+	ECDH_384((short) 256, (short) 384, CodeProvider.SunEC, MessageDigestType.BC_FIPS_SHA3_384), 
 	BC_FIPS_ECDH_128((short) 128, (short) 256, CodeProvider.BCFIPS, MessageDigestType.BC_FIPS_SHA3_256), 
 	BC_FIPS_ECDH_256((short) 256, (short) 256, CodeProvider.BCFIPS, MessageDigestType.BC_FIPS_SHA3_256), 
 	BC_FIPS_ECDH_384((short) 256, (short) 384, CodeProvider.BCFIPS, MessageDigestType.BC_FIPS_SHA3_384), 
@@ -54,6 +55,8 @@ public enum EllipticCurveDiffieHellmanType {
 	private final CodeProvider codeProvider;
 	private final MessageDigestType messageDigestType;
 
+	
+	
 	private EllipticCurveDiffieHellmanType(short keySizeBits, short ECDHKeySizeBits,
 			CodeProvider codeProvider, MessageDigestType messageDigestType) {
 		this.keySizeBits = keySizeBits;

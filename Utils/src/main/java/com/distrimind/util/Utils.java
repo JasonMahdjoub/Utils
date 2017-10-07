@@ -55,7 +55,7 @@ public class Utils {
 		c.set(2016, 1, 4);
 		Calendar c2 = Calendar.getInstance();
 		c.set(2017, 9, 5);
-		VERSION = new Version("Utils", "Utils", 3, 1, 1, Version.Type.Stable, 0, c.getTime(), c2.getTime());
+		VERSION = new Version("Utils", "Utils", 3, 2, 0, Version.Type.Stable, 0, c.getTime(), c2.getTime());
 		try {
 
 			InputStream is = Utils.class.getResourceAsStream("build.txt");
@@ -69,7 +69,13 @@ public class Utils {
 
 			c = Calendar.getInstance();
 			c.set(2017, 9, 6);
-			Description d = new Description(3, 1, 1, Version.Type.Stable, 0, c.getTime());
+			Description d = new Description(3, 2, 0, Version.Type.Stable, 0, c.getTime());
+			d.addItem("Changing default JVM secured random");
+			VERSION.addDescription(d);
+
+			c = Calendar.getInstance();
+			c.set(2017, 9, 6);
+			d = new Description(3, 1, 1, Version.Type.Stable, 0, c.getTime());
 			d.addItem("Adding abstract random into class ClientASymmetricEncryptionAlgorithm");
 			d.addItem("Adding function MessageDigestType.getDigestLengthInBits()");
 			d.addItem("Adding function SymmetricAuthentifiedSignatureType.getSignatureSizeInBits()");

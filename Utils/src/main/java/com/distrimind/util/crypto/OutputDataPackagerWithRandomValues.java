@@ -49,7 +49,7 @@ import gnu.vm.jgnu.security.NoSuchProviderException;
 public class OutputDataPackagerWithRandomValues {
 	public static byte[] encode(byte[] bytes, int max_random_values_size)
 			throws NoSuchAlgorithmException, NoSuchProviderException {
-		return encode(bytes, max_random_values_size, SecureRandomType.BC_FIPS_APPROVED.getInstance(SecureRandomType.nonce));
+		return encode(bytes, max_random_values_size, SecureRandomType.DEFAULT.getInstance(SecureRandomType.nonce));
 	}
 
 	public static byte[] encode(byte[] bytes, int max_random_values_size, AbstractSecureRandom rand) {

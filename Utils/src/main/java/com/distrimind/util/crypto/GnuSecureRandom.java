@@ -51,32 +51,62 @@ public class GnuSecureRandom extends AbstractSecureRandom {
 	 */
 	private static final long serialVersionUID = -3972765139342047885L;
 
-	private final SecureRandom secureRandom;
+	private transient final GnuInterface secureGnuRandom;
 	
+	private boolean initialized;
 
-	GnuSecureRandom(SecureRandomType _type, SecureRandom secureRandom) throws NoSuchAlgorithmException, NoSuchProviderException {
-		super(_type, true);
-		this.secureRandom = secureRandom;
+
+	GnuSecureRandom(SecureRandomType _type, final SecureRandom secureRandom) throws NoSuchAlgorithmException, NoSuchProviderException {
+		super(new AbstractSecureRandomSpi(true) {
+
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 7215224107476788151L;
+
+			@Override
+			protected void engineSetSeed(byte[] seed) {
+				synchronized(secureRandom)
+				{
+					if (secureRandom != null)
+						secureRandom.setSeed(seed);
+				}				
+			}
+
+			@Override
+			protected void engineNextBytes(byte[] bytes) {
+				synchronized(secureRandom)
+				{
+					if (secureRandom != null)
+					{
+						secureRandom.nextBytes(bytes);
+						if (bytes!=null)
+							addDataProvided(bytes.length);
+					}
+				}
+				
+			}
+
+			@Override
+			protected byte[] engineGenerateSeed(int numBytes) {
+				synchronized(secureRandom)
+				{
+					return secureRandom.generateSeed(numBytes);
+				}
+			}}, _type);
+		this.initialized=false;
+		this.secureGnuRandom=new GnuInterface();
+		this.initialized=true;
 		if (_type.needInitialSeed())
 		{
-			setSeed(SecureRandomType.tryToGenerateNativeNonBlockingSeed(55));
+			setSeed(SecureRandomType.tryToGenerateNativeNonBlockingRandomBytes(55));
 			nextBytes(new byte[20]);
 		}
 	}
 
 	@Override
-	public byte[] generateSeed(int _numBytes) {
-		return secureRandom.generateSeed(_numBytes);
-	}
-
-	@Override
-	public String getAlgorithm() {
-		return secureRandom.getAlgorithm();
-	}
-
-	@Override
 	public SecureRandom getGnuSecureRandom() {
-		return secureRandom;
+		return secureGnuRandom;
 	}
 
 	@Override
@@ -84,37 +114,43 @@ public class GnuSecureRandom extends AbstractSecureRandom {
 		return this;
 	}
 
-	@Override
-	public void nextBytes(byte[] _bytes) {
-		synchronized(this)
-		{
-			if (secureRandom != null)
-			{
-				secureRandom.nextBytes(_bytes);
-				if (_bytes!=null)
-					addDataProvided(_bytes.length);
-			}
+	
+	private class GnuInterface extends SecureRandom {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 4299616485652308411L;
+
+		
+		protected GnuInterface() {
+			super(new gnu.vm.jgnu.security.SecureRandomSpi() {
+				
+				
+				/**
+				 * 
+				 */
+				private static final long serialVersionUID = 740095511171490031L;
+
+				@Override
+				protected void engineSetSeed(byte[] seed) {
+					if (initialized)
+						GnuSecureRandom.this.secureRandomSpi.engineSetSeed(seed);
+				}
+				
+				@Override
+				protected void engineNextBytes(byte[] bytes) {
+					if (initialized)
+						GnuSecureRandom.this.secureRandomSpi.engineNextBytes(bytes);
+					
+				}
+				
+				@Override
+				protected byte[] engineGenerateSeed(int numBytes) {
+					return GnuSecureRandom.this.secureRandomSpi.engineGenerateSeed(numBytes);
+				}
+			}, null);
+			
 		}
-	}
-
-	@Override
-	public void setSeed(byte[] _seed) {
-		synchronized(this)
-		{
-			if (secureRandom != null)
-				secureRandom.setSeed(_seed);
-		}
-
-	}
-
-	@Override
-	public void setSeed(long _seed) {
-		synchronized(this)
-		{
-			if (secureRandom != null)
-				secureRandom.setSeed(_seed);
-		}
-
-	}
+	}	
 
 }

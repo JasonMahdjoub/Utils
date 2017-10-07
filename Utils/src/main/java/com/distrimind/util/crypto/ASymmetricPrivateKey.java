@@ -118,7 +118,7 @@ public class ASymmetricPrivateKey implements UtilKey {
 		this(privateKey, keySize);
 		if (type == null)
 			throw new NullPointerException("type");
-		if (type.getCodeProvider() == CodeProvider.GNU_CRYPTO)
+		if (type.getCodeProviderForEncryption() == CodeProvider.GNU_CRYPTO)
 			throw new IllegalAccessError();
 		this.encryptionType = type;
 		this.signatureType=null;
@@ -127,7 +127,7 @@ public class ASymmetricPrivateKey implements UtilKey {
 		this(privateKey, keySize);
 		if (type == null)
 			throw new NullPointerException("type");
-		if (type.getCodeProvider() == CodeProvider.GNU_CRYPTO)
+		if (type.getCodeProviderForSignature() == CodeProvider.GNU_CRYPTO)
 			throw new IllegalAccessError();
 		this.encryptionType = null;
 		this.signatureType=type;
