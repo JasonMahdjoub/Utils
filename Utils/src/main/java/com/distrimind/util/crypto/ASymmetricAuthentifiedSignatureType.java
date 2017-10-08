@@ -111,7 +111,7 @@ public enum ASymmetricAuthentifiedSignatureType {
 
 		} else {
 			try {
-				return new JavaNativeSignature(Signature.getInstance(signatureAlgorithmName, codeProviderSignature.name()));
+				return new JavaNativeSignature(Signature.getInstance(signatureAlgorithmName, codeProviderSignature.checkProviderWithCurrentOS().name()));
 			} catch (NoSuchAlgorithmException e) {
 				throw new gnu.vm.jgnu.security.NoSuchAlgorithmException(e);
 			}catch (java.security.NoSuchProviderException e) {
@@ -179,7 +179,7 @@ public enum ASymmetricAuthentifiedSignatureType {
 			} 
 		} else {
 			try {
-				KeyPairGenerator kgp = KeyPairGenerator.getInstance(keyGeneratorAlgorithmName, codeProviderKeyGenerator.name());
+				KeyPairGenerator kgp = KeyPairGenerator.getInstance(keyGeneratorAlgorithmName, codeProviderKeyGenerator.checkProviderWithCurrentOS().name());
 				JavaNativeKeyPairGenerator res = new JavaNativeKeyPairGenerator(this, kgp);
 				res.initialize(keySize, expirationTimeUTC, random);
 

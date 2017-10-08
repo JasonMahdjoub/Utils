@@ -64,11 +64,11 @@ public abstract class HardDriveDetect {
 		if (instance.get() == null) {
 			synchronized (instance) {
 				if (instance.get() == null) {
-					if (OSValidator.isLinux())
+					if (OSValidator.getCurrentOS()==OSValidator.LINUX)
 						instance.set(new LinuxHardDriveDetect());
-					else if (OSValidator.isWindows())
+					else if (OSValidator.getCurrentOS()==OSValidator.WINDOWS)
 						instance.set(new WindowsHardDriveDetect());
-					else if (OSValidator.isMac())
+					else if (OSValidator.getCurrentOS()==OSValidator.MACOS)
 						instance.set(new MacOSHardDriveDetect());
 					else
 						instance.set(new DefaultHardDriveDetect());

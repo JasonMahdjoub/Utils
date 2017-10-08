@@ -120,7 +120,7 @@ public enum PasswordHashType {
 					password[size] = (char) (data[off + size * 2] & 0xFF);
 
 				PBEKeySpec spec = new PBEKeySpec(password, salt, iterations, (hashLength) * 8);
-				SecretKeyFactory skf = SecretKeyFactory.getInstance(algorithmName, codeProvider.name());
+				SecretKeyFactory skf = SecretKeyFactory.getInstance(algorithmName, codeProvider.checkProviderWithCurrentOS().name());
 				return skf.generateSecret(spec).getEncoded();
 			} catch (NoSuchAlgorithmException e) {
 				throw new gnu.vm.jgnu.security.NoSuchAlgorithmException(e);
@@ -213,7 +213,7 @@ public enum PasswordHashType {
 		case PBKDF2WithHMacSHA512:{
 			try {
 				PBEKeySpec spec = new PBEKeySpec(password, salt, iterations, (hashLength) * 8);
-				SecretKeyFactory skf = SecretKeyFactory.getInstance(algorithmName, codeProvider.name());
+				SecretKeyFactory skf = SecretKeyFactory.getInstance(algorithmName, codeProvider.checkProviderWithCurrentOS().name());
 				return skf.generateSecret(spec).getEncoded();
 			} catch (NoSuchAlgorithmException e) {
 				throw new gnu.vm.jgnu.security.NoSuchAlgorithmException(e);

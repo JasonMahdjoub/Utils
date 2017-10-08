@@ -165,7 +165,7 @@ public class FortunaSecureRandom extends AbstractSecureRandom implements Seriali
 			{
 				byte[] seed;
 				try {
-					seed = SecureRandomType.tryToGenerateNativeNonBlockingRandomBytes(numBytes);
+					seed = SecureRandomType.tryToGenerateNativeNonBlockingSeed(numBytes);
 				} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
 					e.printStackTrace();
 					seed=new byte[numBytes];

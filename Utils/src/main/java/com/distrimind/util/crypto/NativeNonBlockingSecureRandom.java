@@ -155,7 +155,7 @@ public class NativeNonBlockingSecureRandom extends AbstractSecureRandom {
 			protected byte[] engineGenerateSeed(int numBytes) {
 				try
 				{
-					return SecureRandomType.NativePRNG.getSingleton(null).generateSeed(numBytes);
+					return SecureRandomType.tryToGenerateNativeNonBlockingSeed(numBytes);
 				}
 				catch(Exception e)
 				{

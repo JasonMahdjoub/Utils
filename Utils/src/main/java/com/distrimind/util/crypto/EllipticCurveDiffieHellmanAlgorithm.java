@@ -91,7 +91,7 @@ public class EllipticCurveDiffieHellmanAlgorithm {
 			if (type.getCodeProvider() == CodeProvider.BCFIPS || type.getCodeProvider() == CodeProvider.BC) {
 				CodeProvider.ensureBouncyCastleProviderLoaded();
 			} 
-			kpg = KeyPairGenerator.getInstance("EC", type.getCodeProvider().name());
+			kpg = KeyPairGenerator.getInstance("EC", type.getCodeProvider().checkProviderWithCurrentOS().name());
 			kpg.initialize(keySize, randomForKeys);
 			KeyPair kp=kpg.generateKeyPair();
 			setKeyPair(new ASymmetricKeyPair(ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA384withECDSA, kp, keySize, expirationUTC));
@@ -148,7 +148,7 @@ public class EllipticCurveDiffieHellmanAlgorithm {
 				CodeProvider.ensureBouncyCastleProviderLoaded();
 				
 			} 
-			kf = KeyFactory.getInstance("EC", type.getCodeProvider().name());
+			kf = KeyFactory.getInstance("EC", type.getCodeProvider().checkProviderWithCurrentOS().name());
 	
 			X509EncodedKeySpec pkSpec = new X509EncodedKeySpec(distantPublicKeyBytes);
 			PublicKey distantPublicKey = kf.generatePublic(pkSpec);
@@ -158,7 +158,7 @@ public class EllipticCurveDiffieHellmanAlgorithm {
 			{
 				CodeProvider.ensureBouncyCastleProviderLoaded();
 			}
-			ka = KeyAgreement.getInstance("ECDH", CodeProvider.BCFIPS.name());
+			ka = KeyAgreement.getInstance("ECDH", type.getCodeProvider().checkProviderWithCurrentOS().name());
 
 	
 			ka.init(myKeyPair.getASymmetricPrivateKey().toJavaNativeKey());

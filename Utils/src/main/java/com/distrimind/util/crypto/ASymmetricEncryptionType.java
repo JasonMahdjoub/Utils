@@ -248,7 +248,7 @@ public enum ASymmetricEncryptionType {
 		} else {
 			try {
 				
-				return new JavaNativeCipher(Cipher.getInstance(name, codeProviderForEncryption.name()));
+				return new JavaNativeCipher(Cipher.getInstance(name, codeProviderForEncryption.checkProviderWithCurrentOS().name()));
 			} catch (NoSuchAlgorithmException e) {
 				throw new gnu.vm.jgnu.security.NoSuchAlgorithmException(e);
 			} catch (NoSuchPaddingException e) {
@@ -307,7 +307,7 @@ public enum ASymmetricEncryptionType {
 			}
 		} else {
 			try {
-				KeyPairGenerator kgp = KeyPairGenerator.getInstance(algorithmName, codeProviderForKeyGenerator.name());
+				KeyPairGenerator kgp = KeyPairGenerator.getInstance(algorithmName, codeProviderForKeyGenerator.checkProviderWithCurrentOS().name());
 				JavaNativeKeyPairGenerator res = new JavaNativeKeyPairGenerator(this, kgp);
 				res.initialize(keySize, expirationTimeUTC, random);
 

@@ -108,7 +108,7 @@ public enum MessageDigestType {
 			
 		} else {
 			try {
-				return new JavaNativeMessageDigest(MessageDigest.getInstance(algorithmName, codeProvider.name()));
+				return new JavaNativeMessageDigest(MessageDigest.getInstance(algorithmName, codeProvider.checkProviderWithCurrentOS().name()));
 			} catch (NoSuchAlgorithmException e) {
 				throw new gnu.vm.jgnu.security.NoSuchAlgorithmException(e);
 			}

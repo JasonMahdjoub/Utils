@@ -63,11 +63,11 @@ public abstract class TraceRoute {
 		if (instance.get() == null) {
 			synchronized (instance) {
 				if (instance.get() == null) {
-					if (OSValidator.isLinux())
+					if (OSValidator.getCurrentOS()==OSValidator.LINUX)
 						instance.set(new LinuxTraceRoute());
-					else if (OSValidator.isWindows())
+					else if (OSValidator.getCurrentOS()==OSValidator.WINDOWS)
 						instance.set(new WindowsTraceRoute());
-					else if (OSValidator.isMac())
+					else if (OSValidator.getCurrentOS()==OSValidator.MACOS)
 						instance.set(new MacOSTraceRoute());
 					else
 						instance.set(new DefaultTraceRoute());

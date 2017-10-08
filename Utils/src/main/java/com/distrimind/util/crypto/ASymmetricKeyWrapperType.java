@@ -121,7 +121,7 @@ public enum ASymmetricKeyWrapperType {
 				{
 					CodeProvider.ensureBouncyCastleProviderLoaded();
 				}
-				c=javax.crypto.Cipher.getInstance(algorithmName, provider.name());
+				c=javax.crypto.Cipher.getInstance(algorithmName, provider.checkProviderWithCurrentOS().name());
 
 				if (withParameters)
 				{
@@ -206,7 +206,7 @@ public enum ASymmetricKeyWrapperType {
 					CodeProvider.ensureBouncyCastleProviderLoaded();
 					
 				}
-				c=javax.crypto.Cipher.getInstance(algorithmName, provider.name());
+				c=javax.crypto.Cipher.getInstance(algorithmName, provider.checkProviderWithCurrentOS().name());
 
 				byte[] wrapedKey=null;
 				if (withParameters)

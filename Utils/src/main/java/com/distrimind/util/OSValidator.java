@@ -35,50 +35,120 @@ knowledge of the CeCILL-C license and that you accept its terms.
 
 package com.distrimind.util;
 
+
 /**
  * Set of functions giving information about the current running OS
  * 
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 2.0
  * @since Utils 1.0
  *
  */
-public class OSValidator {
-
+public enum OSValidator {
+	UNKNOW,
+	LINUX,
+	MACOS,
+	SOLARIS,
+	WINDOWS,
+	ANDROID;
+	
 	private static String OS = System.getProperty("os.name").toLowerCase();
 
 	private static String OS_VERSION = System.getProperty("os.name") + " " + System.getProperty("os.version");
+	
+	static private volatile OSValidator currentOS=null;
+	
+	private static final double currentJREVersion;
+	static
+	{
+		double d;
+		try
+		{
+			d=Double.parseDouble(System.getProperty("java.specification.version"));
+		}
+		catch(Throwable t)
+		{
+			d=0.0;
+		}
+		
+		currentJREVersion=d;
+	}
 
-	public static String getOSVersion() {
+	public static double getCurrentJREVersion()
+	{
+		return currentJREVersion;
+	}
+	
+	public static OSValidator getCurrentOS()
+	{
+		if (currentOS==null)
+		{
+			if (isLinux())
+				currentOS=LINUX;
+			else if (isMac())
+				currentOS=OSValidator.MACOS;
+			else if (isSolaris())
+				currentOS=OSValidator.SOLARIS;
+			else if (isWindows())
+				currentOS=OSValidator.WINDOWS;
+			else if (isAndroid())
+				currentOS=OSValidator.ANDROID;
+			currentOS=UNKNOW;
+		}
+		return currentOS;
+	}
+	
+	
+	public String getOSVersion() {
 		return OS_VERSION;
 	}
 
-	public static boolean isLinux() {
+	private static boolean isLinux() {
 
 		return OS.indexOf("linux") >= 0;
 	}
 
-	public static boolean isMac() {
+	private static boolean isMac() {
 
 		return (OS.indexOf("mac") >= 0);
 
 	}
 
-	public static boolean isSolaris() {
+	private static boolean isSolaris() {
 
 		return (OS.indexOf("sunos") >= 0);
 
 	}
 
-	public static boolean isUnix() {
+	public boolean isUnix() {
 
 		return (OS.indexOf("nix") >= 0 || OS.indexOf("nux") >= 0 || OS.indexOf("aix") > 0);
 
 	}
 
-	public static boolean isWindows() {
+	private static boolean isWindows() {
 
 		return (OS.indexOf("win") >= 0);
 	}
 
+	private static boolean isAndroid()
+	{
+		try {
+			return Class.forName("android.os.Build.VERSION")!=null;
+		} catch (ClassNotFoundException e) {
+			return false;
+		}
+	}
+	
+	public String getAndroidVersion()
+	{
+		try {
+			Class<?> versionClass=Class.forName("android.os.Build.VERSION");
+			return (String)versionClass.getDeclaredField("RELEASE").get(null);
+		} catch (ClassNotFoundException | IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException e) {
+			return null;
+		}
+	}
+	
+	
 }

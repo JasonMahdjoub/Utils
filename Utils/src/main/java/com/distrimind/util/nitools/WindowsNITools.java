@@ -60,7 +60,7 @@ class WindowsNITools extends NITools {
 				return Long.MAX_VALUE;
 			Process p = null;
 			// TODO check compatibility with Vista and Seven
-			if (OSValidator.getOSVersion().toLowerCase().contains("vista"))
+			if (OSValidator.getCurrentOS().getOSVersion().toLowerCase().contains("vista"))
 				p = Runtime.getRuntime().exec("wmic NIC where \"NetEnabled=true\" get \"InterfaceIndex,Speed\"");
 			else
 				p = Runtime.getRuntime().exec("wmic NIC where NetEnabled=true get InterfaceIndex,Speed");

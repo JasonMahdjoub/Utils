@@ -216,7 +216,7 @@ public enum SymmetricEncryptionType {
 
 		} else {
 			try {
-				res = new JavaNativeKeyGenerator(this, javax.crypto.KeyGenerator.getInstance(algorithmName, CodeProviderForKeyGenerator.name()));
+				res = new JavaNativeKeyGenerator(this, javax.crypto.KeyGenerator.getInstance(algorithmName, CodeProviderForKeyGenerator.checkProviderWithCurrentOS().name()));
 			} catch (java.security.NoSuchAlgorithmException e) {
 				throw new NoSuchAlgorithmException(e);
 			}

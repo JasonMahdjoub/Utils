@@ -109,7 +109,7 @@ public enum SymmetricAuthentifiedSignatureType {
 			}
 		} else {
 			try {
-				return new JavaNativeMac(javax.crypto.Mac.getInstance(algorithmName, codeProviderForSignature.name()));
+				return new JavaNativeMac(javax.crypto.Mac.getInstance(algorithmName, codeProviderForSignature.checkProviderWithCurrentOS().name()));
 			} catch (java.security.NoSuchAlgorithmException e) {
 				throw new gnu.vm.jgnu.security.NoSuchAlgorithmException(e);
 			}
@@ -167,7 +167,7 @@ public enum SymmetricAuthentifiedSignatureType {
 
 		} else {
 			try {
-				res = new JavaNativeKeyGenerator(this, javax.crypto.KeyGenerator.getInstance(algorithmName, codeProviderForKeyGenerator.name()));
+				res = new JavaNativeKeyGenerator(this, javax.crypto.KeyGenerator.getInstance(algorithmName, codeProviderForKeyGenerator.checkProviderWithCurrentOS().name()));
 			} catch (java.security.NoSuchAlgorithmException e) {
 				throw new NoSuchAlgorithmException(e);
 			}catch (java.security.NoSuchProviderException e) {

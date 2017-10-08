@@ -40,6 +40,8 @@ import java.security.Security;
 import org.bouncycastle.jcajce.provider.BouncyCastleFipsProvider;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
+import com.distrimind.util.OSValidator;
+
 /**
  * List of asymmetric encryption algorithms
  * 
@@ -73,8 +75,16 @@ public enum CodeProvider {
 				}
 			}
 		}
-
-		
 	}
 
+	CodeProvider checkProviderWithCurrentOS()
+	{
+		if (OSValidator.getCurrentOS()==OSValidator.ANDROID)
+		{
+			if (this==SUN || this==SunJCE || this==SunJSSE || this==SunRsaSign || this==SunEC)
+				return BC;
+		}
+		return this;
+	}
+	
 }

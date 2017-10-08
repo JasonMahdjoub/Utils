@@ -147,7 +147,7 @@ public final class JavaNativeSecureRandom extends AbstractSecureRandom {
 		initialized=true;
 		if (type.needInitialSeed())
 		{
-			setSeed(SecureRandomType.tryToGenerateNativeNonBlockingRandomBytes(55));
+			setSeed(SecureRandomType.tryToGenerateNativeNonBlockingSeed(55));
 			nextBytes(new byte[20]);
 		}
 		

@@ -62,14 +62,14 @@ public abstract class NITools {
 		if (instance.get() == null) {
 			synchronized (instance) {
 				if (instance.get() == null) {
-					if (OSValidator.isLinux())
+					if (OSValidator.getCurrentOS()==OSValidator.LINUX)
 						instance.set(new LinuxNITools());
-					else if (OSValidator.isWindows()
-							&& !OSValidator.getOSVersion().toLowerCase().contains("windows xp"))
+					else if (OSValidator.getCurrentOS()==OSValidator.WINDOWS
+							&& !OSValidator.getCurrentOS().getOSVersion().toLowerCase().contains("windows xp"))
 						instance.set(new WindowsNITools());// TODO see for
 					// Windows XP
 					// compatibility
-					else if (OSValidator.isMac())
+					else if (OSValidator.getCurrentOS()==OSValidator.MACOS)
 						instance.set(new MacOSXNITools());
 					else
 						instance.set(new DefaultNITools());

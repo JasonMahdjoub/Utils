@@ -103,7 +103,7 @@ public enum SymmetricKeyWrapperType {
 					CodeProvider.ensureBouncyCastleProviderLoaded();
 					
 				}
-				cipher=javax.crypto.Cipher.getInstance(algorithmName, provider.name());
+				cipher=javax.crypto.Cipher.getInstance(algorithmName, provider.checkProviderWithCurrentOS().name());
 
 				cipher.init(javax.crypto.Cipher.WRAP_MODE, key.toJavaNativeKey());
 				return cipher.wrap(keyToWrap.toJavaNativeKey());
@@ -168,7 +168,7 @@ public enum SymmetricKeyWrapperType {
 					CodeProvider.ensureBouncyCastleProviderLoaded();
 					
 				}
-				cipher=javax.crypto.Cipher.getInstance(algorithmName, provider.name());
+				cipher=javax.crypto.Cipher.getInstance(algorithmName, provider.checkProviderWithCurrentOS().name());
 
 
 				cipher.init(Cipher.UNWRAP_MODE, key.toJavaNativeKey());
