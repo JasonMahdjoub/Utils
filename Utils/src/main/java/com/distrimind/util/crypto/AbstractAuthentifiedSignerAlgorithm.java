@@ -36,6 +36,7 @@ package com.distrimind.util.crypto;
 
 import java.io.IOException;
 
+import gnu.vm.jgnu.security.InvalidAlgorithmParameterException;
 import gnu.vm.jgnu.security.InvalidKeyException;
 import gnu.vm.jgnu.security.NoSuchAlgorithmException;
 import gnu.vm.jgnu.security.SignatureException;
@@ -66,7 +67,7 @@ public abstract class AbstractAuthentifiedSignerAlgorithm {
 
 	public void sign(byte message[], int offm, int lenm, byte signature[], int off_sig, int len_sig)
 			throws gnu.vm.jgnu.security.InvalidKeyException, gnu.vm.jgnu.security.SignatureException,
-			gnu.vm.jgnu.security.NoSuchAlgorithmException, InvalidKeySpecException, ShortBufferException
+			gnu.vm.jgnu.security.NoSuchAlgorithmException, InvalidKeySpecException, ShortBufferException, InvalidAlgorithmParameterException, IllegalStateException, IOException
 	{
 		init();
 		update(message, offm, lenm);
@@ -74,7 +75,7 @@ public abstract class AbstractAuthentifiedSignerAlgorithm {
 		
 	}
 	
-	public abstract void init() throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException;
+	public abstract void init() throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, gnu.vm.jgnu.security.InvalidAlgorithmParameterException;
 	
 	public void update(byte message[]) throws SignatureException
 	{
@@ -83,7 +84,11 @@ public abstract class AbstractAuthentifiedSignerAlgorithm {
 	
 	public abstract void update(byte message[], int offm, int lenm) throws SignatureException ;
 	
-	public abstract void getSignature(byte signature[], int off_sig) throws ShortBufferException, IllegalStateException, SignatureException;
+	public void getSignature(byte signature[], int off_sig) throws ShortBufferException, IllegalStateException, SignatureException, IOException, InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException
+	{
+		byte s[]=getSignature();
+		System.arraycopy(s, 0, signature, off_sig, s.length);
+	}
 	
     /**
      * Returns the length of the MAC in bytes.
@@ -92,11 +97,6 @@ public abstract class AbstractAuthentifiedSignerAlgorithm {
      */
 	public abstract int getMacLength();
 	
-	public byte[] getSignature() throws InvalidKeyException, SignatureException, NoSuchAlgorithmException, InvalidKeySpecException, ShortBufferException, IllegalStateException
-	{
-		byte[] res=new byte[getMacLength()];
-		getSignature(res, 0);
-		return res;
-	}
+	public abstract byte[] getSignature() throws InvalidKeyException, SignatureException, NoSuchAlgorithmException, InvalidKeySpecException, ShortBufferException, IllegalStateException, IOException;
 
 }

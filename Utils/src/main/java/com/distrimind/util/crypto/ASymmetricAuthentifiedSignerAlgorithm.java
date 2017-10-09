@@ -59,7 +59,7 @@ public class ASymmetricAuthentifiedSignerAlgorithm extends AbstractAuthentifiedS
 	private final AbstractSignature signature;
 	private final int macLength;
 	private final ASymmetricAuthentifiedSignatureType type;
-
+	private boolean includeParameter=false;
 	public ASymmetricAuthentifiedSignerAlgorithm(ASymmetricPrivateKey localPrivateKey) throws NoSuchAlgorithmException, NoSuchProviderException {
 		if (localPrivateKey == null)
 			throw new NullPointerException("localPrivateKey");
@@ -79,13 +79,12 @@ public class ASymmetricAuthentifiedSignerAlgorithm extends AbstractAuthentifiedS
 		return signature;
 	}
 
+
 	@Override
-	public byte[] sign(byte bytes[], int off, int len)
-			throws gnu.vm.jgnu.security.InvalidKeyException, gnu.vm.jgnu.security.SignatureException,
-			gnu.vm.jgnu.security.NoSuchAlgorithmException, InvalidKeySpecException, gnu.vm.jgnu.security.InvalidAlgorithmParameterException, IOException {
+	public void init() throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, gnu.vm.jgnu.security.InvalidAlgorithmParameterException {
 		try
 		{
-			boolean includeParameter=false;
+			includeParameter=false;
 			if (type==ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA256withRSAandMGF1)
 			{
 				((JavaNativeSignature)signature).getSignature().setParameter(new PSSParameterSpec("SHA-256","MGF1",new MGF1ParameterSpec("SHA-256"),0, PSSParameterSpec.DEFAULT.getTrailerField()));
@@ -101,34 +100,11 @@ public class ASymmetricAuthentifiedSignerAlgorithm extends AbstractAuthentifiedS
 				((JavaNativeSignature)signature).getSignature().setParameter(new PSSParameterSpec("SHA-512","MGF1",new MGF1ParameterSpec("SHA-512"),0, PSSParameterSpec.DEFAULT.getTrailerField()));
 				includeParameter=true;
 			}
-			
+		
 			signature.initSign(localPrivateKey);
-			signature.update(bytes, off, len);
-			byte[] s=signature.sign();
-			if (includeParameter)
-			{
-				return Bits.concateEncodingWithIntSizedTabs(s, ((JavaNativeSignature)signature).getSignature().getParameters().getEncoded());
-			}
-			else
-				return s;
-		} catch (InvalidAlgorithmParameterException e) {
+		}catch (InvalidAlgorithmParameterException e) {
 			throw new gnu.vm.jgnu.security.InvalidAlgorithmParameterException(e);
 		}
-	}
-		
-
-	@Override
-	public void sign(byte message[], int offm, int lenm, byte signature[], int off_sig, int len_sig)
-			throws gnu.vm.jgnu.security.InvalidKeyException, gnu.vm.jgnu.security.SignatureException,
-			gnu.vm.jgnu.security.NoSuchAlgorithmException, InvalidKeySpecException {
-		this.signature.initSign(localPrivateKey);
-		this.signature.update(message, offm, lenm);
-		this.signature.sign(signature, off_sig, len_sig);
-	}
-
-	@Override
-	public void init() throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException {
-		this.signature.initSign(localPrivateKey);
 	}
 
 	@Override
@@ -137,8 +113,15 @@ public class ASymmetricAuthentifiedSignerAlgorithm extends AbstractAuthentifiedS
 	}
 
 	@Override
-	public void getSignature(byte[] signature, int off_sig) throws ShortBufferException, IllegalStateException, SignatureException {
-		this.signature.sign(signature, off_sig, getMacLength());
+	public byte[] getSignature() throws ShortBufferException, IllegalStateException, SignatureException, IOException {
+		
+		byte[] s=this.signature.sign();
+		if (includeParameter)
+		{
+			return Bits.concateEncodingWithIntSizedTabs(s, ((JavaNativeSignature)this.signature).getSignature().getParameters().getEncoded());
+		}
+		else
+			return s;
 	}
 
 	@Override

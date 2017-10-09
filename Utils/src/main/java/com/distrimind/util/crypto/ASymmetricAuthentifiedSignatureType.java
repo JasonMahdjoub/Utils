@@ -93,6 +93,11 @@ public enum ASymmetricAuthentifiedSignatureType {
 	{
 		return keyGeneratorAlgorithmName;
 	}
+	
+	public short getDefaultKeySize()
+	{
+		return keySize;
+	}
 
 	public AbstractSignature getSignatureInstance() throws gnu.vm.jgnu.security.NoSuchAlgorithmException, NoSuchProviderException {
 		if (codeProviderSignature == CodeProvider.GNU_CRYPTO) {
@@ -121,11 +126,15 @@ public enum ASymmetricAuthentifiedSignatureType {
 	}
 
 	public int getSignatureSizeBits(int keySize) {
+		if (this==BC_FIPS_SHA256withRSAandMGF1 || this==ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA384withRSAandMGF1 || this==ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA512withRSAandMGF1)
+			return keySize+464;
+		else if (this==ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA384withECDSA || this==ASymmetricAuthentifiedSignatureType.SHA384withECDSA)
+			return keySize;
 		return keySize;
 	}
 
 	public int getSignatureSizeBytes(int keySize) {
-		return keySize / 8;
+		return getSignatureSizeBits(keySize) / 8;
 	}
 
 	public CodeProvider getCodeProviderForSignature() {

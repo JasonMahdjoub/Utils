@@ -113,6 +113,17 @@ public class CryptoTests {
 		return res;
 	}
 	
+	@DataProvider(name = "provideDataForASymetricSignatures", parallel = true)
+	public Object[][] provideDataForASymetricSignatures() {
+		Object[][] res = new Object[ASymmetricAuthentifiedSignatureType.values().length][];
+		int i = 0;
+		for (ASymmetricAuthentifiedSignatureType v : ASymmetricAuthentifiedSignatureType.values()) {
+			Object o[] = new Object[1];
+			o[0] = v;
+			res[i++] = o;
+		}
+		return res;
+	}
 
 
 	@DataProvider(name = "provideDataForHybridEncryptions", parallel = true)
@@ -231,6 +242,26 @@ public class CryptoTests {
 		System.out.println("Testing ASymmetricKeyPairEncoding " + type);
 		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getSingleton(null);
 		ASymmetricKeyPair kpd = type.getKeyPairGenerator(rand, (short)1024).generateKeyPair();
+
+		Assert.assertEquals(ASymmetricPublicKey.decode(kpd.getASymmetricPublicKey().encode()),
+				kpd.getASymmetricPublicKey());
+		Assert.assertEquals(ASymmetricPrivateKey.decode(kpd.getASymmetricPrivateKey().encode()),
+				kpd.getASymmetricPrivateKey());
+		Assert.assertEquals(ASymmetricKeyPair.decode(kpd.encode()), kpd);
+		Assert.assertEquals(ASymmetricKeyPair.decode(kpd.encode()).getASymmetricPrivateKey(),
+				kpd.getASymmetricPrivateKey());
+		Assert.assertEquals(ASymmetricKeyPair.decode(kpd.encode()).getASymmetricPublicKey(),
+				kpd.getASymmetricPublicKey());
+	}
+	@Test(dataProvider = "provideDataForASymetricSignatures")
+	public void testASymmetricKeyPairEncoding(ASymmetricAuthentifiedSignatureType type)
+			throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException {
+		System.out.println("Testing ASymmetricKeyPairEncoding " + type);
+		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getSingleton(null);
+		
+		boolean isECDSA=type==ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA384withECDSA || type==ASymmetricAuthentifiedSignatureType.SHA384withECDSA; 
+		
+		ASymmetricKeyPair kpd = type.getKeyPairGenerator(rand, isECDSA?type.getDefaultKeySize():(short)1024).generateKeyPair();
 
 		Assert.assertEquals(ASymmetricPublicKey.decode(kpd.getASymmetricPublicKey().encode()),
 				kpd.getASymmetricPublicKey());
@@ -835,7 +866,9 @@ public class CryptoTests {
 
 		ASymmetricAuthentifiedSignerAlgorithm signer = new ASymmetricAuthentifiedSignerAlgorithm(kpd.getASymmetricPrivateKey());
 		byte[] signature = signer.sign(m);
-
+		if (sigType!=ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA384withECDSA && sigType!=ASymmetricAuthentifiedSignatureType.SHA384withECDSA)
+			Assert.assertEquals(sigType.getSignatureSizeBits(kpd.getKeySize()), signature.length*8);
+		
 		ASymmetricAuthentifiedSignatureCheckerAlgorithm checker = new ASymmetricAuthentifiedSignatureCheckerAlgorithm(kpd.getASymmetricPublicKey());
 		Assert.assertTrue(checker.verify(m, signature));
 		Assert.assertTrue(checker.verify(m, signature));
@@ -1028,6 +1061,7 @@ public class CryptoTests {
 
 		SymmetricAuthentifiedSignerAlgorithm signer = new SymmetricAuthentifiedSignerAlgorithm(secretKey);
 		byte[] signature = signer.sign(m);
+		Assert.assertEquals(sigType.getSignatureSizeInBits()/8, signature.length);
 
 		SymmetricAuthentifiedSignatureCheckerAlgorithm checker = new SymmetricAuthentifiedSignatureCheckerAlgorithm(secretKey);
 		Assert.assertTrue(checker.verify(m, signature));
@@ -1134,6 +1168,21 @@ public class CryptoTests {
 		
 		byte[] publicKey1 = peer1.getEncodedPublicKey();
 		byte[] publicKey2 = peer2.getEncodedPublicKey();
+		{
+			try
+			{
+				EllipticCurveDiffieHellmanAlgorithm falsePeer = type.getInstance(random);
+				falsePeer.setKeyPair(peer1.getKeyPair());
+				falsePeer.setDistantPublicKey(publicKey1, SymmetricEncryptionType.DEFAULT, (short)128);
+				
+				Assert.fail();
+			}
+			catch(Exception e)
+			{
+				
+			}
+		}
+		
 		peer1.setDistantPublicKey(publicKey2, SymmetricEncryptionType.DEFAULT, (short)128);
 		peer2.setDistantPublicKey(publicKey1, SymmetricEncryptionType.DEFAULT, (short)128);
 		Assert.assertEquals(peer1.getDerivedKey(),peer2.getDerivedKey());

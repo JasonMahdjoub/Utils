@@ -152,6 +152,8 @@ public class EllipticCurveDiffieHellmanAlgorithm {
 	
 			X509EncodedKeySpec pkSpec = new X509EncodedKeySpec(distantPublicKeyBytes);
 			PublicKey distantPublicKey = kf.generatePublic(pkSpec);
+			if (Arrays.equals(distantPublicKey.getEncoded(), myKeyPair.getASymmetricPublicKey().toJavaNativeKey().getEncoded()))
+				throw new gnu.vm.jgnu.security.InvalidKeyException("The local et distant public keys cannot be similar !");
 	
 			KeyAgreement ka = null;
 			if (type.getCodeProvider() == CodeProvider.BCFIPS)

@@ -54,8 +54,8 @@ public class Utils {
 		Calendar c = Calendar.getInstance();
 		c.set(2016, 1, 4);
 		Calendar c2 = Calendar.getInstance();
-		c.set(2017, 9, 5);
-		VERSION = new Version("Utils", "Utils", 3, 2, 0, Version.Type.Stable, 0, c.getTime(), c2.getTime());
+		c.set(2017, 9, 9);
+		VERSION = new Version("Utils", "Utils", 3, 2, 3, Version.Type.Stable, 0, c.getTime(), c2.getTime());
 		try {
 
 			InputStream is = Utils.class.getResourceAsStream("build.txt");
@@ -68,8 +68,18 @@ public class Utils {
 			VERSION.addDeveloper(new PersonDeveloper("mahdjoub", "jason", c.getTime()));
 
 			c = Calendar.getInstance();
+			c.set(2017, 9, 9);
+			Description d = new Description(3, 2, 3, Version.Type.Stable, 0, c.getTime());
+			d.addItem("Fix an issue with signature process");
+			d.addItem("Fix an issue with signature size");
+			d.addItem("Add throw exception when local et distant public keys are the same with ECDH key agreement");
+			d.addItem("Fix issue with ASymmetricKeyPair for signature encoding");
+			VERSION.addDescription(d);
+
+			
+			c = Calendar.getInstance();
 			c.set(2017, 9, 6);
-			Description d = new Description(3, 2, 0, Version.Type.Stable, 0, c.getTime());
+			d = new Description(3, 2, 0, Version.Type.Stable, 0, c.getTime());
 			d.addItem("Changing default JVM secured random");
 			VERSION.addDescription(d);
 

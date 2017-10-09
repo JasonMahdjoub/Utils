@@ -57,11 +57,24 @@ public class ASymmetricKeyPair implements Serializable {
 	public static ASymmetricKeyPair decode(byte[] b) throws IllegalArgumentException {
 		byte[][] res1 = Bits.separateEncodingsWithIntSizedTabs(b);
 		byte[][] res2 = Bits.separateEncodingsWithShortSizedTabs(res1[0]);
-		ASymmetricEncryptionType type = ASymmetricEncryptionType.valueOf(Bits.getInt(res2[0], 2));
+		
 		short keySize = Bits.getShort(res2[0], 0);
 		long expirationUTC = Bits.getLong(res2[0], 6);
-		return new ASymmetricKeyPair(type, new ASymmetricPrivateKey(type, res1[1], keySize),
+		
+		if (res2[0][14]==1)
+		{
+			ASymmetricAuthentifiedSignatureType type = ASymmetricAuthentifiedSignatureType.valueOf(Bits.getInt(res2[0], 2));
+			
+			return new ASymmetricKeyPair(type, new ASymmetricPrivateKey(type, res1[1], keySize),
 				new ASymmetricPublicKey(type, res2[1], keySize, expirationUTC), keySize);
+		}
+		else
+		{
+			ASymmetricEncryptionType type = ASymmetricEncryptionType.valueOf(Bits.getInt(res2[0], 2));
+		
+			return new ASymmetricKeyPair(type, new ASymmetricPrivateKey(type, res1[1], keySize),
+				new ASymmetricPublicKey(type, res2[1], keySize, expirationUTC), keySize);
+		}
 	}
 
 	public static ASymmetricKeyPair valueOf(String key) throws IllegalArgumentException, IOException {
