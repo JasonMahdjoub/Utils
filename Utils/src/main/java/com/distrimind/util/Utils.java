@@ -55,7 +55,7 @@ public class Utils {
 		c.set(2016, 1, 4);
 		Calendar c2 = Calendar.getInstance();
 		c.set(2017, 9, 9);
-		VERSION = new Version("Utils", "Utils", 3, 2, 3, Version.Type.Stable, 0, c.getTime(), c2.getTime());
+		VERSION = new Version("Utils", "Utils", 3, 2, 4, Version.Type.Stable, 0, c.getTime(), c2.getTime());
 		try {
 
 			InputStream is = Utils.class.getResourceAsStream("build.txt");
@@ -69,7 +69,7 @@ public class Utils {
 
 			c = Calendar.getInstance();
 			c.set(2017, 9, 9);
-			Description d = new Description(3, 2, 3, Version.Type.Stable, 0, c.getTime());
+			Description d = new Description(3, 2, 4, Version.Type.Stable, 0, c.getTime());
 			d.addItem("Fix an issue with signature process");
 			d.addItem("Fix an issue with signature size");
 			d.addItem("Add throw exception when local et distant public keys are the same with ECDH key agreement");
