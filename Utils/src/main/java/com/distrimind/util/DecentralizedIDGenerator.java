@@ -42,7 +42,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * network.
  * 
  * @author Jason Mahdjoub
- * @version 2.0
+ * @version 2.1
  * @since Utils 1.0
  */
 public class DecentralizedIDGenerator extends AbstractDecentralizedIDGenerator {
@@ -71,8 +71,8 @@ public class DecentralizedIDGenerator extends AbstractDecentralizedIDGenerator {
 		super();
 	}
 	
-	public DecentralizedIDGenerator(boolean useShortMacAddressAndRandomNumber) {
-		super(useShortMacAddressAndRandomNumber);
+	public DecentralizedIDGenerator(boolean useShortMacAddressAndRandomNumber, boolean hashAllIdentifier) {
+		super(useShortMacAddressAndRandomNumber, hashAllIdentifier);
 	}
 
 	DecentralizedIDGenerator(long timestamp, long work_id_sequence) {

@@ -66,31 +66,56 @@ public class DecentralizedIDTests {
 		Object[][] res = new Object[numberofTests][];
 		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getSingleton(null);
 		for (int i = 0; i < res.length; i++) {
-			switch ((int) Math.random() * 4) {
+			switch ((int) (Math.random() * 16)) {
 			case 0:
-				res[i] = new Object[] { new DecentralizedIDGenerator(true) };
+				res[i] = new Object[] { new DecentralizedIDGenerator(true, true) };
 				break;
 			case 1:
-				res[i] = new Object[] { new RenforcedDecentralizedIDGenerator(true) };
+				res[i] = new Object[] { new RenforcedDecentralizedIDGenerator(true, true) };
 				break;
 			case 2:
-				res[i] = new Object[] { new SecuredDecentralizedID(new RenforcedDecentralizedIDGenerator(true), rand) };
+				res[i] = new Object[] { new SecuredDecentralizedID(new RenforcedDecentralizedIDGenerator(true, true), rand) };
 				break;
 			case 3:
-				res[i] = new Object[] { new SecuredDecentralizedID(new DecentralizedIDGenerator(true), rand) };
+				res[i] = new Object[] { new SecuredDecentralizedID(new DecentralizedIDGenerator(true, true), rand) };
 				break;
 			case 4:
-				res[i] = new Object[] { new DecentralizedIDGenerator(false) };
+				res[i] = new Object[] { new DecentralizedIDGenerator(false, true) };
 				break;
 			case 5:
-				res[i] = new Object[] { new RenforcedDecentralizedIDGenerator(false) };
+				res[i] = new Object[] { new RenforcedDecentralizedIDGenerator(false, true) };
 				break;
 			case 6:
-				res[i] = new Object[] { new SecuredDecentralizedID(new RenforcedDecentralizedIDGenerator(false), rand) };
+				res[i] = new Object[] { new SecuredDecentralizedID(new RenforcedDecentralizedIDGenerator(false, true), rand) };
 				break;
 			case 7:
-				res[i] = new Object[] { new SecuredDecentralizedID(new DecentralizedIDGenerator(false), rand) };
+				res[i] = new Object[] { new SecuredDecentralizedID(new DecentralizedIDGenerator(false, true), rand) };
 				break;
+			case 8:
+				res[i] = new Object[] { new DecentralizedIDGenerator(true, false) };
+				break;
+			case 9:
+				res[i] = new Object[] { new RenforcedDecentralizedIDGenerator(true, false) };
+				break;
+			case 10:
+				res[i] = new Object[] { new SecuredDecentralizedID(new RenforcedDecentralizedIDGenerator(true, false), rand) };
+				break;
+			case 11:
+				res[i] = new Object[] { new SecuredDecentralizedID(new DecentralizedIDGenerator(true, false), rand) };
+				break;
+			case 12:
+				res[i] = new Object[] { new DecentralizedIDGenerator(false, false) };
+				break;
+			case 13:
+				res[i] = new Object[] { new RenforcedDecentralizedIDGenerator(false, false) };
+				break;
+			case 14:
+				res[i] = new Object[] { new SecuredDecentralizedID(new RenforcedDecentralizedIDGenerator(false, false), rand) };
+				break;
+			case 15:
+				res[i] = new Object[] { new SecuredDecentralizedID(new DecentralizedIDGenerator(false, false), rand) };
+				break;
+				
 			}
 		}
 		return res;

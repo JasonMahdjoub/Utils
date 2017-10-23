@@ -98,6 +98,63 @@ public enum ASymmetricKeyWrapperType {
 		return algorithmName;
 	}	
 	
+	static byte[] wrapKeyWithMetaData(byte[] wrappedKey, SymmetricSecretKey keyToWrap)
+	{
+		byte[] res=new byte[wrappedKey.length+7];
+		res[0]=keyToWrap.getAuthentifiedSignatureAlgorithmType()!=null?(byte)1:(byte)0;
+		Bits.putInt(res, 1, keyToWrap.getAuthentifiedSignatureAlgorithmType()!=null?keyToWrap.getAuthentifiedSignatureAlgorithmType().ordinal():keyToWrap.getEncryptionAlgorithmType().ordinal());
+		Bits.putShort(res, 5, keyToWrap.getKeySize());
+		System.arraycopy(wrappedKey, 0, res, 7, wrappedKey.length);
+		return res;
+	}
+	static byte[] getWrappedKeyFromMetaData(byte[] wk) throws InvalidKeyException
+	{
+		if (wk.length<9)
+			throw new InvalidKeyException();
+		byte[] res=new byte[wk.length-7];
+		System.arraycopy(wk, 7, res, 0, res.length);
+		return res;
+	}
+	static boolean isSignatureFromMetaData(byte[] wk) throws InvalidKeyException
+	{
+		if (wk.length<9)
+			throw new InvalidKeyException();
+		return wk[0]==1;
+	}
+	static short getKeySizeFromMetaData(byte[] wk) throws InvalidKeyException
+	{
+		if (wk.length<9)
+			throw new InvalidKeyException();
+		return Bits.getShort(wk, 5);
+	}
+	
+	static SymmetricAuthentifiedSignatureType getSignatureTypeFromMetaData(byte[] wk) throws InvalidKeyException
+	{
+		if (wk.length<9)
+			throw new InvalidKeyException();
+		int ordinal=Bits.getInt(wk, 1);
+		for (SymmetricAuthentifiedSignatureType t : SymmetricAuthentifiedSignatureType.values())
+		{
+			if (t.ordinal()==ordinal)
+				return t;
+		}
+		throw new InvalidKeyException();
+	}
+	static SymmetricEncryptionType getEncryptionTypeFromMetaData(byte[] wk) throws InvalidKeyException
+	{
+		if (wk.length<9)
+			throw new InvalidKeyException();
+		int ordinal=Bits.getInt(wk, 1);
+		for (SymmetricEncryptionType t : SymmetricEncryptionType.values())
+		{
+			if (t.ordinal()==ordinal)
+				return t;
+		}
+		throw new InvalidKeyException();
+	}
+	
+	
+	
 	public byte[] wrapKey(AbstractSecureRandom random, ASymmetricPublicKey publicKey, SymmetricSecretKey keyToWrap) throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, IllegalStateException, IllegalBlockSizeException, gnu.vm.jgnu.security.NoSuchProviderException, gnu.vm.jgnu.security.InvalidAlgorithmParameterException, IOException
 	{
 		if ((publicKey.getAuthentifiedSignatureAlgorithmType()!=null && ((provider==CodeProvider.GNU_CRYPTO)!=(publicKey.getAuthentifiedSignatureAlgorithmType().getCodeProviderForSignature()==CodeProvider.GNU_CRYPTO))) 
@@ -110,7 +167,7 @@ public enum ASymmetricKeyWrapperType {
 		{
 			Cipher c = Cipher.getInstance(algorithmName);
 			c.init(Cipher.WRAP_MODE, publicKey.toGnuKey(), random.getGnuSecureRandom());
-			return c.wrap(keyToWrap.toGnuKey());
+			return wrapKeyWithMetaData(c.wrap(keyToWrap.toGnuKey()), keyToWrap);
 		}
 		else
 		{
@@ -129,17 +186,17 @@ public enum ASymmetricKeyWrapperType {
 							new OAEPParameterSpec("SHA-384","MGF1",new MGF1ParameterSpec("SHA-384"),PSource.PSpecified.DEFAULT), random);
 					byte[] wrapedKey=c.wrap(keyToWrap.toJavaNativeKey());
 					byte[] encodedParameters=c.getParameters().getEncoded();
-					return Bits.concateEncodingWithShortSizedTabs(wrapedKey, encodedParameters);
+					return wrapKeyWithMetaData(Bits.concateEncodingWithShortSizedTabs(wrapedKey, encodedParameters), keyToWrap);
 				}
 				else if (this.algorithmName.equals(BC_FIPS_RSA_KTS_KTM.algorithmName))
 				{
 					c.init(javax.crypto.Cipher.WRAP_MODE, publicKey.toJavaNativeKey(), new KTSParameterSpec.Builder(NISTObjectIdentifiers.id_aes256_wrap.getId(),256).build(), random);
-					return c.wrap(keyToWrap.toJavaNativeKey());
+					return wrapKeyWithMetaData(c.wrap(keyToWrap.toJavaNativeKey()), keyToWrap);
 				}
 				else
 				{
 					c.init(javax.crypto.Cipher.WRAP_MODE, publicKey.toJavaNativeKey(), random);
-					return c.wrap(keyToWrap.toJavaNativeKey());
+					return wrapKeyWithMetaData(c.wrap(keyToWrap.toJavaNativeKey()), keyToWrap);
 				}
 				
 			}
@@ -169,13 +226,13 @@ public enum ASymmetricKeyWrapperType {
 		}
 	}
 	
-	public SymmetricSecretKey unwrapKey(ASymmetricPrivateKey privateKey, byte[] keyToUnwrap, SymmetricAuthentifiedSignatureType signatureType, short keySize) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalStateException, gnu.vm.jgnu.security.NoSuchProviderException, InvalidKeySpecException, gnu.vm.jgnu.security.InvalidAlgorithmParameterException, IOException
+	public SymmetricSecretKey unwrapKey(ASymmetricPrivateKey privateKey, byte[] keyToUnwrap) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalStateException, gnu.vm.jgnu.security.NoSuchProviderException, InvalidKeySpecException, gnu.vm.jgnu.security.InvalidAlgorithmParameterException, IOException
 	{
-		return unwrapKey(privateKey, keyToUnwrap, null, signatureType, keySize);
-	}
-	public SymmetricSecretKey unwrapKey(ASymmetricPrivateKey privateKey, byte[] keyToUnwrap, SymmetricEncryptionType encryptionType, short keySize) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalStateException, gnu.vm.jgnu.security.NoSuchProviderException, InvalidKeySpecException, gnu.vm.jgnu.security.InvalidAlgorithmParameterException, IOException
-	{
-		return unwrapKey(privateKey, keyToUnwrap, encryptionType, null, keySize);
+		if (isSignatureFromMetaData(keyToUnwrap))
+			return unwrapKey(privateKey, getWrappedKeyFromMetaData(keyToUnwrap), null, getSignatureTypeFromMetaData(keyToUnwrap), getKeySizeFromMetaData(keyToUnwrap));
+		else
+			return unwrapKey(privateKey, getWrappedKeyFromMetaData(keyToUnwrap), getEncryptionTypeFromMetaData(keyToUnwrap), null, getKeySizeFromMetaData(keyToUnwrap));
+		
 	}
 	private SymmetricSecretKey unwrapKey(ASymmetricPrivateKey privateKey, byte[] keyToUnwrap, SymmetricEncryptionType encryptionType, SymmetricAuthentifiedSignatureType signatureType, short keySize) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalStateException, gnu.vm.jgnu.security.NoSuchProviderException, InvalidKeySpecException, IOException, gnu.vm.jgnu.security.InvalidAlgorithmParameterException
 	{

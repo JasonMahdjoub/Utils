@@ -91,7 +91,7 @@ public enum SymmetricKeyWrapperType {
 		{
 			Cipher cipher=Cipher.getInstance(algorithmName);
 			cipher.init(Cipher.WRAP_MODE, key.toGnuKey());
-			return cipher.wrap(keyToWrap.toGnuKey());
+			return ASymmetricKeyWrapperType.wrapKeyWithMetaData(cipher.wrap(keyToWrap.toGnuKey()), keyToWrap);
 		}
 		else
 		{
@@ -106,7 +106,7 @@ public enum SymmetricKeyWrapperType {
 				cipher=javax.crypto.Cipher.getInstance(algorithmName, provider.checkProviderWithCurrentOS().name());
 
 				cipher.init(javax.crypto.Cipher.WRAP_MODE, key.toJavaNativeKey());
-				return cipher.wrap(keyToWrap.toJavaNativeKey());
+				return ASymmetricKeyWrapperType.wrapKeyWithMetaData(cipher.wrap(keyToWrap.toJavaNativeKey()), keyToWrap);
 				
 			}
 			catch(java.security.NoSuchAlgorithmException e)
@@ -131,13 +131,12 @@ public enum SymmetricKeyWrapperType {
 			}
 		}
 	}
-	public SymmetricSecretKey unwrapKey(SymmetricSecretKey key, byte[] keyToUnwrap, SymmetricAuthentifiedSignatureType signatureType, short keySize) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalStateException, gnu.vm.jgnu.security.NoSuchProviderException
+	public SymmetricSecretKey unwrapKey(SymmetricSecretKey key, byte[] keyToUnwrap) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalStateException, gnu.vm.jgnu.security.NoSuchProviderException
 	{
-		return unwrapKey(key, keyToUnwrap, null, signatureType, keySize);
-	}
-	public SymmetricSecretKey unwrapKey(SymmetricSecretKey key, byte[] keyToUnwrap, SymmetricEncryptionType encryptionType, short keySize) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalStateException, gnu.vm.jgnu.security.NoSuchProviderException
-	{
-		return unwrapKey(key, keyToUnwrap, encryptionType, null, keySize);
+		if (ASymmetricKeyWrapperType.isSignatureFromMetaData(keyToUnwrap))
+			return unwrapKey(key, ASymmetricKeyWrapperType.getWrappedKeyFromMetaData(keyToUnwrap), null, ASymmetricKeyWrapperType.getSignatureTypeFromMetaData(keyToUnwrap), ASymmetricKeyWrapperType.getKeySizeFromMetaData(keyToUnwrap));
+		else
+			return unwrapKey(key, ASymmetricKeyWrapperType.getWrappedKeyFromMetaData(keyToUnwrap), ASymmetricKeyWrapperType.getEncryptionTypeFromMetaData(keyToUnwrap), null, ASymmetricKeyWrapperType.getKeySizeFromMetaData(keyToUnwrap));
 	}
 	private SymmetricSecretKey unwrapKey(SymmetricSecretKey key, byte[] keyToUnwrap, SymmetricEncryptionType encryptionType, SymmetricAuthentifiedSignatureType signatureType, short keySize) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalStateException, gnu.vm.jgnu.security.NoSuchProviderException
 	{

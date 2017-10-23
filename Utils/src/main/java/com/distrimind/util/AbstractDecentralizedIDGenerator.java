@@ -52,7 +52,7 @@ import gnu.vm.jgnu.security.NoSuchProviderException;
  * network.
  * 
  * @author Jason Mahdjoub
- * @version 2.0
+ * @version 2.1
  * @since Utils 1.0
  * 
  */
@@ -63,6 +63,7 @@ public abstract class AbstractDecentralizedIDGenerator extends AbstractDecentral
 	private static final long serialVersionUID = 478117044055632008L;
 
 	private final static transient long LOCAL_MAC;
+	private final static transient byte []LOCAL_MAC_BYTES;
 	//private final static transient long SHORT_LOCAL_MAC;
 	private final static transient byte SHORT_LOCAL_MAC_BYTES[];
 	private final static transient AbstractSecureRandom RANDOM;
@@ -76,6 +77,7 @@ public abstract class AbstractDecentralizedIDGenerator extends AbstractDecentral
 		byte shortLocalMacBytes[]=new byte[6];
 		AbstractSecureRandom random=null;
 		AbstractMessageDigest messageDigest=null;
+		byte digestion48[]=new byte[6];
 		try {
 			messageDigest=MessageDigestType.BC_FIPS_SHA3_256.getMessageDigestInstance();
 			final Enumeration<NetworkInterface> e = NetworkInterface.getNetworkInterfaces();
@@ -97,7 +99,7 @@ public abstract class AbstractDecentralizedIDGenerator extends AbstractDecentral
 							byte digestion64[]=new byte[8];
 							for (int i=0;i<8;i++)
 								digestion64[i]=(byte)(digestion256[i]^digestion256[i+8]^digestion256[i+16]^digestion256[i+24]);
-							byte digestion48[]=new byte[6];
+							
 							for (int i=0;i<2;i++)
 								digestion48[i]=(byte)(digestion64[i]^digestion64[i+2]);
 							for (int i=2;i<6;i++)
@@ -145,6 +147,7 @@ public abstract class AbstractDecentralizedIDGenerator extends AbstractDecentral
 		if (result == 0)
 			result = result2;
 		LOCAL_MAC = result;
+		LOCAL_MAC_BYTES=digestion48;
 		//SHORT_LOCAL_MAC=0xFFFFl & resultShort;
 		RANDOM=random;
 		MESSAGE_DIGEST=messageDigest;
@@ -166,35 +169,59 @@ public abstract class AbstractDecentralizedIDGenerator extends AbstractDecentral
 
 	protected final long worker_id_and_sequence;
 	public AbstractDecentralizedIDGenerator() {
-		this(true);
+		this(true, false);
 	}
-	public AbstractDecentralizedIDGenerator(boolean useShortMacAddressAndRandomNumber) {
-		timestamp = System.currentTimeMillis();
-		if (useShortMacAddressAndRandomNumber)
+	public AbstractDecentralizedIDGenerator(boolean useShortMacAddressAndRandomNumber, boolean hashAllIdentifier) {
+		
+		if (hashAllIdentifier)
 		{
-			//long r=0;
+			long timestamp = System.currentTimeMillis();
 			byte digestion256[]=null;
 			synchronized(RANDOM)
 			{
 				MESSAGE_DIGEST.reset();
-				MESSAGE_DIGEST.update(SHORT_LOCAL_MAC_BYTES, 0, 2);
+				MESSAGE_DIGEST.update(LOCAL_MAC_BYTES);
 				byte[] r=new byte[4];
 				RANDOM.nextBytes(r);
-				MESSAGE_DIGEST.update(r, 0, 4);
+				MESSAGE_DIGEST.update(r);
+				byte[] ts=new byte[10];
+				Bits.putLong(ts, 0, timestamp);
+				Bits.putShort(ts, 8, getNewSequence());
+				MESSAGE_DIGEST.update(ts);
 				digestion256=MESSAGE_DIGEST.digest();
-				
-				
-				
-				//r=0xFFFFFFFFFFFFFFFFl & ((long)RANDOM.nextInt());
 			}
-			digestion256[0]=0;
-			digestion256[1]=0;
-			
-			//worker_id_and_sequence = SHORT_LOCAL_MAC | ((0xFFFFFFFFl & r)<<16) | ((0xFFFFl & getNewSequence()) << 48);
-			worker_id_and_sequence = Bits.getLong(digestion256, 0) | ((0xFFFFl & getNewSequence()) << 48);
+			this.timestamp=Bits.getLong(digestion256, 0);
+			worker_id_and_sequence=Bits.getLong(digestion256, 8);
 		}
 		else
-			worker_id_and_sequence = LOCAL_MAC | ((0xFFFFl & getNewSequence()) << 48);
+		{
+			timestamp = System.currentTimeMillis();
+			if (useShortMacAddressAndRandomNumber)
+			{
+				//long r=0;
+				byte digestion256[]=null;
+				synchronized(RANDOM)
+				{
+					MESSAGE_DIGEST.reset();
+					MESSAGE_DIGEST.update(SHORT_LOCAL_MAC_BYTES, 0, 2);
+					byte[] r=new byte[4];
+					RANDOM.nextBytes(r);
+					MESSAGE_DIGEST.update(r, 0, 4);
+					digestion256=MESSAGE_DIGEST.digest();
+					
+					
+					
+					//r=0xFFFFFFFFFFFFFFFFl & ((long)RANDOM.nextInt());
+				}
+				digestion256[0]=0;
+				digestion256[1]=0;
+				
+				//worker_id_and_sequence = SHORT_LOCAL_MAC | ((0xFFFFFFFFl & r)<<16) | ((0xFFFFl & getNewSequence()) << 48);
+				worker_id_and_sequence = Bits.getLong(digestion256, 0) | ((0xFFFFl & getNewSequence()) << 48);
+			}
+			else
+				worker_id_and_sequence = LOCAL_MAC | ((0xFFFFl & getNewSequence()) << 48);
+		}
 	}
 
 	AbstractDecentralizedIDGenerator(long timestamp, long work_id_sequence) {

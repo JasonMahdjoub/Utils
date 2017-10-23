@@ -113,7 +113,7 @@ public class CryptoTests {
 		return res;
 	}
 	
-	/*@DataProvider(name = "provideDataForASymetricSignatures", parallel = true)
+	@DataProvider(name = "provideDataForASymetricSignatures", parallel = true)
 	public Object[][] provideDataForASymetricSignatures() {
 		Object[][] res = new Object[ASymmetricAuthentifiedSignatureType.values().length][];
 		int i = 0;
@@ -123,7 +123,7 @@ public class CryptoTests {
 			res[i++] = o;
 		}
 		return res;
-	}*/
+	}
 
 
 	@DataProvider(name = "provideDataForHybridEncryptions", parallel = true)
@@ -645,7 +645,10 @@ public class CryptoTests {
 			kw=ASymmetricKeyWrapperType.RSA_OAEP_WITH_PARAMETERS;
 			
 		byte[] localEncryptedKey = kw.wrapKey(rand, kpd.getASymmetricPublicKey(), localKey);
-		SymmetricSecretKey decryptedKey=kw.unwrapKey(kpd.getASymmetricPrivateKey(), localEncryptedKey, stype, stype.getDefaultKeySizeBits());
+		SymmetricSecretKey decryptedKey=kw.unwrapKey(kpd.getASymmetricPrivateKey(), localEncryptedKey);
+		Assert.assertEquals(localKey.getAuthentifiedSignatureAlgorithmType(), decryptedKey.getAuthentifiedSignatureAlgorithmType());
+		Assert.assertEquals(localKey.getEncryptionAlgorithmType(), decryptedKey.getEncryptionAlgorithmType());
+		Assert.assertEquals(localKey.getKeySize(), decryptedKey.getKeySize());
 		SymmetricEncryptionAlgorithm algoDistantS = new SymmetricEncryptionAlgorithm(rand, decryptedKey);
 
 		for (byte[] m : messagesToEncrypt) {
@@ -878,7 +881,7 @@ public class CryptoTests {
 		SymmetricSecretKey kp=asetype.getKeyGenerator(rand, asetype.getDefaultKeySizeBits()).generateKey();
 		SymmetricSecretKey sk= setype.getKeyGenerator(rand, setype.getDefaultKeySizeBits()).generateKey();
 		byte[] wrappedKey=typeWrapper.wrapKey(kp, sk);
-		SymmetricSecretKey sk2=typeWrapper.unwrapKey(kp, wrappedKey, setype, setype.getDefaultKeySizeBits());
+		SymmetricSecretKey sk2=typeWrapper.unwrapKey(kp, wrappedKey);
 		Assert.assertEquals(sk.getKeySize(), sk2.getKeySize());
 		Assert.assertEquals(sk.getAuthentifiedSignatureAlgorithmType(), sk2.getAuthentifiedSignatureAlgorithmType());
 		Assert.assertEquals(sk.getEncryptionAlgorithmType(), sk2.getEncryptionAlgorithmType());
@@ -891,7 +894,7 @@ public class CryptoTests {
 		SymmetricSecretKey kp=asetype.getKeyGenerator(rand, (short)128).generateKey();
 		SymmetricSecretKey sk= setype.getKeyGenerator(rand, (short)128).generateKey();
 		byte[] wrappedKey=typeWrapper.wrapKey(kp, sk);
-		SymmetricSecretKey sk2=typeWrapper.unwrapKey(kp, wrappedKey, setype, (short)128);
+		SymmetricSecretKey sk2=typeWrapper.unwrapKey(kp, wrappedKey);
 		Assert.assertEquals(sk.getKeySize(), sk2.getKeySize());
 		Assert.assertEquals(sk.getAuthentifiedSignatureAlgorithmType(), sk2.getAuthentifiedSignatureAlgorithmType());
 		Assert.assertEquals(sk.getEncryptionAlgorithmType(), sk2.getEncryptionAlgorithmType());
@@ -962,7 +965,7 @@ public class CryptoTests {
 		ASymmetricKeyPair kp=asetype.getKeyPairGenerator(rand, (short)1024).generateKeyPair();
 		SymmetricSecretKey sk= setype.getKeyGenerator(rand, setype.getDefaultKeySizeBits()).generateKey();
 		byte[] wrappedKey=typeWrapper.wrapKey(rand, kp.getASymmetricPublicKey(), sk);
-		SymmetricSecretKey sk2=typeWrapper.unwrapKey(kp.getASymmetricPrivateKey(), wrappedKey, setype, setype.getDefaultKeySizeBits());
+		SymmetricSecretKey sk2=typeWrapper.unwrapKey(kp.getASymmetricPrivateKey(), wrappedKey);
 		Assert.assertEquals(sk.getKeySize(), sk2.getKeySize());
 		Assert.assertEquals(sk.getAuthentifiedSignatureAlgorithmType(), sk2.getAuthentifiedSignatureAlgorithmType());
 		Assert.assertEquals(sk.getEncryptionAlgorithmType(), sk2.getEncryptionAlgorithmType());
@@ -976,7 +979,7 @@ public class CryptoTests {
 		ASymmetricKeyPair kp=asetype.getKeyPairGenerator(rand, (short)1024).generateKeyPair();
 		SymmetricSecretKey sk= ssigtype.getKeyGenerator(rand, ssigtype.getDefaultKeySizeBits()).generateKey();
 		byte[] wrappedKey=typeWrapper.wrapKey(rand, kp.getASymmetricPublicKey(), sk);
-		SymmetricSecretKey sk2=typeWrapper.unwrapKey(kp.getASymmetricPrivateKey(), wrappedKey, ssigtype, ssigtype.getDefaultKeySizeBits());
+		SymmetricSecretKey sk2=typeWrapper.unwrapKey(kp.getASymmetricPrivateKey(), wrappedKey);
 		Assert.assertEquals(sk.getKeySize(), sk2.getKeySize());
 		Assert.assertEquals(sk.getAuthentifiedSignatureAlgorithmType(), sk2.getAuthentifiedSignatureAlgorithmType());
 		Assert.assertEquals(sk.getEncryptionAlgorithmType(), sk2.getEncryptionAlgorithmType());
