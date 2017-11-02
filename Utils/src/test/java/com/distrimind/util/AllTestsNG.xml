@@ -31,5 +31,19 @@
 			<class name="com.distrimind.util.version.VersionTests" />
 		</classes>
 	</test>
+	<test name="testDataBuffers">
+		<classes>
+			<class name="com.distrimind.util.data_buffers.testDataBufferBool" />
+			<class name="com.distrimind.util.data_buffers.testDataBufferByte" />
+			<class name="com.distrimind.util.data_buffers.testDataBufferChar" />
+			<class name="com.distrimind.util.data_buffers.testDataBufferDouble" />
+			<class name="com.distrimind.util.data_buffers.testDataBufferFloat" />
+			<class name="com.distrimind.util.data_buffers.testDataBufferInt" />
+			<class name="com.distrimind.util.data_buffers.testDataBufferLong" />
+			<class name="com.distrimind.util.data_buffers.testDataBufferShort" />
+			<class name="com.distrimind.util.data_buffers.testDataBufferUnsignedByte" />
+			<class name="com.distrimind.util.data_buffers.testDataBufferUnsignedShort" />
+		</classes>
+	</test>
 	
 </suite>

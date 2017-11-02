@@ -54,8 +54,8 @@ public class Utils {
 		Calendar c = Calendar.getInstance();
 		c.set(2016, 1, 4);
 		Calendar c2 = Calendar.getInstance();
-		c.set(2017, 9, 23);
-		VERSION = new Version("Utils", "Utils", 3, 3, 0, Version.Type.Stable, 0, c.getTime(), c2.getTime());
+		c.set(2017, 10, 2);
+		VERSION = new Version("Utils", "Utils", 3, 4, 0, Version.Type.Stable, 0, c.getTime(), c2.getTime());
 		try {
 
 			InputStream is = Utils.class.getResourceAsStream("build.txt");
@@ -68,8 +68,14 @@ public class Utils {
 			VERSION.addDeveloper(new PersonDeveloper("mahdjoub", "jason", c.getTime()));
 
 			c = Calendar.getInstance();
+			c.set(2017, 10, 2);
+			Description d = new Description(3, 4, 0, Version.Type.Stable, 0, c.getTime());
+			d.addItem("Add data buffers classes");
+			VERSION.addDescription(d);
+
+			c = Calendar.getInstance();
 			c.set(2017, 9, 23);
-			Description d = new Description(3, 3, 0, Version.Type.Stable, 0, c.getTime());
+			d = new Description(3, 3, 0, Version.Type.Stable, 0, c.getTime());
 			d.addItem("Improving key wrapping process");
 			d.addItem("Decentralized ID can now be entirely hashed");
 			VERSION.addDescription(d);
