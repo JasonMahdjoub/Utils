@@ -63,6 +63,10 @@ public enum MessageDigestType {
 	BC_FIPS_SHA3_384("SHA3-384",CodeProvider.BCFIPS, 384), 
 	BC_FIPS_SHA3_512("SHA3-512", CodeProvider.BCFIPS, 512), 
 	BC_WHIRLPOOL("WHIRLPOOL",CodeProvider.BC, 512), 
+	BC_BLAKE2B_160("BLAKE2B-160", CodeProvider.BC, 160),
+	BC_BLAKE2B_256("BLAKE2B-256", CodeProvider.BC, 256),
+	BC_BLAKE2B_384("BLAKE2B-384", CodeProvider.BC, 384),
+	BC_BLAKE2B_512("BLAKE2B-512", CodeProvider.BC, 512),
 	DEFAULT(BC_FIPS_SHA3_384);
 
 	

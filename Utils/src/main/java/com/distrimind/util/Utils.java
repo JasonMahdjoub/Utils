@@ -55,7 +55,7 @@ public class Utils {
 		c.set(2016, 1, 4);
 		Calendar c2 = Calendar.getInstance();
 		c.set(2017, 10, 2);
-		VERSION = new Version("Utils", "Utils", 3, 4, 0, Version.Type.Stable, 0, c.getTime(), c2.getTime());
+		VERSION = new Version("Utils", "Utils", 3, 5, 0, Version.Type.Stable, 0, c.getTime(), c2.getTime());
 		try {
 
 			InputStream is = Utils.class.getResourceAsStream("build.txt");
@@ -69,7 +69,13 @@ public class Utils {
 
 			c = Calendar.getInstance();
 			c.set(2017, 10, 2);
-			Description d = new Description(3, 4, 0, Version.Type.Stable, 0, c.getTime());
+			Description d = new Description(3, 5, 0, Version.Type.Stable, 0, c.getTime());
+			d.addItem("Add blake 2b message digest");
+			VERSION.addDescription(d);
+
+			c = Calendar.getInstance();
+			c.set(2017, 10, 2);
+			d = new Description(3, 4, 0, Version.Type.Stable, 0, c.getTime());
 			d.addItem("Add data buffers classes");
 			VERSION.addDescription(d);
 
