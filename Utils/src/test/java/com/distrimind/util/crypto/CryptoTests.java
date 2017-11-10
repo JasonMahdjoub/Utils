@@ -264,7 +264,9 @@ public class CryptoTests {
 		System.out.println("Testing ASymmetricKeyPairEncoding " + type);
 		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getSingleton(null);
 		
-		boolean isECDSA=type==ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA384withECDSA || type==ASymmetricAuthentifiedSignatureType.SHA384withECDSA; 
+		boolean isECDSA=type==ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA384withECDSA 
+				|| 	type==ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA256withECDSA
+				|| type==ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA512withECDSA; 
 		
 		ASymmetricKeyPair kpd = type.getKeyPairGenerator(rand, isECDSA?type.getDefaultKeySize():(short)1024).generateKeyPair();
 
@@ -870,7 +872,10 @@ public class CryptoTests {
 		ASymmetricAuthentifiedSignerAlgorithm signer = new ASymmetricAuthentifiedSignerAlgorithm(kpd.getASymmetricPrivateKey());
 		ASymmetricAuthentifiedSignatureCheckerAlgorithm checker = new ASymmetricAuthentifiedSignatureCheckerAlgorithm(kpd.getASymmetricPublicKey());
 		byte[] signature=testSignature(signer, checker);
-		if (kpd.getAuthentifiedSignatureAlgorithmType()!=ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA384withECDSA && kpd.getAuthentifiedSignatureAlgorithmType()!=ASymmetricAuthentifiedSignatureType.SHA384withECDSA)
+		if (kpd.getAuthentifiedSignatureAlgorithmType()!=ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA384withECDSA
+				&& kpd.getAuthentifiedSignatureAlgorithmType()!=ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA256withECDSA
+				&& kpd.getAuthentifiedSignatureAlgorithmType()!=ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA512withECDSA
+				)
 			Assert.assertEquals(kpd.getAuthentifiedSignatureAlgorithmType().getSignatureSizeBits(kpd.getKeySize()), signature.length*8);
 	}
 	
@@ -1164,6 +1169,8 @@ public class CryptoTests {
 		AbstractSecureRandom random = SecureRandomType.DEFAULT.getSingleton(null);
 		EllipticCurveDiffieHellmanAlgorithm peer1 = type.getInstance(random);
 		EllipticCurveDiffieHellmanAlgorithm peer2 = type.getInstance(random);
+		byte[] keyingMaterial=new byte[100];
+		random.nextBytes(keyingMaterial);
 		peer1.generateAndSetKeyPair();
 		peer2.generateAndSetKeyPair();
 		
@@ -1174,7 +1181,7 @@ public class CryptoTests {
 			{
 				EllipticCurveDiffieHellmanAlgorithm falsePeer = type.getInstance(random);
 				falsePeer.setKeyPair(peer1.getKeyPair());
-				falsePeer.setDistantPublicKey(publicKey1, SymmetricEncryptionType.DEFAULT, (short)128);
+				falsePeer.setDistantPublicKey(publicKey1, SymmetricEncryptionType.DEFAULT, (short)128, keyingMaterial);
 				
 				Assert.fail();
 			}
@@ -1184,8 +1191,8 @@ public class CryptoTests {
 			}
 		}
 		
-		peer1.setDistantPublicKey(publicKey2, SymmetricEncryptionType.DEFAULT, (short)128);
-		peer2.setDistantPublicKey(publicKey1, SymmetricEncryptionType.DEFAULT, (short)128);
+		peer1.setDistantPublicKey(publicKey2, SymmetricEncryptionType.DEFAULT, (short)128, keyingMaterial);
+		peer2.setDistantPublicKey(publicKey1, SymmetricEncryptionType.DEFAULT, (short)128, keyingMaterial);
 		Assert.assertEquals(peer1.getDerivedKey(),peer2.getDerivedKey());
 
 		SymmetricSecretKey key = peer1.getDerivedKey();
@@ -1258,8 +1265,11 @@ public class CryptoTests {
 		
 		byte[] publicKey1 = peer1.getEncodedPublicKey();
 		byte[] publicKey2 = peer2.getEncodedPublicKey();
-		peer1.setDistantPublicKey(publicKey2, SymmetricAuthentifiedSignatureType.DEFAULT, (short)128);
-		peer2.setDistantPublicKey(publicKey1, SymmetricAuthentifiedSignatureType.DEFAULT, (short)128);
+		byte[] keyingMaterial=new byte[100];
+		random.nextBytes(keyingMaterial);
+		
+		peer1.setDistantPublicKey(publicKey2, SymmetricAuthentifiedSignatureType.DEFAULT, (short)128, keyingMaterial);
+		peer2.setDistantPublicKey(publicKey1, SymmetricAuthentifiedSignatureType.DEFAULT, (short)128, keyingMaterial);
 		Assert.assertEquals(peer1.getDerivedKey(),peer2.getDerivedKey());
 
 		SymmetricSecretKey key = peer1.getDerivedKey();

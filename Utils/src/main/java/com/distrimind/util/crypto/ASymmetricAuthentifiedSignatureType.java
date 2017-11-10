@@ -53,14 +53,15 @@ public enum ASymmetricAuthentifiedSignatureType {
 	SHA256withRSA("SHA256withRSA","RSA", CodeProvider.SunRsaSign,CodeProvider.SunRsaSign,(short) 3072, 31536000000l), 
 	SHA384withRSA("SHA384withRSA", "RSA", CodeProvider.SunRsaSign,CodeProvider.SunRsaSign,(short) 3072, 31536000000l), 
 	SHA512withRSA("SHA512withRSA", "RSA", CodeProvider.SunRsaSign,CodeProvider.SunRsaSign,(short) 3072, 31536000000l),
-	SHA384withECDSA("SHA384withECDSA", "EC", CodeProvider.SunEC,CodeProvider.SunEC,(short) 384, 31536000000l),
 	BC_FIPS_SHA256withRSA("SHA256withRSA","RSA", CodeProvider.BCFIPS,CodeProvider.BCFIPS,(short) 3072, 31536000000l), 
 	BC_FIPS_SHA384withRSA("SHA384withRSA","RSA", CodeProvider.BCFIPS,CodeProvider.BCFIPS,(short) 3072, 31536000000l), 
 	BC_FIPS_SHA512withRSA("SHA512withRSA", "RSA", CodeProvider.BCFIPS,CodeProvider.BCFIPS,(short) 3072, 31536000000l),
 	BC_FIPS_SHA256withRSAandMGF1("SHA256withRSAandMGF1","RSA", CodeProvider.BCFIPS,CodeProvider.BCFIPS,(short) 3072, 31536000000l), 
 	BC_FIPS_SHA384withRSAandMGF1("SHA384withRSAandMGF1","RSA", CodeProvider.BCFIPS,CodeProvider.BCFIPS,(short) 3072, 31536000000l), 
 	BC_FIPS_SHA512withRSAandMGF1("SHA512withRSAandMGF1", "RSA", CodeProvider.BCFIPS,CodeProvider.BCFIPS,(short) 3072, 31536000000l),
+	BC_FIPS_SHA256withECDSA("SHA256withECDSA", "EC", CodeProvider.BCFIPS,CodeProvider.BCFIPS,(short) 256, 31536000000l),
 	BC_FIPS_SHA384withECDSA("SHA384withECDSA", "EC", CodeProvider.BCFIPS,CodeProvider.BCFIPS,(short) 384, 31536000000l),
+	BC_FIPS_SHA512withECDSA("SHA512withECDSA", "EC", CodeProvider.BCFIPS,CodeProvider.BCFIPS,(short) 521, 31536000000l),
 	DEFAULT(BC_FIPS_SHA384withRSAandMGF1);
 
 	private final String signatureAlgorithmName;
@@ -128,7 +129,7 @@ public enum ASymmetricAuthentifiedSignatureType {
 	public int getSignatureSizeBits(int keySize) {
 		if (this==BC_FIPS_SHA256withRSAandMGF1 || this==ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA384withRSAandMGF1 || this==ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA512withRSAandMGF1)
 			return keySize+464;
-		else if (this==ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA384withECDSA || this==ASymmetricAuthentifiedSignatureType.SHA384withECDSA)
+		else if (this==ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA384withECDSA)
 			return keySize;
 		return keySize;
 	}
@@ -201,6 +202,6 @@ public enum ASymmetricAuthentifiedSignatureType {
 
 		}
 
-	}	
+	}
 
 }

@@ -37,6 +37,7 @@ package com.distrimind.util.crypto;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
+import java.security.spec.ECGenParameterSpec;
 import java.security.spec.RSAKeyGenParameterSpec;
 
 /**
@@ -86,8 +87,17 @@ public final class JavaNativeKeyPairGenerator extends AbstractKeyPairGenerator {
 	public void initialize(short _keysize, long expirationTime, AbstractSecureRandom _random) throws gnu.vm.jgnu.security.InvalidAlgorithmParameterException {
 		try
 		{
-			if (signatureType!=null && signatureType.getKeyGeneratorAlgorithmName().equals(ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA384withECDSA.getKeyGeneratorAlgorithmName()))
-				keyPairGenerator.initialize(_keysize, _random.getJavaNativeSecureRandom());
+			if (signatureType!=null && signatureType.getKeyGeneratorAlgorithmName().equals(ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA256withECDSA.getKeyGeneratorAlgorithmName()))
+			{
+				if (_keysize<256)
+					keyPairGenerator.initialize(new ECGenParameterSpec("P-224"), _random.getJavaNativeSecureRandom());	
+				else if (_keysize<(384-256)/2)
+					keyPairGenerator.initialize(new ECGenParameterSpec("P-256"), _random.getJavaNativeSecureRandom());
+				else if (_keysize<(521-384)/2)
+					keyPairGenerator.initialize(new ECGenParameterSpec("P-384"), _random.getJavaNativeSecureRandom());
+				else
+					keyPairGenerator.initialize(new ECGenParameterSpec("P-521"), _random.getJavaNativeSecureRandom());
+			}
 			else
 				keyPairGenerator.initialize(new RSAKeyGenParameterSpec(_keysize, RSAKeyGenParameterSpec.F4), _random.getJavaNativeSecureRandom());
 		}

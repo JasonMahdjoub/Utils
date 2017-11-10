@@ -42,38 +42,46 @@ package com.distrimind.util.crypto;
  * @since Utils 2.9
  */
 public enum EllipticCurveDiffieHellmanType {
-	ECDH_128((short) 128, (short) 256, CodeProvider.SunEC, MessageDigestType.BC_FIPS_SHA3_256), 
-	ECDH_256((short) 256, (short) 256, CodeProvider.SunEC, MessageDigestType.BC_FIPS_SHA3_256), 
-	ECDH_384((short) 256, (short) 384, CodeProvider.SunEC, MessageDigestType.BC_FIPS_SHA3_384), 
-	BC_FIPS_ECDH_128((short) 128, (short) 256, CodeProvider.BCFIPS, MessageDigestType.BC_FIPS_SHA3_256), 
-	BC_FIPS_ECDH_256((short) 256, (short) 256, CodeProvider.BCFIPS, MessageDigestType.BC_FIPS_SHA3_256), 
-	BC_FIPS_ECDH_384((short) 256, (short) 384, CodeProvider.BCFIPS, MessageDigestType.BC_FIPS_SHA3_384), 
-	DEFAULT(BC_FIPS_ECDH_384);
+	ECDDH_384_AES128((short) 128, (short) 256, CodeProvider.BCFIPS, ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA256withECDSA, "ECCDHwithSHA384CKDF"),
+	ECDDH_384_AES256((short) 256, (short) 384, CodeProvider.BCFIPS, ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA384withECDSA, "ECCDHwithSHA384CKDF"),
+	ECDDH_512_AES256((short) 256, (short) 521, CodeProvider.BCFIPS, ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA512withECDSA, "ECCDHwithSHA512CKDF"), 
+	BC_FIPS_ECDDH_384_AES128((short) 128, (short) 256, CodeProvider.BCFIPS, ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA256withECDSA, "ECCDHwithSHA384CKDF"),
+	BC_FIPS_ECDDH_384_AES256((short) 256, (short) 384, CodeProvider.BCFIPS, ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA384withECDSA, "ECCDHwithSHA384CKDF"),
+	BC_FIPS_ECDDH_512_AES256((short) 256, (short) 521, CodeProvider.BCFIPS, ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA512withECDSA, "ECCDHwithSHA512CKDF"), 
+	DEFAULT(BC_FIPS_ECDDH_384_AES128);
 
 	private final short keySizeBits;
 	private final short ECDHKeySizeBits;
 	private final CodeProvider codeProvider;
-	private final MessageDigestType messageDigestType;
+	private final ASymmetricAuthentifiedSignatureType aSymmetricAuthentifiedSignatureType;
+	private final String keyAgreementName;
 
 	
 	
 	private EllipticCurveDiffieHellmanType(short keySizeBits, short ECDHKeySizeBits,
-			CodeProvider codeProvider, MessageDigestType messageDigestType) {
+			CodeProvider codeProvider, ASymmetricAuthentifiedSignatureType aSymmetricAuthentifiedSignatureType, String keyAgreementName) {
 		this.keySizeBits = keySizeBits;
 		this.ECDHKeySizeBits = ECDHKeySizeBits;
 		this.codeProvider = codeProvider;
-		this.messageDigestType=messageDigestType;
+		this.aSymmetricAuthentifiedSignatureType=aSymmetricAuthentifiedSignatureType;
+		this.keyAgreementName=keyAgreementName;
 	}
 	
-	public MessageDigestType getMessageDigestType()
+	public ASymmetricAuthentifiedSignatureType getASymmetricAuthentifiedSignatureType()
 	{
-		return messageDigestType;
+		return aSymmetricAuthentifiedSignatureType;
 	}
 
 	private EllipticCurveDiffieHellmanType(EllipticCurveDiffieHellmanType other) {
-		this(other.keySizeBits, other.ECDHKeySizeBits, other.codeProvider, other.messageDigestType);
+		this(other.keySizeBits, other.ECDHKeySizeBits, other.codeProvider, other.aSymmetricAuthentifiedSignatureType, other.keyAgreementName);
 	}
 
+	public String getKeyAgreementName()
+	{
+		return keyAgreementName;
+	}
+	
+	
 	public short getKeySizeBits() {
 		return keySizeBits;
 	}
