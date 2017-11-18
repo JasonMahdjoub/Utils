@@ -47,6 +47,7 @@ import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
 import org.bouncycastle.jcajce.spec.KTSParameterSpec;
 
 import com.distrimind.util.Bits;
+import com.distrimind.util.OSValidator;
 
 import gnu.vm.jgnu.security.InvalidKeyException;
 import gnu.vm.jgnu.security.NoSuchAlgorithmException;
@@ -178,7 +179,14 @@ public enum ASymmetricKeyWrapperType {
 				{
 					CodeProvider.ensureBouncyCastleProviderLoaded();
 				}
-				c=javax.crypto.Cipher.getInstance(algorithmName, provider.checkProviderWithCurrentOS().name());
+				if (OSValidator.getCurrentOS()==OSValidator.MACOS && (this==RSA_OAEP || this==ASymmetricKeyWrapperType.RSA_OAEP_WITH_PARAMETERS))
+				{
+					CodeProvider.ensureBouncyCastleProviderLoaded();
+				
+					c=javax.crypto.Cipher.getInstance(algorithmName, CodeProvider.BCFIPS.name());
+				}
+				else
+					c=javax.crypto.Cipher.getInstance(algorithmName, provider.checkProviderWithCurrentOS().name());
 
 				if (withParameters)
 				{
@@ -206,7 +214,7 @@ public enum ASymmetricKeyWrapperType {
 			}
 			catch(javax.crypto.NoSuchPaddingException e)
 			{
-				throw new NoSuchPaddingException(e.getMessage());
+				throw new NoSuchPaddingException(e.getMessage()+" "+ this);
 			}
 			catch(java.security.InvalidKeyException e)
 			{
@@ -263,7 +271,14 @@ public enum ASymmetricKeyWrapperType {
 					CodeProvider.ensureBouncyCastleProviderLoaded();
 					
 				}
-				c=javax.crypto.Cipher.getInstance(algorithmName, provider.checkProviderWithCurrentOS().name());
+				if (OSValidator.getCurrentOS()==OSValidator.MACOS && (this==RSA_OAEP || this==ASymmetricKeyWrapperType.RSA_OAEP_WITH_PARAMETERS))
+				{
+					CodeProvider.ensureBouncyCastleProviderLoaded();
+				
+					c=javax.crypto.Cipher.getInstance(algorithmName, CodeProvider.BCFIPS.name());
+				}
+				else
+					c=javax.crypto.Cipher.getInstance(algorithmName, provider.checkProviderWithCurrentOS().name());
 
 				byte[] wrapedKey=null;
 				if (withParameters)
@@ -314,5 +329,5 @@ public enum ASymmetricKeyWrapperType {
 		}
 		
 	}
-
+	
 }

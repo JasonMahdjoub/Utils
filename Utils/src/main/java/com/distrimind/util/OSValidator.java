@@ -93,7 +93,8 @@ public enum OSValidator {
 				currentOS=OSValidator.WINDOWS;
 			else if (isAndroid())
 				currentOS=OSValidator.ANDROID;
-			currentOS=UNKNOW;
+			else
+				currentOS=UNKNOW;
 		}
 		return currentOS;
 	}
@@ -109,7 +110,6 @@ public enum OSValidator {
 	}
 
 	private static boolean isMac() {
-
 		return (OS.indexOf("mac") >= 0);
 
 	}

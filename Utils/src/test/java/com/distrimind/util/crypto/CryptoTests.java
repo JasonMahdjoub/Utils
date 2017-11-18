@@ -641,10 +641,9 @@ public class CryptoTests {
 		ASymmetricKeyWrapperType kw=null;
 		if (astype.getCodeProviderForEncryption()==CodeProvider.GNU_CRYPTO)
 			kw=ASymmetricKeyWrapperType.GNU_RSA_OAEP;
-		else if (astype.getCodeProviderForEncryption()==CodeProvider.BCFIPS)
-			kw=ASymmetricKeyWrapperType.BC_FIPS_RSA_KTS_KTM;
 		else
-			kw=ASymmetricKeyWrapperType.RSA_OAEP_WITH_PARAMETERS;
+			kw=ASymmetricKeyWrapperType.BC_FIPS_RSA_KTS_KTM;
+		
 			
 		byte[] localEncryptedKey = kw.wrapKey(rand, kpd.getASymmetricPublicKey(), localKey);
 		SymmetricSecretKey decryptedKey=kw.unwrapKey(kpd.getASymmetricPrivateKey(), localEncryptedKey);
