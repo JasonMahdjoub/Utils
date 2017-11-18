@@ -43,6 +43,7 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 
 import com.berry.BCrypt;
+import com.distrimind.util.OSValidator;
 
 
 /**
@@ -104,6 +105,16 @@ public enum PasswordHashType {
 			throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException, gnu.vm.jgnu.security.NoSuchProviderException {
 		if (defaultOf != null)
 			return defaultOf.hash(data, off, len, salt, iterations, hashLength);
+		
+		if (OSValidator.getCurrentOS()==OSValidator.MACOS)
+		{
+			if (this==PBKDF2WithHMacSHA256)
+				return PasswordHashType.BC_FIPS_PBKFD2WithHMacSHA256.hash(data, off, len, salt, iterations, hashLength);
+			if (this==PBKDF2WithHMacSHA384)
+				return PasswordHashType.BC_FIPS_PBKFD2WithHMacSHA384.hash(data, off, len, salt, iterations, hashLength);
+			if (this==PBKDF2WithHMacSHA512)
+				return PasswordHashType.BC_FIPS_PBKFD2WithHMacSHA512.hash(data, off, len, salt, iterations, hashLength);
+		}
 		switch (this) {
 		case DEFAULT:
 		case PBKDF2WithHmacSHA1: 
@@ -205,6 +216,15 @@ public enum PasswordHashType {
 			throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException, gnu.vm.jgnu.security.NoSuchProviderException {
 		if (defaultOf != null)
 			return defaultOf.hash(password, salt, iterations, hashLength);
+		if (OSValidator.getCurrentOS()==OSValidator.MACOS)
+		{
+			if (this==PBKDF2WithHMacSHA256)
+				return PasswordHashType.BC_FIPS_PBKFD2WithHMacSHA256.hash(password, salt, iterations, hashLength);
+			if (this==PBKDF2WithHMacSHA384)
+				return PasswordHashType.BC_FIPS_PBKFD2WithHMacSHA384.hash(password, salt, iterations, hashLength);
+			if (this==PBKDF2WithHMacSHA512)
+				return PasswordHashType.BC_FIPS_PBKFD2WithHMacSHA512.hash(password, salt, iterations, hashLength);
+		}
 		switch (this) {
 		case DEFAULT:
 		case PBKDF2WithHmacSHA1:
