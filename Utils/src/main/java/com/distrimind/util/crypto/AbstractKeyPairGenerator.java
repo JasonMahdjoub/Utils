@@ -34,8 +34,6 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
-import gnu.vm.jgnu.security.InvalidParameterException;
-
 /**
  * 
  * @author Jason Mahdjoub
@@ -74,8 +72,7 @@ public abstract class AbstractKeyPairGenerator {
 
 	/**
 	 * Returns the standard name of the algorithm for this key pair generator. See
-	 * the KeyPairGenerator section in the <a href= "
-	 * {@docRoot}/../technotes/guides/security/StandardNames.html#KeyPairGenerator">
+	 * the KeyPairGenerator section in the <a href= "{@docRoot}/../technotes/guides/security/StandardNames.html#KeyPairGenerator">
 	 * Java Cryptography Architecture Standard Algorithm Name Documentation</a> for
 	 * information about standard algorithm names.
 	 *
@@ -93,10 +90,8 @@ public abstract class AbstractKeyPairGenerator {
 	 * @param keysize
 	 *            the keysize. This is an algorithm-specific metric, such as modulus
 	 *            length, specified in number of bits.
-	 *
-	 * @exception InvalidParameterException
-	 *                if the <code>keysize</code> is not supported by this
-	 *                KeyPairGenerator object.
+	 * @param expirationTime the key expiration tiume
+
 	 */
 	public abstract void initialize(short keysize, long expirationTime);
 
@@ -107,12 +102,12 @@ public abstract class AbstractKeyPairGenerator {
 	 * @param keysize
 	 *            the keysize. This is an algorithm-specific metric, such as modulus
 	 *            length, specified in number of bits.
+	 * @param expirationTime the key expiration tiume
 	 * @param random
 	 *            the source of randomness.
 	 *
-	 * @exception InvalidParameterException
-	 *                if the <code>keysize</code> is not supported by this
-	 *                KeyPairGenerator object.
+	 * @throws gnu.vm.jgnu.security.InvalidAlgorithmParameterException if the algorithm parameters are invalid
+	 *                
 	 *
 	 * @since 1.2
 	 */

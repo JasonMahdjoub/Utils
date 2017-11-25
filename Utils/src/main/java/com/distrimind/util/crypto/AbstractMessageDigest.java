@@ -112,6 +112,7 @@ public abstract class AbstractMessageDigest implements Cloneable {
 	 * @param len
 	 *            the length of the buffer.
 	 * @return Returns the length of the buffer.
+	 * @throws DigestException if a problem occurs
 	 */
 	public abstract int digest(byte[] buf, int offset, int len) throws DigestException;
 

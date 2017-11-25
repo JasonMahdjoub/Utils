@@ -129,7 +129,7 @@ public enum SecureRandomType {
 	/**
 	 * 
 	 * @param nonce               value to use in DRBG construction.
-	 * @param personalizationString
+	 * @param personalizationString the personalization string
 	 * @return the secure random
 	 * @throws gnu.vm.jgnu.security.NoSuchAlgorithmException if the algorithm was not found
 	 * @throws gnu.vm.jgnu.security.NoSuchProviderException if the provider was not found
@@ -145,7 +145,6 @@ public enum SecureRandomType {
 	 * @param personalizationString the personalisation string for the underlying DRBG.
 	 * @return the secure random
 	 * @throws gnu.vm.jgnu.security.NoSuchAlgorithmException if the algorithm was not found
-	 * @throws gnu.vm.jgnu.security.NoSuchProviderException 
 	 * @throws gnu.vm.jgnu.security.NoSuchProviderException if the provider was not found
 	 */
 	public AbstractSecureRandom getInstance(byte nonce[], byte[] personalizationString)

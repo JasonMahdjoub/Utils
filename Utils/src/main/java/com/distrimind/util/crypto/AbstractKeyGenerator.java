@@ -89,8 +89,7 @@ public abstract class AbstractKeyGenerator {
 	 *
 	 * @param keySize
 	 *            The target key size, in bits.
-	 * @throws java.security.InvalidParameterException
-	 *             If the key size is unsupported.
+
 	 */
 	public abstract void init(short keySize);
 
@@ -102,8 +101,6 @@ public abstract class AbstractKeyGenerator {
 	 *            The target key size, in bits.
 	 * @param random
 	 *            The source of randomness.
-	 * @throws java.security.InvalidAlgorithmParameterException
-	 *             If the key size is unsupported.
 	 */
 	public abstract void init(short keySize, AbstractSecureRandom random);
 

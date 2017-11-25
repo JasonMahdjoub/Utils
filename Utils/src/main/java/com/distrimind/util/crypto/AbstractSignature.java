@@ -86,8 +86,9 @@ public abstract class AbstractSignature implements Cloneable {
 	 *            the private key to sign with.
 	 * @throws InvalidKeyException
 	 *             if the key is invalid.
-	 * @throws InvalidKeySpecException
-	 * @throws NoSuchAlgorithmException
+	 * @throws InvalidKeySpecException if the key is invalid
+	 * @throws NoSuchAlgorithmException if the algorithm was not found
+	 * @throws InvalidKeyException if the key is invalid
 	 */
 	public abstract void initSign(ASymmetricPrivateKey privateKey)
 			throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException;
@@ -102,8 +103,9 @@ public abstract class AbstractSignature implements Cloneable {
 	 *            the {@link SecureRandom} to use.
 	 * @throws InvalidKeyException
 	 *             if the key is invalid.
-	 * @throws InvalidKeySpecException
-	 * @throws NoSuchAlgorithmException
+	 * @throws InvalidKeySpecException if the key is invalid
+	 * @throws NoSuchAlgorithmException if the algorithm was not found
+	 * @throws InvalidKeyException if the key is invalid
 	 */
 	public abstract void initSign(ASymmetricPrivateKey privateKey, AbstractSecureRandom random)
 			throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException;
@@ -115,8 +117,9 @@ public abstract class AbstractSignature implements Cloneable {
 	 *            the public key to verify with.
 	 * @throws InvalidKeyException
 	 *             if the key is invalid.
-	 * @throws InvalidKeySpecException
-	 * @throws NoSuchAlgorithmException
+	 * @throws InvalidKeySpecException if the key is invalid
+	 * @throws NoSuchAlgorithmException if the algorithm was not found
+	 * @throws InvalidKeyException if the key is invalid
 	 */
 	public abstract void initVerify(ASymmetricPublicKey publicKey)
 			throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException;

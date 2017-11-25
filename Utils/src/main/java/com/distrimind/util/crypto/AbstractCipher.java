@@ -266,11 +266,10 @@ public abstract class AbstractCipher {
 	 *            The operation mode to use.
 	 * @param key
 	 *            The key.
-	 * @throws java.security.InvalidKeyException
-	 *             If the underlying cipher instance rejects the given key.
-	 * @throws InvalidKeySpecException
-	 * @throws NoSuchAlgorithmException
-	 * @throws NoSuchProviderException
+	 * @throws InvalidKeySpecException if key is invalid
+	 * @throws InvalidKeyException if key is invalid
+	 * @throws NoSuchAlgorithmException if the algorithm as not found
+	 * @throws NoSuchProviderException if the provider was not found
 	 */
 	public abstract void init(int opmode, UtilKey key)
 			throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException;
@@ -292,10 +291,10 @@ public abstract class AbstractCipher {
 	 *            The key.
 	 * @param random
 	 *            The source of randomness to use.
-	 * @throws java.security.InvalidKeyException
-	 *             If the underlying cipher instance rejects the given key.
-	 * @throws InvalidKeySpecException
-	 * @throws NoSuchAlgorithmException
+
+	 * @throws InvalidKeySpecException if the key is invalid
+	 * @throws InvalidKeyException if key is invalid
+	 * @throws NoSuchAlgorithmException if the algoirithm was not found
 	 */
 	public abstract void init(int opmode, UtilKey key, AbstractSecureRandom random)
 			throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException;
@@ -324,11 +323,10 @@ public abstract class AbstractCipher {
 	 *            The key.
 	 * @param iv
 	 *            the iv parameter
-	 * @throws java.security.InvalidKeyException
-	 *             If the underlying cipher instance rejects the given key.
-	 * @throws InvalidKeySpecException
-	 * @throws NoSuchAlgorithmException
-	 * @throws InvalidAlgorithmParameterException
+	 * @throws InvalidKeySpecException if the key is invalid
+	 * @throws InvalidKeyException if key is invalid
+	 * @throws NoSuchAlgorithmException if the algorithm was not found
+	 * @throws InvalidAlgorithmParameterException the algorithm parameters are invalid
 	 */
 	public abstract void init(int opmode, UtilKey key, byte[] iv) throws InvalidKeyException, NoSuchAlgorithmException,
 			InvalidKeySpecException, InvalidAlgorithmParameterException;
@@ -376,7 +374,7 @@ public abstract class AbstractCipher {
 	 * @return The number of transformed bytes.
 	 * @throws java.lang.IllegalStateException
 	 *             If this cipher was not initialized for encryption or decryption.
-	 * @throws javax.security.ShortBufferException
+	 * @throws ShortBufferException
 	 *             If there is not enough room in the output array to hold the
 	 *             transformed bytes.
 	 */
@@ -400,7 +398,7 @@ public abstract class AbstractCipher {
 	 * @return The number of transformed bytes.
 	 * @throws java.lang.IllegalStateException
 	 *             If this cipher was not initialized for encryption or decryption.
-	 * @throws javax.security.ShortBufferException
+	 * @throws ShortBufferException
 	 *             If there is not enough room in the output array to hold the
 	 *             transformed bytes.
 	 */

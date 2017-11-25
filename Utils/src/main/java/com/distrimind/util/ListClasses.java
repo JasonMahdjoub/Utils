@@ -33,10 +33,7 @@ public class ListClasses {
 	 * @param _package
 	 *            the name of the considered package
 	 * @return the list of classes
-	 * @throws ClassNotFoundException
-	 *             when a class was not found
-	 * @throws IOException
-	 *             when an IO Exception occurs
+
 	 */
 	public static Set<Class<?>> getClasses(Package _package) {
 		Set<Class<?>> classes = cache.get(_package);

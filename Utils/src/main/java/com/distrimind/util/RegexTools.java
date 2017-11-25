@@ -59,7 +59,7 @@ public class RegexTools {
 	 *            languages are concerned)
 	 * @param punctuation
 	 *            the character must be include a punctuation :
-	 *            !"#$%&'()*+,-./:;<=>?@[\]^_`{|}~
+	 *            <p>!"#$%&amp;'()*+,-./:;&lt;=&gt;?@[\]^_`{|}~</p>
 	 * @param spaceortab
 	 *            the character must include space or tab's
 	 * @param exDecimalDigit
@@ -128,7 +128,7 @@ public class RegexTools {
 	/**
 	 * Returns a regex that exclude characters that can be used to make code
 	 * injection, with the new additional punctuation characters to include :
-	 * -.:'`;()&
+	 * <p>-.:'`;()&amp;</p>
 	 * 
 	 * @param minChars
 	 *            minimum characters number
