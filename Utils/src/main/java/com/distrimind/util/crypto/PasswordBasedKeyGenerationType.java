@@ -43,7 +43,7 @@ import gnu.vm.jgnu.security.spec.InvalidKeySpecException;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 1.1
  * @since Utils 1.17.0
  */
 public enum PasswordBasedKeyGenerationType {
@@ -56,6 +56,8 @@ public enum PasswordBasedKeyGenerationType {
 	BC_FIPS_PBKFD2WithHMacSHA256(PasswordHashType.BC_FIPS_PBKFD2WithHMacSHA256),
 	BC_FIPS_PBKFD2WithHMacSHA384(PasswordHashType.BC_FIPS_PBKFD2WithHMacSHA384),
 	BC_FIPS_PBKFD2WithHMacSHA512(PasswordHashType.BC_FIPS_PBKFD2WithHMacSHA512),
+	SCRYPT_FOR_LOGIN(PasswordHashType.SCRYPT_FOR_LOGIN),
+	SCRYPT_FOR_DATAENCRYPTION(PasswordHashType.SCRYPT_FOR_LOGIN),
 	DEFAULT(BC_FIPS_PBKFD2WithHMacSHA384);
 	
 	

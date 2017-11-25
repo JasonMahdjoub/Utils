@@ -42,6 +42,9 @@ import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 
+import org.kocakosm.pitaya.security.KDF;
+import org.kocakosm.pitaya.security.KDFs;
+
 import com.berry.BCrypt;
 import com.distrimind.util.OSValidator;
 
@@ -49,7 +52,7 @@ import com.distrimind.util.OSValidator;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 2.0
+ * @version 2.1
  * @since Utils 1.8
  *
  */
@@ -59,6 +62,8 @@ public enum PasswordHashType {
 	PBKDF2WithHMacSHA384("PBKDF2WithHMacSHA384", (byte) 32, CodeProvider.SunJCE),
 	PBKDF2WithHMacSHA512("PBKDF2WithHMacSHA512", (byte) 32, CodeProvider.SunJCE),
 	BCRYPT("BCRYPT", (byte) 32, CodeProvider.SUN), 
+	SCRYPT_FOR_LOGIN("SCRYPT", (byte)32, CodeProvider.PITAYA),
+	SCRYPT_FOR_DATAENCRYPTION("SCRYPT", (byte)32, CodeProvider.PITAYA),
 	GNU_PBKDF2WithHmacSHA1("PBKDF2WithHMacSHA1", (byte) 32, CodeProvider.GNU_CRYPTO), 
 	GNU_PBKDF2WithHMacSHA256("PBKDF2WithHMacSHA256",(byte) 32, CodeProvider.GNU_CRYPTO), 
 	GNU_PBKDF2WithHMacSHA384("PBKDF2WithHMacSHA384", (byte) 32, CodeProvider.GNU_CRYPTO), 
@@ -115,6 +120,7 @@ public enum PasswordHashType {
 			if (this==PBKDF2WithHMacSHA512)
 				return PasswordHashType.BC_FIPS_PBKFD2WithHMacSHA512.hash(data, off, len, salt, iterations, hashLength);
 		}
+		KDF scrypt=null;
 		switch (this) {
 		case DEFAULT:
 		case PBKDF2WithHmacSHA1: 
@@ -205,6 +211,22 @@ public enum PasswordHashType {
 				throw new gnu.vm.jgnu.security.spec.InvalidKeySpecException(e);
 			}
 		}
+		case SCRYPT_FOR_LOGIN:
+			scrypt=KDFs.scrypt(8, 1<<15, 1, hashLength);
+		case SCRYPT_FOR_DATAENCRYPTION:
+			if (scrypt==null)
+				scrypt=KDFs.scrypt(8, 1<<20, 1, hashLength);
+			byte []d=null;
+			if (len==data.length && off==0)
+				d=data;
+			else
+			{
+				d=new byte[len];
+				System.arraycopy(data, off, d, 0, len);
+			}
+			return scrypt.deriveKey(d, salt);
+		default:
+			break;
 			
 			
 
@@ -225,6 +247,7 @@ public enum PasswordHashType {
 			if (this==PBKDF2WithHMacSHA512)
 				return PasswordHashType.BC_FIPS_PBKFD2WithHMacSHA512.hash(password, salt, iterations, hashLength);
 		}
+		KDF scrypt=null;
 		switch (this) {
 		case DEFAULT:
 		case PBKDF2WithHmacSHA1:
@@ -289,6 +312,18 @@ public enum PasswordHashType {
 				throw new gnu.vm.jgnu.security.spec.InvalidKeySpecException(e);
 			}
 		}
+		case SCRYPT_FOR_LOGIN:
+			scrypt=KDFs.scrypt(8, 1<<15, 1, hashLength);
+		case SCRYPT_FOR_DATAENCRYPTION:
+			if (scrypt==null)
+				scrypt=KDFs.scrypt(8, 1<<20, 1, hashLength);
+			byte[] passwordb = new byte[password.length * 2];
+			for (int i = 0; i < password.length; i++) {
+				passwordb[i * 2] = (byte) (password[i] & 0xFF);
+				passwordb[i * 2 + 1] = (byte) ((password[i] >> 8 & 0xFFFF) & 0xFF);
+			}
+			
+			return scrypt.deriveKey(passwordb, salt);
 		}
 		return null;
 	}

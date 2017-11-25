@@ -50,7 +50,7 @@ import com.distrimind.util.OSValidator;
  * @since Utils 2.9.0
  */
 public enum CodeProvider {
-	SUN, SunJCE, SunJSSE, SunRsaSign, SunEC, GNU_CRYPTO, BCFIPS, BC;
+	SUN, SunJCE, SunJSSE, SunRsaSign, SunEC, GNU_CRYPTO, BCFIPS, BC, PITAYA;
 
 	private static volatile Provider bouncyProvider = null;
 	private static volatile Provider bouncyProviderFIPS = null;

@@ -42,6 +42,7 @@ dependencies {
      compile(group:'org.bouncycastle', name: 'bc-fips', version: '1.0.4')
      compile(group:'gnu', name: 'Gnu-Crypt', version: '1.2.1')
      compile(group:'commons-codec', name: 'commons-codec', version: '1.10')
+     compile 'org.kocakosm:pitaya:0.4'
 }
 
 allprojects {
@@ -53,7 +54,7 @@ allprojects {
 
 sourceCompatibility = 1.7
 targetCompatibility=1.7
-version='3.6.0'
+version='3.7.0'
 
 
 task sourcesJar(type: Jar, dependsOn: classes) {
