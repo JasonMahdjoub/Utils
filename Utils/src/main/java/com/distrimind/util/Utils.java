@@ -54,8 +54,8 @@ public class Utils {
 		Calendar c = Calendar.getInstance();
 		c.set(2016, 1, 4);
 		Calendar c2 = Calendar.getInstance();
-		c.set(2017, 10, 25);
-		VERSION = new Version("Utils", "Utils", 3, 7, 0, Version.Type.Stable, 0, c.getTime(), c2.getTime());
+		c.set(2017, 11, 13);
+		VERSION = new Version("Utils", "Utils", 3, 7, 1, Version.Type.Stable, 0, c.getTime(), c2.getTime());
 		try {
 
 			InputStream is = Utils.class.getResourceAsStream("build.txt");
@@ -66,10 +66,18 @@ public class Utils {
 			c = Calendar.getInstance();
 			c.set(2016, 1, 4);
 			VERSION.addDeveloper(new PersonDeveloper("mahdjoub", "jason", c.getTime()));
-
+			
 			c = Calendar.getInstance();
 			c.set(2017, 10, 25);
-			Description d = new Description(3, 7, 0, Version.Type.Stable, 0, c.getTime());
+			Description d = new Description(3, 7, 1, Version.Type.Stable, 0, c.getTime());
+			d.addItem("Add function AbstractEncryptionIOAlgorithm.decode(InputStream is, OutputStream os, int length)");
+			d.addItem("Add function AbstractEncryptionOutputAlgorithm.public void encode(byte[] bytes, int off, int len, OutputStream os)");
+			d.addItem("Add scrypt algorithm");
+			VERSION.addDescription(d);
+			
+			c = Calendar.getInstance();
+			c.set(2017, 10, 25);
+			d = new Description(3, 7, 0, Version.Type.Stable, 0, c.getTime());
 			d.addItem("Correction of Mac OS Compatibility");
 			d.addItem("Add scrypt algorithm");
 			VERSION.addDescription(d);

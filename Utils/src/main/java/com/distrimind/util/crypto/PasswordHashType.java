@@ -212,10 +212,10 @@ public enum PasswordHashType {
 			}
 		}
 		case SCRYPT_FOR_LOGIN:
-			scrypt=KDFs.scrypt(8, 1<<15, 1, hashLength);
+			scrypt=KDFs.scrypt(8, 1<<14, 1, hashLength);
 		case SCRYPT_FOR_DATAENCRYPTION:
 			if (scrypt==null)
-				scrypt=KDFs.scrypt(8, 1<<20, 1, hashLength);
+				scrypt=KDFs.scrypt(8, 1<<18, 1, hashLength);
 			byte []d=null;
 			if (len==data.length && off==0)
 				d=data;
@@ -313,10 +313,10 @@ public enum PasswordHashType {
 			}
 		}
 		case SCRYPT_FOR_LOGIN:
-			scrypt=KDFs.scrypt(8, 1<<15, 1, hashLength);
+			scrypt=KDFs.scrypt(8, 1<<14, 1, hashLength);
 		case SCRYPT_FOR_DATAENCRYPTION:
 			if (scrypt==null)
-				scrypt=KDFs.scrypt(8, 1<<20, 1, hashLength);
+				scrypt=KDFs.scrypt(8, 1<<18, 1, hashLength);
 			byte[] passwordb = new byte[password.length * 2];
 			for (int i = 0; i < password.length; i++) {
 				passwordb[i * 2] = (byte) (password[i] & 0xFF);

@@ -52,7 +52,7 @@ import gnu.vm.jgnux.crypto.NoSuchPaddingException;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 2.0
+ * @version 2.1
  * @since Utils 1.5
  */
 public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOutputAlgorithm {
@@ -91,8 +91,11 @@ public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOu
 			return baos.toByteArray();
 		}
 	}
-
-	public void decode(InputStream is, OutputStream os)
+	public void decode(InputStream is, OutputStream os) throws InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException
+	{
+		decode(is, os, -1);
+	}
+	public void decode(InputStream is, OutputStream os, int length)
 			throws InvalidKeyException, InvalidAlgorithmParameterException, IOException, IllegalBlockSizeException,
 			BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
 		byte[] iv = null;
@@ -110,19 +113,28 @@ public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOu
 		byte[] buffer = new byte[BUFFER_SIZE];
 		boolean finish = false;
 		while (!finish) {
+			
+			int maxPartSize;
+			if (length>=0)
+				maxPartSize=Math.min(maxBlockSize, length);
+			else 
+				maxPartSize=maxBlockSize;
+			
 			blockACC = 0;
 			do {
-				int nb = Math.min(BUFFER_SIZE, maxBlockSize - blockACC);
+				int nb = Math.min(BUFFER_SIZE, maxPartSize - blockACC);
 				int size = is.read(buffer, 0, nb);
 				if (size > 0) {
 					byte[] tab=cipher.update(buffer, 0, size);
 					if (tab!=null)
 						os.write(tab);
 					blockACC += size;
+					if (length>=0)
+						length-=size;
 				}
 				if (nb != size || size <= 0)
 					finish = true;
-			} while ((blockACC < maxBlockSize || maxBlockSize == Integer.MAX_VALUE) && !finish);
+			} while ((blockACC < maxPartSize || maxPartSize == Integer.MAX_VALUE) && !finish && length!=0);
 			if (blockACC != 0)
 				os.write(cipher.doFinal());
 		}

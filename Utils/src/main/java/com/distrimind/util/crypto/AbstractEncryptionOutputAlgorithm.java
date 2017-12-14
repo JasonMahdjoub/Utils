@@ -47,7 +47,7 @@ import gnu.vm.jgnu.security.spec.InvalidKeySpecException;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 2.0
+ * @version 2.1
  * @since Utils 1.5
  */
 public abstract class AbstractEncryptionOutputAlgorithm {
@@ -118,24 +118,34 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 		 */
 
 	}
+	public void encode(InputStream is, OutputStream os) throws gnu.vm.jgnu.security.InvalidKeyException, IOException,InvalidAlgorithmParameterException, IllegalStateException, gnu.vm.jgnux.crypto.IllegalBlockSizeException,
+	gnu.vm.jgnux.crypto.BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException,
+	NoSuchProviderException{
+		encode(is, os, -1);
+	}
 
-	public void encode(InputStream is, OutputStream os) throws gnu.vm.jgnu.security.InvalidKeyException, IOException,
+	public void encode(InputStream is, OutputStream os, int length) throws gnu.vm.jgnu.security.InvalidKeyException, IOException,
 			InvalidAlgorithmParameterException, IllegalStateException, gnu.vm.jgnux.crypto.IllegalBlockSizeException,
 			gnu.vm.jgnux.crypto.BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException,
 			NoSuchProviderException {
 		initCipherForEncrypt(cipher);
 
-		int maxBlockSize = getMaxBlockSizeForEncoding();
+		final int maxBlockSize=getMaxBlockSizeForEncoding();
 
 		if (includeIV())
 			os.write(cipher.getIV());
 		byte[] buffer = new byte[BUFFER_SIZE];
 		boolean finish = false;
 		while (!finish) {
-
+			int maxPartSize;
+			if (length>=0)
+				maxPartSize=Math.min(maxBlockSize, length);
+			else 
+				maxPartSize=maxBlockSize;
+			
 			int blockACC = 0;
 			do {
-				int nb = Math.min(BUFFER_SIZE, maxBlockSize - blockACC);
+				int nb = Math.min(BUFFER_SIZE, maxPartSize - blockACC);
 				int size = is.read(buffer, 0, nb);
 				if (size > 0) {
 					byte[] tab=cipher.update(buffer, 0, size);
@@ -143,10 +153,12 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 						os.write(tab);
 					
 					blockACC += size;
+					if (length>=0)
+						length-=blockACC;
 				}
 				if (nb != size || size <= 0)
 					finish = true;
-			} while ((blockACC < maxBlockSize || maxBlockSize == Integer.MAX_VALUE) && !finish);
+			} while ((blockACC < maxPartSize || maxPartSize == Integer.MAX_VALUE) && !finish && length!=0);
 			if (blockACC != 0)
 				os.write(cipher.doFinal());
 		}
