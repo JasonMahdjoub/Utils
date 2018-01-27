@@ -40,6 +40,9 @@ import java.security.KeyPairGenerator;
 import java.security.spec.ECGenParameterSpec;
 import java.security.spec.RSAKeyGenParameterSpec;
 
+import org.bouncycastle.asn1.x9.X9ECParameters;
+import org.bouncycastle.crypto.ec.CustomNamedCurves;
+
 /**
  * 
  * @author Jason Mahdjoub
@@ -83,11 +86,14 @@ public final class JavaNativeKeyPairGenerator extends AbstractKeyPairGenerator {
 
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public void initialize(short _keysize, long expirationTime, AbstractSecureRandom _random) throws gnu.vm.jgnu.security.InvalidAlgorithmParameterException {
 		try
 		{
-			if (signatureType!=null && signatureType.getKeyGeneratorAlgorithmName().equals(ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA256withECDSA.getKeyGeneratorAlgorithmName()))
+			if (signatureType!=null && (signatureType.getKeyGeneratorAlgorithmName().equals(ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA256withECDSA.getKeyGeneratorAlgorithmName())
+					|| signatureType.getKeyGeneratorAlgorithmName().equals(ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA384withECDSA.getKeyGeneratorAlgorithmName())
+							|| signatureType.getKeyGeneratorAlgorithmName().equals(ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA512withECDSA.getKeyGeneratorAlgorithmName())))
 			{
 				if (_keysize<256)
 					keyPairGenerator.initialize(new ECGenParameterSpec("P-224"), _random.getJavaNativeSecureRandom());	
@@ -97,6 +103,14 @@ public final class JavaNativeKeyPairGenerator extends AbstractKeyPairGenerator {
 					keyPairGenerator.initialize(new ECGenParameterSpec("P-384"), _random.getJavaNativeSecureRandom());
 				else
 					keyPairGenerator.initialize(new ECGenParameterSpec("P-521"), _random.getJavaNativeSecureRandom());
+			}
+			else if (signatureType!=null && (signatureType.getKeyGeneratorAlgorithmName().equals(ASymmetricAuthentifiedSignatureType.BC_SHA256withECDSA_CURVE_25519.getKeyGeneratorAlgorithmName())
+					|| signatureType.getKeyGeneratorAlgorithmName().equals(ASymmetricAuthentifiedSignatureType.BC_SHA384withECDSA_CURVE_25519.getKeyGeneratorAlgorithmName())
+					|| signatureType.getKeyGeneratorAlgorithmName().equals(ASymmetricAuthentifiedSignatureType.BC_SHA512withECDSA_CURVE_25519.getKeyGeneratorAlgorithmName())))
+			{
+				X9ECParameters ecP = CustomNamedCurves.getByName("curve25519");
+				keyPairGenerator.initialize(new org.bouncycastle.jce.spec.ECParameterSpec(ecP.getCurve(), ecP.getG(),
+				        ecP.getN(), ecP.getH(), ecP.getSeed()), _random.getJavaNativeSecureRandom());
 			}
 			else
 				keyPairGenerator.initialize(new RSAKeyGenParameterSpec(_keysize, RSAKeyGenParameterSpec.F4), _random.getJavaNativeSecureRandom());

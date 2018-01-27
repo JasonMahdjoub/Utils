@@ -148,6 +148,7 @@ public class CryptoTests {
 		return res2;
 	}
 
+	@SuppressWarnings("deprecation")
 	@DataProvider(name = "provideDataForASymmetricSignatureTest", parallel = true)
 	public Object[][] provideDataForASymmetricSignatureTest() throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException {
 		Object[][] res = new Object[ASymmetricAuthentifiedSignatureType.values().length
@@ -161,6 +162,22 @@ public class CryptoTests {
 				o[0]=st;
 				o[1] = st.getKeyPairGenerator(rand, (short) 384).generateKeyPair();
 				o[2] = new Integer(384);
+				res[index++] = o;
+			}
+			else if (st.getSignatureAlgorithmName().equals(ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA256withECDSA.getSignatureAlgorithmName()))
+			{
+				Object o[] = new Object[3];
+				o[0]=st;
+				o[1] = st.getKeyPairGenerator(rand, (short) 256).generateKeyPair();
+				o[2] = new Integer(256);
+				res[index++] = o;
+			}
+			else if (st.getSignatureAlgorithmName().equals(ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA512withECDSA.getSignatureAlgorithmName()))
+			{
+				Object o[] = new Object[3];
+				o[0]=st;
+				o[1] = st.getKeyPairGenerator(rand, (short) 512).generateKeyPair();
+				o[2] = new Integer(512);
 				res[index++] = o;
 			}
 			else
@@ -264,6 +281,7 @@ public class CryptoTests {
 		System.out.println("Testing ASymmetricKeyPairEncoding " + type);
 		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getSingleton(null);
 		
+		@SuppressWarnings("deprecation")
 		boolean isECDSA=type==ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA384withECDSA 
 				|| 	type==ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA256withECDSA
 				|| type==ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA512withECDSA; 
@@ -863,6 +881,7 @@ public class CryptoTests {
 		System.out.println("End test "+type);
 	}
 
+	@SuppressWarnings("deprecation")
 	@Test(dataProvider = "provideDataForASymmetricSignatureTest")
 	public void testAsymmetricSignatures(ASymmetricAuthentifiedSignatureType type, ASymmetricKeyPair kpd, int keySize)
 			throws NoSuchAlgorithmException, InvalidKeyException, SignatureException, InvalidKeySpecException,
@@ -874,6 +893,10 @@ public class CryptoTests {
 		if (kpd.getAuthentifiedSignatureAlgorithmType()!=ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA384withECDSA
 				&& kpd.getAuthentifiedSignatureAlgorithmType()!=ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA256withECDSA
 				&& kpd.getAuthentifiedSignatureAlgorithmType()!=ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA512withECDSA
+				&& kpd.getAuthentifiedSignatureAlgorithmType()!=ASymmetricAuthentifiedSignatureType.BC_SHA256withECDSA_CURVE_25519
+				&& kpd.getAuthentifiedSignatureAlgorithmType()!=ASymmetricAuthentifiedSignatureType.BC_SHA384withECDSA_CURVE_25519
+				&& kpd.getAuthentifiedSignatureAlgorithmType()!=ASymmetricAuthentifiedSignatureType.BC_SHA512withECDSA_CURVE_25519
+				
 				)
 			Assert.assertEquals(kpd.getAuthentifiedSignatureAlgorithmType().getSignatureSizeBits(kpd.getKeySize()), signature.length*8);
 	}

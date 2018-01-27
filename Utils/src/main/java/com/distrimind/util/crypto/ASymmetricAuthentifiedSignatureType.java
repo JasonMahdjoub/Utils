@@ -59,9 +59,15 @@ public enum ASymmetricAuthentifiedSignatureType {
 	BC_FIPS_SHA256withRSAandMGF1("SHA256withRSAandMGF1","RSA", CodeProvider.BCFIPS,CodeProvider.BCFIPS,(short) 3072, 31536000000l), 
 	BC_FIPS_SHA384withRSAandMGF1("SHA384withRSAandMGF1","RSA", CodeProvider.BCFIPS,CodeProvider.BCFIPS,(short) 3072, 31536000000l), 
 	BC_FIPS_SHA512withRSAandMGF1("SHA512withRSAandMGF1", "RSA", CodeProvider.BCFIPS,CodeProvider.BCFIPS,(short) 3072, 31536000000l),
+	@Deprecated
 	BC_FIPS_SHA256withECDSA("SHA256withECDSA", "EC", CodeProvider.BCFIPS,CodeProvider.BCFIPS,(short) 256, 31536000000l),
+	@Deprecated
 	BC_FIPS_SHA384withECDSA("SHA384withECDSA", "EC", CodeProvider.BCFIPS,CodeProvider.BCFIPS,(short) 384, 31536000000l),
+	@Deprecated
 	BC_FIPS_SHA512withECDSA("SHA512withECDSA", "EC", CodeProvider.BCFIPS,CodeProvider.BCFIPS,(short) 521, 31536000000l),
+	BC_SHA256withECDSA_CURVE_25519("ECDSA", "ECDSA", CodeProvider.BCFIPS,CodeProvider.BC, (short)128, 31536000000l),
+	BC_SHA384withECDSA_CURVE_25519("ECDSA", "ECDSA", CodeProvider.BCFIPS,CodeProvider.BC, (short)128, 31536000000l),
+	BC_SHA512withECDSA_CURVE_25519("ECDSA", "ECDSA", CodeProvider.BCFIPS,CodeProvider.BC, (short)128, 31536000000l),
 	DEFAULT(BC_FIPS_SHA384withRSAandMGF1);
 
 	private final String signatureAlgorithmName;
@@ -103,7 +109,7 @@ public enum ASymmetricAuthentifiedSignatureType {
 	public AbstractSignature getSignatureInstance() throws gnu.vm.jgnu.security.NoSuchAlgorithmException, NoSuchProviderException {
 		if (codeProviderSignature == CodeProvider.GNU_CRYPTO) {
 			return new GnuSignature(gnu.vm.jgnu.security.Signature.getInstance(signatureAlgorithmName));
-		} else if (codeProviderSignature == CodeProvider.BCFIPS) {
+		} else if (codeProviderSignature == CodeProvider.BCFIPS || codeProviderSignature == CodeProvider.BC) {
 			CodeProvider.ensureBouncyCastleProviderLoaded();
 			try {
 				Signature s=Signature.getInstance(signatureAlgorithmName, codeProviderSignature.name());
@@ -129,8 +135,12 @@ public enum ASymmetricAuthentifiedSignatureType {
 	public int getSignatureSizeBits(int keySize) {
 		if (this==BC_FIPS_SHA256withRSAandMGF1 || this==ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA384withRSAandMGF1 || this==ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA512withRSAandMGF1)
 			return keySize+464;
-		else if (this==ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA384withECDSA)
-			return keySize;
+		else if (this==BC_SHA256withECDSA_CURVE_25519 || this==ASymmetricAuthentifiedSignatureType.BC_SHA384withECDSA_CURVE_25519 || this==ASymmetricAuthentifiedSignatureType.BC_SHA512withECDSA_CURVE_25519)
+			return 560;
+		else if (this==ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA256withECDSA)
+			return 1112;
+		else if (this==ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA384withECDSA || this==ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA512withECDSA)
+			return 1104;
 		return keySize;
 	}
 
@@ -172,10 +182,10 @@ public enum ASymmetricAuthentifiedSignatureType {
 			res.initialize(keySize, expirationTimeUTC, random);
 
 			return res;
-		} else if (codeProviderKeyGenerator == CodeProvider.BCFIPS) {
+		} else if (codeProviderKeyGenerator == CodeProvider.BCFIPS || codeProviderKeyGenerator == CodeProvider.BC) {
 			CodeProvider.ensureBouncyCastleProviderLoaded();
 			try {
-				KeyPairGenerator kgp = KeyPairGenerator.getInstance(keyGeneratorAlgorithmName, CodeProvider.BCFIPS.name());
+				KeyPairGenerator kgp = KeyPairGenerator.getInstance(keyGeneratorAlgorithmName, codeProviderKeyGenerator.name());
 				JavaNativeKeyPairGenerator res = new JavaNativeKeyPairGenerator(this, kgp);
 				res.initialize(keySize, expirationTimeUTC, random);	
 				

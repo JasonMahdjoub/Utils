@@ -398,32 +398,32 @@ public enum SecureRandomType {
 	
 	static void tryToGenerateNativeNonBlockingRandomBytes(final byte[] buffer) throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.NoSuchProviderException
 	{
-		if (OSValidator.getCurrentOS().isUnix())
+		if (OSValidator.getCurrentJREVersion()>=1.8)
 		{
-			if (OSValidator.getCurrentJREVersion()>=1.8)
+			if (!nativeNonBlockingSeedInitialized)
 			{
-				if (!nativeNonBlockingSeedInitialized)
+				synchronized(NativeNonBlockingSecureRandom.class)
 				{
-					synchronized(NativeNonBlockingSecureRandom.class)
+					if (!nativeNonBlockingSeedInitialized)
 					{
-						if (!nativeNonBlockingSeedInitialized)
-						{
-							nativeNonBlockingSeedInitialized=true;
-							try {
-								nativeNonBlockingSeed=new JavaNativeSecureRandom(NativePRNGNonBlocking, SecureRandom.getInstance("NativePRNGNonBlocking", CodeProvider.SUN.checkProviderWithCurrentOS().name()), false);
-							} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
-								nativeNonBlockingSeed=null;
-							}
+						nativeNonBlockingSeedInitialized=true;
+						try {
+							nativeNonBlockingSeed=new JavaNativeSecureRandom(NativePRNGNonBlocking, SecureRandom.getInstance("NativePRNGNonBlocking", CodeProvider.SUN.checkProviderWithCurrentOS().name()), false);
+						} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
+							nativeNonBlockingSeed=null;
 						}
 					}
 				}
-				if (nativeNonBlockingSeed!=null)
-				{
-					nativeNonBlockingSeed.nextBytes(buffer);
-					return;
-				}
 			}
-				
+			if (nativeNonBlockingSeed!=null)
+			{
+				nativeNonBlockingSeed.nextBytes(buffer);
+				return;
+			}
+		}
+		else if (OSValidator.getCurrentOS().isUnix())
+		{
+			
 			AccessController.doPrivileged(new PrivilegedAction<Void>() {
 
 				@Override
@@ -462,18 +462,19 @@ public enum SecureRandomType {
 		{
 			if (OSValidator.getCurrentJREVersion()>=1.8)
 			{
+				System.out.println("here");
 				if (!nativeNonBlockingSeedInitialized)
 				{
 					synchronized(NativeNonBlockingSecureRandom.class)
 					{
 						if (!nativeNonBlockingSeedInitialized)
 						{
-							nativeNonBlockingSeedInitialized=true;
 							try {
 								nativeNonBlockingSeed=new JavaNativeSecureRandom(NativePRNGNonBlocking, SecureRandom.getInstance("NativePRNGNonBlocking", CodeProvider.SUN.checkProviderWithCurrentOS().name()), false);
 							} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
 								nativeNonBlockingSeed=null;
 							}
+							nativeNonBlockingSeedInitialized=true;
 						}
 					}
 				}
