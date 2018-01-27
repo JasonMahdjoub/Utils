@@ -42,10 +42,10 @@ import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 
+import org.bouncycastle.crypto.generators.BCrypt;
 import org.bouncycastle.crypto.generators.SCrypt;
 
 
-import com.berry.BCrypt;
 import com.distrimind.util.OSValidator;
 
 
@@ -178,9 +178,14 @@ public enum PasswordHashType {
 			} else
 				passwordb = data;
 
-			BCrypt B = new BCrypt();
-			salt = uniformizeSaltLength(salt, BCrypt.BCRYPT_SALT_LEN);
-			return B.crypt_raw(passwordb, salt, (int) Math.log(iterations), BCrypt.bf_crypt_ciphertext.clone());
+			salt = uniformizeSaltLength(salt, 16);
+			int cost=-1;
+			while (iterations>0)
+			{
+				++cost;
+				iterations>>=1;
+			}
+			return BCrypt.generate(passwordb, salt, cost);
 		}
 		case BC_FIPS_PBKFD2WithHMacSHA2_256:
 		case BC_FIPS_PBKFD2WithHMacSHA2_384:
@@ -287,14 +292,15 @@ public enum PasswordHashType {
 			return skf.generateSecret(spec).getEncoded();
 		}
 		case BCRYPT: {
-			byte[] passwordb = new byte[password.length * 2];
-			for (int i = 0; i < password.length; i++) {
-				passwordb[i * 2] = (byte) (password[i] & 0xFF);
-				passwordb[i * 2 + 1] = (byte) ((password[i] >> 8 & 0xFFFF) & 0xFF);
+			int cost=-1;
+			while (iterations>0)
+			{
+				++cost;
+				iterations>>=1;
 			}
-			BCrypt B = new BCrypt();
-			salt = uniformizeSaltLength(salt, BCrypt.BCRYPT_SALT_LEN);
-			return B.crypt_raw(passwordb, salt, (int) Math.log(iterations), BCrypt.bf_crypt_ciphertext.clone());
+			salt = uniformizeSaltLength(salt, 16);
+			
+			return BCrypt.generate(BCrypt.passwordToByteArray(password), salt, cost);
 		}
 		case BC_FIPS_PBKFD2WithHMacSHA2_256:
 		case BC_FIPS_PBKFD2WithHMacSHA2_384:
