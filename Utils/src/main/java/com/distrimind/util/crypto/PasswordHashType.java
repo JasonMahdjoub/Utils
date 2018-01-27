@@ -69,9 +69,12 @@ public enum PasswordHashType {
 	GNU_PBKDF2WithHMacSHA384("PBKDF2WithHMacSHA384", (byte) 32, CodeProvider.GNU_CRYPTO), 
 	GNU_PBKDF2WithHMacSHA512("PBKDF2WithHMacSHA512", (byte) 32, CodeProvider.GNU_CRYPTO), 
 	GNU_PBKDF2WithHMacWhirlpool("PBKDF2WithHMacWhirlpool",(byte) 32, CodeProvider.GNU_CRYPTO),
-	BC_FIPS_PBKFD2WithHMacSHA256("HmacSHA256",(byte) 32, CodeProvider.BCFIPS),
-	BC_FIPS_PBKFD2WithHMacSHA384("HmacSHA384",(byte) 32, CodeProvider.BCFIPS),
-	BC_FIPS_PBKFD2WithHMacSHA512("HmacSHA512",(byte) 32, CodeProvider.BCFIPS),
+	BC_FIPS_PBKFD2WithHMacSHA2_256("PBKDF2WithHMacSHA256",(byte) 32, CodeProvider.BCFIPS),
+	BC_FIPS_PBKFD2WithHMacSHA2_384("PBKDF2WithHMacSHA384",(byte) 32, CodeProvider.BCFIPS),
+	BC_FIPS_PBKFD2WithHMacSHA2_512("PBKDF2WithHMacSHA512",(byte) 32, CodeProvider.BCFIPS),
+	BC_PBKFD2WithHMacSHA3_256("PBKDF2WithHMacSHA3-256",(byte) 32, CodeProvider.BC),
+	BC_PBKFD2WithHMacSHA3_384("PBKDF2WithHMacSHA3-384",(byte) 32, CodeProvider.BC),
+	BC_PBKFD2WithHMacSHA3_512("PBKDF2WithHMacSHA3-512",(byte) 32, CodeProvider.BC),
 	DEFAULT(BCRYPT);
 
 	
@@ -114,11 +117,11 @@ public enum PasswordHashType {
 		if (OSValidator.getCurrentOS()==OSValidator.MACOS)
 		{
 			if (this==PBKDF2WithHMacSHA256)
-				return PasswordHashType.BC_FIPS_PBKFD2WithHMacSHA256.hash(data, off, len, salt, iterations, hashLength);
+				return PasswordHashType.BC_FIPS_PBKFD2WithHMacSHA2_256.hash(data, off, len, salt, iterations, hashLength);
 			if (this==PBKDF2WithHMacSHA384)
-				return PasswordHashType.BC_FIPS_PBKFD2WithHMacSHA384.hash(data, off, len, salt, iterations, hashLength);
+				return PasswordHashType.BC_FIPS_PBKFD2WithHMacSHA2_384.hash(data, off, len, salt, iterations, hashLength);
 			if (this==PBKDF2WithHMacSHA512)
-				return PasswordHashType.BC_FIPS_PBKFD2WithHMacSHA512.hash(data, off, len, salt, iterations, hashLength);
+				return PasswordHashType.BC_FIPS_PBKFD2WithHMacSHA2_512.hash(data, off, len, salt, iterations, hashLength);
 		}
 		KDF scrypt=null;
 		switch (this) {
@@ -179,9 +182,12 @@ public enum PasswordHashType {
 			salt = uniformizeSaltLength(salt, BCrypt.BCRYPT_SALT_LEN);
 			return B.crypt_raw(passwordb, salt, (int) Math.log(iterations), BCrypt.bf_crypt_ciphertext.clone());
 		}
-		case BC_FIPS_PBKFD2WithHMacSHA256:
-		case BC_FIPS_PBKFD2WithHMacSHA384:
-		case BC_FIPS_PBKFD2WithHMacSHA512:
+		case BC_FIPS_PBKFD2WithHMacSHA2_256:
+		case BC_FIPS_PBKFD2WithHMacSHA2_384:
+		case BC_FIPS_PBKFD2WithHMacSHA2_512:
+		case BC_PBKFD2WithHMacSHA3_256:
+		case BC_PBKFD2WithHMacSHA3_384:
+		case BC_PBKFD2WithHMacSHA3_512:
 		{
 			CodeProvider.ensureBouncyCastleProviderLoaded();
 			try
@@ -241,11 +247,11 @@ public enum PasswordHashType {
 		if (OSValidator.getCurrentOS()==OSValidator.MACOS)
 		{
 			if (this==PBKDF2WithHMacSHA256)
-				return PasswordHashType.BC_FIPS_PBKFD2WithHMacSHA256.hash(password, salt, iterations, hashLength);
+				return PasswordHashType.BC_FIPS_PBKFD2WithHMacSHA2_256.hash(password, salt, iterations, hashLength);
 			if (this==PBKDF2WithHMacSHA384)
-				return PasswordHashType.BC_FIPS_PBKFD2WithHMacSHA384.hash(password, salt, iterations, hashLength);
+				return PasswordHashType.BC_FIPS_PBKFD2WithHMacSHA2_384.hash(password, salt, iterations, hashLength);
 			if (this==PBKDF2WithHMacSHA512)
-				return PasswordHashType.BC_FIPS_PBKFD2WithHMacSHA512.hash(password, salt, iterations, hashLength);
+				return PasswordHashType.BC_FIPS_PBKFD2WithHMacSHA2_512.hash(password, salt, iterations, hashLength);
 		}
 		KDF scrypt=null;
 		switch (this) {
@@ -288,14 +294,17 @@ public enum PasswordHashType {
 			salt = uniformizeSaltLength(salt, BCrypt.BCRYPT_SALT_LEN);
 			return B.crypt_raw(passwordb, salt, (int) Math.log(iterations), BCrypt.bf_crypt_ciphertext.clone());
 		}
-		case BC_FIPS_PBKFD2WithHMacSHA256:
-		case BC_FIPS_PBKFD2WithHMacSHA384:
-		case BC_FIPS_PBKFD2WithHMacSHA512:
+		case BC_FIPS_PBKFD2WithHMacSHA2_256:
+		case BC_FIPS_PBKFD2WithHMacSHA2_384:
+		case BC_FIPS_PBKFD2WithHMacSHA2_512:
+		case BC_PBKFD2WithHMacSHA3_256:
+		case BC_PBKFD2WithHMacSHA3_384:
+		case BC_PBKFD2WithHMacSHA3_512:
 		{
 			try
 			{
 				CodeProvider.ensureBouncyCastleProviderLoaded();
-				SecretKeyFactory keyFact = SecretKeyFactory.getInstance(algorithmName,CodeProvider.BCFIPS.name());
+				SecretKeyFactory keyFact = SecretKeyFactory.getInstance(algorithmName,codeProvider.name());
 				
 				SecretKey hmacKey = keyFact.generateSecret(new PBEKeySpec(password,  salt,iterations,hashLength*8));
 				
