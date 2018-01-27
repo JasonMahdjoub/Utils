@@ -109,21 +109,25 @@ public enum PasswordHashType {
 		return hashLength;
 	}
 
-	byte[] hash(byte data[], int off, int len, byte salt[], int iterations, byte hashLength)
+	byte[] hash(byte data[], int off, int len, byte salt[], int cost, byte hashLength)
 			throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException, gnu.vm.jgnu.security.NoSuchProviderException {
+		if (cost<4 || cost>31)
+			throw new IllegalArgumentException("cost must be greater or equals than 4 and lower or equals than 31");
+
 		if (defaultOf != null)
-			return defaultOf.hash(data, off, len, salt, iterations, hashLength);
+			return defaultOf.hash(data, off, len, salt, cost, hashLength);
 		
 		if (OSValidator.getCurrentOS()==OSValidator.MACOS)
 		{
 			if (this==PBKDF2WithHMacSHA256)
-				return PasswordHashType.BC_FIPS_PBKFD2WithHMacSHA2_256.hash(data, off, len, salt, iterations, hashLength);
+				return PasswordHashType.BC_FIPS_PBKFD2WithHMacSHA2_256.hash(data, off, len, salt, cost, hashLength);
 			if (this==PBKDF2WithHMacSHA384)
-				return PasswordHashType.BC_FIPS_PBKFD2WithHMacSHA2_384.hash(data, off, len, salt, iterations, hashLength);
+				return PasswordHashType.BC_FIPS_PBKFD2WithHMacSHA2_384.hash(data, off, len, salt, cost, hashLength);
 			if (this==PBKDF2WithHMacSHA512)
-				return PasswordHashType.BC_FIPS_PBKFD2WithHMacSHA2_512.hash(data, off, len, salt, iterations, hashLength);
+				return PasswordHashType.BC_FIPS_PBKFD2WithHMacSHA2_512.hash(data, off, len, salt, cost, hashLength);
 		}
 		int scryptN=1<<18;
+		int iterations=1<<(cost-1);
 		switch (this) {
 		case DEFAULT:
 		case PBKDF2WithHmacSHA1: 
@@ -179,12 +183,7 @@ public enum PasswordHashType {
 				passwordb = data;
 
 			salt = uniformizeSaltLength(salt, 16);
-			int cost=-1;
-			while (iterations>0)
-			{
-				++cost;
-				iterations>>=1;
-			}
+			
 			return BCrypt.generate(passwordb, salt, cost);
 		}
 		case BC_FIPS_PBKFD2WithHMacSHA2_256:
@@ -247,19 +246,23 @@ public enum PasswordHashType {
 		return null;
 	}
 
-	byte[] hash(char password[], byte salt[], int iterations, byte hashLength)
+	byte[] hash(char password[], byte salt[], int cost, byte hashLength)
 			throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException, gnu.vm.jgnu.security.NoSuchProviderException {
+		if (cost<4 || cost>31)
+			throw new IllegalArgumentException("cost must be greater or equals than 4 and lower or equals than 31");
+
 		if (defaultOf != null)
-			return defaultOf.hash(password, salt, iterations, hashLength);
+			return defaultOf.hash(password, salt, cost, hashLength);
 		if (OSValidator.getCurrentOS()==OSValidator.MACOS)
 		{
 			if (this==PBKDF2WithHMacSHA256)
-				return PasswordHashType.BC_FIPS_PBKFD2WithHMacSHA2_256.hash(password, salt, iterations, hashLength);
+				return PasswordHashType.BC_FIPS_PBKFD2WithHMacSHA2_256.hash(password, salt, cost, hashLength);
 			if (this==PBKDF2WithHMacSHA384)
-				return PasswordHashType.BC_FIPS_PBKFD2WithHMacSHA2_384.hash(password, salt, iterations, hashLength);
+				return PasswordHashType.BC_FIPS_PBKFD2WithHMacSHA2_384.hash(password, salt, cost, hashLength);
 			if (this==PBKDF2WithHMacSHA512)
-				return PasswordHashType.BC_FIPS_PBKFD2WithHMacSHA2_512.hash(password, salt, iterations, hashLength);
+				return PasswordHashType.BC_FIPS_PBKFD2WithHMacSHA2_512.hash(password, salt, cost, hashLength);
 		}
+		int iterations=1<<(cost-1);
 		int scryptN=1<<18;
 		switch (this) {
 		case DEFAULT:
@@ -292,14 +295,8 @@ public enum PasswordHashType {
 			return skf.generateSecret(spec).getEncoded();
 		}
 		case BCRYPT: {
-			int cost=-1;
-			while (iterations>0)
-			{
-				++cost;
-				iterations>>=1;
-			}
-			salt = uniformizeSaltLength(salt, 16);
 			
+			salt = uniformizeSaltLength(salt, 16);
 			return BCrypt.generate(BCrypt.passwordToByteArray(password), salt, cost);
 		}
 		case BC_FIPS_PBKFD2WithHMacSHA2_256:

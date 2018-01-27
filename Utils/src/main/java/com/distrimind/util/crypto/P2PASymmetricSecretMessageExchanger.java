@@ -187,7 +187,7 @@ public class P2PASymmetricSecretMessageExchanger {
 
 	private final PasswordHashType passwordHashType;
 
-	private int hashIterationsNumber = PasswordHash.DEFAULT_NB_ITERATIONS;
+	private int cost = PasswordHash.DEFAULT_COST;
 
 	public P2PASymmetricSecretMessageExchanger(AbstractSecureRandom secureRandom, ASymmetricPublicKey myPublicKey)
 			throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,
@@ -364,8 +364,8 @@ public class P2PASymmetricSecretMessageExchanger {
 		return this.distantMessageEncoder.getMyPublicKey();
 	}
 
-	public int getHashIterationsNumber() {
-		return hashIterationsNumber;
+	public int getCost() {
+		return cost;
 	}
 
 	public ASymmetricPublicKey getMyPublicKey() {
@@ -378,7 +378,7 @@ public class P2PASymmetricSecretMessageExchanger {
 		if (!messageIsKey && salt != null && len_salt > 0) {
 			byte s[] = new byte[len_salt];
 			System.arraycopy(salt, offset_salt, s, 0, len_salt);
-			data = passwordHashType.hash(data, off, len, s, hashIterationsNumber, passwordHashType.getDefaultHashLengthBytes());
+			data = passwordHashType.hash(data, off, len, s, cost, passwordHashType.getDefaultHashLengthBytes());
 			off = 0;
 			len = data.length;
 		}
@@ -400,7 +400,7 @@ public class P2PASymmetricSecretMessageExchanger {
 		if (salt != null && len_salt > 0) {
 			byte s[] = new byte[len_salt];
 			System.arraycopy(salt, offset_salt, s, 0, len_salt);
-			byte[] res = passwordHashType.hash(password, s, hashIterationsNumber, passwordHashType.getDefaultHashLengthBytes());
+			byte[] res = passwordHashType.hash(password, s, cost, passwordHashType.getDefaultHashLengthBytes());
 
 			return hashMessage(messageDigest, res, 0, res.length, null, -1, -1, true);
 		} else {
@@ -428,13 +428,16 @@ public class P2PASymmetricSecretMessageExchanger {
 				ASymmetricPublicKey.decode(distantPublicKeyAndIV));
 		if (myPublicKey.equals(distantMessageEncoder.myPublicKey))
 			throw new IllegalArgumentException("Local public key equals distant public key");
-		distantMessageEncoder.setHashIterationsNumber(getHashIterationsNumber());
+		distantMessageEncoder.setCost(getCost());
 	}
 
-	public void setHashIterationsNumber(int _hashIterationsNumber) {
-		hashIterationsNumber = _hashIterationsNumber;
+	public void setCost(int cost) {
+		if (cost<4 || cost>31)
+			throw new IllegalArgumentException("cost must be greater or equals than 4 and lower or equals than 31");
+
+		this.cost = cost;
 		if (distantMessageEncoder != null)
-			distantMessageEncoder.setHashIterationsNumber(_hashIterationsNumber);
+			distantMessageEncoder.setCost(cost);
 	}
 
 	public boolean verifyDistantMessage(byte[] originalMessage, byte[] salt, byte[] distantMessage,

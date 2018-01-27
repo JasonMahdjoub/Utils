@@ -75,35 +75,39 @@ public enum PasswordBasedKeyGenerationType {
 	}
 	public SymmetricSecretKey derivateKey(char[] password, byte[] salt, SymmetricEncryptionType type) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException
 	{
-		return derivateKey(password, salt, PasswordHash.DEFAULT_NB_ITERATIONS, type, type.getDefaultKeySizeBits());
+		return derivateKey(password, salt, PasswordHash.DEFAULT_COST, type, type.getDefaultKeySizeBits());
 	}
 	public SymmetricSecretKey derivateKey(char[] password, byte[] salt, int iterationNumber, SymmetricEncryptionType type) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException
 	{
 		return derivateKey(password, salt, iterationNumber, type, type.getDefaultKeySizeBits());
 	}
-	public SymmetricSecretKey derivateKey(char[] password, byte[] salt, int iterationNumber, SymmetricEncryptionType type, short keySizeBits) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException
+	public SymmetricSecretKey derivateKey(char[] password, byte[] salt, int cost, SymmetricEncryptionType type, short keySizeBits) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException
 	{
+		if (cost<4 || cost>31)
+			throw new IllegalArgumentException("cost must be greater or equals than 4 and lower or equals than 31");
 		if (getCodeProvider()==CodeProvider.GNU_CRYPTO)
 		{
-			return new SymmetricSecretKey(type, new gnu.vm.jgnux.crypto.spec.SecretKeySpec(passwordHashType.hash(password, salt, iterationNumber, (byte)(keySizeBits/8)), type.getAlgorithmName()), keySizeBits);
+			return new SymmetricSecretKey(type, new gnu.vm.jgnux.crypto.spec.SecretKeySpec(passwordHashType.hash(password, salt, cost, (byte)(keySizeBits/8)), type.getAlgorithmName()), keySizeBits);
 		}
 		else
 		{
-			return new SymmetricSecretKey(type, new SecretKeySpec(passwordHashType.hash(password, salt, iterationNumber, (byte)(keySizeBits/8)), type.getAlgorithmName()), keySizeBits);
+			return new SymmetricSecretKey(type, new SecretKeySpec(passwordHashType.hash(password, salt, cost, (byte)(keySizeBits/8)), type.getAlgorithmName()), keySizeBits);
 		}
 	}
-	public SymmetricSecretKey derivateKey(char[] password, byte[] salt, int iterationNumber, SymmetricAuthentifiedSignatureType type) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException
+	public SymmetricSecretKey derivateKey(char[] password, byte[] salt, int cost, SymmetricAuthentifiedSignatureType type) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException
 	{
-		return derivateKey(password, salt, iterationNumber, type, type.getDefaultKeySizeBits());
+		return derivateKey(password, salt, cost, type, type.getDefaultKeySizeBits());
 	}
 	public SymmetricSecretKey derivateKey(char[] password, byte[] salt, SymmetricAuthentifiedSignatureType type) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException
 	{
-		return derivateKey(password, salt, PasswordHash.DEFAULT_NB_ITERATIONS, type, type.getDefaultKeySizeBits());
+		return derivateKey(password, salt, PasswordHash.DEFAULT_COST, type, type.getDefaultKeySizeBits());
 	}
 	
-	public SymmetricSecretKey derivateKey(char[] password, byte[] salt, int iterationNumber, SymmetricAuthentifiedSignatureType type, short keySizeBits) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException
+	public SymmetricSecretKey derivateKey(char[] password, byte[] salt, int cost, SymmetricAuthentifiedSignatureType type, short keySizeBits) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException
 	{
-		return new SymmetricSecretKey(type, new SecretKeySpec(passwordHashType.hash(password, salt, iterationNumber, (byte)(keySizeBits/8)), type.getAlgorithmName()), keySizeBits);
+		if (cost<4 || cost>31)
+			throw new IllegalArgumentException("cost must be greater or equals than 4 and lower or equals than 31");
+		return new SymmetricSecretKey(type, new SecretKeySpec(passwordHashType.hash(password, salt, cost, (byte)(keySizeBits/8)), type.getAlgorithmName()), keySizeBits);
 	}
 	
 	public CodeProvider getCodeProvider()

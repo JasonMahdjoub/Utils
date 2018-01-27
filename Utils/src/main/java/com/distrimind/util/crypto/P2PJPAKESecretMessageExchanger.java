@@ -78,13 +78,13 @@ public class P2PJPAKESecretMessageExchanger extends Agreement {
 	private char[] getHashedPassword(char[] message, byte salt[], int offset_salt, int len_salt) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException
 	{
 		byte[] m = hashMessage(MessageDigestType.BC_FIPS_SHA3_256.getMessageDigestInstance(), message, salt,
-				offset_salt, len_salt, PasswordHashType.BCRYPT, 10000);
+				offset_salt, len_salt, PasswordHashType.BCRYPT, 15);
 		return convertToChar(m);
 	}
 	private char[] getHashedPassword(byte[] message, int offset, int len, byte salt[], int offset_salt, int len_salt, boolean messageIsKey) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException
 	{
 		byte[] m = hashMessage(MessageDigestType.BC_FIPS_SHA3_256.getMessageDigestInstance(), message, offset, len,
-				salt, offset_salt, len_salt, messageIsKey ? null : PasswordHashType.BCRYPT, messageIsKey?1000:10000);
+				salt, offset_salt, len_salt, messageIsKey ? null : PasswordHashType.BCRYPT, messageIsKey?10:15);
 		return convertToChar(m);
 	}
 	
@@ -136,12 +136,12 @@ public class P2PJPAKESecretMessageExchanger extends Agreement {
 	}
 
 	private static byte[] hashMessage(AbstractMessageDigest messageDigest, byte data[], int off, int len, byte[] salt,
-			int offset_salt, int len_salt, PasswordHashType passwordHashType, int hashIterationsNumber)
+			int offset_salt, int len_salt, PasswordHashType passwordHashType, int cost)
 			throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
 		if (passwordHashType != null && salt != null && len_salt > 0) {
 			byte s[] = new byte[len_salt];
 			System.arraycopy(salt, offset_salt, s, 0, len_salt);
-			data = passwordHashType.hash(data, off, len, s, hashIterationsNumber, passwordHashType.getDefaultHashLengthBytes());
+			data = passwordHashType.hash(data, off, len, s, cost, passwordHashType.getDefaultHashLengthBytes());
 			off = 0;
 			len = data.length;
 		}
@@ -152,12 +152,12 @@ public class P2PJPAKESecretMessageExchanger extends Agreement {
 	}
 
 	private static byte[] hashMessage(AbstractMessageDigest messageDigest, char password[], byte[] salt,
-			int offset_salt, int len_salt, PasswordHashType passwordHashType, int hashIterationsNumber)
+			int offset_salt, int len_salt, PasswordHashType passwordHashType, int cost)
 			throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
 		if (salt != null && len_salt > 0) {
 			byte s[] = new byte[len_salt];
 			System.arraycopy(salt, offset_salt, s, 0, len_salt);
-			byte[] res = passwordHashType.hash(password, s, hashIterationsNumber, passwordHashType.getDefaultHashLengthBytes());
+			byte[] res = passwordHashType.hash(password, s, cost, passwordHashType.getDefaultHashLengthBytes());
 			return hashMessage(messageDigest, res, 0, res.length, null, -1, -1, null, 0);
 		} else {
 			byte[] res = new byte[password.length * 2];

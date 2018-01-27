@@ -299,8 +299,8 @@ public class CryptoTests {
 					kpd.getASymmetricPublicKey());
 			algoLocal.setDistantPublicKey(algoDistant.encodeMyPublicKey());
 			algoDistant.setDistantPublicKey(algoLocal.encodeMyPublicKey());
-			algoLocal.setHashIterationsNumber(1024);
-			algoDistant.setHashIterationsNumber(1024);
+			algoLocal.setCost(11);
+			algoDistant.setCost(11);
 
 			byte[] falseMessage = new byte[10];
 			rand.nextBytes(falseMessage);
@@ -739,7 +739,7 @@ public class CryptoTests {
 		PasswordHash ph = new PasswordHash(type, random);
 		String password = "password";
 		String invalidPassword = "invalid password";
-		ph.setHashIterationsNumber(100);
+		ph.setCost(7);
 		byte[] hashedValue = ph.hash(password);
 		Assert.assertTrue(ph.checkValidHashedPassword(password, hashedValue));
 		Assert.assertFalse(ph.checkValidHashedPassword(invalidPassword, hashedValue));
@@ -757,11 +757,11 @@ public class CryptoTests {
 		Random r=new Random(System.currentTimeMillis());
 		byte[] salt=new byte[32];
 		r.nextBytes(salt);
-		SymmetricSecretKey key1=derivationType.derivateKey(password.toCharArray(), salt, 100, encryptionType);
+		SymmetricSecretKey key1=derivationType.derivateKey(password.toCharArray(), salt, 7, encryptionType);
 		Assert.assertEquals(key1.getKeySize(), encryptionType.getDefaultKeySizeBits());
 		Assert.assertEquals(key1.getEncryptionAlgorithmType(), encryptionType);
-		Assert.assertEquals(key1.encode(), derivationType.derivateKey(password.toCharArray(), salt, 100, encryptionType).encode());
-		Assert.assertNotEquals(key1.encode(), derivationType.derivateKey(invalidPassword.toCharArray(), salt, 100, encryptionType).encode());
+		Assert.assertEquals(key1.encode(), derivationType.derivateKey(password.toCharArray(), salt, 7, encryptionType).encode());
+		Assert.assertNotEquals(key1.encode(), derivationType.derivateKey(invalidPassword.toCharArray(), salt, 7, encryptionType).encode());
 	}
 	@Test(dataProvider = "providePasswordKeyDerivationTypesForSymmetricSignatures", dependsOnMethods="testPasswordHash")
 	public void testPasswordKeyDerivation(PasswordBasedKeyGenerationType derivationType, SymmetricAuthentifiedSignatureType signatureType) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
@@ -770,11 +770,11 @@ public class CryptoTests {
 		Random r=new Random(System.currentTimeMillis());
 		byte[] salt=new byte[32];
 		r.nextBytes(salt);
-		SymmetricSecretKey key1=derivationType.derivateKey(password.toCharArray(), salt, 100, signatureType);
+		SymmetricSecretKey key1=derivationType.derivateKey(password.toCharArray(), salt, 7, signatureType);
 		Assert.assertEquals(key1.getKeySize(), signatureType.getDefaultKeySizeBits());
 		Assert.assertEquals(key1.getAuthentifiedSignatureAlgorithmType(), signatureType);
-		Assert.assertEquals(key1.encode(), derivationType.derivateKey(password.toCharArray(), salt, 100, signatureType).encode());
-		Assert.assertNotEquals(key1.encode(), derivationType.derivateKey(invalidPassword.toCharArray(), salt, 100, signatureType).encode());
+		Assert.assertEquals(key1.encode(), derivationType.derivateKey(password.toCharArray(), salt, 7, signatureType).encode());
+		Assert.assertNotEquals(key1.encode(), derivationType.derivateKey(invalidPassword.toCharArray(), salt, 7, signatureType).encode());
 	}
 
 	@DataProvider(name="providePasswordKeyDerivationTypesForSymmetricEncryptions", parallel=true)

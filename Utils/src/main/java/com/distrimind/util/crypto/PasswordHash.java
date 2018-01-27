@@ -53,7 +53,7 @@ import gnu.vm.jgnu.security.spec.InvalidKeySpecException;
 public class PasswordHash {
 	final static int DEFAULT_SALT_SIZE = 24;
 
-	final static int DEFAULT_NB_ITERATIONS = 100000;
+	final static int DEFAULT_COST = 16;
 
 	public static byte[] generateSalt(SecureRandom random, int saltSize) {
 		byte[] res = new byte[saltSize];
@@ -67,7 +67,7 @@ public class PasswordHash {
 
 	private int saltSize;
 
-	private int hashIterationsNumber;
+	private int cost;
 	
 
 	public PasswordHash() {
@@ -80,16 +80,19 @@ public class PasswordHash {
 	
 
 	public PasswordHash(PasswordHashType type, SecureRandom random) {
-		this(type, random, DEFAULT_SALT_SIZE, DEFAULT_NB_ITERATIONS);
+		this(type, random, DEFAULT_COST, DEFAULT_SALT_SIZE);
 	}
-	public PasswordHash(PasswordHashType type, SecureRandom random, int hashIterationNumber) {
-		this(type, random, hashIterationNumber, DEFAULT_NB_ITERATIONS);
+	public PasswordHash(PasswordHashType type, SecureRandom random, int cost) {
+		this(type, random, cost, DEFAULT_SALT_SIZE);
 	}
-	public PasswordHash(PasswordHashType type, SecureRandom random, int hashIterationNumber, int saltSize) {
+	public PasswordHash(PasswordHashType type, SecureRandom random, int cost, int saltSize) {
+		if (cost<4 || cost>31)
+			throw new IllegalArgumentException("cost must be greater or equals than 4 and lower or equals than 31");
+
 		this.type = type;
 		this.random = random;
-		this.saltSize = hashIterationNumber;
-		this.hashIterationsNumber = saltSize;
+		this.cost = cost;
+		this.saltSize = saltSize;
 	}
 
 	public boolean checkValidHashedPassword(char password[], byte[] goodHash, byte defaultHashLengthBytes) {
@@ -106,7 +109,7 @@ public class PasswordHash {
 			byte[] generatedSalt = separated[1];
 			byte[] salt = mixSaltWithStaticSalt(generatedSalt, staticAdditionalSalt);
 
-			return Arrays.equals(type.hash(password, salt, hashIterationsNumber, defaultHashLengthBytes), separated[0]);
+			return Arrays.equals(type.hash(password, salt, cost, defaultHashLengthBytes), separated[0]);
 		} catch (Exception e) {
 			return false;
 		}
@@ -125,8 +128,8 @@ public class PasswordHash {
 		return checkValidHashedPassword(password.toCharArray(), goodHash, staticAdditionalSalt, defaultHashLengthBytes);
 	}
 
-	public int getHashIterationsNumber() {
-		return hashIterationsNumber;
+	public int getCost() {
+		return cost;
 	}
 
 	public int getSaltSize() {
@@ -152,7 +155,7 @@ public class PasswordHash {
 
 		byte[] generatedSalt = generateSalt(random, saltSize);
 		byte[] salt = mixSaltWithStaticSalt(generatedSalt, staticAdditionalSalt);
-		return Bits.concateEncodingWithShortSizedTabs(type.hash(password, salt, hashIterationsNumber, defaultHashLengthBytes), generatedSalt);
+		return Bits.concateEncodingWithShortSizedTabs(type.hash(password, salt, cost, defaultHashLengthBytes), generatedSalt);
 	}
 
 	public byte[] hash(String password)
@@ -182,8 +185,11 @@ public class PasswordHash {
 		return salt;
 	}
 
-	public void setHashIterationsNumber(int _hashIterationsNumber) {
-		hashIterationsNumber = _hashIterationsNumber;
+	public void setCost(int cost) {
+		if (cost<4 || cost>31)
+			throw new IllegalArgumentException("cost must be greater or equals than 4 and lower or equals than 31");
+
+		this.cost = cost;
 	}
 
 	public void setSaltSize(int _saltSize) {
