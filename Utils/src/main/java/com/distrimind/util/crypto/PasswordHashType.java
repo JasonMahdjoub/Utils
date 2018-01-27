@@ -42,8 +42,8 @@ import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 
-import org.kocakosm.pitaya.security.KDF;
-import org.kocakosm.pitaya.security.KDFs;
+import org.bouncycastle.crypto.generators.SCrypt;
+
 
 import com.berry.BCrypt;
 import com.distrimind.util.OSValidator;
@@ -123,7 +123,7 @@ public enum PasswordHashType {
 			if (this==PBKDF2WithHMacSHA512)
 				return PasswordHashType.BC_FIPS_PBKFD2WithHMacSHA2_512.hash(data, off, len, salt, iterations, hashLength);
 		}
-		KDF scrypt=null;
+		int scryptN=1<<18;
 		switch (this) {
 		case DEFAULT:
 		case PBKDF2WithHmacSHA1: 
@@ -218,10 +218,11 @@ public enum PasswordHashType {
 			}
 		}
 		case SCRYPT_FOR_LOGIN:
-			scrypt=KDFs.scrypt(8, 1<<14, 1, hashLength);
+			
+			scryptN=1<<14;
+			
 		case SCRYPT_FOR_DATAENCRYPTION:
-			if (scrypt==null)
-				scrypt=KDFs.scrypt(8, 1<<18, 1, hashLength);
+		{
 			byte []d=null;
 			if (len==data.length && off==0)
 				d=data;
@@ -230,7 +231,8 @@ public enum PasswordHashType {
 				d=new byte[len];
 				System.arraycopy(data, off, d, 0, len);
 			}
-			return scrypt.deriveKey(d, salt);
+			return SCrypt.generate(d, salt, scryptN, 8, 1, hashLength);
+		}	
 		default:
 			break;
 			
@@ -253,7 +255,7 @@ public enum PasswordHashType {
 			if (this==PBKDF2WithHMacSHA512)
 				return PasswordHashType.BC_FIPS_PBKFD2WithHMacSHA2_512.hash(password, salt, iterations, hashLength);
 		}
-		KDF scrypt=null;
+		int scryptN=1<<18;
 		switch (this) {
 		case DEFAULT:
 		case PBKDF2WithHmacSHA1:
@@ -322,17 +324,16 @@ public enum PasswordHashType {
 			}
 		}
 		case SCRYPT_FOR_LOGIN:
-			scrypt=KDFs.scrypt(8, 1<<14, 1, hashLength);
+			scryptN=1<<14;
+			
 		case SCRYPT_FOR_DATAENCRYPTION:
-			if (scrypt==null)
-				scrypt=KDFs.scrypt(8, 1<<18, 1, hashLength);
 			byte[] passwordb = new byte[password.length * 2];
 			for (int i = 0; i < password.length; i++) {
 				passwordb[i * 2] = (byte) (password[i] & 0xFF);
 				passwordb[i * 2 + 1] = (byte) ((password[i] >> 8 & 0xFFFF) & 0xFF);
 			}
 			
-			return scrypt.deriveKey(passwordb, salt);
+			return SCrypt.generate(passwordb, salt, scryptN, 8, 1, hashLength);
 		}
 		return null;
 	}
