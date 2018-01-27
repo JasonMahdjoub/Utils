@@ -36,6 +36,7 @@ repositories {
        		url "https://mahdjoub.net/artifactory/DistriMind-Public"
    		} 
     jcenter()
+    
 }
 
 dependencies {
@@ -58,7 +59,7 @@ allprojects {
 
 sourceCompatibility = 1.7
 targetCompatibility=1.7
-version='3.7.1'
+version='3.8.0'
 
 
 task sourcesJar(type: Jar, dependsOn: classes) {

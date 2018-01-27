@@ -54,8 +54,8 @@ public class Utils {
 		Calendar c = Calendar.getInstance();
 		c.set(2016, 1, 4);
 		Calendar c2 = Calendar.getInstance();
-		c.set(2017, 11, 13);
-		VERSION = new Version("Utils", "Utils", 3, 7, 1, Version.Type.Stable, 0, c.getTime(), c2.getTime());
+		c.set(2018, 0, 27);
+		VERSION = new Version("Utils", "Utils", 3, 8, 0, Version.Type.Stable, 0, c.getTime(), c2.getTime());
 		try {
 
 			InputStream is = Utils.class.getResourceAsStream("build.txt");
@@ -68,8 +68,20 @@ public class Utils {
 			VERSION.addDeveloper(new PersonDeveloper("mahdjoub", "jason", c.getTime()));
 			
 			c = Calendar.getInstance();
+			c.set(2018, 9, 27);
+			Description d = new Description(3, 8, 0, Version.Type.Stable, 0, c.getTime());
+			d.addItem("Update bouncy castle to 1.59b");
+			d.addItem("Add PKBFs with SHA3 hash method");
+			d.addItem("Use now BouncyCastle implementation of BCrypt (instead of Berry)");
+			d.addItem("Use now BouncyCastle implementation of SCrypt (instead of Tamaya");
+			d.addItem("Removing dependencies with JUnit. Use only TestNG.");
+			d.addItem("Change iteration numver variable to cost variable with PBKF.");
+			d.addItem("Add curve 25519 for asymmetric signatures.");
+			VERSION.addDescription(d);
+			
+			c = Calendar.getInstance();
 			c.set(2017, 10, 25);
-			Description d = new Description(3, 7, 1, Version.Type.Stable, 0, c.getTime());
+			d = new Description(3, 7, 1, Version.Type.Stable, 0, c.getTime());
 			d.addItem("Add function AbstractEncryptionIOAlgorithm.decode(InputStream is, OutputStream os, int length)");
 			d.addItem("Add function AbstractEncryptionOutputAlgorithm.public void encode(byte[] bytes, int off, int len, OutputStream os)");
 			d.addItem("Add scrypt algorithm");
