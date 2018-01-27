@@ -34,9 +34,10 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.data_buffers;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -94,9 +95,9 @@ public final class testDataBufferDouble extends testDataBuffer {
 	@Test
 	public void testConstructors() {
 		DataBufferDouble d = new DataBufferDouble(10);
-		assertNotNull("DataBufferBool allocation error", d);
+		assertNotNull(d, "DataBufferBool allocation error");
 		d = new DataBufferDouble(tab);
-		assertNotNull("DataBufferBool allocation error", d);
+		assertNotNull(d, "DataBufferBool allocation error");
 	}
 
 	@Override
@@ -152,7 +153,7 @@ public final class testDataBufferDouble extends testDataBuffer {
 
 		try {
 			d.getBoolean(0);
-			assertTrue("getting a boolean on a DataBufferDouble should be imposible", false);
+			assertTrue(false, "getting a boolean on a DataBufferDouble should be imposible");
 		} catch (IllegalAccessError i) {
 		}
 
@@ -163,7 +164,7 @@ public final class testDataBufferDouble extends testDataBuffer {
 	public void testClone() {
 		DataBufferDouble d = new DataBufferDouble(tab);
 		DataBufferDouble dd = d.clone();
-		assertFalse("A cloned object cannot have the same reference", d == dd);
+		assertFalse(d == dd, "A cloned object cannot have the same reference");
 		for (int i = d.getSize() - 1; i >= 0; i--) {
 			assertTrue(d.getDouble(i) == dd.getDouble(i));
 		}
@@ -240,7 +241,7 @@ public final class testDataBufferDouble extends testDataBuffer {
 
 		try {
 			d.setData(new Double(0.0));
-			assertTrue("setting any object other than numeric buffer on a DataBufferDouble should be imposible", false);
+			assertTrue(false, "setting any object other than numeric buffer on a DataBufferDouble should be imposible");
 		} catch (IllegalArgumentException i) {
 		}
 

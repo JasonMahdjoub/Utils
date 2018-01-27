@@ -34,7 +34,8 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.data_buffers;
 
-import static org.junit.Assert.assertTrue;
+
+import static org.testng.Assert.assertTrue;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -59,27 +60,27 @@ public abstract class testDataBuffer {
 	@Test
 	public void getDataType() {
 		DataBuffer d = getNewDataBuffer(10);
-		assertTrue("Invalid Data Type (int)", d.getDataType() == getType());
+		assertTrue(d.getDataType() == getType(), "Invalid Data Type (int)");
 		d = getNewDataBuffer(0);
-		assertTrue("Invalid Data Type (int)", d.getDataType() == getType());
+		assertTrue(d.getDataType() == getType(), "Invalid Data Type (int)");
 	}
 
 	@Test
 	public void getDataTypeString() {
 
 		DataBuffer d = getNewDataBuffer(10);
-		assertTrue("Invalid Data Type (String)", d.getDataTypeString().equals(getTypeString()));
+		assertTrue(d.getDataTypeString().equals(getTypeString()), "Invalid Data Type (String)");
 	}
 
 	@Test
 	public void setGetSize() {
 		try {
 			DataBuffer d = getNewDataBuffer(10);
-			assertTrue("Invalid Data Type (String)", d.getSize() == 10);
+			assertTrue(d.getSize() == 10, "Invalid Data Type (String)");
 			d.setSize(20);
-			assertTrue("Invalid Data Type (String)", d.getSize() == 20);
+			assertTrue(d.getSize() == 20, "Invalid Data Type (String)");
 			d.setSize(5);
-			assertTrue("Invalid Data Type (String)", d.getSize() == 5);
+			assertTrue(d.getSize() == 5, "Invalid Data Type (String)");
 			d.setSize(-1);
 			Assert.fail();
 		} catch (IllegalArgumentException e) {
@@ -113,7 +114,7 @@ public abstract class testDataBuffer {
 		DataBuffer d = getNewDataBuffer(100);
 		d.setAllToZero();
 		for (int i = d.getSize() - 1; i >= 0; i--) {
-			assertTrue("Data are not set to zero", d.getInt(i) == 0);
+			assertTrue(d.getInt(i) == 0, "Data are not set to zero");
 		}
 	}
 

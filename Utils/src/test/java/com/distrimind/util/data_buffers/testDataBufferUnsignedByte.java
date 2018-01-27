@@ -35,9 +35,9 @@ knowledge of the CeCILL-C license and that you accept its terms.
 
 package com.distrimind.util.data_buffers;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -95,9 +95,9 @@ public class testDataBufferUnsignedByte extends testDataBuffer {
 	@Test
 	public void testConstructors() {
 		DataBufferUnsignedByte d = new DataBufferUnsignedByte(10);
-		assertNotNull("DataBufferBool allocation error", d);
+		assertNotNull(d, "DataBufferBool allocation error");
 		d = new DataBufferUnsignedByte(tab);
-		assertNotNull("DataBufferBool allocation error", d);
+		assertNotNull(d, "DataBufferBool allocation error");
 	}
 
 	@Override
@@ -153,7 +153,7 @@ public class testDataBufferUnsignedByte extends testDataBuffer {
 
 		try {
 			d.getBoolean(0);
-			assertTrue("getting a boolean on a DataBufferUnsignedByte should be imposible", false);
+			assertTrue(false, "getting a boolean on a DataBufferUnsignedByte should be imposible");
 		} catch (IllegalAccessError i) {
 		}
 
@@ -164,7 +164,7 @@ public class testDataBufferUnsignedByte extends testDataBuffer {
 	public void testClone() {
 		DataBufferUnsignedByte d = new DataBufferUnsignedByte(tab);
 		DataBufferUnsignedByte dd = d.clone();
-		assertFalse("A cloned object cannot have the same reference", d == dd);
+		assertFalse(d == dd, "A cloned object cannot have the same reference");
 		for (int i = d.getSize() - 1; i >= 0; i--) {
 			assertTrue(d.getByte(i) == dd.getByte(i));
 		}
@@ -241,8 +241,7 @@ public class testDataBufferUnsignedByte extends testDataBuffer {
 		d = new DataBufferUnsignedByte(0);
 		try {
 			d.setData(new Double(0.0));
-			assertTrue("setting any object other than numeric buffer on a DataBufferUnsignedByte should be imposible",
-					false);
+			assertTrue(false, "setting any object other than numeric buffer on a DataBufferUnsignedByte should be imposible");
 		} catch (IllegalArgumentException i) {
 		}
 

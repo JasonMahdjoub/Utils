@@ -34,9 +34,10 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.data_buffers;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -98,9 +99,9 @@ public final class testDataBufferBool extends testDataBuffer {
 	@Test
 	public void testConstructors() {
 		DataBufferBool d = new DataBufferBool(10);
-		assertNotNull("DataBufferBool allocation error", d);
+		assertNotNull(d, "DataBufferBool allocation error");
 		d = new DataBufferBool(tab);
-		assertNotNull("DataBufferBool allocation error", d);
+		assertNotNull(d, "DataBufferBool allocation error");
 	}
 
 	@Override
@@ -128,37 +129,37 @@ public final class testDataBufferBool extends testDataBuffer {
 
 		try {
 			d.setByte(0, (byte) 0);
-			assertTrue("setting a byte on a DataBufferBool should be imposible", false);
+			assertTrue(false, "setting a byte on a DataBufferBool should be imposible");
 		} catch (IllegalAccessError i) {
 		}
 		try {
 			d.setChar(0, (char) 0);
-			assertTrue("setting a char on a DataBufferBool should be imposible", false);
+			assertTrue(false, "setting a char on a DataBufferBool should be imposible");
 		} catch (IllegalAccessError i) {
 		}
 		try {
 			d.setDouble(0, (double) 0);
-			assertTrue("setting a double on a DataBufferBool should be imposible", false);
+			assertTrue(false, "setting a double on a DataBufferBool should be imposible");
 		} catch (IllegalAccessError i) {
 		}
 		try {
 			d.setFloat(0, (float) 0);
-			assertTrue("setting a float on a DataBufferBool should be imposible", false);
+			assertTrue(false, "setting a float on a DataBufferBool should be imposible");
 		} catch (IllegalAccessError i) {
 		}
 		try {
 			d.setInt(0, (int) 0);
-			assertTrue("setting a int on a DataBufferBool should be imposible", false);
+			assertTrue(false, "setting a int on a DataBufferBool should be imposible");
 		} catch (IllegalAccessError i) {
 		}
 		try {
 			d.setLong(0, (long) 0);
-			assertTrue("setting a long on a DataBufferBool should be imposible", false);
+			assertTrue(false, "setting a long on a DataBufferBool should be imposible");
 		} catch (IllegalAccessError i) {
 		}
 		try {
 			d.setShort(0, (short) 0);
-			assertTrue("setting a short on a DataBufferBool should be imposible", false);
+			assertTrue(false, "setting a short on a DataBufferBool should be imposible");
 		} catch (IllegalAccessError i) {
 		}
 	}
@@ -168,7 +169,7 @@ public final class testDataBufferBool extends testDataBuffer {
 	public void testClone() {
 		DataBufferBool d = new DataBufferBool(tab);
 		DataBufferBool dd = d.clone();
-		assertFalse("A cloned object cannot have the same reference", d == dd);
+		assertFalse(d == dd, "A cloned object cannot have the same reference");
 		for (int i = d.getSize() - 1; i >= 0; i--) {
 			assertTrue(d.getBoolean(i) == dd.getBoolean(i));
 		}
@@ -196,43 +197,43 @@ public final class testDataBufferBool extends testDataBuffer {
 
 		try {
 			d.setData(new byte[10]);
-			assertTrue("setting a byte buffer on a DataBufferBool should be imposible", false);
+			assertTrue(false, "setting a byte buffer on a DataBufferBool should be imposible");
 		} catch (IllegalArgumentException i) {
 		}
 		try {
 			d.setData(new short[10]);
-			assertTrue("setting a short buffer on a DataBufferBool should be imposible", false);
+			assertTrue(false, "setting a short buffer on a DataBufferBool should be imposible");
 		} catch (IllegalArgumentException i) {
 		}
 		try {
 			d.setData(new char[10]);
-			assertTrue("setting a char buffer on a DataBufferBool should be imposible", false);
+			assertTrue(false, "setting a char buffer on a DataBufferBool should be imposible");
 		} catch (IllegalArgumentException i) {
 		}
 		try {
 			d.setData(new double[10]);
-			assertTrue("setting a double buffer on a DataBufferBool should be imposible", false);
+			assertTrue(false, "setting a double buffer on a DataBufferBool should be imposible");
 		} catch (IllegalArgumentException i) {
 		}
 		try {
 			d.setData(new float[10]);
-			assertTrue("setting a float buffer on a DataBufferBool should be imposible", false);
+			assertTrue(false, "setting a float buffer on a DataBufferBool should be imposible");
 		} catch (IllegalArgumentException i) {
 		}
 		try {
 			d.setData(new int[10]);
-			assertTrue("setting a int buffer on a DataBufferBool should be imposible", false);
+			assertTrue(false, "setting a int buffer on a DataBufferBool should be imposible");
 		} catch (IllegalArgumentException i) {
 		}
 		try {
 			d.setData(new long[10]);
-			assertTrue("setting a long buffer on a DataBufferBool should be imposible", false);
+			assertTrue(false, "setting a long buffer on a DataBufferBool should be imposible");
 		} catch (IllegalArgumentException i) {
 		}
 
 		try {
 			d.setData(new Double(0.0));
-			assertTrue("setting a any object other than boolean buffer on a DataBufferBool should be imposible", false);
+			assertTrue(false, "setting a any object other than boolean buffer on a DataBufferBool should be imposible");
 		} catch (IllegalArgumentException i) {
 		}
 
