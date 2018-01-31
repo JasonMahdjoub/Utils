@@ -54,8 +54,8 @@ public class Utils {
 		Calendar c = Calendar.getInstance();
 		c.set(2016, 1, 4);
 		Calendar c2 = Calendar.getInstance();
-		c.set(2018, 0, 27);
-		VERSION = new Version("Utils", "Utils", 3, 8, 0, Version.Type.Stable, 0, c.getTime(), c2.getTime());
+		c.set(2018, 0, 31);
+		VERSION = new Version("Utils", "Utils", 3, 9, 0, Version.Type.Stable, 0, c.getTime(), c2.getTime());
 		try {
 
 			InputStream is = Utils.class.getResourceAsStream("build.txt");
@@ -68,8 +68,17 @@ public class Utils {
 			VERSION.addDeveloper(new PersonDeveloper("mahdjoub", "jason", c.getTime()));
 			
 			c = Calendar.getInstance();
-			c.set(2018, 9, 27);
-			Description d = new Description(3, 8, 0, Version.Type.Stable, 0, c.getTime());
+			c.set(2018, 0, 31);
+			Description d = new Description(3, 9, 0, Version.Type.Stable, 0, c.getTime());
+			d.addItem("Add curve M-221 for asymmetric signatures and ECDH Key Exchangers.");
+			d.addItem("Add curve M-383 for asymmetric signatures and ECDH Key Exchangers.");
+			d.addItem("Add curve M-511 for asymmetric signatures and ECDH Key Exchangers.");
+			d.addItem("Add curve 41417 for asymmetric signatures and ECDH Key Exchangers.");
+			VERSION.addDescription(d);
+			
+			c = Calendar.getInstance();
+			c.set(2018, 0, 27);
+			d = new Description(3, 8, 0, Version.Type.Stable, 0, c.getTime());
 			d.addItem("Update bouncy castle to 1.59b");
 			d.addItem("Add PKBFs with SHA3 hash method");
 			d.addItem("Use now BouncyCastle implementation of BCrypt (instead of Berry)");

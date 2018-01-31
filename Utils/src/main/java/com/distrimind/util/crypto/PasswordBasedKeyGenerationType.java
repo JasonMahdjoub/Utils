@@ -77,11 +77,11 @@ public enum PasswordBasedKeyGenerationType {
 	{
 		return derivateKey(password, salt, PasswordHash.DEFAULT_COST, type, type.getDefaultKeySizeBits());
 	}
-	public SymmetricSecretKey derivateKey(char[] password, byte[] salt, int iterationNumber, SymmetricEncryptionType type) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException
+	public SymmetricSecretKey derivateKey(char[] password, byte[] salt, byte cost, SymmetricEncryptionType type) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException
 	{
-		return derivateKey(password, salt, iterationNumber, type, type.getDefaultKeySizeBits());
+		return derivateKey(password, salt, cost, type, type.getDefaultKeySizeBits());
 	}
-	public SymmetricSecretKey derivateKey(char[] password, byte[] salt, int cost, SymmetricEncryptionType type, short keySizeBits) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException
+	public SymmetricSecretKey derivateKey(char[] password, byte[] salt, byte cost, SymmetricEncryptionType type, short keySizeBits) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException
 	{
 		if (cost<4 || cost>31)
 			throw new IllegalArgumentException("cost must be greater or equals than 4 and lower or equals than 31");
@@ -94,7 +94,7 @@ public enum PasswordBasedKeyGenerationType {
 			return new SymmetricSecretKey(type, new SecretKeySpec(passwordHashType.hash(password, salt, cost, (byte)(keySizeBits/8)), type.getAlgorithmName()), keySizeBits);
 		}
 	}
-	public SymmetricSecretKey derivateKey(char[] password, byte[] salt, int cost, SymmetricAuthentifiedSignatureType type) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException
+	public SymmetricSecretKey derivateKey(char[] password, byte[] salt, byte cost, SymmetricAuthentifiedSignatureType type) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException
 	{
 		return derivateKey(password, salt, cost, type, type.getDefaultKeySizeBits());
 	}
@@ -103,7 +103,7 @@ public enum PasswordBasedKeyGenerationType {
 		return derivateKey(password, salt, PasswordHash.DEFAULT_COST, type, type.getDefaultKeySizeBits());
 	}
 	
-	public SymmetricSecretKey derivateKey(char[] password, byte[] salt, int cost, SymmetricAuthentifiedSignatureType type, short keySizeBits) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException
+	public SymmetricSecretKey derivateKey(char[] password, byte[] salt, byte cost, SymmetricAuthentifiedSignatureType type, short keySizeBits) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException
 	{
 		if (cost<4 || cost>31)
 			throw new IllegalArgumentException("cost must be greater or equals than 4 and lower or equals than 31");

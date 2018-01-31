@@ -44,11 +44,29 @@ package com.distrimind.util.crypto;
 public enum EllipticCurveDiffieHellmanType {
 	ECDDH_384_AES128((short) 128, (short) 256, CodeProvider.BCFIPS, ASymmetricAuthentifiedSignatureType.BC_SHA256withECDSA_CURVE_25519, "ECCDHwithSHA384CKDF"),
 	ECDDH_384_AES256((short) 256, (short) 384, CodeProvider.BCFIPS, ASymmetricAuthentifiedSignatureType.BC_SHA384withECDSA_CURVE_25519, "ECCDHwithSHA384CKDF"),
-	ECDDH_512_AES256((short) 256, (short) 521, CodeProvider.BCFIPS, ASymmetricAuthentifiedSignatureType.BC_SHA512withECDSA_CURVE_25519, "ECCDHwithSHA512CKDF"), 
-	BC_ECDDH_384_AES128((short) 128, (short) 256, CodeProvider.BCFIPS, ASymmetricAuthentifiedSignatureType.BC_SHA256withECDSA_CURVE_25519, "ECCDHwithSHA384CKDF"),
-	BC_ECDDH_384_AES256((short) 256, (short) 384, CodeProvider.BCFIPS, ASymmetricAuthentifiedSignatureType.BC_SHA384withECDSA_CURVE_25519, "ECCDHwithSHA384CKDF"),
-	BC_ECDDH_512_AES256((short) 256, (short) 521, CodeProvider.BCFIPS, ASymmetricAuthentifiedSignatureType.BC_SHA512withECDSA_CURVE_25519, "ECCDHwithSHA512CKDF"), 
-	DEFAULT(BC_ECDDH_384_AES128);
+	ECDDH_512_AES256((short) 256, (short) 521, CodeProvider.BCFIPS, ASymmetricAuthentifiedSignatureType.BC_SHA512withECDSA_CURVE_25519, "ECCDHwithSHA512CKDF"),
+	@Deprecated
+	BC_FIPS_ECDDH_384_AES128((short) 128, (short) 256, CodeProvider.BCFIPS, ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA256withECDSA, "ECCDHwithSHA384CKDF"),
+	@Deprecated
+	BC_FIPS_ECDDH_384_AES256((short) 256, (short) 384, CodeProvider.BCFIPS, ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA384withECDSA, "ECCDHwithSHA384CKDF"),
+	@Deprecated
+	BC_FIPS_ECDDH_512_AES256((short) 256, (short) 521, CodeProvider.BCFIPS, ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA512withECDSA, "ECCDHwithSHA512CKDF"), 
+	BC_ECDDH_384_AES128_CURVE_25519((short) 128, (short) 256, CodeProvider.BCFIPS, ASymmetricAuthentifiedSignatureType.BC_SHA256withECDSA_CURVE_25519, "ECCDHwithSHA384CKDF"),
+	BC_ECDDH_384_AES256_CURVE_25519((short) 256, (short) 384, CodeProvider.BCFIPS, ASymmetricAuthentifiedSignatureType.BC_SHA384withECDSA_CURVE_25519, "ECCDHwithSHA384CKDF"),
+	BC_ECDDH_512_AES256_CURVE_25519((short) 256, (short) 521, CodeProvider.BCFIPS, ASymmetricAuthentifiedSignatureType.BC_SHA512withECDSA_CURVE_25519, "ECCDHwithSHA512CKDF"), 
+	BC_ECDDH_384_AES128_CURVE_M_221((short) 128, (short) 256, CodeProvider.BCFIPS, ASymmetricAuthentifiedSignatureType.BC_SHA256withECDSA_CURVE_M_221, "ECCDHwithSHA384CKDF"),
+	BC_ECDDH_384_AES256_CURVE_M_221((short) 256, (short) 384, CodeProvider.BCFIPS, ASymmetricAuthentifiedSignatureType.BC_SHA384withECDSA_CURVE_M_221, "ECCDHwithSHA384CKDF"),
+	BC_ECDDH_512_AES256_CURVE_M_221((short) 256, (short) 521, CodeProvider.BCFIPS, ASymmetricAuthentifiedSignatureType.BC_SHA512withECDSA_CURVE_M_221, "ECCDHwithSHA512CKDF"), 
+	BC_ECDDH_384_AES128_CURVE_M_383((short) 128, (short) 256, CodeProvider.BCFIPS, ASymmetricAuthentifiedSignatureType.BC_SHA256withECDSA_CURVE_M_383, "ECCDHwithSHA384CKDF"),
+	BC_ECDDH_384_AES256_CURVE_M_383((short) 256, (short) 384, CodeProvider.BCFIPS, ASymmetricAuthentifiedSignatureType.BC_SHA384withECDSA_CURVE_M_383, "ECCDHwithSHA384CKDF"),
+	BC_ECDDH_512_AES256_CURVE_M_383((short) 256, (short) 521, CodeProvider.BCFIPS, ASymmetricAuthentifiedSignatureType.BC_SHA512withECDSA_CURVE_M_383, "ECCDHwithSHA512CKDF"), 
+	BC_ECDDH_384_AES128_CURVE_M_511((short) 128, (short) 256, CodeProvider.BCFIPS, ASymmetricAuthentifiedSignatureType.BC_SHA256withECDSA_CURVE_M_511, "ECCDHwithSHA384CKDF"),
+	BC_ECDDH_384_AES256_CURVE_M_511((short) 256, (short) 384, CodeProvider.BCFIPS, ASymmetricAuthentifiedSignatureType.BC_SHA384withECDSA_CURVE_M_511, "ECCDHwithSHA384CKDF"),
+	BC_ECDDH_512_AES256_CURVE_M_511((short) 256, (short) 521, CodeProvider.BCFIPS, ASymmetricAuthentifiedSignatureType.BC_SHA512withECDSA_CURVE_M_511, "ECCDHwithSHA512CKDF"), 
+	BC_ECDDH_384_AES128_CURVE_41417((short) 128, (short) 256, CodeProvider.BCFIPS, ASymmetricAuthentifiedSignatureType.BC_SHA256withECDSA_CURVE_41417, "ECCDHwithSHA384CKDF"),
+	BC_ECDDH_384_AES256_CURVE_41417((short) 256, (short) 384, CodeProvider.BCFIPS, ASymmetricAuthentifiedSignatureType.BC_SHA384withECDSA_CURVE_41417, "ECCDHwithSHA384CKDF"),
+	BC_ECDDH_512_AES256_CURVE_41417((short) 256, (short) 521, CodeProvider.BCFIPS, ASymmetricAuthentifiedSignatureType.BC_SHA512withECDSA_CURVE_41417, "ECCDHwithSHA512CKDF"), 
+	DEFAULT(BC_ECDDH_384_AES256_CURVE_M_511);
 
 	private final short keySizeBits;
 	private final short ECDHKeySizeBits;

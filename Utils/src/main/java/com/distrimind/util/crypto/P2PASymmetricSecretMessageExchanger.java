@@ -187,7 +187,7 @@ public class P2PASymmetricSecretMessageExchanger {
 
 	private final PasswordHashType passwordHashType;
 
-	private int cost = PasswordHash.DEFAULT_COST;
+	private byte cost = PasswordHash.DEFAULT_COST;
 
 	public P2PASymmetricSecretMessageExchanger(AbstractSecureRandom secureRandom, ASymmetricPublicKey myPublicKey)
 			throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,
@@ -364,7 +364,7 @@ public class P2PASymmetricSecretMessageExchanger {
 		return this.distantMessageEncoder.getMyPublicKey();
 	}
 
-	public int getCost() {
+	public byte getCost() {
 		return cost;
 	}
 
@@ -431,7 +431,7 @@ public class P2PASymmetricSecretMessageExchanger {
 		distantMessageEncoder.setCost(getCost());
 	}
 
-	public void setCost(int cost) {
+	public void setCost(byte cost) {
 		if (cost<4 || cost>31)
 			throw new IllegalArgumentException("cost must be greater or equals than 4 and lower or equals than 31");
 

@@ -317,8 +317,8 @@ public class CryptoTests {
 					kpd.getASymmetricPublicKey());
 			algoLocal.setDistantPublicKey(algoDistant.encodeMyPublicKey());
 			algoDistant.setDistantPublicKey(algoLocal.encodeMyPublicKey());
-			algoLocal.setCost(11);
-			algoDistant.setCost(11);
+			algoLocal.setCost((byte)11);
+			algoDistant.setCost((byte)11);
 
 			byte[] falseMessage = new byte[10];
 			rand.nextBytes(falseMessage);
@@ -757,7 +757,7 @@ public class CryptoTests {
 		PasswordHash ph = new PasswordHash(type, random);
 		String password = "password";
 		String invalidPassword = "invalid password";
-		ph.setCost(7);
+		ph.setCost((byte)7);
 		byte[] hashedValue = ph.hash(password);
 		Assert.assertTrue(ph.checkValidHashedPassword(password, hashedValue));
 		Assert.assertFalse(ph.checkValidHashedPassword(invalidPassword, hashedValue));
@@ -775,11 +775,11 @@ public class CryptoTests {
 		Random r=new Random(System.currentTimeMillis());
 		byte[] salt=new byte[32];
 		r.nextBytes(salt);
-		SymmetricSecretKey key1=derivationType.derivateKey(password.toCharArray(), salt, 7, encryptionType);
+		SymmetricSecretKey key1=derivationType.derivateKey(password.toCharArray(), salt, (byte)7, encryptionType);
 		Assert.assertEquals(key1.getKeySize(), encryptionType.getDefaultKeySizeBits());
 		Assert.assertEquals(key1.getEncryptionAlgorithmType(), encryptionType);
-		Assert.assertEquals(key1.encode(), derivationType.derivateKey(password.toCharArray(), salt, 7, encryptionType).encode());
-		Assert.assertNotEquals(key1.encode(), derivationType.derivateKey(invalidPassword.toCharArray(), salt, 7, encryptionType).encode());
+		Assert.assertEquals(key1.encode(), derivationType.derivateKey(password.toCharArray(), salt, (byte)7, encryptionType).encode());
+		Assert.assertNotEquals(key1.encode(), derivationType.derivateKey(invalidPassword.toCharArray(), salt,(byte) 7, encryptionType).encode());
 	}
 	@Test(dataProvider = "providePasswordKeyDerivationTypesForSymmetricSignatures", dependsOnMethods="testPasswordHash")
 	public void testPasswordKeyDerivation(PasswordBasedKeyGenerationType derivationType, SymmetricAuthentifiedSignatureType signatureType) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
@@ -788,11 +788,11 @@ public class CryptoTests {
 		Random r=new Random(System.currentTimeMillis());
 		byte[] salt=new byte[32];
 		r.nextBytes(salt);
-		SymmetricSecretKey key1=derivationType.derivateKey(password.toCharArray(), salt, 7, signatureType);
+		SymmetricSecretKey key1=derivationType.derivateKey(password.toCharArray(), salt, (byte)7, signatureType);
 		Assert.assertEquals(key1.getKeySize(), signatureType.getDefaultKeySizeBits());
 		Assert.assertEquals(key1.getAuthentifiedSignatureAlgorithmType(), signatureType);
-		Assert.assertEquals(key1.encode(), derivationType.derivateKey(password.toCharArray(), salt, 7, signatureType).encode());
-		Assert.assertNotEquals(key1.encode(), derivationType.derivateKey(invalidPassword.toCharArray(), salt, 7, signatureType).encode());
+		Assert.assertEquals(key1.encode(), derivationType.derivateKey(password.toCharArray(), salt, (byte)7, signatureType).encode());
+		Assert.assertNotEquals(key1.encode(), derivationType.derivateKey(invalidPassword.toCharArray(), salt, (byte)7, signatureType).encode());
 	}
 
 	@DataProvider(name="providePasswordKeyDerivationTypesForSymmetricEncryptions", parallel=true)
@@ -887,6 +887,9 @@ public class CryptoTests {
 			throws NoSuchAlgorithmException, InvalidKeyException, SignatureException, InvalidKeySpecException,
 			NoSuchProviderException, ShortBufferException, IllegalStateException, InvalidAlgorithmParameterException, InvalidParameterSpecException, IOException {
 		System.out.println("Testing asymmetric signature : " + keySize);
+		byte b[]=kpd.encode();
+		ASymmetricKeyPair kpd2=ASymmetricKeyPair.decode(b);
+		Assert.assertEquals(kpd2, kpd);
 		ASymmetricAuthentifiedSignerAlgorithm signer = new ASymmetricAuthentifiedSignerAlgorithm(kpd.getASymmetricPrivateKey());
 		ASymmetricAuthentifiedSignatureCheckerAlgorithm checker = new ASymmetricAuthentifiedSignatureCheckerAlgorithm(kpd.getASymmetricPublicKey());
 		byte[] signature=testSignature(signer, checker);
@@ -896,7 +899,9 @@ public class CryptoTests {
 				&& kpd.getAuthentifiedSignatureAlgorithmType()!=ASymmetricAuthentifiedSignatureType.BC_SHA256withECDSA_CURVE_25519
 				&& kpd.getAuthentifiedSignatureAlgorithmType()!=ASymmetricAuthentifiedSignatureType.BC_SHA384withECDSA_CURVE_25519
 				&& kpd.getAuthentifiedSignatureAlgorithmType()!=ASymmetricAuthentifiedSignatureType.BC_SHA512withECDSA_CURVE_25519
-				
+				&& kpd.getAuthentifiedSignatureAlgorithmType()!=ASymmetricAuthentifiedSignatureType.BC_SHA256withECDSA_CURVE_M_511
+				&& kpd.getAuthentifiedSignatureAlgorithmType()!=ASymmetricAuthentifiedSignatureType.BC_SHA384withECDSA_CURVE_M_511
+				&& kpd.getAuthentifiedSignatureAlgorithmType()!=ASymmetricAuthentifiedSignatureType.BC_SHA512withECDSA_CURVE_M_511			
 				)
 			Assert.assertEquals(kpd.getAuthentifiedSignatureAlgorithmType().getSignatureSizeBits(kpd.getKeySize()), signature.length*8);
 	}

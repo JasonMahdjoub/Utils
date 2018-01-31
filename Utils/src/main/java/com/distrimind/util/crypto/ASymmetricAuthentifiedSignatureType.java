@@ -65,9 +65,21 @@ public enum ASymmetricAuthentifiedSignatureType {
 	BC_FIPS_SHA384withECDSA("SHA384withECDSA", "EC", CodeProvider.BCFIPS,CodeProvider.BCFIPS,(short) 384, 31536000000l),
 	@Deprecated
 	BC_FIPS_SHA512withECDSA("SHA512withECDSA", "EC", CodeProvider.BCFIPS,CodeProvider.BCFIPS,(short) 521, 31536000000l),
-	BC_SHA256withECDSA_CURVE_25519("ECDSA", "ECDSA", CodeProvider.BCFIPS,CodeProvider.BC, (short)128, 31536000000l),
-	BC_SHA384withECDSA_CURVE_25519("ECDSA", "ECDSA", CodeProvider.BCFIPS,CodeProvider.BC, (short)128, 31536000000l),
-	BC_SHA512withECDSA_CURVE_25519("ECDSA", "ECDSA", CodeProvider.BCFIPS,CodeProvider.BC, (short)128, 31536000000l),
+	BC_SHA256withECDSA_CURVE_25519("SHA256withECDSA", "ECDSA", CodeProvider.BCFIPS,CodeProvider.BC, (short)256, 31536000000l),
+	BC_SHA384withECDSA_CURVE_25519("SHA384withECDSA", "ECDSA", CodeProvider.BCFIPS,CodeProvider.BC, (short)256, 31536000000l),
+	BC_SHA512withECDSA_CURVE_25519("SHA512withECDSA", "ECDSA", CodeProvider.BCFIPS,CodeProvider.BC, (short)256, 31536000000l),
+	BC_SHA256withECDSA_CURVE_M_221("SHA256withECDSA", "ECDSA", CodeProvider.BCFIPS,CodeProvider.BC, (short)383, 31536000000l),
+	BC_SHA384withECDSA_CURVE_M_221("SHA384withECDSA", "ECDSA", CodeProvider.BCFIPS,CodeProvider.BC, (short)383, 31536000000l),
+	BC_SHA512withECDSA_CURVE_M_221("SHA512withECDSA", "ECDSA", CodeProvider.BCFIPS,CodeProvider.BC, (short)383, 31536000000l),
+	BC_SHA256withECDSA_CURVE_M_383("SHA256withECDSA", "ECDSA", CodeProvider.BCFIPS,CodeProvider.BC, (short)383, 31536000000l),
+	BC_SHA384withECDSA_CURVE_M_383("SHA384withECDSA", "ECDSA", CodeProvider.BCFIPS,CodeProvider.BC, (short)383, 31536000000l),
+	BC_SHA512withECDSA_CURVE_M_383("SHA512withECDSA", "ECDSA", CodeProvider.BCFIPS,CodeProvider.BC, (short)383, 31536000000l),
+	BC_SHA256withECDSA_CURVE_M_511("SHA256withECDSA", "ECDSA", CodeProvider.BCFIPS,CodeProvider.BC, (short)511, 31536000000l),
+	BC_SHA384withECDSA_CURVE_M_511("SHA384withECDSA", "ECDSA", CodeProvider.BCFIPS,CodeProvider.BC, (short)511, 31536000000l),
+	BC_SHA512withECDSA_CURVE_M_511("SHA512withECDSA", "ECDSA", CodeProvider.BCFIPS,CodeProvider.BC, (short)511, 31536000000l),
+	BC_SHA256withECDSA_CURVE_41417("SHA256withECDSA", "ECDSA", CodeProvider.BCFIPS,CodeProvider.BC, (short)414, 31536000000l),
+	BC_SHA384withECDSA_CURVE_41417("SHA384withECDSA", "ECDSA", CodeProvider.BCFIPS,CodeProvider.BC, (short)414, 31536000000l),
+	BC_SHA512withECDSA_CURVE_41417("SHA512withECDSA", "ECDSA", CodeProvider.BCFIPS,CodeProvider.BC, (short)414, 31536000000l),
 	DEFAULT(BC_FIPS_SHA384withRSAandMGF1);
 
 	private final String signatureAlgorithmName;
@@ -135,7 +147,35 @@ public enum ASymmetricAuthentifiedSignatureType {
 	public int getSignatureSizeBits(int keySize) {
 		if (this==BC_FIPS_SHA256withRSAandMGF1 || this==ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA384withRSAandMGF1 || this==ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA512withRSAandMGF1)
 			return keySize+464;
-		else if (this==BC_SHA256withECDSA_CURVE_25519 || this==ASymmetricAuthentifiedSignatureType.BC_SHA384withECDSA_CURVE_25519 || this==ASymmetricAuthentifiedSignatureType.BC_SHA512withECDSA_CURVE_25519)
+		else if (this==BC_SHA256withECDSA_CURVE_25519)
+			return 560;
+		else if (this==BC_SHA384withECDSA_CURVE_25519)
+			return 560;
+		else if (this==BC_SHA512withECDSA_CURVE_25519)
+			return 560;
+		else if (this==BC_SHA256withECDSA_CURVE_41417)
+			return 560;
+		else if (this==BC_SHA384withECDSA_CURVE_41417)
+			return 560;
+		else if (this==BC_SHA512withECDSA_CURVE_41417)
+			return 560;
+		else if (this==BC_SHA256withECDSA_CURVE_M_511)
+			return 560;
+		else if (this==BC_SHA384withECDSA_CURVE_M_511)
+			return 560;
+		else if (this==BC_SHA512withECDSA_CURVE_M_511)
+			return 560;
+		else if (this==BC_SHA256withECDSA_CURVE_M_383)
+			return 560;
+		else if (this==BC_SHA384withECDSA_CURVE_M_383)
+			return 560;
+		else if (this==BC_SHA512withECDSA_CURVE_M_383)
+			return 560;
+		else if (this==BC_SHA256withECDSA_CURVE_M_221)
+			return 560;
+		else if (this==BC_SHA384withECDSA_CURVE_M_221)
+			return 560;
+		else if (this==BC_SHA512withECDSA_CURVE_M_221)
 			return 560;
 		else if (this==ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA256withECDSA)
 			return 1112;
