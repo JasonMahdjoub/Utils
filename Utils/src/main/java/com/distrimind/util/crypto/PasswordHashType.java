@@ -109,7 +109,7 @@ public enum PasswordHashType {
 		return hashLength;
 	}
 
-	byte[] hash(byte data[], int off, int len, byte salt[], int cost, byte hashLength)
+	byte[] hash(byte data[], int off, int len, byte salt[], byte cost, byte hashLength)
 			throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException, gnu.vm.jgnu.security.NoSuchProviderException {
 		if (cost<4 || cost>31)
 			throw new IllegalArgumentException("cost must be greater or equals than 4 and lower or equals than 31");
@@ -223,7 +223,7 @@ public enum PasswordHashType {
 		}
 		case SCRYPT_FOR_LOGIN:
 			
-			scryptN=1<<14;
+			scryptN=1<<13;
 			
 		case SCRYPT_FOR_DATAENCRYPTION:
 		{
@@ -246,7 +246,7 @@ public enum PasswordHashType {
 		return null;
 	}
 
-	byte[] hash(char password[], byte salt[], int cost, byte hashLength)
+	byte[] hash(char password[], byte salt[], byte cost, byte hashLength)
 			throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException, gnu.vm.jgnu.security.NoSuchProviderException {
 		if (cost<4 || cost>31)
 			throw new IllegalArgumentException("cost must be greater or equals than 4 and lower or equals than 31");
@@ -327,7 +327,7 @@ public enum PasswordHashType {
 			}
 		}
 		case SCRYPT_FOR_LOGIN:
-			scryptN=1<<14;
+			scryptN=1<<13;
 			
 		case SCRYPT_FOR_DATAENCRYPTION:
 			byte[] passwordb = new byte[password.length * 2];
