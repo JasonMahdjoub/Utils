@@ -53,7 +53,7 @@ import gnu.vm.jgnu.security.spec.InvalidKeySpecException;
 public class PasswordHash {
 	final static int DEFAULT_SALT_SIZE = 24;
 
-	final static int DEFAULT_COST = 16;
+	final static byte DEFAULT_COST = 16;
 
 	public static byte[] generateSalt(SecureRandom random, int saltSize) {
 		byte[] res = new byte[saltSize];
@@ -67,7 +67,7 @@ public class PasswordHash {
 
 	private int saltSize;
 
-	private int cost;
+	private byte cost;
 	
 
 	public PasswordHash() {
@@ -82,10 +82,10 @@ public class PasswordHash {
 	public PasswordHash(PasswordHashType type, SecureRandom random) {
 		this(type, random, DEFAULT_COST, DEFAULT_SALT_SIZE);
 	}
-	public PasswordHash(PasswordHashType type, SecureRandom random, int cost) {
+	public PasswordHash(PasswordHashType type, SecureRandom random, byte cost) {
 		this(type, random, cost, DEFAULT_SALT_SIZE);
 	}
-	public PasswordHash(PasswordHashType type, SecureRandom random, int cost, int saltSize) {
+	public PasswordHash(PasswordHashType type, SecureRandom random, byte cost, int saltSize) {
 		if (cost<4 || cost>31)
 			throw new IllegalArgumentException("cost must be greater or equals than 4 and lower or equals than 31");
 
@@ -128,7 +128,7 @@ public class PasswordHash {
 		return checkValidHashedPassword(password.toCharArray(), goodHash, staticAdditionalSalt, defaultHashLengthBytes);
 	}
 
-	public int getCost() {
+	public byte getCost() {
 		return cost;
 	}
 
@@ -185,7 +185,7 @@ public class PasswordHash {
 		return salt;
 	}
 
-	public void setCost(int cost) {
+	public void setCost(byte cost) {
 		if (cost<4 || cost>31)
 			throw new IllegalArgumentException("cost must be greater or equals than 4 and lower or equals than 31");
 
