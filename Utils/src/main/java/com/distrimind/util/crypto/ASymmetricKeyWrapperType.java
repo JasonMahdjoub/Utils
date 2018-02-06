@@ -38,8 +38,6 @@ import java.io.IOException;
 import java.security.AlgorithmParameters;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchProviderException;
-import java.security.interfaces.RSAPrivateKey;
-import java.security.interfaces.RSAPublicKey;
 import java.security.spec.MGF1ParameterSpec;
 
 import javax.crypto.spec.OAEPParameterSpec;
@@ -199,10 +197,7 @@ public enum ASymmetricKeyWrapperType {
 					
 					
 					
-					RSAPublicKey javaNativePublicKey=(RSAPublicKey)publicKey.toJavaNativeKey();
-					AsymmetricRSAPublicKey bcPK=new AsymmetricRSAPublicKey(
-            				FipsRSA.ALGORITHM, 
-            				javaNativePublicKey.getModulus(), javaNativePublicKey.getPublicExponent());
+					AsymmetricRSAPublicKey bcPK=publicKey.toBouncyCastleKey();
 					
 					byte encodedKey []=keyToWrap.encode();
 					
@@ -329,9 +324,7 @@ public enum ASymmetricKeyWrapperType {
 				{
 					CodeProvider.ensureBouncyCastleProviderLoaded();
 					
-					RSAPrivateKey javaNativePrivateKey=(RSAPrivateKey)privateKey.toJavaNativeKey();
-					AsymmetricRSAPrivateKey bcPK=new AsymmetricRSAPrivateKey(FipsRSA.ALGORITHM, 
-							javaNativePrivateKey.getModulus(), javaNativePrivateKey.getPrivateExponent());
+					AsymmetricRSAPrivateKey bcPK=privateKey.toBouncyCastleKey();
 					
 					OAEPParameters OAEPParams=null;
 					

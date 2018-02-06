@@ -36,11 +36,17 @@ package com.distrimind.util.crypto;
 
 import java.io.IOException;
 import java.security.PublicKey;
+import java.security.interfaces.RSAPublicKey;
 import java.util.Arrays;
 
 import org.apache.commons.codec.binary.Base64;
+import org.bouncycastle.crypto.Algorithm;
+import org.bouncycastle.crypto.asymmetric.AsymmetricRSAPublicKey;
 
 import com.distrimind.util.Bits;
+
+import gnu.vm.jgnu.security.NoSuchAlgorithmException;
+import gnu.vm.jgnu.security.spec.InvalidKeySpecException;
 
 
 /**
@@ -253,6 +259,25 @@ public class ASymmetricPublicKey implements UtilKey {
 	@Override
 	public String toString() {
 		return Base64.encodeBase64URLSafeString(encode());
+	}
+
+	Algorithm getBouncyCastleAlgorithm()
+	{
+		if (encryptionType==null)
+			return signatureType.getBouncyCastleAlgorithm();
+		else
+			return encryptionType.getBouncyCastleAlgorithm();
+					
+	}
+	
+	@Override
+	public AsymmetricRSAPublicKey toBouncyCastleKey() throws NoSuchAlgorithmException, InvalidKeySpecException {
+		
+		RSAPublicKey javaNativePublicKey=(RSAPublicKey)toJavaNativeKey();
+		AsymmetricRSAPublicKey bcPK=new AsymmetricRSAPublicKey(
+				getBouncyCastleAlgorithm(), 
+				javaNativePublicKey.getModulus(), javaNativePublicKey.getPublicExponent());
+		return bcPK;
 	}
 
 }

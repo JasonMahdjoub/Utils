@@ -51,7 +51,7 @@ public interface UtilKey extends Serializable {
 	java.security.Key toJavaNativeKey()
 			throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException;
 	
-	Key toBouncyCastleKey();
+	Key toBouncyCastleKey() throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException;
 	
 	
 

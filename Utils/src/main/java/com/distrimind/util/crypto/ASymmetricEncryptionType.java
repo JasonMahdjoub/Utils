@@ -47,6 +47,9 @@ import java.security.spec.X509EncodedKeySpec;
 import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
 
+import org.bouncycastle.crypto.Algorithm;
+import org.bouncycastle.crypto.fips.FipsRSA;
+
 import com.distrimind.util.Bits;
 
 import gnu.vm.jgnu.security.InvalidAlgorithmParameterException;
@@ -61,11 +64,11 @@ import gnu.vm.jgnu.security.NoSuchProviderException;
  */
 public enum ASymmetricEncryptionType {
 	RSA_OAEPWithSHA256AndMGF1Padding("RSA", "ECB", "OAEPWITHSHA-256ANDMGF1PADDING", ASymmetricAuthentifiedSignatureType.SHA384withRSA,
-			(short) 3072, 31536000000l, (short) 66, CodeProvider.SunJCE,CodeProvider.SunRsaSign), 
+			(short) 3072, 31536000000l, (short) 66, CodeProvider.SunJCE,CodeProvider.SunRsaSign, FipsRSA.ALGORITHM), 
 	RSA_PKCS1Padding("RSA", "ECB", "PKCS1Padding", ASymmetricAuthentifiedSignatureType.SHA384withRSA, (short) 3072, 31536000000l, (short) 11,
-					CodeProvider.SunJCE,CodeProvider.SunRsaSign),
-	BC_FIPS_RSA_OAEPWithSHA256AndMGF1Padding("RSA", "NONE", "OAEPwithSHA256andMGF1Padding", ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA384withRSAandMGF1, (short) 3072, 31536000000l, (short) 66,CodeProvider.BCFIPS,CodeProvider.BCFIPS),
-	BC_FIPS_RSA_PKCS1Padding("RSA", "NONE", "PKCS1Padding", ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA384withRSAandMGF1, (short) 3072, 31536000000l, (short) 11,CodeProvider.BCFIPS,CodeProvider.BCFIPS),
+					CodeProvider.SunJCE,CodeProvider.SunRsaSign, FipsRSA.ALGORITHM),
+	BC_FIPS_RSA_OAEPWithSHA256AndMGF1Padding("RSA", "NONE", "OAEPwithSHA256andMGF1Padding", ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA384withRSAandMGF1, (short) 3072, 31536000000l, (short) 66,CodeProvider.BCFIPS,CodeProvider.BCFIPS, FipsRSA.ALGORITHM),
+	BC_FIPS_RSA_PKCS1Padding("RSA", "NONE", "PKCS1Padding", ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA384withRSAandMGF1, (short) 3072, 31536000000l, (short) 11,CodeProvider.BCFIPS,CodeProvider.BCFIPS, FipsRSA.ALGORITHM),
 	DEFAULT(BC_FIPS_RSA_OAEPWithSHA256AndMGF1Padding);
 	
 
@@ -200,14 +203,16 @@ public enum ASymmetricEncryptionType {
 
 	private final CodeProvider codeProviderForEncryption, codeProviderForKeyGenerator;
 
+	private final Algorithm bcAlgorithm;
+	
 	private ASymmetricEncryptionType(ASymmetricEncryptionType type) {
 		this(type.algorithmName, type.blockMode, type.padding, type.signature, type.keySize, type.expirationTimeMilis,
-				type.blockSizeDecrement, type.codeProviderForEncryption, type.codeProviderForKeyGenerator);
+				type.blockSizeDecrement, type.codeProviderForEncryption, type.codeProviderForKeyGenerator, type.bcAlgorithm);
 	}
 
 	private ASymmetricEncryptionType(String algorithmName, String blockMode, String padding,
 			ASymmetricAuthentifiedSignatureType signature, short keySize, long expirationTimeMilis, short blockSizeDecrement,
-			CodeProvider codeProviderForEncryption, CodeProvider codeProviderForKeyGenetor) {
+			CodeProvider codeProviderForEncryption, CodeProvider codeProviderForKeyGenetor, Algorithm bcAlgorithm) {
 		this.algorithmName = algorithmName;
 		this.blockMode = blockMode;
 		this.padding = padding;
@@ -217,6 +222,7 @@ public enum ASymmetricEncryptionType {
 		this.codeProviderForEncryption = codeProviderForEncryption;
 		this.codeProviderForKeyGenerator=codeProviderForKeyGenetor;
 		this.expirationTimeMilis = expirationTimeMilis;
+		this.bcAlgorithm=bcAlgorithm;
 	}
 
 	public String getAlgorithmName() {
@@ -337,4 +343,9 @@ public enum ASymmetricEncryptionType {
 		return codeProviderForKeyGenerator;
 	}
 	
+	
+	Algorithm getBouncyCastleAlgorithm()
+	{
+		return bcAlgorithm;
+	}
 }
