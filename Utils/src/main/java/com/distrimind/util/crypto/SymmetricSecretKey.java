@@ -39,6 +39,8 @@ import java.util.Arrays;
 import javax.crypto.SecretKey;
 
 import org.apache.commons.codec.binary.Base64;
+import org.bouncycastle.crypto.Algorithm;
+
 
 import com.distrimind.util.Bits;
 
@@ -85,6 +87,8 @@ public class SymmetricSecretKey implements UtilKey {
 	private transient SecretKey javaNativeSecretKey = null;
 
 	private transient gnu.vm.jgnux.crypto.SecretKey gnuSecretKey = null;
+	
+	private transient org.bouncycastle.crypto.SymmetricSecretKey bcfipsNativeSecretKey=null;
 
 	SymmetricSecretKey(SymmetricEncryptionType type, byte secretKey[], short keySize) {
 		this(secretKey, keySize);
@@ -224,6 +228,24 @@ public class SymmetricSecretKey implements UtilKey {
 	@Override
 	public String toString() {
 		return Base64.encodeBase64URLSafeString(encode());
+	}
+
+	Algorithm getBouncyCastleAlgorithm()
+	{
+		if (encryptionType==null)
+			return signatureType.getBouncyCastleAlgorithm();
+		else
+			return encryptionType.getBouncyCastleAlgorithm();
+	}
+	
+	@Override
+	public org.bouncycastle.crypto.SymmetricSecretKey toBouncyCastleKey() {
+		
+		if (bcfipsNativeSecretKey == null)
+			bcfipsNativeSecretKey = new org.bouncycastle.crypto.SymmetricSecretKey(getBouncyCastleAlgorithm(), secretKey);
+		
+		return bcfipsNativeSecretKey;
+		
 	}
 
 	/*

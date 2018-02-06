@@ -36,6 +36,8 @@ package com.distrimind.util.crypto;
 
 import java.io.Serializable;
 
+import org.bouncycastle.crypto.Key;
+
 /**
  * 
  * @author Jason Mahdjoub
@@ -48,5 +50,9 @@ public interface UtilKey extends Serializable {
 
 	java.security.Key toJavaNativeKey()
 			throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException;
+	
+	Key toBouncyCastleKey();
+	
+	
 
 }

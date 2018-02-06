@@ -37,6 +37,9 @@ package com.distrimind.util.crypto;
 
 import javax.crypto.spec.SecretKeySpec;
 
+import org.bouncycastle.crypto.Algorithm;
+
+
 import gnu.vm.jgnu.security.NoSuchAlgorithmException;
 import gnu.vm.jgnu.security.NoSuchProviderException;
 import gnu.vm.jgnux.crypto.KeyGenerator;
@@ -63,7 +66,6 @@ public enum SymmetricAuthentifiedSignatureType {
 	private final short keySizeBits;
 	private final short keySizeBytes;
 	private final MessageDigestType messageDigestType;
-
 		
 	
 	private SymmetricAuthentifiedSignatureType(String algorithmName, CodeProvider codeProviderForSignature, CodeProvider codeProviderForKeyGenerator, short keySizeBits, short keySizeBytes, MessageDigestType messageDigestType) {
@@ -76,6 +78,7 @@ public enum SymmetricAuthentifiedSignatureType {
 	}
 
 	private SymmetricAuthentifiedSignatureType(SymmetricAuthentifiedSignatureType other) {
+		
 		this(other.algorithmName, other.codeProviderForSignature, other.codeProviderForKeyGenerator, other.keySizeBits, other.keySizeBytes, other.messageDigestType);
 	}
 
@@ -98,15 +101,8 @@ public enum SymmetricAuthentifiedSignatureType {
 			return new GnuMac(Mac.getInstance(algorithmName));
 		} else if (codeProviderForSignature == CodeProvider.BCFIPS) {
 			CodeProvider.ensureBouncyCastleProviderLoaded();
-			try {
-				return new JavaNativeMac(javax.crypto.Mac.getInstance(algorithmName, codeProviderForSignature.name()));
-			} catch (java.security.NoSuchAlgorithmException e) {
-				throw new gnu.vm.jgnu.security.NoSuchAlgorithmException(e);
-			}
-			catch(java.security.NoSuchProviderException e)
-			{
-				throw new gnu.vm.jgnu.security.NoSuchProviderException(e.getMessage());
-			}
+			return new BCMac(this);
+			
 		} else {
 			try {
 				return new JavaNativeMac(javax.crypto.Mac.getInstance(algorithmName, codeProviderForSignature.checkProviderWithCurrentOS().name()));
@@ -194,5 +190,8 @@ public enum SymmetricAuthentifiedSignatureType {
 			throw new IllegalAccessError();
 
 	}
-	
+	Algorithm getBouncyCastleAlgorithm()
+	{
+		return org.bouncycastle.crypto.general.AES.ALGORITHM;
+	}
 }
