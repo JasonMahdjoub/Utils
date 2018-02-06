@@ -38,13 +38,23 @@ import java.io.IOException;
 import java.security.AlgorithmParameters;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchProviderException;
+import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.RSAPublicKey;
 import java.security.spec.MGF1ParameterSpec;
 
 import javax.crypto.spec.OAEPParameterSpec;
 import javax.crypto.spec.PSource;
 
-import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
-import org.bouncycastle.jcajce.spec.KTSParameterSpec;
+
+import org.bouncycastle.crypto.InvalidWrappingException;
+import org.bouncycastle.crypto.KeyUnwrapperUsingSecureRandom;
+import org.bouncycastle.crypto.KeyWrapperUsingSecureRandom;
+import org.bouncycastle.crypto.asymmetric.AsymmetricRSAPrivateKey;
+import org.bouncycastle.crypto.asymmetric.AsymmetricRSAPublicKey;
+import org.bouncycastle.crypto.fips.FipsRSA;
+import org.bouncycastle.crypto.fips.FipsSHS;
+import org.bouncycastle.crypto.fips.FipsRSA.OAEPParameters;
+import org.bouncycastle.crypto.fips.FipsRSA.WrapParameters;
 
 import com.distrimind.util.Bits;
 import com.distrimind.util.OSValidator;
@@ -70,8 +80,8 @@ public enum ASymmetricKeyWrapperType {
 	GNU_RSA_OAEP("RSA/NONE/OAEPPadding",CodeProvider.GNU_CRYPTO, false),
 	BC_FIPS_RSA_OAEP("RSA/NONE/OAEPPadding",CodeProvider.BCFIPS, false),
 	BC_FIPS_RSA_OAEP_WITH_PARAMETERS("RSA/NONE/OAEPPadding",CodeProvider.BCFIPS, true),
-	BC_FIPS_RSA_KTS_KTM("RSA-KTS-KEM-KWS",CodeProvider.BCFIPS, false),
-	DEFAULT(BC_FIPS_RSA_KTS_KTM);
+	//BC_FIPS_RSA_KTS_KTM("RSA-KTS-KEM-KWS",CodeProvider.BCFIPS, false),
+	DEFAULT(BC_FIPS_RSA_OAEP_WITH_PARAMETERS);
 	
 	
 	
@@ -154,7 +164,14 @@ public enum ASymmetricKeyWrapperType {
 		throw new InvalidKeyException();
 	}
 	
-	
+	private OAEPParameters getOAEPParams(byte params[])
+	{
+		OAEPParameters OAEPParams=FipsRSA.WRAP_OAEP;
+		if (withParameters)
+			OAEPParams=OAEPParams.withMGFDigest(FipsSHS.Algorithm.SHA3_384)
+						.withEncodingParams(params);
+		return OAEPParams;
+	}
 	
 	public byte[] wrapKey(AbstractSecureRandom random, ASymmetricPublicKey publicKey, SymmetricSecretKey keyToWrap) throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, IllegalStateException, IllegalBlockSizeException, gnu.vm.jgnu.security.NoSuchProviderException, gnu.vm.jgnu.security.InvalidAlgorithmParameterException, IOException
 	{
@@ -175,16 +192,56 @@ public enum ASymmetricKeyWrapperType {
 			try
 			{
 				javax.crypto.Cipher c=null;
-				if (provider.equals(CodeProvider.BCFIPS))
+				if (provider.equals(CodeProvider.BCFIPS) || (OSValidator.getCurrentOS()==OSValidator.MACOS && (this==RSA_OAEP || this==ASymmetricKeyWrapperType.RSA_OAEP_WITH_PARAMETERS)))
 				{
 					CodeProvider.ensureBouncyCastleProviderLoaded();
+					
+					
+					
+					
+					RSAPublicKey javaNativePublicKey=(RSAPublicKey)publicKey.toJavaNativeKey();
+					AsymmetricRSAPublicKey bcPK=new AsymmetricRSAPublicKey(
+            				FipsRSA.ALGORITHM, 
+            				javaNativePublicKey.getModulus(), javaNativePublicKey.getPublicExponent());
+					
+					byte encodedKey []=keyToWrap.encode();
+					
+					OAEPParameters OAEPParams=getOAEPParams(PSource.PSpecified.DEFAULT.getValue());
+					
+					/*if (this.algorithmName.equals(BC_FIPS_RSA_KTS_KTM.algorithmName))
+					{
+						OAEPKTSParameters OAEPKTSParams=FipsRSA.KTS_OAEP
+								.withOAEPParameters(OAEPParams)
+								.withKeySizeInBits(256)
+								.withMacKeySizeInBits(256);
+								
+						FipsRSA.KTSOperatorFactory wrapFact=new FipsRSA.KTSOperatorFactory(random);
+						wrapFact.createGenerator
+						FipsEncapsulatingSecretGenerator<FipsRSA.KTSParameters> wrapper=wrapFact.createGenerator(bcPK, OAEPKTSParams)
+								.withSecureRandom(random);
+						
+						
+					}
+					else
+					{*/
+					FipsRSA.KeyWrapOperatorFactory wrapFact = new FipsRSA.KeyWrapOperatorFactory();
+					KeyWrapperUsingSecureRandom<FipsRSA.WrapParameters> wrapper = 
+					            wrapFact.createKeyWrapper(bcPK, OAEPParams)
+					            .withSecureRandom(random);
+						
+						
+						
+					byte[] wrapedKey=wrapper.wrap(encodedKey, 0, encodedKey.length);
+					byte[] encodedParameters=OAEPParams.getEncodingParams();
+					return wrapKeyWithMetaData(Bits.concateEncodingWithShortSizedTabs(wrapedKey, encodedParameters), keyToWrap);
+					
 				}
-				if (OSValidator.getCurrentOS()==OSValidator.MACOS && (this==RSA_OAEP || this==ASymmetricKeyWrapperType.RSA_OAEP_WITH_PARAMETERS))
+				/*if (OSValidator.getCurrentOS()==OSValidator.MACOS && (this==RSA_OAEP || this==ASymmetricKeyWrapperType.RSA_OAEP_WITH_PARAMETERS))
 				{
 					CodeProvider.ensureBouncyCastleProviderLoaded();
 				
 					c=javax.crypto.Cipher.getInstance(algorithmName, CodeProvider.BCFIPS.name());
-				}
+				}*/
 				else
 					c=javax.crypto.Cipher.getInstance(algorithmName, provider.checkProviderWithCurrentOS().name());
 
@@ -196,11 +253,11 @@ public enum ASymmetricKeyWrapperType {
 					byte[] encodedParameters=c.getParameters().getEncoded();
 					return wrapKeyWithMetaData(Bits.concateEncodingWithShortSizedTabs(wrapedKey, encodedParameters), keyToWrap);
 				}
-				else if (this.algorithmName.equals(BC_FIPS_RSA_KTS_KTM.algorithmName))
+				/*else if (this.algorithmName.equals(BC_FIPS_RSA_KTS_KTM.algorithmName))
 				{
 					c.init(javax.crypto.Cipher.WRAP_MODE, publicKey.toJavaNativeKey(), new KTSParameterSpec.Builder(NISTObjectIdentifiers.id_aes256_wrap.getId(),256).build(), random);
 					return wrapKeyWithMetaData(c.wrap(keyToWrap.toJavaNativeKey()), keyToWrap);
-				}
+				}*/
 				else
 				{
 					c.init(javax.crypto.Cipher.WRAP_MODE, publicKey.toJavaNativeKey(), random);
@@ -234,7 +291,7 @@ public enum ASymmetricKeyWrapperType {
 		}
 	}
 	
-	public SymmetricSecretKey unwrapKey(ASymmetricPrivateKey privateKey, byte[] keyToUnwrap) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalStateException, gnu.vm.jgnu.security.NoSuchProviderException, InvalidKeySpecException, gnu.vm.jgnu.security.InvalidAlgorithmParameterException, IOException
+	public SymmetricSecretKey unwrapKey(ASymmetricPrivateKey privateKey, byte[] keyToUnwrap) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalStateException, gnu.vm.jgnu.security.NoSuchProviderException, InvalidKeySpecException, gnu.vm.jgnu.security.InvalidAlgorithmParameterException, IOException, IllegalArgumentException, InvalidWrappingException
 	{
 		if (isSignatureFromMetaData(keyToUnwrap))
 			return unwrapKey(privateKey, getWrappedKeyFromMetaData(keyToUnwrap), null, getSignatureTypeFromMetaData(keyToUnwrap), getKeySizeFromMetaData(keyToUnwrap));
@@ -242,7 +299,7 @@ public enum ASymmetricKeyWrapperType {
 			return unwrapKey(privateKey, getWrappedKeyFromMetaData(keyToUnwrap), getEncryptionTypeFromMetaData(keyToUnwrap), null, getKeySizeFromMetaData(keyToUnwrap));
 		
 	}
-	private SymmetricSecretKey unwrapKey(ASymmetricPrivateKey privateKey, byte[] keyToUnwrap, SymmetricEncryptionType encryptionType, SymmetricAuthentifiedSignatureType signatureType, short keySize) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalStateException, gnu.vm.jgnu.security.NoSuchProviderException, InvalidKeySpecException, IOException, gnu.vm.jgnu.security.InvalidAlgorithmParameterException
+	private SymmetricSecretKey unwrapKey(ASymmetricPrivateKey privateKey, byte[] keyToUnwrap, SymmetricEncryptionType encryptionType, SymmetricAuthentifiedSignatureType signatureType, short keySize) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalStateException, gnu.vm.jgnu.security.NoSuchProviderException, InvalidKeySpecException, IOException, gnu.vm.jgnu.security.InvalidAlgorithmParameterException, IllegalArgumentException, InvalidWrappingException
 	{
 		if ((privateKey.getAuthentifiedSignatureAlgorithmType()!=null && ((provider==CodeProvider.GNU_CRYPTO)!=(privateKey.getAuthentifiedSignatureAlgorithmType().getCodeProviderForSignature()==CodeProvider.GNU_CRYPTO))) 
 				|| (privateKey.getEncryptionAlgorithmType()!=null  && ((provider==CodeProvider.GNU_CRYPTO)!=(privateKey.getEncryptionAlgorithmType().getCodeProviderForEncryption()==CodeProvider.GNU_CRYPTO)))
@@ -265,18 +322,46 @@ public enum ASymmetricKeyWrapperType {
 		{
 			try
 			{
+				
+				
 				javax.crypto.Cipher c=null;
-				if (provider.equals(CodeProvider.BCFIPS))
+				if (provider.equals(CodeProvider.BCFIPS) || (OSValidator.getCurrentOS()==OSValidator.MACOS && (this==RSA_OAEP || this==ASymmetricKeyWrapperType.RSA_OAEP_WITH_PARAMETERS)))
 				{
 					CodeProvider.ensureBouncyCastleProviderLoaded();
 					
+					RSAPrivateKey javaNativePrivateKey=(RSAPrivateKey)privateKey.toJavaNativeKey();
+					AsymmetricRSAPrivateKey bcPK=new AsymmetricRSAPrivateKey(FipsRSA.ALGORITHM, 
+							javaNativePrivateKey.getModulus(), javaNativePrivateKey.getPrivateExponent());
+					
+					OAEPParameters OAEPParams=null;
+					
+					byte[] wrapedKey=null;
+					if (withParameters)
+					{
+						byte[][] tmp=Bits.separateEncodingsWithShortSizedTabs(keyToUnwrap);
+						wrapedKey=tmp[0];
+						OAEPParams=getOAEPParams(tmp[1]);
+					}
+					else
+					{
+						wrapedKey=keyToUnwrap;
+						OAEPParams=getOAEPParams(null);
+					}
+					
+					
+					FipsRSA.KeyWrapOperatorFactory wrapFact = new FipsRSA.KeyWrapOperatorFactory();
+					KeyUnwrapperUsingSecureRandom<WrapParameters> unwrapper = 
+							wrapFact.createKeyUnwrapper(bcPK,OAEPParams)
+							.withSecureRandom(SecureRandomType.DEFAULT.getSingleton(null));
+					return SymmetricSecretKey.decode(unwrapper.unwrap(wrapedKey, 0, wrapedKey.length));
+					
 				}
-				if (OSValidator.getCurrentOS()==OSValidator.MACOS && (this==RSA_OAEP || this==ASymmetricKeyWrapperType.RSA_OAEP_WITH_PARAMETERS))
+				/*if (OSValidator.getCurrentOS()==OSValidator.MACOS && (this==RSA_OAEP || this==ASymmetricKeyWrapperType.RSA_OAEP_WITH_PARAMETERS))
 				{
 					CodeProvider.ensureBouncyCastleProviderLoaded();
 				
 					c=javax.crypto.Cipher.getInstance(algorithmName, CodeProvider.BCFIPS.name());
-				}
+				}*/
 				else
 					c=javax.crypto.Cipher.getInstance(algorithmName, provider.checkProviderWithCurrentOS().name());
 
@@ -289,11 +374,11 @@ public enum ASymmetricKeyWrapperType {
 					algorithmParameters.init(tmp[1]);
 					c.init(Cipher.UNWRAP_MODE, privateKey.toJavaNativeKey(), algorithmParameters);
 				}
-				else if (this.algorithmName.equals(BC_FIPS_RSA_KTS_KTM.algorithmName))
+				/*else if (this.algorithmName.equals(BC_FIPS_RSA_KTS_KTM.algorithmName))
 				{
 					wrapedKey=keyToUnwrap;
 					c.init(Cipher.UNWRAP_MODE, privateKey.toJavaNativeKey(), new KTSParameterSpec.Builder(NISTObjectIdentifiers.id_aes256_wrap.getId(),256).build());
-				}
+				}*/
 				else
 				{
 					wrapedKey=keyToUnwrap;
