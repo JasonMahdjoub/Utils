@@ -227,8 +227,14 @@ public enum ASymmetricKeyWrapperType {
 						
 						
 					byte[] wrapedKey=wrapper.wrap(encodedKey, 0, encodedKey.length);
-					byte[] encodedParameters=OAEPParams.getEncodingParams();
-					return wrapKeyWithMetaData(Bits.concateEncodingWithShortSizedTabs(wrapedKey, encodedParameters), keyToWrap);
+					
+					if (withParameters)
+					{
+						byte[] encodedParameters=OAEPParams.getEncodingParams();
+						return wrapKeyWithMetaData(Bits.concateEncodingWithShortSizedTabs(wrapedKey, encodedParameters), keyToWrap);
+					}
+					else
+						return wrapKeyWithMetaData(wrapedKey, keyToWrap);
 					
 				}
 				/*if (OSValidator.getCurrentOS()==OSValidator.MACOS && (this==RSA_OAEP || this==ASymmetricKeyWrapperType.RSA_OAEP_WITH_PARAMETERS))

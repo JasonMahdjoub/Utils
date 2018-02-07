@@ -54,7 +54,7 @@ import gnu.vm.jgnu.security.spec.InvalidKeySpecException;
  * @version 1.0
  * @since Utils 3.10.0
  */
-public class BCMac extends AbstractMac {
+public final class BCMac extends AbstractMac {
 
 	private final SymmetricAuthentifiedSignatureType type;
 	private int macLength=32;
