@@ -77,16 +77,6 @@ public class JavaNativeKeyGenerator extends AbstractKeyGenerator {
 		return keyGenerator.getProvider().getName();
 	}
 
-	@Override
-	public void init(AbstractSecureRandom _random) {
-		keyGenerator.init(_random.getJavaNativeSecureRandom());
-	}
-
-	@Override
-	public void init(short _keySize) {
-		keySize = _keySize;
-		keyGenerator.init(_keySize);
-	}
 
 	@Override
 	public void init(short _keySize, AbstractSecureRandom _random) {

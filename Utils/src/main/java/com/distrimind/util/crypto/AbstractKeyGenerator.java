@@ -34,6 +34,9 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
+import gnu.vm.jgnu.security.NoSuchAlgorithmException;
+import gnu.vm.jgnu.security.NoSuchProviderException;
+
 /**
  * 
  * @author Jason Mahdjoub
@@ -74,6 +77,7 @@ public abstract class AbstractKeyGenerator {
 	 */
 	public abstract String getProvider();
 
+	
 	/**
 	 * Initialize this key generator with a source of randomness. The
 	 * implementation-specific default parameters (such as key size) will be used.
@@ -81,7 +85,13 @@ public abstract class AbstractKeyGenerator {
 	 * @param random
 	 *            The source of randomness.
 	 */
-	public abstract void init(AbstractSecureRandom random);
+	public void init(AbstractSecureRandom random) {
+		
+		if (encryptionType==null)
+			init(signatureType.getDefaultKeySizeBits(), random);
+		else
+			init(encryptionType.getDefaultKeySizeBits(), random);
+	}
 
 	/**
 	 * Initialize this key generator with a key size (in bits); the highest-priority
@@ -91,7 +101,9 @@ public abstract class AbstractKeyGenerator {
 	 *            The target key size, in bits.
 
 	 */
-	public abstract void init(short keySize);
+	public void init(short keySize) throws NoSuchAlgorithmException, NoSuchProviderException {
+		init(keySize, SecureRandomType.FORTUNA_WITH_BC_FIPS_APPROVED_FOR_KEYS.getSingleton(null));
+	}
 
 	/**
 	 * Initialize this key generator with a key size (in bits) and a source of

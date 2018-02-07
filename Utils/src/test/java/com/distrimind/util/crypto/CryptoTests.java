@@ -668,7 +668,7 @@ public class CryptoTests {
 		SymmetricSecretKey decryptedKey=kw.unwrapKey(kpd.getASymmetricPrivateKey(), localEncryptedKey);
 		Assert.assertEquals(localKey.getAuthentifiedSignatureAlgorithmType(), decryptedKey.getAuthentifiedSignatureAlgorithmType());
 		Assert.assertEquals(localKey.getEncryptionAlgorithmType(), decryptedKey.getEncryptionAlgorithmType());
-		Assert.assertEquals(localKey.getKeySize(), decryptedKey.getKeySize());
+		Assert.assertEquals(localKey.getKeySizeBits(), decryptedKey.getKeySizeBits());
 		SymmetricEncryptionAlgorithm algoDistantS = new SymmetricEncryptionAlgorithm(rand, decryptedKey);
 
 		for (byte[] m : messagesToEncrypt) {
@@ -777,7 +777,7 @@ public class CryptoTests {
 		byte[] salt=new byte[32];
 		r.nextBytes(salt);
 		SymmetricSecretKey key1=derivationType.derivateKey(password.toCharArray(), salt, (byte)7, encryptionType);
-		Assert.assertEquals(key1.getKeySize(), encryptionType.getDefaultKeySizeBits());
+		Assert.assertEquals(key1.getKeySizeBits(), encryptionType.getDefaultKeySizeBits());
 		Assert.assertEquals(key1.getEncryptionAlgorithmType(), encryptionType);
 		Assert.assertEquals(key1.encode(), derivationType.derivateKey(password.toCharArray(), salt, (byte)7, encryptionType).encode());
 		Assert.assertNotEquals(key1.encode(), derivationType.derivateKey(invalidPassword.toCharArray(), salt,(byte) 7, encryptionType).encode());
@@ -790,7 +790,7 @@ public class CryptoTests {
 		byte[] salt=new byte[32];
 		r.nextBytes(salt);
 		SymmetricSecretKey key1=derivationType.derivateKey(password.toCharArray(), salt, (byte)7, signatureType);
-		Assert.assertEquals(key1.getKeySize(), signatureType.getDefaultKeySizeBits());
+		Assert.assertEquals(key1.getKeySizeBits(), signatureType.getDefaultKeySizeBits());
 		Assert.assertEquals(key1.getAuthentifiedSignatureAlgorithmType(), signatureType);
 		Assert.assertEquals(key1.encode(), derivationType.derivateKey(password.toCharArray(), salt, (byte)7, signatureType).encode());
 		Assert.assertNotEquals(key1.encode(), derivationType.derivateKey(invalidPassword.toCharArray(), salt, (byte)7, signatureType).encode());
@@ -915,10 +915,11 @@ public class CryptoTests {
 		SymmetricSecretKey sk= setype.getKeyGenerator(rand, setype.getDefaultKeySizeBits()).generateKey();
 		byte[] wrappedKey=typeWrapper.wrapKey(kp, sk);
 		SymmetricSecretKey sk2=typeWrapper.unwrapKey(kp, wrappedKey);
-		Assert.assertEquals(sk.getKeySize(), sk2.getKeySize());
+		Assert.assertEquals(sk.getKeySizeBits(), sk2.getKeySizeBits());
 		Assert.assertEquals(sk.getAuthentifiedSignatureAlgorithmType(), sk2.getAuthentifiedSignatureAlgorithmType());
 		Assert.assertEquals(sk.getEncryptionAlgorithmType(), sk2.getEncryptionAlgorithmType());
 		Assert.assertEquals(sk.toJavaNativeKey().getEncoded(), sk2.toJavaNativeKey().getEncoded());
+		Assert.assertEquals(sk.toBouncyCastleKey().getKeyBytes(), sk2.toBouncyCastleKey().getKeyBytes());
 	}
 	@Test(dataProvider="provideDataSymmetricKeyWrapperForSignature")
 	public void testSymmetricKeyWrapperForSignature(SymmetricKeyWrapperType typeWrapper, SymmetricEncryptionType asetype, SymmetricAuthentifiedSignatureType setype) throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, IllegalStateException, IllegalBlockSizeException, NoSuchProviderException, InvalidAlgorithmParameterException, IOException
@@ -928,10 +929,11 @@ public class CryptoTests {
 		SymmetricSecretKey sk= setype.getKeyGenerator(rand, (short)128).generateKey();
 		byte[] wrappedKey=typeWrapper.wrapKey(kp, sk);
 		SymmetricSecretKey sk2=typeWrapper.unwrapKey(kp, wrappedKey);
-		Assert.assertEquals(sk.getKeySize(), sk2.getKeySize());
+		Assert.assertEquals(sk.getKeySizeBits(), sk2.getKeySizeBits());
 		Assert.assertEquals(sk.getAuthentifiedSignatureAlgorithmType(), sk2.getAuthentifiedSignatureAlgorithmType());
 		Assert.assertEquals(sk.getEncryptionAlgorithmType(), sk2.getEncryptionAlgorithmType());
 		Assert.assertEquals(sk.toJavaNativeKey().getEncoded(), sk2.toJavaNativeKey().getEncoded());
+		Assert.assertEquals(sk.toBouncyCastleKey().getKeyBytes(), sk2.toBouncyCastleKey().getKeyBytes());
 	}
 	@DataProvider(name="provideDataSymmetricKeyWrapperForEncryption", parallel=false)
 	public Object[][] provideDataSymmetricKeyWrapperForEncryption()
@@ -999,10 +1001,11 @@ public class CryptoTests {
 		SymmetricSecretKey sk= setype.getKeyGenerator(rand, setype.getDefaultKeySizeBits()).generateKey();
 		byte[] wrappedKey=typeWrapper.wrapKey(rand, kp.getASymmetricPublicKey(), sk);
 		SymmetricSecretKey sk2=typeWrapper.unwrapKey(kp.getASymmetricPrivateKey(), wrappedKey);
-		Assert.assertEquals(sk.getKeySize(), sk2.getKeySize());
+		Assert.assertEquals(sk.getKeySizeBits(), sk2.getKeySizeBits());
 		Assert.assertEquals(sk.getAuthentifiedSignatureAlgorithmType(), sk2.getAuthentifiedSignatureAlgorithmType());
 		Assert.assertEquals(sk.getEncryptionAlgorithmType(), sk2.getEncryptionAlgorithmType());
 		Assert.assertEquals(sk.toJavaNativeKey().getEncoded(), sk2.toJavaNativeKey().getEncoded());
+		Assert.assertEquals(sk.toBouncyCastleKey().getKeyBytes(), sk2.toBouncyCastleKey().getKeyBytes());
 
 	}
 	@Test(dataProvider="provideDataASymmetricKeyWrapperForSignature")
@@ -1013,11 +1016,11 @@ public class CryptoTests {
 		SymmetricSecretKey sk= ssigtype.getKeyGenerator(rand, ssigtype.getDefaultKeySizeBits()).generateKey();
 		byte[] wrappedKey=typeWrapper.wrapKey(rand, kp.getASymmetricPublicKey(), sk);
 		SymmetricSecretKey sk2=typeWrapper.unwrapKey(kp.getASymmetricPrivateKey(), wrappedKey);
-		Assert.assertEquals(sk.getKeySize(), sk2.getKeySize());
+		Assert.assertEquals(sk.getKeySizeBits(), sk2.getKeySizeBits());
 		Assert.assertEquals(sk.getAuthentifiedSignatureAlgorithmType(), sk2.getAuthentifiedSignatureAlgorithmType());
 		Assert.assertEquals(sk.getEncryptionAlgorithmType(), sk2.getEncryptionAlgorithmType());
 		Assert.assertEquals(sk.toJavaNativeKey().getEncoded(), sk2.toJavaNativeKey().getEncoded());
-
+		Assert.assertEquals(sk.toBouncyCastleKey().getKeyBytes(), sk2.toBouncyCastleKey().getKeyBytes());
 	}
 	
 	@DataProvider(name="provideDataASymmetricKeyWrapperForEncryption", parallel=true)

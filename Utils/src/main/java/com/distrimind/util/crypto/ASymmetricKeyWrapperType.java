@@ -112,7 +112,7 @@ public enum ASymmetricKeyWrapperType {
 		byte[] res=new byte[wrappedKey.length+7];
 		res[0]=keyToWrap.getAuthentifiedSignatureAlgorithmType()!=null?(byte)1:(byte)0;
 		Bits.putInt(res, 1, keyToWrap.getAuthentifiedSignatureAlgorithmType()!=null?keyToWrap.getAuthentifiedSignatureAlgorithmType().ordinal():keyToWrap.getEncryptionAlgorithmType().ordinal());
-		Bits.putShort(res, 5, keyToWrap.getKeySize());
+		Bits.putShort(res, 5, keyToWrap.getKeySizeBits());
 		System.arraycopy(wrappedKey, 0, res, 7, wrappedKey.length);
 		return res;
 	}

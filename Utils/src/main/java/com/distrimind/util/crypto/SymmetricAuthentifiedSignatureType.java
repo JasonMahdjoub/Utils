@@ -149,17 +149,10 @@ public enum SymmetricAuthentifiedSignatureType {
 		AbstractKeyGenerator res = null;
 		if (codeProviderForKeyGenerator == CodeProvider.GNU_CRYPTO) {
 			res = new GnuKeyGenerator(this, KeyGenerator.getInstance(algorithmName));
-		} else if (codeProviderForKeyGenerator == CodeProvider.BCFIPS) {
+		} else if (codeProviderForKeyGenerator == CodeProvider.BCFIPS || codeProviderForKeyGenerator == CodeProvider.BC) {
 
-			try {
-				CodeProvider.ensureBouncyCastleProviderLoaded();
-				res = new JavaNativeKeyGenerator(this,javax.crypto.KeyGenerator.getInstance(algorithmName, "BCFIPS"));
-			} catch (java.security.NoSuchAlgorithmException e) {
-				throw new NoSuchAlgorithmException(e);
-			} catch (java.security.NoSuchProviderException e) {
-				throw new NoSuchProviderException(e.getMessage());
-			}
-			
+			CodeProvider.ensureBouncyCastleProviderLoaded();
+			res = new BCKeyGenerator(this);
 
 		} else {
 			try {

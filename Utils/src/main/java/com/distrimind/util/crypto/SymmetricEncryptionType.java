@@ -102,6 +102,11 @@ public enum SymmetricEncryptionType {
 	static byte[] encodeSecretKey(SecretKey key) {
 		return Bits.concateEncodingWithShortSizedTabs(key.getAlgorithm().getBytes(), key.getEncoded());
 	}
+	
+	static byte[] encodeSecretKey(org.bouncycastle.crypto.SymmetricSecretKey key)
+	{
+		return Bits.concateEncodingWithShortSizedTabs(key.getAlgorithm().getName().getBytes(), key.getKeyBytes());
+	}
 
 	static SymmetricEncryptionType valueOf(int ordinal) throws IllegalArgumentException {
 		for (SymmetricEncryptionType a : values()) {
@@ -210,16 +215,8 @@ public enum SymmetricEncryptionType {
 			res = new GnuKeyGenerator(this, KeyGenerator.getInstance(algorithmName));
 		} else if (CodeProviderForKeyGenerator == CodeProvider.BCFIPS || CodeProviderForKeyGenerator == CodeProvider.BC) {
 
-			try {
-				CodeProvider.ensureBouncyCastleProviderLoaded();
-				res = new JavaNativeKeyGenerator(this,
-						javax.crypto.KeyGenerator.getInstance(algorithmName, CodeProviderForKeyGenerator.name()));
-			} catch (java.security.NoSuchAlgorithmException e) {
-				throw new NoSuchAlgorithmException(e);
-			}
-			catch (java.security.NoSuchProviderException e) {
-				throw new NoSuchProviderException(e.getMessage());
-			}			
+			CodeProvider.ensureBouncyCastleProviderLoaded();
+			res = new BCKeyGenerator(this);
 
 		} else {
 			try {

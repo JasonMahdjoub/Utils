@@ -114,6 +114,8 @@ public class SymmetricSecretKey implements UtilKey {
 		this.encryptionType = type;
 		this.signatureType=null;
 	}
+	
+	
 	SymmetricSecretKey(SymmetricAuthentifiedSignatureType type, gnu.vm.jgnux.crypto.SecretKey secretKey, short keySize) {
 		this(secretKey, keySize);
 		if (type == null)
@@ -143,6 +145,25 @@ public class SymmetricSecretKey implements UtilKey {
 		this.signatureType=type;
 	}
 	
+	SymmetricSecretKey(SymmetricEncryptionType type, org.bouncycastle.crypto.SymmetricSecretKey secretKey, short keySize) {
+		this(secretKey, keySize);
+		if (type == null)
+			throw new NullPointerException("type");
+		if (type.getCodeProviderForEncryption() != CodeProvider.GNU_CRYPTO)
+			throw new IllegalAccessError();
+		this.encryptionType = type;
+		this.signatureType=null;
+	}
+	
+	SymmetricSecretKey(SymmetricAuthentifiedSignatureType type, org.bouncycastle.crypto.SymmetricSecretKey secretKey, short keySize) {
+		this(secretKey, keySize);
+		if (type == null)
+			throw new NullPointerException("type");
+		if (type.getCodeProviderForSignature() == CodeProvider.GNU_CRYPTO)
+			throw new IllegalAccessError();
+		this.encryptionType = null;
+		this.signatureType=type;
+	}
 	
 	private SymmetricSecretKey(byte secretKey[], short keySize) {
 		if (secretKey == null)
@@ -153,6 +174,14 @@ public class SymmetricSecretKey implements UtilKey {
 	}
 
 	private SymmetricSecretKey(gnu.vm.jgnux.crypto.SecretKey secretKey, short keySize) {
+		if (secretKey == null)
+			throw new NullPointerException("secretKey");
+		this.secretKey = SymmetricEncryptionType.encodeSecretKey(secretKey);
+		this.keySize = keySize;
+		hashCode = Arrays.hashCode(this.secretKey);
+	}
+	
+	private SymmetricSecretKey(org.bouncycastle.crypto.SymmetricSecretKey secretKey, short keySize) {
 		if (secretKey == null)
 			throw new NullPointerException("secretKey");
 		this.secretKey = SymmetricEncryptionType.encodeSecretKey(secretKey);
@@ -196,7 +225,7 @@ public class SymmetricSecretKey implements UtilKey {
 		return signatureType;
 	}
 
-	public short getKeySize() {
+	public short getKeySizeBits() {
 		return keySize;
 	}
 
