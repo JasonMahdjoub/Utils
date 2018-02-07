@@ -153,6 +153,12 @@ public enum ASymmetricAuthentifiedSignatureType {
 		}
 	}
 
+	/**
+	 * Works well only with RSA algorithms.
+	 * @param keySize
+	 * @return
+	 */
+	@Deprecated
 	public int getSignatureSizeBits(int keySize) {
 		if (this==BC_FIPS_SHA256withRSAandMGF1 || this==ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA384withRSAandMGF1 || this==ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA512withRSAandMGF1)
 			return keySize+464;
