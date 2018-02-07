@@ -34,12 +34,8 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
-import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
-
-import javax.crypto.KeyAgreement;
-import javax.crypto.SecretKey;
 
 import org.bouncycastle.jcajce.spec.UserKeyingMaterialSpec;
 
@@ -134,42 +130,22 @@ public class EllipticCurveDiffieHellmanAlgorithm {
 			if (myKeyPair.getASymmetricPublicKey().equals(distantPublicKey))
 				throw new gnu.vm.jgnu.security.InvalidKeyException("The local et distant public keys cannot be similar !");
 	
-			KeyAgreement ka = null;
-			if (type.getCodeProvider() == CodeProvider.BCFIPS)
-			{
-				CodeProvider.ensureBouncyCastleProviderLoaded();
-			}
-			ka = KeyAgreement.getInstance(type.getKeyAgreementName(), type.getCodeProvider().checkProviderWithCurrentOS().name());
-	
-			ka.init(myKeyPair.getASymmetricPrivateKey().toJavaNativeKey(), new UserKeyingMaterialSpec(keyingMaterial));
-			ka.doPhase(distantPublicKey.toJavaNativeKey(), true);
-			
+			AbstractKeyAgreement ka = null;
 			if (symmetricEncryptionType==null)
-			{
-				SecretKey sk=ka.generateSecret(symmetricSignatureType.getAlgorithmName()+"["+type.getKeySizeBits()+"]");
-				this.derivedKey=new SymmetricSecretKey(symmetricSignatureType, sk, type.getKeySizeBits());
-			}
+				ka = type.getKeyAgreementInstance(symmetricSignatureType);
 			else
-			{
-				SecretKey sk=ka.generateSecret(symmetricEncryptionType.getAlgorithmName()+"["+type.getKeySizeBits()+"]");
-				this.derivedKey=new SymmetricSecretKey(symmetricEncryptionType, sk, type.getKeySizeBits());
-			}
-			
-			
-
+				ka = type.getKeyAgreementInstance(symmetricEncryptionType);
+	
+			ka.init(myKeyPair.getASymmetricPrivateKey(), new UserKeyingMaterialSpec(keyingMaterial));
+			ka.doPhase(distantPublicKey, true);
+			derivedKey=ka.generateSecretKey((short)(type.getKeySizeBits()/8));
 		}
 		catch(NoSuchAlgorithmException e)
 		{
 			throw new gnu.vm.jgnu.security.NoSuchAlgorithmException(e);
 		}
-		catch(InvalidKeyException e)
-		{
-			throw new gnu.vm.jgnu.security.InvalidKeyException(e);
-		} 
 		catch (NoSuchProviderException e) {
 			throw new gnu.vm.jgnu.security.NoSuchAlgorithmException(e.getMessage());
-		} catch (java.security.InvalidAlgorithmParameterException e) {
-			throw new InvalidAlgorithmParameterException(e);
 		}		
 	}
 

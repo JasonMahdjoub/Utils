@@ -197,7 +197,7 @@ public enum ASymmetricKeyWrapperType {
 					
 					
 					
-					AsymmetricRSAPublicKey bcPK=publicKey.toBouncyCastleKey();
+					AsymmetricRSAPublicKey bcPK=(AsymmetricRSAPublicKey)publicKey.toBouncyCastleKey();
 					
 					byte encodedKey []=keyToWrap.encode();
 					
@@ -330,7 +330,7 @@ public enum ASymmetricKeyWrapperType {
 				{
 					CodeProvider.ensureBouncyCastleProviderLoaded();
 					
-					AsymmetricRSAPrivateKey bcPK=privateKey.toBouncyCastleKey();
+					AsymmetricRSAPrivateKey bcPK=(AsymmetricRSAPrivateKey)privateKey.toBouncyCastleKey();
 					
 					OAEPParameters OAEPParams=null;
 					

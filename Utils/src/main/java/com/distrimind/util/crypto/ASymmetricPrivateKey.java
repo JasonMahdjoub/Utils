@@ -36,11 +36,14 @@ package com.distrimind.util.crypto;
 
 import java.io.IOException;
 import java.security.PrivateKey;
+import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.RSAPrivateKey;
 import java.util.Arrays;
 
 import org.apache.commons.codec.binary.Base64;
 import org.bouncycastle.crypto.Algorithm;
+import org.bouncycastle.crypto.AsymmetricKey;
+import org.bouncycastle.crypto.asymmetric.AsymmetricECPrivateKey;
 import org.bouncycastle.crypto.asymmetric.AsymmetricRSAPrivateKey;
 
 import com.distrimind.util.Bits;
@@ -249,10 +252,23 @@ public class ASymmetricPrivateKey implements UtilKey {
 	}
 
 	@Override
-	public AsymmetricRSAPrivateKey toBouncyCastleKey() throws NoSuchAlgorithmException, InvalidKeySpecException {
-		RSAPrivateKey javaNativePrivateKey=(RSAPrivateKey)toJavaNativeKey();
-		AsymmetricRSAPrivateKey bcPK=new AsymmetricRSAPrivateKey(getBouncyCastleAlgorithm(), 
+	public AsymmetricKey toBouncyCastleKey() throws NoSuchAlgorithmException, InvalidKeySpecException {
+		PrivateKey pk=toJavaNativeKey();
+		if (pk instanceof RSAPrivateKey)
+		{
+			RSAPrivateKey javaNativePrivateKey=(RSAPrivateKey)pk;
+			AsymmetricRSAPrivateKey bcPK=new AsymmetricRSAPrivateKey(getBouncyCastleAlgorithm(), 
 				javaNativePrivateKey.getModulus(), javaNativePrivateKey.getPrivateExponent());
-		return bcPK;
+			return bcPK;
+		}
+		else if (pk instanceof ECPrivateKey)
+		{
+			ECPrivateKey javaNativePrivateKey=(ECPrivateKey)pk;
+			AsymmetricECPrivateKey bcPK=new AsymmetricECPrivateKey(getBouncyCastleAlgorithm(), javaNativePrivateKey.getEncoded());
+			return bcPK;
+		}
+		else 
+			throw new IllegalAccessError();
+		
 	}
 }

@@ -34,6 +34,9 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+
 import javax.crypto.Cipher;
 
 import gnu.vm.jgnu.security.NoSuchAlgorithmException;
@@ -94,6 +97,18 @@ public enum SymmetricEncryptionType {
 		byte[][] parts = Bits.separateEncodingsWithShortSizedTabs(encodedSecretKey, off, len);
 		return new SecretKeySpec(parts[1], new String(parts[0]));
 	}
+	
+	static org.bouncycastle.crypto.SymmetricSecretKey decodeBCSecretKey(Algorithm algorithm, byte[] encodedSecretKey) {
+		
+		return decodeBCSecretKey(algorithm, encodedSecretKey, 0, encodedSecretKey.length);
+	}
+	static org.bouncycastle.crypto.SymmetricSecretKey decodeBCSecretKey(Algorithm algorithm, byte[] encodedSecretKey, int off, int len) {
+		final byte[][] parts = Bits.separateEncodingsWithShortSizedTabs(encodedSecretKey, off, len);
+		
+		return new org.bouncycastle.crypto.SymmetricSecretKey(algorithm, parts[1]);
+	}
+	
+	
 
 	static byte[] encodeSecretKey(gnu.vm.jgnux.crypto.SecretKey key) {
 		return Bits.concateEncodingWithShortSizedTabs(key.getAlgorithm().getBytes(), key.getEncoded());
@@ -103,9 +118,16 @@ public enum SymmetricEncryptionType {
 		return Bits.concateEncodingWithShortSizedTabs(key.getAlgorithm().getBytes(), key.getEncoded());
 	}
 	
-	static byte[] encodeSecretKey(org.bouncycastle.crypto.SymmetricSecretKey key)
+	static byte[] encodeSecretKey(final org.bouncycastle.crypto.SymmetricSecretKey key)
 	{
-		return Bits.concateEncodingWithShortSizedTabs(key.getAlgorithm().getName().getBytes(), key.getKeyBytes());
+		
+		return Bits.concateEncodingWithShortSizedTabs(key.getAlgorithm().getName().getBytes(), AccessController.doPrivileged(new PrivilegedAction<byte[]>()
+        {
+            public byte[] run()
+            {
+                return key.getKeyBytes();
+            }
+        }));
 	}
 
 	static SymmetricEncryptionType valueOf(int ordinal) throws IllegalArgumentException {

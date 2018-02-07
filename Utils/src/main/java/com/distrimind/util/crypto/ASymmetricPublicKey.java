@@ -36,11 +36,14 @@ package com.distrimind.util.crypto;
 
 import java.io.IOException;
 import java.security.PublicKey;
+import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.Arrays;
 
 import org.apache.commons.codec.binary.Base64;
 import org.bouncycastle.crypto.Algorithm;
+import org.bouncycastle.crypto.AsymmetricKey;
+import org.bouncycastle.crypto.asymmetric.AsymmetricECPublicKey;
 import org.bouncycastle.crypto.asymmetric.AsymmetricRSAPublicKey;
 
 import com.distrimind.util.Bits;
@@ -271,13 +274,25 @@ public class ASymmetricPublicKey implements UtilKey {
 	}
 	
 	@Override
-	public AsymmetricRSAPublicKey toBouncyCastleKey() throws NoSuchAlgorithmException, InvalidKeySpecException {
-		
-		RSAPublicKey javaNativePublicKey=(RSAPublicKey)toJavaNativeKey();
-		AsymmetricRSAPublicKey bcPK=new AsymmetricRSAPublicKey(
+	public AsymmetricKey toBouncyCastleKey() throws NoSuchAlgorithmException, InvalidKeySpecException {
+		PublicKey pk=toJavaNativeKey();
+		if (pk instanceof RSAPublicKey)
+		{
+			RSAPublicKey javaNativePublicKey=(RSAPublicKey)pk;
+			AsymmetricRSAPublicKey bcPK=new AsymmetricRSAPublicKey(
 				getBouncyCastleAlgorithm(), 
 				javaNativePublicKey.getModulus(), javaNativePublicKey.getPublicExponent());
-		return bcPK;
+			return bcPK;
+		}
+		else if (pk instanceof ECPublicKey)
+		{
+			ECPublicKey javaNativePublicKey=(ECPublicKey)pk;
+			AsymmetricECPublicKey bcPK=new AsymmetricECPublicKey(getBouncyCastleAlgorithm(), javaNativePublicKey.getEncoded());
+			return bcPK;
+		}
+		else
+			throw new IllegalAccessError();
+		
 	}
 
 }

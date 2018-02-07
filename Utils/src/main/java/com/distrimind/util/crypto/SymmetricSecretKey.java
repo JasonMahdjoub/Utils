@@ -149,7 +149,7 @@ public class SymmetricSecretKey implements UtilKey {
 		this(secretKey, keySize);
 		if (type == null)
 			throw new NullPointerException("type");
-		if (type.getCodeProviderForEncryption() != CodeProvider.GNU_CRYPTO)
+		if (type.getCodeProviderForEncryption() == CodeProvider.GNU_CRYPTO)
 			throw new IllegalAccessError();
 		this.encryptionType = type;
 		this.signatureType=null;
@@ -271,7 +271,7 @@ public class SymmetricSecretKey implements UtilKey {
 	public org.bouncycastle.crypto.SymmetricSecretKey toBouncyCastleKey() {
 		
 		if (bcfipsNativeSecretKey == null)
-			bcfipsNativeSecretKey = new org.bouncycastle.crypto.SymmetricSecretKey(getBouncyCastleAlgorithm(), secretKey);
+			bcfipsNativeSecretKey = SymmetricEncryptionType.decodeBCSecretKey(getBouncyCastleAlgorithm(), secretKey);
 		
 		return bcfipsNativeSecretKey;
 		

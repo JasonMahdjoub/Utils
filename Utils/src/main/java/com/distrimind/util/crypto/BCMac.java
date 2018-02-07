@@ -57,7 +57,7 @@ import gnu.vm.jgnu.security.spec.InvalidKeySpecException;
 public final class BCMac extends AbstractMac {
 
 	private final SymmetricAuthentifiedSignatureType type;
-	private int macLength=32;
+	private int macLength=16;
 	private org.bouncycastle.crypto.SymmetricSecretKey secretKey;
 	private FipsOutputMACCalculator<AuthParameters> mac;
 	private UpdateOutputStream macStream;
