@@ -134,14 +134,14 @@ public final class GnuCipher extends AbstractCipher {
 	
 
 	@Override
-	public void init(int _opmode, UtilKey _key, AbstractSecureRandom _random)
+	public void init(int _opmode, Key _key, AbstractSecureRandom _random)
 			throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException {
 		cipher.init(_opmode, _key.toGnuKey(), setSecureRandom(_random));
 
 	}
 
 	@Override
-	public void init(int _opmode, UtilKey _key, byte[] _iv) throws InvalidKeyException, NoSuchAlgorithmException,
+	public void init(int _opmode, Key _key, byte[] _iv) throws InvalidKeyException, NoSuchAlgorithmException,
 			InvalidKeySpecException, InvalidAlgorithmParameterException {
 		cipher.init(_opmode, _key.toGnuKey(), new IvParameterSpec(_iv));
 	}

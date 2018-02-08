@@ -167,7 +167,7 @@ public final class JavaNativeCipher extends AbstractCipher {
 
 
 	@Override
-	public void init(int _opmode, UtilKey _key, AbstractSecureRandom _random)
+	public void init(int _opmode, Key _key, AbstractSecureRandom _random)
 			throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException {
 		try {
 			cipher.init(_opmode, _key.toJavaNativeKey(), setSecureRandom(_random));
@@ -178,7 +178,7 @@ public final class JavaNativeCipher extends AbstractCipher {
 	}
 
 	@Override
-	public void init(int _opmode, UtilKey _key, byte[] _iv) throws InvalidKeyException, NoSuchAlgorithmException,
+	public void init(int _opmode, Key _key, byte[] _iv) throws InvalidKeyException, NoSuchAlgorithmException,
 			InvalidKeySpecException, InvalidAlgorithmParameterException {
 		try {
 			cipher.init(_opmode, _key.toJavaNativeKey(), new IvParameterSpec(_iv));

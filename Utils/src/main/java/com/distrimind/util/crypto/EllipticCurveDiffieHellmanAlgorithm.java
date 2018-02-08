@@ -126,7 +126,7 @@ public class EllipticCurveDiffieHellmanAlgorithm {
 				CodeProvider.ensureBouncyCastleProviderLoaded();
 				
 			} 
-			ASymmetricPublicKey distantPublicKey=(ASymmetricPublicKey)UtilKey.decode(distantPublicKeyBytes);
+			ASymmetricPublicKey distantPublicKey=(ASymmetricPublicKey)Key.decode(distantPublicKeyBytes);
 			if (myKeyPair.getASymmetricPublicKey().equals(distantPublicKey))
 				throw new gnu.vm.jgnu.security.InvalidKeyException("The local et distant public keys cannot be similar !");
 	

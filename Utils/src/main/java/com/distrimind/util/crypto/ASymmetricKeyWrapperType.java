@@ -352,7 +352,7 @@ public enum ASymmetricKeyWrapperType {
 					KeyUnwrapperUsingSecureRandom<WrapParameters> unwrapper = 
 							wrapFact.createKeyUnwrapper(bcPK,OAEPParams)
 							.withSecureRandom(SecureRandomType.DEFAULT.getSingleton(null));
-					return (SymmetricSecretKey)UtilKey.decode(unwrapper.unwrap(wrapedKey, 0, wrapedKey.length));
+					return (SymmetricSecretKey)Key.decode(unwrapper.unwrap(wrapedKey, 0, wrapedKey.length));
 					
 				}
 				/*if (OSValidator.getCurrentOS()==OSValidator.MACOS && (this==RSA_OAEP || this==ASymmetricKeyWrapperType.RSA_OAEP_WITH_PARAMETERS))

@@ -78,7 +78,7 @@ public final class BCKeyAgreement extends AbstractKeyAgreement{
 	}
 
 	@Override
-	public void doPhase(UtilKey key, boolean lastPhase)
+	public void doPhase(Key key, boolean lastPhase)
 			throws IllegalStateException, InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException {
 		secret=agreement.calculate((AsymmetricPublicKey)key.toBouncyCastleKey());
 	}
@@ -149,7 +149,7 @@ public final class BCKeyAgreement extends AbstractKeyAgreement{
 	}
 
 	@Override
-	public void init(UtilKey key, Object params) throws InvalidAlgorithmParameterException,
+	public void init(Key key, Object params) throws InvalidAlgorithmParameterException,
 			InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException {
 		paramskeymaterial=((UserKeyingMaterialSpec)params).getUserKeyingMaterial();
 		AgreementParameters aparams=FipsEC.CDH.withDigest(type.getBCFipsDigestAlgorithm())

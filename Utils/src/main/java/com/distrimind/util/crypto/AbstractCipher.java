@@ -281,7 +281,7 @@ public abstract class AbstractCipher {
 	 * @throws NoSuchAlgorithmException if the algorithm as not found
 	 * @throws NoSuchProviderException if the provider was not found
 	 */
-	public void init(int opmode, UtilKey key)
+	public void init(int opmode, Key key)
 			throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException
 	{
 		init(opmode, key, SecureRandomType.FORTUNA_WITH_BC_FIPS_APPROVED.getSingleton(SecureRandomType.nonce));
@@ -309,7 +309,7 @@ public abstract class AbstractCipher {
 	 * @throws InvalidKeyException if key is invalid
 	 * @throws NoSuchAlgorithmException if the algoirithm was not found
 	 */
-	public abstract void init(int opmode, UtilKey key, AbstractSecureRandom random)
+	public abstract void init(int opmode, Key key, AbstractSecureRandom random)
 			throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException;
 
 	/**
@@ -341,7 +341,7 @@ public abstract class AbstractCipher {
 	 * @throws NoSuchAlgorithmException if the algorithm was not found
 	 * @throws InvalidAlgorithmParameterException the algorithm parameters are invalid
 	 */
-	public abstract void init(int opmode, UtilKey key, byte[] iv) throws InvalidKeyException, NoSuchAlgorithmException,
+	public abstract void init(int opmode, Key key, byte[] iv) throws InvalidKeyException, NoSuchAlgorithmException,
 			InvalidKeySpecException, InvalidAlgorithmParameterException;
 
 	/**

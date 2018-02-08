@@ -61,7 +61,7 @@ public abstract class AbstractMac {
 
 	public abstract int getMacLength();
 
-	public abstract void init(UtilKey _key)
+	public abstract void init(Key _key)
 			throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException;
 
 	public abstract void update(byte _input) throws IllegalStateException;

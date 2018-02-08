@@ -85,7 +85,7 @@ public final class JavaNativeMac extends AbstractMac {
 	}
 
 	@Override
-	public final void init(UtilKey _key) throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException {
+	public final void init(Key _key) throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException {
 		try {
 			mac.init(new SecretKeySpec(_key.toJavaNativeKey().getEncoded(), mac.getAlgorithm()));
 		} catch (java.security.InvalidKeyException e) {

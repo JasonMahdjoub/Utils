@@ -38,7 +38,6 @@ import java.io.IOException;
 import java.io.Serializable;
 
 import org.apache.commons.codec.binary.Base64;
-import org.bouncycastle.crypto.Key;
 
 import com.distrimind.util.Bits;
 
@@ -48,7 +47,7 @@ import com.distrimind.util.Bits;
  * @version 1.0
  * @since Utils 2.0
  */
-public abstract class UtilKey implements Serializable {
+public abstract class Key implements Serializable {
 	
 	
 	
@@ -65,12 +64,12 @@ public abstract class UtilKey implements Serializable {
 	abstract java.security.Key toJavaNativeKey()
 			throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException;
 	
-	abstract Key toBouncyCastleKey() throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException;
+	abstract org.bouncycastle.crypto.Key toBouncyCastleKey() throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException;
 	
 	abstract byte[] encode();
 
 	
-	public static UtilKey decode(byte[] b) throws IllegalArgumentException {
+	public static Key decode(byte[] b) throws IllegalArgumentException {
 		byte[][] res = Bits.separateEncodingsWithShortSizedTabs(b);
 		if (res[0][0]==(byte)2)
 			return new SymmetricSecretKey(SymmetricEncryptionType.valueOf(Bits.getInt(res[0], 1)), res[1],
@@ -105,7 +104,7 @@ public abstract class UtilKey implements Serializable {
 	
 	
 	
-	public static UtilKey valueOf(String key) throws IllegalArgumentException, IOException {
+	public static Key valueOf(String key) throws IllegalArgumentException, IOException {
 		return decode(Base64.decodeBase64(key));
 	}
 }

@@ -50,7 +50,7 @@ import com.distrimind.util.Bits;
  * @version 2.0
  * @since Utils 1.7.1
  */
-public class SymmetricSecretKey extends UtilKey {
+public class SymmetricSecretKey extends Key {
 
 	/**
 	 * 

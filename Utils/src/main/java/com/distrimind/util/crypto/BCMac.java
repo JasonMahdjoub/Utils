@@ -93,7 +93,7 @@ public final class BCMac extends AbstractMac {
 	}
 
 	@Override
-	public void init(UtilKey _key) throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException {
+	public void init(Key _key) throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException {
 		init((org.bouncycastle.crypto.SymmetricSecretKey)_key.toBouncyCastleKey());
 	}
 	

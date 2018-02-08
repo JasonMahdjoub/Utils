@@ -72,7 +72,7 @@ public abstract class AbstractKeyAgreement {
 
 
 
-	public abstract void doPhase(UtilKey key, boolean lastPhase) throws IllegalStateException, InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException;
+	public abstract void doPhase(Key key, boolean lastPhase) throws IllegalStateException, InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException;
 
 	
 	public abstract byte[] generateSecret() throws IllegalStateException;
@@ -91,7 +91,7 @@ public abstract class AbstractKeyAgreement {
 
 	
 	
-	public abstract void init(UtilKey key, Object params)
+	public abstract void init(Key key, Object params)
 			throws InvalidAlgorithmParameterException, InvalidKeyException, NoSuchAlgorithmException,InvalidKeySpecException;
 
 	
