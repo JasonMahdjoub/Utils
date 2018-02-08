@@ -604,7 +604,7 @@ public class BCCipher extends AbstractCipher {
 		}
 
 		/**
-		 * Returns whether or not this input stream supports the {@link #mark(long)} and
+		 * Returns whether or not this input stream supports the long and
 		 * {@link #reset()} methods; this input stream does not, however, and invariably
 		 * returns <code>false</code>.
 		 *
@@ -647,7 +647,7 @@ public class BCCipher extends AbstractCipher {
 		 * Read a single byte from this input stream; returns -1 on the end-of-file.
 		 *
 		 * @return The byte read, or -1 if there are no more bytes.
-		 * @throws java.io.IOExcpetion
+		 * @throws IOException
 		 *             If an I/O exception occurs.
 		 */
 		@Override

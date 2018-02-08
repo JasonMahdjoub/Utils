@@ -46,7 +46,7 @@ import org.bouncycastle.crypto.fips.FipsSHS;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 1.2
+ * @version 1.3
  * @since Utils 2.9
  */
 public enum EllipticCurveDiffieHellmanType {

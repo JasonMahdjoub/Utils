@@ -39,13 +39,12 @@ import gnu.vm.jgnu.security.InvalidAlgorithmParameterException;
 import gnu.vm.jgnu.security.InvalidKeyException;
 import gnu.vm.jgnu.security.NoSuchAlgorithmException;
 import gnu.vm.jgnu.security.spec.InvalidKeySpecException;
-import gnu.vm.jgnux.crypto.SecretKey;
 import gnu.vm.jgnux.crypto.ShortBufferException;
 
 /**
  * 
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 1.1
  * @since Utils 3.10.0
  */
 public abstract class AbstractKeyAgreement {
@@ -72,92 +71,26 @@ public abstract class AbstractKeyAgreement {
 
 
 
-	/**
-	 * Do a phase in the key agreement. The number of times this method is called
-	 * depends upon the algorithm and the number of parties involved, but must be
-	 * called at least once with the <code>lastPhase</code> flag set to
-	 * <code>true</code>.
-	 *
-	 * @param key
-	 *            The key for this phase.
-	 * @param lastPhase
-	 *            Should be <code>true</code> if this will be the last phase before
-	 *            generating the shared secret.
-	 * @return The intermediate result, or <code>null</code> if there is no
-	 *         intermediate result.
-	 * @throws java.lang.IllegalStateException
-	 *             If this instance has not been initialized.
-	 * @throws java.security.InvalidKeyException
-	 *             If the key is inappropriate for this algorithm.
-	 */
+
 	public abstract void doPhase(UtilKey key, boolean lastPhase) throws IllegalStateException, InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException;
 
-	/**
-	 * Generate the shared secret in a new byte array.
-	 *
-	 * @return The shared secret.
-	 * @throws java.lang.IllegalStateException
-	 *             If this instnace has not been initialized, or if not enough calls
-	 *             to <code>doPhase</code> have been made.
-	 */
+	
 	public abstract byte[] generateSecret() throws IllegalStateException;
 		
 
-	/**
-	 * Generate the shared secret and store it into the supplied array.
-	 *
-	 * @param sharedSecret
-	 *            The array in which to store the secret.
-	 * @param offset
-	 *            The index in <code>sharedSecret</code> to start storing data.
-	 * @return The length of the shared secret, in bytes.
-	 * @throws java.lang.IllegalStateException
-	 *             If this instnace has not been initialized, or if not enough calls
-	 *             to <code>doPhase</code> have been made.
-	 * @throws gnu.vm.jgnux.crypto.ShortBufferException
-	 *             If the supplied array is not large enough to store the result.
-	 */
 	public abstract int generateSecret(byte[] sharedSecret, int offset)
 			throws IllegalStateException, ShortBufferException ;
 
-	/**
-	 * Generate the shared secret and return it as an appropriate {@link SecretKey}.
-	 *
-	 * @param keySize the key size
-	 * @return The shared secret as a secret key.
-	 * @throws java.lang.IllegalStateException
-	 *             If this instnace has not been initialized, or if not enough calls
-	 *             to <code>doPhase</code> have been made.
-	 * @throws java.security.InvalidKeyException
-	 *             If the shared secret cannot be used to make a {@link SecretKey}.
-	 * @throws java.security.NoSuchAlgorithmException
-	 *             If the specified algorithm does not exist.
-	 */
+	
 	public abstract SymmetricSecretKey generateSecretKey(short keySize)
 			throws IllegalStateException, InvalidKeyException, NoSuchAlgorithmException;
 
-	/**
-	 * Return the name of this key-agreement algorithm.
-	 *
-	 * @return The algorithm name.
-	 */
+	
 	public abstract String getAlgorithm();
 
 
 	
-	/**
-	 * Initialize this key agreement with a key, parameters, and source of
-	 * randomness.
-	 *
-	 * @param key
-	 *            The key, usually the user's private key.
-	 * @param params
-	 *            The algorithm parameters.
-	 * @throws java.security.InvalidAlgorithmParameterException
-	 *             If the supplied parameters are not appropriate.
-	 * @throws java.security.InvalidKeyException
-	 *             If the supplied key is not appropriate.
-	 */
+	
 	public abstract void init(UtilKey key, Object params)
 			throws InvalidAlgorithmParameterException, InvalidKeyException, NoSuchAlgorithmException,InvalidKeySpecException;
 

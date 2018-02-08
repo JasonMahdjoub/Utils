@@ -45,7 +45,7 @@ import com.distrimind.util.Bits;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 3.0
+ * @version 3.1
  * @since Utils 1.7.1
  */
 public class ASymmetricKeyPair implements Serializable {

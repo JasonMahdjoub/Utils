@@ -52,7 +52,7 @@ import gnu.vm.jgnux.crypto.ShortBufferException;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 1.1
+ * @version 1.2
  * @since Utils 2.0
  */
 public abstract class AbstractCipher {

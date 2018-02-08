@@ -55,7 +55,7 @@ import gnu.vm.jgnux.crypto.spec.IvParameterSpec;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 1.1
  * @since Utils 2.0
  */
 public final class GnuCipher extends AbstractCipher {

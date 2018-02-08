@@ -48,7 +48,7 @@ import gnu.vm.jgnu.security.NoSuchProviderException;
  * List of signature algorithms
  * 
  * @author Jason Mahdjoub
- * @version 4.0
+ * @version 4.1
  * @since Utils 1.4
  */
 public enum ASymmetricAuthentifiedSignatureType {
@@ -155,8 +155,8 @@ public enum ASymmetricAuthentifiedSignatureType {
 
 	/**
 	 * Works well only with RSA algorithms.
-	 * @param keySize
-	 * @return
+	 * @param keySize the size of the used key
+	 * @return the signature size in bits
 	 */
 	@Deprecated
 	public int getSignatureSizeBits(int keySize) {

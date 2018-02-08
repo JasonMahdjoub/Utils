@@ -56,7 +56,7 @@ import com.distrimind.util.OSValidator;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 2.1
+ * @version 2.2
  * @since Utils 1.8
  *
  */

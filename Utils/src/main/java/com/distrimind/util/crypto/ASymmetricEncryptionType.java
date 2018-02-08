@@ -59,7 +59,7 @@ import gnu.vm.jgnu.security.NoSuchProviderException;
  * List of asymmetric encryption algorithms
  * 
  * @author Jason Mahdjoub
- * @version 3.0
+ * @version 3.1
  * @since Utils 1.4
  */
 public enum ASymmetricEncryptionType {

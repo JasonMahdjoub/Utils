@@ -49,7 +49,7 @@ import gnu.vm.jgnux.crypto.Mac;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 1.2
+ * @version 1.3
  * @since Utils 2.10.0
  */
 public enum SymmetricAuthentifiedSignatureType {

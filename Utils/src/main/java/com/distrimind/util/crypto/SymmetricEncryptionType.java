@@ -57,7 +57,7 @@ import com.distrimind.util.Bits;
  * List of symmetric encryption algorithms
  * 
  * @author Jason Mahdjoub
- * @version 2.1
+ * @version 2.2
  * @since Utils 1.4
  */
 public enum SymmetricEncryptionType {

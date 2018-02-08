@@ -40,7 +40,7 @@ import gnu.vm.jgnu.security.NoSuchProviderException;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 1.1
  * @since Utils 2.0
  */
 public abstract class AbstractKeyGenerator {
@@ -93,14 +93,7 @@ public abstract class AbstractKeyGenerator {
 			init(encryptionType.getDefaultKeySizeBits(), random);
 	}
 
-	/**
-	 * Initialize this key generator with a key size (in bits); the highest-priority
-	 * {@link java.security.SecureRandom} implementation will be used.
-	 *
-	 * @param keySize
-	 *            The target key size, in bits.
 
-	 */
 	public void init(short keySize) throws NoSuchAlgorithmException, NoSuchProviderException {
 		init(keySize, SecureRandomType.FORTUNA_WITH_BC_FIPS_APPROVED_FOR_KEYS.getSingleton(SecureRandomType.nonce));
 	}

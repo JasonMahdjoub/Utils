@@ -68,7 +68,7 @@ import gnu.vm.jgnux.crypto.SecretKey;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 1.1
  * @since Utils 1.17.0
  */
 public enum ASymmetricKeyWrapperType {

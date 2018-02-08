@@ -54,7 +54,7 @@ import gnu.vm.jgnu.security.spec.InvalidKeySpecException;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 2.0
+ * @version 2.1
  * @since Utils 1.7.1
  */
 public class ASymmetricPrivateKey extends UtilKey {

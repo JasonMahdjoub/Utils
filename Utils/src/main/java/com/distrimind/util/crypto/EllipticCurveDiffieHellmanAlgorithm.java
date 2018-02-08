@@ -44,7 +44,7 @@ import gnu.vm.jgnu.security.InvalidAlgorithmParameterException;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 2.0
+ * @version 2.1
  * @since Utils 2.9
  */
 public class EllipticCurveDiffieHellmanAlgorithm {
