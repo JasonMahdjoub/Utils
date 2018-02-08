@@ -37,8 +37,10 @@ package com.distrimind.util.crypto;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+
 import gnu.vm.jgnu.security.InvalidAlgorithmParameterException;
 import gnu.vm.jgnu.security.InvalidKeyException;
+
 import gnu.vm.jgnu.security.NoSuchAlgorithmException;
 import gnu.vm.jgnu.security.SecureRandom;
 import gnu.vm.jgnu.security.spec.InvalidKeySpecException;
@@ -158,6 +160,8 @@ public final class GnuCipher extends AbstractCipher {
 			throws IllegalStateException, ShortBufferException {
 		return cipher.update(_input, _inputOffset, _inputLength, _output, _outputOffset);
 	}
+
+
 
 	
 }

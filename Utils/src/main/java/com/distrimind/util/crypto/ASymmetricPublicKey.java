@@ -34,7 +34,6 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
-import java.io.IOException;
 import java.security.PublicKey;
 import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPublicKey;
@@ -58,26 +57,15 @@ import gnu.vm.jgnu.security.spec.InvalidKeySpecException;
  * @version 3.0
  * @since Utils 1.7.1
  */
-public class ASymmetricPublicKey implements UtilKey {
+public class ASymmetricPublicKey extends UtilKey {
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1279365581082525690L;
 
-	public static ASymmetricPublicKey decode(byte[] b) {
-		byte[][] res = Bits.separateEncodingsWithShortSizedTabs(b);
-		if (res[0][14]==0)
-			return new ASymmetricPublicKey(ASymmetricEncryptionType.valueOf(Bits.getInt(res[0], 2)), res[1],
-				Bits.getShort(res[0], 0), Bits.getLong(b, 6));
-		else if (res[0][14]==1)
-			return new ASymmetricPublicKey(ASymmetricAuthentifiedSignatureType.valueOf(Bits.getInt(res[0], 2)), res[1],
-					Bits.getShort(res[0], 0), Bits.getLong(b, 6));
-		else throw new IllegalArgumentException();
-	}
+	
 
-	public static ASymmetricPublicKey valueOf(String key) throws IOException {
-		return decode(Base64.decodeBase64(key));
-	}
+	
 
 	// private final PublicKey publicKey;
 	private final byte[] publicKey;
@@ -189,10 +177,11 @@ public class ASymmetricPublicKey implements UtilKey {
 
 	public byte[] encode() {
 		byte[] tab = new byte[15];
-		Bits.putShort(tab, 0, keySize);
-		Bits.putInt(tab, 2, encryptionType==null?signatureType.ordinal():encryptionType.ordinal());
-		Bits.putLong(tab, 6, expirationUTC);
-		tab[14]=encryptionType==null?(byte)1:(byte)0;
+		tab[0]=encryptionType==null?(byte)9:(byte)8;
+		Bits.putShort(tab, 1, keySize);
+		Bits.putInt(tab, 3, encryptionType==null?signatureType.ordinal():encryptionType.ordinal());
+		Bits.putLong(tab, 7, expirationUTC);
+		
 		return Bits.concateEncodingWithShortSizedTabs(tab, publicKey);
 	}
 

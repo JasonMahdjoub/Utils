@@ -46,15 +46,18 @@ import java.util.Arrays;
 import javax.crypto.Cipher;
 
 import org.bouncycastle.crypto.AuthenticationParametersWithIV;
+import org.bouncycastle.crypto.InvalidWrappingException;
+import org.bouncycastle.crypto.KeyUnwrapper;
+import org.bouncycastle.crypto.KeyWrapper;
 import org.bouncycastle.crypto.OutputCipher;
 import org.bouncycastle.crypto.OutputDecryptor;
 import org.bouncycastle.crypto.OutputEncryptor;
+import org.bouncycastle.crypto.PlainInputProcessingException;
 import org.bouncycastle.crypto.SymmetricSecretKey;
 import org.bouncycastle.crypto.UpdateOutputStream;
 import org.bouncycastle.crypto.fips.FipsAES;
 import org.bouncycastle.crypto.general.Serpent;
 import org.bouncycastle.crypto.general.Twofish;
-
 
 
 import gnu.vm.jgnu.security.NoSuchAlgorithmException;
@@ -77,11 +80,21 @@ public class BCCipher extends AbstractCipher {
 	private OutputCipher<?> cipher=null;
 	private UpdateOutputStream processingStream=null;
 	private ByteArrayOutputStream resultStream = new ByteArrayOutputStream();
+	private final SymmetricKeyWrapperType keyWrapperType;
 	private byte iv[];
+	private KeyWrapper<?> wrapper;
+	private KeyUnwrapper<?> unwrapper;
 	
 	BCCipher(SymmetricEncryptionType type)
 	{
 		this.type=type;
+		this.keyWrapperType=null;
+	}
+	
+	BCCipher(SymmetricKeyWrapperType keyWrapperType)
+	{
+		this.type=null;
+		this.keyWrapperType=keyWrapperType;
 	}
 	
 	@Override
@@ -304,6 +317,40 @@ public class BCCipher extends AbstractCipher {
 			cipher=decryptor;
 			processingStream = decryptor.getDecryptingStream(resultStream);
 		}
+		else if (opmode==Cipher.WRAP_MODE)
+		{
+			if (keyWrapperType.getAlgorithmName().equals(SymmetricKeyWrapperType.BC_FIPS_AES.getAlgorithmName()))
+			{
+				FipsAES.KeyWrapOperatorFactory factory = new	FipsAES.KeyWrapOperatorFactory();
+				wrapper = factory.createKeyWrapper((SymmetricSecretKey)key.toBouncyCastleKey(),	FipsAES.	KW);
+				
+			}
+			else if (keyWrapperType.getAlgorithmName().equals(SymmetricKeyWrapperType.BC_FIPS_AES_WITH_PADDING.getAlgorithmName()))
+			{
+					FipsAES.KeyWrapOperatorFactory factory = new	FipsAES.KeyWrapOperatorFactory();
+					wrapper = factory.createKeyWrapper((SymmetricSecretKey)key.toBouncyCastleKey(),	FipsAES.	KWP);
+			}
+			else
+				throw new IllegalAccessError();
+
+		}
+		else if (opmode==Cipher.UNWRAP_MODE)
+		{
+			if (keyWrapperType.getAlgorithmName().equals(SymmetricKeyWrapperType.BC_FIPS_AES.getAlgorithmName()))
+			{
+				FipsAES.KeyWrapOperatorFactory factory = new	FipsAES.KeyWrapOperatorFactory();
+				unwrapper = factory.createKeyUnwrapper((SymmetricSecretKey)key.toBouncyCastleKey(),	FipsAES.	KW);
+				
+			}
+			else if (keyWrapperType.getAlgorithmName().equals(SymmetricKeyWrapperType.BC_FIPS_AES_WITH_PADDING.getAlgorithmName()))
+			{
+				FipsAES.KeyWrapOperatorFactory factory = new	FipsAES.KeyWrapOperatorFactory();
+				unwrapper = factory.createKeyUnwrapper((SymmetricSecretKey)key.toBouncyCastleKey(),	FipsAES.	KWP);
+			}
+			else
+				throw new IllegalAccessError();
+			
+		}
 		else 
 			throw new IllegalAccessError();
 		
@@ -327,7 +374,15 @@ public class BCCipher extends AbstractCipher {
         return null;
 	}
 
-
+	public byte[] wrap(UtilKey key) throws PlainInputProcessingException, NoSuchAlgorithmException, InvalidKeySpecException {
+		byte b[]=key.toJavaNativeKey().getEncoded();
+		return wrapper.wrap(b, 0, b.length);
+	}
+	
+	public final byte[] unwrap(byte[] wrappedKey)
+			throws InvalidWrappingException {
+		return unwrapper.unwrap(wrappedKey, 0, wrappedKey.length);
+	}
 
 	@Override
 	public int update(byte[] input, int inputOffset, int inputLength, byte[] output, int outputOffset) throws ShortBufferException

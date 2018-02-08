@@ -34,7 +34,6 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
-import java.io.IOException;
 import java.util.Arrays;
 import javax.crypto.SecretKey;
 
@@ -51,29 +50,14 @@ import com.distrimind.util.Bits;
  * @version 2.0
  * @since Utils 1.7.1
  */
-public class SymmetricSecretKey implements UtilKey {
+public class SymmetricSecretKey extends UtilKey {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = -1811177031909192919L;
 
-	public static SymmetricSecretKey decode(byte[] b) throws IllegalArgumentException {
-		byte[][] res = Bits.separateEncodingsWithShortSizedTabs(b);
-		if (res[0][0]==(byte)0)
-			return new SymmetricSecretKey(SymmetricEncryptionType.valueOf(Bits.getInt(res[0], 1)), res[1],
-				Bits.getShort(res[0], 5));
-		else if (res[0][0]==(byte)1)
-			return new SymmetricSecretKey(SymmetricAuthentifiedSignatureType.valueOf(Bits.getInt(res[0], 1)), res[1],
-					Bits.getShort(res[0], 5));
-		else
-			throw new IllegalArgumentException();
-			
-	}
-
-	public static SymmetricSecretKey valueOf(String key) throws IllegalArgumentException, IOException {
-		return decode(Base64.decodeBase64(key));
-	}
+	
 
 	private final byte[] secretKey;
 
@@ -97,6 +81,22 @@ public class SymmetricSecretKey implements UtilKey {
 		this.encryptionType = type;
 		this.signatureType=null;
 	}
+	SymmetricSecretKey(SymmetricEncryptionType type, byte secretKey[]) {
+		if (type == null)
+			throw new NullPointerException("type");
+		if (secretKey == null)
+			throw new NullPointerException("secretKey");
+		this.secretKey=Bits.concateEncodingWithShortSizedTabs(type.getAlgorithmName().getBytes(), secretKey);
+		if (type.getAlgorithmName().toUpperCase().equals("DES"))
+			this.keySize=56;
+		else if (type.getAlgorithmName().toUpperCase().equals("DESEDE"))
+			this.keySize=168;
+		else
+			this.keySize=(short)(secretKey.length*8);
+		this.encryptionType = type;
+		this.signatureType=null;
+		hashCode = Arrays.hashCode(this.secretKey);
+	}
 	SymmetricSecretKey(SymmetricAuthentifiedSignatureType type, byte secretKey[], short keySize) {
 		this(secretKey, keySize);
 		if (type == null)
@@ -104,7 +104,17 @@ public class SymmetricSecretKey implements UtilKey {
 		this.encryptionType = null;
 		this.signatureType=type;
 	}
-
+	SymmetricSecretKey(SymmetricAuthentifiedSignatureType type, byte secretKey[]) {
+		if (type == null)
+			throw new NullPointerException("type");
+		if (secretKey == null)
+			throw new NullPointerException("secretKey");
+		this.secretKey=Bits.concateEncodingWithShortSizedTabs(type.getAlgorithmName().getBytes(), secretKey);
+		this.keySize=(short)(secretKey.length*8);
+		this.encryptionType = null;
+		this.signatureType=type;
+		hashCode = Arrays.hashCode(this.secretKey);
+	}
 	SymmetricSecretKey(SymmetricEncryptionType type, gnu.vm.jgnux.crypto.SecretKey secretKey, short keySize) {
 		this(secretKey, keySize);
 		if (type == null)
@@ -196,10 +206,10 @@ public class SymmetricSecretKey implements UtilKey {
 		this.keySize = keySize;
 		hashCode = Arrays.hashCode(this.secretKey);
 	}
-
+	@Override
 	public byte[] encode() {
 		byte[] tab = new byte[7];
-		tab[0]=encryptionType==null?(byte)1:(byte)0;
+		tab[0]=encryptionType==null?(byte)3:(byte)2;
 		Bits.putInt(tab, 1, encryptionType==null?signatureType.ordinal():encryptionType.ordinal());
 		Bits.putShort(tab, 5, keySize);
 		return Bits.concateEncodingWithShortSizedTabs(tab, secretKey);

@@ -44,6 +44,7 @@ import javax.crypto.CipherInputStream;
 import javax.crypto.CipherOutputStream;
 import javax.crypto.spec.IvParameterSpec;
 
+
 import gnu.vm.jgnu.security.InvalidAlgorithmParameterException;
 import gnu.vm.jgnu.security.InvalidKeyException;
 import gnu.vm.jgnu.security.NoSuchAlgorithmException;
@@ -206,5 +207,9 @@ public final class JavaNativeCipher extends AbstractCipher {
 		}
 
 	}
+	
+
+	
+	
 
 }

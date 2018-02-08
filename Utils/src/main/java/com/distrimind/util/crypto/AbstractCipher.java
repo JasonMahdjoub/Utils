@@ -39,6 +39,7 @@ import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.ReadOnlyBufferException;
 
+
 import gnu.vm.jgnu.security.InvalidAlgorithmParameterException;
 import gnu.vm.jgnu.security.InvalidKeyException;
 import gnu.vm.jgnu.security.NoSuchAlgorithmException;
@@ -448,5 +449,7 @@ public abstract class AbstractCipher {
 	{
 		return update(input.array(), input.position(), input.remaining(), output.array(), output.position());
 	}
+	
+
 
 }
