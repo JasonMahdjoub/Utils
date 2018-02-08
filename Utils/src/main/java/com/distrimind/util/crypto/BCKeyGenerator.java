@@ -93,6 +93,7 @@ public final class BCKeyGenerator extends AbstractKeyGenerator {
 			if (signatureType.getCodeProviderForKeyGenerator().equals(CodeProvider.BC) || signatureType.getCodeProviderForKeyGenerator().equals(CodeProvider.BCFIPS))
 			{
 				keyGenerator=new FipsAES.KeyGenerator(FipsAES.CBCwithPKCS7, keySize, random);
+				this.keySizeBits=keySize;
 			}
 			else
 				throw new IllegalAccessError();
@@ -100,17 +101,20 @@ public final class BCKeyGenerator extends AbstractKeyGenerator {
 		}
 		else
 		{
-			if (encryptionType.getAlgorithmName().equals(SymmetricEncryptionType.BC_AES.getAlgorithmName()))
+			if (encryptionType.getAlgorithmName().equals(SymmetricEncryptionType.BC_FIPS_AES.getAlgorithmName()))
 			{
 				keyGenerator=new FipsAES.KeyGenerator(FipsAES.CBCwithPKCS7, keySize, random);
+				this.keySizeBits=keySize;
 			}
 			else if (encryptionType.getAlgorithmName().equals(SymmetricEncryptionType.BC_SERPENT.getAlgorithmName()))
 			{
 				keyGenerator=new Serpent.KeyGenerator(Serpent.CBCwithPKCS7, keySize, random);
+				this.keySizeBits=keySize;
 			}
 			else if (encryptionType.getAlgorithmName().equals(SymmetricEncryptionType.BC_TWOFISH.getAlgorithmName()))
 			{
 				keyGenerator=new Twofish.KeyGenerator(Twofish.CBCwithPKCS7, keySize, random);
+				this.keySizeBits=keySize;
 			}
 			else
 				throw new IllegalAccessError();

@@ -36,13 +36,10 @@ package com.distrimind.util.crypto;
 
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.ByteBuffer;
-import java.nio.ReadOnlyBufferException;
 
 import gnu.vm.jgnu.security.InvalidAlgorithmParameterException;
 import gnu.vm.jgnu.security.InvalidKeyException;
 import gnu.vm.jgnu.security.NoSuchAlgorithmException;
-import gnu.vm.jgnu.security.NoSuchProviderException;
 import gnu.vm.jgnu.security.SecureRandom;
 import gnu.vm.jgnu.security.spec.InvalidKeySpecException;
 import gnu.vm.jgnux.crypto.BadPaddingException;
@@ -63,11 +60,6 @@ public final class GnuCipher extends AbstractCipher {
 	private final Cipher cipher;
 	private volatile SecureRandom random;
 
-	private SecureRandom getSecureRandom() throws NoSuchAlgorithmException, NoSuchProviderException {
-		if (random == null)
-			return setSecureRandom(SecureRandomType.BC_FIPS_APPROVED.getInstance(SecureRandomType.nonce));
-		return random;
-	}
 
 	private SecureRandom setSecureRandom(AbstractSecureRandom random) {
 		this.random = random.getGnuSecureRandom();
@@ -83,10 +75,7 @@ public final class GnuCipher extends AbstractCipher {
 		return cipher.doFinal();
 	}
 
-	@Override
-	public byte[] doFinal(byte[] _input) throws IllegalStateException, IllegalBlockSizeException, BadPaddingException {
-		return cipher.doFinal(_input);
-	}
+	
 
 	@Override
 	public int doFinal(byte[] _output, int _outputOffset)
@@ -100,11 +89,7 @@ public final class GnuCipher extends AbstractCipher {
 		return cipher.doFinal(_input, _inputOffset, _inputLength);
 	}
 
-	@Override
-	public int doFinal(byte[] _input, int _inputOffset, int _inputLength, byte[] _output)
-			throws IllegalStateException, IllegalBlockSizeException, BadPaddingException, ShortBufferException {
-		return cipher.doFinal(_input, _inputOffset, _inputLength, _output);
-	}
+	
 
 	@Override
 	public int doFinal(byte[] _input, int _inputOffset, int _inputLength, byte[] _output, int _outputOffset)
@@ -112,11 +97,7 @@ public final class GnuCipher extends AbstractCipher {
 		return cipher.doFinal(_input, _inputOffset, _inputLength, _output, _outputOffset);
 	}
 
-	@Override
-	public int doFinal(ByteBuffer _input, ByteBuffer _output)
-			throws ReadOnlyBufferException, ShortBufferException, BadPaddingException, IllegalBlockSizeException {
-		return cipher.doFinal(_input, _output);
-	}
+	
 
 	@Override
 	public String getAlgorithm() {
@@ -148,12 +129,7 @@ public final class GnuCipher extends AbstractCipher {
 		return cipher.getOutputSize(_inputLength);
 	}
 
-	@Override
-	public void init(int _opmode, UtilKey _key)
-			throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
-		cipher.init(_opmode, _key.toGnuKey(), getSecureRandom());
-
-	}
+	
 
 	@Override
 	public void init(int _opmode, UtilKey _key, AbstractSecureRandom _random)
@@ -168,21 +144,14 @@ public final class GnuCipher extends AbstractCipher {
 		cipher.init(_opmode, _key.toGnuKey(), new IvParameterSpec(_iv));
 	}
 
-	@Override
-	public byte[] update(byte[] _input) throws IllegalStateException {
-		return cipher.update(_input);
-	}
+	
 
 	@Override
 	public byte[] update(byte[] _input, int _inputOffset, int _inputLength) throws IllegalStateException {
 		return cipher.update(_input, _inputOffset, _inputLength);
 	}
 
-	@Override
-	public int update(byte[] _input, int _inputOffset, int _inputLength, byte[] _output)
-			throws IllegalStateException, ShortBufferException {
-		return cipher.update(_input, _inputOffset, _inputLength, _output);
-	}
+	
 
 	@Override
 	public int update(byte[] _input, int _inputOffset, int _inputLength, byte[] _output, int _outputOffset)
@@ -190,8 +159,5 @@ public final class GnuCipher extends AbstractCipher {
 		return cipher.update(_input, _inputOffset, _inputLength, _output, _outputOffset);
 	}
 
-	@Override
-	public int update(ByteBuffer _input, ByteBuffer _output) throws ReadOnlyBufferException, ShortBufferException {
-		return cipher.update(_input, _output);
-	}
+	
 }

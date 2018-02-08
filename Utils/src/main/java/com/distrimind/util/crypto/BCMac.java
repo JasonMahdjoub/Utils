@@ -37,12 +37,10 @@ package com.distrimind.util.crypto;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
-
 import org.bouncycastle.crypto.UpdateOutputStream;
-import org.bouncycastle.crypto.fips.FipsAES;
-import org.bouncycastle.crypto.fips.FipsAES.AuthParameters;
-import org.bouncycastle.crypto.fips.FipsMACOperatorFactory;
 import org.bouncycastle.crypto.fips.FipsOutputMACCalculator;
+import org.bouncycastle.crypto.fips.FipsSHS;
+import org.bouncycastle.crypto.fips.FipsSHS.AuthParameters;
 
 import gnu.vm.jgnu.security.InvalidKeyException;
 import gnu.vm.jgnu.security.NoSuchAlgorithmException;
@@ -57,7 +55,7 @@ import gnu.vm.jgnu.security.spec.InvalidKeySpecException;
 public final class BCMac extends AbstractMac {
 
 	private final SymmetricAuthentifiedSignatureType type;
-	private int macLength=16;
+	private final int macLength;
 	private org.bouncycastle.crypto.SymmetricSecretKey secretKey;
 	private FipsOutputMACCalculator<AuthParameters> mac;
 	private UpdateOutputStream macStream;
@@ -65,6 +63,7 @@ public final class BCMac extends AbstractMac {
 	BCMac(SymmetricAuthentifiedSignatureType type)
 	{
 		this.type=type;
+		macLength=type.getSignatureSizeInBits();
 	}
 	
 	@Override
@@ -99,8 +98,8 @@ public final class BCMac extends AbstractMac {
 	}
 	
 	public void init(org.bouncycastle.crypto.SymmetricSecretKey _key) throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException {
-		FipsMACOperatorFactory<FipsAES.AuthParameters> fipsFacto=new FipsAES.MACOperatorFactory();
-		mac=fipsFacto.createOutputMACCalculator(secretKey=_key, FipsAES.CMAC.withMACSize(macLength*8));
+		FipsSHS.MACOperatorFactory fipsFacto=new FipsSHS.MACOperatorFactory();
+		mac=fipsFacto.createOutputMACCalculator(secretKey=_key, type.getMessageDigestAuth());
 		reset();
 	}
 

@@ -102,7 +102,7 @@ public abstract class AbstractKeyGenerator {
 
 	 */
 	public void init(short keySize) throws NoSuchAlgorithmException, NoSuchProviderException {
-		init(keySize, SecureRandomType.FORTUNA_WITH_BC_FIPS_APPROVED_FOR_KEYS.getSingleton(null));
+		init(keySize, SecureRandomType.FORTUNA_WITH_BC_FIPS_APPROVED_FOR_KEYS.getSingleton(SecureRandomType.nonce));
 	}
 
 	/**

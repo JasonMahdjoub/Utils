@@ -36,6 +36,7 @@ package com.distrimind.util.crypto;
 
 import javax.crypto.Cipher;
 
+import gnu.vm.jgnu.security.InvalidAlgorithmParameterException;
 import gnu.vm.jgnu.security.InvalidKeyException;
 import gnu.vm.jgnu.security.NoSuchAlgorithmException;
 import gnu.vm.jgnu.security.NoSuchProviderException;
@@ -57,7 +58,7 @@ public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutpu
 	private final AbstractSecureRandom random;
 
 	public ClientASymmetricEncryptionAlgorithm(AbstractSecureRandom random, ASymmetricPublicKey distantPublicKey) throws NoSuchAlgorithmException, NoSuchPaddingException,
-			InvalidKeyException, InvalidKeySpecException, NoSuchProviderException {
+			InvalidKeyException, InvalidKeySpecException, NoSuchProviderException, InvalidAlgorithmParameterException {
 		super(distantPublicKey.getEncryptionAlgorithmType().getCipherInstance());
 		this.type = distantPublicKey.getEncryptionAlgorithmType();
 		this.distantPublicKey = distantPublicKey;
@@ -88,13 +89,13 @@ public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutpu
 
 	@Override
 	public void initCipherForEncrypt(AbstractCipher _cipher)
-			throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
+			throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, InvalidAlgorithmParameterException {
 		initCipherForEncryptAndNotChangeIV(_cipher);
 	}
 
 	@Override
 	public void initCipherForEncryptAndNotChangeIV(AbstractCipher _cipher)
-			throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
+			throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, InvalidAlgorithmParameterException {
 		_cipher.init(Cipher.ENCRYPT_MODE, distantPublicKey, random);
 
 	}

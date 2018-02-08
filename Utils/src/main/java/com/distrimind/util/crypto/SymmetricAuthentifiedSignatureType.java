@@ -38,7 +38,8 @@ package com.distrimind.util.crypto;
 import javax.crypto.spec.SecretKeySpec;
 
 import org.bouncycastle.crypto.Algorithm;
-
+import org.bouncycastle.crypto.fips.FipsSHS;
+import org.bouncycastle.crypto.fips.FipsSHS.AuthParameters;
 
 import gnu.vm.jgnu.security.NoSuchAlgorithmException;
 import gnu.vm.jgnu.security.NoSuchProviderException;
@@ -52,34 +53,43 @@ import gnu.vm.jgnux.crypto.Mac;
  * @since Utils 2.10.0
  */
 public enum SymmetricAuthentifiedSignatureType {
-	HMAC_SHA_256("HmacSHA256", CodeProvider.SunJCE, CodeProvider.SunJCE, (short)128, (short)16, MessageDigestType.SHA2_256), 
-	HMAC_SHA_384("HmacSHA384", CodeProvider.SunJCE, CodeProvider.SunJCE, (short)128, (short)16, MessageDigestType.SHA2_384), 
-	HMAC_SHA_512("HmacSHA512", CodeProvider.SunJCE, CodeProvider.SunJCE, (short)128, (short)16, MessageDigestType.SHA2_512), 
-	BC_FIPS_HMAC_SHA_256("HmacSHA256", CodeProvider.BCFIPS, CodeProvider.BCFIPS, (short)128, (short)16, MessageDigestType.BC_FIPS_SHA2_256), 
-	BC_FIPS_HMAC_SHA_384("HmacSHA384", CodeProvider.BCFIPS, CodeProvider.BCFIPS, (short)128, (short)16, MessageDigestType.BC_FIPS_SHA2_384), 
-	BC_FIPS_HMAC_SHA_512("HmacSHA512", CodeProvider.BCFIPS, CodeProvider.BCFIPS, (short)128, (short)16, MessageDigestType.BC_FIPS_SHA2_512), 
-	BC_FIPS_HMAC_WHIRLPOOL("HmacWHIRLPOOL",CodeProvider.BCFIPS, CodeProvider.BCFIPS, (short)128, (short)16, MessageDigestType.BC_WHIRLPOOL), 
-	DEFAULT(BC_FIPS_HMAC_SHA_256);
+	HMAC_SHA_256("HmacSHA256", CodeProvider.SunJCE, CodeProvider.SunJCE, (short)128, (short)16, MessageDigestType.SHA2_256, null), 
+	HMAC_SHA_384("HmacSHA384", CodeProvider.SunJCE, CodeProvider.SunJCE, (short)128, (short)16, MessageDigestType.SHA2_384, null), 
+	HMAC_SHA_512("HmacSHA512", CodeProvider.SunJCE, CodeProvider.SunJCE, (short)128, (short)16, MessageDigestType.SHA2_512, null), 
+	BC_FIPS_HMAC_SHA_256("HmacSHA256", CodeProvider.BCFIPS, CodeProvider.BCFIPS, (short)128, (short)16, MessageDigestType.BC_FIPS_SHA2_256, FipsSHS.SHA256_HMAC), 
+	BC_FIPS_HMAC_SHA_384("HmacSHA384", CodeProvider.BCFIPS, CodeProvider.BCFIPS, (short)128, (short)16, MessageDigestType.BC_FIPS_SHA2_384, FipsSHS.SHA384_HMAC), 
+	BC_FIPS_HMAC_SHA_512("HmacSHA512", CodeProvider.BCFIPS, CodeProvider.BCFIPS, (short)128, (short)16, MessageDigestType.BC_FIPS_SHA2_512, FipsSHS.SHA512_HMAC), 
+	//BC_FIPS_HMAC_WHIRLPOOL("HmacWHIRLPOOL",CodeProvider.BCFIPS, CodeProvider.BCFIPS, (short)128, (short)16, MessageDigestType.BC_WHIRLPOOL, FipsSHS.WHIRPOOL_HMAC), 
+	DEFAULT(BC_FIPS_HMAC_SHA_384);
 
 	private final String algorithmName;
 	private final CodeProvider codeProviderForSignature, codeProviderForKeyGenerator;
 	private final short keySizeBits;
 	private final short keySizeBytes;
 	private final MessageDigestType messageDigestType;
-		
+	private final AuthParameters messageDigestAuth;
 	
-	private SymmetricAuthentifiedSignatureType(String algorithmName, CodeProvider codeProviderForSignature, CodeProvider codeProviderForKeyGenerator, short keySizeBits, short keySizeBytes, MessageDigestType messageDigestType) {
+	private SymmetricAuthentifiedSignatureType(String algorithmName, CodeProvider codeProviderForSignature, CodeProvider codeProviderForKeyGenerator, short keySizeBits, short keySizeBytes, MessageDigestType messageDigestType, AuthParameters messageDigestAuth) {
 		this.algorithmName = algorithmName;
 		this.codeProviderForSignature = codeProviderForSignature;
 		this.codeProviderForKeyGenerator=codeProviderForKeyGenerator;
 		this.keySizeBits=keySizeBits;
 		this.keySizeBytes=keySizeBytes;
 		this.messageDigestType=messageDigestType;
+		this.messageDigestAuth=messageDigestAuth;
 	}
+
+	
+	
+	AuthParameters getMessageDigestAuth() {
+		return messageDigestAuth;
+	}
+
+
 
 	private SymmetricAuthentifiedSignatureType(SymmetricAuthentifiedSignatureType other) {
 		
-		this(other.algorithmName, other.codeProviderForSignature, other.codeProviderForKeyGenerator, other.keySizeBits, other.keySizeBytes, other.messageDigestType);
+		this(other.algorithmName, other.codeProviderForSignature, other.codeProviderForKeyGenerator, other.keySizeBits, other.keySizeBytes, other.messageDigestType, other.messageDigestAuth);
 	}
 
 	public int getSignatureSizeInBits()

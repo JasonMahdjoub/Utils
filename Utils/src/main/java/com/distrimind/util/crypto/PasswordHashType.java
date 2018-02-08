@@ -38,10 +38,14 @@ import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.spec.InvalidKeySpecException;
 
-import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 
+import org.bouncycastle.crypto.PasswordBasedDeriver;
+import org.bouncycastle.crypto.PasswordConverter;
+import org.bouncycastle.crypto.fips.FipsDigestAlgorithm;
+import org.bouncycastle.crypto.fips.FipsPBKD;
+import org.bouncycastle.crypto.fips.FipsSHS;
 import org.bouncycastle.crypto.generators.BCrypt;
 import org.bouncycastle.crypto.generators.SCrypt;
 
@@ -69,12 +73,9 @@ public enum PasswordHashType {
 	GNU_PBKDF2WithHMacSHA384("PBKDF2WithHMacSHA384", (byte) 32, CodeProvider.GNU_CRYPTO), 
 	GNU_PBKDF2WithHMacSHA512("PBKDF2WithHMacSHA512", (byte) 32, CodeProvider.GNU_CRYPTO), 
 	GNU_PBKDF2WithHMacWhirlpool("PBKDF2WithHMacWhirlpool",(byte) 32, CodeProvider.GNU_CRYPTO),
-	BC_FIPS_PBKFD2WithHMacSHA2_256("PBKDF2WithHMacSHA256",(byte) 32, CodeProvider.BCFIPS),
-	BC_FIPS_PBKFD2WithHMacSHA2_384("PBKDF2WithHMacSHA384",(byte) 32, CodeProvider.BCFIPS),
-	BC_FIPS_PBKFD2WithHMacSHA2_512("PBKDF2WithHMacSHA512",(byte) 32, CodeProvider.BCFIPS),
-	BC_PBKFD2WithHMacSHA3_256("PBKDF2WithHMacSHA3-256",(byte) 32, CodeProvider.BC),
-	BC_PBKFD2WithHMacSHA3_384("PBKDF2WithHMacSHA3-384",(byte) 32, CodeProvider.BC),
-	BC_PBKFD2WithHMacSHA3_512("PBKDF2WithHMacSHA3-512",(byte) 32, CodeProvider.BC),
+	BC_FIPS_PBKFD2WithHMacSHA2_256("PBKDF2WithHMacSHA256",(byte) 32, CodeProvider.BCFIPS, FipsSHS.Algorithm.SHA256_HMAC),
+	BC_FIPS_PBKFD2WithHMacSHA2_384("PBKDF2WithHMacSHA384",(byte) 32, CodeProvider.BCFIPS, FipsSHS.Algorithm.SHA384_HMAC),
+	BC_FIPS_PBKFD2WithHMacSHA2_512("PBKDF2WithHMacSHA512",(byte) 32, CodeProvider.BCFIPS, FipsSHS.Algorithm.SHA512_HMAC),
 	DEFAULT(BCRYPT);
 
 	
@@ -87,17 +88,23 @@ public enum PasswordHashType {
 	private final String algorithmName;
 	
 	private final CodeProvider codeProvider;
+	
+	private final FipsDigestAlgorithm fipsDigestAlgorithm;
 
 	private PasswordHashType(PasswordHashType type) {
-		this(type.algorithmName, type.hashLength, type.codeProvider);
+		this(type.algorithmName, type.hashLength, type.codeProvider, type.fipsDigestAlgorithm);
 		this.defaultOf = type;
 	}
 
-	private PasswordHashType(String algorithmName, byte hashLength, CodeProvider codeProvider) {
+	private PasswordHashType(String algorithmName, byte hashLength, CodeProvider codeProvider, FipsDigestAlgorithm fipsDigestAlgorithm) {
 		this.hashLength = hashLength;
 		this.defaultOf = null;
 		this.algorithmName = algorithmName;
 		this.codeProvider=codeProvider;
+		this.fipsDigestAlgorithm=fipsDigestAlgorithm;
+	}
+	private PasswordHashType(String algorithmName, byte hashLength, CodeProvider codeProvider) {
+		this(algorithmName, hashLength, codeProvider, null);
 	}
 	
 	public CodeProvider getCodeProvider()
@@ -189,37 +196,13 @@ public enum PasswordHashType {
 		case BC_FIPS_PBKFD2WithHMacSHA2_256:
 		case BC_FIPS_PBKFD2WithHMacSHA2_384:
 		case BC_FIPS_PBKFD2WithHMacSHA2_512:
-		case BC_PBKFD2WithHMacSHA3_256:
-		case BC_PBKFD2WithHMacSHA3_384:
-		case BC_PBKFD2WithHMacSHA3_512:
 		{
 			CodeProvider.ensureBouncyCastleProviderLoaded();
-			try
-			{
-				int size = len / 2;
-				char[] password = new char[size + len % 2];
-				for (int i = 0; i < size; i++) {
-					password[i] = (char) ((data[off + i * 2] & 0xFF) & ((data[off + i * 2 + 1] << 8) & 0xFF));
-				}
-				if (size < password.length)
-					password[size] = (char) (data[off + size * 2] & 0xFF);
-	
-				SecretKeyFactory keyFact = SecretKeyFactory.getInstance(algorithmName,codeProvider.name());
-				
-				SecretKey hmacKey = keyFact.generateSecret(new PBEKeySpec(password,  salt,iterations,hashLength*8));
-				
-				return hmacKey.getEncoded();
-			}
-			catch(NoSuchProviderException e)
-			{
-				throw new gnu.vm.jgnu.security.NoSuchProviderException(e.getMessage());
-			}
-			catch(NoSuchAlgorithmException e)
-			{
-				throw new gnu.vm.jgnu.security.NoSuchAlgorithmException(e);
-			} catch (InvalidKeySpecException e) {
-				throw new gnu.vm.jgnu.security.spec.InvalidKeySpecException(e);
-			}
+			PasswordBasedDeriver<org.bouncycastle.crypto.fips.FipsPBKD.Parameters> deriver = 
+						new FipsPBKD.DeriverFactory().createDeriver(FipsPBKD.PBKDF2.using(fipsDigestAlgorithm, data)
+												.withIterationCount(iterations)
+												.withSalt(salt));
+			return deriver.deriveKey(PasswordBasedDeriver.KeyType.CIPHER,((hashLength*8) +7) / 8);
 		}
 		case SCRYPT_FOR_LOGIN:
 			
@@ -302,29 +285,13 @@ public enum PasswordHashType {
 		case BC_FIPS_PBKFD2WithHMacSHA2_256:
 		case BC_FIPS_PBKFD2WithHMacSHA2_384:
 		case BC_FIPS_PBKFD2WithHMacSHA2_512:
-		case BC_PBKFD2WithHMacSHA3_256:
-		case BC_PBKFD2WithHMacSHA3_384:
-		case BC_PBKFD2WithHMacSHA3_512:
 		{
-			try
-			{
-				CodeProvider.ensureBouncyCastleProviderLoaded();
-				SecretKeyFactory keyFact = SecretKeyFactory.getInstance(algorithmName,codeProvider.name());
-				
-				SecretKey hmacKey = keyFact.generateSecret(new PBEKeySpec(password,  salt,iterations,hashLength*8));
-				
-				return hmacKey.getEncoded();
-			}
-			catch(NoSuchProviderException e)
-			{
-				throw new gnu.vm.jgnu.security.NoSuchProviderException(e.getMessage());
-			}
-			catch(NoSuchAlgorithmException e)
-			{
-				throw new gnu.vm.jgnu.security.NoSuchAlgorithmException(e);
-			} catch (InvalidKeySpecException e) {
-				throw new gnu.vm.jgnu.security.spec.InvalidKeySpecException(e);
-			}
+			CodeProvider.ensureBouncyCastleProviderLoaded();
+			PasswordBasedDeriver<org.bouncycastle.crypto.fips.FipsPBKD.Parameters> deriver = 
+						new FipsPBKD.DeriverFactory().createDeriver(FipsPBKD.PBKDF2.using(fipsDigestAlgorithm, PasswordConverter.UTF8.convert(password))
+												.withIterationCount(iterations)
+												.withSalt(salt));
+			return deriver.deriveKey(PasswordBasedDeriver.KeyType.CIPHER,((hashLength*8) +7) / 8);
 		}
 		case SCRYPT_FOR_LOGIN:
 			scryptN=1<<13;

@@ -90,8 +90,11 @@ public abstract class AbstractCipher {
 	 *             If this instance is decrypting and the padding bytes do not match
 	 *             this instance's padding scheme.
 	 */
-	public abstract byte[] doFinal(byte[] input)
-			throws IllegalStateException, IllegalBlockSizeException, BadPaddingException;
+	public byte[] doFinal(byte[] input)
+			throws IllegalStateException, IllegalBlockSizeException, BadPaddingException
+	{
+		return doFinal(input, 0, input.length);
+	}
 
 	/**
 	 * Finishes a multi-part transformation and stores the transformed bytes into
@@ -142,8 +145,11 @@ public abstract class AbstractCipher {
 	public abstract byte[] doFinal(byte[] input, int inputOffset, int inputLength)
 			throws IllegalStateException, IllegalBlockSizeException, BadPaddingException;
 
-	public abstract int doFinal(byte[] input, int inputOffset, int inputLength, byte[] output)
-			throws IllegalStateException, IllegalBlockSizeException, BadPaddingException, ShortBufferException;
+	public int doFinal(byte[] input, int inputOffset, int inputLength, byte[] output)
+			throws IllegalStateException, IllegalBlockSizeException, BadPaddingException, ShortBufferException
+	{
+		return doFinal(input, inputOffset, inputLength, output, 0);
+	}
 
 	/**
 	 * Finishes a multi-part transformation or transforms a portion of a byte array,
@@ -202,8 +208,11 @@ public abstract class AbstractCipher {
 	 *             decrypted bytes do not end with a valid padding.
 	 * @since 1.5
 	 */
-	public abstract int doFinal(ByteBuffer input, ByteBuffer output)
-			throws ReadOnlyBufferException, ShortBufferException, BadPaddingException, IllegalBlockSizeException;
+	public int doFinal(ByteBuffer input, ByteBuffer output)
+			throws ReadOnlyBufferException, ShortBufferException, BadPaddingException, IllegalBlockSizeException
+	{
+		return doFinal(input.array(), input.position(), input.remaining(), output.array(), output.position());
+	}
 
 	/**
 	 * Get the name that this cipher instance was created with; 
@@ -271,8 +280,11 @@ public abstract class AbstractCipher {
 	 * @throws NoSuchAlgorithmException if the algorithm as not found
 	 * @throws NoSuchProviderException if the provider was not found
 	 */
-	public abstract void init(int opmode, UtilKey key)
-			throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException;
+	public void init(int opmode, UtilKey key)
+			throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException
+	{
+		init(opmode, key, SecureRandomType.FORTUNA_WITH_BC_FIPS_APPROVED.getSingleton(SecureRandomType.nonce));
+	}
 
 	/**
 	 * <p>
@@ -341,7 +353,10 @@ public abstract class AbstractCipher {
 	 * @throws java.lang.IllegalStateException
 	 *             If this cipher was not initialized for encryption or decryption.
 	 */
-	public abstract byte[] update(byte[] input) throws IllegalStateException;
+	public byte[] update(byte[] input) throws IllegalStateException
+	{
+		return update(input, 0, input.length);
+	}
 
 	/**
 	 * Continue a multi-part transformation on part of a byte array, returning the
@@ -378,8 +393,11 @@ public abstract class AbstractCipher {
 	 *             If there is not enough room in the output array to hold the
 	 *             transformed bytes.
 	 */
-	public abstract int update(byte[] input, int inputOffset, int inputLength, byte[] output)
-			throws IllegalStateException, ShortBufferException;
+	public int update(byte[] input, int inputOffset, int inputLength, byte[] output)
+			throws IllegalStateException, ShortBufferException
+	{
+		return update(input, inputOffset, inputLength, output, 0);
+	}
 
 	/**
 	 * Continue a multi-part transformation on part of a byte array, placing the
@@ -425,7 +443,10 @@ public abstract class AbstractCipher {
 	 *             transformed bytes.
 	 * @since 1.5
 	 */
-	public abstract int update(ByteBuffer input, ByteBuffer output)
-			throws ReadOnlyBufferException, ShortBufferException;
+	public int update(ByteBuffer input, ByteBuffer output)
+			throws ReadOnlyBufferException, ShortBufferException
+	{
+		return update(input.array(), input.position(), input.remaining(), output.array(), output.position());
+	}
 
 }

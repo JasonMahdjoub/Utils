@@ -192,7 +192,7 @@ public class P2PASymmetricSecretMessageExchanger {
 	public P2PASymmetricSecretMessageExchanger(AbstractSecureRandom secureRandom, ASymmetricPublicKey myPublicKey)
 			throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,
 			InvalidAlgorithmParameterException, InvalidKeySpecException, NoSuchProviderException {
-		this(secureRandom, MessageDigestType.BC_FIPS_SHA3_512, PasswordHashType.BC_PBKFD2WithHMacSHA3_512, myPublicKey);
+		this(secureRandom, MessageDigestType.BC_FIPS_SHA3_512, PasswordHashType.BC_FIPS_PBKFD2WithHMacSHA2_512, myPublicKey);
 	}
 
 	public P2PASymmetricSecretMessageExchanger(AbstractSecureRandom secureRandom, MessageDigestType messageDigestType, PasswordHashType passwordHashType,
