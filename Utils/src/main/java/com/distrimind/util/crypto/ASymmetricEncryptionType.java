@@ -65,11 +65,13 @@ import gnu.vm.jgnu.security.NoSuchProviderException;
 public enum ASymmetricEncryptionType {
 	RSA_OAEPWithSHA256AndMGF1Padding("RSA", "ECB", "OAEPWITHSHA-256ANDMGF1PADDING", ASymmetricAuthentifiedSignatureType.SHA384withRSA,
 			(short) 3072, 31536000000l, (short) 66, CodeProvider.SunJCE,CodeProvider.SunRsaSign, FipsRSA.ALGORITHM), 
+	RSA_OAEPWithSHA512AndMGF1Padding("RSA", "ECB", "OAEPWITHSHA-256ANDMGF1PADDING", ASymmetricAuthentifiedSignatureType.SHA512withRSA,
+			(short) 3072, 31536000000l, (short) 66, CodeProvider.SunJCE,CodeProvider.SunRsaSign, FipsRSA.ALGORITHM), 
 	RSA_PKCS1Padding("RSA", "ECB", "PKCS1Padding", ASymmetricAuthentifiedSignatureType.SHA384withRSA, (short) 3072, 31536000000l, (short) 11,
 					CodeProvider.SunJCE,CodeProvider.SunRsaSign, FipsRSA.ALGORITHM),
-	BC_FIPS_RSA_OAEPWithSHA256AndMGF1Padding("RSA", "NONE", "OAEPwithSHA256andMGF1Padding", ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA384withRSAandMGF1, (short) 3072, 31536000000l, (short) 66,CodeProvider.BCFIPS,CodeProvider.BCFIPS, FipsRSA.ALGORITHM),
-	BC_FIPS_RSA_PKCS1Padding("RSA", "NONE", "PKCS1Padding", ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA384withRSAandMGF1, (short) 3072, 31536000000l, (short) 11,CodeProvider.BCFIPS,CodeProvider.BCFIPS, FipsRSA.ALGORITHM),
-	DEFAULT(BC_FIPS_RSA_OAEPWithSHA256AndMGF1Padding);
+	//BC_FIPS_RSA_OAEPWithSHA256AndMGF1Padding("RSA", "NONE", "OAEPwithSHA256andMGF1Padding", ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA384withRSAandMGF1, (short) 3072, 31536000000l, (short) 66,CodeProvider.BCFIPS,CodeProvider.BCFIPS, FipsRSA.ALGORITHM),
+	//BC_FIPS_RSA_PKCS1Padding("RSA", "NONE", "PKCS1Padding", ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA384withRSAandMGF1, (short) 3072, 31536000000l, (short) 11,CodeProvider.BCFIPS,CodeProvider.BCFIPS, FipsRSA.ALGORITHM),
+	DEFAULT(RSA_OAEPWithSHA512AndMGF1Padding);
 	
 
 
@@ -240,17 +242,7 @@ public enum ASymmetricEncryptionType {
 			return new GnuCipher(gnu.vm.jgnux.crypto.Cipher.getInstance(name));
 		} else if (codeProviderForEncryption == CodeProvider.BCFIPS || codeProviderForEncryption == CodeProvider.BC) {
 			CodeProvider.ensureBouncyCastleProviderLoaded();
-			try {
-				
-				return new JavaNativeCipher(Cipher.getInstance(name, codeProviderForEncryption.name()));
-			} catch (NoSuchAlgorithmException e) {
-				throw new gnu.vm.jgnu.security.NoSuchAlgorithmException(e);
-			} catch (NoSuchPaddingException e) {
-				throw new gnu.vm.jgnux.crypto.NoSuchPaddingException(e.getMessage());
-			} catch (java.security.NoSuchProviderException e) {
-				throw new NoSuchProviderException(e.getMessage());
-			}
-
+			throw new IllegalAccessError();
 		} else {
 			try {
 				

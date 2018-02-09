@@ -262,6 +262,7 @@ public enum ASymmetricKeyWrapperType {
 				else
 				{
 					c.init(javax.crypto.Cipher.WRAP_MODE, publicKey.toJavaNativeKey(), random);
+
 					return wrapKeyWithMetaData(c.wrap(keyToWrap.toJavaNativeKey()), keyToWrap);
 				}
 				

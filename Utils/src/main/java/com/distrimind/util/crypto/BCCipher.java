@@ -205,8 +205,7 @@ public class BCCipher extends AbstractCipher {
 
 	@Override
 	public void init(int opmode, Key key, AbstractSecureRandom random) throws NoSuchAlgorithmException, InvalidKeySpecException
-			 {
-		 
+	{
 		init(opmode, key, (byte[])null);
 	}
 
@@ -215,6 +214,7 @@ public class BCCipher extends AbstractCipher {
 		this.iv=iv;
 		if (opmode==Cipher.ENCRYPT_MODE)
 		{
+			
 			if (type.getAlgorithmName().equals(SymmetricEncryptionType.BC_FIPS_AES.getAlgorithmName()))
 			{
 				if (type.getBlockMode().toUpperCase().equals("CBC") && type.getPadding().toUpperCase().equals("PKCS7PADDING"))
