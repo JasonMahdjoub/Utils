@@ -909,6 +909,9 @@ public class CryptoTests {
 				&& kpd.getAuthentifiedSignatureAlgorithmType()!=ASymmetricAuthentifiedSignatureType.BC_SHA256withECDSA_CURVE_M_383
 				&& kpd.getAuthentifiedSignatureAlgorithmType()!=ASymmetricAuthentifiedSignatureType.BC_SHA384withECDSA_CURVE_M_383
 				&& kpd.getAuthentifiedSignatureAlgorithmType()!=ASymmetricAuthentifiedSignatureType.BC_SHA512withECDSA_CURVE_M_383	
+				&& kpd.getAuthentifiedSignatureAlgorithmType()!=ASymmetricAuthentifiedSignatureType.BC_SHA256withECDSA_CURVE_41417
+				&& kpd.getAuthentifiedSignatureAlgorithmType()!=ASymmetricAuthentifiedSignatureType.BC_SHA384withECDSA_CURVE_41417
+				&& kpd.getAuthentifiedSignatureAlgorithmType()!=ASymmetricAuthentifiedSignatureType.BC_SHA512withECDSA_CURVE_41417	
 				)
 			Assert.assertEquals(kpd.getAuthentifiedSignatureAlgorithmType().getSignatureSizeBits(kpd.getKeySize()), signature.length*8);
 	}
@@ -1234,6 +1237,12 @@ public class CryptoTests {
 
 		SymmetricSecretKey key = peer1.getDerivedKey();
 
+		testEncryptionAfterKeyExchange(random, SymmetricEncryptionType.DEFAULT, key);
+
+	}
+	
+	private void testEncryptionAfterKeyExchange(AbstractSecureRandom random, SymmetricEncryptionType type, SymmetricSecretKey key) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException, NoSuchProviderException, InvalidKeySpecException, BadPaddingException, IllegalStateException, IllegalBlockSizeException, IOException
+	{
 		SymmetricEncryptionAlgorithm algoDistant = new SymmetricEncryptionAlgorithm(random, key);
 		SymmetricEncryptionAlgorithm algoLocal = new SymmetricEncryptionAlgorithm(random, key);
 
@@ -1286,8 +1295,106 @@ public class CryptoTests {
 				Assert.assertEquals(md[i], m[i + off]);
 
 		}
+	}
+	
+	@Test(invocationCount = 20, dataProvider = "provideDataForNewHopePostQuantumCrytoKeyExchangeForEncryption", dependsOnMethods = "testMessageDigest")
+	public void testNewHopePostQuantumCrytoKeyExchange(SymmetricEncryptionType type)
+			throws java.security.NoSuchAlgorithmException, java.security.InvalidKeyException,
+			java.security.spec.InvalidKeySpecException, NoSuchAlgorithmException, NoSuchProviderException,
+			InvalidKeyException, NoSuchPaddingException, InvalidAlgorithmParameterException, InvalidKeySpecException,
+			BadPaddingException, IllegalStateException, IllegalBlockSizeException, IOException {
+		AbstractSecureRandom random = SecureRandomType.DEFAULT.getSingleton(null);
+		
+		int keySizeBits=random.nextBoolean()?128:256;
+		NewHopeKeyAgreementClient client=new NewHopeKeyAgreementClient(type, keySizeBits, random);
+		NewHopeKeyAgreementServer server=new NewHopeKeyAgreementServer(type, keySizeBits, random);
+		
+		byte clientData[]=client.getDataPhase1();
+		server.setDataPhase1(clientData);
+		byte serverData[]=server.getDataPhase2();
+		client.setDataPhase2(serverData);
+		
+		SymmetricSecretKey keyClient=client.generateSecretKey();
+		SymmetricSecretKey serverClient=server.generateSecretKey();
+		
+		
+		Assert.assertEquals(keyClient,serverClient);
+		Assert.assertEquals(keyClient.getKeySizeBits(), keySizeBits);
+
+		testEncryptionAfterKeyExchange(random, type, keyClient);
 
 	}
+	
+	@DataProvider(name="provideDataForNewHopePostQuantumCrytoKeyExchangeForEncryption")
+	Object[][] provideDataForNewHopePostQuantumCrytoKeyExchangeForEncryption()
+	{
+		return new Object[][] {
+			{SymmetricEncryptionType.AES},
+			{SymmetricEncryptionType.BC_FIPS_AES},
+			{SymmetricEncryptionType.BC_SERPENT},
+			{SymmetricEncryptionType.BC_TWOFISH},
+			{SymmetricEncryptionType.GNU_AES},
+			{SymmetricEncryptionType.GNU_ANUBIS},
+			{SymmetricEncryptionType.GNU_SERPENT},
+			{SymmetricEncryptionType.GNU_TWOFISH}
+		};
+	}
+	
+	@DataProvider(name="provideDataForNewHopePostQuantumCrytoKeyExchangeForSignature")
+	Object[][] provideDataForNewHopePostQuantumCrytoKeyExchangeForSignature()
+	{
+		return new Object[][] {
+			{SymmetricAuthentifiedSignatureType.BC_FIPS_HMAC_SHA_256},
+			{SymmetricAuthentifiedSignatureType.BC_FIPS_HMAC_SHA_384},
+			{SymmetricAuthentifiedSignatureType.BC_FIPS_HMAC_SHA_512},
+			{SymmetricAuthentifiedSignatureType.HMAC_SHA_256},
+			{SymmetricAuthentifiedSignatureType.HMAC_SHA_384},
+			{SymmetricAuthentifiedSignatureType.HMAC_SHA_512}
+			
+		};
+	}
+	
+	@Test(invocationCount = 20, dataProvider = "provideDataForNewHopePostQuantumCrytoKeyExchangeForSignature", dependsOnMethods = "testMessageDigest")
+	public void testNewHopePostQuantumCrytoKeyExchange(SymmetricAuthentifiedSignatureType type)
+			throws java.security.NoSuchAlgorithmException, java.security.InvalidKeyException,
+			java.security.spec.InvalidKeySpecException, NoSuchAlgorithmException, NoSuchProviderException,
+			InvalidKeyException, NoSuchPaddingException, InvalidAlgorithmParameterException, InvalidKeySpecException,
+			BadPaddingException, IllegalStateException, IllegalBlockSizeException, IOException, SignatureException, ShortBufferException, InvalidParameterSpecException {
+		AbstractSecureRandom random = SecureRandomType.DEFAULT.getSingleton(null);
+		
+		int keySizeBits=random.nextBoolean()?128:256;
+		NewHopeKeyAgreementClient client=new NewHopeKeyAgreementClient(type, keySizeBits, random);
+		NewHopeKeyAgreementServer server=new NewHopeKeyAgreementServer(type, keySizeBits, random);
+		
+		byte clientData[]=client.getDataPhase1();
+		server.setDataPhase1(clientData);
+		byte serverData[]=server.getDataPhase2();
+		client.setDataPhase2(serverData);
+		
+		SymmetricSecretKey keyClient=client.generateSecretKey();
+		SymmetricSecretKey serverClient=server.generateSecretKey();
+		
+		
+		Assert.assertEquals(keyClient,serverClient);
+		Assert.assertEquals(keyClient.getKeySizeBits(), keySizeBits);
+
+		testSignatureAfterKeyExchange(random, keyClient);
+	}
+	
+	private void testSignatureAfterKeyExchange(AbstractSecureRandom random, SymmetricSecretKey key) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidKeyException, SignatureException, InvalidKeySpecException, ShortBufferException, IllegalStateException, InvalidAlgorithmParameterException, IOException, InvalidParameterSpecException
+	{
+		SymmetricAuthentifiedSignatureCheckerAlgorithm checker=new SymmetricAuthentifiedSignatureCheckerAlgorithm(key);
+		SymmetricAuthentifiedSignerAlgorithm signer=new SymmetricAuthentifiedSignerAlgorithm(key);
+
+		for (byte[] m : messagesToEncrypt) {
+			byte[] signature=signer.sign(m);
+			Assert.assertTrue(checker.verify(m, signature));
+			for (int i=0;i<signature.length;i++)
+				signature[i]=(byte)~signature[i];
+			Assert.assertFalse(checker.verify(m, signature));
+		}
+	}
+	
 	@Test(invocationCount = 100, dataProvider = "provideDataForEllipticCurveDiffieHellmanKeyExchanger", dependsOnMethods = "testMessageDigest")
 	public void testEllipticCurveDiffieHellmanKeyExchangerForSignature(EllipticCurveDiffieHellmanType type)
 			throws java.security.NoSuchAlgorithmException, java.security.InvalidKeyException,
@@ -1311,16 +1418,7 @@ public class CryptoTests {
 
 		SymmetricSecretKey key = peer1.getDerivedKey();
 
-		SymmetricAuthentifiedSignatureCheckerAlgorithm checker=new SymmetricAuthentifiedSignatureCheckerAlgorithm(key);
-		SymmetricAuthentifiedSignerAlgorithm signer=new SymmetricAuthentifiedSignerAlgorithm(key);
-
-		for (byte[] m : messagesToEncrypt) {
-			byte[] signature=signer.sign(m);
-			Assert.assertTrue(checker.verify(m, signature));
-			for (int i=0;i<signature.length;i++)
-				signature[i]=(byte)~signature[i];
-			Assert.assertFalse(checker.verify(m, signature));
-		}
+		testSignatureAfterKeyExchange(random, key);
 
 	}
 
