@@ -52,7 +52,7 @@ import org.bouncycastle.crypto.ec.CustomNamedCurves;
 public final class JavaNativeKeyPairGenerator extends AbstractKeyPairGenerator {
 	private final KeyPairGenerator keyPairGenerator;
 
-	private short keySize = -1;
+	private short keySizeBits = -1;
 	private long expirationTime = -1;
 
 	JavaNativeKeyPairGenerator(ASymmetricEncryptionType type, KeyPairGenerator keyPairGenerator) {
@@ -68,9 +68,9 @@ public final class JavaNativeKeyPairGenerator extends AbstractKeyPairGenerator {
 	public ASymmetricKeyPair generateKeyPair() {
 		KeyPair kp = keyPairGenerator.generateKeyPair();
 		if (encryptionType==null)
-			return new ASymmetricKeyPair(signatureType, kp, keySize, expirationTime);
+			return new ASymmetricKeyPair(signatureType, kp, keySizeBits, expirationTime);
 		else
-			return new ASymmetricKeyPair(encryptionType, kp, keySize, expirationTime);
+			return new ASymmetricKeyPair(encryptionType, kp, keySizeBits, expirationTime);
 	}
 
 	@Override
@@ -81,7 +81,7 @@ public final class JavaNativeKeyPairGenerator extends AbstractKeyPairGenerator {
 	@Override
 	public void initialize(short _keysize, long expirationTime) {
 		keyPairGenerator.initialize(_keysize);
-		this.keySize = _keysize;
+		this.keySizeBits = _keysize;
 		this.expirationTime = expirationTime;
 
 	}
@@ -151,7 +151,7 @@ public final class JavaNativeKeyPairGenerator extends AbstractKeyPairGenerator {
 		{
 			throw new gnu.vm.jgnu.security.InvalidAlgorithmParameterException(e);
 		}
-		this.keySize = _keysize;
+		this.keySizeBits = _keysize;
 		this.expirationTime = expirationTime;
 
 	}

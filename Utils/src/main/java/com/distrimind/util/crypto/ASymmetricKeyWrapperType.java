@@ -43,12 +43,12 @@ import java.security.spec.MGF1ParameterSpec;
 import javax.crypto.spec.OAEPParameterSpec;
 import javax.crypto.spec.PSource;
 
-
 import org.bouncycastle.crypto.InvalidWrappingException;
 import org.bouncycastle.crypto.KeyUnwrapperUsingSecureRandom;
 import org.bouncycastle.crypto.KeyWrapperUsingSecureRandom;
 import org.bouncycastle.crypto.asymmetric.AsymmetricRSAPrivateKey;
 import org.bouncycastle.crypto.asymmetric.AsymmetricRSAPublicKey;
+import org.bouncycastle.crypto.fips.FipsDigestAlgorithm;
 import org.bouncycastle.crypto.fips.FipsRSA;
 import org.bouncycastle.crypto.fips.FipsSHS;
 import org.bouncycastle.crypto.fips.FipsRSA.OAEPParameters;
@@ -73,29 +73,43 @@ import gnu.vm.jgnux.crypto.SecretKey;
  */
 public enum ASymmetricKeyWrapperType {
 
-	RSA_OAEP("RSA/ECB/OAEPPadding",CodeProvider.SunJCE, false),
-	RSA_OAEP_WITH_PARAMETERS("RSA/ECB/OAEPPadding",CodeProvider.SunJCE, true),
-	GNU_RSA_OAEP("RSA/NONE/OAEPPadding",CodeProvider.GNU_CRYPTO, false),
-	BC_FIPS_RSA_OAEP("RSA/NONE/OAEPPadding",CodeProvider.BCFIPS, false),
-	BC_FIPS_RSA_OAEP_WITH_PARAMETERS("RSA/NONE/OAEPPadding",CodeProvider.BCFIPS, true),
+	RSA_OAEP_WITH_SHA2_384("RSA/ECB/OAEPPadding",CodeProvider.SunJCE, false, "SHA-384", FipsSHS.Algorithm.SHA384),
+	RSA_OAEP_WITH_PARAMETERS_SHA2_384("RSA/ECB/OAEPPadding",CodeProvider.SunJCE, true, "SHA-384", FipsSHS.Algorithm.SHA384),
+	GNU_RSA_OAEP_SHA2_384("RSA/NONE/OAEPPadding",CodeProvider.GNU_CRYPTO, false, "SHA-384", FipsSHS.Algorithm.SHA384),
+	RSA_OAEP_SHA2_512("RSA/ECB/OAEPPadding",CodeProvider.SunJCE, false, "SHA-512", FipsSHS.Algorithm.SHA512),
+	RSA_OAEP_WITH_PARAMETERS_SHA2_512("RSA/ECB/OAEPPadding",CodeProvider.SunJCE, true, "SHA-512", FipsSHS.Algorithm.SHA512),
+	GNU_RSA_OAEP_SHA2_512("RSA/NONE/OAEPPadding",CodeProvider.GNU_CRYPTO, false, "SHA-512", FipsSHS.Algorithm.SHA512),
+	BC_FIPS_RSA_OAEP_WITH_SHA2_384("RSA/NONE/OAEPPadding",CodeProvider.BCFIPS, false, "SHA-384", FipsSHS.Algorithm.SHA384),
+	BC_FIPS_RSA_OAEP_WITH_PARAMETERS_SHA2_384("RSA/NONE/OAEPPadding",CodeProvider.BCFIPS, true, "SHA-384", FipsSHS.Algorithm.SHA384),
+	BC_FIPS_RSA_OAEP_SHA2_512("RSA/NONE/OAEPPadding",CodeProvider.BCFIPS, false, "SHA-384", FipsSHS.Algorithm.SHA512),
+	BC_FIPS_RSA_OAEP_WITH_PARAMETERS_SHA2_512("RSA/NONE/OAEPPadding",CodeProvider.BCFIPS, true, "SHA-384", FipsSHS.Algorithm.SHA512),
+	BC_FIPS_RSA_OAEP_WITH_SHA3_384("RSA/NONE/OAEPPadding",CodeProvider.BCFIPS, false, "SHA-384", FipsSHS.Algorithm.SHA3_384),
+	BC_FIPS_RSA_OAEP_WITH_PARAMETERS_SHA3_384("RSA/NONE/OAEPPadding",CodeProvider.BCFIPS, true, "SHA-384", FipsSHS.Algorithm.SHA3_384),
+	BC_FIPS_RSA_OAEP_SHA3_512("RSA/NONE/OAEPPadding",CodeProvider.BCFIPS, false, "SHA-384", FipsSHS.Algorithm.SHA3_512),
+	BC_FIPS_RSA_OAEP_WITH_PARAMETERS_SHA3_512("RSA/NONE/OAEPPadding",CodeProvider.BCFIPS, true, "SHA-384", FipsSHS.Algorithm.SHA3_512),
 	//BC_FIPS_RSA_KTS_KTM("RSA-KTS-KEM-KWS",CodeProvider.BCFIPS, false),
-	DEFAULT(BC_FIPS_RSA_OAEP_WITH_PARAMETERS);
+	DEFAULT(BC_FIPS_RSA_OAEP_WITH_PARAMETERS_SHA3_384);
 	
 	
 	
 	private final String algorithmName;
 	private final CodeProvider provider;
 	private final boolean withParameters;
+	private final String shaAlgorithm;
+	private final FipsDigestAlgorithm bcShaDigestAlgorithm;
 	
-	private ASymmetricKeyWrapperType(String algorithmName, CodeProvider provider, boolean withParameters) {
+	
+	private ASymmetricKeyWrapperType(String algorithmName, CodeProvider provider, boolean withParameters, String shaAlgorithm, FipsDigestAlgorithm bcShaDigestAlgorithm) {
 		this.algorithmName = algorithmName;
 		this.provider = provider;
 		this.withParameters=withParameters;
+		this.shaAlgorithm=shaAlgorithm;
+		this.bcShaDigestAlgorithm=bcShaDigestAlgorithm;
 	}
 	
 	private ASymmetricKeyWrapperType(ASymmetricKeyWrapperType other)
 	{
-		this(other.algorithmName, other.provider, other.withParameters);
+		this(other.algorithmName, other.provider, other.withParameters, other.shaAlgorithm, other.bcShaDigestAlgorithm);
 	}
 	
 	public CodeProvider getCodeProvider()
@@ -166,7 +180,7 @@ public enum ASymmetricKeyWrapperType {
 	{
 		OAEPParameters OAEPParams=FipsRSA.WRAP_OAEP;
 		if (withParameters)
-			OAEPParams=OAEPParams.withMGFDigest(FipsSHS.Algorithm.SHA3_384)
+			OAEPParams=OAEPParams.withMGFDigest(bcShaDigestAlgorithm)
 						.withEncodingParams(params);
 		return OAEPParams;
 	}
@@ -190,7 +204,7 @@ public enum ASymmetricKeyWrapperType {
 			try
 			{
 				javax.crypto.Cipher c=null;
-				if (provider.equals(CodeProvider.BCFIPS) || (OSValidator.getCurrentOS()==OSValidator.MACOS && (this==RSA_OAEP || this==ASymmetricKeyWrapperType.RSA_OAEP_WITH_PARAMETERS)))
+				if (provider.equals(CodeProvider.BCFIPS) || (OSValidator.getCurrentOS()==OSValidator.MACOS && (this.getCodeProvider()==CodeProvider.SunJCE)))
 				{
 					CodeProvider.ensureBouncyCastleProviderLoaded();
 					
@@ -249,7 +263,7 @@ public enum ASymmetricKeyWrapperType {
 				if (withParameters)
 				{
 					c.init(javax.crypto.Cipher.WRAP_MODE, publicKey.toJavaNativeKey(),
-							new OAEPParameterSpec("SHA-384","MGF1",new MGF1ParameterSpec("SHA-384"),PSource.PSpecified.DEFAULT), random);
+							new OAEPParameterSpec(shaAlgorithm,"MGF1",new MGF1ParameterSpec(shaAlgorithm),PSource.PSpecified.DEFAULT), random);
 					byte[] wrapedKey=c.wrap(keyToWrap.toJavaNativeKey());
 					byte[] encodedParameters=c.getParameters().getEncoded();
 					return wrapKeyWithMetaData(Bits.concateEncodingWithShortSizedTabs(wrapedKey, encodedParameters), keyToWrap);
@@ -327,7 +341,7 @@ public enum ASymmetricKeyWrapperType {
 				
 				
 				javax.crypto.Cipher c=null;
-				if (provider.equals(CodeProvider.BCFIPS) || (OSValidator.getCurrentOS()==OSValidator.MACOS && (this==RSA_OAEP || this==ASymmetricKeyWrapperType.RSA_OAEP_WITH_PARAMETERS)))
+				if (provider.equals(CodeProvider.BCFIPS) || (OSValidator.getCurrentOS()==OSValidator.MACOS && (this.getCodeProvider()==CodeProvider.SunJCE)))
 				{
 					CodeProvider.ensureBouncyCastleProviderLoaded();
 					
@@ -370,7 +384,7 @@ public enum ASymmetricKeyWrapperType {
 				{
 					byte[][] tmp=Bits.separateEncodingsWithShortSizedTabs(keyToUnwrap);
 					wrapedKey=tmp[0];
-					AlgorithmParameters algorithmParameters = provider.equals(CodeProvider.BCFIPS)?AlgorithmParameters.getInstance("OAEP",provider.name()):AlgorithmParameters.getInstance("OAEP");
+					AlgorithmParameters algorithmParameters = AlgorithmParameters.getInstance("OAEP");
 					algorithmParameters.init(tmp[1]);
 					c.init(Cipher.UNWRAP_MODE, privateKey.toJavaNativeKey(), algorithmParameters);
 				}
