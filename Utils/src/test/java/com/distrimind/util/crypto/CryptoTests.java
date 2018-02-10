@@ -767,14 +767,14 @@ public class CryptoTests {
 		String invalidPassword = "invalid password";
 		ph.setCost((byte)7);
 		byte[] hashedValue = ph.hash(password);
-		Assert.assertTrue(ph.checkValidHashedPassword(password, hashedValue));
-		Assert.assertFalse(ph.checkValidHashedPassword(invalidPassword, hashedValue));
+		Assert.assertTrue(PasswordHash.checkValidHashedPassword(password, hashedValue));
+		Assert.assertFalse(PasswordHash.checkValidHashedPassword(invalidPassword, hashedValue));
 		byte[] staticSalt = new byte[20];
 		random.nextBytes(staticSalt);
 		hashedValue = ph.hash(password, staticSalt);
-		Assert.assertTrue(ph.checkValidHashedPassword(password, hashedValue, staticSalt));
-		Assert.assertFalse(ph.checkValidHashedPassword(password, hashedValue));
-		Assert.assertFalse(ph.checkValidHashedPassword(invalidPassword, hashedValue, staticSalt));
+		Assert.assertTrue(PasswordHash.checkValidHashedPassword(password, hashedValue, staticSalt));
+		Assert.assertFalse(PasswordHash.checkValidHashedPassword(password, hashedValue));
+		Assert.assertFalse(PasswordHash.checkValidHashedPassword(invalidPassword, hashedValue, staticSalt));
 	}
 	@Test(dataProvider = "providePasswordKeyDerivationTypesForSymmetricEncryptions", dependsOnMethods="testPasswordHash")
 	public void testPasswordKeyDerivation(PasswordBasedKeyGenerationType derivationType, SymmetricEncryptionType encryptionType) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {

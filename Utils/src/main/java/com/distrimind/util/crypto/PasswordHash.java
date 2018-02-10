@@ -38,6 +38,7 @@ import java.security.SecureRandom;
 import java.util.Arrays;
 
 import com.distrimind.util.Bits;
+import com.distrimind.util.sizeof.ObjectSizer;
 
 import gnu.vm.jgnu.security.NoSuchAlgorithmException;
 import gnu.vm.jgnu.security.NoSuchProviderException;
@@ -95,37 +96,34 @@ public class PasswordHash {
 		this.saltSize = saltSize;
 	}
 
-	public boolean checkValidHashedPassword(char password[], byte[] goodHash, byte defaultHashLengthBytes) {
-		return this.checkValidHashedPassword(password, goodHash, null, defaultHashLengthBytes);
+
+	public static boolean checkValidHashedPassword(char password[], byte[] goodHash) {
+		return checkValidHashedPassword(password, goodHash, null);
 	}
 
-	public boolean checkValidHashedPassword(char password[], byte[] goodHash) {
-		return this.checkValidHashedPassword(password, goodHash, null, type.getDefaultHashLengthBytes());
-	}
-
-	public boolean checkValidHashedPassword(char password[], byte[] goodHash, byte[] staticAdditionalSalt, byte defaultHashLengthBytes) {
+	public static boolean checkValidHashedPassword(char password[], byte[] goodHash, byte[] staticAdditionalSalt) {
+		PasswordHashType type=PasswordHashType.valueOf(goodHash);
+		byte cost=PasswordHashType.getCost(goodHash);
 		try {
-			byte[][] separated = Bits.separateEncodingsWithShortSizedTabs(goodHash);
+			
+			
+			byte []composedHash=getHashFromIdentifiedHash(goodHash);
+			byte[][] separated = Bits.separateEncodingsWithShortSizedTabs(composedHash);
 			byte[] generatedSalt = separated[1];
 			byte[] salt = mixSaltWithStaticSalt(generatedSalt, staticAdditionalSalt);
+			byte hash[]=separated[0];
 
-			return Arrays.equals(type.hash(password, salt, cost, defaultHashLengthBytes), separated[0]);
+			return Arrays.equals(type.hash(password, salt, cost, (byte)hash.length), hash);
 		} catch (Exception e) {
 			return false;
 		}
 	}
 
-	public boolean checkValidHashedPassword(String password, byte[] goodHash) {
+	public static boolean checkValidHashedPassword(String password, byte[] goodHash) {
 		return checkValidHashedPassword(password.toCharArray(), goodHash);
 	}
-	public boolean checkValidHashedPassword(String password, byte[] goodHash, byte defaultHashLengthBytes) {
-		return checkValidHashedPassword(password.toCharArray(), goodHash, defaultHashLengthBytes);
-	}
-	public boolean checkValidHashedPassword(String password, byte[] goodHash, byte[] staticAdditionalSalt) {
-		return checkValidHashedPassword(password.toCharArray(), goodHash, staticAdditionalSalt, type.getDefaultHashLengthBytes());
-	}
-	public boolean checkValidHashedPassword(String password, byte[] goodHash, byte[] staticAdditionalSalt, byte defaultHashLengthBytes) {
-		return checkValidHashedPassword(password.toCharArray(), goodHash, staticAdditionalSalt, defaultHashLengthBytes);
+	public static boolean checkValidHashedPassword(String password, byte[] goodHash, byte[] staticAdditionalSalt) {
+		return checkValidHashedPassword(password.toCharArray(), goodHash, staticAdditionalSalt);
 	}
 
 	public byte getCost() {
@@ -155,9 +153,28 @@ public class PasswordHash {
 
 		byte[] generatedSalt = generateSalt(random, saltSize);
 		byte[] salt = mixSaltWithStaticSalt(generatedSalt, staticAdditionalSalt);
-		return Bits.concateEncodingWithShortSizedTabs(type.hash(password, salt, cost, defaultHashLengthBytes), generatedSalt);
+		return getIdentifiedHash(Bits.concateEncodingWithShortSizedTabs(type.hash(password, salt, cost, defaultHashLengthBytes), generatedSalt));
+		
+	}
+	
+	private byte[] getIdentifiedHash(byte hash[])
+	{
+		byte res[]=new byte[hash.length+2];
+		res[0]=type.getID();
+		res[1]=cost;
+		System.arraycopy(hash, 0, res, ObjectSizer.SHORT_FIELD_SIZE, hash.length);
+		return res;
 	}
 
+	
+	
+	
+	private static byte[] getHashFromIdentifiedHash(byte identifiedHash[])
+	{
+		byte res[]=new byte[identifiedHash.length-2];
+		System.arraycopy(identifiedHash, 2, res, 0, res.length);
+		return res;
+	}
 	public byte[] hash(String password)
 			throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException, NoSuchProviderException {
 		return hash(password.toCharArray());
@@ -175,7 +192,7 @@ public class PasswordHash {
 		return hash(password.toCharArray(), staticAdditionalSalt, defaultHashLengthBytes);
 	}
 
-	private byte[] mixSaltWithStaticSalt(byte[] salt, byte[] staticAdditionalSalt) {
+	private static byte[] mixSaltWithStaticSalt(byte[] salt, byte[] staticAdditionalSalt) {
 		if (staticAdditionalSalt != null) {
 			byte[] res = new byte[salt.length + staticAdditionalSalt.length];
 			System.arraycopy(salt, 0, res, 0, salt.length);
