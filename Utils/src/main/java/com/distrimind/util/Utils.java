@@ -54,8 +54,8 @@ public class Utils {
 		Calendar c = Calendar.getInstance();
 		c.set(2016, 1, 4);
 		Calendar c2 = Calendar.getInstance();
-		c.set(2018, 1, 9);
-		VERSION = new Version("Utils", "Utils", 3, 10, 0, Version.Type.Stable, 0, c.getTime(), c2.getTime());
+		c.set(2018, 1, 10);
+		VERSION = new Version("Utils", "Utils", 3, 10, 1, Version.Type.Stable, 0, c.getTime(), c2.getTime());
 		try {
 
 			InputStream is = Utils.class.getResourceAsStream("build.txt");
@@ -68,8 +68,17 @@ public class Utils {
 			VERSION.addDeveloper(new PersonDeveloper("mahdjoub", "jason", c.getTime()));
 			
 			c = Calendar.getInstance();
+			c.set(2018, 1, 10);
+			Description d = new Description(3, 10, 1, Version.Type.Stable, 0, c.getTime());
+			d.addItem("Fix a problem with BC Mac Length.");
+			d.addItem("Add asymmetric encryption algorithms.");
+			d.addItem("Add asymmetric key wrapper algorithms.");
+			d.addItem("Rename getKeySize to getKeySizeBits.");
+			VERSION.addDescription(d);
+			
+			c = Calendar.getInstance();
 			c.set(2018, 1, 9);
-			Description d = new Description(3, 10, 0, Version.Type.Stable, 0, c.getTime());
+			d = new Description(3, 10, 0, Version.Type.Stable, 0, c.getTime());
 			d.addItem("Encryption algorithms does not need signed JAR to work. So this release work on official Oracle JVM.");
 			d.addItem("Add a post quantum cryptography algorithm : New Hope Key Exchanger.");
 			VERSION.addDescription(d);

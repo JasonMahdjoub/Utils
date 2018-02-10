@@ -315,7 +315,7 @@ public class CryptoTests {
 			IllegalBlockSizeException, BadPaddingException, NoSuchProviderException {
 		System.out.println("Testing ASymmetricSecretMessageExchanger " + type);
 		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getSingleton(null);
-		for (short keySize = 1024; keySize <= 4096; keySize += 1024) {
+		for (short keySize = 2048; keySize <= 4096; keySize += 1024) {
 			ASymmetricKeyPair kpd = type.getKeyPairGenerator(rand, keySize).generateKeyPair();
 			ASymmetricKeyPair kpl = type.getKeyPairGenerator(rand, keySize).generateKeyPair();
 
@@ -612,7 +612,7 @@ public class CryptoTests {
 			BadPaddingException, NoSuchProviderException, InvalidKeySpecException, ShortBufferException, IllegalStateException, InvalidParameterSpecException {
 		System.out.println("Testing " + type);
 		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getSingleton(null);
-		ASymmetricKeyPair kp = type.getKeyPairGenerator(rand, (short) 1024).generateKeyPair();
+		ASymmetricKeyPair kp = type.getKeyPairGenerator(rand, (short) 2048).generateKeyPair();
 		
 		ClientASymmetricEncryptionAlgorithm algoClient = new ClientASymmetricEncryptionAlgorithm(rand,
 				kp.getASymmetricPublicKey());
