@@ -68,7 +68,7 @@ public class ASymmetricAuthentifiedSignerAlgorithm extends AbstractAuthentifiedS
 			throw new IllegalArgumentException("The given key is not destinated to a signature process");
 		this.localPrivateKey = localPrivateKey;
 		this.signature = type.getSignatureInstance();
-		this.macLength = type.getSignatureSizeBytes(localPrivateKey.getKeySize());
+		this.macLength = type.getSignatureSizeBytes(localPrivateKey.getKeySizeBits());
 	}
 
 	public ASymmetricPrivateKey getLocalPrivateKey() {

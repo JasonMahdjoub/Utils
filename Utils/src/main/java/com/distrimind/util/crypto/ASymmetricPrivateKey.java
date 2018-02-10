@@ -67,7 +67,7 @@ public class ASymmetricPrivateKey extends Key {
 	// private final PrivateKey privateKey;
 	private final byte[] privateKey;
 
-	private final short keySize;
+	private final short keySizeBits;
 
 	private ASymmetricEncryptionType encryptionType;
 	private ASymmetricAuthentifiedSignatureType signatureType;
@@ -132,7 +132,7 @@ public class ASymmetricPrivateKey extends Key {
 		if (keySize < 256)
 			throw new IllegalArgumentException("keySize");
 		this.privateKey = privateKey;
-		this.keySize = keySize;
+		this.keySizeBits = keySize;
 		hashCode = Arrays.hashCode(privateKey);
 	}
 
@@ -142,7 +142,7 @@ public class ASymmetricPrivateKey extends Key {
 		if (keySize < 256)
 			throw new IllegalArgumentException("keySize");
 		this.privateKey = ASymmetricEncryptionType.encodePrivateKey(privateKey);
-		this.keySize = keySize;
+		this.keySizeBits = keySize;
 		hashCode = Arrays.hashCode(this.privateKey);
 	}
 
@@ -152,7 +152,7 @@ public class ASymmetricPrivateKey extends Key {
 		if (keySize < 256)
 			throw new IllegalArgumentException("keySize");
 		this.privateKey = ASymmetricEncryptionType.encodePrivateKey(privateKey);
-		this.keySize = keySize;
+		this.keySizeBits = keySize;
 		hashCode = Arrays.hashCode(this.privateKey);
 	}
 
@@ -160,7 +160,7 @@ public class ASymmetricPrivateKey extends Key {
 	public byte[] encode() {
 		byte[] tab = new byte[7];
 		tab[0]=encryptionType==null?(byte)4:(byte)5;
-		Bits.putShort(tab, 1, keySize);
+		Bits.putShort(tab, 1, keySizeBits);
 		Bits.putInt(tab, 3, encryptionType==null?signatureType.ordinal():encryptionType.ordinal());
 		
 		return Bits.concateEncodingWithShortSizedTabs(tab, privateKey);
@@ -174,7 +174,7 @@ public class ASymmetricPrivateKey extends Key {
 			return true;
 		if (o instanceof ASymmetricPrivateKey) {
 			ASymmetricPrivateKey other = (ASymmetricPrivateKey) o;
-			return keySize == other.keySize && encryptionType == other.encryptionType && signatureType == other.signatureType && Arrays.equals(privateKey, other.privateKey);
+			return keySizeBits == other.keySizeBits && encryptionType == other.encryptionType && signatureType == other.signatureType && Arrays.equals(privateKey, other.privateKey);
 		}
 		return false;
 	}
@@ -190,15 +190,15 @@ public class ASymmetricPrivateKey extends Key {
 		return privateKey;
 	}
 
-	public short getKeySize() {
-		return keySize;
+	public short getKeySizeBits() {
+		return keySizeBits;
 	}
 
 	public int getMaxBlockSize() {
 		if (encryptionType==null)
 			throw new IllegalAccessError("This key should be used for signature");
 		else
-			return encryptionType.getMaxBlockSize(keySize);
+			return encryptionType.getMaxBlockSize(keySizeBits);
 	}
 
 	@Override

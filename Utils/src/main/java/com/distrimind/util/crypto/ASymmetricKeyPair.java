@@ -85,7 +85,7 @@ public class ASymmetricKeyPair implements Serializable {
 
 	private final ASymmetricPublicKey publicKey;
 
-	private final short keySize;
+	private final short keySizeBits;
 
 	private final ASymmetricEncryptionType encryptionType;
 	private final ASymmetricAuthentifiedSignatureType signatureType;
@@ -108,7 +108,7 @@ public class ASymmetricKeyPair implements Serializable {
 			throw new IllegalArgumentException("keySize");
 		this.privateKey = privateKey;
 		this.publicKey = publicKey;
-		this.keySize = keySize;
+		this.keySizeBits = keySize;
 		this.encryptionType = type;
 		this.signatureType=null;
 
@@ -125,7 +125,7 @@ public class ASymmetricKeyPair implements Serializable {
 			throw new IllegalArgumentException("keySize");
 		privateKey = new ASymmetricPrivateKey(type, keyPair.getPrivate(), keySize);
 		publicKey = new ASymmetricPublicKey(type, keyPair.getPublic(), keySize, expirationUTC);
-		this.keySize = keySize;
+		this.keySizeBits = keySize;
 		this.encryptionType = type;
 		this.signatureType=null;
 
@@ -141,7 +141,7 @@ public class ASymmetricKeyPair implements Serializable {
 			throw new IllegalArgumentException("keySize");
 		privateKey = new ASymmetricPrivateKey(type, keyPair.getPrivate(), keySize);
 		publicKey = new ASymmetricPublicKey(type, keyPair.getPublic(), keySize, expirationUTC);
-		this.keySize = keySize;
+		this.keySizeBits = keySize;
 		this.encryptionType = type;
 		this.signatureType=null;
 
@@ -160,7 +160,7 @@ public class ASymmetricKeyPair implements Serializable {
 			throw new IllegalArgumentException("keySize");
 		this.privateKey = privateKey;
 		this.publicKey = publicKey;
-		this.keySize = keySize;
+		this.keySizeBits = keySize;
 		this.encryptionType = null;
 		this.signatureType=type;
 
@@ -177,7 +177,7 @@ public class ASymmetricKeyPair implements Serializable {
 			throw new IllegalArgumentException("keySize");
 		privateKey = new ASymmetricPrivateKey(type, keyPair.getPrivate(), keySize);
 		publicKey = new ASymmetricPublicKey(type, keyPair.getPublic(), keySize, expirationUTC);
-		this.keySize = keySize;
+		this.keySizeBits = keySize;
 		this.encryptionType = null;
 		this.signatureType=type;
 
@@ -193,7 +193,7 @@ public class ASymmetricKeyPair implements Serializable {
 			throw new IllegalArgumentException("keySize");
 		privateKey = new ASymmetricPrivateKey(type, keyPair.getPrivate(), keySize);
 		publicKey = new ASymmetricPublicKey(type, keyPair.getPublic(), keySize, expirationUTC);
-		this.keySize = keySize;
+		this.keySizeBits = keySize;
 		this.encryptionType = null;
 		this.signatureType=type;
 
@@ -203,7 +203,7 @@ public class ASymmetricKeyPair implements Serializable {
 	
 	public byte[] encode() {
 		byte[] tab = new byte[15];
-		Bits.putShort(tab, 0, keySize);
+		Bits.putShort(tab, 0, keySizeBits);
 		Bits.putInt(tab, 2, encryptionType==null?signatureType.ordinal():encryptionType.ordinal());
 		Bits.putLong(tab, 6, publicKey.getTimeExpirationUTC());
 		tab[14]=encryptionType==null?(byte)1:(byte)0;
@@ -222,7 +222,7 @@ public class ASymmetricKeyPair implements Serializable {
 			return true;
 		if (o instanceof ASymmetricKeyPair) {
 			ASymmetricKeyPair other = ((ASymmetricKeyPair) o);
-			return privateKey.equals(other.privateKey) && publicKey.equals(other.publicKey) && keySize == other.keySize
+			return privateKey.equals(other.privateKey) && publicKey.equals(other.publicKey) && keySizeBits == other.keySizeBits
 					&& encryptionType == other.encryptionType && signatureType == other.signatureType;
 		}
 		return false;
@@ -247,15 +247,15 @@ public class ASymmetricKeyPair implements Serializable {
 		return publicKey;
 	}
 
-	public short getKeySize() {
-		return keySize;
+	public short getKeySizeBits() {
+		return keySizeBits;
 	}
 
 	public int getMaxBlockSize() {
 		if (encryptionType==null)
 			throw new IllegalAccessError("This key should be used for signature");
 		else
-			return encryptionType.getMaxBlockSize(keySize);
+			return encryptionType.getMaxBlockSize(keySizeBits);
 	}
 
 	@Override
