@@ -49,8 +49,9 @@ import org.bouncycastle.crypto.fips.FipsSHS;
 import org.bouncycastle.crypto.generators.BCrypt;
 import org.bouncycastle.crypto.generators.SCrypt;
 
-
+import com.distrimind.util.Bits;
 import com.distrimind.util.OSValidator;
+import com.distrimind.util.sizeof.ObjectSizer;
 
 
 /**
@@ -65,7 +66,7 @@ public enum PasswordHashType {
 	PBKDF2WithHMacSHA256("PBKDF2WithHMacSHA256", (byte) 32, CodeProvider.SunJCE, (byte)2),
 	PBKDF2WithHMacSHA384("PBKDF2WithHMacSHA384", (byte) 32, CodeProvider.SunJCE, (byte)3),
 	PBKDF2WithHMacSHA512("PBKDF2WithHMacSHA512", (byte) 32, CodeProvider.SunJCE, (byte)4),
-	BCRYPT("BCRYPT", (byte) 32, CodeProvider.SUN, (byte)5), 
+	BCRYPT("BCRYPT", (byte) 24, CodeProvider.SUN, (byte)5), 
 	SCRYPT_FOR_LOGIN("SCRYPT", (byte)32, CodeProvider.BC, (byte)6),
 	SCRYPT_FOR_DATAENCRYPTION("SCRYPT", (byte)32, CodeProvider.BC, (byte)7),
 	GNU_PBKDF2WithHmacSHA1("PBKDF2WithHMacSHA1", (byte) 32, CodeProvider.GNU_CRYPTO, (byte)8), 
@@ -357,5 +358,24 @@ public enum PasswordHashType {
 		if (identifiedHash.length<2)
 			throw new IllegalArgumentException();
 		return identifiedHash[1];
+	}
+	
+	public static byte getPasswordHashLengthBytes(byte identifiedHash[])
+	{
+		short size=Bits.getShort(identifiedHash, 2);
+		
+		if (size>Byte.MAX_VALUE)
+			throw new IllegalArgumentException();
+		return (byte)size;
+	}
+	
+	public static byte getSaltSizeBytes(byte identifiedHash[])
+	{
+		int size=Bits.getShort(identifiedHash, 2);
+		size=identifiedHash.length-2 - ObjectSizer.SHORT_FIELD_SIZE - size;
+		
+		if (size>Byte.MAX_VALUE)
+			throw new IllegalArgumentException();
+		return (byte)size;
 	}
 }

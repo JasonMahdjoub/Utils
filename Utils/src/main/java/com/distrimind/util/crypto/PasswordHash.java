@@ -52,7 +52,7 @@ import gnu.vm.jgnu.security.spec.InvalidKeySpecException;
  *
  */
 public class PasswordHash {
-	final static int DEFAULT_SALT_SIZE = 24;
+	final static byte DEFAULT_SALT_SIZE = 24;
 
 	final static byte DEFAULT_COST = 16;
 
@@ -66,7 +66,7 @@ public class PasswordHash {
 
 	private final SecureRandom random;
 
-	private int saltSize;
+	private byte saltSize;
 
 	private byte cost;
 	
@@ -86,7 +86,7 @@ public class PasswordHash {
 	public PasswordHash(PasswordHashType type, SecureRandom random, byte cost) {
 		this(type, random, cost, DEFAULT_SALT_SIZE);
 	}
-	public PasswordHash(PasswordHashType type, SecureRandom random, byte cost, int saltSize) {
+	public PasswordHash(PasswordHashType type, SecureRandom random, byte cost, byte saltSize) {
 		if (cost<4 || cost>31)
 			throw new IllegalArgumentException("cost must be greater or equals than 4 and lower or equals than 31");
 
@@ -107,8 +107,8 @@ public class PasswordHash {
 		try {
 			
 			
-			byte []composedHash=getHashFromIdentifiedHash(goodHash);
-			byte[][] separated = Bits.separateEncodingsWithShortSizedTabs(composedHash);
+			//byte []composedHash=getHashFromIdentifiedHash(goodHash);
+			byte[][] separated = Bits.separateEncodingsWithShortSizedTabs(goodHash, 2, goodHash.length-2);
 			byte[] generatedSalt = separated[1];
 			byte[] salt = mixSaltWithStaticSalt(generatedSalt, staticAdditionalSalt);
 			byte hash[]=separated[0];
@@ -130,7 +130,7 @@ public class PasswordHash {
 		return cost;
 	}
 
-	public int getSaltSize() {
+	public byte getSaltSizeBytes() {
 		return saltSize;
 	}
 
@@ -146,14 +146,14 @@ public class PasswordHash {
 	{
 		return hash(password, staticAdditionalSalt, type.getDefaultHashLengthBytes());
 	}
-	public byte[] hash(char[] password, byte[] staticAdditionalSalt, byte defaultHashLengthBytes)
+	public byte[] hash(char[] password, byte[] staticAdditionalSalt, byte hashLengthBytes)
 			throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException, NoSuchProviderException {
 		if (password == null)
 			throw new NullPointerException("password");
 
 		byte[] generatedSalt = generateSalt(random, saltSize);
 		byte[] salt = mixSaltWithStaticSalt(generatedSalt, staticAdditionalSalt);
-		return getIdentifiedHash(Bits.concateEncodingWithShortSizedTabs(type.hash(password, salt, cost, defaultHashLengthBytes), generatedSalt));
+		return getIdentifiedHash(Bits.concateEncodingWithShortSizedTabs(type.hash(password, salt, cost, hashLengthBytes), generatedSalt));
 		
 	}
 	
@@ -169,12 +169,12 @@ public class PasswordHash {
 	
 	
 	
-	private static byte[] getHashFromIdentifiedHash(byte identifiedHash[])
+	/*tatic byte[] getHashFromIdentifiedHash(byte identifiedHash[])
 	{
 		byte res[]=new byte[identifiedHash.length-2];
 		System.arraycopy(identifiedHash, 2, res, 0, res.length);
 		return res;
-	}
+	}*/
 	public byte[] hash(String password)
 			throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException, NoSuchProviderException {
 		return hash(password.toCharArray());
@@ -209,7 +209,7 @@ public class PasswordHash {
 		this.cost = cost;
 	}
 
-	public void setSaltSize(int _saltSize) {
+	public void setSaltSize(byte _saltSize) {
 		saltSize = _saltSize;
 	}
 

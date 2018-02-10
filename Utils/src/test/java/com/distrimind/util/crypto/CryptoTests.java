@@ -769,6 +769,8 @@ public class CryptoTests {
 		byte[] hashedValue = ph.hash(password);
 		Assert.assertTrue(PasswordHash.checkValidHashedPassword(password, hashedValue));
 		Assert.assertFalse(PasswordHash.checkValidHashedPassword(invalidPassword, hashedValue));
+		Assert.assertEquals(PasswordHashType.getPasswordHashLengthBytes(hashedValue), type.getDefaultHashLengthBytes());
+		Assert.assertEquals(PasswordHashType.getSaltSizeBytes(hashedValue), ph.getSaltSizeBytes());
 		byte[] staticSalt = new byte[20];
 		random.nextBytes(staticSalt);
 		hashedValue = ph.hash(password, staticSalt);
