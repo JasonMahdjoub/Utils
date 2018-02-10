@@ -55,7 +55,7 @@ public class Utils {
 		c.set(2016, 1, 4);
 		Calendar c2 = Calendar.getInstance();
 		c.set(2018, 1, 10);
-		VERSION = new Version("Utils", "Utils", 3, 10, 1, Version.Type.Stable, 0, c.getTime(), c2.getTime());
+		VERSION = new Version("Utils", "Utils", 3, 10, 2, Version.Type.Stable, 0, c.getTime(), c2.getTime());
 		try {
 
 			InputStream is = Utils.class.getResourceAsStream("build.txt");
@@ -69,7 +69,7 @@ public class Utils {
 			
 			c = Calendar.getInstance();
 			c.set(2018, 1, 10);
-			Description d = new Description(3, 10, 1, Version.Type.Stable, 0, c.getTime());
+			Description d = new Description(3, 10, 2, Version.Type.Stable, 0, c.getTime());
 			d.addItem("Fix a problem with BC Mac Length.");
 			d.addItem("Add asymmetric encryption algorithms.");
 			d.addItem("Add asymmetric key wrapper algorithms.");
