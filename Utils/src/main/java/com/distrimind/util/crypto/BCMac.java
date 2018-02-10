@@ -89,7 +89,7 @@ public final class BCMac extends AbstractMac {
 	@Override
 	public int getMacLength() {
 		
-		return macLength;
+		return macLength/8;
 	}
 
 	@Override

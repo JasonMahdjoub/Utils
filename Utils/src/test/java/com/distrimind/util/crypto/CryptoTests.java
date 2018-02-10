@@ -200,7 +200,7 @@ public class CryptoTests {
 
 	@DataProvider(name = "provideDataForSymmetricSignatureTest", parallel = true)
 	public Object[][] provideDataForSymmetricSignatureTest() throws NoSuchAlgorithmException, NoSuchProviderException {
-		Object[][] res = new Object[SymmetricAuthentifiedSignatureType.values().length][];
+		Object[][] res = new Object[SymmetricAuthentifiedSignatureType.values().length*2][];
 		int i = 0;
 		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getSingleton(null);
 		for (SymmetricAuthentifiedSignatureType ast : SymmetricAuthentifiedSignatureType.values()) {
@@ -208,6 +208,13 @@ public class CryptoTests {
 			o[0] = ast;
 			
 			o[1] = ast.getKeyGenerator(rand, (short)256).generateKey();
+			res[i++] = o;
+		}
+		for (SymmetricAuthentifiedSignatureType ast : SymmetricAuthentifiedSignatureType.values()) {
+			Object o[] = new Object[2];
+			o[0] = ast;
+			
+			o[1] = ast.getKeyGenerator(rand, (short)128).generateKey();
 			res[i++] = o;
 		}
 		return res;
@@ -659,9 +666,9 @@ public class CryptoTests {
 		SymmetricEncryptionAlgorithm algoLocalS = new SymmetricEncryptionAlgorithm(rand, localKey);
 		ASymmetricKeyWrapperType kw=null;
 		if (astype.getCodeProviderForEncryption()==CodeProvider.GNU_CRYPTO)
-			kw=ASymmetricKeyWrapperType.GNU_RSA_OAEP;
+			kw=ASymmetricKeyWrapperType.GNU_RSA_OAEP_SHA2_384;
 		else
-			kw=ASymmetricKeyWrapperType.BC_FIPS_RSA_OAEP;
+			kw=ASymmetricKeyWrapperType.BC_FIPS_RSA_OAEP_SHA3_512;
 		
 			
 		byte[] localEncryptedKey = kw.wrapKey(rand, kpd.getASymmetricPublicKey(), localKey);
@@ -706,8 +713,8 @@ public class CryptoTests {
 			BadPaddingException, NoSuchProviderException, InvalidKeySpecException, ShortBufferException, IllegalStateException, InvalidParameterSpecException {
 		System.out.println("Testing " + type);
 		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getSingleton(null);
-		ASymmetricKeyPair kpd = type.getKeyPairGenerator(rand, (short)1024).generateKeyPair();
-		ASymmetricKeyPair kpl = type.getKeyPairGenerator(rand, (short)1024).generateKeyPair();
+		ASymmetricKeyPair kpd = type.getKeyPairGenerator(rand, (short)2048).generateKeyPair();
+		ASymmetricKeyPair kpl = type.getKeyPairGenerator(rand, (short)2048).generateKeyPair();
 		P2PASymmetricEncryptionAlgorithm algoDistant = new P2PASymmetricEncryptionAlgorithm(kpd,
 				kpl.getASymmetricPublicKey());
 		P2PASymmetricEncryptionAlgorithm algoLocal = new P2PASymmetricEncryptionAlgorithm(kpl,
@@ -913,7 +920,7 @@ public class CryptoTests {
 				&& kpd.getAuthentifiedSignatureAlgorithmType()!=ASymmetricAuthentifiedSignatureType.BC_SHA384withECDSA_CURVE_41417
 				&& kpd.getAuthentifiedSignatureAlgorithmType()!=ASymmetricAuthentifiedSignatureType.BC_SHA512withECDSA_CURVE_41417	
 				)
-			Assert.assertEquals(kpd.getAuthentifiedSignatureAlgorithmType().getSignatureSizeBits(kpd.getKeySize()), signature.length*8);
+			Assert.assertEquals(kpd.getAuthentifiedSignatureAlgorithmType().getSignatureSizeBits(kpd.getKeySizeBits()), signature.length*8);
 	}
 	
 	@Test(dataProvider="provideDataSymmetricKeyWrapperForEncryption")
@@ -1095,10 +1102,11 @@ public class CryptoTests {
 		r.nextBytes(m);
 
 		byte[] signature = signer.sign(m);
-
+		if (signer instanceof SymmetricAuthentifiedSignerAlgorithm)
+			Assert.assertEquals(signer.getMacLength(), signature.length);
 		Assert.assertTrue(checker.verify(m, signature));
 		Assert.assertTrue(checker.verify(m, signature));
-		
+		Assert.assertTrue(checker.verify(m, 0, m.length, signature, 0, signature.length));
 
 		for (int i = 0; i < m.length; i++) {
 			m[i] = (byte) ~m[i];
@@ -1354,7 +1362,7 @@ public class CryptoTests {
 		};
 	}
 	
-	@Test(invocationCount = 20, dataProvider = "provideDataForNewHopePostQuantumCrytoKeyExchangeForSignature", dependsOnMethods = "testMessageDigest")
+	@Test(invocationCount = 3, dataProvider = "provideDataForNewHopePostQuantumCrytoKeyExchangeForSignature", dependsOnMethods = "testMessageDigest")
 	public void testNewHopePostQuantumCrytoKeyExchange(SymmetricAuthentifiedSignatureType type)
 			throws java.security.NoSuchAlgorithmException, java.security.InvalidKeyException,
 			java.security.spec.InvalidKeySpecException, NoSuchAlgorithmException, NoSuchProviderException,
@@ -1372,19 +1380,19 @@ public class CryptoTests {
 		client.setDataPhase2(serverData);
 		
 		SymmetricSecretKey keyClient=client.generateSecretKey();
-		SymmetricSecretKey serverClient=server.generateSecretKey();
+		SymmetricSecretKey keyServer=server.generateSecretKey();
 		
 		
-		Assert.assertEquals(keyClient,serverClient);
+		Assert.assertEquals(keyClient,keyServer);
 		Assert.assertEquals(keyClient.getKeySizeBits(), keySizeBits);
 
-		testSignatureAfterKeyExchange(random, keyClient);
+		testSignatureAfterKeyExchange(random, keyClient, keyServer);
 	}
 	
-	private void testSignatureAfterKeyExchange(AbstractSecureRandom random, SymmetricSecretKey key) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidKeyException, SignatureException, InvalidKeySpecException, ShortBufferException, IllegalStateException, InvalidAlgorithmParameterException, IOException, InvalidParameterSpecException
+	private void testSignatureAfterKeyExchange(AbstractSecureRandom random, SymmetricSecretKey keySigner, SymmetricSecretKey keyChecker) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidKeyException, SignatureException, InvalidKeySpecException, ShortBufferException, IllegalStateException, InvalidAlgorithmParameterException, IOException, InvalidParameterSpecException
 	{
-		SymmetricAuthentifiedSignatureCheckerAlgorithm checker=new SymmetricAuthentifiedSignatureCheckerAlgorithm(key);
-		SymmetricAuthentifiedSignerAlgorithm signer=new SymmetricAuthentifiedSignerAlgorithm(key);
+		SymmetricAuthentifiedSignatureCheckerAlgorithm checker=new SymmetricAuthentifiedSignatureCheckerAlgorithm(keyChecker);
+		SymmetricAuthentifiedSignerAlgorithm signer=new SymmetricAuthentifiedSignerAlgorithm(keySigner);
 
 		for (byte[] m : messagesToEncrypt) {
 			byte[] signature=signer.sign(m);
@@ -1395,8 +1403,8 @@ public class CryptoTests {
 		}
 	}
 	
-	@Test(invocationCount = 100, dataProvider = "provideDataForEllipticCurveDiffieHellmanKeyExchanger", dependsOnMethods = "testMessageDigest")
-	public void testEllipticCurveDiffieHellmanKeyExchangerForSignature(EllipticCurveDiffieHellmanType type)
+	@Test(invocationCount = 10, dataProvider = "provideDataForEllipticCurveDiffieHellmanKeyExchangerForSignature", dependsOnMethods = "testMessageDigest")
+	public void testEllipticCurveDiffieHellmanKeyExchangerForSignature(EllipticCurveDiffieHellmanType type, SymmetricAuthentifiedSignatureType signatureType)
 			throws java.security.NoSuchAlgorithmException, java.security.InvalidKeyException,
 			java.security.spec.InvalidKeySpecException, NoSuchAlgorithmException, NoSuchProviderException,
 			InvalidKeyException, NoSuchPaddingException, InvalidAlgorithmParameterException, InvalidKeySpecException,
@@ -1411,17 +1419,15 @@ public class CryptoTests {
 		byte[] publicKey2 = peer2.getEncodedPublicKey();
 		byte[] keyingMaterial=new byte[100];
 		random.nextBytes(keyingMaterial);
-		
-		peer1.setDistantPublicKey(publicKey2, SymmetricAuthentifiedSignatureType.DEFAULT, (short)128, keyingMaterial);
-		peer2.setDistantPublicKey(publicKey1, SymmetricAuthentifiedSignatureType.DEFAULT, (short)128, keyingMaterial);
+		short keySizeBits=random.nextBoolean()?(short)128:(short)256;
+		peer1.setDistantPublicKey(publicKey2, signatureType, keySizeBits, keyingMaterial);
+		peer2.setDistantPublicKey(publicKey1, signatureType, keySizeBits, keyingMaterial);
 		Assert.assertEquals(peer1.getDerivedKey(),peer2.getDerivedKey());
 
-		SymmetricSecretKey key = peer1.getDerivedKey();
-
-		testSignatureAfterKeyExchange(random, key);
+		testSignatureAfterKeyExchange(random, peer1.getDerivedKey(), peer2.getDerivedKey());
+		
 
 	}
-
 	@DataProvider(name = "provideDataForEllipticCurveDiffieHellmanKeyExchanger", parallel = true)
 	public Object[][] provideDataForEllipticCurveDiffieHellmanKeyExchanger() {
 		Object[][] res = new Object[EllipticCurveDiffieHellmanType.values().length][];
@@ -1429,6 +1435,20 @@ public class CryptoTests {
 		for (EllipticCurveDiffieHellmanType type : EllipticCurveDiffieHellmanType.values()) {
 			res[index] = new Object[1];
 			res[index++][0] = type;
+		}
+		return res;
+	}
+	@DataProvider(name = "provideDataForEllipticCurveDiffieHellmanKeyExchangerForSignature", parallel = true)
+	public Object[][] provideDataForEllipticCurveDiffieHellmanKeyExchangerForSignature() {
+		Object[][] res = new Object[EllipticCurveDiffieHellmanType.values().length*SymmetricAuthentifiedSignatureType.values().length][];
+		int index = 0;
+		for (EllipticCurveDiffieHellmanType type : EllipticCurveDiffieHellmanType.values()) {
+			for (SymmetricAuthentifiedSignatureType stype : SymmetricAuthentifiedSignatureType.values())
+			{
+				res[index] = new Object[2];
+				res[index][0] = type;
+				res[index++][1] = stype;
+			}
 		}
 		return res;
 	}
