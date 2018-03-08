@@ -30,19 +30,19 @@ Adapt into your build.gradle file, the next code :
 	repositories {
 		...
 		maven {
-	       		url "https://mahdjoub.net/artifactory/DistriMind-Public"
+	       		url "https://artifactory.distri-mind.fr/artifactory/DistriMind-Public"
 	   	} 
 		...
 	}
 	...
 	dependencies {
 		...
-		compile(group:'com.distrimind.util', name: 'Utils', version: '3.10.4')
+		compile(group:'com.distrimind.util', name: 'Utils', version: '3.10.5')
 		...
 	}
 	...
 
-To know what last version has been uploaded, please refer to versions availables into [this repository](https://mahdjoub.net/artifactory/DistriMind-Public/com/distrimind/util/Utils/)
+To know what last version has been uploaded, please refer to versions availables into [this repository](https://artifactory.distri-mind.fr/artifactory/DistriMind-Public/com/distrimind/util/Utils/)
 ## With Maven :
 Adapt into your pom.xml file, the next code :
 
@@ -53,7 +53,7 @@ Adapt into your pom.xml file, the next code :
 			<dependency>
 				<groupId>com.distrimind.util</groupId>
 				<artifactId>Utils</artifactId>
-				<version>3.10.4</version>
+				<version>3.10.5</version>
 			</dependency>
 			...
 		</dependencies>
@@ -62,11 +62,11 @@ Adapt into your pom.xml file, the next code :
 			...
 			<repository>
 				<id>DistriMind-Public</id>
-				<url>https://mahdjoub.net/artifactory/DistriMind-Public</url>
+				<url>https://artifactory.distri-mind.fr/artifactory/DistriMind-Public</url>
 			</repository>
 			...
 		</repositories>
 	</project>
 
-To know what last version has been uploaded, please refer to versions availables into [this repository](https://mahdjoub.net/artifactory/DistriMind-Public/com/distrimind/util/Utils/)
+To know what last version has been uploaded, please refer to versions availables into [this repository](https://artifactory.distri-mind.fr/artifactory/DistriMind-Public/com/distrimind/util/Utils/)
 
