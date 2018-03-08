@@ -45,7 +45,7 @@ import gnu.vm.jgnux.crypto.NoSuchPaddingException;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 2.0
+ * @version 2.1
  * @since Utils 1.4
  */
 public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm {
@@ -68,7 +68,7 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 	public P2PASymmetricEncryptionAlgorithm(ASymmetricAuthentifiedSignatureType signatureType, ASymmetricKeyPair myKeyPair,
 			ASymmetricPublicKey distantPublicKey) throws NoSuchAlgorithmException, NoSuchPaddingException,
 			InvalidKeyException, InvalidKeySpecException, NoSuchProviderException {
-		super(myKeyPair.getEncryptionAlgorithmType().getCipherInstance());
+		super(myKeyPair.getEncryptionAlgorithmType().getCipherInstance(), 0);
 		if (signatureType == null)
 			throw new NullPointerException("signatureType");
 		if (distantPublicKey == null)
@@ -133,6 +133,11 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 			throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
 		_cipher.init(Cipher.ENCRYPT_MODE, distantPublicKey);
 
+	}
+
+	@Override
+	public int getIVSizeBytes() {
+		return 0;
 	}
 
 }

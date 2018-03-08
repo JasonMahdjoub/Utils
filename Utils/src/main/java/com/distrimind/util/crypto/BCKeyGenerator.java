@@ -36,13 +36,14 @@ package com.distrimind.util.crypto;
 
 import org.bouncycastle.crypto.SymmetricKeyGenerator;
 import org.bouncycastle.crypto.fips.FipsAES;
+import org.bouncycastle.crypto.general.AES;
 import org.bouncycastle.crypto.general.Serpent;
 import org.bouncycastle.crypto.general.Twofish;
 
 /**
  * 
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 2.0
  * @since Utils 3.10.0
  */
 public final class BCKeyGenerator extends AbstractKeyGenerator {
@@ -101,19 +102,58 @@ public final class BCKeyGenerator extends AbstractKeyGenerator {
 		}
 		else
 		{
-			if (encryptionType.getAlgorithmName().equals(SymmetricEncryptionType.BC_FIPS_AES.getAlgorithmName()))
+			if (encryptionType.getAlgorithmName().equals(SymmetricEncryptionType.BC_FIPS_AES_GCM.getAlgorithmName())
+					&& SymmetricEncryptionType.BC_FIPS_AES_GCM.getBlockMode().equals(encryptionType.getBlockMode()))
+			{
+				keyGenerator=new FipsAES.KeyGenerator(FipsAES.GCM, keySize, random);
+				this.keySizeBits=keySize;
+			}
+			else if (encryptionType.getAlgorithmName().equals(SymmetricEncryptionType.BC_FIPS_AES_CBC.getAlgorithmName())
+					&& SymmetricEncryptionType.BC_FIPS_AES_CBC.getBlockMode().equals(encryptionType.getBlockMode()))
 			{
 				keyGenerator=new FipsAES.KeyGenerator(FipsAES.CBCwithPKCS7, keySize, random);
 				this.keySizeBits=keySize;
 			}
-			else if (encryptionType.getAlgorithmName().equals(SymmetricEncryptionType.BC_SERPENT.getAlgorithmName()))
+			else if (encryptionType.getAlgorithmName().equals(SymmetricEncryptionType.BC_AES_EAX.getAlgorithmName())
+					&& SymmetricEncryptionType.BC_AES_EAX.getBlockMode().equals(encryptionType.getBlockMode()))
+			{
+				keyGenerator=new AES.KeyGenerator(AES.EAX, keySize, random);
+				this.keySizeBits=keySize;
+			}
+			else if (encryptionType.getAlgorithmName().equals(SymmetricEncryptionType.BC_SERPENT_CBC.getAlgorithmName())
+					&& SymmetricEncryptionType.BC_SERPENT_CBC.getBlockMode().equals(encryptionType.getBlockMode()))
 			{
 				keyGenerator=new Serpent.KeyGenerator(Serpent.CBCwithPKCS7, keySize, random);
 				this.keySizeBits=keySize;
 			}
-			else if (encryptionType.getAlgorithmName().equals(SymmetricEncryptionType.BC_TWOFISH.getAlgorithmName()))
+			else if (encryptionType.getAlgorithmName().equals(SymmetricEncryptionType.BC_SERPENT_GCM.getAlgorithmName())
+					&& SymmetricEncryptionType.BC_SERPENT_GCM.getBlockMode().equals(encryptionType.getBlockMode()))
+			{
+				keyGenerator=new Serpent.KeyGenerator(Serpent.GCM, keySize, random);
+				this.keySizeBits=keySize;
+			}
+			else if (encryptionType.getAlgorithmName().equals(SymmetricEncryptionType.BC_SERPENT_EAX.getAlgorithmName())
+					&& SymmetricEncryptionType.BC_SERPENT_EAX.getBlockMode().equals(encryptionType.getBlockMode()))
+			{
+				keyGenerator=new Serpent.KeyGenerator(Serpent.EAX, keySize, random);
+				this.keySizeBits=keySize;
+			}
+			else if (encryptionType.getAlgorithmName().equals(SymmetricEncryptionType.BC_TWOFISH_CBC.getAlgorithmName())
+					&& SymmetricEncryptionType.BC_TWOFISH_CBC.getBlockMode().equals(encryptionType.getBlockMode()))
 			{
 				keyGenerator=new Twofish.KeyGenerator(Twofish.CBCwithPKCS7, keySize, random);
+				this.keySizeBits=keySize;
+			}
+			else if (encryptionType.getAlgorithmName().equals(SymmetricEncryptionType.BC_TWOFISH_GCM.getAlgorithmName())
+					&& SymmetricEncryptionType.BC_TWOFISH_GCM.getBlockMode().equals(encryptionType.getBlockMode()))
+			{
+				keyGenerator=new Twofish.KeyGenerator(Twofish.GCM, keySize, random);
+				this.keySizeBits=keySize;
+			}
+			else if (encryptionType.getAlgorithmName().equals(SymmetricEncryptionType.BC_TWOFISH_EAX.getAlgorithmName())
+					&& SymmetricEncryptionType.BC_TWOFISH_EAX.getBlockMode().equals(encryptionType.getBlockMode()))
+			{
+				keyGenerator=new Twofish.KeyGenerator(Twofish.EAX, keySize, random);
 				this.keySizeBits=keySize;
 			}
 			else

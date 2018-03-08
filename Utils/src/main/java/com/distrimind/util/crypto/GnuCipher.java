@@ -55,7 +55,7 @@ import gnu.vm.jgnux.crypto.spec.IvParameterSpec;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 1.1
+ * @version 1.2
  * @since Utils 2.0
  */
 public final class GnuCipher extends AbstractCipher {
@@ -159,6 +159,11 @@ public final class GnuCipher extends AbstractCipher {
 	public int update(byte[] _input, int _inputOffset, int _inputLength, byte[] _output, int _outputOffset)
 			throws IllegalStateException, ShortBufferException {
 		return cipher.update(_input, _inputOffset, _inputLength, _output, _outputOffset);
+	}
+
+	@Override
+	public void updateAAD(byte[] ad, int offset, int size) {
+		throw new IllegalStateException();
 	}
 
 

@@ -55,7 +55,7 @@ import gnu.vm.jgnux.crypto.NoSuchPaddingException;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 3.0
+ * @version 3.1
  * @since Utils 1.4.1
  */
 public class P2PASymmetricSecretMessageExchanger {
@@ -285,9 +285,9 @@ public class P2PASymmetricSecretMessageExchanger {
 				len_salt, false);
 
 		SymmetricEncryptionAlgorithm sea = new SymmetricEncryptionAlgorithm(secureRandom,
-				new SymmetricSecretKey(SymmetricEncryptionType.AES,
+				new SymmetricSecretKey(SymmetricEncryptionType.BC_FIPS_AES_GCM,
 						new SecretKeySpec(hashedMessage,
-								SymmetricEncryptionType.AES.getAlgorithmName()),
+								SymmetricEncryptionType.BC_FIPS_AES_GCM.getAlgorithmName()),
 						(short) 256));
 		return sea.encode(OutputDataPackagerWithRandomValues.encode(encodedLevel2, encodedLevel2.length));
 	}
@@ -302,9 +302,9 @@ public class P2PASymmetricSecretMessageExchanger {
 				len_salt, false);
 
 		SymmetricEncryptionAlgorithm sea = new SymmetricEncryptionAlgorithm(secureRandom,
-				new SymmetricSecretKey(SymmetricEncryptionType.AES,
+				new SymmetricSecretKey(SymmetricEncryptionType.BC_FIPS_AES_GCM,
 						new SecretKeySpec(hashedMessage,
-								SymmetricEncryptionType.AES.getAlgorithmName()),
+								SymmetricEncryptionType.BC_FIPS_AES_GCM.getAlgorithmName()),
 						(short) 256));
 		byte[] v = sea.decode(encodedLevel1, off_encodedlevel1, len_encodedlevel1);
 		try {

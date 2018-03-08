@@ -52,13 +52,13 @@ import gnu.vm.jgnux.crypto.NoSuchPaddingException;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 2.1
+ * @version 3.0
  * @since Utils 1.5
  */
 public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOutputAlgorithm {
 
-	protected AbstractEncryptionIOAlgorithm(AbstractCipher cipher) {
-		super(cipher);
+	protected AbstractEncryptionIOAlgorithm(AbstractCipher cipher, int ivSizeBytes) {
+		super(cipher, ivSizeBytes);
 
 	}
 
@@ -67,8 +67,15 @@ public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOu
 			BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
 		return decode(bytes, 0, bytes.length);
 	}
-
-	public byte[] decode(byte[] bytes, int off, int len)
+	public byte[] decode(byte[] bytes, byte[] associatedData) throws InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException
+	{
+		return decode(bytes, 0, bytes.length, associatedData, 0, associatedData.length);
+	}
+	public byte[] decode(byte[] bytes, int off, int len) throws InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException
+	{
+		return decode(bytes, 0, bytes.length, null, 0, 0);
+	}
+	public byte[] decode(byte[] bytes, int off, int len, byte[] associatedData, int offAD, int lenAD)
 			throws InvalidKeyException, InvalidAlgorithmParameterException, IOException, IllegalBlockSizeException,
 			BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
 		if (len < 0 || off < 0)
@@ -79,35 +86,59 @@ public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOu
 			throw new IllegalArgumentException("bytes.length=" + bytes.length + ", off=" + off + ", len=" + len);
 
 		try (ByteArrayInputStream bais = new ByteArrayInputStream(bytes, off, len)) {
-			return decode(bais);
+			return decode(bais, associatedData, offAD, lenAD);
 		}
 	}
-
-	public byte[] decode(InputStream is)
+	public byte[] decode(InputStream is, byte[] associatedData) throws InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException
+	{
+		return decode(is, associatedData, 0, associatedData.length);
+	}
+	public byte[] decode(InputStream is) throws InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException
+	{
+		return decode(is, null, 0, 0);
+	}
+	public byte[] decode(InputStream is, byte[] associatedData, int offAD, int lenAD)
 			throws InvalidKeyException, InvalidAlgorithmParameterException, IOException, IllegalBlockSizeException,
 			BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
 		try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-			this.decode(is, baos);
+			this.decode(is, associatedData, offAD, lenAD, baos);
 			return baos.toByteArray();
 		}
 	}
+	public void decode(InputStream is, byte[] associatedData, OutputStream os) throws InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException
+	{
+		decode(is, associatedData, 0, associatedData.length, os);
+	}
 	public void decode(InputStream is, OutputStream os) throws InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException
 	{
-		decode(is, os, -1);
+		decode(is, null, 0, 0, os);
 	}
-	public void decode(InputStream is, OutputStream os, int length)
+	public void decode(InputStream is, byte[] associatedData, int offAD, int lenAD, OutputStream os) throws InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException
+	{
+		decode(is, associatedData, offAD, lenAD, os, -1);
+	}
+	public void decode(InputStream is, OutputStream os, int length) throws InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException
+	{
+		decode(is, null, 0, 0, os, length);
+	}
+	public void decode(InputStream is, byte[] associatedData, OutputStream os, int length) throws InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException
+	{
+		decode(is, associatedData, 0, associatedData.length, os, length);
+	}
+	public void decode(InputStream is, byte[] associatedData, int offAD, int lenAD, OutputStream os, int length)
 			throws InvalidKeyException, InvalidAlgorithmParameterException, IOException, IllegalBlockSizeException,
 			BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
 		byte[] iv = null;
 		if (includeIV()) {
-			iv = new byte[cipher.getBlockSize()];
+			iv = new byte[getIVSizeBytes()];
 			int read = is.read(iv);
 			if (read != iv.length)
 				throw new IOException("read=" + read + ", iv.length=" + iv.length);
 		}
 
 		initCipherForDecrypt(cipher, iv);
-
+		if (associatedData!=null && lenAD>0)
+			cipher.updateAAD(associatedData, offAD, lenAD);
 		int maxBlockSize = getMaxBlockSizeForDecoding();
 		int blockACC = 0;
 		byte[] buffer = new byte[BUFFER_SIZE];
@@ -153,7 +184,7 @@ public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOu
 		AbstractCipher c = getCipherInstance();
 		byte[] iv = null;
 		if (includeIV()) {
-			iv = new byte[c.getBlockSize()];
+			iv = new byte[getIVSizeBytes()];
 			if (is.read(iv) != iv.length)
 				throw new IOException();
 		}
@@ -168,7 +199,7 @@ public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOu
 			NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
 		initCipherForDecrypt(cipher, nullIV);
 		if (includeIV()) {
-			inputLen -= cipher.getBlockSize();
+			inputLen -= getIVSizeBytes();
 		}
 
 		int maxBlockSize = getMaxBlockSizeForDecoding();

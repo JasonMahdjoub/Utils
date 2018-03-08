@@ -1146,7 +1146,9 @@ public class CryptoTests {
 
 		for (byte[] m : messagesToEncrypt) {
 			byte encrypted[] = algoLocal.encode(m);
-			Assert.assertEquals(encrypted.length, algoLocal.getOutputSizeForEncryption(m.length), "length=" + m.length);
+			int mlength=m.length;
+			
+			Assert.assertEquals(encrypted.length, algoLocal.getOutputSizeForEncryption(mlength), "length=" + m.length);
 
 			Assert.assertTrue(encrypted.length >= m.length);
 			byte decrypted[] = algoDistant.decode(encrypted);
@@ -1155,8 +1157,9 @@ public class CryptoTests {
 			byte[] md = decrypted;
 			Assert.assertEquals(md.length, m.length, "Testing size " + type);
 			Assert.assertEquals(md, m, "Testing " + type);
+			mlength=m.length;
 			encrypted = algoDistant.encode(m);
-			Assert.assertEquals(encrypted.length, algoDistant.getOutputSizeForEncryption(m.length));
+			Assert.assertEquals(encrypted.length, algoDistant.getOutputSizeForEncryption(mlength));
 			Assert.assertTrue(encrypted.length >= m.length);
 			md = algoLocal.decode(encrypted);
 			Assert.assertEquals(md.length, m.length, "Testing size " + type);
@@ -1166,16 +1169,25 @@ public class CryptoTests {
 			int size = m.length;
 			size -= rand.nextInt(15) + off;
 
-			encrypted = algoLocal.encode(m, off, size);
+			byte associatedData[]=new byte[random.nextInt(128)+127];
+			if (type.supportAssociatedData())
+				encrypted = algoLocal.encode(m, off, size, associatedData, 0, associatedData.length);
+			else
+				encrypted = algoLocal.encode(m, off, size);
 
 			Assert.assertEquals(encrypted.length, algoLocal.getOutputSizeForEncryption(size));
 			Assert.assertTrue(encrypted.length >= size);
-			decrypted = algoDistant.decode(encrypted);
+			if (type.supportAssociatedData())
+				decrypted = algoDistant.decode(encrypted, associatedData);
+			else
+				decrypted = algoDistant.decode(encrypted);
 			Assert.assertEquals(decrypted.length, size, "Testing size " + type);
 			for (int i = 0; i < decrypted.length; i++)
 				Assert.assertEquals(decrypted[i], m[i + off]);
-
-			md = algoDistant.decode(encrypted);
+			if (type.supportAssociatedData())
+				md = algoDistant.decode(encrypted, associatedData);
+			else
+				md = algoDistant.decode(encrypted);
 
 			Assert.assertEquals(md.length, size, "Testing size " + type);
 			for (int i = 0; i < md.length; i++)
@@ -1339,14 +1351,20 @@ public class CryptoTests {
 	Object[][] provideDataForNewHopePostQuantumCrytoKeyExchangeForEncryption()
 	{
 		return new Object[][] {
-			{SymmetricEncryptionType.AES},
-			{SymmetricEncryptionType.BC_FIPS_AES},
-			{SymmetricEncryptionType.BC_SERPENT},
-			{SymmetricEncryptionType.BC_TWOFISH},
-			{SymmetricEncryptionType.GNU_AES},
-			{SymmetricEncryptionType.GNU_ANUBIS},
-			{SymmetricEncryptionType.GNU_SERPENT},
-			{SymmetricEncryptionType.GNU_TWOFISH}
+			{SymmetricEncryptionType.AES_CBC},
+			{SymmetricEncryptionType.BC_FIPS_AES_CBC},
+			{SymmetricEncryptionType.BC_FIPS_AES_GCM},
+			{SymmetricEncryptionType.BC_AES_EAX},
+			{SymmetricEncryptionType.BC_SERPENT_CBC},
+			{SymmetricEncryptionType.BC_SERPENT_GCM},
+			{SymmetricEncryptionType.BC_SERPENT_EAX},
+			{SymmetricEncryptionType.BC_TWOFISH_CBC},
+			{SymmetricEncryptionType.BC_TWOFISH_GCM},
+			{SymmetricEncryptionType.BC_TWOFISH_EAX},
+			{SymmetricEncryptionType.GNU_AES_CBC},
+			{SymmetricEncryptionType.GNU_ANUBIS_CBC},
+			{SymmetricEncryptionType.GNU_SERPENT_CBC},
+			{SymmetricEncryptionType.GNU_TWOFISH_CBC}
 		};
 	}
 	

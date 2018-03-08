@@ -46,7 +46,7 @@ import gnu.vm.jgnux.crypto.NoSuchPaddingException;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 2.0
+ * @version 3.0
  * @since Utils 1.4
  */
 public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm {
@@ -62,15 +62,23 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 	public SymmetricEncryptionAlgorithm(AbstractSecureRandom random, SymmetricSecretKey key)
 			throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,
 			InvalidAlgorithmParameterException, NoSuchProviderException, InvalidKeySpecException {
-		super(key.getEncryptionAlgorithmType().getCipherInstance());
+		super(key.getEncryptionAlgorithmType().getCipherInstance(), key.getEncryptionAlgorithmType().getIVSizeBytes());
 		this.type = key.getEncryptionAlgorithmType();
 		this.key = key;
 		this.random = random;
 		this.cipher.init(Cipher.ENCRYPT_MODE, this.key, generateIV());
 	}
 
+	
+
+	
+	@Override
+	public int getIVSizeBytes()
+	{
+		return type.getIVSizeBytes();
+	}	
 	private byte[] generateIV() {
-		byte[] iv = new byte[cipher.getBlockSize()];
+		byte[] iv = new byte[getIVSizeBytes()];
 		random.nextBytes(iv);
 		return iv;
 	}

@@ -52,7 +52,7 @@ import gnu.vm.jgnux.crypto.ShortBufferException;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 1.2
+ * @version 2.0
  * @since Utils 2.0
  */
 public abstract class AbstractCipher {
@@ -451,5 +451,17 @@ public abstract class AbstractCipher {
 	}
 	
 
+	public abstract void updateAAD(byte ad[], int offset, int size);
+	
+	
+	public void updateAAD(byte ad[])
+	{
+		updateAAD(ad, 0, ad.length);
+	}
+	
+	public void updateAAD(ByteBuffer ad)
+	{
+		updateAAD(ad.array(), ad.position(), ad.remaining());
+	}
 
 }

@@ -42,6 +42,7 @@ import java.security.SecureRandom;
 import javax.crypto.Cipher;
 import javax.crypto.CipherInputStream;
 import javax.crypto.CipherOutputStream;
+import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.IvParameterSpec;
 
 
@@ -56,21 +57,25 @@ import gnu.vm.jgnux.crypto.ShortBufferException;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 1.1
+ * @version 1.2
  * @since Utils 2.0
  */
 public final class JavaNativeCipher extends AbstractCipher {
+	private final SymmetricEncryptionType type;
 	private final Cipher cipher;
 	private volatile SecureRandom random;
-
+	
 
 
 	private SecureRandom setSecureRandom(AbstractSecureRandom random) {
 		this.random = random.getJavaNativeSecureRandom();
 		return this.random;
 	}
-
 	JavaNativeCipher(Cipher cipher) {
+		this(null, cipher);
+	}
+	JavaNativeCipher(SymmetricEncryptionType type, Cipher cipher) {
+		this.type=type;
 		this.cipher = cipher;
 	}
 
@@ -181,7 +186,10 @@ public final class JavaNativeCipher extends AbstractCipher {
 	public void init(int _opmode, Key _key, byte[] _iv) throws InvalidKeyException, NoSuchAlgorithmException,
 			InvalidKeySpecException, InvalidAlgorithmParameterException {
 		try {
-			cipher.init(_opmode, _key.toJavaNativeKey(), new IvParameterSpec(_iv));
+			if (type!=null && type.getBlockMode().toUpperCase().equals("GCM"))
+				cipher.init(_opmode, _key.toJavaNativeKey(), new GCMParameterSpec(_iv.length*8, _iv));
+			else
+				cipher.init(_opmode, _key.toJavaNativeKey(), new IvParameterSpec(_iv));
 		} catch (java.security.InvalidKeyException e) {
 			throw new InvalidKeyException(e.getMessage());
 		} catch (java.security.InvalidAlgorithmParameterException e) {
@@ -206,6 +214,10 @@ public final class JavaNativeCipher extends AbstractCipher {
 			throw new ShortBufferException(e.getMessage());
 		}
 
+	}
+	@Override
+	public void updateAAD(byte[] ad, int offset, int size) {
+		cipher.updateAAD(ad, offset, size);
 	}
 	
 

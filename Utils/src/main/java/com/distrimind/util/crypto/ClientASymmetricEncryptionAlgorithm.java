@@ -46,7 +46,7 @@ import gnu.vm.jgnux.crypto.NoSuchPaddingException;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 3.1
+ * @version 3.2
  * @since Utils 1.7
  */
 public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutputAlgorithm {
@@ -59,7 +59,7 @@ public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutpu
 
 	public ClientASymmetricEncryptionAlgorithm(AbstractSecureRandom random, ASymmetricPublicKey distantPublicKey) throws NoSuchAlgorithmException, NoSuchPaddingException,
 			InvalidKeyException, InvalidKeySpecException, NoSuchProviderException, InvalidAlgorithmParameterException {
-		super(distantPublicKey.getEncryptionAlgorithmType().getCipherInstance());
+		super(distantPublicKey.getEncryptionAlgorithmType().getCipherInstance(), 0);
 		this.type = distantPublicKey.getEncryptionAlgorithmType();
 		this.distantPublicKey = distantPublicKey;
 		this.random=random;
@@ -98,6 +98,11 @@ public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutpu
 			throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, InvalidAlgorithmParameterException {
 		_cipher.init(Cipher.ENCRYPT_MODE, distantPublicKey, random);
 
+	}
+
+	@Override
+	public int getIVSizeBytes() {
+		return 0;
 	}
 
 }
