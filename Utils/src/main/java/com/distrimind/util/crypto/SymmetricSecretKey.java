@@ -47,7 +47,7 @@ import com.distrimind.util.Bits;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 2.0
+ * @version 2.1
  * @since Utils 1.7.1
  */
 public class SymmetricSecretKey extends Key {
@@ -61,7 +61,7 @@ public class SymmetricSecretKey extends Key {
 
 	private final byte[] secretKey;
 
-	private final short keySize;
+	private final short keySizeBits;
 
 	private SymmetricEncryptionType encryptionType;
 	private SymmetricAuthentifiedSignatureType signatureType;
@@ -88,11 +88,11 @@ public class SymmetricSecretKey extends Key {
 			throw new NullPointerException("secretKey");
 		this.secretKey=Bits.concateEncodingWithShortSizedTabs(type.getAlgorithmName().getBytes(), secretKey);
 		if (type.getAlgorithmName().toUpperCase().equals("DES"))
-			this.keySize=56;
+			this.keySizeBits=56;
 		else if (type.getAlgorithmName().toUpperCase().equals("DESEDE"))
-			this.keySize=168;
+			this.keySizeBits=168;
 		else
-			this.keySize=(short)(secretKey.length*8);
+			this.keySizeBits=(short)(secretKey.length*8);
 		this.encryptionType = type;
 		this.signatureType=null;
 		hashCode = Arrays.hashCode(this.secretKey);
@@ -110,7 +110,7 @@ public class SymmetricSecretKey extends Key {
 		if (secretKey == null)
 			throw new NullPointerException("secretKey");
 		this.secretKey=Bits.concateEncodingWithShortSizedTabs(type.getAlgorithmName().getBytes(), secretKey);
-		this.keySize=(short)(secretKey.length*8);
+		this.keySizeBits=(short)(secretKey.length*8);
 		this.encryptionType = null;
 		this.signatureType=type;
 		hashCode = Arrays.hashCode(this.secretKey);
@@ -179,7 +179,7 @@ public class SymmetricSecretKey extends Key {
 		if (secretKey == null)
 			throw new NullPointerException("secretKey");
 		this.secretKey = secretKey;
-		this.keySize = keySize;
+		this.keySizeBits = keySize;
 		hashCode = Arrays.hashCode(this.secretKey);
 	}
 
@@ -187,7 +187,7 @@ public class SymmetricSecretKey extends Key {
 		if (secretKey == null)
 			throw new NullPointerException("secretKey");
 		this.secretKey = SymmetricEncryptionType.encodeSecretKey(secretKey);
-		this.keySize = keySize;
+		this.keySizeBits = keySize;
 		hashCode = Arrays.hashCode(this.secretKey);
 	}
 	
@@ -195,7 +195,7 @@ public class SymmetricSecretKey extends Key {
 		if (secretKey == null)
 			throw new NullPointerException("secretKey");
 		this.secretKey = SymmetricEncryptionType.encodeSecretKey(secretKey);
-		this.keySize = keySize;
+		this.keySizeBits = keySize;
 		hashCode = Arrays.hashCode(this.secretKey);
 	}
 
@@ -203,7 +203,7 @@ public class SymmetricSecretKey extends Key {
 		if (secretKey == null)
 			throw new NullPointerException("secretKey");
 		this.secretKey = SymmetricEncryptionType.encodeSecretKey(secretKey);
-		this.keySize = keySize;
+		this.keySizeBits = keySize;
 		hashCode = Arrays.hashCode(this.secretKey);
 	}
 	@Override
@@ -211,7 +211,7 @@ public class SymmetricSecretKey extends Key {
 		byte[] tab = new byte[7];
 		tab[0]=encryptionType==null?(byte)3:(byte)2;
 		Bits.putInt(tab, 1, encryptionType==null?signatureType.ordinal():encryptionType.ordinal());
-		Bits.putShort(tab, 5, keySize);
+		Bits.putShort(tab, 5, keySizeBits);
 		return Bits.concateEncodingWithShortSizedTabs(tab, secretKey);
 	}
 
@@ -236,7 +236,7 @@ public class SymmetricSecretKey extends Key {
 	}
 
 	public short getKeySizeBits() {
-		return keySize;
+		return keySizeBits;
 	}
 
 	public int getMaxBlockSize() {
@@ -263,6 +263,12 @@ public class SymmetricSecretKey extends Key {
 
 		return javaNativeSecretKey;
 	}
+	
+	byte[] getSecretKeyBytes()
+	{
+		return secretKey;
+	}
+	
 
 	@Override
 	public String toString() {

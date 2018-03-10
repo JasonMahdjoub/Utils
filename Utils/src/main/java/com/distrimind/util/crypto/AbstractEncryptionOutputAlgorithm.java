@@ -57,6 +57,7 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 	final static int BUFFER_SIZE = 1024;
 
 	protected final AbstractCipher cipher;
+	
 	final byte nullIV[];
 	
 	protected AbstractEncryptionOutputAlgorithm(AbstractCipher cipher, int ivSizeBytes) {

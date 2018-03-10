@@ -108,8 +108,8 @@ public final class BCKeyGenerator extends AbstractKeyGenerator {
 				keyGenerator=new FipsAES.KeyGenerator(FipsAES.GCM, keySize, random);
 				this.keySizeBits=keySize;
 			}
-			else if (encryptionType.getAlgorithmName().equals(SymmetricEncryptionType.BC_FIPS_AES_CBC.getAlgorithmName())
-					&& SymmetricEncryptionType.BC_FIPS_AES_CBC.getBlockMode().equals(encryptionType.getBlockMode()))
+			else if (encryptionType.getAlgorithmName().equals(SymmetricEncryptionType.BC_FIPS_AES_CBC_PKCS7Padding.getAlgorithmName())
+					&& SymmetricEncryptionType.BC_FIPS_AES_CBC_PKCS7Padding.getBlockMode().equals(encryptionType.getBlockMode()))
 			{
 				keyGenerator=new FipsAES.KeyGenerator(FipsAES.CBCwithPKCS7, keySize, random);
 				this.keySizeBits=keySize;
@@ -120,8 +120,8 @@ public final class BCKeyGenerator extends AbstractKeyGenerator {
 				keyGenerator=new AES.KeyGenerator(AES.EAX, keySize, random);
 				this.keySizeBits=keySize;
 			}
-			else if (encryptionType.getAlgorithmName().equals(SymmetricEncryptionType.BC_SERPENT_CBC.getAlgorithmName())
-					&& SymmetricEncryptionType.BC_SERPENT_CBC.getBlockMode().equals(encryptionType.getBlockMode()))
+			else if (encryptionType.getAlgorithmName().equals(SymmetricEncryptionType.BC_SERPENT_CBC_PKCS7Padding.getAlgorithmName())
+					&& SymmetricEncryptionType.BC_SERPENT_CBC_PKCS7Padding.getBlockMode().equals(encryptionType.getBlockMode()))
 			{
 				keyGenerator=new Serpent.KeyGenerator(Serpent.CBCwithPKCS7, keySize, random);
 				this.keySizeBits=keySize;
@@ -138,8 +138,8 @@ public final class BCKeyGenerator extends AbstractKeyGenerator {
 				keyGenerator=new Serpent.KeyGenerator(Serpent.EAX, keySize, random);
 				this.keySizeBits=keySize;
 			}
-			else if (encryptionType.getAlgorithmName().equals(SymmetricEncryptionType.BC_TWOFISH_CBC.getAlgorithmName())
-					&& SymmetricEncryptionType.BC_TWOFISH_CBC.getBlockMode().equals(encryptionType.getBlockMode()))
+			else if (encryptionType.getAlgorithmName().equals(SymmetricEncryptionType.BC_TWOFISH_CBC_PKCS7Padding.getAlgorithmName())
+					&& SymmetricEncryptionType.BC_TWOFISH_CBC_PKCS7Padding.getBlockMode().equals(encryptionType.getBlockMode()))
 			{
 				keyGenerator=new Twofish.KeyGenerator(Twofish.CBCwithPKCS7, keySize, random);
 				this.keySizeBits=keySize;

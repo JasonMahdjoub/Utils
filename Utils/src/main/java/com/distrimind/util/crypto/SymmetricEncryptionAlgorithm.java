@@ -34,6 +34,8 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
+import java.util.Random;
+
 import javax.crypto.Cipher;
 
 import gnu.vm.jgnu.security.InvalidAlgorithmParameterException;
@@ -130,10 +132,11 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 			InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeySpecException {
 		cipher.init(Cipher.ENCRYPT_MODE, key, generateIV());
 	}
-
+	private final Random nonSecureRandom=new Random(System.currentTimeMillis());
 	@Override
 	public void initCipherForEncryptAndNotChangeIV(AbstractCipher cipher) throws InvalidKeyException,
 			NoSuchAlgorithmException, InvalidKeySpecException, InvalidAlgorithmParameterException {
+		nonSecureRandom.nextBytes(nullIV);
 		cipher.init(Cipher.ENCRYPT_MODE, key, nullIV);
 	}
 }

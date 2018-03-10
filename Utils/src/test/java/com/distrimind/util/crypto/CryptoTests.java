@@ -231,6 +231,28 @@ public class CryptoTests {
 		}
 		return res;
 	}
+	@DataProvider(name = "provideDataForTestSymetricEncryptionsCompatibility", parallel = true)
+	public Object[][] provideDataForTestSymetricEncryptionsCompatibility() {
+		Object[][] res = new Object[][] {
+			{SymmetricEncryptionType.AES_CBC_PKCS5Padding, SymmetricEncryptionType.BC_FIPS_AES_CBC_PKCS7Padding},
+			{SymmetricEncryptionType.AES_GCM, SymmetricEncryptionType.BC_FIPS_AES_GCM},
+			{SymmetricEncryptionType.GNU_AES_CBC_PKCS5Padding, SymmetricEncryptionType.BC_FIPS_AES_CBC_PKCS7Padding},
+			{SymmetricEncryptionType.GNU_TWOFISH_CBC_PKCS5Padding, SymmetricEncryptionType.BC_TWOFISH_CBC_PKCS7Padding},
+			{SymmetricEncryptionType.GNU_SERPENT_CBC_PKCS5Padding, SymmetricEncryptionType.BC_SERPENT_CBC_PKCS7Padding},
+			{SymmetricEncryptionType.GNU_AES_CBC_PKCS5Padding, SymmetricEncryptionType.AES_CBC_PKCS5Padding}
+		};
+		Object[][] res2 = new Object[res.length*2][2];
+		int j=0;
+		for (int i=0;i<res.length;i++)
+		{
+			res2[j][0]=res[i][0];
+			res2[j++][1]=res[i][1];
+			res2[j][0]=res[i][1];
+			res2[j++][1]=res[i][0];
+		}
+		return res2;
+	}
+	
 
 	@DataProvider(name = "provideMessageDigestType", parallel = true)
 	public Object[][] provideMessageDigestType() {
@@ -1134,13 +1156,27 @@ public class CryptoTests {
 	public void testSymetricEncryptions(SymmetricEncryptionType type) throws NoSuchAlgorithmException,
 			NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IOException,
 			IllegalBlockSizeException, BadPaddingException, NoSuchProviderException, InvalidKeySpecException {
-		System.out.println("Testing " + type);
+		testSymetricEncryptionsCompatibility(type, type);
+
+	}
+
+	@Test(invocationCount = 1, dataProvider = "provideDataForTestSymetricEncryptionsCompatibility", dependsOnMethods = "testSymetricEncryptions")
+	public void testSymetricEncryptionsCompatibility(SymmetricEncryptionType type1, SymmetricEncryptionType type2) throws NoSuchAlgorithmException,
+			NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IOException,
+			IllegalBlockSizeException, BadPaddingException, NoSuchProviderException, InvalidKeySpecException {
+		System.out.println("Testing " + type1+", "+type2);
 		AbstractSecureRandom random = SecureRandomType.DEFAULT.getSingleton(null);
 
-		SymmetricSecretKey key = type.getKeyGenerator(random).generateKey();
+		SymmetricSecretKey key1 = type1.getKeyGenerator(random).generateKey();
+		SymmetricSecretKey key2=null;
 
-		SymmetricEncryptionAlgorithm algoDistant = new SymmetricEncryptionAlgorithm(random, key);
-		SymmetricEncryptionAlgorithm algoLocal = new SymmetricEncryptionAlgorithm(random, key);
+		if (type2.getCodeProviderForEncryption()!=CodeProvider.GNU_CRYPTO && type2.getCodeProviderForEncryption()!=CodeProvider.BC && type2.getCodeProviderForEncryption()==CodeProvider.BCFIPS)
+			key2=new SymmetricSecretKey(type2, key1.toJavaNativeKey(), key1.getKeySizeBits());
+		else 
+			key2=new SymmetricSecretKey(type2, key1.getSecretKeyBytes(), key1.getKeySizeBits());
+
+		SymmetricEncryptionAlgorithm algoDistant = new SymmetricEncryptionAlgorithm(random, key1);
+		SymmetricEncryptionAlgorithm algoLocal = new SymmetricEncryptionAlgorithm(random, key2);
 
 		Random rand = new Random(System.currentTimeMillis());
 
@@ -1152,44 +1188,44 @@ public class CryptoTests {
 
 			Assert.assertTrue(encrypted.length >= m.length);
 			byte decrypted[] = algoDistant.decode(encrypted);
-			Assert.assertEquals(decrypted.length, m.length, "Testing size " + type);
-			Assert.assertEquals(decrypted, m, "Testing " + type);
+			Assert.assertEquals(decrypted.length, m.length, "Testing size " + type1+", "+type2);
+			Assert.assertEquals(decrypted, m, "Testing " + type1+", "+type2);
 			byte[] md = decrypted;
-			Assert.assertEquals(md.length, m.length, "Testing size " + type);
-			Assert.assertEquals(md, m, "Testing " + type);
+			Assert.assertEquals(md.length, m.length, "Testing size " + type1+", "+type2);
+			Assert.assertEquals(md, m, "Testing " + type1+", "+type2);
 			mlength=m.length;
 			encrypted = algoDistant.encode(m);
 			Assert.assertEquals(encrypted.length, algoDistant.getOutputSizeForEncryption(mlength));
 			Assert.assertTrue(encrypted.length >= m.length);
 			md = algoLocal.decode(encrypted);
-			Assert.assertEquals(md.length, m.length, "Testing size " + type);
-			Assert.assertEquals(md, m, "Testing " + type);
+			Assert.assertEquals(md.length, m.length, "Testing size " + type1+", "+type2);
+			Assert.assertEquals(md, m, "Testing " + type1+", "+type2);
 
 			int off = rand.nextInt(15);
 			int size = m.length;
 			size -= rand.nextInt(15) + off;
 
 			byte associatedData[]=new byte[random.nextInt(128)+127];
-			if (type.supportAssociatedData())
+			if (type1.supportAssociatedData())
 				encrypted = algoLocal.encode(m, off, size, associatedData, 0, associatedData.length);
 			else
 				encrypted = algoLocal.encode(m, off, size);
 
 			Assert.assertEquals(encrypted.length, algoLocal.getOutputSizeForEncryption(size));
 			Assert.assertTrue(encrypted.length >= size);
-			if (type.supportAssociatedData())
+			if (type1.supportAssociatedData())
 				decrypted = algoDistant.decode(encrypted, associatedData);
 			else
 				decrypted = algoDistant.decode(encrypted);
-			Assert.assertEquals(decrypted.length, size, "Testing size " + type);
+			Assert.assertEquals(decrypted.length, size, "Testing size " + type1+", "+type2);
 			for (int i = 0; i < decrypted.length; i++)
 				Assert.assertEquals(decrypted[i], m[i + off]);
-			if (type.supportAssociatedData())
+			if (type1.supportAssociatedData())
 				md = algoDistant.decode(encrypted, associatedData);
 			else
 				md = algoDistant.decode(encrypted);
 
-			Assert.assertEquals(md.length, size, "Testing size " + type);
+			Assert.assertEquals(md.length, size, "Testing size " + type1+", "+type2);
 			for (int i = 0; i < md.length; i++)
 				Assert.assertEquals(md[i], m[i + off]);
 
@@ -1198,14 +1234,14 @@ public class CryptoTests {
 			Assert.assertTrue(encrypted.length >= size);
 
 			md = algoLocal.decode(encrypted);
-			Assert.assertEquals(md.length, size, "Testing size " + type);
+			Assert.assertEquals(md.length, size, "Testing size " + type1+", "+type2);
 			for (int i = 0; i < md.length; i++)
 				Assert.assertEquals(md[i], m[i + off]);
 
 		}
 
 	}
-
+	
 	@Test(invocationCount = 4000)
 	public void testReadWriteDataPackaged() throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
 		Random rand = new Random(System.currentTimeMillis());
@@ -1351,20 +1387,20 @@ public class CryptoTests {
 	Object[][] provideDataForNewHopePostQuantumCrytoKeyExchangeForEncryption()
 	{
 		return new Object[][] {
-			{SymmetricEncryptionType.AES_CBC},
-			{SymmetricEncryptionType.BC_FIPS_AES_CBC},
+			{SymmetricEncryptionType.AES_CBC_PKCS5Padding},
+			{SymmetricEncryptionType.BC_FIPS_AES_CBC_PKCS7Padding},
 			{SymmetricEncryptionType.BC_FIPS_AES_GCM},
 			{SymmetricEncryptionType.BC_AES_EAX},
-			{SymmetricEncryptionType.BC_SERPENT_CBC},
+			{SymmetricEncryptionType.BC_SERPENT_CBC_PKCS7Padding},
 			{SymmetricEncryptionType.BC_SERPENT_GCM},
 			{SymmetricEncryptionType.BC_SERPENT_EAX},
-			{SymmetricEncryptionType.BC_TWOFISH_CBC},
+			{SymmetricEncryptionType.BC_TWOFISH_CBC_PKCS7Padding},
 			{SymmetricEncryptionType.BC_TWOFISH_GCM},
 			{SymmetricEncryptionType.BC_TWOFISH_EAX},
-			{SymmetricEncryptionType.GNU_AES_CBC},
-			{SymmetricEncryptionType.GNU_ANUBIS_CBC},
-			{SymmetricEncryptionType.GNU_SERPENT_CBC},
-			{SymmetricEncryptionType.GNU_TWOFISH_CBC}
+			{SymmetricEncryptionType.GNU_AES_CBC_PKCS5Padding},
+			{SymmetricEncryptionType.GNU_ANUBIS_CBC_PKCS5Padding},
+			{SymmetricEncryptionType.GNU_SERPENT_CBC_PKCS5Padding},
+			{SymmetricEncryptionType.GNU_TWOFISH_CBC_PKCS5Padding}
 		};
 	}
 	

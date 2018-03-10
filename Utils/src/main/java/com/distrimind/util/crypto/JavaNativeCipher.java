@@ -187,7 +187,7 @@ public final class JavaNativeCipher extends AbstractCipher {
 			InvalidKeySpecException, InvalidAlgorithmParameterException {
 		try {
 			if (type!=null && type.getBlockMode().toUpperCase().equals("GCM"))
-				cipher.init(_opmode, _key.toJavaNativeKey(), new GCMParameterSpec(_iv.length*8, _iv));
+				cipher.init(_opmode, _key.toJavaNativeKey(), new GCMParameterSpec(128, _iv));
 			else
 				cipher.init(_opmode, _key.toJavaNativeKey(), new IvParameterSpec(_iv));
 		} catch (java.security.InvalidKeyException e) {
