@@ -54,6 +54,8 @@ public class StaticObjectAllocator<T> {
 		this.maxAllocations=maxAllocations;
 		this.constructor=concernedClass.getDeclaredConstructor(constructorParamters);
 		this.allocations=new Object[maxAllocations];
+		for (int i=0;i<this.allocations.length;i++)
+			this.allocations[i]=null;
 	}
 	
 	public int getMaxAllocations()
