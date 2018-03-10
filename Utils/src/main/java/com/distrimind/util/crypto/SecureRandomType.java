@@ -61,7 +61,7 @@ import com.distrimind.util.OSValidator;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 2.0
+ * @version 2.0.1
  * @since Utils 2.0
  */
 public enum SecureRandomType {
@@ -398,7 +398,7 @@ public enum SecureRandomType {
 	
 	static void tryToGenerateNativeNonBlockingRandomBytes(final byte[] buffer) throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.NoSuchProviderException
 	{
-		if (OSValidator.getCurrentJREVersion()>=1.8)
+		if (OSValidator.getCurrentJREVersionDouble()>=1.8)
 		{
 			if (!nativeNonBlockingSeedInitialized)
 			{
@@ -460,7 +460,7 @@ public enum SecureRandomType {
 	{
 		if (OSValidator.getCurrentOS().isUnix())
 		{
-			if (OSValidator.getCurrentJREVersion()>=1.8)
+			if (OSValidator.getCurrentJREVersionDouble()>=1.8)
 			{
 				System.out.println("here");
 				if (!nativeNonBlockingSeedInitialized)

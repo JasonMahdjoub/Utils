@@ -40,7 +40,7 @@ package com.distrimind.util;
  * Set of functions giving information about the current running OS
  * 
  * @author Jason Mahdjoub
- * @version 2.0
+ * @version 2.1
  * @since Utils 1.0
  *
  */
@@ -74,9 +74,13 @@ public enum OSValidator {
 		currentJREVersion=d;
 	}
 
-	public static double getCurrentJREVersion()
+	public static double getCurrentJREVersionDouble()
 	{
 		return currentJREVersion;
+	}
+	public static byte getCurrentJREVersionByte()
+	{
+		return (byte)(currentJREVersion-1.0*10.0);
 	}
 	
 	public static OSValidator getCurrentOS()

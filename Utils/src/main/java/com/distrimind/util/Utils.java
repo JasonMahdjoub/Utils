@@ -54,8 +54,8 @@ public class Utils {
 		Calendar c = Calendar.getInstance();
 		c.set(2016, 1, 4);
 		Calendar c2 = Calendar.getInstance();
-		c.set(2018, 2, 8);
-		VERSION = new Version("Utils", "Utils", 3, 11, 0, Version.Type.Stable, 0, c.getTime(), c2.getTime());
+		c.set(2018, 2, 10);
+		VERSION = new Version("Utils", "Utils", 3, 11, 1, Version.Type.Stable, 0, c.getTime(), c2.getTime());
 		try {
 
 			InputStream is = Utils.class.getResourceAsStream("build.txt");
@@ -68,8 +68,14 @@ public class Utils {
 			VERSION.addDeveloper(new PersonDeveloper("mahdjoub", "jason", c.getTime()));
 			
 			c = Calendar.getInstance();
+			c.set(2018, 2, 10);
+			Description d = new Description(3, 11, 1, Version.Type.Stable, 0, c.getTime());
+			d.addItem("Add speed indexes for symmetric encryptions.");
+			VERSION.addDescription(d);
+
+			c = Calendar.getInstance();
 			c.set(2018, 2, 8);
-			Description d = new Description(3, 11, 0, Version.Type.Stable, 0, c.getTime());
+			d = new Description(3, 11, 0, Version.Type.Stable, 0, c.getTime());
 			d.addItem("Add BouncyCastle GCM and EAX authenticated block modes for symmetric encryptions.");
 			VERSION.addDescription(d);
 
