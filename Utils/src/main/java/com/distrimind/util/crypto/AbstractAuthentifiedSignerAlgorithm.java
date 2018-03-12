@@ -84,11 +84,7 @@ public abstract class AbstractAuthentifiedSignerAlgorithm {
 	
 	public abstract void update(byte message[], int offm, int lenm) throws SignatureException ;
 	
-	public void getSignature(byte signature[], int off_sig) throws ShortBufferException, IllegalStateException, SignatureException, IOException, InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException
-	{
-		byte s[]=getSignature();
-		System.arraycopy(s, 0, signature, off_sig, s.length);
-	}
+	public abstract void getSignature(byte signature[], int off_sig) throws ShortBufferException, IllegalStateException, SignatureException, IOException, InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException;
 	
     /**
      * Returns the length of the MAC in bytes.

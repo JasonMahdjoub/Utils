@@ -264,6 +264,7 @@ public class ASymmetricPublicKey extends Key {
 	
 	@Override
 	public AsymmetricKey toBouncyCastleKey() throws NoSuchAlgorithmException, InvalidKeySpecException {
+		
 		PublicKey pk=toJavaNativeKey();
 		if (pk instanceof RSAPublicKey)
 		{

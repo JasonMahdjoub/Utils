@@ -60,6 +60,7 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 	private final SymmetricEncryptionType type;
 
 	private final AbstractSecureRandom random;
+	private final byte iv[];
 
 	public SymmetricEncryptionAlgorithm(AbstractSecureRandom random, SymmetricSecretKey key)
 			throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,
@@ -68,7 +69,11 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 		this.type = key.getEncryptionAlgorithmType();
 		this.key = key;
 		this.random = random;
+		iv = new byte[getIVSizeBytes()];
 		this.cipher.init(Cipher.ENCRYPT_MODE, this.key, generateIV());
+		
+		initBufferAllocatorArgs();
+		
 	}
 
 	
@@ -80,7 +85,6 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 		return type.getIVSizeBytes();
 	}	
 	private byte[] generateIV() {
-		byte[] iv = new byte[getIVSizeBytes()];
 		random.nextBytes(iv);
 		return iv;
 	}

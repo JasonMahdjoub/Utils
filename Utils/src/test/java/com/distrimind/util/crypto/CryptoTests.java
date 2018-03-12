@@ -334,7 +334,7 @@ public class CryptoTests {
 	public void testASymmetricSecretMessageExchanger(ASymmetricEncryptionType type)
 			throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,
 			InvalidAlgorithmParameterException, IOException, IllegalAccessException, InvalidKeySpecException,
-			IllegalBlockSizeException, BadPaddingException, NoSuchProviderException {
+			IllegalBlockSizeException, BadPaddingException, NoSuchProviderException, IllegalStateException, ShortBufferException {
 		System.out.println("Testing ASymmetricSecretMessageExchanger " + type);
 		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getSingleton(null);
 		for (short keySize = 2048; keySize <= 4096; keySize += 1024) {
@@ -679,7 +679,7 @@ public class CryptoTests {
 	public void testHybridEncryptions(ASymmetricEncryptionType astype, SymmetricEncryptionType stype)
 			throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,
 			InvalidAlgorithmParameterException, IOException, IllegalBlockSizeException, BadPaddingException,
-			NoSuchProviderException, InvalidKeySpecException, IllegalStateException, IllegalArgumentException, InvalidWrappingException {
+			NoSuchProviderException, InvalidKeySpecException, IllegalStateException, IllegalArgumentException, InvalidWrappingException, ShortBufferException {
 		System.out.println("Testing " + astype + "/" + stype);
 		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getSingleton(null);
 		ASymmetricKeyPair kpd = astype.getKeyPairGenerator(rand, (short)1024).generateKeyPair();
@@ -918,7 +918,7 @@ public class CryptoTests {
 	public void testAsymmetricSignatures(ASymmetricAuthentifiedSignatureType type, ASymmetricKeyPair kpd, int keySize)
 			throws NoSuchAlgorithmException, InvalidKeyException, SignatureException, InvalidKeySpecException,
 			NoSuchProviderException, ShortBufferException, IllegalStateException, InvalidAlgorithmParameterException, InvalidParameterSpecException, IOException {
-		System.out.println("Testing asymmetric signature : " + keySize);
+		System.out.println("Testing asymmetric signature : " +type+", "+ keySize+", "+kpd.getASymmetricPublicKey().toJavaNativeKey().getEncoded().length);
 		byte b[]=kpd.encode();
 		ASymmetricKeyPair kpd2=ASymmetricKeyPair.decode(b);
 		Assert.assertEquals(kpd2, kpd);
@@ -1155,7 +1155,7 @@ public class CryptoTests {
 	@Test(invocationCount = 1, dataProvider = "provideDataForSymetricEncryptions", dependsOnMethods = "testSecretKeyEncoding")
 	public void testSymetricEncryptions(SymmetricEncryptionType type) throws NoSuchAlgorithmException,
 			NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IOException,
-			IllegalBlockSizeException, BadPaddingException, NoSuchProviderException, InvalidKeySpecException {
+			IllegalBlockSizeException, BadPaddingException, NoSuchProviderException, InvalidKeySpecException, IllegalStateException, ShortBufferException {
 		testSymetricEncryptionsCompatibility(type, type);
 
 	}
@@ -1163,7 +1163,7 @@ public class CryptoTests {
 	@Test(invocationCount = 1, dataProvider = "provideDataForTestSymetricEncryptionsCompatibility", dependsOnMethods = "testSymetricEncryptions")
 	public void testSymetricEncryptionsCompatibility(SymmetricEncryptionType type1, SymmetricEncryptionType type2) throws NoSuchAlgorithmException,
 			NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IOException,
-			IllegalBlockSizeException, BadPaddingException, NoSuchProviderException, InvalidKeySpecException {
+			IllegalBlockSizeException, BadPaddingException, NoSuchProviderException, InvalidKeySpecException, IllegalStateException, ShortBufferException {
 		System.out.println("Testing " + type1+", "+type2);
 		AbstractSecureRandom random = SecureRandomType.DEFAULT.getSingleton(null);
 
@@ -1263,7 +1263,7 @@ public class CryptoTests {
 			throws java.security.NoSuchAlgorithmException, java.security.InvalidKeyException,
 			java.security.spec.InvalidKeySpecException, NoSuchAlgorithmException, NoSuchProviderException,
 			InvalidKeyException, NoSuchPaddingException, InvalidAlgorithmParameterException, InvalidKeySpecException,
-			BadPaddingException, IllegalStateException, IllegalBlockSizeException, IOException {
+			BadPaddingException, IllegalStateException, IllegalBlockSizeException, IOException, ShortBufferException {
 		AbstractSecureRandom random = SecureRandomType.DEFAULT.getSingleton(null);
 		EllipticCurveDiffieHellmanAlgorithm peer1 = type.getInstance(random);
 		EllipticCurveDiffieHellmanAlgorithm peer2 = type.getInstance(random);
@@ -1299,7 +1299,7 @@ public class CryptoTests {
 
 	}
 	
-	private void testEncryptionAfterKeyExchange(AbstractSecureRandom random, SymmetricEncryptionType type, SymmetricSecretKey key) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException, NoSuchProviderException, InvalidKeySpecException, BadPaddingException, IllegalStateException, IllegalBlockSizeException, IOException
+	private void testEncryptionAfterKeyExchange(AbstractSecureRandom random, SymmetricEncryptionType type, SymmetricSecretKey key) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException, NoSuchProviderException, InvalidKeySpecException, BadPaddingException, IllegalStateException, IllegalBlockSizeException, IOException, ShortBufferException
 	{
 		SymmetricEncryptionAlgorithm algoDistant = new SymmetricEncryptionAlgorithm(random, key);
 		SymmetricEncryptionAlgorithm algoLocal = new SymmetricEncryptionAlgorithm(random, key);
@@ -1360,7 +1360,7 @@ public class CryptoTests {
 			throws java.security.NoSuchAlgorithmException, java.security.InvalidKeyException,
 			java.security.spec.InvalidKeySpecException, NoSuchAlgorithmException, NoSuchProviderException,
 			InvalidKeyException, NoSuchPaddingException, InvalidAlgorithmParameterException, InvalidKeySpecException,
-			BadPaddingException, IllegalStateException, IllegalBlockSizeException, IOException {
+			BadPaddingException, IllegalStateException, IllegalBlockSizeException, IOException, ShortBufferException {
 		AbstractSecureRandom random = SecureRandomType.DEFAULT.getSingleton(null);
 		
 		int keySizeBits=random.nextBoolean()?128:256;

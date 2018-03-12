@@ -36,6 +36,7 @@ package com.distrimind.util.crypto;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+
 import java.io.IOException;
 
 
@@ -114,6 +115,7 @@ public class CryptoBench {
 				nb+=shift;
 			}
 		}
+		signer=null;
 		double ms=t.getMilid();
 		double speedEncoding=(nb/(ms/1000.0)/1024.0/1024.0);
 		System.out.println(type+" - Encryption speed  : "+speedEncoding+" MiO/s");
@@ -133,7 +135,7 @@ public class CryptoBench {
 			os.write(cipher.decode(tmp));
 			if (!type.isAuthenticatedAlgorithm())
 			{
-				signer.sign(tmp);
+				//signer.sign(tmp);
 				Assert.assertTrue(checker.verify(tmp, 0, tmp.length, signatures, indexSignature, signatureSize));
 				indexSignature+=signatureSize;
 			}
@@ -162,4 +164,5 @@ public class CryptoBench {
 		}
 		return res;
 	}
+
 }

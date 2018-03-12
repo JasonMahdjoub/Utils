@@ -54,8 +54,8 @@ public class Utils {
 		Calendar c = Calendar.getInstance();
 		c.set(2016, 1, 4);
 		Calendar c2 = Calendar.getInstance();
-		c.set(2018, 2, 10);
-		VERSION = new Version("Utils", "Utils", 3, 11, 1, Version.Type.Stable, 0, c.getTime(), c2.getTime());
+		c.set(2018, 2, 12);
+		VERSION = new Version("Utils", "Utils", 3, 12, 0, Version.Type.Stable, 0, c.getTime(), c2.getTime());
 		try {
 
 			InputStream is = Utils.class.getResourceAsStream("build.txt");
@@ -69,7 +69,14 @@ public class Utils {
 			
 			c = Calendar.getInstance();
 			c.set(2018, 2, 10);
-			Description d = new Description(3, 11, 1, Version.Type.Stable, 0, c.getTime());
+			Description d = new Description(3, 12, 0, Version.Type.Stable, 0, c.getTime());
+			d.addItem("Add sphincs signature (Post Quantum Cryptography).");
+			d.addItem("Optimize encryption and minimize memory allocation.");
+			VERSION.addDescription(d);
+
+			c = Calendar.getInstance();
+			c.set(2018, 2, 10);
+			d = new Description(3, 11, 1, Version.Type.Stable, 0, c.getTime());
 			d.addItem("Add speed indexes for symmetric encryptions.");
 			VERSION.addDescription(d);
 

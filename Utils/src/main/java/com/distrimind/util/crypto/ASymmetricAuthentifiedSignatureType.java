@@ -38,9 +38,11 @@ import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.Signature;
 
+
 import org.bouncycastle.crypto.Algorithm;
 import org.bouncycastle.crypto.fips.FipsEC;
 import org.bouncycastle.crypto.fips.FipsRSA;
+import org.bouncycastle.pqc.jcajce.provider.sphincs.Sphincs256KeyPairGeneratorSpi;
 
 import gnu.vm.jgnu.security.NoSuchProviderException;
 
@@ -53,37 +55,39 @@ import gnu.vm.jgnu.security.NoSuchProviderException;
  */
 public enum ASymmetricAuthentifiedSignatureType {
 	@Deprecated
-	SHA1withRSA("SHA1withRSA", "RSA", CodeProvider.SunRsaSign,CodeProvider.SunRsaSign,(short) 3072, 31536000000l, FipsRSA.ALGORITHM), 
-	SHA256withRSA("SHA256withRSA","RSA", CodeProvider.SunRsaSign,CodeProvider.SunRsaSign,(short) 3072, 31536000000l, FipsRSA.ALGORITHM), 
-	SHA384withRSA("SHA384withRSA", "RSA", CodeProvider.SunRsaSign,CodeProvider.SunRsaSign,(short) 3072, 31536000000l, FipsRSA.ALGORITHM), 
-	SHA512withRSA("SHA512withRSA", "RSA", CodeProvider.SunRsaSign,CodeProvider.SunRsaSign,(short) 3072, 31536000000l, FipsRSA.ALGORITHM),
-	BC_FIPS_SHA256withRSA("SHA256withRSA","RSA", CodeProvider.BCFIPS,CodeProvider.BCFIPS,(short) 3072, 31536000000l, FipsRSA.ALGORITHM), 
-	BC_FIPS_SHA384withRSA("SHA384withRSA","RSA", CodeProvider.BCFIPS,CodeProvider.BCFIPS,(short) 3072, 31536000000l, FipsRSA.ALGORITHM), 
-	BC_FIPS_SHA512withRSA("SHA512withRSA", "RSA", CodeProvider.BCFIPS,CodeProvider.BCFIPS,(short) 3072, 31536000000l, FipsRSA.ALGORITHM),
-	BC_FIPS_SHA256withRSAandMGF1("SHA256withRSAandMGF1","RSA", CodeProvider.BCFIPS,CodeProvider.BCFIPS,(short) 3072, 31536000000l, FipsRSA.ALGORITHM), 
-	BC_FIPS_SHA384withRSAandMGF1("SHA384withRSAandMGF1","RSA", CodeProvider.BCFIPS,CodeProvider.BCFIPS,(short) 3072, 31536000000l, FipsRSA.ALGORITHM), 
-	BC_FIPS_SHA512withRSAandMGF1("SHA512withRSAandMGF1", "RSA", CodeProvider.BCFIPS,CodeProvider.BCFIPS,(short) 3072, 31536000000l, FipsRSA.ALGORITHM),
+	SHA1withRSA("SHA1withRSA", "RSA", CodeProvider.SunRsaSign,CodeProvider.SunRsaSign,(short) 3072, 31536000000l, FipsRSA.ALGORITHM, false), 
+	SHA256withRSA("SHA256withRSA","RSA", CodeProvider.SunRsaSign,CodeProvider.SunRsaSign,(short) 3072, 31536000000l, FipsRSA.ALGORITHM, false), 
+	SHA384withRSA("SHA384withRSA", "RSA", CodeProvider.SunRsaSign,CodeProvider.SunRsaSign,(short) 3072, 31536000000l, FipsRSA.ALGORITHM, false), 
+	SHA512withRSA("SHA512withRSA", "RSA", CodeProvider.SunRsaSign,CodeProvider.SunRsaSign,(short) 3072, 31536000000l, FipsRSA.ALGORITHM, false),
+	BC_FIPS_SHA256withRSA("SHA256withRSA","RSA", CodeProvider.BCFIPS,CodeProvider.BCFIPS,(short) 3072, 31536000000l, FipsRSA.ALGORITHM, false), 
+	BC_FIPS_SHA384withRSA("SHA384withRSA","RSA", CodeProvider.BCFIPS,CodeProvider.BCFIPS,(short) 3072, 31536000000l, FipsRSA.ALGORITHM, false), 
+	BC_FIPS_SHA512withRSA("SHA512withRSA", "RSA", CodeProvider.BCFIPS,CodeProvider.BCFIPS,(short) 3072, 31536000000l, FipsRSA.ALGORITHM, false),
+	BC_FIPS_SHA256withRSAandMGF1("SHA256withRSAandMGF1","RSA", CodeProvider.BCFIPS,CodeProvider.BCFIPS,(short) 3072, 31536000000l, FipsRSA.ALGORITHM, false), 
+	BC_FIPS_SHA384withRSAandMGF1("SHA384withRSAandMGF1","RSA", CodeProvider.BCFIPS,CodeProvider.BCFIPS,(short) 3072, 31536000000l, FipsRSA.ALGORITHM, false), 
+	BC_FIPS_SHA512withRSAandMGF1("SHA512withRSAandMGF1", "RSA", CodeProvider.BCFIPS,CodeProvider.BCFIPS,(short) 3072, 31536000000l, FipsRSA.ALGORITHM, false),
 	@Deprecated
-	BC_FIPS_SHA256withECDSA("SHA256withECDSA", "EC", CodeProvider.BCFIPS,CodeProvider.BCFIPS,(short) 256, 31536000000l, FipsEC.ALGORITHM),
+	BC_FIPS_SHA256withECDSA("SHA256withECDSA", "EC", CodeProvider.BCFIPS,CodeProvider.BCFIPS,(short) 256, 31536000000l, FipsEC.ALGORITHM, false),
 	@Deprecated
-	BC_FIPS_SHA384withECDSA("SHA384withECDSA", "EC", CodeProvider.BCFIPS,CodeProvider.BCFIPS,(short) 384, 31536000000l, FipsEC.ALGORITHM),
+	BC_FIPS_SHA384withECDSA("SHA384withECDSA", "EC", CodeProvider.BCFIPS,CodeProvider.BCFIPS,(short) 384, 31536000000l, FipsEC.ALGORITHM, false),
 	@Deprecated
-	BC_FIPS_SHA512withECDSA("SHA512withECDSA", "EC", CodeProvider.BCFIPS,CodeProvider.BCFIPS,(short) 521, 31536000000l, FipsEC.ALGORITHM),
-	BC_SHA256withECDSA_CURVE_25519("SHA256withECDSA", "ECDSA", CodeProvider.BCFIPS,CodeProvider.BC, (short)256, 31536000000l, FipsEC.ALGORITHM),
-	BC_SHA384withECDSA_CURVE_25519("SHA384withECDSA", "ECDSA", CodeProvider.BCFIPS,CodeProvider.BC, (short)256, 31536000000l, FipsEC.ALGORITHM),
-	BC_SHA512withECDSA_CURVE_25519("SHA512withECDSA", "ECDSA", CodeProvider.BCFIPS,CodeProvider.BC, (short)256, 31536000000l, FipsEC.ALGORITHM),
-	BC_SHA256withECDSA_CURVE_M_221("SHA256withECDSA", "ECDSA", CodeProvider.BCFIPS,CodeProvider.BC, (short)383, 31536000000l, FipsEC.ALGORITHM),
-	BC_SHA384withECDSA_CURVE_M_221("SHA384withECDSA", "ECDSA", CodeProvider.BCFIPS,CodeProvider.BC, (short)383, 31536000000l, FipsEC.ALGORITHM),
-	BC_SHA512withECDSA_CURVE_M_221("SHA512withECDSA", "ECDSA", CodeProvider.BCFIPS,CodeProvider.BC, (short)383, 31536000000l, FipsEC.ALGORITHM),
-	BC_SHA256withECDSA_CURVE_M_383("SHA256withECDSA", "ECDSA", CodeProvider.BCFIPS,CodeProvider.BC, (short)383, 31536000000l, FipsEC.ALGORITHM),
-	BC_SHA384withECDSA_CURVE_M_383("SHA384withECDSA", "ECDSA", CodeProvider.BCFIPS,CodeProvider.BC, (short)383, 31536000000l, FipsEC.ALGORITHM),
-	BC_SHA512withECDSA_CURVE_M_383("SHA512withECDSA", "ECDSA", CodeProvider.BCFIPS,CodeProvider.BC, (short)383, 31536000000l, FipsEC.ALGORITHM),
-	BC_SHA256withECDSA_CURVE_M_511("SHA256withECDSA", "ECDSA", CodeProvider.BCFIPS,CodeProvider.BC, (short)511, 31536000000l, FipsEC.ALGORITHM),
-	BC_SHA384withECDSA_CURVE_M_511("SHA384withECDSA", "ECDSA", CodeProvider.BCFIPS,CodeProvider.BC, (short)511, 31536000000l, FipsEC.ALGORITHM),
-	BC_SHA512withECDSA_CURVE_M_511("SHA512withECDSA", "ECDSA", CodeProvider.BCFIPS,CodeProvider.BC, (short)511, 31536000000l, FipsEC.ALGORITHM),
-	BC_SHA256withECDSA_CURVE_41417("SHA256withECDSA", "ECDSA", CodeProvider.BCFIPS,CodeProvider.BC, (short)414, 31536000000l, FipsEC.ALGORITHM),
-	BC_SHA384withECDSA_CURVE_41417("SHA384withECDSA", "ECDSA", CodeProvider.BCFIPS,CodeProvider.BC, (short)414, 31536000000l, FipsEC.ALGORITHM),
-	BC_SHA512withECDSA_CURVE_41417("SHA512withECDSA", "ECDSA", CodeProvider.BCFIPS,CodeProvider.BC, (short)414, 31536000000l, FipsEC.ALGORITHM),
+	BC_FIPS_SHA512withECDSA("SHA512withECDSA", "EC", CodeProvider.BCFIPS,CodeProvider.BCFIPS,(short) 521, 31536000000l, FipsEC.ALGORITHM, false),
+	BC_SHA256withECDSA_CURVE_25519("SHA256withECDSA", "ECDSA", CodeProvider.BCFIPS,CodeProvider.BC, (short)256, 31536000000l, FipsEC.ALGORITHM, false),
+	BC_SHA384withECDSA_CURVE_25519("SHA384withECDSA", "ECDSA", CodeProvider.BCFIPS,CodeProvider.BC, (short)256, 31536000000l, FipsEC.ALGORITHM, false),
+	BC_SHA512withECDSA_CURVE_25519("SHA512withECDSA", "ECDSA", CodeProvider.BCFIPS,CodeProvider.BC, (short)256, 31536000000l, FipsEC.ALGORITHM, false),
+	BC_SHA256withECDSA_CURVE_M_221("SHA256withECDSA", "ECDSA", CodeProvider.BCFIPS,CodeProvider.BC, (short)383, 31536000000l, FipsEC.ALGORITHM, false),
+	BC_SHA384withECDSA_CURVE_M_221("SHA384withECDSA", "ECDSA", CodeProvider.BCFIPS,CodeProvider.BC, (short)383, 31536000000l, FipsEC.ALGORITHM, false),
+	BC_SHA512withECDSA_CURVE_M_221("SHA512withECDSA", "ECDSA", CodeProvider.BCFIPS,CodeProvider.BC, (short)383, 31536000000l, FipsEC.ALGORITHM, false),
+	BC_SHA256withECDSA_CURVE_M_383("SHA256withECDSA", "ECDSA", CodeProvider.BCFIPS,CodeProvider.BC, (short)383, 31536000000l, FipsEC.ALGORITHM, false),
+	BC_SHA384withECDSA_CURVE_M_383("SHA384withECDSA", "ECDSA", CodeProvider.BCFIPS,CodeProvider.BC, (short)383, 31536000000l, FipsEC.ALGORITHM, false),
+	BC_SHA512withECDSA_CURVE_M_383("SHA512withECDSA", "ECDSA", CodeProvider.BCFIPS,CodeProvider.BC, (short)383, 31536000000l, FipsEC.ALGORITHM, false),
+	BC_SHA256withECDSA_CURVE_M_511("SHA256withECDSA", "ECDSA", CodeProvider.BCFIPS,CodeProvider.BC, (short)511, 31536000000l, FipsEC.ALGORITHM, false),
+	BC_SHA384withECDSA_CURVE_M_511("SHA384withECDSA", "ECDSA", CodeProvider.BCFIPS,CodeProvider.BC, (short)511, 31536000000l, FipsEC.ALGORITHM, false),
+	BC_SHA512withECDSA_CURVE_M_511("SHA512withECDSA", "ECDSA", CodeProvider.BCFIPS,CodeProvider.BC, (short)511, 31536000000l, FipsEC.ALGORITHM, false),
+	BC_SHA256withECDSA_CURVE_41417("SHA256withECDSA", "ECDSA", CodeProvider.BCFIPS,CodeProvider.BC, (short)414, 31536000000l, FipsEC.ALGORITHM, false),
+	BC_SHA384withECDSA_CURVE_41417("SHA384withECDSA", "ECDSA", CodeProvider.BCFIPS,CodeProvider.BC, (short)414, 31536000000l, FipsEC.ALGORITHM, false),
+	BC_SHA512withECDSA_CURVE_41417("SHA512withECDSA", "ECDSA", CodeProvider.BCFIPS,CodeProvider.BC, (short)414, 31536000000l, FipsEC.ALGORITHM, false),
+	BCPQC_SPHINCS256_SHA2_512_256("SHA512withSPHINCS256", "SHA512withSPHINCS256", CodeProvider.BCPQC,CodeProvider.BCPQC, (short)1024, 31536000000l, null, true),
+	BCPQC_SPHINCS256_SHA3_512("SHA3-512withSPHINCS256", "SHA3-256withSPHINCS256", CodeProvider.BCPQC,CodeProvider.BCPQC, (short)1024, 31536000000l, null, true),
 	DEFAULT(BC_FIPS_SHA384withRSAandMGF1);
 
 	private final String signatureAlgorithmName;
@@ -97,8 +101,10 @@ public enum ASymmetricAuthentifiedSignatureType {
 	
 	private final Algorithm bcAlgorithm;
 	
+	private final boolean isPostQuantumAlgorithm;
+	
 
-	private ASymmetricAuthentifiedSignatureType(String signatureAlgorithmName, String keyGeneratorAlgorithmName, CodeProvider codeProviderSignature, CodeProvider codeProviderKeyGenerator, short keySize, long expirationTimeMilis, Algorithm bcAlgorithm) {
+	private ASymmetricAuthentifiedSignatureType(String signatureAlgorithmName, String keyGeneratorAlgorithmName, CodeProvider codeProviderSignature, CodeProvider codeProviderKeyGenerator, short keySize, long expirationTimeMilis, Algorithm bcAlgorithm, boolean isPostQuantumAlgorithm) {
 		this.signatureAlgorithmName = signatureAlgorithmName;
 		this.keyGeneratorAlgorithmName=keyGeneratorAlgorithmName;
 		this.codeProviderSignature = codeProviderSignature;
@@ -106,10 +112,11 @@ public enum ASymmetricAuthentifiedSignatureType {
 		this.keySize=keySize;
 		this.expirationTimeMilis=expirationTimeMilis;
 		this.bcAlgorithm=bcAlgorithm;
+		this.isPostQuantumAlgorithm=isPostQuantumAlgorithm;
 		
 	}
 	private ASymmetricAuthentifiedSignatureType(ASymmetricAuthentifiedSignatureType other) {
-		this(other.signatureAlgorithmName, other.keyGeneratorAlgorithmName, other.codeProviderSignature, other.codeProviderKeyGenerator, other.keySize, other.expirationTimeMilis, other.bcAlgorithm);
+		this(other.signatureAlgorithmName, other.keyGeneratorAlgorithmName, other.codeProviderSignature, other.codeProviderKeyGenerator, other.keySize, other.expirationTimeMilis, other.bcAlgorithm, other.isPostQuantumAlgorithm);
 	}
 
 	public String getSignatureAlgorithmName() {
@@ -130,11 +137,11 @@ public enum ASymmetricAuthentifiedSignatureType {
 	public AbstractSignature getSignatureInstance() throws gnu.vm.jgnu.security.NoSuchAlgorithmException, NoSuchProviderException {
 		if (codeProviderSignature == CodeProvider.GNU_CRYPTO) {
 			return new GnuSignature(gnu.vm.jgnu.security.Signature.getInstance(signatureAlgorithmName));
-		} else if (codeProviderSignature == CodeProvider.BCFIPS || codeProviderSignature == CodeProvider.BC) {
+		} else if (codeProviderSignature == CodeProvider.BCFIPS || codeProviderSignature == CodeProvider.BC || codeProviderSignature == CodeProvider.BCPQC) {
 			CodeProvider.ensureBouncyCastleProviderLoaded();
 			try {
 				Signature s=Signature.getInstance(signatureAlgorithmName, codeProviderSignature.name());
-					
+				
 				return new JavaNativeSignature(s);
 			} catch (NoSuchAlgorithmException e) {
 				throw new gnu.vm.jgnu.security.NoSuchAlgorithmException(e);
@@ -192,6 +199,10 @@ public enum ASymmetricAuthentifiedSignatureType {
 			return 560;
 		else if (this==BC_SHA512withECDSA_CURVE_M_221)
 			return 560;
+		else if (this==BCPQC_SPHINCS256_SHA2_512_256)
+			return 328000;
+		else if (this==BCPQC_SPHINCS256_SHA3_512)
+			return 328000;
 		else if (this==ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA256withECDSA)
 			return 1112;
 		else if (this==ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA384withECDSA || this==ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA512withECDSA)
@@ -237,10 +248,20 @@ public enum ASymmetricAuthentifiedSignatureType {
 			res.initialize(keySize, expirationTimeUTC, random);
 
 			return res;
-		} else if (codeProviderKeyGenerator == CodeProvider.BCFIPS || codeProviderKeyGenerator == CodeProvider.BC) {
+		} else if (codeProviderKeyGenerator == CodeProvider.BCFIPS || codeProviderKeyGenerator == CodeProvider.BC || codeProviderKeyGenerator == CodeProvider.BCPQC) {
 			CodeProvider.ensureBouncyCastleProviderLoaded();
+			
+				
+					
 			try {
-				KeyPairGenerator kgp = KeyPairGenerator.getInstance(keyGeneratorAlgorithmName, codeProviderKeyGenerator.name());
+				KeyPairGenerator kgp = null;
+				if (this.getKeyGeneratorAlgorithmName().equals(BCPQC_SPHINCS256_SHA3_512.getKeyGeneratorAlgorithmName()) || this.getKeyGeneratorAlgorithmName().equals(BCPQC_SPHINCS256_SHA2_512_256.getKeyGeneratorAlgorithmName()))
+				{
+					kgp=new Sphincs256KeyPairGeneratorSpi();
+					
+				}
+				else
+					kgp = KeyPairGenerator.getInstance(keyGeneratorAlgorithmName, codeProviderKeyGenerator.name());
 				JavaNativeKeyPairGenerator res = new JavaNativeKeyPairGenerator(this, kgp);
 				res.initialize(keySize, expirationTimeUTC, random);	
 				
@@ -273,5 +294,9 @@ public enum ASymmetricAuthentifiedSignatureType {
 	{
 		return bcAlgorithm;
 	}
-
+	public boolean isPostQuantumAlgorithm() {
+		return isPostQuantumAlgorithm;
+	}
+	
+	
 }

@@ -39,6 +39,7 @@ import java.security.Security;
 
 import org.bouncycastle.jcajce.provider.BouncyCastleFipsProvider;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.pqc.jcajce.provider.BouncyCastlePQCProvider;
 
 import com.distrimind.util.OSValidator;
 
@@ -50,13 +51,23 @@ import com.distrimind.util.OSValidator;
  * @since Utils 2.9.0
  */
 public enum CodeProvider {
-	SUN, SunJCE, SunJSSE, SunRsaSign, SunEC, GNU_CRYPTO, BCFIPS, BC;
+	SUN, SunJCE, SunJSSE, SunRsaSign, SunEC, GNU_CRYPTO, BCFIPS, BC, BCPQC;
 
 	private static volatile Provider bouncyProvider = null;
 	private static volatile Provider bouncyProviderFIPS = null;
+	private static volatile Provider bouncyProviderPQC = null;
 
 	static void ensureBouncyCastleProviderLoaded() {
 
+		if (bouncyProviderPQC == null) {
+
+			synchronized (CodeProvider.class) {
+				if (bouncyProviderPQC == null) {
+					bouncyProviderPQC = new BouncyCastlePQCProvider();
+					Security.insertProviderAt(bouncyProviderPQC, Security.getProviders().length+1);
+				}
+			}
+		}
 		if (bouncyProvider == null) {
 
 			synchronized (CodeProvider.class) {

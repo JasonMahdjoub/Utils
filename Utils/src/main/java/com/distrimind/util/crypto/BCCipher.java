@@ -542,7 +542,6 @@ public class BCCipher extends AbstractCipher {
 	@Override
 	public byte[] update(byte[] input, int inputOffset, int inputLength)  {
 		
-			
 		processingStream.update(input, inputOffset, inputLength);
 		if (resultStream.size() > 0)
         {

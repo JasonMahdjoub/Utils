@@ -82,6 +82,7 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 		this.maxBlockSizeForEncoding = myKeyPair.getMaxBlockSize();
 		initCipherForEncrypt(this.cipher);
 		this.maxBlockSizeForDecoding = cipher.getOutputSize(this.maxBlockSizeForEncoding);
+		initBufferAllocatorArgs();
 	}
 
 	@Override

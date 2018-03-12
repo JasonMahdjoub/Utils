@@ -58,33 +58,33 @@ import com.distrimind.util.OSValidator;
  * List of symmetric encryption algorithms
  * 
  * @author Jason Mahdjoub
- * @version 3.1
+ * @version 3.2
  * @since Utils 1.4
  */
 public enum SymmetricEncryptionType {
 
-	AES_CBC_PKCS5Padding("AES", "CBC", "PKCS5Padding", (short) 128, CodeProvider.SunJCE, CodeProvider.SunJCE, SymmetricAuthentifiedSignatureType.HMAC_SHA_384, org.bouncycastle.crypto.general.AES.ALGORITHM, (short)128, false, (short)117, (short)91, (short)131, (short)93, (short)192, (short)193), 
-	AES_GCM("AES", "GCM", "NoPadding", (short) 128, CodeProvider.SunJCE, CodeProvider.SunJCE, SymmetricAuthentifiedSignatureType.HMAC_SHA_384, org.bouncycastle.crypto.general.AES.ALGORITHM, (short)128, true, (short)40, (short)48, (short)59, (short) 54, (short)202, (short)307),
+	AES_CBC_PKCS5Padding("AES", "CBC", "PKCS5Padding", (short) 128, CodeProvider.SunJCE, CodeProvider.SunJCE, SymmetricAuthentifiedSignatureType.HMAC_SHA_384, org.bouncycastle.crypto.general.AES.ALGORITHM, (short)128, false, (short)118, (short)146, (short)132, (short)148, (short)192, (short)327), 
+	AES_GCM("AES", "GCM", "NoPadding", (short) 128, CodeProvider.SunJCE, CodeProvider.SunJCE, SymmetricAuthentifiedSignatureType.HMAC_SHA_384, org.bouncycastle.crypto.general.AES.ALGORITHM, (short)128, true, (short)40, (short)48, (short)58, (short) 58, (short)202, (short)475),
 	@Deprecated
-	DES_CBC("DES", "CBC", "PKCS5Padding", (short) 56, (short) 8, CodeProvider.SunJCE, CodeProvider.SunJCE, SymmetricAuthentifiedSignatureType.HMAC_SHA_384, org.bouncycastle.crypto.general.DES.ALGORITHM, (short)64, false, (short)35, (short)26, (short)40, (short)32, (short)34, (short)38), 
+	DES_CBC_PKCS5Padding("DES", "CBC", "PKCS5Padding", (short) 56, (short) 8, CodeProvider.SunJCE, CodeProvider.SunJCE, SymmetricAuthentifiedSignatureType.HMAC_SHA_384, org.bouncycastle.crypto.general.DES.ALGORITHM, (short)64, false, (short)41, (short)39, (short)40, (short)37, (short)44, (short)44), 
 	@Deprecated
-	DESede_CBC("DESede", "CBC", "PKCS5Padding", (short) 168, (short) 24, CodeProvider.SunJCE, CodeProvider.SunJCE,SymmetricAuthentifiedSignatureType.HMAC_SHA_384, org.bouncycastle.crypto.general.DES.ALGORITHM, (short)64, false, (short)14, (short)14, (short)15, (short)14, (short)16, (short)15), 
+	DESede_CBC_PKCS5Padding("DESede", "CBC", "PKCS5Padding", (short) 168, (short) 24, CodeProvider.SunJCE, CodeProvider.SunJCE,SymmetricAuthentifiedSignatureType.HMAC_SHA_384, org.bouncycastle.crypto.general.DES.ALGORITHM, (short)64, false, (short)16, (short)16, (short)15, (short)15, (short)16, (short)16), 
 	@Deprecated
-	Blowfish_CBC("Blowfish", "CBC", "PKCS5Padding", (short) 128, CodeProvider.SunJCE, CodeProvider.SunJCE, SymmetricAuthentifiedSignatureType.HMAC_SHA_384, org.bouncycastle.crypto.general.Blowfish.ALGORITHM, (short)64, false, (short)49, (short)42, (short)54, (short)42, (short)54, (short)49), 
-	GNU_AES_CBC_PKCS5Padding("AES", "CBC", "PKCS5Padding", (short) 128, CodeProvider.GNU_CRYPTO, CodeProvider.GNU_CRYPTO, SymmetricAuthentifiedSignatureType.BC_FIPS_HMAC_SHA_512, org.bouncycastle.crypto.general.AES.ALGORITHM, (short)128, false, (short)65, (short)48, (short)63, (short)48, (short)68, (short)50), 
-	GNU_TWOFISH_CBC_PKCS5Padding("TWOFISH","CBC", "PKCS5Padding", (short) 128, CodeProvider.GNU_CRYPTO, CodeProvider.GNU_CRYPTO, SymmetricAuthentifiedSignatureType.BC_FIPS_HMAC_SHA_512, Twofish.ALGORITHM, (short)128, false, (short)56, (short)45, (short)52, (short)42, (short)56, (short)44), 
-	GNU_SERPENT_CBC_PKCS5Padding("Serpent", "CBC", "PKCS5Padding", (short) 128, CodeProvider.GNU_CRYPTO, CodeProvider.GNU_CRYPTO, SymmetricAuthentifiedSignatureType.BC_FIPS_HMAC_SHA_512, Serpent.ALGORITHM, (short)128, false, (short)37, (short)31, (short)36, (short)30, (short)37, (short)33), 
-	GNU_ANUBIS_CBC_PKCS5Padding("Anubis", "CBC", "PKCS5Padding", (short) 128, CodeProvider.GNU_CRYPTO, CodeProvider.GNU_CRYPTO, SymmetricAuthentifiedSignatureType.BC_FIPS_HMAC_SHA_512, null, (short)128, false, (short)62, (short)45, (short)56, (short)44, (short)60, (short)49), 
-	GNU_SQUARE_CBC__PKCS5Padding("Square", "CBC", "PKCS5Padding", (short) 128, CodeProvider.GNU_CRYPTO, CodeProvider.GNU_CRYPTO, SymmetricAuthentifiedSignatureType.BC_FIPS_HMAC_SHA_512, null, (short)128, false, (short)69, (short)51, (short)60, (short)45, (short)68, (short)55), 
-	BC_FIPS_AES_CBC_PKCS7Padding("AES", "CBC", "PKCS7Padding", (short) 128, CodeProvider.BCFIPS, CodeProvider.BCFIPS, SymmetricAuthentifiedSignatureType.BC_FIPS_HMAC_SHA_512, org.bouncycastle.crypto.general.AES.ALGORITHM, (short)128, false, (short)60, (short)57, (short)59, (short)54, (short)61, (short)54),
-	BC_FIPS_AES_GCM("AES", "GCM", "NoPadding", (short) 128, CodeProvider.BCFIPS, CodeProvider.BCFIPS, SymmetricAuthentifiedSignatureType.BC_FIPS_HMAC_SHA_512, org.bouncycastle.crypto.general.AES.ALGORITHM, (short)128, true, (short)40, (short)47, (short)46, (short)57, (short)42, (short)55),
-	BC_AES_EAX("AES", "EAX", "NoPadding", (short) 128, CodeProvider.BC, CodeProvider.BC, SymmetricAuthentifiedSignatureType.BC_FIPS_HMAC_SHA_512, org.bouncycastle.crypto.general.AES.ALGORITHM, (short)128, true, (short)38, (short)43, (short)43, (short)43, (short)36, (short)42),
-	BC_TWOFISH_CBC_PKCS7Padding("TWOFISH", "CBC", "PKCS7Padding", (short) 128,CodeProvider.BC, CodeProvider.BC,SymmetricAuthentifiedSignatureType.BC_FIPS_HMAC_SHA_512, Twofish.ALGORITHM, (short)128, false, (short)45, (short)45, (short)44, (short)43, (short)46, (short)46),
-	BC_TWOFISH_GCM("TWOFISH", "GCM", "NoPadding", (short) 128,CodeProvider.BC, CodeProvider.BC,SymmetricAuthentifiedSignatureType.BC_FIPS_HMAC_SHA_512, Twofish.ALGORITHM, (short)128, true, (short)35, (short)41, (short)39, (short)45, (short)38, (short)44),
-	BC_TWOFISH_EAX("TWOFISH", "EAX", "NoPadding", (short) 128,CodeProvider.BC, CodeProvider.BC,SymmetricAuthentifiedSignatureType.BC_FIPS_HMAC_SHA_512, Twofish.ALGORITHM, (short)128, true, (short)26, (short)30, (short)27, (short)30, (short)27, (short)30),
-	BC_SERPENT_CBC_PKCS7Padding("Serpent", "CBC", "PKCS7Padding",(short) 128, CodeProvider.BC, CodeProvider.BC,SymmetricAuthentifiedSignatureType.BC_FIPS_HMAC_SHA_512, Serpent.ALGORITHM, (short)128, false, (short)39, (short)34,(short)39, (short)34, (short)41, (short)36),
-	BC_SERPENT_GCM("Serpent", "GCM", "NoPadding",(short) 128, CodeProvider.BC, CodeProvider.BC,SymmetricAuthentifiedSignatureType.BC_FIPS_HMAC_SHA_512, Serpent.ALGORITHM, (short)128, true, (short)30, (short)34, (short)33, (short)37, (short)34, (short)39),
-	BC_SERPENT_EAX("Serpent", "EAX", "NoPadding",(short) 128, CodeProvider.BC, CodeProvider.BC,SymmetricAuthentifiedSignatureType.BC_FIPS_HMAC_SHA_512, Serpent.ALGORITHM, (short)128, true, (short)22, (short)24, (short)23, (short)24, (short)24, (short)12),
+	Blowfish_CBC_PKCS5Padding("Blowfish", "CBC", "PKCS5Padding", (short) 128, CodeProvider.SunJCE, CodeProvider.SunJCE, SymmetricAuthentifiedSignatureType.HMAC_SHA_384, org.bouncycastle.crypto.general.Blowfish.ALGORITHM, (short)64, false, (short)49, (short)51, (short)55, (short)51, (short)58, (short)55), 
+	GNU_AES_CBC_PKCS5Padding("AES", "CBC", "PKCS5Padding", (short) 128, CodeProvider.GNU_CRYPTO, CodeProvider.GNU_CRYPTO, SymmetricAuthentifiedSignatureType.BC_FIPS_HMAC_SHA_512, org.bouncycastle.crypto.general.AES.ALGORITHM, (short)128, false, (short)67, (short)63, (short)63, (short)64, (short)65, (short)68), 
+	GNU_TWOFISH_CBC_PKCS5Padding("TWOFISH","CBC", "PKCS5Padding", (short) 128, CodeProvider.GNU_CRYPTO, CodeProvider.GNU_CRYPTO, SymmetricAuthentifiedSignatureType.BC_FIPS_HMAC_SHA_512, Twofish.ALGORITHM, (short)128, false, (short)57, (short)56, (short)55, (short)55, (short)59, (short)57), 
+	GNU_SERPENT_CBC_PKCS5Padding("Serpent", "CBC", "PKCS5Padding", (short) 128, CodeProvider.GNU_CRYPTO, CodeProvider.GNU_CRYPTO, SymmetricAuthentifiedSignatureType.BC_FIPS_HMAC_SHA_512, Serpent.ALGORITHM, (short)128, false, (short)37, (short)37, (short)35, (short)37, (short)38, (short)39), 
+	GNU_ANUBIS_CBC_PKCS5Padding("Anubis", "CBC", "PKCS5Padding", (short) 128, CodeProvider.GNU_CRYPTO, CodeProvider.GNU_CRYPTO, SymmetricAuthentifiedSignatureType.BC_FIPS_HMAC_SHA_512, null, (short)128, false, (short)61, (short)58, (short)57, (short)57, (short)63, (short)65), 
+	GNU_SQUARE_CBC__PKCS5Padding("Square", "CBC", "PKCS5Padding", (short) 128, CodeProvider.GNU_CRYPTO, CodeProvider.GNU_CRYPTO, SymmetricAuthentifiedSignatureType.BC_FIPS_HMAC_SHA_512, null, (short)128, false, (short)69, (short)67, (short)61, (short)62, (short)72, (short)72), 
+	BC_FIPS_AES_CBC_PKCS7Padding("AES", "CBC", "PKCS7Padding", (short) 128, CodeProvider.BCFIPS, CodeProvider.BCFIPS, SymmetricAuthentifiedSignatureType.BC_FIPS_HMAC_SHA_512, org.bouncycastle.crypto.general.AES.ALGORITHM, (short)128, false, (short)60, (short)75, (short)60, (short)73, (short)61, (short)75),
+	BC_FIPS_AES_GCM("AES", "GCM", "NoPadding", (short) 128, CodeProvider.BCFIPS, CodeProvider.BCFIPS, SymmetricAuthentifiedSignatureType.BC_FIPS_HMAC_SHA_512, org.bouncycastle.crypto.general.AES.ALGORITHM, (short)128, true, (short)42, (short)48, (short)47, (short)57, (short)44, (short)54),
+	BC_AES_EAX("AES", "EAX", "NoPadding", (short) 128, CodeProvider.BC, CodeProvider.BC, SymmetricAuthentifiedSignatureType.BC_FIPS_HMAC_SHA_512, org.bouncycastle.crypto.general.AES.ALGORITHM, (short)128, true, (short)36, (short)43, (short)44, (short)39, (short)42, (short)42),
+	BC_TWOFISH_CBC_PKCS7Padding("TWOFISH", "CBC", "PKCS7Padding", (short) 128,CodeProvider.BC, CodeProvider.BC,SymmetricAuthentifiedSignatureType.BC_FIPS_HMAC_SHA_512, Twofish.ALGORITHM, (short)128, false, (short)45, (short)56, (short)45, (short)57, (short)46, (short)59),
+	BC_TWOFISH_GCM("TWOFISH", "GCM", "NoPadding", (short) 128,CodeProvider.BC, CodeProvider.BC,SymmetricAuthentifiedSignatureType.BC_FIPS_HMAC_SHA_512, Twofish.ALGORITHM, (short)128, true, (short)35, (short)41, (short)39, (short)46, (short)38, (short)45),
+	BC_TWOFISH_EAX("TWOFISH", "EAX", "NoPadding", (short) 128,CodeProvider.BC, CodeProvider.BC,SymmetricAuthentifiedSignatureType.BC_FIPS_HMAC_SHA_512, Twofish.ALGORITHM, (short)128, true, (short)27, (short)30, (short)28, (short)31, (short)27, (short)30),
+	BC_SERPENT_CBC_PKCS7Padding("Serpent", "CBC", "PKCS7Padding",(short) 128, CodeProvider.BC, CodeProvider.BC,SymmetricAuthentifiedSignatureType.BC_FIPS_HMAC_SHA_512, Serpent.ALGORITHM, (short)128, false, (short)40, (short)42,(short)39, (short)41, (short)42, (short)43),
+	BC_SERPENT_GCM("Serpent", "GCM", "NoPadding",(short) 128, CodeProvider.BC, CodeProvider.BC,SymmetricAuthentifiedSignatureType.BC_FIPS_HMAC_SHA_512, Serpent.ALGORITHM, (short)128, true, (short)31, (short)35, (short)33, (short)38, (short)34, (short)39),
+	BC_SERPENT_EAX("Serpent", "EAX", "NoPadding",(short) 128, CodeProvider.BC, CodeProvider.BC,SymmetricAuthentifiedSignatureType.BC_FIPS_HMAC_SHA_512, Serpent.ALGORITHM, (short)128, true, (short)22, (short)24, (short)23, (short)24, (short)24, (short)25),
 	DEFAULT(AES_CBC_PKCS5Padding);
 	
 		
@@ -342,16 +342,25 @@ public enum SymmetricEncryptionType {
 		return isAuthenticatedAlgorithm();
 	}
 	
+	private static boolean supportAESIntrinsics()
+	{
+		return true;
+	}
+	
 	public short getEncodingSpeedIndex()
 	{
-		return getEncodingSpeedIndex(OSValidator.getCurrentJREVersionByte());
+		
+		return getEncodingSpeedIndex(OSValidator.getCurrentJREVersionByte(), supportAESIntrinsics());
 	}
 	public short getDecodingSpeedIndex()
 	{
-		return getDecodingSpeedIndex(OSValidator.getCurrentJREVersionByte());
+		return getDecodingSpeedIndex(OSValidator.getCurrentJREVersionByte(), supportAESIntrinsics());
 	}
-	public short getEncodingSpeedIndex(byte javaVersion)
+	public short getEncodingSpeedIndex(byte javaVersion, boolean supportAESIntrisics)
 	{
+		if (!supportAESIntrisics)
+			javaVersion=7;
+			
 		if (javaVersion<=7)
 			return encodingSpeedIndexJava7;
 		else if (javaVersion==8)
@@ -359,8 +368,10 @@ public enum SymmetricEncryptionType {
 		else
 			return encodingSpeedIndexJava9;
 	}
-	public short getDecodingSpeedIndex(byte javaVersion)
+	public short getDecodingSpeedIndex(byte javaVersion, boolean supportAESIntrisics)
 	{
+		if (!supportAESIntrisics)
+			javaVersion=7;
 		if (javaVersion<=7)
 			return decodingSpeedIndexJava7;
 		else if (javaVersion==8)

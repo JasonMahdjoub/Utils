@@ -42,7 +42,7 @@ package com.distrimind.util;
  * @since Utils 3.12
  *
  */
-public class StaticAllocation<T>{
+public class StaticAllocation<T> implements AutoCloseable{
 	private final T instance;
 	volatile boolean used;
 	
@@ -62,5 +62,10 @@ public class StaticAllocation<T>{
 	public void free()
 	{
 		used=false;
+	}
+
+	@Override
+	public void close() {
+		free();
 	}
 }

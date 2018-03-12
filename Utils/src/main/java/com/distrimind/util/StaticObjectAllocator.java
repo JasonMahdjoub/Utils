@@ -47,12 +47,18 @@ import java.lang.reflect.InvocationTargetException;
  */
 public class StaticObjectAllocator<T> {
 	private final int maxAllocations;
-	private final Constructor<T> constructor;
+	private final Constructor<? extends T> constructor;
 	private final Object allocations[];
-	public StaticObjectAllocator(int maxAllocations, Class<T> concernedClass, Class<?> ...constructorParamters) throws NoSuchMethodException, SecurityException
+	private final boolean isByteArray;
+	private static Class<? extends byte[]> byteArrayClass=new byte[0].getClass();
+	private Object staticArgs[]=new Object[0];
+	public StaticObjectAllocator(int maxAllocations, Class<? extends T> concernedClass, Class<?> ...constructorParamters) throws NoSuchMethodException, SecurityException
 	{
 		this.maxAllocations=maxAllocations;
-		this.constructor=concernedClass.getDeclaredConstructor(constructorParamters);
+		if (isByteArray=concernedClass.equals(byteArrayClass))
+			this.constructor=null;
+		else
+			this.constructor=concernedClass.getDeclaredConstructor(constructorParamters);
 		this.allocations=new Object[maxAllocations];
 		for (int i=0;i<this.allocations.length;i++)
 			this.allocations[i]=null;
@@ -62,8 +68,11 @@ public class StaticObjectAllocator<T> {
 	{
 		return maxAllocations;
 	}
-	
-	public StaticAllocation<T> getNewInstance(Object ...staticArgs) throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException
+	public void initArgs(Object ...staticArgs)
+	{
+		this.staticArgs=staticArgs;
+	}
+	public StaticAllocation<T> getNewInstance() throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException
 	{
 		synchronized(this)
 		{
@@ -72,7 +81,9 @@ public class StaticObjectAllocator<T> {
 				Object o = allocations[i];
 				if (o==null)
 				{
-					StaticAllocation<T> sa=new StaticAllocation<T>(constructor.newInstance(staticArgs));
+					@SuppressWarnings("unchecked")
+					T instance=(T)(isByteArray?new byte[((Integer)staticArgs[0]).intValue()]:constructor.newInstance(staticArgs));
+					StaticAllocation<T> sa=new StaticAllocation<T>(instance);
 					allocations[i]=sa;
 					return sa;
 				}

@@ -49,6 +49,7 @@ import javax.crypto.NoSuchPaddingException;
 
 import org.bouncycastle.crypto.Algorithm;
 import org.bouncycastle.crypto.fips.FipsRSA;
+import org.bouncycastle.pqc.jcajce.provider.sphincs.Sphincs256KeyFactorySpi;
 
 import com.distrimind.util.Bits;
 
@@ -122,9 +123,19 @@ public enum ASymmetricEncryptionType {
 
 		try {
 			byte[][] parts = Bits.separateEncodingsWithShortSizedTabs(encodedKey);
-			PKCS8EncodedKeySpec pkcsKeySpec = new PKCS8EncodedKeySpec(parts[1]);
-			KeyFactory kf = KeyFactory.getInstance(new String(parts[0]));
-			return kf.generatePrivate(pkcsKeySpec);
+			String algorithm=new String(parts[0]);
+			if (algorithm.equals("SPHINCS-256"))
+			{
+				Sphincs256KeyFactorySpi kf=new Sphincs256KeyFactorySpi();
+				return kf.engineGeneratePrivate(new PKCS8EncodedKeySpec(parts[1]));
+			}
+			else
+			{
+
+				PKCS8EncodedKeySpec pkcsKeySpec = new PKCS8EncodedKeySpec(parts[1]);
+				KeyFactory kf = KeyFactory.getInstance(algorithm);
+				return kf.generatePrivate(pkcsKeySpec);
+			}
 		} catch (NoSuchAlgorithmException e) {
 			throw new gnu.vm.jgnu.security.NoSuchAlgorithmException(e);
 		} catch (InvalidKeySpecException e) {
@@ -136,9 +147,18 @@ public enum ASymmetricEncryptionType {
 			throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException {
 		try {
 			byte[][] parts = Bits.separateEncodingsWithShortSizedTabs(encodedKey);
-			X509EncodedKeySpec pubKeySpec = new X509EncodedKeySpec(parts[1]);
-			KeyFactory kf = KeyFactory.getInstance(new String(parts[0]));
-			return kf.generatePublic(pubKeySpec);
+			String algorithm=new String(parts[0]);
+			if (algorithm.equals("SPHINCS-256"))
+			{
+				Sphincs256KeyFactorySpi kf=new Sphincs256KeyFactorySpi();
+				return kf.engineGeneratePublic(new X509EncodedKeySpec(parts[1]));
+			}
+			else
+			{
+				X509EncodedKeySpec pubKeySpec = new X509EncodedKeySpec(parts[1]);
+				KeyFactory kf = KeyFactory.getInstance(algorithm);
+				return kf.generatePublic(pubKeySpec);
+			}
 		} catch (NoSuchAlgorithmException e) {
 			throw new gnu.vm.jgnu.security.NoSuchAlgorithmException(e);
 		} catch (InvalidKeySpecException e) {

@@ -39,6 +39,7 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.spec.MGF1ParameterSpec;
 import java.security.spec.PSSParameterSpec;
 
+
 import com.distrimind.util.Bits;
 
 import gnu.vm.jgnu.security.InvalidKeyException;
@@ -127,6 +128,20 @@ public class ASymmetricAuthentifiedSignerAlgorithm extends AbstractAuthentifiedS
 	@Override
 	public int getMacLength() {
 		return macLength;
+	}
+
+	@Override
+	public void getSignature(byte[] signature, int off_sig) throws ShortBufferException, IllegalStateException,
+			SignatureException, IOException, InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException {
+		if (includeParameter)
+		{
+			byte s[]=getSignature();
+			System.arraycopy(s, 0, signature, off_sig, s.length);
+		}
+		else
+		{
+			this.signature.sign(signature, off_sig, macLength);
+		}		
 	}
 
 }
