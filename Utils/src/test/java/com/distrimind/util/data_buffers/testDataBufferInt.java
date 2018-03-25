@@ -240,7 +240,7 @@ public final class testDataBufferInt extends testDataBuffer {
 		d = new DataBufferInt(0);
 
 		try {
-			d.setData(new Double(0.0));
+			d.setData(Double.valueOf(0.0));
 			assertTrue(false, "setting any object other than numeric buffer on a DataBufferInt should be imposible");
 		} catch (IllegalArgumentException i) {
 		}

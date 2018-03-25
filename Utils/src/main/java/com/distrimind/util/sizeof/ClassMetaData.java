@@ -155,7 +155,7 @@ final class ClassMetaData {
 				if (fieldType.isPrimitive()) {
 					m_size += ObjectSizer.getPrimitiveSize(fieldType);
 				} else {
-					if (!f.isAccessible()) {
+					//if (!f.isAccessible()) {
 						synchronized (fapa) {
 							fapa.setContext(f);
 							try {
@@ -164,7 +164,7 @@ final class ClassMetaData {
 								throw new RuntimeException(
 										"could not make field " + f + " accessible: " + e.getException());
 							}
-						}
+						//}
 					}
 					m_size += ObjectSizer.OBJREF_SIZE;
 

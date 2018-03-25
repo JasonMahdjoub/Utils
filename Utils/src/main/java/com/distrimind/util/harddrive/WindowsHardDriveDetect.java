@@ -78,7 +78,7 @@ class WindowsHardDriveDetect extends HardDriveDetect {
 					drive = (char) (drive - ('A' - 'a'));
 				if (!((drive >= 'a' && drive <= 'z') || (drive >= 'A' || drive <= 'Z')))
 					return HardDriveDetect.DEFAULT_HARD_DRIVE_IDENTIFIER;
-				Character Drive = new Character(drive);
+				Character Drive = Character.valueOf(drive);
 				Identifier id = identifiers.get(Drive);
 				if (id == null) {
 					id = getIdentifier(drive);

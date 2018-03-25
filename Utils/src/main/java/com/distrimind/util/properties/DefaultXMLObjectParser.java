@@ -275,21 +275,21 @@ public class DefaultXMLObjectParser extends AbstractXMLObjectParser {
 				tab[i] = btab[i] != 0;
 			return tab;
 		} else if (field_type == Boolean.class) {
-			return new Boolean(Boolean.parseBoolean(nodeValue));
+			return Boolean.valueOf(Boolean.parseBoolean(nodeValue));
 		} else if (field_type == Byte.class) {
-			return new Byte(Byte.parseByte(nodeValue));
+			return Byte.valueOf(Byte.parseByte(nodeValue));
 		} else if (field_type == Short.class) {
-			return new Short(Short.parseShort(nodeValue));
+			return Short.valueOf(Short.parseShort(nodeValue));
 		} else if (field_type == Integer.class) {
-			return new Integer(Integer.parseInt(nodeValue));
+			return Integer.valueOf(Integer.parseInt(nodeValue));
 		} else if (field_type == Long.class) {
-			return new Long(Long.parseLong(nodeValue));
+			return Long.valueOf(Long.parseLong(nodeValue));
 		} else if (field_type == Float.class) {
-			return new Float(Float.parseFloat(nodeValue));
+			return Float.valueOf(Float.parseFloat(nodeValue));
 		} else if (field_type == Double.class) {
-			return new Double(Double.parseDouble(nodeValue));
+			return Double.valueOf(Double.parseDouble(nodeValue));
 		} else if (field_type == Character.class) {
-			return new Character(nodeValue.charAt(0));
+			return Character.valueOf(nodeValue.charAt(0));
 		} else if (field_type == String.class) {
 			return nodeValue;
 		} else if (field_type == Class.class) {

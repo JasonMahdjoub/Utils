@@ -619,7 +619,7 @@ public abstract class XMLProperties implements Cloneable, Serializable {
 					m = new HashMap<Object, Object>();
 				} else {
 					@SuppressWarnings("unchecked")
-					Map<Object, Object> newInstance = (Map<Object, Object>) type.newInstance();
+					Map<Object, Object> newInstance = (Map<Object, Object>) type.getDeclaredConstructor().newInstance();
 					m = newInstance;
 				}
 
@@ -664,7 +664,7 @@ public abstract class XMLProperties implements Cloneable, Serializable {
 				}
 				field.set(this, m);
 
-			} catch (InstantiationException | IllegalAccessException | DOMException | ClassNotFoundException e) {
+			} catch (InstantiationException | IllegalAccessException | DOMException | ClassNotFoundException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
 				throw new XMLPropertiesParseException(e, "Impossible to read the type " + type.getName());
 			}
 
@@ -689,7 +689,7 @@ public abstract class XMLProperties implements Cloneable, Serializable {
 								l = new ArrayList<>();
 						} else {
 							@SuppressWarnings("unchecked")
-							List<Object> newInstance = (List<Object>) type.newInstance();
+							List<Object> newInstance = (List<Object>) type.getDeclaredConstructor().newInstance();
 							l = newInstance;
 						}
 					}
@@ -714,7 +714,7 @@ public abstract class XMLProperties implements Cloneable, Serializable {
 					field.set(this, l);
 				}
 
-			} catch (InstantiationException | IllegalAccessException | DOMException | ClassNotFoundException e) {
+			} catch (InstantiationException | IllegalAccessException | DOMException | ClassNotFoundException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
 				throw new XMLPropertiesParseException(e, "Impossible to read the type " + type.getName());
 			}
 
@@ -879,7 +879,7 @@ public abstract class XMLProperties implements Cloneable, Serializable {
 					if (Modifier.isAbstract(field_type.getModifiers()))
 						l = new ArrayList<>();
 					else
-						l = (List<Object>) field_type.newInstance();
+						l = (List<Object>) field_type.getDeclaredConstructor().newInstance();
 
 					if (value.startsWith("{") && value.endsWith("}")) {
 						value = value.substring(1, value.length() - 1);
@@ -900,7 +900,7 @@ public abstract class XMLProperties implements Cloneable, Serializable {
 					if (Modifier.isAbstract(field_type.getModifiers())) {
 						m = new HashMap<Object, Object>();
 					} else {
-						Map<Object, Object> newInstance = (Map<Object, Object>) field_type.newInstance();
+						Map<Object, Object> newInstance = (Map<Object, Object>) field_type.getDeclaredConstructor().newInstance();
 						m = newInstance;
 					}
 

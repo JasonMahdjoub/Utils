@@ -240,7 +240,7 @@ public class testDataBufferUnsignedByte extends testDataBuffer {
 
 		d = new DataBufferUnsignedByte(0);
 		try {
-			d.setData(new Double(0.0));
+			d.setData(Double.valueOf(0.0));
 			assertTrue(false, "setting any object other than numeric buffer on a DataBufferUnsignedByte should be imposible");
 		} catch (IllegalArgumentException i) {
 		}

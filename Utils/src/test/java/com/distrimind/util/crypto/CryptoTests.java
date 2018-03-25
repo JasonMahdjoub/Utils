@@ -430,14 +430,14 @@ public class CryptoTests {
 
 		Object[][] res = new Object[8][];
 
-		res[0] = new Object[] { new Boolean(true), salt, new Boolean(true) };
-		res[1] = new Object[] { new Boolean(true), salt, new Boolean(false) };
-		res[2] = new Object[] { new Boolean(false), salt, new Boolean(false) };
-		res[3] = new Object[] { new Boolean(false), salt, new Boolean(true) };
-		res[4] = new Object[] { new Boolean(true), null, new Boolean(true) };
-		res[5] = new Object[] { new Boolean(true), null, new Boolean(false) };
-		res[6] = new Object[] { new Boolean(false), null, new Boolean(false) };
-		res[7] = new Object[] { new Boolean(false), null, new Boolean(true) };
+		res[0] = new Object[] { Boolean.valueOf(true), salt, Boolean.valueOf(true) };
+		res[1] = new Object[] { Boolean.valueOf(true), salt, Boolean.valueOf(false) };
+		res[2] = new Object[] { Boolean.valueOf(false), salt, Boolean.valueOf(false) };
+		res[3] = new Object[] { Boolean.valueOf(false), salt, Boolean.valueOf(true) };
+		res[4] = new Object[] { Boolean.valueOf(true), null, Boolean.valueOf(true) };
+		res[5] = new Object[] { Boolean.valueOf(true), null,Boolean.valueOf(false) };
+		res[6] = new Object[] { Boolean.valueOf(false), null, Boolean.valueOf(false) };
+		res[7] = new Object[] { Boolean.valueOf(false), null, Boolean.valueOf(true) };
 
 		return res;
 	}
@@ -534,7 +534,7 @@ public class CryptoTests {
 			for (boolean expectedVerify : new boolean[] { true, false }) {
 				for (byte[] s : new byte[][] { null, salt }) {
 					for (boolean messageIsKey : new boolean[] { true, false }) {
-						res.add(new Object[] { new Boolean(expectedVerify), new Boolean(messageIsKey), s, m });
+						res.add(new Object[] { Boolean.valueOf(expectedVerify), Boolean.valueOf(messageIsKey), s, m });
 					}
 				}
 			}

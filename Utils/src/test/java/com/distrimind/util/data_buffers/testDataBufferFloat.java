@@ -239,7 +239,7 @@ public final class testDataBufferFloat extends testDataBuffer {
 		d = new DataBufferFloat(0);
 
 		try {
-			d.setData(new Double(0.0));
+			d.setData(Double.valueOf(0.0));
 			assertTrue(false, "setting any object other than numeric buffer on a DataBufferFloat should be imposible");
 		} catch (IllegalArgumentException i) {
 		}

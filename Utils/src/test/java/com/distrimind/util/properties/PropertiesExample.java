@@ -312,13 +312,13 @@ public class PropertiesExample extends XMLProperties {
 		floatValue = rand.nextFloat();
 		doubleValue = rand.nextDouble();
 
-		IntegerValue = new Integer(rand.nextInt());
-		ShortValue = new Short((short) rand.nextInt());
-		ByteValue = new Byte((byte) rand.nextInt());
-		BooleanValue = new Boolean(rand.nextBoolean());
-		LongValue = new Long(rand.nextLong());
-		FloatValue = new Float(rand.nextFloat());
-		DoubleValue = new Double(rand.nextDouble());
+		IntegerValue = Integer.valueOf(rand.nextInt());
+		ShortValue = Short.valueOf((short) rand.nextInt());
+		ByteValue = Byte.valueOf((byte) rand.nextInt());
+		BooleanValue = Boolean.valueOf(rand.nextBoolean());
+		LongValue = Long.valueOf(rand.nextLong());
+		FloatValue = Float.valueOf(rand.nextFloat());
+		DoubleValue = Double.valueOf(rand.nextDouble());
 
 		stringValue = getString(rand);
 		fileValue = new File(getString(rand));
@@ -334,7 +334,7 @@ public class PropertiesExample extends XMLProperties {
 		className = SubProperties.class;
 		map = new HashMap<>();
 		for (int i = 0; i < 10; i++)
-			map.put(getString(rand), new Integer(rand.nextInt()));
+			map.put(getString(rand), Integer.valueOf(rand.nextInt()));
 		map2 = (HashMap<String, Integer>) map;
 		list = new ArrayList<>();
 		for (int i = 0; i < 10; i++)

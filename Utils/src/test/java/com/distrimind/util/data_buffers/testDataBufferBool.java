@@ -232,7 +232,7 @@ public final class testDataBufferBool extends testDataBuffer {
 		}
 
 		try {
-			d.setData(new Double(0.0));
+			d.setData(Double.valueOf(0.0));
 			assertTrue(false, "setting a any object other than boolean buffer on a DataBufferBool should be imposible");
 		} catch (IllegalArgumentException i) {
 		}

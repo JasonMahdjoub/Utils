@@ -49,7 +49,7 @@ public class Main {
 
 		truc() {
 			for (int i = 0; i < 10; i++) {
-				v.add(new Float(0));
+				v.add(Float.valueOf(0));
 			}
 		}
 	}
@@ -63,7 +63,7 @@ public class Main {
 
 		truc1() {
 			for (int i = 0; i < 10; i++) {
-				v.add(new Float(0));
+				v.add(Float.valueOf(0));
 			}
 		}
 	}
@@ -77,7 +77,7 @@ public class Main {
 
 		truc2() {
 			for (int i = 0; i < 10; i++) {
-				v.add(new Float(0));
+				v.add(Float.valueOf(0));
 			}
 		}
 	}
@@ -91,7 +91,7 @@ public class Main {
 
 		truc3() {
 			for (int i = 0; i < 10; i++) {
-				v.add(new Float(0));
+				v.add(Float.valueOf(0));
 			}
 		}
 

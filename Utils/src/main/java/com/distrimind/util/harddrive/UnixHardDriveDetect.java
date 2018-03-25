@@ -124,7 +124,7 @@ abstract class UnixHardDriveDetect extends HardDriveDetect {
 
 	UnixHardDriveDetect() {
 		root.set(null);
-		previous_update.set(new Long(System.currentTimeMillis()));
+		previous_update.set(Long.valueOf(System.currentTimeMillis()));
 	}
 
 	@Override
@@ -134,7 +134,7 @@ abstract class UnixHardDriveDetect extends HardDriveDetect {
 			if (root.get() == null
 					|| (System.currentTimeMillis() - previous_update.get().longValue()) > getTimeBeforeUpdate()) {
 				root.set(scanPartitions());
-				previous_update.set(new Long(System.currentTimeMillis()));
+				previous_update.set(Long.valueOf(System.currentTimeMillis()));
 			}
 			String res = root.get().getHardDriveIdentifier(f);
 			if (res == null)

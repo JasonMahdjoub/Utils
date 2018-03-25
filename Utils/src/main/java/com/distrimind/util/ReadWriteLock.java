@@ -195,7 +195,7 @@ public class ReadWriteLock {
 
 			}
 
-			readingThreads.put(callingThread, new Integer((getReadAccessCount(callingThread) + 1)));
+			readingThreads.put(callingThread, Integer.valueOf((getReadAccessCount(callingThread) + 1)));
 		}
 	}
 
@@ -237,7 +237,7 @@ public class ReadWriteLock {
 			if (accessCount == 1) {
 				readingThreads.remove(callingThread);
 			} else {
-				readingThreads.put(callingThread, new Integer((accessCount - 1)));
+				readingThreads.put(callingThread, Integer.valueOf((accessCount - 1)));
 			}
 			notifyAll();
 		}

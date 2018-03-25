@@ -164,7 +164,7 @@ public class ObjectSizer {
 
 			long startMemoryUse = getMemoryUse();
 			for (int idx = 0; idx < objects.length; ++idx) {
-				objects[idx] = aClass.newInstance();
+				objects[idx] = aClass.getDeclaredConstructor().newInstance();
 			}
 			long endMemoryUse = getMemoryUse();
 
