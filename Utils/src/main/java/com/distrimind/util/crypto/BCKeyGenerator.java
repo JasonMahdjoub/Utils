@@ -108,6 +108,12 @@ public final class BCKeyGenerator extends AbstractKeyGenerator {
 				keyGenerator=new FipsAES.KeyGenerator(FipsAES.GCM, keySize, random);
 				this.keySizeBits=keySize;
 			}
+			else if (encryptionType.getAlgorithmName().equals(SymmetricEncryptionType.BC_FIPS_AES_CTR.getAlgorithmName())
+					&& SymmetricEncryptionType.BC_FIPS_AES_CTR.getBlockMode().equals(encryptionType.getBlockMode()))
+			{
+				keyGenerator=new FipsAES.KeyGenerator(FipsAES.CTR, keySize, random);
+				this.keySizeBits=keySize;
+			}
 			else if (encryptionType.getAlgorithmName().equals(SymmetricEncryptionType.BC_FIPS_AES_CBC_PKCS7Padding.getAlgorithmName())
 					&& SymmetricEncryptionType.BC_FIPS_AES_CBC_PKCS7Padding.getBlockMode().equals(encryptionType.getBlockMode()))
 			{
@@ -126,6 +132,12 @@ public final class BCKeyGenerator extends AbstractKeyGenerator {
 				keyGenerator=new Serpent.KeyGenerator(Serpent.CBCwithPKCS7, keySize, random);
 				this.keySizeBits=keySize;
 			}
+			else if (encryptionType.getAlgorithmName().equals(SymmetricEncryptionType.BC_SERPENT_CTR.getAlgorithmName())
+					&& SymmetricEncryptionType.BC_SERPENT_CTR.getBlockMode().equals(encryptionType.getBlockMode()))
+			{
+				keyGenerator=new Serpent.KeyGenerator(Serpent.CTR, keySize, random);
+				this.keySizeBits=keySize;
+			}
 			else if (encryptionType.getAlgorithmName().equals(SymmetricEncryptionType.BC_SERPENT_GCM.getAlgorithmName())
 					&& SymmetricEncryptionType.BC_SERPENT_GCM.getBlockMode().equals(encryptionType.getBlockMode()))
 			{
@@ -142,6 +154,12 @@ public final class BCKeyGenerator extends AbstractKeyGenerator {
 					&& SymmetricEncryptionType.BC_TWOFISH_CBC_PKCS7Padding.getBlockMode().equals(encryptionType.getBlockMode()))
 			{
 				keyGenerator=new Twofish.KeyGenerator(Twofish.CBCwithPKCS7, keySize, random);
+				this.keySizeBits=keySize;
+			}
+			else if (encryptionType.getAlgorithmName().equals(SymmetricEncryptionType.BC_TWOFISH_CTR.getAlgorithmName())
+					&& SymmetricEncryptionType.BC_TWOFISH_CTR.getBlockMode().equals(encryptionType.getBlockMode()))
+			{
+				keyGenerator=new Twofish.KeyGenerator(Twofish.CTR, keySize, random);
 				this.keySizeBits=keySize;
 			}
 			else if (encryptionType.getAlgorithmName().equals(SymmetricEncryptionType.BC_TWOFISH_GCM.getAlgorithmName())

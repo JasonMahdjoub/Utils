@@ -276,6 +276,15 @@ public class BCCipher extends AbstractCipher {
 					
 					encryptor=aeadEncryptor = fipsSymmetricFactory.createOutputAEADEncryptor((SymmetricSecretKey)key.toBouncyCastleKey(),param);
 				}
+				else if (type.getBlockMode().toUpperCase().equals("CTR") && type.getPadding().toUpperCase().equals("NOPADDING"))
+				{
+					FipsAES.OperatorFactory fipsSymmetricFactory=new FipsAES.OperatorFactory();
+					FipsAES.Parameters param=FipsAES.CTR;
+					if (iv!=null)
+						param=param.withIV(iv);
+					encryptor = fipsSymmetricFactory.createOutputEncryptor((SymmetricSecretKey)key.toBouncyCastleKey(),param);
+	
+				}
 				else
 				{
 					throw new IllegalAccessError();
@@ -287,6 +296,14 @@ public class BCCipher extends AbstractCipher {
 				{
 					Serpent.OperatorFactory fipsSymmetricFactory=new Serpent.OperatorFactory();
 					Serpent.Parameters param=Serpent.CBCwithPKCS7;
+					if (iv!=null)
+						param=param.withIV(iv);
+					encryptor = fipsSymmetricFactory.createOutputEncryptor((SymmetricSecretKey)key.toBouncyCastleKey(),param);
+				}
+				else if (type.getBlockMode().toUpperCase().equals("CTR") && type.getPadding().toUpperCase().equals("NOPADDING"))
+				{
+					Serpent.OperatorFactory fipsSymmetricFactory=new Serpent.OperatorFactory();
+					Serpent.Parameters param=Serpent.CTR;
 					if (iv!=null)
 						param=param.withIV(iv);
 					encryptor = fipsSymmetricFactory.createOutputEncryptor((SymmetricSecretKey)key.toBouncyCastleKey(),param);
@@ -326,6 +343,14 @@ public class BCCipher extends AbstractCipher {
 				{
 					Twofish.OperatorFactory fipsSymmetricFactory=new Twofish.OperatorFactory();
 					Twofish.Parameters param=Twofish.CBCwithPKCS7;
+					if (iv!=null)
+						param=param.withIV(iv);
+					encryptor = fipsSymmetricFactory.createOutputEncryptor((SymmetricSecretKey)key.toBouncyCastleKey(),param.withIV(iv));
+				}
+				else if (type.getBlockMode().toUpperCase().equals("CTR") && type.getPadding().toUpperCase().equals("NOPADDING"))
+				{
+					Twofish.OperatorFactory fipsSymmetricFactory=new Twofish.OperatorFactory();
+					Twofish.Parameters param=Twofish.CTR;
 					if (iv!=null)
 						param=param.withIV(iv);
 					encryptor = fipsSymmetricFactory.createOutputEncryptor((SymmetricSecretKey)key.toBouncyCastleKey(),param.withIV(iv));
@@ -382,6 +407,14 @@ public class BCCipher extends AbstractCipher {
 						param=param.withIV(iv);
 					decryptor = fipsSymmetricFactory.createOutputDecryptor((SymmetricSecretKey)key.toBouncyCastleKey(),param);
 				}
+				else if (type.getBlockMode().toUpperCase().equals("CTR") && type.getPadding().toUpperCase().equals("NOPADDING"))
+				{
+					FipsAES.OperatorFactory fipsSymmetricFactory=new FipsAES.OperatorFactory();
+					FipsAES.Parameters param=FipsAES.CTR;
+					if (iv!=null)
+						param=param.withIV(iv);
+					decryptor = fipsSymmetricFactory.createOutputDecryptor((SymmetricSecretKey)key.toBouncyCastleKey(),param);
+				}
 				else if (type.getBlockMode().toUpperCase().equals("GCM") && type.getPadding().toUpperCase().equals("NOPADDING"))
 				{
 					FipsAES.AEADOperatorFactory fipsSymmetricFactory=new FipsAES.AEADOperatorFactory();
@@ -422,6 +455,14 @@ public class BCCipher extends AbstractCipher {
 						param=param.withIV(iv);
 					decryptor = fipsSymmetricFactory.createOutputDecryptor((SymmetricSecretKey)key.toBouncyCastleKey(),param);
 				}
+				else if (type.getBlockMode().toUpperCase().equals("CTR") && type.getPadding().toUpperCase().equals("NOPADDING"))
+				{
+					Serpent.OperatorFactory fipsSymmetricFactory=new Serpent.OperatorFactory();
+					Serpent.Parameters param=Serpent.CTR;
+					if (iv!=null)
+						param=param.withIV(iv);
+					decryptor = fipsSymmetricFactory.createOutputDecryptor((SymmetricSecretKey)key.toBouncyCastleKey(),param);
+				}
 				else if (type.getBlockMode().toUpperCase().equals("GCM") && type.getPadding().toUpperCase().equals("NOPADDING"))
 				{
 					Serpent.AEADOperatorFactory fipsSymmetricFactory=new Serpent.AEADOperatorFactory();
@@ -457,6 +498,14 @@ public class BCCipher extends AbstractCipher {
 				{
 					Twofish.OperatorFactory fipsSymmetricFactory=new Twofish.OperatorFactory();
 					Twofish.Parameters param=Twofish.CBCwithPKCS7;
+					if (iv!=null)
+						param=param.withIV(iv);
+					decryptor = fipsSymmetricFactory.createOutputDecryptor((SymmetricSecretKey)key.toBouncyCastleKey(),param);
+				}
+				else if (type.getBlockMode().toUpperCase().equals("CTR") && type.getPadding().toUpperCase().equals("NOPADDING"))
+				{
+					Twofish.OperatorFactory fipsSymmetricFactory=new Twofish.OperatorFactory();
+					Twofish.Parameters param=Twofish.CTR;
 					if (iv!=null)
 						param=param.withIV(iv);
 					decryptor = fipsSymmetricFactory.createOutputDecryptor((SymmetricSecretKey)key.toBouncyCastleKey(),param);

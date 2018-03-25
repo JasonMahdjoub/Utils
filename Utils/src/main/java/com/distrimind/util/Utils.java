@@ -54,8 +54,8 @@ public class Utils {
 		Calendar c = Calendar.getInstance();
 		c.set(2016, 1, 4);
 		Calendar c2 = Calendar.getInstance();
-		c.set(2018, 2, 12);
-		VERSION = new Version("Utils", "Utils", 3, 12, 0, Version.Type.Stable, 0, c.getTime(), c2.getTime());
+		c.set(2018, 2, 25);
+		VERSION = new Version("Utils", "Utils", 3, 13, 0, Version.Type.Stable, 0, c.getTime(), c2.getTime());
 		try {
 
 			InputStream is = Utils.class.getResourceAsStream("build.txt");
@@ -68,8 +68,14 @@ public class Utils {
 			VERSION.addDeveloper(new PersonDeveloper("mahdjoub", "jason", c.getTime()));
 			
 			c = Calendar.getInstance();
+			c.set(2018, 2, 25);
+			Description d = new Description(3, 13, 0, Version.Type.Stable, 0, c.getTime());
+			d.addItem("Add CTR mode support.");
+			VERSION.addDescription(d);
+
+			c = Calendar.getInstance();
 			c.set(2018, 2, 10);
-			Description d = new Description(3, 12, 0, Version.Type.Stable, 0, c.getTime());
+			d = new Description(3, 12, 0, Version.Type.Stable, 0, c.getTime());
 			d.addItem("Add sphincs signature (Post Quantum Cryptography).");
 			d.addItem("Optimize encryption and minimize memory allocation.");
 			VERSION.addDescription(d);
