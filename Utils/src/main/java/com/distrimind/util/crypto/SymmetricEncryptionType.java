@@ -346,19 +346,21 @@ public enum SymmetricEncryptionType {
 		return isAuthenticatedAlgorithm();
 	}
 	
-	private static boolean supportAESIntrinsics()
-	{
-		return true;
-	}
+	
 	
 	public short getEncodingSpeedIndex()
 	{
 		
-		return getEncodingSpeedIndex(OSValidator.getCurrentJREVersionByte(), supportAESIntrinsics());
+		return getEncodingSpeedIndex(OSValidator.getCurrentJREVersionByte(), OSValidator.supportAESIntrinsicsAcceleration());
 	}
 	public short getDecodingSpeedIndex()
 	{
-		return getDecodingSpeedIndex(OSValidator.getCurrentJREVersionByte(), supportAESIntrinsics());
+		return getDecodingSpeedIndex(OSValidator.getCurrentJREVersionByte(), OSValidator.supportAESIntrinsicsAcceleration());
+	}
+	
+	public short getAverageSpeedIndex()
+	{
+		return (short)( (getEncodingSpeedIndex()+getDecodingSpeedIndex())/2);
 	}
 	public short getEncodingSpeedIndex(byte javaVersion, boolean supportAESIntrisics)
 	{
@@ -384,4 +386,8 @@ public enum SymmetricEncryptionType {
 			return decodingSpeedIndexJava9;
 	}
 	
+	public short getAverageSpeedIndex(byte javaVersion, boolean supportAESIntrisics)
+	{
+		return (short)( (getEncodingSpeedIndex(javaVersion, supportAESIntrisics)+getDecodingSpeedIndex(javaVersion, supportAESIntrisics))/2);
+	}
 }

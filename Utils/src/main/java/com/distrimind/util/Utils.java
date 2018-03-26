@@ -54,7 +54,7 @@ public class Utils {
 		Calendar c = Calendar.getInstance();
 		c.set(2016, 1, 4);
 		Calendar c2 = Calendar.getInstance();
-		c.set(2018, 2, 25);
+		c.set(2018, 2, 26);
 		VERSION = new Version("Utils", "Utils", 3, 13, 0, Version.Type.Stable, 0, c.getTime(), c2.getTime());
 		try {
 
@@ -68,9 +68,12 @@ public class Utils {
 			VERSION.addDeveloper(new PersonDeveloper("mahdjoub", "jason", c.getTime()));
 			
 			c = Calendar.getInstance();
-			c.set(2018, 2, 25);
+			c.set(2018, 2, 26);
 			Description d = new Description(3, 13, 0, Version.Type.Stable, 0, c.getTime());
 			d.addItem("Add CTR mode support.");
+			d.addItem("Optmizations of Numbers allocations.");
+			d.addItem("Add function OSValidator.getJVMLocation.");
+			d.addItem("Add function OSValidator.supportAESIntrinsicsAcceleration.");
 			VERSION.addDescription(d);
 
 			c = Calendar.getInstance();

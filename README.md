@@ -6,7 +6,7 @@ Set of Java tools :
 * Get size of Java memory objects
 * OS tools (OS version, trace route, hardrive tools, network speed)
 * Cryptography tools
-	* Home interface that use of three Implementations : Java native JCE, GNU CRYPT, BouncyCastle (And BouncyCastle FIPS)
+	* Home interface that use of three Implementations : Java native JCE, GNU CRYPT, BouncyCastle (+ BouncyCastle FIPS and BouncyCastle PQC)
 	* Encryption algorithms does not need signed JAR to work. So the release work on official Oracle JVM.
 	* MessageDigest algorithms
 	* Symmetric signatures
@@ -16,7 +16,7 @@ Set of Java tools :
 	* Key agreements
 	* DRBG
 	* JPAKE algorithm and home secret message exchanger
-	* Use of post quantum algorithm (New Hope key exchanger)
+	* Use of post quantum algorithm (New Hope key exchanger, Sphincs)
 * Compatible with Java 7 and newer
 
 
@@ -37,7 +37,7 @@ Adapt into your build.gradle file, the next code :
 	...
 	dependencies {
 		...
-		compile(group:'com.distrimind.util', name: 'Utils', version: '3.12.0')
+		compile(group:'com.distrimind.util', name: 'Utils', version: '3.13.0')
 		...
 	}
 	...
@@ -53,7 +53,7 @@ Adapt into your pom.xml file, the next code :
 			<dependency>
 				<groupId>com.distrimind.util</groupId>
 				<artifactId>Utils</artifactId>
-				<version>3.12.0</version>
+				<version>3.13.0</version>
 			</dependency>
 			...
 		</dependencies>

@@ -35,12 +35,17 @@ knowledge of the CeCILL-C license and that you accept its terms.
 
 package com.distrimind.util;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 
 /**
  * Set of functions giving information about the current running OS
  * 
  * @author Jason Mahdjoub
- * @version 2.1
+ * @version 2.2
  * @since Utils 1.0
  *
  */
@@ -154,5 +159,54 @@ public enum OSValidator {
 		}
 	}
 	
+	public static String getJVMLocation()
+	{
+		if (isWindows()) {
+		    return System.getProperties().getProperty("java.home") + File.separator + "bin" + File.separator + "java.exe";
+		} 
+		else if (isAndroid())
+			return "java";
+		else {
+		    return System.getProperties().getProperty("java.home") + File.separator + "bin" + File.separator + "java";
+		}
+	}
+	
+	private static volatile Boolean aesNIAcceleration=null;
+	
+	public static boolean supportAESIntrinsicsAcceleration() 
+	{
+		if (aesNIAcceleration==null)
+		{
+			try
+			{
+				Process p=Runtime.getRuntime().exec(getJVMLocation()+" -XX:+PrintFlagsFinal -version");
+				
+				try(InputStream is=p.getInputStream();InputStreamReader isr=new InputStreamReader(is); BufferedReader br=new BufferedReader(isr))
+				{
+					String line=br.readLine();
+					while (line!=null)
+					{
+						line=line.toLowerCase();
+						if (line.contains("useaesintrinsics"))
+						{
+							aesNIAcceleration=Boolean.valueOf(line.contains("true"));
+						}
+						line=br.readLine();
+					}
+				}
+				p.destroy();
+				p=null;
+			}
+			catch(IOException e)
+			{
+				e.printStackTrace();
+			}
+			if (aesNIAcceleration==null)
+				aesNIAcceleration=Boolean.valueOf(false);
+		}
+		return aesNIAcceleration.booleanValue();
+		
+	}
+
 	
 }
