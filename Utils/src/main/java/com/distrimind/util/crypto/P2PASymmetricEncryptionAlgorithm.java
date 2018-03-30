@@ -36,6 +36,7 @@ package com.distrimind.util.crypto;
 
 import javax.crypto.Cipher;
 
+import gnu.vm.jgnu.security.InvalidAlgorithmParameterException;
 import gnu.vm.jgnu.security.InvalidKeyException;
 import gnu.vm.jgnu.security.NoSuchAlgorithmException;
 import gnu.vm.jgnu.security.NoSuchProviderException;
@@ -61,13 +62,13 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 
 	public P2PASymmetricEncryptionAlgorithm(ASymmetricKeyPair myKeyPair, ASymmetricPublicKey distantPublicKey)
 			throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidKeySpecException,
-			NoSuchProviderException {
+			NoSuchProviderException, InvalidAlgorithmParameterException {
 		this(myKeyPair.getEncryptionAlgorithmType().getDefaultSignatureAlgorithm(), myKeyPair, distantPublicKey);
 	}
 
 	public P2PASymmetricEncryptionAlgorithm(ASymmetricAuthentifiedSignatureType signatureType, ASymmetricKeyPair myKeyPair,
 			ASymmetricPublicKey distantPublicKey) throws NoSuchAlgorithmException, NoSuchPaddingException,
-			InvalidKeyException, InvalidKeySpecException, NoSuchProviderException {
+			InvalidKeyException, InvalidKeySpecException, NoSuchProviderException, InvalidAlgorithmParameterException {
 		super(myKeyPair.getEncryptionAlgorithmType().getCipherInstance(), 0);
 		if (signatureType == null)
 			throw new NullPointerException("signatureType");
@@ -118,13 +119,13 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 	}
 
 	@Override
-	public void initCipherForDecrypt(AbstractCipher _cipher, byte[] iv)
+	public void initCipherForDecrypt(AbstractCipher _cipher, byte[] iv, byte[] externalCounter)
 			throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
 		_cipher.init(Cipher.DECRYPT_MODE, myKeyPair.getASymmetricPrivateKey());
 	}
 
 	@Override
-	public void initCipherForEncrypt(AbstractCipher _cipher)
+	public void initCipherForEncrypt(AbstractCipher _cipher, byte[] externalCounter)
 			throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
 		initCipherForEncryptAndNotChangeIV(_cipher);
 	}
@@ -137,7 +138,7 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 	}
 
 	@Override
-	public int getIVSizeBytes() {
+	public int getIVSizeBytesWithExternalCounter() {
 		return 0;
 	}
 

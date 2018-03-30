@@ -65,6 +65,15 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 	protected byte bufferOut[];
 	
 	
+	public byte getBlockModeCounterBytes() {
+		return (byte)0;
+	}
+	
+	public boolean useExternalCounter()
+	{
+		return false;
+	}
+	
 	protected AbstractEncryptionOutputAlgorithm(AbstractCipher cipher, int ivSizeBytes) {
 		if (cipher == null)
 			throw new NullPointerException("cipher");
@@ -98,9 +107,13 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 			NoSuchProviderException, ShortBufferException {
 		return encode(bytes, 0, bytes.length);
 	}
-	public byte[] encode(byte[] bytes, byte[] associatedData) throws InvalidKeyException, InvalidAlgorithmParameterException, IllegalStateException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException, ShortBufferException 
+	public byte[] encode(byte[] bytes, byte[] associatedData) throws InvalidKeyException, InvalidAlgorithmParameterException, IllegalStateException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException, ShortBufferException
 	{
-		return encode(bytes, 0, bytes.length, associatedData, 0, associatedData.length);
+		return encode(bytes, 0, bytes.length, associatedData, 0, associatedData==null?0:associatedData.length, (byte[])null);
+	}
+	public byte[] encode(byte[] bytes, byte[] associatedData, byte[] externalCounter) throws InvalidKeyException, InvalidAlgorithmParameterException, IllegalStateException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException, ShortBufferException 
+	{
+		return encode(bytes, 0, bytes.length, associatedData, 0, associatedData==null?0:associatedData.length, externalCounter);
 	}
 
 	public byte[] encode(byte[] bytes, int off, int len) throws InvalidKeyException, InvalidAlgorithmParameterException, IllegalStateException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException, ShortBufferException 
@@ -108,13 +121,16 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 		return encode(bytes, off, len, null, 0, 0);
 	}
 	
-			
-	public byte[] encode(byte[] bytes, int off, int len, byte[] associatedData, int offAD, int lenAD) throws gnu.vm.jgnu.security.InvalidKeyException, IOException,
+	public byte[] encode(byte[] bytes, int off, int len, byte[] associatedData, int offAD, int lenAD) throws gnu.vm.jgnu.security.InvalidKeyException, IOException, InvalidAlgorithmParameterException, IllegalStateException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, ShortBufferException
+	{
+		return encode(bytes, off, len, associatedData, offAD, lenAD, (byte[])null);
+	}
+	public byte[] encode(byte[] bytes, int off, int len, byte[] associatedData, int offAD, int lenAD, byte[] externalCounter) throws gnu.vm.jgnu.security.InvalidKeyException, IOException,
 			InvalidAlgorithmParameterException, IllegalStateException, gnu.vm.jgnux.crypto.IllegalBlockSizeException,
 			gnu.vm.jgnux.crypto.BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException,
 			NoSuchProviderException, ShortBufferException {
 		try (ByteArrayOutputStream baos = new ByteArrayOutputStream(getOutputSizeForEncryption(len))) {
-			encode(bytes, off, len, associatedData, offAD, lenAD, baos);
+			encode(bytes, off, len, associatedData, offAD, lenAD, baos, externalCounter);
 			return baos.toByteArray();
 		}
 	}
@@ -122,7 +138,11 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 	{
 		encode(bytes, off, len, null,0, 0, os);
 	}
-	public void encode(byte[] bytes, int off, int len, byte[] associatedData, int offAD, int lenAD, OutputStream os) throws gnu.vm.jgnu.security.InvalidKeyException,
+	public void encode(byte[] bytes, int off, int len, byte[] associatedData, int offAD, int lenAD, OutputStream os) throws gnu.vm.jgnu.security.InvalidKeyException, InvalidAlgorithmParameterException, IllegalStateException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, ShortBufferException, IOException
+	{
+		encode(bytes, off, len, associatedData, offAD, lenAD, os, null);
+	}
+	public void encode(byte[] bytes, int off, int len, byte[] associatedData, int offAD, int lenAD, OutputStream os, byte[] externalCounter) throws gnu.vm.jgnu.security.InvalidKeyException,
 			IOException, InvalidAlgorithmParameterException, IllegalStateException,
 			gnu.vm.jgnux.crypto.IllegalBlockSizeException, gnu.vm.jgnux.crypto.BadPaddingException,
 			NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, ShortBufferException {
@@ -133,11 +153,11 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 		if (off + len > bytes.length)
 			throw new IllegalArgumentException("bytes.length=" + bytes.length + ", off=" + off + ", len=" + len);
 
-		initCipherForEncrypt(cipher);
+		initCipherForEncrypt(cipher, externalCounter);
 		if (associatedData!=null && lenAD>0)
 			cipher.updateAAD(associatedData, offAD, lenAD);
 		if (includeIV())
-			os.write(cipher.getIV());
+			os.write(cipher.getIV(), 0, getIVSizeBytesWithoutExternalCounter());
 		int maxBlockSize = getMaxBlockSizeForEncoding();
 		//byte[] buffer=new byte[getOutputSizeForEncryption(Math.min(len, maxBlockSize))];
 		while (len > 0) {
@@ -166,7 +186,7 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 	}
 	public void encode(InputStream is, byte[] associatedData, OutputStream os) throws InvalidKeyException, InvalidAlgorithmParameterException, IllegalStateException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException, ShortBufferException 
 	{
-		encode(is, associatedData, 0, associatedData.length, os);
+		encode(is, associatedData, 0, associatedData==null?0:associatedData.length, os);
 	}
 	public void encode(InputStream is, byte[] associatedData, int offAD, int lenAD, OutputStream os) throws gnu.vm.jgnu.security.InvalidKeyException, IOException,InvalidAlgorithmParameterException, IllegalStateException, gnu.vm.jgnux.crypto.IllegalBlockSizeException,
 	gnu.vm.jgnux.crypto.BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException,
@@ -179,22 +199,28 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 	}
 	public void encode(InputStream is, byte[] associatedData, OutputStream os, int length) throws InvalidKeyException, InvalidAlgorithmParameterException, IllegalStateException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException, ShortBufferException
 	{
-		encode(is, associatedData, 0, associatedData.length, os, length);
+		encode(is, associatedData, 0, associatedData==null?0:associatedData.length, os, length);
 	}
 	
 	
-	
 	public void encode(InputStream is, byte[] associatedData, int offAD, int lenAD, OutputStream os, int length) throws gnu.vm.jgnu.security.InvalidKeyException, IOException,
+	InvalidAlgorithmParameterException, IllegalStateException, gnu.vm.jgnux.crypto.IllegalBlockSizeException,
+	gnu.vm.jgnux.crypto.BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException,
+	NoSuchProviderException, ShortBufferException {
+		encode(is, associatedData, offAD, lenAD, os, length, null);
+	}
+	
+	public void encode(InputStream is, byte[] associatedData, int offAD, int lenAD, OutputStream os, int length, byte[] externalCounter) throws gnu.vm.jgnu.security.InvalidKeyException, IOException,
 			InvalidAlgorithmParameterException, IllegalStateException, gnu.vm.jgnux.crypto.IllegalBlockSizeException,
 			gnu.vm.jgnux.crypto.BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException,
 			NoSuchProviderException, ShortBufferException {
-		initCipherForEncrypt(cipher);
+		initCipherForEncrypt(cipher, externalCounter);
 		if (associatedData!=null && lenAD>0)
 			cipher.updateAAD(associatedData, offAD, lenAD);
 		final int maxBlockSize=getMaxBlockSizeForEncoding();
 
 		if (includeIV())
-			os.write(cipher.getIV());
+			os.write(cipher.getIV(), 0, getIVSizeBytesWithExternalCounter());
 		boolean finish = false;
 		while (!finish) {
 			int maxPartSize;
@@ -238,13 +264,13 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 	protected abstract AbstractCipher getCipherInstance() throws gnu.vm.jgnu.security.NoSuchAlgorithmException,
 			gnu.vm.jgnux.crypto.NoSuchPaddingException, NoSuchProviderException;
 
-	public OutputStream getCipherOutputStream(OutputStream os) throws gnu.vm.jgnu.security.InvalidKeyException,
+	public OutputStream getCipherOutputStream(OutputStream os, byte[] externalCounter) throws gnu.vm.jgnu.security.InvalidKeyException,
 			gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnux.crypto.NoSuchPaddingException,
 			InvalidAlgorithmParameterException, IOException, InvalidKeySpecException, NoSuchProviderException {
 		AbstractCipher c = getCipherInstance();
-		initCipherForEncrypt(c);
+		initCipherForEncrypt(c, externalCounter);
 		if (includeIV())
-			os.write(c.getIV());
+			os.write(c.getIV(), 0, getIVSizeBytesWithoutExternalCounter());
 
 		return c.getCipherOutputStream(os);
 	}
@@ -252,7 +278,11 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 	public abstract int getMaxBlockSizeForEncoding();
 
 	
-	public abstract int getIVSizeBytes();
+	public abstract int getIVSizeBytesWithExternalCounter();
+	public final int getIVSizeBytesWithoutExternalCounter()
+	{
+		return getIVSizeBytesWithExternalCounter()-(useExternalCounter()?0:getBlockModeCounterBytes());
+	}
 	
 	public int getOutputSizeForEncryption(int inputLen)
 			throws gnu.vm.jgnu.security.InvalidKeyException, InvalidAlgorithmParameterException,
@@ -261,7 +291,7 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 		int maxBlockSize = getMaxBlockSizeForEncoding();
 		if (maxBlockSize == Integer.MAX_VALUE) {
 			if (includeIV()) {
-				return cipher.getOutputSize(inputLen) + getIVSizeBytes();
+				return cipher.getOutputSize(inputLen) + getIVSizeBytesWithoutExternalCounter();
 			} else {
 				return cipher.getOutputSize(inputLen);
 			}
@@ -280,8 +310,11 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 	}
 
 	protected abstract boolean includeIV();
-
-	public abstract void initCipherForEncrypt(AbstractCipher cipher)
+	public void initCipherForEncrypt(AbstractCipher cipher) throws InvalidKeyException,
+	InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
+		initCipherForEncrypt(cipher, null);
+	}
+	public abstract void initCipherForEncrypt(AbstractCipher cipher, byte[] externalCounter)
 			throws gnu.vm.jgnu.security.InvalidKeyException, InvalidAlgorithmParameterException,
 			NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException;
 

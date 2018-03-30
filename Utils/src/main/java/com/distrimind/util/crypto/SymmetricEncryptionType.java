@@ -58,7 +58,7 @@ import com.distrimind.util.OSValidator;
  * List of symmetric encryption algorithms
  * 
  * @author Jason Mahdjoub
- * @version 3.3
+ * @version 3.4
  * @since Utils 1.4
  */
 public enum SymmetricEncryptionType {
@@ -173,6 +173,7 @@ public enum SymmetricEncryptionType {
 	
 	private final boolean authenticated;
 	
+	
 	private final short encodingSpeedIndexJava7;
 	
 	private final short decodingSpeedIndexJava7;
@@ -184,6 +185,8 @@ public enum SymmetricEncryptionType {
 	private final short encodingSpeedIndexJava9;
 	
 	private final short decodingSpeedIndexJava9;
+	
+	private final byte maxModeCounterSize;
 
 	private SymmetricEncryptionType(String algorithmName, String blockMode, String padding, short keySizeBits,
 			CodeProvider codeProviderForEncryption, CodeProvider codeProviderForKeyGenerator, SymmetricAuthentifiedSignatureType defaultSignature, Algorithm bcAlgorithm, short blockSize, boolean authentified, short encodingSpeedIndexJava7, short decodingSpeedIndexJava7, short encodingSpeedIndexJava8, short decodingSpeedIndexJava8, short encodingSpeedIndexJava9, short decodingSpeedIndexJava9) {
@@ -209,6 +212,10 @@ public enum SymmetricEncryptionType {
 		this.decodingSpeedIndexJava8=decodingSpeedIndexJava8;
 		this.encodingSpeedIndexJava9=encodingSpeedIndexJava9;
 		this.decodingSpeedIndexJava9=decodingSpeedIndexJava9;
+		if (blockMode.toLowerCase().equals("ctr"))
+			maxModeCounterSize=8;
+		else
+			maxModeCounterSize=0;
 	}
 
 	private SymmetricEncryptionType(SymmetricEncryptionType type) {
@@ -389,5 +396,14 @@ public enum SymmetricEncryptionType {
 	public short getAverageSpeedIndex(byte javaVersion, boolean supportAESIntrisics)
 	{
 		return (short)( (getEncodingSpeedIndex(javaVersion, supportAESIntrisics)+getDecodingSpeedIndex(javaVersion, supportAESIntrisics))/2);
+	}
+	
+	public boolean isBlockModeSupportingCounter()
+	{
+		return maxModeCounterSize>0;
+	}
+	public byte getMaxCounterSizeInBytesUsedWithBlockMode()
+	{
+		return maxModeCounterSize;
 	}
 }

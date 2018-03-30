@@ -1175,29 +1175,32 @@ public class CryptoTests {
 		else 
 			key2=new SymmetricSecretKey(type2, key1.getSecretKeyBytes(), key1.getKeySizeBits());
 
-		SymmetricEncryptionAlgorithm algoDistant = new SymmetricEncryptionAlgorithm(random, key1);
-		SymmetricEncryptionAlgorithm algoLocal = new SymmetricEncryptionAlgorithm(random, key2);
+		byte counterSizeBytes=(byte)random.nextInt(key1.getEncryptionAlgorithmType().getMaxCounterSizeInBytesUsedWithBlockMode()+1);
+		SymmetricEncryptionAlgorithm algoDistant = new SymmetricEncryptionAlgorithm(random, key1, counterSizeBytes, false);
+		SymmetricEncryptionAlgorithm algoLocal = new SymmetricEncryptionAlgorithm(random, key2, counterSizeBytes, false);
 
+		byte[] counter=new byte[counterSizeBytes];
 		Random rand = new Random(System.currentTimeMillis());
 
 		for (byte[] m : messagesToEncrypt) {
-			byte encrypted[] = algoLocal.encode(m);
+			rand.nextBytes(counter);
+			byte encrypted[] = algoLocal.encode(m, null, counter);
 			int mlength=m.length;
 			
 			Assert.assertEquals(encrypted.length, algoLocal.getOutputSizeForEncryption(mlength), "length=" + m.length);
 
 			Assert.assertTrue(encrypted.length >= m.length);
-			byte decrypted[] = algoDistant.decode(encrypted);
+			byte decrypted[] = algoDistant.decode(encrypted, null, counter);
 			Assert.assertEquals(decrypted.length, m.length, "Testing size " + type1+", "+type2);
 			Assert.assertEquals(decrypted, m, "Testing " + type1+", "+type2);
 			byte[] md = decrypted;
 			Assert.assertEquals(md.length, m.length, "Testing size " + type1+", "+type2);
 			Assert.assertEquals(md, m, "Testing " + type1+", "+type2);
 			mlength=m.length;
-			encrypted = algoDistant.encode(m);
+			encrypted = algoDistant.encode(m, null, counter);
 			Assert.assertEquals(encrypted.length, algoDistant.getOutputSizeForEncryption(mlength));
 			Assert.assertTrue(encrypted.length >= m.length);
-			md = algoLocal.decode(encrypted);
+			md = algoLocal.decode(encrypted, null, counter);
 			Assert.assertEquals(md.length, m.length, "Testing size " + type1+", "+type2);
 			Assert.assertEquals(md, m, "Testing " + type1+", "+type2);
 
@@ -1207,33 +1210,33 @@ public class CryptoTests {
 
 			byte associatedData[]=new byte[random.nextInt(128)+127];
 			if (type1.supportAssociatedData())
-				encrypted = algoLocal.encode(m, off, size, associatedData, 0, associatedData.length);
+				encrypted = algoLocal.encode(m, off, size, associatedData, 0, associatedData.length, counter);
 			else
-				encrypted = algoLocal.encode(m, off, size);
+				encrypted = algoLocal.encode(m, off, size, null, 0, 0, counter);
 
 			Assert.assertEquals(encrypted.length, algoLocal.getOutputSizeForEncryption(size));
 			Assert.assertTrue(encrypted.length >= size);
 			if (type1.supportAssociatedData())
-				decrypted = algoDistant.decode(encrypted, associatedData);
+				decrypted = algoDistant.decode(encrypted, associatedData, counter);
 			else
-				decrypted = algoDistant.decode(encrypted);
+				decrypted = algoDistant.decode(encrypted, null, counter);
 			Assert.assertEquals(decrypted.length, size, "Testing size " + type1+", "+type2);
 			for (int i = 0; i < decrypted.length; i++)
 				Assert.assertEquals(decrypted[i], m[i + off]);
 			if (type1.supportAssociatedData())
-				md = algoDistant.decode(encrypted, associatedData);
+				md = algoDistant.decode(encrypted, associatedData, counter);
 			else
-				md = algoDistant.decode(encrypted);
+				md = algoDistant.decode(encrypted, null, counter);
 
 			Assert.assertEquals(md.length, size, "Testing size " + type1+", "+type2);
 			for (int i = 0; i < md.length; i++)
 				Assert.assertEquals(md[i], m[i + off]);
 
-			encrypted = algoDistant.encode(m, off, size);
+			encrypted = algoDistant.encode(m, off, size, null, 0, 0, counter);
 			Assert.assertEquals(encrypted.length, algoDistant.getOutputSizeForEncryption(size));
 			Assert.assertTrue(encrypted.length >= size);
 
-			md = algoLocal.decode(encrypted);
+			md = algoLocal.decode(encrypted, null, counter);
 			Assert.assertEquals(md.length, size, "Testing size " + type1+", "+type2);
 			for (int i = 0; i < md.length; i++)
 				Assert.assertEquals(md[i], m[i + off]);

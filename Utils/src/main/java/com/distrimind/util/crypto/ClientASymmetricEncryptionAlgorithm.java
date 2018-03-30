@@ -88,7 +88,7 @@ public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutpu
 	}
 
 	@Override
-	public void initCipherForEncrypt(AbstractCipher _cipher)
+	public void initCipherForEncrypt(AbstractCipher _cipher, byte[] externalCounter)
 			throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, InvalidAlgorithmParameterException {
 		initCipherForEncryptAndNotChangeIV(_cipher);
 	}
@@ -101,7 +101,7 @@ public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutpu
 	}
 
 	@Override
-	public int getIVSizeBytes() {
+	public int getIVSizeBytesWithExternalCounter() {
 		return 0;
 	}
 
