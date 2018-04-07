@@ -54,7 +54,7 @@ public class Utils {
 		Calendar c = Calendar.getInstance();
 		c.set(2016, 1, 4);
 		Calendar c2 = Calendar.getInstance();
-		c.set(2018, 2, 27);
+		c.set(2018, 3, 7);
 		VERSION = new Version("Utils", "Utils", 3, 13, 1, Version.Type.Stable, 0, c.getTime(), c2.getTime());
 		try {
 
@@ -68,8 +68,14 @@ public class Utils {
 			VERSION.addDeveloper(new PersonDeveloper("mahdjoub", "jason", c.getTime()));
 			
 			c = Calendar.getInstance();
+			c.set(2018, 3, 7);
+			Description d = new Description(3, 13, 2, Version.Type.Stable, 0, c.getTime());
+			d.addItem("Correction of a null pointer exception.");
+			VERSION.addDescription(d);
+
+			c = Calendar.getInstance();
 			c.set(2018, 2, 27);
-			Description d = new Description(3, 13, 1, Version.Type.Stable, 0, c.getTime());
+			d = new Description(3, 13, 1, Version.Type.Stable, 0, c.getTime());
 			d.addItem("Add possibility to use a counter with CTR mode.");
 			VERSION.addDescription(d);
 

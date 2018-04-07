@@ -171,7 +171,7 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 	public void initCipherForDecrypt(AbstractCipher cipher, byte[] iv, byte[] externalCounter)
 			throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException,
 			InvalidKeySpecException, NoSuchProviderException {
-		if (!internalCounter && (externalCounter==null || externalCounter.length!=blockModeCounterBytes) && externalCounter.length+iv.length<getIVSizeBytesWithExternalCounter())
+		if (!internalCounter && (externalCounter==null || externalCounter.length!=blockModeCounterBytes) && (externalCounter==null?0:externalCounter.length)+iv.length<getIVSizeBytesWithExternalCounter())
 			throw new IllegalArgumentException("Please use external counters at every initialization with the defined size "+blockModeCounterBytes);
 		if (iv!=null && iv.length<getIVSizeBytesWithoutExternalCounter() && (externalCounter==null || externalCounter.length+iv.length<getIVSizeBytesWithExternalCounter()))
 			throw new IllegalArgumentException("Illegal iv size");
