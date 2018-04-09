@@ -43,7 +43,7 @@ import org.bouncycastle.crypto.general.Twofish;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 2.0
+ * @version 2.1
  * @since Utils 3.10.0
  */
 public final class BCKeyGenerator extends AbstractKeyGenerator {

@@ -37,6 +37,7 @@ package com.distrimind.util.crypto;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.util.Arrays;
 import java.util.Random;
 
 import javax.crypto.Cipher;
@@ -56,7 +57,7 @@ import gnu.vm.jgnux.crypto.ShortBufferException;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 3.1
+ * @version 3.2
  * @since Utils 1.4.1
  */
 public class P2PASymmetricSecretMessageExchanger {
@@ -250,7 +251,10 @@ public class P2PASymmetricSecretMessageExchanger {
 
 		message = hashMessage(messageDigest, message, offset, len, salt, offset_salt, len_salt, messageIsKey);
 		byte[] encodedLevel2 = encodeLevel2(message);
-		return encodeLevel1(encodedLevel2, message, salt, offset_salt, len_salt);
+		byte[] res=encodeLevel1(encodedLevel2, message, salt, offset_salt, len_salt);
+		Arrays.fill(message, (byte)0);
+		Arrays.fill(encodedLevel2, (byte)0);
+		return res;
 	}
 
 	private byte[] encodeLevel2(byte hashedMessage[])
@@ -290,7 +294,10 @@ public class P2PASymmetricSecretMessageExchanger {
 						new SecretKeySpec(hashedMessage,
 								SymmetricEncryptionType.BC_FIPS_AES_GCM.getAlgorithmName()),
 						(short) 256));
-		return sea.encode(OutputDataPackagerWithRandomValues.encode(encodedLevel2, encodedLevel2.length));
+		byte[] res= sea.encode(OutputDataPackagerWithRandomValues.encode(encodedLevel2, encodedLevel2.length));
+		Arrays.fill(hashedMessage, (byte)0);
+		return res;
+
 	}
 
 	private byte[] decodeLevel2(byte encodedLevel1[], int off_encodedlevel1, int len_encodedlevel1,
@@ -312,6 +319,11 @@ public class P2PASymmetricSecretMessageExchanger {
 			return InputDataPackagedWithRandomValues.decode(v);
 		} catch (Throwable e) {
 			return null;
+		}
+		finally
+		{
+			Arrays.fill(v, (byte)0);
+			Arrays.fill(hashedMessage, (byte)0);
 		}
 	}
 
@@ -339,7 +351,10 @@ public class P2PASymmetricSecretMessageExchanger {
 
 		byte hashedMessage[] = hashMessage(messageDigest, message, salt, offset_salt, len_salt);
 		byte encodedLevel2[] = encodeLevel2(hashedMessage);
-		return encodeLevel1(encodedLevel2, hashedMessage, salt, offset_salt, len_salt);
+		byte[] res=encodeLevel1(encodedLevel2, hashedMessage, salt, offset_salt, len_salt);
+		Arrays.fill(hashedMessage, (byte)0);
+		Arrays.fill(encodedLevel2, (byte)0);
+		return res;
 	}
 
 	public byte[] encode(String message, byte[] salt) throws IOException, InvalidKeyException,
@@ -376,17 +391,22 @@ public class P2PASymmetricSecretMessageExchanger {
 	private byte[] hashMessage(AbstractMessageDigest messageDigest, byte data[], int off, int len, byte[] salt,
 			int offset_salt, int len_salt, boolean messageIsKey)
 			throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
+		boolean zeroize=false;
 		if (!messageIsKey && salt != null && len_salt > 0) {
 			byte s[] = new byte[len_salt];
 			System.arraycopy(salt, offset_salt, s, 0, len_salt);
 			data = passwordHashType.hash(data, off, len, s, cost, passwordHashType.getDefaultHashLengthBytes());
 			off = 0;
 			len = data.length;
+			zeroize=true;
 		}
 		messageDigest.update(data, off, len);
 		if (messageIsKey && salt != null && len_salt > 0)
 			messageDigest.update(salt, offset_salt, len_salt);
-		return messageDigest.digest();
+		byte[] res=messageDigest.digest();
+		if (zeroize)
+			Arrays.fill(data, (byte)0);
+		return res;
 	}
 
 	private byte[] hashMessage(AbstractMessageDigest messageDigest, char password[], byte[] salt, int offset_salt,
@@ -403,14 +423,18 @@ public class P2PASymmetricSecretMessageExchanger {
 			System.arraycopy(salt, offset_salt, s, 0, len_salt);
 			byte[] res = passwordHashType.hash(password, s, cost, passwordHashType.getDefaultHashLengthBytes());
 
-			return hashMessage(messageDigest, res, 0, res.length, null, -1, -1, true);
+			byte[] r2=hashMessage(messageDigest, res, 0, res.length, null, -1, -1, true);
+			Arrays.fill(res, (byte)0);
+			return r2;
 		} else {
 			byte[] res = new byte[password.length * 2];
 			for (int i = 0; i < password.length; i++) {
 				res[i * 2] = (byte) (password[i] & 0xFF);
 				res[i * 2 + 1] = (byte) ((password[i] >> 8) & 0xFF);
 			}
-			return hashMessage(messageDigest, res, 0, res.length, null, -1, -1, true);
+			byte[] r2=hashMessage(messageDigest, res, 0, res.length, null, -1, -1, true);
+			Arrays.fill(res, (byte)0);
+			return r2;
 		}
 
 	}
@@ -534,10 +558,18 @@ public class P2PASymmetricSecretMessageExchanger {
 		try {
 			byte distantLevel2[] = distantMessageEncoder.decodeLevel2(distantMessage, offd, lend, hashedMessage, salt,
 					offset_salt, len_salt);
-
-			return compareEncodedLevel2(encodedLevel2, distantLevel2);
+			
+			boolean res=compareEncodedLevel2(encodedLevel2, distantLevel2);
+			Arrays.fill(distantLevel2, (byte)0);
+			return res;
 		} catch (Throwable e) {
 			return false;
+		}
+		finally
+		{
+			Arrays.fill(hashedMessage, (byte)0);
+			Arrays.fill(encodedLevel2, (byte)0);
+
 		}
 	}
 

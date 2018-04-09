@@ -36,6 +36,7 @@ package com.distrimind.util.crypto;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
+import java.util.Arrays;
 
 import org.bouncycastle.jcajce.spec.UserKeyingMaterialSpec;
 
@@ -44,7 +45,7 @@ import gnu.vm.jgnu.security.InvalidAlgorithmParameterException;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 2.1
+ * @version 2.2
  * @since Utils 2.9
  */
 public class EllipticCurveDiffieHellmanAlgorithm {
@@ -64,6 +65,30 @@ public class EllipticCurveDiffieHellmanAlgorithm {
 		reset();
 	}
 
+	public void zeroize()
+	{
+		if (derivedKey!=null)
+		{
+			derivedKey=null;
+		}
+		if (myKeyPair!=null)
+		{
+			myKeyPair=null;
+		}
+		if (myPublicKeyBytes!=null)
+		{
+			Arrays.fill(myPublicKeyBytes, (byte)0);
+			myPublicKeyBytes=null;
+		}
+		
+	}
+	
+	@Override
+	public void finalize()
+	{
+		zeroize();
+	}
+	
 	public void reset() {
 		derivedKey = null;
 		myKeyPair = null;

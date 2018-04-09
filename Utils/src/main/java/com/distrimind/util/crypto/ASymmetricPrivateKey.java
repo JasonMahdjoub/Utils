@@ -54,7 +54,7 @@ import gnu.vm.jgnu.security.spec.InvalidKeySpecException;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 2.1
+ * @version 2.2
  * @since Utils 1.7.1
  */
 public class ASymmetricPrivateKey extends Key {
@@ -65,7 +65,7 @@ public class ASymmetricPrivateKey extends Key {
 
 
 	// private final PrivateKey privateKey;
-	private final byte[] privateKey;
+	private byte[] privateKey;
 
 	private final short keySizeBits;
 
@@ -78,6 +78,27 @@ public class ASymmetricPrivateKey extends Key {
 
 	private volatile transient gnu.vm.jgnu.security.PrivateKey gnuPrivateKey;
 
+	
+	@Override
+	public void zeroize()
+	{
+		if (privateKey!=null)
+		{
+			Arrays.fill(privateKey, (byte)0);
+			privateKey=null;
+		}
+		if (nativePrivateKey!=null)
+		{
+			Arrays.fill(nativePrivateKey.getEncoded(), (byte)0);
+			nativePrivateKey=null;
+		}
+		if (gnuPrivateKey!=null)
+		{
+			Arrays.fill(gnuPrivateKey.getEncoded(), (byte)0);
+			gnuPrivateKey=null;
+		}
+	}
+	
 	ASymmetricPrivateKey(ASymmetricEncryptionType type, byte privateKey[], short keySize) {
 		this(privateKey, keySize);
 		if (type == null)
@@ -99,6 +120,7 @@ public class ASymmetricPrivateKey extends Key {
 			throw new NullPointerException("type");
 		this.encryptionType = type;
 		this.signatureType=null;
+		
 	}
 	ASymmetricPrivateKey(ASymmetricAuthentifiedSignatureType type, gnu.vm.jgnu.security.PrivateKey privateKey, short keySize) {
 		this(privateKey, keySize);
@@ -144,6 +166,7 @@ public class ASymmetricPrivateKey extends Key {
 		this.privateKey = ASymmetricEncryptionType.encodePrivateKey(privateKey);
 		this.keySizeBits = keySize;
 		hashCode = Arrays.hashCode(this.privateKey);
+		this.gnuPrivateKey=null;
 	}
 
 	private ASymmetricPrivateKey(PrivateKey privateKey, short keySize) {
@@ -154,6 +177,7 @@ public class ASymmetricPrivateKey extends Key {
 		this.privateKey = ASymmetricEncryptionType.encodePrivateKey(privateKey);
 		this.keySizeBits = keySize;
 		hashCode = Arrays.hashCode(this.privateKey);
+		this.nativePrivateKey=null;
 	}
 
 	@Override

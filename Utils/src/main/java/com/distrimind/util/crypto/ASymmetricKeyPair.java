@@ -37,6 +37,7 @@ package com.distrimind.util.crypto;
 import java.io.IOException;
 import java.io.Serializable;
 import java.security.KeyPair;
+import java.util.Arrays;
 
 import org.apache.commons.codec.binary.Base64;
 
@@ -55,25 +56,32 @@ public class ASymmetricKeyPair implements Serializable {
 	private static final long serialVersionUID = -8249147431069134363L;
 
 	public static ASymmetricKeyPair decode(byte[] b) throws IllegalArgumentException {
-		byte[][] res1 = Bits.separateEncodingsWithIntSizedTabs(b);
-		byte[][] res2 = Bits.separateEncodingsWithShortSizedTabs(res1[0]);
-		
-		short keySize = Bits.getShort(res2[0], 0);
-		long expirationUTC = Bits.getLong(res2[0], 6);
-		
-		if (res2[0][14]==1)
+		try
 		{
-			ASymmetricAuthentifiedSignatureType type = ASymmetricAuthentifiedSignatureType.valueOf(Bits.getInt(res2[0], 2));
+			byte[][] res1 = Bits.separateEncodingsWithIntSizedTabs(b);
+			byte[][] res2 = Bits.separateEncodingsWithShortSizedTabs(res1[0]);
 			
-			return new ASymmetricKeyPair(type, new ASymmetricPrivateKey(type, res1[1], keySize),
-				new ASymmetricPublicKey(type, res2[1], keySize, expirationUTC), keySize);
+			short keySize = Bits.getShort(res2[0], 0);
+			long expirationUTC = Bits.getLong(res2[0], 6);
+			
+			if (res2[0][14]==1)
+			{
+				ASymmetricAuthentifiedSignatureType type = ASymmetricAuthentifiedSignatureType.valueOf(Bits.getInt(res2[0], 2));
+				
+				return new ASymmetricKeyPair(type, new ASymmetricPrivateKey(type, res1[1], keySize),
+					new ASymmetricPublicKey(type, res2[1], keySize, expirationUTC), keySize);
+			}
+			else
+			{
+				ASymmetricEncryptionType type = ASymmetricEncryptionType.valueOf(Bits.getInt(res2[0], 2));
+			
+				return new ASymmetricKeyPair(type, new ASymmetricPrivateKey(type, res1[1], keySize),
+					new ASymmetricPublicKey(type, res2[1], keySize, expirationUTC), keySize);
+			}
 		}
-		else
+		finally
 		{
-			ASymmetricEncryptionType type = ASymmetricEncryptionType.valueOf(Bits.getInt(res2[0], 2));
-		
-			return new ASymmetricKeyPair(type, new ASymmetricPrivateKey(type, res1[1], keySize),
-				new ASymmetricPublicKey(type, res2[1], keySize, expirationUTC), keySize);
+			Arrays.fill(b, (byte)0);
 		}
 	}
 
@@ -81,9 +89,9 @@ public class ASymmetricKeyPair implements Serializable {
 		return decode(Base64.decodeBase64(key));
 	}
 
-	private final ASymmetricPrivateKey privateKey;
+	private ASymmetricPrivateKey privateKey;
 
-	private final ASymmetricPublicKey publicKey;
+	private ASymmetricPublicKey publicKey;
 
 	private final short keySizeBits;
 
@@ -96,6 +104,29 @@ public class ASymmetricKeyPair implements Serializable {
 
 	private transient volatile gnu.vm.jgnu.security.KeyPair gnuKeyPair;
 
+	public void zeroize()
+	{
+		privateKey=null;
+		publicKey=null;
+		if (nativeKeyPair!=null)
+		{
+			Arrays.fill(nativeKeyPair.getPublic().getEncoded(), (byte)0);
+			Arrays.fill(nativeKeyPair.getPrivate().getEncoded(), (byte)0);
+			nativeKeyPair=null;
+		}
+		if (gnuKeyPair!=null)
+		{
+			Arrays.fill(gnuKeyPair.getPublic().getEncoded(), (byte)0);
+			Arrays.fill(gnuKeyPair.getPrivate().getEncoded(), (byte)0);
+			gnuKeyPair=null;
+		}
+	}
+	
+	@Override public void finalize()
+	{
+		zeroize();
+	}
+	
 	ASymmetricKeyPair(ASymmetricEncryptionType type, ASymmetricPrivateKey privateKey, ASymmetricPublicKey publicKey,
 			short keySize) {
 		if (type == null)
@@ -130,6 +161,7 @@ public class ASymmetricKeyPair implements Serializable {
 		this.signatureType=null;
 
 		hashCode = privateKey.hashCode() + publicKey.hashCode();
+		this.gnuKeyPair=keyPair;
 	}
 
 	ASymmetricKeyPair(ASymmetricEncryptionType type, KeyPair keyPair, short keySize, long expirationUTC) {
@@ -146,6 +178,7 @@ public class ASymmetricKeyPair implements Serializable {
 		this.signatureType=null;
 
 		hashCode = privateKey.hashCode() + publicKey.hashCode();
+		this.nativeKeyPair=keyPair;
 	}
 
 	ASymmetricKeyPair(ASymmetricAuthentifiedSignatureType type, ASymmetricPrivateKey privateKey, ASymmetricPublicKey publicKey,
@@ -182,6 +215,7 @@ public class ASymmetricKeyPair implements Serializable {
 		this.signatureType=type;
 
 		hashCode = privateKey.hashCode() + publicKey.hashCode();
+		this.gnuKeyPair=keyPair;
 	}
 
 	ASymmetricKeyPair(ASymmetricAuthentifiedSignatureType type, KeyPair keyPair, short keySize, long expirationUTC) {
@@ -198,6 +232,7 @@ public class ASymmetricKeyPair implements Serializable {
 		this.signatureType=type;
 
 		hashCode = privateKey.hashCode() + publicKey.hashCode();
+		this.nativeKeyPair=keyPair;
 	}
 	
 	

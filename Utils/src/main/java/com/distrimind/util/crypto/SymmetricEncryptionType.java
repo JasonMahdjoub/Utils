@@ -123,18 +123,18 @@ public enum SymmetricEncryptionType {
 	
 	
 
-	static byte[] encodeSecretKey(gnu.vm.jgnux.crypto.SecretKey key) {
-		return Bits.concateEncodingWithShortSizedTabs(key.getAlgorithm().getBytes(), key.getEncoded());
+	static byte[] encodeSecretKey(gnu.vm.jgnux.crypto.SecretKey key, String algorithmName) {
+		return Bits.concateEncodingWithShortSizedTabs(algorithmName.getBytes(), key.getEncoded());
 	}
 
-	static byte[] encodeSecretKey(SecretKey key) {
-		return Bits.concateEncodingWithShortSizedTabs(key.getAlgorithm().getBytes(), key.getEncoded());
+	static byte[] encodeSecretKey(SecretKey key, String algorithmName) {
+		return Bits.concateEncodingWithShortSizedTabs(algorithmName.getBytes(), key.getEncoded());
 	}
 	
-	static byte[] encodeSecretKey(final org.bouncycastle.crypto.SymmetricSecretKey key)
+	static byte[] encodeSecretKey(final org.bouncycastle.crypto.SymmetricSecretKey key, String algorithmName)
 	{
 		
-		return Bits.concateEncodingWithShortSizedTabs(key.getAlgorithm().getName().getBytes(), AccessController.doPrivileged(new PrivilegedAction<byte[]>()
+		return Bits.concateEncodingWithShortSizedTabs(algorithmName.getBytes(), AccessController.doPrivileged(new PrivilegedAction<byte[]>()
         {
             public byte[] run()
             {
@@ -212,7 +212,7 @@ public enum SymmetricEncryptionType {
 		this.decodingSpeedIndexJava8=decodingSpeedIndexJava8;
 		this.encodingSpeedIndexJava9=encodingSpeedIndexJava9;
 		this.decodingSpeedIndexJava9=decodingSpeedIndexJava9;
-		if (blockMode.toLowerCase().equals("ctr"))
+		if (blockMode.toLowerCase().equals("ctr") && !codeProviderForEncryption.equals(CodeProvider.SunJCE))
 			maxModeCounterSize=8;
 		else
 			maxModeCounterSize=0;

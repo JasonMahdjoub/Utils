@@ -40,7 +40,12 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.lang.reflect.Field;
 import java.math.BigInteger;
+import java.security.AccessController;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
+import java.util.Arrays;
 
 import org.apache.commons.codec.binary.Base64;
 import org.bouncycastle.crypto.CryptoException;
@@ -62,7 +67,7 @@ import gnu.vm.jgnu.security.spec.InvalidKeySpecException;
  * @since Utils 2.9.0
  */
 public class P2PJPAKESecretMessageExchanger extends Agreement {
-	private final JPAKEParticipant jpake;
+	private JPAKEParticipant jpake;
 	private BigInteger keyMaterial;
 
 	public P2PJPAKESecretMessageExchanger(AbstractSecureRandom secureRandom, Serializable participantID, char[] message)
@@ -85,7 +90,9 @@ public class P2PJPAKESecretMessageExchanger extends Agreement {
 	{
 		byte[] m = hashMessage(MessageDigestType.BC_FIPS_SHA3_256.getMessageDigestInstance(), message, offset, len,
 				salt, offset_salt, len_salt, messageIsKey ? null : PasswordHashType.BC_FIPS_PBKFD2WithHMacSHA2_512, messageIsKey?(byte)10:(byte)15);
-		return convertToChar(m);
+		char[] res=convertToChar(m);
+		Arrays.fill(m, (byte)0);
+		return res;
 	}
 	
 	private char[] convertToChar(byte[] m)
@@ -101,7 +108,10 @@ public class P2PJPAKESecretMessageExchanger extends Agreement {
 		try(ByteArrayOutputStream bais=new ByteArrayOutputStream();ObjectOutputStream oos=new ObjectOutputStream(bais))
 		{
 			oos.writeObject(participantID);
-			return Base64.encodeBase64URLSafeString(bais.toByteArray());
+			byte[] a=bais.toByteArray();
+			String res=Base64.encodeBase64URLSafeString(a);
+			Arrays.fill(a, (byte)0);
+			return res;
 		}
 	}
 	
@@ -340,5 +350,54 @@ public class P2PJPAKESecretMessageExchanger extends Agreement {
 			
 		}
 	}
+	
+	@Override
+	public void finalize()
+	{
+		zeroize();
+	}
+	public void zeroize()
+	{
+		if (jpake!=null)
+		{
+			try {
+				char chars[]=(char[])jpakeFieldPassword.get(jpake);
+				if (chars!=null)
+					Arrays.fill(chars, (char)0);
+				
+				
+			} catch (IllegalArgumentException | IllegalAccessException e) {
+				e.printStackTrace();
+			}
+			
+			jpake=null;
+		}
+	}
+	
 
+	private static final Field jpakeFieldPassword;
+	static
+	{
+		jpakeFieldPassword=getField(JPAKEParticipant.class, "password");
+	}
+	private static Field getField(final Class<?> c, final String method_name) {
+		try {
+			
+			return AccessController.doPrivileged(new PrivilegedExceptionAction<Field>() {
+
+				@Override
+				public Field run() throws Exception {
+					Field m = c.getDeclaredField(method_name);
+					m.setAccessible(true);
+					return m;
+				}
+			});
+
+				
+		} catch (SecurityException | PrivilegedActionException  e) {
+			e.printStackTrace();
+			System.exit(-1);
+			return null;
+		}
+	}
 }

@@ -54,7 +54,7 @@ import gnu.vm.jgnu.security.spec.InvalidKeySpecException;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 3.1
+ * @version 3.2
  * @since Utils 1.7.1
  */
 public class ASymmetricPublicKey extends Key {
@@ -68,7 +68,7 @@ public class ASymmetricPublicKey extends Key {
 	
 
 	// private final PublicKey publicKey;
-	private final byte[] publicKey;
+	private byte[] publicKey;
 
 	private final short keySizeBits;
 
@@ -84,6 +84,27 @@ public class ASymmetricPublicKey extends Key {
 
 	private volatile transient gnu.vm.jgnu.security.PublicKey gnuPublicKey = null;
 
+	@Override
+	public void zeroize()
+	{
+		if (publicKey!=null)
+		{
+			Arrays.fill(publicKey, (byte)0);
+			publicKey=null;
+		}
+		if (nativePublicKey!=null)
+		{
+			Arrays.fill(nativePublicKey.getEncoded(), (byte)0);
+			nativePublicKey=null;
+		}
+		if (nativePublicKey!=null)
+		{
+			Arrays.fill(gnuPublicKey.getEncoded(), (byte)0);
+			gnuPublicKey=null;
+		}
+	}
+	
+	
 	ASymmetricPublicKey(ASymmetricEncryptionType type, byte[] publicKey, short keySize, long expirationUTC) {
 		this(publicKey, keySize, expirationUTC);
 		if (type == null)
@@ -161,6 +182,7 @@ public class ASymmetricPublicKey extends Key {
 		this.keySizeBits = keySize;
 		hashCode = Arrays.hashCode(this.publicKey);
 		this.expirationUTC = expirationUTC;
+		this.gnuPublicKey=null;
 	}
 
 	private ASymmetricPublicKey(PublicKey publicKey, short keySize, long expirationUTC) {
@@ -173,6 +195,7 @@ public class ASymmetricPublicKey extends Key {
 		this.keySizeBits = keySize;
 		hashCode = Arrays.hashCode(this.publicKey);
 		this.expirationUTC = expirationUTC;
+		this.nativePublicKey=null;
 	}
 
 	public byte[] encode() {

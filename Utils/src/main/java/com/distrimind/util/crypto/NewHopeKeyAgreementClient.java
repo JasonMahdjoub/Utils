@@ -34,6 +34,8 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
+import java.util.Arrays;
+
 import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
 import org.bouncycastle.crypto.KeyGenerationParameters;
 import org.bouncycastle.pqc.crypto.newhope.NHKeyPairGenerator;
@@ -43,7 +45,7 @@ import org.bouncycastle.pqc.crypto.newhope.NHPublicKeyParameters;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 1.1
  * @since Utils 3.10.0
  */
 public class NewHopeKeyAgreementClient extends AbstractNewHopeKeyAgreement{
@@ -64,11 +66,26 @@ public class NewHopeKeyAgreementClient extends AbstractNewHopeKeyAgreement{
 		super(type, keySizeBits/8);
 		this.randomForKeys=randomForKeys;
 	}
+	
+	public void zeroize()
+	{
+		super.zeroize();
+		if (priv!=null)
+		{
+			try {
+				short[] f = (short[])fieldSecData.get(priv);
+				Arrays.fill(f, (short)0);
+			} catch (IllegalArgumentException | IllegalAccessException e) {
+				e.printStackTrace();
+			}
+		}
+	}
 
 	public byte[] getDataPhase1()
 	{
 		//init key pair
 		NHKeyPairGenerator keyPairEngine = new NHKeyPairGenerator();
+		
 		keyPairEngine.init(new KeyGenerationParameters(randomForKeys, 1024));
 		AsymmetricCipherKeyPair pair = keyPairEngine.generateKeyPair();
         NHPublicKeyParameters pub = (NHPublicKeyParameters)pair.getPublic();
@@ -83,8 +100,6 @@ public class NewHopeKeyAgreementClient extends AbstractNewHopeKeyAgreement{
         shared = new byte[agreementSize];
 
         sharedA(shared, priv.getSecData(), data);
-
-        
 	}
 
 }

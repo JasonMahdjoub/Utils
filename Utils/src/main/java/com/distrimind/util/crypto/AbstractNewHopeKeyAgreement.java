@@ -37,12 +37,18 @@ package com.distrimind.util.crypto;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.security.AccessController;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 import java.security.SecureRandom;
+import java.util.Arrays;
+
+import org.bouncycastle.pqc.crypto.newhope.NHPrivateKeyParameters;
 
 /**
  * 
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 1.1
  * @since Utils 3.10.0
  */
 public class AbstractNewHopeKeyAgreement {
@@ -50,6 +56,7 @@ public class AbstractNewHopeKeyAgreement {
 	private SymmetricAuthentifiedSignatureType signatureType;
 	protected int agreementSize;
 	protected byte shared[];
+	private SymmetricSecretKey secretKey=null;
 	
 	protected AbstractNewHopeKeyAgreement(SymmetricEncryptionType type, int agreementSize)
 	{
@@ -67,17 +74,35 @@ public class AbstractNewHopeKeyAgreement {
 	
 	public SymmetricSecretKey generateSecretKey()
 	{
-		if (encryptionType==null)
-    		return new SymmetricSecretKey(signatureType, shared);
-    else
-    		return new SymmetricSecretKey(encryptionType, shared);
+		if (secretKey==null)
+		{
+			if (encryptionType==null)
+				secretKey=new SymmetricSecretKey(signatureType, shared);
+			else
+				secretKey=new SymmetricSecretKey(encryptionType, shared);
+			shared=null;
+		}
+		return secretKey;
 	}
 	
+	public void zeroize()
+	{
+		if (shared!=null)
+			Arrays.fill(shared, (byte)0);
+		secretKey=null;
+	}
+	
+	@Override
+	public void finalize()
+	{
+		zeroize();
+	}
 	
     static final int POLY_SIZE;
     static final int SENDB_BYTES;
     static final Method methodShareB;
     static final Method methodShareA;
+    static final Field fieldSecData;
     static 
     {
     	
@@ -119,7 +144,7 @@ public class AbstractNewHopeKeyAgreement {
     		Class<?> bClass=new byte[0].getClass();
     		methodShareA=getMethod(newHopeClass, "sharedA", bClass,new short[0].getClass(),bClass);
     		methodShareB=getMethod(newHopeClass, "sharedB", SecureRandom.class, bClass,bClass,bClass );
-    		
+    		fieldSecData=getField(NHPrivateKeyParameters.class, "secData");
     		
     }
 	
@@ -153,15 +178,47 @@ public class AbstractNewHopeKeyAgreement {
 		}
 	}
     
-    private static Method getMethod(Class<?> c, String method_name, Class<?>... parameters) {
+    private static Method getMethod(final Class<?> c, final String method_name, final Class<?>... parameters) {
 		try {
-			Method m = c.getDeclaredMethod(method_name, parameters);
-			m.setAccessible(true);
-			return m;
-		} catch (SecurityException | NoSuchMethodException e) {
+			
+			return AccessController.doPrivileged(new PrivilegedExceptionAction<Method>() {
+
+				@Override
+				public Method run() throws Exception {
+					Method m = c.getDeclaredMethod(method_name, parameters);
+					m.setAccessible(true);
+					return m;
+				}
+			});
+
+				
+		} catch (SecurityException | PrivilegedActionException  e) {
 			System.err.println("Impossible to access to the function " + method_name + " of the class "
 					+ c.getCanonicalName()
 					+ ". This is an inner bug of MadKitLanEdition. Please contact the developers. Impossible to continue. See the next error :");
+			e.printStackTrace();
+			System.exit(-1);
+			return null;
+		}
+	}
+
+    
+    
+    private static Field getField(final Class<?> c, final String method_name) {
+		try {
+			
+			return AccessController.doPrivileged(new PrivilegedExceptionAction<Field>() {
+
+				@Override
+				public Field run() throws Exception {
+					Field m = c.getDeclaredField(method_name);
+					m.setAccessible(true);
+					return m;
+				}
+			});
+
+				
+		} catch (SecurityException | PrivilegedActionException  e) {
 			e.printStackTrace();
 			System.exit(-1);
 			return null;

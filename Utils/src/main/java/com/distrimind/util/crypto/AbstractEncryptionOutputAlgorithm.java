@@ -51,7 +51,7 @@ import gnu.vm.jgnux.crypto.ShortBufferException;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 3.0
+ * @version 3.1
  * @since Utils 1.5
  */
 public abstract class AbstractEncryptionOutputAlgorithm {
@@ -220,7 +220,7 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 		final int maxBlockSize=getMaxBlockSizeForEncoding();
 
 		if (includeIV())
-			os.write(cipher.getIV(), 0, getIVSizeBytesWithExternalCounter());
+			os.write(cipher.getIV(), 0, getIVSizeBytesWithoutExternalCounter());
 		boolean finish = false;
 		while (!finish) {
 			int maxPartSize;
@@ -281,7 +281,7 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 	public abstract int getIVSizeBytesWithExternalCounter();
 	public final int getIVSizeBytesWithoutExternalCounter()
 	{
-		return getIVSizeBytesWithExternalCounter()-(useExternalCounter()?0:getBlockModeCounterBytes());
+		return getIVSizeBytesWithExternalCounter()-(useExternalCounter()?getBlockModeCounterBytes():0);
 	}
 	
 	public int getOutputSizeForEncryption(int inputLen)

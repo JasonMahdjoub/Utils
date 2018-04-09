@@ -36,6 +36,7 @@ package com.distrimind.util.crypto;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.Arrays;
 
 import org.apache.commons.codec.binary.Base64;
 
@@ -44,7 +45,7 @@ import com.distrimind.util.Bits;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 1.1
  * @since Utils 2.0
  */
 public abstract class Key implements Serializable {
@@ -70,35 +71,43 @@ public abstract class Key implements Serializable {
 
 	
 	public static Key decode(byte[] b) throws IllegalArgumentException {
-		byte[][] res = Bits.separateEncodingsWithShortSizedTabs(b);
-		if (res[0][0]==(byte)2)
-			return new SymmetricSecretKey(SymmetricEncryptionType.valueOf(Bits.getInt(res[0], 1)), res[1],
-				Bits.getShort(res[0], 5));
-		else if (res[0][0]==(byte)3)
-			return new SymmetricSecretKey(SymmetricAuthentifiedSignatureType.valueOf(Bits.getInt(res[0], 1)), res[1],
+		try
+		{
+			byte[][] res = Bits.separateEncodingsWithShortSizedTabs(b);
+			
+			if (res[0][0]==(byte)2)
+				return new SymmetricSecretKey(SymmetricEncryptionType.valueOf(Bits.getInt(res[0], 1)), res[1],
 					Bits.getShort(res[0], 5));
-		else if (res[0][0]==(byte)4)
-		{
-			return new ASymmetricPrivateKey(ASymmetricAuthentifiedSignatureType.valueOf(Bits.getInt(res[0], 3)), res[1],
-					Bits.getShort(res[0], 1));
+			else if (res[0][0]==(byte)3)
+				return new SymmetricSecretKey(SymmetricAuthentifiedSignatureType.valueOf(Bits.getInt(res[0], 1)), res[1],
+						Bits.getShort(res[0], 5));
+			else if (res[0][0]==(byte)4)
+			{
+				return new ASymmetricPrivateKey(ASymmetricAuthentifiedSignatureType.valueOf(Bits.getInt(res[0], 3)), res[1],
+						Bits.getShort(res[0], 1));
+			}
+			else if (res[0][0]==(byte)5)
+			{
+				return new ASymmetricPrivateKey(ASymmetricEncryptionType.valueOf(Bits.getInt(res[0], 3)), res[1],
+						Bits.getShort(res[0], 1));
+			}
+			else if (res[0][0]==(byte)8)
+			{
+				return new ASymmetricPublicKey(ASymmetricEncryptionType.valueOf(Bits.getInt(res[0], 3)), res[1],
+						Bits.getShort(res[0], 1), Bits.getLong(b, 7));
+			}
+			else if (res[0][0]==(byte)9)
+			{
+				return new ASymmetricPublicKey(ASymmetricAuthentifiedSignatureType.valueOf(Bits.getInt(res[0], 3)), res[1],
+						Bits.getShort(res[0], 1), Bits.getLong(b, 7));
+			}
+			else
+				throw new IllegalArgumentException();
 		}
-		else if (res[0][0]==(byte)5)
+		finally
 		{
-			return new ASymmetricPrivateKey(ASymmetricEncryptionType.valueOf(Bits.getInt(res[0], 3)), res[1],
-					Bits.getShort(res[0], 1));
+			Arrays.fill(b, (byte)0);
 		}
-		else if (res[0][0]==(byte)8)
-		{
-			return new ASymmetricPublicKey(ASymmetricEncryptionType.valueOf(Bits.getInt(res[0], 3)), res[1],
-					Bits.getShort(res[0], 1), Bits.getLong(b, 7));
-		}
-		else if (res[0][0]==(byte)9)
-		{
-			return new ASymmetricPublicKey(ASymmetricAuthentifiedSignatureType.valueOf(Bits.getInt(res[0], 3)), res[1],
-					Bits.getShort(res[0], 1), Bits.getLong(b, 7));
-		}
-		else
-			throw new IllegalArgumentException();
 			
 	}
 	
@@ -106,5 +115,13 @@ public abstract class Key implements Serializable {
 	
 	public static Key valueOf(String key) throws IllegalArgumentException, IOException {
 		return decode(Base64.decodeBase64(key));
+	}
+	
+	public abstract void zeroize();
+	
+	@Override
+	public void finalize()
+	{
+		zeroize();
 	}
 }

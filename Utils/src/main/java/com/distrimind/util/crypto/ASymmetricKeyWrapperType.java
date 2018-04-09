@@ -326,12 +326,17 @@ public enum ASymmetricKeyWrapperType {
 		{
 			Cipher c = Cipher.getInstance(algorithmName);
 			c.init(Cipher.UNWRAP_MODE, privateKey.toGnuKey());
+			
 			if (encryptionType==null)
 			{
+
 				return new SymmetricSecretKey(signatureType, (SecretKey)c.unwrap(keyToUnwrap, signatureType.getAlgorithmName(), Cipher.SECRET_KEY), keySize);
 			}
 			else
+			{
+				
 				return new SymmetricSecretKey(encryptionType, (SecretKey)c.unwrap(keyToUnwrap, encryptionType.getAlgorithmName(), Cipher.SECRET_KEY), keySize);
+			}
 			
 		}
 		else
@@ -367,6 +372,7 @@ public enum ASymmetricKeyWrapperType {
 					KeyUnwrapperUsingSecureRandom<WrapParameters> unwrapper = 
 							wrapFact.createKeyUnwrapper(bcPK,OAEPParams)
 							.withSecureRandom(SecureRandomType.DEFAULT.getSingleton(null));
+					
 					return (SymmetricSecretKey)Key.decode(unwrapper.unwrap(wrapedKey, 0, wrapedKey.length));
 					
 				}
@@ -403,7 +409,9 @@ public enum ASymmetricKeyWrapperType {
 					return new SymmetricSecretKey(signatureType, (javax.crypto.SecretKey)c.unwrap(wrapedKey, signatureType.getAlgorithmName(), javax.crypto.Cipher.SECRET_KEY), keySize);
 				}
 				else
+				{
 					return new SymmetricSecretKey(encryptionType, (javax.crypto.SecretKey)c.unwrap(wrapedKey, encryptionType.getAlgorithmName(), javax.crypto.Cipher.SECRET_KEY), keySize);
+				}
 				
 			}
 			catch(java.security.NoSuchAlgorithmException e)

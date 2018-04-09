@@ -1176,9 +1176,26 @@ public class CryptoTests {
 			key2=new SymmetricSecretKey(type2, key1.getSecretKeyBytes(), key1.getKeySizeBits());
 
 		byte counterSizeBytes=(byte)random.nextInt(key1.getEncryptionAlgorithmType().getMaxCounterSizeInBytesUsedWithBlockMode()+1);
-		SymmetricEncryptionAlgorithm algoDistant = new SymmetricEncryptionAlgorithm(random, key1, counterSizeBytes, false);
+		SymmetricEncryptionAlgorithm algoDistant;
+		if (type1.isBlockModeSupportingCounter())
+		{
+			algoDistant = new SymmetricEncryptionAlgorithm(random, key1, counterSizeBytes, true);
+			Assert.assertEquals(algoDistant.getBlockModeCounterBytes(), counterSizeBytes);
+			Assert.assertEquals(algoDistant.useExternalCounter(), false);
+			Assert.assertEquals(algoDistant.getIVSizeBytesWithExternalCounter(), type1.getIVSizeBytes()-counterSizeBytes);
+			Assert.assertEquals(algoDistant.getIVSizeBytesWithoutExternalCounter(), type1.getIVSizeBytes()-counterSizeBytes);
+		}
+		
+		
+		algoDistant = new SymmetricEncryptionAlgorithm(random, key1, counterSizeBytes, false);
 		SymmetricEncryptionAlgorithm algoLocal = new SymmetricEncryptionAlgorithm(random, key2, counterSizeBytes, false);
+		Assert.assertEquals(algoDistant.getBlockModeCounterBytes(), counterSizeBytes);
+		Assert.assertEquals(algoDistant.useExternalCounter(), counterSizeBytes>0);
+		Assert.assertEquals(algoDistant.getIVSizeBytesWithExternalCounter(), type1.getIVSizeBytes());
+		Assert.assertEquals(algoDistant.getIVSizeBytesWithoutExternalCounter(), type1.getIVSizeBytes()-counterSizeBytes);
 
+		
+		
 		byte[] counter=new byte[counterSizeBytes];
 		Random rand = new Random(System.currentTimeMillis());
 
@@ -1282,7 +1299,7 @@ public class CryptoTests {
 			{
 				EllipticCurveDiffieHellmanAlgorithm falsePeer = type.getInstance(random);
 				falsePeer.setKeyPair(peer1.getKeyPair());
-				falsePeer.setDistantPublicKey(publicKey1, SymmetricEncryptionType.DEFAULT, (short)128, keyingMaterial);
+				falsePeer.setDistantPublicKey(publicKey1.clone(), SymmetricEncryptionType.DEFAULT, (short)128, keyingMaterial);
 				
 				Assert.fail();
 			}

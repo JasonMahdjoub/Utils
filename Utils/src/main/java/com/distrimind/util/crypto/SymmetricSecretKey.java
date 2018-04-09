@@ -44,10 +44,11 @@ import org.bouncycastle.crypto.Algorithm;
 import com.distrimind.util.Bits;
 
 
+
 /**
  * 
  * @author Jason Mahdjoub
- * @version 2.1
+ * @version 2.2
  * @since Utils 1.7.1
  */
 public class SymmetricSecretKey extends Key {
@@ -59,7 +60,7 @@ public class SymmetricSecretKey extends Key {
 
 	
 
-	private final byte[] secretKey;
+	private byte[] secretKey;
 
 	private final short keySizeBits;
 
@@ -74,12 +75,39 @@ public class SymmetricSecretKey extends Key {
 	
 	private transient org.bouncycastle.crypto.SymmetricSecretKey bcfipsNativeSecretKey=null;
 
+	@Override
+	public void zeroize()
+	{
+		if (secretKey!=null)
+		{
+			Arrays.fill(secretKey, (byte)0);
+			secretKey=null;
+		}
+		if (javaNativeSecretKey!=null)
+		{
+			Arrays.fill(javaNativeSecretKey.getEncoded(), (byte)0);
+			javaNativeSecretKey=null;
+		}
+		if (gnuSecretKey!=null)
+		{
+			Arrays.fill(gnuSecretKey.getEncoded(), (byte)0);
+			gnuSecretKey=null;
+		}
+		if (bcfipsNativeSecretKey!=null)
+		{
+			Arrays.fill(bcfipsNativeSecretKey.getKeyBytes(), (byte)0);
+			bcfipsNativeSecretKey=null;
+		}
+	}
+	
+	
 	SymmetricSecretKey(SymmetricEncryptionType type, byte secretKey[], short keySize) {
 		this(secretKey, keySize);
 		if (type == null)
 			throw new NullPointerException("type");
 		this.encryptionType = type;
 		this.signatureType=null;
+		//Arrays.fill(secretKey, (byte)0);
 	}
 	SymmetricSecretKey(SymmetricEncryptionType type, byte secretKey[]) {
 		if (type == null)
@@ -96,6 +124,7 @@ public class SymmetricSecretKey extends Key {
 		this.encryptionType = type;
 		this.signatureType=null;
 		hashCode = Arrays.hashCode(this.secretKey);
+		Arrays.fill(secretKey, (byte)0);
 	}
 	SymmetricSecretKey(SymmetricAuthentifiedSignatureType type, byte secretKey[], short keySize) {
 		this(secretKey, keySize);
@@ -103,6 +132,7 @@ public class SymmetricSecretKey extends Key {
 			throw new NullPointerException("type");
 		this.encryptionType = null;
 		this.signatureType=type;
+		//Arrays.fill(secretKey, (byte)0);
 	}
 	SymmetricSecretKey(SymmetricAuthentifiedSignatureType type, byte secretKey[]) {
 		if (type == null)
@@ -114,65 +144,61 @@ public class SymmetricSecretKey extends Key {
 		this.encryptionType = null;
 		this.signatureType=type;
 		hashCode = Arrays.hashCode(this.secretKey);
+		Arrays.fill(secretKey, (byte)0);
 	}
 	SymmetricSecretKey(SymmetricEncryptionType type, gnu.vm.jgnux.crypto.SecretKey secretKey, short keySize) {
-		this(secretKey, keySize);
-		if (type == null)
-			throw new NullPointerException("type");
+		this(SymmetricEncryptionType.encodeSecretKey(secretKey, type.getAlgorithmName()), keySize);
 		if (type.getCodeProviderForEncryption() != CodeProvider.GNU_CRYPTO)
 			throw new IllegalAccessError();
 		this.encryptionType = type;
 		this.signatureType=null;
+		this.gnuSecretKey=secretKey;
 	}
 	
 	
 	SymmetricSecretKey(SymmetricAuthentifiedSignatureType type, gnu.vm.jgnux.crypto.SecretKey secretKey, short keySize) {
-		this(secretKey, keySize);
-		if (type == null)
-			throw new NullPointerException("type");
+		this(SymmetricEncryptionType.encodeSecretKey(secretKey, type.getAlgorithmName()), keySize);
 		if (type.getCodeProviderForSignature() != CodeProvider.GNU_CRYPTO)
 			throw new IllegalAccessError();
 		this.encryptionType = null;
 		this.signatureType=type;
+		this.gnuSecretKey=secretKey;
 	}
 
 	SymmetricSecretKey(SymmetricEncryptionType type, SecretKey secretKey, short keySize) {
-		this(secretKey, keySize);
-		if (type == null)
-			throw new NullPointerException("type");
+		this(SymmetricEncryptionType.encodeSecretKey(secretKey, type.getAlgorithmName()), keySize);
 		if (type.getCodeProviderForEncryption() == CodeProvider.GNU_CRYPTO)
 			throw new IllegalAccessError();
 		this.encryptionType = type;
 		this.signatureType=null;
+		this.javaNativeSecretKey=secretKey;
 	}
 	SymmetricSecretKey(SymmetricAuthentifiedSignatureType type, SecretKey secretKey, short keySize) {
-		this(secretKey, keySize);
-		if (type == null)
-			throw new NullPointerException("type");
+		this(SymmetricEncryptionType.encodeSecretKey(secretKey, type.getAlgorithmName()), keySize);
 		if (type.getCodeProviderForSignature() == CodeProvider.GNU_CRYPTO)
 			throw new IllegalAccessError();
 		this.encryptionType = null;
 		this.signatureType=type;
+		this.javaNativeSecretKey=secretKey;
 	}
 	
 	SymmetricSecretKey(SymmetricEncryptionType type, org.bouncycastle.crypto.SymmetricSecretKey secretKey, short keySize) {
-		this(secretKey, keySize);
-		if (type == null)
-			throw new NullPointerException("type");
+		this(SymmetricEncryptionType.encodeSecretKey(secretKey, type.getAlgorithmName()), keySize);
 		if (type.getCodeProviderForEncryption() == CodeProvider.GNU_CRYPTO)
 			throw new IllegalAccessError();
 		this.encryptionType = type;
 		this.signatureType=null;
+		
+		this.bcfipsNativeSecretKey=new org.bouncycastle.crypto.SymmetricSecretKey(getBouncyCastleAlgorithm(), secretKey.getKeyBytes());
 	}
 	
 	SymmetricSecretKey(SymmetricAuthentifiedSignatureType type, org.bouncycastle.crypto.SymmetricSecretKey secretKey, short keySize) {
-		this(secretKey, keySize);
-		if (type == null)
-			throw new NullPointerException("type");
+		this(SymmetricEncryptionType.encodeSecretKey(secretKey, type.getAlgorithmName()), keySize);
 		if (type.getCodeProviderForSignature() == CodeProvider.GNU_CRYPTO)
 			throw new IllegalAccessError();
 		this.encryptionType = null;
 		this.signatureType=type;
+		this.bcfipsNativeSecretKey=new org.bouncycastle.crypto.SymmetricSecretKey(getBouncyCastleAlgorithm(), secretKey.getKeyBytes());
 	}
 	
 	private SymmetricSecretKey(byte secretKey[], short keySize) {
@@ -183,29 +209,6 @@ public class SymmetricSecretKey extends Key {
 		hashCode = Arrays.hashCode(this.secretKey);
 	}
 
-	private SymmetricSecretKey(gnu.vm.jgnux.crypto.SecretKey secretKey, short keySize) {
-		if (secretKey == null)
-			throw new NullPointerException("secretKey");
-		this.secretKey = SymmetricEncryptionType.encodeSecretKey(secretKey);
-		this.keySizeBits = keySize;
-		hashCode = Arrays.hashCode(this.secretKey);
-	}
-	
-	private SymmetricSecretKey(org.bouncycastle.crypto.SymmetricSecretKey secretKey, short keySize) {
-		if (secretKey == null)
-			throw new NullPointerException("secretKey");
-		this.secretKey = SymmetricEncryptionType.encodeSecretKey(secretKey);
-		this.keySizeBits = keySize;
-		hashCode = Arrays.hashCode(this.secretKey);
-	}
-
-	private SymmetricSecretKey(SecretKey secretKey, short keySize) {
-		if (secretKey == null)
-			throw new NullPointerException("secretKey");
-		this.secretKey = SymmetricEncryptionType.encodeSecretKey(secretKey);
-		this.keySizeBits = keySize;
-		hashCode = Arrays.hashCode(this.secretKey);
-	}
 	@Override
 	public byte[] encode() {
 		byte[] tab = new byte[7];
