@@ -1188,11 +1188,15 @@ public class CryptoTests {
 		
 		
 		algoDistant = new SymmetricEncryptionAlgorithm(random, key1, counterSizeBytes, false);
-		SymmetricEncryptionAlgorithm algoLocal = new SymmetricEncryptionAlgorithm(random, key2, counterSizeBytes, false);
 		Assert.assertEquals(algoDistant.getBlockModeCounterBytes(), counterSizeBytes);
 		Assert.assertEquals(algoDistant.useExternalCounter(), counterSizeBytes>0);
 		Assert.assertEquals(algoDistant.getIVSizeBytesWithExternalCounter(), type1.getIVSizeBytes());
 		Assert.assertEquals(algoDistant.getIVSizeBytesWithoutExternalCounter(), type1.getIVSizeBytes()-counterSizeBytes);
+		SymmetricEncryptionAlgorithm algoLocal = new SymmetricEncryptionAlgorithm(random, key2, counterSizeBytes, false);
+		Assert.assertEquals(algoLocal.getBlockModeCounterBytes(), counterSizeBytes);
+		Assert.assertEquals(algoLocal.useExternalCounter(), counterSizeBytes>0);
+		Assert.assertEquals(algoLocal.getIVSizeBytesWithExternalCounter(), type1.getIVSizeBytes());
+		Assert.assertEquals(algoLocal.getIVSizeBytesWithoutExternalCounter(), type1.getIVSizeBytes()-counterSizeBytes);
 
 		
 		
@@ -1238,6 +1242,7 @@ public class CryptoTests {
 			else
 				decrypted = algoDistant.decode(encrypted, null, counter);
 			Assert.assertEquals(decrypted.length, size, "Testing size " + type1+", "+type2);
+			Assert.assertTrue(algoDistant.getOutputSizeForDecryption(encrypted.length)>=size, "Testing size " + type1+", "+type2);
 			for (int i = 0; i < decrypted.length; i++)
 				Assert.assertEquals(decrypted[i], m[i + off]);
 			if (type1.supportAssociatedData())
@@ -1246,6 +1251,7 @@ public class CryptoTests {
 				md = algoDistant.decode(encrypted, null, counter);
 
 			Assert.assertEquals(md.length, size, "Testing size " + type1+", "+type2);
+			Assert.assertTrue(algoDistant.getOutputSizeForDecryption(encrypted.length)>=size, "Testing size " + type1+", "+type2);
 			for (int i = 0; i < md.length; i++)
 				Assert.assertEquals(md[i], m[i + off]);
 
@@ -1255,6 +1261,7 @@ public class CryptoTests {
 
 			md = algoLocal.decode(encrypted, null, counter);
 			Assert.assertEquals(md.length, size, "Testing size " + type1+", "+type2);
+			Assert.assertTrue(algoDistant.getOutputSizeForDecryption(encrypted.length)>=size, "Testing size " + type1+", "+type2);
 			for (int i = 0; i < md.length; i++)
 				Assert.assertEquals(md[i], m[i + off]);
 
