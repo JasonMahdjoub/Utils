@@ -55,7 +55,7 @@ public class Utils {
 		c.set(2016, 1, 4);
 		Calendar c2 = Calendar.getInstance();
 		c.set(2018, 3, 9);
-		VERSION = new Version("Utils", "Utils", 3, 13, 3, Version.Type.Stable, 0, c.getTime(), c2.getTime());
+		VERSION = new Version("Utils", "Utils", 3, 13, 4, Version.Type.Stable, 0, c.getTime(), c2.getTime());
 		try {
 
 			InputStream is = Utils.class.getResourceAsStream("build.txt");
@@ -69,7 +69,7 @@ public class Utils {
 			
 			c = Calendar.getInstance();
 			c.set(2018, 3, 9);
-			Description d = new Description(3, 13, 3, Version.Type.Stable, 0, c.getTime());
+			Description d = new Description(3, 13, 4, Version.Type.Stable, 0, c.getTime());
 			d.addItem("Correction of a null pointer exception.");
 			d.addItem("Security fix : counter was transmitted to other peer.");
 			d.addItem("Fill keys with zeros when they are destroyed.");

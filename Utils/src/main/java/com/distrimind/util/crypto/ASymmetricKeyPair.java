@@ -56,8 +56,6 @@ public class ASymmetricKeyPair implements Serializable {
 	private static final long serialVersionUID = -8249147431069134363L;
 
 	public static ASymmetricKeyPair decode(byte[] b) throws IllegalArgumentException {
-		try
-		{
 			byte[][] res1 = Bits.separateEncodingsWithIntSizedTabs(b);
 			byte[][] res2 = Bits.separateEncodingsWithShortSizedTabs(res1[0]);
 			
@@ -78,11 +76,6 @@ public class ASymmetricKeyPair implements Serializable {
 				return new ASymmetricKeyPair(type, new ASymmetricPrivateKey(type, res1[1], keySize),
 					new ASymmetricPublicKey(type, res2[1], keySize, expirationUTC), keySize);
 			}
-		}
-		finally
-		{
-			Arrays.fill(b, (byte)0);
-		}
 	}
 
 	public static ASymmetricKeyPair valueOf(String key) throws IllegalArgumentException, IOException {

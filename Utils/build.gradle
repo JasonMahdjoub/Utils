@@ -82,7 +82,7 @@ allprojects {
 
 sourceCompatibility = 1.7
 targetCompatibility=1.7
-version='3.13.3'
+version='3.13.4'
 
 
 task sourcesJar(type: Jar, dependsOn: classes) {

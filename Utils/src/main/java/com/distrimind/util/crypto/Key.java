@@ -36,7 +36,6 @@ package com.distrimind.util.crypto;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.Arrays;
 
 import org.apache.commons.codec.binary.Base64;
 
@@ -71,8 +70,7 @@ public abstract class Key implements Serializable {
 
 	
 	public static Key decode(byte[] b) throws IllegalArgumentException {
-		try
-		{
+		
 			byte[][] res = Bits.separateEncodingsWithShortSizedTabs(b);
 			
 			if (res[0][0]==(byte)2)
@@ -103,11 +101,7 @@ public abstract class Key implements Serializable {
 			}
 			else
 				throw new IllegalArgumentException();
-		}
-		finally
-		{
-			Arrays.fill(b, (byte)0);
-		}
+		
 			
 	}
 	
