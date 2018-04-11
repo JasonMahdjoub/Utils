@@ -52,18 +52,19 @@ public class NewHopeKeyAgreementClient extends AbstractNewHopeKeyAgreement{
 
 	private AbstractSecureRandom randomForKeys;
 	private NHPrivateKeyParameters priv;
-	protected NewHopeKeyAgreementClient(SymmetricAuthentifiedSignatureType type, AbstractSecureRandom randomForKeys) {
-		this(type, 256, randomForKeys);
+	private boolean valid=true;
+	NewHopeKeyAgreementClient(SymmetricAuthentifiedSignatureType type, AbstractSecureRandom randomForKeys) {
+		this(type, (short)256, randomForKeys);
 	}
-	protected NewHopeKeyAgreementClient(SymmetricAuthentifiedSignatureType type, int keySizeBits, AbstractSecureRandom randomForKeys) {
-		super(type, keySizeBits/8);
+	NewHopeKeyAgreementClient(SymmetricAuthentifiedSignatureType type, short keySizeBits, AbstractSecureRandom randomForKeys) {
+		super(type, (short)(keySizeBits/8));
 		this.randomForKeys=randomForKeys;
 	}
-	protected NewHopeKeyAgreementClient(SymmetricEncryptionType type, AbstractSecureRandom randomForKeys) {
-		this(type, 256, randomForKeys);
+	NewHopeKeyAgreementClient(SymmetricEncryptionType type, AbstractSecureRandom randomForKeys) {
+		this(type, (short)256, randomForKeys);
 	}
-	protected NewHopeKeyAgreementClient(SymmetricEncryptionType type, int keySizeBits, AbstractSecureRandom randomForKeys) {
-		super(type, keySizeBits/8);
+	NewHopeKeyAgreementClient(SymmetricEncryptionType type, short keySizeBits, AbstractSecureRandom randomForKeys) {
+		super(type, (short)(keySizeBits/8));
 		this.randomForKeys=randomForKeys;
 	}
 	
@@ -81,8 +82,9 @@ public class NewHopeKeyAgreementClient extends AbstractNewHopeKeyAgreement{
 		}
 	}
 
-	public byte[] getDataPhase1()
+	private byte[] getDataPhase1()
 	{
+		valid=false;
 		//init key pair
 		NHKeyPairGenerator keyPairEngine = new NHKeyPairGenerator();
 		
@@ -91,15 +93,39 @@ public class NewHopeKeyAgreementClient extends AbstractNewHopeKeyAgreement{
         NHPublicKeyParameters pub = (NHPublicKeyParameters)pair.getPublic();
         priv = (NHPrivateKeyParameters)pair.getPrivate();
         
-        return pub.getPubData();
+        byte[] res=pub.getPubData();
+        valid=true;
+        return res;
 	}
 	
-	public void setDataPhase2(byte []data)
+	private void setDataPhase2(byte []data)
 	{
 		//calculate agreement
+		valid=false;
         shared = new byte[agreementSize];
 
         sharedA(shared, priv.getSecData(), data);
+        valid=true;
+	}
+	@Override
+	protected boolean isAgreementProcessValidImpl() {
+		return valid;
+	}
+	@Override
+	protected byte[] getDataToSend(int stepNumber) throws Exception {
+		if (stepNumber==0)
+			return getDataPhase1();
+		else
+			throw new IllegalAccessException();
+	}
+	@Override
+	protected void receiveData(int stepNumber, byte[] data) throws Exception {
+		
+		if (stepNumber==0)
+			setDataPhase2(data);
+		else
+			throw new IllegalAccessException();
+		
 	}
 
 }

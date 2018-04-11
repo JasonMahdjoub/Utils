@@ -54,8 +54,8 @@ public class Utils {
 		Calendar c = Calendar.getInstance();
 		c.set(2016, 1, 4);
 		Calendar c2 = Calendar.getInstance();
-		c.set(2018, 3, 9);
-		VERSION = new Version("Utils", "Utils", 3, 13, 4, Version.Type.Stable, 0, c.getTime(), c2.getTime());
+		c.set(2018, 3, 11);
+		VERSION = new Version("Utils", "Utils", 3, 14, 0, Version.Type.Stable, 0, c.getTime(), c2.getTime());
 		try {
 
 			InputStream is = Utils.class.getResourceAsStream("build.txt");
@@ -68,8 +68,20 @@ public class Utils {
 			VERSION.addDeveloper(new PersonDeveloper("mahdjoub", "jason", c.getTime()));
 			
 			c = Calendar.getInstance();
+			c.set(2018, 3, 11);
+			Description d = new Description(3, 14, 0, Version.Type.Stable, 0, c.getTime());
+			d.addItem("Add KeyAgreementType and KeyAgreement class. ");
+			d.addItem("NewHope and ECDA use now the same protocol.");
+			d.addItem("Add SHA2-512/224 message digest.");
+			d.addItem("Add SHA2-512/256 message digest.");
+			d.addItem("Add SHA2-512/224 HMAC.");
+			d.addItem("Add SHA2-512/256 HMAC.");
+			d.addItem("Add functions isPostQuantomAlgorithm into several classes.");
+			VERSION.addDescription(d);
+			
+			c = Calendar.getInstance();
 			c.set(2018, 3, 9);
-			Description d = new Description(3, 13, 4, Version.Type.Stable, 0, c.getTime());
+			d = new Description(3, 13, 4, Version.Type.Stable, 0, c.getTime());
 			d.addItem("Correction of a null pointer exception.");
 			d.addItem("Security fix : counter was transmitted to other peer.");
 			d.addItem("Fill keys with zeros when they are destroyed.");

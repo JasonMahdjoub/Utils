@@ -69,6 +69,7 @@ import gnu.vm.jgnu.security.spec.InvalidKeySpecException;
 public class P2PJPAKESecretMessageExchanger extends Agreement {
 	private JPAKEParticipant jpake;
 	private BigInteger keyMaterial;
+	private boolean valid=true;;
 
 	public P2PJPAKESecretMessageExchanger(AbstractSecureRandom secureRandom, Serializable participantID, char[] message)
 			throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException {
@@ -182,11 +183,14 @@ public class P2PJPAKESecretMessageExchanger extends Agreement {
 
 	@Override
 	protected boolean isAgreementProcessValidImpl() {
-		return jpake.getState() == JPAKEParticipant.STATE_ROUND_3_VALIDATED;
+		if (this.getActualStepForReceptionIndex()==this.getStepsNumberForReception() && this.getActualStepForSendIndex()==this.getStepsNumberForSend() && jpake.getState() != JPAKEParticipant.STATE_ROUND_3_VALIDATED)
+			return false;
+		return valid;
 	}
 
 	@Override
 	protected byte[] getDataToSend(int stepNumber) throws Exception {
+		valid=false;
 		switch(stepNumber)
 		{
 		case 0:
@@ -213,6 +217,7 @@ public class P2PJPAKESecretMessageExchanger extends Agreement {
 					
 					oos.writeObject(toSerialize.getParticipantId());
 				}
+				valid=true;
 				return baos.toByteArray();
 			}
 			
@@ -231,6 +236,7 @@ public class P2PJPAKESecretMessageExchanger extends Agreement {
 						oos.writeObject(bi);
 					oos.writeObject(toSerialize.getParticipantId());
 				}
+				valid=true;
 				return baos.toByteArray();
 			}
 			
@@ -244,6 +250,7 @@ public class P2PJPAKESecretMessageExchanger extends Agreement {
 					oos.writeObject(toSerialize.getMacTag());
 					oos.writeObject(toSerialize.getParticipantId());
 				}
+				valid=true;
 				return baos.toByteArray();
 			}
 			
@@ -255,6 +262,7 @@ public class P2PJPAKESecretMessageExchanger extends Agreement {
 
 	@Override
 	protected void receiveData(int stepNumber, byte[] dataReceived) throws Exception {
+		valid=false;
 		switch(stepNumber)
 		{
 		case 0:
@@ -349,6 +357,7 @@ public class P2PJPAKESecretMessageExchanger extends Agreement {
 			
 			
 		}
+		valid=true;
 	}
 	
 	@Override

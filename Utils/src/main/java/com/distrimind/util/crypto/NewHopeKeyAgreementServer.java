@@ -47,26 +47,28 @@ import org.bouncycastle.pqc.crypto.newhope.NHPublicKeyParameters;
 public class NewHopeKeyAgreementServer extends AbstractNewHopeKeyAgreement{
 	private AbstractSecureRandom randomForKeys;
 	private ExchangePair exchangePair;
+	private boolean valid=true;
 	protected NewHopeKeyAgreementServer(SymmetricAuthentifiedSignatureType type, AbstractSecureRandom randomForKeys) {
-		this(type, 256, randomForKeys);
+		this(type, (short)256, randomForKeys);
 	}
-	protected NewHopeKeyAgreementServer(SymmetricAuthentifiedSignatureType type, int keySizeBits, AbstractSecureRandom randomForKeys) {
-		super(type, keySizeBits/8);
+	protected NewHopeKeyAgreementServer(SymmetricAuthentifiedSignatureType type, short keySizeBits, AbstractSecureRandom randomForKeys) {
+		super(type, (short)(keySizeBits/8));
 		this.randomForKeys=randomForKeys;
 	}
 
 	protected NewHopeKeyAgreementServer(SymmetricEncryptionType type, AbstractSecureRandom randomForKeys) {
-		this(type, 256, randomForKeys);
+		this(type, (short)256, randomForKeys);
 	}
 
-	protected NewHopeKeyAgreementServer(SymmetricEncryptionType type, int keySizeBits, AbstractSecureRandom randomForKeys) {
-		super(type, keySizeBits/8);
+	protected NewHopeKeyAgreementServer(SymmetricEncryptionType type, short keySizeBits, AbstractSecureRandom randomForKeys) {
+		super(type, (short)(keySizeBits/8));
 		this.randomForKeys=randomForKeys;
 	}
 	
 	
 	public void setDataPhase1(byte []data)
 	{
+		valid=false;
         byte[] sharedValue = new byte[agreementSize];
         byte[] publicKeyValue = new byte[SENDB_BYTES];
 
@@ -75,14 +77,37 @@ public class NewHopeKeyAgreementServer extends AbstractNewHopeKeyAgreement{
 		
         exchangePair=new ExchangePair(new NHPublicKeyParameters(publicKeyValue), sharedValue);
         shared=exchangePair.getSharedValue();
+        valid=true;
 	}
 	
 	public byte[] getDataPhase2()
 	{
-		return ((NHPublicKeyParameters)exchangePair.getPublicKey()).getPubData();
+		valid=false;
+		byte[] res= ((NHPublicKeyParameters)exchangePair.getPublicKey()).getPubData();
+		valid=true;
+		return res;
 	}
 	
-	
+	@Override
+	protected boolean isAgreementProcessValidImpl() {
+		return valid;
+	}
+	@Override
+	protected byte[] getDataToSend(int stepNumber) throws Exception {
+		if (stepNumber==0)
+			return getDataPhase2();
+		else
+			throw new IllegalAccessException();
+	}
+	@Override
+	protected void receiveData(int stepNumber, byte[] data) throws Exception {
+		
+		if (stepNumber==0)
+			setDataPhase1(data);
+		else
+			throw new IllegalAccessException();
+		
+	}
 	
     
 	

@@ -33,73 +33,18 @@ The fact that you are presently reading this means that you have had
 knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
-
 /**
  * 
  * @author Jason Mahdjoub
  * @version 1.0
- * @since Utils 3.0
+ * @since Utils 3.14.0
  */
-public abstract class Agreement {
-	
-	private int actualStepForReception, actualStepForSend;
-	private final int stepsNumberForReception;
-	private final int stepsNumberForSend;
-	protected Agreement(int stepsNumberForReceiption, int stepsNumberForSend)
-	{
-		actualStepForReception=0;
-		actualStepForSend=0;
-		this.stepsNumberForReception=stepsNumberForReceiption;
-		this.stepsNumberForSend=stepsNumberForSend;
-	}
-	
-	public int getActualStepForReceptionIndex()
-	{
-		return actualStepForReception;
-	}
-	public int getActualStepForSendIndex()
-	{
-		return actualStepForSend;
-	}
-	
-	public int getStepsNumberForReception()
-	{
-		return stepsNumberForReception;
-	}
-	public int getStepsNumberForSend()
-	{
-		return stepsNumberForSend;
-	}
-	
-	public boolean hasFinishedSend()
-	{
-		return stepsNumberForSend==actualStepForSend || !isAgreementProcessValidImpl();
-	}
-	public boolean hasFinishedReceiption()
-	{
-		return stepsNumberForReception==actualStepForReception || !isAgreementProcessValidImpl();
-	}
-	
-	public boolean isAgreementProcessValid()
-	{
-		return hasFinishedReceiption() && hasFinishedSend() && isAgreementProcessValidImpl();
-	}
-	
-	protected abstract boolean isAgreementProcessValidImpl(); 
-	
-	public byte[] getDataToSend() throws Exception
-	{
-		if (hasFinishedSend())
-			throw new IllegalAccessException("The process has finished");
-		return getDataToSend(actualStepForSend++);
-	}
-	public void receiveData(byte data[]) throws Exception
-	{
-		if (hasFinishedReceiption())
-			throw new IllegalAccessException("The process has finished");
-		receiveData(actualStepForReception++, data);
-	}
+public abstract class KeyAgreement extends Agreement {
 
-	protected abstract byte[] getDataToSend(int stepNumber) throws Exception;
-	protected abstract void receiveData(int stepNumber, byte data[]) throws Exception;
+	protected KeyAgreement(int stepsNumberForReceiption, int stepsNumberForSend) {
+		super(stepsNumberForReceiption, stepsNumberForSend);
+	}
+	
+	public abstract SymmetricSecretKey getDerivedKey();
+	
 }

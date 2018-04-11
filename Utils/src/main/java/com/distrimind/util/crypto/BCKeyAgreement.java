@@ -137,9 +137,9 @@ public final class BCKeyAgreement extends AbstractKeyAgreement{
         }
 
         if (encryptionType==null)
-        		return new SymmetricSecretKey(signatureType, new org.bouncycastle.crypto.SymmetricSecretKey(signatureType.getBouncyCastleAlgorithm(), secret), keySize);
+        		return new SymmetricSecretKey(signatureType, new org.bouncycastle.crypto.SymmetricSecretKey(signatureType.getBouncyCastleAlgorithm(), secret), (short)(keySize*8));
         else
-        		return new SymmetricSecretKey(encryptionType, new org.bouncycastle.crypto.SymmetricSecretKey(encryptionType.getBouncyCastleAlgorithm(), secret), keySize);
+        		return new SymmetricSecretKey(encryptionType, new org.bouncycastle.crypto.SymmetricSecretKey(encryptionType.getBouncyCastleAlgorithm(), secret), (short)(keySize*8));
 	}
 
 	@Override

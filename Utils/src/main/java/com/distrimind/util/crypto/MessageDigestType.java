@@ -59,6 +59,8 @@ public enum MessageDigestType {
 	BC_FIPS_SHA2_256("SHA-256", CodeProvider.BCFIPS, 256), 
 	BC_FIPS_SHA2_384("SHA-384",CodeProvider.BCFIPS, 384), 
 	BC_FIPS_SHA2_512("SHA-512", CodeProvider.BCFIPS, 512), 
+	BC_FIPS_SHA2_512_224("SHA-512/224", CodeProvider.BCFIPS, 224), 
+	BC_FIPS_SHA2_512_256("SHA-512/256", CodeProvider.BCFIPS, 256), 
 	BC_FIPS_SHA3_256("SHA3-256", CodeProvider.BCFIPS, 256), 
 	BC_FIPS_SHA3_384("SHA3-384",CodeProvider.BCFIPS, 384), 
 	BC_FIPS_SHA3_512("SHA3-512", CodeProvider.BCFIPS, 512), 

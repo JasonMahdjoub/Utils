@@ -49,18 +49,20 @@ import gnu.vm.jgnux.crypto.Mac;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 1.3
+ * @version 1.4
  * @since Utils 2.10.0
  */
 public enum SymmetricAuthentifiedSignatureType {
-	HMAC_SHA_256("HmacSHA256", CodeProvider.SunJCE, CodeProvider.SunJCE, (short)128, (short)16, MessageDigestType.SHA2_256, null), 
-	HMAC_SHA_384("HmacSHA384", CodeProvider.SunJCE, CodeProvider.SunJCE, (short)128, (short)16, MessageDigestType.SHA2_384, null), 
-	HMAC_SHA_512("HmacSHA512", CodeProvider.SunJCE, CodeProvider.SunJCE, (short)128, (short)16, MessageDigestType.SHA2_512, null), 
-	BC_FIPS_HMAC_SHA_256("HmacSHA256", CodeProvider.BCFIPS, CodeProvider.BCFIPS, (short)128, (short)16, MessageDigestType.BC_FIPS_SHA2_256, FipsSHS.SHA256_HMAC), 
-	BC_FIPS_HMAC_SHA_384("HmacSHA384", CodeProvider.BCFIPS, CodeProvider.BCFIPS, (short)128, (short)16, MessageDigestType.BC_FIPS_SHA2_384, FipsSHS.SHA384_HMAC), 
-	BC_FIPS_HMAC_SHA_512("HmacSHA512", CodeProvider.BCFIPS, CodeProvider.BCFIPS, (short)128, (short)16, MessageDigestType.BC_FIPS_SHA2_512, FipsSHS.SHA512_HMAC), 
+	HMAC_SHA2_256("HmacSHA256", CodeProvider.SunJCE, CodeProvider.SunJCE, (short)128, (short)16, MessageDigestType.SHA2_256, null), 
+	HMAC_SHA2_384("HmacSHA384", CodeProvider.SunJCE, CodeProvider.SunJCE, (short)128, (short)16, MessageDigestType.SHA2_384, null), 
+	HMAC_SHA2_512("HmacSHA512", CodeProvider.SunJCE, CodeProvider.SunJCE, (short)128, (short)16, MessageDigestType.SHA2_512, null), 
+	BC_FIPS_HMAC_SHA2_256("HmacSHA256", CodeProvider.BCFIPS, CodeProvider.BCFIPS, (short)128, (short)16, MessageDigestType.BC_FIPS_SHA2_256, FipsSHS.SHA256_HMAC), 
+	BC_FIPS_HMAC_SHA2_384("HmacSHA384", CodeProvider.BCFIPS, CodeProvider.BCFIPS, (short)128, (short)16, MessageDigestType.BC_FIPS_SHA2_384, FipsSHS.SHA384_HMAC), 
+	BC_FIPS_HMAC_SHA2_512("HmacSHA512", CodeProvider.BCFIPS, CodeProvider.BCFIPS, (short)128, (short)16, MessageDigestType.BC_FIPS_SHA2_512, FipsSHS.SHA512_HMAC),
+	BC_FIPS_HMAC_SHA2_512_224("HmacSHA512/224", CodeProvider.BCFIPS, CodeProvider.BCFIPS, (short)128, (short)16, MessageDigestType.BC_FIPS_SHA2_512_224, FipsSHS.SHA512_224_HMAC),
+	BC_FIPS_HMAC_SHA2_512_256("HmacSHA512/256", CodeProvider.BCFIPS, CodeProvider.BCFIPS, (short)128, (short)16, MessageDigestType.BC_FIPS_SHA2_512_256, FipsSHS.SHA512_256_HMAC),
 	//BC_FIPS_HMAC_WHIRLPOOL("HmacWHIRLPOOL",CodeProvider.BCFIPS, CodeProvider.BCFIPS, (short)128, (short)16, MessageDigestType.BC_WHIRLPOOL, FipsSHS.WHIRPOOL_HMAC), 
-	DEFAULT(BC_FIPS_HMAC_SHA_384);
+	DEFAULT(BC_FIPS_HMAC_SHA2_512);
 
 	private final String algorithmName;
 	private final CodeProvider codeProviderForSignature, codeProviderForKeyGenerator;
@@ -196,5 +198,12 @@ public enum SymmetricAuthentifiedSignatureType {
 	Algorithm getBouncyCastleAlgorithm()
 	{
 		return org.bouncycastle.crypto.general.AES.ALGORITHM;
+	}
+	
+	public boolean isPostQuantumAlgorithm(short keySizeBits) 
+	{
+		if (keySizeBits<256)
+			return false;
+		return true;
 	}
 }

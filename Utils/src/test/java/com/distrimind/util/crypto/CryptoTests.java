@@ -1285,46 +1285,7 @@ public class CryptoTests {
 			Assert.assertEquals(decodedBytes[i], originalBytes[i]);
 	}
 
-	@Test(invocationCount = 100, dataProvider = "provideDataForEllipticCurveDiffieHellmanKeyExchanger", dependsOnMethods = "testMessageDigest")
-	public void testEllipticCurveDiffieHellmanKeyExchanger(EllipticCurveDiffieHellmanType type)
-			throws java.security.NoSuchAlgorithmException, java.security.InvalidKeyException,
-			java.security.spec.InvalidKeySpecException, NoSuchAlgorithmException, NoSuchProviderException,
-			InvalidKeyException, NoSuchPaddingException, InvalidAlgorithmParameterException, InvalidKeySpecException,
-			BadPaddingException, IllegalStateException, IllegalBlockSizeException, IOException, ShortBufferException {
-		AbstractSecureRandom random = SecureRandomType.DEFAULT.getSingleton(null);
-		EllipticCurveDiffieHellmanAlgorithm peer1 = type.getInstance(random);
-		EllipticCurveDiffieHellmanAlgorithm peer2 = type.getInstance(random);
-		byte[] keyingMaterial=new byte[100];
-		random.nextBytes(keyingMaterial);
-		peer1.generateAndSetKeyPair();
-		peer2.generateAndSetKeyPair();
-		
-		byte[] publicKey1 = peer1.getEncodedPublicKey();
-		byte[] publicKey2 = peer2.getEncodedPublicKey();
-		{
-			try
-			{
-				EllipticCurveDiffieHellmanAlgorithm falsePeer = type.getInstance(random);
-				falsePeer.setKeyPair(peer1.getKeyPair());
-				falsePeer.setDistantPublicKey(publicKey1.clone(), SymmetricEncryptionType.DEFAULT, (short)128, keyingMaterial);
-				
-				Assert.fail();
-			}
-			catch(Exception e)
-			{
-				
-			}
-		}
-		
-		peer1.setDistantPublicKey(publicKey2, SymmetricEncryptionType.DEFAULT, (short)128, keyingMaterial);
-		peer2.setDistantPublicKey(publicKey1, SymmetricEncryptionType.DEFAULT, (short)128, keyingMaterial);
-		Assert.assertEquals(peer1.getDerivedKey(),peer2.getDerivedKey());
-
-		SymmetricSecretKey key = peer1.getDerivedKey();
-
-		testEncryptionAfterKeyExchange(random, SymmetricEncryptionType.DEFAULT, key);
-
-	}
+	
 	
 	private void testEncryptionAfterKeyExchange(AbstractSecureRandom random, SymmetricEncryptionType type, SymmetricSecretKey key) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException, NoSuchProviderException, InvalidKeySpecException, BadPaddingException, IllegalStateException, IllegalBlockSizeException, IOException, ShortBufferException
 	{
@@ -1382,96 +1343,93 @@ public class CryptoTests {
 		}
 	}
 	
-	@Test(invocationCount = 20, dataProvider = "provideDataForNewHopePostQuantumCrytoKeyExchangeForEncryption", dependsOnMethods = "testMessageDigest")
-	public void testNewHopePostQuantumCrytoKeyExchange(SymmetricEncryptionType type)
-			throws java.security.NoSuchAlgorithmException, java.security.InvalidKeyException,
-			java.security.spec.InvalidKeySpecException, NoSuchAlgorithmException, NoSuchProviderException,
-			InvalidKeyException, NoSuchPaddingException, InvalidAlgorithmParameterException, InvalidKeySpecException,
-			BadPaddingException, IllegalStateException, IllegalBlockSizeException, IOException, ShortBufferException {
+	
+	
+	
+	
+	
+	
+	
+	@Test(invocationCount = 5, dataProvider = "provideDataForKeyAgreementsSignature", dependsOnMethods = "testMessageDigest")
+	public void testKeyAgreementsForSignature(KeyAgreementType keyAgreementType, SymmetricAuthentifiedSignatureType type)
+			throws Exception {
 		AbstractSecureRandom random = SecureRandomType.DEFAULT.getSingleton(null);
+		byte[] keyingMaterial=new byte[100];
+		random.nextBytes(keyingMaterial);
 		
-		int keySizeBits=random.nextBoolean()?128:256;
-		NewHopeKeyAgreementClient client=new NewHopeKeyAgreementClient(type, keySizeBits, random);
-		NewHopeKeyAgreementServer server=new NewHopeKeyAgreementServer(type, keySizeBits, random);
+		KeyAgreement client=keyAgreementType.getKeyAgreementClient(random, type, (short)256, keyingMaterial);
+		KeyAgreement server=keyAgreementType.getKeyAgreementServer(random, type, (short)256, keyingMaterial);
 		
-		byte clientData[]=client.getDataPhase1();
-		server.setDataPhase1(clientData);
-		byte serverData[]=server.getDataPhase2();
-		client.setDataPhase2(serverData);
-		
-		SymmetricSecretKey keyClient=client.generateSecretKey();
-		SymmetricSecretKey serverClient=server.generateSecretKey();
-		
-		
-		Assert.assertEquals(keyClient,serverClient);
-		Assert.assertEquals(keyClient.getKeySizeBits(), keySizeBits);
+		do
+		{
+			if (!client.hasFinishedSend())
+			{
+				byte[] clientData=client.getDataToSend();
+				
+				server.receiveData(clientData);
+				
+			}
+			if (!server.hasFinishedSend())
+			{
+				byte[] serverData=server.getDataToSend();
+				
+				client.receiveData(serverData);
+				
+			}
+		} while(!server.hasFinishedReceiption() || !server.hasFinishedSend() || !client.hasFinishedReceiption() || !client.hasFinishedSend() );
 
-		testEncryptionAfterKeyExchange(random, type, keyClient);
+		Assert.assertTrue(client.isAgreementProcessValid());
+		Assert.assertTrue(server.isAgreementProcessValid());
+		
 
-	}
-	
-	@DataProvider(name="provideDataForNewHopePostQuantumCrytoKeyExchangeForEncryption")
-	Object[][] provideDataForNewHopePostQuantumCrytoKeyExchangeForEncryption()
-	{
-		return new Object[][] {
-			{SymmetricEncryptionType.AES_CBC_PKCS5Padding},
-			{SymmetricEncryptionType.BC_FIPS_AES_CBC_PKCS7Padding},
-			{SymmetricEncryptionType.BC_FIPS_AES_GCM},
-			{SymmetricEncryptionType.BC_AES_EAX},
-			{SymmetricEncryptionType.BC_SERPENT_CBC_PKCS7Padding},
-			{SymmetricEncryptionType.BC_SERPENT_GCM},
-			{SymmetricEncryptionType.BC_SERPENT_EAX},
-			{SymmetricEncryptionType.BC_TWOFISH_CBC_PKCS7Padding},
-			{SymmetricEncryptionType.BC_TWOFISH_GCM},
-			{SymmetricEncryptionType.BC_TWOFISH_EAX},
-			{SymmetricEncryptionType.GNU_AES_CBC_PKCS5Padding},
-			{SymmetricEncryptionType.GNU_ANUBIS_CBC_PKCS5Padding},
-			{SymmetricEncryptionType.GNU_SERPENT_CBC_PKCS5Padding},
-			{SymmetricEncryptionType.GNU_TWOFISH_CBC_PKCS5Padding}
-		};
-	}
-	
-	@DataProvider(name="provideDataForNewHopePostQuantumCrytoKeyExchangeForSignature")
-	Object[][] provideDataForNewHopePostQuantumCrytoKeyExchangeForSignature()
-	{
-		return new Object[][] {
-			{SymmetricAuthentifiedSignatureType.BC_FIPS_HMAC_SHA_256},
-			{SymmetricAuthentifiedSignatureType.BC_FIPS_HMAC_SHA_384},
-			{SymmetricAuthentifiedSignatureType.BC_FIPS_HMAC_SHA_512},
-			{SymmetricAuthentifiedSignatureType.HMAC_SHA_256},
-			{SymmetricAuthentifiedSignatureType.HMAC_SHA_384},
-			{SymmetricAuthentifiedSignatureType.HMAC_SHA_512}
-			
-		};
-	}
-	
-	@Test(invocationCount = 3, dataProvider = "provideDataForNewHopePostQuantumCrytoKeyExchangeForSignature", dependsOnMethods = "testMessageDigest")
-	public void testNewHopePostQuantumCrytoKeyExchange(SymmetricAuthentifiedSignatureType type)
-			throws java.security.NoSuchAlgorithmException, java.security.InvalidKeyException,
-			java.security.spec.InvalidKeySpecException, NoSuchAlgorithmException, NoSuchProviderException,
-			InvalidKeyException, NoSuchPaddingException, InvalidAlgorithmParameterException, InvalidKeySpecException,
-			BadPaddingException, IllegalStateException, IllegalBlockSizeException, IOException, SignatureException, ShortBufferException, InvalidParameterSpecException {
-		AbstractSecureRandom random = SecureRandomType.DEFAULT.getSingleton(null);
 		
-		int keySizeBits=random.nextBoolean()?128:256;
-		NewHopeKeyAgreementClient client=new NewHopeKeyAgreementClient(type, keySizeBits, random);
-		NewHopeKeyAgreementServer server=new NewHopeKeyAgreementServer(type, keySizeBits, random);
-		
-		byte clientData[]=client.getDataPhase1();
-		server.setDataPhase1(clientData);
-		byte serverData[]=server.getDataPhase2();
-		client.setDataPhase2(serverData);
-		
-		SymmetricSecretKey keyClient=client.generateSecretKey();
-		SymmetricSecretKey keyServer=server.generateSecretKey();
+		SymmetricSecretKey keyClient=client.getDerivedKey();
+		SymmetricSecretKey keyServer=server.getDerivedKey();
 		
 		
 		Assert.assertEquals(keyClient,keyServer);
-		Assert.assertEquals(keyClient.getKeySizeBits(), keySizeBits);
-
+		Assert.assertEquals(keyClient.getKeySizeBits(), 256);
 		testSignatureAfterKeyExchange(random, keyClient, keyServer);
 	}
-	
+	@Test(invocationCount = 5, dataProvider = "provideDataForKeyAgreementsEncryption", dependsOnMethods = "testMessageDigest")
+	public void testKeyAgreementsForEncryption(KeyAgreementType keyAgreementType, SymmetricEncryptionType type)
+			throws Exception {
+		AbstractSecureRandom random = SecureRandomType.DEFAULT.getSingleton(null);
+		byte[] keyingMaterial=new byte[100];
+		random.nextBytes(keyingMaterial);
+		
+		KeyAgreement client=keyAgreementType.getKeyAgreementClient(random, type, (short)256, keyingMaterial);
+		KeyAgreement server=keyAgreementType.getKeyAgreementServer(random, type, (short)256, keyingMaterial);
+		
+		do
+		{
+			if (!client.hasFinishedSend())
+			{
+				byte[] clientData=client.getDataToSend();
+				
+				server.receiveData(clientData);
+				
+			}
+			if (!server.hasFinishedSend())
+			{
+				byte[] serverData=server.getDataToSend();
+				
+				client.receiveData(serverData);
+				
+			}
+		} while(!server.hasFinishedReceiption() || !server.hasFinishedSend() || !client.hasFinishedReceiption() || !client.hasFinishedSend() );
+
+		Assert.assertTrue(client.isAgreementProcessValid());
+		Assert.assertTrue(server.isAgreementProcessValid());
+		
+		SymmetricSecretKey keyClient=client.getDerivedKey();
+		SymmetricSecretKey keyServer=server.getDerivedKey();
+		
+		
+		Assert.assertEquals(keyClient,keyServer);
+		Assert.assertEquals(keyClient.getKeySizeBits(), 256);
+		testEncryptionAfterKeyExchange(random, type, keyClient);
+	}
 	private void testSignatureAfterKeyExchange(AbstractSecureRandom random, SymmetricSecretKey keySigner, SymmetricSecretKey keyChecker) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidKeyException, SignatureException, InvalidKeySpecException, ShortBufferException, IllegalStateException, InvalidAlgorithmParameterException, IOException, InvalidParameterSpecException
 	{
 		SymmetricAuthentifiedSignatureCheckerAlgorithm checker=new SymmetricAuthentifiedSignatureCheckerAlgorithm(keyChecker);
@@ -1486,53 +1444,52 @@ public class CryptoTests {
 		}
 	}
 	
-	@Test(invocationCount = 10, dataProvider = "provideDataForEllipticCurveDiffieHellmanKeyExchangerForSignature", dependsOnMethods = "testMessageDigest")
-	public void testEllipticCurveDiffieHellmanKeyExchangerForSignature(EllipticCurveDiffieHellmanType type, SymmetricAuthentifiedSignatureType signatureType)
-			throws java.security.NoSuchAlgorithmException, java.security.InvalidKeyException,
-			java.security.spec.InvalidKeySpecException, NoSuchAlgorithmException, NoSuchProviderException,
-			InvalidKeyException, NoSuchPaddingException, InvalidAlgorithmParameterException, InvalidKeySpecException,
-			BadPaddingException, IllegalStateException, IllegalBlockSizeException, IOException, SignatureException, ShortBufferException, InvalidParameterSpecException {
-		AbstractSecureRandom random = SecureRandomType.DEFAULT.getSingleton(null);
-		EllipticCurveDiffieHellmanAlgorithm peer1 = type.getInstance(random);
-		EllipticCurveDiffieHellmanAlgorithm peer2 = type.getInstance(random);
-		peer1.generateAndSetKeyPair();
-		peer2.generateAndSetKeyPair();
+	
+	
+	@DataProvider(name = "provideDataForKeyAgreementsEncryption", parallel = true)
+	public Object[][] provideDataForEllipticCurveDiffieHellmanKeyExchangerForEncryption() {
+		ArrayList<Object[]> l=new ArrayList<>();
 		
-		byte[] publicKey1 = peer1.getEncodedPublicKey();
-		byte[] publicKey2 = peer2.getEncodedPublicKey();
-		byte[] keyingMaterial=new byte[100];
-		random.nextBytes(keyingMaterial);
-		short keySizeBits=random.nextBoolean()?(short)128:(short)256;
-		peer1.setDistantPublicKey(publicKey2, signatureType, keySizeBits, keyingMaterial);
-		peer2.setDistantPublicKey(publicKey1, signatureType, keySizeBits, keyingMaterial);
-		Assert.assertEquals(peer1.getDerivedKey(),peer2.getDerivedKey());
-
-		testSignatureAfterKeyExchange(random, peer1.getDerivedKey(), peer2.getDerivedKey());
 		
-
-	}
-	@DataProvider(name = "provideDataForEllipticCurveDiffieHellmanKeyExchanger", parallel = true)
-	public Object[][] provideDataForEllipticCurveDiffieHellmanKeyExchanger() {
-		Object[][] res = new Object[EllipticCurveDiffieHellmanType.values().length][];
-		int index = 0;
-		for (EllipticCurveDiffieHellmanType type : EllipticCurveDiffieHellmanType.values()) {
-			res[index] = new Object[1];
-			res[index++][0] = type;
-		}
-		return res;
-	}
-	@DataProvider(name = "provideDataForEllipticCurveDiffieHellmanKeyExchangerForSignature", parallel = true)
-	public Object[][] provideDataForEllipticCurveDiffieHellmanKeyExchangerForSignature() {
-		Object[][] res = new Object[EllipticCurveDiffieHellmanType.values().length*SymmetricAuthentifiedSignatureType.values().length][];
-		int index = 0;
-		for (EllipticCurveDiffieHellmanType type : EllipticCurveDiffieHellmanType.values()) {
-			for (SymmetricAuthentifiedSignatureType stype : SymmetricAuthentifiedSignatureType.values())
+		for (KeyAgreementType type : KeyAgreementType.values()) {
+			for (SymmetricEncryptionType etype : SymmetricEncryptionType.values())
 			{
-				res[index] = new Object[2];
-				res[index][0] = type;
-				res[index++][1] = stype;
+				if (etype.isPostQuantumAlgorithm((short)256) && etype.getCodeProviderForEncryption()!=CodeProvider.GNU_CRYPTO)
+				{
+					Object o[]=new Object[2];
+					o[0]=type;
+					o[1]=etype;
+					l.add(o);
+				}
 			}
 		}
+		Object[][] res = new Object[l.size()][];
+		int index=0;
+		for (Object o[] : l)
+			res[index++]=o;
+		return res;
+	}
+	@DataProvider(name = "provideDataForKeyAgreementsSignature", parallel = true)
+	public Object[][] provideDataForEllipticCurveDiffieHellmanKeyExchangerForSignature() {
+		ArrayList<Object[]> l=new ArrayList<>();
+		
+		
+		for (KeyAgreementType type : KeyAgreementType.values()) {
+			for (SymmetricAuthentifiedSignatureType etype : SymmetricAuthentifiedSignatureType.values())
+			{
+				if (!type.isPostQuantumAlgorithm() || etype.isPostQuantumAlgorithm((short)256))
+				{
+					Object o[]=new Object[2];
+					o[0]=type;
+					o[1]=etype;
+					l.add(o);
+				}
+			}
+		}
+		Object[][] res = new Object[l.size()][];
+		int index=0;
+		for (Object o[] : l)
+			res[index++]=o;
 		return res;
 	}
 

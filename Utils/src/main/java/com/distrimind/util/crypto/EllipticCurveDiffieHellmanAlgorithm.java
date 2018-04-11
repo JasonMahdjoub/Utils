@@ -41,6 +41,7 @@ import java.util.Arrays;
 import org.bouncycastle.jcajce.spec.UserKeyingMaterialSpec;
 
 import gnu.vm.jgnu.security.InvalidAlgorithmParameterException;
+import gnu.vm.jgnu.security.spec.InvalidKeySpecException;
 
 /**
  * 
@@ -48,21 +49,39 @@ import gnu.vm.jgnu.security.InvalidAlgorithmParameterException;
  * @version 2.2
  * @since Utils 2.9
  */
-public class EllipticCurveDiffieHellmanAlgorithm {
+public class EllipticCurveDiffieHellmanAlgorithm extends KeyAgreement {
 	private final EllipticCurveDiffieHellmanType type;
 	private SymmetricSecretKey derivedKey;
 	private ASymmetricKeyPair myKeyPair;
 	private byte[] myPublicKeyBytes;
 	private final AbstractSecureRandom randomForKeys;
-
-	EllipticCurveDiffieHellmanAlgorithm(AbstractSecureRandom randomForKeys, EllipticCurveDiffieHellmanType type) {
+	private boolean valid=true;
+	private SymmetricEncryptionType encryptionType;
+	private SymmetricAuthentifiedSignatureType signatureType;
+	private final short keySizeBits;
+	
+	private byte[] keyingMaterial;
+	EllipticCurveDiffieHellmanAlgorithm(AbstractSecureRandom randomForKeys, EllipticCurveDiffieHellmanType type, short keySizeBits, byte[] keyingMaterial, SymmetricAuthentifiedSignatureType signatureType) throws gnu.vm.jgnu.security.NoSuchAlgorithmException, InvalidKeySpecException, gnu.vm.jgnu.security.NoSuchProviderException, InvalidAlgorithmParameterException {
+		this(randomForKeys, type, keySizeBits, keyingMaterial);
+		this.signatureType=signatureType;
+	}
+	EllipticCurveDiffieHellmanAlgorithm(AbstractSecureRandom randomForKeys, EllipticCurveDiffieHellmanType type, short keySizeBits, byte[] keyingMaterial, SymmetricEncryptionType encryptionType) throws gnu.vm.jgnu.security.NoSuchAlgorithmException, InvalidKeySpecException, gnu.vm.jgnu.security.NoSuchProviderException, InvalidAlgorithmParameterException {
+		this(randomForKeys, type, keySizeBits, keyingMaterial);
+		this.encryptionType=encryptionType;
+	}
+	private EllipticCurveDiffieHellmanAlgorithm(AbstractSecureRandom randomForKeys, EllipticCurveDiffieHellmanType type, short keySizeBits, byte[] keyingMaterial) throws gnu.vm.jgnu.security.NoSuchAlgorithmException, InvalidKeySpecException, gnu.vm.jgnu.security.NoSuchProviderException, InvalidAlgorithmParameterException {
+		super(1, 1);
 		if (type == null)
 			throw new NullPointerException();
 		if (randomForKeys == null)
 			throw new NullPointerException();
 		this.type = type;
 		this.randomForKeys=randomForKeys;
+		
+		this.keyingMaterial=keyingMaterial;
+		this.keySizeBits=keySizeBits;
 		reset();
+		generateAndSetKeyPair();
 	}
 
 	public void zeroize()
@@ -94,20 +113,21 @@ public class EllipticCurveDiffieHellmanAlgorithm {
 		myKeyPair = null;
 		myPublicKeyBytes = null;
 	}
-	public ASymmetricKeyPair generateAndSetKeyPair() throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException, gnu.vm.jgnu.security.NoSuchProviderException, InvalidAlgorithmParameterException  {
+	private ASymmetricKeyPair generateAndSetKeyPair() throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException, gnu.vm.jgnu.security.NoSuchProviderException, InvalidAlgorithmParameterException  {
 		return generateAndSetKeyPair(type.getECDHKeySizeBits(), System.currentTimeMillis()+(24*60*60*1000));
 	}
-	public ASymmetricKeyPair generateAndSetKeyPair(short keySize) throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException, gnu.vm.jgnu.security.NoSuchProviderException, InvalidAlgorithmParameterException  {
+	/*private ASymmetricKeyPair generateAndSetKeyPair(short keySize) throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException, gnu.vm.jgnu.security.NoSuchProviderException, InvalidAlgorithmParameterException  {
 		return generateAndSetKeyPair(keySize, System.currentTimeMillis()+(24*60*60*1000));
-	}
-	public ASymmetricKeyPair generateAndSetKeyPair(short keySize, long expirationUTC) throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException, gnu.vm.jgnu.security.NoSuchProviderException, InvalidAlgorithmParameterException  {
+	}¨*/
+	private ASymmetricKeyPair generateAndSetKeyPair(short keySize, long expirationUTC) throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException, gnu.vm.jgnu.security.NoSuchProviderException, InvalidAlgorithmParameterException  {
+		valid=false;
 		ASymmetricKeyPair kp=type.getASymmetricAuthentifiedSignatureType().getKeyPairGenerator(randomForKeys, keySize, expirationUTC).generateKeyPair();
 		setKeyPair(kp);
-
+		valid=true;
 		return myKeyPair;
 	}
 	
-	public void setKeyPair(ASymmetricKeyPair keyPair) throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException
+	private void setKeyPair(ASymmetricKeyPair keyPair) throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException
 	{
 		if (keyPair==null)
 			throw new NullPointerException("keyPair");
@@ -116,28 +136,21 @@ public class EllipticCurveDiffieHellmanAlgorithm {
 		myPublicKeyBytes = myKeyPair.getASymmetricPublicKey().encode();
 	}
 	
-	public ASymmetricKeyPair getKeyPair()
+	/*private ASymmetricKeyPair getKeyPair()
 	{
 		return myKeyPair;
-	}
+	}*/
 	
-	public byte[] getEncodedPublicKey()
+	private byte[] getEncodedPublicKey()
 	{
 		return myPublicKeyBytes;
 	}
 
-	public void setDistantPublicKey(byte[] distantPublicKeyBytes, SymmetricEncryptionType symmetricEncryptionType, short keySize, byte[] keyingMaterial) throws 
-	gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.InvalidKeyException, gnu.vm.jgnu.security.spec.InvalidKeySpecException, gnu.vm.jgnu.security.NoSuchProviderException, InvalidAlgorithmParameterException {
-		setDistantPublicKey(distantPublicKeyBytes, symmetricEncryptionType, null, keySize, keyingMaterial);
-	}
-	public void setDistantPublicKey(byte[] distantPublicKeyBytes, SymmetricAuthentifiedSignatureType symmetricSignatureType, short keySize, byte[] keyingMaterial) throws 
-	gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.InvalidKeyException, gnu.vm.jgnu.security.spec.InvalidKeySpecException, gnu.vm.jgnu.security.NoSuchProviderException, InvalidAlgorithmParameterException {
-		setDistantPublicKey(distantPublicKeyBytes, null, symmetricSignatureType, keySize, keyingMaterial);
-	}
-	private void setDistantPublicKey(byte[] distantPublicKeyBytes, SymmetricEncryptionType symmetricEncryptionType, SymmetricAuthentifiedSignatureType symmetricSignatureType, short keySize, byte[] keyingMaterial) throws 
+	private void setDistantPublicKey(byte[] distantPublicKeyBytes, SymmetricEncryptionType symmetricEncryptionType, SymmetricAuthentifiedSignatureType symmetricSignatureType, byte[] keyingMaterial) throws 
 			gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.InvalidKeyException, gnu.vm.jgnu.security.spec.InvalidKeySpecException, gnu.vm.jgnu.security.NoSuchProviderException, InvalidAlgorithmParameterException {
 		try
 		{
+			valid=false;
 			if (distantPublicKeyBytes == null)
 				throw new NullPointerException();
 			if (keyingMaterial==null)
@@ -163,7 +176,8 @@ public class EllipticCurveDiffieHellmanAlgorithm {
 	
 			ka.init(myKeyPair.getASymmetricPrivateKey(), new UserKeyingMaterialSpec(keyingMaterial));
 			ka.doPhase(distantPublicKey, true);
-			derivedKey=ka.generateSecretKey((short)(type.getKeySizeBits()/8));
+			derivedKey=ka.generateSecretKey((short)(keySizeBits/8));
+			valid=true;
 		}
 		catch(NoSuchAlgorithmException e)
 		{
@@ -176,6 +190,29 @@ public class EllipticCurveDiffieHellmanAlgorithm {
 
 	public SymmetricSecretKey getDerivedKey() {
 		return derivedKey;
+	}
+
+	@Override
+	protected boolean isAgreementProcessValidImpl() {
+		return valid;
+	}
+
+	@Override
+	protected byte[] getDataToSend(int stepNumber) throws Exception {
+		if (stepNumber==0)
+			return getEncodedPublicKey();
+		else 
+			throw new IllegalAccessException();
+	}
+
+	@Override
+	protected void receiveData(int stepNumber, byte[] data) throws Exception {
+		if (stepNumber==0)
+		{
+			setDistantPublicKey(data, encryptionType, signatureType, keyingMaterial);
+		}
+		else 
+			throw new IllegalAccessException();
 	}
 
 }
