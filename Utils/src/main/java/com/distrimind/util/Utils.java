@@ -69,7 +69,14 @@ public class Utils {
 			
 			c = Calendar.getInstance();
 			c.set(2018, 3, 11);
-			Description d = new Description(3, 14, 0, Version.Type.Stable, 0, c.getTime());
+			Description d = new Description(3, 14, 2, Version.Type.Stable, 0, c.getTime());
+			d.addItem("Add function KeyAgreementType.getDefaultKeySizeBits().");
+			d.addItem("Add function KeyAgreementType.getCodeProvider().");
+			VERSION.addDescription(d);
+
+			c = Calendar.getInstance();
+			c.set(2018, 3, 11);
+			d = new Description(3, 14, 0, Version.Type.Stable, 0, c.getTime());
 			d.addItem("Add KeyAgreementType and KeyAgreement class. ");
 			d.addItem("NewHope and ECDA use now the same protocol.");
 			d.addItem("Add SHA2-512/224 message digest.");

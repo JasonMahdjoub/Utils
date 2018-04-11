@@ -42,7 +42,7 @@ import gnu.vm.jgnu.security.spec.InvalidKeySpecException;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 1.1
  * @since Utils 3.14.0
  */
 
@@ -87,18 +87,15 @@ public enum KeyAgreementType {
 	public boolean isPostQuantumAlgorithm() {
 		return isPQC;
 	}
-	KeyAgreement getKeyAgreementClient(AbstractSecureRandom randomForKeys, SymmetricAuthentifiedSignatureType signatureType) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, InvalidAlgorithmParameterException
+	public KeyAgreement getKeyAgreementClient(AbstractSecureRandom randomForKeys, SymmetricAuthentifiedSignatureType signatureType) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, InvalidAlgorithmParameterException
 	{
-		if (ecdhType!=null)
-			return getKeyAgreementClient(randomForKeys, signatureType, ecdhType.getECDHKeySizeBits());
-		else
-			return getKeyAgreementClient(randomForKeys, signatureType, (short)256);
+		return getKeyAgreementClient(randomForKeys, signatureType, getDefaultKeySizeBits());
 	}
-	KeyAgreement getKeyAgreementClient(AbstractSecureRandom randomForKeys, SymmetricAuthentifiedSignatureType signatureType, short keySizeBits) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, InvalidAlgorithmParameterException
+	public KeyAgreement getKeyAgreementClient(AbstractSecureRandom randomForKeys, SymmetricAuthentifiedSignatureType signatureType, short keySizeBits) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, InvalidAlgorithmParameterException
 	{
 		return getKeyAgreementClient(randomForKeys, signatureType, keySizeBits, null);
 	}
-	KeyAgreement getKeyAgreementClient(AbstractSecureRandom randomForKeys, SymmetricAuthentifiedSignatureType signatureType, short keySizeBits, byte[] keyingMaterial) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, InvalidAlgorithmParameterException
+	public KeyAgreement getKeyAgreementClient(AbstractSecureRandom randomForKeys, SymmetricAuthentifiedSignatureType signatureType, short keySizeBits, byte[] keyingMaterial) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, InvalidAlgorithmParameterException
 	{
 		if (ecdhType!=null)
 			return new EllipticCurveDiffieHellmanAlgorithm(randomForKeys, ecdhType, keySizeBits, keyingMaterial, signatureType);
@@ -110,18 +107,16 @@ public enum KeyAgreementType {
 			throw new InternalError();
 			
 	}
-	KeyAgreement getKeyAgreementClient(AbstractSecureRandom randomForKeys, SymmetricEncryptionType encryptionType) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, InvalidAlgorithmParameterException
+	public KeyAgreement getKeyAgreementClient(AbstractSecureRandom randomForKeys, SymmetricEncryptionType encryptionType) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, InvalidAlgorithmParameterException
 	{
-		if (ecdhType!=null)
-			return getKeyAgreementClient(randomForKeys, encryptionType, ecdhType.getECDHKeySizeBits());
-		else
-			return getKeyAgreementClient(randomForKeys, encryptionType, (short)256);
+		
+		return getKeyAgreementClient(randomForKeys, encryptionType, getDefaultKeySizeBits());
 	}
-	KeyAgreement getKeyAgreementClient(AbstractSecureRandom randomForKeys, SymmetricEncryptionType encryptionType, short keySizeBits) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, InvalidAlgorithmParameterException
+	public KeyAgreement getKeyAgreementClient(AbstractSecureRandom randomForKeys, SymmetricEncryptionType encryptionType, short keySizeBits) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, InvalidAlgorithmParameterException
 	{
 		return getKeyAgreementClient(randomForKeys, encryptionType, keySizeBits, null);
 	}
-	KeyAgreement getKeyAgreementClient(AbstractSecureRandom randomForKeys, SymmetricEncryptionType encryptionType, short keySizeBits, byte[] keyingMaterial) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, InvalidAlgorithmParameterException
+	public KeyAgreement getKeyAgreementClient(AbstractSecureRandom randomForKeys, SymmetricEncryptionType encryptionType, short keySizeBits, byte[] keyingMaterial) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, InvalidAlgorithmParameterException
 	{
 		if (ecdhType!=null)
 			return new EllipticCurveDiffieHellmanAlgorithm(randomForKeys, ecdhType, keySizeBits, keyingMaterial, encryptionType);
@@ -133,18 +128,15 @@ public enum KeyAgreementType {
 			throw new InternalError();
 			
 	}
-	KeyAgreement getKeyAgreementServer(AbstractSecureRandom randomForKeys, SymmetricAuthentifiedSignatureType signatureType) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, InvalidAlgorithmParameterException
+	public KeyAgreement getKeyAgreementServer(AbstractSecureRandom randomForKeys, SymmetricAuthentifiedSignatureType signatureType) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, InvalidAlgorithmParameterException
 	{
-		if (ecdhType!=null)
-			return getKeyAgreementServer(randomForKeys, signatureType, ecdhType.getECDHKeySizeBits());
-		else
-			return getKeyAgreementServer(randomForKeys, signatureType, (short)256);
+		return getKeyAgreementServer(randomForKeys, signatureType, getDefaultKeySizeBits());
 	}
-	KeyAgreement getKeyAgreementServer(AbstractSecureRandom randomForKeys, SymmetricAuthentifiedSignatureType signatureType, short keySizeBits) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, InvalidAlgorithmParameterException
+	public KeyAgreement getKeyAgreementServer(AbstractSecureRandom randomForKeys, SymmetricAuthentifiedSignatureType signatureType, short keySizeBits) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, InvalidAlgorithmParameterException
 	{
 		return getKeyAgreementServer(randomForKeys, signatureType, keySizeBits, null);
 	}
-	KeyAgreement getKeyAgreementServer(AbstractSecureRandom randomForKeys, SymmetricAuthentifiedSignatureType signatureType, short keySizeBits, byte[] keyingMaterial) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, InvalidAlgorithmParameterException
+	public KeyAgreement getKeyAgreementServer(AbstractSecureRandom randomForKeys, SymmetricAuthentifiedSignatureType signatureType, short keySizeBits, byte[] keyingMaterial) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, InvalidAlgorithmParameterException
 	{
 		if (ecdhType!=null)
 			return new EllipticCurveDiffieHellmanAlgorithm(randomForKeys, ecdhType, keySizeBits, keyingMaterial, signatureType);
@@ -156,18 +148,15 @@ public enum KeyAgreementType {
 			throw new InternalError();
 			
 	}
-	KeyAgreement getKeyAgreementServer(AbstractSecureRandom randomForKeys, SymmetricEncryptionType encryptionType) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, InvalidAlgorithmParameterException
+	public KeyAgreement getKeyAgreementServer(AbstractSecureRandom randomForKeys, SymmetricEncryptionType encryptionType) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, InvalidAlgorithmParameterException
 	{
-		if (ecdhType!=null)
-			return getKeyAgreementServer(randomForKeys, encryptionType, ecdhType.getECDHKeySizeBits());
-		else
-			return getKeyAgreementServer(randomForKeys, encryptionType, (short)256);
+		return getKeyAgreementServer(randomForKeys, encryptionType, getDefaultKeySizeBits());
 	}
-	KeyAgreement getKeyAgreementServer(AbstractSecureRandom randomForKeys, SymmetricEncryptionType encryptionType, short keySizeBits) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, InvalidAlgorithmParameterException
+	public KeyAgreement getKeyAgreementServer(AbstractSecureRandom randomForKeys, SymmetricEncryptionType encryptionType, short keySizeBits) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, InvalidAlgorithmParameterException
 	{
 		return getKeyAgreementServer(randomForKeys, encryptionType, keySizeBits, null);
 	}
-	KeyAgreement getKeyAgreementServer(AbstractSecureRandom randomForKeys, SymmetricEncryptionType encryptionType, short keySizeBits, byte[] keyingMaterial) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, InvalidAlgorithmParameterException
+	public KeyAgreement getKeyAgreementServer(AbstractSecureRandom randomForKeys, SymmetricEncryptionType encryptionType, short keySizeBits, byte[] keyingMaterial) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, InvalidAlgorithmParameterException
 	{
 		if (ecdhType!=null)
 			return new EllipticCurveDiffieHellmanAlgorithm(randomForKeys, ecdhType, keySizeBits, keyingMaterial, encryptionType);
@@ -180,4 +169,20 @@ public enum KeyAgreementType {
 			
 	}
 	
+	
+	public short getDefaultKeySizeBits()
+	{
+		if (ecdhType==null)
+			return 256;
+		else
+			return ecdhType.getKeySizeBits();
+	}
+	
+	public CodeProvider getCodeProvider()
+	{
+		if (ecdhType==null)
+			return CodeProvider.BCPQC;
+		else
+			return ecdhType.getCodeProvider();
+	}
 }
