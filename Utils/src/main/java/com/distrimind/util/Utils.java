@@ -34,6 +34,11 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util;
 
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Calendar;
 
@@ -69,8 +74,9 @@ public class Utils {
 			
 			c = Calendar.getInstance();
 			c.set(2018, 3, 28);
-			Description d = new Description(3, 14, 3, Version.Type.Stable, 0, c.getTime());
+			Description d = new Description(3, 14, 4, Version.Type.Stable, 0, c.getTime());
 			d.addItem("Key.encode() is now public.");
+			d.addItem("Generate 'versions.html' file into jar files.");
 			VERSION.addDescription(d);
 			
 			c = Calendar.getInstance();
@@ -518,6 +524,16 @@ public class Utils {
 			VERSION.addDescription(d);
 		} catch (Exception e) {
 			e.printStackTrace();
+		}
+	}
+	
+	public static void main(String args[]) throws FileNotFoundException, IOException
+	{
+		String html=VERSION.getHTMLCode();
+		try(FileOutputStream fos=new FileOutputStream(new File("../versions.html"));DataOutputStream dos=new DataOutputStream(fos))
+		{
+			dos.writeChars(html);
+			dos.flush();
 		}
 	}
 	

@@ -86,15 +86,11 @@ allprojects {
 
 sourceCompatibility = 1.7
 targetCompatibility=1.7
-version='3.14.3'
+version='3.14.4'
 
 
-task sourcesJar(type: Jar, dependsOn: classes) {
-    classifier = 'sources'
-    from sourceSets.main.allSource
-    from "../LICENSE"
-    
-    def versionBuildFile = file('src/main/resources/com/distrimind/util/build.txt')
+task generateVersionsFile(type:JavaExec, dependsOn: classes) {
+  def versionBuildFile = file('src/main/resources/com/distrimind/util/build.txt')
     
     /*Wrapping inside a method avoids auto incrementing on every gradle task run. Now it runs only when we build apk*/
     if (versionBuildFile.canRead())
@@ -111,13 +107,23 @@ task sourcesJar(type: Jar, dependsOn: classes) {
 	    	out.println 1
 		}
 	}
-		
+	
+   main = 'com.distrimind.util.Utils'
+   classpath = sourceSets.main.runtimeClasspath
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+    from "../LICENSE"
+    from "../versions.html"
 }
 
 task javadocJar(type: Jar, dependsOn: javadoc) {
     classifier = 'javadoc'
     from javadoc.destinationDir
     from "../LICENSE"
+    from "../versions.html"
 }
 
 artifacts {
@@ -125,12 +131,16 @@ artifacts {
     archives javadocJar
 }
 
-jar {
+
+
+jar{
+	dependsOn generateVersionsFile
     manifest {
         attributes('Implementation-Title': project.name,
                    'Implementation-Version': project.version)
     }
     from "../LICENSE"
+    from "../versions.html"
 
 }
 
