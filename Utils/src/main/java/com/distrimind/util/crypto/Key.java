@@ -44,7 +44,7 @@ import com.distrimind.util.Bits;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 1.1
+ * @version 1.2
  * @since Utils 2.0
  */
 public abstract class Key implements Serializable {
@@ -66,7 +66,7 @@ public abstract class Key implements Serializable {
 	
 	abstract org.bouncycastle.crypto.Key toBouncyCastleKey() throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException;
 	
-	abstract byte[] encode();
+	public  abstract byte[] encode();
 
 	
 	public static Key decode(byte[] b) throws IllegalArgumentException {
@@ -118,4 +118,5 @@ public abstract class Key implements Serializable {
 	{
 		zeroize();
 	}
+	
 }
