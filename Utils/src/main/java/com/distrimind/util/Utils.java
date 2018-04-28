@@ -60,7 +60,7 @@ public class Utils {
 		c.set(2016, 1, 4);
 		Calendar c2 = Calendar.getInstance();
 		c.set(2018, 3, 28);
-		VERSION = new Version("Utils", "Utils", 3, 14, 3, Version.Type.Stable, 0, c.getTime(), c2.getTime());
+		VERSION = new Version("Utils", "Utils", 3, 14, 5, Version.Type.Stable, 0, c.getTime(), c2.getTime());
 		try {
 
 			InputStream is = Utils.class.getResourceAsStream("build.txt");
@@ -74,9 +74,10 @@ public class Utils {
 			
 			c = Calendar.getInstance();
 			c.set(2018, 3, 28);
-			Description d = new Description(3, 14, 4, Version.Type.Stable, 0, c.getTime());
+			Description d = new Description(3, 14, 5, Version.Type.Stable, 0, c.getTime());
 			d.addItem("Key.encode() is now public.");
 			d.addItem("Generate 'versions.html' file into jar files.");
+			d.addItem("Correct a bug with collections of type Class.");
 			VERSION.addDescription(d);
 			
 			c = Calendar.getInstance();

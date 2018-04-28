@@ -86,7 +86,7 @@ allprojects {
 
 sourceCompatibility = 1.7
 targetCompatibility=1.7
-version='3.14.4'
+version='3.14.5'
 
 
 task generateVersionsFile(type:JavaExec, dependsOn: classes) {

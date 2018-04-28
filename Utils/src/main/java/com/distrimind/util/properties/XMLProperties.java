@@ -45,6 +45,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.net.URI;
 import java.net.URL;
 import java.sql.Date;
@@ -155,6 +156,20 @@ public abstract class XMLProperties implements Cloneable, Serializable {
 		optional_xml_object_parser_instance = _optional_xml_object_parser_instance;
 	}
 
+	private Class<?> getGenericType(Field f) throws IllegalAccessException
+	{
+		Class<?> element_list_class;
+		Type t=((ParameterizedType) f.getGenericType()).getActualTypeArguments()[0];
+		if (t instanceof Class)
+			element_list_class= (Class<?>) t;
+		else if (t instanceof ParameterizedType)
+			element_list_class= (Class<?>) ((ParameterizedType)t).getRawType();
+		else
+			throw new IllegalAccessException();
+		return element_list_class;
+	}
+	
+	
 	/**
 	 * Convert this properties to a {@link Properties} class format.
 	 * 
@@ -178,8 +193,8 @@ public abstract class XMLProperties implements Cloneable, Serializable {
 						if (o == null)
 							buffer.append("null");
 						else {
-							Class<?> element_list_class = (Class<?>) ((ParameterizedType) f.getGenericType())
-									.getActualTypeArguments()[0];
+							Class<?> element_list_class=getGenericType(f);
+							
 							buffer.append("{");
 							List<?> l = (List<?>) o;
 							boolean first = true;
@@ -872,8 +887,7 @@ public abstract class XMLProperties implements Cloneable, Serializable {
 					field.set(this, null);
 				else {
 
-					Class<?> element_list_class = (Class<?>) ((ParameterizedType) field.getGenericType())
-							.getActualTypeArguments()[0];
+					Class<?> element_list_class = getGenericType(field);
 					List<Object> l = null;
 
 					if (Modifier.isAbstract(field_type.getModifiers()))
@@ -1090,8 +1104,7 @@ public abstract class XMLProperties implements Cloneable, Serializable {
 				if (l == null)
 					return;
 
-				Class<?> element_list_class = (Class<?>) ((ParameterizedType) field.getGenericType())
-						.getActualTypeArguments()[0];
+				Class<?> element_list_class = getGenericType(field);
 
 				Element element = document.createElement(field.getName());
 

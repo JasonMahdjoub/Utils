@@ -179,6 +179,8 @@ public class PropertiesExample extends XMLProperties {
 	DecentralizedIDGenerator decentralizedId = null;
 
 	TestEnum testEnum = null;
+	
+	List<Class<?>> classesList=null;
 
 	protected PropertiesExample(AbstractXMLObjectParser _optional_xml_object_parser_instance) {
 		super(_optional_xml_object_parser_instance);
@@ -280,6 +282,8 @@ public class PropertiesExample extends XMLProperties {
 				return false;
 			if (!equals(testEnum, pe.testEnum))
 				return false;
+			if (!equals(classesList, pe.classesList))
+				return false;
 
 			Assert.assertFalse(version == null ^ pe.version == null);
 			if (version == null ^ pe.version == null) {
@@ -362,6 +366,9 @@ public class PropertiesExample extends XMLProperties {
 		publicKey = keyPair.getASymmetricPublicKey();
 		decentralizedId = new DecentralizedIDGenerator();
 		testEnum = Math.random() > 0.5 ? TestEnum.ENUM1 : TestEnum.ENUM2;
+		classesList=new ArrayList<>();
+		classesList.add(String.class);
+		classesList.add(Integer.class);
 	}
 
 	String getString(Random rand) {
