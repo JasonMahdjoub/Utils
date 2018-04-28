@@ -94,7 +94,7 @@ task sourcesJar(type: Jar, dependsOn: classes) {
     from sourceSets.main.allSource
     from "../LICENSE"
     
-    def versionBuildFile = file('src/main/java/com/distrimind/util/build.txt')
+    def versionBuildFile = file('src/main/resources/com/distrimind/util/build.txt')
     
     /*Wrapping inside a method avoids auto incrementing on every gradle task run. Now it runs only when we build apk*/
     if (versionBuildFile.canRead())
