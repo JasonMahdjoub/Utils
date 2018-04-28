@@ -39,6 +39,10 @@ if (propFile.canRead())
 	if (props!=null && props.containsKey('artifactory_password'))
 		pwd="${artifactory_password}"	
 }
+
+	
+
+
 eclipse {
     classpath {
        downloadSources=true
@@ -89,6 +93,25 @@ task sourcesJar(type: Jar, dependsOn: classes) {
     classifier = 'sources'
     from sourceSets.main.allSource
     from "../LICENSE"
+    
+    def versionBuildFile = file('src/main/java/com/distrimind/util/build.txt')
+    
+    /*Wrapping inside a method avoids auto incrementing on every gradle task run. Now it runs only when we build apk*/
+    if (versionBuildFile.canRead())
+    {
+    	def line  
+    	versionBuildFile.withReader { line = it.readLine() } 
+		def buildNumber =line.toInteger()+1
+		versionBuildFile.withWriter { out ->
+	    	out.println buildNumber
+		}
+	}
+	else {
+		versionBuildFile.withWriter { out ->
+	    	out.println 1
+		}
+	}
+		
 }
 
 task javadocJar(type: Jar, dependsOn: javadoc) {
