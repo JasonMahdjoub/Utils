@@ -124,7 +124,7 @@ public enum PasswordHashType {
 	{
 		return hashLength;
 	}
-
+	@SuppressWarnings("fallthrough")
 	byte[] hash(byte data[], int off, int len, byte salt[], byte cost, byte hashLength)
 			throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException, gnu.vm.jgnu.security.NoSuchProviderException {
 		if (cost<4 || cost>31)

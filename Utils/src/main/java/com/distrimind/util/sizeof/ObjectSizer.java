@@ -148,7 +148,7 @@ public class ObjectSizer {
 		// if the class does not have a no-argument constructor, then
 		// inform the user and return 0.
 		try {
-			aClass.getConstructor(new Class[] {});
+			aClass.getDeclaredConstructor();
 		} catch (NoSuchMethodException ex) {
 			System.err.println(aClass + " does not have a no-argument constructor.");
 			return result;

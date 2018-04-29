@@ -64,7 +64,7 @@ public abstract class AbstractCipher {
 	 * @return The final transformed bytes.
 	 * @throws java.lang.IllegalStateException
 	 *             If this instance has not been initialized, or if a
-	 *             <tt>doFinal</tt> call has already been made.
+	 *             <b>doFinal</b> call has already been made.
 	 * @throws gnu.vm.jgnux.crypto.IllegalBlockSizeException
 	 *             If this instance has no padding and the input is not a multiple
 	 *             of this cipher's block size.
@@ -83,7 +83,7 @@ public abstract class AbstractCipher {
 	 * @return The final transformed bytes.
 	 * @throws java.lang.IllegalStateException
 	 *             If this instance has not been initialized, or if a
-	 *             <tt>doFinal</tt> call has already been made.
+	 *             <b>doFinal</b> call has already been made.
 	 * @throws gnu.vm.jgnux.crypto.IllegalBlockSizeException
 	 *             If this instance has no padding and the input is not a multiple
 	 *             of this cipher's block size.
@@ -104,11 +104,11 @@ public abstract class AbstractCipher {
 	 * @param output
 	 *            The destination for the transformed bytes.
 	 * @param outputOffset
-	 *            The offset in <tt>output</tt> to start storing bytes.
+	 *            The offset in <b>output</b> to start storing bytes.
 	 * @return The number of bytes placed into the output array.
 	 * @throws java.lang.IllegalStateException
 	 *             If this instance has not been initialized, or if a
-	 *             <tt>doFinal</tt> call has already been made.
+	 *             <b>doFinal</b> call has already been made.
 	 * @throws gnu.vm.jgnux.crypto.IllegalBlockSizeException
 	 *             If this instance has no padding and the input is not a multiple
 	 *             of this cipher's block size.
@@ -135,7 +135,7 @@ public abstract class AbstractCipher {
 	 * @return The final transformed bytes.
 	 * @throws java.lang.IllegalStateException
 	 *             If this instance has not been initialized, or if a
-	 *             <tt>doFinal</tt> call has already been made.
+	 *             <b>doFinal</b> call has already been made.
 	 * @throws gnu.vm.jgnux.crypto.IllegalBlockSizeException
 	 *             If this instance has no padding and the input is not a multiple
 	 *             of this cipher's block size.
@@ -159,17 +159,17 @@ public abstract class AbstractCipher {
 	 * @param input
 	 *            The input bytes.
 	 * @param inputOffset
-	 *            The index in <tt>input</tt> to start.
+	 *            The index in <b>input</b> to start.
 	 * @param inputLength
 	 *            The number of bytes to transform.
 	 * @param output
 	 *            The output buffer.
 	 * @param outputOffset
-	 *            The index in <tt>output</tt> to start.
+	 *            The index in <b>output</b> to start.
 	 * @return The number of bytes placed into the output array.
 	 * @throws java.lang.IllegalStateException
 	 *             If this instance has not been initialized, or if a
-	 *             <tt>doFinal</tt> call has already been made.
+	 *             <b>doFinal</b> call has already been made.
 	 * @throws gnu.vm.jgnux.crypto.IllegalBlockSizeException
 	 *             If this instance has no padding and the input is not a multiple
 	 *             of this cipher's block size.
@@ -250,7 +250,7 @@ public abstract class AbstractCipher {
 	 * @return The output length given this input length.
 	 * @throws java.lang.IllegalStateException
 	 *             If this instance has not been initialized, or if a
-	 *             <tt>doFinal</tt> call has already been made.
+	 *             <b>doFinal</b> call has already been made.
 	 */
 	public abstract int getOutputSize(int inputLength) throws IllegalStateException;
 

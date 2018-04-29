@@ -88,6 +88,12 @@ public class Description extends XMLProperties {
 		m_date = _date;
 	}
 
+	@Override
+	public int hashCode()
+	{
+		return m_major<<24+m_minor<<16+m_revision<<8+m_alpha_beta_version;
+	}
+	
 	public void addItem(String d) {
 		if (d == null)
 			throw new NullPointerException(d);

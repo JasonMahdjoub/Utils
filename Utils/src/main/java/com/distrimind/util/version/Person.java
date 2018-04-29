@@ -72,6 +72,12 @@ public class Person extends XMLProperties {
 	}
 
 	@Override
+	public int hashCode()
+	{
+		return m_name.hashCode()+m_first_name.hashCode();
+	}
+	
+	@Override
 	public boolean equals(Object o) {
 		if (o == null)
 			return false;

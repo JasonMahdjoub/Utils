@@ -77,12 +77,8 @@ public enum KeyAgreementType {
 	{
 		if (o==null)
 			return false;
-		if (o instanceof KeyAgreementType)
-		{
-			KeyAgreementType kat=(KeyAgreementType)o;
-			return kat.isNewHope==isNewHope && ecdhType.equals(ecdhType);
-		}
-		return false;
+		
+		return o.isNewHope==isNewHope && o.ecdhType.equals(ecdhType);
 	}
 	public boolean isPostQuantumAlgorithm() {
 		return isPQC;

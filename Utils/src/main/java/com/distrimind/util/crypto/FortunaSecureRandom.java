@@ -185,6 +185,7 @@ public class FortunaSecureRandom extends AbstractSecureRandom implements Seriali
 		
 		protected class FortunaImpl extends Fortuna
 		{
+			private static final long serialVersionUID =2335;
 			@Override
 			protected void refreshDigestWithRandomEvents(IMessageDigest pool)
 			{

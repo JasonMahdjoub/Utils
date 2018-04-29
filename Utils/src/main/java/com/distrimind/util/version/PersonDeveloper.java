@@ -66,7 +66,7 @@ public class PersonDeveloper extends Person {
 			throw new NullPointerException("_date_begin_development");
 		m_date_begin_development = _date_begin_development;
 	}
-
+	
 	@Override
 	public boolean equals(Object o) {
 		if (o == null)
