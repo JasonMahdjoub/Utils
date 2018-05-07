@@ -64,7 +64,15 @@ dependencies {
      compile(group:'commons-codec', name: 'commons-codec', version: '1.10')
     
 }
+
+def javaVersion=7
+sourceCompatibility = javaVersion
+targetCompatibility= javaVersion
+
+version='3.14.5'
     
+
+
 
 allprojects {
 	group='com.distrimind.util'
@@ -72,13 +80,11 @@ allprojects {
         jcenter() 
     }
     //compileJava.options.compilerArgs << "-Xlint"
+    compileJava.options.compilerArgs.addAll(['--release', javaVersion])
     if (project.hasProperty('javaHomeVersion') && javaHomeVersion.toFloat()>1.8)
     	javadoc.options.addStringOption("html5", "-quiet")
 }
 
-sourceCompatibility = 1.7
-targetCompatibility= 1.7
-version='3.14.5'
 
 
 task generateVersionsFile(type:JavaExec, dependsOn: classes) {

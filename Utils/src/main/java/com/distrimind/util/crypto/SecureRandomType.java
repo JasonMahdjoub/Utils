@@ -462,7 +462,6 @@ public enum SecureRandomType {
 		{
 			if (OSValidator.getCurrentJREVersionDouble()>=1.8)
 			{
-				System.out.println("here");
 				if (!nativeNonBlockingSeedInitialized)
 				{
 					synchronized(NativeNonBlockingSecureRandom.class)
