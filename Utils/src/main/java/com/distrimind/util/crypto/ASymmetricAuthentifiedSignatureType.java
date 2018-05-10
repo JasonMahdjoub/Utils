@@ -50,7 +50,7 @@ import gnu.vm.jgnu.security.NoSuchProviderException;
  * List of signature algorithms
  * 
  * @author Jason Mahdjoub
- * @version 4.1
+ * @version 4.2
  * @since Utils 1.4
  */
 public enum ASymmetricAuthentifiedSignatureType {
@@ -66,11 +66,11 @@ public enum ASymmetricAuthentifiedSignatureType {
 	BC_FIPS_SHA384withRSAandMGF1("SHA384withRSAandMGF1","RSA", CodeProvider.BCFIPS,CodeProvider.BCFIPS,(short) 3072, 31536000000l, FipsRSA.ALGORITHM, false), 
 	BC_FIPS_SHA512withRSAandMGF1("SHA512withRSAandMGF1", "RSA", CodeProvider.BCFIPS,CodeProvider.BCFIPS,(short) 3072, 31536000000l, FipsRSA.ALGORITHM, false),
 	@Deprecated
-	BC_FIPS_SHA256withECDSA("SHA256withECDSA", "EC", CodeProvider.BCFIPS,CodeProvider.BCFIPS,(short) 256, 31536000000l, FipsEC.ALGORITHM, false),
+	BC_FIPS_SHA256withECDSA_P_256("SHA256withECDSA", "EC", CodeProvider.BCFIPS,CodeProvider.BCFIPS,(short) 256, 31536000000l, FipsEC.ALGORITHM, false),
 	@Deprecated
-	BC_FIPS_SHA384withECDSA("SHA384withECDSA", "EC", CodeProvider.BCFIPS,CodeProvider.BCFIPS,(short) 384, 31536000000l, FipsEC.ALGORITHM, false),
+	BC_FIPS_SHA384withECDSA_P_384("SHA384withECDSA", "EC", CodeProvider.BCFIPS,CodeProvider.BCFIPS,(short) 384, 31536000000l, FipsEC.ALGORITHM, false),
 	@Deprecated
-	BC_FIPS_SHA512withECDSA("SHA512withECDSA", "EC", CodeProvider.BCFIPS,CodeProvider.BCFIPS,(short) 521, 31536000000l, FipsEC.ALGORITHM, false),
+	BC_FIPS_SHA512withECDSA_P_521("SHA512withECDSA", "EC", CodeProvider.BCFIPS,CodeProvider.BCFIPS,(short) 521, 31536000000l, FipsEC.ALGORITHM, false),
 	BC_SHA256withECDSA_CURVE_25519("SHA256withECDSA", "ECDSA", CodeProvider.BCFIPS,CodeProvider.BC, (short)256, 31536000000l, FipsEC.ALGORITHM, false),
 	BC_SHA384withECDSA_CURVE_25519("SHA384withECDSA", "ECDSA", CodeProvider.BCFIPS,CodeProvider.BC, (short)256, 31536000000l, FipsEC.ALGORITHM, false),
 	BC_SHA512withECDSA_CURVE_25519("SHA512withECDSA", "ECDSA", CodeProvider.BCFIPS,CodeProvider.BC, (short)256, 31536000000l, FipsEC.ALGORITHM, false),
@@ -203,9 +203,9 @@ public enum ASymmetricAuthentifiedSignatureType {
 			return 328000;
 		else if (this==BCPQC_SPHINCS256_SHA3_512)
 			return 328000;
-		else if (this==ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA256withECDSA)
+		else if (this==ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA256withECDSA_P_256)
 			return 1112;
-		else if (this==ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA384withECDSA || this==ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA512withECDSA)
+		else if (this==ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA384withECDSA_P_384 || this==ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA512withECDSA_P_521)
 			return 1104;
 		return keySize;
 	}

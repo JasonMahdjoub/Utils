@@ -35,6 +35,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
 package com.distrimind.util.crypto;
 
 
+
 import org.bouncycastle.crypto.AsymmetricPrivateKey;
 import org.bouncycastle.crypto.AsymmetricPublicKey;
 import org.bouncycastle.crypto.KDFCalculator;
@@ -60,7 +61,7 @@ import gnu.vm.jgnux.crypto.ShortBufferException;
  */
 public final class BCKeyAgreement extends AbstractKeyAgreement{
 	private final EllipticCurveDiffieHellmanType type;
-	private FipsAgreement<AgreementParameters> agreement;
+	private FipsAgreement<?> agreement;
 	private byte []secret;
 	private FipsKDF.AgreementKDFParametersBuilder kdfAlgorithm;
 	private byte[] paramskeymaterial;
@@ -145,17 +146,39 @@ public final class BCKeyAgreement extends AbstractKeyAgreement{
 	@Override
 	public String getAlgorithm() {
 		
-		return type.getKeyAgreementName();
+		return type.getKeyAgreementAlgorithmName();
 	}
 
+
+    
+	
 	@Override
 	public void init(Key key, Object params) throws InvalidAlgorithmParameterException,
 			InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException {
-		paramskeymaterial=((UserKeyingMaterialSpec)params).getUserKeyingMaterial();
-		AgreementParameters aparams=FipsEC.CDH.withDigest(type.getBCFipsDigestAlgorithm())
-			.withKDF(kdfAlgorithm=FipsKDF.CONCATENATION.withPRF(type.getBCFipsAgreementKDFPRF()), paramskeymaterial, paramskeymaterial.length);
-		FipsEC.DHAgreementFactory agreementFact=new FipsEC.DHAgreementFactory();
-		agreement=agreementFact.createAgreement((AsymmetricPrivateKey)key.toBouncyCastleKey(), aparams);
+		if (type.isECCDHType())
+		{
+			paramskeymaterial=((UserKeyingMaterialSpec)params).getUserKeyingMaterial();
+			AgreementParameters aparams=FipsEC.CDH.withDigest(type.getBCFipsDigestAlgorithm())
+				.withKDF(kdfAlgorithm=FipsKDF.CONCATENATION.withPRF(type.getBCFipsAgreementKDFPRF()), paramskeymaterial, paramskeymaterial.length);
+			FipsEC.DHAgreementFactory agreementFact=new FipsEC.DHAgreementFactory();
+			agreement=agreementFact.createAgreement((AsymmetricPrivateKey)key.toBouncyCastleKey(), aparams);
+			
+		}
+		else if (type.isECMQVType())
+		{
+			Object [] p=(Object[])params;
+			org.bouncycastle.crypto.fips.FipsEC.MQVAgreementParameters mqvparam=(org.bouncycastle.crypto.fips.FipsEC.MQVAgreementParameters)p[0];
+			paramskeymaterial=(byte[])p[1];
+			
+			mqvparam=mqvparam.withDigest(type.getBCFipsDigestAlgorithm())
+					.withKDF(kdfAlgorithm=FipsKDF.CONCATENATION.withPRF(type.getBCFipsAgreementKDFPRF()), paramskeymaterial, paramskeymaterial.length);
+			
+			FipsEC.MQVAgreementFactory mqvagreementfact=new FipsEC.MQVAgreementFactory();
+			
+			agreement=mqvagreementfact.createAgreement((AsymmetricPrivateKey)key.toBouncyCastleKey(), mqvparam);
+		}
+		else
+			throw new InternalError();
 		secret=null;
 		
 	}

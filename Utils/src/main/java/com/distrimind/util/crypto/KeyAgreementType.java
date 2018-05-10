@@ -42,25 +42,39 @@ import gnu.vm.jgnu.security.spec.InvalidKeySpecException;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 1.1
+ * @version 1.2
  * @since Utils 3.14.0
  */
 
 public enum KeyAgreementType {
 	@Deprecated
-	BC_FIPS_ECDDH_384(false, false, EllipticCurveDiffieHellmanType.BC_FIPS_ECDDH_384),
+	BC_FIPS_ECDDH_384_P_384(false, false, EllipticCurveDiffieHellmanType.BC_FIPS_ECDDH_384_P_384),
 	@Deprecated
-	BC_FIPS_ECDDH_512(false, false, EllipticCurveDiffieHellmanType.BC_FIPS_ECDDH_512), 
-	BC_ECDDH_384_CURVE_25519(false, false, EllipticCurveDiffieHellmanType.BC_ECDDH_384_CURVE_25519),
-	BC_ECDDH_512_CURVE_25519(false, false, EllipticCurveDiffieHellmanType.BC_ECDDH_512_CURVE_25519), 
-	BC_ECDDH_384_CURVE_M_221(false, false, EllipticCurveDiffieHellmanType.BC_ECDDH_384_CURVE_M_221),
-	BC_ECDDH_512_CURVE_M_221(false, false, EllipticCurveDiffieHellmanType.BC_ECDDH_512_CURVE_M_221), 
-	BC_ECDDH_384_CURVE_M_383(false, false, EllipticCurveDiffieHellmanType.BC_ECDDH_384_CURVE_M_383),
-	BC_ECDDH_512_CURVE_M_383(false, false, EllipticCurveDiffieHellmanType.BC_ECDDH_512_CURVE_M_383), 
-	BC_ECDDH_384_CURVE_M_511(false, false, EllipticCurveDiffieHellmanType.BC_ECDDH_384_CURVE_M_511),
-	BC_ECDDH_512_CURVE_M_511(false, false, EllipticCurveDiffieHellmanType.BC_ECDDH_512_CURVE_M_511), 
-	BC_ECDDH_384_CURVE_41417(false, false, EllipticCurveDiffieHellmanType.BC_ECDDH_384_CURVE_41417),
-	BC_ECDDH_512_CURVE_41417(false, false, EllipticCurveDiffieHellmanType.BC_ECDDH_512_CURVE_41417),
+	BC_FIPS_ECDDH_512_P_521(false, false, EllipticCurveDiffieHellmanType.BC_FIPS_ECDDH_512_P_521), 
+	BC_ECCDH_384_CURVE_25519(false, false, EllipticCurveDiffieHellmanType.BC_ECCDH_384_CURVE_25519),
+	BC_ECCDH_512_CURVE_25519(false, false, EllipticCurveDiffieHellmanType.BC_ECCDH_512_CURVE_25519), 
+	BC_ECCDH_384_CURVE_M_221(false, false, EllipticCurveDiffieHellmanType.BC_ECCDH_384_CURVE_M_221),
+	BC_ECCDH_512_CURVE_M_221(false, false, EllipticCurveDiffieHellmanType.BC_ECCDH_512_CURVE_M_221), 
+	BC_ECCDH_384_CURVE_M_383(false, false, EllipticCurveDiffieHellmanType.BC_ECCDH_384_CURVE_M_383),
+	BC_ECCDH_512_CURVE_M_383(false, false, EllipticCurveDiffieHellmanType.BC_ECCDH_512_CURVE_M_383), 
+	BC_ECCDH_384_CURVE_M_511(false, false, EllipticCurveDiffieHellmanType.BC_ECCDH_384_CURVE_M_511),
+	BC_ECCDH_512_CURVE_M_511(false, false, EllipticCurveDiffieHellmanType.BC_ECCDH_512_CURVE_M_511), 
+	BC_ECCDH_384_CURVE_41417(false, false, EllipticCurveDiffieHellmanType.BC_ECCDH_384_CURVE_41417),
+	BC_ECCDH_512_CURVE_41417(false, false, EllipticCurveDiffieHellmanType.BC_ECCDH_512_CURVE_41417),
+	/*@Deprecated
+	BC_FIPS_ECMQV_384_P_384(false, false, EllipticCurveDiffieHellmanType.BC_FIPS_ECMQV_384_P_384),
+	@Deprecated
+	BC_FIPS_ECMQV_512_P_512(false, false, EllipticCurveDiffieHellmanType.BC_FIPS_ECMQV_512_P_521), 
+	BC_ECMQV_384_CURVE_25519(false, false, EllipticCurveDiffieHellmanType.BC_ECMQV_384_CURVE_25519),
+	BC_ECMQV_512_CURVE_25519(false, false, EllipticCurveDiffieHellmanType.BC_ECMQV_512_CURVE_25519), 
+	BC_ECMQV_384_CURVE_M_221(false, false, EllipticCurveDiffieHellmanType.BC_ECMQV_384_CURVE_M_221),
+	BC_ECMQV_512_CURVE_M_221(false, false, EllipticCurveDiffieHellmanType.BC_ECMQV_512_CURVE_M_221), 
+	BC_ECMQV_384_CURVE_M_383(false, false, EllipticCurveDiffieHellmanType.BC_ECMQV_384_CURVE_M_383),
+	BC_ECMQV_512_CURVE_M_383(false, false, EllipticCurveDiffieHellmanType.BC_ECMQV_512_CURVE_M_383), 
+	BC_ECMQV_384_CURVE_M_511(false, false, EllipticCurveDiffieHellmanType.BC_ECMQV_384_CURVE_M_511),
+	BC_ECMQV_512_CURVE_M_511(false, false, EllipticCurveDiffieHellmanType.BC_ECMQV_512_CURVE_M_511), 
+	BC_ECMQV_384_CURVE_41417(false, false, EllipticCurveDiffieHellmanType.BC_ECMQV_384_CURVE_41417),
+	BC_ECMQV_512_CURVE_41417(false, false, EllipticCurveDiffieHellmanType.BC_ECMQV_512_CURVE_41417),*/
 	BCPQC_NEW_HOPE(true, true, null),
 	DEFAULT(false, false, EllipticCurveDiffieHellmanType.DEFAULT);
 	
@@ -181,4 +195,6 @@ public enum KeyAgreementType {
 		else
 			return ecdhType.getCodeProvider();
 	}
+	
+	
 }

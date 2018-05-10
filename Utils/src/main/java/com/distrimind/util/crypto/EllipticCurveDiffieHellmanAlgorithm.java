@@ -173,8 +173,18 @@ public class EllipticCurveDiffieHellmanAlgorithm extends KeyAgreement {
 				ka = type.getKeyAgreementInstance(symmetricSignatureType);
 			else
 				ka = type.getKeyAgreementInstance(symmetricEncryptionType);
-	
-			ka.init(myKeyPair.getASymmetricPrivateKey(), new UserKeyingMaterialSpec(keyingMaterial));
+			if (type.isECCDHType())
+				ka.init(myKeyPair.getASymmetricPrivateKey(), new UserKeyingMaterialSpec(keyingMaterial));
+			else if (type.isECMQVType())
+			{
+				throw new InternalError("Next code must use ephemeral and static keys. It must be completed/corrected.");
+				/*ka.init(myKeyPair.getASymmetricPrivateKey(), new Object[] {
+						FipsEC.MQV.using(
+								(AsymmetricECPublicKey)myKeyPair.getASymmetricPublicKey().toBouncyCastleKey(), (AsymmetricECPrivateKey)myKeyPair.getASymmetricPrivateKey().toBouncyCastleKey(), (AsymmetricECPublicKey)distantPublicKey.toBouncyCastleKey()),
+						keyingMaterial,
+					}
+				);*/
+			}
 			ka.doPhase(distantPublicKey, true);
 			derivedKey=ka.generateSecretKey((short)(keySizeBits/8));
 			valid=true;

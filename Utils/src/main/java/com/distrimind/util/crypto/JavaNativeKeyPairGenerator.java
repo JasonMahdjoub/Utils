@@ -95,9 +95,9 @@ public final class JavaNativeKeyPairGenerator extends AbstractKeyPairGenerator {
 		
 		try
 		{
-			if (signatureType!=null && (signatureType.getKeyGeneratorAlgorithmName().equals(ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA256withECDSA.getKeyGeneratorAlgorithmName())
-					|| signatureType.getKeyGeneratorAlgorithmName().equals(ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA384withECDSA.getKeyGeneratorAlgorithmName())
-							|| signatureType.getKeyGeneratorAlgorithmName().equals(ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA512withECDSA.getKeyGeneratorAlgorithmName())))
+			if (signatureType!=null && (signatureType.getKeyGeneratorAlgorithmName().equals(ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA256withECDSA_P_256.getKeyGeneratorAlgorithmName())
+					|| signatureType.getKeyGeneratorAlgorithmName().equals(ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA384withECDSA_P_384.getKeyGeneratorAlgorithmName())
+							|| signatureType.getKeyGeneratorAlgorithmName().equals(ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA512withECDSA_P_521.getKeyGeneratorAlgorithmName())))
 			{
 				if (_keysize<256)
 				{

@@ -59,8 +59,8 @@ public class Utils {
 		Calendar c = Calendar.getInstance();
 		c.set(2016, 1, 4);
 		Calendar c2 = Calendar.getInstance();
-		c.set(2018, 3, 28);
-		VERSION = new Version("Utils", "Utils", 3, 14, 5, Version.Type.Stable, 0, c.getTime(), c2.getTime());
+		c.set(2018, 4, 10);
+		VERSION = new Version("Utils", "Utils", 3, 14, 6, Version.Type.Stable, 0, c.getTime(), c2.getTime());
 		try {
 
 			InputStream is = Utils.class.getResourceAsStream("build.txt");
@@ -73,8 +73,16 @@ public class Utils {
 			VERSION.addDeveloper(new PersonDeveloper("mahdjoub", "jason", c.getTime()));
 			
 			c = Calendar.getInstance();
+			c.set(2018, 4, 10);
+			Description d = new Description(3, 14, 6, Version.Type.Stable, 0, c.getTime());
+			d.addItem("Update BCFIPS to 1.0.1.");
+			d.addItem("Update common-codec to 1.11.");
+			d.addItem("Renaming ECDDH to ECCDH.");
+			VERSION.addDescription(d);
+			
+			c = Calendar.getInstance();
 			c.set(2018, 3, 28);
-			Description d = new Description(3, 14, 5, Version.Type.Stable, 0, c.getTime());
+			d = new Description(3, 14, 5, Version.Type.Stable, 0, c.getTime());
 			d.addItem("Key.encode() is now public.");
 			d.addItem("Generate 'versions.html' file into jar files.");
 			d.addItem("Correct a bug with collections of type Class.");

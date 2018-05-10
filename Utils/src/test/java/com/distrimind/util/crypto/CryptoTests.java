@@ -157,7 +157,7 @@ public class CryptoTests {
 		int index = 0;
 		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getSingleton(null);
 		for (ASymmetricAuthentifiedSignatureType st : ASymmetricAuthentifiedSignatureType.values()) {
-			if (st.getSignatureAlgorithmName().equals(ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA384withECDSA.getSignatureAlgorithmName()))
+			if (st.getSignatureAlgorithmName().equals(ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA384withECDSA_P_384.getSignatureAlgorithmName()))
 			{
 				Object o[] = new Object[3];
 				o[0]=st;
@@ -165,7 +165,7 @@ public class CryptoTests {
 				o[2] = new Integer(384);
 				res[index++] = o;
 			}
-			else if (st.getSignatureAlgorithmName().equals(ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA256withECDSA.getSignatureAlgorithmName()))
+			else if (st.getSignatureAlgorithmName().equals(ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA256withECDSA_P_256.getSignatureAlgorithmName()))
 			{
 				Object o[] = new Object[3];
 				o[0]=st;
@@ -173,7 +173,7 @@ public class CryptoTests {
 				o[2] = new Integer(256);
 				res[index++] = o;
 			}
-			else if (st.getSignatureAlgorithmName().equals(ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA512withECDSA.getSignatureAlgorithmName()))
+			else if (st.getSignatureAlgorithmName().equals(ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA512withECDSA_P_521.getSignatureAlgorithmName()))
 			{
 				Object o[] = new Object[3];
 				o[0]=st;
@@ -312,9 +312,9 @@ public class CryptoTests {
 		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getSingleton(null);
 		
 		@SuppressWarnings("deprecation")
-		boolean isECDSA=type==ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA384withECDSA 
-				|| 	type==ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA256withECDSA
-				|| type==ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA512withECDSA; 
+		boolean isECDSA=type==ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA384withECDSA_P_384 
+				|| 	type==ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA256withECDSA_P_256
+				|| type==ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA512withECDSA_P_521; 
 		
 		ASymmetricKeyPair kpd = type.getKeyPairGenerator(rand, isECDSA?type.getDefaultKeySize():(short)1024).generateKeyPair();
 
@@ -925,9 +925,9 @@ public class CryptoTests {
 		ASymmetricAuthentifiedSignerAlgorithm signer = new ASymmetricAuthentifiedSignerAlgorithm(kpd.getASymmetricPrivateKey());
 		ASymmetricAuthentifiedSignatureCheckerAlgorithm checker = new ASymmetricAuthentifiedSignatureCheckerAlgorithm(kpd.getASymmetricPublicKey());
 		byte[] signature=testSignature(signer, checker);
-		if (kpd.getAuthentifiedSignatureAlgorithmType()!=ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA384withECDSA
-				&& kpd.getAuthentifiedSignatureAlgorithmType()!=ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA256withECDSA
-				&& kpd.getAuthentifiedSignatureAlgorithmType()!=ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA512withECDSA
+		if (kpd.getAuthentifiedSignatureAlgorithmType()!=ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA384withECDSA_P_384
+				&& kpd.getAuthentifiedSignatureAlgorithmType()!=ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA256withECDSA_P_256
+				&& kpd.getAuthentifiedSignatureAlgorithmType()!=ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA512withECDSA_P_521
 				&& kpd.getAuthentifiedSignatureAlgorithmType()!=ASymmetricAuthentifiedSignatureType.BC_SHA256withECDSA_CURVE_25519
 				&& kpd.getAuthentifiedSignatureAlgorithmType()!=ASymmetricAuthentifiedSignatureType.BC_SHA384withECDSA_CURVE_25519
 				&& kpd.getAuthentifiedSignatureAlgorithmType()!=ASymmetricAuthentifiedSignatureType.BC_SHA512withECDSA_CURVE_25519
