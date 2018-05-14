@@ -66,17 +66,17 @@ import gnu.vm.jgnu.security.spec.InvalidKeySpecException;
  * @version 2.0
  * @since Utils 2.9.0
  */
-public class P2PJPAKESecretMessageExchanger extends Agreement {
+public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
 	private JPAKEParticipant jpake;
 	private BigInteger keyMaterial;
 	private boolean valid=true;;
 
-	public P2PJPAKESecretMessageExchanger(AbstractSecureRandom secureRandom, Serializable participantID, char[] message)
+	P2PJPAKESecretMessageExchanger(AbstractSecureRandom secureRandom, Serializable participantID, char[] message)
 			throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException {
 		this(secureRandom, participantID, message, null, -1, -1);
 	}
 
-	public P2PJPAKESecretMessageExchanger(AbstractSecureRandom secureRandom, Serializable participantID, byte[] message, boolean messageIsKey)
+	P2PJPAKESecretMessageExchanger(AbstractSecureRandom secureRandom, Serializable participantID, byte[] message, boolean messageIsKey)
 			throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException {
 		this(secureRandom, participantID, message, 0, message.length, null, -1, -1, messageIsKey);
 	}
@@ -116,7 +116,7 @@ public class P2PJPAKESecretMessageExchanger extends Agreement {
 		}
 	}
 	
-	public P2PJPAKESecretMessageExchanger(AbstractSecureRandom secureRandom, Serializable participantID, char[] message, byte salt[], int offset_salt,
+	P2PJPAKESecretMessageExchanger(AbstractSecureRandom secureRandom, Serializable participantID, char[] message, byte salt[], int offset_salt,
 			int len_salt) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException {
 		super(3, 3);
 		if (message == null)
@@ -130,7 +130,7 @@ public class P2PJPAKESecretMessageExchanger extends Agreement {
 		this.keyMaterial = null;
 	}
 
-	public P2PJPAKESecretMessageExchanger(AbstractSecureRandom secureRandom, Serializable participantID, byte[] message, int offset, int len, byte salt[],
+	P2PJPAKESecretMessageExchanger(AbstractSecureRandom secureRandom, Serializable participantID, byte[] message, int offset, int len, byte salt[],
 			int offset_salt, int len_salt, boolean messageIsKey)
 			throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException {
 		super(3, 3);
