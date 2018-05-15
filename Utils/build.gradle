@@ -113,14 +113,14 @@ task sourcesJar(type: Jar, dependsOn: classes) {
     classifier = 'sources'
     from sourceSets.main.allSource
     from "../LICENSE"
-    from "../versions.html"
+    from "../versions.md"
 }
 
 task javadocJar(type: Jar, dependsOn: javadoc) {
     classifier = 'javadoc'
     from javadoc.destinationDir
     from "../LICENSE"
-    from "../versions.html"
+    from "../versions.md"
 }
 
 artifacts {
@@ -137,7 +137,7 @@ jar{
                    'Implementation-Version': project.version)
     }
     from "../LICENSE"
-    from "../versions.html"
+    from "../versions.md"
 
 }
 

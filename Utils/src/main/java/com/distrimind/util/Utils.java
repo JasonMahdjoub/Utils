@@ -34,10 +34,9 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util;
 
-import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Calendar;
@@ -79,6 +78,7 @@ public class Utils {
 			d.addItem("Add P2P multi login agreement based on symmetric signature and JPAKE.");
 			d.addItem("XMLProperties is renamed to MultiFormatProperties.");
 			d.addItem("MultiFormatProperties support YAML format.");
+			d.addItem("Historical of modifications can be exported to Markdown code : Version.getMarkdownCode().");
 			VERSION.addDescription(d);
 
 			c = Calendar.getInstance();
@@ -547,11 +547,11 @@ public class Utils {
 	
 	public static void main(String args[]) throws FileNotFoundException, IOException
 	{
-		String html=VERSION.getHTMLCode();
-		try(FileOutputStream fos=new FileOutputStream(new File("../versions.html"));DataOutputStream dos=new DataOutputStream(fos))
+		String html=VERSION.getMarkdownCode();
+		try(FileWriter fr=new FileWriter(new File("../versions.md")))
 		{
-			dos.writeChars(html);
-			dos.flush();
+			fr.write(html);
+			fr.flush();
 		}
 	}
 	

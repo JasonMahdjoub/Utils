@@ -241,7 +241,56 @@ public class Version extends MultiFormatProperties implements Comparable<Version
 
 		return s.toString();
 	}
+	public String getMarkdownCode() {
+		StringBuffer s = new StringBuffer();
+		
+		s.append(m_program_name);
+		s.append("\n");
+		int nb=m_program_name.length();
+		for (int i=0;i<nb;i++)
+			s.append("=");
+		s.append("\n");
+		s.append(Integer.toString(m_major) + "." + Integer.toString(m_minor) + "." + Integer.toString(m_revision) + " "
+				+ m_type + ((m_type.equals(Type.Alpha) || m_type.equals(Type.Beta)) ? " " + m_alpha_beta_version : "")
+				+ " (Build: " + m_build_number + ")");
+		s.append(" (from " + DateFormat.getDateInstance(DateFormat.SHORT, Locale.FRANCE).format(m_date_start_project)
+				+ " to " + DateFormat.getDateInstance(DateFormat.SHORT, Locale.FRANCE).format(m_date_end_project)
+				+ ")");
+		s.append("\n");
+		
+		
+		
+		if (m_creators.size() > 0) {
+			s.append("\n");
+			s.append("# Creator(s):");
+			s.append("\n");
+			for (Person p : m_creators) {
+				s.append(p);
+				s.append("\n");
+			}
+			s.append("\n");
+		}
+		if (m_developers.size() > 0) {
+			s.append("# Developer(s):");
+			s.append("\n");
+			for (PersonDeveloper p : m_developers) {
+				s.append(p);
+				s.append("\n");
+			}
+			s.append("\n");
+		}
+		s.append("# Modifications:");
+		s.append("\n");
+		if (m_descriptions.size() > 0) {
+			for (Description d : m_descriptions) {
+				s.append("\n");
+				s.append(d.getMarkdownCode());
+			}
+		}
+		s.append("\n");
 
+		return s.toString();
+	}
 	public JFrame getJFrame() {
 		if (m_frame == null) {
 			final JFrame f = m_frame = new JFrame("About " + m_program_name);

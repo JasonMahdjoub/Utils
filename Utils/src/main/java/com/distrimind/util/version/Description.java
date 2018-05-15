@@ -140,6 +140,23 @@ public class Description extends MultiFormatProperties {
 		return s.toString();
 	}
 
+	public String getMarkdownCode() {
+		StringBuffer s = new StringBuffer();
+		s.append("\n");
+		s.append("### "+m_major + "." + m_minor + "." + m_revision + " " + m_type
+				+ ((m_type.equals(Type.Alpha) || m_type.equals(Type.Beta))
+						? " " + Integer.toString(m_alpha_beta_version)
+						: "")
+				+ " (" + DateFormat.getDateInstance(DateFormat.SHORT, Locale.FRANCE).format(m_date) + ")");
+		s.append("\n");
+		for (String d : m_items) {
+			s.append("* ");
+			s.append(d);
+			s.append("\n");
+		}
+		
+		return s.toString();
+	}
 	public ArrayList<String> getItems() {
 		return m_items;
 	}
