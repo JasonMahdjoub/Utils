@@ -1,7 +1,7 @@
 # Utils
 Set of Java tools :
 * Decentralized identifier generation (similar to UUID, but with hash possibilities and some enforcement)
-* XML class mapping
+* XML, YAML and properties class mapping
 * Timer
 * Get size of Java memory objects
 * OS tools (OS version, trace route, hardrive tools, network speed)
@@ -16,10 +16,13 @@ Set of Java tools :
 	* Key agreements
 	* DRBG
 	* JPAKE algorithm and home secret message exchanger
+	* Login thanks to a symmetric signature process
 	* Use of post quantum algorithm (New Hope key exchanger, Sphincs)
 * Compatible with Java 7 and newer
 
+# Changes
 
+[Get historic of changes](./versions.md)
 
 # How to use it ?
 ## With Gradle :
@@ -37,7 +40,7 @@ Adapt into your build.gradle file, the next code :
 	...
 	dependencies {
 		...
-		compile(group:'com.distrimind.util', name: 'Utils', version: '3.14.6')
+		compile(group:'com.distrimind.util', name: 'Utils', version: '3.15.0')
 		...
 	}
 	...
@@ -53,7 +56,7 @@ Adapt into your pom.xml file, the next code :
 			<dependency>
 				<groupId>com.distrimind.util</groupId>
 				<artifactId>Utils</artifactId>
-				<version>3.14.6</version>
+				<version>3.15.0</version>
 			</dependency>
 			...
 		</dependencies>
