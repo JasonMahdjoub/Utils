@@ -22,7 +22,7 @@ Set of Java tools :
 
 # Changes
 
-[Get historic of changes](./versions.md)
+[See historical of changes](./versions.md)
 
 # How to use it ?
 ## With Gradle :
@@ -34,7 +34,7 @@ Adapt into your build.gradle file, the next code :
 		...
 		maven {
 	       		url "https://artifactory.distri-mind.fr/artifactory/gradle-release"
-	   	} 
+	   	}
 		...
 	}
 	...
@@ -72,4 +72,3 @@ Adapt into your pom.xml file, the next code :
 	</project>
 
 To know what last version has been uploaded, please refer to versions availables into [this repository](https://artifactory.distri-mind.fr/artifactory/DistriMind-Public/com/distrimind/util/Utils/)
-
