@@ -79,6 +79,7 @@ public class Utils {
 			d.addItem("XMLProperties is renamed to MultiFormatProperties.");
 			d.addItem("MultiFormatProperties support YAML format.");
 			d.addItem("Historical of modifications can be exported to Markdown code : Version.getMarkdownCode().");
+			d.addItem("Sign git commits.");
 			VERSION.addDescription(d);
 
 			c = Calendar.getInstance();
