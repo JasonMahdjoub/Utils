@@ -81,6 +81,7 @@ public class Utils {
 			d.addItem("Historical of modifications can be exported to Markdown code : Version.getMarkdownCode().");
 			d.addItem("Sign git commits.");
 			VERSION.addDescription(d);
+			
 
 			c = Calendar.getInstance();
 			c.set(2018, 4, 10);
