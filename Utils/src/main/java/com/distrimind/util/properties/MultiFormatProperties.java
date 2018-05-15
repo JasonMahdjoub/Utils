@@ -37,6 +37,8 @@ package com.distrimind.util.properties;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
@@ -46,11 +48,16 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URL;
+
 import java.sql.Date;
 import java.util.AbstractSequentialList;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -79,6 +86,18 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
+import org.yaml.snakeyaml.DumperOptions;
+import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.AbstractConstruct;
+import org.yaml.snakeyaml.constructor.Construct;
+import org.yaml.snakeyaml.introspector.BeanAccess;
+
+import org.yaml.snakeyaml.nodes.ScalarNode;
+import org.yaml.snakeyaml.nodes.Tag;
+import org.yaml.snakeyaml.representer.Represent;
+import org.yaml.snakeyaml.representer.Representer;
+
+import com.distrimind.util.AbstractDecentralizedID;
 
 /**
  * This interface enable to partially serialize/deserialize classes that
@@ -95,18 +114,18 @@ import org.xml.sax.SAXException;
  * 
  * 
  * @author Jason Mahdjoub
- * @version 1.1
+ * @version 2.0
  * @since Utils 1.0
  *
  */
-public abstract class XMLProperties implements Cloneable, Serializable {
+public abstract class MultiFormatProperties implements Cloneable, Serializable {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 6821595638425166680L;
 
-	static DefaultXMLObjectParser default_xml_object_parser_instance = new DefaultXMLObjectParser();
+	static transient DefaultMultiFormatObjectParser default_xml_object_parser_instance = new DefaultMultiFormatObjectParser();
 
 	/**
 	 * return the DOM from an xml file.
@@ -148,11 +167,11 @@ public abstract class XMLProperties implements Cloneable, Serializable {
 		}
 	}
 
-	AbstractXMLObjectParser optional_xml_object_parser_instance;
+	transient AbstractMultiFormatObjectParser optional_xml_object_parser_instance;
 
 	private Properties freeStringProperties = null;
 
-	protected XMLProperties(AbstractXMLObjectParser _optional_xml_object_parser_instance) {
+	protected MultiFormatProperties(AbstractMultiFormatObjectParser _optional_xml_object_parser_instance) {
 		optional_xml_object_parser_instance = _optional_xml_object_parser_instance;
 	}
 
@@ -254,10 +273,10 @@ public abstract class XMLProperties implements Cloneable, Serializable {
 							buffer.append("}");
 						}
 						res.put(f.getName(), buffer.toString());
-					} else if (XMLProperties.class.isAssignableFrom(f.getType())) {
+					} else if (MultiFormatProperties.class.isAssignableFrom(f.getType())) {
 						Object o = f.get(this);
 						if (o != null) {
-							XMLProperties xmlp = (XMLProperties) o;
+							MultiFormatProperties xmlp = (MultiFormatProperties) o;
 							if (xmlp.optional_xml_object_parser_instance == null)
 								xmlp.optional_xml_object_parser_instance = optional_xml_object_parser_instance;
 							for (Map.Entry<Object, Object> e : xmlp.convertToStringProperties().entrySet()) {
@@ -298,7 +317,7 @@ public abstract class XMLProperties implements Cloneable, Serializable {
 		return res;
 	}
 
-	String getElementValue(Document document, Node node) throws XMLPropertiesParseException {
+	String getElementValue(Document document, Node node) throws PropertiesParseException {
 		String nodeValue = node.getTextContent();
 		if (nodeValue == null)
 			return null;
@@ -322,9 +341,9 @@ public abstract class XMLProperties implements Cloneable, Serializable {
 				String value = getElementValue(document, e);
 				res.append(value);
 			} else if (nl.getLength() == 0)
-				throw new XMLPropertiesParseException("The element tagged by " + id + " was not found.");
+				throw new PropertiesParseException("The element tagged by " + id + " was not found.");
 			else
-				throw new XMLPropertiesParseException(
+				throw new PropertiesParseException(
 						"The element tagged by " + id + " was found in more than one occurences.");
 		}
 		res.append(nodeValue.substring(previous_index, nodeValue.length()));
@@ -383,34 +402,34 @@ public abstract class XMLProperties implements Cloneable, Serializable {
 	String getString(Class<?> field_type, Object object) throws Exception {
 		String res = null;
 		if (optional_xml_object_parser_instance != null) {
-			res = optional_xml_object_parser_instance.convertObjectToXML(field_type, object);
+			res = optional_xml_object_parser_instance.convertObjectToString(field_type, object);
 			if (res == null)
-				res = default_xml_object_parser_instance.convertObjectToXML(field_type, object);
+				res = default_xml_object_parser_instance.convertObjectToString(field_type, object);
 		} else
-			res = default_xml_object_parser_instance.convertObjectToXML(field_type, object);
+			res = default_xml_object_parser_instance.convertObjectToString(field_type, object);
 		return res;
 	}
 
 	Object getValue(Class<?> field_type, String nodeValue) throws Exception {
 		Object res = null;
 		if (optional_xml_object_parser_instance != null) {
-			res = optional_xml_object_parser_instance.convertXMLToObject(field_type, nodeValue);
+			res = optional_xml_object_parser_instance.convertStringToObject(field_type, nodeValue);
 			if (res == Void.TYPE)
-				res = default_xml_object_parser_instance.convertXMLToObject(field_type, nodeValue);
+				res = default_xml_object_parser_instance.convertStringToObject(field_type, nodeValue);
 		} else
-			res = default_xml_object_parser_instance.convertXMLToObject(field_type, nodeValue);
+			res = default_xml_object_parser_instance.convertStringToObject(field_type, nodeValue);
 		return res;
 	}
 
 	Object getValue(Document document, String field_name, Class<?> field_type, Node n)
-			throws XMLPropertiesParseException {
+			throws PropertiesParseException {
 		try {
 
 			String nodeValue = getElementValue(document, n);
 
 			if (nodeValue == null)
 				return null;
-			if (XMLProperties.class.isAssignableFrom(field_type)) {
+			if (MultiFormatProperties.class.isAssignableFrom(field_type)) {
 				Constructor<?> default_constructor = null;
 				for (Constructor<?> c : field_type.getDeclaredConstructors()) {
 
@@ -421,11 +440,11 @@ public abstract class XMLProperties implements Cloneable, Serializable {
 					}
 				}
 				if (default_constructor == null) {
-					throw new XMLPropertiesParseException(
+					throw new PropertiesParseException(
 							"The class " + field_type.getCanonicalName() + " must have a default constructor ");
 				}
 
-				XMLProperties e = (XMLProperties) default_constructor.newInstance();
+				MultiFormatProperties e = (MultiFormatProperties) default_constructor.newInstance();
 				if (e.optional_xml_object_parser_instance == null)
 					e.optional_xml_object_parser_instance = optional_xml_object_parser_instance;
 				e.read(document, n.getChildNodes());
@@ -433,7 +452,7 @@ public abstract class XMLProperties implements Cloneable, Serializable {
 			} else
 				return getValue(field_type, nodeValue);
 		} catch (Exception e) {
-			throw new XMLPropertiesParseException(e,
+			throw new PropertiesParseException(e,
 					"Impossible to read the field " + field_name + " of the type " + field_type.getName());
 		}
 	}
@@ -442,7 +461,7 @@ public abstract class XMLProperties implements Cloneable, Serializable {
 		int mod = field.getModifiers();
 		if (Modifier.isFinal(mod) || Modifier.isTransient(mod) || Modifier.isNative(mod) || Modifier.isStatic(mod))
 			return false;
-		return XMLProperties.class.isAssignableFrom(field.getType()) || Map.class.isAssignableFrom(field.getType())
+		return MultiFormatProperties.class.isAssignableFrom(field.getType()) || Map.class.isAssignableFrom(field.getType())
 				|| List.class.isAssignableFrom(field.getType())
 				|| default_xml_object_parser_instance.isValid(field.getType())
 				|| (optional_xml_object_parser_instance != null
@@ -454,16 +473,16 @@ public abstract class XMLProperties implements Cloneable, Serializable {
 	 * 
 	 * @param document
 	 *            the document to load
-	 * @throws XMLPropertiesParseException
+	 * @throws PropertiesParseException
 	 *             if a problem of XML parse occurs
 	 */
-	public void load(Document document) throws XMLPropertiesParseException {
+	public void loadXML(Document document) throws PropertiesParseException {
 		if (document == null)
 			throw new NullPointerException("document");
 
 		Node n = getRootNode(document);
 		if (n == null || n.getChildNodes() == null)
-			throw new XMLPropertiesParseException(
+			throw new PropertiesParseException(
 					"Impossible to find the node named " + this.getClass().getCanonicalName());
 
 		NodeList nl = null;
@@ -476,7 +495,7 @@ public abstract class XMLProperties implements Cloneable, Serializable {
 			}
 		}
 		if (nl == null)
-			throw new XMLPropertiesParseException(
+			throw new PropertiesParseException(
 					"Impossible to find the node named " + this.getClass().getCanonicalName());
 		/*
 		 * else if (nl.getLength()>1) throw new
@@ -491,17 +510,17 @@ public abstract class XMLProperties implements Cloneable, Serializable {
 	 * 
 	 * @param xml_file
 	 *            the file to load
-	 * @throws XMLPropertiesParseException
+	 * @throws PropertiesParseException
 	 *             if a problem parsing occurs
 	 * @throws IOException
 	 *             of a IO problem occurs
 	 */
-	public void load(File xml_file) throws XMLPropertiesParseException, IOException {
+	public void loadXML(File xml_file) throws PropertiesParseException, IOException {
 		try {
 			Document d = getDOM(xml_file);
-			load(d);
+			loadXML(d);
 		} catch (SAXException | ParserConfigurationException e) {
-			throw new XMLPropertiesParseException(e, "Impossible to read the XML file " + xml_file);
+			throw new PropertiesParseException(e, "Impossible to read the XML file " + xml_file);
 		}
 	}
 
@@ -510,22 +529,25 @@ public abstract class XMLProperties implements Cloneable, Serializable {
 	 * 
 	 * @param is
 	 *            the input stream
-	 * @throws XMLPropertiesParseException
+	 * @throws PropertiesParseException
 	 *             if a problem parsing occurs
 	 * @throws IOException
 	 *             of a IO problem occurs
 	 */
-	public void load(InputStream is) throws XMLPropertiesParseException, IOException {
+	public void loadXML(InputStream is) throws PropertiesParseException, IOException {
 		try {
 			if (is == null)
 				throw new NullPointerException("is");
 			Document d = getDOM(is);
-			load(d);
+			loadXML(d);
 		} catch (SAXException | ParserConfigurationException e) {
-			throw new XMLPropertiesParseException(e, "Impossible to read the given input stream !");
+			throw new PropertiesParseException(e, "Impossible to read the given input stream !");
 		}
 	}
 
+	
+
+	
 	/**
 	 * Load properties from {@link Properties} class.
 	 * 
@@ -543,13 +565,13 @@ public abstract class XMLProperties implements Cloneable, Serializable {
 			String key = (String) e.getKey();
 			String value = (String) e.getValue();
 
-			if (!XMLProperties.this.setField(XMLProperties.this, key.split("\\."), 0, value)) {
+			if (!MultiFormatProperties.this.setField(MultiFormatProperties.this, key.split("\\."), 0, value)) {
 				getFreeStringProperties().put(key, value);
 			}
 		}
 	}
 
-	void read(Document document, NodeList node_list) throws XMLPropertiesParseException {
+	void read(Document document, NodeList node_list) throws PropertiesParseException {
 		for (int i = 0; i < node_list.getLength(); i++) {
 			Node node = node_list.item(i);
 			String node_name = node.getNodeName();
@@ -573,7 +595,7 @@ public abstract class XMLProperties implements Cloneable, Serializable {
 	private Class<?> equals(Field f, String node_name) {
 		if (f.getName().equals(node_name))
 			return f.getType();
-		else if (XMLProperties.class.isAssignableFrom(f.getType())) {
+		else if (MultiFormatProperties.class.isAssignableFrom(f.getType())) {
 			try {
 				Class<?> c = Class.forName(node_name.substring(0, node_name.lastIndexOf(".")));
 				if (f.getType().isAssignableFrom(c))
@@ -591,7 +613,7 @@ public abstract class XMLProperties implements Cloneable, Serializable {
 		if (keys.length - keyOff.get() <= 0)
 			return null;
 
-		if (XMLProperties.class.isAssignableFrom(f.getType())) {
+		if (MultiFormatProperties.class.isAssignableFrom(f.getType())) {
 			String fExplodedClass[] = f.getType().getName().split("\\.");
 
 			if (keys.length - keyOff.get() - 2 < fExplodedClass.length)
@@ -605,7 +627,7 @@ public abstract class XMLProperties implements Cloneable, Serializable {
 				}
 				try {
 					Class<?> c = Class.forName(cs.toString());
-					if (XMLProperties.class.isAssignableFrom(f.getType()) && f.getName().equals(keys[s])) {
+					if (MultiFormatProperties.class.isAssignableFrom(f.getType()) && f.getName().equals(keys[s])) {
 						keyOff.set(keyOff.get() + s + 1);
 						return c;
 					}
@@ -622,7 +644,7 @@ public abstract class XMLProperties implements Cloneable, Serializable {
 		return null;
 	}
 
-	void readField(Document document, Field field, Class<?> type, Node node) throws XMLPropertiesParseException {
+	void readField(Document document, Field field, Class<?> type, Node node) throws PropertiesParseException {
 
 		if (Map.class.isAssignableFrom(type)) {
 
@@ -680,7 +702,7 @@ public abstract class XMLProperties implements Cloneable, Serializable {
 				field.set(this, m);
 
 			} catch (InstantiationException | IllegalAccessException | DOMException | ClassNotFoundException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
-				throw new XMLPropertiesParseException(e, "Impossible to read the type " + type.getName());
+				throw new PropertiesParseException(e, "Impossible to read the type " + type.getName());
 			}
 
 		} else if (List.class.isAssignableFrom(type) /* || type.isArray() */) // TODO
@@ -730,14 +752,14 @@ public abstract class XMLProperties implements Cloneable, Serializable {
 				}
 
 			} catch (InstantiationException | IllegalAccessException | DOMException | ClassNotFoundException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
-				throw new XMLPropertiesParseException(e, "Impossible to read the type " + type.getName());
+				throw new PropertiesParseException(e, "Impossible to read the type " + type.getName());
 			}
 
-		} else if (XMLProperties.class.isAssignableFrom(type)) {
+		} else if (MultiFormatProperties.class.isAssignableFrom(type)) {
 			// deal with Properties instance
 
 			try {
-				XMLProperties p = (XMLProperties) field.get(this);
+				MultiFormatProperties p = (MultiFormatProperties) field.get(this);
 				if (p == null) {
 					Constructor<?> default_constructor = null;
 					for (Constructor<?> c : type.getDeclaredConstructors()) {
@@ -749,11 +771,11 @@ public abstract class XMLProperties implements Cloneable, Serializable {
 						}
 					}
 					if (default_constructor == null) {
-						throw new XMLPropertiesParseException(
+						throw new PropertiesParseException(
 								"The class " + type.getCanonicalName() + " must have a default constructor ");
 					}
 
-					p = (XMLProperties) default_constructor.newInstance();
+					p = (MultiFormatProperties) default_constructor.newInstance();
 					field.set(this, p);
 				}
 				if (p.optional_xml_object_parser_instance == null)
@@ -761,7 +783,7 @@ public abstract class XMLProperties implements Cloneable, Serializable {
 				p.read(document, node.getChildNodes());
 			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
 					| InvocationTargetException e) {
-				throw new XMLPropertiesParseException(e, "Impossible to read the type " + type.getName());
+				throw new PropertiesParseException(e, "Impossible to read the type " + type.getName());
 			}
 		} else if (type.isPrimitive()) {
 
@@ -787,10 +809,10 @@ public abstract class XMLProperties implements Cloneable, Serializable {
 				} else if (type == char.class) {
 					field.setChar(this, nodeValue.charAt(0));
 				} else
-					throw new XMLPropertiesParseException("Unknow primitive type " + type.getName());
+					throw new PropertiesParseException("Unknow primitive type " + type.getName());
 
 			} catch (IllegalArgumentException | IllegalAccessException e) {
-				throw new XMLPropertiesParseException(e, "Impossible read the field " + field.getName());
+				throw new PropertiesParseException(e, "Impossible read the field " + field.getName());
 			}
 		} else {
 			try {
@@ -798,7 +820,7 @@ public abstract class XMLProperties implements Cloneable, Serializable {
 				if (!(o != null && o == Void.TYPE))
 					field.set(this, o);
 			} catch (IllegalArgumentException | IllegalAccessException | DOMException e) {
-				throw new XMLPropertiesParseException(e, "Impossible read the field " + field.getName());
+				throw new PropertiesParseException(e, "Impossible read the field " + field.getName());
 			}
 
 		}
@@ -809,16 +831,16 @@ public abstract class XMLProperties implements Cloneable, Serializable {
 	 * 
 	 * @param doc
 	 *            the document
-	 * @throws XMLPropertiesParseException
+	 * @throws PropertiesParseException
 	 *             if a problem of XML parse occurs
 	 */
-	public void save(Document doc) throws XMLPropertiesParseException {
+	public void saveXML(Document doc) throws PropertiesParseException {
 		try {
 			Node root = doc.createElement(this.getClass().getCanonicalName());
 			if (write(doc, root))
 				createOrGetRootNode(doc).appendChild(root);
 		} catch (DOMException e) {
-			throw new XMLPropertiesParseException(e, "");
+			throw new PropertiesParseException(e, "");
 		}
 	}
 
@@ -827,10 +849,10 @@ public abstract class XMLProperties implements Cloneable, Serializable {
 	 * 
 	 * @param xml_file
 	 *            the file to save
-	 * @throws XMLPropertiesParseException
+	 * @throws PropertiesParseException
 	 *             if a problem of XML parse occurs
 	 */
-	public void save(File xml_file) throws XMLPropertiesParseException {
+	public void saveXML(File xml_file) throws PropertiesParseException {
 		try {
 			DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
 			DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
@@ -838,7 +860,7 @@ public abstract class XMLProperties implements Cloneable, Serializable {
 			// root elements
 			Document doc = docBuilder.newDocument();
 			doc.setXmlStandalone(true);
-			save(doc);
+			saveXML(doc);
 
 			TransformerFactory transformerFactory = TransformerFactory.newInstance();
 			Transformer transformer = transformerFactory.newTransformer();
@@ -850,10 +872,262 @@ public abstract class XMLProperties implements Cloneable, Serializable {
 			transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
 			transformer.transform(source, result);
 		} catch (ParserConfigurationException | TransformerException e) {
-			throw new XMLPropertiesParseException(e, "");
+			throw new PropertiesParseException(e, "");
 		}
 	}
+	/**
+	 * Save properties into an YAML file
+	 * 
+	 * @param yaml_file
+	 *            the file to save
+	 * @throws IOException
+	 */
+	public void saveYAML(File yaml_file) throws IOException
+	{
+		
+		
+		Yaml yaml=new Yaml(new YamlRepresenter(),getDumperOptions());
+		yaml.setBeanAccess(BeanAccess.FIELD);
+		yaml.setName(this.getClass().getSimpleName());
+		try(FileWriter fw = new FileWriter(yaml_file))
+		{
+			yaml.dump(this, fw);
+		}
+		
+	}
+	
+	private DumperOptions getDumperOptions()
+	{
+		DumperOptions options = new DumperOptions();
+		options.setAllowUnicode(true);
+		options.setAllowReadOnlyProperties(false);
+		options.setIndent(4);
+		return options;
+	}
+	
+	/**
+	 * Load properties from an YAML file
+	 * 
+	 * @param yamlFile
+	 *            the file name
+	 */
+	public void loadYAML(File yamlFile) throws PropertiesParseException, IOException {
+		ConstructorYaml constructor=new ConstructorYaml();
+		Yaml yaml=new Yaml(constructor);
+		yaml.setBeanAccess(BeanAccess.FIELD);
+		try(FileReader fr=new FileReader(yamlFile))
+		{
+			if (yaml.load(fr)!=this)
+				throw new IOException();
+		}
+	}
+	
+	
+	private class YamlRepresenter extends Representer
+	{
+		YamlRepresenter()
+		{
+			init(default_xml_object_parser_instance);
+			if (optional_xml_object_parser_instance!=null)
+				init(optional_xml_object_parser_instance);
+		}
+		private void init (AbstractMultiFormatObjectParser parser)
+		{
+			for (Class<?> c : parser.getSupportedClasses())
+			{
+				if (isPersonalizedYAMLSerialization(c) && (!representers.containsKey(c)))
+					representers.put(c, new YamlRepresent(parser, c));
+			}
+			for (Class<?> c : parser.getSupportedMultiClasses())
+			{
+				if (isPersonalizedYAMLSerialization(c) && (!multiRepresenters.containsKey(c)))
+					multiRepresenters.put(c, new YamlRepresent(parser, c));
+			}
+		}
+		
+		private class YamlRepresent implements Represent
+		{
+			private final AbstractMultiFormatObjectParser parser;
+			private final Class<?> clazz;
+			
+			YamlRepresent(AbstractMultiFormatObjectParser parser, Class<?> clazz)
+			{
+				this.parser=parser;
+				this.clazz=clazz;
+				
+			}
+			
+			
+			
+			@Override
+			public org.yaml.snakeyaml.nodes.Node representData(Object data) {
+				
+				try {
+					String value=parser.convertObjectToString(clazz, data);
+					return representScalar(MultiFormatProperties.getTag(data.getClass()), value);
+				} catch (Exception e) {
+					e.printStackTrace();
+					return null;
+				}
+				
+			}
+		}
+		
+		
+		
+	}
+	
+	private boolean isPersonalizedYAMLSerialization(Class<?> c)
+	{
+		return String.class!=c && !Number.class.isAssignableFrom(c) && !c.isPrimitive() && !c.isEnum() && !c.isAssignableFrom(MultiFormatProperties.class) && !Collection.class.isAssignableFrom(c) && !Map.class.isAssignableFrom(c) && !c.isArray() && !Calendar.class.isAssignableFrom(c);
+	}
+	
+	private static Tag getTag(Class<?> clazz)
+	{
+		if (AbstractDecentralizedID.class.isAssignableFrom(clazz))
+			return new Tag(Tag.PREFIX+"decentralizedID");
+		else if (InetAddress.class.isAssignableFrom(clazz))
+			return new Tag(Tag.PREFIX+"ip");
+		else if (InetSocketAddress.class.isAssignableFrom(clazz))
+			return new Tag(Tag.PREFIX+"ipp");
+		else if (URI.class==clazz)
+			return new Tag(Tag.PREFIX+"uir");
+		else if (URL.class==clazz)
+			return new Tag(Tag.PREFIX+"url");
+		else if (File.class==clazz)
+			return new Tag(Tag.PREFIX+"file");
+		else if (Class.class==clazz)
+			return new Tag(Tag.PREFIX+"class");
+		else if (Level.class==clazz)
+			return new Tag(Tag.PREFIX+"logLevel");
+		else
+			return new Tag(clazz);
 
+	}
+	
+	private class ConstructorYaml extends org.yaml.snakeyaml.constructor.Constructor
+	{
+		private boolean setFirstTime=false;
+		protected final Map<Tag, Construct> yamlAbstractConstructors = new HashMap<Tag, Construct>();
+		ConstructorYaml()
+		{
+			init(default_xml_object_parser_instance);
+			if (optional_xml_object_parser_instance!=null)
+				init(optional_xml_object_parser_instance);
+			//yamlClassConstructors.put(NodeId.mapping, new RootConstruct());
+			
+		}
+	
+		
+		@Override
+		protected Construct getConstructor(org.yaml.snakeyaml.nodes.Node node) {
+			
+	        if (node.useClassConstructor()) {
+	            return yamlClassConstructors.get(node.getNodeId());
+	        } else {
+	            Construct constructor = yamlConstructors.get(node.getTag());
+	            if (constructor == null) {
+	            	for (Map.Entry<Tag, Construct> e: yamlAbstractConstructors.entrySet())
+	            	{
+	            		try {
+							if (node.getTag().getValue().equals(e.getKey().getValue()) || (e.getKey().getValue().startsWith(Tag.PREFIX) && e.getKey().getClassName().contains(".") && Class.forName(e.getKey().getClassName()).isAssignableFrom(node.getType())))
+							{
+								return e.getValue();
+							}
+						} catch (ClassNotFoundException e1) {
+							e1.printStackTrace();
+						}
+	            		
+	            	}
+	                for (String prefix : yamlMultiConstructors.keySet()) {
+	                    if (node.getTag().startsWith(prefix)) {
+	                        return yamlMultiConstructors.get(prefix);
+	                    }
+	                }
+	                return yamlConstructors.get(null);
+	            }
+	            return constructor;
+	        }
+	    }
+		@Override
+		protected Object newInstance(Class<?> ancestor, org.yaml.snakeyaml.nodes.Node node, boolean tryDefault)
+	            throws InstantiationException {
+			
+			super.newInstance(ancestor, node, tryDefault);
+			if (setFirstTime)
+				return super.newInstance(ancestor, node, tryDefault);
+			else
+			{
+				setFirstTime=true;
+				return MultiFormatProperties.this;
+			}
+		}
+		
+		private void init (AbstractMultiFormatObjectParser parser)
+		{
+			for (Class<?> c : parser.getSupportedClasses())
+			{
+				//String k=c.getName();
+				Tag t=getTag(c);
+				if (isPersonalizedYAMLSerialization(c) && (!yamlConstructors.containsKey(t)))
+					yamlConstructors.put(t, new ConstructYaml(parser, c));
+			}
+			for (Class<?> c : parser.getSupportedMultiClasses())
+			{
+				Tag t=getTag(c);
+				if (isPersonalizedYAMLSerialization(c) && (!yamlAbstractConstructors.containsKey(t)))
+					yamlAbstractConstructors.put(t, new ConstructYaml(parser, c));
+			}
+			
+		}
+		
+		
+		
+		private class ConstructYaml extends AbstractConstruct
+		{
+			private final AbstractMultiFormatObjectParser parser;
+			private final Class<?> clazz;
+			ConstructYaml(AbstractMultiFormatObjectParser parser, Class<?> clazz)
+			{
+				this.parser=parser;
+				this.clazz=clazz;
+			}
+		
+
+			@Override
+			public Object construct(org.yaml.snakeyaml.nodes.Node node) {
+				
+				String value = (String)constructScalar((ScalarNode)node);
+				try {
+					return parser.convertStringToObject(clazz, value);
+				} catch (Exception e) {
+					e.printStackTrace();
+					return null;
+				}
+			}
+		}
+		
+		/*private class RootConstruct extends ConstructMapping
+		{
+			private boolean root=true;
+			@Override
+			 protected Object createEmptyJavaBean(MappingNode node) {
+		            if (root)
+		            {
+		            	root=false;
+		            	return MultiFormatProperties.this;
+		            }
+		            else
+		            {
+		            	return super.createEmptyJavaBean(node);
+		            }
+		        }
+		}
+	*/
+	}
+	
+	
+	
 	@SuppressWarnings("unchecked")
 	void setField(Field field, String value) throws IllegalArgumentException {
 		try {
@@ -954,7 +1228,7 @@ public abstract class XMLProperties implements Cloneable, Serializable {
 		}
 	}
 
-	boolean setField(XMLProperties instance, String keys[], int current_index, String value)
+	boolean setField(MultiFormatProperties instance, String keys[], int current_index, String value)
 			throws IllegalArgumentException {
 		try {
 			if (instance == null)
@@ -970,14 +1244,14 @@ public abstract class XMLProperties implements Cloneable, Serializable {
 							instance.setField(f, value);
 							return true;
 						} else {
-							if (XMLProperties.class.isAssignableFrom(type)) {
+							if (MultiFormatProperties.class.isAssignableFrom(type)) {
 								boolean toreload = false;
-								XMLProperties i = (XMLProperties) f.get(instance);
+								MultiFormatProperties i = (MultiFormatProperties) f.get(instance);
 								if (i == null) {
 									toreload = true;
 									Constructor<?> construct = type.getDeclaredConstructor();
 									construct.setAccessible(true);
-									i = (XMLProperties) construct.newInstance();
+									i = (MultiFormatProperties) construct.newInstance();
 								}
 
 								boolean ok = setField(i, keys, off.get(), value);
@@ -1000,13 +1274,13 @@ public abstract class XMLProperties implements Cloneable, Serializable {
 	}
 
 	boolean setTextContent(Document document, Node node, String field_name, Class<?> field_type, Object object)
-			throws XMLPropertiesParseException {
+			throws PropertiesParseException {
 		try {
 			if (object == null) {
 				node.setTextContent(null);
 				return false;
-			} else if (XMLProperties.class.isAssignableFrom(field_type)) {
-				XMLProperties e = (XMLProperties) object;
+			} else if (MultiFormatProperties.class.isAssignableFrom(field_type)) {
+				MultiFormatProperties e = (MultiFormatProperties) object;
 				if (e.optional_xml_object_parser_instance == null)
 					e.optional_xml_object_parser_instance = optional_xml_object_parser_instance;
 				return e.write(document, node);
@@ -1020,12 +1294,12 @@ public abstract class XMLProperties implements Cloneable, Serializable {
 				}
 			}
 		} catch (Exception e) {
-			throw new XMLPropertiesParseException(e,
+			throw new PropertiesParseException(e,
 					"Impossible to write the field " + field_name + " of the type " + field_type.getName());
 		}
 	}
 
-	boolean write(Document document, Node element) throws XMLPropertiesParseException {
+	boolean write(Document document, Node element) throws PropertiesParseException {
 		Class<?> c = this.getClass();
 		while (c != Object.class) {
 			for (Field f : c.getDeclaredFields()) {
@@ -1039,7 +1313,7 @@ public abstract class XMLProperties implements Cloneable, Serializable {
 		return true;
 	}
 
-	void writeField(Document document, Node parent_element, Field field) throws XMLPropertiesParseException {
+	void writeField(Document document, Node parent_element, Field field) throws PropertiesParseException {
 		Class<?> type = field.getType();
 		if (optional_xml_object_parser_instance != null && optional_xml_object_parser_instance.isValid(type)) {
 			try {
@@ -1047,7 +1321,7 @@ public abstract class XMLProperties implements Cloneable, Serializable {
 				if (setTextContent(document, element, field.getName(), field.getType(), field.get(this)))
 					parent_element.appendChild(element);
 			} catch (IllegalArgumentException | IllegalAccessException | DOMException e) {
-				throw new XMLPropertiesParseException(e, "Impossible read the field " + field.getName());
+				throw new PropertiesParseException(e, "Impossible read the field " + field.getName());
 			}
 		} else if (Map.class.isAssignableFrom(type)) {
 
@@ -1092,7 +1366,7 @@ public abstract class XMLProperties implements Cloneable, Serializable {
 				}
 				parent_element.appendChild(element);
 			} catch (IllegalAccessException | DOMException e) {
-				throw new XMLPropertiesParseException(e, "Impossible to read the type " + type.getName());
+				throw new PropertiesParseException(e, "Impossible to read the type " + type.getName());
 			}
 
 		} else if (List.class.isAssignableFrom(type)) {
@@ -1124,7 +1398,7 @@ public abstract class XMLProperties implements Cloneable, Serializable {
 				}
 				parent_element.appendChild(element);
 			} catch (IllegalAccessException | DOMException e) {
-				throw new XMLPropertiesParseException(e, "Impossible to read the type " + type.getName());
+				throw new PropertiesParseException(e, "Impossible to read the type " + type.getName());
 			}
 		} // TODO add array management
 		/*
@@ -1146,11 +1420,11 @@ public abstract class XMLProperties implements Cloneable, Serializable {
 		 * 
 		 * }
 		 */
-		else if (XMLProperties.class.isAssignableFrom(type)) {
+		else if (MultiFormatProperties.class.isAssignableFrom(type)) {
 			// deal with Properties instance
 
 			try {
-				XMLProperties p = (XMLProperties) field.get(this);
+				MultiFormatProperties p = (MultiFormatProperties) field.get(this);
 				if (p != null) {
 					if (p.optional_xml_object_parser_instance == null)
 						p.optional_xml_object_parser_instance = optional_xml_object_parser_instance;
@@ -1159,7 +1433,7 @@ public abstract class XMLProperties implements Cloneable, Serializable {
 						parent_element.appendChild(element);
 				}
 			} catch (IllegalAccessException e) {
-				throw new XMLPropertiesParseException(e, "Impossible to read the type " + type.getName());
+				throw new PropertiesParseException(e, "Impossible to read the type " + type.getName());
 			}
 		} else if (type.isPrimitive()) {
 
@@ -1188,7 +1462,7 @@ public abstract class XMLProperties implements Cloneable, Serializable {
 				parent_element.appendChild(element);
 
 			} catch (IllegalArgumentException | IllegalAccessException e) {
-				throw new XMLPropertiesParseException(e, "Impossible read the field " + field.getName());
+				throw new PropertiesParseException(e, "Impossible read the field " + field.getName());
 			}
 		} else {
 			try {
@@ -1196,7 +1470,7 @@ public abstract class XMLProperties implements Cloneable, Serializable {
 				if (setTextContent(document, element, field.getName(), field.getType(), field.get(this)))
 					parent_element.appendChild(element);
 			} catch (IllegalArgumentException | IllegalAccessException | DOMException e) {
-				throw new XMLPropertiesParseException(e, "Impossible read the field " + field.getName());
+				throw new PropertiesParseException(e, "Impossible read the field " + field.getName());
 			}
 
 		}

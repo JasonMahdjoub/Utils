@@ -35,7 +35,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
 
 package com.distrimind.util.version;
 
-import com.distrimind.util.properties.XMLProperties;
+import com.distrimind.util.properties.MultiFormatProperties;
 
 /**
  * Represents a Person participating to a software creation
@@ -46,7 +46,7 @@ import com.distrimind.util.properties.XMLProperties;
  * @see Version
  * @see PersonDeveloper
  */
-public class Person extends XMLProperties {
+public class Person extends MultiFormatProperties {
 	/**
 	 * 
 	 */

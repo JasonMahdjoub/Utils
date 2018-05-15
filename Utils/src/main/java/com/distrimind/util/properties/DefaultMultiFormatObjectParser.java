@@ -45,7 +45,6 @@ import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
 import java.util.TimeZone;
 import java.util.logging.Level;
 
@@ -68,21 +67,76 @@ import com.distrimind.util.crypto.SymmetricSecretKey;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 1.2
+ * @version 2.0
  * @since Utils 1.0
  */
-public class DefaultXMLObjectParser extends AbstractXMLObjectParser {
+public class DefaultMultiFormatObjectParser extends AbstractMultiFormatObjectParser {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = -6853594945240574230L;
 
+	private static final Class<?>[] supportedClasses=new Class<?>[] {
+		Boolean.class,
+		Byte.class,
+		Short.class,
+		Integer.class,
+		Long.class,
+		Float.class,
+		Double.class,
+		Character.class,
+		String.class,
+		Class.class,
+		Date.class,
+		File.class,
+		URL.class,
+		URI.class,
+		Level.class,
+		InetAddress.class,
+		Inet4Address.class,
+		byte[].class,
+		short[].class,
+		char[].class,
+		int[].class,
+		long[].class,
+		float[].class,
+		double[].class,
+		boolean[].class,
+		Inet6Address.class,
+		InetSocketAddress.class,
+		SourceVersion.class,
+		ASymmetricEncryptionType.class,
+		MessageDigestType.class,
+		SymmetricEncryptionType.class,
+		ASymmetricAuthentifiedSignatureType.class,
+		SymmetricSecretKey.class,
+		ASymmetricPrivateKey.class,
+		ASymmetricPublicKey.class,
+		ASymmetricKeyPair.class,
+	};
+	private static final Class<?>[] supportedMultiClasses=new Class<?>[] {
+		AbstractDecentralizedID.class, MultiFormatProperties.class, Calendar.class,Enum.class
+	};
+	
+	@Override
+	public Class<?>[] getSupportedClasses()
+	{
+		return supportedClasses;
+	}
+	
+	@Override
+	public Class<?>[] getSupportedMultiClasses()
+	{
+		return supportedMultiClasses;
+	}
+	
+	
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public String convertObjectToXML(Class<?> field_type, Object object) throws Exception {
+	public String convertObjectToString(Class<?> field_type, Object object) throws Exception {
 		if (field_type == byte[].class) {
 			
 			return Base64.encodeBase64URLSafeString((byte[]) object);
@@ -215,7 +269,7 @@ public class DefaultXMLObjectParser extends AbstractXMLObjectParser {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public Object convertXMLToObject(Class<?> field_type, String nodeValue) throws Exception {
+	public Object convertStringToObject(Class<?> field_type, String nodeValue) throws Exception {
 		if (nodeValue == null)
 			return null;
 		nodeValue = nodeValue.trim();
@@ -227,7 +281,7 @@ public class DefaultXMLObjectParser extends AbstractXMLObjectParser {
 			byte[] btab = Base64.decodeBase64(nodeValue);
 			int s = Integer.SIZE / 8;
 			if (btab.length % s != 0)
-				throw new XMLPropertiesParseException("Invalid tab data");
+				throw new PropertiesParseException("Invalid tab data");
 			int tab[] = new int[btab.length / s];
 			for (int i = 0; i < tab.length; i++)
 				tab[i] = Bits.getInt(btab, i * s);
@@ -236,7 +290,7 @@ public class DefaultXMLObjectParser extends AbstractXMLObjectParser {
 			byte[] btab = Base64.decodeBase64(nodeValue);
 			int s = Float.SIZE / 8;
 			if (btab.length % s != 0)
-				throw new XMLPropertiesParseException("Invalid tab data");
+				throw new PropertiesParseException("Invalid tab data");
 			float tab[] = new float[btab.length / s];
 			for (int i = 0; i < tab.length; i++)
 				tab[i] = Bits.getFloat(btab, i * s);
@@ -245,7 +299,7 @@ public class DefaultXMLObjectParser extends AbstractXMLObjectParser {
 			byte[] btab = Base64.decodeBase64(nodeValue);
 			int s = Double.SIZE / 8;
 			if (btab.length % s != 0)
-				throw new XMLPropertiesParseException("Invalid tab data");
+				throw new PropertiesParseException("Invalid tab data");
 			double tab[] = new double[btab.length / s];
 			for (int i = 0; i < tab.length; i++)
 				tab[i] = Bits.getDouble(btab, i * s);
@@ -254,7 +308,7 @@ public class DefaultXMLObjectParser extends AbstractXMLObjectParser {
 			byte[] btab = Base64.decodeBase64(nodeValue);
 			int s = Short.SIZE / 8;
 			if (btab.length % s != 0)
-				throw new XMLPropertiesParseException("Invalid tab data");
+				throw new PropertiesParseException("Invalid tab data");
 			short tab[] = new short[btab.length / s];
 			for (int i = 0; i < tab.length; i++)
 				tab[i] = Bits.getShort(btab, i * s);
@@ -263,7 +317,7 @@ public class DefaultXMLObjectParser extends AbstractXMLObjectParser {
 			byte[] btab = Base64.decodeBase64(nodeValue);
 			int s = Long.SIZE / 8;
 			if (btab.length % s != 0)
-				throw new XMLPropertiesParseException("Invalid tab data");
+				throw new PropertiesParseException("Invalid tab data");
 			long tab[] = new long[btab.length / s];
 			for (int i = 0; i < tab.length; i++)
 				tab[i] = Bits.getLong(btab, i * s);
@@ -386,26 +440,18 @@ public class DefaultXMLObjectParser extends AbstractXMLObjectParser {
 	 */
 	@Override
 	public boolean isValid(Class<?> field_type) {
-		return field_type == Boolean.class || field_type == Byte.class || field_type == Short.class
-				|| field_type == Integer.class || field_type == Long.class || field_type == Float.class
-				|| field_type == Double.class || field_type == Character.class || field_type == String.class
-				|| field_type == Class.class || field_type == Date.class || field_type == File.class
-				|| field_type == URL.class || field_type == URI.class || field_type == Level.class
-				|| field_type == InetAddress.class || field_type == Inet4Address.class || field_type == byte[].class
-				|| field_type == short[].class || field_type == char[].class || field_type == int[].class
-				|| field_type == long[].class || field_type == float[].class || field_type == double[].class
-				|| field_type == boolean[].class || field_type == Inet6Address.class
-				|| field_type == InetSocketAddress.class || field_type == SourceVersion.class
-				|| field_type == ASymmetricEncryptionType.class || field_type == MessageDigestType.class
-				|| field_type == SymmetricEncryptionType.class || field_type == ASymmetricAuthentifiedSignatureType.class
-				// || field_type==SymmetricSecretKeyType.class
-				|| field_type == SymmetricSecretKey.class || field_type == ASymmetricPrivateKey.class
-				|| field_type == ASymmetricPublicKey.class || field_type == ASymmetricKeyPair.class
-				|| AbstractDecentralizedID.class.isAssignableFrom(field_type) || List.class.isAssignableFrom(field_type)
-				|| XMLProperties.class.isAssignableFrom(field_type) || field_type.isPrimitive()
-				|| Calendar.class.isAssignableFrom(field_type) || field_type.isEnum();
-
+		if (field_type.isEnum() || field_type.isPrimitive())
+			return true;
+		for (Class<?> c : getSupportedClasses())
+			if (c==field_type)
+				return true;
+		
+		for (Class<?> c : getSupportedMultiClasses())
+			if (c.isAssignableFrom(field_type))
+				return true;
+		return false;
 	}
+	
 
 	Date parseDateString(String d) {
 		return new Date(Long.parseLong(d));

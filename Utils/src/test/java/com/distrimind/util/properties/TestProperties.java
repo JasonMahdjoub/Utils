@@ -44,7 +44,7 @@ import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import com.distrimind.util.properties.XMLPropertiesParseException;
+import com.distrimind.util.properties.PropertiesParseException;
 
 import gnu.vm.jgnu.security.InvalidAlgorithmParameterException;
 import gnu.vm.jgnu.security.NoSuchProviderException;
@@ -91,14 +91,33 @@ public class TestProperties {
 	}
 
 	@Test(dataProvider = "getPropertiesExample")
-	public void testPropertiesXMLSave(PropertiesExample pe) throws XMLPropertiesParseException, IOException {
+	public void testPropertiesXMLSave(PropertiesExample pe) throws PropertiesParseException, IOException {
 		File f = new File("propertiesExemple.xml");
-		pe.save(f);
+		pe.saveXML(f);
 		PropertiesExample pe2 = new PropertiesExample(null);
-		pe2.load(f);
+		pe2.loadXML(f);
 		pe.equals(pe2);
 		Assert.assertEquals(pe2, pe);
 		f.delete();
 	}
 
+	@Test(dataProvider = "getPropertiesExample")
+	public void testPropertiesYAMLSave(PropertiesExample pe) throws PropertiesParseException, IOException {
+		try
+		{
+			File f = new File("propertiesExemple.yaml");
+			pe.saveYAML(f);
+			PropertiesExample pe2 = new PropertiesExample(null);
+			pe2.loadYAML(f);
+			pe.equals(pe2);
+			Assert.assertEquals(pe2, pe);
+			f.delete();
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+			throw e;
+		}
+		
+	}
 }

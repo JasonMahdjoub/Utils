@@ -59,8 +59,8 @@ public class Utils {
 		Calendar c = Calendar.getInstance();
 		c.set(2016, 1, 4);
 		Calendar c2 = Calendar.getInstance();
-		c.set(2018, 4, 10);
-		VERSION = new Version("Utils", "Utils", 3, 14, 6, Version.Type.Stable, 0, c.getTime(), c2.getTime());
+		c.set(2018, 4, 15);
+		VERSION = new Version("Utils", "Utils", 3, 15, 0, Version.Type.Stable, 0, c.getTime(), c2.getTime());
 		try {
 
 			InputStream is = Utils.class.getResourceAsStream("build.txt");
@@ -73,8 +73,17 @@ public class Utils {
 			VERSION.addDeveloper(new PersonDeveloper("mahdjoub", "jason", c.getTime()));
 			
 			c = Calendar.getInstance();
+			c.set(2018, 4, 15);
+			Description d = new Description(3, 15, 0, Version.Type.Stable, 0, c.getTime());
+			d.addItem("Add P2P login agreement based on symmetric signature.");
+			d.addItem("Add P2P multi login agreement based on symmetric signature and JPAKE.");
+			d.addItem("XMLProperties is renamed to MultiFormatProperties.");
+			d.addItem("MultiFormatProperties support YAML format.");
+			VERSION.addDescription(d);
+
+			c = Calendar.getInstance();
 			c.set(2018, 4, 10);
-			Description d = new Description(3, 14, 6, Version.Type.Stable, 0, c.getTime());
+			d = new Description(3, 14, 6, Version.Type.Stable, 0, c.getTime());
 			d.addItem("Update BCFIPS to 1.0.1.");
 			d.addItem("Update common-codec to 1.11.");
 			d.addItem("Renaming ECDDH to ECCDH.");

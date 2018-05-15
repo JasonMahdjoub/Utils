@@ -35,25 +35,66 @@ knowledge of the CeCILL-C license and that you accept its terms.
 
 package com.distrimind.util.properties;
 
+import java.io.Serializable;
+
 /**
+ * This object enables to convert an object to XML node content, and conversely.
  * 
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 2.0
  * @since Utils 1.0
  */
-public class XMLPropertiesParseException extends Exception {
-
+public abstract class AbstractMultiFormatObjectParser implements Serializable {
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 7734567701438018962L;
+	private static final long serialVersionUID = -684538962129630953L;
 
-	public XMLPropertiesParseException(Exception parent_exception, String message) {
-		super(message, parent_exception);
-	}
+	/**
+	 * Convert an object to a XML node content
+	 * 
+	 * @param field_type
+	 *            the object type
+	 * @param object
+	 *            the object to convert
+	 * @return the XML node content
+	 * @throws Exception
+	 *             if a problem occurs
+	 */
+	public abstract String convertObjectToString(Class<?> field_type, Object object) throws Exception;
 
-	public XMLPropertiesParseException(String message) {
-		super(message);
-	}
+	/**
+	 * Convert the XML node content to an object
+	 * 
+	 * @param field_type
+	 *            the object type
+	 * @param nodeValue
+	 *            the XML node content
+	 * @return the corresponding object
+	 * @throws Exception
+	 *             if a problem occurs
+	 */
+	public abstract Object convertStringToObject(Class<?> field_type, String nodeValue) throws Exception;
 
+	/**
+	 * Tells if the given object type is managed by this class
+	 * 
+	 * @param field_type
+	 *            the object type
+	 * @return true if the field type is managed by this class
+	 */
+	public abstract boolean isValid(Class<?> field_type);
+
+	
+	/**
+	 * 
+	 * @return the supported classes
+	 */
+	public abstract Class<?>[] getSupportedClasses();
+	
+	/**
+	 * 
+	 * @return the supported classes and their subclasses
+	 */
+	public abstract Class<?>[] getSupportedMultiClasses();
 }

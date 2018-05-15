@@ -60,7 +60,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
-import com.distrimind.util.properties.XMLProperties;
+import com.distrimind.util.properties.MultiFormatProperties;
 
 /**
  * Represent the description of all versions of a software, including the
@@ -73,7 +73,7 @@ import com.distrimind.util.properties.XMLProperties;
  * @see Person
  * @see PersonDeveloper
  */
-public class Version extends XMLProperties implements Comparable<Version> {
+public class Version extends MultiFormatProperties implements Comparable<Version> {
 	public enum Type {
 		Stable, Alpha, Beta, RC
 	}

@@ -40,7 +40,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
 
-import com.distrimind.util.properties.XMLProperties;
+import com.distrimind.util.properties.MultiFormatProperties;
 import com.distrimind.util.version.Version.Type;
 
 /**
@@ -51,7 +51,7 @@ import com.distrimind.util.version.Version.Type;
  * @since Utils 1.5
  * @see Version
  */
-public class Description extends XMLProperties {
+public class Description extends MultiFormatProperties {
 
 	/**
 	 * 

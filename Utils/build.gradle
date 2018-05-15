@@ -62,6 +62,7 @@ dependencies {
      compile(group:'org.bouncycastle', name: 'bc-fips', version: '1.0.1-DMRECOMPILE')
      compile(group:'gnu', name: 'Gnu-Crypt', version: '1.2.1')
      compile(group:'commons-codec', name: 'commons-codec', version: '1.11')
+     compile(group:'org.yaml', name: 'snakeyaml', version: '1.21')
     
 }
 

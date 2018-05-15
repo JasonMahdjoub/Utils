@@ -35,54 +35,25 @@ knowledge of the CeCILL-C license and that you accept its terms.
 
 package com.distrimind.util.properties;
 
-import java.io.Serializable;
-
 /**
- * This object enables to convert an object to XML node content, and conversely.
  * 
  * @author Jason Mahdjoub
- * @version 1.2
+ * @version 1.0
  * @since Utils 1.0
  */
-public abstract class AbstractXMLObjectParser implements Serializable {
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -684538962129630953L;
+public class PropertiesParseException extends Exception {
 
 	/**
-	 * Convert an object to a XML node content
 	 * 
-	 * @param field_type
-	 *            the object type
-	 * @param object
-	 *            the object to convert
-	 * @return the XML node content
-	 * @throws Exception
-	 *             if a problem occurs
 	 */
-	public abstract String convertObjectToXML(Class<?> field_type, Object object) throws Exception;
+	private static final long serialVersionUID = 7734567701438018962L;
 
-	/**
-	 * Convert the XML node content to an object
-	 * 
-	 * @param field_type
-	 *            the object type
-	 * @param nodeValue
-	 *            the XML node content
-	 * @return the corresponding object
-	 * @throws Exception
-	 *             if a problem occurs
-	 */
-	public abstract Object convertXMLToObject(Class<?> field_type, String nodeValue) throws Exception;
+	public PropertiesParseException(Exception parent_exception, String message) {
+		super(message, parent_exception);
+	}
 
-	/**
-	 * Tells if the given object type is managed by this class
-	 * 
-	 * @param field_type
-	 *            the object type
-	 * @return true if the field type is managed by this class
-	 */
-	public abstract boolean isValid(Class<?> field_type);
+	public PropertiesParseException(String message) {
+		super(message);
+	}
 
 }

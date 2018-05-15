@@ -65,8 +65,8 @@ import com.distrimind.util.crypto.MessageDigestType;
 import com.distrimind.util.crypto.SecureRandomType;
 import com.distrimind.util.crypto.SymmetricEncryptionType;
 import com.distrimind.util.crypto.SymmetricSecretKey;
-import com.distrimind.util.properties.AbstractXMLObjectParser;
-import com.distrimind.util.properties.XMLProperties;
+import com.distrimind.util.properties.AbstractMultiFormatObjectParser;
+import com.distrimind.util.properties.MultiFormatProperties;
 import com.distrimind.util.version.Version;
 
 import gnu.vm.jgnu.security.InvalidAlgorithmParameterException;
@@ -78,7 +78,7 @@ import gnu.vm.jgnu.security.NoSuchProviderException;
  * @version 1.0
  * @since Utils 1.6.1
  */
-public class PropertiesExample extends XMLProperties {
+public class PropertiesExample extends MultiFormatProperties {
 
 	/**
 	 * 
@@ -92,6 +92,12 @@ public class PropertiesExample extends XMLProperties {
 			return true;
 		if (o1 == null)
 			return false;
+		if (o1 instanceof Calendar)
+		{
+			Assert.assertTrue(o2 instanceof Calendar);
+			Assert.assertEquals(((Calendar) o1).getTimeInMillis(), ((Calendar)o2).getTimeInMillis());
+			return ((Calendar) o1).getTimeInMillis()==((Calendar)o2).getTimeInMillis();
+		}
 		Assert.assertEquals(o2, o1);
 		return o1.equals(o2);
 	}
@@ -162,7 +168,7 @@ public class PropertiesExample extends XMLProperties {
 
 	ArrayList<String> list3 = null;
 
-	LinkedList<String> list4 = null;
+	List<String> list4 = null;
 
 	AbstractSubProperties subProperties = null;
 
@@ -182,10 +188,15 @@ public class PropertiesExample extends XMLProperties {
 	
 	List<Class<?>> classesList=null;
 
-	protected PropertiesExample(AbstractXMLObjectParser _optional_xml_object_parser_instance) {
+	protected PropertiesExample(AbstractMultiFormatObjectParser _optional_xml_object_parser_instance) {
 		super(_optional_xml_object_parser_instance);
 	}
 
+	public PropertiesExample()
+	{
+		super(null);
+	}
+	
 	@Override
 	public boolean equals(Object o) {
 		if (o == null)
@@ -339,7 +350,7 @@ public class PropertiesExample extends XMLProperties {
 		map = new HashMap<>();
 		for (int i = 0; i < 10; i++)
 			map.put(getString(rand), Integer.valueOf(rand.nextInt()));
-		map2 = (HashMap<String, Integer>) map;
+		//map2 = (HashMap<String, Integer>) map;*/
 		list = new ArrayList<>();
 		for (int i = 0; i < 10; i++)
 			list.add(getString(rand));
@@ -355,9 +366,9 @@ public class PropertiesExample extends XMLProperties {
 		for (int i = 0; i < 10; i++)
 			getFreeStringProperties().put(getString(rand), getString(rand));
 
-		date = new Date(rand.nextLong());
+		date = new Date(System.currentTimeMillis()+1000l*rand.nextInt());
 		calendar = Calendar.getInstance();
-		calendar.setTime(new Date(rand.nextLong()));
+		calendar.setTime(new Date(System.currentTimeMillis()+1000l*rand.nextInt()));
 		version = Utils.VERSION;
 		AbstractSecureRandom random = SecureRandomType.DEFAULT.getSingleton(null);
 		secretKey = SymmetricEncryptionType.DEFAULT.getKeyGenerator(random).generateKey();
