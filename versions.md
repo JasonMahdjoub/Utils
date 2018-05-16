@@ -1,6 +1,6 @@
 Utils
 =====
-3.15.0 Stable (Build: 507) (from 15/05/2018 to 15/05/2018)
+3.15.0 Stable (Build: 510) (from 15/05/2018 to 16/05/2018)
 
 # Creator(s):
 Jason MAHDJOUB
@@ -17,6 +17,7 @@ Jason MAHDJOUB (Entred in the team at 04/02/2016)
 * XMLProperties is renamed to MultiFormatProperties.
 * MultiFormatProperties support YAML format.
 * Historical of modifications can be exported to Markdown code : Version.getMarkdownCode().
+* Sign git commits.
 
 
 ### 3.14.6 Stable (10/05/2018)

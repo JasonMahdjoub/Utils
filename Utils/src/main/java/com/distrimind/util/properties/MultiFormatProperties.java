@@ -41,6 +41,8 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.io.Serializable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -912,16 +914,25 @@ public abstract class MultiFormatProperties implements Cloneable, Serializable {
 	 *            the file name
 	 */
 	public void loadYAML(File yamlFile) throws PropertiesParseException, IOException {
+		
+		try(FileReader fr=new FileReader(yamlFile))
+		{
+			loadYAML(fr);
+		}
+	}
+	public void loadYAML(Reader reader) throws PropertiesParseException, IOException {
 		ConstructorYaml constructor=new ConstructorYaml();
 		Yaml yaml=new Yaml(constructor);
 		yaml.setBeanAccess(BeanAccess.FIELD);
-		try(FileReader fr=new FileReader(yamlFile))
+		if (yaml.load(reader)!=this)
+			throw new IOException();
+	}
+	public void loadYAML(InputStream input) throws PropertiesParseException, IOException {
+		try(InputStreamReader fr=new InputStreamReader(input))
 		{
-			if (yaml.load(fr)!=this)
-				throw new IOException();
+			loadYAML(fr);
 		}
 	}
-	
 	
 	private class YamlRepresenter extends Representer
 	{
