@@ -34,6 +34,8 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
+import org.bouncycastle.crypto.internal.CryptoException;
+
 /**
  * 
  * @author Jason Mahdjoub
@@ -104,12 +106,12 @@ public class P2PLoginWithSignature extends P2PLoginAgreement {
 			if (otherMessage!=null)
 			{
 				valid=false;
-				throw new IllegalAccessError();
+				throw new CryptoException();
 			}
 			if (data.length!=messageSize)
 			{
 				valid=false;
-				throw new IllegalAccessException();
+				throw new CryptoException();
 			}
 			otherMessage=data;
 		}
@@ -119,7 +121,7 @@ public class P2PLoginWithSignature extends P2PLoginAgreement {
 			if (otherMessage==null)
 			{
 				valid=false;
-				throw new IllegalAccessError();
+				throw new CryptoException();
 			}
 			SymmetricAuthentifiedSignatureCheckerAlgorithm checker=new SymmetricAuthentifiedSignatureCheckerAlgorithm(secretKey);
 			checker.init(data);
@@ -131,7 +133,7 @@ public class P2PLoginWithSignature extends P2PLoginAgreement {
 		break;
 		default:
 			valid=false;
-			throw new IllegalAccessError(""+stepNumber);
+			throw new CryptoException(""+stepNumber);
 		}
 	}
 
