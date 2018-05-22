@@ -10,6 +10,7 @@
 apply plugin: 'java-library'
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
+apply plugin: 'idea'
 
 def Properties props = new Properties()
 def propFile = file('gradle.properties')
@@ -71,9 +72,14 @@ sourceCompatibility = javaVersion
 targetCompatibility= javaVersion
 
 version='3.15.0'
-    
 
 
+idea {
+    project {
+        jdkName = javaVersion
+        languageLevel = javaVersion
+    }
+}
 
 allprojects {
 	group='com.distrimind.util'
@@ -92,7 +98,7 @@ task generateVersionsFile(type:JavaExec, dependsOn: classes) {
     /*Wrapping inside a method avoids auto incrementing on every gradle task run. Now it runs only when we build apk*/
     if (versionBuildFile.canRead())
     {
-    	def line  
+    	def line = -1
     	versionBuildFile.withReader { line = it.readLine() } 
 		def buildNumber =line.toInteger()+1
 		versionBuildFile.withWriter { out ->

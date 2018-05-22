@@ -882,7 +882,7 @@ public abstract class MultiFormatProperties implements Cloneable, Serializable {
 	 * 
 	 * @param yaml_file
 	 *            the file to save
-	 * @throws IOException
+	 * @throws IOException if a problem occurs
 	 */
 	public void saveYAML(File yaml_file) throws IOException
 	{
@@ -912,6 +912,8 @@ public abstract class MultiFormatProperties implements Cloneable, Serializable {
 	 * 
 	 * @param yamlFile
 	 *            the file name
+	 * @throws PropertiesParseException if a problem occurs
+	 * @throws IOException if a problem occurs
 	 */
 	public void loadYAML(File yamlFile) throws PropertiesParseException, IOException {
 		
