@@ -1,11 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="10b253e7-fd4e-4a64-8b2a-093fa1eb6135" name="Default" comment="Create IDEA Project">
-      <change beforePath="$PROJECT_DIR$/.idea/gradle.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/gradle.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+    <list default="true" id="10b253e7-fd4e-4a64-8b2a-093fa1eb6135" name="Default" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/com/distrimind/util/build.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/com/distrimind/util/build.txt" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/.gradle/" />
     <ignored path="$PROJECT_DIR$/build/" />
@@ -31,6 +28,12 @@
     <ignored path="$PROJECT_DIR$/../../BouncyCastle/BouncyCastle/tls/.gradle/" />
     <ignored path="$PROJECT_DIR$/../../BouncyCastle/BouncyCastle/tls/build/" />
     <ignored path="$PROJECT_DIR$/../../BouncyCastle/BouncyCastle/tls/out/" />
+    <ignored path="$PROJECT_DIR$/../../BouncyCastle-FIPS/BouncyCastle-FIPS/.gradle/" />
+    <ignored path="$PROJECT_DIR$/../../BouncyCastle-FIPS/BouncyCastle-FIPS/build/" />
+    <ignored path="$PROJECT_DIR$/../../BouncyCastle-FIPS/BouncyCastle-FIPS/out/" />
+    <ignored path="$PROJECT_DIR$/../../Gnu-Crypt/Gnu-Crypt/.gradle/" />
+    <ignored path="$PROJECT_DIR$/../../Gnu-Crypt/Gnu-Crypt/build/" />
+    <ignored path="$PROJECT_DIR$/../../Gnu-Crypt/Gnu-Crypt/out/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -39,7 +42,13 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="ExternalProjectsData">
+    <projectState path="$PROJECT_DIR$/../../BouncyCastle-FIPS/BouncyCastle-FIPS">
+      <ProjectState />
+    </projectState>
     <projectState path="$PROJECT_DIR$/../../BouncyCastle/BouncyCastle">
+      <ProjectState />
+    </projectState>
+    <projectState path="$PROJECT_DIR$/../../Gnu-Crypt/Gnu-Crypt">
       <ProjectState />
     </projectState>
     <projectState path="$PROJECT_DIR$">
@@ -68,28 +77,14 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="build.gradle" pinned="false" current-in-tab="false">
+      <file leaf-file-name="build.gradle" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/build.gradle">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="180">
+            <state relative-caret-position="-619">
               <caret line="12" selection-start-line="12" selection-end-line="12" selection-end-column="20" />
               <folding>
                 <element signature="n#!!doc" expanded="true" />
               </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="workspace.xml" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/../../BouncyCastle/BouncyCastle/.idea/workspace.xml">
-          <provider selected="true" editor-type-id="text-editor" />
-        </entry>
-      </file>
-      <file leaf-file-name="MultiFormatProperties.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/com/distrimind/util/properties/MultiFormatProperties.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="255">
-              <caret line="114" column="3" selection-start-line="114" selection-start-column="3" selection-end-line="114" selection-end-column="3" />
             </state>
           </provider>
         </entry>
@@ -102,18 +97,23 @@
         <option value="Jason Mahdjoub &lt;jason.mahdjoub@distri-mind.fr&gt;" />
       </list>
     </option>
-    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/../../BouncyCastle" />
+    <option name="ROOT_SYNC" value="SYNC" />
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
   </component>
   <component name="GradleLocalSettings">
     <option name="myGradleHomes">
       <map>
+        <entry key="$PROJECT_DIR$/../../BouncyCastle-FIPS/BouncyCastle-FIPS" value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7" />
         <entry key="$PROJECT_DIR$/../../BouncyCastle/BouncyCastle" value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-bin/73xux3q4721jgr4pjvqf9o30/gradle-4.7" />
-        <entry key="$PROJECT_DIR$" value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-bin/73xux3q4721jgr4pjvqf9o30/gradle-4.7" />
+        <entry key="$PROJECT_DIR$/../../Gnu-Crypt/Gnu-Crypt" value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7" />
+        <entry key="$PROJECT_DIR$" value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7" />
       </map>
     </option>
     <option name="myGradleVersions">
       <map>
+        <entry key="$PROJECT_DIR$/../../BouncyCastle-FIPS/BouncyCastle-FIPS" value="4.7" />
         <entry key="$PROJECT_DIR$/../../BouncyCastle/BouncyCastle" value="4.7" />
+        <entry key="$PROJECT_DIR$/../../Gnu-Crypt/Gnu-Crypt" value="4.7" />
         <entry key="$PROJECT_DIR$" value="4.7" />
       </map>
     </option>
@@ -162,6 +162,38 @@
         <entry>
           <key>
             <ExternalProjectPojo>
+              <option name="name" value="BouncyCastle-FIPS" />
+              <option name="path" value="$PROJECT_DIR$/../../BouncyCastle-FIPS/BouncyCastle-FIPS" />
+            </ExternalProjectPojo>
+          </key>
+          <value>
+            <list>
+              <ExternalProjectPojo>
+                <option name="name" value="BouncyCastle-FIPS" />
+                <option name="path" value="$PROJECT_DIR$/../../BouncyCastle-FIPS/BouncyCastle-FIPS" />
+              </ExternalProjectPojo>
+            </list>
+          </value>
+        </entry>
+        <entry>
+          <key>
+            <ExternalProjectPojo>
+              <option name="name" value="Gnu-Crypt" />
+              <option name="path" value="$PROJECT_DIR$/../../Gnu-Crypt/Gnu-Crypt" />
+            </ExternalProjectPojo>
+          </key>
+          <value>
+            <list>
+              <ExternalProjectPojo>
+                <option name="name" value="Gnu-Crypt" />
+                <option name="path" value="$PROJECT_DIR$/../../Gnu-Crypt/Gnu-Crypt" />
+              </ExternalProjectPojo>
+            </list>
+          </value>
+        </entry>
+        <entry>
+          <key>
+            <ExternalProjectPojo>
               <option name="name" value="Utils" />
               <option name="path" value="$PROJECT_DIR$" />
             </ExternalProjectPojo>
@@ -179,6 +211,213 @@
     </option>
     <option name="availableTasks">
       <map>
+        <entry key="$PROJECT_DIR$/../../BouncyCastle-FIPS/BouncyCastle-FIPS">
+          <value>
+            <list>
+              <ExternalTaskPojo>
+                <option name="description" value="Publishes Maven publication 'mavenJava' to Maven repository 'maven'." />
+                <option name="linkedExternalProjectPath" value="$PROJECT_DIR$/../../BouncyCastle-FIPS/BouncyCastle-FIPS" />
+                <option name="name" value="publishMavenJavaPublicationToMavenRepository" />
+              </ExternalTaskPojo>
+              <ExternalTaskPojo>
+                <option name="description" value="Displays the sub-projects of root project 'BouncyCastle-FIPS'." />
+                <option name="linkedExternalProjectPath" value="$PROJECT_DIR$/../../BouncyCastle-FIPS/BouncyCastle-FIPS" />
+                <option name="name" value="projects" />
+              </ExternalTaskPojo>
+              <ExternalTaskPojo>
+                <option name="description" value="Generates Gradle wrapper files." />
+                <option name="linkedExternalProjectPath" value="$PROJECT_DIR$/../../BouncyCastle-FIPS/BouncyCastle-FIPS" />
+                <option name="name" value="wrapper" />
+              </ExternalTaskPojo>
+              <ExternalTaskPojo>
+                <option name="linkedExternalProjectPath" value="$PROJECT_DIR$/../../BouncyCastle-FIPS/BouncyCastle-FIPS" />
+                <option name="name" value="sourcesJar" />
+              </ExternalTaskPojo>
+              <ExternalTaskPojo>
+                <option name="description" value="Generates the Eclipse classpath file." />
+                <option name="linkedExternalProjectPath" value="$PROJECT_DIR$/../../BouncyCastle-FIPS/BouncyCastle-FIPS" />
+                <option name="name" value="eclipseClasspath" />
+              </ExternalTaskPojo>
+              <ExternalTaskPojo>
+                <option name="description" value="Assembles a jar archive containing the main classes." />
+                <option name="linkedExternalProjectPath" value="$PROJECT_DIR$/../../BouncyCastle-FIPS/BouncyCastle-FIPS" />
+                <option name="name" value="jar" />
+              </ExternalTaskPojo>
+              <ExternalTaskPojo>
+                <option name="description" value="Displays the configuration model of root project 'BouncyCastle-FIPS'. [incubating]" />
+                <option name="linkedExternalProjectPath" value="$PROJECT_DIR$/../../BouncyCastle-FIPS/BouncyCastle-FIPS" />
+                <option name="name" value="model" />
+              </ExternalTaskPojo>
+              <ExternalTaskPojo>
+                <option name="description" value="Processes main resources." />
+                <option name="linkedExternalProjectPath" value="$PROJECT_DIR$/../../BouncyCastle-FIPS/BouncyCastle-FIPS" />
+                <option name="name" value="processResources" />
+              </ExternalTaskPojo>
+              <ExternalTaskPojo>
+                <option name="description" value="Displays the tasks runnable from root project 'BouncyCastle-FIPS'." />
+                <option name="linkedExternalProjectPath" value="$PROJECT_DIR$/../../BouncyCastle-FIPS/BouncyCastle-FIPS" />
+                <option name="name" value="tasks" />
+              </ExternalTaskPojo>
+              <ExternalTaskPojo>
+                <option name="description" value="Initializes a new Gradle build." />
+                <option name="linkedExternalProjectPath" value="$PROJECT_DIR$/../../BouncyCastle-FIPS/BouncyCastle-FIPS" />
+                <option name="name" value="init" />
+              </ExternalTaskPojo>
+              <ExternalTaskPojo>
+                <option name="description" value="Runs the unit tests." />
+                <option name="linkedExternalProjectPath" value="$PROJECT_DIR$/../../BouncyCastle-FIPS/BouncyCastle-FIPS" />
+                <option name="name" value="test" />
+              </ExternalTaskPojo>
+              <ExternalTaskPojo>
+                <option name="description" value="Compiles main Java source." />
+                <option name="linkedExternalProjectPath" value="$PROJECT_DIR$/../../BouncyCastle-FIPS/BouncyCastle-FIPS" />
+                <option name="name" value="compileJava" />
+              </ExternalTaskPojo>
+              <ExternalTaskPojo>
+                <option name="description" value="Runs all checks." />
+                <option name="linkedExternalProjectPath" value="$PROJECT_DIR$/../../BouncyCastle-FIPS/BouncyCastle-FIPS" />
+                <option name="name" value="check" />
+              </ExternalTaskPojo>
+              <ExternalTaskPojo>
+                <option name="description" value="Displays all dependencies declared in root project 'BouncyCastle-FIPS'." />
+                <option name="linkedExternalProjectPath" value="$PROJECT_DIR$/../../BouncyCastle-FIPS/BouncyCastle-FIPS" />
+                <option name="name" value="dependencies" />
+              </ExternalTaskPojo>
+              <ExternalTaskPojo>
+                <option name="description" value="Generates all Eclipse files." />
+                <option name="linkedExternalProjectPath" value="$PROJECT_DIR$/../../BouncyCastle-FIPS/BouncyCastle-FIPS" />
+                <option name="name" value="eclipse" />
+              </ExternalTaskPojo>
+              <ExternalTaskPojo>
+                <option name="description" value="Processes test resources." />
+                <option name="linkedExternalProjectPath" value="$PROJECT_DIR$/../../BouncyCastle-FIPS/BouncyCastle-FIPS" />
+                <option name="name" value="processTestResources" />
+              </ExternalTaskPojo>
+              <ExternalTaskPojo>
+                <option name="description" value="Generates the Eclipse JDT settings file." />
+                <option name="linkedExternalProjectPath" value="$PROJECT_DIR$/../../BouncyCastle-FIPS/BouncyCastle-FIPS" />
+                <option name="name" value="eclipseJdt" />
+              </ExternalTaskPojo>
+              <ExternalTaskPojo>
+                <option name="description" value="Assembles and tests this project and all projects it depends on." />
+                <option name="linkedExternalProjectPath" value="$PROJECT_DIR$/../../BouncyCastle-FIPS/BouncyCastle-FIPS" />
+                <option name="name" value="buildNeeded" />
+              </ExternalTaskPojo>
+              <ExternalTaskPojo>
+                <option name="description" value="Generates the Eclipse project file." />
+                <option name="linkedExternalProjectPath" value="$PROJECT_DIR$/../../BouncyCastle-FIPS/BouncyCastle-FIPS" />
+                <option name="name" value="eclipseProject" />
+              </ExternalTaskPojo>
+              <ExternalTaskPojo>
+                <option name="description" value="Displays the components produced by root project 'BouncyCastle-FIPS'. [incubating]" />
+                <option name="linkedExternalProjectPath" value="$PROJECT_DIR$/../../BouncyCastle-FIPS/BouncyCastle-FIPS" />
+                <option name="name" value="components" />
+              </ExternalTaskPojo>
+              <ExternalTaskPojo>
+                <option name="description" value="Assembles and tests this project and all projects that depend on it." />
+                <option name="linkedExternalProjectPath" value="$PROJECT_DIR$/../../BouncyCastle-FIPS/BouncyCastle-FIPS" />
+                <option name="name" value="buildDependents" />
+              </ExternalTaskPojo>
+              <ExternalTaskPojo>
+                <option name="linkedExternalProjectPath" value="$PROJECT_DIR$/../../BouncyCastle-FIPS/BouncyCastle-FIPS" />
+                <option name="name" value="cleanEclipseClasspath" />
+              </ExternalTaskPojo>
+              <ExternalTaskPojo>
+                <option name="description" value="Cleans all Eclipse files." />
+                <option name="linkedExternalProjectPath" value="$PROJECT_DIR$/../../BouncyCastle-FIPS/BouncyCastle-FIPS" />
+                <option name="name" value="cleanEclipse" />
+              </ExternalTaskPojo>
+              <ExternalTaskPojo>
+                <option name="description" value="Assembles main classes." />
+                <option name="linkedExternalProjectPath" value="$PROJECT_DIR$/../../BouncyCastle-FIPS/BouncyCastle-FIPS" />
+                <option name="name" value="classes" />
+              </ExternalTaskPojo>
+              <ExternalTaskPojo>
+                <option name="description" value="Displays the dependent components of components in root project 'BouncyCastle-FIPS'. [incubating]" />
+                <option name="linkedExternalProjectPath" value="$PROJECT_DIR$/../../BouncyCastle-FIPS/BouncyCastle-FIPS" />
+                <option name="name" value="dependentComponents" />
+              </ExternalTaskPojo>
+              <ExternalTaskPojo>
+                <option name="description" value="Displays all buildscript dependencies declared in root project 'BouncyCastle-FIPS'." />
+                <option name="linkedExternalProjectPath" value="$PROJECT_DIR$/../../BouncyCastle-FIPS/BouncyCastle-FIPS" />
+                <option name="name" value="buildEnvironment" />
+              </ExternalTaskPojo>
+              <ExternalTaskPojo>
+                <option name="linkedExternalProjectPath" value="$PROJECT_DIR$/../../BouncyCastle-FIPS/BouncyCastle-FIPS" />
+                <option name="name" value="cleanEclipseProject" />
+              </ExternalTaskPojo>
+              <ExternalTaskPojo>
+                <option name="description" value="Assembles test classes." />
+                <option name="linkedExternalProjectPath" value="$PROJECT_DIR$/../../BouncyCastle-FIPS/BouncyCastle-FIPS" />
+                <option name="name" value="testClasses" />
+              </ExternalTaskPojo>
+              <ExternalTaskPojo>
+                <option name="description" value="Generates Javadoc API documentation for the main source code." />
+                <option name="linkedExternalProjectPath" value="$PROJECT_DIR$/../../BouncyCastle-FIPS/BouncyCastle-FIPS" />
+                <option name="name" value="javadoc" />
+              </ExternalTaskPojo>
+              <ExternalTaskPojo>
+                <option name="description" value="Generates the Maven POM file for publication 'mavenJava'." />
+                <option name="linkedExternalProjectPath" value="$PROJECT_DIR$/../../BouncyCastle-FIPS/BouncyCastle-FIPS" />
+                <option name="name" value="generatePomFileForMavenJavaPublication" />
+              </ExternalTaskPojo>
+              <ExternalTaskPojo>
+                <option name="linkedExternalProjectPath" value="$PROJECT_DIR$/../../BouncyCastle-FIPS/BouncyCastle-FIPS" />
+                <option name="name" value="cleanEclipseJdt" />
+              </ExternalTaskPojo>
+              <ExternalTaskPojo>
+                <option name="description" value="Publishes Maven publication 'mavenJava' to the local Maven repository." />
+                <option name="linkedExternalProjectPath" value="$PROJECT_DIR$/../../BouncyCastle-FIPS/BouncyCastle-FIPS" />
+                <option name="name" value="publishMavenJavaPublicationToMavenLocal" />
+              </ExternalTaskPojo>
+              <ExternalTaskPojo>
+                <option name="description" value="Displays the insight into a specific dependency in root project 'BouncyCastle-FIPS'." />
+                <option name="linkedExternalProjectPath" value="$PROJECT_DIR$/../../BouncyCastle-FIPS/BouncyCastle-FIPS" />
+                <option name="name" value="dependencyInsight" />
+              </ExternalTaskPojo>
+              <ExternalTaskPojo>
+                <option name="description" value="Assembles the outputs of this project." />
+                <option name="linkedExternalProjectPath" value="$PROJECT_DIR$/../../BouncyCastle-FIPS/BouncyCastle-FIPS" />
+                <option name="name" value="assemble" />
+              </ExternalTaskPojo>
+              <ExternalTaskPojo>
+                <option name="description" value="Deletes the build directory." />
+                <option name="linkedExternalProjectPath" value="$PROJECT_DIR$/../../BouncyCastle-FIPS/BouncyCastle-FIPS" />
+                <option name="name" value="clean" />
+              </ExternalTaskPojo>
+              <ExternalTaskPojo>
+                <option name="description" value="Compiles test Java source." />
+                <option name="linkedExternalProjectPath" value="$PROJECT_DIR$/../../BouncyCastle-FIPS/BouncyCastle-FIPS" />
+                <option name="name" value="compileTestJava" />
+              </ExternalTaskPojo>
+              <ExternalTaskPojo>
+                <option name="description" value="Displays a help message." />
+                <option name="linkedExternalProjectPath" value="$PROJECT_DIR$/../../BouncyCastle-FIPS/BouncyCastle-FIPS" />
+                <option name="name" value="help" />
+              </ExternalTaskPojo>
+              <ExternalTaskPojo>
+                <option name="description" value="Assembles and tests this project." />
+                <option name="linkedExternalProjectPath" value="$PROJECT_DIR$/../../BouncyCastle-FIPS/BouncyCastle-FIPS" />
+                <option name="name" value="build" />
+              </ExternalTaskPojo>
+              <ExternalTaskPojo>
+                <option name="description" value="Publishes all publications produced by this project." />
+                <option name="linkedExternalProjectPath" value="$PROJECT_DIR$/../../BouncyCastle-FIPS/BouncyCastle-FIPS" />
+                <option name="name" value="publish" />
+              </ExternalTaskPojo>
+              <ExternalTaskPojo>
+                <option name="description" value="Publishes all Maven publications produced by this project to the local Maven cache." />
+                <option name="linkedExternalProjectPath" value="$PROJECT_DIR$/../../BouncyCastle-FIPS/BouncyCastle-FIPS" />
+                <option name="name" value="publishToMavenLocal" />
+              </ExternalTaskPojo>
+              <ExternalTaskPojo>
+                <option name="description" value="Displays the properties of root project 'BouncyCastle-FIPS'." />
+                <option name="linkedExternalProjectPath" value="$PROJECT_DIR$/../../BouncyCastle-FIPS/BouncyCastle-FIPS" />
+                <option name="name" value="properties" />
+              </ExternalTaskPojo>
+            </list>
+          </value>
+        </entry>
         <entry key="$PROJECT_DIR$/../../BouncyCastle/BouncyCastle">
           <value>
             <list>
@@ -1817,6 +2056,213 @@
             </list>
           </value>
         </entry>
+        <entry key="$PROJECT_DIR$/../../Gnu-Crypt/Gnu-Crypt">
+          <value>
+            <list>
+              <ExternalTaskPojo>
+                <option name="description" value="Publishes Maven publication 'mavenJava' to Maven repository 'maven'." />
+                <option name="linkedExternalProjectPath" value="$PROJECT_DIR$/../../Gnu-Crypt/Gnu-Crypt" />
+                <option name="name" value="publishMavenJavaPublicationToMavenRepository" />
+              </ExternalTaskPojo>
+              <ExternalTaskPojo>
+                <option name="description" value="Displays the sub-projects of root project 'Gnu-Crypt'." />
+                <option name="linkedExternalProjectPath" value="$PROJECT_DIR$/../../Gnu-Crypt/Gnu-Crypt" />
+                <option name="name" value="projects" />
+              </ExternalTaskPojo>
+              <ExternalTaskPojo>
+                <option name="description" value="Generates Gradle wrapper files." />
+                <option name="linkedExternalProjectPath" value="$PROJECT_DIR$/../../Gnu-Crypt/Gnu-Crypt" />
+                <option name="name" value="wrapper" />
+              </ExternalTaskPojo>
+              <ExternalTaskPojo>
+                <option name="linkedExternalProjectPath" value="$PROJECT_DIR$/../../Gnu-Crypt/Gnu-Crypt" />
+                <option name="name" value="sourcesJar" />
+              </ExternalTaskPojo>
+              <ExternalTaskPojo>
+                <option name="description" value="Generates the Eclipse classpath file." />
+                <option name="linkedExternalProjectPath" value="$PROJECT_DIR$/../../Gnu-Crypt/Gnu-Crypt" />
+                <option name="name" value="eclipseClasspath" />
+              </ExternalTaskPojo>
+              <ExternalTaskPojo>
+                <option name="description" value="Assembles a jar archive containing the main classes." />
+                <option name="linkedExternalProjectPath" value="$PROJECT_DIR$/../../Gnu-Crypt/Gnu-Crypt" />
+                <option name="name" value="jar" />
+              </ExternalTaskPojo>
+              <ExternalTaskPojo>
+                <option name="description" value="Displays the configuration model of root project 'Gnu-Crypt'. [incubating]" />
+                <option name="linkedExternalProjectPath" value="$PROJECT_DIR$/../../Gnu-Crypt/Gnu-Crypt" />
+                <option name="name" value="model" />
+              </ExternalTaskPojo>
+              <ExternalTaskPojo>
+                <option name="description" value="Processes main resources." />
+                <option name="linkedExternalProjectPath" value="$PROJECT_DIR$/../../Gnu-Crypt/Gnu-Crypt" />
+                <option name="name" value="processResources" />
+              </ExternalTaskPojo>
+              <ExternalTaskPojo>
+                <option name="description" value="Displays the tasks runnable from root project 'Gnu-Crypt'." />
+                <option name="linkedExternalProjectPath" value="$PROJECT_DIR$/../../Gnu-Crypt/Gnu-Crypt" />
+                <option name="name" value="tasks" />
+              </ExternalTaskPojo>
+              <ExternalTaskPojo>
+                <option name="description" value="Initializes a new Gradle build." />
+                <option name="linkedExternalProjectPath" value="$PROJECT_DIR$/../../Gnu-Crypt/Gnu-Crypt" />
+                <option name="name" value="init" />
+              </ExternalTaskPojo>
+              <ExternalTaskPojo>
+                <option name="description" value="Runs the unit tests." />
+                <option name="linkedExternalProjectPath" value="$PROJECT_DIR$/../../Gnu-Crypt/Gnu-Crypt" />
+                <option name="name" value="test" />
+              </ExternalTaskPojo>
+              <ExternalTaskPojo>
+                <option name="description" value="Compiles main Java source." />
+                <option name="linkedExternalProjectPath" value="$PROJECT_DIR$/../../Gnu-Crypt/Gnu-Crypt" />
+                <option name="name" value="compileJava" />
+              </ExternalTaskPojo>
+              <ExternalTaskPojo>
+                <option name="description" value="Runs all checks." />
+                <option name="linkedExternalProjectPath" value="$PROJECT_DIR$/../../Gnu-Crypt/Gnu-Crypt" />
+                <option name="name" value="check" />
+              </ExternalTaskPojo>
+              <ExternalTaskPojo>
+                <option name="description" value="Displays all dependencies declared in root project 'Gnu-Crypt'." />
+                <option name="linkedExternalProjectPath" value="$PROJECT_DIR$/../../Gnu-Crypt/Gnu-Crypt" />
+                <option name="name" value="dependencies" />
+              </ExternalTaskPojo>
+              <ExternalTaskPojo>
+                <option name="description" value="Generates all Eclipse files." />
+                <option name="linkedExternalProjectPath" value="$PROJECT_DIR$/../../Gnu-Crypt/Gnu-Crypt" />
+                <option name="name" value="eclipse" />
+              </ExternalTaskPojo>
+              <ExternalTaskPojo>
+                <option name="description" value="Processes test resources." />
+                <option name="linkedExternalProjectPath" value="$PROJECT_DIR$/../../Gnu-Crypt/Gnu-Crypt" />
+                <option name="name" value="processTestResources" />
+              </ExternalTaskPojo>
+              <ExternalTaskPojo>
+                <option name="description" value="Generates the Eclipse JDT settings file." />
+                <option name="linkedExternalProjectPath" value="$PROJECT_DIR$/../../Gnu-Crypt/Gnu-Crypt" />
+                <option name="name" value="eclipseJdt" />
+              </ExternalTaskPojo>
+              <ExternalTaskPojo>
+                <option name="description" value="Assembles and tests this project and all projects it depends on." />
+                <option name="linkedExternalProjectPath" value="$PROJECT_DIR$/../../Gnu-Crypt/Gnu-Crypt" />
+                <option name="name" value="buildNeeded" />
+              </ExternalTaskPojo>
+              <ExternalTaskPojo>
+                <option name="description" value="Generates the Eclipse project file." />
+                <option name="linkedExternalProjectPath" value="$PROJECT_DIR$/../../Gnu-Crypt/Gnu-Crypt" />
+                <option name="name" value="eclipseProject" />
+              </ExternalTaskPojo>
+              <ExternalTaskPojo>
+                <option name="description" value="Displays the components produced by root project 'Gnu-Crypt'. [incubating]" />
+                <option name="linkedExternalProjectPath" value="$PROJECT_DIR$/../../Gnu-Crypt/Gnu-Crypt" />
+                <option name="name" value="components" />
+              </ExternalTaskPojo>
+              <ExternalTaskPojo>
+                <option name="description" value="Assembles and tests this project and all projects that depend on it." />
+                <option name="linkedExternalProjectPath" value="$PROJECT_DIR$/../../Gnu-Crypt/Gnu-Crypt" />
+                <option name="name" value="buildDependents" />
+              </ExternalTaskPojo>
+              <ExternalTaskPojo>
+                <option name="linkedExternalProjectPath" value="$PROJECT_DIR$/../../Gnu-Crypt/Gnu-Crypt" />
+                <option name="name" value="cleanEclipseClasspath" />
+              </ExternalTaskPojo>
+              <ExternalTaskPojo>
+                <option name="description" value="Cleans all Eclipse files." />
+                <option name="linkedExternalProjectPath" value="$PROJECT_DIR$/../../Gnu-Crypt/Gnu-Crypt" />
+                <option name="name" value="cleanEclipse" />
+              </ExternalTaskPojo>
+              <ExternalTaskPojo>
+                <option name="description" value="Assembles main classes." />
+                <option name="linkedExternalProjectPath" value="$PROJECT_DIR$/../../Gnu-Crypt/Gnu-Crypt" />
+                <option name="name" value="classes" />
+              </ExternalTaskPojo>
+              <ExternalTaskPojo>
+                <option name="description" value="Displays the dependent components of components in root project 'Gnu-Crypt'. [incubating]" />
+                <option name="linkedExternalProjectPath" value="$PROJECT_DIR$/../../Gnu-Crypt/Gnu-Crypt" />
+                <option name="name" value="dependentComponents" />
+              </ExternalTaskPojo>
+              <ExternalTaskPojo>
+                <option name="description" value="Displays all buildscript dependencies declared in root project 'Gnu-Crypt'." />
+                <option name="linkedExternalProjectPath" value="$PROJECT_DIR$/../../Gnu-Crypt/Gnu-Crypt" />
+                <option name="name" value="buildEnvironment" />
+              </ExternalTaskPojo>
+              <ExternalTaskPojo>
+                <option name="linkedExternalProjectPath" value="$PROJECT_DIR$/../../Gnu-Crypt/Gnu-Crypt" />
+                <option name="name" value="cleanEclipseProject" />
+              </ExternalTaskPojo>
+              <ExternalTaskPojo>
+                <option name="description" value="Assembles test classes." />
+                <option name="linkedExternalProjectPath" value="$PROJECT_DIR$/../../Gnu-Crypt/Gnu-Crypt" />
+                <option name="name" value="testClasses" />
+              </ExternalTaskPojo>
+              <ExternalTaskPojo>
+                <option name="description" value="Generates Javadoc API documentation for the main source code." />
+                <option name="linkedExternalProjectPath" value="$PROJECT_DIR$/../../Gnu-Crypt/Gnu-Crypt" />
+                <option name="name" value="javadoc" />
+              </ExternalTaskPojo>
+              <ExternalTaskPojo>
+                <option name="description" value="Generates the Maven POM file for publication 'mavenJava'." />
+                <option name="linkedExternalProjectPath" value="$PROJECT_DIR$/../../Gnu-Crypt/Gnu-Crypt" />
+                <option name="name" value="generatePomFileForMavenJavaPublication" />
+              </ExternalTaskPojo>
+              <ExternalTaskPojo>
+                <option name="linkedExternalProjectPath" value="$PROJECT_DIR$/../../Gnu-Crypt/Gnu-Crypt" />
+                <option name="name" value="cleanEclipseJdt" />
+              </ExternalTaskPojo>
+              <ExternalTaskPojo>
+                <option name="description" value="Publishes Maven publication 'mavenJava' to the local Maven repository." />
+                <option name="linkedExternalProjectPath" value="$PROJECT_DIR$/../../Gnu-Crypt/Gnu-Crypt" />
+                <option name="name" value="publishMavenJavaPublicationToMavenLocal" />
+              </ExternalTaskPojo>
+              <ExternalTaskPojo>
+                <option name="description" value="Displays the insight into a specific dependency in root project 'Gnu-Crypt'." />
+                <option name="linkedExternalProjectPath" value="$PROJECT_DIR$/../../Gnu-Crypt/Gnu-Crypt" />
+                <option name="name" value="dependencyInsight" />
+              </ExternalTaskPojo>
+              <ExternalTaskPojo>
+                <option name="description" value="Assembles the outputs of this project." />
+                <option name="linkedExternalProjectPath" value="$PROJECT_DIR$/../../Gnu-Crypt/Gnu-Crypt" />
+                <option name="name" value="assemble" />
+              </ExternalTaskPojo>
+              <ExternalTaskPojo>
+                <option name="description" value="Deletes the build directory." />
+                <option name="linkedExternalProjectPath" value="$PROJECT_DIR$/../../Gnu-Crypt/Gnu-Crypt" />
+                <option name="name" value="clean" />
+              </ExternalTaskPojo>
+              <ExternalTaskPojo>
+                <option name="description" value="Compiles test Java source." />
+                <option name="linkedExternalProjectPath" value="$PROJECT_DIR$/../../Gnu-Crypt/Gnu-Crypt" />
+                <option name="name" value="compileTestJava" />
+              </ExternalTaskPojo>
+              <ExternalTaskPojo>
+                <option name="description" value="Displays a help message." />
+                <option name="linkedExternalProjectPath" value="$PROJECT_DIR$/../../Gnu-Crypt/Gnu-Crypt" />
+                <option name="name" value="help" />
+              </ExternalTaskPojo>
+              <ExternalTaskPojo>
+                <option name="description" value="Assembles and tests this project." />
+                <option name="linkedExternalProjectPath" value="$PROJECT_DIR$/../../Gnu-Crypt/Gnu-Crypt" />
+                <option name="name" value="build" />
+              </ExternalTaskPojo>
+              <ExternalTaskPojo>
+                <option name="description" value="Publishes all publications produced by this project." />
+                <option name="linkedExternalProjectPath" value="$PROJECT_DIR$/../../Gnu-Crypt/Gnu-Crypt" />
+                <option name="name" value="publish" />
+              </ExternalTaskPojo>
+              <ExternalTaskPojo>
+                <option name="description" value="Publishes all Maven publications produced by this project to the local Maven cache." />
+                <option name="linkedExternalProjectPath" value="$PROJECT_DIR$/../../Gnu-Crypt/Gnu-Crypt" />
+                <option name="name" value="publishToMavenLocal" />
+              </ExternalTaskPojo>
+              <ExternalTaskPojo>
+                <option name="description" value="Displays the properties of root project 'Gnu-Crypt'." />
+                <option name="linkedExternalProjectPath" value="$PROJECT_DIR$/../../Gnu-Crypt/Gnu-Crypt" />
+                <option name="name" value="properties" />
+              </ExternalTaskPojo>
+            </list>
+          </value>
+        </entry>
         <entry key="$PROJECT_DIR$">
           <value>
             <list>
@@ -2036,6 +2482,11 @@
     </option>
     <option name="modificationStamps">
       <map>
+        <entry key="$PROJECT_DIR$/../../BouncyCastle-FIPS/BouncyCastle-FIPS" value="6102612391000" />
+        <entry key="$PROJECT_DIR$/../../BouncyCastle-FIPS/BouncyCastle-FIPS/.gradle" value="0" />
+        <entry key="$PROJECT_DIR$/../../BouncyCastle-FIPS/BouncyCastle-FIPS/build.gradle" value="3969972386" />
+        <entry key="$PROJECT_DIR$/../../BouncyCastle-FIPS/BouncyCastle-FIPS/gradle.properties" value="2648172438" />
+        <entry key="$PROJECT_DIR$/../../BouncyCastle-FIPS/BouncyCastle-FIPS/settings.gradle" value="422115286" />
         <entry key="$PROJECT_DIR$/../../BouncyCastle/BouncyCastle" value="13738388427000" />
         <entry key="$PROJECT_DIR$/../../BouncyCastle/BouncyCastle/.gradle" value="0" />
         <entry key="$PROJECT_DIR$/../../BouncyCastle/BouncyCastle/build.gradle" value="706268080" />
@@ -2046,6 +2497,11 @@
         <entry key="$PROJECT_DIR$/../../BouncyCastle/BouncyCastle/prov/build.gradle" value="2267644945" />
         <entry key="$PROJECT_DIR$/../../BouncyCastle/BouncyCastle/settings.gradle" value="4156024651" />
         <entry key="$PROJECT_DIR$/../../BouncyCastle/BouncyCastle/tls/build.gradle" value="2463207222" />
+        <entry key="$PROJECT_DIR$/../../Gnu-Crypt/Gnu-Crypt" value="6106517924000" />
+        <entry key="$PROJECT_DIR$/../../Gnu-Crypt/Gnu-Crypt/.gradle" value="0" />
+        <entry key="$PROJECT_DIR$/../../Gnu-Crypt/Gnu-Crypt/build.gradle" value="2690118812" />
+        <entry key="$PROJECT_DIR$/../../Gnu-Crypt/Gnu-Crypt/gradle.properties" value="2396890427" />
+        <entry key="$PROJECT_DIR$/../../Gnu-Crypt/Gnu-Crypt/settings.gradle" value="2809024493" />
         <entry key="$PROJECT_DIR$" value="7633083835000" />
         <entry key="$PROJECT_DIR$/.gradle" value="0" />
         <entry key="$PROJECT_DIR$/build.gradle" value="1344982988" />
@@ -2056,6 +2512,105 @@
     </option>
     <option name="projectBuildClasspath">
       <map>
+        <entry key="$PROJECT_DIR$/../../BouncyCastle-FIPS/BouncyCastle-FIPS">
+          <value>
+            <ExternalProjectBuildClasspathPojo>
+              <option name="modulesBuildClasspath">
+                <map>
+                  <entry key="$PROJECT_DIR$/../../BouncyCastle-FIPS/BouncyCastle-FIPS">
+                    <value>
+                      <ExternalModuleBuildClasspathPojo>
+                        <option name="path" value="$PROJECT_DIR$/../../BouncyCastle-FIPS/BouncyCastle-FIPS" />
+                      </ExternalModuleBuildClasspathPojo>
+                    </value>
+                  </entry>
+                </map>
+              </option>
+              <option name="name" value="BouncyCastle-FIPS" />
+              <option name="projectBuildClasspath">
+                <list>
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/gradle-logging-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/gradle-wrapper-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/gradle-runtime-api-info-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/gradle-native-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/gradle-process-services-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/gradle-kotlin-dsl-tooling-builders-0.16.3.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/gradle-build-cache-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/gradle-core-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/groovy-all-2.4.12.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/gradle-model-core-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/gradle-base-services-groovy-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/ant-launcher-1.9.9.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/gradle-installation-beacon-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/ant-1.9.9.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/gradle-launcher-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/gradle-jvm-services-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/gradle-messaging-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/gradle-build-option-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/gradle-base-services-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/gradle-persistent-cache-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/gradle-docs-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/gradle-cli-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/gradle-tooling-api-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/gradle-kotlin-dsl-tooling-models-0.16.3.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/gradle-core-api-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/gradle-model-groovy-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/gradle-resources-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/gradle-kotlin-dsl-0.16.3.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/plugins/gradle-plugin-use-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/plugins/gradle-announce-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/plugins/gradle-tooling-api-builders-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/plugins/gradle-ide-play-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/plugins/gradle-language-scala-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/plugins/gradle-javascript-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/plugins/gradle-version-control-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/plugins/gradle-language-native-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/plugins/gradle-build-comparison-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/plugins/gradle-plugins-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/plugins/gradle-jacoco-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/plugins/gradle-platform-native-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/plugins/gradle-ide-native-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/plugins/gradle-diagnostics-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/plugins/gradle-plugin-development-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/plugins/gradle-workers-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/plugins/gradle-build-cache-http-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/plugins/gradle-testing-native-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/plugins/gradle-dependency-management-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/plugins/gradle-composite-builds-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/plugins/gradle-testing-junit-platform-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/plugins/gradle-publish-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/plugins/gradle-ear-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/plugins/gradle-language-jvm-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/plugins/gradle-platform-base-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/plugins/gradle-resources-gcs-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/plugins/gradle-ide-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/plugins/gradle-platform-play-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/plugins/gradle-resources-http-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/plugins/gradle-scala-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/plugins/gradle-language-java-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/plugins/gradle-language-groovy-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/plugins/gradle-osgi-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/plugins/gradle-reporting-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/plugins/gradle-antlr-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/plugins/gradle-code-quality-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/plugins/gradle-resources-s3-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/plugins/gradle-signing-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/plugins/gradle-resources-sftp-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/plugins/gradle-ivy-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/plugins/gradle-test-kit-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/plugins/gradle-build-init-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/plugins/gradle-testing-jvm-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/plugins/gradle-testing-base-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/plugins/gradle-platform-jvm-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/plugins/ivy-2.2.0.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/plugins/gradle-maven-4.7.jar" />
+                  <option value="$PROJECT_DIR$/../../BouncyCastle-FIPS/BouncyCastle-FIPS/buildSrc/src/main/java" />
+                  <option value="$PROJECT_DIR$/../../BouncyCastle-FIPS/BouncyCastle-FIPS/buildSrc/src/main/groovy" />
+                </list>
+              </option>
+            </ExternalProjectBuildClasspathPojo>
+          </value>
+        </entry>
         <entry key="$PROJECT_DIR$/../../BouncyCastle/BouncyCastle">
           <value>
             <ExternalProjectBuildClasspathPojo>
@@ -2239,6 +2794,105 @@
             </ExternalProjectBuildClasspathPojo>
           </value>
         </entry>
+        <entry key="$PROJECT_DIR$/../../Gnu-Crypt/Gnu-Crypt">
+          <value>
+            <ExternalProjectBuildClasspathPojo>
+              <option name="modulesBuildClasspath">
+                <map>
+                  <entry key="$PROJECT_DIR$/../../Gnu-Crypt/Gnu-Crypt">
+                    <value>
+                      <ExternalModuleBuildClasspathPojo>
+                        <option name="path" value="$PROJECT_DIR$/../../Gnu-Crypt/Gnu-Crypt" />
+                      </ExternalModuleBuildClasspathPojo>
+                    </value>
+                  </entry>
+                </map>
+              </option>
+              <option name="name" value="Gnu-Crypt" />
+              <option name="projectBuildClasspath">
+                <list>
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/gradle-logging-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/gradle-wrapper-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/gradle-runtime-api-info-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/gradle-native-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/gradle-process-services-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/gradle-kotlin-dsl-tooling-builders-0.16.3.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/gradle-build-cache-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/gradle-core-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/groovy-all-2.4.12.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/gradle-model-core-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/gradle-base-services-groovy-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/ant-launcher-1.9.9.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/gradle-installation-beacon-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/ant-1.9.9.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/gradle-launcher-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/gradle-jvm-services-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/gradle-messaging-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/gradle-build-option-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/gradle-base-services-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/gradle-persistent-cache-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/gradle-docs-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/gradle-cli-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/gradle-tooling-api-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/gradle-kotlin-dsl-tooling-models-0.16.3.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/gradle-core-api-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/gradle-model-groovy-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/gradle-resources-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/gradle-kotlin-dsl-0.16.3.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/plugins/gradle-plugin-use-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/plugins/gradle-announce-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/plugins/gradle-tooling-api-builders-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/plugins/gradle-ide-play-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/plugins/gradle-language-scala-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/plugins/gradle-javascript-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/plugins/gradle-version-control-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/plugins/gradle-language-native-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/plugins/gradle-build-comparison-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/plugins/gradle-plugins-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/plugins/gradle-jacoco-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/plugins/gradle-platform-native-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/plugins/gradle-ide-native-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/plugins/gradle-diagnostics-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/plugins/gradle-plugin-development-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/plugins/gradle-workers-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/plugins/gradle-build-cache-http-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/plugins/gradle-testing-native-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/plugins/gradle-dependency-management-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/plugins/gradle-composite-builds-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/plugins/gradle-testing-junit-platform-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/plugins/gradle-publish-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/plugins/gradle-ear-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/plugins/gradle-language-jvm-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/plugins/gradle-platform-base-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/plugins/gradle-resources-gcs-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/plugins/gradle-ide-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/plugins/gradle-platform-play-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/plugins/gradle-resources-http-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/plugins/gradle-scala-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/plugins/gradle-language-java-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/plugins/gradle-language-groovy-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/plugins/gradle-osgi-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/plugins/gradle-reporting-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/plugins/gradle-antlr-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/plugins/gradle-code-quality-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/plugins/gradle-resources-s3-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/plugins/gradle-signing-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/plugins/gradle-resources-sftp-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/plugins/gradle-ivy-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/plugins/gradle-test-kit-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/plugins/gradle-build-init-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/plugins/gradle-testing-jvm-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/plugins/gradle-testing-base-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/plugins/gradle-platform-jvm-4.7.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/plugins/ivy-2.2.0.jar" />
+                  <option value="/usr/local/Cellar/gradle/4.7/libexec/lib/plugins/gradle-maven-4.7.jar" />
+                  <option value="$PROJECT_DIR$/../../Gnu-Crypt/Gnu-Crypt/buildSrc/src/main/java" />
+                  <option value="$PROJECT_DIR$/../../Gnu-Crypt/Gnu-Crypt/buildSrc/src/main/groovy" />
+                </list>
+              </option>
+            </ExternalProjectBuildClasspathPojo>
+          </value>
+        </entry>
         <entry key="$PROJECT_DIR$">
           <value>
             <ExternalProjectBuildClasspathPojo>
@@ -2413,7 +3067,9 @@
     <option name="projectSyncType">
       <map>
         <entry key="$USER_HOME$/IdeaProjectsDistrimind" value="PREVIEW" />
-        <entry key="$PROJECT_DIR$/../../BouncyCastle/BouncyCastle" value="IMPORT" />
+        <entry key="$PROJECT_DIR$/../../BouncyCastle-FIPS/BouncyCastle-FIPS" value="IMPORT" />
+        <entry key="$PROJECT_DIR$/../../BouncyCastle/BouncyCastle" value="RE_IMPORT" />
+        <entry key="$PROJECT_DIR$/../../Gnu-Crypt/Gnu-Crypt" value="IMPORT" />
         <entry key="$PROJECT_DIR$/.." value="PREVIEW" />
         <entry key="$PROJECT_DIR$" value="RE_IMPORT" />
       </map>
@@ -2439,6 +3095,8 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="PackagesPane" />
+      <pane id="AndroidView" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -2446,47 +3104,10 @@
               <item name="Utils" type="b2602c69:ProjectViewProjectNode" />
               <item name="Utils" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
             </path>
-            <path>
-              <item name="Utils" type="b2602c69:ProjectViewProjectNode" />
-              <item name="Utils" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="Utils" type="b2602c69:ProjectViewProjectNode" />
-              <item name="Utils" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="Utils" type="b2602c69:ProjectViewProjectNode" />
-              <item name="Utils" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="462c0819:PsiDirectoryNode" />
-              <item name="java" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="Utils" type="b2602c69:ProjectViewProjectNode" />
-              <item name="Utils" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="462c0819:PsiDirectoryNode" />
-              <item name="java" type="462c0819:PsiDirectoryNode" />
-              <item name="util" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="Utils" type="b2602c69:ProjectViewProjectNode" />
-              <item name="Utils" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="462c0819:PsiDirectoryNode" />
-              <item name="java" type="462c0819:PsiDirectoryNode" />
-              <item name="util" type="462c0819:PsiDirectoryNode" />
-              <item name="properties" type="462c0819:PsiDirectoryNode" />
-            </path>
           </expand>
           <select />
         </subPane>
       </pane>
-      <pane id="AndroidView" />
-      <pane id="PackagesPane" />
       <pane id="Scope" />
     </panes>
   </component>
@@ -2592,7 +3213,14 @@
       <option name="project" value="LOCAL" />
       <updated>1527156149319</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="Join dependant projects">
+      <created>1527161428588</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1527161428588</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers>
       <Gitlab url="https://gitlab.distri-mind.fr/git">
         <option name="currentProject">
@@ -2604,14 +3232,13 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="69" y="23" width="1611" height="1027" extended-state="6" />
-    <editor active="true" />
     <layout>
       <window_info anchor="right" id="Palette" order="3" />
       <window_info anchor="bottom" id="TODO" order="6" />
       <window_info anchor="right" id="Palette&#9;" order="3" />
       <window_info id="Image Layers" order="2" />
       <window_info anchor="right" id="Capture Analysis" order="3" />
-      <window_info anchor="bottom" id="Event Log" order="7" sideWeight="0.50031036" side_tool="true" visible="true" weight="0.32843652" />
+      <window_info anchor="bottom" id="Event Log" order="7" sideWeight="0.5009311" side_tool="true" visible="true" weight="0.32843652" />
       <window_info anchor="right" id="Maven Projects" order="3" />
       <window_info anchor="bottom" id="Run" order="2" weight="0.32946146" />
       <window_info anchor="bottom" id="Version Control" order="7" sideWeight="0.49534452" weight="0.3809024" />
@@ -2619,6 +3246,7 @@
       <window_info id="Capture Tool" order="2" />
       <window_info id="Designer" order="2" />
       <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.24270639" />
+      <window_info anchor="bottom" id="Build" order="7" sideWeight="0.49906892" visible="true" weight="0.32843652" />
       <window_info id="Learn" order="2" />
       <window_info anchor="right" id="Gradle" order="3" visible="true" weight="0.16387337" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
@@ -2633,7 +3261,6 @@
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
-      <window_info anchor="bottom" id="Build" order="7" sideWeight="0.49968964" visible="true" weight="0.32843652" />
       <window_info anchor="bottom" id="Find" order="1" sideWeight="0.49947917" weight="0.32910246" />
     </layout>
   </component>
@@ -2656,9 +3283,30 @@
       <path value="$PROJECT_DIR$" />
     </ignored-roots>
     <MESSAGE value="Create IDEA Project" />
-    <option name="LAST_COMMIT_MESSAGE" value="Create IDEA Project" />
+    <MESSAGE value="Join dependant projects" />
+    <option name="LAST_COMMIT_MESSAGE" value="Join dependant projects" />
   </component>
   <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/build.gradle">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="180">
+          <caret line="12" selection-start-line="12" selection-end-line="12" selection-end-column="20" />
+          <folding>
+            <element signature="n#!!doc" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/distrimind/util/properties/MultiFormatProperties.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="255">
+          <caret line="114" column="3" selection-start-line="114" selection-start-column="3" selection-end-line="114" selection-end-column="3" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../../BouncyCastle/BouncyCastle/.idea/workspace.xml">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
     <entry file="file://$PROJECT_DIR$/build.gradle">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="180">
@@ -2826,18 +3474,22 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/../../BouncyCastle/BouncyCastle/.idea/workspace.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="405">
+          <caret line="27" column="47" selection-start-line="27" selection-start-column="47" selection-end-line="27" selection-end-column="47" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/build.gradle">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="180">
+        <state relative-caret-position="-619">
           <caret line="12" selection-start-line="12" selection-end-line="12" selection-end-column="20" />
           <folding>
             <element signature="n#!!doc" expanded="true" />
           </folding>
         </state>
       </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/../../BouncyCastle/BouncyCastle/.idea/workspace.xml">
-      <provider selected="true" editor-type-id="text-editor" />
     </entry>
   </component>
   <component name="masterDetails">
