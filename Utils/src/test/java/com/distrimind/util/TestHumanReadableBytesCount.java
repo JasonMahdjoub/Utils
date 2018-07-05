@@ -15,7 +15,19 @@ public class TestHumanReadableBytesCount {
     public void testConvertToString(long quantityInBytes, boolean longFormat, boolean si, boolean useOctet, boolean siIsBin, int precision, String result)
     {
         Assert.assertEquals(HumanReadableBytesCount.convertToString(quantityInBytes, longFormat, si, useOctet, siIsBin, precision).replace(',', '.'), result);
-        Assert.assertEquals(HumanReadableBytesCount.valueOf(result, siIsBin), quantityInBytes);
+        if (precision>=2) {
+            long v=HumanReadableBytesCount.valueOf(result, siIsBin);
+            Assert.assertTrue(quantityInBytes==0?v==quantityInBytes:((double)Math.abs(v-quantityInBytes))/((double)quantityInBytes)<0.004, "expected : "+quantityInBytes+", found : "+v);
+            result=result.replace("octet", "bit").replace("byte", "bit");
+            if (result.endsWith("o"))
+                result=result.substring(0, result.length()-1)+"b";
+            if (result.endsWith("B"))
+                result=result.substring(0, result.length()-1)+"b";
+            quantityInBytes*=8;
+            v=HumanReadableBytesCount.valueOf(result, siIsBin);
+            Assert.assertTrue(quantityInBytes==0?v==quantityInBytes:((double)Math.abs(v-quantityInBytes))/((double)quantityInBytes)<0.004, "expected : "+result+", found : "+v);
+
+        }
     }
 
     @DataProvider(name = "dataForConvertingToString", parallel = false)

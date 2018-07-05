@@ -25,9 +25,9 @@ public class HumanReadableBytesCount {
     private static final String presSIShort[]=new String[]{"", "k","M", "G", "T", "P", "E", "Z"};
     private static final String presBinShort[]=new String[]{"", "K","M", "G", "T", "P", "E", "Z"};
     private static final DecimalFormatSymbols decimalFormatSymbols=((DecimalFormat)DecimalFormat.getInstance(Locale.getDefault())).getDecimalFormatSymbols();
-    private static final char decimalSeparator=decimalFormatSymbols.getDecimalSeparator();
+    //private static final char decimalSeparator=decimalFormatSymbols.getDecimalSeparator();
 
-    private static String unitsShort[]=new String[]{"o", "B"};
+    private static final String unitsShort[]=new String[]{"o", "B"};
 
     public static String convertToString(long quantityInBytes)
     {
@@ -57,7 +57,7 @@ public class HumanReadableBytesCount {
         quantityInBytes=Math.abs(quantityInBytes);
 
         long base=(si && !siIsBin)?1000:1024;
-        int exp=(int)(Math.log1p(quantityInBytes)/Math.log1p(base)+0.01);
+        int exp=(int)(Math.log1p(quantityInBytes)/Math.log1p(base)+0.1);
 
         double val=((double)quantityInBytes)/((double)powerN(base, exp));
         if (precision==0)
@@ -106,22 +106,22 @@ public class HumanReadableBytesCount {
             m=getShortComposedUnitsPattern().matcher(preunit);
             if (m.matches())
             {
-                boolean bit=preunit.charAt(2)=='b';
+                boolean bit=preunit.endsWith("b");
                 preunit=preunit.toLowerCase();
-                String pre=(""+preunit.charAt(0));
-                boolean si=preunit.charAt(1)!='i';
+                String pre=preunit.length()>=2?(""+preunit.charAt(0)):"";
+                boolean si=preunit.length()==2 && (preunit.charAt(1)!='i');
                 long base=(si && !siIsBin)?1000:1024;
-                long multiplicator=-1;
+                long multiplier=-1;
                 for (int i=0;i<presSIShort.length;i++)
                 {
                     if (presSIShort[i].toLowerCase().equals(pre))
                     {
-                        multiplicator=powerN(base, i);
+                        multiplier=powerN(base, i);
                     }
                 }
-                if (multiplicator<=0)
+                if (multiplier<=0)
                     throw new InternalError();
-                return ((long)(val*multiplicator))*(bit?8:1);
+                return ((long)(val*multiplier))*(bit?8:1);
             }
             else
             {
@@ -136,18 +136,18 @@ public class HumanReadableBytesCount {
                             return (long)val;
                     }
                     boolean bit=preunit.endsWith("bit") || preunit.endsWith("bits");
-                    for (int i=0;i<presBin.length;i++)
+                    for (int i=1;i<presBin.length;i++)
                     {
                         if (preunit.startsWith(presBin[i]))
                         {
                             return ((long)(powerN(1024, i)*val))*(bit?8:1);
                         }
                     }
-                    for (int i=0;i<presSI.length;i++)
+                    for (int i=1;i<presSI.length;i++)
                     {
-                        if (preunit.startsWith(presBin[i]))
+                        if (preunit.startsWith(presSI[i]))
                         {
-                            long base=!siIsBin?1000:1024;
+                            long base=siIsBin?1024:1000;
 
                             return ((long)(powerN(base, i)*val))*(bit?8:1);
                         }
@@ -173,12 +173,12 @@ public class HumanReadableBytesCount {
             {
                 res+=s;
             }
-            res+="]?";
+            res+="]";
             regexShortPre=res;
         }
         return regexShortPre;
     }
-    private static volatile String regexUnitsShort="";
+    private static volatile String regexUnitsShort=null;
     private static String getRegexUnitsShort()
     {
         if (regexUnitsShort==null)
@@ -193,7 +193,7 @@ public class HumanReadableBytesCount {
     }
     private static String getRegexShortComposedUnits()
     {
-        return "("+getRegexShortPre()+"i?"+getRegexUnitsShort()+")";
+        return "(("+getRegexShortPre()+"i?)?"+getRegexUnitsShort()+")";
     }
     private static volatile String regexPre=null;
     private static String getRegexPre()
@@ -203,20 +203,23 @@ public class HumanReadableBytesCount {
             String res="(";
             boolean first=true;
             for (String s : presSI) {
-                if (first)
-                    first=false;
-                else
-                    res += "|";
-                res += s;
+                if (s.length()>0){
+                    if (first)
+                        first=false;
+                    else
+                        res += "|";
+                    res += s;
+                }
             }
             for (String s : presBin)
-                res+="|"+s;
+                if (s.length()>0)
+                    res+="|"+s;
             res+=")?";
             regexPre=res;
         }
         return regexPre;
     }
-    private static volatile String regexUnits="";
+    private static volatile String regexUnits=null;
     private static String getRegexUnits()
     {
         if (regexUnits==null)
@@ -242,7 +245,7 @@ public class HumanReadableBytesCount {
     {
         if (globalPattern==null)
         {
-            globalPattern=Pattern.compile("(?<sign>-?)(?<value>(([0-9]+)|([0-9]*[.|,][0-9]+))) ?(?<preunit>("+getRegexShortComposedUnits()+"|"+getRegexComposedUnits()+"))");
+            globalPattern=Pattern.compile("(?<sign>(-?))(?<value>(([0-9]+)|([0-9]*[.|,][0-9]+))) ?(?<preunit>("+getRegexShortComposedUnits()+"|"+getRegexComposedUnits()+"))");
         }
         return globalPattern;
     }
