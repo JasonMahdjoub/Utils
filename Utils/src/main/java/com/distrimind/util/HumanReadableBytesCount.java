@@ -39,7 +39,7 @@ public class HumanReadableBytesCount {
     }
     public static String convertToString(long quantityInBytes, boolean longFormat, boolean si)
     {
-        return convertToString(quantityInBytes, longFormat, si, false);
+        return convertToString(quantityInBytes, longFormat, si, Locale.getDefault().getLanguage().equals(Locale.FRANCE.getLanguage()));
     }
     public static String convertToString(long quantityInBytes, boolean longFormat, boolean si, boolean useOctet)
     {
