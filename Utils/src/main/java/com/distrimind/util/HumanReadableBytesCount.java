@@ -1,0 +1,274 @@
+package com.distrimind.util;
+
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.text.NumberFormat;
+import java.text.ParseException;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Locale;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+/**
+ * @author Jason Mahdjoub
+ * @version 1.0
+ * @since Utils 3.16
+ */
+public class HumanReadableBytesCount {
+
+    private static final String units[]=new String[]{"octet", "byte"};
+    //private static final String pluralUnits[]=new String[]{"octets", "bytes"};
+    private static final String presSI[]=new String[]{"", "kilo","mega", "giga", "tera", "peta", "exa", "zetta"};
+    private static final String presBin[]=new String[]{"", "kibio","mebio", "gibio", "tebio", "pebio", "exbio", "zebio"};
+    private static final String presSIShort[]=new String[]{"", "k","M", "G", "T", "P", "E", "Z"};
+    private static final String presBinShort[]=new String[]{"", "K","M", "G", "T", "P", "E", "Z"};
+    private static final DecimalFormatSymbols decimalFormatSymbols=((DecimalFormat)DecimalFormat.getInstance(Locale.getDefault())).getDecimalFormatSymbols();
+    private static final char decimalSeparator=decimalFormatSymbols.getDecimalSeparator();
+
+    private static String unitsShort[]=new String[]{"o", "B"};
+
+    public static String convertToString(long quantityInBytes)
+    {
+        return convertToString(quantityInBytes, false);
+    }
+    public static String convertToString(long quantityInBytes, boolean longFormat)
+    {
+        return convertToString(quantityInBytes, longFormat, false);
+    }
+    public static String convertToString(long quantityInBytes, boolean longFormat, boolean si)
+    {
+        return convertToString(quantityInBytes, longFormat, si, false);
+    }
+    public static String convertToString(long quantityInBytes, boolean longFormat, boolean si, boolean useOctet)
+    {
+        return convertToString(quantityInBytes, longFormat, si, useOctet, OSValidator.getCurrentOS().SIPrefixAreUnderstoodAsBinaryPrefixForByteMultiples());
+    }
+
+    public static String convertToString(long quantityInBytes, boolean longFormat, boolean si, boolean useOctet, boolean siIsBin)
+    {
+        return convertToString(quantityInBytes, longFormat, si, useOctet, siIsBin, 2);
+    }
+
+    public static String convertToString(long quantityInBytes, boolean longFormat, boolean si, boolean useOctet, boolean siIsBin, int precision)
+    {
+        boolean neg=quantityInBytes<0;
+        quantityInBytes=Math.abs(quantityInBytes);
+
+        long base=(si && !siIsBin)?1000:1024;
+        int exp=(int)(Math.log1p(quantityInBytes)/Math.log1p(base)+0.01);
+
+        double val=((double)quantityInBytes)/((double)powerN(base, exp));
+        if (precision==0)
+            val=Math.round(val);
+
+        String units[]=longFormat?HumanReadableBytesCount.units:unitsShort;
+        String pres[]=longFormat?(si?presSI:presBin):(si?presSIShort:presBinShort);
+
+        String pre=pres[exp]+((longFormat || exp==0 || si)?"":"i");
+        String unit=(useOctet?units[0]:units[1])+((val<=1.0 || !longFormat)?"":"s");
+
+
+
+        DecimalFormat df=new DecimalFormat();
+        df.setDecimalFormatSymbols(decimalFormatSymbols);
+        if (val!=Math.floor(val)) {
+            df.setMaximumFractionDigits(precision);
+            df.setMinimumFractionDigits(1);
+        }
+        else
+        {
+            df.setMaximumFractionDigits(0);
+            df.setMinimumFractionDigits(0);
+        }
+        df.setRoundingMode(RoundingMode.HALF_UP);
+        return String.format("%s%s %s%s", neg?"-":"", df.format(val), pre, unit);
+    }
+    public static long valueOf(String quantity)
+    {
+        return valueOf(quantity, OSValidator.getCurrentOS().SIPrefixAreUnderstoodAsBinaryPrefixForByteMultiples());
+    }
+    public static long valueOf(String quantity, boolean siIsBin)
+    {
+        quantity=quantity.replace("é","e");
+        Matcher m=getGlobalPattern().matcher(quantity);
+        if (m.matches())
+        {
+            NumberFormat format=NumberFormat.getInstance(Locale.US);
+            double val= 0;
+            try {
+                val = (m.group("sign").equals("-")?-1.0:1.0)*(format.parse(m.group("value")).doubleValue());
+            } catch (ParseException e) {
+                throw new InternalError(e);
+            }
+            String preunit=m.group("preunit");
+            m=getShortComposedUnitsPattern().matcher(preunit);
+            if (m.matches())
+            {
+                boolean bit=preunit.charAt(2)=='b';
+                preunit=preunit.toLowerCase();
+                String pre=(""+preunit.charAt(0));
+                boolean si=preunit.charAt(1)!='i';
+                long base=(si && !siIsBin)?1000:1024;
+                long multiplicator=-1;
+                for (int i=0;i<presSIShort.length;i++)
+                {
+                    if (presSIShort[i].toLowerCase().equals(pre))
+                    {
+                        multiplicator=powerN(base, i);
+                    }
+                }
+                if (multiplicator<=0)
+                    throw new InternalError();
+                return ((long)(val*multiplicator))*(bit?8:1);
+            }
+            else
+            {
+                preunit=preunit.toLowerCase();
+                if (preunit.startsWith("bit"))
+                    return ((long)val)*8;
+                else
+                {
+                    for (String s : units)
+                    {
+                        if (preunit.startsWith(s))
+                            return (long)val;
+                    }
+                    boolean bit=preunit.endsWith("bit") || preunit.endsWith("bits");
+                    for (int i=0;i<presBin.length;i++)
+                    {
+                        if (preunit.startsWith(presBin[i]))
+                        {
+                            return ((long)(powerN(1024, i)*val))*(bit?8:1);
+                        }
+                    }
+                    for (int i=0;i<presSI.length;i++)
+                    {
+                        if (preunit.startsWith(presBin[i]))
+                        {
+                            long base=!siIsBin?1000:1024;
+
+                            return ((long)(powerN(base, i)*val))*(bit?8:1);
+                        }
+                    }
+                    throw new InternalError();
+                }
+            }
+        }
+        else
+            throw new IllegalArgumentException("The given quantity is not valid : "+quantity);
+    }
+
+    private static volatile String regexShortPre=null;
+    private static String getRegexShortPre()
+    {
+        if (regexShortPre==null)
+        {
+            String res="[";
+            HashSet<String> hs=new HashSet<>();
+            hs.addAll(Arrays.asList(presSIShort));
+            hs.addAll(Arrays.asList(presBinShort));
+            for (String s : hs)
+            {
+                res+=s;
+            }
+            res+="]?";
+            regexShortPre=res;
+        }
+        return regexShortPre;
+    }
+    private static volatile String regexUnitsShort="";
+    private static String getRegexUnitsShort()
+    {
+        if (regexUnitsShort==null)
+        {
+            String res="[b";
+            for (String s : unitsShort)
+                res+=s;
+            res+="]";
+            regexUnitsShort=res;
+        }
+        return regexUnitsShort;
+    }
+    private static String getRegexShortComposedUnits()
+    {
+        return "("+getRegexShortPre()+"i?"+getRegexUnitsShort()+")";
+    }
+    private static volatile String regexPre=null;
+    private static String getRegexPre()
+    {
+        if (regexPre==null)
+        {
+            String res="(";
+            boolean first=true;
+            for (String s : presSI) {
+                if (first)
+                    first=false;
+                else
+                    res += "|";
+                res += s;
+            }
+            for (String s : presBin)
+                res+="|"+s;
+            res+=")?";
+            regexPre=res;
+        }
+        return regexPre;
+    }
+    private static volatile String regexUnits="";
+    private static String getRegexUnits()
+    {
+        if (regexUnits==null)
+        {
+            String res="(bit";
+            for (String s : units)
+                res+="|"+s;
+            res+=")";
+            regexUnits=res;
+        }
+        return regexUnits;
+    }
+
+    private static String getRegexComposedUnits()
+    {
+        return "(("+getRegexPre()+getRegexUnits()+")s?)";
+    }
+
+    private static volatile Pattern globalPattern=null, shortComposedUnitsPattern=null, composedUnitsPattern=null;
+
+
+    private static Pattern getGlobalPattern()
+    {
+        if (globalPattern==null)
+        {
+            globalPattern=Pattern.compile("(?<sign>-?)(?<value>(([0-9]+)|([0-9]*[.|,][0-9]+))) ?(?<preunit>("+getRegexShortComposedUnits()+"|"+getRegexComposedUnits()+"))");
+        }
+        return globalPattern;
+    }
+
+    private static Pattern getShortComposedUnitsPattern()
+    {
+        if (shortComposedUnitsPattern==null)
+        {
+            shortComposedUnitsPattern=Pattern.compile(getRegexShortComposedUnits());
+        }
+        return shortComposedUnitsPattern;
+    }
+
+
+
+
+    private static long powerN(long number, int power){
+        long res = 1;
+        long sq = number;
+        while(power > 0){
+            if(power % 2 == 1){
+                res *= sq;
+            }
+            sq = sq * sq;
+            power /= 2;
+        }
+        return res;
+    }
+}
