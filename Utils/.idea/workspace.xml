@@ -1,8 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="10b253e7-fd4e-4a64-8b2a-093fa1eb6135" name="Default" comment="">
+    <list default="true" id="10b253e7-fd4e-4a64-8b2a-093fa1eb6135" name="Default" comment="Add human readable">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gradle/wrapper/gradle-wrapper.properties" beforeDir="false" afterPath="$PROJECT_DIR$/gradle/wrapper/gradle-wrapper.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/distrimind/util/OSValidator.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/distrimind/util/OSValidator.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/distrimind/util/harddrive/HardDriveDetect.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/distrimind/util/harddrive/HardDriveDetect.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/distrimind/util/harddrive/LinuxHardDriveDetect.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/distrimind/util/harddrive/LinuxHardDriveDetect.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/distrimind/util/harddrive/MacOSHardDriveDetect.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/distrimind/util/harddrive/MacOSHardDriveDetect.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/distrimind/util/harddrive/UnixHardDriveDetect.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/distrimind/util/harddrive/UnixHardDriveDetect.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/com/distrimind/util/build.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/com/distrimind/util/build.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/com/distrimind/util/TestHumanReadableBytesCount.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/com/distrimind/util/TestHumanReadableBytesCount.java" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/.gradle/" />
     <ignored path="$PROJECT_DIR$/build/" />
@@ -77,11 +86,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="build.gradle" pinned="false" current-in-tab="true">
+      <file leaf-file-name="build.gradle" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/build.gradle">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-619">
-              <caret line="12" selection-start-line="12" selection-end-line="12" selection-end-column="20" />
+            <state relative-caret-position="556">
+              <caret line="73" column="13" selection-start-line="73" selection-start-column="13" selection-end-line="73" selection-end-column="13" />
               <folding>
                 <element signature="n#!!doc" expanded="true" />
               </folding>
@@ -89,7 +98,125 @@
           </provider>
         </entry>
       </file>
+      <file leaf-file-name="gradle-wrapper.properties" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/gradle/wrapper/gradle-wrapper.properties">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="75">
+              <caret line="5" column="71" selection-start-line="5" selection-start-column="71" selection-end-line="5" selection-end-column="71" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="HardDriveDetect.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/java/com/distrimind/util/harddrive/HardDriveDetect.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="150">
+              <caret line="43" selection-start-line="43" selection-end-line="43" />
+              <folding>
+                <element signature="imports" expanded="true" />
+                <element signature="e#3193#3194#0" expanded="true" />
+                <element signature="e#3275#3276#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="MacOSHardDriveDetect.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/java/com/distrimind/util/harddrive/MacOSHardDriveDetect.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="225">
+              <caret line="139" column="36" selection-start-line="139" selection-start-column="36" selection-end-line="139" selection-end-column="36" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="HashSet.java" pinned="false" current-in-tab="false">
+        <entry file="jar:///Library/Java/JavaVirtualMachines/jdk-10.0.1.jdk/Contents/Home/lib/src.zip!/java.base/java/util/HashSet.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="248">
+              <caret line="104" column="11" selection-start-line="104" selection-start-column="11" selection-end-line="104" selection-end-column="11" />
+              <folding>
+                <element signature="e#3745#3746#0" expanded="true" />
+                <element signature="e#3782#3783#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="HumanReadableBytesCount.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/java/com/distrimind/util/HumanReadableBytesCount.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="385">
+              <caret line="41" column="133" selection-start-line="41" selection-start-column="133" selection-end-line="41" selection-end-column="133" />
+              <folding>
+                <element signature="imports" expanded="true" />
+                <element signature="e#1021#1022#0" expanded="true" />
+                <element signature="e#1083#1084#0" expanded="true" />
+                <element signature="e#8473#8474#0" expanded="true" />
+                <element signature="e#8537#8538#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="Formatter.java" pinned="false" current-in-tab="false">
+        <entry file="jar:///Library/Java/JavaVirtualMachines/jdk-10.0.1.jdk/Contents/Home/lib/src.zip!/java.base/java/util/Formatter.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="248">
+              <caret line="4420" selection-start-line="4420" selection-end-line="4420" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="TestHumanReadableBytesCount.java" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/test/java/com/distrimind/util/TestHumanReadableBytesCount.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="404">
+              <caret line="32" column="69" selection-start-line="32" selection-start-column="69" selection-end-line="32" selection-end-column="69" />
+              <folding>
+                <element signature="imports" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="IDGeneratorIntTests.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/test/java/com/distrimind/util/IDGeneratorIntTests.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="60">
+              <caret line="5" column="13" selection-start-line="5" selection-start-column="13" selection-end-line="5" selection-end-column="13" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="DecentralizedIDTests.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/test/java/com/distrimind/util/DecentralizedIDTests.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="-13">
+              <caret line="60" column="13" selection-start-line="60" selection-start-column="13" selection-end-line="60" selection-end-column="13" />
+            </state>
+          </provider>
+        </entry>
+      </file>
     </leaf>
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Enum" />
+        <option value="Class" />
+      </list>
+    </option>
+  </component>
+  <component name="FindInProjectRecents">
+    <findStrings>
+      <find>list</find>
+      <find>1.00</find>
+      <find>1 petaoctets</find>
+      <find>1 kibiooctet</find>
+      <find>1.54 mebiooctets</find>
+      <find>regexUnitsShort</find>
+    </findStrings>
   </component>
   <component name="Git.Settings">
     <option name="PREVIOUS_COMMIT_AUTHORS">
@@ -106,7 +233,7 @@
         <entry key="$PROJECT_DIR$/../../BouncyCastle-FIPS/BouncyCastle-FIPS" value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7" />
         <entry key="$PROJECT_DIR$/../../BouncyCastle/BouncyCastle" value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-bin/73xux3q4721jgr4pjvqf9o30/gradle-4.7" />
         <entry key="$PROJECT_DIR$/../../Gnu-Crypt/Gnu-Crypt" value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7" />
-        <entry key="$PROJECT_DIR$" value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7" />
+        <entry key="$PROJECT_DIR$" value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1" />
       </map>
     </option>
     <option name="myGradleVersions">
@@ -114,7 +241,7 @@
         <entry key="$PROJECT_DIR$/../../BouncyCastle-FIPS/BouncyCastle-FIPS" value="4.7" />
         <entry key="$PROJECT_DIR$/../../BouncyCastle/BouncyCastle" value="4.7" />
         <entry key="$PROJECT_DIR$/../../Gnu-Crypt/Gnu-Crypt" value="4.7" />
-        <entry key="$PROJECT_DIR$" value="4.7" />
+        <entry key="$PROJECT_DIR$" value="4.8.1" />
       </map>
     </option>
     <option name="availableProjects">
@@ -2301,6 +2428,11 @@
                 <option name="name" value="model" />
               </ExternalTaskPojo>
               <ExternalTaskPojo>
+                <option name="description" value="Generates the Gradle metadata file for publication 'mavenJava'." />
+                <option name="linkedExternalProjectPath" value="$PROJECT_DIR$" />
+                <option name="name" value="generateMetadataFileForMavenJavaPublication" />
+              </ExternalTaskPojo>
+              <ExternalTaskPojo>
                 <option name="description" value="Processes main resources." />
                 <option name="linkedExternalProjectPath" value="$PROJECT_DIR$" />
                 <option name="name" value="processResources" />
@@ -2502,11 +2634,11 @@
         <entry key="$PROJECT_DIR$/../../Gnu-Crypt/Gnu-Crypt/build.gradle" value="2690118812" />
         <entry key="$PROJECT_DIR$/../../Gnu-Crypt/Gnu-Crypt/gradle.properties" value="2396890427" />
         <entry key="$PROJECT_DIR$/../../Gnu-Crypt/Gnu-Crypt/settings.gradle" value="2809024493" />
-        <entry key="$PROJECT_DIR$" value="7633083835000" />
+        <entry key="$PROJECT_DIR$" value="7644473432000" />
         <entry key="$PROJECT_DIR$/.gradle" value="0" />
-        <entry key="$PROJECT_DIR$/build.gradle" value="1344982988" />
+        <entry key="$PROJECT_DIR$/build.gradle" value="1266406963" />
         <entry key="$PROJECT_DIR$/gradle.properties" value="671833164" />
-        <entry key="$PROJECT_DIR$/gradle/wrapper/gradle-wrapper.properties" value="1168256157" />
+        <entry key="$PROJECT_DIR$/gradle/wrapper/gradle-wrapper.properties" value="2077093676" />
         <entry key="$PROJECT_DIR$/settings.gradle" value="2870877935" />
       </map>
     </option>
@@ -2910,151 +3042,153 @@
               <option name="name" value="Utils" />
               <option name="projectBuildClasspath">
                 <list>
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/src/ide" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/src/internal-integ-testing" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/src/platform-native" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/src/reporting" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/src/language-groovy" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/src/build-option" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/src/launcher" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/src/platform-base" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/src/announce" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/src/signing" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/src/core" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/src/installation-beacon" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/src/jvm-services" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/src/native" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/src/tooling-api" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/src/platform-play" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/src/ivy" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/src/wrapper" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/src/process-services" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/src/plugins" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/src/antlr" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/src/plugin-use" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/src/language-jvm" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/src/maven" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/src/testing-base" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/src/resources" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/src/version-control" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/src/osgi" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/src/testing-junit-platform" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/src/resources-http" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/src/internal-testing" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/src/composite-builds" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/src/model-groovy" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/src/test-kit" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/src/cli" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/src/build-init" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/src/ear" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/src/jacoco" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/src/persistent-cache" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/src/build-comparison" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/src/publish" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/src/platform-jvm" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/src/resources-sftp" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/src/base-services" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/src/model-core" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/src/scala" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/src/diagnostics" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/src/dependency-management" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/src/ide-play" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/src/workers" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/src/code-quality" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/src/language-java" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/src/build-cache" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/src/plugin-development" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/src/core-api" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/src/javascript" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/src/resources-gcs" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/src/testing-native" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/src/internal-performance-testing" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/src/ide-native" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/src/base-services-groovy" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/src/messaging" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/src/testing-jvm" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/src/tooling-api-builders" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/src/logging" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/src/language-scala" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/src/language-native" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/src/resources-s3" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/src/internal-android-performance-testing" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/src/build-cache-http" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/lib/gradle-logging-4.7.jar" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/lib/gradle-wrapper-4.7.jar" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/lib/gradle-runtime-api-info-4.7.jar" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/lib/gradle-native-4.7.jar" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/lib/gradle-process-services-4.7.jar" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/lib/gradle-kotlin-dsl-tooling-builders-0.16.3.jar" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/lib/gradle-build-cache-4.7.jar" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/lib/gradle-core-4.7.jar" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/lib/groovy-all-2.4.12.jar" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/lib/gradle-model-core-4.7.jar" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/lib/gradle-base-services-groovy-4.7.jar" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/lib/ant-launcher-1.9.9.jar" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/lib/gradle-installation-beacon-4.7.jar" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/lib/ant-1.9.9.jar" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/lib/gradle-launcher-4.7.jar" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/lib/gradle-jvm-services-4.7.jar" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/lib/gradle-messaging-4.7.jar" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/lib/gradle-build-option-4.7.jar" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/lib/gradle-base-services-4.7.jar" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/lib/gradle-persistent-cache-4.7.jar" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/lib/gradle-docs-4.7.jar" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/lib/gradle-cli-4.7.jar" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/lib/gradle-tooling-api-4.7.jar" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/lib/gradle-kotlin-dsl-tooling-models-0.16.3.jar" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/lib/gradle-core-api-4.7.jar" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/lib/gradle-model-groovy-4.7.jar" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/lib/gradle-resources-4.7.jar" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/lib/gradle-kotlin-dsl-0.16.3.jar" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/lib/plugins/gradle-plugin-use-4.7.jar" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/lib/plugins/gradle-announce-4.7.jar" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/lib/plugins/gradle-tooling-api-builders-4.7.jar" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/lib/plugins/gradle-ide-play-4.7.jar" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/lib/plugins/gradle-language-scala-4.7.jar" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/lib/plugins/gradle-javascript-4.7.jar" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/lib/plugins/gradle-version-control-4.7.jar" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/lib/plugins/gradle-language-native-4.7.jar" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/lib/plugins/gradle-build-comparison-4.7.jar" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/lib/plugins/gradle-plugins-4.7.jar" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/lib/plugins/gradle-jacoco-4.7.jar" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/lib/plugins/gradle-platform-native-4.7.jar" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/lib/plugins/gradle-ide-native-4.7.jar" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/lib/plugins/gradle-diagnostics-4.7.jar" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/lib/plugins/gradle-plugin-development-4.7.jar" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/lib/plugins/gradle-workers-4.7.jar" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/lib/plugins/gradle-build-cache-http-4.7.jar" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/lib/plugins/gradle-testing-native-4.7.jar" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/lib/plugins/gradle-dependency-management-4.7.jar" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/lib/plugins/gradle-composite-builds-4.7.jar" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/lib/plugins/gradle-testing-junit-platform-4.7.jar" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/lib/plugins/gradle-publish-4.7.jar" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/lib/plugins/gradle-ear-4.7.jar" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/lib/plugins/gradle-language-jvm-4.7.jar" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/lib/plugins/gradle-platform-base-4.7.jar" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/lib/plugins/gradle-resources-gcs-4.7.jar" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/lib/plugins/gradle-ide-4.7.jar" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/lib/plugins/gradle-platform-play-4.7.jar" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/lib/plugins/gradle-resources-http-4.7.jar" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/lib/plugins/gradle-scala-4.7.jar" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/lib/plugins/gradle-language-java-4.7.jar" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/lib/plugins/gradle-language-groovy-4.7.jar" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/lib/plugins/gradle-osgi-4.7.jar" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/lib/plugins/gradle-reporting-4.7.jar" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/lib/plugins/gradle-antlr-4.7.jar" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/lib/plugins/gradle-code-quality-4.7.jar" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/lib/plugins/gradle-resources-s3-4.7.jar" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/lib/plugins/gradle-signing-4.7.jar" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/lib/plugins/gradle-resources-sftp-4.7.jar" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/lib/plugins/gradle-ivy-4.7.jar" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/lib/plugins/gradle-test-kit-4.7.jar" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/lib/plugins/gradle-build-init-4.7.jar" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/lib/plugins/gradle-testing-jvm-4.7.jar" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/lib/plugins/gradle-testing-base-4.7.jar" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/lib/plugins/gradle-platform-jvm-4.7.jar" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/lib/plugins/ivy-2.2.0.jar" />
-                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.7-all/4cret0dgl5o3b21weaoncl7ys/gradle-4.7/lib/plugins/gradle-maven-4.7.jar" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/src/ide" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/src/internal-integ-testing" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/src/platform-native" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/src/reporting" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/src/language-groovy" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/src/build-option" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/src/launcher" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/src/platform-base" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/src/announce" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/src/signing" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/src/core" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/src/installation-beacon" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/src/jvm-services" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/src/native" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/src/tooling-api" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/src/platform-play" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/src/ivy" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/src/wrapper" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/src/process-services" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/src/plugins" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/src/antlr" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/src/plugin-use" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/src/language-jvm" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/src/maven" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/src/testing-base" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/src/resources" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/src/version-control" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/src/osgi" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/src/testing-junit-platform" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/src/resources-http" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/src/internal-testing" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/src/composite-builds" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/src/model-groovy" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/src/test-kit" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/src/cli" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/src/build-init" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/src/ear" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/src/jacoco" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/src/persistent-cache" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/src/build-comparison" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/src/publish" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/src/platform-jvm" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/src/resources-sftp" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/src/base-services" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/src/model-core" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/src/scala" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/src/diagnostics" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/src/dependency-management" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/src/ide-play" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/src/workers" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/src/code-quality" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/src/language-java" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/src/build-cache" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/src/plugin-development" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/src/core-api" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/src/javascript" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/src/resources-gcs" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/src/testing-native" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/src/internal-performance-testing" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/src/ide-native" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/src/base-services-groovy" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/src/messaging" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/src/testing-jvm" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/src/tooling-api-builders" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/src/logging" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/src/language-scala" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/src/language-native" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/src/resources-s3" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/src/internal-android-performance-testing" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/src/build-cache-http" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/lib/gradle-build-cache-4.8.1.jar" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/lib/gradle-wrapper-4.8.1.jar" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/lib/gradle-messaging-4.8.1.jar" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/lib/gradle-model-groovy-4.8.1.jar" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/lib/gradle-process-services-4.8.1.jar" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/lib/gradle-tooling-api-4.8.1.jar" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/lib/gradle-kotlin-dsl-tooling-builders-0.17.5.jar" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/lib/gradle-docs-4.8.1.jar" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/lib/ant-1.9.11.jar" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/lib/gradle-jvm-services-4.8.1.jar" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/lib/gradle-native-4.8.1.jar" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/lib/ant-launcher-1.9.11.jar" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/lib/gradle-logging-4.8.1.jar" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/lib/gradle-runtime-api-info-4.8.1.jar" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/lib/groovy-all-2.4.12.jar" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/lib/gradle-launcher-4.8.1.jar" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/lib/gradle-base-services-groovy-4.8.1.jar" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/lib/gradle-installation-beacon-4.8.1.jar" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/lib/gradle-kotlin-dsl-provider-spi-0.17.5.jar" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/lib/gradle-kotlin-dsl-0.17.5.jar" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/lib/gradle-base-services-4.8.1.jar" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/lib/gradle-kotlin-dsl-tooling-models-0.17.5.jar" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/lib/gradle-resources-4.8.1.jar" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/lib/gradle-core-4.8.1.jar" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/lib/gradle-kotlin-dsl-provider-plugins-0.17.5.jar" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/lib/gradle-cli-4.8.1.jar" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/lib/gradle-build-option-4.8.1.jar" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/lib/gradle-model-core-4.8.1.jar" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/lib/gradle-persistent-cache-4.8.1.jar" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/lib/gradle-core-api-4.8.1.jar" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/lib/plugins/gradle-language-scala-4.8.1.jar" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/lib/plugins/gradle-plugins-4.8.1.jar" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/lib/plugins/gradle-test-kit-4.8.1.jar" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/lib/plugins/gradle-signing-4.8.1.jar" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/lib/plugins/gradle-osgi-4.8.1.jar" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/lib/plugins/gradle-code-quality-4.8.1.jar" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/lib/plugins/gradle-maven-4.8.1.jar" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/lib/plugins/gradle-tooling-api-builders-4.8.1.jar" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/lib/plugins/gradle-platform-play-4.8.1.jar" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/lib/plugins/gradle-language-native-4.8.1.jar" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/lib/plugins/gradle-build-comparison-4.8.1.jar" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/lib/plugins/gradle-publish-4.8.1.jar" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/lib/plugins/gradle-resources-s3-4.8.1.jar" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/lib/plugins/gradle-ear-4.8.1.jar" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/lib/plugins/gradle-ide-play-4.8.1.jar" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/lib/plugins/gradle-composite-builds-4.8.1.jar" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/lib/plugins/gradle-ide-native-4.8.1.jar" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/lib/plugins/gradle-javascript-4.8.1.jar" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/lib/plugins/gradle-platform-jvm-4.8.1.jar" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/lib/plugins/gradle-announce-4.8.1.jar" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/lib/plugins/gradle-plugin-use-4.8.1.jar" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/lib/plugins/gradle-language-jvm-4.8.1.jar" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/lib/plugins/gradle-jacoco-4.8.1.jar" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/lib/plugins/gradle-testing-junit-platform-4.8.1.jar" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/lib/plugins/gradle-workers-4.8.1.jar" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/lib/plugins/gradle-resources-http-4.8.1.jar" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/lib/plugins/gradle-build-cache-http-4.8.1.jar" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/lib/plugins/gradle-testing-base-4.8.1.jar" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/lib/plugins/gradle-version-control-4.8.1.jar" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/lib/plugins/gradle-build-init-4.8.1.jar" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/lib/plugins/gradle-testing-jvm-4.8.1.jar" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/lib/plugins/gradle-platform-base-4.8.1.jar" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/lib/plugins/gradle-language-java-4.8.1.jar" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/lib/plugins/gradle-testing-native-4.8.1.jar" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/lib/plugins/gradle-resources-sftp-4.8.1.jar" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/lib/plugins/gradle-ide-4.8.1.jar" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/lib/plugins/gradle-platform-native-4.8.1.jar" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/lib/plugins/gradle-ivy-4.8.1.jar" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/lib/plugins/gradle-dependency-management-4.8.1.jar" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/lib/plugins/gradle-antlr-4.8.1.jar" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/lib/plugins/gradle-language-groovy-4.8.1.jar" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/lib/plugins/gradle-plugin-development-4.8.1.jar" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/lib/plugins/gradle-diagnostics-4.8.1.jar" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/lib/plugins/gradle-resources-gcs-4.8.1.jar" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/lib/plugins/ivy-2.2.0.jar" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/lib/plugins/gradle-scala-4.8.1.jar" />
+                  <option value="$USER_HOME$/.gradle/wrapper/dists/gradle-4.8.1-all/6fmj4nezasjg1b7kkmy10xgo2/gradle-4.8.1/lib/plugins/gradle-reporting-4.8.1.jar" />
                   <option value="$PROJECT_DIR$/buildSrc/src/main/java" />
                   <option value="$PROJECT_DIR$/buildSrc/src/main/groovy" />
                 </list>
@@ -3078,25 +3212,38 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/build.gradle" />
         <option value="$PROJECT_DIR$/src/main/java/com/distrimind/util/properties/MultiFormatProperties.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/distrimind/util/harddrive/UnixHardDriveDetect.java" />
+        <option value="$PROJECT_DIR$/build.gradle" />
+        <option value="$PROJECT_DIR$/src/main/java/com/distrimind/util/harddrive/Partition.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/distrimind/util/ByteUnit.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/distrimind/util/DigitalInformationUnit.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/distrimind/util/DigitalInformationUnitSI.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/distrimind/util/BytesUnitHumanReadeable.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/distrimind/util/OSValidator.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/distrimind/util/HumanReableBytesCount.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/distrimind/util/harddrive/MacOSHardDriveDetect.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/distrimind/util/harddrive/HardDriveDetect.java" />
+        <option value="$PROJECT_DIR$/src/test/java/com/distrimind/util/TestHumanReadableIDGenerator.java" />
+        <option value="$PROJECT_DIR$/gradle/wrapper/gradle-wrapper.properties" />
+        <option value="$PROJECT_DIR$/src/main/java/com/distrimind/util/HumanReadableBytesCount.java" />
+        <option value="$PROJECT_DIR$/src/test/java/com/distrimind/util/TestHumanReadableBytesCount.java" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="69" />
-    <option name="y" value="23" />
-    <option name="width" value="1611" />
-    <option name="height" value="1027" />
+    <option name="y" value="-1177" />
+    <option name="width" value="1920" />
+    <option name="height" value="1177" />
   </component>
-  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true">
+    <ConfirmationsSetting value="1" id="Add" />
+  </component>
   <component name="ProjectView">
     <navigator proportions="" version="1">
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="PackagesPane" />
-      <pane id="AndroidView" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -3104,11 +3251,80 @@
               <item name="Utils" type="b2602c69:ProjectViewProjectNode" />
               <item name="Utils" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
             </path>
+            <path>
+              <item name="Utils" type="b2602c69:ProjectViewProjectNode" />
+              <item name="Utils" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name="gradle" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="Utils" type="b2602c69:ProjectViewProjectNode" />
+              <item name="Utils" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name="gradle" type="462c0819:PsiDirectoryNode" />
+              <item name="wrapper" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="Utils" type="b2602c69:ProjectViewProjectNode" />
+              <item name="Utils" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="Utils" type="b2602c69:ProjectViewProjectNode" />
+              <item name="Utils" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="main" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="Utils" type="b2602c69:ProjectViewProjectNode" />
+              <item name="Utils" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="main" type="462c0819:PsiDirectoryNode" />
+              <item name="java" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="Utils" type="b2602c69:ProjectViewProjectNode" />
+              <item name="Utils" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="main" type="462c0819:PsiDirectoryNode" />
+              <item name="java" type="462c0819:PsiDirectoryNode" />
+              <item name="util" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="Utils" type="b2602c69:ProjectViewProjectNode" />
+              <item name="Utils" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="main" type="462c0819:PsiDirectoryNode" />
+              <item name="java" type="462c0819:PsiDirectoryNode" />
+              <item name="util" type="462c0819:PsiDirectoryNode" />
+              <item name="harddrive" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="Utils" type="b2602c69:ProjectViewProjectNode" />
+              <item name="Utils" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="test" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="Utils" type="b2602c69:ProjectViewProjectNode" />
+              <item name="Utils" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="test" type="462c0819:PsiDirectoryNode" />
+              <item name="java" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="Utils" type="b2602c69:ProjectViewProjectNode" />
+              <item name="Utils" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="test" type="462c0819:PsiDirectoryNode" />
+              <item name="java" type="462c0819:PsiDirectoryNode" />
+              <item name="util" type="462c0819:PsiDirectoryNode" />
+            </path>
           </expand>
           <select />
         </subPane>
       </pane>
+      <pane id="AndroidView" />
       <pane id="Scope" />
+      <pane id="PackagesPane" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -3116,7 +3332,7 @@
     <property name="project.structure.proportion" value="0.0" />
     <property name="project.structure.side.proportion" value="0.0" />
     <property name="run.code.analysis.last.selected.profile" value="pProject Default" />
-    <property name="settings.editor.selected.configurable" value="reference.settingsdialog.project.gradle" />
+    <property name="settings.editor.selected.configurable" value="preferences.pluginManager" />
   </component>
   <component name="RunDashboard">
     <option name="ruleStates">
@@ -3130,7 +3346,29 @@
       </list>
     </option>
   </component>
-  <component name="RunManager">
+  <component name="RunManager" selected="Gradle.Utils [assemble]">
+    <configuration name="HardDriveDetect" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="com.distrimind.util.harddrive.HardDriveDetect" />
+      <module name="Utils" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.distrimind.util.harddrive.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+    </configuration>
+    <configuration name="UnixHardDriveDetect" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="com.distrimind.util.harddrive.UnixHardDriveDetect" />
+      <module name="Utils" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.distrimind.util.harddrive.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+    </configuration>
     <configuration default="true" type="Application" factoryName="Application">
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
     </configuration>
@@ -3167,6 +3405,35 @@
       </option>
       <patterns />
     </configuration>
+    <configuration name="TestHumanReadableBytesCount.testConvertToString" type="TestNG" factoryName="TestNG" temporary="true" nameIsGenerated="true">
+      <module name="Utils" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.distrimind.util.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
+      <option name="SUITE_NAME" />
+      <option name="PACKAGE_NAME" value="com.distrimind.util" />
+      <option name="MAIN_CLASS_NAME" value="com.distrimind.util.TestHumanReadableBytesCount" />
+      <option name="METHOD_NAME" value="testConvertToString" />
+      <option name="GROUP_NAME" />
+      <option name="TEST_OBJECT" value="METHOD" />
+      <option name="VM_PARAMETERS" value="-ea" />
+      <option name="PARAMETERS" />
+      <option name="WORKING_DIRECTORY" value="%MODULE_WORKING_DIR%" />
+      <option name="OUTPUT_DIRECTORY" />
+      <option name="PASS_PARENT_ENVS" value="true" />
+      <option name="TEST_SEARCH_SCOPE">
+        <value defaultName="singleModule" />
+      </option>
+      <option name="USE_DEFAULT_REPORTERS" value="false" />
+      <option name="PROPERTIES_FILE" />
+      <properties />
+      <listeners />
+    </configuration>
     <configuration default="true" type="TestNG" factoryName="TestNG">
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
       <option name="ALTERNATIVE_JRE_PATH" />
@@ -3189,8 +3456,17 @@
       <properties />
       <listeners />
     </configuration>
+    <list>
+      <item itemvalue="Gradle.Utils [assemble]" />
+      <item itemvalue="Application.HardDriveDetect" />
+      <item itemvalue="Application.UnixHardDriveDetect" />
+      <item itemvalue="TestNG.TestHumanReadableBytesCount.testConvertToString" />
+    </list>
     <recent_temporary>
       <list>
+        <item itemvalue="TestNG.TestHumanReadableBytesCount.testConvertToString" />
+        <item itemvalue="Application.HardDriveDetect" />
+        <item itemvalue="Application.UnixHardDriveDetect" />
         <item itemvalue="Gradle.Utils [assemble]" />
       </list>
     </recent_temporary>
@@ -3220,7 +3496,28 @@
       <option name="project" value="LOCAL" />
       <updated>1527161428588</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="Add human readable bytes count">
+      <created>1530806546949</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1530806546949</updated>
+    </task>
+    <task id="LOCAL-00004" summary="Debug human readable">
+      <created>1530818906035</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1530818906035</updated>
+    </task>
+    <task id="LOCAL-00005" summary="Detect language">
+      <created>1530819059773</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1530819059773</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers>
       <Gitlab url="https://gitlab.distri-mind.fr/git">
         <option name="currentProject">
@@ -3230,25 +3527,59 @@
       </Gitlab>
     </servers>
   </component>
+  <component name="TestHistory">
+    <history-entry file="TestHumanReadableBytesCount_testConvertToString - 2018.07.05 at 21h 19m 12s.xml">
+      <configuration name="TestHumanReadableBytesCount.testConvertToString" configurationId="TestNG" />
+    </history-entry>
+    <history-entry file="TestHumanReadableBytesCount_testConvertToString - 2018.07.05 at 21h 20m 56s.xml">
+      <configuration name="TestHumanReadableBytesCount.testConvertToString" configurationId="TestNG" />
+    </history-entry>
+    <history-entry file="TestHumanReadableBytesCount_testConvertToString - 2018.07.05 at 21h 21m 37s.xml">
+      <configuration name="TestHumanReadableBytesCount.testConvertToString" configurationId="TestNG" />
+    </history-entry>
+    <history-entry file="TestHumanReadableBytesCount_testConvertToString - 2018.07.05 at 21h 23m 04s.xml">
+      <configuration name="TestHumanReadableBytesCount.testConvertToString" configurationId="TestNG" />
+    </history-entry>
+    <history-entry file="TestHumanReadableBytesCount_testConvertToString - 2018.07.05 at 21h 23m 54s.xml">
+      <configuration name="TestHumanReadableBytesCount.testConvertToString" configurationId="TestNG" />
+    </history-entry>
+    <history-entry file="TestHumanReadableBytesCount_testConvertToString - 2018.07.05 at 21h 26m 09s.xml">
+      <configuration name="TestHumanReadableBytesCount.testConvertToString" configurationId="TestNG" />
+    </history-entry>
+    <history-entry file="TestHumanReadableBytesCount_testConvertToString - 2018.07.05 at 21h 26m 39s.xml">
+      <configuration name="TestHumanReadableBytesCount.testConvertToString" configurationId="TestNG" />
+    </history-entry>
+    <history-entry file="TestHumanReadableBytesCount_testConvertToString - 2018.07.05 at 21h 26m 56s.xml">
+      <configuration name="TestHumanReadableBytesCount.testConvertToString" configurationId="TestNG" />
+    </history-entry>
+    <history-entry file="TestHumanReadableBytesCount_testConvertToString - 2018.07.05 at 21h 28m 00s.xml">
+      <configuration name="TestHumanReadableBytesCount.testConvertToString" configurationId="TestNG" />
+    </history-entry>
+    <history-entry file="TestHumanReadableBytesCount_testConvertToString - 2018.07.05 at 21h 31m 09s.xml">
+      <configuration name="TestHumanReadableBytesCount.testConvertToString" configurationId="TestNG" />
+    </history-entry>
+  </component>
   <component name="ToolWindowManager">
-    <frame x="69" y="23" width="1611" height="1027" extended-state="6" />
+    <frame x="0" y="-1177" width="1920" height="1177" extended-state="6" />
+    <editor active="true" />
     <layout>
       <window_info anchor="right" id="Palette" order="3" />
       <window_info anchor="bottom" id="TODO" order="6" />
+      <window_info anchor="bottom" id="Messages" sideWeight="0.4946752" weight="0.3287037" />
       <window_info anchor="right" id="Palette&#9;" order="3" />
       <window_info id="Image Layers" order="2" />
       <window_info anchor="right" id="Capture Analysis" order="3" />
-      <window_info anchor="bottom" id="Event Log" order="7" sideWeight="0.5009311" side_tool="true" visible="true" weight="0.32843652" />
+      <window_info anchor="bottom" id="Event Log" order="7" sideWeight="0.50479233" side_tool="true" weight="0.28333333" />
       <window_info anchor="right" id="Maven Projects" order="3" />
-      <window_info anchor="bottom" id="Run" order="2" weight="0.32946146" />
+      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.49520767" weight="0.28333333" />
       <window_info anchor="bottom" id="Version Control" order="7" sideWeight="0.49534452" weight="0.3809024" />
-      <window_info anchor="bottom" id="Terminal" order="7" />
+      <window_info anchor="bottom" id="Terminal" order="7" sideWeight="0.49946752" weight="0.32962963" />
       <window_info id="Capture Tool" order="2" />
       <window_info id="Designer" order="2" />
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.24270639" />
-      <window_info anchor="bottom" id="Build" order="7" sideWeight="0.49906892" visible="true" weight="0.32843652" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.20500532" />
+      <window_info anchor="bottom" id="Build" order="7" sideWeight="0.4978701" weight="0.32777777" />
       <window_info id="Learn" order="2" />
-      <window_info anchor="right" id="Gradle" order="3" visible="true" weight="0.16387337" />
+      <window_info anchor="right" id="Gradle" order="3" visible="true" weight="0.1368477" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info id="UI Designer" order="2" />
@@ -3284,9 +3615,22 @@
     </ignored-roots>
     <MESSAGE value="Create IDEA Project" />
     <MESSAGE value="Join dependant projects" />
-    <option name="LAST_COMMIT_MESSAGE" value="Join dependant projects" />
+    <MESSAGE value="Add human readable bytes count" />
+    <MESSAGE value="Debug human readable" />
+    <MESSAGE value="Detect language" />
+    <option name="LAST_COMMIT_MESSAGE" value="Detect language" />
   </component>
   <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/build.gradle">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="90">
+          <caret line="12" selection-start-line="12" selection-end-line="12" selection-end-column="20" />
+          <folding>
+            <element signature="n#!!doc" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/build.gradle">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="180">
@@ -3481,12 +3825,231 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/distrimind/util/harddrive/Partition.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="645">
+          <caret line="43" lean-forward="true" selection-start-line="43" selection-end-line="43" />
+          <folding>
+            <element signature="imports" expanded="true" />
+            <element signature="e#347#348#0" expanded="true" />
+            <element signature="e#387#388#0" expanded="true" />
+            <element signature="e#446#447#0" expanded="true" />
+            <element signature="e#470#471#0" expanded="true" />
+            <element signature="e#579#580#0" expanded="true" />
+            <element signature="e#604#605#0" expanded="true" />
+            <element signature="e#662#663#0" expanded="true" />
+            <element signature="e#713#714#0" expanded="true" />
+            <element signature="e#913#914#0" expanded="true" />
+            <element signature="e#940#941#0" expanded="true" />
+            <element signature="e#983#984#0" expanded="true" />
+            <element signature="e#1024#1025#0" expanded="true" />
+            <element signature="e#1067#1068#0" expanded="true" />
+            <element signature="e#1106#1107#0" expanded="true" />
+            <element signature="e#1146#1147#0" expanded="true" />
+            <element signature="e#1182#1183#0" expanded="true" />
+            <element signature="e#1222#1223#0" expanded="true" />
+            <element signature="e#1261#1262#0" expanded="true" />
+            <element signature="e#1305#1306#0" expanded="true" />
+            <element signature="e#1347#1348#0" expanded="true" />
+            <element signature="e#1383#1384#0" expanded="true" />
+            <element signature="e#1417#1418#0" expanded="true" />
+            <element signature="e#1450#1451#0" expanded="true" />
+            <element signature="e#1481#1482#0" expanded="true" />
+            <element signature="e#1513#1514#0" expanded="true" />
+            <element signature="e#1543#1544#0" expanded="true" />
+            <element signature="e#1580#1581#0" expanded="true" />
+            <element signature="e#1613#1614#0" expanded="true" />
+            <element signature="e#1648#1649#0" expanded="true" />
+            <element signature="e#1679#1680#0" expanded="true" />
+            <element signature="e#1817#1818#0" expanded="true" />
+            <element signature="e#1877#1878#0" expanded="true" />
+            <element signature="e#1941#1942#0" expanded="true" />
+            <element signature="e#1997#1998#0" expanded="true" />
+            <element signature="e#2055#2056#0" expanded="true" />
+            <element signature="e#2105#2106#0" expanded="true" />
+            <element signature="e#2166#2167#0" expanded="true" />
+            <element signature="e#2222#2223#0" expanded="true" />
+            <element signature="e#2289#2290#0" expanded="true" />
+            <element signature="e#2344#2345#0" expanded="true" />
+            <element signature="e#2395#2396#0" expanded="true" />
+            <element signature="e#2434#2435#0" expanded="true" />
+            <element signature="e#2479#2480#0" expanded="true" />
+            <element signature="e#2512#2513#0" expanded="true" />
+            <element signature="e#2555#2556#0" expanded="true" />
+            <element signature="e#2586#2587#0" expanded="true" />
+            <element signature="e#2638#2639#0" expanded="true" />
+            <element signature="e#2682#2683#0" expanded="true" />
+            <element signature="e#2730#2731#0" expanded="true" />
+            <element signature="e#2770#2771#0" expanded="true" />
+            <element signature="e#2914#2915#0" expanded="true" />
+            <element signature="e#2935#2936#0" expanded="true" />
+            <element signature="e#3117#3118#0" expanded="true" />
+            <element signature="e#3164#3165#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/distrimind/util/harddrive/DefaultHardDriveDetect.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="195">
+          <caret line="46" column="6" selection-start-line="46" selection-start-column="6" selection-end-line="46" selection-end-column="6" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar:///Library/Java/JavaVirtualMachines/jdk-10.0.1.jdk/Contents/Home/lib/src.zip!/java.base/java/io/File.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="385">
+          <caret line="1789" column="25" selection-start-line="1789" selection-start-column="25" selection-end-line="1789" selection-end-column="25" />
+          <folding>
+            <element signature="e#75909#75910#0" expanded="true" />
+            <element signature="e#75946#75947#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar:///Library/Java/JavaVirtualMachines/jdk-10.0.1.jdk/Contents/Home/lib/src.zip!/java.base/java/nio/file/FileSystems.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="216">
+          <caret line="162" column="84" selection-start-line="162" selection-start-column="59" selection-end-line="162" selection-end-column="84" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/distrimind/util/harddrive/UnixHardDriveDetect.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="225">
+          <caret line="51" column="21" selection-start-line="51" selection-start-column="21" selection-end-line="51" selection-end-column="21" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/distrimind/util/harddrive/WindowsHardDriveDetect.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-475">
+          <caret line="50" column="6" selection-start-line="50" selection-start-column="6" selection-end-line="50" selection-end-column="6" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/distrimind/util/harddrive/LinuxHardDriveDetect.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-182">
+          <caret line="52" column="6" selection-start-line="52" selection-start-column="6" selection-end-line="52" selection-end-column="6" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/distrimind/util/OSValidator.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="554">
+          <caret line="214" column="12" lean-forward="true" selection-start-line="214" selection-start-column="12" selection-end-line="214" selection-end-column="12" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/distrimind/util/DigitalInformationUnitSI.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="450">
+          <caret line="30" lean-forward="true" selection-start-line="30" selection-end-line="30" />
+          <folding>
+            <element signature="e#339#340#0" expanded="true" />
+            <element signature="e#371#372#0" expanded="true" />
+            <element signature="e#424#425#0" expanded="true" />
+            <element signature="e#452#453#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar:///Library/Java/JavaVirtualMachines/jdk-10.0.1.jdk/Contents/Home/lib/src.zip!/java.base/java/util/HashSet.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="248">
+          <caret line="104" column="11" selection-start-line="104" selection-start-column="11" selection-end-line="104" selection-end-column="11" />
+          <folding>
+            <element signature="e#3745#3746#0" expanded="true" />
+            <element signature="e#3782#3783#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/test/java/com/distrimind/util/IDGeneratorIntTests.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="60">
+          <caret line="5" column="13" selection-start-line="5" selection-start-column="13" selection-end-line="5" selection-end-column="13" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/test/java/com/distrimind/util/DecentralizedIDTests.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-13">
+          <caret line="60" column="13" selection-start-line="60" selection-start-column="13" selection-end-line="60" selection-end-column="13" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/distrimind/util/harddrive/MacOSHardDriveDetect.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="225">
+          <caret line="139" column="36" selection-start-line="139" selection-start-column="36" selection-end-line="139" selection-end-column="36" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/distrimind/util/harddrive/HardDriveDetect.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="150">
+          <caret line="43" selection-start-line="43" selection-end-line="43" />
+          <folding>
+            <element signature="imports" expanded="true" />
+            <element signature="e#3193#3194#0" expanded="true" />
+            <element signature="e#3275#3276#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar:///Library/Java/JavaVirtualMachines/jdk-10.0.1.jdk/Contents/Home/lib/src.zip!/java.base/java/util/Formatter.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="248">
+          <caret line="4420" selection-start-line="4420" selection-end-line="4420" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar:///Library/Java/JavaVirtualMachines/jdk-10.0.1.jdk/Contents/Home/lib/src.zip!/java.base/java/lang/StringBuffer.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1692">
+          <caret line="141" column="11" selection-start-line="141" selection-start-column="11" selection-end-line="141" selection-end-column="11" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/build.gradle">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-619">
-          <caret line="12" selection-start-line="12" selection-end-line="12" selection-end-column="20" />
+        <state relative-caret-position="556">
+          <caret line="73" column="13" selection-start-line="73" selection-start-column="13" selection-end-line="73" selection-end-column="13" />
           <folding>
             <element signature="n#!!doc" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/gradle/wrapper/gradle-wrapper.properties">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="75">
+          <caret line="5" column="71" selection-start-line="5" selection-start-column="71" selection-end-line="5" selection-end-column="71" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/distrimind/util/HumanReadableBytesCount.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="385">
+          <caret line="41" column="133" selection-start-line="41" selection-start-column="133" selection-end-line="41" selection-end-column="133" />
+          <folding>
+            <element signature="imports" expanded="true" />
+            <element signature="e#1021#1022#0" expanded="true" />
+            <element signature="e#1083#1084#0" expanded="true" />
+            <element signature="e#8473#8474#0" expanded="true" />
+            <element signature="e#8537#8538#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/test/java/com/distrimind/util/TestHumanReadableBytesCount.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="404">
+          <caret line="32" column="69" selection-start-line="32" selection-start-column="69" selection-end-line="32" selection-end-column="69" />
+          <folding>
+            <element signature="imports" expanded="true" />
           </folding>
         </state>
       </provider>
