@@ -30,7 +30,7 @@ public class TestHumanReadableBytesCount {
         }
     }
 
-    @DataProvider(name = "dataForConvertingToString", parallel = false)
+    @DataProvider(name = "dataForConvertingToString", parallel = true)
     public Object[][] getDataForConvertingToString()
     {
         return new Object[][]{

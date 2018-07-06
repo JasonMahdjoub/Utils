@@ -47,9 +47,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * 
@@ -60,29 +58,49 @@ import java.util.UUID;
  */
 class MacOSHardDriveDetect extends UnixHardDriveDetect {
 
-	@Override
-	long getTimeBeforeUpdate() {
-		return 30000;
-	}
+    private HashSet<Disk> disks;
+    private HashSet<Partition> partitions;
+
+
+
 
 	@Override
-	List<Partition> scanPartitions() throws IOException {
-		//UnixPartition root = new UnixPartition();
+    Set<Disk> getDetectedDisksImpl() {
+        return disks;
+    }
+
+    @Override
+    Set<Partition> getDetectedPartitionsImpl() {
+        return partitions;
+    }
+
+    @Override
+	void scanDisksAndPartitions() throws IOException {
+
 		try {
-			List<Partition> res = new ArrayList<>();
+            disks=new HashSet<>();
+            partitions=new HashSet<>();
+
 			Process p = Runtime.getRuntime().exec("diskutil list -plist");
 			ArrayList<String> partitionIdentifiers = new ArrayList<>();
 			Document d = MultiFormatProperties.getDOM(p.getInputStream());
 			Node rootNode = null;
 			for (int i = 0; i < d.getChildNodes().getLength(); i++) {
 				Node n = d.getChildNodes().item(i);
-				if (n.getNodeName().equals("dict")) {
+				if (n.getNodeName().equals("plist")) {
 					rootNode = n;
 					break;
 				}
 			}
 			if (rootNode == null)
-				return res;
+				return;
+            for (int i = 0; i < d.getChildNodes().getLength(); i++) {
+                Node n = d.getChildNodes().item(i);
+                if (n.getNodeName().equals("dict")) {
+                    rootNode = n;
+                    break;
+                }
+            }
 			boolean takeNext = false;
 
 			for (int i = 0; i < rootNode.getChildNodes().getLength(); i++) {
@@ -104,19 +122,28 @@ class MacOSHardDriveDetect extends UnixHardDriveDetect {
 			for (String partitionIdentifier : partitionIdentifiers) {
 				Process p2 = Runtime.getRuntime().exec("diskutil info -plist " + partitionIdentifier);
 				d = MultiFormatProperties.getDOM(p2.getInputStream());
-
+                rootNode=null;
 				for (int i = 0; i < d.getChildNodes().getLength(); i++) {
-					Node n = d.getChildNodes().item(i);
+                    Node n = d.getChildNodes().item(i);
+                    if (n.getNodeName().equals("plist")) {
+                        rootNode = n;
+                        break;
+                    }
+                }
+                if (rootNode==null)
+                    continue;
+				for (int i = 0; i < rootNode.getChildNodes().getLength(); i++) {
+					Node n = rootNode.getChildNodes().item(i);
 
 					if (n.getNodeName().equals("dict")) {
 						String currentKey = null;
 
 						String deviceIdentifier = null, mountPoint = null, volumeName = null, content = null,
-								deviceNode = null, fileSystemName = null, fileSystemType = null, protocol = null;
-						boolean removable = true, writable = false;
-						long size = -1, freeSpace = -1;
-						int volumeBlockSize = 1;
-						UUID volumeUUID = null;
+								deviceNode = null, fileSystemName = null, fileSystemType = null, protocol = null, mediaName=null;
+						boolean internal = false, writable = false;
+						long size = -1, freeSpace = -1, diskSize=-1;
+						int volumeBlockSize = 1, deviceBlockSize=-1;
+						UUID volumeUUID = null, diskUUID=null;
 
 						for (int j = 0; j < n.getChildNodes().getLength(); j++) {
 							Node descN = n.getChildNodes().item(j);
@@ -137,7 +164,15 @@ class MacOSHardDriveDetect extends UnixHardDriveDetect {
 											}
 										}
 										break;
-
+                                    case "DeviceBlockSize":
+                                        if (descN.getNodeName().equals("integer")) {
+                                            try {
+                                                deviceBlockSize = Integer.valueOf(descN.getNodeValue());
+                                            } catch (Exception e) {
+                                                deviceBlockSize = -1;
+                                            }
+                                        }
+                                        break;
 									case "DeviceIdentifier":
 										if (descN.getNodeName().equals("string"))
 											deviceIdentifier = descN.getNodeValue();
@@ -146,8 +181,8 @@ class MacOSHardDriveDetect extends UnixHardDriveDetect {
 										if (descN.getNodeName().equals("string"))
 											deviceNode = descN.getNodeValue();
 										break;
-									case "RemovableMediaOrExternalDevice":
-										removable = descN.getNodeName().equals("true");
+									case "Internal":
+										internal = descN.getNodeName().equals("true");
 
 										break;
 									case "FilesystemUserVisibleName":
@@ -158,6 +193,10 @@ class MacOSHardDriveDetect extends UnixHardDriveDetect {
 										if (descN.getNodeName().equals("string"))
 											fileSystemType = descN.getNodeValue();
 										break;
+                                    case "MediaName":
+                                        if (descN.getNodeName().equals("string"))
+                                            mediaName = descN.getNodeValue();
+                                        break;
 									case "FreeSpace":
 										try {
 											if (descN.getNodeName().equals("integer"))
@@ -173,19 +212,44 @@ class MacOSHardDriveDetect extends UnixHardDriveDetect {
 									case "Size":
 										try {
 											if (descN.getNodeName().equals("integer"))
-												size = Long.valueOf(descN.getNodeValue());
+												diskSize = Long.valueOf(descN.getNodeValue());
 										} catch (Exception e) {
-											size = -1;
+                                            diskSize = -1;
 										}
 										break;
+                                    case "VolumeSize":
+                                        try {
+                                            if (descN.getNodeName().equals("integer"))
+                                                size = Long.valueOf(descN.getNodeValue());
+                                        } catch (Exception e) {
+                                            size = -1;
+                                        }
+                                        break;
 									case "VolumeName":
 										if (descN.getNodeName().equals("string"))
 											volumeName = descN.getNodeValue();
 										break;
 									case "VolumeUUID":
-										if (descN.getNodeName().equals("string"))
-											volumeUUID = UUID.fromString(descN.getNodeValue());
-										break;
+									    try {
+                                            if (descN.getNodeName().equals("string"))
+                                                volumeUUID = UUID.fromString(descN.getNodeValue());
+                                        }
+                                        catch(Exception e)
+                                        {
+                                            e.printStackTrace();
+                                        }
+
+                                    break;
+                                    case "DiskUUID":
+                                        try {
+                                            if (descN.getNodeName().equals("string"))
+                                                diskUUID = UUID.fromString(descN.getNodeValue());
+                                        }
+                                        catch(Exception e)
+                                        {
+                                            e.printStackTrace();
+                                        }
+                                        break;
 									case "Writable":
 										writable = descN.getNodeName().equals("true");
 
@@ -198,9 +262,19 @@ class MacOSHardDriveDetect extends UnixHardDriveDetect {
 								}
 							}
 						}
-						if (deviceIdentifier != null && mountPoint != null && volumeName != null && volumeUUID != null) {
-							Partition partition = new Partition(volumeUUID, new File(mountPoint), deviceIdentifier, fileSystemType, fileSystemName, volumeBlockSize, writable, removable, volumeName, protocol, size);
-							res.add(partition);
+
+						if (volumeUUID==null)
+                        {
+                            if (diskUUID!=null && deviceNode!=null && diskSize!=-1)
+                                disks.add(new Disk(diskUUID,diskSize,internal,deviceBlockSize,protocol, deviceNode, mediaName));
+                        }
+                        else if (deviceIdentifier != null && mountPoint != null && volumeName != null && volumeUUID != null) {
+						    for (Disk disk : disks) {
+                                if (disk.getDiskUUID().equals(diskUUID)) {
+                                    partitions.add(new Partition(volumeUUID, new File(mountPoint), deviceIdentifier, fileSystemType, fileSystemName, volumeBlockSize, writable, volumeName, size, disk));
+                                    break;
+                                }
+                            }
 						}
 						break;
 					}
@@ -210,7 +284,6 @@ class MacOSHardDriveDetect extends UnixHardDriveDetect {
 			}
 
 
-			return res;
 		}
 		catch(ParserConfigurationException | SAXException e)
 		{

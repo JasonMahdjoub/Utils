@@ -6,9 +6,14 @@
 		    <class name="com.distrimind.util.IDGeneratorIntTests" />
 		</classes>
 	</test>
-	
-	
-		<test name="testDencentralizedIDGenerator">  
+
+	<test name="testHumanReadableBytes">
+		<classes>
+			<class name="com.distrimind.util.TestHumanReadableBytesCount" />
+		</classes>
+	</test>
+
+	<test name="testDencentralizedIDGenerator">
 		<classes>
 		    <class name="com.distrimind.util.DecentralizedIDTests" />
 		</classes>

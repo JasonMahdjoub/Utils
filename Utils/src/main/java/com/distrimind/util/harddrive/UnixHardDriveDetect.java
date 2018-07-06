@@ -38,6 +38,7 @@ package com.distrimind.util.harddrive;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -49,38 +50,23 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 abstract class UnixHardDriveDetect extends HardDriveDetect {
 
-	static class Partition {
-		private String hard_drive_identifier;
+	private static class UnixPartition {
+		private Partition partition;
 
-		private String path;
+		private UnixPartition parent = null;
 
-		private Partition parent = null;
+		private final ArrayList<UnixPartition> childs = new ArrayList<>();
 
-		private final ArrayList<Partition> childs = new ArrayList<>();
-
-		Partition() {
-			hard_drive_identifier = HardDriveDetect.DEFAULT_HARD_DRIVE_IDENTIFIER;
-			path = "/";
+		UnixPartition(Partition partition) {
+			this.partition=partition;
 		}
 
-		Partition(File _path) throws IOException {
-			hard_drive_identifier = HardDriveDetect.DEFAULT_HARD_DRIVE_IDENTIFIER;
-			path = _path.getCanonicalPath();
-		}
-
-		Partition(File _hard_drive_identifier, File _path) throws IOException {
-			hard_drive_identifier = _hard_drive_identifier.getCanonicalPath();
-			path = _path.getCanonicalPath();
-		}
-
-		boolean addPartition(Partition _partition) {
-			if (_partition.path.equals(path)) {
-				hard_drive_identifier = _partition.hard_drive_identifier;
-				path = _partition.path;
+		boolean addPartition(UnixPartition _partition) {
+			if (_partition.partition.equals(partition)) {
 				return true;
 			} else {
-				if (_partition.path.startsWith(path)) {
-					for (Partition hd : childs) {
+				if (_partition.partition.getMountPointOrLetter().getAbsolutePath().startsWith(partition.getMountPointOrLetter().getAbsolutePath())) {
+					for (UnixPartition hd : childs) {
 						if (hd.addPartition(_partition))
 							return true;
 					}
@@ -93,62 +79,58 @@ abstract class UnixHardDriveDetect extends HardDriveDetect {
 			}
 		}
 
-		public String getHardDriveIdentifier() {
-			return hard_drive_identifier;
-		}
 
-		private String getHardDriveIdentifier(String _canonical_path) {
-			if (_canonical_path.startsWith(path)) {
-				for (Partition p : childs) {
-					String res = p.getHardDriveIdentifier(_canonical_path);
+		private Partition getHardDriveIdentifier(String _canonical_path) {
+			if (_canonical_path.startsWith(partition.getMountPointOrLetter().getAbsolutePath())) {
+				for (UnixPartition p : childs) {
+                    Partition res = p.getHardDriveIdentifier(_canonical_path);
 					if (res != null)
 						return res;
 				}
-				return hard_drive_identifier;
+				return partition;
 			} else
 				return null;
 		}
 
-		public Partition getParent() {
+		public UnixPartition getParent() {
 			return parent;
 		}
 
-		public String getPath() {
-			return path;
-		}
+
 	}
 
-	private AtomicReference<Partition> root = new AtomicReference<>();
-
-	private AtomicReference<Long> previous_update = new AtomicReference<>();
+	private volatile UnixPartition root;
 
 	UnixHardDriveDetect() {
-		root.set(null);
-		previous_update.set(Long.valueOf(System.currentTimeMillis()));
+		root=null;
 	}
+
+    public Partition getConcernedPartition(File _file) throws IOException {
+        synchronized (this)
+        {
+            updateIfNecessary();
+            if (root!=null)
+                return root.getHardDriveIdentifier(_file.getCanonicalPath());
+            return null;
+        }
+    }
 
 	@Override
-	public final String getHardDriveIdentifier(File _file) {
-		try {
-			String f = _file.getCanonicalPath();
-			if (root.get() == null
-					|| (System.currentTimeMillis() - previous_update.get().longValue()) > getTimeBeforeUpdate()) {
-				root.set(scanPartitions());
-				previous_update.set(Long.valueOf(System.currentTimeMillis()));
-			}
-			String res = root.get().getHardDriveIdentifier(f);
-			if (res == null)
-				return HardDriveDetect.DEFAULT_HARD_DRIVE_IDENTIFIER;
-			else
-				return res;
-		} catch (IOException e) {
-			return null;
-		}
+    void update() throws IOException {
+        super.update();
+        for (Partition p : getDetectedPartitions()) {
+            if (p.getMountPointOrLetter().getAbsolutePath().equals("/")) {
+                root = new UnixPartition(p);
+                break;
+            }
+        }
+        for (Partition p : getDetectedPartitions()) {
+            root.addPartition(new UnixPartition(p));
+        }
+    }
 
-	}
 
-	abstract long getTimeBeforeUpdate();
 
-	abstract Partition scanPartitions();
+
 
 }

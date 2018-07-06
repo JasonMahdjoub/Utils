@@ -36,9 +36,14 @@ knowledge of the CeCILL-C license and that you accept its terms.
 package com.distrimind.util.harddrive;
 
 import java.io.File;
+
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
 import com.distrimind.util.OSValidator;
+
 
 /**
  * Class giving a unique hard drive identifier, considering a folder,
@@ -52,7 +57,6 @@ public abstract class HardDriveDetect {
 	/**
 	 * Default hard drive identifier
 	 */
-	public static final String DEFAULT_HARD_DRIVE_IDENTIFIER = "DEFAULT_HARD_DRIVE_IDENTIFIER";
 
 	private static final AtomicReference<HardDriveDetect> instance = new AtomicReference<>();
 
@@ -78,8 +82,8 @@ public abstract class HardDriveDetect {
 		return instance.get();
 	}
 
-	public static void main(String args[]) {
-		System.out.println(getInstance().getHardDriveIdentifier(new File(args[0])));
+	public static void main(String args[]) throws IOException {
+		System.out.println(getInstance().getConcernedPartition(new File(args[0])));
 	}
 
 	HardDriveDetect() {
@@ -87,13 +91,131 @@ public abstract class HardDriveDetect {
 	}
 
 	/**
-	 * Returns a unique hard drive identifier considering a file
+	 * Returns the concerned partition considering a file
 	 * 
 	 * @param _file
 	 *            a file contained into the hard drive
-	 * @return the hard drive identifier or
-	 *         {@link HardDriveDetect#DEFAULT_HARD_DRIVE_IDENTIFIER} if the hard
-	 *         drive identifier couldn't be found.
+	 * @return the concerned partition or null if the partition was not found
 	 */
-	public abstract String getHardDriveIdentifier(File _file);
+	public abstract Partition getConcernedPartition(File _file) throws IOException;
+
+
+	abstract void scanDisksAndPartitions() throws IOException;
+
+    private long lastUpdateUTC=Long.MIN_VALUE;
+    private long delayBetweenEachUpdate=30000;
+
+    private Set<Disk> oldDisks=new HashSet<>(), removedDisks=new HashSet<>(), addedDisks=new HashSet<>();
+    private Set<Partition> oldPartitions=new HashSet<>(), removedPartitions =new HashSet<>(), addedPartitions=new HashSet<>();
+
+
+	abstract Set<Disk> getDetectedDisksImpl();
+	abstract Set<Partition> getDetectedPartitionsImpl();
+
+	void update() throws IOException {
+        scanDisksAndPartitions();
+        Set<Disk> nd=getDetectedDisksImpl();
+        addedDisks=new HashSet<>();
+        removedDisks=new HashSet<>();
+        for (Disk d : nd)
+        {
+            if (!oldDisks.contains(d)) {
+                addedDisks.add(d);
+                removedDisks.remove(d);
+            }
+        }
+        for (Disk d : oldDisks)
+        {
+            if (!nd.contains(d)) {
+                removedDisks.add(d);
+                addedDisks.remove(d);
+            }
+        }
+        Set<Partition> np=getDetectedPartitionsImpl();
+        addedPartitions=new HashSet<>();
+        removedPartitions =new HashSet<>();
+        for (Partition p : np)
+        {
+            if (!oldPartitions.contains(p)) {
+                addedPartitions.add(p);
+                removedPartitions.remove(p);
+            }
+        }
+        for (Partition p : oldPartitions)
+        {
+            if (!np.contains(p)) {
+                removedPartitions.add(p);
+                addedPartitions.remove(p);
+            }
+        }
+        oldPartitions=np;
+        oldDisks=nd;
+    }
+
+	void updateIfNecessary() throws IOException {
+        if (lastUpdateUTC+delayBetweenEachUpdate<System.currentTimeMillis()) {
+
+            update();
+            lastUpdateUTC=System.currentTimeMillis();
+        }
+    }
+
+
+    public Set<Disk> getDetectedDisks() throws IOException {
+        synchronized(this) {
+            updateIfNecessary();
+            return getDetectedDisksImpl();
+        }
+    }
+
+    public Set<Partition> getDetectedPartitions() throws IOException {
+        synchronized(this) {
+            updateIfNecessary();
+            return getDetectedPartitionsImpl();
+        }
+    }
+
+    public long getDelayBetweenEachUpdate() {
+        return delayBetweenEachUpdate;
+    }
+
+    public void setDelayBetweenEachUpdate(long delayBetweenEachUpdate) {
+        this.delayBetweenEachUpdate = delayBetweenEachUpdate;
+    }
+
+    public Set<Partition> getNewDetectedPartitions()
+    {
+        synchronized(this) {
+            Set<Partition> res = addedPartitions;
+            addedPartitions = null;
+            return res;
+        }
+    }
+    public Set<Partition> getNewRemovedPartitions()
+    {
+        synchronized(this) {
+            Set<Partition> res = removedPartitions;
+            removedPartitions = null;
+            return res;
+        }
+    }
+
+    public Set<Disk> getNewDetectedDisks()
+    {
+        synchronized(this) {
+            Set<Disk> res = addedDisks;
+            addedDisks = null;
+            return res;
+        }
+    }
+    public Set<Disk> getNewRemovedDisks()
+    {
+        synchronized(this) {
+            Set<Disk> res = removedDisks;
+            removedDisks = null;
+            return res;
+        }
+    }
+
+
 }

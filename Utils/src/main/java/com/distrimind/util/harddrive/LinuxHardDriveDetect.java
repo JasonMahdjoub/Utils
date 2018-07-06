@@ -61,12 +61,12 @@ class LinuxHardDriveDetect extends UnixHardDriveDetect {
 	}
 
 	@Override
-	Partition scanPartitions() {
+	UnixPartition scanPartitions() {
 		return scanPartitions(2);
 	}
 
-	Partition scanPartitions(int iteration) {
-		Partition root = new Partition();
+	UnixPartition scanPartitions(int iteration) {
+		UnixPartition root = new UnixPartition();
 		if (iteration <= 0)
 			return root;
 
@@ -92,7 +92,7 @@ class LinuxHardDriveDetect extends UnixHardDriveDetect {
 									}
 									if (id.length() > 1) {
 										try {
-											Partition p = new Partition(new File(id), new File(values[1]));
+											UnixPartition p = new UnixPartition(new File(id), new File(values[1]));
 											root.addPartition(p);
 										} catch (Exception e) {
 										}
@@ -101,7 +101,7 @@ class LinuxHardDriveDetect extends UnixHardDriveDetect {
 								}
 							} else {
 								try {
-									Partition p = new Partition(new File(values[1]));
+									UnixPartition p = new UnixPartition(new File(values[1]));
 									root.addPartition(p);
 								} catch (Exception e) {
 								}

@@ -100,7 +100,7 @@ public class HumanReadableBytesCount {
             try {
                 val = (m.group("sign").equals("-")?-1.0:1.0)*(format.parse(m.group("value")).doubleValue());
             } catch (ParseException e) {
-                throw new InternalError(e);
+                throw new InternalError();
             }
             String preunit=m.group("preunit");
             m=getShortComposedUnitsPattern().matcher(preunit);

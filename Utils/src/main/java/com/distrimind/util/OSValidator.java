@@ -208,5 +208,12 @@ public enum OSValidator {
 		
 	}
 
+	public boolean SIPrefixAreUnderstoodAsBinaryPrefixForByteMultiples()
+	{
+		if (this==WINDOWS || (this==MACOS && Double.valueOf(getOSVersion())<10.1))
+			return true;
+		else
+			return false;
+	}
 	
 }
