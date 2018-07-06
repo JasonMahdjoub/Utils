@@ -35,9 +35,21 @@ knowledge of the CeCILL-C license and that you accept its terms.
 
 package com.distrimind.util.harddrive;
 
+import com.distrimind.util.properties.MultiFormatProperties;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.xml.sax.SAXException;
+
+import javax.xml.parsers.ParserConfigurationException;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 /**
  * 
@@ -54,98 +66,158 @@ class MacOSHardDriveDetect extends UnixHardDriveDetect {
 	}
 
 	@Override
-	Partition scanPartitions() {
-		Partition root = new Partition();
+	List<Partition> scanPartitions() throws IOException {
+		//UnixPartition root = new UnixPartition();
 		try {
-			Process p = Runtime.getRuntime().exec("diskutil list");
-			try (InputStreamReader isr = new InputStreamReader(p.getInputStream())) {
-				try (BufferedReader input = new BufferedReader(isr)) {
-					String current_drive = null;
-					String line;
+			List<Partition> res = new ArrayList<>();
+			Process p = Runtime.getRuntime().exec("diskutil list -plist");
+			ArrayList<String> partitionIdentifiers = new ArrayList<>();
+			Document d = MultiFormatProperties.getDOM(p.getInputStream());
+			Node rootNode = null;
+			for (int i = 0; i < d.getChildNodes().getLength(); i++) {
+				Node n = d.getChildNodes().item(i);
+				if (n.getNodeName().equals("dict")) {
+					rootNode = n;
+					break;
+				}
+			}
+			if (rootNode == null)
+				return res;
+			boolean takeNext = false;
 
-					while ((line = input.readLine()) != null) {
-						if (line.startsWith("/dev/")) {
-							if (new File(line).exists())
-								current_drive = line;
-							else
-								current_drive = null;
-						} else if (current_drive != null) {
-							String strings[] = line.split(" ");
-							if (strings.length > 0) {
-								String lastString = strings[strings.length - 1];
-								int lastindex = lastString.lastIndexOf("s");
-								String part = "s";
-								if (lastindex > 0) {
-									boolean ok = true;
-									for (int i = lastindex + 1; i < lastString.length(); i++) {
-										char c = lastString.charAt(i);
-										part += c;
-										if (c < '0' || c > '9') {
-											ok = false;
-										}
-									}
-									if (ok) {
-										String currentPart = current_drive + part;
-										Process p2 = Runtime.getRuntime().exec("diskutil info " + currentPart);
-										try (InputStreamReader isr2 = new InputStreamReader(p2.getInputStream())) {
-											try (BufferedReader input2 = new BufferedReader(isr2)) {
-												String line2;
-												boolean mounted = false;
+			for (int i = 0; i < rootNode.getChildNodes().getLength(); i++) {
+				Node n = rootNode.getChildNodes().item(i);
+				if (takeNext && n.getNodeName().equals(("array"))) {
+					for (int j = 0; j < n.getChildNodes().getLength(); j++) {
+						Node disk = n.getChildNodes().item(j);
+						if (disk.getNodeName().equals("string"))
+							partitionIdentifiers.add(disk.getNodeValue());
+					}
+					break;
+				} else if (n.getNodeName().equals(("key")) && n.getNodeValue().equals("AllDisks")) {
+					takeNext = true;
+				} else
+					takeNext = false;
+			}
+			p.destroy();
 
-												while ((line2 = input2.readLine()) != null) {
-													strings = line2.split(" ");
-													String s1 = null;
-													String s2 = null;
-													String s3 = null;
-													for (int i = 0; i < strings.length; i++) {
-														if (strings[i].length() != 0) {
-															if (s1 == null)
-																s1 = strings[i];
-															else if (s2 == null) {
-																s2 = strings[i];
-																if (!mounted)
-																	break;
-															} else if (s3 == null) {
-																s3 = strings[i];
-																break;
-															}
-														}
-													}
-													if (s2 != null) {
-														if (s1.startsWith("Mounted")) {
-															if (s2.equals("Yes")) {
-																mounted = true;
-															} else
-																break;
-														} else if (mounted && s3 != null && s1.equals("Mount")
-																&& s2.startsWith("Point")) {
-															try {
-																File mount = new File(s3);
-																if (mount.exists()) {
-																	Partition partition = new Partition(
-																			new File(current_drive), mount);
-																	root.addPartition(partition);
-																}
-															} catch (Exception e) {
-															}
-															break;
-														}
-													}
-												}
+			for (String partitionIdentifier : partitionIdentifiers) {
+				Process p2 = Runtime.getRuntime().exec("diskutil info -plist " + partitionIdentifier);
+				d = MultiFormatProperties.getDOM(p2.getInputStream());
+
+				for (int i = 0; i < d.getChildNodes().getLength(); i++) {
+					Node n = d.getChildNodes().item(i);
+
+					if (n.getNodeName().equals("dict")) {
+						String currentKey = null;
+
+						String deviceIdentifier = null, mountPoint = null, volumeName = null, content = null,
+								deviceNode = null, fileSystemName = null, fileSystemType = null, protocol = null;
+						boolean removable = true, writable = false;
+						long size = -1, freeSpace = -1;
+						int volumeBlockSize = 1;
+						UUID volumeUUID = null;
+
+						for (int j = 0; j < n.getChildNodes().getLength(); j++) {
+							Node descN = n.getChildNodes().item(j);
+							if (descN.getNodeName().equals("key")) {
+								currentKey = descN.getNodeValue();
+							} else if (currentKey != null) {
+								switch (currentKey) {
+									case "Content":
+										if (descN.getNodeName().equals("string"))
+											content = descN.getNodeValue();
+										break;
+									case "VolumeAllocationBlockSize":
+										if (descN.getNodeName().equals("integer")) {
+											try {
+												volumeBlockSize = Integer.valueOf(descN.getNodeValue());
+											} catch (Exception e) {
+												volumeBlockSize = -1;
 											}
 										}
-									}
+										break;
+
+									case "DeviceIdentifier":
+										if (descN.getNodeName().equals("string"))
+											deviceIdentifier = descN.getNodeValue();
+										break;
+									case "DeviceNode":
+										if (descN.getNodeName().equals("string"))
+											deviceNode = descN.getNodeValue();
+										break;
+									case "RemovableMediaOrExternalDevice":
+										removable = descN.getNodeName().equals("true");
+
+										break;
+									case "FilesystemUserVisibleName":
+										if (descN.getNodeName().equals("string"))
+											fileSystemName = descN.getNodeValue();
+										break;
+									case "FilesystemType":
+										if (descN.getNodeName().equals("string"))
+											fileSystemType = descN.getNodeValue();
+										break;
+									case "FreeSpace":
+										try {
+											if (descN.getNodeName().equals("integer"))
+												freeSpace = Long.valueOf(descN.getNodeValue());
+										} catch (Exception e) {
+											freeSpace = -1;
+										}
+										break;
+									case "MountPoint":
+										if (descN.getNodeName().equals("String"))
+											mountPoint = descN.getNodeValue();
+										break;
+									case "Size":
+										try {
+											if (descN.getNodeName().equals("integer"))
+												size = Long.valueOf(descN.getNodeValue());
+										} catch (Exception e) {
+											size = -1;
+										}
+										break;
+									case "VolumeName":
+										if (descN.getNodeName().equals("string"))
+											volumeName = descN.getNodeValue();
+										break;
+									case "VolumeUUID":
+										if (descN.getNodeName().equals("string"))
+											volumeUUID = UUID.fromString(descN.getNodeValue());
+										break;
+									case "Writable":
+										writable = descN.getNodeName().equals("true");
+
+										break;
+									case "BusProtocol":
+										if (descN.getNodeName().equals("string"))
+											protocol = descN.getNodeValue();
+
+										break;
 								}
 							}
 						}
+						if (deviceIdentifier != null && mountPoint != null && volumeName != null && volumeUUID != null) {
+							Partition partition = new Partition(volumeUUID, new File(mountPoint), deviceIdentifier, fileSystemType, fileSystemName, volumeBlockSize, writable, removable, volumeName, protocol, size);
+							res.add(partition);
+						}
+						break;
 					}
 				}
+
+				p2.destroy();
 			}
-			p.destroy();
-			return root;
-		} catch (Exception e) {
-			return new Partition();
+
+
+			return res;
 		}
+		catch(ParserConfigurationException | SAXException e)
+		{
+			throw new IOException(e);
+		}
+
+
 	}
 
 }
