@@ -2,15 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="10b253e7-fd4e-4a64-8b2a-093fa1eb6135" name="Default" comment="Add human readable">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/distrimind/util/HumanReadableBytesCount.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/distrimind/util/HumanReadableBytesCount.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/distrimind/util/OSValidator.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/distrimind/util/OSValidator.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/distrimind/util/harddrive/HardDriveDetect.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/distrimind/util/harddrive/HardDriveDetect.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/distrimind/util/harddrive/Disk.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/distrimind/util/harddrive/Disk.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/distrimind/util/harddrive/LinuxHardDriveDetect.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/distrimind/util/harddrive/LinuxHardDriveDetect.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/distrimind/util/harddrive/MacOSHardDriveDetect.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/distrimind/util/harddrive/MacOSHardDriveDetect.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/distrimind/util/harddrive/UnixHardDriveDetect.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/distrimind/util/harddrive/UnixHardDriveDetect.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/com/distrimind/util/build.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/com/distrimind/util/build.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/java/com/distrimind/util/AllTestsNG.xml" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/com/distrimind/util/AllTestsNG.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/distrimind/util/harddrive/Partition.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/distrimind/util/harddrive/Partition.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/test/java/com/distrimind/util/TestHumanReadableBytesCount.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/com/distrimind/util/TestHumanReadableBytesCount.java" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/.gradle/" />
@@ -145,7 +140,7 @@
         <entry file="file://$PROJECT_DIR$/src/main/java/com/distrimind/util/HumanReadableBytesCount.java">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="435">
-              <caret line="41" column="133" selection-start-line="41" selection-start-column="133" selection-end-line="41" selection-end-column="133" />
+              <caret line="75" column="133" selection-start-line="75" selection-start-column="133" selection-end-line="75" selection-end-column="133" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -166,8 +161,9 @@
         <entry file="file://$PROJECT_DIR$/src/test/java/com/distrimind/util/TestHumanReadableBytesCount.java">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="404">
-              <caret line="32" column="69" selection-start-line="32" selection-start-column="69" selection-end-line="32" selection-end-column="69" />
+              <caret line="66" column="69" selection-start-line="66" selection-start-column="69" selection-end-line="66" selection-end-column="69" />
               <folding>
+                <element signature="e#0#13730#0" expanded="true" />
                 <element signature="imports" expanded="true" />
               </folding>
             </state>
@@ -3662,6 +3658,7 @@
         <state relative-caret-position="450">
           <caret line="32" column="69" selection-start-line="32" selection-start-column="69" selection-end-line="32" selection-end-column="69" />
           <folding>
+            <element signature="e#0#13730#0" expanded="true" />
             <element signature="imports" expanded="true" />
           </folding>
         </state>
@@ -4061,7 +4058,7 @@
     <entry file="file://$PROJECT_DIR$/src/main/java/com/distrimind/util/HumanReadableBytesCount.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="435">
-          <caret line="41" column="133" selection-start-line="41" selection-start-column="133" selection-end-line="41" selection-end-column="133" />
+          <caret line="75" column="133" selection-start-line="75" selection-start-column="133" selection-end-line="75" selection-end-column="133" />
           <folding>
             <element signature="imports" expanded="true" />
           </folding>
@@ -4071,8 +4068,9 @@
     <entry file="file://$PROJECT_DIR$/src/test/java/com/distrimind/util/TestHumanReadableBytesCount.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="404">
-          <caret line="32" column="69" selection-start-line="32" selection-start-column="69" selection-end-line="32" selection-end-column="69" />
+          <caret line="66" column="69" selection-start-line="66" selection-start-column="69" selection-end-line="66" selection-end-column="69" />
           <folding>
+            <element signature="e#0#13730#0" expanded="true" />
             <element signature="imports" expanded="true" />
           </folding>
         </state>

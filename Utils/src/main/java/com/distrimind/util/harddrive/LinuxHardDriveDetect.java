@@ -55,10 +55,6 @@ class LinuxHardDriveDetect extends UnixHardDriveDetect {
 
 	}
 
-	@Override
-	long getTimeBeforeUpdate() {
-		return 10000;
-	}
 
 	@Override
 	UnixPartition scanPartitions() {
