@@ -118,13 +118,13 @@ abstract class UnixHardDriveDetect extends HardDriveDetect {
 	@Override
     void update() throws IOException {
         super.update();
-        for (Partition p : getDetectedPartitions()) {
+        for (Partition p : getDetectedPartitionsImpl()) {
             if (p.getMountPointOrLetter().getAbsolutePath().equals("/")) {
                 root = new UnixPartition(p);
                 break;
             }
         }
-        for (Partition p : getDetectedPartitions()) {
+        for (Partition p : getDetectedPartitionsImpl()) {
             root.addPartition(new UnixPartition(p));
         }
     }
