@@ -63,6 +63,7 @@ public class SystemFunctions {
 	 * @param _file
 	 *            a file contained into the hard drive
 	 * @return the concerned partition
+     * @throws IOException if a problem occur
 	 */
 	public static Partition getHardDrivePartition(File _file) throws IOException {
 		return HardDriveDetect.getInstance().getConcernedPartition(_file);

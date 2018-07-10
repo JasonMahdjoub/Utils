@@ -100,6 +100,7 @@ public abstract class HardDriveDetect {
 	 * @param _file
 	 *            a file contained into the hard drive
 	 * @return the concerned partition or null if the partition was not found
+     * @throws IOException if a problem occurs
 	 */
 	public abstract Partition getConcernedPartition(File _file) throws IOException;
 

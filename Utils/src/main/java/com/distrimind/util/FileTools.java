@@ -67,6 +67,7 @@ public final class FileTools {
 	 * 
 	 * @param folderPath
 	 *            A folder path.
+     * @return true if the fold exists or has been created
 	 */
 	public static boolean checkFolder(File folderPath) {
 		if (!(folderPath.exists())) {
@@ -81,6 +82,7 @@ public final class FileTools {
 	 *
 	 * @param folderPath
 	 *            A folder path.
+     * @return true if the folders exists or have been created
 	 */
     @SuppressWarnings("UnusedReturnValue")
 	public static boolean checkFolderRecursive(File folderPath) {
@@ -238,6 +240,7 @@ public final class FileTools {
 	 *
 	 * @param path
 	 *            A folder path.
+     * @return true if the directory has been deleted
 	 */
     @SuppressWarnings("UnusedReturnValue")
 	public static boolean deleteDirectory(File path) {
@@ -332,6 +335,7 @@ public final class FileTools {
 	 *            A root directory.
 	 * @throws IOException
 	 *             if a problem occurs
+     * @return true if the file has been removed
 	 */
 
 	@SuppressWarnings("UnusedReturnValue")
