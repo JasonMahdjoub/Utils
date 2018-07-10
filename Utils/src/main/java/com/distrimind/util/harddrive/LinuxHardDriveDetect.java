@@ -38,7 +38,6 @@ package com.distrimind.util.harddrive;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.*;
@@ -86,6 +85,8 @@ class LinuxHardDriveDetect extends UnixHardDriveDetect {
 							if (node.startsWith("/dev/")) {
 								try {
 									node = new File(node).getCanonicalPath();
+									if (node.endsWith("/"))
+										node=node.substring(0, node.length()-1);
 									String disk=node;
 									char last_char = disk.charAt(disk.length() - 1);
 									while (last_char >= '0' && last_char <= '9') {
@@ -96,16 +97,16 @@ class LinuxHardDriveDetect extends UnixHardDriveDetect {
 											break;
 									}
 									int li=node.lastIndexOf("/")+1;
-									String nodeShort=node.substring(li, node.length()-li);
+									String nodeShort=node.substring(li);
 
                                     li=node.lastIndexOf("/")+1;
-                                    String diskNodeShort=disk.substring(li, node.length()-li);
+                                    String diskNodeShort=disk.substring(li);
 
 									if (disk.length() > 1) {
                                         Disk d=disksString.get(disk);
 									    if (d==null)
                                         {
-                                            d=new Disk(null, getDiskOrPartitionSize(diskNodeShort), !isRemovable(disk, node), -1, getProtocol(disk), disk, null);
+                                            d=new Disk(null, getDiskOrPartitionSize(diskNodeShort), !isRemovable(diskNodeShort, node), -1, getProtocol(disk), disk, null);
                                             disks.add(d);
                                             disksString.put(disk, d);
                                         }
@@ -129,12 +130,15 @@ class LinuxHardDriveDetect extends UnixHardDriveDetect {
 
 	private long getDiskOrPartitionSize(String diskOrPartition) throws IOException {
 		File file = new File("/sys/class/block/"+diskOrPartition+"/size");
+		
 		if (file.exists()) {
+			
 			long size=-1;
 			try (FileInputStream fis = new FileInputStream(file)) {
 				try (InputStreamReader isr = new InputStreamReader(fis)) {
 					try (BufferedReader br = new BufferedReader(isr)) {
 						size=Long.valueOf(br.readLine());
+						
 					}
 				}
 			}
@@ -154,7 +158,7 @@ class LinuxHardDriveDetect extends UnixHardDriveDetect {
 			try (FileInputStream fis = new FileInputStream(file)) {
 				try (InputStreamReader isr = new InputStreamReader(fis)) {
 					try (BufferedReader br = new BufferedReader(isr)) {
-						removable=Integer.valueOf(br.readLine())!=0;
+						removable=Integer.valueOf(br.readLine())==1;
 					}
 				}
 			}
@@ -170,26 +174,11 @@ class LinuxHardDriveDetect extends UnixHardDriveDetect {
 	}
 
 	private UUID getPartitionUUID(String nodeShort) throws IOException {
-	    String path="../../"+nodeShort;
-        Process p = Runtime.getRuntime().exec("list -g -o --time-style=+ /dev/disk/by-partuuid");
-        try (InputStreamReader isr = new InputStreamReader(p.getInputStream())) {
-            try (BufferedReader br = new BufferedReader(isr)) {
-                String line;
-                while ((line=br.readLine())!=null)
-                {
-                    String cols[]=line.split(" ");
-                    if (cols.length==6 && cols[5].equals(path))
-                    {
-                        return UUID.fromString(cols[3]);
-                    }
-                }
-            }
-        }
-        catch(Exception e)
-        {
-            e.printStackTrace();
-        }
-        return null;
+	    String r=getCorrespondance("/dev/disk/by-partuuid", nodeShort);
+	    if (r==null)
+	    	return null;
+	    else
+	    	return UUID.fromString(r);
     }
     private String getPartitionLabel(String nodeShort) throws IOException {
 	    String res=getCorrespondance("/dev/disk/by-partlabel", nodeShort);
@@ -202,16 +191,16 @@ class LinuxHardDriveDetect extends UnixHardDriveDetect {
     }
     private String getCorrespondance(String searchPath, String nodeShort) throws IOException {
         String path="../../"+nodeShort;
-        Process p = Runtime.getRuntime().exec("list -g -o --time-style=+ "+searchPath);
+        Process p = Runtime.getRuntime().exec("ls -g -o --time-style=+ "+searchPath);
         try (InputStreamReader isr = new InputStreamReader(p.getInputStream())) {
             try (BufferedReader br = new BufferedReader(isr)) {
                 String line;
                 while ((line=br.readLine())!=null)
                 {
                     String cols[]=line.split(" ");
-                    if (cols.length==6 && cols[5].equals(path))
+                    if (cols.length==7 && cols[6].equals(path))
                     {
-                        return cols[3];
+                        return cols[4];
                     }
                 }
             }

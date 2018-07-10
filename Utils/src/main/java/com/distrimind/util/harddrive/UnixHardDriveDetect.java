@@ -38,8 +38,6 @@ package com.distrimind.util.harddrive;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * 
@@ -53,7 +51,6 @@ abstract class UnixHardDriveDetect extends HardDriveDetect {
 	private static class UnixPartition {
 		private Partition partition;
 
-		private UnixPartition parent = null;
 
 		private final ArrayList<UnixPartition> childs = new ArrayList<>();
 
@@ -71,7 +68,6 @@ abstract class UnixHardDriveDetect extends HardDriveDetect {
 							return true;
 					}
 					childs.add(_partition);
-					_partition.parent = this;
 					return true;
 				} else {
 					return false;
@@ -90,10 +86,6 @@ abstract class UnixHardDriveDetect extends HardDriveDetect {
 				return partition;
 			} else
 				return null;
-		}
-
-		public UnixPartition getParent() {
-			return parent;
 		}
 
 
