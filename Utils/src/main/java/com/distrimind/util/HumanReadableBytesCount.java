@@ -272,7 +272,7 @@ public class HumanReadableBytesCount {
         return "(("+getRegexPre()+getRegexUnits()+")s?)";
     }
 
-    private static volatile Pattern globalPattern=null, shortComposedUnitsPattern=null, composedUnitsPattern=null;
+    private static volatile Pattern globalPattern=null, shortComposedUnitsPattern=null;
 
 
     private static Pattern getGlobalPattern()

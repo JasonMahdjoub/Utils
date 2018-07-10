@@ -41,12 +41,8 @@ import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.file.FileSystem;
-import java.nio.file.FileSystems;
 import java.util.*;
 
 /**
@@ -159,7 +155,7 @@ class MacOSHardDriveDetect extends UnixHardDriveDetect {
 						String deviceIdentifier = null, mountPoint = null, volumeName = null,
 								deviceNode = null, fileSystemName = null, fileSystemType = null, protocol = null, mediaName=null;
 						boolean internal = false, writable = false;
-						long size = -1, freeSpace = -1, diskSize=-1;
+						long size = -1, diskSize=-1;
 						int volumeBlockSize = 1, deviceBlockSize=-1;
 						UUID volumeUUID = null, diskUUID=null;
 
@@ -214,14 +210,7 @@ class MacOSHardDriveDetect extends UnixHardDriveDetect {
                                         if (descN.getNodeName().equals("string"))
                                             mediaName = descN.getTextContent();
                                         break;
-									case "FreeSpace":
-										try {
-											if (descN.getNodeName().equals("integer"))
-												freeSpace = Long.valueOf(descN.getTextContent());
-										} catch (Exception e) {
-											freeSpace = -1;
-										}
-										break;
+								
 									case "MountPoint":
 										if (descN.getNodeName().equals("string"))
 											mountPoint = descN.getTextContent();

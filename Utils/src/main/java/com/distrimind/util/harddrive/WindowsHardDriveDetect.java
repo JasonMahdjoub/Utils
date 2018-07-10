@@ -35,7 +35,6 @@ knowledge of the CeCILL-C license and that you accept its terms.
 
 package com.distrimind.util.harddrive;
 
-import javax.swing.filechooser.FileSystemView;
 import java.io.*;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -170,21 +169,13 @@ class WindowsHardDriveDetect extends HardDriveDetect {
                         {
                             e.printStackTrace();
                         }
-                        long freeSpace=-1;
-                        try
-                        {
-                            freeSpace=Long.valueOf(tab[5]);
-                        }
-                        catch (Exception e)
-                        {
-                            e.printStackTrace();
-                        }
+                      
                         boolean isReady=tab[6].equals("1");
                         String volumeName=tab[7];
                         if (volumeName.equals("_"))
                             volumeName=null;
                         Partition partition=partitionsMap.get(deviceID);
-                        if (partition!=null)
+                        if (partition!=null || !isReady)
                             continue;
                         Disk disk=new Disk(UUID.nameUUIDFromBytes(serialNumber.getBytes()), volumeSize,false, -1, null, deviceID, volumeName);
                         disksMap.put(deviceID, disk);
