@@ -34,7 +34,6 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
-import gnu.vm.jgnu.security.InvalidAlgorithmParameterException;
 import gnu.vm.jgnu.security.KeyPair;
 import gnu.vm.jgnu.security.KeyPairGenerator;
 
@@ -81,7 +80,7 @@ public final class GnuKeyPairGenerator extends AbstractKeyPairGenerator {
 	}
 
 	@Override
-	public void initialize(short _keysize, long expirationTime, AbstractSecureRandom _random) throws InvalidAlgorithmParameterException {
+	public void initialize(short _keysize, long expirationTime, AbstractSecureRandom _random) {
 		
 		keyPairGenerator.initialize(keySize, _random.getGnuSecureRandom());
 		this.keySize = _keysize;

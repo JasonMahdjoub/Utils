@@ -43,7 +43,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -69,24 +68,27 @@ public final class FileTools {
 	 * @param folderPath
 	 *            A folder path.
 	 */
-	public static void checkFolder(File folderPath) {
+	public static boolean checkFolder(File folderPath) {
 		if (!(folderPath.exists())) {
-			folderPath.mkdir();
+			return folderPath.mkdir();
 		}
+		return true;
 	}
 
 	/**
 	 * Check if a specified file path is a folder and create a folder if it does not
 	 * exist.
-	 * 
+	 *
 	 * @param folderPath
 	 *            A folder path.
 	 */
-	public static void checkFolderRecursive(File folderPath) {
+    @SuppressWarnings("UnusedReturnValue")
+	public static boolean checkFolderRecursive(File folderPath) {
 		if (!(folderPath.exists())) {
 			checkFolderRecursive(folderPath.getParentFile());
-			folderPath.mkdir();
+			return folderPath.mkdir();
 		}
+		return false;
 	}
 
 	/**
@@ -163,7 +165,7 @@ public final class FileTools {
 	 */
 	public static void copyFolderToFolder(File sourceFolder, File destinationFolder, boolean include_source_forder,
 			String _exclude_regex, String _include_regex) throws IOException {
-		copyFolderToFolder(sourceFolder, include_source_forder ? sourceFolder.getName() : "", sourceFolder,
+		copyFolderToFolder(sourceFolder, include_source_forder ? sourceFolder.getName() : "",
 				destinationFolder, _exclude_regex, _include_regex);
 	}
 
@@ -176,8 +178,6 @@ public final class FileTools {
 	 *            Used for the recursive called.
 	 * @param relatedPath
 	 *            Used for the recursive called.
-	 * @param sourceFolder
-	 *            Source directory.
 	 * @param destinationFolder
 	 *            Destination directory.
 	 * @param regex_exclude
@@ -187,7 +187,7 @@ public final class FileTools {
 	 * @throws IOException
 	 *             if a problem occurs
 	 */
-	private static void copyFolderToFolder(File currentFolder, String relatedPath, File sourceFolder,
+	private static void copyFolderToFolder(File currentFolder, String relatedPath,
 			File destinationFolder, String regex_exclude, String regex_include) throws IOException {
 		// Current Directory.
 
@@ -197,59 +197,64 @@ public final class FileTools {
 			File[] list = currentFolder.listFiles();
 			if (list != null) {
 				// Read the files list.
-				for (int i = 0; i < list.length; i++) {
-					// Create current source File
-					/*
-					 * File tf = new File(sourceFolder + relatedPath + "/" + list[i].getName());
-					 */
-					File tf = list[i];
-					// Create current destination File
-					File pf = new File(new File(destinationFolder, relatedPath), list[i].getName());
-					if (FileTools.matchString(tf.getAbsolutePath(), regex_exclude, regex_include)) {
-						if (tf.isDirectory() && !pf.exists()) {
-							// If the file is a directory and does not exit in
-							// the
-							// destination Folder.
-							// Create the directory.
-							pf.mkdir();
-							copyFolderToFolder(tf, relatedPath + "/" + tf.getName(), sourceFolder, destinationFolder,
-									regex_exclude, regex_include);
-						} else if (tf.isDirectory() && pf.exists()) {
-							// If the file is a directory and exits in the
-							// destination Folder.
-							copyFolderToFolder(tf, relatedPath + "/" + tf.getName(), sourceFolder, destinationFolder,
-									regex_exclude, regex_include);
-						} else if (tf.isFile()) {
-							// If it is a file.
-							FileTools.checkFolderRecursive(pf.getParentFile());
-							copy(tf, pf);
-						} else {
-							throw new IOException("Messages.file_problem + tf.getAbsolutePath()");
-						}
-					}
-				}
+                for (File tf : list) {
+                    // Create current source File
+                    /*
+                     * File tf = new File(sourceFolder + relatedPath + "/" + list[i].getName());
+                     */
+                    // Create current destination File
+                    File pf = new File(new File(destinationFolder, relatedPath), tf.getName());
+                    if (FileTools.matchString(tf.getAbsolutePath(), regex_exclude, regex_include)) {
+                        if (tf.isDirectory() && !pf.exists()) {
+                            // If the file is a directory and does not exit in
+                            // the
+                            // destination Folder.
+                            // Create the directory.
+                            if (pf.mkdir())
+                                copyFolderToFolder(tf, relatedPath + "/" + tf.getName(), destinationFolder,
+                                    regex_exclude, regex_include);
+                            else
+                                throw new IOException("Impossible to create folder : "+pf);
+                        } else if (tf.isDirectory() && pf.exists()) {
+                            // If the file is a directory and exits in the
+                            // destination Folder.
+                            copyFolderToFolder(tf, relatedPath + "/" + tf.getName(), destinationFolder,
+                                    regex_exclude, regex_include);
+                        } else if (tf.isFile()) {
+                            // If it is a file.
+                            FileTools.checkFolderRecursive(pf.getParentFile());
+                            copy(tf, pf);
+                        } else {
+                            throw new IOException("Messages.file_problem + tf.getAbsolutePath()");
+                        }
+                    }
+                }
 			}
 		}
 	}
 
 	/**
 	 * Delete a directory.
-	 * 
+	 *
 	 * @param path
 	 *            A folder path.
 	 */
-	public static void deleteDirectory(File path) {
+    @SuppressWarnings("UnusedReturnValue")
+	public static boolean deleteDirectory(File path) {
 		if (path.exists()) {
 			File[] files = path.listFiles();
-			for (int i = 0; i < files.length; i++) {
-				if (files[i].isDirectory()) {
-					deleteDirectory(files[i]);
-				} else {
-					files[i].delete();
-				}
-			}
+			if (files!=null) {
+                for (File file : files) {
+                    if (file.isDirectory()) {
+                        deleteDirectory(file);
+                    } else {
+                        if (!file.delete())
+                            return false;
+                    }
+                }
+            }
 		}
-		path.delete();
+		return path.delete();
 	}
 
 	/*
@@ -279,9 +284,12 @@ public final class FileTools {
 	 * @return the file directory tree
 	 */
 	public static ArrayList<File> getTree(File directory) {
-		ArrayList<File> res = new ArrayList<File>();
+		ArrayList<File> res = new ArrayList<>();
 		res.add(directory);
-		for (File f2 : directory.listFiles()) {
+		File[] files=directory.listFiles();
+		if (files==null)
+		    return res;
+		for (File f2 : files) {
 			if (f2.isDirectory()) {
 				res.addAll(getTree(f2));
 			}
@@ -292,10 +300,8 @@ public final class FileTools {
 	public static boolean matchString(String s, String regex_exclude, String regex_include) {
 		if (regex_include != null && !Pattern.compile(regex_include).matcher(s).find())
 			return false;
-		if (regex_exclude != null && Pattern.compile(regex_exclude).matcher(s).find())
-			return false;
-		return true;
-	}
+        return regex_exclude == null || !Pattern.compile(regex_exclude).matcher(s).find();
+    }
 
 	/**
 	 * Move a file from a source to a destination. If the moving by using the
@@ -327,18 +333,22 @@ public final class FileTools {
 	 * @throws IOException
 	 *             if a problem occurs
 	 */
-	public static void removeFile(String file, File rootDirectory) throws IOException {
+
+	@SuppressWarnings("UnusedReturnValue")
+    public static boolean removeFile(String file, File rootDirectory) throws IOException {
 		// Remove a file on the local machine
 		if (file == null || file.equals("")) {
+		    return false;
 		}
 		if (!rootDirectory.isDirectory()) {
 			throw new IOException(rootDirectory.toString());
 		} else {
 			File f = new File(rootDirectory, file);
 			if (f.exists()) {
-				f.delete();
+				return f.delete();
 			}
 		}
+		return false;
 	}
 
 	/**
@@ -352,10 +362,9 @@ public final class FileTools {
 	 *             if a problem occurs
 	 */
 	public static void removeFiles(ArrayList<String> files, File projectDirectory) throws IOException {
-		Iterator<String> it = files.iterator();
-		while (it.hasNext()) {
-			removeFile(it.next(), projectDirectory);
-		}
+        for (String file : files) {
+            removeFile(file, projectDirectory);
+        }
 	}
 
 	private static String transformToDirectory(String _dir) {
@@ -399,7 +408,7 @@ public final class FileTools {
 			throw new IllegalAccessError("The directory of destination does not exists !");
 		if (!_directory_dst.isDirectory())
 			throw new IllegalAccessError("The directory of destination is not a directory !");
-		BufferedOutputStream dest = null;
+		BufferedOutputStream dest;
 		FileInputStream fis = new FileInputStream(_zip_file);
 		ZipInputStream zis = new ZipInputStream(new BufferedInputStream(fis));
 		ZipEntry entry;
@@ -455,8 +464,10 @@ public final class FileTools {
 			String dir = _directory.getAbsolutePath();
 			int l = dir.lastIndexOf(_directory.getName());
 			String base = dir.substring(0, l);
-
-			ZipEntry entry = new ZipEntry(transformToDirectory(getRelativePath(base, _directory.getAbsolutePath())));
+            String relPath=getRelativePath(base, _directory.getAbsolutePath());
+            if (relPath==null)
+                throw new IOException();
+			ZipEntry entry = new ZipEntry(transformToDirectory(relPath));
 			out.putNextEntry(entry);
 
 			zipDirectory(out, _directory, base);
@@ -470,9 +481,13 @@ public final class FileTools {
 		out.close();
 	}
 
-	private static void zipDirectory(ZipOutputStream out, File _directory, String base_directory) throws IOException {
+	@SuppressWarnings("ConstantConditions")
+    private static void zipDirectory(ZipOutputStream out, File _directory, String base_directory) throws IOException {
 		byte data[] = new byte[BUFFER];
-		for (File f : _directory.listFiles()) {
+        File files[]=_directory.listFiles();
+        if (files==null)
+            throw new IOException();
+		for (File f : files ) {
 			// System.out.println("Adding: "+files[i]);
 			if (f.isDirectory()) {
 				ZipEntry entry = new ZipEntry(
@@ -496,6 +511,6 @@ public final class FileTools {
 	/**
 	 * FileTools Constructor.
 	 */
-	FileTools() {
+	private FileTools() {
 	}
 }

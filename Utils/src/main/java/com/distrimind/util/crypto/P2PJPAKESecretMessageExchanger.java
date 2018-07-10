@@ -69,9 +69,9 @@ import gnu.vm.jgnu.security.spec.InvalidKeySpecException;
 public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
 	private JPAKEParticipant jpake;
 	private BigInteger keyMaterial;
-	private boolean valid=true;;
+	private boolean valid=true;
 
-	P2PJPAKESecretMessageExchanger(AbstractSecureRandom secureRandom, Serializable participantID, char[] message)
+	/*P2PJPAKESecretMessageExchanger(AbstractSecureRandom secureRandom, Serializable participantID, char[] message)
 			throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException {
 		this(secureRandom, participantID, message, null, -1, -1);
 	}
@@ -79,7 +79,7 @@ public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
 	P2PJPAKESecretMessageExchanger(AbstractSecureRandom secureRandom, Serializable participantID, byte[] message, boolean messageIsKey)
 			throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException {
 		this(secureRandom, participantID, message, 0, message.length, null, -1, -1, messageIsKey);
-	}
+	}*/
 
 	private char[] getHashedPassword(char[] message, byte salt[], int offset_salt, int len_salt) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException
 	{
@@ -162,8 +162,9 @@ public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
 		return messageDigest.digest();
 	}
 
+	@SuppressWarnings("SameParameterValue")
 	private static byte[] hashMessage(AbstractMessageDigest messageDigest, char password[], byte[] salt,
-			int offset_salt, int len_salt, PasswordHashType passwordHashType, byte cost)
+									  int offset_salt, int len_salt, PasswordHashType passwordHashType, byte cost)
 			throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
 		if (salt != null && len_salt > 0) {
 			byte s[] = new byte[len_salt];
@@ -205,6 +206,7 @@ public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
 						oos.writeInt(0);
 					else
 						oos.writeInt(b.length);
+					assert b != null;
 					for (BigInteger bi : b)
 						oos.writeObject(bi);
 					b=toSerialize.getKnowledgeProofForX2();
@@ -212,6 +214,7 @@ public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
 						oos.writeInt(0);
 					else
 						oos.writeInt(b.length);
+					assert b != null;
 					for (BigInteger bi : b)
 						oos.writeObject(bi);
 					
@@ -232,6 +235,7 @@ public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
 						oos.writeInt(0);
 					else
 						oos.writeInt(b.length);
+					assert b != null;
 					for (BigInteger bi : b)
 						oos.writeObject(bi);
 					oos.writeObject(toSerialize.getParticipantId());
@@ -268,7 +272,7 @@ public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
 		case 0:
 			try (ByteArrayInputStream bais = new ByteArrayInputStream(dataReceived)) {
 				try (ObjectInputStream ois = new ObjectInputStream(bais)) {
-					JPAKERound1Payload r1=null;
+					JPAKERound1Payload r1;
 					try
 					{
 						BigInteger gx1 = (BigInteger)ois.readObject();
@@ -294,6 +298,8 @@ public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
 								knowledgeProofForX2[i]=(BigInteger)ois.readObject();
 						}
 						String pid=(String)ois.readObject();
+						assert knowledgeProofForX1 != null;
+						assert knowledgeProofForX2 != null;
 						r1=new JPAKERound1Payload(pid, gx1, gx2, knowledgeProofForX1, knowledgeProofForX2);
 					}
 					catch(Exception e)
@@ -307,7 +313,7 @@ public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
 		case 1:
 			try (ByteArrayInputStream bais = new ByteArrayInputStream(dataReceived)) {
 				try (ObjectInputStream ois = new ObjectInputStream(bais)) {
-					JPAKERound2Payload r2=null;
+					JPAKERound2Payload r2;
 					try
 					{
 						BigInteger A = (BigInteger)ois.readObject();
@@ -323,6 +329,7 @@ public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
 								knowledgeProofForX2s[i]=(BigInteger)ois.readObject();
 						}
 						String pid=(String)ois.readObject();
+						assert knowledgeProofForX2s != null;
 						r2=new JPAKERound2Payload(pid, A, knowledgeProofForX2s);
 					}
 					catch(Exception e)
@@ -336,7 +343,7 @@ public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
 		case 2:
 			try (ByteArrayInputStream bais = new ByteArrayInputStream(dataReceived)) {
 				try (ObjectInputStream ois = new ObjectInputStream(bais)) {
-					JPAKERound3Payload r3=null;
+					JPAKERound3Payload r3;
 					try
 					{
 						BigInteger magTag = (BigInteger)ois.readObject();
@@ -360,6 +367,7 @@ public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
 		valid=true;
 	}
 	
+	@SuppressWarnings("deprecation")
 	@Override
 	public void finalize()
 	{
@@ -389,14 +397,15 @@ public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
 	{
 		jpakeFieldPassword=getField(JPAKEParticipant.class, "password");
 	}
-	private static Field getField(final Class<?> c, final String method_name) {
+	@SuppressWarnings("SameParameterValue")
+	private static Field getField(final Class<?> c, final String fieldName) {
 		try {
 			
 			return AccessController.doPrivileged(new PrivilegedExceptionAction<Field>() {
 
 				@Override
 				public Field run() throws Exception {
-					Field m = c.getDeclaredField(method_name);
+					Field m = c.getDeclaredField(fieldName);
 					m.setAccessible(true);
 					return m;
 				}

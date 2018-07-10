@@ -37,9 +37,7 @@ package com.distrimind.util.crypto;
 import gnu.vm.jgnu.security.InvalidKeyException;
 import gnu.vm.jgnu.security.NoSuchAlgorithmException;
 import gnu.vm.jgnu.security.NoSuchProviderException;
-import gnu.vm.jgnu.security.SignatureException;
 import gnu.vm.jgnu.security.spec.InvalidKeySpecException;
-import gnu.vm.jgnux.crypto.ShortBufferException;
 
 /**
  * 
@@ -77,14 +75,14 @@ public class SymmetricAuthentifiedSignatureCheckerAlgorithm extends AbstractAuth
 	}
 
 	@Override
-	public void update(byte[] message, int offm, int lenm) throws SignatureException {
+	public void update(byte[] message, int offm, int lenm)  {
 		signer.update(message, offm, lenm);
 		
 	}
 
 	@Override
 	public boolean verify()
-			throws SignatureException, InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, ShortBufferException, IllegalStateException {
+			throws IllegalStateException {
 		try
 		{
 			if (signature == null)

@@ -71,7 +71,12 @@ public final class JavaNativeMac extends AbstractMac {
 
 	@Override
 	public boolean equals(Object _obj) {
-		return mac.equals(_obj);
+		if (_obj instanceof JavaNativeMac)
+			return mac.equals(((JavaNativeMac) _obj).mac);
+		else if (_obj instanceof Mac)
+			return mac.equals(_obj);
+		else
+			return false;
 	}
 
 	@Override

@@ -34,7 +34,6 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
-import com.distrimind.util.crypto.P2PASymmetricSecretMessageExchanger.FakeSecureRandom;
 
 import gnu.vm.jgnu.security.NoSuchAlgorithmException;
 import gnu.vm.jgnu.security.NoSuchProviderException;
@@ -95,9 +94,9 @@ public final class JavaNativeSecureRandom extends AbstractSecureRandom {
 	private final GnuInterface secureGnuRandom;
 	private boolean initialized;
 
-	JavaNativeSecureRandom(FakeSecureRandom random) throws NoSuchAlgorithmException, NoSuchProviderException {
+	/*JavaNativeSecureRandom(FakeSecureRandom random) throws NoSuchAlgorithmException, NoSuchProviderException {
 		this(SecureRandomType.DEFAULT, random, false);
-	}
+	}*/
 	
 	
 	JavaNativeSecureRandom(SecureRandomType type, java.security.SecureRandom secureRandom) throws NoSuchAlgorithmException, NoSuchProviderException {

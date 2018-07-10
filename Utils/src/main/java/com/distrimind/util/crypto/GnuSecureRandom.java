@@ -66,25 +66,26 @@ public class GnuSecureRandom extends AbstractSecureRandom {
 
 			@Override
 			protected void engineSetSeed(byte[] seed) {
-				synchronized(secureRandom)
-				{
-					if (secureRandom != null)
+				if (secureRandom != null) {
+					synchronized (secureRandom) {
+
 						secureRandom.setSeed(seed);
-				}				
+					}
+				}
 			}
 
 			@Override
 			protected void engineNextBytes(byte[] bytes) {
-				synchronized(secureRandom)
-				{
-					if (secureRandom != null)
-					{
-						secureRandom.nextBytes(bytes);
-						if (bytes!=null)
+				if (bytes != null) {
+					if (secureRandom != null) {
+						synchronized (secureRandom) {
+
+							secureRandom.nextBytes(bytes);
+
 							addDataProvided(bytes.length);
+						}
 					}
 				}
-				
 			}
 
 			@Override

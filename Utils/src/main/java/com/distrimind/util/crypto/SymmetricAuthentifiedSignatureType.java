@@ -71,7 +71,7 @@ public enum SymmetricAuthentifiedSignatureType {
 	private final MessageDigestType messageDigestType;
 	private final AuthParameters messageDigestAuth;
 	
-	private SymmetricAuthentifiedSignatureType(String algorithmName, CodeProvider codeProviderForSignature, CodeProvider codeProviderForKeyGenerator, short keySizeBits, short keySizeBytes, MessageDigestType messageDigestType, AuthParameters messageDigestAuth) {
+	SymmetricAuthentifiedSignatureType(String algorithmName, CodeProvider codeProviderForSignature, CodeProvider codeProviderForKeyGenerator, short keySizeBits, short keySizeBytes, MessageDigestType messageDigestType, AuthParameters messageDigestAuth) {
 		this.algorithmName = algorithmName;
 		this.codeProviderForSignature = codeProviderForSignature;
 		this.codeProviderForKeyGenerator=codeProviderForKeyGenerator;
@@ -89,7 +89,7 @@ public enum SymmetricAuthentifiedSignatureType {
 
 
 
-	private SymmetricAuthentifiedSignatureType(SymmetricAuthentifiedSignatureType other) {
+	SymmetricAuthentifiedSignatureType(SymmetricAuthentifiedSignatureType other) {
 		
 		this(other.algorithmName, other.codeProviderForSignature, other.codeProviderForKeyGenerator, other.keySizeBits, other.keySizeBytes, other.messageDigestType, other.messageDigestAuth);
 	}
@@ -158,7 +158,7 @@ public enum SymmetricAuthentifiedSignatureType {
 
 	public AbstractKeyGenerator getKeyGenerator(AbstractSecureRandom random, short keySizeBits)
 			throws NoSuchAlgorithmException, NoSuchProviderException {
-		AbstractKeyGenerator res = null;
+		AbstractKeyGenerator res ;
 		if (codeProviderForKeyGenerator == CodeProvider.GNU_CRYPTO) {
 			res = new GnuKeyGenerator(this, KeyGenerator.getInstance(algorithmName));
 		} else if (codeProviderForKeyGenerator == CodeProvider.BCFIPS || codeProviderForKeyGenerator == CodeProvider.BC) {
@@ -202,8 +202,6 @@ public enum SymmetricAuthentifiedSignatureType {
 	
 	public boolean isPostQuantumAlgorithm(short keySizeBits) 
 	{
-		if (keySizeBits<256)
-			return false;
-		return true;
+		return keySizeBits >= 256;
 	}
 }

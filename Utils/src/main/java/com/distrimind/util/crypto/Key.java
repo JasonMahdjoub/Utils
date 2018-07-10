@@ -34,7 +34,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
-import java.io.IOException;
+
 import java.io.Serializable;
 
 import org.apache.commons.codec.binary.Base64;
@@ -107,12 +107,13 @@ public abstract class Key implements Serializable {
 	
 	
 	
-	public static Key valueOf(String key) throws IllegalArgumentException, IOException {
+	public static Key valueOf(String key) throws IllegalArgumentException {
 		return decode(Base64.decodeBase64(key));
 	}
 	
 	public abstract void zeroize();
 	
+	@SuppressWarnings("deprecation")
 	@Override
 	public void finalize()
 	{

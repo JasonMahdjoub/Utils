@@ -123,7 +123,7 @@ public class NativeNonBlockingSecureRandom extends AbstractSecureRandom {
 	}
 	
 	
-	public NativeNonBlockingSecureRandom() throws NoSuchAlgorithmException, NoSuchProviderException {
+	public NativeNonBlockingSecureRandom() {
 		super(new AbstractSecureRandomSpi(false) {
 
 			/**

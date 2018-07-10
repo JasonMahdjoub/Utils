@@ -2,7 +2,6 @@ package com.distrimind.util;
 
 import java.io.File;
 import java.io.FilenameFilter;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -25,7 +24,7 @@ public class ListClasses {
 
 	}
 
-	private static HashMap<Package, Set<Class<?>>> cache = new HashMap<Package, Set<Class<?>>>();
+	private static HashMap<Package, Set<Class<?>>> cache = new HashMap<>();
 
 	/**
 	 * This method enables to list all classes contained into a given package
@@ -40,21 +39,21 @@ public class ListClasses {
 		if (classes != null)
 			return classes;
 		// creation of the list which will be returned
-		classes = new HashSet<Class<?>>();
+		classes = new HashSet<>();
 
 		// We get all CLASSPATH entries
 		String[] entries = System.getProperty("java.class.path").split(System.getProperty("path.separator"));
 
 		// For all these entries, we check if they contains a directory, or a
 		// jar file
-		for (int i = 0; i < entries.length; i++) {
+		for (String entry : entries) {
 
-			if (entries[i].endsWith(".jar")) {
-				File jar = new File(entries[i]);
+			if (entry.endsWith(".jar")) {
+				File jar = new File(entry);
 				if (jar.isFile())
 					classes.addAll(processJar(jar, _package));
 			} else {
-				File dir = new File(entries[i]);
+				File dir = new File(entry);
 				if (dir.isDirectory()) {
 					classes.addAll(processDirectory(dir, _package));
 				}
@@ -75,20 +74,20 @@ public class ListClasses {
 	 * This method enables to list all classes contained into a directory for a
 	 * given package
 	 * 
-	 * @param directory
+	 * @param _directory
 	 *            the considered directory
-	 * @param _package_name
+	 * @param _package
 	 *            the package name
 	 * @return the list of classes
 	 */
 	private static Set<Class<?>> processDirectory(File _directory, Package _package) {
-		Set<Class<?>> classes = new HashSet<Class<?>>();
+		Set<Class<?>> classes = new HashSet<>();
 
 		// we generate the absolute path of the package
 		ArrayList<String> repsPkg = splitPoint(_package.getName());
 
-		for (int i = 0; i < repsPkg.size(); i++) {
-			_directory = new File(_directory, repsPkg.get(i));
+		for (String aRepsPkg : repsPkg) {
+			_directory = new File(_directory, aRepsPkg);
 		}
 
 		// if the directory exists and if it is a directory, we list it
@@ -98,14 +97,17 @@ public class ListClasses {
 			File[] liste = _directory.listFiles(filter);
 			// for each element present on the directory, we add it into the
 			// classes list.
-			for (int i = 0; i < liste.length; i++) {
-				try {
-					classes.add(Class.forName(_package.getName() + "."
-							+ liste[i].getName().substring(0, liste[i].getName().length() - 6)));
-				} catch (Exception e) {
+			if (liste!=null) {
+
+				for (File aListe : liste) {
+					try {
+						classes.add(Class.forName(_package.getName() + "."
+								+ aListe.getName().substring(0, aListe.getName().length() - 6)));
+					} catch (Exception ignored) {
+
+					}
 
 				}
-
 			}
 		}
 
@@ -116,16 +118,15 @@ public class ListClasses {
 	 * This method enables to list all classes contained into a jar file for a given
 	 * package
 	 *
-	 * @param _jar_path
+	 * @param _jar_file
 	 *            the considered jar file
-	 * @param _package_name
+	 * @param _package
 	 *            the package name
 	 * @return the list of classes
-	 * @throws IOException
-	 * @throws ClassNotFoundException
+	 *
 	 */
 	private static Set<Class<?>> processJar(File _jar_file, Package _package) {
-		Set<Class<?>> classes = new HashSet<Class<?>>();
+		Set<Class<?>> classes = new HashSet<>();
 
 		try {
 			JarFile jfile = new JarFile(_jar_file);
@@ -143,7 +144,7 @@ public class ListClasses {
 
 					try {
 						classes.add(Class.forName(_package.getName() + "." + class_name));
-					} catch (Exception e) {
+					} catch (Exception ignored) {
 
 					}
 
@@ -151,14 +152,14 @@ public class ListClasses {
 
 			}
 			jfile.close();
-		} catch (Exception e) {
+		} catch (Exception ignored) {
 
 		}
 		return classes;
 	}
 
 	private static ArrayList<String> splitPoint(String s) {
-		ArrayList<String> res = new ArrayList<String>(10);
+		ArrayList<String> res = new ArrayList<>(10);
 		int last_index = 0;
 		for (int i = 0; i < s.length(); i++) {
 			if (s.charAt(i) == '.') {

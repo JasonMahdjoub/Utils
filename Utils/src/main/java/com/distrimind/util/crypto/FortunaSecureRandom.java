@@ -84,7 +84,7 @@ public class FortunaSecureRandom extends AbstractSecureRandom implements Seriali
 		 */
 		private static final long serialVersionUID = -8786132962158601823L;
 		
-		private volatile FortunaImpl fortuna=null;
+		private volatile FortunaImpl fortuna;
 		private transient boolean fortunaInitialized=false;
 		private transient final AbstractSecureRandom randoms[];
 		protected final byte nonce[], personalizationString[];
@@ -189,11 +189,10 @@ public class FortunaSecureRandom extends AbstractSecureRandom implements Seriali
 			@Override
 			protected void refreshDigestWithRandomEvents(IMessageDigest pool)
 			{
-				for (int i=0;i<randoms.length;i++)
-				{
-					byte[] tab=new byte[20];
-					randoms[i].nextBytes(tab);
-					pool.update(tab);				
+				for (AbstractSecureRandom random : randoms) {
+					byte[] tab = new byte[20];
+					random.nextBytes(tab);
+					pool.update(tab);
 				}
 				try {
 					pool.update(SecureRandomType.tryToGenerateNativeNonBlockingRandomBytes(20));
@@ -218,6 +217,7 @@ public class FortunaSecureRandom extends AbstractSecureRandom implements Seriali
 		initialized=true;
 	}
 
+	@SuppressWarnings("MethodDoesntCallSuperMethod")
 	@Override
 	public FortunaSecureRandom clone() throws CloneNotSupportedException
 	{

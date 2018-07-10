@@ -79,7 +79,7 @@ public abstract class AbstractKeyAgreement {
 		
 
 	public abstract int generateSecret(byte[] sharedSecret, int offset)
-			throws IllegalStateException, ShortBufferException ;
+            throws IllegalStateException, ShortBufferException, javax.crypto.ShortBufferException;
 
 	
 	public abstract SymmetricSecretKey generateSecretKey(short keySize)

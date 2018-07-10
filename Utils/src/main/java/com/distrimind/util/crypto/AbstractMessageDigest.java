@@ -94,7 +94,7 @@ public abstract class AbstractMessageDigest implements Cloneable {
 	/**
 	 * Computes a final update using the input array of bytes, then computes a final
 	 * digest and returns it. It calls {@link #update(byte[])} and then
-	 * {@link #digest(byte[])}.
+	 * {@link #digest()}.
 	 *
 	 * @param input
 	 *            an array of bytes to perform final update with.

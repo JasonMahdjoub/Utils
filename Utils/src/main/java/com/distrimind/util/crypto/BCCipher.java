@@ -66,7 +66,6 @@ import org.bouncycastle.crypto.general.Twofish;
 import gnu.vm.jgnu.security.NoSuchAlgorithmException;
 import gnu.vm.jgnu.security.spec.InvalidKeySpecException;
 import gnu.vm.jgnux.crypto.BadPaddingException;
-import gnu.vm.jgnux.crypto.IllegalBlockSizeException;
 import gnu.vm.jgnux.crypto.ShortBufferException;
 
 /**
@@ -75,11 +74,10 @@ import gnu.vm.jgnux.crypto.ShortBufferException;
  * @version 2.0
  * @since Utils 3.10.0
  */
+@SuppressWarnings("ConstantConditions")
 public class BCCipher extends AbstractCipher {
 
 	final SymmetricEncryptionType type;
-	private OutputEncryptor<?> encryptor=null;
-	private OutputDecryptor<?> decryptor=null;
 	private OutputCipher<?> cipher=null;
 	private UpdateOutputStream processingStream=null;
 	private ByteArrayOutputStream resultStream;
@@ -87,8 +85,6 @@ public class BCCipher extends AbstractCipher {
 	private byte iv[];
 	private KeyWrapper<?> wrapper;
 	private KeyUnwrapper<?> unwrapper;
-	private OutputAEADEncryptor<?> aeadEncryptor=null;
-	private OutputAEADDecryptor<?> aeadDecryptor=null;
 	private UpdateOutputStream aadStream=null;
 	
 	BCCipher(SymmetricEncryptionType type)
@@ -104,7 +100,7 @@ public class BCCipher extends AbstractCipher {
 	}
 	
 	@Override
-	public byte[] doFinal() throws IllegalStateException, IllegalBlockSizeException, BadPaddingException {
+	public byte[] doFinal() throws IllegalStateException, BadPaddingException {
 		return doFinal(null, 0, 0);
 	}
 
@@ -231,12 +227,12 @@ public class BCCipher extends AbstractCipher {
 	@Override
 	public void init(int opmode, Key key, byte[] iv) throws NoSuchAlgorithmException, InvalidKeySpecException  {
 		this.iv=iv;
-		this.decryptor=null;
-		this.encryptor=null;
+		OutputDecryptor<?> decryptor ;
+		OutputEncryptor<?> encryptor ;
 		this.wrapper=null;
 		this.unwrapper=null;
-		this.aeadEncryptor=null;
-		this.aeadDecryptor=null;
+		OutputAEADEncryptor<?> aeadEncryptor = null;
+		OutputAEADDecryptor<?> aeadDecryptor = null;
 		this.aadStream=null;
 		resultStream=new ByteArrayOutputStream();
 		if (opmode==Cipher.ENCRYPT_MODE)
@@ -262,7 +258,7 @@ public class BCCipher extends AbstractCipher {
 					else
 						param=param.withMACSize(128);
 					
-					encryptor=aeadEncryptor = fipsSymmetricFactory.createOutputAEADEncryptor((SymmetricSecretKey)key.toBouncyCastleKey(),param);
+					encryptor = aeadEncryptor = fipsSymmetricFactory.createOutputAEADEncryptor((SymmetricSecretKey)key.toBouncyCastleKey(),param);
 				}
 				else if (type.getBlockMode().toUpperCase().equals("EAX") && type.getPadding().toUpperCase().equals("NOPADDING"))
 				{
@@ -274,7 +270,7 @@ public class BCCipher extends AbstractCipher {
 					else
 						param=param.withMACSize(128);
 					
-					encryptor=aeadEncryptor = fipsSymmetricFactory.createOutputAEADEncryptor((SymmetricSecretKey)key.toBouncyCastleKey(),param);
+					encryptor = aeadEncryptor = fipsSymmetricFactory.createOutputAEADEncryptor((SymmetricSecretKey)key.toBouncyCastleKey(),param);
 				}
 				else if (type.getBlockMode().toUpperCase().equals("CTR") && type.getPadding().toUpperCase().equals("NOPADDING"))
 				{
@@ -318,7 +314,7 @@ public class BCCipher extends AbstractCipher {
 					else
 						param=param.withMACSize(128);
 					
-					encryptor=aeadEncryptor = fipsSymmetricFactory.createOutputAEADEncryptor((SymmetricSecretKey)key.toBouncyCastleKey(),param);
+					encryptor = aeadEncryptor = fipsSymmetricFactory.createOutputAEADEncryptor((SymmetricSecretKey)key.toBouncyCastleKey(),param);
 				}
 				else if (type.getBlockMode().toUpperCase().equals("EAX") && type.getPadding().toUpperCase().equals("NOPADDING"))
 				{
@@ -330,7 +326,7 @@ public class BCCipher extends AbstractCipher {
 					else
 						param=param.withMACSize(128);
 					
-					encryptor=aeadEncryptor = fipsSymmetricFactory.createOutputAEADEncryptor((SymmetricSecretKey)key.toBouncyCastleKey(),param);
+					encryptor = aeadEncryptor = fipsSymmetricFactory.createOutputAEADEncryptor((SymmetricSecretKey)key.toBouncyCastleKey(),param);
 				}				
 				else
 				{
@@ -365,7 +361,7 @@ public class BCCipher extends AbstractCipher {
 					else
 						param=param.withMACSize(128);
 					
-					encryptor=aeadEncryptor = fipsSymmetricFactory.createOutputAEADEncryptor((SymmetricSecretKey)key.toBouncyCastleKey(),param);
+					encryptor = aeadEncryptor = fipsSymmetricFactory.createOutputAEADEncryptor((SymmetricSecretKey)key.toBouncyCastleKey(),param);
 				}
 				else if (type.getBlockMode().toUpperCase().equals("EAX") && type.getPadding().toUpperCase().equals("NOPADDING"))
 				{
@@ -377,7 +373,7 @@ public class BCCipher extends AbstractCipher {
 					else
 						param=param.withMACSize(128);
 					
-					encryptor=aeadEncryptor = fipsSymmetricFactory.createOutputAEADEncryptor((SymmetricSecretKey)key.toBouncyCastleKey(),param);
+					encryptor = aeadEncryptor = fipsSymmetricFactory.createOutputAEADEncryptor((SymmetricSecretKey)key.toBouncyCastleKey(),param);
 				}
 				else
 				{
@@ -386,12 +382,12 @@ public class BCCipher extends AbstractCipher {
 			}
 			else 
 				throw new IllegalAccessError();
-			cipher=encryptor;
+			cipher= encryptor;
 			
 			processingStream = encryptor.getEncryptingStream(resultStream);
-			if (aeadEncryptor!=null)
+			if (aeadEncryptor !=null)
 			{
-				aadStream=aeadEncryptor.getAADStream();
+				aadStream= aeadEncryptor.getAADStream();
 			}
 			
 		}
@@ -425,7 +421,7 @@ public class BCCipher extends AbstractCipher {
 					else
 						param=param.withMACSize(128);
 					
-					decryptor=aeadDecryptor = fipsSymmetricFactory.createOutputAEADDecryptor((SymmetricSecretKey)key.toBouncyCastleKey(),param);
+					decryptor = aeadDecryptor = fipsSymmetricFactory.createOutputAEADDecryptor((SymmetricSecretKey)key.toBouncyCastleKey(),param);
 				}
 				else if (type.getBlockMode().toUpperCase().equals("EAX") && type.getPadding().toUpperCase().equals("NOPADDING"))
 				{
@@ -437,7 +433,7 @@ public class BCCipher extends AbstractCipher {
 					else
 						param=param.withMACSize(128);
 					
-					decryptor=aeadDecryptor = fipsSymmetricFactory.createOutputAEADDecryptor((SymmetricSecretKey)key.toBouncyCastleKey(),param);
+					decryptor = aeadDecryptor = fipsSymmetricFactory.createOutputAEADDecryptor((SymmetricSecretKey)key.toBouncyCastleKey(),param);
 				}
 				else
 				{
@@ -473,7 +469,7 @@ public class BCCipher extends AbstractCipher {
 					else
 						param=param.withMACSize(128);
 					
-					decryptor=aeadDecryptor = fipsSymmetricFactory.createOutputAEADDecryptor((SymmetricSecretKey)key.toBouncyCastleKey(),param);
+					decryptor = aeadDecryptor = fipsSymmetricFactory.createOutputAEADDecryptor((SymmetricSecretKey)key.toBouncyCastleKey(),param);
 				}
 				else if (type.getBlockMode().toUpperCase().equals("EAX") && type.getPadding().toUpperCase().equals("NOPADDING"))
 				{
@@ -485,7 +481,7 @@ public class BCCipher extends AbstractCipher {
 					else
 						param=param.withMACSize(128);
 					
-					decryptor=aeadDecryptor = fipsSymmetricFactory.createOutputAEADDecryptor((SymmetricSecretKey)key.toBouncyCastleKey(),param);
+					decryptor = aeadDecryptor = fipsSymmetricFactory.createOutputAEADDecryptor((SymmetricSecretKey)key.toBouncyCastleKey(),param);
 				}
 				else
 				{
@@ -520,7 +516,7 @@ public class BCCipher extends AbstractCipher {
 					else
 						param=param.withMACSize(128);
 					
-					decryptor=aeadDecryptor = fipsSymmetricFactory.createOutputAEADDecryptor((SymmetricSecretKey)key.toBouncyCastleKey(),param);
+					decryptor = aeadDecryptor = fipsSymmetricFactory.createOutputAEADDecryptor((SymmetricSecretKey)key.toBouncyCastleKey(),param);
 				}
 				else if (type.getBlockMode().toUpperCase().equals("EAX") && type.getPadding().toUpperCase().equals("NOPADDING"))
 				{
@@ -532,7 +528,7 @@ public class BCCipher extends AbstractCipher {
 					else
 						param=param.withMACSize(128);
 					
-					decryptor=aeadDecryptor = fipsSymmetricFactory.createOutputAEADDecryptor((SymmetricSecretKey)key.toBouncyCastleKey(),param);
+					decryptor = aeadDecryptor = fipsSymmetricFactory.createOutputAEADDecryptor((SymmetricSecretKey)key.toBouncyCastleKey(),param);
 				}
 				else
 				{
@@ -541,10 +537,10 @@ public class BCCipher extends AbstractCipher {
 			}
 			else 
 				throw new IllegalAccessError();
-			cipher=decryptor;
-			processingStream=decryptor.getDecryptingStream(resultStream);
-			if (aeadDecryptor!=null)
-				this.aadStream=aeadDecryptor.getAADStream();
+			cipher= decryptor;
+			processingStream= decryptor.getDecryptingStream(resultStream);
+			if (aeadDecryptor !=null)
+				this.aadStream= aeadDecryptor.getAADStream();
 		}
 		else if (opmode==Cipher.WRAP_MODE)
 		{
@@ -673,9 +669,7 @@ public class BCCipher extends AbstractCipher {
 				out.flush();
 				out.close();
 			} catch (Exception cause) {
-				IOException ioex = new IOException(String.valueOf(cause));
-				ioex.initCause(cause);
-				throw ioex;
+				throw new IOException(String.valueOf(cause));
 			}
 		}
 
@@ -863,13 +857,7 @@ public class BCCipher extends AbstractCipher {
 					outBuffer = update(buf, 0, l);
 				}
 			} catch (BadPaddingException bpe) {
-				IOException ioe = new IOException("bad padding");
-				ioe.initCause(bpe);
-				throw ioe;
-			} catch (IllegalBlockSizeException ibse) {
-				IOException ioe = new IOException("illegal block size");
-				ioe.initCause(ibse);
-				throw ioe;
+				throw new IOException("bad padding", bpe);
 			}
 		}
 
@@ -946,9 +934,7 @@ public class BCCipher extends AbstractCipher {
 					try {
 						update(buf, off, len, buf, off);
 					} catch (ShortBufferException shouldNotHappen) {
-						IOException ioe = new IOException("Short buffer for stream cipher -- this should not happen");
-						ioe.initCause(shouldNotHappen);
-						throw ioe;
+						throw new IOException("Short buffer for stream cipher -- this should not happen", shouldNotHappen);
 					}
 				}
 				return len;

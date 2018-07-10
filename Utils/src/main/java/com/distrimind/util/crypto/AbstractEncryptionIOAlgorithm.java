@@ -82,7 +82,7 @@ public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOu
 	}
 	public byte[] decode(byte[] bytes, int off, int len, byte[] associatedData, int offAD, int lenAD) throws InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IllegalStateException, ShortBufferException, IOException
 	{
-		return decode(bytes, off, len, associatedData, offAD, lenAD, (byte[])null);
+		return decode(bytes, off, len, associatedData, offAD, lenAD, null);
 	}
 	public byte[] decode(byte[] bytes, int off, int len, byte[] associatedData, int offAD, int lenAD, byte[] externalCounter)
 			throws InvalidKeyException, InvalidAlgorithmParameterException, IOException, IllegalBlockSizeException,
@@ -189,7 +189,7 @@ public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOu
 		if (associatedData!=null && lenAD>0)
 			cipher.updateAAD(associatedData, offAD, lenAD);
 		int maxBlockSize = getMaxBlockSizeForDecoding();
-		int blockACC = 0;
+		int blockACC;
 		boolean finish = false;
 		while (!finish) {
 			

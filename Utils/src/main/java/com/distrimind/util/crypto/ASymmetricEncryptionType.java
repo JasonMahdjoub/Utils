@@ -35,7 +35,6 @@ knowledge of the CeCILL-C license and that you accept its terms.
 package com.distrimind.util.crypto;
 
 import java.security.KeyFactory;
-import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
@@ -65,12 +64,12 @@ import gnu.vm.jgnu.security.NoSuchProviderException;
  */
 public enum ASymmetricEncryptionType {
 	RSA_OAEPWithSHA256AndMGF1Padding("RSA", "ECB", "OAEPWITHSHA-256ANDMGF1PADDING", ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA384withRSA,
-			(short) 3072, 31536000000l, (short) 66, CodeProvider.SunJCE,CodeProvider.SunRsaSign, FipsRSA.ALGORITHM), 
+			(short) 3072, 31536000000L, (short) 66, CodeProvider.SunJCE,CodeProvider.SunRsaSign, FipsRSA.ALGORITHM),
 	RSA_OAEPWithSHA384AndMGF1Padding("RSA", "ECB", "OAEPWITHSHA-384ANDMGF1PADDING", ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA384withRSA,
-			(short) 3072, 31536000000l, (short) 98, CodeProvider.SunJCE,CodeProvider.SunRsaSign, FipsRSA.ALGORITHM), 
+			(short) 3072, 31536000000L, (short) 98, CodeProvider.SunJCE,CodeProvider.SunRsaSign, FipsRSA.ALGORITHM),
 	RSA_OAEPWithSHA512AndMGF1Padding("RSA", "ECB", "OAEPWITHSHA-512ANDMGF1PADDING", ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA512withRSA,
-			(short) 3072, 31536000000l, (short) 130, CodeProvider.SunJCE,CodeProvider.SunRsaSign, FipsRSA.ALGORITHM), 
-	RSA_PKCS1Padding("RSA", "ECB", "PKCS1Padding", ASymmetricAuthentifiedSignatureType.SHA384withRSA, (short) 3072, 31536000000l, (short) 11,
+			(short) 3072, 31536000000L, (short) 130, CodeProvider.SunJCE,CodeProvider.SunRsaSign, FipsRSA.ALGORITHM),
+	RSA_PKCS1Padding("RSA", "ECB", "PKCS1Padding", ASymmetricAuthentifiedSignatureType.SHA384withRSA, (short) 3072, 31536000000L, (short) 11,
 					CodeProvider.SunJCE,CodeProvider.SunRsaSign, FipsRSA.ALGORITHM),
 	//BC_FIPS_RSA_OAEPWithSHA256AndMGF1Padding("RSA", "NONE", "OAEPwithSHA256andMGF1Padding", ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA384withRSAandMGF1, (short) 3072, 31536000000l, (short) 66,CodeProvider.BCFIPS,CodeProvider.BCFIPS, FipsRSA.ALGORITHM),
 	//BC_FIPS_RSA_PKCS1Padding("RSA", "NONE", "PKCS1Padding", ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA384withRSAandMGF1, (short) 3072, 31536000000l, (short) 11,CodeProvider.BCFIPS,CodeProvider.BCFIPS, FipsRSA.ALGORITHM),
@@ -78,7 +77,7 @@ public enum ASymmetricEncryptionType {
 	
 
 
-	static gnu.vm.jgnu.security.KeyPair decodeGnuKeyPair(byte[] encodedKeyPair)
+	/*static gnu.vm.jgnu.security.KeyPair decodeGnuKeyPair(byte[] encodedKeyPair)
 			throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException {
 		return decodeGnuKeyPair(encodedKeyPair, 0, encodedKeyPair.length);
 	}
@@ -87,7 +86,7 @@ public enum ASymmetricEncryptionType {
 			throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException {
 		byte[][] parts = Bits.separateEncodingsWithShortSizedTabs(encodedKeyPair, off, len);
 		return new gnu.vm.jgnu.security.KeyPair(decodeGnuPublicKey(parts[0]), decodeGnuPrivateKey(parts[1]));
-	}
+	}*/
 
 	static gnu.vm.jgnu.security.PrivateKey decodeGnuPrivateKey(byte[] encodedKey)
 			throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException {
@@ -107,16 +106,16 @@ public enum ASymmetricEncryptionType {
 		return kf.generatePublic(pubKeySpec);
 	}
 
-	static KeyPair decodeNativeKeyPair(byte[] encodedKeyPair)
+	/*static KeyPair decodeNativeKeyPair(byte[] encodedKeyPair)
 			throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException {
 		return decodeNativeKeyPair(encodedKeyPair, 0, encodedKeyPair.length);
-	}
+	}*/
 
-	static KeyPair decodeNativeKeyPair(byte[] encodedKeyPair, int off, int len)
+	/*static KeyPair decodeNativeKeyPair(byte[] encodedKeyPair, int off, int len)
 			throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException {
 		byte[][] parts = Bits.separateEncodingsWithShortSizedTabs(encodedKeyPair, off, len);
 		return new KeyPair(decodeNativePublicKey(parts[0]), decodeNativePrivateKey(parts[1]));
-	}
+	}*/
 
 	static PrivateKey decodeNativePrivateKey(byte[] encodedKey)
 			throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException {
@@ -167,7 +166,7 @@ public enum ASymmetricEncryptionType {
 
 	}
 
-	static byte[] encodeKeyPair(gnu.vm.jgnu.security.KeyPair keyPair) {
+	/*static byte[] encodeKeyPair(gnu.vm.jgnu.security.KeyPair keyPair) {
 		return Bits.concateEncodingWithShortSizedTabs(encodePublicKey(keyPair.getPublic()),
 				encodePrivateKey(keyPair.getPrivate()));
 	}
@@ -175,7 +174,7 @@ public enum ASymmetricEncryptionType {
 	static byte[] encodeKeyPair(KeyPair keyPair) {
 		return Bits.concateEncodingWithShortSizedTabs(encodePublicKey(keyPair.getPublic()),
 				encodePrivateKey(keyPair.getPrivate()));
-	}
+	}*/
 
 	static byte[] encodePrivateKey(gnu.vm.jgnu.security.PrivateKey key) {
 		return Bits.concateEncodingWithShortSizedTabs(key.getAlgorithm().getBytes(), key.getEncoded());
@@ -229,12 +228,12 @@ public enum ASymmetricEncryptionType {
 
 	private final Algorithm bcAlgorithm;
 	
-	private ASymmetricEncryptionType(ASymmetricEncryptionType type) {
+	ASymmetricEncryptionType(ASymmetricEncryptionType type) {
 		this(type.algorithmName, type.blockMode, type.padding, type.signature, type.keySize, type.expirationTimeMilis,
 				type.blockSizeDecrement, type.codeProviderForEncryption, type.codeProviderForKeyGenerator, type.bcAlgorithm);
 	}
 
-	private ASymmetricEncryptionType(String algorithmName, String blockMode, String padding,
+	ASymmetricEncryptionType(String algorithmName, String blockMode, String padding,
 			ASymmetricAuthentifiedSignatureType signature, short keySize, long expirationTimeMilis, short blockSizeDecrement,
 			CodeProvider codeProviderForEncryption, CodeProvider codeProviderForKeyGenetor, Algorithm bcAlgorithm) {
 		this.algorithmName = algorithmName;

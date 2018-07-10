@@ -96,6 +96,7 @@ public enum SymmetricEncryptionType {
 		return decodeGnuSecretKey(encodedSecretKey, 0, encodedSecretKey.length);
 	}
 
+	@SuppressWarnings("SameParameterValue")
 	static gnu.vm.jgnux.crypto.SecretKey decodeGnuSecretKey(byte[] encodedSecretKey, int off, int len) {
 		byte[][] parts = Bits.separateEncodingsWithShortSizedTabs(encodedSecretKey, off, len);
 		return new gnu.vm.jgnux.crypto.spec.SecretKeySpec(parts[1], new String(parts[0]));
@@ -105,6 +106,7 @@ public enum SymmetricEncryptionType {
 		return decodeNativeSecretKey(encodedSecretKey, 0, encodedSecretKey.length);
 	}
 
+	@SuppressWarnings("SameParameterValue")
 	static SecretKey decodeNativeSecretKey(byte[] encodedSecretKey, int off, int len) {
 		byte[][] parts = Bits.separateEncodingsWithShortSizedTabs(encodedSecretKey, off, len);
 		
@@ -115,6 +117,7 @@ public enum SymmetricEncryptionType {
 		
 		return decodeBCSecretKey(algorithm, encodedSecretKey, 0, encodedSecretKey.length);
 	}
+	@SuppressWarnings("SameParameterValue")
 	static org.bouncycastle.crypto.SymmetricSecretKey decodeBCSecretKey(Algorithm algorithm, byte[] encodedSecretKey, int off, int len) {
 		final byte[][] parts = Bits.separateEncodingsWithShortSizedTabs(encodedSecretKey, off, len);
 		
@@ -188,12 +191,12 @@ public enum SymmetricEncryptionType {
 	
 	private final byte maxModeCounterSize;
 
-	private SymmetricEncryptionType(String algorithmName, String blockMode, String padding, short keySizeBits,
+	SymmetricEncryptionType(String algorithmName, String blockMode, String padding, short keySizeBits,
 			CodeProvider codeProviderForEncryption, CodeProvider codeProviderForKeyGenerator, SymmetricAuthentifiedSignatureType defaultSignature, Algorithm bcAlgorithm, short blockSize, boolean authentified, short encodingSpeedIndexJava7, short decodingSpeedIndexJava7, short encodingSpeedIndexJava8, short decodingSpeedIndexJava8, short encodingSpeedIndexJava9, short decodingSpeedIndexJava9) {
 		this(algorithmName, blockMode, padding, keySizeBits, (short) (keySizeBits / 8), codeProviderForEncryption, codeProviderForKeyGenerator, defaultSignature, bcAlgorithm, blockSize, authentified, encodingSpeedIndexJava7, decodingSpeedIndexJava7, encodingSpeedIndexJava8, decodingSpeedIndexJava8, encodingSpeedIndexJava9, decodingSpeedIndexJava9);
 	}
 
-	private SymmetricEncryptionType(String algorithmName, String blockMode, String padding, short keySizeBits,
+	SymmetricEncryptionType(String algorithmName, String blockMode, String padding, short keySizeBits,
 			short keySizeBytes, CodeProvider codeProviderForEncryption, CodeProvider codeProviderForKeyGenerator, SymmetricAuthentifiedSignatureType defaultSignature, Algorithm bcAlgorithm, short blockSize, boolean authentified, short encodingSpeedIndexJava7, short decodingSpeedIndexJava7, short encodingSpeedIndexJava8, short decodingSpeedIndexJava8, short encodingSpeedIndexJava9, short decodingSpeedIndexJava9) {
 		this.algorithmName = algorithmName;
 		this.blockMode = blockMode;
@@ -218,7 +221,8 @@ public enum SymmetricEncryptionType {
 			maxModeCounterSize=0;
 	}
 
-	private SymmetricEncryptionType(SymmetricEncryptionType type) {
+	@SuppressWarnings("CopyConstructorMissesField")
+	SymmetricEncryptionType(SymmetricEncryptionType type) {
 		this(type.algorithmName, type.blockMode, type.padding, type.keySizeBits, type.keySizeBytes, type.codeProviderForEncryption, type.CodeProviderForKeyGenerator,
 				type.defaultSignature, type.bcAlgorithm, type.blockSizeBits, type.authenticated, type.encodingSpeedIndexJava7, type.decodingSpeedIndexJava7, type.encodingSpeedIndexJava8, type.decodingSpeedIndexJava8, type.encodingSpeedIndexJava9, type.decodingSpeedIndexJava9);
 	}
@@ -280,7 +284,7 @@ public enum SymmetricEncryptionType {
 
 	public AbstractKeyGenerator getKeyGenerator(AbstractSecureRandom random, short keySizeBits)
 			throws NoSuchAlgorithmException, NoSuchProviderException {
-		AbstractKeyGenerator res = null;
+		AbstractKeyGenerator res ;
 		if (CodeProviderForKeyGenerator == CodeProvider.GNU_CRYPTO) {
 			res = new GnuKeyGenerator(this, KeyGenerator.getInstance(algorithmName));
 		} else if (CodeProviderForKeyGenerator == CodeProvider.BCFIPS || CodeProviderForKeyGenerator == CodeProvider.BC) {
@@ -411,8 +415,6 @@ public enum SymmetricEncryptionType {
 	{
 		if (keySizeBits<256)
 			return false;
-		if (getBlockSizeBits()<128)
-			return false;
-		return true;
+		return getBlockSizeBits() >= 128;
 	}
 }

@@ -51,11 +51,11 @@ import gnu.vm.jgnux.crypto.ShortBufferException;
  */
 public abstract class AbstractAuthentifiedCheckerAlgorithm {
 
-	public void init(byte signature[]) throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, NoSuchProviderException, gnu.vm.jgnu.security.InvalidAlgorithmParameterException, gnu.vm.jgnu.security.spec.InvalidParameterSpecException, IOException
+	public void init(byte signature[]) throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, gnu.vm.jgnu.security.InvalidAlgorithmParameterException, gnu.vm.jgnu.security.spec.InvalidParameterSpecException, IOException
 	{
 		init(signature, 0, signature.length);
 	}
-	public abstract void init(byte signature[], int offs, int lens) throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, NoSuchProviderException, gnu.vm.jgnu.security.InvalidAlgorithmParameterException, gnu.vm.jgnu.security.spec.InvalidParameterSpecException, IOException;
+	public abstract void init(byte signature[], int offs, int lens) throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, gnu.vm.jgnu.security.InvalidAlgorithmParameterException, gnu.vm.jgnu.security.spec.InvalidParameterSpecException, IOException;
 	
 	public void update(byte message[]) throws SignatureException
 	{

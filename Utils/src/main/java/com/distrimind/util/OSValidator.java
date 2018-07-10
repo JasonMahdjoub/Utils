@@ -115,29 +115,29 @@ public enum OSValidator {
 
 	private static boolean isLinux() {
 
-		return OS.indexOf("linux") >= 0;
+		return OS.contains("linux");
 	}
 
 	private static boolean isMac() {
-		return (OS.indexOf("mac") >= 0);
+		return (OS.contains("mac"));
 
 	}
 
 	private static boolean isSolaris() {
 
-		return (OS.indexOf("sunos") >= 0);
+		return (OS.contains("sunos"));
 
 	}
 
 	public boolean isUnix() {
 
-		return (OS.indexOf("nix") >= 0 || OS.indexOf("nux") >= 0 || OS.indexOf("aix") > 0);
+		return (OS.contains("nix") || OS.contains("nux") || OS.indexOf("aix") > 0);
 
 	}
 
 	private static boolean isWindows() {
 
-		return (OS.indexOf("win") >= 0);
+		return (OS.contains("win"));
 	}
 
 	private static boolean isAndroid()
@@ -189,31 +189,27 @@ public enum OSValidator {
 						line=line.toLowerCase();
 						if (line.contains("useaesintrinsics"))
 						{
-							aesNIAcceleration=Boolean.valueOf(line.contains("true"));
+							aesNIAcceleration= line.contains("true");
 						}
 						line=br.readLine();
 					}
 				}
 				p.destroy();
-				p=null;
 			}
 			catch(IOException e)
 			{
 				e.printStackTrace();
 			}
 			if (aesNIAcceleration==null)
-				aesNIAcceleration=Boolean.valueOf(false);
+				aesNIAcceleration= Boolean.FALSE;
 		}
-		return aesNIAcceleration.booleanValue();
+		return aesNIAcceleration;
 		
 	}
 
 	public boolean SIPrefixAreUnderstoodAsBinaryPrefixForByteMultiples()
 	{
-		if (this==WINDOWS || (this==MACOS && Double.valueOf(getOSVersion())<10.1))
-			return true;
-		else
-			return false;
+		return this == WINDOWS || (this == MACOS && Double.valueOf(getOSVersion()) < 10.1);
 	}
 	
 }

@@ -89,13 +89,13 @@ public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutpu
 
 	@Override
 	public void initCipherForEncrypt(AbstractCipher _cipher, byte[] externalCounter)
-			throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, InvalidAlgorithmParameterException {
+			throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException {
 		initCipherForEncryptAndNotChangeIV(_cipher);
 	}
 
 	@Override
 	public void initCipherForEncryptAndNotChangeIV(AbstractCipher _cipher)
-			throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, InvalidAlgorithmParameterException {
+			throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException {
 		_cipher.init(Cipher.ENCRYPT_MODE, distantPublicKey, random);
 
 	}

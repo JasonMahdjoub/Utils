@@ -130,7 +130,7 @@ public class HumanReadableBytesCount {
         if (m.matches())
         {
             NumberFormat format=NumberFormat.getInstance(Locale.US);
-            double val= 0;
+            double val;
             try {
                 val = (m.group("sign").equals("-")?-1.0:1.0)*(format.parse(m.group("value")).doubleValue());
             } catch (ParseException e) {
@@ -199,16 +199,16 @@ public class HumanReadableBytesCount {
     {
         if (regexShortPre==null)
         {
-            String res="[";
+            StringBuilder res=new StringBuilder("[");
             HashSet<String> hs=new HashSet<>();
             hs.addAll(Arrays.asList(presSIShort));
             hs.addAll(Arrays.asList(presBinShort));
             for (String s : hs)
             {
-                res+=s;
+                res.append(s);
             }
-            res+="]";
-            regexShortPre=res;
+            res.append("]");
+            regexShortPre=res.toString();
         }
         return regexShortPre;
     }
@@ -217,11 +217,11 @@ public class HumanReadableBytesCount {
     {
         if (regexUnitsShort==null)
         {
-            String res="[b";
+            StringBuilder res=new StringBuilder("[b");
             for (String s : unitsShort)
-                res+=s;
-            res+="]";
-            regexUnitsShort=res;
+                res.append(s);
+            res.append("]");
+            regexUnitsShort=res.toString();
         }
         return regexUnitsShort;
     }
@@ -234,22 +234,22 @@ public class HumanReadableBytesCount {
     {
         if (regexPre==null)
         {
-            String res="(";
+            StringBuilder res=new StringBuilder("(");
             boolean first=true;
             for (String s : presSI) {
                 if (s.length()>0){
                     if (first)
                         first=false;
                     else
-                        res += "|";
-                    res += s;
+                        res .append("|");
+                    res.append(s);
                 }
             }
             for (String s : presBin)
                 if (s.length()>0)
-                    res+="|"+s;
-            res+=")?";
-            regexPre=res;
+                    res.append("|").append(s);
+            res.append(")?");
+            regexPre=res.toString();
         }
         return regexPre;
     }
@@ -258,11 +258,11 @@ public class HumanReadableBytesCount {
     {
         if (regexUnits==null)
         {
-            String res="(bit";
+            StringBuilder res=new StringBuilder("(bit");
             for (String s : units)
-                res+="|"+s;
-            res+=")";
-            regexUnits=res;
+                res.append("|").append(s);
+            res.append(")");
+            regexUnits=res.toString();
         }
         return regexUnits;
     }

@@ -87,12 +87,18 @@ public final class JavaNativeKeyAgreement extends AbstractKeyAgreement {
 
 	@Override
 	public int generateSecret(byte[] sharedSecret, int offset) throws IllegalStateException, ShortBufferException {
-		
-		return generateSecret(sharedSecret, offset);
+		try {
+			return this.keyAgreement.generateSecret(sharedSecret, offset);
+		}
+		catch(javax.crypto.ShortBufferException e)
+		{
+			throw new ShortBufferException(e.getMessage());
+		}
 	}
 
 
-	@Override
+	@SuppressWarnings("ConstantConditions")
+    @Override
 	public SymmetricSecretKey generateSecretKey(short keySize)
 			throws InvalidKeyException, NoSuchAlgorithmException {
 		try

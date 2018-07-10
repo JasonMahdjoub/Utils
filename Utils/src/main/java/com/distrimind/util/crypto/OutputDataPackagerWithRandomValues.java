@@ -65,7 +65,6 @@ public class OutputDataPackagerWithRandomValues {
 
 	private final AbstractSecureRandom random;
 	private final byte[] tab;
-	private final int random_values_size;
 	private int random_values_size_remaining;
 	// private int data_size;
 	private int cursor;
@@ -78,12 +77,13 @@ public class OutputDataPackagerWithRandomValues {
 			throw new NullPointerException("rand");
 		this.random = rand;
 		int min = getMiniRandomValueSize();
+		int random_values_size;
 		if (max_random_values_size >= min)
-			this.random_values_size = min + rand.nextInt(max_random_values_size - min + 1);
+			random_values_size = min + rand.nextInt(max_random_values_size - min + 1);
 		else
-			this.random_values_size = min;
-		random_values_size_remaining = this.random_values_size;
-		tab = new byte[bufferSize + this.random_values_size];
+			random_values_size = min;
+		random_values_size_remaining = random_values_size;
+		tab = new byte[bufferSize + random_values_size];
 		// data_size=tab.length-this.random_values_size;
 		cursor = 0;
 		nextRandValuePos = 0;
@@ -99,6 +99,7 @@ public class OutputDataPackagerWithRandomValues {
 	 * writeData(t, 0, 1)==1; }
 	 */
 
+	@SuppressWarnings("SameParameterValue")
 	private int writeData(byte[] d, int offset, int size) {
 		if (size <= 0)
 			return 0;
@@ -160,8 +161,7 @@ public class OutputDataPackagerWithRandomValues {
 				nextRand = (byte) (random.nextInt(maxNextRand) + 1);
 			}
 			tab[cursor++] = encodeLocalNumberRandomVal(nbrand, random);
-			for (int i = 0; i < tabrand.length; i++)
-				tab[cursor++] = tabrand[i];
+			for (byte aTabrand : tabrand) tab[cursor++] = aTabrand;
 			tab[cursor++] = encodeLocalPosNextRandomVal(nextRand, random);
 			randamValuesWrited += 2 + nbrand;
 			if (nextRand == 0)
@@ -189,6 +189,7 @@ public class OutputDataPackagerWithRandomValues {
 		return tab;
 	}
 
+	@SuppressWarnings("UnusedReturnValue")
 	private boolean writeInt(int _value) {
 		byte b[] = new byte[4];
 		Bits.putInt(b, 0, _value);

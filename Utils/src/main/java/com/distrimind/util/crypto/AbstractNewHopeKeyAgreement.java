@@ -99,6 +99,7 @@ public abstract class AbstractNewHopeKeyAgreement extends KeyAgreement{
 		secretKey=null;
 	}
 	
+	@SuppressWarnings("deprecation")
 	@Override
 	public void finalize()
 	{
@@ -148,8 +149,8 @@ public abstract class AbstractNewHopeKeyAgreement extends KeyAgreement{
     		}
     		POLY_SIZE=polySize;
     		SENDB_BYTES=sendBBytes;
-    		Class<?> bClass=new byte[0].getClass();
-    		methodShareA=getMethod(newHopeClass, "sharedA", bClass,new short[0].getClass(),bClass);
+    		Class<?> bClass=byte[].class;
+    		methodShareA=getMethod(newHopeClass, "sharedA", bClass,short[].class,bClass);
     		methodShareB=getMethod(newHopeClass, "sharedB", SecureRandom.class, bClass,bClass,bClass );
     		fieldSecData=getField(NHPrivateKeyParameters.class, "secData");
     		
@@ -172,7 +173,8 @@ public abstract class AbstractNewHopeKeyAgreement extends KeyAgreement{
 		}
   	
     }
-    static Object invoke(Method m, Object o, Object... args) throws InvocationTargetException {
+    @SuppressWarnings({"UnusedReturnValue", "SameParameterValue"})
+	static Object invoke(Method m, Object o, Object... args) throws InvocationTargetException {
 		try {
 			return m.invoke(o, args);
 		} catch (IllegalAccessException | IllegalArgumentException e) {
@@ -211,7 +213,8 @@ public abstract class AbstractNewHopeKeyAgreement extends KeyAgreement{
 
     
     
-    private static Field getField(final Class<?> c, final String method_name) {
+    @SuppressWarnings("SameParameterValue")
+	private static Field getField(final Class<?> c, final String method_name) {
 		try {
 			
 			return AccessController.doPrivileged(new PrivilegedExceptionAction<Field>() {

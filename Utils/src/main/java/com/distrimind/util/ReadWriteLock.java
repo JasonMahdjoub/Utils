@@ -74,7 +74,7 @@ public class ReadWriteLock {
 		}
 	}
 
-	private final Map<Thread, Integer> readingThreads = new HashMap<Thread, Integer>();
+	private final Map<Thread, Integer> readingThreads = new HashMap<>();
 
 	// private ReentrantLock lock=new ReentrantLock(true);
 	// private Condition cannotContinue=lock.newCondition();
@@ -92,9 +92,7 @@ public class ReadWriteLock {
 			return false;
 		if (isReader(callingThread))
 			return true;
-		if (hasWriteRequests())
-			return false;
-		return true;
+		return !hasWriteRequests();
 	}
 
 	private boolean canGrantWriteAccess(Thread callingThread) {
@@ -104,9 +102,7 @@ public class ReadWriteLock {
 			return true;
 		if (hasReaders())
 			return false;
-		if (writingThread == null)
-			return true;
-		return false;
+		return writingThread == null;
 	}
 
 	public ReadLock getAutoCloseableReadLock() {
@@ -121,7 +117,7 @@ public class ReadWriteLock {
 		Integer accessCount = readingThreads.get(callingThread);
 		if (accessCount == null)
 			return 0;
-		return accessCount.intValue();
+		return accessCount;
 	}
 
 	private boolean hasReaders() {
@@ -154,16 +150,20 @@ public class ReadWriteLock {
 				this.tryLockRead();
 				return;
 			} catch (InterruptedException e) {
+				e.printStackTrace();
 			}
 		}
 	}
 
+
+	@SuppressWarnings("UnusedReturnValue")
 	public int lockWrite() {
 		while (true) {
 			try {
 				return this.tryLockWrite();
 
 			} catch (InterruptedException e) {
+				e.printStackTrace();
 			}
 		}
 	}
@@ -195,7 +195,7 @@ public class ReadWriteLock {
 
 			}
 
-			readingThreads.put(callingThread, Integer.valueOf((getReadAccessCount(callingThread) + 1)));
+			readingThreads.put(callingThread, (getReadAccessCount(callingThread) + 1));
 		}
 	}
 
@@ -237,7 +237,7 @@ public class ReadWriteLock {
 			if (accessCount == 1) {
 				readingThreads.remove(callingThread);
 			} else {
-				readingThreads.put(callingThread, Integer.valueOf((accessCount - 1)));
+				readingThreads.put(callingThread, (accessCount - 1));
 			}
 			notifyAll();
 		}

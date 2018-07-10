@@ -60,12 +60,11 @@ import gnu.vm.jgnux.crypto.spec.IvParameterSpec;
  */
 public final class GnuCipher extends AbstractCipher {
 	private final Cipher cipher;
-	private volatile SecureRandom random;
+
 
 
 	private SecureRandom setSecureRandom(AbstractSecureRandom random) {
-		this.random = random.getGnuSecureRandom();
-		return this.random;
+	    return random.getGnuSecureRandom();
 	}
 
 	GnuCipher(Cipher cipher) {

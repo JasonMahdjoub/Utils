@@ -161,7 +161,7 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 		int maxBlockSize = getMaxBlockSizeForEncoding();
 		//byte[] buffer=new byte[getOutputSizeForEncryption(Math.min(len, maxBlockSize))];
 		while (len > 0) {
-			int size = 0;
+			int size ;
 			size = Math.min(len, maxBlockSize);
 				
 			os.write(cipher.doFinal(bytes, off, size));

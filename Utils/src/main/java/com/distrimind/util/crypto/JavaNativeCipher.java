@@ -63,13 +63,11 @@ import gnu.vm.jgnux.crypto.ShortBufferException;
 public final class JavaNativeCipher extends AbstractCipher {
 	private final SymmetricEncryptionType type;
 	private final Cipher cipher;
-	private volatile SecureRandom random;
-	
+
 
 
 	private SecureRandom setSecureRandom(AbstractSecureRandom random) {
-		this.random = random.getJavaNativeSecureRandom();
-		return this.random;
+		return random.getJavaNativeSecureRandom();
 	}
 	JavaNativeCipher(Cipher cipher) {
 		this(null, cipher);

@@ -87,10 +87,11 @@ public final class JavaNativeKeyPairGenerator extends AbstractKeyPairGenerator {
 
 	}
 
-	@SuppressWarnings("deprecation")
+
+	@SuppressWarnings({"deprecation", "ConstantConditions"})
 	@Override
-	public void initialize(short _keysize, long expirationTime, AbstractSecureRandom _random) throws gnu.vm.jgnu.security.InvalidAlgorithmParameterException {
-		this.keySizeBits = _keysize;
+	public void initialize(short _keySize, long expirationTime, AbstractSecureRandom _random) throws gnu.vm.jgnu.security.InvalidAlgorithmParameterException {
+		this.keySizeBits = _keySize;
 		this.expirationTime = expirationTime;
 		
 		try
@@ -99,17 +100,17 @@ public final class JavaNativeKeyPairGenerator extends AbstractKeyPairGenerator {
 					|| signatureType.getKeyGeneratorAlgorithmName().equals(ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA384withECDSA_P_384.getKeyGeneratorAlgorithmName())
 							|| signatureType.getKeyGeneratorAlgorithmName().equals(ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA512withECDSA_P_521.getKeyGeneratorAlgorithmName())))
 			{
-				if (_keysize<256)
+				if (_keySize<256)
 				{
 					this.keySizeBits=224;
 					keyPairGenerator.initialize(new ECGenParameterSpec("P-224"), _random.getJavaNativeSecureRandom());
 				}
-				else if (_keysize<(384-256)/2)
+				else if (_keySize<(384-256)/2)
 				{
 					this.keySizeBits=256;
 					keyPairGenerator.initialize(new ECGenParameterSpec("P-256"), _random.getJavaNativeSecureRandom());
 				}
-				else if (_keysize<(521-384)/2)
+				else if (_keySize<(521-384)/2)
 				{
 					this.keySizeBits=384;
 					keyPairGenerator.initialize(new ECGenParameterSpec("P-384"), _random.getJavaNativeSecureRandom());
@@ -176,7 +177,7 @@ public final class JavaNativeKeyPairGenerator extends AbstractKeyPairGenerator {
 				keyPairGenerator.initialize(new SPHINCS256KeyGenParameterSpec(SPHINCS256KeyGenParameterSpec.SHA512_256), _random.getJavaNativeSecureRandom());
 			}
 			else
-				keyPairGenerator.initialize(new RSAKeyGenParameterSpec(_keysize, RSAKeyGenParameterSpec.F4), _random.getJavaNativeSecureRandom());
+				keyPairGenerator.initialize(new RSAKeyGenParameterSpec(_keySize, RSAKeyGenParameterSpec.F4), _random.getJavaNativeSecureRandom());
 		}
 		catch(InvalidAlgorithmParameterException e)
 		{

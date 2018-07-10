@@ -83,11 +83,11 @@ public class RenforcedDecentralizedIDGenerator extends AbstractDecentralizedIDGe
 	@Override
 	protected short getNewSequence() {
 		synchronized (AbstractDecentralizedIDGenerator.class) {
-			short tmp = 0;
+			short tmp ;
 			try (RandomAccessFile raf = new RandomAccessFile(
 					new File(System.getProperty("java.io.tmpdir"), "RDIDG_UTILS_DISTRIMIND"), "rw");
 					final FileChannel channel = raf.getChannel();
-					final FileLock lock = channel.lock();) {
+					final FileLock lock = channel.lock()) {
 				if (!lock.isValid())
 					throw new IOException();
 				final ByteBuffer b = ByteBuffer.allocate(2);

@@ -113,6 +113,7 @@ public class PasswordHash {
 			byte[] salt = mixSaltWithStaticSalt(generatedSalt, staticAdditionalSalt);
 			byte hash[]=separated[0];
 
+			assert type != null;
 			return Arrays.equals(type.hash(password, salt, cost, (byte)hash.length), hash);
 		} catch (Exception e) {
 			return false;

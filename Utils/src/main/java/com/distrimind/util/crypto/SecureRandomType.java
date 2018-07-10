@@ -93,7 +93,7 @@ public enum SecureRandomType {
 	
 	private static final Map<SecureRandomType, AbstractSecureRandom> singletons=Collections.synchronizedMap(new HashMap<SecureRandomType, AbstractSecureRandom>());
 	
-	private SecureRandomType(SecureRandomType type) {
+	SecureRandomType(SecureRandomType type) {
 		this(type.algorithmeName, type.provider, type.gnuVersion, type.needInitialSeed);
 	}
 	
@@ -102,7 +102,7 @@ public enum SecureRandomType {
 		return needInitialSeed;
 	}
 
-	private SecureRandomType(String algorithmName, CodeProvider provider, boolean gnuVersion, boolean needInitialSeed) {
+	SecureRandomType(String algorithmName, CodeProvider provider, boolean gnuVersion, boolean needInitialSeed) {
 		this.algorithmeName = algorithmName;
 		this.provider = provider;
 		this.gnuVersion = gnuVersion;
@@ -149,7 +149,7 @@ public enum SecureRandomType {
 	 */
 	public AbstractSecureRandom getInstance(byte nonce[], byte[] personalizationString)
 			throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.NoSuchProviderException {
-		AbstractSecureRandom res=null;
+		AbstractSecureRandom res;
 		if (gnuVersion) {
 			if (algorithmeName == null)
 				res=new GnuSecureRandom(this, new gnu.vm.jgnu.security.SecureRandom());
@@ -228,7 +228,7 @@ public enum SecureRandomType {
 			throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.NoSuchProviderException {
 		byte[] nonce=new byte[8];
 		Bits.putLong(nonce, 0, seed);
-		return getInstance(seed);
+		return getInstance(nonce);
 	}
 
 	public boolean isGNUVersion() {
@@ -249,23 +249,21 @@ public enum SecureRandomType {
 		long result2=0;
 		try {
 			final Enumeration<NetworkInterface> e = NetworkInterface.getNetworkInterfaces();
-			if (e != null) {
-				while (e.hasMoreElements()) {
-					final NetworkInterface ni = e.nextElement();
-						
-					
-					if (!ni.isLoopback()) {
-						
-						long val = getHardwareAddress(ni.getHardwareAddress());
-						if (val != 0 && val != 224)
-						{
-							if (ni.isPointToPoint()) {
-								result2=val;
-							}
-							else {
-								result = val;
-								break;
-							}
+			while (e.hasMoreElements()) {
+				final NetworkInterface ni = e.nextElement();
+
+
+				if (!ni.isLoopback()) {
+
+					long val = getHardwareAddress(ni.getHardwareAddress());
+					if (val != 0 && val != 224)
+					{
+						if (ni.isPointToPoint()) {
+							result2=val;
+						}
+						else {
+							result = val;
+							break;
 						}
 					}
 				}
@@ -386,7 +384,8 @@ public enum SecureRandomType {
 		}
 		return defaultNativeNonBlockingSeed;
 	}
-	static byte[] tryToGenerateNativeNonBlockingRandomBytes(final int size) throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.NoSuchProviderException
+	@SuppressWarnings("SameParameterValue")
+    static byte[] tryToGenerateNativeNonBlockingRandomBytes(final int size) throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.NoSuchProviderException
 	{
 		byte[] res=new byte[size];
 		tryToGenerateNativeNonBlockingRandomBytes(res);
@@ -418,15 +417,15 @@ public enum SecureRandomType {
 			if (nativeNonBlockingSeed!=null)
 			{
 				nativeNonBlockingSeed.nextBytes(buffer);
-				return;
-			}
+            }
 		}
 		else if (OSValidator.getCurrentOS().isUnix())
 		{
 			
 			AccessController.doPrivileged(new PrivilegedAction<Void>() {
 
-				@Override
+				@SuppressWarnings("ResultOfMethodCallIgnored")
+                @Override
 				public Void run() {
 						synchronized(NativeNonBlockingSecureRandom.class)
 						{
@@ -485,7 +484,8 @@ public enum SecureRandomType {
 				
 			return AccessController.doPrivileged(new PrivilegedAction<byte[]>() {
 
-				@Override
+				@SuppressWarnings("ResultOfMethodCallIgnored")
+                @Override
 				public byte[] run() {
 						synchronized(NativeNonBlockingSecureRandom.class)
 						{

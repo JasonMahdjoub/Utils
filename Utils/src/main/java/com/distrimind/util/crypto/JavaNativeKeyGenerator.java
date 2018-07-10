@@ -56,6 +56,7 @@ public class JavaNativeKeyGenerator extends AbstractKeyGenerator {
 		this.keyGenerator = keyGenerator;
 	}
 
+	@SuppressWarnings("ConstantConditions")
 	@Override
 	public SymmetricSecretKey generateKey() {
 		if (encryptionType==null)

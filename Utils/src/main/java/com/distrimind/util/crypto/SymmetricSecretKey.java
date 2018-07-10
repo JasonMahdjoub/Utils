@@ -115,12 +115,17 @@ public class SymmetricSecretKey extends Key {
 		if (secretKey == null)
 			throw new NullPointerException("secretKey");
 		this.secretKey=Bits.concateEncodingWithShortSizedTabs(type.getAlgorithmName().getBytes(), secretKey);
-		if (type.getAlgorithmName().toUpperCase().equals("DES"))
-			this.keySizeBits=56;
-		else if (type.getAlgorithmName().toUpperCase().equals("DESEDE"))
-			this.keySizeBits=168;
-		else
-			this.keySizeBits=(short)(secretKey.length*8);
+		switch (type.getAlgorithmName().toUpperCase()) {
+			case "DES":
+				this.keySizeBits = 56;
+				break;
+			case "DESEDE":
+				this.keySizeBits = 168;
+				break;
+			default:
+				this.keySizeBits = (short) (secretKey.length * 8);
+				break;
+		}
 		this.encryptionType = type;
 		this.signatureType=null;
 		hashCode = Arrays.hashCode(this.secretKey);

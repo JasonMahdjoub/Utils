@@ -85,6 +85,7 @@ public abstract class AbstractKeyGenerator {
 	 * @param random
 	 *            The source of randomness.
 	 */
+	@SuppressWarnings("ConstantConditions")
 	public void init(AbstractSecureRandom random) {
 		
 		if (encryptionType==null)

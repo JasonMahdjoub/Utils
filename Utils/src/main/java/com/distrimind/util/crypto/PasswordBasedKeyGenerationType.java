@@ -62,11 +62,11 @@ public enum PasswordBasedKeyGenerationType {
 	
 	
 	private final PasswordHashType passwordHashType;
-	private PasswordBasedKeyGenerationType(PasswordHashType passwordHashType)
+	PasswordBasedKeyGenerationType(PasswordHashType passwordHashType)
 	{
 		this.passwordHashType=passwordHashType;
 	}
-	private PasswordBasedKeyGenerationType(PasswordBasedKeyGenerationType other)
+	PasswordBasedKeyGenerationType(PasswordBasedKeyGenerationType other)
 	{
 		this(other.passwordHashType);
 	}

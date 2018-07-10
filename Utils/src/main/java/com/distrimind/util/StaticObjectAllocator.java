@@ -50,7 +50,7 @@ public class StaticObjectAllocator<T> {
 	private final Constructor<? extends T> constructor;
 	private final Object allocations[];
 	private final boolean isByteArray;
-	private static Class<? extends byte[]> byteArrayClass=new byte[0].getClass();
+	private static Class<? extends byte[]> byteArrayClass=byte[].class;
 	private Object staticArgs[]=new Object[0];
 	public StaticObjectAllocator(int maxAllocations, Class<? extends T> concernedClass, Class<?> ...constructorParamters) throws NoSuchMethodException, SecurityException
 	{
@@ -82,8 +82,8 @@ public class StaticObjectAllocator<T> {
 				if (o==null)
 				{
 					@SuppressWarnings("unchecked")
-					T instance=(T)(isByteArray?new byte[((Integer)staticArgs[0]).intValue()]:constructor.newInstance(staticArgs));
-					StaticAllocation<T> sa=new StaticAllocation<T>(instance);
+					T instance=(T)(isByteArray?new byte[(Integer)staticArgs[0]]:constructor.newInstance(staticArgs));
+					StaticAllocation<T> sa=new StaticAllocation<>(instance);
 					allocations[i]=sa;
 					return sa;
 				}

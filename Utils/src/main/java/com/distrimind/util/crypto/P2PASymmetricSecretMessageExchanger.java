@@ -173,8 +173,6 @@ public class P2PASymmetricSecretMessageExchanger {
 
 	private final ASymmetricPublicKey myPublicKey;
 
-	private final ASymmetricEncryptionType type;
-
 	private P2PASymmetricSecretMessageExchanger distantMessageEncoder;
 
 	private final AbstractSecureRandom random;
@@ -215,7 +213,7 @@ public class P2PASymmetricSecretMessageExchanger {
 			throw new NullPointerException("passwordHashType");
 		if (secureRandom==null)
 			throw new NullPointerException("secureRandom");
-		this.type = myPublicKey.getEncryptionAlgorithmType();
+		ASymmetricEncryptionType type = myPublicKey.getEncryptionAlgorithmType();
 		this.myPublicKey = myPublicKey;
 		this.secureRandom=secureRandom;
 
@@ -397,6 +395,7 @@ public class P2PASymmetricSecretMessageExchanger {
 			System.arraycopy(salt, offset_salt, s, 0, len_salt);
 			data = passwordHashType.hash(data, off, len, s, cost, passwordHashType.getDefaultHashLengthBytes());
 			off = 0;
+			assert data != null;
 			len = data.length;
 			zeroize=true;
 		}
@@ -418,7 +417,7 @@ public class P2PASymmetricSecretMessageExchanger {
 			throw new NullPointerException(
 					"salt can't be empty when the message is a password (and not a secret key) !");
 
-		if (salt != null && len_salt > 0) {
+		if (len_salt > 0) {
 			byte s[] = new byte[len_salt];
 			System.arraycopy(salt, offset_salt, s, 0, len_salt);
 			byte[] res = passwordHashType.hash(password, s, cost, passwordHashType.getDefaultHashLengthBytes());
@@ -560,6 +559,7 @@ public class P2PASymmetricSecretMessageExchanger {
 					offset_salt, len_salt);
 			
 			boolean res=compareEncodedLevel2(encodedLevel2, distantLevel2);
+			assert distantLevel2 != null;
 			Arrays.fill(distantLevel2, (byte)0);
 			return res;
 		} catch (Throwable e) {

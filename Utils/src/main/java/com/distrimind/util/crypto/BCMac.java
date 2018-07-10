@@ -42,7 +42,6 @@ import org.bouncycastle.crypto.fips.FipsOutputMACCalculator;
 import org.bouncycastle.crypto.fips.FipsSHS;
 import org.bouncycastle.crypto.fips.FipsSHS.AuthParameters;
 
-import gnu.vm.jgnu.security.InvalidKeyException;
 import gnu.vm.jgnu.security.NoSuchAlgorithmException;
 import gnu.vm.jgnu.security.spec.InvalidKeySpecException;
 
@@ -78,7 +77,12 @@ public final class BCMac extends AbstractMac {
 
 	@Override
 	public boolean equals(Object _obj) {
-		return mac.equals(_obj);
+		if (_obj instanceof BCMac)
+			return mac.equals(((BCMac) _obj).mac);
+		else if (_obj instanceof FipsOutputMACCalculator)
+			return mac.equals(_obj);
+		else
+			return false;
 	}
 
 	@Override
@@ -93,11 +97,11 @@ public final class BCMac extends AbstractMac {
 	}
 
 	@Override
-	public void init(Key _key) throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException {
+	public void init(Key _key) throws NoSuchAlgorithmException, InvalidKeySpecException {
 		init((org.bouncycastle.crypto.SymmetricSecretKey)_key.toBouncyCastleKey());
 	}
 	
-	public void init(org.bouncycastle.crypto.SymmetricSecretKey _key) throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException {
+	public void init(org.bouncycastle.crypto.SymmetricSecretKey _key) {
 		FipsSHS.MACOperatorFactory fipsFacto=new FipsSHS.MACOperatorFactory();
 		mac=fipsFacto.createOutputMACCalculator(secretKey=_key, type.getMessageDigestAuth());
 		reset();
@@ -188,14 +192,12 @@ public final class BCMac extends AbstractMac {
 	}
 
 	@Override
-	public BCMac clone() throws CloneNotSupportedException {
-		try {
-			BCMac res=new BCMac(type);
-			res.init(secretKey);
-			return res;
-		} catch (InvalidKeyException | NoSuchAlgorithmException | InvalidKeySpecException e) {
-			throw new CloneNotSupportedException(e.getMessage());
-		}
+	public BCMac clone() {
+
+        BCMac res=new BCMac(type);
+        res.init(secretKey);
+        return res;
+
 	}
 
 }

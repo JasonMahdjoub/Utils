@@ -65,7 +65,13 @@ public final class GnuMac extends AbstractMac {
 
 	@Override
 	public boolean equals(Object _obj) {
-		return mac.equals(_obj);
+		if (_obj instanceof GnuMac)
+			return mac.equals(((GnuMac) _obj).mac);
+		else if (_obj instanceof Mac)
+			return mac.equals(_obj);
+		else
+			return false;
+
 	}
 
 	@Override

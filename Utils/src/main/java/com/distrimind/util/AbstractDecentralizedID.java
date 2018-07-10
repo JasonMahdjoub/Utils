@@ -74,7 +74,7 @@ public abstract class AbstractDecentralizedID implements Serializable {
 			throw new IllegalArgumentException();
 
 		byte type = bytes[off];
-		int sizeLong = ObjectSizer.sizeOf(1l);
+		int sizeLong = ObjectSizer.sizeOf(1L);
 		int sizeByte = ObjectSizer.sizeOf(type);
 		switch (type) {
 		case AbstractDecentralizedID.DECENTRALIZED_ID_GENERATOR_TYPE:

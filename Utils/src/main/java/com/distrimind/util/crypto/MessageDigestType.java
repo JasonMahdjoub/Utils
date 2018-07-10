@@ -78,11 +78,11 @@ public enum MessageDigestType {
 	
 	private final int digestLengthBits;
 
-	private MessageDigestType(MessageDigestType type) {
+	MessageDigestType(MessageDigestType type) {
 		this(type.algorithmName, type.codeProvider, type.digestLengthBits);
 	}
 
-	private MessageDigestType(String algorithmName, CodeProvider codeProvider, int digestLengthBits) {
+	MessageDigestType(String algorithmName, CodeProvider codeProvider, int digestLengthBits) {
 		this.algorithmName = algorithmName;
 		this.codeProvider = codeProvider;
 		this.digestLengthBits=digestLengthBits;

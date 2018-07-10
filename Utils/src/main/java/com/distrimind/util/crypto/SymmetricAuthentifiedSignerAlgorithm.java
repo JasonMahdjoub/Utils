@@ -90,7 +90,7 @@ public class SymmetricAuthentifiedSignerAlgorithm extends AbstractAuthentifiedSi
 	}
 
 	@Override
-	public byte[] getSignature() throws ShortBufferException, IllegalStateException {
+	public byte[] getSignature() throws IllegalStateException {
 		return mac.doFinal();
 	}
 	

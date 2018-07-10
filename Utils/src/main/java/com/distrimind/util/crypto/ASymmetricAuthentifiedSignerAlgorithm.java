@@ -61,6 +61,7 @@ public class ASymmetricAuthentifiedSignerAlgorithm extends AbstractAuthentifiedS
 	private final int macLength;
 	private final ASymmetricAuthentifiedSignatureType type;
 	private boolean includeParameter=false;
+	@SuppressWarnings("deprecation")
 	public ASymmetricAuthentifiedSignerAlgorithm(ASymmetricPrivateKey localPrivateKey) throws NoSuchAlgorithmException, NoSuchProviderException {
 		if (localPrivateKey == null)
 			throw new NullPointerException("localPrivateKey");
@@ -114,7 +115,7 @@ public class ASymmetricAuthentifiedSignerAlgorithm extends AbstractAuthentifiedS
 	}
 
 	@Override
-	public byte[] getSignature() throws ShortBufferException, IllegalStateException, SignatureException, IOException {
+	public byte[] getSignature() throws IllegalStateException, SignatureException, IOException {
 		
 		byte[] s=this.signature.sign();
 		if (includeParameter)
@@ -125,14 +126,15 @@ public class ASymmetricAuthentifiedSignerAlgorithm extends AbstractAuthentifiedS
 			return s;
 	}
 
+	@Deprecated
 	@Override
 	public int getMacLength() {
 		return macLength;
 	}
 
 	@Override
-	public void getSignature(byte[] signature, int off_sig) throws ShortBufferException, IllegalStateException,
-			SignatureException, IOException, InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException {
+	public void getSignature(byte[] signature, int off_sig) throws IllegalStateException,
+			SignatureException, IOException {
 		if (includeParameter)
 		{
 			byte s[]=getSignature();

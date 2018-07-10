@@ -268,15 +268,14 @@ public class ASymmetricPrivateKey extends Key {
 		if (pk instanceof RSAPrivateKey)
 		{
 			RSAPrivateKey javaNativePrivateKey=(RSAPrivateKey)pk;
-			AsymmetricRSAPrivateKey bcPK=new AsymmetricRSAPrivateKey(getBouncyCastleAlgorithm(), 
+			return new AsymmetricRSAPrivateKey(getBouncyCastleAlgorithm(),
 				javaNativePrivateKey.getModulus(), javaNativePrivateKey.getPrivateExponent());
-			return bcPK;
+
 		}
 		else if (pk instanceof ECPrivateKey)
 		{
 			ECPrivateKey javaNativePrivateKey=(ECPrivateKey)pk;
-			AsymmetricECPrivateKey bcPK=new AsymmetricECPrivateKey(getBouncyCastleAlgorithm(), javaNativePrivateKey.getEncoded());
-			return bcPK;
+			return new AsymmetricECPrivateKey(getBouncyCastleAlgorithm(), javaNativePrivateKey.getEncoded());
 		}
 		else 
 			throw new IllegalAccessError();

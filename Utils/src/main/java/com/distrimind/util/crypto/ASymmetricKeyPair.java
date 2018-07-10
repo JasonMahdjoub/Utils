@@ -34,7 +34,6 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.security.KeyPair;
 import java.util.Arrays;
@@ -78,7 +77,7 @@ public class ASymmetricKeyPair implements Serializable {
 			}
 	}
 
-	public static ASymmetricKeyPair valueOf(String key) throws IllegalArgumentException, IOException {
+	public static ASymmetricKeyPair valueOf(String key) throws IllegalArgumentException {
 		return decode(Base64.decodeBase64(key));
 	}
 
@@ -115,6 +114,7 @@ public class ASymmetricKeyPair implements Serializable {
 		}
 	}
 	
+	@SuppressWarnings("deprecation")
 	@Override public void finalize()
 	{
 		zeroize();

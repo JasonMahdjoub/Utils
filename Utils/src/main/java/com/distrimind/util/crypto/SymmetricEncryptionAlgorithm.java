@@ -181,10 +181,7 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 		{
 			if (!internalCounter && externalCounter!=null && externalCounter.length!=0 && iv!=this.iv)
 			{
-				for (int i=0;i<iv.length;i++)
-				{
-					this.iv[i]=iv[i];
-				}
+				System.arraycopy(iv, 0, this.iv, 0, iv.length);
 				int j=0;
 				for (int i=iv.length;i<this.iv.length;i++)
 				{

@@ -292,16 +292,16 @@ public class ASymmetricPublicKey extends Key {
 		if (pk instanceof RSAPublicKey)
 		{
 			RSAPublicKey javaNativePublicKey=(RSAPublicKey)pk;
-			AsymmetricRSAPublicKey bcPK=new AsymmetricRSAPublicKey(
+			return new AsymmetricRSAPublicKey(
 				getBouncyCastleAlgorithm(), 
 				javaNativePublicKey.getModulus(), javaNativePublicKey.getPublicExponent());
-			return bcPK;
+
 		}
 		else if (pk instanceof ECPublicKey)
 		{
 			ECPublicKey javaNativePublicKey=(ECPublicKey)pk;
-			AsymmetricECPublicKey bcPK=new AsymmetricECPublicKey(getBouncyCastleAlgorithm(), javaNativePublicKey.getEncoded());
-			return bcPK;
+			return new AsymmetricECPublicKey(getBouncyCastleAlgorithm(), javaNativePublicKey.getEncoded());
+
 		}
 		else
 			throw new IllegalAccessError();

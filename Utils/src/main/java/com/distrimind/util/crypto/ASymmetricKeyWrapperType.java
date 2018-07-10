@@ -71,6 +71,7 @@ import gnu.vm.jgnux.crypto.SecretKey;
  * @version 1.1
  * @since Utils 1.17.0
  */
+@SuppressWarnings("ConstantConditions")
 public enum ASymmetricKeyWrapperType {
 
 	RSA_OAEP_WITH_SHA2_384("RSA/ECB/OAEPPadding",CodeProvider.SunJCE, false, "SHA-384", FipsSHS.Algorithm.SHA384),
@@ -99,7 +100,7 @@ public enum ASymmetricKeyWrapperType {
 	private final FipsDigestAlgorithm bcShaDigestAlgorithm;
 	
 	
-	private ASymmetricKeyWrapperType(String algorithmName, CodeProvider provider, boolean withParameters, String shaAlgorithm, FipsDigestAlgorithm bcShaDigestAlgorithm) {
+	ASymmetricKeyWrapperType(String algorithmName, CodeProvider provider, boolean withParameters, String shaAlgorithm, FipsDigestAlgorithm bcShaDigestAlgorithm) {
 		this.algorithmName = algorithmName;
 		this.provider = provider;
 		this.withParameters=withParameters;
@@ -107,7 +108,7 @@ public enum ASymmetricKeyWrapperType {
 		this.bcShaDigestAlgorithm=bcShaDigestAlgorithm;
 	}
 	
-	private ASymmetricKeyWrapperType(ASymmetricKeyWrapperType other)
+	ASymmetricKeyWrapperType(ASymmetricKeyWrapperType other)
 	{
 		this(other.algorithmName, other.provider, other.withParameters, other.shaAlgorithm, other.bcShaDigestAlgorithm);
 	}
@@ -203,7 +204,7 @@ public enum ASymmetricKeyWrapperType {
 		{
 			try
 			{
-				javax.crypto.Cipher c=null;
+				javax.crypto.Cipher c;
 				if (provider.equals(CodeProvider.BCFIPS) || (OSValidator.getCurrentOS()==OSValidator.MACOS && (this.getCodeProvider()==CodeProvider.SunJCE)))
 				{
 					CodeProvider.ensureBouncyCastleProviderLoaded();
@@ -345,16 +346,16 @@ public enum ASymmetricKeyWrapperType {
 			{
 				
 				
-				javax.crypto.Cipher c=null;
+				javax.crypto.Cipher c;
 				if (provider.equals(CodeProvider.BCFIPS) || (OSValidator.getCurrentOS()==OSValidator.MACOS && (this.getCodeProvider()==CodeProvider.SunJCE)))
 				{
 					CodeProvider.ensureBouncyCastleProviderLoaded();
 					
 					AsymmetricRSAPrivateKey bcPK=(AsymmetricRSAPrivateKey)privateKey.toBouncyCastleKey();
 					
-					OAEPParameters OAEPParams=null;
+					OAEPParameters OAEPParams;
 					
-					byte[] wrapedKey=null;
+					byte[] wrapedKey;
 					if (withParameters)
 					{
 						byte[][] tmp=Bits.separateEncodingsWithShortSizedTabs(keyToUnwrap);
@@ -385,7 +386,7 @@ public enum ASymmetricKeyWrapperType {
 				else
 					c=javax.crypto.Cipher.getInstance(algorithmName, provider.checkProviderWithCurrentOS().name());
 
-				byte[] wrapedKey=null;
+				byte[] wrapedKey;
 				if (withParameters)
 				{
 					byte[][] tmp=Bits.separateEncodingsWithShortSizedTabs(keyToUnwrap);

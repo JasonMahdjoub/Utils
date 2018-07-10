@@ -47,8 +47,6 @@ import org.bouncycastle.util.Arrays;
 import org.bouncycastle.crypto.fips.FipsKDF;
 import org.bouncycastle.crypto.fips.FipsKDF.AgreementKDFParameters;
 
-import gnu.vm.jgnu.security.InvalidAlgorithmParameterException;
-import gnu.vm.jgnu.security.InvalidKeyException;
 import gnu.vm.jgnu.security.NoSuchAlgorithmException;
 import gnu.vm.jgnu.security.spec.InvalidKeySpecException;
 import gnu.vm.jgnux.crypto.ShortBufferException;
@@ -80,7 +78,7 @@ public final class BCKeyAgreement extends AbstractKeyAgreement{
 
 	@Override
 	public void doPhase(Key key, boolean lastPhase)
-			throws IllegalStateException, InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException {
+			throws IllegalStateException, NoSuchAlgorithmException, InvalidKeySpecException {
 		secret=agreement.calculate((AsymmetricPublicKey)key.toBouncyCastleKey());
 	}
 
@@ -108,7 +106,7 @@ public final class BCKeyAgreement extends AbstractKeyAgreement{
 
 	@Override
 	public SymmetricSecretKey generateSecretKey(short keySize)
-			throws IllegalStateException, InvalidKeyException, NoSuchAlgorithmException {
+			throws IllegalStateException {
 		byte secret[]=generateSecret();
 		if (type.useKDF())
         {
@@ -153,8 +151,7 @@ public final class BCKeyAgreement extends AbstractKeyAgreement{
     
 	
 	@Override
-	public void init(Key key, Object params) throws InvalidAlgorithmParameterException,
-			InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException {
+	public void init(Key key, Object params) throws NoSuchAlgorithmException, InvalidKeySpecException {
 		if (type.isECCDHType())
 		{
 			paramskeymaterial=((UserKeyingMaterialSpec)params).getUserKeyingMaterial();

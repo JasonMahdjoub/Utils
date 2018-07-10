@@ -103,8 +103,9 @@ public class SecuredDecentralizedID extends AbstractDecentralizedID {
 		this(getDefaultMessageDigestInstance(), generator, rand);
 	}
 
+	@SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
 	public SecuredDecentralizedID(AbstractMessageDigest messageDigest, AbstractDecentralizedIDGenerator generator,
-			AbstractSecureRandom rand) {
+								  AbstractSecureRandom rand) {
 		if (messageDigest == null)
 			throw new NullPointerException("messageDigest");
 		if (generator == null)
@@ -113,20 +114,20 @@ public class SecuredDecentralizedID extends AbstractDecentralizedID {
 			throw new NullPointerException("rand");
 		synchronized (messageDigest) {
 
-			long v = 1l;
+			long v = 1L;
 			final int sizeLong = ObjectSizer.sizeOf(v);
-			byte[] idbytes = new byte[sizeLong * 2];
-			Bits.putLong(idbytes, 0, generator.getWorkerIDAndSequence());
-			Bits.putLong(idbytes, sizeLong, generator.getTimeStamp());
+			byte[] idBytes = new byte[sizeLong * 2];
+			Bits.putLong(idBytes, 0, generator.getWorkerIDAndSequence());
+			Bits.putLong(idBytes, sizeLong, generator.getTimeStamp());
 
-			byte[] salt = null;
-			int size = Math.max(messageDigest.getDigestLength(), idbytes.length) - idbytes.length;
+			byte[] salt ;
+			int size = Math.max(messageDigest.getDigestLength(), idBytes.length) - idBytes.length;
 			if (size >= 0)
 				salt = new byte[size];
 			else
 				salt = new byte[0];
 			rand.nextBytes(salt);
-			messageDigest.update(idbytes);
+			messageDigest.update(idBytes);
 			messageDigest.update(salt);
 
 			byte[] id = messageDigest.digest();
@@ -139,13 +140,12 @@ public class SecuredDecentralizedID extends AbstractDecentralizedID {
 				idLongs[i] = Bits.getLong(id, i * sizeLong);
 			}
 			if (mod > 0) {
-				idbytes = new byte[sizeLong];
-				for (int i = 0; i < mod; i++)
-					idbytes[i] = id[size + i];
+				idBytes = new byte[sizeLong];
+				System.arraycopy(id, size, idBytes, 0, mod);
 				for (int i = mod; i < sizeLong; i++) {
-					idbytes[i] = 0;
+					idBytes[i] = 0;
 				}
-				idLongs[idLongs.length - 1] = Bits.getLong(idbytes, 0);
+				idLongs[idLongs.length - 1] = Bits.getLong(idBytes, 0);
 			}
 			hashCode = computeHashCode(idLongs);
 		}
@@ -228,8 +228,6 @@ public class SecuredDecentralizedID extends AbstractDecentralizedID {
 			hashCode = computeHashCode(idLongs);
 		} catch (IOException e) {
 			throw e;
-		} catch (ClassNotFoundException e) {
-			throw e;
 		} catch (Exception e) {
 			throw new IOException(e);
 		}
@@ -237,14 +235,14 @@ public class SecuredDecentralizedID extends AbstractDecentralizedID {
 
 	@Override
 	public String toString() {
-		StringBuffer res = new StringBuffer(ToStringHead + "[");
+		StringBuilder res = new StringBuilder(ToStringHead + "[");
 		boolean first = true;
-		for (int i = 0; i < idLongs.length; i++) {
+		for (long idLong : idLongs) {
 			if (first)
 				first = false;
 			else
 				res.append(";");
-			res.append(idLongs[i]);
+			res.append(idLong);
 		}
 		res.append("]");
 		return res.toString();

@@ -47,7 +47,6 @@ import gnu.vm.jgnu.security.NoSuchAlgorithmException;
 import gnu.vm.jgnu.security.NoSuchProviderException;
 import gnu.vm.jgnu.security.SignatureException;
 import gnu.vm.jgnu.security.spec.InvalidKeySpecException;
-import gnu.vm.jgnux.crypto.ShortBufferException;
 
 /**
  * 
@@ -125,10 +124,7 @@ public class ASymmetricAuthentifiedSignatureCheckerAlgorithm extends AbstractAut
 	}
 
 	@Override
-	public boolean verify() throws SignatureException, InvalidKeyException, NoSuchAlgorithmException,
-			InvalidKeySpecException, ShortBufferException, IllegalStateException, IOException, NoSuchProviderException,
-			gnu.vm.jgnu.security.InvalidAlgorithmParameterException,
-			gnu.vm.jgnu.security.spec.InvalidParameterSpecException {
+	public boolean verify() throws SignatureException, IllegalStateException {
 		try
 		{
 			return signer.verify(signature);

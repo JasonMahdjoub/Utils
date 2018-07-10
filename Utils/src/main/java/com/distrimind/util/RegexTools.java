@@ -75,19 +75,19 @@ public class RegexTools {
 	public static String getRegexCharMatch(boolean latin, boolean greek, boolean internationalChars,
 			boolean punctuation, boolean spaceortab, boolean exDecimalDigit, boolean digit, boolean uppperCase,
 			boolean lowerCase) {
-		StringBuffer pattern = new StringBuffer("[");
-		StringBuffer patternNot = new StringBuffer("&&[");
+		StringBuilder pattern = new StringBuilder("[");
+		StringBuilder patternNot = new StringBuilder("&&[");
 		if (internationalChars) {
 			for (Character.UnicodeScript us : Character.UnicodeScript.values()) {
 				if (us != Character.UnicodeScript.UNKNOWN && us != Character.UnicodeScript.COMMON) {
 					if (us == Character.UnicodeScript.LATIN) {
 						if (latin)
-							pattern.append("\\p{Script=" + us + "}");
+							pattern.append("\\p{Script=").append(us).append("}");
 					} else if (us == Character.UnicodeScript.GREEK) {
 						if (greek)
-							pattern.append("\\p{Script=" + us + "}");
+							pattern.append("\\p{Script=").append(us).append("}");
 					} else
-						pattern.append("\\p{Script=" + us + "}");
+						pattern.append("\\p{Script=").append(us).append("}");
 
 				}
 			}

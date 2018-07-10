@@ -46,6 +46,7 @@ import org.bouncycastle.crypto.general.Twofish;
  * @version 2.1
  * @since Utils 3.10.0
  */
+@SuppressWarnings("ConstantConditions")
 public final class BCKeyGenerator extends AbstractKeyGenerator {
 
 	private SymmetricKeyGenerator<org.bouncycastle.crypto.SymmetricSecretKey> keyGenerator;

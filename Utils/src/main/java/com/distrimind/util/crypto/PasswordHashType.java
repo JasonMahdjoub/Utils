@@ -94,12 +94,12 @@ public enum PasswordHashType {
 	
 	private final byte id;
 
-	private PasswordHashType(PasswordHashType type) {
+	PasswordHashType(PasswordHashType type) {
 		this(type.algorithmName, type.hashLength, type.codeProvider, type.fipsDigestAlgorithm, type.id);
 		this.defaultOf = type;
 	}
 
-	private PasswordHashType(String algorithmName, byte hashLength, CodeProvider codeProvider, FipsDigestAlgorithm fipsDigestAlgorithm, byte id) {
+	PasswordHashType(String algorithmName, byte hashLength, CodeProvider codeProvider, FipsDigestAlgorithm fipsDigestAlgorithm, byte id) {
 		this.hashLength = hashLength;
 		this.defaultOf = null;
 		this.algorithmName = algorithmName;
@@ -107,7 +107,7 @@ public enum PasswordHashType {
 		this.fipsDigestAlgorithm=fipsDigestAlgorithm;
 		this.id=id;
 	}
-	private PasswordHashType(String algorithmName, byte hashLength, CodeProvider codeProvider, byte id) {
+	PasswordHashType(String algorithmName, byte hashLength, CodeProvider codeProvider, byte id) {
 		this(algorithmName, hashLength, codeProvider, null, id);
 	}
 	
@@ -145,12 +145,36 @@ public enum PasswordHashType {
 		int scryptN=1<<18;
 		int iterations=1<<(cost-1);
 		switch (this) {
-		case DEFAULT:
-		case PBKDF2WithHmacSHA1: 
-		case PBKDF2WithHMacSHA256:
-		case PBKDF2WithHMacSHA384:
-		case PBKDF2WithHMacSHA512:{
-			try {
+			case DEFAULT:
+			case PBKDF2WithHmacSHA1:
+			case PBKDF2WithHMacSHA256:
+			case PBKDF2WithHMacSHA384:
+			case PBKDF2WithHMacSHA512: {
+				try {
+					int size = len / 2;
+					char[] password = new char[size + len % 2];
+					for (int i = 0; i < size; i++) {
+						password[i] = (char) ((data[off + i * 2] & 0xFF) & ((data[off + i * 2 + 1] << 8) & 0xFF));
+					}
+					if (size < password.length)
+						password[size] = (char) (data[off + size * 2] & 0xFF);
+
+					PBEKeySpec spec = new PBEKeySpec(password, salt, iterations, (hashLength) * 8);
+					SecretKeyFactory skf = SecretKeyFactory.getInstance(algorithmName, codeProvider.checkProviderWithCurrentOS().name());
+					return skf.generateSecret(spec).getEncoded();
+				} catch (NoSuchAlgorithmException e) {
+					throw new gnu.vm.jgnu.security.NoSuchAlgorithmException(e);
+				} catch (InvalidKeySpecException e) {
+					throw new gnu.vm.jgnu.security.spec.InvalidKeySpecException(e);
+				} catch (NoSuchProviderException e) {
+					throw new gnu.vm.jgnu.security.NoSuchProviderException(e.getMessage());
+				}
+			}
+			case GNU_PBKDF2WithHMacSHA256:
+			case GNU_PBKDF2WithHMacSHA384:
+			case GNU_PBKDF2WithHMacSHA512:
+			case GNU_PBKDF2WithHMacWhirlpool:
+			case GNU_PBKDF2WithHmacSHA1: {
 				int size = len / 2;
 				char[] password = new char[size + len % 2];
 				for (int i = 0; i < size; i++) {
@@ -159,87 +183,56 @@ public enum PasswordHashType {
 				if (size < password.length)
 					password[size] = (char) (data[off + size * 2] & 0xFF);
 
-				PBEKeySpec spec = new PBEKeySpec(password, salt, iterations, (hashLength) * 8);
-				SecretKeyFactory skf = SecretKeyFactory.getInstance(algorithmName, codeProvider.checkProviderWithCurrentOS().name());
+				gnu.vm.jgnux.crypto.spec.PBEKeySpec spec = new gnu.vm.jgnux.crypto.spec.PBEKeySpec(password, salt,
+						iterations, (hashLength));
+				gnu.vm.jgnux.crypto.SecretKeyFactory skf = gnu.vm.jgnux.crypto.SecretKeyFactory.getInstance(algorithmName);
 				return skf.generateSecret(spec).getEncoded();
-			} catch (NoSuchAlgorithmException e) {
-				throw new gnu.vm.jgnu.security.NoSuchAlgorithmException(e);
-			} catch (InvalidKeySpecException e) {
-				throw new gnu.vm.jgnu.security.spec.InvalidKeySpecException(e);
 			}
-			catch(NoSuchProviderException e)
-			{
-				throw new gnu.vm.jgnu.security.NoSuchProviderException(e.getMessage());
-			}
-		}
-		case GNU_PBKDF2WithHMacSHA256:
-		case GNU_PBKDF2WithHMacSHA384:
-		case GNU_PBKDF2WithHMacSHA512:
-		case GNU_PBKDF2WithHMacWhirlpool:
-		case GNU_PBKDF2WithHmacSHA1: {
-			int size = len / 2;
-			char[] password = new char[size + len % 2];
-			for (int i = 0; i < size; i++) {
-				password[i] = (char) ((data[off + i * 2] & 0xFF) & ((data[off + i * 2 + 1] << 8) & 0xFF));
-			}
-			if (size < password.length)
-				password[size] = (char) (data[off + size * 2] & 0xFF);
+			case BCRYPT: {
+				byte[] passwordb ;
+				if (off != 0 || len != data.length) {
+					passwordb = new byte[len];
+					System.arraycopy(data, off, passwordb, 0, len);
+				} else
+					passwordb = data;
 
-			gnu.vm.jgnux.crypto.spec.PBEKeySpec spec = new gnu.vm.jgnux.crypto.spec.PBEKeySpec(password, salt,
-					iterations, (hashLength) );
-			gnu.vm.jgnux.crypto.SecretKeyFactory skf = gnu.vm.jgnux.crypto.SecretKeyFactory.getInstance(algorithmName);
-			return skf.generateSecret(spec).getEncoded();
-		}
-		case BCRYPT: {
-			byte[] passwordb = null;
-			if (off != 0 || len != data.length) {
-				passwordb = new byte[len];
-				System.arraycopy(data, off, passwordb, 0, len);
-			} else
-				passwordb = data;
+				salt = uniformizeSaltLength(salt, 16);
 
-			salt = uniformizeSaltLength(salt, 16);
-			
-			return BCrypt.generate(passwordb, salt, cost);
-		}
-		case BC_FIPS_PBKFD2WithHMacSHA2_256:
-		case BC_FIPS_PBKFD2WithHMacSHA2_384:
-		case BC_FIPS_PBKFD2WithHMacSHA2_512:
-		{
-			CodeProvider.ensureBouncyCastleProviderLoaded();
-			PasswordBasedDeriver<org.bouncycastle.crypto.fips.FipsPBKD.Parameters> deriver = 
+				return BCrypt.generate(passwordb, salt, cost);
+			}
+			case BC_FIPS_PBKFD2WithHMacSHA2_256:
+			case BC_FIPS_PBKFD2WithHMacSHA2_384:
+			case BC_FIPS_PBKFD2WithHMacSHA2_512: {
+				CodeProvider.ensureBouncyCastleProviderLoaded();
+				PasswordBasedDeriver<org.bouncycastle.crypto.fips.FipsPBKD.Parameters> deriver =
 						new FipsPBKD.DeriverFactory().createDeriver(FipsPBKD.PBKDF2.using(fipsDigestAlgorithm, data)
-												.withIterationCount(iterations)
-												.withSalt(salt));
-			return deriver.deriveKey(PasswordBasedDeriver.KeyType.CIPHER,((hashLength*8) +7) / 8);
-		}
-		case SCRYPT_FOR_LOGIN:
-			
-			scryptN=1<<13;
-			
-		case SCRYPT_FOR_DATAENCRYPTION:
-		{
-			byte []d=null;
-			if (len==data.length && off==0)
-				d=data;
-			else
-			{
-				d=new byte[len];
-				System.arraycopy(data, off, d, 0, len);
+								.withIterationCount(iterations)
+								.withSalt(salt));
+				return deriver.deriveKey(PasswordBasedDeriver.KeyType.CIPHER, ((hashLength * 8) + 7) / 8);
 			}
-			return SCrypt.generate(d, salt, scryptN, 8, 1, hashLength);
-		}	
-		default:
-			break;
-			
+			case SCRYPT_FOR_LOGIN:
+
+				scryptN = 1 << 13;
+
+			case SCRYPT_FOR_DATAENCRYPTION: {
+				byte[] d ;
+				if (len == data.length && off == 0)
+					d = data;
+				else {
+					d = new byte[len];
+					System.arraycopy(data, off, d, 0, len);
+				}
+				return SCrypt.generate(d, salt, scryptN, 8, 1, hashLength);
+			}
+			default:
+				break;
+		}
 			
 
-		}
-		return null;
+		throw new InternalError();
 	}
 
-	byte[] hash(char password[], byte salt[], byte cost, byte hashLength)
-			throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException, gnu.vm.jgnu.security.NoSuchProviderException {
+	byte[] hash(char password[], byte salt[], byte cost, byte hashLength) throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException, gnu.vm.jgnu.security.NoSuchProviderException {
 		if (cost<4 || cost>31)
 			throw new IllegalArgumentException("cost must be greater or equals than 4 and lower or equals than 31");
 
@@ -314,7 +307,7 @@ public enum PasswordHashType {
 			
 			return SCrypt.generate(passwordb, salt, scryptN, 8, 1, hashLength);
 		}
-		return null;
+		throw new InternalError();
 	}
 
 	private byte[] uniformizeSaltLength(byte salt[], int salt_length) {

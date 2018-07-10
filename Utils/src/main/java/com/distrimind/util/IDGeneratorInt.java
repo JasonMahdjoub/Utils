@@ -104,9 +104,7 @@ public final class IDGeneratorInt implements Serializable {
 		}
 		if (i < m_size) {
 			if (getReserve() > 0) {
-				for (int j = m_size; j > i; j--) {
-					m_ids[j] = m_ids[j - 1];
-				}
+				System.arraycopy(m_ids, i, m_ids, i + 1, m_size - i);
 				m_ids[i] = res;
 				++m_size;
 			} else {
@@ -140,9 +138,11 @@ public final class IDGeneratorInt implements Serializable {
 		return false;
 	}
 
+	@SuppressWarnings({"UnusedReturnValue", "StatementWithEmptyBody"})
 	public boolean removeID(int _val) {
 		int i;
 		for (i = 0; i < m_size && m_ids[i] < _val; i++) {
+
 		}
 		if (i < m_size && m_ids[i] == _val) {
 			if (getReserve() > m_reserve_max * 2) {
@@ -155,9 +155,7 @@ public final class IDGeneratorInt implements Serializable {
 				m_ids = ids;
 				--m_size;
 			} else {
-				for (int j = i + 1; j < m_size; j++) {
-					m_ids[j - 1] = m_ids[j];
-				}
+				System.arraycopy(m_ids, i + 1, m_ids, i + 1 - 1, m_size - i + 1);
 				--m_size;
 			}
 			if (m_size > 0)

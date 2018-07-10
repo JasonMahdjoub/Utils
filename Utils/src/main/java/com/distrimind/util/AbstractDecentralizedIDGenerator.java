@@ -81,46 +81,43 @@ public abstract class AbstractDecentralizedIDGenerator extends AbstractDecentral
 		try {
 			messageDigest=MessageDigestType.BC_FIPS_SHA3_256.getMessageDigestInstance();
 			final Enumeration<NetworkInterface> e = NetworkInterface.getNetworkInterfaces();
-			if (e != null) {
-				while (e.hasMoreElements()) {
-					final NetworkInterface ni = e.nextElement();
-						
-					
-					if (!ni.isLoopback()) {
-						
-						//resultShort=Bits.getShort(digestion16, 0);
-						/*shortLocalMacBytes[0]=digestion16[0];
-						shortLocalMacBytes[1]=digestion16[1];*/
-						
-						long val = getHardwareAddress(ni.getHardwareAddress());
-						if (val != 0 && val != 224)// is the current network interface is not a virtual interface
-						{
-							byte digestion256[]=messageDigest.digest(ni.getHardwareAddress());
-							byte digestion64[]=new byte[8];
-							for (int i=0;i<8;i++)
-								digestion64[i]=(byte)(digestion256[i]^digestion256[i+8]^digestion256[i+16]^digestion256[i+24]);
-							
-							for (int i=0;i<2;i++)
-								digestion48[i]=(byte)(digestion64[i]^digestion64[i+2]);
-							for (int i=2;i<6;i++)
-								digestion48[i]=digestion64[i+2];
-							//byte digestion16[]=new byte[2];
-							for (int i=0;i<2;i++)
-								shortLocalMacBytes[i]=(byte)(digestion64[i]^digestion64[i+2]+digestion64[i+4]+digestion64[i+6]);
+			while (e.hasMoreElements()) {
+				final NetworkInterface ni = e.nextElement();
 
-							
-							val = getHardwareAddress(digestion48);
-							if (ni.isPointToPoint()) {
-								result2 = val;
-							} else {
-								result = val;
-								break;
-							}
+
+				if (!ni.isLoopback()) {
+
+					//resultShort=Bits.getShort(digestion16, 0);
+					/*shortLocalMacBytes[0]=digestion16[0];
+					shortLocalMacBytes[1]=digestion16[1];*/
+
+					long val = getHardwareAddress(ni.getHardwareAddress());
+					if (val != 0 && val != 224)// is the current network interface is not a virtual interface
+					{
+						byte digestion256[]=messageDigest.digest(ni.getHardwareAddress());
+						byte digestion64[]=new byte[8];
+						for (int i=0;i<8;i++)
+							digestion64[i]=(byte)(digestion256[i]^digestion256[i+8]^digestion256[i+16]^digestion256[i+24]);
+
+						for (int i=0;i<2;i++)
+							digestion48[i]=(byte)(digestion64[i]^digestion64[i+2]);
+						System.arraycopy(digestion64, 4, digestion48, 2, 4);
+						//byte digestion16[]=new byte[2];
+						for (int i=0;i<2;i++)
+							shortLocalMacBytes[i]=(byte)(digestion64[i]^digestion64[i+2]+digestion64[i+4]+digestion64[i+6]);
+
+
+						val = getHardwareAddress(digestion48);
+						if (ni.isPointToPoint()) {
+							result2 = val;
+						} else {
+							result = val;
+							break;
 						}
 					}
 				}
 			}
-			byte[] nonce=("Que(3) j(1)'aime(4) à(1) faire(5) apprendre ce nombre utile aux sages !\n" + 
+			byte[] nonce=("Que(3) j(1)'aime(4) à(1) faire(5) apprendre ce nombre utile aux sages !\n" +
 					"Immortel Archimède, artiste ingénieur,\n" + 
 					"Qui de ton jugement peut priser la valeur ?\n" + 
 					"Pour moi, ton problème eut de pareils avantages.\n" + 
@@ -176,7 +173,7 @@ public abstract class AbstractDecentralizedIDGenerator extends AbstractDecentral
 		if (hashAllIdentifier)
 		{
 			long timestamp = System.currentTimeMillis();
-			byte digestion256[]=null;
+			byte digestion256[];
 			synchronized(RANDOM)
 			{
 				MESSAGE_DIGEST.reset();
@@ -199,7 +196,7 @@ public abstract class AbstractDecentralizedIDGenerator extends AbstractDecentral
 			if (useShortMacAddressAndRandomNumber)
 			{
 				//long r=0;
-				byte digestion256[]=null;
+				byte digestion256[];
 				synchronized(RANDOM)
 				{
 					MESSAGE_DIGEST.reset();
@@ -217,10 +214,10 @@ public abstract class AbstractDecentralizedIDGenerator extends AbstractDecentral
 				digestion256[1]=0;
 				
 				//worker_id_and_sequence = SHORT_LOCAL_MAC | ((0xFFFFFFFFl & r)<<16) | ((0xFFFFl & getNewSequence()) << 48);
-				worker_id_and_sequence = Bits.getLong(digestion256, 0) | ((0xFFFFl & getNewSequence()) << 48);
+				worker_id_and_sequence = Bits.getLong(digestion256, 0) | ((0xFFFFL & getNewSequence()) << 48);
 			}
 			else
-				worker_id_and_sequence = LOCAL_MAC | ((0xFFFFl & getNewSequence()) << 48);
+				worker_id_and_sequence = LOCAL_MAC | ((0xFFFFL & getNewSequence()) << 48);
 		}
 	}
 
@@ -261,7 +258,7 @@ public abstract class AbstractDecentralizedIDGenerator extends AbstractDecentral
 	protected abstract short getNewSequence();
 
 	public short getSequenceID() {
-		return (short) ((worker_id_and_sequence >>> 48) & 0xFFFFl);
+		return (short) ((worker_id_and_sequence >>> 48) & 0xFFFFL);
 	}
 
 	public long getTimeStamp() {
@@ -269,7 +266,7 @@ public abstract class AbstractDecentralizedIDGenerator extends AbstractDecentral
 	}
 
 	public long getWorkerID() {
-		return worker_id_and_sequence & 0xFFFFFFFFFFFFl;
+		return worker_id_and_sequence & 0xFFFFFFFFFFFFL;
 	}
 
 	public long getWorkerIDAndSequence() {

@@ -50,10 +50,10 @@ public class P2PJPakeAndLoginAgreement extends P2PLoginAgreement {
 	
 	private final P2PJPAKESecretMessageExchanger jpake;
 	private final P2PLoginWithSignature login;
-	P2PJPakeAndLoginAgreement(AbstractSecureRandom random, Serializable participantID, char[] message, SymmetricSecretKey secretKeyForSignature) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException {
+	/*P2PJPakeAndLoginAgreement(AbstractSecureRandom random, Serializable participantID, char[] message, SymmetricSecretKey secretKeyForSignature) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException {
 	
 		this(random, participantID, message, null, 0, 0, secretKeyForSignature);
-	}
+	}*/
 	P2PJPakeAndLoginAgreement(AbstractSecureRandom random, Serializable participantID, char[] message, byte salt[],
 			int offset_salt, int len_salt, SymmetricSecretKey secretKeyForSignature) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException {
 		super(secretKeyForSignature==null?3:5, secretKeyForSignature==null?3:5);
@@ -63,10 +63,10 @@ public class P2PJPakeAndLoginAgreement extends P2PLoginAgreement {
 		else
 			login=new P2PLoginWithSignature(secretKeyForSignature, random);
 	}
-	P2PJPakeAndLoginAgreement(AbstractSecureRandom random, Serializable participantID, byte[] message, boolean messageIsKey, SymmetricSecretKey secretKeyForSignature) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException {
+	/*P2PJPakeAndLoginAgreement(AbstractSecureRandom random, Serializable participantID, byte[] message, boolean messageIsKey, SymmetricSecretKey secretKeyForSignature) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException {
 		
 		this(random, participantID, message, 0, message.length,null, 0, 0, messageIsKey, secretKeyForSignature);
-	}
+	}*/
 	P2PJPakeAndLoginAgreement(AbstractSecureRandom random, Serializable participantID, byte[] message, int offset, int len, byte salt[],
 			int offset_salt, int len_salt, boolean messageIsKey, SymmetricSecretKey secretKeyForSignature) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException {
 		super(secretKeyForSignature==null?3:5, secretKeyForSignature==null?3:5);

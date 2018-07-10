@@ -35,7 +35,6 @@ knowledge of the CeCILL-C license and that you accept its terms.
 package com.distrimind.util;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -56,10 +55,10 @@ public class Utils {
 
 	static {
 		Calendar c = Calendar.getInstance();
-		c.set(2016, 1, 4);
+		c.set(2016, Calendar.JANUARY, 4);
 		Calendar c2 = Calendar.getInstance();
-		c.set(2018, 4, 15);
-		VERSION = new Version("Utils", "Utils", 3, 15, 0, Version.Type.Stable, 0, c.getTime(), c2.getTime());
+		c.set(2018, Calendar.JULY, 10);
+		VERSION = new Version("Utils", "Utils", 3, 16, 0, Version.Type.Stable, 0, c.getTime(), c2.getTime());
 		try {
 
 			InputStream is = Utils.class.getResourceAsStream("build.txt");
@@ -68,12 +67,20 @@ public class Utils {
 			
 			VERSION.addCreator(new Person("mahdjoub", "jason"));
 			c = Calendar.getInstance();
-			c.set(2016, 1, 4);
+			c.set(2016, Calendar.JANUARY, 4);
 			VERSION.addDeveloper(new PersonDeveloper("mahdjoub", "jason", c.getTime()));
-			
+
 			c = Calendar.getInstance();
-			c.set(2018, 4, 15);
-			Description d = new Description(3, 15, 0, Version.Type.Stable, 0, c.getTime());
+			c.set(2018, Calendar.JULY, 10);
+			Description d = new Description(3, 16, 0, Version.Type.Stable, 0, c.getTime());
+			d.addItem("Add HumanReadableBytesCount class.");
+			d.addItem("Update hardrive and partitions detections.");
+            d.addItem("Clean code.");
+			VERSION.addDescription(d);
+
+			c = Calendar.getInstance();
+			c.set(2018, Calendar.MAY, 15);
+			d = new Description(3, 15, 0, Version.Type.Stable, 0, c.getTime());
 			d.addItem("Add P2P login agreement based on symmetric signature.");
 			d.addItem("Add P2P multi login agreement based on symmetric signature and JPAKE.");
 			d.addItem("XMLProperties is renamed to MultiFormatProperties.");
@@ -84,7 +91,7 @@ public class Utils {
 			
 
 			c = Calendar.getInstance();
-			c.set(2018, 4, 10);
+			c.set(2018, Calendar.MAY, 10);
 			d = new Description(3, 14, 6, Version.Type.Stable, 0, c.getTime());
 			d.addItem("Update BCFIPS to 1.0.1.");
 			d.addItem("Update common-codec to 1.11.");
@@ -92,7 +99,7 @@ public class Utils {
 			VERSION.addDescription(d);
 			
 			c = Calendar.getInstance();
-			c.set(2018, 3, 28);
+			c.set(2018, Calendar.APRIL, 28);
 			d = new Description(3, 14, 5, Version.Type.Stable, 0, c.getTime());
 			d.addItem("Key.encode() is now public.");
 			d.addItem("Generate 'versions.html' file into jar files.");
@@ -100,14 +107,14 @@ public class Utils {
 			VERSION.addDescription(d);
 			
 			c = Calendar.getInstance();
-			c.set(2018, 3, 11);
+			c.set(2018, Calendar.APRIL, 11);
 			d = new Description(3, 14, 2, Version.Type.Stable, 0, c.getTime());
 			d.addItem("Add function KeyAgreementType.getDefaultKeySizeBits().");
 			d.addItem("Add function KeyAgreementType.getCodeProvider().");
 			VERSION.addDescription(d);
 
 			c = Calendar.getInstance();
-			c.set(2018, 3, 11);
+			c.set(2018, Calendar.APRIL, 11);
 			d = new Description(3, 14, 0, Version.Type.Stable, 0, c.getTime());
 			d.addItem("Add KeyAgreementType and KeyAgreement class. ");
 			d.addItem("NewHope and ECDA use now the same protocol.");
@@ -119,7 +126,7 @@ public class Utils {
 			VERSION.addDescription(d);
 			
 			c = Calendar.getInstance();
-			c.set(2018, 3, 9);
+			c.set(2018, Calendar.APRIL, 9);
 			d = new Description(3, 13, 4, Version.Type.Stable, 0, c.getTime());
 			d.addItem("Correction of a null pointer exception.");
 			d.addItem("Security fix : counter was transmitted to other peer.");
@@ -128,13 +135,13 @@ public class Utils {
 			VERSION.addDescription(d);
 
 			c = Calendar.getInstance();
-			c.set(2018, 2, 27);
+			c.set(2018, Calendar.MARCH, 27);
 			d = new Description(3, 13, 1, Version.Type.Stable, 0, c.getTime());
 			d.addItem("Add possibility to use a counter with CTR mode.");
 			VERSION.addDescription(d);
 
 			c = Calendar.getInstance();
-			c.set(2018, 2, 26);
+			c.set(2018, Calendar.MARCH, 26);
 			d = new Description(3, 13, 0, Version.Type.Stable, 0, c.getTime());
 			d.addItem("Add CTR mode support.");
 			d.addItem("Optmizations of Numbers allocations.");
@@ -143,32 +150,32 @@ public class Utils {
 			VERSION.addDescription(d);
 
 			c = Calendar.getInstance();
-			c.set(2018, 2, 10);
+			c.set(2018, Calendar.MARCH, 10);
 			d = new Description(3, 12, 0, Version.Type.Stable, 0, c.getTime());
 			d.addItem("Add sphincs signature (Post Quantum Cryptography).");
 			d.addItem("Optimize encryption and minimize memory allocation.");
 			VERSION.addDescription(d);
 
 			c = Calendar.getInstance();
-			c.set(2018, 2, 10);
+			c.set(2018, Calendar.MARCH, 10);
 			d = new Description(3, 11, 1, Version.Type.Stable, 0, c.getTime());
 			d.addItem("Add speed indexes for symmetric encryptions.");
 			VERSION.addDescription(d);
 
 			c = Calendar.getInstance();
-			c.set(2018, 2, 8);
+			c.set(2018, Calendar.MARCH, 8);
 			d = new Description(3, 11, 0, Version.Type.Stable, 0, c.getTime());
 			d.addItem("Add BouncyCastle GCM and EAX authenticated block modes for symmetric encryptions.");
 			VERSION.addDescription(d);
 
 			c = Calendar.getInstance();
-			c.set(2018, 1, 10);
+			c.set(2018, Calendar.FEBRUARY, 10);
 			d = new Description(3, 10, 5, Version.Type.Stable, 0, c.getTime());
 			d.addItem("Java 7 compatible.");
 			VERSION.addDescription(d);
 			
 			c = Calendar.getInstance();
-			c.set(2018, 1, 10);
+			c.set(2018, Calendar.FEBRUARY, 10);
 			d = new Description(3, 10, 4, Version.Type.Stable, 0, c.getTime());
 			d.addItem("Fix a problem with BC Mac Length.");
 			d.addItem("Add asymmetric encryption algorithms.");
@@ -178,14 +185,14 @@ public class Utils {
 			VERSION.addDescription(d);
 			
 			c = Calendar.getInstance();
-			c.set(2018, 1, 9);
+			c.set(2018, Calendar.FEBRUARY, 9);
 			d = new Description(3, 10, 0, Version.Type.Stable, 0, c.getTime());
 			d.addItem("Encryption algorithms does not need signed JAR to work. So this release work on official Oracle JVM.");
 			d.addItem("Add a post quantum cryptography algorithm : New Hope Key Exchanger.");
 			VERSION.addDescription(d);
 			
 			c = Calendar.getInstance();
-			c.set(2018, 0, 31);
+			c.set(2018, Calendar.JANUARY, 31);
 			d = new Description(3, 9, 0, Version.Type.Stable, 0, c.getTime());
 			d.addItem("Add curve M-221 for asymmetric signatures and ECDH Key Exchangers.");
 			d.addItem("Add curve M-383 for asymmetric signatures and ECDH Key Exchangers.");
@@ -194,7 +201,7 @@ public class Utils {
 			VERSION.addDescription(d);
 			
 			c = Calendar.getInstance();
-			c.set(2018, 0, 27);
+			c.set(2018, Calendar.JANUARY, 27);
 			d = new Description(3, 8, 0, Version.Type.Stable, 0, c.getTime());
 			d.addItem("Update bouncy castle to 1.59b");
 			d.addItem("Add PKBFs with SHA3 hash method");
@@ -206,7 +213,7 @@ public class Utils {
 			VERSION.addDescription(d);
 			
 			c = Calendar.getInstance();
-			c.set(2017, 10, 25);
+			c.set(2017, Calendar.NOVEMBER, 25);
 			d = new Description(3, 7, 1, Version.Type.Stable, 0, c.getTime());
 			d.addItem("Add function AbstractEncryptionIOAlgorithm.decode(InputStream is, OutputStream os, int length)");
 			d.addItem("Add function AbstractEncryptionOutputAlgorithm.public void encode(byte[] bytes, int off, int len, OutputStream os)");
@@ -214,34 +221,34 @@ public class Utils {
 			VERSION.addDescription(d);
 			
 			c = Calendar.getInstance();
-			c.set(2017, 10, 25);
+			c.set(2017, Calendar.NOVEMBER, 25);
 			d = new Description(3, 7, 0, Version.Type.Stable, 0, c.getTime());
 			d.addItem("Correction of Mac OS Compatibility");
 			d.addItem("Add scrypt algorithm");
 			VERSION.addDescription(d);
 			
 			c = Calendar.getInstance();
-			c.set(2017, 10, 2);
+			c.set(2017, Calendar.NOVEMBER, 2);
 			d = new Description(3, 6, 0, Version.Type.Stable, 0, c.getTime());
 			d.addItem("Add blake 2b message digest");
 			d.addItem("ECDDH are now FIPS compliant");
 			VERSION.addDescription(d);
 
 			c = Calendar.getInstance();
-			c.set(2017, 10, 2);
+			c.set(2017, Calendar.NOVEMBER, 2);
 			d = new Description(3, 4, 0, Version.Type.Stable, 0, c.getTime());
 			d.addItem("Add data buffers classes");
 			VERSION.addDescription(d);
 
 			c = Calendar.getInstance();
-			c.set(2017, 9, 23);
+			c.set(2017, Calendar.OCTOBER, 23);
 			d = new Description(3, 3, 0, Version.Type.Stable, 0, c.getTime());
 			d.addItem("Improving key wrapping process");
 			d.addItem("Decentralized ID can now be entirely hashed");
 			VERSION.addDescription(d);
 
 			c = Calendar.getInstance();
-			c.set(2017, 9, 9);
+			c.set(2017, Calendar.OCTOBER, 9);
 			d = new Description(3, 2, 4, Version.Type.Stable, 0, c.getTime());
 			d.addItem("Fix an issue with signature process");
 			d.addItem("Fix an issue with signature size");
@@ -251,13 +258,13 @@ public class Utils {
 
 			
 			c = Calendar.getInstance();
-			c.set(2017, 9, 6);
+			c.set(2017, Calendar.OCTOBER, 6);
 			d = new Description(3, 2, 0, Version.Type.Stable, 0, c.getTime());
 			d.addItem("Changing default JVM secured random");
 			VERSION.addDescription(d);
 
 			c = Calendar.getInstance();
-			c.set(2017, 9, 6);
+			c.set(2017, Calendar.OCTOBER, 6);
 			d = new Description(3, 1, 1, Version.Type.Stable, 0, c.getTime());
 			d.addItem("Adding abstract random into class ClientASymmetricEncryptionAlgorithm");
 			d.addItem("Adding function MessageDigestType.getDigestLengthInBits()");
@@ -265,7 +272,7 @@ public class Utils {
 			VERSION.addDescription(d);
 
 			c = Calendar.getInstance();
-			c.set(2017, 9, 5);
+			c.set(2017, Calendar.OCTOBER, 5);
 			d = new Description(3, 1, 0, Version.Type.Stable, 0, c.getTime());
 			d.addItem("Correcting a bug with seed generator");
 			d.addItem("Improving fortuna random speed");
@@ -273,13 +280,13 @@ public class Utils {
 			VERSION.addDescription(d);
 
 			c = Calendar.getInstance();
-			c.set(2017, 9, 5);
+			c.set(2017, Calendar.OCTOBER, 5);
 			d = new Description(3, 0, 5, Version.Type.Stable, 0, c.getTime());
 			d.addItem("Correcting a bug with seed generator");
 			VERSION.addDescription(d);
 
 			c = Calendar.getInstance();
-			c.set(2017, 9, 4);
+			c.set(2017, Calendar.OCTOBER, 4);
 			d = new Description(3, 0, 0, Version.Type.Stable, 0, c.getTime());
 			d.addItem("Minimal corrections into PasswordHash class");
 			d.addItem("Updating Bouncy Castle to 1.58 version");
@@ -291,14 +298,14 @@ public class Utils {
 			VERSION.addDescription(d);
 
 			c = Calendar.getInstance();
-			c.set(2017, 8, 1);
+			c.set(2017, Calendar.SEPTEMBER, 1);
 			d = new Description(2, 16, 2, Version.Type.Stable, 0, c.getTime());
 			d.addItem("Renforcing MAC address anonymization");
 			d.addItem("Possibility to convert UUID to DencentelizedID");
 			VERSION.addDescription(d);
 
 			c = Calendar.getInstance();
-			c.set(2017, 8, 1);
+			c.set(2017, Calendar.SEPTEMBER, 1);
 			d = new Description(2, 16, 0, Version.Type.Stable, 0, c.getTime());
 			d.addItem("Adding support for SHA3");
 			d.addItem("Dencentralized ID's use now anonymized MAC address and random numbers");
@@ -307,13 +314,13 @@ public class Utils {
 			VERSION.addDescription(d);
 
 			c = Calendar.getInstance();
-			c.set(2017, 7, 21);
+			c.set(2017, Calendar.AUGUST, 21);
 			d = new Description(2, 15, 1, Version.Type.Stable, 0, c.getTime());
 			d.addItem("Minimal corrections");
 			VERSION.addDescription(d);
 
 			c = Calendar.getInstance();
-			c.set(2017, 7, 15);
+			c.set(2017, Calendar.AUGUST, 15);
 			d = new Description(2, 15, 0, Version.Type.Stable, 0, c.getTime());
 			d.addItem("Add FortunaSecureRandom class");
 			d.addItem("Making FortunaSecureRandom default secured random generator");
@@ -321,38 +328,38 @@ public class Utils {
 			VERSION.addDescription(d);
 
 			c = Calendar.getInstance();
-			c.set(2017, 7, 13);
+			c.set(2017, Calendar.AUGUST, 13);
 			d = new Description(2, 14, 0, Version.Type.Stable, 0, c.getTime());
 			d.addItem("Debuging EllipticCurveDiffieHellmanAlgorithm");
 			VERSION.addDescription(d);
 
 			c = Calendar.getInstance();
-			c.set(2017, 7, 10);
+			c.set(2017, Calendar.AUGUST, 10);
 			d = new Description(2, 12, 0, Version.Type.Stable, 0, c.getTime());
 			d.addItem("Enabling 256 bits SUN AES encryption");
 			VERSION.addDescription(d);
 
 			c = Calendar.getInstance();
-			c.set(2017, 7, 5);
+			c.set(2017, Calendar.AUGUST, 5);
 			d = new Description(2, 12, 0, Version.Type.Stable, 0, c.getTime());
 			d.addItem("Minimal corrections");
 			VERSION.addDescription(d);
 
 			c = Calendar.getInstance();
-			c.set(2017, 7, 4);
+			c.set(2017, Calendar.AUGUST, 4);
 			d = new Description(2, 11, 0, Version.Type.Stable, 0, c.getTime());
 			d.addItem("Converting project to gradle project");
 			VERSION.addDescription(d);
 
 			c = Calendar.getInstance();
-			c.set(2017, 5, 19);
+			c.set(2017, Calendar.JUNE, 19);
 			d = new Description(2, 10, 0, Version.Type.Stable, 0, c.getTime());
 			d.addItem("Adding symmetric signture algorithms");
 			d.addItem("Altereging P2PJPAKESecretMessageExchanger class");
 			VERSION.addDescription(d);
 
 			c = Calendar.getInstance();
-			c.set(2017, 5, 18);
+			c.set(2017, Calendar.JUNE, 18);
 			d = new Description(2, 9, 0, Version.Type.Stable, 0, c.getTime());
 			d.addItem("Adding Elliptic Curve Diffie-Hellman key exchange support");
 			d.addItem("Password Authenticated Key Exchange by Juggling (2008) algorithm");
@@ -360,26 +367,26 @@ public class Utils {
 			VERSION.addDescription(d);
 
 			c = Calendar.getInstance();
-			c.set(2017, 5, 1);
+			c.set(2017, Calendar.JUNE, 1);
 			d = new Description(2, 8, 0, Version.Type.Stable, 0, c.getTime());
 			d.addItem("Managing enum type into XML properties");
 			d.addItem("XML properties are able to manage abstract sub XML properties");
 			VERSION.addDescription(d);
 
 			c = Calendar.getInstance();
-			c.set(2017, 4, 23);
+			c.set(2017, Calendar.MAY, 23);
 			d = new Description(2, 7, 1, Version.Type.Stable, 0, c.getTime());
 			d.addItem("Altering ListClasses");
 			VERSION.addDescription(d);
 
 			c = Calendar.getInstance();
-			c.set(2017, 4, 3);
+			c.set(2017, Calendar.MAY, 3);
 			d = new Description(2, 7, 0, Version.Type.Stable, 0, c.getTime());
 			d.addItem("Adding primitive tab support for XML Properties");
 			VERSION.addDescription(d);
 
 			c = Calendar.getInstance();
-			c.set(2017, 3, 24);
+			c.set(2017, Calendar.APRIL, 24);
 			d = new Description(2, 6, 1, Version.Type.Stable, 0, c.getTime());
 			d.addItem("JDK 7 compatible");
 			d.addItem("Correcting a bug with testReadWriteDataPackaged in CryptoTests");
@@ -391,51 +398,51 @@ public class Utils {
 			VERSION.addDescription(d);
 
 			c = Calendar.getInstance();
-			c.set(2017, 2, 7);
+			c.set(2017, Calendar.MARCH, 7);
 			d = new Description(2, 5, 0, Version.Type.Stable, 0, c.getTime());
 			d.addItem("Improving and renforcing P2PAsymmetricSecretMessageExchanger");
 			d.addItem("Additional manifest content possibility for projects export");
 			VERSION.addDescription(d);
 
 			c = Calendar.getInstance();
-			c.set(2017, 2, 4);
+			c.set(2017, Calendar.MARCH, 4);
 			d = new Description(2, 4, 0, Version.Type.Stable, 0, c.getTime());
 			d.addItem("Debugging documentation export");
 			d.addItem("Updating common net to 3.6 version");
 			VERSION.addDescription(d);
 
 			c = Calendar.getInstance();
-			c.set(2017, 1, 7);
+			c.set(2017, Calendar.FEBRUARY, 7);
 			d = new Description(2, 3, 0, Version.Type.Stable, 0, c.getTime());
 			d.addItem("AbstractXMLObjectParser is now serializable");
 			VERSION.addDescription(d);
 
 			c = Calendar.getInstance();
-			c.set(2017, 0, 5);
+			c.set(2017, Calendar.JANUARY, 5);
 			d = new Description(2, 2, 0, Version.Type.Stable, 0, c.getTime());
 			d.addItem("Updating IDGeneratorInt class and fix memory leak problem");
 			VERSION.addDescription(d);
 
 			c = Calendar.getInstance();
-			c.set(2016, 11, 31);
+			c.set(2016, Calendar.DECEMBER, 31);
 			d = new Description(2, 1, 0, Version.Type.Stable, 0, c.getTime());
 			d.addItem("Adding expiration time for public keys");
 			VERSION.addDescription(d);
 
 			c = Calendar.getInstance();
-			c.set(2016, 11, 23);
+			c.set(2016, Calendar.DECEMBER, 23);
 			d = new Description(2, 0, 1, Version.Type.Stable, 0, c.getTime());
 			d.addItem("Changing gnu cryto packages");
 			VERSION.addDescription(d);
 
 			c = Calendar.getInstance();
-			c.set(2016, 11, 17);
+			c.set(2016, Calendar.DECEMBER, 17);
 			d = new Description(2, 0, 0, Version.Type.Stable, 0, c.getTime());
 			d.addItem("Including Gnu Crypto Algorithms.");
 			VERSION.addDescription(d);
 
 			c = Calendar.getInstance();
-			c.set(2016, 11, 6);
+			c.set(2016, Calendar.DECEMBER, 6);
 			d = new Description(1, 9, 0, Version.Type.Stable, 0, c.getTime());
 			d.addItem(
 					"Correcting a bug with the use of IV parameter. Now, the IV parameter is generated for each encryption.");
@@ -443,13 +450,13 @@ public class Utils {
 			VERSION.addDescription(d);
 
 			c = Calendar.getInstance();
-			c.set(2016, 9, 13);
+			c.set(2016, Calendar.OCTOBER, 13);
 			d = new Description(1, 8, 0, Version.Type.Stable, 0, c.getTime());
 			d.addItem("Adding password hash (PBKDF and bcrypt)");
 			VERSION.addDescription(d);
 
 			c = Calendar.getInstance();
-			c.set(2016, 8, 15);
+			c.set(2016, Calendar.SEPTEMBER, 15);
 			d = new Description(1, 7, 2, Version.Type.Stable, 0, c.getTime());
 			d.addItem("Correcting a bug for P2PASymmetricSecretMessageExchanger");
 			d.addItem("Adding toString and valueOf functions for crypto keys");
@@ -459,7 +466,7 @@ public class Utils {
 			VERSION.addDescription(d);
 
 			c = Calendar.getInstance();
-			c.set(2016, 7, 23);
+			c.set(2016, Calendar.AUGUST, 23);
 			d = new Description(1, 7, 1, Version.Type.Stable, 0, c.getTime());
 			d.addItem("Correcting a bug for loop back network interface speed");
 			d.addItem("Correcting a bug for P2PASymmetricSecretMessageExchanger");
@@ -468,7 +475,7 @@ public class Utils {
 			VERSION.addDescription(d);
 
 			c = Calendar.getInstance();
-			c.set(2016, 6, 4);
+			c.set(2016, Calendar.JULY, 4);
 			d = new Description(1, 7, 0, Version.Type.Stable, 0, c.getTime());
 			d.addItem("Renaming class ASymmetricEncryptionAlgorithm to P2PASymmetricEncryptionAlgorithm");
 			d.addItem("Adding class SignatureCheckerAlgorithm");
@@ -479,7 +486,7 @@ public class Utils {
 			VERSION.addDescription(d);
 
 			c = Calendar.getInstance();
-			c.set(2016, 5, 10);
+			c.set(2016, Calendar.JUNE, 10);
 			d = new Description(1, 6, 1, Version.Type.Stable, 0, c.getTime());
 			d.addItem("Correcting bug into XMLProperties class");
 			d.addItem("Adding tests for XMLProperties class");
@@ -490,7 +497,7 @@ public class Utils {
 			VERSION.addDescription(d);
 
 			c = Calendar.getInstance();
-			c.set(2016, 2, 15);
+			c.set(2016, Calendar.MARCH, 15);
 			d = new Description(1, 6, 0, Version.Type.Stable, 0, c.getTime());
 			d.addItem("Adding unit tests possibility for project export tools");
 			d.addItem("Adding unit compilation for project export tools");
@@ -498,7 +505,7 @@ public class Utils {
 			VERSION.addDescription(d);
 
 			c = Calendar.getInstance();
-			c.set(2016, 2, 9);
+			c.set(2016, Calendar.MARCH, 9);
 			d = new Description(1, 5, 0, Version.Type.Stable, 0, c.getTime());
 			d.addItem("Adding PeerToPeerASymmetricSecretMessageExchanger class");
 			d.addItem("Adding ObjectSizer class (determins sizeof each java object instance)");
@@ -507,38 +514,38 @@ public class Utils {
 			VERSION.addDescription(d);
 
 			c = Calendar.getInstance();
-			c.set(2016, 2, 1);
+			c.set(2016, Calendar.MARCH, 1);
 			d = new Description(1, 4, 0, Version.Type.Stable, 0, c.getTime());
 			d.addItem("Adding encryption utilities");
 			VERSION.addDescription(d);
 
 			c = Calendar.getInstance();
-			c.set(2016, 1, 24);
+			c.set(2016, Calendar.FEBRUARY, 24);
 			d = new Description(1, 3, 1, Version.Type.Stable, 0, c.getTime());
 			d.addItem("Set Bits static functions public");
 			VERSION.addDescription(d);
 
 			c = Calendar.getInstance();
-			c.set(2016, 1, 22);
+			c.set(2016, Calendar.FEBRUARY, 22);
 			d = new Description(1, 3, 0, Version.Type.Stable, 0, c.getTime());
 			d.addItem("Adding SecuredDecentralizedID class");
 			VERSION.addDescription(d);
 
 			c = Calendar.getInstance();
-			c.set(2016, 1, 15);
+			c.set(2016, Calendar.FEBRUARY, 15);
 			d = new Description(1, 2, 0, Version.Type.Stable, 0, c.getTime());
 			d.addItem("Adding function AbstractXMLObjectParser.isValid(Class)");
 			d.addItem("Correcting export bug : temporary files were not deleted.");
 			VERSION.addDescription(d);
 
 			c = Calendar.getInstance();
-			c.set(2016, 1, 14);
+			c.set(2016, Calendar.FEBRUARY, 14);
 			d = new Description(1, 1, 0, Version.Type.Stable, 0, c.getTime());
 			d.addItem("Adding some internal modifications to ReadWriteLocker");
 			VERSION.addDescription(d);
 
 			c = Calendar.getInstance();
-			c.set(2016, 1, 4);
+			c.set(2016, Calendar.FEBRUARY, 4);
 			d = new Description(1, 0, 0, Version.Type.Stable, 0, c.getTime());
 			d.addItem("Realeasing first version of Utils");
 			VERSION.addDescription(d);
@@ -547,7 +554,7 @@ public class Utils {
 		}
 	}
 	
-	public static void main(String args[]) throws FileNotFoundException, IOException
+	public static void main(String args[]) throws IOException
 	{
 		String html=VERSION.getMarkdownCode();
 		try(FileWriter fr=new FileWriter(new File("../versions.md")))
