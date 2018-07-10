@@ -36,11 +36,15 @@ knowledge of the CeCILL-C license and that you accept its terms.
 package com.distrimind.util;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.util.List;
+import java.util.Set;
 
+import com.distrimind.util.harddrive.Disk;
 import com.distrimind.util.harddrive.HardDriveDetect;
+import com.distrimind.util.harddrive.Partition;
 import com.distrimind.util.nitools.NITools;
 import com.distrimind.util.traceroute.TraceRoute;
 
@@ -54,17 +58,34 @@ import com.distrimind.util.traceroute.TraceRoute;
  */
 public class SystemFunctions {
 	/**
-	 * Returns a unique hard drive identifier considering a file
+	 * Returns a partition considering a file
 	 * 
 	 * @param _file
 	 *            a file contained into the hard drive
-	 * @return the hard drive identifier or
-	 *         {@link HardDriveDetect#DEFAULT_HARD_DRIVE_IDENTIFIER} if the hard
-	 *         drive identifier couldn't be found.
+	 * @return the concerned partition
 	 */
-	public static String getHardDriveIdentifier(File _file) {
-		return HardDriveDetect.getInstance().getHardDriveIdentifier(_file);
+	public static Partition getHardDrivePartition(File _file) throws IOException {
+		return HardDriveDetect.getInstance().getConcernedPartition(_file);
 	}
+
+	/**
+	 * Gets the detected partitions of this computer
+	 * @return the detected partitions of this computer
+	 * @throws IOException if a problem occur
+	 */
+	public static Set<Partition> getDetectedPartitions() throws IOException {
+		return HardDriveDetect.getInstance().getDetectedPartitions();
+	}
+
+	/**
+	 * Gets the detected disks of this computer
+	 * @return the detected disks of this computer
+	 * @throws IOException if a problem occur
+	 */
+	public static Set<Disk> getDetectedDisks() throws IOException {
+		return HardDriveDetect.getInstance().getDetectedDisks();
+	}
+
 
 	/**
 	 * Gets the speed in bytes of the given network interface

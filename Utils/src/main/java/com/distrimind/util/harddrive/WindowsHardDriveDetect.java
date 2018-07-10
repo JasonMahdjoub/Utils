@@ -35,11 +35,12 @@ knowledge of the CeCILL-C license and that you accept its terms.
 
 package com.distrimind.util.harddrive;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.InputStreamReader;
+import javax.swing.filechooser.FileSystemView;
+import java.io.*;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
 
 /**
  * 
@@ -50,79 +51,194 @@ import java.util.HashMap;
  */
 class WindowsHardDriveDetect extends HardDriveDetect {
 
-	private static class Identifier {
-		public final String identifier;
+	private HashSet<Disk> disks;
+	private HashSet<Partition> partitions;
 
-		private final long timeToBeUpdated;
 
-		public Identifier(String _identifier) {
-			identifier = _identifier;
-			timeToBeUpdated = System.currentTimeMillis() + duration_between_each_update;
-		}
 
-		public boolean hasToBeUpdated() {
-			return System.currentTimeMillis() - timeToBeUpdated > 0;
-		}
-	}
-
-	private static final long duration_between_each_update = 10000;
-
-	private HashMap<Character, Identifier> identifiers = new HashMap<>();
 
 	@Override
-	public String getHardDriveIdentifier(File _file) {
-		synchronized (identifiers) {
-			try {
-				char drive = _file.getCanonicalPath().charAt(0);
-				if (drive >= 'A' && drive <= 'Z')
-					drive = (char) (drive - ('A' - 'a'));
-				if (!((drive >= 'a' && drive <= 'z') || (drive >= 'A' || drive <= 'Z')))
-					return HardDriveDetect.DEFAULT_HARD_DRIVE_IDENTIFIER;
-				Character Drive = Character.valueOf(drive);
-				Identifier id = identifiers.get(Drive);
-				if (id == null) {
-					id = getIdentifier(drive);
-					identifiers.put(Drive, id);
-				} else if (id.hasToBeUpdated()) {
-					id = getIdentifier(drive);
-					identifiers.put(Drive, id);
-				}
-				return id.identifier;
-			} catch (Exception e) {
-				return HardDriveDetect.DEFAULT_HARD_DRIVE_IDENTIFIER;
-			}
-		}
+	Set<Disk> getDetectedDisksImpl() {
+		return disks;
 	}
 
-	private Identifier getIdentifier(char drive) {
-
-		try {
-			String result = "";
-			File file = File.createTempFile("realhowto", ".vbs");
-			file.deleteOnExit();
-			try (FileWriter fw = new java.io.FileWriter(file)) {
-				String vbs = "Set objFSO = CreateObject(\"Scripting.FileSystemObject\")\n"
-						+ "Set colDrives = objFSO.Drives\n" + "Set objDrive = colDrives.item(\"" + drive + "\")\n"
-						+ "Wscript.Echo objDrive.SerialNumber";
-				fw.write(vbs);
-			}
-			Process p = Runtime.getRuntime().exec("cscript //NoLogo " + file.getPath());
-			try (InputStreamReader isr = new InputStreamReader(p.getInputStream())) {
-				try (BufferedReader input = new BufferedReader(isr)) {
-					String line;
-					while ((line = input.readLine()) != null) {
-						result += line;
-					}
-
-				}
-			}
-			p.destroy();
-			if (result.length() == 0)
-				return new Identifier(HardDriveDetect.DEFAULT_HARD_DRIVE_IDENTIFIER);
-			return new Identifier(result.trim());
-		} catch (Exception e) {
-			return new Identifier(HardDriveDetect.DEFAULT_HARD_DRIVE_IDENTIFIER);
-		}
+	@Override
+	Set<Partition> getDetectedPartitionsImpl() {
+		return partitions;
 	}
+
+	@Override
+	void scanDisksAndPartitions() throws IOException {
+        //FileSystemView fsv=FileSystemView.getFileSystemView();
+        disks=new HashSet<>();
+        partitions=new HashSet<>();
+        HashMap<String, Disk> disksMap=new HashMap<>();
+        HashMap<String, Partition> partitionsMap=new HashMap<>();
+        File sfile=getScriptFile();
+        Process p = Runtime.getRuntime().exec("cscript //NoLogo " + sfile.getPath());
+        try (InputStreamReader isr = new InputStreamReader(p.getInputStream())) {
+            try (BufferedReader input = new BufferedReader(isr)) {
+                String line;
+                while ((line = input.readLine()) != null) {
+                    String tab[]=line.split(" ");
+                    if (tab.length==11)
+                    {
+                        String driveLetter=tab[0];
+                        int li=driveLetter.lastIndexOf(":");
+                        if (li<0)
+                            li=driveLetter.length();
+                        String deviceID=driveLetter.substring(0, li);
+                        if (deviceID.equals("_"))
+                            continue;
+                        String name=tab[1];
+                        if (name.equals("_"))
+                            name=null;
+                        String fileSystem=tab[2];
+                        if (fileSystem.equals("_"))
+                            fileSystem=null;
+                        long volumeSize=-1;
+                        try
+                        {
+                            volumeSize=Long.valueOf(tab[3]);
+                        }
+                        catch (Exception e)
+                        {
+                            e.printStackTrace();
+                        }
+
+                        int volumeBlockSize=-1;
+                        try
+                        {
+                            volumeBlockSize=Integer.valueOf(tab[5]);
+                        }
+                        catch (Exception e)
+                        {
+                            e.printStackTrace();
+                        }
+                        String caption=tab[6];
+                        if (caption.equals("_"))
+                            caption=null;
+                        String diskID=tab[7];
+                        if (diskID.equals("_"))
+                            diskID=null;
+                        long diskSize=-1;
+                        try
+                        {
+                            diskSize=Long.valueOf(tab[8]);
+                        }
+                        catch (Exception e)
+                        {
+                            e.printStackTrace();
+                        }
+                        String interfaceType=tab[9];
+                        if (interfaceType.equals("_"))
+                            interfaceType=null;
+
+                        String serialNumber=tab[10];
+                        if (serialNumber.equals("_"))
+                            serialNumber=null;
+                        Disk disk=disksMap.get(diskID);
+                        if (disk==null)
+                        {
+                            disk=new Disk(UUID.nameUUIDFromBytes(serialNumber.getBytes()), diskSize, true, -1, interfaceType, diskID, caption);
+                            disksMap.put(diskID, disk);
+                            disks.add(disk);
+                        }
+                        Partition partition=new Partition(null, new File(driveLetter), deviceID, fileSystem, fileSystem, volumeBlockSize, new File(driveLetter).canWrite(), name, volumeSize, disk);
+                        partitions.add(partition);
+                        partitionsMap.put(deviceID, partition);
+
+                    } else if (tab.length==8)
+                    {
+                        int li=tab[0].lastIndexOf(":");
+                        if (li<0)
+                            li=tab[0].length();
+                        String deviceID=tab[0].substring(0, li);
+                        String driveLetter=deviceID+":";
+                        String serialNumber=tab[1];
+                        if (serialNumber.equals("_"))
+                            serialNumber=null;
+                        String fileSystem=tab[3];
+                        if (fileSystem.equals("_"))
+                            fileSystem=null;
+                        long volumeSize=-1;
+                        try
+                        {
+                            volumeSize=Long.valueOf(tab[4]);
+                        }
+                        catch (Exception e)
+                        {
+                            e.printStackTrace();
+                        }
+                        long freeSpace=-1;
+                        try
+                        {
+                            freeSpace=Long.valueOf(tab[5]);
+                        }
+                        catch (Exception e)
+                        {
+                            e.printStackTrace();
+                        }
+                        boolean isReady=tab[6].equals("1");
+                        String volumeName=tab[7];
+                        if (volumeName.equals("_"))
+                            volumeName=null;
+                        Partition partition=partitionsMap.get(deviceID);
+                        if (partition!=null)
+                            continue;
+                        Disk disk=new Disk(UUID.nameUUIDFromBytes(serialNumber.getBytes()), volumeSize,false, -1, null, deviceID, volumeName);
+                        disksMap.put(deviceID, disk);
+                        disks.add(disk);
+                        partition=new Partition(null, new File(driveLetter), deviceID, fileSystem, fileSystem, -1, new File(driveLetter).canWrite(), volumeName, volumeSize, disk);
+                        partitions.add(partition);
+                        partitionsMap.put(deviceID, partition);
+
+
+
+                    }
+
+                }
+            }
+        }
+        p.destroy();
+	}
+    private File scriptFile=null;
+    private File getScriptFile() throws IOException {
+
+        if (scriptFile.exists())
+            return scriptFile;
+        scriptFile = File.createTempFile("comdistriminddiskinfo", ".vbs");
+        scriptFile.deleteOnExit();
+        try (FileWriter fw = new java.io.FileWriter(scriptFile)) {
+            StringBuffer sb=new StringBuffer();
+            try(BufferedReader br=new BufferedReader(new InputStreamReader(WindowsHardDriveDetect.class.getResourceAsStream("diskinfo.vbs"))))
+            {
+                String line;
+                while ((line=br.readLine())!=null)
+                {
+                    sb.append(line);
+                    sb.append("\n");
+                }
+            }
+            fw.write(sb.toString());
+
+        }
+        return scriptFile;
+
+
+    }
+
+	@Override
+	public Partition getConcernedPartition(File _file) throws IOException {
+        synchronized (this) {
+            updateIfNecessary();
+            String path = _file.getCanonicalPath();
+            for (Partition p : partitions)
+                if (path.startsWith(p.getMountPointOrLetter().getAbsolutePath()))
+                    return p;
+            return null;
+        }
+	}
+
 
 }

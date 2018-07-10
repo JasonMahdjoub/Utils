@@ -83,7 +83,11 @@ public abstract class HardDriveDetect {
 	}
 
 	public static void main(String args[]) throws IOException {
-		System.out.println(getInstance().getConcernedPartition(new File(args[0])));
+	    for (Disk d : getInstance().getDetectedDisks())
+	        System.out.println(d);
+        for (Partition p : getInstance().getDetectedPartitions())
+            System.out.println(p);
+
 	}
 
 	HardDriveDetect() {

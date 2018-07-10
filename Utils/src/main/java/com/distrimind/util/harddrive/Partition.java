@@ -115,7 +115,7 @@ public class Partition {
     }
 
     public boolean isWritable() {
-        return isWritable;
+        return isWritable && getMountPointOrLetter().canWrite();
     }
 
     public String getVolumeName() {
@@ -130,7 +130,10 @@ public class Partition {
         return disk;
     }
 
-
+    public long getFreeSpace()
+    {
+        return getMountPointOrLetter().getFreeSpace();
+    }
     @Override
     public String toString() {
         return "Partition{" +

@@ -35,7 +35,12 @@ knowledge of the CeCILL-C license and that you accept its terms.
 
 package com.distrimind.util.harddrive;
 
+import javax.swing.filechooser.FileSystemView;
 import java.io.File;
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
 
 /**
  * 
@@ -46,13 +51,48 @@ import java.io.File;
  */
 class DefaultHardDriveDetect extends HardDriveDetect {
 
+	Set<Disk> disks;
+	Set<Partition> partitions;
 	DefaultHardDriveDetect() {
 
 	}
 
 	@Override
-	public String getHardDriveIdentifier(File _file) {
-		return HardDriveDetect.DEFAULT_HARD_DRIVE_IDENTIFIER;
+	public Partition getConcernedPartition(File _file) throws IOException {
+		synchronized (this) {
+			updateIfNecessary();
+			String path = _file.getCanonicalPath();
+			for (Partition p : partitions)
+				if (path.startsWith(p.getMountPointOrLetter().getAbsolutePath()))
+					return p;
+			return null;
+		}
 	}
+
+	@Override
+	void scanDisksAndPartitions() throws IOException {
+        disks=new HashSet<>();
+        partitions=new HashSet<>();
+		FileSystemView fileSystemView=FileSystemView.getFileSystemView();
+		for (File f : File.listRoots())
+		{
+			Partition p=new Partition(null, f, f.getAbsolutePath(), fileSystemView.getSystemTypeDescription(f),
+					fileSystemView.getSystemTypeDescription(f), -1, f.canWrite(), fileSystemView.getSystemTypeDescription(f), f.getTotalSpace(),
+					new Disk(null, f.getTotalSpace(), true, -1, fileSystemView.getSystemTypeDescription(f), f.getAbsolutePath(), fileSystemView.getSystemDisplayName(f)));
+			disks.add(p.getDisk());
+			partitions.add(p);
+		}
+	}
+
+	@Override
+	Set<Disk> getDetectedDisksImpl() {
+		return disks;
+	}
+
+	@Override
+	Set<Partition> getDetectedPartitionsImpl() {
+		return partitions;
+	}
+
 
 }
