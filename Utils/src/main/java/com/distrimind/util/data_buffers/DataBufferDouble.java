@@ -103,7 +103,7 @@ public final class DataBufferDouble extends DataBuffer implements Cloneable, Ser
 		if (_data == null) {
 			m_buffer = null;
 			m_size = 0;
-		} else if (_data.getClass() == (new double[1]).getClass()) {
+		} else if (_data.getClass() == double[].class) {
 			m_buffer = (double[]) _data;
 			m_size = m_buffer.length;
 		} else {

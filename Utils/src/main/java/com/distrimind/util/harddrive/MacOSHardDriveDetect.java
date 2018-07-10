@@ -124,10 +124,7 @@ class MacOSHardDriveDetect extends UnixHardDriveDetect {
 							partitionIdentifiers.add(disk.getTextContent());
 					}
 					break;
-				} else if (n.getNodeName().equals("key") && "AllDisks".equals(n.getTextContent())) {
-					takeNext = true;
-				} else
-					takeNext = false;
+				} else takeNext = n.getNodeName().equals("key") && "AllDisks".equals(n.getTextContent());
 			}
 			p.destroy();
 			for (String partitionIdentifier : partitionIdentifiers) {

@@ -107,19 +107,19 @@ public abstract class DataBuffer implements Cloneable, Serializable {
 	private static final int dataTypeSize[] = { 1, 8, 16, 16, 32, 64, 32, 64, 8, 16 };
 
 	/** The size type of this DataBuffer. */
-	protected int m_size = 0;
+	protected int m_size;
 
 	/** The data type of this DataBuffer. */
-	protected int m_data_type = TYPE_UNDEFINED;
+	protected int m_data_type;
 
-	static protected final int getDataType(final Object o) {
+	static protected int getDataType(final Object o) {
 		for (int i = FIRST_TYPE; i <= LAST_TYPE; i++)
 			if (o.getClass() == TYPE_CLASSES[i])
 				return i;
 		return TYPE_UNDEFINED;
 	}
 
-	public static final int getDataTypeSize(int type) {
+	public static int getDataTypeSize(int type) {
 		if (type < FIRST_TYPE || type > LAST_TYPE) {
 			throw new IllegalArgumentException("Unknown data type " + type);
 		}

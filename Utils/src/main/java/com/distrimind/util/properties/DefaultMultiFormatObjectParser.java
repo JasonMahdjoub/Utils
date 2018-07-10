@@ -42,7 +42,6 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URL;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
@@ -136,7 +135,7 @@ public class DefaultMultiFormatObjectParser extends AbstractMultiFormatObjectPar
 	 * {@inheritDoc}
 	 */
 	@Override
-	public String convertObjectToString(Class<?> field_type, Object object) throws Exception {
+	public String convertObjectToString(Class<?> field_type, Object object)  {
 		if (field_type == byte[].class) {
 			
 			return Base64.encodeBase64URLSafeString((byte[]) object);
@@ -329,21 +328,21 @@ public class DefaultMultiFormatObjectParser extends AbstractMultiFormatObjectPar
 				tab[i] = btab[i] != 0;
 			return tab;
 		} else if (field_type == Boolean.class) {
-			return Boolean.valueOf(Boolean.parseBoolean(nodeValue));
+			return Boolean.parseBoolean(nodeValue);
 		} else if (field_type == Byte.class) {
-			return Byte.valueOf(Byte.parseByte(nodeValue));
+			return Byte.parseByte(nodeValue);
 		} else if (field_type == Short.class) {
-			return Short.valueOf(Short.parseShort(nodeValue));
+			return Short.parseShort(nodeValue);
 		} else if (field_type == Integer.class) {
-			return Integer.valueOf(Integer.parseInt(nodeValue));
+			return Integer.parseInt(nodeValue);
 		} else if (field_type == Long.class) {
-			return Long.valueOf(Long.parseLong(nodeValue));
+			return Long.parseLong(nodeValue);
 		} else if (field_type == Float.class) {
-			return Float.valueOf(Float.parseFloat(nodeValue));
+			return Float.parseFloat(nodeValue);
 		} else if (field_type == Double.class) {
-			return Double.valueOf(Double.parseDouble(nodeValue));
+			return Double.parseDouble(nodeValue);
 		} else if (field_type == Character.class) {
-			return Character.valueOf(nodeValue.charAt(0));
+			return nodeValue.charAt(0);
 		} else if (field_type == String.class) {
 			return nodeValue;
 		} else if (field_type == Class.class) {
@@ -424,16 +423,13 @@ public class DefaultMultiFormatObjectParser extends AbstractMultiFormatObjectPar
 		return Void.TYPE;
 	}
 
-	public enum test {
-		test;
 
-	}
 
-	SimpleDateFormat getSimpleDateFormat() {
+	/*SimpleDateFormat getSimpleDateFormat() {
 		SimpleDateFormat format = new SimpleDateFormat("yyyy:MM:dd HH:mm:ss:SSSS z");
 		format.setTimeZone(TimeZone.getTimeZone("GMT"));
 		return format;
-	}
+	}*/
 
 	/**
 	 * {@inheritDoc}

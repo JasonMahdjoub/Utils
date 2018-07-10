@@ -101,7 +101,7 @@ public final class DataBufferUnsignedByte extends DataBuffer {
 		if (_data == null) {
 			m_buffer = null;
 			m_size = 0;
-		} else if (_data.getClass() == (new byte[1]).getClass()) {
+		} else if (_data.getClass() == byte[].class) {
 			m_buffer = (byte[]) _data;
 			m_size = m_buffer.length;
 		} else {

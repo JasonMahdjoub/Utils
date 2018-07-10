@@ -103,11 +103,11 @@ public class Version extends MultiFormatProperties implements Comparable<Version
 
 	private String m_short_program_name;
 
-	ArrayList<Person> m_creators = new ArrayList<Person>();
+	ArrayList<Person> m_creators = new ArrayList<>();
 
-	ArrayList<PersonDeveloper> m_developers = new ArrayList<PersonDeveloper>();
+	ArrayList<PersonDeveloper> m_developers = new ArrayList<>();
 
-	ArrayList<Description> m_descriptions = new ArrayList<Description>();
+	ArrayList<Description> m_descriptions = new ArrayList<>();
 
 	private JFrame m_frame = null;
 
@@ -199,15 +199,11 @@ public class Version extends MultiFormatProperties implements Comparable<Version
 	}
 
 	public String getHTMLCode() {
-		StringBuffer s = new StringBuffer();
+		StringBuilder s = new StringBuilder();
 		s.append("<html><table><tr><td><H1>");
-		s.append(m_program_name + "</H1>");
-		s.append(Integer.toString(m_major) + "." + Integer.toString(m_minor) + "." + Integer.toString(m_revision) + " "
-				+ m_type + ((m_type.equals(Type.Alpha) || m_type.equals(Type.Beta)) ? " " + m_alpha_beta_version : "")
-				+ " (Build: " + m_build_number + ")");
-		s.append(" (from " + DateFormat.getDateInstance(DateFormat.SHORT, Locale.FRANCE).format(m_date_start_project)
-				+ " to " + DateFormat.getDateInstance(DateFormat.SHORT, Locale.FRANCE).format(m_date_end_project)
-				+ ")");
+		s.append(m_program_name).append("</H1>");
+		s.append(Integer.toString(m_major)).append(".").append(Integer.toString(m_minor)).append(".").append(Integer.toString(m_revision)).append(" ").append(m_type).append((m_type.equals(Type.Alpha) || m_type.equals(Type.Beta)) ? " " + m_alpha_beta_version : "").append(" (Build: ").append(m_build_number).append(")");
+		s.append(" (from ").append(DateFormat.getDateInstance(DateFormat.SHORT, Locale.FRANCE).format(m_date_start_project)).append(" to ").append(DateFormat.getDateInstance(DateFormat.SHORT, Locale.FRANCE).format(m_date_end_project)).append(")");
 		s.append("</H1><BR>");
 		if (m_creators.size() > 0) {
 			s.append("<BR><BR>");
@@ -242,7 +238,7 @@ public class Version extends MultiFormatProperties implements Comparable<Version
 		return s.toString();
 	}
 	public String getMarkdownCode() {
-		StringBuffer s = new StringBuffer();
+		StringBuilder s = new StringBuilder();
 		
 		s.append(m_program_name);
 		s.append("\n");
@@ -250,12 +246,8 @@ public class Version extends MultiFormatProperties implements Comparable<Version
 		for (int i=0;i<nb;i++)
 			s.append("=");
 		s.append("\n");
-		s.append(Integer.toString(m_major) + "." + Integer.toString(m_minor) + "." + Integer.toString(m_revision) + " "
-				+ m_type + ((m_type.equals(Type.Alpha) || m_type.equals(Type.Beta)) ? " " + m_alpha_beta_version : "")
-				+ " (Build: " + m_build_number + ")");
-		s.append(" (from " + DateFormat.getDateInstance(DateFormat.SHORT, Locale.FRANCE).format(m_date_start_project)
-				+ " to " + DateFormat.getDateInstance(DateFormat.SHORT, Locale.FRANCE).format(m_date_end_project)
-				+ ")");
+		s.append(Integer.toString(m_major)).append(".").append(Integer.toString(m_minor)).append(".").append(Integer.toString(m_revision)).append(" ").append(m_type).append((m_type.equals(Type.Alpha) || m_type.equals(Type.Beta)) ? " " + m_alpha_beta_version : "").append(" (Build: ").append(m_build_number).append(")");
+		s.append(" (from ").append(DateFormat.getDateInstance(DateFormat.SHORT, Locale.FRANCE).format(m_date_start_project)).append(" to ").append(DateFormat.getDateInstance(DateFormat.SHORT, Locale.FRANCE).format(m_date_end_project)).append(")");
 		s.append("\n");
 		
 		
@@ -325,7 +317,7 @@ public class Version extends MultiFormatProperties implements Comparable<Version
 			f.add(ps, BorderLayout.SOUTH);
 			ps.add(b);
 
-			JLabel j = new JLabel(this.getHTMLCode().toString());
+			JLabel j = new JLabel(this.getHTMLCode());
 			j.setAlignmentY(Component.TOP_ALIGNMENT);
 			JScrollPane scrollpane = new JScrollPane(j);
 			scrollpane.getVerticalScrollBar().setUnitIncrement(15);
@@ -413,11 +405,10 @@ public class Version extends MultiFormatProperties implements Comparable<Version
 
 	@Override
 	public String toString() {
-		StringBuffer s = new StringBuffer();
-		s.append(m_program_name + " ");
+		StringBuilder s = new StringBuilder();
+		s.append(m_program_name).append(" ");
 		s.append(toStringShort());
-		s.append("\n from " + DateFormat.getDateInstance(DateFormat.SHORT, Locale.FRANCE).format(m_date_start_project)
-				+ " to " + DateFormat.getDateInstance(DateFormat.SHORT, Locale.FRANCE).format(m_date_end_project));
+		s.append("\n from ").append(DateFormat.getDateInstance(DateFormat.SHORT, Locale.FRANCE).format(m_date_start_project)).append(" to ").append(DateFormat.getDateInstance(DateFormat.SHORT, Locale.FRANCE).format(m_date_end_project));
 		if (m_creators.size() > 0) {
 			s.append("\n\n");
 			s.append("Creator(s) :");

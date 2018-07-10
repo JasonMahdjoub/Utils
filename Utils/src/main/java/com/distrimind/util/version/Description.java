@@ -58,7 +58,7 @@ public class Description extends MultiFormatProperties {
 	 */
 	private static final long serialVersionUID = -5480559682819518935L;
 
-	private ArrayList<String> m_items = new ArrayList<String>();
+	private ArrayList<String> m_items = new ArrayList<>();
 
 	private int m_major = 0;
 
@@ -96,7 +96,7 @@ public class Description extends MultiFormatProperties {
 	
 	public void addItem(String d) {
 		if (d == null)
-			throw new NullPointerException(d);
+			throw new NullPointerException();
 		m_items.add(d);
 	}
 
@@ -124,12 +124,10 @@ public class Description extends MultiFormatProperties {
 	}
 
 	public String getHTML() {
-		StringBuffer s = new StringBuffer();
-		s.append("<BR><H2>" + m_major + "." + m_minor + "." + m_revision + " " + m_type
-				+ ((m_type.equals(Type.Alpha) || m_type.equals(Type.Beta))
-						? " " + Integer.toString(m_alpha_beta_version)
-						: "")
-				+ " (" + DateFormat.getDateInstance(DateFormat.SHORT, Locale.FRANCE).format(m_date) + ")</H2>");
+		StringBuilder s = new StringBuilder();
+		s.append("<BR><H2>").append(m_major).append(".").append(m_minor).append(".").append(m_revision).append(" ").append(m_type).append((m_type.equals(Type.Alpha) || m_type.equals(Type.Beta))
+				? " " + Integer.toString(m_alpha_beta_version)
+				: "").append(" (").append(DateFormat.getDateInstance(DateFormat.SHORT, Locale.FRANCE).format(m_date)).append(")</H2>");
 		s.append("<ul>");
 		for (String d : m_items) {
 			s.append("<li>");
@@ -141,13 +139,11 @@ public class Description extends MultiFormatProperties {
 	}
 
 	public String getMarkdownCode() {
-		StringBuffer s = new StringBuffer();
+		StringBuilder s = new StringBuilder();
 		s.append("\n");
-		s.append("### "+m_major + "." + m_minor + "." + m_revision + " " + m_type
-				+ ((m_type.equals(Type.Alpha) || m_type.equals(Type.Beta))
-						? " " + Integer.toString(m_alpha_beta_version)
-						: "")
-				+ " (" + DateFormat.getDateInstance(DateFormat.SHORT, Locale.FRANCE).format(m_date) + ")");
+		s.append("### ").append(m_major).append(".").append(m_minor).append(".").append(m_revision).append(" ").append(m_type).append((m_type.equals(Type.Alpha) || m_type.equals(Type.Beta))
+				? " " + Integer.toString(m_alpha_beta_version)
+				: "").append(" (").append(DateFormat.getDateInstance(DateFormat.SHORT, Locale.FRANCE).format(m_date)).append(")");
 		s.append("\n");
 		for (String d : m_items) {
 			s.append("* ");

@@ -68,7 +68,7 @@ class LinuxHardDriveDetect extends UnixHardDriveDetect {
 	}
 
 	@Override
-	void scanDisksAndPartitions() throws IOException {
+	void scanDisksAndPartitions() {
 		disks=new HashSet<>();
 		partitions=new HashSet<>();
 		HashMap<String, Disk> disksString=new HashMap<>();
@@ -128,7 +128,7 @@ class LinuxHardDriveDetect extends UnixHardDriveDetect {
 		}
 	}
 
-	private long getDiskOrPartitionSize(String diskOrPartition) throws IOException {
+	private long getDiskOrPartitionSize(String diskOrPartition)  {
 		File file = new File("/sys/class/block/"+diskOrPartition+"/size");
 		
 		if (file.exists()) {
@@ -151,7 +151,7 @@ class LinuxHardDriveDetect extends UnixHardDriveDetect {
 		else
 			return -1;
 	}
-	private boolean isRemovable(String disk, String node) throws IOException {
+	private boolean isRemovable(String disk, String node)  {
 		File file = new File("/sys/class/block/"+disk+"/removable");
 		if (file.exists()) {
 			boolean removable;

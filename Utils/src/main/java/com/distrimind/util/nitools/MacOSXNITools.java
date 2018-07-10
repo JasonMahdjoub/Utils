@@ -62,9 +62,9 @@ class MacOSXNITools extends NITools {
 			long res = -1;
 			try (InputStreamReader isr = new InputStreamReader(p.getInputStream())) {
 				try (BufferedReader input = new BufferedReader(isr)) {
-					String line = null;
+					String line ;
 					Pattern pattern = Pattern.compile(".*([1-9][0-9]*)base.*");
-					while (res == -1 && (line = input.readLine()) != null) {
+					while ((line = input.readLine()) != null) {
 
 						if (line.contains("media:")) {
 							Matcher m = pattern.matcher(line);
@@ -73,7 +73,7 @@ class MacOSXNITools extends NITools {
 
 									String match = m.group(1);
 									return Long.parseLong(match) * 1000000;
-								} catch (Exception e) {
+								} catch (Exception ignored) {
 
 								}
 							}

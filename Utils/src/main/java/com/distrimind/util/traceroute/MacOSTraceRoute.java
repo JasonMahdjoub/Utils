@@ -65,7 +65,7 @@ class MacOSTraceRoute extends TraceRoute {
 	@Override
 	public List<InetAddress> tracePath(InetAddress _ia, int depth, int time_out) {
 		try {
-			ArrayList<InetAddress> res = new ArrayList<InetAddress>();
+			ArrayList<InetAddress> res = new ArrayList<>();
 			if (depth > 0)
 				++depth;
 			Process p = Runtime.getRuntime().exec("traceroute -n -I " + (depth < 0 ? "" : ("-m " + depth + " "))
@@ -73,7 +73,7 @@ class MacOSTraceRoute extends TraceRoute {
 
 			try (InputStreamReader isr = new InputStreamReader(p.getInputStream())) {
 				try (BufferedReader input = new BufferedReader(isr)) {
-					String line = null;
+					String line ;
 
 					Pattern pattern = Pattern.compile("^[1-9][0-9]*");
 					while ((line = input.readLine()) != null) {
@@ -87,6 +87,7 @@ class MacOSTraceRoute extends TraceRoute {
 							}
 						}
 
+						assert first_string != null;
 						if (split.length > 3 && pattern.matcher(first_string).matches()) {
 							String ip = null;
 							for (int j = i + 1; j < split.length; j++) {

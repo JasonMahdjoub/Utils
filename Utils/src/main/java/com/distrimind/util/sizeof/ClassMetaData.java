@@ -56,7 +56,7 @@ final class ClassMetaData {
 		private Class<?> m_cls;
 
 		@Override
-		public Object run() throws Exception {
+		public Object run()  {
 			return m_cls.getDeclaredFields();
 		}
 
@@ -69,7 +69,7 @@ final class ClassMetaData {
 		private Field m_field;
 
 		@Override
-		public Object run() throws Exception {
+		public Object run()  {
 			m_field.setAccessible(true);
 
 			return null;
@@ -102,12 +102,12 @@ final class ClassMetaData {
 
 	private Class<?> m_class;
 
-	private ArrayList<PersonalField> m_fields = new ArrayList<PersonalField>();
+	private ArrayList<PersonalField> m_fields = new ArrayList<>();
 
-	private ArrayList<Field> m_fields_collection = new ArrayList<Field>();
+	private ArrayList<Field> m_fields_collection = new ArrayList<>();
 
 	// private ArrayList<Field> m_arrays=new ArrayList<Field>();
-	private int m_size = 0;
+	private int m_size ;
 
 	@SuppressWarnings("unchecked")
 	public ClassMetaData(Class<?> _c) {
@@ -136,10 +136,7 @@ final class ClassMetaData {
 						if (f.getType() == (new ArrayList<Field>()).getClass()) {
 							try {
 								fields_to_avoid = (ArrayList<Field>) f.get(null);
-							} catch (IllegalArgumentException e) {
-								throw new RuntimeException(
-										"could not make get static field m_not_computed_size_fields: " + e);
-							} catch (IllegalAccessException e) {
+							} catch (IllegalArgumentException | IllegalAccessException e) {
 								throw new RuntimeException(
 										"could not make get static field m_not_computed_size_fields: " + e);
 							}
@@ -168,7 +165,7 @@ final class ClassMetaData {
 					}
 					m_size += ObjectSizer.OBJREF_SIZE;
 
-					if ((fields_to_avoid == null || (fields_to_avoid != null && !fields_to_avoid.contains(f)))) {
+					if (fields_to_avoid == null || !fields_to_avoid.contains(f)) {
 						DontComputeSize a = f.getAnnotation(DontComputeSize.class);
 						if (a == null) {
 							DontComputeSizeForInnerCollectionElements d = f
@@ -207,7 +204,10 @@ final class ClassMetaData {
 
 	@Override
 	public boolean equals(Object _o) {
-		return this.equals((ClassMetaData) _o);
+		if (_o instanceof ClassMetaData)
+			return this.equals((ClassMetaData) _o);
+		else
+			return false;
 	}
 
 	public int getSizeBytes(Object _instance) {
@@ -217,7 +217,7 @@ final class ClassMetaData {
 			throw new IllegalArgumentException("the object instance does not correspond to this class meta data");
 		if (m_class.isPrimitive())
 			return m_size;
-		LinkedList<Object> visited = new LinkedList<Object>();
+		LinkedList<Object> visited = new LinkedList<>();
 
 		return getSizeBytes(_instance, visited, -1);
 	}
@@ -256,10 +256,7 @@ final class ClassMetaData {
 					Object obj;
 					try {
 						obj = f.m_field.get(_instance);
-					} catch (IllegalArgumentException e) {
-						throw new RuntimeException("could not access declared fields of class " + m_class.getName()
-								+ " with instance " + _instance + ": " + e);
-					} catch (IllegalAccessException e) {
+					} catch (IllegalArgumentException | IllegalAccessException e) {
 						throw new RuntimeException("could not access declared fields of class " + m_class.getName()
 								+ " with instance " + _instance + ": " + e);
 					}
@@ -279,17 +276,12 @@ final class ClassMetaData {
 					Collection<?> obj;
 					try {
 						obj = (Collection<?>) f.get(_instance);
-					} catch (IllegalArgumentException e) {
-						throw new RuntimeException("could not access declared fields of class " + m_class.getName()
-								+ " with instance " + _instance + ": " + e);
-					} catch (IllegalAccessException e) {
+					} catch (IllegalArgumentException | IllegalAccessException e) {
 						throw new RuntimeException("could not access declared fields of class " + m_class.getName()
 								+ " with instance " + _instance + ": " + e);
 					}
 					if (obj != null) {
-						for (Object o : obj) {
-							visited.add(o);
-						}
+                        visited.addAll(obj);
 						ClassMetaData c = ObjectSizer.getClassMetaData(obj.getClass());
 						if (depth != -1)
 							size += c.getSizeBytes(obj, visited, depth - 1);

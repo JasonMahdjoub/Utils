@@ -57,7 +57,7 @@ class WindowsTraceRoute extends TraceRoute {
 	@Override
 	public List<InetAddress> tracePath(InetAddress _ia, int depth, int time_out_ms) {
 		try {
-			ArrayList<InetAddress> res = new ArrayList<InetAddress>();
+			ArrayList<InetAddress> res = new ArrayList<>();
 			if (depth > 0)
 				++depth;
 			Process p = Runtime.getRuntime().exec("tracert -d " + (depth < 0 ? "" : ("-h " + depth + " "))
@@ -65,20 +65,21 @@ class WindowsTraceRoute extends TraceRoute {
 
 			try (InputStreamReader isr = new InputStreamReader(p.getInputStream())) {
 				try (BufferedReader input = new BufferedReader(isr)) {
-					String line = null;
+					String line ;
 
 					Pattern pattern = Pattern.compile("^[1-9][0-9]*");
 
 					while ((line = input.readLine()) != null) {
 						String split[] = line.split(" ");
 						String first_string = null;
-						for (int i = 0; i < split.length; i++) {
-							if (split[i].length() > 0) {
-								first_string = split[i];
+						for (String aSplit : split) {
+							if (aSplit.length() > 0) {
+								first_string = aSplit;
 								break;
 							}
 						}
 
+						assert first_string != null;
 						if (split.length > 3 && pattern.matcher(first_string).matches()) {
 							try {
 								res.add(InetAddress.getByName(split[split.length - 1]));

@@ -57,21 +57,6 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.distrimind.util.Bits;
-import com.distrimind.util.crypto.P2PASymmetricEncryptionAlgorithm;
-import com.distrimind.util.crypto.ASymmetricEncryptionType;
-import com.distrimind.util.crypto.ASymmetricKeyPair;
-import com.distrimind.util.crypto.ASymmetricPrivateKey;
-import com.distrimind.util.crypto.ASymmetricPublicKey;
-import com.distrimind.util.crypto.ClientASymmetricEncryptionAlgorithm;
-import com.distrimind.util.crypto.P2PASymmetricSecretMessageExchanger;
-import com.distrimind.util.crypto.PasswordHash;
-import com.distrimind.util.crypto.PasswordHashType;
-import com.distrimind.util.crypto.ServerASymmetricEncryptionAlgorithm;
-import com.distrimind.util.crypto.MessageDigestType;
-import com.distrimind.util.crypto.ASymmetricAuthentifiedSignatureType;
-import com.distrimind.util.crypto.SymmetricEncryptionAlgorithm;
-import com.distrimind.util.crypto.SymmetricEncryptionType;
-import com.distrimind.util.crypto.SymmetricSecretKey;
 
 /**
  * 
@@ -144,8 +129,7 @@ public class CryptoTests {
 			}
 		}
 		Object res2[][]=new Object[index][];
-		for (int i=0;i<index;i++)
-			res2[i]=res[i];
+		System.arraycopy(res, 0, res2, 0, index);
 		return res2;
 	}
 
@@ -162,7 +146,7 @@ public class CryptoTests {
 				Object o[] = new Object[3];
 				o[0]=st;
 				o[1] = st.getKeyPairGenerator(rand, (short) 384).generateKeyPair();
-				o[2] = new Integer(384);
+				o[2] = 384;
 				res[index++] = o;
 			}
 			else if (st.getSignatureAlgorithmName().equals(ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA256withECDSA_P_256.getSignatureAlgorithmName()))
@@ -170,7 +154,7 @@ public class CryptoTests {
 				Object o[] = new Object[3];
 				o[0]=st;
 				o[1] = st.getKeyPairGenerator(rand, (short) 256).generateKeyPair();
-				o[2] = new Integer(256);
+				o[2] = 256;
 				res[index++] = o;
 			}
 			else if (st.getSignatureAlgorithmName().equals(ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA512withECDSA_P_521.getSignatureAlgorithmName()))
@@ -178,7 +162,7 @@ public class CryptoTests {
 				Object o[] = new Object[3];
 				o[0]=st;
 				o[1] = st.getKeyPairGenerator(rand, (short) 512).generateKeyPair();
-				o[2] = new Integer(512);
+				o[2] = 512;
 				res[index++] = o;
 			}
 			else
@@ -187,14 +171,13 @@ public class CryptoTests {
 					Object o[] = new Object[3];
 					o[0]=st;					
 					o[1] = st.getKeyPairGenerator(rand, (short) keySize).generateKeyPair();
-					o[2] = new Integer(keySize);
+					o[2] = keySize;
 					res[index++] = o;
 				}
 			}
 		}
 		Object[][] res2=new Object[index][];
-		for (int i=0;i<index;i++)
-			res2[i]=res[i];
+		System.arraycopy(res, 0, res2, 0, index);
 		return res2;
 	}
 
@@ -231,8 +214,8 @@ public class CryptoTests {
 		}
 		return res;
 	}
-	@DataProvider(name = "provideDataForTestSymetricEncryptionsCompatibility", parallel = true)
-	public Object[][] provideDataForTestSymetricEncryptionsCompatibility() {
+	@DataProvider(name = "provideDataForTestSymmetricEncryptionCompatibility", parallel = true)
+	public Object[][] provideDataForTestSymmetricEncryptionCompatibility() {
 		Object[][] res = new Object[][] {
 			{SymmetricEncryptionType.AES_CBC_PKCS5Padding, SymmetricEncryptionType.BC_FIPS_AES_CBC_PKCS7Padding},
 			{SymmetricEncryptionType.AES_GCM, SymmetricEncryptionType.BC_FIPS_AES_GCM},
@@ -243,13 +226,12 @@ public class CryptoTests {
 		};
 		Object[][] res2 = new Object[res.length*2][2];
 		int j=0;
-		for (int i=0;i<res.length;i++)
-		{
-			res2[j][0]=res[i][0];
-			res2[j++][1]=res[i][1];
-			res2[j][0]=res[i][1];
-			res2[j++][1]=res[i][0];
-		}
+        for (Object[] re : res) {
+            res2[j][0] = re[0];
+            res2[j++][1] = re[1];
+            res2[j][0] = re[1];
+            res2[j++][1] = re[0];
+        }
 		return res2;
 	}
 	
@@ -430,14 +412,14 @@ public class CryptoTests {
 
 		Object[][] res = new Object[8][];
 
-		res[0] = new Object[] { Boolean.valueOf(true), salt, Boolean.valueOf(true) };
-		res[1] = new Object[] { Boolean.valueOf(true), salt, Boolean.valueOf(false) };
-		res[2] = new Object[] { Boolean.valueOf(false), salt, Boolean.valueOf(false) };
-		res[3] = new Object[] { Boolean.valueOf(false), salt, Boolean.valueOf(true) };
-		res[4] = new Object[] { Boolean.valueOf(true), null, Boolean.valueOf(true) };
-		res[5] = new Object[] { Boolean.valueOf(true), null,Boolean.valueOf(false) };
-		res[6] = new Object[] { Boolean.valueOf(false), null, Boolean.valueOf(false) };
-		res[7] = new Object[] { Boolean.valueOf(false), null, Boolean.valueOf(true) };
+		res[0] = new Object[] {Boolean.TRUE, salt, Boolean.TRUE};
+		res[1] = new Object[] {Boolean.TRUE, salt, Boolean.FALSE};
+		res[2] = new Object[] {Boolean.FALSE, salt, Boolean.FALSE};
+		res[3] = new Object[] {Boolean.FALSE, salt, Boolean.TRUE};
+		res[4] = new Object[] {Boolean.TRUE, null, Boolean.TRUE};
+		res[5] = new Object[] {Boolean.TRUE, null, Boolean.FALSE};
+		res[6] = new Object[] {Boolean.FALSE, null, Boolean.FALSE};
+		res[7] = new Object[] {Boolean.FALSE, null, Boolean.TRUE};
 
 		return res;
 	}
@@ -445,8 +427,7 @@ public class CryptoTests {
 	@Test(dataProvider = "provideDataForP2PJPAKEPasswordExchanger", dependsOnMethods = { "testMessageDigest",
 			"testPasswordHash" })
 	public void testP2PJPAKEPasswordExchanger(boolean expectedVerify, byte[] salt, boolean messageIsKey)
-			throws NoSuchAlgorithmException, IOException, InvalidKeySpecException, NoSuchProviderException,
-			ClassNotFoundException {
+			throws NoSuchAlgorithmException, IOException, InvalidKeySpecException, NoSuchProviderException{
 		char[] password = "password".toCharArray();
 		char[] falsePassword = "falsePassword".toCharArray();
 		AbstractSecureRandom random=SecureRandomType.DEFAULT.getSingleton(null);
@@ -536,9 +517,9 @@ public class CryptoTests {
 					for (boolean messageIsKey : new boolean[] { true, false }) {
 						for (P2PLoginAgreementType t : P2PLoginAgreementType.values())
 						{
-							res.add(new Object[] { t, Boolean.valueOf(expectedVerify), Boolean.valueOf(messageIsKey), s, m , secretKey});
+							res.add(new Object[] { t, expectedVerify, messageIsKey, s, m , secretKey});
 							if (t==P2PLoginAgreementType.JPAKE_AND_AGREEMENT_WITH_SIGNATURE)
-								res.add(new Object[] { t, Boolean.valueOf(expectedVerify), Boolean.valueOf(messageIsKey), s, m , null});
+								res.add(new Object[] { t, expectedVerify, messageIsKey, s, m , null});
 						}
 					}
 				}
@@ -552,8 +533,7 @@ public class CryptoTests {
 
 	@Test(dataProvider = "provideDataForP2PLoginAgreement", dependsOnMethods = { "testMessageDigest" })
 	public void testP2PLoginAgreement(P2PLoginAgreementType type, boolean expectedVerify, boolean messageIsKey, byte[] salt, byte[] m, SymmetricSecretKey secretKey)
-			throws NoSuchAlgorithmException, IOException, InvalidKeySpecException, NoSuchProviderException,
-			ClassNotFoundException {
+			throws NoSuchAlgorithmException, IOException, InvalidKeySpecException, NoSuchProviderException{
 		AbstractSecureRandom r = SecureRandomType.DEFAULT.getSingleton(null);
 		byte[] falseMessage = new byte[10];
 		r.nextBytes(falseMessage);
@@ -622,8 +602,8 @@ public class CryptoTests {
 	@Test(dataProvider = "provideDataForASymetricEncryptions", dependsOnMethods = { "testASymmetricKeyPairEncoding" })
 	public void testClientServerASymetricEncryptions(ASymmetricEncryptionType type)
 			throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,
-			InvalidAlgorithmParameterException, IOException, SignatureException, IllegalBlockSizeException,
-			BadPaddingException, NoSuchProviderException, InvalidKeySpecException, ShortBufferException, IllegalStateException, InvalidParameterSpecException {
+			InvalidAlgorithmParameterException, IOException, IllegalBlockSizeException,
+			BadPaddingException, NoSuchProviderException, InvalidKeySpecException, ShortBufferException, IllegalStateException {
 		System.out.println("Testing " + type);
 		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getSingleton(null);
 		ASymmetricKeyPair kp = type.getKeyPairGenerator(rand, (short) 2048).generateKeyPair();
@@ -667,7 +647,7 @@ public class CryptoTests {
 		Assert.assertEquals(t2, decoded[1]);
 	}
 
-	@Test(dataProvider = "provideDataForHybridEncryptions", dependsOnMethods = { "testSymetricEncryptions","testP2PASymetricEncryptions" })
+	@Test(dataProvider = "provideDataForHybridEncryptions", dependsOnMethods = {"testSymmetricEncryptions","testP2PASymetricEncryptions" })
 	public void testHybridEncryptions(ASymmetricEncryptionType astype, SymmetricEncryptionType stype)
 			throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,
 			InvalidAlgorithmParameterException, IOException, IllegalBlockSizeException, BadPaddingException,
@@ -678,7 +658,7 @@ public class CryptoTests {
 
 		SymmetricSecretKey localKey = stype.getKeyGenerator(rand).generateKey();
 		SymmetricEncryptionAlgorithm algoLocalS = new SymmetricEncryptionAlgorithm(rand, localKey);
-		ASymmetricKeyWrapperType kw=null;
+		ASymmetricKeyWrapperType kw;
 		if (astype.getCodeProviderForEncryption()==CodeProvider.GNU_CRYPTO)
 			kw=ASymmetricKeyWrapperType.GNU_RSA_OAEP_SHA2_384;
 		else
@@ -723,8 +703,8 @@ public class CryptoTests {
 	@Test(dataProvider = "provideDataForASymetricEncryptions", dependsOnMethods = { "testASymmetricKeyPairEncoding" })
 	public void testP2PASymetricEncryptions(ASymmetricEncryptionType type)
 			throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,
-			InvalidAlgorithmParameterException, IOException, SignatureException, IllegalBlockSizeException,
-			BadPaddingException, NoSuchProviderException, InvalidKeySpecException, ShortBufferException, IllegalStateException, InvalidParameterSpecException {
+			InvalidAlgorithmParameterException, IOException, IllegalBlockSizeException,
+			BadPaddingException, NoSuchProviderException, InvalidKeySpecException, ShortBufferException, IllegalStateException {
 		System.out.println("Testing " + type);
 		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getSingleton(null);
 		ASymmetricKeyPair kpd = type.getKeyPairGenerator(rand, (short)2048).generateKeyPair();
@@ -838,8 +818,7 @@ public class CryptoTests {
 			}
 		}
 		Object res2[][]=new Object[index][];
-		for (int i=0;i<index;i++)
-			res2[i]=res[i];
+        System.arraycopy(res, 0, res2, 0, index);
 		return res2;
 	}
 	
@@ -862,8 +841,7 @@ public class CryptoTests {
 			}
 		}
 		Object res2[][]=new Object[index][];
-		for (int i=0;i<index;i++)
-			res2[i]=res[i];
+        System.arraycopy(res, 0, res2, 0, index);
 		return res2;
 	}
 	
@@ -882,7 +860,7 @@ public class CryptoTests {
 
 	@Test(dataProvider = "provideSecureRandomType")
 	public void testSecureRandom(SecureRandomType type) throws NoSuchAlgorithmException, NoSuchProviderException {
-		AbstractSecureRandom random = type.getInstance(null, "parameter".getBytes());
+		AbstractSecureRandom random;
 		System.out.println("Test "+type);
 		random = type.getSingleton("nonce".getBytes(), "parameter".getBytes());
 		System.out.println(type+" instantiated");
@@ -890,7 +868,7 @@ public class CryptoTests {
 		if (type!=SecureRandomType.NativePRNG && type!=SecureRandomType.GNU_DEFAULT && type!=SecureRandomType.SHA1PRNG && type.getProvider()!=CodeProvider.BCFIPS)
 		{
 			
-			int nb= type.getProvider()!=CodeProvider.BCFIPS?110000:260000/8;
+			int nb= 110000;
 			random.nextBytes(new byte[nb]);
 			random.nextBytes(new byte[nb]);
 			random.nextBytes(new byte[nb]);
@@ -940,7 +918,7 @@ public class CryptoTests {
 	}
 	
 	@Test(dataProvider="provideDataSymmetricKeyWrapperForEncryption")
-	public void testSymmetricKeyWrapperForEncryption(SymmetricKeyWrapperType typeWrapper, SymmetricEncryptionType asetype, SymmetricEncryptionType setype) throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, IllegalStateException, IllegalBlockSizeException, NoSuchProviderException, InvalidAlgorithmParameterException, IOException
+	public void testSymmetricKeyWrapperForEncryption(SymmetricKeyWrapperType typeWrapper, SymmetricEncryptionType asetype, SymmetricEncryptionType setype) throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, IllegalStateException, IllegalBlockSizeException, NoSuchProviderException
 	{
 		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getSingleton(null);
 		SymmetricSecretKey kp=asetype.getKeyGenerator(rand, asetype.getDefaultKeySizeBits()).generateKey();
@@ -954,7 +932,7 @@ public class CryptoTests {
 		Assert.assertEquals(sk.toBouncyCastleKey().getKeyBytes(), sk2.toBouncyCastleKey().getKeyBytes());
 	}
 	@Test(dataProvider="provideDataSymmetricKeyWrapperForSignature")
-	public void testSymmetricKeyWrapperForSignature(SymmetricKeyWrapperType typeWrapper, SymmetricEncryptionType asetype, SymmetricAuthentifiedSignatureType setype) throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, IllegalStateException, IllegalBlockSizeException, NoSuchProviderException, InvalidAlgorithmParameterException, IOException
+	public void testSymmetricKeyWrapperForSignature(SymmetricKeyWrapperType typeWrapper, SymmetricEncryptionType asetype, SymmetricAuthentifiedSignatureType setype) throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, IllegalStateException, IllegalBlockSizeException, NoSuchProviderException
 	{
 		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getSingleton(null);
 		SymmetricSecretKey kp=asetype.getKeyGenerator(rand, (short)128).generateKey();
@@ -967,7 +945,7 @@ public class CryptoTests {
 		Assert.assertEquals(sk.toJavaNativeKey().getEncoded(), sk2.toJavaNativeKey().getEncoded());
 		Assert.assertEquals(sk.toBouncyCastleKey().getKeyBytes(), sk2.toBouncyCastleKey().getKeyBytes());
 	}
-	@DataProvider(name="provideDataSymmetricKeyWrapperForEncryption", parallel=false)
+	@DataProvider(name="provideDataSymmetricKeyWrapperForEncryption")
 	public Object[][] provideDataSymmetricKeyWrapperForEncryption()
 	{
 		Object [][] res=new Object[SymmetricKeyWrapperType.values().length*SymmetricEncryptionType.values().length*SymmetricEncryptionType.values().length][];
@@ -991,8 +969,7 @@ public class CryptoTests {
 			}
 		}
 		Object res2[][]=new Object[index][];
-		for (int i=0;i<index;i++)
-			res2[i]=res[i];
+        System.arraycopy(res, 0, res2, 0, index);
 		return res2;
 	}
 	@DataProvider(name="provideDataSymmetricKeyWrapperForSignature", parallel=true)
@@ -1019,8 +996,7 @@ public class CryptoTests {
 			}
 		}
 		Object res2[][]=new Object[index][];
-		for (int i=0;i<index;i++)
-			res2[i]=res[i];
+        System.arraycopy(res, 0, res2, 0, index);
 		return res2;
 	}
 
@@ -1078,8 +1054,7 @@ public class CryptoTests {
 			}
 		}
 		Object res2[][]=new Object[index][];
-		for (int i=0;i<index;i++)
-			res2[i]=res[i];
+        System.arraycopy(res, 0, res2, 0, index);
 		return res2;
 
 	}
@@ -1106,8 +1081,7 @@ public class CryptoTests {
 			}
 		}
 		Object res2[][]=new Object[index][];
-		for (int i=0;i<index;i++)
-			res2[i]=res[i];
+        System.arraycopy(res, 0, res2, 0, index);
 		return res2;
 	}
 	
@@ -1133,7 +1107,7 @@ public class CryptoTests {
 		
 	}
 
-	@Test(dataProvider = "provideDataForSymmetricSignatureTest", dependsOnMethods = { "testSymetricEncryptions" })
+	@Test(dataProvider = "provideDataForSymmetricSignatureTest", dependsOnMethods = {"testSymmetricEncryptions"})
 	public void testSymmetricSignatures(SymmetricAuthentifiedSignatureType type, SymmetricSecretKey secretKey)
 			throws NoSuchAlgorithmException, InvalidKeyException, SignatureException, InvalidKeySpecException,
 			NoSuchProviderException, ShortBufferException, IllegalStateException, InvalidAlgorithmParameterException, InvalidParameterSpecException, IOException {
@@ -1144,23 +1118,24 @@ public class CryptoTests {
 		Assert.assertEquals(signature.length*8, secretKey.getAuthentifiedSignatureAlgorithmType().getSignatureSizeInBits());
 	}
 
-	@Test(invocationCount = 1, dataProvider = "provideDataForSymetricEncryptions", dependsOnMethods = "testSecretKeyEncoding")
-	public void testSymetricEncryptions(SymmetricEncryptionType type) throws NoSuchAlgorithmException,
+	@Test(dataProvider = "provideDataForSymetricEncryptions", dependsOnMethods = "testSecretKeyEncoding")
+	public void testSymmetricEncryptions(SymmetricEncryptionType type) throws NoSuchAlgorithmException,
 			NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IOException,
 			IllegalBlockSizeException, BadPaddingException, NoSuchProviderException, InvalidKeySpecException, IllegalStateException, ShortBufferException {
-		testSymetricEncryptionsCompatibility(type, type);
+		testSymmetricEncryptionsCompatibility(type, type);
 
 	}
 
-	@Test(invocationCount = 1, dataProvider = "provideDataForTestSymetricEncryptionsCompatibility", dependsOnMethods = "testSymetricEncryptions")
-	public void testSymetricEncryptionsCompatibility(SymmetricEncryptionType type1, SymmetricEncryptionType type2) throws NoSuchAlgorithmException,
+
+	@Test(invocationCount = 1, dataProvider = "provideDataForTestSymmetricEncryptionCompatibility", dependsOnMethods = "testSymmetricEncryptions")
+	public void testSymmetricEncryptionsCompatibility(SymmetricEncryptionType type1, SymmetricEncryptionType type2) throws NoSuchAlgorithmException,
 			NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IOException,
 			IllegalBlockSizeException, BadPaddingException, NoSuchProviderException, InvalidKeySpecException, IllegalStateException, ShortBufferException {
 		System.out.println("Testing " + type1+", "+type2);
 		AbstractSecureRandom random = SecureRandomType.DEFAULT.getSingleton(null);
 
 		SymmetricSecretKey key1 = type1.getKeyGenerator(random).generateKey();
-		SymmetricSecretKey key2=null;
+		SymmetricSecretKey key2;
 
 		if (type2.getCodeProviderForEncryption()!=CodeProvider.GNU_CRYPTO && type2.getCodeProviderForEncryption()!=CodeProvider.BC && type2.getCodeProviderForEncryption()==CodeProvider.BCFIPS)
 			key2=new SymmetricSecretKey(type2, key1.toJavaNativeKey(), key1.getKeySizeBits());
@@ -1173,7 +1148,7 @@ public class CryptoTests {
 		{
 			algoDistant = new SymmetricEncryptionAlgorithm(random, key1, counterSizeBytes, true);
 			Assert.assertEquals(algoDistant.getBlockModeCounterBytes(), counterSizeBytes);
-			Assert.assertEquals(algoDistant.useExternalCounter(), false);
+            Assert.assertFalse(algoDistant.useExternalCounter());
 			Assert.assertEquals(algoDistant.getIVSizeBytesWithExternalCounter(), type1.getIVSizeBytes()-counterSizeBytes);
 			Assert.assertEquals(algoDistant.getIVSizeBytesWithoutExternalCounter(), type1.getIVSizeBytes()-counterSizeBytes);
 		}
@@ -1381,7 +1356,7 @@ public class CryptoTests {
 		
 		Assert.assertEquals(keyClient,keyServer);
 		Assert.assertEquals(keyClient.getKeySizeBits(), 256);
-		testSignatureAfterKeyExchange(random, keyClient, keyServer);
+		testSignatureAfterKeyExchange(keyClient, keyServer);
 	}
 	@Test(invocationCount = 5, dataProvider = "provideDataForKeyAgreementsEncryption", dependsOnMethods = "testMessageDigest")
 	public void testKeyAgreementsForEncryption(KeyAgreementType keyAgreementType, SymmetricEncryptionType type)
@@ -1422,7 +1397,7 @@ public class CryptoTests {
 		Assert.assertEquals(keyClient.getKeySizeBits(), 256);
 		testEncryptionAfterKeyExchange(random, type, keyClient);
 	}
-	private void testSignatureAfterKeyExchange(AbstractSecureRandom random, SymmetricSecretKey keySigner, SymmetricSecretKey keyChecker) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidKeyException, SignatureException, InvalidKeySpecException, ShortBufferException, IllegalStateException, InvalidAlgorithmParameterException, IOException, InvalidParameterSpecException
+	private void testSignatureAfterKeyExchange(SymmetricSecretKey keySigner, SymmetricSecretKey keyChecker) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidKeyException, SignatureException, InvalidKeySpecException, ShortBufferException, IllegalStateException, InvalidAlgorithmParameterException, IOException, InvalidParameterSpecException
 	{
 		SymmetricAuthentifiedSignatureCheckerAlgorithm checker=new SymmetricAuthentifiedSignatureCheckerAlgorithm(keyChecker);
 		SymmetricAuthentifiedSignerAlgorithm signer=new SymmetricAuthentifiedSignerAlgorithm(keySigner);

@@ -105,7 +105,7 @@ public final class DataBufferShort extends DataBuffer implements Cloneable, Seri
 		if (_data == null) {
 			m_buffer = null;
 			m_size = 0;
-		} else if (_data.getClass() == (new short[1]).getClass()) {
+		} else if (_data.getClass() == short[].class) {
 			m_buffer = (short[]) _data;
 			m_size = m_buffer.length;
 		} else {

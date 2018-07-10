@@ -104,7 +104,7 @@ public final class DataBufferInt extends DataBuffer implements Cloneable, Serial
 		if (_data == null) {
 			m_buffer = null;
 			m_size = 0;
-		} else if (_data.getClass() == (new int[1]).getClass()) {
+		} else if (_data.getClass() == int[].class) {
 			m_buffer = (int[]) _data;
 			m_size = m_buffer.length;
 		} else {

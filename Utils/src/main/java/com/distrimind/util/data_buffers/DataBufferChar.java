@@ -105,7 +105,7 @@ public final class DataBufferChar extends DataBuffer implements Cloneable, Seria
 		if (_data == null) {
 			m_buffer = null;
 			m_size = 0;
-		} else if (_data.getClass() == (new char[1]).getClass()) {
+		} else if (_data.getClass() == char[].class) {
 			m_buffer = (char[]) _data;
 			m_size = m_buffer.length;
 		} else {

@@ -62,14 +62,14 @@ class LinuxTraceRoute extends TraceRoute {
 	@Override
 	public List<InetAddress> tracePath(InetAddress _ia, int depth, int time_out_ms) {
 		try {
-			ArrayList<InetAddress> res = new ArrayList<InetAddress>();
+			ArrayList<InetAddress> res = new ArrayList<>();
 
 			Process p = Runtime.getRuntime().exec("mtr --raw -c 1 "
 					+ (time_out_ms < 0 ? "" : ("--timeout " + time_out_ms / 1000 + " ")) + _ia.getHostAddress());
 
 			try (InputStreamReader isr = new InputStreamReader(p.getInputStream())) {
 				try (BufferedReader input = new BufferedReader(isr)) {
-					String line = null;
+					String line ;
 
 					while ((line = input.readLine()) != null) {
 						if (depth < 0 || res.size() < depth) {

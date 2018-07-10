@@ -104,7 +104,7 @@ public final class DataBufferLong extends DataBuffer implements Cloneable, Seria
 		if (_data == null) {
 			m_buffer = null;
 			m_size = 0;
-		} else if (_data.getClass() == (new long[1]).getClass()) {
+		} else if (_data.getClass() == long[].class) {
 			m_buffer = (long[]) _data;
 			m_size = m_buffer.length;
 		} else {

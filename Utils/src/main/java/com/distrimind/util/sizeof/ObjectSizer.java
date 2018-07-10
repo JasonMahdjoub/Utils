@@ -45,11 +45,11 @@ import java.util.HashMap;
  */
 public class ObjectSizer {
 
-	public static class O extends Object {
+	public static class O {
 
 	}
 
-	protected static final HashMap<Class<?>, ClassMetaData> m_class_meta_data_cache = new HashMap<Class<?>, ClassMetaData>();
+	protected static final HashMap<Class<?>, ClassMetaData> m_class_meta_data_cache = new HashMap<>();
 
 	public static final int OBJECT_SHELL_SIZE_32 = 8; // java.lang.Object shell
 	// size in bytes
@@ -201,8 +201,9 @@ public class ObjectSizer {
 	 * 
 	 * @return return the size of reference
 	 */
+	@SuppressWarnings("MismatchedReadAndWriteOfArray")
 	protected static long getReferenceSize() {
-		long result = 0;
+		long result ;
 
 		// this array will simply hold a bunch of references, such that
 		// the objects cannot be garbage-collected

@@ -60,7 +60,7 @@ class LinuxNITools extends NITools {
 			long res = -1;
 			try (InputStreamReader isr = new InputStreamReader(p.getInputStream())) {
 				try (BufferedReader input = new BufferedReader(isr)) {
-					String line = null;
+					String line ;
 					while (res == -1 && (line = input.readLine()) != null) {
 						String split[] = line.split(" ");
 						for (int i = 0; i < split.length - 1; i++) {

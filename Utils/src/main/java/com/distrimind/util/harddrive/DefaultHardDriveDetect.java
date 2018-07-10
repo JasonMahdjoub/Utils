@@ -69,7 +69,7 @@ class DefaultHardDriveDetect extends HardDriveDetect {
 	}
 
 	@Override
-	void scanDisksAndPartitions() throws IOException {
+	void scanDisksAndPartitions()  {
         disks=new HashSet<>();
         partitions=new HashSet<>();
 		FileSystemView fileSystemView=FileSystemView.getFileSystemView();

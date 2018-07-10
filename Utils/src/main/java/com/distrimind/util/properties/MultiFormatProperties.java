@@ -61,7 +61,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -162,11 +161,9 @@ public abstract class MultiFormatProperties implements Cloneable, Serializable {
 	 *             if a problem of XML parse occurs
 	 */
 	public static Document getDOM(InputStream stream) throws SAXException, IOException, ParserConfigurationException {
-		try {
-			return DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(stream);
-		} catch (SAXException | IOException | ParserConfigurationException e) {
-			throw e;
-		}
+
+		return DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(stream);
+
 	}
 
 	transient AbstractMultiFormatObjectParser optional_xml_object_parser_instance;
@@ -209,7 +206,7 @@ public abstract class MultiFormatProperties implements Cloneable, Serializable {
 					if (f.getType().isPrimitive()) {
 						res.put(f.getName(), getPrimitiveValue(f));
 					} else if (List.class.isAssignableFrom(f.getType())) {
-						StringBuffer buffer = new StringBuffer();
+						StringBuilder buffer = new StringBuilder();
 						Object o = f.get(this);
 						if (o == null)
 							buffer.append("null");
@@ -220,7 +217,7 @@ public abstract class MultiFormatProperties implements Cloneable, Serializable {
 							List<?> l = (List<?>) o;
 							boolean first = true;
 							for (Object e : l) {
-								String s = null;
+								String s;
 
 								if (e == null)
 									s = "null";
@@ -239,7 +236,7 @@ public abstract class MultiFormatProperties implements Cloneable, Serializable {
 						}
 						res.put(f.getName(), buffer.toString());
 					} else if (Map.class.isAssignableFrom(f.getType())) {
-						StringBuffer buffer = new StringBuffer();
+						StringBuilder buffer = new StringBuilder();
 						Object o = f.get(this);
 						if (o == null)
 							buffer.append("null");
@@ -323,16 +320,16 @@ public abstract class MultiFormatProperties implements Cloneable, Serializable {
 		String nodeValue = node.getTextContent();
 		if (nodeValue == null)
 			return null;
-		final String subpatternstring = "\\w+";
+		final String subPatternString = "\\w+";
 
-		final Pattern p = Pattern.compile("@\\{node[vV]alue/" + subpatternstring + "\\}");
+		final Pattern p = Pattern.compile("@\\{node[vV]alue/" + subPatternString + "}");
 		Matcher m = p.matcher(nodeValue);
 
-		StringBuffer res = new StringBuffer();
+		StringBuilder res = new StringBuilder();
 		int previous_index = 0;
 
 		while (m.find()) {
-			res.append(nodeValue.substring(previous_index, m.start()));
+			res.append(nodeValue, previous_index, m.start());
 			previous_index = m.end();
 			String group = m.group();
 			String id = group.substring(12, group.length() - 1);
@@ -348,7 +345,7 @@ public abstract class MultiFormatProperties implements Cloneable, Serializable {
 				throw new PropertiesParseException(
 						"The element tagged by " + id + " was found in more than one occurences.");
 		}
-		res.append(nodeValue.substring(previous_index, nodeValue.length()));
+		res.append(nodeValue, previous_index, nodeValue.length());
 		return res.toString();
 	}
 
@@ -402,7 +399,7 @@ public abstract class MultiFormatProperties implements Cloneable, Serializable {
 	}
 
 	String getString(Class<?> field_type, Object object) throws Exception {
-		String res = null;
+		String res ;
 		if (optional_xml_object_parser_instance != null) {
 			res = optional_xml_object_parser_instance.convertObjectToString(field_type, object);
 			if (res == null)
@@ -413,7 +410,7 @@ public abstract class MultiFormatProperties implements Cloneable, Serializable {
 	}
 
 	Object getValue(Class<?> field_type, String nodeValue) throws Exception {
-		Object res = null;
+		Object res ;
 		if (optional_xml_object_parser_instance != null) {
 			res = optional_xml_object_parser_instance.convertStringToObject(field_type, nodeValue);
 			if (res == Void.TYPE)
@@ -621,7 +618,7 @@ public abstract class MultiFormatProperties implements Cloneable, Serializable {
 			if (keys.length - keyOff.get() - 2 < fExplodedClass.length)
 				return null;
 			for (int s = keys.length - 2; s >= fExplodedClass.length; s--) {
-				StringBuffer cs = new StringBuffer("");
+				StringBuilder cs = new StringBuilder();
 				for (int i = keyOff.get(); i < s; i++) {
 					if (cs.length() > 0)
 						cs.append(".");
@@ -633,7 +630,7 @@ public abstract class MultiFormatProperties implements Cloneable, Serializable {
 						keyOff.set(keyOff.get() + s + 1);
 						return c;
 					}
-				} catch (Exception e) {
+				} catch (Exception ignored) {
 
 				}
 			}
@@ -648,66 +645,62 @@ public abstract class MultiFormatProperties implements Cloneable, Serializable {
 
 	void readField(Document document, Field field, Class<?> type, Node node) throws PropertiesParseException {
 
-		if (Map.class.isAssignableFrom(type)) {
+		// deal with map
+		if (Map.class.isAssignableFrom(type)) try {
+			Map<Object, Object> m;
+			if (Modifier.isAbstract(type.getModifiers())) {
+				m = new HashMap<>();
+			} else {
+				@SuppressWarnings("unchecked")
+				Map<Object, Object> newInstance = (Map<Object, Object>) type.getDeclaredConstructor().newInstance();
+				m = newInstance;
+			}
 
-			// deal with map
+			/*
+			 * Class<?> key_map_class= (Class<?>) ((ParameterizedType)
+			 * field.getGenericType()).getActualTypeArguments()[0]; Class<?>
+			 * value_map_class= (Class<?>) ((ParameterizedType)
+			 * field.getGenericType()).getActualTypeArguments()[1];
+			 */
 
-			try {
-				Map<Object, Object> m = null;
-				if (Modifier.isAbstract(type.getModifiers())) {
-					m = new HashMap<Object, Object>();
-				} else {
-					@SuppressWarnings("unchecked")
-					Map<Object, Object> newInstance = (Map<Object, Object>) type.getDeclaredConstructor().newInstance();
-					m = newInstance;
-				}
+			NodeList node_list = node.getChildNodes();
+			for (int i = 0; i < node_list.getLength(); i++) {
+				Node n = node_list.item(i);
+				if (n.getNodeName().equals("ElementMap")) {
+					Node keyn = null;
+					Node valuen = null;
+					NodeList ne = n.getChildNodes();
 
-				/*
-				 * Class<?> key_map_class= (Class<?>) ((ParameterizedType)
-				 * field.getGenericType()).getActualTypeArguments()[0]; Class<?>
-				 * value_map_class= (Class<?>) ((ParameterizedType)
-				 * field.getGenericType()).getActualTypeArguments()[1];
-				 */
+					for (int j = 0; j < ne.getLength() && !(keyn != null && valuen != null); j++) {
+						Node n2 = ne.item(j);
 
-				NodeList node_list = node.getChildNodes();
-				for (int i = 0; i < node_list.getLength(); i++) {
-					Node n = node_list.item(i);
-					if (n.getNodeName().equals("ElementMap")) {
-						Node keyn = null;
-						Node valuen = null;
-						NodeList ne = n.getChildNodes();
+						if (n2.getNodeName().equals("key"))
+							keyn = n2;
+						else if (n2.getNodeName().equals("value"))
+							valuen = n2;
+					}
 
-						for (int j = 0; j < ne.getLength() && !(keyn != null && valuen != null); j++) {
-							Node n2 = ne.item(j);
+					if (keyn != null && valuen != null) {
+						Class<?> key_map_class = Class
+								.forName(keyn.getAttributes().getNamedItem("ElementType").getNodeValue());
+						Class<?> value_map_class = Class
+								.forName(valuen.getAttributes().getNamedItem("ElementType").getNodeValue());
 
-							if (n2.getNodeName().equals("key"))
-								keyn = n2;
-							else if (n2.getNodeName().equals("value"))
-								valuen = n2;
-						}
+						Object okey = getValue(document, field.getName(), key_map_class, keyn);
+						Object ovalue = getValue(document, field.getName(), value_map_class, valuen);
 
-						if (keyn != null && valuen != null) {
-							Class<?> key_map_class = Class
-									.forName(keyn.getAttributes().getNamedItem("ElementType").getNodeValue());
-							Class<?> value_map_class = Class
-									.forName(valuen.getAttributes().getNamedItem("ElementType").getNodeValue());
-
-							Object okey = getValue(document, field.getName(), key_map_class, keyn);
-							Object ovalue = getValue(document, field.getName(), value_map_class, valuen);
-
-							if (!(okey != null && okey == Void.TYPE) && !(ovalue != null && ovalue == Void.TYPE)) {
-								m.put(okey, ovalue);
-							}
+						if (!(okey != null && okey == Void.TYPE) && !(ovalue != null && ovalue == Void.TYPE)) {
+							m.put(okey, ovalue);
 						}
 					}
 				}
-				field.set(this, m);
-
-			} catch (InstantiationException | IllegalAccessException | DOMException | ClassNotFoundException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
-				throw new PropertiesParseException(e, "Impossible to read the type " + type.getName());
 			}
+			field.set(this, m);
 
-		} else if (List.class.isAssignableFrom(type) /* || type.isArray() */) // TODO
+		} catch (InstantiationException | IllegalAccessException | DOMException | ClassNotFoundException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
+			throw new PropertiesParseException(e, "Impossible to read the type " + type.getName());
+		}
+		else if (List.class.isAssignableFrom(type) /* || type.isArray() */) // TODO
 		// add
 		// array
 		// management
@@ -715,7 +708,7 @@ public abstract class MultiFormatProperties implements Cloneable, Serializable {
 			// deal with list
 
 			try {
-				List<Object> l = null;
+				List<Object> l ;
 				{
 					if (type.isArray()) {
 						l = new ArrayList<>();
@@ -912,24 +905,24 @@ public abstract class MultiFormatProperties implements Cloneable, Serializable {
 	 * 
 	 * @param yamlFile
 	 *            the file name
-	 * @throws PropertiesParseException if a problem occurs
+	 *
 	 * @throws IOException if a problem occurs
 	 */
-	public void loadYAML(File yamlFile) throws PropertiesParseException, IOException {
+	public void loadYAML(File yamlFile) throws IOException {
 		
 		try(FileReader fr=new FileReader(yamlFile))
 		{
 			loadYAML(fr);
 		}
 	}
-	public void loadYAML(Reader reader) throws PropertiesParseException, IOException {
+	public void loadYAML(Reader reader) throws IOException {
 		ConstructorYaml constructor=new ConstructorYaml();
 		Yaml yaml=new Yaml(constructor);
 		yaml.setBeanAccess(BeanAccess.FIELD);
 		if (yaml.load(reader)!=this)
 			throw new IOException();
 	}
-	public void loadYAML(InputStream input) throws PropertiesParseException, IOException {
+	public void loadYAML(InputStream input) throws IOException {
 		try(InputStreamReader fr=new InputStreamReader(input))
 		{
 			loadYAML(fr);
@@ -1021,7 +1014,7 @@ public abstract class MultiFormatProperties implements Cloneable, Serializable {
 	private class ConstructorYaml extends org.yaml.snakeyaml.constructor.Constructor
 	{
 		private boolean setFirstTime=false;
-		protected final Map<Tag, Construct> yamlAbstractConstructors = new HashMap<Tag, Construct>();
+		protected final Map<Tag, Construct> yamlAbstractConstructors = new HashMap<>();
 		ConstructorYaml()
 		{
 			init(default_xml_object_parser_instance);
@@ -1110,7 +1103,7 @@ public abstract class MultiFormatProperties implements Cloneable, Serializable {
 			@Override
 			public Object construct(org.yaml.snakeyaml.nodes.Node node) {
 				
-				String value = (String)constructScalar((ScalarNode)node);
+				String value = constructScalar((ScalarNode)node);
 				try {
 					return parser.convertStringToObject(clazz, value);
 				} catch (Exception e) {
@@ -1146,9 +1139,7 @@ public abstract class MultiFormatProperties implements Cloneable, Serializable {
 		try {
 			Class<?> field_type = field.getType();
 			if (field_type.isPrimitive()) {
-				if (value == null)
-					return;
-				else {
+				if (value != null){
 					if (field_type == boolean.class) {
 						field.setBoolean(this, Boolean.parseBoolean(value));
 					} else if (field_type == byte.class) {
@@ -1165,8 +1156,7 @@ public abstract class MultiFormatProperties implements Cloneable, Serializable {
 						field.setDouble(this, Double.parseDouble(value));
 					} else if (field_type == char.class) {
 						field.setChar(this, value.charAt(0));
-					} else
-						return;
+					}
 
 				}
 			} else if (List.class.isAssignableFrom(field_type)) {
@@ -1175,7 +1165,7 @@ public abstract class MultiFormatProperties implements Cloneable, Serializable {
 				else {
 
 					Class<?> element_list_class = getGenericType(field);
-					List<Object> l = null;
+					List<Object> l ;
 
 					if (Modifier.isAbstract(field_type.getModifiers()))
 						l = new ArrayList<>();
@@ -1199,10 +1189,9 @@ public abstract class MultiFormatProperties implements Cloneable, Serializable {
 				Map<Object, Object> m = null;
 				if (!value.equals("null")) {
 					if (Modifier.isAbstract(field_type.getModifiers())) {
-						m = new HashMap<Object, Object>();
+						m = new HashMap<>();
 					} else {
-						Map<Object, Object> newInstance = (Map<Object, Object>) field_type.getDeclaredConstructor().newInstance();
-						m = newInstance;
+						m = (Map<Object, Object>) field_type.getDeclaredConstructor().newInstance();
 					}
 
 					if (value.startsWith("{") && value.endsWith("}")) {
@@ -1348,9 +1337,7 @@ public abstract class MultiFormatProperties implements Cloneable, Serializable {
 					return;
 				Element element = document.createElement(field.getName());
 
-				Iterator<Map.Entry<Object, Object>> it = m.entrySet().iterator();
-				while (it.hasNext()) {
-					Map.Entry<Object, Object> entry = it.next();
+				for (Entry<Object, Object> entry : m.entrySet()) {
 					Element elementM = document.createElement("ElementMap");
 					Element key = document.createElement("key");
 					/*

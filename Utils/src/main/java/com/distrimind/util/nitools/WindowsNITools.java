@@ -58,7 +58,7 @@ class WindowsNITools extends NITools {
 		try {
 			if (_network_interface.isLoopback())
 				return Long.MAX_VALUE;
-			Process p = null;
+			Process p ;
 			// TODO check compatibility with Vista and Seven
 			if (OSValidator.getCurrentOS().getOSVersion().toLowerCase().contains("vista"))
 				p = Runtime.getRuntime().exec("wmic NIC where \"NetEnabled=true\" get \"InterfaceIndex,Speed\"");
@@ -68,7 +68,7 @@ class WindowsNITools extends NITools {
 			long res = -1;
 			try (InputStreamReader isr = new InputStreamReader(p.getInputStream())) {
 				try (BufferedReader input = new BufferedReader(isr)) {
-					String line = null;
+					String line ;
 					boolean first = true;
 					while (res == -1 && (line = input.readLine()) != null) {
 						if (first) {
@@ -95,7 +95,7 @@ class WindowsNITools extends NITools {
 										}
 									}
 								}
-							} catch (Exception e) {
+							} catch (Exception ignored) {
 
 							}
 						}
