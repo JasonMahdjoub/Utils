@@ -139,7 +139,9 @@ class WindowsHardDriveDetect extends HardDriveDetect {
                         Disk disk=disksMap.get(diskID);
                         if (disk==null)
                         {
-                            disk=new Disk(UUID.nameUUIDFromBytes(serialNumber.getBytes()), diskSize, true, -1, interfaceType, diskID, caption);
+                            String it=interfaceType.toUpperCase();
+                            disk=new Disk(UUID.nameUUIDFromBytes(serialNumber.getBytes()), diskSize,
+                                    !it.contains("USB") && !it.contains("THUNDERBOLT") && !it.contains("FIREWIRE") && !it.contains("1394"), -1, interfaceType, diskID, caption);
                             disksMap.put(diskID, disk);
                             disks.add(disk);
                         }
@@ -196,7 +198,7 @@ class WindowsHardDriveDetect extends HardDriveDetect {
     private File scriptFile=null;
     private File getScriptFile() throws IOException {
 
-        if (scriptFile.exists())
+        if (scriptFile!=null && scriptFile.exists())
             return scriptFile;
         scriptFile = File.createTempFile("comdistriminddiskinfo", ".vbs");
         scriptFile.deleteOnExit();

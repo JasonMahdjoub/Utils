@@ -1,4 +1,4 @@
-﻿ComputerName = "."
+ComputerName = "."
 Set wmiServices  = GetObject ( _
     "winmgmts:{impersonationLevel=Impersonate}!//" _
     & ComputerName)
