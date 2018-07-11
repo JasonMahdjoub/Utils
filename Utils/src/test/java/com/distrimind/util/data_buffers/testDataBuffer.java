@@ -36,7 +36,6 @@ package com.distrimind.util.data_buffers;
 
 
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;

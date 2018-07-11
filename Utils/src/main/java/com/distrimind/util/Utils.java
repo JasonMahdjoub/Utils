@@ -57,8 +57,8 @@ public class Utils {
 		Calendar c = Calendar.getInstance();
 		c.set(2016, Calendar.JANUARY, 4);
 		Calendar c2 = Calendar.getInstance();
-		c.set(2018, Calendar.JULY, 10);
-		VERSION = new Version("Utils", "Utils", 3, 16, 0, Version.Type.Stable, 0, c.getTime(), c2.getTime());
+		c.set(2018, Calendar.JULY, 11);
+		VERSION = new Version("Utils", "Utils", 3, 16, 1, Version.Type.Stable, 0, c.getTime(), c2.getTime());
 		try {
 
 			InputStream is = Utils.class.getResourceAsStream("build.txt");
@@ -71,8 +71,8 @@ public class Utils {
 			VERSION.addDeveloper(new PersonDeveloper("mahdjoub", "jason", c.getTime()));
 
 			c = Calendar.getInstance();
-			c.set(2018, Calendar.JULY, 10);
-			Description d = new Description(3, 16, 0, Version.Type.Stable, 0, c.getTime());
+			c.set(2018, Calendar.JULY, 11);
+			Description d = new Description(3, 16, 1, Version.Type.Stable, 0, c.getTime());
 			d.addItem("Add HumanReadableBytesCount class.");
 			d.addItem("Update hardrive and partitions detections.");
             d.addItem("Clean code.");

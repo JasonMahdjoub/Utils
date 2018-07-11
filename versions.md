@@ -1,6 +1,6 @@
 Utils
 =====
-3.16.0 Stable (Build: 537) (from 10/07/2018 to 10/07/2018)
+3.16.1 Stable (Build: 540) (from 11/07/2018 to 11/07/2018)
 
 # Creator(s):
 Jason MAHDJOUB
@@ -11,7 +11,7 @@ Jason MAHDJOUB (Entred in the team at 04/01/2016)
 # Modifications:
 
 
-### 3.16.0 Stable (10/07/2018)
+### 3.16.1 Stable (11/07/2018)
 * Add HumanReadableBytesCount class.
 * Update hardrive and partitions detections.
 * Clean code.

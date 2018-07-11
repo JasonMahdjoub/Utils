@@ -21,7 +21,7 @@ public class IDGeneratorIntTests {
 		for (int i = 0; i < numberIds; i++) {
 			for (int j = 0; j < numberIds; j++) {
 				if (i != j) {
-					Assert.assertNotEquals(Integer.valueOf(ids[i]), Integer.valueOf(ids[j]));
+					Assert.assertNotEquals(ids[i], ids[j]);
 				}
 			}
 			generator.removeID(ids[i]);

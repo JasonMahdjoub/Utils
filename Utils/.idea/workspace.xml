@@ -2,11 +2,27 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="10b253e7-fd4e-4a64-8b2a-093fa1eb6135" name="Default" comment="Add human readable">
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/distrimind/util/FileTools.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/distrimind/util/FileTools.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/distrimind/util/SystemFunctions.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/distrimind/util/SystemFunctions.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/distrimind/util/harddrive/HardDriveDetect.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/distrimind/util/harddrive/HardDriveDetect.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../README.md" beforeDir="false" afterPath="$PROJECT_DIR$/../README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/distrimind/util/Utils.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/distrimind/util/Utils.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/com/distrimind/util/build.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/com/distrimind/util/build.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../versions.md" beforeDir="false" afterPath="$PROJECT_DIR$/../versions.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/com/distrimind/util/DecentralizedIDTests.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/com/distrimind/util/DecentralizedIDTests.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/com/distrimind/util/IDGeneratorIntTests.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/com/distrimind/util/IDGeneratorIntTests.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/com/distrimind/util/data_buffers/testDataBuffer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/com/distrimind/util/data_buffers/testDataBuffer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/com/distrimind/util/data_buffers/testDataBufferBool.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/com/distrimind/util/data_buffers/testDataBufferBool.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/com/distrimind/util/data_buffers/testDataBufferByte.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/com/distrimind/util/data_buffers/testDataBufferByte.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/com/distrimind/util/data_buffers/testDataBufferChar.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/com/distrimind/util/data_buffers/testDataBufferChar.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/com/distrimind/util/data_buffers/testDataBufferDouble.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/com/distrimind/util/data_buffers/testDataBufferDouble.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/com/distrimind/util/data_buffers/testDataBufferFloat.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/com/distrimind/util/data_buffers/testDataBufferFloat.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/com/distrimind/util/data_buffers/testDataBufferInt.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/com/distrimind/util/data_buffers/testDataBufferInt.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/com/distrimind/util/data_buffers/testDataBufferLong.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/com/distrimind/util/data_buffers/testDataBufferLong.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/com/distrimind/util/data_buffers/testDataBufferShort.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/com/distrimind/util/data_buffers/testDataBufferShort.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/com/distrimind/util/data_buffers/testDataBufferUnsignedByte.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/com/distrimind/util/data_buffers/testDataBufferUnsignedByte.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/com/distrimind/util/data_buffers/testDataBufferUnsignedShort.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/com/distrimind/util/data_buffers/testDataBufferUnsignedShort.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/com/distrimind/util/properties/PropertiesExample.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/com/distrimind/util/properties/PropertiesExample.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/com/distrimind/util/properties/TestProperties.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/com/distrimind/util/properties/TestProperties.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/com/distrimind/util/version/VersionTests.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/com/distrimind/util/version/VersionTests.java" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/.gradle/" />
     <ignored path="$PROJECT_DIR$/build/" />
@@ -183,7 +199,7 @@
         <entry file="file://$PROJECT_DIR$/src/test/java/com/distrimind/util/DecentralizedIDTests.java">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="165">
-              <caret line="60" column="13" selection-start-line="60" selection-start-column="13" selection-end-line="60" selection-end-column="13" />
+              <caret line="55" column="13" selection-start-line="55" selection-start-column="13" selection-end-line="55" selection-end-column="13" />
             </state>
           </provider>
         </entry>
@@ -2624,9 +2640,9 @@
         <entry key="$PROJECT_DIR$/../../Gnu-Crypt/Gnu-Crypt/build.gradle" value="2690118812" />
         <entry key="$PROJECT_DIR$/../../Gnu-Crypt/Gnu-Crypt/gradle.properties" value="2396890427" />
         <entry key="$PROJECT_DIR$/../../Gnu-Crypt/Gnu-Crypt/settings.gradle" value="2809024493" />
-        <entry key="$PROJECT_DIR$" value="7644473432000" />
+        <entry key="$PROJECT_DIR$" value="7645018481000" />
         <entry key="$PROJECT_DIR$/.gradle" value="0" />
-        <entry key="$PROJECT_DIR$/build.gradle" value="1266406963" />
+        <entry key="$PROJECT_DIR$/build.gradle" value="601296611" />
         <entry key="$PROJECT_DIR$/gradle.properties" value="671833164" />
         <entry key="$PROJECT_DIR$/gradle/wrapper/gradle-wrapper.properties" value="2077093676" />
         <entry key="$PROJECT_DIR$/settings.gradle" value="2870877935" />
@@ -4002,7 +4018,7 @@
     <entry file="file://$PROJECT_DIR$/src/test/java/com/distrimind/util/DecentralizedIDTests.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="165">
-          <caret line="60" column="13" selection-start-line="60" selection-start-column="13" selection-end-line="60" selection-end-column="13" />
+          <caret line="55" column="13" selection-start-line="55" selection-start-column="13" selection-end-line="55" selection-end-column="13" />
         </state>
       </provider>
     </entry>

@@ -40,11 +40,6 @@ import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import com.distrimind.util.AbstractDecentralizedID;
-import com.distrimind.util.AbstractDecentralizedIDGenerator;
-import com.distrimind.util.DecentralizedIDGenerator;
-import com.distrimind.util.RenforcedDecentralizedIDGenerator;
-import com.distrimind.util.SecuredDecentralizedID;
 import com.distrimind.util.crypto.AbstractSecureRandom;
 import com.distrimind.util.crypto.MessageDigestType;
 import com.distrimind.util.crypto.SecureRandomType;

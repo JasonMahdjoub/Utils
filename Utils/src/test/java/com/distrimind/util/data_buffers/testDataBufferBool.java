@@ -35,10 +35,6 @@ knowledge of the CeCILL-C license and that you accept its terms.
 package com.distrimind.util.data_buffers;
 
 
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -50,6 +46,8 @@ import java.util.Random;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import static org.testng.Assert.*;
+
 /**
  * 
  * @author Jason Mahdjoub
@@ -58,7 +56,7 @@ import org.testng.annotations.Test;
  *
  */
 public final class testDataBufferBool extends testDataBuffer {
-	protected static int size = 50;
+	protected static final int size = 50;
 	protected static boolean tab[] = null;
 
 	public static boolean[] getTab(int _size) {
@@ -67,10 +65,7 @@ public final class testDataBufferBool extends testDataBuffer {
 
 		for (int i = _size - 1; i >= 0; i--) {
 			int val = r.nextInt() % 2;
-			if (val == 0)
-				res[i] = false;
-			else
-				res[i] = true;
+			res[i] = val != 0;
 		}
 		return res;
 	}
@@ -109,7 +104,7 @@ public final class testDataBufferBool extends testDataBuffer {
 	public void testGetsSets() {
 		DataBufferBool d = new DataBufferBool(tab.clone());
 		for (int i = size - 1; i >= 0; i--) {
-			assertTrue(tab[i] == d.getBoolean(i));
+			assertEquals(tab[i], d.getBoolean(i));
 		}
 
 		d = new DataBufferBool(size);
@@ -117,50 +112,50 @@ public final class testDataBufferBool extends testDataBuffer {
 			d.setBoolean(i, tab[i]);
 		}
 		for (int i = size - 1; i >= 0; i--) {
-			assertTrue(tab[i] == d.getBoolean(i));
-			assertTrue((tab[i] ? (byte) 1 : (byte) 0) == d.getByte(i));
-			assertTrue((tab[i] ? (char) 1 : (char) 0) == d.getChar(i));
-			assertTrue((tab[i] ? (double) 1 : (double) 0) == d.getDouble(i));
-			assertTrue((tab[i] ? (float) 1 : (float) 0) == d.getFloat(i));
-			assertTrue((tab[i] ? (int) 1 : (int) 0) == d.getInt(i));
-			assertTrue((tab[i] ? (long) 1 : (long) 0) == d.getLong(i));
-			assertTrue((tab[i] ? (short) 1 : (short) 0) == d.getShort(i));
+			assertEquals(tab[i], d.getBoolean(i));
+			assertEquals((tab[i] ? (byte) 1 : (byte) 0), d.getByte(i));
+			assertEquals((tab[i] ? (char) 1 : (char) 0), d.getChar(i));
+			assertEquals((tab[i] ? (double) 1 : (double) 0), d.getDouble(i), 0.0);
+			assertEquals((tab[i] ? (float) 1 : (float) 0), d.getFloat(i), 0.0);
+			assertEquals((tab[i] ? 1 : 0), d.getInt(i));
+			assertEquals((tab[i] ? (long) 1 : (long) 0), d.getLong(i));
+			assertEquals((tab[i] ? (short) 1 : (short) 0), d.getShort(i));
 		}
 
 		try {
 			d.setByte(0, (byte) 0);
-			assertTrue(false, "setting a byte on a DataBufferBool should be imposible");
-		} catch (IllegalAccessError i) {
+			fail("setting a byte on a DataBufferBool should be imposible");
+		} catch (IllegalAccessError ignored) {
 		}
 		try {
 			d.setChar(0, (char) 0);
-			assertTrue(false, "setting a char on a DataBufferBool should be imposible");
-		} catch (IllegalAccessError i) {
+			fail("setting a char on a DataBufferBool should be imposible");
+		} catch (IllegalAccessError ignored) {
 		}
 		try {
 			d.setDouble(0, (double) 0);
-			assertTrue(false, "setting a double on a DataBufferBool should be imposible");
-		} catch (IllegalAccessError i) {
+			fail("setting a double on a DataBufferBool should be imposible");
+		} catch (IllegalAccessError ignored) {
 		}
 		try {
 			d.setFloat(0, (float) 0);
-			assertTrue(false, "setting a float on a DataBufferBool should be imposible");
-		} catch (IllegalAccessError i) {
+			fail("setting a float on a DataBufferBool should be imposible");
+		} catch (IllegalAccessError ignored) {
 		}
 		try {
-			d.setInt(0, (int) 0);
-			assertTrue(false, "setting a int on a DataBufferBool should be imposible");
-		} catch (IllegalAccessError i) {
+			d.setInt(0, 0);
+			fail("setting a int on a DataBufferBool should be imposible");
+		} catch (IllegalAccessError ignored) {
 		}
 		try {
 			d.setLong(0, (long) 0);
-			assertTrue(false, "setting a long on a DataBufferBool should be imposible");
-		} catch (IllegalAccessError i) {
+			fail("setting a long on a DataBufferBool should be imposible");
+		} catch (IllegalAccessError ignored) {
 		}
 		try {
 			d.setShort(0, (short) 0);
-			assertTrue(false, "setting a short on a DataBufferBool should be imposible");
-		} catch (IllegalAccessError i) {
+			fail("setting a short on a DataBufferBool should be imposible");
+		} catch (IllegalAccessError ignored) {
 		}
 	}
 
@@ -169,9 +164,9 @@ public final class testDataBufferBool extends testDataBuffer {
 	public void testClone() {
 		DataBufferBool d = new DataBufferBool(tab);
 		DataBufferBool dd = d.clone();
-		assertFalse(d == dd, "A cloned object cannot have the same reference");
+		assertNotSame(d, dd, "A cloned object cannot have the same reference");
 		for (int i = d.getSize() - 1; i >= 0; i--) {
-			assertTrue(d.getBoolean(i) == dd.getBoolean(i));
+			assertEquals(d.getBoolean(i), dd.getBoolean(i));
 		}
 	}
 
@@ -179,7 +174,7 @@ public final class testDataBufferBool extends testDataBuffer {
 	@Test
 	public void getData() {
 		DataBufferBool d = new DataBufferBool(tab);
-		assertTrue(d.getData() == tab);
+		assertSame(d.getData(), tab);
 	}
 
 	@Override
@@ -190,51 +185,51 @@ public final class testDataBufferBool extends testDataBuffer {
 		DataBufferBool dd = new DataBufferBool(0);
 		dd.setData(d.clone());
 		for (int i = size - 1; i >= 0; i--) {
-			assertTrue(tab[i] == d.getBoolean(i));
-			assertTrue(tab[i] == dd.getBoolean(i));
+			assertEquals(tab[i], d.getBoolean(i));
+			assertEquals(tab[i], dd.getBoolean(i));
 		}
 		d = new DataBufferBool(0);
 
 		try {
 			d.setData(new byte[10]);
-			assertTrue(false, "setting a byte buffer on a DataBufferBool should be imposible");
-		} catch (IllegalArgumentException i) {
+			fail("setting a byte buffer on a DataBufferBool should be imposible");
+		} catch (IllegalArgumentException ignored) {
 		}
 		try {
 			d.setData(new short[10]);
-			assertTrue(false, "setting a short buffer on a DataBufferBool should be imposible");
-		} catch (IllegalArgumentException i) {
+			fail("setting a short buffer on a DataBufferBool should be imposible");
+		} catch (IllegalArgumentException ignored) {
 		}
 		try {
 			d.setData(new char[10]);
-			assertTrue(false, "setting a char buffer on a DataBufferBool should be imposible");
-		} catch (IllegalArgumentException i) {
+			fail("setting a char buffer on a DataBufferBool should be imposible");
+		} catch (IllegalArgumentException ignored) {
 		}
 		try {
 			d.setData(new double[10]);
-			assertTrue(false, "setting a double buffer on a DataBufferBool should be imposible");
-		} catch (IllegalArgumentException i) {
+			fail("setting a double buffer on a DataBufferBool should be imposible");
+		} catch (IllegalArgumentException ignored) {
 		}
 		try {
 			d.setData(new float[10]);
-			assertTrue(false, "setting a float buffer on a DataBufferBool should be imposible");
-		} catch (IllegalArgumentException i) {
+			fail("setting a float buffer on a DataBufferBool should be imposible");
+		} catch (IllegalArgumentException ignored) {
 		}
 		try {
 			d.setData(new int[10]);
-			assertTrue(false, "setting a int buffer on a DataBufferBool should be imposible");
-		} catch (IllegalArgumentException i) {
+			fail("setting a int buffer on a DataBufferBool should be imposible");
+		} catch (IllegalArgumentException ignored) {
 		}
 		try {
 			d.setData(new long[10]);
-			assertTrue(false, "setting a long buffer on a DataBufferBool should be imposible");
-		} catch (IllegalArgumentException i) {
+			fail("setting a long buffer on a DataBufferBool should be imposible");
+		} catch (IllegalArgumentException ignored) {
 		}
 
 		try {
-			d.setData(Double.valueOf(0.0));
-			assertTrue(false, "setting a any object other than boolean buffer on a DataBufferBool should be imposible");
-		} catch (IllegalArgumentException i) {
+			d.setData(0.0);
+			fail("setting a any object other than boolean buffer on a DataBufferBool should be imposible");
+		} catch (IllegalArgumentException ignored) {
 		}
 
 	}
@@ -247,27 +242,27 @@ public final class testDataBufferBool extends testDataBuffer {
 		DataBufferBool d = new DataBufferBool(tab);
 		DataBufferBool dd = new DataBufferBool(tab2);
 		d.insertData(d.getSize(), dd);
-		assertTrue(d.getSize() == dd.getSize() * 2);
+		assertEquals(d.getSize(), dd.getSize() * 2);
 		for (int i = size - 1; i >= 0; i--) {
-			assertTrue(tab[i] == d.getBoolean(i));
+			assertEquals(tab[i], d.getBoolean(i));
 		}
 		for (int i = size * 2 - 1; i >= size; i--) {
-			assertTrue(tab2[i - size] == d.getBoolean(i));
+			assertEquals(tab2[i - size], d.getBoolean(i));
 		}
 		d.insertData(0, dd);
 		for (int i = size - 1; i >= 0; i--) {
-			assertTrue(tab2[i] == d.getBoolean(i));
+			assertEquals(tab2[i], d.getBoolean(i));
 		}
 
 		dd.insertValues(dd.getSize(), 10);
-		assertTrue(dd.getSize() == tab.length + 10);
+		assertEquals(dd.getSize(), tab.length + 10);
 		for (int i = size - 1; i >= 0; i--) {
-			assertTrue(tab2[i] == dd.getBoolean(i));
+			assertEquals(tab2[i], dd.getBoolean(i));
 		}
 		dd.insertValues(0, 10);
-		assertTrue(dd.getSize() == tab.length + 20);
+		assertEquals(dd.getSize(), tab.length + 20);
 		for (int i = size - 1; i >= 0; i--) {
-			assertTrue(tab2[i] == dd.getBoolean(i + 10));
+			assertEquals(tab2[i], dd.getBoolean(i + 10));
 		}
 	}
 
@@ -276,21 +271,21 @@ public final class testDataBufferBool extends testDataBuffer {
 	public void removeValues() {
 		DataBufferBool d = new DataBufferBool(tab);
 		d.removeValues(0, 10);
-		assertTrue(d.getSize() == 40);
+		assertEquals(40, d.getSize());
 		for (int i = 9; i >= 0; i--) {
-			assertTrue(tab[i + 10] == d.getBoolean(i));
+			assertEquals(tab[i + 10], d.getBoolean(i));
 		}
 		d = new DataBufferBool(tab);
 		d.removeValues(d.getSize() - 10, 10);
-		assertTrue(d.getSize() == 40);
+		assertEquals(40, d.getSize());
 		for (int i = 9; i >= 0; i--) {
-			assertTrue(tab[i] == d.getBoolean(i));
+			assertEquals(tab[i], d.getBoolean(i));
 		}
 
 		d = new DataBufferBool(tab);
 		try {
 			d.removeValues(0, size + 10);
-			assertTrue(false);
+			fail();
 		} catch (Exception e) {
 			assertTrue(true);
 		}
@@ -298,7 +293,7 @@ public final class testDataBufferBool extends testDataBuffer {
 		d = new DataBufferBool(tab);
 		try {
 			d.removeValues(-1, size + 10);
-			assertTrue(false);
+			fail();
 		} catch (Exception e) {
 			assertTrue(true);
 		}
@@ -323,6 +318,7 @@ public final class testDataBufferBool extends testDataBuffer {
 			ok = false;
 		} finally {
 			try {
+				assert oOut != null;
 				oOut.flush();
 				oOut.close();
 				fOut.close();
@@ -335,14 +331,11 @@ public final class testDataBufferBool extends testDataBuffer {
 			fIn = new FileInputStream(".test_databufferbool.dat");
 			oIn = new ObjectInputStream(fIn);
 			DataBufferBool dd = (DataBufferBool) oIn.readObject();
-			assertTrue(dd.getSize() == d.getSize());
+			assertEquals(dd.getSize(), d.getSize());
 			for (int i = d.getSize() - 1; i >= 0; i--) {
-				assertTrue(d.getBoolean(i) == dd.getBoolean(i));
+				assertEquals(d.getBoolean(i), dd.getBoolean(i));
 			}
-		} catch (IOException e) {
-			e.printStackTrace();
-			ok = false;
-		} catch (ClassNotFoundException e) {
+		} catch (IOException | ClassNotFoundException e) {
 			e.printStackTrace();
 			ok = false;
 		} finally {

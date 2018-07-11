@@ -35,10 +35,6 @@ knowledge of the CeCILL-C license and that you accept its terms.
 
 package com.distrimind.util.data_buffers;
 
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -49,6 +45,8 @@ import java.util.Random;
 
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+
+import static org.testng.Assert.*;
 
 /**
  * 
@@ -105,7 +103,7 @@ public class testDataBufferUnsignedByte extends testDataBuffer {
 	public void testGetsSets() {
 		DataBufferUnsignedByte d = new DataBufferUnsignedByte(tab.clone());
 		for (int i = size - 1; i >= 0; i--) {
-			assertTrue(tab[i] == d.getByte(i));
+            assertEquals(tab[i], d.getByte(i));
 		}
 
 		d = new DataBufferUnsignedByte(size);
@@ -113,13 +111,13 @@ public class testDataBufferUnsignedByte extends testDataBuffer {
 			d.setByte(i, tab[i]);
 		}
 		for (int i = size - 1; i >= 0; i--) {
-			assertTrue(tab[i] == d.getByte(i));
-			assertTrue((char) (0xFF & tab[i]) == d.getChar(i));
-			assertTrue((double) (0xFF & tab[i]) == d.getDouble(i));
-			assertTrue((float) (0xFF & tab[i]) == d.getFloat(i));
-			assertTrue((int) (0xFF & tab[i]) == d.getInt(i));
-			assertTrue((long) (0xFF & tab[i]) == d.getLong(i));
-			assertTrue((short) (0xFF & tab[i]) == d.getShort(i));
+            assertEquals(tab[i], d.getByte(i));
+            assertEquals((char) (0xFF & tab[i]), d.getChar(i));
+            assertEquals((double) (0xFF & tab[i]), d.getDouble(i), 0.0);
+            assertEquals((float) (0xFF & tab[i]), d.getFloat(i), 0.0);
+            assertEquals((int) (0xFF & tab[i]), d.getInt(i));
+            assertEquals((long) (0xFF & tab[i]), d.getLong(i));
+            assertEquals((short) (0xFF & tab[i]), d.getShort(i));
 		}
 
 		DataBufferUnsignedByte dbool = new DataBufferUnsignedByte(size);
@@ -142,19 +140,19 @@ public class testDataBufferUnsignedByte extends testDataBuffer {
 		}
 
 		for (int i = size - 1; i >= 0; i--) {
-			assertTrue((tab[i] > 0 ? 1 : 0) == dbool.getByte(i));
-			assertTrue((char) (0xFF & tab[i]) == dc.getChar(i));
-			assertTrue((double) (0xFF & tab[i]) == dd.getDouble(i));
-			assertTrue((float) (0xFF & tab[i]) == df.getFloat(i));
-			assertTrue((int) (0xFF & tab[i]) == di.getInt(i));
-			assertTrue((long) (0xFF & tab[i]) == dl.getLong(i));
-			assertTrue((short) (0xFF & tab[i]) == ds.getShort(i));
+			assertEquals((tab[i] > 0 ? 1 : 0), dbool.getByte(i));
+			assertEquals((char) (0xFF & tab[i]), dc.getChar(i));
+			assertEquals((double) (0xFF & tab[i]), dd.getDouble(i), 0.0);
+			assertEquals((float) (0xFF & tab[i]), df.getFloat(i), 0.0);
+			assertEquals(0xFF & tab[i], di.getInt(i));
+			assertEquals((long) (0xFF & tab[i]), dl.getLong(i));
+			assertEquals((short) (0xFF & tab[i]), ds.getShort(i));
 		}
 
 		try {
 			d.getBoolean(0);
-			assertTrue(false, "getting a boolean on a DataBufferUnsignedByte should be imposible");
-		} catch (IllegalAccessError i) {
+			fail("getting a boolean on a DataBufferUnsignedByte should be imposible");
+		} catch (IllegalAccessError ignored) {
 		}
 
 	}
@@ -164,9 +162,9 @@ public class testDataBufferUnsignedByte extends testDataBuffer {
 	public void testClone() {
 		DataBufferUnsignedByte d = new DataBufferUnsignedByte(tab);
 		DataBufferUnsignedByte dd = d.clone();
-		assertFalse(d == dd, "A cloned object cannot have the same reference");
+		assertNotSame(d, dd, "A cloned object cannot have the same reference");
 		for (int i = d.getSize() - 1; i >= 0; i--) {
-			assertTrue(d.getByte(i) == dd.getByte(i));
+			assertEquals(d.getByte(i), dd.getByte(i));
 		}
 	}
 
@@ -174,7 +172,7 @@ public class testDataBufferUnsignedByte extends testDataBuffer {
 	@Test
 	public void getData() {
 		DataBufferUnsignedByte d = new DataBufferUnsignedByte(tab);
-		assertTrue(d.getData() == tab);
+		assertSame(d.getData(), tab);
 	}
 
 	@Override
@@ -185,64 +183,57 @@ public class testDataBufferUnsignedByte extends testDataBuffer {
 		DataBufferUnsignedByte dd = new DataBufferUnsignedByte(0);
 		dd.setData(d.clone());
 		for (int i = size - 1; i >= 0; i--) {
-			assertTrue(tab[i] == d.getByte(i));
-			assertTrue(tab[i] == dd.getByte(i));
+			assertEquals(tab[i], d.getByte(i));
+			assertEquals(tab[i], dd.getByte(i));
 		}
 
 		boolean tbool[] = testDataBufferBool.getTab(size);
 		d.setData(tbool);
 		for (int i = size - 1; i >= 0; i--) {
-			assertTrue(tbool[i] == (d.getByte(i) % 2 == 0) ? false : true);
+			assertTrue(tbool[i] != (d.getByte(i) % 2 == 0));
 		}
-		tbool = null;
 
 		char tc[] = testDataBufferChar.getTab(size);
 		d.setData(tc);
 		for (int i = size - 1; i >= 0; i--) {
-			assertTrue((byte) tc[i] == d.getByte(i));
+			assertEquals((byte) tc[i], d.getByte(i));
 		}
-		tc = null;
 
 		double td[] = testDataBufferDouble.getTab(size);
 		d.setData(td);
 		for (int i = size - 1; i >= 0; i--) {
-			assertTrue((byte) td[i] == d.getByte(i));
+			assertEquals((byte) td[i], d.getByte(i));
 		}
-		td = null;
 
 		float tf[] = testDataBufferFloat.getTab(size);
 		d.setData(tf);
 		for (int i = size - 1; i >= 0; i--) {
-			assertTrue((byte) tf[i] == d.getByte(i));
+			assertEquals((byte) tf[i], d.getByte(i));
 		}
-		tf = null;
 
 		int ti[] = testDataBufferInt.getTab(size);
 		d.setData(ti);
 		for (int i = size - 1; i >= 0; i--) {
-			assertTrue((byte) ti[i] == d.getByte(i));
+			assertEquals((byte) ti[i], d.getByte(i));
 		}
-		ti = null;
 
 		long tl[] = testDataBufferLong.getTab(size);
 		d.setData(tl);
 		for (int i = size - 1; i >= 0; i--) {
-			assertTrue((byte) tl[i] == d.getByte(i));
+			assertEquals((byte) tl[i], d.getByte(i));
 		}
-		tl = null;
 
 		short ts[] = testDataBufferShort.getTab(size);
 		d.setData(ts);
 		for (int i = size - 1; i >= 0; i--) {
-			assertTrue((byte) ts[i] == d.getByte(i));
+			assertEquals((byte) ts[i], d.getByte(i));
 		}
-		ts = null;
 
-		d = new DataBufferUnsignedByte(0);
+        d = new DataBufferUnsignedByte(0);
 		try {
-			d.setData(Double.valueOf(0.0));
-			assertTrue(false, "setting any object other than numeric buffer on a DataBufferUnsignedByte should be imposible");
-		} catch (IllegalArgumentException i) {
+			d.setData(0.0);
+			fail("setting any object other than numeric buffer on a DataBufferUnsignedByte should be imposible");
+		} catch (IllegalArgumentException ignored) {
 		}
 
 	}
@@ -255,27 +246,27 @@ public class testDataBufferUnsignedByte extends testDataBuffer {
 		DataBufferUnsignedByte d = new DataBufferUnsignedByte(tab);
 		DataBufferUnsignedByte dd = new DataBufferUnsignedByte(tab2);
 		d.insertData(d.getSize(), dd);
-		assertTrue(d.getSize() == dd.getSize() * 2);
+		assertEquals(d.getSize(), dd.getSize() * 2);
 		for (int i = size - 1; i >= 0; i--) {
-			assertTrue(tab[i] == d.getByte(i));
+			assertEquals(tab[i], d.getByte(i));
 		}
 		for (int i = size * 2 - 1; i >= size; i--) {
-			assertTrue(tab2[i - size] == d.getByte(i));
+			assertEquals(tab2[i - size], d.getByte(i));
 		}
 		d.insertData(0, dd);
 		for (int i = size - 1; i >= 0; i--) {
-			assertTrue(tab2[i] == d.getByte(i));
+			assertEquals(tab2[i], d.getByte(i));
 		}
 
 		dd.insertValues(dd.getSize(), 10);
-		assertTrue(dd.getSize() == tab.length + 10);
+		assertEquals(dd.getSize(), tab.length + 10);
 		for (int i = size - 1; i >= 0; i--) {
-			assertTrue(tab2[i] == dd.getByte(i));
+			assertEquals(tab2[i], dd.getByte(i));
 		}
 		dd.insertValues(0, 10);
-		assertTrue(dd.getSize() == tab.length + 20);
+		assertEquals(dd.getSize(), tab.length + 20);
 		for (int i = size - 1; i >= 0; i--) {
-			assertTrue(tab2[i] == dd.getByte(i + 10));
+			assertEquals(tab2[i], dd.getByte(i + 10));
 		}
 	}
 
@@ -284,21 +275,21 @@ public class testDataBufferUnsignedByte extends testDataBuffer {
 	public void removeValues() {
 		DataBufferUnsignedByte d = new DataBufferUnsignedByte(tab);
 		d.removeValues(0, 10);
-		assertTrue(d.getSize() == 40);
+		assertEquals(40, d.getSize());
 		for (int i = 9; i >= 0; i--) {
-			assertTrue(tab[i + 10] == d.getByte(i));
+			assertEquals(tab[i + 10], d.getByte(i));
 		}
 		d = new DataBufferUnsignedByte(tab);
 		d.removeValues(d.getSize() - 10, 10);
-		assertTrue(d.getSize() == 40);
+		assertEquals(40, d.getSize());
 		for (int i = 9; i >= 0; i--) {
-			assertTrue(tab[i] == d.getByte(i));
+			assertEquals(tab[i], d.getByte(i));
 		}
 
 		d = new DataBufferUnsignedByte(tab);
 		try {
 			d.removeValues(0, size + 10);
-			assertTrue(false);
+			fail();
 		} catch (Exception e) {
 			assertTrue(true);
 		}
@@ -306,7 +297,7 @@ public class testDataBufferUnsignedByte extends testDataBuffer {
 		d = new DataBufferUnsignedByte(tab);
 		try {
 			d.removeValues(-1, size + 10);
-			assertTrue(false);
+			fail();
 		} catch (Exception e) {
 			assertTrue(true);
 		}
@@ -332,6 +323,7 @@ public class testDataBufferUnsignedByte extends testDataBuffer {
 			ok = false;
 		} finally {
 			try {
+				assert oOut != null;
 				oOut.flush();
 				oOut.close();
 				fOut.close();
@@ -344,14 +336,11 @@ public class testDataBufferUnsignedByte extends testDataBuffer {
 			fIn = new FileInputStream(".test_databufferbyte.dat");
 			oIn = new ObjectInputStream(fIn);
 			DataBufferUnsignedByte dd = (DataBufferUnsignedByte) oIn.readObject();
-			assertTrue(dd.getSize() == d.getSize());
+			assertEquals(dd.getSize(), d.getSize());
 			for (int i = d.getSize() - 1; i >= 0; i--) {
-				assertTrue(d.getByte(i) == dd.getByte(i));
+				assertEquals(d.getByte(i), dd.getByte(i));
 			}
-		} catch (IOException e) {
-			e.printStackTrace();
-			ok = false;
-		} catch (ClassNotFoundException e) {
+		} catch (IOException | ClassNotFoundException e) {
 			e.printStackTrace();
 			ok = false;
 		} finally {

@@ -46,6 +46,7 @@ import com.distrimind.util.Utils;
  *
  */
 public class VersionTests {
+	@SuppressWarnings("ResultOfMethodCallIgnored")
 	@Test
 	void testFunctions() {
 		Utils.VERSION.toString();

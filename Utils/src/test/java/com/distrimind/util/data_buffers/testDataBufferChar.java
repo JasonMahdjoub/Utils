@@ -35,10 +35,6 @@ knowledge of the CeCILL-C license and that you accept its terms.
 package com.distrimind.util.data_buffers;
 
 
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -49,6 +45,8 @@ import java.util.Random;
 
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+
+import static org.testng.Assert.*;
 
 /**
  * 
@@ -105,7 +103,7 @@ public final class testDataBufferChar extends testDataBuffer {
 	public void testGetsSets() {
 		DataBufferChar d = new DataBufferChar(tab.clone());
 		for (int i = size - 1; i >= 0; i--) {
-			assertTrue(tab[i] == d.getChar(i));
+			assertEquals(tab[i], d.getChar(i));
 		}
 
 		d = new DataBufferChar(size);
@@ -113,13 +111,13 @@ public final class testDataBufferChar extends testDataBuffer {
 			d.setChar(i, tab[i]);
 		}
 		for (int i = size - 1; i >= 0; i--) {
-			assertTrue((byte) tab[i] == d.getByte(i));
-			assertTrue(tab[i] == d.getChar(i));
-			assertTrue((double) tab[i] == d.getDouble(i));
-			assertTrue((float) tab[i] == d.getFloat(i));
-			assertTrue((int) tab[i] == d.getInt(i));
-			assertTrue((long) tab[i] == d.getLong(i));
-			assertTrue((short) tab[i] == d.getShort(i));
+			assertEquals((byte) tab[i], d.getByte(i));
+			assertEquals(tab[i], d.getChar(i));
+			assertEquals((double) tab[i], d.getDouble(i), 0.0);
+			assertEquals((float) tab[i], d.getFloat(i), 0.0);
+			assertEquals((int) tab[i], d.getInt(i));
+			assertEquals((long) tab[i], d.getLong(i));
+			assertEquals((short) tab[i], d.getShort(i));
 		}
 
 		DataBufferChar dbool = new DataBufferChar(size);
@@ -142,19 +140,19 @@ public final class testDataBufferChar extends testDataBuffer {
 		}
 
 		for (int i = size - 1; i >= 0; i--) {
-			assertTrue((tab[i] > 0 ? 1 : 0) == dbool.getChar(i));
-			assertTrue((byte) tab[i] == db.getByte(i));
-			assertTrue((double) tab[i] == dd.getDouble(i));
-			assertTrue((float) tab[i] == df.getFloat(i));
-			assertTrue((int) tab[i] == di.getInt(i));
-			assertTrue((long) tab[i] == dl.getLong(i));
-			assertTrue((short) tab[i] == ds.getShort(i));
+			assertEquals((tab[i] > 0 ? 1 : 0), dbool.getChar(i));
+			assertEquals((byte) tab[i], db.getByte(i));
+			assertEquals((double) tab[i], dd.getDouble(i), 0.0);
+			assertEquals((float) tab[i], df.getFloat(i), 0.0);
+			assertEquals((int) tab[i], di.getInt(i));
+			assertEquals((long) tab[i], dl.getLong(i));
+			assertEquals((short) tab[i], ds.getShort(i));
 		}
 
 		try {
 			d.getBoolean(0);
-			assertTrue(false, "getting a boolean on a DataBufferChar should be imposible");
-		} catch (IllegalAccessError i) {
+			fail("getting a boolean on a DataBufferChar should be imposible");
+		} catch (IllegalAccessError ignored) {
 		}
 
 	}
@@ -164,9 +162,9 @@ public final class testDataBufferChar extends testDataBuffer {
 	public void testClone() {
 		DataBufferChar d = new DataBufferChar(tab);
 		DataBufferChar dd = d.clone();
-		assertFalse(d == dd, "A cloned object cannot have the same reference");
+		assertNotSame(d, dd, "A cloned object cannot have the same reference");
 		for (int i = d.getSize() - 1; i >= 0; i--) {
-			assertTrue(d.getChar(i) == dd.getChar(i));
+			assertEquals(d.getChar(i), dd.getChar(i));
 		}
 	}
 
@@ -174,7 +172,7 @@ public final class testDataBufferChar extends testDataBuffer {
 	@Test
 	public void getData() {
 		DataBufferChar d = new DataBufferChar(tab);
-		assertTrue(d.getData() == tab);
+		assertSame(d.getData(), tab);
 	}
 
 	@Override
@@ -185,64 +183,57 @@ public final class testDataBufferChar extends testDataBuffer {
 		DataBufferChar dd = new DataBufferChar(0);
 		dd.setData(d.clone());
 		for (int i = size - 1; i >= 0; i--) {
-			assertTrue(tab[i] == d.getChar(i));
-			assertTrue(tab[i] == dd.getChar(i));
+			assertEquals(tab[i], d.getChar(i));
+			assertEquals(tab[i], dd.getChar(i));
 		}
 
 		boolean tbool[] = testDataBufferBool.getTab(size);
 		d.setData(tbool);
 		for (int i = size - 1; i >= 0; i--) {
-			assertTrue(tbool[i] == (d.getChar(i) % 2 == 0) ? false : true);
+			assertTrue(tbool[i] != (d.getChar(i) % 2 == 0));
 		}
-		tbool = null;
 
 		byte tb[] = testDataBufferByte.getTab(size);
 		d.setData(tb);
 		for (int i = size - 1; i >= 0; i--) {
-			assertTrue((char) tb[i] == d.getChar(i));
+			assertEquals((char) tb[i], d.getChar(i));
 		}
-		tb = null;
 
-		double td[] = testDataBufferDouble.getTab(size);
+        double td[] = testDataBufferDouble.getTab(size);
 		d.setData(td);
 		for (int i = size - 1; i >= 0; i--) {
-			assertTrue((char) td[i] == d.getChar(i));
+			assertEquals((char) td[i], d.getChar(i));
 		}
-		td = null;
 
-		float tf[] = testDataBufferFloat.getTab(size);
+        float tf[] = testDataBufferFloat.getTab(size);
 		d.setData(tf);
 		for (int i = size - 1; i >= 0; i--) {
-			assertTrue((char) tf[i] == d.getChar(i));
+			assertEquals((char) tf[i], d.getChar(i));
 		}
-		tf = null;
 
-		int ti[] = testDataBufferInt.getTab(size);
+        int ti[] = testDataBufferInt.getTab(size);
 		d.setData(ti);
 		for (int i = size - 1; i >= 0; i--) {
-			assertTrue((char) ti[i] == d.getChar(i));
+			assertEquals((char) ti[i], d.getChar(i));
 		}
-		ti = null;
 
-		long tl[] = testDataBufferLong.getTab(size);
+        long tl[] = testDataBufferLong.getTab(size);
 		d.setData(tl);
 		for (int i = size - 1; i >= 0; i--) {
-			assertTrue((char) tl[i] == d.getChar(i));
+			assertEquals((char) tl[i], d.getChar(i));
 		}
-		tl = null;
 
-		short ts[] = testDataBufferShort.getTab(size);
+        short ts[] = testDataBufferShort.getTab(size);
 		d.setData(ts);
 		for (int i = size - 1; i >= 0; i--) {
-			assertTrue((char) ts[i] == d.getChar(i));
+			assertEquals((char) ts[i], d.getChar(i));
 		}
-		ts = null;
-		d = new DataBufferChar(0);
+        d = new DataBufferChar(0);
 
 		try {
-			d.setData(Double.valueOf(0.0));
-			assertTrue(false, "setting any object other than numeric buffer on a DataBufferChar should be imposible");
-		} catch (IllegalArgumentException i) {
+			d.setData(0.0);
+			fail("setting any object other than numeric buffer on a DataBufferChar should be imposible");
+		} catch (IllegalArgumentException ignored) {
 		}
 
 	}
@@ -255,27 +246,27 @@ public final class testDataBufferChar extends testDataBuffer {
 		DataBufferChar d = new DataBufferChar(tab);
 		DataBufferChar dd = new DataBufferChar(tab2);
 		d.insertData(d.getSize(), dd);
-		assertTrue(d.getSize() == dd.getSize() * 2);
+		assertEquals(d.getSize(), dd.getSize() * 2);
 		for (int i = size - 1; i >= 0; i--) {
-			assertTrue(tab[i] == d.getChar(i));
+			assertEquals(tab[i], d.getChar(i));
 		}
 		for (int i = size * 2 - 1; i >= size; i--) {
-			assertTrue(tab2[i - size] == d.getChar(i));
+			assertEquals(tab2[i - size], d.getChar(i));
 		}
 		d.insertData(0, dd);
 		for (int i = size - 1; i >= 0; i--) {
-			assertTrue(tab2[i] == d.getChar(i));
+			assertEquals(tab2[i], d.getChar(i));
 		}
 
 		dd.insertValues(dd.getSize(), 10);
-		assertTrue(dd.getSize() == tab.length + 10);
+		assertEquals(dd.getSize(), tab.length + 10);
 		for (int i = size - 1; i >= 0; i--) {
-			assertTrue(tab2[i] == dd.getChar(i));
+			assertEquals(tab2[i], dd.getChar(i));
 		}
 		dd.insertValues(0, 10);
-		assertTrue(dd.getSize() == tab.length + 20);
+		assertEquals(dd.getSize(), tab.length + 20);
 		for (int i = size - 1; i >= 0; i--) {
-			assertTrue(tab2[i] == dd.getChar(i + 10));
+			assertEquals(tab2[i], dd.getChar(i + 10));
 		}
 	}
 
@@ -284,21 +275,21 @@ public final class testDataBufferChar extends testDataBuffer {
 	public void removeValues() {
 		DataBufferChar d = new DataBufferChar(tab);
 		d.removeValues(0, 10);
-		assertTrue(d.getSize() == 40);
+		assertEquals(40, d.getSize());
 		for (int i = 9; i >= 0; i--) {
-			assertTrue(tab[i + 10] == d.getChar(i));
+			assertEquals(tab[i + 10], d.getChar(i));
 		}
 		d = new DataBufferChar(tab);
 		d.removeValues(d.getSize() - 10, 10);
-		assertTrue(d.getSize() == 40);
+		assertEquals(40, d.getSize());
 		for (int i = 9; i >= 0; i--) {
-			assertTrue(tab[i] == d.getChar(i));
+			assertEquals(tab[i], d.getChar(i));
 		}
 
 		d = new DataBufferChar(tab);
 		try {
 			d.removeValues(0, size + 10);
-			assertTrue(false);
+			fail();
 		} catch (Exception e) {
 			assertTrue(true);
 		}
@@ -306,7 +297,7 @@ public final class testDataBufferChar extends testDataBuffer {
 		d = new DataBufferChar(tab);
 		try {
 			d.removeValues(-1, size + 10);
-			assertTrue(false);
+			fail();
 		} catch (Exception e) {
 			assertTrue(true);
 		}
@@ -331,6 +322,7 @@ public final class testDataBufferChar extends testDataBuffer {
 			ok = false;
 		} finally {
 			try {
+				assert oOut != null;
 				oOut.flush();
 				oOut.close();
 				fOut.close();
@@ -343,14 +335,11 @@ public final class testDataBufferChar extends testDataBuffer {
 			fIn = new FileInputStream(".test_databufferchar.dat");
 			oIn = new ObjectInputStream(fIn);
 			DataBufferChar dd = (DataBufferChar) oIn.readObject();
-			assertTrue(dd.getSize() == d.getSize());
+			assertEquals(dd.getSize(), d.getSize());
 			for (int i = d.getSize() - 1; i >= 0; i--) {
-				assertTrue(d.getChar(i) == dd.getChar(i));
+				assertEquals(d.getChar(i), dd.getChar(i));
 			}
-		} catch (IOException e) {
-			e.printStackTrace();
-			ok = false;
-		} catch (ClassNotFoundException e) {
+		} catch (IOException | ClassNotFoundException e) {
 			e.printStackTrace();
 			ok = false;
 		} finally {

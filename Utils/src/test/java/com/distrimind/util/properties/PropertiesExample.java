@@ -65,8 +65,7 @@ import com.distrimind.util.crypto.MessageDigestType;
 import com.distrimind.util.crypto.SecureRandomType;
 import com.distrimind.util.crypto.SymmetricEncryptionType;
 import com.distrimind.util.crypto.SymmetricSecretKey;
-import com.distrimind.util.properties.AbstractMultiFormatObjectParser;
-import com.distrimind.util.properties.MultiFormatProperties;
+
 import com.distrimind.util.version.Version;
 
 import gnu.vm.jgnu.security.InvalidAlgorithmParameterException;
@@ -297,20 +296,6 @@ public class PropertiesExample extends MultiFormatProperties {
 				return false;
 
 			Assert.assertFalse(version == null ^ pe.version == null);
-			if (version == null ^ pe.version == null) {
-				Assert.assertEquals(version.getAlphaBetaVersion(), pe.version.getAlphaBetaVersion());
-				Assert.assertEquals(version.getBuildNumber(), pe.version.getBuildNumber());
-				Assert.assertEquals(version.getMajor(), pe.version.getMajor());
-				Assert.assertEquals(version.getMinor(), pe.version.getMinor());
-				Assert.assertEquals(version.getProgramName(), pe.version.getProgramName());
-				Assert.assertEquals(version.getRevision(), pe.version.getRevision());
-				Assert.assertEquals(version.getProjectEndDate(), pe.version.getProjectEndDate());
-				Assert.assertEquals(version.getProjectStartDate(), pe.version.getProjectStartDate());
-				Assert.assertEquals(version.getType(), pe.version.getType());
-				Assert.assertEquals(version.getDevelopers(), pe.version.getDevelopers());
-				Assert.assertEquals(version.getCreators(), pe.version.getCreators());
-				Assert.assertEquals(version.getDescriptions(), pe.version.getDescriptions());
-			}
 			return true;
 		} else
 			return false;
@@ -327,13 +312,13 @@ public class PropertiesExample extends MultiFormatProperties {
 		floatValue = rand.nextFloat();
 		doubleValue = rand.nextDouble();
 
-		IntegerValue = Integer.valueOf(rand.nextInt());
-		ShortValue = Short.valueOf((short) rand.nextInt());
-		ByteValue = Byte.valueOf((byte) rand.nextInt());
-		BooleanValue = Boolean.valueOf(rand.nextBoolean());
-		LongValue = Long.valueOf(rand.nextLong());
-		FloatValue = Float.valueOf(rand.nextFloat());
-		DoubleValue = Double.valueOf(rand.nextDouble());
+		IntegerValue = rand.nextInt();
+		ShortValue = (short) rand.nextInt();
+		ByteValue = (byte) rand.nextInt();
+		BooleanValue = rand.nextBoolean();
+		LongValue = rand.nextLong();
+		FloatValue = rand.nextFloat();
+		DoubleValue = rand.nextDouble();
 
 		stringValue = getString(rand);
 		fileValue = new File(getString(rand));
@@ -349,7 +334,7 @@ public class PropertiesExample extends MultiFormatProperties {
 		className = SubProperties.class;
 		map = new HashMap<>();
 		for (int i = 0; i < 10; i++)
-			map.put(getString(rand), Integer.valueOf(rand.nextInt()));
+			map.put(getString(rand), rand.nextInt());
 		//map2 = (HashMap<String, Integer>) map;*/
 		list = new ArrayList<>();
 		for (int i = 0; i < 10; i++)
@@ -358,7 +343,7 @@ public class PropertiesExample extends MultiFormatProperties {
 		for (int i = 0; i < 10; i++)
 			list2.add(getString(rand));
 		list3 = (ArrayList<String>) list;
-		list4 = (LinkedList<String>) list2;
+		list4 = list2;
 		SubProperties sb = new SubProperties();
 		sb.value = getString(rand);
 		subProperties = sb;
@@ -366,9 +351,9 @@ public class PropertiesExample extends MultiFormatProperties {
 		for (int i = 0; i < 10; i++)
 			getFreeStringProperties().put(getString(rand), getString(rand));
 
-		date = new Date(System.currentTimeMillis()+1000l*rand.nextInt());
+		date = new Date(System.currentTimeMillis()+ 1000L *rand.nextInt());
 		calendar = Calendar.getInstance();
-		calendar.setTime(new Date(System.currentTimeMillis()+1000l*rand.nextInt()));
+		calendar.setTime(new Date(System.currentTimeMillis()+ 1000L *rand.nextInt()));
 		version = Utils.VERSION;
 		AbstractSecureRandom random = SecureRandomType.DEFAULT.getSingleton(null);
 		secretKey = SymmetricEncryptionType.DEFAULT.getKeyGenerator(random).generateKey();
