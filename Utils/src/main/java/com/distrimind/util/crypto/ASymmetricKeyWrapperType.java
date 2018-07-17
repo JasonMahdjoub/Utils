@@ -206,7 +206,7 @@ public enum ASymmetricKeyWrapperType {
 			try
 			{
 				javax.crypto.Cipher c;
-				if (provider.equals(CodeProvider.BCFIPS) || (OSVersion.getCurrentOSVersion()!=null && OSVersion.getCurrentOSVersion().getOS()==OS.MAC_OS && (this.getCodeProvider()==CodeProvider.SunJCE)))
+				if (provider.equals(CodeProvider.BCFIPS) || (OSVersion.getCurrentOSVersion()!=null && OSVersion.getCurrentOSVersion().getOS()==OS.MAC_OS_X && (this.getCodeProvider()==CodeProvider.SunJCE)))
 				{
 					CodeProvider.ensureBouncyCastleProviderLoaded();
 					
@@ -348,7 +348,7 @@ public enum ASymmetricKeyWrapperType {
 				
 				
 				javax.crypto.Cipher c;
-				if (provider.equals(CodeProvider.BCFIPS) || (OSVersion.getCurrentOSVersion()!=null && OSVersion.getCurrentOSVersion().getOS()==OS.MAC_OS && (this.getCodeProvider()==CodeProvider.SunJCE)))
+				if (provider.equals(CodeProvider.BCFIPS) || (OSVersion.getCurrentOSVersion()!=null && OSVersion.getCurrentOSVersion().getOS()==OS.MAC_OS_X && (this.getCodeProvider()==CodeProvider.SunJCE)))
 				{
 					CodeProvider.ensureBouncyCastleProviderLoaded();
 					

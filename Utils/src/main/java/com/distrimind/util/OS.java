@@ -61,7 +61,7 @@ public enum OS {
     BEOS(".*beos.*"),
     QNX(".*qnx.*"),
     IOS(".*((iphone)|(ipad)|(ios)).*"),
-	MAC_OS(".*mac.*"),
+	MAC_OS_X(".*mac.*"),
     OS_2(".*os/2.*"),
 	WINDOWS(".*win.*"),
 	ANDROID(".*(android).*"),
@@ -188,7 +188,7 @@ public enum OS {
 	@SuppressWarnings("unused")
     public boolean SIPrefixAreUnderstoodAsBinaryPrefixForByteMultiples()
 	{
-		return this == WINDOWS || (this == MAC_OS && Double.valueOf(OSVersion.OS_VERSION) < 10.1);
+		return this == WINDOWS || (this == MAC_OS_X && Double.valueOf(OSVersion.OS_VERSION) < 10.1);
 	}
 
 	@SuppressWarnings("unused")

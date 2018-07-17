@@ -68,7 +68,7 @@ public abstract class TraceRoute {
 						instance.set(new LinuxTraceRoute());
 					else if (OSVersion.getCurrentOSVersion()!=null && OSVersion.getCurrentOSVersion().getOS()==OS.WINDOWS)
 						instance.set(new WindowsTraceRoute());
-					else if (OSVersion.getCurrentOSVersion()!=null && OSVersion.getCurrentOSVersion().getOS()==OS.MAC_OS)
+					else if (OSVersion.getCurrentOSVersion()!=null && OSVersion.getCurrentOSVersion().getOS()==OS.MAC_OS_X)
 						instance.set(new MacOSTraceRoute());
 					else
 						instance.set(new DefaultTraceRoute());

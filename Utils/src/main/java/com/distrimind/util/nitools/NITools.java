@@ -70,7 +70,7 @@ public abstract class NITools {
 						instance.set(new WindowsNITools());// TODO see for
 					// Windows XP
 					// compatibility
-					else if (OSVersion.getCurrentOSVersion()!=null && OSVersion.getCurrentOSVersion().getOS()==OS.MAC_OS)
+					else if (OSVersion.getCurrentOSVersion()!=null && OSVersion.getCurrentOSVersion().getOS()==OS.MAC_OS_X)
 						instance.set(new MacOSXNITools());
 					else
 						instance.set(new DefaultNITools());

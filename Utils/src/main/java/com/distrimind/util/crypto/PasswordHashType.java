@@ -134,7 +134,7 @@ public enum PasswordHashType {
 		if (defaultOf != null)
 			return defaultOf.hash(data, off, len, salt, cost, hashLength);
 		
-		if (OSVersion.getCurrentOSVersion()!=null && OSVersion.getCurrentOSVersion().getOS()==OS.MAC_OS)
+		if (OSVersion.getCurrentOSVersion()!=null && OSVersion.getCurrentOSVersion().getOS()==OS.MAC_OS_X)
 		{
 			if (this==PBKDF2WithHMacSHA256)
 				return PasswordHashType.BC_FIPS_PBKFD2WithHMacSHA2_256.hash(data, off, len, salt, cost, hashLength);
@@ -239,7 +239,7 @@ public enum PasswordHashType {
 
 		if (defaultOf != null)
 			return defaultOf.hash(password, salt, cost, hashLength);
-		if (OSVersion.getCurrentOSVersion()!=null && OSVersion.getCurrentOSVersion().getOS()==OS.MAC_OS)
+		if (OSVersion.getCurrentOSVersion()!=null && OSVersion.getCurrentOSVersion().getOS()==OS.MAC_OS_X)
 		{
 			if (this==PBKDF2WithHMacSHA256)
 				return PasswordHashType.BC_FIPS_PBKFD2WithHMacSHA2_256.hash(password, salt, cost, hashLength);
