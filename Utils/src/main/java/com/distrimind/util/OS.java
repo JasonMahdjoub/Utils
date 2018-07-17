@@ -55,17 +55,17 @@ import static com.distrimind.util.OSVersion.getCurrentOSVersion;
  *
  */
 public enum OS {
-	LINUX("(linux)|(x11)"),
-    OPEN_BSD("(openbsd)"),
-    SUN_OS("sunos"),
-    BEOS("beos"),
-    QNX("qnx"),
-    IOS("(iphone)|(ipad)"),
+	LINUX(".*((linux)|(x11)).*"),
+    OPEN_BSD(".*(openbsd).*"),
+    SUN_OS(".*sunos.*"),
+    BEOS(".*beos.*"),
+    QNX(".*qnx.*"),
+    IOS(".*((iphone)|(ipad)|(ios)).*"),
 	MAC_OS(".*mac.*"),
-    OS_2("os/2"),
+    OS_2(".*os/2.*"),
 	WINDOWS(".*win.*"),
-	ANDROID("(android)"),
-    SEARCH_BOT("(nuhk)|(googlebot)|(yammybot)|(openbot)|(slurp)|(mnsbot)|(ssk jeeves/teoma)");
+	ANDROID(".*(android).*"),
+    SEARCH_BOT(".*((nuhk)|(googlebot)|(yammybot)|(openbot)|(slurp)|(mnsbot)|(ssk jeeves/teoma)).*");
 
 	final Pattern pattern;
 
