@@ -70,7 +70,8 @@ class MacOSHardDriveDetect extends UnixHardDriveDetect {
         return partitions;
     }
 
-    @Override
+    @SuppressWarnings("ConstantConditions")
+	@Override
 	void scanDisksAndPartitions() throws IOException {
 
 		try {

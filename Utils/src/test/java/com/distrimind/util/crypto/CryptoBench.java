@@ -43,7 +43,7 @@ import java.io.IOException;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 
-import com.distrimind.util.OSValidator;
+import com.distrimind.util.OS;
 import com.distrimind.util.Timer;
 
 import gnu.vm.jgnu.security.InvalidAlgorithmParameterException;
@@ -71,7 +71,7 @@ public class CryptoBench {
 	@org.testng.annotations.Test(dataProvider="provideDataForTestEncryptionAndSignatureSpeed")
 	public void testEncryptionAndSignatureSpeed(SymmetricEncryptionType type) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException, NoSuchProviderException, InvalidKeySpecException, IllegalStateException, IllegalBlockSizeException, BadPaddingException, IOException, SignatureException, ShortBufferException, InvalidParameterSpecException
 	{
-		System.out.println("JRE Version : "+OSValidator.getCurrentJREVersionDouble());
+		System.out.println("JRE Version : "+OS.getCurrentJREVersionDouble());
 		byte toEncrypt[]=new byte[1024*1024*400];
 		int shift=32*1024;
 		SymmetricEncryptionAlgorithm cipher=new SymmetricEncryptionAlgorithm(SecureRandomType.FORTUNA_WITH_BC_FIPS_APPROVED.getInstance(null), type.getKeyGenerator(SecureRandomType.FORTUNA_WITH_BC_FIPS_APPROVED_FOR_KEYS.getInstance(null), type.getDefaultKeySizeBits()).generateKey());

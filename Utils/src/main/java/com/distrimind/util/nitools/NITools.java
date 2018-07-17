@@ -40,7 +40,8 @@ import java.net.SocketException;
 import java.util.Enumeration;
 import java.util.concurrent.atomic.AtomicReference;
 
-import com.distrimind.util.OSValidator;
+import com.distrimind.util.OS;
+import com.distrimind.util.OSVersion;
 
 /**
  * Class that gives tools for network interfaces, independently from current OS
@@ -62,14 +63,14 @@ public abstract class NITools {
 		if (instance.get() == null) {
 			synchronized (instance) {
 				if (instance.get() == null) {
-					if (OSValidator.getCurrentOS()==OSValidator.LINUX)
+					if (OSVersion.getCurrentOSVersion()!=null && OSVersion.getCurrentOSVersion().getOS()==OS.LINUX)
 						instance.set(new LinuxNITools());
-					else if (OSValidator.getCurrentOS()==OSValidator.WINDOWS
-							&& !OSValidator.getCurrentOS().getOSVersion().toLowerCase().contains("windows xp"))
+					else if (OSVersion.getCurrentOSVersion()!=null && OSVersion.getCurrentOSVersion().getOS()==OS.WINDOWS
+							&& !OSVersion.WINDOWS_XP.getLowerOrEqualsVersions().contains(OSVersion.getCurrentOSVersion()))
 						instance.set(new WindowsNITools());// TODO see for
 					// Windows XP
 					// compatibility
-					else if (OSValidator.getCurrentOS()==OSValidator.MACOS)
+					else if (OSVersion.getCurrentOSVersion()!=null && OSVersion.getCurrentOSVersion().getOS()==OS.MAC_OS)
 						instance.set(new MacOSXNITools());
 					else
 						instance.set(new DefaultNITools());

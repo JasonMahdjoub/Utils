@@ -77,7 +77,7 @@ public class HumanReadableBytesCount {
     }
     public static String convertToString(long quantityInBytes, boolean longFormat, boolean si, boolean useOctet)
     {
-        return convertToString(quantityInBytes, longFormat, si, useOctet, OSValidator.getCurrentOS().SIPrefixAreUnderstoodAsBinaryPrefixForByteMultiples());
+        return convertToString(quantityInBytes, longFormat, si, useOctet, OSVersion.getCurrentOSVersion() != null && OSVersion.getCurrentOSVersion().getOS().SIPrefixAreUnderstoodAsBinaryPrefixForByteMultiples());
     }
 
     public static String convertToString(long quantityInBytes, boolean longFormat, boolean si, boolean useOctet, boolean siIsBin)
@@ -121,7 +121,7 @@ public class HumanReadableBytesCount {
     }
     public static long valueOf(String quantity)
     {
-        return valueOf(quantity, OSValidator.getCurrentOS().SIPrefixAreUnderstoodAsBinaryPrefixForByteMultiples());
+        return valueOf(quantity, OSVersion.getCurrentOSVersion() != null && OSVersion.getCurrentOSVersion().getOS().SIPrefixAreUnderstoodAsBinaryPrefixForByteMultiples());
     }
     public static long valueOf(String quantity, boolean siIsBin)
     {

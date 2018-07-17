@@ -192,13 +192,13 @@ public abstract class AbstractNewHopeKeyAgreement extends KeyAgreement{
 			
 			return AccessController.doPrivileged(new PrivilegedExceptionAction<Method>() {
 
-				@Override
-				public Method run() throws Exception {
-					Method m = c.getDeclaredMethod(method_name, parameters);
-					m.setAccessible(true);
-					return m;
-				}
-			});
+                @Override
+                public Method run() throws Exception {
+                    Method m = c.getDeclaredMethod(method_name, parameters);
+                    m.setAccessible(true);
+                    return m;
+                }
+            });
 
 				
 		} catch (SecurityException | PrivilegedActionException  e) {
@@ -219,13 +219,13 @@ public abstract class AbstractNewHopeKeyAgreement extends KeyAgreement{
 			
 			return AccessController.doPrivileged(new PrivilegedExceptionAction<Field>() {
 
-				@Override
-				public Field run() throws Exception {
-					Field m = c.getDeclaredField(method_name);
-					m.setAccessible(true);
-					return m;
-				}
-			});
+                @Override
+                public Field run() throws Exception {
+                    Field m = c.getDeclaredField(method_name);
+                    m.setAccessible(true);
+                    return m;
+                }
+            });
 
 				
 		} catch (SecurityException | PrivilegedActionException  e) {

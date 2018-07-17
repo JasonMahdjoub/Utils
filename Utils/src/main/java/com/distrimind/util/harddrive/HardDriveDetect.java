@@ -42,7 +42,8 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
-import com.distrimind.util.OSValidator;
+import com.distrimind.util.OS;
+import com.distrimind.util.OSVersion;
 
 
 /**
@@ -68,11 +69,11 @@ public abstract class HardDriveDetect {
 		if (instance.get() == null) {
 			synchronized (instance) {
 				if (instance.get() == null) {
-					if (OSValidator.getCurrentOS()==OSValidator.LINUX)
+					if (OSVersion.getCurrentOSVersion()!=null && OSVersion.getCurrentOSVersion().getOS()==OS.LINUX)
 						instance.set(new LinuxHardDriveDetect());
-					else if (OSValidator.getCurrentOS()==OSValidator.WINDOWS)
+					else if (OSVersion.getCurrentOSVersion()!=null && OSVersion.getCurrentOSVersion().getOS()==OS.WINDOWS)
 						instance.set(new WindowsHardDriveDetect());
-					else if (OSValidator.getCurrentOS()==OSValidator.MACOS)
+					else if (OSVersion.getCurrentOSVersion()!=null && OSVersion.getCurrentOSVersion().getOS()==OS.MAC_OS)
 						instance.set(new MacOSHardDriveDetect());
 					else
 						instance.set(new DefaultHardDriveDetect());

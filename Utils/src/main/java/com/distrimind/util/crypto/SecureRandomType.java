@@ -50,13 +50,14 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.distrimind.util.OSVersion;
 import org.bouncycastle.crypto.CryptoServicesRegistrar;
 import org.bouncycastle.crypto.EntropySourceProvider;
 import org.bouncycastle.crypto.fips.FipsDRBG;
 import org.bouncycastle.crypto.util.BasicEntropySourceProvider;
 
 import com.distrimind.util.Bits;
-import com.distrimind.util.OSValidator;
+import com.distrimind.util.OS;
 
 /**
  * 
@@ -349,7 +350,7 @@ public enum SecureRandomType {
 				if (defaultNativeNonBlockingSeed==null)
 				{
 					SecureRandom sr=null;
-					if (OSValidator.getCurrentOS().isUnix())
+					if (OSVersion.getCurrentOSVersion()!=null && OSVersion.getCurrentOSVersion().getOS().isUnix())
 					{
 						try {
 							sr=SecureRandom.getInstance("NativePRNG", CodeProvider.SUN.checkProviderWithCurrentOS().name());
@@ -397,7 +398,7 @@ public enum SecureRandomType {
 	
 	static void tryToGenerateNativeNonBlockingRandomBytes(final byte[] buffer) throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.NoSuchProviderException
 	{
-		if (OSValidator.getCurrentJREVersionDouble()>=1.8)
+		if (OS.getCurrentJREVersionDouble()>=1.8)
 		{
 			if (!nativeNonBlockingSeedInitialized)
 			{
@@ -419,7 +420,7 @@ public enum SecureRandomType {
 				nativeNonBlockingSeed.nextBytes(buffer);
             }
 		}
-		else if (OSValidator.getCurrentOS().isUnix())
+		else if (OSVersion.getCurrentOSVersion()!=null && OSVersion.getCurrentOSVersion().getOS().isUnix())
 		{
 			
 			AccessController.doPrivileged(new PrivilegedAction<Void>() {
@@ -457,9 +458,9 @@ public enum SecureRandomType {
 	}
 	static byte[] tryToGenerateNativeNonBlockingSeed(final int numBytes) throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.NoSuchProviderException
 	{
-		if (OSValidator.getCurrentOS().isUnix())
+		if (OSVersion.getCurrentOSVersion()!=null && OSVersion.getCurrentOSVersion().getOS().isUnix())
 		{
-			if (OSValidator.getCurrentJREVersionDouble()>=1.8)
+			if (OS.getCurrentJREVersionDouble()>=1.8)
 			{
 				if (!nativeNonBlockingSeedInitialized)
 				{
@@ -485,23 +486,20 @@ public enum SecureRandomType {
 			return AccessController.doPrivileged(new PrivilegedAction<byte[]>() {
 
 				@SuppressWarnings("ResultOfMethodCallIgnored")
-                @Override
+				@Override
 				public byte[] run() {
-						synchronized(NativeNonBlockingSecureRandom.class)
-						{
-							File randomSource=getURandomPath();
-							
-							try (InputStream in = new FileInputStream(randomSource)) {
-								byte buffer[]=new byte[numBytes];
-								in.read(buffer);
-								return buffer;
-							}
-							catch(IOException e)
-							{
-								e.printStackTrace();
-							}
-							return getDefaultNativeNonBlockingSeedSingleton().generateSeed(numBytes);
+					synchronized (NativeNonBlockingSecureRandom.class) {
+						File randomSource = getURandomPath();
+
+						try (InputStream in = new FileInputStream(randomSource)) {
+							byte buffer[] = new byte[numBytes];
+							in.read(buffer);
+							return buffer;
+						} catch (IOException e) {
+							e.printStackTrace();
 						}
+						return getDefaultNativeNonBlockingSeedSingleton().generateSeed(numBytes);
+					}
 				}
 			});
 

@@ -52,7 +52,7 @@ import org.bouncycastle.crypto.general.Serpent;
 import org.bouncycastle.crypto.general.Twofish;
 
 import com.distrimind.util.Bits;
-import com.distrimind.util.OSValidator;
+import com.distrimind.util.OS;
 
 /**
  * List of symmetric encryption algorithms
@@ -137,10 +137,8 @@ public enum SymmetricEncryptionType {
 	static byte[] encodeSecretKey(final org.bouncycastle.crypto.SymmetricSecretKey key, String algorithmName)
 	{
 		
-		return Bits.concateEncodingWithShortSizedTabs(algorithmName.getBytes(), AccessController.doPrivileged(new PrivilegedAction<byte[]>()
-        {
-            public byte[] run()
-            {
+		return Bits.concateEncodingWithShortSizedTabs(algorithmName.getBytes(), AccessController.doPrivileged(new PrivilegedAction<byte[]>() {
+            public byte[] run() {
                 return key.getKeyBytes();
             }
         }));
@@ -255,7 +253,7 @@ public enum SymmetricEncryptionType {
 			return new BCCipher(this);
 					
 		} else {
-			if (OSValidator.getCurrentJREVersionDouble()<1.8 && this.getAlgorithmName().equals(AES_GCM.getAlgorithmName()) && this.getBlockMode().equals(AES_GCM.getBlockMode()) && this.getPadding().equals(AES_GCM.getPadding()))
+			if (OS.getCurrentJREVersionDouble()<1.8 && this.getAlgorithmName().equals(AES_GCM.getAlgorithmName()) && this.getBlockMode().equals(AES_GCM.getBlockMode()) && this.getPadding().equals(AES_GCM.getPadding()))
 					return BC_FIPS_AES_GCM.getCipherInstance();
 			try {
 				return new JavaNativeCipher(this, Cipher.getInstance(algorithmName + "/" + blockMode + "/" + padding, codeProviderForEncryption.name()));
@@ -293,7 +291,7 @@ public enum SymmetricEncryptionType {
 			res = new BCKeyGenerator(this);
 
 		} else {
-			if (OSValidator.getCurrentJREVersionDouble()<1.8 && this.getAlgorithmName().equals(AES_GCM.getAlgorithmName()) && this.getBlockMode().equals(AES_GCM.getBlockMode()) && this.getPadding().equals(AES_GCM.getPadding()))
+			if (OS.getCurrentJREVersionDouble()<1.8 && this.getAlgorithmName().equals(AES_GCM.getAlgorithmName()) && this.getBlockMode().equals(AES_GCM.getBlockMode()) && this.getPadding().equals(AES_GCM.getPadding()))
 				return BC_FIPS_AES_GCM.getKeyGenerator(random, keySizeBits);
 			try {
 				res = new JavaNativeKeyGenerator(this, javax.crypto.KeyGenerator.getInstance(algorithmName, CodeProviderForKeyGenerator.checkProviderWithCurrentOS().name()));
@@ -362,11 +360,11 @@ public enum SymmetricEncryptionType {
 	public short getEncodingSpeedIndex()
 	{
 		
-		return getEncodingSpeedIndex(OSValidator.getCurrentJREVersionByte(), OSValidator.supportAESIntrinsicsAcceleration());
+		return getEncodingSpeedIndex(OS.getCurrentJREVersionByte(), OS.supportAESIntrinsicsAcceleration());
 	}
 	public short getDecodingSpeedIndex()
 	{
-		return getDecodingSpeedIndex(OSValidator.getCurrentJREVersionByte(), OSValidator.supportAESIntrinsicsAcceleration());
+		return getDecodingSpeedIndex(OS.getCurrentJREVersionByte(), OS.supportAESIntrinsicsAcceleration());
 	}
 	
 	public short getAverageSpeedIndex()

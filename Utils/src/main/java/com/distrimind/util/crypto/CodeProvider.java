@@ -37,11 +37,12 @@ package com.distrimind.util.crypto;
 import java.security.Provider;
 import java.security.Security;
 
+import com.distrimind.util.OSVersion;
 import org.bouncycastle.jcajce.provider.BouncyCastleFipsProvider;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.pqc.jcajce.provider.BouncyCastlePQCProvider;
 
-import com.distrimind.util.OSValidator;
+import com.distrimind.util.OS;
 
 /**
  * List of asymmetric encryption algorithms
@@ -90,7 +91,7 @@ public enum CodeProvider {
 
 	CodeProvider checkProviderWithCurrentOS()
 	{
-		if (OSValidator.getCurrentOS()==OSValidator.ANDROID)
+		if (OSVersion.getCurrentOSVersion()!=null && OSVersion.getCurrentOSVersion().getOS()==OS.ANDROID)
 		{
 			if (this==SUN || this==SunJCE || this==SunJSSE || this==SunRsaSign || this==SunEC)
 				return BC;

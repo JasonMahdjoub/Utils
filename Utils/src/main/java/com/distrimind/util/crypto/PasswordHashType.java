@@ -41,6 +41,7 @@ import java.security.spec.InvalidKeySpecException;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 
+import com.distrimind.util.OSVersion;
 import org.bouncycastle.crypto.PasswordBasedDeriver;
 import org.bouncycastle.crypto.PasswordConverter;
 import org.bouncycastle.crypto.fips.FipsDigestAlgorithm;
@@ -50,7 +51,7 @@ import org.bouncycastle.crypto.generators.BCrypt;
 import org.bouncycastle.crypto.generators.SCrypt;
 
 import com.distrimind.util.Bits;
-import com.distrimind.util.OSValidator;
+import com.distrimind.util.OS;
 import com.distrimind.util.sizeof.ObjectSizer;
 
 
@@ -133,7 +134,7 @@ public enum PasswordHashType {
 		if (defaultOf != null)
 			return defaultOf.hash(data, off, len, salt, cost, hashLength);
 		
-		if (OSValidator.getCurrentOS()==OSValidator.MACOS)
+		if (OSVersion.getCurrentOSVersion()!=null && OSVersion.getCurrentOSVersion().getOS()==OS.MAC_OS)
 		{
 			if (this==PBKDF2WithHMacSHA256)
 				return PasswordHashType.BC_FIPS_PBKFD2WithHMacSHA2_256.hash(data, off, len, salt, cost, hashLength);
@@ -238,7 +239,7 @@ public enum PasswordHashType {
 
 		if (defaultOf != null)
 			return defaultOf.hash(password, salt, cost, hashLength);
-		if (OSValidator.getCurrentOS()==OSValidator.MACOS)
+		if (OSVersion.getCurrentOSVersion()!=null && OSVersion.getCurrentOSVersion().getOS()==OS.MAC_OS)
 		{
 			if (this==PBKDF2WithHMacSHA256)
 				return PasswordHashType.BC_FIPS_PBKFD2WithHMacSHA2_256.hash(password, salt, cost, hashLength);

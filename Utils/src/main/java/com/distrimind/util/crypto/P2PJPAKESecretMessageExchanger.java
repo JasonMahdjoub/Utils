@@ -403,13 +403,13 @@ public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
 			
 			return AccessController.doPrivileged(new PrivilegedExceptionAction<Field>() {
 
-				@Override
-				public Field run() throws Exception {
-					Field m = c.getDeclaredField(fieldName);
-					m.setAccessible(true);
-					return m;
-				}
-			});
+                @Override
+                public Field run() throws Exception {
+                    Field m = c.getDeclaredField(fieldName);
+                    m.setAccessible(true);
+                    return m;
+                }
+            });
 
 				
 		} catch (SecurityException | PrivilegedActionException  e) {

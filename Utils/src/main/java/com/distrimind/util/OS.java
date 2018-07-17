@@ -40,6 +40,11 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Pattern;
+
+import static com.distrimind.util.OSVersion.getCurrentOSVersion;
 
 /**
  * Set of functions giving information about the current running OS
@@ -49,19 +54,40 @@ import java.io.InputStreamReader;
  * @since Utils 1.0
  *
  */
-public enum OSValidator {
-	UNKNOW,
-	LINUX,
-	MACOS,
-	SOLARIS,
-	WINDOWS,
-	ANDROID;
-	
-	private static String OS = System.getProperty("os.name").toLowerCase();
+public enum OS {
+	LINUX("(linux)|(x11)"),
+    OPEN_BSD("(openbsd)"),
+    SUN_OS("sunos"),
+    BEOS("beos"),
+    QNX("qnx"),
+    IOS("(iphone)|(ipad)"),
+	MAC_OS(".*mac.*"),
+    OS_2("os/2"),
+	WINDOWS(".*win.*"),
+	ANDROID("(android)"),
+    SEARCH_BOT("(nuhk)|(googlebot)|(yammybot)|(openbot)|(slurp)|(mnsbot)|(ssk jeeves/teoma)");
 
-	private static String OS_VERSION = System.getProperty("os.name") + " " + System.getProperty("os.version");
+	final Pattern pattern;
+
+	OS(String regex)
+	{
+		this.pattern = Pattern.compile(regex);
+	}
+
+	@SuppressWarnings("unused")
+    public static OS getFrom(String userAgent) {
+		for (OS os : OS.values()) {
+			if (os.pattern.matcher(userAgent.toLowerCase()).matches())
+				return os;
+		}
+		return null;
+	}
+
+	static String OSName = System.getProperty("os.name").toLowerCase();
+
+
 	
-	static private volatile OSValidator currentOS=null;
+
 	
 	private static final double currentJREVersion;
 	static
@@ -88,59 +114,19 @@ public enum OSValidator {
 		return (byte)(currentJREVersion-1.0*10.0);
 	}
 	
-	public static OSValidator getCurrentOS()
-	{
-		if (currentOS==null)
-		{
-			if (isLinux())
-				currentOS=LINUX;
-			else if (isMac())
-				currentOS=OSValidator.MACOS;
-			else if (isSolaris())
-				currentOS=OSValidator.SOLARIS;
-			else if (isWindows())
-				currentOS=OSValidator.WINDOWS;
-			else if (isAndroid())
-				currentOS=OSValidator.ANDROID;
-			else
-				currentOS=UNKNOW;
-		}
-		return currentOS;
-	}
-	
-	
-	public String getOSVersion() {
-		return OS_VERSION;
-	}
 
-	private static boolean isLinux() {
 
-		return OS.contains("linux");
-	}
+    @SuppressWarnings("unused")
+    public boolean isUnix() {
 
-	private static boolean isMac() {
-		return (OS.contains("mac"));
+        return (OSName.contains("nix") || OSName.contains("nux") || OSName.indexOf("aix") > 0);
 
-	}
+    }
 
-	private static boolean isSolaris() {
 
-		return (OS.contains("sunos"));
 
-	}
 
-	public boolean isUnix() {
-
-		return (OS.contains("nix") || OS.contains("nux") || OS.indexOf("aix") > 0);
-
-	}
-
-	private static boolean isWindows() {
-
-		return (OS.contains("win"));
-	}
-
-	private static boolean isAndroid()
+	static boolean isAndroid()
 	{
 		try {
 			return Class.forName("android.os.Build.VERSION")!=null;
@@ -149,19 +135,11 @@ public enum OSValidator {
 		}
 	}
 	
-	public String getAndroidVersion()
-	{
-		try {
-			Class<?> versionClass=Class.forName("android.os.Build.VERSION");
-			return (String)versionClass.getDeclaredField("RELEASE").get(null);
-		} catch (ClassNotFoundException | IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException e) {
-			return null;
-		}
-	}
+
 	
 	public static String getJVMLocation()
 	{
-		if (isWindows()) {
+		if (getCurrentOSVersion()!=null && getCurrentOSVersion().getOS()==WINDOWS) {
 		    return System.getProperties().getProperty("java.home") + File.separator + "bin" + File.separator + "java.exe";
 		} 
 		else if (isAndroid())
@@ -207,9 +185,19 @@ public enum OSValidator {
 		
 	}
 
-	public boolean SIPrefixAreUnderstoodAsBinaryPrefixForByteMultiples()
+	@SuppressWarnings("unused")
+    public boolean SIPrefixAreUnderstoodAsBinaryPrefixForByteMultiples()
 	{
-		return this == WINDOWS || (this == MACOS && Double.valueOf(getOSVersion()) < 10.1);
+		return this == WINDOWS || (this == MAC_OS && Double.valueOf(OSVersion.OS_VERSION) < 10.1);
 	}
-	
+
+	@SuppressWarnings("unused")
+    List<OSVersion> getVersions()
+    {
+        List<OSVersion> res=new ArrayList<>();
+        for (OSVersion v : OSVersion.values())
+            if (v.getOS()==this)
+                res.add(v);
+        return res;
+    }
 }

@@ -43,6 +43,7 @@ import java.security.spec.MGF1ParameterSpec;
 import javax.crypto.spec.OAEPParameterSpec;
 import javax.crypto.spec.PSource;
 
+import com.distrimind.util.OSVersion;
 import org.bouncycastle.crypto.InvalidWrappingException;
 import org.bouncycastle.crypto.KeyUnwrapperUsingSecureRandom;
 import org.bouncycastle.crypto.KeyWrapperUsingSecureRandom;
@@ -55,7 +56,7 @@ import org.bouncycastle.crypto.fips.FipsRSA.OAEPParameters;
 import org.bouncycastle.crypto.fips.FipsRSA.WrapParameters;
 
 import com.distrimind.util.Bits;
-import com.distrimind.util.OSValidator;
+import com.distrimind.util.OS;
 
 import gnu.vm.jgnu.security.InvalidKeyException;
 import gnu.vm.jgnu.security.NoSuchAlgorithmException;
@@ -205,7 +206,7 @@ public enum ASymmetricKeyWrapperType {
 			try
 			{
 				javax.crypto.Cipher c;
-				if (provider.equals(CodeProvider.BCFIPS) || (OSValidator.getCurrentOS()==OSValidator.MACOS && (this.getCodeProvider()==CodeProvider.SunJCE)))
+				if (provider.equals(CodeProvider.BCFIPS) || (OSVersion.getCurrentOSVersion()!=null && OSVersion.getCurrentOSVersion().getOS()==OS.MAC_OS && (this.getCodeProvider()==CodeProvider.SunJCE)))
 				{
 					CodeProvider.ensureBouncyCastleProviderLoaded();
 					
@@ -347,7 +348,7 @@ public enum ASymmetricKeyWrapperType {
 				
 				
 				javax.crypto.Cipher c;
-				if (provider.equals(CodeProvider.BCFIPS) || (OSValidator.getCurrentOS()==OSValidator.MACOS && (this.getCodeProvider()==CodeProvider.SunJCE)))
+				if (provider.equals(CodeProvider.BCFIPS) || (OSVersion.getCurrentOSVersion()!=null && OSVersion.getCurrentOSVersion().getOS()==OS.MAC_OS && (this.getCodeProvider()==CodeProvider.SunJCE)))
 				{
 					CodeProvider.ensureBouncyCastleProviderLoaded();
 					

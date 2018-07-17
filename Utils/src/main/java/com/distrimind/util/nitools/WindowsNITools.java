@@ -39,7 +39,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.NetworkInterface;
 
-import com.distrimind.util.OSValidator;
+import com.distrimind.util.OSVersion;
 
 /**
  * 
@@ -60,7 +60,7 @@ class WindowsNITools extends NITools {
 				return Long.MAX_VALUE;
 			Process p ;
 			// TODO check compatibility with Vista and Seven
-			if (OSValidator.getCurrentOS().getOSVersion().toLowerCase().contains("vista"))
+			if (OSVersion.getCurrentOSVersion()!=null && OSVersion.getCurrentOSVersion()==OSVersion.WINDOWS_VISTA)
 				p = Runtime.getRuntime().exec("wmic NIC where \"NetEnabled=true\" get \"InterfaceIndex,Speed\"");
 			else
 				p = Runtime.getRuntime().exec("wmic NIC where NetEnabled=true get InterfaceIndex,Speed");
