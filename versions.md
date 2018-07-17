@@ -1,6 +1,6 @@
 Utils
 =====
-3.16.1 Stable (Build: 540) (from 11/07/2018 to 11/07/2018)
+3.17.0 Stable (Build: 546) (from 17/07/2018 to 17/07/2018)
 
 # Creator(s):
 Jason MAHDJOUB
@@ -9,6 +9,10 @@ Jason MAHDJOUB
 Jason MAHDJOUB (Entred in the team at 04/01/2016)
 
 # Modifications:
+
+
+### 3.17.0 Stable (17/07/2018)
+* Improve OS's Version detection.
 
 
 ### 3.16.1 Stable (11/07/2018)
