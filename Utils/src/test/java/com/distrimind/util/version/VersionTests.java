@@ -34,6 +34,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.version;
 
+import com.distrimind.util.properties.PropertiesParseException;
 import org.testng.annotations.Test;
 
 import com.distrimind.util.Utils;
@@ -48,7 +49,7 @@ import com.distrimind.util.Utils;
 public class VersionTests {
 	@SuppressWarnings("ResultOfMethodCallIgnored")
 	@Test
-	void testFunctions() {
+	void testFunctions() throws PropertiesParseException {
 		Utils.VERSION.toString();
 		Utils.VERSION.toStringShort();
 		Utils.VERSION.convertToStringProperties();

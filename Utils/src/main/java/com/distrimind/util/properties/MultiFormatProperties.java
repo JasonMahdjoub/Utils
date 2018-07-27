@@ -35,41 +35,20 @@ knowledge of the CeCILL-C license and that you accept its terms.
 
 package com.distrimind.util.properties;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.io.Serializable;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.URI;
-import java.net.URL;
-
-import java.sql.Date;
-import java.util.AbstractSequentialList;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.Properties;
-import java.util.logging.Level;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import com.distrimind.util.AbstractDecentralizedID;
+import org.w3c.dom.*;
+import org.xml.sax.SAXException;
+import org.yaml.snakeyaml.DumperOptions;
+import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.AbstractConstruct;
+import org.yaml.snakeyaml.constructor.Construct;
+import org.yaml.snakeyaml.introspector.BeanAccess;
+import org.yaml.snakeyaml.introspector.Property;
+import org.yaml.snakeyaml.nodes.NodeTuple;
+import org.yaml.snakeyaml.nodes.ScalarNode;
+import org.yaml.snakeyaml.nodes.Tag;
+import org.yaml.snakeyaml.representer.Represent;
+import org.yaml.snakeyaml.representer.Representer;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -80,25 +59,19 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-
-import org.w3c.dom.DOMException;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
-import org.yaml.snakeyaml.DumperOptions;
-import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.constructor.AbstractConstruct;
-import org.yaml.snakeyaml.constructor.Construct;
-import org.yaml.snakeyaml.introspector.BeanAccess;
-
-import org.yaml.snakeyaml.nodes.ScalarNode;
-import org.yaml.snakeyaml.nodes.Tag;
-import org.yaml.snakeyaml.representer.Represent;
-import org.yaml.snakeyaml.representer.Representer;
-
-import com.distrimind.util.AbstractDecentralizedID;
+import java.io.*;
+import java.lang.reflect.*;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.URI;
+import java.net.URL;
+import java.sql.Date;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Level;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * This interface enable to partially serialize/deserialize classes that
@@ -186,14 +159,23 @@ public abstract class MultiFormatProperties implements Cloneable, Serializable {
 			throw new IllegalAccessException();
 		return element_list_class;
 	}
-	
+    /**
+     * Convert this properties to a {@link Properties} class format.
+     *
+     * @return this properties converted to a {@link Properties} class format.
+     * @throws PropertiesParseException if a problem occurs
+     */
+    public Properties convertToStringProperties() throws PropertiesParseException {
+        return convertToStringProperties(null);
+    }
 	
 	/**
 	 * Convert this properties to a {@link Properties} class format.
-	 * 
+	 * @param referenceProperties the reference properties. If a property is the same between this instance and the given reference, that the properties is not saved into the file
 	 * @return this properties converted to a {@link Properties} class format.
+     * @throws PropertiesParseException if a problem occurs
 	 */
-	public Properties convertToStringProperties() {
+	public Properties convertToStringProperties(MultiFormatProperties referenceProperties) throws PropertiesParseException {
 		Properties res = new Properties();
 		Class<?> c = this.getClass();
 		while (c != Object.class) {
@@ -201,7 +183,12 @@ public abstract class MultiFormatProperties implements Cloneable, Serializable {
 				if (!isValid(f))
 					continue;
 				f.setAccessible(true);
-
+                try {
+                    if (referenceProperties!=null && canExclude(referenceProperties, f, f.get(this)))
+                        continue;
+                } catch (IllegalAccessException e) {
+                    throw new PropertiesParseException(e, "");
+                }
 				try {
 					if (f.getType().isPrimitive()) {
 						res.put(f.getName(), getPrimitiveValue(f));
@@ -278,7 +265,7 @@ public abstract class MultiFormatProperties implements Cloneable, Serializable {
 							MultiFormatProperties xmlp = (MultiFormatProperties) o;
 							if (xmlp.optional_xml_object_parser_instance == null)
 								xmlp.optional_xml_object_parser_instance = optional_xml_object_parser_instance;
-							for (Map.Entry<Object, Object> e : xmlp.convertToStringProperties().entrySet()) {
+							for (Map.Entry<Object, Object> e : xmlp.convertToStringProperties(referenceProperties).entrySet()) {
 								res.put(o.getClass().getName() + "." + f.getName() + "." + e.getKey(), e.getValue());
 							}
 						}
@@ -820,34 +807,57 @@ public abstract class MultiFormatProperties implements Cloneable, Serializable {
 
 		}
 	}
-
+    /**
+     * Save properties into an XML document
+     *
+     * @param doc
+     *            the document
+     * @throws PropertiesParseException
+     *             if a problem of XML parse occurs
+     */
+    public void saveXML(Document doc) throws PropertiesParseException {
+        saveXML(doc, null);
+    }
 	/**
 	 * Save properties into an XML document
 	 * 
 	 * @param doc
 	 *            the document
+     * @param referenceProperties the reference properties. If a property is the same between this instance and the given reference, that the properties is not saved into the file
 	 * @throws PropertiesParseException
 	 *             if a problem of XML parse occurs
 	 */
-	public void saveXML(Document doc) throws PropertiesParseException {
+	public void saveXML(Document doc, MultiFormatProperties referenceProperties) throws PropertiesParseException {
 		try {
 			Node root = doc.createElement(this.getClass().getCanonicalName());
-			if (write(doc, root))
+			if (write(doc, root, referenceProperties))
 				createOrGetRootNode(doc).appendChild(root);
 		} catch (DOMException e) {
 			throw new PropertiesParseException(e, "");
 		}
 	}
+    /**
+     * Save properties into an XML file
+     *
+     * @param xml_file
+     *            the file to save
+     * @throws PropertiesParseException
+     *             if a problem of XML parse occurs
+     */
+    public void saveXML(File xml_file) throws PropertiesParseException {
+        saveXML(xml_file, null);
+    }
 
 	/**
 	 * Save properties into an XML file
 	 * 
 	 * @param xml_file
 	 *            the file to save
+     * @param referenceProperties the reference properties. If a property is the same between this instance and the given reference, that the properties is not saved into the file
 	 * @throws PropertiesParseException
 	 *             if a problem of XML parse occurs
 	 */
-	public void saveXML(File xml_file) throws PropertiesParseException {
+	public void saveXML(File xml_file, MultiFormatProperties referenceProperties) throws PropertiesParseException {
 		try {
 			DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
 			DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
@@ -855,7 +865,7 @@ public abstract class MultiFormatProperties implements Cloneable, Serializable {
 			// root elements
 			Document doc = docBuilder.newDocument();
 			doc.setXmlStandalone(true);
-			saveXML(doc);
+			saveXML(doc, referenceProperties);
 
 			TransformerFactory transformerFactory = TransformerFactory.newInstance();
 			Transformer transformer = transformerFactory.newTransformer();
@@ -870,18 +880,32 @@ public abstract class MultiFormatProperties implements Cloneable, Serializable {
 			throw new PropertiesParseException(e, "");
 		}
 	}
+    /**
+     * Save properties into an YAML file
+     *
+     * @param yaml_file
+     *            the file to save
+     * @throws IOException if a problem occurs
+     */
+    public void saveYAML(File yaml_file) throws IOException
+    {
+        saveYAML(yaml_file, null);
+    }
 	/**
-	 * Save properties into an YAML file
+	 * Save properties into an YAML file that are different from the reference
 	 * 
 	 * @param yaml_file
 	 *            the file to save
+     * @param referenceProperties the reference properties. If a property is the same between this instance and the given reference, that the properties is not saved into the file
+     *
 	 * @throws IOException if a problem occurs
 	 */
-	public void saveYAML(File yaml_file) throws IOException
+	public void saveYAML(File yaml_file, MultiFormatProperties referenceProperties) throws IOException
 	{
 		
 		
-		Yaml yaml=new Yaml(new YamlRepresenter(),getDumperOptions());
+		Yaml yaml=new Yaml(new YamlRepresenter(referenceProperties),getDumperOptions());
+
 		yaml.setBeanAccess(BeanAccess.FIELD);
 		yaml.setName(this.getClass().getSimpleName());
 		try(FileWriter fw = new FileWriter(yaml_file))
@@ -928,15 +952,121 @@ public abstract class MultiFormatProperties implements Cloneable, Serializable {
 			loadYAML(fr);
 		}
 	}
-	
+
+	private boolean canExclude(MultiFormatProperties mfp, String fieldName, Object propertyValue)  {
+        if (mfp!=null && mfp.getClass()==this.getClass())
+        {
+            try {
+                Field f=this.getClass().getDeclaredField(fieldName);
+                f.setAccessible(true);
+                return canExclude(mfp, f, propertyValue, true);
+            } catch (NoSuchFieldException ignored) {
+                return false;
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+                return false;
+            }
+        }
+        return false;
+    }
+    private boolean canExclude(MultiFormatProperties mfp, Field field, Object value) throws IllegalAccessException {
+	    return canExclude(mfp, field, value, false);
+    }
+    private boolean canExclude(MultiFormatProperties mfp, Field field, Object value, boolean noTestMFP) throws IllegalAccessException {
+        if (noTestMFP || (mfp!=null && mfp.getClass()==this.getClass()))
+        {
+            Object reference=field.get(mfp);
+            if (reference!=null && value!=null)
+            {
+                if (field.getType().isAssignableFrom(MultiFormatProperties.class))
+                    return canExclude((MultiFormatProperties)reference, (MultiFormatProperties)value);
+                else if (field.getDeclaringClass().isAssignableFrom(Map.class))
+                {
+                    return canExclude((Map<?, ?>)value, (Map<?, ?>)reference);
+                }
+                else if (field.getDeclaringClass().isAssignableFrom(List.class))
+                {
+                    return canExclude((List<?>)value, (List<?>)value);
+                }
+
+            }
+            return reference == value || (reference != null && reference.equals(value));
+        }
+        return false;
+    }
+
+    private boolean canExclude(MultiFormatProperties mfp, MultiFormatProperties value) throws IllegalAccessException {
+        Class<?> c = value.getClass().getClass();
+        while (c != Object.class) {
+            for (Field field : c.getDeclaredFields())
+            {
+                if (isValid(field))
+                {
+                    field.setAccessible(true);
+                    if (!canExclude(mfp, field, field.get(value)))
+                        return false;
+                }
+            }
+            c = c.getSuperclass();
+        }
+
+        return true;
+    }
+
+    private boolean canExclude(Map<?, ?> value, Map<?, ?> reference)  {
+	    if (value.size()!=reference.size())
+	        return false;
+	    for (Map.Entry<?, ?> e : value.entrySet())
+        {
+            if (!reference.containsKey(e.getKey()))
+                return false;
+            Object o=reference.get(e.getKey());
+
+            if (o!=e.getValue() && o!=null && !o.equals(e.getValue()))
+                return false;
+        }
+
+        return true;
+    }
+
+    private boolean canExclude(List<?> value, List<?> reference) {
+        if (value.size()!=reference.size())
+            return false;
+        for (Object v : value)
+        {
+            if (!reference.contains(v))
+                return false;
+        }
+
+        return true;
+    }
+
 	private class YamlRepresenter extends Representer
 	{
-		YamlRepresenter()
+		final MultiFormatProperties mfp;
+		YamlRepresenter(MultiFormatProperties mfp)
 		{
+		    if (mfp!=null && mfp.getClass()==MultiFormatProperties.this.getClass())
+			    this.mfp=mfp;
+		    else
+		        this.mfp=null;
 			init(default_xml_object_parser_instance);
 			if (optional_xml_object_parser_instance!=null)
 				init(optional_xml_object_parser_instance);
+
 		}
+
+        @Override
+        protected NodeTuple representJavaBeanProperty(Object javaBean, Property property, Object propertyValue, Tag customTag) {
+
+            if (canExclude(mfp, property.getName(), propertyValue)) {
+                return null;
+            }
+            else {
+                return super.representJavaBeanProperty(javaBean, property, propertyValue, customTag);
+            }
+        }
+
 		private void init (AbstractMultiFormatObjectParser parser)
 		{
 			for (Class<?> c : parser.getSupportedClasses())
@@ -967,7 +1097,6 @@ public abstract class MultiFormatProperties implements Cloneable, Serializable {
 			
 			@Override
 			public org.yaml.snakeyaml.nodes.Node representData(Object data) {
-				
 				try {
 					String value=parser.convertObjectToString(clazz, data);
 					return representScalar(MultiFormatProperties.getTag(data.getClass()), value);
@@ -1275,7 +1404,7 @@ public abstract class MultiFormatProperties implements Cloneable, Serializable {
 		}
 	}
 
-	boolean setTextContent(Document document, Node node, String field_name, Class<?> field_type, Object object)
+	boolean setTextContent(Document document, Node node, String field_name, Class<?> field_type, Object object, MultiFormatProperties referenceProperties)
 			throws PropertiesParseException {
 		try {
 			if (object == null) {
@@ -1285,7 +1414,7 @@ public abstract class MultiFormatProperties implements Cloneable, Serializable {
 				MultiFormatProperties e = (MultiFormatProperties) object;
 				if (e.optional_xml_object_parser_instance == null)
 					e.optional_xml_object_parser_instance = optional_xml_object_parser_instance;
-				return e.write(document, node);
+				return e.write(document, node, referenceProperties);
 			} else {
 				String res = getString(field_type, object);
 				if (res == null) {
@@ -1301,26 +1430,31 @@ public abstract class MultiFormatProperties implements Cloneable, Serializable {
 		}
 	}
 
-	boolean write(Document document, Node element) throws PropertiesParseException {
+	boolean write(Document document, Node element, MultiFormatProperties referenceProperties) throws PropertiesParseException {
 		Class<?> c = this.getClass();
 		while (c != Object.class) {
 			for (Field f : c.getDeclaredFields()) {
 				if (isValid(f)) {
 					f.setAccessible(true);
-					writeField(document, element, f);
-				}
+                    try {
+                        if (referenceProperties==null || !canExclude(referenceProperties, f, f.get(this)))
+                            writeField(document, element, f, referenceProperties);
+                    } catch (IllegalAccessException e) {
+                        throw new PropertiesParseException(e, "");
+                    }
+                }
 			}
 			c = c.getSuperclass();
 		}
 		return true;
 	}
 
-	void writeField(Document document, Node parent_element, Field field) throws PropertiesParseException {
+	void writeField(Document document, Node parent_element, Field field, MultiFormatProperties referenceProperties) throws PropertiesParseException {
 		Class<?> type = field.getType();
 		if (optional_xml_object_parser_instance != null && optional_xml_object_parser_instance.isValid(type)) {
 			try {
 				Element element = document.createElement(field.getName());
-				if (setTextContent(document, element, field.getName(), field.getType(), field.get(this)))
+				if (setTextContent(document, element, field.getName(), field.getType(), field.get(this), referenceProperties))
 					parent_element.appendChild(element);
 			} catch (IllegalArgumentException | IllegalAccessException | DOMException e) {
 				throw new PropertiesParseException(e, "Impossible read the field " + field.getName());
@@ -1347,7 +1481,7 @@ public abstract class MultiFormatProperties implements Cloneable, Serializable {
 					 */
 					elementM.appendChild(key);
 					Object k = entry.getKey();
-					if (setTextContent(document, key, field.getName(), k == null ? null : k.getClass(), k)) {
+					if (setTextContent(document, key, field.getName(), k == null ? null : k.getClass(), k, referenceProperties)) {
 						key.setAttribute("ElementType", k == null ? null : k.getClass().getCanonicalName());
 						Element value = document.createElement("value");
 						/*
@@ -1358,7 +1492,7 @@ public abstract class MultiFormatProperties implements Cloneable, Serializable {
 
 						elementM.appendChild(value);
 						Object v = entry.getValue();
-						if (setTextContent(document, value, field.getName(), v == null ? null : v.getClass(), v)) {
+						if (setTextContent(document, value, field.getName(), v == null ? null : v.getClass(), v, referenceProperties)) {
 							value.setAttribute("ElementType", v == null ? null : v.getClass().getCanonicalName());
 							element.appendChild(elementM);
 						}
@@ -1390,7 +1524,7 @@ public abstract class MultiFormatProperties implements Cloneable, Serializable {
 					 * attr.setValue(o.getClass().getCanonicalName()); elemL.setAttributeNode(attr);
 					 */
 					if (setTextContent(document, elemL, field.getName(), o == null ? element_list_class : o.getClass(),
-							o)) {
+							o, referenceProperties)) {
 						elemL.setAttribute("ElementType",
 								o == null ? element_list_class.getCanonicalName() : o.getClass().getCanonicalName());
 						element.appendChild(elemL);
@@ -1429,7 +1563,7 @@ public abstract class MultiFormatProperties implements Cloneable, Serializable {
 					if (p.optional_xml_object_parser_instance == null)
 						p.optional_xml_object_parser_instance = optional_xml_object_parser_instance;
 					Element element = document.createElement(p.getClass().getName() + "." + field.getName());
-					if (p.write(document, element))
+					if (p.write(document, element, referenceProperties))
 						parent_element.appendChild(element);
 				}
 			} catch (IllegalAccessException e) {
@@ -1467,7 +1601,7 @@ public abstract class MultiFormatProperties implements Cloneable, Serializable {
 		} else {
 			try {
 				Element element = document.createElement(field.getName());
-				if (setTextContent(document, element, field.getName(), field.getType(), field.get(this)))
+				if (setTextContent(document, element, field.getName(), field.getType(), field.get(this), referenceProperties))
 					parent_element.appendChild(element);
 			} catch (IllegalArgumentException | IllegalAccessException | DOMException e) {
 				throw new PropertiesParseException(e, "Impossible read the field " + field.getName());

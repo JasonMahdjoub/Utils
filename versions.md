@@ -1,6 +1,6 @@
 Utils
 =====
-3.17.0 Stable (Build: 546) (from 17/07/2018 to 17/07/2018)
+3.18.0 Stable (Build: 550) (from 27/07/2018 to 27/07/2018)
 
 # Creator(s):
 Jason MAHDJOUB
@@ -9,6 +9,10 @@ Jason MAHDJOUB
 Jason MAHDJOUB (Entred in the team at 04/01/2016)
 
 # Modifications:
+
+
+### 3.18.0 Stable (27/07/2018)
+* MultiFormatProperties : Add possibility to only save properties that different from a reference.
 
 
 ### 3.17.0 Stable (17/07/2018)

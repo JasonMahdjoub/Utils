@@ -81,29 +81,50 @@ public class TestProperties {
 
 	@SuppressWarnings("ResultOfMethodCallIgnored")
 	@Test(dataProvider = "getPropertiesExample")
-	public void testPropertiesExport(PropertiesExample pe) {
+	public void testPropertiesExport(PropertiesExample pe) throws PropertiesParseException, CloneNotSupportedException {
 		Properties p = pe.convertToStringProperties();
 		PropertiesExample pe2 = new PropertiesExample(null);
 		pe2.loadFromProperties(p);
 		pe.equals(pe2);
 		Assert.assertEquals(pe2, pe);
+        p = pe.convertToStringProperties(pe.clone());
+        pe2 = new PropertiesExample(null);
+        pe2.booleanValue=!pe.booleanValue;
+        pe2.loadFromProperties(p);
+        pe.equals(pe2);
+        Assert.assertNotEquals(pe2, pe);
+        pe2 = pe.clone();
+        pe2.loadFromProperties(p);
+        pe.equals(pe2);
+        Assert.assertEquals(pe2, pe);
 	}
 
 	@SuppressWarnings("ResultOfMethodCallIgnored")
 	@Test(dataProvider = "getPropertiesExample")
-	public void testPropertiesXMLSave(PropertiesExample pe) throws PropertiesParseException, IOException {
+	public void testPropertiesXMLSave(PropertiesExample pe) throws PropertiesParseException, IOException, CloneNotSupportedException {
 		File f = new File("propertiesExemple.xml");
 		pe.saveXML(f);
 		PropertiesExample pe2 = new PropertiesExample(null);
 		pe2.loadXML(f);
 		pe.equals(pe2);
-		Assert.assertEquals(pe2, pe);
+		Assert.assertEquals(pe2, pe.clone());
+		f.delete();
+		pe.saveXML(f, pe);
+		pe2 = new PropertiesExample(null);
+        pe2.booleanValue=!pe.booleanValue;
+		pe2.loadXML(f);
+		pe.equals(pe2);
+        Assert.assertNotEquals(pe2, pe);
+        pe2 = pe.clone();
+        pe2.loadXML(f);
+        pe.equals(pe2);
+        Assert.assertEquals(pe2, pe);
 		f.delete();
 	}
 
 	@SuppressWarnings("ResultOfMethodCallIgnored")
 	@Test(dataProvider = "getPropertiesExample")
-	public void testPropertiesYAMLSave(PropertiesExample pe) throws IOException {
+	public void testPropertiesYAMLSave(PropertiesExample pe) throws IOException, CloneNotSupportedException {
 		try
 		{
 			File f = new File("propertiesExemple.yaml");
@@ -113,6 +134,17 @@ public class TestProperties {
 			pe.equals(pe2);
 			Assert.assertEquals(pe2, pe);
 			f.delete();
+            pe.saveYAML(f, pe.clone());
+            pe2 = new PropertiesExample(null);
+            pe2.booleanValue=!pe.booleanValue;
+            pe2.loadYAML(f);
+            pe.equals(pe2);
+            Assert.assertNotEquals(pe2, pe);
+            pe2 = pe.clone();
+            pe2.loadYAML(f);
+            pe.equals(pe2);
+            Assert.assertEquals(pe2, pe);
+            f.delete();
 		}
 		catch(Exception e)
 		{

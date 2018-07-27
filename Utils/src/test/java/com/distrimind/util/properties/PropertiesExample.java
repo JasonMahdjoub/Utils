@@ -371,4 +371,7 @@ public class PropertiesExample extends MultiFormatProperties {
 		return strings[rand.nextInt(strings.length)];
 	}
 
+	public PropertiesExample clone() throws CloneNotSupportedException {
+		return (PropertiesExample) super.clone();
+	}
 }
