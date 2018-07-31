@@ -48,7 +48,7 @@ import com.distrimind.util.Bits;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 2.2
+ * @version 2.3
  * @since Utils 1.7.1
  */
 public class SymmetricSecretKey extends Key {
@@ -213,14 +213,47 @@ public class SymmetricSecretKey extends Key {
 		this.keySizeBits = keySize;
 		hashCode = Arrays.hashCode(this.secretKey);
 	}
+    static int getEncodedTypeSize()
+	{
+		int max=Math.max(SymmetricEncryptionType.values().length, SymmetricAuthentifiedSignatureType.values().length);
+		if (max<=0xFF)
+			return 1;
+		else if (max<=0xFFFF)
+			return 2;
+        else if (max<=0xFFFFFF)
+            return 3;
+        else
+			return 4;
+	}
+    static int encodeKeySizeBits(short keySizeBits)
+    {
+        return (keySizeBits-56)/8;
+    }
+
+    static short decodeKeySizeBits(int encodedKeySizeBits)
+    {
+        return (short)(encodedKeySizeBits*8+56);
+    }
+
+    static int maxKeySizeBits(int usedBitsForEncoding)
+    {
+        return decodeKeySizeBits((1<<usedBitsForEncoding)-1);
+    }
+
 
 	@Override
 	public byte[] encode() {
-		byte[] tab = new byte[7];
-		tab[0]=encryptionType==null?(byte)3:(byte)2;
-		Bits.putInt(tab, 1, encryptionType==null?signatureType.ordinal():encryptionType.ordinal());
-		Bits.putShort(tab, 5, keySizeBits);
-		return Bits.concateEncodingWithShortSizedTabs(tab, secretKey);
+	    int codedTypeSize=getEncodedTypeSize();
+		byte[] tab = new byte[2+codedTypeSize+secretKey.length];
+		if (keySizeBits<56)
+		    throw new InternalError();
+        if (keySizeBits>maxKeySizeBits(8))
+            throw new InternalError();
+		tab[0]=encryptionType==null?(byte)1:(byte)0;
+		Bits.putPositiveInteger(tab, 1, encryptionType==null?signatureType.ordinal():encryptionType.ordinal(), codedTypeSize);
+        tab[codedTypeSize+1]=(byte)encodeKeySizeBits(keySizeBits);
+        System.arraycopy(secretKey, 0, tab, codedTypeSize+2, secretKey.length);
+        return tab;
 	}
 
 	@Override

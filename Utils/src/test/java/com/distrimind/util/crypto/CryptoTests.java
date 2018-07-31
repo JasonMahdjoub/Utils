@@ -37,6 +37,7 @@ package com.distrimind.util.crypto;
 import java.io.IOException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Random;
 
 import gnu.vm.jgnu.security.InvalidAlgorithmParameterException;
@@ -51,6 +52,7 @@ import gnu.vm.jgnux.crypto.IllegalBlockSizeException;
 import gnu.vm.jgnux.crypto.NoSuchPaddingException;
 import gnu.vm.jgnux.crypto.ShortBufferException;
 
+import org.apache.commons.codec.binary.Base64;
 import org.bouncycastle.crypto.InvalidWrappingException;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
@@ -1460,4 +1462,18 @@ public class CryptoTests {
 		return res;
 	}
 
+	@Test
+	public void testBase64() throws NoSuchProviderException, NoSuchAlgorithmException {
+		SymmetricSecretKey key1=SymmetricEncryptionType.AES_CTR.getKeyGenerator(SecureRandomType.DEFAULT.getInstance(0), (short)256).generateKey();
+		SymmetricSecretKey key2=SymmetricAuthentifiedSignatureType.DEFAULT.getKeyGenerator(SecureRandomType.DEFAULT.getInstance(0), (short)256).generateKey();
+		Assert.assertEquals(key1.getKeySizeBits(), 256);
+		Assert.assertEquals(key2.getKeySizeBits(), 256);
+		System.out.println("First 256 bits : \n\t"+ Base64.encodeBase64URLSafeString(Arrays.copyOf(key1.getSecretKeyBytes(), 32)));
+		System.out.println("Key encryption : \n\t"+ Base64.encodeBase64URLSafeString(key1.getSecretKeyBytes()));
+		System.out.println("Key encryption (complete): \n\t"+ Base64.encodeBase64URLSafeString(key1.encode()));
+		System.out.println("Key signature : \n\t"+ Base64.encodeBase64URLSafeString(key2.getSecretKeyBytes()));
+		System.out.println("Key signature (complete) : \n\t"+ Base64.encodeBase64URLSafeString(key2.encode()));
+		Assert.assertEquals(key1.getSecretKeyBytes().length, 32);
+		Assert.assertEquals(key2.getSecretKeyBytes().length, 32);
+	}
 }

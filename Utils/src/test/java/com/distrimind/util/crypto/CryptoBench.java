@@ -38,8 +38,10 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 
+import org.apache.commons.codec.binary.Base64;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 
@@ -57,6 +59,7 @@ import gnu.vm.jgnux.crypto.BadPaddingException;
 import gnu.vm.jgnux.crypto.IllegalBlockSizeException;
 import gnu.vm.jgnux.crypto.NoSuchPaddingException;
 import gnu.vm.jgnux.crypto.ShortBufferException;
+import org.testng.annotations.Test;
 
 /**
  * Set of functions giving information about the current running OS
@@ -166,5 +169,7 @@ public class CryptoBench {
 		}
 		return res;
 	}
+
+
 
 }

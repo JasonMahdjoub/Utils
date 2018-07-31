@@ -54,7 +54,7 @@ import gnu.vm.jgnu.security.spec.InvalidKeySpecException;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 3.2
+ * @version 3.3
  * @since Utils 1.7.1
  */
 public class ASymmetricPublicKey extends Key {
@@ -198,14 +198,16 @@ public class ASymmetricPublicKey extends Key {
 		this.nativePublicKey=null;
 	}
 
+
 	public byte[] encode() {
-		byte[] tab = new byte[15];
-		tab[0]=encryptionType==null?(byte)9:(byte)8;
+		int codedTypeSize=ASymmetricPrivateKey.getEncodedTypeSize();
+		byte[] tab = new byte[11+codedTypeSize+publicKey.length];
+		tab[0]=encryptionType==null?(byte)5:(byte)4;
 		Bits.putShort(tab, 1, keySizeBits);
-		Bits.putInt(tab, 3, encryptionType==null?signatureType.ordinal():encryptionType.ordinal());
-		Bits.putLong(tab, 7, expirationUTC);
-		
-		return Bits.concateEncodingWithShortSizedTabs(tab, publicKey);
+		Bits.putPositiveInteger(tab, 3, encryptionType==null?signatureType.ordinal():encryptionType.ordinal(), codedTypeSize);
+		Bits.putLong(tab, 3+codedTypeSize, expirationUTC);
+		System.arraycopy(publicKey, 0, tab, codedTypeSize+11, publicKey.length);
+		return tab;
 	}
 
 	@Override

@@ -136,6 +136,73 @@ public class Bits {
 		b[off + 1] = (byte) (val);
 		b[off] = (byte) (val >>> 8);
 	}
+	public static void putPositiveShortInt(byte[] b, int off, int val) {
+		if (val>0xFFFFFF)
+			throw new IllegalArgumentException("val cannot be greater than "+0xFFFFFF);
+		if (val<0)
+			throw new IllegalArgumentException("val cannot be negative");
+		b[off + 2] = (byte) (val);
+		b[off + 1] = (byte) (val >>> 8);
+		b[off] = (byte) (val >>> 16);
+	}
+
+    public static int getPositiveShortInt(byte[] b, int off) {
+        return ((b[off + 2] & 0xFF)) + ((b[off + 1] & 0xFF) << 8) + ((b[off] & 0xFF) << 16);
+    }
+	public static void putPositiveInteger(byte[] b, int off, long val, int valueSizeInBytes) {
+	    if (val<0)
+	        throw new IllegalArgumentException();
+		if (valueSizeInBytes<1) {
+		    return;
+        }
+		if (valueSizeInBytes==1) {
+			if (val>0xFF)
+				throw new IllegalArgumentException();
+			b[off] = (byte) val;
+		}
+		else if (valueSizeInBytes==2) {
+            if (val>0xFFFF)
+                throw new IllegalArgumentException();
+            putShort(b, off, (short) val);
+        }
+		else if (valueSizeInBytes==3) {
+            putPositiveShortInt(b, off, (int) val);
+        }
+        else if (valueSizeInBytes==4) {
+            if (val>0xFFFFFFFF)
+                throw new IllegalArgumentException();
+            putInt(b, off, (int) val);
+        }
+        else if (valueSizeInBytes<=8) {
+            if (val>0xFFFFFFFFFFFFFFFFL)
+                throw new IllegalArgumentException();
+            putLong(b, off, val);
+        }
+        else
+            throw new IllegalArgumentException();
+	}
+
+    public static long getPositiveInteger(byte[] b, int off, int valueSizeInBytes) {
+        if (valueSizeInBytes<1)
+            return -1;
+        else if (valueSizeInBytes==1) {
+            return b[off] & 0xFF;
+        }
+        else if (valueSizeInBytes==2) {
+            return getShort(b, off);
+        }
+        else if (valueSizeInBytes==3) {
+            return getPositiveShortInt(b, off);
+        }
+        else if (valueSizeInBytes==4) {
+            return getInt(b, off);
+        }
+        else if (valueSizeInBytes<=8) {
+            return getLong(b, off);
+        }
+        else
+            throw new IllegalArgumentException();
+    }
 
 	public static byte[][] separateEncodingsWithIntSizedTabs(byte[] concatedEncodedElement) {
 		return separateEncodingsWithIntSizedTabs(concatedEncodedElement, 0, concatedEncodedElement.length);

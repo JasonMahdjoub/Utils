@@ -54,7 +54,7 @@ import gnu.vm.jgnu.security.spec.InvalidKeySpecException;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 2.2
+ * @version 2.3
  * @since Utils 1.7.1
  */
 public class ASymmetricPrivateKey extends Key {
@@ -180,14 +180,29 @@ public class ASymmetricPrivateKey extends Key {
 		this.nativePrivateKey=null;
 	}
 
+	static int getEncodedTypeSize()
+	{
+		int max=Math.max(ASymmetricEncryptionType.values().length, ASymmetricAuthentifiedSignatureType.values().length);
+		if (max<=0xFF)
+			return 1;
+		else if (max<=0xFFFF)
+			return 2;
+		else if (max<=0xFFFFFF)
+			return 3;
+		else
+			return 4;
+	}
+
 	@Override
 	public byte[] encode() {
-		byte[] tab = new byte[7];
-		tab[0]=encryptionType==null?(byte)4:(byte)5;
+		int codedTypeSize=getEncodedTypeSize();
+		byte[] tab = new byte[3+codedTypeSize+privateKey.length];
+
+		tab[0]=encryptionType==null?(byte)2:(byte)3;
 		Bits.putShort(tab, 1, keySizeBits);
-		Bits.putInt(tab, 3, encryptionType==null?signatureType.ordinal():encryptionType.ordinal());
-		
-		return Bits.concateEncodingWithShortSizedTabs(tab, privateKey);
+		Bits.putPositiveInteger(tab, 3, encryptionType==null?signatureType.ordinal():encryptionType.ordinal(), codedTypeSize);
+        System.arraycopy(privateKey, 0, tab, codedTypeSize+3, privateKey.length);
+        return tab;
 	}
 
 	@Override

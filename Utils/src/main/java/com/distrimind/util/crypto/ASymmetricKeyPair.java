@@ -45,7 +45,7 @@ import com.distrimind.util.Bits;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 3.1
+ * @version 3.2
  * @since Utils 1.7.1
  */
 public class ASymmetricKeyPair implements Serializable {
@@ -54,28 +54,7 @@ public class ASymmetricKeyPair implements Serializable {
 	 */
 	private static final long serialVersionUID = -8249147431069134363L;
 
-	public static ASymmetricKeyPair decode(byte[] b) throws IllegalArgumentException {
-			byte[][] res1 = Bits.separateEncodingsWithIntSizedTabs(b);
-			byte[][] res2 = Bits.separateEncodingsWithShortSizedTabs(res1[0]);
-			
-			short keySize = Bits.getShort(res2[0], 0);
-			long expirationUTC = Bits.getLong(res2[0], 6);
-			
-			if (res2[0][14]==1)
-			{
-				ASymmetricAuthentifiedSignatureType type = ASymmetricAuthentifiedSignatureType.valueOf(Bits.getInt(res2[0], 2));
-				
-				return new ASymmetricKeyPair(type, new ASymmetricPrivateKey(type, res1[1], keySize),
-					new ASymmetricPublicKey(type, res2[1], keySize, expirationUTC), keySize);
-			}
-			else
-			{
-				ASymmetricEncryptionType type = ASymmetricEncryptionType.valueOf(Bits.getInt(res2[0], 2));
-			
-				return new ASymmetricKeyPair(type, new ASymmetricPrivateKey(type, res1[1], keySize),
-					new ASymmetricPublicKey(type, res2[1], keySize, expirationUTC), keySize);
-			}
-	}
+
 
 	public static ASymmetricKeyPair valueOf(String key) throws IllegalArgumentException {
 		return decode(Base64.decodeBase64(key));
@@ -230,18 +209,42 @@ public class ASymmetricKeyPair implements Serializable {
 	
 	
 	public byte[] encode() {
-		byte[] tab = new byte[15];
-		Bits.putShort(tab, 0, keySizeBits);
-		Bits.putInt(tab, 2, encryptionType==null?signatureType.ordinal():encryptionType.ordinal());
-		Bits.putLong(tab, 6, publicKey.getTimeExpirationUTC());
-		tab[14]=encryptionType==null?(byte)1:(byte)0;
-		return Bits.concateEncodingWithIntSizedTabs(
-				Bits.concateEncodingWithShortSizedTabs(tab, publicKey.getBytesPublicKey()),
-				privateKey.getBytesPrivateKey());
-		// return Bits.concateEncodingWithShortSizedTabs(tab,
-		// ASymmetricEncryptionType.encodeKeyPair(toGnuKeyPair()));
+		int codedTypeSize=ASymmetricPrivateKey.getEncodedTypeSize();
+		byte[] kp=Bits.concateEncodingWithShortSizedTabs(privateKey.getBytesPrivateKey(), publicKey.getBytesPublicKey());
+		byte[] tab = new byte[11+codedTypeSize+kp.length];
+		tab[0]=encryptionType==null?(byte)1:(byte)0;
+		Bits.putShort(tab, 1, keySizeBits);
+		Bits.putPositiveInteger(tab, 3, encryptionType==null?signatureType.ordinal():encryptionType.ordinal(), codedTypeSize);
+		Bits.putLong(tab, 3+codedTypeSize, publicKey.getTimeExpirationUTC());
+		System.arraycopy(kp, 0, tab, 11+codedTypeSize, kp.length);
+		return tab;
 	}
+    public static ASymmetricKeyPair decode(byte[] b) throws IllegalArgumentException {
+        int codedTypeSize=SymmetricSecretKey.getEncodedTypeSize();
+        short keySize = Bits.getShort(b, 1);
+        long expirationUTC = Bits.getLong(b, 3+codedTypeSize);
+        byte[] kp=new byte[b.length-11-codedTypeSize];
+        System.arraycopy(b, 11+codedTypeSize, kp, 0, kp.length);
+        byte[][] keys=Bits.separateEncodingsWithShortSizedTabs(kp);
+        if (b[0]==1)
+        {
+            ASymmetricAuthentifiedSignatureType type = ASymmetricAuthentifiedSignatureType.valueOf((int)Bits.getPositiveInteger(b, 3, codedTypeSize));
 
+            return new ASymmetricKeyPair(type, new ASymmetricPrivateKey(type, keys[0], keySize),
+                    new ASymmetricPublicKey(type, keys[1], keySize, expirationUTC), keySize);
+        }
+        else if (b[0]==0)
+        {
+            ASymmetricEncryptionType type = ASymmetricEncryptionType.valueOf((int)Bits.getPositiveInteger(b, 3, codedTypeSize));
+
+            return new ASymmetricKeyPair(type, new ASymmetricPrivateKey(type, keys[0], keySize),
+                    new ASymmetricPublicKey(type, keys[1], keySize, expirationUTC), keySize);
+        }
+        else
+            throw new IllegalArgumentException();
+
+
+    }
 	@Override
 	public boolean equals(Object o) {
 		if (o == null)

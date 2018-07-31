@@ -44,7 +44,7 @@ import com.distrimind.util.Bits;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 1.2
+ * @version 1.3
  * @since Utils 2.0
  */
 public abstract class Key implements Serializable {
@@ -71,33 +71,53 @@ public abstract class Key implements Serializable {
 	
 	public static Key decode(byte[] b) throws IllegalArgumentException {
 		
-			byte[][] res = Bits.separateEncodingsWithShortSizedTabs(b);
+			//byte[][] res = Bits.separateEncodingsWithShortSizedTabs(b);
 			
-			if (res[0][0]==(byte)2)
-				return new SymmetricSecretKey(SymmetricEncryptionType.valueOf(Bits.getInt(res[0], 1)), res[1],
-					Bits.getShort(res[0], 5));
-			else if (res[0][0]==(byte)3)
-				return new SymmetricSecretKey(SymmetricAuthentifiedSignatureType.valueOf(Bits.getInt(res[0], 1)), res[1],
-						Bits.getShort(res[0], 5));
-			else if (res[0][0]==(byte)4)
-			{
-				return new ASymmetricPrivateKey(ASymmetricAuthentifiedSignatureType.valueOf(Bits.getInt(res[0], 3)), res[1],
-						Bits.getShort(res[0], 1));
+			if (b[0]==(byte)0) {
+				int codedTypeSize=SymmetricSecretKey.getEncodedTypeSize();
+				byte secretKey[]=new byte[b.length-2-codedTypeSize];
+				System.arraycopy(b, 2+codedTypeSize, secretKey, 0, secretKey.length);
+				return new SymmetricSecretKey(SymmetricEncryptionType.valueOf((int)Bits.getPositiveInteger(b, 1, codedTypeSize)), secretKey,
+						SymmetricSecretKey.decodeKeySizeBits(b[codedTypeSize+1]));
 			}
-			else if (res[0][0]==(byte)5)
-			{
-				return new ASymmetricPrivateKey(ASymmetricEncryptionType.valueOf(Bits.getInt(res[0], 3)), res[1],
-						Bits.getShort(res[0], 1));
+			else if (b[0]==(byte)1) {
+				int codedTypeSize=SymmetricSecretKey.getEncodedTypeSize();
+				byte secretKey[]=new byte[b.length-2-codedTypeSize];
+				System.arraycopy(b, 2+codedTypeSize, secretKey, 0, secretKey.length);
+				return new SymmetricSecretKey(SymmetricAuthentifiedSignatureType.valueOf((int)Bits.getPositiveInteger(b, 1, codedTypeSize)), secretKey,
+						SymmetricSecretKey.decodeKeySizeBits(b[codedTypeSize+1]));
 			}
-			else if (res[0][0]==(byte)8)
+			else if (b[0]==(byte)2)
 			{
-				return new ASymmetricPublicKey(ASymmetricEncryptionType.valueOf(Bits.getInt(res[0], 3)), res[1],
-						Bits.getShort(res[0], 1), Bits.getLong(b, 7));
+				int codedTypeSize=ASymmetricPrivateKey.getEncodedTypeSize();
+				byte privateKey[]=new byte[b.length-3-codedTypeSize];
+				System.arraycopy(b, 3+codedTypeSize, privateKey, 0, privateKey.length);
+				return new ASymmetricPrivateKey(ASymmetricAuthentifiedSignatureType.valueOf((int)Bits.getPositiveInteger(b, 3, codedTypeSize)), privateKey,
+						Bits.getShort(b, 1));
 			}
-			else if (res[0][0]==(byte)9)
+			else if (b[0]==(byte)3)
 			{
-				return new ASymmetricPublicKey(ASymmetricAuthentifiedSignatureType.valueOf(Bits.getInt(res[0], 3)), res[1],
-						Bits.getShort(res[0], 1), Bits.getLong(b, 7));
+				int codedTypeSize=ASymmetricPrivateKey.getEncodedTypeSize();
+				byte privateKey[]=new byte[b.length-3-codedTypeSize];
+				System.arraycopy(b, 3+codedTypeSize, privateKey, 0, privateKey.length);
+				return new ASymmetricPrivateKey(ASymmetricEncryptionType.valueOf((int)Bits.getPositiveInteger(b, 3, codedTypeSize)), privateKey,
+						Bits.getShort(b, 1));
+			}
+			else if (b[0]==(byte)4)
+			{
+				int codedTypeSize=ASymmetricPrivateKey.getEncodedTypeSize();
+				byte publicKey[]=new byte[b.length-11-codedTypeSize];
+				System.arraycopy(b, 11+codedTypeSize, publicKey, 0, publicKey.length);
+				return new ASymmetricPublicKey(ASymmetricEncryptionType.valueOf((int)Bits.getPositiveInteger(b, 3, codedTypeSize)), publicKey,
+						Bits.getShort(b, 1), Bits.getLong(b, 3+codedTypeSize));
+			}
+			else if (b[0]==(byte)5)
+			{
+				int codedTypeSize=ASymmetricPrivateKey.getEncodedTypeSize();
+				byte publicKey[]=new byte[b.length-11-codedTypeSize];
+				System.arraycopy(b, 11+codedTypeSize, publicKey, 0, publicKey.length);
+				return new ASymmetricPublicKey(ASymmetricAuthentifiedSignatureType.valueOf((int)Bits.getPositiveInteger(b, 3, codedTypeSize)), publicKey,
+						Bits.getShort(b, 1), Bits.getLong(b, 3+codedTypeSize));
 			}
 			else
 				throw new IllegalArgumentException();
