@@ -49,7 +49,7 @@ import org.bouncycastle.pqc.jcajce.spec.SPHINCS256KeyGenParameterSpec;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 1.1
+ * @version 1.2
  * @since Utils 2.0
  */
 public final class JavaNativeKeyPairGenerator extends AbstractKeyPairGenerator {
@@ -83,7 +83,7 @@ public final class JavaNativeKeyPairGenerator extends AbstractKeyPairGenerator {
 
 	@Override
 	public void initialize(short _keysize, long expirationTime) throws NoSuchProviderException, NoSuchAlgorithmException, gnu.vm.jgnu.security.InvalidAlgorithmParameterException {
-        this.initialize(_keysize, expirationTime, SecureRandomType.DEFAULT.getSingleton(null));
+        this.initialize(_keysize, expirationTime, SecureRandomType.BC_FIPS_APPROVED_FOR_KEYS.getSingleton(null));
 
 	}
 
@@ -93,9 +93,45 @@ public final class JavaNativeKeyPairGenerator extends AbstractKeyPairGenerator {
 	public void initialize(short _keySize, long expirationTime, AbstractSecureRandom _random) throws gnu.vm.jgnu.security.InvalidAlgorithmParameterException {
 		this.keySizeBits = _keySize;
 		this.expirationTime = expirationTime;
-		
 		try
 		{
+            if (signatureType != null && signatureType.getKeyGeneratorAlgorithmName().equals(ASymmetricAuthentifiedSignatureType.BCPQC_SPHINCS256_SHA3_512.getKeyGeneratorAlgorithmName())) {
+                this.keySizeBits = signatureType.getDefaultKeySize();
+                keyPairGenerator.initialize(new SPHINCS256KeyGenParameterSpec(SPHINCS256KeyGenParameterSpec.SHA3_256), _random.getJavaNativeSecureRandom());
+            } else if (signatureType != null && signatureType.getKeyGeneratorAlgorithmName().equals(ASymmetricAuthentifiedSignatureType.BCPQC_SPHINCS256_SHA2_512_256.getKeyGeneratorAlgorithmName())) {
+                this.keySizeBits = signatureType.getDefaultKeySize();
+                keyPairGenerator.initialize(new SPHINCS256KeyGenParameterSpec(SPHINCS256KeyGenParameterSpec.SHA512_256), _random.getJavaNativeSecureRandom());
+            } else if (signatureType==null || signatureType.getCurveName()==null)
+                keyPairGenerator.initialize(new RSAKeyGenParameterSpec(_keySize, RSAKeyGenParameterSpec.F4), _random.getJavaNativeSecureRandom());
+            else {
+                switch (signatureType.getCurveName()) {
+                    case "P-256":
+                    case "P-384":
+                    case "P-521":
+                        this.keySizeBits = signatureType.getDefaultKeySize();
+                        keyPairGenerator.initialize(new ECGenParameterSpec(signatureType.getCurveName()), _random.getJavaNativeSecureRandom());
+                        break;
+                    case "curve25519":
+                        this.keySizeBits = signatureType.getDefaultKeySize();
+
+                        keyPairGenerator.initialize(ASymmetricEncryptionType.getCurve25519(), _random.getJavaNativeSecureRandom());
+                        break;
+                    /*case "M221":
+                    case "M383":
+                    case "M511":
+                    case "curve41417":
+                        this.keySizeBits = signatureType.getDefaultKeySize();
+                        X9ECParameters ecP = CustomNamedCurves.getByName(signatureType.getCurveName());
+                        keyPairGenerator.initialize(new org.bouncycastle.jce.spec.ECParameterSpec(ecP.getCurve(), ecP.getG(),
+                                ecP.getN(), ecP.getH(), ecP.getSeed()), _random.getJavaNativeSecureRandom());
+                        break;*/
+                    default:
+                        throw new InternalError();
+
+                }
+            }
+			/*this.keySizeBits=signatureType.getDefaultKeySize();
+			keyPairGenerator.initialize(new ECGenParameterSpec(signatureType.getCurveName()), _random.getJavaNativeSecureRandom());
 			if (signatureType!=null && (signatureType.getKeyGeneratorAlgorithmName().equals(ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA256withECDSA_P_256.getKeyGeneratorAlgorithmName())
 					|| signatureType.getKeyGeneratorAlgorithmName().equals(ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA384withECDSA_P_384.getKeyGeneratorAlgorithmName())
 							|| signatureType.getKeyGeneratorAlgorithmName().equals(ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA512withECDSA_P_521.getKeyGeneratorAlgorithmName())))
@@ -133,6 +169,7 @@ public final class JavaNativeKeyPairGenerator extends AbstractKeyPairGenerator {
 					|| signatureType.getKeyGeneratorAlgorithmName().equals(ASymmetricAuthentifiedSignatureType.BC_SHA384withECDSA_CURVE_M_221.getKeyGeneratorAlgorithmName())
 					|| signatureType.getKeyGeneratorAlgorithmName().equals(ASymmetricAuthentifiedSignatureType.BC_SHA512withECDSA_CURVE_M_221.getKeyGeneratorAlgorithmName())))
 			{
+
 				this.keySizeBits=signatureType.getDefaultKeySize();
 				X9ECParameters ecP = CustomNamedCurves.getByName("M-221");
 				keyPairGenerator.initialize(new org.bouncycastle.jce.spec.ECParameterSpec(ecP.getCurve(), ecP.getG(),
@@ -176,7 +213,7 @@ public final class JavaNativeKeyPairGenerator extends AbstractKeyPairGenerator {
 				keyPairGenerator.initialize(new SPHINCS256KeyGenParameterSpec(SPHINCS256KeyGenParameterSpec.SHA512_256), _random.getJavaNativeSecureRandom());
 			}
 			else
-				keyPairGenerator.initialize(new RSAKeyGenParameterSpec(_keySize, RSAKeyGenParameterSpec.F4), _random.getJavaNativeSecureRandom());
+				keyPairGenerator.initialize(new RSAKeyGenParameterSpec(_keySize, RSAKeyGenParameterSpec.F4), _random.getJavaNativeSecureRandom());*/
 		}
 		catch(InvalidAlgorithmParameterException e)
 		{

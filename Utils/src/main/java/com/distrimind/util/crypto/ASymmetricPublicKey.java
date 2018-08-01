@@ -263,7 +263,7 @@ public class ASymmetricPublicKey extends Key {
 			throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException {
 		if (nativePublicKey == null)
 			nativePublicKey = ASymmetricEncryptionType.decodeNativePublicKey(publicKey, encryptionType==null?signatureType.getKeyGeneratorAlgorithmName():encryptionType.getAlgorithmName(),
-					encryptionType==null?signatureType.name():encryptionType.name());
+					encryptionType==null?signatureType.name():encryptionType.name(), encryptionType==null?signatureType.getCurveName():null);
 
 		return nativePublicKey;
 	}

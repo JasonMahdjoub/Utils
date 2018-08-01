@@ -34,41 +34,26 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
-import java.math.BigInteger;
-import java.security.KeyFactory;
-import java.security.KeyPairGenerator;
-import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-
+import gnu.vm.jgnu.security.InvalidAlgorithmParameterException;
+import gnu.vm.jgnu.security.NoSuchProviderException;
 import org.bouncycastle.asn1.x9.X9ECParameters;
+import org.bouncycastle.crypto.Algorithm;
 import org.bouncycastle.crypto.ec.CustomNamedCurves;
-import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPublicKey;
-import org.bouncycastle.jcajce.provider.config.ProviderConfiguration;
+import org.bouncycastle.crypto.fips.FipsRSA;
 import org.bouncycastle.jce.interfaces.ECPrivateKey;
 import org.bouncycastle.jce.interfaces.ECPublicKey;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.KeySpec;
-import java.security.spec.PKCS8EncodedKeySpec;
-import java.security.spec.X509EncodedKeySpec;
+import org.bouncycastle.jce.spec.ECParameterSpec;
+import org.bouncycastle.jce.spec.ECPrivateKeySpec;
+import org.bouncycastle.math.ec.ECCurve;
+import org.bouncycastle.pqc.jcajce.provider.sphincs.Sphincs256KeyFactorySpi;
 
 import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
-
-import org.bouncycastle.crypto.Algorithm;
-import org.bouncycastle.crypto.fips.FipsRSA;
-
-import org.bouncycastle.jce.spec.ECParameterSpec;
-import org.bouncycastle.jce.spec.ECPrivateKeySpec;
-import org.bouncycastle.jce.spec.ECPublicKeySpec;
-import org.bouncycastle.math.ec.ECCurve;
-import org.bouncycastle.math.ec.ECPoint;
-import org.bouncycastle.pqc.jcajce.provider.sphincs.Sphincs256KeyFactorySpi;
-
-import com.distrimind.util.Bits;
-
-import gnu.vm.jgnu.security.InvalidAlgorithmParameterException;
-import gnu.vm.jgnu.security.NoSuchProviderException;
+import java.math.BigInteger;
+import java.security.*;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 
 /**
  * List of asymmetric encryption algorithms
@@ -162,8 +147,8 @@ public enum ASymmetricEncryptionType {
 		}
 	}
 
-	static PublicKey decodeNativePublicKey(byte[] encodedKey, String algorithm, String algorithmType)
-			throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException {
+	static PublicKey decodeNativePublicKey(byte[] encodedKey, String algorithm, String algorithmType, String curveName)
+            throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException {
 		try {
 			//byte[][] parts = Bits.separateEncodingsWithShortSizedTabs(encodedKey);
 
@@ -175,24 +160,25 @@ public enum ASymmetricEncryptionType {
 			else if (algorithmType.contains("25519"))
 			{
 
-				ECPublicKeySpec ks=deserializePublicKey(encodedKey, false);
+				org.bouncycastle.jce.spec.ECPublicKeySpec ks=deserializePublicKey(encodedKey, false);
 				return KeyFactory.getInstance(algorithm).generatePublic(ks);
+			}
+			/*else if (algorithm.equalsIgnoreCase("ECDSA") && curveName!=null)
+            {
+                return getPubKeyFromCurve(encodedKey, curveName);
 
-			}
-			else
-			{
-				X509EncodedKeySpec pubKeySpec = new X509EncodedKeySpec(encodedKey);
-				KeyFactory kf = KeyFactory.getInstance(algorithm);
-				return kf.generatePublic(pubKeySpec);
-			}
+            }*/
+            X509EncodedKeySpec pubKeySpec = new X509EncodedKeySpec(encodedKey);
+            KeyFactory kf = KeyFactory.getInstance(algorithm);
+            return kf.generatePublic(pubKeySpec);
 		} catch (NoSuchAlgorithmException e) {
 			throw new gnu.vm.jgnu.security.NoSuchAlgorithmException(e);
 		} catch (InvalidKeySpecException e) {
 			throw new gnu.vm.jgnu.security.spec.InvalidKeySpecException(e);
 		}
 
-	}
-	static ECPublicKeySpec deserializePublicKey(byte[] publicKey, boolean lazy) {
+    }
+	static org.bouncycastle.jce.spec.ECPublicKeySpec deserializePublicKey(byte[] publicKey, boolean lazy) {
 
 		if (publicKey.length <= 32) {
 			if (lazy && (publicKey.length == 32)) {
@@ -204,16 +190,16 @@ public enum ASymmetricEncryptionType {
 				key[offset++] = publicKey[i];
 			}
 			key[0] = 3;
-			ECCurve curve = getCurve25519().getCurve();
-			ECPoint q = curve.decodePoint(key);
-			return new ECPublicKeySpec(q, getCurve25519());
+            ECCurve curve = getCurve25519().getCurve();
+			org.bouncycastle.math.ec.ECPoint q = curve.decodePoint(key);
+			return new org.bouncycastle.jce.spec.ECPublicKeySpec(q, getCurve25519());
 		} else if (publicKey.length == 33) { // TODO make 32 byte representation normal form
 			if (lazy) {
 				return null;
 			}
 			ECCurve curve = getCurve25519().getCurve();
-			ECPoint q = curve.decodePoint(publicKey);
-			return new ECPublicKeySpec(q, getCurve25519());
+			org.bouncycastle.math.ec.ECPoint q = curve.decodePoint(publicKey);
+			return new org.bouncycastle.jce.spec.ECPublicKeySpec(q, getCurve25519());
 		} else {
 			throw new IllegalArgumentException();
 		}
@@ -232,12 +218,12 @@ public enum ASymmetricEncryptionType {
 		}
 	}
 	private static volatile ECParameterSpec curve25519;
-	static ECParameterSpec getCurve25519() {
+	static org.bouncycastle.jce.spec.ECParameterSpec getCurve25519() {
 
 		if (curve25519 == null) {
 			X9ECParameters ecP = CustomNamedCurves.getByName("curve25519");
 			// ECParameterSpec curve25519 = ECNamedCurveTable.getParameterSpec(algorithm);
-			curve25519 = new ECParameterSpec(ecP.getCurve(), ecP.getG(), ecP.getN(), ecP.getH(), ecP.getSeed());
+			curve25519 = new org.bouncycastle.jce.spec.ECParameterSpec(ecP.getCurve(), ecP.getG(), ecP.getN(), ecP.getH(), ecP.getSeed());
 		}
 		return curve25519;
 	}
@@ -283,10 +269,134 @@ public enum ASymmetricEncryptionType {
 		{
 			return ((ECPublicKey) key).getQ().getEncoded(true);
 		}
-		else
-			return key.getEncoded();
+		/*else if (type.getKeyGeneratorAlgorithmName().contains("ECDSA"))
+		{
+		    try {
+                if (key instanceof BCECPublicKey)
+                    return getKeyAsRawBytes((BCECPublicKey) key);
+                else if (key instanceof ECPublicKey)
+                    return getKeyAsRawBytes((ECPublicKey) key);
+            }
+            catch(Exception e)
+            {
+                e.printStackTrace();
+            }
+
+
+		}*/
+
+		return key.getEncoded();
 
 	}
+    /*private static byte[] getKeyAsRawBytes(
+            org.bouncycastle.jce.interfaces.ECPublicKey pub) throws IOException {
+        byte[] raw;
+        ByteArrayOutputStream bos = new ByteArrayOutputStream(65);
+
+        bos.write(0x04);
+        bos.write(asUnsignedByteArray(pub.getQ().getX().toBigInteger()));
+        bos.write(asUnsignedByteArray(pub.getQ().getY().toBigInteger()));
+        raw = bos.toByteArray();
+        return raw;
+    }
+    private static byte[] asUnsignedByteArray(BigInteger value) {
+        byte[] bytes = value.toByteArray();
+
+        if (bytes[0] == 0) {
+            byte[] tmp = new byte[bytes.length - 1];
+
+            System.arraycopy(bytes, 1, tmp, 0, tmp.length);
+
+            return tmp;
+        }
+
+        return bytes;
+    }
+    private static byte[] getKeyAsRawBytes(BCECPublicKey pub) throws IOException {
+        byte[] raw;
+        ByteArrayOutputStream bos = new ByteArrayOutputStream(65);
+
+        bos.write(0x04);
+        bos.write(pub.getQ().getXCoord().getEncoded());
+        bos.write(pub.getQ().getYCoord().getEncoded());
+        raw = bos.toByteArray();
+        return raw;
+    }
+    private static PublicKey getPubKeyFromCurve(byte[] pubKey, String curveName)
+            throws InvalidKeySpecException, NoSuchAlgorithmException,
+            java.security.NoSuchProviderException {
+
+        ECNamedCurveParameterSpec spec = ECNamedCurveTable
+                .getParameterSpec(curveName);
+        KeyFactory kf = KeyFactory.getInstance("ECDSA",
+                "BC");
+        ECNamedCurveSpec params = new ECNamedCurveSpec(curveName,
+                spec.getCurve(), spec.getG(), spec.getN());
+        ECPoint point = ECPointUtil.decodePoint(params.getCurve(), pubKey);
+        ECPublicKeySpec pubKeySpec = new ECPublicKeySpec(point, params);
+        ECPublicKey pk = (ECPublicKey) kf.generatePublic(pubKeySpec);
+        return pk;
+    }*/
+    /*private static ECPublicKey decodeECPublicKey(java.security.spec.ECParameterSpec params,
+                                                 final byte[] pubkey) throws NoSuchAlgorithmException,
+            InvalidKeySpecException {
+        int keySizeBytes = params.getOrder().bitLength() / Byte.SIZE;
+
+        int offset = 0;
+        BigInteger x = new BigInteger(1, Arrays.copyOfRange(pubkey, offset,
+                offset + keySizeBytes));
+        offset += keySizeBytes;
+        BigInteger y = new BigInteger(1, Arrays.copyOfRange(pubkey, offset,
+                offset + keySizeBytes));
+        ECPoint w = new ECPoint(x, y);
+
+
+        java.security.spec.ECPublicKeySpec otherKeySpec = new java.security.spec.ECPublicKeySpec(w, params);
+        KeyFactory keyFactory = KeyFactory.getInstance("ECDSA");
+        ECPublicKey otherKey = (ECPublicKey) keyFactory
+                .generatePublic(otherKeySpec);
+        return otherKey;
+    }
+    private static byte[] encodeECPublicKey(java.security.interfaces.ECPublicKey pubKey) {
+        int keyLengthBytes = pubKey.getParams().getOrder().bitLength()
+                / Byte.SIZE;
+        byte[] publicKeyEncoded = new byte[2 * keyLengthBytes];
+
+        int offset = 0;
+
+        BigInteger x = pubKey.getW().getAffineX();
+        byte[] xba = x.toByteArray();
+        if (xba.length > keyLengthBytes + 1 || xba.length == keyLengthBytes + 1
+                && xba[0] != 0) {
+            throw new IllegalStateException(
+                    "X coordinate of EC public key has wrong size");
+        }
+
+        if (xba.length == keyLengthBytes + 1) {
+            System.arraycopy(xba, 1, publicKeyEncoded, offset, keyLengthBytes);
+        } else {
+            System.arraycopy(xba, 0, publicKeyEncoded, offset + keyLengthBytes
+                    - xba.length, xba.length);
+        }
+        offset += keyLengthBytes;
+
+        BigInteger y = pubKey.getW().getAffineY();
+        byte[] yba = y.toByteArray();
+        if (yba.length > keyLengthBytes + 1 || yba.length == keyLengthBytes + 1
+                && yba[0] != 0) {
+            throw new IllegalStateException(
+                    "Y coordinate of EC public key has wrong size");
+        }
+
+        if (yba.length == keyLengthBytes + 1) {
+            System.arraycopy(yba, 1, publicKeyEncoded, offset, keyLengthBytes);
+        } else {
+            System.arraycopy(yba, 0, publicKeyEncoded, offset + keyLengthBytes
+                    - yba.length, yba.length);
+        }
+
+        return publicKeyEncoded;
+    }*/
 
 	static ASymmetricEncryptionType valueOf(int ordinal) throws IllegalArgumentException {
 		for (ASymmetricEncryptionType a : values()) {

@@ -57,8 +57,8 @@ public class Utils {
 		Calendar c = Calendar.getInstance();
 		c.set(2016, Calendar.JANUARY, 4);
 		Calendar c2 = Calendar.getInstance();
-		c.set(2018, Calendar.JULY, 31);
-		VERSION = new Version("Utils", "Utils", (short)3, (short)18, (short)1, Version.Type.Stable, (short)0, c.getTime(), c2.getTime());
+		c.set(2018, Calendar.JULY, 1);
+		VERSION = new Version("Utils", "Utils", (short)3, (short)19, (short)0, Version.Type.Stable, (short)0, c.getTime(), c2.getTime());
 		try {
 
 			InputStream is = Utils.class.getResourceAsStream("build.txt");
@@ -71,12 +71,13 @@ public class Utils {
 			VERSION.addDeveloper(new PersonDeveloper("mahdjoub", "jason", c.getTime()));
 
 			c = Calendar.getInstance();
-			c.set(2018, Calendar.JULY, 31);
-			Description d = new Description((short)3, (short)18, (short)1, Version.Type.Stable, (short)0, c.getTime());
+			c.set(2018, Calendar.JULY, 1);
+			Description d = new Description((short)3, (short)19, (short)0, Version.Type.Stable, (short)0, c.getTime());
 			d.addItem("Optimize encoding of encryption and signature keys.");
 			d.addItem("Version class has now short values (instead of int).");
 			d.addItem("Optimize encoding of curve25519.");
 			d.addItem("Correction of Calendar saving into YAML documents.");
+			d.addItem("Remove unsupported curves.");
 			VERSION.addDescription(d);
 
 			c = Calendar.getInstance();

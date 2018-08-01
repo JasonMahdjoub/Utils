@@ -41,7 +41,7 @@ import gnu.vm.jgnu.security.NoSuchProviderException;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 1.2
+ * @version 1.3
  * @since Utils 3.14.0
  */
 
@@ -52,14 +52,14 @@ public enum KeyAgreementType {
 	BC_FIPS_ECDDH_512_P_521(false, false, EllipticCurveDiffieHellmanType.BC_FIPS_ECDDH_512_P_521), 
 	BC_ECCDH_384_CURVE_25519(false, false, EllipticCurveDiffieHellmanType.BC_ECCDH_384_CURVE_25519),
 	BC_ECCDH_512_CURVE_25519(false, false, EllipticCurveDiffieHellmanType.BC_ECCDH_512_CURVE_25519), 
-	BC_ECCDH_384_CURVE_M_221(false, false, EllipticCurveDiffieHellmanType.BC_ECCDH_384_CURVE_M_221),
+	/*BC_ECCDH_384_CURVE_M_221(false, false, EllipticCurveDiffieHellmanType.BC_ECCDH_384_CURVE_M_221),
 	BC_ECCDH_512_CURVE_M_221(false, false, EllipticCurveDiffieHellmanType.BC_ECCDH_512_CURVE_M_221), 
 	BC_ECCDH_384_CURVE_M_383(false, false, EllipticCurveDiffieHellmanType.BC_ECCDH_384_CURVE_M_383),
 	BC_ECCDH_512_CURVE_M_383(false, false, EllipticCurveDiffieHellmanType.BC_ECCDH_512_CURVE_M_383), 
 	BC_ECCDH_384_CURVE_M_511(false, false, EllipticCurveDiffieHellmanType.BC_ECCDH_384_CURVE_M_511),
 	BC_ECCDH_512_CURVE_M_511(false, false, EllipticCurveDiffieHellmanType.BC_ECCDH_512_CURVE_M_511), 
 	BC_ECCDH_384_CURVE_41417(false, false, EllipticCurveDiffieHellmanType.BC_ECCDH_384_CURVE_41417),
-	BC_ECCDH_512_CURVE_41417(false, false, EllipticCurveDiffieHellmanType.BC_ECCDH_512_CURVE_41417),
+	BC_ECCDH_512_CURVE_41417(false, false, EllipticCurveDiffieHellmanType.BC_ECCDH_512_CURVE_41417),*/
 	/*@Deprecated
 	BC_FIPS_ECMQV_384_P_384(false, false, EllipticCurveDiffieHellmanType.BC_FIPS_ECMQV_384_P_384),
 	@Deprecated
