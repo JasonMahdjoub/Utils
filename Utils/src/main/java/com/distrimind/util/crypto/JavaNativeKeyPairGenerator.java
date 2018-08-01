@@ -40,6 +40,8 @@ import java.security.KeyPairGenerator;
 import java.security.spec.ECGenParameterSpec;
 import java.security.spec.RSAKeyGenParameterSpec;
 
+import gnu.vm.jgnu.security.NoSuchAlgorithmException;
+import gnu.vm.jgnu.security.NoSuchProviderException;
 import org.bouncycastle.asn1.x9.X9ECParameters;
 import org.bouncycastle.crypto.ec.CustomNamedCurves;
 import org.bouncycastle.pqc.jcajce.spec.SPHINCS256KeyGenParameterSpec;
@@ -80,10 +82,8 @@ public final class JavaNativeKeyPairGenerator extends AbstractKeyPairGenerator {
 	}
 
 	@Override
-	public void initialize(short _keysize, long expirationTime) {
-		keyPairGenerator.initialize(_keysize);
-		this.keySizeBits = _keysize;
-		this.expirationTime = expirationTime;
+	public void initialize(short _keysize, long expirationTime) throws NoSuchProviderException, NoSuchAlgorithmException, gnu.vm.jgnu.security.InvalidAlgorithmParameterException {
+        this.initialize(_keysize, expirationTime, SecureRandomType.DEFAULT.getSingleton(null));
 
 	}
 
@@ -126,9 +126,8 @@ public final class JavaNativeKeyPairGenerator extends AbstractKeyPairGenerator {
 					|| signatureType.getKeyGeneratorAlgorithmName().equals(ASymmetricAuthentifiedSignatureType.BC_SHA512withECDSA_CURVE_25519.getKeyGeneratorAlgorithmName())))
 			{
 				this.keySizeBits=signatureType.getDefaultKeySize();
-				X9ECParameters ecP = CustomNamedCurves.getByName("curve25519");
-				keyPairGenerator.initialize(new org.bouncycastle.jce.spec.ECParameterSpec(ecP.getCurve(), ecP.getG(),
-				        ecP.getN(), ecP.getH(), ecP.getSeed()), _random.getJavaNativeSecureRandom());
+
+				keyPairGenerator.initialize(ASymmetricEncryptionType.getCurve25519(), _random.getJavaNativeSecureRandom());
 			}
 			else if (signatureType!=null && (signatureType.getKeyGeneratorAlgorithmName().equals(ASymmetricAuthentifiedSignatureType.BC_SHA256withECDSA_CURVE_M_221.getKeyGeneratorAlgorithmName())
 					|| signatureType.getKeyGeneratorAlgorithmName().equals(ASymmetricAuthentifiedSignatureType.BC_SHA384withECDSA_CURVE_M_221.getKeyGeneratorAlgorithmName())

@@ -34,6 +34,10 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
+import gnu.vm.jgnu.security.InvalidAlgorithmParameterException;
+import gnu.vm.jgnu.security.NoSuchAlgorithmException;
+import gnu.vm.jgnu.security.NoSuchProviderException;
+
 /**
  * 
  * @author Jason Mahdjoub
@@ -91,9 +95,12 @@ public abstract class AbstractKeyPairGenerator {
 	 *            the keysize. This is an algorithm-specific metric, such as modulus
 	 *            length, specified in number of bits.
 	 * @param expirationTime the key expiration tiume
+	 * @throws NoSuchProviderException if a problem occurs
+	 * @throws NoSuchAlgorithmException if a problem occurs
+	 * @throws InvalidAlgorithmParameterException if a problem occurs
 
 	 */
-	public abstract void initialize(short keysize, long expirationTime);
+	public abstract void initialize(short keysize, long expirationTime) throws NoSuchProviderException, NoSuchAlgorithmException, InvalidAlgorithmParameterException;
 
 	/**
 	 * Initializes the key pair generator for a certain keysize with the given

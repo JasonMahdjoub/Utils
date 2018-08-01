@@ -98,8 +98,13 @@ public class ASymmetricPrivateKey extends Key {
 			gnuPrivateKey=null;
 		}
 	}
-	
-	ASymmetricPrivateKey(ASymmetricEncryptionType type, byte privateKey[], short keySize) {
+
+    @Override
+    byte[] getKeyBytes() {
+        return privateKey;
+    }
+
+    ASymmetricPrivateKey(ASymmetricEncryptionType type, byte privateKey[], short keySize) {
 		this(privateKey, keySize);
 		if (type == null)
 			throw new NullPointerException("type");
@@ -131,7 +136,7 @@ public class ASymmetricPrivateKey extends Key {
 	}
 
 	ASymmetricPrivateKey(ASymmetricEncryptionType type, PrivateKey privateKey, short keySize) {
-		this(privateKey, keySize);
+		this(ASymmetricEncryptionType.encodePrivateKey(privateKey, type), keySize);
 		if (type == null)
 			throw new NullPointerException("type");
 		if (type.getCodeProviderForEncryption() == CodeProvider.GNU_CRYPTO)
@@ -140,7 +145,7 @@ public class ASymmetricPrivateKey extends Key {
 		this.signatureType=null;
 	}
 	ASymmetricPrivateKey(ASymmetricAuthentifiedSignatureType type, PrivateKey privateKey, short keySize) {
-		this(privateKey, keySize);
+		this(ASymmetricEncryptionType.encodePrivateKey(privateKey, type), keySize);
 		if (type == null)
 			throw new NullPointerException("type");
 		if (type.getCodeProviderForSignature() == CodeProvider.GNU_CRYPTO)
@@ -169,16 +174,7 @@ public class ASymmetricPrivateKey extends Key {
 		this.gnuPrivateKey=null;
 	}
 
-	private ASymmetricPrivateKey(PrivateKey privateKey, short keySize) {
-		if (privateKey == null)
-			throw new NullPointerException("privateKey");
-		if (keySize < 256)
-			throw new IllegalArgumentException("keySize");
-		this.privateKey = ASymmetricEncryptionType.encodePrivateKey(privateKey);
-		this.keySizeBits = keySize;
-		hashCode = Arrays.hashCode(this.privateKey);
-		this.nativePrivateKey=null;
-	}
+
 
 	static int getEncodedTypeSize()
 	{
@@ -249,7 +245,7 @@ public class ASymmetricPrivateKey extends Key {
 	public gnu.vm.jgnu.security.PrivateKey toGnuKey()
 			throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException {
 		if (gnuPrivateKey == null)
-			gnuPrivateKey = ASymmetricEncryptionType.decodeGnuPrivateKey(privateKey);
+			gnuPrivateKey = ASymmetricEncryptionType.decodeGnuPrivateKey(privateKey, encryptionType==null?signatureType.getKeyGeneratorAlgorithmName():encryptionType.getAlgorithmName());
 
 		return gnuPrivateKey;
 	}
@@ -258,7 +254,8 @@ public class ASymmetricPrivateKey extends Key {
 	public PrivateKey toJavaNativeKey()
 			throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException {
 		if (nativePrivateKey == null)
-			nativePrivateKey = ASymmetricEncryptionType.decodeNativePrivateKey(privateKey);
+			nativePrivateKey = ASymmetricEncryptionType.decodeNativePrivateKey(privateKey, encryptionType==null?signatureType.getKeyGeneratorAlgorithmName():encryptionType.getAlgorithmName(),
+					encryptionType==null?signatureType.name():encryptionType.name());
 
 		return nativePrivateKey;
 	}

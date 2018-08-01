@@ -34,12 +34,21 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
+import java.math.BigInteger;
 import java.security.KeyFactory;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+
+import org.bouncycastle.asn1.x9.X9ECParameters;
+import org.bouncycastle.crypto.ec.CustomNamedCurves;
+import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPublicKey;
+import org.bouncycastle.jcajce.provider.config.ProviderConfiguration;
+import org.bouncycastle.jce.interfaces.ECPrivateKey;
+import org.bouncycastle.jce.interfaces.ECPublicKey;
 import java.security.spec.InvalidKeySpecException;
+import java.security.spec.KeySpec;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 
@@ -48,6 +57,12 @@ import javax.crypto.NoSuchPaddingException;
 
 import org.bouncycastle.crypto.Algorithm;
 import org.bouncycastle.crypto.fips.FipsRSA;
+
+import org.bouncycastle.jce.spec.ECParameterSpec;
+import org.bouncycastle.jce.spec.ECPrivateKeySpec;
+import org.bouncycastle.jce.spec.ECPublicKeySpec;
+import org.bouncycastle.math.ec.ECCurve;
+import org.bouncycastle.math.ec.ECPoint;
 import org.bouncycastle.pqc.jcajce.provider.sphincs.Sphincs256KeyFactorySpi;
 
 import com.distrimind.util.Bits;
@@ -88,21 +103,21 @@ public enum ASymmetricEncryptionType {
 		return new gnu.vm.jgnu.security.KeyPair(decodeGnuPublicKey(parts[0]), decodeGnuPrivateKey(parts[1]));
 	}*/
 
-	static gnu.vm.jgnu.security.PrivateKey decodeGnuPrivateKey(byte[] encodedKey)
+	static gnu.vm.jgnu.security.PrivateKey decodeGnuPrivateKey(byte[] encodedKey, String algorithm)
 			throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException {
-		byte[][] parts = Bits.separateEncodingsWithShortSizedTabs(encodedKey);
+		//byte[][] parts = Bits.separateEncodingsWithShortSizedTabs(encodedKey);
 		gnu.vm.jgnu.security.spec.PKCS8EncodedKeySpec pkcsKeySpec = new gnu.vm.jgnu.security.spec.PKCS8EncodedKeySpec(
-				parts[1]);
-		gnu.vm.jgnu.security.KeyFactory kf = gnu.vm.jgnu.security.KeyFactory.getInstance(new String(parts[0]));
+				encodedKey);
+		gnu.vm.jgnu.security.KeyFactory kf = gnu.vm.jgnu.security.KeyFactory.getInstance(algorithm);
 		return kf.generatePrivate(pkcsKeySpec);
 	}
 
-	static gnu.vm.jgnu.security.PublicKey decodeGnuPublicKey(byte[] encodedKey)
+	static gnu.vm.jgnu.security.PublicKey decodeGnuPublicKey(byte[] encodedKey, String algorithm)
 			throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException {
-		byte[][] parts = Bits.separateEncodingsWithShortSizedTabs(encodedKey);
+		//byte[][] parts = Bits.separateEncodingsWithShortSizedTabs(encodedKey);
 		gnu.vm.jgnu.security.spec.X509EncodedKeySpec pubKeySpec = new gnu.vm.jgnu.security.spec.X509EncodedKeySpec(
-				parts[1]);
-		gnu.vm.jgnu.security.KeyFactory kf = gnu.vm.jgnu.security.KeyFactory.getInstance(new String(parts[0]));
+				encodedKey);
+		gnu.vm.jgnu.security.KeyFactory kf = gnu.vm.jgnu.security.KeyFactory.getInstance(algorithm);
 		return kf.generatePublic(pubKeySpec);
 	}
 
@@ -117,21 +132,26 @@ public enum ASymmetricEncryptionType {
 		return new KeyPair(decodeNativePublicKey(parts[0]), decodeNativePrivateKey(parts[1]));
 	}*/
 
-	static PrivateKey decodeNativePrivateKey(byte[] encodedKey)
+	static PrivateKey decodeNativePrivateKey(byte[] encodedKey, String algorithm, String algorithmType)
 			throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException {
 
 		try {
-			byte[][] parts = Bits.separateEncodingsWithShortSizedTabs(encodedKey);
-			String algorithm=new String(parts[0]);
-			if (algorithm.equals("SPHINCS-256"))
+			if (algorithmType.contains("SPHINCS"))
 			{
 				Sphincs256KeyFactorySpi kf=new Sphincs256KeyFactorySpi();
-				return kf.engineGeneratePrivate(new PKCS8EncodedKeySpec(parts[1]));
+				return kf.engineGeneratePrivate(new PKCS8EncodedKeySpec(encodedKey));
+			}
+			else if (algorithmType.contains("25519"))
+			{
+
+				ECPrivateKeySpec ks=deserializePrivateKey(encodedKey, false);
+				return KeyFactory.getInstance(algorithm).generatePrivate(ks);
+
 			}
 			else
 			{
 
-				PKCS8EncodedKeySpec pkcsKeySpec = new PKCS8EncodedKeySpec(parts[1]);
+				PKCS8EncodedKeySpec pkcsKeySpec = new PKCS8EncodedKeySpec(encodedKey);
 				KeyFactory kf = KeyFactory.getInstance(algorithm);
 				return kf.generatePrivate(pkcsKeySpec);
 			}
@@ -142,19 +162,26 @@ public enum ASymmetricEncryptionType {
 		}
 	}
 
-	static PublicKey decodeNativePublicKey(byte[] encodedKey)
+	static PublicKey decodeNativePublicKey(byte[] encodedKey, String algorithm, String algorithmType)
 			throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException {
 		try {
-			byte[][] parts = Bits.separateEncodingsWithShortSizedTabs(encodedKey);
-			String algorithm=new String(parts[0]);
-			if (algorithm.equals("SPHINCS-256"))
+			//byte[][] parts = Bits.separateEncodingsWithShortSizedTabs(encodedKey);
+
+			if (algorithmType.contains("SPHINCS"))
 			{
 				Sphincs256KeyFactorySpi kf=new Sphincs256KeyFactorySpi();
-				return kf.engineGeneratePublic(new X509EncodedKeySpec(parts[1]));
+				return kf.engineGeneratePublic(new X509EncodedKeySpec(encodedKey));
+			}
+			else if (algorithmType.contains("25519"))
+			{
+
+				ECPublicKeySpec ks=deserializePublicKey(encodedKey, false);
+				return KeyFactory.getInstance(algorithm).generatePublic(ks);
+
 			}
 			else
 			{
-				X509EncodedKeySpec pubKeySpec = new X509EncodedKeySpec(parts[1]);
+				X509EncodedKeySpec pubKeySpec = new X509EncodedKeySpec(encodedKey);
 				KeyFactory kf = KeyFactory.getInstance(algorithm);
 				return kf.generatePublic(pubKeySpec);
 			}
@@ -164,6 +191,55 @@ public enum ASymmetricEncryptionType {
 			throw new gnu.vm.jgnu.security.spec.InvalidKeySpecException(e);
 		}
 
+	}
+	static ECPublicKeySpec deserializePublicKey(byte[] publicKey, boolean lazy) {
+
+		if (publicKey.length <= 32) {
+			if (lazy && (publicKey.length == 32)) {
+				return null;
+			}
+			byte[] key = new byte[33];
+			int offset = 33 - publicKey.length;
+			for (int i = publicKey.length - 1; i >= 0; i--) {
+				key[offset++] = publicKey[i];
+			}
+			key[0] = 3;
+			ECCurve curve = getCurve25519().getCurve();
+			ECPoint q = curve.decodePoint(key);
+			return new ECPublicKeySpec(q, getCurve25519());
+		} else if (publicKey.length == 33) { // TODO make 32 byte representation normal form
+			if (lazy) {
+				return null;
+			}
+			ECCurve curve = getCurve25519().getCurve();
+			ECPoint q = curve.decodePoint(publicKey);
+			return new ECPublicKeySpec(q, getCurve25519());
+		} else {
+			throw new IllegalArgumentException();
+		}
+	}
+
+	static ECPrivateKeySpec deserializePrivateKey(byte[] privateKey, boolean lazy) {
+
+		if (privateKey.length <= 32) {
+			if (lazy) {
+				return null;
+			}
+			BigInteger s = new BigInteger(privateKey);
+			return new ECPrivateKeySpec(s, getCurve25519());
+		} else {
+			throw new IllegalArgumentException();
+		}
+	}
+	private static volatile ECParameterSpec curve25519;
+	static ECParameterSpec getCurve25519() {
+
+		if (curve25519 == null) {
+			X9ECParameters ecP = CustomNamedCurves.getByName("curve25519");
+			// ECParameterSpec curve25519 = ECNamedCurveTable.getParameterSpec(algorithm);
+			curve25519 = new ECParameterSpec(ecP.getCurve(), ecP.getG(), ecP.getN(), ecP.getH(), ecP.getSeed());
+		}
+		return curve25519;
 	}
 
 	/*static byte[] encodeKeyPair(gnu.vm.jgnu.security.KeyPair keyPair) {
@@ -177,29 +253,39 @@ public enum ASymmetricEncryptionType {
 	}*/
 
 	static byte[] encodePrivateKey(gnu.vm.jgnu.security.PrivateKey key) {
-		return Bits.concateEncodingWithShortSizedTabs(key.getAlgorithm().getBytes(), key.getEncoded());
+	    return key.getEncoded();
+		//return Bits.concateEncodingWithShortSizedTabs(key.getAlgorithm().getBytes(), key.getEncoded());
 	}
-
-	static byte[] encodePrivateKey(PrivateKey key) {
-		return Bits.concateEncodingWithShortSizedTabs(key.getAlgorithm().getBytes(), key.getEncoded());
+	static byte[] encodePrivateKey(PrivateKey key, ASymmetricEncryptionType type) {
+		return key.getEncoded();
+	}
+	static byte[] encodePrivateKey(PrivateKey key, ASymmetricAuthentifiedSignatureType type) {
+		if (type==ASymmetricAuthentifiedSignatureType.BC_SHA384withECDSA_CURVE_25519 || type==ASymmetricAuthentifiedSignatureType.BC_SHA512withECDSA_CURVE_25519 || type==ASymmetricAuthentifiedSignatureType.BC_SHA256withECDSA_CURVE_25519)
+		{
+			return ((ECPrivateKey) key).getD().toByteArray();
+		}
+		else
+	    	return key.getEncoded();
+		//return Bits.concateEncodingWithShortSizedTabs(key.getAlgorithm().getBytes(), key.getEncoded());
 	}
 
 	static byte[] encodePublicKey(gnu.vm.jgnu.security.PublicKey key) {
-		return Bits.concateEncodingWithShortSizedTabs(key.getAlgorithm().getBytes(), key.getEncoded());
-		/*
-		 * X509EncodedKeySpec pubKeySpec = new X509EncodedKeySpec(key.getEncoded());
-		 * return Bits.concateEncodingWithShortSizedTabs(key.getAlgorithm().getBytes(),
-		 * pubKeySpec.getEncoded());
-		 */
+	    return key.getEncoded();
 	}
 
-	static byte[] encodePublicKey(PublicKey key) {
-		return Bits.concateEncodingWithShortSizedTabs(key.getAlgorithm().getBytes(), key.getEncoded());
-		/*
-		 * X509EncodedKeySpec pubKeySpec = new X509EncodedKeySpec(key.getEncoded());
-		 * return Bits.concateEncodingWithShortSizedTabs(key.getAlgorithm().getBytes(),
-		 * pubKeySpec.getEncoded());
-		 */
+
+	static byte[] encodePublicKey(PublicKey key, ASymmetricEncryptionType type) {
+	    return key.getEncoded();
+
+	}
+	static byte[] encodePublicKey(PublicKey key, ASymmetricAuthentifiedSignatureType type) {
+		if (type==ASymmetricAuthentifiedSignatureType.BC_SHA384withECDSA_CURVE_25519 || type==ASymmetricAuthentifiedSignatureType.BC_SHA512withECDSA_CURVE_25519 || type==ASymmetricAuthentifiedSignatureType.BC_SHA256withECDSA_CURVE_25519)
+		{
+			return ((ECPublicKey) key).getQ().getEncoded(true);
+		}
+		else
+			return key.getEncoded();
+
 	}
 
 	static ASymmetricEncryptionType valueOf(int ordinal) throws IllegalArgumentException {

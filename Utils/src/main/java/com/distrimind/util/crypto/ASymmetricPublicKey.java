@@ -103,9 +103,14 @@ public class ASymmetricPublicKey extends Key {
 			gnuPublicKey=null;
 		}
 	}
-	
-	
-	ASymmetricPublicKey(ASymmetricEncryptionType type, byte[] publicKey, short keySize, long expirationUTC) {
+
+    @Override
+    byte[] getKeyBytes() {
+        return publicKey;
+    }
+
+
+    ASymmetricPublicKey(ASymmetricEncryptionType type, byte[] publicKey, short keySize, long expirationUTC) {
 		this(publicKey, keySize, expirationUTC);
 		if (type == null)
 			throw new NullPointerException("type");
@@ -140,7 +145,7 @@ public class ASymmetricPublicKey extends Key {
 	}
 
 	ASymmetricPublicKey(ASymmetricEncryptionType type, PublicKey publicKey, short keySize, long expirationUTC) {
-		this(publicKey, keySize, expirationUTC);
+		this(ASymmetricEncryptionType.encodePublicKey(publicKey, type), keySize, expirationUTC);
 		if (type == null)
 			throw new NullPointerException("type");
 		if (type.getCodeProviderForEncryption() == CodeProvider.GNU_CRYPTO)
@@ -150,7 +155,7 @@ public class ASymmetricPublicKey extends Key {
 		this.signatureType=null;
 	}
 	ASymmetricPublicKey(ASymmetricAuthentifiedSignatureType type, PublicKey publicKey, short keySize, long expirationUTC) {
-		this(publicKey, keySize, expirationUTC);
+		this(ASymmetricEncryptionType.encodePublicKey(publicKey, type), keySize, expirationUTC);
 		if (type == null)
 			throw new NullPointerException("type");
 		if (type.getCodeProviderForSignature() == CodeProvider.GNU_CRYPTO)
@@ -185,18 +190,7 @@ public class ASymmetricPublicKey extends Key {
 		this.gnuPublicKey=null;
 	}
 
-	private ASymmetricPublicKey(PublicKey publicKey, short keySize, long expirationUTC) {
-		if (publicKey == null)
-			throw new NullPointerException("publicKey");
-		if (keySize < 256)
-			throw new IllegalArgumentException("keySize");
 
-		this.publicKey = ASymmetricEncryptionType.encodePublicKey(publicKey);
-		this.keySizeBits = keySize;
-		hashCode = Arrays.hashCode(this.publicKey);
-		this.expirationUTC = expirationUTC;
-		this.nativePublicKey=null;
-	}
 
 
 	public byte[] encode() {
@@ -259,7 +253,7 @@ public class ASymmetricPublicKey extends Key {
 	public gnu.vm.jgnu.security.PublicKey toGnuKey()
 			throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException {
 		if (gnuPublicKey == null)
-			gnuPublicKey = ASymmetricEncryptionType.decodeGnuPublicKey(publicKey);
+			gnuPublicKey = ASymmetricEncryptionType.decodeGnuPublicKey(publicKey, encryptionType==null?signatureType.getKeyGeneratorAlgorithmName():encryptionType.getAlgorithmName());
 
 		return gnuPublicKey;
 	}
@@ -268,7 +262,8 @@ public class ASymmetricPublicKey extends Key {
 	public PublicKey toJavaNativeKey()
 			throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException {
 		if (nativePublicKey == null)
-			nativePublicKey = ASymmetricEncryptionType.decodeNativePublicKey(publicKey);
+			nativePublicKey = ASymmetricEncryptionType.decodeNativePublicKey(publicKey, encryptionType==null?signatureType.getKeyGeneratorAlgorithmName():encryptionType.getAlgorithmName(),
+					encryptionType==null?signatureType.name():encryptionType.name());
 
 		return nativePublicKey;
 	}

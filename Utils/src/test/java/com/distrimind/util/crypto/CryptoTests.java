@@ -101,7 +101,7 @@ public class CryptoTests {
 		return res;
 	}
 	
-	@DataProvider(name = "provideDataForASymetricSignatures", parallel = true)
+	@DataProvider(name = "provideDataForASymetricSignatures", parallel = false)
 	public Object[][] provideDataForASymetricSignatures() {
 		Object[][] res = new Object[ASymmetricAuthentifiedSignatureType.values().length][];
 		int i = 0;
@@ -300,6 +300,10 @@ public class CryptoTests {
 				kpd.getASymmetricPrivateKey());
 		Assert.assertEquals(ASymmetricKeyPair.decode(kpd.encode()).getASymmetricPublicKey(),
 				kpd.getASymmetricPublicKey());
+		System.out.println(type+" :");
+		System.out.println("\tKey pair encoding : "+kpd.toString());
+		System.out.println("\tPublic key encoding : "+kpd.getASymmetricPublicKey().toString());
+		System.out.println("\tPrivate key encoding : "+kpd.getASymmetricPrivateKey().toString());
 	}
 	@Test(dataProvider = "provideDataForASymetricSignatures")
 	public void testASymmetricKeyPairEncoding(ASymmetricAuthentifiedSignatureType type)
@@ -323,6 +327,11 @@ public class CryptoTests {
 				kpd.getASymmetricPrivateKey());
 		Assert.assertEquals(ASymmetricKeyPair.decode(kpd.encode()).getASymmetricPublicKey(),
 				kpd.getASymmetricPublicKey());
+        System.out.println(type+" :");
+        System.out.println("\tKey pair encoding : "+kpd.toString());
+        System.out.println("\tPublic key encoding : "+kpd.getASymmetricPublicKey().toString());
+        System.out.println("\tPrivate key encoding : "+kpd.getASymmetricPrivateKey().toString());
+
 	}
 
 	@Test(dataProvider = "provideDataForASymetricEncryptions", dependsOnMethods = { "testASymmetricKeyPairEncoding",
@@ -902,7 +911,7 @@ public class CryptoTests {
 	public void testAsymmetricSignatures(ASymmetricAuthentifiedSignatureType type, ASymmetricKeyPair kpd, int keySize)
 			throws NoSuchAlgorithmException, InvalidKeyException, SignatureException, InvalidKeySpecException,
 			NoSuchProviderException, ShortBufferException, IllegalStateException, InvalidAlgorithmParameterException, InvalidParameterSpecException, IOException {
-		System.out.println("Testing asymmetric signature : " +type+", "+ keySize+", "+kpd.getASymmetricPublicKey().toJavaNativeKey().getEncoded().length);
+		System.out.println("Testing asymmetric signature : " +type+", "+ keySize+", "+kpd.getASymmetricPublicKey().getKeyBytes().length);
 		byte b[]=kpd.encode();
 		ASymmetricKeyPair kpd2=ASymmetricKeyPair.decode(b);
 		Assert.assertEquals(kpd2, kpd);
