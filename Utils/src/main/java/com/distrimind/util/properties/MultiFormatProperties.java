@@ -1114,7 +1114,7 @@ public abstract class MultiFormatProperties implements Cloneable, Serializable {
 	
 	private boolean isPersonalizedYAMLSerialization(Class<?> c)
 	{
-		return String.class!=c && !Number.class.isAssignableFrom(c) && !c.isPrimitive() && !c.isEnum() && !c.isAssignableFrom(MultiFormatProperties.class) && !Collection.class.isAssignableFrom(c) && !Map.class.isAssignableFrom(c) && !c.isArray();
+		return String.class!=c && !Number.class.isAssignableFrom(c) && !c.isPrimitive() && !c.isEnum() && !c.isAssignableFrom(MultiFormatProperties.class) && !Collection.class.isAssignableFrom(c) && !Map.class.isAssignableFrom(c) && !c.isArray() && !Calendar.class.isAssignableFrom(c);
 	}
 	
 	private static Tag getTag(Class<?> clazz)

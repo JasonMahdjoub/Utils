@@ -94,8 +94,8 @@ public class PropertiesExample extends MultiFormatProperties {
 		if (o1 instanceof Calendar)
 		{
 			Assert.assertTrue(o2 instanceof Calendar);
-			Assert.assertEquals(((Calendar) o1).getTimeInMillis(), ((Calendar)o2).getTimeInMillis());
-			return ((Calendar) o1).getTimeInMillis()==((Calendar)o2).getTimeInMillis();
+			Assert.assertEquals(((Calendar) o1).getTime().getTime(), ((Calendar)o2).getTime().getTime());
+			return ((Calendar) o1).getTime().getTime()==((Calendar)o2).getTime().getTime();
 		}
 		Assert.assertEquals(o2, o1);
 		return o1.equals(o2);
