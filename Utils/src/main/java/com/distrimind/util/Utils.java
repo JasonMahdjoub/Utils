@@ -75,6 +75,8 @@ public class Utils {
 			Description d = new Description((short)3, (short)18, (short)1, Version.Type.Stable, (short)0, c.getTime());
 			d.addItem("Optimize encoding of encryption and signature keys.");
 			d.addItem("Version class has now short values (instead of int).");
+			d.addItem("Optimize encoding of curve25519.");
+			d.addItem("Correction of Calendar saving into YAML documents.");
 			VERSION.addDescription(d);
 
 			c = Calendar.getInstance();
