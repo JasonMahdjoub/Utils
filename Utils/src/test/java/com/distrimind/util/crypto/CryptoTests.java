@@ -63,7 +63,7 @@ import com.distrimind.util.Bits;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 1.6
+ * @version 1.7
  * @since Utils 1.4
  */
 public class CryptoTests {
@@ -216,6 +216,18 @@ public class CryptoTests {
 		}
 		return res;
 	}
+
+    @DataProvider(name = "symmetricSignatures", parallel = true)
+    public Object[][] provideDataForSymetricSignatures() {
+        Object[][] res = new Object[SymmetricAuthentifiedSignatureType.values().length][];
+        int i = 0;
+        for (SymmetricAuthentifiedSignatureType v : SymmetricAuthentifiedSignatureType.values()) {
+            Object o[] = new Object[1];
+            o[0] = v;
+            res[i++] = o;
+        }
+        return res;
+    }
 	@DataProvider(name = "provideDataForTestSymmetricEncryptionCompatibility", parallel = true)
 	public Object[][] provideDataForTestSymmetricEncryptionCompatibility() {
 		Object[][] res = new Object[][] {
@@ -930,6 +942,7 @@ public class CryptoTests {
 		Assert.assertEquals(sk.getKeySizeBits(), sk2.getKeySizeBits());
 		Assert.assertEquals(sk.getAuthentifiedSignatureAlgorithmType(), sk2.getAuthentifiedSignatureAlgorithmType());
 		Assert.assertEquals(sk.getEncryptionAlgorithmType(), sk2.getEncryptionAlgorithmType());
+        Assert.assertEquals(sk.getKeyBytes(), sk2.getKeyBytes());
 		Assert.assertEquals(sk.toJavaNativeKey().getEncoded(), sk2.toJavaNativeKey().getEncoded());
 		Assert.assertEquals(sk.toBouncyCastleKey().getKeyBytes(), sk2.toBouncyCastleKey().getKeyBytes());
 	}
@@ -940,10 +953,13 @@ public class CryptoTests {
 		SymmetricSecretKey kp=asetype.getKeyGenerator(rand, (short)128).generateKey();
 		SymmetricSecretKey sk= setype.getKeyGenerator(rand, (short)128).generateKey();
 		byte[] wrappedKey=typeWrapper.wrapKey(kp, sk);
+
 		SymmetricSecretKey sk2=typeWrapper.unwrapKey(kp, wrappedKey);
 		Assert.assertEquals(sk.getKeySizeBits(), sk2.getKeySizeBits());
 		Assert.assertEquals(sk.getAuthentifiedSignatureAlgorithmType(), sk2.getAuthentifiedSignatureAlgorithmType());
 		Assert.assertEquals(sk.getEncryptionAlgorithmType(), sk2.getEncryptionAlgorithmType());
+
+        Assert.assertEquals(sk.getKeyBytes(), sk2.getKeyBytes(), sk+" , "+sk2+" , "+Base64.encodeBase64URLSafeString(wrappedKey));
 		Assert.assertEquals(sk.toJavaNativeKey().getEncoded(), sk2.toJavaNativeKey().getEncoded());
 		Assert.assertEquals(sk.toBouncyCastleKey().getKeyBytes(), sk2.toBouncyCastleKey().getKeyBytes());
 	}
@@ -1142,7 +1158,7 @@ public class CryptoTests {
 		if (type2.getCodeProviderForEncryption()!=CodeProvider.GNU_CRYPTO && type2.getCodeProviderForEncryption()!=CodeProvider.BC && type2.getCodeProviderForEncryption()==CodeProvider.BCFIPS)
 			key2=new SymmetricSecretKey(type2, key1.toJavaNativeKey(), key1.getKeySizeBits());
 		else 
-			key2=new SymmetricSecretKey(type2, key1.getSecretKeyBytes(), key1.getKeySizeBits());
+			key2=new SymmetricSecretKey(type2, key1.getKeyBytes(), key1.getKeySizeBits());
 
 		byte counterSizeBytes=(byte)random.nextInt(key1.getEncryptionAlgorithmType().getMaxCounterSizeInBytesUsedWithBlockMode()+1);
 		SymmetricEncryptionAlgorithm algoDistant;
@@ -1462,18 +1478,25 @@ public class CryptoTests {
 		return res;
 	}
 
-	@Test
-	public void testBase64() throws NoSuchProviderException, NoSuchAlgorithmException {
-		SymmetricSecretKey key1=SymmetricEncryptionType.AES_CTR.getKeyGenerator(SecureRandomType.DEFAULT.getInstance(0), (short)256).generateKey();
-		SymmetricSecretKey key2=SymmetricAuthentifiedSignatureType.DEFAULT.getKeyGenerator(SecureRandomType.DEFAULT.getInstance(0), (short)256).generateKey();
-		Assert.assertEquals(key1.getKeySizeBits(), 256);
-		Assert.assertEquals(key2.getKeySizeBits(), 256);
-		System.out.println("First 256 bits : \n\t"+ Base64.encodeBase64URLSafeString(Arrays.copyOf(key1.getSecretKeyBytes(), 32)));
-		System.out.println("Key encryption : \n\t"+ Base64.encodeBase64URLSafeString(key1.getSecretKeyBytes()));
+	@Test(dataProvider = "provideDataForSymetricEncryptions")
+	public void testBase64(SymmetricEncryptionType encryptionType) throws NoSuchProviderException, NoSuchAlgorithmException {
+
+		SymmetricSecretKey key1=encryptionType.getKeyGenerator(SecureRandomType.DEFAULT.getInstance(0), encryptionType.getDefaultKeySizeBits()).generateKey();
+
+		Assert.assertEquals(key1.getKeySizeBits(), encryptionType.getDefaultKeySizeBits());
+		System.out.println("Key encryption : \n\t"+ Base64.encodeBase64URLSafeString(key1.getKeyBytes()));
 		System.out.println("Key encryption (complete): \n\t"+ Base64.encodeBase64URLSafeString(key1.encode()));
-		System.out.println("Key signature : \n\t"+ Base64.encodeBase64URLSafeString(key2.getSecretKeyBytes()));
-		System.out.println("Key signature (complete) : \n\t"+ Base64.encodeBase64URLSafeString(key2.encode()));
-		Assert.assertEquals(key1.getSecretKeyBytes().length, 32);
-		Assert.assertEquals(key2.getSecretKeyBytes().length, 32);
+		Assert.assertEquals(key1.getKeyBytes().length, encryptionType.getDefaultKeySizeBytes());
 	}
+
+    @Test(dataProvider = "symmetricSignatures")
+    public void testBase64(SymmetricAuthentifiedSignatureType signatureType) throws NoSuchProviderException, NoSuchAlgorithmException {
+
+        SymmetricSecretKey key1=signatureType.getKeyGenerator(SecureRandomType.DEFAULT.getInstance(0), signatureType.getDefaultKeySizeBits()).generateKey();
+
+        Assert.assertEquals(key1.getKeySizeBits(), signatureType.getDefaultKeySizeBits());
+        System.out.println("Key encryption : \n\t"+ Base64.encodeBase64URLSafeString(key1.getKeyBytes()));
+        System.out.println("Key encryption (complete): \n\t"+ Base64.encodeBase64URLSafeString(key1.encode()));
+        Assert.assertEquals(key1.getKeyBytes().length, signatureType.getDefaultKeySizeBytes());
+    }
 }

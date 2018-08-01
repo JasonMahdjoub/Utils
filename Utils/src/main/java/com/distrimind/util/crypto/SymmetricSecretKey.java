@@ -114,7 +114,7 @@ public class SymmetricSecretKey extends Key {
 			throw new NullPointerException("type");
 		if (secretKey == null)
 			throw new NullPointerException("secretKey");
-		this.secretKey=Bits.concateEncodingWithShortSizedTabs(type.getAlgorithmName().getBytes(), secretKey);
+		this.secretKey=secretKey.clone();
 		switch (type.getAlgorithmName().toUpperCase()) {
 			case "DES":
 				this.keySizeBits = 56;
@@ -144,7 +144,7 @@ public class SymmetricSecretKey extends Key {
 			throw new NullPointerException("type");
 		if (secretKey == null)
 			throw new NullPointerException("secretKey");
-		this.secretKey=Bits.concateEncodingWithShortSizedTabs(type.getAlgorithmName().getBytes(), secretKey);
+		this.secretKey=secretKey.clone();
 		this.keySizeBits=(short)(secretKey.length*8);
 		this.encryptionType = null;
 		this.signatureType=type;
@@ -292,7 +292,7 @@ public class SymmetricSecretKey extends Key {
 	@Override
 	public gnu.vm.jgnux.crypto.SecretKey toGnuKey() {
 		if (gnuSecretKey == null)
-			gnuSecretKey = SymmetricEncryptionType.decodeGnuSecretKey(secretKey);
+			gnuSecretKey = SymmetricEncryptionType.decodeGnuSecretKey(secretKey, encryptionType==null?signatureType.getAlgorithmName():encryptionType.getAlgorithmName());
 
 		return gnuSecretKey;
 	}
@@ -300,12 +300,13 @@ public class SymmetricSecretKey extends Key {
 	@Override
 	public SecretKey toJavaNativeKey() {
 		if (javaNativeSecretKey == null)
-			javaNativeSecretKey = SymmetricEncryptionType.decodeNativeSecretKey(secretKey);
+			javaNativeSecretKey = SymmetricEncryptionType.decodeNativeSecretKey(secretKey, encryptionType==null?signatureType.getAlgorithmName():encryptionType.getAlgorithmName());
 
 		return javaNativeSecretKey;
 	}
-	
-	byte[] getSecretKeyBytes()
+
+	@Override
+    byte[] getKeyBytes()
 	{
 		return secretKey;
 	}

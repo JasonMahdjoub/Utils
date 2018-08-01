@@ -92,56 +92,62 @@ public enum SymmetricEncryptionType {
 	DEFAULT(AES_CTR);
 	
 		
-	static gnu.vm.jgnux.crypto.SecretKey decodeGnuSecretKey(byte[] encodedSecretKey) {
-		return decodeGnuSecretKey(encodedSecretKey, 0, encodedSecretKey.length);
+	static gnu.vm.jgnux.crypto.SecretKey decodeGnuSecretKey(byte[] encodedSecretKey, String algorithmName) {
+		return decodeGnuSecretKey(encodedSecretKey, 0, encodedSecretKey.length, algorithmName);
 	}
 
 	@SuppressWarnings("SameParameterValue")
-	static gnu.vm.jgnux.crypto.SecretKey decodeGnuSecretKey(byte[] encodedSecretKey, int off, int len) {
-		byte[][] parts = Bits.separateEncodingsWithShortSizedTabs(encodedSecretKey, off, len);
-		return new gnu.vm.jgnux.crypto.spec.SecretKeySpec(parts[1], new String(parts[0]));
+	static gnu.vm.jgnux.crypto.SecretKey decodeGnuSecretKey(byte[] encodedSecretKey, int off, int len, String algorithmName) {
+		//byte[][] parts = Bits.separateEncodingsWithShortSizedTabs(encodedSecretKey, off, len);
+		return new gnu.vm.jgnux.crypto.spec.SecretKeySpec(encodedSecretKey, off, len, algorithmName);
 	}
 
-	static SecretKey decodeNativeSecretKey(byte[] encodedSecretKey) {
-		return decodeNativeSecretKey(encodedSecretKey, 0, encodedSecretKey.length);
+	static SecretKey decodeNativeSecretKey(byte[] encodedSecretKey, String algorithmName) {
+		return decodeNativeSecretKey(encodedSecretKey, 0, encodedSecretKey.length, algorithmName);
 	}
 
 	@SuppressWarnings("SameParameterValue")
-	static SecretKey decodeNativeSecretKey(byte[] encodedSecretKey, int off, int len) {
-		byte[][] parts = Bits.separateEncodingsWithShortSizedTabs(encodedSecretKey, off, len);
+	static SecretKey decodeNativeSecretKey(byte[] encodedSecretKey, int off, int len, String algorithmName) {
+		//byte[][] parts = Bits.separateEncodingsWithShortSizedTabs(encodedSecretKey, off, len);
 		
-		return new SecretKeySpec(parts[1], new String(parts[0]).split("/")[0]);
+		return new SecretKeySpec(encodedSecretKey, off, len, algorithmName);
 	}
 	
 	static org.bouncycastle.crypto.SymmetricSecretKey decodeBCSecretKey(Algorithm algorithm, byte[] encodedSecretKey) {
-		
-		return decodeBCSecretKey(algorithm, encodedSecretKey, 0, encodedSecretKey.length);
+        return new org.bouncycastle.crypto.SymmetricSecretKey(algorithm, encodedSecretKey);
+		//return decodeBCSecretKey(algorithm, encodedSecretKey, 0, encodedSecretKey.length, algorithmName);
 	}
-	@SuppressWarnings("SameParameterValue")
-	static org.bouncycastle.crypto.SymmetricSecretKey decodeBCSecretKey(Algorithm algorithm, byte[] encodedSecretKey, int off, int len) {
-		final byte[][] parts = Bits.separateEncodingsWithShortSizedTabs(encodedSecretKey, off, len);
+	/*@SuppressWarnings("SameParameterValue")
+	static org.bouncycastle.crypto.SymmetricSecretKey decodeBCSecretKey(Algorithm algorithm, byte[] encodedSecretKey, int off, int len, String algorithmName) {
+		//final byte[][] parts = Bits.separateEncodingsWithShortSizedTabs(encodedSecretKey, off, len);
 		
-		return new org.bouncycastle.crypto.SymmetricSecretKey(algorithm, parts[1]);
-	}
+		return new org.bouncycastle.crypto.SymmetricSecretKey(algorithmName, encodedSecretKey);
+	}*/
 	
 	
 
 	static byte[] encodeSecretKey(gnu.vm.jgnux.crypto.SecretKey key, String algorithmName) {
-		return Bits.concateEncodingWithShortSizedTabs(algorithmName.getBytes(), key.getEncoded());
+		return key.getEncoded();
+		//return Bits.concateEncodingWithShortSizedTabs(algorithmName.getBytes(), key.getEncoded());
 	}
 
 	static byte[] encodeSecretKey(SecretKey key, String algorithmName) {
-		return Bits.concateEncodingWithShortSizedTabs(algorithmName.getBytes(), key.getEncoded());
+		return key.getEncoded();
+		//return Bits.concateEncodingWithShortSizedTabs(algorithmName.getBytes(), key.getEncoded());
 	}
 	
 	static byte[] encodeSecretKey(final org.bouncycastle.crypto.SymmetricSecretKey key, String algorithmName)
 	{
-		
-		return Bits.concateEncodingWithShortSizedTabs(algorithmName.getBytes(), AccessController.doPrivileged(new PrivilegedAction<byte[]>() {
+		return AccessController.doPrivileged(new PrivilegedAction<byte[]>() {
+			public byte[] run() {
+				return key.getKeyBytes();
+			}
+		});
+		/*return Bits.concateEncodingWithShortSizedTabs(algorithmName.getBytes(), AccessController.doPrivileged(new PrivilegedAction<byte[]>() {
             public byte[] run() {
                 return key.getKeyBytes();
             }
-        }));
+        }));*/
 	}
 
 	static SymmetricEncryptionType valueOf(int ordinal) throws IllegalArgumentException {

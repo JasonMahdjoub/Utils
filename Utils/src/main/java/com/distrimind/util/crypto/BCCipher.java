@@ -601,7 +601,7 @@ public class BCCipher extends AbstractCipher {
 	}
 
 	public byte[] wrap(Key key) throws PlainInputProcessingException, NoSuchAlgorithmException, InvalidKeySpecException {
-		byte b[]=key.toJavaNativeKey().getEncoded();
+		byte b[]=key.getKeyBytes();
 		return wrapper.wrap(b, 0, b.length);
 	}
 	

@@ -139,5 +139,6 @@ public abstract class Key implements Serializable {
 	{
 		zeroize();
 	}
-	
+
+    abstract byte[] getKeyBytes();
 }
