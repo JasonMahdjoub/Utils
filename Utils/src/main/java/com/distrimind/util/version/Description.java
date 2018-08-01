@@ -60,23 +60,23 @@ public class Description extends MultiFormatProperties {
 
 	private ArrayList<String> m_items = new ArrayList<>();
 
-	private int m_major = 0;
+	private short m_major = 0;
 
-	private int m_minor = 0;
+	private short m_minor = 0;
 
-	private int m_revision = 0;
+	private short m_revision = 0;
 
 	private Version.Type m_type = null;
 
-	private int m_alpha_beta_version = 0;
+	private short m_alpha_beta_version = 0;
 
 	private Date m_date;
 
 	protected Description() {
-		this(0, 0, 0, Version.Type.Alpha, 0, new Date());
+		this((short)0, (short)0, (short)0, Version.Type.Alpha, (short)0, new Date());
 	}
 
-	public Description(int _major, int _minor, int _revision, Version.Type _type, int _alpha_beta_version, Date _date) {
+	public Description(short _major, short _minor, short _revision, Version.Type _type, short _alpha_beta_version, Date _date) {
 		super(null);
 		if (_date == null)
 			throw new NullPointerException("_date");
@@ -115,7 +115,7 @@ public class Description extends MultiFormatProperties {
 		return false;
 	}
 
-	public int getAlphaBetaVersion() {
+	public short getAlphaBetaVersion() {
 		return m_alpha_beta_version;
 	}
 
@@ -157,15 +157,15 @@ public class Description extends MultiFormatProperties {
 		return m_items;
 	}
 
-	public int getMajor() {
+	public short getMajor() {
 		return m_major;
 	}
 
-	public int getMinor() {
+	public short getMinor() {
 		return m_minor;
 	}
 
-	public int getRevision() {
+	public short getRevision() {
 		return m_revision;
 	}
 

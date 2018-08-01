@@ -67,7 +67,7 @@ import com.distrimind.util.properties.MultiFormatProperties;
  * current version
  * 
  * @author Jason Mahdjoub
- * @version 1.1
+ * @version 1.2
  * @since Utils 1.0
  * @see Description
  * @see Person
@@ -83,15 +83,15 @@ public class Version extends MultiFormatProperties implements Comparable<Version
 	 */
 	private static final long serialVersionUID = -183708465780440306L;
 
-	private int m_major = 0;
+	private short m_major = 0;
 
-	private int m_minor = 0;
+	private short m_minor = 0;
 
-	private int m_revision = 0;
+	private short m_revision = 0;
 
 	private Type m_type = null;
 
-	private int m_alpha_beta_version = 0;
+	private short m_alpha_beta_version = 0;
 
 	private Date m_date_start_project = null;
 
@@ -112,11 +112,11 @@ public class Version extends MultiFormatProperties implements Comparable<Version
 	private JFrame m_frame = null;
 
 	protected Version() {
-		this("", "", 0, 0, 0, Type.Alpha, 0, new Date(), new Date());
+		this("", "", (short)0, (short)0, (short)0, Type.Alpha, (short)0, new Date(), new Date());
 	}
 
-	public Version(String _program_name, String shortProgramName, int _major, int _minor, int _revision, Type _type,
-			int _alpha_beta_version, Date _date_start_project, Date _date_end_project) {
+	public Version(String _program_name, String shortProgramName, short _major, short _minor, short _revision, Type _type,
+				   short _alpha_beta_version, Date _date_start_project, Date _date_end_project) {
 		super(null);
 		if (_program_name == null)
 			throw new NullPointerException("_program_name");
@@ -166,7 +166,7 @@ public class Version extends MultiFormatProperties implements Comparable<Version
 		return this.m_build_number - b.m_build_number;
 	}
 
-	public int getAlphaBetaVersion() {
+	public short getAlphaBetaVersion() {
 		return m_alpha_beta_version;
 	}
 
@@ -329,11 +329,11 @@ public class Version extends MultiFormatProperties implements Comparable<Version
 		return m_frame;
 	}
 
-	public int getMajor() {
+	public short getMajor() {
 		return m_major;
 	}
 
-	public int getMinor() {
+	public short getMinor() {
 		return m_minor;
 	}
 
@@ -349,7 +349,7 @@ public class Version extends MultiFormatProperties implements Comparable<Version
 		return m_date_start_project;
 	}
 
-	public int getRevision() {
+	public short getRevision() {
 		return m_revision;
 	}
 
