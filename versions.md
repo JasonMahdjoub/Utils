@@ -1,6 +1,6 @@
 Utils
 =====
-3.19.0 Stable (Build: 562) (from 01/07/2018 to 01/08/2018)
+3.19.0 Stable (Build: 564) (from 01/08/2018 to 01/08/2018)
 
 # Creator(s):
 Jason MAHDJOUB
@@ -11,7 +11,7 @@ Jason MAHDJOUB (Entred in the team at 04/01/2016)
 # Modifications:
 
 
-### 3.19.0 Stable (01/07/2018)
+### 3.19.0 Stable (01/08/2018)
 * Optimize encoding of encryption and signature keys.
 * Version class has now short values (instead of int).
 * Optimize encoding of curve25519.
