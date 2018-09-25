@@ -1,6 +1,6 @@
 Utils
 =====
-3.19.0 Stable (Build: 564) (from 01/08/2018 to 01/08/2018)
+3.20.0 Stable (Build: 567) (from 25/09/2018 to 25/09/2018)
 
 # Creator(s):
 Jason MAHDJOUB
@@ -9,6 +9,11 @@ Jason MAHDJOUB
 Jason MAHDJOUB (Entred in the team at 04/01/2016)
 
 # Modifications:
+
+
+### 3.20.0 Stable (25/09/2018)
+* Add SecureRandomType.BC_FIPS_APPROVED_FOR_KEYS_With_NativePRNG.
+* Add SecureRandomType.FORTUNA_WITH_BC_FIPS_APPROVED_FOR_KEYS_With_NativePRNG.
 
 
 ### 3.19.0 Stable (01/08/2018)

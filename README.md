@@ -40,7 +40,7 @@ Adapt into your build.gradle file, the next code :
 	...
 	dependencies {
 		...
-		compile(group:'com.distrimind.util', name: 'Utils', version: '3.19.0')
+		compile(group:'com.distrimind.util', name: 'Utils', version: '3.20.0')
 		...
 	}
 	...
@@ -56,7 +56,7 @@ Adapt into your pom.xml file, the next code :
 			<dependency>
 				<groupId>com.distrimind.util</groupId>
 				<artifactId>Utils</artifactId>
-				<version>3.19.0</version>
+				<version>3.20.0</version>
 			</dependency>
 			...
 		</dependencies>
