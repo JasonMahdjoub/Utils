@@ -888,7 +888,7 @@ public class CryptoTests {
 		random = type.getSingleton("nonce".getBytes(), "parameter".getBytes());
 		System.out.println(type+" instantiated");
 		random.nextBytes(new byte[10]);
-		if (type!=SecureRandomType.NativePRNG && type!=SecureRandomType.GNU_DEFAULT && type!=SecureRandomType.SHA1PRNG && type.getProvider()!=CodeProvider.BCFIPS)
+		if (type!=SecureRandomType.NativePRNG && type!=SecureRandomType.BC_FIPS_APPROVED_FOR_KEYS_With_NativePRNG && type!=SecureRandomType.FORTUNA_WITH_BC_FIPS_APPROVED_FOR_KEYS_With_NativePRNG && type!=SecureRandomType.GNU_DEFAULT && type!=SecureRandomType.SHA1PRNG && type.getProvider()!=CodeProvider.BCFIPS)
 		{
 			
 			int nb= 110000;
