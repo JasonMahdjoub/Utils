@@ -3,10 +3,10 @@
   <component name="GradleSettings">
     <option name="linkedExternalProjectsSettings">
       <GradleProjectSettings>
-        <option name="distributionType" value="LOCAL" />
+        <option name="distributionType" value="DEFAULT_WRAPPED" />
         <option name="externalProjectPath" value="$PROJECT_DIR$/../../BouncyCastle-FIPS/BouncyCastle-FIPS" />
         <option name="gradleHome" value="/usr/local/Cellar/gradle/4.7/libexec" />
-        <option name="gradleJvm" value="Open JDK 10" />
+        <option name="gradleJvm" value="Open JDK 11" />
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$/../../BouncyCastle-FIPS/BouncyCastle-FIPS" />
@@ -15,10 +15,10 @@
         <option name="useAutoImport" value="true" />
       </GradleProjectSettings>
       <GradleProjectSettings>
-        <option name="distributionType" value="LOCAL" />
+        <option name="distributionType" value="DEFAULT_WRAPPED" />
         <option name="externalProjectPath" value="$PROJECT_DIR$/../../BouncyCastle/BouncyCastle" />
         <option name="gradleHome" value="/usr/local/Cellar/gradle/4.7/libexec" />
-        <option name="gradleJvm" value="Open JDK 10" />
+        <option name="gradleJvm" value="Open JDK 11" />
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$/../../BouncyCastle/BouncyCastle" />
@@ -33,10 +33,10 @@
         <option name="useAutoImport" value="true" />
       </GradleProjectSettings>
       <GradleProjectSettings>
-        <option name="distributionType" value="LOCAL" />
+        <option name="distributionType" value="DEFAULT_WRAPPED" />
         <option name="externalProjectPath" value="$PROJECT_DIR$/../../Gnu-Crypt/Gnu-Crypt" />
         <option name="gradleHome" value="/usr/local/Cellar/gradle/4.7/libexec" />
-        <option name="gradleJvm" value="Open JDK 10" />
+        <option name="gradleJvm" value="Open JDK 11" />
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$/../../Gnu-Crypt/Gnu-Crypt" />
@@ -48,7 +48,7 @@
         <option name="distributionType" value="DEFAULT_WRAPPED" />
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
         <option name="gradleHome" value="/usr/local/Cellar/gradle/4.7/libexec" />
-        <option name="gradleJvm" value="Open JDK 10" />
+        <option name="gradleJvm" value="Open JDK 11" />
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
