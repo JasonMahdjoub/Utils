@@ -1,17 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="10b253e7-fd4e-4a64-8b2a-093fa1eb6135" name="Default" comment="Add human readable">
-      <change beforePath="$PROJECT_DIR$/../../BouncyCastle-FIPS/BouncyCastle-FIPS/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../../BouncyCastle-FIPS/BouncyCastle-FIPS/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../BouncyCastle-FIPS/BouncyCastle-FIPS/src/main/resources/META-INF/HMAC.SHA256" beforeDir="false" afterPath="$PROJECT_DIR$/../../BouncyCastle-FIPS/BouncyCastle-FIPS/src/main/resources/META-INF/HMAC.SHA256" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../BouncyCastle/BouncyCastle/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../../BouncyCastle/BouncyCastle/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../Gnu-Crypt/Gnu-Crypt/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../../Gnu-Crypt/Gnu-Crypt/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/Utils.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/Utils.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/gradle.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/gradle.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" />
+    <list default="true" id="10b253e7-fd4e-4a64-8b2a-093fa1eb6135" name="Default" comment="Build project with open JDK 11">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/com/distrimind/util/build.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/com/distrimind/util/build.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../versions.md" beforeDir="false" afterPath="$PROJECT_DIR$/../versions.md" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/.gradle/" />
     <ignored path="$PROJECT_DIR$/build/" />
@@ -93,6 +84,12 @@
                 <item name="Tasks" type="e4a08cd1:TasksNode" />
                 <item name="build" type="c8890929:TasksNode$1" />
               </path>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="Utils" type="f1a62948:ProjectNode" />
+                <item name="Tasks" type="e4a08cd1:TasksNode" />
+                <item name="publishing" type="c8890929:TasksNode$1" />
+              </path>
             </expand>
             <select />
           </tree_state>
@@ -104,7 +101,7 @@
     <session id="714323757">
       <usages-collector id="statistics.lifecycle.project">
         <counts>
-          <entry key="project.closed" value="1" />
+          <entry key="project.closed" value="2" />
           <entry key="project.open.time.1" value="1" />
           <entry key="project.open.time.2" value="1" />
           <entry key="project.opened" value="2" />
@@ -129,11 +126,13 @@
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
           <entry key="java" value="2" />
+          <entry key="txt" value="38" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
           <entry key="JAVA" value="2" />
+          <entry key="PLAIN_TEXT" value="38" />
         </counts>
       </usages-collector>
     </session>
@@ -167,7 +166,7 @@
         <entry file="file://$PROJECT_DIR$/../../BouncyCastle-FIPS/BouncyCastle-FIPS/src/main/resources/META-INF/HMAC.SHA256">
           <provider selected="true" editor-type-id="text-editor">
             <state>
-              <caret column="64" selection-start-column="64" selection-end-column="64" />
+              <caret column="34" selection-start-column="34" selection-end-column="34" />
             </state>
           </provider>
         </entry>
@@ -3652,7 +3651,7 @@
     </panes>
   </component>
   <component name="PropertiesComponent">
-    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1538000111254" />
+    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1538000142221" />
     <property name="project.structure.last.edited" value="Modules" />
     <property name="project.structure.proportion" value="0.0" />
     <property name="project.structure.side.proportion" value="0.0" />
@@ -3849,7 +3848,14 @@
       <option name="project" value="LOCAL" />
       <updated>1530819059773</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="Build project with open JDK 11">
+      <created>1538000148408</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1538000148408</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers>
       <Gitlab url="https://gitlab.distri-mind.fr/git">
         <option name="currentProject">
@@ -3893,6 +3899,7 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="55" y="23" width="1625" height="1027" extended-state="6" />
+    <editor active="true" />
     <layout>
       <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.269741" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
@@ -3904,7 +3911,7 @@
       <window_info id="Learn" order="7" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" sideWeight="0.49947917" weight="0.32903227" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" sideWeight="0.4921036" visible="true" weight="0.28235295" />
+      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.4921036" weight="0.28235295" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -3950,7 +3957,8 @@
     <MESSAGE value="Add human readable bytes count" />
     <MESSAGE value="Debug human readable" />
     <MESSAGE value="Detect language" />
-    <option name="LAST_COMMIT_MESSAGE" value="Detect language" />
+    <MESSAGE value="Build project with open JDK 11" />
+    <option name="LAST_COMMIT_MESSAGE" value="Build project with open JDK 11" />
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/src/test/java/com/distrimind/util/properties/AbstractSubProperties.java">
@@ -4214,7 +4222,7 @@
     <entry file="file://$PROJECT_DIR$/../../BouncyCastle-FIPS/BouncyCastle-FIPS/src/main/resources/META-INF/HMAC.SHA256">
       <provider selected="true" editor-type-id="text-editor">
         <state>
-          <caret column="64" selection-start-column="64" selection-end-column="64" />
+          <caret column="34" selection-start-column="34" selection-end-column="34" />
         </state>
       </provider>
     </entry>
