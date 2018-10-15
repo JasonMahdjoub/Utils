@@ -42,10 +42,12 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URL;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 import java.util.logging.Level;
+import java.util.regex.Pattern;
 
 import javax.lang.model.SourceVersion;
 
@@ -70,6 +72,8 @@ import com.distrimind.util.crypto.SymmetricSecretKey;
  * @since Utils 1.0
  */
 public class DefaultMultiFormatObjectParser extends AbstractMultiFormatObjectParser {
+
+
 
 	/**
 	 * 
@@ -112,12 +116,39 @@ public class DefaultMultiFormatObjectParser extends AbstractMultiFormatObjectPar
 		SymmetricSecretKey.class,
 		ASymmetricPrivateKey.class,
 		ASymmetricPublicKey.class,
-		ASymmetricKeyPair.class,
+		ASymmetricKeyPair.class
+
 	};
 	private static final Class<?>[] supportedMultiClasses=new Class<?>[] {
-		AbstractDecentralizedID.class, MultiFormatProperties.class, Calendar.class,Enum.class
+		AbstractDecentralizedID.class, MultiFormatProperties.class,Enum.class,Calendar.class
 	};
-	
+	private SimpleDateFormat getSimpleDateFormat()
+	{
+		return new SimpleDateFormat(simpleDataFormats[0]);
+	}
+	private static final String simpleDataFormats[]=new String[]{
+			"yyyy-MM-dd HH:mm:ss.SSS",
+			"yyyy-MM-dd HH:mm:ss",
+			"yyyy-MM-dd HH:mm",
+			"yyyy-MM-dd",
+			"HH:mm:ss.SSS",
+			"HH:mm:ss",
+			"HH:mm",
+	};
+
+	private static final Pattern beginWithYearPattern=Pattern.compile("^[0-9]{4}-[0-9]{2}-[0-9]{2}.*");
+
+
+
+
+	private SimpleDateFormat getSimpleDateFormatForRead(int length)
+	{
+		for (String s : simpleDataFormats)
+			if (s.length()==length)
+				return new SimpleDateFormat(s);
+		return null;
+	}
+
 	@Override
 	public Class<?>[] getSupportedClasses()
 	{
@@ -217,7 +248,10 @@ public class DefaultMultiFormatObjectParser extends AbstractMultiFormatObjectPar
 		} else if (field_type == Date.class) {
 			return toString((Date) object);
 		} else if (Calendar.class.isAssignableFrom(field_type)) {
-			return toString(((Calendar) object).getTime()) + ";" + ((Calendar) object).getTimeZone().getID();
+			SimpleDateFormat calendarDateFormat=getSimpleDateFormat();
+			calendarDateFormat.setTimeZone(((Calendar)object).getTimeZone());
+			return getSimpleDateFormat().format(((Calendar)object).getTime())+" "+calendarDateFormat.getTimeZone().getID();
+			//return toString(((Calendar) object).getTime()) + ";" + ((Calendar) object).getTimeZone().getID();
 		} else if (field_type == File.class) {
 			return object.toString();
 		} else if (field_type == URL.class) {
@@ -263,6 +297,8 @@ public class DefaultMultiFormatObjectParser extends AbstractMultiFormatObjectPar
 		else
 			return null;
 	}
+
+
 
 	/**
 	 * {@inheritDoc}
@@ -350,16 +386,32 @@ public class DefaultMultiFormatObjectParser extends AbstractMultiFormatObjectPar
 		} else if (field_type == Date.class) {
 			return parseDateString(nodeValue);
 		} else if (Calendar.class.isAssignableFrom(field_type)) {
-			String values[] = nodeValue.split(";");
-			if (values.length != 2)
-				return Void.TYPE;
-			else {
-				Date d = parseDateString(values[0]);
-				Calendar c = Calendar.getInstance();
-				c.setTimeZone(TimeZone.getTimeZone(values[1]));
-				c.setTime(d);
-				return c;
+			nodeValue=nodeValue.trim();
+			int i=nodeValue.lastIndexOf(' ');
+			SimpleDateFormat calendarDateFormat;
+			TimeZone tz=null;
+			boolean timeZonePresent=i>0;
+			if (timeZonePresent)
+				timeZonePresent=nodeValue.lastIndexOf(' ', i)>0 || beginWithYearPattern.matcher(nodeValue).matches();
+			if (timeZonePresent)
+			{
+				calendarDateFormat=getSimpleDateFormatForRead(i);
+				if (calendarDateFormat!=null) {
+					tz = TimeZone.getTimeZone(nodeValue.substring(i + 1));
+					nodeValue = nodeValue.substring(0, i);
+				}
 			}
+			else {
+				calendarDateFormat=getSimpleDateFormatForRead(nodeValue.length());
+				tz=TimeZone.getTimeZone("GMT");
+			}
+			if (calendarDateFormat==null)
+				throw new PropertiesParseException("Invalid calendar : "+nodeValue);
+			calendarDateFormat.setTimeZone(tz);
+			Calendar c = Calendar.getInstance();
+
+			c.setTime(calendarDateFormat.parse(nodeValue));
+			return c;
 
 		} else if (field_type == File.class) {
 			return new File(nodeValue);

@@ -83,7 +83,7 @@ public enum OS {
 		return null;
 	}
 
-	static String OSName = System.getProperty("os.name").toLowerCase();
+	static final String OSName = System.getProperty("os.name").toLowerCase();
 
 
 	

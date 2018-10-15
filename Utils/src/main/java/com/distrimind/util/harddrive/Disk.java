@@ -43,13 +43,13 @@ import java.util.UUID;
  * @since MaDKitLanEdition 3.16
  */
 public class Disk {
-    private UUID diskUUID;
-    private long diskSize;
-    private boolean internal;
-    private int blockSize;
-    private String protocol;
-    private String deviceNode;
-    private String mediaName;
+    private final UUID diskUUID;
+    private final long diskSize;
+    private final boolean internal;
+    private final int blockSize;
+    private final String protocol;
+    private final String deviceNode;
+    private final String mediaName;
 
 
     Disk(UUID diskUUID, long diskSize, boolean internal, int blockSize, String protocol, String deviceNode, String mediaName) {

@@ -24,7 +24,7 @@ public class ListClasses {
 
 	}
 
-	private static HashMap<Package, Set<Class<?>>> cache = new HashMap<>();
+	private static final HashMap<Package, Set<Class<?>>> cache = new HashMap<>();
 
 	/**
 	 * This method enables to list all classes contained into a given package

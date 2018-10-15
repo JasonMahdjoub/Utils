@@ -600,7 +600,7 @@ public class BCCipher extends AbstractCipher {
         return null;
 	}
 
-	public byte[] wrap(Key key) throws PlainInputProcessingException, NoSuchAlgorithmException, InvalidKeySpecException {
+	public byte[] wrap(Key key) throws PlainInputProcessingException {
 		byte b[]=key.getKeyBytes();
 		return wrapper.wrap(b, 0, b.length);
 	}
@@ -805,17 +805,7 @@ public class BCCipher extends AbstractCipher {
 			return outBuffer.length - outOffset;
 		}
 
-		/**
-		 * Close this input stream. This method merely calls the
-		 * {@link java.io.InputStream#close()} method of the underlying input stream.
-		 *
-		 * @throws java.io.IOException
-		 *             If an I/O exception occurs.
-		 */
-		@Override
-		public synchronized void close() throws IOException {
-			super.close();
-		}
+
 
 		/**
 		 * Set the mark. This method is unsupported and is empty.

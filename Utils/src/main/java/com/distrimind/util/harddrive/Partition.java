@@ -44,19 +44,19 @@ import java.util.UUID;
  * @since Utils 3.16
  */
 public class Partition {
-    private UUID UUID;
-    private File mountPointOrLetter;
-    private String deviceIdentifier;
-    private String partitionType;
-    private String partitionTypeUserVisible;
-    private int blockSizeInBytes;
-    private boolean isWritable;
+    private final UUID UUID;
+    private final File mountPointOrLetter;
+    private final String deviceIdentifier;
+    private final String partitionType;
+    private final String partitionTypeUserVisible;
+    private final int blockSizeInBytes;
+    private final boolean isWritable;
 
-    private String volumeName;
+    private final String volumeName;
 
-    private long partitionSize;
+    private final long partitionSize;
 
-    private Disk disk;
+    private final Disk disk;
 
     Partition(java.util.UUID UUID, File mountPointOrLetter, String deviceIdentifier, String partitionType, String partitionTypeUserVisible, int blockSizeInBytes, boolean isWritable, String volumeName, long partitionSize, Disk disk) {
         this.UUID = UUID;

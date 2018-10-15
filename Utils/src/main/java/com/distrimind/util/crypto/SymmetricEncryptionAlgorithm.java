@@ -65,7 +65,7 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 	private final byte blockModeCounterBytes;
 	private final boolean internalCounter;
 	
-	private byte[] externalCounter=null;
+	private byte[] externalCounter;
 	
 	public SymmetricEncryptionAlgorithm(AbstractSecureRandom random, SymmetricSecretKey key)
 			throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,

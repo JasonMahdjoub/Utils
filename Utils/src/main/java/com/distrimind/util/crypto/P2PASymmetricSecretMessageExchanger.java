@@ -68,7 +68,7 @@ public class P2PASymmetricSecretMessageExchanger {
 		 */
 		private static final long serialVersionUID = -3862260428441022619L;
 
-		private GnuInterface gnuRandom;
+		private final GnuInterface gnuRandom;
 		private boolean initialized;
 		protected FakeSecureRandom() {
 			
@@ -77,7 +77,7 @@ public class P2PASymmetricSecretMessageExchanger {
 				 * 
 				 */
 				private static final long serialVersionUID = 6035266817848199010L;
-				Random random = new Random();
+				final Random random = new Random();
 				
 				@Override
 				protected void engineSetSeed(byte[] seed) {
@@ -164,7 +164,7 @@ public class P2PASymmetricSecretMessageExchanger {
 		
 	}
 
-	protected static BigInteger maxLongValue = BigInteger.valueOf(1).shiftLeft(63);
+	protected static final BigInteger maxLongValue = BigInteger.valueOf(1).shiftLeft(63);
 
 	private static AbstractCipher getCipherInstancePriv(ASymmetricEncryptionType type)
 			throws NoSuchAlgorithmException, NoSuchPaddingException, NoSuchProviderException {
@@ -230,7 +230,7 @@ public class P2PASymmetricSecretMessageExchanger {
 
 	public byte[] encode(byte[] message, byte[] salt, boolean messageIsKey) throws IOException, InvalidKeyException,
 			IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException,
-			NoSuchPaddingException, InvalidAlgorithmParameterException, NoSuchProviderException, IllegalStateException, ShortBufferException {
+			NoSuchPaddingException, InvalidAlgorithmParameterException, NoSuchProviderException, IllegalStateException {
 		if (salt == null)
 			salt = new byte[0];
 		return encode(message, 0, message.length, salt, 0, salt.length, messageIsKey);
@@ -239,7 +239,7 @@ public class P2PASymmetricSecretMessageExchanger {
 	public byte[] encode(byte[] message, int offset, int len, byte[] salt, int offset_salt, int len_salt,
 			boolean messageIsKey) throws IOException, InvalidKeyException, IllegalBlockSizeException,
 			BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException,
-			InvalidAlgorithmParameterException, NoSuchProviderException, IllegalStateException, ShortBufferException {
+			InvalidAlgorithmParameterException, NoSuchProviderException, IllegalStateException {
 		if (message == null)
 			throw new NullPointerException("message");
 		if (message.length - offset < len)
@@ -283,7 +283,7 @@ public class P2PASymmetricSecretMessageExchanger {
 	private byte[] encodeLevel1(byte encodedLevel2[], byte[] hashedMessage, byte salt[], int offset_salt, int len_salt)
 			throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, NoSuchPaddingException,
 			InvalidAlgorithmParameterException, NoSuchProviderException, BadPaddingException, IllegalStateException,
-			IllegalBlockSizeException, IOException, ShortBufferException {
+			IllegalBlockSizeException, IOException {
 		hashedMessage = hashMessage(messageDigest256, hashedMessage, 0, hashedMessage.length, salt, offset_salt,
 				len_salt, false);
 
@@ -327,7 +327,7 @@ public class P2PASymmetricSecretMessageExchanger {
 
 	public byte[] encode(char[] message, byte[] salt) throws IOException, InvalidKeyException,
 			IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException,
-			NoSuchPaddingException, InvalidAlgorithmParameterException, NoSuchProviderException, IllegalStateException, ShortBufferException {
+			NoSuchPaddingException, InvalidAlgorithmParameterException, NoSuchProviderException, IllegalStateException {
 		if (salt == null)
 			salt = new byte[0];
 		return encode(message, salt, 0, salt.length);
@@ -336,7 +336,7 @@ public class P2PASymmetricSecretMessageExchanger {
 	public byte[] encode(char[] message, byte[] salt, int offset_salt, int len_salt)
 			throws IOException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException,
 			NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException,
-			InvalidAlgorithmParameterException, NoSuchProviderException, IllegalStateException, ShortBufferException {
+			InvalidAlgorithmParameterException, NoSuchProviderException, IllegalStateException {
 		if (message == null)
 			throw new NullPointerException("message");
 		if (salt == null) {
@@ -357,14 +357,14 @@ public class P2PASymmetricSecretMessageExchanger {
 
 	public byte[] encode(String message, byte[] salt) throws IOException, InvalidKeyException,
 			IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException,
-			NoSuchPaddingException, InvalidAlgorithmParameterException, NoSuchProviderException, IllegalStateException, ShortBufferException {
+			NoSuchPaddingException, InvalidAlgorithmParameterException, NoSuchProviderException, IllegalStateException {
 		return encode(message.toCharArray(), salt);
 	}
 
 	public byte[] encode(String message, byte[] salt, int offset_salt, int len_salt)
 			throws IOException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException,
 			NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException,
-			InvalidAlgorithmParameterException, NoSuchProviderException, IllegalStateException, ShortBufferException {
+			InvalidAlgorithmParameterException, NoSuchProviderException, IllegalStateException {
 		return encode(message.toCharArray(), salt, offset_salt, len_salt);
 	}
 

@@ -100,11 +100,11 @@ final class ClassMetaData {
 
 	protected static final FieldAccessPrivilegedAction fapa = new FieldAccessPrivilegedAction();
 
-	private Class<?> m_class;
+	private final Class<?> m_class;
 
-	private ArrayList<PersonalField> m_fields = new ArrayList<>();
+	private final ArrayList<PersonalField> m_fields = new ArrayList<>();
 
-	private ArrayList<Field> m_fields_collection = new ArrayList<>();
+	private final ArrayList<Field> m_fields_collection = new ArrayList<>();
 
 	// private ArrayList<Field> m_arrays=new ArrayList<Field>();
 	private int m_size ;

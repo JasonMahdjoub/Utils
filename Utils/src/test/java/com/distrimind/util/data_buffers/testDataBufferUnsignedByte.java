@@ -41,6 +41,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.Objects;
 import java.util.Random;
 
 import org.testng.annotations.BeforeClass;
@@ -56,7 +57,7 @@ import static org.testng.Assert.*;
  *
  */
 public class testDataBufferUnsignedByte extends testDataBuffer {
-	protected static int size = 50;
+	protected static final int size = 50;
 	protected static byte tab[] = null;
 
 	public static byte[] getTab(int _size) {
@@ -115,7 +116,7 @@ public class testDataBufferUnsignedByte extends testDataBuffer {
             assertEquals((char) (0xFF & tab[i]), d.getChar(i));
             assertEquals((double) (0xFF & tab[i]), d.getDouble(i), 0.0);
             assertEquals((float) (0xFF & tab[i]), d.getFloat(i), 0.0);
-            assertEquals((int) (0xFF & tab[i]), d.getInt(i));
+            assertEquals((0xFF & tab[i]), d.getInt(i));
             assertEquals((long) (0xFF & tab[i]), d.getLong(i));
             assertEquals((short) (0xFF & tab[i]), d.getShort(i));
 		}
@@ -345,8 +346,8 @@ public class testDataBufferUnsignedByte extends testDataBuffer {
 			ok = false;
 		} finally {
 			try {
-				oIn.close();
-				fIn.close();
+				Objects.requireNonNull(oIn).close();
+				Objects.requireNonNull(fIn).close();
 				java.io.File f = new File(".test_databufferbyte.dat");
 				assertTrue(f.delete());
 			} catch (IOException e1) {

@@ -279,7 +279,7 @@ public class HumanReadableBytesCount {
     {
         if (globalPattern==null)
         {
-            globalPattern=Pattern.compile("(?<sign>(-?))(?<value>(([0-9]+)|([0-9]*[.|,][0-9]+))) ?(?<preunit>("+getRegexShortComposedUnits()+"|"+getRegexComposedUnits()+"))");
+            globalPattern=Pattern.compile("(?<sign>(-?))(?<value>(([0-9]+)|([0-9]*[.,][0-9]+))) ?(?<preunit>("+getRegexShortComposedUnits()+"|"+getRegexComposedUnits()+"))");
         }
         return globalPattern;
     }

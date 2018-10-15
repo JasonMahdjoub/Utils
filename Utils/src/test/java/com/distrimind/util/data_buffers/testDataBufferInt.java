@@ -56,7 +56,7 @@ import static org.testng.Assert.*;
  *
  */
 public final class testDataBufferInt extends testDataBuffer {
-	protected static int size = 50;
+	protected static final int size = 50;
 	protected static int tab[] = null;
 
 	public static int[] getTab(int _size) {
@@ -303,6 +303,7 @@ public final class testDataBufferInt extends testDataBuffer {
 		}
 	}
 
+	@SuppressWarnings("ConstantConditions")
 	@Override
 	@Test
 	public void serialize() {

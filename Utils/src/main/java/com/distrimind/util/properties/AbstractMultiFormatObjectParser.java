@@ -58,10 +58,9 @@ public abstract class AbstractMultiFormatObjectParser implements Serializable {
 	 * @param object
 	 *            the object to convert
 	 * @return the XML node content
-	 * @throws Exception
-	 *             if a problem occurs
+	 *
 	 */
-	public abstract String convertObjectToString(Class<?> field_type, Object object) throws Exception;
+	public abstract String convertObjectToString(Class<?> field_type, Object object);
 
 	/**
 	 * Convert the XML node content to an object

@@ -49,7 +49,7 @@ import java.util.ArrayList;
 abstract class UnixHardDriveDetect extends HardDriveDetect {
 
 	private static class UnixPartition {
-		private Partition partition;
+		private final Partition partition;
 
 
 		private final ArrayList<UnixPartition> childs = new ArrayList<>();

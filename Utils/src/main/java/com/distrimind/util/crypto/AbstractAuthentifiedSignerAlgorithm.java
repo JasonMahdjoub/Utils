@@ -52,13 +52,13 @@ import gnu.vm.jgnux.crypto.ShortBufferException;
 public abstract class AbstractAuthentifiedSignerAlgorithm {
 	public byte[] sign(byte bytes[])
 			throws gnu.vm.jgnu.security.InvalidKeyException, gnu.vm.jgnu.security.SignatureException,
-			gnu.vm.jgnu.security.NoSuchAlgorithmException, InvalidKeySpecException, ShortBufferException, IllegalStateException, gnu.vm.jgnu.security.InvalidAlgorithmParameterException, IOException {
+			gnu.vm.jgnu.security.NoSuchAlgorithmException, InvalidKeySpecException, IllegalStateException, gnu.vm.jgnu.security.InvalidAlgorithmParameterException, IOException {
 		return sign(bytes, 0, bytes.length);
 	}
 
 	public byte[] sign(byte bytes[], int off, int len)
 			throws gnu.vm.jgnu.security.InvalidKeyException, gnu.vm.jgnu.security.SignatureException,
-			gnu.vm.jgnu.security.NoSuchAlgorithmException, InvalidKeySpecException, ShortBufferException, IllegalStateException, gnu.vm.jgnu.security.InvalidAlgorithmParameterException, IOException
+			gnu.vm.jgnu.security.NoSuchAlgorithmException, InvalidKeySpecException, IllegalStateException, gnu.vm.jgnu.security.InvalidAlgorithmParameterException, IOException
 	{
 		init();
 		update(bytes, off, len);
@@ -84,7 +84,7 @@ public abstract class AbstractAuthentifiedSignerAlgorithm {
 	
 	public abstract void update(byte message[], int offm, int lenm) throws SignatureException ;
 	
-	public abstract void getSignature(byte signature[], int off_sig) throws ShortBufferException, IllegalStateException, SignatureException, IOException, InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException;
+	public abstract void getSignature(byte signature[], int off_sig) throws ShortBufferException, IllegalStateException, SignatureException, IOException;
 	
     /**
      * Returns the length of the MAC in bytes.
@@ -93,6 +93,6 @@ public abstract class AbstractAuthentifiedSignerAlgorithm {
      */
 	public abstract int getMacLength();
 	
-	public abstract byte[] getSignature() throws InvalidKeyException, SignatureException, NoSuchAlgorithmException, InvalidKeySpecException, ShortBufferException, IllegalStateException, IOException;
+	public abstract byte[] getSignature() throws SignatureException, IllegalStateException, IOException;
 
 }

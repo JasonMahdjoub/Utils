@@ -37,7 +37,6 @@ package com.distrimind.util.crypto;
 import java.io.IOException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Random;
 
 import gnu.vm.jgnu.security.InvalidAlgorithmParameterException;
@@ -87,7 +86,7 @@ public class CryptoTests {
 
 	}
 
-	private static int[] keySizes = { 1024, 2048, 3072, 4096 };
+	private static final int[] keySizes = { 1024, 2048, 3072, 4096 };
 
 	@DataProvider(name = "provideDataForASymetricEncryptions", parallel = true)
 	public Object[][] provideDataForASymetricEncryptions() {
@@ -101,7 +100,7 @@ public class CryptoTests {
 		return res;
 	}
 	
-	@DataProvider(name = "provideDataForASymetricSignatures", parallel = false)
+	@DataProvider(name = "provideDataForASymetricSignatures")
 	public Object[][] provideDataForASymetricSignatures() {
 		Object[][] res = new Object[ASymmetricAuthentifiedSignatureType.values().length][];
 		int i = 0;
@@ -339,7 +338,7 @@ public class CryptoTests {
 	public void testASymmetricSecretMessageExchanger(ASymmetricEncryptionType type)
 			throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,
 			InvalidAlgorithmParameterException, IOException, IllegalAccessException, InvalidKeySpecException,
-			IllegalBlockSizeException, BadPaddingException, NoSuchProviderException, IllegalStateException, ShortBufferException {
+			IllegalBlockSizeException, BadPaddingException, NoSuchProviderException, IllegalStateException {
 		System.out.println("Testing ASymmetricSecretMessageExchanger " + type);
 		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getSingleton(null);
 		for (short keySize = 2048; keySize <= 4096; keySize += 1024) {
@@ -626,7 +625,7 @@ public class CryptoTests {
 	public void testClientServerASymetricEncryptions(ASymmetricEncryptionType type)
 			throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,
 			InvalidAlgorithmParameterException, IOException, IllegalBlockSizeException,
-			BadPaddingException, NoSuchProviderException, InvalidKeySpecException, ShortBufferException, IllegalStateException {
+			BadPaddingException, NoSuchProviderException, InvalidKeySpecException, IllegalStateException {
 		System.out.println("Testing " + type);
 		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getSingleton(null);
 		ASymmetricKeyPair kp = type.getKeyPairGenerator(rand, (short) 2048).generateKeyPair();
@@ -910,7 +909,7 @@ public class CryptoTests {
 	@Test(dataProvider = "provideDataForASymmetricSignatureTest")
 	public void testAsymmetricSignatures(ASymmetricAuthentifiedSignatureType type, ASymmetricKeyPair kpd, int keySize)
 			throws NoSuchAlgorithmException, InvalidKeyException, SignatureException, InvalidKeySpecException,
-			NoSuchProviderException, ShortBufferException, IllegalStateException, InvalidAlgorithmParameterException, InvalidParameterSpecException, IOException {
+			NoSuchProviderException, IllegalStateException, InvalidAlgorithmParameterException, InvalidParameterSpecException, IOException {
 		System.out.println("Testing asymmetric signature : " +type+", "+ keySize+", "+kpd.getASymmetricPublicKey().getKeyBytes().length);
 		byte b[]=kpd.encode();
 		ASymmetricKeyPair kpd2=ASymmetricKeyPair.decode(b);
@@ -1112,7 +1111,7 @@ public class CryptoTests {
 		return res2;
 	}
 	
-	private byte[] testSignature(AbstractAuthentifiedSignerAlgorithm signer, AbstractAuthentifiedCheckerAlgorithm checker) throws InvalidKeyException, SignatureException, NoSuchAlgorithmException, InvalidKeySpecException, ShortBufferException, IllegalStateException, NoSuchProviderException, InvalidAlgorithmParameterException, InvalidParameterSpecException, IOException
+	private byte[] testSignature(AbstractAuthentifiedSignerAlgorithm signer, AbstractAuthentifiedCheckerAlgorithm checker) throws InvalidKeyException, SignatureException, NoSuchAlgorithmException, InvalidKeySpecException, IllegalStateException, NoSuchProviderException, InvalidAlgorithmParameterException, InvalidParameterSpecException, IOException
 	{
 		byte[] m = new byte[100000];
 		Random r=new Random(System.currentTimeMillis());
@@ -1137,7 +1136,7 @@ public class CryptoTests {
 	@Test(dataProvider = "provideDataForSymmetricSignatureTest", dependsOnMethods = {"testSymmetricEncryptions"})
 	public void testSymmetricSignatures(SymmetricAuthentifiedSignatureType type, SymmetricSecretKey secretKey)
 			throws NoSuchAlgorithmException, InvalidKeyException, SignatureException, InvalidKeySpecException,
-			NoSuchProviderException, ShortBufferException, IllegalStateException, InvalidAlgorithmParameterException, InvalidParameterSpecException, IOException {
+			NoSuchProviderException, IllegalStateException, InvalidAlgorithmParameterException, InvalidParameterSpecException, IOException {
 		System.out.println("Testing symmetric signature : " + secretKey.getAuthentifiedSignatureAlgorithmType());
 		SymmetricAuthentifiedSignerAlgorithm signer = new SymmetricAuthentifiedSignerAlgorithm(secretKey);
 		SymmetricAuthentifiedSignatureCheckerAlgorithm checker = new SymmetricAuthentifiedSignatureCheckerAlgorithm(secretKey);
@@ -1154,7 +1153,7 @@ public class CryptoTests {
 	}
 
 
-	@Test(invocationCount = 1, dataProvider = "provideDataForTestSymmetricEncryptionCompatibility", dependsOnMethods = "testSymmetricEncryptions")
+	@Test(dataProvider = "provideDataForTestSymmetricEncryptionCompatibility", dependsOnMethods = "testSymmetricEncryptions")
 	public void testSymmetricEncryptionsCompatibility(SymmetricEncryptionType type1, SymmetricEncryptionType type2) throws NoSuchAlgorithmException,
 			NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IOException,
 			IllegalBlockSizeException, BadPaddingException, NoSuchProviderException, InvalidKeySpecException, IllegalStateException, ShortBufferException {
@@ -1424,7 +1423,7 @@ public class CryptoTests {
 		Assert.assertEquals(keyClient.getKeySizeBits(), 256);
 		testEncryptionAfterKeyExchange(random, type, keyClient);
 	}
-	private void testSignatureAfterKeyExchange(SymmetricSecretKey keySigner, SymmetricSecretKey keyChecker) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidKeyException, SignatureException, InvalidKeySpecException, ShortBufferException, IllegalStateException, InvalidAlgorithmParameterException, IOException, InvalidParameterSpecException
+	private void testSignatureAfterKeyExchange(SymmetricSecretKey keySigner, SymmetricSecretKey keyChecker) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidKeyException, SignatureException, InvalidKeySpecException, IllegalStateException, InvalidAlgorithmParameterException, IOException, InvalidParameterSpecException
 	{
 		SymmetricAuthentifiedSignatureCheckerAlgorithm checker=new SymmetricAuthentifiedSignatureCheckerAlgorithm(keyChecker);
 		SymmetricAuthentifiedSignerAlgorithm signer=new SymmetricAuthentifiedSignerAlgorithm(keySigner);

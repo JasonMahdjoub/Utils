@@ -83,31 +83,31 @@ public class Version extends MultiFormatProperties implements Comparable<Version
 	 */
 	private static final long serialVersionUID = -183708465780440306L;
 
-	private short m_major = 0;
+	private short m_major;
 
-	private short m_minor = 0;
+	private short m_minor;
 
-	private short m_revision = 0;
+	private short m_revision;
 
-	private Type m_type = null;
+	private Type m_type;
 
-	private short m_alpha_beta_version = 0;
+	private short m_alpha_beta_version;
 
-	private Date m_date_start_project = null;
+	private Date m_date_start_project;
 
-	private Date m_date_end_project = null;
+	private Date m_date_end_project;
 
 	private int m_build_number = 1;
 
-	private String m_program_name = null;
+	private String m_program_name;
 
 	private String m_short_program_name;
 
-	ArrayList<Person> m_creators = new ArrayList<>();
+	final ArrayList<Person> m_creators = new ArrayList<>();
 
-	ArrayList<PersonDeveloper> m_developers = new ArrayList<>();
+	final ArrayList<PersonDeveloper> m_developers = new ArrayList<>();
 
-	ArrayList<Description> m_descriptions = new ArrayList<>();
+	final ArrayList<Description> m_descriptions = new ArrayList<>();
 
 	private JFrame m_frame = null;
 

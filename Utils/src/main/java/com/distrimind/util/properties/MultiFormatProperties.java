@@ -99,7 +99,7 @@ public abstract class MultiFormatProperties implements Cloneable, Serializable {
 	 */
 	private static final long serialVersionUID = 6821595638425166680L;
 
-	static transient DefaultMultiFormatObjectParser default_xml_object_parser_instance = new DefaultMultiFormatObjectParser();
+	final transient DefaultMultiFormatObjectParser default_xml_object_parser_instance = new DefaultMultiFormatObjectParser();
 
 	/**
 	 * return the DOM from an xml file.
@@ -385,7 +385,7 @@ public abstract class MultiFormatProperties implements Cloneable, Serializable {
 		return null;
 	}
 
-	String getString(Class<?> field_type, Object object) throws Exception {
+	String getString(Class<?> field_type, Object object) {
 		String res ;
 		if (optional_xml_object_parser_instance != null) {
 			res = optional_xml_object_parser_instance.convertObjectToString(field_type, object);
@@ -996,7 +996,7 @@ public abstract class MultiFormatProperties implements Cloneable, Serializable {
     }
 
     private boolean canExclude(MultiFormatProperties mfp, MultiFormatProperties value) throws IllegalAccessException {
-        Class<?> c = value.getClass().getClass();
+        Class<?> c = value.getClass();
         while (c != Object.class) {
             for (Field field : c.getDeclaredFields())
             {
@@ -1069,6 +1069,8 @@ public abstract class MultiFormatProperties implements Cloneable, Serializable {
 
 		private void init (AbstractMultiFormatObjectParser parser)
 		{
+            representers.remove(Calendar.class);
+            multiRepresenters.remove(Calendar.class);
 			for (Class<?> c : parser.getSupportedClasses())
 			{
 				if (isPersonalizedYAMLSerialization(c) && (!representers.containsKey(c)))
@@ -1114,7 +1116,7 @@ public abstract class MultiFormatProperties implements Cloneable, Serializable {
 	
 	private boolean isPersonalizedYAMLSerialization(Class<?> c)
 	{
-		return String.class!=c && !Number.class.isAssignableFrom(c) && !c.isPrimitive() && !c.isEnum() && !c.isAssignableFrom(MultiFormatProperties.class) && !Collection.class.isAssignableFrom(c) && !Map.class.isAssignableFrom(c) && !c.isArray() && !Calendar.class.isAssignableFrom(c);
+		return String.class!=c && !Number.class.isAssignableFrom(c) && !c.isPrimitive() && !c.isEnum() && !c.isAssignableFrom(MultiFormatProperties.class) && !Collection.class.isAssignableFrom(c) && !Map.class.isAssignableFrom(c) && !c.isArray();
 	}
 	
 	private static Tag getTag(Class<?> clazz)
@@ -1197,9 +1199,24 @@ public abstract class MultiFormatProperties implements Cloneable, Serializable {
 				return MultiFormatProperties.this;
 			}
 		}
-		
+
+		/*private void removeCalendar(Map<Tag, Class<?>> m)
+        {
+            for (Iterator<Map.Entry<Tag, Class<?>>> it=m.entrySet().iterator();it.hasNext();)
+            {
+                try {
+                    if (Calendar.class.isAssignableFrom(Class.forName(it.next().getKey().getClassName())))
+                        it.remove();
+                } catch (ClassNotFoundException e) {
+                    e.printStackTrace();
+                }
+            }
+        }*/
 		private void init (AbstractMultiFormatObjectParser parser)
 		{
+
+		    yamlConstructors.remove(getTag(Calendar.class));
+            yamlAbstractConstructors.remove(getTag(Calendar.class));
 			for (Class<?> c : parser.getSupportedClasses())
 			{
 				//String k=c.getName();
@@ -1231,7 +1248,6 @@ public abstract class MultiFormatProperties implements Cloneable, Serializable {
 
 			@Override
 			public Object construct(org.yaml.snakeyaml.nodes.Node node) {
-				
 				String value = constructScalar((ScalarNode)node);
 				try {
 					return parser.convertStringToObject(clazz, value);

@@ -96,56 +96,51 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 	}
 	
 	
-	protected void initIV()
+	/*protected void initIV()
 	{
 		
-	}
+	}*/
 	
 	public byte[] encode(byte[] bytes) throws gnu.vm.jgnu.security.InvalidKeyException, IOException,
 			InvalidAlgorithmParameterException, gnu.vm.jgnux.crypto.BadPaddingException, IllegalStateException,
 			gnu.vm.jgnux.crypto.IllegalBlockSizeException, NoSuchAlgorithmException, InvalidKeySpecException,
-			NoSuchProviderException, ShortBufferException {
+			NoSuchProviderException {
 		return encode(bytes, 0, bytes.length);
 	}
-	public byte[] encode(byte[] bytes, byte[] associatedData) throws InvalidKeyException, InvalidAlgorithmParameterException, IllegalStateException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException, ShortBufferException
-	{
+	public byte[] encode(byte[] bytes, byte[] associatedData) throws InvalidKeyException, InvalidAlgorithmParameterException, IllegalStateException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException {
 		return encode(bytes, 0, bytes.length, associatedData, 0, associatedData==null?0:associatedData.length, (byte[])null);
 	}
-	public byte[] encode(byte[] bytes, byte[] associatedData, byte[] externalCounter) throws InvalidKeyException, InvalidAlgorithmParameterException, IllegalStateException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException, ShortBufferException 
-	{
+	public byte[] encode(byte[] bytes, byte[] associatedData, byte[] externalCounter) throws InvalidKeyException, InvalidAlgorithmParameterException, IllegalStateException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException {
 		return encode(bytes, 0, bytes.length, associatedData, 0, associatedData==null?0:associatedData.length, externalCounter);
 	}
 
-	public byte[] encode(byte[] bytes, int off, int len) throws InvalidKeyException, InvalidAlgorithmParameterException, IllegalStateException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException, ShortBufferException 
-	{
+	public byte[] encode(byte[] bytes, int off, int len) throws InvalidKeyException, InvalidAlgorithmParameterException, IllegalStateException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException {
 		return encode(bytes, off, len, null, 0, 0);
 	}
 	
-	public byte[] encode(byte[] bytes, int off, int len, byte[] associatedData, int offAD, int lenAD) throws gnu.vm.jgnu.security.InvalidKeyException, IOException, InvalidAlgorithmParameterException, IllegalStateException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, ShortBufferException
-	{
+	public byte[] encode(byte[] bytes, int off, int len, byte[] associatedData, int offAD, int lenAD) throws gnu.vm.jgnu.security.InvalidKeyException, IOException, InvalidAlgorithmParameterException, IllegalStateException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
 		return encode(bytes, off, len, associatedData, offAD, lenAD, (byte[])null);
 	}
 	public byte[] encode(byte[] bytes, int off, int len, byte[] associatedData, int offAD, int lenAD, byte[] externalCounter) throws gnu.vm.jgnu.security.InvalidKeyException, IOException,
 			InvalidAlgorithmParameterException, IllegalStateException, gnu.vm.jgnux.crypto.IllegalBlockSizeException,
 			gnu.vm.jgnux.crypto.BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException,
-			NoSuchProviderException, ShortBufferException {
+			NoSuchProviderException {
 		try (ByteArrayOutputStream baos = new ByteArrayOutputStream(getOutputSizeForEncryption(len))) {
 			encode(bytes, off, len, associatedData, offAD, lenAD, baos, externalCounter);
 			return baos.toByteArray();
 		}
 	}
-	public void encode(byte[] bytes, int off, int len, OutputStream os) throws InvalidKeyException, InvalidAlgorithmParameterException, IllegalStateException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException, ShortBufferException 
-	{
+	public void encode(byte[] bytes, int off, int len, OutputStream os) throws InvalidKeyException, InvalidAlgorithmParameterException, IllegalStateException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException {
 		encode(bytes, off, len, null,0, 0, os);
 	}
-	public void encode(byte[] bytes, int off, int len, byte[] associatedData, int offAD, int lenAD, OutputStream os) throws gnu.vm.jgnu.security.InvalidKeyException, InvalidAlgorithmParameterException, IllegalStateException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, ShortBufferException, IOException
+	public void encode(byte[] bytes, int off, int len, byte[] associatedData, int offAD, int lenAD, OutputStream os) throws gnu.vm.jgnu.security.InvalidKeyException, InvalidAlgorithmParameterException, IllegalStateException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException
 	{
 		encode(bytes, off, len, associatedData, offAD, lenAD, os, null);
 	}
 	public void encode(byte[] bytes, int off, int len, byte[] associatedData, int offAD, int lenAD, OutputStream os, byte[] externalCounter) throws gnu.vm.jgnu.security.InvalidKeyException,
 			IOException, InvalidAlgorithmParameterException, IllegalStateException,
 			gnu.vm.jgnux.crypto.IllegalBlockSizeException, gnu.vm.jgnux.crypto.BadPaddingException,
-			NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, ShortBufferException {
+			NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
 		if (len < 0 || off < 0)
 			throw new IllegalArgumentException("bytes.length=" + bytes.length + ", off=" + off + ", len=" + len);
 		if (off > bytes.length)

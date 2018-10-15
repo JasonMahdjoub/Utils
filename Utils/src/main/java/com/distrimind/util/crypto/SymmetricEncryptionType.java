@@ -51,7 +51,6 @@ import org.bouncycastle.crypto.Algorithm;
 import org.bouncycastle.crypto.general.Serpent;
 import org.bouncycastle.crypto.general.Twofish;
 
-import com.distrimind.util.Bits;
 import com.distrimind.util.OS;
 
 /**

@@ -41,6 +41,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.Objects;
 import java.util.Random;
 
 import org.testng.annotations.BeforeClass;
@@ -340,8 +341,8 @@ public final class testDataBufferBool extends testDataBuffer {
 			ok = false;
 		} finally {
 			try {
-				oIn.close();
-				fIn.close();
+				Objects.requireNonNull(oIn).close();
+				Objects.requireNonNull(fIn).close();
 				java.io.File f = new File(".test_databufferbool.dat");
 				assertTrue(f.delete());
 			} catch (IOException e1) {

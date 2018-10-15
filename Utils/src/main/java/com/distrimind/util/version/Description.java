@@ -58,17 +58,17 @@ public class Description extends MultiFormatProperties {
 	 */
 	private static final long serialVersionUID = -5480559682819518935L;
 
-	private ArrayList<String> m_items = new ArrayList<>();
+	private final ArrayList<String> m_items = new ArrayList<>();
 
-	private short m_major = 0;
+	private short m_major;
 
-	private short m_minor = 0;
+	private short m_minor;
 
-	private short m_revision = 0;
+	private short m_revision;
 
-	private Version.Type m_type = null;
+	private Version.Type m_type;
 
-	private short m_alpha_beta_version = 0;
+	private short m_alpha_beta_version;
 
 	private Date m_date;
 

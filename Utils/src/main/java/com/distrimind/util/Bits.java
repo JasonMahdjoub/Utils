@@ -169,15 +169,11 @@ public class Bits {
             putPositiveShortInt(b, off, (int) val);
         }
         else if (valueSizeInBytes==4) {
-            if (val>0xFFFFFFFF)
-                throw new IllegalArgumentException();
-            putInt(b, off, (int) val);
-        }
+			throw new IllegalArgumentException();
+		}
         else if (valueSizeInBytes<=8) {
-            if (val>0xFFFFFFFFFFFFFFFFL)
-                throw new IllegalArgumentException();
-            putLong(b, off, val);
-        }
+			throw new IllegalArgumentException();
+		}
         else
             throw new IllegalArgumentException();
 	}

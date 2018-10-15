@@ -12,7 +12,7 @@ apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 apply plugin: 'idea'
 
-def Properties props = new Properties()
+Properties props = new Properties()
 def propFile = file('gradle.properties')
 def artifactory_Url="https://artifactory.distri-mind.fr/artifactory"
 def user=""
@@ -63,7 +63,7 @@ dependencies {
      compile(group:'org.bouncycastle', name: 'bc-fips', version: '1.0.1-DMRECOMPILE')
      compile(group:'gnu', name: 'Gnu-Crypt', version: '1.2.1')
      compile(group:'commons-codec', name: 'commons-codec', version: '1.11')
-     compile(group:'org.yaml', name: 'snakeyaml', version: '1.21')
+     compile(group:'org.yaml', name: 'snakeyaml', version: '1.23')
     
 }
 
@@ -71,7 +71,7 @@ def javaVersion=7
 sourceCompatibility = javaVersion
 targetCompatibility= javaVersion
 
-version='3.20.0'
+version='3.20.1'
 
 
 idea {
@@ -85,7 +85,7 @@ allprojects {
 	group='com.distrimind.util'
 
     //compileJava.options.compilerArgs << "-Xlint"
-    compileJava.options.compilerArgs.addAll(['--release', javaVersion])
+    compileJava.options.compilerArgs.addAll(['--release', javaVersion] as Collection<? extends String>)
     if (project.hasProperty('javaHomeVersion') && javaHomeVersion.toFloat()>1.8)
     	javadoc.options.addStringOption("html5", "-quiet")
 }

@@ -57,8 +57,8 @@ public class Utils {
 		Calendar c = Calendar.getInstance();
 		c.set(2016, Calendar.JANUARY, 4);
 		Calendar c2 = Calendar.getInstance();
-		c.set(2018, Calendar.SEPTEMBER, 25);
-		VERSION = new Version("Utils", "Utils", (short)3, (short)20, (short)0, Version.Type.Stable, (short)0, c.getTime(), c2.getTime());
+		c.set(2018, Calendar.OCTOBER, 15);
+		VERSION = new Version("Utils", "Utils", (short)3, (short)21, (short)0, Version.Type.Stable, (short)0, c.getTime(), c2.getTime());
 		try {
 
 			InputStream is = Utils.class.getResourceAsStream("build.txt");
@@ -71,8 +71,16 @@ public class Utils {
 			VERSION.addDeveloper(new PersonDeveloper("mahdjoub", "jason", c.getTime()));
 
 			c = Calendar.getInstance();
+			c.set(2018, Calendar.OCTOBER, 15);
+			Description d = new Description((short)3, (short)21, (short)0, Version.Type.Stable, (short)0, c.getTime());
+			d.addItem("Update snakeyaml to 1.23.");
+			d.addItem("Debug YAML Calendar saving.");
+			d.addItem("Clean code.");
+			VERSION.addDescription(d);
+
+			c = Calendar.getInstance();
 			c.set(2018, Calendar.SEPTEMBER, 25);
-			Description d = new Description((short)3, (short)20, (short)0, Version.Type.Stable, (short)0, c.getTime());
+			d = new Description((short)3, (short)20, (short)0, Version.Type.Stable, (short)0, c.getTime());
 			d.addItem("Add SecureRandomType.BC_FIPS_APPROVED_FOR_KEYS_With_NativePRNG.");
 			d.addItem("Add SecureRandomType.FORTUNA_WITH_BC_FIPS_APPROVED_FOR_KEYS_With_NativePRNG.");
 			VERSION.addDescription(d);

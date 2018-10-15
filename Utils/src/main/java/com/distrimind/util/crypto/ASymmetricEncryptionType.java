@@ -147,7 +147,7 @@ public enum ASymmetricEncryptionType {
 		}
 	}
 
-	static PublicKey decodeNativePublicKey(byte[] encodedKey, String algorithm, String algorithmType, String curveName)
+	static PublicKey decodeNativePublicKey(byte[] encodedKey, String algorithm, String algorithmType, @SuppressWarnings("unused") String curveName)
             throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException {
 		try {
 			//byte[][] parts = Bits.separateEncodingsWithShortSizedTabs(encodedKey);
@@ -242,7 +242,7 @@ public enum ASymmetricEncryptionType {
 	    return key.getEncoded();
 		//return Bits.concateEncodingWithShortSizedTabs(key.getAlgorithm().getBytes(), key.getEncoded());
 	}
-	static byte[] encodePrivateKey(PrivateKey key, ASymmetricEncryptionType type) {
+	static byte[] encodePrivateKey(PrivateKey key, @SuppressWarnings("unused") ASymmetricEncryptionType type) {
 		return key.getEncoded();
 	}
 	static byte[] encodePrivateKey(PrivateKey key, ASymmetricAuthentifiedSignatureType type) {
@@ -260,7 +260,7 @@ public enum ASymmetricEncryptionType {
 	}
 
 
-	static byte[] encodePublicKey(PublicKey key, ASymmetricEncryptionType type) {
+	static byte[] encodePublicKey(PublicKey key, @SuppressWarnings("unused") ASymmetricEncryptionType type) {
 	    return key.getEncoded();
 
 	}

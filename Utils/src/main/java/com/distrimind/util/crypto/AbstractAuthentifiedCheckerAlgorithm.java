@@ -41,7 +41,6 @@ import gnu.vm.jgnu.security.NoSuchAlgorithmException;
 import gnu.vm.jgnu.security.NoSuchProviderException;
 import gnu.vm.jgnu.security.SignatureException;
 import gnu.vm.jgnu.security.spec.InvalidKeySpecException;
-import gnu.vm.jgnux.crypto.ShortBufferException;
 
 /**
  * 
@@ -66,15 +65,15 @@ public abstract class AbstractAuthentifiedCheckerAlgorithm {
 	public abstract void update(byte message[], int offm, int lenm) throws SignatureException ;
 
 	public abstract boolean verify()
-			throws SignatureException, InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, ShortBufferException, IllegalStateException, IOException, NoSuchProviderException, gnu.vm.jgnu.security.InvalidAlgorithmParameterException, gnu.vm.jgnu.security.spec.InvalidParameterSpecException;
+			throws SignatureException, IllegalStateException;
 
 	public boolean verify(byte message[], byte signature[])
-			throws SignatureException, InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, ShortBufferException, IllegalStateException, IOException, NoSuchProviderException, gnu.vm.jgnu.security.InvalidAlgorithmParameterException, gnu.vm.jgnu.security.spec.InvalidParameterSpecException {
+			throws SignatureException, InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, IllegalStateException, IOException, NoSuchProviderException, gnu.vm.jgnu.security.InvalidAlgorithmParameterException, gnu.vm.jgnu.security.spec.InvalidParameterSpecException {
 		return this.verify(message, 0, message.length, signature, 0, signature.length);
 	}
 
 	public boolean verify(byte message[], int offm, int lenm, byte signature[], int offs, int lens)
-			throws SignatureException, InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, ShortBufferException, IllegalStateException, IOException, NoSuchProviderException, gnu.vm.jgnu.security.InvalidAlgorithmParameterException, gnu.vm.jgnu.security.spec.InvalidParameterSpecException
+			throws SignatureException, InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, IllegalStateException, IOException, NoSuchProviderException, gnu.vm.jgnu.security.InvalidAlgorithmParameterException, gnu.vm.jgnu.security.spec.InvalidParameterSpecException
 	{
 		init(signature, offs, lens);
 		update(message, offm, lenm);

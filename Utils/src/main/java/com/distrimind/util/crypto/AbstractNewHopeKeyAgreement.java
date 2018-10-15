@@ -106,7 +106,7 @@ public abstract class AbstractNewHopeKeyAgreement extends KeyAgreement{
 		zeroize();
 	}
 	
-    static final int POLY_SIZE;
+    //static final int POLY_SIZE;
     static final int SENDB_BYTES;
     static final Method methodShareB;
     static final Method methodShareA;
@@ -114,14 +114,14 @@ public abstract class AbstractNewHopeKeyAgreement extends KeyAgreement{
     static 
     {
     	
-    		int polySize=1024;
+    		//int polySize=1024;
     		int sendBBytes=1792+256;
     		Class<?> newHopeClass=null;
     		try
     		{
     			newHopeClass=Class.forName("org.bouncycastle.pqc.crypto.newhope.NewHope");
     		
-	    		try
+	    		/*try
 	    		{
 	    			Field f=newHopeClass.getDeclaredField("POLY_SIZE");
 	    			f.setAccessible(true);
@@ -130,7 +130,7 @@ public abstract class AbstractNewHopeKeyAgreement extends KeyAgreement{
 	    		catch(Exception e)
 	    		{
 	    			e.printStackTrace();
-	    		}
+	    		}*/
 	    		try
 	    		{
 	    			Field f=newHopeClass.getDeclaredField("SENDB_BYTES");
@@ -147,7 +147,7 @@ public abstract class AbstractNewHopeKeyAgreement extends KeyAgreement{
     			e.printStackTrace();
     			System.exit(-1);
     		}
-    		POLY_SIZE=polySize;
+    		//POLY_SIZE=polySize;
     		SENDB_BYTES=sendBBytes;
     		Class<?> bClass=byte[].class;
     		methodShareA=getMethod(newHopeClass, "sharedA", bClass,short[].class,bClass);

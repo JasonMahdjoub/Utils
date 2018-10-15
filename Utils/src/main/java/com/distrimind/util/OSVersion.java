@@ -121,7 +121,7 @@ public enum OSVersion {
         }
     }
     static private volatile com.distrimind.util.OSVersion currentOS=null;
-    static String OS_VERSION = (System.getProperty("os.name") + " " + System.getProperty("os.version")).toLowerCase();
+    static final String OS_VERSION = (System.getProperty("os.name") + " " + System.getProperty("os.version")).toLowerCase();
 
     public static OSVersion getCurrentOSVersion()
     {

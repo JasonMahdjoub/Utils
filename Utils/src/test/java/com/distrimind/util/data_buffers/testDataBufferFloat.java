@@ -40,6 +40,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.Objects;
 import java.util.Random;
 
 import org.testng.annotations.BeforeClass;
@@ -55,7 +56,7 @@ import static org.testng.Assert.*;
  *
  */
 public final class testDataBufferFloat extends testDataBuffer {
-	protected static int size = 50;
+	protected static final int size = 50;
 	protected static float tab[] = null;
 
 	public static float[] getTab(int _size) {
@@ -343,8 +344,8 @@ public final class testDataBufferFloat extends testDataBuffer {
 			ok = false;
 		} finally {
 			try {
-				oIn.close();
-				fIn.close();
+				Objects.requireNonNull(oIn).close();
+				Objects.requireNonNull(fIn).close();
 				java.io.File f = new File(".test_databufferfloat.dat");
 				assertTrue(f.delete());
 			} catch (IOException e1) {

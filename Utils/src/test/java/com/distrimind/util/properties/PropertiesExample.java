@@ -84,7 +84,7 @@ public class PropertiesExample extends MultiFormatProperties {
 	 */
 	private static final long serialVersionUID = -569461229020640634L;
 
-	private static String[] strings = { "sfdg", "fdgdg", "bjf", "fsgh", "hlqoit" };
+	private final static String[] strings = { "sfdg", "fdgdg", "bjf", "fsgh", "hlqoit" };
 
 	public static boolean equals(Object o1, Object o2) {
 		if (o1 == o2)

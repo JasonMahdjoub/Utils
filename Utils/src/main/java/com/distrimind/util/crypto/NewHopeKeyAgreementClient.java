@@ -50,7 +50,7 @@ import org.bouncycastle.pqc.crypto.newhope.NHPublicKeyParameters;
  */
 public class NewHopeKeyAgreementClient extends AbstractNewHopeKeyAgreement{
 
-	private AbstractSecureRandom randomForKeys;
+	private final AbstractSecureRandom randomForKeys;
 	private NHPrivateKeyParameters priv;
 	private boolean valid=true;
 	/*NewHopeKeyAgreementClient(SymmetricAuthentifiedSignatureType type, AbstractSecureRandom randomForKeys) {
