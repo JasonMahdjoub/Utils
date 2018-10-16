@@ -1,6 +1,6 @@
 Utils
 =====
-3.21.0 Stable (Build: 606) (from 15/10/2018 to 15/10/2018)
+3.20.1 Stable (Build: 895) (from 15/10/2018 to 15/10/2018)
 
 # Creator(s):
 Jason MAHDJOUB
@@ -11,7 +11,7 @@ Jason MAHDJOUB (Entred in the team at 04/01/2016)
 # Modifications:
 
 
-### 3.21.0 Stable (15/10/2018)
+### 3.20.1 Stable (15/10/2018)
 * Update snakeyaml to 1.23.
 * Debug YAML Calendar saving.
 * Clean code.

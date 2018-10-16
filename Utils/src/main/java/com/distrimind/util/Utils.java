@@ -58,7 +58,7 @@ public class Utils {
 		c.set(2016, Calendar.JANUARY, 4);
 		Calendar c2 = Calendar.getInstance();
 		c.set(2018, Calendar.OCTOBER, 15);
-		VERSION = new Version("Utils", "Utils", (short)3, (short)21, (short)0, Version.Type.Stable, (short)0, c.getTime(), c2.getTime());
+		VERSION = new Version("Utils", "Utils", (short)3, (short)20, (short)1, Version.Type.Stable, (short)0, c.getTime(), c2.getTime());
 		try {
 
 			InputStream is = Utils.class.getResourceAsStream("build.txt");
@@ -72,7 +72,7 @@ public class Utils {
 
 			c = Calendar.getInstance();
 			c.set(2018, Calendar.OCTOBER, 15);
-			Description d = new Description((short)3, (short)21, (short)0, Version.Type.Stable, (short)0, c.getTime());
+			Description d = new Description((short)3, (short)20, (short)1, Version.Type.Stable, (short)0, c.getTime());
 			d.addItem("Update snakeyaml to 1.23.");
 			d.addItem("Debug YAML Calendar saving.");
 			d.addItem("Clean code.");
@@ -591,12 +591,25 @@ public class Utils {
 		}
 	}
 	
-	public static void main(String args[]) throws IOException
+	@SuppressWarnings("ResultOfMethodCallIgnored")
+    public static void main(String args[]) throws IOException
 	{
 		String html=VERSION.getMarkdownCode();
-		try(FileWriter fr=new FileWriter(new File("../versions.md")))
+        File f=new File("../versions.md");
+        if (f.exists())
+            f.delete();
+		try(FileWriter fr=new FileWriter(f))
 		{
 			fr.write(html);
+			fr.flush();
+		}
+		String lastVersion=VERSION.getFileHeadVersion();
+        f=new File("../lastVersion.md");
+        if (f.exists())
+            f.delete();
+		try(FileWriter fr=new FileWriter(f))
+		{
+			fr.write(lastVersion);
 			fr.flush();
 		}
 	}
