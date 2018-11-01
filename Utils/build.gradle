@@ -73,7 +73,7 @@ targetCompatibility= javaVersion
 
 idea {
     project {
-        Utils.jdkName = javaVersion
+        jdkName = javaVersion
         languageLevel = javaVersion
     }
 }
