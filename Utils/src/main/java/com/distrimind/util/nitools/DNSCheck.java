@@ -88,7 +88,7 @@ public class DNSCheck {
     }
     public static String getEmailFromDomain(String email)
     {
-        return email.substring(email.lastIndexOf("@"));
+        return email.substring(email.lastIndexOf("@")+1);
     }
     public static boolean isFreeDomainFromEmail(String email)
     {
