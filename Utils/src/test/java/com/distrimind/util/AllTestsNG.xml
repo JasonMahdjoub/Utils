@@ -50,5 +50,11 @@
 			<class name="com.distrimind.util.data_buffers.testDataBufferUnsignedShort" />
 		</classes>
 	</test>
+
+	<test name="testDNS">
+		<classes>
+			<class name="com.distrimind.util.TestDNS" />
+		</classes>
+	</test>
 	
 </suite>
