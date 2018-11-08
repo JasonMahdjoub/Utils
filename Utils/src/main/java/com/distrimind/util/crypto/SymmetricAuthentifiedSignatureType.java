@@ -62,7 +62,7 @@ public enum SymmetricAuthentifiedSignatureType {
 	BC_FIPS_HMAC_SHA2_512_224("HmacSHA512/224", CodeProvider.BCFIPS, CodeProvider.BCFIPS, (short)128, (short)16, MessageDigestType.BC_FIPS_SHA2_512_224, FipsSHS.SHA512_224_HMAC),
 	BC_FIPS_HMAC_SHA2_512_256("HmacSHA512/256", CodeProvider.BCFIPS, CodeProvider.BCFIPS, (short)128, (short)16, MessageDigestType.BC_FIPS_SHA2_512_256, FipsSHS.SHA512_256_HMAC),
 	//BC_FIPS_HMAC_WHIRLPOOL("HmacWHIRLPOOL",CodeProvider.BCFIPS, CodeProvider.BCFIPS, (short)128, (short)16, MessageDigestType.BC_WHIRLPOOL, FipsSHS.WHIRPOOL_HMAC), 
-	DEFAULT(BC_FIPS_HMAC_SHA2_512);
+	DEFAULT(HMAC_SHA2_256);
 
 	private final String algorithmName;
 	private final CodeProvider codeProviderForSignature, codeProviderForKeyGenerator;

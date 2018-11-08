@@ -1,6 +1,6 @@
 Utils
 =====
-3.21.0 Stable (Build: 906) (from 05/11/2018 to 06/11/2018)
+3.21.1 Stable (Build: 912) (from 08/11/2018 to 08/11/2018)
 
 # Creator(s):
 Jason MAHDJOUB
@@ -9,6 +9,10 @@ Jason MAHDJOUB
 Jason MAHDJOUB (Entred in the team at 04/01/2016)
 
 # Modifications:
+
+
+### 3.21.1 Stable (08/11/2018)
+* Change default symmetric signer to HMAC_SHA2_256.
 
 
 ### 3.21.0 Stable (05/11/2018)
