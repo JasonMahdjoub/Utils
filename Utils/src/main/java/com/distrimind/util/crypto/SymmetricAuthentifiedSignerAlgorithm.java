@@ -97,7 +97,7 @@ public class SymmetricAuthentifiedSignerAlgorithm extends AbstractAuthentifiedSi
 
 	@Override
 	public int getMacLength() {
-		return mac.getMacLength();
+		return mac.getMacLengthBits();
 	}
 
 }

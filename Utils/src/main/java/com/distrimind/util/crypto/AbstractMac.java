@@ -59,7 +59,7 @@ public abstract class AbstractMac {
 	@Override
 	public abstract String toString();
 
-	public abstract int getMacLength();
+	public abstract int getMacLengthBits();
 
 	public abstract void init(Key _key)
 			throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException;

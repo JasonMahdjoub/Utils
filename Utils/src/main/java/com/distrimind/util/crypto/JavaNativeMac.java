@@ -85,7 +85,7 @@ public final class JavaNativeMac extends AbstractMac {
 	}
 
 	@Override
-	public final int getMacLength() {
+	public final int getMacLengthBits() {
 		return mac.getMacLength();
 	}
 

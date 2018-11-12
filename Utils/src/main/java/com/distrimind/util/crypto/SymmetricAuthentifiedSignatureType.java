@@ -35,33 +35,42 @@ knowledge of the CeCILL-C license and that you accept its terms.
 package com.distrimind.util.crypto;
 
 
-import javax.crypto.spec.SecretKeySpec;
-
-import org.bouncycastle.crypto.Algorithm;
-import org.bouncycastle.crypto.fips.FipsSHS;
-import org.bouncycastle.crypto.fips.FipsSHS.AuthParameters;
-
 import gnu.vm.jgnu.security.NoSuchAlgorithmException;
 import gnu.vm.jgnu.security.NoSuchProviderException;
 import gnu.vm.jgnux.crypto.KeyGenerator;
 import gnu.vm.jgnux.crypto.Mac;
+import org.bouncycastle.crypto.Algorithm;
+import org.bouncycastle.crypto.fips.FipsSHS;
+import org.bouncycastle.crypto.fips.FipsSHS.AuthParameters;
+
+import javax.crypto.spec.SecretKeySpec;
+import java.security.MessageDigest;
 
 /**
  * 
  * @author Jason Mahdjoub
- * @version 1.4
+ * @version 1.5
  * @since Utils 2.10.0
  */
 public enum SymmetricAuthentifiedSignatureType {
 	HMAC_SHA2_256("HmacSHA256", CodeProvider.SunJCE, CodeProvider.SunJCE, (short)128, (short)16, MessageDigestType.SHA2_256, null), 
 	HMAC_SHA2_384("HmacSHA384", CodeProvider.SunJCE, CodeProvider.SunJCE, (short)128, (short)16, MessageDigestType.SHA2_384, null), 
-	HMAC_SHA2_512("HmacSHA512", CodeProvider.SunJCE, CodeProvider.SunJCE, (short)128, (short)16, MessageDigestType.SHA2_512, null), 
-	BC_FIPS_HMAC_SHA2_256("HmacSHA256", CodeProvider.BCFIPS, CodeProvider.BCFIPS, (short)128, (short)16, MessageDigestType.BC_FIPS_SHA2_256, FipsSHS.SHA256_HMAC), 
+	HMAC_SHA2_512("HmacSHA512", CodeProvider.SunJCE, CodeProvider.SunJCE, (short)128, (short)16, MessageDigestType.SHA2_512, null),
+    BC_FIPS_HMAC_SHA2_256("HmacSHA256", CodeProvider.BCFIPS, CodeProvider.BCFIPS, (short)128, (short)16, MessageDigestType.BC_FIPS_SHA2_256, FipsSHS.SHA256_HMAC),
 	BC_FIPS_HMAC_SHA2_384("HmacSHA384", CodeProvider.BCFIPS, CodeProvider.BCFIPS, (short)128, (short)16, MessageDigestType.BC_FIPS_SHA2_384, FipsSHS.SHA384_HMAC), 
 	BC_FIPS_HMAC_SHA2_512("HmacSHA512", CodeProvider.BCFIPS, CodeProvider.BCFIPS, (short)128, (short)16, MessageDigestType.BC_FIPS_SHA2_512, FipsSHS.SHA512_HMAC),
 	BC_FIPS_HMAC_SHA2_512_224("HmacSHA512/224", CodeProvider.BCFIPS, CodeProvider.BCFIPS, (short)128, (short)16, MessageDigestType.BC_FIPS_SHA2_512_224, FipsSHS.SHA512_224_HMAC),
 	BC_FIPS_HMAC_SHA2_512_256("HmacSHA512/256", CodeProvider.BCFIPS, CodeProvider.BCFIPS, (short)128, (short)16, MessageDigestType.BC_FIPS_SHA2_512_256, FipsSHS.SHA512_256_HMAC),
-	//BC_FIPS_HMAC_WHIRLPOOL("HmacWHIRLPOOL",CodeProvider.BCFIPS, CodeProvider.BCFIPS, (short)128, (short)16, MessageDigestType.BC_WHIRLPOOL, FipsSHS.WHIRPOOL_HMAC), 
+	BC_HMAC_SHA3_256("HmacSHA3-256", CodeProvider.BC, CodeProvider.BC, (short)128, (short)16, MessageDigestType.BC_FIPS_SHA3_256, null),
+	BC_HMAC_SHA3_384("HmacSHA3-384", CodeProvider.BC, CodeProvider.BC, (short)128, (short)16, MessageDigestType.BC_FIPS_SHA3_384, null),
+	BC_HMAC_SHA3_512("HmacSHA3-512", CodeProvider.BC, CodeProvider.BC, (short)128, (short)16, MessageDigestType.BC_FIPS_SHA3_512, null),
+    HMAC_SHA2_512_224("HmacSHA512/224", CodeProvider.SunJCE, CodeProvider.SunJCE, (short)128, (short)16, MessageDigestType.SHA2_512_224, null, BC_FIPS_HMAC_SHA2_512_224),
+    HMAC_SHA2_512_256("HmacSHA512/256", CodeProvider.SunJCE, CodeProvider.SunJCE, (short)128, (short)16, MessageDigestType.SHA2_512_256, null, BC_FIPS_HMAC_SHA2_512_256),
+    HMAC_SHA3_256("HmacSHA3-256", CodeProvider.SunJCE, CodeProvider.SunJCE, (short)128, (short)16, MessageDigestType.SHA3_256, null, BC_HMAC_SHA3_256),
+    HMAC_SHA3_384("HmacSHA3-384", CodeProvider.SunJCE, CodeProvider.SunJCE, (short)128, (short)16, MessageDigestType.SHA3_384, null, BC_HMAC_SHA3_384),
+    HMAC_SHA3_512("HmacSHA3-512", CodeProvider.SunJCE, CodeProvider.SunJCE, (short)128, (short)16, MessageDigestType.SHA3_512, null, BC_HMAC_SHA3_512),
+
+	//BC_FIPS_HMAC_WHIRLPOOL("HmacWHIRLPOOL",CodeProvider.BCFIPS, CodeProvider.BCFIPS, (short)128, (short)16, MessageDigestType.BC_WHIRLPOOL, FipsSHS.WHIRPOOL_HMAC),
 	DEFAULT(HMAC_SHA2_256);
 
 	private final String algorithmName;
@@ -70,16 +79,23 @@ public enum SymmetricAuthentifiedSignatureType {
 	private final short keySizeBytes;
 	private final MessageDigestType messageDigestType;
 	private final AuthParameters messageDigestAuth;
+    private final SymmetricAuthentifiedSignatureType replacer;
+
 	
 	SymmetricAuthentifiedSignatureType(String algorithmName, CodeProvider codeProviderForSignature, CodeProvider codeProviderForKeyGenerator, short keySizeBits, short keySizeBytes, MessageDigestType messageDigestType, AuthParameters messageDigestAuth) {
-		this.algorithmName = algorithmName;
-		this.codeProviderForSignature = codeProviderForSignature;
-		this.codeProviderForKeyGenerator=codeProviderForKeyGenerator;
-		this.keySizeBits=keySizeBits;
-		this.keySizeBytes=keySizeBytes;
-		this.messageDigestType=messageDigestType;
-		this.messageDigestAuth=messageDigestAuth;
+        this(algorithmName,codeProviderForSignature, codeProviderForKeyGenerator, keySizeBits, keySizeBytes, messageDigestType, messageDigestAuth, null);
+
 	}
+    SymmetricAuthentifiedSignatureType(String algorithmName, CodeProvider codeProviderForSignature, CodeProvider codeProviderForKeyGenerator, short keySizeBits, short keySizeBytes, MessageDigestType messageDigestType, AuthParameters messageDigestAuth, SymmetricAuthentifiedSignatureType replacer) {
+        this.algorithmName = algorithmName;
+        this.codeProviderForSignature = codeProviderForSignature;
+        this.codeProviderForKeyGenerator=codeProviderForKeyGenerator;
+        this.keySizeBits=keySizeBits;
+        this.keySizeBytes=keySizeBytes;
+        this.messageDigestType=messageDigestType;
+        this.messageDigestAuth=messageDigestAuth;
+        this.replacer=replacer;
+    }
 
 	
 	
@@ -91,7 +107,7 @@ public enum SymmetricAuthentifiedSignatureType {
 
 	SymmetricAuthentifiedSignatureType(SymmetricAuthentifiedSignatureType other) {
 		
-		this(other.algorithmName, other.codeProviderForSignature, other.codeProviderForKeyGenerator, other.keySizeBits, other.keySizeBytes, other.messageDigestType, other.messageDigestAuth);
+		this(other.algorithmName, other.codeProviderForSignature, other.codeProviderForKeyGenerator, other.keySizeBits, other.keySizeBytes, other.messageDigestType, other.messageDigestAuth, other.replacer);
 	}
 
 	public int getSignatureSizeInBits()
@@ -111,18 +127,26 @@ public enum SymmetricAuthentifiedSignatureType {
 	public AbstractMac getHMacInstance() throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.NoSuchProviderException {
 		if (codeProviderForSignature == CodeProvider.GNU_CRYPTO) {
 			return new GnuMac(Mac.getInstance(algorithmName));
-		} else if (codeProviderForSignature == CodeProvider.BCFIPS) {
+		} else if (codeProviderForSignature == CodeProvider.BCFIPS ) {
+			CodeProvider.ensureBouncyCastleProviderLoaded();
+			return new BCFIPSMac(this);
+
+		} else if (codeProviderForSignature == CodeProvider.BC) {
 			CodeProvider.ensureBouncyCastleProviderLoaded();
 			return new BCMac(this);
-			
+
 		} else {
 			try {
 				return new JavaNativeMac(javax.crypto.Mac.getInstance(algorithmName, codeProviderForSignature.checkProviderWithCurrentOS().name()));
 			} catch (java.security.NoSuchAlgorithmException e) {
+			    if (replacer!=null)
+			        return replacer.getHMacInstance();
 				throw new gnu.vm.jgnu.security.NoSuchAlgorithmException(e);
 			}
 			catch(java.security.NoSuchProviderException e)
 			{
+                if (replacer!=null)
+                    return replacer.getHMacInstance();
 				throw new gnu.vm.jgnu.security.NoSuchProviderException(e.getMessage());
 			}
 		}
@@ -170,8 +194,12 @@ public enum SymmetricAuthentifiedSignatureType {
 			try {
 				res = new JavaNativeKeyGenerator(this, javax.crypto.KeyGenerator.getInstance(algorithmName, codeProviderForKeyGenerator.checkProviderWithCurrentOS().name()));
 			} catch (java.security.NoSuchAlgorithmException e) {
+			    if (replacer!=null)
+			        return replacer.getKeyGenerator(random, keySizeBits);
 				throw new NoSuchAlgorithmException(e);
 			}catch (java.security.NoSuchProviderException e) {
+                if (replacer!=null)
+                    return replacer.getKeyGenerator(random, keySizeBits);
 				throw new NoSuchProviderException(e.getMessage());
 			}
 		}
@@ -204,4 +232,5 @@ public enum SymmetricAuthentifiedSignatureType {
 	{
 		return keySizeBits >= 256;
 	}
+
 }

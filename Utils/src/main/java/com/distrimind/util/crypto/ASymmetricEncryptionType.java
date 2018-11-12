@@ -126,9 +126,8 @@ public enum ASymmetricEncryptionType {
 				Sphincs256KeyFactorySpi kf=new Sphincs256KeyFactorySpi();
 				return kf.engineGeneratePrivate(new PKCS8EncodedKeySpec(encodedKey));
 			}
-			else if (algorithmType.contains("25519"))
+			else if (algorithmType.contains("CURVE_25519"))
 			{
-
 				ECPrivateKeySpec ks=deserializePrivateKey(encodedKey, false);
 				return KeyFactory.getInstance(algorithm).generatePrivate(ks);
 
@@ -157,7 +156,7 @@ public enum ASymmetricEncryptionType {
 				Sphincs256KeyFactorySpi kf=new Sphincs256KeyFactorySpi();
 				return kf.engineGeneratePublic(new X509EncodedKeySpec(encodedKey));
 			}
-			else if (algorithmType.contains("25519"))
+			else if (algorithmType.contains("CURVE_25519"))
 			{
 
 				org.bouncycastle.jce.spec.ECPublicKeySpec ks=deserializePublicKey(encodedKey, false);
@@ -214,7 +213,7 @@ public enum ASymmetricEncryptionType {
 			BigInteger s = new BigInteger(privateKey);
 			return new ECPrivateKeySpec(s, getCurve25519());
 		} else {
-			throw new IllegalArgumentException();
+			throw new IllegalArgumentException("privateKey.length="+privateKey.length);
 		}
 	}
 	private static volatile ECParameterSpec curve25519;

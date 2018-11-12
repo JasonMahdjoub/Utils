@@ -34,12 +34,15 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
+import java.lang.reflect.InvocationTargetException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
+import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.ECGenParameterSpec;
 import java.security.spec.RSAKeyGenParameterSpec;
 
+import com.distrimind.util.OS;
 import gnu.vm.jgnu.security.NoSuchAlgorithmException;
 import gnu.vm.jgnu.security.NoSuchProviderException;
 import org.bouncycastle.pqc.jcajce.spec.SPHINCS256KeyGenParameterSpec;
@@ -86,6 +89,26 @@ public final class JavaNativeKeyPairGenerator extends AbstractKeyPairGenerator {
 	}
 
 
+    private AlgorithmParameterSpec getXDHAlgorithmParameterSpec(String curveName) throws InvalidAlgorithmParameterException {
+
+	    if (OS.getCurrentJREVersionDouble()<11.0)
+            throw new InvalidAlgorithmParameterException();
+	    try {
+            return (AlgorithmParameterSpec) Class.forName("java.security.spec.NamedParameterSpec").getDeclaredConstructor(String.class).newInstance(curveName);
+        }
+        catch(InvocationTargetException e)
+        {
+            if (e.getCause() instanceof InvalidAlgorithmParameterException)
+                throw (InvalidAlgorithmParameterException)e.getCause();
+            else
+                throw new InvalidAlgorithmParameterException(e);
+        }
+        catch(Exception e)
+        {
+            throw new InvalidAlgorithmParameterException(e);
+        }
+
+    }
 	@SuppressWarnings({"deprecation", "ConstantConditions"})
 	@Override
 	public void initialize(short _keySize, long expirationTime, AbstractSecureRandom _random) throws gnu.vm.jgnu.security.InvalidAlgorithmParameterException {
@@ -114,6 +137,9 @@ public final class JavaNativeKeyPairGenerator extends AbstractKeyPairGenerator {
 
                         keyPairGenerator.initialize(ASymmetricEncryptionType.getCurve25519(), _random.getJavaNativeSecureRandom());
                         break;
+					case "X25519":case "X448":
+						keyPairGenerator.initialize(getXDHAlgorithmParameterSpec(signatureType.getCurveName()));
+						break;
                     /*case "M221":
                     case "M383":
                     case "M511":

@@ -34,34 +34,34 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
-import java.nio.ByteBuffer;
-
-import org.bouncycastle.crypto.Digest;
-import org.bouncycastle.crypto.digests.SHA3Digest;
-import org.bouncycastle.crypto.fips.FipsOutputMACCalculator;
-
 import gnu.vm.jgnu.security.NoSuchAlgorithmException;
 import gnu.vm.jgnu.security.spec.InvalidKeySpecException;
-import org.bouncycastle.crypto.macs.HMac;
-import org.bouncycastle.crypto.params.KeyParameter;
+import org.bouncycastle.crypto.UpdateOutputStream;
+import org.bouncycastle.crypto.fips.FipsOutputMACCalculator;
+import org.bouncycastle.crypto.fips.FipsSHS;
+import org.bouncycastle.crypto.fips.FipsSHS.AuthParameters;
+
+import java.io.IOException;
+import java.nio.ByteBuffer;
 
 /**
  * 
  * @author Jason Mahdjoub
- * @version 2.0
- * @since Utils 3.10.0
+ * @version 1.0
+ * @since Utils 3.22.0
  */
-public final class BCMac extends AbstractMac {
+public final class BCFIPSMac extends AbstractMac {
 
 	private final SymmetricAuthentifiedSignatureType type;
-
+	private final int macLength;
 	private org.bouncycastle.crypto.SymmetricSecretKey secretKey;
-	private HMac mac;
+	private FipsOutputMACCalculator<AuthParameters> mac;
+	private UpdateOutputStream macStream;
 
-	BCMac(SymmetricAuthentifiedSignatureType type)
+	BCFIPSMac(SymmetricAuthentifiedSignatureType type)
 	{
 		this.type=type;
-
+		macLength=type.getSignatureSizeInBits();
 	}
 	
 	@Override
@@ -76,8 +76,8 @@ public final class BCMac extends AbstractMac {
 
 	@Override
 	public boolean equals(Object _obj) {
-		if (_obj instanceof BCMac)
-			return mac.equals(((BCMac) _obj).mac);
+		if (_obj instanceof BCFIPSMac)
+			return mac.equals(((BCFIPSMac) _obj).mac);
 		else if (_obj instanceof FipsOutputMACCalculator)
 			return mac.equals(_obj);
 		else
@@ -92,7 +92,7 @@ public final class BCMac extends AbstractMac {
 	@Override
 	public int getMacLengthBits() {
 		
-		return mac.getMacSize();
+		return macLength/8;
 	}
 
 	@Override
@@ -103,65 +103,86 @@ public final class BCMac extends AbstractMac {
 	public void init(org.bouncycastle.crypto.SymmetricSecretKey _key) throws NoSuchAlgorithmException {
 		if (type.getCodeProviderForSignature()==CodeProvider.BC)
 		{
-			Digest d;
-			switch(type.getMessageDigestType())
-			{
-				case BC_FIPS_SHA3_256:
-					d=new SHA3Digest(256);
-					break;
-				case BC_FIPS_SHA3_384:
-					d=new SHA3Digest(384);
-					break;
-				case BC_FIPS_SHA3_512:
-					d=new SHA3Digest(512);
-					break;
-				default:
-					throw new NoSuchAlgorithmException(type.toString());
-			}
-			mac=new HMac(d);
-			mac.init(new KeyParameter((secretKey=_key).getKeyBytes()));
-			reset();
+			throw new NoSuchAlgorithmException(type.toString());
 		}
 		else {
-			throw new NoSuchAlgorithmException(type.toString());
+			FipsSHS.MACOperatorFactory fipsFacto = new FipsSHS.MACOperatorFactory();
+			mac = fipsFacto.createOutputMACCalculator(secretKey = _key, type.getMessageDigestAuth());
+			reset();
 		}
 	}
 
 	@Override
 	public void update(byte _input) throws IllegalStateException {
-		mac.update(_input);
-
+		try
+		{
+			macStream.write(_input);
+		}
+		catch(IOException e)
+		{
+			throw new IllegalStateException(e);
+		}
+		
 	}
 
 	@Override
 	public void update(byte[] _input) throws IllegalStateException {
-		this.update(_input, 0, _input.length);
-
+		try
+		{
+			macStream.write(_input);
+		}
+		catch(IOException e)
+		{
+			throw new IllegalStateException(e);
+		}
+		
 	}
 
 	@Override
 	public void update(byte[] _input, int _offset, int _len) throws IllegalStateException {
-		mac.update(_input, _offset,_len);
-
+		try
+		{
+			macStream.write(_input, _offset, _len);
+		}
+		catch(IOException e)
+		{
+			throw new IllegalStateException(e);
+		}
+		
 	}
 
 	@Override
 	public void update(ByteBuffer _input) {
-		mac.update(_input.array(), _input.position(), _input.remaining());
+		macStream.update(_input.array(), _input.position(), _input.remaining());
 	}
 
 	@Override
 	public byte[] doFinal() throws IllegalStateException {
-		byte[] res=new byte[mac.getMacSize()];
-		doFinal(res, 0);
-		return res;
+		try
+		{
+			macStream.close();
+			byte res[]=mac.getMAC();
+			reset();
+			return res;
+		}
+		catch(IOException e)
+		{
+			throw new IllegalStateException(e);
+		}
 	}
 
 	@Override
 	public void doFinal(byte[] _output, int _outOffset) throws IllegalStateException {
-		mac.doFinal(_output, _outOffset);
-		reset();
-
+		try
+		{
+			macStream.close();
+			mac.getMAC(_output, _outOffset);
+			reset();
+		}
+		catch(IOException e)
+		{
+			throw new IllegalStateException(e);
+		}
 	}
 
 	@Override
@@ -172,19 +193,19 @@ public final class BCMac extends AbstractMac {
 
 	@Override
 	public void reset() {
-
+		macStream=mac.getMACStream();
 	}
 
 	@Override
-	public BCMac clone() throws CloneNotSupportedException {
+	public BCFIPSMac clone() throws CloneNotSupportedException {
 
-        BCMac res=new BCMac(type);
+        BCFIPSMac res=new BCFIPSMac(type);
 		try {
 			res.init(secretKey);
 		} catch (NoSuchAlgorithmException e) {
 			throw new CloneNotSupportedException(e.getMessage());
 		}
-		return res;
+        return res;
 
 	}
 

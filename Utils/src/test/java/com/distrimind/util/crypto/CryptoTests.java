@@ -1133,7 +1133,7 @@ public class CryptoTests {
 		
 	}
 
-	@Test(dataProvider = "provideDataForSymmetricSignatureTest", dependsOnMethods = {"testSymmetricEncryptions"})
+	@Test(dataProvider = "provideDataForSymmetricSignatureTest")
 	public void testSymmetricSignatures(SymmetricAuthentifiedSignatureType type, SymmetricSecretKey secretKey)
 			throws NoSuchAlgorithmException, InvalidKeyException, SignatureException, InvalidKeySpecException,
 			NoSuchProviderException, IllegalStateException, InvalidAlgorithmParameterException, InvalidParameterSpecException, IOException {

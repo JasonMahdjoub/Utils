@@ -51,8 +51,8 @@ public enum MessageDigestType {
 	SHA1("SHA", CodeProvider.SUN, 160), 
 	SHA2_256("SHA-256", CodeProvider.SUN, 256), 
 	SHA2_384("SHA-384",	CodeProvider.SUN, 384), 
-	SHA2_512("SHA-512", CodeProvider.SUN, 512), 
-	GNU_SHA2_256("SHA-256", CodeProvider.GNU_CRYPTO, 256), 
+	SHA2_512("SHA-512", CodeProvider.SUN, 512),
+	GNU_SHA2_256("SHA-256", CodeProvider.GNU_CRYPTO, 256),
 	GNU_SHA2_384("SHA-384", CodeProvider.GNU_CRYPTO, 384), 
 	GNU_SHA2_512("SHA-512", CodeProvider.GNU_CRYPTO, 512), 
 	GNU_WHIRLPOOL("WHIRLPOOL", CodeProvider.GNU_CRYPTO, 512), 
@@ -69,6 +69,11 @@ public enum MessageDigestType {
 	BC_BLAKE2B_256("BLAKE2B-256", CodeProvider.BC, 256),
 	BC_BLAKE2B_384("BLAKE2B-384", CodeProvider.BC, 384),
 	BC_BLAKE2B_512("BLAKE2B-512", CodeProvider.BC, 512),
+    SHA2_512_224("SHA-512/224", CodeProvider.SUN, 224, BC_FIPS_SHA2_512_224),
+    SHA2_512_256("SHA-512/256",	CodeProvider.SUN, 256, BC_FIPS_SHA2_512_256),
+	SHA3_256("SHA3-256", CodeProvider.SUN, 256, BC_FIPS_SHA3_256),
+	SHA3_384("SHA3-384",	CodeProvider.SUN, 384, BC_FIPS_SHA3_384),
+	SHA3_512("SHA3-512", CodeProvider.SUN, 512, BC_FIPS_SHA3_512),
 	DEFAULT(BC_FIPS_SHA3_384);
 
 	
@@ -78,14 +83,21 @@ public enum MessageDigestType {
 	
 	private final int digestLengthBits;
 
+	private final MessageDigestType replacer;
+
 	MessageDigestType(MessageDigestType type) {
-		this(type.algorithmName, type.codeProvider, type.digestLengthBits);
+		this(type.algorithmName, type.codeProvider, type.digestLengthBits, type.replacer);
 	}
 
 	MessageDigestType(String algorithmName, CodeProvider codeProvider, int digestLengthBits) {
+		this(algorithmName, codeProvider, digestLengthBits, null);
+	}
+
+	MessageDigestType(String algorithmName, CodeProvider codeProvider, int digestLengthBits, MessageDigestType replacer) {
 		this.algorithmName = algorithmName;
 		this.codeProvider = codeProvider;
 		this.digestLengthBits=digestLengthBits;
+		this.replacer=replacer;
 	}
 
 	public String getAlgorithmName() {
@@ -116,10 +128,14 @@ public enum MessageDigestType {
 			try {
 				return new JavaNativeMessageDigest(MessageDigest.getInstance(algorithmName, codeProvider.checkProviderWithCurrentOS().name()));
 			} catch (NoSuchAlgorithmException e) {
+				if (replacer!=null)
+					return replacer.getMessageDigestInstance();
 				throw new gnu.vm.jgnu.security.NoSuchAlgorithmException(e);
 			}
 			catch(NoSuchProviderException e)
 			{
+				if (replacer!=null)
+					return replacer.getMessageDigestInstance();
 				throw new gnu.vm.jgnu.security.NoSuchProviderException(e.getMessage());
 			}
 		}
