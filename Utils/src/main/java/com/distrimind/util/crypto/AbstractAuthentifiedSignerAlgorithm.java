@@ -91,7 +91,7 @@ public abstract class AbstractAuthentifiedSignerAlgorithm {
      *
      * @return the MAC length in bytes.
      */
-	public abstract int getMacLength();
+	public abstract int getMacLengthBytes();
 	
 	public abstract byte[] getSignature() throws SignatureException, IllegalStateException, IOException;
 
