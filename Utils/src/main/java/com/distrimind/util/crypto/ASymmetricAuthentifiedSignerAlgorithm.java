@@ -127,7 +127,7 @@ public class ASymmetricAuthentifiedSignerAlgorithm extends AbstractAuthentifiedS
 
 	@Deprecated
 	@Override
-	public int getMacLength() {
+	public int getMacLengthBytes() {
 		return macLength;
 	}
 

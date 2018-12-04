@@ -90,7 +90,7 @@ public final class BCMac extends AbstractMac {
 	}
 
 	@Override
-	public int getMacLengthBits() {
+	public int getMacLengthBytes() {
 		
 		return mac.getMacSize();
 	}

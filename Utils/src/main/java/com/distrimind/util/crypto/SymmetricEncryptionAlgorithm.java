@@ -131,7 +131,7 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 	
 	
 
-	public int getBlockSize() {
+	public int getBlockSizeBytes() {
 		return cipher.getBlockSize();
 	}
 

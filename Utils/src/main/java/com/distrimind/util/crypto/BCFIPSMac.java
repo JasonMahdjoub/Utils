@@ -61,7 +61,7 @@ public final class BCFIPSMac extends AbstractMac {
 	BCFIPSMac(SymmetricAuthentifiedSignatureType type)
 	{
 		this.type=type;
-		macLength=type.getSignatureSizeInBits();
+		macLength=type.getSignatureSizeInBits()/8;
 	}
 	
 	@Override
@@ -90,9 +90,9 @@ public final class BCFIPSMac extends AbstractMac {
 	}
 
 	@Override
-	public int getMacLengthBits() {
+	public int getMacLengthBytes() {
 		
-		return macLength/8;
+		return macLength;
 	}
 
 	@Override

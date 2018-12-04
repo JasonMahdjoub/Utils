@@ -105,7 +105,7 @@ public final class GnuMac extends AbstractMac {
 	}
 
 	@Override
-	public final int getMacLengthBits() {
+	public final int getMacLengthBytes() {
 		return mac.getMacLength();
 	}
 

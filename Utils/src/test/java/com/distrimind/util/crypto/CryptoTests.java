@@ -1135,7 +1135,7 @@ public class CryptoTests {
 
 		byte[] signature = signer.sign(m);
 		if (signer instanceof SymmetricAuthentifiedSignerAlgorithm)
-			Assert.assertEquals(signer.getMacLength(), signature.length);
+			Assert.assertEquals(signer.getMacLengthBytes(), signature.length);
 		Assert.assertTrue(checker.verify(m, signature));
 		Assert.assertTrue(checker.verify(m, signature));
 		Assert.assertTrue(checker.verify(m, 0, m.length, signature, 0, signature.length));
