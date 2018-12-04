@@ -39,17 +39,17 @@ import org.bouncycastle.crypto.internal.CryptoException;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 1.1
  * @since Utils 3.15.0
  */
-public class P2PLoginWithSignature extends P2PLoginAgreement {
+public class P2PLoginWithSymmetricSignature extends P2PLoginAgreement {
 
 	private final SymmetricSecretKey secretKey;
 	private byte[] myMessage, otherMessage=null;
 	private static final int messageSize=32;
 	private boolean valid=true;
 	
-	P2PLoginWithSignature(SymmetricSecretKey secretKey, AbstractSecureRandom random) {
+	P2PLoginWithSymmetricSignature(SymmetricSecretKey secretKey, AbstractSecureRandom random) {
 		super(2, 2);
 		if (secretKey==null)
 			throw new NullPointerException();

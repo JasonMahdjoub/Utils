@@ -52,6 +52,7 @@ import gnu.vm.jgnux.crypto.NoSuchPaddingException;
 import gnu.vm.jgnux.crypto.ShortBufferException;
 
 import org.apache.commons.codec.binary.Base64;
+import org.bouncycastle.crypto.CryptoException;
 import org.bouncycastle.crypto.InvalidWrappingException;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
@@ -527,26 +528,32 @@ public class CryptoTests {
 	}
 
 	@DataProvider(name = "provideDataForP2PLoginAgreement", parallel = true)
-	public Object[][] provideDataForP2PLoginAgreement() throws NoSuchAlgorithmException, NoSuchProviderException {
+	public Object[][] provideDataForP2PLoginAgreement() throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException {
 		byte[] salt = new byte[] { (byte) 21, (byte) 5645, (byte) 512, (byte) 42310, (byte) 24, (byte) 0, (byte) 1,
 				(byte) 1231, (byte) 34 };
 
 		ArrayList<Object[]> res = new ArrayList<>();
 		SymmetricSecretKey secretKey=SymmetricAuthentifiedSignatureType.BC_FIPS_HMAC_SHA2_384.getKeyGenerator(SecureRandomType.DEFAULT.getInstance(null)).generateKey();
+		ASymmetricKeyPair keyPair=ASymmetricAuthentifiedSignatureType.BC_SHA256withECDSA_CURVE_25519.getKeyPairGenerator(SecureRandomType.DEFAULT.getInstance(null)).generateKeyPair();
 		for (byte[] m : messagesToEncrypt) {
 			for (boolean expectedVerify : new boolean[] { true, false }) {
 				for (byte[] s : new byte[][] { null, salt }) {
 					for (boolean messageIsKey : new boolean[] { true, false }) {
 						for (P2PLoginAgreementType t : P2PLoginAgreementType.values())
 						{
-							res.add(new Object[] { t, expectedVerify, messageIsKey, s, m , secretKey});
-							if (t==P2PLoginAgreementType.JPAKE_AND_AGREEMENT_WITH_SIGNATURE)
-								res.add(new Object[] { t, expectedVerify, messageIsKey, s, m , null});
+							res.add(new Object[] { t, null, expectedVerify, messageIsKey, s, m , secretKey, null});
+							if (t==P2PLoginAgreementType.JPAKE_AND_AGREEMENT_WITH_SYMMETRIC_SIGNATURE)
+								res.add(new Object[] { t, null, expectedVerify, messageIsKey, s, m , null, null});
+						}
+						for (ASymmetricLoginAgreementType t : ASymmetricLoginAgreementType.values())
+						{
+							res.add(new Object[] { null, t, expectedVerify, messageIsKey, s, m , null, keyPair});
 						}
 					}
 				}
 			}
 		}
+
 		Object[][] res2 = new Object[res.size()][];
 		for (int i = 0; i < res.size(); i++)
 			res2[i] = res.get(i);
@@ -554,18 +561,27 @@ public class CryptoTests {
 	}
 
 	@Test(dataProvider = "provideDataForP2PLoginAgreement", dependsOnMethods = { "testMessageDigest" })
-	public void testP2PLoginAgreement(P2PLoginAgreementType type, boolean expectedVerify, boolean messageIsKey, byte[] salt, byte[] m, SymmetricSecretKey secretKey)
-			throws NoSuchAlgorithmException, IOException, InvalidKeySpecException, NoSuchProviderException{
+	public void testP2PLoginAgreement(P2PLoginAgreementType type, ASymmetricLoginAgreementType asType, boolean expectedVerify, boolean messageIsKey, byte[] salt, byte[] m, SymmetricSecretKey secretKey, ASymmetricKeyPair keyPair)
+			throws NoSuchAlgorithmException, IOException, InvalidKeySpecException, NoSuchProviderException, CryptoException {
 		AbstractSecureRandom r = SecureRandomType.DEFAULT.getSingleton(null);
 		byte[] falseMessage = new byte[10];
 		r.nextBytes(falseMessage);
 		SymmetricSecretKey falseSecretKey=secretKey==null?null:secretKey.getAuthentifiedSignatureAlgorithmType().getKeyGenerator(r).generateKey();
+		P2PLoginAgreement exchanger1 = null;
+		P2PLoginAgreement exchanger2 = null;
+		if (asType!=null)
+		{
+			exchanger1=asType.getAgreementAlgorithmForASymmetricSignatureRequester(r, keyPair);
+			exchanger2=asType.getAgreementAlgorithmForASymmetricSignatureReceiver(r, keyPair.getASymmetricPublicKey());
 
-		P2PLoginAgreement exchanger1 = type.getAgreementAlgorithm(r, "participant id 1", m, 0,
-				m.length, salt, 0, salt == null ? 0 : salt.length, messageIsKey, (expectedVerify?secretKey:falseSecretKey));
-		P2PLoginAgreement exchanger2 = type.getAgreementAlgorithm(r, "participant id 2",
-				expectedVerify ? m : falseMessage, 0, (expectedVerify ? m : falseMessage).length, salt, 0,
-				salt == null ? 0 : salt.length, messageIsKey, (expectedVerify?secretKey:falseSecretKey));
+		}
+		else {
+			exchanger1 = type.getAgreementAlgorithm(r, "participant id 1", m, 0,
+					m.length, salt, 0, salt == null ? 0 : salt.length, messageIsKey, (expectedVerify ? secretKey : falseSecretKey));
+			exchanger2 = type.getAgreementAlgorithm(r, "participant id 2",
+					expectedVerify ? m : falseMessage, 0, (expectedVerify ? m : falseMessage).length, salt, 0,
+					salt == null ? 0 : salt.length, messageIsKey, (expectedVerify ? secretKey : falseSecretKey));
+		}
 		try {
 			int send=0, received=0;
 			while (!exchanger1.hasFinishedSend())

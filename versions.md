@@ -1,6 +1,6 @@
 Utils
 =====
-3.21.1 Stable (Build: 912) (from 08/11/2018 to 08/11/2018)
+3.23.0 Stable (Build: 934) (from 04/12/2018 to 04/12/2018)
 
 # Creator(s):
 Jason MAHDJOUB
@@ -9,6 +9,16 @@ Jason MAHDJOUB
 Jason MAHDJOUB (Entred in the team at 04/01/2016)
 
 # Modifications:
+
+
+### 3.23.0 Stable (04/12/2018)
+* Add P2P login asymmetric signature
+
+
+### 3.22.0 Stable (12/11/2018)
+* Add Symmetric signature algorithms : Native HMAC_SHA3 (experimental)
+* Add message digest : Native SHA3
+* Update BouncyCastle to 1.60
 
 
 ### 3.21.1 Stable (08/11/2018)

@@ -18,6 +18,7 @@ Set of Java tools :
 	* DRBG
 	* JPAKE algorithm and home secret message exchanger
 	* Login thanks to a symmetric signature process
+	* Login thanks to an asymmetric signature process
 	* Use of post quantum algorithm (New Hope key exchanger, Sphincs)
 * Compatible with Java 7 and newer
 
@@ -41,7 +42,7 @@ Adapt into your build.gradle file, the next code :
 	...
 	dependencies {
 		...
-		compile(group:'com.distrimind.util', name: 'Utils', version: '3.21.1-Stable')
+		compile(group:'com.distrimind.util', name: 'Utils', version: '3.23.0-Stable')
 		...
 	}
 	...
@@ -57,7 +58,7 @@ Adapt into your pom.xml file, the next code :
 			<dependency>
 				<groupId>com.distrimind.util</groupId>
 				<artifactId>Utils</artifactId>
-				<version>3.21.1-Stable</version>
+				<version>3.23.0-Stable</version>
 			</dependency>
 			...
 		</dependencies>

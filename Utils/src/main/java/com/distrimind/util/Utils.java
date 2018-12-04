@@ -57,8 +57,8 @@ public class Utils {
 		Calendar c = Calendar.getInstance();
 		c.set(2016, Calendar.JANUARY, 4);
 		Calendar c2 = Calendar.getInstance();
-		c.set(2018, Calendar.NOVEMBER, 12);
-		VERSION = new Version("Utils", "Utils", (short)3, (short)22, (short)0, Version.Type.Stable, (short)0, c.getTime(), c2.getTime());
+		c.set(2018, Calendar.DECEMBER, 4);
+		VERSION = new Version("Utils", "Utils", (short)3, (short)23, (short)0, Version.Type.Stable, (short)0, c.getTime(), c2.getTime());
 		try {
 
 			InputStream is = Utils.class.getResourceAsStream("build.txt");
@@ -71,8 +71,14 @@ public class Utils {
 			VERSION.addDeveloper(new PersonDeveloper("mahdjoub", "jason", c.getTime()));
 
 			c = Calendar.getInstance();
+			c.set(2018, Calendar.DECEMBER, 4);
+			Description d = new Description((short)3, (short)23, (short)0, Version.Type.Stable, (short)0, c.getTime());
+			d.addItem("Add P2P login asymmetric signature");
+			VERSION.addDescription(d);
+
+			c = Calendar.getInstance();
 			c.set(2018, Calendar.NOVEMBER, 12);
-			Description d = new Description((short)3, (short)22, (short)0, Version.Type.Stable, (short)0, c.getTime());
+			d = new Description((short)3, (short)22, (short)0, Version.Type.Stable, (short)0, c.getTime());
 			d.addItem("Add Symmetric signature algorithms : Native HMAC_SHA3 (experimental)");
             d.addItem("Add message digest : Native SHA3");
 			d.addItem("Update BouncyCastle to 1.60");

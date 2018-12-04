@@ -18,6 +18,7 @@ Set of Java tools :
 	* DRBG
 	* JPAKE algorithm and home secret message exchanger
 	* Login thanks to a symmetric signature process
+	* Login thanks to an asymmetric signature process
 	* Use of post quantum algorithm (New Hope key exchanger, Sphincs)
 * Compatible with Java 7 and newer
 

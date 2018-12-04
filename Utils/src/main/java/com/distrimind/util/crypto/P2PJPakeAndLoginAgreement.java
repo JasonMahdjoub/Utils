@@ -49,19 +49,19 @@ import gnu.vm.jgnu.security.spec.InvalidKeySpecException;
 public class P2PJPakeAndLoginAgreement extends P2PLoginAgreement {
 	
 	private final P2PJPAKESecretMessageExchanger jpake;
-	private final P2PLoginWithSignature login;
+	private final P2PLoginWithSymmetricSignature login;
 	/*P2PJPakeAndLoginAgreement(AbstractSecureRandom random, Serializable participantID, char[] message, SymmetricSecretKey secretKeyForSignature) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException {
 	
 		this(random, participantID, message, null, 0, 0, secretKeyForSignature);
 	}*/
-	P2PJPakeAndLoginAgreement(AbstractSecureRandom random, Serializable participantID, char[] message, byte salt[],
+	P2PJPakeAndLoginAgreement(AbstractSecureRandom random, Serializable participantID, char[] message, byte[] salt,
 			int offset_salt, int len_salt, SymmetricSecretKey secretKeyForSignature) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException {
 		super(secretKeyForSignature==null?3:5, secretKeyForSignature==null?3:5);
 		jpake=new P2PJPAKESecretMessageExchanger(random, participantID, message, salt, offset_salt, len_salt);
 		if (secretKeyForSignature==null)
 			login=null;
 		else
-			login=new P2PLoginWithSignature(secretKeyForSignature, random);
+			login=new P2PLoginWithSymmetricSignature(secretKeyForSignature, random);
 	}
 	/*P2PJPakeAndLoginAgreement(AbstractSecureRandom random, Serializable participantID, byte[] message, boolean messageIsKey, SymmetricSecretKey secretKeyForSignature) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException {
 		
@@ -74,7 +74,7 @@ public class P2PJPakeAndLoginAgreement extends P2PLoginAgreement {
 		if (secretKeyForSignature==null)
 			login=null;
 		else
-			login=new P2PLoginWithSignature(secretKeyForSignature, random);
+			login=new P2PLoginWithSymmetricSignature(secretKeyForSignature, random);
 	}
 	@Override
 	protected boolean isAgreementProcessValidImpl() {
