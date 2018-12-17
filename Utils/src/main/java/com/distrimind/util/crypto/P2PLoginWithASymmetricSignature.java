@@ -45,7 +45,7 @@ import org.bouncycastle.crypto.CryptoException;
 public class P2PLoginWithASymmetricSignature extends P2PLoginAgreement{
     private final ASymmetricPrivateKey privateKey;
     private byte[] myMessage, otherMessage=null;
-    private static final int messageSize=32;
+    static final int messageSize=32;
     private boolean valid=true;
 
     P2PLoginWithASymmetricSignature(ASymmetricKeyPair keyPair, AbstractSecureRandom random) {

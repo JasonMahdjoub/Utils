@@ -45,7 +45,7 @@ import org.bouncycastle.crypto.CryptoException;
 public class P2PLoginCheckerWithASymmetricSignature extends P2PLoginAgreement{
     private final ASymmetricPublicKey publicKey;
     private byte[] myMessage, otherMessage=null;
-    private static final int messageSize=32;
+
     private boolean valid=true;
 
     P2PLoginCheckerWithASymmetricSignature(ASymmetricPublicKey publicKey, AbstractSecureRandom random) {
@@ -55,7 +55,7 @@ public class P2PLoginCheckerWithASymmetricSignature extends P2PLoginAgreement{
         if (publicKey.getAuthentifiedSignatureAlgorithmType()==null)
             throw new IllegalArgumentException("The given public key is not usable for signature");
         this.publicKey=publicKey;
-        myMessage=new byte[messageSize];
+        myMessage=new byte[P2PLoginWithASymmetricSignature.messageSize];
         random.nextBytes(myMessage);
 
     }
@@ -93,7 +93,7 @@ public class P2PLoginCheckerWithASymmetricSignature extends P2PLoginAgreement{
         try {
             switch (stepNumber) {
                 case 0: {
-                    if (data.length != messageSize) {
+                    if (data.length != P2PLoginWithASymmetricSignature.messageSize) {
                         valid = false;
                         throw new CryptoException();
                     }
