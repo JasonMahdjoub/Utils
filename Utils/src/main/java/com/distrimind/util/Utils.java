@@ -57,8 +57,8 @@ public class Utils {
 		Calendar c = Calendar.getInstance();
 		c.set(2016, Calendar.JANUARY, 4);
 		Calendar c2 = Calendar.getInstance();
-		c.set(2018, Calendar.DECEMBER, 4);
-		VERSION = new Version("Utils", "Utils", (short)3, (short)23, (short)0, Version.Type.Stable, (short)0, c.getTime(), c2.getTime());
+		c.set(2018, Calendar.DECEMBER, 17);
+		VERSION = new Version("Utils", "Utils", (short)3, (short)24, (short)0, Version.Type.Stable, (short)0, c.getTime(), c2.getTime());
 		try {
 
 			InputStream is = Utils.class.getResourceAsStream("build.txt");
@@ -71,8 +71,17 @@ public class Utils {
 			VERSION.addDeveloper(new PersonDeveloper("mahdjoub", "jason", c.getTime()));
 
 			c = Calendar.getInstance();
+			c.set(2018, Calendar.DECEMBER, 17);
+			Description d = new Description((short)3, (short)24, (short)0, Version.Type.Stable, (short)0, c.getTime());
+			d.addItem("Add P2PLopinKeyAgreementType.ASYMMETRIC_SECRET_MESSAGE_EXCHANGER");
+			d.addItem("Add P2PLopinKeyAgreementType.ASYMMETRIC_SECRET_MESSAGE_EXCHANGER_AND_AGREEMENT_WITH_SYMMETRIC_SIGNATURE");
+			d.addItem("Change Agreement.receiveData(int stepNumber, byte[] data) signature");
+			d.addItem("Several minimal security fix");
+			VERSION.addDescription(d);
+
+			c = Calendar.getInstance();
 			c.set(2018, Calendar.DECEMBER, 4);
-			Description d = new Description((short)3, (short)23, (short)0, Version.Type.Stable, (short)0, c.getTime());
+			d = new Description((short)3, (short)23, (short)0, Version.Type.Stable, (short)0, c.getTime());
 			d.addItem("Add P2P login asymmetric signature");
 			VERSION.addDescription(d);
 

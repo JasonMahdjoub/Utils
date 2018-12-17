@@ -35,6 +35,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
 package com.distrimind.util.crypto;
 
 
+import org.bouncycastle.crypto.CryptoException;
 import org.bouncycastle.pqc.crypto.ExchangePair;
 import org.bouncycastle.pqc.crypto.newhope.NHPublicKeyParameters;
 
@@ -94,19 +95,43 @@ public class NewHopeKeyAgreementServer extends AbstractNewHopeKeyAgreement{
 	}
 	@Override
 	protected byte[] getDataToSend(int stepNumber) throws Exception {
-		if (stepNumber==0)
-			return getDataPhase2();
-		else
-			throw new IllegalAccessException();
+		if (!valid)
+			throw new CryptoException();
+
+		try {
+			if (stepNumber == 0)
+				return getDataPhase2();
+			else {
+				valid = false;
+				throw new IllegalAccessException();
+			}
+		}
+		catch(Exception e)
+		{
+			valid=false;
+			throw e;
+		}
+
+
 	}
 	@Override
-	protected void receiveData(int stepNumber, byte[] data) throws Exception {
-		
-		if (stepNumber==0)
-			setDataPhase1(data);
-		else
-			throw new IllegalAccessException();
-		
+	protected void receiveData(int stepNumber, byte[] data) throws CryptoException {
+		if (!valid)
+			throw new CryptoException();
+
+		try {
+			if (stepNumber == 0)
+				setDataPhase1(data);
+			else
+				throw new IllegalAccessException();
+		}
+		catch(Exception e)
+		{
+			valid=false;
+			throw new CryptoException("", e);
+		}
+
+
 	}
 	
     

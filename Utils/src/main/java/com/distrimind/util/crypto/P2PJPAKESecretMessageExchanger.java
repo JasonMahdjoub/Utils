@@ -81,13 +81,13 @@ public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
 		this(secureRandom, participantID, message, 0, message.length, null, -1, -1, messageIsKey);
 	}*/
 
-	private char[] getHashedPassword(char[] message, byte salt[], int offset_salt, int len_salt) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException
+	private char[] getHashedPassword(char[] message, byte[] salt, int offset_salt, int len_salt) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException
 	{
 		byte[] m = hashMessage(MessageDigestType.BC_FIPS_SHA3_256.getMessageDigestInstance(), message, salt,
 				offset_salt, len_salt, PasswordHashType.BCRYPT, (byte)15);
 		return convertToChar(m);
 	}
-	private char[] getHashedPassword(byte[] message, int offset, int len, byte salt[], int offset_salt, int len_salt, boolean messageIsKey) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException
+	private char[] getHashedPassword(byte[] message, int offset, int len, byte[] salt, int offset_salt, int len_salt, boolean messageIsKey) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException
 	{
 		byte[] m = hashMessage(MessageDigestType.BC_FIPS_SHA3_256.getMessageDigestInstance(), message, offset, len,
 				salt, offset_salt, len_salt, messageIsKey ? null : PasswordHashType.BC_FIPS_PBKFD2WithHMacSHA2_512, messageIsKey?(byte)6:(byte)15);
@@ -116,8 +116,8 @@ public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
 		}
 	}
 	
-	P2PJPAKESecretMessageExchanger(AbstractSecureRandom secureRandom, Serializable participantID, char[] message, byte salt[], int offset_salt,
-			int len_salt) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException {
+	P2PJPAKESecretMessageExchanger(AbstractSecureRandom secureRandom, Serializable participantID, char[] message, byte[] salt, int offset_salt,
+								   int len_salt) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException {
 		super(3, 3);
 		if (message == null)
 			throw new NullPointerException("message");
@@ -130,8 +130,8 @@ public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
 		this.keyMaterial = null;
 	}
 
-	P2PJPAKESecretMessageExchanger(AbstractSecureRandom secureRandom, Serializable participantID, byte[] message, int offset, int len, byte salt[],
-			int offset_salt, int len_salt, boolean messageIsKey)
+	P2PJPAKESecretMessageExchanger(AbstractSecureRandom secureRandom, Serializable participantID, byte[] message, int offset, int len, byte[] salt,
+								   int offset_salt, int len_salt, boolean messageIsKey)
 			throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException {
 		super(3, 3);
 		if (message == null)
@@ -146,11 +146,11 @@ public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
 		this.keyMaterial = null;
 	}
 
-	private static byte[] hashMessage(AbstractMessageDigest messageDigest, byte data[], int off, int len, byte[] salt,
-			int offset_salt, int len_salt, PasswordHashType passwordHashType, byte cost)
+	private static byte[] hashMessage(AbstractMessageDigest messageDigest, byte[] data, int off, int len, byte[] salt,
+									  int offset_salt, int len_salt, PasswordHashType passwordHashType, byte cost)
 			throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
 		if (passwordHashType != null && salt != null && len_salt > 0) {
-			byte s[] = new byte[len_salt];
+			byte[] s = new byte[len_salt];
 			System.arraycopy(salt, offset_salt, s, 0, len_salt);
 			data = passwordHashType.hash(data, off, len, s, cost, passwordHashType.getDefaultHashLengthBytes());
 			off = 0;
@@ -163,11 +163,11 @@ public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
 	}
 
 	@SuppressWarnings("SameParameterValue")
-	private static byte[] hashMessage(AbstractMessageDigest messageDigest, char password[], byte[] salt,
+	private static byte[] hashMessage(AbstractMessageDigest messageDigest, char[] password, byte[] salt,
 									  int offset_salt, int len_salt, PasswordHashType passwordHashType, byte cost)
 			throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
 		if (salt != null && len_salt > 0) {
-			byte s[] = new byte[len_salt];
+			byte[] s = new byte[len_salt];
 			System.arraycopy(salt, offset_salt, s, 0, len_salt);
 			byte[] res = passwordHashType.hash(password, s, cost, passwordHashType.getDefaultHashLengthBytes());
 			return hashMessage(messageDigest, res, 0, res.length, null, -1, -1, null, (byte)0);
@@ -265,7 +265,7 @@ public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
 	}
 
 	@Override
-	protected void receiveData(int stepNumber, byte[] dataReceived) throws Exception {
+	protected void receiveData(int stepNumber, byte[] dataReceived) throws CryptoException {
 		valid=false;
 		switch(stepNumber)
 		{
@@ -278,7 +278,7 @@ public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
 						BigInteger gx1 = (BigInteger)ois.readObject();
 						BigInteger gx2 = (BigInteger)ois.readObject();
 						int size=ois.readInt();
-						BigInteger knowledgeProofForX1[]=null;
+						BigInteger[] knowledgeProofForX1 = null;
 						if (size>0)
 						{
 							if (size>100)
@@ -288,7 +288,7 @@ public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
 								knowledgeProofForX1[i]=(BigInteger)ois.readObject();
 						}
 						size=ois.readInt();
-						BigInteger knowledgeProofForX2[]=null;
+						BigInteger[] knowledgeProofForX2 = null;
 						if (size>0)
 						{
 							if (size>100)
@@ -304,10 +304,19 @@ public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
 					}
 					catch(Exception e)
 					{
+						valid=false;
 						throw new CryptoException("data received is not a valid instance of JPAKERound1Payload", e);
 					}
 					jpake.validateRound1PayloadReceived(r1);
 				}
+			}
+			catch (Exception e)
+			{
+				valid = false;
+				if (e instanceof CryptoException)
+					throw (CryptoException)e;
+				else
+					throw new CryptoException("", e);
 			}
 			break;
 		case 1:
@@ -319,7 +328,7 @@ public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
 						BigInteger A = (BigInteger)ois.readObject();
 						
 						int size=ois.readInt();
-						BigInteger knowledgeProofForX2s[]=null;
+						BigInteger[] knowledgeProofForX2s = null;
 						if (size>0)
 						{
 							if (size>100)
@@ -334,10 +343,19 @@ public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
 					}
 					catch(Exception e)
 					{
+						valid=false;
 						throw new CryptoException("data received is not a valid instance of JPAKERound2Payload", e);
 					}
 					jpake.validateRound2PayloadReceived(r2);
 				}
+			}
+			catch (Exception e)
+			{
+				valid = false;
+				if (e instanceof CryptoException)
+					throw (CryptoException)e;
+				else
+					throw new CryptoException("", e);
 			}
 			break;
 		case 2:
@@ -352,11 +370,20 @@ public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
 					}
 					catch(Exception e)
 					{
+						valid=false;
 						throw new CryptoException("data received is not a valid instance of JPAKERound2Payload", e);
 					}
 					
 					jpake.validateRound3PayloadReceived(r3, keyMaterial);
 				}
+			}
+			catch (Exception e)
+			{
+				valid = false;
+				if (e instanceof CryptoException)
+					throw (CryptoException)e;
+				else
+					throw new CryptoException("", e);
 			}
 			break;
 		default:
@@ -378,7 +405,7 @@ public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
 		if (jpake!=null)
 		{
 			try {
-				char chars[]=(char[])jpakeFieldPassword.get(jpake);
+				char[] chars = (char[]) jpakeFieldPassword.get(jpake);
 				if (chars!=null)
 					Arrays.fill(chars, (char)0);
 				

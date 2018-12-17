@@ -34,9 +34,12 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
+import gnu.vm.jgnu.security.InvalidAlgorithmParameterException;
+import gnu.vm.jgnu.security.InvalidKeyException;
 import gnu.vm.jgnu.security.NoSuchAlgorithmException;
 import gnu.vm.jgnu.security.NoSuchProviderException;
 import gnu.vm.jgnu.security.spec.InvalidKeySpecException;
+import gnu.vm.jgnux.crypto.NoSuchPaddingException;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -44,21 +47,42 @@ import java.io.Serializable;
 
 /**
  * @author Jason Mahdjoub
- * @version 2.0
+ * @version 3.0
  * @since MaDKitLanEdition 3.15.0
  */
 public enum P2PLoginAgreementType {
 	JPAKE,
 	AGREEMENT_WITH_SYMMETRIC_SIGNATURE,
-	JPAKE_AND_AGREEMENT_WITH_SYMMETRIC_SIGNATURE;
-	
-	public P2PLoginAgreement getAgreementAlgorithm(AbstractSecureRandom random, Serializable participantID, char[] message, SymmetricSecretKey secretKeyForSignature) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException
+	JPAKE_AND_AGREEMENT_WITH_SYMMETRIC_SIGNATURE,
+	ASYMMETRIC_SECRET_MESSAGE_EXCHANGER,
+	ASYMMETRIC_SECRET_MESSAGE_EXCHANGER_AND_AGREEMENT_WITH_SYMMETRIC_SIGNATURE;
+
+	private MessageDigestType getDefaultMessageDigestType()
 	{
-		return getAgreementAlgorithm(random, participantID, message, null, 0, 0, secretKeyForSignature);
+		return MessageDigestType.DEFAULT;
+	}
+	private PasswordHashType getDefaultPasswordHashType()
+	{
+		return PasswordHashType.DEFAULT;
+	}
+
+	private ASymmetricPublicKey generateASymmetricPublicKey(AbstractSecureRandom random) throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException {
+		return ASymmetricEncryptionType.DEFAULT.getKeyPairGenerator(random).generateKeyPair().getASymmetricPublicKey();
+	}
+	public P2PLoginAgreement getAgreementAlgorithm(AbstractSecureRandom random, Serializable participantID, char[] message, SymmetricSecretKey secretKeyForSignature) throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException, InvalidKeySpecException, IOException, InvalidKeyException, NoSuchPaddingException {
+		return getAgreementAlgorithm(random, participantID, message, secretKeyForSignature, getDefaultMessageDigestType(), getDefaultPasswordHashType(), generateASymmetricPublicKey(random));
+	}
+	public P2PLoginAgreement getAgreementAlgorithm(AbstractSecureRandom random, Serializable participantID, char[] message, SymmetricSecretKey secretKeyForSignature,MessageDigestType messageDigestType, PasswordHashType passwordHashType,
+												   ASymmetricPublicKey myPublicKey) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException, NoSuchPaddingException, InvalidAlgorithmParameterException, InvalidKeyException {
+		return getAgreementAlgorithm(random, participantID, message, null, 0, 0, secretKeyForSignature, messageDigestType, passwordHashType, myPublicKey);
 	}
 	public P2PLoginAgreement getAgreementAlgorithm(AbstractSecureRandom random, Serializable participantID, char[] message, byte[] salt,
-												   int offset_salt, int len_salt, SymmetricSecretKey secretKeyForSignature) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException
-	{
+												   int offset_salt, int len_salt, SymmetricSecretKey secretKeyForSignature) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException, InvalidAlgorithmParameterException, InvalidKeyException, NoSuchPaddingException {
+		return getAgreementAlgorithm(random, participantID, message, salt, offset_salt, len_salt, secretKeyForSignature, getDefaultMessageDigestType(), getDefaultPasswordHashType(), generateASymmetricPublicKey(random));
+	}
+	public P2PLoginAgreement getAgreementAlgorithm(AbstractSecureRandom random, Serializable participantID, char[] message, byte[] salt,
+												   int offset_salt, int len_salt, SymmetricSecretKey secretKeyForSignature,MessageDigestType messageDigestType, PasswordHashType passwordHashType,
+												   ASymmetricPublicKey myPublicKey) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException, NoSuchPaddingException, InvalidAlgorithmParameterException, InvalidKeyException {
 		switch(this)
 		{
 		case AGREEMENT_WITH_SYMMETRIC_SIGNATURE:
@@ -67,14 +91,30 @@ public enum P2PLoginAgreementType {
 			return new P2PJPAKESecretMessageExchanger(random, participantID, message, salt, offset_salt, len_salt);
 		case JPAKE_AND_AGREEMENT_WITH_SYMMETRIC_SIGNATURE:
 			return new P2PJPakeAndLoginAgreement(random, participantID, message, salt, offset_salt, len_salt, secretKeyForSignature);
+		case ASYMMETRIC_SECRET_MESSAGE_EXCHANGER:
+			return new P2PASymmetricSecretMessageExchangerAgreement(random, messageDigestType, passwordHashType, myPublicKey, salt, offset_salt, len_salt, message);
+
+		case ASYMMETRIC_SECRET_MESSAGE_EXCHANGER_AND_AGREEMENT_WITH_SYMMETRIC_SIGNATURE:
+			return new P2PASymmetricSecretMessageExchangerAgreementWithSymmetricSignature(random, message, salt, offset_salt, len_salt, secretKeyForSignature, messageDigestType, passwordHashType, myPublicKey);
 		}
-		throw new IllegalAccessError(); 
+
+		throw new IllegalAccessError();
 	}
-	public P2PLoginAgreement getAgreementAlgorithm(AbstractSecureRandom random, Serializable participantID, byte[] message, boolean messageIsKey, SymmetricSecretKey secretKeyForSignature) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException {
-		return getAgreementAlgorithm(random, participantID, message, 0, message.length,null, 0, 0, messageIsKey, secretKeyForSignature);
+	public P2PLoginAgreement getAgreementAlgorithm(AbstractSecureRandom random, Serializable participantID, byte[] message, boolean messageIsKey, SymmetricSecretKey secretKeyForSignature) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException, InvalidAlgorithmParameterException, InvalidKeyException, NoSuchPaddingException {
+		return getAgreementAlgorithm(random, participantID, message, messageIsKey, secretKeyForSignature,getDefaultMessageDigestType(), getDefaultPasswordHashType(), generateASymmetricPublicKey(random));
+	}
+	public P2PLoginAgreement getAgreementAlgorithm(AbstractSecureRandom random, Serializable participantID, byte[] message, boolean messageIsKey, SymmetricSecretKey secretKeyForSignature,MessageDigestType messageDigestType, PasswordHashType passwordHashType,
+												   ASymmetricPublicKey myPublicKey) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException, NoSuchPaddingException, InvalidAlgorithmParameterException, InvalidKeyException {
+		return getAgreementAlgorithm(random, participantID, message, 0, message.length,null, 0, 0, messageIsKey, secretKeyForSignature, messageDigestType, passwordHashType, myPublicKey);
 	}
 	public P2PLoginAgreement getAgreementAlgorithm(AbstractSecureRandom random, Serializable participantID, byte[] message, int offset, int len, byte[] salt,
-												   int offset_salt, int len_salt, boolean messageIsKey, SymmetricSecretKey secretKeyForSignature) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException {
+												   int offset_salt, int len_salt, boolean messageIsKey, SymmetricSecretKey secretKeyForSignature) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException, InvalidAlgorithmParameterException, InvalidKeyException, NoSuchPaddingException {
+		return getAgreementAlgorithm(random, participantID, message, offset, len, salt, offset_salt, len_salt, messageIsKey, secretKeyForSignature,getDefaultMessageDigestType(), getDefaultPasswordHashType(), generateASymmetricPublicKey(random));
+	}
+
+	public P2PLoginAgreement getAgreementAlgorithm(AbstractSecureRandom random, Serializable participantID, byte[] message, int offset, int len, byte[] salt,
+												   int offset_salt, int len_salt, boolean messageIsKey, SymmetricSecretKey secretKeyForSignature,MessageDigestType messageDigestType, PasswordHashType passwordHashType,
+												   ASymmetricPublicKey myPublicKey) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException, NoSuchPaddingException, InvalidAlgorithmParameterException, InvalidKeyException {
 		switch(this)
 		{
 		case AGREEMENT_WITH_SYMMETRIC_SIGNATURE:
@@ -83,6 +123,11 @@ public enum P2PLoginAgreementType {
 			return new P2PJPAKESecretMessageExchanger(random, participantID, message, offset, len, salt, offset_salt, len_salt, messageIsKey);
 		case JPAKE_AND_AGREEMENT_WITH_SYMMETRIC_SIGNATURE:
 			return new P2PJPakeAndLoginAgreement(random, participantID, message, offset, len, salt, offset_salt, len_salt, messageIsKey, secretKeyForSignature);
+		case ASYMMETRIC_SECRET_MESSAGE_EXCHANGER:
+			return new P2PASymmetricSecretMessageExchangerAgreement(random, messageDigestType, passwordHashType, myPublicKey, salt, offset_salt, len_salt, message, offset, len, messageIsKey);
+
+		case ASYMMETRIC_SECRET_MESSAGE_EXCHANGER_AND_AGREEMENT_WITH_SYMMETRIC_SIGNATURE:
+			return new P2PASymmetricSecretMessageExchangerAgreementWithSymmetricSignature(random, message, offset, len, salt, offset_salt, len_salt, messageIsKey, secretKeyForSignature, messageDigestType, passwordHashType, myPublicKey);
 		}
 		throw new IllegalAccessError();
 	}

@@ -562,7 +562,7 @@ public class CryptoTests {
 
 	@Test(dataProvider = "provideDataForP2PLoginAgreement", dependsOnMethods = { "testMessageDigest" })
 	public void testP2PLoginAgreement(P2PLoginAgreementType type, ASymmetricLoginAgreementType asType, boolean expectedVerify, boolean messageIsKey, byte[] salt, byte[] m, SymmetricSecretKey secretKey, ASymmetricKeyPair keyPair)
-			throws NoSuchAlgorithmException, IOException, InvalidKeySpecException, NoSuchProviderException, CryptoException {
+			throws NoSuchAlgorithmException, IOException, InvalidKeySpecException, NoSuchProviderException, CryptoException, InvalidAlgorithmParameterException, NoSuchPaddingException, InvalidKeyException {
 		AbstractSecureRandom r = SecureRandomType.DEFAULT.getSingleton(null);
 		byte[] falseMessage = new byte[10];
 		r.nextBytes(falseMessage);

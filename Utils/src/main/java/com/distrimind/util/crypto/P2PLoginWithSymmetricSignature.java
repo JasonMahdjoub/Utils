@@ -34,12 +34,13 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
-import org.bouncycastle.crypto.internal.CryptoException;
+
+import org.bouncycastle.crypto.CryptoException;
 
 /**
  * 
  * @author Jason Mahdjoub
- * @version 1.1
+ * @version 1.2
  * @since Utils 3.15.0
  */
 public class P2PLoginWithSymmetricSignature extends P2PLoginAgreement {
@@ -69,71 +70,80 @@ public class P2PLoginWithSymmetricSignature extends P2PLoginAgreement {
 	@Override
 	protected byte[] getDataToSend(int stepNumber) throws Exception {
 		if (!valid)
-			return null;
-		switch(stepNumber)
-		{
-		case 0:
-			return myMessage;
-		case 1:
-		{
-			if (otherMessage==null)
-			{
-				valid=false;
-				throw new IllegalAccessError();
+			throw new CryptoException();
+
+		try {
+			switch (stepNumber) {
+				case 0:
+					return myMessage;
+				case 1: {
+					if (otherMessage == null) {
+						valid = false;
+						throw new IllegalAccessError();
+					}
+					SymmetricAuthentifiedSignerAlgorithm signer = new SymmetricAuthentifiedSignerAlgorithm(secretKey);
+					signer.init();
+					signer.update(myMessage);
+					signer.update(otherMessage);
+					return signer.getSignature();
+
+				}
+				default:
+					valid = false;
+					throw new IllegalAccessError();
 			}
- 			SymmetricAuthentifiedSignerAlgorithm signer=new SymmetricAuthentifiedSignerAlgorithm(secretKey);
- 			signer.init();
-			signer.update(myMessage);
-			signer.update(otherMessage);
-			return signer.getSignature();
-			
-		}	
-		default:
+		}
+		catch(Exception e)
+		{
 			valid=false;
-			throw new IllegalAccessError();
+			throw e;
 		}
 		
 	}
 
 	@Override
-	protected void receiveData(int stepNumber, byte[] data) throws Exception {
-		if (!valid)
-			return ;
-		switch(stepNumber)
-		{
-		case 0:
-		{
-			if (otherMessage!=null)
-			{
-				valid=false;
+	protected void receiveData(int stepNumber, byte[] data) throws CryptoException {
+		try {
+			if (!valid)
 				throw new CryptoException();
+			switch (stepNumber) {
+				case 0: {
+					if (otherMessage != null) {
+						valid = false;
+						throw new CryptoException();
+					}
+					if (data.length != messageSize) {
+						valid = false;
+						throw new CryptoException();
+					}
+					otherMessage = data;
+				}
+				break;
+				case 1: {
+					if (otherMessage == null) {
+						valid = false;
+						throw new CryptoException();
+					}
+					SymmetricAuthentifiedSignatureCheckerAlgorithm checker = new SymmetricAuthentifiedSignatureCheckerAlgorithm(secretKey);
+					checker.init(data);
+					checker.update(otherMessage);
+					checker.update(myMessage);
+
+					valid = checker.verify();
+				}
+				break;
+				default:
+					valid = false;
+					throw new CryptoException("" + stepNumber);
 			}
-			if (data.length!=messageSize)
-			{
-				valid=false;
-				throw new CryptoException();
-			}
-			otherMessage=data;
 		}
-		break;
-		case 1:
+		catch (Exception e)
 		{
-			if (otherMessage==null)
-			{
-				valid=false;
-				throw new CryptoException();
-			}
-			SymmetricAuthentifiedSignatureCheckerAlgorithm checker=new SymmetricAuthentifiedSignatureCheckerAlgorithm(secretKey);
-			checker.init(data);
-			checker.update(otherMessage);
-			checker.update(myMessage);
-			
-			valid=checker.verify();
-		}
-		break;
-		default:
-			valid=false;
-			throw new CryptoException(""+stepNumber);
+			valid = false;
+			if (e instanceof CryptoException)
+				throw (CryptoException)e;
+			else
+				throw new CryptoException("", e);
 		}
 	}
 

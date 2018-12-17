@@ -34,11 +34,12 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
-import org.bouncycastle.crypto.internal.CryptoException;
+
+import org.bouncycastle.crypto.CryptoException;
 
 /**
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 1.1
  * @since MaDKitLanEdition 3.23.0
  */
 public class P2PLoginWithASymmetricSignature extends P2PLoginAgreement{
@@ -67,36 +68,42 @@ public class P2PLoginWithASymmetricSignature extends P2PLoginAgreement{
     @Override
     protected byte[] getDataToSend(int stepNumber) throws Exception {
         if (!valid)
-            return null;
-        switch(stepNumber)
-        {
-            case 0:
-                return myMessage;
-            case 1:
-            {
-                if (otherMessage==null)
-                {
-                    valid=false;
-                    throw new IllegalAccessError();
-                }
-                ASymmetricAuthentifiedSignerAlgorithm signer=new ASymmetricAuthentifiedSignerAlgorithm(privateKey);
-                signer.init();
-                signer.update(myMessage);
-                signer.update(otherMessage);
-                return signer.getSignature();
+            throw new CryptoException();
 
+        try {
+            switch (stepNumber) {
+                case 0:
+                    return myMessage;
+                case 1: {
+                    if (otherMessage == null) {
+                        valid = false;
+                        throw new IllegalAccessError();
+                    }
+                    ASymmetricAuthentifiedSignerAlgorithm signer = new ASymmetricAuthentifiedSignerAlgorithm(privateKey);
+                    signer.init();
+                    signer.update(myMessage);
+                    signer.update(otherMessage);
+                    return signer.getSignature();
+
+                }
+                default:
+                    valid = false;
+                    throw new IllegalAccessError();
             }
-            default:
-                valid=false;
-                throw new IllegalAccessError();
+        }
+        catch(Exception e)
+        {
+            valid=false;
+            throw e;
         }
 
     }
 
     @Override
-    protected void receiveData(int stepNumber, byte[] data) throws Exception {
+    protected void receiveData(int stepNumber, byte[] data) throws CryptoException {
         if (!valid)
-            return ;
+            throw new CryptoException();
+
         switch(stepNumber)
         {
             case 0:

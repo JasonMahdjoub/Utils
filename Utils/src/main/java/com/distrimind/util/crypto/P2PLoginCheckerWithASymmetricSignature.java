@@ -35,7 +35,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
 package com.distrimind.util.crypto;
 
 
-import org.bouncycastle.crypto.internal.CryptoException;
+import org.bouncycastle.crypto.CryptoException;
 
 /**
  * @author Jason Mahdjoub
@@ -67,9 +67,10 @@ public class P2PLoginCheckerWithASymmetricSignature extends P2PLoginAgreement{
 
     private final static byte[] emptyTab=new byte[0];
     @Override
-    protected byte[] getDataToSend(int stepNumber) {
+    protected byte[] getDataToSend(int stepNumber) throws CryptoException {
         if (!valid)
-            return null;
+            throw new CryptoException();
+
         switch(stepNumber)
         {
             case 0:
@@ -85,39 +86,45 @@ public class P2PLoginCheckerWithASymmetricSignature extends P2PLoginAgreement{
     }
 
     @Override
-    protected void receiveData(int stepNumber, byte[] data) throws Exception {
+    protected void receiveData(int stepNumber, byte[] data) throws CryptoException {
         if (!valid)
-            return ;
-        switch(stepNumber)
-        {
-            case 0:
-            {
-                if (data.length!=messageSize)
-                {
-                    valid=false;
-                    throw new CryptoException();
-                }
-                otherMessage=data;
-            }
-            break;
-            case 1:
-            {
-                if (otherMessage==null)
-                {
-                    valid=false;
-                    throw new CryptoException();
-                }
-                ASymmetricAuthentifiedSignatureCheckerAlgorithm checker=new ASymmetricAuthentifiedSignatureCheckerAlgorithm(publicKey);
-                checker.init(data);
-                checker.update(otherMessage);
-                checker.update(myMessage);
+            throw new CryptoException();
 
-                valid=checker.verify();
+        try {
+            switch (stepNumber) {
+                case 0: {
+                    if (data.length != messageSize) {
+                        valid = false;
+                        throw new CryptoException();
+                    }
+                    otherMessage = data;
+                }
+                break;
+                case 1: {
+                    if (otherMessage == null) {
+                        valid = false;
+                        throw new CryptoException();
+                    }
+                    ASymmetricAuthentifiedSignatureCheckerAlgorithm checker = new ASymmetricAuthentifiedSignatureCheckerAlgorithm(publicKey);
+                    checker.init(data);
+                    checker.update(otherMessage);
+                    checker.update(myMessage);
+
+                    valid = checker.verify();
+                }
+                break;
+                default:
+                    valid = false;
+                    throw new CryptoException("" + stepNumber);
             }
-            break;
-            default:
-                valid=false;
-                throw new CryptoException(""+stepNumber);
+        }
+        catch (Exception e)
+        {
+            valid = false;
+            if (e instanceof CryptoException)
+                throw (CryptoException)e;
+            else
+                throw new CryptoException("", e);
         }
     }
 }

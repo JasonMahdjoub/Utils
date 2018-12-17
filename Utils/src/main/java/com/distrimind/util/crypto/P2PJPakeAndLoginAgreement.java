@@ -40,6 +40,8 @@ import java.io.Serializable;
 import gnu.vm.jgnu.security.NoSuchAlgorithmException;
 import gnu.vm.jgnu.security.NoSuchProviderException;
 import gnu.vm.jgnu.security.spec.InvalidKeySpecException;
+import org.bouncycastle.crypto.CryptoException;
+
 /**
  * 
  * @author Jason Mahdjoub
@@ -89,7 +91,7 @@ public class P2PJPakeAndLoginAgreement extends P2PLoginAgreement {
 			return jpake.getDataToSend();
 	}
 	@Override
-	protected void receiveData(int stepNumber, byte[] data) throws Exception {
+	protected void receiveData(int stepNumber, byte[] data) throws CryptoException {
 		if (login!=null && stepNumber<2)
 			login.receiveData(data);
 		else

@@ -37,6 +37,7 @@ package com.distrimind.util.crypto;
 import java.util.Arrays;
 
 import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
+import org.bouncycastle.crypto.CryptoException;
 import org.bouncycastle.crypto.KeyGenerationParameters;
 import org.bouncycastle.pqc.crypto.newhope.NHKeyPairGenerator;
 import org.bouncycastle.pqc.crypto.newhope.NHPrivateKeyParameters;
@@ -113,19 +114,41 @@ public class NewHopeKeyAgreementClient extends AbstractNewHopeKeyAgreement{
 	}
 	@Override
 	protected byte[] getDataToSend(int stepNumber) throws Exception {
-		if (stepNumber==0)
-			return getDataPhase1();
-		else
-			throw new IllegalAccessException();
+		if (!valid)
+			throw new CryptoException();
+
+		try {
+			if (stepNumber == 0)
+				return getDataPhase1();
+			else {
+				valid = false;
+				throw new IllegalAccessException();
+			}
+		}
+		catch(Exception e)
+		{
+			valid=false;
+			throw e;
+		}
 	}
 	@Override
-	protected void receiveData(int stepNumber, byte[] data) throws Exception {
-		
-		if (stepNumber==0)
-			setDataPhase2(data);
-		else
-			throw new IllegalAccessException();
-		
+	protected void receiveData(int stepNumber, byte[] data) throws CryptoException {
+		if (!valid)
+			throw new CryptoException();
+
+		try {
+			if (stepNumber == 0)
+				setDataPhase2(data);
+			else
+				throw new IllegalAccessException();
+		}
+		catch(Exception e)
+		{
+			valid=false;
+			throw new CryptoException("", e);
+		}
+
+
 	}
 
 }

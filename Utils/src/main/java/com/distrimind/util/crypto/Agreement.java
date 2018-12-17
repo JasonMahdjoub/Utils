@@ -34,10 +34,13 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
+
+import org.bouncycastle.crypto.CryptoException;
+
 /**
  * 
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 1.1
  * @since Utils 3.0
  */
 public abstract class Agreement {
@@ -93,13 +96,22 @@ public abstract class Agreement {
 			throw new IllegalAccessException("The process has finished");
 		return getDataToSend(actualStepForSend++);
 	}
-	public void receiveData(byte data[]) throws Exception
+	public void receiveData(byte[] data) throws CryptoException
 	{
-		if (hasFinishedReceiption())
-			throw new IllegalAccessException("The process has finished");
-		receiveData(actualStepForReception++, data);
+		try {
+			if (hasFinishedReceiption())
+				throw new IllegalAccessException("The process has finished");
+			receiveData(actualStepForReception++, data);
+		}
+		catch(Exception e)
+		{
+			if (e instanceof CryptoException)
+				throw (CryptoException)e;
+			else
+				throw new CryptoException("", e);
+		}
 	}
 
 	protected abstract byte[] getDataToSend(int stepNumber) throws Exception;
-	protected abstract void receiveData(int stepNumber, byte data[]) throws Exception;
+	protected abstract void receiveData(int stepNumber, byte[] data) throws CryptoException;
 }
