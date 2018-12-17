@@ -34,31 +34,24 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
-import java.io.IOException;
-import java.security.SecureRandom;
-import java.util.ArrayList;
-import java.util.Random;
-
-import gnu.vm.jgnu.security.InvalidAlgorithmParameterException;
-import gnu.vm.jgnu.security.InvalidKeyException;
-import gnu.vm.jgnu.security.NoSuchAlgorithmException;
-import gnu.vm.jgnu.security.NoSuchProviderException;
-import gnu.vm.jgnu.security.SignatureException;
+import com.distrimind.util.Bits;
+import gnu.vm.jgnu.security.*;
 import gnu.vm.jgnu.security.spec.InvalidKeySpecException;
 import gnu.vm.jgnu.security.spec.InvalidParameterSpecException;
 import gnu.vm.jgnux.crypto.BadPaddingException;
 import gnu.vm.jgnux.crypto.IllegalBlockSizeException;
 import gnu.vm.jgnux.crypto.NoSuchPaddingException;
 import gnu.vm.jgnux.crypto.ShortBufferException;
-
 import org.apache.commons.codec.binary.Base64;
-import org.bouncycastle.crypto.CryptoException;
 import org.bouncycastle.crypto.InvalidWrappingException;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import com.distrimind.util.Bits;
+import java.io.IOException;
+import java.security.SecureRandom;
+import java.util.ArrayList;
+import java.util.Random;
 
 /**
  * 
@@ -67,9 +60,9 @@ import com.distrimind.util.Bits;
  * @since Utils 1.4
  */
 public class CryptoTests {
-	private static final byte[] messagesToEncrypt[];
+	private static final byte[][] messagesToEncrypt;
 
-	private static final byte salt[];
+	private static final byte[] salt;
 	static {
 		System.out.println("Generatring messages");
 		Random rand = new Random(System.currentTimeMillis());
@@ -94,7 +87,7 @@ public class CryptoTests {
 		Object[][] res = new Object[ASymmetricEncryptionType.values().length][];
 		int i = 0;
 		for (ASymmetricEncryptionType v : ASymmetricEncryptionType.values()) {
-			Object o[] = new Object[1];
+			Object[] o = new Object[1];
 			o[0] = v;
 			res[i++] = o;
 		}
@@ -106,7 +99,7 @@ public class CryptoTests {
 		Object[][] res = new Object[ASymmetricAuthentifiedSignatureType.values().length][];
 		int i = 0;
 		for (ASymmetricAuthentifiedSignatureType v : ASymmetricAuthentifiedSignatureType.values()) {
-			Object o[] = new Object[1];
+			Object[] o = new Object[1];
 			o[0] = v;
 			res[i++] = o;
 		}
@@ -123,14 +116,15 @@ public class CryptoTests {
 			for (ASymmetricEncryptionType vAS : ASymmetricEncryptionType.values()) {
 				if ((vS.getCodeProviderForEncryption()==CodeProvider.GNU_CRYPTO)==(vAS.getCodeProviderForEncryption()==CodeProvider.GNU_CRYPTO))
 				{
-					Object o[] = new Object[2];
+					Object[] o = new Object[2];
 					o[0] = vAS;
 					o[1] = vS;
 					res[index++] = o;
 				}
 			}
 		}
-		Object res2[][]=new Object[index][];
+		Object[][] res2;
+		res2 = new Object[index][];
 		System.arraycopy(res, 0, res2, 0, index);
 		return res2;
 	}
@@ -143,9 +137,10 @@ public class CryptoTests {
 		int index = 0;
 		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getSingleton(null);
 		for (ASymmetricAuthentifiedSignatureType st : ASymmetricAuthentifiedSignatureType.values()) {
+			//noinspection IfCanBeSwitch
 			if (st.getSignatureAlgorithmName().equals(ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA384withECDSA_P_384.getSignatureAlgorithmName()))
 			{
-				Object o[] = new Object[3];
+				Object[] o = new Object[3];
 				o[0]=st;
 				o[1] = st.getKeyPairGenerator(rand, (short) 384).generateKeyPair();
 				o[2] = 384;
@@ -153,7 +148,7 @@ public class CryptoTests {
 			}
 			else if (st.getSignatureAlgorithmName().equals(ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA256withECDSA_P_256.getSignatureAlgorithmName()))
 			{
-				Object o[] = new Object[3];
+				Object[] o = new Object[3];
 				o[0]=st;
 				o[1] = st.getKeyPairGenerator(rand, (short) 256).generateKeyPair();
 				o[2] = 256;
@@ -161,7 +156,7 @@ public class CryptoTests {
 			}
 			else if (st.getSignatureAlgorithmName().equals(ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA512withECDSA_P_521.getSignatureAlgorithmName()))
 			{
-				Object o[] = new Object[3];
+				Object[] o = new Object[3];
 				o[0]=st;
 				o[1] = st.getKeyPairGenerator(rand, (short) 512).generateKeyPair();
 				o[2] = 512;
@@ -170,8 +165,8 @@ public class CryptoTests {
 			else
 			{
 				for (int keySize : keySizes) {
-					Object o[] = new Object[3];
-					o[0]=st;					
+					Object[] o = new Object[3];
+					o[0]=st;
 					o[1] = st.getKeyPairGenerator(rand, (short) keySize).generateKeyPair();
 					o[2] = keySize;
 					res[index++] = o;
@@ -189,14 +184,14 @@ public class CryptoTests {
 		int i = 0;
 		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getSingleton(null);
 		for (SymmetricAuthentifiedSignatureType ast : SymmetricAuthentifiedSignatureType.values()) {
-			Object o[] = new Object[2];
+			Object[] o = new Object[2];
 			o[0] = ast;
 			
 			o[1] = ast.getKeyGenerator(rand, (short)256).generateKey();
 			res[i++] = o;
 		}
 		for (SymmetricAuthentifiedSignatureType ast : SymmetricAuthentifiedSignatureType.values()) {
-			Object o[] = new Object[2];
+			Object[] o = new Object[2];
 			o[0] = ast;
 			
 			o[1] = ast.getKeyGenerator(rand, (short)128).generateKey();
@@ -210,7 +205,7 @@ public class CryptoTests {
 		Object[][] res = new Object[SymmetricEncryptionType.values().length][];
 		int i = 0;
 		for (SymmetricEncryptionType v : SymmetricEncryptionType.values()) {
-			Object o[] = new Object[1];
+			Object[] o = new Object[1];
 			o[0] = v;
 			res[i++] = o;
 		}
@@ -222,7 +217,7 @@ public class CryptoTests {
         Object[][] res = new Object[SymmetricAuthentifiedSignatureType.values().length][];
         int i = 0;
         for (SymmetricAuthentifiedSignatureType v : SymmetricAuthentifiedSignatureType.values()) {
-            Object o[] = new Object[1];
+			Object[] o = new Object[1];
             o[0] = v;
             res[i++] = o;
         }
@@ -255,7 +250,7 @@ public class CryptoTests {
 		Object[][] res = new Object[MessageDigestType.values().length][];
 		int i = 0;
 		for (MessageDigestType v : MessageDigestType.values()) {
-			Object o[] = new Object[1];
+			Object[] o = new Object[1];
 			o[0] = v;
 			res[i++] = o;
 		}
@@ -277,7 +272,7 @@ public class CryptoTests {
 		Object[][] res = new Object[SecureRandomType.values().length][];
 		int i = 0;
 		for (SecureRandomType v : SecureRandomType.values()) {
-			Object o[] = new Object[1];
+			Object[] o = new Object[1];
 			o[0] = v;
 			res[i++] = o;
 		}
@@ -542,7 +537,7 @@ public class CryptoTests {
 						for (P2PLoginAgreementType t : P2PLoginAgreementType.values())
 						{
 							res.add(new Object[] { t, null, expectedVerify, messageIsKey, s, m , secretKey, null});
-							if (t==P2PLoginAgreementType.JPAKE_AND_AGREEMENT_WITH_SYMMETRIC_SIGNATURE)
+							if (t==P2PLoginAgreementType.JPAKE_AND_AGREEMENT_WITH_SYMMETRIC_SIGNATURE || t==P2PLoginAgreementType.ASYMMETRIC_SECRET_MESSAGE_EXCHANGER_AND_AGREEMENT_WITH_SYMMETRIC_SIGNATURE)
 								res.add(new Object[] { t, null, expectedVerify, messageIsKey, s, m , null, null});
 						}
 						for (ASymmetricLoginAgreementType t : ASymmetricLoginAgreementType.values())
@@ -562,13 +557,13 @@ public class CryptoTests {
 
 	@Test(dataProvider = "provideDataForP2PLoginAgreement", dependsOnMethods = { "testMessageDigest" })
 	public void testP2PLoginAgreement(P2PLoginAgreementType type, ASymmetricLoginAgreementType asType, boolean expectedVerify, boolean messageIsKey, byte[] salt, byte[] m, SymmetricSecretKey secretKey, ASymmetricKeyPair keyPair)
-			throws NoSuchAlgorithmException, IOException, InvalidKeySpecException, NoSuchProviderException, CryptoException, InvalidAlgorithmParameterException, NoSuchPaddingException, InvalidKeyException {
+			throws NoSuchAlgorithmException, IOException, InvalidKeySpecException, NoSuchProviderException, InvalidAlgorithmParameterException, NoSuchPaddingException, InvalidKeyException {
 		AbstractSecureRandom r = SecureRandomType.DEFAULT.getSingleton(null);
 		byte[] falseMessage = new byte[10];
 		r.nextBytes(falseMessage);
 		SymmetricSecretKey falseSecretKey=secretKey==null?null:secretKey.getAuthentifiedSignatureAlgorithmType().getKeyGenerator(r).generateKey();
-		P2PLoginAgreement exchanger1 = null;
-		P2PLoginAgreement exchanger2 = null;
+		P2PLoginAgreement exchanger1;
+		P2PLoginAgreement exchanger2;
 		if (asType!=null)
 		{
 			exchanger1=asType.getAgreementAlgorithmForASymmetricSignatureRequester(r, keyPair);
@@ -650,7 +645,7 @@ public class CryptoTests {
 				kp.getASymmetricPublicKey());
 		ServerASymmetricEncryptionAlgorithm algoServer = new ServerASymmetricEncryptionAlgorithm(kp);
 
-		for (byte m[] : messagesToEncrypt) {
+		for (byte[] m : messagesToEncrypt) {
 			byte[] encodedBytes = algoClient.encode(m);
 			Assert.assertEquals(encodedBytes.length, algoClient.getOutputSizeForEncryption(m.length));
 			byte[] decodedBytes = algoServer.decode(encodedBytes);
@@ -728,9 +723,9 @@ public class CryptoTests {
 
 		AbstractMessageDigest md = type.getMessageDigestInstance();
 		for (byte[] m : messagesToEncrypt) {
-			byte b1[] = md.digest(m);
+			byte[] b1 = md.digest(m);
 			md.reset();
-			byte b2[] = md.digest(m);
+			byte[] b2 = md.digest(m);
 
 			Assert.assertEquals(b1, b2);
 
@@ -752,10 +747,10 @@ public class CryptoTests {
 		P2PASymmetricEncryptionAlgorithm algoLocal = new P2PASymmetricEncryptionAlgorithm(kpl,
 				kpd.getASymmetricPublicKey());
 
-		for (byte m[] : messagesToEncrypt) {
+		for (byte[] m : messagesToEncrypt) {
 			byte[] encoded = algoLocal.encode(m);
 			Assert.assertEquals(encoded.length, algoLocal.getOutputSizeForEncryption(m.length));
-			byte md[] = algoDistant.decode(encoded);
+			byte[] md = algoDistant.decode(encoded);
 			Assert.assertEquals(md.length, m.length, "Testing size " + type);
 			Assert.assertEquals(md, m, "Testing " + type);
 
@@ -848,14 +843,14 @@ public class CryptoTests {
 			{
 				if ((p.getCodeProvider()==CodeProvider.GNU_CRYPTO)==(s.getCodeProviderForEncryption()==CodeProvider.GNU_CRYPTO))
 				{
-					Object params[]=new Object[2];
+					Object[] params = new Object[2];
 					params[0]=p;
 					params[1]=s;
 					res[index++]=params;
 				}
 			}
 		}
-		Object res2[][]=new Object[index][];
+		Object[][] res2 = new Object[index][];
         System.arraycopy(res, 0, res2, 0, index);
 		return res2;
 	}
@@ -871,14 +866,14 @@ public class CryptoTests {
 			{
 				if ((p.getCodeProvider()==CodeProvider.GNU_CRYPTO)==(s.getCodeProviderForSignature()==CodeProvider.GNU_CRYPTO))
 				{
-					Object params[]=new Object[2];
+					Object[] params = new Object[2];
 					params[0]=p;
 					params[1]=s;
 					res[index++]=params;
 				}
 			}
 		}
-		Object res2[][]=new Object[index][];
+		Object[][] res2 = new Object[index][];
         System.arraycopy(res, 0, res2, 0, index);
 		return res2;
 	}
@@ -927,7 +922,7 @@ public class CryptoTests {
 			throws NoSuchAlgorithmException, InvalidKeyException, SignatureException, InvalidKeySpecException,
 			NoSuchProviderException, IllegalStateException, InvalidAlgorithmParameterException, InvalidParameterSpecException, IOException {
 		System.out.println("Testing asymmetric signature : " +type+", "+ keySize+", "+kpd.getASymmetricPublicKey().getKeyBytes().length);
-		byte b[]=kpd.encode();
+		byte[] b = kpd.encode();
 		ASymmetricKeyPair kpd2=ASymmetricKeyPair.decode(b);
 		Assert.assertEquals(kpd2, kpd);
 		ASymmetricAuthentifiedSignerAlgorithm signer = new ASymmetricAuthentifiedSignerAlgorithm(kpd.getASymmetricPrivateKey());
@@ -1001,7 +996,7 @@ public class CryptoTests {
 					if ((akpw.getCodeProvider()==CodeProvider.GNU_CRYPTO)==(aet.getCodeProviderForEncryption()==CodeProvider.GNU_CRYPTO) && (akpw.getCodeProvider()==CodeProvider.GNU_CRYPTO)==(set.getCodeProviderForEncryption()==CodeProvider.GNU_CRYPTO)
 							&& akpw.getAlgorithmName().startsWith(aet.getAlgorithmName()))
 					{
-						Object params[]=new Object[3];
+						Object[] params = new Object[3];
 						params[0]=akpw;
 						params[1]=aet;
 						params[2]=set;
@@ -1010,7 +1005,7 @@ public class CryptoTests {
 				}
 			}
 		}
-		Object res2[][]=new Object[index][];
+		Object[][] res2 = new Object[index][];
         System.arraycopy(res, 0, res2, 0, index);
 		return res2;
 	}
@@ -1028,7 +1023,7 @@ public class CryptoTests {
 					if ((akpw.getCodeProvider()==CodeProvider.GNU_CRYPTO)==(aet.getCodeProviderForEncryption()==CodeProvider.GNU_CRYPTO) && (akpw.getCodeProvider()==CodeProvider.GNU_CRYPTO)==(set.getCodeProviderForSignature()==CodeProvider.GNU_CRYPTO)
 							&& akpw.getAlgorithmName().startsWith(aet.getAlgorithmName()))
 					{
-						Object params[]=new Object[3];
+						Object[] params = new Object[3];
 						params[0]=akpw;
 						params[1]=aet;
 						params[2]=set;
@@ -1037,7 +1032,7 @@ public class CryptoTests {
 				}
 			}
 		}
-		Object res2[][]=new Object[index][];
+		Object[][] res2 = new Object[index][];
         System.arraycopy(res, 0, res2, 0, index);
 		return res2;
 	}
@@ -1086,7 +1081,7 @@ public class CryptoTests {
 				{
 					if (akpw.getCodeProvider().equals(aet.getCodeProviderForEncryption()) && akpw.getCodeProvider().equals(set.getCodeProviderForEncryption()))
 					{
-						Object params[]=new Object[3];
+						Object[] params = new Object[3];
 						params[0]=akpw;
 						params[1]=aet;
 						params[2]=set;
@@ -1095,7 +1090,7 @@ public class CryptoTests {
 				}
 			}
 		}
-		Object res2[][]=new Object[index][];
+		Object[][] res2 = new Object[index][];
         System.arraycopy(res, 0, res2, 0, index);
 		return res2;
 
@@ -1112,8 +1107,8 @@ public class CryptoTests {
 				for (SymmetricAuthentifiedSignatureType set : SymmetricAuthentifiedSignatureType.values())
 				{
 					if (akpw.getCodeProvider().equals(aet.getCodeProviderForEncryption()) && akpw.getCodeProvider().equals(set.getCodeProviderForSignature()))
-					{						
-						Object params[]=new Object[3];
+					{
+						Object[] params = new Object[3];
 						params[0]=akpw;
 						params[1]=aet;
 						params[2]=set;
@@ -1122,7 +1117,7 @@ public class CryptoTests {
 				}
 			}
 		}
-		Object res2[][]=new Object[index][];
+		Object[][] res2 = new Object[index][];
         System.arraycopy(res, 0, res2, 0, index);
 		return res2;
 	}
@@ -1214,13 +1209,13 @@ public class CryptoTests {
 
 		for (byte[] m : messagesToEncrypt) {
 			rand.nextBytes(counter);
-			byte encrypted[] = algoLocal.encode(m, null, counter);
+			byte[] encrypted = algoLocal.encode(m, null, counter);
 			int mlength=m.length;
 			
 			Assert.assertEquals(encrypted.length, algoLocal.getOutputSizeForEncryption(mlength), "length=" + m.length);
 
 			Assert.assertTrue(encrypted.length >= m.length);
-			byte decrypted[] = algoDistant.decode(encrypted, null, counter);
+			byte[] decrypted = algoDistant.decode(encrypted, null, counter);
 			Assert.assertEquals(decrypted.length, m.length, "Testing size " + type1+", "+type2);
 			Assert.assertEquals(decrypted, m, "Testing " + type1+", "+type2);
 			byte[] md = decrypted;
@@ -1238,7 +1233,7 @@ public class CryptoTests {
 			int size = m.length;
 			size -= rand.nextInt(15) + off;
 
-			byte associatedData[]=new byte[random.nextInt(128)+127];
+			byte[] associatedData = new byte[random.nextInt(128) + 127];
 			if (type1.supportAssociatedData())
 				encrypted = algoLocal.encode(m, off, size, associatedData, 0, associatedData.length, counter);
 			else
@@ -1281,14 +1276,14 @@ public class CryptoTests {
 	@Test(invocationCount = 4000)
 	public void testReadWriteDataPackaged() throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
 		Random rand = new Random(System.currentTimeMillis());
-		byte originalBytes[] = new byte[50 + rand.nextInt(10000)];
+		byte[] originalBytes = new byte[50 + rand.nextInt(10000)];
 		rand.nextBytes(originalBytes);
 		int randNb = rand.nextInt(10000);
-		byte encodedBytes[] = OutputDataPackagerWithRandomValues.encode(originalBytes, randNb);
+		byte[] encodedBytes = OutputDataPackagerWithRandomValues.encode(originalBytes, randNb);
 		// Assert.assertTrue(encodedBytes.length>originalBytes.length);
 		Assert.assertTrue(encodedBytes.length >= originalBytes.length, "invalid size : " + encodedBytes.length
 				+ " (originalBytes size=" + originalBytes.length + ", randNb=" + randNb + ") ");
-		byte decodedBytes[] = InputDataPackagedWithRandomValues.decode(encodedBytes);
+		byte[] decodedBytes = InputDataPackagedWithRandomValues.decode(encodedBytes);
 		Assert.assertEquals(decodedBytes.length, originalBytes.length);
 		for (int i = 0; i < decodedBytes.length; i++)
 			Assert.assertEquals(decodedBytes[i], originalBytes[i]);
@@ -1304,11 +1299,11 @@ public class CryptoTests {
 		Random rand = new Random(System.currentTimeMillis());
 
 		for (byte[] m : messagesToEncrypt) {
-			byte encrypted[] = algoLocal.encode(m);
+			byte[] encrypted = algoLocal.encode(m);
 			Assert.assertEquals(encrypted.length, algoLocal.getOutputSizeForEncryption(m.length), "length=" + m.length);
 
 			Assert.assertTrue(encrypted.length >= m.length);
-			byte decrypted[] = algoDistant.decode(encrypted);
+			byte[] decrypted = algoDistant.decode(encrypted);
 			Assert.assertEquals(decrypted.length, m.length, "Testing size " + type);
 			Assert.assertEquals(decrypted, m, "Testing " + type);
 			byte[] md = decrypted;
@@ -1465,7 +1460,7 @@ public class CryptoTests {
 			{
 				if (etype.isPostQuantumAlgorithm((short)256) && etype.getCodeProviderForEncryption()!=CodeProvider.GNU_CRYPTO)
 				{
-					Object o[]=new Object[2];
+					Object[] o = new Object[2];
 					o[0]=type;
 					o[1]=etype;
 					l.add(o);
@@ -1474,7 +1469,7 @@ public class CryptoTests {
 		}
 		Object[][] res = new Object[l.size()][];
 		int index=0;
-		for (Object o[] : l)
+		for (Object[] o : l)
 			res[index++]=o;
 		return res;
 	}
@@ -1488,7 +1483,7 @@ public class CryptoTests {
 			{
 				if (!type.isPostQuantumAlgorithm() || etype.isPostQuantumAlgorithm((short)256))
 				{
-					Object o[]=new Object[2];
+					Object[] o = new Object[2];
 					o[0]=type;
 					o[1]=etype;
 					l.add(o);
@@ -1497,7 +1492,7 @@ public class CryptoTests {
 		}
 		Object[][] res = new Object[l.size()][];
 		int index=0;
-		for (Object o[] : l)
+		for (Object[] o : l)
 			res[index++]=o;
 		return res;
 	}
