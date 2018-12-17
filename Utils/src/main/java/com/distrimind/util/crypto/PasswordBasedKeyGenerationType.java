@@ -49,9 +49,9 @@ import gnu.vm.jgnu.security.spec.InvalidKeySpecException;
 public enum PasswordBasedKeyGenerationType {
 	PBKDF2WithHmacSHA1(PasswordHashType.PBKDF2WithHmacSHA1), 
 	GNU_PBKDF2WithHmacSHA1(PasswordHashType.GNU_PBKDF2WithHmacSHA1), 
-	GNU_PBKDF2WithHMacSHA256(PasswordHashType.GNU_PBKDF2WithHMacSHA256), 
-	GNU_PBKDF2WithHMacSHA384(PasswordHashType.GNU_PBKDF2WithHMacSHA384), 
-	GNU_PBKDF2WithHMacSHA512(PasswordHashType.GNU_PBKDF2WithHMacSHA512), 
+	GNU_PBKDF2WithHMacSHA256(PasswordHashType.GNU_PBKDF2WithHMacSHA2_256),
+	GNU_PBKDF2WithHMacSHA384(PasswordHashType.GNU_PBKDF2WithHMacSHA2_384),
+	GNU_PBKDF2WithHMacSHA512(PasswordHashType.GNU_PBKDF2WithHMacSHA2_512),
 	GNU_PBKDF2WithHMacWhirlpool(PasswordHashType.GNU_PBKDF2WithHMacWhirlpool),
 	BC_FIPS_PBKFD2WithHMacSHA2_256(PasswordHashType.BC_FIPS_PBKFD2WithHMacSHA2_256),
 	BC_FIPS_PBKFD2WithHMacSHA2_384(PasswordHashType.BC_FIPS_PBKFD2WithHMacSHA2_384),

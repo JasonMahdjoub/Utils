@@ -58,26 +58,26 @@ import com.distrimind.util.sizeof.ObjectSizer;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 2.2
+ * @version 2.3
  * @since Utils 1.8
  *
  */
 public enum PasswordHashType {
 	PBKDF2WithHmacSHA1("PBKDF2WithHmacSHA1", (byte) 32, CodeProvider.SunJCE, (byte)1),
-	PBKDF2WithHMacSHA256("PBKDF2WithHMacSHA256", (byte) 32, CodeProvider.SunJCE, (byte)2),
-	PBKDF2WithHMacSHA384("PBKDF2WithHMacSHA384", (byte) 32, CodeProvider.SunJCE, (byte)3),
-	PBKDF2WithHMacSHA512("PBKDF2WithHMacSHA512", (byte) 32, CodeProvider.SunJCE, (byte)4),
+	PBKDF2WithHMacSHA2_256("PBKDF2WithHMacSHA256", (byte) 32, CodeProvider.SunJCE, (byte)2),
+	PBKDF2WithHMacSHA2_384("PBKDF2WithHMacSHA384", (byte) 32, CodeProvider.SunJCE, (byte)3),
+	PBKDF2WithHMacSHA2_512("PBKDF2WithHMacSHA512", (byte) 32, CodeProvider.SunJCE, (byte)4),
 	BCRYPT("BCRYPT", (byte) 24, CodeProvider.SUN, (byte)5), 
 	SCRYPT_FOR_LOGIN("SCRYPT", (byte)32, CodeProvider.BC, (byte)6),
 	SCRYPT_FOR_DATAENCRYPTION("SCRYPT", (byte)32, CodeProvider.BC, (byte)7),
 	GNU_PBKDF2WithHmacSHA1("PBKDF2WithHMacSHA1", (byte) 32, CodeProvider.GNU_CRYPTO, (byte)8), 
-	GNU_PBKDF2WithHMacSHA256("PBKDF2WithHMacSHA256",(byte) 32, CodeProvider.GNU_CRYPTO, (byte)9), 
-	GNU_PBKDF2WithHMacSHA384("PBKDF2WithHMacSHA384", (byte) 32, CodeProvider.GNU_CRYPTO, (byte)10), 
-	GNU_PBKDF2WithHMacSHA512("PBKDF2WithHMacSHA512", (byte) 32, CodeProvider.GNU_CRYPTO, (byte)11), 
+	GNU_PBKDF2WithHMacSHA2_256("PBKDF2WithHMacSHA256",(byte) 32, CodeProvider.GNU_CRYPTO, (byte)9),
+	GNU_PBKDF2WithHMacSHA2_384("PBKDF2WithHMacSHA384", (byte) 32, CodeProvider.GNU_CRYPTO, (byte)10),
+	GNU_PBKDF2WithHMacSHA2_512("PBKDF2WithHMacSHA512", (byte) 32, CodeProvider.GNU_CRYPTO, (byte)11),
 	GNU_PBKDF2WithHMacWhirlpool("PBKDF2WithHMacWhirlpool",(byte) 32, CodeProvider.GNU_CRYPTO, (byte)12),
-	BC_FIPS_PBKFD2WithHMacSHA2_256("PBKDF2WithHMacSHA256",(byte) 32, CodeProvider.BCFIPS, FipsSHS.Algorithm.SHA256_HMAC, (byte)13),
-	BC_FIPS_PBKFD2WithHMacSHA2_384("PBKDF2WithHMacSHA384",(byte) 32, CodeProvider.BCFIPS, FipsSHS.Algorithm.SHA384_HMAC, (byte)14),
-	BC_FIPS_PBKFD2WithHMacSHA2_512("PBKDF2WithHMacSHA512",(byte) 32, CodeProvider.BCFIPS, FipsSHS.Algorithm.SHA512_HMAC, (byte)15),
+	BC_FIPS_PBKFD2WithHMacSHA2_256("PBKDF2WithHMacSHA2_256",(byte) 32, CodeProvider.BCFIPS, FipsSHS.Algorithm.SHA256_HMAC, (byte)13),
+	BC_FIPS_PBKFD2WithHMacSHA2_384("PBKDF2WithHMacSHA2_384",(byte) 32, CodeProvider.BCFIPS, FipsSHS.Algorithm.SHA384_HMAC, (byte)14),
+	BC_FIPS_PBKFD2WithHMacSHA2_512("PBKDF2WithHMacSHA2_512",(byte) 32, CodeProvider.BCFIPS, FipsSHS.Algorithm.SHA512_HMAC, (byte)15),
 	DEFAULT(BCRYPT);
 
 	
@@ -136,11 +136,11 @@ public enum PasswordHashType {
 		
 		if (OSVersion.getCurrentOSVersion()!=null && OSVersion.getCurrentOSVersion().getOS()==OS.MAC_OS_X)
 		{
-			if (this==PBKDF2WithHMacSHA256)
+			if (this== PBKDF2WithHMacSHA2_256)
 				return PasswordHashType.BC_FIPS_PBKFD2WithHMacSHA2_256.hash(data, off, len, salt, cost, hashLength);
-			if (this==PBKDF2WithHMacSHA384)
+			if (this== PBKDF2WithHMacSHA2_384)
 				return PasswordHashType.BC_FIPS_PBKFD2WithHMacSHA2_384.hash(data, off, len, salt, cost, hashLength);
-			if (this==PBKDF2WithHMacSHA512)
+			if (this== PBKDF2WithHMacSHA2_512)
 				return PasswordHashType.BC_FIPS_PBKFD2WithHMacSHA2_512.hash(data, off, len, salt, cost, hashLength);
 		}
 		int scryptN=1<<18;
@@ -148,9 +148,9 @@ public enum PasswordHashType {
 		switch (this) {
 			case DEFAULT:
 			case PBKDF2WithHmacSHA1:
-			case PBKDF2WithHMacSHA256:
-			case PBKDF2WithHMacSHA384:
-			case PBKDF2WithHMacSHA512: {
+			case PBKDF2WithHMacSHA2_256:
+			case PBKDF2WithHMacSHA2_384:
+			case PBKDF2WithHMacSHA2_512: {
 				try {
 					int size = len / 2;
 					char[] password = new char[size + len % 2];
@@ -171,9 +171,9 @@ public enum PasswordHashType {
 					throw new gnu.vm.jgnu.security.NoSuchProviderException(e.getMessage());
 				}
 			}
-			case GNU_PBKDF2WithHMacSHA256:
-			case GNU_PBKDF2WithHMacSHA384:
-			case GNU_PBKDF2WithHMacSHA512:
+			case GNU_PBKDF2WithHMacSHA2_256:
+			case GNU_PBKDF2WithHMacSHA2_384:
+			case GNU_PBKDF2WithHMacSHA2_512:
 			case GNU_PBKDF2WithHMacWhirlpool:
 			case GNU_PBKDF2WithHmacSHA1: {
 				int size = len / 2;
@@ -241,11 +241,11 @@ public enum PasswordHashType {
 			return defaultOf.hash(password, salt, cost, hashLength);
 		if (OSVersion.getCurrentOSVersion()!=null && OSVersion.getCurrentOSVersion().getOS()==OS.MAC_OS_X)
 		{
-			if (this==PBKDF2WithHMacSHA256)
+			if (this== PBKDF2WithHMacSHA2_256)
 				return PasswordHashType.BC_FIPS_PBKFD2WithHMacSHA2_256.hash(password, salt, cost, hashLength);
-			if (this==PBKDF2WithHMacSHA384)
+			if (this== PBKDF2WithHMacSHA2_384)
 				return PasswordHashType.BC_FIPS_PBKFD2WithHMacSHA2_384.hash(password, salt, cost, hashLength);
-			if (this==PBKDF2WithHMacSHA512)
+			if (this== PBKDF2WithHMacSHA2_512)
 				return PasswordHashType.BC_FIPS_PBKFD2WithHMacSHA2_512.hash(password, salt, cost, hashLength);
 		}
 		int iterations=1<<(cost-1);
@@ -253,9 +253,9 @@ public enum PasswordHashType {
 		switch (this) {
 		case DEFAULT:
 		case PBKDF2WithHmacSHA1:
-		case PBKDF2WithHMacSHA256:
-		case PBKDF2WithHMacSHA384:
-		case PBKDF2WithHMacSHA512:{
+		case PBKDF2WithHMacSHA2_256:
+		case PBKDF2WithHMacSHA2_384:
+		case PBKDF2WithHMacSHA2_512:{
 			try {
 				PBEKeySpec spec = new PBEKeySpec(password, salt, iterations, (hashLength) * 8);
 				SecretKeyFactory skf = SecretKeyFactory.getInstance(algorithmName, codeProvider.checkProviderWithCurrentOS().name());
@@ -270,9 +270,9 @@ public enum PasswordHashType {
 				throw new gnu.vm.jgnu.security.NoSuchProviderException(e.getMessage());
 			}
 		}
-		case GNU_PBKDF2WithHMacSHA256:
-		case GNU_PBKDF2WithHMacSHA384:
-		case GNU_PBKDF2WithHMacSHA512:
+		case GNU_PBKDF2WithHMacSHA2_256:
+		case GNU_PBKDF2WithHMacSHA2_384:
+		case GNU_PBKDF2WithHMacSHA2_512:
 		case GNU_PBKDF2WithHMacWhirlpool:
 		case GNU_PBKDF2WithHmacSHA1: {
 			gnu.vm.jgnux.crypto.spec.PBEKeySpec spec = new gnu.vm.jgnux.crypto.spec.PBEKeySpec(password, salt,

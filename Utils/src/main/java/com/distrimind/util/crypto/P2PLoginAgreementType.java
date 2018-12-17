@@ -63,7 +63,7 @@ public enum P2PLoginAgreementType {
 	}
 	private PasswordHashType getDefaultPasswordHashType()
 	{
-		return PasswordHashType.DEFAULT;
+		return PasswordHashType.PBKDF2WithHMacSHA2_512;
 	}
 
 	private ASymmetricPublicKey generateASymmetricPublicKey(AbstractSecureRandom random) throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException {

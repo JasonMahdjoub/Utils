@@ -1,6 +1,6 @@
 Utils
 =====
-3.23.0 Stable (Build: 938) (from 04/12/2018 to 14/12/2018)
+3.24.0 Stable (Build: 940) (from 17/12/2018 to 17/12/2018)
 
 # Creator(s):
 Jason MAHDJOUB
@@ -9,6 +9,13 @@ Jason MAHDJOUB
 Jason MAHDJOUB (Entred in the team at 04/01/2016)
 
 # Modifications:
+
+
+### 3.24.0 Stable (17/12/2018)
+* Add P2PLopinKeyAgreementType.ASYMMETRIC_SECRET_MESSAGE_EXCHANGER
+* Add P2PLopinKeyAgreementType.ASYMMETRIC_SECRET_MESSAGE_EXCHANGER_AND_AGREEMENT_WITH_SYMMETRIC_SIGNATURE
+* Change Agreement.receiveData(int stepNumber, byte[] data) signature
+* Several minimal security fix
 
 
 ### 3.23.0 Stable (04/12/2018)
