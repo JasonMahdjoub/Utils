@@ -23,7 +23,7 @@ if (propFile.canRead())
 
    
 	if (props!=null && props.containsKey('artifactory_contextUrl'))
-		artifactory_Url="${artifactory_contextUrl}"	
+		artifactory_Url="${artifactory_contextUrl}"
 	if (props!=null && props.containsKey('artifactory_user'))
 		user="${artifactory_user}"	
 	if (props!=null && props.containsKey('artifactory_password'))
@@ -49,8 +49,8 @@ repositories {
        		if (user!="")
        		{
 	       		credentials {
-	              username "${artifactory_user}"
-	              password "${artifactory_password}"
+	              username "${user}"
+	              password "${pwd}"
 	            }
 	         }
    	} 
