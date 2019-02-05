@@ -57,8 +57,8 @@ public class Utils {
 		Calendar c = Calendar.getInstance();
 		c.set(2016, Calendar.JANUARY, 4);
 		Calendar c2 = Calendar.getInstance();
-		c.set(2018, Calendar.DECEMBER, 17);
-		VERSION = new Version("Utils", "Utils", (short)3, (short)24, (short)0, Version.Type.Stable, (short)0, c.getTime(), c2.getTime());
+		c.set(2018, Calendar.FEBRUARY, 5);
+		VERSION = new Version("Utils", "Utils", (short)3, (short)25, (short)0, Version.Type.Stable, (short)0, c.getTime(), c2.getTime());
 		try {
 
 			InputStream is = Utils.class.getResourceAsStream("build.txt");
@@ -71,8 +71,17 @@ public class Utils {
 			VERSION.addDeveloper(new PersonDeveloper("mahdjoub", "jason", c.getTime()));
 
 			c = Calendar.getInstance();
+			c.set(2018, Calendar.FEBRUARY, 5);
+			Description d = new Description((short)3, (short)25, (short)0, Version.Type.Stable, (short)0, c.getTime());
+			d.addItem("Add public constructor into ASymmetricKeyPair");
+			d.addItem("Add function ASymmetricKeyPair.getKeyPairWithNewExpirationTime(long)");
+			d.addItem("Add function ASymmetricPublicKey.getPublicKeyWithNewExpirationTime(long)");
+			d.addItem("Security fix : fill byte array with zero when decoding keys");
+			VERSION.addDescription(d);
+
+			c = Calendar.getInstance();
 			c.set(2018, Calendar.DECEMBER, 17);
-			Description d = new Description((short)3, (short)24, (short)0, Version.Type.Stable, (short)0, c.getTime());
+			d = new Description((short)3, (short)24, (short)0, Version.Type.Stable, (short)0, c.getTime());
 			d.addItem("Add P2PLopinKeyAgreementType.ASYMMETRIC_SECRET_MESSAGE_EXCHANGER");
 			d.addItem("Add P2PLopinKeyAgreementType.ASYMMETRIC_SECRET_MESSAGE_EXCHANGER_AND_AGREEMENT_WITH_SYMMETRIC_SIGNATURE");
 			d.addItem("Change Agreement.receiveData(int stepNumber, byte[] data) signature");
@@ -628,7 +637,7 @@ public class Utils {
 	}
 	
 	@SuppressWarnings("ResultOfMethodCallIgnored")
-    public static void main(String args[]) throws IOException
+    public static void main(String[] args) throws IOException
 	{
 		String html=VERSION.getMarkdownCode();
         File f=new File("../versions.md");

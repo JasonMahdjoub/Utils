@@ -118,6 +118,29 @@ public class ASymmetricKeyPair implements Serializable {
 		hashCode = privateKey.hashCode() + publicKey.hashCode();
 	}
 
+	public ASymmetricKeyPair(ASymmetricPrivateKey privateKey, ASymmetricPublicKey publicKey) {
+		if (privateKey == null)
+			throw new NullPointerException("privateKey");
+		if (publicKey == null)
+			throw new NullPointerException("publicKey");
+		if (privateKey.getAuthentifiedSignatureAlgorithmType()!=publicKey.getAuthentifiedSignatureAlgorithmType())
+			throw new IllegalArgumentException();
+		if (privateKey.getEncryptionAlgorithmType()!=publicKey.getEncryptionAlgorithmType())
+			throw new IllegalArgumentException();
+		this.privateKey = privateKey;
+		this.publicKey = publicKey;
+		this.keySizeBits = publicKey.getKeySizeBits();
+		this.encryptionType = publicKey.getEncryptionAlgorithmType();
+		this.signatureType=privateKey.getAuthentifiedSignatureAlgorithmType();
+
+		hashCode = privateKey.hashCode() + publicKey.hashCode();
+	}
+
+	public ASymmetricKeyPair getKeyPairWithNewExpirationTime(long timeExpirationUTC)
+	{
+		return new ASymmetricKeyPair(this.privateKey.getNewClonedPrivateKey(), this.publicKey.getPublicKeyWithNewExpirationTime(timeExpirationUTC));
+	}
+
 	ASymmetricKeyPair(ASymmetricEncryptionType type, gnu.vm.jgnu.security.KeyPair keyPair, short keySize,
 			long expirationUTC) {
 		if (type == null)
@@ -219,29 +242,35 @@ public class ASymmetricKeyPair implements Serializable {
 		System.arraycopy(kp, 0, tab, 11+codedTypeSize, kp.length);
 		return tab;
 	}
-    public static ASymmetricKeyPair decode(byte[] b) throws IllegalArgumentException {
-        int codedTypeSize=SymmetricSecretKey.getEncodedTypeSize();
-        short keySize = Bits.getShort(b, 1);
-        long expirationUTC = Bits.getLong(b, 3+codedTypeSize);
-        byte[] kp=new byte[b.length-11-codedTypeSize];
-        System.arraycopy(b, 11+codedTypeSize, kp, 0, kp.length);
-        byte[][] keys=Bits.separateEncodingsWithShortSizedTabs(kp);
-        if (b[0]==1)
-        {
-            ASymmetricAuthentifiedSignatureType type = ASymmetricAuthentifiedSignatureType.valueOf((int)Bits.getPositiveInteger(b, 3, codedTypeSize));
+	public static ASymmetricKeyPair decode(byte[] b) throws IllegalArgumentException {
+		return decode(b, true);
+	}
+    public static ASymmetricKeyPair decode(byte[] b, boolean fillArrayWithZerosWhenDecoded) throws IllegalArgumentException {
+		try {
+			int codedTypeSize = SymmetricSecretKey.getEncodedTypeSize();
+			short keySize = Bits.getShort(b, 1);
+			long expirationUTC = Bits.getLong(b, 3 + codedTypeSize);
+			byte[] kp = new byte[b.length - 11 - codedTypeSize];
+			System.arraycopy(b, 11 + codedTypeSize, kp, 0, kp.length);
+			byte[][] keys = Bits.separateEncodingsWithShortSizedTabs(kp);
+			if (b[0] == 1) {
+				ASymmetricAuthentifiedSignatureType type = ASymmetricAuthentifiedSignatureType.valueOf((int) Bits.getPositiveInteger(b, 3, codedTypeSize));
 
-            return new ASymmetricKeyPair(type, new ASymmetricPrivateKey(type, keys[0], keySize),
-                    new ASymmetricPublicKey(type, keys[1], keySize, expirationUTC), keySize);
-        }
-        else if (b[0]==0)
-        {
-            ASymmetricEncryptionType type = ASymmetricEncryptionType.valueOf((int)Bits.getPositiveInteger(b, 3, codedTypeSize));
+				return new ASymmetricKeyPair(type, new ASymmetricPrivateKey(type, keys[0], keySize),
+						new ASymmetricPublicKey(type, keys[1], keySize, expirationUTC), keySize);
+			} else if (b[0] == 0) {
+				ASymmetricEncryptionType type = ASymmetricEncryptionType.valueOf((int) Bits.getPositiveInteger(b, 3, codedTypeSize));
 
-            return new ASymmetricKeyPair(type, new ASymmetricPrivateKey(type, keys[0], keySize),
-                    new ASymmetricPublicKey(type, keys[1], keySize, expirationUTC), keySize);
-        }
-        else
-            throw new IllegalArgumentException();
+				return new ASymmetricKeyPair(type, new ASymmetricPrivateKey(type, keys[0], keySize),
+						new ASymmetricPublicKey(type, keys[1], keySize, expirationUTC), keySize);
+			} else
+				throw new IllegalArgumentException();
+		}
+		finally {
+			if (fillArrayWithZerosWhenDecoded)
+				Arrays.fill(b, (byte)0);
+		}
+
 
 
     }

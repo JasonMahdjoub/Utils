@@ -36,6 +36,7 @@ package com.distrimind.util.crypto;
 
 
 import java.io.Serializable;
+import java.util.Arrays;
 
 import org.apache.commons.codec.binary.Base64;
 
@@ -68,61 +69,58 @@ public abstract class Key implements Serializable {
 	
 	public  abstract byte[] encode();
 
-	
 	public static Key decode(byte[] b) throws IllegalArgumentException {
+		return decode(b, true);
+	}
+	public static Key decode(byte[] b, boolean fillArrayWithZerosWhenDecoded) throws IllegalArgumentException {
 		
 			//byte[][] res = Bits.separateEncodingsWithShortSizedTabs(b);
-			
-			if (b[0]==(byte)0) {
-				int codedTypeSize=SymmetricSecretKey.getEncodedTypeSize();
-				byte secretKey[]=new byte[b.length-2-codedTypeSize];
-				System.arraycopy(b, 2+codedTypeSize, secretKey, 0, secretKey.length);
-				return new SymmetricSecretKey(SymmetricEncryptionType.valueOf((int)Bits.getPositiveInteger(b, 1, codedTypeSize)), secretKey,
-						SymmetricSecretKey.decodeKeySizeBits(b[codedTypeSize+1]));
+			try {
+				if (b[0] == (byte) 0) {
+					int codedTypeSize = SymmetricSecretKey.getEncodedTypeSize();
+					byte secretKey[] = new byte[b.length - 2 - codedTypeSize];
+					System.arraycopy(b, 2 + codedTypeSize, secretKey, 0, secretKey.length);
+					return new SymmetricSecretKey(SymmetricEncryptionType.valueOf((int) Bits.getPositiveInteger(b, 1, codedTypeSize)), secretKey,
+							SymmetricSecretKey.decodeKeySizeBits(b[codedTypeSize + 1]));
+				} else if (b[0] == (byte) 1) {
+					int codedTypeSize = SymmetricSecretKey.getEncodedTypeSize();
+					byte secretKey[] = new byte[b.length - 2 - codedTypeSize];
+					System.arraycopy(b, 2 + codedTypeSize, secretKey, 0, secretKey.length);
+					return new SymmetricSecretKey(SymmetricAuthentifiedSignatureType.valueOf((int) Bits.getPositiveInteger(b, 1, codedTypeSize)), secretKey,
+							SymmetricSecretKey.decodeKeySizeBits(b[codedTypeSize + 1]));
+				} else if (b[0] == (byte) 2) {
+					int codedTypeSize = ASymmetricPrivateKey.getEncodedTypeSize();
+					byte privateKey[] = new byte[b.length - 3 - codedTypeSize];
+					System.arraycopy(b, 3 + codedTypeSize, privateKey, 0, privateKey.length);
+					return new ASymmetricPrivateKey(ASymmetricAuthentifiedSignatureType.valueOf((int) Bits.getPositiveInteger(b, 3, codedTypeSize)), privateKey,
+							Bits.getShort(b, 1));
+				} else if (b[0] == (byte) 3) {
+					int codedTypeSize = ASymmetricPrivateKey.getEncodedTypeSize();
+					byte privateKey[] = new byte[b.length - 3 - codedTypeSize];
+					System.arraycopy(b, 3 + codedTypeSize, privateKey, 0, privateKey.length);
+					return new ASymmetricPrivateKey(ASymmetricEncryptionType.valueOf((int) Bits.getPositiveInteger(b, 3, codedTypeSize)), privateKey,
+							Bits.getShort(b, 1));
+				} else if (b[0] == (byte) 4) {
+					int codedTypeSize = ASymmetricPrivateKey.getEncodedTypeSize();
+					byte publicKey[] = new byte[b.length - 11 - codedTypeSize];
+					System.arraycopy(b, 11 + codedTypeSize, publicKey, 0, publicKey.length);
+					return new ASymmetricPublicKey(ASymmetricEncryptionType.valueOf((int) Bits.getPositiveInteger(b, 3, codedTypeSize)), publicKey,
+							Bits.getShort(b, 1), Bits.getLong(b, 3 + codedTypeSize));
+				} else if (b[0] == (byte) 5) {
+					int codedTypeSize = ASymmetricPrivateKey.getEncodedTypeSize();
+					byte publicKey[] = new byte[b.length - 11 - codedTypeSize];
+					System.arraycopy(b, 11 + codedTypeSize, publicKey, 0, publicKey.length);
+					return new ASymmetricPublicKey(ASymmetricAuthentifiedSignatureType.valueOf((int) Bits.getPositiveInteger(b, 3, codedTypeSize)), publicKey,
+							Bits.getShort(b, 1), Bits.getLong(b, 3 + codedTypeSize));
+				} else
+					throw new IllegalArgumentException();
+
 			}
-			else if (b[0]==(byte)1) {
-				int codedTypeSize=SymmetricSecretKey.getEncodedTypeSize();
-				byte secretKey[]=new byte[b.length-2-codedTypeSize];
-				System.arraycopy(b, 2+codedTypeSize, secretKey, 0, secretKey.length);
-				return new SymmetricSecretKey(SymmetricAuthentifiedSignatureType.valueOf((int)Bits.getPositiveInteger(b, 1, codedTypeSize)), secretKey,
-						SymmetricSecretKey.decodeKeySizeBits(b[codedTypeSize+1]));
-			}
-			else if (b[0]==(byte)2)
+			finally
 			{
-				int codedTypeSize=ASymmetricPrivateKey.getEncodedTypeSize();
-				byte privateKey[]=new byte[b.length-3-codedTypeSize];
-				System.arraycopy(b, 3+codedTypeSize, privateKey, 0, privateKey.length);
-				return new ASymmetricPrivateKey(ASymmetricAuthentifiedSignatureType.valueOf((int)Bits.getPositiveInteger(b, 3, codedTypeSize)), privateKey,
-						Bits.getShort(b, 1));
+				if (fillArrayWithZerosWhenDecoded)
+					Arrays.fill(b, (byte)0);
 			}
-			else if (b[0]==(byte)3)
-			{
-				int codedTypeSize=ASymmetricPrivateKey.getEncodedTypeSize();
-				byte privateKey[]=new byte[b.length-3-codedTypeSize];
-				System.arraycopy(b, 3+codedTypeSize, privateKey, 0, privateKey.length);
-				return new ASymmetricPrivateKey(ASymmetricEncryptionType.valueOf((int)Bits.getPositiveInteger(b, 3, codedTypeSize)), privateKey,
-						Bits.getShort(b, 1));
-			}
-			else if (b[0]==(byte)4)
-			{
-				int codedTypeSize=ASymmetricPrivateKey.getEncodedTypeSize();
-				byte publicKey[]=new byte[b.length-11-codedTypeSize];
-				System.arraycopy(b, 11+codedTypeSize, publicKey, 0, publicKey.length);
-				return new ASymmetricPublicKey(ASymmetricEncryptionType.valueOf((int)Bits.getPositiveInteger(b, 3, codedTypeSize)), publicKey,
-						Bits.getShort(b, 1), Bits.getLong(b, 3+codedTypeSize));
-			}
-			else if (b[0]==(byte)5)
-			{
-				int codedTypeSize=ASymmetricPrivateKey.getEncodedTypeSize();
-				byte publicKey[]=new byte[b.length-11-codedTypeSize];
-				System.arraycopy(b, 11+codedTypeSize, publicKey, 0, publicKey.length);
-				return new ASymmetricPublicKey(ASymmetricAuthentifiedSignatureType.valueOf((int)Bits.getPositiveInteger(b, 3, codedTypeSize)), publicKey,
-						Bits.getShort(b, 1), Bits.getLong(b, 3+codedTypeSize));
-			}
-			else
-				throw new IllegalArgumentException();
-		
-			
 	}
 	
 	

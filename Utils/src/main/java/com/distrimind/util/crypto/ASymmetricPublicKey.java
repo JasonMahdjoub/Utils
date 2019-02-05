@@ -176,6 +176,18 @@ public class ASymmetricPublicKey extends Key {
 		this.expirationUTC = expirationUTC;
 	}
 
+	public ASymmetricPublicKey getPublicKeyWithNewExpirationTime(long timeExpirationUTC)
+	{
+		ASymmetricPublicKey res;
+		if (signatureType==null)
+			res=new ASymmetricPublicKey(this.encryptionType, publicKey.clone(), this.keySizeBits, timeExpirationUTC);
+		else
+			res=new ASymmetricPublicKey(this.signatureType, publicKey.clone(), this.keySizeBits, timeExpirationUTC);
+		return res;
+	}
+
+
+
 	private ASymmetricPublicKey(gnu.vm.jgnu.security.PublicKey publicKey, short keySize,
 			long expirationUTC) {
 		if (publicKey == null)

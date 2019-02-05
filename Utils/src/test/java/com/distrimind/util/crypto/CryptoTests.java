@@ -52,7 +52,6 @@ import gnu.vm.jgnux.crypto.NoSuchPaddingException;
 import gnu.vm.jgnux.crypto.ShortBufferException;
 
 import org.apache.commons.codec.binary.Base64;
-import org.bouncycastle.crypto.CryptoException;
 import org.bouncycastle.crypto.InvalidWrappingException;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
@@ -289,8 +288,8 @@ public class CryptoTests {
 	public void testASymmetricKeyPairEncoding(ASymmetricEncryptionType type)
 			throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException {
 		System.out.println("Testing ASymmetricKeyPairEncoding " + type);
-		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getSingleton(null);
-		ASymmetricKeyPair kpd = type.getKeyPairGenerator(rand, (short)1024).generateKeyPair();
+
+		ASymmetricKeyPair kpd=generateKeyPair(type);
 
 		Assert.assertEquals(ASymmetricPublicKey.decode(kpd.getASymmetricPublicKey().encode()),
 				kpd.getASymmetricPublicKey());
@@ -306,18 +305,30 @@ public class CryptoTests {
 		System.out.println("\tPublic key encoding : "+kpd.getASymmetricPublicKey().toString());
 		System.out.println("\tPrivate key encoding : "+kpd.getASymmetricPrivateKey().toString());
 	}
+
+
+	private ASymmetricKeyPair generateKeyPair(ASymmetricAuthentifiedSignatureType type) throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException {
+		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getSingleton(null);
+
+		@SuppressWarnings("deprecation")
+		boolean isECDSA=type==ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA384withECDSA_P_384
+				|| 	type==ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA256withECDSA_P_256
+				|| type==ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA512withECDSA_P_521;
+
+		return type.getKeyPairGenerator(rand, isECDSA?type.getDefaultKeySize():(short)1024).generateKeyPair();
+	}
+
+	private ASymmetricKeyPair generateKeyPair(ASymmetricEncryptionType type) throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException {
+		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getSingleton(null);
+		return type.getKeyPairGenerator(rand, (short)1024).generateKeyPair();
+	}
+
 	@Test(dataProvider = "provideDataForASymetricSignatures")
 	public void testASymmetricKeyPairEncoding(ASymmetricAuthentifiedSignatureType type)
 			throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException {
 		System.out.println("Testing ASymmetricKeyPairEncoding " + type);
-		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getSingleton(null);
-		
-		@SuppressWarnings("deprecation")
-		boolean isECDSA=type==ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA384withECDSA_P_384 
-				|| 	type==ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA256withECDSA_P_256
-				|| type==ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA512withECDSA_P_521; 
-		
-		ASymmetricKeyPair kpd = type.getKeyPairGenerator(rand, isECDSA?type.getDefaultKeySize():(short)1024).generateKeyPair();
+
+		ASymmetricKeyPair kpd=generateKeyPair(type);
 
 		Assert.assertEquals(ASymmetricPublicKey.decode(kpd.getASymmetricPublicKey().encode()),
 				kpd.getASymmetricPublicKey());
@@ -332,6 +343,45 @@ public class CryptoTests {
         System.out.println("\tKey pair encoding : "+kpd.toString());
         System.out.println("\tPublic key encoding : "+kpd.getASymmetricPublicKey().toString());
         System.out.println("\tPrivate key encoding : "+kpd.getASymmetricPrivateKey().toString());
+
+	}
+	@Test(dataProvider = "provideDataForASymetricSignatures")
+	public void testASymmetricKeyExpirationTimeChange(ASymmetricAuthentifiedSignatureType type) throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException {
+		testASymmetricKeyExpirationTimeChange(generateKeyPair(type));
+	}
+	@Test(dataProvider = "provideDataForASymetricEncryptions")
+	public void testASymmetricKeyExpirationTimeChange(ASymmetricEncryptionType type) throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException {
+		testASymmetricKeyExpirationTimeChange(generateKeyPair(type));
+	}
+
+	private void testASymmetricKeyExpirationTimeChange(ASymmetricKeyPair keyPair)
+	{
+
+		ASymmetricKeyPair newKeyPair=keyPair.getKeyPairWithNewExpirationTime(-1);
+		ASymmetricPublicKey pk=keyPair.getASymmetricPublicKey().getPublicKeyWithNewExpirationTime(-1);
+		Assert.assertEquals(newKeyPair.getASymmetricPrivateKey(), keyPair.getASymmetricPrivateKey());
+		Assert.assertEquals(newKeyPair.getASymmetricPublicKey().getBytesPublicKey(), keyPair.getASymmetricPublicKey().getBytesPublicKey());
+		Assert.assertEquals(newKeyPair.getASymmetricPrivateKey().getBytesPrivateKey(), keyPair.getASymmetricPrivateKey().getBytesPrivateKey());
+		Assert.assertEquals(newKeyPair.getKeySizeBits(), keyPair.getKeySizeBits());
+		Assert.assertEquals(newKeyPair.getASymmetricPublicKey().getKeySizeBits(), keyPair.getASymmetricPublicKey().getKeySizeBits());
+		Assert.assertEquals(newKeyPair.getASymmetricPrivateKey().getKeySizeBits(), keyPair.getASymmetricPrivateKey().getKeySizeBits());
+		Assert.assertEquals(newKeyPair.getASymmetricPublicKey().getTimeExpirationUTC(), -1);
+		Assert.assertEquals(newKeyPair.getTimeExpirationUTC(), -1);
+		Assert.assertEquals(newKeyPair.getASymmetricPublicKey().getAuthentifiedSignatureAlgorithmType(), keyPair.getASymmetricPublicKey().getAuthentifiedSignatureAlgorithmType());
+		Assert.assertEquals(newKeyPair.getASymmetricPublicKey().getEncryptionAlgorithmType(), keyPair.getASymmetricPublicKey().getEncryptionAlgorithmType());
+		Assert.assertEquals(newKeyPair.getASymmetricPrivateKey().getAuthentifiedSignatureAlgorithmType(), keyPair.getASymmetricPrivateKey().getAuthentifiedSignatureAlgorithmType());
+		Assert.assertEquals(newKeyPair.getASymmetricPrivateKey().getEncryptionAlgorithmType(), keyPair.getASymmetricPrivateKey().getEncryptionAlgorithmType());
+		Assert.assertEquals(newKeyPair.getAuthentifiedSignatureAlgorithmType(), keyPair.getAuthentifiedSignatureAlgorithmType());
+		Assert.assertEquals(newKeyPair.getEncryptionAlgorithmType(), keyPair.getEncryptionAlgorithmType());
+		Assert.assertEquals(newKeyPair.hashCode(), keyPair.hashCode());
+
+
+		Assert.assertEquals(pk.getBytesPublicKey(), keyPair.getASymmetricPublicKey().getBytesPublicKey());
+		Assert.assertEquals(pk.getKeySizeBits(), keyPair.getASymmetricPublicKey().getKeySizeBits());
+		Assert.assertEquals(pk.getTimeExpirationUTC(), -1);
+		Assert.assertEquals(pk.getAuthentifiedSignatureAlgorithmType(), keyPair.getASymmetricPublicKey().getAuthentifiedSignatureAlgorithmType());
+		Assert.assertEquals(pk.getEncryptionAlgorithmType(), keyPair.getASymmetricPublicKey().getEncryptionAlgorithmType());
+		Assert.assertEquals(pk.hashCode(), keyPair.getASymmetricPublicKey().hashCode());
 
 	}
 

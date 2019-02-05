@@ -1,6 +1,6 @@
 Utils
 =====
-3.25.0 Stable (Build: 981) (from 30/12/2018 to 02/01/2019)
+3.25.0 Stable (Build: 947) (from 05/02/2018 to 05/02/2019)
 
 # Creator(s):
 Jason MAHDJOUB
@@ -11,7 +11,11 @@ Jason MAHDJOUB (Entred in the team at 04/01/2016)
 # Modifications:
 
 
-### 3.25.0 Stable (30/12/2018)
+### 3.25.0 Stable (05/02/2018)
+* Add public constructor into ASymmetricKeyPair
+* Add function ASymmetricKeyPair.getKeyPairWithNewExpirationTime(long)
+* Add function ASymmetricPublicKey.getPublicKeyWithNewExpirationTime(long)
+* Security fix : fill byte array with zero when decoding keys
 
 
 ### 3.24.0 Stable (17/12/2018)

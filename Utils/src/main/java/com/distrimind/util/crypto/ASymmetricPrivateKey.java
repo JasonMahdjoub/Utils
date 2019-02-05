@@ -104,14 +104,14 @@ public class ASymmetricPrivateKey extends Key {
         return privateKey;
     }
 
-    ASymmetricPrivateKey(ASymmetricEncryptionType type, byte privateKey[], short keySize) {
+    ASymmetricPrivateKey(ASymmetricEncryptionType type, byte[] privateKey, short keySize) {
 		this(privateKey, keySize);
 		if (type == null)
 			throw new NullPointerException("type");
 		this.encryptionType = type;
 		this.signatureType=null;
 	}
-	ASymmetricPrivateKey(ASymmetricAuthentifiedSignatureType type, byte privateKey[], short keySize) {
+	ASymmetricPrivateKey(ASymmetricAuthentifiedSignatureType type, byte[] privateKey, short keySize) {
 		this(privateKey, keySize);
 		if (type == null)
 			throw new NullPointerException("type");
@@ -153,7 +153,16 @@ public class ASymmetricPrivateKey extends Key {
 		this.encryptionType = null;
 		this.signatureType=type;
 	}
-	private ASymmetricPrivateKey(byte privateKey[], short keySize) {
+
+	ASymmetricPrivateKey getNewClonedPrivateKey()
+	{
+		if (signatureType==null)
+			return new ASymmetricPrivateKey(encryptionType, privateKey.clone(), keySizeBits);
+		else
+			return new ASymmetricPrivateKey(signatureType, privateKey.clone(), keySizeBits);
+	}
+
+	private ASymmetricPrivateKey(byte[] privateKey, short keySize) {
 		if (privateKey == null)
 			throw new NullPointerException("privateKey");
 		if (keySize < 256)
