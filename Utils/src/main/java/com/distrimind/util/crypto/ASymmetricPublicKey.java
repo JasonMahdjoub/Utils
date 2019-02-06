@@ -104,7 +104,12 @@ public class ASymmetricPublicKey extends Key {
 		}
 	}
 
-    @Override
+	@Override
+	public void finalize() {
+
+	}
+
+	@Override
     byte[] getKeyBytes() {
         return publicKey;
     }

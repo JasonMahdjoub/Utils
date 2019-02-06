@@ -1,6 +1,6 @@
 Utils
 =====
-3.25.0 Stable (Build: 947) (from 05/02/2018 to 05/02/2019)
+3.25.1 Stable (Build: 950) (from 06/02/2018 to 06/02/2019)
 
 # Creator(s):
 Jason MAHDJOUB
@@ -9,6 +9,10 @@ Jason MAHDJOUB
 Jason MAHDJOUB (Entred in the team at 04/01/2016)
 
 # Modifications:
+
+
+### 3.25.1 Stable (06/02/2018)
+* Do not zeroize public keys
 
 
 ### 3.25.0 Stable (05/02/2018)

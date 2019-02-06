@@ -76,6 +76,7 @@ public abstract class Key implements Serializable {
 		
 			//byte[][] res = Bits.separateEncodingsWithShortSizedTabs(b);
 			try {
+
 				if (b[0] == (byte) 0) {
 					int codedTypeSize = SymmetricSecretKey.getEncodedTypeSize();
 					byte secretKey[] = new byte[b.length - 2 - codedTypeSize];
@@ -101,19 +102,23 @@ public abstract class Key implements Serializable {
 					return new ASymmetricPrivateKey(ASymmetricEncryptionType.valueOf((int) Bits.getPositiveInteger(b, 3, codedTypeSize)), privateKey,
 							Bits.getShort(b, 1));
 				} else if (b[0] == (byte) 4) {
+					fillArrayWithZerosWhenDecoded=false;
 					int codedTypeSize = ASymmetricPrivateKey.getEncodedTypeSize();
 					byte publicKey[] = new byte[b.length - 11 - codedTypeSize];
 					System.arraycopy(b, 11 + codedTypeSize, publicKey, 0, publicKey.length);
 					return new ASymmetricPublicKey(ASymmetricEncryptionType.valueOf((int) Bits.getPositiveInteger(b, 3, codedTypeSize)), publicKey,
 							Bits.getShort(b, 1), Bits.getLong(b, 3 + codedTypeSize));
 				} else if (b[0] == (byte) 5) {
+					fillArrayWithZerosWhenDecoded=false;
 					int codedTypeSize = ASymmetricPrivateKey.getEncodedTypeSize();
 					byte publicKey[] = new byte[b.length - 11 - codedTypeSize];
 					System.arraycopy(b, 11 + codedTypeSize, publicKey, 0, publicKey.length);
 					return new ASymmetricPublicKey(ASymmetricAuthentifiedSignatureType.valueOf((int) Bits.getPositiveInteger(b, 3, codedTypeSize)), publicKey,
 							Bits.getShort(b, 1), Bits.getLong(b, 3 + codedTypeSize));
-				} else
+				} else {
+					fillArrayWithZerosWhenDecoded=false;
 					throw new IllegalArgumentException();
+				}
 
 			}
 			finally
