@@ -35,6 +35,8 @@ knowledge of the CeCILL-C license and that you accept its terms.
 
 package com.distrimind.util.traceroute;
 
+import com.distrimind.util.Utils;
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.InetAddress;
@@ -50,9 +52,13 @@ import java.util.List;
  * @see TraceRoute
  */
 class LinuxTraceRoute extends TraceRoute {
-	public static void main(String args[]) throws UnknownHostException {
-		for (InetAddress ia : new LinuxTraceRoute().tracePath(InetAddress.getByName("www.google.fr"), -1, -1))
-			System.out.println(ia);
+	public static void main(String[] args) throws UnknownHostException {
+		for (InetAddress from:InetAddress.getAllByName("www.google.fr")) {
+			System.out.println("Trace of google ("+from+")");
+			for (InetAddress ia : new LinuxTraceRoute().tracePath(from, -1, -1)) {
+				System.out.println("\t"+ia);
+			}
+		}
 	}
 
 	LinuxTraceRoute() {
@@ -86,7 +92,9 @@ class LinuxTraceRoute extends TraceRoute {
 
 				}
 			}
-			p.destroy();
+			finally {
+				Utils.flushAndDestroyProcess(p);
+			}
 			return res;
 
 		} catch (Exception e) {

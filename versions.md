@@ -1,6 +1,6 @@
 Utils
 =====
-3.25.1 Stable (Build: 950) (from 06/02/2018 to 06/02/2019)
+3.25.2 Stable (Build: 954) (from 13/03/2019 to 13/03/2019)
 
 # Creator(s):
 Jason MAHDJOUB
@@ -11,11 +11,16 @@ Jason MAHDJOUB (Entred in the team at 04/01/2016)
 # Modifications:
 
 
-### 3.25.1 Stable (06/02/2018)
+### 3.25.2 Stable (13/03/2019)
+* Make some optimizations with process launching
+* Add function Utils.flushAndDestroyProcess
+
+
+### 3.25.1 Stable (06/02/2019)
 * Do not zeroize public keys
 
 
-### 3.25.0 Stable (05/02/2018)
+### 3.25.0 Stable (05/02/2019)
 * Add public constructor into ASymmetricKeyPair
 * Add function ASymmetricKeyPair.getKeyPairWithNewExpirationTime(long)
 * Add function ASymmetricPublicKey.getPublicKeyWithNewExpirationTime(long)

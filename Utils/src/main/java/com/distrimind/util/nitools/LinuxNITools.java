@@ -35,6 +35,8 @@ knowledge of the CeCILL-C license and that you accept its terms.
 
 package com.distrimind.util.nitools;
 
+import com.distrimind.util.Utils;
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.NetworkInterface;
@@ -62,18 +64,19 @@ class LinuxNITools extends NITools {
 				try (BufferedReader input = new BufferedReader(isr)) {
 					String line ;
 					while (res == -1 && (line = input.readLine()) != null) {
-						String split[] = line.split(" ");
+						String[] split = line.split(" ");
 						for (int i = 0; i < split.length - 1; i++) {
 							if (split[i].contains("Speed:")) {
 								res = readLong(split[split.length - 1]);
 								break;
 							}
 						}
-
 					}
 				}
 			}
-			p.destroy();
+			finally {
+				Utils.flushAndDestroyProcess(p);
+			}
 			return res;
 		} catch (Exception e) {
 			e.printStackTrace();

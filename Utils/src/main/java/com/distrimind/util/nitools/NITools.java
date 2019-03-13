@@ -105,14 +105,15 @@ public abstract class NITools {
 	public abstract long getNetworkInterfaceSpeed(NetworkInterface network_interface);
 
 	long readLong(String value) {
+		String substring = value.substring(0, value.length() - 4);
 		if (value.toLowerCase().endsWith("kb/s")) {
-			return Long.parseLong(value.substring(0, value.length() - 4)) * 1000L;
+			return Long.parseLong(substring) * 1000L;
 		} else if (value.toLowerCase().endsWith("mb/s")) {
-			return Long.parseLong(value.substring(0, value.length() - 4)) * 1000000L;
+			return Long.parseLong(substring) * 1000000L;
 		} else if (value.toLowerCase().endsWith("gb/s")) {
-			return Long.parseLong(value.substring(0, value.length() - 4)) * 1000000000L;
+			return Long.parseLong(substring) * 1000000000L;
 		} else if (value.toLowerCase().endsWith("tb/s")) {
-			return Long.parseLong(value.substring(0, value.length() - 4)) * 1000000000000L;
+			return Long.parseLong(substring) * 1000000000000L;
 		} else
 			return Long.parseLong(value);
 	}

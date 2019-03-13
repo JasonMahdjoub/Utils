@@ -35,6 +35,8 @@ knowledge of the CeCILL-C license and that you accept its terms.
 
 package com.distrimind.util.traceroute;
 
+import com.distrimind.util.Utils;
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.InetAddress;
@@ -70,7 +72,7 @@ class WindowsTraceRoute extends TraceRoute {
 					Pattern pattern = Pattern.compile("^[1-9][0-9]*");
 
 					while ((line = input.readLine()) != null) {
-						String split[] = line.split(" ");
+						String[] split = line.split(" ");
 						String first_string = null;
 						for (String aSplit : split) {
 							if (aSplit.length() > 0) {
@@ -90,7 +92,9 @@ class WindowsTraceRoute extends TraceRoute {
 					}
 				}
 			}
-			p.destroy();
+			finally {
+				Utils.flushAndDestroyProcess(p);
+			}
 			return res;
 
 		} catch (Exception e) {

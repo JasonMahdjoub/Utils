@@ -40,6 +40,7 @@ import java.io.InputStreamReader;
 import java.net.NetworkInterface;
 
 import com.distrimind.util.OSVersion;
+import com.distrimind.util.Utils;
 
 /**
  * 
@@ -76,7 +77,7 @@ class WindowsNITools extends NITools {
 							continue;
 						}
 
-						String split[] = line.split(" ");
+						String[] split = line.split(" ");
 						String index = null;
 						int i = 0;
 						for (; i < split.length - 1; i++) {
@@ -102,7 +103,11 @@ class WindowsNITools extends NITools {
 					}
 				}
 			}
-			p.destroy();
+			finally {
+				Utils.flushAndDestroyProcess(p);
+			}
+
+
 			return res;
 		} catch (Exception e) {
 			e.printStackTrace();

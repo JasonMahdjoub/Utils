@@ -35,6 +35,8 @@ knowledge of the CeCILL-C license and that you accept its terms.
 
 package com.distrimind.util.harddrive;
 
+import com.distrimind.util.Utils;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -79,7 +81,7 @@ class LinuxHardDriveDetect extends UnixHardDriveDetect {
 				try (BufferedReader br = new BufferedReader(isr)) {
 					String line = br.readLine();
 					while (line != null) {
-						String values[] = line.split(" ");
+						String[] values = line.split(" ");
 						if (values.length > 2) {
 							String node = values[0];
 							if (node.startsWith("/dev/")) {
@@ -197,7 +199,7 @@ class LinuxHardDriveDetect extends UnixHardDriveDetect {
                 String line;
                 while ((line=br.readLine())!=null)
                 {
-                    String cols[]=line.split(" ");
+					String[] cols = line.split(" ");
                     if (cols.length==7 && cols[6].equals(path))
                     {
                         return cols[4];
@@ -209,6 +211,9 @@ class LinuxHardDriveDetect extends UnixHardDriveDetect {
         {
             e.printStackTrace();
         }
+        finally {
+			Utils.flushAndDestroyProcess(p);
+		}
         return null;
     }
 }

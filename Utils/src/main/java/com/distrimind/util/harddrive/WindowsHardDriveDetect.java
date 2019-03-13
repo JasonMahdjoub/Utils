@@ -35,6 +35,8 @@ knowledge of the CeCILL-C license and that you accept its terms.
 
 package com.distrimind.util.harddrive;
 
+import com.distrimind.util.Utils;
+
 import java.io.*;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -75,11 +77,12 @@ class WindowsHardDriveDetect extends HardDriveDetect {
         HashMap<String, Partition> partitionsMap=new HashMap<>();
         File sfile=getScriptFile();
         Process p = Runtime.getRuntime().exec("cscript //NoLogo " + sfile.getPath());
+
         try (InputStreamReader isr = new InputStreamReader(p.getInputStream())) {
             try (BufferedReader input = new BufferedReader(isr)) {
                 String line;
                 while ((line = input.readLine()) != null) {
-                    String tab[]=line.split(" ");
+                    String[] tab = line.split(" ");
                     if (tab.length==11)
                     {
                         String driveLetter=tab[0];
@@ -195,8 +198,11 @@ class WindowsHardDriveDetect extends HardDriveDetect {
                 }
             }
         }
-        p.destroy();
-	}
+        finally {
+            Utils.flushAndDestroyProcess(p);
+        }
+
+    }
     private File scriptFile=null;
     private File getScriptFile() throws IOException {
 

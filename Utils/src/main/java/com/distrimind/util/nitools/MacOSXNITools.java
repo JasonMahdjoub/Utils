@@ -35,6 +35,8 @@ knowledge of the CeCILL-C license and that you accept its terms.
 
 package com.distrimind.util.nitools;
 
+import com.distrimind.util.Utils;
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.NetworkInterface;
@@ -79,9 +81,12 @@ class MacOSXNITools extends NITools {
 							}
 						}
 					}
+
 				}
 			}
-			p.destroy();
+			finally {
+				Utils.flushAndDestroyProcess(p);
+			}
 			return res;
 		} catch (Exception e) {
 			e.printStackTrace();

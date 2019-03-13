@@ -35,6 +35,8 @@ knowledge of the CeCILL-C license and that you accept its terms.
 
 package com.distrimind.util.traceroute;
 
+import com.distrimind.util.Utils;
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.InetAddress;
@@ -51,7 +53,7 @@ import java.util.regex.Pattern;
  * @see TraceRoute
  */
 class MacOSTraceRoute extends TraceRoute {
-	public static void main(String args[]) throws UnknownHostException {
+	public static void main(String[] args) throws UnknownHostException {
 		for (InetAddress ia : new MacOSTraceRoute().tracePath(InetAddress.getByName("www.google.fr"), -1, -1))
 			System.out.println(ia);
 		for (InetAddress ia : new MacOSTraceRoute().tracePath(InetAddress.getByName("www.google.fr"), 2, 4000))
@@ -77,7 +79,7 @@ class MacOSTraceRoute extends TraceRoute {
 
 					Pattern pattern = Pattern.compile("^[1-9][0-9]*");
 					while ((line = input.readLine()) != null) {
-						String split[] = line.split(" ");
+						String[] split = line.split(" ");
 						String first_string = null;
 						int i = 0;
 						for (; i < split.length; i++) {
@@ -105,7 +107,9 @@ class MacOSTraceRoute extends TraceRoute {
 					}
 				}
 			}
-			p.destroy();
+			finally {
+				Utils.flushAndDestroyProcess(p);
+			}
 			return res;
 
 		} catch (Exception e) {

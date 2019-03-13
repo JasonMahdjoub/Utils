@@ -57,8 +57,8 @@ public class Utils {
 		Calendar c = Calendar.getInstance();
 		c.set(2016, Calendar.JANUARY, 4);
 		Calendar c2 = Calendar.getInstance();
-		c.set(2019, Calendar.FEBRUARY, 6);
-		VERSION = new Version("Utils", "Utils", (short)3, (short)25, (short)1, Version.Type.Stable, (short)0, c.getTime(), c2.getTime());
+		c.set(2019, Calendar.MARCH, 13);
+		VERSION = new Version("Utils", "Utils", (short)3, (short)25, (short)2, Version.Type.Stable, (short)0, c.getTime(), c2.getTime());
 		try {
 
 			InputStream is = Utils.class.getResourceAsStream("build.txt");
@@ -71,8 +71,15 @@ public class Utils {
 			VERSION.addDeveloper(new PersonDeveloper("mahdjoub", "jason", c.getTime()));
 
 			c = Calendar.getInstance();
+			c.set(2019, Calendar.MARCH, 13);
+			Description d = new Description((short)3, (short)25, (short)2, Version.Type.Stable, (short)0, c.getTime());
+			d.addItem("Make some optimizations with process launching");
+			d.addItem("Add function Utils.flushAndDestroyProcess");
+			VERSION.addDescription(d);
+
+			c = Calendar.getInstance();
 			c.set(2019, Calendar.FEBRUARY, 6);
-			Description d = new Description((short)3, (short)25, (short)1, Version.Type.Stable, (short)0, c.getTime());
+			d = new Description((short)3, (short)25, (short)1, Version.Type.Stable, (short)0, c.getTime());
 			d.addItem("Do not zeroize public keys");
 			VERSION.addDescription(d);
 
@@ -664,5 +671,54 @@ public class Utils {
 			fr.flush();
 		}
 	}
-	
+
+	public static  boolean flushAndDestroyProcess(Process p) throws IOException {
+
+		try
+		{
+			p.exitValue();
+			return true;
+		}
+		catch(IllegalThreadStateException ignored)
+		{
+			try(InputStream is=p.getInputStream();InputStream es=p.getErrorStream())
+			{
+				try {
+					int c = is.read();
+					while (c != -1)
+						c = is.read();
+				}
+				catch(IOException e)
+				{
+					if (!e.getMessage().equals("Stream closed"))
+						throw e;
+				}
+				try {
+					int c = es.read();
+					while (c != -1)
+						c = es.read();
+				}
+				catch(IOException e)
+				{
+					if (!e.getMessage().equals("Stream closed"))
+						throw e;
+				}
+
+			}
+			finally {
+				p.destroy();
+			}
+			try
+			{
+				p.exitValue();
+				return true;
+			}
+			catch(IllegalThreadStateException e)
+			{
+				e.printStackTrace();
+				return false;
+			}
+		}
+	}
+
 }
