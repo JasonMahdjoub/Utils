@@ -58,7 +58,7 @@ public class Utils {
 		c.set(2016, Calendar.JANUARY, 4);
 		Calendar c2 = Calendar.getInstance();
 		c.set(2019, Calendar.MARCH, 13);
-		VERSION = new Version("Utils", "Utils", (short)3, (short)25, (short)2, Version.Type.Stable, (short)0, c.getTime(), c2.getTime());
+		VERSION = new Version("Utils", "Utils", (short)3, (short)25, (short)3, Version.Type.Stable, (short)0, c.getTime(), c2.getTime());
 		try {
 
 			InputStream is = Utils.class.getResourceAsStream("build.txt");
@@ -72,7 +72,7 @@ public class Utils {
 
 			c = Calendar.getInstance();
 			c.set(2019, Calendar.MARCH, 13);
-			Description d = new Description((short)3, (short)25, (short)2, Version.Type.Stable, (short)0, c.getTime());
+			Description d = new Description((short)3, (short)25, (short)3, Version.Type.Stable, (short)0, c.getTime());
 			d.addItem("Make some optimizations with process launching");
 			d.addItem("Add function Utils.flushAndDestroyProcess");
 			VERSION.addDescription(d);
@@ -710,10 +710,11 @@ public class Utils {
 			}
 			try
 			{
+				p.waitFor();
 				p.exitValue();
 				return true;
 			}
-			catch(IllegalThreadStateException e)
+			catch(IllegalThreadStateException | InterruptedException e)
 			{
 				e.printStackTrace();
 				return false;

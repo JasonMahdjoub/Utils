@@ -193,6 +193,7 @@ class LinuxHardDriveDetect extends UnixHardDriveDetect {
     }
     private String getCorrespondance(String searchPath, String nodeShort) throws IOException {
         String path="../../"+nodeShort;
+
         Process p = Runtime.getRuntime().exec("ls -g -o --time-style=+ "+searchPath);
         try (InputStreamReader isr = new InputStreamReader(p.getInputStream())) {
             try (BufferedReader br = new BufferedReader(isr)) {
@@ -216,4 +217,16 @@ class LinuxHardDriveDetect extends UnixHardDriveDetect {
 		}
         return null;
     }
+
+    public static void main(String[] args)
+	{
+		try {
+			Partition p=HardDriveDetect.getInstance().getConcernedPartition(new File("/"));
+			Disk disk=p.getDisk();
+			System.out.println(p);
+			System.out.println(disk);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 }
