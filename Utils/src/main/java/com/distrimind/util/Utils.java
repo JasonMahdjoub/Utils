@@ -34,16 +34,18 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Calendar;
-
 import com.distrimind.util.version.Description;
 import com.distrimind.util.version.Person;
 import com.distrimind.util.version.PersonDeveloper;
 import com.distrimind.util.version.Version;
+
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
 
 /**
  * 
@@ -58,7 +60,7 @@ public class Utils {
 		c.set(2016, Calendar.JANUARY, 4);
 		Calendar c2 = Calendar.getInstance();
 		c.set(2019, Calendar.MARCH, 13);
-		VERSION = new Version("Utils", "Utils", (short)3, (short)25, (short)3, Version.Type.Stable, (short)0, c.getTime(), c2.getTime());
+		VERSION = new Version("Utils", "Utils", (short)3, (short)25, (short)4, Version.Type.Stable, (short)0, c.getTime(), c2.getTime());
 		try {
 
 			InputStream is = Utils.class.getResourceAsStream("build.txt");
@@ -72,7 +74,7 @@ public class Utils {
 
 			c = Calendar.getInstance();
 			c.set(2019, Calendar.MARCH, 13);
-			Description d = new Description((short)3, (short)25, (short)3, Version.Type.Stable, (short)0, c.getTime());
+			Description d = new Description((short)3, (short)25, (short)4, Version.Type.Stable, (short)0, c.getTime());
 			d.addItem("Make some optimizations with process launching");
 			d.addItem("Add function Utils.flushAndDestroyProcess");
 			VERSION.addDescription(d);
@@ -672,7 +674,9 @@ public class Utils {
 		}
 	}
 
-	public static  boolean flushAndDestroyProcess(Process p) throws IOException {
+	private static Thread thread=null;
+	private static final List<Process> processesToFlush=new ArrayList<>();
+	public static  boolean flushAndDestroyProcess(final Process p) {
 
 		try
 		{
@@ -681,40 +685,100 @@ public class Utils {
 		}
 		catch(IllegalThreadStateException ignored)
 		{
-			try(InputStream is=p.getInputStream();InputStream es=p.getErrorStream())
-			{
-				try {
-					int c = is.read();
-					while (c != -1)
-						c = is.read();
-				}
-				catch(IOException e)
-				{
-					if (!e.getMessage().equals("Stream closed"))
-						throw e;
-				}
-				try {
-					int c = es.read();
-					while (c != -1)
-						c = es.read();
-				}
-				catch(IOException e)
-				{
-					if (!e.getMessage().equals("Stream closed"))
-						throw e;
-				}
+			//final AtomicReference<IOException> exception=new AtomicReference<>(null);
+			//final AtomicReference<Exception> exception2=new AtomicReference<>(null);
+			synchronized (processesToFlush) {
+				processesToFlush.add(p);
+				if (thread==null) {
 
+					thread = new Thread(new Runnable() {
+						@Override
+						public void run() {
+
+
+							while(true) {
+								List<Process> processes;
+								synchronized (processesToFlush) {
+									if (processesToFlush.isEmpty()) {
+										try {
+											processesToFlush.wait(10000);
+										} catch (InterruptedException e) {
+											e.printStackTrace();
+										}
+
+									}
+									if (processesToFlush.isEmpty()) {
+
+										thread=null;
+										return;
+									}
+									else
+										processes=new ArrayList<>(processesToFlush);
+								}
+								for (Process p : processes) {
+									try (InputStream is = p.getInputStream(); InputStream es = p.getErrorStream()) {
+										boolean inClosed = false, outClosed = false;
+
+
+										try {
+											int c = is.read();
+											while (c != -1) {
+												c = is.read();
+											}
+										} catch (IOException ignored) {
+											/*if (!e.getMessage().equalsIgnoreCase("Stream Closed"))
+												e.printStackTrace();*/
+											inClosed = true;
+										}
+										try {
+											int c = es.read();
+											while (c != -1)
+												c = es.read();
+										} catch (IOException ignored) {
+											/*if (!e.getMessage().equalsIgnoreCase("Stream closed"))
+												e.printStackTrace();*/
+											outClosed = true;
+										}
+										if (inClosed && outClosed) {
+											synchronized (processesToFlush) {
+												processesToFlush.remove(p);
+											}
+										}
+									} catch (IOException e) {
+										e.printStackTrace();
+									}
+								}
+							}
+						}
+					});
+					thread.start();
+				}
+				else
+					processesToFlush.notify();
+			}
+			try
+			{
+
+				p.waitFor();
+			}
+			catch (InterruptedException e)
+			{
+				e.printStackTrace();
+				return false;
 			}
 			finally {
+				synchronized (processesToFlush)
+				{
+					processesToFlush.remove(p);
+				}
 				p.destroy();
 			}
 			try
 			{
-				p.waitFor();
 				p.exitValue();
 				return true;
 			}
-			catch(IllegalThreadStateException | InterruptedException e)
+			catch(IllegalThreadStateException e)
 			{
 				e.printStackTrace();
 				return false;

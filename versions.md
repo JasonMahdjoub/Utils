@@ -1,6 +1,6 @@
 Utils
 =====
-3.25.3 Stable (Build: 956) (from 13/03/2019 to 13/03/2019)
+3.25.4 Stable (Build: 969) (from 13/03/2019 to 18/03/2019)
 
 # Creator(s):
 Jason MAHDJOUB
@@ -11,7 +11,7 @@ Jason MAHDJOUB (Entred in the team at 04/01/2016)
 # Modifications:
 
 
-### 3.25.3 Stable (13/03/2019)
+### 3.25.4 Stable (13/03/2019)
 * Make some optimizations with process launching
 * Add function Utils.flushAndDestroyProcess
 
