@@ -1,6 +1,6 @@
 Utils
 =====
-3.25.4 Stable (Build: 969) (from 13/03/2019 to 18/03/2019)
+3.25.5 Stable (Build: 974) (from 21/03/2019 to 21/03/2019)
 
 # Creator(s):
 Jason MAHDJOUB
@@ -9,6 +9,10 @@ Jason MAHDJOUB
 Jason MAHDJOUB (Entred in the team at 04/01/2016)
 
 # Modifications:
+
+
+### 3.25.5 Stable (21/03/2019)
+* Securing XML document reading
 
 
 ### 3.25.4 Stable (13/03/2019)
