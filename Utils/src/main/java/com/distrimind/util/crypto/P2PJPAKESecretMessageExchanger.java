@@ -34,36 +34,27 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
+import gnu.vm.jgnu.security.NoSuchAlgorithmException;
+import gnu.vm.jgnu.security.NoSuchProviderException;
+import gnu.vm.jgnu.security.spec.InvalidKeySpecException;
+import org.apache.commons.codec.binary.Base64;
+import org.bouncycastle.crypto.CryptoException;
+import org.bouncycastle.crypto.agreement.jpake.*;
+import org.bouncycastle.crypto.digests.SHA512Digest;
+
+import java.io.*;
 import java.lang.reflect.Field;
 import java.math.BigInteger;
+import java.nio.charset.Charset;
 import java.security.AccessController;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.util.Arrays;
 
-import org.apache.commons.codec.binary.Base64;
-import org.bouncycastle.crypto.CryptoException;
-import org.bouncycastle.crypto.agreement.jpake.JPAKEParticipant;
-import org.bouncycastle.crypto.agreement.jpake.JPAKEPrimeOrderGroups;
-import org.bouncycastle.crypto.agreement.jpake.JPAKERound1Payload;
-import org.bouncycastle.crypto.agreement.jpake.JPAKERound2Payload;
-import org.bouncycastle.crypto.agreement.jpake.JPAKERound3Payload;
-import org.bouncycastle.crypto.digests.SHA512Digest;
-
-import gnu.vm.jgnu.security.NoSuchAlgorithmException;
-import gnu.vm.jgnu.security.NoSuchProviderException;
-import gnu.vm.jgnu.security.spec.InvalidKeySpecException;
-
 /**
  * 
  * @author Jason Mahdjoub
- * @version 2.0
+ * @version 3.0
  * @since Utils 2.9.0
  */
 public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
@@ -104,20 +95,13 @@ public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
 		return res;
 	}
 	
-	private String getParticipanIDString(Serializable participantID) throws IOException
+	private String getParticipanIDString(byte[] participantID)
 	{
-		try(ByteArrayOutputStream bais=new ByteArrayOutputStream();ObjectOutputStream oos=new ObjectOutputStream(bais))
-		{
-			oos.writeObject(participantID);
-			byte[] a=bais.toByteArray();
-			String res=Base64.encodeBase64URLSafeString(a);
-			Arrays.fill(a, (byte)0);
-			return res;
-		}
+		return Base64.encodeBase64URLSafeString(participantID);
 	}
 	
-	P2PJPAKESecretMessageExchanger(AbstractSecureRandom secureRandom, Serializable participantID, char[] message, byte[] salt, int offset_salt,
-								   int len_salt) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException {
+	P2PJPAKESecretMessageExchanger(AbstractSecureRandom secureRandom, byte[] participantID, char[] message, byte[] salt, int offset_salt,
+								   int len_salt) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
 		super(3, 3);
 		if (message == null)
 			throw new NullPointerException("message");
@@ -130,9 +114,9 @@ public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
 		this.keyMaterial = null;
 	}
 
-	P2PJPAKESecretMessageExchanger(AbstractSecureRandom secureRandom, Serializable participantID, byte[] message, int offset, int len, byte[] salt,
+	P2PJPAKESecretMessageExchanger(AbstractSecureRandom secureRandom, byte[] participantID, byte[] message, int offset, int len, byte[] salt,
 								   int offset_salt, int len_salt, boolean messageIsKey)
-			throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException {
+			throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
 		super(3, 3);
 		if (message == null)
 			throw new NullPointerException("message");
@@ -196,29 +180,56 @@ public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
 		{
 		case 0:
 			try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-				try (ObjectOutputStream oos = new ObjectOutputStream(baos)) {
+				try (DataOutputStream oos = new DataOutputStream(baos)) {
 
 					JPAKERound1Payload toSerialize = jpake.createRound1PayloadToSend();
-					oos.writeObject(toSerialize.getGx1());
-					oos.writeObject(toSerialize.getGx2());
+					byte[] tab=toSerialize.getGx1().toByteArray();
+					if (tab.length>Short.MAX_VALUE)
+						throw new IOException();
+					oos.writeShort(tab.length);
+					oos.write(tab);
+					tab=toSerialize.getGx2().toByteArray();
+					if (tab.length>Short.MAX_VALUE)
+						throw new IOException();
+					oos.writeShort(tab.length);
+					oos.write(tab);
+
 					BigInteger[] b=toSerialize.getKnowledgeProofForX1();
 					if (b==null)
 						oos.writeInt(0);
 					else
 						oos.writeInt(b.length);
-					assert b != null;
-					for (BigInteger bi : b)
-						oos.writeObject(bi);
+					if (b==null)
+						throw new IOException();
+
+					for (BigInteger bi : b) {
+						tab=bi.toByteArray();
+						if (tab.length>Short.MAX_VALUE)
+							throw new IOException();
+						oos.writeShort(tab.length);
+						oos.write(tab);
+					}
 					b=toSerialize.getKnowledgeProofForX2();
 					if (b==null)
 						oos.writeInt(0);
 					else
 						oos.writeInt(b.length);
-					assert b != null;
-					for (BigInteger bi : b)
-						oos.writeObject(bi);
-					
-					oos.writeObject(toSerialize.getParticipantId());
+					if (b==null)
+						throw new IOException();
+
+					for (BigInteger bi : b) {
+						tab=bi.toByteArray();
+						if (tab.length>Short.MAX_VALUE)
+							throw new IOException();
+						oos.writeShort(tab.length);
+						oos.write(tab);
+
+					}
+					tab=toSerialize.getParticipantId().getBytes(Charset.forName("utf-8"));
+					if (tab.length>Short.MAX_VALUE)
+						throw new IOException();
+					oos.writeShort(tab.length);
+					oos.write(tab);
 				}
 				valid=true;
 				return baos.toByteArray();
@@ -226,19 +237,35 @@ public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
 			
 		case 1:
 			try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-				try (ObjectOutputStream oos = new ObjectOutputStream(baos)) {
+				try (DataOutputStream oos = new DataOutputStream(baos)) {
 
 					JPAKERound2Payload toSerialize = jpake.createRound2PayloadToSend();
-					oos.writeObject(toSerialize.getA());
+					byte[] tab=toSerialize.getA().toByteArray();
+					if (tab.length>Short.MAX_VALUE)
+						throw new IOException();
+					oos.writeShort(tab.length);
+					oos.write(tab);
+
 					BigInteger[] b=toSerialize.getKnowledgeProofForX2s();
 					if (b==null)
 						oos.writeInt(0);
 					else
 						oos.writeInt(b.length);
-					assert b != null;
-					for (BigInteger bi : b)
-						oos.writeObject(bi);
-					oos.writeObject(toSerialize.getParticipantId());
+					if (b==null)
+						throw new IOException();
+
+					for (BigInteger bi : b) {
+						tab=bi.toByteArray();
+						if (tab.length>Short.MAX_VALUE)
+							throw new IOException();
+						oos.writeShort(tab.length);
+						oos.write(tab);
+					}
+					tab=toSerialize.getParticipantId().getBytes(Charset.forName("utf-8"));
+					if (tab.length>Short.MAX_VALUE)
+						throw new IOException();
+					oos.writeShort(tab.length);
+					oos.write(tab);
 				}
 				valid=true;
 				return baos.toByteArray();
@@ -246,13 +273,21 @@ public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
 			
 		case 2:
 			try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-				try (ObjectOutputStream oos = new ObjectOutputStream(baos)) {
+				try (DataOutputStream oos = new DataOutputStream(baos)) {
 
 					keyMaterial = jpake.calculateKeyingMaterial();
 					JPAKERound3Payload toSerialize = jpake.createRound3PayloadToSend(keyMaterial);
-					
-					oos.writeObject(toSerialize.getMacTag());
-					oos.writeObject(toSerialize.getParticipantId());
+					byte[] tab=toSerialize.getMacTag().toByteArray();
+					if (tab.length>Short.MAX_VALUE)
+						throw new IOException();
+					oos.writeShort(tab.length);
+					oos.write(tab);
+
+					tab=toSerialize.getParticipantId().getBytes(Charset.forName("utf-8"));
+					if (tab.length>Short.MAX_VALUE)
+						throw new IOException();
+					oos.writeShort(tab.length);
+					oos.write(tab);
 				}
 				valid=true;
 				return baos.toByteArray();
@@ -271,12 +306,24 @@ public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
 		{
 		case 0:
 			try (ByteArrayInputStream bais = new ByteArrayInputStream(dataReceived)) {
-				try (ObjectInputStream ois = new ObjectInputStream(bais)) {
+				try (DataInputStream ois = new DataInputStream(bais)) {
 					JPAKERound1Payload r1;
 					try
 					{
-						BigInteger gx1 = (BigInteger)ois.readObject();
-						BigInteger gx2 = (BigInteger)ois.readObject();
+						short s=ois.readShort();
+						if (s<=0)
+							throw new IOException();
+						byte[] tab=new byte[s];
+						ois.readFully(tab);
+						BigInteger gx1 = new BigInteger(tab);
+
+						s=ois.readShort();
+						if (s<=0)
+							throw new IOException();
+						tab=new byte[s];
+						ois.readFully(tab);
+						BigInteger gx2 = new BigInteger(tab);
+
 						int size=ois.readInt();
 						BigInteger[] knowledgeProofForX1 = null;
 						if (size>0)
@@ -284,8 +331,14 @@ public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
 							if (size>100)
 								throw new CryptoException("illegal argument exception");
 							knowledgeProofForX1=new BigInteger[size];
-							for (int i=0;i<size;i++)
-								knowledgeProofForX1[i]=(BigInteger)ois.readObject();
+							for (int i=0;i<size;i++) {
+								s=ois.readShort();
+								if (s<=0)
+									throw new IOException();
+								tab=new byte[s];
+								ois.readFully(tab);
+								knowledgeProofForX1[i] = new BigInteger(tab);
+							}
 						}
 						size=ois.readInt();
 						BigInteger[] knowledgeProofForX2 = null;
@@ -294,12 +347,25 @@ public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
 							if (size>100)
 								throw new CryptoException("illegal argument exception");
 							knowledgeProofForX2=new BigInteger[size];
-							for (int i=0;i<size;i++)
-								knowledgeProofForX2[i]=(BigInteger)ois.readObject();
+							for (int i=0;i<size;i++) {
+								s=ois.readShort();
+								if (s<=0)
+									throw new IOException();
+								tab=new byte[s];
+								ois.readFully(tab);
+								knowledgeProofForX2[i] = new BigInteger(tab);
+							}
 						}
-						String pid=(String)ois.readObject();
-						assert knowledgeProofForX1 != null;
-						assert knowledgeProofForX2 != null;
+						s=ois.readShort();
+						if (s<=0)
+							throw new IOException();
+						tab=new byte[s];
+						ois.readFully(tab);
+						String pid=new String(tab, Charset.forName("utf-8"));
+						if (knowledgeProofForX1==null)
+							throw new IOException();
+						if (knowledgeProofForX2==null)
+							throw new IOException();
 						r1=new JPAKERound1Payload(pid, gx1, gx2, knowledgeProofForX1, knowledgeProofForX2);
 					}
 					catch(Exception e)
@@ -321,12 +387,18 @@ public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
 			break;
 		case 1:
 			try (ByteArrayInputStream bais = new ByteArrayInputStream(dataReceived)) {
-				try (ObjectInputStream ois = new ObjectInputStream(bais)) {
+				try (DataInputStream ois = new DataInputStream(bais)) {
 					JPAKERound2Payload r2;
 					try
 					{
-						BigInteger A = (BigInteger)ois.readObject();
-						
+						short s=ois.readShort();
+						if (s<=0)
+							throw new IOException();
+						byte[] tab=new byte[s];
+						ois.readFully(tab);
+						BigInteger A = new BigInteger(tab);
+
+
 						int size=ois.readInt();
 						BigInteger[] knowledgeProofForX2s = null;
 						if (size>0)
@@ -334,11 +406,25 @@ public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
 							if (size>100)
 								throw new CryptoException("illegal argument exception");
 							knowledgeProofForX2s=new BigInteger[size];
-							for (int i=0;i<size;i++)
-								knowledgeProofForX2s[i]=(BigInteger)ois.readObject();
+							for (int i=0;i<size;i++) {
+								s=ois.readShort();
+								if (s<=0)
+									throw new IOException();
+								tab=new byte[s];
+								ois.readFully(tab);
+								knowledgeProofForX2s[i] = new BigInteger(tab);
+							}
 						}
-						String pid=(String)ois.readObject();
-						assert knowledgeProofForX2s != null;
+						s=ois.readShort();
+						if (s<=0)
+							throw new IOException();
+						tab=new byte[s];
+						ois.readFully(tab);
+						String pid=new String(tab, Charset.forName("utf-8"));
+
+						if (knowledgeProofForX2s==null)
+							throw new IOException();
+
 						r2=new JPAKERound2Payload(pid, A, knowledgeProofForX2s);
 					}
 					catch(Exception e)
@@ -360,12 +446,25 @@ public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
 			break;
 		case 2:
 			try (ByteArrayInputStream bais = new ByteArrayInputStream(dataReceived)) {
-				try (ObjectInputStream ois = new ObjectInputStream(bais)) {
+				try (DataInputStream ois = new DataInputStream(bais)) {
 					JPAKERound3Payload r3;
 					try
 					{
-						BigInteger magTag = (BigInteger)ois.readObject();
-						String pid=(String)ois.readObject();
+						short s=ois.readShort();
+						if (s<=0)
+							throw new IOException();
+						byte[] tab=new byte[s];
+						ois.readFully(tab);
+						BigInteger magTag = new BigInteger(tab);
+
+
+						s=ois.readShort();
+						if (s<=0)
+							throw new IOException();
+						tab=new byte[s];
+						ois.readFully(tab);
+						String pid=new String(tab, Charset.forName("utf-8"));
+
 						r3=new JPAKERound3Payload(pid, magTag);
 					}
 					catch(Exception e)

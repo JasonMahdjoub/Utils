@@ -1,6 +1,6 @@
 Utils
 =====
-3.25.5 Stable (Build: 974) (from 21/03/2019 to 21/03/2019)
+3.25.6 Stable (Build: 979) (from 19/04/2019 to 19/04/2019)
 
 # Creator(s):
 Jason MAHDJOUB
@@ -9,6 +9,10 @@ Jason MAHDJOUB
 Jason MAHDJOUB (Entred in the team at 04/01/2016)
 
 # Modifications:
+
+
+### 3.25.6 Stable (19/04/2019)
+* Fix security issue with JPAKE participantID encoding. Forbid ObjectInputStream.
 
 
 ### 3.25.5 Stable (21/03/2019)

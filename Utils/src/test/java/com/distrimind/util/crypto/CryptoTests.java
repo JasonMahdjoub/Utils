@@ -505,9 +505,9 @@ public class CryptoTests {
 		char[] password = "password".toCharArray();
 		char[] falsePassword = "falsePassword".toCharArray();
 		AbstractSecureRandom random=SecureRandomType.DEFAULT.getSingleton(null);
-		P2PJPAKESecretMessageExchanger exchanger1 = new P2PJPAKESecretMessageExchanger(random, "participant id 1", password,
+		P2PJPAKESecretMessageExchanger exchanger1 = new P2PJPAKESecretMessageExchanger(random, "participant id 1".getBytes(), password,
 				salt, 0, salt == null ? 0 : salt.length);
-		P2PJPAKESecretMessageExchanger exchanger2 = new P2PJPAKESecretMessageExchanger(random, "participant id 2",
+		P2PJPAKESecretMessageExchanger exchanger2 = new P2PJPAKESecretMessageExchanger(random, "participant id 2".getBytes(),
 				expectedVerify ? password : falsePassword, salt, 0, salt == null ? 0 : salt.length);
 		try {
 
@@ -627,9 +627,9 @@ public class CryptoTests {
 
 		}
 		else {
-			exchanger1 = type.getAgreementAlgorithm(r, "participant id 1", m, 0,
+			exchanger1 = type.getAgreementAlgorithm(r, "participant id 1".getBytes(), m, 0,
 					m.length, salt, 0, salt == null ? 0 : salt.length, messageIsKey, (expectedVerify ? secretKey : falseSecretKey));
-			exchanger2 = type.getAgreementAlgorithm(r, "participant id 2",
+			exchanger2 = type.getAgreementAlgorithm(r, "participant id 2".getBytes(),
 					expectedVerify ? m : falseMessage, 0, (expectedVerify ? m : falseMessage).length, salt, 0,
 					salt == null ? 0 : salt.length, messageIsKey, (expectedVerify ? secretKey : falseSecretKey));
 		}
