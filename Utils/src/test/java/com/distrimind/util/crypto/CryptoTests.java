@@ -353,7 +353,7 @@ public class CryptoTests {
 
 		byte[] b = kpd.encode(false);
 		Assert.assertEquals(b.length, kpd.encode(true).length-8);
-		Assert.assertEquals(b.length, kpd.getASymmetricPublicKey().encode(true).length-8);
+
 		ASymmetricKeyPair kpd2=ASymmetricKeyPair.decode(b);
 		Assert.assertEquals(kpd2.getASymmetricPrivateKey(), kpd.getASymmetricPrivateKey());
 		Assert.assertEquals(kpd2.getASymmetricPublicKey().getBytesPublicKey(), kpd.getASymmetricPublicKey().getBytesPublicKey());
@@ -366,6 +366,7 @@ public class CryptoTests {
 		Assert.assertEquals(kpd2.getASymmetricPrivateKey().getEncryptionAlgorithmType(), kpd.getASymmetricPrivateKey().getEncryptionAlgorithmType());
 
 		b = kpd.getASymmetricPublicKey().encode(false);
+		Assert.assertEquals(b.length, kpd.getASymmetricPublicKey().encode(true).length-8);
 		ASymmetricPublicKey pk=(ASymmetricPublicKey)Key.decode(b);
 		Assert.assertEquals(pk.getBytesPublicKey(), kpd.getASymmetricPublicKey().getBytesPublicKey());
 		Assert.assertEquals(pk.getAuthentifiedSignatureAlgorithmType(), kpd.getASymmetricPublicKey().getAuthentifiedSignatureAlgorithmType());

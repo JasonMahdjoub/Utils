@@ -1,6 +1,6 @@
 Utils
 =====
-3.25.6 Stable (Build: 979) (from 19/04/2019 to 19/04/2019)
+3.26.0 Stable (Build: 984) (from 04/05/2019 to 04/05/2019)
 
 # Creator(s):
 Jason MAHDJOUB
@@ -9,6 +9,10 @@ Jason MAHDJOUB
 Jason MAHDJOUB (Entred in the team at 04/01/2016)
 
 # Modifications:
+
+
+### 3.26.0 Stable (04/05/2019)
+* Key expiration encoding is now optional.
 
 
 ### 3.25.6 Stable (19/04/2019)
