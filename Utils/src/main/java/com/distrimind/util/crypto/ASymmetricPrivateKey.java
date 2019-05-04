@@ -197,8 +197,11 @@ public class ASymmetricPrivateKey extends Key {
 		else
 			return 4;
 	}
-
 	@Override
+	public byte[] encode(boolean includeTimeExpiration) {
+		return encode();
+	}
+
 	public byte[] encode() {
 		int codedTypeSize=getEncodedTypeSize();
 		byte[] tab = new byte[3+codedTypeSize+privateKey.length];

@@ -369,7 +369,7 @@ public class P2PASymmetricSecretMessageExchanger {
 	}
 
 	public byte[] encodeMyPublicKey() {
-		return myPublicKey.encode();
+		return myPublicKey.encode(true);
 	}
 
 	public ASymmetricPublicKey getDistantPublicKey() {

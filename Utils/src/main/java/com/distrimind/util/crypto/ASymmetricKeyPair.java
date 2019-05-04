@@ -231,15 +231,21 @@ public class ASymmetricKeyPair implements Serializable {
 	}
 	
 	
-	public byte[] encode() {
+	public byte[] encode(boolean includeTimeExpiration) {
 		int codedTypeSize=ASymmetricPrivateKey.getEncodedTypeSize();
 		byte[] kp=Bits.concateEncodingWithShortSizedTabs(privateKey.getBytesPrivateKey(), publicKey.getBytesPublicKey());
-		byte[] tab = new byte[11+codedTypeSize+kp.length];
+		byte[] tab = new byte[3+codedTypeSize+kp.length+(includeTimeExpiration?8:0)];
 		tab[0]=encryptionType==null?(byte)1:(byte)0;
+		if (includeTimeExpiration)
+			tab[0]|=Key.INCLUDE_KEY_EXPIRATION_CODE;
 		Bits.putShort(tab, 1, keySizeBits);
 		Bits.putPositiveInteger(tab, 3, encryptionType==null?signatureType.ordinal():encryptionType.ordinal(), codedTypeSize);
-		Bits.putLong(tab, 3+codedTypeSize, publicKey.getTimeExpirationUTC());
-		System.arraycopy(kp, 0, tab, 11+codedTypeSize, kp.length);
+		int pos=3+codedTypeSize;
+		if (includeTimeExpiration) {
+			Bits.putLong(tab, 3 + codedTypeSize, publicKey.getTimeExpirationUTC());
+			pos += 8;
+		}
+		System.arraycopy(kp, 0, tab, pos, kp.length);
 		return tab;
 	}
 	public static ASymmetricKeyPair decode(byte[] b) throws IllegalArgumentException {
@@ -249,10 +255,21 @@ public class ASymmetricKeyPair implements Serializable {
 		try {
 			int codedTypeSize = SymmetricSecretKey.getEncodedTypeSize();
 			short keySize = Bits.getShort(b, 1);
-			long expirationUTC = Bits.getLong(b, 3 + codedTypeSize);
-			byte[] kp = new byte[b.length - 11 - codedTypeSize];
-			System.arraycopy(b, 11 + codedTypeSize, kp, 0, kp.length);
+			int posKey=codedTypeSize+3;
+			long expirationUTC;
+			boolean includeKeyExpiration=(b[0] & Key.INCLUDE_KEY_EXPIRATION_CODE) == Key.INCLUDE_KEY_EXPIRATION_CODE;
+			if (includeKeyExpiration) {
+
+				expirationUTC=Bits.getLong(b, posKey);
+				posKey += 8;
+			}
+			else
+				expirationUTC=Long.MAX_VALUE;
+			b[0]&=Key.INCLUDE_KEY_EXPIRATION_CODE_NOT;
+			byte[] kp = new byte[b.length - 3 - codedTypeSize-(includeKeyExpiration?8:0)];
+			System.arraycopy(b, posKey, kp, 0, kp.length);
 			byte[][] keys = Bits.separateEncodingsWithShortSizedTabs(kp);
+
 			if (b[0] == 1) {
 				ASymmetricAuthentifiedSignatureType type = ASymmetricAuthentifiedSignatureType.valueOf((int) Bits.getPositiveInteger(b, 3, codedTypeSize));
 
@@ -358,7 +375,7 @@ public class ASymmetricKeyPair implements Serializable {
 	@Override
 	public String toString() {
 		try {
-			return Base64.encodeBase64URLSafeString(encode());
+			return Base64.encodeBase64URLSafeString(encode(true));
 		} catch (Exception e) {
 			return e.toString();
 		}

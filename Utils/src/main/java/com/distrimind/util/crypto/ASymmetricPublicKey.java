@@ -104,6 +104,7 @@ public class ASymmetricPublicKey extends Key {
 		}
 	}
 
+	@SuppressWarnings("MethodDoesntCallSuperMethod")
 	@Override
 	public void finalize() {
 
@@ -209,15 +210,22 @@ public class ASymmetricPublicKey extends Key {
 
 
 
-
-	public byte[] encode() {
+	@Override
+	public byte[] encode(boolean includeTimeExpiration) {
 		int codedTypeSize=ASymmetricPrivateKey.getEncodedTypeSize();
-		byte[] tab = new byte[11+codedTypeSize+publicKey.length];
+		byte[] tab = new byte[3+codedTypeSize+publicKey.length+(includeTimeExpiration?8:0)];
 		tab[0]=encryptionType==null?(byte)5:(byte)4;
+		if (includeTimeExpiration)
+			tab[0]|=Key.INCLUDE_KEY_EXPIRATION_CODE;
 		Bits.putShort(tab, 1, keySizeBits);
 		Bits.putPositiveInteger(tab, 3, encryptionType==null?signatureType.ordinal():encryptionType.ordinal(), codedTypeSize);
-		Bits.putLong(tab, 3+codedTypeSize, expirationUTC);
-		System.arraycopy(publicKey, 0, tab, codedTypeSize+11, publicKey.length);
+		int pos=3+codedTypeSize;
+		if (includeTimeExpiration) {
+			Bits.putLong(tab, pos, expirationUTC);
+			pos+=8;
+		}
+
+		System.arraycopy(publicKey, 0, tab, pos, publicKey.length);
 		return tab;
 	}
 
@@ -287,7 +295,7 @@ public class ASymmetricPublicKey extends Key {
 
 	@Override
 	public String toString() {
-		return Base64.encodeBase64URLSafeString(encode());
+		return Base64.encodeBase64URLSafeString(encode(true));
 	}
 
 	Algorithm getBouncyCastleAlgorithm()

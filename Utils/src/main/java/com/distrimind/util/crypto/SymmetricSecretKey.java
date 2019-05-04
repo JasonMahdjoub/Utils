@@ -101,7 +101,7 @@ public class SymmetricSecretKey extends Key {
 	}
 	
 	
-	SymmetricSecretKey(SymmetricEncryptionType type, byte secretKey[], short keySize) {
+	SymmetricSecretKey(SymmetricEncryptionType type, byte[] secretKey, short keySize) {
 		this(secretKey, keySize);
 		if (type == null)
 			throw new NullPointerException("type");
@@ -109,7 +109,7 @@ public class SymmetricSecretKey extends Key {
 		this.signatureType=null;
 		//Arrays.fill(secretKey, (byte)0);
 	}
-	SymmetricSecretKey(SymmetricEncryptionType type, byte secretKey[]) {
+	SymmetricSecretKey(SymmetricEncryptionType type, byte[] secretKey) {
 		if (type == null)
 			throw new NullPointerException("type");
 		if (secretKey == null)
@@ -131,7 +131,7 @@ public class SymmetricSecretKey extends Key {
 		hashCode = Arrays.hashCode(this.secretKey);
 		Arrays.fill(secretKey, (byte)0);
 	}
-	SymmetricSecretKey(SymmetricAuthentifiedSignatureType type, byte secretKey[], short keySize) {
+	SymmetricSecretKey(SymmetricAuthentifiedSignatureType type, byte[] secretKey, short keySize) {
 		this(secretKey, keySize);
 		if (type == null)
 			throw new NullPointerException("type");
@@ -139,7 +139,7 @@ public class SymmetricSecretKey extends Key {
 		this.signatureType=type;
 		//Arrays.fill(secretKey, (byte)0);
 	}
-	SymmetricSecretKey(SymmetricAuthentifiedSignatureType type, byte secretKey[]) {
+	SymmetricSecretKey(SymmetricAuthentifiedSignatureType type, byte[] secretKey) {
 		if (type == null)
 			throw new NullPointerException("type");
 		if (secretKey == null)
@@ -206,7 +206,7 @@ public class SymmetricSecretKey extends Key {
 		this.bcfipsNativeSecretKey=new org.bouncycastle.crypto.SymmetricSecretKey(getBouncyCastleAlgorithm(), secretKey.getKeyBytes());
 	}
 	
-	private SymmetricSecretKey(byte secretKey[], short keySize) {
+	private SymmetricSecretKey(byte[] secretKey, short keySize) {
 		if (secretKey == null)
 			throw new NullPointerException("secretKey");
 		this.secretKey = secretKey;
@@ -240,8 +240,11 @@ public class SymmetricSecretKey extends Key {
         return decodeKeySizeBits((1<<usedBitsForEncoding)-1);
     }
 
-
 	@Override
+	public byte[] encode(boolean includeTimeExpiration) {
+		return encode();
+	}
+
 	public byte[] encode() {
 	    int codedTypeSize=getEncodedTypeSize();
 		byte[] tab = new byte[2+codedTypeSize+secretKey.length];
