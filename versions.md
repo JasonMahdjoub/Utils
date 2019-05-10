@@ -1,6 +1,6 @@
 Utils
 =====
-3.26.0 Stable (Build: 984) (from 04/05/2019 to 04/05/2019)
+3.27.0 Stable (Build: 990) (from 10/05/2019 to 10/05/2019)
 
 # Creator(s):
 Jason MAHDJOUB
@@ -9,6 +9,10 @@ Jason MAHDJOUB
 Jason MAHDJOUB (Entred in the team at 04/01/2016)
 
 # Modifications:
+
+
+### 3.27.0 Stable (10/05/2019)
+* Add IO classes.
 
 
 ### 3.26.0 Stable (04/05/2019)

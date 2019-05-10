@@ -59,8 +59,8 @@ public class Utils {
 		Calendar c = Calendar.getInstance();
 		c.set(2016, Calendar.JANUARY, 4);
 		Calendar c2 = Calendar.getInstance();
-		c.set(2019, Calendar.MAY, 4);
-		VERSION = new Version("Utils", "Utils", (short)3, (short)26, (short)0, Version.Type.Stable, (short)0, c.getTime(), c2.getTime());
+		c.set(2019, Calendar.MAY, 10);
+		VERSION = new Version("Utils", "Utils", (short)3, (short)27, (short)0, Version.Type.Stable, (short)0, c.getTime(), c2.getTime());
 		try {
 
 			InputStream is = Utils.class.getResourceAsStream("build.txt");
@@ -74,8 +74,15 @@ public class Utils {
 
 
 			c = Calendar.getInstance();
+			c.set(2019, Calendar.MAY, 10);
+			Description d = new Description((short)3, (short)27, (short)0, Version.Type.Stable, (short)0, c.getTime());
+			d.addItem("Add IO classes.");
+			VERSION.addDescription(d);
+
+
+			c = Calendar.getInstance();
 			c.set(2019, Calendar.MAY, 4);
-			Description d = new Description((short)3, (short)26, (short)0, Version.Type.Stable, (short)0, c.getTime());
+			d = new Description((short)3, (short)26, (short)0, Version.Type.Stable, (short)0, c.getTime());
 			d.addItem("Key expiration encoding is now optional.");
 			VERSION.addDescription(d);
 
