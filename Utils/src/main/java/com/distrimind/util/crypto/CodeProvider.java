@@ -60,21 +60,21 @@ public enum CodeProvider {
 
 	static void ensureBouncyCastleProviderLoaded() {
 
-		if (bouncyProviderPQC == null) {
-
-			synchronized (CodeProvider.class) {
-				if (bouncyProviderPQC == null) {
-					bouncyProviderPQC = new BouncyCastlePQCProvider();
-					Security.insertProviderAt(bouncyProviderPQC, Security.getProviders().length+1);
-				}
-			}
-		}
 		if (bouncyProvider == null) {
 
 			synchronized (CodeProvider.class) {
 				if (bouncyProvider == null) {
 					bouncyProvider = new BouncyCastleProvider();
 					Security.insertProviderAt(bouncyProvider, Security.getProviders().length+1);
+				}
+			}
+		}
+		if (bouncyProviderPQC == null) {
+
+			synchronized (CodeProvider.class) {
+				if (bouncyProviderPQC == null) {
+					bouncyProviderPQC = new BouncyCastlePQCProvider();
+					Security.insertProviderAt(bouncyProviderPQC, Security.getProviders().length+1);
 				}
 			}
 		}

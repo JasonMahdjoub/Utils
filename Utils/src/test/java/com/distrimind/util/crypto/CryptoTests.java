@@ -385,6 +385,7 @@ public class CryptoTests {
         System.out.println(type+" :");
         System.out.println("\tKey pair encoding : "+kpd.toString());
         System.out.println("\tPublic key encoding : "+kpd.getASymmetricPublicKey().toString());
+		System.out.println("\tJava naviteve public key encoding length : "+kpd.getASymmetricPublicKey().toJavaNativeKey().getEncoded().length);
         System.out.println("\tPrivate key encoding : "+kpd.getASymmetricPrivateKey().toString());
 
 	}

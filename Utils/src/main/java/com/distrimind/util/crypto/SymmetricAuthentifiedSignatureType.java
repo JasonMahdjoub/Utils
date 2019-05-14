@@ -49,7 +49,7 @@ import java.security.MessageDigest;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 1.5
+ * @version 2.0
  * @since Utils 2.10.0
  */
 public enum SymmetricAuthentifiedSignatureType {
@@ -69,7 +69,10 @@ public enum SymmetricAuthentifiedSignatureType {
     HMAC_SHA3_256("HmacSHA3-256", CodeProvider.SunJCE, CodeProvider.SunJCE, (short)128, (short)16, MessageDigestType.SHA3_256, null, BC_HMAC_SHA3_256),
     HMAC_SHA3_384("HmacSHA3-384", CodeProvider.SunJCE, CodeProvider.SunJCE, (short)128, (short)16, MessageDigestType.SHA3_384, null, BC_HMAC_SHA3_384),
     HMAC_SHA3_512("HmacSHA3-512", CodeProvider.SunJCE, CodeProvider.SunJCE, (short)128, (short)16, MessageDigestType.SHA3_512, null, BC_HMAC_SHA3_512),
-
+	BC_HMAC_BLAKE2B_160("HmacBLAKE2B56", CodeProvider.BC, CodeProvider.BC, (short)128, (short)16, MessageDigestType.BC_BLAKE2B_160, null),
+	BC_HMAC_BLAKE2B_256("HmacBLAKE2B56", CodeProvider.BC, CodeProvider.BC, (short)128, (short)16, MessageDigestType.BC_BLAKE2B_256, null),
+	BC_HMAC_BLAKE2B_384("HmacBLAKE2B384", CodeProvider.BC, CodeProvider.BC, (short)128, (short)16, MessageDigestType.BC_BLAKE2B_384, null),
+	BC_HMAC_BLAKE2B_512("HmacBLAKE2B512", CodeProvider.BC, CodeProvider.BC, (short)128, (short)16, MessageDigestType.BC_BLAKE2B_512, null),
 	//BC_FIPS_HMAC_WHIRLPOOL("HmacWHIRLPOOL",CodeProvider.BCFIPS, CodeProvider.BCFIPS, (short)128, (short)16, MessageDigestType.BC_WHIRLPOOL, FipsSHS.WHIRPOOL_HMAC),
 	DEFAULT(HMAC_SHA2_256);
 

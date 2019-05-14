@@ -37,6 +37,7 @@ package com.distrimind.util.crypto;
 import java.nio.ByteBuffer;
 
 import org.bouncycastle.crypto.Digest;
+import org.bouncycastle.crypto.digests.Blake2bDigest;
 import org.bouncycastle.crypto.digests.SHA3Digest;
 import org.bouncycastle.crypto.fips.FipsOutputMACCalculator;
 
@@ -101,9 +102,9 @@ public final class BCMac extends AbstractMac {
 	}
 	
 	public void init(org.bouncycastle.crypto.SymmetricSecretKey _key) throws NoSuchAlgorithmException {
+		Digest d;
 		if (type.getCodeProviderForSignature()==CodeProvider.BC)
 		{
-			Digest d;
 			switch(type.getMessageDigestType())
 			{
 				case BC_FIPS_SHA3_256:
@@ -115,16 +116,21 @@ public final class BCMac extends AbstractMac {
 				case BC_FIPS_SHA3_512:
 					d=new SHA3Digest(512);
 					break;
+				case BC_BLAKE2B_160:case BC_BLAKE2B_256:
+				case BC_BLAKE2B_384:case BC_BLAKE2B_512:
+					d=new Blake2bDigest(type.getMessageDigestType().getDigestLengthInBits());
+				break;
 				default:
 					throw new NoSuchAlgorithmException(type.toString());
 			}
-			mac=new HMac(d);
-			mac.init(new KeyParameter((secretKey=_key).getKeyBytes()));
-			reset();
 		}
 		else {
 			throw new NoSuchAlgorithmException(type.toString());
 		}
+		mac=new HMac(d);
+		mac.init(new KeyParameter((secretKey=_key).getKeyBytes()));
+		reset();
+
 	}
 
 	@Override

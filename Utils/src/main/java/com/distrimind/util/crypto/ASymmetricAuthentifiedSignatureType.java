@@ -34,14 +34,15 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
-import java.security.KeyPairGenerator;
-import java.security.NoSuchAlgorithmException;
-import java.security.Signature;
+import java.security.*;
 
 
 import org.bouncycastle.crypto.Algorithm;
 import org.bouncycastle.crypto.fips.FipsEC;
 import org.bouncycastle.crypto.fips.FipsRSA;
+import org.bouncycastle.crypto.generators.Ed25519KeyPairGenerator;
+import org.bouncycastle.crypto.params.Ed25519KeyGenerationParameters;
+import org.bouncycastle.crypto.params.Ed25519PublicKeyParameters;
 import org.bouncycastle.pqc.jcajce.provider.sphincs.Sphincs256KeyPairGeneratorSpi;
 
 import gnu.vm.jgnu.security.NoSuchProviderException;
@@ -72,8 +73,11 @@ public enum ASymmetricAuthentifiedSignatureType {
 	BC_FIPS_SHA384withECDSA_P_384("SHA384withECDSA", "EC", CodeProvider.BCFIPS,CodeProvider.BCFIPS,(short) 384, 31536000000L, FipsEC.ALGORITHM, false, "P-384"),
 	@Deprecated
 	BC_FIPS_SHA512withECDSA_P_521("SHA512withECDSA", "EC", CodeProvider.BCFIPS,CodeProvider.BCFIPS,(short) 521, 31536000000L, FipsEC.ALGORITHM, false, "P-521"),
+	@Deprecated//prefer BC_Ed25519
 	BC_SHA256withECDSA_CURVE_25519("SHA256withECDSA", "ECDSA", CodeProvider.BCFIPS,CodeProvider.BC, (short)256, 31536000000L, FipsEC.ALGORITHM, false, "curve25519"),
+	@Deprecated//prefer BC_Ed25519
 	BC_SHA384withECDSA_CURVE_25519("SHA384withECDSA", "ECDSA", CodeProvider.BCFIPS,CodeProvider.BC, (short)256, 31536000000L, FipsEC.ALGORITHM, false, "curve25519"),
+	@Deprecated//prefer BC_Ed25519
 	BC_SHA512withECDSA_CURVE_25519("SHA512withECDSA", "ECDSA", CodeProvider.BCFIPS,CodeProvider.BC, (short)256, 31536000000L, FipsEC.ALGORITHM, false, "curve25519"),
 	/*BC_SHA256withECDSA_CURVE_M_221("SHA256withECDSA", "ECDSA", CodeProvider.BCFIPS,CodeProvider.BC, (short)383, 31536000000L, FipsEC.ALGORITHM, false, "M221"),
 	BC_SHA384withECDSA_CURVE_M_221("SHA384withECDSA", "ECDSA", CodeProvider.BCFIPS,CodeProvider.BC, (short)383, 31536000000L, FipsEC.ALGORITHM, false, "M221"),
@@ -89,6 +93,8 @@ public enum ASymmetricAuthentifiedSignatureType {
 	BC_SHA512withECDSA_CURVE_41417("SHA512withECDSA", "ECDSA", CodeProvider.BCFIPS,CodeProvider.BC, (short)414, 31536000000L, FipsEC.ALGORITHM, false, "curve41417"),*/
 	BCPQC_SPHINCS256_SHA2_512_256("SHA512withSPHINCS256", "SHA512withSPHINCS256", CodeProvider.BCPQC,CodeProvider.BCPQC, (short)1024, 31536000000L, null, true),
 	BCPQC_SPHINCS256_SHA3_512("SHA3-512withSPHINCS256", "SHA3-256withSPHINCS256", CodeProvider.BCPQC,CodeProvider.BCPQC, (short)1024, 31536000000L, null, true),
+	BC_Ed25519("EdDSA", "Ed25519", CodeProvider.BC,CodeProvider.BC, (short)256, 31536000000L, null, false, "Ed25519"),
+	BC_Ed448("EdDSA", "Ed448", CodeProvider.BC,CodeProvider.BC, (short)448, 31536000000L, null, false, "Ed448"),
 	DEFAULT(BC_FIPS_SHA384withRSAandMGF1);
 
 	private final String signatureAlgorithmName;
@@ -96,7 +102,7 @@ public enum ASymmetricAuthentifiedSignatureType {
 
 	private final CodeProvider codeProviderSignature, codeProviderKeyGenerator;
 	
-	private final short keySize;
+	private final short keySizeBits;
 
 	private final long expirationTimeMilis;
 	
@@ -106,16 +112,15 @@ public enum ASymmetricAuthentifiedSignatureType {
 
 	private final String curveName;
 
-	ASymmetricAuthentifiedSignatureType(String signatureAlgorithmName, String keyGeneratorAlgorithmName, CodeProvider codeProviderSignature, CodeProvider codeProviderKeyGenerator, short keySize, long expirationTimeMilis, Algorithm bcAlgorithm, boolean isPostQuantumAlgorithm) {
-		this(signatureAlgorithmName, keyGeneratorAlgorithmName, codeProviderSignature, codeProviderKeyGenerator, keySize, expirationTimeMilis, bcAlgorithm, isPostQuantumAlgorithm, null);
-
+	ASymmetricAuthentifiedSignatureType(String signatureAlgorithmName, String keyGeneratorAlgorithmName, CodeProvider codeProviderSignature, CodeProvider codeProviderKeyGenerator, short keySizeBits, long expirationTimeMilis, Algorithm bcAlgorithm, boolean isPostQuantumAlgorithm) {
+		this(signatureAlgorithmName, keyGeneratorAlgorithmName, codeProviderSignature, codeProviderKeyGenerator, keySizeBits, expirationTimeMilis, bcAlgorithm, isPostQuantumAlgorithm, null);
 	}
-	ASymmetricAuthentifiedSignatureType(String signatureAlgorithmName, String keyGeneratorAlgorithmName, CodeProvider codeProviderSignature, CodeProvider codeProviderKeyGenerator, short keySize, long expirationTimeMilis, Algorithm bcAlgorithm, boolean isPostQuantumAlgorithm, String curveName) {
+	ASymmetricAuthentifiedSignatureType(String signatureAlgorithmName, String keyGeneratorAlgorithmName, CodeProvider codeProviderSignature, CodeProvider codeProviderKeyGenerator, short keySizeBits, long expirationTimeMilis, Algorithm bcAlgorithm, boolean isPostQuantumAlgorithm, String curveName) {
 		this.signatureAlgorithmName = signatureAlgorithmName;
 		this.keyGeneratorAlgorithmName=keyGeneratorAlgorithmName;
 		this.codeProviderSignature = codeProviderSignature;
 		this.codeProviderKeyGenerator = codeProviderKeyGenerator;
-		this.keySize=keySize;
+		this.keySizeBits = keySizeBits;
 		this.expirationTimeMilis=expirationTimeMilis;
 		this.bcAlgorithm=bcAlgorithm;
 		this.isPostQuantumAlgorithm=isPostQuantumAlgorithm;
@@ -123,7 +128,7 @@ public enum ASymmetricAuthentifiedSignatureType {
 		
 	}
 	ASymmetricAuthentifiedSignatureType(ASymmetricAuthentifiedSignatureType other) {
-		this(other.signatureAlgorithmName, other.keyGeneratorAlgorithmName, other.codeProviderSignature, other.codeProviderKeyGenerator, other.keySize, other.expirationTimeMilis, other.bcAlgorithm, other.isPostQuantumAlgorithm, other.curveName);
+		this(other.signatureAlgorithmName, other.keyGeneratorAlgorithmName, other.codeProviderSignature, other.codeProviderKeyGenerator, other.keySizeBits, other.expirationTimeMilis, other.bcAlgorithm, other.isPostQuantumAlgorithm, other.curveName);
 	}
 
 	public String getCurveName() {
@@ -142,7 +147,7 @@ public enum ASymmetricAuthentifiedSignatureType {
 	
 	public short getDefaultKeySize()
 	{
-		return keySize;
+		return keySizeBits;
 	}
 
 	public AbstractSignature getSignatureInstance() throws gnu.vm.jgnu.security.NoSuchAlgorithmException, NoSuchProviderException {
@@ -186,6 +191,10 @@ public enum ASymmetricAuthentifiedSignatureType {
 			return 560;
 		else if (this==BC_SHA512withECDSA_CURVE_25519)
 			return 560;
+		else if (this==BC_Ed448)
+			return 912;
+		else if (this==BC_Ed25519)
+			return 512;
 		/*else if (this==BC_SHA256withECDSA_CURVE_41417)
 			return 560;
 		else if (this==BC_SHA384withECDSA_CURVE_41417)
@@ -238,12 +247,12 @@ public enum ASymmetricAuthentifiedSignatureType {
 		}
 		throw new IllegalArgumentException();
 	}
-	/*public int getMaxBlockSize(int keySize) {
-		return keySize / 8 - blockSizeDecrement;
+	/*public int getMaxBlockSize(int keySizeBits) {
+		return keySizeBits / 8 - blockSizeDecrement;
 	}*/
 	public AbstractKeyPairGenerator getKeyPairGenerator(AbstractSecureRandom random)
 			throws gnu.vm.jgnu.security.NoSuchAlgorithmException, NoSuchProviderException, gnu.vm.jgnu.security.InvalidAlgorithmParameterException {
-		return getKeyPairGenerator(random, keySize, System.currentTimeMillis() + expirationTimeMilis);
+		return getKeyPairGenerator(random, keySizeBits, System.currentTimeMillis() + expirationTimeMilis);
 	}
 
 	public AbstractKeyPairGenerator getKeyPairGenerator(AbstractSecureRandom random, short keySize)
@@ -309,6 +318,7 @@ public enum ASymmetricAuthentifiedSignatureType {
 	public boolean isPostQuantumAlgorithm() {
 		return isPostQuantumAlgorithm;
 	}
-	
-	
+
+
+
 }
