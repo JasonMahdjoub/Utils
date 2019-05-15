@@ -151,7 +151,7 @@ public final class BCKeyAgreement extends AbstractKeyAgreement{
     
 	
 	@Override
-	public void init(Key key, Object params) throws NoSuchAlgorithmException, InvalidKeySpecException {
+	public void init(Key key, Object params, AbstractSecureRandom random) throws NoSuchAlgorithmException, InvalidKeySpecException {
 		if (type.isECCDHType())
 		{
 			paramskeymaterial=((UserKeyingMaterialSpec)params).getUserKeyingMaterial();

@@ -67,11 +67,8 @@ public enum ASymmetricAuthentifiedSignatureType {
 	BC_FIPS_SHA256withRSAandMGF1("SHA256withRSAandMGF1","RSA", CodeProvider.BCFIPS,CodeProvider.BCFIPS,(short) 3072, 31536000000L, FipsRSA.ALGORITHM, false),
 	BC_FIPS_SHA384withRSAandMGF1("SHA384withRSAandMGF1","RSA", CodeProvider.BCFIPS,CodeProvider.BCFIPS,(short) 3072, 31536000000L, FipsRSA.ALGORITHM, false),
 	BC_FIPS_SHA512withRSAandMGF1("SHA512withRSAandMGF1", "RSA", CodeProvider.BCFIPS,CodeProvider.BCFIPS,(short) 3072, 31536000000L, FipsRSA.ALGORITHM, false),
-	@Deprecated
 	BC_FIPS_SHA256withECDSA_P_256("SHA256withECDSA", "EC", CodeProvider.BCFIPS,CodeProvider.BCFIPS,(short) 256, 31536000000L, FipsEC.ALGORITHM, false, "P-256"),
-	@Deprecated
 	BC_FIPS_SHA384withECDSA_P_384("SHA384withECDSA", "EC", CodeProvider.BCFIPS,CodeProvider.BCFIPS,(short) 384, 31536000000L, FipsEC.ALGORITHM, false, "P-384"),
-	@Deprecated
 	BC_FIPS_SHA512withECDSA_P_521("SHA512withECDSA", "EC", CodeProvider.BCFIPS,CodeProvider.BCFIPS,(short) 521, 31536000000L, FipsEC.ALGORITHM, false, "P-521"),
 	@Deprecated//prefer BC_Ed25519
 	BC_SHA256withECDSA_CURVE_25519("SHA256withECDSA", "ECDSA", CodeProvider.BCFIPS,CodeProvider.BC, (short)256, 31536000000L, FipsEC.ALGORITHM, false, "curve25519"),
@@ -95,6 +92,8 @@ public enum ASymmetricAuthentifiedSignatureType {
 	BCPQC_SPHINCS256_SHA3_512("SHA3-512withSPHINCS256", "SHA3-256withSPHINCS256", CodeProvider.BCPQC,CodeProvider.BCPQC, (short)1024, 31536000000L, null, true),
 	BC_Ed25519("EdDSA", "Ed25519", CodeProvider.BC,CodeProvider.BC, (short)256, 31536000000L, null, false, "Ed25519"),
 	BC_Ed448("EdDSA", "Ed448", CodeProvider.BC,CodeProvider.BC, (short)448, 31536000000L, null, false, "Ed448"),
+	BC_X25519("EdDSA", "X25519", CodeProvider.BC,CodeProvider.BC, (short)256, 31536000000L, null, false, "X25519"),
+	BC_X448("EdDSA", "X448", CodeProvider.BC,CodeProvider.BC, (short)448, 31536000000L, null, false, "X448"),
 	DEFAULT(BC_FIPS_SHA384withRSAandMGF1);
 
 	private final String signatureAlgorithmName;

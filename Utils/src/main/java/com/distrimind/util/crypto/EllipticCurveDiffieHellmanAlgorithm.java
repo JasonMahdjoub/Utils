@@ -174,8 +174,13 @@ public class EllipticCurveDiffieHellmanAlgorithm extends KeyAgreement {
 				ka = type.getKeyAgreementInstance(symmetricSignatureType);
 			else
 				ka = type.getKeyAgreementInstance(symmetricEncryptionType);
-			if (type.isECCDHType())
-				ka.init(myKeyPair.getASymmetricPrivateKey(), new UserKeyingMaterialSpec(keyingMaterial));
+			if (type.isECCDHType() || type.isXDHType()) {
+
+				UserKeyingMaterialSpec spec=null;
+				if (type.useKDF())
+					spec=new UserKeyingMaterialSpec(keyingMaterial);
+				ka.init(myKeyPair.getASymmetricPrivateKey(), spec, randomForKeys);
+			}
 			else if (type.isECMQVType())
 			{
 				throw new InternalError("Next code must use ephemeral and static keys. It must be completed/corrected.");
@@ -187,7 +192,10 @@ public class EllipticCurveDiffieHellmanAlgorithm extends KeyAgreement {
 				);*/
 			}
 			ka.doPhase(distantPublicKey, true);
-			derivedKey=ka.generateSecretKey((short)(keySizeBits/8));
+			if (ka instanceof JavaNativeKeyAgreement)
+				derivedKey=ka.generateSecretKey(keySizeBits);
+			else
+				derivedKey=ka.generateSecretKey((short)(keySizeBits/8));
 			valid=true;
 		}
 		catch(NoSuchAlgorithmException e)

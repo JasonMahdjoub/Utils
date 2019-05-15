@@ -34,21 +34,19 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
-import java.security.PublicKey;
-import java.security.interfaces.ECPublicKey;
-import java.security.interfaces.RSAPublicKey;
-import java.util.Arrays;
-
+import com.distrimind.util.Bits;
+import gnu.vm.jgnu.security.NoSuchAlgorithmException;
+import gnu.vm.jgnu.security.spec.InvalidKeySpecException;
 import org.apache.commons.codec.binary.Base64;
 import org.bouncycastle.crypto.Algorithm;
 import org.bouncycastle.crypto.AsymmetricKey;
 import org.bouncycastle.crypto.asymmetric.AsymmetricECPublicKey;
 import org.bouncycastle.crypto.asymmetric.AsymmetricRSAPublicKey;
 
-import com.distrimind.util.Bits;
-
-import gnu.vm.jgnu.security.NoSuchAlgorithmException;
-import gnu.vm.jgnu.security.spec.InvalidKeySpecException;
+import java.security.PublicKey;
+import java.security.interfaces.ECPublicKey;
+import java.security.interfaces.RSAPublicKey;
+import java.util.Arrays;
 
 
 /**
@@ -326,7 +324,7 @@ public class ASymmetricPublicKey extends Key {
 
 		}
 		else
-			throw new IllegalAccessError();
+			throw new IllegalAccessError(pk.getClass().getName());
 		
 	}
 

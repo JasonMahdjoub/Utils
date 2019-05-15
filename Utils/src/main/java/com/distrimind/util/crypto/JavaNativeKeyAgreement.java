@@ -71,6 +71,7 @@ public final class JavaNativeKeyAgreement extends AbstractKeyAgreement {
 	public void doPhase(Key key, boolean lastPhase) throws IllegalStateException, InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException {
 		
 		try {
+			System.out.println(key.toJavaNativeKey().getClass());
 			this.keyAgreement.doPhase(key.toJavaNativeKey(), lastPhase);
 		} catch (java.security.InvalidKeyException e) {
 			throw new InvalidKeyException(e);
@@ -128,11 +129,11 @@ public final class JavaNativeKeyAgreement extends AbstractKeyAgreement {
 
 
 	@Override
-	public void init(Key key, Object params)
+	public void init(Key key, Object params, AbstractSecureRandom random)
 			throws InvalidAlgorithmParameterException, InvalidKeyException, NoSuchAlgorithmException,InvalidKeySpecException  {
 		
 		try {
-			keyAgreement.init(key.toJavaNativeKey(), (AlgorithmParameterSpec)params);
+			keyAgreement.init(key.toJavaNativeKey(), (AlgorithmParameterSpec)params, random);
 		} catch (java.security.InvalidKeyException e) {
 			throw new InvalidKeyException(e);
 		} catch (java.security.InvalidAlgorithmParameterException e) {

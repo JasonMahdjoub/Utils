@@ -38,6 +38,7 @@ package com.distrimind.util.crypto;
 import gnu.vm.jgnu.security.InvalidAlgorithmParameterException;
 import gnu.vm.jgnu.security.InvalidKeyException;
 import gnu.vm.jgnu.security.NoSuchAlgorithmException;
+import gnu.vm.jgnu.security.NoSuchProviderException;
 import gnu.vm.jgnu.security.spec.InvalidKeySpecException;
 import gnu.vm.jgnux.crypto.ShortBufferException;
 
@@ -90,8 +91,7 @@ public abstract class AbstractKeyAgreement {
 
 
 	
-	
-	public abstract void init(Key key, Object params)
+	public abstract void init(Key key, Object params, AbstractSecureRandom random)
 			throws InvalidAlgorithmParameterException, InvalidKeyException, NoSuchAlgorithmException,InvalidKeySpecException;
 
 	

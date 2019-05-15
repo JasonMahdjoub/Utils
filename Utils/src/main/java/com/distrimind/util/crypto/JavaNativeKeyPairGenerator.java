@@ -137,12 +137,11 @@ public final class JavaNativeKeyPairGenerator extends AbstractKeyPairGenerator {
 
                         keyPairGenerator.initialize(ASymmetricEncryptionType.getCurve25519(), _random.getJavaNativeSecureRandom());
                         break;
-					case "Ed25519":case "Ed448":
+					case "Ed25519":case "Ed448":case "X25519":case "X448":
 						keyPairGenerator.initialize(signatureType.getDefaultKeySize(), _random.getJavaNativeSecureRandom());
 						break;
-					case "X25519":case "X448":
-						keyPairGenerator.initialize(getXDHAlgorithmParameterSpec(signatureType.getCurveName()));
-						break;
+						//keyPairGenerator.initialize(getXDHAlgorithmParameterSpec(signatureType.getCurveName()));
+						//break;
 
                     /*case "M221":
                     case "M383":
