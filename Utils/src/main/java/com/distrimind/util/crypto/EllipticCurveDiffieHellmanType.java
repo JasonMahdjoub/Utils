@@ -46,7 +46,7 @@ import org.bouncycastle.crypto.fips.FipsSHS;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 3.0
+ * @version 3.1
  * @since Utils 2.10
  */
 public enum EllipticCurveDiffieHellmanType {
@@ -55,10 +55,8 @@ public enum EllipticCurveDiffieHellmanType {
 	ECDDH_512_AES256((short) 256, (short) 521, CodeProvider.SunRsaSign, ASymmetricAuthentifiedSignatureType.BC_SHA512withECDSA_CURVE_25519, "ECCDHwithSHA512CKDF", null, null, true),*/
 	BC_FIPS_ECDDH_384_P_384((short) 256, (short) 384, CodeProvider.BCFIPS, ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA384withECDSA_P_384, "ECCDHwithSHA384CKDF", FipsSHS.Algorithm.SHA384, FipsKDF.AgreementKDFPRF.SHA384, true),
 	BC_FIPS_ECDDH_512_P_521((short) 256, (short) 521, CodeProvider.BCFIPS, ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA512withECDSA_P_521, "ECCDHwithSHA512CKDF", FipsSHS.Algorithm.SHA512, FipsKDF.AgreementKDFPRF.SHA512, true),
-	@Deprecated//prefer XDH
-	BC_ECCDH_384_CURVE_25519((short) 256, (short) 384, CodeProvider.BCFIPS, ASymmetricAuthentifiedSignatureType.BC_SHA384withECDSA_CURVE_25519, "ECCDHwithSHA384CKDF", FipsSHS.Algorithm.SHA384, FipsKDF.AgreementKDFPRF.SHA384, true),
-	@Deprecated//prefer XDH
-	BC_ECCDH_512_CURVE_25519((short) 256, (short) 521, CodeProvider.BCFIPS, ASymmetricAuthentifiedSignatureType.BC_SHA512withECDSA_CURVE_25519, "ECCDHwithSHA512CKDF", FipsSHS.Algorithm.SHA512, FipsKDF.AgreementKDFPRF.SHA512, true),
+	@SuppressWarnings("deprecation") BC_ECCDH_384_CURVE_25519((short) 256, (short) 384, CodeProvider.BCFIPS, ASymmetricAuthentifiedSignatureType.BC_SHA384withECDSA_CURVE_25519, "ECCDHwithSHA384CKDF", FipsSHS.Algorithm.SHA384, FipsKDF.AgreementKDFPRF.SHA384, true),
+	@SuppressWarnings("deprecation") BC_ECCDH_512_CURVE_25519((short) 256, (short) 521, CodeProvider.BCFIPS, ASymmetricAuthentifiedSignatureType.BC_SHA512withECDSA_CURVE_25519, "ECCDHwithSHA512CKDF", FipsSHS.Algorithm.SHA512, FipsKDF.AgreementKDFPRF.SHA512, true),
 	BC_XDH_X25519_WITH_SHA384CKDF((short) 256, (short) 521, CodeProvider.BC, ASymmetricAuthentifiedSignatureType.BC_Ed25519, "X25519withSHA384CKDF", FipsSHS.Algorithm.SHA384, FipsKDF.AgreementKDFPRF.SHA384, true),
 	BC_XDH_X448_WITH_SHA384CKDF((short) 256, (short) 521, CodeProvider.BC, ASymmetricAuthentifiedSignatureType.BC_Ed448, "X448withSHA384CKDF", FipsSHS.Algorithm.SHA384, FipsKDF.AgreementKDFPRF.SHA384, true),
 	BC_XDH_X25519_WITH_SHA512CKDF((short) 256, (short) 521, CodeProvider.BC, ASymmetricAuthentifiedSignatureType.BC_Ed25519, "X25519withSHA512CKDF", FipsSHS.Algorithm.SHA512, FipsKDF.AgreementKDFPRF.SHA512, true),

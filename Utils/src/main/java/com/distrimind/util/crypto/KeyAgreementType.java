@@ -41,18 +41,14 @@ import gnu.vm.jgnu.security.NoSuchProviderException;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 1.3
+ * @version 1.4
  * @since Utils 3.14.0
  */
 
 public enum KeyAgreementType {
-	@Deprecated
 	BC_FIPS_ECDDH_384_P_384(false, false, EllipticCurveDiffieHellmanType.BC_FIPS_ECDDH_384_P_384),
-	@Deprecated
 	BC_FIPS_ECDDH_512_P_521(false, false, EllipticCurveDiffieHellmanType.BC_FIPS_ECDDH_512_P_521),
-	@Deprecated//prefer XDH
 	BC_ECCDH_384_CURVE_25519(false, false, EllipticCurveDiffieHellmanType.BC_ECCDH_384_CURVE_25519),
-	@Deprecated//prefer XDH
 	BC_ECCDH_512_CURVE_25519(false, false, EllipticCurveDiffieHellmanType.BC_ECCDH_512_CURVE_25519),
 	BC_XDH_X25519_WITH_SHA384CKDF(false, false, EllipticCurveDiffieHellmanType.BC_XDH_X25519_WITH_SHA384CKDF),
 	BC_XDH_X448_WITH_SHA384CKDF(false, false, EllipticCurveDiffieHellmanType.BC_XDH_X448_WITH_SHA384CKDF),
