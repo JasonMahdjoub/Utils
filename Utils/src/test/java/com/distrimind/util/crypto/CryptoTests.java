@@ -622,6 +622,7 @@ public class CryptoTests {
 		}
 	}
 
+	@SuppressWarnings("deprecation")
 	@DataProvider(name = "provideDataForP2PLoginAgreement", parallel = true)
 	public Object[][] provideDataForP2PLoginAgreement() throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException {
 		byte[] salt = new byte[] { (byte) 21, (byte) 5645, (byte) 512, (byte) 42310, (byte) 24, (byte) 0, (byte) 1,

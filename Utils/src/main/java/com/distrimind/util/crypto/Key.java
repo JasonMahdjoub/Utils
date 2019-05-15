@@ -74,12 +74,20 @@ public abstract class Key implements Serializable {
 	}
 
 	static final int INCLUDE_KEY_EXPIRATION_CODE=1<<6;
-	static final int INCLUDE_KEY_EXPIRATION_CODE_NOT=~INCLUDE_KEY_EXPIRATION_CODE;
+
+	static final int IS_XDH_KEY=1<<5;
+
+
 	public static Key decode(byte[] b, boolean fillArrayWithZerosWhenDecoded) throws IllegalArgumentException {
 		
 			//byte[][] res = Bits.separateEncodingsWithShortSizedTabs(b);
 			try {
 				boolean includeKeyExpiration=(b[0] & INCLUDE_KEY_EXPIRATION_CODE) == INCLUDE_KEY_EXPIRATION_CODE;
+				boolean isXdh=(b[0] & IS_XDH_KEY) == IS_XDH_KEY;
+				if (includeKeyExpiration)
+					b[0]-=INCLUDE_KEY_EXPIRATION_CODE;
+				if (isXdh)
+					b[0]-=IS_XDH_KEY;
 				if (b[0] == (byte)0) {
 					int codedTypeSize = SymmetricSecretKey.getEncodedTypeSize();
 					byte[] secretKey = new byte[b.length - 2 - codedTypeSize];
@@ -96,15 +104,17 @@ public abstract class Key implements Serializable {
 					int codedTypeSize = ASymmetricPrivateKey.getEncodedTypeSize();
 					byte[] privateKey = new byte[b.length - 3 - codedTypeSize];
 					System.arraycopy(b, 3 + codedTypeSize, privateKey, 0, privateKey.length);
-					return new ASymmetricPrivateKey(ASymmetricAuthentifiedSignatureType.valueOf((int) Bits.getPositiveInteger(b, 3, codedTypeSize)), privateKey,
+					ASymmetricPrivateKey res=new ASymmetricPrivateKey(ASymmetricAuthentifiedSignatureType.valueOf((int) Bits.getPositiveInteger(b, 3, codedTypeSize)), privateKey,
 							Bits.getShort(b, 1));
+					res.xdhKey=isXdh;
+					return res;
 				} else if (b[0] == 3) {
 					int codedTypeSize = ASymmetricPrivateKey.getEncodedTypeSize();
 					byte[] privateKey = new byte[b.length - 3 - codedTypeSize];
 					System.arraycopy(b, 3 + codedTypeSize, privateKey, 0, privateKey.length);
 					return new ASymmetricPrivateKey(ASymmetricEncryptionType.valueOf((int) Bits.getPositiveInteger(b, 3, codedTypeSize)), privateKey,
 							Bits.getShort(b, 1));
-				} else if ((b[0] & INCLUDE_KEY_EXPIRATION_CODE_NOT) == 4) {
+				} else if (b[0] == 4) {
 					fillArrayWithZerosWhenDecoded=false;
 					int codedTypeSize = ASymmetricPrivateKey.getEncodedTypeSize();
 					byte[] publicKey = new byte[b.length - 3 - codedTypeSize-(includeKeyExpiration?8:0)];
@@ -120,10 +130,10 @@ public abstract class Key implements Serializable {
 					System.arraycopy(b, posKey, publicKey, 0, publicKey.length);
 					return new ASymmetricPublicKey(ASymmetricEncryptionType.valueOf((int) Bits.getPositiveInteger(b, 3, codedTypeSize)), publicKey,
 							Bits.getShort(b, 1), timeExpiration);
-				} else if ((b[0] & INCLUDE_KEY_EXPIRATION_CODE_NOT) == 5) {
+				} else if (b[0] == 5) {
 					fillArrayWithZerosWhenDecoded=false;
 					int codedTypeSize = ASymmetricPrivateKey.getEncodedTypeSize();
-					byte publicKey[] = new byte[b.length - 3 - codedTypeSize-(includeKeyExpiration?8:0)];
+					byte[] publicKey = new byte[b.length - 3 - codedTypeSize - (includeKeyExpiration ? 8 : 0)];
 					int posKey=codedTypeSize+3;
 					long timeExpiration;
 					if (includeKeyExpiration) {
@@ -134,8 +144,10 @@ public abstract class Key implements Serializable {
 					else
 						timeExpiration=Long.MAX_VALUE;
 					System.arraycopy(b, posKey, publicKey, 0, publicKey.length);
-					return new ASymmetricPublicKey(ASymmetricAuthentifiedSignatureType.valueOf((int) Bits.getPositiveInteger(b, 3, codedTypeSize)), publicKey,
+					ASymmetricPublicKey res=new ASymmetricPublicKey(ASymmetricAuthentifiedSignatureType.valueOf((int) Bits.getPositiveInteger(b, 3, codedTypeSize)), publicKey,
 							Bits.getShort(b, 1), timeExpiration);
+					res.xdhKey=isXdh;
+					return res;
 				} else {
 					fillArrayWithZerosWhenDecoded=false;
 					throw new IllegalArgumentException();

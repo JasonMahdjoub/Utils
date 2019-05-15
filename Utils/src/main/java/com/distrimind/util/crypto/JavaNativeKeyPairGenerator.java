@@ -68,11 +68,16 @@ public final class JavaNativeKeyPairGenerator extends AbstractKeyPairGenerator {
 		this.keyPairGenerator = keyPairGenerator;
 	}
 
+	private boolean isXDHKey()
+	{
+		return keyPairGenerator.getAlgorithm().equals("X25519") || keyPairGenerator.getAlgorithm().equals("X448");
+	}
+
 	@Override
 	public ASymmetricKeyPair generateKeyPair() {
 		KeyPair kp = keyPairGenerator.generateKeyPair();
 		if (encryptionType==null)
-			return new ASymmetricKeyPair(signatureType, kp, keySizeBits, expirationTime);
+			return new ASymmetricKeyPair(signatureType, kp, keySizeBits, expirationTime, isXDHKey());
 		else
 			return new ASymmetricKeyPair(encryptionType, kp, keySizeBits, expirationTime);
 	}

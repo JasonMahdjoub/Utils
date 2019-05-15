@@ -1,6 +1,6 @@
 Utils
 =====
-3.27.0 Stable (Build: 990) (from 10/05/2019 to 10/05/2019)
+3.28.0 Stable (Build: 1046) (from 15/05/2019 to 15/05/2019)
 
 # Creator(s):
 Jason MAHDJOUB
@@ -9,6 +9,13 @@ Jason MAHDJOUB
 Jason MAHDJOUB (Entred in the team at 04/01/2016)
 
 # Modifications:
+
+
+### 3.28.0 Stable (15/05/2019)
+* Add HMac-Blake2b signature.
+* Add Ed25519 and Ed448 asymmetric signatures.
+* Add X25519 and X448 asymmetric signatures.
+* Add XDH key agreements.
 
 
 ### 3.27.0 Stable (10/05/2019)

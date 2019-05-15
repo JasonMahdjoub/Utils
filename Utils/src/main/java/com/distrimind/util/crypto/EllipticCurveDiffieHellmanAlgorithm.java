@@ -34,6 +34,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
+import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.util.Arrays;
@@ -46,7 +47,7 @@ import gnu.vm.jgnu.security.InvalidAlgorithmParameterException;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 2.3
+ * @version 3.0
  * @since Utils 2.9
  */
 public class EllipticCurveDiffieHellmanAlgorithm extends KeyAgreement {
@@ -122,7 +123,31 @@ public class EllipticCurveDiffieHellmanAlgorithm extends KeyAgreement {
 	}¨*/
 	private void generateAndSetKeyPair(short keySize, long expirationUTC) throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.NoSuchProviderException, InvalidAlgorithmParameterException  {
 		valid=false;
-		ASymmetricKeyPair kp=type.getASymmetricAuthentifiedSignatureType().getKeyPairGenerator(randomForKeys, keySize, expirationUTC).generateKeyPair();
+
+		ASymmetricKeyPair kp;
+		ASymmetricAuthentifiedSignatureType t=type.getASymmetricAuthentifiedSignatureType();
+		if (t==ASymmetricAuthentifiedSignatureType.BC_Ed448 || t==ASymmetricAuthentifiedSignatureType.BC_Ed25519) {
+			try {
+				KeyPairGenerator kpg ;
+				if (t==ASymmetricAuthentifiedSignatureType.BC_Ed448)
+					kpg= KeyPairGenerator.getInstance("X448", CodeProvider.BC.name());
+				else
+					kpg= KeyPairGenerator.getInstance("X25519", CodeProvider.BC.name());
+
+				JavaNativeKeyPairGenerator res = new JavaNativeKeyPairGenerator(t, kpg);
+				res.initialize(keySize, expirationUTC, randomForKeys);
+				kp=res.generateKeyPair();
+			} catch (NoSuchAlgorithmException e) {
+				throw new gnu.vm.jgnu.security.NoSuchAlgorithmException(e);
+			}
+			catch(java.security.NoSuchProviderException e)
+			{
+				throw new gnu.vm.jgnu.security.NoSuchProviderException(e.getMessage());
+			}
+
+		}
+		else
+			kp=t.getKeyPairGenerator(randomForKeys, keySize, expirationUTC).generateKeyPair();
 		setKeyPair(kp);
 		valid=true;
 
@@ -221,17 +246,11 @@ public class EllipticCurveDiffieHellmanAlgorithm extends KeyAgreement {
 		if (!valid)
 			throw new CryptoException();
 
-		try {
-			if (stepNumber == 0)
-				return getEncodedPublicKey();
-			else {
-				valid = false;
-				throw new IllegalAccessException();
-			}
-		}
-		catch(Exception e)
-		{
-			throw e;
+		if (stepNumber == 0)
+			return getEncodedPublicKey();
+		else {
+			valid = false;
+			throw new IllegalAccessException();
 		}
 
 	}

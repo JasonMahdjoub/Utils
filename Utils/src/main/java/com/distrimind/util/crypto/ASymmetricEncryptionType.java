@@ -54,7 +54,6 @@ import org.bouncycastle.pqc.jcajce.provider.sphincs.Sphincs256KeyFactorySpi;
 
 import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
-import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -68,7 +67,7 @@ import java.security.spec.X509EncodedKeySpec;
  * List of asymmetric encryption algorithms
  * 
  * @author Jason Mahdjoub
- * @version 3.1
+ * @version 4.0
  * @since Utils 1.4
  */
 public enum ASymmetricEncryptionType {
@@ -126,7 +125,7 @@ public enum ASymmetricEncryptionType {
 		return new KeyPair(decodeNativePublicKey(parts[0]), decodeNativePrivateKey(parts[1]));
 	}*/
 
-	static PrivateKey decodeNativePrivateKey(byte[] encodedKey, String algorithm, String algorithmType)
+	static PrivateKey decodeNativePrivateKey(byte[] encodedKey, String algorithm, String algorithmType, boolean xdh)
 			throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException {
 
 		try {
@@ -143,24 +142,31 @@ public enum ASymmetricEncryptionType {
 			}
 			else if (algorithmType.contains(ASymmetricAuthentifiedSignatureType.BC_Ed25519.getCurveName()))
 			{
-				Ed25519PrivateKeyParameters pk=new Ed25519PrivateKeyParameters(encodedKey, 0);
-				return constructorBCEdDSAPrivateKey.newInstance(pk);
+				if (xdh)
+				{
+					X25519PrivateKeyParameters pk=new X25519PrivateKeyParameters(encodedKey, 0);
+					return constructorBCXDHPrivateKey.newInstance(pk);
+
+				}
+				else {
+					Ed25519PrivateKeyParameters pk = new Ed25519PrivateKeyParameters(encodedKey, 0);
+					return constructorBCEdDSAPrivateKey.newInstance(pk);
+				}
 			}
 			else if (algorithmType.contains(ASymmetricAuthentifiedSignatureType.BC_Ed448.getCurveName()))
 			{
-				Ed448PrivateKeyParameters pk=new Ed448PrivateKeyParameters(encodedKey, 0);
-				return constructorBCEdDSAPrivateKey.newInstance(pk);
+				if (xdh)
+				{
+					X448PrivateKeyParameters pk=new X448PrivateKeyParameters(encodedKey, 0);
+					return constructorBCXDHPrivateKey.newInstance(pk);
+
+				}
+				else {
+					Ed448PrivateKeyParameters pk = new Ed448PrivateKeyParameters(encodedKey, 0);
+					return constructorBCEdDSAPrivateKey.newInstance(pk);
+				}
 			}
-			else if (algorithmType.contains(ASymmetricAuthentifiedSignatureType.BC_X25519.getCurveName()))
-			{
-				X25519PrivateKeyParameters pk=new X25519PrivateKeyParameters(encodedKey, 0);
-				return constructorBCXDHPrivateKey.newInstance(pk);
-			}
-			else if (algorithmType.contains(ASymmetricAuthentifiedSignatureType.BC_X448.getCurveName()))
-			{
-				X448PrivateKeyParameters pk=new X448PrivateKeyParameters(encodedKey, 0);
-				return constructorBCXDHPrivateKey.newInstance(pk);
-			}
+
 			else
 			{
 
@@ -175,7 +181,7 @@ public enum ASymmetricEncryptionType {
 		}
 	}
 
-	static PublicKey decodeNativePublicKey(byte[] encodedKey, String algorithm, String algorithmType, @SuppressWarnings("unused") String curveName)
+	static PublicKey decodeNativePublicKey(byte[] encodedKey, String algorithm, String algorithmType, @SuppressWarnings("unused") String curveName, boolean xdh)
 			throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException {
 		try {
 			//byte[][] parts = Bits.separateEncodingsWithShortSizedTabs(encodedKey);
@@ -193,23 +199,27 @@ public enum ASymmetricEncryptionType {
 			}
 			else if (algorithmType.contains(ASymmetricAuthentifiedSignatureType.BC_Ed25519.getCurveName()))
 			{
-				Ed25519PublicKeyParameters pk=new Ed25519PublicKeyParameters(encodedKey, 0);
-				return constructorBCEdDSAPublicKey.newInstance(pk);
+				if (xdh)
+				{
+					X25519PublicKeyParameters pk=new X25519PublicKeyParameters(encodedKey, 0);
+					return constructorBCXDHPublicKey.newInstance(pk);
+				}
+				else {
+					Ed25519PublicKeyParameters pk = new Ed25519PublicKeyParameters(encodedKey, 0);
+					return constructorBCEdDSAPublicKey.newInstance(pk);
+				}
 			}
 			else if (algorithmType.contains(ASymmetricAuthentifiedSignatureType.BC_Ed448.getCurveName()))
 			{
-				Ed448PublicKeyParameters pk=new Ed448PublicKeyParameters(encodedKey, 0);
-				return constructorBCEdDSAPublicKey.newInstance(pk);
-			}
-			else if (algorithmType.contains(ASymmetricAuthentifiedSignatureType.BC_X25519.getCurveName()))
-			{
-				X25519PublicKeyParameters pk=new X25519PublicKeyParameters(encodedKey, 0);
-				return constructorBCXDHPublicKey.newInstance(pk);
-			}
-			else if (algorithmType.contains(ASymmetricAuthentifiedSignatureType.BC_X448.getCurveName()))
-			{
-				X448PublicKeyParameters pk=new X448PublicKeyParameters(encodedKey, 0);
-				return constructorBCXDHPublicKey.newInstance(pk);
+				if (xdh)
+				{
+					X448PublicKeyParameters pk=new X448PublicKeyParameters(encodedKey, 0);
+					return constructorBCXDHPublicKey.newInstance(pk);
+				}
+				else {
+					Ed448PublicKeyParameters pk = new Ed448PublicKeyParameters(encodedKey, 0);
+					return constructorBCEdDSAPublicKey.newInstance(pk);
+				}
 			}
 			/*else if (algorithm.equalsIgnoreCase("ECDSA") && curveName!=null)
             {
@@ -293,54 +303,60 @@ public enum ASymmetricEncryptionType {
 	static byte[] encodePrivateKey(PrivateKey key, @SuppressWarnings("unused") ASymmetricEncryptionType type) {
 		return key.getEncoded();
 	}
-	static byte[] encodePrivateKey(PrivateKey key, ASymmetricAuthentifiedSignatureType type) {
+	@SuppressWarnings("deprecation")
+	static byte[] encodePrivateKey(PrivateKey key, ASymmetricAuthentifiedSignatureType type, boolean xdh) {
 		if (type==ASymmetricAuthentifiedSignatureType.BC_SHA384withECDSA_CURVE_25519 || type==ASymmetricAuthentifiedSignatureType.BC_SHA512withECDSA_CURVE_25519 || type==ASymmetricAuthentifiedSignatureType.BC_SHA256withECDSA_CURVE_25519)
 		{
 			return ((ECPrivateKey) key).getD().toByteArray();
 		}
-		if (type==ASymmetricAuthentifiedSignatureType.BC_Ed25519)
+		else if (type==ASymmetricAuthentifiedSignatureType.BC_Ed25519)
 		{
-			Ed25519PrivateKeyParameters k= null;
-			try {
-				k = (Ed25519PrivateKeyParameters)eddsaPrivateKeyField.get(key);
-			} catch (IllegalAccessException e) {
-				e.printStackTrace();
-				System.exit(-1);
+			if (xdh)
+			{
+				X25519PrivateKeyParameters k= null;
+				try {
+					k = (X25519PrivateKeyParameters)xdhPrivateKeyField.get(key);
+				} catch (IllegalAccessException e) {
+					e.printStackTrace();
+					System.exit(-1);
+				}
+				return k.getEncoded();
 			}
-			return k.getEncoded();
+			else {
+
+				Ed25519PrivateKeyParameters k = null;
+				try {
+					k = (Ed25519PrivateKeyParameters) eddsaPrivateKeyField.get(key);
+				} catch (IllegalAccessException e) {
+					e.printStackTrace();
+					System.exit(-1);
+				}
+				return k.getEncoded();
+			}
 		}
-		if (type==ASymmetricAuthentifiedSignatureType.BC_Ed448)
+		else if (type==ASymmetricAuthentifiedSignatureType.BC_Ed448)
 		{
-			Ed448PrivateKeyParameters k= null;
-			try {
-				k = (Ed448PrivateKeyParameters)eddsaPrivateKeyField.get(key);
-			} catch (IllegalAccessException e) {
-				e.printStackTrace();
-				System.exit(-1);
+			if (xdh)
+			{
+				X448PrivateKeyParameters k= null;
+				try {
+					k = (X448PrivateKeyParameters)xdhPrivateKeyField.get(key);
+				} catch (IllegalAccessException e) {
+					e.printStackTrace();
+					System.exit(-1);
+				}
+				return k.getEncoded();
 			}
-			return k.getEncoded();
-		}
-		if (type==ASymmetricAuthentifiedSignatureType.BC_X25519)
-		{
-			X25519PrivateKeyParameters k= null;
-			try {
-				k = (X25519PrivateKeyParameters)xdhPrivateKeyField.get(key);
-			} catch (IllegalAccessException e) {
-				e.printStackTrace();
-				System.exit(-1);
+			else {
+				Ed448PrivateKeyParameters k = null;
+				try {
+					k = (Ed448PrivateKeyParameters) eddsaPrivateKeyField.get(key);
+				} catch (IllegalAccessException e) {
+					e.printStackTrace();
+					System.exit(-1);
+				}
+				return k.getEncoded();
 			}
-			return k.getEncoded();
-		}
-		if (type==ASymmetricAuthentifiedSignatureType.BC_X448)
-		{
-			X448PrivateKeyParameters k= null;
-			try {
-				k = (X448PrivateKeyParameters)xdhPrivateKeyField.get(key);
-			} catch (IllegalAccessException e) {
-				e.printStackTrace();
-				System.exit(-1);
-			}
-			return k.getEncoded();
 		}
 		else
 	    	return key.getEncoded();
@@ -423,7 +439,8 @@ public enum ASymmetricEncryptionType {
 
 	}
 
-	static byte[] encodePublicKey(PublicKey key, ASymmetricAuthentifiedSignatureType type)  {
+	@SuppressWarnings("deprecation")
+	static byte[] encodePublicKey(PublicKey key, ASymmetricAuthentifiedSignatureType type, boolean xdh)  {
 		if (type==ASymmetricAuthentifiedSignatureType.BC_SHA384withECDSA_CURVE_25519
 				|| type==ASymmetricAuthentifiedSignatureType.BC_SHA512withECDSA_CURVE_25519
 				|| type==ASymmetricAuthentifiedSignatureType.BC_SHA256withECDSA_CURVE_25519
@@ -431,50 +448,56 @@ public enum ASymmetricEncryptionType {
 		{
 			return ((ECPublicKey) key).getQ().getEncoded(true);
 		}
-		if (type==ASymmetricAuthentifiedSignatureType.BC_Ed25519)
+		else if (type==ASymmetricAuthentifiedSignatureType.BC_Ed25519)
 		{
-			Ed25519PublicKeyParameters k= null;
-			try {
-				k = (Ed25519PublicKeyParameters)eddsaPublicKeyField.get(key);
-			} catch (IllegalAccessException e) {
-				e.printStackTrace();
-				System.exit(-1);
+			if (xdh)
+			{
+				X25519PublicKeyParameters k= null;
+				try {
+					k = (X25519PublicKeyParameters)xdhPublicKeyField.get(key);
+				} catch (IllegalAccessException e) {
+					e.printStackTrace();
+					System.exit(-1);
+				}
+				return k.getEncoded();
 			}
-			return k.getEncoded();
+			else {
+				Ed25519PublicKeyParameters k = null;
+				try {
+					k = (Ed25519PublicKeyParameters) eddsaPublicKeyField.get(key);
+				} catch (IllegalAccessException e) {
+					e.printStackTrace();
+					System.exit(-1);
+				}
+				return k.getEncoded();
+			}
 		}
 		else if (type==ASymmetricAuthentifiedSignatureType.BC_Ed448)
 		{
-			Ed448PublicKeyParameters k= null;
-			try {
-				k = (Ed448PublicKeyParameters)eddsaPublicKeyField.get(key);
-			} catch (IllegalAccessException e) {
-				e.printStackTrace();
-				System.exit(-1);
+			if (xdh)
+			{
+				X448PublicKeyParameters k= null;
+				try {
+					k = (X448PublicKeyParameters)xdhPublicKeyField.get(key);
+				} catch (IllegalAccessException e) {
+					e.printStackTrace();
+					System.exit(-1);
+				}
+				return k.getEncoded();
 			}
-			return k.getEncoded();
-		}
-		if (type==ASymmetricAuthentifiedSignatureType.BC_X25519)
-		{
-			X25519PublicKeyParameters k= null;
-			try {
-				k = (X25519PublicKeyParameters)xdhPublicKeyField.get(key);
-			} catch (IllegalAccessException e) {
-				e.printStackTrace();
-				System.exit(-1);
+			else {
+
+				Ed448PublicKeyParameters k = null;
+				try {
+					k = (Ed448PublicKeyParameters) eddsaPublicKeyField.get(key);
+				} catch (IllegalAccessException e) {
+					e.printStackTrace();
+					System.exit(-1);
+				}
+				return k.getEncoded();
 			}
-			return k.getEncoded();
 		}
-		else if (type==ASymmetricAuthentifiedSignatureType.BC_X448)
-		{
-			X448PublicKeyParameters k= null;
-			try {
-				k = (X448PublicKeyParameters)xdhPublicKeyField.get(key);
-			} catch (IllegalAccessException e) {
-				e.printStackTrace();
-				System.exit(-1);
-			}
-			return k.getEncoded();
-		}
+
 
 		/*else if (type.getKeyGeneratorAlgorithmName().contains("ECDSA"))
 		{

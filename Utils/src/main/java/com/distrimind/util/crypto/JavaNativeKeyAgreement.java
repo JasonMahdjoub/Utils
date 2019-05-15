@@ -71,7 +71,6 @@ public final class JavaNativeKeyAgreement extends AbstractKeyAgreement {
 	public void doPhase(Key key, boolean lastPhase) throws IllegalStateException, InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException {
 		
 		try {
-			System.out.println(key.toJavaNativeKey().getClass());
 			this.keyAgreement.doPhase(key.toJavaNativeKey(), lastPhase);
 		} catch (java.security.InvalidKeyException e) {
 			throw new InvalidKeyException(e);

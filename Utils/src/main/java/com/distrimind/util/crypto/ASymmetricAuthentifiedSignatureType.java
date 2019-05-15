@@ -34,18 +34,15 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
-import java.security.*;
-
-
+import gnu.vm.jgnu.security.NoSuchProviderException;
 import org.bouncycastle.crypto.Algorithm;
 import org.bouncycastle.crypto.fips.FipsEC;
 import org.bouncycastle.crypto.fips.FipsRSA;
-import org.bouncycastle.crypto.generators.Ed25519KeyPairGenerator;
-import org.bouncycastle.crypto.params.Ed25519KeyGenerationParameters;
-import org.bouncycastle.crypto.params.Ed25519PublicKeyParameters;
 import org.bouncycastle.pqc.jcajce.provider.sphincs.Sphincs256KeyPairGeneratorSpi;
 
-import gnu.vm.jgnu.security.NoSuchProviderException;
+import java.security.KeyPairGenerator;
+import java.security.NoSuchAlgorithmException;
+import java.security.Signature;
 
 /**
  * List of signature algorithms
@@ -92,8 +89,8 @@ public enum ASymmetricAuthentifiedSignatureType {
 	BCPQC_SPHINCS256_SHA3_512("SHA3-512withSPHINCS256", "SHA3-256withSPHINCS256", CodeProvider.BCPQC,CodeProvider.BCPQC, (short)1024, 31536000000L, null, true),
 	BC_Ed25519("EdDSA", "Ed25519", CodeProvider.BC,CodeProvider.BC, (short)256, 31536000000L, null, false, "Ed25519"),
 	BC_Ed448("EdDSA", "Ed448", CodeProvider.BC,CodeProvider.BC, (short)448, 31536000000L, null, false, "Ed448"),
-	BC_X25519("EdDSA", "X25519", CodeProvider.BC,CodeProvider.BC, (short)256, 31536000000L, null, false, "X25519"),
-	BC_X448("EdDSA", "X448", CodeProvider.BC,CodeProvider.BC, (short)448, 31536000000L, null, false, "X448"),
+	/*BC_X25519("EdDSA", "X25519", CodeProvider.BC,CodeProvider.BC, (short)256, 31536000000L, null, false, "X25519"),
+	BC_X448("EdDSA", "X448", CodeProvider.BC,CodeProvider.BC, (short)448, 31536000000L, null, false, "X448"),*/
 	DEFAULT(BC_FIPS_SHA384withRSAandMGF1);
 
 	private final String signatureAlgorithmName;

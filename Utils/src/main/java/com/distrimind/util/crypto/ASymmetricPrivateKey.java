@@ -77,6 +77,7 @@ public class ASymmetricPrivateKey extends Key {
 	private volatile transient PrivateKey nativePrivateKey;
 
 	private volatile transient gnu.vm.jgnu.security.PrivateKey gnuPrivateKey;
+	boolean xdhKey=false;
 
 	
 	@Override
@@ -98,6 +99,8 @@ public class ASymmetricPrivateKey extends Key {
 			gnuPrivateKey=null;
 		}
 	}
+
+
 
     @Override
     byte[] getKeyBytes() {
@@ -144,14 +147,15 @@ public class ASymmetricPrivateKey extends Key {
 		this.encryptionType = type;
 		this.signatureType=null;
 	}
-	ASymmetricPrivateKey(ASymmetricAuthentifiedSignatureType type, PrivateKey privateKey, short keySize) {
-		this(ASymmetricEncryptionType.encodePrivateKey(privateKey, type), keySize);
+	ASymmetricPrivateKey(ASymmetricAuthentifiedSignatureType type, PrivateKey privateKey, short keySize, boolean xdhKey) {
+		this(ASymmetricEncryptionType.encodePrivateKey(privateKey, type, xdhKey), keySize);
 		if (type == null)
 			throw new NullPointerException("type");
 		if (type.getCodeProviderForSignature() == CodeProvider.GNU_CRYPTO)
 			throw new IllegalAccessError();
 		this.encryptionType = null;
 		this.signatureType=type;
+		this.xdhKey=xdhKey;
 	}
 
 	ASymmetricPrivateKey getNewClonedPrivateKey()
@@ -206,7 +210,7 @@ public class ASymmetricPrivateKey extends Key {
 		int codedTypeSize=getEncodedTypeSize();
 		byte[] tab = new byte[3+codedTypeSize+privateKey.length];
 
-		tab[0]=encryptionType==null?(byte)2:(byte)3;
+		tab[0]=encryptionType==null?(byte)((xdhKey?Key.IS_XDH_KEY:0)|2):(byte)3;
 		Bits.putShort(tab, 1, keySizeBits);
 		Bits.putPositiveInteger(tab, 3, encryptionType==null?signatureType.ordinal():encryptionType.ordinal(), codedTypeSize);
         System.arraycopy(privateKey, 0, tab, codedTypeSize+3, privateKey.length);
@@ -267,7 +271,7 @@ public class ASymmetricPrivateKey extends Key {
 			throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException {
 		if (nativePrivateKey == null)
 			nativePrivateKey = ASymmetricEncryptionType.decodeNativePrivateKey(privateKey, encryptionType==null?signatureType.getKeyGeneratorAlgorithmName():encryptionType.getAlgorithmName(),
-					encryptionType==null?signatureType.name():encryptionType.name());
+					encryptionType==null?signatureType.name():encryptionType.name(), xdhKey);
 
 		return nativePrivateKey;
 	}

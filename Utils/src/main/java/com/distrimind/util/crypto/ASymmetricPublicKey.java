@@ -82,6 +82,8 @@ public class ASymmetricPublicKey extends Key {
 
 	private volatile transient gnu.vm.jgnu.security.PublicKey gnuPublicKey = null;
 
+	boolean xdhKey=false;
+
 	@Override
 	public void zeroize()
 	{
@@ -158,8 +160,8 @@ public class ASymmetricPublicKey extends Key {
 		this.encryptionType = type;
 		this.signatureType=null;
 	}
-	ASymmetricPublicKey(ASymmetricAuthentifiedSignatureType type, PublicKey publicKey, short keySize, long expirationUTC) {
-		this(ASymmetricEncryptionType.encodePublicKey(publicKey, type), keySize, expirationUTC);
+	ASymmetricPublicKey(ASymmetricAuthentifiedSignatureType type, PublicKey publicKey, short keySize, long expirationUTC, boolean xdhKey) {
+		this(ASymmetricEncryptionType.encodePublicKey(publicKey, type, xdhKey), keySize, expirationUTC);
 		if (type == null)
 			throw new NullPointerException("type");
 		if (type.getCodeProviderForSignature() == CodeProvider.GNU_CRYPTO)
@@ -167,6 +169,7 @@ public class ASymmetricPublicKey extends Key {
 
 		this.encryptionType = null;
 		this.signatureType=type;
+		this.xdhKey=xdhKey;
 	}
 	private ASymmetricPublicKey(byte[] publicKey, short keySize, long expirationUTC) {
 		if (publicKey == null)
@@ -215,6 +218,8 @@ public class ASymmetricPublicKey extends Key {
 		tab[0]=encryptionType==null?(byte)5:(byte)4;
 		if (includeTimeExpiration)
 			tab[0]|=Key.INCLUDE_KEY_EXPIRATION_CODE;
+		if (xdhKey)
+			tab[0]|=Key.IS_XDH_KEY;
 		Bits.putShort(tab, 1, keySizeBits);
 		Bits.putPositiveInteger(tab, 3, encryptionType==null?signatureType.ordinal():encryptionType.ordinal(), codedTypeSize);
 		int pos=3+codedTypeSize;
@@ -286,7 +291,7 @@ public class ASymmetricPublicKey extends Key {
 			throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException {
 		if (nativePublicKey == null)
 			nativePublicKey = ASymmetricEncryptionType.decodeNativePublicKey(publicKey, encryptionType==null?signatureType.getKeyGeneratorAlgorithmName():encryptionType.getAlgorithmName(),
-					encryptionType==null?signatureType.name():encryptionType.name(), encryptionType==null?signatureType.getCurveName():null);
+					encryptionType==null?signatureType.name():encryptionType.name(), encryptionType==null?signatureType.getCurveName():null, xdhKey);
 
 		return nativePublicKey;
 	}
