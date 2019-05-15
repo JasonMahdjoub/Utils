@@ -60,7 +60,7 @@ public class Utils {
 		c.set(2016, Calendar.JANUARY, 4);
 		Calendar c2 = Calendar.getInstance();
 		c.set(2019, Calendar.MAY, 15);
-		VERSION = new Version("Utils", "Utils", (short)3, (short)28, (short)1, Version.Type.Stable, (short)0, c.getTime(), c2.getTime());
+		VERSION = new Version("Utils", "Utils", (short)3, (short)28, (short)2, Version.Type.Stable, (short)0, c.getTime(), c2.getTime());
 		try {
 
 			InputStream is = Utils.class.getResourceAsStream("build.txt");
@@ -74,7 +74,7 @@ public class Utils {
 
 			c = Calendar.getInstance();
 			c.set(2019, Calendar.MAY, 15);
-			Description d = new Description((short)3, (short)28, (short)1, Version.Type.Stable, (short)0, c.getTime());
+			Description d = new Description((short)3, (short)28, (short)2, Version.Type.Stable, (short)0, c.getTime());
 			d.addItem("Add HMac-Blake2b signature.");
 			d.addItem("Add Ed25519 and Ed448 asymmetric signatures.");
 			d.addItem("Add X25519 and X448 asymmetric signatures.");

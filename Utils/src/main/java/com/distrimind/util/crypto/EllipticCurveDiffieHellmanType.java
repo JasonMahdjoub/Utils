@@ -83,7 +83,7 @@ public enum EllipticCurveDiffieHellmanType {
 	BC_ECMQV_512_CURVE_M_511((short) 256, (short) 521, CodeProvider.BCFIPS, ASymmetricAuthentifiedSignatureType.BC_SHA512withECDSA_CURVE_M_511, "ECMQVwithSHA512CKDF", FipsSHS.Algorithm.SHA512, FipsKDF.AgreementKDFPRF.SHA512, true), 
 	BC_ECMQV_384_CURVE_41417((short) 256, (short) 384, CodeProvider.BCFIPS, ASymmetricAuthentifiedSignatureType.BC_SHA384withECDSA_CURVE_41417, "ECMQVwithSHA384CKDF", FipsSHS.Algorithm.SHA384, FipsKDF.AgreementKDFPRF.SHA384, true),
 	BC_ECMQV_512_CURVE_41417((short) 256, (short) 521, CodeProvider.BCFIPS, ASymmetricAuthentifiedSignatureType.BC_SHA512withECDSA_CURVE_41417, "ECMQVwithSHA512CKDF", FipsSHS.Algorithm.SHA512, FipsKDF.AgreementKDFPRF.SHA512, true),*/ 
-	DEFAULT(BC_ECCDH_512_CURVE_25519);
+	DEFAULT(BC_XDH_X448_WITH_SHA512CKDF);
 
 	private final short keySizeBits;
 	private final short ECDHKeySizeBits;
