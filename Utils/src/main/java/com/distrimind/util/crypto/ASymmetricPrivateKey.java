@@ -301,7 +301,7 @@ public class ASymmetricPrivateKey extends Key {
 			ECPrivateKey javaNativePrivateKey=(ECPrivateKey)pk;
 			return new AsymmetricECPrivateKey(getBouncyCastleAlgorithm(), javaNativePrivateKey.getEncoded());
 		}
-		else 
+		else
 			throw new IllegalAccessError();
 		
 	}
