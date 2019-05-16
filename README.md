@@ -6,6 +6,7 @@ Set of Java tools :
 * Get size of Java memory objects
 * OS tools (OS version, trace route, hardrive tools, network speed)
 * DNS checking and email validation tool
+* Progress monitor with progress bar wrapper to enable multi-plateform compatibility
 * Cryptography tools
 	* Home interface that use of three Implementations : Java native JCE, GNU CRYPT, BouncyCastle (+ BouncyCastle FIPS and BouncyCastle PQC)
 	* Encryption algorithms does not need signed JAR to work. So the release work on official Oracle JVM.
@@ -42,7 +43,7 @@ Adapt into your build.gradle file, the next code :
 	...
 	dependencies {
 		...
-		compile(group:'com.distrimind.util', name: 'Utils', version: '3.28.2-Stable')
+		compile(group:'com.distrimind.util', name: 'Utils', version: '3.29.0-Stable')
 		...
 	}
 	...
@@ -58,7 +59,7 @@ Adapt into your pom.xml file, the next code :
 			<dependency>
 				<groupId>com.distrimind.util</groupId>
 				<artifactId>Utils</artifactId>
-				<version>3.28.2-Stable</version>
+				<version>3.29.0-Stable</version>
 			</dependency>
 			...
 		</dependencies>
