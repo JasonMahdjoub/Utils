@@ -6,6 +6,7 @@ Set of Java tools :
 * Get size of Java memory objects
 * OS tools (OS version, trace route, hardrive tools, network speed)
 * DNS checking and email validation tool
+* Progress monitor with progress bar wrapper to enable multi-plateform compatibility
 * Cryptography tools
 	* Home interface that use of three Implementations : Java native JCE, GNU CRYPT, BouncyCastle (+ BouncyCastle FIPS and BouncyCastle PQC)
 	* Encryption algorithms does not need signed JAR to work. So the release work on official Oracle JVM.
