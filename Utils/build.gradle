@@ -63,8 +63,8 @@ dependencies {
      compile(group:'org.bouncycastle', name: 'bc-prov', version: '1.61-DMRECOMPILE')
      compile(group:'org.bouncycastle', name: 'bc-fips', version: '1.0.1-DMRECOMPILE')
      compile(group:'gnu', name: 'Gnu-Crypt', version: '1.2.1')
-     compile(group:'commons-codec', name: 'commons-codec', version: '1.11')
-     compile(group:'org.yaml', name: 'snakeyaml', version: '1.23')
+     compile(group:'commons-codec', name: 'commons-codec', version: '1.12')
+     compile(group:'org.yaml', name: 'snakeyaml', version: '1.24')
 
     /*compile files('/home/jason/Téléchargements_desync/bc-fips-1.0.1.jar')
     compile files('/home/jason/Téléchargements_desync/bcprov-jdk15on-161.jar')*/
