@@ -59,6 +59,7 @@ repositories {
 dependencies {
      testCompile 'org.testng:testng:6.14.3'
 
+
      compile(group:'org.bouncycastle', name: 'bc-core', version: '1.61-DMRECOMPILE')
      compile(group:'org.bouncycastle', name: 'bc-prov', version: '1.61-DMRECOMPILE')
      compile(group:'org.bouncycastle', name: 'bc-fips', version: '1.0.1-DMRECOMPILE')
