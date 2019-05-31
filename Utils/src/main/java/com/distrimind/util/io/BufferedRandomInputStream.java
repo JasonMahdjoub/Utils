@@ -49,17 +49,26 @@ public class BufferedRandomInputStream extends RandomInputStream {
 	static final int MAX_BUFFER_SIZE=8192;
 
 	private final RandomInputStream in;
-	private final byte[][] buffers=new byte[MAX_BUFFERS_NUMBER][MAX_BUFFER_SIZE];
-	private final long[] positions=new long[MAX_BUFFERS_NUMBER];
+	private final byte[][] buffers;
+	private final long[] positions;
 	private byte[] currentBuffer=null;
 	private int currentBufferIndex=0;
-	private int previousChosenBufferIndex =MAX_BUFFERS_NUMBER-1;
+	private int previousChosenBufferIndex ;
 	private long currentPosition=0;
-
-
+	private final int maxBufferSize;
 
 	public BufferedRandomInputStream(RandomInputStream in) {
+		this(in, MAX_BUFFER_SIZE);
+	}
+	public BufferedRandomInputStream(RandomInputStream in, int maxBufferSize) {
+		this(in, maxBufferSize, MAX_BUFFERS_NUMBER);
+	}
+	public BufferedRandomInputStream(RandomInputStream in, int maxBufferSize, int maxBuffersNumber) {
 		this.in = in;
+		this.maxBufferSize=maxBufferSize;
+		this.previousChosenBufferIndex=maxBuffersNumber-1;
+		buffers=new byte[maxBuffersNumber][maxBufferSize];
+		positions=new long[maxBuffersNumber];
 		Arrays.fill(positions, -1);
 	}
 
@@ -77,13 +86,13 @@ public class BufferedRandomInputStream extends RandomInputStream {
 			long p=positions[i];
 			if (p>=0)
 			{
-				if (_pos>p && _pos<p+MAX_BUFFER_SIZE)
+				if (_pos>p && _pos<p+maxBufferSize)
 				{
 					currentBuffer = buffers[i];
 					currentBufferIndex = i;
 					break;
 				}
-				else if (_pos>=p-MAX_BUFFER_SIZE && _pos<p)
+				else if (_pos>=p-maxBufferSize && _pos<p)
 				{
 					currentBuffer = buffers[i];
 					currentBufferIndex = i;
@@ -122,7 +131,7 @@ public class BufferedRandomInputStream extends RandomInputStream {
 
 			positions[currentBufferIndex]=currentPosition;
 			in.seek(currentPosition);
-			in.readFully(currentBuffer, 0, Math.min(MAX_BUFFER_SIZE, len));
+			in.readFully(currentBuffer, 0, Math.min(maxBufferSize, len));
 		}
  	}
 
@@ -135,17 +144,17 @@ public class BufferedRandomInputStream extends RandomInputStream {
 		{
 			long curPos=positions[currentBufferIndex];
 
-			if (currentPosition>=curPos+MAX_BUFFER_SIZE)
+			if (currentPosition>=curPos+maxBufferSize)
 			{
 				curPos=positions[currentBufferIndex]=currentPosition;
 				if (first) {
 					in.seek(currentPosition);
 					first=false;
 				}
-				in.readFully(currentBuffer, 0, Math.min(MAX_BUFFER_SIZE, len));
+				in.readFully(currentBuffer, 0, Math.min(maxBufferSize, len));
 			}
 			int bufPos=(int)(currentPosition-curPos);
-			int copyLen=Math.min(len, MAX_BUFFER_SIZE-bufPos);
+			int copyLen=Math.min(len, maxBufferSize-bufPos);
 			System.arraycopy(currentBuffer, bufPos, tab, off, copyLen);
 			len-=copyLen;
 			off+=copyLen;
@@ -181,11 +190,11 @@ public class BufferedRandomInputStream extends RandomInputStream {
 		long len=in.length()-currentPosition;
 		checkCurrentBufferNotNull((int)Math.min(Integer.MAX_VALUE, len));
 		long curPos=positions[currentBufferIndex];
-		if (currentPosition>=curPos+MAX_BUFFER_SIZE)
+		if (currentPosition>=curPos+maxBufferSize)
 		{
 			curPos=positions[currentBufferIndex]=currentPosition;
 			in.seek(currentPosition);
-			in.readFully(currentBuffer, 0, (int)Math.min(MAX_BUFFER_SIZE, len));
+			in.readFully(currentBuffer, 0, (int)Math.min(maxBufferSize, len));
 		}
 		return currentBuffer[(int)((currentPosition++)-curPos)];
 	}
@@ -225,19 +234,19 @@ public class BufferedRandomInputStream extends RandomInputStream {
 		{
 			long curPos=positions[currentBufferIndex];
 
-			if (currentPosition>=curPos+MAX_BUFFER_SIZE)
+			if (currentPosition>=curPos+maxBufferSize)
 			{
 				curPos=positions[currentBufferIndex]=currentPosition;
 				if (first) {
 					in.seek(currentPosition);
 					first=false;
 				}
-				int nb=in.read(currentBuffer, 0, Math.min(MAX_BUFFER_SIZE, len));
+				int nb=in.read(currentBuffer, 0, Math.min(maxBufferSize, len));
 				if (nb<len)
 					return nb+res;
 			}
 			int bufPos=(int)(currentPosition-curPos);
-			int copyLen=Math.min(len, MAX_BUFFER_SIZE-bufPos);
+			int copyLen=Math.min(len, maxBufferSize-bufPos);
 			System.arraycopy(currentBuffer, bufPos, b, off, copyLen);
 			len-=copyLen;
 			off+=copyLen;

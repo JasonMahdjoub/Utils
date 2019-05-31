@@ -49,17 +49,28 @@ import static com.distrimind.util.io.BufferedRandomInputStream.MAX_BUFFERS_NUMBE
 public class BufferedRandomOutputStream extends RandomOutputStream{
 	private RandomOutputStream out;
 
-	private final byte[][] buffers=new byte[MAX_BUFFERS_NUMBER][MAX_BUFFER_SIZE];
-	private final long[] positions=new long[MAX_BUFFERS_NUMBER];
-	private final int[] endPositions=new int[MAX_BUFFERS_NUMBER];
+	private final byte[][] buffers;
+	private final long[] positions;
+	private final int[] endPositions;
 	private byte[] currentBuffer=null;
 	private int currentBufferIndex=0;
-	private int previousChosenBufferIndex =MAX_BUFFERS_NUMBER-1;
+	private int previousChosenBufferIndex ;
 	private long currentPosition=0;
-
+	private final int maxBufferSize;
 
 	public BufferedRandomOutputStream(RandomOutputStream out) {
+		this(out, MAX_BUFFER_SIZE);
+	}
+	public BufferedRandomOutputStream(RandomOutputStream out, int maxBufferSize) {
+		this(out, maxBufferSize, MAX_BUFFERS_NUMBER);
+	}
+	public BufferedRandomOutputStream(RandomOutputStream out, int maxBufferSize, int maxBuffersNumber) {
 		this.out = out;
+		this.maxBufferSize=maxBufferSize;
+		buffers=new byte[maxBuffersNumber][maxBufferSize];
+		positions=new long[maxBuffersNumber];
+		endPositions=new int[maxBuffersNumber];
+		previousChosenBufferIndex=maxBuffersNumber-1;
 		Arrays.fill(positions, -1);
 		Arrays.fill(endPositions, 0);
 	}
@@ -72,7 +83,7 @@ public class BufferedRandomOutputStream extends RandomOutputStream{
 			long p=positions[i];
 			if (p>=0)
 			{
-				if (_pos>p && _pos<p+MAX_BUFFER_SIZE)
+				if (_pos>p && _pos<p+maxBufferSize)
 				{
 					currentBuffer = buffers[i];
 					currentBufferIndex = i;
@@ -81,7 +92,7 @@ public class BufferedRandomOutputStream extends RandomOutputStream{
 					}
 					break;
 				}
-				else if (_pos>=p-MAX_BUFFER_SIZE && _pos<p)
+				else if (_pos>=p-maxBufferSize && _pos<p)
 				{
 					flush(i, _pos);
 					currentBuffer = buffers[i];
@@ -155,7 +166,7 @@ public class BufferedRandomOutputStream extends RandomOutputStream{
 			}
 		} else
 		{
-			if (positions[currentBufferIndex]+MAX_BUFFER_SIZE>=currentPosition) {
+			if (positions[currentBufferIndex]+maxBufferSize>=currentPosition) {
 				flush(currentBufferIndex, currentPosition);
 			}
 		}
@@ -182,27 +193,27 @@ public class BufferedRandomOutputStream extends RandomOutputStream{
 		while(len>0)
 		{
 
-			int l=Math.min(MAX_BUFFER_SIZE-curPos, len);
+			int l=Math.min(maxBufferSize-curPos, len);
 			System.arraycopy(b, off, currentBuffer, curPos, l);
 			curPos=(endPositions[currentBufferIndex]+=l);
 			len-=l;
 			currentPosition+=l;
 			off+=l;
-			if (curPos==MAX_BUFFER_SIZE)
+			if (curPos==maxBufferSize)
 				flush(currentBufferIndex, currentPosition);
 		}
 	}
 
 	@Override
 	public void flush() throws IOException {
-		for (int i=0;i<MAX_BUFFERS_NUMBER;i++)
+		for (int i=0;i<maxBufferSize;i++)
 			flush(i, currentPosition);
 		out.flush();
 	}
 
 	@Override
 	public void close() throws IOException {
-		for (int i=0;i<MAX_BUFFERS_NUMBER;i++)
+		for (int i=0;i<maxBufferSize;i++)
 			flush(i, currentPosition);
 		out.close();
 	}
