@@ -59,8 +59,8 @@ public class Utils {
 		Calendar c = Calendar.getInstance();
 		c.set(2016, Calendar.JANUARY, 4);
 		Calendar c2 = Calendar.getInstance();
-		c.set(2019, Calendar.MAY, 26);
-		VERSION = new Version("Utils", "Utils", (short)3, (short)29, (short)1, Version.Type.Stable, (short)0, c.getTime(), c2.getTime());
+		c.set(2019, Calendar.MAY, 31);
+		VERSION = new Version("Utils", "Utils", (short)3, (short)30, (short)0, Version.Type.Stable, (short)0, c.getTime(), c2.getTime());
 		try {
 
 			InputStream is = Utils.class.getResourceAsStream("build.txt");
@@ -73,8 +73,14 @@ public class Utils {
 			VERSION.addDeveloper(new PersonDeveloper("mahdjoub", "jason", c.getTime()));
 
 			c = Calendar.getInstance();
+			c.set(2019, Calendar.MAY, 31);
+			Description d = new Description((short)3, (short)30, (short)0, Version.Type.Stable, (short)0, c.getTime());
+			d.addItem("Add BufferedRandomInputStream abd BufferedRandomOutputStream.");
+			VERSION.addDescription(d);
+
+			c = Calendar.getInstance();
 			c.set(2019, Calendar.MAY, 26);
-			Description d = new Description((short)3, (short)29, (short)1, Version.Type.Stable, (short)0, c.getTime());
+			d = new Description((short)3, (short)29, (short)1, Version.Type.Stable, (short)0, c.getTime());
 			d.addItem("Add HMac-Blake2b signature.");
 			d.addItem("Add Ed25519 and Ed448 asymmetric signatures.");
 			d.addItem("Add X25519 and X448 asymmetric signatures.");
