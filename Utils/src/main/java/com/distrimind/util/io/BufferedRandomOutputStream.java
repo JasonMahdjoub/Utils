@@ -192,15 +192,23 @@ public class BufferedRandomOutputStream extends RandomOutputStream{
 		int curPos=endPositions[currentBufferIndex];
 		while(len>0)
 		{
-
+			if (curPos==0 && len>=maxBufferSize)
+			{
+				out.write(b, off, len);
+				currentPosition+=len;
+				chooseBuffer(currentPosition);
+				return;
+			}
 			int l=Math.min(maxBufferSize-curPos, len);
 			System.arraycopy(b, off, currentBuffer, curPos, l);
 			curPos=(endPositions[currentBufferIndex]+=l);
 			len-=l;
 			currentPosition+=l;
 			off+=l;
-			if (curPos==maxBufferSize)
+			if (curPos==maxBufferSize) {
 				flush(currentBufferIndex, currentPosition);
+				curPos = 0;
+			}
 		}
 	}
 
@@ -217,5 +225,7 @@ public class BufferedRandomOutputStream extends RandomOutputStream{
 			flush(i, currentPosition);
 		out.close();
 	}
+
+
 
 }

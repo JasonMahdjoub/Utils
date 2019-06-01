@@ -141,18 +141,27 @@ public class BufferedRandomInputStream extends RandomInputStream {
 
 		checkCurrentBufferNotNull(len);
 		boolean first=true;
+		long curPos=positions[currentBufferIndex];
 		while(len>0)
 		{
-			long curPos=positions[currentBufferIndex];
 
 			if (currentPosition>=curPos+maxBufferSize)
 			{
-				curPos=positions[currentBufferIndex]=currentPosition;
-				if (first) {
-					in.seek(currentPosition);
-					first=false;
+				if (len<maxBufferSize) {
+					curPos = positions[currentBufferIndex] = currentPosition;
+					if (first) {
+						in.seek(currentPosition);
+						first = false;
+					}
+					in.readFully(currentBuffer, 0, Math.min(maxBufferSize, len));
 				}
-				in.readFully(currentBuffer, 0, Math.min(maxBufferSize, len));
+				else
+				{
+					in.readFully(tab, off, len);
+					currentPosition+=len;
+					chooseBuffer(currentPosition);
+					return;
+				}
 			}
 			int bufPos=(int)(currentPosition-curPos);
 			int copyLen=Math.min(len, maxBufferSize-bufPos);
@@ -264,14 +273,23 @@ public class BufferedRandomInputStream extends RandomInputStream {
 
 			if (currentPosition>=curPos+maxBufferSize)
 			{
-				curPos=positions[currentBufferIndex]=currentPosition;
-				if (first) {
-					in.seek(currentPosition);
-					first=false;
+				if (len<maxBufferSize) {
+					curPos = positions[currentBufferIndex] = currentPosition;
+					if (first) {
+						in.seek(currentPosition);
+						first = false;
+					}
+					int nb = in.read(currentBuffer, 0, Math.min(maxBufferSize, len));
+					if (nb < len)
+						return nb + res;
 				}
-				int nb=in.read(currentBuffer, 0, Math.min(maxBufferSize, len));
-				if (nb<len)
-					return nb+res;
+				else
+				{
+					in.readFully(b, off, len);
+					currentPosition+=len;
+					chooseBuffer(currentPosition);
+					return res+len;
+				}
 			}
 			int bufPos=(int)(currentPosition-curPos);
 			int copyLen=Math.min(len, maxBufferSize-bufPos);
@@ -304,5 +322,6 @@ public class BufferedRandomInputStream extends RandomInputStream {
 	public void close() throws IOException {
 		in.close();
 	}
+
 
 }

@@ -327,4 +327,16 @@ public abstract class RandomInputStream extends InputStream implements AutoClose
 		}
 		return transferred;
 	}
+
+	public int readNBytes(byte[] b, int off, int len) throws IOException {
+		int n = 0;
+		while (n < len) {
+			int count = read(b, off + n, len - n);
+			if (count < 0)
+				break;
+			n += count;
+		}
+		return n;
+	}
+
 }
