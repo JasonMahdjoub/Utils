@@ -36,6 +36,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Arrays;
 
 /**
@@ -182,6 +183,33 @@ public class BufferedRandomInputStream extends RandomInputStream {
 			currentPosition=in.currentPosition();
 			chooseBuffer(currentPosition);
 		}
+	}
+
+	@Override
+	public byte[] readNBytes(int len) throws IOException {
+		in.seek(currentPosition);
+		byte[] res=in.readNBytes(len);
+		currentPosition=in.currentPosition();
+		chooseBuffer(currentPosition);
+		return res;
+	}
+
+	@Override
+	public byte[] readAllBytes() throws IOException {
+		in.seek(currentPosition);
+		byte[] res=in.readAllBytes();
+		currentPosition=in.currentPosition();
+		chooseBuffer(currentPosition);
+		return res;
+	}
+
+	@Override
+	public long transferTo(OutputStream out) throws IOException {
+		in.seek(currentPosition);
+		long res=in.transferTo(out);
+		currentPosition=in.currentPosition();
+		chooseBuffer(currentPosition);
+		return res;
 	}
 
 	@Override
