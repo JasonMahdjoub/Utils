@@ -35,33 +35,28 @@ knowledge of the CeCILL-C license and that you accept its terms.
 package com.distrimind.util.crypto;
 
 import java.io.IOException;
-import java.security.InvalidAlgorithmParameterException;
+import java.security.*;
+import java.security.spec.InvalidKeySpecException;
 import java.security.spec.MGF1ParameterSpec;
 import java.security.spec.PSSParameterSpec;
 
 
 import com.distrimind.util.Bits;
 
-import gnu.vm.jgnu.security.InvalidKeyException;
-import gnu.vm.jgnu.security.NoSuchAlgorithmException;
-import gnu.vm.jgnu.security.NoSuchProviderException;
-import gnu.vm.jgnu.security.SignatureException;
-import gnu.vm.jgnu.security.spec.InvalidKeySpecException;
-
 /**
  * 
  * @author Jason Mahdjoub
- * @version 4.1
+ * @version 5.0
  * @since Utils 1.7
  */
-public class ASymmetricAuthentifiedSignerAlgorithm extends AbstractAuthentifiedSignerAlgorithm {
+public class ASymmetricAuthenticatedSignerAlgorithm extends AbstractAuthentifiedSignerAlgorithm {
 	private final ASymmetricPrivateKey localPrivateKey;
 	private final AbstractSignature signature;
 	private final int macLength;
-	private final ASymmetricAuthentifiedSignatureType type;
+	private final ASymmetricAuthenticatedSignatureType type;
 	private boolean includeParameter=false;
 	@SuppressWarnings("deprecation")
-	public ASymmetricAuthentifiedSignerAlgorithm(ASymmetricPrivateKey localPrivateKey) throws NoSuchAlgorithmException, NoSuchProviderException {
+	public ASymmetricAuthenticatedSignerAlgorithm(ASymmetricPrivateKey localPrivateKey) throws NoSuchAlgorithmException, NoSuchProviderException {
 		if (localPrivateKey == null)
 			throw new NullPointerException("localPrivateKey");
 		type=localPrivateKey.getAuthentifiedSignatureAlgorithmType();
@@ -82,30 +77,25 @@ public class ASymmetricAuthentifiedSignerAlgorithm extends AbstractAuthentifiedS
 
 
 	@Override
-	public void init() throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, gnu.vm.jgnu.security.InvalidAlgorithmParameterException {
-		try
+	public void init() throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidAlgorithmParameterException {
+		includeParameter=false;
+		if (type== ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA256withRSAandMGF1)
 		{
-			includeParameter=false;
-			if (type==ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA256withRSAandMGF1)
-			{
-				((JavaNativeSignature)signature).getSignature().setParameter(new PSSParameterSpec("SHA-256","MGF1",new MGF1ParameterSpec("SHA-256"),0, PSSParameterSpec.DEFAULT.getTrailerField()));
-				includeParameter=true;
-			}
-			else if (type==ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA384withRSAandMGF1)
-			{
-				((JavaNativeSignature)signature).getSignature().setParameter(new PSSParameterSpec("SHA-384","MGF1",new MGF1ParameterSpec("SHA-384"),0, PSSParameterSpec.DEFAULT.getTrailerField()));
-				includeParameter=true;
-			}
-			else if (type==ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA512withRSAandMGF1)
-			{
-				((JavaNativeSignature)signature).getSignature().setParameter(new PSSParameterSpec("SHA-512","MGF1",new MGF1ParameterSpec("SHA-512"),0, PSSParameterSpec.DEFAULT.getTrailerField()));
-				includeParameter=true;
-			}
-		
-			signature.initSign(localPrivateKey);
-		}catch (InvalidAlgorithmParameterException e) {
-			throw new gnu.vm.jgnu.security.InvalidAlgorithmParameterException(e);
+			((JavaNativeSignature)signature).getSignature().setParameter(new PSSParameterSpec("SHA-256","MGF1",new MGF1ParameterSpec("SHA-256"),0, PSSParameterSpec.DEFAULT.getTrailerField()));
+			includeParameter=true;
 		}
+		else if (type== ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA384withRSAandMGF1)
+		{
+			((JavaNativeSignature)signature).getSignature().setParameter(new PSSParameterSpec("SHA-384","MGF1",new MGF1ParameterSpec("SHA-384"),0, PSSParameterSpec.DEFAULT.getTrailerField()));
+			includeParameter=true;
+		}
+		else if (type== ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA512withRSAandMGF1)
+		{
+			((JavaNativeSignature)signature).getSignature().setParameter(new PSSParameterSpec("SHA-512","MGF1",new MGF1ParameterSpec("SHA-512"),0, PSSParameterSpec.DEFAULT.getTrailerField()));
+			includeParameter=true;
+		}
+
+		signature.initSign(localPrivateKey);
 	}
 
 	@Override
@@ -136,7 +126,7 @@ public class ASymmetricAuthentifiedSignerAlgorithm extends AbstractAuthentifiedS
 			SignatureException, IOException {
 		if (includeParameter)
 		{
-			byte s[]=getSignature();
+			byte[] s = getSignature();
 			System.arraycopy(s, 0, signature, off_sig, s.length);
 		}
 		else

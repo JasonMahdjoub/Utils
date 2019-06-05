@@ -45,14 +45,14 @@ import gnu.vm.jgnu.security.spec.InvalidKeySpecException;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 2.0
  * @since Utils 2.0
  *
  */
 public final class GnuSignature extends AbstractSignature {
-	private final Signature signature;
+	private final Object signature;
 
-	GnuSignature(Signature signature) {
+	GnuSignature(Object signature) {
 		this.signature = signature;
 	}
 

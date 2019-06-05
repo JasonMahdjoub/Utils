@@ -34,25 +34,26 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
-import gnu.vm.jgnu.security.InvalidAlgorithmParameterException;
-import gnu.vm.jgnu.security.NoSuchAlgorithmException;
-import gnu.vm.jgnu.security.NoSuchProviderException;
+
+import java.security.InvalidAlgorithmParameterException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 
 /**
  * 
  * @author Jason Mahdjoub
- * @version 2.1
+ * @version 3.0
  * @since Utils 2.0
  */
 public abstract class AbstractKeyPairGenerator {
 	protected final ASymmetricEncryptionType encryptionType;
-	protected final ASymmetricAuthentifiedSignatureType signatureType;
+	protected final ASymmetricAuthenticatedSignatureType signatureType;
 
 	AbstractKeyPairGenerator(ASymmetricEncryptionType type) {
 		this.encryptionType = type;
 		this.signatureType=null;
 	}
-	AbstractKeyPairGenerator(ASymmetricAuthentifiedSignatureType type) {
+	AbstractKeyPairGenerator(ASymmetricAuthenticatedSignatureType type) {
 		this.encryptionType = null;
 		this.signatureType=type;
 	}

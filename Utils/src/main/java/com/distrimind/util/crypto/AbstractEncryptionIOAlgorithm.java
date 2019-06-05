@@ -34,26 +34,26 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.ShortBufferException;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import gnu.vm.jgnu.security.InvalidAlgorithmParameterException;
-import gnu.vm.jgnu.security.InvalidKeyException;
-import gnu.vm.jgnu.security.NoSuchAlgorithmException;
-import gnu.vm.jgnu.security.NoSuchProviderException;
-import gnu.vm.jgnu.security.spec.InvalidKeySpecException;
-import gnu.vm.jgnux.crypto.BadPaddingException;
-import gnu.vm.jgnux.crypto.IllegalBlockSizeException;
-import gnu.vm.jgnux.crypto.NoSuchPaddingException;
-import gnu.vm.jgnux.crypto.ShortBufferException;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.spec.InvalidKeySpecException;
 
 /**
  * 
  * @author Jason Mahdjoub
- * @version 3.0
+ * @version 4.0
  * @since Utils 1.5
  */
 public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOutputAlgorithm {
@@ -142,7 +142,7 @@ public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOu
 	{
 		decode(is, null, 0, 0, os, length);
 	}
-	public void decode(InputStream is, OutputStream os, int length, byte externalCounter[]) throws InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException, IllegalStateException, ShortBufferException
+	public void decode(InputStream is, OutputStream os, int length, byte[] externalCounter) throws InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException, IllegalStateException, ShortBufferException
 	{
 		decode(is, null, 0, 0, os, length, externalCounter);
 	}
@@ -150,7 +150,8 @@ public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOu
 	{
 		decode(is, associatedData, 0, associatedData==null?0:associatedData.length, os, length);
 	}
-	private byte iv[]=null;
+
+	private byte[] iv = null;
 	public void decode(InputStream is, byte[] associatedData, int offAD, int lenAD, OutputStream os, int length)
 			throws InvalidKeyException, InvalidAlgorithmParameterException, IOException, IllegalBlockSizeException,
 			BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IllegalStateException, ShortBufferException {

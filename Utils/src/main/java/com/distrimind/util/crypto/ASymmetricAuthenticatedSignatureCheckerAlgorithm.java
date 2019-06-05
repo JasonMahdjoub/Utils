@@ -35,18 +35,13 @@ knowledge of the CeCILL-C license and that you accept its terms.
 package com.distrimind.util.crypto;
 
 import java.io.IOException;
-import java.security.AlgorithmParameters;
-import java.security.InvalidAlgorithmParameterException;
+import java.security.*;
+import java.security.spec.InvalidKeySpecException;
 import java.security.spec.InvalidParameterSpecException;
 import java.security.spec.PSSParameterSpec;
 
 import com.distrimind.util.Bits;
 
-import gnu.vm.jgnu.security.InvalidKeyException;
-import gnu.vm.jgnu.security.NoSuchAlgorithmException;
-import gnu.vm.jgnu.security.NoSuchProviderException;
-import gnu.vm.jgnu.security.SignatureException;
-import gnu.vm.jgnu.security.spec.InvalidKeySpecException;
 
 /**
  * 
@@ -54,15 +49,15 @@ import gnu.vm.jgnu.security.spec.InvalidKeySpecException;
  * @version 3.0
  * @since Utils 1.7
  */
-public class ASymmetricAuthentifiedSignatureCheckerAlgorithm extends AbstractAuthentifiedCheckerAlgorithm {
+public class ASymmetricAuthenticatedSignatureCheckerAlgorithm extends AbstractAuthenticatedCheckerAlgorithm {
 	private final ASymmetricPublicKey distantPublicKey;
 
 	private final AbstractSignature signer;
-	private final ASymmetricAuthentifiedSignatureType type;
+	private final ASymmetricAuthenticatedSignatureType type;
 
 	private byte[] signature=null;
-	public ASymmetricAuthentifiedSignatureCheckerAlgorithm(ASymmetricPublicKey distantPublicKey)
-			throws gnu.vm.jgnu.security.NoSuchAlgorithmException, NoSuchProviderException {
+	public ASymmetricAuthenticatedSignatureCheckerAlgorithm(ASymmetricPublicKey distantPublicKey)
+			throws NoSuchAlgorithmException, NoSuchProviderException {
 		if (distantPublicKey == null)
 			throw new NullPointerException("distantPublicKey");
 		type=distantPublicKey.getAuthentifiedSignatureAlgorithmType();
@@ -80,30 +75,18 @@ public class ASymmetricAuthentifiedSignatureCheckerAlgorithm extends AbstractAut
 
 	@Override
 	public void init(byte[] signature, int offs, int lens)
-			throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, gnu.vm.jgnu.security.InvalidAlgorithmParameterException, gnu.vm.jgnu.security.spec.InvalidParameterSpecException, IOException {
-		if (type==ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA256withRSAandMGF1 || type==ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA384withRSAandMGF1 || type==ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA512withRSAandMGF1)
+			throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, InvalidAlgorithmParameterException, InvalidParameterSpecException, IOException {
+		if (type== ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA256withRSAandMGF1 || type== ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA384withRSAandMGF1 || type== ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA512withRSAandMGF1)
 		{
-			try {
-				byte[][] tmp=Bits.separateEncodingsWithIntSizedTabs(signature, offs, lens);
-				this.signature=tmp[0];
-				byte[] encParameters=tmp[1];
-				AlgorithmParameters pssParameters;
-				pssParameters = AlgorithmParameters.getInstance("PSS","BCFIPS");
-				pssParameters.init(encParameters);
-				
-				PSSParameterSpec pssParameterSpec = pssParameters.getParameterSpec(PSSParameterSpec.class);
-				((JavaNativeSignature)signer).getSignature().setParameter(pssParameterSpec);
-				
-			} catch (java.security.NoSuchAlgorithmException e) {
-				throw new NoSuchAlgorithmException(e);
-			} catch (java.security.NoSuchProviderException e) {
-				throw new NoSuchProviderException(e.getMessage());
-			} catch (InvalidAlgorithmParameterException e) {
-				throw new gnu.vm.jgnu.security.InvalidAlgorithmParameterException(e);
-			} catch (InvalidParameterSpecException e) {
-				throw new gnu.vm.jgnu.security.spec.InvalidParameterSpecException(e.getMessage());
-			}
-			
+			byte[][] tmp=Bits.separateEncodingsWithIntSizedTabs(signature, offs, lens);
+			this.signature=tmp[0];
+			byte[] encParameters=tmp[1];
+			AlgorithmParameters pssParameters;
+			pssParameters = AlgorithmParameters.getInstance("PSS","BCFIPS");
+			pssParameters.init(encParameters);
+
+			PSSParameterSpec pssParameterSpec = pssParameters.getParameterSpec(PSSParameterSpec.class);
+			((JavaNativeSignature)signer).getSignature().setParameter(pssParameterSpec);
 		}
 		else
 		{

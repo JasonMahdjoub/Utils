@@ -462,7 +462,7 @@ public enum SecureRandomType {
 			}
 		}
 	}
-	static byte[] tryToGenerateNativeNonBlockingSeed(final int numBytes) throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.NoSuchProviderException
+	static byte[] tryToGenerateNativeNonBlockingSeed(final int numBytes) throws NoSuchAlgorithmException, NoSuchProviderException
 	{
 		if (OSVersion.getCurrentOSVersion()!=null && OSVersion.getCurrentOSVersion().getOS().isUnix())
 		{

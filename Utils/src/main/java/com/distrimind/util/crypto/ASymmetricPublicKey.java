@@ -71,7 +71,7 @@ public class ASymmetricPublicKey extends Key {
 	private final short keySizeBits;
 
 	private ASymmetricEncryptionType encryptionType;
-	private ASymmetricAuthentifiedSignatureType signatureType;
+	private ASymmetricAuthenticatedSignatureType signatureType;
 
 
 	private final int hashCode;
@@ -123,7 +123,7 @@ public class ASymmetricPublicKey extends Key {
 		this.encryptionType = type;
 		this.signatureType=null;
 	}
-	ASymmetricPublicKey(ASymmetricAuthentifiedSignatureType type, byte[] publicKey, short keySize, long expirationUTC) {
+	ASymmetricPublicKey(ASymmetricAuthenticatedSignatureType type, byte[] publicKey, short keySize, long expirationUTC) {
 		this(publicKey, keySize, expirationUTC);
 		if (type == null)
 			throw new NullPointerException("type");
@@ -140,8 +140,8 @@ public class ASymmetricPublicKey extends Key {
 		this.encryptionType = type;
 		this.signatureType=null;
 	}
-	ASymmetricPublicKey(ASymmetricAuthentifiedSignatureType type, gnu.vm.jgnu.security.PublicKey publicKey, short keySize,
-			long expirationUTC) {
+	ASymmetricPublicKey(ASymmetricAuthenticatedSignatureType type, gnu.vm.jgnu.security.PublicKey publicKey, short keySize,
+						long expirationUTC) {
 		this(publicKey, keySize, expirationUTC);
 		if (type == null)
 			throw new NullPointerException("type");
@@ -160,7 +160,7 @@ public class ASymmetricPublicKey extends Key {
 		this.encryptionType = type;
 		this.signatureType=null;
 	}
-	ASymmetricPublicKey(ASymmetricAuthentifiedSignatureType type, PublicKey publicKey, short keySize, long expirationUTC, boolean xdhKey) {
+	ASymmetricPublicKey(ASymmetricAuthenticatedSignatureType type, PublicKey publicKey, short keySize, long expirationUTC, boolean xdhKey) {
 		this(ASymmetricEncryptionType.encodePublicKey(publicKey, type, xdhKey), keySize, expirationUTC);
 		if (type == null)
 			throw new NullPointerException("type");
@@ -249,7 +249,7 @@ public class ASymmetricPublicKey extends Key {
 	public ASymmetricEncryptionType getEncryptionAlgorithmType() {
 		return encryptionType;
 	}
-	public ASymmetricAuthentifiedSignatureType getAuthentifiedSignatureAlgorithmType() {
+	public ASymmetricAuthenticatedSignatureType getAuthentifiedSignatureAlgorithmType() {
 		return signatureType;
 	}
 

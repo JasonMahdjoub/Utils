@@ -102,9 +102,9 @@ public class CryptoTests {
 	
 	@DataProvider(name = "provideDataForASymetricSignatures")
 	public Object[][] provideDataForASymetricSignatures() {
-		Object[][] res = new Object[ASymmetricAuthentifiedSignatureType.values().length][];
+		Object[][] res = new Object[ASymmetricAuthenticatedSignatureType.values().length][];
 		int i = 0;
-		for (ASymmetricAuthentifiedSignatureType v : ASymmetricAuthentifiedSignatureType.values()) {
+		for (ASymmetricAuthenticatedSignatureType v : ASymmetricAuthenticatedSignatureType.values()) {
 			Object[] o = new Object[1];
 			o[0] = v;
 			res[i++] = o;
@@ -138,12 +138,12 @@ public class CryptoTests {
 	@SuppressWarnings("deprecation")
 	@DataProvider(name = "provideDataForASymmetricSignatureTest", parallel = true)
 	public Object[][] provideDataForASymmetricSignatureTest() throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException {
-		Object[][] res = new Object[ASymmetricAuthentifiedSignatureType.values().length
+		Object[][] res = new Object[ASymmetricAuthenticatedSignatureType.values().length
 				* keySizes.length][];
 		int index = 0;
 		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getSingleton(null);
-		for (ASymmetricAuthentifiedSignatureType st : ASymmetricAuthentifiedSignatureType.values()) {
-			if (st.getSignatureAlgorithmName().equals(ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA384withECDSA_P_384.getSignatureAlgorithmName()))
+		for (ASymmetricAuthenticatedSignatureType st : ASymmetricAuthenticatedSignatureType.values()) {
+			if (st.getSignatureAlgorithmName().equals(ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA384withECDSA_P_384.getSignatureAlgorithmName()))
 			{
 				Object[] o = new Object[3];
 				o[0]=st;
@@ -151,7 +151,7 @@ public class CryptoTests {
 				o[2] = 384;
 				res[index++] = o;
 			}
-			else if (st.getSignatureAlgorithmName().equals(ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA256withECDSA_P_256.getSignatureAlgorithmName()))
+			else if (st.getSignatureAlgorithmName().equals(ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA256withECDSA_P_256.getSignatureAlgorithmName()))
 			{
 				Object[] o = new Object[3];
 				o[0]=st;
@@ -159,7 +159,7 @@ public class CryptoTests {
 				o[2] = 256;
 				res[index++] = o;
 			}
-			else if (st.getSignatureAlgorithmName().equals(ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA512withECDSA_P_521.getSignatureAlgorithmName()))
+			else if (st.getSignatureAlgorithmName().equals(ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA512withECDSA_P_521.getSignatureAlgorithmName()))
 			{
 				Object[] o = new Object[3];
 				o[0]=st;
@@ -328,13 +328,13 @@ public class CryptoTests {
 	}
 
 
-	private ASymmetricKeyPair generateKeyPair(ASymmetricAuthentifiedSignatureType type) throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException {
+	private ASymmetricKeyPair generateKeyPair(ASymmetricAuthenticatedSignatureType type) throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException {
 		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getSingleton(null);
 
 		@SuppressWarnings("deprecation")
-		boolean isECDSA=type==ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA384withECDSA_P_384
-				|| 	type==ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA256withECDSA_P_256
-				|| type==ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA512withECDSA_P_521;
+		boolean isECDSA=type== ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA384withECDSA_P_384
+				|| 	type== ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA256withECDSA_P_256
+				|| type== ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA512withECDSA_P_521;
 
 		return type.getKeyPairGenerator(rand, isECDSA?type.getDefaultKeySize():(short)1024).generateKeyPair();
 	}
@@ -345,7 +345,7 @@ public class CryptoTests {
 	}
 
 	@Test(dataProvider = "provideDataForASymetricSignatures")
-	public void testASymmetricKeyPairEncoding(ASymmetricAuthentifiedSignatureType type)
+	public void testASymmetricKeyPairEncoding(ASymmetricAuthenticatedSignatureType type)
 			throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException, InvalidKeySpecException {
 		System.out.println("Testing ASymmetricKeyPairEncoding " + type);
 
@@ -390,7 +390,7 @@ public class CryptoTests {
 
 	}
 	@Test(dataProvider = "provideDataForASymetricSignatures")
-	public void testASymmetricKeyExpirationTimeChange(ASymmetricAuthentifiedSignatureType type) throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException {
+	public void testASymmetricKeyExpirationTimeChange(ASymmetricAuthenticatedSignatureType type) throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException {
 		testASymmetricKeyExpirationTimeChange(generateKeyPair(type));
 	}
 	@Test(dataProvider = "provideDataForASymetricEncryptions")
@@ -630,7 +630,7 @@ public class CryptoTests {
 
 		ArrayList<Object[]> res = new ArrayList<>();
 		SymmetricSecretKey secretKey=SymmetricAuthentifiedSignatureType.BC_FIPS_HMAC_SHA2_384.getKeyGenerator(SecureRandomType.DEFAULT.getInstance(null)).generateKey();
-		ASymmetricKeyPair keyPair=ASymmetricAuthentifiedSignatureType.BC_SHA256withECDSA_CURVE_25519.getKeyPairGenerator(SecureRandomType.DEFAULT.getInstance(null)).generateKeyPair();
+		ASymmetricKeyPair keyPair= ASymmetricAuthenticatedSignatureType.BC_SHA256withECDSA_CURVE_25519.getKeyPairGenerator(SecureRandomType.DEFAULT.getInstance(null)).generateKeyPair();
 		for (byte[] m : messagesToEncrypt) {
 			for (boolean expectedVerify : new boolean[] { true, false }) {
 				for (byte[] s : new byte[][] { null, salt }) {
@@ -1019,34 +1019,34 @@ public class CryptoTests {
 
 	@SuppressWarnings("deprecation")
 	@Test(dataProvider = "provideDataForASymmetricSignatureTest")
-	public void testAsymmetricSignatures(ASymmetricAuthentifiedSignatureType type, ASymmetricKeyPair kpd, int keySize)
+	public void testAsymmetricSignatures(ASymmetricAuthenticatedSignatureType type, ASymmetricKeyPair kpd, int keySize)
 			throws NoSuchAlgorithmException, InvalidKeyException, SignatureException, InvalidKeySpecException,
 			NoSuchProviderException, IllegalStateException, InvalidAlgorithmParameterException, InvalidParameterSpecException, IOException {
 		System.out.println("Testing asymmetric signature : " +type+", "+ keySize+", "+kpd.getASymmetricPublicKey().getKeyBytes().length);
 		byte[] b = kpd.encode(true);
 		ASymmetricKeyPair kpd2=ASymmetricKeyPair.decode(b);
 		Assert.assertEquals(kpd2, kpd);
-		ASymmetricAuthentifiedSignerAlgorithm signer = new ASymmetricAuthentifiedSignerAlgorithm(kpd.getASymmetricPrivateKey());
-		ASymmetricAuthentifiedSignatureCheckerAlgorithm checker = new ASymmetricAuthentifiedSignatureCheckerAlgorithm(kpd.getASymmetricPublicKey());
+		ASymmetricAuthenticatedSignerAlgorithm signer = new ASymmetricAuthenticatedSignerAlgorithm(kpd.getASymmetricPrivateKey());
+		ASymmetricAuthenticatedSignatureCheckerAlgorithm checker = new ASymmetricAuthenticatedSignatureCheckerAlgorithm(kpd.getASymmetricPublicKey());
 		byte[] signature=testSignature(signer, checker);
-		if (kpd.getAuthentifiedSignatureAlgorithmType()!=ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA384withECDSA_P_384
-				&& kpd.getAuthentifiedSignatureAlgorithmType()!=ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA256withECDSA_P_256
-				&& kpd.getAuthentifiedSignatureAlgorithmType()!=ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA512withECDSA_P_521
-				&& kpd.getAuthentifiedSignatureAlgorithmType()!=ASymmetricAuthentifiedSignatureType.BC_SHA256withECDSA_CURVE_25519
-				&& kpd.getAuthentifiedSignatureAlgorithmType()!=ASymmetricAuthentifiedSignatureType.BC_SHA384withECDSA_CURVE_25519
-				&& kpd.getAuthentifiedSignatureAlgorithmType()!=ASymmetricAuthentifiedSignatureType.BC_SHA512withECDSA_CURVE_25519
-				/*&& kpd.getAuthentifiedSignatureAlgorithmType()!=ASymmetricAuthentifiedSignatureType.BC_SHA256withECDSA_CURVE_M_511
-				&& kpd.getAuthentifiedSignatureAlgorithmType()!=ASymmetricAuthentifiedSignatureType.BC_SHA384withECDSA_CURVE_M_511
-				&& kpd.getAuthentifiedSignatureAlgorithmType()!=ASymmetricAuthentifiedSignatureType.BC_SHA512withECDSA_CURVE_M_511	
-				&& kpd.getAuthentifiedSignatureAlgorithmType()!=ASymmetricAuthentifiedSignatureType.BC_SHA256withECDSA_CURVE_M_221
-				&& kpd.getAuthentifiedSignatureAlgorithmType()!=ASymmetricAuthentifiedSignatureType.BC_SHA384withECDSA_CURVE_M_221
-				&& kpd.getAuthentifiedSignatureAlgorithmType()!=ASymmetricAuthentifiedSignatureType.BC_SHA512withECDSA_CURVE_M_221	
-				&& kpd.getAuthentifiedSignatureAlgorithmType()!=ASymmetricAuthentifiedSignatureType.BC_SHA256withECDSA_CURVE_M_383
-				&& kpd.getAuthentifiedSignatureAlgorithmType()!=ASymmetricAuthentifiedSignatureType.BC_SHA384withECDSA_CURVE_M_383
-				&& kpd.getAuthentifiedSignatureAlgorithmType()!=ASymmetricAuthentifiedSignatureType.BC_SHA512withECDSA_CURVE_M_383	
-				&& kpd.getAuthentifiedSignatureAlgorithmType()!=ASymmetricAuthentifiedSignatureType.BC_SHA256withECDSA_CURVE_41417
-				&& kpd.getAuthentifiedSignatureAlgorithmType()!=ASymmetricAuthentifiedSignatureType.BC_SHA384withECDSA_CURVE_41417
-				&& kpd.getAuthentifiedSignatureAlgorithmType()!=ASymmetricAuthentifiedSignatureType.BC_SHA512withECDSA_CURVE_41417	*/
+		if (kpd.getAuthentifiedSignatureAlgorithmType()!= ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA384withECDSA_P_384
+				&& kpd.getAuthentifiedSignatureAlgorithmType()!= ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA256withECDSA_P_256
+				&& kpd.getAuthentifiedSignatureAlgorithmType()!= ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA512withECDSA_P_521
+				&& kpd.getAuthentifiedSignatureAlgorithmType()!= ASymmetricAuthenticatedSignatureType.BC_SHA256withECDSA_CURVE_25519
+				&& kpd.getAuthentifiedSignatureAlgorithmType()!= ASymmetricAuthenticatedSignatureType.BC_SHA384withECDSA_CURVE_25519
+				&& kpd.getAuthentifiedSignatureAlgorithmType()!= ASymmetricAuthenticatedSignatureType.BC_SHA512withECDSA_CURVE_25519
+				/*&& kpd.getAuthentifiedSignatureAlgorithmType()!=ASymmetricAuthenticatedSignatureType.BC_SHA256withECDSA_CURVE_M_511
+				&& kpd.getAuthentifiedSignatureAlgorithmType()!=ASymmetricAuthenticatedSignatureType.BC_SHA384withECDSA_CURVE_M_511
+				&& kpd.getAuthentifiedSignatureAlgorithmType()!=ASymmetricAuthenticatedSignatureType.BC_SHA512withECDSA_CURVE_M_511
+				&& kpd.getAuthentifiedSignatureAlgorithmType()!=ASymmetricAuthenticatedSignatureType.BC_SHA256withECDSA_CURVE_M_221
+				&& kpd.getAuthentifiedSignatureAlgorithmType()!=ASymmetricAuthenticatedSignatureType.BC_SHA384withECDSA_CURVE_M_221
+				&& kpd.getAuthentifiedSignatureAlgorithmType()!=ASymmetricAuthenticatedSignatureType.BC_SHA512withECDSA_CURVE_M_221
+				&& kpd.getAuthentifiedSignatureAlgorithmType()!=ASymmetricAuthenticatedSignatureType.BC_SHA256withECDSA_CURVE_M_383
+				&& kpd.getAuthentifiedSignatureAlgorithmType()!=ASymmetricAuthenticatedSignatureType.BC_SHA384withECDSA_CURVE_M_383
+				&& kpd.getAuthentifiedSignatureAlgorithmType()!=ASymmetricAuthenticatedSignatureType.BC_SHA512withECDSA_CURVE_M_383
+				&& kpd.getAuthentifiedSignatureAlgorithmType()!=ASymmetricAuthenticatedSignatureType.BC_SHA256withECDSA_CURVE_41417
+				&& kpd.getAuthentifiedSignatureAlgorithmType()!=ASymmetricAuthenticatedSignatureType.BC_SHA384withECDSA_CURVE_41417
+				&& kpd.getAuthentifiedSignatureAlgorithmType()!=ASymmetricAuthenticatedSignatureType.BC_SHA512withECDSA_CURVE_41417	*/
 				)
 			Assert.assertEquals(kpd.getAuthentifiedSignatureAlgorithmType().getSignatureSizeBits(kpd.getKeySizeBits()), signature.length*8);
 	}
@@ -1223,7 +1223,7 @@ public class CryptoTests {
 		return res2;
 	}
 	
-	private byte[] testSignature(AbstractAuthentifiedSignerAlgorithm signer, AbstractAuthentifiedCheckerAlgorithm checker) throws InvalidKeyException, SignatureException, NoSuchAlgorithmException, InvalidKeySpecException, IllegalStateException, NoSuchProviderException, InvalidAlgorithmParameterException, InvalidParameterSpecException, IOException
+	private byte[] testSignature(AbstractAuthentifiedSignerAlgorithm signer, AbstractAuthenticatedCheckerAlgorithm checker) throws InvalidKeyException, SignatureException, NoSuchAlgorithmException, InvalidKeySpecException, IllegalStateException, NoSuchProviderException, InvalidAlgorithmParameterException, InvalidParameterSpecException, IOException
 	{
 		byte[] m = new byte[100000];
 		Random r=new Random(System.currentTimeMillis());
@@ -1251,7 +1251,7 @@ public class CryptoTests {
 			NoSuchProviderException, IllegalStateException, InvalidAlgorithmParameterException, InvalidParameterSpecException, IOException {
 		System.out.println("Testing symmetric signature : " + secretKey.getAuthentifiedSignatureAlgorithmType());
 		SymmetricAuthentifiedSignerAlgorithm signer = new SymmetricAuthentifiedSignerAlgorithm(secretKey);
-		SymmetricAuthentifiedSignatureCheckerAlgorithm checker = new SymmetricAuthentifiedSignatureCheckerAlgorithm(secretKey);
+		SymmetricAuthenticatedSignatureCheckerAlgorithm checker = new SymmetricAuthenticatedSignatureCheckerAlgorithm(secretKey);
 		byte[] signature=testSignature(signer, checker);
 		Assert.assertEquals(signature.length*8, secretKey.getAuthentifiedSignatureAlgorithmType().getSignatureSizeInBits());
 	}
@@ -1537,7 +1537,7 @@ public class CryptoTests {
 	}
 	private void testSignatureAfterKeyExchange(SymmetricSecretKey keySigner, SymmetricSecretKey keyChecker) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidKeyException, SignatureException, InvalidKeySpecException, IllegalStateException, InvalidAlgorithmParameterException, IOException, InvalidParameterSpecException
 	{
-		SymmetricAuthentifiedSignatureCheckerAlgorithm checker=new SymmetricAuthentifiedSignatureCheckerAlgorithm(keyChecker);
+		SymmetricAuthenticatedSignatureCheckerAlgorithm checker=new SymmetricAuthenticatedSignatureCheckerAlgorithm(keyChecker);
 		SymmetricAuthentifiedSignerAlgorithm signer=new SymmetricAuthentifiedSignerAlgorithm(keySigner);
 
 		for (byte[] m : messagesToEncrypt) {

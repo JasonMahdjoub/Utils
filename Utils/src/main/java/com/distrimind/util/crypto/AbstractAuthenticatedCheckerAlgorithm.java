@@ -36,44 +36,47 @@ package com.distrimind.util.crypto;
 
 import java.io.IOException;
 
-import gnu.vm.jgnu.security.InvalidKeyException;
-import gnu.vm.jgnu.security.NoSuchAlgorithmException;
-import gnu.vm.jgnu.security.NoSuchProviderException;
-import gnu.vm.jgnu.security.SignatureException;
-import gnu.vm.jgnu.security.spec.InvalidKeySpecException;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.SignatureException;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.InvalidParameterSpecException;
+
 
 /**
  * 
  * @author Jason Mahdjoub
- * @version 2.0
+ * @version 3.0
  * @since Utils 2.10.0
  */
-public abstract class AbstractAuthentifiedCheckerAlgorithm {
+public abstract class AbstractAuthenticatedCheckerAlgorithm {
 
-	public void init(byte signature[]) throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, gnu.vm.jgnu.security.InvalidAlgorithmParameterException, gnu.vm.jgnu.security.spec.InvalidParameterSpecException, IOException
+	public void init(byte[] signature) throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, InvalidAlgorithmParameterException, InvalidParameterSpecException, IOException
 	{
 		init(signature, 0, signature.length);
 	}
-	public abstract void init(byte signature[], int offs, int lens) throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, gnu.vm.jgnu.security.InvalidAlgorithmParameterException, gnu.vm.jgnu.security.spec.InvalidParameterSpecException, IOException;
+	public abstract void init(byte[] signature, int offs, int lens) throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, InvalidAlgorithmParameterException, InvalidParameterSpecException, IOException;
 	
-	public void update(byte message[]) throws SignatureException
+	public void update(byte[] message) throws SignatureException
 	{
 		update(message,0, message.length);
 	}
 	
 	
-	public abstract void update(byte message[], int offm, int lenm) throws SignatureException ;
+	public abstract void update(byte[] message, int offm, int lenm) throws SignatureException ;
 
 	public abstract boolean verify()
 			throws SignatureException, IllegalStateException;
 
-	public boolean verify(byte message[], byte signature[])
-			throws SignatureException, InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, IllegalStateException, IOException, NoSuchProviderException, gnu.vm.jgnu.security.InvalidAlgorithmParameterException, gnu.vm.jgnu.security.spec.InvalidParameterSpecException {
+	public boolean verify(byte[] message, byte[] signature)
+			throws SignatureException, InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, IllegalStateException, IOException, NoSuchProviderException, InvalidAlgorithmParameterException, InvalidParameterSpecException {
 		return this.verify(message, 0, message.length, signature, 0, signature.length);
 	}
 
-	public boolean verify(byte message[], int offm, int lenm, byte signature[], int offs, int lens)
-			throws SignatureException, InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, IllegalStateException, IOException, NoSuchProviderException, gnu.vm.jgnu.security.InvalidAlgorithmParameterException, gnu.vm.jgnu.security.spec.InvalidParameterSpecException
+	public boolean verify(byte[] message, int offm, int lenm, byte[] signature, int offs, int lens)
+			throws SignatureException, InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, IllegalStateException, IOException, NoSuchProviderException, InvalidAlgorithmParameterException, InvalidParameterSpecException
 	{
 		init(signature, offs, lens);
 		update(message, offm, lenm);

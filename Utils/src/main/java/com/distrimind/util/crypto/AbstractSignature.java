@@ -35,18 +35,16 @@ knowledge of the CeCILL-C license and that you accept its terms.
 package com.distrimind.util.crypto;
 
 import java.nio.ByteBuffer;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SignatureException;
+import java.security.spec.InvalidKeySpecException;
 
-import gnu.vm.jgnu.security.InvalidKeyException;
-import gnu.vm.jgnu.security.NoSuchAlgorithmException;
-import gnu.vm.jgnu.security.Provider;
-import gnu.vm.jgnu.security.SecureRandom;
-import gnu.vm.jgnu.security.SignatureException;
-import gnu.vm.jgnu.security.spec.InvalidKeySpecException;
 
 /**
  * 
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 2.0
  * @since Utils 2.0
  */
 public abstract class AbstractSignature implements Cloneable {
@@ -73,9 +71,9 @@ public abstract class AbstractSignature implements Cloneable {
 	public abstract String getAlgorithm();
 
 	/**
-	 * Returns the {@link Provider} of this instance.
+	 * Returns the {@link java.security.Provider} of this instance.
 	 *
-	 * @return the {@link Provider} of this instance.
+	 * @return the {@link java.security.Provider} of this instance.
 	 */
 	public abstract String getProvider();
 
@@ -100,7 +98,7 @@ public abstract class AbstractSignature implements Cloneable {
 	 * @param privateKey
 	 *            the private key to sign with.
 	 * @param random
-	 *            the {@link SecureRandom} to use.
+	 *            the {@link java.security.SecureRandom} to use.
 	 * @throws InvalidKeyException
 	 *             if the key is invalid.
 	 * @throws InvalidKeySpecException if the key is invalid

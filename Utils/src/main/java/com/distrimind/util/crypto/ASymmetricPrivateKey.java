@@ -70,7 +70,7 @@ public class ASymmetricPrivateKey extends Key {
 	private final short keySizeBits;
 
 	private ASymmetricEncryptionType encryptionType;
-	private ASymmetricAuthentifiedSignatureType signatureType;
+	private ASymmetricAuthenticatedSignatureType signatureType;
 
 	private final int hashCode;
 
@@ -114,7 +114,7 @@ public class ASymmetricPrivateKey extends Key {
 		this.encryptionType = type;
 		this.signatureType=null;
 	}
-	ASymmetricPrivateKey(ASymmetricAuthentifiedSignatureType type, byte[] privateKey, short keySize) {
+	ASymmetricPrivateKey(ASymmetricAuthenticatedSignatureType type, byte[] privateKey, short keySize) {
 		this(privateKey, keySize);
 		if (type == null)
 			throw new NullPointerException("type");
@@ -130,7 +130,7 @@ public class ASymmetricPrivateKey extends Key {
 		this.signatureType=null;
 		
 	}
-	ASymmetricPrivateKey(ASymmetricAuthentifiedSignatureType type, gnu.vm.jgnu.security.PrivateKey privateKey, short keySize) {
+	ASymmetricPrivateKey(ASymmetricAuthenticatedSignatureType type, gnu.vm.jgnu.security.PrivateKey privateKey, short keySize) {
 		this(privateKey, keySize);
 		if (type == null)
 			throw new NullPointerException("type");
@@ -147,7 +147,7 @@ public class ASymmetricPrivateKey extends Key {
 		this.encryptionType = type;
 		this.signatureType=null;
 	}
-	ASymmetricPrivateKey(ASymmetricAuthentifiedSignatureType type, PrivateKey privateKey, short keySize, boolean xdhKey) {
+	ASymmetricPrivateKey(ASymmetricAuthenticatedSignatureType type, PrivateKey privateKey, short keySize, boolean xdhKey) {
 		this(ASymmetricEncryptionType.encodePrivateKey(privateKey, type, xdhKey), keySize);
 		if (type == null)
 			throw new NullPointerException("type");
@@ -191,7 +191,7 @@ public class ASymmetricPrivateKey extends Key {
 
 	static int getEncodedTypeSize()
 	{
-		int max=Math.max(ASymmetricEncryptionType.values().length, ASymmetricAuthentifiedSignatureType.values().length);
+		int max=Math.max(ASymmetricEncryptionType.values().length, ASymmetricAuthenticatedSignatureType.values().length);
 		if (max<=0xFF)
 			return 1;
 		else if (max<=0xFFFF)
@@ -233,7 +233,7 @@ public class ASymmetricPrivateKey extends Key {
 	public ASymmetricEncryptionType getEncryptionAlgorithmType() {
 		return encryptionType;
 	}
-	public ASymmetricAuthentifiedSignatureType getAuthentifiedSignatureAlgorithmType() {
+	public ASymmetricAuthenticatedSignatureType getAuthentifiedSignatureAlgorithmType() {
 		return signatureType;
 	}
 

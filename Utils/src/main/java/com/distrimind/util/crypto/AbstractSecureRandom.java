@@ -34,17 +34,13 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
-import java.security.SecureRandom;
-import java.security.SecureRandomSpi;
-import java.security.Security;
-
-import gnu.vm.jgnu.security.NoSuchProviderException;
+import java.security.*;
 
 
 /**
  * 
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 2.0
  * @since Utils 2.0
  */
 public abstract class AbstractSecureRandom extends SecureRandom {
@@ -79,7 +75,7 @@ public abstract class AbstractSecureRandom extends SecureRandom {
 					
 					try {
 						this.engineSetSeed(SecureRandomType.tryToGenerateNativeNonBlockingSeed(55));
-					} catch (gnu.vm.jgnu.security.NoSuchAlgorithmException | NoSuchProviderException e) {
+					} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
 						this.engineSetSeed(this.engineGenerateSeed(55));
 					}
 					this.engineNextBytes(new byte[20]);

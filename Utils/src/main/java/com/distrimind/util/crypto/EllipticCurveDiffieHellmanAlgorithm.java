@@ -125,11 +125,11 @@ public class EllipticCurveDiffieHellmanAlgorithm extends KeyAgreement {
 		valid=false;
 
 		ASymmetricKeyPair kp;
-		ASymmetricAuthentifiedSignatureType t=type.getASymmetricAuthentifiedSignatureType();
-		if (t==ASymmetricAuthentifiedSignatureType.BC_Ed448 || t==ASymmetricAuthentifiedSignatureType.BC_Ed25519) {
+		ASymmetricAuthenticatedSignatureType t=type.getASymmetricAuthentifiedSignatureType();
+		if (t== ASymmetricAuthenticatedSignatureType.BC_Ed448 || t== ASymmetricAuthenticatedSignatureType.BC_Ed25519) {
 			try {
 				KeyPairGenerator kpg ;
-				if (t==ASymmetricAuthentifiedSignatureType.BC_Ed448)
+				if (t== ASymmetricAuthenticatedSignatureType.BC_Ed448)
 					kpg= KeyPairGenerator.getInstance("X448", CodeProvider.BC.name());
 				else
 					kpg= KeyPairGenerator.getInstance("X25519", CodeProvider.BC.name());

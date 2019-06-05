@@ -55,11 +55,11 @@ import gnu.vm.jgnux.crypto.spec.IvParameterSpec;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 1.2
+ * @version 2.0
  * @since Utils 2.0
  */
 public final class GnuCipher extends AbstractCipher {
-	private final Cipher cipher;
+	private final Object cipher;
 
 
 
@@ -67,7 +67,7 @@ public final class GnuCipher extends AbstractCipher {
 	    return random.getGnuSecureRandom();
 	}
 
-	GnuCipher(Cipher cipher) {
+	GnuCipher(Object cipher) {
 		this.cipher = cipher;
 	}
 

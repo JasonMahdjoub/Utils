@@ -51,18 +51,12 @@ import java.util.regex.Pattern;
 
 import javax.lang.model.SourceVersion;
 
+import com.distrimind.util.crypto.*;
 import org.apache.commons.codec.binary.Base64;
 
 import com.distrimind.util.AbstractDecentralizedID;
 import com.distrimind.util.Bits;
-import com.distrimind.util.crypto.ASymmetricEncryptionType;
-import com.distrimind.util.crypto.ASymmetricKeyPair;
-import com.distrimind.util.crypto.ASymmetricPrivateKey;
-import com.distrimind.util.crypto.ASymmetricPublicKey;
-import com.distrimind.util.crypto.MessageDigestType;
-import com.distrimind.util.crypto.ASymmetricAuthentifiedSignatureType;
-import com.distrimind.util.crypto.SymmetricEncryptionType;
-import com.distrimind.util.crypto.SymmetricSecretKey;
+import com.distrimind.util.crypto.ASymmetricAuthenticatedSignatureType;
 
 
 /**
@@ -112,7 +106,7 @@ public class DefaultMultiFormatObjectParser extends AbstractMultiFormatObjectPar
 		ASymmetricEncryptionType.class,
 		MessageDigestType.class,
 		SymmetricEncryptionType.class,
-		ASymmetricAuthentifiedSignatureType.class,
+		ASymmetricAuthenticatedSignatureType.class,
 		SymmetricSecretKey.class,
 		ASymmetricPrivateKey.class,
 		ASymmetricPublicKey.class,
@@ -273,7 +267,7 @@ public class DefaultMultiFormatObjectParser extends AbstractMultiFormatObjectPar
 			return object.toString();
 		} else if (field_type == SymmetricEncryptionType.class) {
 			return object.toString();
-		} else if (field_type == ASymmetricAuthentifiedSignatureType.class) {
+		} else if (field_type == ASymmetricAuthenticatedSignatureType.class) {
 			return object.toString();
 		} else if (field_type == MessageDigestType.class) {
 			return object.toString();
@@ -446,8 +440,8 @@ public class DefaultMultiFormatObjectParser extends AbstractMultiFormatObjectPar
 			return ASymmetricEncryptionType.valueOf(nodeValue);
 		} else if (field_type == SymmetricEncryptionType.class) {
 			return SymmetricEncryptionType.valueOf(nodeValue);
-		} else if (field_type == ASymmetricAuthentifiedSignatureType.class) {
-			return ASymmetricAuthentifiedSignatureType.valueOf(nodeValue);
+		} else if (field_type == ASymmetricAuthenticatedSignatureType.class) {
+			return ASymmetricAuthenticatedSignatureType.valueOf(nodeValue);
 		} else if (field_type == MessageDigestType.class) {
 			return MessageDigestType.valueOf(nodeValue);
 		}

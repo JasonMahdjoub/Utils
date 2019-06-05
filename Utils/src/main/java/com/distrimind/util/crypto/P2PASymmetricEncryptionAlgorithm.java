@@ -56,7 +56,7 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 
 	private final ASymmetricEncryptionType type;
 
-	private final ASymmetricAuthentifiedSignatureType signatureType;
+	private final ASymmetricAuthenticatedSignatureType signatureType;
 
 	private final int maxBlockSizeForEncoding, maxBlockSizeForDecoding;
 
@@ -66,8 +66,8 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 		this(myKeyPair.getEncryptionAlgorithmType().getDefaultSignatureAlgorithm(), myKeyPair, distantPublicKey);
 	}
 
-	public P2PASymmetricEncryptionAlgorithm(ASymmetricAuthentifiedSignatureType signatureType, ASymmetricKeyPair myKeyPair,
-			ASymmetricPublicKey distantPublicKey) throws NoSuchAlgorithmException, NoSuchPaddingException,
+	public P2PASymmetricEncryptionAlgorithm(ASymmetricAuthenticatedSignatureType signatureType, ASymmetricKeyPair myKeyPair,
+											ASymmetricPublicKey distantPublicKey) throws NoSuchAlgorithmException, NoSuchPaddingException,
 			InvalidKeyException, InvalidKeySpecException, NoSuchProviderException, InvalidAlgorithmParameterException {
 		super(myKeyPair.getEncryptionAlgorithmType().getCipherInstance(), 0);
 		if (signatureType == null)
@@ -109,7 +109,7 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 		return this.myKeyPair;
 	}
 
-	public ASymmetricAuthentifiedSignatureType getSignatureType() {
+	public ASymmetricAuthenticatedSignatureType getSignatureType() {
 		return signatureType;
 	}
 

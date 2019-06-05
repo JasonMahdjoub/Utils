@@ -124,7 +124,7 @@ public class P2PLoginWithSymmetricSignature extends P2PLoginAgreement {
 						valid = false;
 						throw new CryptoException();
 					}
-					SymmetricAuthentifiedSignatureCheckerAlgorithm checker = new SymmetricAuthentifiedSignatureCheckerAlgorithm(secretKey);
+					SymmetricAuthenticatedSignatureCheckerAlgorithm checker = new SymmetricAuthenticatedSignatureCheckerAlgorithm(secretKey);
 					checker.init(data);
 					checker.update(otherMessage);
 					checker.update(myMessage);

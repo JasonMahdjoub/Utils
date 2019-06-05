@@ -55,7 +55,7 @@ public abstract class AbstractNewHopeKeyAgreement extends KeyAgreement{
 	private SymmetricEncryptionType encryptionType;
 	private SymmetricAuthentifiedSignatureType signatureType;
 	protected int agreementSize;
-	protected byte shared[];
+	protected byte[] shared;
 	private SymmetricSecretKey secretKey=null;
 	
 	protected AbstractNewHopeKeyAgreement(SymmetricEncryptionType type, short agreementSize)

@@ -53,7 +53,7 @@ public final class GnuKeyPairGenerator extends AbstractKeyPairGenerator {
 		super(type);
 		this.keyPairGenerator = keyPairGenerator;
 	}
-	GnuKeyPairGenerator(ASymmetricAuthentifiedSignatureType type, KeyPairGenerator keyPairGenerator) {
+	GnuKeyPairGenerator(ASymmetricAuthenticatedSignatureType type, KeyPairGenerator keyPairGenerator) {
 		super(type);
 		this.keyPairGenerator = keyPairGenerator;
 	}

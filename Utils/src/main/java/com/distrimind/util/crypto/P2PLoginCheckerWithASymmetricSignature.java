@@ -105,7 +105,7 @@ public class P2PLoginCheckerWithASymmetricSignature extends P2PLoginAgreement{
                         valid = false;
                         throw new CryptoException();
                     }
-                    ASymmetricAuthentifiedSignatureCheckerAlgorithm checker = new ASymmetricAuthentifiedSignatureCheckerAlgorithm(publicKey);
+                    ASymmetricAuthenticatedSignatureCheckerAlgorithm checker = new ASymmetricAuthenticatedSignatureCheckerAlgorithm(publicKey);
                     checker.init(data);
                     checker.update(otherMessage);
                     checker.update(myMessage);

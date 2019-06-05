@@ -104,7 +104,7 @@ public abstract class Key implements Serializable {
 					int codedTypeSize = ASymmetricPrivateKey.getEncodedTypeSize();
 					byte[] privateKey = new byte[b.length - 3 - codedTypeSize];
 					System.arraycopy(b, 3 + codedTypeSize, privateKey, 0, privateKey.length);
-					ASymmetricPrivateKey res=new ASymmetricPrivateKey(ASymmetricAuthentifiedSignatureType.valueOf((int) Bits.getPositiveInteger(b, 3, codedTypeSize)), privateKey,
+					ASymmetricPrivateKey res=new ASymmetricPrivateKey(ASymmetricAuthenticatedSignatureType.valueOf((int) Bits.getPositiveInteger(b, 3, codedTypeSize)), privateKey,
 							Bits.getShort(b, 1));
 					res.xdhKey=isXdh;
 					return res;
@@ -144,7 +144,7 @@ public abstract class Key implements Serializable {
 					else
 						timeExpiration=Long.MAX_VALUE;
 					System.arraycopy(b, posKey, publicKey, 0, publicKey.length);
-					ASymmetricPublicKey res=new ASymmetricPublicKey(ASymmetricAuthentifiedSignatureType.valueOf((int) Bits.getPositiveInteger(b, 3, codedTypeSize)), publicKey,
+					ASymmetricPublicKey res=new ASymmetricPublicKey(ASymmetricAuthenticatedSignatureType.valueOf((int) Bits.getPositiveInteger(b, 3, codedTypeSize)), publicKey,
 							Bits.getShort(b, 1), timeExpiration);
 					res.xdhKey=isXdh;
 					return res;

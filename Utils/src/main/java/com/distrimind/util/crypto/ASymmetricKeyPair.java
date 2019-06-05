@@ -36,6 +36,8 @@ package com.distrimind.util.crypto;
 
 import java.io.Serializable;
 import java.security.KeyPair;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
 
 import org.apache.commons.codec.binary.Base64;
@@ -67,13 +69,13 @@ public class ASymmetricKeyPair implements Serializable {
 	private final short keySizeBits;
 
 	private final ASymmetricEncryptionType encryptionType;
-	private final ASymmetricAuthentifiedSignatureType signatureType;
+	private final ASymmetricAuthenticatedSignatureType signatureType;
 
 	private final int hashCode;
 
 	private transient volatile KeyPair nativeKeyPair;
 
-	private transient volatile gnu.vm.jgnu.security.KeyPair gnuKeyPair;
+	private transient volatile Object gnuKeyPair;
 
 	public void zeroize()
 	{
@@ -87,8 +89,8 @@ public class ASymmetricKeyPair implements Serializable {
 		}
 		if (gnuKeyPair!=null)
 		{
-			Arrays.fill(gnuKeyPair.getPublic().getEncoded(), (byte)0);
-			Arrays.fill(gnuKeyPair.getPrivate().getEncoded(), (byte)0);
+			Arrays.fill(GnuFunctions.getEncoded(GnuFunctions.getPublicKey(gnuKeyPair)), (byte)0);
+			Arrays.fill(GnuFunctions.getEncoded(GnuFunctions.getPrivateKey(gnuKeyPair)), (byte)0);
 			gnuKeyPair=null;
 		}
 	}
@@ -141,7 +143,7 @@ public class ASymmetricKeyPair implements Serializable {
 		return new ASymmetricKeyPair(this.privateKey.getNewClonedPrivateKey(), this.publicKey.getPublicKeyWithNewExpirationTime(timeExpirationUTC));
 	}
 
-	ASymmetricKeyPair(ASymmetricEncryptionType type, gnu.vm.jgnu.security.KeyPair keyPair, short keySize,
+	ASymmetricKeyPair(ASymmetricEncryptionType type, Object keyPair, short keySize,
 			long expirationUTC) {
 		if (type == null)
 			throw new NullPointerException("type");
@@ -149,8 +151,8 @@ public class ASymmetricKeyPair implements Serializable {
 			throw new NullPointerException("keyPair");
 		if (keySize < 256)
 			throw new IllegalArgumentException("keySize");
-		privateKey = new ASymmetricPrivateKey(type, keyPair.getPrivate(), keySize);
-		publicKey = new ASymmetricPublicKey(type, keyPair.getPublic(), keySize, expirationUTC);
+		privateKey = new ASymmetricPrivateKey(type, GnuFunctions.getPrivateKey(keyPair), keySize);
+		publicKey = new ASymmetricPublicKey(type, GnuFunctions.getPublicKey(keyPair), keySize, expirationUTC);
 		this.keySizeBits = keySize;
 		this.encryptionType = type;
 		this.signatureType=null;
@@ -176,8 +178,8 @@ public class ASymmetricKeyPair implements Serializable {
 		this.nativeKeyPair=keyPair;
 	}
 
-	ASymmetricKeyPair(ASymmetricAuthentifiedSignatureType type, ASymmetricPrivateKey privateKey, ASymmetricPublicKey publicKey,
-			short keySize) {
+	ASymmetricKeyPair(ASymmetricAuthenticatedSignatureType type, ASymmetricPrivateKey privateKey, ASymmetricPublicKey publicKey,
+					  short keySize) {
 		if (type == null)
 			throw new NullPointerException("type");
 		if (privateKey == null)
@@ -195,16 +197,16 @@ public class ASymmetricKeyPair implements Serializable {
 		hashCode = privateKey.hashCode() + publicKey.hashCode();
 	}
 
-	ASymmetricKeyPair(ASymmetricAuthentifiedSignatureType type, gnu.vm.jgnu.security.KeyPair keyPair, short keySize,
-			long expirationUTC) {
+	ASymmetricKeyPair(ASymmetricAuthenticatedSignatureType type, Object keyPair, short keySize,
+					  long expirationUTC) {
 		if (type == null)
 			throw new NullPointerException("type");
 		if (keyPair == null)
 			throw new NullPointerException("keyPair");
 		if (keySize < 256)
 			throw new IllegalArgumentException("keySize");
-		privateKey = new ASymmetricPrivateKey(type, keyPair.getPrivate(), keySize);
-		publicKey = new ASymmetricPublicKey(type, keyPair.getPublic(), keySize, expirationUTC);
+		privateKey = new ASymmetricPrivateKey(type, GnuFunctions.getPrivateKey(keyPair), keySize);
+		publicKey = new ASymmetricPublicKey(type, GnuFunctions.getPublicKey(keyPair), keySize, expirationUTC);
 		this.keySizeBits = keySize;
 		this.encryptionType = null;
 		this.signatureType=type;
@@ -213,7 +215,7 @@ public class ASymmetricKeyPair implements Serializable {
 		this.gnuKeyPair=keyPair;
 	}
 
-	ASymmetricKeyPair(ASymmetricAuthentifiedSignatureType type, KeyPair keyPair, short keySize, long expirationUTC, boolean xdhKey) {
+	ASymmetricKeyPair(ASymmetricAuthenticatedSignatureType type, KeyPair keyPair, short keySize, long expirationUTC, boolean xdhKey) {
 		if (type == null)
 			throw new NullPointerException("type");
 		if (keyPair == null)
@@ -278,7 +280,7 @@ public class ASymmetricKeyPair implements Serializable {
 			byte[][] keys = Bits.separateEncodingsWithShortSizedTabs(kp);
 
 			if (b[0] == 2) {
-				ASymmetricAuthentifiedSignatureType type = ASymmetricAuthentifiedSignatureType.valueOf((int) Bits.getPositiveInteger(b, 3, codedTypeSize));
+				ASymmetricAuthenticatedSignatureType type = ASymmetricAuthenticatedSignatureType.valueOf((int) Bits.getPositiveInteger(b, 3, codedTypeSize));
 
 				ASymmetricKeyPair res=new ASymmetricKeyPair(type, new ASymmetricPrivateKey(type, keys[0], keySize),
 						new ASymmetricPublicKey(type, keys[1], keySize, expirationUTC), keySize);
@@ -325,7 +327,7 @@ public class ASymmetricKeyPair implements Serializable {
 	public ASymmetricEncryptionType getEncryptionAlgorithmType() {
 		return encryptionType;
 	}
-	public ASymmetricAuthentifiedSignatureType getAuthentifiedSignatureAlgorithmType() {
+	public ASymmetricAuthenticatedSignatureType getAuthentifiedSignatureAlgorithmType() {
 		return signatureType;
 	}
 
@@ -353,10 +355,10 @@ public class ASymmetricKeyPair implements Serializable {
 		return hashCode;
 	}
 
-	public gnu.vm.jgnu.security.KeyPair toGnuKeyPair()
-			throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException {
+	public Object toGnuKeyPair()throws NoSuchAlgorithmException, InvalidKeySpecException
+	{
 		if (gnuKeyPair == null)
-			gnuKeyPair = new gnu.vm.jgnu.security.KeyPair(publicKey.toGnuKey(), privateKey.toGnuKey());
+			gnuKeyPair = GnuFunctions.getKeyPairInstance(publicKey.toGnuKey(), privateKey.toGnuKey());
 
 		return gnuKeyPair;
 	}
@@ -378,7 +380,7 @@ public class ASymmetricKeyPair implements Serializable {
 	 */
 
 	public KeyPair toJavaNativeKeyPair()
-			throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException {
+			throws NoSuchAlgorithmException, InvalidKeySpecException {
 		if (nativeKeyPair == null)
 			nativeKeyPair = new KeyPair(publicKey.toJavaNativeKey(), privateKey.toJavaNativeKey());
 

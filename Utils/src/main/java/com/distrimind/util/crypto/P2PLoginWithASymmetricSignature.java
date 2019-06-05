@@ -79,7 +79,7 @@ public class P2PLoginWithASymmetricSignature extends P2PLoginAgreement{
                         valid = false;
                         throw new IllegalAccessError();
                     }
-                    ASymmetricAuthentifiedSignerAlgorithm signer = new ASymmetricAuthentifiedSignerAlgorithm(privateKey);
+                    ASymmetricAuthenticatedSignerAlgorithm signer = new ASymmetricAuthenticatedSignerAlgorithm(privateKey);
                     signer.init();
                     signer.update(myMessage);
                     signer.update(otherMessage);

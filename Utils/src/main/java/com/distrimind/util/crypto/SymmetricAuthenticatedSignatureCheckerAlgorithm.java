@@ -45,17 +45,17 @@ import gnu.vm.jgnu.security.spec.InvalidKeySpecException;
  * @version 2.1
  * @since Utils 2.10.0
  */
-public class SymmetricAuthentifiedSignatureCheckerAlgorithm extends AbstractAuthentifiedCheckerAlgorithm {
+public class SymmetricAuthenticatedSignatureCheckerAlgorithm extends AbstractAuthenticatedCheckerAlgorithm {
 
 	private final SymmetricAuthentifiedSignerAlgorithm signer;
 	private byte[] signature=null;
-	private SymmetricAuthentifiedSignatureCheckerAlgorithm(SymmetricAuthentifiedSignerAlgorithm signer) {
+	private SymmetricAuthenticatedSignatureCheckerAlgorithm(SymmetricAuthentifiedSignerAlgorithm signer) {
 		if (signer == null)
 			throw new NullPointerException();
 		this.signer = signer;
 	}
 
-	public SymmetricAuthentifiedSignatureCheckerAlgorithm(SymmetricSecretKey secretKey) throws NoSuchAlgorithmException, NoSuchProviderException {
+	public SymmetricAuthenticatedSignatureCheckerAlgorithm(SymmetricSecretKey secretKey) throws NoSuchAlgorithmException, NoSuchProviderException {
 		this(new SymmetricAuthentifiedSignerAlgorithm(secretKey));
 	}
 

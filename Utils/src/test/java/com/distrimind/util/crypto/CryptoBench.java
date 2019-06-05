@@ -78,14 +78,14 @@ public class CryptoBench {
 		SymmetricAuthentifiedSignatureType sigType;
 		SymmetricSecretKey sks;
 		SymmetricAuthentifiedSignerAlgorithm signer=null;
-		SymmetricAuthentifiedSignatureCheckerAlgorithm checker=null;
+		SymmetricAuthenticatedSignatureCheckerAlgorithm checker=null;
 		sigType=type.getDefaultSignatureAlgorithm();
 		if (!type.isAuthenticatedAlgorithm())
 		{
 			
 			sks=sigType.getKeyGenerator(SecureRandomType.FORTUNA_WITH_BC_FIPS_APPROVED_FOR_KEYS.getInstance(null), (short)128).generateKey();
 			signer=new SymmetricAuthentifiedSignerAlgorithm(sks);
-			checker=new SymmetricAuthentifiedSignatureCheckerAlgorithm(sks);
+			checker=new SymmetricAuthenticatedSignatureCheckerAlgorithm(sks);
 		}
 		double nb=0;
 

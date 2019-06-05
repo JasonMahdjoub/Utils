@@ -35,15 +35,12 @@ knowledge of the CeCILL-C license and that you accept its terms.
 package com.distrimind.util.crypto;
 
 import java.nio.ByteBuffer;
-
-import gnu.vm.jgnu.security.DigestException;
-import gnu.vm.jgnu.security.MessageDigestSpi;
-import gnu.vm.jgnu.security.Provider;
+import java.security.DigestException;
 
 /**
  * 
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 2.0
  * @since Utils 2.0
  */
 public abstract class AbstractMessageDigest implements Cloneable {
@@ -74,7 +71,7 @@ public abstract class AbstractMessageDigest implements Cloneable {
 	/**
 	 * Returns a clone of this instance if cloning is supported. If it does not then
 	 * a {@link CloneNotSupportedException} is thrown. Cloning depends on whether
-	 * the subclass {@link MessageDigestSpi} implements {@link Cloneable} which
+	 * the subclass {@link java.security.MessageDigestSpi} implements {@link Cloneable} which
 	 * contains the actual implementation of the appropriate algorithm.
 	 *
 	 * @return a clone of this instance.
@@ -133,9 +130,9 @@ public abstract class AbstractMessageDigest implements Cloneable {
 	public abstract int getDigestLength();
 
 	/**
-	 * Returns the {@link Provider} of this instance.
+	 * Returns the {@link java.security.Provider} of this instance.
 	 *
-	 * @return the {@link Provider} of this instance.
+	 * @return the {@link java.security.Provider} of this instance.
 	 */
 	public abstract String getProvider();
 
