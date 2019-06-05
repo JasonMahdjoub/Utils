@@ -54,9 +54,10 @@ public class BufferedRandomInputStream extends RandomInputStream {
 	private final long[] positions;
 	private byte[] currentBuffer=null;
 	private int currentBufferIndex=0;
-	private int previousChosenBufferIndex ;
+
 	private long currentPosition=0;
 	private final int maxBufferSize;
+	private final int maxBufferSizeDiv2;
 
 	public BufferedRandomInputStream(RandomInputStream in) {
 		this(in, MAX_BUFFER_SIZE);
@@ -67,7 +68,7 @@ public class BufferedRandomInputStream extends RandomInputStream {
 	public BufferedRandomInputStream(RandomInputStream in, int maxBufferSize, int maxBuffersNumber) {
 		this.in = in;
 		this.maxBufferSize=maxBufferSize;
-		this.previousChosenBufferIndex=maxBuffersNumber-1;
+		this.maxBufferSizeDiv2=maxBufferSize/2;
 		buffers=new byte[maxBuffersNumber][maxBufferSize];
 		positions=new long[maxBuffersNumber];
 		Arrays.fill(positions, -1);
@@ -81,33 +82,36 @@ public class BufferedRandomInputStream extends RandomInputStream {
 	private void chooseBuffer(long _pos)
 	{
 		currentBuffer=null;
-		previousChosenBufferIndex =currentBufferIndex;
-		currentBufferIndex=0;
+		currentBufferIndex=-1;
 		for (int i=0;i<positions.length;i++) {
 			long p=positions[i];
 			if (p>=0)
 			{
-				if (_pos>p && _pos<p+maxBufferSize)
+				if (_pos>=p && _pos<p+maxBufferSize)
 				{
 					currentBuffer = buffers[i];
 					currentBufferIndex = i;
 					break;
 				}
-				else if (_pos>=p-maxBufferSize && _pos<p)
+				/*else if (_pos>p-maxBufferSize && _pos<p)
 				{
 					currentBuffer = buffers[i];
 					currentBufferIndex = i;
 					positions[i]=_pos;
 					break;
-				}
+				}*/
 			}
 		}
 	}
 
 	@Override
-	public void seek(long _pos) {
-		chooseBuffer(_pos);
+	public void seek(long _pos) throws IOException {
+		if (_pos<0 || _pos>length())
+			throw new IllegalArgumentException();
+
 		currentPosition=_pos;
+		chooseBuffer(_pos);
+
 	}
 
 	@Override
@@ -120,43 +124,55 @@ public class BufferedRandomInputStream extends RandomInputStream {
 		return in.isClosed();
 	}
 
-	private void checkCurrentBufferNotNull(int len) throws IOException {
+	private void checkCurrentBufferNotNull() throws IOException {
 		if (currentBuffer==null)
 		{
-			if (previousChosenBufferIndex ==0 && positions.length>1)
-				currentBufferIndex=1;
-			else
-				currentBufferIndex=0;
-
+			long best=Long.MAX_VALUE;
+			for (int i = 0; i < positions.length; i++) {
+				if (positions[i] == -1) {
+					currentBufferIndex = i;
+					break;
+				} else {
+					long v = Math.abs(positions[i] - currentPosition);
+					if (best > v) {
+						best = v;
+						currentBufferIndex = i;
+					}
+				}
+			}
 			currentBuffer=buffers[currentBufferIndex];
 
-			positions[currentBufferIndex]=currentPosition;
-			in.seek(currentPosition);
-			in.readFully(currentBuffer, 0, Math.min(maxBufferSize, len));
+			if (positions[currentBufferIndex]!=currentPosition) {
+				positions[currentBufferIndex] = currentPosition;
+				in.seek(currentPosition);
+				in.readFully(currentBuffer, 0, (int)Math.min(maxBufferSize, length()-currentPosition));
+			}
 		}
  	}
 
 	@Override
 	public void readFully(byte[] tab, int off, int len) throws IOException {
 
-		checkCurrentBufferNotNull(len);
+		if (currentPosition+len>length())
+			throw new IOException();
+		checkCurrentBufferNotNull();
 		boolean first=true;
 		long curPos=positions[currentBufferIndex];
 		while(len>0)
 		{
-
 			if (currentPosition>=curPos+maxBufferSize)
 			{
-				if (len<maxBufferSize) {
+				if (len<maxBufferSizeDiv2) {
 					curPos = positions[currentBufferIndex] = currentPosition;
 					if (first) {
 						in.seek(currentPosition);
 						first = false;
 					}
-					in.readFully(currentBuffer, 0, Math.min(maxBufferSize, len));
+					in.readFully(currentBuffer, 0, (int)Math.min(maxBufferSize, length()-currentPosition));
 				}
 				else
 				{
+					in.seek(currentPosition);
 					in.readFully(tab, off, len);
 					currentPosition+=len;
 					chooseBuffer(currentPosition);
@@ -175,8 +191,12 @@ public class BufferedRandomInputStream extends RandomInputStream {
 
 	@Override
 	public int skipBytes(int n) throws IOException {
+		long l=in.length();
+		if (n<0 || n+currentPosition>l)
+			throw new IllegalArgumentException();
+
 		long oldPos=currentPosition;
-		currentPosition=Math.min(currentPosition+n, in.length());
+		currentPosition=Math.min(currentPosition+n, l);
 		n=(int)(currentPosition-oldPos);
 		chooseBuffer(currentPosition);
 		return n;
@@ -223,15 +243,15 @@ public class BufferedRandomInputStream extends RandomInputStream {
 
 	@Override
 	public int read() throws IOException {
-
-		long len=in.length()-currentPosition;
-		checkCurrentBufferNotNull((int)Math.min(Integer.MAX_VALUE, len));
+		if (currentPosition>=length())
+			return -1;
+		checkCurrentBufferNotNull();
 		long curPos=positions[currentBufferIndex];
 		if (currentPosition>=curPos+maxBufferSize)
 		{
 			curPos=positions[currentBufferIndex]=currentPosition;
 			in.seek(currentPosition);
-			in.readFully(currentBuffer, 0, (int)Math.min(maxBufferSize, len));
+			in.readFully(currentBuffer, 0, (int)Math.min(maxBufferSize, in.length()-currentPosition));
 		}
 		return currentBuffer[(int)((currentPosition++)-curPos)];
 	}
@@ -264,40 +284,47 @@ public class BufferedRandomInputStream extends RandomInputStream {
 
 	@Override
 	public int read(byte[] b, int off, int len) throws IOException {
-		checkCurrentBufferNotNull(len);
+		checkCurrentBufferNotNull();
 		int res=0;
 		boolean first=true;
+
 		while(len>0)
 		{
+			long available=length()-currentPosition;
+			if (available==0)
+				return 0;
 			long curPos=positions[currentBufferIndex];
 
 			if (currentPosition>=curPos+maxBufferSize)
 			{
-				if (len<maxBufferSize) {
+				if (len<maxBufferSizeDiv2) {
 					curPos = positions[currentBufferIndex] = currentPosition;
 					if (first) {
 						in.seek(currentPosition);
 						first = false;
 					}
-					int nb = in.read(currentBuffer, 0, Math.min(maxBufferSize, len));
-					if (nb < len)
-						return nb + res;
+					in.readFully(currentBuffer, 0, (int)Math.min(maxBufferSize, length()-currentPosition));
 				}
 				else
 				{
-					in.readFully(b, off, len);
+					in.seek(currentPosition);
+					len=in.read(b, off, len);
 					currentPosition+=len;
 					chooseBuffer(currentPosition);
 					return res+len;
 				}
 			}
+
 			int bufPos=(int)(currentPosition-curPos);
-			int copyLen=Math.min(len, maxBufferSize-bufPos);
+
+			int copyLen=(int)Math.min(available, Math.min(len, maxBufferSize-bufPos));
 			System.arraycopy(currentBuffer, bufPos, b, off, copyLen);
 			len-=copyLen;
 			off+=copyLen;
 			res+=copyLen;
 			currentPosition+=copyLen;
+			if (copyLen==available)
+				return res;
 		}
 		return res;
 	}
@@ -305,8 +332,12 @@ public class BufferedRandomInputStream extends RandomInputStream {
 
 	@Override
 	public long skip(long n) throws IOException {
+		long l=in.length();
+		if (n<0 || n+currentPosition>l)
+			throw new IllegalArgumentException();
+
 		long oldPos=currentPosition;
-		currentPosition=Math.min(currentPosition+n, in.length());
+		currentPosition=Math.min(currentPosition+n, l);
 		n=currentPosition-oldPos;
 		chooseBuffer(currentPosition);
 		return n;
@@ -314,8 +345,8 @@ public class BufferedRandomInputStream extends RandomInputStream {
 
 	@Override
 	public int available() throws IOException {
-		in.seek(currentPosition);
-		return in.available();
+
+		return (int)Math.min(Integer.MAX_VALUE, length()-currentPosition);
 	}
 
 	@Override

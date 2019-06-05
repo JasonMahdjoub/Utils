@@ -56,5 +56,10 @@
 			<class name="com.distrimind.util.TestDNS" />
 		</classes>
 	</test>
-	
+
+	<test name="testBufferedStreams">
+		<classes>
+			<class name="com.distrimind.util.io.TestBufferedStreams" />
+		</classes>
+	</test>
 </suite>

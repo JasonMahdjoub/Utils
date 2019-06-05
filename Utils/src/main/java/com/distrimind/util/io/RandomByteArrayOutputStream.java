@@ -147,6 +147,9 @@ public class RandomByteArrayOutputStream extends RandomOutputStream {
 	public void seek(long _pos) throws IOException {
 		if (current_pos == -1)
 			throw new IOException("The current RandomByteArrayOutputStream is closed !");
+		if (_pos<0 || _pos>length())
+			throw new IllegalArgumentException(""+_pos+" is not in [0,"+length()+"]");
+
 		ensureLength(_pos + 1);
 		current_pos = (int) _pos;
 	}

@@ -105,7 +105,9 @@ public class RandomFileInputStream extends RandomInputStream {
 	 */
 	@Override
 	public void seek(long _pos) throws IOException {
-		if (_pos >= length())
+		if (_pos<0)
+			throw new IllegalArgumentException();
+		if (_pos > length())
 			throw new IOException("The position must be lower that the size of the file");
 		raf.seek(_pos);
 	}
@@ -119,6 +121,9 @@ public class RandomFileInputStream extends RandomInputStream {
 	 */
 	@Override
 	public long skip(long _nb) throws IOException {
+		long l=length();
+		if (_nb<0 || _nb+currentPosition()>l)
+			throw new IllegalArgumentException();
 		long skipped = Math.min(getFreeSpace(), _nb);
 		raf.seek(currentPosition() + skipped);
 		return skipped;
@@ -144,6 +149,9 @@ public class RandomFileInputStream extends RandomInputStream {
 
 	@Override
 	public int skipBytes(int n) throws IOException {
+		long l=length();
+		if (n<0 || n+currentPosition()>l)
+			throw new IllegalArgumentException();
 		return raf.skipBytes(n);
 	}
 

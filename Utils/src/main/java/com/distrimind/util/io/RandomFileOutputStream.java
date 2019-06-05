@@ -147,6 +147,8 @@ public class RandomFileOutputStream extends RandomOutputStream {
 	 */
 	@Override
 	public void setLength(long _length) throws IOException {
+		if (_length<0)
+			throw new IllegalArgumentException();
 		raf.setLength(_length);
 	}
 
@@ -155,6 +157,8 @@ public class RandomFileOutputStream extends RandomOutputStream {
 	 */
 	@Override
 	public void seek(long _pos) throws IOException {
+		if (_pos<0 || _pos>length())
+			throw new IllegalArgumentException();
 		raf.seek(_pos);
 	}
 

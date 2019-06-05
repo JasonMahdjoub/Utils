@@ -53,10 +53,13 @@ public class BufferedRandomOutputStream extends RandomOutputStream{
 	private final long[] positions;
 	private final int[] endPositions;
 	private byte[] currentBuffer=null;
-	private int currentBufferIndex=0;
-	private int previousChosenBufferIndex ;
+	private int currentBufferIndex=-1;
+
 	private long currentPosition=0;
 	private final int maxBufferSize;
+	private final int maxBufferSizeDiv2;
+	private final int maxBuffersNumber;
+	private long length=0;
 
 	public BufferedRandomOutputStream(RandomOutputStream out) {
 		this(out, MAX_BUFFER_SIZE);
@@ -67,34 +70,32 @@ public class BufferedRandomOutputStream extends RandomOutputStream{
 	public BufferedRandomOutputStream(RandomOutputStream out, int maxBufferSize, int maxBuffersNumber) {
 		this.out = out;
 		this.maxBufferSize=maxBufferSize;
+		this.maxBufferSizeDiv2=maxBufferSize/2;
+		this.maxBuffersNumber=maxBuffersNumber;
 		buffers=new byte[maxBuffersNumber][maxBufferSize];
 		positions=new long[maxBuffersNumber];
 		endPositions=new int[maxBuffersNumber];
-		previousChosenBufferIndex=maxBuffersNumber-1;
+
 		Arrays.fill(positions, -1);
 		Arrays.fill(endPositions, 0);
 	}
 
 	private void chooseBuffer(long _pos) throws IOException {
 		currentBuffer=null;
-		previousChosenBufferIndex =currentBufferIndex;
-		currentBufferIndex=0;
-		for (int i=0;i<positions.length;i++) {
+		currentBufferIndex=-1;
+		for (int i=0;i<maxBuffersNumber;i++) {
 			long p=positions[i];
 			if (p>=0)
 			{
-				if (_pos>p && _pos<p+maxBufferSize)
+				if (_pos>=p && _pos<p+maxBufferSize)
 				{
-					currentBuffer = buffers[i];
-					currentBufferIndex = i;
-					if (endPositions[i]!=_pos) {
-						flush(i, _pos);
+					long newP=positions[i]+endPositions[i];
+					if (newP!=_pos) {
+						if (newP<_pos)
+							flush(i, _pos);
+						else
+							endPositions[i]=(int)(_pos-positions[i]);
 					}
-					break;
-				}
-				else if (_pos>=p-maxBufferSize && _pos<p)
-				{
-					flush(i, _pos);
 					currentBuffer = buffers[i];
 					currentBufferIndex = i;
 					break;
@@ -103,34 +104,107 @@ public class BufferedRandomOutputStream extends RandomOutputStream{
 		}
 	}
 
-	private void flush(int bufferIndex, long newPos) throws IOException {
+	private void changePosition(int bufferIndex, long newPos) throws IOException {
 
+		if (newPos==-1) {
+			positions[bufferIndex]=-1;
+
+			return;
+		}
+		else {
+			if (positions[bufferIndex]==newPos)
+				return;
+			positions[bufferIndex] = newPos;
+		}
+		for (int i=0;i<maxBuffersNumber;i++)
+		{
+			if (i!=bufferIndex)
+			{
+				long p=positions[i];
+				if (p!=-1 && isOverlapped(p, newPos))
+				{
+					int len=endPositions[i];
+
+					if (len>0) {
+						out.seek(p);
+						out.write(buffers[i], 0, len);
+						endPositions[i]=0;
+					}
+					positions[i]=-1;
+				}
+			}
+		}
+	}
+	private boolean isOverlapped(long position, long newPos)
+	{
+		return isOverlapped(position, newPos, maxBufferSize);
+	}
+	private boolean isOverlapped(long position, long newPos, int len)
+	{
+		return position+maxBufferSize>newPos && position<newPos+len;
+	}
+	private void flush(int bufferIndex, long newPos) throws IOException {
 		int len=endPositions[bufferIndex];
+
 		if (len>0)
 		{
-			long oldPos=out.currentPosition();
 			long pos=positions[bufferIndex];
-			if (pos!=oldPos)
-				out.seek(pos);
-			out.write(buffers[bufferIndex], 0, len);
-			endPositions[bufferIndex]=0;
-			positions[bufferIndex]=newPos;
-		}
+			if (pos!=-1) {
+				/*long oldPos=out.currentPosition();
+				if (pos != oldPos)*/
 
+				out.seek(pos);
+
+				out.write(buffers[bufferIndex], 0, len);
+				endPositions[bufferIndex] = 0;
+
+				changePosition(bufferIndex, newPos);
+
+			}
+
+		}
+		else {
+			changePosition(bufferIndex, newPos);
+		}
 	}
 
 	@Override
-	public long length() throws IOException {
-		return out.length();
+	public long length()  {
+		return length;
 	}
 
 	@Override
 	public void setLength(long newLength) throws IOException {
+		if (newLength<0)
+			throw new IllegalArgumentException();
+
+
+		length=newLength;
+		for (int i=0;i<maxBuffersNumber;i++)
+		{
+			if (positions[i]!=-1) {
+				if (positions[i] > newLength) {
+					positions[i] = -1;
+					endPositions[i]=0;
+				}
+				else
+					endPositions[i]=(int)Math.min(newLength-positions[i], endPositions[i]);
+			}
+		}
 		out.setLength(newLength);
+		if (currentPosition>newLength) {
+			currentPosition = newLength;
+			chooseBuffer(currentPosition);
+		}
+
+
+
 	}
 
 	@Override
 	public void seek(long _pos) throws IOException {
+		if (_pos<0 || _pos>length())
+			throw new IllegalArgumentException();
 		currentPosition=_pos;
 		chooseBuffer(_pos);
 	}
@@ -146,44 +220,75 @@ public class BufferedRandomOutputStream extends RandomOutputStream{
 	}
 
 	@Override
-	protected BufferedRandomInputStream getRandomInputStreamImpl() {
-		return new BufferedRandomInputStream(out.getRandomInputStreamImpl());
+	protected BufferedRandomInputStream getRandomInputStreamImpl() throws IOException {
+		flush();
+		return new BufferedRandomInputStream(out.getRandomInputStream(), maxBufferSize, maxBuffersNumber);
 	}
 
 
 	private void checkCurrentBufferNotNull() throws IOException {
 		if (currentBuffer==null)
 		{
-			if (previousChosenBufferIndex ==0 && positions.length>1)
-				currentBufferIndex=1;
-			else
-				currentBufferIndex=0;
 
+			for (int i=0;i<maxBuffersNumber;i++) {
+				long p=positions[i];
+				if (p!=-1 && isOverlapped(p, currentPosition)) {
+					flush(i, -1);
+				}
+			}
+			long best=Long.MAX_VALUE;
+			for (int i = 0; i < maxBuffersNumber; i++) {
+				if (positions[i] == -1) {
+					positions[i]=currentPosition;
+					currentBufferIndex = i;
+					currentBuffer=buffers[currentBufferIndex];
+					return;
+				} else {
+					long v = Math.abs(positions[i] - currentPosition);
+					if (best > v) {
+						best = v;
+						currentBufferIndex = i;
+					}
+				}
+			}
 			currentBuffer=buffers[currentBufferIndex];
 
-			if (positions[currentBufferIndex]!=-1) {
-				flush(currentBufferIndex, currentPosition);
-			}
-		} else
+			flush(currentBufferIndex, currentPosition);
+
+
+		} /*else
 		{
-			if (positions[currentBufferIndex]+maxBufferSize>=currentPosition) {
+			long pos=positions[currentBufferIndex];
+			if (pos>currentPosition)
+				throw new IllegalAccessError();
+			if (pos+maxBufferSize>=currentPosition) {
 				flush(currentBufferIndex, currentPosition);
 			}
-		}
+		}*/
 	}
 
 	@Override
 	public void write(int b) throws IOException {
 		checkCurrentBufferNotNull();
+
 		currentBuffer[endPositions[currentBufferIndex]++]=(byte)b;
 		++currentPosition;
+		length=Math.max(currentPosition, length);
+		if (endPositions[currentBufferIndex]==maxBufferSize)
+			flush(currentBufferIndex, currentPosition);
+
 	}
 
 	@Override
 	public void ensureLength(long length) throws IOException {
-		if (length<out.length())
-			flush();
-		out.ensureLength(length);
+		if (length<0)
+			throw new IllegalArgumentException();
+		//flush();
+
+		if (length>this.length) {
+			out.ensureLength(length);
+			this.length = length;
+		}
 	}
 
 	@Override
@@ -192,10 +297,31 @@ public class BufferedRandomOutputStream extends RandomOutputStream{
 		int curPos=endPositions[currentBufferIndex];
 		while(len>0)
 		{
-			if (curPos==0 && len>=maxBufferSize)
+			if (curPos==0 && len>=maxBufferSizeDiv2)
 			{
+				long newPos=currentPosition+len;
+
+				currentBuffer=null;
+				currentBufferIndex=-1;
+				for (int i=0;i<maxBuffersNumber;i++)
+				{
+					long p=positions[i];
+
+					if (p!=-1) {
+						/*if (p >= currentPosition && p < newPos)
+							flush(i, (int)(newPos-p), -1, -1);
+						else if (p<currentPosition && p+maxBufferSize>currentPosition)
+						{
+							flush(i, 0, -1, (int)(currentPosition-p));
+						}*/
+						if (isOverlapped(p, newPos, len))
+							flush(i, p);
+					}
+				}
+				out.seek(currentPosition);
 				out.write(b, off, len);
 				currentPosition+=len;
+				length=Math.max(currentPosition, length);
 				chooseBuffer(currentPosition);
 				return;
 			}
@@ -204,8 +330,10 @@ public class BufferedRandomOutputStream extends RandomOutputStream{
 			curPos=(endPositions[currentBufferIndex]+=l);
 			len-=l;
 			currentPosition+=l;
+			length=Math.max(currentPosition, length);
 			off+=l;
 			if (curPos==maxBufferSize) {
+
 				flush(currentBufferIndex, currentPosition);
 				curPos = 0;
 			}
@@ -214,15 +342,17 @@ public class BufferedRandomOutputStream extends RandomOutputStream{
 
 	@Override
 	public void flush() throws IOException {
-		for (int i=0;i<maxBufferSize;i++)
-			flush(i, currentPosition);
+		currentBuffer=null;
+		currentBufferIndex=-1;
+		for (int i=0;i<maxBuffersNumber;i++) {
+			flush(i, -1);
+		}
 		out.flush();
 	}
 
 	@Override
 	public void close() throws IOException {
-		for (int i=0;i<maxBufferSize;i++)
-			flush(i, currentPosition);
+		flush();
 		out.close();
 	}
 

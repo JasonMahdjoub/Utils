@@ -124,9 +124,10 @@ public class RandomByteArrayInputStream extends RandomInputStream {
 	 */
 	@Override
 	public void seek(long _pos) throws IOException {
+
 		if (outputStream == null)
 			throw new IOException("The current RandomByteArrayInputStream is closed !");
-		if (_pos >= (long) outputStream.bytes.length || _pos < 0)
+		if (_pos > (long) outputStream.bytes.length || _pos < 0)
 			throw new IOException("The given position (" + _pos + ") is invalid. Attempted a position between 0 and "
 					+ outputStream.bytes.length + " excluded.");
 		current_pos = (int) _pos;
@@ -139,6 +140,10 @@ public class RandomByteArrayInputStream extends RandomInputStream {
 	public long skip(long _nb) throws IOException {
 		if (outputStream == null)
 			throw new IOException("The current RandomByteArrayInputStream is closed !");
+		long l=length();
+		if (_nb<0 || _nb+currentPosition()>l)
+			throw new IllegalArgumentException();
+
 		long skipped = Math.min(getFreeSpace(), _nb);
 		current_pos += skipped;
 		return skipped;
@@ -166,7 +171,11 @@ public class RandomByteArrayInputStream extends RandomInputStream {
 	}
 
 	@Override
-	public int skipBytes(int n) {
+	public int skipBytes(int n) throws IOException {
+		long l=length();
+		if (n<0 || n+currentPosition()>l)
+			throw new IllegalArgumentException();
+
 		return current_pos+=n;
 	}
 
