@@ -80,35 +80,25 @@ public class BufferedRandomOutputStream extends RandomOutputStream{
 		Arrays.fill(endPositions, 0);
 	}
 
-	private void chooseBuffer(long _pos) throws IOException {
+	private void checkOverlapping() throws IOException {
 		currentBuffer=null;
 		currentBufferIndex=-1;
 		for (int i=0;i<maxBuffersNumber;i++) {
 			long p=positions[i];
-			if (p>=0)
-			{
-				if (_pos>=p && _pos<p+maxBufferSize)
-				{
-					long newP=positions[i]+endPositions[i];
-					if (newP!=_pos) {
-						if (newP<_pos)
-							flush(i, _pos);
-						else
-							endPositions[i]=(int)(_pos-positions[i]);
-					}
-					currentBuffer = buffers[i];
-					currentBufferIndex = i;
-					break;
-				}
+			if (p!=-1 && isOverlapped(p, currentPosition)) {
+				flush(i, -1);
 			}
 		}
+
 	}
 
 	private void changePosition(int bufferIndex, long newPos) throws IOException {
-
+		//assert endPositions[bufferIndex]==0;
 		if (newPos==-1) {
 			positions[bufferIndex]=-1;
 
+			/*if (bufferIndex==currentBufferIndex)
+				throw new InternalError();*/
 			return;
 		}
 		else {
@@ -124,7 +114,7 @@ public class BufferedRandomOutputStream extends RandomOutputStream{
 				if (p!=-1 && isOverlapped(p, newPos))
 				{
 					int len=endPositions[i];
-
+					//assert len<=maxBufferSize;
 					if (len>0) {
 						out.seek(p);
 						out.write(buffers[i], 0, len);
@@ -154,13 +144,15 @@ public class BufferedRandomOutputStream extends RandomOutputStream{
 				if (pos != oldPos)*/
 
 				out.seek(pos);
-
+				//assert len<=maxBufferSize;
 				out.write(buffers[bufferIndex], 0, len);
 				endPositions[bufferIndex] = 0;
 
 				changePosition(bufferIndex, newPos);
 
 			}
+			/*else
+				throw new InternalError();*/
 
 		}
 		else {
@@ -194,7 +186,7 @@ public class BufferedRandomOutputStream extends RandomOutputStream{
 		out.setLength(newLength);
 		if (currentPosition>newLength) {
 			currentPosition = newLength;
-			chooseBuffer(currentPosition);
+			checkOverlapping();
 		}
 
 
@@ -206,7 +198,7 @@ public class BufferedRandomOutputStream extends RandomOutputStream{
 		if (_pos<0 || _pos>length())
 			throw new IllegalArgumentException();
 		currentPosition=_pos;
-		chooseBuffer(_pos);
+		checkOverlapping();
 	}
 
 	@Override
@@ -229,13 +221,8 @@ public class BufferedRandomOutputStream extends RandomOutputStream{
 	private void checkCurrentBufferNotNull() throws IOException {
 		if (currentBuffer==null)
 		{
+			//assert currentBufferIndex==-1;
 
-			for (int i=0;i<maxBuffersNumber;i++) {
-				long p=positions[i];
-				if (p!=-1 && isOverlapped(p, currentPosition)) {
-					flush(i, -1);
-				}
-			}
 			long best=Long.MAX_VALUE;
 			for (int i = 0; i < maxBuffersNumber; i++) {
 				if (positions[i] == -1) {
@@ -322,7 +309,7 @@ public class BufferedRandomOutputStream extends RandomOutputStream{
 				out.write(b, off, len);
 				currentPosition+=len;
 				length=Math.max(currentPosition, length);
-				chooseBuffer(currentPosition);
+				checkOverlapping();
 				return;
 			}
 			int l=Math.min(maxBufferSize-curPos, len);
@@ -337,6 +324,8 @@ public class BufferedRandomOutputStream extends RandomOutputStream{
 				flush(currentBufferIndex, currentPosition);
 				curPos = 0;
 			}
+			/*else if (curPos>maxBufferSize)
+				throw new InternalError();*/
 		}
 	}
 

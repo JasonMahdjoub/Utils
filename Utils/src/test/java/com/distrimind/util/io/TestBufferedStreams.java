@@ -38,8 +38,6 @@ knowledge of the CeCILL-C license and that you accept its terms.
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Random;
 
@@ -50,7 +48,7 @@ import java.util.Random;
  */
 public class TestBufferedStreams {
 
-	@Test
+	@Test(invocationCount = 16, threadPoolSize = 16)
 	public void testBufferedInputStream() throws IOException {
 		Random rand=new Random(System.currentTimeMillis());
 		byte[] tab=new byte[25000000];
@@ -61,6 +59,7 @@ public class TestBufferedStreams {
 		testBufferedInputStream(rand, inputStream, 9000, ris);
 	}
 
+	@SuppressWarnings("ResultOfMethodCallIgnored")
 	private void testBufferedInputStream(Random rand, BufferedRandomInputStream inputStream, int maxCycles, RandomInputStream ris) throws IOException {
 
 		Assert.assertEquals(inputStream.length(), ris.length());
@@ -71,7 +70,7 @@ public class TestBufferedStreams {
 			Assert.assertEquals(inputStream.available(), ris.available());
 			if (rand.nextDouble()<0.1) {
 				if (rand.nextDouble()<0.5) {
-					long pos = (long) (Math.random() * inputStream.length()-1);
+					long pos = (long) (Math.random() * inputStream.length());
 					inputStream.seek(pos);
 					ris.seek(pos);
 				}
@@ -126,7 +125,7 @@ public class TestBufferedStreams {
 		}
 	}
 
-	@Test()
+	@Test(dependsOnMethods = "testBufferedInputStream", invocationCount = 200, threadPoolSize = 16)
 	public void testBufferedOutputStream() throws IOException {
 		RandomByteArrayOutputStream dest=new RandomByteArrayOutputStream();
 		BufferedRandomOutputStream outputStream=new BufferedRandomOutputStream(dest);

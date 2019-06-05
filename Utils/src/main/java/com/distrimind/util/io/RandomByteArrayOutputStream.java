@@ -37,6 +37,8 @@
  */
 package com.distrimind.util.io;
 
+import org.bouncycastle.util.Arrays;
+
 import java.io.IOException;
 
 /**
@@ -48,15 +50,19 @@ import java.io.IOException;
 public class RandomByteArrayOutputStream extends RandomOutputStream {
 	byte[] bytes;
 	private int current_pos;
+	int length;
+	static final int MAX_ARRAY_SIZE = Integer.MAX_VALUE - 8;
 
 	public RandomByteArrayOutputStream(byte[] _bytes) {
 		bytes = _bytes;
 		current_pos = 0;
+		length=_bytes.length;
 	}
 
 	public RandomByteArrayOutputStream() {
 		bytes = new byte[0];
 		current_pos = 0;
+		length=0;
 	}
 
 	public RandomByteArrayOutputStream(int length) {
@@ -64,6 +70,7 @@ public class RandomByteArrayOutputStream extends RandomOutputStream {
 			throw new IllegalArgumentException("length must can't be negative");
 		bytes = new byte[length];
 		current_pos = 0;
+		this.length=length;
 	}
 
 	/**
@@ -74,8 +81,9 @@ public class RandomByteArrayOutputStream extends RandomOutputStream {
 	public void write(int b) throws IOException {
 		if (current_pos == -1)
 			throw new IOException("The current RandomByteArrayOutputStream is closed !");
-		ensureLength(current_pos + 1);
+		ensureAdditionalLength(1);
 		bytes[current_pos++] = (byte) b;
+		length=Math.max(length, current_pos);
 	}
 
 	/**
@@ -99,9 +107,10 @@ public class RandomByteArrayOutputStream extends RandomOutputStream {
 			throw new NullPointerException("_bytes");
 		if (_length > _bytes.length)
 			throw new IllegalArgumentException("_length must be greater than _bytes.length !");
-		ensureLength(current_pos + _length);
+		ensureAdditionalLength(_length);
 		System.arraycopy(_bytes, _offset, bytes, current_pos, _length);
 		current_pos += _length;
+		length=Math.max(length, current_pos);
 	}
 
 	/**
@@ -112,7 +121,7 @@ public class RandomByteArrayOutputStream extends RandomOutputStream {
 	public long length() throws IOException {
 		if (current_pos == -1)
 			throw new IOException("The current RandomByteArrayOutputStream is closed !");
-		return bytes.length;
+		return length;
 	}
 
 	/**
@@ -124,19 +133,19 @@ public class RandomByteArrayOutputStream extends RandomOutputStream {
 		if (current_pos == -1)
 			throw new IOException("The current RandomByteArrayOutputStream is closed !");
 
-		if (_length < 0 || _length > (long) Integer.MAX_VALUE)
+		if (_length < 0 || _length > MAX_ARRAY_SIZE)
 			throw new IllegalArgumentException("invalid length : " + _length);
-
 		int length = (int) _length;
-		if (length == bytes.length)
-			return;
-		byte[] prev = bytes;
-		bytes = new byte[length];
-		if (prev.length != 0 && length != 0) {
-			System.arraycopy(prev, 0, bytes, 0, Math.min(prev.length, length));
+		if (bytes.length<length || bytes.length>_length*3) {
+			byte[] prev = bytes;
+			bytes = new byte[length];
+			if (this.length != 0) {
+				System.arraycopy(prev, 0, bytes, 0, Math.min(this.length, length));
+			}
 		}
 
-		current_pos = Math.min(bytes.length, current_pos);
+		this.length = length;
+		current_pos = Math.min(length, current_pos);
 	}
 
 	/**
@@ -150,7 +159,6 @@ public class RandomByteArrayOutputStream extends RandomOutputStream {
 		if (_pos<0 || _pos>length())
 			throw new IllegalArgumentException(""+_pos+" is not in [0,"+length()+"]");
 
-		ensureLength(_pos + 1);
 		current_pos = (int) _pos;
 	}
 
@@ -174,7 +182,7 @@ public class RandomByteArrayOutputStream extends RandomOutputStream {
 	}
 
 	public byte[] getBytes() {
-		return bytes;
+		return Arrays.copyOf(bytes, length);
 	}
 
 	/**
@@ -184,6 +192,21 @@ public class RandomByteArrayOutputStream extends RandomOutputStream {
 	@Override
 	public void close() {
 		current_pos = -1;
+	}
+
+	private void ensureAdditionalLength(int l) throws IOException {
+		l=this.current_pos+l;
+		if (l > MAX_ARRAY_SIZE)
+			throw new IOException("invalid length : " + length);
+
+		if (bytes.length<l) {
+			int length = (int) Math.min(2L*l, MAX_ARRAY_SIZE);
+			byte[] prev = bytes;
+			bytes = new byte[length];
+			if (this.length != 0) {
+				System.arraycopy(prev, 0, bytes, 0, this.length);
+			}
+		}
 	}
 
 }

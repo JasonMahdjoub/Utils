@@ -107,7 +107,8 @@ public class BufferedRandomInputStream extends RandomInputStream {
 	@Override
 	public void seek(long _pos) throws IOException {
 		if (_pos<0 || _pos>length())
-			throw new IllegalArgumentException();
+			throw new IllegalArgumentException(""+_pos+" is not in [0,"+length()+"]");
+
 
 		currentPosition=_pos;
 		chooseBuffer(_pos);

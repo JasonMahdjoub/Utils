@@ -66,7 +66,7 @@ public class RandomByteArrayInputStream extends RandomInputStream {
 	}
 
 	private int getFreeSpace() {
-		return outputStream.bytes.length - current_pos;
+		return outputStream.length - current_pos;
 	}
 
 	/**
@@ -77,7 +77,7 @@ public class RandomByteArrayInputStream extends RandomInputStream {
 	public int read() throws IOException {
 		if (outputStream == null)
 			throw new IOException("The current RandomByteArrayInputStream is closed !");
-		if (current_pos >= outputStream.bytes.length)
+		if (current_pos >= outputStream.length)
 			return -1;
 		else {
 			return outputStream.bytes[current_pos++];
@@ -116,7 +116,7 @@ public class RandomByteArrayInputStream extends RandomInputStream {
 		if (outputStream == null)
 			throw new IOException("The current RandomByteArrayInputStream is closed !");
 
-		return outputStream.bytes.length;
+		return outputStream.length;
 	}
 
 	/**
@@ -127,9 +127,9 @@ public class RandomByteArrayInputStream extends RandomInputStream {
 
 		if (outputStream == null)
 			throw new IOException("The current RandomByteArrayInputStream is closed !");
-		if (_pos > (long) outputStream.bytes.length || _pos < 0)
+		if (_pos > (long) outputStream.length || _pos < 0)
 			throw new IOException("The given position (" + _pos + ") is invalid. Attempted a position between 0 and "
-					+ outputStream.bytes.length + " excluded.");
+					+ outputStream.length + " excluded.");
 		current_pos = (int) _pos;
 	}
 

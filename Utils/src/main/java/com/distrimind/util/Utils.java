@@ -76,6 +76,7 @@ public class Utils {
 			c.set(2019, Calendar.MAY, 31);
 			Description d = new Description((short)3, (short)30, (short)0, Version.Type.Stable, (short)0, c.getTime());
 			d.addItem("Add BufferedRandomInputStream abd BufferedRandomOutputStream.");
+			d.addItem("Pre-allocate bytes arrays with random byte array streams.");
 			VERSION.addDescription(d);
 
 			c = Calendar.getInstance();
