@@ -6,6 +6,7 @@ class RandomDataBuffer {
     private int remainingBits = 0;
 
     synchronized int next(int bits, Supplier<byte[]> randomDataSupplier) {
+
         int result = 0;
         int bitsStillToTake = bits;
         while (bitsStillToTake > 0) {

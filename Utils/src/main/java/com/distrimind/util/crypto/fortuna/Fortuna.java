@@ -32,9 +32,9 @@ public class Fortuna extends Random {
     private final Generator generator;
     private final Accumulator accumulator;
     private final ScheduledExecutorService scheduler;
-    private final boolean createdScheduler;
+    private boolean createdScheduler;
     private final PrefetchingSupplier<byte[]> randomDataPrefetcher;
-    private final SecureRandomSource secureRandomSource;
+    final SecureRandomSource secureRandomSource;
 
 
 
@@ -82,6 +82,7 @@ public class Fortuna extends Random {
 
     public Fortuna()  {
         this(createDefaultScheduler());
+        this.createdScheduler = true;
     }
 
     public Fortuna(ScheduledExecutorService scheduler) {
@@ -91,7 +92,6 @@ public class Fortuna extends Random {
         AtomicReference<SecureRandomSource> secureRandomSource=new AtomicReference<>();
         this.accumulator = createAccumulator(scheduler, secureRandomSource);
         this.secureRandomSource=secureRandomSource.get();
-
         this.randomDataPrefetcher = new PrefetchingSupplier<>(new Callable<byte[]>() {
             @Override
             public byte[] call() {
@@ -156,6 +156,7 @@ public class Fortuna extends Random {
 
     @Override
     protected int next(int bits) {
+        secureRandomSource.setUpdate(true);
         return randomDataBuffer.next(bits, randomDataPrefetcher);
     }
 

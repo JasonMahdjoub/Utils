@@ -19,6 +19,7 @@ import java.util.concurrent.TimeUnit;
 public class SecureRandomSource implements EntropySource {
 
 	private volatile AbstractSecureRandom [] secureRandoms=null;
+	private volatile boolean update=true;
 
 	public void add(AbstractSecureRandom random) {
 		if (random==null)
@@ -35,6 +36,14 @@ public class SecureRandomSource implements EntropySource {
 
 	}
 
+	public boolean isUpdate() {
+		return update;
+	}
+
+	public void setUpdate(boolean update) {
+		this.update = update;
+	}
+
 	public void add(SecureRandomType type) throws NoSuchProviderException, NoSuchAlgorithmException {
 		add(type.getInstance(null));
 	}
@@ -46,31 +55,34 @@ public class SecureRandomSource implements EntropySource {
 
 	@Override
 	public void event(EventAdder adder) {
-		byte numBytes=32;
-		byte[] seed=null;
-		try {
-			seed = SecureRandomType.tryToGenerateNativeNonBlockingSeed(numBytes);
-		} catch (java.security.NoSuchAlgorithmException | java.security.NoSuchProviderException e) {
-			e.printStackTrace();
+		if (update) {
+			byte numBytes = 32;
+			byte[] seed = null;
+			try {
+				seed = SecureRandomType.tryToGenerateNativeNonBlockingSeed(numBytes);
+			} catch (java.security.NoSuchAlgorithmException | java.security.NoSuchProviderException e) {
+				e.printStackTrace();
 
-		}
+			}
 
-		byte[] s=null;
-		if (secureRandoms!=null) {
-			for (int i = 0; i < secureRandoms.length; i++) {
-				if (s == null)
-					s = new byte[numBytes];
-				secureRandoms[i].nextBytes(s);
-				if (seed == null) {
-					seed = s;
-					s = null;
-				} else {
-					for (int j = 0; j < numBytes; j++)
-						seed[j] = (byte) (seed[i] ^ s[i]);
+			byte[] s = null;
+			if (secureRandoms != null) {
+				for (int i = 0; i < secureRandoms.length; i++) {
+					if (s == null)
+						s = new byte[numBytes];
+					secureRandoms[i].nextBytes(s);
+					if (seed == null) {
+						seed = s;
+						s = null;
+					} else {
+						for (int j = 0; j < numBytes; j++)
+							seed[j] = (byte) (seed[i] ^ s[i]);
+					}
 				}
 			}
+			if (seed != null)
+				adder.add(seed);
+			update=false;
 		}
-		if (seed!=null)
-			adder.add(seed);
 	}
 }

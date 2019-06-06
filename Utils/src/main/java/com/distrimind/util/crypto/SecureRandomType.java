@@ -124,7 +124,7 @@ public enum SecureRandomType {
 	 * @throws gnu.vm.jgnu.security.NoSuchAlgorithmException if the algorithm was not found
 	 * @throws gnu.vm.jgnu.security.NoSuchProviderException if the provider was not found
 	 */
-	public AbstractSecureRandom getInstance(byte nonce[]) throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.NoSuchProviderException
+	public AbstractSecureRandom getInstance(byte nonce[]) throws NoSuchAlgorithmException, NoSuchProviderException
 	{
 		return getInstance(nonce, (byte[])null);
 	}
