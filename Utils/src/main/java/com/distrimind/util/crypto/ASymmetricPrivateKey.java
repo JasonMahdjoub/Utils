@@ -94,7 +94,7 @@ public class ASymmetricPrivateKey extends Key {
 		}
 		if (gnuPrivateKey!=null)
 		{
-			Arrays.fill(GnuFunctions.getEncoded(gnuPrivateKey), (byte)0);
+			Arrays.fill(GnuFunctions.keyGetEncoded(gnuPrivateKey), (byte)0);
 			gnuPrivateKey=null;
 		}
 	}

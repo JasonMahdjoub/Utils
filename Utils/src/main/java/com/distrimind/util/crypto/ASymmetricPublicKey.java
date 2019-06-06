@@ -99,7 +99,7 @@ public class ASymmetricPublicKey extends Key {
 		}
 		if (nativePublicKey!=null)
 		{
-			Arrays.fill(GnuFunctions.getEncoded(gnuPublicKey), (byte)0);
+			Arrays.fill(GnuFunctions.keyGetEncoded(gnuPublicKey), (byte)0);
 			gnuPublicKey=null;
 		}
 	}

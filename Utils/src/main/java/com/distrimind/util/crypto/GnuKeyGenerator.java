@@ -34,7 +34,6 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
-import gnu.vm.jgnux.crypto.KeyGenerator;
 
 /**
  * 
@@ -43,15 +42,15 @@ import gnu.vm.jgnux.crypto.KeyGenerator;
  * @since Utils 2.0
  */
 public class GnuKeyGenerator extends AbstractKeyGenerator {
-	private final KeyGenerator keyGenerator;
+	private final Object keyGenerator;
 
 	private short keySize = -1;
 
-	GnuKeyGenerator(SymmetricEncryptionType type, KeyGenerator keyGenerator) {
+	GnuKeyGenerator(SymmetricEncryptionType type, Object keyGenerator) {
 		super(type);
 		this.keyGenerator = keyGenerator;
 	}
-	GnuKeyGenerator(SymmetricAuthentifiedSignatureType type, KeyGenerator keyGenerator) {
+	GnuKeyGenerator(SymmetricAuthentifiedSignatureType type, Object keyGenerator) {
 		super(type);
 		this.keyGenerator = keyGenerator;
 	}
@@ -60,21 +59,21 @@ public class GnuKeyGenerator extends AbstractKeyGenerator {
 	@Override
 	public SymmetricSecretKey generateKey() {
 		if (encryptionType==null)
-			return new SymmetricSecretKey(signatureType, keyGenerator.generateKey(),
+			return new SymmetricSecretKey(signatureType, GnuFunctions.keyGeneratorGeneratorKey(keyGenerator),
 				keySize < 0 ? signatureType.getDefaultKeySizeBits() : keySize);
 		else
-			return new SymmetricSecretKey(encryptionType, keyGenerator.generateKey(),
+			return new SymmetricSecretKey(encryptionType, GnuFunctions.keyGeneratorGeneratorKey(keyGenerator),
 					keySize < 0 ? encryptionType.getDefaultKeySizeBits() : keySize);
 	}
 
 	@Override
 	public String getAlgorithm() {
-		return keyGenerator.getAlgorithm();
+		return GnuFunctions.keyGeneratorGetAlgorithm(keyGenerator);
 	}
 
 	@Override
 	public String getProvider() {
-		return keyGenerator.getProvider().getName();
+		return GnuFunctions.keyGeneratorGetProvider(keyGenerator);
 	}
 
 	
@@ -82,6 +81,6 @@ public class GnuKeyGenerator extends AbstractKeyGenerator {
 	@Override
 	public void init(short _keySize, AbstractSecureRandom _random) {
 		keySize = _keySize;
-		keyGenerator.init(_keySize, _random.getGnuSecureRandom());
+		GnuFunctions.keyGeneratorInit(keyGenerator, _keySize, _random);
 	}
 }

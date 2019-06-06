@@ -36,14 +36,14 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 
 
-import gnu.vm.jgnux.crypto.Cipher;
-
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import javax.crypto.ShortBufferException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.*;
+import java.nio.ByteBuffer;
 import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 
@@ -65,13 +65,21 @@ class GnuFunctions {
 	private static Method cipherUnwrap=null;
 	private static Method cipherDoFinal=null, cipherInitIntKeyParamSpec =null, cipherDoFinalBytesInt=null,
 			cipherDoFinalBytesIntInt=null, cipherDoFinalBytesIntIntBytesInt=null,  cipherGetAlgorithm=null, cipherGetIv=null,
-			cipherGetOutputSize=null, cipherUpdateBytesIntInt=null, cipherUpdateBytesIntIntBytesInt=null, cipherGetBlockSize=null ;
+			cipherGetOutputSize=null, cipherUpdateBytesIntInt=null, cipherUpdateBytesIntIntBytesInt=null, cipherGetBlockSize=null, cipherGetInstance ;
 	private static Method engineSetSeed=null, engineNextBytes=null, engineGenerateSeed=null;
+	private static Method keyGeneratorGenerateKey, keyGeneratorGetAlgorithm, keyGeneratorGetProvider, keyGeneratorInit;
+	private static Method keyPairGeneratorGenerateKeyPair, keyPairGeneratorGetAlgorithm,  keyPairGeneratorInit,  keyPairGeneratorInitRandom;
+	private static Method macDoFinal, macDoFinalBytes, macDoFinalBytesInt,macGetAlgorithm, macGetMacLength, macInit, macReset, macUpdateByte, macUpdateBytesIntInt,macUpdateByteBuffer;
+	private static Method clone;
+	private static Method keyFactGetInstance, keyFactGeneratePublic, keyFactGeneratePrivate;
 
-	private static Constructor<?> keyPairConstructor;
+	private static Constructor<?> keyPairConstructorPublicPrivate, keyPairGeneratorConstructorString ;
 	private static Constructor<?> secureRandomFromSpiConstructor;
 	private static Constructor<?> IVparamSpec;
 	private static Constructor<?> constCipherInputStream, consCipherOutputStream;
+	private static Constructor<?> constSecretKeySpec;
+	private static Constructor<?> constPKCS8EncodedKeySpec, constX509EncodedKeySpec;
+
 
 	private static int WRAP_MODE;
 	private static int UNWRAP_MODE;
@@ -93,45 +101,77 @@ class GnuFunctions {
 						getPrivateKey=Class.forName("gnu.vm.jgnu.security.KeyPair").getDeclaredMethod("getPrivate");
 						getPrivateKey=Class.forName("gnu.vm.jgnu.security.KeyPair").getDeclaredMethod("getPrivate");
 						getEncoded=Class.forName("gnu.vm.jgnu.security.Key").getDeclaredMethod("getEncoded");
-						keyPairConstructor=Class.forName("gnu.vm.jgnu.security.KeyPair").getDeclaredConstructor(Class.forName("gnu.vm.jgnu.security.PublicKey"), Class.forName("gnu.vm.jgnu.security.PrivateKey"));
-						cipherInitIntKeyRandom =Class.forName("gnu.vm.jgnux.crypto.Cipher").getMethod("init", int.class,Class.forName("gnu.vm.jgnu.security.Key"), Class.forName("gnu.vm.jgnu.security.SecureRandom") );
-						cipherInitIntKeyParamSpec =Class.forName("gnu.vm.jgnux.crypto.Cipher").getMethod("init", int.class, Class.forName("gnu.vm.jgnu.security.Key"), Class.forName("gnu.vm.jgnu.security.spec.AlgorithmParameterSpec"));
-						cipherInitUnwrap=Class.forName("gnu.vm.jgnux.crypto.Cipher").getMethod("init", int.class,Class.forName("gnu.vm.jgnu.security.Key"));
-						cipherWrap=Class.forName("gnu.vm.jgnux.crypto.Cipher").getMethod("wrap", Class.forName("gnu.vm.jgnu.security.Key"));
-						cipherUnwrap=Class.forName("gnu.vm.jgnux.crypto.Cipher").getMethod("unwrap", byte[].class, String.class, int.class);
-						cipherDoFinal=Class.forName("gnu.vm.jgnux.crypto.Cipher").getMethod("doFinal");
+						keyPairConstructorPublicPrivate =Class.forName("gnu.vm.jgnu.security.KeyPair").getDeclaredConstructor(Class.forName("gnu.vm.jgnu.security.PublicKey"), Class.forName("gnu.vm.jgnu.security.PrivateKey"));
+						keyPairGeneratorConstructorString =Class.forName("gnu.vm.jgnu.security.KeyPairGenerator").getDeclaredConstructor(String.class);
+						cipherInitIntKeyRandom =Class.forName("gnu.vm.jgnux.crypto.Cipher").getDeclaredMethod("init", int.class,Class.forName("gnu.vm.jgnu.security.Key"), Class.forName("gnu.vm.jgnu.security.SecureRandom") );
+						cipherInitIntKeyParamSpec =Class.forName("gnu.vm.jgnux.crypto.Cipher").getDeclaredMethod("init", int.class, Class.forName("gnu.vm.jgnu.security.Key"), Class.forName("gnu.vm.jgnu.security.spec.AlgorithmParameterSpec"));
+						cipherInitUnwrap=Class.forName("gnu.vm.jgnux.crypto.Cipher").getDeclaredMethod("init", int.class,Class.forName("gnu.vm.jgnu.security.Key"));
+						cipherWrap=Class.forName("gnu.vm.jgnux.crypto.Cipher").getDeclaredMethod("wrap", Class.forName("gnu.vm.jgnu.security.Key"));
+						cipherUnwrap=Class.forName("gnu.vm.jgnux.crypto.Cipher").getDeclaredMethod("unwrap", byte[].class, String.class, int.class);
+						cipherDoFinal=Class.forName("gnu.vm.jgnux.crypto.Cipher").getDeclaredMethod("doFinal");
 
-						cipherDoFinalBytesInt=Class.forName("gnu.vm.jgnux.crypto.Cipher").getMethod("doFinal", byte[].class, int.class);
-						cipherDoFinalBytesIntInt=Class.forName("gnu.vm.jgnux.crypto.Cipher").getMethod("doFinal", byte[].class, int.class, int.class);
-						cipherDoFinalBytesIntIntBytesInt=Class.forName("gnu.vm.jgnux.crypto.Cipher").getMethod("doFinal", byte[].class, int.class, int.class, byte[].class, int.class);
-						cipherGetAlgorithm=Class.forName("gnu.vm.jgnux.crypto.Cipher").getMethod("getAlgorithm");
-						cipherGetIv=Class.forName("gnu.vm.jgnux.crypto.Cipher").getMethod("getIV");
-						cipherGetBlockSize=Class.forName("gnu.vm.jgnux.crypto.Cipher").getMethod("getBlockSize");
-						cipherGetOutputSize=Class.forName("gnu.vm.jgnux.crypto.Cipher").getMethod("getOutputSize", int.class);
-						cipherUpdateBytesIntInt=Class.forName("gnu.vm.jgnux.crypto.Cipher").getMethod("update", byte[].class, int.class, int.class);
-						cipherUpdateBytesIntIntBytesInt=Class.forName("gnu.vm.jgnux.crypto.Cipher").getMethod("update", byte[].class, int.class, int.class, byte[].class, int.class);
+						cipherDoFinalBytesInt=Class.forName("gnu.vm.jgnux.crypto.Cipher").getDeclaredMethod("doFinal", byte[].class, int.class);
+						cipherDoFinalBytesIntInt=Class.forName("gnu.vm.jgnux.crypto.Cipher").getDeclaredMethod("doFinal", byte[].class, int.class, int.class);
+						cipherDoFinalBytesIntIntBytesInt=Class.forName("gnu.vm.jgnux.crypto.Cipher").getDeclaredMethod("doFinal", byte[].class, int.class, int.class, byte[].class, int.class);
+						cipherGetAlgorithm=Class.forName("gnu.vm.jgnux.crypto.Cipher").getDeclaredMethod("getAlgorithm");
+						cipherGetIv=Class.forName("gnu.vm.jgnux.crypto.Cipher").getDeclaredMethod("getIV");
+						cipherGetBlockSize=Class.forName("gnu.vm.jgnux.crypto.Cipher").getDeclaredMethod("getBlockSize");
+						cipherGetOutputSize=Class.forName("gnu.vm.jgnux.crypto.Cipher").getDeclaredMethod("getOutputSize", int.class);
+						cipherUpdateBytesIntInt=Class.forName("gnu.vm.jgnux.crypto.Cipher").getDeclaredMethod("update", byte[].class, int.class, int.class);
+						cipherUpdateBytesIntIntBytesInt=Class.forName("gnu.vm.jgnux.crypto.Cipher").getDeclaredMethod("update", byte[].class, int.class, int.class, byte[].class, int.class);
+						cipherGetInstance=Class.forName("gnu.vm.jgnux.crypto.Cipher").getDeclaredMethod("getInstance", String.class);
 						IVparamSpec=Class.forName("gnu.vm.jgnux.crypto.spec.IvParameterSpec").getDeclaredConstructor(byte[].class);
-						constCipherInputStream=Class.forName("gnu.vm.jgnux.crypto.CipherInputStream").getDeclaredConstructor(InputStream.class, Cipher.class);
-						consCipherOutputStream=Class.forName("gnu.vm.jgnux.crypto.CipherOutputStream").getDeclaredConstructor(OutputStream.class, Cipher.class);
+						constCipherInputStream=Class.forName("gnu.vm.jgnux.crypto.CipherInputStream").getDeclaredConstructor(InputStream.class, Class.forName("gnu.vm.jgnux.crypto.Cipher"));
+						consCipherOutputStream=Class.forName("gnu.vm.jgnux.crypto.CipherOutputStream").getDeclaredConstructor(OutputStream.class, Class.forName("gnu.vm.jgnux.crypto.Cipher"));
 
 
 						WRAP_MODE=(int)Class.forName("gnu.vm.jgnux.crypto.Cipher").getDeclaredField("WRAP_MODE").get(null);
 						UNWRAP_MODE=(int)Class.forName("gnu.vm.jgnux.crypto.Cipher").getDeclaredField("UNWRAP_MODE").get(null);
 						SECRET_KEY=(int)Class.forName("gnu.vm.jgnux.crypto.Cipher").getDeclaredField("SECRET_KEY").get(null);
 
-						//noinspection JavaReflectionMemberAccess
-						engineSetSeed=Class.forName("gnu.vm.jgnu.security.SecureRandomSpi").getMethod("engineSetSeed", byte[].class);
-						//noinspection JavaReflectionMemberAccess
-						engineNextBytes=Class.forName("gnu.vm.jgnu.security.SecureRandomSpi").getMethod("engineNextBytes", byte[].class);
-						//noinspection JavaReflectionMemberAccess
-						engineGenerateSeed=Class.forName("gnu.vm.jgnu.security.SecureRandomSpi").getMethod("engineGenerateSeed", int.class);
+						engineSetSeed=Class.forName("gnu.vm.jgnu.security.SecureRandomSpi").getDeclaredMethod("engineSetSeed", byte[].class);
+						engineNextBytes=Class.forName("gnu.vm.jgnu.security.SecureRandomSpi").getDeclaredMethod("engineNextBytes", byte[].class);
+						engineGenerateSeed=Class.forName("gnu.vm.jgnu.security.SecureRandomSpi").getDeclaredMethod("engineGenerateSeed", int.class);
 						secureRandomFromSpiConstructor=Class.forName("gnu.vm.jgnu.security.SecureRandom").getDeclaredConstructor(Class.forName("gnu.vm.jgnu.security.SecureRandomSpi"), Class.forName("gnu.vm.jgnu.security.Provider"));
+
+						keyGeneratorGenerateKey=Class.forName("gnu.vm.jgnux.crypto.KeyGenerator").getDeclaredMethod("generateKey" );
+						keyGeneratorGetAlgorithm=Class.forName("gnu.vm.jgnux.crypto.KeyGenerator").getDeclaredMethod("getAlgorithm");
+						keyGeneratorGetProvider =Class.forName("gnu.vm.jgnux.crypto.KeyGenerator").getDeclaredMethod("getProvider");
+						keyGeneratorInit=Class.forName("gnu.vm.jgnux.crypto.KeyGenerator").getDeclaredMethod("init", int.class, Class.forName("gnu.vm.jgnu.security.SecureRandom"));
+
+						keyPairGeneratorGenerateKeyPair=Class.forName("gnu.vm.jgnu.security.KeyPairGenerator").getDeclaredMethod("generateKeyPair" );
+						keyPairGeneratorGetAlgorithm=Class.forName("ggnu.vm.jgnu.security.KeyPairGenerator").getDeclaredMethod("getAlgorithm");
+						keyPairGeneratorInitRandom=Class.forName("gnu.vm.jgnu.security.KeyPairGenerator").getDeclaredMethod("initialize", int.class, Class.forName("gnu.vm.jgnu.security.SecureRandom"));
+						keyPairGeneratorInit=Class.forName("gnu.vm.jgnu.security.KeyPairGenerator").getDeclaredMethod("initialize", int.class);
+
+
+						macGetAlgorithm=Class.forName("gnu.vm.jgnux.crypto.Mac").getDeclaredMethod("getAlgorithm");
+						macGetMacLength=Class.forName("gnu.vm.jgnux.crypto.Mac").getDeclaredMethod("getMacLength");
+						macDoFinal=Class.forName("gnu.vm.jgnux.crypto.Mac").getDeclaredMethod("doFinal");
+						macDoFinalBytes=Class.forName("gnu.vm.jgnux.crypto.Mac").getDeclaredMethod("doFinal", byte[].class);
+						macDoFinalBytesInt=Class.forName("gnu.vm.jgnux.crypto.Mac").getDeclaredMethod("doFinal", byte[].class, int.class);
+						macInit=Class.forName("gnu.vm.jgnux.crypto.Mac").getDeclaredMethod("init", Class.forName("gnu.vm.jgnu.security.Key"));
+						macReset=Class.forName("gnu.vm.jgnux.crypto.Mac").getDeclaredMethod("reset");
+						macUpdateByte=Class.forName("gnu.vm.jgnux.crypto.Mac").getDeclaredMethod("update", byte.class);
+						macUpdateBytesIntInt=Class.forName("gnu.vm.jgnux.crypto.Mac").getDeclaredMethod("update", byte[].class, int.class, int.class);
+						macUpdateByteBuffer=Class.forName("gnu.vm.jgnux.crypto.Mac").getDeclaredMethod("update", ByteBuffer.class);
+						constSecretKeySpec=Class.forName("gnu.vm.jgnux.crypto.spec.SecretKeySpec").getDeclaredConstructor(byte[].class, String.class);
+
+						clone=Object.class.getDeclaredMethod("clone");
+
+						keyFactGetInstance=Class.forName("gnu.vm.jgnu.security.KeyFactory").getDeclaredMethod("getInstance", String.class);
+						keyFactGeneratePrivate=Class.forName("gnu.vm.jgnu.security.KeyFactory").getDeclaredMethod("generatePrivate", Class.forName("gnu.vm.jgnu.security.spec.KeySpec"));
+						keyFactGeneratePublic=Class.forName("gnu.vm.jgnu.security.KeyFactory").getDeclaredMethod("generatePublic", Class.forName("gnu.vm.jgnu.security.spec.KeySpec"));
+						constPKCS8EncodedKeySpec=Class.forName("gnu.vm.jgnu.security.spec.PKCS8EncodedKeySpec").getDeclaredConstructor(byte[].class);
+						constX509EncodedKeySpec=Class.forName("gnu.vm.jgnu.security.spec.X509EncodedKeySpec").getDeclaredConstructor(byte[].class);
+
 
 
 						AccessController.doPrivileged(new PrivilegedAction<Void>() {
 							@Override
 							public Void run() {
 								secureRandomFromSpiConstructor.setAccessible(true);
+								macUpdateByteBuffer.setAccessible(true);
 								return null;
 							}
 						});
@@ -147,12 +187,43 @@ class GnuFunctions {
 		}
 	}
 
+	static Object decodeGnuPrivateKey(byte[] encodedKey, String algorithm) throws NoSuchAlgorithmException, InvalidKeySpecException {
+		checkGnuLoaded();
+		try {
+			return keyFactGeneratePrivate.invoke(keyFactGetInstance.invoke(null, algorithm),constPKCS8EncodedKeySpec.newInstance((Object)encodedKey));
+		} catch (IllegalAccessException | InstantiationException e) {
+			throw new IllegalStateException(e);
+		} catch (InvocationTargetException e) {
+			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.NoSuchAlgorithmException"))
+				throw new NoSuchAlgorithmException(e.getTargetException());
+			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.spec.InvalidKeySpecException"))
+				throw new InvalidKeySpecException(e.getTargetException());
+			throw new IllegalStateException(e);
+		}
+	}
+
+	static Object decodeGnuPublicKey(byte[] encodedKey, String algorithm) throws NoSuchAlgorithmException, InvalidKeySpecException {
+		checkGnuLoaded();
+		try {
+			return keyFactGeneratePublic.invoke(keyFactGetInstance.invoke(null, algorithm),constX509EncodedKeySpec.newInstance((Object)encodedKey));
+		} catch (IllegalAccessException | InstantiationException e) {
+			throw new IllegalStateException(e);
+		} catch (InvocationTargetException e) {
+			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.NoSuchAlgorithmException"))
+				throw new NoSuchAlgorithmException(e.getTargetException());
+			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.spec.InvalidKeySpecException"))
+				throw new InvalidKeySpecException(e.getTargetException());
+			throw new IllegalStateException(e);
+		}
+	}
+
+
 	static Object getSignatureAlgorithm(String signatureName) throws NoSuchAlgorithmException {
 		checkGnuLoaded();
 		try {
 			return getSignatureAlgo.invoke(null, signatureName);
 		} catch (IllegalAccessException e) {
-			throw new IllegalAccessError();
+			throw new IllegalStateException(e);
 		} catch (InvocationTargetException e) {
 			throw new NoSuchAlgorithmException(e.getTargetException());
 		}
@@ -163,7 +234,7 @@ class GnuFunctions {
 		try {
 			return getCihperAlgo.invoke(null, signatureName);
 		} catch (IllegalAccessException e) {
-			throw new IllegalAccessError();
+			throw new IllegalStateException(e);
 		} catch (InvocationTargetException e) {
 			throw new NoSuchAlgorithmException(e.getTargetException());
 		}
@@ -174,7 +245,7 @@ class GnuFunctions {
 		try {
 			cipherInitIntKeyRandom.invoke(cipher, WRAP_MODE, publicKey, random);
 		} catch (IllegalAccessException e) {
-			throw new IllegalAccessError();
+			throw new IllegalStateException(e);
 		} catch (InvocationTargetException e) {
 			throw new InvalidKeyException(e.getTargetException());
 		}
@@ -185,7 +256,7 @@ class GnuFunctions {
 		try {
 			cipherInitIntKeyRandom.invoke(cipher, mode, publicKey, random);
 		} catch (IllegalAccessException e) {
-			throw new IllegalAccessError();
+			throw new IllegalStateException(e);
 		} catch (InvocationTargetException e) {
 			if (e.getTargetException() instanceof IllegalStateException)
 				throw (IllegalStateException)e.getTargetException();
@@ -198,12 +269,30 @@ class GnuFunctions {
 			throw new IllegalStateException(e.getTargetException());
 		}
 	}
+	static Object cipherGetInstance(String name) throws NoSuchAlgorithmException, NoSuchPaddingException, NoSuchProviderException {
+		checkGnuLoaded();
+		try {
+			return cipherGetInstance.invoke(null, name);
+		} catch (IllegalAccessException e) {
+			throw new IllegalStateException(e);
+		} catch (InvocationTargetException e) {
+			if (e.getTargetException() instanceof IllegalStateException)
+				throw (IllegalStateException)e.getTargetException();
+			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.NoSuchAlgorithmException") )
+				throw new NoSuchAlgorithmException(e.getTargetException());
+			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnux.crypto.NoSuchPaddingException") )
+				throw new NoSuchPaddingException(e.getTargetException().getMessage());
+			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.NoSuchProviderException") )
+				throw new NoSuchProviderException(e.getTargetException().getMessage());
+			throw new IllegalStateException(e.getTargetException());
+		}
+	}
 	static void cipherInit(Object cipher, int mode, Object publicKey, byte[] _iv) throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidAlgorithmParameterException {
 		checkGnuLoaded();
 		try {
 			cipherInitIntKeyParamSpec.invoke(cipher, mode, publicKey, IVparamSpec.newInstance((Object)_iv));
 		} catch (IllegalAccessException | InstantiationException e) {
-			throw new IllegalAccessError();
+			throw new IllegalStateException(e);
 		} catch (InvocationTargetException e) {
 			if (e.getTargetException() instanceof IllegalStateException)
 				throw (IllegalStateException)e.getTargetException();
@@ -220,11 +309,10 @@ class GnuFunctions {
 		}
 	}
 	static byte[] cipherDoFinal(Object cipher) throws IllegalStateException, IllegalBlockSizeException, BadPaddingException {
-		checkGnuLoaded();
 		try {
 			return (byte[])cipherDoFinal.invoke(cipher);
 		} catch (IllegalAccessException e) {
-			throw new IllegalAccessError();
+			throw new IllegalStateException(e);
 		} catch (InvocationTargetException e) {
 			if (e.getTargetException() instanceof IllegalStateException)
 				throw (IllegalStateException)e.getTargetException();
@@ -236,11 +324,10 @@ class GnuFunctions {
 		}
 	}
 	static int cipherDoFinal(Object cipher, byte[] _output, int _outputOffset) throws IllegalStateException, IllegalBlockSizeException, BadPaddingException, ShortBufferException {
-		checkGnuLoaded();
 		try {
 			return (int)cipherDoFinalBytesInt.invoke(cipher, _output, _outputOffset);
 		} catch (IllegalAccessException e) {
-			throw new IllegalAccessError();
+			throw new IllegalStateException(e);
 		} catch (InvocationTargetException e) {
 			if (e.getTargetException() instanceof IllegalStateException)
 				throw (IllegalStateException)e.getTargetException();
@@ -254,11 +341,10 @@ class GnuFunctions {
 		}
 	}
 	static byte[] cipherDoFinal(Object cipher, byte[] _input, int _inputOffset, int _inputLength) throws IllegalStateException, IllegalBlockSizeException, BadPaddingException {
-		checkGnuLoaded();
 		try {
 			return (byte[])cipherDoFinalBytesIntInt.invoke(cipher, _input, _inputOffset, _inputLength);
 		} catch (IllegalAccessException e) {
-			throw new IllegalAccessError();
+			throw new IllegalStateException(e);
 		} catch (InvocationTargetException e) {
 			if (e.getTargetException() instanceof IllegalStateException)
 				throw (IllegalStateException)e.getTargetException();
@@ -271,11 +357,10 @@ class GnuFunctions {
 	}
 
 	static int cipherDoFinal(Object cipher, byte[] _input, int _inputOffset, int _inputLength, byte[] _output, int _outputOffset) throws IllegalStateException, IllegalBlockSizeException, BadPaddingException, ShortBufferException {
-		checkGnuLoaded();
 		try {
 			return (int)cipherDoFinalBytesIntIntBytesInt.invoke(cipher, _input, _inputOffset, _inputLength, _output, _outputOffset);
 		} catch (IllegalAccessException e) {
-			throw new IllegalAccessError();
+			throw new IllegalStateException(e);
 		} catch (InvocationTargetException e) {
 			if (e.getTargetException() instanceof IllegalStateException)
 				throw (IllegalStateException)e.getTargetException();
@@ -290,21 +375,224 @@ class GnuFunctions {
 	}
 
 	static String cipherGetAlgorithm(Object cipher)  {
-		checkGnuLoaded();
 		try {
 			return (String)cipherGetAlgorithm.invoke(cipher);
 		} catch (IllegalAccessException e) {
-			throw new IllegalAccessError();
+			throw new IllegalStateException(e);
+		} catch (InvocationTargetException e) {
+			throw new IllegalStateException(e.getTargetException());
+		}
+	}
+
+	static Object clone(Object o) throws CloneNotSupportedException {
+		try {
+			return clone.invoke(o);
+		} catch (IllegalAccessException e) {
+			throw new IllegalStateException(e);
+		} catch (InvocationTargetException e) {
+			if (e.getTargetException() instanceof CloneNotSupportedException)
+				throw (CloneNotSupportedException)e.getTargetException();
+			throw new IllegalStateException(e.getTargetException());
+		}
+	}
+
+
+	static void macReset(Object cipher) {
+		try {
+			macReset.invoke(cipher);
+		} catch (IllegalAccessException e) {
+			throw new IllegalStateException(e);
+		} catch (InvocationTargetException e) {
+			throw new IllegalStateException(e.getTargetException());
+		}
+	}
+	static int macGetLengthByes(Object cipher) {
+		try {
+			return (int)macGetMacLength.invoke(cipher);
+		} catch (IllegalAccessException e) {
+			throw new IllegalStateException(e);
+		} catch (InvocationTargetException e) {
+			throw new IllegalStateException(e.getTargetException());
+		}
+	}
+	static String macGetAlgorithm(Object cipher) {
+		try {
+			return (String)macGetAlgorithm.invoke(cipher);
+		} catch (IllegalAccessException e) {
+			throw new IllegalStateException(e);
+		} catch (InvocationTargetException e) {
+			throw new IllegalStateException(e.getTargetException());
+		}
+	}
+	static byte[] macDoFinal(Object cipher) throws IllegalStateException {
+		try {
+			return (byte[])macDoFinal.invoke(cipher);
+		} catch (IllegalAccessException e) {
+			throw new IllegalStateException(e);
+		} catch (InvocationTargetException e) {
+			if (e.getTargetException() instanceof IllegalStateException)
+				throw (IllegalStateException)e.getTargetException();
+			throw new IllegalStateException(e.getTargetException());
+		}
+	}
+	static byte[] macDoFinal(Object cipher, byte[] _input) throws IllegalStateException {
+		try {
+			return (byte[])macDoFinalBytes.invoke(cipher, (Object)_input);
+		} catch (IllegalAccessException e) {
+			throw new IllegalStateException(e);
+		} catch (InvocationTargetException e) {
+			if (e.getTargetException() instanceof IllegalStateException)
+				throw (IllegalStateException)e.getTargetException();
+			throw new IllegalStateException(e.getTargetException());
+		}
+	}
+	static void macDoFinal(Object cipher, byte[] _output, int _outOffset) throws IllegalStateException, ShortBufferException {
+		try {
+			macDoFinalBytesInt.invoke(cipher, _output, _outOffset);
+		} catch (IllegalAccessException e) {
+			throw new IllegalStateException(e);
+		} catch (InvocationTargetException e) {
+			if (e.getTargetException() instanceof IllegalStateException)
+				throw (IllegalStateException)e.getTargetException();
+			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnux.crypto.ShortBufferException") )
+				throw new ShortBufferException(e.getTargetException().getMessage());
+			throw new IllegalStateException(e.getTargetException());
+		}
+	}
+	static void macUpdate(Object cipher, byte _input) throws IllegalStateException {
+		try {
+			macUpdateByte.invoke(cipher, _input);
+		} catch (IllegalAccessException e) {
+			throw new IllegalStateException(e);
+		} catch (InvocationTargetException e) {
+			if (e.getTargetException() instanceof IllegalStateException)
+				throw (IllegalStateException)e.getTargetException();
+			throw new IllegalStateException(e.getTargetException());
+		}
+	}
+	static void macUpdate(Object cipher, byte[] _input, int _offset, int _length) throws IllegalStateException {
+		try {
+			macUpdateBytesIntInt.invoke(cipher, _input, _offset, _length);
+		} catch (IllegalAccessException e) {
+			throw new IllegalStateException(e);
+		} catch (InvocationTargetException e) {
+			if (e.getTargetException() instanceof IllegalStateException)
+				throw (IllegalStateException)e.getTargetException();
+			throw new IllegalStateException(e.getTargetException());
+		}
+	}
+	static void macUpdate(Object cipher, ByteBuffer _buffer) {
+		try {
+			macUpdateByteBuffer.invoke(cipher, _buffer);
+		} catch (IllegalAccessException e) {
+			throw new IllegalStateException(e);
+		} catch (InvocationTargetException e) {
+			if (e.getTargetException() instanceof IllegalStateException)
+				throw (IllegalStateException)e.getTargetException();
+			throw new IllegalStateException(e.getTargetException());
+		}
+	}
+	static void macInit(Object cipher, Key key) throws InvalidKeySpecException, NoSuchAlgorithmException, InvalidKeyException {
+		try {
+			macInit.invoke(cipher, constSecretKeySpec.newInstance(keyGetEncoded(key.toGnuKey()), macGetAlgorithm(cipher)));
+		} catch (IllegalAccessException | InstantiationException e) {
+			throw new IllegalStateException(e);
+		} catch (InvocationTargetException e) {
+			if (e.getTargetException() instanceof IllegalStateException)
+				throw (IllegalStateException)e.getTargetException();
+			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.InvalidKeyException") )
+				throw new InvalidKeyException(e.getTargetException());
+			throw new IllegalStateException(e.getTargetException());
+		}
+	}
+	static String keyGeneratorGetAlgorithm(Object keyGenerator)  {
+		checkGnuLoaded();
+		try {
+			return (String)keyGeneratorGetAlgorithm.invoke(keyGenerator);
+		} catch (IllegalAccessException e) {
+			throw new IllegalStateException(e);
+		} catch (InvocationTargetException e) {
+			throw new IllegalStateException(e.getTargetException());
+		}
+	}
+	static String keyGeneratorGetProvider(Object keyGenerator)  {
+		checkGnuLoaded();
+		try {
+			return (String) keyGeneratorGetProvider.invoke(keyGenerator);
+		} catch (IllegalAccessException e) {
+			throw new IllegalStateException(e);
+		} catch (InvocationTargetException e) {
+			throw new IllegalStateException(e.getTargetException());
+		}
+	}
+	static Object keyGeneratorGeneratorKey(Object keyGenerator)  {
+		checkGnuLoaded();
+		try {
+			return keyGeneratorGenerateKey.invoke(keyGenerator);
+		} catch (IllegalAccessException e) {
+			throw new IllegalStateException(e);
+		} catch (InvocationTargetException e) {
+			throw new IllegalStateException(e.getTargetException());
+		}
+	}
+	static void keyGeneratorInit(Object keyGenerator, short _keySize, AbstractSecureRandom _random)  {
+		checkGnuLoaded();
+		try {
+			keyGeneratorInit.invoke(keyGenerator, _keySize, _random.getGnuSecureRandom());
+		} catch (IllegalAccessException e) {
+			throw new IllegalStateException(e);
+		} catch (InvocationTargetException e) {
+			throw new IllegalStateException(e.getTargetException());
+		}
+	}
+
+
+
+	static String keyPairGeneratorGetAlgorithm(Object keyGenerator)  {
+		checkGnuLoaded();
+		try {
+			return (String)keyPairGeneratorGetAlgorithm.invoke(keyGenerator);
+		} catch (IllegalAccessException e) {
+			throw new IllegalStateException(e);
+		} catch (InvocationTargetException e) {
+			throw new IllegalStateException(e.getTargetException());
+		}
+	}
+	static Object keyPairGeneratorGeneratorKeyPair(Object keyGenerator)  {
+		checkGnuLoaded();
+		try {
+			return  keyPairGeneratorGenerateKeyPair.invoke(keyGenerator);
+		} catch (IllegalAccessException e) {
+			throw new IllegalStateException(e);
+		} catch (InvocationTargetException e) {
+			throw new IllegalStateException(e.getTargetException());
+		}
+	}
+	static void keyPairGeneratorInit(Object keyGenerator, short _keySize, AbstractSecureRandom _random)  {
+		checkGnuLoaded();
+		try {
+			keyPairGeneratorInitRandom.invoke(keyGenerator, _keySize, _random.getGnuSecureRandom());
+		} catch (IllegalAccessException e) {
+			throw new IllegalStateException(e);
+		} catch (InvocationTargetException e) {
+			throw new IllegalStateException(e.getTargetException());
+		}
+	}
+	static void keyPairGeneratorInit(Object keyGenerator, short _keySize)  {
+		checkGnuLoaded();
+		try {
+			keyPairGeneratorInit.invoke(keyGenerator, _keySize);
+		} catch (IllegalAccessException e) {
+			throw new IllegalStateException(e);
 		} catch (InvocationTargetException e) {
 			throw new IllegalStateException(e.getTargetException());
 		}
 	}
 	static int cipherGetBlockSize(Object cipher)  {
-		checkGnuLoaded();
 		try {
 			return (int)cipherGetBlockSize.invoke(cipher);
 		} catch (IllegalAccessException e) {
-			throw new IllegalAccessError();
+			throw new IllegalStateException(e);
 		} catch (InvocationTargetException e) {
 			throw new IllegalStateException(e.getTargetException());
 		}
@@ -315,17 +603,17 @@ class GnuFunctions {
 		try {
 			return (byte[])cipherGetIv.invoke(cipher);
 		} catch (IllegalAccessException e) {
-			throw new IllegalAccessError();
+			throw new IllegalStateException(e);
 		} catch (InvocationTargetException e) {
 			throw new IllegalStateException(e.getTargetException());
 		}
 	}
 	static int cipherGetOutputSize(Object cipher, int _inputLength) throws IllegalStateException {
-		checkGnuLoaded();
+
 		try {
 			return (int)cipherGetOutputSize.invoke(cipher, _inputLength);
 		} catch (IllegalAccessException e) {
-			throw new IllegalAccessError();
+			throw new IllegalStateException(e);
 		} catch (InvocationTargetException e) {
 			if (e.getTargetException() instanceof IllegalStateException)
 				throw (IllegalStateException)e.getTargetException();
@@ -334,11 +622,10 @@ class GnuFunctions {
 	}
 
 	static byte[] cipherUpdate(Object cipher,byte[] _input, int _inputOffset, int _inputLength) throws IllegalStateException {
-		checkGnuLoaded();
 		try {
 			return (byte[])cipherUpdateBytesIntInt.invoke(cipher, _input, _inputOffset, _inputLength);
 		} catch (IllegalAccessException e) {
-			throw new IllegalAccessError();
+			throw new IllegalStateException(e);
 		} catch (InvocationTargetException e) {
 			if (e.getTargetException() instanceof IllegalStateException)
 				throw (IllegalStateException)e.getTargetException();
@@ -346,11 +633,10 @@ class GnuFunctions {
 		}
 	}
 	static int cipherUpdate(Object cipher,byte[] _input, int _inputOffset, int _inputLength, byte[] _output, int _outputOffset) throws IllegalStateException, ShortBufferException {
-		checkGnuLoaded();
 		try {
 			return (int)cipherUpdateBytesIntIntBytesInt.invoke(cipher, _input, _inputOffset, _inputLength, _output, _outputOffset);
 		} catch (IllegalAccessException e) {
-			throw new IllegalAccessError();
+			throw new IllegalStateException(e);
 		} catch (InvocationTargetException e) {
 			if (e.getTargetException() instanceof IllegalStateException)
 				throw (IllegalStateException)e.getTargetException();
@@ -364,7 +650,7 @@ class GnuFunctions {
 		try {
 			return (InputStream)constCipherInputStream.newInstance(in, cipher);
 		} catch (IllegalAccessException | InstantiationException e) {
-			throw new IllegalAccessError();
+			throw new IllegalStateException(e);
 		} catch (InvocationTargetException e) {
 			throw new IllegalStateException(e.getTargetException());
 		}
@@ -374,7 +660,7 @@ class GnuFunctions {
 		try {
 			return (OutputStream)consCipherOutputStream.newInstance(out, cipher);
 		} catch (IllegalAccessException | InstantiationException e) {
-			throw new IllegalAccessError();
+			throw new IllegalStateException(e);
 		} catch (InvocationTargetException e) {
 			throw new IllegalStateException(e.getTargetException());
 		}
@@ -385,19 +671,18 @@ class GnuFunctions {
 		try {
 			cipherInitUnwrap.invoke(cipher, UNWRAP_MODE, privateKey);
 		} catch (IllegalAccessException e) {
-			throw new IllegalAccessError();
+			throw new IllegalStateException(e);
 		} catch (InvocationTargetException e) {
 			throw new InvalidKeyException(e.getTargetException());
 		}
 	}
 
 
-	static void cipherWrap(Object cipher, Object keyToWrap) throws IllegalStateException, IllegalBlockSizeException, InvalidKeyException {
-		checkGnuLoaded();
+	static byte[] cipherWrap(Object cipher, Object keyToWrap) throws IllegalStateException, IllegalBlockSizeException, InvalidKeyException {
 		try {
-			cipherWrap.invoke(cipher, keyToWrap);
+			return (byte[])cipherWrap.invoke(cipher, keyToWrap);
 		} catch (IllegalAccessException e) {
-			throw new IllegalAccessError();
+			throw new IllegalStateException(e);
 		} catch (InvocationTargetException e) {
 			if (e.getTargetException() instanceof IllegalStateException)
 			 	throw (IllegalStateException)e.getTargetException();
@@ -409,16 +694,15 @@ class GnuFunctions {
 				throw new IllegalBlockSizeException(e.getTargetException().getMessage());
 			else if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.InvalidKeyException"))
 				throw new InvalidKeyException(e.getTargetException());
-			throw new IllegalAccessError();
+			throw new IllegalStateException(e);
 		}
 	}
 
 	static void cipherUnwrap(Object cipher, byte[] keyToUnwrap, String algorithmName) throws IllegalStateException, InvalidKeyException, NoSuchAlgorithmException  {
-		checkGnuLoaded();
 		try {
 			cipherUnwrap.invoke(cipher, keyToUnwrap, algorithmName, SECRET_KEY);
 		} catch (IllegalAccessException e) {
-			throw new IllegalAccessError();
+			throw new IllegalStateException(e);
 		} catch (InvocationTargetException e) {
 			if (e.getTargetException() instanceof IllegalStateException)
 				throw (IllegalStateException)e.getTargetException();
@@ -428,7 +712,7 @@ class GnuFunctions {
 				throw new InvalidKeyException(e.getTargetException());
 			else if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.NoSuchAlgorithmException"))
 				throw new NoSuchAlgorithmException(e.getTargetException());
-			throw new IllegalAccessError();
+			throw new IllegalStateException(e);
 		}
 	}
 
@@ -437,7 +721,7 @@ class GnuFunctions {
 		try {
 			return getPublicKey.invoke(keyPair);
 		} catch (IllegalAccessException | InvocationTargetException e) {
-			throw new IllegalAccessError();
+			throw new IllegalStateException(e);
 		}
 	}
 
@@ -446,31 +730,45 @@ class GnuFunctions {
 		try {
 			return getPrivateKey.invoke(keyPair);
 		} catch (IllegalAccessException | InvocationTargetException e) {
-			throw new IllegalAccessError();
+			throw new IllegalStateException(e);
 		}
 	}
-	static byte[] getEncoded(Object key) {
+	static byte[] keyGetEncoded(Object key) {
 		checkGnuLoaded();
 		try {
 			return (byte[])getEncoded.invoke(key);
 		} catch (IllegalAccessException | InvocationTargetException e) {
-			throw new IllegalAccessError();
+			throw new IllegalStateException(e);
 		}
 	}
 
 	static Object getKeyPairInstance(Object publicKey, Object privateKey) throws NoSuchAlgorithmException, InvalidKeySpecException {
 		checkGnuLoaded();
 		try {
-			return keyPairConstructor.newInstance(publicKey, privateKey);
+			return keyPairConstructorPublicPrivate.newInstance(publicKey, privateKey);
 		} catch (InstantiationException | IllegalAccessException e) {
-			throw new IllegalAccessError();
+			throw new IllegalStateException(e);
 		} catch (InvocationTargetException e) {
 			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.NoSuchAlgorithmException"))
 				throw new NoSuchAlgorithmException(e.getTargetException());
 			else if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.spec.InvalidKeySpecException"))
 				throw new InvalidKeySpecException(e.getTargetException());
-			e.printStackTrace();
-			throw new IllegalAccessError();
+			throw new IllegalStateException(e);
+		}
+	}
+
+	static Object getKeyPairGenerator(String algoName) throws NoSuchAlgorithmException, NoSuchProviderException {
+		checkGnuLoaded();
+		try {
+			return keyPairGeneratorConstructorString.newInstance(algoName);
+		} catch (InstantiationException | IllegalAccessException e) {
+			throw new IllegalStateException(e);
+		} catch (InvocationTargetException e) {
+			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.NoSuchAlgorithmException"))
+				throw new NoSuchAlgorithmException(e.getTargetException());
+			else if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.NoSuchProviderException"))
+				throw new NoSuchProviderException(e.getTargetException().getMessage());
+			throw new IllegalStateException(e);
 		}
 	}
 

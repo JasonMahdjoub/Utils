@@ -34,8 +34,6 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
-import gnu.vm.jgnu.security.KeyPair;
-import gnu.vm.jgnu.security.KeyPairGenerator;
 
 /**
  * 
@@ -44,23 +42,24 @@ import gnu.vm.jgnu.security.KeyPairGenerator;
  * @since Utils 2.0
  */
 public final class GnuKeyPairGenerator extends AbstractKeyPairGenerator {
-	private final KeyPairGenerator keyPairGenerator;
+	private final Object keyPairGenerator;
 
 	private short keySize = -1;
 	private long expirationTime = -1;
 
-	GnuKeyPairGenerator(ASymmetricEncryptionType type, KeyPairGenerator keyPairGenerator) {
+	GnuKeyPairGenerator(ASymmetricEncryptionType type, Object keyPairGenerator) {
 		super(type);
 		this.keyPairGenerator = keyPairGenerator;
 	}
-	GnuKeyPairGenerator(ASymmetricAuthenticatedSignatureType type, KeyPairGenerator keyPairGenerator) {
+	GnuKeyPairGenerator(ASymmetricAuthenticatedSignatureType type, Object keyPairGenerator) {
 		super(type);
 		this.keyPairGenerator = keyPairGenerator;
 	}
 
 	@Override
 	public ASymmetricKeyPair generateKeyPair() {
-		KeyPair kp = keyPairGenerator.generateKeyPair();
+
+		Object kp = GnuFunctions.keyPairGeneratorGeneratorKeyPair(keyPairGenerator);
 		if (encryptionType==null)
 			return new ASymmetricKeyPair(signatureType, kp, keySize, expirationTime);
 		else
@@ -69,20 +68,20 @@ public final class GnuKeyPairGenerator extends AbstractKeyPairGenerator {
 
 	@Override
 	public String getAlgorithm() {
-		return keyPairGenerator.getAlgorithm();
+		return GnuFunctions.keyPairGeneratorGetAlgorithm(keyPairGenerator);
 	}
 
 	@Override
 	public void initialize(short _keysize, long expirationTime) {
-		keyPairGenerator.initialize(_keysize);
+
+		GnuFunctions.keyPairGeneratorInit(keyPairGenerator, _keysize);
 		this.keySize = _keysize;
 		this.expirationTime = expirationTime;
 	}
 
 	@Override
 	public void initialize(short _keysize, long expirationTime, AbstractSecureRandom _random) {
-		
-		keyPairGenerator.initialize(keySize, _random.getGnuSecureRandom());
+		GnuFunctions.keyPairGeneratorInit(keyPairGenerator, _keysize, _random);
 		this.keySize = _keysize;
 		this.expirationTime = expirationTime;
 

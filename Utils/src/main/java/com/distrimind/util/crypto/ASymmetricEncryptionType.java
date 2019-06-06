@@ -65,7 +65,7 @@ import java.security.spec.X509EncodedKeySpec;
  * List of asymmetric encryption algorithms
  * 
  * @author Jason Mahdjoub
- * @version 5.0
+ * @version 3.1
  * @since Utils 1.4
  */
 public enum ASymmetricEncryptionType {
@@ -77,51 +77,23 @@ public enum ASymmetricEncryptionType {
 			(short) 3072, 31536000000L, (short) 130, CodeProvider.SunJCE,CodeProvider.SunRsaSign, FipsRSA.ALGORITHM),
 	RSA_PKCS1Padding("RSA", "ECB", "PKCS1Padding", ASymmetricAuthenticatedSignatureType.SHA384withRSA, (short) 3072, 31536000000L, (short) 11,
 					CodeProvider.SunJCE,CodeProvider.SunRsaSign, FipsRSA.ALGORITHM),
-	//BC_FIPS_RSA_OAEPWithSHA256AndMGF1Padding("RSA", "NONE", "OAEPwithSHA256andMGF1Padding", ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA384withRSAandMGF1, (short) 3072, 31536000000l, (short) 66,CodeProvider.BCFIPS,CodeProvider.BCFIPS, FipsRSA.ALGORITHM),
-	//BC_FIPS_RSA_PKCS1Padding("RSA", "NONE", "PKCS1Padding", ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA384withRSAandMGF1, (short) 3072, 31536000000l, (short) 11,CodeProvider.BCFIPS,CodeProvider.BCFIPS, FipsRSA.ALGORITHM),
+	//BC_FIPS_RSA_OAEPWithSHA256AndMGF1Padding("RSA", "NONE", "OAEPwithSHA256andMGF1Padding", ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA384withRSAandMGF1, (short) 3072, 31536000000l, (short) 66,CodeProvider.BCFIPS,CodeProvider.BCFIPS, FipsRSA.ALGORITHM),
+	//BC_FIPS_RSA_PKCS1Padding("RSA", "NONE", "PKCS1Padding", ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA384withRSAandMGF1, (short) 3072, 31536000000l, (short) 11,CodeProvider.BCFIPS,CodeProvider.BCFIPS, FipsRSA.ALGORITHM),
 	DEFAULT(RSA_OAEPWithSHA512AndMGF1Padding);
 	
 
 
-	/*static KeyPair decodeGnuKeyPair(byte[] encodedKeyPair)
-			throws NoSuchAlgorithmException, spec.InvalidKeySpecException {
-		return decodeGnuKeyPair(encodedKeyPair, 0, encodedKeyPair.length);
-	}
-
-	static KeyPair decodeGnuKeyPair(byte[] encodedKeyPair, int off, int len)
-			throws NoSuchAlgorithmException, spec.InvalidKeySpecException {
-		byte[][] parts = Bits.separateEncodingsWithShortSizedTabs(encodedKeyPair, off, len);
-		return new KeyPair(decodeGnuPublicKey(parts[0]), decodeGnuPrivateKey(parts[1]));
-	}*/
-
-	static PrivateKey decodeGnuPrivateKey(byte[] encodedKey, String algorithm)
+	static Object decodeGnuPrivateKey(byte[] encodedKey, String algorithm)
 			throws NoSuchAlgorithmException, InvalidKeySpecException {
-		//byte[][] parts = Bits.separateEncodingsWithShortSizedTabs(encodedKey);
-		PKCS8EncodedKeySpec pkcsKeySpec = new PKCS8EncodedKeySpec(
-				encodedKey);
-		KeyFactory kf = KeyFactory.getInstance(algorithm);
-		return kf.generatePrivate(pkcsKeySpec);
+		return GnuFunctions.decodeGnuPrivateKey(encodedKey, algorithm);
 	}
 
-	static PublicKey decodeGnuPublicKey(byte[] encodedKey, String algorithm)
+	static Object decodeGnuPublicKey(byte[] encodedKey, String algorithm)
 			throws NoSuchAlgorithmException, InvalidKeySpecException {
-		//byte[][] parts = Bits.separateEncodingsWithShortSizedTabs(encodedKey);
-		X509EncodedKeySpec pubKeySpec = new X509EncodedKeySpec(
-				encodedKey);
-		KeyFactory kf = KeyFactory.getInstance(algorithm);
-		return kf.generatePublic(pubKeySpec);
+		return GnuFunctions.decodeGnuPublicKey(encodedKey, algorithm);
 	}
 
-	/*static KeyPair decodeNativeKeyPair(byte[] encodedKeyPair)
-			throws NoSuchAlgorithmException, spec.InvalidKeySpecException {
-		return decodeNativeKeyPair(encodedKeyPair, 0, encodedKeyPair.length);
-	}*/
 
-	/*static KeyPair decodeNativeKeyPair(byte[] encodedKeyPair, int off, int len)
-			throws NoSuchAlgorithmException, spec.InvalidKeySpecException {
-		byte[][] parts = Bits.separateEncodingsWithShortSizedTabs(encodedKeyPair, off, len);
-		return new KeyPair(decodeNativePublicKey(parts[0]), decodeNativePrivateKey(parts[1]));
-	}*/
 
 	static PrivateKey decodeNativePrivateKey(byte[] encodedKey, String algorithm, String algorithmType, boolean xdh)
 			throws NoSuchAlgorithmException, InvalidKeySpecException {
@@ -172,9 +144,7 @@ public enum ASymmetricEncryptionType {
 				KeyFactory kf = KeyFactory.getInstance(algorithm);
 				return kf.generatePrivate(pkcsKeySpec);
 			}
-		} catch (InvocationTargetException e) {
-			throw new InvalidKeySpecException(e.getCause());
-		} catch (IllegalAccessException | InstantiationException e) {
+		} catch (InvalidKeySpecException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
 			throw new InvalidKeySpecException(e);
 		}
 	}
@@ -282,18 +252,10 @@ public enum ASymmetricEncryptionType {
 		return curve25519;
 	}
 
-	/*static byte[] encodeKeyPair(KeyPair keyPair) {
-		return Bits.concateEncodingWithShortSizedTabs(encodePublicKey(keyPair.getPublic()),
-				encodePrivateKey(keyPair.getPrivate()));
-	}
 
-	static byte[] encodeKeyPair(KeyPair keyPair) {
-		return Bits.concateEncodingWithShortSizedTabs(encodePublicKey(keyPair.getPublic()),
-				encodePrivateKey(keyPair.getPrivate()));
-	}*/
 
-	static byte[] encodeGnuPrivateKey(Object privateKey) {
-		return GnuFunctions.getEncoded(privateKey);
+	static byte[] encodeGnuPrivateKey(Object key) {
+	    return GnuFunctions.keyGetEncoded(key);
 		//return Bits.concateEncodingWithShortSizedTabs(key.getAlgorithm().getBytes(), key.getEncoded());
 	}
 	static byte[] encodePrivateKey(PrivateKey key, @SuppressWarnings("unused") ASymmetricEncryptionType type) {
@@ -301,11 +263,11 @@ public enum ASymmetricEncryptionType {
 	}
 	@SuppressWarnings("deprecation")
 	static byte[] encodePrivateKey(PrivateKey key, ASymmetricAuthenticatedSignatureType type, boolean xdh) {
-		if (type== ASymmetricAuthenticatedSignatureType.BC_SHA384withECDSA_CURVE_25519 || type== ASymmetricAuthenticatedSignatureType.BC_SHA512withECDSA_CURVE_25519 || type== ASymmetricAuthenticatedSignatureType.BC_SHA256withECDSA_CURVE_25519)
+		if (type==ASymmetricAuthenticatedSignatureType.BC_SHA384withECDSA_CURVE_25519 || type==ASymmetricAuthenticatedSignatureType.BC_SHA512withECDSA_CURVE_25519 || type==ASymmetricAuthenticatedSignatureType.BC_SHA256withECDSA_CURVE_25519)
 		{
 			return ((ECPrivateKey) key).getD().toByteArray();
 		}
-		else if (type== ASymmetricAuthenticatedSignatureType.BC_Ed25519)
+		else if (type==ASymmetricAuthenticatedSignatureType.BC_Ed25519)
 		{
 			if (xdh)
 			{
@@ -330,7 +292,7 @@ public enum ASymmetricEncryptionType {
 				return k.getEncoded();
 			}
 		}
-		else if (type== ASymmetricAuthenticatedSignatureType.BC_Ed448)
+		else if (type==ASymmetricAuthenticatedSignatureType.BC_Ed448)
 		{
 			if (xdh)
 			{
@@ -359,8 +321,8 @@ public enum ASymmetricEncryptionType {
 		//return Bits.concateEncodingWithShortSizedTabs(key.getAlgorithm().getBytes(), key.getEncoded());
 	}
 
-	static byte[] encodeGnuPublicKey(Object publicKey) {
-	    return GnuFunctions.getEncoded(publicKey);
+	static byte[] encodeGnuPublicKey(Object key) {
+	    return GnuFunctions.keyGetEncoded(key);
 	}
 
 
@@ -437,14 +399,14 @@ public enum ASymmetricEncryptionType {
 
 	@SuppressWarnings("deprecation")
 	static byte[] encodePublicKey(PublicKey key, ASymmetricAuthenticatedSignatureType type, boolean xdh)  {
-		if (type== ASymmetricAuthenticatedSignatureType.BC_SHA384withECDSA_CURVE_25519
-				|| type== ASymmetricAuthenticatedSignatureType.BC_SHA512withECDSA_CURVE_25519
-				|| type== ASymmetricAuthenticatedSignatureType.BC_SHA256withECDSA_CURVE_25519
+		if (type==ASymmetricAuthenticatedSignatureType.BC_SHA384withECDSA_CURVE_25519
+				|| type==ASymmetricAuthenticatedSignatureType.BC_SHA512withECDSA_CURVE_25519
+				|| type==ASymmetricAuthenticatedSignatureType.BC_SHA256withECDSA_CURVE_25519
 		)
 		{
 			return ((ECPublicKey) key).getQ().getEncoded(true);
 		}
-		else if (type== ASymmetricAuthenticatedSignatureType.BC_Ed25519)
+		else if (type==ASymmetricAuthenticatedSignatureType.BC_Ed25519)
 		{
 			if (xdh)
 			{
@@ -468,7 +430,7 @@ public enum ASymmetricEncryptionType {
 				return k.getEncoded();
 			}
 		}
-		else if (type== ASymmetricAuthenticatedSignatureType.BC_Ed448)
+		else if (type==ASymmetricAuthenticatedSignatureType.BC_Ed448)
 		{
 			if (xdh)
 			{
@@ -657,7 +619,7 @@ public enum ASymmetricEncryptionType {
 
 	ASymmetricEncryptionType(String algorithmName, String blockMode, String padding,
 							 ASymmetricAuthenticatedSignatureType signature, short keySize, long expirationTimeMilis, short blockSizeDecrement,
-							 CodeProvider codeProviderForEncryption, CodeProvider codeProviderForKeyGenetor, Algorithm bcAlgorithm) {
+			CodeProvider codeProviderForEncryption, CodeProvider codeProviderForKeyGenetor, Algorithm bcAlgorithm) {
 		this.algorithmName = algorithmName;
 		this.blockMode = blockMode;
 		this.padding = padding;
@@ -682,7 +644,7 @@ public enum ASymmetricEncryptionType {
 			throws NoSuchAlgorithmException, NoSuchPaddingException, NoSuchProviderException {
 		String name = algorithmName+"/" + blockMode + "/" + padding;
 		if (codeProviderForEncryption == CodeProvider.GNU_CRYPTO) {
-			return new GnuCipher(GnuFunctions.getCipherAlgorithm(name));
+			return new GnuCipher(GnuFunctions.cipherGetInstance(name));
 		} else if (codeProviderForEncryption == CodeProvider.BCFIPS || codeProviderForEncryption == CodeProvider.BC) {
 			CodeProvider.ensureBouncyCastleProviderLoaded();
 			throw new IllegalAccessError();
@@ -718,25 +680,27 @@ public enum ASymmetricEncryptionType {
 	public AbstractKeyPairGenerator getKeyPairGenerator(AbstractSecureRandom random, short keySize,
 			long expirationTimeUTC) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException {
 		if (codeProviderForKeyGenerator == CodeProvider.GNU_CRYPTO) {
-			KeyPairGenerator kgp = KeyPairGenerator
-					.getInstance(algorithmName);
-			GnuKeyPairGenerator res = new GnuKeyPairGenerator(this, kgp);
+			Object kpg=GnuFunctions.getKeyPairGenerator(algorithmName);
+			GnuKeyPairGenerator res = new GnuKeyPairGenerator(this, kpg);
 			res.initialize(keySize, expirationTimeUTC, random);
 
 			return res;
 		} else if (codeProviderForKeyGenerator == CodeProvider.BCFIPS) {
 			CodeProvider.ensureBouncyCastleProviderLoaded();
-			KeyPairGenerator kgp = KeyPairGenerator.getInstance(algorithmName, CodeProvider.BCFIPS.name());
-			JavaNativeKeyPairGenerator res = new JavaNativeKeyPairGenerator(this, kgp);
-			res.initialize(keySize, expirationTimeUTC, random);
 
-			return res;
+				KeyPairGenerator kgp = KeyPairGenerator.getInstance(algorithmName, CodeProvider.BCFIPS.name());
+				JavaNativeKeyPairGenerator res = new JavaNativeKeyPairGenerator(this, kgp);
+				res.initialize(keySize, expirationTimeUTC, random);
+
+				return res;
+
 		} else {
 			KeyPairGenerator kgp = KeyPairGenerator.getInstance(algorithmName, codeProviderForKeyGenerator.checkProviderWithCurrentOS().name());
 			JavaNativeKeyPairGenerator res = new JavaNativeKeyPairGenerator(this, kgp);
 			res.initialize(keySize, expirationTimeUTC, random);
 
 			return res;
+
 
 		}
 

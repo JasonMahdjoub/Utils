@@ -127,12 +127,12 @@ public enum SymmetricEncryptionType {
 
 	static byte[] encodeSecretKey(gnu.vm.jgnux.crypto.SecretKey key, String algorithmName) {
 		return key.getEncoded();
-		//return Bits.concateEncodingWithShortSizedTabs(algorithmName.getBytes(), key.getEncoded());
+		//return Bits.concateEncodingWithShortSizedTabs(algorithmName.getBytes(), key.keyGetEncoded());
 	}
 
 	static byte[] encodeSecretKey(SecretKey key, String algorithmName) {
 		return key.getEncoded();
-		//return Bits.concateEncodingWithShortSizedTabs(algorithmName.getBytes(), key.getEncoded());
+		//return Bits.concateEncodingWithShortSizedTabs(algorithmName.getBytes(), key.keyGetEncoded());
 	}
 	
 	static byte[] encodeSecretKey(final org.bouncycastle.crypto.SymmetricSecretKey key, String algorithmName)

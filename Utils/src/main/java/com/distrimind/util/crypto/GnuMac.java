@@ -34,14 +34,12 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
+import javax.crypto.ShortBufferException;
 import java.nio.ByteBuffer;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 
-import gnu.vm.jgnu.security.InvalidKeyException;
-import gnu.vm.jgnu.security.NoSuchAlgorithmException;
-import gnu.vm.jgnu.security.spec.InvalidKeySpecException;
-import gnu.vm.jgnux.crypto.Mac;
-import gnu.vm.jgnux.crypto.ShortBufferException;
-import gnu.vm.jgnux.crypto.spec.SecretKeySpec;
 
 /**
  * 
@@ -50,9 +48,9 @@ import gnu.vm.jgnux.crypto.spec.SecretKeySpec;
  * @since Utils 2.10.0
  */
 public final class GnuMac extends AbstractMac {
-	private final Mac mac;
+	private final Object mac;
 
-	GnuMac(Mac mac) {
+	GnuMac(Object mac) {
 		if (mac == null)
 			throw new NullPointerException();
 		this.mac = mac;
@@ -65,33 +63,42 @@ public final class GnuMac extends AbstractMac {
 
 	@Override
 	public boolean equals(Object _obj) {
+		if (_obj==null)
+			return false;
 		if (_obj instanceof GnuMac)
 			return mac.equals(((GnuMac) _obj).mac);
-		else if (_obj instanceof Mac)
-			return mac.equals(_obj);
-		else
-			return false;
+		else {
+			try {
+				if (Class.forName("gnu.vm.jgnux.crypto.Mac").isAssignableFrom(_obj.getClass()))
+					return mac.equals(_obj);
+				else
+					return false;
+			} catch (ClassNotFoundException e) {
+				e.printStackTrace();
+				return false;
+			}
+		}
 
 	}
 
 	@Override
 	public final GnuMac clone() throws CloneNotSupportedException {
-		return new GnuMac((Mac) mac.clone());
+		return new GnuMac(GnuFunctions.clone(mac));
 	}
 
 	@Override
 	public final byte[] doFinal() throws IllegalStateException {
-		return mac.doFinal();
+		return GnuFunctions.macDoFinal(mac);
 	}
 
 	@Override
 	public final byte[] doFinal(byte[] _input) throws IllegalStateException {
-		return mac.doFinal(_input);
+		return GnuFunctions.macDoFinal(mac, _input);
 	}
 
 	@Override
 	public final void doFinal(byte[] _output, int _outOffset) throws IllegalStateException, ShortBufferException {
-		mac.doFinal(_output, _outOffset);
+		GnuFunctions.macDoFinal(mac, _output, _outOffset);
 	}
 
 	@Override
@@ -101,41 +108,41 @@ public final class GnuMac extends AbstractMac {
 
 	@Override
 	public final String getAlgorithm() {
-		return mac.getAlgorithm();
+		return GnuFunctions.macGetAlgorithm(mac);
 	}
 
 	@Override
 	public final int getMacLengthBytes() {
-		return mac.getMacLength();
+		return GnuFunctions.macGetLengthByes(mac);
 	}
 
 	@Override
 	public final void init(Key _key) throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException {
-		mac.init(new SecretKeySpec(_key.toGnuKey().getEncoded(), mac.getAlgorithm()));
+		GnuFunctions.macInit(mac, _key);
 	}
 
 	@Override
 	public final void reset() {
-		mac.reset();
+		GnuFunctions.macReset(mac);
 	}
 
 	@Override
 	public final void update(byte _input) throws IllegalStateException {
-		mac.update(_input);
+		GnuFunctions.macUpdate(mac, _input);
 	}
 
 	@Override
 	public final void update(byte[] _input) throws IllegalStateException {
-		mac.update(_input);
+		GnuFunctions.macUpdate(mac, _input, 0, _input.length);
 	}
 
 	@Override
 	public final void update(byte[] _input, int _offset, int _length) throws IllegalStateException {
-		mac.update(_input, _offset, _length);
+		GnuFunctions.macUpdate(mac, _input, _offset, _length);
 	}
 
 	@Override
 	public final void update(ByteBuffer _buffer) {
-		mac.update(_buffer);
+		GnuFunctions.macUpdate(mac, _buffer);
 	}
 }

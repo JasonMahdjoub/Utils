@@ -89,8 +89,8 @@ public class ASymmetricKeyPair implements Serializable {
 		}
 		if (gnuKeyPair!=null)
 		{
-			Arrays.fill(GnuFunctions.getEncoded(GnuFunctions.getPublicKey(gnuKeyPair)), (byte)0);
-			Arrays.fill(GnuFunctions.getEncoded(GnuFunctions.getPrivateKey(gnuKeyPair)), (byte)0);
+			Arrays.fill(GnuFunctions.keyGetEncoded(GnuFunctions.getPublicKey(gnuKeyPair)), (byte)0);
+			Arrays.fill(GnuFunctions.keyGetEncoded(GnuFunctions.getPrivateKey(gnuKeyPair)), (byte)0);
 			gnuKeyPair=null;
 		}
 	}
