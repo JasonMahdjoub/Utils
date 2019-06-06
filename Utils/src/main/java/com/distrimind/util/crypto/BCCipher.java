@@ -41,9 +41,13 @@ import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
 
+import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
+import javax.crypto.ShortBufferException;
 
 import org.bouncycastle.crypto.AuthenticationParametersWithIV;
 import org.bouncycastle.crypto.InvalidWrappingException;
@@ -63,15 +67,11 @@ import org.bouncycastle.crypto.general.Serpent;
 import org.bouncycastle.crypto.general.Twofish;
 
 
-import gnu.vm.jgnu.security.NoSuchAlgorithmException;
-import gnu.vm.jgnu.security.spec.InvalidKeySpecException;
-import gnu.vm.jgnux.crypto.BadPaddingException;
-import gnu.vm.jgnux.crypto.ShortBufferException;
 
 /**
  * 
  * @author Jason Mahdjoub
- * @version 2.0
+ * @version 3.0
  * @since Utils 3.10.0
  */
 @SuppressWarnings("ConstantConditions")
@@ -82,7 +82,7 @@ public class BCCipher extends AbstractCipher {
 	private UpdateOutputStream processingStream=null;
 	private ByteArrayOutputStream resultStream;
 	private final SymmetricKeyWrapperType keyWrapperType;
-	private byte iv[];
+	private byte[] iv;
 	private KeyWrapper<?> wrapper;
 	private KeyUnwrapper<?> unwrapper;
 	private UpdateOutputStream aadStream=null;
@@ -601,7 +601,7 @@ public class BCCipher extends AbstractCipher {
 	}
 
 	public byte[] wrap(Key key) throws PlainInputProcessingException {
-		byte b[]=key.getKeyBytes();
+		byte[] b = key.getKeyBytes();
 		return wrapper.wrap(b, 0, b.length);
 	}
 	

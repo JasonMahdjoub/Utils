@@ -135,7 +135,7 @@ public abstract class AbstractSecureRandom extends SecureRandom {
 	}
 	
 
-	public abstract gnu.vm.jgnu.security.SecureRandom getGnuSecureRandom();
+	public abstract Object getGnuSecureRandom();
 
 	public abstract java.security.SecureRandom getJavaNativeSecureRandom();
 

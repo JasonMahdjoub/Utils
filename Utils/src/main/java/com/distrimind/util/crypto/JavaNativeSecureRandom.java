@@ -39,6 +39,10 @@ import gnu.vm.jgnu.security.NoSuchAlgorithmException;
 import gnu.vm.jgnu.security.NoSuchProviderException;
 import gnu.vm.jgnu.security.SecureRandom;
 
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+
 /**
  * 
  * @author Jason Mahdjoub
@@ -46,6 +50,12 @@ import gnu.vm.jgnu.security.SecureRandom;
  * @since Utils 2.0
  */
 public final class JavaNativeSecureRandom extends AbstractSecureRandom {
+
+
+
+
+
+
 	private class GnuInterface extends SecureRandom {
 		/**
 		 * 

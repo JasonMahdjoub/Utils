@@ -34,9 +34,11 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
+import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.RSAPrivateKey;
+import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
 
 import org.apache.commons.codec.binary.Base64;
@@ -47,14 +49,11 @@ import org.bouncycastle.crypto.asymmetric.AsymmetricRSAPrivateKey;
 
 import com.distrimind.util.Bits;
 
-import gnu.vm.jgnu.security.NoSuchAlgorithmException;
-import gnu.vm.jgnu.security.spec.InvalidKeySpecException;
-
 
 /**
  * 
  * @author Jason Mahdjoub
- * @version 2.3
+ * @version 3.0
  * @since Utils 1.7.1
  */
 public class ASymmetricPrivateKey extends Key {
@@ -76,7 +75,7 @@ public class ASymmetricPrivateKey extends Key {
 
 	private volatile transient PrivateKey nativePrivateKey;
 
-	private volatile transient gnu.vm.jgnu.security.PrivateKey gnuPrivateKey;
+	private volatile transient Object gnuPrivateKey;
 	boolean xdhKey=false;
 
 	
@@ -95,7 +94,7 @@ public class ASymmetricPrivateKey extends Key {
 		}
 		if (gnuPrivateKey!=null)
 		{
-			Arrays.fill(gnuPrivateKey.getEncoded(), (byte)0);
+			Arrays.fill(GnuFunctions.getEncoded(gnuPrivateKey), (byte)0);
 			gnuPrivateKey=null;
 		}
 	}
@@ -122,7 +121,7 @@ public class ASymmetricPrivateKey extends Key {
 		this.signatureType=type;
 	}
 
-	ASymmetricPrivateKey(ASymmetricEncryptionType type, gnu.vm.jgnu.security.PrivateKey privateKey, short keySize) {
+	ASymmetricPrivateKey(ASymmetricEncryptionType type, Object privateKey, short keySize) {
 		this(privateKey, keySize);
 		if (type == null)
 			throw new NullPointerException("type");
@@ -130,7 +129,7 @@ public class ASymmetricPrivateKey extends Key {
 		this.signatureType=null;
 		
 	}
-	ASymmetricPrivateKey(ASymmetricAuthenticatedSignatureType type, gnu.vm.jgnu.security.PrivateKey privateKey, short keySize) {
+	ASymmetricPrivateKey(ASymmetricAuthenticatedSignatureType type, Object privateKey, short keySize) {
 		this(privateKey, keySize);
 		if (type == null)
 			throw new NullPointerException("type");
@@ -176,12 +175,12 @@ public class ASymmetricPrivateKey extends Key {
 		hashCode = Arrays.hashCode(privateKey);
 	}
 
-	private ASymmetricPrivateKey(gnu.vm.jgnu.security.PrivateKey privateKey, short keySize) {
+	private ASymmetricPrivateKey(Object privateKey, short keySize) {
 		if (privateKey == null)
 			throw new NullPointerException("privateKey");
 		if (keySize < 256)
 			throw new IllegalArgumentException("keySize");
-		this.privateKey = ASymmetricEncryptionType.encodePrivateKey(privateKey);
+		this.privateKey = ASymmetricEncryptionType.encodeGnuPrivateKey(privateKey);
 		this.keySizeBits = keySize;
 		hashCode = Arrays.hashCode(this.privateKey);
 		this.gnuPrivateKey=null;
@@ -258,8 +257,7 @@ public class ASymmetricPrivateKey extends Key {
 	}
 
 	@Override
-	public gnu.vm.jgnu.security.PrivateKey toGnuKey()
-			throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException {
+	public Object toGnuKey() throws InvalidKeySpecException, NoSuchAlgorithmException {
 		if (gnuPrivateKey == null)
 			gnuPrivateKey = ASymmetricEncryptionType.decodeGnuPrivateKey(privateKey, encryptionType==null?signatureType.getKeyGeneratorAlgorithmName():encryptionType.getAlgorithmName());
 
@@ -268,7 +266,7 @@ public class ASymmetricPrivateKey extends Key {
 
 	@Override
 	public PrivateKey toJavaNativeKey()
-			throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException {
+			throws NoSuchAlgorithmException, InvalidKeySpecException {
 		if (nativePrivateKey == null)
 			nativePrivateKey = ASymmetricEncryptionType.decodeNativePrivateKey(privateKey, encryptionType==null?signatureType.getKeyGeneratorAlgorithmName():encryptionType.getAlgorithmName(),
 					encryptionType==null?signatureType.name():encryptionType.name(), xdhKey);

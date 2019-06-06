@@ -35,24 +35,24 @@ knowledge of the CeCILL-C license and that you accept its terms.
 package com.distrimind.util.crypto;
 
 import com.distrimind.util.Bits;
-import gnu.vm.jgnu.security.NoSuchAlgorithmException;
-import gnu.vm.jgnu.security.spec.InvalidKeySpecException;
 import org.apache.commons.codec.binary.Base64;
 import org.bouncycastle.crypto.Algorithm;
 import org.bouncycastle.crypto.AsymmetricKey;
 import org.bouncycastle.crypto.asymmetric.AsymmetricECPublicKey;
 import org.bouncycastle.crypto.asymmetric.AsymmetricRSAPublicKey;
 
+import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPublicKey;
+import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
 
 
 /**
  * 
  * @author Jason Mahdjoub
- * @version 3.3
+ * @version 4.0
  * @since Utils 1.7.1
  */
 public class ASymmetricPublicKey extends Key {
@@ -80,7 +80,7 @@ public class ASymmetricPublicKey extends Key {
 
 	private volatile transient PublicKey nativePublicKey = null;
 
-	private volatile transient gnu.vm.jgnu.security.PublicKey gnuPublicKey = null;
+	private volatile transient Object gnuPublicKey = null;
 
 	boolean xdhKey=false;
 
@@ -99,7 +99,7 @@ public class ASymmetricPublicKey extends Key {
 		}
 		if (nativePublicKey!=null)
 		{
-			Arrays.fill(gnuPublicKey.getEncoded(), (byte)0);
+			Arrays.fill(GnuFunctions.getEncoded(gnuPublicKey), (byte)0);
 			gnuPublicKey=null;
 		}
 	}
@@ -131,7 +131,7 @@ public class ASymmetricPublicKey extends Key {
 		this.signatureType=type;
 	}
 
-	ASymmetricPublicKey(ASymmetricEncryptionType type, gnu.vm.jgnu.security.PublicKey publicKey, short keySize,
+	ASymmetricPublicKey(ASymmetricEncryptionType type, Object publicKey, short keySize,
 			long expirationUTC) {
 		this(publicKey, keySize, expirationUTC);
 		if (type == null)
@@ -140,7 +140,7 @@ public class ASymmetricPublicKey extends Key {
 		this.encryptionType = type;
 		this.signatureType=null;
 	}
-	ASymmetricPublicKey(ASymmetricAuthenticatedSignatureType type, gnu.vm.jgnu.security.PublicKey publicKey, short keySize,
+	ASymmetricPublicKey(ASymmetricAuthenticatedSignatureType type, Object publicKey, short keySize,
 						long expirationUTC) {
 		this(publicKey, keySize, expirationUTC);
 		if (type == null)
@@ -195,14 +195,14 @@ public class ASymmetricPublicKey extends Key {
 
 
 
-	private ASymmetricPublicKey(gnu.vm.jgnu.security.PublicKey publicKey, short keySize,
+	private ASymmetricPublicKey(Object publicKey, short keySize,
 			long expirationUTC) {
 		if (publicKey == null)
 			throw new NullPointerException("publicKey");
 		if (keySize < 256)
 			throw new IllegalArgumentException("keySize");
 
-		this.publicKey = ASymmetricEncryptionType.encodePublicKey(publicKey);
+		this.publicKey = ASymmetricEncryptionType.encodeGnuPublicKey(publicKey);
 		this.keySizeBits = keySize;
 		hashCode = Arrays.hashCode(this.publicKey);
 		this.expirationUTC = expirationUTC;
@@ -278,8 +278,8 @@ public class ASymmetricPublicKey extends Key {
 	}
 
 	@Override
-	public gnu.vm.jgnu.security.PublicKey toGnuKey()
-			throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException {
+	public Object toGnuKey()
+			throws NoSuchAlgorithmException, InvalidKeySpecException {
 		if (gnuPublicKey == null)
 			gnuPublicKey = ASymmetricEncryptionType.decodeGnuPublicKey(publicKey, encryptionType==null?signatureType.getKeyGeneratorAlgorithmName():encryptionType.getAlgorithmName());
 
@@ -288,7 +288,7 @@ public class ASymmetricPublicKey extends Key {
 
 	@Override
 	public PublicKey toJavaNativeKey()
-			throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException {
+			throws NoSuchAlgorithmException, InvalidKeySpecException {
 		if (nativePublicKey == null)
 			nativePublicKey = ASymmetricEncryptionType.decodeNativePublicKey(publicKey, encryptionType==null?signatureType.getKeyGeneratorAlgorithmName():encryptionType.getAlgorithmName(),
 					encryptionType==null?signatureType.name():encryptionType.name(), encryptionType==null?signatureType.getCurveName():null, xdhKey);

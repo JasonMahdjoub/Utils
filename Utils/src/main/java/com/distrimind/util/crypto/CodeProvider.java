@@ -48,7 +48,7 @@ import com.distrimind.util.OS;
  * List of asymmetric encryption algorithms
  * 
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 2.0
  * @since Utils 2.9.0
  */
 public enum CodeProvider {
@@ -69,15 +69,10 @@ public enum CodeProvider {
 				}
 			}
 		}
-		if (bouncyProviderPQC == null) {
+	}
 
-			synchronized (CodeProvider.class) {
-				if (bouncyProviderPQC == null) {
-					bouncyProviderPQC = new BouncyCastlePQCProvider();
-					Security.insertProviderAt(bouncyProviderPQC, Security.getProviders().length+1);
-				}
-			}
-		}
+	static void ensureBCFIPSProviderLoaded() {
+		ensureBouncyCastleProviderLoaded();
 		if (bouncyProviderFIPS == null) {
 
 			synchronized (CodeProvider.class) {
@@ -88,6 +83,21 @@ public enum CodeProvider {
 			}
 		}
 	}
+
+	static void ensureBQCProviderLoaded() {
+		ensureBouncyCastleProviderLoaded();
+		if (bouncyProviderPQC == null) {
+
+			synchronized (CodeProvider.class) {
+				if (bouncyProviderPQC == null) {
+					bouncyProviderPQC = new BouncyCastlePQCProvider();
+					Security.insertProviderAt(bouncyProviderPQC, Security.getProviders().length+1);
+				}
+			}
+		}
+	}
+
+
 
 	CodeProvider checkProviderWithCurrentOS()
 	{

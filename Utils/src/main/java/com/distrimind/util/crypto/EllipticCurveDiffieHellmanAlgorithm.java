@@ -34,15 +34,12 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
-import java.security.KeyPairGenerator;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
+import java.security.*;
+import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
 
 import org.bouncycastle.crypto.CryptoException;
 import org.bouncycastle.jcajce.spec.UserKeyingMaterialSpec;
-
-import gnu.vm.jgnu.security.InvalidAlgorithmParameterException;
 
 /**
  * 
@@ -62,15 +59,15 @@ public class EllipticCurveDiffieHellmanAlgorithm extends KeyAgreement {
 	private final short keySizeBits;
 	
 	private byte[] keyingMaterial;
-	EllipticCurveDiffieHellmanAlgorithm(AbstractSecureRandom randomForKeys, EllipticCurveDiffieHellmanType type, short keySizeBits, byte[] keyingMaterial, SymmetricAuthentifiedSignatureType signatureType) throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.NoSuchProviderException, InvalidAlgorithmParameterException {
+	EllipticCurveDiffieHellmanAlgorithm(AbstractSecureRandom randomForKeys, EllipticCurveDiffieHellmanType type, short keySizeBits, byte[] keyingMaterial, SymmetricAuthentifiedSignatureType signatureType) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException {
 		this(randomForKeys, type, keySizeBits, keyingMaterial);
 		this.signatureType=signatureType;
 	}
-	EllipticCurveDiffieHellmanAlgorithm(AbstractSecureRandom randomForKeys, EllipticCurveDiffieHellmanType type, short keySizeBits, byte[] keyingMaterial, SymmetricEncryptionType encryptionType) throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.NoSuchProviderException, InvalidAlgorithmParameterException {
+	EllipticCurveDiffieHellmanAlgorithm(AbstractSecureRandom randomForKeys, EllipticCurveDiffieHellmanType type, short keySizeBits, byte[] keyingMaterial, SymmetricEncryptionType encryptionType) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException {
 		this(randomForKeys, type, keySizeBits, keyingMaterial);
 		this.encryptionType=encryptionType;
 	}
-	private EllipticCurveDiffieHellmanAlgorithm(AbstractSecureRandom randomForKeys, EllipticCurveDiffieHellmanType type, short keySizeBits, byte[] keyingMaterial) throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.NoSuchProviderException, InvalidAlgorithmParameterException {
+	private EllipticCurveDiffieHellmanAlgorithm(AbstractSecureRandom randomForKeys, EllipticCurveDiffieHellmanType type, short keySizeBits, byte[] keyingMaterial) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException {
 		super(1, 1);
 		if (type == null)
 			throw new NullPointerException();
@@ -115,13 +112,13 @@ public class EllipticCurveDiffieHellmanAlgorithm extends KeyAgreement {
 		myKeyPair = null;
 		myPublicKeyBytes = null;
 	}
-	private void generateAndSetKeyPair() throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.NoSuchProviderException, InvalidAlgorithmParameterException  {
+	private void generateAndSetKeyPair() throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException  {
 		generateAndSetKeyPair(type.getECDHKeySizeBits(), System.currentTimeMillis()+(24*60*60*1000));
 	}
-	/*private ASymmetricKeyPair generateAndSetKeyPair(short keySize) throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException, gnu.vm.jgnu.security.NoSuchProviderException, InvalidAlgorithmParameterException  {
+	/*private ASymmetricKeyPair generateAndSetKeyPair(short keySize) throws NoSuchAlgorithmException, spec.InvalidKeySpecException, NoSuchProviderException, InvalidAlgorithmParameterException  {
 		return generateAndSetKeyPair(keySize, System.currentTimeMillis()+(24*60*60*1000));
 	}¨*/
-	private void generateAndSetKeyPair(short keySize, long expirationUTC) throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.NoSuchProviderException, InvalidAlgorithmParameterException  {
+	private void generateAndSetKeyPair(short keySize, long expirationUTC) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException  {
 		valid=false;
 
 		ASymmetricKeyPair kp;
@@ -138,11 +135,11 @@ public class EllipticCurveDiffieHellmanAlgorithm extends KeyAgreement {
 				res.initialize(keySize, expirationUTC, randomForKeys);
 				kp=res.generateKeyPair();
 			} catch (NoSuchAlgorithmException e) {
-				throw new gnu.vm.jgnu.security.NoSuchAlgorithmException(e);
+				throw new NoSuchAlgorithmException(e);
 			}
 			catch(java.security.NoSuchProviderException e)
 			{
-				throw new gnu.vm.jgnu.security.NoSuchProviderException(e.getMessage());
+				throw new NoSuchProviderException(e.getMessage());
 			}
 
 		}
@@ -173,7 +170,7 @@ public class EllipticCurveDiffieHellmanAlgorithm extends KeyAgreement {
 	}
 
 	private void setDistantPublicKey(byte[] distantPublicKeyBytes, SymmetricEncryptionType symmetricEncryptionType, SymmetricAuthentifiedSignatureType symmetricSignatureType, byte[] keyingMaterial) throws 
-			gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.InvalidKeyException, gnu.vm.jgnu.security.spec.InvalidKeySpecException, InvalidAlgorithmParameterException {
+			NoSuchAlgorithmException, InvalidKeyException, InvalidKeySpecException, InvalidAlgorithmParameterException {
 		try
 		{
 			valid=false;
@@ -192,7 +189,7 @@ public class EllipticCurveDiffieHellmanAlgorithm extends KeyAgreement {
 			} 
 			ASymmetricPublicKey distantPublicKey=(ASymmetricPublicKey)Key.decode(distantPublicKeyBytes);
 			if (myKeyPair.getASymmetricPublicKey().equals(distantPublicKey))
-				throw new gnu.vm.jgnu.security.InvalidKeyException("The local et distant public keys cannot be similar !");
+				throw new InvalidKeyException("The local et distant public keys cannot be similar !");
 	
 			AbstractKeyAgreement ka ;
 			if (symmetricEncryptionType==null)
@@ -225,10 +222,10 @@ public class EllipticCurveDiffieHellmanAlgorithm extends KeyAgreement {
 		}
 		catch(NoSuchAlgorithmException e)
 		{
-			throw new gnu.vm.jgnu.security.NoSuchAlgorithmException(e);
+			throw new NoSuchAlgorithmException(e);
 		}
 		catch (NoSuchProviderException e) {
-			throw new gnu.vm.jgnu.security.NoSuchAlgorithmException(e.getMessage());
+			throw new NoSuchAlgorithmException(e.getMessage());
 		}		
 	}
 

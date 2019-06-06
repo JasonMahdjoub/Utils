@@ -35,21 +35,12 @@ knowledge of the CeCILL-C license and that you accept its terms.
 package com.distrimind.util.crypto;
 
 import java.io.IOException;
-import java.security.SecureRandom;
+import java.security.*;
 import java.util.ArrayList;
 import java.util.Random;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.InvalidParameterSpecException;
 
-import gnu.vm.jgnu.security.InvalidAlgorithmParameterException;
-import gnu.vm.jgnu.security.InvalidKeyException;
-import gnu.vm.jgnu.security.NoSuchAlgorithmException;
-import gnu.vm.jgnu.security.NoSuchProviderException;
-import gnu.vm.jgnu.security.SignatureException;
-import gnu.vm.jgnu.security.spec.InvalidKeySpecException;
-import gnu.vm.jgnu.security.spec.InvalidParameterSpecException;
-import gnu.vm.jgnux.crypto.BadPaddingException;
-import gnu.vm.jgnux.crypto.IllegalBlockSizeException;
-import gnu.vm.jgnux.crypto.NoSuchPaddingException;
-import gnu.vm.jgnux.crypto.ShortBufferException;
 
 import org.apache.commons.codec.binary.Base64;
 import org.bouncycastle.crypto.InvalidWrappingException;
@@ -59,10 +50,15 @@ import org.testng.annotations.Test;
 
 import com.distrimind.util.Bits;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.ShortBufferException;
+
 /**
  * 
  * @author Jason Mahdjoub
- * @version 1.7
+ * @version 2.0
  * @since Utils 1.4
  */
 public class CryptoTests {

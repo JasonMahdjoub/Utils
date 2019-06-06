@@ -34,8 +34,6 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
-import gnu.vm.jgnu.security.NoSuchAlgorithmException;
-import gnu.vm.jgnu.security.spec.InvalidKeySpecException;
 import org.bouncycastle.crypto.UpdateOutputStream;
 import org.bouncycastle.crypto.fips.FipsOutputMACCalculator;
 import org.bouncycastle.crypto.fips.FipsSHS;
@@ -43,11 +41,13 @@ import org.bouncycastle.crypto.fips.FipsSHS.AuthParameters;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 
 /**
  * 
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 2.0
  * @since Utils 3.22.0
  */
 public final class BCFIPSMac extends AbstractMac {
@@ -161,7 +161,7 @@ public final class BCFIPSMac extends AbstractMac {
 		try
 		{
 			macStream.close();
-			byte res[]=mac.getMAC();
+			byte[] res = mac.getMAC();
 			reset();
 			return res;
 		}

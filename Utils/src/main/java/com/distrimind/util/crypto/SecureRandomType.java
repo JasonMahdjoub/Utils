@@ -402,7 +402,7 @@ public enum SecureRandomType {
 	private static volatile JavaNativeSecureRandom nativeNonBlockingSeed=null;
 	private static volatile boolean nativeNonBlockingSeedInitialized=false;
 	
-	static void tryToGenerateNativeNonBlockingRandomBytes(final byte[] buffer) throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.NoSuchProviderException
+	public static void tryToGenerateNativeNonBlockingRandomBytes(final byte[] buffer) throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.NoSuchProviderException
 	{
 		if (OS.getCurrentJREVersionDouble()>=1.8)
 		{
@@ -462,7 +462,7 @@ public enum SecureRandomType {
 			}
 		}
 	}
-	static byte[] tryToGenerateNativeNonBlockingSeed(final int numBytes) throws NoSuchAlgorithmException, NoSuchProviderException
+	public static byte[] tryToGenerateNativeNonBlockingSeed(final int numBytes) throws NoSuchAlgorithmException, NoSuchProviderException
 	{
 		if (OSVersion.getCurrentOSVersion()!=null && OSVersion.getCurrentOSVersion().getOS().isUnix())
 		{

@@ -138,6 +138,46 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 	{
 		encode(bytes, off, len, associatedData, offAD, lenAD, os, null);
 	}
+
+	void encodeBlock(byte[] bytes, int off, int len) throws InvalidKeyException,
+			IOException, InvalidAlgorithmParameterException, IllegalStateException,
+			IllegalBlockSizeException, BadPaddingException,
+			NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
+		if (len < 0 || off < 0)
+			throw new IllegalArgumentException("bytes.length=" + bytes.length + ", off=" + off + ", len=" + len);
+		if (off > bytes.length)
+			throw new IllegalArgumentException("bytes.length=" + bytes.length + ", off=" + off + ", len=" + len);
+		if (off + len > bytes.length)
+			throw new IllegalArgumentException("bytes.length=" + bytes.length + ", off=" + off + ", len=" + len);
+
+		initCipherForEncrypt(cipher, externalCounter);
+		if (associatedData!=null && lenAD>0)
+			cipher.updateAAD(associatedData, offAD, lenAD);
+		if (includeIV())
+			os.write(cipher.getIV(), 0, getIVSizeBytesWithoutExternalCounter());
+		int maxBlockSize = getMaxBlockSizeForEncoding();
+		//byte[] buffer=new byte[getOutputSizeForEncryption(Math.min(len, maxBlockSize))];
+		while (len > 0) {
+			int size ;
+			size = Math.min(len, maxBlockSize);
+
+			os.write(cipher.doFinal(bytes, off, size));
+			/*byte tab[] = cipher.doFinal();
+			if (tab!=null)
+				os.write(tab);*/
+
+			off += size;
+			len -= size;
+		}
+		os.flush();
+
+		/*
+		 * try(CipherOutputStream cos=new CipherOutputStream(os, cipher)) {
+		 * cos.write(bytes, off, len); }
+		 */
+
+	}
+
 	public void encode(byte[] bytes, int off, int len, byte[] associatedData, int offAD, int lenAD, OutputStream os, byte[] externalCounter) throws InvalidKeyException,
 			IOException, InvalidAlgorithmParameterException, IllegalStateException,
 			IllegalBlockSizeException, BadPaddingException,

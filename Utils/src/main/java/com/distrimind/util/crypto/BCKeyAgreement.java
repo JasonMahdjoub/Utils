@@ -47,9 +47,9 @@ import org.bouncycastle.util.Arrays;
 import org.bouncycastle.crypto.fips.FipsKDF;
 import org.bouncycastle.crypto.fips.FipsKDF.AgreementKDFParameters;
 
-import gnu.vm.jgnu.security.NoSuchAlgorithmException;
-import gnu.vm.jgnu.security.spec.InvalidKeySpecException;
-import gnu.vm.jgnux.crypto.ShortBufferException;
+import javax.crypto.ShortBufferException;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 
 /**
  * 
@@ -84,7 +84,7 @@ public final class BCKeyAgreement extends AbstractKeyAgreement{
 
 	@Override
 	public byte[] generateSecret() throws IllegalStateException {
-		byte res[]=secret;
+		byte[] res = secret;
 		secret=null;
 		return res;
 	}
@@ -107,7 +107,7 @@ public final class BCKeyAgreement extends AbstractKeyAgreement{
 	@Override
 	public SymmetricSecretKey generateSecretKey(short keySize)
 			throws IllegalStateException {
-		byte secret[]=generateSecret();
+		byte[] secret = generateSecret();
 		if (type.useKDF())
         {
             byte[] keyBytes = new byte[keySize];

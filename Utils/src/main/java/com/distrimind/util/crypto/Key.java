@@ -36,6 +36,8 @@ package com.distrimind.util.crypto;
 
 
 import java.io.Serializable;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
 
 import org.apache.commons.codec.binary.Base64;
@@ -45,7 +47,7 @@ import com.distrimind.util.Bits;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 1.3
+ * @version 2.0
  * @since Utils 2.0
  */
 public abstract class Key implements Serializable {
@@ -59,13 +61,13 @@ public abstract class Key implements Serializable {
 
 
 
-	abstract gnu.vm.jgnu.security.Key toGnuKey()
-			throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException;
+	abstract Object toGnuKey()
+			throws InvalidKeySpecException, NoSuchAlgorithmException;
 
 	abstract java.security.Key toJavaNativeKey()
-			throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException;
+			throws NoSuchAlgorithmException, InvalidKeySpecException;
 	
-	abstract org.bouncycastle.crypto.Key toBouncyCastleKey() throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException;
+	abstract org.bouncycastle.crypto.Key toBouncyCastleKey() throws NoSuchAlgorithmException, InvalidKeySpecException;
 	
 	public  abstract byte[] encode(boolean includeTimeExpiration);
 

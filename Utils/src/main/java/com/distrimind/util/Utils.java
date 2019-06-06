@@ -416,7 +416,7 @@ public class Utils {
 			c.set(2017, Calendar.OCTOBER, 5);
 			d = new Description((short)3, (short)1, (short)0, Version.Type.Stable, (short)0, c.getTime());
 			d.addItem("Correcting a bug with seed generator");
-			d.addItem("Improving fortuna random speed");
+			d.addItem("Improving fortuna2 random speed");
 			d.addItem("Add native non blocking secure random");
 			VERSION.addDescription(d);
 
