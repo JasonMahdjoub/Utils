@@ -58,12 +58,12 @@ public class SecureRandomSource implements EntropySource {
 		if (update) {
 			byte numBytes = 32;
 			byte[] seed = null;
-			try {
+			/*try {
 				seed = SecureRandomType.tryToGenerateNativeNonBlockingSeed(numBytes);
 			} catch (java.security.NoSuchAlgorithmException | java.security.NoSuchProviderException e) {
 				e.printStackTrace();
 
-			}
+			}*/
 
 			byte[] s = null;
 			if (secureRandoms != null) {

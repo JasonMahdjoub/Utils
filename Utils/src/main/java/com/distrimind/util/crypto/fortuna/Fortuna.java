@@ -6,6 +6,8 @@ import com.distrimind.util.crypto.SecureRandomType;
 import com.distrimind.util.crypto.fortuna.accumulator.Accumulator;
 import com.distrimind.util.crypto.fortuna.entropy.*;
 
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.util.Arrays;
@@ -118,9 +120,9 @@ public class Fortuna extends Random {
         accumulator.addSource(new MemoryPoolEntropySource());
         secureRandomSource.set(new SecureRandomSource());
         accumulator.addSource(secureRandomSource.get());
-        /*if (Files.exists(Paths.get("/dev/urandom"))) {
+        if (Files.exists(Paths.get("/dev/urandom"))) {
             accumulator.addSource(new URandomEntropySource());
-        }*/
+        }
         while (pools[0].size() < MIN_POOL_SIZE) {
             try {
                 Thread.sleep(10);
