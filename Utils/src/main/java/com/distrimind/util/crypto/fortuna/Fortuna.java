@@ -70,7 +70,9 @@ public class Fortuna extends Random {
 
 
     public static void setDefaultScheduledExecutorService(ScheduledExecutorService defaultScheduledExecutorService) {
-        Fortuna.defaultScheduledExecutorService = defaultScheduledExecutorService;
+        synchronized (Fortuna.class) {
+            Fortuna.defaultScheduledExecutorService = defaultScheduledExecutorService;
+        }
     }
 
     public static Fortuna createInstance() {

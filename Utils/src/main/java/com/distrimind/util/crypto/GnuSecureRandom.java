@@ -34,9 +34,9 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
-import gnu.vm.jgnu.security.NoSuchAlgorithmException;
-import gnu.vm.jgnu.security.NoSuchProviderException;
-import gnu.vm.jgnu.security.SecureRandom;
+
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 
 /**
  * 
@@ -51,12 +51,11 @@ public class GnuSecureRandom extends AbstractSecureRandom {
 	 */
 	private static final long serialVersionUID = -3972765139342047885L;
 
-	private transient final GnuInterface secureGnuRandom;
+	private transient final Object secureGnuRandom;
 	
-	private boolean initialized;
 
 
-	GnuSecureRandom(SecureRandomType _type, final SecureRandom secureRandom) throws NoSuchAlgorithmException, NoSuchProviderException {
+	GnuSecureRandom(SecureRandomType _type, final Object secureRandom) throws NoSuchAlgorithmException, NoSuchProviderException {
 		super(new AbstractSecureRandomSpi(true) {
 
 			/**
@@ -68,8 +67,7 @@ public class GnuSecureRandom extends AbstractSecureRandom {
 			protected void engineSetSeed(byte[] seed) {
 				if (secureRandom != null) {
 					synchronized (secureRandom) {
-
-						secureRandom.setSeed(seed);
+						GnuFunctions.secureRandomSetSeed(secureRandom, seed);
 					}
 				}
 			}
@@ -80,7 +78,7 @@ public class GnuSecureRandom extends AbstractSecureRandom {
 					if (secureRandom != null) {
 						synchronized (secureRandom) {
 
-							secureRandom.nextBytes(bytes);
+							GnuFunctions.secureRandomNextBytes(secureRandom, bytes);
 
 							addDataProvided(bytes.length);
 						}
@@ -92,12 +90,10 @@ public class GnuSecureRandom extends AbstractSecureRandom {
 			protected byte[] engineGenerateSeed(int numBytes) {
 				synchronized(secureRandom)
 				{
-					return secureRandom.generateSeed(numBytes);
+					return GnuFunctions.secureRandomGenerateSeed(secureRandom, numBytes);
 				}
 			}}, _type);
-		this.initialized=false;
-		this.secureGnuRandom=new GnuInterface();
-		this.initialized=true;
+		this.secureGnuRandom=GnuFunctions.getGnuRandomInterface(secureRandomSpi);
 		if (_type.needInitialSeed())
 		{
 			setSeed(SecureRandomType.tryToGenerateNativeNonBlockingSeed(55));
@@ -106,7 +102,7 @@ public class GnuSecureRandom extends AbstractSecureRandom {
 	}
 
 	@Override
-	public SecureRandom getGnuSecureRandom() {
+	public Object getGnuSecureRandom() {
 		return secureGnuRandom;
 	}
 
@@ -116,42 +112,5 @@ public class GnuSecureRandom extends AbstractSecureRandom {
 	}
 
 	
-	private class GnuInterface extends SecureRandom {
-		/**
-		 * 
-		 */
-		private static final long serialVersionUID = 4299616485652308411L;
-
-		
-		protected GnuInterface() {
-			super(new gnu.vm.jgnu.security.SecureRandomSpi() {
-				
-				
-				/**
-				 * 
-				 */
-				private static final long serialVersionUID = 740095511171490031L;
-
-				@Override
-				protected void engineSetSeed(byte[] seed) {
-					if (initialized)
-						GnuSecureRandom.this.secureRandomSpi.engineSetSeed(seed);
-				}
-				
-				@Override
-				protected void engineNextBytes(byte[] bytes) {
-					if (initialized)
-						GnuSecureRandom.this.secureRandomSpi.engineNextBytes(bytes);
-					
-				}
-				
-				@Override
-				protected byte[] engineGenerateSeed(int numBytes) {
-					return GnuSecureRandom.this.secureRandomSpi.engineGenerateSeed(numBytes);
-				}
-			}, null);
-			
-		}
-	}	
 
 }

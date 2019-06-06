@@ -59,6 +59,7 @@ public class FortunaSecureRandom extends AbstractSecureRandom implements Seriali
 	 * 
 	 */
 	private static final long serialVersionUID = -51252954999309630L;
+	private Object gnuInterface;
 
 	private static class SRSpi extends AbstractSecureRandomSpi
 	{
@@ -109,7 +110,7 @@ public class FortunaSecureRandom extends AbstractSecureRandom implements Seriali
 
 	@Override
 	public Object getGnuSecureRandom() {
-		return GnuFunctions.getGnuRandomInterface(secureRandomSpi);
+		return gnuInterface;
 	}
 
 	@Override
@@ -157,6 +158,7 @@ public class FortunaSecureRandom extends AbstractSecureRandom implements Seriali
 		setSeed(seed);
 	}
 	private void checkSources() throws NoSuchProviderException, NoSuchAlgorithmException {
+		gnuInterface=GnuFunctions.getGnuRandomInterface(secureRandomSpi);
 		if (getType()== SecureRandomType.FORTUNA_WITH_BC_FIPS_APPROVED) {
 			addSecureRandomSource(SecureRandomType.SHA1PRNG);
 			addSecureRandomSource(SecureRandomType.BC_FIPS_APPROVED);

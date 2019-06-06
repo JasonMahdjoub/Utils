@@ -72,6 +72,12 @@ class GnuFunctions {
 	private static Method macDoFinal, macDoFinalBytes, macDoFinalBytesInt,macGetAlgorithm, macGetMacLength, macInit, macReset, macUpdateByte, macUpdateBytesIntInt,macUpdateByteBuffer;
 	private static Method clone;
 	private static Method keyFactGetInstance, keyFactGeneratePublic, keyFactGeneratePrivate;
+	private static Method digestDigest,digestDigestBytes,  digestDigestBytesIntInt, digestGetAlgorithm, digestGetDigestLength,
+			digestGetProvider, providerGetName, digestReset, digestUpdateByte, digestUpdateBytes, digestUpdateBytesIntInt, digestUpdateByteBuffer;
+	private static Method secureRandomSetSeed, secureRandomNextBytes, secureRandomGenerateSeed;
+	private static Method signatureGetAlgorithm, signatureGetProviderName, signatureInitSignPriv, signatureInitSignPrivRand,
+			signatureInitVerifPub, signatureSign, signatureSignBytesIntInt, signatureUpdateByte, signatureUpdateBytes, signatureUpdateBytesIntInt, signatureUpdateByteBuffer,
+			signatureVerifyBytes, signatureVerifyBytesIntInt;
 
 	private static Constructor<?> keyPairConstructorPublicPrivate, keyPairGeneratorConstructorString ;
 	private static Constructor<?> secureRandomFromSpiConstructor;
@@ -165,6 +171,36 @@ class GnuFunctions {
 						constPKCS8EncodedKeySpec=Class.forName("gnu.vm.jgnu.security.spec.PKCS8EncodedKeySpec").getDeclaredConstructor(byte[].class);
 						constX509EncodedKeySpec=Class.forName("gnu.vm.jgnu.security.spec.X509EncodedKeySpec").getDeclaredConstructor(byte[].class);
 
+						digestDigest=Class.forName("gnu.vm.jgnu.security.MessageDigest").getDeclaredMethod("digest");
+						digestDigestBytes=Class.forName("gnu.vm.jgnu.security.MessageDigest").getDeclaredMethod("digest", byte[].class);
+						digestDigestBytesIntInt=Class.forName("gnu.vm.jgnu.security.MessageDigest").getDeclaredMethod("digest", byte[].class, int.class, int.class);
+						digestGetAlgorithm=Class.forName("gnu.vm.jgnu.security.MessageDigest").getDeclaredMethod("getAlgorithm");
+						digestGetDigestLength=Class.forName("gnu.vm.jgnu.security.MessageDigest").getDeclaredMethod("getDigestLength");
+						digestGetProvider=Class.forName("gnu.vm.jgnu.security.MessageDigest").getDeclaredMethod("getProvider");
+						digestReset=Class.forName("gnu.vm.jgnu.security.MessageDigest").getDeclaredMethod("reset");
+						digestUpdateByte=Class.forName("gnu.vm.jgnu.security.MessageDigest").getDeclaredMethod("update", byte.class);
+						digestUpdateBytes=Class.forName("gnu.vm.jgnu.security.MessageDigest").getDeclaredMethod("update", byte[].class);
+						digestUpdateBytesIntInt=Class.forName("gnu.vm.jgnu.security.MessageDigest").getDeclaredMethod("update", byte[].class, int.class, int.class);
+						digestUpdateByteBuffer=Class.forName("gnu.vm.jgnu.security.MessageDigest").getDeclaredMethod("update", ByteBuffer.class);
+						providerGetName=Class.forName("gnu.vm.jgnu.security.Provider").getDeclaredMethod("getName");
+
+						secureRandomSetSeed=Class.forName("gnu.vm.jgnu.security.SecureRandom").getDeclaredMethod("setSeed", long.class);
+						secureRandomNextBytes=Class.forName("gnu.vm.jgnu.security.SecureRandom").getDeclaredMethod("nextBytes", byte[].class);
+						secureRandomGenerateSeed=Class.forName("gnu.vm.jgnu.security.SecureRandom").getDeclaredMethod("generateSeed", int.class);
+
+						signatureGetAlgorithm=Class.forName("gnu.vm.jgnu.security.Signature").getDeclaredMethod("getAlgorithm");
+						signatureGetProviderName=Class.forName("gnu.vm.jgnu.security.Signature").getDeclaredMethod("getProvider");
+						signatureInitSignPriv=Class.forName("gnu.vm.jgnu.security.Signature").getDeclaredMethod("initSign", Class.forName("gnu.vm.jgnu.security.PrivateKey"));
+						signatureInitSignPrivRand=Class.forName("gnu.vm.jgnu.security.Signature").getDeclaredMethod("initSign", Class.forName("gnu.vm.jgnu.security.PrivateKey"), Class.forName("gnu.vm.jgnu.security.SecureRandom"));
+						signatureInitVerifPub=Class.forName("gnu.vm.jgnu.security.Signature").getDeclaredMethod("initVerify", Class.forName("gnu.vm.jgnu.security.PublicKey"));
+						signatureSign=Class.forName("gnu.vm.jgnu.security.Signature").getDeclaredMethod("sign");
+						signatureSignBytesIntInt=Class.forName("gnu.vm.jgnu.security.Signature").getDeclaredMethod("sign", byte[].class, int.class, int.class);
+						signatureUpdateByte=Class.forName("gnu.vm.jgnu.security.Signature").getDeclaredMethod("update", byte.class);
+						signatureUpdateBytes=Class.forName("gnu.vm.jgnu.security.Signature").getDeclaredMethod("update", byte[].class);
+						signatureUpdateBytesIntInt=Class.forName("gnu.vm.jgnu.security.Signature").getDeclaredMethod("update", byte[].class, int.class, int.class);
+						signatureUpdateByteBuffer=Class.forName("gnu.vm.jgnu.security.Signature").getDeclaredMethod("update", ByteBuffer.class);
+						signatureVerifyBytes=Class.forName("gnu.vm.jgnu.security.Signature").getDeclaredMethod("verify", byte[].class);
+						signatureVerifyBytesIntInt=Class.forName("gnu.vm.jgnu.security.Signature").getDeclaredMethod("verify", byte[].class, int.class, int.class);
 
 
 						AccessController.doPrivileged(new PrivilegedAction<Void>() {
@@ -374,6 +410,36 @@ class GnuFunctions {
 		}
 	}
 
+	static void secureRandomSetSeed(Object secureRandom, byte[] seed)  {
+		try {
+			secureRandomSetSeed.invoke(secureRandom, (Object)seed);
+		} catch (IllegalAccessException e) {
+			throw new IllegalStateException(e);
+		} catch (InvocationTargetException e) {
+			throw new IllegalStateException(e.getTargetException());
+		}
+	}
+
+	static void secureRandomNextBytes(Object secureRandom, byte[] bytes)  {
+		try {
+			secureRandomNextBytes.invoke(secureRandom, (Object)bytes);
+		} catch (IllegalAccessException e) {
+			throw new IllegalStateException(e);
+		} catch (InvocationTargetException e) {
+			throw new IllegalStateException(e.getTargetException());
+		}
+	}
+
+	static byte[] secureRandomGenerateSeed(Object secureRandom, int numBytes)  {
+		try {
+			return (byte[])secureRandomGenerateSeed.invoke(secureRandom, numBytes);
+		} catch (IllegalAccessException e) {
+			throw new IllegalStateException(e);
+		} catch (InvocationTargetException e) {
+			throw new IllegalStateException(e.getTargetException());
+		}
+	}
+
 	static String cipherGetAlgorithm(Object cipher)  {
 		try {
 			return (String)cipherGetAlgorithm.invoke(cipher);
@@ -415,6 +481,118 @@ class GnuFunctions {
 			throw new IllegalStateException(e.getTargetException());
 		}
 	}
+
+	static void digestUpdate(Object digest, ByteBuffer _input) {
+		try {
+			digestUpdateByteBuffer.invoke(digest, _input);
+		} catch (IllegalAccessException e) {
+			throw new IllegalStateException(e);
+		} catch (InvocationTargetException e) {
+			throw new IllegalStateException(e.getTargetException());
+		}
+	}
+
+	static void digestUpdate(Object digest, byte[] _input, int _offset, int _len) {
+		try {
+			digestUpdateBytesIntInt.invoke(digest, _input, _offset, _len);
+		} catch (IllegalAccessException e) {
+			throw new IllegalStateException(e);
+		} catch (InvocationTargetException e) {
+			throw new IllegalStateException(e.getTargetException());
+		}
+	}
+
+	static void digestUpdate(Object digest, byte[] _input) {
+		try {
+			digestUpdateBytes.invoke(digest, (Object) _input);
+		} catch (IllegalAccessException e) {
+			throw new IllegalStateException(e);
+		} catch (InvocationTargetException e) {
+			throw new IllegalStateException(e.getTargetException());
+		}
+	}
+
+	static void digestUpdate(Object digest, byte _input) {
+		try {
+			digestUpdateByte.invoke(digest, _input);
+		} catch (IllegalAccessException e) {
+			throw new IllegalStateException(e);
+		} catch (InvocationTargetException e) {
+			throw new IllegalStateException(e.getTargetException());
+		}
+	}
+
+	static void digestReset(Object digest) {
+		try {
+			digestReset.invoke(digest);
+		} catch (IllegalAccessException e) {
+			throw new IllegalStateException(e);
+		} catch (InvocationTargetException e) {
+			throw new IllegalStateException(e.getTargetException());
+		}
+	}
+	static String digestGetProviderName(Object digest) {
+		try {
+			return (String)providerGetName.invoke(digestGetProvider.invoke(digest));
+		} catch (IllegalAccessException e) {
+			throw new IllegalStateException(e);
+		} catch (InvocationTargetException e) {
+			throw new IllegalStateException(e.getTargetException());
+		}
+	}
+
+	static int digestGetLength(Object digest) {
+		try {
+			return (int)digestGetDigestLength.invoke(digest);
+		} catch (IllegalAccessException e) {
+			throw new IllegalStateException(e);
+		} catch (InvocationTargetException e) {
+			throw new IllegalStateException(e.getTargetException());
+		}
+	}
+
+	static int digestDigest(Object digest,byte[] _buf, int _offset, int _len) throws DigestException {
+		try {
+			return (int)digestDigestBytesIntInt.invoke(digest, _buf, _offset, _len);
+		} catch (IllegalAccessException e) {
+			throw new IllegalStateException(e);
+		} catch (InvocationTargetException e) {
+			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.DigestException"))
+				throw new DigestException(e);
+			throw new IllegalStateException(e.getTargetException());
+		}
+	}
+
+	static byte[] digestDigest(Object digest, byte[] _input) {
+		try {
+			return (byte[])digestDigestBytes.invoke(digest, (Object)_input);
+		} catch (IllegalAccessException e) {
+			throw new IllegalStateException(e);
+		} catch (InvocationTargetException e) {
+			throw new IllegalStateException(e.getTargetException());
+		}
+	}
+
+	static String digestGetAlgorithm(Object digest) {
+		try {
+			return (String)digestGetAlgorithm.invoke(digest);
+		} catch (IllegalAccessException e) {
+			throw new IllegalStateException(e);
+		} catch (InvocationTargetException e) {
+			throw new IllegalStateException(e.getTargetException());
+		}
+	}
+	static byte[] digestDigest(Object digest) {
+		try {
+			return (byte[])digestDigest.invoke(digest);
+		} catch (IllegalAccessException e) {
+			throw new IllegalStateException(e);
+		} catch (InvocationTargetException e) {
+			throw new IllegalStateException(e.getTargetException());
+		}
+	}
+
+
 	static String macGetAlgorithm(Object cipher) {
 		try {
 			return (String)macGetAlgorithm.invoke(cipher);
@@ -518,7 +696,7 @@ class GnuFunctions {
 	static String keyGeneratorGetProvider(Object keyGenerator)  {
 		checkGnuLoaded();
 		try {
-			return (String) keyGeneratorGetProvider.invoke(keyGenerator);
+			return (String) providerGetName.invoke(keyGeneratorGetProvider.invoke(keyGenerator));
 		} catch (IllegalAccessException e) {
 			throw new IllegalStateException(e);
 		} catch (InvocationTargetException e) {
@@ -772,12 +950,12 @@ class GnuFunctions {
 		}
 	}
 
-	private static class IH implements InvocationHandler
+	private static class IHForGnuInterface implements InvocationHandler
 	{
 		final AbstractSecureRandom.AbstractSecureRandomSpi secureRandom;
 		boolean initialized=false;
 
-		public IH(AbstractSecureRandom.AbstractSecureRandomSpi secureRandom) {
+		public IHForGnuInterface(AbstractSecureRandom.AbstractSecureRandomSpi secureRandom) {
 			this.secureRandom = secureRandom;
 		}
 
@@ -802,17 +980,18 @@ class GnuFunctions {
 		checkGnuLoaded();
 		try {
 			Class<?> c= Class.forName("gnu.vm.jgnu.security.SecureRandomSpi");
-			IH ih=new IH(secureRandom);
+			IHForGnuInterface ihForGnuInterface =new IHForGnuInterface(secureRandom);
 			Object o= Proxy.newProxyInstance(c.getClassLoader(),
 					new Class[]{c},
-					ih);
+					ihForGnuInterface);
 			o=secureRandomFromSpiConstructor.newInstance(o, null);
-			ih.initialized=true;
+			ihForGnuInterface.initialized=true;
 			return o;
 		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
 			throw new IllegalStateException(e);
 		}
 	}
+
 
 
 }

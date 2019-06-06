@@ -35,9 +35,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
 package com.distrimind.util.crypto;
 
 import java.nio.ByteBuffer;
-
-import gnu.vm.jgnu.security.DigestException;
-import gnu.vm.jgnu.security.MessageDigest;
+import java.security.DigestException;
 
 /**
  * 
@@ -46,50 +44,50 @@ import gnu.vm.jgnu.security.MessageDigest;
  * @since Utils 2.0
  */
 public final class GnuMessageDigest extends AbstractMessageDigest {
-	private final MessageDigest messageDigest;
+	private final Object messageDigest;
 
-	GnuMessageDigest(MessageDigest messageDigest) {
+	GnuMessageDigest(Object messageDigest) {
 		this.messageDigest = messageDigest;
 	}
 
 	@Override
 	public GnuMessageDigest clone() throws CloneNotSupportedException {
-		return new GnuMessageDigest((MessageDigest) messageDigest.clone());
+		return new GnuMessageDigest(GnuFunctions.clone(messageDigest));
 	}
 
 	@Override
 	public byte[] digest() {
-		return messageDigest.digest();
+		return GnuFunctions.digestDigest(messageDigest);
 	}
 
 	@Override
 	public byte[] digest(byte[] _input) {
-		return messageDigest.digest(_input);
+		return GnuFunctions.digestDigest(messageDigest, _input);
 	}
 
 	@Override
 	public int digest(byte[] _buf, int _offset, int _len) throws DigestException {
-		return messageDigest.digest(_buf, _offset, _len);
+		return GnuFunctions.digestDigest(messageDigest, _buf, _offset, _len);
 	}
 
 	@Override
 	public String getAlgorithm() {
-		return messageDigest.getAlgorithm();
+		return GnuFunctions.digestGetAlgorithm(messageDigest);
 	}
 
 	@Override
 	public int getDigestLength() {
-		return messageDigest.getDigestLength();
+		return GnuFunctions.digestGetLength(messageDigest);
 	}
 
 	@Override
 	public String getProvider() {
-		return messageDigest.getProvider().getName();
+		return GnuFunctions.digestGetProviderName(messageDigest);
 	}
 
 	@Override
 	public void reset() {
-		messageDigest.reset();
+		GnuFunctions.digestReset(messageDigest);
 
 	}
 
@@ -100,25 +98,25 @@ public final class GnuMessageDigest extends AbstractMessageDigest {
 
 	@Override
 	public void update(byte _input) {
-		messageDigest.update(_input);
+		GnuFunctions.digestUpdate(messageDigest, _input);
 
 	}
 
 	@Override
 	public void update(byte[] _input) {
-		messageDigest.update(_input);
+		GnuFunctions.digestUpdate(messageDigest, _input);
 
 	}
 
 	@Override
 	public void update(byte[] _input, int _offset, int _len) {
-		messageDigest.update(_input, _offset, _len);
+		GnuFunctions.digestUpdate(messageDigest, _input, _offset, _len);
 
 	}
 
 	@Override
 	public void update(ByteBuffer _input) {
-		messageDigest.update(_input);
+		GnuFunctions.digestUpdate(messageDigest, _input);
 
 	}
 
