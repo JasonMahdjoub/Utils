@@ -116,10 +116,10 @@ public abstract class AbstractSecureRandom extends SecureRandom {
 		
 	}
 
-	private final SecureRandomType type;
+	protected SecureRandomType type;
 	
 	private static final int maxDataGeneratedBeforeReseed=102400;
-	protected final AbstractSecureRandomSpi secureRandomSpi;
+	protected AbstractSecureRandomSpi secureRandomSpi;
 
 	
 	AbstractSecureRandom(AbstractSecureRandomSpi secureRandomSpi, SecureRandomType type) {

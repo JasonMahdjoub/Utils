@@ -38,11 +38,11 @@ package com.distrimind.util.crypto;
 import com.distrimind.util.Bits;
 import com.distrimind.util.crypto.fortuna.Fortuna;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.util.Arrays;
-import java.util.concurrent.ScheduledExecutorService;
 
 
 /**
@@ -63,11 +63,15 @@ public class FortunaSecureRandom extends AbstractSecureRandom implements Seriali
 	private static class SRSpi extends AbstractSecureRandomSpi
 	{
 		final Fortuna fortuna;
-		protected SRSpi(ScheduledExecutorService scheduledExecutorService) {
+		/*protected SRSpi(ScheduledExecutorService scheduledExecutorService) {
 			super(false);
 			if (scheduledExecutorService==null)
 				throw new NullPointerException();
 			fortuna=new Fortuna(scheduledExecutorService);
+		}*/
+		protected SRSpi() {
+			super(false);
+			fortuna=new Fortuna();
 		}
 
 		@Override
@@ -94,8 +98,13 @@ public class FortunaSecureRandom extends AbstractSecureRandom implements Seriali
 		}
 	}
 
-	FortunaSecureRandom(ScheduledExecutorService scheduledExecutorService, SecureRandomType type) {
+	/*FortunaSecureRandom(ScheduledExecutorService scheduledExecutorService, SecureRandomType type) throws NoSuchProviderException, NoSuchAlgorithmException {
 		super(new SRSpi(scheduledExecutorService), type);
+		checkSources();
+	}*/
+	FortunaSecureRandom(SecureRandomType type) throws NoSuchProviderException, NoSuchAlgorithmException {
+		super(new SRSpi(), type);
+		checkSources();
 	}
 
 	@Override
@@ -115,5 +124,50 @@ public class FortunaSecureRandom extends AbstractSecureRandom implements Seriali
 
 	public void addSecureRandomSource(SecureRandomType secureRandomType) throws NoSuchProviderException, NoSuchAlgorithmException {
 		((SRSpi)secureRandomSpi).fortuna.addSecureRandomSource(secureRandomType);
+	}
+
+	private void writeObject(java.io.ObjectOutputStream out)
+			throws IOException
+	{
+		out.writeInt(getType().ordinal());
+		byte[] seed=new byte[32];
+		out.write(seed);
+	}
+	private void readObject(java.io.ObjectInputStream in)
+			throws IOException, ClassNotFoundException
+	{
+		super.secureRandomSpi=new SRSpi();
+		super.type=null;
+		int code=in.readInt();
+		for (SecureRandomType srt : SecureRandomType.values()) {
+			if (srt.ordinal()==code) {
+				super.type = srt;
+				break;
+			}
+		}
+		if (super.type==null)
+			super.type=SecureRandomType.FORTUNA_WITH_BC_FIPS_APPROVED_FOR_KEYS;
+		try {
+			checkSources();
+		} catch (NoSuchProviderException | NoSuchAlgorithmException e) {
+			throw new IOException(e);
+		}
+		byte[] seed=new byte[32];
+		in.readFully(seed);
+		setSeed(seed);
+	}
+	private void checkSources() throws NoSuchProviderException, NoSuchAlgorithmException {
+		if (getType()== SecureRandomType.FORTUNA_WITH_BC_FIPS_APPROVED) {
+			addSecureRandomSource(SecureRandomType.SHA1PRNG);
+			addSecureRandomSource(SecureRandomType.BC_FIPS_APPROVED);
+		}
+		else if (getType()== SecureRandomType.FORTUNA_WITH_BC_FIPS_APPROVED_FOR_KEYS) {
+			addSecureRandomSource(SecureRandomType.SHA1PRNG);
+			addSecureRandomSource(SecureRandomType.BC_FIPS_APPROVED_FOR_KEYS);
+		}
+		else if (getType()== SecureRandomType.FORTUNA_WITH_BC_FIPS_APPROVED_FOR_KEYS_With_NativePRNG) {
+			addSecureRandomSource(SecureRandomType.SHA1PRNG);
+			addSecureRandomSource(SecureRandomType.BC_FIPS_APPROVED_FOR_KEYS_With_NativePRNG);
+		}
 	}
 }
