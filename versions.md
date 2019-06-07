@@ -1,17 +1,17 @@
 Utils
 =====
-4.0.0 Stable (Build: 1095) (from 07/06/2019 to 07/06/2019)
+4.1.0 Stable (Build: 1097) (from 08/06/2019 to 08/06/2019)
 
 # Creator(s):
 Jason MAHDJOUB
 
 # Developer(s):
-Jason MAHDJOUB (Entred in the team at 07/06/2016)
+Jason MAHDJOUB (Entred in the team at 04/01/2016)
 
 # Modifications:
 
 
-### 4.0.0 Stable (31/05/2019)
+### 4.1.0 Stable (08/06/2019)
 * Add BufferedRandomInputStream abd BufferedRandomOutputStream.
 * Pre-allocate bytes arrays with random byte array streams.
 * Gnu library dependency is now optional. It is possible to compile without it.

@@ -71,7 +71,7 @@ public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
 	private char[] getHashedPassword(char[] message, byte[] salt, int offset_salt, int len_salt) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException
 	{
 		byte[] m = hashMessage(MessageDigestType.BC_FIPS_SHA3_256.getMessageDigestInstance(), message, salt,
-				offset_salt, len_salt, PasswordHashType.BCRYPT, (byte)15);
+				offset_salt, len_salt, PasswordHashType.BC_BCRYPT, (byte)15);
 		return convertToChar(m);
 	}
 	private char[] getHashedPassword(byte[] message, int offset, int len, byte[] salt, int offset_salt, int len_salt, boolean messageIsKey) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException

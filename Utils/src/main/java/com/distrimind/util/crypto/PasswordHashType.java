@@ -67,9 +67,9 @@ public enum PasswordHashType {
 	PBKDF2WithHMacSHA2_256("PBKDF2WithHMacSHA256", (byte) 32, CodeProvider.SunJCE, (byte)2),
 	PBKDF2WithHMacSHA2_384("PBKDF2WithHMacSHA384", (byte) 32, CodeProvider.SunJCE, (byte)3),
 	PBKDF2WithHMacSHA2_512("PBKDF2WithHMacSHA512", (byte) 32, CodeProvider.SunJCE, (byte)4),
-	BCRYPT("BCRYPT", (byte) 24, CodeProvider.SUN, (byte)5), 
-	SCRYPT_FOR_LOGIN("SCRYPT", (byte)32, CodeProvider.BC, (byte)6),
-	SCRYPT_FOR_DATAENCRYPTION("SCRYPT", (byte)32, CodeProvider.BC, (byte)7),
+	BC_BCRYPT("BC_BCRYPT", (byte) 24, CodeProvider.SUN, (byte)5),
+	BC_SCRYPT_FOR_LOGIN("SCRYPT", (byte)32, CodeProvider.BC, (byte)6),
+	BC_SCRYPT_FOR_DATAENCRYPTION("SCRYPT", (byte)32, CodeProvider.BC, (byte)7),
 	GNU_PBKDF2WithHmacSHA1("PBKDF2WithHMacSHA1", (byte) 32, CodeProvider.GNU_CRYPTO, (byte)8), 
 	GNU_PBKDF2WithHMacSHA2_256("PBKDF2WithHMacSHA256",(byte) 32, CodeProvider.GNU_CRYPTO, (byte)9),
 	GNU_PBKDF2WithHMacSHA2_384("PBKDF2WithHMacSHA384", (byte) 32, CodeProvider.GNU_CRYPTO, (byte)10),
@@ -78,7 +78,7 @@ public enum PasswordHashType {
 	BC_FIPS_PBKFD2WithHMacSHA2_256("PBKDF2WithHMacSHA2_256",(byte) 32, CodeProvider.BCFIPS, FipsSHS.Algorithm.SHA256_HMAC, (byte)13),
 	BC_FIPS_PBKFD2WithHMacSHA2_384("PBKDF2WithHMacSHA2_384",(byte) 32, CodeProvider.BCFIPS, FipsSHS.Algorithm.SHA384_HMAC, (byte)14),
 	BC_FIPS_PBKFD2WithHMacSHA2_512("PBKDF2WithHMacSHA2_512",(byte) 32, CodeProvider.BCFIPS, FipsSHS.Algorithm.SHA512_HMAC, (byte)15),
-	DEFAULT(BCRYPT);
+	DEFAULT(BC_BCRYPT);
 
 	
 		
@@ -182,7 +182,7 @@ public enum PasswordHashType {
 				Object skf = GnuFunctions.secretKeyFactoryGetInstance(algorithmName);
 				return GnuFunctions.keyGetEncoded(GnuFunctions.secretKeyFactoryGenerateSecret(skf, spec));
 			}
-			case BCRYPT: {
+			case BC_BCRYPT: {
 				byte[] passwordb ;
 				if (off != 0 || len != data.length) {
 					passwordb = new byte[len];
@@ -203,11 +203,11 @@ public enum PasswordHashType {
 								.withSalt(salt));
 				return deriver.deriveKey(PasswordBasedDeriver.KeyType.CIPHER, ((hashLength * 8) + 7) / 8);
 			}
-			case SCRYPT_FOR_LOGIN:
+			case BC_SCRYPT_FOR_LOGIN:
 
 				scryptN = 1 << 13;
 
-			case SCRYPT_FOR_DATAENCRYPTION: {
+			case BC_SCRYPT_FOR_DATAENCRYPTION: {
 				byte[] d ;
 				if (len == data.length && off == 0)
 					d = data;
@@ -263,7 +263,7 @@ public enum PasswordHashType {
 			Object skf = GnuFunctions.secretKeyFactoryGetInstance(algorithmName);
 			return GnuFunctions.keyGetEncoded(GnuFunctions.secretKeyFactoryGenerateSecret(skf, spec));
 		}
-		case BCRYPT: {
+		case BC_BCRYPT: {
 			
 			salt = uniformizeSaltLength(salt, 16);
 			return BCrypt.generate(BCrypt.passwordToByteArray(password), salt, cost);
@@ -278,10 +278,10 @@ public enum PasswordHashType {
 												.withSalt(salt));
 			return deriver.deriveKey(PasswordBasedDeriver.KeyType.CIPHER,((hashLength*8) +7) / 8);
 		}
-		case SCRYPT_FOR_LOGIN:
+		case BC_SCRYPT_FOR_LOGIN:
 			scryptN=1<<13;
 			
-		case SCRYPT_FOR_DATAENCRYPTION:
+		case BC_SCRYPT_FOR_DATAENCRYPTION:
 			byte[] passwordb = new byte[password.length * 2];
 			for (int i = 0; i < password.length; i++) {
 				passwordb[i * 2] = (byte) (password[i] & 0xFF);
