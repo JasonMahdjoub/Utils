@@ -286,8 +286,6 @@ public class BufferedRandomOutputStream extends RandomOutputStream{
 		{
 			if (curPos==0 && len>=maxBufferSizeDiv2)
 			{
-				long newPos=currentPosition+len;
-
 				currentBuffer=null;
 				currentBufferIndex=-1;
 				for (int i=0;i<maxBuffersNumber;i++)
@@ -301,7 +299,7 @@ public class BufferedRandomOutputStream extends RandomOutputStream{
 						{
 							flush(i, 0, -1, (int)(currentPosition-p));
 						}*/
-						if (isOverlapped(p, newPos, len))
+						if (isOverlapped(p, currentPosition, len))
 							flush(i, p);
 					}
 				}

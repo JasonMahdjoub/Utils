@@ -48,10 +48,10 @@ import java.util.Random;
  */
 public class TestBufferedStreams {
 
-	@Test(invocationCount = 16, threadPoolSize = 16)
+	@Test(invocationCount = 1000, threadPoolSize = 16)
 	public void testBufferedInputStream() throws IOException {
 		Random rand=new Random(System.currentTimeMillis());
-		byte[] tab=new byte[25000000];
+		byte[] tab=new byte[1000000];
 		rand.nextBytes(tab);
 		RandomByteArrayInputStream ris=new RandomByteArrayInputStream(tab);
 		BufferedRandomInputStream inputStream=new BufferedRandomInputStream(new RandomByteArrayInputStream(tab));
@@ -125,7 +125,7 @@ public class TestBufferedStreams {
 		}
 	}
 
-	@Test(dependsOnMethods = "testBufferedInputStream", invocationCount = 200, threadPoolSize = 16)
+	@Test(dependsOnMethods = "testBufferedInputStream", invocationCount = 2000, threadPoolSize = 16)
 	public void testBufferedOutputStream() throws IOException {
 		RandomByteArrayOutputStream dest=new RandomByteArrayOutputStream();
 		BufferedRandomOutputStream outputStream=new BufferedRandomOutputStream(dest);
