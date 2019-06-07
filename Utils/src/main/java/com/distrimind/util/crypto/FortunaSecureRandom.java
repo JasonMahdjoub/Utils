@@ -43,6 +43,7 @@ import java.io.Serializable;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.util.Arrays;
+import java.util.concurrent.ScheduledExecutorService;
 
 
 /**
@@ -66,12 +67,13 @@ public class FortunaSecureRandom extends AbstractSecureRandom implements Seriali
 	private static class SRSpi extends AbstractSecureRandomSpi
 	{
 		final Fortuna fortuna;
-		/*protected SRSpi(ScheduledExecutorService scheduledExecutorService) {
+		@SuppressWarnings("unused")
+		protected SRSpi(ScheduledExecutorService scheduledExecutorService) {
 			super(false);
 			if (scheduledExecutorService==null)
 				throw new NullPointerException();
 			fortuna=new Fortuna(scheduledExecutorService);
-		}*/
+		}
 		protected SRSpi() {
 			super(false);
 			fortuna=new Fortuna();

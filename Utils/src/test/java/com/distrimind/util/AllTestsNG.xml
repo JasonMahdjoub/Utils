@@ -1,6 +1,30 @@
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
 <suite name="TestAll">
-	
+	<test name="testBufferedStreams">
+		<classes>
+			<class name="com.distrimind.util.io.TestBufferedStreams" />
+		</classes>
+	</test>
+
+	<test name="testFortuna">
+		<classes>
+			<class name="com.distrimind.util.crypto.fortuna.CounterTest" />
+			<class name="com.distrimind.util.crypto.fortuna.FortunaTest" />
+			<class name="com.distrimind.util.crypto.fortuna.PoolTest" />
+			<class name="com.distrimind.util.crypto.fortuna.PrefetchingSupplierTest" />
+			<class name="com.distrimind.util.crypto.fortuna.RandomDataBufferTest" />
+			<class name="com.distrimind.util.crypto.fortuna.entropy.ThreadTimeEntropySourceTest" />
+			<class name="com.distrimind.util.crypto.fortuna.entropy.BufferPoolEntropySourceTest" />
+			<class name="com.distrimind.util.crypto.fortuna.entropy.FreeMemoryEntropySourceTest" />
+			<class name="com.distrimind.util.crypto.fortuna.entropy.GarbageCollectorEntropySourceTest" />
+			<class name="com.distrimind.util.crypto.fortuna.entropy.LoadAverageEntropySourceTest" />
+			<class name="com.distrimind.util.crypto.fortuna.entropy.MemoryPoolEntropySourceTest" />
+			<class name="com.distrimind.util.crypto.fortuna.entropy.SchedulingEntropySourceTest" />
+			<class name="com.distrimind.util.crypto.fortuna.entropy.SecureRandomSourceTest" />
+			<class name="com.distrimind.util.crypto.fortuna.entropy.UptimeEntropySourceTest" />
+			<class name="com.distrimind.util.crypto.fortuna.entropy.URandomEntropySourceTest" />
+		</classes>
+	</test>
 	<test name="testIDGeneratorInt">  
 		<classes>
 		    <class name="com.distrimind.util.IDGeneratorIntTests" />
@@ -57,29 +81,5 @@
 		</classes>
 	</test>
 
-	<test name="testBufferedStreams">
-		<classes>
-			<class name="com.distrimind.util.io.TestBufferedStreams" />
-		</classes>
-	</test>
 
-	<test name="testFortuna">
-		<classes>
-			<class name="com.distrimind.util.crypto.fortuna.CounterTest" />
-			<class name="com.distrimind.util.crypto.fortuna.FortunaTest" />
-			<class name="com.distrimind.util.crypto.fortuna.PoolTest" />
-			<class name="com.distrimind.util.crypto.fortuna.PrefetchingSupplierTest" />
-			<class name="com.distrimind.util.crypto.fortuna.RandomDataBufferTest" />
-			<class name="com.distrimind.util.crypto.fortuna.entropy.ThreadTimeEntropySourceTest" />
-			<class name="com.distrimind.util.crypto.fortuna.entropy.BufferPoolEntropySourceTest" />
-			<class name="com.distrimind.util.crypto.fortuna.entropy.FreeMemoryEntropySourceTest" />
-			<class name="com.distrimind.util.crypto.fortuna.entropy.GarbageCollectorEntropySourceTest" />
-			<class name="com.distrimind.util.crypto.fortuna.entropy.LoadAverageEntropySourceTest" />
-			<class name="com.distrimind.util.crypto.fortuna.entropy.MemoryPoolEntropySourceTest" />
-			<class name="com.distrimind.util.crypto.fortuna.entropy.SchedulingEntropySourceTest" />
-			<class name="com.distrimind.util.crypto.fortuna.entropy.SecureRandomSourceTest" />
-			<class name="com.distrimind.util.crypto.fortuna.entropy.UptimeEntropySourceTest" />
-			<class name="com.distrimind.util.crypto.fortuna.entropy.URandomEntropySourceTest" />
-		</classes>
-	</test>
 </suite>

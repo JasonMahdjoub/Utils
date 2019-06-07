@@ -33,10 +33,10 @@ public class Fortuna extends Random {
     private final RandomDataBuffer randomDataBuffer;
     private final Generator generator;
     private final Accumulator accumulator;
-    //private final ScheduledExecutorService scheduler;
+    private final ScheduledExecutorService scheduler;
     private boolean createdScheduler;
     private final PrefetchingSupplier<byte[]> randomDataPrefetcher;
-    final SecureRandomSource secureRandomSource;
+    private final SecureRandomSource secureRandomSource;
 
 
 
@@ -45,6 +45,8 @@ public class Fortuna extends Random {
     private static int numberOfDefaultScheduledExecutorServices=0;
     private static ScheduledExecutorService createDefaultScheduler() {
         synchronized (Fortuna.class) {
+            if (personalDefaultScheduledExecutorService!=null)
+                return personalDefaultScheduledExecutorService;
             if (defaultScheduledExecutorService==null) {
                 return defaultScheduledExecutorService = Executors.newSingleThreadScheduledExecutor(new ThreadFactory() {
                     private final ThreadFactory delegate = Executors.defaultThreadFactory();
@@ -73,6 +75,7 @@ public class Fortuna extends Random {
 					if (!defaultScheduledExecutorService.awaitTermination(timeout, unit)) {
 						defaultScheduledExecutorService.shutdownNow();
 					}
+                    defaultScheduledExecutorService=null;
 				}
 			}
 		}
@@ -88,13 +91,15 @@ public class Fortuna extends Random {
     }
 
 
+    @SuppressWarnings("unused")
     public static void setPersonalDefaultScheduledExecutorService(ScheduledExecutorService personalDefaultScheduledExecutorService) {
         synchronized (Fortuna.class) {
-            Fortuna.personalDefaultScheduledExecutorService = defaultScheduledExecutorService;
+            Fortuna.personalDefaultScheduledExecutorService = personalDefaultScheduledExecutorService;
         }
     }
 
-	public static ScheduledExecutorService getPersonalDefaultScheduledExecutorService() {
+	@SuppressWarnings("WeakerAccess")
+    public static ScheduledExecutorService getPersonalDefaultScheduledExecutorService() {
 		synchronized (Fortuna.class) {
 			return Fortuna.personalDefaultScheduledExecutorService;
 		}
@@ -104,15 +109,16 @@ public class Fortuna extends Random {
         return new Fortuna();
     }
 
-    @SuppressWarnings("WeakerAccess")
     public static Fortuna createInstance(ScheduledExecutorService scheduler) {
         return new Fortuna(scheduler);
     }
 
     public Fortuna()  {
         this(createDefaultScheduler());
-        this.createdScheduler = true;
+        if (this.scheduler!=getPersonalDefaultScheduledExecutorService())
+            this.createdScheduler = true;
     }
+
 
     public Fortuna(ScheduledExecutorService scheduler) {
         this.createdScheduler = false;
@@ -128,7 +134,7 @@ public class Fortuna extends Random {
             }
 
         }, scheduler);
-        //this.scheduler = scheduler;
+        this.scheduler = scheduler;
     }
 
     private static Accumulator createAccumulator(ScheduledExecutorService scheduler, AtomicReference<SecureRandomSource> secureRandomSource) {
@@ -152,6 +158,7 @@ public class Fortuna extends Random {
         }
         while (pools[0].size() < MIN_POOL_SIZE) {
             try {
+                secureRandomSource.get().setUpdate(true);
                 Thread.sleep(10);
             } catch (InterruptedException e) {
                 throw new Error("Interrupted while waiting for initialization", e);
@@ -199,7 +206,7 @@ public class Fortuna extends Random {
         randomDataPrefetcher.shutdownPrefetch();
         accumulator.shutdownSources();
         if (createdScheduler) {
-        	releaseDefaultScheduler(timeout, unit);
+       	    releaseDefaultScheduler(timeout, unit);
         }
     }
 

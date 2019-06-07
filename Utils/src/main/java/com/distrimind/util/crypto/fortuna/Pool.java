@@ -12,6 +12,11 @@ public class Pool {
     private final MessageDigest poolDigest = createDigest();
     private long size = 0;
 
+    public Pool()
+    {
+
+    }
+
     private MessageDigest createDigest() {
         try {
             return MessageDigest.getInstance("SHA-256");

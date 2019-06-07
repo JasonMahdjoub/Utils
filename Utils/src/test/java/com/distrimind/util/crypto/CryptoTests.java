@@ -1368,7 +1368,7 @@ public class CryptoTests {
 
 	}
 	
-	@Test(invocationCount = 700, threadPoolSize = 16)
+	@Test(invocationCount = 4000, threadPoolSize = 16)
 	public void testReadWriteDataPackaged() throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
 		Random rand = new Random(System.currentTimeMillis());
 		byte[] originalBytes = new byte[50 + rand.nextInt(10000)];
@@ -1595,7 +1595,7 @@ public class CryptoTests {
 	@Test(dataProvider = "provideDataForSymetricEncryptions")
 	public void testBase64(SymmetricEncryptionType encryptionType) throws NoSuchProviderException, NoSuchAlgorithmException {
 
-		SymmetricSecretKey key1=encryptionType.getKeyGenerator(SecureRandomType.DEFAULT.getInstance(0), encryptionType.getDefaultKeySizeBits()).generateKey();
+		SymmetricSecretKey key1=encryptionType.getKeyGenerator(SecureRandomType.DEFAULT.getSingleton(null), encryptionType.getDefaultKeySizeBits()).generateKey();
 
 		Assert.assertEquals(key1.getKeySizeBits(), encryptionType.getDefaultKeySizeBits());
 		System.out.println("Key encryption : \n\t"+ Base64.encodeBase64URLSafeString(key1.getKeyBytes()));
@@ -1606,7 +1606,7 @@ public class CryptoTests {
     @Test(dataProvider = "symmetricSignatures")
     public void testBase64(SymmetricAuthentifiedSignatureType signatureType) throws NoSuchProviderException, NoSuchAlgorithmException {
 
-        SymmetricSecretKey key1=signatureType.getKeyGenerator(SecureRandomType.DEFAULT.getInstance(0), signatureType.getDefaultKeySizeBits()).generateKey();
+        SymmetricSecretKey key1=signatureType.getKeyGenerator(SecureRandomType.DEFAULT.getSingleton(null), signatureType.getDefaultKeySizeBits()).generateKey();
 
         Assert.assertEquals(key1.getKeySizeBits(), signatureType.getDefaultKeySizeBits());
         System.out.println("Key encryption : \n\t"+ Base64.encodeBase64URLSafeString(key1.getKeyBytes()));

@@ -45,7 +45,7 @@ public class SecureRandomSource implements EntropySource {
 	}
 
 	public void add(SecureRandomType type) throws NoSuchProviderException, NoSuchAlgorithmException {
-		add(type.getInstance(null));
+		add(type.getSingleton(null));
 	}
 
 	@Override
