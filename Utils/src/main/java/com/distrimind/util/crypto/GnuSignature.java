@@ -35,12 +35,11 @@ knowledge of the CeCILL-C license and that you accept its terms.
 package com.distrimind.util.crypto;
 
 import java.nio.ByteBuffer;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SignatureException;
+import java.security.spec.InvalidKeySpecException;
 
-import gnu.vm.jgnu.security.InvalidKeyException;
-import gnu.vm.jgnu.security.NoSuchAlgorithmException;
-import gnu.vm.jgnu.security.Signature;
-import gnu.vm.jgnu.security.SignatureException;
-import gnu.vm.jgnu.security.spec.InvalidKeySpecException;
 
 /**
  * 
@@ -58,49 +57,49 @@ public final class GnuSignature extends AbstractSignature {
 
 	@Override
 	public GnuSignature clone() throws CloneNotSupportedException {
-		return new GnuSignature((Signature) signature.clone());
+		return new GnuSignature(GnuFunctions.clone(signature));
 	}
 
 	@Override
 	public String getAlgorithm() {
 
-		return signature.getAlgorithm();
+		return GnuFunctions.signatureGetAlgorithm(signature);
 	}
 
 	@Override
 	public String getProvider() {
-		return signature.getProvider().getName();
+		return GnuFunctions.signatureGetProvider(signature);
 	}
 
 	@Override
 	public void initSign(ASymmetricPrivateKey _privateKey)
 			throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException {
-		signature.initSign(_privateKey.toGnuKey());
+		GnuFunctions.signatureInitSign(signature, _privateKey);
 
 	}
 
 	@Override
 	public void initSign(ASymmetricPrivateKey _privateKey, AbstractSecureRandom _random)
 			throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException {
-		signature.initSign(_privateKey.toGnuKey(), _random.getGnuSecureRandom());
+		GnuFunctions.signatureInitSign(signature, _privateKey, _random);
 
 	}
 
 	@Override
 	public void initVerify(ASymmetricPublicKey _publicKey)
 			throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException {
-		signature.initVerify(_publicKey.toGnuKey());
+		GnuFunctions.signatureInitVerify(signature, _publicKey);
 
 	}
 
 	@Override
 	public byte[] sign() throws SignatureException {
-		return signature.sign();
+		return GnuFunctions.signatureSign(signature);
 	}
 
 	@Override
 	public int sign(byte[] _outbuf, int _offset, int _len) throws SignatureException {
-		return signature.sign(_outbuf, _offset, _len);
+		return GnuFunctions.signatureSign(signature, _outbuf, _offset, _len);
 	}
 
 	@Override
@@ -111,34 +110,34 @@ public final class GnuSignature extends AbstractSignature {
 
 	@Override
 	public void update(byte _b) throws SignatureException {
-		signature.update(_b);
+		GnuFunctions.signatureUpdate(signature, _b);
 	}
 
 	@Override
 	public void update(byte[] _data) throws SignatureException {
-		signature.update(_data);
+		GnuFunctions.signatureUpdate(signature, _data);
 
 	}
 
 	@Override
 	public void update(byte[] _data, int _off, int _len) throws SignatureException {
-		signature.update(_data, _off, _len);
+		GnuFunctions.signatureUpdate(signature, _data, _off, _len);
 
 	}
 
 	@Override
 	public void update(ByteBuffer _input) throws SignatureException {
-		signature.update(_input);
+		GnuFunctions.signatureUpdate(signature, _input);
 
 	}
 
 	@Override
 	public boolean verify(byte[] _signature) throws SignatureException {
-		return signature.verify(_signature);
+		return GnuFunctions.signatureVerify(signature, _signature);
 	}
 
 	@Override
 	public boolean verify(byte[] _signature, int _offset, int _length) throws SignatureException {
-		return signature.verify(_signature, _offset, _length);
+		return GnuFunctions.signatureVerify(signature, _signature, _offset, _length);
 	}
 }

@@ -463,6 +463,158 @@ class GnuFunctions {
 	}
 
 
+
+	static boolean signatureVerify(Object signature,byte[] _signature, int _offset, int _length) throws SignatureException {
+		try {
+			return (boolean)signatureVerifyBytesIntInt.invoke(signature,_signature, _offset, _length);
+		} catch (IllegalAccessException e) {
+			throw new IllegalStateException(e);
+		} catch (InvocationTargetException e) {
+			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.SignatureException"))
+				throw new SignatureException(e.getTargetException());
+			throw new IllegalStateException(e.getTargetException());
+		}
+	}
+
+	static boolean signatureVerify(Object signature,byte[] _signature) throws SignatureException {
+		try {
+			return (boolean)signatureVerifyBytes.invoke(signature,(Object)_signature);
+		} catch (IllegalAccessException e) {
+			throw new IllegalStateException(e);
+		} catch (InvocationTargetException e) {
+			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.SignatureException"))
+				throw new SignatureException(e.getTargetException());
+			throw new IllegalStateException(e.getTargetException());
+		}
+	}
+
+	static void signatureUpdate(Object signature,ByteBuffer _input) throws SignatureException {
+		try {
+			signatureUpdateByteBuffer.invoke(signature,_input);
+		} catch (IllegalAccessException e) {
+			throw new IllegalStateException(e);
+		} catch (InvocationTargetException e) {
+			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.SignatureException"))
+				throw new SignatureException(e.getTargetException());
+			throw new IllegalStateException(e.getTargetException());
+		}
+	}
+
+	static void signatureUpdate(Object signature, byte[] _data, int _off, int _len) throws SignatureException {
+		try {
+			signatureUpdateBytesIntInt.invoke(signature,_data, _off, _len);
+		} catch (IllegalAccessException e) {
+			throw new IllegalStateException(e);
+		} catch (InvocationTargetException e) {
+			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.SignatureException"))
+				throw new SignatureException(e.getTargetException());
+			throw new IllegalStateException(e.getTargetException());
+		}
+	}
+
+	static void signatureUpdate(Object signature, byte[] _b) throws SignatureException {
+		try {
+			signatureUpdateBytes.invoke(signature, (Object)_b);
+		} catch (IllegalAccessException e) {
+			throw new IllegalStateException(e);
+		} catch (InvocationTargetException e) {
+			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.SignatureException"))
+				throw new SignatureException(e.getTargetException());
+			throw new IllegalStateException(e.getTargetException());
+		}
+	}
+
+	static void signatureUpdate(Object signature, byte _b) throws SignatureException {
+		try {
+			signatureUpdateByte.invoke(signature, _b);
+		} catch (IllegalAccessException e) {
+			throw new IllegalStateException(e);
+		} catch (InvocationTargetException e) {
+			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.SignatureException"))
+				throw new SignatureException(e.getTargetException());
+			throw new IllegalStateException(e.getTargetException());
+		}
+	}
+
+	static int signatureSign(Object signature, byte[] _outbuf, int _offset, int _len) throws SignatureException {
+		try {
+			return (int)signatureSignBytesIntInt.invoke(signature, _outbuf, _offset, _len);
+		} catch (IllegalAccessException e) {
+			throw new IllegalStateException(e);
+		} catch (InvocationTargetException e) {
+			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.SignatureException"))
+				throw new SignatureException(e.getTargetException());
+			throw new IllegalStateException(e.getTargetException());
+		}
+	}
+
+	static byte[] signatureSign(Object signature) throws SignatureException {
+		try {
+			return (byte[])signatureSign.invoke(signature);
+		} catch (IllegalAccessException e) {
+			throw new IllegalStateException(e);
+		} catch (InvocationTargetException e) {
+			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.SignatureException"))
+				throw new SignatureException(e.getTargetException());
+			throw new IllegalStateException(e.getTargetException());
+		}
+	}
+
+	static void signatureInitVerify(Object signature, ASymmetricPublicKey _publicKey) throws InvalidKeySpecException, NoSuchAlgorithmException, InvalidKeyException {
+		try {
+			signatureInitVerifPub.invoke(signature, _publicKey.toGnuKey());
+		} catch (IllegalAccessException e) {
+			throw new IllegalStateException(e);
+		} catch (InvocationTargetException e) {
+			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.InvalidKeyException"))
+				throw new InvalidKeyException(e.getTargetException());
+			throw new IllegalStateException(e.getTargetException());
+		}
+	}
+
+	static void signatureInitSign(Object signature, ASymmetricPrivateKey _privateKey, AbstractSecureRandom _random) throws InvalidKeySpecException, NoSuchAlgorithmException, InvalidKeyException {
+		try {
+			signatureInitSignPrivRand.invoke(signature, _privateKey.toGnuKey(), _random.getGnuSecureRandom());
+		} catch (IllegalAccessException e) {
+			throw new IllegalStateException(e);
+		} catch (InvocationTargetException e) {
+			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.InvalidKeyException"))
+				throw new InvalidKeyException(e.getTargetException());
+			throw new IllegalStateException(e.getTargetException());
+		}
+	}
+	static void signatureInitSign(Object signature, ASymmetricPrivateKey _privateKey) throws InvalidKeySpecException, NoSuchAlgorithmException, InvalidKeyException {
+		try {
+			signatureInitSignPriv.invoke(signature, _privateKey.toGnuKey());
+		} catch (IllegalAccessException e) {
+			throw new IllegalStateException(e);
+		} catch (InvocationTargetException e) {
+			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.InvalidKeyException"))
+				throw new InvalidKeyException(e.getTargetException());
+			throw new IllegalStateException(e.getTargetException());
+		}
+	}
+
+	static String signatureGetAlgorithm(Object signature) {
+		try {
+			return (String)signatureGetAlgorithm.invoke(signature);
+		} catch (IllegalAccessException e) {
+			throw new IllegalStateException(e);
+		} catch (InvocationTargetException e) {
+			throw new IllegalStateException(e.getTargetException());
+		}
+	}
+
+	static String signatureGetProvider(Object signature) {
+		try {
+			return (String)providerGetName.invoke(signatureGetProviderName.invoke(signature));
+		} catch (IllegalAccessException e) {
+			throw new IllegalStateException(e);
+		} catch (InvocationTargetException e) {
+			throw new IllegalStateException(e.getTargetException());
+		}
+	}
+
 	static void macReset(Object cipher) {
 		try {
 			macReset.invoke(cipher);
