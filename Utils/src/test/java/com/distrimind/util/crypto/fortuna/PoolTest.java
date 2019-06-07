@@ -1,6 +1,6 @@
 package com.distrimind.util.crypto.fortuna;
 
-import org.testng.annotations.BeforeTest;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import static org.testng.Assert.*;
 
@@ -10,7 +10,7 @@ import java.security.MessageDigest;
 public class PoolTest {
     private Pool pool;
 
-    @BeforeTest
+    @BeforeMethod
     public void before() {
         pool = new Pool();
     }

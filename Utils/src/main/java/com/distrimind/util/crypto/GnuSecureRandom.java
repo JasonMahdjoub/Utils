@@ -55,7 +55,7 @@ public class GnuSecureRandom extends AbstractSecureRandom {
 	
 
 
-	GnuSecureRandom(SecureRandomType _type, final Object secureRandom) throws NoSuchAlgorithmException, NoSuchProviderException {
+	GnuSecureRandom(SecureRandomType _type, final Object secureRandom) {
 		super(new AbstractSecureRandomSpi(true) {
 
 			/**

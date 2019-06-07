@@ -35,6 +35,8 @@ knowledge of the CeCILL-C license and that you accept its terms.
 package com.distrimind.util;
 
 import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -43,8 +45,6 @@ import com.distrimind.util.crypto.AbstractSecureRandom;
 import com.distrimind.util.crypto.MessageDigestType;
 import com.distrimind.util.sizeof.ObjectSizer;
 
-import gnu.vm.jgnu.security.NoSuchAlgorithmException;
-import gnu.vm.jgnu.security.NoSuchProviderException;
 
 /**
  * This class represents a unique identifier. Uniqueness is guaranteed over the
@@ -68,7 +68,7 @@ public class SecuredDecentralizedID extends AbstractDecentralizedID {
 
 	static final String ToStringHead = "SecuredDecentralizedID";
 
-	private static int computeHashCode(long idLongs[]) {
+	private static int computeHashCode(long[] idLongs) {
 		return Arrays.hashCode(idLongs);
 	}
 
@@ -151,7 +151,7 @@ public class SecuredDecentralizedID extends AbstractDecentralizedID {
 		}
 	}
 
-	SecuredDecentralizedID(long idLongs[]) {
+	SecuredDecentralizedID(long[] idLongs) {
 		if (idLongs == null)
 			throw new NullPointerException("idLongs");
 		if (idLongs.length == 0)
@@ -203,7 +203,7 @@ public class SecuredDecentralizedID extends AbstractDecentralizedID {
 	@Override
 	public byte[] getBytes() {
 		int sizeLong = ObjectSizer.sizeOf(idLongs[0]);
-		byte res[] = new byte[idLongs.length * sizeLong + 1];
+		byte[] res = new byte[idLongs.length * sizeLong + 1];
 		res[0] = getType();
 
 		for (int i = 0; i < idLongs.length; i++) {

@@ -2,7 +2,7 @@ package com.distrimind.util.crypto.fortuna.entropy;
 
 import com.distrimind.util.crypto.fortuna.accumulator.EventAdder;
 import org.testng.Assert;
-import org.testng.annotations.BeforeTest;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 public class MemoryPoolEntropySourceTest {
@@ -10,7 +10,7 @@ public class MemoryPoolEntropySourceTest {
     private MemoryPoolEntropySource target;
     private int adds;
 
-    @BeforeTest
+    @BeforeMethod
     public void before() {
         target = new MemoryPoolEntropySource();
         adds = 0;

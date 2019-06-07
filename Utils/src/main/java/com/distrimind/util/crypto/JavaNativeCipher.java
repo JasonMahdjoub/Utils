@@ -37,27 +37,23 @@ package com.distrimind.util.crypto;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.security.spec.InvalidKeySpecException;
 
-import javax.crypto.Cipher;
-import javax.crypto.CipherInputStream;
-import javax.crypto.CipherOutputStream;
+import javax.crypto.*;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.IvParameterSpec;
 
 
-import gnu.vm.jgnu.security.InvalidAlgorithmParameterException;
-import gnu.vm.jgnu.security.InvalidKeyException;
-import gnu.vm.jgnu.security.NoSuchAlgorithmException;
-import gnu.vm.jgnu.security.spec.InvalidKeySpecException;
-import gnu.vm.jgnux.crypto.BadPaddingException;
-import gnu.vm.jgnux.crypto.IllegalBlockSizeException;
-import gnu.vm.jgnux.crypto.ShortBufferException;
+
 
 /**
  * 
  * @author Jason Mahdjoub
- * @version 1.2
+ * @version 2.0
  * @since Utils 2.0
  */
 public final class JavaNativeCipher extends AbstractCipher {
@@ -79,13 +75,7 @@ public final class JavaNativeCipher extends AbstractCipher {
 
 	@Override
 	public byte[] doFinal() throws IllegalStateException, IllegalBlockSizeException, BadPaddingException {
-		try {
-			return cipher.doFinal();
-		} catch (javax.crypto.IllegalBlockSizeException e) {
-			throw new IllegalBlockSizeException(e.getMessage());
-		} catch (javax.crypto.BadPaddingException e) {
-			throw new BadPaddingException(e.getMessage());
-		}
+		return cipher.doFinal();
 
 	}
 
@@ -94,28 +84,14 @@ public final class JavaNativeCipher extends AbstractCipher {
 	@Override
 	public int doFinal(byte[] _output, int _outputOffset)
 			throws IllegalStateException, IllegalBlockSizeException, BadPaddingException, ShortBufferException {
-		try {
-			return cipher.doFinal(_output, _outputOffset);
-		} catch (javax.crypto.IllegalBlockSizeException e) {
-			throw new IllegalBlockSizeException(e.getMessage());
-		} catch (javax.crypto.BadPaddingException e) {
-			throw new BadPaddingException(e.getMessage());
-		} catch (javax.crypto.ShortBufferException e) {
-			throw new ShortBufferException(e.getMessage());
-		}
+		return cipher.doFinal(_output, _outputOffset);
 
 	}
 
 	@Override
 	public byte[] doFinal(byte[] _input, int _inputOffset, int _inputLength)
 			throws IllegalStateException, IllegalBlockSizeException, BadPaddingException {
-		try {
-			return cipher.doFinal(_input, _inputOffset, _inputLength);
-		} catch (javax.crypto.IllegalBlockSizeException e) {
-			throw new IllegalBlockSizeException(e.getMessage());
-		} catch (javax.crypto.BadPaddingException e) {
-			throw new BadPaddingException(e.getMessage());
-		}
+		return cipher.doFinal(_input, _inputOffset, _inputLength);
 
 	}
 
@@ -124,16 +100,7 @@ public final class JavaNativeCipher extends AbstractCipher {
 	@Override
 	public int doFinal(byte[] _input, int _inputOffset, int _inputLength, byte[] _output, int _outputOffset)
 			throws IllegalStateException, IllegalBlockSizeException, BadPaddingException, ShortBufferException {
-		try {
-			return cipher.doFinal(_input, _inputOffset, _inputLength, _output, _outputOffset);
-		} catch (javax.crypto.IllegalBlockSizeException e) {
-			throw new IllegalBlockSizeException(e.getMessage());
-		} catch (javax.crypto.BadPaddingException e) {
-			throw new BadPaddingException(e.getMessage());
-		} catch (javax.crypto.ShortBufferException e) {
-			throw new ShortBufferException(e.getMessage());
-		}
-
+		return cipher.doFinal(_input, _inputOffset, _inputLength, _output, _outputOffset);
 	}
 
 
@@ -172,27 +139,17 @@ public final class JavaNativeCipher extends AbstractCipher {
 	@Override
 	public void init(int _opmode, Key _key, AbstractSecureRandom _random)
 			throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException {
-		try {
-			cipher.init(_opmode, _key.toJavaNativeKey(), setSecureRandom(_random));
-		} catch (java.security.InvalidKeyException e) {
-			throw new InvalidKeyException(e.getMessage());
-		}
+		cipher.init(_opmode, _key.toJavaNativeKey(), setSecureRandom(_random));
 
 	}
 
 	@Override
 	public void init(int _opmode, Key _key, byte[] _iv) throws InvalidKeyException, NoSuchAlgorithmException,
 			InvalidKeySpecException, InvalidAlgorithmParameterException {
-		try {
-			if (type!=null && type.getBlockMode().toUpperCase().equals("GCM"))
-				cipher.init(_opmode, _key.toJavaNativeKey(), new GCMParameterSpec(128, _iv));
-			else
-				cipher.init(_opmode, _key.toJavaNativeKey(), new IvParameterSpec(_iv));
-		} catch (java.security.InvalidKeyException e) {
-			throw new InvalidKeyException(e.getMessage());
-		} catch (java.security.InvalidAlgorithmParameterException e) {
-			throw new InvalidAlgorithmParameterException(e);
-		}
+		if (type!=null && type.getBlockMode().toUpperCase().equals("GCM"))
+			cipher.init(_opmode, _key.toJavaNativeKey(), new GCMParameterSpec(128, _iv));
+		else
+			cipher.init(_opmode, _key.toJavaNativeKey(), new IvParameterSpec(_iv));
 
 	}
 
@@ -206,11 +163,7 @@ public final class JavaNativeCipher extends AbstractCipher {
 	@Override
 	public int update(byte[] _input, int _inputOffset, int _inputLength, byte[] _output, int _outputOffset)
 			throws IllegalStateException, ShortBufferException {
-		try {
-			return cipher.update(_input, _inputOffset, _inputLength, _output, _outputOffset);
-		} catch (javax.crypto.ShortBufferException e) {
-			throw new ShortBufferException(e.getMessage());
-		}
+		return cipher.update(_input, _inputOffset, _inputLength, _output, _outputOffset);
 
 	}
 	@Override

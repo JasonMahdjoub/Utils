@@ -58,7 +58,7 @@ import com.distrimind.util.sizeof.ObjectSizer;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 2.3
+ * @version 3.0
  * @since Utils 1.8
  *
  */
@@ -126,8 +126,9 @@ public enum PasswordHashType {
 		return hashLength;
 	}
 	@SuppressWarnings("fallthrough")
-	byte[] hash(byte data[], int off, int len, byte salt[], byte cost, byte hashLength)
-			throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException, gnu.vm.jgnu.security.NoSuchProviderException {
+	byte[] hash(byte[] data, int off, int len, byte[] salt, byte cost, byte hashLength)
+			throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
+		CodeProvider.encureProviderLoaded(codeProvider);
 		if (cost<4 || cost>31)
 			throw new IllegalArgumentException("cost must be greater or equals than 4 and lower or equals than 31");
 
@@ -151,25 +152,17 @@ public enum PasswordHashType {
 			case PBKDF2WithHMacSHA2_256:
 			case PBKDF2WithHMacSHA2_384:
 			case PBKDF2WithHMacSHA2_512: {
-				try {
-					int size = len / 2;
-					char[] password = new char[size + len % 2];
-					for (int i = 0; i < size; i++) {
-						password[i] = (char) ((data[off + i * 2] & 0xFF) & ((data[off + i * 2 + 1] << 8) & 0xFF));
-					}
-					if (size < password.length)
-						password[size] = (char) (data[off + size * 2] & 0xFF);
-
-					PBEKeySpec spec = new PBEKeySpec(password, salt, iterations, (hashLength) * 8);
-					SecretKeyFactory skf = SecretKeyFactory.getInstance(algorithmName, codeProvider.checkProviderWithCurrentOS().name());
-					return skf.generateSecret(spec).getEncoded();
-				} catch (NoSuchAlgorithmException e) {
-					throw new gnu.vm.jgnu.security.NoSuchAlgorithmException(e);
-				} catch (InvalidKeySpecException e) {
-					throw new gnu.vm.jgnu.security.spec.InvalidKeySpecException(e);
-				} catch (NoSuchProviderException e) {
-					throw new gnu.vm.jgnu.security.NoSuchProviderException(e.getMessage());
+				int size = len / 2;
+				char[] password = new char[size + len % 2];
+				for (int i = 0; i < size; i++) {
+					password[i] = (char) ((data[off + i * 2] & 0xFF) & ((data[off + i * 2 + 1] << 8) & 0xFF));
 				}
+				if (size < password.length)
+					password[size] = (char) (data[off + size * 2] & 0xFF);
+
+				PBEKeySpec spec = new PBEKeySpec(password, salt, iterations, (hashLength) * 8);
+				SecretKeyFactory skf = SecretKeyFactory.getInstance(algorithmName, codeProvider.checkProviderWithCurrentOS().name());
+				return skf.generateSecret(spec).getEncoded();
 			}
 			case GNU_PBKDF2WithHMacSHA2_256:
 			case GNU_PBKDF2WithHMacSHA2_384:
@@ -184,10 +177,10 @@ public enum PasswordHashType {
 				if (size < password.length)
 					password[size] = (char) (data[off + size * 2] & 0xFF);
 
-				gnu.vm.jgnux.crypto.spec.PBEKeySpec spec = new gnu.vm.jgnux.crypto.spec.PBEKeySpec(password, salt,
+				Object spec = GnuFunctions.PBEKeySpecGetInstance(password, salt,
 						iterations, (hashLength));
-				gnu.vm.jgnux.crypto.SecretKeyFactory skf = gnu.vm.jgnux.crypto.SecretKeyFactory.getInstance(algorithmName);
-				return skf.generateSecret(spec).getEncoded();
+				Object skf = GnuFunctions.secretKeyFactoryGetInstance(algorithmName);
+				return GnuFunctions.keyGetEncoded(GnuFunctions.secretKeyFactoryGenerateSecret(skf, spec));
 			}
 			case BCRYPT: {
 				byte[] passwordb ;
@@ -204,7 +197,6 @@ public enum PasswordHashType {
 			case BC_FIPS_PBKFD2WithHMacSHA2_256:
 			case BC_FIPS_PBKFD2WithHMacSHA2_384:
 			case BC_FIPS_PBKFD2WithHMacSHA2_512: {
-				CodeProvider.ensureBouncyCastleProviderLoaded();
 				PasswordBasedDeriver<org.bouncycastle.crypto.fips.FipsPBKD.Parameters> deriver =
 						new FipsPBKD.DeriverFactory().createDeriver(FipsPBKD.PBKDF2.using(fipsDigestAlgorithm, data)
 								.withIterationCount(iterations)
@@ -233,7 +225,8 @@ public enum PasswordHashType {
 		throw new InternalError();
 	}
 
-	byte[] hash(char password[], byte salt[], byte cost, byte hashLength) throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException, gnu.vm.jgnu.security.NoSuchProviderException {
+	byte[] hash(char[] password, byte[] salt, byte cost, byte hashLength) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
+		CodeProvider.encureProviderLoaded(codeProvider);
 		if (cost<4 || cost>31)
 			throw new IllegalArgumentException("cost must be greater or equals than 4 and lower or equals than 31");
 
@@ -256,29 +249,19 @@ public enum PasswordHashType {
 		case PBKDF2WithHMacSHA2_256:
 		case PBKDF2WithHMacSHA2_384:
 		case PBKDF2WithHMacSHA2_512:{
-			try {
-				PBEKeySpec spec = new PBEKeySpec(password, salt, iterations, (hashLength) * 8);
-				SecretKeyFactory skf = SecretKeyFactory.getInstance(algorithmName, codeProvider.checkProviderWithCurrentOS().name());
-				return skf.generateSecret(spec).getEncoded();
-			} catch (NoSuchAlgorithmException e) {
-				throw new gnu.vm.jgnu.security.NoSuchAlgorithmException(e);
-			} catch (InvalidKeySpecException e) {
-				throw new gnu.vm.jgnu.security.spec.InvalidKeySpecException(e);
-			}
-			catch(NoSuchProviderException e)
-			{
-				throw new gnu.vm.jgnu.security.NoSuchProviderException(e.getMessage());
-			}
+			PBEKeySpec spec = new PBEKeySpec(password, salt, iterations, (hashLength) * 8);
+			SecretKeyFactory skf = SecretKeyFactory.getInstance(algorithmName, codeProvider.checkProviderWithCurrentOS().name());
+			return skf.generateSecret(spec).getEncoded();
 		}
 		case GNU_PBKDF2WithHMacSHA2_256:
 		case GNU_PBKDF2WithHMacSHA2_384:
 		case GNU_PBKDF2WithHMacSHA2_512:
 		case GNU_PBKDF2WithHMacWhirlpool:
 		case GNU_PBKDF2WithHmacSHA1: {
-			gnu.vm.jgnux.crypto.spec.PBEKeySpec spec = new gnu.vm.jgnux.crypto.spec.PBEKeySpec(password, salt,
-					iterations, (hashLength) );
-			gnu.vm.jgnux.crypto.SecretKeyFactory skf = gnu.vm.jgnux.crypto.SecretKeyFactory.getInstance(algorithmName);
-			return skf.generateSecret(spec).getEncoded();
+			Object spec = GnuFunctions.PBEKeySpecGetInstance(password, salt,
+					iterations, hashLength );
+			Object skf = GnuFunctions.secretKeyFactoryGetInstance(algorithmName);
+			return GnuFunctions.keyGetEncoded(GnuFunctions.secretKeyFactoryGenerateSecret(skf, spec));
 		}
 		case BCRYPT: {
 			
@@ -289,8 +272,7 @@ public enum PasswordHashType {
 		case BC_FIPS_PBKFD2WithHMacSHA2_384:
 		case BC_FIPS_PBKFD2WithHMacSHA2_512:
 		{
-			CodeProvider.ensureBouncyCastleProviderLoaded();
-			PasswordBasedDeriver<org.bouncycastle.crypto.fips.FipsPBKD.Parameters> deriver = 
+			PasswordBasedDeriver<org.bouncycastle.crypto.fips.FipsPBKD.Parameters> deriver =
 						new FipsPBKD.DeriverFactory().createDeriver(FipsPBKD.PBKDF2.using(fipsDigestAlgorithm, PasswordConverter.UTF8.convert(password))
 												.withIterationCount(iterations)
 												.withSalt(salt));
@@ -311,7 +293,7 @@ public enum PasswordHashType {
 		throw new InternalError();
 	}
 
-	private byte[] uniformizeSaltLength(byte salt[], int salt_length) {
+	private byte[] uniformizeSaltLength(byte[] salt, int salt_length) {
 		if (salt.length != salt_length) {
 			if (salt.length < salt_length) {
 				byte[] res = new byte[salt_length];
@@ -334,7 +316,7 @@ public enum PasswordHashType {
 		return salt;
 	}
 
-	public static PasswordHashType valueOf(byte identifiedHash[])
+	public static PasswordHashType valueOf(byte[] identifiedHash)
 	{
 		if (identifiedHash.length<2)
 			throw new IllegalArgumentException();
@@ -347,14 +329,14 @@ public enum PasswordHashType {
 		return null;
 	}
 	
-	public static byte getCost(byte identifiedHash[])
+	public static byte getCost(byte[] identifiedHash)
 	{
 		if (identifiedHash.length<2)
 			throw new IllegalArgumentException();
 		return identifiedHash[1];
 	}
 	
-	public static byte getPasswordHashLengthBytes(byte identifiedHash[])
+	public static byte getPasswordHashLengthBytes(byte[] identifiedHash)
 	{
 		short size=Bits.getShort(identifiedHash, 2);
 		
@@ -363,7 +345,7 @@ public enum PasswordHashType {
 		return (byte)size;
 	}
 	
-	public static byte getSaltSizeBytes(byte identifiedHash[])
+	public static byte getSaltSizeBytes(byte[] identifiedHash)
 	{
 		int size=Bits.getShort(identifiedHash, 2);
 		size=identifiedHash.length-2 - ObjectSizer.SHORT_FIELD_SIZE - size;

@@ -35,14 +35,14 @@ knowledge of the CeCILL-C license and that you accept its terms.
 package com.distrimind.util.crypto;
 
 import java.nio.ByteBuffer;
+import java.security.DigestException;
 import java.security.MessageDigest;
 
-import gnu.vm.jgnu.security.DigestException;
 
 /**
  * 
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 2.0
  * @since Utils 2.0
  */
 public final class JavaNativeMessageDigest extends AbstractMessageDigest {
@@ -69,11 +69,7 @@ public final class JavaNativeMessageDigest extends AbstractMessageDigest {
 
 	@Override
 	public int digest(byte[] _buf, int _offset, int _len) throws DigestException {
-		try {
-			return messageDigest.digest(_buf, _offset, _len);
-		} catch (java.security.DigestException e) {
-			throw new DigestException(e);
-		}
+		return messageDigest.digest(_buf, _offset, _len);
 	}
 
 	@Override

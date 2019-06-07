@@ -38,14 +38,14 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.UnknownHostException;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.util.Properties;
 
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
-
-import gnu.vm.jgnu.security.InvalidAlgorithmParameterException;
-import gnu.vm.jgnu.security.NoSuchProviderException;
 
 /**
  * 
@@ -56,7 +56,7 @@ import gnu.vm.jgnu.security.NoSuchProviderException;
 public class TestProperties {
 	@DataProvider(name = "getPropertiesExample")
 	Object[][] getPropertiesExample() throws MalformedURLException, UnknownHostException,
-			gnu.vm.jgnu.security.NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException {
+			NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException {
 		PropertiesExample[][] res = new PropertiesExample[100][];
 		res[0] = new PropertiesExample[] { new PropertiesExample(null) };
 		for (int i = 1; i < res.length; i++) {

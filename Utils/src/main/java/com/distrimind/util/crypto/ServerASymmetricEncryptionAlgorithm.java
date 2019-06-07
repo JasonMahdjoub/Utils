@@ -39,21 +39,21 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.spec.InvalidKeySpecException;
 
+import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 
-import gnu.vm.jgnu.security.InvalidKeyException;
-import gnu.vm.jgnu.security.NoSuchAlgorithmException;
-import gnu.vm.jgnu.security.NoSuchProviderException;
-import gnu.vm.jgnu.security.spec.InvalidKeySpecException;
-import gnu.vm.jgnux.crypto.BadPaddingException;
-import gnu.vm.jgnux.crypto.IllegalBlockSizeException;
-import gnu.vm.jgnux.crypto.NoSuchPaddingException;
 
 /**
  * 
  * @author Jason Mahdjoub
- * @version 3.0
+ * @version 4.0
  * @since Utils 1.7.0
  */
 public class ServerASymmetricEncryptionAlgorithm {

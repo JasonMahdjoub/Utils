@@ -146,10 +146,11 @@ public enum ASymmetricAuthenticatedSignatureType {
 
 
 	public AbstractSignature getSignatureInstance() throws NoSuchAlgorithmException, NoSuchProviderException {
+		CodeProvider.encureProviderLoaded(codeProviderSignature);
 		if (codeProviderSignature == CodeProvider.GNU_CRYPTO) {
 			return new GnuSignature(GnuFunctions.getSignatureAlgorithm(signatureAlgorithmName));
 		} else if (codeProviderSignature == CodeProvider.BCFIPS || codeProviderSignature == CodeProvider.BC || codeProviderSignature == CodeProvider.BCPQC) {
-			CodeProvider.ensureBouncyCastleProviderLoaded();
+
 			Signature s=Signature.getInstance(signatureAlgorithmName, codeProviderSignature.name());
 
 			return new JavaNativeSignature(s);
@@ -245,6 +246,7 @@ public enum ASymmetricAuthenticatedSignatureType {
 
 	public AbstractKeyPairGenerator getKeyPairGenerator(AbstractSecureRandom random, short keySize,
 			long expirationTimeUTC) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException {
+		CodeProvider.encureProviderLoaded(codeProviderSignature);
 		if (codeProviderKeyGenerator == CodeProvider.GNU_CRYPTO) {
 			KeyPairGenerator kgp = KeyPairGenerator.getInstance(keyGeneratorAlgorithmName);
 			GnuKeyPairGenerator res = new GnuKeyPairGenerator(this, kgp);
@@ -252,8 +254,7 @@ public enum ASymmetricAuthenticatedSignatureType {
 
 			return res;
 		} else if (codeProviderKeyGenerator == CodeProvider.BCFIPS || codeProviderKeyGenerator == CodeProvider.BC || codeProviderKeyGenerator == CodeProvider.BCPQC) {
-			CodeProvider.ensureBouncyCastleProviderLoaded();
-			
+
 				
 					
 			KeyPairGenerator kgp;

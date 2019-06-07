@@ -1,14 +1,15 @@
 package com.distrimind.util.crypto.fortuna;
 
 import static org.testng.Assert.*;
-import org.testng.annotations.BeforeTest;
+
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 public class CounterTest {
 
     private Counter counter;
 
-    @BeforeTest
+    @BeforeMethod
     public void before() {
         counter = new Counter(128);
     }
@@ -41,8 +42,8 @@ public class CounterTest {
     public void shouldIncrementOneStep() {
         counter.increment();
         byte[] state = counter.getState();
-        assertEquals(16, state.length);
-        assertEquals(1, state[0]);
+        assertEquals(state.length, 16);
+        assertEquals(state[0], 1);
         assertFalse(counter.isZero());
     }
 

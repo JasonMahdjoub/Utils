@@ -71,7 +71,7 @@ public class SymmetricSecretKey extends Key {
 
 	private transient SecretKey javaNativeSecretKey = null;
 
-	private transient gnu.vm.jgnux.crypto.SecretKey gnuSecretKey = null;
+	private transient Object gnuSecretKey = null;
 	
 	private transient org.bouncycastle.crypto.SymmetricSecretKey bcfipsNativeSecretKey=null;
 
@@ -90,7 +90,7 @@ public class SymmetricSecretKey extends Key {
 		}
 		if (gnuSecretKey!=null)
 		{
-			Arrays.fill(gnuSecretKey.getEncoded(), (byte)0);
+			Arrays.fill(GnuFunctions.keyGetEncoded(gnuSecretKey), (byte)0);
 			gnuSecretKey=null;
 		}
 		if (bcfipsNativeSecretKey!=null)
@@ -151,8 +151,8 @@ public class SymmetricSecretKey extends Key {
 		hashCode = Arrays.hashCode(this.secretKey);
 		Arrays.fill(secretKey, (byte)0);
 	}
-	SymmetricSecretKey(SymmetricEncryptionType type, gnu.vm.jgnux.crypto.SecretKey secretKey, short keySize) {
-		this(SymmetricEncryptionType.encodeSecretKey(secretKey, type.getAlgorithmName()), keySize);
+	SymmetricSecretKey(SymmetricEncryptionType type, Object secretKey, short keySize) {
+		this(SymmetricEncryptionType.encodeGnuSecretKey(secretKey, type.getAlgorithmName()), keySize);
 		if (type.getCodeProviderForEncryption() != CodeProvider.GNU_CRYPTO)
 			throw new IllegalAccessError();
 		this.encryptionType = type;
@@ -161,8 +161,8 @@ public class SymmetricSecretKey extends Key {
 	}
 	
 	
-	SymmetricSecretKey(SymmetricAuthentifiedSignatureType type, gnu.vm.jgnux.crypto.SecretKey secretKey, short keySize) {
-		this(SymmetricEncryptionType.encodeSecretKey(secretKey, type.getAlgorithmName()), keySize);
+	SymmetricSecretKey(SymmetricAuthentifiedSignatureType type, Object secretKey, short keySize) {
+		this(SymmetricEncryptionType.encodeGnuSecretKey(secretKey, type.getAlgorithmName()), keySize);
 		if (type.getCodeProviderForSignature() != CodeProvider.GNU_CRYPTO)
 			throw new IllegalAccessError();
 		this.encryptionType = null;
@@ -235,7 +235,8 @@ public class SymmetricSecretKey extends Key {
         return (short)(encodedKeySizeBits*8+56);
     }
 
-    static int maxKeySizeBits(int usedBitsForEncoding)
+    @SuppressWarnings("SameParameterValue")
+	static int maxKeySizeBits(int usedBitsForEncoding)
     {
         return decodeKeySizeBits((1<<usedBitsForEncoding)-1);
     }
@@ -293,7 +294,7 @@ public class SymmetricSecretKey extends Key {
 	}
 
 	@Override
-	public gnu.vm.jgnux.crypto.SecretKey toGnuKey() {
+	public Object toGnuKey() {
 		if (gnuSecretKey == null)
 			gnuSecretKey = SymmetricEncryptionType.decodeGnuSecretKey(secretKey, encryptionType==null?signatureType.getAlgorithmName():encryptionType.getAlgorithmName());
 

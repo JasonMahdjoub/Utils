@@ -34,14 +34,14 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
-import gnu.vm.jgnu.security.InvalidAlgorithmParameterException;
-import gnu.vm.jgnu.security.NoSuchAlgorithmException;
-import gnu.vm.jgnu.security.NoSuchProviderException;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 
 /**
  * 
  * @author Jason Mahdjoub
- * @version 1.4
+ * @version 2.0
  * @since Utils 3.14.0
  */
 

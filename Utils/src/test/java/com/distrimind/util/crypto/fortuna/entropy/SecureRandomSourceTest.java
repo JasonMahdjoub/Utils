@@ -1,10 +1,14 @@
 package com.distrimind.util.crypto.fortuna.entropy;
 
 
+import com.distrimind.util.crypto.SecureRandomType;
 import com.distrimind.util.crypto.fortuna.accumulator.EventAdder;
 import org.testng.Assert;
-import org.testng.annotations.BeforeTest;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 
 /**
  * @author Jason Mahdjoub
@@ -15,14 +19,16 @@ public class SecureRandomSourceTest {
 	private SecureRandomSource target;
 	private int adds;
 
-	@BeforeTest
+	@BeforeMethod
 	public void before() {
 		target = new SecureRandomSource();
 		adds = 0;
 	}
 
 	@Test
-	public void shouldAddUptime() {
+	public void shouldAddUptime() throws NoSuchProviderException, NoSuchAlgorithmException {
+		target.setUpdate(true);
+		target.add(SecureRandomType.SHA1PRNG);
 		target.event(new EventAdder() {
 			@Override
 			public void add(byte[] event) {

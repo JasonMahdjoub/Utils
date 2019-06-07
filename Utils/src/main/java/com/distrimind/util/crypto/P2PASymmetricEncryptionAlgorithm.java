@@ -35,18 +35,17 @@ knowledge of the CeCILL-C license and that you accept its terms.
 package com.distrimind.util.crypto;
 
 import javax.crypto.Cipher;
-
-import gnu.vm.jgnu.security.InvalidAlgorithmParameterException;
-import gnu.vm.jgnu.security.InvalidKeyException;
-import gnu.vm.jgnu.security.NoSuchAlgorithmException;
-import gnu.vm.jgnu.security.NoSuchProviderException;
-import gnu.vm.jgnu.security.spec.InvalidKeySpecException;
-import gnu.vm.jgnux.crypto.NoSuchPaddingException;
+import javax.crypto.NoSuchPaddingException;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.spec.InvalidKeySpecException;
 
 /**
  * 
  * @author Jason Mahdjoub
- * @version 2.1
+ * @version 3.0
  * @since Utils 1.4
  */
 public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm {

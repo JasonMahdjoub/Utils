@@ -51,7 +51,7 @@ public class InputDataPackagedWithRandomValues {
 			throw new NullPointerException("bytes");
 
 		InputDataPackagedWithRandomValues i = new InputDataPackagedWithRandomValues(bytes);
-		byte res[] = i.getBytesArray();
+		byte[] res = i.getBytesArray();
 		int size = Bits.getInt(res, 0);
 		if (size > res.length - ObjectSizer.INT_FIELD_SIZE)
 			throw new IOException("Invalid size");

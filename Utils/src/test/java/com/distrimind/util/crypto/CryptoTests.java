@@ -131,7 +131,6 @@ public class CryptoTests {
 		return res2;
 	}
 
-	@SuppressWarnings("deprecation")
 	@DataProvider(name = "provideDataForASymmetricSignatureTest", parallel = true)
 	public Object[][] provideDataForASymmetricSignatureTest() throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException {
 		Object[][] res = new Object[ASymmetricAuthenticatedSignatureType.values().length
@@ -327,7 +326,6 @@ public class CryptoTests {
 	private ASymmetricKeyPair generateKeyPair(ASymmetricAuthenticatedSignatureType type) throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException {
 		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getSingleton(null);
 
-		@SuppressWarnings("deprecation")
 		boolean isECDSA=type== ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA384withECDSA_P_384
 				|| 	type== ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA256withECDSA_P_256
 				|| type== ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA512withECDSA_P_521;
@@ -762,7 +760,7 @@ public class CryptoTests {
 
 	}
 
-	@Test(invocationCount = 20)
+	@Test(invocationCount = 20, threadPoolSize = 16)
 	public void testEncodeAndSeparateEncoding() {
 		Random rand = new Random(System.currentTimeMillis());
 		byte[] t1 = new byte[rand.nextInt(100) + 20];
@@ -1370,7 +1368,7 @@ public class CryptoTests {
 
 	}
 	
-	@Test(invocationCount = 4000)
+	@Test(invocationCount = 700, threadPoolSize = 16)
 	public void testReadWriteDataPackaged() throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
 		Random rand = new Random(System.currentTimeMillis());
 		byte[] originalBytes = new byte[50 + rand.nextInt(10000)];

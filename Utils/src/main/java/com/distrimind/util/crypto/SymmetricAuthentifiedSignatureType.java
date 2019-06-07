@@ -35,16 +35,13 @@ knowledge of the CeCILL-C license and that you accept its terms.
 package com.distrimind.util.crypto;
 
 
-import gnu.vm.jgnu.security.NoSuchAlgorithmException;
-import gnu.vm.jgnu.security.NoSuchProviderException;
-import gnu.vm.jgnux.crypto.KeyGenerator;
-import gnu.vm.jgnux.crypto.Mac;
 import org.bouncycastle.crypto.Algorithm;
 import org.bouncycastle.crypto.fips.FipsSHS;
 import org.bouncycastle.crypto.fips.FipsSHS.AuthParameters;
 
 import javax.crypto.spec.SecretKeySpec;
-import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 
 /**
  * 
@@ -127,30 +124,23 @@ public enum SymmetricAuthentifiedSignatureType {
 		return algorithmName;
 	}
 
-	public AbstractMac getHMacInstance() throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.NoSuchProviderException {
+	public AbstractMac getHMacInstance() throws NoSuchAlgorithmException, NoSuchProviderException {
+		CodeProvider.encureProviderLoaded(codeProviderForSignature);
 		if (codeProviderForSignature == CodeProvider.GNU_CRYPTO) {
-			return new GnuMac(Mac.getInstance(algorithmName));
+			return new GnuMac(GnuFunctions.macGetInstance(algorithmName));
 		} else if (codeProviderForSignature == CodeProvider.BCFIPS ) {
-			CodeProvider.ensureBouncyCastleProviderLoaded();
 			return new BCFIPSMac(this);
 
 		} else if (codeProviderForSignature == CodeProvider.BC) {
-			CodeProvider.ensureBouncyCastleProviderLoaded();
 			return new BCMac(this);
 
 		} else {
 			try {
 				return new JavaNativeMac(javax.crypto.Mac.getInstance(algorithmName, codeProviderForSignature.checkProviderWithCurrentOS().name()));
-			} catch (java.security.NoSuchAlgorithmException e) {
+			} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
 			    if (replacer!=null)
 			        return replacer.getHMacInstance();
-				throw new gnu.vm.jgnu.security.NoSuchAlgorithmException(e);
-			}
-			catch(java.security.NoSuchProviderException e)
-			{
-                if (replacer!=null)
-                    return replacer.getHMacInstance();
-				throw new gnu.vm.jgnu.security.NoSuchProviderException(e.getMessage());
+				throw e;
 			}
 		}
 	}
@@ -185,12 +175,12 @@ public enum SymmetricAuthentifiedSignatureType {
 
 	public AbstractKeyGenerator getKeyGenerator(AbstractSecureRandom random, short keySizeBits)
 			throws NoSuchAlgorithmException, NoSuchProviderException {
+		CodeProvider.encureProviderLoaded(codeProviderForKeyGenerator);
 		AbstractKeyGenerator res ;
 		if (codeProviderForKeyGenerator == CodeProvider.GNU_CRYPTO) {
-			res = new GnuKeyGenerator(this, KeyGenerator.getInstance(algorithmName));
+			res = new GnuKeyGenerator(this, GnuFunctions.keyGeneratorGetInstance(algorithmName));
 		} else if (codeProviderForKeyGenerator == CodeProvider.BCFIPS || codeProviderForKeyGenerator == CodeProvider.BC) {
 
-			CodeProvider.ensureBouncyCastleProviderLoaded();
 			res = new BCKeyGenerator(this);
 
 		} else {
@@ -220,8 +210,7 @@ public enum SymmetricAuthentifiedSignatureType {
 		if (codeProviderForKeyGenerator == CodeProvider.BCFIPS || codeProviderForKeyGenerator == CodeProvider.SunJCE) {
 			return new SymmetricSecretKey(this, new SecretKeySpec(secretKey, getAlgorithmName()), keySizeBits);
 		} else if (codeProviderForKeyGenerator == CodeProvider.GNU_CRYPTO) {
-			return new SymmetricSecretKey(this,
-					new gnu.vm.jgnux.crypto.spec.SecretKeySpec(secretKey, getAlgorithmName()), keySizeBits);
+			return new SymmetricSecretKey(this,GnuFunctions.secretKeySpecGetInstance(secretKey, getAlgorithmName()), keySizeBits);
 		} else
 			throw new IllegalAccessError();
 

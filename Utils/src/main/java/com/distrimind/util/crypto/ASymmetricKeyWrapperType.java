@@ -173,7 +173,7 @@ public enum ASymmetricKeyWrapperType {
 		throw new InvalidKeyException();
 	}
 	
-	private OAEPParameters getOAEPParams(byte params[])
+	private OAEPParameters getOAEPParams(byte[] params)
 	{
 		OAEPParameters OAEPParams=FipsRSA.WRAP_OAEP;
 		if (withParameters)
@@ -182,13 +182,13 @@ public enum ASymmetricKeyWrapperType {
 		return OAEPParams;
 	}
 	
-	public byte[] wrapKey(AbstractSecureRandom random, ASymmetricPublicKey publicKey, SymmetricSecretKey keyToWrap) throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, IllegalStateException, IllegalBlockSizeException, NoSuchProviderException, InvalidAlgorithmParameterException, IOException, IllegalBlockSizeException {
+	public byte[] wrapKey(AbstractSecureRandom random, ASymmetricPublicKey publicKey, SymmetricSecretKey keyToWrap) throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, IllegalStateException, NoSuchProviderException, InvalidAlgorithmParameterException, IOException, IllegalBlockSizeException {
 		if ((publicKey.getAuthentifiedSignatureAlgorithmType()!=null && ((provider==CodeProvider.GNU_CRYPTO)!=(publicKey.getAuthentifiedSignatureAlgorithmType().getCodeProviderForSignature()==CodeProvider.GNU_CRYPTO))) 
 				|| (publicKey.getEncryptionAlgorithmType()!=null  && ((provider==CodeProvider.GNU_CRYPTO)!=(publicKey.getEncryptionAlgorithmType().getCodeProviderForEncryption()==CodeProvider.GNU_CRYPTO)))
 				|| (keyToWrap.getAuthentifiedSignatureAlgorithmType()!=null && (provider==CodeProvider.GNU_CRYPTO)!=(keyToWrap.getAuthentifiedSignatureAlgorithmType().getCodeProviderForSignature()==CodeProvider.GNU_CRYPTO))
 				|| (keyToWrap.getEncryptionAlgorithmType()!=null && (provider==CodeProvider.GNU_CRYPTO)!=(keyToWrap.getEncryptionAlgorithmType().getCodeProviderForEncryption()==CodeProvider.GNU_CRYPTO)))
 				throw new IllegalArgumentException("The keys must come from the same providers");
-		
+		CodeProvider.encureProviderLoaded(provider);
 		if (provider.equals(CodeProvider.GNU_CRYPTO))
 		{
 			Object c = GnuFunctions.getCipherAlgorithm(algorithmName);
@@ -200,8 +200,7 @@ public enum ASymmetricKeyWrapperType {
 			javax.crypto.Cipher c;
 			if (provider.equals(CodeProvider.BCFIPS) || (OSVersion.getCurrentOSVersion()!=null && OSVersion.getCurrentOSVersion().getOS()==OS.MAC_OS_X && (this.getCodeProvider()==CodeProvider.SunJCE)))
 			{
-				CodeProvider.ensureBouncyCastleProviderLoaded();
-				
+
 				
 				
 				
@@ -289,6 +288,7 @@ public enum ASymmetricKeyWrapperType {
 	}
 	private SymmetricSecretKey unwrapKey(ASymmetricPrivateKey privateKey, byte[] keyToUnwrap, SymmetricEncryptionType encryptionType, SymmetricAuthentifiedSignatureType signatureType, short keySize) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalStateException, NoSuchProviderException, InvalidKeySpecException, IOException, InvalidAlgorithmParameterException, IllegalArgumentException, InvalidWrappingException
 	{
+		CodeProvider.encureProviderLoaded(getCodeProvider());
 		if ((privateKey.getAuthentifiedSignatureAlgorithmType()!=null && ((provider==CodeProvider.GNU_CRYPTO)!=(privateKey.getAuthentifiedSignatureAlgorithmType().getCodeProviderForSignature()==CodeProvider.GNU_CRYPTO))) 
 				|| (privateKey.getEncryptionAlgorithmType()!=null  && ((provider==CodeProvider.GNU_CRYPTO)!=(privateKey.getEncryptionAlgorithmType().getCodeProviderForEncryption()==CodeProvider.GNU_CRYPTO)))
 				|| (encryptionType!=null && (provider==CodeProvider.GNU_CRYPTO)!=(encryptionType.getCodeProviderForEncryption()==CodeProvider.GNU_CRYPTO))
@@ -317,7 +317,6 @@ public enum ASymmetricKeyWrapperType {
 			javax.crypto.Cipher c;
 			if (provider.equals(CodeProvider.BCFIPS) || (OSVersion.getCurrentOSVersion()!=null && OSVersion.getCurrentOSVersion().getOS()==OS.MAC_OS_X && (this.getCodeProvider()==CodeProvider.SunJCE)))
 			{
-				CodeProvider.ensureBouncyCastleProviderLoaded();
 
 				AsymmetricRSAPrivateKey bcPK=(AsymmetricRSAPrivateKey)privateKey.toBouncyCastleKey();
 

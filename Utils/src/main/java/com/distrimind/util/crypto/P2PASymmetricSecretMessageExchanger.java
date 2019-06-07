@@ -37,27 +37,22 @@ package com.distrimind.util.crypto;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
 import java.util.Random;
 
-import javax.crypto.Cipher;
+import javax.crypto.*;
 import javax.crypto.spec.SecretKeySpec;
 
-import gnu.vm.jgnu.security.InvalidAlgorithmParameterException;
-import gnu.vm.jgnu.security.InvalidKeyException;
-import gnu.vm.jgnu.security.NoSuchAlgorithmException;
-import gnu.vm.jgnu.security.NoSuchProviderException;
-import gnu.vm.jgnu.security.SecureRandom;
-import gnu.vm.jgnu.security.spec.InvalidKeySpecException;
-import gnu.vm.jgnux.crypto.BadPaddingException;
-import gnu.vm.jgnux.crypto.IllegalBlockSizeException;
-import gnu.vm.jgnux.crypto.NoSuchPaddingException;
-import gnu.vm.jgnux.crypto.ShortBufferException;
 
 /**
  * 
  * @author Jason Mahdjoub
- * @version 3.3
+ * @version 4.0
  * @since Utils 1.4.1
  */
 public class P2PASymmetricSecretMessageExchanger {
@@ -68,8 +63,8 @@ public class P2PASymmetricSecretMessageExchanger {
 		 */
 		private static final long serialVersionUID = -3862260428441022619L;
 
-		private final GnuInterface gnuRandom;
-		private boolean initialized;
+		private final Object gnuRandom;
+
 		protected FakeSecureRandom() {
 			
 			super(new AbstractSecureRandomSpi(false) {
@@ -102,9 +97,9 @@ public class P2PASymmetricSecretMessageExchanger {
 					return null;
 				}
 			}, null);
-			initialized=false;
-			gnuRandom=new GnuInterface();
-			initialized=true;
+
+			gnuRandom=GnuFunctions.getGnuRandomInterface(secureRandomSpi);
+
 		}
 
 		@Override
@@ -113,7 +108,7 @@ public class P2PASymmetricSecretMessageExchanger {
 		}
 
 		@Override
-		public SecureRandom getGnuSecureRandom() {
+		public Object getGnuSecureRandom() {
 			return gnuRandom;
 		}
 
@@ -123,45 +118,8 @@ public class P2PASymmetricSecretMessageExchanger {
 		}
 		
 		
-		
-		private class GnuInterface extends SecureRandom {
-			/**
-			 * 
-			 */
-			private static final long serialVersionUID = 4299616485652308411L;
 
-			
-			protected GnuInterface() {
-				super(new gnu.vm.jgnu.security.SecureRandomSpi() {
-					
-					
-					/**
-					 * 
-					 */
-					private static final long serialVersionUID = 740095511171490031L;
 
-					@Override
-					protected void engineSetSeed(byte[] seed) {
-						if (initialized)
-							FakeSecureRandom.this.secureRandomSpi.engineSetSeed(seed);
-					}
-					
-					@Override
-					protected void engineNextBytes(byte[] bytes) {
-						if (initialized)
-							FakeSecureRandom.this.secureRandomSpi.engineNextBytes(bytes);
-						
-					}
-					
-					@Override
-					protected byte[] engineGenerateSeed(int numBytes) {
-						return FakeSecureRandom.this.secureRandomSpi.engineGenerateSeed(numBytes);
-					}
-				}, null);
-				
-			}
-		}	
-		
 	}
 
 	protected static final BigInteger maxLongValue = BigInteger.valueOf(1).shiftLeft(63);

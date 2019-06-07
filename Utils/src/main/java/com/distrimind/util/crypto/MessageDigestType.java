@@ -109,34 +109,20 @@ public enum MessageDigestType {
 		return digestLengthBits;
 	}
 	
-	public AbstractMessageDigest getMessageDigestInstance() throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.NoSuchProviderException {
+	public AbstractMessageDigest getMessageDigestInstance() throws NoSuchAlgorithmException, NoSuchProviderException {
+		CodeProvider.encureProviderLoaded(codeProvider);
 		if (codeProvider == CodeProvider.GNU_CRYPTO) {
-			return new GnuMessageDigest(gnu.vm.jgnu.security.MessageDigest.getInstance(algorithmName));
+			return new GnuMessageDigest(GnuFunctions.digestGetInstance(algorithmName));
 		} else if (codeProvider == CodeProvider.BCFIPS || codeProvider == CodeProvider.BC) {
-			CodeProvider.ensureBouncyCastleProviderLoaded();
-			try {
-				return new JavaNativeMessageDigest(MessageDigest.getInstance(algorithmName, codeProvider.name()));
-			} catch (NoSuchAlgorithmException e) {
-				throw new gnu.vm.jgnu.security.NoSuchAlgorithmException(e);
-			}
-			catch(NoSuchProviderException e)
-			{
-				throw new gnu.vm.jgnu.security.NoSuchProviderException(e.getMessage());
-			}
-			
+			return new JavaNativeMessageDigest(MessageDigest.getInstance(algorithmName, codeProvider.name()));
+
 		} else {
 			try {
 				return new JavaNativeMessageDigest(MessageDigest.getInstance(algorithmName, codeProvider.checkProviderWithCurrentOS().name()));
-			} catch (NoSuchAlgorithmException e) {
+			} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
 				if (replacer!=null)
 					return replacer.getMessageDigestInstance();
-				throw new gnu.vm.jgnu.security.NoSuchAlgorithmException(e);
-			}
-			catch(NoSuchProviderException e)
-			{
-				if (replacer!=null)
-					return replacer.getMessageDigestInstance();
-				throw new gnu.vm.jgnu.security.NoSuchProviderException(e.getMessage());
+				throw e;
 			}
 		}
 	}

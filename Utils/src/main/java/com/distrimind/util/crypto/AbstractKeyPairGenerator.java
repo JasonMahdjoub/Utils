@@ -114,11 +114,11 @@ public abstract class AbstractKeyPairGenerator {
 	 * @param random
 	 *            the source of randomness.
 	 *
-	 * @throws gnu.vm.jgnu.security.InvalidAlgorithmParameterException if the algorithm parameters are invalid
+	 * @throws InvalidAlgorithmParameterException if the algorithm parameters are invalid
 	 *                
 	 *
 	 * @since 1.2
 	 */
-	public abstract void initialize(short keysize, long expirationTime, AbstractSecureRandom random) throws gnu.vm.jgnu.security.InvalidAlgorithmParameterException;
+	public abstract void initialize(short keysize, long expirationTime, AbstractSecureRandom random) throws InvalidAlgorithmParameterException;
 
 }

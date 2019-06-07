@@ -1,7 +1,7 @@
 package com.distrimind.util.crypto.fortuna;
 
 import org.testng.annotations.AfterTest;
-import org.testng.annotations.BeforeTest;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import static org.testng.Assert.assertEquals;
 import java.util.ArrayList;
@@ -15,7 +15,7 @@ public class PrefetchingSupplierTest {
     private ExecutorService executorService;
     private List<Integer> sleeps;
 
-    @BeforeTest
+    @BeforeMethod
     public void setUp() {
         sleeps = new ArrayList<>(Arrays.asList(200, 150, 100, 50, 0));
         executorService = Executors.newFixedThreadPool(5);

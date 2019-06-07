@@ -35,54 +35,17 @@ knowledge of the CeCILL-C license and that you accept its terms.
 package com.distrimind.util.crypto;
 
 
-import gnu.vm.jgnu.security.NoSuchAlgorithmException;
-import gnu.vm.jgnu.security.NoSuchProviderException;
-import gnu.vm.jgnu.security.SecureRandom;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 
 /**
  * 
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 2.0
  * @since Utils 3.1.0
  */
 public class NativeNonBlockingSecureRandom extends AbstractSecureRandom {
-	private class GnuInterface extends SecureRandom {
-		/**
-		 * 
-		 */
-		private static final long serialVersionUID = 4299616485652308411L;
 
-		
-		protected GnuInterface() {
-			super(new gnu.vm.jgnu.security.SecureRandomSpi() {
-				
-				
-				/**
-				 * 
-				 */
-				private static final long serialVersionUID = 740095511171490031L;
-
-				@Override
-				protected void engineSetSeed(byte[] seed) {
-					if (initialized)
-						NativeNonBlockingSecureRandom.this.secureRandomSpi.engineSetSeed(seed);
-				}
-				
-				@Override
-				protected void engineNextBytes(byte[] bytes) {
-					if (initialized)
-						NativeNonBlockingSecureRandom.this.secureRandomSpi.engineNextBytes(bytes);
-					
-				}
-				
-				@Override
-				protected byte[] engineGenerateSeed(int numBytes) {
-					return NativeNonBlockingSecureRandom.this.secureRandomSpi.engineGenerateSeed(numBytes);
-				}
-			}, null);
-			
-		}
-	}	
 
 
 	/**
@@ -90,8 +53,7 @@ public class NativeNonBlockingSecureRandom extends AbstractSecureRandom {
 	 */
 	private static final long serialVersionUID = -1795571548950369446L;
 
-	private final GnuInterface secureGnuRandom;
-	private boolean initialized;
+	private final Object secureGnuRandom;
 
 	public static class Spi extends AbstractSecureRandomSpi
 	{
@@ -163,13 +125,11 @@ public class NativeNonBlockingSecureRandom extends AbstractSecureRandom {
 				}
 			}
 			}, SecureRandomType.NativePRNGNonBlocking);
-		initialized=false;
-		this.secureGnuRandom = new GnuInterface();
-		initialized=true;
+		this.secureGnuRandom = GnuFunctions.getGnuRandomInterface(secureRandomSpi);
 	}
 
 	@Override
-	public SecureRandom getGnuSecureRandom() {
+	public Object getGnuSecureRandom() {
 		return this.secureGnuRandom;
 	}
 

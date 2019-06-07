@@ -171,6 +171,7 @@ public class EllipticCurveDiffieHellmanAlgorithm extends KeyAgreement {
 
 	private void setDistantPublicKey(byte[] distantPublicKeyBytes, SymmetricEncryptionType symmetricEncryptionType, SymmetricAuthentifiedSignatureType symmetricSignatureType, byte[] keyingMaterial) throws 
 			NoSuchAlgorithmException, InvalidKeyException, InvalidKeySpecException, InvalidAlgorithmParameterException {
+		CodeProvider.encureProviderLoaded(type.getCodeProvider());
 		try
 		{
 			valid=false;
@@ -183,10 +184,6 @@ public class EllipticCurveDiffieHellmanAlgorithm extends KeyAgreement {
 			if (derivedKey != null)
 				throw new IllegalArgumentException(
 						"A key exchange process has already been begun. Use reset fonction before calling this function.");
-			if (type.getCodeProvider() == CodeProvider.BCFIPS || type.getCodeProvider() == CodeProvider.BC) {
-				CodeProvider.ensureBouncyCastleProviderLoaded();
-				
-			} 
 			ASymmetricPublicKey distantPublicKey=(ASymmetricPublicKey)Key.decode(distantPublicKeyBytes);
 			if (myKeyPair.getASymmetricPublicKey().equals(distantPublicKey))
 				throw new InvalidKeyException("The local et distant public keys cannot be similar !");

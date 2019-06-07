@@ -642,11 +642,11 @@ public enum ASymmetricEncryptionType {
 
 	public AbstractCipher getCipherInstance()
 			throws NoSuchAlgorithmException, NoSuchPaddingException, NoSuchProviderException {
+		CodeProvider.encureProviderLoaded(codeProviderForEncryption);
 		String name = algorithmName+"/" + blockMode + "/" + padding;
 		if (codeProviderForEncryption == CodeProvider.GNU_CRYPTO) {
 			return new GnuCipher(GnuFunctions.cipherGetInstance(name));
 		} else if (codeProviderForEncryption == CodeProvider.BCFIPS || codeProviderForEncryption == CodeProvider.BC) {
-			CodeProvider.ensureBouncyCastleProviderLoaded();
 			throw new IllegalAccessError();
 		} else {
 			return new JavaNativeCipher(Cipher.getInstance(name, codeProviderForEncryption.checkProviderWithCurrentOS().name()));
@@ -679,6 +679,7 @@ public enum ASymmetricEncryptionType {
 
 	public AbstractKeyPairGenerator getKeyPairGenerator(AbstractSecureRandom random, short keySize,
 			long expirationTimeUTC) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException {
+		CodeProvider.encureProviderLoaded(codeProviderForKeyGenerator);
 		if (codeProviderForKeyGenerator == CodeProvider.GNU_CRYPTO) {
 			Object kpg=GnuFunctions.getKeyPairGenerator(algorithmName);
 			GnuKeyPairGenerator res = new GnuKeyPairGenerator(this, kpg);
@@ -686,7 +687,6 @@ public enum ASymmetricEncryptionType {
 
 			return res;
 		} else if (codeProviderForKeyGenerator == CodeProvider.BCFIPS) {
-			CodeProvider.ensureBouncyCastleProviderLoaded();
 
 				KeyPairGenerator kgp = KeyPairGenerator.getInstance(algorithmName, CodeProvider.BCFIPS.name());
 				JavaNativeKeyPairGenerator res = new JavaNativeKeyPairGenerator(this, kgp);

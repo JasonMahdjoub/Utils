@@ -34,9 +34,6 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
-import gnu.vm.jgnu.security.NoSuchAlgorithmException;
-import gnu.vm.jgnu.security.NoSuchProviderException;
-import gnu.vm.jgnu.security.spec.InvalidKeySpecException;
 import org.apache.commons.codec.binary.Base64;
 import org.bouncycastle.crypto.CryptoException;
 import org.bouncycastle.crypto.agreement.jpake.*;
@@ -46,15 +43,14 @@ import java.io.*;
 import java.lang.reflect.Field;
 import java.math.BigInteger;
 import java.nio.charset.Charset;
-import java.security.AccessController;
-import java.security.PrivilegedActionException;
-import java.security.PrivilegedExceptionAction;
+import java.security.*;
+import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
 
 /**
  * 
  * @author Jason Mahdjoub
- * @version 3.0
+ * @version 4.0
  * @since Utils 2.9.0
  */
 public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {

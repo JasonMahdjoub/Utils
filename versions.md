@@ -1,14 +1,20 @@
 Utils
 =====
-3.29.1 Stable (Build: 1063) (from 26/05/2019 to 27/05/2019)
+4.0.0 Stable (Build: 1088) (from 07/06/2019 to 07/06/2019)
 
 # Creator(s):
 Jason MAHDJOUB
 
 # Developer(s):
-Jason MAHDJOUB (Entred in the team at 04/01/2016)
+Jason MAHDJOUB (Entred in the team at 07/06/2016)
 
 # Modifications:
+
+
+### 4.0.0 Stable (31/05/2019)
+* Add BufferedRandomInputStream abd BufferedRandomOutputStream.
+* Pre-allocate bytes arrays with random byte array streams.
+* Gnu library dependency is now optional. It is possible to compile without it.
 
 
 ### 3.29.1 Stable (26/05/2019)
@@ -256,7 +262,7 @@ Jason MAHDJOUB (Entred in the team at 04/01/2016)
 
 ### 3.1.0 Stable (05/10/2017)
 * Correcting a bug with seed generator
-* Improving fortuna random speed
+* Improving fortuna2 random speed
 * Add native non blocking secure random
 
 

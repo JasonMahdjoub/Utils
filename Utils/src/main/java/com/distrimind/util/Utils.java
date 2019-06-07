@@ -59,8 +59,8 @@ public class Utils {
 		Calendar c = Calendar.getInstance();
 		c.set(2016, Calendar.JANUARY, 4);
 		Calendar c2 = Calendar.getInstance();
-		c.set(2019, Calendar.MAY, 31);
-		VERSION = new Version("Utils", "Utils", (short)3, (short)30, (short)0, Version.Type.Stable, (short)0, c.getTime(), c2.getTime());
+		c.set(2019, Calendar.JUNE, 7);
+		VERSION = new Version("Utils", "Utils", (short)4, (short)0, (short)0, Version.Type.Stable, (short)0, c.getTime(), c2.getTime());
 		try {
 
 			InputStream is = Utils.class.getResourceAsStream("build.txt");
@@ -69,14 +69,15 @@ public class Utils {
 			
 			VERSION.addCreator(new Person("mahdjoub", "jason"));
 			c = Calendar.getInstance();
-			c.set(2016, Calendar.JANUARY, 4);
+			c.set(2016, Calendar.JUNE, 7);
 			VERSION.addDeveloper(new PersonDeveloper("mahdjoub", "jason", c.getTime()));
 
 			c = Calendar.getInstance();
 			c.set(2019, Calendar.MAY, 31);
-			Description d = new Description((short)3, (short)30, (short)0, Version.Type.Stable, (short)0, c.getTime());
+			Description d = new Description((short)4, (short)0, (short)0, Version.Type.Stable, (short)0, c.getTime());
 			d.addItem("Add BufferedRandomInputStream abd BufferedRandomOutputStream.");
 			d.addItem("Pre-allocate bytes arrays with random byte array streams.");
+			d.addItem("Gnu library dependency is now optional. It is possible to compile without it.");
 			VERSION.addDescription(d);
 
 			c = Calendar.getInstance();

@@ -35,19 +35,18 @@ knowledge of the CeCILL-C license and that you accept its terms.
 package com.distrimind.util.crypto;
 
 import java.nio.ByteBuffer;
-import gnu.vm.jgnu.security.InvalidKeyException;
-import gnu.vm.jgnu.security.NoSuchAlgorithmException;
-import gnu.vm.jgnu.security.spec.InvalidKeySpecException;
-
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 import javax.crypto.Mac;
+import javax.crypto.ShortBufferException;
 import javax.crypto.spec.SecretKeySpec;
 
-import gnu.vm.jgnux.crypto.ShortBufferException;
 
 /**
  * 
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 2.0
  * @since Utils 2.10.0
  */
 public final class JavaNativeMac extends AbstractMac {
@@ -91,11 +90,7 @@ public final class JavaNativeMac extends AbstractMac {
 
 	@Override
 	public final void init(Key _key) throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException {
-		try {
-			mac.init(new SecretKeySpec(_key.toJavaNativeKey().getEncoded(), mac.getAlgorithm()));
-		} catch (java.security.InvalidKeyException e) {
-			throw new InvalidKeyException(e);
-		}
+		mac.init(new SecretKeySpec(_key.toJavaNativeKey().getEncoded(), mac.getAlgorithm()));
 	}
 
 	@Override
@@ -125,11 +120,7 @@ public final class JavaNativeMac extends AbstractMac {
 
 	@Override
 	public final void doFinal(byte[] _output, int _outOffset) throws ShortBufferException, IllegalStateException {
-		try {
-			mac.doFinal(_output, _outOffset);
-		} catch (javax.crypto.ShortBufferException e) {
-			throw new ShortBufferException(e.getMessage());
-		}
+		mac.doFinal(_output, _outOffset);
 	}
 
 	@Override

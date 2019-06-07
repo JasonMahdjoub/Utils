@@ -67,13 +67,13 @@ public final class BCKeyAgreement extends AbstractKeyAgreement{
 	protected BCKeyAgreement(SymmetricAuthentifiedSignatureType signatureType, EllipticCurveDiffieHellmanType type) {
 		super(signatureType);
 		this.type=type;
-		CodeProvider.ensureBouncyCastleProviderLoaded();
+		CodeProvider.encureProviderLoaded(type.getCodeProvider());
 	}
 	
 	protected BCKeyAgreement(SymmetricEncryptionType encryptionType, EllipticCurveDiffieHellmanType type) {
 		super(encryptionType);
 		this.type=type;
-		CodeProvider.ensureBouncyCastleProviderLoaded();
+		CodeProvider.encureProviderLoaded(type.getCodeProvider());
 	}
 
 	@Override

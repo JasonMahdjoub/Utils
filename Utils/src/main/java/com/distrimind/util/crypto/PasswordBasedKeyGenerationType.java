@@ -35,10 +35,9 @@ knowledge of the CeCILL-C license and that you accept its terms.
 package com.distrimind.util.crypto;
 
 import javax.crypto.spec.SecretKeySpec;
-
-import gnu.vm.jgnu.security.NoSuchAlgorithmException;
-import gnu.vm.jgnu.security.NoSuchProviderException;
-import gnu.vm.jgnu.security.spec.InvalidKeySpecException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.spec.InvalidKeySpecException;
 
 /**
  * 
@@ -84,7 +83,7 @@ public enum PasswordBasedKeyGenerationType {
 			throw new IllegalArgumentException("cost must be greater or equals than 4 and lower or equals than 31");
 		if (getCodeProvider()==CodeProvider.GNU_CRYPTO)
 		{
-			return new SymmetricSecretKey(type, new gnu.vm.jgnux.crypto.spec.SecretKeySpec(passwordHashType.hash(password, salt, cost, (byte)(keySizeBits/8)), type.getAlgorithmName()), keySizeBits);
+			return new SymmetricSecretKey(type, GnuFunctions.secretKeySpecGetInstance(passwordHashType.hash(password, salt, cost, (byte)(keySizeBits/8)), type.getAlgorithmName()), keySizeBits);
 		}
 		else
 		{

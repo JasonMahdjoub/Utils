@@ -34,16 +34,16 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
-import gnu.vm.jgnu.security.InvalidKeyException;
-import gnu.vm.jgnu.security.NoSuchAlgorithmException;
-import gnu.vm.jgnu.security.NoSuchProviderException;
-import gnu.vm.jgnu.security.spec.InvalidKeySpecException;
-import gnu.vm.jgnux.crypto.ShortBufferException;
+import javax.crypto.ShortBufferException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.spec.InvalidKeySpecException;
 
 /**
  * 
  * @author Jason Mahdjoub
- * @version 2.1
+ * @version 3.0
  * @since Utils 2.10.0
  */
 public class SymmetricAuthentifiedSignerAlgorithm extends AbstractAuthentifiedSignerAlgorithm {

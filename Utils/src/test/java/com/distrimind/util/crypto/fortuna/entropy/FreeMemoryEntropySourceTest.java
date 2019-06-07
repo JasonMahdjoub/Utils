@@ -2,7 +2,7 @@ package com.distrimind.util.crypto.fortuna.entropy;
 
 import com.distrimind.util.crypto.fortuna.accumulator.EventAdder;
 import org.testng.Assert;
-import org.testng.annotations.BeforeTest;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 
@@ -11,7 +11,7 @@ public class FreeMemoryEntropySourceTest {
     private FreeMemoryEntropySource target;
     private int adds;
 
-    @BeforeTest
+    @BeforeMethod
     public void before() {
         target = new FreeMemoryEntropySource();
         adds = 0;

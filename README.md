@@ -43,8 +43,11 @@ Adapt into your build.gradle file, the next code :
 	...
 	dependencies {
 		...
-		compile(group:'com.distrimind.util', name: 'Utils', version: '3.29.1-Stable')
+		compile(group:'com.distrimind.util', name: 'Utils', version: '4.0.0-Stable')
 		...
+		//choose one of these optional drivers for GnuCrypto algorithms
+			testCompile(group:'gnu', name: 'Gnu-Crypt', version: '1.3.0')
+
 	}
 	...
 
@@ -59,7 +62,13 @@ Adapt into your pom.xml file, the next code :
 			<dependency>
 				<groupId>com.distrimind.util</groupId>
 				<artifactId>Utils</artifactId>
-				<version>3.29.1-Stable</version>
+				<version>4.0.0-Stable</version>
+			</dependency>
+			<!-- choose one of these optional drivers for GnuCrypto algorithms-->
+			<dependency>
+				<groupId>gnu</groupId>
+				<artifactId>Gnu-Crypt</artifactId>
+				<version>1.3.0</version>
 			</dependency>
 			...
 		</dependencies>
@@ -72,6 +81,10 @@ Adapt into your pom.xml file, the next code :
 			</repository>
 			...
 		</repositories>
+
 	</project>
 
 To know what last version has been uploaded, please refer to versions availables into [this repository](https://artifactory.distri-mind.fr/artifactory/DistriMind-Public/com/distrimind/util/Utils/)
+
+
+

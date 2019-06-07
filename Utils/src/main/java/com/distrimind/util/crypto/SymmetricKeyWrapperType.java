@@ -34,18 +34,18 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
+import java.security.spec.InvalidKeySpecException;
 
 import org.bouncycastle.crypto.InvalidWrappingException;
 import org.bouncycastle.crypto.PlainInputProcessingException;
 
-import gnu.vm.jgnu.security.InvalidKeyException;
-import gnu.vm.jgnu.security.NoSuchAlgorithmException;
-import gnu.vm.jgnu.security.spec.InvalidKeySpecException;
-import gnu.vm.jgnux.crypto.Cipher;
-import gnu.vm.jgnux.crypto.IllegalBlockSizeException;
-import gnu.vm.jgnux.crypto.NoSuchPaddingException;
-import gnu.vm.jgnux.crypto.SecretKey;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+
 
 /**
  * 
@@ -82,8 +82,9 @@ public enum SymmetricKeyWrapperType {
 		return algorithmName;
 	}
 	
-	public byte[] wrapKey(SymmetricSecretKey key, SymmetricSecretKey keyToWrap) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalStateException, IllegalBlockSizeException, gnu.vm.jgnu.security.NoSuchProviderException, InvalidKeySpecException
+	public byte[] wrapKey(SymmetricSecretKey key, SymmetricSecretKey keyToWrap) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalStateException, IllegalBlockSizeException, NoSuchProviderException, InvalidKeySpecException
 	{
+		CodeProvider.encureProviderLoaded(provider);
 		if ((key.getAuthentifiedSignatureAlgorithmType()!=null && ((provider==CodeProvider.GNU_CRYPTO)!=(key.getAuthentifiedSignatureAlgorithmType().getCodeProviderForSignature()==CodeProvider.GNU_CRYPTO))) 
 				|| (key.getEncryptionAlgorithmType()!=null  && ((provider==CodeProvider.GNU_CRYPTO)!=(key.getEncryptionAlgorithmType().getCodeProviderForEncryption()==CodeProvider.GNU_CRYPTO)))
 				|| (keyToWrap.getAuthentifiedSignatureAlgorithmType()!=null && (provider==CodeProvider.GNU_CRYPTO)!=(keyToWrap.getAuthentifiedSignatureAlgorithmType().getCodeProviderForSignature()==CodeProvider.GNU_CRYPTO))
@@ -93,14 +94,14 @@ public enum SymmetricKeyWrapperType {
 			throw new IllegalArgumentException("The key must be compatible with algorithm "+algorithmName);
 		if (provider.equals(CodeProvider.GNU_CRYPTO))
 		{
-			Cipher cipher=Cipher.getInstance(algorithmName);
-			cipher.init(Cipher.WRAP_MODE, key.toGnuKey());
-			return ASymmetricKeyWrapperType.wrapKeyWithMetaData(cipher.wrap(keyToWrap.toGnuKey()), keyToWrap);
+
+			Object cipher=GnuFunctions.cipherGetInstance(algorithmName);
+			GnuFunctions.cipherInit(cipher, Cipher.WRAP_MODE, key);
+			return ASymmetricKeyWrapperType.wrapKeyWithMetaData(GnuFunctions.cipherWrap(cipher, keyToWrap.toGnuKey()), keyToWrap);
 		}
 		else if (provider.equals(CodeProvider.BC) || provider.equals(CodeProvider.BCFIPS))
 		{
 			
-			CodeProvider.ensureBouncyCastleProviderLoaded();
 			BCCipher cipher=new BCCipher(this);
 			
 			cipher.init(javax.crypto.Cipher.WRAP_MODE, key);
@@ -112,73 +113,43 @@ public enum SymmetricKeyWrapperType {
 		}
 		else
 		{
-			try
-			{
-				javax.crypto.Cipher cipher;
-				if (provider.equals(CodeProvider.BCFIPS))
-				{
-					CodeProvider.ensureBouncyCastleProviderLoaded();
-					
-				}
-				cipher=javax.crypto.Cipher.getInstance(algorithmName, provider.checkProviderWithCurrentOS().name());
+			javax.crypto.Cipher cipher;
+			cipher=javax.crypto.Cipher.getInstance(algorithmName, provider.checkProviderWithCurrentOS().name());
 
-				cipher.init(javax.crypto.Cipher.WRAP_MODE, key.toJavaNativeKey());
-				return ASymmetricKeyWrapperType.wrapKeyWithMetaData(cipher.wrap(keyToWrap.toJavaNativeKey()), keyToWrap);
+			cipher.init(javax.crypto.Cipher.WRAP_MODE, key.toJavaNativeKey());
+			return ASymmetricKeyWrapperType.wrapKeyWithMetaData(cipher.wrap(keyToWrap.toJavaNativeKey()), keyToWrap);
 				
-			}
-			catch(java.security.NoSuchAlgorithmException e)
-			{
-				throw new NoSuchAlgorithmException(e);
-			}
-			catch(javax.crypto.NoSuchPaddingException e)
-			{
-				throw new NoSuchPaddingException(e.getMessage());
-			}
-			catch(java.security.InvalidKeyException e)
-			{
-				throw new InvalidKeyException(e);
-			}
-			catch(javax.crypto.IllegalBlockSizeException e)
-			{
-				throw new IllegalBlockSizeException(e.getMessage());
-			}
-			catch(NoSuchProviderException e)
-			{
-				throw new gnu.vm.jgnu.security.NoSuchProviderException(e.getMessage());
-			}
 		}
 	}
-	public SymmetricSecretKey unwrapKey(SymmetricSecretKey key, byte[] keyToUnwrap) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalStateException, gnu.vm.jgnu.security.NoSuchProviderException, InvalidKeySpecException
-	{
+	public SymmetricSecretKey unwrapKey(SymmetricSecretKey key, byte[] keyToUnwrap) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalStateException, InvalidKeySpecException, NoSuchProviderException {
 		if (ASymmetricKeyWrapperType.isSignatureFromMetaData(keyToUnwrap))
 			return unwrapKey(key, ASymmetricKeyWrapperType.getWrappedKeyFromMetaData(keyToUnwrap), null, ASymmetricKeyWrapperType.getSignatureTypeFromMetaData(keyToUnwrap), ASymmetricKeyWrapperType.getKeySizeFromMetaData(keyToUnwrap));
 		else
 			return unwrapKey(key, ASymmetricKeyWrapperType.getWrappedKeyFromMetaData(keyToUnwrap), ASymmetricKeyWrapperType.getEncryptionTypeFromMetaData(keyToUnwrap), null, ASymmetricKeyWrapperType.getKeySizeFromMetaData(keyToUnwrap));
 	}
 	@SuppressWarnings("ConstantConditions")
-	private SymmetricSecretKey unwrapKey(SymmetricSecretKey key, byte[] keyToUnwrap, SymmetricEncryptionType encryptionType, SymmetricAuthentifiedSignatureType signatureType, short keySize) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalStateException, gnu.vm.jgnu.security.NoSuchProviderException, InvalidKeySpecException
-	{
+	private SymmetricSecretKey unwrapKey(SymmetricSecretKey key, byte[] keyToUnwrap, SymmetricEncryptionType encryptionType, SymmetricAuthentifiedSignatureType signatureType, short keySize) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalStateException, InvalidKeySpecException, NoSuchProviderException {
 		if ((key.getAuthentifiedSignatureAlgorithmType()!=null && ((provider==CodeProvider.GNU_CRYPTO)!=(key.getAuthentifiedSignatureAlgorithmType().getCodeProviderForSignature()==CodeProvider.GNU_CRYPTO))) 
 				|| (key.getEncryptionAlgorithmType()!=null  && ((provider==CodeProvider.GNU_CRYPTO)!=(key.getEncryptionAlgorithmType().getCodeProviderForEncryption()==CodeProvider.GNU_CRYPTO)))
 				|| (encryptionType!=null && (provider==CodeProvider.GNU_CRYPTO)!=(encryptionType.getCodeProviderForEncryption()==CodeProvider.GNU_CRYPTO))
 				|| (signatureType!=null && (provider==CodeProvider.GNU_CRYPTO)!=(signatureType.getCodeProviderForSignature()==CodeProvider.GNU_CRYPTO)))
 				throw new IllegalArgumentException("The keys must come from the same providers");
-		
+		CodeProvider.encureProviderLoaded(provider);
 		if (provider.equals(CodeProvider.GNU_CRYPTO))
 		{
-			Cipher cipher=Cipher.getInstance(algorithmName);
-			cipher.init(Cipher.UNWRAP_MODE, key.toGnuKey());
+
+			Object cipher=GnuFunctions.cipherGetInstance(algorithmName);
+			GnuFunctions.cipherInit(cipher, Cipher.UNWRAP_MODE, key.toGnuKey());
 			if (encryptionType==null)
 			{
-				return new SymmetricSecretKey(signatureType, (SecretKey)cipher.unwrap(keyToUnwrap, signatureType.getAlgorithmName(), Cipher.SECRET_KEY), keySize);
+				return new SymmetricSecretKey(signatureType, GnuFunctions.cipherUnwrap(cipher, keyToUnwrap, signatureType.getAlgorithmName()), keySize);
 			}
 			else
-				return new SymmetricSecretKey(encryptionType, (SecretKey)cipher.unwrap(keyToUnwrap, encryptionType.getAlgorithmName(), Cipher.SECRET_KEY), keySize);
+				return new SymmetricSecretKey(encryptionType, GnuFunctions.cipherUnwrap(cipher, keyToUnwrap, encryptionType.getAlgorithmName()), keySize);
 		}
 		else if (provider.equals(CodeProvider.BC) || provider.equals(CodeProvider.BCFIPS))
 		{
 			
-			CodeProvider.ensureBouncyCastleProviderLoaded();
 			BCCipher cipher=new BCCipher(this);
 			
 			cipher.init(Cipher.UNWRAP_MODE, key);
@@ -200,37 +171,19 @@ public enum SymmetricKeyWrapperType {
 		}
 		else
 		{
-			try
-			{
-				javax.crypto.Cipher cipher;
-				cipher=javax.crypto.Cipher.getInstance(algorithmName, provider.checkProviderWithCurrentOS().name());
+			javax.crypto.Cipher cipher;
+			cipher=javax.crypto.Cipher.getInstance(algorithmName, provider.checkProviderWithCurrentOS().name());
 
 
-				cipher.init(Cipher.UNWRAP_MODE, key.toJavaNativeKey());
-				if (encryptionType==null)
-				{
-					return new SymmetricSecretKey(signatureType, (javax.crypto.SecretKey)cipher.unwrap(keyToUnwrap, signatureType.getAlgorithmName(), javax.crypto.Cipher.SECRET_KEY), keySize);
-				}
-				else
-					return new SymmetricSecretKey(encryptionType, (javax.crypto.SecretKey)cipher.unwrap(keyToUnwrap, encryptionType.getAlgorithmName(), javax.crypto.Cipher.SECRET_KEY), keySize);
-				
-			}
-			catch(java.security.NoSuchAlgorithmException e)
+			cipher.init(Cipher.UNWRAP_MODE, key.toJavaNativeKey());
+			if (encryptionType==null)
 			{
-				throw new NoSuchAlgorithmException(e);
+				return new SymmetricSecretKey(signatureType, (javax.crypto.SecretKey)cipher.unwrap(keyToUnwrap, signatureType.getAlgorithmName(), javax.crypto.Cipher.SECRET_KEY), keySize);
 			}
-			catch(javax.crypto.NoSuchPaddingException e)
-			{
-				throw new NoSuchPaddingException(e.getMessage());
-			}
-			catch(java.security.InvalidKeyException e)
-			{
-				throw new InvalidKeyException(e);
-			}
-			catch(NoSuchProviderException e)
-			{
-				throw new gnu.vm.jgnu.security.NoSuchProviderException(e.getMessage());
-			}
+			else
+				return new SymmetricSecretKey(encryptionType, (javax.crypto.SecretKey)cipher.unwrap(keyToUnwrap, encryptionType.getAlgorithmName(), javax.crypto.Cipher.SECRET_KEY), keySize);
+
+
 			
 		}
 	}

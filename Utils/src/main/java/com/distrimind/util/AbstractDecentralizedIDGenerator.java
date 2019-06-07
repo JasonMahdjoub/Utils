@@ -36,6 +36,8 @@ package com.distrimind.util;
 
 import java.net.NetworkInterface;
 import java.net.SocketException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.util.Enumeration;
 
 import com.distrimind.util.crypto.AbstractMessageDigest;
@@ -43,9 +45,6 @@ import com.distrimind.util.crypto.AbstractSecureRandom;
 import com.distrimind.util.crypto.MessageDigestType;
 import com.distrimind.util.crypto.SecureRandomType;
 import com.distrimind.util.sizeof.ObjectSizer;
-
-import gnu.vm.jgnu.security.NoSuchAlgorithmException;
-import gnu.vm.jgnu.security.NoSuchProviderException;
 
 /**
  * This class represents a unique identifier. Uniqueness is guaranteed over the
@@ -65,7 +64,7 @@ public abstract class AbstractDecentralizedIDGenerator extends AbstractDecentral
 	private final static transient long LOCAL_MAC;
 	private final static transient byte []LOCAL_MAC_BYTES;
 	//private final static transient long SHORT_LOCAL_MAC;
-	private final static transient byte SHORT_LOCAL_MAC_BYTES[];
+	private final static transient byte[] SHORT_LOCAL_MAC_BYTES;
 	private final static transient AbstractSecureRandom RANDOM;
 	private final static transient AbstractMessageDigest MESSAGE_DIGEST;
 	
@@ -74,10 +73,10 @@ public abstract class AbstractDecentralizedIDGenerator extends AbstractDecentral
 		long result = 0;
 		long result2 = 0;
 		//short resultShort=0;
-		byte shortLocalMacBytes[]=new byte[6];
+		byte[] shortLocalMacBytes = new byte[6];
 		AbstractSecureRandom random=null;
 		AbstractMessageDigest messageDigest=null;
-		byte digestion48[]=new byte[6];
+		byte[] digestion48 = new byte[6];
 		try {
 			messageDigest=MessageDigestType.BC_FIPS_SHA3_256.getMessageDigestInstance();
 			final Enumeration<NetworkInterface> e = NetworkInterface.getNetworkInterfaces();
@@ -94,8 +93,8 @@ public abstract class AbstractDecentralizedIDGenerator extends AbstractDecentral
 					long val = getHardwareAddress(ni.getHardwareAddress());
 					if (val != 0 && val != 224)// is the current network interface is not a virtual interface
 					{
-						byte digestion256[]=messageDigest.digest(ni.getHardwareAddress());
-						byte digestion64[]=new byte[8];
+						byte[] digestion256 = messageDigest.digest(ni.getHardwareAddress());
+						byte[] digestion64 = new byte[8];
 						for (int i=0;i<8;i++)
 							digestion64[i]=(byte)(digestion256[i]^digestion256[i+8]^digestion256[i+16]^digestion256[i+24]);
 
@@ -151,7 +150,7 @@ public abstract class AbstractDecentralizedIDGenerator extends AbstractDecentral
 		SHORT_LOCAL_MAC_BYTES=shortLocalMacBytes;
 	}
 
-	private static long getHardwareAddress(byte hardwareAddress[]) {
+	private static long getHardwareAddress(byte[] hardwareAddress) {
 		long result = 0;
 		if (hardwareAddress != null) {
 			for (final byte value : hardwareAddress) {
@@ -173,7 +172,7 @@ public abstract class AbstractDecentralizedIDGenerator extends AbstractDecentral
 		if (hashAllIdentifier)
 		{
 			long timestamp = System.currentTimeMillis();
-			byte digestion256[];
+			byte[] digestion256;
 			synchronized(RANDOM)
 			{
 				MESSAGE_DIGEST.reset();
@@ -196,7 +195,7 @@ public abstract class AbstractDecentralizedIDGenerator extends AbstractDecentral
 			if (useShortMacAddressAndRandomNumber)
 			{
 				//long r=0;
-				byte digestion256[];
+				byte[] digestion256;
 				synchronized(RANDOM)
 				{
 					MESSAGE_DIGEST.reset();
@@ -248,7 +247,7 @@ public abstract class AbstractDecentralizedIDGenerator extends AbstractDecentral
 		long ts = getTimeStamp();
 		long wid = getWorkerIDAndSequence();
 		int sizeLong = ObjectSizer.sizeOf(ts);
-		byte res[] = new byte[sizeLong * 2 + 1];
+		byte[] res = new byte[sizeLong * 2 + 1];
 		res[0] = getType();
 		Bits.putLong(res, 1, ts);
 		Bits.putLong(res, sizeLong + 1, wid);

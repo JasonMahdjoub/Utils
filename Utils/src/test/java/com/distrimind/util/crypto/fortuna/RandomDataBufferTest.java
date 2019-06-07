@@ -1,7 +1,7 @@
 package com.distrimind.util.crypto.fortuna;
 
 
-import org.testng.annotations.BeforeTest;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import static org.testng.Assert.assertEquals;
 
@@ -11,7 +11,7 @@ public class RandomDataBufferTest {
     private RandomDataBuffer randomDataBuffer;
     private Supplier<byte[]> dataSupplier;
 
-    @BeforeTest
+    @BeforeMethod
     public void setUp() {
         randomDataBuffer = new RandomDataBuffer();
         dataSupplier = new Supplier<byte[]>() {

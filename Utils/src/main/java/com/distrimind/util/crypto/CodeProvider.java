@@ -58,7 +58,21 @@ public enum CodeProvider {
 	private static volatile Provider bouncyProviderFIPS = null;
 	private static volatile Provider bouncyProviderPQC = null;
 
-	static void ensureBouncyCastleProviderLoaded() {
+	static void encureProviderLoaded(CodeProvider provider) {
+		switch (provider)
+		{
+			case BCFIPS:
+				ensureBCFIPSProviderLoaded();
+			case BCPQC:
+				ensureBQCProviderLoaded();
+			case BC:
+				ensureBouncyCastleProviderLoaded();
+			case GNU_CRYPTO:
+				GnuFunctions.checkGnuLoaded();
+		}
+	}
+
+	private static void ensureBouncyCastleProviderLoaded() {
 
 		if (bouncyProvider == null) {
 
@@ -71,7 +85,7 @@ public enum CodeProvider {
 		}
 	}
 
-	static void ensureBCFIPSProviderLoaded() {
+	private static void ensureBCFIPSProviderLoaded() {
 		ensureBouncyCastleProviderLoaded();
 		if (bouncyProviderFIPS == null) {
 
@@ -84,7 +98,7 @@ public enum CodeProvider {
 		}
 	}
 
-	static void ensureBQCProviderLoaded() {
+	private static void ensureBQCProviderLoaded() {
 		ensureBouncyCastleProviderLoaded();
 		if (bouncyProviderPQC == null) {
 

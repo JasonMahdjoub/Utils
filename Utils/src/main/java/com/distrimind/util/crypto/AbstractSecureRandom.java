@@ -75,7 +75,7 @@ public abstract class AbstractSecureRandom extends SecureRandom {
 					
 					try {
 						this.engineSetSeed(SecureRandomType.tryToGenerateNativeNonBlockingSeed(55));
-					} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
+					} catch (Exception e) {
 						this.engineSetSeed(this.engineGenerateSeed(55));
 					}
 					this.engineNextBytes(new byte[20]);

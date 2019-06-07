@@ -40,6 +40,9 @@ import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -67,9 +70,6 @@ import com.distrimind.util.crypto.SymmetricEncryptionType;
 import com.distrimind.util.crypto.SymmetricSecretKey;
 
 import com.distrimind.util.version.Version;
-
-import gnu.vm.jgnu.security.InvalidAlgorithmParameterException;
-import gnu.vm.jgnu.security.NoSuchProviderException;
 
 /**
  * 
@@ -302,7 +302,7 @@ public class PropertiesExample extends MultiFormatProperties {
 	}
 
 	void generateValues() throws MalformedURLException, UnknownHostException,
-			gnu.vm.jgnu.security.NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException {
+			NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException {
 		Random rand = new Random(System.currentTimeMillis());
 		intValue = rand.nextInt();
 		shortValue = (short) rand.nextInt();

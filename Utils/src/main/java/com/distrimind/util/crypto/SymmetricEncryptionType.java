@@ -35,15 +35,13 @@ knowledge of the CeCILL-C license and that you accept its terms.
 package com.distrimind.util.crypto;
 
 import java.security.AccessController;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.PrivilegedAction;
 
 import javax.crypto.Cipher;
 
-import gnu.vm.jgnu.security.NoSuchAlgorithmException;
-import gnu.vm.jgnu.security.NoSuchProviderException;
-import gnu.vm.jgnux.crypto.KeyGenerator;
-import gnu.vm.jgnux.crypto.NoSuchPaddingException;
-
+import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
@@ -91,14 +89,14 @@ public enum SymmetricEncryptionType {
 	DEFAULT(AES_CTR);
 	
 		
-	static gnu.vm.jgnux.crypto.SecretKey decodeGnuSecretKey(byte[] encodedSecretKey, String algorithmName) {
+	static Object decodeGnuSecretKey(byte[] encodedSecretKey, String algorithmName) {
 		return decodeGnuSecretKey(encodedSecretKey, 0, encodedSecretKey.length, algorithmName);
 	}
 
 	@SuppressWarnings("SameParameterValue")
-	static gnu.vm.jgnux.crypto.SecretKey decodeGnuSecretKey(byte[] encodedSecretKey, int off, int len, String algorithmName) {
+	static Object decodeGnuSecretKey(byte[] encodedSecretKey, int off, int len, String algorithmName) {
 		//byte[][] parts = Bits.separateEncodingsWithShortSizedTabs(encodedSecretKey, off, len);
-		return new gnu.vm.jgnux.crypto.spec.SecretKeySpec(encodedSecretKey, off, len, algorithmName);
+		return GnuFunctions.secretKeySpecGetInstance(encodedSecretKey, off, len, algorithmName);
 	}
 
 	static SecretKey decodeNativeSecretKey(byte[] encodedSecretKey, String algorithmName) {
@@ -125,8 +123,8 @@ public enum SymmetricEncryptionType {
 	
 	
 
-	static byte[] encodeSecretKey(gnu.vm.jgnux.crypto.SecretKey key, String algorithmName) {
-		return key.getEncoded();
+	static byte[] encodeGnuSecretKey(Object key, String algorithmName) {
+		return GnuFunctions.keyGetEncoded(key);
 		//return Bits.concateEncodingWithShortSizedTabs(algorithmName.getBytes(), key.keyGetEncoded());
 	}
 
@@ -249,26 +247,18 @@ public enum SymmetricEncryptionType {
 	}
 
 	public AbstractCipher getCipherInstance() throws NoSuchAlgorithmException, NoSuchPaddingException, NoSuchProviderException {
+		CodeProvider.encureProviderLoaded(codeProviderForEncryption);
 		if (codeProviderForEncryption == CodeProvider.GNU_CRYPTO) {
-			return new GnuCipher(
-					gnu.vm.jgnux.crypto.Cipher.getInstance(algorithmName + "/" + blockMode + "/" + padding));
+			return new GnuCipher(GnuFunctions.cipherGetInstance(algorithmName + "/" + blockMode + "/" + padding));
+
 		} else if (codeProviderForEncryption == CodeProvider.BCFIPS || codeProviderForEncryption == CodeProvider.BC) {
 
-			CodeProvider.ensureBouncyCastleProviderLoaded();
 			return new BCCipher(this);
 					
 		} else {
 			if (OS.getCurrentJREVersionDouble()<1.8 && this.getAlgorithmName().equals(AES_GCM.getAlgorithmName()) && this.getBlockMode().equals(AES_GCM.getBlockMode()) && this.getPadding().equals(AES_GCM.getPadding()))
 					return BC_FIPS_AES_GCM.getCipherInstance();
-			try {
-				return new JavaNativeCipher(this, Cipher.getInstance(algorithmName + "/" + blockMode + "/" + padding, codeProviderForEncryption.name()));
-			} catch (java.security.NoSuchAlgorithmException e) {
-				throw new NoSuchAlgorithmException(e);
-			} catch (javax.crypto.NoSuchPaddingException e) {
-				throw new NoSuchPaddingException(e.getMessage());
-			}catch (java.security.NoSuchProviderException e) {
-				throw new NoSuchProviderException(e.getMessage());
-			}
+			return new JavaNativeCipher(this, Cipher.getInstance(algorithmName + "/" + blockMode + "/" + padding, codeProviderForEncryption.name()));
 		}
 
 	}
@@ -287,25 +277,18 @@ public enum SymmetricEncryptionType {
 
 	public AbstractKeyGenerator getKeyGenerator(AbstractSecureRandom random, short keySizeBits)
 			throws NoSuchAlgorithmException, NoSuchProviderException {
+		CodeProvider.encureProviderLoaded(CodeProviderForKeyGenerator);
 		AbstractKeyGenerator res ;
 		if (CodeProviderForKeyGenerator == CodeProvider.GNU_CRYPTO) {
-			res = new GnuKeyGenerator(this, KeyGenerator.getInstance(algorithmName));
+			res = new GnuKeyGenerator(this, GnuFunctions.keyGeneratorGetInstance(algorithmName));
 		} else if (CodeProviderForKeyGenerator == CodeProvider.BCFIPS || CodeProviderForKeyGenerator == CodeProvider.BC) {
 
-			CodeProvider.ensureBouncyCastleProviderLoaded();
 			res = new BCKeyGenerator(this);
 
 		} else {
 			if (OS.getCurrentJREVersionDouble()<1.8 && this.getAlgorithmName().equals(AES_GCM.getAlgorithmName()) && this.getBlockMode().equals(AES_GCM.getBlockMode()) && this.getPadding().equals(AES_GCM.getPadding()))
 				return BC_FIPS_AES_GCM.getKeyGenerator(random, keySizeBits);
-			try {
-				res = new JavaNativeKeyGenerator(this, javax.crypto.KeyGenerator.getInstance(algorithmName, CodeProviderForKeyGenerator.checkProviderWithCurrentOS().name()));
-			} catch (java.security.NoSuchAlgorithmException e) {
-				throw new NoSuchAlgorithmException(e);
-			}
-			catch (java.security.NoSuchProviderException e) {
-				throw new NoSuchProviderException(e.getMessage());
-			}
+			res = new JavaNativeKeyGenerator(this, javax.crypto.KeyGenerator.getInstance(algorithmName, CodeProviderForKeyGenerator.checkProviderWithCurrentOS().name()));
 		}
 		res.init(keySizeBits, random);
 		return res;
@@ -335,8 +318,7 @@ public enum SymmetricEncryptionType {
 		if (CodeProviderForKeyGenerator == CodeProvider.BCFIPS || CodeProviderForKeyGenerator == CodeProvider.SunJCE) {
 			return new SymmetricSecretKey(this, new SecretKeySpec(secretKey, getAlgorithmName()), keySizeBits);
 		} else if (CodeProviderForKeyGenerator == CodeProvider.GNU_CRYPTO) {
-			return new SymmetricSecretKey(this,
-					new gnu.vm.jgnux.crypto.spec.SecretKeySpec(secretKey, getAlgorithmName()), keySizeBits);
+			return new SymmetricSecretKey(this,GnuFunctions.secretKeySpecGetInstance(secretKey, getAlgorithmName()), keySizeBits);
 		} else
 			throw new IllegalAccessError();
 

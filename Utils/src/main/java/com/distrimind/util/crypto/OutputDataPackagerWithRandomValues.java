@@ -37,8 +37,8 @@ package com.distrimind.util.crypto;
 import com.distrimind.util.Bits;
 import com.distrimind.util.sizeof.ObjectSizer;
 
-import gnu.vm.jgnu.security.NoSuchAlgorithmException;
-import gnu.vm.jgnu.security.NoSuchProviderException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 
 /**
  * 
@@ -148,7 +148,7 @@ public class OutputDataPackagerWithRandomValues {
 			int nbrandmax = Math.min(random_values_size_remaining - getMiniRandomValueSize() + 1,
 					getMaximumLocalRandomValues() - 1);
 			final byte nbrand = (byte) (random.nextInt(nbrandmax) + 1);
-			byte tabrand[] = new byte[nbrand];
+			byte[] tabrand = new byte[nbrand];
 			random.nextBytes(tabrand);
 			byte nextRand = 0;
 			if (random_values_size_remaining - nbrand - 2 >= getMiniRandomValueSize()
@@ -174,7 +174,7 @@ public class OutputDataPackagerWithRandomValues {
 
 	private void finilizeTab() {
 		if (cursor < tab.length) {
-			byte rands[] = new byte[tab.length - cursor];
+			byte[] rands = new byte[tab.length - cursor];
 
 			random.nextBytes(rands);
 			System.arraycopy(rands, 0, tab, cursor, rands.length);
@@ -191,7 +191,7 @@ public class OutputDataPackagerWithRandomValues {
 
 	@SuppressWarnings("UnusedReturnValue")
 	private boolean writeInt(int _value) {
-		byte b[] = new byte[4];
+		byte[] b = new byte[4];
 		Bits.putInt(b, 0, _value);
 		return writeData(b, 0, 4) == 4;
 	}

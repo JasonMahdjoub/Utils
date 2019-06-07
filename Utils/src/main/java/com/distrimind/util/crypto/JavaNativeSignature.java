@@ -35,17 +35,16 @@ knowledge of the CeCILL-C license and that you accept its terms.
 package com.distrimind.util.crypto;
 
 import java.nio.ByteBuffer;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.security.Signature;
-
-import gnu.vm.jgnu.security.InvalidKeyException;
-import gnu.vm.jgnu.security.NoSuchAlgorithmException;
-import gnu.vm.jgnu.security.SignatureException;
-import gnu.vm.jgnu.security.spec.InvalidKeySpecException;
+import java.security.SignatureException;
+import java.security.spec.InvalidKeySpecException;
 
 /**
  * 
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 2.0
  * @since Utils 2.0
  */
 public final class JavaNativeSignature extends AbstractSignature {
@@ -77,12 +76,7 @@ public final class JavaNativeSignature extends AbstractSignature {
 	@Override
 	public void initSign(ASymmetricPrivateKey _privateKey)
 			throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException {
-		try {
-			signature.initSign(_privateKey.toJavaNativeKey());
-		} catch (java.security.InvalidKeyException e) {
-			throw new InvalidKeyException(e);
-		}
-
+		signature.initSign(_privateKey.toJavaNativeKey());
 	}
 
 	@Override
@@ -109,21 +103,13 @@ public final class JavaNativeSignature extends AbstractSignature {
 
 	@Override
 	public byte[] sign() throws SignatureException {
-		try {
-			return signature.sign();
-		} catch (java.security.SignatureException e) {
-			throw new SignatureException(e);
-		}
+		return signature.sign();
 
 	}
 
 	@Override
 	public int sign(byte[] _outbuf, int _offset, int _len) throws SignatureException {
-		try {
-			return signature.sign(_outbuf, _offset, _len);
-		} catch (java.security.SignatureException e) {
-			throw new SignatureException(e);
-		}
+		return signature.sign(_outbuf, _offset, _len);
 
 	}
 
@@ -145,52 +131,27 @@ public final class JavaNativeSignature extends AbstractSignature {
 
 	@Override
 	public void update(byte[] _data) throws SignatureException {
-		try {
-			signature.update(_data);
-		} catch (java.security.SignatureException e) {
-			throw new SignatureException(e);
-		}
-
+		signature.update(_data);
 	}
 
 	@Override
 	public void update(byte[] _data, int _off, int _len) throws SignatureException {
-		try {
-			signature.update(_data, _off, _len);
-		} catch (java.security.SignatureException e) {
-			throw new SignatureException(e);
-		}
-
+		signature.update(_data, _off, _len);
 	}
 
 	@Override
 	public void update(ByteBuffer _input) throws SignatureException {
-		try {
-			signature.update(_input);
-		} catch (java.security.SignatureException e) {
-			throw new SignatureException(e);
-		}
-
+		signature.update(_input);
 	}
 
 	@Override
 	public boolean verify(byte[] _signature) throws SignatureException {
-		try {
-			return signature.verify(_signature);
-		} catch (java.security.SignatureException e) {
-			throw new SignatureException(e);
-		}
-
+		return signature.verify(_signature);
 	}
 
 	@Override
 	public boolean verify(byte[] _signature, int _offset, int _length) throws SignatureException {
-		try {
-			return signature.verify(_signature, _offset, _length);
-		} catch (java.security.SignatureException e) {
-			throw new SignatureException(e);
-		}
-
+		return signature.verify(_signature, _offset, _length);
 	}
 
 }

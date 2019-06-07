@@ -38,9 +38,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 
 import java.io.IOException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.SignatureException;
+import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.InvalidParameterSpecException;
 
@@ -71,7 +69,7 @@ public class CryptoBench {
 	public void testEncryptionAndSignatureSpeed(SymmetricEncryptionType type) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException, NoSuchProviderException, InvalidKeySpecException, IllegalStateException, IllegalBlockSizeException, BadPaddingException, IOException, SignatureException, ShortBufferException, InvalidParameterSpecException
 	{
 		System.out.println("JRE Version : "+OS.getCurrentJREVersionDouble());
-		byte toEncrypt[]=new byte[1024*1024*400];
+		byte[] toEncrypt = new byte[1024 * 1024 * 400];
 		int shift=32*1024;
 		SymmetricEncryptionAlgorithm cipher=new SymmetricEncryptionAlgorithm(SecureRandomType.FORTUNA_WITH_BC_FIPS_APPROVED.getInstance(null), type.getKeyGenerator(SecureRandomType.FORTUNA_WITH_BC_FIPS_APPROVED_FOR_KEYS.getInstance(null), type.getDefaultKeySizeBits()).generateKey());
 		SymmetricAuthentifiedSignatureType sigType;
@@ -101,14 +99,13 @@ public class CryptoBench {
 		
 		while (is.available()>=shift)
 		{
-			byte tmp[]=new byte[shift];
+			byte[] tmp = new byte[shift];
 			int i=is.read(tmp);
 			if (i==shift)
 			{
 				byte[] encoded=cipher.encode(tmp);
 				if (!type.isAuthenticatedAlgorithm())
 				{
-					assert signer != null;
 					signer.sign(encoded, 0, encoded.length, signatures, indexSignature, signatureSize);
 					indexSignature+=signatureSize;
 				}
@@ -129,14 +126,13 @@ public class CryptoBench {
 		indexSignature=0;
 		while (is.available()>0)
 		{
-			byte tmp[]=new byte[sizeEncoded];
+			byte[] tmp = new byte[sizeEncoded];
 			is.read(tmp);
 			
 			os.write(cipher.decode(tmp));
 			if (!type.isAuthenticatedAlgorithm())
 			{
 				//signer.sign(tmp);
-				assert checker != null;
 				Assert.assertTrue(checker.verify(tmp, 0, tmp.length, signatures, indexSignature, signatureSize));
 				indexSignature+=signatureSize;
 			}
@@ -157,7 +153,7 @@ public class CryptoBench {
 	@DataProvider( name="provideDataForTestEncryptionAndSignatureSpeed")
 	public Object[][] provideDataForTestEncryptionAndSignatureSpeed()
 	{
-		Object res[][]=new Object[SymmetricEncryptionType.values().length][1];
+		Object[][] res = new Object[SymmetricEncryptionType.values().length][1];
 		int index=0;
 		for (SymmetricEncryptionType t : SymmetricEncryptionType.values())
 		{

@@ -35,20 +35,20 @@ knowledge of the CeCILL-C license and that you accept its terms.
 
 package com.distrimind.util.crypto;
 
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.security.spec.AlgorithmParameterSpec;
+import java.security.spec.InvalidKeySpecException;
 
 import javax.crypto.KeyAgreement;
+import javax.crypto.ShortBufferException;
 
-import gnu.vm.jgnu.security.InvalidAlgorithmParameterException;
-import gnu.vm.jgnu.security.InvalidKeyException;
-import gnu.vm.jgnu.security.NoSuchAlgorithmException;
-import gnu.vm.jgnu.security.spec.InvalidKeySpecException;
-import gnu.vm.jgnux.crypto.ShortBufferException;
 
 /**
  * 
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 2.0
  * @since Utils 3.10.0
  */
 public final class JavaNativeKeyAgreement extends AbstractKeyAgreement {
@@ -70,11 +70,7 @@ public final class JavaNativeKeyAgreement extends AbstractKeyAgreement {
 	@Override
 	public void doPhase(Key key, boolean lastPhase) throws IllegalStateException, InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException {
 		
-		try {
-			this.keyAgreement.doPhase(key.toJavaNativeKey(), lastPhase);
-		} catch (java.security.InvalidKeyException e) {
-			throw new InvalidKeyException(e);
-		} 
+		this.keyAgreement.doPhase(key.toJavaNativeKey(), lastPhase);
 	}
 
 
@@ -87,13 +83,7 @@ public final class JavaNativeKeyAgreement extends AbstractKeyAgreement {
 
 	@Override
 	public int generateSecret(byte[] sharedSecret, int offset) throws IllegalStateException, ShortBufferException {
-		try {
-			return this.keyAgreement.generateSecret(sharedSecret, offset);
-		}
-		catch(javax.crypto.ShortBufferException e)
-		{
-			throw new ShortBufferException(e.getMessage());
-		}
+		return this.keyAgreement.generateSecret(sharedSecret, offset);
 	}
 
 
@@ -101,21 +91,12 @@ public final class JavaNativeKeyAgreement extends AbstractKeyAgreement {
     @Override
 	public SymmetricSecretKey generateSecretKey(short keySize)
 			throws InvalidKeyException, NoSuchAlgorithmException {
-		try
+		if (encryptionType==null)
 		{
-			if (encryptionType==null)
-			{
-				return new SymmetricSecretKey(signatureType, this.keyAgreement.generateSecret(signatureType.getAlgorithmName()+"["+keySize+"]"), keySize);
-			}
-			else
-				return new SymmetricSecretKey(encryptionType, this.keyAgreement.generateSecret(encryptionType.getAlgorithmName()+"["+keySize+"]"), keySize);
+			return new SymmetricSecretKey(signatureType, this.keyAgreement.generateSecret(signatureType.getAlgorithmName()+"["+keySize+"]"), keySize);
 		}
-		catch (java.security.InvalidKeyException e) {
-			throw new InvalidKeyException(e);
-		}
-		catch (java.security.NoSuchAlgorithmException e) {
-			throw new NoSuchAlgorithmException(e);
-		}
+		else
+			return new SymmetricSecretKey(encryptionType, this.keyAgreement.generateSecret(encryptionType.getAlgorithmName()+"["+keySize+"]"), keySize);
 	}
 
 
@@ -131,14 +112,8 @@ public final class JavaNativeKeyAgreement extends AbstractKeyAgreement {
 	public void init(Key key, Object params, AbstractSecureRandom random)
 			throws InvalidAlgorithmParameterException, InvalidKeyException, NoSuchAlgorithmException,InvalidKeySpecException  {
 		
-		try {
-			keyAgreement.init(key.toJavaNativeKey(), (AlgorithmParameterSpec)params, random);
-		} catch (java.security.InvalidKeyException e) {
-			throw new InvalidKeyException(e);
-		} catch (java.security.InvalidAlgorithmParameterException e) {
-			throw new InvalidAlgorithmParameterException(e);
-		} 
-		
+		keyAgreement.init(key.toJavaNativeKey(), (AlgorithmParameterSpec)params, random);
+
 	}
 
 

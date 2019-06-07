@@ -60,6 +60,8 @@ public class FortunaSecureRandom extends AbstractSecureRandom implements Seriali
 	 */
 	private static final long serialVersionUID = -51252954999309630L;
 	private Object gnuInterface;
+	private byte[] nonce;
+	private byte[] personalizationString;
 
 	private static class SRSpi extends AbstractSecureRandomSpi
 	{
@@ -103,8 +105,10 @@ public class FortunaSecureRandom extends AbstractSecureRandom implements Seriali
 		super(new SRSpi(scheduledExecutorService), type);
 		checkSources();
 	}*/
-	FortunaSecureRandom(SecureRandomType type) throws NoSuchProviderException, NoSuchAlgorithmException {
+	FortunaSecureRandom(SecureRandomType type, byte[] nonce, byte[] personalizationString) throws NoSuchProviderException, NoSuchAlgorithmException {
 		super(new SRSpi(), type);
+		this.nonce=nonce;
+		this.personalizationString=personalizationString;
 		checkSources();
 	}
 
@@ -132,7 +136,28 @@ public class FortunaSecureRandom extends AbstractSecureRandom implements Seriali
 	{
 		out.writeInt(getType().ordinal());
 		byte[] seed=new byte[32];
+		this.nextBytes(seed);
 		out.write(seed);
+		if (nonce==null) {
+			out.writeShort(-1);
+		}
+		else
+		{
+			int s = Math.min(nonce.length, 2048);
+			out.writeShort(s);
+			out.write(nonce, 0, s);
+		}
+		if (personalizationString==null) {
+			out.writeShort(-1);
+		}
+		else
+		{
+			int s = Math.min(personalizationString.length, 2048);
+			out.writeShort(s);
+			out.write(personalizationString, 0, s);
+		}
+
+
 	}
 	private void readObject(java.io.ObjectInputStream in)
 			throws IOException, ClassNotFoundException
@@ -156,20 +181,41 @@ public class FortunaSecureRandom extends AbstractSecureRandom implements Seriali
 		byte[] seed=new byte[32];
 		in.readFully(seed);
 		setSeed(seed);
+		int s=in.readShort();
+		if (s<=0)
+			nonce=null;
+		else
+		{
+			if (s>2048)
+				throw new IOException();
+			nonce=new byte[s];
+			in.readFully(nonce);
+		}
+		s=in.readShort();
+		if (s<=0)
+			personalizationString=null;
+		else
+		{
+			if (s>2048)
+				throw new IOException();
+			personalizationString=new byte[s];
+			in.readFully(personalizationString);
+		}
+
 	}
 	private void checkSources() throws NoSuchProviderException, NoSuchAlgorithmException {
 		gnuInterface=GnuFunctions.getGnuRandomInterface(secureRandomSpi);
 		if (getType()== SecureRandomType.FORTUNA_WITH_BC_FIPS_APPROVED) {
-			addSecureRandomSource(SecureRandomType.SHA1PRNG);
-			addSecureRandomSource(SecureRandomType.BC_FIPS_APPROVED);
+			addSecureRandomSource(SecureRandomType.SHA1PRNG.getSingleton(nonce, personalizationString));
+			addSecureRandomSource(SecureRandomType.BC_FIPS_APPROVED.getSingleton(nonce, personalizationString));
 		}
 		else if (getType()== SecureRandomType.FORTUNA_WITH_BC_FIPS_APPROVED_FOR_KEYS) {
-			addSecureRandomSource(SecureRandomType.SHA1PRNG);
-			addSecureRandomSource(SecureRandomType.BC_FIPS_APPROVED_FOR_KEYS);
+			addSecureRandomSource(SecureRandomType.SHA1PRNG.getSingleton(nonce, personalizationString));
+			addSecureRandomSource(SecureRandomType.BC_FIPS_APPROVED_FOR_KEYS.getSingleton(nonce, personalizationString));
 		}
 		else if (getType()== SecureRandomType.FORTUNA_WITH_BC_FIPS_APPROVED_FOR_KEYS_With_NativePRNG) {
-			addSecureRandomSource(SecureRandomType.SHA1PRNG);
-			addSecureRandomSource(SecureRandomType.BC_FIPS_APPROVED_FOR_KEYS_With_NativePRNG);
+			addSecureRandomSource(SecureRandomType.SHA1PRNG.getSingleton(nonce, personalizationString));
+			addSecureRandomSource(SecureRandomType.BC_FIPS_APPROVED_FOR_KEYS_With_NativePRNG.getSingleton(nonce, personalizationString));
 		}
 	}
 }

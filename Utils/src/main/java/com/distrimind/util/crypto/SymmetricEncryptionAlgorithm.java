@@ -34,16 +34,16 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.spec.InvalidKeySpecException;
 import java.util.Random;
 
 import javax.crypto.Cipher;
+import javax.crypto.NoSuchPaddingException;
 
-import gnu.vm.jgnu.security.InvalidAlgorithmParameterException;
-import gnu.vm.jgnu.security.InvalidKeyException;
-import gnu.vm.jgnu.security.NoSuchAlgorithmException;
-import gnu.vm.jgnu.security.NoSuchProviderException;
-import gnu.vm.jgnu.security.spec.InvalidKeySpecException;
-import gnu.vm.jgnux.crypto.NoSuchPaddingException;
 
 /**
  * 
@@ -60,7 +60,7 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 	private final SymmetricEncryptionType type;
 
 	private final AbstractSecureRandom random;
-	private final byte iv[];
+	private final byte[] iv;
 	
 	private final byte blockModeCounterBytes;
 	private final boolean internalCounter;

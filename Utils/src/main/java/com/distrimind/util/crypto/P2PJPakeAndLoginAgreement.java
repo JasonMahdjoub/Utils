@@ -34,15 +34,16 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
-import gnu.vm.jgnu.security.NoSuchAlgorithmException;
-import gnu.vm.jgnu.security.NoSuchProviderException;
-import gnu.vm.jgnu.security.spec.InvalidKeySpecException;
 import org.bouncycastle.crypto.CryptoException;
+
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.spec.InvalidKeySpecException;
 
 /**
  * 
  * @author Jason Mahdjoub
- * @version 2.0
+ * @version 3.0
  * @since Utils 3.15.0
  */
 public class P2PJPakeAndLoginAgreement extends P2PLoginAgreement {

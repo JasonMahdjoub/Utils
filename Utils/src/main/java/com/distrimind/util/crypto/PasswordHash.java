@@ -34,20 +34,20 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.SecureRandom;
+import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
 
 import com.distrimind.util.Bits;
 import com.distrimind.util.sizeof.ObjectSizer;
 
-import gnu.vm.jgnu.security.NoSuchAlgorithmException;
-import gnu.vm.jgnu.security.NoSuchProviderException;
-import gnu.vm.jgnu.security.spec.InvalidKeySpecException;
 
 /**
  * 
  * @author Jason Mahdjoub
- * @version 2.1
+ * @version 3.0
  * @since Utils 1.8
  *
  */
@@ -97,11 +97,11 @@ public class PasswordHash {
 	}
 
 
-	public static boolean checkValidHashedPassword(char password[], byte[] goodHash) {
+	public static boolean checkValidHashedPassword(char[] password, byte[] goodHash) {
 		return checkValidHashedPassword(password, goodHash, null);
 	}
 
-	public static boolean checkValidHashedPassword(char password[], byte[] goodHash, byte[] staticAdditionalSalt) {
+	public static boolean checkValidHashedPassword(char[] password, byte[] goodHash, byte[] staticAdditionalSalt) {
 		PasswordHashType type=PasswordHashType.valueOf(goodHash);
 		byte cost=PasswordHashType.getCost(goodHash);
 		try {
@@ -111,7 +111,7 @@ public class PasswordHash {
 			byte[][] separated = Bits.separateEncodingsWithShortSizedTabs(goodHash, 2, goodHash.length-2);
 			byte[] generatedSalt = separated[1];
 			byte[] salt = mixSaltWithStaticSalt(generatedSalt, staticAdditionalSalt);
-			byte hash[]=separated[0];
+			byte[] hash = separated[0];
 
 			assert type != null;
 			return Arrays.equals(type.hash(password, salt, cost, (byte)hash.length), hash);
@@ -136,11 +136,11 @@ public class PasswordHash {
 	}
 
 	public byte[] hash(char[] password)
-			throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException, NoSuchProviderException {
+			throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
 		return hash(password, null, type.getDefaultHashLengthBytes());
 	}
 	public byte[] hash(char[] password, byte defaultHashLengthBytes)
-			throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException, NoSuchProviderException {
+			throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
 		return hash(password, null, defaultHashLengthBytes);
 	}
 	public byte[] hash(char[] password, byte[] staticAdditionalSalt) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException
@@ -148,7 +148,7 @@ public class PasswordHash {
 		return hash(password, staticAdditionalSalt, type.getDefaultHashLengthBytes());
 	}
 	public byte[] hash(char[] password, byte[] staticAdditionalSalt, byte hashLengthBytes)
-			throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException, NoSuchProviderException {
+			throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
 		if (password == null)
 			throw new NullPointerException("password");
 
@@ -158,9 +158,9 @@ public class PasswordHash {
 		
 	}
 	
-	private byte[] getIdentifiedHash(byte hash[])
+	private byte[] getIdentifiedHash(byte[] hash)
 	{
-		byte res[]=new byte[hash.length+2];
+		byte[] res = new byte[hash.length + 2];
 		res[0]=type.getID();
 		res[1]=cost;
 		System.arraycopy(hash, 0, res, ObjectSizer.SHORT_FIELD_SIZE, hash.length);
@@ -177,11 +177,11 @@ public class PasswordHash {
 		return res;
 	}*/
 	public byte[] hash(String password)
-			throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException, NoSuchProviderException {
+			throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
 		return hash(password.toCharArray());
 	}
 	public byte[] hash(String password, byte defaultHashLengthBytes)
-			throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException, NoSuchProviderException {
+			throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
 		return hash(password.toCharArray(), defaultHashLengthBytes);
 	}
 	public byte[] hash(String password, byte[] staticAdditionalSalt) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException
@@ -189,7 +189,7 @@ public class PasswordHash {
 		return hash(password, staticAdditionalSalt, type.getDefaultHashLengthBytes());
 	}
 	public byte[] hash(String password, byte[] staticAdditionalSalt, byte defaultHashLengthBytes)
-			throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.spec.InvalidKeySpecException, NoSuchProviderException {
+			throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
 		return hash(password.toCharArray(), staticAdditionalSalt, defaultHashLengthBytes);
 	}
 

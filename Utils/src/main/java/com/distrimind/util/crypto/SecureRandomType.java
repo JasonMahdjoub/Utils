@@ -121,10 +121,10 @@ public enum SecureRandomType {
 	 * 
 	 * @param nonce               value to use in DRBG construction.
 	 * @return the secure random
-	 * @throws gnu.vm.jgnu.security.NoSuchAlgorithmException if the algorithm was not found
-	 * @throws gnu.vm.jgnu.security.NoSuchProviderException if the provider was not found
+	 * @throws NoSuchAlgorithmException if the algorithm was not found
+	 * @throws NoSuchProviderException if the provider was not found
 	 */
-	public AbstractSecureRandom getInstance(byte nonce[]) throws NoSuchAlgorithmException, NoSuchProviderException
+	public AbstractSecureRandom getInstance(byte[] nonce) throws NoSuchAlgorithmException, NoSuchProviderException
 	{
 		return getInstance(nonce, (byte[])null);
 	}
@@ -134,10 +134,10 @@ public enum SecureRandomType {
 	 * @param nonce               value to use in DRBG construction.
 	 * @param personalizationString the personalization string
 	 * @return the secure random
-	 * @throws gnu.vm.jgnu.security.NoSuchAlgorithmException if the algorithm was not found
-	 * @throws gnu.vm.jgnu.security.NoSuchProviderException if the provider was not found
+	 * @throws NoSuchAlgorithmException if the algorithm was not found
+	 * @throws NoSuchProviderException if the provider was not found
 	 */
-	public AbstractSecureRandom getInstance(byte nonce[], String personalizationString) throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.NoSuchProviderException
+	public AbstractSecureRandom getInstance(byte[] nonce, String personalizationString) throws NoSuchAlgorithmException, NoSuchProviderException
 	{
 		return getInstance(nonce, personalizationString==null?null:personalizationString.getBytes());
 	}
@@ -147,17 +147,18 @@ public enum SecureRandomType {
 	 * @param nonce               value to use in DRBG construction.
 	 * @param personalizationString the personalisation string for the underlying DRBG.
 	 * @return the secure random
-	 * @throws gnu.vm.jgnu.security.NoSuchAlgorithmException if the algorithm was not found
-	 * @throws gnu.vm.jgnu.security.NoSuchProviderException if the provider was not found
+	 * @throws NoSuchAlgorithmException if the algorithm was not found
+	 * @throws NoSuchProviderException if the provider was not found
 	 */
-	public AbstractSecureRandom getInstance(byte nonce[], byte[] personalizationString)
-			throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.NoSuchProviderException {
+	public AbstractSecureRandom getInstance(byte[] nonce, byte[] personalizationString)
+			throws NoSuchAlgorithmException, NoSuchProviderException {
+		CodeProvider.encureProviderLoaded(provider);
 		AbstractSecureRandom res;
 		if (gnuVersion) {
 			if (algorithmeName == null)
-				res=new GnuSecureRandom(this, new gnu.vm.jgnu.security.SecureRandom());
+				res=new GnuSecureRandom(this, GnuFunctions.secureRandomGetInstance());
 			else
-				res=new GnuSecureRandom(this, gnu.vm.jgnu.security.SecureRandom.getInstance(algorithmeName));
+				res=new GnuSecureRandom(this, GnuFunctions.secureRandomGetInstance(algorithmeName));
 		} else {
 			if (BC_FIPS_APPROVED.algorithmeName.equals(this.algorithmeName) || BC_FIPS_APPROVED_FOR_KEYS.algorithmeName.equals(this.algorithmeName) || BC_FIPS_APPROVED_FOR_KEYS_With_NativePRNG.algorithmeName.equals(this.algorithmeName))
 			{
@@ -197,31 +198,19 @@ public enum SecureRandomType {
 				}
 				return new JavaNativeSecureRandom(this, drgbBldr.build(nonce,true), false);
 			}
-			else if (FORTUNA_WITH_BC_FIPS_APPROVED.algorithmeName.equals(algorithmeName)) {
-				return new FortunaSecureRandom(nonce, personalizationString, SHA1PRNG, BC_FIPS_APPROVED);
+			else if (algorithmeName.startsWith("FORTUNA")) {
+				return new FortunaSecureRandom(this, nonce, personalizationString);
 			}
-			else if (FORTUNA_WITH_BC_FIPS_APPROVED_FOR_KEYS.algorithmeName.equals(algorithmeName)) {
-				return new FortunaSecureRandom(nonce, personalizationString, SHA1PRNG, BC_FIPS_APPROVED_FOR_KEYS);
-			}
-            else if (FORTUNA_WITH_BC_FIPS_APPROVED_FOR_KEYS_With_NativePRNG.algorithmeName.equals(algorithmeName)) {
-                return new FortunaSecureRandom(nonce, personalizationString, SHA1PRNG, BC_FIPS_APPROVED_FOR_KEYS_With_NativePRNG);
-            }
 			else if (NativePRNGNonBlocking.algorithmeName.equals(algorithmeName))
 			{
 				return new NativeNonBlockingSecureRandom();
 			}
 			else
 			{
-				try {
-					if (algorithmeName == null)
-						res=new JavaNativeSecureRandom(this, new SecureRandom());
-					else
-						res=new JavaNativeSecureRandom(this, SecureRandom.getInstance(algorithmeName, provider.checkProviderWithCurrentOS().name()));
-				} catch (NoSuchAlgorithmException e) {
-					throw new gnu.vm.jgnu.security.NoSuchAlgorithmException(e);
-				} catch (NoSuchProviderException e) {
-					throw new gnu.vm.jgnu.security.NoSuchProviderException(e.getMessage());
-				}
+				/*if (algorithmeName == null)
+					res=new JavaNativeSecureRandom(this, new SecureRandom());
+				else*/
+					res=new JavaNativeSecureRandom(this, SecureRandom.getInstance(algorithmeName, provider.checkProviderWithCurrentOS().name()));
 			}
 		}
 		if (nonce!=null)
@@ -232,7 +221,7 @@ public enum SecureRandomType {
 	
 
 	public AbstractSecureRandom getInstance(long seed)
-			throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.NoSuchProviderException {
+			throws NoSuchAlgorithmException, NoSuchProviderException {
 		byte[] nonce=new byte[8];
 		Bits.putLong(nonce, 0, seed);
 		return getInstance(nonce);
@@ -299,7 +288,7 @@ public enum SecureRandomType {
 				"dérobé à la Castafiore."+result).getBytes();
 	}
 	
-	private static long getHardwareAddress(byte hardwareAddress[]) {
+	private static long getHardwareAddress(byte[] hardwareAddress) {
 		long result = 0;
 		if (hardwareAddress != null) {
 			for (final byte value : hardwareAddress) {
@@ -312,15 +301,15 @@ public enum SecureRandomType {
 	
 	
 	
-	public AbstractSecureRandom getSingleton(byte nonce[]) throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.NoSuchProviderException
+	public AbstractSecureRandom getSingleton(byte[] nonce) throws NoSuchAlgorithmException, NoSuchProviderException
 	{
 		return getSingleton(nonce, null);
 	}
-	public AbstractSecureRandom getSingleton(byte nonce[], byte[] personalizationString) throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.NoSuchProviderException
+	public AbstractSecureRandom getSingleton(byte[] nonce, byte[] personalizationString) throws NoSuchAlgorithmException, NoSuchProviderException
 	{
 		return getSingleton(nonce, personalizationString, false);
 	}
-	public AbstractSecureRandom getSingleton(byte nonce[], byte[] personalizationString, boolean regenerate) throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.NoSuchProviderException
+	public AbstractSecureRandom getSingleton(byte[] nonce, byte[] personalizationString, boolean regenerate) throws NoSuchAlgorithmException, NoSuchProviderException
 	{
 		AbstractSecureRandom res=null;
 		if (!regenerate)
@@ -391,18 +380,18 @@ public enum SecureRandomType {
 		}
 		return defaultNativeNonBlockingSeed;
 	}
-	@SuppressWarnings("SameParameterValue")
-    static byte[] tryToGenerateNativeNonBlockingRandomBytes(final int size) throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.NoSuchProviderException
+
+    /*static byte[] tryToGenerateNativeNonBlockingRandomBytes(final int size) throws NoSuchAlgorithmException, NoSuchProviderException
 	{
 		byte[] res=new byte[size];
 		tryToGenerateNativeNonBlockingRandomBytes(res);
 		return res;
-	}
+	}*/
 	
 	private static volatile JavaNativeSecureRandom nativeNonBlockingSeed=null;
 	private static volatile boolean nativeNonBlockingSeedInitialized=false;
 	
-	public static void tryToGenerateNativeNonBlockingRandomBytes(final byte[] buffer) throws gnu.vm.jgnu.security.NoSuchAlgorithmException, gnu.vm.jgnu.security.NoSuchProviderException
+	public static void tryToGenerateNativeNonBlockingRandomBytes(final byte[] buffer)
 	{
 		if (OS.getCurrentJREVersionDouble()>=1.8)
 		{
@@ -462,7 +451,7 @@ public enum SecureRandomType {
 			}
 		}
 	}
-	public static byte[] tryToGenerateNativeNonBlockingSeed(final int numBytes) throws NoSuchAlgorithmException, NoSuchProviderException
+	public static byte[] tryToGenerateNativeNonBlockingSeed(final int numBytes)
 	{
 		if (OSVersion.getCurrentOSVersion()!=null && OSVersion.getCurrentOSVersion().getOS().isUnix())
 		{
@@ -498,7 +487,7 @@ public enum SecureRandomType {
 						File randomSource = getURandomPath();
 
 						try (InputStream in = new FileInputStream(randomSource)) {
-							byte buffer[] = new byte[numBytes];
+							byte[] buffer = new byte[numBytes];
 							in.read(buffer);
 							return buffer;
 						} catch (IOException e) {
