@@ -136,7 +136,7 @@ public abstract class AbstractDecentralizedIDGenerator extends AbstractDecentral
 					"Définira limite ; enfin, l'arc, le limiteur\n" + 
 					"De cet inquiétant cercle, ennemi trop rebelle\n" + 
 					"Professeur, enseignez son problème avec zèle. "+result).getBytes();
-			random=SecureRandomType.DEFAULT.getInstance(nonce);
+			random=SecureRandomType.BC_FIPS_APPROVED.getInstance(nonce);
 		} catch (SocketException | NoSuchAlgorithmException | NoSuchProviderException e1) {
 			e1.printStackTrace();
 		}

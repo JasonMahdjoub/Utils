@@ -513,7 +513,7 @@ public enum SecureRandomType {
 		try
 		{
 			Security.insertProviderAt(new UtilsSecurityProvider(), 1);
-			CryptoServicesRegistrar.setSecureRandom(FORTUNA_WITH_BC_FIPS_APPROVED_FOR_KEYS.getSingleton(nonce));
+			CryptoServicesRegistrar.setSecureRandom(BC_FIPS_APPROVED_FOR_KEYS.getSingleton(nonce));
 		}
 		catch(Exception e)
 		{
