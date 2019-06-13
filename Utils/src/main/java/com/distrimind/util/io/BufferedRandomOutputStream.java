@@ -43,7 +43,7 @@ import static com.distrimind.util.io.BufferedRandomInputStream.MAX_BUFFERS_NUMBE
 
 /**
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 1.1
  * @since Utils 3.30.0
  */
 public class BufferedRandomOutputStream extends RandomOutputStream{
@@ -90,6 +90,10 @@ public class BufferedRandomOutputStream extends RandomOutputStream{
 			}
 		}
 
+	}
+
+	public RandomOutputStream getRandomOutputStreamSource() {
+		return out;
 	}
 
 	private void changePosition(int bufferIndex, long newPos) throws IOException {
@@ -215,6 +219,12 @@ public class BufferedRandomOutputStream extends RandomOutputStream{
 	protected BufferedRandomInputStream getRandomInputStreamImpl() throws IOException {
 		flush();
 		return new BufferedRandomInputStream(out.getRandomInputStream(), maxBufferSize, maxBuffersNumber);
+	}
+
+	@Override
+	public RandomInputStream getUnbufferedRandomInputStream() throws IOException {
+		flush();
+		return out.getUnbufferedRandomInputStream();
 	}
 
 

@@ -143,6 +143,10 @@ public abstract class RandomOutputStream extends OutputStream implements AutoClo
 
 	protected abstract RandomInputStream getRandomInputStreamImpl() throws IOException;
 
+	public RandomInputStream getUnbufferedRandomInputStream() throws IOException {
+		return getRandomInputStream();
+	}
+
 	@Override
 	public final void writeBoolean(boolean v) throws IOException {
 		write(v ? 1 : 0);

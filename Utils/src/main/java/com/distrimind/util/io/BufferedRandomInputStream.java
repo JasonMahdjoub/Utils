@@ -41,7 +41,7 @@ import java.util.Arrays;
 
 /**
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 1.1
  * @since Utils 3.30.0
  */
 public class BufferedRandomInputStream extends RandomInputStream {
@@ -77,6 +77,10 @@ public class BufferedRandomInputStream extends RandomInputStream {
 	@Override
 	public long length() throws IOException {
 		return in.length();
+	}
+
+	public RandomInputStream getRandomInputStreamSource() {
+		return in;
 	}
 
 	private void chooseBuffer(long _pos)
