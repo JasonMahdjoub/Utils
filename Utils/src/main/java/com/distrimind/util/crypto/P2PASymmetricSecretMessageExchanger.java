@@ -52,7 +52,7 @@ import javax.crypto.spec.SecretKeySpec;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 4.0
+ * @version 4.1
  * @since Utils 1.4.1
  */
 public class P2PASymmetricSecretMessageExchanger {
@@ -63,7 +63,7 @@ public class P2PASymmetricSecretMessageExchanger {
 		 */
 		private static final long serialVersionUID = -3862260428441022619L;
 
-		private final Object gnuRandom;
+		private volatile Object gnuRandom=null;
 
 		protected FakeSecureRandom() {
 			
@@ -98,7 +98,7 @@ public class P2PASymmetricSecretMessageExchanger {
 				}
 			}, null);
 
-			gnuRandom=GnuFunctions.getGnuRandomInterface(secureRandomSpi);
+
 
 		}
 
@@ -109,6 +109,8 @@ public class P2PASymmetricSecretMessageExchanger {
 
 		@Override
 		public Object getGnuSecureRandom() {
+			if (gnuRandom==null)
+				gnuRandom=GnuFunctions.getGnuRandomInterface(secureRandomSpi);
 			return gnuRandom;
 		}
 

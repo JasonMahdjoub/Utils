@@ -41,7 +41,7 @@ import java.security.NoSuchProviderException;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 2.0
+ * @version 2.1
  * @since Utils 3.1.0
  */
 public class NativeNonBlockingSecureRandom extends AbstractSecureRandom {
@@ -53,7 +53,7 @@ public class NativeNonBlockingSecureRandom extends AbstractSecureRandom {
 	 */
 	private static final long serialVersionUID = -1795571548950369446L;
 
-	private final Object secureGnuRandom;
+	private volatile Object secureGnuRandom;
 
 	public static class Spi extends AbstractSecureRandomSpi
 	{
@@ -125,11 +125,13 @@ public class NativeNonBlockingSecureRandom extends AbstractSecureRandom {
 				}
 			}
 			}, SecureRandomType.NativePRNGNonBlocking);
-		this.secureGnuRandom = GnuFunctions.getGnuRandomInterface(secureRandomSpi);
+		this.secureGnuRandom = null;
 	}
 
 	@Override
 	public Object getGnuSecureRandom() {
+		if (this.secureGnuRandom==null)
+			this.secureGnuRandom=GnuFunctions.getGnuRandomInterface(secureRandomSpi);
 		return this.secureGnuRandom;
 	}
 

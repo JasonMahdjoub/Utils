@@ -48,7 +48,7 @@ import com.distrimind.util.OS;
  * List of asymmetric encryption algorithms
  * 
  * @author Jason Mahdjoub
- * @version 2.0
+ * @version 2.1
  * @since Utils 2.9.0
  */
 public enum CodeProvider {
@@ -63,12 +63,16 @@ public enum CodeProvider {
 		{
 			case BCFIPS:
 				ensureBCFIPSProviderLoaded();
+				break;
 			case BCPQC:
 				ensureBQCProviderLoaded();
+				break;
 			case BC:
 				ensureBouncyCastleProviderLoaded();
+				break;
 			case GNU_CRYPTO:
 				GnuFunctions.checkGnuLoaded();
+				break;
 		}
 	}
 

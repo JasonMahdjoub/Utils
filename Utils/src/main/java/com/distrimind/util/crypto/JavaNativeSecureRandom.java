@@ -38,7 +38,7 @@ package com.distrimind.util.crypto;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 2.0
+ * @version 2.1
  * @since Utils 2.0
  */
 public final class JavaNativeSecureRandom extends AbstractSecureRandom {
@@ -54,7 +54,7 @@ public final class JavaNativeSecureRandom extends AbstractSecureRandom {
 
 	protected java.security.SecureRandom secureRandom;
 
-	private final Object secureGnuRandom;
+	private volatile Object secureGnuRandom;
 
 	/*JavaNativeSecureRandom(FakeSecureRandom random) throws NoSuchAlgorithmException, NoSuchProviderException {
 		this(SecureRandomType.DEFAULT, random, false);
@@ -104,7 +104,7 @@ public final class JavaNativeSecureRandom extends AbstractSecureRandom {
 		if (secureRandom == null)
 			throw new NullPointerException("secureRandom");
 
-		this.secureGnuRandom = GnuFunctions.getGnuRandomInterface(secureRandomSpi);
+
 
 		if (type.needInitialSeed())
 		{
@@ -116,6 +116,8 @@ public final class JavaNativeSecureRandom extends AbstractSecureRandom {
 
 	@Override
 	public Object getGnuSecureRandom() {
+		if (this.secureGnuRandom==null)
+			this.secureGnuRandom = GnuFunctions.getGnuRandomInterface(secureRandomSpi);
 		return this.secureGnuRandom;
 	}
 

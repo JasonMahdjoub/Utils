@@ -51,7 +51,7 @@ import java.util.concurrent.ScheduledExecutorService;
  * This class is thread safe.
  * 
  * @author Jason Mahdjoub
- * @version 2.0
+ * @version 2.1
  * @since Utils 2.15
  */
 public class FortunaSecureRandom extends AbstractSecureRandom implements Serializable{
@@ -60,7 +60,7 @@ public class FortunaSecureRandom extends AbstractSecureRandom implements Seriali
 	 * 
 	 */
 	private static final long serialVersionUID = -51252954999309630L;
-	private Object gnuInterface;
+	private volatile Object gnuInterface=null;
 	private byte[] nonce;
 	private byte[] personalizationString;
 
@@ -116,6 +116,8 @@ public class FortunaSecureRandom extends AbstractSecureRandom implements Seriali
 
 	@Override
 	public Object getGnuSecureRandom() {
+		if (gnuInterface==null)
+			gnuInterface=GnuFunctions.getGnuRandomInterface(secureRandomSpi);
 		return gnuInterface;
 	}
 
@@ -206,7 +208,7 @@ public class FortunaSecureRandom extends AbstractSecureRandom implements Seriali
 
 	}
 	private void checkSources() throws NoSuchProviderException, NoSuchAlgorithmException {
-		gnuInterface=GnuFunctions.getGnuRandomInterface(secureRandomSpi);
+
 		if (getType()== SecureRandomType.FORTUNA_WITH_BC_FIPS_APPROVED) {
 			addSecureRandomSource(SecureRandomType.SHA1PRNG.getSingleton(nonce, personalizationString));
 			addSecureRandomSource(SecureRandomType.BC_FIPS_APPROVED.getSingleton(nonce, personalizationString));

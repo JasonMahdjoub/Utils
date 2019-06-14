@@ -41,7 +41,7 @@ import java.security.NoSuchProviderException;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 2.1
  * @since Utils 2.0
  */
 public class GnuSecureRandom extends AbstractSecureRandom {
@@ -51,7 +51,7 @@ public class GnuSecureRandom extends AbstractSecureRandom {
 	 */
 	private static final long serialVersionUID = -3972765139342047885L;
 
-	private transient final Object secureGnuRandom;
+	private transient volatile Object secureGnuRandom=null;
 	
 
 
@@ -93,7 +93,7 @@ public class GnuSecureRandom extends AbstractSecureRandom {
 					return GnuFunctions.secureRandomGenerateSeed(secureRandom, numBytes);
 				}
 			}}, _type);
-		this.secureGnuRandom=GnuFunctions.getGnuRandomInterface(secureRandomSpi);
+
 		if (_type.needInitialSeed())
 		{
 			setSeed(SecureRandomType.tryToGenerateNativeNonBlockingSeed(55));
@@ -103,6 +103,8 @@ public class GnuSecureRandom extends AbstractSecureRandom {
 
 	@Override
 	public Object getGnuSecureRandom() {
+		if (secureGnuRandom==null)
+			this.secureGnuRandom=GnuFunctions.getGnuRandomInterface(secureRandomSpi);
 		return secureGnuRandom;
 	}
 
