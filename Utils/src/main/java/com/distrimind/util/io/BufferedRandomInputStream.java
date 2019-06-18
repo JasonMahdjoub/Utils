@@ -55,23 +55,25 @@ public class BufferedRandomInputStream extends RandomInputStream {
 	private byte[] currentBuffer=null;
 	private int currentBufferIndex=0;
 
-	private long currentPosition=0;
+	private long currentPosition;
 	private final int maxBufferSize;
 	private final int maxBufferSizeDiv2;
 
-	public BufferedRandomInputStream(RandomInputStream in) {
+	public BufferedRandomInputStream(RandomInputStream in) throws IOException {
 		this(in, MAX_BUFFER_SIZE);
 	}
-	public BufferedRandomInputStream(RandomInputStream in, int maxBufferSize) {
+	public BufferedRandomInputStream(RandomInputStream in, int maxBufferSize) throws IOException {
 		this(in, maxBufferSize, MAX_BUFFERS_NUMBER);
 	}
-	public BufferedRandomInputStream(RandomInputStream in, int maxBufferSize, int maxBuffersNumber) {
+	public BufferedRandomInputStream(RandomInputStream in, int maxBufferSize, int maxBuffersNumber) throws IOException {
 		this.in = in;
 		this.maxBufferSize=maxBufferSize;
 		this.maxBufferSizeDiv2=maxBufferSize/2;
 		buffers=new byte[maxBuffersNumber][maxBufferSize];
 		positions=new long[maxBuffersNumber];
 		Arrays.fill(positions, -1);
+		this.currentPosition=in.currentPosition();
+
 	}
 
 	@Override

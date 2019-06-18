@@ -55,19 +55,19 @@ public class BufferedRandomOutputStream extends RandomOutputStream{
 	private byte[] currentBuffer=null;
 	private int currentBufferIndex=-1;
 
-	private long currentPosition=0;
+	private long currentPosition;
 	private final int maxBufferSize;
 	private final int maxBufferSizeDiv2;
 	private final int maxBuffersNumber;
-	private long length=0;
+	private long length;
 
-	public BufferedRandomOutputStream(RandomOutputStream out) {
+	public BufferedRandomOutputStream(RandomOutputStream out) throws IOException {
 		this(out, MAX_BUFFER_SIZE);
 	}
-	public BufferedRandomOutputStream(RandomOutputStream out, int maxBufferSize) {
+	public BufferedRandomOutputStream(RandomOutputStream out, int maxBufferSize) throws IOException {
 		this(out, maxBufferSize, MAX_BUFFERS_NUMBER);
 	}
-	public BufferedRandomOutputStream(RandomOutputStream out, int maxBufferSize, int maxBuffersNumber) {
+	public BufferedRandomOutputStream(RandomOutputStream out, int maxBufferSize, int maxBuffersNumber) throws IOException {
 		this.out = out;
 		this.maxBufferSize=maxBufferSize;
 		this.maxBufferSizeDiv2=maxBufferSize/2;
@@ -78,6 +78,8 @@ public class BufferedRandomOutputStream extends RandomOutputStream{
 
 		Arrays.fill(positions, -1);
 		Arrays.fill(endPositions, 0);
+		this.currentPosition=out.currentPosition();
+		this.length=out.length();
 	}
 
 	private void checkOverlapping() throws IOException {
