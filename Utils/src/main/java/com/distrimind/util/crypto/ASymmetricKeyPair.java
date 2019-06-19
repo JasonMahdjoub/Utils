@@ -34,12 +34,12 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
-import java.io.Serializable;
 import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
 
+import com.distrimind.util.DecentralizedValue;
 import org.apache.commons.codec.binary.Base64;
 
 import com.distrimind.util.Bits;
@@ -47,10 +47,10 @@ import com.distrimind.util.Bits;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 3.2
+ * @version 3.3
  * @since Utils 1.7.1
  */
-public class ASymmetricKeyPair implements Serializable {
+public class ASymmetricKeyPair extends DecentralizedValue {
 	/**
 	 * 
 	 */
@@ -237,7 +237,7 @@ public class ASymmetricKeyPair implements Serializable {
 		int codedTypeSize=ASymmetricPrivateKey.getEncodedTypeSize();
 		byte[] kp=Bits.concateEncodingWithShortSizedTabs(privateKey.getBytesPrivateKey(), publicKey.getBytesPublicKey());
 		byte[] tab = new byte[3+codedTypeSize+kp.length+(includeTimeExpiration?8:0)];
-		tab[0]=encryptionType==null?(byte)2:(byte)1;
+		tab[0]=encryptionType==null?(byte)9:(byte)8;
 		if (includeTimeExpiration)
 			tab[0]|=Key.INCLUDE_KEY_EXPIRATION_CODE;
 		if (privateKey.xdhKey)
@@ -252,21 +252,43 @@ public class ASymmetricKeyPair implements Serializable {
 		System.arraycopy(kp, 0, tab, pos, kp.length);
 		return tab;
 	}
+	public static boolean isValidType(byte[] b, int off)
+	{
+		byte type=b[off];
+		type&=~Key.INCLUDE_KEY_EXPIRATION_CODE;
+		type&=~Key.IS_XDH_KEY;
+		return type>=8 && type<=9;
+	}
 	public static ASymmetricKeyPair decode(byte[] b) throws IllegalArgumentException {
 		return decode(b, true);
 	}
-    public static ASymmetricKeyPair decode(byte[] b, boolean fillArrayWithZerosWhenDecoded) throws IllegalArgumentException {
+	public static ASymmetricKeyPair decode(byte[] b, int off, int len) throws IllegalArgumentException {
+		return decode(b, off, len,true);
+	}
+	public static ASymmetricKeyPair decode(byte[] b, boolean fillArrayWithZerosWhenDecoded) throws IllegalArgumentException {
+		return decode(b, 0, b.length, fillArrayWithZerosWhenDecoded);
+	}
+
+	@Override
+	public byte[] encodeWithDefaultParameters() {
+		return encode(true);
+	}
+
+	public static ASymmetricKeyPair decode(byte[] b, int off, int len, boolean fillArrayWithZerosWhenDecoded) throws IllegalArgumentException {
+		if (off<0 || len<0 || len+off>b.length)
+			throw new IllegalArgumentException();
+
 		try {
 			int codedTypeSize = SymmetricSecretKey.getEncodedTypeSize();
-			short keySize = Bits.getShort(b, 1);
-			int posKey=codedTypeSize+3;
+			short keySize = Bits.getShort(b, 1+off);
+			int posKey=codedTypeSize+3+off;
 			long expirationUTC;
-			boolean includeKeyExpiration=(b[0] & Key.INCLUDE_KEY_EXPIRATION_CODE) == Key.INCLUDE_KEY_EXPIRATION_CODE;
-			boolean kdhKey=(b[0] & Key.IS_XDH_KEY) == Key.IS_XDH_KEY;
+			boolean includeKeyExpiration=(b[off] & Key.INCLUDE_KEY_EXPIRATION_CODE) == Key.INCLUDE_KEY_EXPIRATION_CODE;
+			boolean kdhKey=(b[off] & Key.IS_XDH_KEY) == Key.IS_XDH_KEY;
 			if (includeKeyExpiration)
-				b[0]-=Key.INCLUDE_KEY_EXPIRATION_CODE;
+				b[off]-=Key.INCLUDE_KEY_EXPIRATION_CODE;
 			if (kdhKey)
-				b[0]-=Key.IS_XDH_KEY;
+				b[off]-=Key.IS_XDH_KEY;
 			if (includeKeyExpiration) {
 
 				expirationUTC=Bits.getLong(b, posKey);
@@ -275,20 +297,20 @@ public class ASymmetricKeyPair implements Serializable {
 			else
 				expirationUTC=Long.MAX_VALUE;
 
-			byte[] kp = new byte[b.length - 3 - codedTypeSize-(includeKeyExpiration?8:0)];
+			byte[] kp = new byte[len - 3 - codedTypeSize-(includeKeyExpiration?8:0)];
 			System.arraycopy(b, posKey, kp, 0, kp.length);
 			byte[][] keys = Bits.separateEncodingsWithShortSizedTabs(kp);
 
-			if (b[0] == 2) {
-				ASymmetricAuthenticatedSignatureType type = ASymmetricAuthenticatedSignatureType.valueOf((int) Bits.getPositiveInteger(b, 3, codedTypeSize));
+			if (b[off] == 9) {
+				ASymmetricAuthenticatedSignatureType type = ASymmetricAuthenticatedSignatureType.valueOf((int) Bits.getPositiveInteger(b, 3+off, codedTypeSize));
 
 				ASymmetricKeyPair res=new ASymmetricKeyPair(type, new ASymmetricPrivateKey(type, keys[0], keySize),
 						new ASymmetricPublicKey(type, keys[1], keySize, expirationUTC), keySize);
 				res.getASymmetricPublicKey().xdhKey=kdhKey;
 				res.getASymmetricPrivateKey().xdhKey=kdhKey;
 				return res;
-			} else if (b[0] == 1) {
-				ASymmetricEncryptionType type = ASymmetricEncryptionType.valueOf((int) Bits.getPositiveInteger(b, 3, codedTypeSize));
+			} else if (b[off] == 8) {
+				ASymmetricEncryptionType type = ASymmetricEncryptionType.valueOf((int) Bits.getPositiveInteger(b, 3+off, codedTypeSize));
 
 				ASymmetricKeyPair res=new ASymmetricKeyPair(type, new ASymmetricPrivateKey(type, keys[0], keySize),
 						new ASymmetricPublicKey(type, keys[1], keySize, expirationUTC), keySize);
@@ -300,7 +322,7 @@ public class ASymmetricKeyPair implements Serializable {
 		}
 		finally {
 			if (fillArrayWithZerosWhenDecoded)
-				Arrays.fill(b, (byte)0);
+				Arrays.fill(b, off, len, (byte)0);
 		}
 
 

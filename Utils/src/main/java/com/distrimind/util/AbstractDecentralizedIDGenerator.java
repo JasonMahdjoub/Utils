@@ -243,7 +243,7 @@ public abstract class AbstractDecentralizedIDGenerator extends AbstractDecentral
 	}
 
 	@Override
-	public byte[] getBytes() {
+	public byte[] encode() {
 		long ts = getTimeStamp();
 		long wid = getWorkerIDAndSequence();
 		int sizeLong = ObjectSizer.sizeOf(ts);

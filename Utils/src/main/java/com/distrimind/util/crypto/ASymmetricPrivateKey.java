@@ -307,4 +307,9 @@ public class ASymmetricPrivateKey extends Key {
 			throw new IllegalAccessError();
 		
 	}
+
+	@Override
+	public byte[] encodeWithDefaultParameters() {
+		return encode();
+	}
 }

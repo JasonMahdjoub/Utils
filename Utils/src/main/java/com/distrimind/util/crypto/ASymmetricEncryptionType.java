@@ -256,7 +256,7 @@ public enum ASymmetricEncryptionType {
 
 	static byte[] encodeGnuPrivateKey(Object key) {
 	    return GnuFunctions.keyGetEncoded(key);
-		//return Bits.concateEncodingWithShortSizedTabs(key.getAlgorithm().getBytes(), key.getEncoded());
+		//return Bits.concateEncodingWithShortSizedTabs(key.getAlgorithm().encode(), key.getEncoded());
 	}
 	static byte[] encodePrivateKey(PrivateKey key, @SuppressWarnings("unused") ASymmetricEncryptionType type) {
 		return key.getEncoded();
@@ -318,7 +318,7 @@ public enum ASymmetricEncryptionType {
 		}
 		else
 	    	return key.getEncoded();
-		//return Bits.concateEncodingWithShortSizedTabs(key.getAlgorithm().getBytes(), key.getEncoded());
+		//return Bits.concateEncodingWithShortSizedTabs(key.getAlgorithm().encode(), key.getEncoded());
 	}
 
 	static byte[] encodeGnuPublicKey(Object key) {

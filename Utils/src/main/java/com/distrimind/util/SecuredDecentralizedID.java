@@ -201,7 +201,7 @@ public class SecuredDecentralizedID extends AbstractDecentralizedID {
 	}
 
 	@Override
-	public byte[] getBytes() {
+	public byte[] encode() {
 		int sizeLong = ObjectSizer.sizeOf(idLongs[0]);
 		byte[] res = new byte[idLongs.length * sizeLong + 1];
 		res[0] = getType();

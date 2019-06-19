@@ -136,10 +136,10 @@ public class DecentralizedIDTests {
 		SecuredDecentralizedID sid1 = new SecuredDecentralizedID(type, id1, rand);
 		SecuredDecentralizedID sid2 = new SecuredDecentralizedID(type, id2, rand);
 		Assert.assertNotEquals(sid1, sid2);
-		Assert.assertNotEquals(AbstractDecentralizedID.instanceOf(id1.getBytes()),
-				AbstractDecentralizedID.instanceOf(id2.getBytes()));
-		Assert.assertNotEquals(AbstractDecentralizedID.instanceOf(sid1.getBytes()),
-				AbstractDecentralizedID.instanceOf(sid2.getBytes()));
+		Assert.assertNotEquals(AbstractDecentralizedID.decode(id1.encode()),
+				AbstractDecentralizedID.decode(id2.encode()));
+		Assert.assertNotEquals(AbstractDecentralizedID.decode(sid1.encode()),
+				AbstractDecentralizedID.decode(sid2.encode()));
 	}
 
 	@Test(dataProvider = "getDEncetralizedIDs", dependsOnMethods = "testToBytes")
@@ -168,11 +168,11 @@ public class DecentralizedIDTests {
 
 	@Test(dataProvider = "getDEncetralizedIDs")
 	public void testToBytes(AbstractDecentralizedID id) {
-		byte[] bytes = id.getBytes();
-		AbstractDecentralizedID id2 = AbstractDecentralizedID.instanceOf(bytes);
+		byte[] bytes = id.encode();
+		AbstractDecentralizedID id2 = AbstractDecentralizedID.decode(bytes);
 		Assert.assertEquals(id, id2);
 		Assert.assertEquals(id.hashCode(), id2.hashCode());
-		Assert.assertEquals(bytes, id2.getBytes());
+		Assert.assertEquals(bytes, id2.encode());
 	}
 
 	@Test

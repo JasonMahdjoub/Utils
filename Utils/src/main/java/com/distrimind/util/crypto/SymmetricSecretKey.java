@@ -339,6 +339,11 @@ public class SymmetricSecretKey extends Key {
 		
 	}
 
+	@Override
+	public byte[] encodeWithDefaultParameters() {
+		return encode(true);
+	}
+
 	/*
 	 * public static SymmetricSecretKey generate(SecureRandom random,
 	 * SymmetricEncryptionType type) throws NoSuchAlgorithmException { return new

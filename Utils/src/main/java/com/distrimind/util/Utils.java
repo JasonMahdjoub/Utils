@@ -59,8 +59,8 @@ public class Utils {
 		Calendar c = Calendar.getInstance();
 		c.set(2016, Calendar.JANUARY, 4);
 		Calendar c2 = Calendar.getInstance();
-		c.set(2019, Calendar.JUNE, 18);
-		VERSION = new Version("Utils", "Utils", (short)4, (short)2, (short)2, Version.Type.Stable, (short)0, c.getTime(), c2.getTime());
+		c.set(2019, Calendar.JUNE, 19);
+		VERSION = new Version("Utils", "Utils", (short)4, (short)3, (short)0, Version.Type.Stable, (short)0, c.getTime(), c2.getTime());
 		try {
 
 			InputStream is = Utils.class.getResourceAsStream("build.txt");
@@ -73,11 +73,12 @@ public class Utils {
 			VERSION.addDeveloper(new PersonDeveloper("mahdjoub", "jason", c.getTime()));
 
 			c = Calendar.getInstance();
-			c.set(2019, Calendar.JUNE, 18);
-			Description d = new Description((short)4, (short)2, (short)2, Version.Type.Stable, (short)0, c.getTime());
+			c.set(2019, Calendar.JUNE, 19);
+			Description d = new Description((short)4, (short)3, (short)0, Version.Type.Stable, (short)0, c.getTime());
 			d.addItem("Add BufferedRandomInputStream abd BufferedRandomOutputStream.");
 			d.addItem("Pre-allocate bytes arrays with random byte array streams.");
 			d.addItem("Gnu library dependency is now optional. It is possible to compile without it.");
+			d.addItem("DecentralizedID and encryptions keys have a common abstract class : DecentralizedValue.");
 			VERSION.addDescription(d);
 
 			c = Calendar.getInstance();

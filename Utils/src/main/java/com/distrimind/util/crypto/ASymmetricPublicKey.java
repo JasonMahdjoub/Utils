@@ -333,4 +333,8 @@ public class ASymmetricPublicKey extends Key {
 		
 	}
 
+	@Override
+	public byte[] encodeWithDefaultParameters() {
+		return encode(true);
+	}
 }

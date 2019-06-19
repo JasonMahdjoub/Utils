@@ -125,12 +125,12 @@ public enum SymmetricEncryptionType {
 
 	static byte[] encodeGnuSecretKey(Object key, String algorithmName) {
 		return GnuFunctions.keyGetEncoded(key);
-		//return Bits.concateEncodingWithShortSizedTabs(algorithmName.getBytes(), key.keyGetEncoded());
+		//return Bits.concateEncodingWithShortSizedTabs(algorithmName.encode(), key.keyGetEncoded());
 	}
 
 	static byte[] encodeSecretKey(SecretKey key, String algorithmName) {
 		return key.getEncoded();
-		//return Bits.concateEncodingWithShortSizedTabs(algorithmName.getBytes(), key.keyGetEncoded());
+		//return Bits.concateEncodingWithShortSizedTabs(algorithmName.encode(), key.keyGetEncoded());
 	}
 	
 	static byte[] encodeSecretKey(final org.bouncycastle.crypto.SymmetricSecretKey key, String algorithmName)
@@ -140,7 +140,7 @@ public enum SymmetricEncryptionType {
 				return key.getKeyBytes();
 			}
 		});
-		/*return Bits.concateEncodingWithShortSizedTabs(algorithmName.getBytes(), AccessController.doPrivileged(new PrivilegedAction<byte[]>() {
+		/*return Bits.concateEncodingWithShortSizedTabs(algorithmName.encode(), AccessController.doPrivileged(new PrivilegedAction<byte[]>() {
             public byte[] run() {
                 return key.getKeyBytes();
             }

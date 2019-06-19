@@ -34,7 +34,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util;
 
-import java.io.Serializable;
+import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -45,58 +45,77 @@ import com.distrimind.util.sizeof.ObjectSizer;
  * network.
  * 
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 1.1
  * @since Utils 1.3
  * 
  */
-public abstract class AbstractDecentralizedID implements Serializable {
+public abstract class AbstractDecentralizedID extends DecentralizedValue {
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 9204239435623960497L;
 
-	static final byte DECENTRALIZED_ID_GENERATOR_TYPE = 0;
+	static final byte DECENTRALIZED_ID_GENERATOR_TYPE = 16;
 
-	static final byte RENFORCED_DECENTRALIZED_ID_GENERATOR_TYPE = 1;
+	static final byte RENFORCED_DECENTRALIZED_ID_GENERATOR_TYPE = 17;
 
-	static final byte SECURED_DECENTRALIZED_ID_TYPE = 2;
+	static final byte SECURED_DECENTRALIZED_ID_TYPE = 18;
 
-	public static AbstractDecentralizedID instanceOf(byte[] bytes) {
-		return instanceOf(bytes, 0, bytes.length);
+	public static AbstractDecentralizedID decode(byte[] bytes) {
+		return decode(bytes, 0, bytes.length);
 	}
 
-	public static AbstractDecentralizedID instanceOf(byte[] bytes, int off, int len) {
+	@Override
+	public byte[] encodeWithDefaultParameters() {
+		return encode();
+	}
+
+	public static boolean isValidType(byte[] bytes, int off)
+	{
+		return bytes[off]==AbstractDecentralizedID.DECENTRALIZED_ID_GENERATOR_TYPE
+				|| bytes[off]==AbstractDecentralizedID.RENFORCED_DECENTRALIZED_ID_GENERATOR_TYPE
+				|| bytes[off]==AbstractDecentralizedID.SECURED_DECENTRALIZED_ID_TYPE;
+	}
+	public static AbstractDecentralizedID decode(byte[] bytes, int off, int len)
+	{
+		return decode(bytes, off, len, false);
+	}
+	public static AbstractDecentralizedID decode(byte[] bytes, int off, int len, boolean fillArrayWithZerosWhenDecoded) {
 		if (bytes == null)
 			throw new NullPointerException("bytes");
-		if (off >= bytes.length)
-			throw new IllegalArgumentException();
-		if (off + len > bytes.length)
+		if (off<0 || len<0 || len+off>bytes.length)
 			throw new IllegalArgumentException();
 
-		byte type = bytes[off];
-		int sizeLong = ObjectSizer.sizeOf(1L);
-		int sizeByte = ObjectSizer.sizeOf(type);
-		switch (type) {
-		case AbstractDecentralizedID.DECENTRALIZED_ID_GENERATOR_TYPE:
-			if (len != sizeByte + sizeLong * 2)
-				throw new IllegalArgumentException();
-			return new DecentralizedIDGenerator(Bits.getLong(bytes, off + sizeByte),
-					Bits.getLong(bytes, off + sizeByte + sizeLong));
-		case AbstractDecentralizedID.RENFORCED_DECENTRALIZED_ID_GENERATOR_TYPE:
-			if (len != sizeByte + sizeLong * 2)
-				throw new IllegalArgumentException();
-			return new RenforcedDecentralizedIDGenerator(Bits.getLong(bytes, off + sizeByte),
-					Bits.getLong(bytes, off + sizeByte + sizeLong));
-		case AbstractDecentralizedID.SECURED_DECENTRALIZED_ID_TYPE: {
-			if ((len - sizeByte) % sizeLong != 0 || (len - sizeByte) / sizeLong <= 0)
-				throw new IllegalArgumentException();
-			long idLongs[] = new long[(len - sizeByte) / sizeLong];
-			for (int i = 0; i < idLongs.length; i++)
-				idLongs[i] = Bits.getLong(bytes, off + sizeByte + i * sizeLong);
-			return new SecuredDecentralizedID(idLongs);
+		try {
+			byte type = bytes[off];
+			int sizeLong = ObjectSizer.sizeOf(1L);
+			int sizeByte = ObjectSizer.sizeOf(type);
+			switch (type) {
+				case AbstractDecentralizedID.DECENTRALIZED_ID_GENERATOR_TYPE:
+					if (len != sizeByte + sizeLong * 2)
+						throw new IllegalArgumentException();
+					return new DecentralizedIDGenerator(Bits.getLong(bytes, off + sizeByte),
+							Bits.getLong(bytes, off + sizeByte + sizeLong));
+				case AbstractDecentralizedID.RENFORCED_DECENTRALIZED_ID_GENERATOR_TYPE:
+					if (len != sizeByte + sizeLong * 2)
+						throw new IllegalArgumentException();
+					return new RenforcedDecentralizedIDGenerator(Bits.getLong(bytes, off + sizeByte),
+							Bits.getLong(bytes, off + sizeByte + sizeLong));
+				case AbstractDecentralizedID.SECURED_DECENTRALIZED_ID_TYPE: {
+					if ((len - sizeByte) % sizeLong != 0 || (len - sizeByte) / sizeLong <= 0)
+						throw new IllegalArgumentException();
+					long[] idLongs = new long[(len - sizeByte) / sizeLong];
+					for (int i = 0; i < idLongs.length; i++)
+						idLongs[i] = Bits.getLong(bytes, off + sizeByte + i * sizeLong);
+					return new SecuredDecentralizedID(idLongs);
+				}
+				default:
+					throw new IllegalArgumentException("Unkown type");
+			}
 		}
-		default:
-			throw new IllegalArgumentException("Unkown type");
+		finally {
+			if (fillArrayWithZerosWhenDecoded)
+				Arrays.fill(bytes, off, len, (byte)0);
 		}
 
 	}
@@ -128,7 +147,7 @@ public abstract class AbstractDecentralizedID implements Serializable {
 		}
 		if (value.startsWith(SecuredDecentralizedID.ToStringHead + "[")) {
 			Pattern p = Pattern.compile(";");
-			String values[] = p
+			String[] values = p
 					.split(value.subSequence(SecuredDecentralizedID.ToStringHead.length() + 1, value.length() - 1));
 			if (values.length >= 1) {
 				long[] vals = new long[values.length];
@@ -145,7 +164,7 @@ public abstract class AbstractDecentralizedID implements Serializable {
 	@Override
 	public abstract boolean equals(Object obj);
 
-	public abstract byte[] getBytes();
+	public abstract byte[] encode();
 
 	abstract byte getType();
 
