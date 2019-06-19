@@ -47,7 +47,18 @@ import java.io.Serializable;
 public abstract class DecentralizedValue implements Serializable {
 
 	public abstract byte[] encodeWithDefaultParameters();
-
+	public static DecentralizedValue decode(byte[] encodedValue)
+	{
+		return decode(encodedValue, 0, encodedValue.length);
+	}
+	public static DecentralizedValue decode(byte[] encodedValue, int off, int len)
+	{
+		return decode(encodedValue, off, len, false);
+	}
+	public static DecentralizedValue decode(byte[] encodedValue, boolean fillArrayWithZerosWhenDecoded)
+	{
+		return decode(encodedValue, 0, encodedValue.length, fillArrayWithZerosWhenDecoded);
+	}
 	public static DecentralizedValue decode(byte[] encodedValue, int off, int len, boolean fillArrayWithZerosWhenDecoded)
 	{
 		if (AbstractDecentralizedID.isValidType(encodedValue, off))

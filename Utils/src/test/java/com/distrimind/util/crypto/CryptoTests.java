@@ -42,6 +42,7 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.InvalidParameterSpecException;
 
 
+import com.distrimind.util.DecentralizedValue;
 import org.apache.commons.codec.binary.Base64;
 import org.bouncycastle.crypto.InvalidWrappingException;
 import org.testng.Assert;
@@ -287,7 +288,7 @@ public class CryptoTests {
 		ASymmetricKeyPair kpd=generateKeyPair(type);
 
 		byte[] b = kpd.encode(false);
-		ASymmetricKeyPair kpd2=ASymmetricKeyPair.decode(b);
+		ASymmetricKeyPair kpd2=(ASymmetricKeyPair)DecentralizedValue.decode(b);
 		Assert.assertEquals(kpd2.getASymmetricPrivateKey(), kpd.getASymmetricPrivateKey());
 		Assert.assertEquals(kpd2.getASymmetricPublicKey().toJavaNativeKey().getEncoded(), kpd.getASymmetricPublicKey().toJavaNativeKey().getEncoded());
 		Assert.assertEquals(kpd2.getEncryptionAlgorithmType(), kpd.getEncryptionAlgorithmType());
@@ -300,21 +301,21 @@ public class CryptoTests {
 
 		b = kpd.getASymmetricPublicKey().encode(false);
 		Assert.assertEquals(b.length, kpd.getASymmetricPublicKey().encode(true).length-8);
-		ASymmetricPublicKey pk=(ASymmetricPublicKey)Key.decode(b);
+		ASymmetricPublicKey pk=(ASymmetricPublicKey) DecentralizedValue.decode(b);
 		Assert.assertEquals(pk.toJavaNativeKey().getEncoded(), kpd.getASymmetricPublicKey().toJavaNativeKey().getEncoded());
 		Assert.assertEquals(pk.getAuthentifiedSignatureAlgorithmType(), kpd.getASymmetricPublicKey().getAuthentifiedSignatureAlgorithmType());
 		Assert.assertEquals(pk.getEncryptionAlgorithmType(), kpd.getASymmetricPublicKey().getEncryptionAlgorithmType());
 		Assert.assertEquals(pk.getTimeExpirationUTC(), Long.MAX_VALUE);
 
 
-		Assert.assertEquals(ASymmetricPublicKey.decode(kpd.getASymmetricPublicKey().encode(true)),
+		Assert.assertEquals(DecentralizedValue.decode(kpd.getASymmetricPublicKey().encode(true)),
 				kpd.getASymmetricPublicKey());
-		Assert.assertEquals(ASymmetricPrivateKey.decode(kpd.getASymmetricPrivateKey().encode()),
+		Assert.assertEquals(DecentralizedValue.decode(kpd.getASymmetricPrivateKey().encode()),
 				kpd.getASymmetricPrivateKey());
-		Assert.assertEquals(ASymmetricKeyPair.decode(kpd.encode(true)), kpd);
-		Assert.assertEquals(ASymmetricKeyPair.decode(kpd.encode(true)).getASymmetricPrivateKey(),
+		Assert.assertEquals(DecentralizedValue.decode(kpd.encode(true)), kpd);
+		Assert.assertEquals(((ASymmetricKeyPair)DecentralizedValue.decode(kpd.encode(true))).getASymmetricPrivateKey(),
 				kpd.getASymmetricPrivateKey());
-		Assert.assertEquals(ASymmetricKeyPair.decode(kpd.encode(true)).getASymmetricPublicKey(),
+		Assert.assertEquals(((ASymmetricKeyPair)DecentralizedValue.decode(kpd.encode(true))).getASymmetricPublicKey(),
 				kpd.getASymmetricPublicKey());
 		System.out.println(type+" :");
 		System.out.println("\tKey pair encoding : "+kpd.toString());
@@ -348,7 +349,7 @@ public class CryptoTests {
 		byte[] b = kpd.encode(false);
 		Assert.assertEquals(b.length, kpd.encode(true).length-8);
 
-		ASymmetricKeyPair kpd2=ASymmetricKeyPair.decode(b);
+		ASymmetricKeyPair kpd2=(ASymmetricKeyPair)DecentralizedValue.decode(b);
 		Assert.assertEquals(kpd2.getASymmetricPrivateKey(), kpd.getASymmetricPrivateKey());
 		Assert.assertEquals(kpd2.getASymmetricPublicKey().getBytesPublicKey(), kpd.getASymmetricPublicKey().getBytesPublicKey());
 		Assert.assertEquals(kpd2.getEncryptionAlgorithmType(), kpd.getEncryptionAlgorithmType());
@@ -361,20 +362,20 @@ public class CryptoTests {
 
 		b = kpd.getASymmetricPublicKey().encode(false);
 		Assert.assertEquals(b.length, kpd.getASymmetricPublicKey().encode(true).length-8);
-		ASymmetricPublicKey pk=(ASymmetricPublicKey)Key.decode(b);
+		ASymmetricPublicKey pk=(ASymmetricPublicKey)DecentralizedValue.decode(b);
 		Assert.assertEquals(pk.getBytesPublicKey(), kpd.getASymmetricPublicKey().getBytesPublicKey());
 		Assert.assertEquals(pk.getAuthentifiedSignatureAlgorithmType(), kpd.getASymmetricPublicKey().getAuthentifiedSignatureAlgorithmType());
 		Assert.assertEquals(pk.getEncryptionAlgorithmType(), kpd.getASymmetricPublicKey().getEncryptionAlgorithmType());
 		Assert.assertEquals(pk.getTimeExpirationUTC(), Long.MAX_VALUE);
 
-		Assert.assertEquals(ASymmetricPublicKey.decode(kpd.getASymmetricPublicKey().encode(true)),
+		Assert.assertEquals(DecentralizedValue.decode(kpd.getASymmetricPublicKey().encode(true)),
 				kpd.getASymmetricPublicKey());
-		Assert.assertEquals(ASymmetricPrivateKey.decode(kpd.getASymmetricPrivateKey().encode()),
+		Assert.assertEquals(DecentralizedValue.decode(kpd.getASymmetricPrivateKey().encode()),
 				kpd.getASymmetricPrivateKey());
-		Assert.assertEquals(ASymmetricKeyPair.decode(kpd.encode(true)), kpd);
-		Assert.assertEquals(ASymmetricKeyPair.decode(kpd.encode(true)).getASymmetricPrivateKey(),
+		Assert.assertEquals(DecentralizedValue.decode(kpd.encode(true)), kpd);
+		Assert.assertEquals(((ASymmetricKeyPair)DecentralizedValue.decode(kpd.encode(true))).getASymmetricPrivateKey(),
 				kpd.getASymmetricPrivateKey());
-		Assert.assertEquals(ASymmetricKeyPair.decode(kpd.encode(true)).getASymmetricPublicKey(),
+		Assert.assertEquals(((ASymmetricKeyPair)DecentralizedValue.decode(kpd.encode(true))).getASymmetricPublicKey(),
 				kpd.getASymmetricPublicKey());
         System.out.println(type+" :");
         System.out.println("\tKey pair encoding : "+kpd.toString());
@@ -980,9 +981,9 @@ public class CryptoTests {
 		System.out.println("Testing " + type);
 		AbstractSecureRandom random = SecureRandomType.DEFAULT.getSingleton(null);
 		SymmetricSecretKey key = type.getKeyGenerator(random).generateKey();
-		Assert.assertEquals(SymmetricSecretKey.decode(key.encode()), key);
+		Assert.assertEquals(DecentralizedValue.decode(key.encode()), key);
 		new SymmetricEncryptionAlgorithm(random, key);
-		Assert.assertEquals(SymmetricSecretKey.decode(key.encode()), key);
+		Assert.assertEquals(DecentralizedValue.decode(key.encode()), key);
 
 	}
 
@@ -1018,7 +1019,7 @@ public class CryptoTests {
 			NoSuchProviderException, IllegalStateException, InvalidAlgorithmParameterException, InvalidParameterSpecException, IOException {
 		System.out.println("Testing asymmetric signature : " +type+", "+ keySize+", "+kpd.getASymmetricPublicKey().getKeyBytes().length);
 		byte[] b = kpd.encode(true);
-		ASymmetricKeyPair kpd2=ASymmetricKeyPair.decode(b);
+		ASymmetricKeyPair kpd2=(ASymmetricKeyPair)DecentralizedValue.decode(b);
 		Assert.assertEquals(kpd2, kpd);
 		ASymmetricAuthenticatedSignerAlgorithm signer = new ASymmetricAuthenticatedSignerAlgorithm(kpd.getASymmetricPrivateKey());
 		ASymmetricAuthenticatedSignatureCheckerAlgorithm checker = new ASymmetricAuthenticatedSignatureCheckerAlgorithm(kpd.getASymmetricPublicKey());
