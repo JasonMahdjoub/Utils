@@ -1,6 +1,6 @@
 Utils
 =====
-4.2.2 Stable (Build: 1118) (from 18/06/2019 to 18/06/2019)
+4.3.0 Stable (Build: 1121) (from 19/06/2019 to 19/06/2019)
 
 # Creator(s):
 Jason MAHDJOUB
@@ -11,10 +11,11 @@ Jason MAHDJOUB (Entred in the team at 04/01/2016)
 # Modifications:
 
 
-### 4.2.2 Stable (18/06/2019)
+### 4.3.0 Stable (19/06/2019)
 * Add BufferedRandomInputStream abd BufferedRandomOutputStream.
 * Pre-allocate bytes arrays with random byte array streams.
 * Gnu library dependency is now optional. It is possible to compile without it.
+* DecentralizedID and encryptions keys have a common abstract class : DecentralizedValue.
 
 
 ### 3.29.1 Stable (26/05/2019)
