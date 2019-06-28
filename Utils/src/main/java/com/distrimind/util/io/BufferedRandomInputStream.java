@@ -260,7 +260,7 @@ public class BufferedRandomInputStream extends RandomInputStream {
 			in.seek(currentPosition);
 			in.readFully(currentBuffer, 0, (int)Math.min(maxBufferSize, in.length()-currentPosition));
 		}
-		return currentBuffer[(int)((currentPosition++)-curPos)];
+		return currentBuffer[(int)((currentPosition++)-curPos)] & 0xFF;
 	}
 
 	@Override

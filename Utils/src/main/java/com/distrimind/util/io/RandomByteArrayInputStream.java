@@ -80,7 +80,7 @@ public class RandomByteArrayInputStream extends RandomInputStream {
 		if (current_pos >= outputStream.length)
 			return -1;
 		else {
-			return outputStream.bytes[current_pos++];
+			return outputStream.bytes[current_pos++] & 0xFF;
 		}
 	}
 

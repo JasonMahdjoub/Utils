@@ -163,11 +163,15 @@ public abstract class RandomOutputStream extends OutputStream implements AutoClo
 	}
 
 	public final void writeUnsignedShort(int v) throws IOException {
+		if (v<0)
+			throw new IllegalArgumentException();
 		write((v >>> 8) & 0xFF);
 		write((v) & 0xFF);
 	}
 
 	public final void writeUnsignedShortInt(int v) throws IOException {
+		if (v<0)
+			throw new IllegalArgumentException();
 		write((v >>> 16) & 0xFF);
 		write((v >>> 8) & 0xFF);
 		write((v) & 0xFF);
