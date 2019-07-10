@@ -37,10 +37,10 @@ knowledge of the CeCILL-C license and that you accept its terms.
 
 /**
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 1.1
  * @since Utils 4.4.0
  */
-enum Integrity {
+public enum Integrity {
 	/**
 	 * The data integrity is good.
 	 */

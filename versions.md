@@ -1,6 +1,6 @@
 Utils
 =====
-4.4.0 Stable (Build: 1135) (from 10/07/2019 to 10/07/2019)
+4.4.1 Stable (Build: 1137) (from 10/07/2019 to 10/07/2019)
 
 # Creator(s):
 Jason MAHDJOUB
@@ -11,7 +11,7 @@ Jason MAHDJOUB (Entred in the team at 04/01/2016)
 # Modifications:
 
 
-### 4.4.0 Stable (10/07/2019)
+### 4.4.1 Stable (10/07/2019)
 * Add secure serialization tools.
 
 
