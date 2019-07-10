@@ -37,10 +37,7 @@
  */
 package com.distrimind.util.io;
 
-import java.io.DataOutput;
-import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 
 /**
  * 
@@ -48,7 +45,7 @@ import java.io.OutputStream;
  * @version 1.0
  * @since Utils 3.27.0
  */
-public abstract class RandomOutputStream extends OutputStream implements AutoCloseable, DataOutput {
+public abstract class RandomOutputStream extends SecuredObjectOutputStream implements AutoCloseable {
 	/*
 	 * public int write(byte[] _bytes) throws OutputStreamException; public int
 	 * write(byte[] _bytes, int offset, int length) throws OutputStreamException;
@@ -145,99 +142,6 @@ public abstract class RandomOutputStream extends OutputStream implements AutoClo
 
 	public RandomInputStream getUnbufferedRandomInputStream() throws IOException {
 		return getRandomInputStream();
-	}
-
-	@Override
-	public final void writeBoolean(boolean v) throws IOException {
-		write(v ? 1 : 0);
-	}
-
-	@Override
-	public final void writeByte(int v) throws IOException {
-		write(v);
-	}
-
-	@Override
-	public final void writeShort(int v) throws IOException {
-		writeUnsignedShort(v);
-	}
-
-	public final void writeUnsignedShort(int v) throws IOException {
-		if (v<0)
-			throw new IllegalArgumentException();
-		write((v >>> 8) & 0xFF);
-		write((v) & 0xFF);
-	}
-
-	public final void writeUnsignedShortInt(int v) throws IOException {
-		if (v<0)
-			throw new IllegalArgumentException();
-		write((v >>> 16) & 0xFF);
-		write((v >>> 8) & 0xFF);
-		write((v) & 0xFF);
-	}
-
-	@Override
-	public final void writeChar(int v) throws IOException {
-		write((v >>> 8) & 0xFF);
-		write((v) & 0xFF);
-	}
-
-	@Override
-	public final void writeInt(int v) throws IOException {
-		write((v >>> 24) & 0xFF);
-		write((v >>> 16) & 0xFF);
-		write((v >>>  8) & 0xFF);
-		write((v) & 0xFF);
-	}
-
-	private byte[] writeBuffer = new byte[8];
-
-	@Override
-	public final void writeLong(long v) throws IOException {
-		writeBuffer[0] = (byte)(v >>> 56);
-		writeBuffer[1] = (byte)(v >>> 48);
-		writeBuffer[2] = (byte)(v >>> 40);
-		writeBuffer[3] = (byte)(v >>> 32);
-		writeBuffer[4] = (byte)(v >>> 24);
-		writeBuffer[5] = (byte)(v >>> 16);
-		writeBuffer[6] = (byte)(v >>>  8);
-		writeBuffer[7] = (byte)(v);
-		write(writeBuffer, 0, 8);
-	}
-
-
-	@Override
-	public final void writeFloat(float v) throws IOException {
-		writeInt(Float.floatToIntBits(v));
-	}
-
-	@Override
-	public final void writeDouble(double v) throws IOException {
-		writeLong(Double.doubleToLongBits(v));
-	}
-
-	@Override
-	public final void writeBytes(String s) throws IOException {
-		int len = s.length();
-		for (int i = 0 ; i < len ; i++) {
-			write((byte)s.charAt(i));
-		}
-	}
-
-	@Override
-	public final void writeChars(String s) throws IOException {
-		int len = s.length();
-		for (int i = 0 ; i < len ; i++) {
-			int v = s.charAt(i);
-			write((v >>> 8) & 0xFF);
-			write((v) & 0xFF);
-		}
-	}
-
-	@Override
-	public final void writeUTF(String str) throws IOException {
-		new DataOutputStream(this).writeUTF(str);
 	}
 
 
