@@ -46,6 +46,7 @@ import java.io.OutputStream;
  */
 public abstract class SecuredObjectOutputStream extends OutputStream implements DataOutput {
 
+	private SerializationTools.ObjectResolver objectResolver=new SerializationTools.ObjectResolver();
 	@Override
 	public final void writeBoolean(boolean v) throws IOException {
 		write(v ? 1 : 0);
@@ -172,9 +173,14 @@ public abstract class SecuredObjectOutputStream extends OutputStream implements 
 		SerializationTools.writeClass(this, clazz, nullAccepted, rootClass);
 	}
 
-	@SuppressWarnings("RedundantThrows")
-	public SecureExternalizableWithoutInnerSizeControl replaceObject(SecureExternalizableWithoutInnerSizeControl o) throws IOException
-	{
-		return o;
+	public SerializationTools.ObjectResolver getObjectResolver() {
+		return objectResolver;
 	}
+
+	public void setObjectResolver(SerializationTools.ObjectResolver objectResolver) {
+		if (objectResolver==null)
+			throw new NullPointerException();
+		this.objectResolver = objectResolver;
+	}
+
 }

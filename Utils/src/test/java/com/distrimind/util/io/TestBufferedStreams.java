@@ -176,8 +176,8 @@ public class TestBufferedStreams {
 				StringBuilder s= new StringBuilder("test");
 				while(Math.random()<0.3)
 					s.append("0");
-				outputStream.writeUTF(s.toString());
-				dest2.writeUTF(s.toString());
+				outputStream.writeString(s.toString(), false, Integer.MAX_VALUE);
+				dest2.writeString(s.toString(), false, Integer.MAX_VALUE);
 			}
 			if (rand.nextDouble()<0.05)
 				outputStream.flush();

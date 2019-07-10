@@ -37,13 +37,12 @@
  */
 package com.distrimind.util;
 
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
-
-import com.distrimind.madkit.kernel.MadkitClassLoader;
 
 /**
  * 
@@ -113,7 +112,7 @@ public class ReflectionTools {
 
 	public static Class<?> loadClass(String class_name) {
 		try {
-			return Class.forName(class_name, true, MadkitClassLoader.getSystemClassLoader());
+			return Class.forName(class_name, true, classLoader);
 		} catch (SecurityException | ClassNotFoundException e) {
 			System.err.println("Impossible to access to the class " + class_name
 					+ ". This is an inner bug of MadKitLanEdition. Please contact the developers. Impossible to continue. See the next error :");
@@ -123,4 +122,13 @@ public class ReflectionTools {
 		}
 	}
 
+	private static volatile ClassLoader classLoader=ClassLoader.getSystemClassLoader();
+
+	public static ClassLoader getClassLoader() {
+		return classLoader;
+	}
+
+	public static void setClassLoader(ClassLoader classLoader) {
+		ReflectionTools.classLoader = classLoader;
+	}
 }

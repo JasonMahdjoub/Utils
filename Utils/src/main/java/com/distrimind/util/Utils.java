@@ -80,7 +80,7 @@ public class Utils {
 
 			c = Calendar.getInstance();
 			c.set(2019, Calendar.JUNE, 28);
-			Description d = new Description((short)4, (short)3, (short)1, Version.Type.Stable, (short)0, c.getTime());
+			d = new Description((short)4, (short)3, (short)1, Version.Type.Stable, (short)0, c.getTime());
 			d.addItem("Add BufferedRandomInputStream abd BufferedRandomOutputStream.");
 			d.addItem("Pre-allocate bytes arrays with random byte array streams.");
 			d.addItem("Gnu library dependency is now optional. It is possible to compile without it.");

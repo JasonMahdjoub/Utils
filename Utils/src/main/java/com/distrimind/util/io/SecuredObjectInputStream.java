@@ -36,6 +36,8 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 
 
+import com.distrimind.util.ReflectionTools;
+
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -50,6 +52,8 @@ import java.util.Objects;
 public abstract class SecuredObjectInputStream extends InputStream implements DataInput  {
 	private static final int DEFAULT_BUFFER_SIZE = 8192;
 	private static final int MAX_BUFFER_SIZE = Integer.MAX_VALUE - 8;
+
+	private SerializationTools.ObjectResolver objectResolver=new SerializationTools.ObjectResolver();
 
 	@Override
 	public final boolean readBoolean() throws IOException {
@@ -301,23 +305,14 @@ public abstract class SecuredObjectInputStream extends InputStream implements Da
 	{
 		return o;
 	}
-	public Class<?> resolveClass(String clazz) throws MessageExternalizationException
-	{
-		return resolveClass(clazz, true);
-	}
-	public Class<?> resolveClass(String clazz, boolean initialize) throws MessageExternalizationException
-	{
-		try
-		{
-			Class<?> c=Class.forName(clazz, initialize, SerializationTools.getClassLoader());
-			if (c==null)
-				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new ClassNotFoundException(clazz));
-			return c;
-		}
-		catch(Exception e)
-		{
-			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new ClassNotFoundException(clazz));
-		}
 
+	public SerializationTools.ObjectResolver getObjectResolver() {
+		return objectResolver;
+	}
+
+	public void setObjectResolver(SerializationTools.ObjectResolver objectResolver) {
+		if (objectResolver==null)
+			throw new NullPointerException();
+		this.objectResolver = objectResolver;
 	}
 }

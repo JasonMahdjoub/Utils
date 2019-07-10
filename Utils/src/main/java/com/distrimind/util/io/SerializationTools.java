@@ -39,6 +39,7 @@ package com.distrimind.util.io;
 
 
 import com.distrimind.util.AbstractDecentralizedID;
+import com.distrimind.util.ReflectionTools;
 import com.distrimind.util.crypto.ASymmetricKeyPair;
 import com.distrimind.util.crypto.Key;
 import com.distrimind.util.sizeof.ObjectSizer;
@@ -714,15 +715,7 @@ public class SerializationTools {
 		SerializationTools.writeString(oos, e.name(), 1000, false);
 	}
 	public final static int MAX_CLASS_LENGTH=2048;
-	private static volatile ClassLoader classLoader=ClassLoader.getSystemClassLoader();
 
-	public static ClassLoader getClassLoader() {
-		return classLoader;
-	}
-
-	public static void setClassLoader(ClassLoader classLoader) {
-		SerializationTools.classLoader = classLoader;
-	}
 
 	@SuppressWarnings("SameParameterValue")
 	static Enum<?> readEnum(final SecuredObjectInputStream ois, boolean supportNull) throws IOException, ClassNotFoundException
@@ -732,7 +725,7 @@ public class SerializationTools {
 			String clazz=SerializationTools.readString(ois, MAX_CLASS_LENGTH, false);
 			String value=SerializationTools.readString(ois, 1000, false);
 			@SuppressWarnings("rawtypes")
-			Class c=Class.forName(clazz, false, classLoader);
+			Class c=Class.forName(clazz, false, ReflectionTools.getClassLoader());
 			if (!c.isEnum())
 				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
 			try
@@ -820,7 +813,7 @@ public class SerializationTools {
 			return;
 
 		}
-		e=objectOutput.replaceObject(e);
+		e=objectOutput.getObjectResolver().replaceObject(e);
 		if (e==null)
 			throw new IOException();
 		Class<?> clazz=e.getClass();
@@ -913,12 +906,12 @@ public class SerializationTools {
 			String clazz=SerializationTools.readString(objectInput, MAX_CLASS_LENGTH, false);
 
 			boolean doubleCheck=rootClass!=Object.class;
-			Class<?> c=objectInput.resolveClass(clazz, !doubleCheck);
+			Class<?> c=objectInput.getObjectResolver().resolveClass(clazz, !doubleCheck);
 
 			if (doubleCheck) {
 				if (!rootClass.isAssignableFrom(c))
 					throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, "rootClass : "+rootClass+" ; class="+c);
-				c = Class.forName(clazz, true, classLoader);
+				c = Class.forName(clazz, true, ReflectionTools.getClassLoader());
 			}
 			return (Class<? extends RT>)c;
 		}
@@ -977,7 +970,7 @@ public class SerializationTools {
 			{
 				try
 				{
-					o=oos.replaceObject((SecureExternalizableWithoutInnerSizeControl)o);
+					o=oos.getObjectResolver().replaceObject((SecureExternalizableWithoutInnerSizeControl)o);
 					if (o==null)
 						throw new IOException();
 					writeObject(oos,o,sizeMax, false, false);
@@ -1358,5 +1351,34 @@ public class SerializationTools {
 		else
 			return ObjectSizer.sizeOf(o);
 	}
-	
+
+	public static class ObjectResolver
+	{
+		public Class<?> resolveClass(String clazz) throws MessageExternalizationException
+		{
+			return resolveClass(clazz, true);
+		}
+		public Class<?> resolveClass(String clazz, boolean initialize) throws MessageExternalizationException
+		{
+			try
+			{
+				Class<?> c=Class.forName(clazz, initialize, ReflectionTools.getClassLoader());
+				if (c==null)
+					throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new ClassNotFoundException(clazz));
+				return c;
+			}
+			catch(Exception e)
+			{
+				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new ClassNotFoundException(clazz));
+			}
+
+		}
+
+		@SuppressWarnings("RedundantThrows")
+		public SecureExternalizableWithoutInnerSizeControl replaceObject(SecureExternalizableWithoutInnerSizeControl o) throws IOException
+		{
+			return o;
+		}
+	}
+
 }
