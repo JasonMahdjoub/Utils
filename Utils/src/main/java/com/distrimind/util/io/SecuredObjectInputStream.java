@@ -300,11 +300,6 @@ public abstract class SecuredObjectInputStream extends InputStream implements Da
 		return SerializationTools.readClass(this, nullAccepted, rootClass);
 	}
 
-	@SuppressWarnings("RedundantThrows")
-	public SecureExternalizableWithoutInnerSizeControl resolveObject(SecureExternalizableWithoutInnerSizeControl o) throws IOException
-	{
-		return o;
-	}
 
 	public SerializationTools.ObjectResolver getObjectResolver() {
 		return objectResolver;

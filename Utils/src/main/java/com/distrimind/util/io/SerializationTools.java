@@ -928,7 +928,7 @@ public class SerializationTools {
 			SecureExternalizableWithoutInnerSizeControl res=(SecureExternalizableWithoutInnerSizeControl)cons.newInstance();
 			res.readExternal(objectInput);
 
-			return objectInput.resolveObject(res);
+			return objectInput.getObjectResolver().resolveObject(res);
 		}
 		catch(InvocationTargetException | NoSuchMethodException | IllegalAccessException | InstantiationException e)
 		{
@@ -1376,6 +1376,12 @@ public class SerializationTools {
 
 		@SuppressWarnings("RedundantThrows")
 		public SecureExternalizableWithoutInnerSizeControl replaceObject(SecureExternalizableWithoutInnerSizeControl o) throws IOException
+		{
+			return o;
+		}
+
+		@SuppressWarnings("RedundantThrows")
+		public SecureExternalizableWithoutInnerSizeControl resolveObject(SecureExternalizableWithoutInnerSizeControl o) throws IOException
 		{
 			return o;
 		}
