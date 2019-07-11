@@ -7,6 +7,7 @@ class EventAdderImpl implements EventAdder {
     private final int sourceId;
     private final Pool[] pools;
 
+
     EventAdderImpl(int sourceId, Pool[] pools) {
         this.sourceId = sourceId;
         this.pools = pools;
@@ -15,7 +16,7 @@ class EventAdderImpl implements EventAdder {
 
     @Override
     public void add(byte[] event) {
-        pool = (pool + 1) % pools.length;
         pools[pool].add(sourceId, event);
+        pool = (pool + 1) % pools.length;
     }
 }

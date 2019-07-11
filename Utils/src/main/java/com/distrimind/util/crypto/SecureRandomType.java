@@ -141,7 +141,16 @@ public enum SecureRandomType {
 	{
 		return getInstance(nonce, personalizationString==null?null:personalizationString.getBytes());
 	}
-	
+
+	public static void main(String[] args) throws NoSuchProviderException, NoSuchAlgorithmException {
+		System.out.println("Test native");
+		SecureRandomType.NativePRNGNonBlocking.getSingleton(null).nextBytes(new byte[262144]);
+		System.out.println("Test BC_FIPS APPROVED");
+		SecureRandomType.BC_FIPS_APPROVED.getSingleton(null).nextBytes(new byte[262144/8]);
+		System.out.println("Test FORTUNA");
+		SecureRandomType.FORTUNA_WITH_BC_FIPS_APPROVED.getSingleton(null).nextBytes(new byte[262144/8]);
+	}
+
 	/**
 	 * 
 	 * @param nonce               value to use in DRBG construction.

@@ -283,12 +283,13 @@ public class ASymmetricKeyPair extends DecentralizedValue {
 			short keySize = Bits.getShort(b, 1+off);
 			int posKey=codedTypeSize+3+off;
 			long expirationUTC;
-			boolean includeKeyExpiration=(b[off] & Key.INCLUDE_KEY_EXPIRATION_CODE) == Key.INCLUDE_KEY_EXPIRATION_CODE;
-			boolean kdhKey=(b[off] & Key.IS_XDH_KEY) == Key.IS_XDH_KEY;
+			byte type=b[off];
+			boolean includeKeyExpiration=(type & Key.INCLUDE_KEY_EXPIRATION_CODE) == Key.INCLUDE_KEY_EXPIRATION_CODE;
+			boolean kdhKey=(type & Key.IS_XDH_KEY) == Key.IS_XDH_KEY;
 			if (includeKeyExpiration)
-				b[off]-=Key.INCLUDE_KEY_EXPIRATION_CODE;
+				type-=Key.INCLUDE_KEY_EXPIRATION_CODE;
 			if (kdhKey)
-				b[off]-=Key.IS_XDH_KEY;
+				type-=Key.IS_XDH_KEY;
 			if (includeKeyExpiration) {
 
 				expirationUTC=Bits.getLong(b, posKey);
@@ -301,19 +302,19 @@ public class ASymmetricKeyPair extends DecentralizedValue {
 			System.arraycopy(b, posKey, kp, 0, kp.length);
 			byte[][] keys = Bits.separateEncodingsWithShortSizedTabs(kp);
 
-			if (b[off] == 9) {
-				ASymmetricAuthenticatedSignatureType type = ASymmetricAuthenticatedSignatureType.valueOf((int) Bits.getPositiveInteger(b, 3+off, codedTypeSize));
+			if (type == 9) {
+				ASymmetricAuthenticatedSignatureType type2 = ASymmetricAuthenticatedSignatureType.valueOf((int) Bits.getPositiveInteger(b, 3+off, codedTypeSize));
 
-				ASymmetricKeyPair res=new ASymmetricKeyPair(type, new ASymmetricPrivateKey(type, keys[0], keySize),
-						new ASymmetricPublicKey(type, keys[1], keySize, expirationUTC), keySize);
+				ASymmetricKeyPair res=new ASymmetricKeyPair(type2, new ASymmetricPrivateKey(type2, keys[0], keySize),
+						new ASymmetricPublicKey(type2, keys[1], keySize, expirationUTC), keySize);
 				res.getASymmetricPublicKey().xdhKey=kdhKey;
 				res.getASymmetricPrivateKey().xdhKey=kdhKey;
 				return res;
-			} else if (b[off] == 8) {
-				ASymmetricEncryptionType type = ASymmetricEncryptionType.valueOf((int) Bits.getPositiveInteger(b, 3+off, codedTypeSize));
+			} else if (type == 8) {
+				ASymmetricEncryptionType type2 = ASymmetricEncryptionType.valueOf((int) Bits.getPositiveInteger(b, 3+off, codedTypeSize));
 
-				ASymmetricKeyPair res=new ASymmetricKeyPair(type, new ASymmetricPrivateKey(type, keys[0], keySize),
-						new ASymmetricPublicKey(type, keys[1], keySize, expirationUTC), keySize);
+				ASymmetricKeyPair res=new ASymmetricKeyPair(type2, new ASymmetricPrivateKey(type2, keys[0], keySize),
+						new ASymmetricPublicKey(type2, keys[1], keySize, expirationUTC), keySize);
 				res.getASymmetricPublicKey().xdhKey=kdhKey;
 				res.getASymmetricPrivateKey().xdhKey=kdhKey;
 				return res;

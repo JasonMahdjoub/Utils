@@ -90,6 +90,7 @@ public enum OS {
 
 	
 	private static final double currentJREVersion;
+	private static final byte currentJREVersionByte;
 	static
 	{
 		double d;
@@ -103,6 +104,7 @@ public enum OS {
 		}
 		
 		currentJREVersion=d;
+		currentJREVersionByte=currentJREVersion>2.0?(byte)currentJREVersion:(byte)((currentJREVersion-1.0)*10.0);
 	}
 
 	public static double getCurrentJREVersionDouble()
@@ -111,7 +113,7 @@ public enum OS {
 	}
 	public static byte getCurrentJREVersionByte()
 	{
-		return (byte)(currentJREVersion-1.0*10.0);
+		return currentJREVersionByte;
 	}
 	
 
@@ -200,4 +202,12 @@ public enum OS {
                 res.add(v);
         return res;
     }
+
+    public static void main(String[] args)
+	{
+		System.out.println(getCurrentJREVersionDouble());
+		System.out.println(getCurrentJREVersionByte());
+		System.out.println(getCurrentOSVersion());
+
+	}
 }

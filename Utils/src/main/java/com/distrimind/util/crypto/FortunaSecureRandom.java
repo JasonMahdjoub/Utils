@@ -68,15 +68,47 @@ public class FortunaSecureRandom extends AbstractSecureRandom implements Seriali
 	{
 		final Fortuna fortuna;
 		@SuppressWarnings("unused")
-		protected SRSpi(ScheduledExecutorService scheduledExecutorService) {
+		protected SRSpi(ScheduledExecutorService scheduledExecutorService, SecureRandomType type, byte[] nonce, byte[] personalizationString) throws NoSuchProviderException, NoSuchAlgorithmException {
 			super(false);
 			if (scheduledExecutorService==null)
 				throw new NullPointerException();
-			fortuna=new Fortuna(scheduledExecutorService);
+			if (type== SecureRandomType.FORTUNA_WITH_BC_FIPS_APPROVED) {
+				fortuna=new Fortuna(scheduledExecutorService,
+						SecureRandomType.SHA1PRNG.getSingleton(nonce, personalizationString),
+						SecureRandomType.BC_FIPS_APPROVED.getSingleton(nonce, personalizationString));
+			}
+			else if (type== SecureRandomType.FORTUNA_WITH_BC_FIPS_APPROVED_FOR_KEYS) {
+				fortuna=new Fortuna(scheduledExecutorService,
+						SecureRandomType.SHA1PRNG.getSingleton(nonce, personalizationString),
+						SecureRandomType.BC_FIPS_APPROVED_FOR_KEYS.getSingleton(nonce, personalizationString));
+			}
+			else if (type== SecureRandomType.FORTUNA_WITH_BC_FIPS_APPROVED_FOR_KEYS_With_NativePRNG) {
+				fortuna=new Fortuna(scheduledExecutorService,
+						SecureRandomType.SHA1PRNG.getSingleton(nonce, personalizationString),
+						SecureRandomType.BC_FIPS_APPROVED_FOR_KEYS_With_NativePRNG.getSingleton(nonce, personalizationString));
+			}
+			else
+				throw new IllegalAccessError();
 		}
-		protected SRSpi() {
+		protected SRSpi(SecureRandomType type, byte[] nonce, byte[] personalizationString) throws NoSuchProviderException, NoSuchAlgorithmException {
 			super(false);
-			fortuna=new Fortuna();
+			if (type.getAlgorithmName().equals(SecureRandomType.FORTUNA_WITH_BC_FIPS_APPROVED.getAlgorithmName())) {
+				fortuna=new Fortuna(
+						SecureRandomType.SHA1PRNG.getSingleton(nonce, personalizationString),
+						SecureRandomType.BC_FIPS_APPROVED.getSingleton(nonce, personalizationString));
+			}
+			else if (type.getAlgorithmName().equals(SecureRandomType.FORTUNA_WITH_BC_FIPS_APPROVED_FOR_KEYS.getAlgorithmName())) {
+				fortuna=new Fortuna(
+						SecureRandomType.SHA1PRNG.getSingleton(nonce, personalizationString),
+						SecureRandomType.BC_FIPS_APPROVED_FOR_KEYS.getSingleton(nonce, personalizationString));
+			}
+			else if (type.getAlgorithmName().equals(SecureRandomType.FORTUNA_WITH_BC_FIPS_APPROVED_FOR_KEYS_With_NativePRNG.getAlgorithmName())) {
+				fortuna=new Fortuna(
+						SecureRandomType.SHA1PRNG.getSingleton(nonce, personalizationString),
+						SecureRandomType.BC_FIPS_APPROVED_FOR_KEYS_With_NativePRNG.getSingleton(nonce, personalizationString));
+			}
+			else
+				throw new IllegalAccessError();
 		}
 
 		@Override
@@ -108,10 +140,9 @@ public class FortunaSecureRandom extends AbstractSecureRandom implements Seriali
 		checkSources();
 	}*/
 	FortunaSecureRandom(SecureRandomType type, byte[] nonce, byte[] personalizationString) throws NoSuchProviderException, NoSuchAlgorithmException {
-		super(new SRSpi(), type);
+		super(new SRSpi(type, nonce, personalizationString), type);
 		this.nonce=nonce;
 		this.personalizationString=personalizationString;
-		checkSources();
 	}
 
 	@Override
@@ -166,7 +197,7 @@ public class FortunaSecureRandom extends AbstractSecureRandom implements Seriali
 	private void readObject(java.io.ObjectInputStream in)
 			throws IOException, ClassNotFoundException
 	{
-		super.secureRandomSpi=new SRSpi();
+
 		super.type=null;
 		int code=in.readInt();
 		for (SecureRandomType srt : SecureRandomType.values()) {
@@ -177,11 +208,7 @@ public class FortunaSecureRandom extends AbstractSecureRandom implements Seriali
 		}
 		if (super.type==null)
 			super.type=SecureRandomType.FORTUNA_WITH_BC_FIPS_APPROVED_FOR_KEYS;
-		try {
-			checkSources();
-		} catch (NoSuchProviderException | NoSuchAlgorithmException e) {
-			throw new IOException(e);
-		}
+
 		byte[] seed=new byte[32];
 		in.readFully(seed);
 		setSeed(seed);
@@ -205,21 +232,12 @@ public class FortunaSecureRandom extends AbstractSecureRandom implements Seriali
 			personalizationString=new byte[s];
 			in.readFully(personalizationString);
 		}
+		try {
+			super.secureRandomSpi=new SRSpi(type, nonce, personalizationString);
+		} catch (NoSuchProviderException | NoSuchAlgorithmException e) {
+			throw new IOException(e);
+		}
 
 	}
-	private void checkSources() throws NoSuchProviderException, NoSuchAlgorithmException {
 
-		if (getType()== SecureRandomType.FORTUNA_WITH_BC_FIPS_APPROVED) {
-			addSecureRandomSource(SecureRandomType.SHA1PRNG.getSingleton(nonce, personalizationString));
-			addSecureRandomSource(SecureRandomType.BC_FIPS_APPROVED.getSingleton(nonce, personalizationString));
-		}
-		else if (getType()== SecureRandomType.FORTUNA_WITH_BC_FIPS_APPROVED_FOR_KEYS) {
-			addSecureRandomSource(SecureRandomType.SHA1PRNG.getSingleton(nonce, personalizationString));
-			addSecureRandomSource(SecureRandomType.BC_FIPS_APPROVED_FOR_KEYS.getSingleton(nonce, personalizationString));
-		}
-		else if (getType()== SecureRandomType.FORTUNA_WITH_BC_FIPS_APPROVED_FOR_KEYS_With_NativePRNG) {
-			addSecureRandomSource(SecureRandomType.SHA1PRNG.getSingleton(nonce, personalizationString));
-			addSecureRandomSource(SecureRandomType.BC_FIPS_APPROVED_FOR_KEYS_With_NativePRNG.getSingleton(nonce, personalizationString));
-		}
-	}
 }

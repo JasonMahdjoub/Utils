@@ -59,14 +59,15 @@ public abstract class SecuredObjectOutputStream extends OutputStream implements 
 
 	@Override
 	public final void writeShort(int v) throws IOException {
-		writeUnsignedShort(v);
+		write((v >>> 8) & 0xFF);
+		write((v) & 0xFF);
+
 	}
 
 	public final void writeUnsignedShort(int v) throws IOException {
 		if (v<0)
 			throw new IllegalArgumentException();
-		write((v >>> 8) & 0xFF);
-		write((v) & 0xFF);
+		writeShort(v);
 	}
 
 	public final void writeUnsignedShortInt(int v) throws IOException {

@@ -48,13 +48,14 @@ public class Fortuna extends Random {
             if (personalDefaultScheduledExecutorService!=null)
                 return personalDefaultScheduledExecutorService;
             if (defaultScheduledExecutorService==null) {
-                return defaultScheduledExecutorService = Executors.newSingleThreadScheduledExecutor(new ThreadFactory() {
+                defaultScheduledExecutorService = Executors.newSingleThreadScheduledExecutor(new ThreadFactory() {
                     private final ThreadFactory delegate = Executors.defaultThreadFactory();
 
                     @Override
                     public Thread newThread(Runnable r) {
                         Thread thread = delegate.newThread(r);
                         thread.setDaemon(true);
+                        thread.setName("FORTUNA Thread");
                         return thread;
                     }
                 });
@@ -113,19 +114,19 @@ public class Fortuna extends Random {
         return new Fortuna(scheduler);
     }
 
-    public Fortuna()  {
+    public Fortuna(AbstractSecureRandom ... secureRandoms)  {
         this(createDefaultScheduler());
         if (this.scheduler!=getPersonalDefaultScheduledExecutorService())
             this.createdScheduler = true;
     }
 
 
-    public Fortuna(ScheduledExecutorService scheduler) {
+    public Fortuna(ScheduledExecutorService scheduler, AbstractSecureRandom ... secureRandoms) {
         this.createdScheduler = false;
         this.generator = new Generator();
         this.randomDataBuffer = new RandomDataBuffer();
         AtomicReference<SecureRandomSource> secureRandomSource=new AtomicReference<>();
-        this.accumulator = createAccumulator(scheduler, secureRandomSource);
+        this.accumulator = createAccumulator(scheduler, secureRandomSource, secureRandoms);
         this.secureRandomSource=secureRandomSource.get();
         this.randomDataPrefetcher = new PrefetchingSupplier<>(new Callable<byte[]>() {
             @Override
@@ -137,7 +138,7 @@ public class Fortuna extends Random {
         this.scheduler = scheduler;
     }
 
-    private static Accumulator createAccumulator(ScheduledExecutorService scheduler, AtomicReference<SecureRandomSource> secureRandomSource) {
+    private static Accumulator createAccumulator(ScheduledExecutorService scheduler, AtomicReference<SecureRandomSource> secureRandomSource, AbstractSecureRandom ... secureRandoms) {
         Pool[] pools = new Pool[32];
         for (int pool = 0; pool < pools.length; pool++) {
             pools[pool] = new Pool();
@@ -153,12 +154,15 @@ public class Fortuna extends Random {
         accumulator.addSource(new MemoryPoolEntropySource());
         secureRandomSource.set(new SecureRandomSource());
         accumulator.addSource(secureRandomSource.get());
+        for (AbstractSecureRandom secureRandom : secureRandoms)
+            secureRandomSource.get().add(secureRandom);
         if (Files.exists(Paths.get("/dev/urandom"))) {
             accumulator.addSource(new URandomEntropySource());
         }
         while (pools[0].size() < MIN_POOL_SIZE) {
             try {
                 secureRandomSource.get().setUpdate(true);
+                assert !scheduler.isShutdown() && !scheduler.isTerminated();
                 Thread.sleep(10);
             } catch (InterruptedException e) {
                 throw new Error("Interrupted while waiting for initialization", e);

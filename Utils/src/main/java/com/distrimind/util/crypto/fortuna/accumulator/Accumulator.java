@@ -32,6 +32,7 @@ public class Accumulator {
         entropySource.schedule((new EventScheduler() {
             @Override
             public void schedule(long delay, TimeUnit timeUnit) {
+
                 entropyFutures.add(scheduler.scheduleWithFixedDelay(new Runnable() {
                     @Override
                     public void run() {
