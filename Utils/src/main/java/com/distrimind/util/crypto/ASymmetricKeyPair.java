@@ -39,7 +39,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
 
-import com.distrimind.util.DecentralizedValue;
 import org.apache.commons.codec.binary.Base64;
 
 import com.distrimind.util.Bits;
@@ -50,7 +49,7 @@ import com.distrimind.util.Bits;
  * @version 3.3
  * @since Utils 1.7.1
  */
-public class ASymmetricKeyPair extends DecentralizedValue {
+public class ASymmetricKeyPair extends com.distrimind.util.crypto.KeyPair {
 	/**
 	 * 
 	 */
@@ -66,7 +65,7 @@ public class ASymmetricKeyPair extends DecentralizedValue {
 
 	private ASymmetricPublicKey publicKey;
 
-	private final short keySizeBits;
+	private final int keySizeBits;
 
 	private final ASymmetricEncryptionType encryptionType;
 	private final ASymmetricAuthenticatedSignatureType signatureType;
@@ -77,6 +76,7 @@ public class ASymmetricKeyPair extends DecentralizedValue {
 
 	private transient volatile Object gnuKeyPair;
 
+	@Override
 	public void zeroize()
 	{
 		privateKey=null;
@@ -95,12 +95,7 @@ public class ASymmetricKeyPair extends DecentralizedValue {
 		}
 	}
 	
-	@SuppressWarnings("deprecation")
-	@Override public void finalize()
-	{
-		zeroize();
-	}
-	
+
 	ASymmetricKeyPair(ASymmetricEncryptionType type, ASymmetricPrivateKey privateKey, ASymmetricPublicKey publicKey,
 			short keySize) {
 		if (type == null)
@@ -231,22 +226,22 @@ public class ASymmetricKeyPair extends DecentralizedValue {
 		hashCode = privateKey.hashCode() + publicKey.hashCode();
 		this.nativeKeyPair=keyPair;
 	}
-	
-	
+
+	@Override
 	public byte[] encode(boolean includeTimeExpiration) {
-		int codedTypeSize=ASymmetricPrivateKey.getEncodedTypeSize();
+
 		byte[] kp=Bits.concateEncodingWithShortSizedTabs(privateKey.getBytesPrivateKey(), publicKey.getBytesPublicKey());
-		byte[] tab = new byte[3+codedTypeSize+kp.length+(includeTimeExpiration?8:0)];
+		byte[] tab = new byte[3+ASymmetricPrivateKey.ENCODED_TYPE_SIZE+kp.length+(includeTimeExpiration?8:0)];
 		tab[0]=encryptionType==null?(byte)9:(byte)8;
 		if (includeTimeExpiration)
 			tab[0]|=Key.INCLUDE_KEY_EXPIRATION_CODE;
 		if (privateKey.xdhKey)
 			tab[0]|=Key.IS_XDH_KEY;
-		Bits.putShort(tab, 1, keySizeBits);
-		Bits.putPositiveInteger(tab, 3, encryptionType==null?signatureType.ordinal():encryptionType.ordinal(), codedTypeSize);
-		int pos=3+codedTypeSize;
+		Bits.putPositiveInteger(tab, 1, keySizeBits/8, 2);
+		Bits.putPositiveInteger(tab, 3, encryptionType==null?signatureType.ordinal():encryptionType.ordinal(), ASymmetricPrivateKey.ENCODED_TYPE_SIZE);
+		int pos=3+ASymmetricPrivateKey.ENCODED_TYPE_SIZE;
 		if (includeTimeExpiration) {
-			Bits.putLong(tab, 3 + codedTypeSize, publicKey.getTimeExpirationUTC());
+			Bits.putLong(tab, 3 + ASymmetricPrivateKey.ENCODED_TYPE_SIZE, publicKey.getTimeExpirationUTC());
 			pos += 8;
 		}
 		System.arraycopy(kp, 0, tab, pos, kp.length);
@@ -269,10 +264,6 @@ public class ASymmetricKeyPair extends DecentralizedValue {
 		return decode(b, 0, b.length, fillArrayWithZerosWhenDecoded);
 	}
 
-	@Override
-	public byte[] encodeWithDefaultParameters() {
-		return encode(true);
-	}
 
 	public static ASymmetricKeyPair decode(byte[] b, int off, int len, boolean fillArrayWithZerosWhenDecoded) throws IllegalArgumentException {
 		if (off<0 || len<0 || len+off>b.length)
@@ -284,6 +275,7 @@ public class ASymmetricKeyPair extends DecentralizedValue {
 			int posKey=codedTypeSize+3+off;
 			long expirationUTC;
 			byte type=b[off];
+
 			boolean includeKeyExpiration=(type & Key.INCLUDE_KEY_EXPIRATION_CODE) == Key.INCLUDE_KEY_EXPIRATION_CODE;
 			boolean kdhKey=(type & Key.IS_XDH_KEY) == Key.IS_XDH_KEY;
 			if (includeKeyExpiration)
@@ -318,8 +310,15 @@ public class ASymmetricKeyPair extends DecentralizedValue {
 				res.getASymmetricPublicKey().xdhKey=kdhKey;
 				res.getASymmetricPrivateKey().xdhKey=kdhKey;
 				return res;
-			} else
+			} else {
+
 				throw new IllegalArgumentException();
+			}
+		}
+		catch (IllegalArgumentException e)
+		{
+			fillArrayWithZerosWhenDecoded=false;
+			throw e;
 		}
 		finally {
 			if (fillArrayWithZerosWhenDecoded)
@@ -343,6 +342,7 @@ public class ASymmetricKeyPair extends DecentralizedValue {
 		return false;
 	}
 
+	@Override
 	public long getTimeExpirationUTC() {
 		return publicKey.getTimeExpirationUTC();
 	}
@@ -362,7 +362,7 @@ public class ASymmetricKeyPair extends DecentralizedValue {
 		return publicKey;
 	}
 
-	public short getKeySizeBits() {
+	public int getKeySizeBits() {
 		return keySizeBits;
 	}
 
@@ -378,6 +378,7 @@ public class ASymmetricKeyPair extends DecentralizedValue {
 		return hashCode;
 	}
 
+	@Override
 	public Object toGnuKeyPair()throws NoSuchAlgorithmException, InvalidKeySpecException
 	{
 		if (gnuKeyPair == null)
@@ -401,7 +402,7 @@ public class ASymmetricKeyPair extends DecentralizedValue {
 	 * { return new ASymmetricKeyPair(type, type.getKeyPairGenerator(random,
 	 * keySize).generateKeyPair(), keySize); }
 	 */
-
+	@Override
 	public KeyPair toJavaNativeKeyPair()
 			throws NoSuchAlgorithmException, InvalidKeySpecException {
 		if (nativeKeyPair == null)
@@ -410,13 +411,10 @@ public class ASymmetricKeyPair extends DecentralizedValue {
 		return nativeKeyPair;
 	}
 
+
 	@Override
-	public String toString() {
-		try {
-			return Base64.encodeBase64URLSafeString(encode(true));
-		} catch (Exception e) {
-			return e.toString();
-		}
+	public boolean isPostQuantumKey() {
+		return encryptionType==null?signatureType.isPostQuantumAlgorithm():encryptionType.isPostQuantumAlgorithm();
 	}
 
 }

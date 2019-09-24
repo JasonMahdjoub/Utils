@@ -726,4 +726,8 @@ public enum ASymmetricEncryptionType {
 	{
 		return bcAlgorithm;
 	}
+
+	public boolean isPostQuantumAlgorithm() {
+		return false;
+	}
 }

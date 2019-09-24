@@ -64,9 +64,10 @@ public class ASymmetricPrivateKey extends Key {
 
 
 	// private final PrivateKey privateKey;
+	public static final int MAX_KEY_SIZE_BITS=0x7FFF8;
 	private byte[] privateKey;
 
-	private final short keySizeBits;
+	private final int keySizeBits;
 
 	private ASymmetricEncryptionType encryptionType;
 	private ASymmetricAuthenticatedSignatureType signatureType;
@@ -106,14 +107,19 @@ public class ASymmetricPrivateKey extends Key {
         return privateKey;
     }
 
-    ASymmetricPrivateKey(ASymmetricEncryptionType type, byte[] privateKey, short keySize) {
+	@Override
+	public boolean isPostQuantumKey() {
+		return encryptionType==null?signatureType.isPostQuantumAlgorithm():encryptionType.isPostQuantumAlgorithm();
+	}
+
+	ASymmetricPrivateKey(ASymmetricEncryptionType type, byte[] privateKey, int keySize) {
 		this(privateKey, keySize);
 		if (type == null)
 			throw new NullPointerException("type");
 		this.encryptionType = type;
 		this.signatureType=null;
 	}
-	ASymmetricPrivateKey(ASymmetricAuthenticatedSignatureType type, byte[] privateKey, short keySize) {
+	ASymmetricPrivateKey(ASymmetricAuthenticatedSignatureType type, byte[] privateKey, int keySize) {
 		this(privateKey, keySize);
 		if (type == null)
 			throw new NullPointerException("type");
@@ -121,7 +127,7 @@ public class ASymmetricPrivateKey extends Key {
 		this.signatureType=type;
 	}
 
-	ASymmetricPrivateKey(ASymmetricEncryptionType type, Object privateKey, short keySize) {
+	ASymmetricPrivateKey(ASymmetricEncryptionType type, Object privateKey, int keySize) {
 		this(privateKey, keySize);
 		if (type == null)
 			throw new NullPointerException("type");
@@ -129,7 +135,7 @@ public class ASymmetricPrivateKey extends Key {
 		this.signatureType=null;
 		
 	}
-	ASymmetricPrivateKey(ASymmetricAuthenticatedSignatureType type, Object privateKey, short keySize) {
+	ASymmetricPrivateKey(ASymmetricAuthenticatedSignatureType type, Object privateKey, int keySize) {
 		this(privateKey, keySize);
 		if (type == null)
 			throw new NullPointerException("type");
@@ -137,7 +143,7 @@ public class ASymmetricPrivateKey extends Key {
 		this.signatureType=type;
 	}
 
-	ASymmetricPrivateKey(ASymmetricEncryptionType type, PrivateKey privateKey, short keySize) {
+	ASymmetricPrivateKey(ASymmetricEncryptionType type, PrivateKey privateKey, int keySize) {
 		this(ASymmetricEncryptionType.encodePrivateKey(privateKey, type), keySize);
 		if (type == null)
 			throw new NullPointerException("type");
@@ -146,7 +152,7 @@ public class ASymmetricPrivateKey extends Key {
 		this.encryptionType = type;
 		this.signatureType=null;
 	}
-	ASymmetricPrivateKey(ASymmetricAuthenticatedSignatureType type, PrivateKey privateKey, short keySize, boolean xdhKey) {
+	ASymmetricPrivateKey(ASymmetricAuthenticatedSignatureType type, PrivateKey privateKey, int keySize, boolean xdhKey) {
 		this(ASymmetricEncryptionType.encodePrivateKey(privateKey, type, xdhKey), keySize);
 		if (type == null)
 			throw new NullPointerException("type");
@@ -165,20 +171,24 @@ public class ASymmetricPrivateKey extends Key {
 			return new ASymmetricPrivateKey(signatureType, privateKey.clone(), keySizeBits);
 	}
 
-	private ASymmetricPrivateKey(byte[] privateKey, short keySize) {
+	private ASymmetricPrivateKey(byte[] privateKey, int keySize) {
 		if (privateKey == null)
 			throw new NullPointerException("privateKey");
 		if (keySize < 256)
+			throw new IllegalArgumentException("keySize");
+		if (keySize>MAX_KEY_SIZE_BITS)
 			throw new IllegalArgumentException("keySize");
 		this.privateKey = privateKey;
 		this.keySizeBits = keySize;
 		hashCode = Arrays.hashCode(privateKey);
 	}
 
-	private ASymmetricPrivateKey(Object privateKey, short keySize) {
+	private ASymmetricPrivateKey(Object privateKey, int keySize) {
 		if (privateKey == null)
 			throw new NullPointerException("privateKey");
 		if (keySize < 256)
+			throw new IllegalArgumentException("keySize");
+		if (keySize>MAX_KEY_SIZE_BITS)
 			throw new IllegalArgumentException("keySize");
 		this.privateKey = ASymmetricEncryptionType.encodeGnuPrivateKey(privateKey);
 		this.keySizeBits = keySize;
@@ -187,32 +197,32 @@ public class ASymmetricPrivateKey extends Key {
 	}
 
 
-
-	static int getEncodedTypeSize()
+	public static final int ENCODED_TYPE_SIZE;
+	static
 	{
 		int max=Math.max(ASymmetricEncryptionType.values().length, ASymmetricAuthenticatedSignatureType.values().length);
 		if (max<=0xFF)
-			return 1;
+			ENCODED_TYPE_SIZE=1;
 		else if (max<=0xFFFF)
-			return 2;
+			ENCODED_TYPE_SIZE=2;
 		else if (max<=0xFFFFFF)
-			return 3;
+			ENCODED_TYPE_SIZE=3;
 		else
-			return 4;
+			ENCODED_TYPE_SIZE=4;
+
 	}
+
 	@Override
 	public byte[] encode(boolean includeTimeExpiration) {
 		return encode();
 	}
 
 	public byte[] encode() {
-		int codedTypeSize=getEncodedTypeSize();
-		byte[] tab = new byte[3+codedTypeSize+privateKey.length];
-
+		byte[] tab = new byte[3+ENCODED_TYPE_SIZE+privateKey.length];
 		tab[0]=encryptionType==null?(byte)((xdhKey?Key.IS_XDH_KEY:0)|2):(byte)3;
-		Bits.putShort(tab, 1, keySizeBits);
-		Bits.putPositiveInteger(tab, 3, encryptionType==null?signatureType.ordinal():encryptionType.ordinal(), codedTypeSize);
-        System.arraycopy(privateKey, 0, tab, codedTypeSize+3, privateKey.length);
+		Bits.putPositiveInteger(tab, 1, keySizeBits/8, 2);
+		Bits.putPositiveInteger(tab, 3, encryptionType==null?signatureType.ordinal():encryptionType.ordinal(), ENCODED_TYPE_SIZE);
+        System.arraycopy(privateKey, 0, tab, ENCODED_TYPE_SIZE+3, privateKey.length);
         return tab;
 	}
 
@@ -240,7 +250,7 @@ public class ASymmetricPrivateKey extends Key {
 		return privateKey;
 	}
 
-	public short getKeySizeBits() {
+	public int getKeySizeBits() {
 		return keySizeBits;
 	}
 
