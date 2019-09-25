@@ -50,71 +50,128 @@ import com.distrimind.util.Bits;
  * @since Utils 1.7
  */
 public class ASymmetricAuthenticatedSignatureCheckerAlgorithm extends AbstractAuthenticatedCheckerAlgorithm {
-	private final ASymmetricPublicKey distantPublicKey;
-
-	private final AbstractSignature signer;
-	private final ASymmetricAuthenticatedSignatureType type;
-
-	private byte[] signature=null;
-	public ASymmetricAuthenticatedSignatureCheckerAlgorithm(ASymmetricPublicKey distantPublicKey)
-			throws NoSuchAlgorithmException, NoSuchProviderException {
-		if (distantPublicKey == null)
-			throw new NullPointerException("distantPublicKey");
-		type=distantPublicKey.getAuthentifiedSignatureAlgorithmType();
-		if (type==null)
-			throw new IllegalArgumentException("The given key is not destinated to a signature process");
-		this.distantPublicKey = distantPublicKey;
-		this.signer = type.getSignatureInstance();
+	private final AbstractAuthenticatedCheckerAlgorithm checker;
+	public ASymmetricAuthenticatedSignatureCheckerAlgorithm(IASymmetricPublicKey distantPublicKey) throws NoSuchProviderException, NoSuchAlgorithmException {
+		if (distantPublicKey instanceof ASymmetricPublicKey)
+			checker=new Checker((ASymmetricPublicKey)distantPublicKey);
+		else
+			checker=new HybridChecker((HybridASymmetricPublicKey)distantPublicKey);
 	}
 
-	public ASymmetricPublicKey getDistantPublicKey() {
-		return distantPublicKey;
-	}
 
-	
 
 	@Override
-	public void init(byte[] signature, int offs, int lens)
-			throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, InvalidAlgorithmParameterException, InvalidParameterSpecException, IOException {
-		if (type== ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA256withRSAandMGF1 || type== ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA384withRSAandMGF1 || type== ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA512withRSAandMGF1)
-		{
-			byte[][] tmp=Bits.separateEncodingsWithIntSizedTabs(signature, offs, lens);
-			this.signature=tmp[0];
-			byte[] encParameters=tmp[1];
-			AlgorithmParameters pssParameters;
-			pssParameters = AlgorithmParameters.getInstance("PSS","BCFIPS");
-			pssParameters.init(encParameters);
-
-			PSSParameterSpec pssParameterSpec = pssParameters.getParameterSpec(PSSParameterSpec.class);
-			((JavaNativeSignature)signer).getSignature().setParameter(pssParameterSpec);
-		}
-		else
-		{
-			this.signature=new byte[lens];
-			
-			System.arraycopy(signature, offs, this.signature, 0, this.signature.length);
-		}
-		signer.initVerify(distantPublicKey);
-
-		
+	public void init(byte[] signature, int offs, int lens) throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, InvalidAlgorithmParameterException, InvalidParameterSpecException, IOException {
+		checker.init(signature, offs, lens);
 	}
+
 
 	@Override
 	public void update(byte[] message, int offm, int lenm) throws SignatureException {
-		signer.update(message, offm, lenm);
-		
-		
+		checker.update(message, offm, lenm);
 	}
 
 	@Override
 	public boolean verify() throws SignatureException, IllegalStateException {
-		try
-		{
-			return signer.verify(signature);
+		return checker.verify();
+	}
+
+
+	private static class HybridChecker extends AbstractAuthenticatedCheckerAlgorithm {
+		private final Checker checkerPQC, checkerNonPQC;
+		private boolean signatureValid=true;
+		HybridChecker(HybridASymmetricPublicKey distantPublicKey) throws NoSuchProviderException, NoSuchAlgorithmException {
+			checkerNonPQC=new Checker(distantPublicKey.getNonPQCPublicKey());
+			checkerPQC=new Checker(distantPublicKey.getPQCPublicKey());
 		}
-		finally
-		{
-			signature=null;
+
+		@Override
+		public void init(byte[] signature, int offs, int lens) throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, InvalidAlgorithmParameterException, InvalidParameterSpecException, IOException {
+			int len=(int)Bits.getPositiveInteger(signature, offs, 3);
+			signatureValid=len+3<lens;
+			if (signatureValid) {
+				checkerNonPQC.init(signature, offs+3, len);
+				checkerPQC.init(signature,offs+3+len, lens-len-3);
+			}
+		}
+
+		@Override
+		public void update(byte[] message, int offm, int lenm) throws SignatureException {
+			if (signatureValid) {
+				checkerNonPQC.update(message, offm, lenm);
+				checkerPQC.update(message, offm, lenm);
+			}
+		}
+
+		@Override
+		public boolean verify() throws SignatureException, IllegalStateException {
+			if (signatureValid)
+				return checkerNonPQC.verify() && checkerPQC.verify();
+			else
+				return false;
+		}
+	}
+	private static class Checker extends AbstractAuthenticatedCheckerAlgorithm {
+		private final ASymmetricPublicKey distantPublicKey;
+
+		private final AbstractSignature signer;
+		private final ASymmetricAuthenticatedSignatureType type;
+
+		private byte[] signature = null;
+
+		public Checker(ASymmetricPublicKey distantPublicKey)
+				throws NoSuchAlgorithmException, NoSuchProviderException {
+			if (distantPublicKey == null)
+				throw new NullPointerException("distantPublicKey");
+			type = distantPublicKey.getAuthentifiedSignatureAlgorithmType();
+			if (type == null)
+				throw new IllegalArgumentException("The given key is not destinated to a signature process");
+			this.distantPublicKey = distantPublicKey;
+			this.signer = type.getSignatureInstance();
+		}
+
+		public ASymmetricPublicKey getDistantPublicKey() {
+			return distantPublicKey;
+		}
+
+
+		@Override
+		public void init(byte[] signature, int offs, int lens)
+				throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, InvalidAlgorithmParameterException, InvalidParameterSpecException, IOException {
+			if (type == ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA256withRSAandMGF1 || type == ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA384withRSAandMGF1 || type == ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA512withRSAandMGF1) {
+				byte[][] tmp = Bits.separateEncodingsWithIntSizedTabs(signature, offs, lens);
+				this.signature = tmp[0];
+				byte[] encParameters = tmp[1];
+				AlgorithmParameters pssParameters;
+				pssParameters = AlgorithmParameters.getInstance("PSS", "BCFIPS");
+				pssParameters.init(encParameters);
+
+				PSSParameterSpec pssParameterSpec = pssParameters.getParameterSpec(PSSParameterSpec.class);
+				((JavaNativeSignature) signer).getSignature().setParameter(pssParameterSpec);
+			} else {
+				this.signature = new byte[lens];
+
+				System.arraycopy(signature, offs, this.signature, 0, this.signature.length);
+			}
+			signer.initVerify(distantPublicKey);
+
+
+		}
+
+		@Override
+		public void update(byte[] message, int offm, int lenm) throws SignatureException {
+			signer.update(message, offm, lenm);
+
+
+		}
+
+		@Override
+		public boolean verify() throws SignatureException, IllegalStateException {
+			try {
+				return signer.verify(signature);
+			} finally {
+				signature = null;
+			}
 		}
 	}
 

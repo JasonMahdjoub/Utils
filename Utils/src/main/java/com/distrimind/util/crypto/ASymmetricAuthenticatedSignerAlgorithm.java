@@ -43,6 +43,8 @@ import java.security.spec.PSSParameterSpec;
 
 import com.distrimind.util.Bits;
 
+import javax.crypto.ShortBufferException;
+
 /**
  * 
  * @author Jason Mahdjoub
@@ -50,89 +52,164 @@ import com.distrimind.util.Bits;
  * @since Utils 1.7
  */
 public class ASymmetricAuthenticatedSignerAlgorithm extends AbstractAuthentifiedSignerAlgorithm {
-	private final ASymmetricPrivateKey localPrivateKey;
-	private final AbstractSignature signature;
-	private final int macLength;
-	private final ASymmetricAuthenticatedSignatureType type;
-	private boolean includeParameter=false;
-	@SuppressWarnings("deprecation")
-	public ASymmetricAuthenticatedSignerAlgorithm(ASymmetricPrivateKey localPrivateKey) throws NoSuchAlgorithmException, NoSuchProviderException {
-		if (localPrivateKey == null)
-			throw new NullPointerException("localPrivateKey");
-		type=localPrivateKey.getAuthentifiedSignatureAlgorithmType();
-		if (type==null)
-			throw new IllegalArgumentException("The given key is not destinated to a signature process");
-		this.localPrivateKey = localPrivateKey;
-		this.signature = type.getSignatureInstance();
-		this.macLength = type.getSignatureSizeBytes(localPrivateKey.getKeySizeBits());
-	}
 
-	public ASymmetricPrivateKey getLocalPrivateKey() {
-		return localPrivateKey;
-	}
+	private final AbstractAuthentifiedSignerAlgorithm signer;
 
-	public AbstractSignature getSignatureAlgorithm() {
-		return signature;
+	public ASymmetricAuthenticatedSignerAlgorithm(IASymmetricPrivateKey localPrivateKey) throws NoSuchProviderException, NoSuchAlgorithmException {
+		if (localPrivateKey instanceof ASymmetricPrivateKey)
+			signer=new Signer((ASymmetricPrivateKey)localPrivateKey);
+		else
+			signer=new HybridSigner((HybridASymmetricPrivateKey) localPrivateKey);
 	}
 
 
 	@Override
 	public void init() throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidAlgorithmParameterException {
-		includeParameter=false;
-		if (type== ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA256withRSAandMGF1)
-		{
-			((JavaNativeSignature)signature).getSignature().setParameter(new PSSParameterSpec("SHA-256","MGF1",new MGF1ParameterSpec("SHA-256"),0, PSSParameterSpec.DEFAULT.getTrailerField()));
-			includeParameter=true;
-		}
-		else if (type== ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA384withRSAandMGF1)
-		{
-			((JavaNativeSignature)signature).getSignature().setParameter(new PSSParameterSpec("SHA-384","MGF1",new MGF1ParameterSpec("SHA-384"),0, PSSParameterSpec.DEFAULT.getTrailerField()));
-			includeParameter=true;
-		}
-		else if (type== ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA512withRSAandMGF1)
-		{
-			((JavaNativeSignature)signature).getSignature().setParameter(new PSSParameterSpec("SHA-512","MGF1",new MGF1ParameterSpec("SHA-512"),0, PSSParameterSpec.DEFAULT.getTrailerField()));
-			includeParameter=true;
-		}
-
-		signature.initSign(localPrivateKey);
+		signer.init();
 	}
+
 
 	@Override
 	public void update(byte[] message, int offm, int lenm) throws SignatureException {
-		this.signature.update(message, offm, lenm);
+		signer.update(message, offm, lenm);
 	}
 
 	@Override
-	public byte[] getSignature() throws IllegalStateException, SignatureException, IOException {
-		
-		byte[] s=this.signature.sign();
-		if (includeParameter)
-		{
-			return Bits.concateEncodingWithIntSizedTabs(s, ((JavaNativeSignature)this.signature).getSignature().getParameters().getEncoded());
+	public int getSignature(byte[] signature, int off_sig) throws ShortBufferException, IllegalStateException, SignatureException, IOException {
+		return signer.getSignature(signature, off_sig);
+	}
+
+	@Override
+	public int getMacLengthBytes() {
+		return signer.getMacLengthBytes();
+	}
+
+	@Override
+	public byte[] getSignature() throws SignatureException, IllegalStateException, IOException {
+		return signer.getSignature();
+	}
+
+	private static class HybridSigner extends AbstractAuthentifiedSignerAlgorithm
+	{
+		private final Signer nonPQCSigner, PQCSigner;
+		public HybridSigner(HybridASymmetricPrivateKey localPrivateKey) throws NoSuchProviderException, NoSuchAlgorithmException {
+			nonPQCSigner=new Signer(localPrivateKey.getNonPQCPrivateKey());
+			PQCSigner=new Signer(localPrivateKey.getPQCPrivateKey());
 		}
-		else
-			return s;
-	}
-
-	@Deprecated
-	@Override
-	public int getMacLengthBytes() {
-		return macLength;
-	}
-
-	@Override
-	public void getSignature(byte[] signature, int off_sig) throws IllegalStateException,
-			SignatureException, IOException {
-		if (includeParameter)
-		{
-			byte[] s = getSignature();
-			System.arraycopy(s, 0, signature, off_sig, s.length);
+		@Override
+		public void init() throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidAlgorithmParameterException {
+			nonPQCSigner.init();
+			PQCSigner.init();
 		}
-		else
-		{
-			this.signature.sign(signature, off_sig, macLength);
-		}		
+
+		@Override
+		public void update(byte[] message, int offm, int lenm) throws SignatureException {
+			nonPQCSigner.update(message, offm, lenm);
+			PQCSigner.update(message, offm, lenm);
+		}
+
+		@Override
+		public int getSignature(byte[] signature, int off_sig) throws ShortBufferException, IllegalStateException, SignatureException, IOException {
+			int nb1=nonPQCSigner.getSignature(signature, off_sig+3);
+			int nb2=PQCSigner.getSignature(signature, off_sig+3+nb1);
+			Bits.putPositiveInteger(signature, off_sig, nb1, 3);
+			return nb1+nb2+3;
+		}
+
+		@Deprecated
+		@Override
+		public int getMacLengthBytes() {
+			return nonPQCSigner.getMacLengthBytes()+PQCSigner.getMacLengthBytes()+3;
+		}
+
+		@Override
+		public byte[] getSignature() throws SignatureException, IllegalStateException, IOException {
+			byte[] sig1=nonPQCSigner.getSignature();
+			byte[] sig2=PQCSigner.getSignature();
+			byte[] res=new byte[sig1.length+sig2.length+3];
+			Bits.putPositiveInteger(res, 0, sig1.length, 3);
+			System.arraycopy(sig1, 0, res, 3, sig1.length);
+			System.arraycopy(sig2, 0, res, 3+sig1.length, sig2.length);
+			return res;
+		}
 	}
 
+	private static class Signer extends AbstractAuthentifiedSignerAlgorithm {
+		private final ASymmetricPrivateKey localPrivateKey;
+		private final AbstractSignature signature;
+		private final int macLength;
+		private final ASymmetricAuthenticatedSignatureType type;
+		private boolean includeParameter = false;
+
+		@SuppressWarnings("deprecation")
+		public Signer(ASymmetricPrivateKey localPrivateKey) throws NoSuchAlgorithmException, NoSuchProviderException {
+			if (localPrivateKey == null)
+				throw new NullPointerException("localPrivateKey");
+			type = localPrivateKey.getAuthentifiedSignatureAlgorithmType();
+			if (type == null)
+				throw new IllegalArgumentException("The given key is not destinated to a signature process");
+			this.localPrivateKey = localPrivateKey;
+			this.signature = type.getSignatureInstance();
+			this.macLength = type.getSignatureSizeBytes(localPrivateKey.getKeySizeBits());
+		}
+
+		public ASymmetricPrivateKey getLocalPrivateKey() {
+			return localPrivateKey;
+		}
+
+		public AbstractSignature getSignatureAlgorithm() {
+			return signature;
+		}
+
+
+		@Override
+		public void init() throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidAlgorithmParameterException {
+			includeParameter = false;
+			if (type == ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA256withRSAandMGF1) {
+				((JavaNativeSignature) signature).getSignature().setParameter(new PSSParameterSpec("SHA-256", "MGF1", new MGF1ParameterSpec("SHA-256"), 0, PSSParameterSpec.DEFAULT.getTrailerField()));
+				includeParameter = true;
+			} else if (type == ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA384withRSAandMGF1) {
+				((JavaNativeSignature) signature).getSignature().setParameter(new PSSParameterSpec("SHA-384", "MGF1", new MGF1ParameterSpec("SHA-384"), 0, PSSParameterSpec.DEFAULT.getTrailerField()));
+				includeParameter = true;
+			} else if (type == ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA512withRSAandMGF1) {
+				((JavaNativeSignature) signature).getSignature().setParameter(new PSSParameterSpec("SHA-512", "MGF1", new MGF1ParameterSpec("SHA-512"), 0, PSSParameterSpec.DEFAULT.getTrailerField()));
+				includeParameter = true;
+			}
+
+			signature.initSign(localPrivateKey);
+		}
+
+		@Override
+		public void update(byte[] message, int offm, int lenm) throws SignatureException {
+			this.signature.update(message, offm, lenm);
+		}
+
+		@Override
+		public byte[] getSignature() throws IllegalStateException, SignatureException, IOException {
+
+			byte[] s = this.signature.sign();
+			if (includeParameter) {
+				return Bits.concateEncodingWithIntSizedTabs(s, ((JavaNativeSignature) this.signature).getSignature().getParameters().getEncoded());
+			} else
+				return s;
+		}
+
+		@Deprecated
+		@Override
+		public int getMacLengthBytes() {
+			return macLength;
+		}
+
+		@Override
+		public int getSignature(byte[] signature, int off_sig) throws IllegalStateException,
+				SignatureException, IOException {
+			if (includeParameter) {
+				byte[] s = getSignature();
+				System.arraycopy(s, 0, signature, off_sig, s.length);
+				return s.length;
+			} else {
+				return this.signature.sign(signature, off_sig, macLength);
+			}
+		}
+	}
 }

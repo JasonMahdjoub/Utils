@@ -48,16 +48,16 @@ import java.security.spec.InvalidKeySpecException;
  */
 public class SymmetricAuthenticatedSignatureCheckerAlgorithm extends AbstractAuthenticatedCheckerAlgorithm {
 
-	private final SymmetricAuthentifiedSignerAlgorithm signer;
+	private final SymmetricAuthenticatedSignerAlgorithm signer;
 	private byte[] signature=null;
-	private SymmetricAuthenticatedSignatureCheckerAlgorithm(SymmetricAuthentifiedSignerAlgorithm signer) {
+	private SymmetricAuthenticatedSignatureCheckerAlgorithm(SymmetricAuthenticatedSignerAlgorithm signer) {
 		if (signer == null)
 			throw new NullPointerException();
 		this.signer = signer;
 	}
 
 	public SymmetricAuthenticatedSignatureCheckerAlgorithm(SymmetricSecretKey secretKey) throws NoSuchAlgorithmException, NoSuchProviderException {
-		this(new SymmetricAuthentifiedSignerAlgorithm(secretKey));
+		this(new SymmetricAuthenticatedSignerAlgorithm(secretKey));
 	}
 
 	public SymmetricSecretKey getSecretKey() {

@@ -81,7 +81,7 @@ public class P2PLoginWithSymmetricSignature extends P2PLoginAgreement {
 						valid = false;
 						throw new IllegalAccessError();
 					}
-					SymmetricAuthentifiedSignerAlgorithm signer = new SymmetricAuthentifiedSignerAlgorithm(secretKey);
+					SymmetricAuthenticatedSignerAlgorithm signer = new SymmetricAuthenticatedSignerAlgorithm(secretKey);
 					signer.init();
 					signer.update(myMessage);
 					signer.update(otherMessage);

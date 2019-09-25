@@ -46,12 +46,12 @@ import java.security.spec.InvalidKeySpecException;
  * @version 3.0
  * @since Utils 2.10.0
  */
-public class SymmetricAuthentifiedSignerAlgorithm extends AbstractAuthentifiedSignerAlgorithm {
+public class SymmetricAuthenticatedSignerAlgorithm extends AbstractAuthentifiedSignerAlgorithm {
 
 	private final AbstractMac mac;
 	private final SymmetricSecretKey secretKey;
 
-	private SymmetricAuthentifiedSignerAlgorithm(AbstractMac mac, SymmetricSecretKey secretKey) {
+	private SymmetricAuthenticatedSignerAlgorithm(AbstractMac mac, SymmetricSecretKey secretKey) {
 		if (mac == null)
 			throw new NullPointerException();
 		if (secretKey == null)
@@ -60,7 +60,7 @@ public class SymmetricAuthentifiedSignerAlgorithm extends AbstractAuthentifiedSi
 		this.secretKey = secretKey;
 	}
 
-	public SymmetricAuthentifiedSignerAlgorithm(SymmetricSecretKey secretKey) throws NoSuchAlgorithmException, NoSuchProviderException {
+	public SymmetricAuthenticatedSignerAlgorithm(SymmetricSecretKey secretKey) throws NoSuchAlgorithmException, NoSuchProviderException {
 		this(secretKey.getAuthentifiedSignatureAlgorithmType().getHMacInstance(), secretKey);
 	}
 
@@ -85,8 +85,9 @@ public class SymmetricAuthentifiedSignerAlgorithm extends AbstractAuthentifiedSi
 	}
 
 	@Override
-	public void getSignature(byte[] signature, int off_sig) throws ShortBufferException, IllegalStateException {
+	public int getSignature(byte[] signature, int off_sig) throws ShortBufferException, IllegalStateException {
 		mac.doFinal(signature, off_sig);
+		return secretKey.getAuthentifiedSignatureAlgorithmType().getSignatureSizeInBits()/8;
 	}
 
 	@Override

@@ -1225,7 +1225,7 @@ public class CryptoTests {
 		r.nextBytes(m);
 
 		byte[] signature = signer.sign(m);
-		if (signer instanceof SymmetricAuthentifiedSignerAlgorithm)
+		if (signer instanceof SymmetricAuthenticatedSignerAlgorithm)
 			Assert.assertEquals(signer.getMacLengthBytes(), signature.length);
 		Assert.assertTrue(checker.verify(m, signature));
 		Assert.assertTrue(checker.verify(m, signature));
@@ -1245,7 +1245,7 @@ public class CryptoTests {
 			throws NoSuchAlgorithmException, InvalidKeyException, SignatureException, InvalidKeySpecException,
 			NoSuchProviderException, IllegalStateException, InvalidAlgorithmParameterException, InvalidParameterSpecException, IOException {
 		System.out.println("Testing symmetric signature : " + secretKey.getAuthentifiedSignatureAlgorithmType());
-		SymmetricAuthentifiedSignerAlgorithm signer = new SymmetricAuthentifiedSignerAlgorithm(secretKey);
+		SymmetricAuthenticatedSignerAlgorithm signer = new SymmetricAuthenticatedSignerAlgorithm(secretKey);
 		SymmetricAuthenticatedSignatureCheckerAlgorithm checker = new SymmetricAuthenticatedSignatureCheckerAlgorithm(secretKey);
 		byte[] signature=testSignature(signer, checker);
 		Assert.assertEquals(signature.length*8, secretKey.getAuthentifiedSignatureAlgorithmType().getSignatureSizeInBits());
@@ -1533,7 +1533,7 @@ public class CryptoTests {
 	private void testSignatureAfterKeyExchange(SymmetricSecretKey keySigner, SymmetricSecretKey keyChecker) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidKeyException, SignatureException, InvalidKeySpecException, IllegalStateException, InvalidAlgorithmParameterException, IOException, InvalidParameterSpecException
 	{
 		SymmetricAuthenticatedSignatureCheckerAlgorithm checker=new SymmetricAuthenticatedSignatureCheckerAlgorithm(keyChecker);
-		SymmetricAuthentifiedSignerAlgorithm signer=new SymmetricAuthentifiedSignerAlgorithm(keySigner);
+		SymmetricAuthenticatedSignerAlgorithm signer=new SymmetricAuthenticatedSignerAlgorithm(keySigner);
 
 		for (byte[] m : messagesToEncrypt) {
 			byte[] signature=signer.sign(m);

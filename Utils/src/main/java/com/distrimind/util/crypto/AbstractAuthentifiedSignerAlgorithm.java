@@ -83,8 +83,40 @@ public abstract class AbstractAuthentifiedSignerAlgorithm {
 	}
 	
 	public abstract void update(byte[] message, int offm, int lenm) throws SignatureException ;
-	
-	public abstract void getSignature(byte[] signature, int off_sig) throws ShortBufferException, IllegalStateException, SignatureException, IOException;
+
+	/**
+	 * Generates signature bytes of all the data fed to this instance and stores it
+	 * in the designated array. The format of the result depends on the underlying
+	 * signature algorithm.
+	 *
+	 * <p>
+	 * After calling this method, the instance is reset to its initial state and can
+	 * then be used to generate additional signatures.
+	 * </p>
+	 *
+	 * <p>
+	 * <b>IMPLEMENTATION NOTE:</b> Neither this method nor the GNU provider will
+	 * return partial digests. If <code>len</code> is less than the signature
+	 * length, this method will throw a {@link SignatureException}. If it is greater
+	 * than or equal then it is ignored.
+	 * </p>
+	 *
+	 * @param signature
+	 *            array of bytes of where to store the resulting signature bytes.
+	 * @param off_sig
+	 *            the offset to start at in the array.
+	 * @return the real number of bytes used.
+	 * @throws SignatureException
+	 *             if the engine is not properly initialized.
+	 * @throws ShortBufferException
+	 *             if an IO issue occurs.
+	 * @throws IllegalStateException
+	 *             if an IO issue occurs.
+	 * @throws IOException
+	 *             if an IO issue occurs.
+	 *
+	 */
+	public abstract int getSignature(byte[] signature, int off_sig) throws ShortBufferException, IllegalStateException, SignatureException, IOException;
 	
     /**
      * Returns the length of the MAC in bytes.
