@@ -49,7 +49,7 @@ import com.distrimind.util.Bits;
  * @version 3.3
  * @since Utils 1.7.1
  */
-public class ASymmetricKeyPair extends com.distrimind.util.crypto.KeyPair {
+public class ASymmetricKeyPair extends AbstractKeyPair {
 	/**
 	 * 
 	 */
@@ -234,9 +234,9 @@ public class ASymmetricKeyPair extends com.distrimind.util.crypto.KeyPair {
 		byte[] tab = new byte[3+ASymmetricPrivateKey.ENCODED_TYPE_SIZE+kp.length+(includeTimeExpiration?8:0)];
 		tab[0]=encryptionType==null?(byte)9:(byte)8;
 		if (includeTimeExpiration)
-			tab[0]|=Key.INCLUDE_KEY_EXPIRATION_CODE;
+			tab[0]|= AbstractKey.INCLUDE_KEY_EXPIRATION_CODE;
 		if (privateKey.xdhKey)
-			tab[0]|=Key.IS_XDH_KEY;
+			tab[0]|= AbstractKey.IS_XDH_KEY;
 		Bits.putPositiveInteger(tab, 1, keySizeBits/8, 2);
 		Bits.putPositiveInteger(tab, 3, encryptionType==null?signatureType.ordinal():encryptionType.ordinal(), ASymmetricPrivateKey.ENCODED_TYPE_SIZE);
 		int pos=3+ASymmetricPrivateKey.ENCODED_TYPE_SIZE;
@@ -250,8 +250,8 @@ public class ASymmetricKeyPair extends com.distrimind.util.crypto.KeyPair {
 	public static boolean isValidType(byte[] b, int off)
 	{
 		byte type=b[off];
-		type&=~Key.INCLUDE_KEY_EXPIRATION_CODE;
-		type&=~Key.IS_XDH_KEY;
+		type&=~AbstractKey.INCLUDE_KEY_EXPIRATION_CODE;
+		type&=~AbstractKey.IS_XDH_KEY;
 		return type>=8 && type<=9;
 	}
 	public static ASymmetricKeyPair decode(byte[] b) throws IllegalArgumentException {
@@ -276,12 +276,12 @@ public class ASymmetricKeyPair extends com.distrimind.util.crypto.KeyPair {
 			long expirationUTC;
 			byte type=b[off];
 
-			boolean includeKeyExpiration=(type & Key.INCLUDE_KEY_EXPIRATION_CODE) == Key.INCLUDE_KEY_EXPIRATION_CODE;
-			boolean kdhKey=(type & Key.IS_XDH_KEY) == Key.IS_XDH_KEY;
+			boolean includeKeyExpiration=(type & AbstractKey.INCLUDE_KEY_EXPIRATION_CODE) == AbstractKey.INCLUDE_KEY_EXPIRATION_CODE;
+			boolean kdhKey=(type & AbstractKey.IS_XDH_KEY) == AbstractKey.IS_XDH_KEY;
 			if (includeKeyExpiration)
-				type-=Key.INCLUDE_KEY_EXPIRATION_CODE;
+				type-= AbstractKey.INCLUDE_KEY_EXPIRATION_CODE;
 			if (kdhKey)
-				type-=Key.IS_XDH_KEY;
+				type-= AbstractKey.IS_XDH_KEY;
 			if (includeKeyExpiration) {
 
 				expirationUTC=Bits.getLong(b, posKey);

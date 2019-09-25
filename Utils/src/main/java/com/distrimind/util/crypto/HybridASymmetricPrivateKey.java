@@ -42,7 +42,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
  * @version 1.0
  * @since Utils 4.5.0
  */
-public class HybridASymmetricPrivateKey extends Key implements HybridKey{
+public class HybridASymmetricPrivateKey extends AbstractKey implements IHybridKey, IASymmetricPrivateKey{
 
 	private final ASymmetricPrivateKey nonPQCPrivateKey, PQCPrivateKey;
 
@@ -90,7 +90,7 @@ public class HybridASymmetricPrivateKey extends Key implements HybridKey{
 	}
 
 	public byte[] encode() {
-		return Key.encodeHybridKey(nonPQCPrivateKey, PQCPrivateKey, false);
+		return AbstractKey.encodeHybridKey(nonPQCPrivateKey, PQCPrivateKey, false);
 	}
 
 	@Override

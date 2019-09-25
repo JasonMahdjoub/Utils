@@ -184,7 +184,7 @@ public class EllipticCurveDiffieHellmanAlgorithm extends KeyAgreement {
 			if (derivedKey != null)
 				throw new IllegalArgumentException(
 						"A key exchange process has already been begun. Use reset fonction before calling this function.");
-			ASymmetricPublicKey distantPublicKey=(ASymmetricPublicKey)Key.decode(distantPublicKeyBytes);
+			ASymmetricPublicKey distantPublicKey=(ASymmetricPublicKey) AbstractKey.decode(distantPublicKeyBytes);
 			if (myKeyPair.getASymmetricPublicKey().equals(distantPublicKey))
 				throw new InvalidKeyException("The local et distant public keys cannot be similar !");
 	

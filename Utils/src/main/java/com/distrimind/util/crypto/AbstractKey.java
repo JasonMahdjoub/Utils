@@ -50,7 +50,7 @@ import com.distrimind.util.Bits;
  * @version 2.2
  * @since Utils 2.0
  */
-public abstract class Key extends DecentralizedValue {
+public abstract class AbstractKey extends DecentralizedValue {
 	
 	
 	
@@ -73,7 +73,7 @@ public abstract class Key extends DecentralizedValue {
 
 
 
-	public static Key decode(byte[] b) throws IllegalArgumentException {
+	public static AbstractKey decode(byte[] b) throws IllegalArgumentException {
 		return decode(b, !isPublicKey(b, 0));
 	}
 
@@ -113,14 +113,14 @@ public abstract class Key extends DecentralizedValue {
 			return type >= 0 && type <= 5;
 		}
 	}
-	public static Key decode(byte[] b, boolean fillArrayWithZerosWhenDecoded) throws IllegalArgumentException {
+	public static AbstractKey decode(byte[] b, boolean fillArrayWithZerosWhenDecoded) throws IllegalArgumentException {
 		return decode(b, 0, b.length, fillArrayWithZerosWhenDecoded);
 	}
-	public static Key decode(byte[] b, int off, int len) throws IllegalArgumentException {
+	public static AbstractKey decode(byte[] b, int off, int len) throws IllegalArgumentException {
 		return decode(b, off, len, !isPublicKey(b, off));
 	}
 
-	static byte[] encodeHybridKey(Key nonPQCKey, Key PQCKey, boolean includeTimeExpiration)
+	static byte[] encodeHybridKey(AbstractKey nonPQCKey, AbstractKey PQCKey, boolean includeTimeExpiration)
 	{
 		byte[] encodedNonPQC=nonPQCKey.encode(includeTimeExpiration);
 		byte[] encodedPQC=PQCKey.encode(includeTimeExpiration);
@@ -147,8 +147,8 @@ public abstract class Key extends DecentralizedValue {
 			int size = (int) Bits.getPositiveInteger(encoded, off + 1, 3);
 			if (size + 36 > len)
 				throw new IllegalArgumentException();
-			Key nonPQCKey = decode(encoded, off + 4, size);
-			if (HybridKey.class.isAssignableFrom(nonPQCKey.getClass()))
+			AbstractKey nonPQCKey = decode(encoded, off + 4, size);
+			if (IHybridKey.class.isAssignableFrom(nonPQCKey.getClass()))
 				throw new IllegalArgumentException();
 			if (!ASymmetricPrivateKey.class.equals(nonPQCKey.getClass())
 					&& !ASymmetricPublicKey.class.equals(nonPQCKey.getClass()))
@@ -156,7 +156,7 @@ public abstract class Key extends DecentralizedValue {
 			if (nonPQCKey.isPostQuantumKey())
 				throw new IllegalArgumentException();
 
-			Key PQCKey = decode(encoded, off + 4 + size, len - off - size - 4);
+			AbstractKey PQCKey = decode(encoded, off + 4 + size, len - off - size - 4);
 
 			if (!PQCKey.getClass().equals(nonPQCKey.getClass()))
 				throw new IllegalArgumentException();
@@ -183,7 +183,7 @@ public abstract class Key extends DecentralizedValue {
 	}
 
 
-	public static Key decode(byte[] b, int off, int len, boolean fillArrayWithZerosWhenDecoded) throws IllegalArgumentException {
+	public static AbstractKey decode(byte[] b, int off, int len, boolean fillArrayWithZerosWhenDecoded) throws IllegalArgumentException {
 		if (off<0 || len<0 || len+off>b.length)
 			throw new IllegalArgumentException();
 			//byte[][] res = Bits.separateEncodingsWithShortSizedTabs(b);
@@ -262,7 +262,7 @@ public abstract class Key extends DecentralizedValue {
 				if (!res.getClass().equals(HybridASymmetricPrivateKey.class)
 						&& !res.getClass().equals(HybridASymmetricPublicKey.class)	)
 					throw new IllegalArgumentException();
-				return (Key)res;
+				return (AbstractKey)res;
 			}
 			else {
 				fillArrayWithZerosWhenDecoded=false;
@@ -279,7 +279,7 @@ public abstract class Key extends DecentralizedValue {
 	
 	
 	
-	public static Key valueOf(String key) throws IllegalArgumentException {
+	public static AbstractKey valueOf(String key) throws IllegalArgumentException {
 		return decode(Base64.decodeBase64(key));
 	}
 	

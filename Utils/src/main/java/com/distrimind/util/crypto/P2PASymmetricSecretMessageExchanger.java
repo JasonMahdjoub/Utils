@@ -409,7 +409,7 @@ public class P2PASymmetricSecretMessageExchanger {
 			throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeySpecException, InvalidKeyException,
 			InvalidAlgorithmParameterException, NoSuchProviderException {
 		distantMessageEncoder = new P2PASymmetricSecretMessageExchanger(secureRandom, messageDigestType, passwordHashType,
-				(ASymmetricPublicKey)Key.decode(distantPublicKeyAndIV));
+				(ASymmetricPublicKey) AbstractKey.decode(distantPublicKeyAndIV));
 		if (myPublicKey.equals(distantMessageEncoder.myPublicKey))
 			throw new IllegalArgumentException("Local public key equals distant public key");
 		distantMessageEncoder.setCost(getCost());

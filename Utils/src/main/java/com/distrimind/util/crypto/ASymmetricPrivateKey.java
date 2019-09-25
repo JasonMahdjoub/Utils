@@ -56,7 +56,7 @@ import com.distrimind.util.Bits;
  * @version 3.0
  * @since Utils 1.7.1
  */
-public class ASymmetricPrivateKey extends Key {
+public class ASymmetricPrivateKey extends AbstractKey implements IASymmetricPrivateKey {
 	/**
 	 * 
 	 */
@@ -219,7 +219,7 @@ public class ASymmetricPrivateKey extends Key {
 
 	public byte[] encode() {
 		byte[] tab = new byte[3+ENCODED_TYPE_SIZE+privateKey.length];
-		tab[0]=encryptionType==null?(byte)((xdhKey?Key.IS_XDH_KEY:0)|2):(byte)3;
+		tab[0]=encryptionType==null?(byte)((xdhKey? AbstractKey.IS_XDH_KEY:0)|2):(byte)3;
 		Bits.putPositiveInteger(tab, 1, keySizeBits/8, 2);
 		Bits.putPositiveInteger(tab, 3, encryptionType==null?signatureType.ordinal():encryptionType.ordinal(), ENCODED_TYPE_SIZE);
         System.arraycopy(privateKey, 0, tab, ENCODED_TYPE_SIZE+3, privateKey.length);

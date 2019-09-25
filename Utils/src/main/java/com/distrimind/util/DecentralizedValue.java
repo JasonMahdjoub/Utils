@@ -35,7 +35,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
 package com.distrimind.util;
 
 import com.distrimind.util.crypto.ASymmetricKeyPair;
-import com.distrimind.util.crypto.Key;
+import com.distrimind.util.crypto.AbstractKey;
 
 import java.io.Serializable;
 
@@ -63,8 +63,8 @@ public abstract class DecentralizedValue implements Serializable {
 	{
 		if (AbstractDecentralizedID.isValidType(encodedValue, off))
 			return AbstractDecentralizedID.decode(encodedValue, off, len, fillArrayWithZerosWhenDecoded);
-		else if (Key.isValidType(encodedValue, off))
-			return Key.decode(encodedValue, off, len, fillArrayWithZerosWhenDecoded);
+		else if (AbstractKey.isValidType(encodedValue, off))
+			return AbstractKey.decode(encodedValue, off, len, fillArrayWithZerosWhenDecoded);
 		else
 			return ASymmetricKeyPair.decode(encodedValue, off, len, fillArrayWithZerosWhenDecoded);
 

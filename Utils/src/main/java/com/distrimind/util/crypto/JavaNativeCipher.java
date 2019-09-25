@@ -137,14 +137,14 @@ public final class JavaNativeCipher extends AbstractCipher {
 
 
 	@Override
-	public void init(int _opmode, Key _key, AbstractSecureRandom _random)
+	public void init(int _opmode, AbstractKey _key, AbstractSecureRandom _random)
 			throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException {
 		cipher.init(_opmode, _key.toJavaNativeKey(), setSecureRandom(_random));
 
 	}
 
 	@Override
-	public void init(int _opmode, Key _key, byte[] _iv) throws InvalidKeyException, NoSuchAlgorithmException,
+	public void init(int _opmode, AbstractKey _key, byte[] _iv) throws InvalidKeyException, NoSuchAlgorithmException,
 			InvalidKeySpecException, InvalidAlgorithmParameterException {
 		if (type!=null && type.getBlockMode().toUpperCase().equals("GCM"))
 			cipher.init(_opmode, _key.toJavaNativeKey(), new GCMParameterSpec(128, _iv));

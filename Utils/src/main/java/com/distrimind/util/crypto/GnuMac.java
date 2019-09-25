@@ -117,7 +117,7 @@ public final class GnuMac extends AbstractMac {
 	}
 
 	@Override
-	public final void init(Key _key) throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException {
+	public final void init(AbstractKey _key) throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException {
 		GnuFunctions.macInit(mac, _key);
 	}
 

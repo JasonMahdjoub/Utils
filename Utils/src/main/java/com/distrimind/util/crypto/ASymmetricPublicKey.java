@@ -55,7 +55,7 @@ import java.util.Arrays;
  * @version 4.0
  * @since Utils 1.7.1
  */
-public class ASymmetricPublicKey extends Key {
+public class ASymmetricPublicKey extends AbstractKey implements IASymmetricPublicKey {
 	/**
 	 * 
 	 */
@@ -220,9 +220,9 @@ public class ASymmetricPublicKey extends Key {
 		byte[] tab = new byte[3+ASymmetricPrivateKey.ENCODED_TYPE_SIZE+publicKey.length+(includeTimeExpiration?8:0)];
 		tab[0]=encryptionType==null?(byte)5:(byte)4;
 		if (includeTimeExpiration)
-			tab[0]|=Key.INCLUDE_KEY_EXPIRATION_CODE;
+			tab[0]|= AbstractKey.INCLUDE_KEY_EXPIRATION_CODE;
 		if (xdhKey)
-			tab[0]|=Key.IS_XDH_KEY;
+			tab[0]|= AbstractKey.IS_XDH_KEY;
 		Bits.putPositiveInteger(tab, 1, keySizeBits/8, 2);
 		Bits.putPositiveInteger(tab, 3, encryptionType==null?signatureType.ordinal():encryptionType.ordinal(), ASymmetricPrivateKey.ENCODED_TYPE_SIZE);
 		int pos=3+ASymmetricPrivateKey.ENCODED_TYPE_SIZE;

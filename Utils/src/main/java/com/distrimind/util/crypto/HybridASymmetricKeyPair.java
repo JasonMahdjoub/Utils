@@ -44,7 +44,7 @@ import java.util.Arrays;
  * @version 1.0
  * @since Utils 4.5.0
  */
-public class HybridASymmetricKeyPair extends KeyPair implements HybridKey {
+public class HybridASymmetricKeyPair extends AbstractKeyPair implements IHybridKey {
 	private final ASymmetricKeyPair nonPQCKeyPair, PQCKeyPair;
 
 	public HybridASymmetricKeyPair(ASymmetricKeyPair nonPQCKeyPair, ASymmetricKeyPair PQCKeyPair) {
@@ -76,7 +76,7 @@ public class HybridASymmetricKeyPair extends KeyPair implements HybridKey {
 
 			if (len < 68)
 				throw new IllegalArgumentException();
-			if (encoded[off] != Key.IS_HYBRID_KEY)
+			if (encoded[off] != AbstractKey.IS_HYBRID_KEY)
 				throw new IllegalArgumentException();
 			int size = (int) Bits.getPositiveInteger(encoded, off + 1, 3);
 			if (size + 36 > len)
@@ -110,7 +110,7 @@ public class HybridASymmetricKeyPair extends KeyPair implements HybridKey {
 		byte[] encodedPQC=PQCKeyPair.encode(includeTimeExpiration);
 
 		byte[] res=new byte[encodedNonPQC.length+encodedPQC.length+4];
-		res[0]=Key.IS_HYBRID_KEY;
+		res[0]= AbstractKey.IS_HYBRID_KEY;
 		Bits.putPositiveInteger(res, 1, encodedNonPQC.length, 3);
 		System.arraycopy(encodedNonPQC, 0, res, 4, encodedNonPQC.length );
 		System.arraycopy(encodedPQC, 0, res, 4+encodedNonPQC.length, encodedPQC.length );

@@ -992,7 +992,7 @@ class GnuFunctions {
 			throw new IllegalStateException(e.getTargetException());
 		}
 	}
-	static void macInit(Object cipher, Key key) throws InvalidKeySpecException, NoSuchAlgorithmException, InvalidKeyException {
+	static void macInit(Object cipher, AbstractKey key) throws InvalidKeySpecException, NoSuchAlgorithmException, InvalidKeyException {
 		try {
 			macInit.invoke(cipher, constSecretKeySpec.newInstance(keyGetEncoded(key.toGnuKey()), macGetAlgorithm(cipher)));
 		} catch (IllegalAccessException | InstantiationException e) {

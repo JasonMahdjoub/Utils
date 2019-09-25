@@ -41,7 +41,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
  * @version 1.0
  * @since MaDKitLanEdition 4.5.0
  */
-public class HybridASymmetricPublicKey extends Key implements HybridKey{
+public class HybridASymmetricPublicKey extends AbstractKey implements IHybridKey, IASymmetricPublicKey{
 
 	private final ASymmetricPublicKey nonPQCPublicKey, PQCPublicKey;
 
@@ -90,7 +90,7 @@ public class HybridASymmetricPublicKey extends Key implements HybridKey{
 
 	@Override
 	public byte[] encode(boolean includeTimeExpiration) {
-		return Key.encodeHybridKey(nonPQCPublicKey, PQCPublicKey, includeTimeExpiration);
+		return AbstractKey.encodeHybridKey(nonPQCPublicKey, PQCPublicKey, includeTimeExpiration);
 	}
 
 	@Override

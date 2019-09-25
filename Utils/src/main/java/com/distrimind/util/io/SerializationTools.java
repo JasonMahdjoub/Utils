@@ -41,7 +41,7 @@ package com.distrimind.util.io;
 import com.distrimind.util.AbstractDecentralizedID;
 import com.distrimind.util.ReflectionTools;
 import com.distrimind.util.crypto.ASymmetricKeyPair;
-import com.distrimind.util.crypto.Key;
+import com.distrimind.util.crypto.AbstractKey;
 import com.distrimind.util.sizeof.ObjectSizer;
 
 import java.io.IOException;
@@ -263,7 +263,7 @@ public class SerializationTools {
 	
 	public static final int MAX_KEY_SIZE=Short.MAX_VALUE;
 	@SuppressWarnings("SameParameterValue")
-	static void writeKey(final SecuredObjectOutputStream oos, Key key, boolean supportNull) throws IOException
+	static void writeKey(final SecuredObjectOutputStream oos, AbstractKey key, boolean supportNull) throws IOException
 	{
 		if (supportNull)
 			oos.writeBoolean(key!=null);
@@ -281,7 +281,7 @@ public class SerializationTools {
 	}
 
 	@SuppressWarnings("SameParameterValue")
-	static Key readKey(final SecuredObjectInputStream in, boolean supportNull) throws IOException
+	static AbstractKey readKey(final SecuredObjectInputStream in, boolean supportNull) throws IOException
 	{
 		if (!supportNull || in.readBoolean())
 		{
@@ -290,7 +290,7 @@ public class SerializationTools {
 			{
 				if (k == null)
 					throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
-				return Key.decode(k);
+				return AbstractKey.decode(k);
 			}
 			catch(Exception e)
 			{
@@ -1036,10 +1036,10 @@ public class SerializationTools {
 			oos.write(9);
 			writeDecentralizedID(oos, (AbstractDecentralizedID)o, false);
 		}
-		else if (o instanceof Key)
+		else if (o instanceof AbstractKey)
 		{
 			oos.write(10);
-			writeKey(oos, (Key)o, false);
+			writeKey(oos, (AbstractKey)o, false);
 		}
 		else if (o instanceof ASymmetricKeyPair)
 		{
@@ -1193,7 +1193,7 @@ public class SerializationTools {
 
 
 
-	public static int getInternalSize(Key key)
+	public static int getInternalSize(AbstractKey key)
 	{
 		if (key==null)
 			return 1;
@@ -1281,9 +1281,9 @@ public class SerializationTools {
 		{
 			return ((byte[])o).length+sizeMax>Short.MAX_VALUE?5:3;
 		}
-		else if (o instanceof Key)
+		else if (o instanceof AbstractKey)
 		{
-			return 4+((Key)o).encodeWithDefaultParameters().length;
+			return 4+((AbstractKey)o).encodeWithDefaultParameters().length;
 		}
 		else if (o instanceof ASymmetricKeyPair)
 		{

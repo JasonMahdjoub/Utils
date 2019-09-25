@@ -219,13 +219,13 @@ public class BCCipher extends AbstractCipher {
 
 
 	@Override
-	public void init(int opmode, Key key, AbstractSecureRandom random) throws NoSuchAlgorithmException, InvalidKeySpecException
+	public void init(int opmode, AbstractKey key, AbstractSecureRandom random) throws NoSuchAlgorithmException, InvalidKeySpecException
 	{
 		init(opmode, key, (byte[])null);
 	}
 
 	@Override
-	public void init(int opmode, Key key, byte[] iv) throws NoSuchAlgorithmException, InvalidKeySpecException  {
+	public void init(int opmode, AbstractKey key, byte[] iv) throws NoSuchAlgorithmException, InvalidKeySpecException  {
 		this.iv=iv;
 		OutputDecryptor<?> decryptor ;
 		OutputEncryptor<?> encryptor ;
@@ -600,7 +600,7 @@ public class BCCipher extends AbstractCipher {
         return null;
 	}
 
-	public byte[] wrap(Key key) throws PlainInputProcessingException {
+	public byte[] wrap(AbstractKey key) throws PlainInputProcessingException {
 		byte[] b = key.getKeyBytes();
 		return wrapper.wrap(b, 0, b.length);
 	}

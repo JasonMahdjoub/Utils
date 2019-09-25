@@ -46,29 +46,29 @@ import java.security.spec.InvalidKeySpecException;
  * @version 1.0
  * @since MaDKitLanEdition 4.5.0
  */
-public abstract class KeyPair extends DecentralizedValue {
-	public static KeyPair decode(byte[] b) throws IllegalArgumentException {
+public abstract class AbstractKeyPair extends DecentralizedValue {
+	public static AbstractKeyPair decode(byte[] b) throws IllegalArgumentException {
 		return decode(b, true);
 	}
-	public static KeyPair decode(byte[] b, int off, int len) throws IllegalArgumentException {
+	public static AbstractKeyPair decode(byte[] b, int off, int len) throws IllegalArgumentException {
 		return decode(b, off, len,true);
 	}
-	public static KeyPair decode(byte[] b, boolean fillArrayWithZerosWhenDecoded) throws IllegalArgumentException {
+	public static AbstractKeyPair decode(byte[] b, boolean fillArrayWithZerosWhenDecoded) throws IllegalArgumentException {
 		return decode(b, 0, b.length, fillArrayWithZerosWhenDecoded);
 	}
-	public static KeyPair decode(byte[] b, int off, int len, boolean fillArrayWithZerosWhenDecoded) throws IllegalArgumentException
+	public static AbstractKeyPair decode(byte[] b, int off, int len, boolean fillArrayWithZerosWhenDecoded) throws IllegalArgumentException
 	{
 		if (off<0 || len<0 || len+off>b.length)
 			throw new IllegalArgumentException();
 
-		if (b[off]==Key.IS_HYBRID_KEY) {
+		if (b[off]== AbstractKey.IS_HYBRID_KEY) {
 			return HybridASymmetricKeyPair.decodeHybridKey(b, off, len, fillArrayWithZerosWhenDecoded);
 		}
 		else
 			return ASymmetricKeyPair.decode(b, off, len, fillArrayWithZerosWhenDecoded);
 	}
 
-	public static KeyPair valueOf(String key) throws IllegalArgumentException {
+	public static AbstractKeyPair valueOf(String key) throws IllegalArgumentException {
 		return decode(Base64.decodeBase64(key));
 	}
 
@@ -95,7 +95,7 @@ public abstract class KeyPair extends DecentralizedValue {
 
 	public static boolean isValidType(byte[] b, int off)
 	{
-		return b[off]==Key.IS_HYBRID_KEY;
+		return b[off]== AbstractKey.IS_HYBRID_KEY;
 	}
 
 	public abstract void zeroize();

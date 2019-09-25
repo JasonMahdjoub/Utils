@@ -40,6 +40,6 @@ knowledge of the CeCILL-C license and that you accept its terms.
  * @version 1.0
  * @since Utils 4.5.0
  */
-public interface HybridKey {
+public interface IHybridKey {
 
 }

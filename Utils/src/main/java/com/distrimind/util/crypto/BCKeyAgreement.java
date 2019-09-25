@@ -77,7 +77,7 @@ public final class BCKeyAgreement extends AbstractKeyAgreement{
 	}
 
 	@Override
-	public void doPhase(Key key, boolean lastPhase)
+	public void doPhase(AbstractKey key, boolean lastPhase)
 			throws IllegalStateException, NoSuchAlgorithmException, InvalidKeySpecException {
 		secret=agreement.calculate((AsymmetricPublicKey)key.toBouncyCastleKey());
 	}
@@ -151,7 +151,7 @@ public final class BCKeyAgreement extends AbstractKeyAgreement{
     
 	
 	@Override
-	public void init(Key key, Object params, AbstractSecureRandom random) throws NoSuchAlgorithmException, InvalidKeySpecException {
+	public void init(AbstractKey key, Object params, AbstractSecureRandom random) throws NoSuchAlgorithmException, InvalidKeySpecException {
 		if (type.isECCDHType())
 		{
 			paramskeymaterial=((UserKeyingMaterialSpec)params).getUserKeyingMaterial();

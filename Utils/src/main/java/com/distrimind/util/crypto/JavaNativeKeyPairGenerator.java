@@ -68,7 +68,7 @@ public final class JavaNativeKeyPairGenerator extends AbstractKeyPairGenerator {
 
 	@Override
 	public ASymmetricKeyPair generateKeyPair() {
-		KeyPair kp = keyPairGenerator.generateKeyPair();
+		AbstractKeyPair kp = keyPairGenerator.generateKeyPair();
 		if (encryptionType==null)
 			return new ASymmetricKeyPair(signatureType, kp, keySizeBits, expirationTime, isXDHKey());
 		else
