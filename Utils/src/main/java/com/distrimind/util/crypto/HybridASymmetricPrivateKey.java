@@ -75,17 +75,17 @@ public class HybridASymmetricPrivateKey extends AbstractKey implements IHybridKe
 	}
 
 	@Override
-	Object toGnuKey(){
+	public Object toGnuKey(){
 		throw new IllegalAccessError();
 	}
 
 	@Override
-	java.security.Key toJavaNativeKey() {
+	public java.security.Key toJavaNativeKey() {
 		throw new IllegalAccessError();
 	}
 
 	@Override
-	org.bouncycastle.crypto.Key toBouncyCastleKey() {
+	public org.bouncycastle.crypto.Key toBouncyCastleKey() {
 		throw new IllegalAccessError();
 	}
 
@@ -105,7 +105,7 @@ public class HybridASymmetricPrivateKey extends AbstractKey implements IHybridKe
 	}
 
 	@Override
-	byte[] getKeyBytes() {
+	public byte[] getKeyBytes() {
 		return null;
 	}
 

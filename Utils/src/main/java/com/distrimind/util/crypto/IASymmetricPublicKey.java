@@ -5,5 +5,5 @@ package com.distrimind.util.crypto;
  * @version 1.0
  * @since MaDKitLanEdition 4.5.0
  */
-public interface IASymmetricPublicKey {
+public interface IASymmetricPublicKey extends IKey {
 }

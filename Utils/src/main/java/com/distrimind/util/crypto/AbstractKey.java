@@ -50,7 +50,7 @@ import com.distrimind.util.Bits;
  * @version 2.2
  * @since Utils 2.0
  */
-public abstract class AbstractKey extends DecentralizedValue {
+public abstract class AbstractKey extends DecentralizedValue implements IKey{
 	
 	
 	
@@ -61,15 +61,6 @@ public abstract class AbstractKey extends DecentralizedValue {
 
 
 
-	abstract Object toGnuKey()
-			throws InvalidKeySpecException, NoSuchAlgorithmException;
-
-	abstract java.security.Key toJavaNativeKey()
-			throws NoSuchAlgorithmException, InvalidKeySpecException;
-	
-	abstract org.bouncycastle.crypto.Key toBouncyCastleKey() throws NoSuchAlgorithmException, InvalidKeySpecException;
-	
-	public  abstract byte[] encode(boolean includeTimeExpiration);
 
 
 
@@ -283,7 +274,7 @@ public abstract class AbstractKey extends DecentralizedValue {
 		return decode(Base64.decodeBase64(key));
 	}
 	
-	public abstract void zeroize();
+
 	
 	@SuppressWarnings("deprecation")
 	@Override
@@ -292,7 +283,5 @@ public abstract class AbstractKey extends DecentralizedValue {
 		zeroize();
 	}
 
-    abstract byte[] getKeyBytes();
 
-	public abstract boolean isPostQuantumKey();
 }

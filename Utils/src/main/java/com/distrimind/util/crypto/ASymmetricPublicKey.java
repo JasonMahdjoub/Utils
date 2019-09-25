@@ -111,7 +111,7 @@ public class ASymmetricPublicKey extends AbstractKey implements IASymmetricPubli
 	}
 
 	@Override
-    byte[] getKeyBytes() {
+	public byte[] getKeyBytes() {
         return publicKey;
     }
 

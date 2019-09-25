@@ -310,11 +310,16 @@ public class SymmetricSecretKey extends AbstractKey {
 	}
 
 	@Override
-    byte[] getKeyBytes()
+    public byte[] getKeyBytes()
 	{
 		return secretKey;
 	}
-	
+
+	@Override
+	public boolean isPostQuantumKey() {
+		return this.encryptionType==null?signatureType.isPostQuantumAlgorithm(keySizeBits):encryptionType.isPostQuantumAlgorithm(keySizeBits);
+	}
+
 
 	@Override
 	public String toString() {

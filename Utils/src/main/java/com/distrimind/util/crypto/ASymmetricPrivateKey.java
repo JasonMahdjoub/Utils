@@ -103,7 +103,7 @@ public class ASymmetricPrivateKey extends AbstractKey implements IASymmetricPriv
 
 
     @Override
-    byte[] getKeyBytes() {
+	public byte[] getKeyBytes() {
         return privateKey;
     }
 
