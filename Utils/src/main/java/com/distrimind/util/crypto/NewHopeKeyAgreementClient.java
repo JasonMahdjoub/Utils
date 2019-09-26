@@ -68,7 +68,8 @@ public class NewHopeKeyAgreementClient extends AbstractNewHopeKeyAgreement{
 		super(type, (short)(keySizeBits/8));
 		this.randomForKeys=randomForKeys;
 	}
-	
+
+	@Override
 	public void zeroize()
 	{
 		super.zeroize();
@@ -77,6 +78,7 @@ public class NewHopeKeyAgreementClient extends AbstractNewHopeKeyAgreement{
 			try {
 				short[] f = (short[])fieldSecData.get(priv);
 				Arrays.fill(f, (short)0);
+				priv=null;
 			} catch (IllegalArgumentException | IllegalAccessException e) {
 				e.printStackTrace();
 			}
@@ -150,5 +152,6 @@ public class NewHopeKeyAgreementClient extends AbstractNewHopeKeyAgreement{
 
 
 	}
+
 
 }

@@ -57,7 +57,8 @@ public class EllipticCurveDiffieHellmanAlgorithm extends KeyAgreement {
 	private SymmetricEncryptionType encryptionType;
 	private SymmetricAuthentifiedSignatureType signatureType;
 	private final short keySizeBits;
-	
+
+
 	private byte[] keyingMaterial;
 	EllipticCurveDiffieHellmanAlgorithm(AbstractSecureRandom randomForKeys, EllipticCurveDiffieHellmanType type, short keySizeBits, byte[] keyingMaterial, SymmetricAuthentifiedSignatureType signatureType) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException {
 		this(randomForKeys, type, keySizeBits, keyingMaterial);
@@ -84,14 +85,8 @@ public class EllipticCurveDiffieHellmanAlgorithm extends KeyAgreement {
 
 	public void zeroize()
 	{
-		if (derivedKey!=null)
-		{
-			derivedKey=null;
-		}
-		if (myKeyPair!=null)
-		{
-			myKeyPair=null;
-		}
+		derivedKey=null;
+		myKeyPair=null;
 		if (myPublicKeyBytes!=null)
 		{
 			Arrays.fill(myPublicKeyBytes, (byte)0);
@@ -99,13 +94,7 @@ public class EllipticCurveDiffieHellmanAlgorithm extends KeyAgreement {
 		}
 		
 	}
-	
-	@SuppressWarnings("deprecation")
-	@Override
-	public void finalize()
-	{
-		zeroize();
-	}
+
 	
 	public void reset() {
 		derivedKey = null;
@@ -228,6 +217,11 @@ public class EllipticCurveDiffieHellmanAlgorithm extends KeyAgreement {
 
 	public SymmetricSecretKey getDerivedKey() {
 		return derivedKey;
+	}
+
+	@Override
+	public short getDerivedKeySizeBytes() {
+		return (short)(keySizeBits/8);
 	}
 
 	@Override

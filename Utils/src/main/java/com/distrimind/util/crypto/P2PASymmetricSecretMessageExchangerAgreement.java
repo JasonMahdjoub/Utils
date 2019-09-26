@@ -8,6 +8,7 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.spec.InvalidKeySpecException;
+import java.util.Arrays;
 
 /**
  * @author Jason Mahdjoub
@@ -23,10 +24,18 @@ public class P2PASymmetricSecretMessageExchangerAgreement extends P2PLoginAgreem
     private final int offset_salt;
     private final int length_salt;
     private byte[] bytesPassword;
-    private int offset_password;
-    private int length_password;
     private boolean passwordIsKey;
     private char[] charPassword;
+
+    @Override
+    public void zeroize() {
+        if (bytesPassword!=null)
+            Arrays.fill(bytesPassword, (byte)0);
+        if (charPassword!=null)
+            Arrays.fill(charPassword, (char)0);
+        bytesPassword=null;
+        charPassword=null;
+    }
 
     P2PASymmetricSecretMessageExchangerAgreement(AbstractSecureRandom secureRandom, MessageDigestType messageDigestType, PasswordHashType passwordHashType,
                                                         ASymmetricPublicKey myPublicKey, byte[] salt, int offset_salt, int len_salt, byte[] bytesPassword, int offset_password, int length_password,
@@ -37,9 +46,7 @@ public class P2PASymmetricSecretMessageExchangerAgreement extends P2PLoginAgreem
         if (bytesPassword.length==0)
             throw new IllegalArgumentException();
 
-        this.bytesPassword=bytesPassword;
-        this.offset_password=offset_password;
-        this.length_password=length_password;
+        this.bytesPassword=Arrays.copyOfRange(bytesPassword, offset_password, length_password);
         this.passwordIsKey=passwordIsKey;
         this.charPassword=null;
     }
@@ -52,7 +59,7 @@ public class P2PASymmetricSecretMessageExchangerAgreement extends P2PLoginAgreem
             throw new IllegalArgumentException();
         this.bytesPassword=null;
         this.passwordIsKey=false;
-        this.charPassword=charPassword;
+        this.charPassword=charPassword.clone();
     }
     /*P2PASymmetricSecretMessageExchangerAgreement(AbstractSecureRandom secureRandom, MessageDigestType messageDigestType, PasswordHashType passwordHashType,
                                                         ASymmetricPublicKey myPublicKey, byte[] salt, int offset_salt, int len_salt, String password) throws NoSuchPaddingException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException, InvalidKeyException, InvalidKeySpecException {
@@ -83,7 +90,7 @@ public class P2PASymmetricSecretMessageExchangerAgreement extends P2PLoginAgreem
                     return p2PASymmetricSecretMessageExchanger.encodeMyPublicKey();
                 case 1:
                     if (bytesPassword != null)
-                        return p2PASymmetricSecretMessageExchanger.encode(bytesPassword, offset_password, length_password, salt, offset_salt, length_salt, passwordIsKey);
+                        return p2PASymmetricSecretMessageExchanger.encode(bytesPassword, 0,bytesPassword.length, salt, offset_salt, length_salt, passwordIsKey);
                     else
                         return p2PASymmetricSecretMessageExchanger.encode(charPassword, salt, offset_salt, length_salt);
                 default:
@@ -116,7 +123,7 @@ public class P2PASymmetricSecretMessageExchangerAgreement extends P2PLoginAgreem
                     break;
                 case 1:
                     if (bytesPassword != null)
-                        valid = p2PASymmetricSecretMessageExchanger.verifyDistantMessage(bytesPassword, offset_password, length_password, salt, offset_salt, length_salt, data, 0, data.length, passwordIsKey);
+                        valid = p2PASymmetricSecretMessageExchanger.verifyDistantMessage(bytesPassword, 0, bytesPassword.length, salt, offset_salt, length_salt, data, 0, data.length, passwordIsKey);
                     else
                         valid = p2PASymmetricSecretMessageExchanger.verifyDistantMessage(charPassword, salt, offset_salt, length_salt, data, 0, data.length);
                     break;
@@ -131,4 +138,6 @@ public class P2PASymmetricSecretMessageExchangerAgreement extends P2PLoginAgreem
             throw new CryptoException("",e);
         }
     }
+
+
 }

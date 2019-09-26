@@ -77,15 +77,42 @@ public enum KeyAgreementType {
 	BC_ECMQV_384_CURVE_41417(false, false, EllipticCurveDiffieHellmanType.BC_ECMQV_384_CURVE_41417),
 	BC_ECMQV_512_CURVE_41417(false, false, EllipticCurveDiffieHellmanType.BC_ECMQV_512_CURVE_41417),*/
 	BCPQC_NEW_HOPE(true, true, null),
+	HYBRID_BQC_NEW_HOPE_WITH_BC_FIPS_ECDDH_384_P_384(BC_FIPS_ECDDH_384_P_384, BCPQC_NEW_HOPE),
+	HYBRID_BQC_NEW_HOPE_WITH_BC_FIPS_ECDDH_512_P_521(BC_FIPS_ECDDH_512_P_521, BCPQC_NEW_HOPE),
+	HYBRID_BQC_NEW_HOPE_WITH_BC_ECCDH_384_CURVE_25519(BC_ECCDH_384_CURVE_25519, BCPQC_NEW_HOPE),
+	HYBRID_BQC_NEW_HOPE_WITH_BC_ECCDH_512_CURVE_25519(BC_ECCDH_512_CURVE_25519, BCPQC_NEW_HOPE),
+	HYBRID_BQC_NEW_HOPE_WITH_BC_XDH_X25519_WITH_SHA384CKDF(BC_XDH_X25519_WITH_SHA384CKDF, BCPQC_NEW_HOPE),
+	HYBRID_BQC_NEW_HOPE_WITH_BC_XDH_X448_WITH_SHA384CKDF(BC_XDH_X448_WITH_SHA384CKDF, BCPQC_NEW_HOPE),
+	HYBRID_BQC_NEW_HOPE_WITH_BC_XDH_X25519_WITH_SHA512CKDF(BC_XDH_X25519_WITH_SHA512CKDF, BCPQC_NEW_HOPE),
+	HYBRID_BQC_NEW_HOPE_WITH_BC_XDH_X448_WITH_SHA512CKDF(BC_XDH_X448_WITH_SHA512CKDF, BCPQC_NEW_HOPE),
+
 	DEFAULT(false, false, EllipticCurveDiffieHellmanType.DEFAULT);
 	
 	private final boolean isPQC;
 	private final boolean isNewHope;
 	private final EllipticCurveDiffieHellmanType ecdhType;
+	private final KeyAgreementType nonPQCKeyAgreementType, PQCKeyAgreementType;
 	KeyAgreementType(boolean isPQC, boolean isNewHope, EllipticCurveDiffieHellmanType ecdhType) {
 		this.isPQC = isPQC;
 		this.isNewHope = isNewHope;
 		this.ecdhType = ecdhType;
+		this.nonPQCKeyAgreementType=null;
+		this.PQCKeyAgreementType=null;
+	}
+	KeyAgreementType(KeyAgreementType nonPQCKeyAgreementType, KeyAgreementType PQCKeyAgreementType) {
+		if (nonPQCKeyAgreementType==null)
+			throw new NullPointerException();
+		if (PQCKeyAgreementType==null)
+			throw new NullPointerException();
+		if (nonPQCKeyAgreementType.isPQC)
+			throw new IllegalArgumentException();
+		if (!PQCKeyAgreementType.isPQC)
+			throw new IllegalArgumentException();
+		this.isPQC=true;
+		this.isNewHope=PQCKeyAgreementType.isNewHope;
+		this.ecdhType=nonPQCKeyAgreementType.ecdhType;
+		this.nonPQCKeyAgreementType=nonPQCKeyAgreementType;
+		this.PQCKeyAgreementType=PQCKeyAgreementType;
 	}
 	
 	public boolean equals(KeyAgreementType o)
@@ -106,9 +133,17 @@ public enum KeyAgreementType {
 	{
 		return getKeyAgreementClient(randomForKeys, signatureType, keySizeBits, null);
 	}
-	public KeyAgreement getKeyAgreementClient(AbstractSecureRandom randomForKeys, SymmetricAuthentifiedSignatureType signatureType, short keySizeBits, byte[] keyingMaterial) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException
+	public KeyAgreement getKeyAgreementClient(AbstractSecureRandom randomForKeys,
+											  SymmetricAuthentifiedSignatureType signatureType,
+											  short keySizeBits, byte[] keyingMaterial) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException
 	{
-		if (ecdhType!=null)
+		if (nonPQCKeyAgreementType!=null && PQCKeyAgreementType!=null)
+		{
+			return new HybridKeyAgreement(
+					nonPQCKeyAgreementType.getKeyAgreementClient(randomForKeys, signatureType, keySizeBits, keyingMaterial),
+					PQCKeyAgreementType.getKeyAgreementClient(randomForKeys, signatureType, keySizeBits, keyingMaterial));
+		}
+		else if (ecdhType!=null)
 			return new EllipticCurveDiffieHellmanAlgorithm(randomForKeys, ecdhType, keySizeBits, keyingMaterial, signatureType);
 		else if (isNewHope)
 		{
@@ -127,9 +162,18 @@ public enum KeyAgreementType {
 	{
 		return getKeyAgreementClient(randomForKeys, encryptionType, keySizeBits, null);
 	}
-	public KeyAgreement getKeyAgreementClient(AbstractSecureRandom randomForKeys, SymmetricEncryptionType encryptionType, short keySizeBits, byte[] keyingMaterial) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException
+	public KeyAgreement getKeyAgreementClient(AbstractSecureRandom randomForKeys,
+											  SymmetricEncryptionType encryptionType,
+											  short keySizeBits,
+											  byte[] keyingMaterial) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException
 	{
-		if (ecdhType!=null)
+		if (nonPQCKeyAgreementType!=null  && PQCKeyAgreementType!=null)
+		{
+			return new HybridKeyAgreement(
+					nonPQCKeyAgreementType.getKeyAgreementClient(randomForKeys, encryptionType, keySizeBits, keyingMaterial),
+					PQCKeyAgreementType.getKeyAgreementClient(randomForKeys, encryptionType, keySizeBits, keyingMaterial));
+		}
+		else if (ecdhType!=null)
 			return new EllipticCurveDiffieHellmanAlgorithm(randomForKeys, ecdhType, keySizeBits, keyingMaterial, encryptionType);
 		else if (isNewHope)
 		{
@@ -147,9 +191,18 @@ public enum KeyAgreementType {
 	{
 		return getKeyAgreementServer(randomForKeys, signatureType, keySizeBits, null);
 	}
-	public KeyAgreement getKeyAgreementServer(AbstractSecureRandom randomForKeys, SymmetricAuthentifiedSignatureType signatureType, short keySizeBits, byte[] keyingMaterial) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException
+	public KeyAgreement getKeyAgreementServer(AbstractSecureRandom randomForKeys,
+											  SymmetricAuthentifiedSignatureType signatureType,
+											  short keySizeBits,
+											  byte[] keyingMaterial) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException
 	{
-		if (ecdhType!=null)
+		if (nonPQCKeyAgreementType!=null && PQCKeyAgreementType!=null)
+		{
+			return new HybridKeyAgreement(
+					nonPQCKeyAgreementType.getKeyAgreementServer(randomForKeys, signatureType, keySizeBits, keyingMaterial),
+					PQCKeyAgreementType.getKeyAgreementServer(randomForKeys, signatureType, keySizeBits, keyingMaterial));
+		}
+		else if (ecdhType!=null)
 			return new EllipticCurveDiffieHellmanAlgorithm(randomForKeys, ecdhType, keySizeBits, keyingMaterial, signatureType);
 		else if (isNewHope)
 		{
@@ -167,9 +220,18 @@ public enum KeyAgreementType {
 	{
 		return getKeyAgreementServer(randomForKeys, encryptionType, keySizeBits, null);
 	}
-	public KeyAgreement getKeyAgreementServer(AbstractSecureRandom randomForKeys, SymmetricEncryptionType encryptionType, short keySizeBits, byte[] keyingMaterial) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException
+	public KeyAgreement getKeyAgreementServer(AbstractSecureRandom randomForKeys,
+											  SymmetricEncryptionType encryptionType,
+											  short keySizeBits,
+											  byte[] keyingMaterial) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException
 	{
-		if (ecdhType!=null)
+		if (nonPQCKeyAgreementType!=null && PQCKeyAgreementType!=null)
+		{
+			return new HybridKeyAgreement(
+					nonPQCKeyAgreementType.getKeyAgreementServer(randomForKeys, encryptionType, keySizeBits, keyingMaterial),
+					PQCKeyAgreementType.getKeyAgreementServer(randomForKeys, encryptionType, keySizeBits, keyingMaterial));
+		}
+		else if (ecdhType!=null)
 			return new EllipticCurveDiffieHellmanAlgorithm(randomForKeys, ecdhType, keySizeBits, keyingMaterial, encryptionType);
 		else if (isNewHope)
 		{

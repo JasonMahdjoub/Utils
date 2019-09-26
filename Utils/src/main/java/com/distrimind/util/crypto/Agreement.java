@@ -114,4 +114,14 @@ public abstract class Agreement {
 
 	protected abstract byte[] getDataToSend(int stepNumber) throws Exception;
 	protected abstract void receiveData(int stepNumber, byte[] data) throws CryptoException;
+
+	public abstract void zeroize();
+
+	@SuppressWarnings("deprecation")
+	@Override
+	public void finalize()
+	{
+		zeroize();
+	}
+
 }

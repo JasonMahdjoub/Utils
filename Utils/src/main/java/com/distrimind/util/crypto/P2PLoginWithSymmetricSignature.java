@@ -37,6 +37,8 @@ package com.distrimind.util.crypto;
 
 import org.bouncycastle.crypto.CryptoException;
 
+import java.util.Arrays;
+
 /**
  * 
  * @author Jason Mahdjoub
@@ -49,6 +51,16 @@ public class P2PLoginWithSymmetricSignature extends P2PLoginAgreement {
 	private byte[] myMessage, otherMessage=null;
 	private static final int messageSize=32;
 	private boolean valid=true;
+
+	@Override
+	public void zeroize() {
+		if (myMessage!=null)
+			Arrays.fill(myMessage, (byte)0);
+		if (otherMessage!=null)
+			Arrays.fill(otherMessage, (byte)0);
+		myMessage=null;
+		otherMessage=null;
+	}
 	
 	P2PLoginWithSymmetricSignature(SymmetricSecretKey secretKey, AbstractSecureRandom random) {
 		super(2, 2);
@@ -146,5 +158,7 @@ public class P2PLoginWithSymmetricSignature extends P2PLoginAgreement {
 				throw new CryptoException("", e);
 		}
 	}
+
+
 
 }

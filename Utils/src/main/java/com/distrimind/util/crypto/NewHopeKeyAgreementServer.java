@@ -39,6 +39,8 @@ import org.bouncycastle.crypto.CryptoException;
 import org.bouncycastle.pqc.crypto.ExchangePair;
 import org.bouncycastle.pqc.crypto.newhope.NHPublicKeyParameters;
 
+import java.util.Arrays;
+
 /**
  * 
  * @author Jason Mahdjoub
@@ -49,6 +51,14 @@ public class NewHopeKeyAgreementServer extends AbstractNewHopeKeyAgreement{
 	private final AbstractSecureRandom randomForKeys;
 	private ExchangePair exchangePair;
 	private boolean valid=true;
+
+	@Override
+	public void zeroize() {
+		super.zeroize();
+		Arrays.fill(exchangePair.getSharedValue(), (byte)0);
+		exchangePair=null;
+	}
+
 	protected NewHopeKeyAgreementServer(SymmetricAuthentifiedSignatureType type, AbstractSecureRandom randomForKeys) {
 		this(type, (short)256, randomForKeys);
 	}

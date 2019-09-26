@@ -57,6 +57,7 @@ public abstract class AbstractNewHopeKeyAgreement extends KeyAgreement{
 	protected int agreementSize;
 	protected byte[] shared;
 	private SymmetricSecretKey secretKey=null;
+	private short keySizeBytes;
 	
 	protected AbstractNewHopeKeyAgreement(SymmetricEncryptionType type, short agreementSize)
 	{
@@ -64,9 +65,14 @@ public abstract class AbstractNewHopeKeyAgreement extends KeyAgreement{
 		this.encryptionType=type;
 		this.signatureType=null;
 		this.agreementSize=agreementSize;
+		keySizeBytes=agreementSize;
 		if (!type.isPostQuantumAlgorithm((short)(agreementSize*8)))
 			throw new IllegalArgumentException("You must use post quantum compatible algorithms");
+	}
 
+	@Override
+	public short getDerivedKeySizeBytes() {
+		return keySizeBytes;
 	}
 	
 	protected AbstractNewHopeKeyAgreement(SymmetricAuthentifiedSignatureType type, short agreementSize)
@@ -91,20 +97,17 @@ public abstract class AbstractNewHopeKeyAgreement extends KeyAgreement{
 		}
 		return secretKey;
 	}
-	
+
+	@Override
 	public void zeroize()
 	{
 		if (shared!=null)
 			Arrays.fill(shared, (byte)0);
+		shared=null;
 		secretKey=null;
 	}
 	
-	@SuppressWarnings("deprecation")
-	@Override
-	public void finalize()
-	{
-		zeroize();
-	}
+
 	
     //static final int POLY_SIZE;
     static final int SENDB_BYTES;

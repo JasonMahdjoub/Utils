@@ -292,7 +292,7 @@ public class CryptoTests {
 		Assert.assertEquals(kpd2.getASymmetricPrivateKey(), kpd.getASymmetricPrivateKey());
 		Assert.assertEquals(kpd2.getASymmetricPublicKey().toJavaNativeKey().getEncoded(), kpd.getASymmetricPublicKey().toJavaNativeKey().getEncoded());
 		Assert.assertEquals(kpd2.getEncryptionAlgorithmType(), kpd.getEncryptionAlgorithmType());
-		Assert.assertEquals(kpd2.getAuthentifiedSignatureAlgorithmType(), kpd.getAuthentifiedSignatureAlgorithmType());
+		Assert.assertEquals(kpd2.getAuthenticatedSignatureAlgorithmType(), kpd.getAuthenticatedSignatureAlgorithmType());
 		Assert.assertEquals(kpd2.getASymmetricPublicKey().getAuthenticatedSignatureAlgorithmType(), kpd.getASymmetricPublicKey().getAuthenticatedSignatureAlgorithmType());
 		Assert.assertEquals(kpd2.getASymmetricPublicKey().getEncryptionAlgorithmType(), kpd.getASymmetricPublicKey().getEncryptionAlgorithmType());
 		Assert.assertEquals(kpd2.getASymmetricPublicKey().getTimeExpirationUTC(), Long.MAX_VALUE);
@@ -353,7 +353,7 @@ public class CryptoTests {
 		Assert.assertEquals(kpd2.getASymmetricPrivateKey(), kpd.getASymmetricPrivateKey());
 		Assert.assertEquals(kpd2.getASymmetricPublicKey().getBytesPublicKey(), kpd.getASymmetricPublicKey().getBytesPublicKey());
 		Assert.assertEquals(kpd2.getEncryptionAlgorithmType(), kpd.getEncryptionAlgorithmType());
-		Assert.assertEquals(kpd2.getAuthentifiedSignatureAlgorithmType(), kpd.getAuthentifiedSignatureAlgorithmType());
+		Assert.assertEquals(kpd2.getAuthenticatedSignatureAlgorithmType(), kpd.getAuthenticatedSignatureAlgorithmType());
 		Assert.assertEquals(kpd2.getASymmetricPublicKey().getAuthenticatedSignatureAlgorithmType(), kpd.getASymmetricPublicKey().getAuthenticatedSignatureAlgorithmType());
 		Assert.assertEquals(kpd2.getASymmetricPublicKey().getEncryptionAlgorithmType(), kpd.getASymmetricPublicKey().getEncryptionAlgorithmType());
 		Assert.assertEquals(kpd2.getASymmetricPublicKey().getTimeExpirationUTC(), Long.MAX_VALUE);
@@ -410,7 +410,7 @@ public class CryptoTests {
 		Assert.assertEquals(newKeyPair.getASymmetricPublicKey().getEncryptionAlgorithmType(), keyPair.getASymmetricPublicKey().getEncryptionAlgorithmType());
 		Assert.assertEquals(newKeyPair.getASymmetricPrivateKey().getAuthenticatedSignatureAlgorithmType(), keyPair.getASymmetricPrivateKey().getAuthenticatedSignatureAlgorithmType());
 		Assert.assertEquals(newKeyPair.getASymmetricPrivateKey().getEncryptionAlgorithmType(), keyPair.getASymmetricPrivateKey().getEncryptionAlgorithmType());
-		Assert.assertEquals(newKeyPair.getAuthentifiedSignatureAlgorithmType(), keyPair.getAuthentifiedSignatureAlgorithmType());
+		Assert.assertEquals(newKeyPair.getAuthenticatedSignatureAlgorithmType(), keyPair.getAuthenticatedSignatureAlgorithmType());
 		Assert.assertEquals(newKeyPair.getEncryptionAlgorithmType(), keyPair.getEncryptionAlgorithmType());
 		Assert.assertEquals(newKeyPair.hashCode(), keyPair.hashCode());
 
@@ -1024,26 +1024,26 @@ public class CryptoTests {
 		ASymmetricAuthenticatedSignerAlgorithm signer = new ASymmetricAuthenticatedSignerAlgorithm(kpd.getASymmetricPrivateKey());
 		ASymmetricAuthenticatedSignatureCheckerAlgorithm checker = new ASymmetricAuthenticatedSignatureCheckerAlgorithm(kpd.getASymmetricPublicKey());
 		byte[] signature=testSignature(signer, checker);
-		if (kpd.getAuthentifiedSignatureAlgorithmType()!= ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA384withECDSA_P_384
-				&& kpd.getAuthentifiedSignatureAlgorithmType()!= ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA256withECDSA_P_256
-				&& kpd.getAuthentifiedSignatureAlgorithmType()!= ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA512withECDSA_P_521
-				&& kpd.getAuthentifiedSignatureAlgorithmType()!= ASymmetricAuthenticatedSignatureType.BC_SHA256withECDSA_CURVE_25519
-				&& kpd.getAuthentifiedSignatureAlgorithmType()!= ASymmetricAuthenticatedSignatureType.BC_SHA384withECDSA_CURVE_25519
-				&& kpd.getAuthentifiedSignatureAlgorithmType()!= ASymmetricAuthenticatedSignatureType.BC_SHA512withECDSA_CURVE_25519
-				/*&& kpd.getAuthentifiedSignatureAlgorithmType()!=ASymmetricAuthenticatedSignatureType.BC_SHA256withECDSA_CURVE_M_511
-				&& kpd.getAuthentifiedSignatureAlgorithmType()!=ASymmetricAuthenticatedSignatureType.BC_SHA384withECDSA_CURVE_M_511
-				&& kpd.getAuthentifiedSignatureAlgorithmType()!=ASymmetricAuthenticatedSignatureType.BC_SHA512withECDSA_CURVE_M_511
-				&& kpd.getAuthentifiedSignatureAlgorithmType()!=ASymmetricAuthenticatedSignatureType.BC_SHA256withECDSA_CURVE_M_221
-				&& kpd.getAuthentifiedSignatureAlgorithmType()!=ASymmetricAuthenticatedSignatureType.BC_SHA384withECDSA_CURVE_M_221
-				&& kpd.getAuthentifiedSignatureAlgorithmType()!=ASymmetricAuthenticatedSignatureType.BC_SHA512withECDSA_CURVE_M_221
-				&& kpd.getAuthentifiedSignatureAlgorithmType()!=ASymmetricAuthenticatedSignatureType.BC_SHA256withECDSA_CURVE_M_383
-				&& kpd.getAuthentifiedSignatureAlgorithmType()!=ASymmetricAuthenticatedSignatureType.BC_SHA384withECDSA_CURVE_M_383
-				&& kpd.getAuthentifiedSignatureAlgorithmType()!=ASymmetricAuthenticatedSignatureType.BC_SHA512withECDSA_CURVE_M_383
-				&& kpd.getAuthentifiedSignatureAlgorithmType()!=ASymmetricAuthenticatedSignatureType.BC_SHA256withECDSA_CURVE_41417
-				&& kpd.getAuthentifiedSignatureAlgorithmType()!=ASymmetricAuthenticatedSignatureType.BC_SHA384withECDSA_CURVE_41417
-				&& kpd.getAuthentifiedSignatureAlgorithmType()!=ASymmetricAuthenticatedSignatureType.BC_SHA512withECDSA_CURVE_41417	*/
+		if (kpd.getAuthenticatedSignatureAlgorithmType()!= ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA384withECDSA_P_384
+				&& kpd.getAuthenticatedSignatureAlgorithmType()!= ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA256withECDSA_P_256
+				&& kpd.getAuthenticatedSignatureAlgorithmType()!= ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA512withECDSA_P_521
+				&& kpd.getAuthenticatedSignatureAlgorithmType()!= ASymmetricAuthenticatedSignatureType.BC_SHA256withECDSA_CURVE_25519
+				&& kpd.getAuthenticatedSignatureAlgorithmType()!= ASymmetricAuthenticatedSignatureType.BC_SHA384withECDSA_CURVE_25519
+				&& kpd.getAuthenticatedSignatureAlgorithmType()!= ASymmetricAuthenticatedSignatureType.BC_SHA512withECDSA_CURVE_25519
+				/*&& kpd.getAuthenticatedSignatureAlgorithmType()!=ASymmetricAuthenticatedSignatureType.BC_SHA256withECDSA_CURVE_M_511
+				&& kpd.getAuthenticatedSignatureAlgorithmType()!=ASymmetricAuthenticatedSignatureType.BC_SHA384withECDSA_CURVE_M_511
+				&& kpd.getAuthenticatedSignatureAlgorithmType()!=ASymmetricAuthenticatedSignatureType.BC_SHA512withECDSA_CURVE_M_511
+				&& kpd.getAuthenticatedSignatureAlgorithmType()!=ASymmetricAuthenticatedSignatureType.BC_SHA256withECDSA_CURVE_M_221
+				&& kpd.getAuthenticatedSignatureAlgorithmType()!=ASymmetricAuthenticatedSignatureType.BC_SHA384withECDSA_CURVE_M_221
+				&& kpd.getAuthenticatedSignatureAlgorithmType()!=ASymmetricAuthenticatedSignatureType.BC_SHA512withECDSA_CURVE_M_221
+				&& kpd.getAuthenticatedSignatureAlgorithmType()!=ASymmetricAuthenticatedSignatureType.BC_SHA256withECDSA_CURVE_M_383
+				&& kpd.getAuthenticatedSignatureAlgorithmType()!=ASymmetricAuthenticatedSignatureType.BC_SHA384withECDSA_CURVE_M_383
+				&& kpd.getAuthenticatedSignatureAlgorithmType()!=ASymmetricAuthenticatedSignatureType.BC_SHA512withECDSA_CURVE_M_383
+				&& kpd.getAuthenticatedSignatureAlgorithmType()!=ASymmetricAuthenticatedSignatureType.BC_SHA256withECDSA_CURVE_41417
+				&& kpd.getAuthenticatedSignatureAlgorithmType()!=ASymmetricAuthenticatedSignatureType.BC_SHA384withECDSA_CURVE_41417
+				&& kpd.getAuthenticatedSignatureAlgorithmType()!=ASymmetricAuthenticatedSignatureType.BC_SHA512withECDSA_CURVE_41417	*/
 				)
-			Assert.assertEquals(kpd.getAuthentifiedSignatureAlgorithmType().getSignatureSizeBits(kpd.getKeySizeBits()), signature.length*8);
+			Assert.assertEquals(kpd.getAuthenticatedSignatureAlgorithmType().getSignatureSizeBits(kpd.getKeySizeBits()), signature.length*8);
 	}
 	
 	@Test(dataProvider="provideDataSymmetricKeyWrapperForEncryption")

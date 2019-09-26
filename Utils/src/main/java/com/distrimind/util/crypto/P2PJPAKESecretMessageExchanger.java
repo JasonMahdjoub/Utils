@@ -489,12 +489,7 @@ public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
 		valid=true;
 	}
 	
-	@SuppressWarnings("deprecation")
 	@Override
-	public void finalize()
-	{
-		zeroize();
-	}
 	public void zeroize()
 	{
 		if (jpake!=null)
@@ -511,6 +506,7 @@ public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
 			
 			jpake=null;
 		}
+		keyMaterial=null;
 	}
 	
 

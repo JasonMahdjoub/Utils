@@ -37,6 +37,8 @@ package com.distrimind.util.crypto;
 
 import org.bouncycastle.crypto.CryptoException;
 
+import java.util.Arrays;
+
 /**
  * @author Jason Mahdjoub
  * @version 1.0
@@ -48,7 +50,17 @@ public class P2PLoginCheckerWithASymmetricSignature extends P2PLoginAgreement{
 
     private boolean valid=true;
 
-    P2PLoginCheckerWithASymmetricSignature(IASymmetricPublicKey publicKey, AbstractSecureRandom random) {
+	@Override
+	public void zeroize() {
+	    if (myMessage!=null)
+		    Arrays.fill(myMessage, (byte)0);
+		myMessage=null;
+		if (otherMessage!=null)
+		    Arrays.fill(otherMessage, (byte)0);
+		otherMessage=null;
+	}
+
+	P2PLoginCheckerWithASymmetricSignature(IASymmetricPublicKey publicKey, AbstractSecureRandom random) {
         super(2, 2);
         if (publicKey==null)
             throw new NullPointerException();

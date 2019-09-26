@@ -46,5 +46,8 @@ public abstract class KeyAgreement extends Agreement {
 	}
 	
 	public abstract SymmetricSecretKey getDerivedKey();
-	
+
+	public abstract short getDerivedKeySizeBytes();
+
+
 }
