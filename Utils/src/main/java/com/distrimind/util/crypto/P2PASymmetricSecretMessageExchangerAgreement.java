@@ -19,6 +19,8 @@ public class P2PASymmetricSecretMessageExchangerAgreement extends P2PLoginAgreem
 
     private P2PASymmetricSecretMessageExchanger p2PASymmetricSecretMessageExchanger;
 
+
+
     private boolean valid=true;
     private final byte[] salt;
     private final int offset_salt;
@@ -26,6 +28,11 @@ public class P2PASymmetricSecretMessageExchangerAgreement extends P2PLoginAgreem
     private byte[] bytesPassword;
     private boolean passwordIsKey;
     private char[] charPassword;
+
+    @Override
+    public boolean isPostQuantumAgreement() {
+        return p2PASymmetricSecretMessageExchanger.getDistantPublicKey().isPostQuantumKey();
+    }
 
     @Override
     public void zeroize() {
@@ -36,6 +43,8 @@ public class P2PASymmetricSecretMessageExchangerAgreement extends P2PLoginAgreem
         bytesPassword=null;
         charPassword=null;
     }
+
+
 
     P2PASymmetricSecretMessageExchangerAgreement(AbstractSecureRandom secureRandom, MessageDigestType messageDigestType, PasswordHashType passwordHashType,
                                                         ASymmetricPublicKey myPublicKey, byte[] salt, int offset_salt, int len_salt, byte[] bytesPassword, int offset_password, int length_password,

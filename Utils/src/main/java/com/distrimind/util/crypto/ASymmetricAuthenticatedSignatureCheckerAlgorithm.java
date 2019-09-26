@@ -76,13 +76,28 @@ public class ASymmetricAuthenticatedSignatureCheckerAlgorithm extends AbstractAu
 		return checker.verify();
 	}
 
+	@Override
+	public boolean isPostQuantumChecker() {
+		return checker.isPostQuantumChecker();
+	}
+
+	public IASymmetricPublicKey getDistantPublicKey()
+	{
+		if (checker instanceof Checker)
+			return ((Checker) checker).getDistantPublicKey();
+		else
+			return ((HybridChecker) checker).distantPublicKey;
+	}
+
 
 	private static class HybridChecker extends AbstractAuthenticatedCheckerAlgorithm {
 		private final Checker checkerPQC, checkerNonPQC;
+		private final HybridASymmetricPublicKey distantPublicKey;
 		private boolean signatureValid=true;
 		HybridChecker(HybridASymmetricPublicKey distantPublicKey) throws NoSuchProviderException, NoSuchAlgorithmException {
 			checkerNonPQC=new Checker(distantPublicKey.getNonPQCPublicKey());
 			checkerPQC=new Checker(distantPublicKey.getPQCPublicKey());
+			this.distantPublicKey=distantPublicKey;
 		}
 
 		@Override
@@ -110,6 +125,10 @@ public class ASymmetricAuthenticatedSignatureCheckerAlgorithm extends AbstractAu
 			else
 				return false;
 		}
+		@Override
+		public boolean isPostQuantumChecker() {
+			return true;
+		}
 	}
 	private static class Checker extends AbstractAuthenticatedCheckerAlgorithm {
 		private final ASymmetricPublicKey distantPublicKey;
@@ -118,6 +137,11 @@ public class ASymmetricAuthenticatedSignatureCheckerAlgorithm extends AbstractAu
 		private final ASymmetricAuthenticatedSignatureType type;
 
 		private byte[] signature = null;
+
+		@Override
+		public boolean isPostQuantumChecker() {
+			return distantPublicKey.isPostQuantumKey();
+		}
 
 		public Checker(ASymmetricPublicKey distantPublicKey)
 				throws NoSuchAlgorithmException, NoSuchProviderException {

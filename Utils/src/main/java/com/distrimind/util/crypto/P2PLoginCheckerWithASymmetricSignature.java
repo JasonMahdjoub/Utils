@@ -60,7 +60,12 @@ public class P2PLoginCheckerWithASymmetricSignature extends P2PLoginAgreement{
 		otherMessage=null;
 	}
 
-	P2PLoginCheckerWithASymmetricSignature(IASymmetricPublicKey publicKey, AbstractSecureRandom random) {
+    @Override
+    public boolean isPostQuantumAgreement() {
+        return publicKey!=null && publicKey.isPostQuantumKey();
+    }
+
+    P2PLoginCheckerWithASymmetricSignature(IASymmetricPublicKey publicKey, AbstractSecureRandom random) {
         super(2, 2);
         if (publicKey==null)
             throw new NullPointerException();

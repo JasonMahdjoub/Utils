@@ -85,6 +85,11 @@ public class NewHopeKeyAgreementClient extends AbstractNewHopeKeyAgreement{
 		}
 	}
 
+	@Override
+	public boolean isPostQuantumAgreement() {
+		return true;
+	}
+
 	private byte[] getDataPhase1()
 	{
 		valid=false;

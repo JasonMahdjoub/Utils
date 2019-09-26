@@ -66,7 +66,10 @@ public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutpu
 		initCipherForEncrypt(this.cipher);
 		initBufferAllocatorArgs();
 	}
-
+	@Override
+	public boolean isPostQuantumEncryption() {
+		return distantPublicKey.isPostQuantumKey();
+	}
 	@Override
 	protected AbstractCipher getCipherInstance() throws NoSuchAlgorithmException, NoSuchPaddingException, NoSuchProviderException {
 		return type.getCipherInstance();
@@ -98,6 +101,8 @@ public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutpu
 		_cipher.init(Cipher.ENCRYPT_MODE, distantPublicKey, random);
 
 	}
+
+
 
 	@Override
 	public int getIVSizeBytesWithExternalCounter() {

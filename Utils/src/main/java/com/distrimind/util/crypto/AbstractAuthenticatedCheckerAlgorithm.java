@@ -83,7 +83,7 @@ public abstract class AbstractAuthenticatedCheckerAlgorithm {
 		return verify();
 	}
 	
-	
+	public abstract boolean isPostQuantumChecker();
 
 	
 	

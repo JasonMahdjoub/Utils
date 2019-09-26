@@ -49,7 +49,7 @@ import java.security.spec.InvalidKeySpecException;
  * @version 3.0
  * @since Utils 2.10.0
  */
-public abstract class AbstractAuthentifiedSignerAlgorithm {
+public abstract class AbstractAuthenticatedSignerAlgorithm {
 	public byte[] sign(byte[] bytes)
 			throws InvalidKeyException, SignatureException,
 			NoSuchAlgorithmException, InvalidKeySpecException, IllegalStateException, InvalidAlgorithmParameterException, IOException {
@@ -127,4 +127,5 @@ public abstract class AbstractAuthentifiedSignerAlgorithm {
 	
 	public abstract byte[] getSignature() throws SignatureException, IllegalStateException, IOException;
 
+	public abstract boolean isPostQuantumSigner();
 }

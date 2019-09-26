@@ -51,9 +51,9 @@ import javax.crypto.ShortBufferException;
  * @version 5.0
  * @since Utils 1.7
  */
-public class ASymmetricAuthenticatedSignerAlgorithm extends AbstractAuthentifiedSignerAlgorithm {
+public class ASymmetricAuthenticatedSignerAlgorithm extends AbstractAuthenticatedSignerAlgorithm {
 
-	private final AbstractAuthentifiedSignerAlgorithm signer;
+	private final AbstractAuthenticatedSignerAlgorithm signer;
 
 	public ASymmetricAuthenticatedSignerAlgorithm(IASymmetricPrivateKey localPrivateKey) throws NoSuchProviderException, NoSuchAlgorithmException {
 		if (localPrivateKey instanceof ASymmetricPrivateKey)
@@ -62,7 +62,10 @@ public class ASymmetricAuthenticatedSignerAlgorithm extends AbstractAuthentified
 			signer=new HybridSigner((HybridASymmetricPrivateKey) localPrivateKey);
 	}
 
-
+	@Override
+	public boolean isPostQuantumSigner() {
+		return signer.isPostQuantumSigner();
+	}
 	@Override
 	public void init() throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidAlgorithmParameterException {
 		signer.init();
@@ -89,7 +92,9 @@ public class ASymmetricAuthenticatedSignerAlgorithm extends AbstractAuthentified
 		return signer.getSignature();
 	}
 
-	private static class HybridSigner extends AbstractAuthentifiedSignerAlgorithm
+
+
+	private static class HybridSigner extends AbstractAuthenticatedSignerAlgorithm
 	{
 		private final Signer nonPQCSigner, PQCSigner;
 		public HybridSigner(HybridASymmetricPrivateKey localPrivateKey) throws NoSuchProviderException, NoSuchAlgorithmException {
@@ -132,14 +137,23 @@ public class ASymmetricAuthenticatedSignerAlgorithm extends AbstractAuthentified
 			System.arraycopy(sig2, 0, res, 3+sig1.length, sig2.length);
 			return res;
 		}
+		@Override
+		public boolean isPostQuantumSigner() {
+			return true;
+		}
 	}
 
-	private static class Signer extends AbstractAuthentifiedSignerAlgorithm {
+	private static class Signer extends AbstractAuthenticatedSignerAlgorithm {
 		private final ASymmetricPrivateKey localPrivateKey;
 		private final AbstractSignature signature;
 		private final int macLength;
 		private final ASymmetricAuthenticatedSignatureType type;
 		private boolean includeParameter = false;
+
+		@Override
+		public boolean isPostQuantumSigner() {
+			return localPrivateKey.isPostQuantumKey();
+		}
 
 		@SuppressWarnings("deprecation")
 		public Signer(ASymmetricPrivateKey localPrivateKey) throws NoSuchAlgorithmException, NoSuchProviderException {

@@ -46,10 +46,16 @@ import java.security.spec.InvalidKeySpecException;
  * @version 3.0
  * @since Utils 2.10.0
  */
-public class SymmetricAuthenticatedSignerAlgorithm extends AbstractAuthentifiedSignerAlgorithm {
+public class SymmetricAuthenticatedSignerAlgorithm extends AbstractAuthenticatedSignerAlgorithm {
 
 	private final AbstractMac mac;
 	private final SymmetricSecretKey secretKey;
+
+	@Override
+	public boolean isPostQuantumSigner() {
+		return secretKey.isPostQuantumKey();
+	}
+
 
 	private SymmetricAuthenticatedSignerAlgorithm(AbstractMac mac, SymmetricSecretKey secretKey) {
 		if (mac == null)
@@ -94,7 +100,8 @@ public class SymmetricAuthenticatedSignerAlgorithm extends AbstractAuthentifiedS
 	public byte[] getSignature() throws IllegalStateException {
 		return mac.doFinal();
 	}
-	
+
+
 
 	@Override
 	public int getMacLengthBytes() {

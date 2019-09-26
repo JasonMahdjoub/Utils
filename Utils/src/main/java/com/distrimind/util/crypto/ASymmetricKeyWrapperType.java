@@ -386,5 +386,11 @@ public enum ASymmetricKeyWrapperType {
 		}
 		
 	}
-	
+
+
+	public boolean isPostQuantumKeyAlgorithm()
+	{
+		return false;
+	}
+
 }

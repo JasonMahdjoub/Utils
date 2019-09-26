@@ -61,7 +61,12 @@ public class P2PLoginWithSymmetricSignature extends P2PLoginAgreement {
 		myMessage=null;
 		otherMessage=null;
 	}
-	
+
+	@Override
+	public boolean isPostQuantumAgreement() {
+		return secretKey!=null && secretKey.isPostQuantumKey();
+	}
+
 	P2PLoginWithSymmetricSignature(SymmetricSecretKey secretKey, AbstractSecureRandom random) {
 		super(2, 2);
 		if (secretKey==null)

@@ -320,4 +320,6 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 			throws InvalidKeyException, InvalidAlgorithmParameterException,
 			NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException;
 
+	public abstract boolean isPostQuantumEncryption();
+
 }

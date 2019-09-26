@@ -58,6 +58,8 @@ public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
 	private BigInteger keyMaterial;
 	private boolean valid=true;
 
+
+
 	/*P2PJPAKESecretMessageExchanger(AbstractSecureRandom secureRandom, Serializable participantID, char[] message)
 			throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException {
 		this(secureRandom, participantID, message, null, -1, -1);
@@ -508,7 +510,12 @@ public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
 		}
 		keyMaterial=null;
 	}
-	
+
+	@Override
+	public boolean isPostQuantumAgreement() {
+		return false;
+	}
+
 
 	private static final Field jpakeFieldPassword;
 	static

@@ -190,5 +190,10 @@ public enum EllipticCurveDiffieHellmanType {
 	{
 		return getKeyAgreementAlgorithmName().startsWith("X");
 	}
+
+	public boolean isPostQuantumAlgorithm()
+	{
+		return false;
+	}
 	
 }

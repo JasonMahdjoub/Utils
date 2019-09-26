@@ -1218,7 +1218,7 @@ public class CryptoTests {
 		return res2;
 	}
 	
-	private byte[] testSignature(AbstractAuthentifiedSignerAlgorithm signer, AbstractAuthenticatedCheckerAlgorithm checker) throws InvalidKeyException, SignatureException, NoSuchAlgorithmException, InvalidKeySpecException, IllegalStateException, NoSuchProviderException, InvalidAlgorithmParameterException, InvalidParameterSpecException, IOException
+	private byte[] testSignature(AbstractAuthenticatedSignerAlgorithm signer, AbstractAuthenticatedCheckerAlgorithm checker) throws InvalidKeyException, SignatureException, NoSuchAlgorithmException, InvalidKeySpecException, IllegalStateException, NoSuchProviderException, InvalidAlgorithmParameterException, InvalidParameterSpecException, IOException
 	{
 		byte[] m = new byte[100000];
 		Random r=new Random(System.currentTimeMillis());

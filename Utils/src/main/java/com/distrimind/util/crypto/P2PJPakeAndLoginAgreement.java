@@ -63,6 +63,11 @@ public class P2PJPakeAndLoginAgreement extends P2PLoginAgreement {
 			login.zeroize();
 	}
 
+	@Override
+	public boolean isPostQuantumAgreement() {
+		return (jpake!=null && jpake.isPostQuantumAgreement()) && (login!=null && login.isPostQuantumAgreement());
+	}
+
 	P2PJPakeAndLoginAgreement(AbstractSecureRandom random, byte[] participantID, char[] message, byte[] salt,
 			int offset_salt, int len_salt, SymmetricSecretKey secretKeyForSignature) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
 		super(secretKeyForSignature==null?3:5, secretKeyForSignature==null?3:5);

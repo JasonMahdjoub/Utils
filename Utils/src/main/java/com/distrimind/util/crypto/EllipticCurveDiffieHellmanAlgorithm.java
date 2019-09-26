@@ -58,6 +58,11 @@ public class EllipticCurveDiffieHellmanAlgorithm extends KeyAgreement {
 	private SymmetricAuthentifiedSignatureType signatureType;
 	private final short keySizeBits;
 
+	@Override
+	public boolean isPostQuantumAgreement() {
+		return type.isPostQuantumAlgorithm();
+	}
+
 
 	private byte[] keyingMaterial;
 	EllipticCurveDiffieHellmanAlgorithm(AbstractSecureRandom randomForKeys, EllipticCurveDiffieHellmanType type, short keySizeBits, byte[] keyingMaterial, SymmetricAuthentifiedSignatureType signatureType) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException {
@@ -95,7 +100,8 @@ public class EllipticCurveDiffieHellmanAlgorithm extends KeyAgreement {
 		
 	}
 
-	
+
+
 	public void reset() {
 		derivedKey = null;
 		myKeyPair = null;

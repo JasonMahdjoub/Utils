@@ -59,6 +59,11 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 
 	private final int maxBlockSizeForEncoding, maxBlockSizeForDecoding;
 
+	@Override
+	public boolean isPostQuantumEncryption() {
+		return myKeyPair.isPostQuantumKey() && distantPublicKey.isPostQuantumKey();
+	}
+
 	public P2PASymmetricEncryptionAlgorithm(ASymmetricKeyPair myKeyPair, ASymmetricPublicKey distantPublicKey)
 			throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidKeySpecException,
 			NoSuchProviderException, InvalidAlgorithmParameterException {
@@ -135,6 +140,8 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 		_cipher.init(Cipher.ENCRYPT_MODE, distantPublicKey);
 
 	}
+
+
 
 	@Override
 	public int getIVSizeBytesWithExternalCounter() {

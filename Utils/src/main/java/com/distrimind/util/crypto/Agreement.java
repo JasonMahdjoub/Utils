@@ -124,4 +124,6 @@ public abstract class Agreement {
 		zeroize();
 	}
 
+	public abstract boolean isPostQuantumAgreement() ;
+
 }

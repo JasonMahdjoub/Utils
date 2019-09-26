@@ -53,6 +53,10 @@ public class HybridKeyAgreement extends KeyAgreement{
 				, Math.max(nonPQCKeyAgreement.getStepsNumberForSend(),PQCKeyAgreement.getStepsNumberForSend()));
 		if (PQCKeyAgreement.getDerivedKeySizeBytes()<32)
 			throw new IllegalArgumentException("Derived key size of PQC algorithm must be greater than 256 bits");
+		if (nonPQCKeyAgreement.isPostQuantumAgreement())
+			throw new IllegalArgumentException();
+		if (!PQCKeyAgreement.isPostQuantumAgreement())
+			throw new IllegalArgumentException();
 		this.nonPQCKeyAgreement=nonPQCKeyAgreement;
 		this.PQCKeyAgreement=PQCKeyAgreement;
 	}
@@ -81,10 +85,8 @@ public class HybridKeyAgreement extends KeyAgreement{
 			int m=Math.min(nonPQCBytes.length, PQCBytes.length);
 			for (int i=0;i<m;i++)
 				shared[i]=(byte)((nonPQCBytes[i] & 0xFF)^(PQCBytes[i] & 0xFF));
-			for (int i=m;i<PQCBytes.length;i++)
-				shared[i]=PQCBytes[i];
-			for (int i=m;i<nonPQCBytes.length;i++)
-				shared[i]=nonPQCBytes[i];
+			System.arraycopy(PQCBytes, m, shared, m, PQCBytes.length - m);
+			if (nonPQCBytes.length - m >= 0) System.arraycopy(nonPQCBytes, m, shared, m, nonPQCBytes.length - m);
 			if (PQC.getEncryptionAlgorithmType()==null)
 				secretKey=new SymmetricSecretKey(PQC.getAuthenticatedSignatureAlgorithmType(), shared);
 			else
@@ -154,5 +156,10 @@ public class HybridKeyAgreement extends KeyAgreement{
 		nonPQCKeyAgreement.zeroize();
 		PQCKeyAgreement.zeroize();
 		this.secretKey=null;
+	}
+
+	@Override
+	public boolean isPostQuantumAgreement() {
+		return true;
 	}
 }

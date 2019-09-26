@@ -66,7 +66,12 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 	private final boolean internalCounter;
 	
 	private byte[] externalCounter;
-	
+
+	@Override
+	public boolean isPostQuantumEncryption() {
+		return key.isPostQuantumKey();
+	}
+
 	public SymmetricEncryptionAlgorithm(AbstractSecureRandom random, SymmetricSecretKey key)
 			throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,
 			InvalidAlgorithmParameterException, NoSuchProviderException, InvalidKeySpecException {
@@ -210,4 +215,6 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 		nonSecureRandom.nextBytes(nullIV);
 		cipher.init(Cipher.ENCRYPT_MODE, key, nullIV);
 	}
+
+
 }

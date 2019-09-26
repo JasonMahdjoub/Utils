@@ -59,6 +59,11 @@ public class NewHopeKeyAgreementServer extends AbstractNewHopeKeyAgreement{
 		exchangePair=null;
 	}
 
+	@Override
+	public boolean isPostQuantumAgreement() {
+		return true;
+	}
+
 	protected NewHopeKeyAgreementServer(SymmetricAuthentifiedSignatureType type, AbstractSecureRandom randomForKeys) {
 		this(type, (short)256, randomForKeys);
 	}

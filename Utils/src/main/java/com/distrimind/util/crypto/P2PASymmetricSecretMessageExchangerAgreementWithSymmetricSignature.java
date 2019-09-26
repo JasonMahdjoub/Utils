@@ -8,7 +8,6 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.spec.InvalidKeySpecException;
-import java.util.Arrays;
 
 /**
  * @author Jason Mahdjoub
@@ -25,6 +24,12 @@ public class P2PASymmetricSecretMessageExchangerAgreementWithSymmetricSignature 
             login.zeroize();
         if (p2PASymmetricSecretMessageExchangerAgreement!=null)
             p2PASymmetricSecretMessageExchangerAgreement.zeroize();
+    }
+
+    @Override
+    public boolean isPostQuantumAgreement() {
+        return (p2PASymmetricSecretMessageExchangerAgreement!=null && p2PASymmetricSecretMessageExchangerAgreement.isPostQuantumAgreement())
+                && (login!=null && login.isPostQuantumAgreement());
     }
 
     /*P2PJPakeAndLoginAgreement(AbstractSecureRandom random, Serializable participantID, char[] message, SymmetricSecretKey secretKeyForSignature) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException {

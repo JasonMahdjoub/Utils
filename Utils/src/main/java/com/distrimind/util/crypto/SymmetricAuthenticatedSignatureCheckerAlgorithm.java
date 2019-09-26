@@ -56,6 +56,11 @@ public class SymmetricAuthenticatedSignatureCheckerAlgorithm extends AbstractAut
 		this.signer = signer;
 	}
 
+	@Override
+	public boolean isPostQuantumChecker() {
+		return signer.isPostQuantumSigner();
+	}
+
 	public SymmetricAuthenticatedSignatureCheckerAlgorithm(SymmetricSecretKey secretKey) throws NoSuchAlgorithmException, NoSuchProviderException {
 		this(new SymmetricAuthenticatedSignerAlgorithm(secretKey));
 	}
@@ -101,5 +106,7 @@ public class SymmetricAuthenticatedSignatureCheckerAlgorithm extends AbstractAut
 			signature=null;
 		}
 	}
+
+
 
 }
