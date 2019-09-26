@@ -46,7 +46,7 @@ import java.security.spec.InvalidKeySpecException;
  * @version 1.0
  * @since MaDKitLanEdition 4.5.0
  */
-public abstract class AbstractKeyPair extends DecentralizedValue {
+public abstract class AbstractKeyPair<PrivKey extends IASymmetricPrivateKey, PubKey extends IASymmetricPublicKey> extends DecentralizedValue {
 	public static AbstractKeyPair decode(byte[] b) throws IllegalArgumentException {
 		return decode(b, true);
 	}
@@ -110,4 +110,11 @@ public abstract class AbstractKeyPair extends DecentralizedValue {
 	public byte[] encodeWithDefaultParameters() {
 		return encode(true);
 	}
+
+	public abstract ASymmetricEncryptionType getEncryptionAlgorithmType() ;
+
+	public abstract ASymmetricAuthenticatedSignatureType getAuthenticatedSignatureAlgorithmType() ;
+
+	public abstract PrivKey getASymmetricPrivateKey();
+	public abstract PubKey getASymmetricPublicKey();
 }

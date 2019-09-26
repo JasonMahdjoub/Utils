@@ -49,7 +49,7 @@ import com.distrimind.util.Bits;
  * @version 3.3
  * @since Utils 1.7.1
  */
-public class ASymmetricKeyPair extends AbstractKeyPair {
+public class ASymmetricKeyPair extends AbstractKeyPair<ASymmetricPrivateKey, ASymmetricPublicKey> {
 	/**
 	 * 
 	 */
@@ -120,7 +120,7 @@ public class ASymmetricKeyPair extends AbstractKeyPair {
 			throw new NullPointerException("privateKey");
 		if (publicKey == null)
 			throw new NullPointerException("publicKey");
-		if (privateKey.getAuthentifiedSignatureAlgorithmType()!=publicKey.getAuthentifiedSignatureAlgorithmType())
+		if (privateKey.getAuthenticatedSignatureAlgorithmType()!=publicKey.getAuthenticatedSignatureAlgorithmType())
 			throw new IllegalArgumentException();
 		if (privateKey.getEncryptionAlgorithmType()!=publicKey.getEncryptionAlgorithmType())
 			throw new IllegalArgumentException();
@@ -128,7 +128,7 @@ public class ASymmetricKeyPair extends AbstractKeyPair {
 		this.publicKey = publicKey;
 		this.keySizeBits = publicKey.getKeySizeBits();
 		this.encryptionType = publicKey.getEncryptionAlgorithmType();
-		this.signatureType=privateKey.getAuthentifiedSignatureAlgorithmType();
+		this.signatureType=privateKey.getAuthenticatedSignatureAlgorithmType();
 
 		hashCode = privateKey.hashCode() + publicKey.hashCode();
 	}
@@ -347,17 +347,21 @@ public class ASymmetricKeyPair extends AbstractKeyPair {
 		return publicKey.getTimeExpirationUTC();
 	}
 
+	@Override
 	public ASymmetricEncryptionType getEncryptionAlgorithmType() {
 		return encryptionType;
 	}
-	public ASymmetricAuthenticatedSignatureType getAuthentifiedSignatureAlgorithmType() {
+	@Override
+	public ASymmetricAuthenticatedSignatureType getAuthenticatedSignatureAlgorithmType() {
 		return signatureType;
 	}
 
+	@Override
 	public ASymmetricPrivateKey getASymmetricPrivateKey() {
 		return privateKey;
 	}
 
+	@Override
 	public ASymmetricPublicKey getASymmetricPublicKey() {
 		return publicKey;
 	}

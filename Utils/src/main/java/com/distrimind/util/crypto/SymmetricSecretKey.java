@@ -276,7 +276,7 @@ public class SymmetricSecretKey extends AbstractKey {
 	public SymmetricEncryptionType getEncryptionAlgorithmType() {
 		return encryptionType;
 	}
-	public SymmetricAuthentifiedSignatureType getAuthentifiedSignatureAlgorithmType() {
+	public SymmetricAuthentifiedSignatureType getAuthenticatedSignatureAlgorithmType() {
 		return signatureType;
 	}
 

@@ -41,5 +41,10 @@ knowledge of the CeCILL-C license and that you accept its terms.
  * @since Utils 4.5.0
  */
 public interface IHybridKey {
+	byte[] encode(boolean includeTimeExpiration);
+	void zeroize();
+
+
+	boolean isPostQuantumKey();
 
 }

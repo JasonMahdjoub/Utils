@@ -54,7 +54,7 @@ public class P2PLoginWithSymmetricSignature extends P2PLoginAgreement {
 		super(2, 2);
 		if (secretKey==null)
 			throw new NullPointerException();
-		if (secretKey.getAuthentifiedSignatureAlgorithmType()==null)
+		if (secretKey.getAuthenticatedSignatureAlgorithmType()==null)
 			throw new IllegalArgumentException("The given secret key is not usable for signature");
 		this.secretKey=secretKey;
 		myMessage=new byte[messageSize];

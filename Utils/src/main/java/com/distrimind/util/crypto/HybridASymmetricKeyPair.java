@@ -44,8 +44,10 @@ import java.util.Arrays;
  * @version 1.0
  * @since Utils 4.5.0
  */
-public class HybridASymmetricKeyPair extends AbstractKeyPair implements IHybridKey {
-	private final ASymmetricKeyPair nonPQCKeyPair, PQCKeyPair;
+public class HybridASymmetricKeyPair extends AbstractKeyPair<HybridASymmetricPrivateKey, HybridASymmetricPublicKey> implements IHybridKey {
+	private final HybridASymmetricPrivateKey privateKey;
+	private final HybridASymmetricPublicKey publicKey;
+
 
 	public HybridASymmetricKeyPair(ASymmetricKeyPair nonPQCKeyPair, ASymmetricKeyPair PQCKeyPair) {
 		if (nonPQCKeyPair==null)
@@ -53,18 +55,37 @@ public class HybridASymmetricKeyPair extends AbstractKeyPair implements IHybridK
 		if (PQCKeyPair==null)
 			throw new NullPointerException();
 		if ((nonPQCKeyPair.getEncryptionAlgorithmType()==null)!=(PQCKeyPair.getEncryptionAlgorithmType()==null)
-				|| (nonPQCKeyPair.getAuthentifiedSignatureAlgorithmType()==null)!=(PQCKeyPair.getAuthentifiedSignatureAlgorithmType()==null))
+				|| (nonPQCKeyPair.getAuthenticatedSignatureAlgorithmType()==null)!=(PQCKeyPair.getAuthenticatedSignatureAlgorithmType()==null))
 			throw new IllegalArgumentException("The given keys must be used both for encryption or both for signature");
-		if ((nonPQCKeyPair.getAuthentifiedSignatureAlgorithmType()!=null
-				&& nonPQCKeyPair.getAuthentifiedSignatureAlgorithmType().isPostQuantumAlgorithm())
+		if ((nonPQCKeyPair.getAuthenticatedSignatureAlgorithmType()!=null
+				&& nonPQCKeyPair.getAuthenticatedSignatureAlgorithmType().isPostQuantumAlgorithm())
 				|| nonPQCKeyPair.getEncryptionAlgorithmType().isPostQuantumAlgorithm())
 			throw new IllegalArgumentException("nonPQCPrivateKey cannot be a post quantum algorithm");
-		if ((PQCKeyPair.getAuthentifiedSignatureAlgorithmType()!=null
-				&& !PQCKeyPair.getAuthentifiedSignatureAlgorithmType().isPostQuantumAlgorithm())
+		if ((PQCKeyPair.getAuthenticatedSignatureAlgorithmType()!=null
+				&& !PQCKeyPair.getAuthenticatedSignatureAlgorithmType().isPostQuantumAlgorithm())
 				|| !PQCKeyPair.getEncryptionAlgorithmType().isPostQuantumAlgorithm())
 			throw new IllegalArgumentException("PQCPrivateKey must be a post quantum algorithm");
-		this.nonPQCKeyPair = nonPQCKeyPair;
-		this.PQCKeyPair = PQCKeyPair;
+		privateKey=new HybridASymmetricPrivateKey(nonPQCKeyPair.getASymmetricPrivateKey(), PQCKeyPair.getASymmetricPrivateKey());
+		publicKey=new HybridASymmetricPublicKey(nonPQCKeyPair.getASymmetricPublicKey(), PQCKeyPair.getASymmetricPublicKey());
+	}
+	public HybridASymmetricKeyPair(HybridASymmetricPrivateKey privateKey, HybridASymmetricPublicKey publicKey) {
+		if (privateKey==null)
+			throw new NullPointerException();
+		if (publicKey==null)
+			throw new NullPointerException();
+		if ((privateKey.getEncryptionAlgorithmType()==null)!=(publicKey.getEncryptionAlgorithmType()==null)
+				|| (privateKey.getAuthenticatedSignatureAlgorithmType()==null)!=(publicKey.getAuthenticatedSignatureAlgorithmType()==null))
+			throw new IllegalArgumentException("The given keys must be used both for encryption or both for signature");
+		if ((privateKey.getAuthenticatedSignatureAlgorithmType()!=null
+				&& privateKey.getAuthenticatedSignatureAlgorithmType().isPostQuantumAlgorithm())
+				|| privateKey.getEncryptionAlgorithmType().isPostQuantumAlgorithm())
+			throw new IllegalArgumentException("nonPQCPrivateKey cannot be a post quantum algorithm");
+		if ((publicKey.getAuthenticatedSignatureAlgorithmType()!=null
+				&& !publicKey.getAuthenticatedSignatureAlgorithmType().isPostQuantumAlgorithm())
+				|| !publicKey.getEncryptionAlgorithmType().isPostQuantumAlgorithm())
+			throw new IllegalArgumentException("PQCPrivateKey must be a post quantum algorithm");
+		this.privateKey=privateKey;
+		this.publicKey=publicKey;
 	}
 
 	static HybridASymmetricKeyPair decodeHybridKey(byte[] encoded, int off, int len, boolean fillArrayWithZerosWhenDecoded)
@@ -81,16 +102,20 @@ public class HybridASymmetricKeyPair extends AbstractKeyPair implements IHybridK
 			int size = (int) Bits.getPositiveInteger(encoded, off + 1, 3);
 			if (size + 36 > len)
 				throw new IllegalArgumentException();
-			ASymmetricKeyPair nonPQCKey = ASymmetricKeyPair.decode(encoded, off + 4, size);
-			if (nonPQCKey.isPostQuantumKey())
+			IHybridKey privateKey = AbstractKey.decodeHybridKey(encoded, off + 4, size, fillArrayWithZerosWhenDecoded);
+			if (privateKey.isPostQuantumKey())
+				throw new IllegalArgumentException();
+			if (!privateKey.getClass().equals(HybridASymmetricPrivateKey.class))
 				throw new IllegalArgumentException();
 
-			ASymmetricKeyPair PQCKey = ASymmetricKeyPair.decode(encoded, off + 4 + size, len - off - size - 4);
+			IHybridKey pubKey = AbstractKey.decodeHybridKey(encoded, off + 4 + size, len - size - 4, fillArrayWithZerosWhenDecoded);
 
-			if (!PQCKey.isPostQuantumKey())
+			if (!privateKey.isPostQuantumKey())
+				throw new IllegalArgumentException();
+			if (!privateKey.getClass().equals(HybridASymmetricPublicKey.class))
 				throw new IllegalArgumentException();
 
-			return new HybridASymmetricKeyPair(nonPQCKey, PQCKey);
+			return new HybridASymmetricKeyPair((HybridASymmetricPrivateKey)privateKey, (HybridASymmetricPublicKey)pubKey);
 		}
 		catch (IllegalArgumentException e)
 		{
@@ -106,14 +131,14 @@ public class HybridASymmetricKeyPair extends AbstractKeyPair implements IHybridK
 
 	@Override
 	public byte[] encode(boolean includeTimeExpiration) {
-		byte[] encodedNonPQC=nonPQCKeyPair.encode(includeTimeExpiration);
-		byte[] encodedPQC=PQCKeyPair.encode(includeTimeExpiration);
+		byte[] encodedPrivKey=privateKey.encode(includeTimeExpiration);
+		byte[] encodedPubKey=publicKey.encode(includeTimeExpiration);
 
-		byte[] res=new byte[encodedNonPQC.length+encodedPQC.length+4];
+		byte[] res=new byte[encodedPrivKey.length+encodedPubKey.length+4];
 		res[0]= AbstractKey.IS_HYBRID_KEY;
-		Bits.putPositiveInteger(res, 1, encodedNonPQC.length, 3);
-		System.arraycopy(encodedNonPQC, 0, res, 4, encodedNonPQC.length );
-		System.arraycopy(encodedPQC, 0, res, 4+encodedNonPQC.length, encodedPQC.length );
+		Bits.putPositiveInteger(res, 1, encodedPrivKey.length, 3);
+		System.arraycopy(encodedPrivKey, 0, res, 4, encodedPrivKey.length );
+		System.arraycopy(encodedPubKey, 0, res, 4+encodedPrivKey.length, encodedPubKey.length );
 		return res;
 
 	}
@@ -130,13 +155,33 @@ public class HybridASymmetricKeyPair extends AbstractKeyPair implements IHybridK
 
 	@Override
 	public long getTimeExpirationUTC() {
-		return nonPQCKeyPair.getTimeExpirationUTC();
+		return publicKey.getTimeExpirationUTC();
 	}
 
 	@Override
 	public void zeroize() {
-		nonPQCKeyPair.zeroize();
-		PQCKeyPair.zeroize();
+		privateKey.zeroize();
+		publicKey.zeroize();
+	}
+
+	@Override
+	public ASymmetricEncryptionType getEncryptionAlgorithmType() {
+		return publicKey.getEncryptionAlgorithmType();
+	}
+
+	@Override
+	public ASymmetricAuthenticatedSignatureType getAuthenticatedSignatureAlgorithmType() {
+		return publicKey.getAuthenticatedSignatureAlgorithmType();
+	}
+
+	@Override
+	public HybridASymmetricPrivateKey getASymmetricPrivateKey() {
+		return privateKey;
+	}
+
+	@Override
+	public HybridASymmetricPublicKey getASymmetricPublicKey() {
+		return publicKey;
 	}
 
 

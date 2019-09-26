@@ -43,16 +43,16 @@ import org.bouncycastle.crypto.CryptoException;
  * @since MaDKitLanEdition 3.23.0
  */
 public class P2PLoginWithASymmetricSignature extends P2PLoginAgreement{
-    private final ASymmetricPrivateKey privateKey;
+    private final IASymmetricPrivateKey privateKey;
     private byte[] myMessage, otherMessage=null;
     static final int messageSize=32;
     private boolean valid=true;
 
-    P2PLoginWithASymmetricSignature(ASymmetricKeyPair keyPair, AbstractSecureRandom random) {
+    P2PLoginWithASymmetricSignature(AbstractKeyPair<?, ?> keyPair, AbstractSecureRandom random) {
         super(2, 2);
         if (keyPair==null)
             throw new NullPointerException();
-        if (keyPair.getAuthentifiedSignatureAlgorithmType()==null)
+        if (keyPair.getAuthenticatedSignatureAlgorithmType()==null)
             throw new IllegalArgumentException("The given key pair is not usable for signature");
         this.privateKey=keyPair.getASymmetricPrivateKey();
         myMessage=new byte[messageSize];

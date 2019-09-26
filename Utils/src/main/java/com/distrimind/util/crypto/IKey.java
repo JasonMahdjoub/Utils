@@ -24,4 +24,7 @@ public interface IKey {
 
 	boolean isPostQuantumKey();
 
+
+
+
 }

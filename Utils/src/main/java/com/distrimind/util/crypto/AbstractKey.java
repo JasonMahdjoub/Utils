@@ -35,14 +35,11 @@ knowledge of the CeCILL-C license and that you accept its terms.
 package com.distrimind.util.crypto;
 
 
-import java.security.NoSuchAlgorithmException;
-import java.security.spec.InvalidKeySpecException;
-import java.util.Arrays;
-
+import com.distrimind.util.Bits;
 import com.distrimind.util.DecentralizedValue;
 import org.apache.commons.codec.binary.Base64;
 
-import com.distrimind.util.Bits;
+import java.util.Arrays;
 
 /**
  * 
@@ -124,7 +121,7 @@ public abstract class AbstractKey extends DecentralizedValue implements IKey{
 		return res;
 	}
 
-	static DecentralizedValue decodeHybridKey(byte[] encoded, int off, int len, boolean fillArrayWithZerosWhenDecoded)
+	static IHybridKey decodeHybridKey(byte[] encoded, int off, int len, boolean fillArrayWithZerosWhenDecoded)
 			throws IllegalArgumentException
 	{
 		try {
@@ -249,7 +246,7 @@ public abstract class AbstractKey extends DecentralizedValue implements IKey{
 				return res;
 			} else if (type==IS_HYBRID_KEY)
 			{
-				DecentralizedValue res=decodeHybridKey(b, off, len, fillArrayWithZerosWhenDecoded);
+				IHybridKey res=decodeHybridKey(b, off, len, fillArrayWithZerosWhenDecoded);
 				if (!res.getClass().equals(HybridASymmetricPrivateKey.class)
 						&& !res.getClass().equals(HybridASymmetricPublicKey.class)	)
 					throw new IllegalArgumentException();

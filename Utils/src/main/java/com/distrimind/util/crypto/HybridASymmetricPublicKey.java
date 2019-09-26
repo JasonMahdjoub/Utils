@@ -51,14 +51,14 @@ public class HybridASymmetricPublicKey extends AbstractKey implements IHybridKey
 		if (PQCPublicKey==null)
 			throw new NullPointerException();
 		if ((nonPQCPublicKey.getEncryptionAlgorithmType()==null)!=(PQCPublicKey.getEncryptionAlgorithmType()==null)
-				|| (nonPQCPublicKey.getAuthentifiedSignatureAlgorithmType()==null)!=(PQCPublicKey.getAuthentifiedSignatureAlgorithmType()==null))
+				|| (nonPQCPublicKey.getAuthenticatedSignatureAlgorithmType()==null)!=(PQCPublicKey.getAuthenticatedSignatureAlgorithmType()==null))
 			throw new IllegalArgumentException("The given keys must be used both for encryption or both for signature");
-		if ((nonPQCPublicKey.getAuthentifiedSignatureAlgorithmType()!=null
-				&& nonPQCPublicKey.getAuthentifiedSignatureAlgorithmType().isPostQuantumAlgorithm())
+		if ((nonPQCPublicKey.getAuthenticatedSignatureAlgorithmType()!=null
+				&& nonPQCPublicKey.getAuthenticatedSignatureAlgorithmType().isPostQuantumAlgorithm())
 				|| nonPQCPublicKey.getEncryptionAlgorithmType().isPostQuantumAlgorithm())
 			throw new IllegalArgumentException("nonPQCPrivateKey cannot be a post quantum algorithm");
-		if ((PQCPublicKey.getAuthentifiedSignatureAlgorithmType()!=null
-				&& !PQCPublicKey.getAuthentifiedSignatureAlgorithmType().isPostQuantumAlgorithm())
+		if ((PQCPublicKey.getAuthenticatedSignatureAlgorithmType()!=null
+				&& !PQCPublicKey.getAuthenticatedSignatureAlgorithmType().isPostQuantumAlgorithm())
 				|| !PQCPublicKey.getEncryptionAlgorithmType().isPostQuantumAlgorithm())
 			throw new IllegalArgumentException("PQCPrivateKey must be a post quantum algorithm");
 		this.nonPQCPublicKey = nonPQCPublicKey;
@@ -112,5 +112,15 @@ public class HybridASymmetricPublicKey extends AbstractKey implements IHybridKey
 	@Override
 	public byte[] encodeWithDefaultParameters() {
 		return encode(true);
+	}
+
+	@Override
+	public ASymmetricEncryptionType getEncryptionAlgorithmType() {
+		return nonPQCPublicKey.getEncryptionAlgorithmType();
+	}
+
+	@Override
+	public ASymmetricAuthenticatedSignatureType getAuthenticatedSignatureAlgorithmType() {
+		return nonPQCPublicKey.getAuthenticatedSignatureAlgorithmType();
 	}
 }

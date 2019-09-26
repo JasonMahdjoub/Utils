@@ -123,7 +123,7 @@ public class ASymmetricAuthenticatedSignatureCheckerAlgorithm extends AbstractAu
 				throws NoSuchAlgorithmException, NoSuchProviderException {
 			if (distantPublicKey == null)
 				throw new NullPointerException("distantPublicKey");
-			type = distantPublicKey.getAuthentifiedSignatureAlgorithmType();
+			type = distantPublicKey.getAuthenticatedSignatureAlgorithmType();
 			if (type == null)
 				throw new IllegalArgumentException("The given key is not destinated to a signature process");
 			this.distantPublicKey = distantPublicKey;

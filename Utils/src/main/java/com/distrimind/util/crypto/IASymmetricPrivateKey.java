@@ -6,4 +6,7 @@ package com.distrimind.util.crypto;
  * @since MaDKitLanEdition 4.5.0
  */
 public interface IASymmetricPrivateKey extends IKey {
+	ASymmetricEncryptionType getEncryptionAlgorithmType() ;
+
+	ASymmetricAuthenticatedSignatureType getAuthenticatedSignatureAlgorithmType() ;
 }

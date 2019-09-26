@@ -293,17 +293,17 @@ public class CryptoTests {
 		Assert.assertEquals(kpd2.getASymmetricPublicKey().toJavaNativeKey().getEncoded(), kpd.getASymmetricPublicKey().toJavaNativeKey().getEncoded());
 		Assert.assertEquals(kpd2.getEncryptionAlgorithmType(), kpd.getEncryptionAlgorithmType());
 		Assert.assertEquals(kpd2.getAuthentifiedSignatureAlgorithmType(), kpd.getAuthentifiedSignatureAlgorithmType());
-		Assert.assertEquals(kpd2.getASymmetricPublicKey().getAuthentifiedSignatureAlgorithmType(), kpd.getASymmetricPublicKey().getAuthentifiedSignatureAlgorithmType());
+		Assert.assertEquals(kpd2.getASymmetricPublicKey().getAuthenticatedSignatureAlgorithmType(), kpd.getASymmetricPublicKey().getAuthenticatedSignatureAlgorithmType());
 		Assert.assertEquals(kpd2.getASymmetricPublicKey().getEncryptionAlgorithmType(), kpd.getASymmetricPublicKey().getEncryptionAlgorithmType());
 		Assert.assertEquals(kpd2.getASymmetricPublicKey().getTimeExpirationUTC(), Long.MAX_VALUE);
-		Assert.assertEquals(kpd2.getASymmetricPrivateKey().getAuthentifiedSignatureAlgorithmType(), kpd.getASymmetricPrivateKey().getAuthentifiedSignatureAlgorithmType());
+		Assert.assertEquals(kpd2.getASymmetricPrivateKey().getAuthenticatedSignatureAlgorithmType(), kpd.getASymmetricPrivateKey().getAuthenticatedSignatureAlgorithmType());
 		Assert.assertEquals(kpd2.getASymmetricPrivateKey().getEncryptionAlgorithmType(), kpd.getASymmetricPrivateKey().getEncryptionAlgorithmType());
 
 		b = kpd.getASymmetricPublicKey().encode(false);
 		Assert.assertEquals(b.length, kpd.getASymmetricPublicKey().encode(true).length-8);
 		ASymmetricPublicKey pk=(ASymmetricPublicKey) DecentralizedValue.decode(b);
 		Assert.assertEquals(pk.toJavaNativeKey().getEncoded(), kpd.getASymmetricPublicKey().toJavaNativeKey().getEncoded());
-		Assert.assertEquals(pk.getAuthentifiedSignatureAlgorithmType(), kpd.getASymmetricPublicKey().getAuthentifiedSignatureAlgorithmType());
+		Assert.assertEquals(pk.getAuthenticatedSignatureAlgorithmType(), kpd.getASymmetricPublicKey().getAuthenticatedSignatureAlgorithmType());
 		Assert.assertEquals(pk.getEncryptionAlgorithmType(), kpd.getASymmetricPublicKey().getEncryptionAlgorithmType());
 		Assert.assertEquals(pk.getTimeExpirationUTC(), Long.MAX_VALUE);
 
@@ -354,17 +354,17 @@ public class CryptoTests {
 		Assert.assertEquals(kpd2.getASymmetricPublicKey().getBytesPublicKey(), kpd.getASymmetricPublicKey().getBytesPublicKey());
 		Assert.assertEquals(kpd2.getEncryptionAlgorithmType(), kpd.getEncryptionAlgorithmType());
 		Assert.assertEquals(kpd2.getAuthentifiedSignatureAlgorithmType(), kpd.getAuthentifiedSignatureAlgorithmType());
-		Assert.assertEquals(kpd2.getASymmetricPublicKey().getAuthentifiedSignatureAlgorithmType(), kpd.getASymmetricPublicKey().getAuthentifiedSignatureAlgorithmType());
+		Assert.assertEquals(kpd2.getASymmetricPublicKey().getAuthenticatedSignatureAlgorithmType(), kpd.getASymmetricPublicKey().getAuthenticatedSignatureAlgorithmType());
 		Assert.assertEquals(kpd2.getASymmetricPublicKey().getEncryptionAlgorithmType(), kpd.getASymmetricPublicKey().getEncryptionAlgorithmType());
 		Assert.assertEquals(kpd2.getASymmetricPublicKey().getTimeExpirationUTC(), Long.MAX_VALUE);
-		Assert.assertEquals(kpd2.getASymmetricPrivateKey().getAuthentifiedSignatureAlgorithmType(), kpd.getASymmetricPrivateKey().getAuthentifiedSignatureAlgorithmType());
+		Assert.assertEquals(kpd2.getASymmetricPrivateKey().getAuthenticatedSignatureAlgorithmType(), kpd.getASymmetricPrivateKey().getAuthenticatedSignatureAlgorithmType());
 		Assert.assertEquals(kpd2.getASymmetricPrivateKey().getEncryptionAlgorithmType(), kpd.getASymmetricPrivateKey().getEncryptionAlgorithmType());
 
 		b = kpd.getASymmetricPublicKey().encode(false);
 		Assert.assertEquals(b.length, kpd.getASymmetricPublicKey().encode(true).length-8);
 		ASymmetricPublicKey pk=(ASymmetricPublicKey)DecentralizedValue.decode(b);
 		Assert.assertEquals(pk.getBytesPublicKey(), kpd.getASymmetricPublicKey().getBytesPublicKey());
-		Assert.assertEquals(pk.getAuthentifiedSignatureAlgorithmType(), kpd.getASymmetricPublicKey().getAuthentifiedSignatureAlgorithmType());
+		Assert.assertEquals(pk.getAuthenticatedSignatureAlgorithmType(), kpd.getASymmetricPublicKey().getAuthenticatedSignatureAlgorithmType());
 		Assert.assertEquals(pk.getEncryptionAlgorithmType(), kpd.getASymmetricPublicKey().getEncryptionAlgorithmType());
 		Assert.assertEquals(pk.getTimeExpirationUTC(), Long.MAX_VALUE);
 
@@ -406,9 +406,9 @@ public class CryptoTests {
 		Assert.assertEquals(newKeyPair.getASymmetricPrivateKey().getKeySizeBits(), keyPair.getASymmetricPrivateKey().getKeySizeBits());
 		Assert.assertEquals(newKeyPair.getASymmetricPublicKey().getTimeExpirationUTC(), -1);
 		Assert.assertEquals(newKeyPair.getTimeExpirationUTC(), -1);
-		Assert.assertEquals(newKeyPair.getASymmetricPublicKey().getAuthentifiedSignatureAlgorithmType(), keyPair.getASymmetricPublicKey().getAuthentifiedSignatureAlgorithmType());
+		Assert.assertEquals(newKeyPair.getASymmetricPublicKey().getAuthenticatedSignatureAlgorithmType(), keyPair.getASymmetricPublicKey().getAuthenticatedSignatureAlgorithmType());
 		Assert.assertEquals(newKeyPair.getASymmetricPublicKey().getEncryptionAlgorithmType(), keyPair.getASymmetricPublicKey().getEncryptionAlgorithmType());
-		Assert.assertEquals(newKeyPair.getASymmetricPrivateKey().getAuthentifiedSignatureAlgorithmType(), keyPair.getASymmetricPrivateKey().getAuthentifiedSignatureAlgorithmType());
+		Assert.assertEquals(newKeyPair.getASymmetricPrivateKey().getAuthenticatedSignatureAlgorithmType(), keyPair.getASymmetricPrivateKey().getAuthenticatedSignatureAlgorithmType());
 		Assert.assertEquals(newKeyPair.getASymmetricPrivateKey().getEncryptionAlgorithmType(), keyPair.getASymmetricPrivateKey().getEncryptionAlgorithmType());
 		Assert.assertEquals(newKeyPair.getAuthentifiedSignatureAlgorithmType(), keyPair.getAuthentifiedSignatureAlgorithmType());
 		Assert.assertEquals(newKeyPair.getEncryptionAlgorithmType(), keyPair.getEncryptionAlgorithmType());
@@ -418,7 +418,7 @@ public class CryptoTests {
 		Assert.assertEquals(pk.getBytesPublicKey(), keyPair.getASymmetricPublicKey().getBytesPublicKey());
 		Assert.assertEquals(pk.getKeySizeBits(), keyPair.getASymmetricPublicKey().getKeySizeBits());
 		Assert.assertEquals(pk.getTimeExpirationUTC(), -1);
-		Assert.assertEquals(pk.getAuthentifiedSignatureAlgorithmType(), keyPair.getASymmetricPublicKey().getAuthentifiedSignatureAlgorithmType());
+		Assert.assertEquals(pk.getAuthenticatedSignatureAlgorithmType(), keyPair.getASymmetricPublicKey().getAuthenticatedSignatureAlgorithmType());
 		Assert.assertEquals(pk.getEncryptionAlgorithmType(), keyPair.getASymmetricPublicKey().getEncryptionAlgorithmType());
 		Assert.assertEquals(pk.hashCode(), keyPair.getASymmetricPublicKey().hashCode());
 
@@ -657,7 +657,7 @@ public class CryptoTests {
 		AbstractSecureRandom r = SecureRandomType.DEFAULT.getSingleton(null);
 		byte[] falseMessage = new byte[10];
 		r.nextBytes(falseMessage);
-		SymmetricSecretKey falseSecretKey=secretKey==null?null:secretKey.getAuthentifiedSignatureAlgorithmType().getKeyGenerator(r).generateKey();
+		SymmetricSecretKey falseSecretKey=secretKey==null?null:secretKey.getAuthenticatedSignatureAlgorithmType().getKeyGenerator(r).generateKey();
 		P2PLoginAgreement exchanger1;
 		P2PLoginAgreement exchanger2;
 		if (asType!=null)
@@ -796,7 +796,7 @@ public class CryptoTests {
 			
 		byte[] localEncryptedKey = kw.wrapKey(rand, kpd.getASymmetricPublicKey(), localKey);
 		SymmetricSecretKey decryptedKey=kw.unwrapKey(kpd.getASymmetricPrivateKey(), localEncryptedKey);
-		Assert.assertEquals(localKey.getAuthentifiedSignatureAlgorithmType(), decryptedKey.getAuthentifiedSignatureAlgorithmType());
+		Assert.assertEquals(localKey.getAuthenticatedSignatureAlgorithmType(), decryptedKey.getAuthenticatedSignatureAlgorithmType());
 		Assert.assertEquals(localKey.getEncryptionAlgorithmType(), decryptedKey.getEncryptionAlgorithmType());
 		Assert.assertEquals(localKey.getKeySizeBits(), decryptedKey.getKeySizeBits());
 		SymmetricEncryptionAlgorithm algoDistantS = new SymmetricEncryptionAlgorithm(rand, decryptedKey);
@@ -923,7 +923,7 @@ public class CryptoTests {
 		r.nextBytes(salt);
 		SymmetricSecretKey key1=derivationType.derivateKey(password.toCharArray(), salt, (byte)7, signatureType);
 		Assert.assertEquals(key1.getKeySizeBits(), signatureType.getDefaultKeySizeBits());
-		Assert.assertEquals(key1.getAuthentifiedSignatureAlgorithmType(), signatureType);
+		Assert.assertEquals(key1.getAuthenticatedSignatureAlgorithmType(), signatureType);
 		Assert.assertEquals(key1.encode(), derivationType.derivateKey(password.toCharArray(), salt, (byte)7, signatureType).encode());
 		Assert.assertNotEquals(key1.encode(), derivationType.derivateKey(invalidPassword.toCharArray(), salt, (byte)7, signatureType).encode());
 	}
@@ -1055,7 +1055,7 @@ public class CryptoTests {
 		byte[] wrappedKey=typeWrapper.wrapKey(kp, sk);
 		SymmetricSecretKey sk2=typeWrapper.unwrapKey(kp, wrappedKey);
 		Assert.assertEquals(sk.getKeySizeBits(), sk2.getKeySizeBits());
-		Assert.assertEquals(sk.getAuthentifiedSignatureAlgorithmType(), sk2.getAuthentifiedSignatureAlgorithmType());
+		Assert.assertEquals(sk.getAuthenticatedSignatureAlgorithmType(), sk2.getAuthenticatedSignatureAlgorithmType());
 		Assert.assertEquals(sk.getEncryptionAlgorithmType(), sk2.getEncryptionAlgorithmType());
         Assert.assertEquals(sk.getKeyBytes(), sk2.getKeyBytes());
 		Assert.assertEquals(sk.toJavaNativeKey().getEncoded(), sk2.toJavaNativeKey().getEncoded());
@@ -1071,7 +1071,7 @@ public class CryptoTests {
 
 		SymmetricSecretKey sk2=typeWrapper.unwrapKey(kp, wrappedKey);
 		Assert.assertEquals(sk.getKeySizeBits(), sk2.getKeySizeBits());
-		Assert.assertEquals(sk.getAuthentifiedSignatureAlgorithmType(), sk2.getAuthentifiedSignatureAlgorithmType());
+		Assert.assertEquals(sk.getAuthenticatedSignatureAlgorithmType(), sk2.getAuthenticatedSignatureAlgorithmType());
 		Assert.assertEquals(sk.getEncryptionAlgorithmType(), sk2.getEncryptionAlgorithmType());
 
         Assert.assertEquals(sk.getKeyBytes(), sk2.getKeyBytes(), sk+" , "+sk2+" , "+Base64.encodeBase64URLSafeString(wrappedKey));
@@ -1143,7 +1143,7 @@ public class CryptoTests {
 		byte[] wrappedKey=typeWrapper.wrapKey(rand, kp.getASymmetricPublicKey(), sk);
 		SymmetricSecretKey sk2=typeWrapper.unwrapKey(kp.getASymmetricPrivateKey(), wrappedKey);
 		Assert.assertEquals(sk.getKeySizeBits(), sk2.getKeySizeBits());
-		Assert.assertEquals(sk.getAuthentifiedSignatureAlgorithmType(), sk2.getAuthentifiedSignatureAlgorithmType());
+		Assert.assertEquals(sk.getAuthenticatedSignatureAlgorithmType(), sk2.getAuthenticatedSignatureAlgorithmType());
 		Assert.assertEquals(sk.getEncryptionAlgorithmType(), sk2.getEncryptionAlgorithmType());
 		Assert.assertEquals(sk.toJavaNativeKey().getEncoded(), sk2.toJavaNativeKey().getEncoded());
 		Assert.assertEquals(sk.toBouncyCastleKey().getKeyBytes(), sk2.toBouncyCastleKey().getKeyBytes());
@@ -1158,7 +1158,7 @@ public class CryptoTests {
 		byte[] wrappedKey=typeWrapper.wrapKey(rand, kp.getASymmetricPublicKey(), sk);
 		SymmetricSecretKey sk2=typeWrapper.unwrapKey(kp.getASymmetricPrivateKey(), wrappedKey);
 		Assert.assertEquals(sk.getKeySizeBits(), sk2.getKeySizeBits());
-		Assert.assertEquals(sk.getAuthentifiedSignatureAlgorithmType(), sk2.getAuthentifiedSignatureAlgorithmType());
+		Assert.assertEquals(sk.getAuthenticatedSignatureAlgorithmType(), sk2.getAuthenticatedSignatureAlgorithmType());
 		Assert.assertEquals(sk.getEncryptionAlgorithmType(), sk2.getEncryptionAlgorithmType());
 		Assert.assertEquals(sk.toJavaNativeKey().getEncoded(), sk2.toJavaNativeKey().getEncoded());
 		Assert.assertEquals(sk.toBouncyCastleKey().getKeyBytes(), sk2.toBouncyCastleKey().getKeyBytes());
@@ -1244,11 +1244,11 @@ public class CryptoTests {
 	public void testSymmetricSignatures(SymmetricAuthentifiedSignatureType type, SymmetricSecretKey secretKey)
 			throws NoSuchAlgorithmException, InvalidKeyException, SignatureException, InvalidKeySpecException,
 			NoSuchProviderException, IllegalStateException, InvalidAlgorithmParameterException, InvalidParameterSpecException, IOException {
-		System.out.println("Testing symmetric signature : " + secretKey.getAuthentifiedSignatureAlgorithmType());
+		System.out.println("Testing symmetric signature : " + secretKey.getAuthenticatedSignatureAlgorithmType());
 		SymmetricAuthenticatedSignerAlgorithm signer = new SymmetricAuthenticatedSignerAlgorithm(secretKey);
 		SymmetricAuthenticatedSignatureCheckerAlgorithm checker = new SymmetricAuthenticatedSignatureCheckerAlgorithm(secretKey);
 		byte[] signature=testSignature(signer, checker);
-		Assert.assertEquals(signature.length*8, secretKey.getAuthentifiedSignatureAlgorithmType().getSignatureSizeInBits());
+		Assert.assertEquals(signature.length*8, secretKey.getAuthenticatedSignatureAlgorithmType().getSignatureSizeInBits());
 	}
 
 	@Test(dataProvider = "provideDataForSymetricEncryptions", dependsOnMethods = "testSecretKeyEncoding")

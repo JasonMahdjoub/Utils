@@ -145,7 +145,7 @@ public class ASymmetricAuthenticatedSignerAlgorithm extends AbstractAuthentified
 		public Signer(ASymmetricPrivateKey localPrivateKey) throws NoSuchAlgorithmException, NoSuchProviderException {
 			if (localPrivateKey == null)
 				throw new NullPointerException("localPrivateKey");
-			type = localPrivateKey.getAuthentifiedSignatureAlgorithmType();
+			type = localPrivateKey.getAuthenticatedSignatureAlgorithmType();
 			if (type == null)
 				throw new IllegalArgumentException("The given key is not destinated to a signature process");
 			this.localPrivateKey = localPrivateKey;

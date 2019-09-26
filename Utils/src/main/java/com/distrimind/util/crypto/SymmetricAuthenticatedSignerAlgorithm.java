@@ -61,7 +61,7 @@ public class SymmetricAuthenticatedSignerAlgorithm extends AbstractAuthentifiedS
 	}
 
 	public SymmetricAuthenticatedSignerAlgorithm(SymmetricSecretKey secretKey) throws NoSuchAlgorithmException, NoSuchProviderException {
-		this(secretKey.getAuthentifiedSignatureAlgorithmType().getHMacInstance(), secretKey);
+		this(secretKey.getAuthenticatedSignatureAlgorithmType().getHMacInstance(), secretKey);
 	}
 
 	public AbstractMac getMac() {
@@ -87,7 +87,7 @@ public class SymmetricAuthenticatedSignerAlgorithm extends AbstractAuthentifiedS
 	@Override
 	public int getSignature(byte[] signature, int off_sig) throws ShortBufferException, IllegalStateException {
 		mac.doFinal(signature, off_sig);
-		return secretKey.getAuthentifiedSignatureAlgorithmType().getSignatureSizeInBits()/8;
+		return secretKey.getAuthenticatedSignatureAlgorithmType().getSignatureSizeInBits()/8;
 	}
 
 	@Override
