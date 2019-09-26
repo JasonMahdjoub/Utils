@@ -49,7 +49,7 @@ import java.security.spec.RSAKeyGenParameterSpec;
 public final class JavaNativeKeyPairGenerator extends AbstractKeyPairGenerator {
 	private final KeyPairGenerator keyPairGenerator;
 
-	private short keySizeBits = -1;
+	private int keySizeBits = -1;
 	private long expirationTime = -1;
 
 	JavaNativeKeyPairGenerator(ASymmetricEncryptionType type, KeyPairGenerator keyPairGenerator) {
@@ -81,7 +81,7 @@ public final class JavaNativeKeyPairGenerator extends AbstractKeyPairGenerator {
 	}
 
 	@Override
-	public void initialize(short _keysize, long expirationTime) throws NoSuchProviderException, NoSuchAlgorithmException, InvalidAlgorithmParameterException {
+	public void initialize(int _keysize, long expirationTime) throws NoSuchProviderException, NoSuchAlgorithmException, InvalidAlgorithmParameterException {
         this.initialize(_keysize, expirationTime, SecureRandomType.BC_FIPS_APPROVED_FOR_KEYS.getSingleton(null));
 
 	}
@@ -108,7 +108,7 @@ public final class JavaNativeKeyPairGenerator extends AbstractKeyPairGenerator {
 
     }*/
 	@Override
-	public void initialize(short _keySize, long expirationTime, AbstractSecureRandom _random) throws InvalidAlgorithmParameterException {
+	public void initialize(int _keySize, long expirationTime, AbstractSecureRandom _random) throws InvalidAlgorithmParameterException {
 		this.keySizeBits = _keySize;
 		this.expirationTime = expirationTime;
 		if (signatureType != null && signatureType.getKeyGeneratorAlgorithmName().equals(ASymmetricAuthenticatedSignatureType.BCPQC_SPHINCS256_SHA3_512.getKeyGeneratorAlgorithmName())) {

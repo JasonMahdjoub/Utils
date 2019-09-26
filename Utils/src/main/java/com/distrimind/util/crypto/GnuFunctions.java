@@ -1062,7 +1062,7 @@ class GnuFunctions {
 			throw new IllegalStateException(e.getTargetException());
 		}
 	}
-	static void keyPairGeneratorInit(Object keyGenerator, short _keySize, AbstractSecureRandom _random)  {
+	static void keyPairGeneratorInit(Object keyGenerator, int _keySize, AbstractSecureRandom _random)  {
 		try {
 			keyPairGeneratorInitRandom.invoke(keyGenerator, _keySize, _random.getGnuSecureRandom());
 		} catch (IllegalAccessException e) {
@@ -1071,7 +1071,7 @@ class GnuFunctions {
 			throw new IllegalStateException(e.getTargetException());
 		}
 	}
-	static void keyPairGeneratorInit(Object keyGenerator, short _keySize)  {
+	static void keyPairGeneratorInit(Object keyGenerator, int _keySize)  {
 		try {
 			keyPairGeneratorInit.invoke(keyGenerator, _keySize);
 		} catch (IllegalAccessException e) {

@@ -97,7 +97,7 @@ public class ASymmetricKeyPair extends AbstractKeyPair<ASymmetricPrivateKey, ASy
 	
 
 	ASymmetricKeyPair(ASymmetricEncryptionType type, ASymmetricPrivateKey privateKey, ASymmetricPublicKey publicKey,
-			short keySize) {
+			int keySize) {
 		if (type == null)
 			throw new NullPointerException("type");
 		if (privateKey == null)
@@ -138,7 +138,7 @@ public class ASymmetricKeyPair extends AbstractKeyPair<ASymmetricPrivateKey, ASy
 		return new ASymmetricKeyPair(this.privateKey.getNewClonedPrivateKey(), this.publicKey.getPublicKeyWithNewExpirationTime(timeExpirationUTC));
 	}
 
-	ASymmetricKeyPair(ASymmetricEncryptionType type, Object keyPair, short keySize,
+	ASymmetricKeyPair(ASymmetricEncryptionType type, Object keyPair, int keySize,
 			long expirationUTC) {
 		if (type == null)
 			throw new NullPointerException("type");
@@ -156,7 +156,7 @@ public class ASymmetricKeyPair extends AbstractKeyPair<ASymmetricPrivateKey, ASy
 		this.gnuKeyPair=keyPair;
 	}
 
-	ASymmetricKeyPair(ASymmetricEncryptionType type, KeyPair keyPair, short keySize, long expirationUTC) {
+	ASymmetricKeyPair(ASymmetricEncryptionType type, KeyPair keyPair, int keySize, long expirationUTC) {
 		if (type == null)
 			throw new NullPointerException("type");
 		if (keyPair == null)
@@ -174,7 +174,7 @@ public class ASymmetricKeyPair extends AbstractKeyPair<ASymmetricPrivateKey, ASy
 	}
 
 	ASymmetricKeyPair(ASymmetricAuthenticatedSignatureType type, ASymmetricPrivateKey privateKey, ASymmetricPublicKey publicKey,
-					  short keySize) {
+					  int keySize) {
 		if (type == null)
 			throw new NullPointerException("type");
 		if (privateKey == null)
@@ -192,7 +192,7 @@ public class ASymmetricKeyPair extends AbstractKeyPair<ASymmetricPrivateKey, ASy
 		hashCode = privateKey.hashCode() + publicKey.hashCode();
 	}
 
-	ASymmetricKeyPair(ASymmetricAuthenticatedSignatureType type, Object keyPair, short keySize,
+	ASymmetricKeyPair(ASymmetricAuthenticatedSignatureType type, Object keyPair, int keySize,
 					  long expirationUTC) {
 		if (type == null)
 			throw new NullPointerException("type");
@@ -210,7 +210,7 @@ public class ASymmetricKeyPair extends AbstractKeyPair<ASymmetricPrivateKey, ASy
 		this.gnuKeyPair=keyPair;
 	}
 
-	ASymmetricKeyPair(ASymmetricAuthenticatedSignatureType type, KeyPair keyPair, short keySize, long expirationUTC, boolean xdhKey) {
+	ASymmetricKeyPair(ASymmetricAuthenticatedSignatureType type, KeyPair keyPair, int keySize, long expirationUTC, boolean xdhKey) {
 		if (type == null)
 			throw new NullPointerException("type");
 		if (keyPair == null)
@@ -271,7 +271,7 @@ public class ASymmetricKeyPair extends AbstractKeyPair<ASymmetricPrivateKey, ASy
 
 		try {
 			int codedTypeSize = SymmetricSecretKey.getEncodedTypeSize();
-			short keySize = Bits.getShort(b, 1+off);
+			int keySize = (int)(Bits.getPositiveInteger(b, 1+off, 2)*8);
 			int posKey=codedTypeSize+3+off;
 			long expirationUTC;
 			byte type=b[off];

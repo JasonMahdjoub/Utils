@@ -44,7 +44,7 @@ package com.distrimind.util.crypto;
 public final class GnuKeyPairGenerator extends AbstractKeyPairGenerator {
 	private final Object keyPairGenerator;
 
-	private short keySize = -1;
+	private int keySize = -1;
 	private long expirationTime = -1;
 
 	GnuKeyPairGenerator(ASymmetricEncryptionType type, Object keyPairGenerator) {
@@ -72,7 +72,7 @@ public final class GnuKeyPairGenerator extends AbstractKeyPairGenerator {
 	}
 
 	@Override
-	public void initialize(short _keysize, long expirationTime) {
+	public void initialize(int _keysize, long expirationTime) {
 
 		GnuFunctions.keyPairGeneratorInit(keyPairGenerator, _keysize);
 		this.keySize = _keysize;
@@ -80,7 +80,7 @@ public final class GnuKeyPairGenerator extends AbstractKeyPairGenerator {
 	}
 
 	@Override
-	public void initialize(short _keysize, long expirationTime, AbstractSecureRandom _random) {
+	public void initialize(int _keysize, long expirationTime, AbstractSecureRandom _random) {
 		GnuFunctions.keyPairGeneratorInit(keyPairGenerator, _keysize, _random);
 		this.keySize = _keysize;
 		this.expirationTime = expirationTime;

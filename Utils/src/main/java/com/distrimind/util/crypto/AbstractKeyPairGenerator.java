@@ -101,7 +101,7 @@ public abstract class AbstractKeyPairGenerator {
 	 * @throws InvalidAlgorithmParameterException if a problem occurs
 
 	 */
-	public abstract void initialize(short keysize, long expirationTime) throws NoSuchProviderException, NoSuchAlgorithmException, InvalidAlgorithmParameterException;
+	public abstract void initialize(int keysize, long expirationTime) throws NoSuchProviderException, NoSuchAlgorithmException, InvalidAlgorithmParameterException;
 
 	/**
 	 * Initializes the key pair generator for a certain keysize with the given
@@ -119,6 +119,6 @@ public abstract class AbstractKeyPairGenerator {
 	 *
 	 * @since 1.2
 	 */
-	public abstract void initialize(short keysize, long expirationTime, AbstractSecureRandom random) throws InvalidAlgorithmParameterException;
+	public abstract void initialize(int keysize, long expirationTime, AbstractSecureRandom random) throws InvalidAlgorithmParameterException;
 
 }

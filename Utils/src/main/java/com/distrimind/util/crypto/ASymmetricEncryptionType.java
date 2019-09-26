@@ -70,12 +70,12 @@ import java.security.spec.X509EncodedKeySpec;
  */
 public enum ASymmetricEncryptionType {
 	RSA_OAEPWithSHA256AndMGF1Padding("RSA", "ECB", "OAEPWITHSHA-256ANDMGF1PADDING", ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA384withRSA,
-			(short) 3072, 31536000000L, (short) 66, CodeProvider.SunJCE,CodeProvider.SunRsaSign, FipsRSA.ALGORITHM),
+			3072, 31536000000L, (short) 66, CodeProvider.SunJCE,CodeProvider.SunRsaSign, FipsRSA.ALGORITHM),
 	RSA_OAEPWithSHA384AndMGF1Padding("RSA", "ECB", "OAEPWITHSHA-384ANDMGF1PADDING", ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA384withRSA,
-			(short) 3072, 31536000000L, (short) 98, CodeProvider.SunJCE,CodeProvider.SunRsaSign, FipsRSA.ALGORITHM),
+			3072, 31536000000L, (short) 98, CodeProvider.SunJCE,CodeProvider.SunRsaSign, FipsRSA.ALGORITHM),
 	RSA_OAEPWithSHA512AndMGF1Padding("RSA", "ECB", "OAEPWITHSHA-512ANDMGF1PADDING", ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA512withRSA,
-			(short) 3072, 31536000000L, (short) 130, CodeProvider.SunJCE,CodeProvider.SunRsaSign, FipsRSA.ALGORITHM),
-	RSA_PKCS1Padding("RSA", "ECB", "PKCS1Padding", ASymmetricAuthenticatedSignatureType.SHA384withRSA, (short) 3072, 31536000000L, (short) 11,
+			3072, 31536000000L, (short) 130, CodeProvider.SunJCE,CodeProvider.SunRsaSign, FipsRSA.ALGORITHM),
+	RSA_PKCS1Padding("RSA", "ECB", "PKCS1Padding", ASymmetricAuthenticatedSignatureType.SHA384withRSA, 3072, 31536000000L, (short) 11,
 					CodeProvider.SunJCE,CodeProvider.SunRsaSign, FipsRSA.ALGORITHM),
 	//BC_FIPS_RSA_OAEPWithSHA256AndMGF1Padding("RSA", "NONE", "OAEPwithSHA256andMGF1Padding", ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA384withRSAandMGF1, (short) 3072, 31536000000l, (short) 66,CodeProvider.BCFIPS,CodeProvider.BCFIPS, FipsRSA.ALGORITHM),
 	//BC_FIPS_RSA_PKCS1Padding("RSA", "NONE", "PKCS1Padding", ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA384withRSAandMGF1, (short) 3072, 31536000000l, (short) 11,CodeProvider.BCFIPS,CodeProvider.BCFIPS, FipsRSA.ALGORITHM),
@@ -202,6 +202,7 @@ public enum ASymmetricEncryptionType {
 		}
 
 	}
+	@SuppressWarnings("SameParameterValue")
 	static org.bouncycastle.jce.spec.ECPublicKeySpec deserializePublicKey(byte[] publicKey, boolean lazy) {
 
 		if (publicKey.length <= 32) {
@@ -229,6 +230,7 @@ public enum ASymmetricEncryptionType {
 		}
 	}
 
+	@SuppressWarnings("SameParameterValue")
 	static ECPrivateKeySpec deserializePrivateKey(byte[] privateKey, boolean lazy) {
 
 		if (privateKey.length <= 32) {
@@ -602,7 +604,7 @@ public enum ASymmetricEncryptionType {
 
 	private final ASymmetricAuthenticatedSignatureType signature;
 
-	private final short keySize;
+	private final int keySize;
 
 	private final long expirationTimeMilis;
 
@@ -618,7 +620,7 @@ public enum ASymmetricEncryptionType {
 	}
 
 	ASymmetricEncryptionType(String algorithmName, String blockMode, String padding,
-							 ASymmetricAuthenticatedSignatureType signature, short keySize, long expirationTimeMilis, short blockSizeDecrement,
+							 ASymmetricAuthenticatedSignatureType signature, int keySize, long expirationTimeMilis, short blockSizeDecrement,
 			CodeProvider codeProviderForEncryption, CodeProvider codeProviderForKeyGenetor, Algorithm bcAlgorithm) {
 		this.algorithmName = algorithmName;
 		this.blockMode = blockMode;
@@ -655,7 +657,7 @@ public enum ASymmetricEncryptionType {
 
 	
 	
-	public short getDefaultKeySize() {
+	public int getDefaultKeySize() {
 		return keySize;
 	}
 
@@ -672,12 +674,12 @@ public enum ASymmetricEncryptionType {
 		return getKeyPairGenerator(random, keySize, System.currentTimeMillis() + expirationTimeMilis);
 	}
 
-	public AbstractKeyPairGenerator getKeyPairGenerator(AbstractSecureRandom random, short keySize)
+	public AbstractKeyPairGenerator getKeyPairGenerator(AbstractSecureRandom random, int keySize)
 			throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException {
 		return getKeyPairGenerator(random, keySize, System.currentTimeMillis() + expirationTimeMilis);
 	}
 
-	public AbstractKeyPairGenerator getKeyPairGenerator(AbstractSecureRandom random, short keySize,
+	public AbstractKeyPairGenerator getKeyPairGenerator(AbstractSecureRandom random, int keySize,
 			long expirationTimeUTC) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException {
 		CodeProvider.encureProviderLoaded(codeProviderForKeyGenerator);
 		if (codeProviderForKeyGenerator == CodeProvider.GNU_CRYPTO) {
