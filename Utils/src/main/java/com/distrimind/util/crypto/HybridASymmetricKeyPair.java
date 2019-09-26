@@ -164,7 +164,7 @@ public class HybridASymmetricKeyPair extends AbstractKeyPair<HybridASymmetricPri
 		publicKey.zeroize();
 	}
 
-	@Override
+	/*@Override
 	public ASymmetricEncryptionType getEncryptionAlgorithmType() {
 		return publicKey.getEncryptionAlgorithmType();
 	}
@@ -172,7 +172,7 @@ public class HybridASymmetricKeyPair extends AbstractKeyPair<HybridASymmetricPri
 	@Override
 	public ASymmetricAuthenticatedSignatureType getAuthenticatedSignatureAlgorithmType() {
 		return publicKey.getAuthenticatedSignatureAlgorithmType();
-	}
+	}*/
 
 	@Override
 	public HybridASymmetricPrivateKey getASymmetricPrivateKey() {
@@ -190,6 +190,13 @@ public class HybridASymmetricKeyPair extends AbstractKeyPair<HybridASymmetricPri
 		return true;
 	}
 
+	public ASymmetricKeyPair getNonPQCASymmetricKeyPair()
+	{
+		return new ASymmetricKeyPair(privateKey.getNonPQCPrivateKey(), publicKey.getNonPQCPublicKey());
+	}
 
-
+	public ASymmetricKeyPair getPQCASymmetricKeyPair()
+	{
+		return new ASymmetricKeyPair(privateKey.getPQCPrivateKey(), publicKey.getPQCPublicKey());
+	}
 }

@@ -74,7 +74,16 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 	{
 		return false;
 	}
-	
+
+	protected AbstractEncryptionOutputAlgorithm()
+	{
+		super();
+		cipher=null;
+		nullIV=null;
+		buffer=null;
+		bufferOut=null;
+	}
+
 	protected AbstractEncryptionOutputAlgorithm(AbstractCipher cipher, int ivSizeBytes) {
 		if (cipher == null)
 			throw new NullPointerException("cipher");

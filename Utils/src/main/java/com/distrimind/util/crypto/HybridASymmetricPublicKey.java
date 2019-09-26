@@ -114,7 +114,7 @@ public class HybridASymmetricPublicKey extends AbstractKey implements IHybridKey
 		return encode(true);
 	}
 
-	@Override
+	/*@Override
 	public ASymmetricEncryptionType getEncryptionAlgorithmType() {
 		return nonPQCPublicKey.getEncryptionAlgorithmType();
 	}
@@ -122,7 +122,7 @@ public class HybridASymmetricPublicKey extends AbstractKey implements IHybridKey
 	@Override
 	public ASymmetricAuthenticatedSignatureType getAuthenticatedSignatureAlgorithmType() {
 		return nonPQCPublicKey.getAuthenticatedSignatureAlgorithmType();
-	}
+	}*/
 
 	@Override
 	public long getTimeExpirationUTC() {

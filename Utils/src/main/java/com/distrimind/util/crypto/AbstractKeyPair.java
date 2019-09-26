@@ -111,9 +111,9 @@ public abstract class AbstractKeyPair<PrivKey extends IASymmetricPrivateKey, Pub
 		return encode(true);
 	}
 
-	public abstract ASymmetricEncryptionType getEncryptionAlgorithmType() ;
+	/*public abstract ASymmetricEncryptionType getEncryptionAlgorithmType() ;
 
-	public abstract ASymmetricAuthenticatedSignatureType getAuthenticatedSignatureAlgorithmType() ;
+	public abstract ASymmetricAuthenticatedSignatureType getAuthenticatedSignatureAlgorithmType() ;*/
 
 	public abstract PrivKey getASymmetricPrivateKey();
 	public abstract PubKey getASymmetricPublicKey();

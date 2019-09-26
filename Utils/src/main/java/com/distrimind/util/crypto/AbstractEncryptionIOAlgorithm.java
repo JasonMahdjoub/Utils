@@ -58,6 +58,11 @@ import java.security.spec.InvalidKeySpecException;
  */
 public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOutputAlgorithm {
 
+	protected AbstractEncryptionIOAlgorithm()
+	{
+		super();
+	}
+
 	protected AbstractEncryptionIOAlgorithm(AbstractCipher cipher, int ivSizeBytes) {
 		super(cipher, ivSizeBytes);
 

@@ -6,9 +6,9 @@ package com.distrimind.util.crypto;
  * @since MaDKitLanEdition 4.5.0
  */
 public interface IASymmetricPublicKey extends IKey {
-	ASymmetricEncryptionType getEncryptionAlgorithmType() ;
+	/*ASymmetricEncryptionType getEncryptionAlgorithmType() ;
 
-	ASymmetricAuthenticatedSignatureType getAuthenticatedSignatureAlgorithmType() ;
+	ASymmetricAuthenticatedSignatureType getAuthenticatedSignatureAlgorithmType() ;*/
 
 	long getTimeExpirationUTC() ;
 }
