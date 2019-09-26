@@ -70,8 +70,14 @@ public class P2PLoginWithASymmetricSignature extends P2PLoginAgreement{
         super(2, 2);
         if (keyPair==null)
             throw new NullPointerException();
-        if (keyPair.getAuthenticatedSignatureAlgorithmType()==null)
+        if (keyPair instanceof HybridASymmetricKeyPair) {
+            if (((HybridASymmetricKeyPair) keyPair).getNonPQCASymmetricKeyPair().getAuthenticatedSignatureAlgorithmType() == null
+                    || ((HybridASymmetricKeyPair) keyPair).getPQCASymmetricKeyPair().getAuthenticatedSignatureAlgorithmType() == null)
+                throw new IllegalArgumentException("The given key pair is not usable for signature");
+        }
+        else if (((ASymmetricKeyPair) keyPair).getAuthenticatedSignatureAlgorithmType()==null)
             throw new IllegalArgumentException("The given key pair is not usable for signature");
+
         this.privateKey=keyPair.getASymmetricPrivateKey();
         myMessage=new byte[messageSize];
         random.nextBytes(myMessage);

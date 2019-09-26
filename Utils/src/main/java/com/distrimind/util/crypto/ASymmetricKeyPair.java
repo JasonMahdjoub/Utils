@@ -347,11 +347,11 @@ public class ASymmetricKeyPair extends AbstractKeyPair<ASymmetricPrivateKey, ASy
 		return publicKey.getTimeExpirationUTC();
 	}
 
-	@Override
+
 	public ASymmetricEncryptionType getEncryptionAlgorithmType() {
 		return encryptionType;
 	}
-	@Override
+
 	public ASymmetricAuthenticatedSignatureType getAuthenticatedSignatureAlgorithmType() {
 		return signatureType;
 	}

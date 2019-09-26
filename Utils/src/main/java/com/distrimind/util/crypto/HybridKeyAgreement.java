@@ -96,6 +96,8 @@ public class HybridKeyAgreement extends KeyAgreement{
 				AbstractCipher cipher=k.getEncryptionAlgorithmType().getCipherInstance();
 				cipher.init(Cipher.ENCRYPT_MODE, k);
 				byte[] shared=cipher.doFinal(PQCBytes, 0, PQCBytes.length);
+				if (shared.length<32)
+					throw new CryptoException();
 				if (PQC.getEncryptionAlgorithmType()==null)
 					secretKey=new SymmetricSecretKey(PQC.getAuthenticatedSignatureAlgorithmType(), shared);
 				else

@@ -35,6 +35,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
 package com.distrimind.util.crypto;
 
 import javax.crypto.*;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -377,6 +378,8 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 	private static class HybridP2PEncryption extends AbstractEncryptionIOAlgorithm
 	{
 		private final P2PEncryption nonPQCEncryption, PQCEncryption;
+		private final HybridASymmetricKeyPair myKeyPair;
+		private final HybridASymmetricPublicKey distantPublicKey;
 
 		public HybridP2PEncryption(HybridASymmetricKeyPair myKeyPair,
 							 HybridASymmetricPublicKey distantPublicKey) throws NoSuchPaddingException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException, InvalidKeyException, InvalidKeySpecException {
@@ -385,6 +388,8 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 			PQCEncryption=new P2PEncryption(myKeyPair.getPQCASymmetricKeyPair(), distantPublicKey.getPQCPublicKey());
 			if (nonPQCEncryption.includeIV()!=PQCEncryption.includeIV())
 				throw new IllegalArgumentException();
+			this.myKeyPair=myKeyPair;
+			this.distantPublicKey=distantPublicKey;
 		}
 
 		public HybridP2PEncryption(ASymmetricAuthenticatedSignatureType nonPQCSignatureType,
@@ -396,6 +401,8 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 			PQCEncryption=new P2PEncryption(PQCSignatureType, myKeyPair.getPQCASymmetricKeyPair(), distantPublicKey.getPQCPublicKey());
 			if (nonPQCEncryption.includeIV()!=PQCEncryption.includeIV())
 				throw new IllegalArgumentException();
+			this.myKeyPair=myKeyPair;
+			this.distantPublicKey=distantPublicKey;
 		}
 
 
@@ -405,12 +412,12 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 		}
 
 		@Override
-		public void initCipherForDecrypt(AbstractCipher cipher, byte[] iv, byte[] externalCounter) throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
+		public void initCipherForDecrypt(AbstractCipher cipher, byte[] iv, byte[] externalCounter)  {
 			throw new IllegalAccessError();
 		}
 
 		@Override
-		protected AbstractCipher getCipherInstance() throws NoSuchAlgorithmException, NoSuchPaddingException, NoSuchProviderException {
+		protected AbstractCipher getCipherInstance()  {
 			throw new IllegalAccessError();
 		}
 
@@ -430,12 +437,12 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 		}
 
 		@Override
-		public void initCipherForEncrypt(AbstractCipher cipher, byte[] externalCounter) throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
+		public void initCipherForEncrypt(AbstractCipher cipher, byte[] externalCounter) {
 			throw new IllegalAccessError();
 		}
 
 		@Override
-		public void initCipherForEncryptAndNotChangeIV(AbstractCipher cipher) throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
+		public void initCipherForEncryptAndNotChangeIV(AbstractCipher cipher) {
 			throw new IllegalAccessError();
 		}
 
@@ -447,7 +454,37 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 		@Override
 		public int getOutputSizeForDecryption(int inputLen) throws InvalidKeyException, InvalidAlgorithmParameterException,
 				NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
-			return p2pencryption.getOutputSizeForDecryption(inputLen);
+			return PQCEncryption.getOutputSizeForDecryption(nonPQCEncryption.getOutputSizeForDecryption(inputLen));
+		}
+
+		@Override
+		public int getOutputSizeForEncryption(int inputLen) throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
+			return nonPQCEncryption.getOutputSizeForEncryption(PQCEncryption.getOutputSizeForEncryption(inputLen));
+		}
+
+		private int privDecode(InputStream is, byte[] associatedData, int offAD, int lenAD, OutputStream os, int length, byte[] externalCounter)
+				throws InvalidKeyException, InvalidAlgorithmParameterException, IOException, IllegalBlockSizeException,
+				BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IllegalStateException, ShortBufferException
+		{
+			int totalBytes=0;
+			while(length>0) {
+				ByteArrayOutputStream baos=new ByteArrayOutputStream();
+
+				int l=Math.min(buffer.length, length);
+				int nb=is.read(buffer);
+				if (nb<0) {
+					if (totalBytes==0)
+						--totalBytes;
+					break;
+				}
+				nonPQCEncryption.decode(is, associatedData, offAD, lenAD, baos, l, externalCounter);
+				byte []b=baos.toByteArray();
+				os.write(PQCEncryption.decode(b, 0, b.length, associatedData, offAD, lenAD, externalCounter));
+				length-=l;
+				totalBytes+=l;
+			}
+
+			return totalBytes;
 		}
 
 		@Override
@@ -455,38 +492,126 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 				throws InvalidKeyException, InvalidAlgorithmParameterException, IOException, IllegalBlockSizeException,
 				BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IllegalStateException, ShortBufferException
 		{
-			p2pencryption.decode(is, associatedData, offAD, lenAD, os, lenAD, externalCounter );
+			privDecode(is, associatedData, offAD, lenAD, os, lenAD, externalCounter);
 		}
 		@Override
 		public void encode(byte[] bytes, int off, int len, byte[] associatedData, int offAD, int lenAD, OutputStream os, byte[] externalCounter) throws InvalidKeyException,
 				IOException, InvalidAlgorithmParameterException, IllegalStateException,
 				IllegalBlockSizeException, BadPaddingException,
 				NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
-			p2pencryption.encode(bytes, off, len, associatedData, offAD, lenAD, os, externalCounter);
+			ByteArrayOutputStream baos=new ByteArrayOutputStream();
+			PQCEncryption.encode(bytes, off, len, associatedData, offAD, lenAD, baos, externalCounter);
+			byte[] b=baos.toByteArray();
+			nonPQCEncryption.encode(b, 0, b.length, associatedData, offAD, lenAD, os, externalCounter);
 		}
+		private final byte[] buffer=new byte[4096];
+
 		@Override
 		public void encode(InputStream is, byte[] associatedData, int offAD, int lenAD, OutputStream os, int length, byte[] externalCounter) throws InvalidKeyException, IOException,
 				InvalidAlgorithmParameterException, IllegalStateException, IllegalBlockSizeException,
 				BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException,
 				NoSuchProviderException, ShortBufferException {
-			p2pencryption.encode(is, associatedData, offAD, lenAD, os, lenAD, externalCounter);
+			for(;;) {
+				ByteArrayOutputStream baos=new ByteArrayOutputStream();
+				int nb=is.read(buffer);
+				if (nb<0)
+					break;
+				PQCEncryption.encode(buffer, 0, nb, associatedData, offAD, lenAD, baos, externalCounter);
+				byte[] b=baos.toByteArray();
+				nonPQCEncryption.encode(b, 0, b.length, associatedData, offAD, lenAD, os, externalCounter);
+
+			}
 		}
 
 		@Override
-		public OutputStream getCipherOutputStream(OutputStream os, byte[] externalCounter) throws InvalidKeyException,
-				NoSuchAlgorithmException, NoSuchPaddingException,
-				InvalidAlgorithmParameterException, IOException, InvalidKeySpecException, NoSuchProviderException {
-			return p2pencryption.getCipherOutputStream(os, externalCounter);
+		public OutputStream getCipherOutputStream(final OutputStream os, final byte[] externalCounter) {
+			return new OutputStream() {
+				private final byte[] one=new byte[1];
+				@Override
+				public void write(int b) throws IOException {
+					one[0]=(byte)b;
+					write(one);
+				}
+
+				@Override
+				public void write(byte[] b, int off, int len) throws IOException {
+					try {
+						encode(b, off, len, null, 0, 0, os, externalCounter);
+					} catch (InvalidKeyException | InvalidAlgorithmParameterException | IllegalBlockSizeException | BadPaddingException | NoSuchAlgorithmException | InvalidKeySpecException | NoSuchProviderException e) {
+						throw new IOException(e);
+					}
+				}
+			};
 		}
 
 		@Override
-		public InputStream getCipherInputStream(InputStream is, byte[] externalCounter)
-				throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,
-				InvalidAlgorithmParameterException, IOException, InvalidKeySpecException, NoSuchProviderException {
-			return p2pencryption.getCipherInputStream(is, externalCounter);
+		public InputStream getCipherInputStream(final InputStream is, final byte[] externalCounter)
+		{
+			return new InputStream() {
+				private final byte[] one=new byte[1];
+				@Override
+				public int read() throws IOException {
+					if (read(one, 0, 1)==1)
+						return one[0];
+					else
+						return -1;
+				}
+
+				@Override
+				public int read(byte[] b, int off, int len) throws IOException {
+					try {
+						return privDecode(is, null, 0, 0, new ArrayOutputStream(b, off, len), len, externalCounter);
+					} catch (InvalidKeyException | InvalidAlgorithmParameterException | IllegalBlockSizeException | BadPaddingException | NoSuchAlgorithmException | InvalidKeySpecException | NoSuchProviderException | ShortBufferException e) {
+						throw new IOException();
+					}
+				}
+			};
 		}
 
 
+	}
+	private static class ArrayOutputStream extends OutputStream
+	{
+		private final byte[] target;
+		private int off;
+		private int len;
+
+		public ArrayOutputStream(byte[] target, int off, int len) {
+			this.target = target;
+			this.off = off;
+			this.len = len;
+		}
+
+		@Override
+		public void write(int b) throws IOException {
+			if (len<=0)
+				throw new IOException();
+			target[off++]=(byte)b;
+			--len;
+		}
+
+		@Override
+		public void write(byte[] b, int off, int len) throws IOException {
+			int l=Math.min(len, this.len);
+			System.arraycopy(b, off, target, this.off, l);
+			this.len-=l;
+			this.off+=l;
+			if (len>l)
+				throw new IOException();
+		}
+	}
+
+	public IASymmetricPublicKey getDistantPublicKey() {
+		if (this.p2pencryption instanceof P2PEncryption)
+			return ((P2PEncryption)p2pencryption).getDistantPublicKey();
+		else
+			return ((HybridP2PEncryption)p2pencryption).distantPublicKey;
+	}
+	public AbstractKeyPair getMyKeyPair() {
+		if (this.p2pencryption instanceof P2PEncryption)
+			return ((P2PEncryption)p2pencryption).getMyKeyPair();
+		else
+			return ((HybridP2PEncryption)p2pencryption).myKeyPair;
 	}
 
 	private static class P2PEncryption extends AbstractEncryptionIOAlgorithm {

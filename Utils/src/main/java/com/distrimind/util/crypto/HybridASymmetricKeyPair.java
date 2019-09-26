@@ -73,17 +73,12 @@ public class HybridASymmetricKeyPair extends AbstractKeyPair<HybridASymmetricPri
 			throw new NullPointerException();
 		if (publicKey==null)
 			throw new NullPointerException();
-		if ((privateKey.getEncryptionAlgorithmType()==null)!=(publicKey.getEncryptionAlgorithmType()==null)
-				|| (privateKey.getAuthenticatedSignatureAlgorithmType()==null)!=(publicKey.getAuthenticatedSignatureAlgorithmType()==null))
+		if ((privateKey.getNonPQCPrivateKey().getEncryptionAlgorithmType()==null)!=(publicKey.getNonPQCPublicKey().getEncryptionAlgorithmType()==null)
+				|| (privateKey.getNonPQCPrivateKey().getAuthenticatedSignatureAlgorithmType()==null)!=(publicKey.getNonPQCPublicKey().getAuthenticatedSignatureAlgorithmType()==null))
 			throw new IllegalArgumentException("The given keys must be used both for encryption or both for signature");
-		if ((privateKey.getAuthenticatedSignatureAlgorithmType()!=null
-				&& privateKey.getAuthenticatedSignatureAlgorithmType().isPostQuantumAlgorithm())
-				|| privateKey.getEncryptionAlgorithmType().isPostQuantumAlgorithm())
-			throw new IllegalArgumentException("nonPQCPrivateKey cannot be a post quantum algorithm");
-		if ((publicKey.getAuthenticatedSignatureAlgorithmType()!=null
-				&& !publicKey.getAuthenticatedSignatureAlgorithmType().isPostQuantumAlgorithm())
-				|| !publicKey.getEncryptionAlgorithmType().isPostQuantumAlgorithm())
-			throw new IllegalArgumentException("PQCPrivateKey must be a post quantum algorithm");
+		if ((privateKey.getPQCPrivateKey().getEncryptionAlgorithmType()==null)!=(publicKey.getPQCPublicKey().getEncryptionAlgorithmType()==null)
+				|| (privateKey.getPQCPrivateKey().getAuthenticatedSignatureAlgorithmType()==null)!=(publicKey.getPQCPublicKey().getAuthenticatedSignatureAlgorithmType()==null))
+			throw new IllegalArgumentException("The given keys must be used both for encryption or both for signature");
 		this.privateKey=privateKey;
 		this.publicKey=publicKey;
 	}

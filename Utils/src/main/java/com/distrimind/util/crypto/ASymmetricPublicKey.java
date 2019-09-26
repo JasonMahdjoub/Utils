@@ -249,11 +249,11 @@ public class ASymmetricPublicKey extends AbstractKey implements IASymmetricPubli
 		return false;
 	}
 
-	@Override
+
 	public ASymmetricEncryptionType getEncryptionAlgorithmType() {
 		return encryptionType;
 	}
-	@Override
+
 	public ASymmetricAuthenticatedSignatureType getAuthenticatedSignatureAlgorithmType() {
 		return signatureType;
 	}

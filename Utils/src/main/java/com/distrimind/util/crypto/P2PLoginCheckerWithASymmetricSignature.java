@@ -69,8 +69,13 @@ public class P2PLoginCheckerWithASymmetricSignature extends P2PLoginAgreement{
         super(2, 2);
         if (publicKey==null)
             throw new NullPointerException();
-        if (publicKey.getAuthenticatedSignatureAlgorithmType()==null)
-            throw new IllegalArgumentException("The given public key is not usable for signature");
+        if (publicKey instanceof HybridASymmetricPublicKey) {
+            if (((HybridASymmetricPublicKey) publicKey).getNonPQCPublicKey().getAuthenticatedSignatureAlgorithmType() == null
+                    || ((HybridASymmetricPublicKey) publicKey).getPQCPublicKey().getAuthenticatedSignatureAlgorithmType() == null)
+                throw new IllegalArgumentException("The given public key is not usable for signature");
+        }
+        else if (((ASymmetricPublicKey) publicKey).getAuthenticatedSignatureAlgorithmType()==null)
+                throw new IllegalArgumentException("The given public key is not usable for signature");
         this.publicKey=publicKey;
         myMessage=new byte[P2PLoginWithASymmetricSignature.messageSize];
         random.nextBytes(myMessage);

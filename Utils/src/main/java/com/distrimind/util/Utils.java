@@ -78,7 +78,7 @@ public class Utils {
 			d.addItem("Add HybridASymmetricPrivateKey class that manage two keys : one PQC key, and one non PQC key");
 			d.addItem("Add HybridASymmetricPublicKey class that manage two keys : one PQC key, and one non PQC key");
 			d.addItem("Add HybridASymmetricKeyPair class that manage two keys : one PQC key, and one non PQC key");
-			d.addItem("Asymmetric signature can now be done with two algorithms at the same time : one PQC algorithm and one non PQC Algorithm");
+			d.addItem("Asymmetric signature and asymmetric encryption can now be done with two algorithms at the same time : one PQC algorithm and one non PQC Algorithm");
 			d.addItem("Key agreements and login agreements can be hybrid and use both post quantum algorithms and non post quantum algorithms");
 			d.addItem("Asymmetric keys have key sizes code with in precision (instead of short precision)");
 			VERSION.addDescription(d);
