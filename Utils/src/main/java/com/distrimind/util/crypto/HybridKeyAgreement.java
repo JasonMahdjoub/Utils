@@ -38,6 +38,15 @@ knowledge of the CeCILL-C license and that you accept its terms.
 import com.distrimind.util.Bits;
 import org.bouncycastle.crypto.CryptoException;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.spec.InvalidKeySpecException;
+
 /**
  * @author Jason Mahdjoub
  * @version 1.0
@@ -77,20 +86,24 @@ public class HybridKeyAgreement extends KeyAgreement{
 		{
 			SymmetricSecretKey nonPQC=nonPQCKeyAgreement.getDerivedKey();
 			SymmetricSecretKey PQC=PQCKeyAgreement.getDerivedKey();
-			byte[] nonPQCBytes=nonPQC.getKeyBytes();
+
 			byte[] PQCBytes=PQC.getKeyBytes();
-			byte[] shared=new byte[Math.max(nonPQCBytes.length, PQCBytes.length)];
-			if (PQCBytes.length<32)
-				throw new CryptoException();
-			int m=Math.min(nonPQCBytes.length, PQCBytes.length);
-			for (int i=0;i<m;i++)
-				shared[i]=(byte)((nonPQCBytes[i] & 0xFF)^(PQCBytes[i] & 0xFF));
-			System.arraycopy(PQCBytes, m, shared, m, PQCBytes.length - m);
-			if (nonPQCBytes.length - m >= 0) System.arraycopy(nonPQCBytes, m, shared, m, nonPQCBytes.length - m);
-			if (PQC.getEncryptionAlgorithmType()==null)
-				secretKey=new SymmetricSecretKey(PQC.getAuthenticatedSignatureAlgorithmType(), shared);
-			else
-				secretKey=new SymmetricSecretKey(PQC.getEncryptionAlgorithmType(), shared);
+
+			try {
+				SymmetricSecretKey k=nonPQC;
+				if (k.getEncryptionAlgorithmType()==null)
+					k=new SymmetricSecretKey(SymmetricEncryptionType.AES_CBC_PKCS5Padding, k.getKeyBytes());
+				AbstractCipher cipher=k.getEncryptionAlgorithmType().getCipherInstance();
+				cipher.init(Cipher.ENCRYPT_MODE, k);
+				byte[] shared=cipher.doFinal(PQCBytes, 0, PQCBytes.length);
+				if (PQC.getEncryptionAlgorithmType()==null)
+					secretKey=new SymmetricSecretKey(PQC.getAuthenticatedSignatureAlgorithmType(), shared);
+				else
+					secretKey=new SymmetricSecretKey(PQC.getEncryptionAlgorithmType(), shared);
+
+			} catch (NoSuchAlgorithmException | NoSuchProviderException | NoSuchPaddingException | InvalidKeyException | InvalidKeySpecException | IllegalBlockSizeException | BadPaddingException e) {
+				throw new CryptoException("", e);
+			}
 		}
 	}
 
