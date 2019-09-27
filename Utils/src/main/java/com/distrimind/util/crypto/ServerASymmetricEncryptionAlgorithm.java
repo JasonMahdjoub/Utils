@@ -39,145 +39,489 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.spec.InvalidKeySpecException;
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
+import javax.crypto.*;
 
 
 /**
  * 
  * @author Jason Mahdjoub
- * @version 4.0
+ * @version 5.0
  * @since Utils 1.7.0
  */
-public class ServerASymmetricEncryptionAlgorithm {
-	private final ASymmetricKeyPair myKeyPair;
+public class ServerASymmetricEncryptionAlgorithm implements IEncryptionInputAlgorithm {
+	private static final int BUFFER_SIZE=AbstractEncryptionIOAlgorithm.BUFFER_SIZE;
 
-	private final ASymmetricEncryptionType type;
-
-	private final AbstractCipher cipher;
-
-	private final int maxBlockSize;
-
-	public ServerASymmetricEncryptionAlgorithm(ASymmetricKeyPair myKeyPair)
-			throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidKeySpecException,
-			NoSuchProviderException {
-
-		if (myKeyPair == null)
-			throw new NullPointerException("myKeyPair");
-
-		this.type = myKeyPair.getEncryptionAlgorithmType();
-		this.myKeyPair = myKeyPair;
-		cipher = type.getCipherInstance();
-		cipher.init(Cipher.ENCRYPT_MODE, myKeyPair.getASymmetricPublicKey());
-		maxBlockSize = cipher.getOutputSize(myKeyPair.getMaxBlockSize());
-		initCipherForDecrypt(cipher);
+	private final IServer server;
+	public ServerASymmetricEncryptionAlgorithm(AbstractKeyPair myKeyPair) throws InvalidKeySpecException, InvalidKeyException, NoSuchProviderException, NoSuchAlgorithmException, NoSuchPaddingException {
+		if (myKeyPair instanceof HybridASymmetricKeyPair)
+			server=new HybridServer((HybridASymmetricKeyPair)myKeyPair);
+		else
+			server=new Server((ASymmetricKeyPair)myKeyPair);
 	}
 
-	public byte[] decode(byte[] bytes) throws InvalidKeyException, IOException, IllegalBlockSizeException,
-			BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
-		return decode(bytes, 0, bytes.length);
+
+	@Override
+	public int getMaxBlockSizeForDecoding() {
+		return server.getMaxBlockSizeForDecoding();
 	}
 
-	public byte[] decode(byte[] bytes, int off, int len)
-			throws InvalidKeyException, IOException, IllegalBlockSizeException, BadPaddingException,
-			NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
-		try (ByteArrayInputStream bais = new ByteArrayInputStream(bytes, off, len)) {
-			return decode(bais);
+	public AbstractKeyPair getMyKeyPair() {
+		if (server instanceof HybridServer)
+			return ((HybridServer) server).myKeyPair;
+		else
+			return ((Server)server).getMyKeyPair();
+	}
+	@Override
+	public int getOutputSizeForDecryption(int inputLen) throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, InvalidAlgorithmParameterException {
+		return server.getOutputSizeForDecryption(inputLen);
+	}
+
+	@Override
+	public void initCipherForDecrypt(AbstractCipher cipher, byte[] iv, byte[] externalCounter) throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, InvalidAlgorithmParameterException {
+		server.initCipherForDecrypt(cipher, iv, externalCounter);
+	}
+	@Override
+	public AbstractCipher getCipherInstance() throws NoSuchAlgorithmException, NoSuchPaddingException, NoSuchProviderException {
+		return server.getCipherInstance();
+	}
+	@Override
+	public boolean isPostQuantumEncryption() {
+		return server.isPostQuantumEncryption();
+	}
+	@Override
+	public void decode(InputStream is, byte[] associatedData, int offAD, int lenAD, OutputStream os, int length, byte[] externalCounter) throws InvalidKeyException, InvalidAlgorithmParameterException, IOException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IllegalStateException, ShortBufferException {
+		server.decode(is, associatedData, offAD, lenAD, os, length, externalCounter);
+	}
+	@Override
+	public InputStream getCipherInputStream(InputStream is, byte[] externalCounter) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidKeySpecException, NoSuchProviderException, IOException, InvalidAlgorithmParameterException {
+		return server.getCipherInputStream(is, externalCounter);
+	}
+
+	private static class HybridServer implements IServer
+	{
+		private final Server nonPQCEncryption, PQCEncryption;
+		private final HybridASymmetricKeyPair myKeyPair;
+		public HybridServer(HybridASymmetricKeyPair myKeyPair) throws InvalidKeySpecException, InvalidKeyException, NoSuchProviderException, NoSuchAlgorithmException, NoSuchPaddingException {
+			this.nonPQCEncryption=new Server(myKeyPair.getNonPQCASymmetricKeyPair());
+			this.PQCEncryption=new Server(myKeyPair.getPQCASymmetricKeyPair());
+			this.myKeyPair=myKeyPair;
+		}
+		@Override
+		public int getMaxBlockSizeForDecoding() {
+			return Math.min(nonPQCEncryption.getMaxBlockSizeForDecoding(), PQCEncryption.getMaxBlockSizeForDecoding());
+		}
+
+
+		@Override
+		public void initCipherForDecrypt(AbstractCipher cipher,byte[] iv, byte[] externalCounter)  {
+			throw new IllegalAccessError();
+		}
+
+		@Override
+		public AbstractCipher getCipherInstance()  {
+			throw new IllegalAccessError();
+		}
+
+
+
+		@Override
+		public boolean isPostQuantumEncryption() {
+			return true;
+		}
+
+		@Override
+		public int getOutputSizeForDecryption(int inputLen) throws InvalidKeyException,
+				NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
+			return PQCEncryption.getOutputSizeForDecryption(nonPQCEncryption.getOutputSizeForDecryption(inputLen));
+		}
+
+		private int privDecode(InputStream is, byte[] associatedData, int offAD, int lenAD, OutputStream os, int length, byte[] externalCounter)
+				throws InvalidKeyException, InvalidAlgorithmParameterException, IOException, IllegalBlockSizeException,
+				BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IllegalStateException, ShortBufferException
+		{
+			int totalBytes=0;
+			while(length>0) {
+				ByteArrayOutputStream baos=new ByteArrayOutputStream();
+
+				int l=Math.min(buffer.length, length);
+				int nb=is.read(buffer);
+				if (nb<0) {
+					if (totalBytes==0)
+						--totalBytes;
+					break;
+				}
+				PQCEncryption.decode(is, associatedData, offAD, lenAD, baos, l, externalCounter);
+				byte []b=baos.toByteArray();
+				os.write(nonPQCEncryption.decode(b, 0, b.length, associatedData, offAD, lenAD, externalCounter));
+				length-=l;
+				totalBytes+=l;
+			}
+
+			return totalBytes;
+		}
+
+		@Override
+		public void decode(InputStream is, byte[] associatedData, int offAD, int lenAD, OutputStream os, int length, byte[] externalCounter)
+				throws InvalidKeyException, InvalidAlgorithmParameterException, IOException, IllegalBlockSizeException,
+				BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IllegalStateException, ShortBufferException
+		{
+			privDecode(is, associatedData, offAD, lenAD, os, lenAD, externalCounter);
+		}
+
+		private final byte[] buffer=new byte[4096];
+
+
+		@Override
+		public InputStream getCipherInputStream(final InputStream is, final byte[] externalCounter)
+		{
+			return new InputStream() {
+				private final byte[] one=new byte[1];
+				@Override
+				public int read() throws IOException {
+					if (read(one, 0, 1)==1)
+						return one[0];
+					else
+						return -1;
+				}
+
+				@Override
+				public int read(byte[] b, int off, int len) throws IOException {
+					try {
+						return privDecode(is, null, 0, 0, new P2PASymmetricEncryptionAlgorithm.ArrayOutputStream(b, off, len), len, externalCounter);
+					} catch (InvalidKeyException | InvalidAlgorithmParameterException | IllegalBlockSizeException | BadPaddingException | NoSuchAlgorithmException | InvalidKeySpecException | NoSuchProviderException | ShortBufferException e) {
+						throw new IOException();
+					}
+				}
+			};
+		}
+		@Override
+		public byte[] decode(byte[] bytes, int off, int len, byte[] associatedData, int offAD, int lenAD, byte[] externalCounter)
+				throws InvalidKeyException, InvalidAlgorithmParameterException, IOException, IllegalBlockSizeException,
+				BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IllegalStateException, ShortBufferException {
+			if (len < 0 || off < 0)
+				throw new IllegalArgumentException("bytes.length=" + bytes.length + ", off=" + off + ", len=" + len);
+			if (off > bytes.length)
+				throw new IllegalArgumentException("bytes.length=" + bytes.length + ", off=" + off + ", len=" + len);
+			if (off + len > bytes.length)
+				throw new IllegalArgumentException("bytes.length=" + bytes.length + ", off=" + off + ", len=" + len);
+
+			try (ByteArrayInputStream bais = new ByteArrayInputStream(bytes, off, len)) {
+				return decode(bais, associatedData, offAD, lenAD, externalCounter);
+			}
+		}
+		public byte[] decode(InputStream is, byte[] associatedData, int offAD, int lenAD, byte[] externalCounter)
+				throws InvalidKeyException, InvalidAlgorithmParameterException, IOException, IllegalBlockSizeException,
+				BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IllegalStateException, ShortBufferException {
+			try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+				this.decode(is, associatedData, offAD, lenAD, baos, externalCounter);
+				return baos.toByteArray();
+			}
+		}
+		public void decode(InputStream is, byte[] associatedData, int offAD, int lenAD, OutputStream os, byte[] externalCounter) throws InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException, IllegalStateException, ShortBufferException
+		{
+			decode(is, associatedData, offAD, lenAD, os, -1, externalCounter);
+		}
+
+	}
+
+
+	private static class Server implements IServer{
+		private final ASymmetricKeyPair myKeyPair;
+
+		private final ASymmetricEncryptionType type;
+
+		private final AbstractCipher cipher;
+
+		private final int maxBlockSize;
+		protected final byte[] buffer=new byte[BUFFER_SIZE];
+		protected byte[] bufferOut;
+
+
+		public Server(ASymmetricKeyPair myKeyPair)
+				throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidKeySpecException,
+				NoSuchProviderException {
+
+			if (myKeyPair == null)
+				throw new NullPointerException("myKeyPair");
+
+			this.type = myKeyPair.getEncryptionAlgorithmType();
+			this.myKeyPair = myKeyPair;
+			cipher = type.getCipherInstance();
+			cipher.init(Cipher.ENCRYPT_MODE, myKeyPair.getASymmetricPublicKey());
+			maxBlockSize = cipher.getOutputSize(myKeyPair.getMaxBlockSize());
+			initCipherForDecrypt(cipher, null, null);
+		}
+
+
+		@Override
+		public AbstractCipher getCipherInstance() throws NoSuchAlgorithmException, NoSuchPaddingException, NoSuchProviderException {
+			return type.getCipherInstance();
+		}
+
+		@Override
+		public boolean isPostQuantumEncryption() {
+			return myKeyPair.isPostQuantumKey();
+		}
+
+		@Override
+		public int getMaxBlockSizeForDecoding() {
+			return maxBlockSize;
+		}
+
+
+		public ASymmetricKeyPair getMyKeyPair() {
+			return this.myKeyPair;
+		}
+
+		@Override
+		public void initCipherForDecrypt(AbstractCipher _cipher, byte[] iv, byte[] externalCounter)
+				throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
+			_cipher.init(Cipher.DECRYPT_MODE, myKeyPair.getASymmetricPrivateKey());
+		}
+
+
+		@Override
+		public void decode(InputStream is, byte[] associatedData, int offAD, int lenAD, OutputStream os, int length,  byte[] externalCounter)
+				throws InvalidKeyException, InvalidAlgorithmParameterException, IOException, IllegalBlockSizeException,
+				BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IllegalStateException, ShortBufferException {
+
+			initCipherForDecrypt(cipher, null, externalCounter);
+			if (associatedData!=null && lenAD>0)
+				cipher.updateAAD(associatedData, offAD, lenAD);
+			int maxBlockSize = getMaxBlockSizeForDecoding();
+			int blockACC;
+			boolean finish = false;
+			while (!finish) {
+
+				int maxPartSize;
+				if (length>=0)
+					maxPartSize=Math.min(maxBlockSize, length);
+				else
+					maxPartSize=maxBlockSize;
+
+				blockACC = 0;
+				do {
+					int nb = Math.min(BUFFER_SIZE, maxPartSize - blockACC);
+					int size = is.read(buffer, 0, nb);
+					if (size > 0) {
+						int sizeOut=cipher.update(buffer, 0, size, bufferOut, 0);
+						if (sizeOut>0)
+							os.write(bufferOut, 0, sizeOut);
+						blockACC += size;
+						if (length>=0)
+							length-=size;
+					}
+					if (nb != size || size <= 0)
+						finish = true;
+				} while ((blockACC < maxPartSize || maxPartSize == Integer.MAX_VALUE) && !finish && length!=0);
+				if (blockACC != 0)
+					os.write(cipher.doFinal());
+			}
+
+			os.flush();
+
+			/*
+			 * try(CipherInputStream cis=new CipherInputStream(is, cipher)) { int read=-1;
+			 * do { read=cis.read(); if (read!=-1) os.write(read); }while (read!=-1); }
+			 */
+		}
+
+
+
+		@Override
+		public InputStream getCipherInputStream(InputStream is, byte[] externalCounter)
+				throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,
+				InvalidKeySpecException, NoSuchProviderException {
+			AbstractCipher c = getCipherInstance();
+
+
+
+			initCipherForDecrypt(c, null, externalCounter);
+			return c.getCipherInputStream(is);
+		}
+		@Override
+		public int getOutputSizeForDecryption(int inputLen) throws InvalidKeyException,
+				NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
+			initCipherForDecrypt(cipher, null, null);
+
+			int maxBlockSize = getMaxBlockSizeForDecoding();
+			if (maxBlockSize == Integer.MAX_VALUE)
+				return cipher.getOutputSize(inputLen);
+			int div = inputLen / maxBlockSize;
+			int mod = inputLen % maxBlockSize;
+			int res = 0;
+			if (div > 0)
+				res += cipher.getOutputSize(maxBlockSize) * div;
+			if (mod > 0)
+				res += cipher.getOutputSize(mod);
+			return res;
+		}
+		@Override
+		public byte[] decode(byte[] bytes, int off, int len, byte[] associatedData, int offAD, int lenAD, byte[] externalCounter)
+				throws InvalidKeyException, InvalidAlgorithmParameterException, IOException, IllegalBlockSizeException,
+				BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IllegalStateException, ShortBufferException {
+			if (len < 0 || off < 0)
+				throw new IllegalArgumentException("bytes.length=" + bytes.length + ", off=" + off + ", len=" + len);
+			if (off > bytes.length)
+				throw new IllegalArgumentException("bytes.length=" + bytes.length + ", off=" + off + ", len=" + len);
+			if (off + len > bytes.length)
+				throw new IllegalArgumentException("bytes.length=" + bytes.length + ", off=" + off + ", len=" + len);
+
+			try (ByteArrayInputStream bais = new ByteArrayInputStream(bytes, off, len)) {
+				return decode(bais, associatedData, offAD, lenAD, externalCounter);
+			}
+		}
+		public byte[] decode(InputStream is, byte[] associatedData, int offAD, int lenAD, byte[] externalCounter)
+				throws InvalidKeyException, InvalidAlgorithmParameterException, IOException, IllegalBlockSizeException,
+				BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IllegalStateException, ShortBufferException {
+			try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+				this.decode(is, associatedData, offAD, lenAD, baos, externalCounter);
+				return baos.toByteArray();
+			}
+		}
+		public void decode(InputStream is, byte[] associatedData, int offAD, int lenAD, OutputStream os, byte[] externalCounter) throws InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException, IllegalStateException, ShortBufferException
+		{
+			decode(is, associatedData, offAD, lenAD, os, -1, externalCounter);
 		}
 	}
 
-	public byte[] decode(InputStream is) throws InvalidKeyException, IOException, IllegalBlockSizeException,
-			BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
+
+
+
+	@Override
+	public byte[] decode(byte[] bytes)
+			throws InvalidKeyException, InvalidAlgorithmParameterException, IOException, IllegalBlockSizeException,
+			BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IllegalStateException, ShortBufferException {
+		return decode(bytes, 0, bytes.length);
+	}
+	@Override
+	public byte[] decode(byte[] bytes, byte[] associatedData, byte[] externalCounter) throws InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException, IllegalStateException, ShortBufferException
+	{
+		return decode(bytes, 0, bytes.length, associatedData, 0, associatedData==null?0:associatedData.length, externalCounter);
+	}
+	@Override
+	public byte[] decode(byte[] bytes, byte[] associatedData) throws InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException, IllegalStateException, ShortBufferException
+	{
+		return decode(bytes, associatedData, null);
+	}
+	@Override
+	public byte[] decode(byte[] bytes, int off, int len) throws InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException, IllegalStateException, ShortBufferException
+	{
+		return decode(bytes, 0, bytes.length, null, 0, 0);
+	}
+	@Override
+	public byte[] decode(byte[] bytes, int off, int len, byte[] associatedData, int offAD, int lenAD) throws InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IllegalStateException, ShortBufferException, IOException
+	{
+		return decode(bytes, off, len, associatedData, offAD, lenAD, null);
+	}
+	@Override
+	public byte[] decode(byte[] bytes, int off, int len, byte[] associatedData, int offAD, int lenAD, byte[] externalCounter)
+			throws InvalidKeyException, InvalidAlgorithmParameterException, IOException, IllegalBlockSizeException,
+			BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IllegalStateException, ShortBufferException {
+		if (len < 0 || off < 0)
+			throw new IllegalArgumentException("bytes.length=" + bytes.length + ", off=" + off + ", len=" + len);
+		if (off > bytes.length)
+			throw new IllegalArgumentException("bytes.length=" + bytes.length + ", off=" + off + ", len=" + len);
+		if (off + len > bytes.length)
+			throw new IllegalArgumentException("bytes.length=" + bytes.length + ", off=" + off + ", len=" + len);
+
+		try (ByteArrayInputStream bais = new ByteArrayInputStream(bytes, off, len)) {
+			return decode(bais, associatedData, offAD, lenAD, externalCounter);
+		}
+	}
+	@Override
+	public byte[] decode(InputStream is, byte[] associatedData) throws InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException, IllegalStateException, ShortBufferException
+	{
+		return decode(is, associatedData, 0, associatedData==null?0:associatedData.length);
+	}
+	@Override
+	public byte[] decode(InputStream is) throws InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException, IllegalStateException, ShortBufferException
+	{
+		return decode(is, null, 0, 0);
+	}
+	@Override
+	public byte[] decode(InputStream is, byte[] associatedData, int offAD, int lenAD) throws InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IllegalStateException, ShortBufferException, IOException
+	{
+		return decode(is, associatedData, offAD, lenAD, (byte[])null);
+	}
+	@Override
+	public byte[] decode(InputStream is, byte[] associatedData, int offAD, int lenAD, byte[] externalCounter)
+			throws InvalidKeyException, InvalidAlgorithmParameterException, IOException, IllegalBlockSizeException,
+			BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IllegalStateException, ShortBufferException {
 		try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-			this.decode(is, baos);
+			this.decode(is, associatedData, offAD, lenAD, baos, externalCounter);
 			return baos.toByteArray();
 		}
 	}
-
-	public void decode(InputStream is, OutputStream os)
-			throws InvalidKeyException, IOException, IllegalBlockSizeException, BadPaddingException,
-			NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
-		// initCipherForDecrypt(cipher);
-		if (is==null)
-			throw new NullPointerException();
-		if (os==null)
-			throw new NullPointerException();
-		int maxBlockSize = getMaxBlockSizeForDecoding();
-
-		byte[] buffer = new byte[AbstractEncryptionOutputAlgorithm.BUFFER_SIZE];
-		boolean finish = false;
-
-		while (!finish) {
-			initCipherForDecrypt(cipher);
-			int blockACC = 0;
-			do {
-				int nb = Math.min(AbstractEncryptionOutputAlgorithm.BUFFER_SIZE, maxBlockSize - blockACC);
-				int size = is.read(buffer, 0, nb);
-				if (size > 0) {
-					byte[] tab=cipher.update(buffer, 0, size);
-					if (tab!=null)
-						os.write(tab);
-					blockACC += size;
-
-				}
-				if (nb != size || size <= 0)
-					finish = true;
-			} while (blockACC < maxBlockSize && !finish);
-			if (blockACC != 0)
-				os.write(cipher.doFinal());
-		}
-
-		os.flush();
-
-		/*
-		 * try(CipherInputStream cis=new CipherInputStream(is, cipher)) { int read=-1;
-		 * do { read=cis.read(); if (read!=-1) os.write(read); }while (read!=-1); }
-		 */
+	@Override
+	public void decode(InputStream is, byte[] associatedData, OutputStream os) throws InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException, IllegalStateException, ShortBufferException
+	{
+		decode(is, associatedData, 0, associatedData==null?0:associatedData.length, os);
+	}
+	@Override
+	public void decode(InputStream is, OutputStream os, byte[] externalCounter) throws InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException, IllegalStateException, ShortBufferException
+	{
+		decode(is, os, -1, externalCounter);
+	}
+	@Override
+	public void decode(InputStream is, OutputStream os) throws InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException, IllegalStateException, ShortBufferException
+	{
+		decode(is, null, 0, 0, os);
+	}
+	@Override
+	public void decode(InputStream is, byte[] associatedData, int offAD, int lenAD, OutputStream os) throws InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException, IllegalStateException, ShortBufferException
+	{
+		decode(is, associatedData, offAD, lenAD, os, null);
+	}
+	@Override
+	public void decode(InputStream is, byte[] associatedData, int offAD, int lenAD, OutputStream os, byte[] externalCounter) throws InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException, IllegalStateException, ShortBufferException
+	{
+		decode(is, associatedData, offAD, lenAD, os, -1, externalCounter);
+	}
+	@Override
+	public void decode(InputStream is, OutputStream os, int length) throws InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException, IllegalStateException, ShortBufferException
+	{
+		decode(is, null, 0, 0, os, length);
+	}
+	@Override
+	public void decode(InputStream is, OutputStream os, int length, byte[] externalCounter) throws InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException, IllegalStateException, ShortBufferException
+	{
+		decode(is, null, 0, 0, os, length, externalCounter);
+	}
+	@Override
+	public void decode(InputStream is, byte[] associatedData, OutputStream os, int length) throws InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException, IllegalStateException, ShortBufferException
+	{
+		decode(is, associatedData, 0, associatedData==null?0:associatedData.length, os, length);
 	}
 
-	public InputStream getCipherInputStream(InputStream is) throws NoSuchAlgorithmException, NoSuchPaddingException,
-			InvalidKeyException, InvalidKeySpecException, NoSuchProviderException {
-		AbstractCipher c = getCipherInstance();
-		initCipherForDecrypt(c);
-		return c.getCipherInputStream(is);
+	@Override
+	public void decode(InputStream is, byte[] associatedData, int offAD, int lenAD, OutputStream os, int length)
+			throws InvalidKeyException, InvalidAlgorithmParameterException, IOException, IllegalBlockSizeException,
+			BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IllegalStateException, ShortBufferException {
+		decode(is, associatedData, offAD, lenAD, os, length, null);
 	}
 
-	protected AbstractCipher getCipherInstance() throws NoSuchAlgorithmException, NoSuchPaddingException, NoSuchProviderException {
-		return type.getCipherInstance();
+	@Override
+	public InputStream getCipherInputStream(InputStream is)
+			throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,
+			InvalidKeySpecException, NoSuchProviderException, IOException, InvalidAlgorithmParameterException {
+		return getCipherInputStream(is, null);
+	}
+	@Override
+	public void initCipherForDecrypt(AbstractCipher cipher) throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, InvalidAlgorithmParameterException {
+		initCipherForDecrypt(cipher,null,  null);
 	}
 
-	public int getMaxBlockSizeForDecoding() {
-		return maxBlockSize;
-	}
-
-	public ASymmetricKeyPair getMyKeyPair() {
-		return this.myKeyPair;
-	}
-
-	public int getOutputSizeForDecryption(int inputLen)
-			throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
-		initCipherForDecrypt(cipher);
-		int maxBlockSize = getMaxBlockSizeForDecoding();
-		int div = inputLen / maxBlockSize;
-		int mod = inputLen % maxBlockSize;
-		int res = 0;
-		if (div > 0)
-			res += cipher.getOutputSize(maxBlockSize) * div;
-		if (mod > 0)
-			res += cipher.getOutputSize(mod);
-		return res;
-	}
-
-	public void initCipherForDecrypt(AbstractCipher _cipher)
-			throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
-		_cipher.init(Cipher.DECRYPT_MODE, myKeyPair.getASymmetricPrivateKey());
+	@Override
+	public void initCipherForDecrypt(AbstractCipher cipher, byte[] iv) throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException
+	{
+		initCipherForDecrypt(cipher,iv,  null);
 	}
 
 }

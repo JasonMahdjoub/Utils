@@ -218,6 +218,11 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 	}
 
 	@Override
+	public void initCipherForDecrypt(AbstractCipher cipher) throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
+		initCipherForDecrypt(cipher, null);
+	}
+
+	@Override
 	public byte[] encode(byte[] bytes) throws InvalidKeyException, IOException, InvalidAlgorithmParameterException, BadPaddingException, IllegalStateException, IllegalBlockSizeException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
 		return p2pencryption.encode(bytes);
 	}
@@ -298,7 +303,7 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 	}
 
 	@Override
-	protected AbstractCipher getCipherInstance() throws NoSuchAlgorithmException, NoSuchPaddingException, NoSuchProviderException {
+	public AbstractCipher getCipherInstance() throws NoSuchAlgorithmException, NoSuchPaddingException, NoSuchProviderException {
 		return p2pencryption.getCipherInstance();
 	}
 
@@ -417,7 +422,7 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 		}
 
 		@Override
-		protected AbstractCipher getCipherInstance()  {
+		public AbstractCipher getCipherInstance()  {
 			throw new IllegalAccessError();
 		}
 
@@ -569,8 +574,12 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 		}
 
 
+		@Override
+		public void initCipherForDecrypt(AbstractCipher cipher) throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
+			initCipherForDecrypt(cipher, null, null);
+		}
 	}
-	private static class ArrayOutputStream extends OutputStream
+	static class ArrayOutputStream extends OutputStream
 	{
 		private final byte[] target;
 		private int off;
@@ -657,7 +666,7 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 		}
 
 		@Override
-		protected AbstractCipher getCipherInstance() throws NoSuchAlgorithmException, NoSuchPaddingException, NoSuchProviderException {
+		public AbstractCipher getCipherInstance() throws NoSuchAlgorithmException, NoSuchPaddingException, NoSuchProviderException {
 			return type.getCipherInstance();
 		}
 
@@ -711,6 +720,11 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 		@Override
 		public int getIVSizeBytesWithExternalCounter() {
 			return 0;
+		}
+
+		@Override
+		public void initCipherForDecrypt(AbstractCipher cipher) throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
+			initCipherForDecrypt(cipher, null);
 		}
 	}
 }

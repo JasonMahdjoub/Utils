@@ -56,7 +56,7 @@ import java.security.spec.InvalidKeySpecException;
  * @version 4.0
  * @since Utils 1.5
  */
-public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOutputAlgorithm {
+public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOutputAlgorithm implements IEncryptionInputAlgorithm{
 
 	protected AbstractEncryptionIOAlgorithm()
 	{
@@ -67,28 +67,33 @@ public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOu
 		super(cipher, ivSizeBytes);
 
 	}
-
+	@Override
 	public byte[] decode(byte[] bytes)
 			throws InvalidKeyException, InvalidAlgorithmParameterException, IOException, IllegalBlockSizeException,
 			BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IllegalStateException, ShortBufferException {
 		return decode(bytes, 0, bytes.length);
 	}
+	@Override
 	public byte[] decode(byte[] bytes, byte[] associatedData, byte[] externalCounter) throws InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException, IllegalStateException, ShortBufferException
 	{
 		return decode(bytes, 0, bytes.length, associatedData, 0, associatedData==null?0:associatedData.length, externalCounter);
 	}
+	@Override
 	public byte[] decode(byte[] bytes, byte[] associatedData) throws InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException, IllegalStateException, ShortBufferException
 	{
 		return decode(bytes, associatedData, null);
 	}
+	@Override
 	public byte[] decode(byte[] bytes, int off, int len) throws InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException, IllegalStateException, ShortBufferException
 	{
 		return decode(bytes, 0, bytes.length, null, 0, 0);
 	}
+	@Override
 	public byte[] decode(byte[] bytes, int off, int len, byte[] associatedData, int offAD, int lenAD) throws InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IllegalStateException, ShortBufferException, IOException
 	{
 		return decode(bytes, off, len, associatedData, offAD, lenAD, null);
 	}
+	@Override
 	public byte[] decode(byte[] bytes, int off, int len, byte[] associatedData, int offAD, int lenAD, byte[] externalCounter)
 			throws InvalidKeyException, InvalidAlgorithmParameterException, IOException, IllegalBlockSizeException,
 			BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IllegalStateException, ShortBufferException {
@@ -103,18 +108,22 @@ public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOu
 			return decode(bais, associatedData, offAD, lenAD, externalCounter);
 		}
 	}
+	@Override
 	public byte[] decode(InputStream is, byte[] associatedData) throws InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException, IllegalStateException, ShortBufferException
 	{
 		return decode(is, associatedData, 0, associatedData==null?0:associatedData.length);
 	}
+	@Override
 	public byte[] decode(InputStream is) throws InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException, IllegalStateException, ShortBufferException
 	{
 		return decode(is, null, 0, 0);
 	}
+	@Override
 	public byte[] decode(InputStream is, byte[] associatedData, int offAD, int lenAD) throws InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IllegalStateException, ShortBufferException, IOException
 	{
 		return decode(is, associatedData, offAD, lenAD, (byte[])null);
 	}
+	@Override
 	public byte[] decode(InputStream is, byte[] associatedData, int offAD, int lenAD, byte[] externalCounter)
 			throws InvalidKeyException, InvalidAlgorithmParameterException, IOException, IllegalBlockSizeException,
 			BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IllegalStateException, ShortBufferException {
@@ -123,40 +132,49 @@ public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOu
 			return baos.toByteArray();
 		}
 	}
+	@Override
 	public void decode(InputStream is, byte[] associatedData, OutputStream os) throws InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException, IllegalStateException, ShortBufferException
 	{
 		decode(is, associatedData, 0, associatedData==null?0:associatedData.length, os);
 	}
+	@Override
 	public void decode(InputStream is, OutputStream os, byte[] externalCounter) throws InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException, IllegalStateException, ShortBufferException
 	{
 		decode(is, os, -1, externalCounter);
 	}
+	@Override
 	public void decode(InputStream is, OutputStream os) throws InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException, IllegalStateException, ShortBufferException
 	{
 		decode(is, null, 0, 0, os);
 	}
+	@Override
 	public void decode(InputStream is, byte[] associatedData, int offAD, int lenAD, OutputStream os) throws InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException, IllegalStateException, ShortBufferException
 	{
 		decode(is, associatedData, offAD, lenAD, os, null);
 	}
+	@Override
 	public void decode(InputStream is, byte[] associatedData, int offAD, int lenAD, OutputStream os, byte[] externalCounter) throws InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException, IllegalStateException, ShortBufferException
 	{
 		decode(is, associatedData, offAD, lenAD, os, -1, externalCounter);
 	}
+	@Override
 	public void decode(InputStream is, OutputStream os, int length) throws InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException, IllegalStateException, ShortBufferException
 	{
 		decode(is, null, 0, 0, os, length);
 	}
+	@Override
 	public void decode(InputStream is, OutputStream os, int length, byte[] externalCounter) throws InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException, IllegalStateException, ShortBufferException
 	{
 		decode(is, null, 0, 0, os, length, externalCounter);
 	}
+	@Override
 	public void decode(InputStream is, byte[] associatedData, OutputStream os, int length) throws InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException, IllegalStateException, ShortBufferException
 	{
 		decode(is, associatedData, 0, associatedData==null?0:associatedData.length, os, length);
 	}
 
 	private byte[] iv = null;
+	@Override
 	public void decode(InputStream is, byte[] associatedData, int offAD, int lenAD, OutputStream os, int length)
 			throws InvalidKeyException, InvalidAlgorithmParameterException, IOException, IllegalBlockSizeException,
 			BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IllegalStateException, ShortBufferException {
@@ -187,6 +205,7 @@ public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOu
 		}
 		return null;
 	}
+	@Override
 	public void decode(InputStream is, byte[] associatedData, int offAD, int lenAD, OutputStream os, int length,  byte[] externalCounter)
 			throws InvalidKeyException, InvalidAlgorithmParameterException, IOException, IllegalBlockSizeException,
 			BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IllegalStateException, ShortBufferException {
@@ -231,12 +250,13 @@ public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOu
 		 * do { read=cis.read(); if (read!=-1) os.write(read); }while (read!=-1); }
 		 */
 	}
+	@Override
 	public InputStream getCipherInputStream(InputStream is)
 			throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,
 			InvalidAlgorithmParameterException, IOException, InvalidKeySpecException, NoSuchProviderException {
 		return getCipherInputStream(is, null);
 	}
-
+	@Override
 	public InputStream getCipherInputStream(InputStream is, byte[] externalCounter)
 			throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,
 			InvalidAlgorithmParameterException, IOException, InvalidKeySpecException, NoSuchProviderException {
@@ -247,9 +267,9 @@ public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOu
 		initCipherForDecrypt(c, iv, externalCounter);
 		return c.getCipherInputStream(is);
 	}
-
+	@Override
 	public abstract int getMaxBlockSizeForDecoding();
-
+	@Override
 	public int getOutputSizeForDecryption(int inputLen) throws InvalidKeyException, InvalidAlgorithmParameterException,
 			NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
 		initCipherForDecrypt(cipher, nullIV);
@@ -269,11 +289,11 @@ public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOu
 			res += cipher.getOutputSize(mod);
 		return res;
 	}
-
+	@Override
 	public abstract void initCipherForDecrypt(AbstractCipher cipher, byte[] iv, byte[] externalCounter)
 			throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException,
 			InvalidKeySpecException, NoSuchProviderException;
-
+	@Override
 	public void initCipherForDecrypt(AbstractCipher cipher, byte[] iv) throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException
 	{
 		initCipherForDecrypt(cipher, iv, null);

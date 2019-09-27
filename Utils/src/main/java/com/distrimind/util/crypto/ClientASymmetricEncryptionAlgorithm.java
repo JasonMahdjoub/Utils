@@ -34,8 +34,11 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
-import javax.crypto.Cipher;
-import javax.crypto.NoSuchPaddingException;
+import javax.crypto.*;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -45,68 +48,339 @@ import java.security.spec.InvalidKeySpecException;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 4.0
+ * @version 5.0
  * @since Utils 1.7
  */
 public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutputAlgorithm {
-	private final ASymmetricPublicKey distantPublicKey;
 
-	private final ASymmetricEncryptionType type;
+	private final AbstractEncryptionOutputAlgorithm client;
 
-	private final int maxBlockSize;
-	private final AbstractSecureRandom random;
-
-	public ClientASymmetricEncryptionAlgorithm(AbstractSecureRandom random, ASymmetricPublicKey distantPublicKey) throws NoSuchAlgorithmException, NoSuchPaddingException,
+	public ClientASymmetricEncryptionAlgorithm(AbstractSecureRandom random, IASymmetricPublicKey distantPublicKey) throws NoSuchAlgorithmException, NoSuchPaddingException,
 			InvalidKeyException, InvalidKeySpecException, NoSuchProviderException, InvalidAlgorithmParameterException {
-		super(distantPublicKey.getEncryptionAlgorithmType().getCipherInstance(), 0);
-		this.type = distantPublicKey.getEncryptionAlgorithmType();
-		this.distantPublicKey = distantPublicKey;
-		this.random=random;
-		this.maxBlockSize = distantPublicKey.getMaxBlockSize();
-		initCipherForEncrypt(this.cipher);
-		initBufferAllocatorArgs();
-	}
-	@Override
-	public boolean isPostQuantumEncryption() {
-		return distantPublicKey.isPostQuantumKey();
-	}
-	@Override
-	protected AbstractCipher getCipherInstance() throws NoSuchAlgorithmException, NoSuchPaddingException, NoSuchProviderException {
-		return type.getCipherInstance();
+		super();
+		if (distantPublicKey instanceof HybridASymmetricPublicKey)
+			client=new HybridClient(random, (HybridASymmetricPublicKey)distantPublicKey);
+		else
+			client=new Client(random, (ASymmetricPublicKey)distantPublicKey);
 	}
 
-	public ASymmetricPublicKey getDistantPublicKey() {
-		return this.distantPublicKey;
+	private static class HybridClient extends AbstractEncryptionOutputAlgorithm {
+		private final Client nonPQCEncryption, PQCEncryption;
+		private final HybridASymmetricPublicKey hybridASymmetricPublicKey;
+		public HybridClient(AbstractSecureRandom random, HybridASymmetricPublicKey distantPublicKey) throws NoSuchAlgorithmException, NoSuchPaddingException,
+				InvalidKeyException, InvalidKeySpecException, NoSuchProviderException, InvalidAlgorithmParameterException {
+			super();
+			this.nonPQCEncryption=new Client(random, distantPublicKey.getNonPQCPublicKey());
+			this.PQCEncryption=new Client(random, distantPublicKey.getPQCPublicKey());
+			this.hybridASymmetricPublicKey=distantPublicKey;
+		}
+
+		@Override
+		protected AbstractCipher getCipherInstance()  {
+			throw new IllegalAccessError();
+		}
+
+		@Override
+		public int getMaxBlockSizeForEncoding() {
+			return Math.min(nonPQCEncryption.getMaxBlockSizeForEncoding(), PQCEncryption.getMaxBlockSizeForEncoding());
+		}
+
+		@Override
+		public int getIVSizeBytesWithExternalCounter() {
+			return Math.max(nonPQCEncryption.getIVSizeBytesWithExternalCounter(), PQCEncryption.getIVSizeBytesWithExternalCounter());
+		}
+
+		@Override
+		protected boolean includeIV() {
+			return false;
+		}
+
+		@Override
+		public void initCipherForEncrypt(AbstractCipher cipher, byte[] externalCounter) {
+			throw new IllegalAccessError();
+		}
+
+		@Override
+		public void initCipherForEncryptAndNotChangeIV(AbstractCipher cipher) {
+			throw new IllegalAccessError();
+		}
+
+		@Override
+		public boolean isPostQuantumEncryption() {
+			return true;
+		}
+
+
+		@Override
+		public int getOutputSizeForEncryption(int inputLen) throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
+			return nonPQCEncryption.getOutputSizeForEncryption(PQCEncryption.getOutputSizeForEncryption(inputLen));
+		}
+
+
+
+
+		@Override
+		public void encode(byte[] bytes, int off, int len, byte[] associatedData, int offAD, int lenAD, OutputStream os, byte[] externalCounter) throws InvalidKeyException,
+				IOException, InvalidAlgorithmParameterException, IllegalStateException,
+				IllegalBlockSizeException, BadPaddingException,
+				NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
+			ByteArrayOutputStream baos=new ByteArrayOutputStream();
+			nonPQCEncryption.encode(bytes, off, len, associatedData, offAD, lenAD, baos, externalCounter);
+			byte[] b=baos.toByteArray();
+			PQCEncryption.encode(b, 0, b.length, associatedData, offAD, lenAD, os, externalCounter);
+		}
+		private final byte[] buffer=new byte[4096];
+
+		@Override
+		public void encode(InputStream is, byte[] associatedData, int offAD, int lenAD, OutputStream os, int length, byte[] externalCounter) throws InvalidKeyException, IOException,
+				InvalidAlgorithmParameterException, IllegalStateException, IllegalBlockSizeException,
+				BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException,
+				NoSuchProviderException, ShortBufferException {
+			for(;;) {
+				ByteArrayOutputStream baos=new ByteArrayOutputStream();
+				int nb=is.read(buffer);
+				if (nb<0)
+					break;
+				nonPQCEncryption.encode(buffer, 0, nb, associatedData, offAD, lenAD, baos, externalCounter);
+				byte[] b=baos.toByteArray();
+				PQCEncryption.encode(b, 0, b.length, associatedData, offAD, lenAD, os, externalCounter);
+
+			}
+		}
+
+		@Override
+		public OutputStream getCipherOutputStream(final OutputStream os, final byte[] externalCounter) {
+			return new OutputStream() {
+				private final byte[] one=new byte[1];
+				@Override
+				public void write(int b) throws IOException {
+					one[0]=(byte)b;
+					write(one);
+				}
+
+				@Override
+				public void write(byte[] b, int off, int len) throws IOException {
+					try {
+						encode(b, off, len, null, 0, 0, os, externalCounter);
+					} catch (InvalidKeyException | InvalidAlgorithmParameterException | IllegalBlockSizeException | BadPaddingException | NoSuchAlgorithmException | InvalidKeySpecException | NoSuchProviderException e) {
+						throw new IOException(e);
+					}
+				}
+			};
+		}
+	}
+
+	@Override
+	public byte getBlockModeCounterBytes() {
+		return client.getBlockModeCounterBytes();
+	}
+
+	@Override
+	public boolean useExternalCounter() {
+		return client.useExternalCounter();
+	}
+
+	@Override
+	public void initBufferAllocatorArgs() {
+		client.initBufferAllocatorArgs();
+	}
+
+	@Override
+	public byte[] encode(byte[] bytes) throws InvalidKeyException, IOException, InvalidAlgorithmParameterException, BadPaddingException, IllegalStateException, IllegalBlockSizeException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
+		return client.encode(bytes);
+	}
+
+	@Override
+	public byte[] encode(byte[] bytes, byte[] associatedData) throws InvalidKeyException, InvalidAlgorithmParameterException, IllegalStateException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException {
+		return client.encode(bytes, associatedData);
+	}
+
+	@Override
+	public byte[] encode(byte[] bytes, byte[] associatedData, byte[] externalCounter) throws InvalidKeyException, InvalidAlgorithmParameterException, IllegalStateException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException {
+		return client.encode(bytes, associatedData, externalCounter);
+	}
+
+	@Override
+	public byte[] encode(byte[] bytes, int off, int len) throws InvalidKeyException, InvalidAlgorithmParameterException, IllegalStateException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException {
+		return client.encode(bytes, off, len);
+	}
+
+	@Override
+	public byte[] encode(byte[] bytes, int off, int len, byte[] associatedData, int offAD, int lenAD) throws InvalidKeyException, IOException, InvalidAlgorithmParameterException, IllegalStateException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
+		return client.encode(bytes, off, len, associatedData, offAD, lenAD);
+	}
+
+	@Override
+	public byte[] encode(byte[] bytes, int off, int len, byte[] associatedData, int offAD, int lenAD, byte[] externalCounter) throws InvalidKeyException, IOException, InvalidAlgorithmParameterException, IllegalStateException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
+		return client.encode(bytes, off, len, associatedData, offAD, lenAD, externalCounter);
+	}
+
+	@Override
+	public void encode(byte[] bytes, int off, int len, OutputStream os) throws InvalidKeyException, InvalidAlgorithmParameterException, IllegalStateException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException {
+		client.encode(bytes, off, len, os);
+	}
+
+	@Override
+	public void encode(byte[] bytes, int off, int len, byte[] associatedData, int offAD, int lenAD, OutputStream os) throws InvalidKeyException, InvalidAlgorithmParameterException, IllegalStateException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException {
+		client.encode(bytes, off, len, associatedData, offAD, lenAD, os);
+	}
+
+	@Override
+	public void encode(byte[] bytes, int off, int len, byte[] associatedData, int offAD, int lenAD, OutputStream os, byte[] externalCounter) throws InvalidKeyException, IOException, InvalidAlgorithmParameterException, IllegalStateException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
+		client.encode(bytes, off, len, associatedData, offAD, lenAD, os, externalCounter);
+	}
+
+	@Override
+	public void encode(InputStream is, OutputStream os) throws InvalidKeyException, InvalidAlgorithmParameterException, IllegalStateException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException, ShortBufferException {
+		client.encode(is, os);
+	}
+
+	@Override
+	public void encode(InputStream is, byte[] associatedData, OutputStream os) throws InvalidKeyException, InvalidAlgorithmParameterException, IllegalStateException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException, ShortBufferException {
+		client.encode(is, associatedData, os);
+	}
+
+	@Override
+	public void encode(InputStream is, byte[] associatedData, int offAD, int lenAD, OutputStream os) throws InvalidKeyException, IOException, InvalidAlgorithmParameterException, IllegalStateException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, ShortBufferException {
+		client.encode(is, associatedData, offAD, lenAD, os);
+	}
+
+	@Override
+	public void encode(InputStream is, OutputStream os, int length) throws InvalidKeyException, InvalidAlgorithmParameterException, IllegalStateException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException, ShortBufferException {
+		client.encode(is, os, length);
+	}
+
+	@Override
+	public void encode(InputStream is, byte[] associatedData, OutputStream os, int length) throws InvalidKeyException, InvalidAlgorithmParameterException, IllegalStateException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException, ShortBufferException {
+		client.encode(is, associatedData, os, length);
+	}
+
+	@Override
+	public void encode(InputStream is, byte[] associatedData, int offAD, int lenAD, OutputStream os, int length) throws InvalidKeyException, IOException, InvalidAlgorithmParameterException, IllegalStateException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, ShortBufferException {
+		client.encode(is, associatedData, offAD, lenAD, os, length);
+	}
+
+	@Override
+	public void encode(InputStream is, byte[] associatedData, int offAD, int lenAD, OutputStream os, int length, byte[] externalCounter) throws InvalidKeyException, IOException, InvalidAlgorithmParameterException, IllegalStateException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, ShortBufferException {
+		client.encode(is, associatedData, offAD, lenAD, os, length, externalCounter);
+	}
+
+	@Override
+	public AbstractCipher getCipherInstance() throws NoSuchAlgorithmException, NoSuchPaddingException, NoSuchProviderException {
+		return client.getCipherInstance();
+	}
+
+	@Override
+	public OutputStream getCipherOutputStream(OutputStream os, byte[] externalCounter) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException, IOException, InvalidKeySpecException, NoSuchProviderException {
+		return client.getCipherOutputStream(os, externalCounter);
 	}
 
 	@Override
 	public int getMaxBlockSizeForEncoding() {
-		return maxBlockSize;
+		return client.getMaxBlockSizeForEncoding();
 	}
-
-	@Override
-	protected boolean includeIV() {
-		return false;
-	}
-
-	@Override
-	public void initCipherForEncrypt(AbstractCipher _cipher, byte[] externalCounter)
-			throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException {
-		initCipherForEncryptAndNotChangeIV(_cipher);
-	}
-
-	@Override
-	public void initCipherForEncryptAndNotChangeIV(AbstractCipher _cipher)
-			throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException {
-		_cipher.init(Cipher.ENCRYPT_MODE, distantPublicKey, random);
-
-	}
-
-
 
 	@Override
 	public int getIVSizeBytesWithExternalCounter() {
-		return 0;
+		return client.getIVSizeBytesWithExternalCounter();
 	}
 
+	@Override
+	public int getOutputSizeForEncryption(int inputLen) throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
+		return client.getOutputSizeForEncryption(inputLen);
+	}
+
+	@Override
+	public boolean includeIV() {
+		return client.includeIV();
+	}
+
+	@Override
+	public void initCipherForEncrypt(AbstractCipher cipher) throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
+		client.initCipherForEncrypt(cipher);
+	}
+
+	@Override
+	public void initCipherForEncrypt(AbstractCipher cipher, byte[] externalCounter) throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
+		client.initCipherForEncrypt(cipher, externalCounter);
+	}
+
+	@Override
+	public void initCipherForEncryptAndNotChangeIV(AbstractCipher cipher) throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
+		client.initCipherForEncryptAndNotChangeIV(cipher);
+	}
+
+	@Override
+	public boolean isPostQuantumEncryption() {
+		return client.isPostQuantumEncryption();
+	}
+
+	public IASymmetricPublicKey getDistantPublicKey() {
+		if (this.client instanceof Client)
+			return ((Client)client).getDistantPublicKey();
+		else
+			return ((HybridClient)client).hybridASymmetricPublicKey;
+	}
+	private static class Client extends AbstractEncryptionOutputAlgorithm {
+		private final ASymmetricPublicKey distantPublicKey;
+
+		private final ASymmetricEncryptionType type;
+
+		private final int maxBlockSize;
+		private final AbstractSecureRandom random;
+
+		public Client(AbstractSecureRandom random, ASymmetricPublicKey distantPublicKey) throws NoSuchAlgorithmException, NoSuchPaddingException,
+				InvalidKeyException, InvalidKeySpecException, NoSuchProviderException, InvalidAlgorithmParameterException {
+			super(distantPublicKey.getEncryptionAlgorithmType().getCipherInstance(), 0);
+			this.type = distantPublicKey.getEncryptionAlgorithmType();
+			this.distantPublicKey = distantPublicKey;
+			this.random = random;
+			this.maxBlockSize = distantPublicKey.getMaxBlockSize();
+			initCipherForEncrypt(this.cipher);
+			initBufferAllocatorArgs();
+		}
+
+		@Override
+		public boolean isPostQuantumEncryption() {
+			return distantPublicKey.isPostQuantumKey();
+		}
+
+		@Override
+		protected AbstractCipher getCipherInstance() throws NoSuchAlgorithmException, NoSuchPaddingException, NoSuchProviderException {
+			return type.getCipherInstance();
+		}
+
+		public ASymmetricPublicKey getDistantPublicKey() {
+			return this.distantPublicKey;
+		}
+
+		@Override
+		public int getMaxBlockSizeForEncoding() {
+			return maxBlockSize;
+		}
+
+		@Override
+		protected boolean includeIV() {
+			return false;
+		}
+
+		@Override
+		public void initCipherForEncrypt(AbstractCipher _cipher, byte[] externalCounter)
+				throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException {
+			initCipherForEncryptAndNotChangeIV(_cipher);
+		}
+
+		@Override
+		public void initCipherForEncryptAndNotChangeIV(AbstractCipher _cipher)
+				throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException {
+			_cipher.init(Cipher.ENCRYPT_MODE, distantPublicKey, random);
+
+		}
+
+
+		@Override
+		public int getIVSizeBytesWithExternalCounter() {
+			return 0;
+		}
+	}
 }
