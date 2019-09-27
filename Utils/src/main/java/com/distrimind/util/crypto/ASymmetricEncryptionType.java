@@ -718,10 +718,13 @@ public enum ASymmetricEncryptionType {
 		} else if (codeProviderForKeyGenerator == CodeProvider.BCPQC) {
 			if (this.name().startsWith("BCPQC_MCELIECE_"))
 			{
+				AbstractKeyPairGenerator res;
 				if (this.name().contains("CCA2"))
-					return new BCMcElieceCipher.KeyPairGeneratorCCA2(this);
+					res=new BCMcElieceCipher.KeyPairGeneratorCCA2(this);
 				else
-					return new BCMcElieceCipher.KeyPairGenerator(this);
+					res=new BCMcElieceCipher.KeyPairGenerator(this);
+				res.initialize(keySizeBits, expirationTimeUTC, random);
+				return res;
 			}
 			else
 				throw new IllegalAccessError();

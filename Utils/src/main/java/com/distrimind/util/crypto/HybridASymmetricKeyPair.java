@@ -38,6 +38,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
 import com.distrimind.util.Bits;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * @author Jason Mahdjoub
@@ -59,11 +60,11 @@ public class HybridASymmetricKeyPair extends AbstractKeyPair<HybridASymmetricPri
 			throw new IllegalArgumentException("The given keys must be used both for encryption or both for signature");
 		if ((nonPQCKeyPair.getAuthenticatedSignatureAlgorithmType()!=null
 				&& nonPQCKeyPair.getAuthenticatedSignatureAlgorithmType().isPostQuantumAlgorithm())
-				|| nonPQCKeyPair.getEncryptionAlgorithmType().isPostQuantumAlgorithm())
+				|| (nonPQCKeyPair.getEncryptionAlgorithmType()!=null && nonPQCKeyPair.getEncryptionAlgorithmType().isPostQuantumAlgorithm()))
 			throw new IllegalArgumentException("nonPQCPrivateKey cannot be a post quantum algorithm");
 		if ((PQCKeyPair.getAuthenticatedSignatureAlgorithmType()!=null
 				&& !PQCKeyPair.getAuthenticatedSignatureAlgorithmType().isPostQuantumAlgorithm())
-				|| !PQCKeyPair.getEncryptionAlgorithmType().isPostQuantumAlgorithm())
+				|| (PQCKeyPair.getEncryptionAlgorithmType()!=null && !PQCKeyPair.getEncryptionAlgorithmType().isPostQuantumAlgorithm()))
 			throw new IllegalArgumentException("PQCPrivateKey must be a post quantum algorithm");
 		privateKey=new HybridASymmetricPrivateKey(nonPQCKeyPair.getASymmetricPrivateKey(), PQCKeyPair.getASymmetricPrivateKey());
 		publicKey=new HybridASymmetricPublicKey(nonPQCKeyPair.getASymmetricPublicKey(), PQCKeyPair.getASymmetricPublicKey());
@@ -92,22 +93,18 @@ public class HybridASymmetricKeyPair extends AbstractKeyPair<HybridASymmetricPri
 
 			if (len < 68)
 				throw new IllegalArgumentException();
-			if (encoded[off] != AbstractKey.IS_HYBRID_KEY)
+			if (encoded[off] != AbstractKey.IS_HYBRID_KEY_PAIR)
 				throw new IllegalArgumentException();
 			int size = (int) Bits.getPositiveInteger(encoded, off + 1, 3);
 			if (size + 36 > len)
 				throw new IllegalArgumentException();
 			IHybridKey privateKey = AbstractKey.decodeHybridKey(encoded, off + 4, size, fillArrayWithZerosWhenDecoded);
-			if (privateKey.isPostQuantumKey())
-				throw new IllegalArgumentException();
 			if (!privateKey.getClass().equals(HybridASymmetricPrivateKey.class))
 				throw new IllegalArgumentException();
 
 			IHybridKey pubKey = AbstractKey.decodeHybridKey(encoded, off + 4 + size, len - size - 4, fillArrayWithZerosWhenDecoded);
 
-			if (!privateKey.isPostQuantumKey())
-				throw new IllegalArgumentException();
-			if (!privateKey.getClass().equals(HybridASymmetricPublicKey.class))
+			if (!pubKey.getClass().equals(HybridASymmetricPublicKey.class))
 				throw new IllegalArgumentException();
 
 			return new HybridASymmetricKeyPair((HybridASymmetricPrivateKey)privateKey, (HybridASymmetricPublicKey)pubKey);
@@ -130,7 +127,7 @@ public class HybridASymmetricKeyPair extends AbstractKeyPair<HybridASymmetricPri
 		byte[] encodedPubKey=publicKey.encode(includeTimeExpiration);
 
 		byte[] res=new byte[encodedPrivKey.length+encodedPubKey.length+4];
-		res[0]= AbstractKey.IS_HYBRID_KEY;
+		res[0]= AbstractKey.IS_HYBRID_KEY_PAIR;
 		Bits.putPositiveInteger(res, 1, encodedPrivKey.length, 3);
 		System.arraycopy(encodedPrivKey, 0, res, 4, encodedPrivKey.length );
 		System.arraycopy(encodedPubKey, 0, res, 4+encodedPrivKey.length, encodedPubKey.length );
@@ -193,5 +190,19 @@ public class HybridASymmetricKeyPair extends AbstractKeyPair<HybridASymmetricPri
 	public ASymmetricKeyPair getPQCASymmetricKeyPair()
 	{
 		return new ASymmetricKeyPair(privateKey.getPQCPrivateKey(), publicKey.getPQCPublicKey());
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		HybridASymmetricKeyPair that = (HybridASymmetricKeyPair) o;
+		return privateKey.equals(that.privateKey) &&
+				publicKey.equals(that.publicKey);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(privateKey, publicKey);
 	}
 }

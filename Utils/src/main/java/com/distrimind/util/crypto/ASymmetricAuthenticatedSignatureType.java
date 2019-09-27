@@ -63,7 +63,7 @@ public enum ASymmetricAuthenticatedSignatureType {
 	BC_FIPS_SHA512withRSAandMGF1("SHA512withRSAandMGF1", "RSA", CodeProvider.BCFIPS,CodeProvider.BCFIPS, 3072, 31536000000L, FipsRSA.ALGORITHM, false),
 	BC_FIPS_SHA256withECDSA_P_256("SHA256withECDSA", "EC", CodeProvider.BCFIPS,CodeProvider.BCFIPS, 256, 31536000000L, FipsEC.ALGORITHM, false, "P-256"),
 	BC_FIPS_SHA384withECDSA_P_384("SHA384withECDSA", "EC", CodeProvider.BCFIPS,CodeProvider.BCFIPS, 384, 31536000000L, FipsEC.ALGORITHM, false, "P-384"),
-	BC_FIPS_SHA512withECDSA_P_521("SHA512withECDSA", "EC", CodeProvider.BCFIPS,CodeProvider.BCFIPS, 521, 31536000000L, FipsEC.ALGORITHM, false, "P-521"),
+	BC_FIPS_SHA512withECDSA_P_521("SHA512withECDSA", "EC", CodeProvider.BCFIPS,CodeProvider.BCFIPS, 528, 31536000000L, FipsEC.ALGORITHM, false, "P-521"),
 	@Deprecated//prefer BC_Ed25519
 	BC_SHA256withECDSA_CURVE_25519("SHA256withECDSA", "ECDSA", CodeProvider.BCFIPS,CodeProvider.BC, 256, 31536000000L, FipsEC.ALGORITHM, false, "curve25519"),
 	@Deprecated//prefer BC_Ed25519

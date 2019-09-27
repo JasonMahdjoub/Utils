@@ -81,7 +81,7 @@ public class BCMcElieceCipher extends AbstractCipher{
 		if (encryptionType==null)
 			throw new NullPointerException();
 		this.encryptionType = encryptionType;
-		if (this.encryptionType.name().startsWith("BCPQC_MCELIECE_"))
+		if (!this.encryptionType.name().startsWith("BCPQC_MCELIECE_"))
 			throw new IllegalArgumentException();
 		cca2=this.encryptionType.name().contains("CCA2");
 	}
@@ -98,6 +98,8 @@ public class BCMcElieceCipher extends AbstractCipher{
 			return new McElieceCipher();
 	}
 
+	private static final int MAX_GF2MATRIX_SIZE=256*1024;
+
 	static class PrivateKey implements AsymmetricPrivateKey, SecureExternalizableWithoutInnerSizeControl {
 		private McEliecePrivateKeyParameters privateKeyParameters;
 		private volatile byte []encoded=null;
@@ -105,6 +107,10 @@ public class BCMcElieceCipher extends AbstractCipher{
 		PrivateKey()
 		{
 			privateKeyParameters=null;
+		}
+
+		public McEliecePrivateKeyParameters getPrivateKeyParameters() {
+			return privateKeyParameters;
 		}
 
 		PrivateKey(McEliecePrivateKeyParameters privateKeyParameters) {
@@ -156,10 +162,10 @@ public class BCMcElieceCipher extends AbstractCipher{
 
 			out.writeBytesArray(privateKeyParameters.getField().getEncoded(), false, Short.MAX_VALUE);
 			out.writeBytesArray(privateKeyParameters.getGoppaPoly().getEncoded(), false, Short.MAX_VALUE);
-			out.writeBytesArray(privateKeyParameters.getH().getEncoded(), false, Short.MAX_VALUE);
+			out.writeBytesArray(privateKeyParameters.getH().getEncoded(), false, MAX_GF2MATRIX_SIZE);
 			out.writeBytesArray(privateKeyParameters.getP1().getEncoded(), false, Short.MAX_VALUE);
 			out.writeBytesArray(privateKeyParameters.getP2().getEncoded(), false, Short.MAX_VALUE);
-			out.writeBytesArray(privateKeyParameters.getSInv().getEncoded(), false, Short.MAX_VALUE);
+			out.writeBytesArray(privateKeyParameters.getSInv().getEncoded(), false, MAX_GF2MATRIX_SIZE);
 			PolynomialGF2mSmallM[] qinv=privateKeyParameters.getQInv();
 			if (qinv.length>Short.MAX_VALUE)
 				throw new IOException();
@@ -175,10 +181,10 @@ public class BCMcElieceCipher extends AbstractCipher{
 			try {
 				byte[] field=in.readBytesArray(false, Short.MAX_VALUE);
 				byte[] goppaPoly=in.readBytesArray(false, Short.MAX_VALUE);
-				byte[] h=in.readBytesArray(false, Short.MAX_VALUE);
+				byte[] h=in.readBytesArray(false, MAX_GF2MATRIX_SIZE);
 				byte[] p1=in.readBytesArray(false, Short.MAX_VALUE);
 				byte[] p2=in.readBytesArray(false, Short.MAX_VALUE);
-				byte[] sinv=in.readBytesArray(false, Short.MAX_VALUE);
+				byte[] sinv=in.readBytesArray(false, MAX_GF2MATRIX_SIZE);
 				int s=in.readShort();
 				if (s<=0)
 					throw new IOException();
@@ -210,6 +216,10 @@ public class BCMcElieceCipher extends AbstractCipher{
 		private McElieceCCA2PrivateKeyParameters privateKeyParameters;
 		private volatile byte []encoded=null;
 		private volatile Integer hashCode=null;
+
+		public McElieceCCA2PrivateKeyParameters getPrivateKeyParameters() {
+			return privateKeyParameters;
+		}
 
 		PrivateKeyCCA2()
 		{
@@ -278,7 +288,7 @@ public class BCMcElieceCipher extends AbstractCipher{
 
 			out.writeBytesArray(privateKeyParameters.getField().getEncoded(), false, Short.MAX_VALUE);
 			out.writeBytesArray(privateKeyParameters.getGoppaPoly().getEncoded(), false, Short.MAX_VALUE);
-			out.writeBytesArray(privateKeyParameters.getH().getEncoded(), false, Short.MAX_VALUE);
+			out.writeBytesArray(privateKeyParameters.getH().getEncoded(), false, MAX_GF2MATRIX_SIZE);
 			out.writeBytesArray(privateKeyParameters.getP().getEncoded(), false, Short.MAX_VALUE);
 			if (writeDigest)
 				out.writeString(privateKeyParameters.getDigest(), false, 512);
@@ -306,7 +316,7 @@ public class BCMcElieceCipher extends AbstractCipher{
 			try {
 				GF2mField field=new GF2mField(in.readBytesArray(false, Short.MAX_VALUE));
 				PolynomialGF2mSmallM goppaPoly=new PolynomialGF2mSmallM(field, in.readBytesArray(false, Short.MAX_VALUE));
-				GF2Matrix h=new GF2Matrix(in.readBytesArray(false, Short.MAX_VALUE));
+				GF2Matrix h=new GF2Matrix(in.readBytesArray(false, MAX_GF2MATRIX_SIZE));
 				Permutation p=new Permutation(in.readBytesArray(false, Short.MAX_VALUE));
 				if (digest==null)
 					digest=in.readString(false, 512);
@@ -328,6 +338,10 @@ public class BCMcElieceCipher extends AbstractCipher{
 		private McEliecePublicKeyParameters publicKeyParameters;
 		private volatile byte []encoded=null;
 		private volatile Integer hashCode=null;
+
+		public McEliecePublicKeyParameters getPublicKeyParameters() {
+			return publicKeyParameters;
+		}
 
 		public PublicKey() {
 			publicKeyParameters=null;
@@ -388,7 +402,7 @@ public class BCMcElieceCipher extends AbstractCipher{
 		@Override
 		public void writeExternal(SecuredObjectOutputStream out) throws IOException {
 
-			out.writeBytesArray(publicKeyParameters.getG().getEncoded(), false, Short.MAX_VALUE);
+			out.writeBytesArray(publicKeyParameters.getG().getEncoded(), false, MAX_GF2MATRIX_SIZE);
 			out.writeInt(publicKeyParameters.getN());
 			out.writeInt(publicKeyParameters.getT());
 		}
@@ -396,7 +410,7 @@ public class BCMcElieceCipher extends AbstractCipher{
 		@Override
 		public void readExternal(SecuredObjectInputStream in) throws IOException {
 			try {
-				byte[] g=in.readBytesArray(false, Short.MAX_VALUE);
+				byte[] g=in.readBytesArray(false, MAX_GF2MATRIX_SIZE);
 				int n=in.readInt();
 				int t=in.readInt();
 				publicKeyParameters=new McEliecePublicKeyParameters(n, t, new GF2Matrix(g));
@@ -412,6 +426,10 @@ public class BCMcElieceCipher extends AbstractCipher{
 		private McElieceCCA2PublicKeyParameters publicKeyParameters;
 		private volatile byte []encoded=null;
 		private volatile Integer hashCode=null;
+
+		public McElieceCCA2PublicKeyParameters getPublicKeyParameters() {
+			return publicKeyParameters;
+		}
 
 		public PublicKeyCCA2() {
 			publicKeyParameters=null;
@@ -478,7 +496,7 @@ public class BCMcElieceCipher extends AbstractCipher{
 
 		public void writeExternal(SecuredObjectOutputStream out, boolean includeType) throws IOException {
 
-			out.writeBytesArray(publicKeyParameters.getG().getEncoded(), false, Short.MAX_VALUE);
+			out.writeBytesArray(publicKeyParameters.getG().getEncoded(), false, MAX_GF2MATRIX_SIZE);
 			if (includeType)
 				out.writeString(publicKeyParameters.getDigest(), false, 512);
 			out.writeInt(publicKeyParameters.getN());
@@ -503,7 +521,7 @@ public class BCMcElieceCipher extends AbstractCipher{
 		}
 		public void readExternal(SecuredObjectInputStream in, String digest) throws IOException {
 			try {
-				GF2Matrix g=new GF2Matrix(in.readBytesArray(false, Short.MAX_VALUE));
+				GF2Matrix g=new GF2Matrix(in.readBytesArray(false, MAX_GF2MATRIX_SIZE));
 				if (digest==null)
 					digest=in.readString(false, 512);
 				int n=in.readInt();
@@ -527,7 +545,7 @@ public class BCMcElieceCipher extends AbstractCipher{
 
 		KeyPairGenerator(ASymmetricEncryptionType encryptionType) {
 			super(encryptionType);
-			if (this.encryptionType.name().startsWith("BCPQC_MCELIECE_"))
+			if (!this.encryptionType.name().startsWith("BCPQC_MCELIECE_"))
 				throw new IllegalArgumentException();
 			boolean cca2=this.encryptionType.name().contains("CCA2");
 			if (cca2)
@@ -602,7 +620,7 @@ public class BCMcElieceCipher extends AbstractCipher{
 
 		KeyPairGeneratorCCA2(ASymmetricEncryptionType encryptionType) {
 			super(encryptionType);
-			if (this.encryptionType.name().startsWith("BCPQC_MCELIECE_"))
+			if (!this.encryptionType.name().startsWith("BCPQC_MCELIECE_"))
 				throw new IllegalArgumentException();
 			boolean cca2=this.encryptionType.name().contains("CCA2");
 			if (!cca2)

@@ -230,7 +230,7 @@ public class ASymmetricKeyPair extends AbstractKeyPair<ASymmetricPrivateKey, ASy
 	@Override
 	public byte[] encode(boolean includeTimeExpiration) {
 
-		byte[] kp=Bits.concateEncodingWithShortSizedTabs(privateKey.getBytesPrivateKey(), publicKey.getBytesPublicKey());
+		byte[] kp=Bits.concatenateEncodingWithShortIntSizedTabs(privateKey.getBytesPrivateKey(), publicKey.getBytesPublicKey());
 		byte[] tab = new byte[3+ASymmetricPrivateKey.ENCODED_TYPE_SIZE+kp.length+(includeTimeExpiration?8:0)];
 		tab[0]=encryptionType==null?(byte)9:(byte)8;
 		if (includeTimeExpiration)
@@ -292,7 +292,7 @@ public class ASymmetricKeyPair extends AbstractKeyPair<ASymmetricPrivateKey, ASy
 
 			byte[] kp = new byte[len - 3 - codedTypeSize-(includeKeyExpiration?8:0)];
 			System.arraycopy(b, posKey, kp, 0, kp.length);
-			byte[][] keys = Bits.separateEncodingsWithShortSizedTabs(kp);
+			byte[][] keys = Bits.separateEncodingsWithShortIntSizedTabs(kp);
 
 			if (type == 9) {
 				ASymmetricAuthenticatedSignatureType type2 = ASymmetricAuthenticatedSignatureType.valueOf((int) Bits.getPositiveInteger(b, 3+off, codedTypeSize));

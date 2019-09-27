@@ -34,32 +34,29 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util;
 
-import com.distrimind.util.sizeof.ObjectSizer;
-
 /**
  * Utility methods for packing/unpacking primitive values in/out of byte arrays
  * using big-endian byte ordering.
  */
 public class Bits {
 
-	public static byte[] concateEncodingWithIntSizedTabs(byte part1[], byte[] part2) {
+	public static byte[] concatenateEncodingWithIntSizedTabs(byte[] part1, byte[] part2) {
+		return concatenateEncodingWithSizedTabs(part1, part2, 4);
+	}
+	public static byte[] concatenateEncodingWithShortIntSizedTabs(byte[] part1, byte[] part2) {
+		return concatenateEncodingWithSizedTabs(part1, part2, 3);
+	}
+	private static byte[] concatenateEncodingWithSizedTabs(byte[] part1, byte[] part2, int sizePrecision) {
 		int sizePart1 = part1.length;
-		byte[] res = new byte[part2.length + part1.length + ObjectSizer.sizeOf(sizePart1)];
-		Bits.putInt(res, 0, sizePart1);
-		System.arraycopy(part1, 0, res, ObjectSizer.sizeOf(sizePart1), sizePart1);
-		System.arraycopy(part2, 0, res, ObjectSizer.sizeOf(sizePart1) + sizePart1, part2.length);
+		byte[] res = new byte[part2.length + part1.length + sizePrecision];
+		Bits.putPositiveInteger(res, 0, sizePart1, sizePrecision);
+		System.arraycopy(part1, 0, res, sizePrecision, sizePart1);
+		System.arraycopy(part2, 0, res, sizePrecision + sizePart1, part2.length);
 		return res;
 	}
 
-	public static byte[] concateEncodingWithShortSizedTabs(byte part1[], byte[] part2) {
-		if (part1.length>Short.MAX_VALUE)
-			throw new IllegalArgumentException();
-		short sizePart1 = (short) part1.length;
-		byte[] res = new byte[part2.length + part1.length + ObjectSizer.sizeOf(sizePart1)];
-		Bits.putShort(res, 0, sizePart1);
-		System.arraycopy(part1, 0, res, ObjectSizer.sizeOf(sizePart1), sizePart1);
-		System.arraycopy(part2, 0, res, ObjectSizer.sizeOf(sizePart1) + sizePart1, part2.length);
-		return res;
+	public static byte[] concatenateEncodingWithShortSizedTabs(byte[] part1, byte[] part2) {
+		return concatenateEncodingWithSizedTabs(part1, part2, 2);
 	}
 
 	public static boolean getBoolean(byte[] b, int off) {
@@ -205,11 +202,23 @@ public class Bits {
 	}
 
 	public static byte[][] separateEncodingsWithIntSizedTabs(byte[] concatedEncodedElement, int off, int len) {
-		int sizePar1 = Bits.getInt(concatedEncodedElement, off);
+		return separateEncodingsWithSizedTabs(concatedEncodedElement, off, len, 4);
+	}
+
+	public static byte[][] separateEncodingsWithShortIntSizedTabs(byte[] concatedEncodedElement) {
+		return separateEncodingsWithShortIntSizedTabs(concatedEncodedElement, 0, concatedEncodedElement.length);
+	}
+
+	public static byte[][] separateEncodingsWithShortIntSizedTabs(byte[] concatedEncodedElement, int off, int len) {
+		return separateEncodingsWithSizedTabs(concatedEncodedElement, off, len, 3);
+	}
+
+	private static byte[][] separateEncodingsWithSizedTabs(byte[] concatedEncodedElement, int off, int len, int sizePrecision) {
+		int sizePar1 = (int)Bits.getPositiveInteger(concatedEncodedElement, off, sizePrecision);
 		byte[] part1 = new byte[sizePar1];
-		byte[] part2 = new byte[len - ObjectSizer.sizeOf(sizePar1) - sizePar1];
-		System.arraycopy(concatedEncodedElement, off + ObjectSizer.sizeOf(sizePar1), part1, 0, sizePar1);
-		System.arraycopy(concatedEncodedElement, off + ObjectSizer.sizeOf(sizePar1) + sizePar1, part2, 0, part2.length);
+		byte[] part2 = new byte[len - sizePrecision - sizePar1];
+		System.arraycopy(concatedEncodedElement, off + sizePrecision, part1, 0, sizePar1);
+		System.arraycopy(concatedEncodedElement, off + sizePrecision + sizePar1, part2, 0, part2.length);
 		byte[][] res = new byte[2][];
 		res[0] = part1;
 		res[1] = part2;
@@ -221,14 +230,6 @@ public class Bits {
 	}
 
 	public static byte[][] separateEncodingsWithShortSizedTabs(byte[] concatedEncodedElement, int off, int len) {
-		short sizePar1 = Bits.getShort(concatedEncodedElement, off);
-		byte[] part1 = new byte[sizePar1];
-		byte[] part2 = new byte[len - ObjectSizer.sizeOf(sizePar1) - sizePar1];
-		System.arraycopy(concatedEncodedElement, off + ObjectSizer.sizeOf(sizePar1), part1, 0, sizePar1);
-		System.arraycopy(concatedEncodedElement, off + ObjectSizer.sizeOf(sizePar1) + sizePar1, part2, 0, part2.length);
-		byte[][] res = new byte[2][];
-		res[0] = part1;
-		res[1] = part2;
-		return res;
+		return separateEncodingsWithSizedTabs(concatedEncodedElement, off, len, 2);
 	}
 }

@@ -36,6 +36,7 @@ package com.distrimind.util;
 
 import com.distrimind.util.crypto.ASymmetricKeyPair;
 import com.distrimind.util.crypto.AbstractKey;
+import com.distrimind.util.crypto.AbstractKeyPair;
 
 import java.io.Serializable;
 
@@ -66,7 +67,7 @@ public abstract class DecentralizedValue implements Serializable {
 		else if (AbstractKey.isValidType(encodedValue, off))
 			return AbstractKey.decode(encodedValue, off, len, fillArrayWithZerosWhenDecoded);
 		else
-			return ASymmetricKeyPair.decode(encodedValue, off, len, fillArrayWithZerosWhenDecoded);
+			return AbstractKeyPair.decode(encodedValue, off, len, fillArrayWithZerosWhenDecoded);
 
 	}
 }

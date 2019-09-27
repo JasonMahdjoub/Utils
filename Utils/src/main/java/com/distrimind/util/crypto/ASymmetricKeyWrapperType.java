@@ -238,7 +238,7 @@ public enum ASymmetricKeyWrapperType {
 				if (withParameters)
 				{
 					byte[] encodedParameters=OAEPParams.getEncodingParams();
-					return wrapKeyWithMetaData(Bits.concateEncodingWithShortSizedTabs(wrapedKey, encodedParameters), keyToWrap);
+					return wrapKeyWithMetaData(Bits.concatenateEncodingWithShortSizedTabs(wrapedKey, encodedParameters), keyToWrap);
 				}
 				else
 					return wrapKeyWithMetaData(wrapedKey, keyToWrap);
@@ -259,7 +259,7 @@ public enum ASymmetricKeyWrapperType {
 						new OAEPParameterSpec(shaAlgorithm,"MGF1",new MGF1ParameterSpec(shaAlgorithm),PSource.PSpecified.DEFAULT), random);
 				byte[] wrapedKey=c.wrap(keyToWrap.toJavaNativeKey());
 				byte[] encodedParameters=c.getParameters().getEncoded();
-				return wrapKeyWithMetaData(Bits.concateEncodingWithShortSizedTabs(wrapedKey, encodedParameters), keyToWrap);
+				return wrapKeyWithMetaData(Bits.concatenateEncodingWithShortSizedTabs(wrapedKey, encodedParameters), keyToWrap);
 			}
 			/*else if (this.algorithmName.equals(BC_FIPS_RSA_KTS_KTM.algorithmName))
 			{

@@ -42,6 +42,8 @@ import org.bouncycastle.crypto.AsymmetricKey;
 import org.bouncycastle.crypto.AsymmetricPublicKey;
 import org.bouncycastle.crypto.asymmetric.AsymmetricECPublicKey;
 import org.bouncycastle.crypto.asymmetric.AsymmetricRSAPublicKey;
+import org.bouncycastle.pqc.jcajce.provider.mceliece.BCMcElieceCCA2PublicKey;
+import org.bouncycastle.pqc.jcajce.provider.mceliece.BCMcEliecePublicKey;
 
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
@@ -321,7 +323,16 @@ public class ASymmetricPublicKey extends AbstractKey implements IASymmetricPubli
 	@Override
 	public PublicKey toJavaNativeKey()
 			throws NoSuchAlgorithmException, InvalidKeySpecException {
-		if (nativePublicKey == null)
+		if (encryptionType!=null && encryptionType.name().startsWith("BCPQC_MCELIECE_"))
+		{
+			AsymmetricKey bk=toBouncyCastleKey();
+			if (bk instanceof BCMcElieceCipher.PublicKeyCCA2)
+				nativePublicKey= new BCMcElieceCCA2PublicKey(((BCMcElieceCipher.PublicKeyCCA2)bk).getPublicKeyParameters());
+			else
+				nativePublicKey= new BCMcEliecePublicKey(((BCMcElieceCipher.PublicKey)bk).getPublicKeyParameters());
+		}
+		else
+			if (nativePublicKey == null)
 			nativePublicKey = ASymmetricEncryptionType.decodeNativePublicKey(publicKey, encryptionType==null?signatureType.getKeyGeneratorAlgorithmName():encryptionType.getAlgorithmName(),
 					encryptionType==null?signatureType.name():encryptionType.name(), encryptionType==null?signatureType.getCurveName():null, xdhKey);
 

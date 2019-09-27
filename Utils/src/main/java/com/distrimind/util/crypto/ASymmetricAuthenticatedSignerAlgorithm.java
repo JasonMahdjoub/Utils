@@ -203,7 +203,7 @@ public class ASymmetricAuthenticatedSignerAlgorithm extends AbstractAuthenticate
 
 			byte[] s = this.signature.sign();
 			if (includeParameter) {
-				return Bits.concateEncodingWithIntSizedTabs(s, ((JavaNativeSignature) this.signature).getSignature().getParameters().getEncoded());
+				return Bits.concatenateEncodingWithIntSizedTabs(s, ((JavaNativeSignature) this.signature).getSignature().getParameters().getEncoded());
 			} else
 				return s;
 		}

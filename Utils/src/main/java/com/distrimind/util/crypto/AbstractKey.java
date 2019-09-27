@@ -68,7 +68,10 @@ public abstract class AbstractKey extends DecentralizedValue implements IKey{
 	static final int INCLUDE_KEY_EXPIRATION_CODE=1<<6;
 
 	static final int IS_XDH_KEY=1<<5;
-	static final int IS_HYBRID_KEY=1<<4;
+
+	static final byte IS_HYBRID_KEY_PAIR=(byte)(19);
+	static final byte IS_HYBRID_PUBLIC_KEY=(byte)(20);
+	static final byte IS_HYBRID_PRIVATE_KEY=(byte)(21);
 
 	public static boolean isPublicKey(byte[] b)
 	{
@@ -85,14 +88,13 @@ public abstract class AbstractKey extends DecentralizedValue implements IKey{
 	}
 	public static boolean isValidType(byte[] b, int off)
 	{
-		if (b[0]==IS_HYBRID_KEY)
+		if (b[0]==IS_HYBRID_PRIVATE_KEY || b[0]==IS_HYBRID_PUBLIC_KEY)
 		{
-			int s=(int)Bits.getPositiveInteger(b, off+1, 3);
+			return true;
+			/*int s=(int)Bits.getPositiveInteger(b, off+1, 3);
 			if (b.length<off+36+s)
 				return false;
-			if (b[off+4]==IS_HYBRID_KEY || b[off+4+s]==IS_HYBRID_KEY)
-				return false;
-			return isValidType(b, off+4) && isValidType(b, off+4+s);
+			return isValidType(b, off+4) && isValidType(b, off+4+s);*/
 		}
 		else {
 			byte type = b[off];
@@ -114,7 +116,7 @@ public abstract class AbstractKey extends DecentralizedValue implements IKey{
 		byte[] encodedPQC=PQCKey.encode(includeTimeExpiration);
 
 		byte[] res=new byte[encodedNonPQC.length+encodedPQC.length+4];
-		res[0]=IS_HYBRID_KEY;
+		res[0]=((nonPQCKey instanceof HybridASymmetricPublicKey)?IS_HYBRID_PUBLIC_KEY:IS_HYBRID_PRIVATE_KEY);
 		Bits.putPositiveInteger(res, 1, encodedNonPQC.length, 3);
 		System.arraycopy(encodedNonPQC, 0, res, 4, encodedNonPQC.length );
 		System.arraycopy(encodedPQC, 0, res, 4+encodedNonPQC.length, encodedPQC.length );
@@ -130,8 +132,8 @@ public abstract class AbstractKey extends DecentralizedValue implements IKey{
 
 			if (len < 68)
 				throw new IllegalArgumentException();
-			if (encoded[off] != IS_HYBRID_KEY)
-				throw new IllegalArgumentException();
+			if (encoded[off] != IS_HYBRID_PRIVATE_KEY && encoded[off] != IS_HYBRID_PUBLIC_KEY)
+				throw new IllegalArgumentException(""+(encoded[off] & 0xFF));
 			int size = (int) Bits.getPositiveInteger(encoded, off + 1, 3);
 			if (size + 36 > len)
 				throw new IllegalArgumentException();
@@ -144,7 +146,7 @@ public abstract class AbstractKey extends DecentralizedValue implements IKey{
 			if (nonPQCKey.isPostQuantumKey())
 				throw new IllegalArgumentException();
 
-			AbstractKey PQCKey = decode(encoded, off + 4 + size, len - off - size - 4);
+			AbstractKey PQCKey = decode(encoded, off + 4 + size, len - size - 4);
 
 			if (!PQCKey.getClass().equals(nonPQCKey.getClass()))
 				throw new IllegalArgumentException();
@@ -176,7 +178,7 @@ public abstract class AbstractKey extends DecentralizedValue implements IKey{
 			throw new IllegalArgumentException();
 			//byte[][] res = Bits.separateEncodingsWithShortSizedTabs(b);
 		try {
-			byte type=b[off];
+			int type=b[off] & 0xFF;
 			boolean includeKeyExpiration=(type & INCLUDE_KEY_EXPIRATION_CODE) == INCLUDE_KEY_EXPIRATION_CODE;
 
 			boolean isXdh=(type & IS_XDH_KEY) == IS_XDH_KEY;
@@ -239,12 +241,12 @@ public abstract class AbstractKey extends DecentralizedValue implements IKey{
 				}
 				else
 					timeExpiration=Long.MAX_VALUE;
-				System.arraycopy(b, posKey+off, publicKey, 0, publicKey.length);
+				System.arraycopy(b, posKey, publicKey, 0, publicKey.length);
 				ASymmetricPublicKey res=new ASymmetricPublicKey(ASymmetricAuthenticatedSignatureType.valueOf((int) Bits.getPositiveInteger(b, off+3, ASymmetricPrivateKey.ENCODED_TYPE_SIZE)), publicKey,
 						(int)Bits.getPositiveInteger(b, off+1, 2)*8, timeExpiration);
 				res.xdhKey=isXdh;
 				return res;
-			} else if (type==IS_HYBRID_KEY)
+			} else if (type==IS_HYBRID_PRIVATE_KEY || type==IS_HYBRID_PUBLIC_KEY)
 			{
 				IHybridKey res=decodeHybridKey(b, off, len, fillArrayWithZerosWhenDecoded);
 				if (!res.getClass().equals(HybridASymmetricPrivateKey.class)

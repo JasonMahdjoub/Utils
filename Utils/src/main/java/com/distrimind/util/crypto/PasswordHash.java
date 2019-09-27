@@ -154,7 +154,7 @@ public class PasswordHash {
 
 		byte[] generatedSalt = generateSalt(random, saltSize);
 		byte[] salt = mixSaltWithStaticSalt(generatedSalt, staticAdditionalSalt);
-		return getIdentifiedHash(Bits.concateEncodingWithShortSizedTabs(type.hash(password, salt, cost, hashLengthBytes), generatedSalt));
+		return getIdentifiedHash(Bits.concatenateEncodingWithShortSizedTabs(type.hash(password, salt, cost, hashLengthBytes), generatedSalt));
 		
 	}
 	

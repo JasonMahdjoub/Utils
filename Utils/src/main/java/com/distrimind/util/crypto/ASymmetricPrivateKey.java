@@ -34,14 +34,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
-import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.interfaces.ECPrivateKey;
-import java.security.interfaces.RSAPrivateKey;
-import java.security.spec.InvalidKeySpecException;
-import java.util.Arrays;
-
+import com.distrimind.util.Bits;
 import com.distrimind.util.io.RandomByteArrayInputStream;
 import org.apache.commons.codec.binary.Base64;
 import org.bouncycastle.crypto.Algorithm;
@@ -49,8 +42,16 @@ import org.bouncycastle.crypto.AsymmetricKey;
 import org.bouncycastle.crypto.AsymmetricPrivateKey;
 import org.bouncycastle.crypto.asymmetric.AsymmetricECPrivateKey;
 import org.bouncycastle.crypto.asymmetric.AsymmetricRSAPrivateKey;
+import org.bouncycastle.pqc.jcajce.provider.mceliece.BCMcElieceCCA2PrivateKey;
+import org.bouncycastle.pqc.jcajce.provider.mceliece.BCMcEliecePrivateKey;
 
-import com.distrimind.util.Bits;
+import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.interfaces.ECPrivateKey;
+import java.security.interfaces.RSAPrivateKey;
+import java.security.spec.InvalidKeySpecException;
+import java.util.Arrays;
 
 
 /**
@@ -301,8 +302,17 @@ public class ASymmetricPrivateKey extends AbstractKey implements IASymmetricPriv
 	@Override
 	public PrivateKey toJavaNativeKey()
 			throws NoSuchAlgorithmException, InvalidKeySpecException {
-		if (nativePrivateKey == null)
-			nativePrivateKey = ASymmetricEncryptionType.decodeNativePrivateKey(privateKey, encryptionType==null?signatureType.getKeyGeneratorAlgorithmName():encryptionType.getAlgorithmName(),
+		if (encryptionType!=null && encryptionType.name().startsWith("BCPQC_MCELIECE_"))
+		{
+			AsymmetricKey bk=toBouncyCastleKey();
+			if (bk instanceof BCMcElieceCipher.PrivateKeyCCA2)
+				nativePrivateKey= new BCMcElieceCCA2PrivateKey(((BCMcElieceCipher.PrivateKeyCCA2)bk).getPrivateKeyParameters());
+			else
+				nativePrivateKey= new BCMcEliecePrivateKey(((BCMcElieceCipher.PrivateKey)bk).getPrivateKeyParameters());
+		}
+		else
+			if (nativePrivateKey == null)
+				nativePrivateKey = ASymmetricEncryptionType.decodeNativePrivateKey(privateKey, encryptionType==null?signatureType.getKeyGeneratorAlgorithmName():encryptionType.getAlgorithmName(),
 					encryptionType==null?signatureType.name():encryptionType.name(), xdhKey);
 
 		return nativePrivateKey;

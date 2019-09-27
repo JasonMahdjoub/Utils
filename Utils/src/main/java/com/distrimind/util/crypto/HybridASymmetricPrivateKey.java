@@ -36,6 +36,9 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 
 
+import org.apache.commons.codec.binary.Base64;
+
+import java.util.Objects;
 
 /**
  * @author Jason Mahdjoub
@@ -56,11 +59,11 @@ public class HybridASymmetricPrivateKey extends AbstractKey implements IHybridKe
 			throw new IllegalArgumentException("The given keys must be used both for encryption or both for signature");
 		if ((nonPQCPrivateKey.getAuthenticatedSignatureAlgorithmType()!=null
 				&& nonPQCPrivateKey.getAuthenticatedSignatureAlgorithmType().isPostQuantumAlgorithm())
-			|| nonPQCPrivateKey.getEncryptionAlgorithmType().isPostQuantumAlgorithm())
+			|| (nonPQCPrivateKey.getEncryptionAlgorithmType()!=null && nonPQCPrivateKey.getEncryptionAlgorithmType().isPostQuantumAlgorithm()))
 			throw new IllegalArgumentException("nonPQCPrivateKey cannot be a post quantum algorithm");
 		if ((PQCPrivateKey.getAuthenticatedSignatureAlgorithmType()!=null
 				&& !PQCPrivateKey.getAuthenticatedSignatureAlgorithmType().isPostQuantumAlgorithm())
-				|| !PQCPrivateKey.getEncryptionAlgorithmType().isPostQuantumAlgorithm())
+				|| (PQCPrivateKey.getEncryptionAlgorithmType()!=null && !PQCPrivateKey.getEncryptionAlgorithmType().isPostQuantumAlgorithm()))
 			throw new IllegalArgumentException("PQCPrivateKey must be a post quantum algorithm");
 		this.nonPQCPrivateKey = nonPQCPrivateKey;
 		this.PQCPrivateKey = PQCPrivateKey;
@@ -105,6 +108,11 @@ public class HybridASymmetricPrivateKey extends AbstractKey implements IHybridKe
 	}
 
 	@Override
+	public String toString() {
+		return Base64.encodeBase64URLSafeString(encode(true));
+	}
+
+	@Override
 	public byte[] getKeyBytes() {
 		return null;
 	}
@@ -117,6 +125,20 @@ public class HybridASymmetricPrivateKey extends AbstractKey implements IHybridKe
 	@Override
 	public byte[] encodeWithDefaultParameters() {
 		return encode();
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		HybridASymmetricPrivateKey that = (HybridASymmetricPrivateKey) o;
+		return nonPQCPrivateKey.equals(that.nonPQCPrivateKey) &&
+				PQCPrivateKey.equals(that.PQCPrivateKey);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(nonPQCPrivateKey, PQCPrivateKey);
 	}
 
 	/*@Override

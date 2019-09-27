@@ -61,7 +61,7 @@ public abstract class AbstractKeyPair<PrivKey extends IASymmetricPrivateKey, Pub
 		if (off<0 || len<0 || len+off>b.length)
 			throw new IllegalArgumentException();
 
-		if (b[off]== AbstractKey.IS_HYBRID_KEY) {
+		if (b[off]== AbstractKey.IS_HYBRID_KEY_PAIR) {
 			return HybridASymmetricKeyPair.decodeHybridKey(b, off, len, fillArrayWithZerosWhenDecoded);
 		}
 		else
@@ -95,7 +95,7 @@ public abstract class AbstractKeyPair<PrivKey extends IASymmetricPrivateKey, Pub
 
 	public static boolean isValidType(byte[] b, int off)
 	{
-		return b[off]== AbstractKey.IS_HYBRID_KEY;
+		return b[off]== AbstractKey.IS_HYBRID_KEY_PAIR;
 	}
 
 	public abstract void zeroize();

@@ -36,6 +36,10 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 
 
+import org.apache.commons.codec.binary.Base64;
+
+import java.util.Objects;
+
 /**
  * @author Jason Mahdjoub
  * @version 1.0
@@ -55,11 +59,11 @@ public class HybridASymmetricPublicKey extends AbstractKey implements IHybridKey
 			throw new IllegalArgumentException("The given keys must be used both for encryption or both for signature");
 		if ((nonPQCPublicKey.getAuthenticatedSignatureAlgorithmType()!=null
 				&& nonPQCPublicKey.getAuthenticatedSignatureAlgorithmType().isPostQuantumAlgorithm())
-				|| nonPQCPublicKey.getEncryptionAlgorithmType().isPostQuantumAlgorithm())
+				|| (nonPQCPublicKey.getEncryptionAlgorithmType()!=null && nonPQCPublicKey.getEncryptionAlgorithmType().isPostQuantumAlgorithm()))
 			throw new IllegalArgumentException("nonPQCPrivateKey cannot be a post quantum algorithm");
 		if ((PQCPublicKey.getAuthenticatedSignatureAlgorithmType()!=null
 				&& !PQCPublicKey.getAuthenticatedSignatureAlgorithmType().isPostQuantumAlgorithm())
-				|| !PQCPublicKey.getEncryptionAlgorithmType().isPostQuantumAlgorithm())
+				|| (PQCPublicKey.getEncryptionAlgorithmType()!=null && !PQCPublicKey.getEncryptionAlgorithmType().isPostQuantumAlgorithm()))
 			throw new IllegalArgumentException("PQCPrivateKey must be a post quantum algorithm");
 		this.nonPQCPublicKey = nonPQCPublicKey;
 		this.PQCPublicKey = PQCPublicKey;
@@ -100,6 +104,12 @@ public class HybridASymmetricPublicKey extends AbstractKey implements IHybridKey
 	}
 
 	@Override
+	public String toString() {
+		return Base64.encodeBase64URLSafeString(encode(true));
+	}
+
+
+	@Override
 	public byte[] getKeyBytes() {
 		return null;
 	}
@@ -127,5 +137,19 @@ public class HybridASymmetricPublicKey extends AbstractKey implements IHybridKey
 	@Override
 	public long getTimeExpirationUTC() {
 		return Math.min(nonPQCPublicKey.getTimeExpirationUTC(), PQCPublicKey.getTimeExpirationUTC());
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		HybridASymmetricPublicKey that = (HybridASymmetricPublicKey) o;
+		return nonPQCPublicKey.equals(that.nonPQCPublicKey) &&
+				PQCPublicKey.equals(that.PQCPublicKey);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(nonPQCPublicKey, PQCPublicKey);
 	}
 }
