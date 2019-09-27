@@ -37,19 +37,34 @@ package com.distrimind.util.crypto;
 
 /**
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 1.2
  * @since MaDKitLanEdition 3.23.0
  */
 public enum ASymmetricLoginAgreementType {
-    AGREEMENT_WITH_ASYMMETRIC_SIGNATURE;
+    AGREEMENT_WITH_ASYMMETRIC_SIGNATURE(true);
 
-    public P2PLoginAgreement getAgreementAlgorithmForASymmetricSignatureRequester(AbstractSecureRandom random, ASymmetricKeyPair keyPair) {
+    private final boolean pqc;
+    private ASymmetricLoginAgreementType(boolean pqc)
+    {
+        this.pqc=pqc;
+    }
+
+    public P2PLoginAgreement getAgreementAlgorithmForASymmetricSignatureRequester(AbstractSecureRandom random, AbstractKeyPair keyPair) {
         return new P2PLoginWithASymmetricSignature(keyPair, random);
 
     }
 
-    public P2PLoginAgreement getAgreementAlgorithmForASymmetricSignatureReceiver(AbstractSecureRandom random, ASymmetricPublicKey publicKey) {
+    public P2PLoginAgreement getAgreementAlgorithmForASymmetricSignatureReceiver(AbstractSecureRandom random, IASymmetricPublicKey publicKey) {
         return new P2PLoginCheckerWithASymmetricSignature(publicKey, random);
 
+    }
+
+    public boolean isPostQuantumAlgorithm(AbstractKeyPair keyPair)
+    {
+        return pqc && keyPair!=null && keyPair.isPostQuantumKey();
+    }
+    public boolean isPostQuantumAlgorithm(IASymmetricPublicKey publicKey)
+    {
+        return pqc && publicKey!=null && publicKey.isPostQuantumKey();
     }
 }

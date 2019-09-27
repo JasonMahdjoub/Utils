@@ -44,15 +44,21 @@ import java.security.spec.InvalidKeySpecException;
 
 /**
  * @author Jason Mahdjoub
- * @version 3.0
+ * @version 3.1
  * @since MaDKitLanEdition 3.15.0
  */
 public enum P2PLoginAgreementType {
-	JPAKE,
-	AGREEMENT_WITH_SYMMETRIC_SIGNATURE,
-	JPAKE_AND_AGREEMENT_WITH_SYMMETRIC_SIGNATURE,
-	ASYMMETRIC_SECRET_MESSAGE_EXCHANGER,
-	ASYMMETRIC_SECRET_MESSAGE_EXCHANGER_AND_AGREEMENT_WITH_SYMMETRIC_SIGNATURE;
+	JPAKE(false),
+	AGREEMENT_WITH_SYMMETRIC_SIGNATURE(true),
+	JPAKE_AND_AGREEMENT_WITH_SYMMETRIC_SIGNATURE(false),
+	ASYMMETRIC_SECRET_MESSAGE_EXCHANGER(false),
+	ASYMMETRIC_SECRET_MESSAGE_EXCHANGER_AND_AGREEMENT_WITH_SYMMETRIC_SIGNATURE(false);
+
+	private final boolean pqc;
+	private P2PLoginAgreementType(boolean pqc)
+	{
+		this.pqc=pqc;
+	}
 
 	private MessageDigestType getDefaultMessageDigestType()
 	{
@@ -130,5 +136,8 @@ public enum P2PLoginAgreementType {
 		throw new IllegalAccessError();
 	}
 
-
+	public boolean isPostQuantumAlgorithm(SymmetricSecretKey secretKey)
+	{
+		return pqc && secretKey!=null && secretKey.isPostQuantumKey();
+	}
 }

@@ -48,7 +48,7 @@ import java.security.spec.InvalidKeySpecException;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 3.0
+ * @version 3.1
  * @since Utils 1.4
  */
 public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm {
@@ -477,9 +477,9 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 						--totalBytes;
 					break;
 				}
-				nonPQCEncryption.decode(is, associatedData, offAD, lenAD, baos, l, externalCounter);
+				PQCEncryption.decode(is, associatedData, offAD, lenAD, baos, l, externalCounter);
 				byte []b=baos.toByteArray();
-				os.write(PQCEncryption.decode(b, 0, b.length, associatedData, offAD, lenAD, externalCounter));
+				os.write(nonPQCEncryption.decode(b, 0, b.length, associatedData, offAD, lenAD, externalCounter));
 				length-=l;
 				totalBytes+=l;
 			}
@@ -500,9 +500,9 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 				IllegalBlockSizeException, BadPaddingException,
 				NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
 			ByteArrayOutputStream baos=new ByteArrayOutputStream();
-			PQCEncryption.encode(bytes, off, len, associatedData, offAD, lenAD, baos, externalCounter);
+			nonPQCEncryption.encode(bytes, off, len, associatedData, offAD, lenAD, baos, externalCounter);
 			byte[] b=baos.toByteArray();
-			nonPQCEncryption.encode(b, 0, b.length, associatedData, offAD, lenAD, os, externalCounter);
+			PQCEncryption.encode(b, 0, b.length, associatedData, offAD, lenAD, os, externalCounter);
 		}
 		private final byte[] buffer=new byte[4096];
 
@@ -516,9 +516,9 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 				int nb=is.read(buffer);
 				if (nb<0)
 					break;
-				PQCEncryption.encode(buffer, 0, nb, associatedData, offAD, lenAD, baos, externalCounter);
+				nonPQCEncryption.encode(buffer, 0, nb, associatedData, offAD, lenAD, baos, externalCounter);
 				byte[] b=baos.toByteArray();
-				nonPQCEncryption.encode(b, 0, b.length, associatedData, offAD, lenAD, os, externalCounter);
+				PQCEncryption.encode(b, 0, b.length, associatedData, offAD, lenAD, os, externalCounter);
 
 			}
 		}

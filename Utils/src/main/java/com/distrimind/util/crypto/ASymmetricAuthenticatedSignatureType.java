@@ -45,7 +45,7 @@ import java.security.*;
  * List of signature algorithms
  * 
  * @author Jason Mahdjoub
- * @version 5.0
+ * @version 5.1
  * @since Utils 1.4
  */
 @SuppressWarnings("DeprecatedIsStillUsed")
@@ -244,13 +244,17 @@ public enum ASymmetricAuthenticatedSignatureType {
 		return getKeyPairGenerator(random, keySize, System.currentTimeMillis() + expirationTimeMilis);
 	}
 
-	public AbstractKeyPairGenerator getKeyPairGenerator(AbstractSecureRandom random, int keySize,
+	public AbstractKeyPairGenerator getKeyPairGenerator(AbstractSecureRandom random, int keySizeBits,
 			long expirationTimeUTC) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException {
+		if (keySizeBits<0)
+			keySizeBits= this.keySizeBits;
+		if (expirationTimeUTC==Long.MIN_VALUE)
+			expirationTimeUTC=System.currentTimeMillis() + expirationTimeMilis;
 		CodeProvider.encureProviderLoaded(codeProviderSignature);
 		if (codeProviderKeyGenerator == CodeProvider.GNU_CRYPTO) {
 			KeyPairGenerator kgp = KeyPairGenerator.getInstance(keyGeneratorAlgorithmName);
 			GnuKeyPairGenerator res = new GnuKeyPairGenerator(this, kgp);
-			res.initialize(keySize, expirationTimeUTC, random);
+			res.initialize(keySizeBits, expirationTimeUTC, random);
 
 			return res;
 		} else if (codeProviderKeyGenerator == CodeProvider.BCFIPS || codeProviderKeyGenerator == CodeProvider.BC || codeProviderKeyGenerator == CodeProvider.BCPQC) {
@@ -266,14 +270,14 @@ public enum ASymmetricAuthenticatedSignatureType {
 			else
 				kgp = KeyPairGenerator.getInstance(keyGeneratorAlgorithmName, codeProviderKeyGenerator.name());
 			JavaNativeKeyPairGenerator res = new JavaNativeKeyPairGenerator(this, kgp);
-			res.initialize(keySize, expirationTimeUTC, random);
+			res.initialize(keySizeBits, expirationTimeUTC, random);
 
 			return res;
 		} else {
 			KeyPairGenerator kgp = KeyPairGenerator.getInstance(keyGeneratorAlgorithmName, codeProviderKeyGenerator.checkProviderWithCurrentOS().name());
 
 			JavaNativeKeyPairGenerator res = new JavaNativeKeyPairGenerator(this, kgp);
-			res.initialize(keySize, expirationTimeUTC, random);
+			res.initialize(keySizeBits, expirationTimeUTC, random);
 
 			return res;
 

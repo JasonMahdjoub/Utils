@@ -40,8 +40,7 @@ package com.distrimind.util.io;
 
 import com.distrimind.util.AbstractDecentralizedID;
 import com.distrimind.util.ReflectionTools;
-import com.distrimind.util.crypto.ASymmetricKeyPair;
-import com.distrimind.util.crypto.AbstractKey;
+import com.distrimind.util.crypto.*;
 import com.distrimind.util.sizeof.ObjectSizer;
 
 import java.io.IOException;
@@ -60,7 +59,7 @@ import java.util.*;
  * 
  * @author Jason Mahdjoub
  * @since Utils 4.4.0
- * @version 1.0
+ * @version 1.1
  * 
  */
 
@@ -714,6 +713,51 @@ public class SerializationTools {
 		SerializationTools.writeString(oos, e.getClass().getName(), MAX_CLASS_LENGTH, false);
 		SerializationTools.writeString(oos, e.name(), 1000, false);
 	}
+	static void writeHybridKeyAgreementType(final SecuredObjectOutputStream oos, HybridKeyAgreementType e, boolean supportNull) throws IOException
+	{
+		if (supportNull)
+			oos.writeBoolean(e!=null);
+		if (e==null)
+		{
+			if (!supportNull)
+				throw new IOException();
+
+			return;
+
+		}
+		SerializationTools.writeString(oos, e.getNonPQCKeyAgreementType().name(), 1000, false);
+		SerializationTools.writeString(oos, e.getPQCKeyAgreementType().name(), 1000, false);
+	}
+	static void writeHybridASymmetricEncryptionType(final SecuredObjectOutputStream oos, HybridASymmetricEncryptionType e, boolean supportNull) throws IOException
+	{
+		if (supportNull)
+			oos.writeBoolean(e!=null);
+		if (e==null)
+		{
+			if (!supportNull)
+				throw new IOException();
+
+			return;
+
+		}
+		SerializationTools.writeString(oos, e.getNonPQCASymmetricEncryptionType().name(), 1000, false);
+		SerializationTools.writeString(oos, e.getPQCASymmetricEncryptionType().name(), 1000, false);
+	}
+	static void writeHybridASymmetricAuthenticatedSignatureType(final SecuredObjectOutputStream oos, HybridASymmetricAuthenticatedSignatureType e, boolean supportNull) throws IOException
+	{
+		if (supportNull)
+			oos.writeBoolean(e!=null);
+		if (e==null)
+		{
+			if (!supportNull)
+				throw new IOException();
+
+			return;
+
+		}
+		SerializationTools.writeString(oos, e.getNonPQCASymmetricAuthenticatedSignatureType().name(), 1000, false);
+		SerializationTools.writeString(oos, e.getPQCASymmetricAuthenticatedSignatureType().name(), 1000, false);
+	}
 	public final static int MAX_CLASS_LENGTH=2048;
 
 
@@ -744,6 +788,58 @@ public class SerializationTools {
 			return null;
 
 	}
+	static HybridKeyAgreementType readHybridKeyAgreementType(final SecuredObjectInputStream ois, boolean supportNull) throws IOException
+	{
+		if (!supportNull || ois.readBoolean())
+		{
+			KeyAgreementType ka=KeyAgreementType.valueOf(SerializationTools.readString(ois, 1000, false));
+			KeyAgreementType pqcka=KeyAgreementType.valueOf(SerializationTools.readString(ois, 1000, false));
+			try {
+				return new HybridKeyAgreementType(ka, pqcka);
+			}
+			catch(Exception e)
+			{
+				throw new IOException(e);
+			}
+		}
+		else
+			return null;
+	}
+	static HybridASymmetricAuthenticatedSignatureType readHybridASymmetricAuthenticatedSignatureType(final SecuredObjectInputStream ois, boolean supportNull) throws IOException
+	{
+		if (!supportNull || ois.readBoolean())
+		{
+			ASymmetricAuthenticatedSignatureType ka=ASymmetricAuthenticatedSignatureType.valueOf(SerializationTools.readString(ois, 1000, false));
+			ASymmetricAuthenticatedSignatureType pqcka=ASymmetricAuthenticatedSignatureType.valueOf(SerializationTools.readString(ois, 1000, false));
+			try {
+				return new HybridASymmetricAuthenticatedSignatureType(ka, pqcka);
+			}
+			catch(Exception e)
+			{
+				throw new IOException(e);
+			}
+		}
+		else
+			return null;
+	}
+	static HybridASymmetricEncryptionType readHybridASymmetricEncryptionType(final SecuredObjectInputStream ois, boolean supportNull) throws IOException
+	{
+		if (!supportNull || ois.readBoolean())
+		{
+			ASymmetricEncryptionType ka=ASymmetricEncryptionType.valueOf(SerializationTools.readString(ois, 1000, false));
+			ASymmetricEncryptionType pqcka=ASymmetricEncryptionType.valueOf(SerializationTools.readString(ois, 1000, false));
+			try {
+				return new HybridASymmetricEncryptionType(ka, pqcka);
+			}
+			catch(Exception e)
+			{
+				throw new IOException(e);
+			}
+		}
+		else
+			return null;
+	}
+
 	/*public static void writeExternalizableAndSizable(final SecuredObjectOutputStream oos, Externalizable e, boolean supportNull) throws IOException
 	{
 		if (e==null)
@@ -1071,6 +1167,21 @@ public class SerializationTools {
 			oos.write(15);
 			writeDate(oos, (Date)o, false);
 		}
+		else if (o instanceof HybridKeyAgreementType)
+		{
+			oos.write(16);
+			writeHybridKeyAgreementType(oos, (HybridKeyAgreementType)o, false);
+		}
+		else if (o instanceof HybridASymmetricAuthenticatedSignatureType)
+		{
+			oos.write(17);
+			writeHybridASymmetricAuthenticatedSignatureType(oos, (HybridASymmetricAuthenticatedSignatureType)o, false);
+		}
+		else if (o instanceof HybridASymmetricEncryptionType)
+		{
+			oos.write(18);
+			writeHybridASymmetricEncryptionType(oos, (HybridASymmetricEncryptionType)o, false);
+		}
 		else
 		{
 			throw new IOException();
@@ -1140,6 +1251,12 @@ public class SerializationTools {
 					return readClass(ois, false, Object.class);
 				case 15:
 					return readDate(ois, false);
+				case 16:
+					return readHybridKeyAgreementType(ois, false);
+				case 17:
+					return readHybridASymmetricAuthenticatedSignatureType(ois, false);
+				case 18:
+					return readHybridASymmetricEncryptionType(ois, false);
 		/*case Byte.MAX_VALUE:
 			return ois.readObject();*/
 				default:
@@ -1149,7 +1266,7 @@ public class SerializationTools {
 		
 	}
 
-	private static final byte lastObjectCode=15;
+	private static final byte lastObjectCode=18;
 	private static final byte classesStartIndex=lastObjectCode+1;
 	private static byte classesEndIndex=0;
 	private static byte enumsStartIndex=0;
@@ -1210,6 +1327,24 @@ public class SerializationTools {
 		if (inetAddress==null)
 			return 1;
 		return getInternalSize(inetAddress, 0);
+	}
+	public static int getInternalSize(HybridKeyAgreementType v)
+	{
+		if (v==null)
+			return 1;
+		return getInternalSize(v, 0);
+	}
+	public static int getInternalSize(HybridASymmetricAuthenticatedSignatureType v)
+	{
+		if (v==null)
+			return 1;
+		return getInternalSize(v, 0);
+	}
+	public static int getInternalSize(HybridASymmetricEncryptionType v)
+	{
+		if (v==null)
+			return 1;
+		return getInternalSize(v, 0);
 	}
 	public static int getInternalSize(InetSocketAddress inetSocketAddress)
 	{
@@ -1347,6 +1482,18 @@ public class SerializationTools {
 		else if (o instanceof Enum<?>)
 		{
 			return 6+((Enum<?>)o).name().length()*2+getInternalSize(o.getClass().getName(), MAX_CLASS_LENGTH);
+		}
+		else if (o instanceof HybridKeyAgreementType)
+		{
+			return 6+((HybridKeyAgreementType)o).getNonPQCKeyAgreementType().name().length()*2+((HybridKeyAgreementType)o).getPQCKeyAgreementType().name().length()*2;
+		}
+		else if (o instanceof HybridASymmetricAuthenticatedSignatureType)
+		{
+			return 6+((HybridASymmetricAuthenticatedSignatureType)o).getNonPQCASymmetricAuthenticatedSignatureType().name().length()*2+((HybridASymmetricAuthenticatedSignatureType)o).getPQCASymmetricAuthenticatedSignatureType().name().length()*2;
+		}
+		else if (o instanceof HybridASymmetricEncryptionType)
+		{
+			return 6+((HybridASymmetricEncryptionType)o).getNonPQCASymmetricEncryptionType().name().length()*2+((HybridASymmetricEncryptionType)o).getPQCASymmetricEncryptionType().name().length()*2;
 		}
 		else
 			return ObjectSizer.sizeOf(o);

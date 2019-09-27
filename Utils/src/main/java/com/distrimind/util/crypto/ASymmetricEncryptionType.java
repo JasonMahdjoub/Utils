@@ -65,7 +65,7 @@ import java.security.spec.X509EncodedKeySpec;
  * List of asymmetric encryption algorithms
  * 
  * @author Jason Mahdjoub
- * @version 3.1
+ * @version 3.2
  * @since Utils 1.4
  */
 public enum ASymmetricEncryptionType {
@@ -604,7 +604,7 @@ public enum ASymmetricEncryptionType {
 
 	private final ASymmetricAuthenticatedSignatureType signature;
 
-	private final int keySize;
+	private final int keySizeBits;
 
 	private final long expirationTimeMilis;
 
@@ -615,18 +615,18 @@ public enum ASymmetricEncryptionType {
 	private final Algorithm bcAlgorithm;
 	
 	ASymmetricEncryptionType(ASymmetricEncryptionType type) {
-		this(type.algorithmName, type.blockMode, type.padding, type.signature, type.keySize, type.expirationTimeMilis,
+		this(type.algorithmName, type.blockMode, type.padding, type.signature, type.keySizeBits, type.expirationTimeMilis,
 				type.blockSizeDecrement, type.codeProviderForEncryption, type.codeProviderForKeyGenerator, type.bcAlgorithm);
 	}
 
 	ASymmetricEncryptionType(String algorithmName, String blockMode, String padding,
-							 ASymmetricAuthenticatedSignatureType signature, int keySize, long expirationTimeMilis, short blockSizeDecrement,
-			CodeProvider codeProviderForEncryption, CodeProvider codeProviderForKeyGenetor, Algorithm bcAlgorithm) {
+							 ASymmetricAuthenticatedSignatureType signature, int keySizeBits, long expirationTimeMilis, short blockSizeDecrement,
+							 CodeProvider codeProviderForEncryption, CodeProvider codeProviderForKeyGenetor, Algorithm bcAlgorithm) {
 		this.algorithmName = algorithmName;
 		this.blockMode = blockMode;
 		this.padding = padding;
 		this.signature = signature;
-		this.keySize = keySize;
+		this.keySizeBits = keySizeBits;
 		this.blockSizeDecrement = blockSizeDecrement;
 		this.codeProviderForEncryption = codeProviderForEncryption;
 		this.codeProviderForKeyGenerator=codeProviderForKeyGenetor;
@@ -658,11 +658,11 @@ public enum ASymmetricEncryptionType {
 	
 	
 	public int getDefaultKeySize() {
-		return keySize;
+		return keySizeBits;
 	}
 
 	public int getDefaultMaxBlockSize() {
-		return getMaxBlockSize(keySize);
+		return getMaxBlockSize(keySizeBits);
 	}
 
 	public ASymmetricAuthenticatedSignatureType getDefaultSignatureAlgorithm() {
@@ -671,35 +671,40 @@ public enum ASymmetricEncryptionType {
 
 	public AbstractKeyPairGenerator getKeyPairGenerator(AbstractSecureRandom random)
 			throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException {
-		return getKeyPairGenerator(random, keySize, System.currentTimeMillis() + expirationTimeMilis);
+		return getKeyPairGenerator(random, keySizeBits, System.currentTimeMillis() + expirationTimeMilis);
 	}
 
-	public AbstractKeyPairGenerator getKeyPairGenerator(AbstractSecureRandom random, int keySize)
+	public AbstractKeyPairGenerator getKeyPairGenerator(AbstractSecureRandom random, int keySizeBits)
 			throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException {
-		return getKeyPairGenerator(random, keySize, System.currentTimeMillis() + expirationTimeMilis);
+		return getKeyPairGenerator(random, keySizeBits, System.currentTimeMillis() + expirationTimeMilis);
 	}
 
-	public AbstractKeyPairGenerator getKeyPairGenerator(AbstractSecureRandom random, int keySize,
+	public AbstractKeyPairGenerator getKeyPairGenerator(AbstractSecureRandom random, int keySizeBits,
 			long expirationTimeUTC) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException {
+		if (keySizeBits<0)
+			keySizeBits= this.keySizeBits;
+		if (expirationTimeUTC==Long.MIN_VALUE)
+			expirationTimeUTC=System.currentTimeMillis() + expirationTimeMilis;
+
 		CodeProvider.encureProviderLoaded(codeProviderForKeyGenerator);
 		if (codeProviderForKeyGenerator == CodeProvider.GNU_CRYPTO) {
 			Object kpg=GnuFunctions.getKeyPairGenerator(algorithmName);
 			GnuKeyPairGenerator res = new GnuKeyPairGenerator(this, kpg);
-			res.initialize(keySize, expirationTimeUTC, random);
+			res.initialize(keySizeBits, expirationTimeUTC, random);
 
 			return res;
 		} else if (codeProviderForKeyGenerator == CodeProvider.BCFIPS) {
 
 				KeyPairGenerator kgp = KeyPairGenerator.getInstance(algorithmName, CodeProvider.BCFIPS.name());
 				JavaNativeKeyPairGenerator res = new JavaNativeKeyPairGenerator(this, kgp);
-				res.initialize(keySize, expirationTimeUTC, random);
+				res.initialize(keySizeBits, expirationTimeUTC, random);
 
 				return res;
 
 		} else {
 			KeyPairGenerator kgp = KeyPairGenerator.getInstance(algorithmName, codeProviderForKeyGenerator.checkProviderWithCurrentOS().name());
 			JavaNativeKeyPairGenerator res = new JavaNativeKeyPairGenerator(this, kgp);
-			res.initialize(keySize, expirationTimeUTC, random);
+			res.initialize(keySizeBits, expirationTimeUTC, random);
 
 			return res;
 
