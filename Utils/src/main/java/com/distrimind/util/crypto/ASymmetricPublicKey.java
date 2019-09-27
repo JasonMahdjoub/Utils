@@ -35,12 +35,15 @@ knowledge of the CeCILL-C license and that you accept its terms.
 package com.distrimind.util.crypto;
 
 import com.distrimind.util.Bits;
+import com.distrimind.util.io.RandomByteArrayInputStream;
 import org.apache.commons.codec.binary.Base64;
 import org.bouncycastle.crypto.Algorithm;
 import org.bouncycastle.crypto.AsymmetricKey;
+import org.bouncycastle.crypto.AsymmetricPublicKey;
 import org.bouncycastle.crypto.asymmetric.AsymmetricECPublicKey;
 import org.bouncycastle.crypto.asymmetric.AsymmetricRSAPublicKey;
 
+import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.interfaces.ECPublicKey;
@@ -52,7 +55,7 @@ import java.util.Arrays;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 4.0
+ * @version 5.0
  * @since Utils 1.7.1
  */
 public class ASymmetricPublicKey extends AbstractKey implements IASymmetricPublicKey {
@@ -82,6 +85,9 @@ public class ASymmetricPublicKey extends AbstractKey implements IASymmetricPubli
 
 	private volatile transient Object gnuPublicKey = null;
 
+	private volatile transient AsymmetricPublicKey bouncyCastlePublicKey=null;
+
+
 	boolean xdhKey=false;
 
 	@Override
@@ -102,9 +108,18 @@ public class ASymmetricPublicKey extends AbstractKey implements IASymmetricPubli
 			Arrays.fill(GnuFunctions.keyGetEncoded(gnuPublicKey), (byte)0);
 			gnuPublicKey=null;
 		}
+		if (bouncyCastlePublicKey==null)
+		{
+			if (bouncyCastlePublicKey instanceof BCMcElieceCipher.PublicKey)
+				((BCMcElieceCipher.PublicKey) bouncyCastlePublicKey).zeroize();
+			else if (bouncyCastlePublicKey instanceof BCMcElieceCipher.PublicKeyCCA2)
+				((BCMcElieceCipher.PublicKeyCCA2) bouncyCastlePublicKey).zeroize();
+			bouncyCastlePublicKey=null;
+		}
+
 	}
 
-	@SuppressWarnings("MethodDoesntCallSuperMethod")
+	@SuppressWarnings({"MethodDoesntCallSuperMethod", "deprecation"})
 	@Override
 	public void finalize() {
 
@@ -148,6 +163,7 @@ public class ASymmetricPublicKey extends AbstractKey implements IASymmetricPubli
 
 		this.encryptionType = null;
 		this.signatureType=type;
+
 	}
 
 	ASymmetricPublicKey(ASymmetricEncryptionType type, PublicKey publicKey, int keySize, long expirationUTC) {
@@ -159,6 +175,17 @@ public class ASymmetricPublicKey extends AbstractKey implements IASymmetricPubli
 
 		this.encryptionType = type;
 		this.signatureType=null;
+	}
+	ASymmetricPublicKey(ASymmetricEncryptionType type, AsymmetricPublicKey publicKey, int keySize, long expirationUTC) {
+		this(publicKey.getEncoded(), keySize, expirationUTC);
+		if (type == null)
+			throw new NullPointerException("type");
+		if (type.getCodeProviderForEncryption() == CodeProvider.GNU_CRYPTO)
+			throw new IllegalAccessError();
+
+		this.encryptionType = type;
+		this.signatureType=null;
+		this.bouncyCastlePublicKey=publicKey;
 	}
 	ASymmetricPublicKey(ASymmetricAuthenticatedSignatureType type, PublicKey publicKey, int keySize, long expirationUTC, boolean xdhKey) {
 		this(ASymmetricEncryptionType.encodePublicKey(publicKey, type, xdhKey), keySize, expirationUTC);
@@ -317,24 +344,45 @@ public class ASymmetricPublicKey extends AbstractKey implements IASymmetricPubli
 	
 	@Override
 	public AsymmetricKey toBouncyCastleKey() throws NoSuchAlgorithmException, InvalidKeySpecException {
-		
-		PublicKey pk=toJavaNativeKey();
-		if (pk instanceof RSAPublicKey)
+		if (encryptionType!=null && encryptionType.name().startsWith("BCPQC_MCELIECE_"))
 		{
-			RSAPublicKey javaNativePublicKey=(RSAPublicKey)pk;
-			return new AsymmetricRSAPublicKey(
-				getBouncyCastleAlgorithm(), 
-				javaNativePublicKey.getModulus(), javaNativePublicKey.getPublicExponent());
+			if (bouncyCastlePublicKey==null) {
+				if (encryptionType.name().contains("CCA2")) {
+					BCMcElieceCipher.PublicKeyCCA2 res = new BCMcElieceCipher.PublicKeyCCA2();
+					try {
+						res.readExternal(new RandomByteArrayInputStream(this.publicKey), encryptionType);
+						bouncyCastlePublicKey = res;
+					} catch (IOException  e) {
+						throw new InvalidKeySpecException(e);
+					}
+				} else {
+					BCMcElieceCipher.PublicKey res = new BCMcElieceCipher.PublicKey();
+					try {
+						res.readExternal(new RandomByteArrayInputStream(this.publicKey));
+						bouncyCastlePublicKey = res;
+					} catch (IOException  e) {
+						throw new InvalidKeySpecException(e);
+					}
 
+				}
+			}
+			return bouncyCastlePublicKey;
 		}
-		else if (pk instanceof ECPublicKey)
-		{
-			ECPublicKey javaNativePublicKey=(ECPublicKey)pk;
-			return new AsymmetricECPublicKey(getBouncyCastleAlgorithm(), javaNativePublicKey.getEncoded());
+		else {
+			PublicKey pk = toJavaNativeKey();
+			if (pk instanceof RSAPublicKey) {
+				RSAPublicKey javaNativePublicKey = (RSAPublicKey) pk;
+				return new AsymmetricRSAPublicKey(
+						getBouncyCastleAlgorithm(),
+						javaNativePublicKey.getModulus(), javaNativePublicKey.getPublicExponent());
 
+			} else if (pk instanceof ECPublicKey) {
+				ECPublicKey javaNativePublicKey = (ECPublicKey) pk;
+				return new AsymmetricECPublicKey(getBouncyCastleAlgorithm(), javaNativePublicKey.getEncoded());
+
+			} else
+				throw new IllegalAccessError(pk.getClass().getName());
 		}
-		else
-			throw new IllegalAccessError(pk.getClass().getName());
 		
 	}
 

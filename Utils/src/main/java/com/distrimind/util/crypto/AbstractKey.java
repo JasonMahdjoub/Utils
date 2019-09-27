@@ -48,11 +48,11 @@ import java.util.Arrays;
  * @since Utils 2.0
  */
 public abstract class AbstractKey extends DecentralizedValue implements IKey{
-	
-	
-	
+
+
+
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = -8425241891004940479L;
 
@@ -264,21 +264,20 @@ public abstract class AbstractKey extends DecentralizedValue implements IKey{
 				Arrays.fill(b, off, len, (byte)0);
 		}
 	}
-	
-	
-	
+
+
+
 	public static AbstractKey valueOf(String key) throws IllegalArgumentException {
 		return decode(Base64.decodeBase64(key));
 	}
-	
 
-	
+
+
 	@SuppressWarnings("deprecation")
 	@Override
 	public void finalize()
 	{
 		zeroize();
 	}
-
 
 }

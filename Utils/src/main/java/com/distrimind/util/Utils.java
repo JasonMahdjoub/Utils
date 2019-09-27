@@ -81,6 +81,7 @@ public class Utils {
 			d.addItem("Asymmetric signature and asymmetric encryption can now be done with two algorithms at the same time : one PQC algorithm and one non PQC Algorithm");
 			d.addItem("Key agreements and login agreements can be hybrid and use both post quantum algorithms and non post quantum algorithms");
 			d.addItem("Asymmetric keys have key sizes code with in precision (instead of short precision)");
+			d.addItem("Add McEliece Post Quantum asymmetric encryption algorithm");
 			VERSION.addDescription(d);
 
 			c = Calendar.getInstance();

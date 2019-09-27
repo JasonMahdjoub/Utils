@@ -280,6 +280,7 @@ public class SymmetricSecretKey extends AbstractKey {
 		return signatureType;
 	}
 
+
 	public short getKeySizeBits() {
 		return keySizeBits;
 	}

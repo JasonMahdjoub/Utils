@@ -34,6 +34,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
+import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.interfaces.ECPrivateKey;
@@ -41,9 +42,11 @@ import java.security.interfaces.RSAPrivateKey;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
 
+import com.distrimind.util.io.RandomByteArrayInputStream;
 import org.apache.commons.codec.binary.Base64;
 import org.bouncycastle.crypto.Algorithm;
 import org.bouncycastle.crypto.AsymmetricKey;
+import org.bouncycastle.crypto.AsymmetricPrivateKey;
 import org.bouncycastle.crypto.asymmetric.AsymmetricECPrivateKey;
 import org.bouncycastle.crypto.asymmetric.AsymmetricRSAPrivateKey;
 
@@ -53,7 +56,7 @@ import com.distrimind.util.Bits;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 3.0
+ * @version 4.0
  * @since Utils 1.7.1
  */
 public class ASymmetricPrivateKey extends AbstractKey implements IASymmetricPrivateKey {
@@ -74,9 +77,10 @@ public class ASymmetricPrivateKey extends AbstractKey implements IASymmetricPriv
 
 	private final int hashCode;
 
-	private volatile transient PrivateKey nativePrivateKey;
+	private volatile transient PrivateKey nativePrivateKey=null;
 
-	private volatile transient Object gnuPrivateKey;
+	private volatile transient Object gnuPrivateKey=null;
+	private volatile transient AsymmetricPrivateKey bouncyCastlePrivateKey=null;
 	boolean xdhKey=false;
 
 	
@@ -97,6 +101,14 @@ public class ASymmetricPrivateKey extends AbstractKey implements IASymmetricPriv
 		{
 			Arrays.fill(GnuFunctions.keyGetEncoded(gnuPrivateKey), (byte)0);
 			gnuPrivateKey=null;
+		}
+		if (bouncyCastlePrivateKey==null)
+		{
+			if (bouncyCastlePrivateKey instanceof BCMcElieceCipher.PrivateKey)
+				((BCMcElieceCipher.PrivateKey) bouncyCastlePrivateKey).zeroize();
+			else if (bouncyCastlePrivateKey instanceof BCMcElieceCipher.PrivateKeyCCA2)
+				((BCMcElieceCipher.PrivateKeyCCA2) bouncyCastlePrivateKey).zeroize();
+			bouncyCastlePrivateKey=null;
 		}
 	}
 
@@ -151,6 +163,16 @@ public class ASymmetricPrivateKey extends AbstractKey implements IASymmetricPriv
 			throw new IllegalAccessError();
 		this.encryptionType = type;
 		this.signatureType=null;
+	}
+	ASymmetricPrivateKey(ASymmetricEncryptionType type, AsymmetricPrivateKey privateKey, int keySize) {
+		this(privateKey.getEncoded(), keySize);
+		if (type == null)
+			throw new NullPointerException("type");
+		if (type.getCodeProviderForEncryption() == CodeProvider.GNU_CRYPTO)
+			throw new IllegalAccessError();
+		this.encryptionType = type;
+		this.signatureType=null;
+		this.bouncyCastlePrivateKey=privateKey;
 	}
 	ASymmetricPrivateKey(ASymmetricAuthenticatedSignatureType type, PrivateKey privateKey, int keySize, boolean xdhKey) {
 		this(ASymmetricEncryptionType.encodePrivateKey(privateKey, type, xdhKey), keySize);
@@ -302,21 +324,42 @@ public class ASymmetricPrivateKey extends AbstractKey implements IASymmetricPriv
 
 	@Override
 	public AsymmetricKey toBouncyCastleKey() throws NoSuchAlgorithmException, InvalidKeySpecException {
-		PrivateKey pk=toJavaNativeKey();
-		if (pk instanceof RSAPrivateKey)
+		if (encryptionType!=null && encryptionType.name().startsWith("BCPQC_MCELIECE_"))
 		{
-			RSAPrivateKey javaNativePrivateKey=(RSAPrivateKey)pk;
-			return new AsymmetricRSAPrivateKey(getBouncyCastleAlgorithm(),
-				javaNativePrivateKey.getModulus(), javaNativePrivateKey.getPrivateExponent());
+			if (bouncyCastlePrivateKey==null) {
+				if (encryptionType.name().contains("CCA2")) {
+					BCMcElieceCipher.PrivateKeyCCA2 res = new BCMcElieceCipher.PrivateKeyCCA2();
+					try {
+						res.readExternal(new RandomByteArrayInputStream(this.privateKey), encryptionType);
+						bouncyCastlePrivateKey=res;
+					} catch (IOException e) {
+						throw new InvalidKeySpecException(e);
+					}
+				} else {
+					BCMcElieceCipher.PrivateKey res = new BCMcElieceCipher.PrivateKey();
+					try {
+						res.readExternal(new RandomByteArrayInputStream(this.privateKey));
+						bouncyCastlePrivateKey=res;
+					} catch (IOException e) {
+						throw new InvalidKeySpecException(e);
+					}
+				}
+			}
+			return bouncyCastlePrivateKey;
+		}
+		else {
+			PrivateKey pk = toJavaNativeKey();
+			if (pk instanceof RSAPrivateKey) {
+				RSAPrivateKey javaNativePrivateKey = (RSAPrivateKey) pk;
+				return new AsymmetricRSAPrivateKey(getBouncyCastleAlgorithm(),
+						javaNativePrivateKey.getModulus(), javaNativePrivateKey.getPrivateExponent());
 
+			} else if (pk instanceof ECPrivateKey) {
+				ECPrivateKey javaNativePrivateKey = (ECPrivateKey) pk;
+				return new AsymmetricECPrivateKey(getBouncyCastleAlgorithm(), javaNativePrivateKey.getEncoded());
+			} else
+				throw new IllegalAccessError();
 		}
-		else if (pk instanceof ECPrivateKey)
-		{
-			ECPrivateKey javaNativePrivateKey=(ECPrivateKey)pk;
-			return new AsymmetricECPrivateKey(getBouncyCastleAlgorithm(), javaNativePrivateKey.getEncoded());
-		}
-		else
-			throw new IllegalAccessError();
 		
 	}
 

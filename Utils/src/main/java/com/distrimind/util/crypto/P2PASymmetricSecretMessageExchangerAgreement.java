@@ -55,7 +55,7 @@ public class P2PASymmetricSecretMessageExchangerAgreement extends P2PLoginAgreem
         if (bytesPassword.length==0)
             throw new IllegalArgumentException();
 
-        this.bytesPassword=Arrays.copyOfRange(bytesPassword, offset_password, length_password);
+        this.bytesPassword=Arrays.copyOfRange(bytesPassword, offset_password, length_password+offset_password);
         this.passwordIsKey=passwordIsKey;
         this.charPassword=null;
     }

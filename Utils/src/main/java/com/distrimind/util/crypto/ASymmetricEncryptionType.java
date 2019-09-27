@@ -65,18 +65,30 @@ import java.security.spec.X509EncodedKeySpec;
  * List of asymmetric encryption algorithms
  * 
  * @author Jason Mahdjoub
- * @version 3.2
+ * @version 4.0
  * @since Utils 1.4
  */
 public enum ASymmetricEncryptionType {
 	RSA_OAEPWithSHA256AndMGF1Padding("RSA", "ECB", "OAEPWITHSHA-256ANDMGF1PADDING", ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA384withRSA,
-			3072, 31536000000L, (short) 66, CodeProvider.SunJCE,CodeProvider.SunRsaSign, FipsRSA.ALGORITHM),
+			3072, 31536000000L, (short) 66, CodeProvider.SunJCE,CodeProvider.SunRsaSign, FipsRSA.ALGORITHM, false),
 	RSA_OAEPWithSHA384AndMGF1Padding("RSA", "ECB", "OAEPWITHSHA-384ANDMGF1PADDING", ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA384withRSA,
-			3072, 31536000000L, (short) 98, CodeProvider.SunJCE,CodeProvider.SunRsaSign, FipsRSA.ALGORITHM),
+			3072, 31536000000L, (short) 98, CodeProvider.SunJCE,CodeProvider.SunRsaSign, FipsRSA.ALGORITHM, false),
 	RSA_OAEPWithSHA512AndMGF1Padding("RSA", "ECB", "OAEPWITHSHA-512ANDMGF1PADDING", ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA512withRSA,
-			3072, 31536000000L, (short) 130, CodeProvider.SunJCE,CodeProvider.SunRsaSign, FipsRSA.ALGORITHM),
+			3072, 31536000000L, (short) 130, CodeProvider.SunJCE,CodeProvider.SunRsaSign, FipsRSA.ALGORITHM, false),
 	RSA_PKCS1Padding("RSA", "ECB", "PKCS1Padding", ASymmetricAuthenticatedSignatureType.SHA384withRSA, 3072, 31536000000L, (short) 11,
-					CodeProvider.SunJCE,CodeProvider.SunRsaSign, FipsRSA.ALGORITHM),
+					CodeProvider.SunJCE,CodeProvider.SunRsaSign, FipsRSA.ALGORITHM, false),
+	BCPQC_MCELIECE_SHA256("McEliece", "ECB", "NoPadding", null, (short)2048, 31536000000L, (short)0, CodeProvider.BCPQC, CodeProvider.BCPQC, null, true),
+	BCPQC_MCELIECE_SHA384("McEliece", "ECB", "NoPadding", null, (short)2048, 31536000000L, (short)0, CodeProvider.BCPQC, CodeProvider.BCPQC, null, true),
+	BCPQC_MCELIECE_SHA512("McEliece", "ECB", "NoPadding", null, (short)2048, 31536000000L, (short)0, CodeProvider.BCPQC, CodeProvider.BCPQC, null, true),
+	BCPQC_MCELIECE_FUJISAKI_CCA2_SHA256("McEliece", "ECB", "NoPadding", null, (short)2048, 31536000000L, (short)0, CodeProvider.BCPQC, CodeProvider.BCPQC, null, true),
+	BCPQC_MCELIECE_FUJISAKI_CCA2_SHA384("McEliece", "ECB", "NoPadding", null, (short)2048, 31536000000L, (short)0, CodeProvider.BCPQC, CodeProvider.BCPQC, null, true),
+	BCPQC_MCELIECE_FUJISAKI_CCA2_SHA512("McEliece", "ECB", "NoPadding", null, (short)2048, 31536000000L, (short)0, CodeProvider.BCPQC, CodeProvider.BCPQC, null, true),
+	BCPQC_MCELIECE_POINTCHEVAL_CCA2_SHA256("McEliece", "ECB", "NoPadding", null, (short)2048, 31536000000L, (short)0, CodeProvider.BCPQC, CodeProvider.BCPQC, null, true),
+	BCPQC_MCELIECE_POINTCHEVAL_CCA2_SHA384("McEliece", "ECB", "NoPadding", null, (short)2048, 31536000000L, (short)0, CodeProvider.BCPQC, CodeProvider.BCPQC, null, true),
+	BCPQC_MCELIECE_POINTCHEVAL_CCA2_SHA512("McEliece", "ECB", "NoPadding", null, (short)2048, 31536000000L, (short)0, CodeProvider.BCPQC, CodeProvider.BCPQC, null, true),
+	BCPQC_MCELIECE_KOBARA_IMAI_CCA2_SHA256("McEliece", "ECB", "NoPadding", null, (short)2048, 31536000000L, (short)0, CodeProvider.BCPQC, CodeProvider.BCPQC, null, true),
+	BCPQC_MCELIECE_KOBARA_IMAI_CCA2_SHA384("McEliece", "ECB", "NoPadding", null, (short)2048, 31536000000L, (short)0, CodeProvider.BCPQC, CodeProvider.BCPQC, null, true),
+	BCPQC_MCELIECE_KOBARA_IMAI_CCA2_SHA512("McEliece", "ECB", "NoPadding", null, (short)2048, 31536000000L, (short)0, CodeProvider.BCPQC, CodeProvider.BCPQC, null, true),
 	//BC_FIPS_RSA_OAEPWithSHA256AndMGF1Padding("RSA", "NONE", "OAEPwithSHA256andMGF1Padding", ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA384withRSAandMGF1, (short) 3072, 31536000000l, (short) 66,CodeProvider.BCFIPS,CodeProvider.BCFIPS, FipsRSA.ALGORITHM),
 	//BC_FIPS_RSA_PKCS1Padding("RSA", "NONE", "PKCS1Padding", ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA384withRSAandMGF1, (short) 3072, 31536000000l, (short) 11,CodeProvider.BCFIPS,CodeProvider.BCFIPS, FipsRSA.ALGORITHM),
 	DEFAULT(RSA_OAEPWithSHA512AndMGF1Padding);
@@ -613,15 +625,17 @@ public enum ASymmetricEncryptionType {
 	private final CodeProvider codeProviderForEncryption, codeProviderForKeyGenerator;
 
 	private final Algorithm bcAlgorithm;
-	
+
+	private final boolean pqc;
+
 	ASymmetricEncryptionType(ASymmetricEncryptionType type) {
 		this(type.algorithmName, type.blockMode, type.padding, type.signature, type.keySizeBits, type.expirationTimeMilis,
-				type.blockSizeDecrement, type.codeProviderForEncryption, type.codeProviderForKeyGenerator, type.bcAlgorithm);
+				type.blockSizeDecrement, type.codeProviderForEncryption, type.codeProviderForKeyGenerator, type.bcAlgorithm, type.pqc);
 	}
 
 	ASymmetricEncryptionType(String algorithmName, String blockMode, String padding,
 							 ASymmetricAuthenticatedSignatureType signature, int keySizeBits, long expirationTimeMilis, short blockSizeDecrement,
-							 CodeProvider codeProviderForEncryption, CodeProvider codeProviderForKeyGenetor, Algorithm bcAlgorithm) {
+							 CodeProvider codeProviderForEncryption, CodeProvider codeProviderForKeyGenetor, Algorithm bcAlgorithm, boolean pqc) {
 		this.algorithmName = algorithmName;
 		this.blockMode = blockMode;
 		this.padding = padding;
@@ -632,6 +646,7 @@ public enum ASymmetricEncryptionType {
 		this.codeProviderForKeyGenerator=codeProviderForKeyGenetor;
 		this.expirationTimeMilis = expirationTimeMilis;
 		this.bcAlgorithm=bcAlgorithm;
+		this.pqc=pqc;
 	}
 
 	public String getAlgorithmName() {
@@ -648,6 +663,13 @@ public enum ASymmetricEncryptionType {
 		String name = algorithmName+"/" + blockMode + "/" + padding;
 		if (codeProviderForEncryption == CodeProvider.GNU_CRYPTO) {
 			return new GnuCipher(GnuFunctions.cipherGetInstance(name));
+		} else if (codeProviderForEncryption == CodeProvider.BCPQC)
+		{
+			if (this.name().startsWith("BCPQC_MCELIECE_"))
+				return new BCMcElieceCipher(this);
+			else
+				throw new IllegalAccessError();
+
 		} else if (codeProviderForEncryption == CodeProvider.BCFIPS || codeProviderForEncryption == CodeProvider.BC) {
 			throw new IllegalAccessError();
 		} else {
@@ -693,6 +715,17 @@ public enum ASymmetricEncryptionType {
 			res.initialize(keySizeBits, expirationTimeUTC, random);
 
 			return res;
+		} else if (codeProviderForKeyGenerator == CodeProvider.BCPQC) {
+			if (this.name().startsWith("BCPQC_MCELIECE_"))
+			{
+				if (this.name().contains("CCA2"))
+					return new BCMcElieceCipher.KeyPairGeneratorCCA2(this);
+				else
+					return new BCMcElieceCipher.KeyPairGenerator(this);
+			}
+			else
+				throw new IllegalAccessError();
+
 		} else if (codeProviderForKeyGenerator == CodeProvider.BCFIPS) {
 
 				KeyPairGenerator kgp = KeyPairGenerator.getInstance(algorithmName, CodeProvider.BCFIPS.name());
@@ -735,6 +768,6 @@ public enum ASymmetricEncryptionType {
 	}
 
 	public boolean isPostQuantumAlgorithm() {
-		return false;
+		return pqc;
 	}
 }

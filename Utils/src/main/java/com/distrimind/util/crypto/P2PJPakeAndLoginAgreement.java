@@ -84,7 +84,7 @@ public class P2PJPakeAndLoginAgreement extends P2PLoginAgreement {
 	P2PJPakeAndLoginAgreement(AbstractSecureRandom random, byte[] participantID, byte[] message, int offset, int len, byte[] salt,
 							  int offset_salt, int len_salt, boolean messageIsKey, SymmetricSecretKey secretKeyForSignature) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
 		super(secretKeyForSignature==null?3:5, secretKeyForSignature==null?3:5);
-		jpake=new P2PJPAKESecretMessageExchanger(random, participantID, Arrays.copyOfRange(message, offset, len), 0, len, salt, offset_salt, len_salt, messageIsKey);
+		jpake=new P2PJPAKESecretMessageExchanger(random, participantID, Arrays.copyOfRange(message, offset, len+offset), 0, len, salt, offset_salt, len_salt, messageIsKey);
 		if (secretKeyForSignature==null)
 			login=null;
 		else
