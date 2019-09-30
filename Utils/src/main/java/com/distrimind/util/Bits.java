@@ -152,46 +152,35 @@ public class Bits {
 		if (valueSizeInBytes<1) {
 		    return;
         }
-		if (valueSizeInBytes==1) {
-			if (val>0xFF)
-				throw new IllegalArgumentException();
-			b[off] = (byte) val;
-		}
-		else if (valueSizeInBytes==2) {
-            if (val>0xFFFF)
-                throw new IllegalArgumentException();
-            putShort(b, off, (short) val);
-        }
-		else if (valueSizeInBytes==3) {
-            putPositiveShortInt(b, off, (int) val);
-        }
-        else if (valueSizeInBytes==4) {
-			throw new IllegalArgumentException();
-		}
         else if (valueSizeInBytes<=8) {
-			throw new IllegalArgumentException();
+        	int i=valueSizeInBytes-1;
+        	while (i>=0)
+			{
+				b[off + i--] = (byte) (val);
+				val>>>=8;
+			}
 		}
         else
+
             throw new IllegalArgumentException();
 	}
 
     public static long getPositiveInteger(byte[] b, int off, int valueSizeInBytes) {
         if (valueSizeInBytes<1)
             return -1;
-        else if (valueSizeInBytes==1) {
-            return b[off] & 0xFF;
-        }
-        else if (valueSizeInBytes==2) {
-            return getShort(b, off);
-        }
-        else if (valueSizeInBytes==3) {
-            return getPositiveShortInt(b, off);
-        }
-        else if (valueSizeInBytes==4) {
-            return getInt(b, off);
-        }
         else if (valueSizeInBytes<=8) {
-            return getLong(b, off);
+        	int i=valueSizeInBytes-1;
+        	long res=0;
+        	int decal=0;
+        	while(i>=0)
+			{
+				if (decal==0)
+					res += (b[off + i--] & 0xFFL);
+				else
+					res+=(b[off + i--] & 0xFFL) << decal;
+				decal+=8;
+			}
+        	return res;
         }
         else
             throw new IllegalArgumentException();

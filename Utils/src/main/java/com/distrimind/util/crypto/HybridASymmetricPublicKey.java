@@ -111,7 +111,7 @@ public class HybridASymmetricPublicKey extends AbstractKey implements IHybridKey
 
 	@Override
 	public byte[] getKeyBytes() {
-		return null;
+		return encodeWithDefaultParameters();
 	}
 
 	@Override
