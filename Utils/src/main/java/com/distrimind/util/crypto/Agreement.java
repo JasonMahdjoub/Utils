@@ -48,11 +48,11 @@ public abstract class Agreement {
 	private int actualStepForReception, actualStepForSend;
 	private final int stepsNumberForReception;
 	private final int stepsNumberForSend;
-	protected Agreement(int stepsNumberForReceiption, int stepsNumberForSend)
+	protected Agreement(int stepsNumberForReception, int stepsNumberForSend)
 	{
 		actualStepForReception=0;
 		actualStepForSend=0;
-		this.stepsNumberForReception=stepsNumberForReceiption;
+		this.stepsNumberForReception=stepsNumberForReception;
 		this.stepsNumberForSend=stepsNumberForSend;
 	}
 	
@@ -78,14 +78,14 @@ public abstract class Agreement {
 	{
 		return stepsNumberForSend==actualStepForSend || !isAgreementProcessValidImpl();
 	}
-	public boolean hasFinishedReceiption()
+	public boolean hasFinishedReception()
 	{
 		return stepsNumberForReception==actualStepForReception || !isAgreementProcessValidImpl();
 	}
 	
 	public boolean isAgreementProcessValid()
 	{
-		return hasFinishedReceiption() && hasFinishedSend() && isAgreementProcessValidImpl();
+		return hasFinishedReception() && hasFinishedSend() && isAgreementProcessValidImpl();
 	}
 	
 	protected abstract boolean isAgreementProcessValidImpl(); 
@@ -99,7 +99,7 @@ public abstract class Agreement {
 	public void receiveData(byte[] data) throws CryptoException
 	{
 		try {
-			if (hasFinishedReceiption())
+			if (hasFinishedReception())
 				throw new IllegalAccessException("The process has finished");
 			receiveData(actualStepForReception++, data);
 		}

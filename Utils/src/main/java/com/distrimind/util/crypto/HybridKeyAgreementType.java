@@ -54,7 +54,7 @@ public final class HybridKeyAgreementType {
 			throw new NullPointerException();
 		if (nonPQCKeyAgreementType.isPostQuantumAlgorithm())
 			throw new IllegalArgumentException();
-		if (PQCKeyAgreementType.isPostQuantumAlgorithm())
+		if (!PQCKeyAgreementType.isPostQuantumAlgorithm())
 			throw new IllegalArgumentException();
 
 		this.nonPQCKeyAgreementType = nonPQCKeyAgreementType;

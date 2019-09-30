@@ -54,10 +54,10 @@ import org.bouncycastle.pqc.crypto.newhope.NHPrivateKeyParameters;
 public abstract class AbstractNewHopeKeyAgreement extends KeyAgreement{
 	private SymmetricEncryptionType encryptionType;
 	private SymmetricAuthentifiedSignatureType signatureType;
-	protected int agreementSize;
+	protected short agreementSize;
 	protected byte[] shared;
 	private SymmetricSecretKey secretKey=null;
-	private short keySizeBytes;
+
 	
 	protected AbstractNewHopeKeyAgreement(SymmetricEncryptionType type, short agreementSize)
 	{
@@ -65,14 +65,14 @@ public abstract class AbstractNewHopeKeyAgreement extends KeyAgreement{
 		this.encryptionType=type;
 		this.signatureType=null;
 		this.agreementSize=agreementSize;
-		keySizeBytes=agreementSize;
+
 		if (!type.isPostQuantumAlgorithm((short)(agreementSize*8)))
 			throw new IllegalArgumentException("You must use post quantum compatible algorithms");
 	}
 
 	@Override
 	public short getDerivedKeySizeBytes() {
-		return keySizeBytes;
+		return agreementSize;
 	}
 	
 	protected AbstractNewHopeKeyAgreement(SymmetricAuthentifiedSignatureType type, short agreementSize)

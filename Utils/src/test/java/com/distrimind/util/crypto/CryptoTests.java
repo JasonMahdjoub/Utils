@@ -765,8 +765,8 @@ public class CryptoTests {
 
 			Assert.assertFalse(exchanger1.isAgreementProcessValid());
 			Assert.assertFalse(exchanger2.isAgreementProcessValid());
-			Assert.assertFalse(exchanger1.hasFinishedReceiption());
-			Assert.assertFalse(exchanger2.hasFinishedReceiption());
+			Assert.assertFalse(exchanger1.hasFinishedReception());
+			Assert.assertFalse(exchanger2.hasFinishedReception());
 			Assert.assertFalse(exchanger1.hasFinishedSend());
 			Assert.assertFalse(exchanger2.hasFinishedSend());
 
@@ -775,8 +775,8 @@ public class CryptoTests {
 
 			Assert.assertFalse(exchanger1.isAgreementProcessValid());
 			Assert.assertFalse(exchanger2.isAgreementProcessValid());
-			Assert.assertFalse(exchanger1.hasFinishedReceiption());
-			Assert.assertFalse(exchanger2.hasFinishedReceiption());
+			Assert.assertFalse(exchanger1.hasFinishedReception());
+			Assert.assertFalse(exchanger2.hasFinishedReception());
 			Assert.assertFalse(exchanger1.hasFinishedSend());
 			Assert.assertFalse(exchanger2.hasFinishedSend());
 			
@@ -785,8 +785,8 @@ public class CryptoTests {
 			
 			Assert.assertFalse(exchanger1.isAgreementProcessValid());
 			Assert.assertFalse(exchanger2.isAgreementProcessValid());
-			Assert.assertFalse(exchanger1.hasFinishedReceiption());
-			Assert.assertFalse(exchanger2.hasFinishedReceiption());
+			Assert.assertFalse(exchanger1.hasFinishedReception());
+			Assert.assertFalse(exchanger2.hasFinishedReception());
 			Assert.assertFalse(exchanger1.hasFinishedSend());
 			Assert.assertFalse(exchanger2.hasFinishedSend());
 
@@ -795,8 +795,8 @@ public class CryptoTests {
 
 			Assert.assertFalse(exchanger1.isAgreementProcessValid());
 			Assert.assertFalse(exchanger2.isAgreementProcessValid());
-			Assert.assertFalse(exchanger1.hasFinishedReceiption());
-			Assert.assertFalse(exchanger2.hasFinishedReceiption());
+			Assert.assertFalse(exchanger1.hasFinishedReception());
+			Assert.assertFalse(exchanger2.hasFinishedReception());
 			Assert.assertFalse(exchanger1.hasFinishedSend());
 			Assert.assertFalse(exchanger2.hasFinishedSend());
 
@@ -805,8 +805,8 @@ public class CryptoTests {
 
 			Assert.assertFalse(exchanger1.isAgreementProcessValid());
 			Assert.assertFalse(exchanger2.isAgreementProcessValid());
-			Assert.assertFalse(exchanger1.hasFinishedReceiption());
-			Assert.assertFalse(exchanger2.hasFinishedReceiption());
+			Assert.assertFalse(exchanger1.hasFinishedReception());
+			Assert.assertFalse(exchanger2.hasFinishedReception());
 			Assert.assertTrue(exchanger1.hasFinishedSend());
 			Assert.assertTrue(exchanger2.hasFinishedSend());
 			
@@ -815,8 +815,8 @@ public class CryptoTests {
 			
 			Assert.assertEquals(exchanger1.isAgreementProcessValid(), expectedVerify);
 			Assert.assertEquals(exchanger2.isAgreementProcessValid(), expectedVerify);
-			Assert.assertTrue(exchanger1.hasFinishedReceiption());
-			Assert.assertTrue(exchanger2.hasFinishedReceiption());
+			Assert.assertTrue(exchanger1.hasFinishedReception());
+			Assert.assertTrue(exchanger2.hasFinishedReception());
 			Assert.assertTrue(exchanger1.hasFinishedSend());
 			Assert.assertTrue(exchanger2.hasFinishedSend());
 		} catch (Exception e) {
@@ -899,23 +899,23 @@ public class CryptoTests {
 				}
 				Assert.assertFalse(exchanger1.isAgreementProcessValid());
 				Assert.assertFalse(exchanger2.isAgreementProcessValid());
-				Assert.assertEquals(exchanger1.hasFinishedReceiption(), received==exchanger1.getStepsNumberForReception());
-				Assert.assertEquals(exchanger2.hasFinishedReceiption(), received==exchanger2.getStepsNumberForReception());
+				Assert.assertEquals(exchanger1.hasFinishedReception(), received==exchanger1.getStepsNumberForReception());
+				Assert.assertEquals(exchanger2.hasFinishedReception(), received==exchanger2.getStepsNumberForReception());
 				Assert.assertEquals(exchanger1.hasFinishedSend(), send==exchanger1.getStepsNumberForReception());
 				Assert.assertEquals(exchanger2.hasFinishedSend(), send==exchanger2.getStepsNumberForReception());
 				
 				exchanger1.receiveData(step2);
 				exchanger2.receiveData(step1);
 				received++;
-				if (exchanger1.hasFinishedReceiption())
+				if (exchanger1.hasFinishedReception())
 				{
 					Assert.assertEquals(exchanger1.isAgreementProcessValid(), expectedVerify);
 					Assert.assertEquals(exchanger2.isAgreementProcessValid(), expectedVerify);
 				}
 				else
 				{
-					Assert.assertEquals(exchanger1.hasFinishedReceiption(), received==exchanger1.getStepsNumberForReception(), ""+received+" ; "+exchanger1.getStepsNumberForReception());
-					Assert.assertEquals(exchanger2.hasFinishedReceiption(), received==exchanger2.getStepsNumberForReception());
+					Assert.assertEquals(exchanger1.hasFinishedReception(), received==exchanger1.getStepsNumberForReception(), ""+received+" ; "+exchanger1.getStepsNumberForReception());
+					Assert.assertEquals(exchanger2.hasFinishedReception(), received==exchanger2.getStepsNumberForReception());
 					Assert.assertEquals(exchanger1.hasFinishedSend(), send==exchanger1.getStepsNumberForReception());
 					Assert.assertEquals(exchanger2.hasFinishedSend(), send==exchanger2.getStepsNumberForReception());
 				}
@@ -923,8 +923,8 @@ public class CryptoTests {
 			Assert.assertEquals(send, received);
 			Assert.assertEquals(exchanger1.isAgreementProcessValid(), expectedVerify);
 			Assert.assertEquals(exchanger2.isAgreementProcessValid(), expectedVerify);
-			Assert.assertTrue(exchanger1.hasFinishedReceiption());
-			Assert.assertTrue(exchanger2.hasFinishedReceiption());
+			Assert.assertTrue(exchanger1.hasFinishedReception());
+			Assert.assertTrue(exchanger2.hasFinishedReception());
 			Assert.assertTrue(exchanger1.hasFinishedSend());
 			Assert.assertTrue(exchanger2.hasFinishedSend());
 		} catch (Exception e) {
@@ -1265,7 +1265,7 @@ public class CryptoTests {
 		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getSingleton(null);
 		SymmetricSecretKey kp=asetype.getKeyGenerator(rand, asetype.getDefaultKeySizeBits()).generateKey();
 		SymmetricSecretKey sk= setype.getKeyGenerator(rand, setype.getDefaultKeySizeBits()).generateKey();
-		byte[] wrappedKey=typeWrapper.wrapKey(kp, sk);
+		byte[] wrappedKey=typeWrapper.wrapKey(kp, sk, rand);
 		SymmetricSecretKey sk2=typeWrapper.unwrapKey(kp, wrappedKey);
 		Assert.assertEquals(sk.getKeySizeBits(), sk2.getKeySizeBits());
 		Assert.assertEquals(sk.getAuthenticatedSignatureAlgorithmType(), sk2.getAuthenticatedSignatureAlgorithmType());
@@ -1280,7 +1280,7 @@ public class CryptoTests {
 		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getSingleton(null);
 		SymmetricSecretKey kp=asetype.getKeyGenerator(rand, (short)128).generateKey();
 		SymmetricSecretKey sk= setype.getKeyGenerator(rand, (short)128).generateKey();
-		byte[] wrappedKey=typeWrapper.wrapKey(kp, sk);
+		byte[] wrappedKey=typeWrapper.wrapKey(kp, sk, rand);
 
 		SymmetricSecretKey sk2=typeWrapper.unwrapKey(kp, wrappedKey);
 		Assert.assertEquals(sk.getKeySizeBits(), sk2.getKeySizeBits());
@@ -1655,14 +1655,26 @@ public class CryptoTests {
 
 		}
 	}
-	
-	
-	
-	
-	
-	
-	
-	
+
+
+
+
+
+
+
+	@Test(invocationCount = 5, dataProvider = "provideDataForHybridKeyAgreementsSignature", dependsOnMethods = "testMessageDigest")
+	public void testKeyAgreementsForSignature(HybridKeyAgreementType keyAgreementType, SymmetricAuthentifiedSignatureType type)
+			throws Exception {
+		AbstractSecureRandom random = SecureRandomType.DEFAULT.getSingleton(null);
+		byte[] keyingMaterial=new byte[100];
+		random.nextBytes(keyingMaterial);
+
+		KeyAgreement client=keyAgreementType.getKeyAgreementClient(random, type, (short)256, keyingMaterial);
+		KeyAgreement server=keyAgreementType.getKeyAgreementServer(random, type, (short)256, keyingMaterial);
+
+		testKeyAgreementsForSignature(client, server, type);
+	}
+
 	@Test(invocationCount = 5, dataProvider = "provideDataForKeyAgreementsSignature", dependsOnMethods = "testMessageDigest")
 	public void testKeyAgreementsForSignature(KeyAgreementType keyAgreementType, SymmetricAuthentifiedSignatureType type)
 			throws Exception {
@@ -1672,36 +1684,69 @@ public class CryptoTests {
 		
 		KeyAgreement client=keyAgreementType.getKeyAgreementClient(random, type, (short)256, keyingMaterial);
 		KeyAgreement server=keyAgreementType.getKeyAgreementServer(random, type, (short)256, keyingMaterial);
-		
+
+		testKeyAgreementsForSignature(client, server, type);
+	}
+	public void testKeyAgreementsForSignature(KeyAgreement client, KeyAgreement server, SymmetricAuthentifiedSignatureType type)
+			throws Exception {
+
 		do
 		{
 			if (!client.hasFinishedSend())
 			{
 				byte[] clientData=client.getDataToSend();
-				
+
 				server.receiveData(clientData);
-				
+
 			}
 			if (!server.hasFinishedSend())
 			{
 				byte[] serverData=server.getDataToSend();
-				
+
 				client.receiveData(serverData);
-				
+
 			}
-		} while(!server.hasFinishedReceiption() || !server.hasFinishedSend() || !client.hasFinishedReceiption() || !client.hasFinishedSend() );
+		} while(!server.hasFinishedReception() || !server.hasFinishedSend() || !client.hasFinishedReception() || !client.hasFinishedSend() );
+
+		Assert.assertTrue(client.hasFinishedSend());
+		Assert.assertTrue(server.hasFinishedReception());
+
+		if (client instanceof HybridKeyAgreement)
+		{
+			HybridKeyAgreement ka=(HybridKeyAgreement)client;
+			Assert.assertTrue(ka.getPQCKeyAgreement().isAgreementProcessValidImpl());
+			Assert.assertTrue(ka.getNonPQCKeyAgreement().isAgreementProcessValidImpl());
+			Assert.assertTrue(ka.getPQCKeyAgreement().hasFinishedSend());
+			Assert.assertTrue(ka.getPQCKeyAgreement().hasFinishedReception());
+			Assert.assertTrue(ka.getNonPQCKeyAgreement().hasFinishedSend());
+			Assert.assertTrue(ka.getNonPQCKeyAgreement().hasFinishedReception());
+			Assert.assertTrue(ka.getPQCKeyAgreement().isAgreementProcessValid());
+			Assert.assertTrue(ka.getNonPQCKeyAgreement().isAgreementProcessValid());
+		}
+		if (server instanceof HybridKeyAgreement)
+		{
+			HybridKeyAgreement ka=(HybridKeyAgreement)server;
+			Assert.assertTrue(ka.getPQCKeyAgreement().isAgreementProcessValidImpl());
+			Assert.assertTrue(ka.getNonPQCKeyAgreement().isAgreementProcessValidImpl());
+			Assert.assertTrue(ka.getPQCKeyAgreement().hasFinishedSend());
+			Assert.assertTrue(ka.getPQCKeyAgreement().hasFinishedReception());
+			Assert.assertTrue(ka.getNonPQCKeyAgreement().hasFinishedSend());
+			Assert.assertTrue(ka.getNonPQCKeyAgreement().hasFinishedReception());
+			Assert.assertTrue(ka.getNonPQCKeyAgreement().isAgreementProcessValid());
+			Assert.assertTrue(ka.getPQCKeyAgreement().isAgreementProcessValid());
+		}
 
 		Assert.assertTrue(client.isAgreementProcessValid());
 		Assert.assertTrue(server.isAgreementProcessValid());
-		
 
-		
+
+
 		SymmetricSecretKey keyClient=client.getDerivedKey();
 		SymmetricSecretKey keyServer=server.getDerivedKey();
-		
-		
+
+
 		Assert.assertEquals(keyClient,keyServer);
-		Assert.assertEquals(keyClient.getKeySizeBits(), 256);
+		Assert.assertEquals(keyClient.getKeySizeBits(), 256, keyClient.toString());
 		testSignatureAfterKeyExchange(keyClient, keyServer);
 	}
 	@Test(invocationCount = 5, dataProvider = "provideDataForKeyAgreementsEncryption", dependsOnMethods = "testMessageDigest")
@@ -1713,32 +1758,49 @@ public class CryptoTests {
 		
 		KeyAgreement client=keyAgreementType.getKeyAgreementClient(random, type, (short)256, keyingMaterial);
 		KeyAgreement server=keyAgreementType.getKeyAgreementServer(random, type, (short)256, keyingMaterial);
-		
+		testKeyAgreementsForEncryption(client, server, type);
+	}
+	@Test(invocationCount = 5, dataProvider = "provideDataForHybridKeyAgreementsEncryption", dependsOnMethods = "testMessageDigest")
+	public void testHybridKeyAgreementsForEncryption(HybridKeyAgreementType keyAgreementType, SymmetricEncryptionType type)
+			throws Exception {
+		AbstractSecureRandom random = SecureRandomType.DEFAULT.getSingleton(null);
+		byte[] keyingMaterial=new byte[100];
+		random.nextBytes(keyingMaterial);
+
+		KeyAgreement client=keyAgreementType.getKeyAgreementClient(random, type, (short)256, keyingMaterial);
+		KeyAgreement server=keyAgreementType.getKeyAgreementServer(random, type, (short)256, keyingMaterial);
+		testKeyAgreementsForEncryption(client, server, type);
+	}
+
+	public void testKeyAgreementsForEncryption(KeyAgreement client, KeyAgreement server, SymmetricEncryptionType type)
+			throws Exception {
+		AbstractSecureRandom random = SecureRandomType.DEFAULT.getSingleton(null);
+
 		do
 		{
 			if (!client.hasFinishedSend())
 			{
 				byte[] clientData=client.getDataToSend();
-				
+
 				server.receiveData(clientData);
-				
+
 			}
 			if (!server.hasFinishedSend())
 			{
 				byte[] serverData=server.getDataToSend();
-				
+
 				client.receiveData(serverData);
-				
+
 			}
-		} while(!server.hasFinishedReceiption() || !server.hasFinishedSend() || !client.hasFinishedReceiption() || !client.hasFinishedSend() );
+		} while(!server.hasFinishedReception() || !server.hasFinishedSend() || !client.hasFinishedReception() || !client.hasFinishedSend() );
 
 		Assert.assertTrue(client.isAgreementProcessValid());
 		Assert.assertTrue(server.isAgreementProcessValid());
-		
+
 		SymmetricSecretKey keyClient=client.getDerivedKey();
 		SymmetricSecretKey keyServer=server.getDerivedKey();
-		
-		
+
+
 		Assert.assertEquals(keyClient,keyServer);
 		Assert.assertEquals(keyClient.getKeySizeBits(), 256);
 		testEncryptionAfterKeyExchange(random, type, keyClient);
@@ -1760,7 +1822,7 @@ public class CryptoTests {
 	
 	
 	@DataProvider(name = "provideDataForKeyAgreementsEncryption", parallel = true)
-	public Object[][] provideDataForEllipticCurveDiffieHellmanKeyExchangerForEncryption() {
+	public Object[][] provideDataForKeyAgreementsEncryption() {
 		ArrayList<Object[]> l=new ArrayList<>();
 		
 		
@@ -1782,8 +1844,32 @@ public class CryptoTests {
 			res[index++]=o;
 		return res;
 	}
+	@DataProvider(name = "provideDataForHybridKeyAgreementsEncryption", parallel = true)
+	public Object[][] provideDataForHybridKeyAgreementsEncryption() {
+		ArrayList<Object[]> l=new ArrayList<>();
+
+
+		for (KeyAgreementType type : KeyAgreementType.values()) {
+			if (type.isPostQuantumAlgorithm())
+				continue;
+			for (KeyAgreementType type2 : KeyAgreementType.values()) {
+				if (!type2.isPostQuantumAlgorithm())
+					continue;
+				Object[] o = new Object[2];
+				o[0]=new HybridKeyAgreementType(type, type2);
+				o[1]=SymmetricEncryptionType.AES_CBC_PKCS5Padding;
+				l.add(o);
+
+			}
+		}
+		Object[][] res = new Object[l.size()][];
+		int index=0;
+		for (Object[] o : l)
+			res[index++]=o;
+		return res;
+	}
 	@DataProvider(name = "provideDataForKeyAgreementsSignature", parallel = true)
-	public Object[][] provideDataForEllipticCurveDiffieHellmanKeyExchangerForSignature() {
+	public Object[][] provideDataForKeyAgreementsSignature() {
 		ArrayList<Object[]> l=new ArrayList<>();
 		
 		
@@ -1797,6 +1883,31 @@ public class CryptoTests {
 					o[1]=etype;
 					l.add(o);
 				}
+			}
+		}
+		Object[][] res = new Object[l.size()][];
+		int index=0;
+		for (Object[] o : l)
+			res[index++]=o;
+		return res;
+	}
+
+	@DataProvider(name = "provideDataForHybridKeyAgreementsSignature", parallel = true)
+	public Object[][] provideDataForHybridKeyAgreementsSignature() {
+		ArrayList<Object[]> l=new ArrayList<>();
+
+
+		for (KeyAgreementType type : KeyAgreementType.values()) {
+			if (type.isPostQuantumAlgorithm())
+				continue;
+			for (KeyAgreementType type2 : KeyAgreementType.values()) {
+				if (!type2.isPostQuantumAlgorithm())
+					continue;
+
+				Object[] o = new Object[2];
+				o[0]=new HybridKeyAgreementType(type, type2);
+				o[1]=SymmetricAuthentifiedSignatureType.HMAC_SHA2_256;
+				l.add(o);
 			}
 		}
 		Object[][] res = new Object[l.size()][];

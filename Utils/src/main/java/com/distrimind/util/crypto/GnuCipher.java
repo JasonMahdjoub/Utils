@@ -123,7 +123,12 @@ public final class GnuCipher extends AbstractCipher {
 		return GnuFunctions.cipherGetOutputSize(cipher, _inputLength);
 	}
 
-	
+	@Override
+	public void init(int _opmode, AbstractKey _key)
+			throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException {
+		GnuFunctions.cipherInit(cipher, _opmode, _key.toGnuKey());
+	}
+
 
 	@Override
 	public void init(int _opmode, AbstractKey _key, AbstractSecureRandom _random)

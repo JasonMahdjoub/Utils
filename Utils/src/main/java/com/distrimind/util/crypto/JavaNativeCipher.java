@@ -37,10 +37,7 @@ package com.distrimind.util.crypto;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
+import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 
 import javax.crypto.*;
@@ -141,6 +138,11 @@ public final class JavaNativeCipher extends AbstractCipher {
 			throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException {
 		cipher.init(_opmode, _key.toJavaNativeKey(), setSecureRandom(_random));
 
+	}
+
+	@Override
+	public void init(int _opmode, AbstractKey _key) throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
+		cipher.init(_opmode, _key.toJavaNativeKey());
 	}
 
 	@Override

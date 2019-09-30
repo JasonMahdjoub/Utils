@@ -82,7 +82,7 @@ public enum SymmetricKeyWrapperType {
 		return algorithmName;
 	}
 	
-	public byte[] wrapKey(SymmetricSecretKey key, SymmetricSecretKey keyToWrap) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalStateException, IllegalBlockSizeException, NoSuchProviderException, InvalidKeySpecException
+	public byte[] wrapKey(SymmetricSecretKey key, SymmetricSecretKey keyToWrap, AbstractSecureRandom random) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalStateException, IllegalBlockSizeException, NoSuchProviderException, InvalidKeySpecException
 	{
 		CodeProvider.encureProviderLoaded(provider);
 		if ((key.getAuthenticatedSignatureAlgorithmType()!=null && ((provider==CodeProvider.GNU_CRYPTO)!=(key.getAuthenticatedSignatureAlgorithmType().getCodeProviderForSignature()==CodeProvider.GNU_CRYPTO)))
@@ -104,7 +104,7 @@ public enum SymmetricKeyWrapperType {
 			
 			BCCipher cipher=new BCCipher(this);
 			
-			cipher.init(javax.crypto.Cipher.WRAP_MODE, key);
+			cipher.init(javax.crypto.Cipher.WRAP_MODE, key, random);
 			try {
 				return ASymmetricKeyWrapperType.wrapKeyWithMetaData(cipher.wrap(keyToWrap), keyToWrap);
 			} catch (PlainInputProcessingException e) {

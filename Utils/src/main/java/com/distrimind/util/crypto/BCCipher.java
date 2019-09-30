@@ -217,6 +217,11 @@ public class BCCipher extends AbstractCipher {
 			return cipher.getMaxOutputSize(inputLength);
 	}
 
+	@Override
+	public void init(int opmode, AbstractKey key) throws NoSuchAlgorithmException, InvalidKeySpecException
+	{
+		init(opmode, key, (byte[])null);
+	}
 
 	@Override
 	public void init(int opmode, AbstractKey key, AbstractSecureRandom random) throws NoSuchAlgorithmException, InvalidKeySpecException

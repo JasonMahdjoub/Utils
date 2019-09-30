@@ -82,8 +82,9 @@ public enum CodeProvider {
 
 			synchronized (CodeProvider.class) {
 				if (bouncyProvider == null) {
-					bouncyProvider = new BouncyCastleProvider();
-					Security.insertProviderAt(bouncyProvider, Security.getProviders().length+1);
+					BouncyCastleProvider bc = new BouncyCastleProvider();
+					Security.insertProviderAt(bc, Security.getProviders().length+1);
+					bouncyProvider=bc;
 				}
 			}
 		}
@@ -95,8 +96,9 @@ public enum CodeProvider {
 
 			synchronized (CodeProvider.class) {
 				if (bouncyProviderFIPS == null) {
-					bouncyProviderFIPS = new BouncyCastleFipsProvider();
-					Security.insertProviderAt(bouncyProviderFIPS, Security.getProviders().length+1);
+					BouncyCastleFipsProvider bc = new BouncyCastleFipsProvider();
+					Security.insertProviderAt(bc, Security.getProviders().length+1);
+					bouncyProviderFIPS=bc;
 				}
 			}
 		}
@@ -108,8 +110,9 @@ public enum CodeProvider {
 
 			synchronized (CodeProvider.class) {
 				if (bouncyProviderPQC == null) {
-					bouncyProviderPQC = new BouncyCastlePQCProvider();
-					Security.insertProviderAt(bouncyProviderPQC, Security.getProviders().length+1);
+					BouncyCastlePQCProvider bc = new BouncyCastlePQCProvider();
+					Security.insertProviderAt(bc, Security.getProviders().length+1);
+					bouncyProviderPQC=bc;
 				}
 			}
 		}

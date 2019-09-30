@@ -41,8 +41,8 @@ package com.distrimind.util.crypto;
  */
 public abstract class KeyAgreement extends Agreement {
 
-	protected KeyAgreement(int stepsNumberForReceiption, int stepsNumberForSend) {
-		super(stepsNumberForReceiption, stepsNumberForSend);
+	protected KeyAgreement(int stepsNumberForReception, int stepsNumberForSend) {
+		super(stepsNumberForReception, stepsNumberForSend);
 	}
 	
 	public abstract SymmetricSecretKey getDerivedKey();

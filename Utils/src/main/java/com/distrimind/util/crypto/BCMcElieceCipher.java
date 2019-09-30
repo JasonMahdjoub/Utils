@@ -787,7 +787,10 @@ public class BCMcElieceCipher extends AbstractCipher{
 
 		return 0;
 	}
-
+	@Override
+	public void init(int opmode, AbstractKey key) throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException {
+		init(opmode, key, (AbstractSecureRandom)null);
+	}
 	@Override
 	public void init(int opmode, AbstractKey key, AbstractSecureRandom random) throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException {
 		out=new ByteArrayOutputStream();
