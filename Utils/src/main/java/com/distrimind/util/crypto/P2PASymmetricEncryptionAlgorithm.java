@@ -538,37 +538,6 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 			initCipherForDecrypt(cipher, null, null);
 		}
 	}
-	static class ArrayOutputStream extends OutputStream
-	{
-		private final byte[] target;
-		private int off;
-		private int len;
-
-		public ArrayOutputStream(byte[] target, int off, int len) {
-			this.target = target;
-			this.off = off;
-			this.len = len;
-		}
-
-		@Override
-		public void write(int b) throws IOException {
-			if (len<=0)
-				throw new IOException();
-			target[off++]=(byte)b;
-			--len;
-		}
-
-		@Override
-		public void write(byte[] b, int off, int len) throws IOException {
-			int l=Math.min(len, this.len);
-			System.arraycopy(b, off, target, this.off, l);
-			this.len-=l;
-			this.off+=l;
-			if (len>l)
-				throw new IOException();
-		}
-
-	}
 
 	public IASymmetricPublicKey getDistantPublicKey() {
 		if (this.p2pencryption instanceof P2PEncryption)
