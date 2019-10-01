@@ -248,9 +248,9 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 					
 					blockACC += size;
 					if (length>=0)
-						length-=blockACC;
+						length-=size;
 				}
-				if (nb != size || size <= 0)
+				if (size < 0)
 					finish = true;
 			} while ((blockACC < maxPartSize || maxPartSize == Integer.MAX_VALUE) && !finish && length!=0);
 			if (blockACC != 0)

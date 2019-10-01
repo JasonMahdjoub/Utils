@@ -231,17 +231,17 @@ public class ASymmetricKeyPair extends AbstractKeyPair<ASymmetricPrivateKey, ASy
 	public byte[] encode(boolean includeTimeExpiration) {
 
 		byte[] kp=Bits.concatenateEncodingWithShortIntSizedTabs(privateKey.getBytesPrivateKey(), publicKey.getBytesPublicKey());
-		byte[] tab = new byte[3+ASymmetricPrivateKey.ENCODED_TYPE_SIZE+kp.length+(includeTimeExpiration?8:0)];
+		byte[] tab = new byte[4+ASymmetricPrivateKey.ENCODED_TYPE_SIZE+kp.length+(includeTimeExpiration?8:0)];
 		tab[0]=encryptionType==null?(byte)9:(byte)8;
 		if (includeTimeExpiration)
 			tab[0]|= AbstractKey.INCLUDE_KEY_EXPIRATION_CODE;
 		if (privateKey.xdhKey)
 			tab[0]|= AbstractKey.IS_XDH_KEY;
-		Bits.putPositiveInteger(tab, 1, keySizeBits/8, 2);
-		Bits.putPositiveInteger(tab, 3, encryptionType==null?signatureType.ordinal():encryptionType.ordinal(), ASymmetricPrivateKey.ENCODED_TYPE_SIZE);
-		int pos=3+ASymmetricPrivateKey.ENCODED_TYPE_SIZE;
+		Bits.putPositiveInteger(tab, 1, keySizeBits, 3);
+		Bits.putPositiveInteger(tab, 4, encryptionType==null?signatureType.ordinal():encryptionType.ordinal(), ASymmetricPrivateKey.ENCODED_TYPE_SIZE);
+		int pos=4+ASymmetricPrivateKey.ENCODED_TYPE_SIZE;
 		if (includeTimeExpiration) {
-			Bits.putLong(tab, 3 + ASymmetricPrivateKey.ENCODED_TYPE_SIZE, publicKey.getTimeExpirationUTC());
+			Bits.putLong(tab, 4 + ASymmetricPrivateKey.ENCODED_TYPE_SIZE, publicKey.getTimeExpirationUTC());
 			pos += 8;
 		}
 		System.arraycopy(kp, 0, tab, pos, kp.length);
@@ -271,8 +271,8 @@ public class ASymmetricKeyPair extends AbstractKeyPair<ASymmetricPrivateKey, ASy
 
 		try {
 			int codedTypeSize = SymmetricSecretKey.getEncodedTypeSize();
-			int keySize = (int)(Bits.getPositiveInteger(b, 1+off, 2)*8);
-			int posKey=codedTypeSize+3+off;
+			int keySize = (int)(Bits.getPositiveInteger(b, 1+off, 3));
+			int posKey=codedTypeSize+4+off;
 			long expirationUTC;
 			byte type=b[off];
 
@@ -290,12 +290,12 @@ public class ASymmetricKeyPair extends AbstractKeyPair<ASymmetricPrivateKey, ASy
 			else
 				expirationUTC=Long.MAX_VALUE;
 
-			byte[] kp = new byte[len - 3 - codedTypeSize-(includeKeyExpiration?8:0)];
+			byte[] kp = new byte[len - 4 - codedTypeSize-(includeKeyExpiration?8:0)];
 			System.arraycopy(b, posKey, kp, 0, kp.length);
 			byte[][] keys = Bits.separateEncodingsWithShortIntSizedTabs(kp);
 
 			if (type == 9) {
-				ASymmetricAuthenticatedSignatureType type2 = ASymmetricAuthenticatedSignatureType.valueOf((int) Bits.getPositiveInteger(b, 3+off, codedTypeSize));
+				ASymmetricAuthenticatedSignatureType type2 = ASymmetricAuthenticatedSignatureType.valueOf((int) Bits.getPositiveInteger(b, 4+off, codedTypeSize));
 
 				ASymmetricKeyPair res=new ASymmetricKeyPair(type2, new ASymmetricPrivateKey(type2, keys[0], keySize),
 						new ASymmetricPublicKey(type2, keys[1], keySize, expirationUTC), keySize);
@@ -303,7 +303,7 @@ public class ASymmetricKeyPair extends AbstractKeyPair<ASymmetricPrivateKey, ASy
 				res.getASymmetricPrivateKey().xdhKey=kdhKey;
 				return res;
 			} else if (type == 8) {
-				ASymmetricEncryptionType type2 = ASymmetricEncryptionType.valueOf((int) Bits.getPositiveInteger(b, 3+off, codedTypeSize));
+				ASymmetricEncryptionType type2 = ASymmetricEncryptionType.valueOf((int) Bits.getPositiveInteger(b, 4+off, codedTypeSize));
 
 				ASymmetricKeyPair res=new ASymmetricKeyPair(type2, new ASymmetricPrivateKey(type2, keys[0], keySize),
 						new ASymmetricPublicKey(type2, keys[1], keySize, expirationUTC), keySize);

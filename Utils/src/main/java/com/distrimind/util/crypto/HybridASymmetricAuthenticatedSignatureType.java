@@ -39,6 +39,7 @@ import org.bouncycastle.crypto.Algorithm;
 import org.bouncycastle.pqc.jcajce.provider.sphincs.Sphincs256KeyPairGeneratorSpi;
 
 import java.security.*;
+import java.util.Objects;
 
 import static com.distrimind.util.crypto.ASymmetricAuthenticatedSignatureType.BCPQC_SPHINCS256_SHA2_512_256;
 import static com.distrimind.util.crypto.ASymmetricAuthenticatedSignatureType.BCPQC_SPHINCS256_SHA3_512;
@@ -84,4 +85,25 @@ public final class HybridASymmetricAuthenticatedSignatureType {
 		return new HybridASymmetricKeyPair(kp, pqcKP);
 	}
 
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		HybridASymmetricAuthenticatedSignatureType that = (HybridASymmetricAuthenticatedSignatureType) o;
+		return nonPQCASymmetricAuthenticatedSignatureType == that.nonPQCASymmetricAuthenticatedSignatureType &&
+				PQCASymmetricAuthenticatedSignatureType == that.PQCASymmetricAuthenticatedSignatureType;
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(nonPQCASymmetricAuthenticatedSignatureType, PQCASymmetricAuthenticatedSignatureType);
+	}
+
+	@Override
+	public String toString() {
+		return "HybridASymmetricAuthenticatedSignatureType{" +
+				"nonPQCASymmetricAuthenticatedSignatureType=" + nonPQCASymmetricAuthenticatedSignatureType +
+				", PQCASymmetricAuthenticatedSignatureType=" + PQCASymmetricAuthenticatedSignatureType +
+				'}';
+	}
 }

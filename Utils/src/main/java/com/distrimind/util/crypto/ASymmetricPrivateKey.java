@@ -68,7 +68,7 @@ public class ASymmetricPrivateKey extends AbstractKey implements IASymmetricPriv
 
 
 	// private final PrivateKey privateKey;
-	public static final int MAX_KEY_SIZE_BITS=0x7FFF8;
+	public static final int MAX_KEY_SIZE_BITS=1<<24-1;
 	private byte[] privateKey;
 
 	private final int keySizeBits;
@@ -241,11 +241,11 @@ public class ASymmetricPrivateKey extends AbstractKey implements IASymmetricPriv
 	}
 
 	public byte[] encode() {
-		byte[] tab = new byte[3+ENCODED_TYPE_SIZE+privateKey.length];
+		byte[] tab = new byte[4+ENCODED_TYPE_SIZE+privateKey.length];
 		tab[0]=encryptionType==null?(byte)((xdhKey? AbstractKey.IS_XDH_KEY:0)|2):(byte)3;
-		Bits.putPositiveInteger(tab, 1, keySizeBits/8, 2);
-		Bits.putPositiveInteger(tab, 3, encryptionType==null?signatureType.ordinal():encryptionType.ordinal(), ENCODED_TYPE_SIZE);
-        System.arraycopy(privateKey, 0, tab, ENCODED_TYPE_SIZE+3, privateKey.length);
+		Bits.putPositiveInteger(tab, 1, keySizeBits, 3);
+		Bits.putPositiveInteger(tab, 4, encryptionType==null?signatureType.ordinal():encryptionType.ordinal(), ENCODED_TYPE_SIZE);
+        System.arraycopy(privateKey, 0, tab, ENCODED_TYPE_SIZE+4, privateKey.length);
         return tab;
 	}
 

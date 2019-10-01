@@ -246,15 +246,15 @@ public class ASymmetricPublicKey extends AbstractKey implements IASymmetricPubli
 
 	@Override
 	public byte[] encode(boolean includeTimeExpiration) {
-		byte[] tab = new byte[3+ASymmetricPrivateKey.ENCODED_TYPE_SIZE+publicKey.length+(includeTimeExpiration?8:0)];
+		byte[] tab = new byte[4+ASymmetricPrivateKey.ENCODED_TYPE_SIZE+publicKey.length+(includeTimeExpiration?8:0)];
 		tab[0]=encryptionType==null?(byte)5:(byte)4;
 		if (includeTimeExpiration)
 			tab[0]|= AbstractKey.INCLUDE_KEY_EXPIRATION_CODE;
 		if (xdhKey)
 			tab[0]|= AbstractKey.IS_XDH_KEY;
-		Bits.putPositiveInteger(tab, 1, keySizeBits/8, 2);
-		Bits.putPositiveInteger(tab, 3, encryptionType==null?signatureType.ordinal():encryptionType.ordinal(), ASymmetricPrivateKey.ENCODED_TYPE_SIZE);
-		int pos=3+ASymmetricPrivateKey.ENCODED_TYPE_SIZE;
+		Bits.putPositiveInteger(tab, 1, keySizeBits, 3);
+		Bits.putPositiveInteger(tab, 4, encryptionType==null?signatureType.ordinal():encryptionType.ordinal(), ASymmetricPrivateKey.ENCODED_TYPE_SIZE);
+		int pos=4+ASymmetricPrivateKey.ENCODED_TYPE_SIZE;
 		if (includeTimeExpiration) {
 			Bits.putLong(tab, pos, expirationUTC);
 			pos+=8;

@@ -200,23 +200,23 @@ public abstract class AbstractKey extends DecentralizedValue implements IKey{
 						SymmetricSecretKey.decodeKeySizeBits(b[codedTypeSize + 1+off]));
 			} else if (type == 2) {
 
-				byte[] privateKey = new byte[len - 3 - ASymmetricPrivateKey.ENCODED_TYPE_SIZE];
-				System.arraycopy(b, 3 + ASymmetricPrivateKey.ENCODED_TYPE_SIZE+off, privateKey, 0, privateKey.length);
-				ASymmetricPrivateKey res=new ASymmetricPrivateKey(ASymmetricAuthenticatedSignatureType.valueOf((int) Bits.getPositiveInteger(b, off+3, ASymmetricPrivateKey.ENCODED_TYPE_SIZE)), privateKey,
-						(int)Bits.getPositiveInteger(b, off+1, 2)*8);
+				byte[] privateKey = new byte[len - 4 - ASymmetricPrivateKey.ENCODED_TYPE_SIZE];
+				System.arraycopy(b, 4 + ASymmetricPrivateKey.ENCODED_TYPE_SIZE+off, privateKey, 0, privateKey.length);
+				ASymmetricPrivateKey res=new ASymmetricPrivateKey(ASymmetricAuthenticatedSignatureType.valueOf((int) Bits.getPositiveInteger(b, off+4, ASymmetricPrivateKey.ENCODED_TYPE_SIZE)), privateKey,
+						(int)Bits.getPositiveInteger(b, off+1, 3));
 				res.xdhKey=isXdh;
 				return res;
 			} else if (type == 3) {
 
-				byte[] privateKey = new byte[len - 3 - ASymmetricPrivateKey.ENCODED_TYPE_SIZE];
-				System.arraycopy(b, 3 + ASymmetricPrivateKey.ENCODED_TYPE_SIZE+off, privateKey, 0, privateKey.length);
-				return new ASymmetricPrivateKey(ASymmetricEncryptionType.valueOf((int) Bits.getPositiveInteger(b, off+3, ASymmetricPrivateKey.ENCODED_TYPE_SIZE)), privateKey,
-						(int)Bits.getPositiveInteger(b, off+1, 2)*8);
+				byte[] privateKey = new byte[len - 4 - ASymmetricPrivateKey.ENCODED_TYPE_SIZE];
+				System.arraycopy(b, 4 + ASymmetricPrivateKey.ENCODED_TYPE_SIZE+off, privateKey, 0, privateKey.length);
+				return new ASymmetricPrivateKey(ASymmetricEncryptionType.valueOf((int) Bits.getPositiveInteger(b, off+4, ASymmetricPrivateKey.ENCODED_TYPE_SIZE)), privateKey,
+						(int)Bits.getPositiveInteger(b, off+1, 3));
 			} else if (type == 4) {
 				fillArrayWithZerosWhenDecoded=false;
 
-				byte[] publicKey = new byte[len - 3 - ASymmetricPrivateKey.ENCODED_TYPE_SIZE-(includeKeyExpiration?8:0)];
-				int posKey=ASymmetricPrivateKey.ENCODED_TYPE_SIZE+3+off;
+				byte[] publicKey = new byte[len - 4 - ASymmetricPrivateKey.ENCODED_TYPE_SIZE-(includeKeyExpiration?8:0)];
+				int posKey=ASymmetricPrivateKey.ENCODED_TYPE_SIZE+4+off;
 				long timeExpiration;
 				if (includeKeyExpiration) {
 
@@ -226,13 +226,13 @@ public abstract class AbstractKey extends DecentralizedValue implements IKey{
 				else
 					timeExpiration=Long.MAX_VALUE;
 				System.arraycopy(b, posKey, publicKey, 0, publicKey.length);
-				return new ASymmetricPublicKey(ASymmetricEncryptionType.valueOf((int) Bits.getPositiveInteger(b, off+3, ASymmetricPrivateKey.ENCODED_TYPE_SIZE)), publicKey,
-						(int)Bits.getPositiveInteger(b, off+1, 2)*8, timeExpiration);
+				return new ASymmetricPublicKey(ASymmetricEncryptionType.valueOf((int) Bits.getPositiveInteger(b, off+4, ASymmetricPrivateKey.ENCODED_TYPE_SIZE)), publicKey,
+						(int)Bits.getPositiveInteger(b, off+1, 3), timeExpiration);
 			} else if (type == 5) {
 				fillArrayWithZerosWhenDecoded=false;
 
-				byte[] publicKey = new byte[len - 3 - ASymmetricPrivateKey.ENCODED_TYPE_SIZE - (includeKeyExpiration ? 8 : 0)];
-				int posKey=ASymmetricPrivateKey.ENCODED_TYPE_SIZE+3+off;
+				byte[] publicKey = new byte[len - 4 - ASymmetricPrivateKey.ENCODED_TYPE_SIZE - (includeKeyExpiration ? 8 : 0)];
+				int posKey=ASymmetricPrivateKey.ENCODED_TYPE_SIZE+4+off;
 				long timeExpiration;
 				if (includeKeyExpiration) {
 
@@ -242,8 +242,8 @@ public abstract class AbstractKey extends DecentralizedValue implements IKey{
 				else
 					timeExpiration=Long.MAX_VALUE;
 				System.arraycopy(b, posKey, publicKey, 0, publicKey.length);
-				ASymmetricPublicKey res=new ASymmetricPublicKey(ASymmetricAuthenticatedSignatureType.valueOf((int) Bits.getPositiveInteger(b, off+3, ASymmetricPrivateKey.ENCODED_TYPE_SIZE)), publicKey,
-						(int)Bits.getPositiveInteger(b, off+1, 2)*8, timeExpiration);
+				ASymmetricPublicKey res=new ASymmetricPublicKey(ASymmetricAuthenticatedSignatureType.valueOf((int) Bits.getPositiveInteger(b, off+4, ASymmetricPrivateKey.ENCODED_TYPE_SIZE)), publicKey,
+						(int)Bits.getPositiveInteger(b, off+1, 3), timeExpiration);
 				res.xdhKey=isXdh;
 				return res;
 			} else if (type==IS_HYBRID_PRIVATE_KEY || type==IS_HYBRID_PUBLIC_KEY)

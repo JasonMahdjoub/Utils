@@ -96,9 +96,9 @@ public class CryptoTests {
 			for (ASymmetricEncryptionType v2 : ASymmetricEncryptionType.values()) {
 				if (v2.isPostQuantumAlgorithm())
 				{
-					Object[] o = new Object[2];
-					o[0] = v;
-					o[1] = v2;
+					Object[] o = new Object[1];
+					o[0] = new HybridASymmetricEncryptionType(v, v2);
+
 					res.add(o);
 				}
 			}
@@ -142,6 +142,7 @@ public class CryptoTests {
 		}
 		return res;
 	}
+
 	
 	@DataProvider(name = "provideDataForASymetricSignatures")
 	public Object[][] provideDataForASymetricSignatures() {
@@ -938,22 +939,34 @@ public class CryptoTests {
 		}
 	}
 
-	@Test(dataProvider = "provideDataForASymetricEncryptions", dependsOnMethods = { "testASymmetricKeyPairEncoding" })
-	public void testClientServerASymetricEncryptions(ASymmetricEncryptionType type)
+	@Test(dataProvider = "provideDataForHybridASymetricEncryptions", dependsOnMethods = { "testASymmetricKeyPairEncoding" })
+	public void testClientServerASymetricEncryptions(HybridASymmetricEncryptionType type)
 			throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,
 			InvalidAlgorithmParameterException, IOException, IllegalBlockSizeException,
 			BadPaddingException, NoSuchProviderException, InvalidKeySpecException, IllegalStateException, ShortBufferException {
 		System.out.println("Testing " + type);
 		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getSingleton(null);
-		ASymmetricKeyPair kp = type.getKeyPairGenerator(rand, (short) 2048).generateKeyPair();
-		
+		ASymmetricKeyPair kpnonpqc = type.getNonPQCASymmetricEncryptionType().getKeyPairGenerator(rand, type.getNonPQCASymmetricEncryptionType().name().startsWith("BCPQC_MCELIECE_")?type.getNonPQCASymmetricEncryptionType().getDefaultKeySizeBits():2048).generateKeyPair();
+		ASymmetricKeyPair kppqc = type.getPQCASymmetricEncryptionType().getKeyPairGenerator(rand, type.getPQCASymmetricEncryptionType().getDefaultKeySizeBits()).generateKeyPair();
+		testClientServerASymetricEncryptions(new HybridASymmetricKeyPair(kpnonpqc, kppqc));
+
+	}
+
+	public void testClientServerASymetricEncryptions(AbstractKeyPair kp)
+			throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,
+			InvalidAlgorithmParameterException, IOException, IllegalBlockSizeException,
+			BadPaddingException, NoSuchProviderException, InvalidKeySpecException, IllegalStateException, ShortBufferException {
+		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getSingleton(null);
+
 		ClientASymmetricEncryptionAlgorithm algoClient = new ClientASymmetricEncryptionAlgorithm(rand,
 				kp.getASymmetricPublicKey());
 		ServerASymmetricEncryptionAlgorithm algoServer = new ServerASymmetricEncryptionAlgorithm(kp);
 
 		for (byte[] m : messagesToEncrypt) {
 			byte[] encodedBytes = algoClient.encode(m);
-			Assert.assertEquals(encodedBytes.length, algoClient.getOutputSizeForEncryption(m.length));
+			Assert.assertTrue(encodedBytes.length>0);
+			if (!kp.isPostQuantumKey())
+				Assert.assertEquals(encodedBytes.length, algoClient.getOutputSizeForEncryption(m.length));
 			byte[] decodedBytes = algoServer.decode(encodedBytes);
 			Assert.assertEquals(m, decodedBytes);
 
@@ -962,12 +975,26 @@ public class CryptoTests {
 			size -= rand.nextInt(15) + off;
 
 			encodedBytes = algoClient.encode(m, off, size);
-			Assert.assertEquals(encodedBytes.length, algoClient.getOutputSizeForEncryption(size));
+			if (!kp.isPostQuantumKey())
+				Assert.assertEquals(encodedBytes.length, algoClient.getOutputSizeForEncryption(size));
 			decodedBytes = algoServer.decode(encodedBytes);
 			for (int i = 0; i < size; i++)
 				Assert.assertEquals(decodedBytes[i], m[i + off]);
 
 		}
+
+	}
+
+	@Test(dataProvider = "provideDataForASymetricEncryptions", dependsOnMethods = { "testASymmetricKeyPairEncoding" })
+	public void testClientServerASymetricEncryptions(ASymmetricEncryptionType type)
+			throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,
+			InvalidAlgorithmParameterException, IOException, IllegalBlockSizeException,
+			BadPaddingException, NoSuchProviderException, InvalidKeySpecException, IllegalStateException, ShortBufferException {
+		System.out.println("Testing " + type);
+		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getSingleton(null);
+		ASymmetricKeyPair kp = type.getKeyPairGenerator(rand, type.name().startsWith("BCPQC_MCELIECE_")?type.getDefaultKeySizeBits():2048).generateKeyPair();
+
+		testClientServerASymetricEncryptions(kp);
 
 	}
 
@@ -1464,7 +1491,7 @@ public class CryptoTests {
 		Assert.assertEquals(signature.length*8, secretKey.getAuthenticatedSignatureAlgorithmType().getSignatureSizeInBits());
 	}
 
-	@Test(dataProvider = "provideDataForSymetricEncryptions", dependsOnMethods = "testSecretKeyEncoding")
+	@Test(dataProvider = "provideDataForSymetricEncryptions")
 	public void testSymmetricEncryptions(SymmetricEncryptionType type) throws NoSuchAlgorithmException,
 			NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IOException,
 			IllegalBlockSizeException, BadPaddingException, NoSuchProviderException, InvalidKeySpecException, IllegalStateException, ShortBufferException {

@@ -38,6 +38,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
 import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
+import java.util.Objects;
 
 /**
  * @author Jason Mahdjoub
@@ -79,5 +80,27 @@ public final class HybridASymmetricEncryptionType {
 		ASymmetricKeyPair kp=nonPQCASymmetricEncryptionType.getKeyPairGenerator(random, keySizeBits, expirationTimeUTC ).generateKeyPair();
 		ASymmetricKeyPair pqcKP=PQCASymmetricEncryptionType.getKeyPairGenerator(random, keySizeBits, expirationTimeUTC ).generateKeyPair();
 		return new HybridASymmetricKeyPair(kp, pqcKP);
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		HybridASymmetricEncryptionType that = (HybridASymmetricEncryptionType) o;
+		return nonPQCASymmetricEncryptionType == that.nonPQCASymmetricEncryptionType &&
+				PQCASymmetricEncryptionType == that.PQCASymmetricEncryptionType;
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(nonPQCASymmetricEncryptionType, PQCASymmetricEncryptionType);
+	}
+
+	@Override
+	public String toString() {
+		return "HybridASymmetricEncryptionType{" +
+				"nonPQCASymmetricEncryptionType=" + nonPQCASymmetricEncryptionType +
+				", PQCASymmetricEncryptionType=" + PQCASymmetricEncryptionType +
+				'}';
 	}
 }

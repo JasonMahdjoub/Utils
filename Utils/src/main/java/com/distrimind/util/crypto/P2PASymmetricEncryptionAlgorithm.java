@@ -467,37 +467,14 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 			return nonPQCEncryption.getOutputSizeForEncryption(PQCEncryption.getOutputSizeForEncryption(inputLen));
 		}
 
-		private int privDecode(InputStream is, byte[] associatedData, int offAD, int lenAD, OutputStream os, int length, byte[] externalCounter)
-				throws InvalidKeyException, InvalidAlgorithmParameterException, IOException, IllegalBlockSizeException,
-				BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IllegalStateException, ShortBufferException
-		{
-			int totalBytes=0;
-			while(length>0) {
-				ByteArrayOutputStream baos=new ByteArrayOutputStream();
 
-				int l=Math.min(buffer.length, length);
-				int nb=is.read(buffer);
-				if (nb<0) {
-					if (totalBytes==0)
-						--totalBytes;
-					break;
-				}
-				PQCEncryption.decode(is, associatedData, offAD, lenAD, baos, l, externalCounter);
-				byte []b=baos.toByteArray();
-				os.write(nonPQCEncryption.decode(b, 0, b.length, associatedData, offAD, lenAD, externalCounter));
-				length-=l;
-				totalBytes+=l;
-			}
-
-			return totalBytes;
-		}
 
 		@Override
 		public void decode(InputStream is, byte[] associatedData, int offAD, int lenAD, OutputStream os, int length, byte[] externalCounter)
 				throws InvalidKeyException, InvalidAlgorithmParameterException, IOException, IllegalBlockSizeException,
 				BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IllegalStateException, ShortBufferException
 		{
-			privDecode(is, associatedData, offAD, lenAD, os, lenAD, externalCounter);
+			ServerASymmetricEncryptionAlgorithm.HybridServer.privDecode(PQCEncryption, nonPQCEncryption,is, associatedData, offAD, lenAD, os, length, externalCounter);
 		}
 		@Override
 		public void encode(byte[] bytes, int off, int len, byte[] associatedData, int offAD, int lenAD, OutputStream os, byte[] externalCounter) throws InvalidKeyException,
@@ -552,30 +529,12 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 		@Override
 		public InputStream getCipherInputStream(final InputStream is, final byte[] externalCounter)
 		{
-			return new InputStream() {
-				private final byte[] one=new byte[1];
-				@Override
-				public int read() throws IOException {
-					if (read(one, 0, 1)==1)
-						return one[0];
-					else
-						return -1;
-				}
-
-				@Override
-				public int read(byte[] b, int off, int len) throws IOException {
-					try {
-						return privDecode(is, null, 0, 0, new ArrayOutputStream(b, off, len), len, externalCounter);
-					} catch (InvalidKeyException | InvalidAlgorithmParameterException | IllegalBlockSizeException | BadPaddingException | NoSuchAlgorithmException | InvalidKeySpecException | NoSuchProviderException | ShortBufferException e) {
-						throw new IOException();
-					}
-				}
-			};
+			return ServerASymmetricEncryptionAlgorithm.HybridServer.getCipherInputStreamImpl(PQCEncryption, nonPQCEncryption, is, externalCounter);
 		}
 
 
 		@Override
-		public void initCipherForDecrypt(AbstractCipher cipher) throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
+		public void initCipherForDecrypt(AbstractCipher cipher) {
 			initCipherForDecrypt(cipher, null, null);
 		}
 	}
@@ -608,6 +567,7 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 			if (len>l)
 				throw new IOException();
 		}
+
 	}
 
 	public IASymmetricPublicKey getDistantPublicKey() {

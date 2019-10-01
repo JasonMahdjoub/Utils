@@ -41,6 +41,7 @@ import com.distrimind.util.io.SecuredObjectInputStream;
 import com.distrimind.util.io.SecuredObjectOutputStream;
 import org.bouncycastle.crypto.*;
 import org.bouncycastle.crypto.digests.*;
+import org.bouncycastle.crypto.params.ParametersWithRandom;
 import org.bouncycastle.pqc.crypto.MessageEncryptor;
 import org.bouncycastle.pqc.crypto.mceliece.*;
 import org.bouncycastle.pqc.math.linearalgebra.GF2Matrix;
@@ -74,7 +75,7 @@ public class BCMcElieceCipher extends AbstractCipher{
 	private final ASymmetricEncryptionType encryptionType;
 	private final boolean cca2;
 
-	private ByteArrayOutputStream out=null;
+	private final ByteArrayOutputStream out=new ByteArrayOutputStream();
 	private boolean encrypt;
 
 	public BCMcElieceCipher(ASymmetricEncryptionType encryptionType) {
@@ -86,19 +87,21 @@ public class BCMcElieceCipher extends AbstractCipher{
 		cca2=this.encryptionType.name().contains("CCA2");
 	}
 
+
+
 	private MessageEncryptor getMcElieceCipher()
 	{
-		if (encryptionType.name().contains("Fujisaki"))
+		if (encryptionType.name().contains("FUJISAKI"))
 			return new McElieceFujisakiCipher();
-		else if (encryptionType.name().contains("Pointcheval"))
+		else if (encryptionType.name().contains("POINTCHEVAL"))
 			return new McEliecePointchevalCipher();
-		else if (encryptionType.name().contains("KobaraImai"))
+		else if (encryptionType.name().contains("KOBARA_IMAI"))
 			return new McElieceKobaraImaiCipher();
 		else
 			return new McElieceCipher();
 	}
 
-	private static final int MAX_GF2MATRIX_SIZE=256*1024;
+	private static final int MAX_GF2MATRIX_SIZE=30*1024*1024;
 
 	static class PrivateKey implements AsymmetricPrivateKey, SecureExternalizableWithoutInnerSizeControl {
 		private McEliecePrivateKeyParameters privateKeyParameters;
@@ -606,7 +609,7 @@ public class BCMcElieceCipher extends AbstractCipher{
 			this.keySize=keysize;
 			this.keyExpiration=expirationTime;
 			mcElieceKeyPairGenerator=new McElieceKeyPairGenerator();
-			mcElieceKeyPairGenerator.init(new McElieceKeyGenerationParameters(random, new McElieceParameters(keysize, getDigest())));
+			mcElieceKeyPairGenerator.init(new McElieceKeyGenerationParameters(random, new McElieceParameters(/*keysize, */getDigest())));
 		}
 	}
 
@@ -638,6 +641,7 @@ public class BCMcElieceCipher extends AbstractCipher{
 		@Override
 		public ASymmetricKeyPair generateKeyPair() {
 			AsymmetricCipherKeyPair res= mcElieceKeyPairGenerator.generateKeyPair();
+
 			return new ASymmetricKeyPair(new ASymmetricPrivateKey(encryptionType, new PrivateKeyCCA2((McElieceCCA2PrivateKeyParameters) res.getPrivate()), keySize),
 					new ASymmetricPublicKey(encryptionType, new PublicKeyCCA2((McElieceCCA2PublicKeyParameters) res.getPublic()), keySize, keyExpiration));
 		}
@@ -657,20 +661,27 @@ public class BCMcElieceCipher extends AbstractCipher{
 			this.keySize=keysize;
 			this.keyExpiration=expirationTime;
 			mcElieceKeyPairGenerator=new McElieceCCA2KeyPairGenerator();
-			mcElieceKeyPairGenerator.init(new McElieceCCA2KeyGenerationParameters(random, new McElieceCCA2Parameters(keysize, digest)));
+			mcElieceKeyPairGenerator.init(new McElieceCCA2KeyGenerationParameters(random, new McElieceCCA2Parameters(/*keysize/8, */digest)));
 		}
 	}
 
 	@Override
 	public byte[] doFinal() throws IllegalStateException, IllegalBlockSizeException, BadPaddingException {
-		if (encrypt)
-			return mcElieceCipher.messageEncrypt(out.toByteArray());
-		else {
-			try {
-				return mcElieceCipher.messageDecrypt(out.toByteArray());
-			} catch (BCInvalidCipherTextException e) {
-				throw new IllegalStateException(e);
+		try {
+			if (encrypt) {
+				byte[] b = out.toByteArray();
+				return mcElieceCipher.messageEncrypt(b);
+			} else {
+				byte[] b = out.toByteArray();
+				try {
+					return mcElieceCipher.messageDecrypt(b);
+				} catch (BCInvalidCipherTextException e) {
+					throw new IllegalStateException(e);
+				}
 			}
+		}
+		finally {
+			out.reset();
 		}
 	}
 
@@ -700,10 +711,7 @@ public class BCMcElieceCipher extends AbstractCipher{
 
 	@Override
 	public int getBlockSize() {
-		if (mcElieceCipher.getClass()==McElieceCipher.class)
-			return ((McElieceCipher)mcElieceCipher).maxPlainTextSize;
-		else
-			return Short.MAX_VALUE;
+		return Short.MAX_VALUE;
 	}
 
 	@Override
@@ -785,7 +793,7 @@ public class BCMcElieceCipher extends AbstractCipher{
 	@Override
 	public int getOutputSize(int inputLength) throws IllegalStateException {
 
-		return 0;
+		return inputLength;
 	}
 	@Override
 	public void init(int opmode, AbstractKey key) throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException {
@@ -793,7 +801,7 @@ public class BCMcElieceCipher extends AbstractCipher{
 	}
 	@Override
 	public void init(int opmode, AbstractKey key, AbstractSecureRandom random) throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException {
-		out=new ByteArrayOutputStream();
+		out.reset();
 		encrypt=opmode== Cipher.ENCRYPT_MODE || opmode==Cipher.WRAP_MODE;
 		mcElieceCipher=getMcElieceCipher();
 		if (cca2)
@@ -803,7 +811,8 @@ public class BCMcElieceCipher extends AbstractCipher{
 				mcElieceCipher.init(encrypt, ((PrivateKeyCCA2)key.toBouncyCastleKey()).privateKeyParameters);
 			}
 			else {
-				mcElieceCipher.init(encrypt, ((PublicKeyCCA2)key.toBouncyCastleKey()).publicKeyParameters);
+
+				mcElieceCipher.init(encrypt, new ParametersWithRandom(((PublicKeyCCA2)key.toBouncyCastleKey()).publicKeyParameters, random));
 			}
 		}
 		else {
@@ -813,7 +822,7 @@ public class BCMcElieceCipher extends AbstractCipher{
 				mcElieceCipher.init(encrypt, ((PrivateKey)key.toBouncyCastleKey()).privateKeyParameters);
 			}
 			else {
-				mcElieceCipher.init(encrypt, ((PublicKey)key.toBouncyCastleKey()).publicKeyParameters);
+				mcElieceCipher.init(encrypt, new ParametersWithRandom(((PublicKey)key.toBouncyCastleKey()).publicKeyParameters));
 			}
 		}
 
@@ -833,7 +842,7 @@ public class BCMcElieceCipher extends AbstractCipher{
 		out.write(input, inputOffset, inputLength);
 		return empty;
 	}
-	private byte[] empty=new byte[0];
+	private final byte[] empty=new byte[0];
 
 	@Override
 	public int update(byte[] input, int inputOffset, int inputLength, byte[] output, int outputOffset) throws IllegalStateException, ShortBufferException {

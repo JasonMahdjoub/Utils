@@ -103,7 +103,7 @@ public class ServerASymmetricEncryptionAlgorithm implements IEncryptionInputAlgo
 		return server.getCipherInputStream(is, externalCounter);
 	}
 
-	private static class HybridServer implements IServer
+	static class HybridServer implements IServer
 	{
 		private final Server nonPQCEncryption, PQCEncryption;
 		private final HybridASymmetricKeyPair myKeyPair;
@@ -141,29 +141,20 @@ public class ServerASymmetricEncryptionAlgorithm implements IEncryptionInputAlgo
 			return PQCEncryption.getOutputSizeForDecryption(nonPQCEncryption.getOutputSizeForDecryption(inputLen));
 		}
 
-		private int privDecode(InputStream is, byte[] associatedData, int offAD, int lenAD, OutputStream os, int length, byte[] externalCounter)
+		static void privDecode(IServer PQCEncryption, IServer nonPQCEncryption, InputStream is, byte[] associatedData, int offAD, int lenAD, OutputStream os, int length, byte[] externalCounter)
 				throws InvalidKeyException, InvalidAlgorithmParameterException, IOException, IllegalBlockSizeException,
 				BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IllegalStateException, ShortBufferException
 		{
-			int totalBytes=0;
-			while(length>0) {
-				ByteArrayOutputStream baos=new ByteArrayOutputStream();
 
-				int l=Math.min(buffer.length, length);
-				int nb=is.read(buffer);
-				if (nb<0) {
-					if (totalBytes==0)
-						--totalBytes;
-					break;
-				}
-				PQCEncryption.decode(is, associatedData, offAD, lenAD, baos, l, externalCounter);
-				byte []b=baos.toByteArray();
-				os.write(nonPQCEncryption.decode(b, 0, b.length, associatedData, offAD, lenAD, externalCounter));
-				length-=l;
-				totalBytes+=l;
-			}
 
-			return totalBytes;
+			ByteArrayOutputStream baos=new ByteArrayOutputStream();
+			PQCEncryption.decode(is, associatedData, offAD, lenAD, baos, length, externalCounter);
+
+			byte []b=baos.toByteArray();
+
+			os.write(nonPQCEncryption.decode(b, 0, b.length, associatedData, offAD, lenAD, externalCounter));
+
+
 		}
 
 		@Override
@@ -171,35 +162,55 @@ public class ServerASymmetricEncryptionAlgorithm implements IEncryptionInputAlgo
 				throws InvalidKeyException, InvalidAlgorithmParameterException, IOException, IllegalBlockSizeException,
 				BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IllegalStateException, ShortBufferException
 		{
-			privDecode(is, associatedData, offAD, lenAD, os, lenAD, externalCounter);
+			privDecode(PQCEncryption, nonPQCEncryption, is, associatedData, offAD, lenAD, os, length, externalCounter);
 		}
-
-		private final byte[] buffer=new byte[4096];
 
 
 		@Override
 		public InputStream getCipherInputStream(final InputStream is, final byte[] externalCounter)
 		{
+			return getCipherInputStreamImpl(PQCEncryption, nonPQCEncryption, is, externalCounter);
+		}
+
+		static InputStream getCipherInputStreamImpl(final IServer PQCEncryption, final IServer nonPQCEncryption, final InputStream is, final byte[] externalCounter)
+		{
 			return new InputStream() {
-				private final byte[] one=new byte[1];
+				private byte[] decoded=null;
+				private int index=0;
+				private void checkDecoded() throws IOException {
+					if (decoded==null)
+					{
+						ByteArrayOutputStream out=new ByteArrayOutputStream();
+						try {
+							privDecode(PQCEncryption, nonPQCEncryption,is, null, 0, 0, out, -1, externalCounter);
+						} catch (InvalidKeyException | InvalidAlgorithmParameterException | IllegalBlockSizeException | BadPaddingException | NoSuchAlgorithmException | InvalidKeySpecException | NoSuchProviderException | ShortBufferException e) {
+							throw new IOException(e);
+						}
+						decoded=out.toByteArray();
+					}
+				}
 				@Override
 				public int read() throws IOException {
-					if (read(one, 0, 1)==1)
-						return one[0];
+					checkDecoded();
+					if (index<decoded.length)
+						return decoded[index++];
 					else
 						return -1;
 				}
 
 				@Override
 				public int read(byte[] b, int off, int len) throws IOException {
-					try {
-						return privDecode(is, null, 0, 0, new P2PASymmetricEncryptionAlgorithm.ArrayOutputStream(b, off, len), len, externalCounter);
-					} catch (InvalidKeyException | InvalidAlgorithmParameterException | IllegalBlockSizeException | BadPaddingException | NoSuchAlgorithmException | InvalidKeySpecException | NoSuchProviderException | ShortBufferException e) {
-						throw new IOException();
-					}
+					checkDecoded();
+					if (index>=decoded.length)
+						return -1;
+					len=Math.min(decoded.length-index, len);
+					System.arraycopy(decoded, index, b, off, len);
+					return len;
 				}
 			};
 		}
+
+
 		@Override
 		public byte[] decode(byte[] bytes, int off, int len, byte[] associatedData, int offAD, int lenAD, byte[] externalCounter)
 				throws InvalidKeyException, InvalidAlgorithmParameterException, IOException, IllegalBlockSizeException,
