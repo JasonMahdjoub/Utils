@@ -39,9 +39,7 @@ import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.MGF1ParameterSpec;
 
-import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
+import javax.crypto.*;
 import javax.crypto.spec.OAEPParameterSpec;
 import javax.crypto.spec.PSource;
 
@@ -64,26 +62,28 @@ import com.distrimind.util.OS;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 2.0
+ * @version 3.0
  * @since Utils 1.17.0
  */
 @SuppressWarnings("ConstantConditions")
 public enum ASymmetricKeyWrapperType {
 
-	RSA_OAEP_WITH_SHA2_384("RSA/ECB/OAEPPadding",CodeProvider.SunJCE, false, "SHA-384", FipsSHS.Algorithm.SHA384),
-	RSA_OAEP_WITH_PARAMETERS_SHA2_384("RSA/ECB/OAEPPadding",CodeProvider.SunJCE, true, "SHA-384", FipsSHS.Algorithm.SHA384),
-	GNU_RSA_OAEP_SHA2_384("RSA/NONE/OAEPPadding",CodeProvider.GNU_CRYPTO, false, "SHA-384", FipsSHS.Algorithm.SHA384),
-	RSA_OAEP_SHA2_512("RSA/ECB/OAEPPadding",CodeProvider.SunJCE, false, "SHA-512", FipsSHS.Algorithm.SHA512),
-	RSA_OAEP_WITH_PARAMETERS_SHA2_512("RSA/ECB/OAEPPadding",CodeProvider.SunJCE, true, "SHA-512", FipsSHS.Algorithm.SHA512),
-	GNU_RSA_OAEP_SHA2_512("RSA/NONE/OAEPPadding",CodeProvider.GNU_CRYPTO, false, "SHA-512", FipsSHS.Algorithm.SHA512),
-	BC_FIPS_RSA_OAEP_WITH_SHA2_384("RSA/NONE/OAEPPadding",CodeProvider.BCFIPS, false, "SHA-384", FipsSHS.Algorithm.SHA384),
-	BC_FIPS_RSA_OAEP_WITH_PARAMETERS_SHA2_384("RSA/NONE/OAEPPadding",CodeProvider.BCFIPS, true, "SHA-384", FipsSHS.Algorithm.SHA384),
-	BC_FIPS_RSA_OAEP_SHA2_512("RSA/NONE/OAEPPadding",CodeProvider.BCFIPS, false, "SHA-384", FipsSHS.Algorithm.SHA512),
-	BC_FIPS_RSA_OAEP_WITH_PARAMETERS_SHA2_512("RSA/NONE/OAEPPadding",CodeProvider.BCFIPS, true, "SHA-384", FipsSHS.Algorithm.SHA512),
-	BC_FIPS_RSA_OAEP_WITH_SHA3_384("RSA/NONE/OAEPPadding",CodeProvider.BCFIPS, false, "SHA-384", FipsSHS.Algorithm.SHA3_384),
-	BC_FIPS_RSA_OAEP_WITH_PARAMETERS_SHA3_384("RSA/NONE/OAEPPadding",CodeProvider.BCFIPS, true, "SHA-384", FipsSHS.Algorithm.SHA3_384),
-	BC_FIPS_RSA_OAEP_SHA3_512("RSA/NONE/OAEPPadding",CodeProvider.BCFIPS, false, "SHA-384", FipsSHS.Algorithm.SHA3_512),
-	BC_FIPS_RSA_OAEP_WITH_PARAMETERS_SHA3_512("RSA/NONE/OAEPPadding",CodeProvider.BCFIPS, true, "SHA-384", FipsSHS.Algorithm.SHA3_512),
+	RSA_OAEP_WITH_SHA2_384("RSA/ECB/OAEPPadding",CodeProvider.SunJCE, false, "SHA-384", FipsSHS.Algorithm.SHA384, false),
+	RSA_OAEP_WITH_PARAMETERS_SHA2_384("RSA/ECB/OAEPPadding",CodeProvider.SunJCE, true, "SHA-384", FipsSHS.Algorithm.SHA384, false),
+	GNU_RSA_OAEP_SHA2_384("RSA/NONE/OAEPPadding",CodeProvider.GNU_CRYPTO, false, "SHA-384", FipsSHS.Algorithm.SHA384, false),
+	RSA_OAEP_SHA2_512("RSA/ECB/OAEPPadding",CodeProvider.SunJCE, false, "SHA-512", FipsSHS.Algorithm.SHA512, false),
+	RSA_OAEP_WITH_PARAMETERS_SHA2_512("RSA/ECB/OAEPPadding",CodeProvider.SunJCE, true, "SHA-512", FipsSHS.Algorithm.SHA512, false),
+	GNU_RSA_OAEP_SHA2_512("RSA/NONE/OAEPPadding",CodeProvider.GNU_CRYPTO, false, "SHA-512", FipsSHS.Algorithm.SHA512, false),
+	BC_FIPS_RSA_OAEP_WITH_SHA2_384("RSA/NONE/OAEPPadding",CodeProvider.BCFIPS, false, "SHA-384", FipsSHS.Algorithm.SHA384, false),
+	BC_FIPS_RSA_OAEP_WITH_PARAMETERS_SHA2_384("RSA/NONE/OAEPPadding",CodeProvider.BCFIPS, true, "SHA-384", FipsSHS.Algorithm.SHA384, false),
+	BC_FIPS_RSA_OAEP_SHA2_512("RSA/NONE/OAEPPadding",CodeProvider.BCFIPS, false, "SHA-384", FipsSHS.Algorithm.SHA512, false),
+	BC_FIPS_RSA_OAEP_WITH_PARAMETERS_SHA2_512("RSA/NONE/OAEPPadding",CodeProvider.BCFIPS, true, "SHA-384", FipsSHS.Algorithm.SHA512, false),
+	BC_FIPS_RSA_OAEP_WITH_SHA3_384("RSA/NONE/OAEPPadding",CodeProvider.BCFIPS, false, "SHA-384", FipsSHS.Algorithm.SHA3_384, false),
+	BC_FIPS_RSA_OAEP_WITH_PARAMETERS_SHA3_384("RSA/NONE/OAEPPadding",CodeProvider.BCFIPS, true, "SHA-384", FipsSHS.Algorithm.SHA3_384, false),
+	BC_FIPS_RSA_OAEP_SHA3_512("RSA/NONE/OAEPPadding",CodeProvider.BCFIPS, false, "SHA-384", FipsSHS.Algorithm.SHA3_512, false),
+	BC_FIPS_RSA_OAEP_WITH_PARAMETERS_SHA3_512("RSA/NONE/OAEPPadding",CodeProvider.BCFIPS, true, "SHA-384", FipsSHS.Algorithm.SHA3_512, false),
+	BCPQC_MCELIECE_FUJISAKI_CCA2_SHA256("McElieceFujisaki",CodeProvider.BCPQC, false, "SHA-256", FipsSHS.Algorithm.SHA256, true),
+	BCPQC_MCELIECE_POINTCHEVAL_CCA2_SHA256("McEliecePointCheval",CodeProvider.BCPQC, false, "SHA-256", FipsSHS.Algorithm.SHA256, true),
 	//BC_FIPS_RSA_KTS_KTM("RSA-KTS-KEM-KWS",CodeProvider.BCFIPS, false),
 	DEFAULT(BC_FIPS_RSA_OAEP_WITH_PARAMETERS_SHA3_384);
 	
@@ -94,19 +94,21 @@ public enum ASymmetricKeyWrapperType {
 	private final boolean withParameters;
 	private final String shaAlgorithm;
 	private final FipsDigestAlgorithm bcShaDigestAlgorithm;
+	private final boolean pqc;
 	
 	
-	ASymmetricKeyWrapperType(String algorithmName, CodeProvider provider, boolean withParameters, String shaAlgorithm, FipsDigestAlgorithm bcShaDigestAlgorithm) {
+	ASymmetricKeyWrapperType(String algorithmName, CodeProvider provider, boolean withParameters, String shaAlgorithm, FipsDigestAlgorithm bcShaDigestAlgorithm, boolean pqc) {
 		this.algorithmName = algorithmName;
 		this.provider = provider;
 		this.withParameters=withParameters;
 		this.shaAlgorithm=shaAlgorithm;
 		this.bcShaDigestAlgorithm=bcShaDigestAlgorithm;
+		this.pqc=pqc;
 	}
 	
 	ASymmetricKeyWrapperType(ASymmetricKeyWrapperType other)
 	{
-		this(other.algorithmName, other.provider, other.withParameters, other.shaAlgorithm, other.bcShaDigestAlgorithm);
+		this(other.algorithmName, other.provider, other.withParameters, other.shaAlgorithm, other.bcShaDigestAlgorithm, other.pqc);
 	}
 	
 	public CodeProvider getCodeProvider()
@@ -182,215 +184,245 @@ public enum ASymmetricKeyWrapperType {
 		return OAEPParams;
 	}
 	
-	public byte[] wrapKey(AbstractSecureRandom random, ASymmetricPublicKey publicKey, SymmetricSecretKey keyToWrap) throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, IllegalStateException, NoSuchProviderException, InvalidAlgorithmParameterException, IOException, IllegalBlockSizeException {
-		if ((publicKey.getAuthenticatedSignatureAlgorithmType()!=null && ((provider==CodeProvider.GNU_CRYPTO)!=(publicKey.getAuthenticatedSignatureAlgorithmType().getCodeProviderForSignature()==CodeProvider.GNU_CRYPTO)))
-				|| (publicKey.getEncryptionAlgorithmType()!=null  && ((provider==CodeProvider.GNU_CRYPTO)!=(publicKey.getEncryptionAlgorithmType().getCodeProviderForEncryption()==CodeProvider.GNU_CRYPTO)))
-				|| (keyToWrap.getAuthenticatedSignatureAlgorithmType()!=null && (provider==CodeProvider.GNU_CRYPTO)!=(keyToWrap.getAuthenticatedSignatureAlgorithmType().getCodeProviderForSignature()==CodeProvider.GNU_CRYPTO))
-				|| (keyToWrap.getEncryptionAlgorithmType()!=null && (provider==CodeProvider.GNU_CRYPTO)!=(keyToWrap.getEncryptionAlgorithmType().getCodeProviderForEncryption()==CodeProvider.GNU_CRYPTO)))
-				throw new IllegalArgumentException("The keys must come from the same providers");
-		CodeProvider.encureProviderLoaded(provider);
-		if (provider.equals(CodeProvider.GNU_CRYPTO))
+	public byte[] wrapKey(AbstractSecureRandom random, IASymmetricPublicKey ipublicKey, SymmetricSecretKey keyToWrap)
+			throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException,
+				NoSuchPaddingException, IllegalStateException, NoSuchProviderException,
+			InvalidAlgorithmParameterException, IOException, IllegalBlockSizeException {
+
+
+		if (ipublicKey instanceof ASymmetricPublicKey) {
+			ASymmetricPublicKey publicKey=(ASymmetricPublicKey)ipublicKey;
+			CodeProvider.encureProviderLoaded(provider);
+			if (name().startsWith("BCPQC_MCELIECE_"))
+			{
+				ClientASymmetricEncryptionAlgorithm client=new ClientASymmetricEncryptionAlgorithm(random, publicKey);
+				try {
+					return client.encode(keyToWrap.encodeWithDefaultParameters());
+				} catch (BadPaddingException e) {
+					throw new IllegalStateException(e);
+				}
+
+			}
+			else {
+
+				if ((publicKey.getAuthenticatedSignatureAlgorithmType() != null && ((provider == CodeProvider.GNU_CRYPTO) != (publicKey.getAuthenticatedSignatureAlgorithmType().getCodeProviderForSignature() == CodeProvider.GNU_CRYPTO)))
+						|| (publicKey.getEncryptionAlgorithmType() != null && ((provider == CodeProvider.GNU_CRYPTO) != (publicKey.getEncryptionAlgorithmType().getCodeProviderForEncryption() == CodeProvider.GNU_CRYPTO)))
+						|| (keyToWrap.getAuthenticatedSignatureAlgorithmType() != null && (provider == CodeProvider.GNU_CRYPTO) != (keyToWrap.getAuthenticatedSignatureAlgorithmType().getCodeProviderForSignature() == CodeProvider.GNU_CRYPTO))
+						|| (keyToWrap.getEncryptionAlgorithmType() != null && (provider == CodeProvider.GNU_CRYPTO) != (keyToWrap.getEncryptionAlgorithmType().getCodeProviderForEncryption() == CodeProvider.GNU_CRYPTO)))
+					throw new IllegalArgumentException("The keys must come from the same providers");
+				if (provider.equals(CodeProvider.GNU_CRYPTO)) {
+					Object c = GnuFunctions.getCipherAlgorithm(algorithmName);
+					GnuFunctions.cipherInitWrapMode(c, publicKey.toGnuKey(), random.getGnuSecureRandom());
+					return wrapKeyWithMetaData(GnuFunctions.cipherWrap(c, keyToWrap.toGnuKey()), keyToWrap);
+				} else {
+					javax.crypto.Cipher c;
+					if (provider.equals(CodeProvider.BCFIPS) || (OSVersion.getCurrentOSVersion() != null && OSVersion.getCurrentOSVersion().getOS() == OS.MAC_OS_X && (this.getCodeProvider() == CodeProvider.SunJCE))) {
+
+
+						AsymmetricRSAPublicKey bcPK = (AsymmetricRSAPublicKey) publicKey.toBouncyCastleKey();
+
+						byte[] encodedKey = keyToWrap.encode();
+
+						OAEPParameters OAEPParams = getOAEPParams(PSource.PSpecified.DEFAULT.getValue());
+
+			/*if (this.algorithmName.equals(BC_FIPS_RSA_KTS_KTM.algorithmName))
+			{
+				OAEPKTSParameters OAEPKTSParams=FipsRSA.KTS_OAEP
+						.withOAEPParameters(OAEPParams)
+						.withKeySizeInBits(256)
+						.withMacKeySizeInBits(256);
+
+				FipsRSA.KTSOperatorFactory wrapFact=new FipsRSA.KTSOperatorFactory(random);
+				wrapFact.createGenerator
+				FipsEncapsulatingSecretGenerator<FipsRSA.KTSParameters> wrapper=wrapFact.createGenerator(bcPK, OAEPKTSParams)
+						.withSecureRandom(random);
+
+
+			}
+			else
+			{*/
+						FipsRSA.KeyWrapOperatorFactory wrapFact = new FipsRSA.KeyWrapOperatorFactory();
+						KeyWrapperUsingSecureRandom<FipsRSA.WrapParameters> wrapper =
+								wrapFact.createKeyWrapper(bcPK, OAEPParams)
+										.withSecureRandom(random);
+
+
+						byte[] wrapedKey = wrapper.wrap(encodedKey, 0, encodedKey.length);
+
+						if (withParameters) {
+							byte[] encodedParameters = OAEPParams.getEncodingParams();
+							return wrapKeyWithMetaData(Bits.concatenateEncodingWithShortSizedTabs(wrapedKey, encodedParameters), keyToWrap);
+						} else
+							return wrapKeyWithMetaData(wrapedKey, keyToWrap);
+
+					}
+		/*if (OSValidator.getCurrentOS()==OSValidator.MACOS && (this==RSA_OAEP || this==ASymmetricKeyWrapperType.RSA_OAEP_WITH_PARAMETERS))
 		{
-			Object c = GnuFunctions.getCipherAlgorithm(algorithmName);
-			GnuFunctions.cipherInitWrapMode(c, publicKey.toGnuKey(), random.getGnuSecureRandom());
-			return wrapKeyWithMetaData(GnuFunctions.cipherWrap(c, keyToWrap.toGnuKey()), keyToWrap);
+			CodeProvider.ensureBouncyCastleProviderLoaded();
+
+			c=javax.crypto.Cipher.getInstance(algorithmName, CodeProvider.BCFIPS.name());
+		}*/
+					else
+						c = javax.crypto.Cipher.getInstance(algorithmName, provider.checkProviderWithCurrentOS().name());
+
+					if (withParameters) {
+						c.init(javax.crypto.Cipher.WRAP_MODE, publicKey.toJavaNativeKey(),
+								new OAEPParameterSpec(shaAlgorithm, "MGF1", new MGF1ParameterSpec(shaAlgorithm), PSource.PSpecified.DEFAULT), random);
+						byte[] wrapedKey = c.wrap(keyToWrap.toJavaNativeKey());
+						byte[] encodedParameters = c.getParameters().getEncoded();
+						return wrapKeyWithMetaData(Bits.concatenateEncodingWithShortSizedTabs(wrapedKey, encodedParameters), keyToWrap);
+					}
+		/*else if (this.algorithmName.equals(BC_FIPS_RSA_KTS_KTM.algorithmName))
+		{
+			c.init(javax.crypto.Cipher.WRAP_MODE, publicKey.toJavaNativeKey(), new KTSParameterSpec.Builder(NISTObjectIdentifiers.id_aes256_wrap.getId(),256).build(), random);
+			return wrapKeyWithMetaData(c.wrap(keyToWrap.toJavaNativeKey()), keyToWrap);
+		}*/
+					else {
+						c.init(javax.crypto.Cipher.WRAP_MODE, publicKey.toJavaNativeKey(), random);
+
+						return wrapKeyWithMetaData(c.wrap(keyToWrap.toJavaNativeKey()), keyToWrap);
+					}
+				}
+			}
 		}
 		else
 		{
-			javax.crypto.Cipher c;
-			if (provider.equals(CodeProvider.BCFIPS) || (OSVersion.getCurrentOSVersion()!=null && OSVersion.getCurrentOSVersion().getOS()==OS.MAC_OS_X && (this.getCodeProvider()==CodeProvider.SunJCE)))
-			{
-
-				
-				
-				
-				AsymmetricRSAPublicKey bcPK=(AsymmetricRSAPublicKey)publicKey.toBouncyCastleKey();
-
-				byte[] encodedKey = keyToWrap.encode();
-				
-				OAEPParameters OAEPParams=getOAEPParams(PSource.PSpecified.DEFAULT.getValue());
-				
-				/*if (this.algorithmName.equals(BC_FIPS_RSA_KTS_KTM.algorithmName))
-				{
-					OAEPKTSParameters OAEPKTSParams=FipsRSA.KTS_OAEP
-							.withOAEPParameters(OAEPParams)
-							.withKeySizeInBits(256)
-							.withMacKeySizeInBits(256);
-							
-					FipsRSA.KTSOperatorFactory wrapFact=new FipsRSA.KTSOperatorFactory(random);
-					wrapFact.createGenerator
-					FipsEncapsulatingSecretGenerator<FipsRSA.KTSParameters> wrapper=wrapFact.createGenerator(bcPK, OAEPKTSParams)
-							.withSecureRandom(random);
-					
-					
-				}
-				else
-				{*/
-				FipsRSA.KeyWrapOperatorFactory wrapFact = new FipsRSA.KeyWrapOperatorFactory();
-				KeyWrapperUsingSecureRandom<FipsRSA.WrapParameters> wrapper = 
-							wrapFact.createKeyWrapper(bcPK, OAEPParams)
-							.withSecureRandom(random);
-					
-					
-					
-				byte[] wrapedKey=wrapper.wrap(encodedKey, 0, encodedKey.length);
-				
-				if (withParameters)
-				{
-					byte[] encodedParameters=OAEPParams.getEncodingParams();
-					return wrapKeyWithMetaData(Bits.concatenateEncodingWithShortSizedTabs(wrapedKey, encodedParameters), keyToWrap);
-				}
-				else
-					return wrapKeyWithMetaData(wrapedKey, keyToWrap);
-				
+			HybridASymmetricPublicKey publicKey=(HybridASymmetricPublicKey)ipublicKey;
+			byte[] nonpqcwrap=wrapKey(random, publicKey.getNonPQCPublicKey(), keyToWrap);
+			ClientASymmetricEncryptionAlgorithm client=new ClientASymmetricEncryptionAlgorithm(random, publicKey.getPQCPublicKey());
+			try {
+				return client.encode(nonpqcwrap);
+			} catch (BadPaddingException e) {
+				throw new IllegalStateException(e);
 			}
-			/*if (OSValidator.getCurrentOS()==OSValidator.MACOS && (this==RSA_OAEP || this==ASymmetricKeyWrapperType.RSA_OAEP_WITH_PARAMETERS))
-			{
-				CodeProvider.ensureBouncyCastleProviderLoaded();
-			
-				c=javax.crypto.Cipher.getInstance(algorithmName, CodeProvider.BCFIPS.name());
-			}*/
-			else
-				c=javax.crypto.Cipher.getInstance(algorithmName, provider.checkProviderWithCurrentOS().name());
-
-			if (withParameters)
-			{
-				c.init(javax.crypto.Cipher.WRAP_MODE, publicKey.toJavaNativeKey(),
-						new OAEPParameterSpec(shaAlgorithm,"MGF1",new MGF1ParameterSpec(shaAlgorithm),PSource.PSpecified.DEFAULT), random);
-				byte[] wrapedKey=c.wrap(keyToWrap.toJavaNativeKey());
-				byte[] encodedParameters=c.getParameters().getEncoded();
-				return wrapKeyWithMetaData(Bits.concatenateEncodingWithShortSizedTabs(wrapedKey, encodedParameters), keyToWrap);
-			}
-			/*else if (this.algorithmName.equals(BC_FIPS_RSA_KTS_KTM.algorithmName))
-			{
-				c.init(javax.crypto.Cipher.WRAP_MODE, publicKey.toJavaNativeKey(), new KTSParameterSpec.Builder(NISTObjectIdentifiers.id_aes256_wrap.getId(),256).build(), random);
-				return wrapKeyWithMetaData(c.wrap(keyToWrap.toJavaNativeKey()), keyToWrap);
-			}*/
-			else
-			{
-				c.init(javax.crypto.Cipher.WRAP_MODE, publicKey.toJavaNativeKey(), random);
-
-				return wrapKeyWithMetaData(c.wrap(keyToWrap.toJavaNativeKey()), keyToWrap);
-			}
-				
-			
-			
 		}
+
 	}
 	
-	public SymmetricSecretKey unwrapKey(ASymmetricPrivateKey privateKey, byte[] keyToUnwrap) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalStateException, NoSuchProviderException, InvalidKeySpecException, InvalidAlgorithmParameterException, IOException, IllegalArgumentException, InvalidWrappingException
+	public SymmetricSecretKey unwrapKey(IASymmetricPrivateKey iprivateKey, byte[] keyToUnwrap) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalStateException, NoSuchProviderException, InvalidKeySpecException, InvalidAlgorithmParameterException, IOException, IllegalArgumentException, InvalidWrappingException
 	{
-		if (isSignatureFromMetaData(keyToUnwrap))
-			return unwrapKey(privateKey, getWrappedKeyFromMetaData(keyToUnwrap), null, getSignatureTypeFromMetaData(keyToUnwrap), getKeySizeFromMetaData(keyToUnwrap));
+		if (name().startsWith("BCPQC_MCELIECE_"))
+		{
+			ASymmetricPrivateKey privateKey=(ASymmetricPrivateKey)iprivateKey;
+			ServerASymmetricEncryptionAlgorithm server = new ServerASymmetricEncryptionAlgorithm(privateKey);
+			try {
+				AbstractKey res=AbstractKey.decode(server.decode(keyToUnwrap));
+				if (res instanceof SymmetricSecretKey)
+					return (SymmetricSecretKey)res;
+				else
+					throw new InvalidKeyException();
+			}
+			catch (BadPaddingException | IllegalBlockSizeException | ShortBufferException e) {
+				throw new IllegalStateException(e);
+			}
+		}
+		else if (iprivateKey instanceof HybridASymmetricPrivateKey) {
+			HybridASymmetricPrivateKey privateKey=(HybridASymmetricPrivateKey)iprivateKey;
+			ServerASymmetricEncryptionAlgorithm server=new ServerASymmetricEncryptionAlgorithm(privateKey.getPQCPrivateKey());
+			try {
+				byte[] b=server.decode(keyToUnwrap);
+				return unwrapKey(privateKey.getNonPQCPrivateKey(), b);
+			} catch (BadPaddingException | IllegalBlockSizeException | ShortBufferException e) {
+				throw new IllegalStateException(e);
+			}
+
+		}
+		else if (isSignatureFromMetaData(keyToUnwrap))
+			return unwrapKey((ASymmetricPrivateKey)iprivateKey, getWrappedKeyFromMetaData(keyToUnwrap), null, getSignatureTypeFromMetaData(keyToUnwrap), getKeySizeFromMetaData(keyToUnwrap));
 		else
-			return unwrapKey(privateKey, getWrappedKeyFromMetaData(keyToUnwrap), getEncryptionTypeFromMetaData(keyToUnwrap), null, getKeySizeFromMetaData(keyToUnwrap));
+			return unwrapKey((ASymmetricPrivateKey)iprivateKey, getWrappedKeyFromMetaData(keyToUnwrap), getEncryptionTypeFromMetaData(keyToUnwrap), null, getKeySizeFromMetaData(keyToUnwrap));
 		
 	}
 	private SymmetricSecretKey unwrapKey(ASymmetricPrivateKey privateKey, byte[] keyToUnwrap, SymmetricEncryptionType encryptionType, SymmetricAuthentifiedSignatureType signatureType, short keySize) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalStateException, NoSuchProviderException, InvalidKeySpecException, IOException, InvalidAlgorithmParameterException, IllegalArgumentException, InvalidWrappingException
 	{
+
 		CodeProvider.encureProviderLoaded(getCodeProvider());
-		if ((privateKey.getAuthenticatedSignatureAlgorithmType()!=null && ((provider==CodeProvider.GNU_CRYPTO)!=(privateKey.getAuthenticatedSignatureAlgorithmType().getCodeProviderForSignature()==CodeProvider.GNU_CRYPTO)))
-				|| (privateKey.getEncryptionAlgorithmType()!=null  && ((provider==CodeProvider.GNU_CRYPTO)!=(privateKey.getEncryptionAlgorithmType().getCodeProviderForEncryption()==CodeProvider.GNU_CRYPTO)))
-				|| (encryptionType!=null && (provider==CodeProvider.GNU_CRYPTO)!=(encryptionType.getCodeProviderForEncryption()==CodeProvider.GNU_CRYPTO))
-				|| (signatureType!=null && (provider==CodeProvider.GNU_CRYPTO)!=(signatureType.getCodeProviderForSignature()==CodeProvider.GNU_CRYPTO)))
-				throw new IllegalArgumentException("The keys must come from the same providers");
-		if (provider.equals(CodeProvider.GNU_CRYPTO))
-		{
+		if ((privateKey.getAuthenticatedSignatureAlgorithmType() != null && ((provider == CodeProvider.GNU_CRYPTO) != (privateKey.getAuthenticatedSignatureAlgorithmType().getCodeProviderForSignature() == CodeProvider.GNU_CRYPTO)))
+				|| (privateKey.getEncryptionAlgorithmType() != null && ((provider == CodeProvider.GNU_CRYPTO) != (privateKey.getEncryptionAlgorithmType().getCodeProviderForEncryption() == CodeProvider.GNU_CRYPTO)))
+				|| (encryptionType != null && (provider == CodeProvider.GNU_CRYPTO) != (encryptionType.getCodeProviderForEncryption() == CodeProvider.GNU_CRYPTO))
+				|| (signatureType != null && (provider == CodeProvider.GNU_CRYPTO) != (signatureType.getCodeProviderForSignature() == CodeProvider.GNU_CRYPTO)))
+			throw new IllegalArgumentException("The keys must come from the same providers");
+		if (provider.equals(CodeProvider.GNU_CRYPTO)) {
 			Object c = GnuFunctions.getCipherAlgorithm(algorithmName);
 			GnuFunctions.cipherInitUnwrapMode(c, privateKey.toGnuKey());
-
-			if (encryptionType==null)
-			{
+			if (encryptionType == null) {
 
 				return new SymmetricSecretKey(signatureType, GnuFunctions.cipherUnwrap(c, keyToUnwrap, signatureType.getAlgorithmName()), keySize);
-			}
-			else
-			{
-				
+			} else {
+
 				return new SymmetricSecretKey(encryptionType, GnuFunctions.cipherUnwrap(c, keyToUnwrap, encryptionType.getAlgorithmName()), keySize);
 			}
-			
-		}
-		else
-		{
+
+		} else {
 
 			javax.crypto.Cipher c;
-			if (provider.equals(CodeProvider.BCFIPS) || (OSVersion.getCurrentOSVersion()!=null && OSVersion.getCurrentOSVersion().getOS()==OS.MAC_OS_X && (this.getCodeProvider()==CodeProvider.SunJCE)))
-			{
+			if (provider.equals(CodeProvider.BCFIPS) || (OSVersion.getCurrentOSVersion() != null && OSVersion.getCurrentOSVersion().getOS() == OS.MAC_OS_X && (this.getCodeProvider() == CodeProvider.SunJCE))) {
 
-				AsymmetricRSAPrivateKey bcPK=(AsymmetricRSAPrivateKey)privateKey.toBouncyCastleKey();
+				AsymmetricRSAPrivateKey bcPK = (AsymmetricRSAPrivateKey) privateKey.toBouncyCastleKey();
 
 				OAEPParameters OAEPParams;
 
 				byte[] wrapedKey;
-				if (withParameters)
-				{
-					byte[][] tmp=Bits.separateEncodingsWithShortSizedTabs(keyToUnwrap);
-					wrapedKey=tmp[0];
-					OAEPParams=getOAEPParams(tmp[1]);
-				}
-				else
-				{
-					wrapedKey=keyToUnwrap;
-					OAEPParams=getOAEPParams(null);
+				if (withParameters) {
+					byte[][] tmp = Bits.separateEncodingsWithShortSizedTabs(keyToUnwrap);
+					wrapedKey = tmp[0];
+					OAEPParams = getOAEPParams(tmp[1]);
+				} else {
+					wrapedKey = keyToUnwrap;
+					OAEPParams = getOAEPParams(null);
 				}
 
 
 				FipsRSA.KeyWrapOperatorFactory wrapFact = new FipsRSA.KeyWrapOperatorFactory();
 				KeyUnwrapperUsingSecureRandom<WrapParameters> unwrapper =
-						wrapFact.createKeyUnwrapper(bcPK,OAEPParams)
-						.withSecureRandom(SecureRandomType.DEFAULT.getSingleton(null));
+						wrapFact.createKeyUnwrapper(bcPK, OAEPParams)
+								.withSecureRandom(SecureRandomType.DEFAULT.getSingleton(null));
 
 				return (SymmetricSecretKey) AbstractKey.decode(unwrapper.unwrap(wrapedKey, 0, wrapedKey.length));
 
 			}
-			/*if (OSValidator.getCurrentOS()==OSValidator.MACOS && (this==RSA_OAEP || this==ASymmetricKeyWrapperType.RSA_OAEP_WITH_PARAMETERS))
-			{
-				CodeProvider.ensureBouncyCastleProviderLoaded();
+/*if (OSValidator.getCurrentOS()==OSValidator.MACOS && (this==RSA_OAEP || this==ASymmetricKeyWrapperType.RSA_OAEP_WITH_PARAMETERS))
+{
+	CodeProvider.ensureBouncyCastleProviderLoaded();
 
-				c=javax.crypto.Cipher.getInstance(algorithmName, CodeProvider.BCFIPS.name());
-			}*/
+	c=javax.crypto.Cipher.getInstance(algorithmName, CodeProvider.BCFIPS.name());
+}*/
 			else
-				c=javax.crypto.Cipher.getInstance(algorithmName, provider.checkProviderWithCurrentOS().name());
+				c = javax.crypto.Cipher.getInstance(algorithmName, provider.checkProviderWithCurrentOS().name());
 
 			byte[] wrapedKey;
-			if (withParameters)
-			{
-				byte[][] tmp=Bits.separateEncodingsWithShortSizedTabs(keyToUnwrap);
-				wrapedKey=tmp[0];
+			if (withParameters) {
+				byte[][] tmp = Bits.separateEncodingsWithShortSizedTabs(keyToUnwrap);
+				wrapedKey = tmp[0];
 				AlgorithmParameters algorithmParameters = AlgorithmParameters.getInstance("OAEP");
 				algorithmParameters.init(tmp[1]);
 				c.init(Cipher.UNWRAP_MODE, privateKey.toJavaNativeKey(), algorithmParameters);
 			}
-			/*else if (this.algorithmName.equals(BC_FIPS_RSA_KTS_KTM.algorithmName))
-			{
-				wrapedKey=keyToUnwrap;
-				c.init(Cipher.UNWRAP_MODE, privateKey.toJavaNativeKey(), new KTSParameterSpec.Builder(NISTObjectIdentifiers.id_aes256_wrap.getId(),256).build());
-			}*/
-			else
-			{
-				wrapedKey=keyToUnwrap;
+/*else if (this.algorithmName.equals(BC_FIPS_RSA_KTS_KTM.algorithmName))
+{
+	wrapedKey=keyToUnwrap;
+	c.init(Cipher.UNWRAP_MODE, privateKey.toJavaNativeKey(), new KTSParameterSpec.Builder(NISTObjectIdentifiers.id_aes256_wrap.getId(),256).build());
+}*/
+			else {
+				wrapedKey = keyToUnwrap;
 				c.init(Cipher.UNWRAP_MODE, privateKey.toJavaNativeKey());
 			}
-			if (encryptionType==null)
-			{
-				return new SymmetricSecretKey(signatureType, (javax.crypto.SecretKey)c.unwrap(wrapedKey, signatureType.getAlgorithmName(), javax.crypto.Cipher.SECRET_KEY), keySize);
-			}
-			else
-			{
-				return new SymmetricSecretKey(encryptionType, (javax.crypto.SecretKey)c.unwrap(wrapedKey, encryptionType.getAlgorithmName(), javax.crypto.Cipher.SECRET_KEY), keySize);
+			if (encryptionType == null) {
+				return new SymmetricSecretKey(signatureType, (javax.crypto.SecretKey) c.unwrap(wrapedKey, signatureType.getAlgorithmName(), javax.crypto.Cipher.SECRET_KEY), keySize);
+			} else {
+				return new SymmetricSecretKey(encryptionType, (javax.crypto.SecretKey) c.unwrap(wrapedKey, encryptionType.getAlgorithmName(), javax.crypto.Cipher.SECRET_KEY), keySize);
 			}
 
 
-			
 		}
+
 		
 	}
 
 
 	public boolean isPostQuantumKeyAlgorithm()
 	{
-		return false;
+		return pqc;
 	}
 
 }

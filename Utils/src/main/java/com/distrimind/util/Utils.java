@@ -82,6 +82,8 @@ public class Utils {
 			d.addItem("Key agreements and login agreements can be hybrid and use both post quantum algorithms and non post quantum algorithms");
 			d.addItem("Asymmetric keys have key sizes code with in precision (instead of short precision)");
 			d.addItem("Add McEliece Post Quantum asymmetric encryption algorithm");
+			d.addItem("Add McEliece key wrapper");
+			d.addItem("Key wrappers can be hybrid and use both post quantum algorithms and non post quantum algorithms");
 			VERSION.addDescription(d);
 
 			c = Calendar.getInstance();

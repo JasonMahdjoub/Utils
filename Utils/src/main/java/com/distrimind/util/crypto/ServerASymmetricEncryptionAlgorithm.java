@@ -64,6 +64,12 @@ public class ServerASymmetricEncryptionAlgorithm implements IEncryptionInputAlgo
 		else
 			server=new Server((ASymmetricKeyPair)myKeyPair);
 	}
+	public ServerASymmetricEncryptionAlgorithm(IASymmetricPrivateKey myPrivateKey) throws InvalidKeySpecException, InvalidKeyException, NoSuchProviderException, NoSuchAlgorithmException, NoSuchPaddingException {
+		if (myPrivateKey instanceof HybridASymmetricPrivateKey)
+			server=new HybridServer((HybridASymmetricPrivateKey)myPrivateKey);
+		else
+			server=new Server((ASymmetricPrivateKey) myPrivateKey);
+	}
 
 
 	@Override
@@ -71,9 +77,9 @@ public class ServerASymmetricEncryptionAlgorithm implements IEncryptionInputAlgo
 		return server.getMaxBlockSizeForDecoding();
 	}
 
-	public AbstractKeyPair getMyKeyPair() {
+	public IASymmetricPrivateKey getMyKeyPair() {
 		if (server instanceof HybridServer)
-			return ((HybridServer) server).myKeyPair;
+			return ((HybridServer) server).myPrivateKey;
 		else
 			return ((Server)server).getMyKeyPair();
 	}
@@ -106,11 +112,14 @@ public class ServerASymmetricEncryptionAlgorithm implements IEncryptionInputAlgo
 	static class HybridServer implements IServer
 	{
 		private final Server nonPQCEncryption, PQCEncryption;
-		private final HybridASymmetricKeyPair myKeyPair;
+		private final HybridASymmetricPrivateKey myPrivateKey;
 		public HybridServer(HybridASymmetricKeyPair myKeyPair) throws InvalidKeySpecException, InvalidKeyException, NoSuchProviderException, NoSuchAlgorithmException, NoSuchPaddingException {
-			this.nonPQCEncryption=new Server(myKeyPair.getNonPQCASymmetricKeyPair());
-			this.PQCEncryption=new Server(myKeyPair.getPQCASymmetricKeyPair());
-			this.myKeyPair=myKeyPair;
+			this(myKeyPair.getASymmetricPrivateKey());
+		}
+		public HybridServer(HybridASymmetricPrivateKey myPrivateKey) throws InvalidKeySpecException, InvalidKeyException, NoSuchProviderException, NoSuchAlgorithmException, NoSuchPaddingException {
+			this.nonPQCEncryption=new Server(myPrivateKey.getNonPQCPrivateKey());
+			this.PQCEncryption=new Server(myPrivateKey.getPQCPrivateKey());
+			this.myPrivateKey=myPrivateKey;
 		}
 		@Override
 		public int getMaxBlockSizeForDecoding() {
@@ -243,7 +252,7 @@ public class ServerASymmetricEncryptionAlgorithm implements IEncryptionInputAlgo
 
 
 	private static class Server implements IServer{
-		private final ASymmetricKeyPair myKeyPair;
+		private final ASymmetricPrivateKey myPrivateKey;
 
 		private final ASymmetricEncryptionType type;
 
@@ -253,19 +262,23 @@ public class ServerASymmetricEncryptionAlgorithm implements IEncryptionInputAlgo
 		protected final byte[] buffer=new byte[BUFFER_SIZE];
 		protected byte[] bufferOut;
 
-
 		public Server(ASymmetricKeyPair myKeyPair)
 				throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidKeySpecException,
 				NoSuchProviderException {
+			this(myKeyPair.getASymmetricPrivateKey());
+		}
+		public Server(ASymmetricPrivateKey myPrivateKey)
+				throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidKeySpecException,
+				NoSuchProviderException {
 
-			if (myKeyPair == null)
+			if (myPrivateKey == null)
 				throw new NullPointerException("myKeyPair");
 
-			this.type = myKeyPair.getEncryptionAlgorithmType();
-			this.myKeyPair = myKeyPair;
+			this.type = myPrivateKey.getEncryptionAlgorithmType();
+			this.myPrivateKey = myPrivateKey;
 			cipher = type.getCipherInstance();
-			cipher.init(Cipher.ENCRYPT_MODE, myKeyPair.getASymmetricPublicKey());
-			maxBlockSize = cipher.getOutputSize(myKeyPair.getMaxBlockSize());
+			cipher.init(Cipher.DECRYPT_MODE, myPrivateKey);
+			maxBlockSize = cipher.getOutputSize(myPrivateKey.getMaxBlockSize());
 			initCipherForDecrypt(cipher, null, null);
 		}
 
@@ -277,7 +290,7 @@ public class ServerASymmetricEncryptionAlgorithm implements IEncryptionInputAlgo
 
 		@Override
 		public boolean isPostQuantumEncryption() {
-			return myKeyPair.isPostQuantumKey();
+			return myPrivateKey.isPostQuantumKey();
 		}
 
 		@Override
@@ -286,14 +299,14 @@ public class ServerASymmetricEncryptionAlgorithm implements IEncryptionInputAlgo
 		}
 
 
-		public ASymmetricKeyPair getMyKeyPair() {
-			return this.myKeyPair;
+		public ASymmetricPrivateKey getMyKeyPair() {
+			return this.myPrivateKey;
 		}
 
 		@Override
 		public void initCipherForDecrypt(AbstractCipher _cipher, byte[] iv, byte[] externalCounter)
 				throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
-			_cipher.init(Cipher.DECRYPT_MODE, myKeyPair.getASymmetricPrivateKey());
+			_cipher.init(Cipher.DECRYPT_MODE, myPrivateKey);
 		}
 
 

@@ -46,8 +46,8 @@ import java.util.Objects;
  * @since Utils 4.5.0
  */
 public class HybridASymmetricKeyPair extends AbstractKeyPair<HybridASymmetricPrivateKey, HybridASymmetricPublicKey> implements IHybridKey {
-	private final HybridASymmetricPrivateKey privateKey;
-	private final HybridASymmetricPublicKey publicKey;
+	private HybridASymmetricPrivateKey privateKey;
+	private HybridASymmetricPublicKey publicKey;
 
 
 	public HybridASymmetricKeyPair(ASymmetricKeyPair nonPQCKeyPair, ASymmetricKeyPair PQCKeyPair) {
@@ -152,8 +152,8 @@ public class HybridASymmetricKeyPair extends AbstractKeyPair<HybridASymmetricPri
 
 	@Override
 	public void zeroize() {
-		privateKey.zeroize();
-		publicKey.zeroize();
+		privateKey=null;
+		publicKey=null;
 	}
 
 	/*@Override

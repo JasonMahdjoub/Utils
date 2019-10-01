@@ -50,7 +50,7 @@ import javax.crypto.NoSuchPaddingException;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 1.1
+ * @version 1.2
  * @since Utils 1.17.0
  */
 public enum SymmetricKeyWrapperType {
@@ -187,6 +187,9 @@ public enum SymmetricKeyWrapperType {
 			
 		}
 	}
-	
-	
+
+	public boolean isPostQuantumAlgorithm(short keySizeBits)
+	{
+		return keySizeBits>=256;
+	}
 }

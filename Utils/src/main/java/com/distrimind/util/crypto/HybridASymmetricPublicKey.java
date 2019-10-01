@@ -47,7 +47,7 @@ import java.util.Objects;
  */
 public class HybridASymmetricPublicKey extends AbstractKey implements IHybridKey, IASymmetricPublicKey{
 
-	private final ASymmetricPublicKey nonPQCPublicKey, PQCPublicKey;
+	private ASymmetricPublicKey nonPQCPublicKey, PQCPublicKey;
 
 	public HybridASymmetricPublicKey(ASymmetricPublicKey nonPQCPublicKey, ASymmetricPublicKey PQCPublicKey) {
 		if (nonPQCPublicKey==null)
@@ -99,8 +99,8 @@ public class HybridASymmetricPublicKey extends AbstractKey implements IHybridKey
 
 	@Override
 	public void zeroize() {
-		nonPQCPublicKey.zeroize();
-		PQCPublicKey.zeroize();
+		nonPQCPublicKey=null;
+		PQCPublicKey=null;
 	}
 
 	@Override
