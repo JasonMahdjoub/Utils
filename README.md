@@ -11,7 +11,7 @@ Set of Java tools :
 	* Home interface that use of three Implementations : Java native JCE, GNU CRYPT, BouncyCastle (+ BouncyCastle FIPS and BouncyCastle PQC)
 	* Encryption algorithms does not need signed JAR to work. So the release work on official Oracle JVM.
 	* MessageDigest algorithms
-	* Symmetric signatures
+	* Symmetric signatures 
 	* Asymmetric signatures
 	* Symmetric encryptions
 	* Asymmetric encryptions and key wrappers
@@ -20,7 +20,8 @@ Set of Java tools :
 	* JPAKE algorithm and home secret message exchanger
 	* Login thanks to a symmetric signature process
 	* Login thanks to an asymmetric signature process
-	* Use of post quantum algorithm (New Hope key exchanger, Sphincs)
+	* Use of post quantum algorithms (New Hope key exchanger, Sphincs, McEliece)
+	* Availability of hybrid assymetric key pairs. One hybrid key pair assemble two key pairs : one used with a non post quantum algorithm, and one another used with a post quantum algorithm. Hybrid algorithms like asymmetric encrytion, asymmetric signatures, key agreements, key wrappers, ... enable to use two algorithms (non PQC and PQC) at the same time, in order to keep well-tested non post quantum algorithms with new expérimental post quantum algorithms.
 * Compatible with Java 7 and newer
 
 # Changes
@@ -43,7 +44,7 @@ Adapt into your build.gradle file, the next code :
 	...
 	dependencies {
 		...
-		compile(group:'com.distrimind.util', name: 'Utils', version: '4.4.3-Stable')
+		compile(group:'com.distrimind.util', name: 'Utils', version: '4.5.0-Stable')
 		...
 		//choose one of these optional drivers for GnuCrypto algorithms
 			testCompile(group:'gnu', name: 'Gnu-Crypt', version: '1.3.0')
@@ -62,7 +63,7 @@ Adapt into your pom.xml file, the next code :
 			<dependency>
 				<groupId>com.distrimind.util</groupId>
 				<artifactId>Utils</artifactId>
-				<version>4.4.3-Stable</version>
+				<version>4.5.0-Stable</version>
 			</dependency>
 			<!-- choose one of these optional drivers for GnuCrypto algorithms-->
 			<dependency>

@@ -382,13 +382,11 @@ public class CryptoTests {
 		return res;
 	}
 	@Test(dataProvider = "provideDataForHybridASymetricEncryptions")
-	public void testHybridASymmetricKeyPairEncodingForSignature(ASymmetricEncryptionType nonPQCType, ASymmetricEncryptionType PQCType)
+	public void testHybridASymmetricKeyPairEncodingForSignature(HybridASymmetricEncryptionType type)
 			throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException {
-		System.out.println("Testing HybridASymmetricKeyPairEncoding " + nonPQCType+" ; "+PQCType);
+		System.out.println("Testing HybridASymmetricKeyPairEncoding " + type);
 
-		ASymmetricKeyPair nonPQC=generateKeyPair(nonPQCType);
-		ASymmetricKeyPair PQC=generateKeyPair(PQCType);
-		HybridASymmetricKeyPair kpd=new HybridASymmetricKeyPair(nonPQC, PQC);
+		HybridASymmetricKeyPair kpd=type.generateKeyPair(SecureRandomType.DEFAULT.getSingleton(null), 1024 );
 
 		byte[] b = kpd.encode(false);
 		HybridASymmetricKeyPair kpd2=(HybridASymmetricKeyPair)DecentralizedValue.decode(b);
@@ -428,7 +426,7 @@ public class CryptoTests {
 				kpd.getASymmetricPrivateKey());
 		Assert.assertEquals(((HybridASymmetricKeyPair)DecentralizedValue.decode(kpd.encode(true))).getASymmetricPublicKey(),
 				kpd.getASymmetricPublicKey());
-		System.out.println(nonPQCType+"; "+PQCType+" :");
+		System.out.println(type+" :");
 		System.out.println("\tKey pair encoding : "+kpd.toString());
 		System.out.println("\tPublic key encoding : "+kpd.getASymmetricPublicKey().toString());
 		System.out.println("\tPrivate key encoding : "+kpd.getASymmetricPrivateKey().toString());
@@ -1013,7 +1011,7 @@ public class CryptoTests {
 		Assert.assertEquals(t2, decoded[1]);
 	}
 
-	@Test(dataProvider = "provideDataForHybridEncryptions", dependsOnMethods = {"testSymmetricEncryptions","testP2PASymetricEncryptions" })
+	@Test(dataProvider = "provideDataForHybridEncryptions")
 	public void testHybridEncryptions(ASymmetricEncryptionType astype, SymmetricEncryptionType stype)
 			throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,
 			InvalidAlgorithmParameterException, IOException, IllegalBlockSizeException, BadPaddingException,
@@ -1027,6 +1025,8 @@ public class CryptoTests {
 		ASymmetricKeyWrapperType kw;
 		if (astype.getCodeProviderForEncryption()==CodeProvider.GNU_CRYPTO)
 			kw=ASymmetricKeyWrapperType.GNU_RSA_OAEP_SHA2_384;
+		else if (astype.name().startsWith("BCPQC_MCELIECE_"))
+			kw=ASymmetricKeyWrapperType.BCPQC_MCELIECE_FUJISAKI_CCA2_SHA256;
 		else
 			kw=ASymmetricKeyWrapperType.BC_FIPS_RSA_OAEP_SHA3_512;
 		
@@ -1080,7 +1080,7 @@ public class CryptoTests {
 		P2PASymmetricEncryptionAlgorithm algoLocal = new P2PASymmetricEncryptionAlgorithm(kpl,
 				kpd.getASymmetricPublicKey());
 
-		testP2PASymetricEncryptions(rand, type, algoDistant, algoLocal);
+		testP2PASymetricEncryptionsImpl(rand, type, algoDistant, algoLocal);
 
 	}
 	@Test(dataProvider = "provideDataForHybridASymetricEncryptions", dependsOnMethods = { "testHybridASymmetricKeyPairEncodingForEncryption" })
@@ -1101,11 +1101,11 @@ public class CryptoTests {
 		P2PASymmetricEncryptionAlgorithm algoLocal = new P2PASymmetricEncryptionAlgorithm(kpl,
 				kpd.getASymmetricPublicKey());
 
-		testP2PASymetricEncryptions(rand, type, algoDistant, algoLocal);
+		testP2PASymetricEncryptionsImpl(rand, type, algoDistant, algoLocal);
 
 	}
 
-	public void testP2PASymetricEncryptions(AbstractSecureRandom rand, Object type, P2PASymmetricEncryptionAlgorithm algoDistant, P2PASymmetricEncryptionAlgorithm algoLocal)
+	public void testP2PASymetricEncryptionsImpl(AbstractSecureRandom rand, Object type, P2PASymmetricEncryptionAlgorithm algoDistant, P2PASymmetricEncryptionAlgorithm algoLocal)
 			throws NoSuchAlgorithmException, InvalidKeyException,
 			InvalidAlgorithmParameterException, IOException, IllegalBlockSizeException,
 			BadPaddingException, NoSuchProviderException, InvalidKeySpecException, ShortBufferException, IllegalStateException {

@@ -1,6 +1,6 @@
 Utils
 =====
-4.4.3 Stable (Build: 1190) (from 10/07/2019 to 29/08/2019)
+4.5.0 Stable (Build: 1195) (from 24/09/2019 to 01/10/2019)
 
 # Creator(s):
 Jason MAHDJOUB
@@ -9,6 +9,18 @@ Jason MAHDJOUB
 Jason MAHDJOUB (Entred in the team at 04/01/2016)
 
 # Modifications:
+
+
+### 4.5.0 Stable (24/09/2019)
+* Add HybridASymmetricPrivateKey class that manage two keys : one PQC key, and one non PQC key
+* Add HybridASymmetricPublicKey class that manage two keys : one PQC key, and one non PQC key
+* Add HybridASymmetricKeyPair class that manage two keys : one PQC key, and one non PQC key
+* Asymmetric signature and asymmetric encryption can now be done with two algorithms at the same time : one PQC algorithm and one non PQC Algorithm
+* Key agreements and login agreements can be hybrid and use both post quantum algorithms and non post quantum algorithms
+* Asymmetric keys have key sizes code with in precision (instead of short precision)
+* Add McEliece Post Quantum asymmetric encryption algorithm
+* Add McEliece key wrapper
+* Key wrappers can be hybrid and use both post quantum algorithms and non post quantum algorithms
 
 
 ### 4.4.3 Stable (10/07/2019)
