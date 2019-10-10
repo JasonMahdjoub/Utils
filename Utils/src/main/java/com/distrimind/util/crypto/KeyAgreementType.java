@@ -84,7 +84,7 @@ public enum KeyAgreementType {
 	private final EllipticCurveDiffieHellmanType ecdhType;
 
 	KeyAgreementType(boolean isPQC, boolean isNewHope, EllipticCurveDiffieHellmanType ecdhType) {
-		this.isPQC = isPQC;
+		this.isPQC = (ecdhType==null || ecdhType.isPostQuantumAlgorithm()) && isPQC;
 		this.isNewHope = isNewHope;
 		this.ecdhType = ecdhType;
 	}
