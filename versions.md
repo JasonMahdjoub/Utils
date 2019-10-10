@@ -1,6 +1,6 @@
 Utils
 =====
-4.5.0 Stable (Build: 1195) (from 24/09/2019 to 01/10/2019)
+4.5.1 Stable (Build: 1199) (from 10/10/2019 to 10/10/2019)
 
 # Creator(s):
 Jason MAHDJOUB
@@ -9,6 +9,10 @@ Jason MAHDJOUB
 Jason MAHDJOUB (Entred in the team at 04/01/2016)
 
 # Modifications:
+
+
+### 4.5.1 Stable (10/10/2019)
+* Add serialization of hybrid keys
 
 
 ### 4.5.0 Stable (24/09/2019)

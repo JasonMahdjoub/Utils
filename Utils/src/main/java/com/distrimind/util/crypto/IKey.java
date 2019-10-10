@@ -18,6 +18,7 @@ public interface IKey {
 	org.bouncycastle.crypto.Key toBouncyCastleKey() throws NoSuchAlgorithmException, InvalidKeySpecException;
 
 	byte[] encode(boolean includeTimeExpiration);
+	byte[] encodeWithDefaultParameters();
 	void zeroize();
 
 	byte[] getKeyBytes();

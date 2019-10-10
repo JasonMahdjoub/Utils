@@ -59,7 +59,7 @@ import java.util.*;
  * 
  * @author Jason Mahdjoub
  * @since Utils 4.4.0
- * @version 1.1
+ * @version 2.0
  * 
  */
 
@@ -304,7 +304,7 @@ public class SerializationTools {
 	
 	
 	@SuppressWarnings("SameParameterValue")
-	static void writeKeyPair(final SecuredObjectOutputStream oos, ASymmetricKeyPair keyPair, boolean supportNull) throws IOException
+	static void writeKeyPair(final SecuredObjectOutputStream oos, AbstractKeyPair keyPair, boolean supportNull) throws IOException
 	{
 		if (supportNull)
 			oos.writeBoolean(keyPair!=null);
@@ -323,7 +323,7 @@ public class SerializationTools {
 	}
 
 	@SuppressWarnings("SameParameterValue")
-	static ASymmetricKeyPair readKeyPair(final SecuredObjectInputStream in, boolean supportNull) throws IOException
+	static AbstractKeyPair readKeyPair(final SecuredObjectInputStream in, boolean supportNull) throws IOException
 	{
 		if (!supportNull || in.readBoolean())
 		{
@@ -332,7 +332,7 @@ public class SerializationTools {
 			{
 				if (k==null)
 					throw new MessageExternalizationException(Integrity.FAIL);
-				return ASymmetricKeyPair.decode(k);
+				return AbstractKeyPair.decode(k);
 			}
 			catch(Exception e)
 			{
@@ -1137,10 +1137,10 @@ public class SerializationTools {
 			oos.write(10);
 			writeKey(oos, (AbstractKey)o, false);
 		}
-		else if (o instanceof ASymmetricKeyPair)
+		else if (o instanceof AbstractKeyPair)
 		{
 			oos.write(11);
-			writeKeyPair(oos, (ASymmetricKeyPair)o, false);
+			writeKeyPair(oos, (AbstractKeyPair)o, false);
 		}
 		else if (o instanceof Enum<?>)
 		{
@@ -1308,7 +1308,19 @@ public class SerializationTools {
 
 	}
 
+	public static int getInternalSize(IHybridKey key)
+	{
+		if (key==null)
+			return 1;
+		return getInternalSize(key, 0);
+	}
 
+	public static int getInternalSize(IKey key)
+	{
+		if (key==null)
+			return 1;
+		return getInternalSize(key, 0);
+	}
 
 	public static int getInternalSize(AbstractKey key)
 	{
@@ -1316,7 +1328,7 @@ public class SerializationTools {
 			return 1;
 		return getInternalSize(key, 0);
 	}
-	public static int getInternalSize(ASymmetricKeyPair keyPair)
+	public static int getInternalSize(AbstractKeyPair keyPair)
 	{
 		if (keyPair==null)
 			return 1;
@@ -1420,9 +1432,9 @@ public class SerializationTools {
 		{
 			return 4+((AbstractKey)o).encodeWithDefaultParameters().length;
 		}
-		else if (o instanceof ASymmetricKeyPair)
+		else if (o instanceof AbstractKeyPair)
 		{
-			return 4+((ASymmetricKeyPair)o).encodeWithDefaultParameters().length;
+			return 4+((AbstractKeyPair)o).encodeWithDefaultParameters().length;
 		}
 		else if (o instanceof byte[][])
 		{

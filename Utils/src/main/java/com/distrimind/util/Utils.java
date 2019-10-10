@@ -59,8 +59,8 @@ public class Utils {
 		Calendar c = Calendar.getInstance();
 		c.set(2016, Calendar.JANUARY, 4);
 		Calendar c2 = Calendar.getInstance();
-		c.set(2019, Calendar.SEPTEMBER, 24);
-		VERSION = new Version("Utils", "Utils", (short)4, (short)5, (short)0, Version.Type.Stable, (short)0, c.getTime(), c2.getTime());
+		c.set(2019, Calendar.OCTOBER, 10);
+		VERSION = new Version("Utils", "Utils", (short)4, (short)5, (short)1, Version.Type.Stable, (short)0, c.getTime(), c2.getTime());
 		try {
 
 			InputStream is = Utils.class.getResourceAsStream("build.txt");
@@ -73,8 +73,14 @@ public class Utils {
 			VERSION.addDeveloper(new PersonDeveloper("mahdjoub", "jason", c.getTime()));
 
 			c = Calendar.getInstance();
+			c.set(2019, Calendar.OCTOBER, 10);
+			Description d = new Description((short)4, (short)5, (short)1, Version.Type.Stable, (short)0, c.getTime());
+			d.addItem("Add serialization of hybrid keys");
+			VERSION.addDescription(d);
+
+			c = Calendar.getInstance();
 			c.set(2019, Calendar.SEPTEMBER, 24);
-			Description d = new Description((short)4, (short)5, (short)0, Version.Type.Stable, (short)0, c.getTime());
+			d = new Description((short)4, (short)5, (short)0, Version.Type.Stable, (short)0, c.getTime());
 			d.addItem("Add HybridASymmetricPrivateKey class that manage two keys : one PQC key, and one non PQC key");
 			d.addItem("Add HybridASymmetricPublicKey class that manage two keys : one PQC key, and one non PQC key");
 			d.addItem("Add HybridASymmetricKeyPair class that manage two keys : one PQC key, and one non PQC key");
