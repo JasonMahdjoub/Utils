@@ -229,6 +229,8 @@ public class ASymmetricKeyPair extends AbstractKeyPair<ASymmetricPrivateKey, ASy
 
 	@Override
 	public byte[] encode(boolean includeTimeExpiration) {
+		if (getTimeExpirationUTC()==Long.MAX_VALUE)
+			includeTimeExpiration=false;
 
 		byte[] kp=Bits.concatenateEncodingWithShortIntSizedTabs(privateKey.getBytesPrivateKey(), publicKey.getBytesPublicKey());
 		byte[] tab = new byte[4+ASymmetricPrivateKey.ENCODED_TYPE_SIZE+kp.length+(includeTimeExpiration?8:0)];

@@ -108,7 +108,7 @@ public abstract class AbstractKeyPair<PrivKey extends IASymmetricPrivateKey, Pub
 
 	@Override
 	public byte[] encodeWithDefaultParameters() {
-		return encode(true);
+		return encode(getTimeExpirationUTC()!=Long.MAX_VALUE);
 	}
 
 	/*public abstract ASymmetricEncryptionType getEncryptionAlgorithmType() ;

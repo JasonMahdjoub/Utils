@@ -76,7 +76,7 @@ public final class HybridASymmetricAuthenticatedSignatureType {
 		return generateKeyPair(random, -1);
 	}
 	public HybridASymmetricKeyPair generateKeyPair(AbstractSecureRandom random, int keySizeBits) throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException {
-		return generateKeyPair(random, keySizeBits, Long.MIN_VALUE);
+		return generateKeyPair(random, keySizeBits, Long.MAX_VALUE);
 	}
 	public HybridASymmetricKeyPair generateKeyPair(AbstractSecureRandom random, int keySizeBits,
 												   long expirationTimeUTC) throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException {

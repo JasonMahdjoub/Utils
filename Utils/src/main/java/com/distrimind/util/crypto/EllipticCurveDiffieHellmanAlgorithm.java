@@ -108,12 +108,12 @@ public class EllipticCurveDiffieHellmanAlgorithm extends KeyAgreement {
 		myPublicKeyBytes = null;
 	}
 	private void generateAndSetKeyPair() throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException  {
-		generateAndSetKeyPair(type.getECDHKeySizeBits(), System.currentTimeMillis()+(24*60*60*1000));
+		generateAndSetKeyPair(type.getECDHKeySizeBits());
 	}
 	/*private ASymmetricKeyPair generateAndSetKeyPair(short keySize) throws NoSuchAlgorithmException, spec.InvalidKeySpecException, NoSuchProviderException, InvalidAlgorithmParameterException  {
 		return generateAndSetKeyPair(keySize, System.currentTimeMillis()+(24*60*60*1000));
 	}¨*/
-	private void generateAndSetKeyPair(short keySize, long expirationUTC) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException  {
+	private void generateAndSetKeyPair(short keySize) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException  {
 		valid=false;
 
 		ASymmetricKeyPair kp;
@@ -127,7 +127,7 @@ public class EllipticCurveDiffieHellmanAlgorithm extends KeyAgreement {
 					kpg= KeyPairGenerator.getInstance("X25519", CodeProvider.BC.name());
 
 				JavaNativeKeyPairGenerator res = new JavaNativeKeyPairGenerator(t, kpg);
-				res.initialize(keySize, expirationUTC, randomForKeys);
+				res.initialize(keySize, Long.MAX_VALUE, randomForKeys);
 				kp=res.generateKeyPair();
 			} catch (NoSuchAlgorithmException e) {
 				throw new NoSuchAlgorithmException(e);
@@ -139,7 +139,7 @@ public class EllipticCurveDiffieHellmanAlgorithm extends KeyAgreement {
 
 		}
 		else
-			kp=t.getKeyPairGenerator(randomForKeys, keySize, expirationUTC).generateKeyPair();
+			kp=t.getKeyPairGenerator(randomForKeys, keySize, Long.MAX_VALUE).generateKeyPair();
 		setKeyPair(kp);
 		valid=true;
 

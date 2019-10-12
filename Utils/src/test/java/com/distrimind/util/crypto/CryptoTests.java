@@ -1419,7 +1419,7 @@ public class CryptoTests {
 		testASymmetricKeyWrapperForEncryption(rand, kp, typeWrapper, asetype, setype);
 		if (typeWrapper.isPostQuantumKeyAlgorithm())
 			return;
-		ASymmetricKeyPair kppqc= ASymmetricEncryptionType.BCPQC_MCELIECE_FUJISAKI_CCA2_SHA256.getKeyPairGenerator(rand).generateKeyPair();
+		ASymmetricKeyPair kppqc= ASymmetricEncryptionType.BCPQC_MCELIECE_FUJISAKI_CCA2_SHA256.getKeyPairGenerator(rand, ASymmetricEncryptionType.BCPQC_MCELIECE_FUJISAKI_CCA2_SHA256.getDefaultKeySizeBits(), Long.MAX_VALUE).generateKeyPair();
 		testASymmetricKeyWrapperForEncryption(rand, new HybridASymmetricKeyPair(kp, kppqc), typeWrapper, asetype, setype);
 
 	}
@@ -1444,7 +1444,7 @@ public class CryptoTests {
 		testASymmetricKeyWrapperForSignature(rand, kp, typeWrapper, asetype, ssigtype);
 		if (typeWrapper.isPostQuantumKeyAlgorithm())
 			return;
-		ASymmetricKeyPair kppqc= ASymmetricEncryptionType.BCPQC_MCELIECE_FUJISAKI_CCA2_SHA256.getKeyPairGenerator(rand).generateKeyPair();
+		ASymmetricKeyPair kppqc= ASymmetricEncryptionType.BCPQC_MCELIECE_FUJISAKI_CCA2_SHA256.getKeyPairGenerator(rand, ASymmetricEncryptionType.BCPQC_MCELIECE_FUJISAKI_CCA2_SHA256.getDefaultKeySizeBits(), Long.MAX_VALUE).generateKeyPair();
 		testASymmetricKeyWrapperForSignature(rand, new HybridASymmetricKeyPair(kp, kppqc), typeWrapper, asetype, ssigtype);
 	}
 

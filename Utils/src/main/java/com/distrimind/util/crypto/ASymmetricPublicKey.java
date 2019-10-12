@@ -246,6 +246,8 @@ public class ASymmetricPublicKey extends AbstractKey implements IASymmetricPubli
 
 	@Override
 	public byte[] encode(boolean includeTimeExpiration) {
+		if (getTimeExpirationUTC()==Long.MAX_VALUE)
+			includeTimeExpiration=false;
 		byte[] tab = new byte[4+ASymmetricPrivateKey.ENCODED_TYPE_SIZE+publicKey.length+(includeTimeExpiration?8:0)];
 		tab[0]=encryptionType==null?(byte)5:(byte)4;
 		if (includeTimeExpiration)
