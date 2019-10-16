@@ -1,6 +1,6 @@
 Utils
 =====
-4.5.2 Stable (Build: 1218) (from 12/10/2019 to 12/10/2019)
+4.5.3 Stable (Build: 1223) (from 16/10/2019 to 16/10/2019)
 
 # Creator(s):
 Jason MAHDJOUB
@@ -11,9 +11,10 @@ Jason MAHDJOUB (Entred in the team at 04/01/2016)
 # Modifications:
 
 
-### 4.5.2 Stable (12/10/2019)
+### 4.5.3 Stable (16/10/2019)
 * Add serialization of hybrid keys
 * Do not encode key pairs time expiration when they are unlimited.
+* SecureSerialization encode Number objects.
 
 
 ### 4.5.0 Stable (24/09/2019)

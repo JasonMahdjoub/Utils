@@ -1050,7 +1050,7 @@ public class SerializationTools {
 	}
 	private static void writeObject(final SecuredObjectOutputStream oos, Object o, int sizeMax, boolean supportNull, boolean OOSreplaceObject) throws IOException
 	{
-		Byte id;
+		Short id;
 
 		if (o==null)
 		{
@@ -1059,7 +1059,7 @@ public class SerializationTools {
 			
 			oos.write(0);
 		}
-		else //noinspection SuspiciousMethodCalls
+		else
 			if (o instanceof SecureExternalizableWithoutInnerSizeControl && (id=identifiersPerClasses.get(o.getClass()))!=null)
 		{
 			if (OOSreplaceObject)
@@ -1078,13 +1078,13 @@ public class SerializationTools {
 				}
 			}
 
-			oos.write(id);
+			oos.write(id.byteValue());
 			writeExternalizable(oos, (SecureExternalizableWithoutInnerSizeControl)o);
 		}
-		else //noinspection SuspiciousMethodCalls
+		else
 			if (o instanceof Enum && (id=identifiersPerEnums.get(o.getClass()))!=null)
 		{
-			oos.write(id);
+			oos.write(id.byteValue());
 			oos.writeInt(((Enum<?>)o).ordinal());
 		}
 		else if (o instanceof SecureExternalizableWithoutInnerSizeControl)
@@ -1182,6 +1182,46 @@ public class SerializationTools {
 			oos.write(18);
 			writeHybridASymmetricEncryptionType(oos, (HybridASymmetricEncryptionType)o, false);
 		}
+		else if (o instanceof Long)
+		{
+			oos.write(19);
+			oos.writeLong(((Long) o));
+		}
+		else if (o instanceof Byte)
+		{
+			oos.write(20);
+			oos.write(((Byte) o));
+		}
+		else if (o instanceof Short)
+		{
+			oos.write(21);
+			oos.writeShort(((Short) o));
+		}
+		else if (o instanceof Integer)
+		{
+			oos.write(22);
+			oos.writeInt(((Integer) o));
+		}
+		else if (o instanceof Character)
+		{
+			oos.write(23);
+			oos.writeChar(((Character) o));
+		}
+		else if (o instanceof Boolean)
+		{
+			oos.write(24);
+			oos.writeBoolean(((Boolean) o));
+		}
+		else if (o instanceof Float)
+		{
+			oos.write(25);
+			oos.writeFloat(((Float) o));
+		}
+		else if (o instanceof Double)
+		{
+			oos.write(26);
+			oos.writeDouble(((Double) o));
+		}
 		else
 		{
 			throw new IOException();
@@ -1192,7 +1232,7 @@ public class SerializationTools {
 	
 	static Object readObject(final SecuredObjectInputStream ois, int sizeMax, boolean supportNull) throws IOException, ClassNotFoundException
 	{
-		byte type=ois.readByte();
+		short type=(short)(ois.readByte() & 0xFF);
 		if (type>=classesStartIndex)
 		{
 			if (type<=classesEndIndex)
@@ -1257,6 +1297,22 @@ public class SerializationTools {
 					return readHybridASymmetricAuthenticatedSignatureType(ois, false);
 				case 18:
 					return readHybridASymmetricEncryptionType(ois, false);
+				case 19:
+					return ois.readLong();
+				case 20:
+					return ois.read();
+				case 21:
+					return ois.readShort();
+				case 22:
+					return ois.readInt();
+				case 23:
+					return ois.readChar();
+				case 24:
+					return ois.readBoolean();
+				case 25:
+					return ois.readFloat();
+				case 26:
+					return ois.readDouble();
 		/*case Byte.MAX_VALUE:
 			return ois.readObject();*/
 				default:
@@ -1266,46 +1322,60 @@ public class SerializationTools {
 		
 	}
 
-	private static final byte lastObjectCode=18;
-	private static final byte classesStartIndex=lastObjectCode+1;
-	private static byte classesEndIndex=0;
-	private static byte enumsStartIndex=0;
-	private static byte enumsEndIndex=0;
+	private static final byte lastObjectCode=26;
+	private static final short classesStartIndex=lastObjectCode+1;
+	private static short classesEndIndex=0;
+	private static short enumsStartIndex=0;
+	private static short enumsEndIndex=0;
 	private static final ArrayList<Class<? extends SecureExternalizableWithoutInnerSizeControl>> classes=new ArrayList<>();
-	private static final Map<Class<? extends SecureExternalizableWithoutInnerSizeControl>, Byte> identifiersPerClasses=new HashMap<>();
+	private static final Map<Class<? extends SecureExternalizableWithoutInnerSizeControl>, Short> identifiersPerClasses=new HashMap<>();
 	private static final ArrayList<Class<? extends Enum<?>>> enums=new ArrayList<>();
-	private static final Map<Class<? extends Enum<?>>, Byte> identifiersPerEnums=new HashMap<>();
+	private static final Map<Class<? extends Enum<?>>, Short> identifiersPerEnums=new HashMap<>();
 
 	public static void setPredefinedClasses(List<Class<? extends SecureExternalizableWithoutInnerSizeControl>> cls, List<Class<? extends Enum<?>>> enms)
 	{
-
+		if (cls.size()+enms.size()+classesStartIndex>254)
+			throw new IllegalArgumentException("Too much given predefined classes");
 		classes.clear();
 		enums.clear();
 		classes.addAll(cls);
 		enums.addAll(enms);
 
-		int currentID=lastObjectCode;
+		short currentID=lastObjectCode;
 		for (Class<?> c : classes)
 			assert !Modifier.isAbstract(c.getModifiers()):""+c;
 		assert currentID+classes.size()<255;
 		for (Class<? extends SecureExternalizableWithoutInnerSizeControl> c : classes)
 		{
-			byte id=(byte)(++currentID);
+			short id=++currentID;
 			identifiersPerClasses.put(c, id);
 		}
-		classesEndIndex=(byte)currentID;
+		classesEndIndex=currentID;
 
 
 		assert currentID+enums.size()<255;
 		enumsStartIndex=(byte)(currentID+1);
 		for (Class<? extends Enum<?>> c : enums)
 		{
-			byte id=(byte)(++currentID);
+			short id=(++currentID);
 			identifiersPerEnums.put(c, id);
 		}
-		enumsEndIndex=(byte)currentID;
+		enumsEndIndex=currentID;
+	}
 
+	public static List<Class<? extends SecureExternalizableWithoutInnerSizeControl>> getPredefinedClasses() {
+		return Collections.unmodifiableList(classes);
+	}
 
+	public static List<Class<? extends Enum<?>>> getPredefinedEnums() {
+		return Collections.unmodifiableList(enums);
+	}
+
+	public static int getInternalSize(Number key)
+	{
+		if (key==null)
+			return 1;
+		return getInternalSize(key, 0);
 	}
 
 	public static int getInternalSize(IHybridKey key)
@@ -1508,7 +1578,7 @@ public class SerializationTools {
 			return 6+((HybridASymmetricEncryptionType)o).getNonPQCASymmetricEncryptionType().name().length()*2+((HybridASymmetricEncryptionType)o).getPQCASymmetricEncryptionType().name().length()*2;
 		}
 		else
-			return ObjectSizer.sizeOf(o);
+			return 1+ObjectSizer.sizeOf(o);
 	}
 
 	public static class ObjectResolver
