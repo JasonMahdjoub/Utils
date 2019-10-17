@@ -71,7 +71,7 @@ public class CryptoBench {
 		System.out.println("JRE Version : "+OS.getCurrentJREVersionDouble());
 		byte[] toEncrypt = new byte[1024 * 1024 * 400];
 		int shift=32*1024;
-		SymmetricEncryptionAlgorithm cipher=new SymmetricEncryptionAlgorithm(SecureRandomType.FORTUNA_WITH_BC_FIPS_APPROVED.getInstance(null), type.getKeyGenerator(SecureRandomType.FORTUNA_WITH_BC_FIPS_APPROVED_FOR_KEYS.getInstance(null), type.getDefaultKeySizeBits()).generateKey());
+		SymmetricEncryptionAlgorithm cipher=new SymmetricEncryptionAlgorithm(SecureRandomType.FORTUNA_WITH_BC_FIPS_APPROVED.getInstance(null), type.getKeyGenerator(SecureRandomType.FORTUNA_WITH_BC_FIPS_APPROVED_FOR_KEYS.getInstance(null), (short)(type.getAlgorithmName().contains("AES")?256:type.getDefaultKeySizeBits())).generateKey());
 		SymmetricAuthentifiedSignatureType sigType;
 		SymmetricSecretKey sks;
 		SymmetricAuthenticatedSignerAlgorithm signer=null;
@@ -80,7 +80,7 @@ public class CryptoBench {
 		if (!type.isAuthenticatedAlgorithm())
 		{
 			
-			sks=sigType.getKeyGenerator(SecureRandomType.FORTUNA_WITH_BC_FIPS_APPROVED_FOR_KEYS.getInstance(null), (short)128).generateKey();
+			sks=sigType.getKeyGenerator(SecureRandomType.FORTUNA_WITH_BC_FIPS_APPROVED_FOR_KEYS.getInstance(null), (short)(type.getAlgorithmName().contains("AES")?256:128)).generateKey();
 			signer=new SymmetricAuthenticatedSignerAlgorithm(sks);
 			checker=new SymmetricAuthenticatedSignatureCheckerAlgorithm(sks);
 		}
