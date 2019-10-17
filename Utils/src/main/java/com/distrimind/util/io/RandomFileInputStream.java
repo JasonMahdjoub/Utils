@@ -172,6 +172,17 @@ public class RandomFileInputStream extends RandomInputStream {
 	}
 
 
-
+	@SuppressWarnings("deprecation")
+	@Override
+	public void finalize()
+	{
+		if (!isClosed()) {
+			try {
+				close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
 
 }

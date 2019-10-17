@@ -23,6 +23,8 @@ Set of Java tools :
 	* Use of post quantum algorithms (New Hope key exchanger, Sphincs, McEliece)
 	* Availability of hybrid assymetric key pairs. One hybrid key pair assemble two key pairs : one used with a non post quantum algorithm, and one another used with a post quantum algorithm. Hybrid algorithms like asymmetric encrytion, asymmetric signatures, key agreements, key wrappers, ... enable to use two algorithms (non PQC and PQC) at the same time, in order to keep well-tested non post quantum algorithms with new expérimental post quantum algorithms.
 * Compatible with Java 7 and newer
+* Random input/output streams (byte array, file). 
+* Random cache file output stream which enables to write data into a byte array until an amount of data was reached. Then, when this amount was reached, use instead a file output stream.
 
 # Changes
 
@@ -44,7 +46,7 @@ Adapt into your build.gradle file, the next code :
 	...
 	dependencies {
 		...
-		compile(group:'com.distrimind.util', name: 'Utils', version: '4.5.3-Stable')
+		compile(group:'com.distrimind.util', name: 'Utils', version: '4.6.0-Stable')
 		...
 		//choose one of these optional drivers for GnuCrypto algorithms
 			testCompile(group:'gnu', name: 'Gnu-Crypt', version: '1.3.0')
@@ -63,7 +65,7 @@ Adapt into your pom.xml file, the next code :
 			<dependency>
 				<groupId>com.distrimind.util</groupId>
 				<artifactId>Utils</artifactId>
-				<version>4.5.3-Stable</version>
+				<version>4.6.0-Stable</version>
 			</dependency>
 			<!-- choose one of these optional drivers for GnuCrypto algorithms-->
 			<dependency>

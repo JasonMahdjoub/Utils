@@ -184,6 +184,18 @@ public class RandomFileOutputStream extends RandomOutputStream {
 		raf.close();
 	}
 
-
+	@SuppressWarnings("deprecation")
+	@Override
+	public void finalize()
+	{
+		if (!isClosed()) {
+			try {
+				flush();
+				close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
 	
 }
