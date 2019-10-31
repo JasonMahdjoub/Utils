@@ -46,7 +46,7 @@ import com.distrimind.util.Bits;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 3.3
+ * @version 3.4
  * @since Utils 1.7.1
  */
 public class ASymmetricKeyPair extends AbstractKeyPair<ASymmetricPrivateKey, ASymmetricPublicKey> {
@@ -366,6 +366,21 @@ public class ASymmetricKeyPair extends AbstractKeyPair<ASymmetricPrivateKey, ASy
 	@Override
 	public ASymmetricPublicKey getASymmetricPublicKey() {
 		return publicKey;
+	}
+
+	@Override
+	public boolean useEncryptionAlgorithm() {
+		return getEncryptionAlgorithmType()!=null;
+	}
+
+	@Override
+	public boolean useAuthenticatedSignatureAlgorithm() {
+		return getAuthenticatedSignatureAlgorithmType()!=null;
+	}
+
+	@Override
+	public ASymmetricKeyPair getNonPQCKeyPair() {
+		return this;
 	}
 
 	public int getKeySizeBits() {

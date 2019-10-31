@@ -69,6 +69,18 @@ public class HybridASymmetricPublicKey extends AbstractKey implements IHybridKey
 		this.PQCPublicKey = PQCPublicKey;
 	}
 
+	@Override
+	public boolean useEncryptionAlgorithm() {
+		return getNonPQCPublicKey().getEncryptionAlgorithmType()!=null;
+	}
+
+	@Override
+	public boolean useAuthenticatedSignatureAlgorithm() {
+		return getNonPQCPublicKey().getAuthenticatedSignatureAlgorithmType()!=null;
+	}
+
+
+	@Override
 	public ASymmetricPublicKey getNonPQCPublicKey() {
 		return nonPQCPublicKey;
 	}

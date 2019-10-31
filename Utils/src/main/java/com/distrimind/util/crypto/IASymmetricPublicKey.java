@@ -2,7 +2,7 @@ package com.distrimind.util.crypto;
 
 /**
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 1.1
  * @since MaDKitLanEdition 4.5.0
  */
 public interface IASymmetricPublicKey extends IKey {
@@ -11,5 +11,11 @@ public interface IASymmetricPublicKey extends IKey {
 	ASymmetricAuthenticatedSignatureType getAuthenticatedSignatureAlgorithmType() ;*/
 
 	long getTimeExpirationUTC() ;
+
+	boolean useEncryptionAlgorithm();
+
+	boolean useAuthenticatedSignatureAlgorithm();
+
+	ASymmetricPublicKey getNonPQCPublicKey();
 
 }

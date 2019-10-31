@@ -59,8 +59,8 @@ public class Utils {
 		Calendar c = Calendar.getInstance();
 		c.set(2016, Calendar.JANUARY, 4);
 		Calendar c2 = Calendar.getInstance();
-		c.set(2019, Calendar.OCTOBER, 16);
-		VERSION = new Version("Utils", "Utils", (short)4, (short)6, (short)1, Version.Type.Stable, (short)0, c.getTime(), c2.getTime());
+		c.set(2019, Calendar.OCTOBER, 31);
+		VERSION = new Version("Utils", "Utils", (short)4, (short)6, (short)2, Version.Type.Stable, (short)0, c.getTime(), c2.getTime());
 		try {
 
 			InputStream is = Utils.class.getResourceAsStream("build.txt");
@@ -73,8 +73,15 @@ public class Utils {
 			VERSION.addDeveloper(new PersonDeveloper("mahdjoub", "jason", c.getTime()));
 
 			c = Calendar.getInstance();
+			c.set(2019, Calendar.OCTOBER, 31);
+			Description d = new Description((short)4, (short)6, (short)2, Version.Type.Stable, (short)0, c.getTime());
+			d.addItem("Add functions to IASymmetricPublicKey, IASymmetricPrivateKey, AbstractKeyPair");
+			d.addItem("Better organize SerializationTools.getInternalSize(...)");
+			VERSION.addDescription(d);
+
+			c = Calendar.getInstance();
 			c.set(2019, Calendar.OCTOBER, 19);
-			Description d = new Description((short)4, (short)6, (short)1, Version.Type.Stable, (short)0, c.getTime());
+			d = new Description((short)4, (short)6, (short)1, Version.Type.Stable, (short)0, c.getTime());
 			d.addItem("Update dependencies");
 			VERSION.addDescription(d);
 

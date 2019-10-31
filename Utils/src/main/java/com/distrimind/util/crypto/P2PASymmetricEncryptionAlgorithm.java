@@ -389,8 +389,8 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 		public HybridP2PEncryption(HybridASymmetricKeyPair myKeyPair,
 							 HybridASymmetricPublicKey distantPublicKey) throws NoSuchPaddingException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException, InvalidKeyException, InvalidKeySpecException {
 			super();
-			nonPQCEncryption=new P2PEncryption(myKeyPair.getNonPQCASymmetricKeyPair(), distantPublicKey.getNonPQCPublicKey());
-			PQCEncryption=new P2PEncryption(myKeyPair.getPQCASymmetricKeyPair(), distantPublicKey.getPQCPublicKey());
+			nonPQCEncryption=new P2PEncryption(myKeyPair.getNonPQCKeyPair(), distantPublicKey.getNonPQCPublicKey());
+			PQCEncryption=new P2PEncryption(myKeyPair.getPQCKeyPair(), distantPublicKey.getPQCPublicKey());
 			if (nonPQCEncryption.includeIV()!=PQCEncryption.includeIV())
 				throw new IllegalArgumentException();
 			this.myKeyPair=myKeyPair;
@@ -402,8 +402,8 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 								   HybridASymmetricKeyPair myKeyPair,
 								   HybridASymmetricPublicKey distantPublicKey) throws NoSuchPaddingException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException, InvalidKeyException, InvalidKeySpecException {
 			super();
-			nonPQCEncryption=new P2PEncryption(nonPQCSignatureType, myKeyPair.getNonPQCASymmetricKeyPair(), distantPublicKey.getNonPQCPublicKey());
-			PQCEncryption=new P2PEncryption(PQCSignatureType, myKeyPair.getPQCASymmetricKeyPair(), distantPublicKey.getPQCPublicKey());
+			nonPQCEncryption=new P2PEncryption(nonPQCSignatureType, myKeyPair.getNonPQCKeyPair(), distantPublicKey.getNonPQCPublicKey());
+			PQCEncryption=new P2PEncryption(PQCSignatureType, myKeyPair.getPQCKeyPair(), distantPublicKey.getPQCPublicKey());
 			if (nonPQCEncryption.includeIV()!=PQCEncryption.includeIV())
 				throw new IllegalArgumentException();
 			this.myKeyPair=myKeyPair;

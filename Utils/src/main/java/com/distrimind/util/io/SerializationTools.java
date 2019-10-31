@@ -59,7 +59,7 @@ import java.util.*;
  * 
  * @author Jason Mahdjoub
  * @since Utils 4.4.0
- * @version 2.0
+ * @version 2.1
  * 
  */
 
@@ -1378,12 +1378,6 @@ public class SerializationTools {
 		return getInternalSize(key, 0);
 	}
 
-	public static int getInternalSize(IHybridKey key)
-	{
-		if (key==null)
-			return 1;
-		return getInternalSize(key, 0);
-	}
 
 	public static int getInternalSize(IKey key)
 	{
@@ -1392,12 +1386,6 @@ public class SerializationTools {
 		return getInternalSize(key, 0);
 	}
 
-	public static int getInternalSize(AbstractKey key)
-	{
-		if (key==null)
-			return 1;
-		return getInternalSize(key, 0);
-	}
 	public static int getInternalSize(AbstractKeyPair keyPair)
 	{
 		if (keyPair==null)

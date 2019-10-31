@@ -309,6 +309,21 @@ public class ASymmetricPublicKey extends AbstractKey implements IASymmetricPubli
 	}
 
 	@Override
+	public boolean useEncryptionAlgorithm() {
+		return getEncryptionAlgorithmType()!=null;
+	}
+
+	@Override
+	public boolean useAuthenticatedSignatureAlgorithm() {
+		return getAuthenticatedSignatureAlgorithmType()!=null;
+	}
+
+	@Override
+	public ASymmetricPublicKey getNonPQCPublicKey() {
+		return this;
+	}
+
+	@Override
 	public int hashCode() {
 		return hashCode;
 	}

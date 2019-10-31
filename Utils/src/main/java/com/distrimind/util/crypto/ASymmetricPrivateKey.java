@@ -57,7 +57,7 @@ import java.util.Arrays;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 4.0
+ * @version 4.1
  * @since Utils 1.7.1
  */
 public class ASymmetricPrivateKey extends AbstractKey implements IASymmetricPrivateKey {
@@ -376,5 +376,20 @@ public class ASymmetricPrivateKey extends AbstractKey implements IASymmetricPriv
 	@Override
 	public byte[] encodeWithDefaultParameters() {
 		return encode();
+	}
+
+	@Override
+	public boolean useEncryptionAlgorithm() {
+		return getEncryptionAlgorithmType()!=null;
+	}
+
+	@Override
+	public boolean useAuthenticatedSignatureAlgorithm() {
+		return getAuthenticatedSignatureAlgorithmType()!=null;
+	}
+
+	@Override
+	public ASymmetricPrivateKey getNonPQCPrivateKey() {
+		return this;
 	}
 }

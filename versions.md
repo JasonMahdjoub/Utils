@@ -1,6 +1,6 @@
 Utils
 =====
-4.6.1 Stable (Build: 1239) (from 16/10/2019 to 19/10/2019)
+4.6.2 Stable (Build: 1245) (from 31/10/2019 to 31/10/2019)
 
 # Creator(s):
 Jason MAHDJOUB
@@ -9,6 +9,11 @@ Jason MAHDJOUB
 Jason MAHDJOUB (Entred in the team at 04/01/2016)
 
 # Modifications:
+
+
+### 4.6.2 Stable (31/10/2019)
+* Add functions to IASymmetricPublicKey, IASymmetricPrivateKey, AbstractKeyPair
+* Better organize SerializationTools.getInternalSize(...)
 
 
 ### 4.6.1 Stable (19/10/2019)

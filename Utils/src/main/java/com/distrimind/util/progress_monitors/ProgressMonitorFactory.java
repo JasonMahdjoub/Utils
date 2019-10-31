@@ -66,6 +66,7 @@ public abstract class ProgressMonitorFactory {
 	 *        in the dialog box and setNote will be ineffective
 	 * @param min the lower bound of the range
 	 * @param max the upper bound of the range
+	 * @return the progress monitor
 	 */
 	public ProgressMonitor getProgressMonitor( Object message,
 													   String note,
@@ -95,6 +96,7 @@ public abstract class ProgressMonitorFactory {
 	 *        in the dialog box and setNote will be ineffective
 	 * @param min the lower bound of the range
 	 * @param max the upper bound of the range
+	 * @return the progress monitor
 	 */
 	public abstract ProgressMonitor getProgressMonitor(Object parentComponent,
 													   Object message,
@@ -108,7 +110,8 @@ public abstract class ProgressMonitorFactory {
 	 *
 	 * @param parentComponent the parent component for the dialog box
 	 * @param parameters see {@link ProgressMonitorParameters}
-	 */
+	 * @return the progress monitor
+	 * */
 	public ProgressMonitor getProgressMonitor(Object parentComponent, ProgressMonitorParameters parameters)
 	{
 		ProgressMonitor res=getProgressMonitor(parentComponent, parameters.getMessage(), parameters.getNote(), parameters.getMin(), parameters.getMax());
@@ -128,6 +131,7 @@ public abstract class ProgressMonitorFactory {
 	 *
 	 *
 	 * @param parameters see {@link ProgressMonitorParameters}
+	 * @return the progress monitor
 	 */
 	public ProgressMonitor getProgressMonitor(ProgressMonitorParameters parameters)
 	{
@@ -144,6 +148,7 @@ public abstract class ProgressMonitorFactory {
 	 *        {@link JOptionPane#message}
 	 *        for the range of values.
 	 * @param inputStream The input stream to be monitored.
+	 * @return the progress monitor
 	 */
 	public ProgressMonitorInputStream getProgressMonitorInputStream( final Object message,
 																			 final InputStream inputStream)
@@ -163,6 +168,7 @@ public abstract class ProgressMonitorFactory {
 	 *        {@link JOptionPane#message}
 	 *        for the range of values.
 	 * @param inputStream The input stream to be monitored.
+	 * @return the progress monitor
 	 */
 	public abstract ProgressMonitorInputStream getProgressMonitorInputStream(final Object parentComponent,
 																	final Object message,

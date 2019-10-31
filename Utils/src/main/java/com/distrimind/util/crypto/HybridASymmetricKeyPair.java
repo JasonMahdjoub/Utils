@@ -42,7 +42,7 @@ import java.util.Objects;
 
 /**
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 1.1
  * @since Utils 4.5.0
  */
 public class HybridASymmetricKeyPair extends AbstractKeyPair<HybridASymmetricPrivateKey, HybridASymmetricPublicKey> implements IHybridKey {
@@ -176,18 +176,31 @@ public class HybridASymmetricKeyPair extends AbstractKeyPair<HybridASymmetricPri
 		return publicKey;
 	}
 
+	@Override
+	public boolean useEncryptionAlgorithm() {
+		return publicKey.getNonPQCPublicKey().getEncryptionAlgorithmType()!=null;
+	}
+
+	@Override
+	public boolean useAuthenticatedSignatureAlgorithm() {
+		return publicKey.getNonPQCPublicKey().getAuthenticatedSignatureAlgorithmType()!=null;
+	}
+
+
+
 
 	@Override
 	public boolean isPostQuantumKey() {
 		return true;
 	}
 
-	public ASymmetricKeyPair getNonPQCASymmetricKeyPair()
+	@Override
+	public ASymmetricKeyPair getNonPQCKeyPair()
 	{
 		return new ASymmetricKeyPair(privateKey.getNonPQCPrivateKey(), publicKey.getNonPQCPublicKey());
 	}
 
-	public ASymmetricKeyPair getPQCASymmetricKeyPair()
+	public ASymmetricKeyPair getPQCKeyPair()
 	{
 		return new ASymmetricKeyPair(privateKey.getPQCPrivateKey(), publicKey.getPQCPublicKey());
 	}

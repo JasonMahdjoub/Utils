@@ -42,7 +42,7 @@ import java.util.Objects;
 
 /**
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 1.1
  * @since Utils 4.5.0
  */
 public class HybridASymmetricPrivateKey extends AbstractKey implements IHybridKey, IASymmetricPrivateKey{
@@ -69,6 +69,17 @@ public class HybridASymmetricPrivateKey extends AbstractKey implements IHybridKe
 		this.PQCPrivateKey = PQCPrivateKey;
 	}
 
+	@Override
+	public boolean useEncryptionAlgorithm() {
+		return getNonPQCPrivateKey().getEncryptionAlgorithmType()!=null;
+	}
+
+	@Override
+	public boolean useAuthenticatedSignatureAlgorithm() {
+		return getNonPQCPrivateKey().getAuthenticatedSignatureAlgorithmType()!=null;
+	}
+
+	@Override
 	public ASymmetricPrivateKey getNonPQCPrivateKey() {
 		return nonPQCPrivateKey;
 	}

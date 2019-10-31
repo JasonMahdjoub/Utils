@@ -117,4 +117,10 @@ public abstract class AbstractKeyPair<PrivKey extends IASymmetricPrivateKey, Pub
 
 	public abstract PrivKey getASymmetricPrivateKey();
 	public abstract PubKey getASymmetricPublicKey();
+
+	public abstract boolean useEncryptionAlgorithm();
+
+	public abstract boolean useAuthenticatedSignatureAlgorithm();
+
+	public abstract ASymmetricKeyPair getNonPQCKeyPair();
 }
