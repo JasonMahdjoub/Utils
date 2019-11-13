@@ -70,7 +70,7 @@ public class P2PLoginWithASymmetricSignature extends P2PLoginAgreement{
         super(2, 2);
         if (keyPair==null)
             throw new NullPointerException();
-        if (keyPair.useAuthenticatedSignatureAlgorithm()) {
+        if (!keyPair.useAuthenticatedSignatureAlgorithm()) {
             throw new IllegalArgumentException("The given key pair is not usable for signature");
         }
 
