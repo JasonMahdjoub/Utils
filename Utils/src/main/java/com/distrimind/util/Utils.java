@@ -60,7 +60,7 @@ public class Utils {
 		c.set(2016, Calendar.JANUARY, 4);
 		Calendar c2 = Calendar.getInstance();
 		c.set(2019, Calendar.NOVEMBER, 15);
-		VERSION = new Version("Utils", "Utils", (short)4, (short)6, (short)4, Version.Type.Stable, (short)0, c.getTime(), c2.getTime());
+		VERSION = new Version("Utils", "Utils", (short)4, (short)6, (short)5, Version.Type.Stable, (short)0, c.getTime(), c2.getTime());
 		try {
 
 			InputStream is = Utils.class.getResourceAsStream("build.txt");
@@ -74,7 +74,7 @@ public class Utils {
 
 			c = Calendar.getInstance();
 			c.set(2019, Calendar.NOVEMBER, 15);
-			Description d = new Description((short)4, (short)6, (short)4, Version.Type.Stable, (short)0, c.getTime());
+			Description d = new Description((short)4, (short)6, (short)5, Version.Type.Stable, (short)0, c.getTime());
 			d.addItem("Upgrade gradle to 6.0.0");
 			d.addItem("Compile with openjdk 13 (compatibility set to Java 7");
 			VERSION.addDescription(d);

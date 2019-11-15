@@ -60,13 +60,13 @@ dependencies {
     testImplementation 'org.testng:testng:6.14.3'
 
 
-    compile(group:'org.bouncycastle', name: 'bc-core', version: '1.61-DMRECOMPILE')
-    compile(group:'org.bouncycastle', name: 'bc-prov', version: '1.61-DMRECOMPILE')
-    compile(group:'org.bouncycastle', name: 'bc-fips', version: '1.0.1-DMRECOMPILE')
-    testCompile(group:'gnu', name: 'Gnu-Crypt', version: '1.3.0')
-    compile(group:'commons-codec', name: 'commons-codec', version: '1.13')
-    compile(group:'org.yaml', name: 'snakeyaml', version: '1.25')
-    testCompile(group:'org.apache.commons', name: 'commons-math3', version: '3.6.1')
+    api(group:'org.bouncycastle', name: 'bc-core', version: '1.61-DMRECOMPILE')
+    api(group:'org.bouncycastle', name: 'bc-prov', version: '1.61-DMRECOMPILE')
+    api(group:'org.bouncycastle', name: 'bc-fips', version: '1.0.1-DMRECOMPILE')
+    testImplementation(group:'gnu', name: 'Gnu-Crypt', version: '1.3.0')
+    api(group:'commons-codec', name: 'commons-codec', version: '1.13')
+    api(group:'org.yaml', name: 'snakeyaml', version: '1.25')
+    testImplementation(group:'org.apache.commons', name: 'commons-math3', version: '3.6.1')
 
     /*compile files('/home/jason/Téléchargements_desync/bc-fips-1.0.1.jar')
     compile files('/home/jason/Téléchargements_desync/bcprov-jdk15on-161.jar')*/
