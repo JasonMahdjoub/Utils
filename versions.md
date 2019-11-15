@@ -1,6 +1,6 @@
 Utils
 =====
-4.6.4 Stable (Build: 1296) (from 15/11/2019 to 15/11/2019)
+4.6.4 Stable (Build: 1306) (from 15/11/2019 to 15/11/2019)
 
 # Creator(s):
 Jason MAHDJOUB
