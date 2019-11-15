@@ -713,7 +713,7 @@ public class SerializationTools {
 		SerializationTools.writeString(oos, e.getClass().getName(), MAX_CLASS_LENGTH, false);
 		SerializationTools.writeString(oos, e.name(), 1000, false);
 	}
-	static void writeHybridKeyAgreementType(final SecuredObjectOutputStream oos, HybridKeyAgreementType e, boolean supportNull) throws IOException
+	static void writeHybridKeyAgreementType(final SecuredObjectOutputStream oos, HybridKeyAgreementType e, @SuppressWarnings("SameParameterValue") boolean supportNull) throws IOException
 	{
 		if (supportNull)
 			oos.writeBoolean(e!=null);
@@ -728,7 +728,7 @@ public class SerializationTools {
 		SerializationTools.writeString(oos, e.getNonPQCKeyAgreementType().name(), 1000, false);
 		SerializationTools.writeString(oos, e.getPQCKeyAgreementType().name(), 1000, false);
 	}
-	static void writeHybridASymmetricEncryptionType(final SecuredObjectOutputStream oos, HybridASymmetricEncryptionType e, boolean supportNull) throws IOException
+	static void writeHybridASymmetricEncryptionType(final SecuredObjectOutputStream oos, HybridASymmetricEncryptionType e, @SuppressWarnings("SameParameterValue") boolean supportNull) throws IOException
 	{
 		if (supportNull)
 			oos.writeBoolean(e!=null);
@@ -743,7 +743,7 @@ public class SerializationTools {
 		SerializationTools.writeString(oos, e.getNonPQCASymmetricEncryptionType().name(), 1000, false);
 		SerializationTools.writeString(oos, e.getPQCASymmetricEncryptionType().name(), 1000, false);
 	}
-	static void writeHybridASymmetricAuthenticatedSignatureType(final SecuredObjectOutputStream oos, HybridASymmetricAuthenticatedSignatureType e, boolean supportNull) throws IOException
+	static void writeHybridASymmetricAuthenticatedSignatureType(final SecuredObjectOutputStream oos, HybridASymmetricAuthenticatedSignatureType e, @SuppressWarnings("SameParameterValue") boolean supportNull) throws IOException
 	{
 		if (supportNull)
 			oos.writeBoolean(e!=null);
@@ -776,6 +776,7 @@ public class SerializationTools {
 			{
 				if (value==null)
 					throw new MessageExternalizationException(Integrity.FAIL);
+
 				return Enum.valueOf(c, value);
 			}
 			catch(ClassCastException e)
@@ -788,7 +789,7 @@ public class SerializationTools {
 			return null;
 
 	}
-	static HybridKeyAgreementType readHybridKeyAgreementType(final SecuredObjectInputStream ois, boolean supportNull) throws IOException
+	static HybridKeyAgreementType readHybridKeyAgreementType(final SecuredObjectInputStream ois, @SuppressWarnings("SameParameterValue") boolean supportNull) throws IOException
 	{
 		if (!supportNull || ois.readBoolean())
 		{
@@ -805,7 +806,7 @@ public class SerializationTools {
 		else
 			return null;
 	}
-	static HybridASymmetricAuthenticatedSignatureType readHybridASymmetricAuthenticatedSignatureType(final SecuredObjectInputStream ois, boolean supportNull) throws IOException
+	static HybridASymmetricAuthenticatedSignatureType readHybridASymmetricAuthenticatedSignatureType(final SecuredObjectInputStream ois, @SuppressWarnings("SameParameterValue") boolean supportNull) throws IOException
 	{
 		if (!supportNull || ois.readBoolean())
 		{
@@ -822,7 +823,7 @@ public class SerializationTools {
 		else
 			return null;
 	}
-	static HybridASymmetricEncryptionType readHybridASymmetricEncryptionType(final SecuredObjectInputStream ois, boolean supportNull) throws IOException
+	static HybridASymmetricEncryptionType readHybridASymmetricEncryptionType(final SecuredObjectInputStream ois, @SuppressWarnings("SameParameterValue") boolean supportNull) throws IOException
 	{
 		if (!supportNull || ois.readBoolean())
 		{

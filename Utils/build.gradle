@@ -57,16 +57,16 @@ repositories {
 }
 
 dependencies {
-    testCompile 'org.testng:testng:6.14.3'
+    testImplementation 'org.testng:testng:6.14.3'
 
 
-    compile(group:'org.bouncycastle', name: 'bc-core', version: '1.61-DMRECOMPILE')
-    compile(group:'org.bouncycastle', name: 'bc-prov', version: '1.61-DMRECOMPILE')
-    compile(group:'org.bouncycastle', name: 'bc-fips', version: '1.0.1-DMRECOMPILE')
-    testCompile(group:'gnu', name: 'Gnu-Crypt', version: '1.3.0')
-    compile(group:'commons-codec', name: 'commons-codec', version: '1.13')
-    compile(group:'org.yaml', name: 'snakeyaml', version: '1.25')
-    testCompile(group:'org.apache.commons', name: 'commons-math3', version: '3.6.1')
+    implementation(group:'org.bouncycastle', name: 'bc-core', version: '1.61-DMRECOMPILE')
+    implementation(group:'org.bouncycastle', name: 'bc-prov', version: '1.61-DMRECOMPILE')
+    implementation(group:'org.bouncycastle', name: 'bc-fips', version: '1.0.1-DMRECOMPILE')
+    testImplementation(group:'gnu', name: 'Gnu-Crypt', version: '1.3.0')
+    implementation(group:'commons-codec', name: 'commons-codec', version: '1.13')
+    implementation(group:'org.yaml', name: 'snakeyaml', version: '1.25')
+    testImplementation(group:'org.apache.commons', name: 'commons-math3', version: '3.6.1')
 
     /*compile files('/home/jason/Téléchargements_desync/bc-fips-1.0.1.jar')
     compile files('/home/jason/Téléchargements_desync/bcprov-jdk15on-161.jar')*/
@@ -148,7 +148,8 @@ allprojects {
 
     //compileJava.options.compilerArgs << "-Xlint"
     compileJava.options.compilerArgs.addAll(['--release', javaVersion] as Collection<? extends String>)
-    if (project.hasProperty('javaHomeVersion') && javaHomeVersion.toFloat()>1.8)
+
+    if (JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_1_9))
     	javadoc.options.addStringOption("html5", "-quiet")
 
 }
@@ -159,14 +160,14 @@ allprojects {
 
 task sourcesJar(type: Jar, dependsOn: classes) {
 
-    classifier = 'sources'
+    //classifier = 'sources'
     from sourceSets.main.allSource
     from "../LICENSE"
     from "../versions.md"
 }
 
 task javadocJar(type: Jar, dependsOn: javadoc) {
-    classifier = 'javadoc'
+    //classifier = 'javadoc'
     from javadoc.destinationDir
     from "../LICENSE"
     from "../versions.md"

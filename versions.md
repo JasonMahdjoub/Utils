@@ -1,6 +1,6 @@
 Utils
 =====
-4.6.3 Stable (Build: 1248) (from 12/11/2019 to 13/11/2019)
+4.6.4 Stable (Build: 1294) (from 15/11/2019 to 15/11/2019)
 
 # Creator(s):
 Jason MAHDJOUB
@@ -9,6 +9,11 @@ Jason MAHDJOUB
 Jason MAHDJOUB (Entred in the team at 04/01/2016)
 
 # Modifications:
+
+
+### 4.6.4 Stable (15/11/2019)
+* Upgrade gradle to 6.0.0
+* Compile with openjdk 13 (compatibility set to Java 7
 
 
 ### 4.6.3 Stable (12/11/2019)

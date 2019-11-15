@@ -120,7 +120,7 @@ public class DefaultMultiFormatObjectParser extends AbstractMultiFormatObjectPar
 	{
 		return new SimpleDateFormat(simpleDataFormats[0]);
 	}
-	private static final String simpleDataFormats[]=new String[]{
+	private static final String[] simpleDataFormats =new String[]{
 			"yyyy-MM-dd HH:mm:ss.SSS",
 			"yyyy-MM-dd HH:mm:ss",
 			"yyyy-MM-dd HH:mm",
@@ -171,7 +171,7 @@ public class DefaultMultiFormatObjectParser extends AbstractMultiFormatObjectPar
 				return null;
 			int[] tab = (int[]) object;
 			int s = Integer.SIZE / 8;
-			byte btab[] = new byte[tab.length * s];
+			byte[] btab = new byte[tab.length * s];
 			for (int i = 0; i < tab.length; i++)
 				Bits.putInt(btab, i * s, tab[i]);
 			return Base64.encodeBase64URLSafeString(btab);
@@ -180,7 +180,7 @@ public class DefaultMultiFormatObjectParser extends AbstractMultiFormatObjectPar
 				return null;
 			short[] tab = (short[]) object;
 			int s = Short.SIZE / 8;
-			byte btab[] = new byte[tab.length * s];
+			byte[] btab = new byte[tab.length * s];
 			for (int i = 0; i < tab.length; i++)
 				Bits.putShort(btab, i * s, tab[i]);
 			return Base64.encodeBase64URLSafeString(btab);
@@ -189,7 +189,7 @@ public class DefaultMultiFormatObjectParser extends AbstractMultiFormatObjectPar
 				return null;
 			float[] tab = (float[]) object;
 			int s = Float.SIZE / 8;
-			byte btab[] = new byte[tab.length * s];
+			byte[] btab = new byte[tab.length * s];
 			for (int i = 0; i < tab.length; i++)
 				Bits.putFloat(btab, i * s, tab[i]);
 			return Base64.encodeBase64URLSafeString(btab);
@@ -198,7 +198,7 @@ public class DefaultMultiFormatObjectParser extends AbstractMultiFormatObjectPar
 				return null;
 			double[] tab = (double[]) object;
 			int s = Double.SIZE / 8;
-			byte btab[] = new byte[tab.length * s];
+			byte[] btab = new byte[tab.length * s];
 			for (int i = 0; i < tab.length; i++)
 				Bits.putDouble(btab, i * s, tab[i]);
 			return Base64.encodeBase64URLSafeString(btab);
@@ -207,7 +207,7 @@ public class DefaultMultiFormatObjectParser extends AbstractMultiFormatObjectPar
 				return null;
 			long[] tab = (long[]) object;
 			int s = Double.SIZE / 8;
-			byte btab[] = new byte[tab.length * s];
+			byte[] btab = new byte[tab.length * s];
 			for (int i = 0; i < tab.length; i++)
 				Bits.putLong(btab, i * s, tab[i]);
 			return Base64.encodeBase64URLSafeString(btab);
@@ -215,7 +215,7 @@ public class DefaultMultiFormatObjectParser extends AbstractMultiFormatObjectPar
 			if (object == null)
 				return null;
 			boolean[] tab = (boolean[]) object;
-			byte btab[] = new byte[tab.length];
+			byte[] btab = new byte[tab.length];
 			for (int i = 0; i < tab.length; i++)
 				btab[i] = tab[i] ? (byte) 1 : (byte) 0;
 			return Base64.encodeBase64URLSafeString(btab);
@@ -311,7 +311,7 @@ public class DefaultMultiFormatObjectParser extends AbstractMultiFormatObjectPar
 			int s = Integer.SIZE / 8;
 			if (btab.length % s != 0)
 				throw new PropertiesParseException("Invalid tab data");
-			int tab[] = new int[btab.length / s];
+			int[] tab = new int[btab.length / s];
 			for (int i = 0; i < tab.length; i++)
 				tab[i] = Bits.getInt(btab, i * s);
 			return tab;
@@ -320,7 +320,7 @@ public class DefaultMultiFormatObjectParser extends AbstractMultiFormatObjectPar
 			int s = Float.SIZE / 8;
 			if (btab.length % s != 0)
 				throw new PropertiesParseException("Invalid tab data");
-			float tab[] = new float[btab.length / s];
+			float[] tab = new float[btab.length / s];
 			for (int i = 0; i < tab.length; i++)
 				tab[i] = Bits.getFloat(btab, i * s);
 			return tab;
@@ -329,7 +329,7 @@ public class DefaultMultiFormatObjectParser extends AbstractMultiFormatObjectPar
 			int s = Double.SIZE / 8;
 			if (btab.length % s != 0)
 				throw new PropertiesParseException("Invalid tab data");
-			double tab[] = new double[btab.length / s];
+			double[] tab = new double[btab.length / s];
 			for (int i = 0; i < tab.length; i++)
 				tab[i] = Bits.getDouble(btab, i * s);
 			return tab;
@@ -338,7 +338,7 @@ public class DefaultMultiFormatObjectParser extends AbstractMultiFormatObjectPar
 			int s = Short.SIZE / 8;
 			if (btab.length % s != 0)
 				throw new PropertiesParseException("Invalid tab data");
-			short tab[] = new short[btab.length / s];
+			short[] tab = new short[btab.length / s];
 			for (int i = 0; i < tab.length; i++)
 				tab[i] = Bits.getShort(btab, i * s);
 			return tab;
@@ -347,13 +347,13 @@ public class DefaultMultiFormatObjectParser extends AbstractMultiFormatObjectPar
 			int s = Long.SIZE / 8;
 			if (btab.length % s != 0)
 				throw new PropertiesParseException("Invalid tab data");
-			long tab[] = new long[btab.length / s];
+			long[] tab = new long[btab.length / s];
 			for (int i = 0; i < tab.length; i++)
 				tab[i] = Bits.getLong(btab, i * s);
 			return tab;
 		} else if (field_type == boolean[].class) {
 			byte[] btab = Base64.decodeBase64(nodeValue);
-			boolean tab[] = new boolean[btab.length];
+			boolean[] tab = new boolean[btab.length];
 			for (int i = 0; i < tab.length; i++)
 				tab[i] = btab[i] != 0;
 			return tab;
@@ -403,7 +403,7 @@ public class DefaultMultiFormatObjectParser extends AbstractMultiFormatObjectPar
 				throw new PropertiesParseException("Invalid calendar : "+nodeValue);
 			calendarDateFormat.setTimeZone(tz);
 			Calendar c = Calendar.getInstance();
-
+			c.setTimeZone(tz);
 			c.setTime(calendarDateFormat.parse(nodeValue));
 			return c;
 
@@ -430,7 +430,7 @@ public class DefaultMultiFormatObjectParser extends AbstractMultiFormatObjectPar
 			else
 				return res;
 		} else if (field_type == InetSocketAddress.class) {
-			String split[] = nodeValue.split(";");
+			String[] split = nodeValue.split(";");
 			if (split.length != 2)
 				return Void.TYPE;
 			return new InetSocketAddress(InetAddress.getByName(split[0]), Integer.parseInt(split[1]));
