@@ -30,6 +30,9 @@ Set of Java tools :
 
 [See historical of changes](./versions.md)
 
+###### Requirements under Linux :
+  * Please install the package ethtool
+
 # How to use it ?
 ## With Gradle :
 
