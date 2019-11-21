@@ -77,6 +77,8 @@ public class Utils {
 			Description d = new Description((short)4, (short)7, (short)0, Version.Type.Stable, (short)0, c.getTime());
 			d.addItem("Add classes Reference");
 			d.addItem("Permit secret key hashing");
+			d.addItem("Add SymmetricSecretKeyPair class");
+			d.addItem("Add functions SymmetricSecretKey.getDerivedSecretKeyPair(...)");
 			VERSION.addDescription(d);
 
 			c = Calendar.getInstance();
