@@ -47,7 +47,7 @@ import com.distrimind.util.Bits;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 3.4
+ * @version 4.0
  * @since Utils 1.7.1
  */
 public class ASymmetricKeyPair extends AbstractKeyPair<ASymmetricPrivateKey, ASymmetricPublicKey> {

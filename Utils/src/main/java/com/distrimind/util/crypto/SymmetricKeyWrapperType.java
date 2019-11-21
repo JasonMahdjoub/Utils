@@ -34,11 +34,12 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
+import java.io.IOException;
+import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 
+import com.distrimind.util.Bits;
+import org.apache.commons.codec.binary.Base64;
 import org.bouncycastle.crypto.InvalidWrappingException;
 import org.bouncycastle.crypto.PlainInputProcessingException;
 
@@ -50,7 +51,7 @@ import javax.crypto.NoSuchPaddingException;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 1.2
+ * @version 2.0
  * @since Utils 1.17.0
  */
 public enum SymmetricKeyWrapperType {
@@ -81,7 +82,38 @@ public enum SymmetricKeyWrapperType {
 	{
 		return algorithmName;
 	}
-	
+
+	static SymmetricSecretKey hashPasswordForSecretKeyEncryption(PasswordHashType passwordHashType, String password) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidKeySpecException {
+		if (password==null)
+			throw new NullPointerException();
+		if (passwordHashType==null)
+			throw new NullPointerException();
+		PasswordHash ph = new PasswordHash(passwordHashType, new SecureRandom(), (byte)16, (byte)0);
+		return SymmetricEncryptionType.AES_CBC_PKCS5Padding.generateSecretKeyFromByteArray(ph.hash(password, null), (short)32);
+	}
+
+	public byte[] wrapKey(PasswordHashType passwordHashType, String password, SymmetricSecretKey secretKeyToWrap, AbstractSecureRandom random) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidKeySpecException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException {
+		SymmetricSecretKey secretKey=hashPasswordForSecretKeyEncryption(passwordHashType, password);
+		return wrapKey(secretKey, secretKeyToWrap, random);
+	}
+	public String wrapKeyString(PasswordHashType passwordHashType, String password, SymmetricSecretKey secretKeyToWrap, AbstractSecureRandom random) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidKeySpecException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException {
+		return Base64.encodeBase64URLSafeString(Bits.getByteArrayWithCheckSum(wrapKey(passwordHashType, password, secretKeyToWrap, random)));
+	}
+
+	public SymmetricSecretKey unwrapKey(PasswordHashType passwordHashType, String password, String encryptedSecretKey) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidKeySpecException, NoSuchPaddingException, InvalidKeyException, IOException {
+		return unwrapKey(passwordHashType, password, Bits.checkByteArrayAndReturnsItWithoutCheckSum(Base64.decodeBase64(encryptedSecretKey)));
+	}
+	public SymmetricSecretKey unwrapKey(PasswordHashType passwordHashType, String password, byte[] encryptedSecretKey) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidKeySpecException, NoSuchPaddingException, InvalidKeyException {
+		if (encryptedSecretKey==null)
+			throw new NullPointerException();
+		SymmetricSecretKey secretKey=hashPasswordForSecretKeyEncryption(passwordHashType, password);
+		return unwrapKey(secretKey, encryptedSecretKey);
+	}
+
+	public String wrapKeyString(SymmetricSecretKey key, SymmetricSecretKey keyToWrap, AbstractSecureRandom random) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalStateException, IllegalBlockSizeException, NoSuchProviderException, InvalidKeySpecException
+	{
+		return Base64.encodeBase64URLSafeString(Bits.getByteArrayWithCheckSum(wrapKey(key, keyToWrap, random)));
+	}
 	public byte[] wrapKey(SymmetricSecretKey key, SymmetricSecretKey keyToWrap, AbstractSecureRandom random) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalStateException, IllegalBlockSizeException, NoSuchProviderException, InvalidKeySpecException
 	{
 		CodeProvider.encureProviderLoaded(provider);
@@ -120,6 +152,11 @@ public enum SymmetricKeyWrapperType {
 			return ASymmetricKeyWrapperType.wrapKeyWithMetaData(cipher.wrap(keyToWrap.toJavaNativeKey()), keyToWrap);
 				
 		}
+	}
+
+
+	public SymmetricSecretKey unwrapKey(SymmetricSecretKey key, String keyToUnwrap) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalStateException, InvalidKeySpecException, NoSuchProviderException, IOException {
+		return unwrapKey(key, Bits.checkByteArrayAndReturnsItWithoutCheckSum(Base64.decodeBase64(keyToUnwrap)) );
 	}
 	public SymmetricSecretKey unwrapKey(SymmetricSecretKey key, byte[] keyToUnwrap) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalStateException, InvalidKeySpecException, NoSuchProviderException {
 		if (ASymmetricKeyWrapperType.isSignatureFromMetaData(keyToUnwrap))

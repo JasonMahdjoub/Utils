@@ -58,7 +58,7 @@ import java.util.*;
 /**
  * 
  * @author Jason Mahdjoub
- * @since Utils 4.4.0
+ * @since Utils 4.5.0
  * @version 2.1
  * 
  */

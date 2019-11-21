@@ -47,7 +47,7 @@ import java.util.Arrays;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 2.3
+ * @version 3.0
  * @since Utils 2.0.0
  */
 public class SymmetricSecretKey extends AbstractKey {

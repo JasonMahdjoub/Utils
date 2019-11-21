@@ -37,7 +37,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
 
 /**
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 2.0
  * @since Utils 4.5.0
  */
 public interface IHybridKey {

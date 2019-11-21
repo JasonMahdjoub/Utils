@@ -2,7 +2,7 @@ package com.distrimind.util.crypto;
 
 /**
  * @author Jason Mahdjoub
- * @version 1.1
+ * @version 2.0
  * @since MaDKitLanEdition 4.5.0
  */
 public interface IASymmetricPublicKey extends IKey {

@@ -40,7 +40,7 @@ import java.util.Objects;
 
 /**
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 2.0
  * @since MaDKitLanEdition 4.5.0
  */
 public class HybridASymmetricPublicKey extends AbstractKey implements IHybridKey, IASymmetricPublicKey{

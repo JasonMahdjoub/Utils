@@ -56,7 +56,7 @@ import com.distrimind.util.OS;
  * List of symmetric encryption algorithms
  * 
  * @author Jason Mahdjoub
- * @version 3.5
+ * @version 4.0
  * @since Utils 1.4
  */
 public enum SymmetricEncryptionType {
@@ -132,7 +132,7 @@ public enum SymmetricEncryptionType {
 		AbstractMessageDigest md=(keySizeBits>256?MessageDigestType.SHA3_512:MessageDigestType.SHA3_256).getMessageDigestInstance();
 		md.update(tab);
 		byte[] d=md.digest();
-		return new SymmetricSecretKey(this, Arrays.copyOfRange(d, 0, keySizeBits), keySizeBits);
+		return new SymmetricSecretKey(this, Arrays.copyOfRange(d, 0, keySizeBits/8), keySizeBits);
 	}
 
 	static byte[] encodeGnuSecretKey(Object key, String algorithmName) {

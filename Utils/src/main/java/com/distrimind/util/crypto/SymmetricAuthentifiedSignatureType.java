@@ -47,7 +47,7 @@ import java.util.Arrays;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 2.0
+ * @version 3.0
  * @since Utils 2.10.0
  */
 public enum SymmetricAuthentifiedSignatureType {
@@ -108,7 +108,7 @@ public enum SymmetricAuthentifiedSignatureType {
 		AbstractMessageDigest md=(keySizeBits>256?MessageDigestType.SHA3_512:MessageDigestType.SHA3_256).getMessageDigestInstance();
 		md.update(tab);
 		byte[] d=md.digest();
-		return new SymmetricSecretKey(this, Arrays.copyOfRange(d, 0, keySizeBits), keySizeBits);
+		return new SymmetricSecretKey(this, Arrays.copyOfRange(d, 0, keySizeBits/8), keySizeBits);
 	}
 	
 	

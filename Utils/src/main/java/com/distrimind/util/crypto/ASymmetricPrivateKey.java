@@ -56,7 +56,7 @@ import java.util.Arrays;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 4.1
+ * @version 5.0
  * @since Utils 1.7.1
  */
 public class ASymmetricPrivateKey extends AbstractKey implements IASymmetricPrivateKey {
