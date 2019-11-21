@@ -12,9 +12,7 @@ public interface IASymmetricPublicKey extends IKey {
 
 	long getTimeExpirationUTC() ;
 
-	boolean useEncryptionAlgorithm();
 
-	boolean useAuthenticatedSignatureAlgorithm();
 
 	ASymmetricPublicKey getNonPQCPublicKey();
 

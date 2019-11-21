@@ -90,9 +90,10 @@ public class SymmetricSecretKey extends AbstractKey {
 		AbstractMessageDigest md=messageDigestType.getMessageDigestInstance();
 		md.reset();
 		md.update(secretKey);
-		md.update(encryptionType==null?signatureType.name().getBytes():encryptionType.name().getBytes());
-		if (customApplicationCode!=null)
+		if (customApplicationCode!=null) {
+			md.update(encryptionType==null?signatureType.name().getBytes():encryptionType.name().getBytes());
 			md.update(customApplicationCode);
+		}
 		byte[] k=md.digest();
 		if (k.length>secretKey.length)
 		{
@@ -108,6 +109,28 @@ public class SymmetricSecretKey extends AbstractKey {
 			return new SymmetricSecretKey(signatureType, k, keySizeBits);
 		else
 			return new SymmetricSecretKey(encryptionType, k, keySizeBits);
+	}
+	public SymmetricSecretKeyPair getDerivedSecretKeyPair(MessageDigestType messageDigestType, SymmetricEncryptionType encryptionType) throws NoSuchProviderException, NoSuchAlgorithmException {
+		return getDerivedSecretKeyPair(messageDigestType, encryptionType, signatureType);
+	}
+	public SymmetricSecretKeyPair getDerivedSecretKeyPair(MessageDigestType messageDigestType, SymmetricAuthentifiedSignatureType signatureType) throws NoSuchProviderException, NoSuchAlgorithmException {
+		return getDerivedSecretKeyPair(messageDigestType, encryptionType, signatureType);
+	}
+	private SymmetricSecretKeyPair getDerivedSecretKeyPair(MessageDigestType messageDigestType, SymmetricEncryptionType encryptionType, SymmetricAuthentifiedSignatureType signatureType) throws NoSuchProviderException, NoSuchAlgorithmException {
+		if (messageDigestType.getDigestLengthInBits()/2<keySizeBits)
+			throw new IllegalArgumentException("The message digest digest length must be twice the size the key");
+		if (signatureType==null)
+			throw new NullPointerException();
+		if (encryptionType==null)
+			throw new NullPointerException();
+
+		AbstractMessageDigest md = messageDigestType.getMessageDigestInstance();
+		md.reset();
+		md.update(secretKey);
+		byte[] d=md.digest();
+		return new SymmetricSecretKeyPair(
+				new SymmetricSecretKey(encryptionType, Arrays.copyOfRange(d, 0, keySizeBits)),
+				new SymmetricSecretKey(signatureType, Arrays.copyOfRange(d, keySizeBits, keySizeBits*2)));
 	}
 
 	@Override
@@ -355,6 +378,18 @@ public class SymmetricSecretKey extends AbstractKey {
 	public boolean isPostQuantumKey() {
 		return this.encryptionType==null?signatureType.isPostQuantumAlgorithm(keySizeBits):encryptionType.isPostQuantumAlgorithm(keySizeBits);
 	}
+
+	@Override
+	public boolean useEncryptionAlgorithm() {
+		return getEncryptionAlgorithmType()!=null;
+	}
+
+	@Override
+	public boolean useAuthenticatedSignatureAlgorithm() {
+		return getAuthenticatedSignatureAlgorithmType()!=null;
+	}
+
+
 
 
 	@Override

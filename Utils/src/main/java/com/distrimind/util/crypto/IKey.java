@@ -25,7 +25,9 @@ public interface IKey {
 
 	boolean isPostQuantumKey();
 
+	boolean useEncryptionAlgorithm();
 
+	boolean useAuthenticatedSignatureAlgorithm();
 
 
 }

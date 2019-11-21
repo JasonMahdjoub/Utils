@@ -149,10 +149,10 @@ public class Bits {
 	public static void putPositiveInteger(byte[] b, int off, long val, int valueSizeInBytes) {
 	    if (val<0)
 	        throw new IllegalArgumentException();
-		if (valueSizeInBytes<1) {
-		    return;
-        }
-        else if (valueSizeInBytes<=8) {
+		if (valueSizeInBytes>8) {
+			throw new IllegalArgumentException();
+		}
+        else if (valueSizeInBytes>=1) {
         	int i=valueSizeInBytes-1;
         	while (i>=0)
 			{
@@ -160,9 +160,8 @@ public class Bits {
 				val>>>=8;
 			}
 		}
-        else
 
-            throw new IllegalArgumentException();
+
 	}
 
     public static long getPositiveInteger(byte[] b, int off, int valueSizeInBytes) {

@@ -69,6 +69,7 @@ public abstract class AbstractKey extends DecentralizedValue implements IKey{
 
 	static final int IS_XDH_KEY=1<<5;
 
+
 	static final byte IS_HYBRID_KEY_PAIR=(byte)(19);
 	static final byte IS_HYBRID_PUBLIC_KEY=(byte)(20);
 	static final byte IS_HYBRID_PRIVATE_KEY=(byte)(21);
@@ -187,11 +188,25 @@ public abstract class AbstractKey extends DecentralizedValue implements IKey{
 			if (isXdh)
 				type-=IS_XDH_KEY;
 			if (type == (byte)0) {
-				int codedTypeSize = SymmetricSecretKey.getEncodedTypeSize();
-				byte[] secretKey = new byte[len - 2 - codedTypeSize];
-				System.arraycopy(b, 2 + codedTypeSize+off, secretKey, 0, secretKey.length);
-				return new SymmetricSecretKey(SymmetricEncryptionType.valueOf((int) Bits.getPositiveInteger(b, off+1, codedTypeSize)), secretKey,
-						SymmetricSecretKey.decodeKeySizeBits(b[codedTypeSize + 1+off]));
+				if (isXdh)
+				{
+					int s=b[off+1] & 0xFF;
+
+					AbstractKey ke=decode(b, off+2, s);
+					if (!(ke instanceof SymmetricSecretKey))
+						throw new IllegalArgumentException();
+					AbstractKey ks=decode(b, off+2+s, len-2-s);
+					if (!(ks instanceof SymmetricSecretKey))
+						throw new IllegalArgumentException();
+					return new SymmetricSecretKeyPair((SymmetricSecretKey)ke, (SymmetricSecretKey)ks);
+				}
+				else {
+					int codedTypeSize = SymmetricSecretKey.getEncodedTypeSize();
+					byte[] secretKey = new byte[len - 2 - codedTypeSize];
+					System.arraycopy(b, 2 + codedTypeSize + off, secretKey, 0, secretKey.length);
+					return new SymmetricSecretKey(SymmetricEncryptionType.valueOf((int) Bits.getPositiveInteger(b, off + 1, codedTypeSize)), secretKey,
+							SymmetricSecretKey.decodeKeySizeBits(b[codedTypeSize + 1 + off]));
+				}
 			} else if (type == (byte) 1) {
 				int codedTypeSize = SymmetricSecretKey.getEncodedTypeSize();
 				byte[] secretKey = new byte[len - 2 - codedTypeSize];
