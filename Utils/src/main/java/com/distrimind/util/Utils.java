@@ -60,7 +60,7 @@ public class Utils {
 		c.set(2016, Calendar.JANUARY, 4);
 		Calendar c2 = Calendar.getInstance();
 		c.set(2019, Calendar.NOVEMBER, 21);
-		VERSION = new Version("Utils", "Utils", (short)4, (short)6, (short)6, Version.Type.Stable, (short)0, c.getTime(), c2.getTime());
+		VERSION = new Version("Utils", "Utils", (short)4, (short)7, (short)0, Version.Type.Stable, (short)0, c.getTime(), c2.getTime());
 		try {
 
 			InputStream is = Utils.class.getResourceAsStream("build.txt");
@@ -74,8 +74,9 @@ public class Utils {
 
 			c = Calendar.getInstance();
 			c.set(2019, Calendar.NOVEMBER, 21);
-			Description d = new Description((short)4, (short)6, (short)6, Version.Type.Stable, (short)0, c.getTime());
+			Description d = new Description((short)4, (short)7, (short)0, Version.Type.Stable, (short)0, c.getTime());
 			d.addItem("Add classes Reference");
+			d.addItem("Permit secret key hashing");
 			VERSION.addDescription(d);
 
 			c = Calendar.getInstance();

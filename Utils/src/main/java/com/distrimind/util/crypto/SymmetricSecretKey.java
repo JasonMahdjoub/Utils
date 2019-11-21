@@ -34,6 +34,8 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.util.Arrays;
 import javax.crypto.SecretKey;
 
@@ -49,7 +51,7 @@ import com.distrimind.util.Bits;
  * 
  * @author Jason Mahdjoub
  * @version 2.3
- * @since Utils 1.7.1
+ * @since Utils 2.0.0
  */
 public class SymmetricSecretKey extends AbstractKey {
 
@@ -74,6 +76,39 @@ public class SymmetricSecretKey extends AbstractKey {
 	private transient Object gnuSecretKey = null;
 	
 	private transient org.bouncycastle.crypto.SymmetricSecretKey bcfipsNativeSecretKey=null;
+	public SymmetricSecretKey getHashedSecretKey(MessageDigestType messageDigestType, long customApplicationCode) throws NoSuchProviderException, NoSuchAlgorithmException {
+		byte[] tab=new byte[8];
+		Bits.putLong(tab, 0, customApplicationCode);
+		return getHashedSecretKey(messageDigestType, tab);
+	}
+	public SymmetricSecretKey getHashedSecretKey(MessageDigestType messageDigestType) throws NoSuchProviderException, NoSuchAlgorithmException {
+		return getHashedSecretKey(messageDigestType, null);
+	}
+	public SymmetricSecretKey getHashedSecretKey(MessageDigestType messageDigestType, byte[] customApplicationCode) throws NoSuchProviderException, NoSuchAlgorithmException {
+		if (messageDigestType.getDigestLengthInBits()/8<secretKey.length)
+			throw new IllegalArgumentException("The message digest length cannot be lower than the key size");
+		AbstractMessageDigest md=messageDigestType.getMessageDigestInstance();
+		md.reset();
+		md.update(secretKey);
+		md.update(encryptionType==null?signatureType.name().getBytes():encryptionType.name().getBytes());
+		if (customApplicationCode!=null)
+			md.update(customApplicationCode);
+		byte[] k=md.digest();
+		if (k.length>secretKey.length)
+		{
+			byte[] k2=new byte[secretKey.length];
+			Arrays.fill(k2, (byte)0);
+			for (int i=0;i<k.length;i++)
+			{
+				k2[i%k2.length]^=k[i];
+			}
+			k=k2;
+		}
+		if (encryptionType==null)
+			return new SymmetricSecretKey(signatureType, k, keySizeBits);
+		else
+			return new SymmetricSecretKey(encryptionType, k, keySizeBits);
+	}
 
 	@Override
 	public void zeroize()
