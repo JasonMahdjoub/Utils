@@ -80,6 +80,8 @@ public class Utils {
 			d.addItem("Add SymmetricSecretKeyPair class");
 			d.addItem("Add functions SymmetricSecretKey.getDerivedSecretKeyPair(...)");
 			d.addItem("Add checksum control into DecentralizedValue.toString() and DecentralizedValue.valueOf() functions");
+			d.addItem("Add SymmetricEncryption.generateSecretKeyFromByteArray and SymmetricAuthenticatedSignatureType.generateSecretKeyFromByteArray functions");
+
 			VERSION.addDescription(d);
 
 			c = Calendar.getInstance();

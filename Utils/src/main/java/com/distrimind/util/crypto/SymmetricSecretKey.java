@@ -73,6 +73,7 @@ public class SymmetricSecretKey extends AbstractKey {
 	private transient Object gnuSecretKey = null;
 	
 	private transient org.bouncycastle.crypto.SymmetricSecretKey bcfipsNativeSecretKey=null;
+
 	public SymmetricSecretKey getHashedSecretKey(MessageDigestType messageDigestType, long customApplicationCode) throws NoSuchProviderException, NoSuchAlgorithmException {
 		byte[] tab=new byte[8];
 		Bits.putLong(tab, 0, customApplicationCode);

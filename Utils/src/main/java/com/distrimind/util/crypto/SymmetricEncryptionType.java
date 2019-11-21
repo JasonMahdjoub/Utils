@@ -38,6 +38,7 @@ import java.security.AccessController;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.PrivilegedAction;
+import java.util.Arrays;
 
 import javax.crypto.Cipher;
 
@@ -120,8 +121,19 @@ public enum SymmetricEncryptionType {
 		
 		return new org.bouncycastle.crypto.SymmetricSecretKey(algorithmName, encodedSecretKey);
 	}*/
-	
-	
+
+	public SymmetricSecretKey generateSecretKeyFromByteArray(byte[] tab) throws NoSuchProviderException, NoSuchAlgorithmException {
+		return generateSecretKeyFromByteArray(tab, getDefaultKeySizeBits());
+	}
+
+	public SymmetricSecretKey generateSecretKeyFromByteArray(byte[] tab, short keySizeBits) throws NoSuchProviderException, NoSuchAlgorithmException {
+		if (keySizeBits<56 || keySizeBits>512)
+			throw new IllegalArgumentException();
+		AbstractMessageDigest md=(keySizeBits>256?MessageDigestType.SHA3_512:MessageDigestType.SHA3_256).getMessageDigestInstance();
+		md.update(tab);
+		byte[] d=md.digest();
+		return new SymmetricSecretKey(this, Arrays.copyOfRange(d, 0, keySizeBits), keySizeBits);
+	}
 
 	static byte[] encodeGnuSecretKey(Object key, String algorithmName) {
 		return GnuFunctions.keyGetEncoded(key);

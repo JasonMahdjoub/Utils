@@ -42,6 +42,7 @@ import org.bouncycastle.crypto.fips.FipsSHS.AuthParameters;
 import javax.crypto.spec.SecretKeySpec;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
+import java.util.Arrays;
 
 /**
  * 
@@ -97,6 +98,18 @@ public enum SymmetricAuthentifiedSignatureType {
         this.replacer=replacer;
     }
 
+	public SymmetricSecretKey generateSecretKeyFromByteArray(byte[] tab) throws NoSuchProviderException, NoSuchAlgorithmException {
+		return generateSecretKeyFromByteArray(tab, getDefaultKeySizeBits());
+	}
+
+	public SymmetricSecretKey generateSecretKeyFromByteArray(byte[] tab, short keySizeBits) throws NoSuchProviderException, NoSuchAlgorithmException {
+		if (keySizeBits<56 || keySizeBits>512)
+			throw new IllegalArgumentException();
+		AbstractMessageDigest md=(keySizeBits>256?MessageDigestType.SHA3_512:MessageDigestType.SHA3_256).getMessageDigestInstance();
+		md.update(tab);
+		byte[] d=md.digest();
+		return new SymmetricSecretKey(this, Arrays.copyOfRange(d, 0, keySizeBits), keySizeBits);
+	}
 	
 	
 	AuthParameters getMessageDigestAuth() {
