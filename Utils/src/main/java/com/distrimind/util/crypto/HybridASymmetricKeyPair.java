@@ -121,9 +121,14 @@ public class HybridASymmetricKeyPair extends AbstractKeyPair<HybridASymmetricPri
 	}
 
 
+	public byte[] encode() {
+		return encode(true);
+	}
 	@Override
-	public byte[] encode(boolean includeTimeExpiration) {
-		byte[] encodedPrivKey=privateKey.encode(includeTimeExpiration);
+	public byte[] encode(boolean includeTimeExpiration)
+	{
+
+		byte[] encodedPrivKey=privateKey.encode();
 		byte[] encodedPubKey=publicKey.encode(includeTimeExpiration);
 
 		byte[] res=new byte[encodedPrivKey.length+encodedPubKey.length+4];

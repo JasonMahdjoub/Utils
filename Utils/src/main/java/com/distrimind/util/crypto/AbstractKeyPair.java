@@ -74,13 +74,8 @@ public abstract class AbstractKeyPair<PrivKey extends IASymmetricPrivateKey, Pub
 		return decode(Bits.checkByteArrayAndReturnsItWithoutCheckSum(Base64.decodeBase64(key)));
 	}
 
-	@Override
-	public final String toString() {
-		return Base64.encodeBase64URLSafeString(Bits.getByteArrayWithCheckSum(encodeWithDefaultParameters()));
-	}
 	public abstract boolean isPostQuantumKey();
 
-	public  abstract byte[] encode(boolean includeTimeExpiration);
 
 	public abstract Object toGnuKeyPair()throws NoSuchAlgorithmException, InvalidKeySpecException;
 
@@ -97,15 +92,12 @@ public abstract class AbstractKeyPair<PrivKey extends IASymmetricPrivateKey, Pub
 
 	public abstract void zeroize();
 
+	public abstract byte[] encode(boolean includeTimeExpiration);
+
 	@SuppressWarnings("deprecation")
 	@Override public void finalize()
 	{
 		zeroize();
-	}
-
-	@Override
-	public byte[] encodeWithDefaultParameters() {
-		return encode(getTimeExpirationUTC()!=Long.MAX_VALUE);
 	}
 
 	/*public abstract ASymmetricEncryptionType getEncryptionAlgorithmType() ;

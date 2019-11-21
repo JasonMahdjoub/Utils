@@ -36,7 +36,6 @@ package com.distrimind.util.crypto;
 
 import com.distrimind.util.Bits;
 import com.distrimind.util.io.RandomByteArrayInputStream;
-import org.apache.commons.codec.binary.Base64;
 import org.bouncycastle.crypto.Algorithm;
 import org.bouncycastle.crypto.AsymmetricKey;
 import org.bouncycastle.crypto.AsymmetricPublicKey;
@@ -244,8 +243,12 @@ public class ASymmetricPublicKey extends AbstractKey implements IASymmetricPubli
 
 
 
+	public byte[] encode() {
+		return encode(true);
+	}
 	@Override
-	public byte[] encode(boolean includeTimeExpiration) {
+	public byte[] encode(boolean includeTimeExpiration)
+	{
 		if (getTimeExpirationUTC()==Long.MAX_VALUE)
 			includeTimeExpiration=false;
 		byte[] tab = new byte[4+ASymmetricPrivateKey.ENCODED_TYPE_SIZE+publicKey.length+(includeTimeExpiration?8:0)];
@@ -408,11 +411,6 @@ public class ASymmetricPublicKey extends AbstractKey implements IASymmetricPubli
 				throw new IllegalAccessError(pk.getClass().getName());
 		}
 		
-	}
-
-	@Override
-	public byte[] encodeWithDefaultParameters() {
-		return encode(true);
 	}
 
 	@Override

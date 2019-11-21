@@ -276,7 +276,7 @@ public class SerializationTools {
 			
 		}
 
-		writeBytes(oos, key.encodeWithDefaultParameters(), MAX_KEY_SIZE, false);
+		writeBytes(oos, key.encode(), MAX_KEY_SIZE, false);
 	}
 
 	@SuppressWarnings("SameParameterValue")
@@ -319,7 +319,7 @@ public class SerializationTools {
 		}
 
 		
-		writeBytes(oos, keyPair.encodeWithDefaultParameters(), MAX_KEY_SIZE*2, false);
+		writeBytes(oos, keyPair.encode(), MAX_KEY_SIZE*2, false);
 	}
 
 	@SuppressWarnings("SameParameterValue")
@@ -604,7 +604,7 @@ public class SerializationTools {
 
 		}
 
-		writeBytes(oos, id.encodeWithDefaultParameters(), 513, false);
+		writeBytes(oos, id.encode(), 513, false);
 	}
 	@SuppressWarnings("SameParameterValue")
 	static AbstractDecentralizedID readDecentralizedID(final SecuredObjectInputStream in, boolean supportNull) throws IOException
@@ -1489,11 +1489,11 @@ public class SerializationTools {
 		}
 		else if (o instanceof AbstractKey)
 		{
-			return 4+((AbstractKey)o).encodeWithDefaultParameters().length;
+			return 4+((AbstractKey)o).encode().length;
 		}
 		else if (o instanceof AbstractKeyPair)
 		{
-			return 4+((AbstractKeyPair)o).encodeWithDefaultParameters().length;
+			return 4+((AbstractKeyPair)o).encode().length;
 		}
 		else if (o instanceof byte[][])
 		{
@@ -1548,7 +1548,7 @@ public class SerializationTools {
 		}
 		else if (o instanceof AbstractDecentralizedID)
 		{
-			return ((AbstractDecentralizedID) o).encodeWithDefaultParameters().length+3;
+			return ((AbstractDecentralizedID) o).encode().length+3;
 		}
 		else if (o instanceof Enum<?>)
 		{

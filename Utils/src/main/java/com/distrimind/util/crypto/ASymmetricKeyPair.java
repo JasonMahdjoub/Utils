@@ -228,8 +228,12 @@ public class ASymmetricKeyPair extends AbstractKeyPair<ASymmetricPrivateKey, ASy
 		this.nativeKeyPair=keyPair;
 	}
 
+	public byte[] encode() {
+		return encode(true);
+	}
 	@Override
-	public byte[] encode(boolean includeTimeExpiration) {
+	public byte[] encode(boolean includeTimeExpiration)
+	{
 		if (getTimeExpirationUTC()==Long.MAX_VALUE)
 			includeTimeExpiration=false;
 

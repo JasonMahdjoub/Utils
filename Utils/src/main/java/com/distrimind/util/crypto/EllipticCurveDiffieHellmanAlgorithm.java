@@ -151,7 +151,7 @@ public class EllipticCurveDiffieHellmanAlgorithm extends KeyAgreement {
 			throw new NullPointerException("keyPair");
 		reset();
 		myKeyPair = keyPair;
-		myPublicKeyBytes = myKeyPair.getASymmetricPublicKey().encode(true);
+		myPublicKeyBytes = myKeyPair.getASymmetricPublicKey().encode();
 	}
 	
 	/*private ASymmetricKeyPair getKeyPair()

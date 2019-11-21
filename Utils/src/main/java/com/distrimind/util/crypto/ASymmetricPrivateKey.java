@@ -36,7 +36,6 @@ package com.distrimind.util.crypto;
 
 import com.distrimind.util.Bits;
 import com.distrimind.util.io.RandomByteArrayInputStream;
-import org.apache.commons.codec.binary.Base64;
 import org.bouncycastle.crypto.Algorithm;
 import org.bouncycastle.crypto.AsymmetricKey;
 import org.bouncycastle.crypto.AsymmetricPrivateKey;
@@ -236,11 +235,8 @@ public class ASymmetricPrivateKey extends AbstractKey implements IASymmetricPriv
 	}
 
 	@Override
-	public byte[] encode(boolean includeTimeExpiration) {
-		return encode();
-	}
-
-	public byte[] encode() {
+	public byte[] encode()
+	{
 		byte[] tab = new byte[4+ENCODED_TYPE_SIZE+privateKey.length];
 		tab[0]=encryptionType==null?(byte)((xdhKey? AbstractKey.IS_XDH_KEY:0)|2):(byte)3;
 		Bits.putPositiveInteger(tab, 1, keySizeBits, 3);
@@ -369,10 +365,6 @@ public class ASymmetricPrivateKey extends AbstractKey implements IASymmetricPriv
 		
 	}
 
-	@Override
-	public byte[] encodeWithDefaultParameters() {
-		return encode();
-	}
 
 	@Override
 	public boolean useEncryptionAlgorithm() {

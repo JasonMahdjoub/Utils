@@ -36,8 +36,6 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 
 
-import org.apache.commons.codec.binary.Base64;
-
 import java.util.Objects;
 
 /**
@@ -104,13 +102,9 @@ public class HybridASymmetricPrivateKey extends AbstractKey implements IHybridKe
 	}
 
 	public byte[] encode() {
-		return AbstractKey.encodeHybridKey(nonPQCPrivateKey, PQCPrivateKey, false);
+		return AbstractKey.encodeHybridKey(nonPQCPrivateKey, PQCPrivateKey, true);
 	}
 
-	@Override
-	public byte[] encode(boolean includeTimeExpiration) {
-		return encode();
-	}
 
 	@Override
 	public void zeroize() {
@@ -121,7 +115,7 @@ public class HybridASymmetricPrivateKey extends AbstractKey implements IHybridKe
 
 	@Override
 	public byte[] getKeyBytes() {
-		return encodeWithDefaultParameters();
+		return encode();
 	}
 
 	@Override
@@ -129,10 +123,6 @@ public class HybridASymmetricPrivateKey extends AbstractKey implements IHybridKe
 		return true;
 	}
 
-	@Override
-	public byte[] encodeWithDefaultParameters() {
-		return encode();
-	}
 
 	@Override
 	public boolean equals(Object o) {

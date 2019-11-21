@@ -34,16 +34,13 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
+import com.distrimind.util.Bits;
+import org.bouncycastle.crypto.Algorithm;
+
+import javax.crypto.SecretKey;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.util.Arrays;
-import javax.crypto.SecretKey;
-
-import org.apache.commons.codec.binary.Base64;
-import org.bouncycastle.crypto.Algorithm;
-
-
-import com.distrimind.util.Bits;
 
 
 
@@ -299,11 +296,8 @@ public class SymmetricSecretKey extends AbstractKey {
         return decodeKeySizeBits((1<<usedBitsForEncoding)-1);
     }
 
-	@Override
-	public byte[] encode(boolean includeTimeExpiration) {
-		return encode();
-	}
 
+	@Override
 	public byte[] encode() {
 	    int codedTypeSize=getEncodedTypeSize();
 		byte[] tab = new byte[2+codedTypeSize+secretKey.length];
@@ -410,11 +404,6 @@ public class SymmetricSecretKey extends AbstractKey {
 		
 		return bcfipsNativeSecretKey;
 		
-	}
-
-	@Override
-	public byte[] encodeWithDefaultParameters() {
-		return encode(true);
 	}
 
 	/*

@@ -36,8 +36,6 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 
 
-import org.apache.commons.codec.binary.Base64;
-
 import java.util.Objects;
 
 /**
@@ -104,8 +102,13 @@ public class HybridASymmetricPublicKey extends AbstractKey implements IHybridKey
 		throw new IllegalAccessError();
 	}
 
+	public byte[] encode() {
+		return encode(true);
+	}
 	@Override
-	public byte[] encode(boolean includeTimeExpiration) {
+	public byte[] encode(boolean includeTimeExpiration)
+	{
+
 		return AbstractKey.encodeHybridKey(nonPQCPublicKey, PQCPublicKey, includeTimeExpiration);
 	}
 
@@ -118,7 +121,7 @@ public class HybridASymmetricPublicKey extends AbstractKey implements IHybridKey
 
 	@Override
 	public byte[] getKeyBytes() {
-		return encodeWithDefaultParameters();
+		return encode();
 	}
 
 	@Override
@@ -126,10 +129,6 @@ public class HybridASymmetricPublicKey extends AbstractKey implements IHybridKey
 		return true;
 	}
 
-	@Override
-	public byte[] encodeWithDefaultParameters() {
-		return encode(true);
-	}
 
 	/*@Override
 	public ASymmetricEncryptionType getEncryptionAlgorithmType() {

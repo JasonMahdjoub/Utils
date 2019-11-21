@@ -13,6 +13,7 @@ public interface IASymmetricPrivateKey extends IKey {
 	ASymmetricPrivateKey getNonPQCPrivateKey();
 
 
+
 	/*ASymmetricEncryptionType getEncryptionAlgorithmType() ;
 
 	ASymmetricAuthenticatedSignatureType getAuthenticatedSignatureAlgorithmType() ;*/

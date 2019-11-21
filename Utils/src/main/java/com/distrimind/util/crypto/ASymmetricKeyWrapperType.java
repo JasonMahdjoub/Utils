@@ -197,7 +197,7 @@ public enum ASymmetricKeyWrapperType {
 			{
 				ClientASymmetricEncryptionAlgorithm client=new ClientASymmetricEncryptionAlgorithm(random, publicKey);
 				try {
-					return client.encode(keyToWrap.encodeWithDefaultParameters());
+					return client.encode(keyToWrap.encode());
 				} catch (BadPaddingException e) {
 					throw new IllegalStateException(e);
 				}

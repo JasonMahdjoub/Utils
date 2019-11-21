@@ -89,16 +89,13 @@ public class SymmetricSecretKeyPair extends AbstractKey{
 		throw new IllegalAccessError();
 	}
 
-	@Override
-	public byte[] encode(boolean includeTimeExpiration) {
-		return encode();
-	}
 
+	@Override
 	public byte[] encode()
 	{
 		int codedTypeSize=SymmetricSecretKey.getEncodedTypeSize();
-		byte[] encodedSecretKeyForEncryption=secretKeyForEncryption.encodeWithDefaultParameters();
-		byte[] encodedSecretKeyForSignature=secretKeyForSignature.encodeWithDefaultParameters();
+		byte[] encodedSecretKeyForEncryption=secretKeyForEncryption.encode();
+		byte[] encodedSecretKeyForSignature=secretKeyForSignature.encode();
 		byte[] tab = new byte[2+codedTypeSize+encodedSecretKeyForEncryption.length+encodedSecretKeyForSignature.length];
 		tab[0]=AbstractKey.IS_XDH_KEY;
 		if (encodedSecretKeyForEncryption.length>255)
@@ -124,11 +121,6 @@ public class SymmetricSecretKeyPair extends AbstractKey{
 
 
 	@Override
-	public byte[] encodeWithDefaultParameters() {
-		return encode();
-	}
-
-	@Override
 	public void zeroize() {
 		secretKeyForEncryption=null;
 		secretKeyForSignature=null;
@@ -137,7 +129,7 @@ public class SymmetricSecretKeyPair extends AbstractKey{
 	@Override
 	@Deprecated
 	public byte[] getKeyBytes() {
-		throw new IllegalAccessError();
+		return encode();
 	}
 
 	@Override

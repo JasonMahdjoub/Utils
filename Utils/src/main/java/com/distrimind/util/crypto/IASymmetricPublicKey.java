@@ -11,6 +11,7 @@ public interface IASymmetricPublicKey extends IKey {
 	ASymmetricAuthenticatedSignatureType getAuthenticatedSignatureAlgorithmType() ;*/
 
 	long getTimeExpirationUTC() ;
+	byte[] encode(boolean includeTimeExpiration);
 
 
 

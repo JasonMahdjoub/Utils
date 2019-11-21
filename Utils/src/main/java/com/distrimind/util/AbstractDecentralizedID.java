@@ -65,11 +65,6 @@ public abstract class AbstractDecentralizedID extends DecentralizedValue {
 		return decode(bytes, 0, bytes.length);
 	}
 
-	@Override
-	public byte[] encodeWithDefaultParameters() {
-		return encode();
-	}
-
 	public static boolean isValidType(byte[] bytes, int off)
 	{
 		return bytes[off]==AbstractDecentralizedID.DECENTRALIZED_ID_GENERATOR_TYPE
@@ -164,6 +159,7 @@ public abstract class AbstractDecentralizedID extends DecentralizedValue {
 	@Override
 	public abstract boolean equals(Object obj);
 
+	@Override
 	public abstract byte[] encode();
 
 	abstract byte getType();

@@ -391,7 +391,7 @@ public class CryptoTests {
 		byte[] b = kpd.encode(false);
 		HybridASymmetricKeyPair kpd2=(HybridASymmetricKeyPair)DecentralizedValue.decode(b);
 		testHybridASymmetricKeyPairEqualityForSignatureHybridASymmetricKeyPair(kpd, kpd2);
-		testHybridASymmetricKeyPairEqualityForSignatureHybridASymmetricKeyPair(kpd, (HybridASymmetricKeyPair)DecentralizedValue.valueOf(kpd.toString()));
+		testHybridASymmetricKeyPairEqualityForSignatureHybridASymmetricKeyPair(kpd, (HybridASymmetricKeyPair)DecentralizedValue.valueOf(kpd.encodeString()));
 		Assert.assertEquals(kpd2.getASymmetricPublicKey().getTimeExpirationUTC(), Long.MAX_VALUE);
 
 		b = kpd.getASymmetricPublicKey().encode(false);
@@ -415,8 +415,8 @@ public class CryptoTests {
 		Assert.assertEquals(((HybridASymmetricKeyPair)DecentralizedValue.decode(kpd.encode(true))).getASymmetricPublicKey(),
 				kpd.getASymmetricPublicKey());
 
-		Assert.assertEquals(DecentralizedValue.valueOf(kpd.getASymmetricPublicKey().toString()), kpd);
-		Assert.assertEquals(DecentralizedValue.valueOf(kpd.getASymmetricPrivateKey().toString()), kpd);
+		Assert.assertEquals(DecentralizedValue.valueOf(kpd.getASymmetricPublicKey().encodeString()), kpd);
+		Assert.assertEquals(DecentralizedValue.valueOf(kpd.getASymmetricPrivateKey().encodeString()), kpd);
 
 		System.out.println(type+" :");
 		System.out.println("\tKey pair encoding : "+kpd.toString());
@@ -457,7 +457,7 @@ public class CryptoTests {
 		byte[] b = kpd.encode(false);
 		ASymmetricKeyPair kpd2=(ASymmetricKeyPair)DecentralizedValue.decode(b);
 		testASymmetricKeyPairEqualityForEncryption(kpd, kpd2);
-		testASymmetricKeyPairEqualityForEncryption(kpd, (ASymmetricKeyPair)DecentralizedValue.valueOf(kpd.toString()));
+		testASymmetricKeyPairEqualityForEncryption(kpd, (ASymmetricKeyPair)DecentralizedValue.valueOf(kpd.encodeString()));
 		Assert.assertEquals(kpd2.getASymmetricPublicKey().getTimeExpirationUTC(), Long.MAX_VALUE);
 
 		b = kpd.getASymmetricPublicKey().encode(false);
@@ -479,8 +479,8 @@ public class CryptoTests {
 		Assert.assertEquals(((ASymmetricKeyPair)DecentralizedValue.decode(kpd.encode(true))).getASymmetricPublicKey(),
 				kpd.getASymmetricPublicKey());
 
-		Assert.assertEquals(DecentralizedValue.valueOf(kpd.getASymmetricPublicKey().toString()), kpd);
-		Assert.assertEquals(DecentralizedValue.valueOf(kpd.getASymmetricPrivateKey().toString()), kpd);
+		Assert.assertEquals(DecentralizedValue.valueOf(kpd.getASymmetricPublicKey().encodeString()), kpd);
+		Assert.assertEquals(DecentralizedValue.valueOf(kpd.getASymmetricPrivateKey().encodeString()), kpd);
 
 		System.out.println(type+" :");
 		System.out.println("\tKey pair encoding : "+kpd.toString());
@@ -527,7 +527,7 @@ public class CryptoTests {
 		byte[] b = kpd.encode(false);
 		HybridASymmetricKeyPair kpd2=(HybridASymmetricKeyPair)DecentralizedValue.decode(b);
 		testHybridASymmetricKeyPairEqualityForEncryption(kpd, kpd2);
-		testHybridASymmetricKeyPairEqualityForEncryption(kpd, (HybridASymmetricKeyPair)DecentralizedValue.valueOf(kpd.toString()));
+		testHybridASymmetricKeyPairEqualityForEncryption(kpd, (HybridASymmetricKeyPair)DecentralizedValue.valueOf(kpd.encodeString()));
 		Assert.assertEquals(kpd2.getASymmetricPublicKey().getTimeExpirationUTC(), Long.MAX_VALUE);
 
 		b = kpd.getASymmetricPublicKey().encode(false);
@@ -551,8 +551,8 @@ public class CryptoTests {
 		Assert.assertEquals(((HybridASymmetricKeyPair)DecentralizedValue.decode(kpd.encode(true))).getASymmetricPublicKey(),
 				kpd.getASymmetricPublicKey());
 
-		Assert.assertEquals(DecentralizedValue.valueOf(kpd.getASymmetricPublicKey().toString()), kpd);
-		Assert.assertEquals(DecentralizedValue.valueOf(kpd.getASymmetricPrivateKey().toString()), kpd);
+		Assert.assertEquals(DecentralizedValue.valueOf(kpd.getASymmetricPublicKey().encodeString()), kpd);
+		Assert.assertEquals(DecentralizedValue.valueOf(kpd.getASymmetricPrivateKey().encodeString()), kpd);
 
 		System.out.println(nonPQCType+"; "+PQCType+" :");
 		System.out.println("\tKey pair encoding : "+kpd.toString());
@@ -609,7 +609,7 @@ public class CryptoTests {
 		ASymmetricKeyPair kpd2=(ASymmetricKeyPair)DecentralizedValue.decode(b);
 		testASymmetricKeyPairEqualityForSignature(kpd, kpd2);
 		Assert.assertEquals(kpd2.getASymmetricPublicKey().getTimeExpirationUTC(), Long.MAX_VALUE);
-		testASymmetricKeyPairEqualityForSignature(kpd, (ASymmetricKeyPair)DecentralizedValue.valueOf(kpd.toString()));
+		testASymmetricKeyPairEqualityForSignature(kpd, (ASymmetricKeyPair)DecentralizedValue.valueOf(kpd.encodeString()));
 
 
 
@@ -631,8 +631,8 @@ public class CryptoTests {
 				kpd.getASymmetricPrivateKey());
 		Assert.assertEquals(((ASymmetricKeyPair)DecentralizedValue.decode(kpd.encode(true))).getASymmetricPublicKey(),
 				kpd.getASymmetricPublicKey());
-		Assert.assertEquals(DecentralizedValue.valueOf(kpd.getASymmetricPublicKey().toString()), kpd);
-		Assert.assertEquals(DecentralizedValue.valueOf(kpd.getASymmetricPrivateKey().toString()), kpd);
+		Assert.assertEquals(DecentralizedValue.valueOf(kpd.getASymmetricPublicKey().encodeString()), kpd);
+		Assert.assertEquals(DecentralizedValue.valueOf(kpd.getASymmetricPrivateKey().encodeString()), kpd);
         System.out.println(type+" :");
         System.out.println("\tKey pair encoding : "+kpd.toString());
         System.out.println("\tPublic key encoding : "+kpd.getASymmetricPublicKey().toString());
@@ -1303,10 +1303,10 @@ public class CryptoTests {
 		Assert.assertEquals(DecentralizedValue.decode(key.encode()), key);
 		new SymmetricEncryptionAlgorithm(random, key);
 		Assert.assertEquals(DecentralizedValue.decode(key.encode()), key);
-		Assert.assertEquals(DecentralizedValue.valueOf(key.toString()), key);
+		Assert.assertEquals(DecentralizedValue.valueOf(key.encodeString()), key);
 		SymmetricSecretKeyPair keyPair=key.getDerivedSecretKeyPair(MessageDigestType.BC_FIPS_SHA3_512, SymmetricAuthentifiedSignatureType.HMAC_SHA2_256);
 		Assert.assertEquals(DecentralizedValue.decode(keyPair.encode()), keyPair);
-		Assert.assertEquals(DecentralizedValue.valueOf(keyPair.toString()), keyPair);
+		Assert.assertEquals(DecentralizedValue.valueOf(keyPair.encodeString()), keyPair);
 
 	}
 

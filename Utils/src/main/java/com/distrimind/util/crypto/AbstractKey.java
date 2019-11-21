@@ -114,8 +114,8 @@ public abstract class AbstractKey extends DecentralizedValue implements IKey{
 
 	static byte[] encodeHybridKey(AbstractKey nonPQCKey, AbstractKey PQCKey, boolean includeTimeExpiration)
 	{
-		byte[] encodedNonPQC=nonPQCKey.encode(includeTimeExpiration);
-		byte[] encodedPQC=PQCKey.encode(includeTimeExpiration);
+		byte[] encodedNonPQC=nonPQCKey instanceof IASymmetricPublicKey?((IASymmetricPublicKey)nonPQCKey).encode(includeTimeExpiration):nonPQCKey.encode();
+		byte[] encodedPQC=PQCKey instanceof IASymmetricPublicKey?((IASymmetricPublicKey)PQCKey).encode(includeTimeExpiration):PQCKey.encode();
 
 		byte[] res=new byte[encodedNonPQC.length+encodedPQC.length+4];
 		res[0]=((nonPQCKey instanceof HybridASymmetricPublicKey)?IS_HYBRID_PUBLIC_KEY:IS_HYBRID_PRIVATE_KEY);

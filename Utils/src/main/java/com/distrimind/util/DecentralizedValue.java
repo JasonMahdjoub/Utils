@@ -49,7 +49,7 @@ import java.io.Serializable;
  */
 public abstract class DecentralizedValue implements Serializable {
 
-	public abstract byte[] encodeWithDefaultParameters();
+	public abstract byte[] encode();
 	public static DecentralizedValue decode(byte[] encodedValue)
 	{
 		return decode(encodedValue, 0, encodedValue.length);
@@ -72,9 +72,15 @@ public abstract class DecentralizedValue implements Serializable {
 			return AbstractKeyPair.decode(encodedValue, off, len, fillArrayWithZerosWhenDecoded);
 
 	}
+
+	public final String encodeString() {
+		return Base64.encodeBase64URLSafeString(Bits.getByteArrayWithCheckSum(encode()));
+	}
+
 	@Override
-	public final String toString() {
-		return Base64.encodeBase64URLSafeString(Bits.getByteArrayWithCheckSum(encodeWithDefaultParameters()));
+	public String toString()
+	{
+		return this.getClass().getSimpleName()+"["+encodeString()+"]";
 	}
 
 	public static DecentralizedValue valueOf(String key) throws IllegalArgumentException, IOException {
