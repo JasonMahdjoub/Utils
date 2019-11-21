@@ -1,6 +1,6 @@
 Utils
 =====
-4.6.5 Stable (Build: 1312) (from 15/11/2019 to 20/11/2019)
+4.6.6 Stable (Build: 1316) (from 21/11/2019 to 21/11/2019)
 
 # Creator(s):
 Jason MAHDJOUB
@@ -9,6 +9,10 @@ Jason MAHDJOUB
 Jason MAHDJOUB (Entred in the team at 04/01/2016)
 
 # Modifications:
+
+
+### 4.6.6 Stable (21/11/2019)
+* Add classes Reference
 
 
 ### 4.6.5 Stable (15/11/2019)
