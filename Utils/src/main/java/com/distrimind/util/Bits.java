@@ -34,6 +34,8 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util;
 
+import java.io.IOException;
+
 /**
  * Utility methods for packing/unpacking primitive values in/out of byte arrays
  * using big-endian byte ordering.
@@ -220,4 +222,55 @@ public class Bits {
 	public static byte[][] separateEncodingsWithShortSizedTabs(byte[] concatedEncodedElement, int off, int len) {
 		return separateEncodingsWithSizedTabs(concatedEncodedElement, off, len, 2);
 	}
+
+	private static int computeByteParity(byte b)
+	{
+		int v=b & 0xFF;
+		int res=0;
+		for (int i=0;i<8;i++)
+		{
+			if ((v>>i & 1)==1)
+				res^=1;
+		}
+		return res;
+	}
+
+	public static byte[] getByteArrayWithCheckSum(byte[] tab)
+	{
+		if (tab==null)
+			throw new NullPointerException();
+		if (tab.length==0)
+			return tab;
+		byte[] res=new byte[tab.length+1];
+		int code=0;
+		for (int i=0;i<tab.length;i++)
+		{
+			byte b=tab[i];
+			res[i]=b;
+			code^=computeByteParity(b)<<(i%8);
+
+		}
+		res[tab.length]=(byte)code;
+		return res;
+	}
+
+	public static byte[] checkByteArrayAndReturnsItWithoutCheckSum(byte[] tab) throws IOException {
+		if (tab==null)
+			throw new NullPointerException();
+		if (tab.length==0)
+			return tab;
+		byte[] res=new byte[tab.length-1];
+		int expectedCode=tab[res.length] & 0xFF;
+		int code=0;
+		for (int i=0;i<res.length;i++)
+		{
+			byte b=tab[i];
+			res[i]=b;
+			code^=computeByteParity(b)<<(i%8);
+		}
+		if (code!=expectedCode)
+			throw new IOException("Invalid check sum");
+		return res;
+	}
+
 }

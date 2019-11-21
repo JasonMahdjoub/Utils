@@ -35,9 +35,11 @@ The fact that you are presently reading this means that you have had
 knowledge of the CeCILL-C license and that you accept its terms.
  */
 
+import com.distrimind.util.Bits;
 import com.distrimind.util.DecentralizedValue;
 import org.apache.commons.codec.binary.Base64;
 
+import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 
@@ -68,19 +70,14 @@ public abstract class AbstractKeyPair<PrivKey extends IASymmetricPrivateKey, Pub
 			return ASymmetricKeyPair.decode(b, off, len, fillArrayWithZerosWhenDecoded);
 	}
 
-	public static AbstractKeyPair valueOf(String key) throws IllegalArgumentException {
-		return decode(Base64.decodeBase64(key));
+	public static AbstractKeyPair valueOf(String key) throws IllegalArgumentException, IOException {
+		return decode(Bits.checkByteArrayAndReturnsItWithoutCheckSum(Base64.decodeBase64(key)));
 	}
 
 	@Override
-	public String toString() {
-		try {
-			return Base64.encodeBase64URLSafeString(encode(true));
-		} catch (Exception e) {
-			return e.toString();
-		}
+	public final String toString() {
+		return Base64.encodeBase64URLSafeString(Bits.getByteArrayWithCheckSum(encodeWithDefaultParameters()));
 	}
-
 	public abstract boolean isPostQuantumKey();
 
 	public  abstract byte[] encode(boolean includeTimeExpiration);

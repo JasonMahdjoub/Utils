@@ -37,7 +37,9 @@ package com.distrimind.util;
 import com.distrimind.util.crypto.ASymmetricKeyPair;
 import com.distrimind.util.crypto.AbstractKey;
 import com.distrimind.util.crypto.AbstractKeyPair;
+import org.apache.commons.codec.binary.Base64;
 
+import java.io.IOException;
 import java.io.Serializable;
 
 /**
@@ -70,4 +72,15 @@ public abstract class DecentralizedValue implements Serializable {
 			return AbstractKeyPair.decode(encodedValue, off, len, fillArrayWithZerosWhenDecoded);
 
 	}
+	@Override
+	public final String toString() {
+		return Base64.encodeBase64URLSafeString(Bits.getByteArrayWithCheckSum(encodeWithDefaultParameters()));
+	}
+
+	public static DecentralizedValue valueOf(String key) throws IllegalArgumentException, IOException {
+		if (key==null)
+			throw new NullPointerException();
+		return decode(Bits.checkByteArrayAndReturnsItWithoutCheckSum(Base64.decodeBase64(key)));
+	}
+
 }

@@ -34,6 +34,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
+import java.io.IOException;
 import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
@@ -57,8 +58,8 @@ public class ASymmetricKeyPair extends AbstractKeyPair<ASymmetricPrivateKey, ASy
 
 
 
-	public static ASymmetricKeyPair valueOf(String key) throws IllegalArgumentException {
-		return decode(Base64.decodeBase64(key));
+	public static ASymmetricKeyPair valueOf(String key) throws IllegalArgumentException, IOException {
+		return decode(Bits.checkByteArrayAndReturnsItWithoutCheckSum(Base64.decodeBase64(key)));
 	}
 
 	private ASymmetricPrivateKey privateKey;

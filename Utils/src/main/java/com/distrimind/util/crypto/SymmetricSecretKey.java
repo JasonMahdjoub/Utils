@@ -392,10 +392,7 @@ public class SymmetricSecretKey extends AbstractKey {
 
 
 
-	@Override
-	public String toString() {
-		return Base64.encodeBase64URLSafeString(encode());
-	}
+
 
 	Algorithm getBouncyCastleAlgorithm()
 	{

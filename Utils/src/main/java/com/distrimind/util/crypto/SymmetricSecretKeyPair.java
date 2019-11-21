@@ -44,7 +44,7 @@ import java.security.NoSuchProviderException;
 /**
  * @author Jason Mahdjoub
  * @version 1.0
- * @since MaDKitLanEdition 4.7.0
+ * @since Utils 4.7.0
  */
 public class SymmetricSecretKeyPair extends AbstractKey{
 	private SymmetricSecretKey secretKeyForEncryption;

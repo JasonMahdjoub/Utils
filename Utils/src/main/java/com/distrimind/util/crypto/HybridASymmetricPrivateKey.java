@@ -118,10 +118,6 @@ public class HybridASymmetricPrivateKey extends AbstractKey implements IHybridKe
 		PQCPrivateKey=null;
 	}
 
-	@Override
-	public String toString() {
-		return Base64.encodeBase64URLSafeString(encode(true));
-	}
 
 	@Override
 	public byte[] getKeyBytes() {

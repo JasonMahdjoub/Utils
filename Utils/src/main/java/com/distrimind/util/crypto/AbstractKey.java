@@ -39,6 +39,7 @@ import com.distrimind.util.Bits;
 import com.distrimind.util.DecentralizedValue;
 import org.apache.commons.codec.binary.Base64;
 
+import java.io.IOException;
 import java.util.Arrays;
 
 /**
@@ -284,8 +285,10 @@ public abstract class AbstractKey extends DecentralizedValue implements IKey{
 
 
 
-	public static AbstractKey valueOf(String key) throws IllegalArgumentException {
-		return decode(Base64.decodeBase64(key));
+	public static AbstractKey valueOf(String key) throws IllegalArgumentException, IOException {
+		if (key==null)
+			throw new NullPointerException();
+		return decode(Bits.checkByteArrayAndReturnsItWithoutCheckSum(Base64.decodeBase64(key)));
 	}
 
 
@@ -296,5 +299,7 @@ public abstract class AbstractKey extends DecentralizedValue implements IKey{
 	{
 		zeroize();
 	}
+
+
 
 }
