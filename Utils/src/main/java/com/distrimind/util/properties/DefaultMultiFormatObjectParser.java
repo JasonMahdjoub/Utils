@@ -51,6 +51,7 @@ import java.util.regex.Pattern;
 
 import javax.lang.model.SourceVersion;
 
+import com.distrimind.util.DecentralizedValue;
 import com.distrimind.util.crypto.*;
 import org.apache.commons.codec.binary.Base64;
 
@@ -103,18 +104,9 @@ public class DefaultMultiFormatObjectParser extends AbstractMultiFormatObjectPar
 		Inet6Address.class,
 		InetSocketAddress.class,
 		SourceVersion.class,
-		ASymmetricEncryptionType.class,
-		MessageDigestType.class,
-		SymmetricEncryptionType.class,
-		ASymmetricAuthenticatedSignatureType.class,
-		SymmetricSecretKey.class,
-		ASymmetricPrivateKey.class,
-		ASymmetricPublicKey.class,
-		ASymmetricKeyPair.class
-
 	};
 	private static final Class<?>[] supportedMultiClasses=new Class<?>[] {
-		AbstractDecentralizedID.class, MultiFormatProperties.class,Enum.class,Calendar.class
+		DecentralizedValue.class, MultiFormatProperties.class,Enum.class,Calendar.class
 	};
 	private SimpleDateFormat getSimpleDateFormat()
 	{
@@ -263,31 +255,17 @@ public class DefaultMultiFormatObjectParser extends AbstractMultiFormatObjectPar
 			return isa.getAddress().getHostAddress() + ";" + isa.getPort();
 		} else if (field_type == SourceVersion.class) {
 			return object.toString();
-		} else if (field_type == ASymmetricEncryptionType.class) {
-			return object.toString();
-		} else if (field_type == SymmetricEncryptionType.class) {
-			return object.toString();
-		} else if (field_type == ASymmetricAuthenticatedSignatureType.class) {
-			return object.toString();
-		} else if (field_type == MessageDigestType.class) {
-			return object.toString();
 		}
 		/*
 		 * else if (field_type==SymmetricSecretKeyType.class) { return
 		 * object.toString(); }
 		 */
-		else if (field_type == SymmetricSecretKey.class) {
-			return object.toString();
-		} else if (field_type == ASymmetricPrivateKey.class) {
-			return object.toString();
-		} else if (field_type == ASymmetricPublicKey.class) {
-			return object.toString();
-		} else if (field_type == ASymmetricKeyPair.class) {
-			return object.toString();
-		} else if (field_type.isEnum()) {
+		else if (DecentralizedValue.class.isAssignableFrom(field_type )) {
+			return ((DecentralizedValue)object).encodeString();
+		}
+		else if (field_type.isEnum()) {
 			return ((Enum<?>) object).name();
-		} else if (AbstractDecentralizedID.class.isAssignableFrom(field_type))
-			return object.toString();
+		}
 		else
 			return null;
 	}
@@ -436,35 +414,21 @@ public class DefaultMultiFormatObjectParser extends AbstractMultiFormatObjectPar
 			return new InetSocketAddress(InetAddress.getByName(split[0]), Integer.parseInt(split[1]));
 		} else if (field_type == SourceVersion.class) {
 			return SourceVersion.valueOf(nodeValue);
-		} else if (field_type == ASymmetricEncryptionType.class) {
-			return ASymmetricEncryptionType.valueOf(nodeValue);
-		} else if (field_type == SymmetricEncryptionType.class) {
-			return SymmetricEncryptionType.valueOf(nodeValue);
-		} else if (field_type == ASymmetricAuthenticatedSignatureType.class) {
-			return ASymmetricAuthenticatedSignatureType.valueOf(nodeValue);
-		} else if (field_type == MessageDigestType.class) {
-			return MessageDigestType.valueOf(nodeValue);
 		}
 		/*
 		 * else if (field_type==SymmetricSecretKeyType.class) { return
 		 * SymmetricSecretKeyType.valueOf(nodeValue); }
 		 */
-		else if (field_type == SymmetricSecretKey.class) {
-			return SymmetricSecretKey.valueOf(nodeValue);
-		} else if (field_type == ASymmetricPrivateKey.class) {
-			return ASymmetricPrivateKey.valueOf(nodeValue);
-		} else if (field_type == ASymmetricPublicKey.class) {
-			return ASymmetricPublicKey.valueOf(nodeValue);
-		} else if (field_type == ASymmetricKeyPair.class) {
-			return ASymmetricKeyPair.valueOf(nodeValue);
-		} else if (field_type.isEnum()) {
+		else if (DecentralizedValue.class.isAssignableFrom(field_type)) {
+			return DecentralizedValue.valueOf(nodeValue);
+		}
+		else if (field_type.isEnum()) {
 			for (Enum<?> e : (Enum<?>[]) field_type.getEnumConstants()) {
 				if (e.name().equals(nodeValue))
 					return e;
 			}
 			return null;
-		} else if (AbstractDecentralizedID.class.isAssignableFrom(field_type))
-			return AbstractDecentralizedID.valueOf(nodeValue);
+		}
 
 		return Void.TYPE;
 	}
