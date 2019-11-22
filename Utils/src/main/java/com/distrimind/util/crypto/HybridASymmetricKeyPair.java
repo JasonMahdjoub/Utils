@@ -116,7 +116,7 @@ public class HybridASymmetricKeyPair extends AbstractKeyPair<HybridASymmetricPri
 		}
 		finally {
 			if (fillArrayWithZerosWhenDecoded)
-				Arrays.fill(encoded, off, len, (byte)0);
+				Arrays.fill(encoded, off, off+len, (byte)0);
 		}
 	}
 

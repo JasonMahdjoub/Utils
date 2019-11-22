@@ -110,7 +110,7 @@ public abstract class AbstractDecentralizedID extends DecentralizedValue {
 		}
 		finally {
 			if (fillArrayWithZerosWhenDecoded)
-				Arrays.fill(bytes, off, len, (byte)0);
+				Arrays.fill(bytes, off, off+len, (byte)0);
 		}
 
 	}

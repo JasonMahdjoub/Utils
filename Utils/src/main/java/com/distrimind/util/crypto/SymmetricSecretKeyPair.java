@@ -93,10 +93,9 @@ public class SymmetricSecretKeyPair extends AbstractKey{
 	@Override
 	public byte[] encode()
 	{
-		int codedTypeSize=SymmetricSecretKey.ENCODED_TYPE_SIZE;
 		byte[] encodedSecretKeyForEncryption=secretKeyForEncryption.encode();
 		byte[] encodedSecretKeyForSignature=secretKeyForSignature.encode();
-		byte[] tab = new byte[2+codedTypeSize+encodedSecretKeyForEncryption.length+encodedSecretKeyForSignature.length];
+		byte[] tab = new byte[2+encodedSecretKeyForEncryption.length+encodedSecretKeyForSignature.length];
 		tab[0]=AbstractKey.IS_XDH_KEY;
 		if (encodedSecretKeyForEncryption.length>255)
 			throw new IllegalAccessError();

@@ -170,7 +170,7 @@ public abstract class AbstractKey extends DecentralizedValue implements IKey{
 		}
 		finally {
 			if (fillArrayWithZerosWhenDecoded)
-				Arrays.fill(encoded, off, len, (byte)0);
+				Arrays.fill(encoded, off, off+len, (byte)0);
 		}
 	}
 
@@ -193,10 +193,10 @@ public abstract class AbstractKey extends DecentralizedValue implements IKey{
 				{
 					int s=b[off+1] & 0xFF;
 
-					AbstractKey ke=decode(b, off+2, s);
+					AbstractKey ke=decode(b, off+2, s, false);
 					if (!(ke instanceof SymmetricSecretKey))
 						throw new IllegalArgumentException();
-					AbstractKey ks=decode(b, off+2+s, len-2-s);
+					AbstractKey ks=decode(b, off+2+s, len-2-s, false);
 					if (!(ks instanceof SymmetricSecretKey))
 						throw new IllegalArgumentException();
 					return new SymmetricSecretKeyPair((SymmetricSecretKey)ke, (SymmetricSecretKey)ks);
@@ -279,7 +279,7 @@ public abstract class AbstractKey extends DecentralizedValue implements IKey{
 		finally
 		{
 			if (fillArrayWithZerosWhenDecoded)
-				Arrays.fill(b, off, len, (byte)0);
+				Arrays.fill(b, off, off+len, (byte)0);
 		}
 	}
 

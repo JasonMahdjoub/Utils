@@ -329,7 +329,7 @@ public class ASymmetricKeyPair extends AbstractKeyPair<ASymmetricPrivateKey, ASy
 		}
 		finally {
 			if (fillArrayWithZerosWhenDecoded)
-				Arrays.fill(b, off, len, (byte)0);
+				Arrays.fill(b, off, off+len, (byte)0);
 		}
 
 

@@ -416,7 +416,7 @@ public class CryptoTests {
 		Assert.assertEquals(((HybridASymmetricKeyPair)DecentralizedValue.decode(kpd.encode(true))).getASymmetricPublicKey(),
 				kpd.getASymmetricPublicKey());
 
-		Assert.assertEquals(DecentralizedValue.valueOf(kpd.getASymmetricPublicKey().encodeString()), kpd.getASymmetricPrivateKey());
+		Assert.assertEquals(DecentralizedValue.valueOf(kpd.getASymmetricPublicKey().encodeString()), kpd.getASymmetricPublicKey());
 		Assert.assertEquals(DecentralizedValue.valueOf(kpd.getASymmetricPrivateKey().encodeString()), kpd.getASymmetricPrivateKey());
 
 		System.out.println(type+" :");

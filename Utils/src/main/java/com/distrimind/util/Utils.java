@@ -82,6 +82,7 @@ public class Utils {
 			d.addItem("Add checksum control into DecentralizedValue.toString() and DecentralizedValue.valueOf() functions");
 			d.addItem("Add SymmetricEncryption.generateSecretKeyFromByteArray and SymmetricAuthenticatedSignatureType.generateSecretKeyFromByteArray functions");
 			d.addItem("Add key wrapper support with password");
+			d.addItem("Fix security issue : old keys were not correctly filled by zeros");
 			VERSION.addDescription(d);
 
 			c = Calendar.getInstance();
