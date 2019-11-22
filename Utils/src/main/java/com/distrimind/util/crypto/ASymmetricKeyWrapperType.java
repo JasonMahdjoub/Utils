@@ -118,23 +118,25 @@ public enum ASymmetricKeyWrapperType {
 	public String getAlgorithmName()
 	{
 		return algorithmName;
-	}	
-	
+	}
+
+
+
 	static byte[] wrapKeyWithMetaData(byte[] wrappedKey, SymmetricSecretKey keyToWrap)
 	{
-		byte[] res=new byte[wrappedKey.length+7];
-		res[0]=keyToWrap.getAuthenticatedSignatureAlgorithmType()!=null?(byte)1:(byte)0;
-		Bits.putInt(res, 1, keyToWrap.getAuthenticatedSignatureAlgorithmType()!=null?keyToWrap.getAuthenticatedSignatureAlgorithmType().ordinal():keyToWrap.getEncryptionAlgorithmType().ordinal());
-		Bits.putShort(res, 5, keyToWrap.getKeySizeBits());
-		System.arraycopy(wrappedKey, 0, res, 7, wrappedKey.length);
+		byte[] res=new byte[wrappedKey.length+2+SymmetricSecretKey.ENCODED_TYPE_SIZE];
+		res[0]=keyToWrap.useAuthenticatedSignatureAlgorithm()?(byte)1:(byte)0;
+		Bits.putPositiveInteger(res, 1, keyToWrap.getAuthenticatedSignatureAlgorithmType()!=null?keyToWrap.getAuthenticatedSignatureAlgorithmType().ordinal():keyToWrap.getEncryptionAlgorithmType().ordinal(), SymmetricSecretKey.ENCODED_TYPE_SIZE);
+		res[1+SymmetricSecretKey.ENCODED_TYPE_SIZE]=(byte)SymmetricSecretKey.encodeKeySizeBits(keyToWrap.getKeySizeBits());
+		System.arraycopy(wrappedKey, 0, res, 2+SymmetricSecretKey.ENCODED_TYPE_SIZE, wrappedKey.length);
 		return res;
 	}
 	static byte[] getWrappedKeyFromMetaData(byte[] wk) throws InvalidKeyException
 	{
 		if (wk.length<9)
 			throw new InvalidKeyException();
-		byte[] res=new byte[wk.length-7];
-		System.arraycopy(wk, 7, res, 0, res.length);
+		byte[] res=new byte[wk.length-2-SymmetricSecretKey.ENCODED_TYPE_SIZE];
+		System.arraycopy(wk, 2+SymmetricSecretKey.ENCODED_TYPE_SIZE, res, 0, res.length);
 		return res;
 	}
 	static boolean isSignatureFromMetaData(byte[] wk) throws InvalidKeyException
@@ -147,14 +149,14 @@ public enum ASymmetricKeyWrapperType {
 	{
 		if (wk.length<9)
 			throw new InvalidKeyException();
-		return Bits.getShort(wk, 5);
+		return SymmetricSecretKey.decodeKeySizeBits(wk[1+SymmetricSecretKey.ENCODED_TYPE_SIZE]);
 	}
 	
 	static SymmetricAuthentifiedSignatureType getSignatureTypeFromMetaData(byte[] wk) throws InvalidKeyException
 	{
 		if (wk.length<9)
 			throw new InvalidKeyException();
-		int ordinal=Bits.getInt(wk, 1);
+		int ordinal=(int)Bits.getPositiveInteger(wk, 1, SymmetricSecretKey.ENCODED_TYPE_SIZE);
 		for (SymmetricAuthentifiedSignatureType t : SymmetricAuthentifiedSignatureType.values())
 		{
 			if (t.ordinal()==ordinal)
@@ -166,7 +168,7 @@ public enum ASymmetricKeyWrapperType {
 	{
 		if (wk.length<9)
 			throw new InvalidKeyException();
-		int ordinal=Bits.getInt(wk, 1);
+		int ordinal=(int)Bits.getPositiveInteger(wk, 1, SymmetricSecretKey.ENCODED_TYPE_SIZE);
 		for (SymmetricEncryptionType t : SymmetricEncryptionType.values())
 		{
 			if (t.ordinal()==ordinal)

@@ -277,7 +277,7 @@ public class ASymmetricKeyPair extends AbstractKeyPair<ASymmetricPrivateKey, ASy
 			throw new IllegalArgumentException();
 
 		try {
-			int codedTypeSize = SymmetricSecretKey.getEncodedTypeSize();
+			int codedTypeSize = SymmetricSecretKey.ENCODED_TYPE_SIZE;
 			int keySize = (int)(Bits.getPositiveInteger(b, 1+off, 3));
 			int posKey=codedTypeSize+4+off;
 			long expirationUTC;

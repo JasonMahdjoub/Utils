@@ -126,9 +126,10 @@ public class SymmetricSecretKey extends AbstractKey {
 		md.reset();
 		md.update(secretKey);
 		byte[] d=md.digest();
+		int keySizeBytes=keySizeBits/8;
 		return new SymmetricSecretKeyPair(
-				new SymmetricSecretKey(encryptionType, Arrays.copyOfRange(d, 0, keySizeBits)),
-				new SymmetricSecretKey(signatureType, Arrays.copyOfRange(d, keySizeBits, keySizeBits*2)));
+				new SymmetricSecretKey(encryptionType, Arrays.copyOfRange(d, 0, keySizeBytes)),
+				new SymmetricSecretKey(signatureType, Arrays.copyOfRange(d, keySizeBytes, keySizeBytes*2)));
 	}
 
 	@Override
@@ -269,23 +270,27 @@ public class SymmetricSecretKey extends AbstractKey {
 		this.keySizeBits = keySize;
 		hashCode = Arrays.hashCode(this.secretKey);
 	}
-    static int getEncodedTypeSize()
-	{
+
+	static final int ENCODED_TYPE_SIZE;
+	static {
 		int max=Math.max(SymmetricEncryptionType.values().length, SymmetricAuthentifiedSignatureType.values().length);
 		if (max<=0xFF)
-			return 1;
+			ENCODED_TYPE_SIZE=1;
 		else if (max<=0xFFFF)
-			return 2;
-        else if (max<=0xFFFFFF)
-            return 3;
-        else
-			return 4;
+			ENCODED_TYPE_SIZE=2;
+		else if (max<=0xFFFFFF)
+			ENCODED_TYPE_SIZE=3;
+		else
+			ENCODED_TYPE_SIZE=4;
 	}
     static int encodeKeySizeBits(short keySizeBits)
     {
         return (keySizeBits-56)/8;
     }
-
+	static short decodeKeySizeBits(byte encodedKeySizeBits)
+	{
+		return decodeKeySizeBits(encodedKeySizeBits & 0xFF);
+	}
     static short decodeKeySizeBits(int encodedKeySizeBits)
     {
         return (short)(encodedKeySizeBits*8+56);
@@ -300,7 +305,7 @@ public class SymmetricSecretKey extends AbstractKey {
 
 	@Override
 	public byte[] encode() {
-	    int codedTypeSize=getEncodedTypeSize();
+	    int codedTypeSize=ENCODED_TYPE_SIZE;
 		byte[] tab = new byte[2+codedTypeSize+secretKey.length];
 		if (keySizeBits<56)
 		    throw new InternalError();

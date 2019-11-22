@@ -89,7 +89,7 @@ public enum SymmetricKeyWrapperType {
 		if (passwordHashType==null)
 			throw new NullPointerException();
 		PasswordHash ph = new PasswordHash(passwordHashType, new SecureRandom(), (byte)16, (byte)0);
-		return SymmetricEncryptionType.AES_CBC_PKCS5Padding.generateSecretKeyFromByteArray(ph.hash(password, null), (short)32);
+		return SymmetricEncryptionType.AES_CBC_PKCS5Padding.generateSecretKeyFromByteArray(ph.hash(password, null), (short)256);
 	}
 
 	public byte[] wrapKey(PasswordHashType passwordHashType, String password, SymmetricSecretKey secretKeyToWrap, AbstractSecureRandom random) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidKeySpecException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException {

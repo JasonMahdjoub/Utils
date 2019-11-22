@@ -44,6 +44,7 @@ import java.security.spec.InvalidParameterSpecException;
 
 import com.distrimind.util.DecentralizedValue;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.codec.binary.Hex;
 import org.bouncycastle.crypto.InvalidWrappingException;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
@@ -1607,6 +1608,18 @@ public class CryptoTests {
 
 	}
 
+	@Test(dependsOnMethods = {"testSymmetricEncryptions", "testSymmetricSignatures"})
+	public void testSymmetricKeyPair() throws NoSuchProviderException, NoSuchAlgorithmException {
+		SymmetricAuthentifiedSignatureType sigType=SymmetricAuthentifiedSignatureType.HMAC_SHA2_256;
+		SymmetricSecretKey ke=SymmetricEncryptionType.DEFAULT.getKeyGenerator(SecureRandomType.DEFAULT.getSingleton(null), (short)256).generateKey();
+		SymmetricSecretKeyPair ske=ke.getDerivedSecretKeyPair(MessageDigestType.BC_FIPS_SHA3_512, sigType);
+		Assert.assertEquals(ke.getEncryptionAlgorithmType(), ske.getSecretKeyForEncryption().getEncryptionAlgorithmType());
+		Assert.assertEquals(sigType, ske.getSecretKeyForSignature().getAuthenticatedSignatureAlgorithmType());
+		Assert.assertEquals(ske.getSecretKeyForEncryption().getKeySizeBits(), ke.getKeySizeBits());
+		Assert.assertEquals(ske.getSecretKeyForSignature().getKeySizeBits(), ke.getKeySizeBits());
+		Assert.assertNotEquals(ske.getSecretKeyForEncryption().getKeyBytes(), ke.getKeyBytes());
+		System.out.println(ske);
+	}
 
 	@Test(dataProvider = "provideDataForTestSymmetricEncryptionCompatibility", dependsOnMethods = "testSymmetricEncryptions")
 	public void testSymmetricEncryptionsCompatibility(SymmetricEncryptionType type1, SymmetricEncryptionType type2) throws NoSuchAlgorithmException,
@@ -2073,4 +2086,42 @@ public class CryptoTests {
         System.out.println("Key encryption (complete): \n\t"+ Base64.encodeBase64URLSafeString(key1.encode()));
         Assert.assertEquals(key1.getKeyBytes().length, signatureType.getDefaultKeySizeBytes());
     }
+
+	@Test(dataProvider = "getSymmetricSecretKeysToTestForSecretKeyWrappingWithPassword")
+	public void testSymmetricSecretKeyWrappingWithPassword(SymmetricKeyWrapperType keyWrapperType, SymmetricSecretKey secretKey) throws NoSuchProviderException, NoSuchAlgorithmException, IllegalBlockSizeException, InvalidKeyException, InvalidKeySpecException, NoSuchPaddingException, IOException {
+		String password="MyPassword";
+		PasswordHashType passwordHashType=PasswordHashType.BC_SCRYPT_FOR_DATAENCRYPTION;
+		byte[] encryptedSecretKey=keyWrapperType.wrapKey(passwordHashType, password, secretKey, SecureRandomType.DEFAULT.getSingleton(null));
+		System.out.println("Bytes tab length : "+encryptedSecretKey.length);
+		System.out.println(Hex.encodeHexString(encryptedSecretKey));
+		SymmetricSecretKey decodedSecretKey=keyWrapperType.unwrapKey(passwordHashType, password, encryptedSecretKey);
+		Assert.assertEquals(decodedSecretKey, secretKey);
+
+
+		String encryptedSecretKeyString=keyWrapperType.wrapKeyString(passwordHashType, password, secretKey, SecureRandomType.DEFAULT.getSingleton(null));
+		System.out.println("String length : "+encryptedSecretKeyString.length());
+		System.out.println(encryptedSecretKeyString);
+		decodedSecretKey=keyWrapperType.unwrapKey(passwordHashType, password, encryptedSecretKeyString);
+		Assert.assertEquals(decodedSecretKey, secretKey);
+
+	}
+	@DataProvider(parallel = true,name = "getSymmetricSecretKeysToTestForSecretKeyWrappingWithPassword")
+	public Object[][] getSymmetricSecretKeysToTestForSecretKeyEncryptionWithPassword() throws NoSuchProviderException, NoSuchAlgorithmException {
+		Object[][]res=new Object[4*SymmetricKeyWrapperType.values().length][2];
+		int index=0;
+		for (boolean encryption : new boolean[]{true, false}) {
+			for (short keySize : new short[]{128, 256}) {
+				for (SymmetricKeyWrapperType t : SymmetricKeyWrapperType.values()) {
+					res[index][0]=t;
+					if (encryption) {
+						res[index++][1] = SymmetricEncryptionType.AES_CBC_PKCS5Padding.getKeyGenerator(SecureRandomType.DEFAULT.getSingleton(null), keySize).generateKey();
+					} else {
+						res[index++][1] = SymmetricAuthentifiedSignatureType.HMAC_SHA2_256.getKeyGenerator(SecureRandomType.DEFAULT.getSingleton(null), keySize).generateKey();
+					}
+				}
+			}
+		}
+		return res;
+	}
+
 }
