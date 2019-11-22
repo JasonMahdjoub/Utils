@@ -241,7 +241,7 @@ public class TestsForSymmetricEncryption {
 
 	}
 
-	@DataProvider(parallel = true,name = "getSymmetricSecretKeysToTestForSecretKeyWrappingWithPassword")
+	@DataProvider(name = "getSymmetricSecretKeysToTestForSecretKeyWrappingWithPassword")
 	public Object[][] getSymmetricSecretKeysToTestForSecretKeyEncryptionWithPassword() throws NoSuchProviderException, NoSuchAlgorithmException {
 		Object[][]res=new Object[4*SymmetricKeyWrapperType.values().length][2];
 		int index=0;
