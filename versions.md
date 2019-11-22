@@ -1,6 +1,6 @@
 Utils
 =====
-4.7.0 Stable (Build: 1320) (from 21/11/2019 to 22/11/2019)
+4.7.0 Stable (Build: 1322) (from 21/11/2019 to 22/11/2019)
 
 # Creator(s):
 Jason MAHDJOUB
@@ -19,6 +19,7 @@ Jason MAHDJOUB (Entred in the team at 04/01/2016)
 * Add checksum control into DecentralizedValue.toString() and DecentralizedValue.valueOf() functions
 * Add SymmetricEncryption.generateSecretKeyFromByteArray and SymmetricAuthenticatedSignatureType.generateSecretKeyFromByteArray functions
 * Add key wrapper support with password
+* Fix security issue : old keys were not correctly filled by zeros
 
 
 ### 4.6.5 Stable (15/11/2019)

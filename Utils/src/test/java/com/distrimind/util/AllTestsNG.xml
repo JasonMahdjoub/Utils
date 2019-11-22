@@ -49,9 +49,16 @@
 		</classes>
 	</test>
 	
-	<test name="testCyrpto">
+	<test name="testCrypto">
 		<classes>
-			<class name="com.distrimind.util.crypto.CryptoTests" />
+			<class name="com.distrimind.util.crypto.VariousTests" />
+			<class name="com.distrimind.util.crypto.TestMessageDigests" />
+			<class name="com.distrimind.util.crypto.TestsForSymmetricEncryption" />
+			<class name="com.distrimind.util.crypto.TestsForSymmetricSignatures" />
+			<class name="com.distrimind.util.crypto.TestASymmetricSignatures" />
+			<class name="com.distrimind.util.crypto.TestASymmetricEncryptions" />
+			<class name="com.distrimind.util.crypto.TestKeyAgreements" />
+
 		</classes>
 	</test>
 
