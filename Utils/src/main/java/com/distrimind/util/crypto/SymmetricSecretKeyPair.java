@@ -40,6 +40,7 @@ import com.distrimind.util.Bits;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
+import java.util.Objects;
 
 /**
  * @author Jason Mahdjoub
@@ -61,6 +62,20 @@ public class SymmetricSecretKeyPair extends AbstractKey{
 			throw new IllegalArgumentException();
 		this.secretKeyForEncryption = secretKeyForEncryption;
 		this.secretKeyForSignature = secretKeyForSignature;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		SymmetricSecretKeyPair that = (SymmetricSecretKeyPair) o;
+		return secretKeyForEncryption.equals(that.secretKeyForEncryption) &&
+				secretKeyForSignature.equals(that.secretKeyForSignature);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(secretKeyForEncryption, secretKeyForSignature);
 	}
 
 	public SymmetricSecretKey getSecretKeyForEncryption() {
