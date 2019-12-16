@@ -138,5 +138,9 @@ public abstract class RandomInputStream extends SecuredObjectInputStream impleme
 	public abstract void readFully(byte[] tab, int off, int len) throws IOException;
 
 
+	@Override
+	public int available() throws IOException {
+		return (int)Math.min(Integer.MAX_VALUE, length()-currentPosition());
+	}
 
 }

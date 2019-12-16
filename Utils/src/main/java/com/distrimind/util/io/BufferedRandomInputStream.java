@@ -350,11 +350,6 @@ public class BufferedRandomInputStream extends RandomInputStream {
 		return n;
 	}
 
-	@Override
-	public int available() throws IOException {
-
-		return (int)Math.min(Integer.MAX_VALUE, length()-currentPosition);
-	}
 
 	@Override
 	public void close() throws IOException {
