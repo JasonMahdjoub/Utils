@@ -76,6 +76,7 @@ public class Utils {
 			c.set(2019, Calendar.DECEMBER, 16);
 			Description d = new Description((short)4, (short)7, (short)1, Version.Type.Stable, (short)0, c.getTime());
 			d.addItem("Implements function RandomInputStream.available()");
+			d.addItem("Complete serialization tools function RandomInputStream.available()");
 			VERSION.addDescription(d);
 
 			c = Calendar.getInstance();

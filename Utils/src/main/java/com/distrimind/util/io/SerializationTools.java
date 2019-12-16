@@ -304,7 +304,7 @@ public class SerializationTools {
 	
 	
 	@SuppressWarnings("SameParameterValue")
-	static void writeKeyPair(final SecuredObjectOutputStream oos, AbstractKeyPair keyPair, boolean supportNull) throws IOException
+	static void writeKeyPair(final SecuredObjectOutputStream oos, AbstractKeyPair<?, ?> keyPair, boolean supportNull) throws IOException
 	{
 		if (supportNull)
 			oos.writeBoolean(keyPair!=null);
@@ -323,7 +323,7 @@ public class SerializationTools {
 	}
 
 	@SuppressWarnings("SameParameterValue")
-	static AbstractKeyPair readKeyPair(final SecuredObjectInputStream in, boolean supportNull) throws IOException
+	static AbstractKeyPair<?, ?> readKeyPair(final SecuredObjectInputStream in, boolean supportNull) throws IOException
 	{
 		if (!supportNull || in.readBoolean())
 		{
@@ -1085,7 +1085,7 @@ public class SerializationTools {
 		else
 			if (o instanceof Enum && (id=identifiersPerEnums.get(o.getClass()))!=null)
 		{
-			oos.write(id.byteValue());
+			oos.writeByte(id.byteValue());
 			oos.writeInt(((Enum<?>)o).ordinal());
 		}
 		else if (o instanceof SecureExternalizableWithoutInnerSizeControl)
@@ -1141,7 +1141,7 @@ public class SerializationTools {
 		else if (o instanceof AbstractKeyPair)
 		{
 			oos.write(11);
-			writeKeyPair(oos, (AbstractKeyPair)o, false);
+			writeKeyPair(oos, (AbstractKeyPair<?, ?>)o, false);
 		}
 		else if (o instanceof Enum<?>)
 		{
@@ -1301,7 +1301,7 @@ public class SerializationTools {
 				case 19:
 					return ois.readLong();
 				case 20:
-					return ois.read();
+					return ois.readByte();
 				case 21:
 					return ois.readShort();
 				case 22:
@@ -1387,7 +1387,7 @@ public class SerializationTools {
 		return getInternalSize(key, 0);
 	}
 
-	public static int getInternalSize(AbstractKeyPair keyPair)
+	public static int getInternalSize(AbstractKeyPair<?, ?> keyPair)
 	{
 		if (keyPair==null)
 			return 1;
@@ -1422,6 +1422,10 @@ public class SerializationTools {
 		if (inetSocketAddress==null)
 			return 1;
 		return getInternalSize(inetSocketAddress, 0);
+	}
+	public static int getInternalSize(Class<?> clazz)
+	{
+		return getInternalSize( clazz, MAX_CLASS_LENGTH);
 	}
 	public static int getInternalSize(AbstractDecentralizedID abstractDecentralizedID)
 	{
@@ -1493,7 +1497,7 @@ public class SerializationTools {
 		}
 		else if (o instanceof AbstractKeyPair)
 		{
-			return 4+((AbstractKeyPair)o).encode().length;
+			return 4+((AbstractKeyPair<?, ?>)o).encode().length;
 		}
 		else if (o instanceof byte[][])
 		{
