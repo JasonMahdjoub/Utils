@@ -1,6 +1,6 @@
 Utils
 =====
-4.7.0 Stable (Build: 1334) (from 21/11/2019 to 22/11/2019)
+4.7.1 Stable (Build: 1339) (from 16/12/2019 to 16/12/2019)
 
 # Creator(s):
 Jason MAHDJOUB
@@ -9,6 +9,11 @@ Jason MAHDJOUB
 Jason MAHDJOUB (Entred in the team at 04/01/2016)
 
 # Modifications:
+
+
+### 4.7.1 Stable (16/12/2019)
+* Implements function RandomInputStream.available()
+* Complete serialization tools function RandomInputStream.available()
 
 
 ### 4.7.0 Stable (21/11/2019)
