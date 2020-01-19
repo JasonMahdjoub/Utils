@@ -68,10 +68,6 @@ dependencies {
     api(group:'org.yaml', name: 'snakeyaml', version: '1.25')
     testImplementation(group:'org.apache.commons', name: 'commons-math3', version: '3.6.1')
 
-    /*compile files('/home/jason/Téléchargements_desync/bc-fips-1.0.1.jar')
-    compile files('/home/jason/Téléchargements_desync/bcprov-jdk15on-161.jar')*/
-
-
 }
 
 def javaVersion=7
@@ -146,7 +142,6 @@ task generateMDFiles (dependsOn: generateVersionsFile) {
 allprojects {
 	group='com.distrimind.util'
 
-    //compileJava.options.compilerArgs << "-Xlint"
     compileJava.options.compilerArgs.addAll(['--release', javaVersion] as Collection<? extends String>)
 
     if (JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_1_9))
