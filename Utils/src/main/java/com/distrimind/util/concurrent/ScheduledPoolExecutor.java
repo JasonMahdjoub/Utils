@@ -249,8 +249,12 @@ public class ScheduledPoolExecutor extends PoolExecutor implements ScheduledExec
 
 	@Override
 	void repeatUnsafe(ScheduledFuture<?> sf) {
-		scheduledFutures.add((SF<?>)sf);
-		timeOfFirstOccurrenceInNanos =scheduledFutures.first().start;
+		Future<?> f=(Future<?>)sf;
+		if (f.removedFromList) {
+			scheduledFutures.add((SF<?>) sf);
+			f.removedFromList = false;
+		}
+		timeOfFirstOccurrenceInNanos = scheduledFutures.first().start;
 	}
 
 	@Override
@@ -274,13 +278,18 @@ public class ScheduledPoolExecutor extends PoolExecutor implements ScheduledExec
 		if (pull) {
 			if (timeOfFirstOccurrenceInNanos <=System.nanoTime()) {
 				pull=false;
-				Future<?> r= scheduledFutures.pollFirst();
-				assert r!=null;
-				if (scheduledFutures.size()==0)
-					timeOfFirstOccurrenceInNanos =Long.MAX_VALUE;
-				else
-					timeOfFirstOccurrenceInNanos =scheduledFutures.first().start;
-				return r;
+				Future<?> r;
+
+				while ((r= scheduledFutures.pollFirst())!=null) {
+					if (r.take(true)) {
+						if (scheduledFutures.size() == 0)
+							timeOfFirstOccurrenceInNanos = Long.MAX_VALUE;
+						else
+							timeOfFirstOccurrenceInNanos = scheduledFutures.first().start;
+						return r;
+					}
+				}
+				timeOfFirstOccurrenceInNanos = Long.MAX_VALUE;
 			}
 		}
 		pull = true;

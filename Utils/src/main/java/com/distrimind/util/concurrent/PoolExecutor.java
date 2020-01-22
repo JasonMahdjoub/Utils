@@ -307,6 +307,7 @@ public class PoolExecutor implements ExecutorService {
 		private T res=null;
 		private volatile Exception exception=null;
 		private final Condition waitForComplete;
+		boolean removedFromList;
 
 		protected Future(Callable<T> callable) {
 			this(callable, new ReentrantLock());
@@ -327,6 +328,7 @@ public class PoolExecutor implements ExecutorService {
 			this.flock = flock;
 			this.waitForComplete=waitForComplete;
 			this.started=false;
+			this.removedFromList=true;
 		}
 
 		/*protected Future(Future<T> o) {
@@ -336,10 +338,12 @@ public class PoolExecutor implements ExecutorService {
 			this.started=false;
 		}*/
 
-		boolean take()
+		boolean take(boolean removeFromList)
 		{
 			flock.lock();
 			try {
+				if (removeFromList)
+					this.removedFromList=true;
 				if (started)
 					return false;
 				else
@@ -439,7 +443,7 @@ public class PoolExecutor implements ExecutorService {
 		}
 
 		public T get(long timeout, TimeUnit unit, boolean timeoutUsed) throws InterruptedException, ExecutionException, TimeoutException {
-			if (!timeoutUsed&& !isRepetitive() && take())
+			if (!timeoutUsed&& !isRepetitive() && take(false))
 			{
 				if (isCancelled)
 					throw new CancellationException();
@@ -1000,7 +1004,7 @@ public class PoolExecutor implements ExecutorService {
 	{
 		Future<?> t;
 		while ((t=workQueue.poll())!=null) {
-			if (t.take())
+			if (t.take(true))
 				break;
 		}
 
