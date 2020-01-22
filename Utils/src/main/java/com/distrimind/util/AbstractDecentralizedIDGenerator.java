@@ -39,7 +39,6 @@ import java.net.SocketException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.util.Enumeration;
-import java.util.Objects;
 
 import com.distrimind.util.crypto.AbstractMessageDigest;
 import com.distrimind.util.crypto.AbstractSecureRandom;
@@ -163,8 +162,8 @@ public abstract class AbstractDecentralizedIDGenerator extends AbstractDecentral
 	}
 
 	protected final long timestamp;
-
 	protected final long worker_id_and_sequence;
+	private final transient int hashCode;
 	public AbstractDecentralizedIDGenerator() {
 		this(true, false);
 	}
@@ -219,11 +218,17 @@ public abstract class AbstractDecentralizedIDGenerator extends AbstractDecentral
 			else
 				worker_id_and_sequence = LOCAL_MAC | ((0xFFFFL & getNewSequence()) << 48);
 		}
+		hashCode=computeHashCode();
+	}
+	private int computeHashCode()
+	{
+		return 31 * ((int)(timestamp ^ (timestamp >>> 32))) + ((int)(worker_id_and_sequence ^ (worker_id_and_sequence >>> 32)));
 	}
 
 	AbstractDecentralizedIDGenerator(long timestamp, long work_id_sequence) {
 		this.timestamp = timestamp;
 		this.worker_id_and_sequence = work_id_sequence;
+		hashCode=computeHashCode();
 	}
 
 	public boolean equals(AbstractDecentralizedIDGenerator other) {
@@ -275,7 +280,7 @@ public abstract class AbstractDecentralizedIDGenerator extends AbstractDecentral
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(timestamp, worker_id_and_sequence);
+		return hashCode;
 	}
 
 }
