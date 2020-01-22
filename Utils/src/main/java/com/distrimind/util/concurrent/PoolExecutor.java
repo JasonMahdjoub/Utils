@@ -443,7 +443,7 @@ public class PoolExecutor implements ExecutorService {
 		}
 
 		public T get(long timeout, TimeUnit unit, boolean timeoutUsed) throws InterruptedException, ExecutionException, TimeoutException {
-			if (!timeoutUsed&& !isRepetitive() && take(false))
+			if ((!timeoutUsed || timeout==Long.MAX_VALUE) && !isRepetitive() && take(false))
 			{
 				if (isCancelled)
 					throw new CancellationException();

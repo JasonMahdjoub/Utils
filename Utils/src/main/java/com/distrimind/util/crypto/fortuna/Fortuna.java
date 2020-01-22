@@ -1,6 +1,7 @@
 package com.distrimind.util.crypto.fortuna;
 
 
+import com.distrimind.util.concurrent.ScheduledPoolExecutor;
 import com.distrimind.util.crypto.AbstractSecureRandom;
 import com.distrimind.util.crypto.SecureRandomType;
 import com.distrimind.util.crypto.fortuna.accumulator.Accumulator;
@@ -163,7 +164,10 @@ public class Fortuna extends Random {
             try {
                 secureRandomSource.get().setUpdate(true);
                 assert !scheduler.isShutdown() && !scheduler.isTerminated();
-                Thread.sleep(10);
+                if (scheduler instanceof ScheduledPoolExecutor)
+                    ((ScheduledPoolExecutor)scheduler).sleep(10, TimeUnit.MILLISECONDS);
+                else
+                    Thread.sleep(10);
             } catch (InterruptedException e) {
                 throw new Error("Interrupted while waiting for initialization", e);
             }
