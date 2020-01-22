@@ -88,5 +88,13 @@
 		</classes>
 	</test>
 
+	<test name="testCollections">
+		<classes>
+			<class name="com.distrimind.util.TestCircularArrayList" />
+			<class name="com.distrimind.util.TestCircularDeque" />
+		</classes>
+	</test>
+
+
 
 </suite>

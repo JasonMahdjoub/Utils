@@ -1,1 +1,1 @@
-4.7.1-Stable
+4.8.0-Stable

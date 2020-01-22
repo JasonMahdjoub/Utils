@@ -39,6 +39,7 @@ import java.net.SocketException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.util.Enumeration;
+import java.util.Objects;
 
 import com.distrimind.util.crypto.AbstractMessageDigest;
 import com.distrimind.util.crypto.AbstractSecureRandom;
@@ -51,7 +52,7 @@ import com.distrimind.util.sizeof.ObjectSizer;
  * network.
  * 
  * @author Jason Mahdjoub
- * @version 2.1
+ * @version 2.2
  * @since Utils 1.0
  * 
  */
@@ -274,7 +275,7 @@ public abstract class AbstractDecentralizedIDGenerator extends AbstractDecentral
 
 	@Override
 	public int hashCode() {
-		return (int) (timestamp + worker_id_and_sequence);
+		return Objects.hash(timestamp, worker_id_and_sequence);
 	}
 
 }

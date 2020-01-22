@@ -58,8 +58,7 @@ repositories {
 
 dependencies {
     testImplementation 'org.testng:testng:6.14.3'
-
-
+    testImplementation 'org.hamcrest:hamcrest-core:2.2'
     api(group:'org.bouncycastle', name: 'bc-core', version: '1.61-DMRECOMPILE')
     api(group:'org.bouncycastle', name: 'bc-prov', version: '1.61-DMRECOMPILE')
     api(group:'org.bouncycastle', name: 'bc-fips', version: '1.0.1-DMRECOMPILE')

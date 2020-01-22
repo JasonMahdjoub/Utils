@@ -59,8 +59,8 @@ public class Utils {
 		Calendar c = Calendar.getInstance();
 		c.set(2016, Calendar.JANUARY, 4);
 		Calendar c2 = Calendar.getInstance();
-		c.set(2019, Calendar.DECEMBER, 16);
-		VERSION = new Version("Utils", "Utils", (short)4, (short)7, (short)1, Version.Type.Stable, (short)0, c.getTime(), c2.getTime());
+		c.set(2019, Calendar.JANUARY, 22);
+		VERSION = new Version("Utils", "Utils", (short)4, (short)8, (short)0, Version.Type.Stable, (short)0, c.getTime(), c2.getTime());
 		try {
 
 			InputStream is = Utils.class.getResourceAsStream("build.txt");
@@ -73,8 +73,16 @@ public class Utils {
 			VERSION.addDeveloper(new PersonDeveloper("mahdjoub", "jason", c.getTime()));
 
 			c = Calendar.getInstance();
+			c.set(2019, Calendar.JANUARY, 22);
+			Description d = new Description((short)4, (short)8, (short)0, Version.Type.Stable, (short)0, c.getTime());
+			d.addItem("Add PoolExecutor and ScheduledPoolExecutor");
+			d.addItem("Add CircularArrayList");
+			d.addItem("Change hash code computation in AbstractDecentralizedIDGenerator");
+			VERSION.addDescription(d);
+
+			c = Calendar.getInstance();
 			c.set(2019, Calendar.DECEMBER, 16);
-			Description d = new Description((short)4, (short)7, (short)1, Version.Type.Stable, (short)0, c.getTime());
+			d = new Description((short)4, (short)7, (short)1, Version.Type.Stable, (short)0, c.getTime());
 			d.addItem("Implements function RandomInputStream.available()");
 			d.addItem("Complete serialization tools function RandomInputStream.available()");
 			VERSION.addDescription(d);
