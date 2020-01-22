@@ -222,11 +222,13 @@ public class SecuredDecentralizedID extends AbstractDecentralizedID {
 		return hashCode;
 	}
 
-	private void readObject(java.io.ObjectInputStream in) throws IOException {
+	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
 		try {
 			in.defaultReadObject();
 			hashCode = computeHashCode(idLongs);
-		} catch (IOException e) {
+		}
+		catch(ClassNotFoundException | IOException e)
+		{
 			throw e;
 		} catch (Exception e) {
 			throw new IOException(e);

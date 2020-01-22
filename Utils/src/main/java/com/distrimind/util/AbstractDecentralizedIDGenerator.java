@@ -34,6 +34,8 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.security.NoSuchAlgorithmException;
@@ -163,7 +165,7 @@ public abstract class AbstractDecentralizedIDGenerator extends AbstractDecentral
 
 	protected final long timestamp;
 	protected final long worker_id_and_sequence;
-	private final transient int hashCode;
+	private transient int hashCode;
 	public AbstractDecentralizedIDGenerator() {
 		this(true, false);
 	}
@@ -223,6 +225,11 @@ public abstract class AbstractDecentralizedIDGenerator extends AbstractDecentral
 	private int computeHashCode()
 	{
 		return 31 * ((int)(timestamp ^ (timestamp >>> 32))) + ((int)(worker_id_and_sequence ^ (worker_id_and_sequence >>> 32)));
+	}
+	private void readObject(ObjectInputStream aInputStream) throws ClassNotFoundException, IOException
+	{
+		aInputStream.defaultReadObject();
+		hashCode=computeHashCode();
 	}
 
 	AbstractDecentralizedIDGenerator(long timestamp, long work_id_sequence) {
