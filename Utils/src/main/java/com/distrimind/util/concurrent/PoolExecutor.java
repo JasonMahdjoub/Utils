@@ -473,15 +473,9 @@ public class PoolExecutor implements ExecutorService {
 					if (timeout <= 0)
 						candidateForTimeOut = true;
 				}
-				Executor executor=null;
-				if (!candidateForTimeOut && (executor=getExecutor(Thread.currentThread()))!=null) {
-					if (doesWait())
-						incrementMaxThreadNumber();
-					else {
-						executor = null;
-						candidateForTimeOut = true;
-					}
-				}
+				Executor executor=getExecutor(Thread.currentThread());
+				if (executor!=null)
+					incrementMaxThreadNumber();
 
 				flock.lock();
 				try {
@@ -978,6 +972,7 @@ public class PoolExecutor implements ExecutorService {
 			return false;
 		}
 	}
+	@SuppressWarnings("UnusedReturnValue")
 	public boolean sleep(long duration, TimeUnit unit) throws InterruptedException {
 		if (duration<=0)
 			return true;
