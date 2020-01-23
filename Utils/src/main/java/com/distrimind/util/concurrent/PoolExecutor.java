@@ -298,7 +298,7 @@ public class PoolExecutor implements ExecutorService {
 
 	class Future<T> implements java.util.concurrent.Future<T>, Runnable
 	{
-		private boolean started;
+		boolean started;
 		private final Lock flock;
 		private final Callable<T> callable;
 		private volatile boolean isCancelled=false;
@@ -1092,6 +1092,7 @@ public class PoolExecutor implements ExecutorService {
 
 						if (toRepeat != null) {
 							repeatUnsafe(toRepeat);
+							toRepeat=null;
 						}
 
 

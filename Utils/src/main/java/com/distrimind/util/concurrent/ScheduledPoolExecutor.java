@@ -154,6 +154,7 @@ public class ScheduledPoolExecutor extends PoolExecutor implements ScheduledExec
 			if (isCancelled())
 				return false;
 			isFinished=false;
+			started=false;
 			start=System.nanoTime()+delay;
 			return true;
 		}
@@ -182,7 +183,7 @@ public class ScheduledPoolExecutor extends PoolExecutor implements ScheduledExec
 		{
 			if (isCancelled())
 				return false;
-
+			started=false;
 			isFinished=false;
 			start+=period;
 			long c=System.nanoTime();
