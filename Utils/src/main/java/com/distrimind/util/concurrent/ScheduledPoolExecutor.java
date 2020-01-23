@@ -111,6 +111,29 @@ public class ScheduledPoolExecutor extends PoolExecutor implements ScheduledExec
 				return 0;
 		}
 
+		@Override
+		boolean take(boolean removeFromList)
+		{
+			if (super.take(removeFromList))
+			{
+				if (!removeFromList)
+				{
+					lock.lock();
+					try
+					{
+						scheduledFutures.remove(this);
+					}
+					finally {
+						lock.unlock();
+					}
+				}
+				return true;
+			}
+			else
+				return false;
+		}
+
+
 	}
 
 	private class DelayedSF<T> extends SF<T>
@@ -193,18 +216,32 @@ public class ScheduledPoolExecutor extends PoolExecutor implements ScheduledExec
 	public ScheduledFuture<?> schedule(final Runnable command, long delay, TimeUnit unit) {
 		if (command==null)
 			throw new NullPointerException();
-		return schedule(new SF<>(new Callable<Void>() {
+		SF<Void> r=new SF<>(new Callable<Void>() {
 			@Override
 			public Void call() {
 				command.run();
 				return null;
 			}
-		}, delay, unit));
+		}, delay, unit);
+		if (delay<=0) {
+			execute(r);
+			return r;
+		}
+
+		return schedule(r);
 	}
 
 	@Override
 	public <V> ScheduledFuture<V> schedule(Callable<V> callable, long delay, TimeUnit unit) {
-		return schedule(new SF<>(callable, delay, unit));
+		if (callable==null)
+			throw new NullPointerException();
+		SF<V> r=new SF<>(callable, delay, unit);
+		if (delay<=0) {
+			execute(r);
+			return r;
+		}
+
+		return schedule(r);
 	}
 
 	@Override
@@ -240,7 +277,8 @@ public class ScheduledPoolExecutor extends PoolExecutor implements ScheduledExec
 		lock.lock();
 		try {
 			repeatUnsafe(sf);
-			waitEventsCondition.signalAll();
+			if (launchThreadIfNecessaryUnsafe())
+				waitEventsCondition.signal();
 			return sf;
 		}finally {
 			lock.unlock();
@@ -249,11 +287,7 @@ public class ScheduledPoolExecutor extends PoolExecutor implements ScheduledExec
 
 	@Override
 	void repeatUnsafe(ScheduledFuture<?> sf) {
-		Future<?> f=(Future<?>)sf;
-		if (f.removedFromList) {
-			scheduledFutures.add((SF<?>) sf);
-			f.removedFromList = false;
-		}
+		scheduledFutures.add((SF<?>) sf);
 		timeOfFirstOccurrenceInNanos = scheduledFutures.first().start;
 	}
 
@@ -287,7 +321,7 @@ public class ScheduledPoolExecutor extends PoolExecutor implements ScheduledExec
 				return r;
 			}
 		}
-		timeOfFirstOccurrenceInNanos = Long.MAX_VALUE;
+
 		return null;
 	}
 	@Override

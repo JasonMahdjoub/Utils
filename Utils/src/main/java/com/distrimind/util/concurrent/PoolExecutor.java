@@ -307,7 +307,6 @@ public class PoolExecutor implements ExecutorService {
 		private T res=null;
 		private volatile Exception exception=null;
 		private final Condition waitForComplete;
-		boolean removedFromList;
 
 		protected Future(Callable<T> callable) {
 			this(callable, new ReentrantLock());
@@ -328,7 +327,6 @@ public class PoolExecutor implements ExecutorService {
 			this.flock = flock;
 			this.waitForComplete=waitForComplete;
 			this.started=false;
-			this.removedFromList=true;
 		}
 
 		/*protected Future(Future<T> o) {
@@ -342,8 +340,6 @@ public class PoolExecutor implements ExecutorService {
 		{
 			flock.lock();
 			try {
-				if (removeFromList)
-					this.removedFromList=true;
 				if (started)
 					return false;
 				else
@@ -443,7 +439,9 @@ public class PoolExecutor implements ExecutorService {
 		}
 
 		public T get(long timeout, TimeUnit unit, boolean timeoutUsed) throws InterruptedException, ExecutionException, TimeoutException {
-			if ((!timeoutUsed || timeout==Long.MAX_VALUE) && !isRepetitive() && take(false))
+			if (timeout==Long.MAX_VALUE)
+				timeoutUsed=false;
+			if (!timeoutUsed && !isRepetitive() && take(false))
 			{
 				if (isCancelled)
 					throw new CancellationException();
@@ -456,7 +454,7 @@ public class PoolExecutor implements ExecutorService {
 				return res;
 			}
 			else {
-				Executor executor=getExecutor(Thread.currentThread());
+
 				boolean candidateForTimeOut=false;
 				long start=0;
 				if (timeoutUsed) {
@@ -465,8 +463,9 @@ public class PoolExecutor implements ExecutorService {
 					if (timeout <= 0)
 						candidateForTimeOut = true;
 				}
-				if (executor!=null) {
-					if (!candidateForTimeOut && doesWait())
+				Executor executor=null;
+				if (!candidateForTimeOut && (executor=getExecutor(Thread.currentThread()))!=null) {
+					if (doesWait())
 						incrementMaxThreadNumber();
 					else
 						executor=null;
@@ -639,6 +638,9 @@ public class PoolExecutor implements ExecutorService {
 			assert workQueue.size()>=futures.size();
 			for (Runnable r : workQueue)
 				assert r!=null;
+			while (needNewThreadUnsafe())
+				launchNewThreadUnsafe();
+
 			waitEventsCondition.signalAll();
 
 
@@ -708,8 +710,10 @@ public class PoolExecutor implements ExecutorService {
 			}
 			if (!workQueue.addAll(futures))
 				throw new RejectedExecutionException();
-			waitEventsCondition.signalAll();
+			while (needNewThreadUnsafe())
+				launchNewThreadUnsafe();
 
+			waitEventsCondition.signalAll();
 
 		}
 		finally {
@@ -782,7 +786,8 @@ public class PoolExecutor implements ExecutorService {
 				});
 			if (!workQueue.add(f))
 				throw new RejectedExecutionException();
-			waitEventsCondition.signalAll();
+			if (launchThreadIfNecessaryUnsafe())
+				waitEventsCondition.signal();
 		}
 		finally {
 			lock.unlock();
@@ -817,14 +822,16 @@ public class PoolExecutor implements ExecutorService {
 			lock.unlock();
 		}
 	}
-	void launchChildIfNecessaryUnsafe()
+	boolean launchThreadIfNecessaryUnsafe()
 	{
 		if (!shutdownAsked)
 		{
-			if (needNewThreadUnsafe())
+			if (needNewThreadUnsafe()) {
 				launchNewThreadUnsafe();
-			waitEventsCondition.signalAll();
+				return false;
+			}
 		}
+		return true;
 	}
 	private void incrementMaxThreadNumber()
 	{
@@ -833,7 +840,7 @@ public class PoolExecutor implements ExecutorService {
 		{
 			if (pausedThreads <Integer.MAX_VALUE) {
 				++pausedThreads;
-				launchChildIfNecessaryUnsafe();
+				launchThreadIfNecessaryUnsafe();
 			}
 			else
 				throw new OutOfMemoryError();
@@ -1103,10 +1110,9 @@ public class PoolExecutor implements ExecutorService {
 							++workingThreads;
 							working = true;
 						}
-						while (needNewThreadUnsafe()) {
+						/*while (needNewThreadUnsafe()) {
 							launchNewThreadUnsafe();
-						}
-						waitEventsCondition.signalAll();
+						}*/
 
 					} finally {
 						lock.unlock();
