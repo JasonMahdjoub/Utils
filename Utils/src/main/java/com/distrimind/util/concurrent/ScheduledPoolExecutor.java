@@ -272,28 +272,49 @@ public class ScheduledPoolExecutor extends PoolExecutor implements ScheduledExec
 			}
 		}
 	}
+
+	private Future<?> poolScheduledTask()
+	{
+		Future<?> r;
+
+		while (timeOfFirstOccurrenceInNanos <=System.nanoTime() && (r= scheduledFutures.pollFirst())!=null) {
+			if (scheduledFutures.size() == 0)
+				timeOfFirstOccurrenceInNanos = Long.MAX_VALUE;
+			else
+				timeOfFirstOccurrenceInNanos = scheduledFutures.first().start;
+
+			if (r.take(true)) {
+				return r;
+			}
+		}
+		timeOfFirstOccurrenceInNanos = Long.MAX_VALUE;
+		return null;
+	}
 	@Override
 	Future<?> pollTaskUnsafe() {
 
 		if (pull) {
-			if (timeOfFirstOccurrenceInNanos <=System.nanoTime()) {
-				pull=false;
-				Future<?> r;
 
-				while ((r= scheduledFutures.pollFirst())!=null) {
-					if (r.take(true)) {
-						if (scheduledFutures.size() == 0)
-							timeOfFirstOccurrenceInNanos = Long.MAX_VALUE;
-						else
-							timeOfFirstOccurrenceInNanos = scheduledFutures.first().start;
-						return r;
-					}
-				}
-				timeOfFirstOccurrenceInNanos = Long.MAX_VALUE;
+			Future<?> r=poolScheduledTask();
+			if (r!=null) {
+				pull=false;
+				return r;
+			}
+			else {
+				return super.pollTaskUnsafe();
 			}
 		}
-		pull = true;
-		return super.pollTaskUnsafe();
+		else {
+			Future<?> r=super.pollTaskUnsafe();
+			if (r==null)
+			{
+				return poolScheduledTask();
+			}
+			else {
+				pull = true;
+				return r;
+			}
+		}
 	}
 
 	@Override
