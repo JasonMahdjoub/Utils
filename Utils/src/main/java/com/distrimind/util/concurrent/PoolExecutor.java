@@ -441,17 +441,27 @@ public class PoolExecutor implements ExecutorService {
 		public T get(long timeout, TimeUnit unit, boolean timeoutUsed) throws InterruptedException, ExecutionException, TimeoutException {
 			if (timeout==Long.MAX_VALUE)
 				timeoutUsed=false;
+
 			if (!timeoutUsed && !isRepetitive() && take(false))
 			{
-				if (isCancelled)
-					throw new CancellationException();
+				Executor executor=getExecutor(Thread.currentThread());
+				if (executor!=null)
+					incrementMaxThreadNumber();
+				try {
+					if (isCancelled)
+						throw new CancellationException();
 
-				run();
-				if (isCancelled)
-					throw new CancellationException();
-				if (exception!=null)
-					throw new ExecutionException(exception);
-				return res;
+					run();
+					if (isCancelled)
+						throw new CancellationException();
+					if (exception != null)
+						throw new ExecutionException(exception);
+					return res;
+				}
+				finally {
+					if (executor!=null)
+						decrementMaxThreadNumber();
+				}
 			}
 			else {
 
@@ -467,8 +477,10 @@ public class PoolExecutor implements ExecutorService {
 				if (!candidateForTimeOut && (executor=getExecutor(Thread.currentThread()))!=null) {
 					if (doesWait())
 						incrementMaxThreadNumber();
-					else
-						executor=null;
+					else {
+						executor = null;
+						candidateForTimeOut = true;
+					}
 				}
 
 				flock.lock();
