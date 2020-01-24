@@ -276,6 +276,8 @@ public class ScheduledPoolExecutor extends PoolExecutor implements ScheduledExec
 		if (sf==null)
 			throw new NullPointerException();
 		lock.lock();
+		if (shutdownAsked)
+			throw new RejectedExecutionException();
 		try {
 			repeatUnsafe(sf);
 			if (launchThreadIfNecessaryUnsafe())
@@ -288,6 +290,8 @@ public class ScheduledPoolExecutor extends PoolExecutor implements ScheduledExec
 
 	@Override
 	void repeatUnsafe(ScheduledFuture<?> sf) {
+		if (shutdownAsked)
+			return;
 		scheduledFutures.add((SF<?>) sf);
 		timeOfFirstOccurrenceInNanos = scheduledFutures.first().start;
 	}
@@ -301,11 +305,21 @@ public class ScheduledPoolExecutor extends PoolExecutor implements ScheduledExec
 	{
 		for (Iterator<SF<?>> it = scheduledFutures.iterator(); it.hasNext(); )
 		{
-			if (it.next().isRepetitive())
+			SF<?> sf=it.next();
+			if (sf.isRepetitive())
 			{
+				sf.cancel(false);
 				it.remove();
 			}
 		}
+	}
+	protected void cancelAllTasksUnsafe()
+	{
+		for (SF<?> sf : scheduledFutures)
+			sf.cancel(true);
+		scheduledFutures.clear();
+		timeOfFirstOccurrenceInNanos=Long.MAX_VALUE;
+		super.cancelAllTasksUnsafe();
 	}
 
 	private Future<?> poolScheduledTask()

@@ -58,7 +58,7 @@ public class PoolExecutor implements ExecutorService {
 	private final long keepAliveTime;
 	private final ThreadFactory threadFactory;
 	private final HandlerForFailedExecution handler;
-	private volatile boolean shutdownAsked=false, shutdownNow=false;
+	volatile boolean shutdownAsked=false, shutdownNow=false;
 	private int pausedThreads=0;
 	private int workingThreads=0;
 
@@ -67,6 +67,8 @@ public class PoolExecutor implements ExecutorService {
 	final Condition waitEmptyWorkingQueue=lock.newCondition();
 	private final HashMap<Thread, Executor> executors=new HashMap<>();
 	private final HashMap<Thread, DedicatedRunnable> dedicatedThreads=new HashMap<>();
+	private boolean threadStopperInExecutors=false;
+	private boolean threadStopperInDedicatedThreads=false;
 
 
 	public PoolExecutor(int minimumNumberOfThreads, int maximumNumberOfThreads, long keepAliveTime, TimeUnit unit) {
@@ -157,6 +159,25 @@ public class PoolExecutor implements ExecutorService {
 
 	}
 
+	protected void cancelAllTasksUnsafe()
+	{
+
+		for (Future<?> f:workQueue)
+			f.cancel(true);
+		Thread currentThread=Thread.currentThread();
+
+		for (Executor w : executors.values())
+		{
+			if (w.thread.equals(currentThread)) {
+				threadStopperInExecutors = true;
+				continue;
+			}
+			if (w.currentTask!=null)
+				w.currentTask.cancel(true);
+		}
+		workQueue.clear();
+	}
+
 	private void shutdown(boolean now)
 	{
 		if (shutdownAsked)
@@ -167,14 +188,26 @@ public class PoolExecutor implements ExecutorService {
 			shutdownNow = now;
 			removeRepetitiveTasksUnsafe();
 
+			Thread currentThread=Thread.currentThread();
 			for (Map.Entry<Thread, DedicatedRunnable> e : dedicatedThreads.entrySet()) {
-				for (java.util.concurrent.Future<?> f : e.getValue().tasks)
-					f.cancel(now);
+				if (e.getKey().equals(currentThread)) {
+					threadStopperInDedicatedThreads=true;
+					continue;
+				}
+				for (ListIterator<java.util.concurrent.Future<?>> it=e.getValue().tasks.listIterator(e.getValue().tasks.size());it.hasPrevious();) {
+					it.previous().cancel(now);
+				}
 				if (now)
 					e.getKey().interrupt();
+			}
 
+			if (now) {
+				cancelAllTasksUnsafe();
+				for (Thread t : executors.keySet())
+					t.interrupt();
 			}
 			waitEventsCondition.signalAll();
+			waitEmptyWorkingQueue.signalAll();
 		}
 		finally {
 			lock.unlock();
@@ -227,7 +260,7 @@ public class PoolExecutor implements ExecutorService {
 		try {
 			long start=System.nanoTime();
 			timeout=unit.toNanos(timeout);
-			while (!areWorkingQueuesEmptyUnsafe()) {
+			while (executors.size()>(threadStopperInExecutors?1:0) && dedicatedThreads.size()>(threadStopperInDedicatedThreads?1:0)) {
 				if (!waitEmptyWorkingQueue.await(timeout, TimeUnit.NANOSECONDS))
 					return false;
 				long end=System.nanoTime();
@@ -444,10 +477,10 @@ public class PoolExecutor implements ExecutorService {
 
 			if (!timeoutUsed && !isRepetitive() && take(false))
 			{
-				Executor executor=getExecutor(Thread.currentThread());
+				/*Executor executor=getExecutor(Thread.currentThread());
 				if (executor!=null)
 					incrementMaxThreadNumber();
-				try {
+				try {*/
 					if (isCancelled)
 						throw new CancellationException();
 
@@ -457,11 +490,11 @@ public class PoolExecutor implements ExecutorService {
 					if (exception != null)
 						throw new ExecutionException(exception);
 					return res;
-				}
+				/*}
 				finally {
 					if (executor!=null)
 						decrementMaxThreadNumber();
-				}
+				}*/
 			}
 			else {
 
@@ -473,9 +506,16 @@ public class PoolExecutor implements ExecutorService {
 					if (timeout <= 0)
 						candidateForTimeOut = true;
 				}
-				Executor executor=getExecutor(Thread.currentThread());
-				if (executor!=null)
-					incrementMaxThreadNumber();
+				Executor executor=null;
+				if (!candidateForTimeOut && (executor=getExecutor(Thread.currentThread()))!=null)
+				{
+					if (doesWait())
+						incrementMaxThreadNumber();
+					else {
+						executor = null;
+						candidateForTimeOut=true;
+					}
+				}
 
 				flock.lock();
 				try {
@@ -554,6 +594,9 @@ public class PoolExecutor implements ExecutorService {
 				lock.lock();
 				try {
 					dedicatedThreads.remove(threadReference.get());
+					if (dedicatedThreads.size()==0)
+						waitEmptyWorkingQueue.signalAll();
+
 				}
 				finally {
 					lock.unlock();
@@ -626,9 +669,9 @@ public class PoolExecutor implements ExecutorService {
 
 
 	private <T> List<java.util.concurrent.Future<T>> invokeAll(Collection<? extends Callable<T>> tasks, long timeout, TimeUnit unit, boolean useTimeout) throws InterruptedException {
+		lock.lock();
 		if (shutdownAsked)
 			throw new RejectedExecutionException();
-		lock.lock();
 		ArrayList<Future<T>> futures;
 		ArrayList<java.util.concurrent.Future<T>> futures2;
 		try {
@@ -700,9 +743,9 @@ public class PoolExecutor implements ExecutorService {
 	}
 
 	private <T> T invokeAny(Collection<? extends Callable<T>> tasks, long timeout, TimeUnit unit, boolean useTimeout) throws InterruptedException, ExecutionException, TimeoutException {
+		lock.lock();
 		if (shutdownAsked)
 			throw new RejectedExecutionException();
-		lock.lock();
 		ArrayList<Future<T>> futures;
 
 		Lock flock = new ReentrantLock();
@@ -775,9 +818,9 @@ public class PoolExecutor implements ExecutorService {
 	public void execute(final Runnable command) {
 		if (command==null)
 			throw new NullPointerException();
+		lock.lock();
 		if (shutdownAsked)
 			throw new RejectedExecutionException();
-		lock.lock();
 		try {
 			Future<?> f;
 			if (command instanceof Future<?>)
@@ -1043,6 +1086,7 @@ public class PoolExecutor implements ExecutorService {
 		boolean working=false;
 		private long timeOut;
 		private long start;
+		private Future<?> currentTask=null;
 
 
 
@@ -1073,10 +1117,8 @@ public class PoolExecutor implements ExecutorService {
 		public void run() {
 
 			try {
-				ScheduledFuture<?> toRepeat=null;
 
 				for (; ; ) {
-					Future<?> task = null;
 
 					lock.lock();
 					try {
@@ -1085,15 +1127,16 @@ public class PoolExecutor implements ExecutorService {
 							working = false;
 						}
 
-						if (toRepeat != null) {
-							repeatUnsafe(toRepeat);
-							toRepeat=null;
+						if (currentTask != null) {
+							if (currentTask.repeat())
+								repeatUnsafe((ScheduledFuture<?>)currentTask);
+							currentTask=null;
 						}
 
 
 						restartTimeOutUnsafe();
 
-						while (!shutdownAsked && (task = pollTaskUnsafe()) == null) {
+						while (!shutdownAsked && (currentTask = pollTaskUnsafe()) == null) {
 							try {
 								long timeToWait = timeToWaitBeforeNewTaskScheduledInNanoSeconds() - System.nanoTime();
 								if (timeToWait <= 0)
@@ -1127,15 +1170,13 @@ public class PoolExecutor implements ExecutorService {
 					}
 
 					if (shutdownAsked) {
-						if (task!=null)
-							task.cancel(false);
+						if (currentTask!=null)
+							currentTask.cancel(false);
 						return;
 					}
-					assert task != null;
+					assert currentTask != null;
 
-					task.run();
-					if (task.repeat())
-						toRepeat=(ScheduledFuture<?>)task;
+					currentTask.run();
 				}
 			}
 			finally {
@@ -1145,6 +1186,8 @@ public class PoolExecutor implements ExecutorService {
 						--workingThreads;
 					}
 					executors.remove(this.thread);
+					if (executors.size()==0)
+						waitEmptyWorkingQueue.signalAll();
 				}
 				finally {
 					lock.unlock();
