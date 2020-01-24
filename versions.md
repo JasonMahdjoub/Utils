@@ -1,6 +1,6 @@
 Utils
 =====
-4.8.4 Stable (Build: 1479) (from 23/01/2019 to 23/01/2020)
+4.8.6 Stable (Build: 1497) (from 24/01/2019 to 24/01/2020)
 
 # Creator(s):
 Jason MAHDJOUB
@@ -11,7 +11,7 @@ Jason MAHDJOUB (Entred in the team at 04/01/2016)
 # Modifications:
 
 
-### 4.8.4 Stable (23/01/2019)
+### 4.8.6 Stable (24/01/2019)
 * Add PoolExecutor and ScheduledPoolExecutor
 * Add CircularArrayList
 * Change hash code computation in AbstractDecentralizedIDGenerator
