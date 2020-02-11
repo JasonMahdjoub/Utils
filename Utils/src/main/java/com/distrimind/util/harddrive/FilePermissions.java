@@ -59,14 +59,21 @@ import java.util.Set;
 public class FilePermissions implements SecureExternalizable {
 
 	private final Set<PosixFilePermission> permissions=new HashSet<>();
+	private boolean permissionsFromUnixSystem;
 	private Short code=null;
 
 	private FilePermissions(PosixFilePermission ...posixFilePermissions) {
 		Collections.addAll(permissions, posixFilePermissions);
+		permissionsFromUnixSystem =OSVersion.getCurrentOSVersion().getOS().isUnix();
 	}
 
 	private FilePermissions(Collection<PosixFilePermission> posixFilePermissions) {
 		permissions.addAll(posixFilePermissions);
+		permissionsFromUnixSystem =OSVersion.getCurrentOSVersion().getOS().isUnix();
+	}
+
+	public boolean arePermissionsFromUnixSystem() {
+		return permissionsFromUnixSystem;
 	}
 
 	private FilePermissions() {
@@ -151,6 +158,7 @@ public class FilePermissions implements SecureExternalizable {
 
 	private void readCode()
 	{
+		permissionsFromUnixSystem =(code & 512)==512;
 		if ((code & 256)==256)
 			permissions.add(PosixFilePermission.OWNER_READ);
 		if ((code & 128)==128)
@@ -169,11 +177,12 @@ public class FilePermissions implements SecureExternalizable {
 			permissions.add(PosixFilePermission.OTHERS_WRITE);
 		if ((code & 1)==1)
 			permissions.add(PosixFilePermission.OTHERS_EXECUTE);
+
 	}
 
 	public static FilePermissions from(short code)
 	{
-		if (code<0 || code>511)
+		if (code<0 || code>1023)
 			throw new IllegalArgumentException();
 		FilePermissions res=new FilePermissions();
 		res.code=code;
@@ -181,8 +190,22 @@ public class FilePermissions implements SecureExternalizable {
 		return res;
 	}
 
+	public FilePermissions convertToLocalPermissions()
+	{
+		FilePermissions res=new FilePermissions();
+		if (res.permissionsFromUnixSystem)
+			res.permissions.addAll(permissions);
+		else {
+			for (PosixFilePermission p : permissions) {
+				if ( p == PosixFilePermission.OWNER_EXECUTE || p == PosixFilePermission.OWNER_READ || p == PosixFilePermission.OWNER_WRITE)
+					res.permissions.add(p);
+			}
+		}
+		return res;
+	}
+
 	public void applyTo(File file) throws IOException {
-		if (OSVersion.getCurrentOSVersion().getOS().isUnix())
+		if (permissionsFromUnixSystem && OSVersion.getCurrentOSVersion().getOS().isUnix())
 			applyTo(file.toPath());
 		if (!file.setReadable(containsPermission(PosixFilePermission.OWNER_READ)))
 			throw new SecurityException();
@@ -194,7 +217,7 @@ public class FilePermissions implements SecureExternalizable {
 	}
 
 	public void applyTo(Path path) throws IOException {
-		if (!OSVersion.getCurrentOSVersion().getOS().isUnix())
+		if (!permissionsFromUnixSystem || !OSVersion.getCurrentOSVersion().getOS().isUnix())
 			applyTo(path.toFile());
 		Files.setPosixFilePermissions(path, permissions);
 	}
@@ -229,12 +252,20 @@ public class FilePermissions implements SecureExternalizable {
 		return (short)hashCode();
 	}
 
+	public short getUnixCode()
+	{
+		if (permissionsFromUnixSystem)
+			return (short)(getCode()-512);
+		else
+			return getCode();
+	}
+
 	@Override
 	public int hashCode()
 	{
 		if (code==null)
 		{
-			short c=0;
+			short c=(permissionsFromUnixSystem ?(short)512:0);
 			for (PosixFilePermission p : permissions)
 			{
 				switch (p)
@@ -287,7 +318,7 @@ public class FilePermissions implements SecureExternalizable {
 	@Override
 	public void readExternal(SecuredObjectInputStream in) throws IOException {
 		code=in.readShort();
-		if (code<0 || code>511)
+		if (code<0 || code>1023)
 			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
 		permissions.clear();
 		readCode();
