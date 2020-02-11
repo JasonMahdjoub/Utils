@@ -102,6 +102,7 @@ public class FilePermissions implements SecureExternalizable {
 		else
 			return false;
 	}
+	@SuppressWarnings("UnusedReturnValue")
 	public boolean addPermissions(PosixFilePermission ...permissions)
 	{
 		if (Collections.addAll(this.permissions, permissions)) {
@@ -137,7 +138,24 @@ public class FilePermissions implements SecureExternalizable {
 
 	public static FilePermissions from(String permissions)
 	{
-		return new FilePermissions(PosixFilePermissions.fromString(permissions));
+		if (permissions.length()==3)
+		{
+			permissions=permissions.toLowerCase();
+			FilePermissions res=new FilePermissions();
+			res.permissionsFromUnixSystem=false;
+			if (permissions.charAt(0)=='r')
+				res.addPermissions(PosixFilePermission.OWNER_READ);
+			if (permissions.charAt(1)=='w')
+				res.addPermissions(PosixFilePermission.OWNER_WRITE);
+			if (permissions.charAt(2)=='x')
+				res.addPermissions(PosixFilePermission.OWNER_EXECUTE);
+			return res;
+		}
+		else {
+			FilePermissions res=new FilePermissions(PosixFilePermissions.fromString(permissions));
+			res.permissionsFromUnixSystem=true;
+			return res;
+		}
 	}
 
 	public static FilePermissions from(PosixFilePermission ...posixFilePermissions)
@@ -180,12 +198,13 @@ public class FilePermissions implements SecureExternalizable {
 
 	}
 
-	public static FilePermissions from(short code)
+	public static FilePermissions from(short unixCode)
 	{
-		if (code<0 || code>1023)
+		if (unixCode<0 || unixCode>1023)
 			throw new IllegalArgumentException();
 		FilePermissions res=new FilePermissions();
-		res.code=code;
+		unixCode=(short)(unixCode | 512);
+		res.code=unixCode;
 		res.readCode();
 		return res;
 	}
