@@ -1,6 +1,6 @@
 Utils
 =====
-4.8.6 Stable (Build: 1509) (from 24/01/2019 to 25/01/2020)
+4.9.0 Stable (Build: 1517) (from 11/02/2019 to 11/02/2020)
 
 # Creator(s):
 Jason MAHDJOUB
@@ -9,6 +9,10 @@ Jason MAHDJOUB
 Jason MAHDJOUB (Entred in the team at 04/01/2016)
 
 # Modifications:
+
+
+### 4.9.0 Stable (11/02/2019)
+* Add FilePermissions class
 
 
 ### 4.8.6 Stable (24/01/2019)

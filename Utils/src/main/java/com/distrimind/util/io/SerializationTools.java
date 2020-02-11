@@ -41,6 +41,7 @@ package com.distrimind.util.io;
 import com.distrimind.util.AbstractDecentralizedID;
 import com.distrimind.util.ReflectionTools;
 import com.distrimind.util.crypto.*;
+import com.distrimind.util.harddrive.FilePermissions;
 import com.distrimind.util.sizeof.ObjectSizer;
 
 import java.io.IOException;
@@ -1060,8 +1061,12 @@ public class SerializationTools {
 			
 			oos.write(0);
 		}
-		else
-			if (o instanceof SecureExternalizableWithoutInnerSizeControl && (id=identifiersPerClasses.get(o.getClass()))!=null)
+		else if (o instanceof FilePermissions)
+		{
+			oos.write(27);
+			((FilePermissions) o).writeExternal(oos);
+		}
+		else if (o instanceof SecureExternalizableWithoutInnerSizeControl && (id=identifiersPerClasses.get(o.getClass()))!=null)
 		{
 			if (OOSreplaceObject)
 			{
@@ -1314,6 +1319,12 @@ public class SerializationTools {
 					return ois.readFloat();
 				case 26:
 					return ois.readDouble();
+				case 27: {
+					FilePermissions fp=FilePermissions.from();
+					fp.readExternal(ois);
+					return fp;
+				}
+
 		/*case Byte.MAX_VALUE:
 			return ois.readObject();*/
 				default:
@@ -1323,7 +1334,7 @@ public class SerializationTools {
 		
 	}
 
-	private static final byte lastObjectCode=26;
+	private static final byte lastObjectCode=27;
 	private static final short classesStartIndex=lastObjectCode+1;
 	private static short classesEndIndex=0;
 	private static short enumsStartIndex=0;
