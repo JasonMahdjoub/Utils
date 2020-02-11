@@ -61,11 +61,11 @@ public class FilePermissions implements SecureExternalizable {
 	private final Set<PosixFilePermission> permissions=new HashSet<>();
 	private Short code=null;
 
-	public FilePermissions(PosixFilePermission ...posixFilePermissions) {
+	private FilePermissions(PosixFilePermission ...posixFilePermissions) {
 		Collections.addAll(permissions, posixFilePermissions);
 	}
 
-	public FilePermissions(Collection<PosixFilePermission> posixFilePermissions) {
+	private FilePermissions(Collection<PosixFilePermission> posixFilePermissions) {
 		permissions.addAll(posixFilePermissions);
 	}
 
