@@ -47,8 +47,8 @@ import org.bouncycastle.crypto.PasswordConverter;
 import org.bouncycastle.crypto.fips.FipsDigestAlgorithm;
 import org.bouncycastle.crypto.fips.FipsPBKD;
 import org.bouncycastle.crypto.fips.FipsSHS;
-import org.bouncycastle.crypto.generators.BCrypt;
-import org.bouncycastle.crypto.generators.SCrypt;
+import org.bouncycastle.bccrypto.generators.BCrypt;
+import org.bouncycastle.bccrypto.generators.SCrypt;
 
 import com.distrimind.util.Bits;
 import com.distrimind.util.OS;
@@ -128,7 +128,7 @@ public enum PasswordHashType {
 	@SuppressWarnings("fallthrough")
 	byte[] hash(byte[] data, int off, int len, byte[] salt, byte cost, byte hashLength)
 			throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
-		CodeProvider.encureProviderLoaded(codeProvider);
+		CodeProvider.ensureProviderLoaded(codeProvider);
 		if (cost<4 || cost>31)
 			throw new IllegalArgumentException("cost must be greater or equals than 4 and lower or equals than 31");
 
@@ -226,7 +226,7 @@ public enum PasswordHashType {
 	}
 
 	byte[] hash(char[] password, byte[] salt, byte cost, byte hashLength) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
-		CodeProvider.encureProviderLoaded(codeProvider);
+		CodeProvider.ensureProviderLoaded(codeProvider);
 		if (cost<4 || cost>31)
 			throw new IllegalArgumentException("cost must be greater or equals than 4 and lower or equals than 31");
 

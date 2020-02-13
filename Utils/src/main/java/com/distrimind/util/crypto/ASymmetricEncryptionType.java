@@ -34,11 +34,11 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
-import org.bouncycastle.asn1.x9.X9ECParameters;
+import org.bouncycastle.bcasn1.x9.X9ECParameters;
 import org.bouncycastle.crypto.Algorithm;
-import org.bouncycastle.crypto.ec.CustomNamedCurves;
+import org.bouncycastle.bccrypto.ec.CustomNamedCurves;
 import org.bouncycastle.crypto.fips.FipsRSA;
-import org.bouncycastle.crypto.params.*;
+import org.bouncycastle.bccrypto.params.*;
 import org.bouncycastle.jcajce.provider.asymmetric.edec.BCEdDSAPrivateKey;
 import org.bouncycastle.jcajce.provider.asymmetric.edec.BCEdDSAPublicKey;
 import org.bouncycastle.jcajce.provider.asymmetric.edec.BCXDHPrivateKey;
@@ -47,7 +47,7 @@ import org.bouncycastle.jce.interfaces.ECPrivateKey;
 import org.bouncycastle.jce.interfaces.ECPublicKey;
 import org.bouncycastle.jce.spec.ECParameterSpec;
 import org.bouncycastle.jce.spec.ECPrivateKeySpec;
-import org.bouncycastle.math.ec.ECCurve;
+import org.bouncycastle.bcmath.ec.ECCurve;
 import org.bouncycastle.pqc.jcajce.provider.sphincs.Sphincs256KeyFactorySpi;
 
 import javax.crypto.Cipher;
@@ -228,14 +228,14 @@ public enum ASymmetricEncryptionType {
 			}
 			key[0] = 3;
             ECCurve curve = getCurve25519().getCurve();
-			org.bouncycastle.math.ec.ECPoint q = curve.decodePoint(key);
+			org.bouncycastle.bcmath.ec.ECPoint q = curve.decodePoint(key);
 			return new org.bouncycastle.jce.spec.ECPublicKeySpec(q, getCurve25519());
 		} else if (publicKey.length == 33) { // TODO make 32 byte representation normal form
 			if (lazy) {
 				return null;
 			}
 			ECCurve curve = getCurve25519().getCurve();
-			org.bouncycastle.math.ec.ECPoint q = curve.decodePoint(publicKey);
+			org.bouncycastle.bcmath.ec.ECPoint q = curve.decodePoint(publicKey);
 			return new org.bouncycastle.jce.spec.ECPublicKeySpec(q, getCurve25519());
 		} else {
 			throw new IllegalArgumentException();
@@ -659,7 +659,7 @@ public enum ASymmetricEncryptionType {
 
 	public AbstractCipher getCipherInstance()
 			throws NoSuchAlgorithmException, NoSuchPaddingException, NoSuchProviderException {
-		CodeProvider.encureProviderLoaded(codeProviderForEncryption);
+		CodeProvider.ensureProviderLoaded(codeProviderForEncryption);
 		String name = algorithmName+"/" + blockMode + "/" + padding;
 		if (codeProviderForEncryption == CodeProvider.GNU_CRYPTO) {
 			return new GnuCipher(GnuFunctions.cipherGetInstance(name));
@@ -708,7 +708,7 @@ public enum ASymmetricEncryptionType {
 		if (expirationTimeUTC==Long.MIN_VALUE)
 			expirationTimeUTC=System.currentTimeMillis() + expirationTimeMilis;
 
-		CodeProvider.encureProviderLoaded(codeProviderForKeyGenerator);
+		CodeProvider.ensureProviderLoaded(codeProviderForKeyGenerator);
 		if (codeProviderForKeyGenerator == CodeProvider.GNU_CRYPTO) {
 			Object kpg=GnuFunctions.getKeyPairGenerator(algorithmName);
 			GnuKeyPairGenerator res = new GnuKeyPairGenerator(this, kpg);

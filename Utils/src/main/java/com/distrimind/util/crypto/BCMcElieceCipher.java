@@ -39,9 +39,14 @@ import com.distrimind.util.io.RandomByteArrayOutputStream;
 import com.distrimind.util.io.SecureExternalizableWithoutInnerSizeControl;
 import com.distrimind.util.io.SecuredObjectInputStream;
 import com.distrimind.util.io.SecuredObjectOutputStream;
-import org.bouncycastle.crypto.*;
-import org.bouncycastle.crypto.digests.*;
-import org.bouncycastle.crypto.params.ParametersWithRandom;
+import org.bouncycastle.bccrypto.AsymmetricCipherKeyPair;
+import org.bouncycastle.bccrypto.Digest;
+import org.bouncycastle.bccrypto.InvalidCipherTextException;
+import org.bouncycastle.bccrypto.digests.*;
+import org.bouncycastle.bccrypto.params.ParametersWithRandom;
+import org.bouncycastle.crypto.Algorithm;
+import org.bouncycastle.crypto.AsymmetricPrivateKey;
+import org.bouncycastle.crypto.AsymmetricPublicKey;
 import org.bouncycastle.pqc.crypto.MessageEncryptor;
 import org.bouncycastle.pqc.crypto.mceliece.*;
 import org.bouncycastle.pqc.math.linearalgebra.GF2Matrix;
@@ -107,9 +112,20 @@ public class BCMcElieceCipher extends AbstractCipher{
 		private McEliecePrivateKeyParameters privateKeyParameters;
 		private volatile byte []encoded=null;
 		private volatile Integer hashCode=null;
+		private boolean destroyed=false;
 		PrivateKey()
 		{
 			privateKeyParameters=null;
+		}
+
+		@Override
+		public boolean isDestroyed() {
+			return destroyed;
+		}
+
+		@Override
+		public void destroy() {
+			zeroize();
 		}
 
 		public McEliecePrivateKeyParameters getPrivateKeyParameters() {
@@ -208,6 +224,7 @@ public class BCMcElieceCipher extends AbstractCipher{
 		{
 			if (privateKeyParameters!=null)
 			{
+				destroyed=true;
 				for (int[] a : privateKeyParameters.getH().getIntArray())
 					Arrays.fill(a, 0);
 			}
@@ -219,6 +236,7 @@ public class BCMcElieceCipher extends AbstractCipher{
 		private McElieceCCA2PrivateKeyParameters privateKeyParameters;
 		private volatile byte []encoded=null;
 		private volatile Integer hashCode=null;
+		private boolean destroyed=false;
 
 		public McElieceCCA2PrivateKeyParameters getPrivateKeyParameters() {
 			return privateKeyParameters;
@@ -233,6 +251,16 @@ public class BCMcElieceCipher extends AbstractCipher{
 			if (privateKeyParameters==null)
 				throw new NullPointerException();
 			this.privateKeyParameters = privateKeyParameters;
+		}
+
+		@Override
+		public void destroy() {
+			zeroize();
+		}
+
+		@Override
+		public boolean isDestroyed() {
+			return destroyed;
 		}
 
 		@Override
@@ -281,6 +309,7 @@ public class BCMcElieceCipher extends AbstractCipher{
 		{
 			if (privateKeyParameters!=null)
 			{
+				destroyed=true;
 				for (int[] a : privateKeyParameters.getH().getIntArray())
 					Arrays.fill(a, 0);
 			}
@@ -675,7 +704,7 @@ public class BCMcElieceCipher extends AbstractCipher{
 				byte[] b = out.toByteArray();
 				try {
 					return mcElieceCipher.messageDecrypt(b);
-				} catch (BCInvalidCipherTextException e) {
+				} catch (InvalidCipherTextException e) {
 					throw new IllegalStateException(e);
 				}
 			}

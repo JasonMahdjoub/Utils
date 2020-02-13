@@ -110,7 +110,7 @@ public enum MessageDigestType {
 	}
 	
 	public AbstractMessageDigest getMessageDigestInstance() throws NoSuchAlgorithmException, NoSuchProviderException {
-		CodeProvider.encureProviderLoaded(codeProvider);
+		CodeProvider.ensureProviderLoaded(codeProvider);
 		if (codeProvider == CodeProvider.GNU_CRYPTO) {
 			return new GnuMessageDigest(GnuFunctions.digestGetInstance(algorithmName));
 		} else if (codeProvider == CodeProvider.BCFIPS || codeProvider == CodeProvider.BC) {

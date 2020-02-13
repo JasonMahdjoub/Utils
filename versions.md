@@ -1,6 +1,6 @@
 Utils
 =====
-4.9.0 Stable (Build: 1517) (from 11/02/2019 to 11/02/2020)
+4.10.0 Stable (Build: 1573) (from 13/02/2019 to 13/02/2020)
 
 # Creator(s):
 Jason MAHDJOUB
@@ -9,6 +9,11 @@ Jason MAHDJOUB
 Jason MAHDJOUB (Entred in the team at 04/01/2016)
 
 # Modifications:
+
+
+### 4.10.0 Stable (13/02/2019)
+* Update Bouncy Castle to 1.64
+* Update Bouncy Castle FIPS to 1.0.2
 
 
 ### 4.9.0 Stable (11/02/2019)

@@ -36,7 +36,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 
 import com.distrimind.util.Bits;
-import org.bouncycastle.crypto.CryptoException;
+import org.bouncycastle.bccrypto.CryptoException;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;

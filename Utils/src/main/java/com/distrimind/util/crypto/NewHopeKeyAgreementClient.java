@@ -36,9 +36,9 @@ package com.distrimind.util.crypto;
 
 import java.util.Arrays;
 
-import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
-import org.bouncycastle.crypto.CryptoException;
-import org.bouncycastle.crypto.KeyGenerationParameters;
+import org.bouncycastle.bccrypto.AsymmetricCipherKeyPair;
+import org.bouncycastle.bccrypto.CryptoException;
+import org.bouncycastle.bccrypto.KeyGenerationParameters;
 import org.bouncycastle.pqc.crypto.newhope.NHKeyPairGenerator;
 import org.bouncycastle.pqc.crypto.newhope.NHPrivateKeyParameters;
 import org.bouncycastle.pqc.crypto.newhope.NHPublicKeyParameters;

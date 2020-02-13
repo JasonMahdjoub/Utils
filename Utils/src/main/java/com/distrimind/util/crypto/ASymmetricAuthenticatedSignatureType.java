@@ -84,13 +84,14 @@ public enum ASymmetricAuthenticatedSignatureType {
 	BC_SHA512withECDSA_CURVE_41417("SHA512withECDSA", "ECDSA", CodeProvider.BCFIPS,CodeProvider.BC, 414, 31536000000L, FipsEC.ALGORITHM, false, "curve41417"),*/
 	BCPQC_SPHINCS256_SHA2_512_256("SHA512withSPHINCS256", "SHA512withSPHINCS256", CodeProvider.BCPQC,CodeProvider.BCPQC, 1024, 31536000000L, null, true),
 	BCPQC_SPHINCS256_SHA3_512("SHA3-512withSPHINCS256", "SHA3-256withSPHINCS256", CodeProvider.BCPQC,CodeProvider.BCPQC, 1024, 31536000000L, null, true),
-	BC_Ed25519("EdDSA", "Ed25519", CodeProvider.BC,CodeProvider.BC, 256, 31536000000L, null, false, "Ed25519"),
-	BC_Ed448("EdDSA", "Ed448", CodeProvider.BC,CodeProvider.BC, 448, 31536000000L, null, false, "Ed448"),
+	BC_Ed25519("EdDSA", "Ed25519", CodeProvider.BCFIPS,CodeProvider.BC, 256, 31536000000L, null, false, "Ed25519"),
+	BC_Ed448("EdDSA", "Ed448", CodeProvider.BCFIPS,CodeProvider.BC, 448, 31536000000L, null, false, "Ed448"),
 	/*BC_X25519("EdDSA", "X25519", CodeProvider.BC,CodeProvider.BC, 256, 31536000000L, null, false, "X25519"),
 	BC_X448("EdDSA", "X448", CodeProvider.BC,CodeProvider.BC, 448, 31536000000L, null, false, "X448"),*/
 	DEFAULT(BC_FIPS_SHA384withRSAandMGF1);
 
 	private final String signatureAlgorithmName;
+
 	private final String keyGeneratorAlgorithmName;
 
 	private final CodeProvider codeProviderSignature, codeProviderKeyGenerator;
@@ -146,7 +147,7 @@ public enum ASymmetricAuthenticatedSignatureType {
 
 
 	public AbstractSignature getSignatureInstance() throws NoSuchAlgorithmException, NoSuchProviderException {
-		CodeProvider.encureProviderLoaded(codeProviderSignature);
+		CodeProvider.ensureProviderLoaded(codeProviderSignature);
 		if (codeProviderSignature == CodeProvider.GNU_CRYPTO) {
 			return new GnuSignature(GnuFunctions.getSignatureAlgorithm(signatureAlgorithmName));
 		} else if (codeProviderSignature == CodeProvider.BCFIPS || codeProviderSignature == CodeProvider.BC || codeProviderSignature == CodeProvider.BCPQC) {
@@ -250,7 +251,7 @@ public enum ASymmetricAuthenticatedSignatureType {
 			keySizeBits= this.keySizeBits;
 		if (expirationTimeUTC==Long.MIN_VALUE)
 			expirationTimeUTC=System.currentTimeMillis() + expirationTimeMilis;
-		CodeProvider.encureProviderLoaded(codeProviderSignature);
+		CodeProvider.ensureProviderLoaded(codeProviderSignature);
 		if (codeProviderKeyGenerator == CodeProvider.GNU_CRYPTO) {
 			KeyPairGenerator kgp = KeyPairGenerator.getInstance(keyGeneratorAlgorithmName);
 			GnuKeyPairGenerator res = new GnuKeyPairGenerator(this, kgp);

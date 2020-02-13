@@ -34,7 +34,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
-import org.bouncycastle.crypto.CryptoException;
+import org.bouncycastle.bccrypto.CryptoException;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;

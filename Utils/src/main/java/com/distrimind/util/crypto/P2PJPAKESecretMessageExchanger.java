@@ -35,9 +35,9 @@ knowledge of the CeCILL-C license and that you accept its terms.
 package com.distrimind.util.crypto;
 
 import org.apache.commons.codec.binary.Base64;
-import org.bouncycastle.crypto.CryptoException;
-import org.bouncycastle.crypto.agreement.jpake.*;
-import org.bouncycastle.crypto.digests.SHA512Digest;
+import org.bouncycastle.bccrypto.CryptoException;
+import org.bouncycastle.bccrypto.agreement.jpake.*;
+import org.bouncycastle.bccrypto.digests.SHA512Digest;
 
 import java.io.*;
 import java.lang.reflect.Field;

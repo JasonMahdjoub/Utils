@@ -160,7 +160,7 @@ public enum EllipticCurveDiffieHellmanType {
 	
 	AbstractKeyAgreement getKeyAgreementInstance(SymmetricEncryptionType type) throws NoSuchAlgorithmException, NoSuchProviderException
 	{
-		CodeProvider.encureProviderLoaded(codeProvider);
+		CodeProvider.ensureProviderLoaded(codeProvider);
 		if ((codeProvider==CodeProvider.BC || codeProvider==CodeProvider.BCFIPS) && !isXDHType())
 			return new BCKeyAgreement(type, this);
 		else
@@ -168,7 +168,7 @@ public enum EllipticCurveDiffieHellmanType {
 	}
 	AbstractKeyAgreement getKeyAgreementInstance(SymmetricAuthentifiedSignatureType type) throws NoSuchAlgorithmException, NoSuchProviderException
 	{
-		CodeProvider.encureProviderLoaded(codeProvider);
+		CodeProvider.ensureProviderLoaded(codeProvider);
 		if ((codeProvider==CodeProvider.BC || codeProvider==CodeProvider.BCFIPS) && !isXDHType()) {
 			return new BCKeyAgreement(type, this);
 		}

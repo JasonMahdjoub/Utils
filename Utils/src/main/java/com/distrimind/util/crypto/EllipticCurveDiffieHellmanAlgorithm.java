@@ -38,7 +38,7 @@ import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
 
-import org.bouncycastle.crypto.CryptoException;
+import org.bouncycastle.bccrypto.CryptoException;
 import org.bouncycastle.jcajce.spec.UserKeyingMaterialSpec;
 
 /**
@@ -166,7 +166,7 @@ public class EllipticCurveDiffieHellmanAlgorithm extends KeyAgreement {
 
 	private void setDistantPublicKey(byte[] distantPublicKeyBytes, SymmetricEncryptionType symmetricEncryptionType, SymmetricAuthentifiedSignatureType symmetricSignatureType, byte[] keyingMaterial) throws 
 			NoSuchAlgorithmException, InvalidKeyException, InvalidKeySpecException, InvalidAlgorithmParameterException {
-		CodeProvider.encureProviderLoaded(type.getCodeProvider());
+		CodeProvider.ensureProviderLoaded(type.getCodeProvider());
 		try
 		{
 			valid=false;

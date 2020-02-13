@@ -161,7 +161,7 @@ public enum SecureRandomType {
 	 */
 	public AbstractSecureRandom getInstance(byte[] nonce, byte[] personalizationString)
 			throws NoSuchAlgorithmException, NoSuchProviderException {
-		CodeProvider.encureProviderLoaded(provider);
+		CodeProvider.ensureProviderLoaded(provider);
 		AbstractSecureRandom res;
 		if (gnuVersion) {
 			if (algorithmeName == null)

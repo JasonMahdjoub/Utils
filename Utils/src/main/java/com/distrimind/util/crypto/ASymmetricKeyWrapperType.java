@@ -194,7 +194,7 @@ public enum ASymmetricKeyWrapperType {
 
 		if (ipublicKey instanceof ASymmetricPublicKey) {
 			ASymmetricPublicKey publicKey=(ASymmetricPublicKey)ipublicKey;
-			CodeProvider.encureProviderLoaded(provider);
+			CodeProvider.ensureProviderLoaded(provider);
 			if (name().startsWith("BCPQC_MCELIECE_"))
 			{
 				ClientASymmetricEncryptionAlgorithm client=new ClientASymmetricEncryptionAlgorithm(random, publicKey);
@@ -338,7 +338,7 @@ public enum ASymmetricKeyWrapperType {
 	private SymmetricSecretKey unwrapKey(ASymmetricPrivateKey privateKey, byte[] keyToUnwrap, SymmetricEncryptionType encryptionType, SymmetricAuthentifiedSignatureType signatureType, short keySize) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalStateException, NoSuchProviderException, InvalidKeySpecException, IOException, InvalidAlgorithmParameterException, IllegalArgumentException, InvalidWrappingException
 	{
 
-		CodeProvider.encureProviderLoaded(getCodeProvider());
+		CodeProvider.ensureProviderLoaded(getCodeProvider());
 		if ((privateKey.getAuthenticatedSignatureAlgorithmType() != null && ((provider == CodeProvider.GNU_CRYPTO) != (privateKey.getAuthenticatedSignatureAlgorithmType().getCodeProviderForSignature() == CodeProvider.GNU_CRYPTO)))
 				|| (privateKey.getEncryptionAlgorithmType() != null && ((provider == CodeProvider.GNU_CRYPTO) != (privateKey.getEncryptionAlgorithmType().getCodeProviderForEncryption() == CodeProvider.GNU_CRYPTO)))
 				|| (encryptionType != null && (provider == CodeProvider.GNU_CRYPTO) != (encryptionType.getCodeProviderForEncryption() == CodeProvider.GNU_CRYPTO))

@@ -34,10 +34,13 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.Provider;
 import java.security.Security;
 
 import com.distrimind.util.OSVersion;
+import org.bouncycastle.crypto.CryptoServicesRegistrar;
 import org.bouncycastle.jcajce.provider.BouncyCastleFipsProvider;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.pqc.jcajce.provider.BouncyCastlePQCProvider;
@@ -57,8 +60,9 @@ public enum CodeProvider {
 	private static volatile Provider bouncyProvider = null;
 	private static volatile Provider bouncyProviderFIPS = null;
 	private static volatile Provider bouncyProviderPQC = null;
+	private static volatile boolean init=false;
 
-	static void encureProviderLoaded(CodeProvider provider) {
+	static void ensureProviderLoaded(CodeProvider provider) {
 		switch (provider)
 		{
 			case BCFIPS:
@@ -74,6 +78,17 @@ public enum CodeProvider {
 				GnuFunctions.checkGnuLoaded();
 				break;
 		}
+		if (!init)
+		{
+			CodeProvider.init=true;
+
+			try {
+				CryptoServicesRegistrar.setSecureRandom(SecureRandomType.DEFAULT.getSingleton(null));
+			} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
+				e.printStackTrace();
+			}
+		}
+
 	}
 
 	private static void ensureBouncyCastleProviderLoaded() {

@@ -38,13 +38,13 @@ import java.nio.ByteBuffer;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 
-import org.bouncycastle.crypto.Digest;
-import org.bouncycastle.crypto.digests.Blake2bDigest;
-import org.bouncycastle.crypto.digests.SHA3Digest;
+import org.bouncycastle.bccrypto.Digest;
+import org.bouncycastle.bccrypto.digests.Blake2bDigest;
+import org.bouncycastle.bccrypto.digests.SHA3Digest;
 import org.bouncycastle.crypto.fips.FipsOutputMACCalculator;
 
-import org.bouncycastle.crypto.macs.HMac;
-import org.bouncycastle.crypto.params.KeyParameter;
+import org.bouncycastle.bccrypto.macs.HMac;
+import org.bouncycastle.bccrypto.params.KeyParameter;
 
 /**
  * 

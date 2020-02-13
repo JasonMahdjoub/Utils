@@ -116,7 +116,7 @@ public enum SymmetricKeyWrapperType {
 	}
 	public byte[] wrapKey(SymmetricSecretKey key, SymmetricSecretKey keyToWrap, AbstractSecureRandom random) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalStateException, IllegalBlockSizeException, NoSuchProviderException, InvalidKeySpecException
 	{
-		CodeProvider.encureProviderLoaded(provider);
+		CodeProvider.ensureProviderLoaded(provider);
 		if ((key.getAuthenticatedSignatureAlgorithmType()!=null && ((provider==CodeProvider.GNU_CRYPTO)!=(key.getAuthenticatedSignatureAlgorithmType().getCodeProviderForSignature()==CodeProvider.GNU_CRYPTO)))
 				|| (key.getEncryptionAlgorithmType()!=null  && ((provider==CodeProvider.GNU_CRYPTO)!=(key.getEncryptionAlgorithmType().getCodeProviderForEncryption()==CodeProvider.GNU_CRYPTO)))
 				|| (keyToWrap.getAuthenticatedSignatureAlgorithmType()!=null && (provider==CodeProvider.GNU_CRYPTO)!=(keyToWrap.getAuthenticatedSignatureAlgorithmType().getCodeProviderForSignature()==CodeProvider.GNU_CRYPTO))
@@ -171,7 +171,7 @@ public enum SymmetricKeyWrapperType {
 				|| (encryptionType!=null && (provider==CodeProvider.GNU_CRYPTO)!=(encryptionType.getCodeProviderForEncryption()==CodeProvider.GNU_CRYPTO))
 				|| (signatureType!=null && (provider==CodeProvider.GNU_CRYPTO)!=(signatureType.getCodeProviderForSignature()==CodeProvider.GNU_CRYPTO)))
 				throw new IllegalArgumentException("The keys must come from the same providers");
-		CodeProvider.encureProviderLoaded(provider);
+		CodeProvider.ensureProviderLoaded(provider);
 		if (provider.equals(CodeProvider.GNU_CRYPTO))
 		{
 

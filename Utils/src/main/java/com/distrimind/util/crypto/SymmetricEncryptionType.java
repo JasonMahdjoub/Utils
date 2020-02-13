@@ -259,7 +259,7 @@ public enum SymmetricEncryptionType {
 	}
 
 	public AbstractCipher getCipherInstance() throws NoSuchAlgorithmException, NoSuchPaddingException, NoSuchProviderException {
-		CodeProvider.encureProviderLoaded(codeProviderForEncryption);
+		CodeProvider.ensureProviderLoaded(codeProviderForEncryption);
 		if (codeProviderForEncryption == CodeProvider.GNU_CRYPTO) {
 			return new GnuCipher(GnuFunctions.cipherGetInstance(algorithmName + "/" + blockMode + "/" + padding));
 
@@ -289,7 +289,7 @@ public enum SymmetricEncryptionType {
 
 	public AbstractKeyGenerator getKeyGenerator(AbstractSecureRandom random, short keySizeBits)
 			throws NoSuchAlgorithmException, NoSuchProviderException {
-		CodeProvider.encureProviderLoaded(CodeProviderForKeyGenerator);
+		CodeProvider.ensureProviderLoaded(CodeProviderForKeyGenerator);
 		AbstractKeyGenerator res ;
 		if (CodeProviderForKeyGenerator == CodeProvider.GNU_CRYPTO) {
 			res = new GnuKeyGenerator(this, GnuFunctions.keyGeneratorGetInstance(algorithmName));

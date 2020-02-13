@@ -40,6 +40,7 @@ import org.bouncycastle.crypto.fips.FipsSHS;
 import org.bouncycastle.crypto.fips.FipsSHS.AuthParameters;
 
 import javax.crypto.spec.SecretKeySpec;
+import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.util.Arrays;
@@ -138,7 +139,7 @@ public enum SymmetricAuthentifiedSignatureType {
 	}
 
 	public AbstractMac getHMacInstance() throws NoSuchAlgorithmException, NoSuchProviderException {
-		CodeProvider.encureProviderLoaded(codeProviderForSignature);
+		CodeProvider.ensureProviderLoaded(codeProviderForSignature);
 		if (codeProviderForSignature == CodeProvider.GNU_CRYPTO) {
 			return new GnuMac(GnuFunctions.macGetInstance(algorithmName));
 		} else if (codeProviderForSignature == CodeProvider.BCFIPS ) {
@@ -188,7 +189,7 @@ public enum SymmetricAuthentifiedSignatureType {
 
 	public AbstractKeyGenerator getKeyGenerator(AbstractSecureRandom random, short keySizeBits)
 			throws NoSuchAlgorithmException, NoSuchProviderException {
-		CodeProvider.encureProviderLoaded(codeProviderForKeyGenerator);
+		CodeProvider.ensureProviderLoaded(codeProviderForKeyGenerator);
 		AbstractKeyGenerator res ;
 		if (codeProviderForKeyGenerator == CodeProvider.GNU_CRYPTO) {
 			res = new GnuKeyGenerator(this, GnuFunctions.keyGeneratorGetInstance(algorithmName));
@@ -238,4 +239,8 @@ public enum SymmetricAuthentifiedSignatureType {
 		return keySizeBits >= 256;
 	}
 
+
+	public static void main(String []args) throws NoSuchProviderException, NoSuchAlgorithmException, InvalidAlgorithmParameterException {
+		System.out.println(ASymmetricAuthenticatedSignatureType.BC_Ed25519.getKeyPairGenerator(SecureRandomType.DEFAULT.getSingleton(null) ).generateKeyPair().getASymmetricPublicKey());
+	}
 }

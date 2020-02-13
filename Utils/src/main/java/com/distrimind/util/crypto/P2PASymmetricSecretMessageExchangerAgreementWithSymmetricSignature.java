@@ -1,6 +1,6 @@
 package com.distrimind.util.crypto;
 
-import org.bouncycastle.crypto.CryptoException;
+import org.bouncycastle.bccrypto.CryptoException;
 
 import javax.crypto.NoSuchPaddingException;
 import java.security.InvalidAlgorithmParameterException;
