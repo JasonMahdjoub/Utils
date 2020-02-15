@@ -93,6 +93,7 @@ public class NewHopeKeyAgreementServer extends AbstractNewHopeKeyAgreement{
 		
         exchangePair=new ExchangePair(new NHPublicKeyParameters(publicKeyValue), sharedValue);
         shared=exchangePair.getSharedValue();
+        assert shared!=null;
         valid=true;
 	}
 	

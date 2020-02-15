@@ -35,14 +35,10 @@ The fact that you are presently reading this means that you have had
 knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-import org.bouncycastle.crypto.Algorithm;
-import org.bouncycastle.pqc.jcajce.provider.sphincs.Sphincs256KeyPairGeneratorSpi;
-
-import java.security.*;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.util.Objects;
-
-import static com.distrimind.util.crypto.ASymmetricAuthenticatedSignatureType.BCPQC_SPHINCS256_SHA2_512_256;
-import static com.distrimind.util.crypto.ASymmetricAuthenticatedSignatureType.BCPQC_SPHINCS256_SHA3_512;
 
 /**
  * @author Jason Mahdjoub

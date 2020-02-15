@@ -42,7 +42,7 @@ import org.bouncycastle.crypto.KDFCalculator;
 import org.bouncycastle.crypto.fips.FipsAgreement;
 import org.bouncycastle.crypto.fips.FipsEC;
 import org.bouncycastle.crypto.fips.FipsEC.AgreementParameters;
-import org.bouncycastle.jcajce.spec.UserKeyingMaterialSpec;
+import org.bouncycastle.bcjcajce.spec.UserKeyingMaterialSpec;
 import org.bouncycastle.util.Arrays;
 import org.bouncycastle.crypto.fips.FipsKDF;
 import org.bouncycastle.crypto.fips.FipsKDF.AgreementKDFParameters;

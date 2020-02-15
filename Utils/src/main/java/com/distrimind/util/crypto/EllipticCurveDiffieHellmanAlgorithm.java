@@ -39,7 +39,7 @@ import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
 
 import org.bouncycastle.bccrypto.CryptoException;
-import org.bouncycastle.jcajce.spec.UserKeyingMaterialSpec;
+import org.bouncycastle.bcjcajce.spec.UserKeyingMaterialSpec;
 
 /**
  * 
