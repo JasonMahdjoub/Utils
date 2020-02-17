@@ -1,6 +1,6 @@
 Utils
 =====
-4.10.1 Stable (Build: 1589) (from 15/02/2019 to 15/02/2020)
+4.11.0 Stable (Build: 1592) (from 17/02/2019 to 17/02/2020)
 
 # Creator(s):
 Jason MAHDJOUB
@@ -9,6 +9,13 @@ Jason MAHDJOUB
 Jason MAHDJOUB (Entred in the team at 04/01/2016)
 
 # Modifications:
+
+
+### 4.11.0 Stable (17/02/2019)
+* Make FilePermissions compatible with old Android platforms
+* Asymmetric signatures based on Eduard curves use now BC FIPS implementation
+* Key agreements based on Eduard curves use now BC FIPS implementation
+* SHA3-HMAC use now BC FIPS implementation
 
 
 ### 4.10.1 Stable (15/02/2019)

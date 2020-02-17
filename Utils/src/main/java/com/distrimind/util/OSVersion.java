@@ -161,34 +161,36 @@ public enum OSVersion {
         }
     }*/
 
-    static private volatile com.distrimind.util.OSVersion currentOS=null;
+    static private final OSVersion currentOS;
     static final String OS_VERSION = (System.getProperty("os.name") + " " + System.getProperty("os.version")).toLowerCase();
-
-    public static OSVersion getCurrentOSVersion()
+    static
     {
-        if (currentOS==null) {
-            if (OS.isAndroid()) {
-                for (OSVersion osv:OSVersion.values())
+        OSVersion v=null;
+        if (OS.isAndroid()) {
+            for (OSVersion osv:OSVersion.values())
+            {
+                if (osv.getOS()==OS.ANDROID && osv.name().contains("_"+getAndroidVersionInt()+"_"))
                 {
-                    if (osv.getOS()==OS.ANDROID && osv.name().contains("_"+getAndroidVersionInt()+"_"))
-                    {
-                        currentOS=osv;
-                    }
+                    v=osv;
                 }
-                if (currentOS==null)
-                    currentOS=ANDROID_UNKNOWN;
             }
-            else {
-                for (OS os : OS.values()) {
-                    if (os.pattern.matcher(OS.OSName).matches()) {
-
-
-                        currentOS=OSVersion.getFrom(OS_VERSION);
-                        break;
-                    }
+            if (v==null)
+                v=ANDROID_UNKNOWN;
+        }
+        else {
+            for (OS os : OS.values()) {
+                if (os.pattern.matcher(OS.OSName).matches()) {
+                    v=OSVersion.getFrom(OS_VERSION);
+                    break;
                 }
             }
         }
+        currentOS=v;
+
+    }
+
+    public static OSVersion getCurrentOSVersion()
+    {
         return currentOS;
     }
 
