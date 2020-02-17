@@ -127,11 +127,6 @@ public final class JavaNativeKeyPairGenerator extends AbstractKeyPairGenerator {
 					this.keySizeBits = signatureType.getDefaultKeySize();
 					keyPairGenerator.initialize(new ECGenParameterSpec(signatureType.getCurveName()), _random.getJavaNativeSecureRandom());
 					break;
-				case "curve25519":
-					this.keySizeBits = signatureType.getDefaultKeySize();
-
-					keyPairGenerator.initialize(ASymmetricEncryptionType.getCurve25519(), _random.getJavaNativeSecureRandom());
-					break;
 				case "Ed25519":case "Ed448":case "X25519":case "X448":
 					keyPairGenerator.initialize(signatureType.getDefaultKeySize(), _random.getJavaNativeSecureRandom());
 					break;

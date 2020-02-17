@@ -360,7 +360,7 @@ public class ASymmetricPrivateKey extends AbstractKey implements IASymmetricPriv
 				ECPrivateKey javaNativePrivateKey = (ECPrivateKey) pk;
 				return new AsymmetricECPrivateKey(getBouncyCastleAlgorithm(), javaNativePrivateKey.getEncoded());
 			} else
-				throw new IllegalAccessError();
+				throw new IllegalAccessError(pk.getClass().toString());
 		}
 		
 	}

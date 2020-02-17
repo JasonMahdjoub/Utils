@@ -42,7 +42,7 @@ import org.bouncycastle.crypto.KDFCalculator;
 import org.bouncycastle.crypto.fips.FipsAgreement;
 import org.bouncycastle.crypto.fips.FipsEC;
 import org.bouncycastle.crypto.fips.FipsEC.AgreementParameters;
-import org.bouncycastle.bcjcajce.spec.UserKeyingMaterialSpec;
+import org.bouncycastle.jcajce.spec.UserKeyingMaterialSpec;
 import org.bouncycastle.util.Arrays;
 import org.bouncycastle.crypto.fips.FipsKDF;
 import org.bouncycastle.crypto.fips.FipsKDF.AgreementKDFParameters;
@@ -79,6 +79,8 @@ public final class BCKeyAgreement extends AbstractKeyAgreement{
 	@Override
 	public void doPhase(AbstractKey key, boolean lastPhase)
 			throws IllegalStateException, NoSuchAlgorithmException, InvalidKeySpecException {
+		if (agreement==null)
+			throw new NullPointerException();
 		secret=agreement.calculate((AsymmetricPublicKey)key.toBouncyCastleKey());
 	}
 
@@ -152,12 +154,15 @@ public final class BCKeyAgreement extends AbstractKeyAgreement{
 	
 	@Override
 	public void init(AbstractKey key, Object params, AbstractSecureRandom random) throws NoSuchAlgorithmException, InvalidKeySpecException {
-		if (type.isECCDHType())
+
+		if (type.isECCDHType() || type.isXDHType())
 		{
+
 			paramskeymaterial=((UserKeyingMaterialSpec)params).getUserKeyingMaterial();
 			AgreementParameters aparams=FipsEC.CDH.withDigest(type.getBCFipsDigestAlgorithm())
 				.withKDF(kdfAlgorithm=FipsKDF.CONCATENATION.withPRF(type.getBCFipsAgreementKDFPRF()), paramskeymaterial, paramskeymaterial.length);
 			FipsEC.DHAgreementFactory agreementFact=new FipsEC.DHAgreementFactory();
+
 			agreement=agreementFact.createAgreement((AsymmetricPrivateKey)key.toBouncyCastleKey(), aparams);
 			
 		}

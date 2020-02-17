@@ -39,7 +39,7 @@ import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
 
 import org.bouncycastle.bccrypto.CryptoException;
-import org.bouncycastle.bcjcajce.spec.UserKeyingMaterialSpec;
+import org.bouncycastle.jcajce.spec.UserKeyingMaterialSpec;
 
 /**
  * 
@@ -122,9 +122,9 @@ public class EllipticCurveDiffieHellmanAlgorithm extends KeyAgreement {
 			try {
 				KeyPairGenerator kpg ;
 				if (t== ASymmetricAuthenticatedSignatureType.BC_FIPS_Ed448)
-					kpg= KeyPairGenerator.getInstance("X448", CodeProvider.BC.name());
+					kpg= KeyPairGenerator.getInstance("X448", CodeProvider.BCFIPS.name());
 				else
-					kpg= KeyPairGenerator.getInstance("X25519", CodeProvider.BC.name());
+					kpg= KeyPairGenerator.getInstance("X25519", CodeProvider.BCFIPS.name());
 
 				JavaNativeKeyPairGenerator res = new JavaNativeKeyPairGenerator(t, kpg);
 				res.initialize(keySize, Long.MAX_VALUE, randomForKeys);
@@ -188,12 +188,16 @@ public class EllipticCurveDiffieHellmanAlgorithm extends KeyAgreement {
 				ka = type.getKeyAgreementInstance(symmetricSignatureType);
 			else
 				ka = type.getKeyAgreementInstance(symmetricEncryptionType);
-			if (type.isECCDHType() || type.isXDHType()) {
-
+			if (type.isECCDHType())
+			{
 				UserKeyingMaterialSpec spec=null;
 				if (type.useKDF())
 					spec=new UserKeyingMaterialSpec(keyingMaterial);
 				ka.init(myKeyPair.getASymmetricPrivateKey(), spec, randomForKeys);
+
+			}
+			else if (type.isXDHType()) {
+				ka.init(myKeyPair.getASymmetricPrivateKey(), null, randomForKeys);
 			}
 			else if (type.isECMQVType())
 			{
@@ -205,6 +209,8 @@ public class EllipticCurveDiffieHellmanAlgorithm extends KeyAgreement {
 					}
 				);*/
 			}
+			else
+				throw new InternalError(type.name());
 			ka.doPhase(distantPublicKey, true);
 			if (ka instanceof JavaNativeKeyAgreement)
 				derivedKey=ka.generateSecretKey(keySizeBits);

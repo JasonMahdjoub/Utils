@@ -76,7 +76,8 @@ public class Utils {
 			c.set(2019, Calendar.FEBRUARY, 17);
 			Description d = new Description((short)4, (short)11, (short)0, Version.Type.Stable, (short)0, c.getTime());
 			d.addItem("Make FilePermissions compatible with old Android platforms");
-			d.addItem("Eduard curves use now BC FIPS");
+			d.addItem("Asymmetric signatures based on Eduard curves use now BC FIPS implementation");
+			d.addItem("Key agreements based on Eduard curves use now BC FIPS implementation");
 			VERSION.addDescription(d);
 
 			c = Calendar.getInstance();

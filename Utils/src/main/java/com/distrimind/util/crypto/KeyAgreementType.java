@@ -48,34 +48,10 @@ import java.security.NoSuchProviderException;
 public enum KeyAgreementType {
 	BC_FIPS_ECDDH_384_P_384(false, false, EllipticCurveDiffieHellmanType.BC_FIPS_ECDDH_384_P_384),
 	BC_FIPS_ECDDH_512_P_521(false, false, EllipticCurveDiffieHellmanType.BC_FIPS_ECDDH_512_P_521),
-	/*BC_ECCDH_384_CURVE_25519(false, false, EllipticCurveDiffieHellmanType.BC_ECCDH_384_CURVE_25519),
-	BC_ECCDH_512_CURVE_25519(false, false, EllipticCurveDiffieHellmanType.BC_ECCDH_512_CURVE_25519),*/
-	BC_XDH_X25519_WITH_SHA384CKDF(false, false, EllipticCurveDiffieHellmanType.BC_XDH_X25519_WITH_SHA384CKDF),
-	BC_XDH_X448_WITH_SHA384CKDF(false, false, EllipticCurveDiffieHellmanType.BC_XDH_X448_WITH_SHA384CKDF),
-	BC_XDH_X25519_WITH_SHA512CKDF(false, false, EllipticCurveDiffieHellmanType.BC_XDH_X25519_WITH_SHA512CKDF),
-	BC_XDH_X448_WITH_SHA512CKDF(false, false, EllipticCurveDiffieHellmanType.BC_XDH_X448_WITH_SHA512CKDF),
-	/*BC_ECCDH_384_CURVE_M_221(false, false, EllipticCurveDiffieHellmanType.BC_ECCDH_384_CURVE_M_221),
-	BC_ECCDH_512_CURVE_M_221(false, false, EllipticCurveDiffieHellmanType.BC_ECCDH_512_CURVE_M_221), 
-	BC_ECCDH_384_CURVE_M_383(false, false, EllipticCurveDiffieHellmanType.BC_ECCDH_384_CURVE_M_383),
-	BC_ECCDH_512_CURVE_M_383(false, false, EllipticCurveDiffieHellmanType.BC_ECCDH_512_CURVE_M_383), 
-	BC_ECCDH_384_CURVE_M_511(false, false, EllipticCurveDiffieHellmanType.BC_ECCDH_384_CURVE_M_511),
-	BC_ECCDH_512_CURVE_M_511(false, false, EllipticCurveDiffieHellmanType.BC_ECCDH_512_CURVE_M_511), 
-	BC_ECCDH_384_CURVE_41417(false, false, EllipticCurveDiffieHellmanType.BC_ECCDH_384_CURVE_41417),
-	BC_ECCDH_512_CURVE_41417(false, false, EllipticCurveDiffieHellmanType.BC_ECCDH_512_CURVE_41417),*/
-	/*@Deprecated
-	BC_FIPS_ECMQV_384_P_384(false, false, EllipticCurveDiffieHellmanType.BC_FIPS_ECMQV_384_P_384),
-	@Deprecated
-	BC_FIPS_ECMQV_512_P_512(false, false, EllipticCurveDiffieHellmanType.BC_FIPS_ECMQV_512_P_521), 
-	BC_ECMQV_384_CURVE_25519(false, false, EllipticCurveDiffieHellmanType.BC_ECMQV_384_CURVE_25519),
-	BC_ECMQV_512_CURVE_25519(false, false, EllipticCurveDiffieHellmanType.BC_ECMQV_512_CURVE_25519), 
-	BC_ECMQV_384_CURVE_M_221(false, false, EllipticCurveDiffieHellmanType.BC_ECMQV_384_CURVE_M_221),
-	BC_ECMQV_512_CURVE_M_221(false, false, EllipticCurveDiffieHellmanType.BC_ECMQV_512_CURVE_M_221), 
-	BC_ECMQV_384_CURVE_M_383(false, false, EllipticCurveDiffieHellmanType.BC_ECMQV_384_CURVE_M_383),
-	BC_ECMQV_512_CURVE_M_383(false, false, EllipticCurveDiffieHellmanType.BC_ECMQV_512_CURVE_M_383), 
-	BC_ECMQV_384_CURVE_M_511(false, false, EllipticCurveDiffieHellmanType.BC_ECMQV_384_CURVE_M_511),
-	BC_ECMQV_512_CURVE_M_511(false, false, EllipticCurveDiffieHellmanType.BC_ECMQV_512_CURVE_M_511), 
-	BC_ECMQV_384_CURVE_41417(false, false, EllipticCurveDiffieHellmanType.BC_ECMQV_384_CURVE_41417),
-	BC_ECMQV_512_CURVE_41417(false, false, EllipticCurveDiffieHellmanType.BC_ECMQV_512_CURVE_41417),*/
+	BC_FIPS_XDH_X25519_WITH_SHA384CKDF(false, false, EllipticCurveDiffieHellmanType.BC_FIPS_XDH_X25519_WITH_SHA384CKDF),
+	BC_FIPS_XDH_X448_WITH_SHA384CKDF(false, false, EllipticCurveDiffieHellmanType.BC_FIPS_XDH_X448_WITH_SHA384CKDF),
+	BC_FIPS_XDH_X25519_WITH_SHA512CKDF(false, false, EllipticCurveDiffieHellmanType.BC_FIPS_XDH_X25519_WITH_SHA512CKDF),
+	BC_FIPS_XDH_X448_WITH_SHA512CKDF(false, false, EllipticCurveDiffieHellmanType.BC_FIPS_XDH_X448_WITH_SHA512CKDF),
 	BCPQC_NEW_HOPE(true, true, null),
 	DEFAULT(false, false, EllipticCurveDiffieHellmanType.DEFAULT);
 	

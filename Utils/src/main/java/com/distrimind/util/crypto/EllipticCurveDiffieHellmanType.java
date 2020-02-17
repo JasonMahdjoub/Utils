@@ -57,10 +57,10 @@ public enum EllipticCurveDiffieHellmanType {
 	BC_FIPS_ECDDH_512_P_521((short) 256, (short) 521, CodeProvider.BCFIPS, ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA512withECDSA_P_521, "ECCDHwithSHA512CKDF", FipsSHS.Algorithm.SHA512, FipsKDF.AgreementKDFPRF.SHA512, true),
 	/*@SuppressWarnings("deprecation") BC_ECCDH_384_CURVE_25519((short) 256, (short) 384, CodeProvider.BCFIPS, ASymmetricAuthenticatedSignatureType.BC_SHA384withECDSA_CURVE_25519, "ECCDHwithSHA384CKDF", FipsSHS.Algorithm.SHA384, FipsKDF.AgreementKDFPRF.SHA384, true),
 	@SuppressWarnings("deprecation") BC_ECCDH_512_CURVE_25519((short) 256, (short) 521, CodeProvider.BCFIPS, ASymmetricAuthenticatedSignatureType.BC_SHA512withECDSA_CURVE_25519, "ECCDHwithSHA512CKDF", FipsSHS.Algorithm.SHA512, FipsKDF.AgreementKDFPRF.SHA512, true),*/
-	BC_XDH_X25519_WITH_SHA384CKDF((short) 256, (short) 521, CodeProvider.BC, ASymmetricAuthenticatedSignatureType.BC_FIPS_Ed25519, "X25519withSHA384CKDF", FipsSHS.Algorithm.SHA384, FipsKDF.AgreementKDFPRF.SHA384, true),
-	BC_XDH_X448_WITH_SHA384CKDF((short) 256, (short) 521, CodeProvider.BC, ASymmetricAuthenticatedSignatureType.BC_FIPS_Ed448, "X448withSHA384CKDF", FipsSHS.Algorithm.SHA384, FipsKDF.AgreementKDFPRF.SHA384, true),
-	BC_XDH_X25519_WITH_SHA512CKDF((short) 256, (short) 521, CodeProvider.BC, ASymmetricAuthenticatedSignatureType.BC_FIPS_Ed25519, "X25519withSHA512CKDF", FipsSHS.Algorithm.SHA512, FipsKDF.AgreementKDFPRF.SHA512, true),
-	BC_XDH_X448_WITH_SHA512CKDF((short) 256, (short) 521, CodeProvider.BC, ASymmetricAuthenticatedSignatureType.BC_FIPS_Ed448, "X448withSHA512CKDF", FipsSHS.Algorithm.SHA512, FipsKDF.AgreementKDFPRF.SHA512, true),
+	BC_FIPS_XDH_X25519_WITH_SHA384CKDF((short) 256, (short) 521, CodeProvider.BCFIPS, ASymmetricAuthenticatedSignatureType.BC_FIPS_Ed25519, "X25519", FipsSHS.Algorithm.SHA384, FipsKDF.AgreementKDFPRF.SHA384, true),
+	BC_FIPS_XDH_X448_WITH_SHA384CKDF((short) 256, (short) 521, CodeProvider.BCFIPS, ASymmetricAuthenticatedSignatureType.BC_FIPS_Ed448, "X448", FipsSHS.Algorithm.SHA384, FipsKDF.AgreementKDFPRF.SHA384, true),
+	BC_FIPS_XDH_X25519_WITH_SHA512CKDF((short) 256, (short) 521, CodeProvider.BCFIPS, ASymmetricAuthenticatedSignatureType.BC_FIPS_Ed25519, "X25519", FipsSHS.Algorithm.SHA512, FipsKDF.AgreementKDFPRF.SHA512, true),
+	BC_FIPS_XDH_X448_WITH_SHA512CKDF((short) 256, (short) 521, CodeProvider.BCFIPS, ASymmetricAuthenticatedSignatureType.BC_FIPS_Ed448, "X448", FipsSHS.Algorithm.SHA512, FipsKDF.AgreementKDFPRF.SHA512, true),
 	/*BC_ECCDH_384_CURVE_M_221((short) 256, (short) 384, CodeProvider.BCFIPS, ASymmetricAuthenticatedSignatureType.BC_SHA384withECDSA_CURVE_M_221, "ECCDHwithSHA384CKDF", FipsSHS.Algorithm.SHA384, FipsKDF.AgreementKDFPRF.SHA384, true),
 	BC_ECCDH_512_CURVE_M_221((short) 256, (short) 521, CodeProvider.BCFIPS, ASymmetricAuthenticatedSignatureType.BC_SHA512withECDSA_CURVE_M_221, "ECCDHwithSHA512CKDF", FipsSHS.Algorithm.SHA512, FipsKDF.AgreementKDFPRF.SHA512, true),
 	BC_ECCDH_384_CURVE_M_383((short) 256, (short) 384, CodeProvider.BCFIPS, ASymmetricAuthenticatedSignatureType.BC_SHA384withECDSA_CURVE_M_383, "ECCDHwithSHA384CKDF", FipsSHS.Algorithm.SHA384, FipsKDF.AgreementKDFPRF.SHA384, true),
@@ -83,7 +83,7 @@ public enum EllipticCurveDiffieHellmanType {
 	BC_ECMQV_512_CURVE_M_511((short) 256, (short) 521, CodeProvider.BCFIPS, ASymmetricAuthenticatedSignatureType.BC_SHA512withECDSA_CURVE_M_511, "ECMQVwithSHA512CKDF", FipsSHS.Algorithm.SHA512, FipsKDF.AgreementKDFPRF.SHA512, true),
 	BC_ECMQV_384_CURVE_41417((short) 256, (short) 384, CodeProvider.BCFIPS, ASymmetricAuthenticatedSignatureType.BC_SHA384withECDSA_CURVE_41417, "ECMQVwithSHA384CKDF", FipsSHS.Algorithm.SHA384, FipsKDF.AgreementKDFPRF.SHA384, true),
 	BC_ECMQV_512_CURVE_41417((short) 256, (short) 521, CodeProvider.BCFIPS, ASymmetricAuthenticatedSignatureType.BC_SHA512withECDSA_CURVE_41417, "ECMQVwithSHA512CKDF", FipsSHS.Algorithm.SHA512, FipsKDF.AgreementKDFPRF.SHA512, true),*/
-	DEFAULT(BC_XDH_X448_WITH_SHA512CKDF);
+	DEFAULT(BC_FIPS_XDH_X448_WITH_SHA512CKDF);
 
 	private final short keySizeBits;
 	private final short ECDHKeySizeBits;

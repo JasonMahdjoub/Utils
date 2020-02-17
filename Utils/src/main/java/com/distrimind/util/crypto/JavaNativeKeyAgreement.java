@@ -93,7 +93,7 @@ public final class JavaNativeKeyAgreement extends AbstractKeyAgreement {
 			throws InvalidKeyException, NoSuchAlgorithmException {
 		if (encryptionType==null)
 		{
-			return new SymmetricSecretKey(signatureType, this.keyAgreement.generateSecret(signatureType.getAlgorithmName()+"["+keySize+"]"), keySize);
+			return new SymmetricSecretKey(signatureType, this.keyAgreement.generateSecret("AES["+keySize+"]"), keySize);
 		}
 		else
 			return new SymmetricSecretKey(encryptionType, this.keyAgreement.generateSecret(encryptionType.getAlgorithmName()+"["+keySize+"]"), keySize);
