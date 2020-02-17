@@ -35,19 +35,17 @@ knowledge of the CeCILL-C license and that you accept its terms.
 package com.distrimind.util.crypto;
 
 import org.bouncycastle.bcasn1.x9.X9ECParameters;
-import org.bouncycastle.crypto.Algorithm;
 import org.bouncycastle.bccrypto.ec.CustomNamedCurves;
-import org.bouncycastle.crypto.fips.FipsRSA;
 import org.bouncycastle.bccrypto.params.*;
-import org.bouncycastle.bcjcajce.provider.asymmetric.edec.BCEdDSAPrivateKey;
-import org.bouncycastle.bcjcajce.provider.asymmetric.edec.BCEdDSAPublicKey;
 import org.bouncycastle.bcjcajce.provider.asymmetric.edec.BCXDHPrivateKey;
 import org.bouncycastle.bcjcajce.provider.asymmetric.edec.BCXDHPublicKey;
-import org.bouncycastle.jce.interfaces.ECPrivateKey;
-import org.bouncycastle.jce.interfaces.ECPublicKey;
+import org.bouncycastle.bcmath.ec.ECCurve;
+import org.bouncycastle.crypto.Algorithm;
+import org.bouncycastle.crypto.asymmetric.AsymmetricEdDSAPublicKey;
+import org.bouncycastle.crypto.fips.FipsRSA;
+import org.bouncycastle.crypto.general.EdEC;
 import org.bouncycastle.jce.spec.ECParameterSpec;
 import org.bouncycastle.jce.spec.ECPrivateKeySpec;
-import org.bouncycastle.bcmath.ec.ECCurve;
 import org.bouncycastle.pqc.jcajce.provider.sphincs.Sphincs256KeyFactorySpi;
 
 import javax.crypto.Cipher;
@@ -65,7 +63,7 @@ import java.security.spec.X509EncodedKeySpec;
  * List of asymmetric encryption algorithms
  * 
  * @author Jason Mahdjoub
- * @version 4.0
+ * @version 4.1
  * @since Utils 1.4
  */
 public enum ASymmetricEncryptionType {
@@ -122,7 +120,7 @@ public enum ASymmetricEncryptionType {
 				return KeyFactory.getInstance(algorithm).generatePrivate(ks);
 
 			}
-			else if (algorithmType.contains(ASymmetricAuthenticatedSignatureType.BC_Ed25519.getCurveName()))
+			else if (algorithmType.contains(ASymmetricAuthenticatedSignatureType.BC_FIPS_Ed25519.getCurveName()))
 			{
 				if (xdh)
 				{
@@ -131,11 +129,12 @@ public enum ASymmetricEncryptionType {
 
 				}
 				else {
-					Ed25519PrivateKeyParameters pk = new Ed25519PrivateKeyParameters(encodedKey, 0);
-					return constructorBCEdDSAPrivateKey.newInstance(pk);
+					PKCS8EncodedKeySpec pkcsKeySpec = new PKCS8EncodedKeySpec(encodedKey);
+					KeyFactory kf = KeyFactory.getInstance(algorithm);
+					return kf.generatePrivate(pkcsKeySpec);
 				}
 			}
-			else if (algorithmType.contains(ASymmetricAuthenticatedSignatureType.BC_Ed448.getCurveName()))
+			else if (algorithmType.contains(ASymmetricAuthenticatedSignatureType.BC_FIPS_Ed448.getCurveName()))
 			{
 				if (xdh)
 				{
@@ -144,8 +143,9 @@ public enum ASymmetricEncryptionType {
 
 				}
 				else {
-					Ed448PrivateKeyParameters pk = new Ed448PrivateKeyParameters(encodedKey, 0);
-					return constructorBCEdDSAPrivateKey.newInstance(pk);
+					PKCS8EncodedKeySpec pkcsKeySpec = new PKCS8EncodedKeySpec(encodedKey);
+					KeyFactory kf = KeyFactory.getInstance(algorithm);
+					return kf.generatePrivate(pkcsKeySpec);
 				}
 			}
 
@@ -177,7 +177,7 @@ public enum ASymmetricEncryptionType {
 				org.bouncycastle.jce.spec.ECPublicKeySpec ks=deserializePublicKey(encodedKey, false);
 				return KeyFactory.getInstance(algorithm).generatePublic(ks);
 			}
-			else if (algorithmType.contains(ASymmetricAuthenticatedSignatureType.BC_Ed25519.getCurveName()))
+			else if (algorithmType.contains(ASymmetricAuthenticatedSignatureType.BC_FIPS_Ed25519.getCurveName()))
 			{
 				if (xdh)
 				{
@@ -185,11 +185,11 @@ public enum ASymmetricEncryptionType {
 					return constructorBCXDHPublicKey.newInstance(pk);
 				}
 				else {
-					Ed25519PublicKeyParameters pk = new Ed25519PublicKeyParameters(encodedKey, 0);
-					return constructorBCEdDSAPublicKey.newInstance(pk);
+					AsymmetricEdDSAPublicKey k= new AsymmetricEdDSAPublicKey(EdEC.Algorithm.Ed25519, encodedKey);
+					return constructorProvEdDSAPublicKey.newInstance(k);
 				}
 			}
-			else if (algorithmType.contains(ASymmetricAuthenticatedSignatureType.BC_Ed448.getCurveName()))
+			else if (algorithmType.contains(ASymmetricAuthenticatedSignatureType.BC_FIPS_Ed448.getCurveName()))
 			{
 				if (xdh)
 				{
@@ -197,15 +197,10 @@ public enum ASymmetricEncryptionType {
 					return constructorBCXDHPublicKey.newInstance(pk);
 				}
 				else {
-					Ed448PublicKeyParameters pk = new Ed448PublicKeyParameters(encodedKey, 0);
-					return constructorBCEdDSAPublicKey.newInstance(pk);
+					AsymmetricEdDSAPublicKey k= new AsymmetricEdDSAPublicKey(EdEC.Algorithm.Ed448, encodedKey);
+					return constructorProvEdDSAPublicKey.newInstance(k);
 				}
 			}
-			/*else if (algorithm.equalsIgnoreCase("ECDSA") && curveName!=null)
-            {
-                return getPubKeyFromCurve(encodedKey, curveName);
-
-            }*/
             X509EncodedKeySpec pubKeySpec = new X509EncodedKeySpec(encodedKey);
             KeyFactory kf = KeyFactory.getInstance(algorithm);
             return kf.generatePublic(pubKeySpec);
@@ -275,13 +270,12 @@ public enum ASymmetricEncryptionType {
 	static byte[] encodePrivateKey(PrivateKey key, @SuppressWarnings("unused") ASymmetricEncryptionType type) {
 		return key.getEncoded();
 	}
-	@SuppressWarnings("deprecation")
 	static byte[] encodePrivateKey(PrivateKey key, ASymmetricAuthenticatedSignatureType type, boolean xdh) {
-		if (type==ASymmetricAuthenticatedSignatureType.BC_SHA384withECDSA_CURVE_25519 || type==ASymmetricAuthenticatedSignatureType.BC_SHA512withECDSA_CURVE_25519 || type==ASymmetricAuthenticatedSignatureType.BC_SHA256withECDSA_CURVE_25519)
+		/*if (type==ASymmetricAuthenticatedSignatureType.BC_SHA384withECDSA_CURVE_25519 || type==ASymmetricAuthenticatedSignatureType.BC_SHA512withECDSA_CURVE_25519 || type==ASymmetricAuthenticatedSignatureType.BC_SHA256withECDSA_CURVE_25519)
 		{
 			return ((ECPrivateKey) key).getD().toByteArray();
 		}
-		else if (type==ASymmetricAuthenticatedSignatureType.BC_Ed25519)
+		else */if (type==ASymmetricAuthenticatedSignatureType.BC_FIPS_Ed25519)
 		{
 			if (xdh)
 			{
@@ -295,18 +289,10 @@ public enum ASymmetricEncryptionType {
 				return k.getEncoded();
 			}
 			else {
-
-				Ed25519PrivateKeyParameters k = null;
-				try {
-					k = (Ed25519PrivateKeyParameters) eddsaPrivateKeyField.get(key);
-				} catch (IllegalAccessException e) {
-					e.printStackTrace();
-					System.exit(-1);
-				}
-				return k.getEncoded();
+				return key.getEncoded();
 			}
 		}
-		else if (type==ASymmetricAuthenticatedSignatureType.BC_Ed448)
+		else if (type==ASymmetricAuthenticatedSignatureType.BC_FIPS_Ed448)
 		{
 			if (xdh)
 			{
@@ -320,14 +306,7 @@ public enum ASymmetricEncryptionType {
 				return k.getEncoded();
 			}
 			else {
-				Ed448PrivateKeyParameters k = null;
-				try {
-					k = (Ed448PrivateKeyParameters) eddsaPrivateKeyField.get(key);
-				} catch (IllegalAccessException e) {
-					e.printStackTrace();
-					System.exit(-1);
-				}
-				return k.getEncoded();
+				return key.getEncoded();
 			}
 		}
 		else
@@ -345,35 +324,23 @@ public enum ASymmetricEncryptionType {
 
 	}
 
-	static final Field eddsaPublicKeyField;
-	private static final Constructor<BCEdDSAPublicKey> constructorBCEdDSAPublicKey;
-	static final Field eddsaPrivateKeyField;
-	private static final Constructor<BCEdDSAPrivateKey> constructorBCEdDSAPrivateKey;
+
 	static final Field xdhPublicKeyField;
 	private static final Constructor<BCXDHPublicKey> constructorBCXDHPublicKey;
 	static final Field xdhPrivateKeyField;
 	private static final Constructor<BCXDHPrivateKey> constructorBCXDHPrivateKey;
+	private static final Field provEdDSAPublicKeyBaseKey;
+	private static final Constructor<PublicKey> constructorProvEdDSAPublicKey;
 	static
 	{
-		Field tmpEddsaPublicKeyField=null;
-		Constructor<BCEdDSAPublicKey> tmpConstructorBCEdDSAPublicKey=null;
-		Field tmpEddsaPrivateKeyField=null;
-		Constructor<BCEdDSAPrivateKey> tmpConstructorBCEdDSAPrivateKey=null;
 		Field tmpXdhPublicKeyField=null;
 		Constructor<BCXDHPublicKey> tmpConstructorBCXDHPublicKey=null;
 		Field tmpXdhPrivateKeyField=null;
 		Constructor<BCXDHPrivateKey> tmpConstructorBCXDHPrivateKey=null;
+		Field tmpProvEdDSAPublicKeyBaseKey=null;
+		Constructor<PublicKey> tmpConstructorProvEdDSAPublicKey=null;
 
 		try {
-			tmpEddsaPublicKeyField=BCEdDSAPublicKey.class.getDeclaredField("eddsaPublicKey");
-			tmpEddsaPublicKeyField.setAccessible(true);
-			tmpConstructorBCEdDSAPublicKey=BCEdDSAPublicKey.class.getDeclaredConstructor(AsymmetricKeyParameter.class);
-			tmpConstructorBCEdDSAPublicKey.setAccessible(true);
-			tmpEddsaPrivateKeyField=BCEdDSAPrivateKey.class.getDeclaredField("eddsaPrivateKey");
-			tmpEddsaPrivateKeyField.setAccessible(true);
-			tmpConstructorBCEdDSAPrivateKey=BCEdDSAPrivateKey.class.getDeclaredConstructor(AsymmetricKeyParameter.class);
-			tmpConstructorBCEdDSAPrivateKey.setAccessible(true);
-
 			tmpXdhPublicKeyField=BCXDHPublicKey.class.getDeclaredField("xdhPublicKey");
 			tmpXdhPublicKeyField.setAccessible(true);
 			tmpConstructorBCXDHPublicKey=BCXDHPublicKey.class.getDeclaredConstructor(AsymmetricKeyParameter.class);
@@ -382,45 +349,35 @@ public enum ASymmetricEncryptionType {
 			tmpXdhPrivateKeyField.setAccessible(true);
 			tmpConstructorBCXDHPrivateKey=BCXDHPrivateKey.class.getDeclaredConstructor(AsymmetricKeyParameter.class);
 			tmpConstructorBCXDHPrivateKey.setAccessible(true);
+			//noinspection unchecked
+			tmpConstructorProvEdDSAPublicKey= (Constructor<PublicKey>) Class.forName("org.bouncycastle.jcajce.provider.ProvEdDSAPublicKey").getDeclaredConstructor(AsymmetricEdDSAPublicKey.class);
+			tmpConstructorProvEdDSAPublicKey.setAccessible(true);
+			tmpProvEdDSAPublicKeyBaseKey=Class.forName("org.bouncycastle.jcajce.provider.ProvEdDSAPublicKey").getDeclaredField("baseKey");
+			tmpProvEdDSAPublicKeyBaseKey.setAccessible(true);
 
-		} catch (NoSuchFieldException | NoSuchMethodException e) {
+		} catch (NoSuchFieldException | NoSuchMethodException | ClassNotFoundException e) {
 			e.printStackTrace();
 			System.exit(-1);
 		}
-		eddsaPublicKeyField=tmpEddsaPublicKeyField;
-		constructorBCEdDSAPublicKey=tmpConstructorBCEdDSAPublicKey;
-		eddsaPrivateKeyField=tmpEddsaPrivateKeyField;
-		constructorBCEdDSAPrivateKey=tmpConstructorBCEdDSAPrivateKey;
 		xdhPublicKeyField=tmpXdhPublicKeyField;
 		constructorBCXDHPublicKey=tmpConstructorBCXDHPublicKey;
 		xdhPrivateKeyField=tmpXdhPrivateKeyField;
 		constructorBCXDHPrivateKey=tmpConstructorBCXDHPrivateKey;
-		/*AccessController.doPrivileged(new PrivilegedAction<Field>() {
-			@Override
-			public Field run() {
-				try {
-					Field f=BCEdDSAPublicKey.class.getDeclaredField("eddsaPublicKey");
-					f.setAccessible(true);
-				} catch (NoSuchFieldException e) {
-					e.printStackTrace();
-					System.exit(0);
-				}
-				return null;
-			}
-		});*/
+		provEdDSAPublicKeyBaseKey =tmpProvEdDSAPublicKeyBaseKey;
+		constructorProvEdDSAPublicKey=tmpConstructorProvEdDSAPublicKey;
+
 
 	}
 
-	@SuppressWarnings("deprecation")
 	static byte[] encodePublicKey(PublicKey key, ASymmetricAuthenticatedSignatureType type, boolean xdh)  {
-		if (type==ASymmetricAuthenticatedSignatureType.BC_SHA384withECDSA_CURVE_25519
+		/*if (type==ASymmetricAuthenticatedSignatureType.BC_SHA384withECDSA_CURVE_25519
 				|| type==ASymmetricAuthenticatedSignatureType.BC_SHA512withECDSA_CURVE_25519
 				|| type==ASymmetricAuthenticatedSignatureType.BC_SHA256withECDSA_CURVE_25519
 		)
 		{
 			return ((ECPublicKey) key).getQ().getEncoded(true);
 		}
-		else if (type==ASymmetricAuthenticatedSignatureType.BC_Ed25519)
+		else */if (type==ASymmetricAuthenticatedSignatureType.BC_FIPS_Ed25519)
 		{
 			if (xdh)
 			{
@@ -434,17 +391,17 @@ public enum ASymmetricEncryptionType {
 				return k.getEncoded();
 			}
 			else {
-				Ed25519PublicKeyParameters k = null;
+				AsymmetricEdDSAPublicKey k= null;
 				try {
-					k = (Ed25519PublicKeyParameters) eddsaPublicKeyField.get(key);
+					k = (AsymmetricEdDSAPublicKey) provEdDSAPublicKeyBaseKey.get(key);
 				} catch (IllegalAccessException e) {
 					e.printStackTrace();
 					System.exit(-1);
 				}
-				return k.getEncoded();
+				return k.getPublicData();
 			}
 		}
-		else if (type==ASymmetricAuthenticatedSignatureType.BC_Ed448)
+		else if (type==ASymmetricAuthenticatedSignatureType.BC_FIPS_Ed448)
 		{
 			if (xdh)
 			{
@@ -458,147 +415,23 @@ public enum ASymmetricEncryptionType {
 				return k.getEncoded();
 			}
 			else {
-
-				Ed448PublicKeyParameters k = null;
+				AsymmetricEdDSAPublicKey k= null;
 				try {
-					k = (Ed448PublicKeyParameters) eddsaPublicKeyField.get(key);
+					k = (AsymmetricEdDSAPublicKey) provEdDSAPublicKeyBaseKey.get(key);
 				} catch (IllegalAccessException e) {
 					e.printStackTrace();
 					System.exit(-1);
 				}
-				return k.getEncoded();
+				return k.getPublicData();
 			}
 		}
 
 
-		/*else if (type.getKeyGeneratorAlgorithmName().contains("ECDSA"))
-		{
-		    try {
-                if (key instanceof BCECPublicKey)
-                    return getKeyAsRawBytes((BCECPublicKey) key);
-                else if (key instanceof ECPublicKey)
-                    return getKeyAsRawBytes((ECPublicKey) key);
-            }
-            catch(Exception e)
-            {
-                e.printStackTrace();
-            }
-
-
-		}*/
 
 		return key.getEncoded();
 
 	}
-    /*private static byte[] getKeyAsRawBytes(
-            org.bouncycastle.jce.interfaces.ECPublicKey pub) throws IOException {
-        byte[] raw;
-        ByteArrayOutputStream bos = new ByteArrayOutputStream(65);
 
-        bos.write(0x04);
-        bos.write(asUnsignedByteArray(pub.getQ().getX().toBigInteger()));
-        bos.write(asUnsignedByteArray(pub.getQ().getY().toBigInteger()));
-        raw = bos.toByteArray();
-        return raw;
-    }
-    private static byte[] asUnsignedByteArray(BigInteger value) {
-        byte[] bytes = value.toByteArray();
-
-        if (bytes[0] == 0) {
-            byte[] tmp = new byte[bytes.length - 1];
-
-            System.arraycopy(bytes, 1, tmp, 0, tmp.length);
-
-            return tmp;
-        }
-
-        return bytes;
-    }
-    private static byte[] getKeyAsRawBytes(BCECPublicKey pub) throws IOException {
-        byte[] raw;
-        ByteArrayOutputStream bos = new ByteArrayOutputStream(65);
-
-        bos.write(0x04);
-        bos.write(pub.getQ().getXCoord().getEncoded());
-        bos.write(pub.getQ().getYCoord().getEncoded());
-        raw = bos.toByteArray();
-        return raw;
-    }
-    private static PublicKey getPubKeyFromCurve(byte[] pubKey, String curveName)
-            throws InvalidKeySpecException, NoSuchAlgorithmException,
-            java.security.NoSuchProviderException {
-
-        ECNamedCurveParameterSpec spec = ECNamedCurveTable
-                .getParameterSpec(curveName);
-        KeyFactory kf = KeyFactory.getInstance("ECDSA",
-                "BC");
-        ECNamedCurveSpec params = new ECNamedCurveSpec(curveName,
-                spec.getCurve(), spec.getG(), spec.getN());
-        ECPoint point = ECPointUtil.decodePoint(params.getCurve(), pubKey);
-        ECPublicKeySpec pubKeySpec = new ECPublicKeySpec(point, params);
-        ECPublicKey pk = (ECPublicKey) kf.generatePublic(pubKeySpec);
-        return pk;
-    }*/
-    /*private static ECPublicKey decodeECPublicKey(java.security.spec.ECParameterSpec params,
-                                                 final byte[] pubkey) throws NoSuchAlgorithmException,
-            InvalidKeySpecException {
-        int keySizeBytes = params.getOrder().bitLength() / Byte.SIZE;
-
-        int offset = 0;
-        BigInteger x = new BigInteger(1, Arrays.copyOfRange(pubkey, offset,
-                offset + keySizeBytes));
-        offset += keySizeBytes;
-        BigInteger y = new BigInteger(1, Arrays.copyOfRange(pubkey, offset,
-                offset + keySizeBytes));
-        ECPoint w = new ECPoint(x, y);
-
-
-        java.security.spec.ECPublicKeySpec otherKeySpec = new java.security.spec.ECPublicKeySpec(w, params);
-        KeyFactory keyFactory = KeyFactory.getInstance("ECDSA");
-        ECPublicKey otherKey = (ECPublicKey) keyFactory
-                .generatePublic(otherKeySpec);
-        return otherKey;
-    }
-    private static byte[] encodeECPublicKey(java.security.interfaces.ECPublicKey pubKey) {
-        int keyLengthBytes = pubKey.getParams().getOrder().bitLength()
-                / Byte.SIZE;
-        byte[] publicKeyEncoded = new byte[2 * keyLengthBytes];
-
-        int offset = 0;
-
-        BigInteger x = pubKey.getW().getAffineX();
-        byte[] xba = x.toByteArray();
-        if (xba.length > keyLengthBytes + 1 || xba.length == keyLengthBytes + 1
-                && xba[0] != 0) {
-            throw new IllegalStateException(
-                    "X coordinate of EC public key has wrong size");
-        }
-
-        if (xba.length == keyLengthBytes + 1) {
-            System.arraycopy(xba, 1, publicKeyEncoded, offset, keyLengthBytes);
-        } else {
-            System.arraycopy(xba, 0, publicKeyEncoded, offset + keyLengthBytes
-                    - xba.length, xba.length);
-        }
-        offset += keyLengthBytes;
-
-        BigInteger y = pubKey.getW().getAffineY();
-        byte[] yba = y.toByteArray();
-        if (yba.length > keyLengthBytes + 1 || yba.length == keyLengthBytes + 1
-                && yba[0] != 0) {
-            throw new IllegalStateException(
-                    "Y coordinate of EC public key has wrong size");
-        }
-
-        if (yba.length == keyLengthBytes + 1) {
-            System.arraycopy(yba, 1, publicKeyEncoded, offset, keyLengthBytes);
-        } else {
-            System.arraycopy(yba, 0, publicKeyEncoded, offset + keyLengthBytes
-                    - yba.length, yba.length);
-        }
-
-        return publicKeyEncoded;
-    }*/
 
 	static ASymmetricEncryptionType valueOf(int ordinal) throws IllegalArgumentException {
 		for (ASymmetricEncryptionType a : values()) {

@@ -241,6 +241,6 @@ public enum SymmetricAuthentifiedSignatureType {
 
 
 	public static void main(String []args) throws NoSuchProviderException, NoSuchAlgorithmException, InvalidAlgorithmParameterException {
-		System.out.println(ASymmetricAuthenticatedSignatureType.BC_Ed25519.getKeyPairGenerator(SecureRandomType.DEFAULT.getSingleton(null) ).generateKeyPair().getASymmetricPublicKey());
+		System.out.println(ASymmetricAuthenticatedSignatureType.BC_FIPS_Ed25519.getKeyPairGenerator(SecureRandomType.DEFAULT.getSingleton(null) ).generateKeyPair().getASymmetricPublicKey());
 	}
 }

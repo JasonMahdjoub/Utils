@@ -45,7 +45,7 @@ import java.security.*;
  * List of signature algorithms
  * 
  * @author Jason Mahdjoub
- * @version 5.1
+ * @version 5.2
  * @since Utils 1.4
  */
 @SuppressWarnings("DeprecatedIsStillUsed")
@@ -64,13 +64,13 @@ public enum ASymmetricAuthenticatedSignatureType {
 	BC_FIPS_SHA256withECDSA_P_256("SHA256withECDSA", "EC", CodeProvider.BCFIPS,CodeProvider.BCFIPS, 256, 31536000000L, FipsEC.ALGORITHM, false, "P-256"),
 	BC_FIPS_SHA384withECDSA_P_384("SHA384withECDSA", "EC", CodeProvider.BCFIPS,CodeProvider.BCFIPS, 384, 31536000000L, FipsEC.ALGORITHM, false, "P-384"),
 	BC_FIPS_SHA512withECDSA_P_521("SHA512withECDSA", "EC", CodeProvider.BCFIPS,CodeProvider.BCFIPS, 528, 31536000000L, FipsEC.ALGORITHM, false, "P-521"),
-	@Deprecated//prefer BC_Ed25519
+	/*@Deprecated//prefer BC_Ed25519
 	BC_SHA256withECDSA_CURVE_25519("SHA256withECDSA", "ECDSA", CodeProvider.BCFIPS,CodeProvider.BC, 256, 31536000000L, FipsEC.ALGORITHM, false, "curve25519"),
 	@Deprecated//prefer BC_Ed25519
 	BC_SHA384withECDSA_CURVE_25519("SHA384withECDSA", "ECDSA", CodeProvider.BCFIPS,CodeProvider.BC, 256, 31536000000L, FipsEC.ALGORITHM, false, "curve25519"),
 	@Deprecated//prefer BC_Ed25519
 	BC_SHA512withECDSA_CURVE_25519("SHA512withECDSA", "ECDSA", CodeProvider.BCFIPS,CodeProvider.BC, 256, 31536000000L, FipsEC.ALGORITHM, false, "curve25519"),
-	/*BC_SHA256withECDSA_CURVE_M_221("SHA256withECDSA", "ECDSA", CodeProvider.BCFIPS,CodeProvider.BC, 383, 31536000000L, FipsEC.ALGORITHM, false, "M221"),
+	BC_SHA256withECDSA_CURVE_M_221("SHA256withECDSA", "ECDSA", CodeProvider.BCFIPS,CodeProvider.BC, 383, 31536000000L, FipsEC.ALGORITHM, false, "M221"),
 	BC_SHA384withECDSA_CURVE_M_221("SHA384withECDSA", "ECDSA", CodeProvider.BCFIPS,CodeProvider.BC, 383, 31536000000L, FipsEC.ALGORITHM, false, "M221"),
 	BC_SHA512withECDSA_CURVE_M_221("SHA512withECDSA", "ECDSA", CodeProvider.BCFIPS,CodeProvider.BC, 383, 31536000000L, FipsEC.ALGORITHM, false, "M221"),
 	BC_SHA256withECDSA_CURVE_M_383("SHA256withECDSA", "ECDSA", CodeProvider.BCFIPS,CodeProvider.BC, 383, 31536000000L, FipsEC.ALGORITHM, false, "M383"),
@@ -84,8 +84,8 @@ public enum ASymmetricAuthenticatedSignatureType {
 	BC_SHA512withECDSA_CURVE_41417("SHA512withECDSA", "ECDSA", CodeProvider.BCFIPS,CodeProvider.BC, 414, 31536000000L, FipsEC.ALGORITHM, false, "curve41417"),*/
 	BCPQC_SPHINCS256_SHA2_512_256("SHA512withSPHINCS256", "SHA512withSPHINCS256", CodeProvider.BCPQC,CodeProvider.BCPQC, 1024, 31536000000L, null, true),
 	BCPQC_SPHINCS256_SHA3_512("SHA3-512withSPHINCS256", "SHA3-256withSPHINCS256", CodeProvider.BCPQC,CodeProvider.BCPQC, 1024, 31536000000L, null, true),
-	BC_Ed25519("EdDSA", "Ed25519", CodeProvider.BCFIPS,CodeProvider.BC, 256, 31536000000L, null, false, "Ed25519"),
-	BC_Ed448("EdDSA", "Ed448", CodeProvider.BCFIPS,CodeProvider.BC, 448, 31536000000L, null, false, "Ed448"),
+	BC_FIPS_Ed25519("EdDSA", "Ed25519", CodeProvider.BCFIPS,CodeProvider.BCFIPS, 256, 31536000000L, null, false, "Ed25519"),
+	BC_FIPS_Ed448("EdDSA", "Ed448", CodeProvider.BCFIPS,CodeProvider.BCFIPS, 448, 31536000000L, null, false, "Ed448"),
 	/*BC_X25519("EdDSA", "X25519", CodeProvider.BC,CodeProvider.BC, 256, 31536000000L, null, false, "X25519"),
 	BC_X448("EdDSA", "X448", CodeProvider.BC,CodeProvider.BC, 448, 31536000000L, null, false, "X448"),*/
 	DEFAULT(BC_FIPS_SHA384withRSAandMGF1);
@@ -170,15 +170,15 @@ public enum ASymmetricAuthenticatedSignatureType {
 	public int getSignatureSizeBits(int keySize) {
 		if (this==BC_FIPS_SHA256withRSAandMGF1 || this== ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA384withRSAandMGF1 || this== ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA512withRSAandMGF1)
 			return keySize+464;
-		else if (this==BC_SHA256withECDSA_CURVE_25519)
+		/*else if (this==BC_SHA256withECDSA_CURVE_25519)
 			return 560;
 		else if (this==BC_SHA384withECDSA_CURVE_25519)
 			return 560;
 		else if (this==BC_SHA512withECDSA_CURVE_25519)
-			return 560;
-		else if (this==BC_Ed448)
+			return 560;*/
+		else if (this== BC_FIPS_Ed448)
 			return 912;
-		else if (this==BC_Ed25519)
+		else if (this== BC_FIPS_Ed25519)
 			return 512;
 		/*else if (this==BC_SHA256withECDSA_CURVE_41417)
 			return 560;

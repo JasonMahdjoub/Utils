@@ -465,7 +465,7 @@ public class TestKeyAgreements {
 		}
 	}
 
-	@SuppressWarnings("deprecation")
+
 	@DataProvider(name = "provideDataForP2PLoginAgreement", parallel = true)
 	public Object[][] provideDataForP2PLoginAgreement() throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException {
 		byte[] salt = new byte[] { (byte) 21, (byte) 5645, (byte) 512, (byte) 42310, (byte) 24, (byte) 0, (byte) 1,
@@ -473,7 +473,7 @@ public class TestKeyAgreements {
 
 		ArrayList<Object[]> res = new ArrayList<>();
 		SymmetricSecretKey secretKey=SymmetricAuthentifiedSignatureType.BC_FIPS_HMAC_SHA2_384.getKeyGenerator(SecureRandomType.DEFAULT.getInstance(null)).generateKey();
-		ASymmetricKeyPair keyPair= ASymmetricAuthenticatedSignatureType.BC_SHA256withECDSA_CURVE_25519.getKeyPairGenerator(SecureRandomType.DEFAULT.getInstance(null)).generateKeyPair();
+		ASymmetricKeyPair keyPair= ASymmetricAuthenticatedSignatureType.BC_FIPS_Ed25519.getKeyPairGenerator(SecureRandomType.DEFAULT.getInstance(null)).generateKeyPair();
 		for (byte[] m : VariousTests.messagesToEncrypt) {
 			for (boolean expectedVerify : new boolean[] { true, false }) {
 				for (byte[] s : new byte[][] { null, salt }) {

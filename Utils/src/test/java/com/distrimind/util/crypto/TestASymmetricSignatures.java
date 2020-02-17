@@ -122,10 +122,10 @@ public class TestASymmetricSignatures {
 			if (kpd3.getAuthenticatedSignatureAlgorithmType() != ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA384withECDSA_P_384
 					&& kpd3.getAuthenticatedSignatureAlgorithmType() != ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA256withECDSA_P_256
 					&& kpd3.getAuthenticatedSignatureAlgorithmType() != ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA512withECDSA_P_521
-					&& kpd3.getAuthenticatedSignatureAlgorithmType() != ASymmetricAuthenticatedSignatureType.BC_SHA256withECDSA_CURVE_25519
+					/*&& kpd3.getAuthenticatedSignatureAlgorithmType() != ASymmetricAuthenticatedSignatureType.BC_SHA256withECDSA_CURVE_25519
 					&& kpd3.getAuthenticatedSignatureAlgorithmType() != ASymmetricAuthenticatedSignatureType.BC_SHA384withECDSA_CURVE_25519
 					&& kpd3.getAuthenticatedSignatureAlgorithmType() != ASymmetricAuthenticatedSignatureType.BC_SHA512withECDSA_CURVE_25519
-				/*&& kpd.getAuthenticatedSignatureAlgorithmType()!=ASymmetricAuthenticatedSignatureType.BC_SHA256withECDSA_CURVE_M_511
+				&& kpd.getAuthenticatedSignatureAlgorithmType()!=ASymmetricAuthenticatedSignatureType.BC_SHA256withECDSA_CURVE_M_511
 				&& kpd.getAuthenticatedSignatureAlgorithmType()!=ASymmetricAuthenticatedSignatureType.BC_SHA384withECDSA_CURVE_M_511
 				&& kpd.getAuthenticatedSignatureAlgorithmType()!=ASymmetricAuthenticatedSignatureType.BC_SHA512withECDSA_CURVE_M_511
 				&& kpd.getAuthenticatedSignatureAlgorithmType()!=ASymmetricAuthenticatedSignatureType.BC_SHA256withECDSA_CURVE_M_221
@@ -185,6 +185,7 @@ public class TestASymmetricSignatures {
 		System.out.println(type+" :");
 		System.out.println("\tKey pair encoding : "+kpd.toString());
 		System.out.println("\tPublic key encoding : "+kpd.getASymmetricPublicKey().toString());
+		System.out.println("\tPublic key encoding length : "+kpd.getASymmetricPublicKey().toString().length());
 		System.out.println("\tJava naviteve public key encoding length : "+kpd.getASymmetricPublicKey().toJavaNativeKey().getEncoded().length);
 		System.out.println("\tPrivate key encoding : "+kpd.getASymmetricPrivateKey().toString());
 
