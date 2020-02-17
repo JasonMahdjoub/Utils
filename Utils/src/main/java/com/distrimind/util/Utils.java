@@ -78,6 +78,7 @@ public class Utils {
 			d.addItem("Make FilePermissions compatible with old Android platforms");
 			d.addItem("Asymmetric signatures based on Eduard curves use now BC FIPS implementation");
 			d.addItem("Key agreements based on Eduard curves use now BC FIPS implementation");
+			d.addItem("SHA3-HMAC use now BC FIPS implementation");
 			VERSION.addDescription(d);
 
 			c = Calendar.getInstance();

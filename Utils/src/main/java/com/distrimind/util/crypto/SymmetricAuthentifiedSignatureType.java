@@ -48,7 +48,7 @@ import java.util.Arrays;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 3.0
+ * @version 3.1
  * @since Utils 2.10.0
  */
 public enum SymmetricAuthentifiedSignatureType {
@@ -60,14 +60,14 @@ public enum SymmetricAuthentifiedSignatureType {
 	BC_FIPS_HMAC_SHA2_512("HmacSHA512", CodeProvider.BCFIPS, CodeProvider.BCFIPS, (short)128, (short)16, MessageDigestType.BC_FIPS_SHA2_512, FipsSHS.SHA512_HMAC),
 	BC_FIPS_HMAC_SHA2_512_224("HmacSHA512/224", CodeProvider.BCFIPS, CodeProvider.BCFIPS, (short)128, (short)16, MessageDigestType.BC_FIPS_SHA2_512_224, FipsSHS.SHA512_224_HMAC),
 	BC_FIPS_HMAC_SHA2_512_256("HmacSHA512/256", CodeProvider.BCFIPS, CodeProvider.BCFIPS, (short)128, (short)16, MessageDigestType.BC_FIPS_SHA2_512_256, FipsSHS.SHA512_256_HMAC),
-	BC_HMAC_SHA3_256("HmacSHA3-256", CodeProvider.BC, CodeProvider.BC, (short)128, (short)16, MessageDigestType.BC_FIPS_SHA3_256, null),
-	BC_HMAC_SHA3_384("HmacSHA3-384", CodeProvider.BC, CodeProvider.BC, (short)128, (short)16, MessageDigestType.BC_FIPS_SHA3_384, null),
-	BC_HMAC_SHA3_512("HmacSHA3-512", CodeProvider.BC, CodeProvider.BC, (short)128, (short)16, MessageDigestType.BC_FIPS_SHA3_512, null),
+	BC_FIPS_HMAC_SHA3_256("HmacSHA3-256", CodeProvider.BCFIPS, CodeProvider.BCFIPS, (short)128, (short)16, MessageDigestType.BC_FIPS_SHA3_256, FipsSHS.SHA3_256_HMAC),
+	BC_FIPS_HMAC_SHA3_384("HmacSHA3-384", CodeProvider.BCFIPS, CodeProvider.BCFIPS, (short)128, (short)16, MessageDigestType.BC_FIPS_SHA3_384, FipsSHS.SHA3_384_HMAC),
+	BC_FIPS_HMAC_SHA3_512("HmacSHA3-512", CodeProvider.BCFIPS, CodeProvider.BCFIPS, (short)128, (short)16, MessageDigestType.BC_FIPS_SHA3_512, FipsSHS.SHA3_512_HMAC),
     HMAC_SHA2_512_224("HmacSHA512/224", CodeProvider.SunJCE, CodeProvider.SunJCE, (short)128, (short)16, MessageDigestType.SHA2_512_224, null, BC_FIPS_HMAC_SHA2_512_224),
     HMAC_SHA2_512_256("HmacSHA512/256", CodeProvider.SunJCE, CodeProvider.SunJCE, (short)128, (short)16, MessageDigestType.SHA2_512_256, null, BC_FIPS_HMAC_SHA2_512_256),
-    HMAC_SHA3_256("HmacSHA3-256", CodeProvider.SunJCE, CodeProvider.SunJCE, (short)128, (short)16, MessageDigestType.SHA3_256, null, BC_HMAC_SHA3_256),
-    HMAC_SHA3_384("HmacSHA3-384", CodeProvider.SunJCE, CodeProvider.SunJCE, (short)128, (short)16, MessageDigestType.SHA3_384, null, BC_HMAC_SHA3_384),
-    HMAC_SHA3_512("HmacSHA3-512", CodeProvider.SunJCE, CodeProvider.SunJCE, (short)128, (short)16, MessageDigestType.SHA3_512, null, BC_HMAC_SHA3_512),
+    HMAC_SHA3_256("HmacSHA3-256", CodeProvider.SunJCE, CodeProvider.SunJCE, (short)128, (short)16, MessageDigestType.SHA3_256, null, BC_FIPS_HMAC_SHA3_256),
+    HMAC_SHA3_384("HmacSHA3-384", CodeProvider.SunJCE, CodeProvider.SunJCE, (short)128, (short)16, MessageDigestType.SHA3_384, null, BC_FIPS_HMAC_SHA3_384),
+    HMAC_SHA3_512("HmacSHA3-512", CodeProvider.SunJCE, CodeProvider.SunJCE, (short)128, (short)16, MessageDigestType.SHA3_512, null, BC_FIPS_HMAC_SHA3_512),
 	BC_HMAC_BLAKE2B_160("HmacBLAKE2B56", CodeProvider.BC, CodeProvider.BC, (short)128, (short)16, MessageDigestType.BC_BLAKE2B_160, null),
 	BC_HMAC_BLAKE2B_256("HmacBLAKE2B56", CodeProvider.BC, CodeProvider.BC, (short)128, (short)16, MessageDigestType.BC_BLAKE2B_256, null),
 	BC_HMAC_BLAKE2B_384("HmacBLAKE2B384", CodeProvider.BC, CodeProvider.BC, (short)128, (short)16, MessageDigestType.BC_BLAKE2B_384, null),
