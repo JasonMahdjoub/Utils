@@ -41,7 +41,7 @@ import java.util.regex.Pattern;
 
 /**
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 1.1
  * @since Utils 3.17
  */
 public enum OSVersion {
@@ -57,7 +57,7 @@ public enum OSVersion {
     WINDOWS_7(".*((windows nt 6.1)|(windows.*7)|(windows.*6.1)).*", OS.WINDOWS, WINDOWS_VISTA, WINDOWS_SERVER_2003, WINDOWS_XP, WINDOWS_2000, WINDOWS_ME, WINDOWS_NT_4_0, WINDOWS_98, WINDOWS_95, WINDOWS_3_11),
     WINDOWS_8(".*((windows nt 6.2)|(windows.*8)|(windows.*6.2)).*", OS.WINDOWS, WINDOWS_7, WINDOWS_VISTA, WINDOWS_SERVER_2003, WINDOWS_XP, WINDOWS_2000, WINDOWS_ME, WINDOWS_NT_4_0, WINDOWS_98, WINDOWS_95, WINDOWS_3_11),
     WINDOWS_10(".*((windows nt 10.0)|(windows.*10)).*", OS.WINDOWS, WINDOWS_8, WINDOWS_7, WINDOWS_VISTA, WINDOWS_SERVER_2003, WINDOWS_XP, WINDOWS_2000, WINDOWS_ME,WINDOWS_NT_4_0, WINDOWS_98,WINDOWS_95, WINDOWS_3_11),
-    WINDOWS_UNKOWN(".*((windows)|(win)).*", OS.WINDOWS),
+    WINDOWS_UNKNOWN(".*((windows)|(win)).*", OS.WINDOWS),
     OPEN_BSD(".*openbsd.*", OS.OPEN_BSD),
     SUN_OS(".*(sunos).*", OS.SUN_OS),
     Ubuntu( ".*(ubuntu).*",OS.LINUX),
@@ -70,11 +70,41 @@ public enum OSVersion {
     MAC_OS_X_10_11( ".*((mac_powerPC)|(macintosh)|(mac)).*10.11.*",OS.MAC_OS_X, MAC_OS_X_10_7, MAC_OS_X_10_8, MAC_OS_X_10_9, MAC_OS_X_10_10),
     MAC_OS_X_10_12( ".*((mac_powerPC)|(macintosh)|(mac)).*10.12.*",OS.MAC_OS_X, MAC_OS_X_10_7, MAC_OS_X_10_8, MAC_OS_X_10_9, MAC_OS_X_10_10, MAC_OS_X_10_11),
     MAC_OS_X_10_13( ".*((mac_powerPC)|(macintosh)|(mac)).*10.13.*",OS.MAC_OS_X, MAC_OS_X_10_7, MAC_OS_X_10_8, MAC_OS_X_10_9, MAC_OS_X_10_10, MAC_OS_X_10_11, MAC_OS_X_10_12),
-    MAC_OS_X_UNKOWN( ".*((mac_powerPC)|(macintosh)|(mac)).*",OS.MAC_OS_X),
+    MAC_OS_X_10_14( ".*((mac_powerPC)|(macintosh)|(mac)).*10.14.*",OS.MAC_OS_X, MAC_OS_X_10_7, MAC_OS_X_10_8, MAC_OS_X_10_9, MAC_OS_X_10_10, MAC_OS_X_10_11, MAC_OS_X_10_12, MAC_OS_X_10_13),
+    MAC_OS_X_10_15( ".*((mac_powerPC)|(macintosh)|(mac)).*10.15.*",OS.MAC_OS_X, MAC_OS_X_10_7, MAC_OS_X_10_8, MAC_OS_X_10_9, MAC_OS_X_10_10, MAC_OS_X_10_11, MAC_OS_X_10_12, MAC_OS_X_10_13, MAC_OS_X_10_14),
+    MAC_OS_X_UNKNOWN( ".*((mac_powerPC)|(macintosh)|(mac)).*",OS.MAC_OS_X),
     QNX(".*(qnx).*",OS.QNX),
     BeOS(".*(beos).*",OS.BEOS),
     OS_2(".*(os/2).*", OS.OS_2),
-    ANDROID(".*(android).*",OS.ANDROID),
+    ANDROID_1_BASE(".*(android).*",OS.ANDROID),
+    ANDROID_2_BASE_1_1(".*(android).*",OS.ANDROID),
+    ANDROID_3_CUPCAKE(".*(android).*",OS.ANDROID),
+    ANDROID_4_DONUT(".*(android).*",OS.ANDROID),
+    ANDROID_5_ECLAIR(".*(android).*",OS.ANDROID),
+    ANDROID_6_ECLAIR_0_1(".*(android).*",OS.ANDROID),
+    ANDROID_7_ECLAIR_MR1(".*(android).*",OS.ANDROID),
+    ANDROID_8_FROYO(".*(android).*",OS.ANDROID),
+    ANDROID_9_GINGERBREAD(".*(android).*",OS.ANDROID),
+    ANDROID_10_GINGERBREAD_MR1(".*(android).*",OS.ANDROID),
+    ANDROID_11_HONEYCOMB(".*(android).*",OS.ANDROID),
+    ANDROID_12_HONEYCOMB_MR1(".*(android).*",OS.ANDROID),
+    ANDROID_13_HONEYCOMB_MR2(".*(android).*",OS.ANDROID),
+    ANDROID_14_ICE_SCREAM_SANDWICH(".*(android).*",OS.ANDROID),
+    ANDROID_15_ICE_SCREAM_SANDWICH_MR1(".*(android).*",OS.ANDROID),
+    ANDROID_16_JELLY_BEAN(".*(android).*",OS.ANDROID),
+    ANDROID_17_JELLY_BEAN_MR1(".*(android).*",OS.ANDROID),
+    ANDROID_18_JELLY_BEAN_MR2(".*(android).*",OS.ANDROID),
+    ANDROID_19_KITKAT(".*(android).*",OS.ANDROID),
+    ANDROID_20_KITKAT_WATCH(".*(android).*",OS.ANDROID),
+    ANDROID_21_LOLLIPOP(".*(android).*",OS.ANDROID),
+    ANDROID_22_LOLLIPOP_MR1(".*(android).*",OS.ANDROID),
+    ANDROID_23_M(".*(android).*",OS.ANDROID),
+    ANDROID_24_N(".*(android).*",OS.ANDROID),
+    ANDROID_25_N_MR1(".*(android).*",OS.ANDROID),
+    ANDROID_26_O(".*(android).*",OS.ANDROID),
+    ANDROID_27_O_MR1(".*(android).*",OS.ANDROID),
+    ANDROID_28_P(".*(android).*",OS.ANDROID),
+    ANDROID_UNKNOWN(".*(android).*",OS.ANDROID),
     SEARCH_BOT_NUHK(".*(nuhk).*",OS.SEARCH_BOT),
     SEARCH_BOT_GOOGLEBOT(".*(googlebot).*",OS.SEARCH_BOT),
     SEARCH_BOT_YAMMYBOT(".*(yammybot).*",OS.SEARCH_BOT),
@@ -86,7 +116,7 @@ public enum OSVersion {
 
     private final Pattern pattern;
     private final OS os;
-    private final OSVersion compatibleVersions[];
+    private final OSVersion[] compatibleVersions;
 
     OSVersion(String pattern, OS os, OSVersion... compatibleVersions) {
         this.pattern = Pattern.compile(pattern);
@@ -111,7 +141,17 @@ public enum OSVersion {
         return compatibleVersions;
     }
 
-    private static String getAndroidVersion()
+    private static int getAndroidVersionInt()
+    {
+        try {
+            Class<?> versionClass=Class.forName("android.os.Build.VERSION");
+            return (int)versionClass.getDeclaredField("SDK_INT").get(null);
+        } catch (ClassNotFoundException | IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException e) {
+            return 0;
+        }
+    }
+
+    /*private static String getAndroidVersion()
     {
         try {
             Class<?> versionClass=Class.forName("android.os.Build.VERSION");
@@ -119,7 +159,8 @@ public enum OSVersion {
         } catch (ClassNotFoundException | IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException e) {
             return null;
         }
-    }
+    }*/
+
     static private volatile com.distrimind.util.OSVersion currentOS=null;
     static final String OS_VERSION = (System.getProperty("os.name") + " " + System.getProperty("os.version")).toLowerCase();
 
@@ -127,7 +168,15 @@ public enum OSVersion {
     {
         if (currentOS==null) {
             if (OS.isAndroid()) {
-                currentOS=OSVersion.getFrom(getAndroidVersion());
+                for (OSVersion osv:OSVersion.values())
+                {
+                    if (osv.getOS()==OS.ANDROID && osv.name().contains("_"+getAndroidVersionInt()+"_"))
+                    {
+                        currentOS=osv;
+                    }
+                }
+                if (currentOS==null)
+                    currentOS=ANDROID_UNKNOWN;
             }
             else {
                 for (OS os : OS.values()) {
@@ -187,7 +236,7 @@ public enum OSVersion {
         return res;
     }
     
-    public static void main(String args[])
+    public static void main(String[] args)
     {
         System.out.println(OS_VERSION);
     	System.out.println(getCurrentOSVersion());

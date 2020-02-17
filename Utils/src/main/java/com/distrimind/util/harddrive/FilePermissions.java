@@ -35,6 +35,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
 
 package com.distrimind.util.harddrive;
 
+import com.distrimind.util.OS;
 import com.distrimind.util.OSVersion;
 import com.distrimind.util.io.*;
 
@@ -42,8 +43,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.attribute.PosixFilePermission;
-import java.nio.file.attribute.PosixFilePermissions;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -58,19 +57,22 @@ import java.util.Set;
  */
 public class FilePermissions implements SecureExternalizable {
 
+
 	private final Set<PosixFilePermission> permissions=new HashSet<>();
 	private boolean permissionsFromUnixSystem;
 	private Short code=null;
 
 	private FilePermissions(PosixFilePermission ...posixFilePermissions) {
 		Collections.addAll(permissions, posixFilePermissions);
-		permissionsFromUnixSystem =OSVersion.getCurrentOSVersion().getOS().isUnix();
+		permissionsFromUnixSystem =isOSCompatibleWithUnix();
 	}
 
 	private FilePermissions(Collection<PosixFilePermission> posixFilePermissions) {
 		permissions.addAll(posixFilePermissions);
-		permissionsFromUnixSystem =OSVersion.getCurrentOSVersion().getOS().isUnix();
+		permissionsFromUnixSystem =isOSCompatibleWithUnix();
 	}
+
+
 
 	public boolean arePermissionsFromUnixSystem() {
 		return permissionsFromUnixSystem;
@@ -133,29 +135,84 @@ public class FilePermissions implements SecureExternalizable {
 	@Override
 	public String toString()
 	{
-		return PosixFilePermissions.toString(permissions);
+		StringBuilder sb=new StringBuilder(9);
+		if (permissions.contains(PosixFilePermission.OWNER_READ))
+			sb.append("r");
+		else
+			sb.append("-");
+		if (permissions.contains(PosixFilePermission.OWNER_WRITE))
+			sb.append("w");
+		else
+			sb.append("-");
+		if (permissions.contains(PosixFilePermission.OWNER_EXECUTE))
+			sb.append("x");
+		else
+			sb.append("-");
+		if (permissions.contains(PosixFilePermission.GROUP_READ))
+			sb.append("r");
+		else
+			sb.append("-");
+		if (permissions.contains(PosixFilePermission.GROUP_WRITE))
+			sb.append("w");
+		else
+			sb.append("-");
+		if (permissions.contains(PosixFilePermission.GROUP_EXECUTE))
+			sb.append("x");
+		else
+			sb.append("-");
+		if (permissions.contains(PosixFilePermission.OTHERS_READ))
+			sb.append("r");
+		else
+			sb.append("-");
+		if (permissions.contains(PosixFilePermission.OTHERS_WRITE))
+			sb.append("w");
+		else
+			sb.append("-");
+		if (permissions.contains(PosixFilePermission.OTHERS_EXECUTE))
+			sb.append("x");
+		else
+			sb.append("-");
+		return sb.toString();
 	}
 
 	public static FilePermissions from(String permissions)
 	{
+		permissions=permissions.toLowerCase();
+		FilePermissions res=new FilePermissions();
 		if (permissions.length()==3)
 		{
-			permissions=permissions.toLowerCase();
-			FilePermissions res=new FilePermissions();
 			res.permissionsFromUnixSystem=false;
-			if (permissions.charAt(0)=='r')
+			if (permissions.charAt(2)=='r')
 				res.addPermissions(PosixFilePermission.OWNER_READ);
 			if (permissions.charAt(1)=='w')
 				res.addPermissions(PosixFilePermission.OWNER_WRITE);
-			if (permissions.charAt(2)=='x')
+			if (permissions.charAt(0)=='x')
 				res.addPermissions(PosixFilePermission.OWNER_EXECUTE);
-			return res;
 		}
-		else {
-			FilePermissions res=new FilePermissions(PosixFilePermissions.fromString(permissions));
+		else
+		{
 			res.permissionsFromUnixSystem=true;
-			return res;
+			if (permissions.charAt(8)=='r')
+				res.addPermissions(PosixFilePermission.OWNER_READ);
+			if (permissions.charAt(7)=='w')
+				res.addPermissions(PosixFilePermission.OWNER_WRITE);
+			if (permissions.charAt(6)=='x')
+				res.addPermissions(PosixFilePermission.OWNER_EXECUTE);
+			if (permissions.charAt(5)=='r')
+				res.addPermissions(PosixFilePermission.GROUP_READ);
+			if (permissions.charAt(4)=='w')
+				res.addPermissions(PosixFilePermission.GROUP_WRITE);
+			if (permissions.charAt(3)=='x')
+				res.addPermissions(PosixFilePermission.GROUP_EXECUTE);
+			if (permissions.charAt(2)=='r')
+				res.addPermissions(PosixFilePermission.OTHERS_READ);
+			if (permissions.charAt(1)=='w')
+				res.addPermissions(PosixFilePermission.OTHERS_WRITE);
+			if (permissions.charAt(0)=='x')
+				res.addPermissions(PosixFilePermission.OTHERS_EXECUTE);
+
 		}
+		return res;
 	}
 
 	public static FilePermissions from(PosixFilePermission ...posixFilePermissions)
@@ -224,7 +281,8 @@ public class FilePermissions implements SecureExternalizable {
 	}
 
 	public void applyTo(File file) throws IOException {
-		if (permissionsFromUnixSystem && OSVersion.getCurrentOSVersion().getOS().isUnix())
+
+		if (permissionsFromUnixSystem && isOSCompatibleWithUnix())
 			applyTo(file.toPath());
 		if (!file.setReadable(containsPermission(PosixFilePermission.OWNER_READ)))
 			throw new SecurityException();
@@ -236,13 +294,47 @@ public class FilePermissions implements SecureExternalizable {
 	}
 
 	public void applyTo(Path path) throws IOException {
-		if (!permissionsFromUnixSystem || !OSVersion.getCurrentOSVersion().getOS().isUnix())
-			applyTo(path.toFile());
-		Files.setPosixFilePermissions(path, permissions);
+		if (!permissionsFromUnixSystem || !isOSCompatibleWithUnix())
+			applyTo(getFile(path));
+		Set<java.nio.file.attribute.PosixFilePermission> set=new HashSet<>();
+		for (java.nio.file.attribute.PosixFilePermission p : Files.getPosixFilePermissions(path ))
+		{
+			switch (p)
+			{
+				case OWNER_READ:
+					set.add(java.nio.file.attribute.PosixFilePermission.OWNER_READ);
+					break;
+				case OWNER_WRITE:
+					set.add(java.nio.file.attribute.PosixFilePermission.OWNER_WRITE);
+					break;
+				case OWNER_EXECUTE:
+					set.add(java.nio.file.attribute.PosixFilePermission.OWNER_EXECUTE);
+					break;
+				case GROUP_READ:
+					set.add(java.nio.file.attribute.PosixFilePermission.GROUP_READ);
+					break;
+				case GROUP_WRITE:
+					set.add(java.nio.file.attribute.PosixFilePermission.GROUP_WRITE);
+					break;
+				case GROUP_EXECUTE:
+					set.add(java.nio.file.attribute.PosixFilePermission.GROUP_EXECUTE);
+					break;
+				case OTHERS_READ:
+					set.add(java.nio.file.attribute.PosixFilePermission.OTHERS_READ);
+					break;
+				case OTHERS_WRITE:
+					set.add(java.nio.file.attribute.PosixFilePermission.OTHERS_WRITE);
+					break;
+				case OTHERS_EXECUTE:
+					set.add(java.nio.file.attribute.PosixFilePermission.OTHERS_EXECUTE);
+					break;
+			}
+		}
+		Files.setPosixFilePermissions(path, set);
 	}
 
 	public static FilePermissions from(File file) throws IOException {
-		if (OSVersion.getCurrentOSVersion().getOS().isUnix())
+		if (isOSCompatibleWithUnix())
 			return from(file.toPath());
 		else
 		{
@@ -257,12 +349,61 @@ public class FilePermissions implements SecureExternalizable {
 		}
 	}
 
+	private static File getFile(Path path)
+	{
+		if (OSVersion.getCurrentOSVersion().getOS()!= OS.ANDROID || OSVersion.getCurrentOSVersion().compareTo(OSVersion.ANDROID_26_O)>=0)
+			return getFile(path);
+		else
+			return new File(path.toString());
+	}
+
+	private static boolean isOSCompatibleWithUnix()
+	{
+		return OSVersion.getCurrentOSVersion().getOS().isUnix()
+				&&
+				(OSVersion.getCurrentOSVersion().getOS()!= OS.ANDROID || OSVersion.getCurrentOSVersion().compareTo(OSVersion.ANDROID_26_O)>=0);
+	}
+
 	public static FilePermissions from(Path path) throws IOException {
-		if (!OSVersion.getCurrentOSVersion().getOS().isUnix())
-			return from(path.toFile());
+		if (!isOSCompatibleWithUnix())
+			return from(getFile(path));
 		else
 		{
-			return new FilePermissions(Files.getPosixFilePermissions(path ));
+			FilePermissions fp=new FilePermissions();
+			for (java.nio.file.attribute.PosixFilePermission p : Files.getPosixFilePermissions(path ))
+			{
+				switch (p)
+				{
+					case OWNER_READ:
+						fp.permissions.add(PosixFilePermission.OWNER_READ);
+						break;
+					case OWNER_WRITE:
+						fp.permissions.add(PosixFilePermission.OWNER_WRITE);
+						break;
+					case OWNER_EXECUTE:
+						fp.permissions.add(PosixFilePermission.OWNER_EXECUTE);
+						break;
+					case GROUP_READ:
+						fp.permissions.add(PosixFilePermission.GROUP_READ);
+						break;
+					case GROUP_WRITE:
+						fp.permissions.add(PosixFilePermission.GROUP_WRITE);
+						break;
+					case GROUP_EXECUTE:
+						fp.permissions.add(PosixFilePermission.GROUP_EXECUTE);
+						break;
+					case OTHERS_READ:
+						fp.permissions.add(PosixFilePermission.OTHERS_READ);
+						break;
+					case OTHERS_WRITE:
+						fp.permissions.add(PosixFilePermission.OTHERS_WRITE);
+						break;
+					case OTHERS_EXECUTE:
+						fp.permissions.add(PosixFilePermission.OTHERS_EXECUTE);
+						break;
+				}
+			}
+			return fp;
 		}
 	}
 
@@ -342,4 +483,6 @@ public class FilePermissions implements SecureExternalizable {
 		permissions.clear();
 		readCode();
 	}
+
+
 }
