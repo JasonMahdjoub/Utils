@@ -59,8 +59,8 @@ public class Utils {
 		Calendar c = Calendar.getInstance();
 		c.set(2016, Calendar.JANUARY, 4);
 		Calendar c2 = Calendar.getInstance();
-		c.set(2019, Calendar.FEBRUARY, 17);
-		VERSION = new Version("Utils", "Utils", (short)4, (short)11, (short)0, Version.Type.Stable, (short)0, c.getTime(), c2.getTime());
+		c.set(2019, Calendar.FEBRUARY, 25);
+		VERSION = new Version("Utils", "Utils", (short)4, (short)12, (short)0, Version.Type.Stable, (short)0, c.getTime(), c2.getTime());
 		try {
 
 			InputStream is = Utils.class.getResourceAsStream("build.txt");
@@ -73,8 +73,14 @@ public class Utils {
 			VERSION.addDeveloper(new PersonDeveloper("mahdjoub", "jason", c.getTime()));
 
 			c = Calendar.getInstance();
+			c.set(2019, Calendar.FEBRUARY, 25);
+			Description d = new Description((short)4, (short)12, (short)0, Version.Type.Stable, (short)0, c.getTime());
+			d.addItem("Add FileTools.walkFileTree function");
+			VERSION.addDescription(d);
+
+			c = Calendar.getInstance();
 			c.set(2019, Calendar.FEBRUARY, 17);
-			Description d = new Description((short)4, (short)11, (short)0, Version.Type.Stable, (short)0, c.getTime());
+			d = new Description((short)4, (short)11, (short)0, Version.Type.Stable, (short)0, c.getTime());
 			d.addItem("Make FilePermissions compatible with old Android platforms");
 			d.addItem("Asymmetric signatures based on Eduard curves use now BC FIPS implementation");
 			d.addItem("Key agreements based on Eduard curves use now BC FIPS implementation");

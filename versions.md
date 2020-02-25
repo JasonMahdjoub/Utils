@@ -1,6 +1,6 @@
 Utils
 =====
-4.11.0 Stable (Build: 1592) (from 17/02/2019 to 17/02/2020)
+4.12.0 Stable (Build: 1594) (from 25/02/2019 to 25/02/2020)
 
 # Creator(s):
 Jason MAHDJOUB
@@ -9,6 +9,10 @@ Jason MAHDJOUB
 Jason MAHDJOUB (Entred in the team at 04/01/2016)
 
 # Modifications:
+
+
+### 4.12.0 Stable (25/02/2019)
+* Add FileTools.walkFileTree function
 
 
 ### 4.11.0 Stable (17/02/2019)

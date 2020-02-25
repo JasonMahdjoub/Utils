@@ -34,23 +34,14 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
-/*import org.apache.commons.net.ftp.FTPClient;
-import org.apache.commons.net.ftp.FTPFile;
-import org.apache.commons.net.ftp.FTPListParseEngine;*/
 
 /**
  * FileTool is a class which provides some methods used to work on Files and
@@ -123,7 +114,7 @@ public final class FileTools {
 	 *             if a problem occurs
 	 */
 	public static void copy(InputStream source, OutputStream destination) throws IOException {
-		byte buffer[] = new byte[512 * 1024];
+		byte[] buffer = new byte[512 * 1024];
 		int nbRead;
 		while ((nbRead = source.read(buffer)) != -1) {
 			destination.write(buffer, 0, nbRead);
@@ -424,7 +415,7 @@ public final class FileTools {
 			} else {
 				// System.out.println("Extracting: " +entry);
 				int count;
-				byte data[] = new byte[BUFFER];
+				byte[] data = new byte[BUFFER];
 				// write the files to the disk
 				// System.out.println("Extracting: " +new File(_directory_dst,
 				// entry.getName()));
@@ -464,8 +455,8 @@ public final class FileTools {
 		FileOutputStream dest = new FileOutputStream(_zipfile);
 		ZipOutputStream out = new ZipOutputStream(new BufferedOutputStream(dest));
 
+		String dir = _directory.getAbsolutePath();
 		if (_include_directory) {
-			String dir = _directory.getAbsolutePath();
 			int l = dir.lastIndexOf(_directory.getName());
 			String base = dir.substring(0, l);
             String relPath=getRelativePath(base, _directory.getAbsolutePath());
@@ -476,10 +467,9 @@ public final class FileTools {
 
 			zipDirectory(out, _directory, base);
 		} else {
-			String base = _directory.getAbsolutePath();
-			if (!base.endsWith("/"))
-				base = base + "/";
-			zipDirectory(out, _directory, base);
+			if (!dir.endsWith("/"))
+				dir = dir + "/";
+			zipDirectory(out, _directory, dir);
 		}
 
 		out.close();
@@ -487,8 +477,8 @@ public final class FileTools {
 
 	@SuppressWarnings("ConstantConditions")
     private static void zipDirectory(ZipOutputStream out, File _directory, String base_directory) throws IOException {
-		byte data[] = new byte[BUFFER];
-        File files[]=_directory.listFiles();
+		byte[] data = new byte[BUFFER];
+        File[] files =_directory.listFiles();
         if (files==null)
             throw new IOException();
 		for (File f : files ) {
@@ -516,5 +506,72 @@ public final class FileTools {
 	 * FileTools Constructor.
 	 */
 	private FileTools() {
+	}
+
+	public static abstract class FileVisitor
+	{
+		private final boolean includeStartDirectory;
+		private final boolean acceptFiles;
+		private final boolean acceptDirectories;
+		private final boolean visitSubDirectories;
+
+		protected FileVisitor(boolean acceptFiles, boolean acceptDirectories, boolean includeStartDirectory, boolean visitSubDirectories) {
+			if (!acceptDirectories && !acceptFiles)
+				throw new IllegalArgumentException();
+			if (!acceptDirectories && includeStartDirectory)
+				throw new IllegalArgumentException();
+			this.acceptFiles = acceptFiles;
+			this.acceptDirectories = acceptDirectories;
+			this.includeStartDirectory=includeStartDirectory;
+			this.visitSubDirectories=visitSubDirectories;
+		}
+
+		/**
+		 * A new file has been identified when this function is called
+		 * @param file the file
+		 * @return true if the scan can continue
+		 */
+		@SuppressWarnings("BooleanMethodIsAlwaysInverted")
+		public abstract boolean visitFile(File file) ;
+
+	}
+	public static void walkFileTree(File directory, final FileVisitor fv)
+	{
+		if (directory==null)
+			throw new NullPointerException();
+		if (directory.isDirectory())
+		{
+			if (fv.includeStartDirectory)
+				if (!fv.visitFile(directory))
+					return;
+			walkDirTree(directory, fv);
+		}
+		else
+		{
+			throw new IllegalArgumentException();
+		}
+	}
+	private static boolean walkDirTree(File directory, final FileVisitor fv)
+	{
+		for (File f : Objects.requireNonNull(directory.listFiles(((fv.acceptDirectories || fv.visitSubDirectories) && fv.acceptFiles)?null:new FileFilter() {
+			@Override
+			public boolean accept(File pathname) {
+				return ((fv.acceptDirectories || fv.visitSubDirectories) && pathname.isDirectory()) || (fv.acceptFiles && pathname.isFile());
+			}
+		}))) {
+			if (fv.acceptFiles && f.isFile())
+				if (!fv.visitFile(f))
+					return false;
+			else if (f.isDirectory())
+			{
+				if (fv.acceptDirectories)
+					if (!fv.visitFile(f))
+						return false;
+				if (fv.visitSubDirectories)
+					if (!walkDirTree(f, fv))
+						return false;
+			}
+		}
+		return true;
 	}
 }
