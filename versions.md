@@ -1,6 +1,6 @@
 Utils
 =====
-4.12.0 Stable (Build: 1596) (from 25/02/2019 to 08/03/2020)
+4.13.0 Stable (Build: 1602) (from 16/03/2019 to 16/03/2020)
 
 # Creator(s):
 Jason MAHDJOUB
@@ -9,6 +9,10 @@ Jason MAHDJOUB
 Jason MAHDJOUB (Entred in the team at 04/01/2016)
 
 # Modifications:
+
+
+### 4.13.0 Stable (16/03/2019)
+* Add ProgressMonitor class
 
 
 ### 4.12.0 Stable (25/02/2019)
