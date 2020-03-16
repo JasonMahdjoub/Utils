@@ -37,7 +37,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
 
 import com.distrimind.util.OSVersion;
 
-import javax.swing.*;
+import java.io.FilterInputStream;
 import java.io.InputStream;
 
 /**
@@ -54,9 +54,6 @@ public abstract class ProgressMonitorFactory {
 	 * @param message a descriptive message that will be shown
 	 *        to the user to indicate what operation is being monitored.
 	 *        This does not change as the operation progresses.
-	 *        See the message parameters to methods in
-	 *        {@link JOptionPane#message}
-	 *        for the range of values.
 	 * @param note a short note describing the state of the
 	 *        operation.  As the operation progresses, you can call
 	 *        setNote to change the note displayed.  This is used,
@@ -68,7 +65,7 @@ public abstract class ProgressMonitorFactory {
 	 * @param max the upper bound of the range
 	 * @return the progress monitor
 	 */
-	public ProgressMonitor getProgressMonitor( Object message,
+	public ProgressMonitorDM getProgressMonitor( Object message,
 													   String note,
 													   int min,
 													   int max)
@@ -84,9 +81,6 @@ public abstract class ProgressMonitorFactory {
 	 * @param message a descriptive message that will be shown
 	 *        to the user to indicate what operation is being monitored.
 	 *        This does not change as the operation progresses.
-	 *        See the message parameters to methods in
-	 *        {@link JOptionPane#message}
-	 *        for the range of values.
 	 * @param note a short note describing the state of the
 	 *        operation.  As the operation progresses, you can call
 	 *        setNote to change the note displayed.  This is used,
@@ -98,7 +92,7 @@ public abstract class ProgressMonitorFactory {
 	 * @param max the upper bound of the range
 	 * @return the progress monitor
 	 */
-	public abstract ProgressMonitor getProgressMonitor(Object parentComponent,
+	public abstract ProgressMonitorDM getProgressMonitor(Object parentComponent,
 													   Object message,
 													   String note,
 													   int min,
@@ -112,9 +106,9 @@ public abstract class ProgressMonitorFactory {
 	 * @param parameters see {@link ProgressMonitorParameters}
 	 * @return the progress monitor
 	 * */
-	public ProgressMonitor getProgressMonitor(Object parentComponent, ProgressMonitorParameters parameters)
+	public ProgressMonitorDM getProgressMonitor(Object parentComponent, ProgressMonitorParameters parameters)
 	{
-		ProgressMonitor res=getProgressMonitor(parentComponent, parameters.getMessage(), parameters.getNote(), parameters.getMin(), parameters.getMax());
+		ProgressMonitorDM res=getProgressMonitor(parentComponent, parameters.getMessage(), parameters.getNote(), parameters.getMin(), parameters.getMax());
 		if (res.getMillisToPopup()>=0)
 		{
 			res.setMillisToPopup(parameters.getMillisToPopup());
@@ -133,7 +127,7 @@ public abstract class ProgressMonitorFactory {
 	 * @param parameters see {@link ProgressMonitorParameters}
 	 * @return the progress monitor
 	 */
-	public ProgressMonitor getProgressMonitor(ProgressMonitorParameters parameters)
+	public ProgressMonitorDM getProgressMonitor(ProgressMonitorParameters parameters)
 	{
 		return getProgressMonitor(null, parameters);
 	}
@@ -144,13 +138,10 @@ public abstract class ProgressMonitorFactory {
 	 * @param message a descriptive message that will be shown
 	 *        to the user to indicate what operation is being monitored.
 	 *        This does not change as the operation progresses.
-	 *        See the message parameters to methods in
-	 *        {@link JOptionPane#message}
-	 *        for the range of values.
 	 * @param inputStream The input stream to be monitored.
 	 * @return the progress monitor
 	 */
-	public ProgressMonitorInputStream getProgressMonitorInputStream( final Object message,
+	public FilterInputStream getProgressMonitorInputStream( final Object message,
 																			 final InputStream inputStream)
 	{
 		return getProgressMonitorInputStream(null, message, inputStream);
@@ -164,13 +155,10 @@ public abstract class ProgressMonitorFactory {
 	 * @param message a descriptive message that will be shown
 	 *        to the user to indicate what operation is being monitored.
 	 *        This does not change as the operation progresses.
-	 *        See the message parameters to methods in
-	 *        {@link JOptionPane#message}
-	 *        for the range of values.
 	 * @param inputStream The input stream to be monitored.
 	 * @return the progress monitor
 	 */
-	public abstract ProgressMonitorInputStream getProgressMonitorInputStream(final Object parentComponent,
+	public abstract FilterInputStream getProgressMonitorInputStream(final Object parentComponent,
 																	final Object message,
 																	final InputStream inputStream);
 
@@ -189,7 +177,7 @@ public abstract class ProgressMonitorFactory {
 					case WINDOWS:
 					case LINUX:
 					case MAC_OS_X:
-						defaultProgressMonitorFactory=new SwingProgressMonitor();
+						defaultProgressMonitorFactory=new SwingProgressMonitorFactory();
 						break;
 					default:
 						defaultProgressMonitorFactory=new NullProgressMonitorFactory();
@@ -207,5 +195,19 @@ public abstract class ProgressMonitorFactory {
 		synchronized (ProgressMonitorFactory.class) {
 			defaultProgressMonitorFactory = progressMonitorFactory;
 		}
+	}
+
+	public static void main(String [] args) throws InterruptedException {
+		ProgressMonitorFactory pmf=getDefaultProgressMonitorFactory();
+		ProgressMonitorParameters pmp=new ProgressMonitorParameters("test message", "test note", 0, 100);
+		pmp.setMillisToDecideToPopup(1000);
+		pmp.setMillisToPopup(0);
+		ProgressMonitorDM pm=pmf.getProgressMonitor(pmp);
+		for (int i=0;i<=100;i++) {
+			pm.setProgress(i);
+			Thread.sleep(100);
+		}
+
+
 	}
 }

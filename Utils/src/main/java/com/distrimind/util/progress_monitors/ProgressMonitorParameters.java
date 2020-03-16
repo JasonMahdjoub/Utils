@@ -37,7 +37,6 @@ knowledge of the CeCILL-C license and that you accept its terms.
 
 import com.distrimind.util.properties.MultiFormatProperties;
 
-import javax.swing.*;
 
 /**
  * @author Jason Mahdjoub
@@ -81,9 +80,6 @@ public class ProgressMonitorParameters extends MultiFormatProperties {
 	 * @param message a descriptive message that will be shown
 	 *        to the user to indicate what operation is being monitored.
 	 *        This does not change as the operation progresses.
-	 *        See the message parameters to methods in
-	 *        {@link JOptionPane#message}
-	 *        for the range of values.
 	 * @param note a short note describing the state of the
 	 *        operation.  As the operation progresses, you can call
 	 *        setNote to change the note displayed.  This is used,

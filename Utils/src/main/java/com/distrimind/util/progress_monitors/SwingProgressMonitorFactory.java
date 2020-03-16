@@ -44,28 +44,98 @@ import java.io.InputStream;
  * @version 1.0
  * @since Utils 3.29.0
  */
-public class SwingProgressMonitor extends ProgressMonitorFactory {
+public class SwingProgressMonitorFactory extends ProgressMonitorFactory {
 	@Override
-	public ProgressMonitor getProgressMonitor(Object parentComponent,
-											  Object message,
-											  String note,
-											  int min,
-											  int max) {
+	public ProgressMonitorDM getProgressMonitor(Object parentComponent,
+												Object message,
+												String note,
+												int min,
+												int max) {
 		return getProgressMonitor((Component)parentComponent, message, note, min, max);
 	}
 
-	public ProgressMonitor getProgressMonitor(Component parentComponent,
-											  Object message,
-											  String note,
-											  int min,
-											  int max) {
+	public ProgressMonitorDM getProgressMonitor(Component parentComponent,
+												Object message,
+												String note,
+												int min,
+												int max) {
 
-		return new ProgressMonitor(parentComponent, message, note, min, max);
+		return getProgressMonitor(new ProgressMonitor(parentComponent, message, note, min, max));
 	}
 
-	public ProgressMonitor getProgressMonitor(Component parentComponent, ProgressMonitorParameters parameters) {
+	private ProgressMonitorDM getProgressMonitor(final ProgressMonitor pm)
+	{
+		return new ProgressMonitorDM() {
+			@Override
+			public void setProgress(int nv) {
+				pm.setProgress(nv);
+			}
 
-		return new ProgressMonitor(parentComponent, parameters.getMessage(), parameters.getNote(), parameters.getMin(), parameters.getMax());
+			@Override
+			public void close() {
+				pm.close();
+			}
+
+			@Override
+			public int getMinimum() {
+				return pm.getMinimum();
+			}
+
+			@Override
+			public void setMinimum(int m) {
+				pm.setMinimum(m);
+			}
+
+			@Override
+			public int getMaximum() {
+				return pm.getMaximum();
+			}
+
+			@Override
+			public void setMaximum(int m) {
+				pm.setMaximum(m);
+			}
+
+			@Override
+			public boolean isCanceled() {
+				return pm.isCanceled();
+			}
+
+			@Override
+			public void setMillisToDecideToPopup(int millisToDecideToPopup) {
+				pm.setMillisToDecideToPopup(millisToDecideToPopup);
+			}
+
+			@Override
+			public int getMillisToDecideToPopup() {
+				return pm.getMillisToDecideToPopup();
+			}
+
+			@Override
+			public void setMillisToPopup(int millisToPopup) {
+				pm.setMillisToPopup(millisToPopup);
+			}
+
+			@Override
+			public int getMillisToPopup() {
+				return pm.getMillisToPopup();
+			}
+
+			@Override
+			public void setNote(String note) {
+				pm.setNote(note);
+			}
+
+			@Override
+			public String getNote() {
+				return pm.getNote();
+			}
+		};
+	}
+
+	public ProgressMonitorDM getProgressMonitor(Component parentComponent, ProgressMonitorParameters parameters) {
+
+		return getProgressMonitor(new ProgressMonitor(parentComponent, parameters.getMessage(), parameters.getNote(), parameters.getMin(), parameters.getMax()));
 	}
 
 	@Override

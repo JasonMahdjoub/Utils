@@ -35,89 +35,47 @@ The fact that you are presently reading this means that you have had
 knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-import java.io.FilterInputStream;
-import java.io.InputStream;
-
 /**
  * @author Jason Mahdjoub
  * @version 1.0
- * @since Utils 3.29.0
+ * @since Utils 4.13.0
  */
-public class NullProgressMonitorFactory extends ProgressMonitorFactory{
-	@Override
-	public ProgressMonitorDM getProgressMonitor(Object parentComponent, Object message, String note, int min, int max) {
-		return new ProgressMonitorDM() {
-			@Override
-			public void setProgress(int nv) {
+public interface ProgressMonitorDM {
 
-			}
 
-			@Override
-			public void close() {
+	void setProgress(int nv);
 
-			}
+	void close() ;
 
-			@Override
-			public int getMinimum() {
-				return 0;
-			}
 
-			@Override
-			public void setMinimum(int m) {
+	int getMinimum();
 
-			}
+	void setMinimum(int m) ;
 
-			@Override
-			public int getMaximum() {
-				return 0;
-			}
 
-			@Override
-			public void setMaximum(int m) {
+	int getMaximum();
 
-			}
+	void setMaximum(int m) ;
 
-			@Override
-			public boolean isCanceled() {
-				return false;
-			}
 
-			@Override
-			public void setMillisToDecideToPopup(int millisToDecideToPopup) {
+	boolean isCanceled() ;
 
-			}
 
-			@Override
-			public int getMillisToDecideToPopup() {
-				return 0;
-			}
+	void setMillisToDecideToPopup(int millisToDecideToPopup) ;
 
-			@Override
-			public void setMillisToPopup(int millisToPopup) {
 
-			}
+	int getMillisToDecideToPopup();
 
-			@Override
-			public int getMillisToPopup() {
-				return 0;
-			}
 
-			@Override
-			public void setNote(String note) {
+	void setMillisToPopup(int millisToPopup);
 
-			}
 
-			@Override
-			public String getNote() {
-				return "";
-			}
-		};
-	}
+	int getMillisToPopup();
 
-	@Override
-	public FilterInputStream getProgressMonitorInputStream(Object parentComponent, Object message, InputStream inputStream) {
-		return new FilterInputStream(inputStream){
+	void setNote(String note);
 
-		};
-	}
+
+	String getNote();
+
+
 }
