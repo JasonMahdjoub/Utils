@@ -131,7 +131,7 @@ public enum OS {
 	static boolean isAndroid()
 	{
 		try {
-			return Class.forName("android.os.Build.VERSION")!=null;
+			return Class.forName("android.os.Build$VERSION")!=null;
 		} catch (ClassNotFoundException e) {
 			return false;
 		}

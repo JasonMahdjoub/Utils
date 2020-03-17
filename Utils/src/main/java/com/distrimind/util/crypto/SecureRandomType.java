@@ -45,10 +45,7 @@ import java.security.NoSuchProviderException;
 import java.security.PrivilegedAction;
 import java.security.SecureRandom;
 import java.security.Security;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import com.distrimind.util.OSVersion;
 import org.bouncycastle.crypto.CryptoServicesRegistrar;
@@ -84,7 +81,7 @@ public enum SecureRandomType {
 	FORTUNA_WITH_BC_FIPS_APPROVED("FORTUNA_WITH_BC_FIPS_APPROVED", CodeProvider.BC, false, false),
 	FORTUNA_WITH_BC_FIPS_APPROVED_FOR_KEYS("FORTUNA_WITH_BC_FIPS_APPROVED_FOR_KEYS", CodeProvider.BC, false, true),
 	FORTUNA_WITH_BC_FIPS_APPROVED_FOR_KEYS_With_NativePRNG("FORTUNA_WITH_BC_FIPS_APPROVED_FOR_KEYS_With_NativePRNG", CodeProvider.BC, false, true),
-	DEFAULT(FORTUNA_WITH_BC_FIPS_APPROVED);
+	DEFAULT(BC_FIPS_APPROVED);
 
 	private final String algorithmeName;
 
@@ -216,14 +213,16 @@ public enum SecureRandomType {
 			}
 			else
 			{
-				/*if (algorithmeName == null)
+				if (OSVersion.getCurrentOSVersion().getOS()==OS.ANDROID)
 					res=new JavaNativeSecureRandom(this, new SecureRandom());
-				else*/
+				else
 					res=new JavaNativeSecureRandom(this, SecureRandom.getInstance(algorithmeName, provider.checkProviderWithCurrentOS().name()));
 			}
 		}
-		if (nonce!=null)
+		if (nonce!=null) {
+
 			res.setSeed(nonce);
+		}
 		return res;
 
 	}
@@ -345,7 +344,7 @@ public enum SecureRandomType {
 	}
 	
 	private static volatile SecureRandom defaultNativeNonBlockingSeed=null;
-	private static SecureRandom getDefaultNativeNonBlockingSeedSingleton()
+	static SecureRandom getDefaultNativeNonBlockingSeedSingleton()
 	{
 		if (defaultNativeNonBlockingSeed==null)
 		{
@@ -357,7 +356,10 @@ public enum SecureRandomType {
 					if (OSVersion.getCurrentOSVersion()!=null && OSVersion.getCurrentOSVersion().getOS().isUnix())
 					{
 						try {
-							sr=SecureRandom.getInstance("NativePRNG", CodeProvider.SUN.checkProviderWithCurrentOS().name());
+							if (OSVersion.getCurrentOSVersion().getOS()==OS.ANDROID)
+								sr=new SecureRandom();
+							else
+								sr=SecureRandom.getInstance("NativePRNG", CodeProvider.SUN.checkProviderWithCurrentOS().name());
 						} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
 							try
 							{
@@ -374,7 +376,10 @@ public enum SecureRandomType {
 					{
 						try
 						{
-							sr=SecureRandom.getInstance("SHA1PRNG", CodeProvider.SUN.checkProviderWithCurrentOS().name());
+							if (Objects.requireNonNull(OSVersion.getCurrentOSVersion()).getOS()==OS.ANDROID)
+								sr=new SecureRandom();
+							else
+								sr=SecureRandom.getInstance("SHA1PRNG", CodeProvider.SUN.checkProviderWithCurrentOS().name());
 						}
 						catch(NoSuchAlgorithmException | NoSuchProviderException e2)
 						{
@@ -464,7 +469,22 @@ public enum SecureRandomType {
 	{
 		if (OSVersion.getCurrentOSVersion()!=null && OSVersion.getCurrentOSVersion().getOS().isUnix())
 		{
-			if (OS.getCurrentJREVersionDouble()>=1.8)
+			if (OSVersion.getCurrentOSVersion().getOS()==OS.ANDROID)
+			{
+				if (!nativeNonBlockingSeedInitialized) {
+					synchronized (NativeNonBlockingSecureRandom.class) {
+						if (!nativeNonBlockingSeedInitialized) {
+							nativeNonBlockingSeed = new JavaNativeSecureRandom(NativePRNGNonBlocking, new SecureRandom(), false);
+							nativeNonBlockingSeedInitialized = true;
+						}
+					}
+				}
+				if (nativeNonBlockingSeed!=null)
+				{
+					return nativeNonBlockingSeed.generateSeed(numBytes);
+				}
+			}
+			else if (OS.getCurrentJREVersionDouble()>=1.8)
 			{
 				if (!nativeNonBlockingSeedInitialized)
 				{

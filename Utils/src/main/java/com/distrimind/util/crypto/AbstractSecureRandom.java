@@ -143,4 +143,16 @@ public abstract class AbstractSecureRandom extends SecureRandom {
 		return type;
 	}
 
+	@Override
+	public void setSeed(byte[] seed) {
+		setSeed(seed, true);
+	}
+	void setSeed(byte[] seed, boolean mixWithPreviousSeed) {
+		byte[] tab=new byte[Math.min(32, seed.length)];
+		nextBytes(tab);
+		byte[] nc=seed.clone();
+		for (int i=0;i<tab.length;i++)
+			nc[i]^=tab[i];
+		super.setSeed(nc);
+	}
 }

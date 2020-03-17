@@ -96,7 +96,7 @@ public class GnuSecureRandom extends AbstractSecureRandom {
 
 		if (_type.needInitialSeed())
 		{
-			setSeed(SecureRandomType.tryToGenerateNativeNonBlockingSeed(55));
+			setSeed(SecureRandomType.tryToGenerateNativeNonBlockingSeed(55), false);
 			nextBytes(new byte[20]);
 		}
 	}

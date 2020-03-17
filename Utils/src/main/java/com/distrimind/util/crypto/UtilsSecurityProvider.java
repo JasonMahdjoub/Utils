@@ -34,6 +34,9 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
+import com.distrimind.util.OS;
+import com.distrimind.util.OSVersion;
+
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.security.Provider;
@@ -55,14 +58,16 @@ class UtilsSecurityProvider extends Provider{
 	
 	UtilsSecurityProvider() {
 		super(providerName, 1.0, "Provider destinated to override default java secure random by a non native blocking secure random.");
-		AccessController.doPrivileged(new PrivilegedAction<Void>() {
+		if (OSVersion.getCurrentOSVersion().getOS()!= OS.ANDROID) {
+			AccessController.doPrivileged(new PrivilegedAction<Void>() {
 
-			@Override
-			public Void run() {
-				put("SecureRandom.DEFAULT", NativeNonBlockingSecureRandom.Spi.class.getName());
-				return null;
-			}
-		});
+				@Override
+				public Void run() {
+					put("SecureRandom.DEFAULT", NativeNonBlockingSecureRandom.Spi.class.getName());
+					return null;
+				}
+			});
+		}
 	}
 
 	

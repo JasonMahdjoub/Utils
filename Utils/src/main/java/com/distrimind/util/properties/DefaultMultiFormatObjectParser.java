@@ -43,21 +43,15 @@ import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URL;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.TimeZone;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
 
 import javax.lang.model.SourceVersion;
 
-import com.distrimind.util.DecentralizedValue;
-import com.distrimind.util.crypto.*;
+import com.distrimind.util.*;
 import org.apache.commons.codec.binary.Base64;
 
-import com.distrimind.util.AbstractDecentralizedID;
-import com.distrimind.util.Bits;
-import com.distrimind.util.crypto.ASymmetricAuthenticatedSignatureType;
 
 
 /**
@@ -75,36 +69,46 @@ public class DefaultMultiFormatObjectParser extends AbstractMultiFormatObjectPar
 	 */
 	private static final long serialVersionUID = -6853594945240574230L;
 
-	private static final Class<?>[] supportedClasses=new Class<?>[] {
-		Boolean.class,
-		Byte.class,
-		Short.class,
-		Integer.class,
-		Long.class,
-		Float.class,
-		Double.class,
-		Character.class,
-		String.class,
-		Class.class,
-		Date.class,
-		File.class,
-		URL.class,
-		URI.class,
-		Level.class,
-		InetAddress.class,
-		Inet4Address.class,
-		byte[].class,
-		short[].class,
-		char[].class,
-		int[].class,
-		long[].class,
-		float[].class,
-		double[].class,
-		boolean[].class,
-		Inet6Address.class,
-		InetSocketAddress.class,
-		SourceVersion.class,
-	};
+	private static final Class<?>[] supportedClasses;
+
+	static {
+		ArrayList<Class<?>> sc= new ArrayList<>(Arrays.asList((Class<?>)Boolean.class,
+				Byte.class,
+				Short.class,
+				Integer.class,
+				Long.class,
+				Float.class,
+				Double.class,
+				Character.class,
+				String.class,
+				Class.class,
+				Date.class,
+				File.class,
+				URL.class,
+				URI.class,
+				Level.class,
+				InetAddress.class,
+				Inet4Address.class,
+				byte[].class,
+				short[].class,
+				char[].class,
+				int[].class,
+				long[].class,
+				float[].class,
+				double[].class,
+				boolean[].class,
+				Inet6Address.class,
+				InetSocketAddress.class));
+		try {
+			sc.add(Class.forName("javax.lang.model.SourceVersion"));
+		} catch (ClassNotFoundException ignored) {
+
+		}
+		supportedClasses=new Class<?>[sc.size()];
+		int i=0;
+		for (Class<?> c : sc)
+			supportedClasses[i++]=c;
+	}
 	private static final Class<?>[] supportedMultiClasses=new Class<?>[] {
 		DecentralizedValue.class, MultiFormatProperties.class,Enum.class,Calendar.class
 	};

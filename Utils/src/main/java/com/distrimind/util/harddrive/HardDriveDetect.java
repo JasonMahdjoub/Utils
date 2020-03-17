@@ -75,6 +75,8 @@ public abstract class HardDriveDetect {
 						instance.set(new WindowsHardDriveDetect());
 					else if (OSVersion.getCurrentOSVersion()!=null && OSVersion.getCurrentOSVersion().getOS()==OS.MAC_OS_X)
 						instance.set(new MacOSHardDriveDetect());
+					else if (OSVersion.getCurrentOSVersion()!=null && OSVersion.getCurrentOSVersion().getOS()==OS.ANDROID)
+						instance.set(new AndroidHardDriveDetect());
 					else
 						instance.set(new DefaultHardDriveDetect());
 				}

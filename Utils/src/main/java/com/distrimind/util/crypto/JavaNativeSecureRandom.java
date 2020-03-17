@@ -76,9 +76,13 @@ public final class JavaNativeSecureRandom extends AbstractSecureRandom {
 			protected void engineSetSeed(byte[] seed) {
 				synchronized(secureRandom)
 				{
-					secureRandom.nextBytes(seed);
-					if (seed!=null)
-						addDataProvided(seed.length);
+					byte[] tab=new byte[Math.min(32, seed.length)];
+					secureRandom.nextBytes(tab);
+					byte[] nc=seed.clone();
+					for (int i=0;i<tab.length;i++)
+						nc[i]^=tab[i];
+					secureRandom.setSeed(nc);
+					addDataProvided(seed.length);
 				}
 				
 			}
@@ -108,7 +112,7 @@ public final class JavaNativeSecureRandom extends AbstractSecureRandom {
 
 		if (type.needInitialSeed())
 		{
-			setSeed(SecureRandomType.tryToGenerateNativeNonBlockingSeed(55));
+			setSeed(SecureRandomType.tryToGenerateNativeNonBlockingSeed(55), false);
 			nextBytes(new byte[20]);
 		}
 		

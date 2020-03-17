@@ -55,7 +55,7 @@ import com.distrimind.util.OS;
  * @since Utils 2.9.0
  */
 public enum CodeProvider {
-	SUN, SunJCE, SunJSSE, SunRsaSign, SunEC, GNU_CRYPTO, BCFIPS, BC, BCPQC;
+	SUN, SunJCE, SunJSSE, SunRsaSign, SunEC, GNU_CRYPTO, BCFIPS, BC, BCPQC, AndroidOpenSSL;
 
 	private static volatile Provider bouncyProvider = null;
 	private static volatile Provider bouncyProviderFIPS = null;
@@ -140,7 +140,7 @@ public enum CodeProvider {
 		if (OSVersion.getCurrentOSVersion()!=null && OSVersion.getCurrentOSVersion().getOS()==OS.ANDROID)
 		{
 			if (this==SUN || this==SunJCE || this==SunJSSE || this==SunRsaSign || this==SunEC)
-				return BC;
+				return AndroidOpenSSL;
 		}
 		return this;
 	}

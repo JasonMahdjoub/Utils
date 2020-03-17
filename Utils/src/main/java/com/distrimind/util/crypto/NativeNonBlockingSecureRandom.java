@@ -35,8 +35,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
 package com.distrimind.util.crypto;
 
 
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
+import java.security.SecureRandom;
 
 /**
  * 
@@ -55,17 +54,15 @@ public class NativeNonBlockingSecureRandom extends AbstractSecureRandom {
 
 	private volatile Object secureGnuRandom;
 
-	public static class Spi extends AbstractSecureRandomSpi
+	static class Spi extends AbstractSecureRandomSpi
 	{
-		/**
-		 * 
-		 */
 		private static final long serialVersionUID = 3887548046414173231L;
-		private final AbstractSecureRandom secureRandom;
-		public Spi() throws NoSuchAlgorithmException, NoSuchProviderException
+		private final SecureRandom secureRandom;
+
+		public Spi()
 		{
 			super(false);
-			secureRandom=SecureRandomType.NativePRNGNonBlocking.getSingleton(null);
+			secureRandom=SecureRandomType.getDefaultNativeNonBlockingSeedSingleton();
 		}
 		@Override
 		protected void engineSetSeed(byte[] seed) {
@@ -81,7 +78,8 @@ public class NativeNonBlockingSecureRandom extends AbstractSecureRandom {
 		protected byte[] engineGenerateSeed(int numBytes) {
 			return secureRandom.generateSeed(numBytes);
 		}
-		
+
+
 	}
 	
 	
