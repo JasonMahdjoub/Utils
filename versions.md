@@ -1,6 +1,6 @@
 Utils
 =====
-4.15.6 Stable (Build: 1661) (from 18/03/2019 to 18/03/2020)
+4.15.8 Stable (Build: 1666) (from 18/03/2019 to 18/03/2020)
 
 # Creator(s):
 Jason MAHDJOUB
@@ -11,7 +11,7 @@ Jason MAHDJOUB (Entred in the team at 04/01/2016)
 # Modifications:
 
 
-### 4.15.6 Stable (18/03/2019)
+### 4.15.8 Stable (18/03/2019)
 * Update FIPS to a recompiled version compatible with Android
 * Update commons-codec to 1.14
 * Update snakeyaml to 2.26

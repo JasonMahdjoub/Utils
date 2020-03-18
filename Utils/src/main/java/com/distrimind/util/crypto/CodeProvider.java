@@ -97,14 +97,17 @@ public enum CodeProvider {
 
 			synchronized (CodeProvider.class) {
 				if (bouncyProvider == null) {
+					BouncyCastleProvider bc = new BouncyCastleProvider();
+					bouncyProvider=bc;
 					if (OSVersion.getCurrentOSVersion().getOS()==OS.ANDROID)
 					{
-						Security.removeProvider("BC");
-						Security.removeProvider("AndroidOpenSSL");
+						if (OSVersion.getCurrentOSVersion().compareTo(OSVersion.ANDROID_28_P)<0) {
+							Security.insertProviderAt(bc, Security.getProviders().length+1);
+						}
 					}
-					BouncyCastleProvider bc = new BouncyCastleProvider();
-					Security.insertProviderAt(bc, Security.getProviders().length+1);
-					bouncyProvider=bc;
+					else
+						Security.insertProviderAt(bc, Security.getProviders().length+1);
+
 				}
 			}
 		}
@@ -144,8 +147,16 @@ public enum CodeProvider {
 	{
 		if (OSVersion.getCurrentOSVersion()!=null && OSVersion.getCurrentOSVersion().getOS()==OS.ANDROID)
 		{
+			CodeProvider cp;
+			if (OSVersion.getCurrentOSVersion().compareTo(OSVersion.ANDROID_28_P)<0) {
+				cp=BC;
+			}
+			else {
+				cp=AndroidOpenSSL;
+			}
+
 			if (this==SUN || this==SunJCE || this==SunJSSE || this==SunRsaSign || this==SunEC)
-				return BC;
+				return cp;
 		}
 		return this;
 	}

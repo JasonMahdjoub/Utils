@@ -104,6 +104,7 @@ public enum OSVersion {
     ANDROID_26_O(".*(android).*",OS.ANDROID),
     ANDROID_27_O_MR1(".*(android).*",OS.ANDROID),
     ANDROID_28_P(".*(android).*",OS.ANDROID),
+    ANDROID_29_Q(".*(android).*",OS.ANDROID),
     ANDROID_UNKNOWN(".*(android).*",OS.ANDROID),
     SEARCH_BOT_NUHK(".*(nuhk).*",OS.SEARCH_BOT),
     SEARCH_BOT_GOOGLEBOT(".*(googlebot).*",OS.SEARCH_BOT),
@@ -144,7 +145,7 @@ public enum OSVersion {
     private static int getAndroidVersionInt()
     {
         try {
-            Class<?> versionClass=Class.forName("android.os.Build.VERSION");
+            Class<?> versionClass=Class.forName("android.os.Build$VERSION");
             return (int)versionClass.getDeclaredField("SDK_INT").get(null);
         } catch (ClassNotFoundException | IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException e) {
             return 0;
