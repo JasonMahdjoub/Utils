@@ -42,7 +42,6 @@ import java.io.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.nio.file.Files;
 import java.util.*;
 
 /**
@@ -74,7 +73,7 @@ public class AndroidHardDriveDetect extends UnixHardDriveDetect{
 				disks.add(disk);
 				partitions.add(new Partition(null, internalStorageVolume, null,
 						"Unknown", "Unknown", blockSize,
-						Files.isWritable(internalStorageVolume.toPath()),
+						internalStorageVolume.canWrite(),
 						"Internal SD card", (long) getAvailableBytes.invoke(stat), disk));
 			}
 
@@ -89,7 +88,7 @@ public class AndroidHardDriveDetect extends UnixHardDriveDetect{
 					disk=new Disk(null, (long)getTotalBytes.invoke(stat ), false, blockSize, "Unknown", "ExternalStorage"+index, "External storage "+index);
 					partitions.add(new Partition(null, f, null,
 							"Unknown", "Unknown", blockSize,
-							Files.isWritable(f.toPath()),
+							f.canWrite(),
 							"Internal SD card "+index, (long)getAvailableBytes.invoke(stat), disk));
 					++index;
 				}

@@ -97,6 +97,11 @@ public enum CodeProvider {
 
 			synchronized (CodeProvider.class) {
 				if (bouncyProvider == null) {
+					if (OSVersion.getCurrentOSVersion().getOS()==OS.ANDROID)
+					{
+						Security.removeProvider("BC");
+						Security.removeProvider("AndroidOpenSSL");
+					}
 					BouncyCastleProvider bc = new BouncyCastleProvider();
 					Security.insertProviderAt(bc, Security.getProviders().length+1);
 					bouncyProvider=bc;
@@ -140,7 +145,7 @@ public enum CodeProvider {
 		if (OSVersion.getCurrentOSVersion()!=null && OSVersion.getCurrentOSVersion().getOS()==OS.ANDROID)
 		{
 			if (this==SUN || this==SunJCE || this==SunJSSE || this==SunRsaSign || this==SunEC)
-				return AndroidOpenSSL;
+				return BC;
 		}
 		return this;
 	}
