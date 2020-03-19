@@ -73,77 +73,121 @@ public abstract class AbstractDecentralizedIDGenerator extends AbstractDecentral
 	
 	static {
 		long result = 0;
-		long result2 = 0;
 		//short resultShort=0;
 		byte[] shortLocalMacBytes = new byte[6];
 		AbstractSecureRandom random=null;
 		AbstractMessageDigest messageDigest=null;
 		byte[] digestion48 = new byte[6];
 		try {
-			messageDigest=MessageDigestType.BC_FIPS_SHA3_256.getMessageDigestInstance();
-			final Enumeration<NetworkInterface> e = NetworkInterface.getNetworkInterfaces();
-			while (e.hasMoreElements()) {
-				final NetworkInterface ni = e.nextElement();
-
-
-				if (!ni.isLoopback()) {
-
-					//resultShort=Bits.getShort(digestion16, 0);
-					/*shortLocalMacBytes[0]=digestion16[0];
-					shortLocalMacBytes[1]=digestion16[1];*/
-
-					long val = getHardwareAddress(ni.getHardwareAddress());
-					if (val != 0 && val != 224)// is the current network interface is not a virtual interface
-					{
-						byte[] digestion256 = messageDigest.digest(ni.getHardwareAddress());
-						byte[] digestion64 = new byte[8];
-						for (int i=0;i<8;i++)
-							digestion64[i]=(byte)(digestion256[i]^digestion256[i+8]^digestion256[i+16]^digestion256[i+24]);
-
-						for (int i=0;i<2;i++)
-							digestion48[i]=(byte)(digestion64[i]^digestion64[i+2]);
-						System.arraycopy(digestion64, 4, digestion48, 2, 4);
-						//byte digestion16[]=new byte[2];
-						for (int i=0;i<2;i++)
-							shortLocalMacBytes[i]=(byte)(digestion64[i]^digestion64[i+2]+digestion64[i+4]+digestion64[i+6]);
-
-
-						val = getHardwareAddress(digestion48);
-						if (ni.isPointToPoint()) {
-							result2 = val;
-						} else {
-							result = val;
-							break;
-						}
-					}
-				}
-			}
 			byte[] nonce=("Que(3) j(1)'aime(4) à(1) faire(5) apprendre ce nombre utile aux sages !\n" +
-					"Immortel Archimède, artiste ingénieur,\n" + 
-					"Qui de ton jugement peut priser la valeur ?\n" + 
-					"Pour moi, ton problème eut de pareils avantages.\n" + 
-					"Jadis, mystérieux, un problème bloquait\n" + 
-					"Tout l'admirable procédé, l'œuvre grandiose\n" + 
-					"Que Pythagore découvrit aux anciens Grecs.\n" + 
-					"Ô quadrature ! Vieux tourment du philosophe\n" + 
-					"Insoluble rondeur, trop longtemps vous avez\n" + 
-					"Défié Pythagore et ses imitateurs.\n" + 
-					"Comment intégrer l'espace plan circulaire ?\n" + 
-					"Former un triangle auquel il équivaudra ?\n" + 
-					"Nouvelle invention : Archimède inscrira\n" + 
-					"Dedans un hexagone ; appréciera son aire\n" + 
-					"Fonction du rayon. Pas trop ne s'y tiendra :\n" + 
-					"Dédoublera chaque élément antérieur ;\n" + 
-					"Toujours de l'orbe calculée approchera ;\n" + 
-					"Définira limite ; enfin, l'arc, le limiteur\n" + 
-					"De cet inquiétant cercle, ennemi trop rebelle\n" + 
+					"Immortel Archimède, artiste ingénieur,\n" +
+					"Qui de ton jugement peut priser la valeur ?\n" +
+					"Pour moi, ton problème eut de pareils avantages.\n" +
+					"Jadis, mystérieux, un problème bloquait\n" +
+					"Tout l'admirable procédé, l'œuvre grandiose\n" +
+					"Que Pythagore découvrit aux anciens Grecs.\n" +
+					"Ô quadrature ! Vieux tourment du philosophe\n" +
+					"Insoluble rondeur, trop longtemps vous avez\n" +
+					"Défié Pythagore et ses imitateurs.\n" +
+					"Comment intégrer l'espace plan circulaire ?\n" +
+					"Former un triangle auquel il équivaudra ?\n" +
+					"Nouvelle invention : Archimède inscrira\n" +
+					"Dedans un hexagone ; appréciera son aire\n" +
+					"Fonction du rayon. Pas trop ne s'y tiendra :\n" +
+					"Dédoublera chaque élément antérieur ;\n" +
+					"Toujours de l'orbe calculée approchera ;\n" +
+					"Définira limite ; enfin, l'arc, le limiteur\n" +
+					"De cet inquiétant cercle, ennemi trop rebelle\n" +
 					"Professeur, enseignez son problème avec zèle. "+result).getBytes();
 			random=SecureRandomType.BC_FIPS_APPROVED.getInstance(nonce);
-		} catch (SocketException | NoSuchAlgorithmException | NoSuchProviderException e1) {
+			messageDigest=MessageDigestType.BC_FIPS_SHA3_256.getMessageDigestInstance();
+			byte[] hardwareAddress = null;
+			byte[] hardwareAddress2 = null;
+
+			try {
+				final Enumeration<NetworkInterface> e = NetworkInterface.getNetworkInterfaces();
+
+				while (e.hasMoreElements()) {
+					final NetworkInterface ni = e.nextElement();
+
+
+					if (!ni.isLoopback()) {
+
+						byte[] t = ni.getHardwareAddress();
+						if (t[0]==2)
+						{
+							boolean all0=true;
+							for (int i=1;i<t.length;i++) {
+								if (t[i]!=0) {
+									all0 = false;
+									break;
+								}
+							}
+							if (all0)
+								t=null;
+						}
+						else if (t[t.length-1]==0)
+						{
+							boolean all0=true;
+							for (int i=t.length-2;i>=0;i--) {
+								if (t[i]!=0) {
+									all0 = false;
+									break;
+								}
+							}
+							if (all0)
+								t=null;
+						}
+						if (t == null)
+							continue;
+						long val = getHardwareAddress(t);
+						if (val != 0 && val != 224)// is the current network interface is not a virtual interface
+						{
+							if (ni.isPointToPoint())
+							{
+								hardwareAddress2=t;
+							}
+							else {
+								hardwareAddress = t;
+								break;
+							}
+						}
+					}
+
+				}
+			}
+			catch (SocketException e)
+			{
+				e.printStackTrace();
+			}
+
+			if (hardwareAddress==null)
+			{
+				if (hardwareAddress2!=null)
+					hardwareAddress=hardwareAddress2;
+				else {
+					hardwareAddress = new byte[48];
+					random.nextBytes(hardwareAddress);
+				}
+			}
+			byte[] digestion256 = messageDigest.digest(hardwareAddress);
+			byte[] digestion64 = new byte[8];
+			for (int i=0;i<8;i++)
+				digestion64[i]=(byte)(digestion256[i]^digestion256[i+8]^digestion256[i+16]^digestion256[i+24]);
+
+			for (int i=0;i<2;i++)
+				digestion48[i]=(byte)(digestion64[i]^digestion64[i+2]);
+			System.arraycopy(digestion64, 4, digestion48, 2, 4);
+			//byte digestion16[]=new byte[2];
+			for (int i=0;i<2;i++)
+				shortLocalMacBytes[i]=(byte)(digestion64[i]^digestion64[i+2]+digestion64[i+4]+digestion64[i+6]);
+
+			result = getHardwareAddress(digestion48);
+
+		} catch (NoSuchAlgorithmException | NoSuchProviderException e1) {
 			e1.printStackTrace();
+			System.exit(-1);
 		}
-		if (result == 0)
-			result = result2;
 		LOCAL_MAC = result;
 		LOCAL_MAC_BYTES=digestion48;
 		//SHORT_LOCAL_MAC=0xFFFFl & resultShort;
