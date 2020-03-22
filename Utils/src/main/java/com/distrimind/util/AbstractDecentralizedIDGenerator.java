@@ -77,7 +77,7 @@ public abstract class AbstractDecentralizedIDGenerator extends AbstractDecentral
 		byte[] shortLocalMacBytes = new byte[6];
 		AbstractSecureRandom random=null;
 		AbstractMessageDigest messageDigest=null;
-		byte[] digestion48 = new byte[6];
+		byte[] digestion48 = null;
 		try {
 			byte[] nonce=("Que(3) j(1)'aime(4) à(1) faire(5) apprendre ce nombre utile aux sages !\n" +
 					"Immortel Archimède, artiste ingénieur,\n" +
@@ -156,7 +156,7 @@ public abstract class AbstractDecentralizedIDGenerator extends AbstractDecentral
 
 				}
 			}
-			catch (SocketException e)
+			catch (NullPointerException | SocketException e)
 			{
 				e.printStackTrace();
 			}
@@ -165,24 +165,28 @@ public abstract class AbstractDecentralizedIDGenerator extends AbstractDecentral
 			{
 				if (hardwareAddress2!=null)
 					hardwareAddress=hardwareAddress2;
-				else {
+				/*else {
 					hardwareAddress = new byte[48];
 					random.nextBytes(hardwareAddress);
-				}
+				}*/
 			}
-			byte[] digestion256 = messageDigest.digest(hardwareAddress);
-			byte[] digestion64 = new byte[8];
-			for (int i=0;i<8;i++)
-				digestion64[i]=(byte)(digestion256[i]^digestion256[i+8]^digestion256[i+16]^digestion256[i+24]);
+			if (hardwareAddress!=null) {
+				digestion48=new byte[6];
+				byte[] digestion256 = messageDigest.digest(hardwareAddress);
+				byte[] digestion64 = new byte[8];
+				for (int i = 0; i < 8; i++)
+					digestion64[i] = (byte) (digestion256[i] ^ digestion256[i + 8] ^ digestion256[i + 16] ^ digestion256[i + 24]);
 
-			for (int i=0;i<2;i++)
-				digestion48[i]=(byte)(digestion64[i]^digestion64[i+2]);
-			System.arraycopy(digestion64, 4, digestion48, 2, 4);
-			//byte digestion16[]=new byte[2];
-			for (int i=0;i<2;i++)
-				shortLocalMacBytes[i]=(byte)(digestion64[i]^digestion64[i+2]+digestion64[i+4]+digestion64[i+6]);
+				for (int i = 0; i < 2; i++)
+					digestion48[i] = (byte) (digestion64[i] ^ digestion64[i + 2]);
+				System.arraycopy(digestion64, 4, digestion48, 2, 4);
+				//byte digestion16[]=new byte[2];
+				for (int i = 0; i < 2; i++)
+					shortLocalMacBytes[i] = (byte) (digestion64[i] ^ digestion64[i + 2] + digestion64[i + 4] + digestion64[i + 6]);
 
-			result = getHardwareAddress(digestion48);
+				result = getHardwareAddress(digestion48);
+			}
+
 
 		} catch (NoSuchAlgorithmException | NoSuchProviderException e1) {
 			e1.printStackTrace();
@@ -222,10 +226,18 @@ public abstract class AbstractDecentralizedIDGenerator extends AbstractDecentral
 			synchronized(RANDOM)
 			{
 				MESSAGE_DIGEST.reset();
-				MESSAGE_DIGEST.update(LOCAL_MAC_BYTES);
-				byte[] r=new byte[4];
-				RANDOM.nextBytes(r);
-				MESSAGE_DIGEST.update(r);
+				if (LOCAL_MAC==0)
+				{
+					byte[] r = new byte[6];
+					RANDOM.nextBytes(r);
+					MESSAGE_DIGEST.update(r);
+				}
+				else {
+					MESSAGE_DIGEST.update(LOCAL_MAC_BYTES);
+					byte[] r = new byte[4];
+					RANDOM.nextBytes(r);
+					MESSAGE_DIGEST.update(r);
+				}
 				byte[] ts=new byte[10];
 				Bits.putLong(ts, 0, timestamp);
 				Bits.putShort(ts, 8, getNewSequence());
@@ -238,6 +250,7 @@ public abstract class AbstractDecentralizedIDGenerator extends AbstractDecentral
 		else
 		{
 			timestamp = System.currentTimeMillis();
+
 			if (useShortMacAddressAndRandomNumber)
 			{
 				//long r=0;
@@ -245,10 +258,18 @@ public abstract class AbstractDecentralizedIDGenerator extends AbstractDecentral
 				synchronized(RANDOM)
 				{
 					MESSAGE_DIGEST.reset();
-					MESSAGE_DIGEST.update(SHORT_LOCAL_MAC_BYTES, 0, 2);
-					byte[] r=new byte[4];
-					RANDOM.nextBytes(r);
-					MESSAGE_DIGEST.update(r, 0, 4);
+					if (LOCAL_MAC==0)
+					{
+						byte[] r = new byte[6];
+						RANDOM.nextBytes(r);
+						MESSAGE_DIGEST.update(r);
+					}
+					else {
+						MESSAGE_DIGEST.update(SHORT_LOCAL_MAC_BYTES, 0, 2);
+						byte[] r = new byte[4];
+						RANDOM.nextBytes(r);
+						MESSAGE_DIGEST.update(r, 0, 4);
+					}
 					digestion256=MESSAGE_DIGEST.digest();
 					
 					
@@ -261,8 +282,15 @@ public abstract class AbstractDecentralizedIDGenerator extends AbstractDecentral
 				//worker_id_and_sequence = SHORT_LOCAL_MAC | ((0xFFFFFFFFl & r)<<16) | ((0xFFFFl & getNewSequence()) << 48);
 				worker_id_and_sequence = Bits.getLong(digestion256, 0) | ((0xFFFFL & getNewSequence()) << 48);
 			}
-			else
-				worker_id_and_sequence = LOCAL_MAC | ((0xFFFFL & getNewSequence()) << 48);
+			else {
+				if (LOCAL_MAC==0)
+				{
+					worker_id_and_sequence = (RANDOM.nextLong() & 0xFFFFFFFFFFFFL) | ((0xFFFFL & getNewSequence()) << 48);
+				}
+				else {
+					worker_id_and_sequence = LOCAL_MAC | ((0xFFFFL & getNewSequence()) << 48);
+				}
+			}
 		}
 		hashCode=computeHashCode();
 	}
