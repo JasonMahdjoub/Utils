@@ -60,7 +60,7 @@ public class Utils {
 		c.set(2016, Calendar.JANUARY, 4);
 		Calendar c2 = Calendar.getInstance();
 		c.set(2019, Calendar.MARCH, 20);
-		VERSION = new Version("Utils", "Utils", (short)4, (short)15, (short)10, Version.Type.Stable, (short)0, c.getTime(), c2.getTime());
+		VERSION = new Version("Utils", "Utils", (short)4, (short)15, (short)11, Version.Type.Stable, (short)0, c.getTime(), c2.getTime());
 		try {
 
 			InputStream is = Utils.class.getResourceAsStream("build.txt");
@@ -74,7 +74,7 @@ public class Utils {
 
 			c = Calendar.getInstance();
 			c.set(2019, Calendar.MARCH, 20);
-			Description d = new Description((short)4, (short)15, (short)9, Version.Type.Stable, (short)0, c.getTime());
+			Description d = new Description((short)4, (short)15, (short)11, Version.Type.Stable, (short)0, c.getTime());
 			d.addItem("Update FIPS to a recompiled version compatible with Android");
 			d.addItem("Update commons-codec to 1.14");
 			d.addItem("Update snakeyaml to 2.26");

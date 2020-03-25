@@ -114,6 +114,8 @@ public abstract class AbstractDecentralizedIDGenerator extends AbstractDecentral
 					if (!ni.isLoopback()) {
 
 						byte[] t = ni.getHardwareAddress();
+						if (t == null)
+							continue;
 						if (t[0]==2)
 						{
 							boolean all0=true;
@@ -138,8 +140,7 @@ public abstract class AbstractDecentralizedIDGenerator extends AbstractDecentral
 							if (all0)
 								t=null;
 						}
-						if (t == null)
-							continue;
+
 						long val = getHardwareAddress(t);
 						if (val != 0 && val != 224)// is the current network interface is not a virtual interface
 						{
