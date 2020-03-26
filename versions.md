@@ -1,6 +1,6 @@
 Utils
 =====
-4.15.11 Stable (Build: 1676) (from 20/03/2019 to 25/03/2020)
+4.15.12 Stable (Build: 1680) (from 20/03/2019 to 26/03/2020)
 
 # Creator(s):
 Jason MAHDJOUB
@@ -11,13 +11,14 @@ Jason MAHDJOUB (Entred in the team at 04/01/2016)
 # Modifications:
 
 
-### 4.15.11 Stable (20/03/2019)
+### 4.15.12 Stable (20/03/2019)
 * Update FIPS to a recompiled version compatible with Android
 * Update commons-codec to 1.14
 * Update snakeyaml to 2.26
 * Make Utils compatible with Android
 * Add AndroidHardDriveDetect class
 * Revisit AbstractDecentralizedIDGenerator to make it compatible with Android
+* Fix issue with check folder
 
 
 ### 4.13.0 Stable (16/03/2019)

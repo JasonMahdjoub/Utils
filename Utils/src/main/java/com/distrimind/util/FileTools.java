@@ -68,17 +68,19 @@ public final class FileTools {
 	}
 
 	/**
-	 * Check if a specified file path is a folder and create a folder if it does not
-	 * exist.
+	 * Check if a specified file path is a folder and create the folder recursively if it does not exist.
 	 *
 	 * @param folderPath
 	 *            A folder path.
+	 *
      * @return true if the folders exists or have been created
 	 */
     @SuppressWarnings("UnusedReturnValue")
 	public static boolean checkFolderRecursive(File folderPath) {
 		if (!(folderPath.exists())) {
-			checkFolderRecursive(folderPath.getParentFile());
+			File parent=folderPath.getParentFile();
+			if (parent!=null)
+				checkFolderRecursive(parent);
 			return folderPath.mkdir();
 		}
 		return false;
@@ -91,12 +93,16 @@ public final class FileTools {
 	 *            Source file path.
 	 * @param destination
 	 *            Destination file path.
+	 * @param checkDestinationFolderRecursive Check if a specified destination path is in a folder that exists  and create the folder recursively if it does not exist.
 	 * @throws IOException
 	 *             when an IO exception occurs
 	 */
-	public static void copy(File source, File destination) throws IOException {
+	public static void copy(File source, File destination, boolean checkDestinationFolderRecursive) throws IOException {
 		// destination.createNewFile();
+
 		try (FileInputStream sourceFile = new FileInputStream(source)) {
+			if (checkDestinationFolderRecursive)
+				checkFolderRecursive(destination.getParentFile());
 			try (FileOutputStream destinationFile = new java.io.FileOutputStream(destination)) {
 				copy(sourceFile, destinationFile);
 			}
@@ -215,8 +221,8 @@ public final class FileTools {
                                     regex_exclude, regex_include);
                         } else if (tf.isFile()) {
                             // If it is a file.
-                            FileTools.checkFolderRecursive(pf.getParentFile());
-                            copy(tf, pf);
+
+                            copy(tf, pf, true);
                         } else {
                             throw new IOException("Messages.file_problem + tf.getAbsolutePath()");
                         }
@@ -305,15 +311,16 @@ public final class FileTools {
 	 *            Source file path.
 	 * @param destination
 	 *            Destination file path.
+	 * @param checkDestinationFolderRecursive Check if a specified destination path is in a folder that exists  and create the folder recursively if it does not exist.
 	 * @throws IOException
 	 *             when an IO exception occurs
 	 */
-	public static void move(File source, File destination) throws IOException {
+	public static void move(File source, File destination, boolean checkDestinationFolderRecursive) throws IOException {
 		// Try to use renameTo
 		boolean result = source.renameTo(destination);
 		if (!result) {
 			// Copy
-			copy(source, destination);
+			copy(source, destination, checkDestinationFolderRecursive);
 		}
 	}
 
