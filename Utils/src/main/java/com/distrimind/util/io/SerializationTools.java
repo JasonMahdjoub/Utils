@@ -39,6 +39,8 @@ package com.distrimind.util.io;
 
 
 import com.distrimind.util.AbstractDecentralizedID;
+import com.distrimind.util.OS;
+import com.distrimind.util.OSVersion;
 import com.distrimind.util.ReflectionTools;
 import com.distrimind.util.crypto.*;
 import com.distrimind.util.harddrive.FilePermissions;
@@ -1339,40 +1341,63 @@ public class SerializationTools {
 	private static short classesEndIndex=0;
 	private static short enumsStartIndex=0;
 	private static short enumsEndIndex=0;
-	private static final ArrayList<Class<? extends SecureExternalizableWithoutInnerSizeControl>> classes=new ArrayList<>();
+	private static final ArrayList<Class<? extends SecureExternalizableWithoutInnerSizeControl>> classes=new ArrayList<Class<? extends SecureExternalizableWithoutInnerSizeControl>>(
+			Collections.singletonList((Class<? extends SecureExternalizableWithoutInnerSizeControl>) FilePermissions.class));
 	private static final Map<Class<? extends SecureExternalizableWithoutInnerSizeControl>, Short> identifiersPerClasses=new HashMap<>();
-	private static final ArrayList<Class<? extends Enum<?>>> enums=new ArrayList<>();
+	private static final ArrayList<Class<? extends Enum<?>>> enums=new ArrayList<>(Arrays.asList(
+			MessageDigestType.class,
+			SecureRandomType.class,
+			SymmetricEncryptionType.class,
+			SymmetricAuthentifiedSignatureType.class,
+			ASymmetricEncryptionType.class,
+			ASymmetricAuthenticatedSignatureType.class,
+			KeyAgreementType.class,
+			PasswordHashType.class,
+			SymmetricKeyWrapperType.class,
+			ASymmetricKeyWrapperType.class,
+			ASymmetricLoginAgreementType.class,
+			CodeProvider.class,
+			EllipticCurveDiffieHellmanType.class,
+			P2PLoginAgreementType.class,
+			PasswordBasedKeyGenerationType.class,
+			OS.class,
+			OSVersion.class));
 	private static final Map<Class<? extends Enum<?>>, Short> identifiersPerEnums=new HashMap<>();
+	public static void addPredefinedClasses(List<Class<? extends SecureExternalizableWithoutInnerSizeControl>> cls, List<Class<? extends Enum<?>>> enms)
+	{
+		synchronized (SerializationTools.class) {
+			if (classes.size() + enums.size() + cls.size() + enms.size() + classesStartIndex > 254)
+				throw new IllegalArgumentException("Too much given predefined classes");
+			classes.addAll(cls);
+			enums.addAll(enms);
 
+			short currentID = lastObjectCode;
+			for (Class<?> c : classes)
+				assert !Modifier.isAbstract(c.getModifiers()) : "" + c;
+			assert currentID + classes.size() < 255;
+			for (Class<? extends SecureExternalizableWithoutInnerSizeControl> c : classes) {
+				short id = ++currentID;
+				identifiersPerClasses.put(c, id);
+			}
+			classesEndIndex = currentID;
+
+
+			assert currentID + enums.size() < 255;
+			enumsStartIndex = (byte) (currentID + 1);
+			for (Class<? extends Enum<?>> c : enums) {
+				short id = (++currentID);
+				identifiersPerEnums.put(c, id);
+			}
+			enumsEndIndex = currentID;
+		}
+	}
 	public static void setPredefinedClasses(List<Class<? extends SecureExternalizableWithoutInnerSizeControl>> cls, List<Class<? extends Enum<?>>> enms)
 	{
-		if (cls.size()+enms.size()+classesStartIndex>254)
-			throw new IllegalArgumentException("Too much given predefined classes");
-		classes.clear();
-		enums.clear();
-		classes.addAll(cls);
-		enums.addAll(enms);
-
-		short currentID=lastObjectCode;
-		for (Class<?> c : classes)
-			assert !Modifier.isAbstract(c.getModifiers()):""+c;
-		assert currentID+classes.size()<255;
-		for (Class<? extends SecureExternalizableWithoutInnerSizeControl> c : classes)
-		{
-			short id=++currentID;
-			identifiersPerClasses.put(c, id);
+		synchronized (SerializationTools.class) {
+			classes.clear();
+			enums.clear();
+			addPredefinedClasses(cls, enms);
 		}
-		classesEndIndex=currentID;
-
-
-		assert currentID+enums.size()<255;
-		enumsStartIndex=(byte)(currentID+1);
-		for (Class<? extends Enum<?>> c : enums)
-		{
-			short id=(++currentID);
-			identifiersPerEnums.put(c, id);
-		}
-		enumsEndIndex=currentID;
 	}
 
 	public static List<Class<? extends SecureExternalizableWithoutInnerSizeControl>> getPredefinedClasses() {
