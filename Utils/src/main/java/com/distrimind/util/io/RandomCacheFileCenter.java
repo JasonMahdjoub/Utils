@@ -40,7 +40,7 @@ import java.io.File;
 /**
  * @author Jason Mahdjoub
  * @version 1.0
- * @since MaDKitLanEdition 4.6.0
+ * @since Utils 4.6.0
  */
 public class RandomCacheFileCenter {
 	private final long maxMemoryUsedToStoreDataIntoMemoryInsteadOfFiles;

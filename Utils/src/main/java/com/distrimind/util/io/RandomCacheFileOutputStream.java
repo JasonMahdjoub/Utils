@@ -41,7 +41,7 @@ import java.io.IOException;
 /**
  * @author Jason Mahdjoub
  * @version 1.0
- * @since MaDKitLanEdition 4.6.0
+ * @since Utils 4.6.0
  */
 public class RandomCacheFileOutputStream extends RandomOutputStream{
 	private final RandomCacheFileCenter randomCacheFileCenter;
@@ -65,7 +65,7 @@ public class RandomCacheFileOutputStream extends RandomOutputStream{
 		if (fileUsed)
 			return;
 
-		RandomOutputStream fout=new RandomFileOutputStream(fileName, accessMode);;
+		RandomOutputStream fout=new RandomFileOutputStream(fileName, accessMode);
 		if (maxBufferSize>0)
 			fout=new BufferedRandomOutputStream(fout, maxBufferSize, maxBuffersNumber);
 
