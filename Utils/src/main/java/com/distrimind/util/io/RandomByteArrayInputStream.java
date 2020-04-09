@@ -140,14 +140,12 @@ public class RandomByteArrayInputStream extends RandomInputStream {
 	public long skip(long _nb) throws IOException {
 		if (outputStream == null)
 			throw new IOException("The current RandomByteArrayInputStream is closed !");
-		long l=length();
-		if (_nb<0 || _nb+currentPosition()>l)
-			throw new IllegalArgumentException();
 
 		long skipped = Math.min(getFreeSpace(), _nb);
 		current_pos += skipped;
 		return skipped;
 	}
+
 
 	/**
 	 * {@inheritDoc}

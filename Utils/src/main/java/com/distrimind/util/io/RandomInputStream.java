@@ -143,4 +143,13 @@ public abstract class RandomInputStream extends SecuredObjectInputStream impleme
 		return (int)Math.min(Integer.MAX_VALUE, length()-currentPosition());
 	}
 
+	@Override
+	public void skipNBytes(long _nb) throws IOException {
+		long l=length();
+		if (_nb<0 || _nb+currentPosition()>l)
+			throw new IllegalArgumentException();
+
+		super.skipNBytes(_nb);
+	}
+
 }

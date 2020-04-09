@@ -121,13 +121,12 @@ public class RandomFileInputStream extends RandomInputStream {
 	 */
 	@Override
 	public long skip(long _nb) throws IOException {
-		long l=length();
-		if (_nb<0 || _nb+currentPosition()>l)
-			throw new IllegalArgumentException();
 		long skipped = Math.min(getFreeSpace(), _nb);
 		raf.seek(currentPosition() + skipped);
 		return skipped;
 	}
+
+
 
 	/**
 	 * {@inheritDoc}
