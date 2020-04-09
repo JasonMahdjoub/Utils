@@ -152,4 +152,10 @@ public abstract class RandomInputStream extends SecuredObjectInputStream impleme
 		super.skipNBytes(_nb);
 	}
 
+	public void readFully(RandomOutputStream outputStream, long length) throws IOException {
+		outputStream.write(this, length);
+	}
+	public void readFully(RandomOutputStream outputStream) throws IOException {
+		outputStream.write(this);
+	}
 }

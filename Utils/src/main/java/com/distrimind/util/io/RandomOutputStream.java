@@ -144,6 +144,31 @@ public abstract class RandomOutputStream extends SecuredObjectOutputStream imple
 		return getRandomInputStream();
 	}
 
+	public void write(RandomInputStream inputStream) throws IOException {
+		writeImpl(inputStream, -1);
+	}
 
+	public void write(RandomInputStream inputStream, long length) throws IOException {
+		if (length<0)
+			throw new IllegalArgumentException();
+
+		writeImpl(inputStream, length);
+	}
+
+	private void writeImpl(RandomInputStream inputStream, long length) throws IOException {
+		if (length==0)
+			return;
+		if (length<0)
+			length=inputStream.length()-inputStream.currentPosition();
+		else if (length>inputStream.length()-inputStream.currentPosition())
+			throw new IllegalArgumentException();
+		byte[] buf=new byte[(int)Math.min(BufferedRandomInputStream.MAX_BUFFER_SIZE, length)];
+		do {
+			int s=(int)Math.min(length, buf.length);
+			inputStream.readFully(buf, 0, s);
+			write(buf, 0, s);
+			length-=s;
+		} while (length>0);
+	}
 
 }
