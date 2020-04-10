@@ -77,6 +77,7 @@ public class Utils {
 			Description d = new Description((short)4, (short)16, (short)0, Version.Type.Stable, (short)0, c.getTime());
 			d.addItem("Add class EncryptionTools");
 			d.addItem("Use temporary directory into RandomCacheFileCenter");
+			d.addItem("Fix issues into FilePermissions");
 			VERSION.addDescription(d);
 
 			c = Calendar.getInstance();

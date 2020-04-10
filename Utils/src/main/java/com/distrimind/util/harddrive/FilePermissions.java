@@ -41,6 +41,8 @@ import com.distrimind.util.io.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
@@ -294,8 +296,10 @@ public class FilePermissions implements SecureExternalizable {
 	}
 
 	public void applyTo(Path path) throws IOException {
-		if (!permissionsFromUnixSystem || !isOSCompatibleWithUnix())
+		if (!permissionsFromUnixSystem || !isOSCompatibleWithUnix()) {
 			applyTo(getFile(path));
+			return;
+		}
 		Set<java.nio.file.attribute.PosixFilePermission> set=new HashSet<>();
 		for (java.nio.file.attribute.PosixFilePermission p : Files.getPosixFilePermissions(path ))
 		{
@@ -348,11 +352,26 @@ public class FilePermissions implements SecureExternalizable {
 			return res;
 		}
 	}
-
-	private static File getFile(Path path)
+	private static final Method toFileMethod;
+	static
 	{
-		if (OSVersion.getCurrentOSVersion().getOS()!= OS.ANDROID || OSVersion.getCurrentOSVersion().compareTo(OSVersion.ANDROID_26_O)>=0)
-			return getFile(path);
+		Method m=null;
+		try {
+			m=Path.class.getDeclaredMethod("toFile" );
+		} catch (NoSuchMethodException e) {
+			e.printStackTrace();
+			System.exit(-1);
+		}
+		toFileMethod=m;
+	}
+	public static File getFile(Path path) throws IOException {
+		if (OSVersion.getCurrentOSVersion().getOS()!= OS.ANDROID || OSVersion.getCurrentOSVersion().compareTo(OSVersion.ANDROID_26_O)>=0) {
+			try {
+				return (File)toFileMethod.invoke(path);
+			} catch (IllegalAccessException | InvocationTargetException e) {
+				throw new IOException(e);
+			}
+		}
 		else
 			return new File(path.toString());
 	}
