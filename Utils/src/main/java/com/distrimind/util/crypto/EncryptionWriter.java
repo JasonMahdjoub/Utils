@@ -50,11 +50,11 @@ import java.util.Arrays;
 /**
  * @author Jason Mahdjoub
  * @version 1.0
- * @since MaDKitLanEdition 4.16.0
+ * @since Utils 4.16.0
  */
-public class EncryptionTools {
+public class EncryptionWriter {
 	private static final MessageDigestType defaultMessageType=MessageDigestType.SHA2_256;
-	private static void checkLimits(byte[] data, int off, int len)
+	static void checkLimits(byte[] data, int off, int len)
 	{
 		if (data==null)
 			throw new NullPointerException();
@@ -68,11 +68,12 @@ public class EncryptionTools {
 			throw new IllegalArgumentException();
 	}
 
-	private static byte getCode(SymmetricAuthenticatedSignerAlgorithm symmetricSigner, ASymmetricAuthenticatedSignerAlgorithm asymmetricSigner, AbstractMessageDigest digest)
+	private static byte getCode(byte[] associatedData, SymmetricAuthenticatedSignerAlgorithm symmetricSigner, ASymmetricAuthenticatedSignerAlgorithm asymmetricSigner, AbstractMessageDigest digest)
 	{
 		int res=symmetricSigner==null?0:1;
 		res+=asymmetricSigner==null?0:2;
 		res+=digest==null?0:4;
+		res+=associatedData==null?0:8;
 		return (byte)res;
 	}
 
@@ -90,11 +91,98 @@ public class EncryptionTools {
 	{
 		return (code & 4)==4;
 	}
-
-	public static void encrypt(RandomInputStream inputStream, RandomOutputStream originalOutputStream, SymmetricEncryptionAlgorithm cipher,byte[] associatedData, int offAD, int lenAD, SymmetricAuthenticatedSignerAlgorithm symmetricSigner, ASymmetricAuthenticatedSignerAlgorithm asymmetricSigner, AbstractMessageDigest digest)
+	private static boolean hasAssociatedData(byte code)
 	{
-
+		return (code & 8)==8;
 	}
+	private final RandomInputStream inputStream;
+	private final RandomOutputStream outputStream;
+	private SymmetricEncryptionAlgorithm cipher=null;
+	private byte[] associatedData=null;
+	private int offAD=0;
+	private int lenAD=0;
+	private SymmetricAuthenticatedSignerAlgorithm symmetricSigner=null;
+	private ASymmetricAuthenticatedSignerAlgorithm asymmetricSigner=null;
+	private AbstractMessageDigest digest=null;
+	public EncryptionWriter(RandomInputStream inputStream, RandomOutputStream outputStream) throws IOException {
+		if (inputStream==null)
+			throw new NullPointerException();
+		if (inputStream.length()-inputStream.currentPosition()==0)
+			throw new IllegalArgumentException();
+		if (outputStream==null)
+			throw new NullPointerException();
+		this.inputStream=inputStream;
+		this.outputStream=outputStream;
+	}
+
+	public EncryptionWriter withCipher(SymmetricEncryptionAlgorithm cipher)
+	{
+		if (cipher==null)
+			throw new NullPointerException();
+		this.cipher=cipher;
+		return this;
+	}
+	public EncryptionWriter withCipherAndAssociatedData(SymmetricEncryptionAlgorithm cipher, byte[] associatedData, int offAD, int lenAD)
+	{
+		if (cipher==null)
+			throw new NullPointerException();
+		if (associatedData==null)
+			throw new NullPointerException();
+		checkLimits(associatedData, offAD, lenAD);
+		this.cipher=cipher;
+		this.associatedData=associatedData;
+		this.offAD=offAD;
+		this.lenAD=lenAD;
+		return this;
+	}
+	public EncryptionWriter withSymmetricSigner(SymmetricAuthenticatedSignerAlgorithm symmetricSigner)
+	{
+		if (symmetricSigner==null)
+			throw new NullPointerException();
+		this.symmetricSigner=symmetricSigner;
+		return this;
+	}
+	public EncryptionWriter withSymmetricSecretKeyForSignature(SymmetricSecretKey secretKeyForSignature) throws NoSuchProviderException, NoSuchAlgorithmException {
+		if (secretKeyForSignature==null)
+			throw new NullPointerException();
+		if (!secretKeyForSignature.useAuthenticatedSignatureAlgorithm())
+			throw new IllegalArgumentException();
+		this.symmetricSigner=new SymmetricAuthenticatedSignerAlgorithm(secretKeyForSignature);
+		return this;
+	}
+	public EncryptionWriter withASymmetricSigner(ASymmetricAuthenticatedSignerAlgorithm asymmetricSigner)
+	{
+		if (asymmetricSigner==null)
+			throw new NullPointerException();
+		this.asymmetricSigner=asymmetricSigner;
+		return this;
+	}
+	public EncryptionWriter withASymmetricPrivateKeyForSignature(ASymmetricPrivateKey privateKeyForSignature) throws NoSuchProviderException, NoSuchAlgorithmException {
+		if (privateKeyForSignature==null)
+			throw new NullPointerException();
+		if (!privateKeyForSignature.useAuthenticatedSignatureAlgorithm())
+			throw new IllegalArgumentException();
+		this.asymmetricSigner=new ASymmetricAuthenticatedSignerAlgorithm(privateKeyForSignature);
+		return this;
+	}
+	public EncryptionWriter withMessageDigest(AbstractMessageDigest messageDigest)
+	{
+		if (digest==null)
+			throw new NullPointerException();
+		this.digest=messageDigest;
+		return this;
+	}
+	public EncryptionWriter withMessageDigestType(MessageDigestType messageDigestType) throws NoSuchProviderException, NoSuchAlgorithmException {
+		if (messageDigestType==null)
+			throw new NullPointerException();
+		this.digest=messageDigestType.getMessageDigestInstance();
+		return this;
+	}
+	public void encrypt() throws IOException {
+		encryptAndSignImpl(inputStream, outputStream, cipher, associatedData, offAD, lenAD, symmetricSigner, asymmetricSigner, digest);
+	}
+
+
 	private static void encryptAndSignImpl(RandomInputStream inputStream, RandomOutputStream originalOutputStream, SymmetricEncryptionAlgorithm cipher,byte[] associatedData, int offAD, int lenAD, SymmetricAuthenticatedSignerAlgorithm symmetricSigner, ASymmetricAuthenticatedSignerAlgorithm asymmetricSigner, AbstractMessageDigest digest) throws IOException {
 		if (inputStream==null)
 			throw new NullPointerException();
@@ -106,7 +194,7 @@ public class EncryptionTools {
 			checkLimits(associatedData, offAD, lenAD);
 
 		try {
-			byte code=getCode(symmetricSigner, asymmetricSigner, digest);
+			byte code=getCode(associatedData, symmetricSigner, asymmetricSigner, digest);
 			if (symmetricSigner!=null && asymmetricSigner!=null && digest==null)
 				digest=defaultMessageType.getMessageDigestInstance();
 			RandomOutputStream outputStream=originalOutputStream;
@@ -197,7 +285,7 @@ public class EncryptionTools {
 		}
 	}
 
-	private void decryptAndCheckSignature(RandomInputStream originalInputStream, RandomOutputStream outputStream, SymmetricEncryptionAlgorithm cipher, byte[] associatedData, int offAD, int lenAD, SymmetricAuthenticatedSignatureCheckerAlgorithm symmetricChecker, ASymmetricAuthenticatedSignatureCheckerAlgorithm asymmetricChecker, AbstractMessageDigest digest) throws IOException {
+	static void decryptAndCheckHashAndSignaturesImpl(RandomInputStream originalInputStream, RandomOutputStream outputStream, SymmetricEncryptionAlgorithm cipher, byte[] associatedData, int offAD, int lenAD, SymmetricAuthenticatedSignatureCheckerAlgorithm symmetricChecker, ASymmetricAuthenticatedSignatureCheckerAlgorithm asymmetricChecker, AbstractMessageDigest digest) throws IOException {
 		if (originalInputStream==null)
 			throw new NullPointerException();
 		if (originalInputStream.length()<=0)
@@ -212,6 +300,11 @@ public class EncryptionTools {
 			boolean symCheckOK=hasSymmetricSignature(code);
 			boolean asymCheckOK=hasASymmetricSignature(code);
 			boolean hashCheckOK=hasHash(code);
+			boolean hasAssociatedData=hasAssociatedData(code);
+			if (hasAssociatedData && associatedData==null)
+				throw new NullPointerException();
+			else if (!hasAssociatedData && associatedData!=null)
+				throw new IllegalArgumentException();
 			if (symCheckOK && symmetricChecker==null)
 				throw new NullPointerException("symmetricChecker");
 			if (asymCheckOK && asymmetricChecker==null)
@@ -258,7 +351,7 @@ public class EncryptionTools {
 				outputStream.write(lis);
 			}
 			byte[] lenBuffer=null;
-			if (digest!=null) {
+			if (digest!=null || symmetricChecker!=null || asymmetricChecker!=null) {
 				lenBuffer= new byte[8];
 				Bits.putLong(lenBuffer, 0, dataLen);
 
@@ -270,8 +363,8 @@ public class EncryptionTools {
 				byte[] hash = digest.digest();
 				byte[] hash2=hash;
 				byte[] hash3=hash;
-				byte[] symSign=null;
-				byte[] asymSign=null;
+				byte[] symSign;
+				byte[] asymSign;
 				if (symCheckOK)
 				{
 					symSign=inputStream.readBytesArray(false, symmetricChecker.getMacLengthBytes());
@@ -323,7 +416,7 @@ public class EncryptionTools {
 		}
 	}
 
-	private Integrity checkHashAndSignature(final RandomInputStream inputStream, SymmetricAuthenticatedSignatureCheckerAlgorithm symmetricChecker, ASymmetricAuthenticatedSignatureCheckerAlgorithm asymmetricChecker, AbstractMessageDigest digest) throws IOException {
+	static Integrity checkHashAndSignatureImpl(final RandomInputStream inputStream, SymmetricAuthenticatedSignatureCheckerAlgorithm symmetricChecker, ASymmetricAuthenticatedSignatureCheckerAlgorithm asymmetricChecker, AbstractMessageDigest digest) throws IOException {
 		if (inputStream==null)
 			throw new NullPointerException();
 		if (inputStream.length()<=0)
@@ -353,22 +446,23 @@ public class EncryptionTools {
 
 			long dataLen=inputStream.readLong();
 			long dataPos=inputStream.currentPosition();
+			byte[] lenBuffer= new byte[8];
+			Bits.putLong(lenBuffer, 0, dataLen);
 
 			if (digest!=null) {
-				digest.update(code);
+
 				digest.reset();
 				LimitedRandomInputStream lis=new LimitedRandomInputStream(inputStream, dataPos, dataLen);
 				digest.update(lis);
-				byte[] lenBuffer = new byte[8];
-				Bits.putLong(lenBuffer, 0, dataLen);
+				digest.update(code);
 				digest.update(lenBuffer);
 
 
 				byte[] hash = digest.digest();
 				byte[] hash2=hash;
 				byte[] hash3=hash;
-				byte[] symSign=null;
-				byte[] asymSign=null;
+				byte[] symSign;
+				byte[] asymSign;
 				if (symCheckOK)
 				{
 					symSign=inputStream.readBytesArray(false, symmetricChecker.getMacLengthBytes());
@@ -402,11 +496,13 @@ public class EncryptionTools {
 			}
 			else if (symmetricChecker!=null)
 			{
-				symmetricChecker.update(code);
+
 				inputStream.seek(dataPos+dataLen);
 				symmetricChecker.init(inputStream.readBytesArray(false, symmetricChecker.getMacLengthBytes()));
 				LimitedRandomInputStream lis=new LimitedRandomInputStream(inputStream, dataPos, dataLen);
 				symmetricChecker.update(lis);
+				symmetricChecker.update(code);
+				symmetricChecker.update(lenBuffer);
 				if (symmetricChecker.verify())
 					return Integrity.OK;
 				else
@@ -415,11 +511,13 @@ public class EncryptionTools {
 			}
 			else
 			{
-				asymmetricChecker.update(code);
+
 				inputStream.seek(dataPos+dataLen);
 				asymmetricChecker.init(inputStream.readBytesArray(false, asymmetricChecker.getMacLengthBytes()));
 				LimitedRandomInputStream lis=new LimitedRandomInputStream(inputStream, dataPos, dataLen);
 				asymmetricChecker.update(lis);
+				asymmetricChecker.update(code);
+				asymmetricChecker.update(lenBuffer);
 				if (asymmetricChecker.verify())
 					return Integrity.OK;
 				else
@@ -441,7 +539,7 @@ public class EncryptionTools {
 		}
 		maxSymSigSizeBytes=v;
 	}
-	private Integrity checkHashAndPublicSignature(final RandomInputStream inputStream, ASymmetricAuthenticatedSignatureCheckerAlgorithm asymmetricChecker, AbstractMessageDigest digest) throws IOException {
+	static Integrity checkHashAndPublicSignatureImpl(final RandomInputStream inputStream, ASymmetricAuthenticatedSignatureCheckerAlgorithm asymmetricChecker, AbstractMessageDigest digest) throws IOException {
 		if (inputStream==null)
 			throw new NullPointerException();
 		if (inputStream.length()<=0)
@@ -470,22 +568,22 @@ public class EncryptionTools {
 
 			long dataLen=inputStream.readLong();
 			long dataPos=inputStream.currentPosition();
+			byte[] lenBuffer = new byte[8];
+			Bits.putLong(lenBuffer, 0, dataLen);
 
 			if (digest!=null) {
-				digest.update(code);
 				digest.reset();
 				LimitedRandomInputStream lis=new LimitedRandomInputStream(inputStream, dataPos, dataLen);
 				digest.update(lis);
-				byte[] lenBuffer = new byte[8];
-				Bits.putLong(lenBuffer, 0, dataLen);
+				digest.update(code);
 				digest.update(lenBuffer);
 
 
 				byte[] hash = digest.digest();
 				byte[] hash2=hash;
 				byte[] hash3=hash;
-				byte[] symSign=null;
-				byte[] asymSign=null;
+				byte[] symSign;
+				byte[] asymSign;
 				if (symCheckOK)
 				{
 					symSign=inputStream.readBytesArray(false, maxSymSigSizeBytes);
@@ -518,11 +616,13 @@ public class EncryptionTools {
 			}
 			else
 			{
-				asymmetricChecker.update(code);
+
 				inputStream.seek(dataPos+dataLen);
 				asymmetricChecker.init(inputStream.readBytesArray(false, asymmetricChecker.getMacLengthBytes()));
 				LimitedRandomInputStream lis=new LimitedRandomInputStream(inputStream, dataPos, dataLen);
 				asymmetricChecker.update(lis);
+				asymmetricChecker.update(code);
+				asymmetricChecker.update(lenBuffer);
 				if (asymmetricChecker.verify())
 					return Integrity.OK;
 				else

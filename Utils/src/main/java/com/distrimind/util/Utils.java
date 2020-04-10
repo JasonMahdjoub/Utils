@@ -78,6 +78,7 @@ public class Utils {
 			d.addItem("Add class EncryptionTools");
 			d.addItem("Use temporary directory into RandomCacheFileCenter");
 			d.addItem("Fix issues into FilePermissions");
+			d.addItem("Implements EncryptionWriter and EncryptionReader");
 			VERSION.addDescription(d);
 
 			c = Calendar.getInstance();
