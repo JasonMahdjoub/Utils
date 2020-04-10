@@ -112,13 +112,13 @@ public enum MessageDigestType {
 	public AbstractMessageDigest getMessageDigestInstance() throws NoSuchAlgorithmException, NoSuchProviderException {
 		CodeProvider.ensureProviderLoaded(codeProvider);
 		if (codeProvider == CodeProvider.GNU_CRYPTO) {
-			return new GnuMessageDigest(GnuFunctions.digestGetInstance(algorithmName));
+			return new GnuMessageDigest(this, GnuFunctions.digestGetInstance(algorithmName));
 		} else if (codeProvider == CodeProvider.BCFIPS || codeProvider == CodeProvider.BC) {
-			return new JavaNativeMessageDigest(MessageDigest.getInstance(algorithmName, codeProvider.name()));
+			return new JavaNativeMessageDigest(this, MessageDigest.getInstance(algorithmName, codeProvider.name()));
 
 		} else {
 			try {
-				return new JavaNativeMessageDigest(MessageDigest.getInstance(algorithmName, codeProvider.checkProviderWithCurrentOS().name()));
+				return new JavaNativeMessageDigest(this, MessageDigest.getInstance(algorithmName, codeProvider.checkProviderWithCurrentOS().name()));
 			} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
 				if (replacer!=null)
 					return replacer.getMessageDigestInstance();

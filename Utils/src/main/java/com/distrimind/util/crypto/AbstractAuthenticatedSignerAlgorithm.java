@@ -78,7 +78,15 @@ public abstract class AbstractAuthenticatedSignerAlgorithm {
 	}
 	
 	public abstract void init() throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidAlgorithmParameterException;
-	
+
+	private final byte[] one=new byte[1];
+
+	public void update(byte c) throws SignatureException
+	{
+		one[0]=c;
+		update(one);
+	}
+
 	public void update(byte[] message) throws SignatureException
 	{
 		update(message,0, message.length);

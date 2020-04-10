@@ -48,13 +48,14 @@ import java.security.MessageDigest;
 public final class JavaNativeMessageDigest extends AbstractMessageDigest {
 	private final MessageDigest messageDigest;
 
-	JavaNativeMessageDigest(MessageDigest messageDigest) {
+	JavaNativeMessageDigest(MessageDigestType messageDigestType, MessageDigest messageDigest) {
+		super(messageDigestType);
 		this.messageDigest = messageDigest;
 	}
 
 	@Override
 	public JavaNativeMessageDigest clone() throws CloneNotSupportedException {
-		return new JavaNativeMessageDigest((MessageDigest) messageDigest.clone());
+		return new JavaNativeMessageDigest(getMessageDigestType(), (MessageDigest) messageDigest.clone());
 	}
 
 	@Override

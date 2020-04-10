@@ -34,8 +34,6 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
-import com.distrimind.util.io.RandomByteArrayInputStream;
-import com.distrimind.util.io.RandomByteArrayOutputStream;
 import com.distrimind.util.io.RandomInputStream;
 
 import java.io.IOException;
@@ -49,6 +47,15 @@ import java.security.DigestException;
  * @since Utils 2.0
  */
 public abstract class AbstractMessageDigest implements Cloneable {
+
+	private final MessageDigestType messageDigestType;
+
+	protected AbstractMessageDigest(MessageDigestType messageDigestType) {
+		if (messageDigestType==null)
+			throw new NullPointerException();
+		this.messageDigestType = messageDigestType;
+	}
+
 	/**
 	 * Does a simple byte comparison of the two digests.
 	 *
@@ -67,10 +74,6 @@ public abstract class AbstractMessageDigest implements Cloneable {
 				return false;
 
 		return true;
-	}
-
-	AbstractMessageDigest() {
-
 	}
 
 	/**
@@ -204,5 +207,10 @@ public abstract class AbstractMessageDigest implements Cloneable {
 			update(buffer, 0, s);
 			l-=s;
 		} while (l>0);
+	}
+
+	public MessageDigestType getMessageDigestType()
+	{
+		return messageDigestType;
 	}
 }

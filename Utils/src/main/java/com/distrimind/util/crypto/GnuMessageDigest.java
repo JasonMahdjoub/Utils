@@ -46,13 +46,14 @@ import java.security.DigestException;
 public final class GnuMessageDigest extends AbstractMessageDigest {
 	private final Object messageDigest;
 
-	GnuMessageDigest(Object messageDigest) {
+	GnuMessageDigest(MessageDigestType messageDigestType, Object messageDigest) {
+		super(messageDigestType);
 		this.messageDigest = messageDigest;
 	}
 
 	@Override
 	public GnuMessageDigest clone() throws CloneNotSupportedException {
-		return new GnuMessageDigest(GnuFunctions.clone(messageDigest));
+		return new GnuMessageDigest(getMessageDigestType(), GnuFunctions.clone(messageDigest));
 	}
 
 	@Override

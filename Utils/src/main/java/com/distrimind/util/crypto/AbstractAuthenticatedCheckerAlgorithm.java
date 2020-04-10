@@ -65,6 +65,11 @@ public abstract class AbstractAuthenticatedCheckerAlgorithm {
 	{
 		update(message,0, message.length);
 	}
+	private final byte[] one=new byte[1];
+	public void update(byte c) throws SignatureException {
+		one[0]=c;
+		update(one);
+	}
 	
 	
 	public abstract void update(byte[] message, int offm, int lenm) throws SignatureException ;
