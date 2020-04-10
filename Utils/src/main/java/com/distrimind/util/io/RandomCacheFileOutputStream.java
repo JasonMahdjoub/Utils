@@ -40,7 +40,7 @@ import java.io.IOException;
 
 /**
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 1.1
  * @since Utils 4.6.0
  */
 public class RandomCacheFileOutputStream extends RandomOutputStream{
@@ -50,7 +50,8 @@ public class RandomCacheFileOutputStream extends RandomOutputStream{
 	private final RandomFileOutputStream.AccessMode accessMode;
 	private boolean fileUsed;
 	private final int maxBufferSize, maxBuffersNumber;
-	RandomCacheFileOutputStream(RandomCacheFileCenter randomCacheFileCenter, File fileName, RandomFileOutputStream.AccessMode accessMode,int maxBufferSize, int maxBuffersNumber)
+	private final boolean removeFileWhenClosed;
+	RandomCacheFileOutputStream(RandomCacheFileCenter randomCacheFileCenter, File fileName, boolean removeFileWhenClosed, RandomFileOutputStream.AccessMode accessMode,int maxBufferSize, int maxBuffersNumber)
 	{
 		this.randomCacheFileCenter=randomCacheFileCenter;
 		this.out=new RandomByteArrayOutputStream();
@@ -59,6 +60,7 @@ public class RandomCacheFileOutputStream extends RandomOutputStream{
 		this.accessMode=accessMode;
 		this.maxBufferSize=maxBufferSize;
 		this.maxBuffersNumber=maxBuffersNumber;
+		this.removeFileWhenClosed=removeFileWhenClosed;
 	}
 
 	public void forceWritingMemoryCacheToFile() throws IOException {
@@ -145,6 +147,9 @@ public class RandomCacheFileOutputStream extends RandomOutputStream{
 			randomCacheFileCenter.releaseDataFromMemory(out.length());
 		}
 		out.close();
+		if (fileUsed && removeFileWhenClosed)
+			//noinspection ResultOfMethodCallIgnored
+			fileName.delete();
 	}
 
 	@Override
@@ -158,7 +163,6 @@ public class RandomCacheFileOutputStream extends RandomOutputStream{
 	{
 		if (!isClosed()) {
 			try {
-				flush();
 				close();
 			} catch (IOException e) {
 				e.printStackTrace();

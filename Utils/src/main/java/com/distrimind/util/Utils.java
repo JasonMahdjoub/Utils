@@ -76,6 +76,7 @@ public class Utils {
 			c.set(2019, Calendar.APRIL, 9);
 			Description d = new Description((short)4, (short)16, (short)0, Version.Type.Stable, (short)0, c.getTime());
 			d.addItem("Add class EncryptionTools");
+			d.addItem("Use temporary directory into RandomCacheFileCenter");
 			VERSION.addDescription(d);
 
 			c = Calendar.getInstance();

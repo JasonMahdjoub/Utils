@@ -36,50 +36,76 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 
 import java.io.File;
+import java.io.IOException;
 
 /**
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 1.1
  * @since Utils 4.6.0
  */
 public class RandomCacheFileCenter {
 	private final long maxMemoryUsedToStoreDataIntoMemoryInsteadOfFiles;
 	private long memoryUsedToStoreDataIntoMemoryInsteadOfFiles;
-	public RandomCacheFileCenter(long maxMemoryUsedToStoreDataIntoMemoryInsteadOfFiles)
-	{
+	private static final String prefixTmpFileName="DistriMindCacheFileCenter";
+	private static final String suffixTmpFileName="data";
+
+	public RandomCacheFileCenter(long maxMemoryUsedToStoreDataIntoMemoryInsteadOfFiles) {
 		this.maxMemoryUsedToStoreDataIntoMemoryInsteadOfFiles=maxMemoryUsedToStoreDataIntoMemoryInsteadOfFiles;
 		this.memoryUsedToStoreDataIntoMemoryInsteadOfFiles=0;
 	}
-
-	public RandomCacheFileOutputStream getNewRandomCacheFileOutputStream(File fileName)
-	{
-		return getNewRandomCacheFileOutputStream(fileName, RandomFileOutputStream.AccessMode.READ_AND_WRITE);
+	public RandomCacheFileOutputStream getNewRandomCacheFileOutputStream() throws IOException {
+		return getNewRandomCacheFileOutputStream(true);
 	}
-	public RandomCacheFileOutputStream getNewRandomCacheFileOutputStream(File fileName, RandomFileOutputStream.AccessMode accessMode)
-	{
-		return new RandomCacheFileOutputStream(this, fileName, accessMode, -1,0);
+	public RandomCacheFileOutputStream getNewRandomCacheFileOutputStream(boolean removeFileWhenClosingStream) throws IOException {
+		return getNewRandomCacheFileOutputStream(File.createTempFile(prefixTmpFileName, suffixTmpFileName), removeFileWhenClosingStream, RandomFileOutputStream.AccessMode.READ_AND_WRITE);
 	}
-
-	public RandomCacheFileOutputStream getNewBufferedRandomCacheFileOutputStream(File fileName)
+	public RandomCacheFileOutputStream getNewRandomCacheFileOutputStream(File fileName, boolean removeFileWhenClosingStream)
 	{
-		return getNewBufferedRandomCacheFileOutputStream(fileName, BufferedRandomInputStream.MAX_BUFFER_SIZE);
+		return getNewRandomCacheFileOutputStream(fileName, removeFileWhenClosingStream, RandomFileOutputStream.AccessMode.READ_AND_WRITE);
 	}
-	public RandomCacheFileOutputStream getNewBufferedRandomCacheFileOutputStream(File fileName, RandomFileOutputStream.AccessMode accessMode)
+	public RandomCacheFileOutputStream getNewRandomCacheFileOutputStream(File fileName, boolean removeFileWhenClosingStream, RandomFileOutputStream.AccessMode accessMode)
 	{
-		return getNewBufferedRandomCacheFileOutputStream(fileName, accessMode, BufferedRandomInputStream.MAX_BUFFER_SIZE);
-	}
-	public RandomCacheFileOutputStream getNewBufferedRandomCacheFileOutputStream(File fileName,  int maxBufferSize)
-	{
-		return getNewBufferedRandomCacheFileOutputStream(fileName, RandomFileOutputStream.AccessMode.READ_AND_WRITE, maxBufferSize, BufferedRandomInputStream.MAX_BUFFERS_NUMBER);
-	}
-	public RandomCacheFileOutputStream getNewBufferedRandomCacheFileOutputStream(File fileName, RandomFileOutputStream.AccessMode accessMode,  int maxBufferSize)
-	{
-		return getNewBufferedRandomCacheFileOutputStream(fileName, accessMode, maxBufferSize, BufferedRandomInputStream.MAX_BUFFERS_NUMBER);
+		return new RandomCacheFileOutputStream(this, fileName, removeFileWhenClosingStream, accessMode, -1,0);
 	}
 
-	public RandomCacheFileOutputStream getNewBufferedRandomCacheFileOutputStream(File fileName, RandomFileOutputStream.AccessMode accessMode,  int maxBufferSize, int maxBuffersNumber)
+	public RandomCacheFileOutputStream getNewBufferedRandomCacheFileOutputStream() throws IOException {
+		return getNewBufferedRandomCacheFileOutputStream(true);
+	}
+	public RandomCacheFileOutputStream getNewBufferedRandomCacheFileOutputStream(boolean removeFileWhenClosingStream) throws IOException {
+		return getNewBufferedRandomCacheFileOutputStream(removeFileWhenClosingStream, RandomFileOutputStream.AccessMode.READ_AND_WRITE);
+	}
+
+	public RandomCacheFileOutputStream getNewBufferedRandomCacheFileOutputStream(boolean removeFileWhenClosingStream, RandomFileOutputStream.AccessMode accessMode) throws IOException {
+		return getNewBufferedRandomCacheFileOutputStream(removeFileWhenClosingStream, accessMode, BufferedRandomInputStream.MAX_BUFFER_SIZE);
+	}
+
+	public RandomCacheFileOutputStream getNewBufferedRandomCacheFileOutputStream(boolean removeFileWhenClosingStream, RandomFileOutputStream.AccessMode accessMode,  int maxBufferSize) throws IOException {
+		return getNewBufferedRandomCacheFileOutputStream(removeFileWhenClosingStream, accessMode, maxBufferSize, BufferedRandomInputStream.MAX_BUFFERS_NUMBER);
+	}
+	public RandomCacheFileOutputStream getNewBufferedRandomCacheFileOutputStream(boolean removeFileWhenClosingStream, RandomFileOutputStream.AccessMode accessMode,  int maxBufferSize, int maxBuffersNumber) throws IOException {
+		return getNewBufferedRandomCacheFileOutputStream(File.createTempFile(prefixTmpFileName, suffixTmpFileName), removeFileWhenClosingStream, accessMode, maxBufferSize, maxBuffersNumber);
+	}
+
+	public RandomCacheFileOutputStream getNewBufferedRandomCacheFileOutputStream(File fileName, boolean removeFileWhenClosingStream)
 	{
-		return new RandomCacheFileOutputStream(this, fileName, accessMode, maxBufferSize, maxBuffersNumber);
+		return getNewBufferedRandomCacheFileOutputStream(fileName, removeFileWhenClosingStream, BufferedRandomInputStream.MAX_BUFFER_SIZE);
+	}
+	public RandomCacheFileOutputStream getNewBufferedRandomCacheFileOutputStream(File fileName, boolean removeFileWhenClosingStream, RandomFileOutputStream.AccessMode accessMode)
+	{
+		return getNewBufferedRandomCacheFileOutputStream(fileName, removeFileWhenClosingStream, accessMode, BufferedRandomInputStream.MAX_BUFFER_SIZE);
+	}
+	public RandomCacheFileOutputStream getNewBufferedRandomCacheFileOutputStream(File fileName,  boolean removeFileWhenClosingStream, int maxBufferSize)
+	{
+		return getNewBufferedRandomCacheFileOutputStream(fileName, removeFileWhenClosingStream, RandomFileOutputStream.AccessMode.READ_AND_WRITE, maxBufferSize, BufferedRandomInputStream.MAX_BUFFERS_NUMBER);
+	}
+	public RandomCacheFileOutputStream getNewBufferedRandomCacheFileOutputStream(File fileName, boolean removeFileWhenClosingStream, RandomFileOutputStream.AccessMode accessMode,  int maxBufferSize)
+	{
+		return getNewBufferedRandomCacheFileOutputStream(fileName, removeFileWhenClosingStream, accessMode, maxBufferSize, BufferedRandomInputStream.MAX_BUFFERS_NUMBER);
+	}
+
+	public RandomCacheFileOutputStream getNewBufferedRandomCacheFileOutputStream(File fileName, boolean removeFileWhenClosingStream, RandomFileOutputStream.AccessMode accessMode,  int maxBufferSize, int maxBuffersNumber)
+	{
+		return new RandomCacheFileOutputStream(this, fileName, removeFileWhenClosingStream, accessMode, maxBufferSize, maxBuffersNumber);
 	}
 
 	@SuppressWarnings("BooleanMethodIsAlwaysInverted")
