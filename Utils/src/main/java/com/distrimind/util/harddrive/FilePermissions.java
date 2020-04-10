@@ -44,6 +44,7 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.file.Files;
+import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Collections;
@@ -58,11 +59,33 @@ import java.util.Set;
  *
  */
 public class FilePermissions implements SecureExternalizable {
-
+	private static final Method toFileMethod;
+	private static final Method getPosixFilePermissionsMethod;
+	private static final LinkOption[] emptyLinkOptions=new LinkOption[0];
+	static
+	{
+		Method m=null;
+		try {
+			m=Path.class.getDeclaredMethod("toFile" );
+		} catch (NoSuchMethodException e) {
+			e.printStackTrace();
+			System.exit(-1);
+		}
+		toFileMethod=m;
+		m=null;
+		try {
+			m=Files.class.getDeclaredMethod("getPosixFilePermissions", Path.class, LinkOption[].class);
+		} catch (NoSuchMethodException e) {
+			e.printStackTrace();
+			System.exit(-1);
+		}
+		getPosixFilePermissionsMethod=m;
+	}
 
 	private final Set<PosixFilePermission> permissions=new HashSet<>();
 	private boolean permissionsFromUnixSystem;
 	private Short code=null;
+	private static final boolean pathMethodsCompatible=OSVersion.getCurrentOSVersion().getOS()!= OS.ANDROID || OSVersion.getCurrentOSVersion().compareTo(OSVersion.ANDROID_26_O)>=0;
 
 	private FilePermissions(PosixFilePermission ...posixFilePermissions) {
 		Collections.addAll(permissions, posixFilePermissions);
@@ -295,44 +318,51 @@ public class FilePermissions implements SecureExternalizable {
 
 	}
 
+
+
 	public void applyTo(Path path) throws IOException {
 		if (!permissionsFromUnixSystem || !isOSCompatibleWithUnix()) {
 			applyTo(getFile(path));
 			return;
 		}
 		Set<java.nio.file.attribute.PosixFilePermission> set=new HashSet<>();
-		for (java.nio.file.attribute.PosixFilePermission p : Files.getPosixFilePermissions(path ))
-		{
-			switch (p)
+		try {
+			//noinspection unchecked
+			for (java.nio.file.attribute.PosixFilePermission p : (Set< java.nio.file.attribute.PosixFilePermission >)getPosixFilePermissionsMethod.invoke(null, path, emptyLinkOptions ))
 			{
-				case OWNER_READ:
-					set.add(java.nio.file.attribute.PosixFilePermission.OWNER_READ);
-					break;
-				case OWNER_WRITE:
-					set.add(java.nio.file.attribute.PosixFilePermission.OWNER_WRITE);
-					break;
-				case OWNER_EXECUTE:
-					set.add(java.nio.file.attribute.PosixFilePermission.OWNER_EXECUTE);
-					break;
-				case GROUP_READ:
-					set.add(java.nio.file.attribute.PosixFilePermission.GROUP_READ);
-					break;
-				case GROUP_WRITE:
-					set.add(java.nio.file.attribute.PosixFilePermission.GROUP_WRITE);
-					break;
-				case GROUP_EXECUTE:
-					set.add(java.nio.file.attribute.PosixFilePermission.GROUP_EXECUTE);
-					break;
-				case OTHERS_READ:
-					set.add(java.nio.file.attribute.PosixFilePermission.OTHERS_READ);
-					break;
-				case OTHERS_WRITE:
-					set.add(java.nio.file.attribute.PosixFilePermission.OTHERS_WRITE);
-					break;
-				case OTHERS_EXECUTE:
-					set.add(java.nio.file.attribute.PosixFilePermission.OTHERS_EXECUTE);
-					break;
+				switch (p)
+				{
+					case OWNER_READ:
+						set.add(java.nio.file.attribute.PosixFilePermission.OWNER_READ);
+						break;
+					case OWNER_WRITE:
+						set.add(java.nio.file.attribute.PosixFilePermission.OWNER_WRITE);
+						break;
+					case OWNER_EXECUTE:
+						set.add(java.nio.file.attribute.PosixFilePermission.OWNER_EXECUTE);
+						break;
+					case GROUP_READ:
+						set.add(java.nio.file.attribute.PosixFilePermission.GROUP_READ);
+						break;
+					case GROUP_WRITE:
+						set.add(java.nio.file.attribute.PosixFilePermission.GROUP_WRITE);
+						break;
+					case GROUP_EXECUTE:
+						set.add(java.nio.file.attribute.PosixFilePermission.GROUP_EXECUTE);
+						break;
+					case OTHERS_READ:
+						set.add(java.nio.file.attribute.PosixFilePermission.OTHERS_READ);
+						break;
+					case OTHERS_WRITE:
+						set.add(java.nio.file.attribute.PosixFilePermission.OTHERS_WRITE);
+						break;
+					case OTHERS_EXECUTE:
+						set.add(java.nio.file.attribute.PosixFilePermission.OTHERS_EXECUTE);
+						break;
+				}
 			}
+		} catch (IllegalAccessException | InvocationTargetException e) {
+			throw new IOException(e);
 		}
 		Files.setPosixFilePermissions(path, set);
 	}
@@ -352,20 +382,9 @@ public class FilePermissions implements SecureExternalizable {
 			return res;
 		}
 	}
-	private static final Method toFileMethod;
-	static
-	{
-		Method m=null;
-		try {
-			m=Path.class.getDeclaredMethod("toFile" );
-		} catch (NoSuchMethodException e) {
-			e.printStackTrace();
-			System.exit(-1);
-		}
-		toFileMethod=m;
-	}
+
 	public static File getFile(Path path) throws IOException {
-		if (OSVersion.getCurrentOSVersion().getOS()!= OS.ANDROID || OSVersion.getCurrentOSVersion().compareTo(OSVersion.ANDROID_26_O)>=0) {
+		if (pathMethodsCompatible) {
 			try {
 				return (File)toFileMethod.invoke(path);
 			} catch (IllegalAccessException | InvocationTargetException e) {
@@ -380,7 +399,7 @@ public class FilePermissions implements SecureExternalizable {
 	{
 		return OSVersion.getCurrentOSVersion().getOS().isUnix()
 				&&
-				(OSVersion.getCurrentOSVersion().getOS()!= OS.ANDROID || OSVersion.getCurrentOSVersion().compareTo(OSVersion.ANDROID_26_O)>=0);
+				pathMethodsCompatible;
 	}
 
 	public static FilePermissions from(Path path) throws IOException {
