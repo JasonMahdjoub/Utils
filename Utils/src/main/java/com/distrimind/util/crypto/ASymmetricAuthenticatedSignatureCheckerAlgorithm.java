@@ -58,7 +58,10 @@ public class ASymmetricAuthenticatedSignatureCheckerAlgorithm extends AbstractAu
 			checker=new HybridChecker((HybridASymmetricPublicKey)distantPublicKey);
 	}
 
-
+	@Override
+	public int getMacLengthBytes() {
+		return checker.getMacLengthBytes();
+	}
 
 	@Override
 	public void init(byte[] signature, int offs, int lens) throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, InvalidAlgorithmParameterException, InvalidParameterSpecException, IOException {
@@ -125,6 +128,12 @@ public class ASymmetricAuthenticatedSignatureCheckerAlgorithm extends AbstractAu
 			else
 				return false;
 		}
+		@Deprecated
+		@Override
+		public int getMacLengthBytes() {
+			return checkerNonPQC.getMacLengthBytes()+checkerPQC.getMacLengthBytes()+3;
+		}
+
 		@Override
 		public boolean isPostQuantumChecker() {
 			return true;
@@ -196,6 +205,11 @@ public class ASymmetricAuthenticatedSignatureCheckerAlgorithm extends AbstractAu
 			} finally {
 				signature = null;
 			}
+		}
+		@Deprecated
+		@Override
+		public int getMacLengthBytes() {
+			return distantPublicKey.getAuthenticatedSignatureAlgorithmType().getSignatureSizeBytes(distantPublicKey.getKeySizeBits());
 		}
 	}
 

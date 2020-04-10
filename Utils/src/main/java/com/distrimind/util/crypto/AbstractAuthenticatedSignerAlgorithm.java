@@ -34,6 +34,8 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
+import com.distrimind.util.io.RandomInputStream;
+
 import javax.crypto.ShortBufferException;
 import java.io.IOException;
 
@@ -128,4 +130,20 @@ public abstract class AbstractAuthenticatedSignerAlgorithm {
 	public abstract byte[] getSignature() throws SignatureException, IllegalStateException, IOException;
 
 	public abstract boolean isPostQuantumSigner();
+
+	private byte[] buffer=null;
+
+	public void update(RandomInputStream inputStream) throws IOException, SignatureException {
+		long l=inputStream.length()-inputStream.currentPosition();
+		if (l==0)
+			return;
+		if (buffer==null)
+			buffer=new byte[8192];
+		do {
+			int s=(int)Math.min(buffer.length, l);
+			inputStream.readFully(buffer, 0, s);
+			update(buffer, 0, s);
+			l-=s;
+		} while (l>0);
+	}
 }

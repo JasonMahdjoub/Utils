@@ -34,6 +34,8 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
+import com.distrimind.util.io.RandomInputStream;
+
 import java.io.IOException;
 
 import java.security.InvalidAlgorithmParameterException;
@@ -85,6 +87,27 @@ public abstract class AbstractAuthenticatedCheckerAlgorithm {
 	
 	public abstract boolean isPostQuantumChecker();
 
-	
+	/**
+	 * Returns the length of the MAC in bytes.
+	 *
+	 * @return the MAC length in bytes.
+	 */
+	public abstract int getMacLengthBytes();
+
+	private byte[] buffer=null;
+
+	public void update(RandomInputStream inputStream) throws IOException, SignatureException {
+		long l=inputStream.length()-inputStream.currentPosition();
+		if (l==0)
+			return;
+		if (buffer==null)
+			buffer=new byte[8192];
+		do {
+			int s=(int)Math.min(buffer.length, l);
+			inputStream.readFully(buffer, 0, s);
+			update(buffer, 0, s);
+			l-=s;
+		} while (l>0);
+	}
 	
 }

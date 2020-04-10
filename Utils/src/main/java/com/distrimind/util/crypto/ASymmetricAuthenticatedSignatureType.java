@@ -140,16 +140,31 @@ public enum ASymmetricAuthenticatedSignatureType {
 			return new JavaNativeSignature(Signature.getInstance(signatureAlgorithmName, codeProviderSignature.checkProviderWithCurrentOS().name()));
 		}
 	}
-
+	/**
+	 * Gets the signature size
+	 * @param keySizeBits the size of the used key in bits
+	 * @return the maximum signature size in bits
+	 */
+	public int getMaximumSignatureSizeBits(int keySizeBits) {
+		return getSignatureSizeBits(keySizeBits);
+	}
+	/**
+	 * Gets the signature size
+	 * @param keySizeBits the size of the used key in bits
+	 * @return the maximum signature size in bytes
+	 */
+	public int getMaximumSignatureSizeBytes(int keySizeBits) {
+		return getSignatureSizeBits(keySizeBits)/8;
+	}
 	/**
 	 * Works well only with RSA algorithms.
-	 * @param keySize the size of the used key
+	 * @param keySizeBits the size of the used key in bits
 	 * @return the signature size in bits
 	 */
 	@Deprecated
-	public int getSignatureSizeBits(int keySize) {
+	public int getSignatureSizeBits(int keySizeBits) {
 		if (this==BC_FIPS_SHA256withRSAandMGF1 || this== ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA384withRSAandMGF1 || this== ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA512withRSAandMGF1)
-			return keySize+464;
+			return keySizeBits+464;
 		/*else if (this==BC_SHA256withECDSA_CURVE_25519)
 			return 560;
 		else if (this==BC_SHA384withECDSA_CURVE_25519)
@@ -192,7 +207,7 @@ public enum ASymmetricAuthenticatedSignatureType {
 			return 1112;
 		else if (this== ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA384withECDSA_P_384 || this== ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA512withECDSA_P_521)
 			return 1104;
-		return keySize;
+		return keySizeBits;
 	}
 	@Deprecated
 	public int getSignatureSizeBytes(int keySize) {

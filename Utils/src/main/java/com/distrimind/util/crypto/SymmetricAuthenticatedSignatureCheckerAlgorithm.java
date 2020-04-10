@@ -61,6 +61,11 @@ public class SymmetricAuthenticatedSignatureCheckerAlgorithm extends AbstractAut
 		return signer.isPostQuantumSigner();
 	}
 
+	@Override
+	public int getMacLengthBytes() {
+		return signer.getMacLengthBytes();
+	}
+
 	public SymmetricAuthenticatedSignatureCheckerAlgorithm(SymmetricSecretKey secretKey) throws NoSuchAlgorithmException, NoSuchProviderException {
 		this(new SymmetricAuthenticatedSignerAlgorithm(secretKey));
 	}

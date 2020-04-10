@@ -139,6 +139,8 @@ public class TestASymmetricSignatures {
 				&& kpd.getAuthenticatedSignatureAlgorithmType()!=ASymmetricAuthenticatedSignatureType.BC_SHA512withECDSA_CURVE_41417	*/
 			)
 				Assert.assertEquals(kpd3.getAuthenticatedSignatureAlgorithmType().getSignatureSizeBits(kpd3.getKeySizeBits()), signature.length * 8);
+			else
+				Assert.assertTrue(kpd3.getAuthenticatedSignatureAlgorithmType().getSignatureSizeBits(kpd3.getKeySizeBits())>= signature.length * 8);
 		}
 	}
 
