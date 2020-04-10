@@ -51,6 +51,7 @@ public class RandomCacheFileOutputStream extends RandomOutputStream{
 	private boolean fileUsed;
 	private final int maxBufferSize, maxBuffersNumber;
 	private final boolean removeFileWhenClosed;
+	private boolean closed=false;
 	RandomCacheFileOutputStream(RandomCacheFileCenter randomCacheFileCenter, File fileName, boolean removeFileWhenClosed, RandomFileOutputStream.AccessMode accessMode,int maxBufferSize, int maxBuffersNumber)
 	{
 		this.randomCacheFileCenter=randomCacheFileCenter;
@@ -114,7 +115,7 @@ public class RandomCacheFileOutputStream extends RandomOutputStream{
 
 	@Override
 	public boolean isClosed() {
-		return out.isClosed();
+		return closed;
 	}
 
 	@Override
@@ -140,16 +141,21 @@ public class RandomCacheFileOutputStream extends RandomOutputStream{
 
 	@Override
 	public void close() throws IOException {
-		if (out.isClosed())
+		if (closed)
 			return;
-		if (!fileUsed)
-		{
-			randomCacheFileCenter.releaseDataFromMemory(out.length());
+		try {
+			if (!fileUsed) {
+				randomCacheFileCenter.releaseDataFromMemory(out.length());
+			}
+			if (!out.isClosed())
+				out.close();
+			if (fileUsed && removeFileWhenClosed)
+				//noinspection ResultOfMethodCallIgnored
+				fileName.delete();
 		}
-		out.close();
-		if (fileUsed && removeFileWhenClosed)
-			//noinspection ResultOfMethodCallIgnored
-			fileName.delete();
+		finally {
+			closed=true;
+		}
 	}
 
 	@Override
