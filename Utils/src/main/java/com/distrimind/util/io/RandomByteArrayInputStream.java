@@ -38,6 +38,7 @@
 package com.distrimind.util.io;
 
 import java.io.DataInputStream;
+import java.io.EOFException;
 import java.io.IOException;
 
 /**
@@ -101,6 +102,8 @@ public class RandomByteArrayInputStream extends RandomInputStream {
 	public int read(byte[] _bytes, int _offset, int _length) throws IOException {
 		if (outputStream == null)
 			throw new IOException("The current RandomByteArrayInputStream is closed !");
+		if (getFreeSpace()==0 && _length>0)
+			return -1;
 		int readed = Math.min(Math.min(_length, getFreeSpace()), _bytes.length - _offset);
 		System.arraycopy(outputStream.bytes, current_pos, _bytes, _offset, readed);
 		current_pos += readed;
@@ -164,8 +167,9 @@ public class RandomByteArrayInputStream extends RandomInputStream {
 
 	@Override
 	public void readFully(byte[] tab, int off, int len) throws IOException {
-		//noinspection ResultOfMethodCallIgnored
-		read(tab,off, len);
+
+		if (read(tab,off, len)!=len)
+			throw new EOFException();
 	}
 
 	@Override
