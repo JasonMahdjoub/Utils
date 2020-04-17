@@ -1341,8 +1341,10 @@ public class SerializationTools {
 	private static short classesEndIndex=0;
 	private static short enumsStartIndex=0;
 	private static short enumsEndIndex=0;
-	private static final ArrayList<Class<? extends SecureExternalizableWithoutInnerSizeControl>> classes=new ArrayList<Class<? extends SecureExternalizableWithoutInnerSizeControl>>(
-			Collections.singletonList((Class<? extends SecureExternalizableWithoutInnerSizeControl>) FilePermissions.class));
+	private static final ArrayList<Class<? extends SecureExternalizableWithoutInnerSizeControl>> classes= new ArrayList<>(
+			Arrays.asList((Class<? extends SecureExternalizableWithoutInnerSizeControl>) FilePermissions.class,
+					SubStreamParameter.class,
+					SubStreamParameters.class));
 	private static final Map<Class<? extends SecureExternalizableWithoutInnerSizeControl>, Short> identifiersPerClasses=new HashMap<>();
 	private static final ArrayList<Class<? extends Enum<?>>> enums=new ArrayList<>(Arrays.asList(
 			MessageDigestType.class,
@@ -1368,6 +1370,21 @@ public class SerializationTools {
 		synchronized (SerializationTools.class) {
 			if (classes.size() + enums.size() + cls.size() + enms.size() + classesStartIndex > 254)
 				throw new IllegalArgumentException("Too much given predefined classes");
+			if (classes.size()>0) {
+				cls = new ArrayList<>(cls);
+				for (Iterator<Class<? extends SecureExternalizableWithoutInnerSizeControl>> it = cls.iterator(); it.hasNext(); ) {
+					if (classes.contains(it.next()))
+						it.remove();
+				}
+			}
+			if (enums.size()>0) {
+				enms = new ArrayList<>(enms);
+				for (Iterator<Class<? extends Enum<?>>> it = enms.iterator(); it.hasNext(); ) {
+					if (enums.contains(it.next()))
+						it.remove();
+				}
+			}
+
 			classes.addAll(cls);
 			enums.addAll(enms);
 
@@ -1620,10 +1637,7 @@ public class SerializationTools {
 		{
 			try
 			{
-				Class<?> c=Class.forName(clazz, initialize, ReflectionTools.getClassLoader());
-				if (c==null)
-					throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new ClassNotFoundException(clazz));
-				return c;
+				return Class.forName(clazz, initialize, ReflectionTools.getClassLoader());
 			}
 			catch(Exception e)
 			{
