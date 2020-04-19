@@ -1344,7 +1344,8 @@ public class SerializationTools {
 	private static final ArrayList<Class<? extends SecureExternalizableWithoutInnerSizeControl>> classes= new ArrayList<>(
 			Arrays.asList((Class<? extends SecureExternalizableWithoutInnerSizeControl>) FilePermissions.class,
 					SubStreamParameter.class,
-					SubStreamParameters.class));
+					SubStreamParameters.class,
+					FragmentedStreamParameters.class));
 	private static final Map<Class<? extends SecureExternalizableWithoutInnerSizeControl>, Short> identifiersPerClasses=new HashMap<>();
 	private static final ArrayList<Class<? extends Enum<?>>> enums=new ArrayList<>(Arrays.asList(
 			MessageDigestType.class,
