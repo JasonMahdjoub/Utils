@@ -1,6 +1,7 @@
 package com.distrimind.util.io;
 
-import java.io.DataInputStream;
+import com.distrimind.util.Reference;
+
 import java.io.EOFException;
 import java.io.IOException;
 
@@ -53,7 +54,7 @@ public class FragmentedInputStream extends RandomInputStream {
 	public void readFully(byte[] tab, int off, int len) throws IOException {
 
 		while (len>0) {
-			int s = in.read(tab, off, len);
+			int s = read(tab, off, len);
 			if (s < 0)
 				throw new EOFException();
 			len -= s;
@@ -84,7 +85,7 @@ public class FragmentedInputStream extends RandomInputStream {
 	@Override
 	@Deprecated
 	public String readLine() throws IOException {
-		return new DataInputStream(this).readLine();
+		throw new IOException(new IllegalAccessException());
 	}
 
 	@Override
@@ -92,6 +93,86 @@ public class FragmentedInputStream extends RandomInputStream {
 		int v= in.read();
 		in.skipNBytes(params.getByteToSkipAfterRead());
 		return v;
+	}
+
+	public int readChannels(int[] channels) throws IOException {
+		if (params.getOffset()!=0)
+			throw new IllegalArgumentException("Offset of fragmented stream must be set to 0 when using function");
+		if (channels==null)
+			throw new NullPointerException();
+		if (channels.length!=params.getStreamPartNumbers())
+			throw new IllegalArgumentException();
+		for (int i=0;i<channels.length;i++) {
+			int v=channels[i] = in.read();
+			if (v<0)
+				return i;
+		}
+		return channels.length;
+	}
+	public int readChannels(byte[][] tabs) throws IOException {
+		if (tabs==null)
+			throw new NullPointerException();
+		int [] offs=new int[tabs.length];
+		int[] lens=new int[tabs.length];
+
+		for (int i=0;i<tabs.length;i++)
+		{
+			lens[i]=tabs[i].length;
+			offs[i]=0;
+		}
+		return readChannels(tabs, offs, lens);
+	}
+	public int readChannels(byte[][] tabs, int[] offs, int[] lens) throws IOException {
+		return readChannels(tabs, offs, lens, false);
+	}
+
+	private int readChannels(byte[][] tabs, int[] offs, int[] lens, boolean fully) throws IOException {
+		if (params.getOffset()!=0)
+			throw new IllegalArgumentException("Offset of fragmented stream must be set to 0 when using function");
+		Reference<Integer> offsetToApply=new Reference<>();
+		final int maxSize=params.checkChannelsParams(tabs, offs, lens, offsetToApply);
+		int indexChannel=0;
+		byte[] buffer=new byte[Math.min(BufferedRandomInputStream.MAX_BUFFER_SIZE, maxSize)];
+		int i=0;
+		do {
+			int bs = Math.min(buffer.length, maxSize - i);
+			bs = in.read(buffer, 0, bs);
+			if (bs < 0) {
+				if (fully)
+					throw new EOFException();
+				else
+					return i;
+			}
+
+			for (int bufIndex=0;bufIndex<bs; i++, indexChannel = (indexChannel + 1) % params.getStreamPartNumbers(), bufIndex++) {
+				int len = lens[indexChannel]--;
+				int off = offs[indexChannel]++;
+				if (len>0)
+					tabs[indexChannel][off] = buffer[bufIndex];
+			}
+		} while(i<maxSize);
+		for (i=offsetToApply.get();i>0;i--) {
+			if (in.read()<0)
+				break;
+		}
+		return maxSize;
+	}
+	public int readChannelsFully(byte[][] tabs) throws IOException {
+		if (tabs==null)
+			throw new NullPointerException();
+		int [] offs=new int[tabs.length];
+		int[] lens=new int[tabs.length];
+
+		for (int i=0;i<tabs.length;i++)
+		{
+			lens[i]=tabs[i].length;
+			offs[i]=0;
+		}
+		return readChannelsFully(tabs, offs, lens);
+	}
+	public int readChannelsFully(byte[][] tabs, int[] offs, int[] lens) throws IOException {
+
+		return readChannels(tabs, offs, lens, true);
 	}
 
 	@Override

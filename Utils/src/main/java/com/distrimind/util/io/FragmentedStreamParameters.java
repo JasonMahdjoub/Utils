@@ -1,5 +1,7 @@
 package com.distrimind.util.io;
 
+import com.distrimind.util.Reference;
+
 import java.io.IOException;
 
 /**
@@ -100,5 +102,45 @@ public class FragmentedStreamParameters implements SecureExternalizable {
 	}
 	long getCurrentPosition(RandomOutputStream out) throws IOException {
 		return getCurrentPosition(out.currentPosition());
+	}
+
+	int checkChannelsParams(byte[][] tabs, int[] offs, int[] lens, Reference<Integer> offsetToApply)
+	{
+		if (tabs==null)
+			throw new NullPointerException();
+		if (offs==null)
+			throw new NullPointerException();
+		if (lens==null)
+			throw new NullPointerException();
+		if (tabs.length!=streamPartNumbers)
+			throw new IllegalArgumentException();
+		if (offs.length!=streamPartNumbers)
+			throw new IllegalArgumentException();
+		if (lens.length!=streamPartNumbers)
+			throw new IllegalArgumentException();
+		int maxSize=0;
+		offsetToApply.set(0);
+
+		for (int i=0;i<tabs.length;i++) {
+			int len=lens[i];
+			int off=offs[i];
+			if ((off | len) < 0 || off+len > tabs[i].length)
+				throw new IndexOutOfBoundsException();
+			if (len>0) {
+				int s=(len-1)*streamPartNumbers+i+1;
+				if (maxSize<s) {
+					maxSize = s;
+					offsetToApply.set(tabs.length-i-1);
+				}
+			}
+		}
+		for (int i=1;i<lens.length;i++)
+		{
+			int o1=lens[i-1];
+			int o2=lens[i];
+			if (o1!=o2 && o1!=o2-1)
+				throw new IllegalArgumentException();
+		}
+		return maxSize;
 	}
 }
