@@ -79,11 +79,6 @@ public abstract class DelegatedRandomInputStream extends RandomInputStream {
 	}
 
 	@Override
-	public int skipBytes(int n) throws IOException {
-		return in.skipBytes(n);
-	}
-
-	@Override
 	public void skipNBytes(long _nb) throws IOException {
 		in.skipNBytes(_nb);
 	}

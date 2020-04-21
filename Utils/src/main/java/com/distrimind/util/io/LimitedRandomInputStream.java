@@ -93,19 +93,14 @@ public class LimitedRandomInputStream extends RandomInputStream{
 		in.readFully(tab, off, len);
 	}
 
-	@Override
-	public int skipBytes(int n) throws IOException {
-		long l=length();
-		if (n<0 || n+currentPosition()>l)
-			throw new IllegalArgumentException();
 
-		return in.skipBytes(n);
-	}
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
 	public long skip(long _nb) throws IOException {
+		if (_nb<=0)
+			return 0;
 		_nb=Math.min(length()-currentPosition(), _nb);
 		return in.skip(_nb);
 	}

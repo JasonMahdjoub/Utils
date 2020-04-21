@@ -105,6 +105,11 @@ public class RandomFileOutputStream extends RandomOutputStream {
 		return new RandomFileInputStream(raf);
 	}
 
+	@Override
+	public void flush() throws IOException {
+
+	}
+
 	public RandomAccessFile getRandomAccessFile() {
 		return raf;
 	}

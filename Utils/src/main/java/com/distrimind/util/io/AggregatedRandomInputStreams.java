@@ -47,12 +47,12 @@ import java.util.List;
  */
 public class AggregatedRandomInputStreams extends RandomInputStream{
 
-	private RandomInputStream[] inputStreams;
+	private final RandomInputStream[] inputStreams;
 	private final long length;
 	private int selectedInputStreamPos;
 	private long posOff=0;
 	private boolean closed;
-	private long markPos;
+
 
 	public AggregatedRandomInputStreams(RandomInputStream... inputStreams) throws IOException {
 		if (inputStreams==null)
@@ -77,7 +77,7 @@ public class AggregatedRandomInputStreams extends RandomInputStream{
 	}
 
 	@Override
-	public long length() throws IOException {
+	public long length() {
 		return length;
 	}
 
@@ -125,7 +125,7 @@ public class AggregatedRandomInputStreams extends RandomInputStream{
 		if (closed)
 			return;
 		for (RandomInputStream ris : inputStreams)
-			close();
+			ris.close();
 		closed=true;
 	}
 
@@ -158,37 +158,7 @@ public class AggregatedRandomInputStreams extends RandomInputStream{
 	}
 
 	@Override
-	public int skipBytes(int n) throws IOException {
-		if (closed)
-			throw new IOException("Stream closed");
-		RandomInputStream ris=inputStreams[selectedInputStreamPos];
-		int selectedInputStreamPos=this.selectedInputStreamPos;
-		long posOff=this.posOff;
-		long p=ris.currentPosition()+n;
-
-		while(p>ris.length())
-		{
-			if (++selectedInputStreamPos==inputStreams.length) {
-				--selectedInputStreamPos;
-				long r=length()-currentPosition();
-				if (r==0)
-					return -1;
-				seek(length());
-				return (int)r;
-			}
-			else {
-				posOff+=ris.length();
-				p-=ris.length();
-				ris = inputStreams[selectedInputStreamPos];
-			}
-		}
-		this.posOff=posOff;
-		this.selectedInputStreamPos=selectedInputStreamPos;
-		ris.seek(p);
-		return 0;
-	}
-
-	@Override
+	@Deprecated
 	public String readLine() throws IOException {
 		if (closed)
 			throw new IOException("Stream closed");

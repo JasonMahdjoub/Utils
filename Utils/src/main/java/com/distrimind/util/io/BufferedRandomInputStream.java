@@ -196,15 +196,7 @@ public class BufferedRandomInputStream extends RandomInputStream {
 
 	}
 
-	@Override
-	public int skipBytes(int n) throws IOException {
 
-		long oldPos=currentPosition;
-		currentPosition=Math.min(currentPosition+n, in.length());
-		n=(int)(currentPosition-oldPos);
-		chooseBuffer(currentPosition);
-		return n;
-	}
 
 
 

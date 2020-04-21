@@ -171,4 +171,10 @@ public abstract class RandomOutputStream extends SecuredObjectOutputStream imple
 		} while (length>0);
 	}
 
+
+	@Override
+	public abstract void flush() throws IOException;
+
+	@Override
+	public abstract void close() throws IOException;
 }

@@ -1,6 +1,39 @@
-package com.distrimind.util.io;
+/*
+Copyright or © or Copr. Jason Mahdjoub (01/04/2013)
 
-import com.distrimind.util.Reference;
+jason.mahdjoub@distri-mind.fr
+
+This software (Object Oriented Database (OOD)) is a computer program
+whose purpose is to manage a local database with the object paradigm
+and the java langage
+
+This software is governed by the CeCILL-C license under French law and
+abiding by the rules of distribution of free software.  You can  use,
+modify and/ or redistribute the software under the terms of the CeCILL-C
+license as circulated by CEA, CNRS and INRIA at the following URL
+"http://www.cecill.info".
+
+As a counterpart to the access to the source code and  rights to copy,
+modify and redistribute granted by the license, users are provided only
+with a limited warranty  and the software's author,  the holder of the
+economic rights,  and the successive licensors  have only  limited
+liability.
+
+In this respect, the user's attention is drawn to the risks associated
+with loading,  using,  modifying and/or developing or reproducing the
+software by the user in light of its specific status of free software,
+that may mean  that it is complicated to manipulate,  and  that  also
+therefore means  that it is reserved for developers  and  experienced
+professionals having in-depth computer knowledge. Users are therefore
+encouraged to load and test the software's suitability as regards their
+requirements in conditions enabling the security of their systems and/or
+data to be ensured and,  more generally, to use and operate it in the
+same conditions as regards security.
+
+The fact that you are presently reading this means that you have had
+knowledge of the CeCILL-C license and that you accept its terms.
+ */
+package com.distrimind.util.io;
 
 import java.io.EOFException;
 import java.io.IOException;
@@ -10,13 +43,13 @@ import java.io.IOException;
  * @version 1.0
  * @since Utils 4.16.0
  */
-public class FragmentedInputStream extends RandomInputStream {
+public class FragmentedRandomInputStreamPerChannel extends RandomInputStream {
 	private final RandomInputStream in;
 	private final FragmentedStreamParameters params;
 
 
 
-	FragmentedInputStream(RandomInputStream in, FragmentedStreamParameters fragmentedStreamParameters, boolean seek) throws IOException {
+	FragmentedRandomInputStreamPerChannel(RandomInputStream in, FragmentedStreamParameters fragmentedStreamParameters, boolean seek) throws IOException {
 		if (in==null)
 			throw new NullPointerException();
 		if (fragmentedStreamParameters==null)
@@ -26,7 +59,7 @@ public class FragmentedInputStream extends RandomInputStream {
 		if (seek)
 			in.seek(fragmentedStreamParameters.getOffset());
 	}
-	public FragmentedInputStream(RandomInputStream in, FragmentedStreamParameters fragmentedStreamParameters) throws IOException {
+	public FragmentedRandomInputStreamPerChannel(RandomInputStream in, FragmentedStreamParameters fragmentedStreamParameters) throws IOException {
 		this(in, fragmentedStreamParameters, true);
 	}
 
@@ -63,10 +96,6 @@ public class FragmentedInputStream extends RandomInputStream {
 	}
 
 
-	@Override
-	public int skipBytes(int n) throws IOException {
-		return in.skipBytes(n*params.getStreamPartNumbers());
-	}
 
 	@Override
 	public void skipNBytes(long _nb) throws IOException {
@@ -95,7 +124,7 @@ public class FragmentedInputStream extends RandomInputStream {
 		return v;
 	}
 
-	public int readChannels(int[] channels) throws IOException {
+	/*public int readChannels(int[] channels) throws IOException {
 		if (params.getOffset()!=0)
 			throw new IllegalArgumentException("Offset of fragmented stream must be set to 0 when using function");
 		if (channels==null)
@@ -173,7 +202,7 @@ public class FragmentedInputStream extends RandomInputStream {
 	public int readChannelsFully(byte[][] tabs, int[] offs, int[] lens) throws IOException {
 
 		return readChannels(tabs, offs, lens, true);
-	}
+	}*/
 
 	@Override
 	public void mark(int readlimit) {

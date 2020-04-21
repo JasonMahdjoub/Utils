@@ -147,14 +147,6 @@ public class RandomFileInputStream extends RandomInputStream {
 	}
 
 	@Override
-	public int skipBytes(int n) throws IOException {
-		long l=length();
-		if (n<0 || n+currentPosition()>l)
-			throw new IllegalArgumentException();
-		return raf.skipBytes(n);
-	}
-
-	@Override
 	public String readLine() throws IOException {
 		return raf.readLine();
 	}

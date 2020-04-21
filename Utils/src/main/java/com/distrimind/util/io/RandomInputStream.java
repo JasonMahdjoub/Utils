@@ -145,7 +145,11 @@ public abstract class RandomInputStream extends SecuredObjectInputStream impleme
 
 
 	public void skipNBytes(long n) throws IOException {
-		long l=length();
+		if (n<=0)
+			return;
+		if (skipImpl(n)!=n)
+			throw new EOFException();
+		/*long l=length();
 		if (n<0 || n+currentPosition()>l)
 			throw new IllegalArgumentException();
 
@@ -163,7 +167,7 @@ public abstract class RandomInputStream extends SecuredObjectInputStream impleme
 			} else if (ns != n) {
 				throw new IOException("Unable to skip exactly");
 			}
-		}
+		}*/
 	}
 
 	public void readFully(RandomOutputStream outputStream, long length) throws IOException {
@@ -171,5 +175,30 @@ public abstract class RandomInputStream extends SecuredObjectInputStream impleme
 	}
 	public void readFully(RandomOutputStream outputStream) throws IOException {
 		outputStream.write(this);
+	}
+
+	@Override
+	public abstract void close() throws IOException ;
+
+	@Override
+	public final int skipBytes(int n) throws IOException {
+		return (int)skip(n);
+	}
+
+	private long skipImpl(long n) throws IOException {
+		if (n<=0)
+			return 0;
+		long oldp=currentPosition();
+		long l=length();
+		if (oldp==l)
+			return 0;
+		long np=Math.min(oldp+n, l);
+		seek(np);
+		return np-oldp;
+	}
+
+	@Override
+	public long skip(long n) throws IOException {
+		return skipImpl(n);
 	}
 }

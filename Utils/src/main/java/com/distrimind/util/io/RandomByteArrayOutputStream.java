@@ -181,6 +181,11 @@ public class RandomByteArrayOutputStream extends RandomOutputStream {
 		return new RandomByteArrayInputStream(this);
 	}
 
+	@Override
+	public void flush() {
+
+	}
+
 	public byte[] getBytes() {
 		return Arrays.copyOf(bytes, length);
 	}

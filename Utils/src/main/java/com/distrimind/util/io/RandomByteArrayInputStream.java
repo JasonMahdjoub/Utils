@@ -173,15 +173,6 @@ public class RandomByteArrayInputStream extends RandomInputStream {
 	}
 
 	@Override
-	public int skipBytes(int n) throws IOException {
-		long l=length();
-		if (n<0 || n+currentPosition()>l)
-			throw new IllegalArgumentException();
-
-		return current_pos+=n;
-	}
-
-	@Override
 	@Deprecated
 	public String readLine() throws IOException {
 		return new DataInputStream(this).readLine();

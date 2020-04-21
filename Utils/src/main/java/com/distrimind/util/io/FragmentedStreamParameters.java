@@ -1,7 +1,5 @@
 package com.distrimind.util.io;
 
-import com.distrimind.util.Reference;
-
 import java.io.IOException;
 
 /**
@@ -55,7 +53,7 @@ public class FragmentedStreamParameters implements SecureExternalizable {
 	}
 
 	@Override
-	public void readExternal(SecuredObjectInputStream in) throws IOException, ClassNotFoundException {
+	public void readExternal(SecuredObjectInputStream in) throws IOException {
 		streamPartNumbers=in.readByte();
 		if (streamPartNumbers<1)
 			throw new MessageExternalizationException(Integrity.FAIL);
@@ -104,7 +102,7 @@ public class FragmentedStreamParameters implements SecureExternalizable {
 		return getCurrentPosition(out.currentPosition());
 	}
 
-	int checkChannelsParams(byte[][] tabs, int[] offs, int[] lens, Reference<Integer> offsetToApply)
+	/*int checkChannelsParams(byte[][] tabs, int[] offs, int[] lens, Reference<Integer> offsetToApply)
 	{
 		if (tabs==null)
 			throw new NullPointerException();
@@ -142,5 +140,5 @@ public class FragmentedStreamParameters implements SecureExternalizable {
 				throw new IllegalArgumentException();
 		}
 		return maxSize;
-	}
+	}*/
 }
