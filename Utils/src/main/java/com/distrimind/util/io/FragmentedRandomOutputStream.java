@@ -113,8 +113,7 @@ public class FragmentedRandomOutputStream extends RandomOutputStream {
 
 	@Override
 	public void write(byte[] b, int off, int len) throws IOException {
-		if ((off | len) < 0 || len > b.length - off)
-			throw new IndexOutOfBoundsException();
+		RandomInputStream.checkLimits(b, off, len);
 		int end=off+len;
 		for (int i=off;i<end;i++)
 		{

@@ -101,12 +101,10 @@ public class RandomByteArrayOutputStream extends RandomOutputStream {
 	 */
 	@Override
 	public void write(byte[] _bytes, int _offset, int _length) throws IOException {
+		RandomInputStream.checkLimits(_bytes, _offset, _length);
 		if (current_pos == -1)
 			throw new IOException("The current RandomByteArrayOutputStream is closed !");
-		if (_bytes == null)
-			throw new NullPointerException("_bytes");
-		if (_length > _bytes.length)
-			throw new IllegalArgumentException("_length must be greater than _bytes.length !");
+
 		ensureAdditionalLength(_length);
 		System.arraycopy(_bytes, _offset, bytes, current_pos, _length);
 		current_pos += _length;

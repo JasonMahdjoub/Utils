@@ -88,8 +88,7 @@ public class LimitedRandomInputStream extends RandomInputStream{
 
 	@Override
 	public void readFully(byte[] tab, int off, int len) throws IOException {
-		if (currentPosition()+len>length())
-			throw new IOException();
+		checkLimits(tab, off, len);
 		in.readFully(tab, off, len);
 	}
 
@@ -137,6 +136,7 @@ public class LimitedRandomInputStream extends RandomInputStream{
 
 	@Override
 	public int read(byte[] b, int off, int len) throws IOException {
+		checkLimits(b, off, len);
 		int s = Math.min((int)Math.min(Integer.MAX_VALUE, length()-currentPosition()), len);
 		return in.read(b, off, s);
 	}

@@ -120,8 +120,7 @@ public class FragmentedRandomInputStream extends RandomInputStream{
 		return read(b, off, len, false);
 	}
 	private int read(byte[] b, int off, int len, boolean fully) throws IOException {
-		if ((off | len) < 0 || len > b.length - off)
-			throw new IndexOutOfBoundsException();
+		checkLimits(b, off, len);
 		int end=off+len;
 		for (int i=off;i<end;i++) {
 			int v = ins[sindex].read();
@@ -145,6 +144,7 @@ public class FragmentedRandomInputStream extends RandomInputStream{
 
 	@Override
 	public void readFully(byte[] tab, int off, int len) throws IOException {
+		checkLimits(tab, off, len);
 		//noinspection ResultOfMethodCallIgnored
 		read(tab, off, len, true);
 	}

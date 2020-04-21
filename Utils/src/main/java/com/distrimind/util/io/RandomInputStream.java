@@ -170,6 +170,14 @@ public abstract class RandomInputStream extends SecuredObjectInputStream impleme
 		}*/
 	}
 
+	protected static void checkLimits(byte[] b, int off, int len)
+	{
+		if (b==null)
+			throw new NullPointerException();
+		if ((off | len) < 0 || len > b.length - off)
+			throw new IndexOutOfBoundsException();
+	}
+
 	public void readFully(RandomOutputStream outputStream, long length) throws IOException {
 		outputStream.write(this, length);
 	}

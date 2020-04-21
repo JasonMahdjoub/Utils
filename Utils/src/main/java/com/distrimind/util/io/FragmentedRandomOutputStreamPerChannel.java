@@ -91,8 +91,7 @@ public class FragmentedRandomOutputStreamPerChannel extends RandomOutputStream{
 	@Override
 	public void write(byte[] b, int off, int len) throws IOException {
 
-		if ((off | len) < 0 || len > b.length - off)
-			throw new IndexOutOfBoundsException();
+		RandomInputStream.checkLimits(b, off, len);
 		if (len==0)
 			return;
 		long p;

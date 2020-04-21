@@ -74,6 +74,7 @@ public abstract class DelegatedRandomInputStream extends RandomInputStream {
 
 	@Override
 	public void readFully(byte[] tab, int off, int len) throws IOException {
+		checkLimits(tab, off, len);
 		in.readFully(tab, off, len);
 		derivedRead(tab, off, len);
 	}
@@ -123,6 +124,7 @@ public abstract class DelegatedRandomInputStream extends RandomInputStream {
 
 	@Override
 	public int read(byte[] b, int off, int len) throws IOException {
+		checkLimits(b, off, len);
 		int s= in.read(b, off, len);
 		derivedRead(b, off, s);
 		return s;

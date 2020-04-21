@@ -132,8 +132,7 @@ public class RandomCacheFileOutputStream extends RandomOutputStream{
 
 	@Override
 	public void write(byte[] b, int off, int len) throws IOException {
-		if (len<0)
-			throw new IllegalArgumentException();
+		RandomInputStream.checkLimits(b, off, len);
 		if (!fileUsed && !randomCacheFileCenter.tryToAddNewDataIntoMemory(len))
 			forceWritingMemoryCacheToFile();
 		out.write(b, off, len);

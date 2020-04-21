@@ -135,6 +135,7 @@ public class RandomFileOutputStream extends RandomOutputStream {
 	 */
 	@Override
 	public void write(byte[] _bytes, int _offset, int _length) throws IOException {
+		RandomInputStream.checkLimits(_bytes, _offset, _length);
 		raf.write(_bytes, _offset, _length);
 	}
 

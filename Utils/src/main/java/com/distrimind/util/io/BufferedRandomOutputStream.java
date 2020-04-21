@@ -292,6 +292,7 @@ public class BufferedRandomOutputStream extends RandomOutputStream{
 
 	@Override
 	public void write(byte[] b, int off, int len) throws IOException {
+		RandomInputStream.checkLimits(b, off, len);
 		checkCurrentBufferNotNull();
 		int curPos=endPositions[currentBufferIndex];
 		while(len>0)

@@ -87,6 +87,7 @@ public abstract class DelegatedRandomOutputStream extends RandomOutputStream{
 
 	@Override
 	public void write(byte[] b, int off, int len) throws IOException {
+		RandomInputStream.checkLimits(b, off, len);
 		out.write(b, off, len);
 		derivedWrite(b, off, len);
 	}

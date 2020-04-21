@@ -85,7 +85,7 @@ public class FragmentedRandomInputStreamPerChannel extends RandomInputStream {
 
 	@Override
 	public void readFully(byte[] tab, int off, int len) throws IOException {
-
+		checkLimits(tab, off, len);
 		while (len>0) {
 			int s = read(tab, off, len);
 			if (s < 0)

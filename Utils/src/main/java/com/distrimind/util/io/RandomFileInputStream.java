@@ -89,6 +89,7 @@ public class RandomFileInputStream extends RandomInputStream {
 	 */
 	@Override
 	public int read(byte[] _bytes, int _offset, int _length) throws IOException {
+		checkLimits(_bytes, _offset, _length);
 		return raf.read(_bytes, _offset, _length);
 	}
 
@@ -143,6 +144,7 @@ public class RandomFileInputStream extends RandomInputStream {
 
 	@Override
 	public void readFully(byte[] tab, int off, int len) throws IOException{
+		checkLimits(tab, off, len);
 		raf.readFully(tab, off, len);
 	}
 

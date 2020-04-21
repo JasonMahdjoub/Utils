@@ -59,6 +59,8 @@ public abstract class RandomOutputStream extends SecuredObjectOutputStream imple
 	 */
 	public abstract long length() throws IOException;
 
+	public abstract void write(byte[] b, int off, int len) throws IOException ;
+
 	/**
 	 * Sets the length of this stream.
 	 *

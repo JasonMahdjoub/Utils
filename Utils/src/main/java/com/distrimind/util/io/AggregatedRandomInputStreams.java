@@ -133,6 +133,7 @@ public class AggregatedRandomInputStreams extends RandomInputStream{
 	public void readFully(byte[] tab, int off, int len) throws IOException {
 		if (closed)
 			throw new IOException("Stream closed");
+		checkLimits(tab, off, len);
 		RandomInputStream ris=inputStreams[selectedInputStreamPos];
 		do {
 			if (ris.currentPosition()==ris.length())
@@ -190,6 +191,7 @@ public class AggregatedRandomInputStreams extends RandomInputStream{
 	public int read(byte[] tab, int off, int len) throws IOException {
 		if (closed)
 			throw new IOException("Stream closed");
+		checkLimits(tab, off, len);
 		RandomInputStream ris=inputStreams[selectedInputStreamPos];
 		int total=0;
 		do {

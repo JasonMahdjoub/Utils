@@ -160,8 +160,7 @@ public class BufferedRandomInputStream extends RandomInputStream {
 	@Override
 	public void readFully(byte[] tab, int off, int len) throws IOException {
 
-		if (currentPosition+len>length())
-			throw new IOException();
+		checkLimits(tab, off, len);
 		checkCurrentBufferNotNull();
 		boolean first=true;
 		long curPos=positions[currentBufferIndex];
@@ -283,6 +282,7 @@ public class BufferedRandomInputStream extends RandomInputStream {
 	@Override
 	public int read(byte[] b, int off, int len) throws IOException {
 		checkCurrentBufferNotNull();
+		checkLimits(b, off, len);
 		int res=0;
 		boolean first=true;
 
