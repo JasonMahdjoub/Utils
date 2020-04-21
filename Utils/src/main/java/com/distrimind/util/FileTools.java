@@ -321,6 +321,8 @@ public final class FileTools {
 		if (!result) {
 			// Copy
 			copy(source, destination, checkDestinationFolderRecursive);
+			if (!source.delete())
+				throw new IOException("Impossible to delete source file "+source);
 		}
 	}
 
