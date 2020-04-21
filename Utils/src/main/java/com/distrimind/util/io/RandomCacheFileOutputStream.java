@@ -52,6 +52,7 @@ public class RandomCacheFileOutputStream extends RandomOutputStream{
 	private final int maxBufferSize, maxBuffersNumber;
 	private final boolean removeFileWhenClosed;
 	private boolean closed=false;
+	private RandomInputStream in=null;
 	RandomCacheFileOutputStream(RandomCacheFileCenter randomCacheFileCenter, File fileName, boolean removeFileWhenClosed, RandomFileOutputStream.AccessMode accessMode,int maxBufferSize, int maxBuffersNumber)
 	{
 		this.randomCacheFileCenter=randomCacheFileCenter;
@@ -75,6 +76,8 @@ public class RandomCacheFileOutputStream extends RandomOutputStream{
 		fout.write(((RandomByteArrayOutputStream)out).getBytes());
 		randomCacheFileCenter.releaseDataFromMemory(out.length());
 		out=fout;
+		if (in!=null)
+			in=out.getRandomInputStream();
 		fileUsed=true;
 	}
 
@@ -126,7 +129,86 @@ public class RandomCacheFileOutputStream extends RandomOutputStream{
 	protected RandomInputStream getRandomInputStreamImpl() throws IOException {
 		if (closed)
 			throw new IOException("Stream closed !");
-		return out.getRandomInputStream();
+		if (in==null)
+			in=out.getRandomInputStream();
+		return new RandomInputStream() {
+			public long length() throws IOException {
+				return in.length();
+			}
+
+			public void seek(long _pos) throws IOException {
+				in.seek(_pos);
+			}
+
+			public long currentPosition() throws IOException {
+				return in.currentPosition();
+			}
+
+			public void mark(int readlimit) {
+				in.mark(readlimit);
+			}
+
+			public boolean markSupported() {
+				return in.markSupported();
+			}
+
+			public void reset() throws IOException {
+				in.reset();
+			}
+
+			public boolean isClosed() {
+				return in.isClosed();
+			}
+
+			public void readFully(byte[] tab, int off, int len) throws IOException {
+				in.readFully(tab, off, len);
+			}
+
+			public int available() throws IOException {
+				return in.available();
+			}
+
+			public void skipNBytes(long n) throws IOException {
+				in.skipNBytes(n);
+			}
+
+			public void readFully(RandomOutputStream outputStream, long length) throws IOException {
+				in.readFully(outputStream, length);
+			}
+
+			public void readFully(RandomOutputStream outputStream) throws IOException {
+				in.readFully(outputStream);
+			}
+
+			public void close() throws IOException {
+				in.close();
+			}
+
+			public long skip(long n) throws IOException {
+				return in.skip(n);
+			}
+
+			public byte[] readNBytes(int len) throws IOException {
+				return in.readNBytes(len);
+			}
+
+
+			public int read() throws IOException {
+				return in.read();
+			}
+
+			public int read(byte[] b) throws IOException {
+				return in.read(b);
+			}
+
+			public int read(byte[] b, int off, int len) throws IOException {
+				return in.read(b, off, len);
+			}
+
+			public String readLine() throws IOException {
+				return in.readLine();
+			}
+		};
 	}
 
 	@Override
