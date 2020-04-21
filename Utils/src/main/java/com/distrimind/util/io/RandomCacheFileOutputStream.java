@@ -35,6 +35,8 @@ The fact that you are presently reading this means that you have had
 knowledge of the CeCILL-C license and that you accept its terms.
  */
 
+import com.distrimind.util.FileTools;
+
 import java.io.File;
 import java.io.IOException;
 
@@ -241,8 +243,9 @@ public class RandomCacheFileOutputStream extends RandomOutputStream{
 			if (!out.isClosed())
 				out.close();
 			if (fileUsed && removeFileWhenClosed)
-				//noinspection ResultOfMethodCallIgnored
-				fileName.delete();
+				if (fileName.exists())
+					if (!fileName.delete())
+						throw new IOException("Impossible to delete file "+fileName);
 		}
 		finally {
 			closed=true;
@@ -267,5 +270,19 @@ public class RandomCacheFileOutputStream extends RandomOutputStream{
 				e.printStackTrace();
 			}
 		}
+	}
+	public void moveToFileAndCloseStream(File file) throws IOException {
+		moveToFileAndCloseStream(file, false);
+	}
+	public void moveToFileAndCloseStream(File file, boolean checkDestinationRecursive) throws IOException {
+		if (isClosed())
+			throw new IOException("Stream closed !");
+		if (fileUsed) {
+			out.close();
+			FileTools.move(fileName, file, checkDestinationRecursive);
+		} else {
+			getRandomInputStream().transferTo(new RandomFileOutputStream(file));
+		}
+		close();
 	}
 }
