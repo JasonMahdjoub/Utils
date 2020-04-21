@@ -86,6 +86,8 @@ public class RandomCacheFileOutputStream extends RandomOutputStream{
 
 	@Override
 	public void setLength(long newLength) throws IOException {
+		if (closed)
+			throw new IOException("Stream closed !");
 		if (!fileUsed) {
 			long dataQuantity = newLength-out.length();
 			if (dataQuantity!=0) {
@@ -105,6 +107,8 @@ public class RandomCacheFileOutputStream extends RandomOutputStream{
 
 	@Override
 	public void seek(long _pos) throws IOException {
+		if (closed)
+			throw new IOException("Stream closed !");
 		out.seek(_pos);
 	}
 
@@ -120,11 +124,15 @@ public class RandomCacheFileOutputStream extends RandomOutputStream{
 
 	@Override
 	protected RandomInputStream getRandomInputStreamImpl() throws IOException {
+		if (closed)
+			throw new IOException("Stream closed !");
 		return out.getRandomInputStream();
 	}
 
 	@Override
 	public void write(int b) throws IOException {
+		if (closed)
+			throw new IOException("Stream closed !");
 		if (!fileUsed && !randomCacheFileCenter.tryToAddNewDataIntoMemory(1))
 			forceWritingMemoryCacheToFile();
 		out.write(b);
@@ -132,6 +140,8 @@ public class RandomCacheFileOutputStream extends RandomOutputStream{
 
 	@Override
 	public void write(byte[] b, int off, int len) throws IOException {
+		if (closed)
+			throw new IOException("Stream closed !");
 		RandomInputStream.checkLimits(b, off, len);
 		if (!fileUsed && !randomCacheFileCenter.tryToAddNewDataIntoMemory(len))
 			forceWritingMemoryCacheToFile();
@@ -159,6 +169,8 @@ public class RandomCacheFileOutputStream extends RandomOutputStream{
 
 	@Override
 	public void flush() throws IOException {
+		if (closed)
+			throw new IOException("Stream closed !");
 		out.flush();
 	}
 

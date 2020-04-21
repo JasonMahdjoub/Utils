@@ -47,7 +47,7 @@ import static com.distrimind.util.io.BufferedRandomInputStream.MAX_BUFFERS_NUMBE
  * @since Utils 3.30.0
  */
 public class BufferedRandomOutputStream extends RandomOutputStream{
-	private RandomOutputStream out;
+	private final RandomOutputStream out;
 
 	private final byte[][] buffers;
 	private final long[] positions;
@@ -173,6 +173,8 @@ public class BufferedRandomOutputStream extends RandomOutputStream{
 
 	@Override
 	public void setLength(long newLength) throws IOException {
+		if (isClosed())
+			throw new IOException("Stream closed");
 		if (newLength<0)
 			throw new IllegalArgumentException();
 
@@ -201,6 +203,8 @@ public class BufferedRandomOutputStream extends RandomOutputStream{
 
 	@Override
 	public void seek(long _pos) throws IOException {
+		if (isClosed())
+			throw new IOException("Stream closed");
 		if (_pos<0 || _pos>length())
 			throw new IllegalArgumentException();
 		currentPosition=_pos;
@@ -219,12 +223,16 @@ public class BufferedRandomOutputStream extends RandomOutputStream{
 
 	@Override
 	protected BufferedRandomInputStream getRandomInputStreamImpl() throws IOException {
+		if (isClosed())
+			throw new IOException("Stream closed");
 		flush();
 		return new BufferedRandomInputStream(out.getRandomInputStream(), maxBufferSize, maxBuffersNumber);
 	}
 
 	@Override
 	public RandomInputStream getUnbufferedRandomInputStream() throws IOException {
+		if (isClosed())
+			throw new IOException("Stream closed");
 		flush();
 		return out.getUnbufferedRandomInputStream();
 	}
@@ -268,6 +276,8 @@ public class BufferedRandomOutputStream extends RandomOutputStream{
 
 	@Override
 	public void write(int b) throws IOException {
+		if (isClosed())
+			throw new IOException("Stream closed");
 		checkCurrentBufferNotNull();
 
 		currentBuffer[endPositions[currentBufferIndex]++]=(byte)b;
@@ -280,6 +290,8 @@ public class BufferedRandomOutputStream extends RandomOutputStream{
 
 	@Override
 	public void ensureLength(long length) throws IOException {
+		if (isClosed())
+			throw new IOException("Stream closed");
 		if (length<0)
 			throw new IllegalArgumentException();
 		//flush();
@@ -292,6 +304,8 @@ public class BufferedRandomOutputStream extends RandomOutputStream{
 
 	@Override
 	public void write(byte[] b, int off, int len) throws IOException {
+		if (isClosed())
+			throw new IOException("Stream closed");
 		RandomInputStream.checkLimits(b, off, len);
 		checkCurrentBufferNotNull();
 		int curPos=endPositions[currentBufferIndex];
@@ -342,6 +356,8 @@ public class BufferedRandomOutputStream extends RandomOutputStream{
 
 	@Override
 	public void flush() throws IOException {
+		if (isClosed())
+			throw new IOException("Stream closed");
 		currentBuffer=null;
 		currentBufferIndex=-1;
 		for (int i=0;i<maxBuffersNumber;i++) {
@@ -352,6 +368,8 @@ public class BufferedRandomOutputStream extends RandomOutputStream{
 
 	@Override
 	public void close() throws IOException {
+		if (isClosed())
+			return;
 		flush();
 		out.close();
 	}

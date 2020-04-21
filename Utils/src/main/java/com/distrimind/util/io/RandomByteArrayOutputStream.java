@@ -101,9 +101,9 @@ public class RandomByteArrayOutputStream extends RandomOutputStream {
 	 */
 	@Override
 	public void write(byte[] _bytes, int _offset, int _length) throws IOException {
-		RandomInputStream.checkLimits(_bytes, _offset, _length);
 		if (current_pos == -1)
 			throw new IOException("The current RandomByteArrayOutputStream is closed !");
+		RandomInputStream.checkLimits(_bytes, _offset, _length);
 
 		ensureAdditionalLength(_length);
 		System.arraycopy(_bytes, _offset, bytes, current_pos, _length);

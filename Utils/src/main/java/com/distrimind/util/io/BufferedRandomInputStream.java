@@ -112,6 +112,8 @@ public class BufferedRandomInputStream extends RandomInputStream {
 
 	@Override
 	public void seek(long _pos) throws IOException {
+		if (isClosed())
+			throw new IOException("Stream closed");
 		if (_pos<0 || _pos>length())
 			throw new IllegalArgumentException(""+_pos+" is not in [0,"+length()+"]");
 
@@ -159,7 +161,8 @@ public class BufferedRandomInputStream extends RandomInputStream {
 
 	@Override
 	public void readFully(byte[] tab, int off, int len) throws IOException {
-
+		if (isClosed())
+			throw new IOException("Stream closed");
 		checkLimits(tab, off, len);
 		checkCurrentBufferNotNull();
 		boolean first=true;
@@ -201,6 +204,8 @@ public class BufferedRandomInputStream extends RandomInputStream {
 
 	@Override
 	public String readLine() throws IOException {
+		if (isClosed())
+			throw new IOException("Stream closed");
 		in.seek(currentPosition);
 		try {
 			return in.readLine();
@@ -213,6 +218,8 @@ public class BufferedRandomInputStream extends RandomInputStream {
 
 	@Override
 	public byte[] readNBytes(int len) throws IOException {
+		if (isClosed())
+			throw new IOException("Stream closed");
 		in.seek(currentPosition);
 		byte[] res=in.readNBytes(len);
 		currentPosition=in.currentPosition();
@@ -222,6 +229,8 @@ public class BufferedRandomInputStream extends RandomInputStream {
 
 	@Override
 	public byte[] readAllBytes() throws IOException {
+		if (isClosed())
+			throw new IOException("Stream closed");
 		in.seek(currentPosition);
 		byte[] res=in.readAllBytes();
 		currentPosition=in.currentPosition();
@@ -231,6 +240,8 @@ public class BufferedRandomInputStream extends RandomInputStream {
 
 	@Override
 	public long transferTo(OutputStream out) throws IOException {
+		if (isClosed())
+			throw new IOException("Stream closed");
 		in.seek(currentPosition);
 		long res=in.transferTo(out);
 		currentPosition=in.currentPosition();
@@ -240,6 +251,8 @@ public class BufferedRandomInputStream extends RandomInputStream {
 
 	@Override
 	public int read() throws IOException {
+		if (isClosed())
+			throw new IOException("Stream closed");
 		if (currentPosition>=length())
 			return -1;
 		checkCurrentBufferNotNull();
@@ -255,6 +268,8 @@ public class BufferedRandomInputStream extends RandomInputStream {
 
 	@Override
 	public synchronized void mark(int readlimit) {
+		if (isClosed())
+			return;
 		try {
 			in.seek(currentPosition);
 		} catch (IOException e) {
@@ -265,6 +280,7 @@ public class BufferedRandomInputStream extends RandomInputStream {
 
 	@Override
 	public boolean markSupported() {
+
 		try {
 			in.seek(currentPosition);
 		} catch (IOException e) {
@@ -275,12 +291,16 @@ public class BufferedRandomInputStream extends RandomInputStream {
 
 	@Override
 	public synchronized void reset() throws IOException {
+		if (isClosed())
+			throw new IOException("Stream closed");
 		in.seek(currentPosition);
 		in.reset();
 	}
 
 	@Override
 	public int read(byte[] b, int off, int len) throws IOException {
+		if (isClosed())
+			throw new IOException("Stream closed");
 		checkCurrentBufferNotNull();
 		checkLimits(b, off, len);
 		int res=0;
@@ -330,6 +350,8 @@ public class BufferedRandomInputStream extends RandomInputStream {
 
 	@Override
 	public long skip(long n) throws IOException {
+		if (isClosed())
+			throw new IOException("Stream closed");
 		long l=in.length();
 		if (n<0 || n+currentPosition>l)
 			throw new IllegalArgumentException();
