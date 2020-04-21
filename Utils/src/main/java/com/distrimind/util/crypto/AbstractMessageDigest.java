@@ -34,6 +34,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
+import com.distrimind.util.FileTools;
 import com.distrimind.util.io.RandomInputStream;
 
 import java.io.IOException;
@@ -200,7 +201,7 @@ public abstract class AbstractMessageDigest implements Cloneable {
 		if (l==0)
 			return;
 		if (buffer==null)
-			buffer=new byte[8192];
+			buffer=new byte[FileTools.BUFFER_SIZE];
 		do {
 			int s=(int)Math.min(buffer.length, l);
 			inputStream.readFully(buffer, 0, s);

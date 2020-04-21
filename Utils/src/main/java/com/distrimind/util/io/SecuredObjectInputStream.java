@@ -36,6 +36,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 
 
+import com.distrimind.util.FileTools;
 import com.distrimind.util.ReflectionTools;
 
 import java.io.*;
@@ -50,7 +51,7 @@ import java.util.Objects;
  * @since Utils 4.4.0
  */
 public abstract class SecuredObjectInputStream extends InputStream implements DataInput  {
-	private static final int DEFAULT_BUFFER_SIZE = 8192;
+	private static final int DEFAULT_BUFFER_SIZE = FileTools.BUFFER_SIZE;
 	private static final int MAX_BUFFER_SIZE = Integer.MAX_VALUE - 8;
 
 	private SerializationTools.ObjectResolver objectResolver=new SerializationTools.ObjectResolver();

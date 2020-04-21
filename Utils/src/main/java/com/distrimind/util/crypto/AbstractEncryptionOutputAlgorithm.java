@@ -34,6 +34,8 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
+import com.distrimind.util.FileTools;
+
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
@@ -56,7 +58,7 @@ import java.security.spec.InvalidKeySpecException;
  * @since Utils 1.5
  */
 public abstract class AbstractEncryptionOutputAlgorithm {
-	final static int BUFFER_SIZE = 2048;
+	final static int BUFFER_SIZE = FileTools.BUFFER_SIZE;
 
 	protected final AbstractCipher cipher;
 

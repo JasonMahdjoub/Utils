@@ -37,6 +37,8 @@
  */
 package com.distrimind.util.io;
 
+import com.distrimind.util.FileTools;
+
 import java.io.IOException;
 
 /**
@@ -164,7 +166,7 @@ public abstract class RandomOutputStream extends SecuredObjectOutputStream imple
 			length=inputStream.length()-inputStream.currentPosition();
 		else if (length>inputStream.length()-inputStream.currentPosition())
 			throw new IllegalArgumentException();
-		byte[] buf=new byte[(int)Math.min(BufferedRandomInputStream.MAX_BUFFER_SIZE, length)];
+		byte[] buf=new byte[(int)Math.min(FileTools.BUFFER_SIZE, length)];
 		do {
 			int s=(int)Math.min(length, buf.length);
 			inputStream.readFully(buf, 0, s);

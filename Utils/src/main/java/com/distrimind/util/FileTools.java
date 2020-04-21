@@ -50,7 +50,7 @@ import java.util.zip.ZipOutputStream;
  */
 public final class FileTools {
 
-	private static final int BUFFER = 2048;
+	public static final int BUFFER_SIZE = 128*1024;
 
 	/**
 	 * Check if a specified file path is a folder and create a folder if it does not
@@ -120,7 +120,7 @@ public final class FileTools {
 	 *             if a problem occurs
 	 */
 	public static void copy(InputStream source, OutputStream destination) throws IOException {
-		byte[] buffer = new byte[512 * 1024];
+		byte[] buffer = new byte[BUFFER_SIZE];
 		int nbRead;
 		while ((nbRead = source.read(buffer)) != -1) {
 			destination.write(buffer, 0, nbRead);
@@ -412,34 +412,31 @@ public final class FileTools {
 			throw new IllegalAccessError("The directory of destination does not exists !");
 		if (!_directory_dst.isDirectory())
 			throw new IllegalAccessError("The directory of destination is not a directory !");
-		BufferedOutputStream dest;
-		FileInputStream fis = new FileInputStream(_zip_file);
-		ZipInputStream zis = new ZipInputStream(new BufferedInputStream(fis));
-		ZipEntry entry;
-		while ((entry = zis.getNextEntry()) != null) {
-			if (!matchString(entry.getName(), regex_exclude, regex_include))
-				continue;
-			if (entry.isDirectory()) {
-				checkFolderRecursive(new File(_directory_dst, entry.getName()));
-			} else {
-				// System.out.println("Extracting: " +entry);
-				int count;
-				byte[] data = new byte[BUFFER];
-				// write the files to the disk
-				// System.out.println("Extracting: " +new File(_directory_dst,
-				// entry.getName()));
-				File f = new File(_directory_dst, entry.getName());
-				checkFolderRecursive(f.getParentFile());
-				FileOutputStream fos = new FileOutputStream(f);
-				dest = new BufferedOutputStream(fos, BUFFER);
-				while ((count = zis.read(data, 0, BUFFER)) != -1) {
-					dest.write(data, 0, count);
+		try(FileInputStream fis = new FileInputStream(_zip_file);ZipInputStream zis = new ZipInputStream(fis)) {
+			ZipEntry entry;
+			byte[] data = new byte[BUFFER_SIZE];
+			while ((entry = zis.getNextEntry()) != null) {
+				if (!matchString(entry.getName(), regex_exclude, regex_include))
+					continue;
+				if (entry.isDirectory()) {
+					checkFolderRecursive(new File(_directory_dst, entry.getName()));
+				} else {
+					// System.out.println("Extracting: " +entry);
+					int count;
+
+					// write the files to the disk
+					// System.out.println("Extracting: " +new File(_directory_dst,
+					// entry.getName()));
+					File f = new File(_directory_dst, entry.getName());
+					checkFolderRecursive(f.getParentFile());
+					try (FileOutputStream fos = new FileOutputStream(f)) {
+						while ((count = zis.read(data, 0, data.length)) != -1) {
+							fos.write(data, 0, count);
+						}
+					}
 				}
-				dest.flush();
-				dest.close();
 			}
 		}
-		zis.close();
 
 	}
 
@@ -461,35 +458,34 @@ public final class FileTools {
 			throw new IllegalAccessError("The directory " + _directory + " does not exists !");
 		if (!_directory.isDirectory())
 			throw new IllegalAccessError("The directory " + _directory + " is not a directory !");
-		FileOutputStream dest = new FileOutputStream(_zipfile);
-		ZipOutputStream out = new ZipOutputStream(new BufferedOutputStream(dest));
 
-		String dir = _directory.getAbsolutePath();
-		if (_include_directory) {
-			int l = dir.lastIndexOf(_directory.getName());
-			String base = dir.substring(0, l);
-            String relPath=getRelativePath(base, _directory.getAbsolutePath());
-            if (relPath==null)
-                throw new IOException();
-			ZipEntry entry = new ZipEntry(transformToDirectory(relPath));
-			out.putNextEntry(entry);
+		try(FileOutputStream dest = new FileOutputStream(_zipfile);ZipOutputStream out = new ZipOutputStream(dest)) {
+			String dir = _directory.getAbsolutePath();
+			if (_include_directory) {
+				int l = dir.lastIndexOf(_directory.getName());
+				String base = dir.substring(0, l);
+				String relPath = getRelativePath(base, _directory.getAbsolutePath());
+				if (relPath == null)
+					throw new IOException();
+				ZipEntry entry = new ZipEntry(transformToDirectory(relPath));
+				out.putNextEntry(entry);
 
-			zipDirectory(out, _directory, base);
-		} else {
-			if (!dir.endsWith("/"))
-				dir = dir + "/";
-			zipDirectory(out, _directory, dir);
+				zipDirectory(out, _directory, base);
+			} else {
+				if (!dir.endsWith("/"))
+					dir = dir + "/";
+				zipDirectory(out, _directory, dir);
+			}
 		}
-
-		out.close();
 	}
 
 	@SuppressWarnings("ConstantConditions")
     private static void zipDirectory(ZipOutputStream out, File _directory, String base_directory) throws IOException {
-		byte[] data = new byte[BUFFER];
+
         File[] files =_directory.listFiles();
         if (files==null)
             throw new IOException();
+		byte[] data = new byte[BUFFER_SIZE];
 		for (File f : files ) {
 			// System.out.println("Adding: "+files[i]);
 			if (f.isDirectory()) {
@@ -498,15 +494,15 @@ public final class FileTools {
 				out.putNextEntry(entry);
 				zipDirectory(out, f, base_directory);
 			} else {
-				FileInputStream fi = new FileInputStream(f);
-				BufferedInputStream origin = new BufferedInputStream(fi, BUFFER);
-				ZipEntry entry = new ZipEntry(getRelativePath(base_directory, f.getAbsolutePath()));
-				out.putNextEntry(entry);
-				int count;
-				while ((count = origin.read(data, 0, BUFFER)) != -1) {
-					out.write(data, 0, count);
+
+				try(FileInputStream fi = new FileInputStream(f)) {
+					ZipEntry entry = new ZipEntry(getRelativePath(base_directory, f.getAbsolutePath()));
+					out.putNextEntry(entry);
+					int count;
+					while ((count = fi.read(data, 0, data.length)) != -1) {
+						out.write(data, 0, count);
+					}
 				}
-				origin.close();
 			}
 		}
 	}
