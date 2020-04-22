@@ -56,7 +56,7 @@ import com.distrimind.util.OS;
  * List of symmetric encryption algorithms
  * 
  * @author Jason Mahdjoub
- * @version 4.0
+ * @version 4.1
  * @since Utils 1.4
  */
 public enum SymmetricEncryptionType {
@@ -413,5 +413,10 @@ public enum SymmetricEncryptionType {
 		if (keySizeBits<256)
 			return false;
 		return getBlockSizeBits() >= 128;
+	}
+
+	public boolean supportRandomReadWrite()
+	{
+		return blockMode.equals("CTR");
 	}
 }
