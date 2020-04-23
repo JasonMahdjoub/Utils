@@ -76,7 +76,23 @@ public enum MessageDigestType {
 	SHA3_512("SHA3-512", CodeProvider.SUN, 512, BC_FIPS_SHA3_512),
 	DEFAULT(BC_FIPS_SHA3_384);
 
-	
+	private static final int MAX_DIGEST_LENGTH_IN_BITS;
+	static
+	{
+		int m=0;
+		for (MessageDigestType type : MessageDigestType.values())
+			m=Math.max(type.digestLengthBits, m);
+		MAX_DIGEST_LENGTH_IN_BITS=m;
+	}
+
+	public static int getMaxDigestLengthInBits()
+	{
+		return MAX_DIGEST_LENGTH_IN_BITS;
+	}
+	public static int getMaxDigestLengthInBytes()
+	{
+		return MAX_DIGEST_LENGTH_IN_BITS/8;
+	}
 	private final String algorithmName;
 
 	private final CodeProvider codeProvider;

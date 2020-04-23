@@ -104,15 +104,18 @@ public class SubStreamParameters implements SecureExternalizable {
 		messageDigestType=in.readObject(false, MessageDigestType.class);
 		sorted=false;
 	}
-
-	public byte[] generateHash(RandomInputStream inputStream) throws IOException, NoSuchProviderException, NoSuchAlgorithmException {
-		if (inputStream==null)
-			throw new NullPointerException();
+	private void checkSort()
+	{
 		if (!sorted)
 		{
 			Collections.sort(this.parameters);
 			sorted=true;
 		}
+	}
+	public byte[] generateHash(RandomInputStream inputStream) throws IOException, NoSuchProviderException, NoSuchAlgorithmException {
+		if (inputStream==null)
+			throw new NullPointerException();
+		checkSort();
 		AbstractMessageDigest messageDigest=messageDigestType.getMessageDigestInstance();
 		messageDigest.reset();
 		byte[] buffer=new byte[1024];
@@ -130,4 +133,12 @@ public class SubStreamParameters implements SecureExternalizable {
 		return messageDigest.digest();
 	}
 
+	public ArrayList<SubStreamParameter> getParameters() {
+		checkSort();
+		return parameters;
+	}
+
+	public MessageDigestType getMessageDigestType() {
+		return messageDigestType;
+	}
 }

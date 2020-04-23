@@ -47,7 +47,9 @@ public class LimitedRandomInputStream extends RandomInputStream{
 	private final RandomInputStream in;
 	private final long off;
 	private final long len;
-
+	public LimitedRandomInputStream(RandomInputStream in, long off) throws IOException {
+		this(in, off, in.length()-off);
+	}
 	public LimitedRandomInputStream(RandomInputStream in, long off, long len) throws IOException {
 		if (in==null)
 			throw new NullPointerException();

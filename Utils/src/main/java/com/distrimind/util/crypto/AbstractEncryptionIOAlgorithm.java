@@ -34,6 +34,8 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
+import com.distrimind.util.io.SubStreamParameters;
+
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
@@ -181,7 +183,7 @@ public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOu
 		decode(is, associatedData, offAD, lenAD, os, length, null);
 	}
 	
-	private byte[] readIV(InputStream is, byte[] externalCounter) throws IOException
+	protected byte[] readIV(InputStream is, byte[] externalCounter) throws IOException
 	{
 		if (includeIV()) {
 			if (this.iv==null)
@@ -205,6 +207,8 @@ public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOu
 		}
 		return null;
 	}
+
+
 	@Override
 	public void decode(InputStream is, byte[] associatedData, int offAD, int lenAD, OutputStream os, int length,  byte[] externalCounter)
 			throws InvalidKeyException, InvalidAlgorithmParameterException, IOException, IllegalBlockSizeException,

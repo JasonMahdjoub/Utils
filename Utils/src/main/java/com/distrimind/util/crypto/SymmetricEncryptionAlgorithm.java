@@ -34,11 +34,18 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
+import com.distrimind.util.io.*;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.spec.InvalidKeySpecException;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Random;
 
 import javax.crypto.Cipher;
@@ -70,6 +77,52 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 	@Override
 	public boolean isPostQuantumEncryption() {
 		return key.isPostQuantumKey();
+	}
+	public SubStreamHashResult getIVAndHashedSubStreamFromEncryptedStream(RandomInputStream encryptedInputStream, byte[] associatedData, int offAD, int lenAD, byte[] externalCounter, SubStreamParameters subStreamParameters) throws IOException, NoSuchProviderException, NoSuchAlgorithmException, InvalidAlgorithmParameterException, InvalidKeySpecException, InvalidKeyException {
+		if (!getType().supportRandomReadWrite())
+			throw new IllegalStateException("Encryption type must support random read and write");
+		if (getMaxBlockSizeForDecoding()!=Integer.MAX_VALUE)
+			throw new IllegalAccessError();
+
+
+		byte[] iv=readIV(encryptedInputStream, externalCounter);
+		initCipherForDecrypt(cipher, iv, externalCounter);
+		if (associatedData!=null && lenAD>0)
+			cipher.updateAAD(associatedData, offAD, lenAD);
+		byte[] hash=subStreamParameters.generateHash(new LimitedRandomInputStream(encryptedInputStream, iv.length));
+		return new SubStreamHashResult(hash, iv);
+	}
+
+	public boolean checkHashWithNonEncryptedStream(SubStreamHashResult hashResultFromEncryptedStream, SubStreamParameters subStreamParameters, RandomInputStream nonEncryptedInputStream, byte[] associatedData, int offAD, int lenAD) throws InvalidKeySpecException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, NoSuchProviderException, IOException {
+		if (associatedData!=null && lenAD>0)
+			cipher.updateAAD(associatedData, offAD, lenAD);
+		if (getMaxBlockSizeForEncoding()!=Integer.MAX_VALUE)
+			throw new IllegalAccessError();
+
+		AbstractMessageDigest md=subStreamParameters.getMessageDigestType().getMessageDigestInstance();
+		List<SubStreamParameter> parameters=subStreamParameters.getParameters() ;
+		md.reset();
+		byte[] buffer=new byte[1024];
+		for (SubStreamParameter p : parameters)
+		{
+			nonEncryptedInputStream.seek(p.getStreamStartIncluded());
+			byte[] iv=hashResultFromEncryptedStream.getIv().clone();
+			//increment iv
+			for (int i=0;i<p.getStreamStartIncluded();i++)
+			{
+				if (++iv[i]!=0)
+					break;
+			}
+			cipher.init(Cipher.ENCRYPT_MODE, key, iv);
+			long l = p.getStreamEndExcluded() - p.getStreamStartIncluded();
+			do {
+				int s = (int) Math.min(buffer.length, l);
+				nonEncryptedInputStream.readFully(buffer, 0, s);
+				md.update(cipher.update(buffer, 0, s));
+				l -= s;
+			} while(l>0);
+		}
+		return Arrays.equals(md.digest(), hashResultFromEncryptedStream.getHash());
 	}
 
 	public SymmetricEncryptionAlgorithm(AbstractSecureRandom random, SymmetricSecretKey key)
