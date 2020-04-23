@@ -125,7 +125,7 @@ public class FragmentedRandomInputStreamPerChannel extends RandomInputStream {
 	public int read() throws IOException {
 		int v= in.read();
 		if (v>=0)
-			in.skipBytes(params.getByteToSkipAfterRead());
+			in.skipNBytes(Math.min(in.length()-in.currentPosition(), params.getByteToSkipAfterRead()));
 		return v;
 	}
 
