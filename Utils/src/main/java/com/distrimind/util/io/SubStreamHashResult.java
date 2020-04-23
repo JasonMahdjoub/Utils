@@ -19,11 +19,9 @@ public class SubStreamHashResult implements SecureExternalizable {
 	public SubStreamHashResult(byte[] hash, byte[] iv) {
 		if (hash==null)
 			throw new NullPointerException();
-		if (iv==null)
-			throw new NullPointerException();
 		if (hash.length>MAX_HASH_SIZE)
 			throw new IllegalArgumentException();
-		if (iv.length>MAX_IV_LENGTH)
+		if (iv!=null && iv.length>MAX_IV_LENGTH)
 			throw new IllegalArgumentException();
 		this.hash = hash;
 		this.iv = iv;
@@ -45,13 +43,13 @@ public class SubStreamHashResult implements SecureExternalizable {
 	@Override
 	public void writeExternal(SecuredObjectOutputStream out) throws IOException {
 		out.writeBytesArray(hash, false, MAX_HASH_SIZE);
-		out.writeBytesArray(iv, false, MAX_IV_LENGTH);
+		out.writeBytesArray(iv, true, MAX_IV_LENGTH);
 	}
 
 	@Override
 	public void readExternal(SecuredObjectInputStream in) throws IOException {
 		hash=in.readBytesArray(false, MAX_HASH_SIZE);
-		iv=in.readBytesArray(false, MAX_IV_LENGTH);
+		iv=in.readBytesArray(true, MAX_IV_LENGTH);
 	}
 
 	@Override

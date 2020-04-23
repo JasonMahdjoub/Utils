@@ -78,7 +78,7 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 	public boolean isPostQuantumEncryption() {
 		return key.isPostQuantumKey();
 	}
-	public SubStreamHashResult getIVAndHashedSubStreamFromEncryptedStream(RandomInputStream encryptedInputStream, byte[] associatedData, int offAD, int lenAD, byte[] externalCounter, SubStreamParameters subStreamParameters) throws IOException, NoSuchProviderException, NoSuchAlgorithmException, InvalidAlgorithmParameterException, InvalidKeySpecException, InvalidKeyException {
+	public SubStreamHashResult getIVAndPartialHashedSubStreamFromEncryptedStream(RandomInputStream encryptedInputStream, byte[] associatedData, int offAD, int lenAD, SubStreamParameters subStreamParameters) throws IOException, NoSuchProviderException, NoSuchAlgorithmException, InvalidAlgorithmParameterException, InvalidKeySpecException, InvalidKeyException {
 		if (!getType().supportRandomReadWrite())
 			throw new IllegalStateException("Encryption type must support random read and write");
 		if (getMaxBlockSizeForDecoding()!=Integer.MAX_VALUE)
@@ -92,16 +92,18 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 		byte[] hash=subStreamParameters.generateHash(new LimitedRandomInputStream(encryptedInputStream, iv.length));
 		return new SubStreamHashResult(hash, iv);
 	}
-
-	public boolean checkHashWithNonEncryptedStream(SubStreamHashResult hashResultFromEncryptedStream, SubStreamParameters subStreamParameters, RandomInputStream nonEncryptedInputStream, byte[] associatedData, int offAD, int lenAD) throws InvalidKeySpecException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, NoSuchProviderException, IOException {
+	public boolean checkPartialHashWithNonEncryptedStream(SubStreamHashResult hashResultFromEncryptedStream, SubStreamParameters subStreamParameters, RandomInputStream nonEncryptedInputStream, byte[] associatedData, int offAD, int lenAD) throws InvalidKeySpecException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException, IOException, InvalidKeyException {
+		AbstractMessageDigest md=subStreamParameters.getMessageDigestType().getMessageDigestInstance();
+		md.reset();
+		return checkPartialHashWithNonEncryptedStream(hashResultFromEncryptedStream, subStreamParameters, nonEncryptedInputStream, associatedData, offAD, lenAD, md);
+	}
+	public boolean checkPartialHashWithNonEncryptedStream(SubStreamHashResult hashResultFromEncryptedStream, SubStreamParameters subStreamParameters, RandomInputStream nonEncryptedInputStream, byte[] associatedData, int offAD, int lenAD, AbstractMessageDigest md) throws InvalidKeySpecException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, IOException {
 		if (associatedData!=null && lenAD>0)
 			cipher.updateAAD(associatedData, offAD, lenAD);
 		if (getMaxBlockSizeForEncoding()!=Integer.MAX_VALUE)
 			throw new IllegalAccessError();
 
-		AbstractMessageDigest md=subStreamParameters.getMessageDigestType().getMessageDigestInstance();
 		List<SubStreamParameter> parameters=subStreamParameters.getParameters() ;
-		md.reset();
 		byte[] buffer=new byte[1024];
 		for (SubStreamParameter p : parameters)
 		{

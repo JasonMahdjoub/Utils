@@ -34,13 +34,14 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
-import com.distrimind.util.io.Integrity;
-import com.distrimind.util.io.RandomInputStream;
-import com.distrimind.util.io.RandomOutputStream;
+import com.distrimind.util.io.*;
 
 import java.io.IOException;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
+import java.security.spec.InvalidKeySpecException;
 
 /**
  * @author Jason Mahdjoub
@@ -145,5 +146,17 @@ public class EncryptionReader {
 	}
 	public Integrity checkHashAndPublicSignature() throws IOException {
 		return EncryptionWriter.checkHashAndPublicSignatureImpl(inputStream,asymmetricChecker, digest);
+	}
+	public SubStreamHashResult computePartialHash(SubStreamParameters subStreamParameters) throws IOException {
+
+		try {
+			if (cipher == null) {
+				return new SubStreamHashResult(subStreamParameters.generateHash(inputStream), null);
+			} else {
+				return cipher.getIVAndPartialHashedSubStreamFromEncryptedStream(inputStream, associatedData, offAD, lenAD, subStreamParameters);
+			}
+		} catch (NoSuchProviderException | NoSuchAlgorithmException | InvalidAlgorithmParameterException | InvalidKeySpecException | InvalidKeyException e) {
+			throw new IOException(e);
+		}
 	}
 }

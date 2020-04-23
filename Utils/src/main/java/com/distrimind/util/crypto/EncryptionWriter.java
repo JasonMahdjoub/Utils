@@ -45,7 +45,9 @@ import java.io.IOException;
 import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.InvalidParameterSpecException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * @author Jason Mahdjoub
@@ -180,6 +182,59 @@ public class EncryptionWriter {
 	}
 	public void encrypt() throws IOException {
 		encryptAndSignImpl(inputStream, outputStream, cipher, associatedData, offAD, lenAD, symmetricSigner, asymmetricSigner, digest);
+	}
+
+	public boolean checkPartialHash(SubStreamParameters subStreamParameters, SubStreamHashResult hashResultFromEncryptedStream) throws IOException {
+		try {
+			AbstractMessageDigest md = subStreamParameters.getMessageDigestType().getMessageDigestInstance();
+			md.reset();
+			byte[] head=null;
+			byte code;
+			List<SubStreamParameter> lparameters=subStreamParameters.getParameters();
+			for (SubStreamParameter p : lparameters)
+			{
+				if (p.getStreamStartIncluded()>=9)
+					break;
+				else
+				{
+					long end=Math.min(9, p.getStreamEndExcluded());
+					if (head==null)
+					{
+						RandomByteArrayOutputStream out=new RandomByteArrayOutputStream(9);
+						code=getCode(associatedData, symmetricSigner, asymmetricSigner, digest);
+						out.writeByte(code);
+						out.writeLong(inputStream.length());
+						head=out.getBytes();
+					}
+					md.update(head, (int)p.getStreamStartIncluded(), (int)(end-p.getStreamStartIncluded()));
+				}
+			}
+			ArrayList<SubStreamParameter> l=new ArrayList<>(lparameters.size());
+			for (SubStreamParameter p : lparameters)
+			{
+				if (p.getStreamStartIncluded()<9)
+				{
+					if (p.getStreamEndExcluded()>9)
+					{
+						l.add(new SubStreamParameter(0, p.getStreamEndExcluded()-9));
+					}
+				}
+				else
+					l.add(new SubStreamParameter(p.getStreamStartIncluded()-9, p.getStreamEndExcluded()-9));
+			}
+			subStreamParameters=new SubStreamParameters(subStreamParameters.getMessageDigestType(), l);
+			if (cipher==null)
+			{
+				byte[] hash=subStreamParameters.generateHash(inputStream);
+				return Arrays.equals(hash, hashResultFromEncryptedStream.getHash());
+			}
+			else {
+				return cipher.checkPartialHashWithNonEncryptedStream(hashResultFromEncryptedStream, subStreamParameters, inputStream, associatedData, offAD, lenAD, md);
+			}
+		} catch (NoSuchAlgorithmException | NoSuchProviderException | InvalidKeySpecException | InvalidAlgorithmParameterException | InvalidKeyException e) {
+			throw new IOException(e);
+		}
+
 	}
 
 

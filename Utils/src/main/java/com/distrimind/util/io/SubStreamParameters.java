@@ -36,6 +36,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 
 import com.distrimind.util.crypto.AbstractMessageDigest;
+import com.distrimind.util.crypto.AbstractSecureRandom;
 import com.distrimind.util.crypto.MessageDigestType;
 
 import java.io.IOException;
@@ -59,7 +60,7 @@ public class SubStreamParameters implements SecureExternalizable {
 	private SubStreamParameters() {
 
 	}
-	public SubStreamParameters(Collection<SubStreamParameter> parameters, MessageDigestType messageDigestType) {
+	public SubStreamParameters(MessageDigestType messageDigestType, Collection<SubStreamParameter> parameters) {
 		if (parameters==null)
 			throw new NullPointerException();
 		if (parameters.size()==0)
@@ -71,6 +72,40 @@ public class SubStreamParameters implements SecureExternalizable {
 
 		this.parameters = new ArrayList<>(parameters);
 		this.messageDigestType = messageDigestType;
+	}
+	public SubStreamParameters(final MessageDigestType messageDigestType, long globalStreamLength, long subStreamLength, final AbstractSecureRandom random) {
+		if (random==null)
+			throw new NullPointerException();
+		if (globalStreamLength<=0)
+			throw new IllegalArgumentException();
+		if (subStreamLength<=0)
+			throw new IllegalArgumentException();
+		if (subStreamLength<globalStreamLength)
+			throw new IllegalArgumentException();
+		if (messageDigestType==null)
+			throw new NullPointerException();
+		this.parameters = new ArrayList<>();
+		this.messageDigestType = messageDigestType;
+		long pos=0;
+		while (globalStreamLength>0 && subStreamLength>0)
+		{
+			long maxSkip=globalStreamLength-subStreamLength-1;
+			long skip;
+			if (maxSkip<=0)
+				skip=0;
+			else
+				skip=(long)(random.nextDouble()*maxSkip);
+			pos+=skip;
+			long l=subStreamLength;
+			long l2=Math.min(subStreamLength-32, l);
+			if (l2>0)
+				l+=(long)(random.nextDouble()*l2);
+
+			parameters.add(new SubStreamParameter(pos, pos+l));
+			pos+=l+1;
+			subStreamLength-=l;
+			globalStreamLength-=l+1;
+		}
 	}
 
 	@Override
