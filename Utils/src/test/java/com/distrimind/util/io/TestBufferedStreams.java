@@ -36,9 +36,11 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 
 import org.testng.Assert;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Random;
 
 /**
@@ -48,50 +50,73 @@ import java.util.Random;
  */
 public class TestBufferedStreams {
 
-	@Test(invocationCount = 1000, threadPoolSize = 16)
-	public void testBufferedInputStream() throws IOException {
+	@Test(invocationCount = 1000, threadPoolSize = 16, dataProvider = "provideInputStreams")
+	public void testBufferedInputStream(Random rand, RandomInputStream inputStream, RandomInputStream referenceInputStream) throws IOException {
+		testBufferedInputStream(rand, inputStream, 9000, referenceInputStream);
+	}
+
+	@DataProvider(name = "provideInputStreams", parallel = true)
+	Object[][] provideInputStreams() throws IOException {
+		Object[][] res=new Object[3][3];
 		Random rand=new Random(System.currentTimeMillis());
 		byte[] tab=new byte[1000000];
 		rand.nextBytes(tab);
 		RandomByteArrayInputStream ris=new RandomByteArrayInputStream(tab);
-		BufferedRandomInputStream inputStream=new BufferedRandomInputStream(new RandomByteArrayInputStream(tab));
-
-		testBufferedInputStream(rand, inputStream, 9000, ris);
+		res[0][0]=rand;
+		res[0][1]=new BufferedRandomInputStream(new RandomByteArrayInputStream(tab));
+		res[0][2]=ris;
+		tab=new byte[1000000];
+		rand.nextBytes(tab);
+		res[1][0]=rand;
+		int s, l;
+		res[1][1]=new LimitedRandomInputStream(new RandomByteArrayInputStream(tab), s=rand.nextInt(1000), l=tab.length-s-rand.nextInt(10000));
+		res[1][2]=new RandomByteArrayInputStream(Arrays.copyOfRange(tab, s, l+s));
+		tab=new byte[1000000];
+		rand.nextBytes(tab);
+		byte[] tab2=new byte[1000000];
+		rand.nextBytes(tab2);
+		res[2][0]=rand;
+		res[2][1]=new AggregatedRandomInputStreams(new RandomByteArrayInputStream(tab), new RandomByteArrayInputStream(tab2));
+		byte[] tab3=new byte[tab.length+tab2.length];
+		System.arraycopy(tab, 0, tab3, 0, tab.length);
+		System.arraycopy(tab2, 0, tab3, tab.length, tab2.length);
+		res[2][2]=new RandomByteArrayInputStream(tab3);
+		return res;
 	}
 
 	@SuppressWarnings("ResultOfMethodCallIgnored")
-	private void testBufferedInputStream(Random rand, BufferedRandomInputStream inputStream, int maxCycles, RandomInputStream ris) throws IOException {
+	private void testBufferedInputStream(Random rand, RandomInputStream inputStream, int maxCycles, RandomInputStream referenceInputStream) throws IOException {
 
-		Assert.assertEquals(inputStream.length(), ris.length());
+		Assert.assertEquals(inputStream.length(), referenceInputStream.length());
 		for (int i=0;i<maxCycles;i++)
 		{
 			if (i%(maxCycles/100)==0)
 				System.out.println(((i*100)/maxCycles));
-			Assert.assertEquals(inputStream.available(), ris.available());
+			Assert.assertEquals(inputStream.available(), referenceInputStream.available());
 			if (rand.nextDouble()<0.1) {
 				if (rand.nextDouble()<0.5) {
 					long pos = (long) (Math.random() * inputStream.length());
 					inputStream.seek(pos);
-					ris.seek(pos);
+					referenceInputStream.seek(pos);
 				}
 				else
 				{
 					long skip=(long)(Math.random()*Math.min(16000, inputStream.available()));
 					if (rand.nextDouble()<0.5) {
 						inputStream.skip(skip);
-						ris.skip(skip);
+						referenceInputStream.skip(skip);
 					}
 					else
 					{
 						inputStream.skipBytes((int)skip);
-						ris.skipBytes((int)skip);
+						referenceInputStream.skipBytes((int)skip);
 					}
 				}
 			}
-			Assert.assertEquals(inputStream.currentPosition(), ris.currentPosition());
+			Assert.assertEquals(inputStream.currentPosition(), referenceInputStream.currentPosition());
 			if (inputStream.available()>0) {
 				if (rand.nextDouble() < 0.5) {
-					Assert.assertEquals(inputStream.read(), ris.read());
+					Assert.assertEquals(inputStream.read(), referenceInputStream.read());
 				}
 				else
 				{
@@ -103,17 +128,17 @@ public class TestBufferedStreams {
 						bytes2=new byte[bytes.length];
 						if (rand.nextDouble() < 0.5) {
 							inputStream.readNBytes(bytes, 0, bytes.length);
-							ris.readNBytes(bytes2, 0, bytes2.length);
+							referenceInputStream.readNBytes(bytes2, 0, bytes2.length);
 						} else {
 							inputStream.readFully(bytes);
-							ris.readFully(bytes2);
+							referenceInputStream.readFully(bytes2);
 
 						}
 					}
 					else
 					{
 						bytes=inputStream.readNBytes((int)(Math.random()*inputStream.available()));
-						bytes2=ris.readNBytes(bytes.length);
+						bytes2=referenceInputStream.readNBytes(bytes.length);
 					}
 
 
@@ -127,8 +152,8 @@ public class TestBufferedStreams {
 
 	@Test(dependsOnMethods = "testBufferedInputStream", invocationCount = 2000, threadPoolSize = 16)
 	public void testBufferedOutputStream() throws IOException {
-		RandomByteArrayOutputStream dest=new RandomByteArrayOutputStream();
-		BufferedRandomOutputStream outputStream=new BufferedRandomOutputStream(dest);
+		RandomOutputStream dest=new RandomByteArrayOutputStream();
+		RandomOutputStream outputStream=new BufferedRandomOutputStream(dest);
 		RandomByteArrayOutputStream dest2=new RandomByteArrayOutputStream();
 		int maxCycles=50000;
 		Random rand=new Random(System.currentTimeMillis());

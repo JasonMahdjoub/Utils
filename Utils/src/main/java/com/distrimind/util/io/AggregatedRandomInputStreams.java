@@ -50,7 +50,7 @@ public class AggregatedRandomInputStreams extends RandomInputStream{
 	private final RandomInputStream[] inputStreams;
 	private final long length;
 	private int selectedInputStreamPos;
-	private long posOff=0;
+	private long posOff;
 	private boolean closed;
 
 
@@ -67,9 +67,11 @@ public class AggregatedRandomInputStreams extends RandomInputStream{
 		}
 		this.inputStreams = inputStreams.clone();
 		this.length=l;
+		this.posOff=0;
 		this.selectedInputStreamPos=0;
 		this.inputStreams[0].seek(0);
 		this.closed=false;
+
 	}
 
 	public AggregatedRandomInputStreams(List<RandomInputStream> inputStreams) throws IOException {
@@ -134,14 +136,15 @@ public class AggregatedRandomInputStreams extends RandomInputStream{
 		if (closed)
 			throw new IOException("Stream closed");
 		checkLimits(tab, off, len);
+		if (len==0)
+			return;
 		RandomInputStream ris=inputStreams[selectedInputStreamPos];
 		do {
 			if (ris.currentPosition()==ris.length())
 			{
 				if (++selectedInputStreamPos==inputStreams.length) {
 					--selectedInputStreamPos;
-					if (len>0)
-						throw new EOFException();
+					throw new EOFException();
 				}
 				else {
 					posOff+=ris.length();
@@ -149,7 +152,7 @@ public class AggregatedRandomInputStreams extends RandomInputStream{
 					ris.seek(0);
 				}
 			}
-			int s=(int)Math.min(len, ris.length()-currentPosition());
+			int s=(int)Math.min(len, ris.length()-ris.currentPosition());
 			if (s>0)
 				ris.readFully(tab, off, s);
 			off+=s;
@@ -210,25 +213,21 @@ public class AggregatedRandomInputStreams extends RandomInputStream{
 					ris.seek(0);
 				}
 			}
-			int s=(int)Math.min(len, ris.length()-currentPosition());
-			int s2=0;
-			if (s>0)
-				s2=ris.read(tab, off, s);
-			if (s2>0) {
-				off += s2;
-				len -= s2;
-				total+=s2;
-			}
+			int s=(int)Math.min(len, ris.length()-ris.currentPosition());
 
-			if (s2==-1)
+			if (s>0)
+				s=ris.read(tab, off, s);
+			if (s>0) {
+				off += s;
+				len -= s;
+				total+=s;
+			} else if (s<0)
 			{
 				if (total==0)
 					return -1;
 				else
 					return total;
 			}
-			else
-				total+=s2;
 		} while(len>0);
 		return total;
 	}
