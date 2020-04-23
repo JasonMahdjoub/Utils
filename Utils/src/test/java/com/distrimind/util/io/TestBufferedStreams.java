@@ -57,7 +57,7 @@ public class TestBufferedStreams {
 
 	@DataProvider(name = "provideInputStreams", parallel = true)
 	Object[][] provideInputStreams() throws IOException {
-		Object[][] res=new Object[3][3];
+		Object[][] res=new Object[6][3];
 		Random rand=new Random(System.currentTimeMillis());
 		byte[] tab=new byte[1000000];
 		rand.nextBytes(tab);
@@ -65,15 +65,15 @@ public class TestBufferedStreams {
 		res[0][0]=rand;
 		res[0][1]=new BufferedRandomInputStream(new RandomByteArrayInputStream(tab));
 		res[0][2]=ris;
-		tab=new byte[1000000];
+		tab=new byte[1000];
 		rand.nextBytes(tab);
 		res[1][0]=rand;
 		int s, l;
-		res[1][1]=new LimitedRandomInputStream(new RandomByteArrayInputStream(tab), s=rand.nextInt(1000), l=tab.length-s-rand.nextInt(10000));
+		res[1][1]=new LimitedRandomInputStream(new RandomByteArrayInputStream(tab), s=rand.nextInt(100), l=tab.length-s-rand.nextInt(100));
 		res[1][2]=new RandomByteArrayInputStream(Arrays.copyOfRange(tab, s, l+s));
-		tab=new byte[1000000];
+		tab=new byte[1000];
 		rand.nextBytes(tab);
-		byte[] tab2=new byte[1000000];
+		byte[] tab2=new byte[500];
 		rand.nextBytes(tab2);
 		res[2][0]=rand;
 		res[2][1]=new AggregatedRandomInputStreams(new RandomByteArrayInputStream(tab), new RandomByteArrayInputStream(tab2));
@@ -81,8 +81,29 @@ public class TestBufferedStreams {
 		System.arraycopy(tab, 0, tab3, 0, tab.length);
 		System.arraycopy(tab2, 0, tab3, tab.length, tab2.length);
 		res[2][2]=new RandomByteArrayInputStream(tab3);
+
+		FragmentedStreamParameters parameters=new FragmentedStreamParameters((byte)2, (byte)0);
+		tab=new byte[1000+(rand.nextBoolean()?1:0)];
+		rand.nextBytes(tab);
+		tab2=new byte[tab.length/2+tab.length%2];
+		tab3=new byte[tab.length/2];
+		for (int i=0;i<tab2.length;i++)
+			tab2[i]=tab[i*2];
+		for (int i=0;i<tab3.length;i++)
+			tab3[i]=tab[i*2+1];
+		res[3][0]=rand;
+		res[3][1]=new FragmentedRandomInputStream(parameters, new RandomByteArrayInputStream(tab2), new RandomByteArrayInputStream(tab3));
+		res[3][2]=new RandomByteArrayInputStream(tab);
+		res[4][0]=rand;
+		res[4][1]=new FragmentedRandomInputStreamPerChannel(parameters, new RandomByteArrayInputStream(tab));
+		res[4][2]=new RandomByteArrayInputStream(tab2);
+		res[5][0]=rand;
+		res[5][1]=new FragmentedRandomInputStreamPerChannel(new FragmentedStreamParameters((byte)2, (byte)1), new RandomByteArrayInputStream(tab));
+		res[5][2]=new RandomByteArrayInputStream(tab3);
 		return res;
 	}
+
+
 
 	@SuppressWarnings("ResultOfMethodCallIgnored")
 	private void testBufferedInputStream(Random rand, RandomInputStream inputStream, int maxCycles, RandomInputStream referenceInputStream) throws IOException {

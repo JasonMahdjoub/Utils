@@ -93,7 +93,8 @@ public class FragmentedStreamParameters implements SecureExternalizable {
 
 	long getCurrentPosition(long streamPos)
 	{
-		return (streamPos-offset)/streamPartNumbers;
+		long m=streamPos%streamPartNumbers;
+		return streamPos/streamPartNumbers+(m>offset?1:0);
 	}
 	long getCurrentPosition(RandomInputStream in) throws IOException {
 		return getCurrentPosition(in.currentPosition());

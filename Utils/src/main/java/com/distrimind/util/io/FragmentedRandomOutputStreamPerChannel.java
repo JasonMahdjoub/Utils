@@ -85,7 +85,7 @@ public class FragmentedRandomOutputStreamPerChannel extends RandomOutputStream{
 
 	@Override
 	protected RandomInputStream getRandomInputStreamImpl() throws IOException {
-		return new FragmentedRandomInputStreamPerChannel(out.getRandomInputStream(), params, false);
+		return new FragmentedRandomInputStreamPerChannel(params, out.getRandomInputStream(),false);
 	}
 
 	@Override

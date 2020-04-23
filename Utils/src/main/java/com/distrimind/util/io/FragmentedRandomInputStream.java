@@ -47,7 +47,7 @@ import java.io.IOException;
 public class FragmentedRandomInputStream extends RandomInputStream{
 	private final RandomInputStream[] ins;
 	private final FragmentedStreamParameters parameters;
-	private int sindex=0;
+	private int sindex;
 	private long pos;
 	private boolean closed=false;
 
@@ -61,9 +61,9 @@ public class FragmentedRandomInputStream extends RandomInputStream{
 		for (RandomInputStream in : ins)
 			if (in==null)
 				throw new NullPointerException();
-		this.ins = ins;
+		this.ins = ins.clone();
 		this.parameters = parameters;
-		seek(0);
+		seek(pos);
 	}
 	FragmentedRandomInputStream(FragmentedStreamParameters parameters, RandomInputStream[] ins, boolean closed) throws IOException {
 		this.ins = ins;
@@ -97,7 +97,12 @@ public class FragmentedRandomInputStream extends RandomInputStream{
 		this.pos=_pos;
 		long p=_pos/ins.length;
 		sindex=(int)(_pos%ins.length);
-		for (RandomInputStream in : ins) in.seek(p);
+		for (int i=0;i<ins.length;i++) {
+			if (i<sindex)
+				ins[i].seek(p+1);
+			else
+				ins[i].seek(p);
+		}
 	}
 
 	@Override

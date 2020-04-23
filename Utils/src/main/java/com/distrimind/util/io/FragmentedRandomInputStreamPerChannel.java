@@ -49,7 +49,7 @@ public class FragmentedRandomInputStreamPerChannel extends RandomInputStream {
 
 
 
-	FragmentedRandomInputStreamPerChannel(RandomInputStream in, FragmentedStreamParameters fragmentedStreamParameters, boolean seek) throws IOException {
+	FragmentedRandomInputStreamPerChannel(FragmentedStreamParameters fragmentedStreamParameters, RandomInputStream in, boolean seek) throws IOException {
 		if (in==null)
 			throw new NullPointerException();
 		if (fragmentedStreamParameters==null)
@@ -59,8 +59,8 @@ public class FragmentedRandomInputStreamPerChannel extends RandomInputStream {
 		if (seek)
 			in.seek(fragmentedStreamParameters.getOffset());
 	}
-	public FragmentedRandomInputStreamPerChannel(RandomInputStream in, FragmentedStreamParameters fragmentedStreamParameters) throws IOException {
-		this(in, fragmentedStreamParameters, true);
+	public FragmentedRandomInputStreamPerChannel(FragmentedStreamParameters fragmentedStreamParameters, RandomInputStream in) throws IOException {
+		this(fragmentedStreamParameters, in, true);
 	}
 
 	@Override
@@ -99,6 +99,8 @@ public class FragmentedRandomInputStreamPerChannel extends RandomInputStream {
 
 	@Override
 	public void skipNBytes(long _nb) throws IOException {
+		if (_nb<=0)
+			return;
 		in.skipNBytes(_nb*params.getStreamPartNumbers());
 	}
 
@@ -107,6 +109,8 @@ public class FragmentedRandomInputStreamPerChannel extends RandomInputStream {
 	 */
 	@Override
 	public long skip(long _nb) throws IOException {
+		if (_nb<=0)
+			return 0;
 		return in.skip(_nb*params.getStreamPartNumbers());
 	}
 
@@ -120,7 +124,8 @@ public class FragmentedRandomInputStreamPerChannel extends RandomInputStream {
 	@Override
 	public int read() throws IOException {
 		int v= in.read();
-		in.skipNBytes(params.getByteToSkipAfterRead());
+		if (v>=0)
+			in.skipBytes(params.getByteToSkipAfterRead());
 		return v;
 	}
 
