@@ -85,14 +85,8 @@ public class FragmentedRandomInputStreamPerChannel extends RandomInputStream {
 
 	@Override
 	public void readFully(byte[] tab, int off, int len) throws IOException {
-		checkLimits(tab, off, len);
-		while (len>0) {
-			int s = read(tab, off, len);
-			if (s < 0)
-				throw new EOFException();
-			len -= s;
-			off+=s;
-		}
+
+		read(tab, off, len, true);
 	}
 
 
@@ -129,85 +123,33 @@ public class FragmentedRandomInputStreamPerChannel extends RandomInputStream {
 		return v;
 	}
 
-	/*public int readChannels(int[] channels) throws IOException {
-		if (params.getOffset()!=0)
-			throw new IllegalArgumentException("Offset of fragmented stream must be set to 0 when using function");
-		if (channels==null)
-			throw new NullPointerException();
-		if (channels.length!=params.getStreamPartNumbers())
-			throw new IllegalArgumentException();
-		for (int i=0;i<channels.length;i++) {
-			int v=channels[i] = in.read();
-			if (v<0)
-				return i;
-		}
-		return channels.length;
-	}
-	public int readChannels(byte[][] tabs) throws IOException {
-		if (tabs==null)
-			throw new NullPointerException();
-		int [] offs=new int[tabs.length];
-		int[] lens=new int[tabs.length];
-
-		for (int i=0;i<tabs.length;i++)
-		{
-			lens[i]=tabs[i].length;
-			offs[i]=0;
-		}
-		return readChannels(tabs, offs, lens);
-	}
-	public int readChannels(byte[][] tabs, int[] offs, int[] lens) throws IOException {
-		return readChannels(tabs, offs, lens, false);
+	@Override
+	public int read(byte[] b, int off, int len) throws IOException {
+		return read(b, off, len, false);
 	}
 
-	private int readChannels(byte[][] tabs, int[] offs, int[] lens, boolean fully) throws IOException {
-		if (params.getOffset()!=0)
-			throw new IllegalArgumentException("Offset of fragmented stream must be set to 0 when using function");
-		Reference<Integer> offsetToApply=new Reference<>();
-		final int maxSize=params.checkChannelsParams(tabs, offs, lens, offsetToApply);
-		int indexChannel=0;
-		byte[] buffer=new byte[Math.min(BufferedRandomInputStream.MAX_BUFFER_SIZE, maxSize)];
-		int i=0;
-		do {
-			int bs = Math.min(buffer.length, maxSize - i);
-			bs = in.read(buffer, 0, bs);
-			if (bs < 0) {
+
+	private int read(byte[] b, int off, int len, boolean fully) throws IOException {
+		checkLimits(b, off, len);
+		final int end=off+len;
+		long av=in.length()-in.currentPosition()-1;
+		int skip=params.getByteToSkipAfterRead();
+		for (int i=off;i<end;i++, av--) {
+			int v=in.read();
+			if (v<0) {
 				if (fully)
 					throw new EOFException();
+				i-=off;
+				if (i==0)
+					return -1;
 				else
 					return i;
 			}
-
-			for (int bufIndex=0;bufIndex<bs; i++, indexChannel = (indexChannel + 1) % params.getStreamPartNumbers(), bufIndex++) {
-				int len = lens[indexChannel]--;
-				int off = offs[indexChannel]++;
-				if (len>0)
-					tabs[indexChannel][off] = buffer[bufIndex];
-			}
-		} while(i<maxSize);
-		for (i=offsetToApply.get();i>0;i--) {
-			if (in.read()<0)
-				break;
+			b[i] = (byte)v;
+			in.skipNBytes(Math.min(av, skip));
 		}
-		return maxSize;
+		return len;
 	}
-	public int readChannelsFully(byte[][] tabs) throws IOException {
-		if (tabs==null)
-			throw new NullPointerException();
-		int [] offs=new int[tabs.length];
-		int[] lens=new int[tabs.length];
-
-		for (int i=0;i<tabs.length;i++)
-		{
-			lens[i]=tabs[i].length;
-			offs[i]=0;
-		}
-		return readChannelsFully(tabs, offs, lens);
-	}
-	public int readChannelsFully(byte[][] tabs, int[] offs, int[] lens) throws IOException {
-
-		return readChannels(tabs, offs, lens, true);
-	}*/
 
 	@Override
 	public void mark(int readlimit) {
