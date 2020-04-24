@@ -204,9 +204,9 @@ public class TestStreams {
 
 	}
 
-	@Test(/*dependsOnMethods = "testBufferedInputStream", */invocationCount = 2000, threadPoolSize = 16, dataProvider = "provideOutputStreams")
+	@Test(dependsOnMethods = "testBufferedInputStream", invocationCount = 1000, threadPoolSize = 16, dataProvider = "provideOutputStreams")
 	public void testOutputStreams(RandomOutputStream dest, RandomOutputStream outputStream) throws IOException {
-		int maxCycles=50000;
+		int maxCycles=10000;
 		Random rand=new Random(System.currentTimeMillis());
 		RandomByteArrayOutputStream dest2=new RandomByteArrayOutputStream();
 		for (int i=0;i<maxCycles;i++)
@@ -270,6 +270,8 @@ public class TestStreams {
 
 		Assert.assertEquals(inputStream.length(), outputStream.length());
 		testInputStreams(inputStream, maxCycles, ris);
+		outputStream.setLength(0);
+		dest.setLength(0);
 	}
 
 }

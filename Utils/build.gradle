@@ -202,7 +202,7 @@ test {
   
    // set heap size for the test JVM(s)
    minHeapSize = "1m"
-   maxHeapSize = "2g"
+   maxHeapSize = "6g"
 	/*testLogging {
         events "passed", "skipped", "failed", "standardOut", "standardError"
     }*/
