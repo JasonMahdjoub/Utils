@@ -48,14 +48,14 @@ import java.util.Random;
  * @version 1.0
  * @since Utils 1.30.0
  */
-public class TestBufferedStreams {
+public class TestStreams {
 
 	@Test(invocationCount = 1000, threadPoolSize = 16, dataProvider = "provideInputStreams")
-	public void testBufferedInputStream(RandomInputStream inputStream, RandomInputStream referenceInputStream) throws IOException {
-		testBufferedInputStream(inputStream, 9000, referenceInputStream);
+	public void testInputStreams(RandomInputStream inputStream, RandomInputStream referenceInputStream) throws IOException {
+		testInputStreams(inputStream, 9000, referenceInputStream);
 	}
 
-	@DataProvider(name = "provideInputStreams", parallel = true)
+	@DataProvider(name = "provideInputStreams")
 	Object[][] provideInputStreams() throws IOException {
 		Object[][] res=new Object[6][2];
 		Random rand=new Random(System.currentTimeMillis());
@@ -100,7 +100,7 @@ public class TestBufferedStreams {
 
 
 	@SuppressWarnings("ResultOfMethodCallIgnored")
-	private void testBufferedInputStream(RandomInputStream inputStream, int maxCycles, RandomInputStream referenceInputStream) throws IOException {
+	private void testInputStreams(RandomInputStream inputStream, int maxCycles, RandomInputStream referenceInputStream) throws IOException {
 		Random rand=new Random(System.currentTimeMillis());
 		Assert.assertEquals(inputStream.length(), referenceInputStream.length());
 		for (int i=0;i<maxCycles;i++)
@@ -167,17 +167,45 @@ public class TestBufferedStreams {
 
 	@DataProvider(name = "provideOutputStreams", parallel = true)
 	public Object[][] provideOutputStreams() throws IOException {
-		Object[][] res=new Object[1][2];
-		RandomByteArrayOutputStream dest=new RandomByteArrayOutputStream();
+		Object[][] res=new Object[5][2];
+		RandomOutputStream dest=new RandomByteArrayOutputStream();
 		RandomOutputStream outputStream=new BufferedRandomOutputStream(dest);
 		res[0][0]=dest;
 		res[0][1]=outputStream;
+
+		dest=new AggregatedRandomOutputStreams(new RandomOutputStream[]{
+				new RandomByteArrayOutputStream(),
+				new RandomByteArrayOutputStream()
+		}, new long[]{
+				10,
+				10000000
+		});
+		outputStream=dest;
+
+		res[1][0]=dest;
+		res[1][1]=outputStream;
+
+		dest=new FragmentedRandomOutputStream((byte)2,new RandomByteArrayOutputStream(), new RandomByteArrayOutputStream());
+		outputStream=dest;
+		res[2][0]=dest;
+		res[2][1]=outputStream;
+
+		dest=new FragmentedRandomOutputStreamPerChannel(new FragmentedStreamParameters((byte)2, (byte)0),new RandomByteArrayOutputStream());
+		outputStream=dest;
+		res[3][0]=dest;
+		res[3][1]=outputStream;
+
+		dest=new FragmentedRandomOutputStreamPerChannel(new FragmentedStreamParameters((byte)2, (byte)1),new RandomByteArrayOutputStream());
+		outputStream=dest;
+		res[4][0]=dest;
+		res[4][1]=outputStream;
+
 		return res;
 
 	}
 
 	@Test(/*dependsOnMethods = "testBufferedInputStream", */invocationCount = 2000, threadPoolSize = 16, dataProvider = "provideOutputStreams")
-	public void testBufferedOutputStream(RandomOutputStream dest, RandomOutputStream outputStream) throws IOException {
+	public void testOutputStreams(RandomOutputStream dest, RandomOutputStream outputStream) throws IOException {
 		int maxCycles=50000;
 		Random rand=new Random(System.currentTimeMillis());
 		RandomByteArrayOutputStream dest2=new RandomByteArrayOutputStream();
@@ -237,11 +265,11 @@ public class TestBufferedStreams {
 		dest2.flush();
 		Assert.assertEquals(outputStream.length(),dest2.length() );
 		Assert.assertEquals(dest.length(),dest2.length() );
-		BufferedRandomInputStream inputStream=(BufferedRandomInputStream)outputStream.getRandomInputStream();
+		RandomInputStream inputStream=outputStream.getRandomInputStream();
 		RandomInputStream ris=dest2.getRandomInputStream();
 
 		Assert.assertEquals(inputStream.length(), outputStream.length());
-		testBufferedInputStream(inputStream, maxCycles, ris);
+		testInputStreams(inputStream, maxCycles, ris);
 	}
 
 }

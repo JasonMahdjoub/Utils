@@ -2,7 +2,7 @@
 <suite name="TestAll">
 	<test name="testBufferedStreams">
 		<classes>
-			<class name="com.distrimind.util.io.TestBufferedStreams" />
+			<class name="com.distrimind.util.io.TestStreams" />
 		</classes>
 	</test>
 

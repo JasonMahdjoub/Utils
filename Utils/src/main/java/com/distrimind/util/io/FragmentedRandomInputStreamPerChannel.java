@@ -70,6 +70,7 @@ public class FragmentedRandomInputStreamPerChannel extends RandomInputStream {
 
 	@Override
 	public void seek(long _pos) throws IOException {
+
 		params.seek(in, _pos);
 	}
 
@@ -85,7 +86,7 @@ public class FragmentedRandomInputStreamPerChannel extends RandomInputStream {
 
 	@Override
 	public void readFully(byte[] tab, int off, int len) throws IOException {
-
+		//noinspection ResultOfMethodCallIgnored
 		read(tab, off, len, true);
 	}
 
@@ -93,6 +94,8 @@ public class FragmentedRandomInputStreamPerChannel extends RandomInputStream {
 
 	@Override
 	public void skipNBytes(long _nb) throws IOException {
+		if (isClosed())
+			throw new IOException("Stream closed");
 		if (_nb<=0)
 			return;
 		in.skipNBytes(_nb*params.getStreamPartNumbers());
@@ -103,6 +106,8 @@ public class FragmentedRandomInputStreamPerChannel extends RandomInputStream {
 	 */
 	@Override
 	public long skip(long _nb) throws IOException {
+		if (isClosed())
+			throw new IOException("Stream closed");
 		if (_nb<=0)
 			return 0;
 		return in.skip(_nb*params.getStreamPartNumbers());
@@ -112,11 +117,15 @@ public class FragmentedRandomInputStreamPerChannel extends RandomInputStream {
 	@Override
 	@Deprecated
 	public String readLine() throws IOException {
+		if (isClosed())
+			throw new IOException("Stream closed");
 		throw new IOException(new IllegalAccessException());
 	}
 
 	@Override
 	public int read() throws IOException {
+		if (isClosed())
+			throw new IOException("Stream closed");
 		int v= in.read();
 		if (v>=0)
 			in.skipNBytes(Math.min(in.length()-in.currentPosition(), params.getByteToSkipAfterRead()));
@@ -130,6 +139,8 @@ public class FragmentedRandomInputStreamPerChannel extends RandomInputStream {
 
 
 	private int read(byte[] b, int off, int len, boolean fully) throws IOException {
+		if (isClosed())
+			throw new IOException("Stream closed");
 		checkLimits(b, off, len);
 		final int end=off+len;
 		long av=in.length()-in.currentPosition()-1;

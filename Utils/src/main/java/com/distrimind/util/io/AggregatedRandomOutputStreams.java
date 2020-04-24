@@ -111,6 +111,7 @@ public class AggregatedRandomOutputStreams extends RandomOutputStream {
 	public void write(byte[] tab, int off, int len) throws IOException {
 		if (closed)
 			throw new IOException("Stream closed");
+		ensureLength(currentPosition()+len);
 		RandomInputStream.checkLimits(tab, off, len);
 		RandomOutputStream ros=outs[selectedInputStreamPos];
 		do {
@@ -136,7 +137,24 @@ public class AggregatedRandomOutputStreams extends RandomOutputStream {
 
 	@Override
 	public void setLength(long newLength) throws IOException {
-		throw new IOException(new IllegalAccessException());
+		long acc=0;
+		long curPos=currentPosition();
+		for (int i=0;i<outs.length;i++)
+		{
+			if (acc>=newLength)
+			{
+				outs[i].setLength(0);
+			}
+			else
+			{
+				long l=acc+lengths[i];
+				if (l>=newLength)
+					outs[i].setLength(newLength-acc);
+				acc=l;
+			}
+		}
+		if (curPos>newLength)
+			seek(newLength);
 	}
 
 	@Override
@@ -150,7 +168,8 @@ public class AggregatedRandomOutputStreams extends RandomOutputStream {
 		{
 			RandomOutputStream ris = outs[i];
 			long l=ris.length();
-			if (l>(_pos-off))
+			boolean last=i+1==outs.length;
+			if ((last && l >= _pos - off) || (!last && l > _pos - off))
 			{
 				ris.seek(_pos-off);
 				posOff=off;

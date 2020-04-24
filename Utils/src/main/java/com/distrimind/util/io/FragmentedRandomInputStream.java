@@ -49,7 +49,7 @@ public class FragmentedRandomInputStream extends RandomInputStream{
 	private final FragmentedStreamParameters parameters;
 	private int sindex;
 	private long pos;
-	private boolean closed=false;
+	private boolean closed;
 
 	public FragmentedRandomInputStream(FragmentedStreamParameters parameters, RandomInputStream... ins) throws IOException {
 		if (ins==null)
@@ -63,21 +63,23 @@ public class FragmentedRandomInputStream extends RandomInputStream{
 				throw new NullPointerException();
 		this.ins = ins.clone();
 		this.parameters = parameters;
-		seek(pos);
+		this.closed=false;
+		seek(0);
 	}
 	FragmentedRandomInputStream(FragmentedStreamParameters parameters, RandomInputStream[] ins, boolean closed) throws IOException {
 		this.ins = ins;
 		this.parameters = parameters;
 
-		this.pos=ins[0].currentPosition();
 		this.closed=closed;
 		if (closed)
 			this.pos=0;
 		else {
+			seek(0);
+			/*this.pos=ins[0].currentPosition();
 			for (int i = 1; i < ins.length; i++)
-				this.pos += ins[i].currentPosition();
+				this.pos += ins[i].currentPosition();*/
 		}
-		this.sindex=(int)(pos%ins.length);
+		//this.sindex=(int)(pos%ins.length);
 	}
 
 	public FragmentedStreamParameters getParameters() {
@@ -94,6 +96,9 @@ public class FragmentedRandomInputStream extends RandomInputStream{
 
 	@Override
 	public void seek(long _pos) throws IOException {
+		if (isClosed())
+			throw new IOException("Stream closed");
+
 		this.pos=_pos;
 		long p=_pos/ins.length;
 		sindex=(int)(_pos%ins.length);
@@ -112,6 +117,8 @@ public class FragmentedRandomInputStream extends RandomInputStream{
 
 	@Override
 	public int read() throws IOException {
+		if (isClosed())
+			throw new IOException("Stream closed");
 		int v=ins[sindex].read();
 		if (v>=0) {
 			sindex = (sindex+1)%ins.length;
@@ -125,6 +132,8 @@ public class FragmentedRandomInputStream extends RandomInputStream{
 		return read(b, off, len, false);
 	}
 	private int read(byte[] b, int off, int len, boolean fully) throws IOException {
+		if (isClosed())
+			throw new IOException("Stream closed");
 		checkLimits(b, off, len);
 		int end=off+len;
 		for (int i=off;i<end;i++) {
@@ -149,7 +158,6 @@ public class FragmentedRandomInputStream extends RandomInputStream{
 
 	@Override
 	public void readFully(byte[] tab, int off, int len) throws IOException {
-		checkLimits(tab, off, len);
 		//noinspection ResultOfMethodCallIgnored
 		read(tab, off, len, true);
 	}
@@ -160,6 +168,8 @@ public class FragmentedRandomInputStream extends RandomInputStream{
 	@Override
 	@Deprecated
 	public String readLine() throws IOException {
+		if (isClosed())
+			throw new IOException("Stream closed");
 		return new DataInputStream(this).readLine();
 	}
 	@Override

@@ -193,8 +193,9 @@ public class BufferedRandomOutputStream extends RandomOutputStream{
 		}
 		out.setLength(newLength);
 		if (currentPosition>newLength) {
-			currentPosition = newLength;
-			checkOverlapping();
+			seek(newLength);
+			/*currentPosition = newLength;
+			checkOverlapping();*/
 		}
 
 
@@ -299,6 +300,8 @@ public class BufferedRandomOutputStream extends RandomOutputStream{
 		if (length>this.length) {
 			out.ensureLength(length);
 			this.length = length;
+			if (currentPosition()>length)
+				seek(length);
 		}
 	}
 
@@ -306,6 +309,7 @@ public class BufferedRandomOutputStream extends RandomOutputStream{
 	public void write(byte[] b, int off, int len) throws IOException {
 		if (isClosed())
 			throw new IOException("Stream closed");
+		ensureLength(currentPosition()+len);
 		RandomInputStream.checkLimits(b, off, len);
 		checkCurrentBufferNotNull();
 		int curPos=endPositions[currentBufferIndex];

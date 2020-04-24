@@ -45,10 +45,13 @@ import java.io.IOException;
 public class FragmentedRandomOutputStream extends RandomOutputStream {
 	private final RandomOutputStream[] outs;
 	private final FragmentedStreamParameters parameters;
-	private long length=0;
-	private int sindex=0;
+	private long length;
+	private int sindex;
 	private long pos;
 	private boolean closed=false;
+	public FragmentedRandomOutputStream(byte streamPartNumbers, RandomOutputStream ...outs) throws IOException {
+		this(new FragmentedStreamParameters(streamPartNumbers, (byte)0), outs);
+	}
 	public FragmentedRandomOutputStream(FragmentedStreamParameters parameters, RandomOutputStream ...outs) throws IOException {
 		if (outs==null)
 			throw new NullPointerException();
@@ -61,6 +64,7 @@ public class FragmentedRandomOutputStream extends RandomOutputStream {
 				throw new NullPointerException();
 		this.outs = outs;
 		this.parameters = parameters;
+		this.length=0;
 		seek(0);
 	}
 
@@ -71,21 +75,32 @@ public class FragmentedRandomOutputStream extends RandomOutputStream {
 
 	@Override
 	public void setLength(long newLength) throws IOException {
+		if (isClosed())
+			throw new IOException("Stream closed");
 		long p=newLength/outs.length;
+		long i2=newLength%outs.length;
 		for (int i=0;i<outs.length;i++)
 		{
-			outs[i].setLength(p+(i<newLength%outs.length?1:0));
+			outs[i].setLength(p+(i<i2?1:0));
 		}
 		this.length=newLength;
-		this.pos=Math.min(this.pos, this.length);
+		if (this.pos>this.length)
+			seek(this.length);
 	}
 
 	@Override
 	public void seek(long _pos) throws IOException {
+		if (isClosed())
+			throw new IOException("Stream closed");
 		this.pos=_pos;
 		long p=_pos/outs.length;
-		sindex=(int)(_pos%outs.length);
-		for (RandomOutputStream out : outs) out.seek(p);
+		this.sindex=(int)(_pos%outs.length);
+		for (int i=0;i<outs.length;i++) {
+			if (i<sindex)
+				outs[i].seek(p+1);
+			else
+				outs[i].seek(p);
+		}
 	}
 
 	@Override
@@ -114,10 +129,13 @@ public class FragmentedRandomOutputStream extends RandomOutputStream {
 	@Override
 	public void write(byte[] b, int off, int len) throws IOException {
 		RandomInputStream.checkLimits(b, off, len);
+		if (isClosed())
+			throw new IOException("Stream closed");
+		ensureLength(pos+len);
 		int end=off+len;
 		for (int i=off;i<end;i++)
 		{
-			outs[sindex++].write(b);
+			outs[sindex++].writeByte(b[i]);
 			sindex%=outs.length;
 		}
 		pos+=len;
@@ -126,9 +144,11 @@ public class FragmentedRandomOutputStream extends RandomOutputStream {
 
 	@Override
 	public void write(int b) throws IOException {
+		if (isClosed())
+			throw new IOException("Stream closed");
 		outs[sindex++].write(b);
 		sindex%=outs.length;
-		pos++;
+		++pos;
 		length=Math.max(pos, length);
 	}
 	@Override

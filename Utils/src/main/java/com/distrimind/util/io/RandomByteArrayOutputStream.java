@@ -104,7 +104,6 @@ public class RandomByteArrayOutputStream extends RandomOutputStream {
 		if (current_pos == -1)
 			throw new IOException("The current RandomByteArrayOutputStream is closed !");
 		RandomInputStream.checkLimits(_bytes, _offset, _length);
-
 		ensureAdditionalLength(_length);
 		System.arraycopy(_bytes, _offset, bytes, current_pos, _length);
 		current_pos += _length;
@@ -143,7 +142,8 @@ public class RandomByteArrayOutputStream extends RandomOutputStream {
 		}
 
 		this.length = length;
-		current_pos = Math.min(length, current_pos);
+		if (current_pos>length)
+			current_pos=length;
 	}
 
 	/**
