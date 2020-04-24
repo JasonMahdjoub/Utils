@@ -171,13 +171,22 @@ public class TestBufferedStreams {
 		}
 	}
 
-	@Test(dependsOnMethods = "testBufferedInputStream", invocationCount = 2000, threadPoolSize = 16)
-	public void testBufferedOutputStream() throws IOException {
-		RandomOutputStream dest=new RandomByteArrayOutputStream();
+	@DataProvider(name = "provideOutputStreams", parallel = true)
+	public Object[][] provideOutputStreams() throws IOException {
+		Object[][] res=new Object[1][2];
+		RandomByteArrayOutputStream dest=new RandomByteArrayOutputStream();
 		RandomOutputStream outputStream=new BufferedRandomOutputStream(dest);
-		RandomByteArrayOutputStream dest2=new RandomByteArrayOutputStream();
+		res[0][0]=dest;
+		res[0][1]=outputStream;
+		return res;
+
+	}
+
+	@Test(/*dependsOnMethods = "testBufferedInputStream", */invocationCount = 2000, threadPoolSize = 16, dataProvider = "provideOutputStreams")
+	public void testBufferedOutputStream(RandomOutputStream dest, RandomOutputStream outputStream) throws IOException {
 		int maxCycles=50000;
 		Random rand=new Random(System.currentTimeMillis());
+		RandomByteArrayOutputStream dest2=new RandomByteArrayOutputStream();
 		for (int i=0;i<maxCycles;i++)
 		{
 			if (i%(maxCycles/100)==0)
