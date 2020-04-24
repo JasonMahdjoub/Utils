@@ -157,7 +157,7 @@ public class TestStreams {
 					}
 
 
-					Assert.assertEquals(bytes, bytes2);
+					Assert.assertEquals(bytes, bytes2, "length="+bytes.length);
 
 				}
 			}
@@ -165,7 +165,7 @@ public class TestStreams {
 		}
 	}
 
-	@DataProvider(name = "provideOutputStreams", parallel = true)
+	@DataProvider(name = "provideOutputStreams")
 	public Object[][] provideOutputStreams() throws IOException {
 		Object[][] res=new Object[5][2];
 		RandomOutputStream dest=new RandomByteArrayOutputStream();

@@ -56,8 +56,9 @@ public class FragmentedRandomInputStreamPerChannel extends RandomInputStream {
 			throw new NullPointerException();
 		this.in = in;
 		this.params=fragmentedStreamParameters;
-		if (seek)
+		if (seek && in.length()>0) {
 			in.seek(fragmentedStreamParameters.getOffset());
+		}
 	}
 	public FragmentedRandomInputStreamPerChannel(FragmentedStreamParameters fragmentedStreamParameters, RandomInputStream in) throws IOException {
 		this(fragmentedStreamParameters, in, true);

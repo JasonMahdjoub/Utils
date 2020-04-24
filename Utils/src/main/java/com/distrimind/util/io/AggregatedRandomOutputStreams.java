@@ -93,7 +93,7 @@ public class AggregatedRandomOutputStreams extends RandomOutputStream {
 	public void write(int b) throws IOException {
 		RandomOutputStream ros=outs[selectedInputStreamPos];
 		ros.write(b);
-		if (ros.length()==lengths[selectedInputStreamPos])
+		if (ros.currentPosition()==lengths[selectedInputStreamPos])
 		{
 			if (++selectedInputStreamPos==outs.length)
 			{
@@ -167,7 +167,7 @@ public class AggregatedRandomOutputStreams extends RandomOutputStream {
 		for (int i=0;i<outs.length;i++)
 		{
 			RandomOutputStream ris = outs[i];
-			long l=ris.length();
+			long l=lengths[i];
 			boolean last=i+1==outs.length;
 			if ((last && l >= _pos - off) || (!last && l > _pos - off))
 			{

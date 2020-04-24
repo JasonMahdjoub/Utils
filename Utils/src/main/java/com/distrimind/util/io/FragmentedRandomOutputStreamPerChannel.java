@@ -54,8 +54,8 @@ public class FragmentedRandomOutputStreamPerChannel extends RandomOutputStream{
 			throw new NullPointerException();
 		this.out = out;
 		this.params = fragmentedStreamParameters;
-		out.ensureLength(fragmentedStreamParameters.getOffset());
-		out.seek(fragmentedStreamParameters.getOffset());
+		offsetToApply=params.getOffset();
+		out.seek(0);
 	}
 
 	@Override
@@ -65,10 +65,12 @@ public class FragmentedRandomOutputStreamPerChannel extends RandomOutputStream{
 
 	@Override
 	public void setLength(long newLength) throws IOException {
-		long curPos=currentPosition();
-		out.setLength(newLength*params.getStreamPartNumbers()+params.getOffset());
-		if (curPos>newLength)
-			seek(newLength);
+		if (isClosed())
+			throw new IOException("Stream closed");
+		if (newLength<=0)
+			out.setLength(0);
+		else
+			out.setLength((newLength-1)*params.getStreamPartNumbers()+params.getOffset()+1);
 	}
 
 	@Override
@@ -91,32 +93,24 @@ public class FragmentedRandomOutputStreamPerChannel extends RandomOutputStream{
 
 	@Override
 	protected RandomInputStream getRandomInputStreamImpl() throws IOException {
-		return new FragmentedRandomInputStreamPerChannel(params, out.getRandomInputStream(),false);
+		return new FragmentedRandomInputStreamPerChannel(params, out.getRandomInputStream(),true);
 	}
 
 	@Override
 	public void write(byte[] b, int off, int len) throws IOException {
-		RandomInputStream.checkLimits(b, off, len);
 		if (isClosed())
 			throw new IOException("Stream closed");
+		RandomInputStream.checkLimits(b, off, len);
+
 		if (len==0)
 			return;
 		long p;
-		if (this.offsetToApply>0)
-		{
-			long s=(p=out.currentPosition()+offsetToApply)+1+params.getStreamPartNumbers()*(len-1);
-			out.ensureLength(s);
-		}
-		else
-		{
-			long s=out.currentPosition()+params.getStreamPartNumbers()*(len-1);
-			out.ensureLength(s);
-			p=out.currentPosition();
-		}
-		int s=off+len;
-		for (int i = off ; i < s ; i++) {
+		long s=(p=out.currentPosition()+offsetToApply)+1+params.getStreamPartNumbers()*(len-1);
+		out.ensureLength(s);
+		int end=off+len;
+		for (int i = off ; i < end ; i++) {
 			out.seek(p);
-			out.write(b[off + i]);
+			out.write(b[i]);
 			p+=params.getStreamPartNumbers();
 		}
 		offsetToApply=params.getByteToSkipAfterRead();
@@ -127,9 +121,9 @@ public class FragmentedRandomOutputStreamPerChannel extends RandomOutputStream{
 	public void write(int b) throws IOException {
 		if (offsetToApply>0)
 		{
-			long s=out.currentPosition()+offsetToApply+1;
-			out.ensureLength(s);
-			out.seek(s-1);
+			long s=out.currentPosition()+offsetToApply;
+			out.ensureLength(s+1);
+			out.seek(s);
 		}
 		out.write(b);
 		offsetToApply=params.getByteToSkipAfterRead();
