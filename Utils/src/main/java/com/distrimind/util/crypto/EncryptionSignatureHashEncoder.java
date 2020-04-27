@@ -40,6 +40,7 @@ import com.distrimind.util.io.*;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import javax.crypto.ShortBufferException;
 import java.io.IOException;
 import java.security.*;
@@ -54,7 +55,7 @@ import java.util.List;
  * @version 1.0
  * @since Utils 4.16.0
  */
-public class EncryptionWriter {
+public class EncryptionSignatureHashEncoder {
 	private static final MessageDigestType defaultMessageType=MessageDigestType.SHA2_256;
 	static void checkLimits(byte[] data, int off, int len)
 	{
@@ -106,7 +107,7 @@ public class EncryptionWriter {
 	private SymmetricAuthenticatedSignerAlgorithm symmetricSigner=null;
 	private ASymmetricAuthenticatedSignerAlgorithm asymmetricSigner=null;
 	private AbstractMessageDigest digest=null;
-	public EncryptionWriter(RandomInputStream inputStream, RandomOutputStream outputStream) throws IOException {
+	public EncryptionSignatureHashEncoder(RandomInputStream inputStream, RandomOutputStream outputStream) throws IOException {
 		if (inputStream==null)
 			throw new NullPointerException();
 		if (inputStream.length()-inputStream.currentPosition()==0)
@@ -117,14 +118,32 @@ public class EncryptionWriter {
 		this.outputStream=outputStream;
 	}
 
-	public EncryptionWriter withCipher(SymmetricEncryptionAlgorithm cipher)
+	public EncryptionSignatureHashEncoder withSymmetricSecretKeyForEncryption(AbstractSecureRandom random, SymmetricSecretKey symmetricSecretKeyForEncryption) throws IOException {
+		try {
+			return withCipher(new SymmetricEncryptionAlgorithm(random, symmetricSecretKeyForEncryption));
+		} catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | InvalidAlgorithmParameterException | NoSuchProviderException | InvalidKeySpecException e) {
+			throw new IOException(e);
+		}
+	}
+	public EncryptionSignatureHashEncoder withSymmetricSecretKeyForEncryptionAndAssociatedData(AbstractSecureRandom random, SymmetricSecretKey symmetricSecretKeyForEncryption, byte[] associatedData) throws IOException {
+		return withSymmetricSecretKeyForEncryptionAndAssociatedData(random, symmetricSecretKeyForEncryption, associatedData, 0, associatedData.length);
+	}
+	public EncryptionSignatureHashEncoder withSymmetricSecretKeyForEncryptionAndAssociatedData(AbstractSecureRandom random, SymmetricSecretKey symmetricSecretKeyForEncryption, byte[] associatedData, int offAD, int lenAD) throws IOException {
+		try {
+			return withCipherAndAssociatedData(new SymmetricEncryptionAlgorithm(random, symmetricSecretKeyForEncryption), associatedData, offAD, lenAD);
+		} catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | InvalidAlgorithmParameterException | NoSuchProviderException | InvalidKeySpecException e) {
+			throw new IOException(e);
+		}
+	}
+
+	public EncryptionSignatureHashEncoder withCipher(SymmetricEncryptionAlgorithm cipher)
 	{
 		if (cipher==null)
 			throw new NullPointerException();
 		this.cipher=cipher;
 		return this;
 	}
-	public EncryptionWriter withCipherAndAssociatedData(SymmetricEncryptionAlgorithm cipher, byte[] associatedData, int offAD, int lenAD)
+	public EncryptionSignatureHashEncoder withCipherAndAssociatedData(SymmetricEncryptionAlgorithm cipher, byte[] associatedData, int offAD, int lenAD)
 	{
 		if (cipher==null)
 			throw new NullPointerException();
@@ -137,50 +156,61 @@ public class EncryptionWriter {
 		this.lenAD=lenAD;
 		return this;
 	}
-	public EncryptionWriter withSymmetricSigner(SymmetricAuthenticatedSignerAlgorithm symmetricSigner)
+	public EncryptionSignatureHashEncoder withSymmetricSecretKeyForSignature(SymmetricSecretKey secretKeyForSignature) throws IOException {
+		if (secretKeyForSignature==null)
+			throw new NullPointerException();
+		if (!secretKeyForSignature.useAuthenticatedSignatureAlgorithm())
+			throw new IllegalArgumentException();
+		try {
+			return withSymmetricSigner(new SymmetricAuthenticatedSignerAlgorithm(secretKeyForSignature));
+		} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
+			throw new IOException(e);
+		}
+	}
+	public EncryptionSignatureHashEncoder withSymmetricSigner(SymmetricAuthenticatedSignerAlgorithm symmetricSigner)
 	{
 		if (symmetricSigner==null)
 			throw new NullPointerException();
 		this.symmetricSigner=symmetricSigner;
 		return this;
 	}
-	public EncryptionWriter withSymmetricSecretKeyForSignature(SymmetricSecretKey secretKeyForSignature) throws NoSuchProviderException, NoSuchAlgorithmException {
-		if (secretKeyForSignature==null)
-			throw new NullPointerException();
-		if (!secretKeyForSignature.useAuthenticatedSignatureAlgorithm())
-			throw new IllegalArgumentException();
-		this.symmetricSigner=new SymmetricAuthenticatedSignerAlgorithm(secretKeyForSignature);
-		return this;
-	}
-	public EncryptionWriter withASymmetricSigner(ASymmetricAuthenticatedSignerAlgorithm asymmetricSigner)
+	public EncryptionSignatureHashEncoder withASymmetricSigner(ASymmetricAuthenticatedSignerAlgorithm asymmetricSigner)
 	{
 		if (asymmetricSigner==null)
 			throw new NullPointerException();
 		this.asymmetricSigner=asymmetricSigner;
 		return this;
 	}
-	public EncryptionWriter withASymmetricPrivateKeyForSignature(ASymmetricPrivateKey privateKeyForSignature) throws NoSuchProviderException, NoSuchAlgorithmException {
+	public EncryptionSignatureHashEncoder withASymmetricPrivateKeyForSignature(ASymmetricPrivateKey privateKeyForSignature) throws IOException{
 		if (privateKeyForSignature==null)
 			throw new NullPointerException();
 		if (!privateKeyForSignature.useAuthenticatedSignatureAlgorithm())
 			throw new IllegalArgumentException();
-		this.asymmetricSigner=new ASymmetricAuthenticatedSignerAlgorithm(privateKeyForSignature);
+		try {
+			this.asymmetricSigner=new ASymmetricAuthenticatedSignerAlgorithm(privateKeyForSignature);
+		} catch (NoSuchProviderException | NoSuchAlgorithmException e) {
+			throw new IOException(e);
+		}
 		return this;
 	}
-	public EncryptionWriter withMessageDigest(AbstractMessageDigest messageDigest)
+	public EncryptionSignatureHashEncoder withMessageDigest(AbstractMessageDigest messageDigest)
 	{
 		if (digest==null)
 			throw new NullPointerException();
 		this.digest=messageDigest;
 		return this;
 	}
-	public EncryptionWriter withMessageDigestType(MessageDigestType messageDigestType) throws NoSuchProviderException, NoSuchAlgorithmException {
+	public EncryptionSignatureHashEncoder withMessageDigestType(MessageDigestType messageDigestType) throws IOException {
 		if (messageDigestType==null)
 			throw new NullPointerException();
-		this.digest=messageDigestType.getMessageDigestInstance();
+		try {
+			this.digest=messageDigestType.getMessageDigestInstance();
+		} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
+			throw new IOException(e);
+		}
 		return this;
 	}
-	public void encrypt() throws IOException {
+	public void encode() throws IOException {
 		encryptAndSignImpl(inputStream, outputStream, cipher, associatedData, offAD, lenAD, symmetricSigner, asymmetricSigner, digest);
 	}
 
@@ -332,7 +362,7 @@ public class EncryptionWriter {
 				byte[] signature = asymmetricSigner.getSignature();
 				originalOutputStream.writeBytesArray(signature, false, asymmetricSigner.getMacLengthBytes());
 			}
-
+			outputStream.flush();
 		}
 		catch(InvalidKeyException | InvalidAlgorithmParameterException | IllegalBlockSizeException | BadPaddingException | NoSuchAlgorithmException | InvalidKeySpecException | NoSuchProviderException | SignatureException | ShortBufferException e)
 		{
@@ -464,6 +494,7 @@ public class EncryptionWriter {
 				if (!asymmetricChecker.verify())
 					throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
 			}
+			outputStream.flush();
 		}
 		catch(InvalidKeyException | InvalidAlgorithmParameterException | IllegalBlockSizeException | BadPaddingException | NoSuchAlgorithmException | InvalidKeySpecException | NoSuchProviderException | SignatureException | ShortBufferException | InvalidParameterSpecException e)
 		{

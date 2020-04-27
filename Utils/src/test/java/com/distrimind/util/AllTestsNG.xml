@@ -58,6 +58,7 @@
 			<class name="com.distrimind.util.crypto.TestASymmetricSignatures" />
 			<class name="com.distrimind.util.crypto.TestASymmetricEncryptions" />
 			<class name="com.distrimind.util.crypto.TestKeyAgreements" />
+			<class name="com.distrimind.util.crypto.TestReadWriteEncryption" />
 
 		</classes>
 	</test>

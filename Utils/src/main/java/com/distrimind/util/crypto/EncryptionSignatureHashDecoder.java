@@ -36,6 +36,7 @@ package com.distrimind.util.crypto;
 
 import com.distrimind.util.io.*;
 
+import javax.crypto.NoSuchPaddingException;
 import java.io.IOException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
@@ -48,7 +49,7 @@ import java.security.spec.InvalidKeySpecException;
  * @version 1.0
  * @since Utils 4.16.0
  */
-public class EncryptionReader {
+public class EncryptionSignatureHashDecoder {
 
 	private final RandomInputStream inputStream;
 	private final RandomOutputStream outputStream;
@@ -60,7 +61,7 @@ public class EncryptionReader {
 	private ASymmetricAuthenticatedSignatureCheckerAlgorithm asymmetricChecker=null;
 	private AbstractMessageDigest digest=null;
 
-	public EncryptionReader(RandomInputStream inputStream, RandomOutputStream outputStream) throws IOException {
+	public EncryptionSignatureHashDecoder(RandomInputStream inputStream, RandomOutputStream outputStream) throws IOException {
 		if (inputStream==null)
 			throw new NullPointerException();
 		if (inputStream.length()-inputStream.currentPosition()==0)
@@ -72,56 +73,84 @@ public class EncryptionReader {
 		this.outputStream = outputStream;
 	}
 
-	public EncryptionReader withCipher(SymmetricEncryptionAlgorithm cipher)
+	public EncryptionSignatureHashDecoder withSymmetricSecretKeyForEncryption(AbstractSecureRandom random, SymmetricSecretKey symmetricSecretKeyForEncryption) throws IOException {
+		try {
+			return withCipher(new SymmetricEncryptionAlgorithm(random, symmetricSecretKeyForEncryption));
+		} catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | InvalidAlgorithmParameterException | NoSuchProviderException | InvalidKeySpecException e) {
+			throw new IOException(e);
+		}
+	}
+	public EncryptionSignatureHashDecoder withSymmetricSecretKeyForEncryptionAndAssociatedData(AbstractSecureRandom random, SymmetricSecretKey symmetricSecretKeyForEncryption, byte[] associatedData) throws IOException {
+		return withSymmetricSecretKeyForEncryptionAndAssociatedData(random, symmetricSecretKeyForEncryption, associatedData, 0, associatedData.length);
+	}
+	public EncryptionSignatureHashDecoder withSymmetricSecretKeyForEncryptionAndAssociatedData(AbstractSecureRandom random, SymmetricSecretKey symmetricSecretKeyForEncryption, byte[] associatedData, int offAD, int lenAD) throws IOException {
+		try {
+			return withCipherAndAssociatedData(new SymmetricEncryptionAlgorithm(random, symmetricSecretKeyForEncryption), associatedData, offAD, lenAD);
+		} catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | InvalidAlgorithmParameterException | NoSuchProviderException | InvalidKeySpecException e) {
+			throw new IOException(e);
+		}
+	}
+
+	public EncryptionSignatureHashDecoder withCipher(SymmetricEncryptionAlgorithm cipher)
 	{
 		if (cipher==null)
 			throw new NullPointerException();
 		this.cipher=cipher;
 		return this;
+
 	}
-	public EncryptionReader withCipherAndAssociatedData(SymmetricEncryptionAlgorithm cipher, byte[] associatedData, int offAD, int lenAD)
+
+	public EncryptionSignatureHashDecoder withCipherAndAssociatedData(SymmetricEncryptionAlgorithm cipher, byte[] associatedData, int offAD, int lenAD)
 	{
 		if (cipher==null)
 			throw new NullPointerException();
 		if (associatedData==null)
 			throw new NullPointerException();
-		EncryptionWriter.checkLimits(associatedData, offAD, lenAD);
+		EncryptionSignatureHashEncoder.checkLimits(associatedData, offAD, lenAD);
 		this.cipher=cipher;
 		this.associatedData=associatedData;
 		this.offAD=offAD;
 		this.lenAD=lenAD;
 		return this;
 	}
-	public EncryptionReader withMessageDigest(AbstractMessageDigest messageDigest)
+	public EncryptionSignatureHashDecoder withMessageDigest(AbstractMessageDigest messageDigest)
 	{
 		if (digest==null)
 			throw new NullPointerException();
 		this.digest=messageDigest;
 		return this;
 	}
-	public EncryptionReader withMessageDigestType(MessageDigestType messageDigestType) throws NoSuchProviderException, NoSuchAlgorithmException {
+	public EncryptionSignatureHashDecoder withMessageDigestType(MessageDigestType messageDigestType) throws IOException {
 		if (messageDigestType==null)
 			throw new NullPointerException();
-		this.digest=messageDigestType.getMessageDigestInstance();
+		try {
+			this.digest=messageDigestType.getMessageDigestInstance();
+		} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
+			throw new IOException(e);
+		}
 		return this;
 	}
-	public EncryptionReader withSymmetricChecker(SymmetricAuthenticatedSignatureCheckerAlgorithm symmetricChecker)
+	public EncryptionSignatureHashDecoder withSymmetricChecker(SymmetricAuthenticatedSignatureCheckerAlgorithm symmetricChecker)
 	{
 		if (symmetricChecker==null)
 			throw new NullPointerException();
 		this.symmetricChecker=symmetricChecker;
 		return this;
 	}
-	public EncryptionReader withSymmetricSecretKeyForSignature(SymmetricSecretKey secretKeyForSignature) throws NoSuchProviderException, NoSuchAlgorithmException {
+	public EncryptionSignatureHashDecoder withSymmetricSecretKeyForSignature(SymmetricSecretKey secretKeyForSignature) throws IOException {
 		if (secretKeyForSignature==null)
 			throw new NullPointerException();
 		if (!secretKeyForSignature.useAuthenticatedSignatureAlgorithm())
 			throw new IllegalArgumentException();
-		this.symmetricChecker=new SymmetricAuthenticatedSignatureCheckerAlgorithm(secretKeyForSignature);
+		try {
+			this.symmetricChecker=new SymmetricAuthenticatedSignatureCheckerAlgorithm(secretKeyForSignature);
+		} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
+			throw new IOException(e);
+		}
 		return this;
 	}
 
-	public EncryptionReader withASymmetricChecker(ASymmetricAuthenticatedSignatureCheckerAlgorithm asymmetricChecker)
+	public EncryptionSignatureHashDecoder withASymmetricChecker(ASymmetricAuthenticatedSignatureCheckerAlgorithm asymmetricChecker)
 	{
 		if (asymmetricChecker==null)
 			throw new NullPointerException();
@@ -129,23 +158,27 @@ public class EncryptionReader {
 		return this;
 	}
 
-	public EncryptionReader withASymmetricPublicKeyForSignature(IASymmetricPublicKey publicKeyForSignature) throws NoSuchProviderException, NoSuchAlgorithmException {
+	public EncryptionSignatureHashDecoder withASymmetricPublicKeyForSignature(IASymmetricPublicKey publicKeyForSignature) throws IOException {
 		if (publicKeyForSignature==null)
 			throw new NullPointerException();
 		if (!publicKeyForSignature.useAuthenticatedSignatureAlgorithm())
 			throw new IllegalArgumentException();
-		this.asymmetricChecker=new ASymmetricAuthenticatedSignatureCheckerAlgorithm(publicKeyForSignature);
+		try {
+			this.asymmetricChecker=new ASymmetricAuthenticatedSignatureCheckerAlgorithm(publicKeyForSignature);
+		} catch (NoSuchProviderException | NoSuchAlgorithmException e) {
+			throw new IOException(e);
+		}
 		return this;
 	}
 
-	public void decryptAndCheckHashAndSignatures() throws IOException {
-		EncryptionWriter.decryptAndCheckHashAndSignaturesImpl(inputStream, outputStream, cipher, associatedData, offAD, lenAD, symmetricChecker,asymmetricChecker, digest);
+	public void decodeAndCheckHashAndSignaturesIfNecessary() throws IOException {
+		EncryptionSignatureHashEncoder.decryptAndCheckHashAndSignaturesImpl(inputStream, outputStream, cipher, associatedData, offAD, lenAD, symmetricChecker,asymmetricChecker, digest);
 	}
 	public Integrity checkHashAndSignature() throws IOException {
-		return EncryptionWriter.checkHashAndSignatureImpl(inputStream, symmetricChecker,asymmetricChecker, digest);
+		return EncryptionSignatureHashEncoder.checkHashAndSignatureImpl(inputStream, symmetricChecker,asymmetricChecker, digest);
 	}
 	public Integrity checkHashAndPublicSignature() throws IOException {
-		return EncryptionWriter.checkHashAndPublicSignatureImpl(inputStream,asymmetricChecker, digest);
+		return EncryptionSignatureHashEncoder.checkHashAndPublicSignatureImpl(inputStream,asymmetricChecker, digest);
 	}
 	public SubStreamHashResult computePartialHash(SubStreamParameters subStreamParameters) throws IOException {
 
