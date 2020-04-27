@@ -71,13 +71,24 @@ public class EncryptionSignatureHashEncoder {
 		if (off+len>data.length)
 			throw new IllegalArgumentException();
 	}
-
-	private static byte getCode(byte[] associatedData, SymmetricAuthenticatedSignerAlgorithm symmetricSigner, ASymmetricAuthenticatedSignerAlgorithm asymmetricSigner, AbstractMessageDigest digest)
+	static byte getCode(byte[] associatedData, SymmetricSecretKey secretKeyForSignature, ASymmetricKeyPair keyPair, MessageDigestType messageDigestType)
 	{
+		int res=(secretKeyForSignature==null || !secretKeyForSignature.useAuthenticatedSignatureAlgorithm())?0:1;
+		res+=(keyPair==null || !keyPair.useAuthenticatedSignatureAlgorithm())?0:2;
+		res+=messageDigestType==null?0:4;
+		res+=associatedData==null?0:8;
+		return (byte)res;
+
+	}
+	static byte getCode(SymmetricEncryptionAlgorithm cipher, byte[] associatedData, SymmetricAuthenticatedSignerAlgorithm symmetricSigner, ASymmetricAuthenticatedSignerAlgorithm asymmetricSigner, AbstractMessageDigest digest)
+	{
+		if (associatedData!=null && cipher==null)
+			throw new IllegalArgumentException();
 		int res=symmetricSigner==null?0:1;
 		res+=asymmetricSigner==null?0:2;
 		res+=digest==null?0:4;
 		res+=associatedData==null?0:8;
+		res+=cipher==null?0:16;
 		return (byte)res;
 	}
 
@@ -98,6 +109,10 @@ public class EncryptionSignatureHashEncoder {
 	private static boolean hasAssociatedData(byte code)
 	{
 		return (code & 8)==8;
+	}
+	private static boolean hasCipher(byte code)
+	{
+		return (code & 16)==16;
 	}
 	private final RandomInputStream inputStream;
 	private SymmetricEncryptionAlgorithm cipher=null;
@@ -138,6 +153,7 @@ public class EncryptionSignatureHashEncoder {
 		if (cipher==null)
 			throw new NullPointerException();
 		this.cipher=cipher;
+		this.associatedData=null;
 		return this;
 	}
 	public EncryptionSignatureHashEncoder withCipherAndAssociatedData(SymmetricEncryptionAlgorithm cipher, byte[] associatedData, int offAD, int lenAD)
@@ -230,7 +246,7 @@ public class EncryptionSignatureHashEncoder {
 					if (head==null)
 					{
 						RandomByteArrayOutputStream out=new RandomByteArrayOutputStream(9);
-						code=getCode(associatedData, symmetricSigner, asymmetricSigner, digest);
+						code=getCode(cipher, associatedData, symmetricSigner, asymmetricSigner, digest);
 						out.writeByte(code);
 						out.writeLong(inputStream.length());
 						out.flush();
@@ -275,11 +291,14 @@ public class EncryptionSignatureHashEncoder {
 			throw new IllegalArgumentException();
 		if (originalOutputStream==null)
 			throw new NullPointerException();
-		if (associatedData!=null)
+		if (associatedData!=null) {
+			if (cipher==null)
+				throw new IllegalArgumentException();
 			checkLimits(associatedData, offAD, lenAD);
+		}
 
 		try {
-			byte code=getCode(associatedData, symmetricSigner, asymmetricSigner, digest);
+			byte code=getCode(cipher, associatedData, symmetricSigner, asymmetricSigner, digest);
 			if (symmetricSigner!=null && asymmetricSigner!=null && digest==null)
 				digest=defaultMessageType.getMessageDigestInstance();
 			RandomOutputStream outputStream=originalOutputStream;
@@ -371,16 +390,23 @@ public class EncryptionSignatureHashEncoder {
 			throw new IOException(e);
 		}
 	}
-	private static byte checkCode(RandomInputStream originalInputStream, byte[] associatedData, int offAD, int lenAD, SymmetricAuthenticatedSignatureCheckerAlgorithm symmetricChecker, ASymmetricAuthenticatedSignatureCheckerAlgorithm asymmetricChecker, AbstractMessageDigest digest) throws IOException {
+	private static byte checkCode(SymmetricEncryptionAlgorithm cipher, RandomInputStream originalInputStream, byte[] associatedData, int offAD, int lenAD, SymmetricAuthenticatedSignatureCheckerAlgorithm symmetricChecker, ASymmetricAuthenticatedSignatureCheckerAlgorithm asymmetricChecker, AbstractMessageDigest digest) throws IOException {
 		if (associatedData!=null)
 			checkLimits(associatedData, offAD, lenAD);
 
 		byte code=checkCode(originalInputStream, symmetricChecker, asymmetricChecker, digest);
 		boolean hasAssociatedData=hasAssociatedData(code);
 		if (hasAssociatedData && associatedData==null)
-			throw new NullPointerException();
+			throw new NullPointerException("associatedData");
+		else if (hasAssociatedData && cipher==null)
+			throw new MessageExternalizationException(Integrity.FAIL, "associatedData");
 		else if (!hasAssociatedData && associatedData!=null)
-			throw new IllegalArgumentException();
+			throw new MessageExternalizationException(Integrity.FAIL, "associatedData");
+		boolean hasCipher=hasCipher(code);
+		if (hasCipher && cipher==null)
+			throw new NullPointerException("cipher");
+		else if (!hasCipher && cipher!=null)
+			throw new MessageExternalizationException(Integrity.FAIL, "cipher");
 		return code;
 	}
 	private static byte checkCode(RandomInputStream originalInputStream, SymmetricAuthenticatedSignatureCheckerAlgorithm symmetricChecker, ASymmetricAuthenticatedSignatureCheckerAlgorithm asymmetricChecker, AbstractMessageDigest digest) throws IOException {
@@ -389,7 +415,7 @@ public class EncryptionSignatureHashEncoder {
 		if (symCheckOK && symmetricChecker==null)
 			throw new NullPointerException("symmetricChecker");
 		else if(!symCheckOK && symmetricChecker!=null)
-			throw new IllegalArgumentException("symmetricChecker");
+			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, "symmetricChecker");
 		return code;
 	}
 	private static byte checkCode(RandomInputStream originalInputStream, ASymmetricAuthenticatedSignatureCheckerAlgorithm asymmetricChecker, AbstractMessageDigest digest) throws IOException {
@@ -401,13 +427,13 @@ public class EncryptionSignatureHashEncoder {
 		if (asymCheckOK && asymmetricChecker==null)
 			throw new NullPointerException("asymmetricChecker");
 		else if(!asymCheckOK && asymmetricChecker!=null)
-			throw new IllegalArgumentException("asymmetricChecker");
+			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, "asymmetricChecker");
 		if (hashCheckOK) {
 			if (digest == null)
 				throw new NullPointerException("digest");
 		}
 		else if (digest!=null && digest.getMessageDigestType()!=defaultMessageType)
-			throw new IllegalArgumentException("digest");
+			throw new MessageExternalizationException(Integrity.FAIL, "digest");
 		return code;
 	}
 
@@ -422,7 +448,7 @@ public class EncryptionSignatureHashEncoder {
 			checkLimits(associatedData, offAD, lenAD);
 
 		try {
-			byte code=checkCode(originalInputStream, associatedData, offAD, lenAD, symmetricChecker, asymmetricChecker, digest);
+			byte code=checkCode(cipher, originalInputStream, associatedData, offAD, lenAD, symmetricChecker, asymmetricChecker, digest);
 
 			if (symmetricChecker!=null && asymmetricChecker!=null && digest==null)
 				digest=defaultMessageType.getMessageDigestInstance();
@@ -632,7 +658,7 @@ public class EncryptionSignatureHashEncoder {
 		} catch (MessageExternalizationException e)
 		{
 			return e.getIntegrity();
-		} catch(InvalidKeyException | InvalidAlgorithmParameterException | NoSuchAlgorithmException | InvalidKeySpecException | NoSuchProviderException | SignatureException | InvalidParameterSpecException | IllegalArgumentException | IOException e)
+		} catch(InvalidKeyException | InvalidAlgorithmParameterException | NoSuchAlgorithmException | InvalidKeySpecException | NoSuchProviderException | SignatureException | InvalidParameterSpecException | IllegalArgumentException | IOException | NullPointerException e)
 		{
 			return Integrity.FAIL;
 		}
@@ -723,7 +749,7 @@ public class EncryptionSignatureHashEncoder {
 		} catch (MessageExternalizationException e)
 		{
 			return e.getIntegrity();
-		} catch(InvalidKeyException | InvalidAlgorithmParameterException | NoSuchAlgorithmException | InvalidKeySpecException | NoSuchProviderException | SignatureException | InvalidParameterSpecException | IllegalArgumentException | IOException e)
+		} catch(InvalidKeyException | InvalidAlgorithmParameterException | NoSuchAlgorithmException | InvalidKeySpecException | NoSuchProviderException | SignatureException | InvalidParameterSpecException | IllegalArgumentException | IOException | NullPointerException e)
 		{
 			return Integrity.FAIL;
 		}

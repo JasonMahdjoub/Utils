@@ -158,6 +158,31 @@ public class TestReadWriteEncryption {
 		testFail(res, res.length-70, secretKeyForEncryption, associatedData, secretKeyForSignature, keyPairForSignature, messageDigestType, null);
 		testFail(res, res.length-100, secretKeyForEncryption, associatedData, secretKeyForSignature, keyPairForSignature, messageDigestType, null);
 
+		if (secretKeyForEncryption!=null) {
+			testBadParameters(res, null, associatedData, secretKeyForSignature, keyPairForSignature, messageDigestType);
+			if (associatedData!=null) {
+				testBadParameters(res, secretKeyForEncryption, null, secretKeyForSignature, keyPairForSignature, messageDigestType);
+				byte code=EncryptionSignatureHashEncoder.getCode(null, secretKeyForSignature, keyPairForSignature, messageDigestType);
+				testTruncateCode(code,res, secretKeyForEncryption, associatedData, secretKeyForSignature, keyPairForSignature, messageDigestType);
+			}
+
+		}
+		if (secretKeyForSignature!=null) {
+			testBadParameters(res, secretKeyForEncryption, associatedData, null, keyPairForSignature, messageDigestType);
+			byte code = EncryptionSignatureHashEncoder.getCode(associatedData, null, keyPairForSignature, messageDigestType);
+			testTruncateCode(code, res, secretKeyForEncryption, associatedData, secretKeyForSignature, keyPairForSignature, messageDigestType);
+		}
+		if (keyPairForSignature!=null) {
+			testBadParameters(res, secretKeyForEncryption, associatedData, secretKeyForSignature, null, messageDigestType);
+			byte code = EncryptionSignatureHashEncoder.getCode(associatedData, secretKeyForSignature, null, messageDigestType);
+			testTruncateCode(code, res, secretKeyForEncryption, associatedData, secretKeyForSignature, keyPairForSignature, messageDigestType);
+		}
+		if (messageDigestType!=null) {
+			testBadParameters(res, secretKeyForEncryption, associatedData, secretKeyForSignature, keyPairForSignature, null);
+			byte code = EncryptionSignatureHashEncoder.getCode(associatedData, secretKeyForSignature, keyPairForSignature, null);
+			testTruncateCode(code, res, secretKeyForEncryption, associatedData, secretKeyForSignature, keyPairForSignature, messageDigestType);
+		}
+
 	}
 
 	private EncryptionSignatureHashDecoder getReader(RandomByteArrayInputStream bais, SymmetricSecretKey secretKeyForEncryption, byte[] associatedData, SymmetricSecretKey secretKeyForSignature, ASymmetricKeyPair keyPairForSignature, MessageDigestType messageDigestType) throws IOException, NoSuchProviderException, NoSuchAlgorithmException {
@@ -185,19 +210,72 @@ public class TestReadWriteEncryption {
 		EncryptionSignatureHashDecoder reader=getReader(bais, secretKeyForEncryption, associatedData, secretKeyForSignature, keyPairForSignature, messageDigestType);
 		try {
 			reader.decodeAndCheckHashAndSignaturesIfNecessary(baos);
-			Assert.fail();
+			if (messageDigestType!=null || keyPairForSignature!=null || secretKeyForSignature!=null)
+				Assert.fail();
 		}
 		catch(IOException ignored)
 		{
-
 		}
-		bais.seek(0);
-		Assert.assertNotEquals(reader.checkHashAndSignature(), Integrity.OK);
-		bais.seek(0);
-		Assert.assertNotEquals(reader.checkHashAndPublicSignature(), Integrity.OK);
+		if (messageDigestType!=null || keyPairForSignature!=null || secretKeyForSignature!=null) {
+			bais.seek(0);
+			Assert.assertNotEquals(reader.checkHashAndSignature(), Integrity.OK);
+		}
+		if (messageDigestType!=null || keyPairForSignature!=null) {
+			bais.seek(0);
+			Assert.assertNotEquals(reader.checkHashAndPublicSignature(), Integrity.OK, "");
+		}
 		if (ssp!=null)
 			return reader.computePartialHash(ssp);
 		else
 			return null;
+	}
+
+	private void testBadParameters(byte[] res, SymmetricSecretKey secretKeyForEncryption, byte[] associatedData, SymmetricSecretKey secretKeyForSignature, ASymmetricKeyPair keyPairForSignature, MessageDigestType messageDigestType) throws NoSuchProviderException, NoSuchAlgorithmException, IOException {
+		byte[] ed=res.clone();
+		RandomByteArrayInputStream bais=new RandomByteArrayInputStream(ed);
+		RandomByteArrayOutputStream baos=new RandomByteArrayOutputStream();
+		EncryptionSignatureHashDecoder reader=getReader(bais, secretKeyForEncryption, associatedData, secretKeyForSignature, keyPairForSignature, messageDigestType);
+		boolean symError=false;
+		try {
+			reader.decodeAndCheckHashAndSignaturesIfNecessary(baos);
+			Assert.fail(""+associatedData+" ; "+ed[0]);
+		}
+		catch(NullPointerException e)
+		{
+			symError=e.getMessage().equals("symmetricChecker");
+		}
+
+		if (messageDigestType!=null || keyPairForSignature!=null || secretKeyForSignature!=null) {
+			bais.seek(0);
+			Assert.assertNotEquals(reader.checkHashAndSignature(), Integrity.OK);
+		}
+		if (!symError && (messageDigestType!=null || keyPairForSignature!=null)) {
+			bais.seek(0);
+			Assert.assertNotEquals(reader.checkHashAndPublicSignature(), Integrity.OK, "");
+		}
+	}
+	private void testTruncateCode(byte code, byte[] res, SymmetricSecretKey secretKeyForEncryption, byte[] associatedData, SymmetricSecretKey secretKeyForSignature, ASymmetricKeyPair keyPairForSignature, MessageDigestType messageDigestType) throws NoSuchProviderException, NoSuchAlgorithmException, IOException {
+		byte[] ed=res.clone();
+		ed[0]=code;
+		RandomByteArrayInputStream bais=new RandomByteArrayInputStream(ed);
+		RandomByteArrayOutputStream baos=new RandomByteArrayOutputStream();
+		EncryptionSignatureHashDecoder reader=getReader(bais, secretKeyForEncryption, associatedData, secretKeyForSignature, keyPairForSignature, messageDigestType);
+		boolean symError=false;
+		try {
+			reader.decodeAndCheckHashAndSignaturesIfNecessary(baos);
+			Assert.fail();
+		}
+		catch(MessageExternalizationException e)
+		{
+			symError=e.getMessage().equals("symmetricChecker");
+		}
+		if (messageDigestType!=null || keyPairForSignature!=null || secretKeyForSignature!=null) {
+			bais.seek(0);
+			Assert.assertNotEquals(reader.checkHashAndSignature(), Integrity.OK);
+		}
+		if (!symError && (messageDigestType!=null || keyPairForSignature!=null)) {
+			bais.seek(0);
+			Assert.assertNotEquals(reader.checkHashAndPublicSignature(), Integrity.OK, "");
+		}
 	}
 }

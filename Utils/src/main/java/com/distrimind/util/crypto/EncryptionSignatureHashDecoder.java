@@ -92,6 +92,7 @@ public class EncryptionSignatureHashDecoder {
 		if (cipher==null)
 			throw new NullPointerException();
 		this.cipher=cipher;
+		this.associatedData=null;
 		return this;
 
 	}
