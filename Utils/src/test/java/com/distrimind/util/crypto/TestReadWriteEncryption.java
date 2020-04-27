@@ -137,7 +137,7 @@ public class TestReadWriteEncryption {
 		bais.seek(0);
 		long s;
 		SubStreamParameters ssp=null;
-		SubStreamHashResult sshr=null;
+		SubStreamHashResult sshr;
 		if (associatedData==null) {
 			ssp = new SubStreamParameters(MessageDigestType.DEFAULT, Arrays.asList(
 					new SubStreamParameter(s = r.nextInt(8), s + 12 + r.nextInt(10)),
@@ -148,14 +148,15 @@ public class TestReadWriteEncryption {
 			sshr = reader.computePartialHash(ssp);
 			Assert.assertTrue(writer.checkPartialHash(ssp, sshr));
 		}
-
-		testFail(res, 65, secretKeyForEncryption, associatedData, secretKeyForSignature, keyPairForSignature, messageDigestType);
-		if (ssp!=null)
+		sshr=testFail(res, 8, secretKeyForEncryption, associatedData, secretKeyForSignature, keyPairForSignature, messageDigestType, ssp);
+		if (ssp!=null) {
 			Assert.assertFalse(writer.checkPartialHash(ssp, sshr));
-		testFail(res, res.length-10, secretKeyForEncryption, associatedData, secretKeyForSignature, keyPairForSignature, messageDigestType);
-		testFail(res, res.length-40, secretKeyForEncryption, associatedData, secretKeyForSignature, keyPairForSignature, messageDigestType);
-		testFail(res, res.length-70, secretKeyForEncryption, associatedData, secretKeyForSignature, keyPairForSignature, messageDigestType);
-		testFail(res, res.length-100, secretKeyForEncryption, associatedData, secretKeyForSignature, keyPairForSignature, messageDigestType);
+		}
+		testFail(res, 65, secretKeyForEncryption, associatedData, secretKeyForSignature, keyPairForSignature, messageDigestType, null);
+		testFail(res, res.length-10, secretKeyForEncryption, associatedData, secretKeyForSignature, keyPairForSignature, messageDigestType, null);
+		testFail(res, res.length-40, secretKeyForEncryption, associatedData, secretKeyForSignature, keyPairForSignature, messageDigestType, null);
+		testFail(res, res.length-70, secretKeyForEncryption, associatedData, secretKeyForSignature, keyPairForSignature, messageDigestType, null);
+		testFail(res, res.length-100, secretKeyForEncryption, associatedData, secretKeyForSignature, keyPairForSignature, messageDigestType, null);
 
 	}
 
@@ -176,7 +177,7 @@ public class TestReadWriteEncryption {
 		return reader;
 	}
 
-	private void testFail(byte[] res, int indexModif, SymmetricSecretKey secretKeyForEncryption, byte[] associatedData, SymmetricSecretKey secretKeyForSignature, ASymmetricKeyPair keyPairForSignature, MessageDigestType messageDigestType) throws NoSuchProviderException, NoSuchAlgorithmException, IOException {
+	private SubStreamHashResult testFail(byte[] res, int indexModif, SymmetricSecretKey secretKeyForEncryption, byte[] associatedData, SymmetricSecretKey secretKeyForSignature, ASymmetricKeyPair keyPairForSignature, MessageDigestType messageDigestType, SubStreamParameters ssp) throws NoSuchProviderException, NoSuchAlgorithmException, IOException {
 		byte[] ed=res.clone();
 		ed[indexModif]=(byte)(~ed[indexModif]);
 		RandomByteArrayInputStream bais=new RandomByteArrayInputStream(ed);
@@ -194,6 +195,9 @@ public class TestReadWriteEncryption {
 		Assert.assertNotEquals(reader.checkHashAndSignature(), Integrity.OK);
 		bais.seek(0);
 		Assert.assertNotEquals(reader.checkHashAndPublicSignature(), Integrity.OK);
-
+		if (ssp!=null)
+			return reader.computePartialHash(ssp);
+		else
+			return null;
 	}
 }

@@ -148,11 +148,14 @@ public class SubStreamParameters implements SecureExternalizable {
 		}
 	}
 	public byte[] generateHash(RandomInputStream inputStream) throws IOException, NoSuchProviderException, NoSuchAlgorithmException {
+		AbstractMessageDigest messageDigest=messageDigestType.getMessageDigestInstance();
+		messageDigest.reset();
+		return partialHash(inputStream, messageDigest).digest();
+	}
+	public AbstractMessageDigest partialHash(RandomInputStream inputStream, AbstractMessageDigest messageDigest) throws IOException{
 		if (inputStream==null)
 			throw new NullPointerException();
 		checkSort();
-		AbstractMessageDigest messageDigest=messageDigestType.getMessageDigestInstance();
-		messageDigest.reset();
 		byte[] buffer=new byte[1024];
 		for (SubStreamParameter p : parameters)
 		{
@@ -165,7 +168,7 @@ public class SubStreamParameters implements SecureExternalizable {
 				l -= s;
 			} while(l>0);
 		}
-		return messageDigest.digest();
+		return messageDigest;
 	}
 
 	public ArrayList<SubStreamParameter> getParameters() {
