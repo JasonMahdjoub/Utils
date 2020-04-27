@@ -310,7 +310,7 @@ public class EncryptionSignatureHashEncoder {
 					cipher.encode(inputStream, outputStream);
 				long newPos=originalOutputStream.currentPosition();
 				dataLen=newPos-dataPos;
-				originalOutputStream.seek(dataPos);
+				originalOutputStream.seek(dataPos-8);
 				originalOutputStream.writeLong(dataLen);
 				originalOutputStream.seek(newPos);
 			}
@@ -337,6 +337,7 @@ public class EncryptionSignatureHashEncoder {
 					byte[] signature = symmetricSigner.sign(hash);
 					digest.reset();
 					digest.update(hash);
+					digest.update(signature);
 					hash=digest.digest();
 					originalOutputStream.writeBytesArray(signature, false, symmetricSigner.getMacLengthBytes());
 				}
@@ -345,6 +346,7 @@ public class EncryptionSignatureHashEncoder {
 					byte[] signature = asymmetricSigner.sign(hash);
 					digest.reset();
 					digest.update(hash);
+					digest.update(signature);
 					hash=digest.digest();
 					originalOutputStream.writeBytesArray(signature, false, asymmetricSigner.getMacLengthBytes());
 				}
@@ -423,7 +425,14 @@ public class EncryptionSignatureHashEncoder {
 				asymmetricChecker.init(originalInputStream.readBytesArray(false, asymmetricChecker.getMacLengthBytes()));
 				inputStream=new SignatureCheckerRandomInputStream(inputStream, asymmetricChecker);
 			}
-			LimitedRandomInputStream lis=new LimitedRandomInputStream(inputStream, dataPos, dataLen);
+			LimitedRandomInputStream lis;
+			try {
+				lis = new LimitedRandomInputStream(inputStream, dataPos, dataLen);
+			}
+			catch (IllegalArgumentException e)
+			{
+				throw new IOException(e);
+			}
 
 			if (cipher != null) {
 				if (associatedData!=null)
@@ -448,8 +457,8 @@ public class EncryptionSignatureHashEncoder {
 				byte[] hash = digest.digest();
 				byte[] hash2=hash;
 				byte[] hash3=hash;
-				byte[] symSign;
-				byte[] asymSign;
+				byte[] symSign=null;
+				byte[] asymSign=null;
 				if (symCheckOK)
 				{
 					symSign=inputStream.readBytesArray(false, symmetricChecker.getMacLengthBytes());
@@ -470,14 +479,14 @@ public class EncryptionSignatureHashEncoder {
 				if (!Arrays.equals(hash3, hashToCheck))
 					throw new MessageExternalizationException(Integrity.FAIL);
 
-				if (symmetricChecker != null) {
+				if (symCheckOK) {
 
-					if (!symmetricChecker.verify(hash, hash))
+					if (!symmetricChecker.verify(hash, symSign))
 						throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
 				}
 
-				if (asymmetricChecker != null) {
-					if (!asymmetricChecker.verify(hash, hash2))
+				if (asymCheckOK) {
+					if (!asymmetricChecker.verify(hash2, asymSign))
 						throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
 				}
 			}
@@ -547,8 +556,8 @@ public class EncryptionSignatureHashEncoder {
 				byte[] hash = digest.digest();
 				byte[] hash2=hash;
 				byte[] hash3=hash;
-				byte[] symSign;
-				byte[] asymSign;
+				byte[] symSign=null;
+				byte[] asymSign=null;
 				if (symCheckOK)
 				{
 					symSign=inputStream.readBytesArray(false, symmetricChecker.getMacLengthBytes());
@@ -569,13 +578,13 @@ public class EncryptionSignatureHashEncoder {
 				if (!Arrays.equals(hash3, hashToCheck))
 					return Integrity.FAIL;
 
-				if (symmetricChecker != null) {
-					if (!symmetricChecker.verify(hash, hash))
+				if (symCheckOK) {
+					if (!symmetricChecker.verify(hash, symSign))
 						return Integrity.FAIL_AND_CANDIDATE_TO_BAN;
 				}
 
-				if (asymmetricChecker != null) {
-					if (!asymmetricChecker.verify(hash, hash2))
+				if (asymCheckOK) {
+					if (!asymmetricChecker.verify(hash2, asymSign))
 						return Integrity.FAIL_AND_CANDIDATE_TO_BAN;
 				}
 				return Integrity.OK;
@@ -647,11 +656,11 @@ public class EncryptionSignatureHashEncoder {
 			}
 			else if (digest!=null && digest.getMessageDigestType()!=defaultMessageType)
 				throw new IllegalArgumentException("digest");
-			if (!asymCheckOK && !hashCheckOK)
-				return Integrity.OK;
+
 			if (symCheckOK && asymCheckOK && !hashCheckOK)
 				digest=defaultMessageType.getMessageDigestInstance();
-
+			if (!asymCheckOK && digest==null)
+				return Integrity.OK;
 			long dataLen=inputStream.readLong();
 			long dataPos=inputStream.currentPosition();
 			byte[] lenBuffer = new byte[8];
@@ -690,11 +699,8 @@ public class EncryptionSignatureHashEncoder {
 				if (!Arrays.equals(hash3, hashToCheck))
 					return Integrity.FAIL;
 
-				if (symCheckOK && asymmetricChecker != null) {
-
-
-					inputStream.readBytesArray(false, maxSymSigSizeBytes);
-					if (!asymmetricChecker.verify(hash, inputStream.readBytesArray(false, asymmetricChecker.getMacLengthBytes())))
+				if (asymCheckOK) {
+					if (!asymmetricChecker.verify(hash2, inputStream.readBytesArray(false, asymmetricChecker.getMacLengthBytes())))
 						return Integrity.FAIL_AND_CANDIDATE_TO_BAN;
 				}
 

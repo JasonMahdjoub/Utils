@@ -69,8 +69,11 @@ public class TestReadWriteEncryption {
 					new byte[100]
 			})
 			{
-				if (associatedData!=null)
+				if (associatedData!=null) {
 					rand.nextBytes(associatedData);
+					if (ske!=null)
+						ske = SymmetricEncryptionType.AES_GCM.getKeyGenerator(SecureRandomType.DEFAULT.getInstance(null)).generateKey();
+				}
 				for (SymmetricSecretKey sks : new SymmetricSecretKey[]{
 						SymmetricAuthentifiedSignatureType.DEFAULT.getKeyGenerator(SecureRandomType.DEFAULT.getInstance(null)).generateKey(),
 						null
@@ -132,18 +135,23 @@ public class TestReadWriteEncryption {
 		bais.seek(0);
 		Assert.assertEquals(reader.checkHashAndPublicSignature(), Integrity.OK);
 		bais.seek(0);
-		SubStreamParameters ssp=new SubStreamParameters(MessageDigestType.DEFAULT, Arrays.asList(
-				new SubStreamParameter(r.nextInt(8), 12+r.nextInt(10)),
-				new SubStreamParameter(r.nextInt(100)+200, 10+r.nextInt(10)),
-				new SubStreamParameter(r.nextInt(100)+1000, 10+r.nextInt(10)),
-				new SubStreamParameter(r.nextInt(100)+2000, 10+r.nextInt(10))
-				));
-		SubStreamHashResult sshr=reader.computePartialHash(ssp);
-		Assert.assertEquals(reader.checkHashAndPublicSignature(), Integrity.OK);
-		Assert.assertTrue(writer.checkPartialHash(ssp, sshr));
+		long s;
+		SubStreamParameters ssp=null;
+		SubStreamHashResult sshr=null;
+		if (associatedData==null) {
+			ssp = new SubStreamParameters(MessageDigestType.DEFAULT, Arrays.asList(
+					new SubStreamParameter(s = r.nextInt(8), s + 12 + r.nextInt(10)),
+					new SubStreamParameter(s = r.nextInt(100) + 200, s + 10 + r.nextInt(10)),
+					new SubStreamParameter(s = r.nextInt(100) + 1000, s + 10 + r.nextInt(10)),
+					new SubStreamParameter(s = r.nextInt(100) + 2000, s + 10 + r.nextInt(10))
+			));
+			sshr = reader.computePartialHash(ssp);
+			Assert.assertTrue(writer.checkPartialHash(ssp, sshr));
+		}
 
 		testFail(res, 10, secretKeyForEncryption, associatedData, secretKeyForSignature, keyPairForSignature, messageDigestType);
-		Assert.assertFalse(writer.checkPartialHash(ssp, sshr));
+		if (ssp!=null)
+			Assert.assertFalse(writer.checkPartialHash(ssp, sshr));
 		testFail(res, res.length-10, secretKeyForEncryption, associatedData, secretKeyForSignature, keyPairForSignature, messageDigestType);
 		testFail(res, res.length-40, secretKeyForEncryption, associatedData, secretKeyForSignature, keyPairForSignature, messageDigestType);
 		testFail(res, res.length-70, secretKeyForEncryption, associatedData, secretKeyForSignature, keyPairForSignature, messageDigestType);

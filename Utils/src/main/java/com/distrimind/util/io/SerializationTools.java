@@ -250,7 +250,7 @@ public class SerializationTools {
 			return null;
 		}
 		if (size<0 || size>sizeMax)
-			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
+			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, "size="+size);
 		if (tab==null) {
 			tab = new byte[size];
 			off = 0;
