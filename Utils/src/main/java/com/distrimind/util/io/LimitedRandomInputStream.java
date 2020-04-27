@@ -36,6 +36,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 
 import java.io.DataInputStream;
+import java.io.EOFException;
 import java.io.IOException;
 
 /**
@@ -91,6 +92,8 @@ public class LimitedRandomInputStream extends RandomInputStream{
 	@Override
 	public void readFully(byte[] tab, int off, int len) throws IOException {
 		checkLimits(tab, off, len);
+		if (length()-currentPosition()<len)
+			throw new EOFException();
 		in.readFully(tab, off, len);
 	}
 
@@ -103,6 +106,8 @@ public class LimitedRandomInputStream extends RandomInputStream{
 		if (_nb<=0)
 			return 0;
 		_nb=Math.min(length()-currentPosition(), _nb);
+		if (_nb<=0)
+			return 0;
 		return in.skip(_nb);
 	}
 
@@ -139,7 +144,7 @@ public class LimitedRandomInputStream extends RandomInputStream{
 	@Override
 	public int read(byte[] b, int off, int len) throws IOException {
 		checkLimits(b, off, len);
-		int s = Math.min((int)Math.min(Integer.MAX_VALUE, length()-currentPosition()), len);
+		int s = (int)Math.min(length()-currentPosition(), len);
 		return in.read(b, off, s);
 	}
 

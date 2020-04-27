@@ -55,7 +55,7 @@ public class MessageExternalizationException extends IOException{
 	private final Integrity integrity;
 	public MessageExternalizationException(Integrity integrity)
 	{
-		this(integrity, null, null);
+		this(integrity, "", null);
 	}
 	public MessageExternalizationException(Integrity integrity, String message)
 	{

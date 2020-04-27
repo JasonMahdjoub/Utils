@@ -52,7 +52,6 @@ import java.security.spec.InvalidKeySpecException;
 public class EncryptionSignatureHashDecoder {
 
 	private final RandomInputStream inputStream;
-	private final RandomOutputStream outputStream;
 	private SymmetricEncryptionAlgorithm cipher=null;
 	private byte[] associatedData=null;
 	private int offAD=0;
@@ -61,16 +60,13 @@ public class EncryptionSignatureHashDecoder {
 	private ASymmetricAuthenticatedSignatureCheckerAlgorithm asymmetricChecker=null;
 	private AbstractMessageDigest digest=null;
 
-	public EncryptionSignatureHashDecoder(RandomInputStream inputStream, RandomOutputStream outputStream) throws IOException {
+	public EncryptionSignatureHashDecoder(RandomInputStream inputStream) throws IOException {
 		if (inputStream==null)
 			throw new NullPointerException();
 		if (inputStream.length()-inputStream.currentPosition()==0)
 			throw new IllegalArgumentException();
-		if (outputStream==null)
-			throw new NullPointerException();
 
 		this.inputStream = inputStream;
-		this.outputStream = outputStream;
 	}
 
 	public EncryptionSignatureHashDecoder withSymmetricSecretKeyForEncryption(AbstractSecureRandom random, SymmetricSecretKey symmetricSecretKeyForEncryption) throws IOException {
@@ -171,7 +167,9 @@ public class EncryptionSignatureHashDecoder {
 		return this;
 	}
 
-	public void decodeAndCheckHashAndSignaturesIfNecessary() throws IOException {
+	public void decodeAndCheckHashAndSignaturesIfNecessary(RandomOutputStream outputStream) throws IOException {
+		if (outputStream==null)
+			throw new NullPointerException();
 		EncryptionSignatureHashEncoder.decryptAndCheckHashAndSignaturesImpl(inputStream, outputStream, cipher, associatedData, offAD, lenAD, symmetricChecker,asymmetricChecker, digest);
 	}
 	public Integrity checkHashAndSignature() throws IOException {

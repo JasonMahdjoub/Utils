@@ -110,7 +110,7 @@ public class TestReadWriteEncryption {
 		r.nextBytes(in);
 		RandomByteArrayInputStream bais=new RandomByteArrayInputStream(in.clone());
 		RandomByteArrayOutputStream baos=new RandomByteArrayOutputStream();
-		EncryptionSignatureHashEncoder writer=new EncryptionSignatureHashEncoder(bais, baos);
+		EncryptionSignatureHashEncoder writer=new EncryptionSignatureHashEncoder(bais);
 		if (secretKeyForEncryption!=null) {
 			if (associatedData==null)
 				writer.withSymmetricSecretKeyForEncryption(SecureRandomType.DEFAULT.getInstance(null), secretKeyForEncryption);
@@ -123,12 +123,12 @@ public class TestReadWriteEncryption {
 			writer.withASymmetricPrivateKeyForSignature(keyPairForSignature.getASymmetricPrivateKey());
 		if (messageDigestType!=null)
 			writer.withMessageDigestType(messageDigestType);
-		writer.encode();
+		writer.encode(baos);
 		byte[] res=baos.getBytes();
 		bais=new RandomByteArrayInputStream(res.clone());
 		baos=new RandomByteArrayOutputStream();
-		EncryptionSignatureHashDecoder reader=getReader(bais, baos, secretKeyForEncryption, associatedData, secretKeyForSignature, keyPairForSignature, messageDigestType);
-		reader.decodeAndCheckHashAndSignaturesIfNecessary();
+		EncryptionSignatureHashDecoder reader=getReader(bais, secretKeyForEncryption, associatedData, secretKeyForSignature, keyPairForSignature, messageDigestType);
+		reader.decodeAndCheckHashAndSignaturesIfNecessary(baos);
 		Assert.assertEquals(baos.getBytes(), in);
 		bais.seek(0);
 		Assert.assertEquals(reader.checkHashAndSignature(), Integrity.OK);
@@ -149,7 +149,7 @@ public class TestReadWriteEncryption {
 			Assert.assertTrue(writer.checkPartialHash(ssp, sshr));
 		}
 
-		testFail(res, 10, secretKeyForEncryption, associatedData, secretKeyForSignature, keyPairForSignature, messageDigestType);
+		testFail(res, 65, secretKeyForEncryption, associatedData, secretKeyForSignature, keyPairForSignature, messageDigestType);
 		if (ssp!=null)
 			Assert.assertFalse(writer.checkPartialHash(ssp, sshr));
 		testFail(res, res.length-10, secretKeyForEncryption, associatedData, secretKeyForSignature, keyPairForSignature, messageDigestType);
@@ -159,8 +159,8 @@ public class TestReadWriteEncryption {
 
 	}
 
-	private EncryptionSignatureHashDecoder getReader(RandomByteArrayInputStream bais, RandomByteArrayOutputStream baos, SymmetricSecretKey secretKeyForEncryption, byte[] associatedData, SymmetricSecretKey secretKeyForSignature, ASymmetricKeyPair keyPairForSignature, MessageDigestType messageDigestType) throws IOException, NoSuchProviderException, NoSuchAlgorithmException {
-		EncryptionSignatureHashDecoder reader=new EncryptionSignatureHashDecoder(bais, baos);
+	private EncryptionSignatureHashDecoder getReader(RandomByteArrayInputStream bais, SymmetricSecretKey secretKeyForEncryption, byte[] associatedData, SymmetricSecretKey secretKeyForSignature, ASymmetricKeyPair keyPairForSignature, MessageDigestType messageDigestType) throws IOException, NoSuchProviderException, NoSuchAlgorithmException {
+		EncryptionSignatureHashDecoder reader=new EncryptionSignatureHashDecoder(bais);
 		if (secretKeyForEncryption!=null) {
 			if (associatedData==null)
 				reader.withSymmetricSecretKeyForEncryption(SecureRandomType.DEFAULT.getInstance(null), secretKeyForEncryption);
@@ -181,18 +181,18 @@ public class TestReadWriteEncryption {
 		ed[indexModif]=(byte)(~ed[indexModif]);
 		RandomByteArrayInputStream bais=new RandomByteArrayInputStream(ed);
 		RandomByteArrayOutputStream baos=new RandomByteArrayOutputStream();
-		EncryptionSignatureHashDecoder reader=getReader(bais, baos, secretKeyForEncryption, associatedData, secretKeyForSignature, keyPairForSignature, messageDigestType);
+		EncryptionSignatureHashDecoder reader=getReader(bais, secretKeyForEncryption, associatedData, secretKeyForSignature, keyPairForSignature, messageDigestType);
 		try {
-			reader.decodeAndCheckHashAndSignaturesIfNecessary();
+			reader.decodeAndCheckHashAndSignaturesIfNecessary(baos);
 			Assert.fail();
 		}
-		catch(MessageExternalizationException ignored)
+		catch(IOException ignored)
 		{
 
 		}
-		baos.seek(0);
+		bais.seek(0);
 		Assert.assertNotEquals(reader.checkHashAndSignature(), Integrity.OK);
-		baos.seek(0);
+		bais.seek(0);
 		Assert.assertNotEquals(reader.checkHashAndPublicSignature(), Integrity.OK);
 
 	}
