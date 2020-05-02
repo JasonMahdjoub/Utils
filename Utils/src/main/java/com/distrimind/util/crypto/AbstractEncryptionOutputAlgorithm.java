@@ -34,12 +34,10 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
+import com.distrimind.util.Bits;
 import com.distrimind.util.FileTools;
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.ShortBufferException;
+import javax.crypto.*;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -150,6 +148,7 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 		encode(bytes, off, len, associatedData, offAD, lenAD, os, null);
 	}
 
+	protected abstract void initCipherForEncryptionWithIv(AbstractCipher cipher, byte[] iv);
 
 	public void encode(byte[] bytes, int off, int len, byte[] associatedData, int offAD, int lenAD, OutputStream os, byte[] externalCounter) throws InvalidKeyException,
 			IOException, InvalidAlgorithmParameterException, IllegalStateException,
@@ -165,21 +164,28 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 		initCipherForEncrypt(cipher, externalCounter);
 		if (associatedData!=null && lenAD>0)
 			cipher.updateAAD(associatedData, offAD, lenAD);
-		if (includeIV())
-			os.write(cipher.getIV(), 0, getIVSizeBytesWithoutExternalCounter());
+		byte[] iv=null;
+		int counterPos=0;
+		int counter=0;
+
+		if (includeIV()) {
+			os.write(iv = cipher.getIV(), 0, getIVSizeBytesWithoutExternalCounter());
+			counterPos=iv.length-4;
+			counter=Bits.getInt(iv, counterPos);
+		}
 		int maxBlockSize = getMaxBlockSizeForEncoding();
-		//byte[] buffer=new byte[getOutputSizeForEncryption(Math.min(len, maxBlockSize))];
 		while (len > 0) {
 			int size ;
 			size = Math.min(len, maxBlockSize);
-				
+
 			os.write(cipher.doFinal(bytes, off, size));
-			/*byte tab[] = cipher.doFinal();
-			if (tab!=null)
-				os.write(tab);*/
-			
 			off += size;
 			len -= size;
+			if (len>0) {
+				if (iv!=null)
+					Bits.putInt(iv,counterPos, ++counter);
+				initCipherForEncryptionWithIv(cipher, iv);
+			}
 		}
 		os.flush();
 
@@ -227,10 +233,16 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 		if (associatedData!=null && lenAD>0)
 			cipher.updateAAD(associatedData, offAD, lenAD);
 		final int maxBlockSize=getMaxBlockSizeForEncoding();
-
-		if (includeIV())
-			os.write(cipher.getIV(), 0, getIVSizeBytesWithoutExternalCounter());
+		byte[] iv=null;
+		int counterPos=0;
+		int counter=0;
+		if (includeIV()) {
+			os.write(iv = cipher.getIV(), 0, getIVSizeBytesWithoutExternalCounter());
+			counterPos=iv.length-4;
+			counter=Bits.getInt(iv, counterPos);
+		}
 		boolean finish = false;
+
 		while (!finish) {
 			int maxPartSize;
 			if (length>=0)
@@ -254,10 +266,16 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 				}
 				if (size < 0)
 					finish = true;
-			} while ((blockACC < maxPartSize || maxPartSize == Integer.MAX_VALUE) && !finish && length!=0);
+			} while (blockACC < maxPartSize && !finish && length!=0);
 			if (blockACC != 0)
 			{
 				os.write(cipher.doFinal());
+				if (!finish) {
+
+					if (iv!=null)
+						Bits.putInt(iv,counterPos, ++counter);
+					initCipherForEncryptionWithIv(cipher, iv);
+				}
 			}
 		}
 
@@ -298,7 +316,7 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 			NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
 		initCipherForEncryptAndNotChangeIV(cipher);
 		int maxBlockSize = getMaxBlockSizeForEncoding();
-		if (maxBlockSize == Integer.MAX_VALUE) {
+		if (this instanceof SymmetricEncryptionAlgorithm) {
 			if (includeIV()) {
 				return cipher.getOutputSize(inputLen) + getIVSizeBytesWithoutExternalCounter();
 			} else {

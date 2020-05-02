@@ -134,11 +134,11 @@ public class TestReadWriteEncryption {
 		Assert.assertEquals(reader.checkHashAndSignature(), Integrity.OK);
 		bais.seek(0);
 		Assert.assertEquals(reader.checkHashAndPublicSignature(), Integrity.OK);
-		bais.seek(0);
 		long s;
 		SubStreamParameters ssp=null;
 		SubStreamHashResult sshr;
 		if (associatedData==null) {
+			bais.seek(0);
 			ssp = new SubStreamParameters(MessageDigestType.DEFAULT, Arrays.asList(
 					new SubStreamParameter(s = r.nextInt(8), s + 12 + r.nextInt(10)),
 					new SubStreamParameter(s = r.nextInt(100) + 200, s + 10 + r.nextInt(10)),

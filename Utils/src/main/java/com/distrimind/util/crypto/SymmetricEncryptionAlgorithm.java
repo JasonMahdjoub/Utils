@@ -34,11 +34,14 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
+import com.distrimind.util.Bits;
 import com.distrimind.util.io.*;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.ByteBuffer;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -48,8 +51,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
-import javax.crypto.Cipher;
-import javax.crypto.NoSuchPaddingException;
+import javax.crypto.*;
 
 
 /**
@@ -78,18 +80,19 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 	public boolean isPostQuantumEncryption() {
 		return key.isPostQuantumKey();
 	}
-	public SubStreamHashResult getIVAndPartialHashedSubStreamFromEncryptedStream(RandomInputStream encryptedInputStream, byte[] associatedData, int offAD, int lenAD, SubStreamParameters subStreamParameters) throws IOException, NoSuchProviderException, NoSuchAlgorithmException, InvalidAlgorithmParameterException, InvalidKeySpecException, InvalidKeyException {
+	public SubStreamHashResult getIVAndPartialHashedSubStreamFromEncryptedStream(RandomInputStream encryptedInputStream, SubStreamParameters subStreamParameters) throws IOException, NoSuchProviderException, NoSuchAlgorithmException {
+		return getIVAndPartialHashedSubStreamFromEncryptedStream(encryptedInputStream, subStreamParameters, null);
+	}
+	public SubStreamHashResult getIVAndPartialHashedSubStreamFromEncryptedStream(RandomInputStream encryptedInputStream, SubStreamParameters subStreamParameters, byte[] externalCounter) throws IOException, NoSuchProviderException, NoSuchAlgorithmException {
 		if (!getType().supportRandomReadWrite())
 			throw new IllegalStateException("Encryption type must support random read and write");
 		if (getMaxBlockSizeForDecoding()!=Integer.MAX_VALUE)
 			throw new IllegalAccessError();
 
 
-		byte[] iv=readIV(encryptedInputStream, externalCounter);
-		initCipherForDecrypt(cipher, iv, externalCounter);
-		if (associatedData!=null && lenAD>0)
-			cipher.updateAAD(associatedData, offAD, lenAD);
-		byte[] hash=subStreamParameters.generateHash(new LimitedRandomInputStream(encryptedInputStream, iv.length));
+		byte[] iv=initIVAndCounter(readIV(encryptedInputStream, externalCounter), externalCounter);
+		//initCipherForDecrypt(cipher, iv, externalCounter);
+		byte[] hash=subStreamParameters.generateHash(encryptedInputStream);
 		return new SubStreamHashResult(hash, iv);
 	}
 	public boolean checkPartialHashWithNonEncryptedStream(SubStreamHashResult hashResultFromEncryptedStream, SubStreamParameters subStreamParameters, RandomInputStream nonEncryptedInputStream, byte[] associatedData, int offAD, int lenAD) throws InvalidKeySpecException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException, IOException, InvalidKeyException {
@@ -97,30 +100,81 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 		md.reset();
 		return checkPartialHashWithNonEncryptedStream(hashResultFromEncryptedStream, subStreamParameters, nonEncryptedInputStream, associatedData, offAD, lenAD, md);
 	}
+	public static void main(String args[]) throws NoSuchProviderException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, InvalidAlgorithmParameterException, NoSuchPaddingException, BadPaddingException, IllegalBlockSizeException {
+		byte[] iv=new byte[16];
+		AbstractSecureRandom random=SecureRandomType.DEFAULT.getInstance(null);
+		random.nextBytes(iv);
+		SymmetricSecretKey key=SymmetricEncryptionType.AES_CTR.getKeyGenerator(random).generateKey();
+		SymmetricEncryptionAlgorithm enc=new SymmetricEncryptionAlgorithm(random, key);
+		enc.cipher.init(Cipher.ENCRYPT_MODE, key, iv);
+		byte[] message=new byte[10000];
+		byte[] encMessage=enc.cipher.doFinal(message);
+		int blockSizeBytes=key.getEncryptionAlgorithmType().getBlockSizeBits()/8;
+		ByteBuffer biv= ByteBuffer.allocate(blockSizeBytes);
+		int indexPos= blockSizeBytes - 4;
+		biv.put(iv);
+		biv.putInt(indexPos, 12+biv.getInt(indexPos));
+		enc.cipher.init(Cipher.ENCRYPT_MODE, key, biv.array());
+		byte[] encM2=enc.cipher.doFinal(message, 12*blockSizeBytes, 64);
+		for (int i=0;i<encM2.length;i++)
+		{
+			if (encM2[i]!=encMessage[i+12*blockSizeBytes])
+			{
+				System.out.println("Failed");
+				break;
+			}
+		}
+		System.out.println("Finished");
+
+	}
+
 	public boolean checkPartialHashWithNonEncryptedStream(SubStreamHashResult hashResultFromEncryptedStream, SubStreamParameters subStreamParameters, RandomInputStream nonEncryptedInputStream, byte[] associatedData, int offAD, int lenAD, AbstractMessageDigest md) throws InvalidKeySpecException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, IOException {
-		if (associatedData!=null && lenAD>0)
-			cipher.updateAAD(associatedData, offAD, lenAD);
 		if (getMaxBlockSizeForEncoding()!=Integer.MAX_VALUE)
 			throw new IllegalAccessError();
 
 		List<SubStreamParameter> parameters=subStreamParameters.getParameters() ;
-		byte[] buffer=new byte[1024];
+		byte[] iv=hashResultFromEncryptedStream.getIv().clone();
+		int blockSizeBytes=iv.length;
+		if (blockSizeBytes!=key.getEncryptionAlgorithmType().getBlockSizeBits())
+			throw new IOException();
+		int keySizeBytes=key.getKeySizeBits()/8;
+		byte[] buffer=new byte[keySizeBytes*32];
+		int indexPos= blockSizeBytes - 4;
+		final int counter= Bits.getInt(iv, indexPos);
+
 		for (SubStreamParameter p : parameters)
 		{
-			nonEncryptedInputStream.seek(p.getStreamStartIncluded());
-			byte[] iv=hashResultFromEncryptedStream.getIv().clone();
-			//increment iv
-			for (int i=0;i<p.getStreamStartIncluded();i++)
+			long start=p.getStreamStartIncluded();
+encode()
+			if (start<iv.length)
 			{
-				if (++iv[i]!=0)
-					break;
+				md.update(hashResultFromEncryptedStream.getIv(), (int)start, (int)(Math.min(hashResultFromEncryptedStream.getIv().length, p.getStreamEndExcluded())-start));
+				start=hashResultFromEncryptedStream.getIv().length;
 			}
+			long l = p.getStreamEndExcluded() - start;
+			if (l<=0)
+				continue;
+			start-=hashResultFromEncryptedStream.getIv().length;
+
+			long startAligned=start/keySizeBytes*keySizeBytes;
+			int ivInc=(int)(startAligned/blockSizeBytes);
+			nonEncryptedInputStream.seek(startAligned);
+
+			Bits.putInt(iv, indexPos, ivInc +counter);
 			cipher.init(Cipher.ENCRYPT_MODE, key, iv);
-			long l = p.getStreamEndExcluded() - p.getStreamStartIncluded();
+			InputStream cis=cipher.getCipherInputStream(nonEncryptedInputStream);
+			long toSkip=start-startAligned;
+			while(toSkip>0) {
+				toSkip-=cis.read(buffer, 0, (int)toSkip);
+			}
+
 			do {
 				int s = (int) Math.min(buffer.length, l);
-				nonEncryptedInputStream.readFully(buffer, 0, s);
-				md.update(cipher.update(buffer, 0, s));
+				s=cis.read(buffer, 0, s);
+				if (s>0)
+					md.update(buffer, 0, s);
+				if (s<0)
+					throw new EOFException();
 				l -= s;
 			} while(l>0);
 		}
@@ -227,16 +281,14 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 		return true;
 	}
 
-	@Override
-	public void initCipherForDecrypt(AbstractCipher cipher, byte[] iv, byte[] externalCounter)
-			throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException,
-			InvalidKeySpecException, NoSuchProviderException {
+	private byte[] initIVAndCounter(byte[] iv, byte[] externalCounter)
+	{
 		if (!internalCounter && (externalCounter==null || externalCounter.length!=blockModeCounterBytes) && (externalCounter==null?0:externalCounter.length)+iv.length<getIVSizeBytesWithExternalCounter())
 			throw new IllegalArgumentException("Please use external counters at every initialization with the defined size "+blockModeCounterBytes);
 		if (iv!=null && iv.length<getIVSizeBytesWithoutExternalCounter() && (externalCounter==null || externalCounter.length+iv.length<getIVSizeBytesWithExternalCounter()))
 			throw new IllegalArgumentException("Illegal iv size");
 		this.externalCounter=externalCounter;
-		
+
 		if (iv != null)
 		{
 			if (!internalCounter && externalCounter!=null && externalCounter.length!=0 && iv!=this.iv)
@@ -249,6 +301,18 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 				}
 				iv=this.iv;
 			}
+		}
+		return iv;
+	}
+
+	@Override
+	public void initCipherForDecrypt(AbstractCipher cipher, byte[] iv, byte[] externalCounter)
+			throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException,
+			InvalidKeySpecException, NoSuchProviderException {
+		iv=initIVAndCounter(iv, externalCounter);
+
+		if (iv != null)
+		{
 			cipher.init(Cipher.DECRYPT_MODE, key, iv);
 		}
 		else

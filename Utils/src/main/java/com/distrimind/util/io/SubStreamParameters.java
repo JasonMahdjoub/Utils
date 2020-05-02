@@ -38,6 +38,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
 import com.distrimind.util.crypto.AbstractMessageDigest;
 import com.distrimind.util.crypto.AbstractSecureRandom;
 import com.distrimind.util.crypto.MessageDigestType;
+import com.distrimind.util.crypto.SymmetricSecretKey;
 
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
@@ -74,6 +75,14 @@ public class SubStreamParameters implements SecureExternalizable {
 		this.messageDigestType = messageDigestType;
 	}
 	public SubStreamParameters(final MessageDigestType messageDigestType, long globalStreamLength, long subStreamLength, final AbstractSecureRandom random) {
+		this(messageDigestType, globalStreamLength, subStreamLength, random, 1);
+	}
+	public SubStreamParameters(final MessageDigestType messageDigestType, long globalStreamLength, long subStreamLength, final AbstractSecureRandom random, SymmetricSecretKey secretKeyForEncryption) {
+		this(messageDigestType, globalStreamLength, subStreamLength, random, secretKeyForEncryption.getKeySizeBits()/8);
+		if (!secretKeyForEncryption.useEncryptionAlgorithm())
+			throw new IllegalArgumentException();
+	}
+	public SubStreamParameters(final MessageDigestType messageDigestType, long globalStreamLength, long subStreamLength, final AbstractSecureRandom random, int blockSize) {
 		if (random==null)
 			throw new NullPointerException();
 		if (globalStreamLength<=0)
@@ -94,17 +103,17 @@ public class SubStreamParameters implements SecureExternalizable {
 			if (maxSkip<=0)
 				skip=0;
 			else
-				skip=(long)(random.nextDouble()*maxSkip);
+				skip=((long)(random.nextDouble()*maxSkip/blockSize))*blockSize;
 			pos+=skip;
-			long l=subStreamLength;
-			long l2=Math.min(subStreamLength-32, l);
+			long l=blockSize;
+			long l2=Math.min(subStreamLength-blockSize, l);
 			if (l2>0)
-				l+=(long)(random.nextDouble()*l2);
+				l+=((long)(random.nextDouble()*l2))/blockSize*blockSize;
 
 			parameters.add(new SubStreamParameter(pos, pos+l));
-			pos+=l+1;
+			pos+=l+blockSize;
 			subStreamLength-=l;
-			globalStreamLength-=l+1;
+			globalStreamLength-=l+blockSize;
 		}
 	}
 

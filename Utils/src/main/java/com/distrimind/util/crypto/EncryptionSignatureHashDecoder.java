@@ -185,7 +185,7 @@ public class EncryptionSignatureHashDecoder {
 			if (cipher == null) {
 				return new SubStreamHashResult(subStreamParameters.generateHash(inputStream), null);
 			} else {
-				return cipher.getIVAndPartialHashedSubStreamFromEncryptedStream(inputStream, associatedData, offAD, lenAD, subStreamParameters);
+				return cipher.getIVAndPartialHashedSubStreamFromEncryptedStream(inputStream, subStreamParameters);
 			}
 		} catch (NoSuchProviderException | NoSuchAlgorithmException | InvalidAlgorithmParameterException | InvalidKeySpecException | InvalidKeyException e) {
 			throw new IOException(e);

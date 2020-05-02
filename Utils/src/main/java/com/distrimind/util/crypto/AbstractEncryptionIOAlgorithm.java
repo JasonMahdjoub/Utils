@@ -214,14 +214,15 @@ public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOu
 			throws InvalidKeyException, InvalidAlgorithmParameterException, IOException, IllegalBlockSizeException,
 			BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IllegalStateException, ShortBufferException {
 		byte[] iv=readIV(is, externalCounter);
-		initCipherForDecrypt(cipher, iv, externalCounter);
-		if (associatedData!=null && lenAD>0)
-			cipher.updateAAD(associatedData, offAD, lenAD);
+
 		int maxBlockSize = getMaxBlockSizeForDecoding();
 		int blockACC;
 		boolean finish = false;
 		while (!finish) {
-			
+			initCipherForDecrypt(cipher, iv, externalCounter);
+			if (associatedData!=null && lenAD>0)
+				cipher.updateAAD(associatedData, offAD, lenAD);
+
 			int maxPartSize;
 			if (length>=0)
 				maxPartSize=Math.min(maxBlockSize, length);
@@ -293,6 +294,8 @@ public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOu
 			res += cipher.getOutputSize(mod);
 		return res;
 	}
+
+
 	@Override
 	public abstract void initCipherForDecrypt(AbstractCipher cipher, byte[] iv, byte[] externalCounter)
 			throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException,
