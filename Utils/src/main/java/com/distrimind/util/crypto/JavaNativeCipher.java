@@ -141,7 +141,7 @@ public final class JavaNativeCipher extends AbstractCipher {
 	}
 
 	@Override
-	public void init(int _opmode, AbstractKey _key) throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
+	public void init(int _opmode, AbstractKey _key) throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException {
 		cipher.init(_opmode, _key.toJavaNativeKey());
 	}
 

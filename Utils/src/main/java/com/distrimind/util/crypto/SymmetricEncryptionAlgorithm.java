@@ -320,12 +320,14 @@ encode()
 	}
 
 	@Override
-	public void initCipherForEncrypt(AbstractCipher cipher, byte[] externalCounter) throws InvalidKeyException,
+	public byte[] initCipherForEncrypt(AbstractCipher cipher, byte[] externalCounter) throws InvalidKeyException,
 			InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeySpecException {
 		if (!internalCounter && (externalCounter==null || externalCounter.length!=blockModeCounterBytes))
 			throw new IllegalArgumentException("Please use external counters at every initialization with the defined size "+blockModeCounterBytes);
 		this.externalCounter=externalCounter;
-		cipher.init(Cipher.ENCRYPT_MODE, key, generateIV());
+		byte[] iv=generateIV();
+		cipher.init(Cipher.ENCRYPT_MODE, key, iv);
+		return iv;
 	}
 	private final Random nonSecureRandom=new Random(System.currentTimeMillis());
 	@Override

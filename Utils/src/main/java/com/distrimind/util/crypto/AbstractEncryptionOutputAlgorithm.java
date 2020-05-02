@@ -36,23 +36,23 @@ package com.distrimind.util.crypto;
 
 import com.distrimind.util.Bits;
 import com.distrimind.util.FileTools;
+import com.distrimind.util.io.*;
 
-import javax.crypto.*;
-import java.io.ByteArrayOutputStream;
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.spec.InvalidKeySpecException;
+import java.util.ArrayList;
 
 /**
  * 
  * @author Jason Mahdjoub
- * @version 4.0
+ * @version 5.0
  * @since Utils 1.5
  */
 public abstract class AbstractEncryptionOutputAlgorithm {
@@ -111,195 +111,279 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 		
 	}*/
 	
-	public byte[] encode(byte[] bytes) throws InvalidKeyException, IOException,
-			InvalidAlgorithmParameterException, BadPaddingException, IllegalStateException,
-			IllegalBlockSizeException, NoSuchAlgorithmException, InvalidKeySpecException,
-			NoSuchProviderException {
+	public byte[] encode(byte[] bytes) throws IOException{
 		return encode(bytes, 0, bytes.length);
 	}
-	public byte[] encode(byte[] bytes, byte[] associatedData) throws InvalidKeyException, InvalidAlgorithmParameterException, IllegalStateException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException {
+	public byte[] encode(byte[] bytes, byte[] associatedData) throws IOException{
 		return encode(bytes, 0, bytes.length, associatedData, 0, associatedData==null?0:associatedData.length, (byte[])null);
 	}
-	public byte[] encode(byte[] bytes, byte[] associatedData, byte[] externalCounter) throws InvalidKeyException, InvalidAlgorithmParameterException, IllegalStateException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException {
+	public byte[] encode(byte[] bytes, byte[] associatedData, byte[] externalCounter) throws IOException{
 		return encode(bytes, 0, bytes.length, associatedData, 0, associatedData==null?0:associatedData.length, externalCounter);
 	}
 
-	public byte[] encode(byte[] bytes, int off, int len) throws InvalidKeyException, InvalidAlgorithmParameterException, IllegalStateException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException {
+	public byte[] encode(byte[] bytes, int off, int len) throws IOException{
 		return encode(bytes, off, len, null, 0, 0);
 	}
 	
-	public byte[] encode(byte[] bytes, int off, int len, byte[] associatedData, int offAD, int lenAD) throws InvalidKeyException, IOException, InvalidAlgorithmParameterException, IllegalStateException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
+	public byte[] encode(byte[] bytes, int off, int len, byte[] associatedData, int offAD, int lenAD) throws IOException{
 		return encode(bytes, off, len, associatedData, offAD, lenAD, (byte[])null);
 	}
-	public byte[] encode(byte[] bytes, int off, int len, byte[] associatedData, int offAD, int lenAD, byte[] externalCounter) throws InvalidKeyException, IOException,
-			InvalidAlgorithmParameterException, IllegalStateException, IllegalBlockSizeException,
-			BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException,
-			NoSuchProviderException {
-		try (ByteArrayOutputStream baos = new ByteArrayOutputStream(getOutputSizeForEncryption(len))) {
+	public byte[] encode(byte[] bytes, int off, int len, byte[] associatedData, int offAD, int lenAD, byte[] externalCounter) throws IOException{
+		try (RandomByteArrayOutputStream baos = new RandomByteArrayOutputStream(getOutputSizeForEncryption(len))) {
 			encode(bytes, off, len, associatedData, offAD, lenAD, baos, externalCounter);
-			return baos.toByteArray();
+			return baos.getBytes();
+		} catch (NoSuchAlgorithmException | InvalidKeyException | InvalidKeySpecException | InvalidAlgorithmParameterException | NoSuchProviderException e) {
+			throw new IOException(e);
 		}
 	}
-	public void encode(byte[] bytes, int off, int len, OutputStream os) throws InvalidKeyException, InvalidAlgorithmParameterException, IllegalStateException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException {
+	public void encode(byte[] bytes, int off, int len, RandomOutputStream os) throws IOException{
 		encode(bytes, off, len, null,0, 0, os);
 	}
-	public void encode(byte[] bytes, int off, int len, byte[] associatedData, int offAD, int lenAD, OutputStream os) throws InvalidKeyException, InvalidAlgorithmParameterException, IllegalStateException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException
+	public void encode(byte[] bytes, int off, int len, byte[] associatedData, int offAD, int lenAD, RandomOutputStream os) throws IOException
 	{
 		encode(bytes, off, len, associatedData, offAD, lenAD, os, null);
 	}
 
 	protected abstract void initCipherForEncryptionWithIv(AbstractCipher cipher, byte[] iv);
 
-	public void encode(byte[] bytes, int off, int len, byte[] associatedData, int offAD, int lenAD, OutputStream os, byte[] externalCounter) throws InvalidKeyException,
-			IOException, InvalidAlgorithmParameterException, IllegalStateException,
-			IllegalBlockSizeException, BadPaddingException,
-			NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
-		if (len < 0 || off < 0)
-			throw new IllegalArgumentException("bytes.length=" + bytes.length + ", off=" + off + ", len=" + len);
-		if (off > bytes.length)
-			throw new IllegalArgumentException("bytes.length=" + bytes.length + ", off=" + off + ", len=" + len);
-		if (off + len > bytes.length)
-			throw new IllegalArgumentException("bytes.length=" + bytes.length + ", off=" + off + ", len=" + len);
-
-		initCipherForEncrypt(cipher, externalCounter);
-		if (associatedData!=null && lenAD>0)
-			cipher.updateAAD(associatedData, offAD, lenAD);
-		byte[] iv=null;
-		int counterPos=0;
-		int counter=0;
-
-		if (includeIV()) {
-			os.write(iv = cipher.getIV(), 0, getIVSizeBytesWithoutExternalCounter());
-			counterPos=iv.length-4;
-			counter=Bits.getInt(iv, counterPos);
-		}
-		int maxBlockSize = getMaxBlockSizeForEncoding();
-		while (len > 0) {
-			int size ;
-			size = Math.min(len, maxBlockSize);
-
-			os.write(cipher.doFinal(bytes, off, size));
-			off += size;
-			len -= size;
-			if (len>0) {
-				if (iv!=null)
-					Bits.putInt(iv,counterPos, ++counter);
-				initCipherForEncryptionWithIv(cipher, iv);
-			}
-		}
-		os.flush();
-
-		/*
-		 * try(CipherOutputStream cos=new CipherOutputStream(os, cipher)) {
-		 * cos.write(bytes, off, len); }
-		 */
-
+	public void encode(byte[] bytes, int off, int len, byte[] associatedData, int offAD, int lenAD, RandomOutputStream os, byte[] externalCounter) throws IOException{
+		RandomInputStream ris=new RandomByteArrayInputStream(bytes);
+		if (len!=bytes.length)
+			ris=new LimitedRandomInputStream(ris, off, len);
+		encode(ris, associatedData, offAD, lenAD, os, externalCounter);
 	}
-	public void encode(InputStream is, OutputStream os) throws InvalidKeyException, InvalidAlgorithmParameterException, IllegalStateException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException, ShortBufferException
+	public void encode(RandomInputStream is, RandomOutputStream os) throws IOException
 	{
 		encode(is, null, 0, 0, os);
 	}
-	public void encode(InputStream is, byte[] associatedData, OutputStream os) throws InvalidKeyException, InvalidAlgorithmParameterException, IllegalStateException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException, ShortBufferException 
+	public void encode(RandomInputStream is, byte[] associatedData, RandomOutputStream os) throws IOException
 	{
 		encode(is, associatedData, 0, associatedData==null?0:associatedData.length, os);
 	}
-	public void encode(InputStream is, byte[] associatedData, int offAD, int lenAD, OutputStream os) throws InvalidKeyException, IOException,InvalidAlgorithmParameterException, IllegalStateException, IllegalBlockSizeException,
-	BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException,
-	NoSuchProviderException, ShortBufferException{
-		encode(is, associatedData, offAD, lenAD, os, -1);
+	public void encode(RandomInputStream is, byte[] associatedData, int offAD, int lenAD, RandomOutputStream os) throws IOException{
+		encode(is, associatedData, offAD, lenAD, os, null);
 	}
-	public void encode(InputStream is, OutputStream os, int length) throws InvalidKeyException, InvalidAlgorithmParameterException, IllegalStateException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException, ShortBufferException
-	{
-		encode(is, null, 0, 0,os, length);
-	}
-	public void encode(InputStream is, byte[] associatedData, OutputStream os, int length) throws InvalidKeyException, InvalidAlgorithmParameterException, IllegalStateException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException, ShortBufferException
-	{
-		encode(is, associatedData, 0, associatedData==null?0:associatedData.length, os, length);
-	}
-	
-	
-	public void encode(InputStream is, byte[] associatedData, int offAD, int lenAD, OutputStream os, int length) throws InvalidKeyException, IOException,
-	InvalidAlgorithmParameterException, IllegalStateException, IllegalBlockSizeException,
-	BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException,
-	NoSuchProviderException, ShortBufferException {
-		encode(is, associatedData, offAD, lenAD, os, length, null);
-	}
-	
-	public void encode(InputStream is, byte[] associatedData, int offAD, int lenAD, OutputStream os, int length, byte[] externalCounter) throws InvalidKeyException, IOException,
-			InvalidAlgorithmParameterException, IllegalStateException, IllegalBlockSizeException,
-			BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException,
-			NoSuchProviderException, ShortBufferException {
-		initCipherForEncrypt(cipher, externalCounter);
-		if (associatedData!=null && lenAD>0)
-			cipher.updateAAD(associatedData, offAD, lenAD);
-		final int maxBlockSize=getMaxBlockSizeForEncoding();
-		byte[] iv=null;
-		int counterPos=0;
-		int counter=0;
-		if (includeIV()) {
-			os.write(iv = cipher.getIV(), 0, getIVSizeBytesWithoutExternalCounter());
-			counterPos=iv.length-4;
-			counter=Bits.getInt(iv, counterPos);
+
+	public void encode(RandomInputStream is, byte[] associatedData, int offAD, int lenAD, RandomOutputStream os, byte[] externalCounter) throws IOException {
+
+		try(RandomOutputStream cos = getCipherOutputStream(os, associatedData, offAD, lenAD, externalCounter))
+		{
+			is.transferTo(cos);
 		}
-		boolean finish = false;
-
-		while (!finish) {
-			int maxPartSize;
-			if (length>=0)
-				maxPartSize=Math.min(maxBlockSize, length);
-			else 
-				maxPartSize=maxBlockSize;
-			
-			int blockACC = 0;
-			do {
-				int nb = Math.min(BUFFER_SIZE, maxPartSize - blockACC);
-				int size = is.read(buffer, 0, nb);
-				if (size > 0) {
-					
-					int sizeOut=cipher.update(buffer, 0, size, bufferOut, 0);
-					if (sizeOut>0)
-						os.write(bufferOut, 0, sizeOut);
-					
-					blockACC += size;
-					if (length>=0)
-						length-=size;
-				}
-				if (size < 0)
-					finish = true;
-			} while (blockACC < maxPartSize && !finish && length!=0);
-			if (blockACC != 0)
-			{
-				os.write(cipher.doFinal());
-				if (!finish) {
-
-					if (iv!=null)
-						Bits.putInt(iv,counterPos, ++counter);
-					initCipherForEncryptionWithIv(cipher, iv);
-				}
-			}
-		}
-
-		os.flush();
-		/*
-		 * try(CipherOutputStream cos=new CipherOutputStream(os, cipher)) { int read=-1;
-		 * do { read=is.read(); if (read!=-1) cos.write(read);
-		 * 
-		 * } while (read!=-1); }
-		 */
 	}
 
 	protected abstract AbstractCipher getCipherInstance() throws NoSuchAlgorithmException,
 			NoSuchPaddingException, NoSuchProviderException;
+	protected static void checkLimits(byte[] b, int off, int len)
+	{
+		if (b==null)
+			throw new NullPointerException();
+		if ((off | len) < 0 || len > b.length - off)
+			throw new IndexOutOfBoundsException();
+	}
+	public RandomOutputStream getCipherOutputStream(final RandomOutputStream os, final byte[] associatedData, final int offAD, final int lenAD, final byte[] externalCounter) throws
+			IOException{
+		byte[] tab;
+		try {
+			 tab = initCipherForEncrypt(cipher, externalCounter);
+		} catch (InvalidKeyException | InvalidAlgorithmParameterException | NoSuchAlgorithmException | InvalidKeySpecException | NoSuchProviderException e) {
+			throw new IOException(e);
+		}
+		final byte[] initialIV=tab;
+		final int counterPos = initialIV==null?0:initialIV.length - 4;
+		final int initialCounter=initialIV==null?0:Bits.getInt(initialIV, counterPos);
+		final long initialOutPos=os.currentPosition();
+		return new RandomOutputStream() {
 
-	public OutputStream getCipherOutputStream(OutputStream os, byte[] externalCounter) throws InvalidKeyException,
-			NoSuchAlgorithmException, NoSuchPaddingException,
-			InvalidAlgorithmParameterException, IOException, InvalidKeySpecException, NoSuchProviderException {
-		AbstractCipher c = getCipherInstance();
-		initCipherForEncrypt(c, externalCounter);
-		if (includeIV())
-			os.write(c.getIV(), 0, getIVSizeBytesWithoutExternalCounter());
+			byte[] iv=null;
+			int counter=0;
+			final int maxBlockSize=getMaxBlockSizeForEncoding();
+			long length=0;
+			long currentPos=0;
+			//
+			int round=0;
+			boolean closed=false;
+			private final byte[] one=new byte[1];
+			private final ArrayList<Long> outPos=new ArrayList<>();
 
-		return c.getCipherOutputStream(os);
+
+			private int checkInit() throws IOException {
+				if (currentPos % maxBlockSize == 0) {
+					if (iv == null) {
+						round=0;
+						if (includeIV()) {
+							iv=initialIV;
+							counter=initialCounter;
+							Bits.putInt(iv, counterPos, counter);
+							os.write(iv, 0, getIVSizeBytesWithoutExternalCounter());
+							initCipherForEncryptionWithIv(cipher, initialIV);
+						}
+						else {
+							try {
+								initCipherForEncryptAndNotChangeIV(cipher);
+							} catch (InvalidKeyException | InvalidAlgorithmParameterException | NoSuchAlgorithmException | InvalidKeySpecException | NoSuchProviderException e) {
+								throw new IOException(e);
+							}
+						}
+					} else {
+
+						try {
+							byte[] f=cipher.doFinal();
+							if (f!=null && f.length>0)
+								os.write(f);
+							if (outPos.size()>round) {
+								outPos.set(round, os.currentPosition());
+							}
+							else
+								outPos.add(os.currentPosition());
+						} catch (IllegalBlockSizeException | BadPaddingException e) {
+							throw new IOException(e);
+						}
+						++round;
+						if (includeIV()) {
+
+							counter = initialCounter + round;
+							Bits.putInt(iv, counterPos, counter);
+							initCipherForEncryptionWithIv(cipher, iv);
+						}
+						else {
+							try {
+								initCipherForEncryptAndNotChangeIV(cipher);
+							} catch (InvalidKeyException | InvalidAlgorithmParameterException | NoSuchAlgorithmException | InvalidKeySpecException | NoSuchProviderException e) {
+								throw new IOException(e);
+							}
+						}
+					}
+					if (associatedData != null && lenAD > 0)
+						cipher.updateAAD(associatedData, offAD, lenAD);
+				}
+				return (int) (currentPos % maxBlockSize);
+			}
+			@Override
+			public long length() {
+				return length;
+			}
+
+			@Override
+			public void write(byte[] b, int off, int len) throws IOException {
+				if (closed)
+					throw new IOException("Stream closed");
+				checkLimits(b, off, len);
+				if (len==0)
+					return;
+				int l=checkInit();
+				while (len>0) {
+					int s=Math.min(len, l);
+					cipher.update(b, off, s);
+					len-=s;
+					currentPos+=s;
+					if (len>0) {
+						off+=s;
+						checkInit();
+					}
+				}
+				length=Math.max(length, currentPos);
+			}
+			@Override
+			public void write(int b) throws IOException {
+				if (closed)
+					throw new IOException("Stream closed");
+				checkInit();
+				one[0]=(byte)b;
+				cipher.update(one);
+			}
+
+			@Override
+			public void setLength(long newLength) throws IOException {
+				if (closed)
+					throw new IOException("Stream closed");
+				if (newLength<0)
+					throw new IllegalArgumentException();
+				if (newLength==0) {
+					os.setLength(initialOutPos);
+					currentPos=0;
+					length=0;
+					iv=null;
+				}
+				else {
+					int ivL=0;
+					if (includeIV()) {
+						ivL = getIVSizeBytesWithoutExternalCounter();
+					}
+					os.setLength(ivL+newLength);
+					currentPos=Math.min(newLength, currentPos);
+					length=newLength;
+				}
+			}
+
+			@Override
+			public void seek(long _pos) throws IOException {
+				if (closed)
+					throw new IOException("Stream closed");
+				round = (int) (_pos / maxBlockSize);
+				long p;
+				if (round>0)
+					p=outPos.get(round);
+				else
+					p=initialOutPos;
+				os.seek(p+_pos%maxBlockSize);
+				if (includeIV()) {
+
+					counter = initialCounter+((int) (_pos % maxBlockSize)) + round;
+					Bits.putInt(iv, counterPos, counter);
+					initCipherForEncryptionWithIv(cipher, iv);
+				}
+				else {
+					try {
+						initCipherForEncryptAndNotChangeIV(cipher);
+					} catch (InvalidKeyException | InvalidAlgorithmParameterException | NoSuchAlgorithmException | InvalidKeySpecException | NoSuchProviderException e) {
+						throw new IOException(e);
+					}
+				}
+
+			}
+
+			@Override
+			public long currentPosition() {
+				return currentPos;
+			}
+
+			@Override
+			public boolean isClosed() {
+				return closed;
+			}
+
+			@Override
+			protected RandomInputStream getRandomInputStreamImpl() throws IOException {
+				throw new IOException(new IllegalAccessException());
+			}
+
+			@Override
+			public void flush() throws IOException {
+				os.flush();
+			}
+
+			@Override
+			public void close() throws IOException {
+				if (closed)
+					return;
+				if (length>0) {
+
+					try {
+						byte[] f=cipher.doFinal();
+						if (f!=null && f.length>0)
+							os.write(f);
+					} catch (IllegalBlockSizeException | BadPaddingException e) {
+						throw new IOException(e);
+					}
+				}
+				flush();
+				closed=true;
+			}
+
+
+		};
+
 	}
 
 	public abstract int getMaxBlockSizeForEncoding();
@@ -341,7 +425,7 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 	InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
 		initCipherForEncrypt(cipher, null);
 	}
-	public abstract void initCipherForEncrypt(AbstractCipher cipher, byte[] externalCounter)
+	public abstract byte[] initCipherForEncrypt(AbstractCipher cipher, byte[] externalCounter)
 			throws InvalidKeyException, InvalidAlgorithmParameterException,
 			NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException;
 
