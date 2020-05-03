@@ -181,6 +181,19 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 		if ((off | len) < 0 || len > b.length - off)
 			throw new IndexOutOfBoundsException();
 	}
+	public RandomOutputStream getCipherOutputStream(final RandomOutputStream os) throws IOException
+	{
+		return getCipherOutputStream(os, null, 0,0, null);
+	}
+	public RandomOutputStream getCipherOutputStream(final RandomOutputStream os, final byte[] associatedData, final int offAD, final int lenAD) throws IOException
+	{
+		return getCipherOutputStream(os, associatedData, offAD, lenAD, null);
+	}
+	public RandomOutputStream getCipherOutputStream(final RandomOutputStream os, byte[] externalCounter) throws IOException
+	{
+		return getCipherOutputStream(os, null, 0,0, externalCounter);
+	}
+
 	public RandomOutputStream getCipherOutputStream(final RandomOutputStream os, final byte[] associatedData, final int offAD, final int lenAD, final byte[] externalCounter) throws
 			IOException{
 		byte[] tab;
@@ -256,6 +269,7 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 					}
 					if (associatedData != null && lenAD > 0)
 						cipher.updateAAD(associatedData, offAD, lenAD);
+					return maxBlockSize;
 				}
 				return (int) (currentPos % maxBlockSize);
 			}
@@ -274,7 +288,7 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 				int l=checkInit();
 				while (len>0) {
 					int s=Math.min(len, l);
-					cipher.update(b, off, s);
+					os.write(cipher.update(b, off, s));
 					len-=s;
 					currentPos+=s;
 					if (len>0) {
@@ -290,7 +304,7 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 					throw new IOException("Stream closed");
 				checkInit();
 				one[0]=(byte)b;
-				cipher.update(one);
+				os.write(cipher.update(one));
 			}
 
 			@Override

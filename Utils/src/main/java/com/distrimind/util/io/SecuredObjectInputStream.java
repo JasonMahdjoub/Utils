@@ -228,15 +228,20 @@ public abstract class SecuredObjectInputStream extends InputStream implements Da
 	public byte[] readAllBytes() throws IOException {
 		return readNBytes(Integer.MAX_VALUE);
 	}
-
 	public long transferTo(OutputStream out) throws IOException {
+		return transferTo(out, -1);
+	}
+	public long transferTo(OutputStream out, long maxLength) throws IOException {
 		Objects.requireNonNull(out, "out");
 		long transferred = 0;
 		byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];
 		int read;
-		while ((read = this.read(buffer, 0, DEFAULT_BUFFER_SIZE)) >= 0) {
+
+		while ((read = this.read(buffer, 0, maxLength>=0?(int)Math.min(maxLength, DEFAULT_BUFFER_SIZE):DEFAULT_BUFFER_SIZE)) >= 0) {
 			out.write(buffer, 0, read);
 			transferred += read;
+			if (maxLength>=0)
+				maxLength-=read;
 		}
 		return transferred;
 	}

@@ -35,6 +35,8 @@ The fact that you are presently reading this means that you have had
 knowledge of the CeCILL-C license and that you accept its terms.
  */
 
+import com.distrimind.util.io.RandomInputStream;
+
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
@@ -53,33 +55,31 @@ import java.security.spec.InvalidKeySpecException;
  */
 public interface IEncryptionInputAlgorithm extends IServer{
 	byte[] decode(byte[] bytes)
-			throws InvalidKeyException, InvalidAlgorithmParameterException, IOException, IllegalBlockSizeException,
-			BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IllegalStateException, ShortBufferException;
-	byte[] decode(byte[] bytes, byte[] associatedData, byte[] externalCounter) throws InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException, IllegalStateException, ShortBufferException;
-	byte[] decode(byte[] bytes, byte[] associatedData) throws InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException, IllegalStateException, ShortBufferException;
-	byte[] decode(byte[] bytes, int off, int len) throws InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException, IllegalStateException, ShortBufferException;
-	byte[] decode(byte[] bytes, int off, int len, byte[] associatedData, int offAD, int lenAD) throws InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IllegalStateException, ShortBufferException, IOException;
-	byte[] decode(InputStream is, byte[] associatedData) throws InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException, IllegalStateException, ShortBufferException;
-	byte[] decode(InputStream is) throws InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException, IllegalStateException, ShortBufferException;
-	byte[] decode(InputStream is, byte[] associatedData, int offAD, int lenAD) throws InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IllegalStateException, ShortBufferException, IOException;
-	byte[] decode(InputStream is, byte[] associatedData, int offAD, int lenAD, byte[] externalCounter)
-			throws InvalidKeyException, InvalidAlgorithmParameterException, IOException, IllegalBlockSizeException,
-			BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IllegalStateException, ShortBufferException ;
-	void decode(InputStream is, byte[] associatedData, OutputStream os) throws InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException, IllegalStateException, ShortBufferException;
-	void decode(InputStream is, OutputStream os, byte[] externalCounter) throws InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException, IllegalStateException, ShortBufferException;
-	void decode(InputStream is, OutputStream os) throws InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException, IllegalStateException, ShortBufferException;
-	void decode(InputStream is, byte[] associatedData, int offAD, int lenAD, OutputStream os) throws InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException, IllegalStateException, ShortBufferException;
-	void decode(InputStream is, byte[] associatedData, int offAD, int lenAD, OutputStream os, byte[] externalCounter) throws InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException, IllegalStateException, ShortBufferException;
-	void decode(InputStream is, OutputStream os, int length) throws InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException, IllegalStateException, ShortBufferException;
-	void decode(InputStream is, OutputStream os, int length, byte[] externalCounter) throws InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException, IllegalStateException, ShortBufferException;
-	void decode(InputStream is, byte[] associatedData, OutputStream os, int length) throws InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException, IllegalStateException, ShortBufferException;
+			throws IOException;
+	byte[] decode(byte[] bytes, byte[] associatedData, byte[] externalCounter) throws IOException;
+	byte[] decode(byte[] bytes, byte[] associatedData) throws IOException;
+	byte[] decode(byte[] bytes, int off, int len) throws IOException;
+	byte[] decode(byte[] bytes, int off, int len, byte[] associatedData, int offAD, int lenAD) throws IOException;
+	byte[] decode(RandomInputStream is, byte[] associatedData) throws IOException;
+	byte[] decode(RandomInputStream is) throws IOException;
+	byte[] decode(RandomInputStream is, byte[] associatedData, int offAD, int lenAD) throws IOException;
+	byte[] decode(RandomInputStream is, byte[] associatedData, int offAD, int lenAD, byte[] externalCounter)
+			throws IOException;
+	void decode(RandomInputStream is, byte[] associatedData, OutputStream os) throws IOException;
+	void decode(RandomInputStream is, OutputStream os, byte[] externalCounter) throws IOException;
+	void decode(RandomInputStream is, OutputStream os) throws IOException;
+	void decode(RandomInputStream is, byte[] associatedData, int offAD, int lenAD, OutputStream os) throws IOException;
+	void decode(RandomInputStream is, byte[] associatedData, int offAD, int lenAD, OutputStream os, byte[] externalCounter) throws IOException;
+	void decode(RandomInputStream is, OutputStream os, int length) throws IOException;
+	void decode(RandomInputStream is, OutputStream os, int length, byte[] externalCounter) throws IOException;
+	void decode(RandomInputStream is, byte[] associatedData, OutputStream os, int length) throws IOException;
+	void decode(RandomInputStream is, byte[] associatedData, int offAD, int lenAD, OutputStream os, int length) throws IOException;
+	void decode(RandomInputStream is, byte[] associatedData, int offAD, int lenAD, OutputStream os, int length,  byte[] externalCounter) throws IOException;
+	RandomInputStream getCipherInputStream(final RandomInputStream is) throws IOException ;
+	RandomInputStream getCipherInputStream(final RandomInputStream is, byte[] externalCounter) throws IOException ;
+	RandomInputStream getCipherInputStream(final RandomInputStream is, final byte[] associatedData, final int offAD, final int lenAD) throws IOException ;
+	RandomInputStream getCipherInputStream(final RandomInputStream is, final byte[] associatedData, final int offAD, final int lenAD, byte[] externalCounter) throws IOException ;
 
-	void decode(InputStream is, byte[] associatedData, int offAD, int lenAD, OutputStream os, int length)
-			throws InvalidKeyException, InvalidAlgorithmParameterException, IOException, IllegalBlockSizeException,
-			BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IllegalStateException, ShortBufferException ;
-	InputStream getCipherInputStream(InputStream is)
-			throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,
-			InvalidAlgorithmParameterException, IOException, InvalidKeySpecException, NoSuchProviderException ;
 	void initCipherForDecrypt(AbstractCipher cipher) throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException;
 	void initCipherForDecrypt(AbstractCipher cipher, byte[] iv) throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException;
 
