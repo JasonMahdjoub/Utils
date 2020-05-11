@@ -37,6 +37,7 @@ package com.distrimind.util.crypto;
 import org.bouncycastle.crypto.SymmetricKeyGenerator;
 import org.bouncycastle.crypto.fips.FipsAES;
 import org.bouncycastle.crypto.general.AES;
+import org.bouncycastle.crypto.general.ChaCha20;
 import org.bouncycastle.crypto.general.Serpent;
 import org.bouncycastle.crypto.general.Twofish;
 
@@ -103,7 +104,14 @@ public final class BCKeyGenerator extends AbstractKeyGenerator {
 		}
 		else
 		{
-			if (encryptionType.getAlgorithmName().equals(SymmetricEncryptionType.BC_FIPS_AES_GCM.getAlgorithmName())
+			if (encryptionType.getAlgorithmName().equals(SymmetricEncryptionType.BC_CHACHA20.getAlgorithmName()) /*||
+					encryptionType.getAlgorithmName().equals(SymmetricEncryptionType.BC_CHACHA20_POLY1305.getAlgorithmName())*/) {
+				keyGenerator=new ChaCha20.KeyGenerator(random);
+				if (keySize!=256)
+					throw new IllegalAccessError("Key size must be equal to 256 with BouncyCastle ChaCha20");
+				this.keySizeBits=keySize;
+			}
+			else if (encryptionType.getAlgorithmName().equals(SymmetricEncryptionType.BC_FIPS_AES_GCM.getAlgorithmName())
 					&& SymmetricEncryptionType.BC_FIPS_AES_GCM.getBlockMode().equals(encryptionType.getBlockMode()))
 			{
 				keyGenerator=new FipsAES.KeyGenerator(FipsAES.GCM, keySize, random);
