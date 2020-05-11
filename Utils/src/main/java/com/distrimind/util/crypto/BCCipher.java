@@ -349,7 +349,7 @@ public class BCCipher extends AbstractCipher {
 					Twofish.Parameters param=Twofish.CBCwithPKCS7;
 					if (iv!=null)
 						param=param.withIV(iv);
-					encryptor = fipsSymmetricFactory.createOutputEncryptor((SymmetricSecretKey)key.toBouncyCastleKey(),param.withIV(iv));
+					encryptor = fipsSymmetricFactory.createOutputEncryptor((SymmetricSecretKey)key.toBouncyCastleKey(),param);
 				}
 				else if (type.getBlockMode().toUpperCase().equals("CTR") && type.getPadding().toUpperCase().equals("NOPADDING"))
 				{
@@ -357,7 +357,7 @@ public class BCCipher extends AbstractCipher {
 					Twofish.Parameters param=Twofish.CTR;
 					if (iv!=null)
 						param=param.withIV(iv);
-					encryptor = fipsSymmetricFactory.createOutputEncryptor((SymmetricSecretKey)key.toBouncyCastleKey(),param.withIV(iv));
+					encryptor = fipsSymmetricFactory.createOutputEncryptor((SymmetricSecretKey)key.toBouncyCastleKey(),param);
 				}
 				else if (type.getBlockMode().toUpperCase().equals("GCM") && type.getPadding().toUpperCase().equals("NOPADDING"))
 				{
@@ -394,7 +394,7 @@ public class BCCipher extends AbstractCipher {
 				ChaCha20.Parameters param=ChaCha20.STREAM;
 				if (iv!=null)
 					param=param.withIV(iv);
-				encryptor = factory.createOutputEncryptor((SymmetricSecretKey)key.toBouncyCastleKey(),param.withIV(iv));
+				encryptor = factory.createOutputEncryptor((SymmetricSecretKey)key.toBouncyCastleKey(),param);
 			}
 			else
 				throw new IllegalAccessError();
@@ -545,6 +545,14 @@ public class BCCipher extends AbstractCipher {
 						param=param.withMACSize(128);
 					
 					decryptor = aeadDecryptor = fipsSymmetricFactory.createOutputAEADDecryptor((SymmetricSecretKey)key.toBouncyCastleKey(),param);
+				}
+				else if (type.getAlgorithmName().equals(SymmetricEncryptionType.BC_CHACHA20.getAlgorithmName()))
+				{
+					ChaCha20.OperatorFactory factory=new ChaCha20.OperatorFactory();
+					ChaCha20.Parameters param=ChaCha20.STREAM;
+					if (iv!=null)
+						param=param.withIV(iv);
+					decryptor = factory.createOutputDecryptor((SymmetricSecretKey)key.toBouncyCastleKey(),param);
 				}
 				else
 				{
