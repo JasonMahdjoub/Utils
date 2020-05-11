@@ -148,21 +148,23 @@ public class EncryptionSignatureHashEncoder {
 		}
 	}
 
-	public EncryptionSignatureHashEncoder withCipher(SymmetricEncryptionAlgorithm cipher)
-	{
+	public EncryptionSignatureHashEncoder withCipher(SymmetricEncryptionAlgorithm cipher) throws IOException {
 		if (cipher==null)
 			throw new NullPointerException();
+		if (this.symmetricSigner!=null && cipher.getType().isAuthenticatedAlgorithm())
+			throw new IOException("Symmetric encryption use authentication and a symmetric authenticated signer is already used. No more symmetric authentication is needed. However ASymmetric authentication is possible.");
 		this.cipher=cipher;
 		this.associatedData=null;
 		return this;
 	}
-	public EncryptionSignatureHashEncoder withCipherAndAssociatedData(SymmetricEncryptionAlgorithm cipher, byte[] associatedData, int offAD, int lenAD)
-	{
+	public EncryptionSignatureHashEncoder withCipherAndAssociatedData(SymmetricEncryptionAlgorithm cipher, byte[] associatedData, int offAD, int lenAD) throws IOException {
 		if (cipher==null)
 			throw new NullPointerException();
 		if (associatedData==null)
 			throw new NullPointerException();
 		checkLimits(associatedData, offAD, lenAD);
+		if (this.symmetricSigner!=null && cipher.getType().isAuthenticatedAlgorithm())
+			throw new IOException("Symmetric encryption use authentication and a symmetric authenticated signer is already used. No more symmetric authentication is needed. However ASymmetric authentication is possible.");
 		this.cipher=cipher;
 		this.associatedData=associatedData;
 		this.offAD=offAD;
@@ -180,10 +182,11 @@ public class EncryptionSignatureHashEncoder {
 			throw new IOException(e);
 		}
 	}
-	public EncryptionSignatureHashEncoder withSymmetricSigner(SymmetricAuthenticatedSignerAlgorithm symmetricSigner)
-	{
+	public EncryptionSignatureHashEncoder withSymmetricSigner(SymmetricAuthenticatedSignerAlgorithm symmetricSigner) throws IOException {
 		if (symmetricSigner==null)
 			throw new NullPointerException();
+		if (this.cipher!=null && this.cipher.getType().isAuthenticatedAlgorithm())
+			throw new IOException("Symmetric encryption use authentication. No more symmetric authentication is needed. However ASymmetric authentication is possible.");
 		this.symmetricSigner=symmetricSigner;
 		return this;
 	}

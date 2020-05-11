@@ -87,23 +87,25 @@ public class EncryptionSignatureHashDecoder {
 		}
 	}
 
-	public EncryptionSignatureHashDecoder withCipher(SymmetricEncryptionAlgorithm cipher)
-	{
+	public EncryptionSignatureHashDecoder withCipher(SymmetricEncryptionAlgorithm cipher) throws IOException {
 		if (cipher==null)
 			throw new NullPointerException();
+		if (this.symmetricChecker!=null && cipher.getType().isAuthenticatedAlgorithm())
+			throw new IOException("Symmetric encryption use authentication and a symmetric authenticated signer is already used. No more symmetric authentication is needed. However ASymmetric authentication is possible.");
 		this.cipher=cipher;
 		this.associatedData=null;
 		return this;
 
 	}
 
-	public EncryptionSignatureHashDecoder withCipherAndAssociatedData(SymmetricEncryptionAlgorithm cipher, byte[] associatedData, int offAD, int lenAD)
-	{
+	public EncryptionSignatureHashDecoder withCipherAndAssociatedData(SymmetricEncryptionAlgorithm cipher, byte[] associatedData, int offAD, int lenAD) throws IOException {
 		if (cipher==null)
 			throw new NullPointerException();
 		if (associatedData==null)
 			throw new NullPointerException();
 		EncryptionSignatureHashEncoder.checkLimits(associatedData, offAD, lenAD);
+		if (this.symmetricChecker!=null && cipher.getType().isAuthenticatedAlgorithm())
+			throw new IOException("Symmetric encryption use authentication and a symmetric authenticated signer is already used. No more symmetric authentication is needed. However ASymmetric authentication is possible.");
 		this.cipher=cipher;
 		this.associatedData=associatedData;
 		this.offAD=offAD;
@@ -127,10 +129,11 @@ public class EncryptionSignatureHashDecoder {
 		}
 		return this;
 	}
-	public EncryptionSignatureHashDecoder withSymmetricChecker(SymmetricAuthenticatedSignatureCheckerAlgorithm symmetricChecker)
-	{
+	public EncryptionSignatureHashDecoder withSymmetricChecker(SymmetricAuthenticatedSignatureCheckerAlgorithm symmetricChecker) throws IOException {
 		if (symmetricChecker==null)
 			throw new NullPointerException();
+		if (this.cipher!=null && this.cipher.getType().isAuthenticatedAlgorithm())
+			throw new IOException("Symmetric encryption use authentication. No more symmetric authentication is needed. However ASymmetric authentication is possible.");
 		this.symmetricChecker=symmetricChecker;
 		return this;
 	}
@@ -140,11 +143,10 @@ public class EncryptionSignatureHashDecoder {
 		if (!secretKeyForSignature.useAuthenticatedSignatureAlgorithm())
 			throw new IllegalArgumentException();
 		try {
-			this.symmetricChecker=new SymmetricAuthenticatedSignatureCheckerAlgorithm(secretKeyForSignature);
+			return withSymmetricChecker(new SymmetricAuthenticatedSignatureCheckerAlgorithm(secretKeyForSignature));
 		} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
 			throw new IOException(e);
 		}
-		return this;
 	}
 
 	public EncryptionSignatureHashDecoder withASymmetricChecker(ASymmetricAuthenticatedSignatureCheckerAlgorithm asymmetricChecker)
