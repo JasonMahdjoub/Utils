@@ -209,7 +209,7 @@ public class SymmetricSecretKey extends AbstractKey {
 		Arrays.fill(secretKey, (byte)0);
 	}
 	SymmetricSecretKey(SymmetricEncryptionType type, Object secretKey, short keySize) {
-		this(SymmetricEncryptionType.encodeGnuSecretKey(secretKey, type.getAlgorithmName()), keySize);
+		this(SymmetricEncryptionType.encodeGnuSecretKey(secretKey), keySize);
 		if (type.getCodeProviderForEncryption() != CodeProvider.GNU_CRYPTO)
 			throw new IllegalAccessError();
 		this.encryptionType = type;
@@ -219,7 +219,7 @@ public class SymmetricSecretKey extends AbstractKey {
 	
 	
 	SymmetricSecretKey(SymmetricAuthentifiedSignatureType type, Object secretKey, short keySize) {
-		this(SymmetricEncryptionType.encodeGnuSecretKey(secretKey, type.getAlgorithmName()), keySize);
+		this(SymmetricEncryptionType.encodeGnuSecretKey(secretKey), keySize);
 		if (type.getCodeProviderForSignature() != CodeProvider.GNU_CRYPTO)
 			throw new IllegalAccessError();
 		this.encryptionType = null;
@@ -228,7 +228,7 @@ public class SymmetricSecretKey extends AbstractKey {
 	}
 
 	SymmetricSecretKey(SymmetricEncryptionType type, SecretKey secretKey, short keySize) {
-		this(SymmetricEncryptionType.encodeSecretKey(secretKey, type.getAlgorithmName()), keySize);
+		this(SymmetricEncryptionType.encodeSecretKey(secretKey), keySize);
 		if (type.getCodeProviderForEncryption() == CodeProvider.GNU_CRYPTO)
 			throw new IllegalAccessError();
 		this.encryptionType = type;
@@ -236,7 +236,7 @@ public class SymmetricSecretKey extends AbstractKey {
 		this.javaNativeSecretKey=secretKey;
 	}
 	SymmetricSecretKey(SymmetricAuthentifiedSignatureType type, SecretKey secretKey, short keySize) {
-		this(SymmetricEncryptionType.encodeSecretKey(secretKey, type.getAlgorithmName()), keySize);
+		this(SymmetricEncryptionType.encodeSecretKey(secretKey), keySize);
 		if (type.getCodeProviderForSignature() == CodeProvider.GNU_CRYPTO)
 			throw new IllegalAccessError();
 		this.encryptionType = null;
@@ -245,7 +245,7 @@ public class SymmetricSecretKey extends AbstractKey {
 	}
 	
 	SymmetricSecretKey(SymmetricEncryptionType type, org.bouncycastle.crypto.SymmetricSecretKey secretKey, short keySize) {
-		this(SymmetricEncryptionType.encodeSecretKey(secretKey, type.getAlgorithmName()), keySize);
+		this(SymmetricEncryptionType.encodeSecretKey(secretKey), keySize);
 		if (type.getCodeProviderForEncryption() == CodeProvider.GNU_CRYPTO)
 			throw new IllegalAccessError();
 		this.encryptionType = type;
@@ -255,7 +255,7 @@ public class SymmetricSecretKey extends AbstractKey {
 	}
 	
 	SymmetricSecretKey(SymmetricAuthentifiedSignatureType type, org.bouncycastle.crypto.SymmetricSecretKey secretKey, short keySize) {
-		this(SymmetricEncryptionType.encodeSecretKey(secretKey, type.getAlgorithmName()), keySize);
+		this(SymmetricEncryptionType.encodeSecretKey(secretKey), keySize);
 		if (type.getCodeProviderForSignature() == CodeProvider.GNU_CRYPTO)
 			throw new IllegalAccessError();
 		this.encryptionType = null;

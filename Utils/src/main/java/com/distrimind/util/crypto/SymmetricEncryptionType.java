@@ -87,6 +87,8 @@ public enum SymmetricEncryptionType {
 	BC_SERPENT_CTR("Serpent", "CTR", "NoPadding",(short) 128, CodeProvider.BC, CodeProvider.BC,SymmetricAuthentifiedSignatureType.BC_FIPS_HMAC_SHA2_512, Serpent.ALGORITHM, (short)128, false, (short)33, (short)37,(short)35, (short)40, (short)40, (short)45),
 	BC_SERPENT_GCM("Serpent", "GCM", "NoPadding",(short) 128, CodeProvider.BC, CodeProvider.BC,SymmetricAuthentifiedSignatureType.BC_FIPS_HMAC_SHA2_512, Serpent.ALGORITHM, (short)128, true, (short)31, (short)35, (short)33, (short)38, (short)34, (short)39),
 	BC_SERPENT_EAX("Serpent", "EAX", "NoPadding",(short) 128, CodeProvider.BC, CodeProvider.BC,SymmetricAuthentifiedSignatureType.BC_FIPS_HMAC_SHA2_512, Serpent.ALGORITHM, (short)128, true, (short)22, (short)24, (short)23, (short)24, (short)24, (short)25),
+	CHACHA20("CHACHA", null, null, (short) 128, CodeProvider.SunJCE, CodeProvider.SunJCE, SymmetricAuthentifiedSignatureType.HMAC_SHA2_256, org.bouncycastle.crypto.general.AES.ALGORITHM, (short)128, false, (short)40, (short)48, (short)58, (short) 58, (short)202, (short)475),
+	CHACHA20_POLY1305("CHACHA-Poly1305", null, null, (short) 128, CodeProvider.SunJCE, CodeProvider.SunJCE, SymmetricAuthentifiedSignatureType.HMAC_SHA2_256, org.bouncycastle.crypto.general.AES.ALGORITHM, (short)128, true, (short)40, (short)48, (short)58, (short) 58, (short)202, (short)475),
 	DEFAULT(AES_CTR);
 	
 		
@@ -135,17 +137,17 @@ public enum SymmetricEncryptionType {
 		return new SymmetricSecretKey(this, Arrays.copyOfRange(d, 0, keySizeBits/8), keySizeBits);
 	}
 
-	static byte[] encodeGnuSecretKey(Object key, String algorithmName) {
+	static byte[] encodeGnuSecretKey(Object key) {
 		return GnuFunctions.keyGetEncoded(key);
 		//return Bits.concateEncodingWithShortSizedTabs(algorithmName.encode(), key.keyGetEncoded());
 	}
 
-	static byte[] encodeSecretKey(SecretKey key, String algorithmName) {
+	static byte[] encodeSecretKey(SecretKey key) {
 		return key.getEncoded();
 		//return Bits.concateEncodingWithShortSizedTabs(algorithmName.encode(), key.keyGetEncoded());
 	}
 	
-	static byte[] encodeSecretKey(final org.bouncycastle.crypto.SymmetricSecretKey key, String algorithmName)
+	static byte[] encodeSecretKey(final org.bouncycastle.crypto.SymmetricSecretKey key)
 	{
 		return AccessController.doPrivileged(new PrivilegedAction<byte[]>() {
 			public byte[] run() {
@@ -258,10 +260,18 @@ public enum SymmetricEncryptionType {
 		return blockSizeBits;
 	}
 
+	private String getCipherAlgorithmName()
+	{
+		if (blockMode==null)
+			return algorithmName;
+		else
+			return algorithmName + "/" + blockMode + "/" + padding;
+	}
+
 	public AbstractCipher getCipherInstance() throws NoSuchAlgorithmException, NoSuchPaddingException, NoSuchProviderException {
 		CodeProvider.ensureProviderLoaded(codeProviderForEncryption);
 		if (codeProviderForEncryption == CodeProvider.GNU_CRYPTO) {
-			return new GnuCipher(GnuFunctions.cipherGetInstance(algorithmName + "/" + blockMode + "/" + padding));
+			return new GnuCipher(GnuFunctions.cipherGetInstance(getCipherAlgorithmName()));
 
 		} else if (codeProviderForEncryption == CodeProvider.BCFIPS || codeProviderForEncryption == CodeProvider.BC) {
 
@@ -270,7 +280,7 @@ public enum SymmetricEncryptionType {
 		} else {
 			if (OS.getCurrentJREVersionDouble()<1.8 && this.getAlgorithmName().equals(AES_GCM.getAlgorithmName()) && this.getBlockMode().equals(AES_GCM.getBlockMode()) && this.getPadding().equals(AES_GCM.getPadding()))
 					return BC_FIPS_AES_GCM.getCipherInstance();
-			return new JavaNativeCipher(this, Cipher.getInstance(algorithmName + "/" + blockMode + "/" + padding, codeProviderForEncryption.name()));
+			return new JavaNativeCipher(this, Cipher.getInstance(getCipherAlgorithmName(), codeProviderForEncryption.name()));
 		}
 
 	}
