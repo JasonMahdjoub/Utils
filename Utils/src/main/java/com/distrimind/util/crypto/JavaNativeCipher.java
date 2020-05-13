@@ -34,15 +34,19 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
-import java.io.InputStream;
-import java.io.OutputStream;
-
-import java.security.*;
-import java.security.spec.InvalidKeySpecException;
-
 import javax.crypto.*;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.IvParameterSpec;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.security.spec.AlgorithmParameterSpec;
+import java.security.spec.InvalidKeySpecException;
 
 
 
@@ -145,6 +149,7 @@ public final class JavaNativeCipher extends AbstractCipher {
 		cipher.init(_opmode, _key.toJavaNativeKey());
 	}
 
+
 	@Override
 	public void init(int _opmode, AbstractKey _key, byte[] _iv) throws InvalidKeyException, NoSuchAlgorithmException,
 			InvalidKeySpecException, InvalidAlgorithmParameterException {
@@ -155,6 +160,35 @@ public final class JavaNativeCipher extends AbstractCipher {
 
 	}
 
+	private static final Constructor<? extends AlgorithmParameterSpec> constChachaParam;
+
+	static
+	{
+		Constructor<? extends AlgorithmParameterSpec> c=null;
+		try {
+			//noinspection unchecked
+			c=(Constructor<? extends AlgorithmParameterSpec>)Class.forName("javax.crypto.spec.ChaCha20ParameterSpec").getConstructor(byte[].class, int.class);
+		} catch (NoSuchMethodException | ClassNotFoundException e) {
+			e.printStackTrace();
+
+		}
+		constChachaParam=c;
+	}
+
+	@Override
+	public void init(int opmode, AbstractKey key, byte[] iv, int counter) throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidAlgorithmParameterException {
+		if (type==SymmetricEncryptionType.CHACHA20 || type==SymmetricEncryptionType.CHACHA20_POLY1305)
+		{
+			try {
+				cipher.init(opmode, key.toJavaNativeKey(), constChachaParam.newInstance(iv, counter));
+			} catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
+				throw new InvalidAlgorithmParameterException(e.getCause());
+			}
+		}
+		else
+			super.init(opmode, key, iv, counter);
+
+	}
 
 	@Override
 	public byte[] update(byte[] _input, int _inputOffset, int _inputLength) throws IllegalStateException {

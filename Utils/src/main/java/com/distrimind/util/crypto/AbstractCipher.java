@@ -34,6 +34,8 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
+import com.distrimind.util.Bits;
+
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.ShortBufferException;
@@ -340,6 +342,14 @@ public abstract class AbstractCipher {
 	 */
 	public abstract void init(int opmode, AbstractKey key, byte[] iv) throws InvalidKeyException, NoSuchAlgorithmException,
 			InvalidKeySpecException, InvalidAlgorithmParameterException;
+
+	public void init(int opmode, AbstractKey key, byte[] iv, int counter) throws InvalidKeyException, NoSuchAlgorithmException,
+			InvalidKeySpecException, InvalidAlgorithmParameterException
+	{
+		int pos=iv.length-4;
+		Bits.putInt(iv, pos, Bits.getInt(iv, pos)+counter);
+		init(opmode, key, iv);
+	}
 
 	/**
 	 * Continue a multi-part transformation on an entire byte array, returning the

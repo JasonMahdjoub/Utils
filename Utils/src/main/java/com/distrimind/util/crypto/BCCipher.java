@@ -35,39 +35,22 @@ knowledge of the CeCILL-C license and that you accept its terms.
 
 package com.distrimind.util.crypto;
 
-import java.io.ByteArrayOutputStream;
-import java.io.FilterInputStream;
-import java.io.FilterOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.security.NoSuchAlgorithmException;
-import java.security.spec.InvalidKeySpecException;
-import java.util.Arrays;
-
-import javax.crypto.BadPaddingException;
-import javax.crypto.Cipher;
-import javax.crypto.ShortBufferException;
-
-import org.bouncycastle.bccrypto.modes.ChaCha20Poly1305;
 import org.bouncycastle.bcjcajce.provider.symmetric.ChaCha;
-import org.bouncycastle.crypto.AuthenticationParametersWithIV;
-import org.bouncycastle.crypto.InvalidWrappingException;
-import org.bouncycastle.crypto.KeyUnwrapper;
-import org.bouncycastle.crypto.KeyWrapper;
-import org.bouncycastle.crypto.OutputAEADDecryptor;
-import org.bouncycastle.crypto.OutputAEADEncryptor;
-import org.bouncycastle.crypto.OutputCipher;
-import org.bouncycastle.crypto.OutputDecryptor;
-import org.bouncycastle.crypto.OutputEncryptor;
-import org.bouncycastle.crypto.PlainInputProcessingException;
 import org.bouncycastle.crypto.SymmetricSecretKey;
-import org.bouncycastle.crypto.UpdateOutputStream;
+import org.bouncycastle.crypto.*;
 import org.bouncycastle.crypto.fips.FipsAES;
 import org.bouncycastle.crypto.general.AES;
 import org.bouncycastle.crypto.general.ChaCha20;
 import org.bouncycastle.crypto.general.Serpent;
 import org.bouncycastle.crypto.general.Twofish;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.ShortBufferException;
+import java.io.*;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
+import java.util.Arrays;
 
 
 
@@ -390,6 +373,7 @@ public class BCCipher extends AbstractCipher {
 			}
 			else if (type.getAlgorithmName().equals(SymmetricEncryptionType.BC_CHACHA20.getAlgorithmName()))
 			{
+				new ChaCha.BaseCC20P1305();
 				ChaCha20.OperatorFactory factory=new ChaCha20.OperatorFactory();
 				ChaCha20.Parameters param=ChaCha20.STREAM;
 				if (iv!=null)
@@ -606,7 +590,8 @@ public class BCCipher extends AbstractCipher {
 		
 	}
 
-	
+
+
 
 	@Override
 	public byte[] update(byte[] input, int inputOffset, int inputLength)  {
