@@ -35,6 +35,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
 package com.distrimind.util.crypto;
 
 import com.distrimind.util.OS;
+import com.distrimind.util.OSVersion;
 import org.bouncycastle.crypto.Algorithm;
 import org.bouncycastle.crypto.general.ChaCha20;
 import org.bouncycastle.crypto.general.Serpent;
@@ -214,6 +215,7 @@ public enum SymmetricEncryptionType {
 	private final boolean acousticAttackPossible;
 	private final boolean dfaAttackPossible;//Differential fault analysis
 
+	private static final boolean invlidOSForChacha=(OSVersion.getCurrentOSVersion().getOS()!=OS.ANDROID && OS.getCurrentJREVersionByte()<11) || (OSVersion.getCurrentOSVersion().getOS()==OS.ANDROID && OSVersion.getCurrentOSVersion().compareTo(OSVersion.ANDROID_28_P)<0);
 
 	SymmetricEncryptionType(String algorithmName, String blockMode, String padding, short keySizeBits,
 			CodeProvider codeProviderForEncryption, CodeProvider codeProviderForKeyGenerator, SymmetricAuthentifiedSignatureType defaultSignature, Algorithm bcAlgorithm, short blockSize, boolean authentified, short encodingSpeedIndexJava7, short decodingSpeedIndexJava7, short encodingSpeedIndexJava8, short decodingSpeedIndexJava8, short encodingSpeedIndexJava9, short decodingSpeedIndexJava9,
@@ -302,6 +304,10 @@ public enum SymmetricEncryptionType {
 			return new BCCipher(this);
 					
 		} else {
+			if (this==CHACHA20 && invlidOSForChacha)
+				return BC_CHACHA20.getCipherInstance();
+			else if (this==CHACHA20_POLY1305 && invlidOSForChacha)
+				return BC_CHACHA20_POLY1305.getCipherInstance();
 			if (OS.getCurrentJREVersionDouble()<1.8 && this.getAlgorithmName().equals(AES_GCM.getAlgorithmName()) && this.getBlockMode().equals(AES_GCM.getBlockMode()) && this.getPadding().equals(AES_GCM.getPadding()))
 					return BC_FIPS_AES_GCM.getCipherInstance();
 			return new JavaNativeCipher(this, Cipher.getInstance(getCipherAlgorithmName(), codeProviderForEncryption.name()));
@@ -332,6 +338,10 @@ public enum SymmetricEncryptionType {
 			res = new BCKeyGenerator(this);
 
 		} else {
+			if (this==CHACHA20 && invlidOSForChacha)
+				return BC_CHACHA20.getKeyGenerator(random, keySizeBits);
+			else if (this==CHACHA20_POLY1305 && invlidOSForChacha)
+				return BC_CHACHA20_POLY1305.getKeyGenerator(random, keySizeBits);
 			if (OS.getCurrentJREVersionDouble()<1.8 && this.getAlgorithmName().equals(AES_GCM.getAlgorithmName()) && this.getBlockMode().equals(AES_GCM.getBlockMode()) && this.getPadding().equals(AES_GCM.getPadding()))
 				return BC_FIPS_AES_GCM.getKeyGenerator(random, keySizeBits);
 			res = new JavaNativeKeyGenerator(this, javax.crypto.KeyGenerator.getInstance(algorithmName, CodeProviderForKeyGenerator.checkProviderWithCurrentOS().name()));
