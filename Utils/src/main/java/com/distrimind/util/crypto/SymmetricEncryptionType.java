@@ -88,7 +88,7 @@ public enum SymmetricEncryptionType {
 	BC_SERPENT_EAX("Serpent", "EAX", "NoPadding",(short) 128, CodeProvider.BC, CodeProvider.BC,SymmetricAuthentifiedSignatureType.BC_FIPS_HMAC_SHA2_512, Serpent.ALGORITHM, (short)128, true, (short)22, (short)24, (short)23, (short)24, (short)24, (short)25, false, false, false, false, false, false),
 	CHACHA20("ChaCha20", null, null, (short) 256, CodeProvider.SunJCE, CodeProvider.SunJCE, SymmetricAuthentifiedSignatureType.HMAC_SHA2_256, org.bouncycastle.crypto.general.AES.ALGORITHM, (short)512, false, (short)40, (short)48, (short)58, (short) 58, (short)202, (short)475, false, false, false,  true, false, false),
 	CHACHA20_POLY1305("ChaCha20-Poly1305", null, null, (short) 256, CodeProvider.SunJCE, CodeProvider.SunJCE, SymmetricAuthentifiedSignatureType.HMAC_SHA2_256, org.bouncycastle.crypto.general.AES.ALGORITHM, (short)512, true, (short)40, (short)48, (short)58, (short) 58, (short)202, (short)475, false, false, false,  true, false, false),
-	BC_CHACHA20("ChaCha20", null, null, (short) 256, CodeProvider.BC, CodeProvider.BC, SymmetricAuthentifiedSignatureType.BC_FIPS_HMAC_SHA2_256, ChaCha20.ALGORITHM, (short)512, false, (short)40, (short)48, (short)58, (short) 58, (short)202, (short)475, false, false, false,  true, false, false),
+	//BC_CHACHA20("ChaCha20", null, null, (short) 256, CodeProvider.BC, CodeProvider.BC, SymmetricAuthentifiedSignatureType.BC_FIPS_HMAC_SHA2_256, ChaCha20.ALGORITHM, (short)512, false, (short)40, (short)48, (short)58, (short) 58, (short)202, (short)475, false, false, false,  true, false, false),
 	BC_CHACHA20_POLY1305("ChaCha20-Poly1305", null, null, (short) 256, CodeProvider.BC, CodeProvider.BC, SymmetricAuthentifiedSignatureType.BC_FIPS_HMAC_SHA2_256, ChaCha20.ALGORITHM, (short)512, true, (short)40, (short)48, (short)58, (short) 58, (short)202, (short)475, false, false, false,  true, false, false),
 	DEFAULT(AES_CTR);
 	
@@ -215,7 +215,7 @@ public enum SymmetricEncryptionType {
 	private final boolean acousticAttackPossible;
 	private final boolean dfaAttackPossible;//Differential fault analysis
 
-	private static final boolean invlidOSForChacha=(OSVersion.getCurrentOSVersion().getOS()!=OS.ANDROID && OS.getCurrentJREVersionByte()<11) || (OSVersion.getCurrentOSVersion().getOS()==OS.ANDROID && OSVersion.getCurrentOSVersion().compareTo(OSVersion.ANDROID_28_P)<0);
+	private static final boolean invalidOSForChaCha =(OSVersion.getCurrentOSVersion().getOS()!=OS.ANDROID && OS.getCurrentJREVersionByte()<11) || (OSVersion.getCurrentOSVersion().getOS()==OS.ANDROID && OSVersion.getCurrentOSVersion().compareTo(OSVersion.ANDROID_28_P)<0);
 
 	SymmetricEncryptionType(String algorithmName, String blockMode, String padding, short keySizeBits,
 			CodeProvider codeProviderForEncryption, CodeProvider codeProviderForKeyGenerator, SymmetricAuthentifiedSignatureType defaultSignature, Algorithm bcAlgorithm, short blockSize, boolean authentified, short encodingSpeedIndexJava7, short decodingSpeedIndexJava7, short encodingSpeedIndexJava8, short decodingSpeedIndexJava8, short encodingSpeedIndexJava9, short decodingSpeedIndexJava9,
@@ -300,13 +300,15 @@ public enum SymmetricEncryptionType {
 			return new GnuCipher(GnuFunctions.cipherGetInstance(getCipherAlgorithmName()));
 
 		} else if (codeProviderForEncryption == CodeProvider.BCFIPS || codeProviderForEncryption == CodeProvider.BC) {
-
-			return new BCCipher(this);
+			if (this==CHACHA20_POLY1305)
+				return new JavaNativeCipher(this, Cipher.getInstance(getCipherAlgorithmName(), codeProviderForEncryption.name()));
+			else
+				return new BCCipher(this);
 					
 		} else {
-			if (this==CHACHA20 && invlidOSForChacha)
-				return BC_CHACHA20.getCipherInstance();
-			else if (this==CHACHA20_POLY1305 && invlidOSForChacha)
+			if (this==CHACHA20 && invalidOSForChaCha)
+				throw new NoSuchAlgorithmException();
+			else if (this==CHACHA20_POLY1305 && invalidOSForChaCha)
 				return BC_CHACHA20_POLY1305.getCipherInstance();
 			if (OS.getCurrentJREVersionDouble()<1.8 && this.getAlgorithmName().equals(AES_GCM.getAlgorithmName()) && this.getBlockMode().equals(AES_GCM.getBlockMode()) && this.getPadding().equals(AES_GCM.getPadding()))
 					return BC_FIPS_AES_GCM.getCipherInstance();
@@ -338,9 +340,9 @@ public enum SymmetricEncryptionType {
 			res = new BCKeyGenerator(this);
 
 		} else {
-			if (this==CHACHA20 && invlidOSForChacha)
-				return BC_CHACHA20.getKeyGenerator(random, keySizeBits);
-			else if (this==CHACHA20_POLY1305 && invlidOSForChacha)
+			if (this==CHACHA20 && invalidOSForChaCha)
+				throw new NoSuchAlgorithmException();
+			else if (this==CHACHA20_POLY1305 && invalidOSForChaCha)
 				return BC_CHACHA20_POLY1305.getKeyGenerator(random, keySizeBits);
 			if (OS.getCurrentJREVersionDouble()<1.8 && this.getAlgorithmName().equals(AES_GCM.getAlgorithmName()) && this.getBlockMode().equals(AES_GCM.getBlockMode()) && this.getPadding().equals(AES_GCM.getPadding()))
 				return BC_FIPS_AES_GCM.getKeyGenerator(random, keySizeBits);
@@ -461,7 +463,7 @@ public enum SymmetricEncryptionType {
 
 	public boolean supportRandomReadWrite()
 	{
-		return blockMode.equals("CTR");
+		return this.algorithmName.equals(CHACHA20.algorithmName) || blockMode.equals("CTR");
 	}
 
 	public boolean timingAttackPossibleWithSomeImplementations()

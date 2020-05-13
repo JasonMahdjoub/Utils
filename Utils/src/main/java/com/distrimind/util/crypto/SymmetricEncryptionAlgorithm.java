@@ -145,7 +145,7 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 		for (SubStreamParameter p : parameters)
 		{
 			long start=p.getStreamStartIncluded();
-encode()
+
 			if (start<iv.length)
 			{
 				md.update(hashResultFromEncryptedStream.getIv(), (int)start, (int)(Math.min(hashResultFromEncryptedStream.getIv().length, p.getStreamEndExcluded())-start));

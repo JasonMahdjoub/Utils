@@ -343,11 +343,22 @@ public abstract class AbstractCipher {
 	public abstract void init(int opmode, AbstractKey key, byte[] iv) throws InvalidKeyException, NoSuchAlgorithmException,
 			InvalidKeySpecException, InvalidAlgorithmParameterException;
 
+	private byte[] previousIV=null;
+	private int initialCounterPart;
+	private int counterPos;
+
 	public void init(int opmode, AbstractKey key, byte[] iv, int counter) throws InvalidKeyException, NoSuchAlgorithmException,
 			InvalidKeySpecException, InvalidAlgorithmParameterException
 	{
-		int pos=iv.length-4;
-		Bits.putInt(iv, pos, Bits.getInt(iv, pos)+counter);
+		if (iv!=null) {
+			if (previousIV != iv) {
+				previousIV = iv;
+				counterPos = iv.length - 4;
+				initialCounterPart = Bits.getInt(iv, counterPos);
+			}
+			iv = previousIV.clone();
+			Bits.putInt(iv, counterPos, initialCounterPart + counter);
+		}
 		init(opmode, key, iv);
 	}
 

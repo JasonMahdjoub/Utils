@@ -131,7 +131,8 @@ public enum OS {
 	static boolean isAndroid()
 	{
 		try {
-			return Class.forName("android.os.Build$VERSION")!=null;
+			Class.forName("android.os.Build$VERSION");
+			return true;
 		} catch (ClassNotFoundException e) {
 			return false;
 		}
@@ -190,7 +191,7 @@ public enum OS {
 	@SuppressWarnings("unused")
     public boolean SIPrefixAreUnderstoodAsBinaryPrefixForByteMultiples()
 	{
-		return this == WINDOWS || (this == MAC_OS_X && Double.valueOf(OSVersion.OS_VERSION) < 10.1);
+		return this == WINDOWS || (this == MAC_OS_X && Double.parseDouble(OSVersion.OS_VERSION) < 10.1);
 	}
 
 	@SuppressWarnings("unused")
