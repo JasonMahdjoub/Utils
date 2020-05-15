@@ -342,12 +342,5 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 		initCipherForDecrypt(cipher, null, null);
 	}
 
-	@Override
-	public int getOutputSizeForEncryption(int inputLen) {
-		if (includeIV()) {
-			return cipher.getOutputSize(inputLen) + getIVSizeBytesWithoutExternalCounter();
-		} else {
-			return cipher.getOutputSize(inputLen);
-		}
-	}
+
 }

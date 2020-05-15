@@ -102,12 +102,7 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 
 	protected void initBufferAllocatorArgs()
 	{
-		try
-		{
-			bufferOut=new byte[getOutputSizeForEncryption(BUFFER_SIZE)];
-		} catch (SecurityException | InvalidKeyException | InvalidAlgorithmParameterException | NoSuchAlgorithmException | InvalidKeySpecException | NoSuchProviderException e) {
-			throw new IllegalAccessError(e.getMessage());
-		}
+		bufferOut=new byte[(int)getOutputSizeForEncryption(BUFFER_SIZE)];
 	}
 	
 
@@ -130,11 +125,9 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 		return encode(bytes, off, len, associatedData, offAD, lenAD, (byte[])null);
 	}
 	public byte[] encode(byte[] bytes, int off, int len, byte[] associatedData, int offAD, int lenAD, byte[] externalCounter) throws IOException{
-		try (RandomByteArrayOutputStream baos = new RandomByteArrayOutputStream(getOutputSizeForEncryption(len))) {
+		try (RandomByteArrayOutputStream baos = new RandomByteArrayOutputStream((int)getOutputSizeForEncryption(len))) {
 			encode(bytes, off, len, associatedData, offAD, lenAD, baos, externalCounter);
 			return baos.getBytes();
-		} catch (NoSuchAlgorithmException | InvalidKeyException | InvalidKeySpecException | InvalidAlgorithmParameterException | NoSuchProviderException e) {
-			throw new IOException(e);
 		}
 	}
 	public void encode(byte[] bytes, int off, int len, RandomOutputStream os) throws IOException{
@@ -302,6 +295,8 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 			public void seek(long _pos) throws IOException {
 				if (closed)
 					throw new IOException("Stream closed");
+				if (_pos<0 || _pos>length)
+					throw new IllegalArgumentException();
 				long round = _pos / maxPlainTextSizeForEncoding;
 				if (includeIV()) {
 					long p = initialOutPos + round * maxEncryptedPartLength;
@@ -311,6 +306,9 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 					ris.readFully(iv);
 					long mod=_pos % maxPlainTextSizeForEncoding;
 					int counter=(int)(mod/getCounterStepInBytes());
+					if (mod>0) {
+						mod = cipher.getOutputSize((int)mod)+getIVSizeBytesWithoutExternalCounter();
+					}
 					p += mod;
 					os.seek(p);
 					System.arraycopy(externalCounter, 0, iv, getIVSizeBytesWithoutExternalCounter(), externalCounter.length);
@@ -318,7 +316,10 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 				}
 				else
 				{
-					os.seek(initialOutPos + round * maxEncryptedPartLength+(_pos % maxPlainTextSizeForEncoding));
+					long add=cipher.getOutputSize((int)(_pos % maxPlainTextSizeForEncoding));
+					if (add>0)
+						add+=getIVSizeBytesWithoutExternalCounter();
+					os.seek(initialOutPos + round * maxEncryptedPartLength+add);
 					try {
 						initCipherForEncryptWithNullIV(cipher);
 					} catch (InvalidKeyException | InvalidAlgorithmParameterException | NoSuchAlgorithmException | InvalidKeySpecException | NoSuchProviderException e) {
@@ -390,24 +391,17 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 	{
 		return getIVSizeBytesWithExternalCounter()-(useExternalCounter()?getBlockModeCounterBytes():0);
 	}
-	
-	public int getOutputSizeForEncryption(int inputLen)
-			throws InvalidKeyException, InvalidAlgorithmParameterException,
-			NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
-		initCipherForEncryptWithNullIV(cipher);
-		int maxBlockSize = maxPlainTextSizeForEncoding;
 
-		int div = inputLen / maxBlockSize;
-		int mod = inputLen % maxBlockSize;
-		int res = 0;
-		if (div > 0)
-			res += cipher.getOutputSize(maxBlockSize) * div;
-		
-		if (mod > 0)
-			res += cipher.getOutputSize(mod);
-		if (includeIV())
-			res += cipher.getBlockSize();
-		return res;
+	public long getOutputSizeForEncryption(long inputLen)
+	{
+		if (inputLen<0)
+			throw new IllegalArgumentException();
+		if (inputLen==0)
+			return 0;
+		long add=cipher.getOutputSize((int)(inputLen % maxPlainTextSizeForEncoding));
+		if (add>0)
+			add+=getIVSizeBytesWithoutExternalCounter();
+		return inputLen / maxPlainTextSizeForEncoding * maxEncryptedPartLength+add;
 	}
 
 

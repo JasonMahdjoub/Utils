@@ -112,7 +112,7 @@ public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutpu
 
 
 		@Override
-		public int getOutputSizeForEncryption(int inputLen) throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
+		public long getOutputSizeForEncryption(long inputLen) throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
 			return nonPQCEncryption.getOutputSizeForEncryption(PQCEncryption.getOutputSizeForEncryption(inputLen));
 		}
 
@@ -286,7 +286,7 @@ public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutpu
 	}
 
 	@Override
-	public int getOutputSizeForEncryption(int inputLen) throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
+	public long getOutputSizeForEncryption(long inputLen) throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
 		return client.getOutputSizeForEncryption(inputLen);
 	}
 
