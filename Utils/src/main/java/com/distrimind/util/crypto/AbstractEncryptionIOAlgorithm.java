@@ -251,7 +251,7 @@ public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOu
 				int round=0;
 				int counter=0;
 				private final byte[] buffer=new byte[BUFFER_SIZE];
-				final int maxBlockSize=getMaxBlockSizeForEncoding();
+				final int maxBlockSize= getPlanTextSizeForEncoding();
 				boolean closed=false;
 
 				@Override

@@ -40,7 +40,6 @@ import com.distrimind.util.io.*;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
@@ -129,7 +128,7 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 	}
 
 	public boolean checkPartialHashWithNonEncryptedStream(SubStreamHashResult hashResultFromEncryptedStream, SubStreamParameters subStreamParameters, RandomInputStream nonEncryptedInputStream, byte[] associatedData, int offAD, int lenAD, AbstractMessageDigest md) throws InvalidKeySpecException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, IOException {
-		if (getMaxBlockSizeForEncoding()!=Integer.MAX_VALUE)
+		if (getPlanTextSizeForEncoding()!=Integer.MAX_VALUE)
 			throw new IllegalAccessError();
 
 		List<SubStreamParameter> parameters=subStreamParameters.getParameters() ;
@@ -260,7 +259,7 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 	}
 
 	@Override
-	public int getMaxBlockSizeForEncoding() {
+	public int getPlanTextSizeForEncoding() {
 		return key.getMaxBlockSize();
 	}
 	
@@ -331,7 +330,7 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 	}
 	private final Random nonSecureRandom=new Random(System.currentTimeMillis());
 	@Override
-	public void initCipherForEncryptAndNotChangeIV(AbstractCipher cipher) throws InvalidKeyException,
+	public void initCipherForEncryptWithNullIV(AbstractCipher cipher) throws InvalidKeyException,
 			NoSuchAlgorithmException, InvalidKeySpecException, InvalidAlgorithmParameterException {
 		nonSecureRandom.nextBytes(nullIV);
 		cipher.init(Cipher.ENCRYPT_MODE, key, nullIV);
@@ -341,5 +340,14 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 	@Override
 	public void initCipherForDecrypt(AbstractCipher cipher) throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
 		initCipherForDecrypt(cipher, null, null);
+	}
+
+	@Override
+	public int getOutputSizeForEncryption(int inputLen) {
+		if (includeIV()) {
+			return cipher.getOutputSize(inputLen) + getIVSizeBytesWithoutExternalCounter();
+		} else {
+			return cipher.getOutputSize(inputLen);
+		}
 	}
 }

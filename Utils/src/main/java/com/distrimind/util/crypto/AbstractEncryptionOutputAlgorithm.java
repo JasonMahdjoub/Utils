@@ -34,7 +34,6 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
-import com.distrimind.util.Bits;
 import com.distrimind.util.FileTools;
 import com.distrimind.util.io.*;
 
@@ -47,7 +46,7 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.spec.InvalidKeySpecException;
-import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * 
@@ -64,7 +63,9 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 
 	protected final byte[] buffer;
 	protected byte[] bufferOut;
-	
+	private int maxPlainTextSizeForEncoding;
+	private long maxEncryptedPartLength;
+	private final byte[] one=new byte[1];
 	
 	public byte getBlockModeCounterBytes() {
 		return (byte)0;
@@ -84,15 +85,19 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 		bufferOut=null;
 	}
 
-	protected AbstractEncryptionOutputAlgorithm(AbstractCipher cipher, int ivSizeBytes) {
+	protected AbstractEncryptionOutputAlgorithm(AbstractCipher cipher, int ivSizeBytes) throws IOException {
 		if (cipher == null)
 			throw new NullPointerException("cipher");
 		this.cipher = cipher;
-		if (includeIV())
+		if (includeIV()) {
 			nullIV = new byte[ivSizeBytes];
+			Arrays.fill(nullIV, (byte) 0);
+		}
 		else
 			nullIV = null;
+
 		buffer=new byte[BUFFER_SIZE];
+		setMaxPlainTextSizeForEncoding(getMaxPlainTextSizeForEncoding());
 	}
 
 	protected void initBufferAllocatorArgs()
@@ -105,11 +110,7 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 		}
 	}
 	
-	
-	/*protected void initIV()
-	{
-		
-	}*/
+
 	
 	public byte[] encode(byte[] bytes) throws IOException{
 		return encode(bytes, 0, bytes.length);
@@ -144,7 +145,7 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 		encode(bytes, off, len, associatedData, offAD, lenAD, os, null);
 	}
 
-	protected abstract void initCipherForEncryptionWithIv(AbstractCipher cipher, byte[] iv);
+	protected abstract void initCipherForEncryptionWithIvAndCounter(AbstractCipher cipher, byte[] iv, int counter);
 
 	public void encode(byte[] bytes, int off, int len, byte[] associatedData, int offAD, int lenAD, RandomOutputStream os, byte[] externalCounter) throws IOException{
 		RandomInputStream ris=new RandomByteArrayInputStream(bytes);
@@ -194,84 +195,54 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 		return getCipherOutputStream(os, null, 0,0, externalCounter);
 	}
 
+	protected abstract int getCounterStepInBytes();
+
 	public RandomOutputStream getCipherOutputStream(final RandomOutputStream os, final byte[] associatedData, final int offAD, final int lenAD, final byte[] externalCounter) throws
 			IOException{
-		byte[] tab;
-		try {
-			 tab = initCipherForEncrypt(cipher, externalCounter);
-		} catch (InvalidKeyException | InvalidAlgorithmParameterException | NoSuchAlgorithmException | InvalidKeySpecException | NoSuchProviderException e) {
-			throw new IOException(e);
-		}
-		final byte[] initialIV=tab;
-		final int counterPos = initialIV==null?0:initialIV.length - 4;
-		final int initialCounter=initialIV==null?0:Bits.getInt(initialIV, counterPos);
-		final long initialOutPos=os.currentPosition();
-		return new RandomOutputStream() {
 
-			byte[] iv=null;
-			int counter=0;
-			final int maxBlockSize=getMaxBlockSizeForEncoding();
+		final long initialOutPos=os.currentPosition();
+
+
+
+		return new RandomOutputStream() {
 			long length=0;
 			long currentPos=0;
-			//
-			int round=0;
 			boolean closed=false;
-			private final byte[] one=new byte[1];
-			private final ArrayList<Long> outPos=new ArrayList<>();
 
-
-			private int checkInit() throws IOException {
-				if (currentPos % maxBlockSize == 0) {
-					if (iv == null) {
-						round=0;
-						if (includeIV()) {
-							iv=initialIV;
-							counter=initialCounter;
-							Bits.putInt(iv, counterPos, counter);
-							os.write(iv, 0, getIVSizeBytesWithoutExternalCounter());
-							initCipherForEncryptionWithIv(cipher, initialIV);
-						}
-						else {
-							try {
-								initCipherForEncryptAndNotChangeIV(cipher);
-							} catch (InvalidKeyException | InvalidAlgorithmParameterException | NoSuchAlgorithmException | InvalidKeySpecException | NoSuchProviderException e) {
-								throw new IOException(e);
-							}
-						}
-					} else {
-
+			private long checkInit() throws IOException {
+				if (currentPos % maxPlainTextSizeForEncoding == 0) {
+					long round=currentPos/ maxPlainTextSizeForEncoding;
+					if (round>0){
 						try {
 							byte[] f=cipher.doFinal();
 							if (f!=null && f.length>0)
 								os.write(f);
-							if (outPos.size()>round) {
-								outPos.set(round, os.currentPosition());
-							}
-							else
-								outPos.add(os.currentPosition());
+
 						} catch (IllegalBlockSizeException | BadPaddingException e) {
 							throw new IOException(e);
 						}
-						++round;
-						if (includeIV()) {
-
-							counter = initialCounter + round;
-							Bits.putInt(iv, counterPos, counter);
-							initCipherForEncryptionWithIv(cipher, iv);
-						}
-						else {
-							try {
-								initCipherForEncryptAndNotChangeIV(cipher);
-							} catch (InvalidKeyException | InvalidAlgorithmParameterException | NoSuchAlgorithmException | InvalidKeySpecException | NoSuchProviderException e) {
-								throw new IOException(e);
-							}
+					}
+					if (includeIV()) {
+						try {
+							byte[] iv=initCipherForEncrypt(cipher, externalCounter);
+							os.write(iv, 0, getIVSizeBytesWithoutExternalCounter());
+						} catch (InvalidKeyException | InvalidAlgorithmParameterException | NoSuchAlgorithmException | InvalidKeySpecException | NoSuchProviderException e) {
+							throw new IOException(e);
 						}
 					}
+					else {
+						try {
+							initCipherForEncryptWithNullIV(cipher);
+						} catch (InvalidKeyException | InvalidAlgorithmParameterException | NoSuchAlgorithmException | InvalidKeySpecException | NoSuchProviderException e) {
+							throw new IOException(e);
+						}
+					}
+
 					if (associatedData != null && lenAD > 0)
 						cipher.updateAAD(associatedData, offAD, lenAD);
-					return maxBlockSize;
+					return maxPlainTextSizeForEncoding;
 				}
-				return (int) (currentPos % maxBlockSize);
+				return (int) (currentPos % maxPlainTextSizeForEncoding);
 			}
 			@Override
 			public long length() {
@@ -285,9 +256,9 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 				checkLimits(b, off, len);
 				if (len==0)
 					return;
-				int l=checkInit();
+				long l=checkInit();
 				while (len>0) {
-					int s=Math.min(len, l);
+					int s=(int)Math.min(len, l);
 					os.write(cipher.update(b, off, s));
 					len-=s;
 					currentPos+=s;
@@ -317,16 +288,13 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 					os.setLength(initialOutPos);
 					currentPos=0;
 					length=0;
-					iv=null;
 				}
 				else {
-					int ivL=0;
-					if (includeIV()) {
-						ivL = getIVSizeBytesWithoutExternalCounter();
-					}
-					os.setLength(ivL+newLength);
-					currentPos=Math.min(newLength, currentPos);
+					long round=newLength/ maxPlainTextSizeForEncoding;
+					newLength=initialOutPos + round * maxEncryptedPartLength+(newLength % maxPlainTextSizeForEncoding);
+					os.setLength(newLength);
 					length=newLength;
+					seek(Math.min(newLength, currentPos));
 				}
 			}
 
@@ -334,27 +302,29 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 			public void seek(long _pos) throws IOException {
 				if (closed)
 					throw new IOException("Stream closed");
-				round = (int) (_pos / maxBlockSize);
-				long p;
-				if (round>0)
-					p=outPos.get(round);
-				else
-					p=initialOutPos;
-				os.seek(p+_pos%maxBlockSize);
+				long round = _pos / maxPlainTextSizeForEncoding;
 				if (includeIV()) {
-
-					counter = initialCounter+((int) (_pos % maxBlockSize)) + round;
-					Bits.putInt(iv, counterPos, counter);
-					initCipherForEncryptionWithIv(cipher, iv);
+					long p = initialOutPos + round * maxEncryptedPartLength;
+					RandomInputStream ris = os.getRandomInputStream();
+					os.getRandomInputStream().seek(p);
+					byte[] iv = new byte[getIVSizeBytesWithExternalCounter()];
+					ris.readFully(iv);
+					long mod=_pos % maxPlainTextSizeForEncoding;
+					int counter=(int)(mod/getCounterStepInBytes());
+					p += mod;
+					os.seek(p);
+					System.arraycopy(externalCounter, 0, iv, getIVSizeBytesWithoutExternalCounter(), externalCounter.length);
+					initCipherForEncryptionWithIvAndCounter(cipher, iv, counter);
 				}
-				else {
+				else
+				{
+					os.seek(initialOutPos + round * maxEncryptedPartLength+(_pos % maxPlainTextSizeForEncoding));
 					try {
-						initCipherForEncryptAndNotChangeIV(cipher);
+						initCipherForEncryptWithNullIV(cipher);
 					} catch (InvalidKeyException | InvalidAlgorithmParameterException | NoSuchAlgorithmException | InvalidKeySpecException | NoSuchProviderException e) {
 						throw new IOException(e);
 					}
 				}
-
 			}
 
 			@Override
@@ -400,7 +370,19 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 
 	}
 
-	public abstract int getMaxBlockSizeForEncoding();
+	public abstract int getMaxPlainTextSizeForEncoding();
+
+	void setMaxPlainTextSizeForEncoding(int maxPlainTextSizeForEncoding) throws IOException {
+		try {
+			initCipherForEncryptWithNullIV(cipher);
+			this.maxPlainTextSizeForEncoding=maxPlainTextSizeForEncoding;
+			int maxCipherTextLength = cipher.getOutputSize(maxPlainTextSizeForEncoding);
+			this.maxEncryptedPartLength =((long) maxCipherTextLength)+((long)getIVSizeBytesWithoutExternalCounter());
+		} catch (InvalidKeyException | InvalidAlgorithmParameterException | NoSuchAlgorithmException | InvalidKeySpecException | NoSuchProviderException e) {
+			throw new IOException(e);
+		}
+
+	}
 
 	
 	public abstract int getIVSizeBytesWithExternalCounter();
@@ -412,15 +394,9 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 	public int getOutputSizeForEncryption(int inputLen)
 			throws InvalidKeyException, InvalidAlgorithmParameterException,
 			NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
-		initCipherForEncryptAndNotChangeIV(cipher);
-		int maxBlockSize = getMaxBlockSizeForEncoding();
-		if (this instanceof SymmetricEncryptionAlgorithm) {
-			if (includeIV()) {
-				return cipher.getOutputSize(inputLen) + getIVSizeBytesWithoutExternalCounter();
-			} else {
-				return cipher.getOutputSize(inputLen);
-			}
-		}
+		initCipherForEncryptWithNullIV(cipher);
+		int maxBlockSize = maxPlainTextSizeForEncoding;
+
 		int div = inputLen / maxBlockSize;
 		int mod = inputLen % maxBlockSize;
 		int res = 0;
@@ -434,6 +410,7 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 		return res;
 	}
 
+
 	protected abstract boolean includeIV();
 	public void initCipherForEncrypt(AbstractCipher cipher) throws InvalidKeyException,
 	InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
@@ -443,7 +420,7 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 			throws InvalidKeyException, InvalidAlgorithmParameterException,
 			NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException;
 
-	public abstract void initCipherForEncryptAndNotChangeIV(AbstractCipher cipher)
+	public abstract void initCipherForEncryptWithNullIV(AbstractCipher cipher)
 			throws InvalidKeyException, InvalidAlgorithmParameterException,
 			NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException;
 

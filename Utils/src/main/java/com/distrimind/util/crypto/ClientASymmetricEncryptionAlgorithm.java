@@ -81,8 +81,8 @@ public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutpu
 		}
 
 		@Override
-		public int getMaxBlockSizeForEncoding() {
-			return Math.min(nonPQCEncryption.getMaxBlockSizeForEncoding(), PQCEncryption.getMaxBlockSizeForEncoding());
+		public int getPlanTextSizeForEncoding() {
+			return Math.min(nonPQCEncryption.getPlanTextSizeForEncoding(), PQCEncryption.getPlanTextSizeForEncoding());
 		}
 
 		@Override
@@ -101,7 +101,7 @@ public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutpu
 		}
 
 		@Override
-		public void initCipherForEncryptAndNotChangeIV(AbstractCipher cipher) {
+		public void initCipherForEncryptWithNullIV(AbstractCipher cipher) {
 			throw new IllegalAccessError();
 		}
 
@@ -276,8 +276,8 @@ public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutpu
 	}
 
 	@Override
-	public int getMaxBlockSizeForEncoding() {
-		return client.getMaxBlockSizeForEncoding();
+	public int getPlanTextSizeForEncoding() {
+		return client.getPlanTextSizeForEncoding();
 	}
 
 	@Override
@@ -306,8 +306,8 @@ public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutpu
 	}
 
 	@Override
-	public void initCipherForEncryptAndNotChangeIV(AbstractCipher cipher) throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
-		client.initCipherForEncryptAndNotChangeIV(cipher);
+	public void initCipherForEncryptWithNullIV(AbstractCipher cipher) throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
+		client.initCipherForEncryptWithNullIV(cipher);
 	}
 
 	@Override
@@ -355,7 +355,7 @@ public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutpu
 		}
 
 		@Override
-		public int getMaxBlockSizeForEncoding() {
+		public int getPlanTextSizeForEncoding() {
 			return maxBlockSize;
 		}
 
@@ -367,11 +367,11 @@ public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutpu
 		@Override
 		public void initCipherForEncrypt(AbstractCipher _cipher, byte[] externalCounter)
 				throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException {
-			initCipherForEncryptAndNotChangeIV(_cipher);
+			initCipherForEncryptWithNullIV(_cipher);
 		}
 
 		@Override
-		public void initCipherForEncryptAndNotChangeIV(AbstractCipher _cipher)
+		public void initCipherForEncryptWithNullIV(AbstractCipher _cipher)
 				throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException {
 			_cipher.init(Cipher.ENCRYPT_MODE, distantPublicKey, random);
 
