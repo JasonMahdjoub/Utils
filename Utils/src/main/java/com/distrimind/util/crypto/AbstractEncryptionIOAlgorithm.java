@@ -42,16 +42,13 @@ import com.distrimind.util.io.RandomInputStream;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.ShortBufferException;
 import java.io.*;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
-import java.security.spec.InvalidKeySpecException;
 
 /**
  * 
  * @author Jason Mahdjoub
- * @version 4.0
+ * @version 5.0
  * @since Utils 1.5
  */
 public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOutputAlgorithm implements IEncryptionInputAlgorithm{
@@ -232,7 +229,7 @@ public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOu
 	{
 		return getCipherInputStream(is, associatedData, offAD, lenAD, null);
 	}
-
+	protected abstract void initCipherForDecryptionWithIvAndCounter(AbstractCipher cipher, byte[] iv, int counter) throws IOException ;
 
 	@Override
 	public RandomInputStream getCipherInputStream(final RandomInputStream is, final byte[] associatedData, final int offAD, final int lenAD, byte[] externalCounter)
@@ -265,13 +262,9 @@ public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOu
 						round=(int)(pos/maxBlockSize);
 						counter=round+initialCounter;
 						Bits.putInt(iv, counterPos, counter);
-						try {
-							initCipherForDecrypt(cipher, iv);
-							if (associatedData!=null && lenAD>0)
-								cipher.updateAAD(associatedData, offAD, lenAD);
-						} catch (InvalidKeyException | InvalidAlgorithmParameterException | NoSuchAlgorithmException | InvalidKeySpecException | NoSuchProviderException e) {
-							throw new IOException(e);
-						}
+						initCipherForDecrypt(cipher, iv);
+						if (associatedData!=null && lenAD>0)
+							cipher.updateAAD(associatedData, offAD, lenAD);
 						return maxBlockSize;
 					}
 					return (int) (pos % maxBlockSize);
@@ -358,13 +351,9 @@ public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOu
 					round=(int)(pos/maxBlockSize);
 					counter=(int)(pos%maxBlockSize+initialCounter+round);
 					Bits.putInt(iv, counterPos, counter);
-					try {
-						initCipherForDecrypt(cipher, iv);
-						if (associatedData!=null && lenAD>0)
-							cipher.updateAAD(associatedData, offAD, lenAD);
-					} catch (InvalidKeyException | InvalidAlgorithmParameterException | NoSuchAlgorithmException | InvalidKeySpecException | NoSuchProviderException e) {
-						throw new IOException(e);
-					}
+					initCipherForDecrypt(cipher, iv);
+					if (associatedData!=null && lenAD>0)
+						cipher.updateAAD(associatedData, offAD, lenAD);
 				}
 
 				@Override
@@ -412,24 +401,19 @@ public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOu
 			throw new IllegalArgumentException();
 		if (inputLen==0)
 			return 0;
-		try {
-			initCipherForDecrypt(cipher, nullIV);
-			long add=cipher.getOutputSize((int)(inputLen % maxEncryptedPartLength));
-			if (add>0)
-				add+=getIVSizeBytesWithoutExternalCounter();
-			return inputLen / maxEncryptedPartLength * maxPlainTextSizeForEncoding+add;
-		} catch (InvalidKeyException | InvalidAlgorithmParameterException | NoSuchAlgorithmException | InvalidKeySpecException | NoSuchProviderException e) {
-			throw new IOException(e);
-		}
+		initCipherForDecrypt(cipher, nullIV);
+		long add=cipher.getOutputSize((int)(inputLen % maxEncryptedPartLength));
+		if (add>0)
+			add+=getIVSizeBytesWithoutExternalCounter();
+		return inputLen / maxEncryptedPartLength * maxPlainTextSizeForEncoding+add;
 	}
 
 
 	@Override
 	public abstract void initCipherForDecrypt(AbstractCipher cipher, byte[] iv, byte[] externalCounter)
-			throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException,
-			InvalidKeySpecException, NoSuchProviderException;
+			throws IOException;
 	@Override
-	public void initCipherForDecrypt(AbstractCipher cipher, byte[] iv) throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException
+	public void initCipherForDecrypt(AbstractCipher cipher, byte[] iv) throws IOException
 	{
 		initCipherForDecrypt(cipher, iv, null);
 	}

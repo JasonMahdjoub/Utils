@@ -39,13 +39,7 @@ import com.distrimind.util.io.*;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
 import java.io.IOException;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
 
 /**
@@ -137,7 +131,7 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 		encode(bytes, off, len, associatedData, offAD, lenAD, os, null);
 	}
 
-	protected abstract void initCipherForEncryptionWithIvAndCounter(AbstractCipher cipher, byte[] iv, int counter);
+	protected abstract void initCipherForEncryptionWithIvAndCounter(AbstractCipher cipher, byte[] iv, int counter) throws IOException;
 
 	public void encode(byte[] bytes, int off, int len, byte[] associatedData, int offAD, int lenAD, RandomOutputStream os, byte[] externalCounter) throws IOException{
 		RandomInputStream ris=new RandomByteArrayInputStream(bytes);
@@ -165,8 +159,7 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 		}
 	}
 
-	protected abstract AbstractCipher getCipherInstance() throws NoSuchAlgorithmException,
-			NoSuchPaddingException, NoSuchProviderException;
+	protected abstract AbstractCipher getCipherInstance() throws IOException;
 	protected static void checkLimits(byte[] b, int off, int len)
 	{
 		if (b==null)
@@ -215,19 +208,11 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 						}
 					}
 					if (includeIV()) {
-						try {
-							byte[] iv=initCipherForEncrypt(cipher, externalCounter);
-							os.write(iv, 0, getIVSizeBytesWithoutExternalCounter());
-						} catch (InvalidKeyException | InvalidAlgorithmParameterException | NoSuchAlgorithmException | InvalidKeySpecException | NoSuchProviderException e) {
-							throw new IOException(e);
-						}
+						byte[] iv=initCipherForEncrypt(cipher, externalCounter);
+						os.write(iv, 0, getIVSizeBytesWithoutExternalCounter());
 					}
 					else {
-						try {
-							initCipherForEncryptWithNullIV(cipher);
-						} catch (InvalidKeyException | InvalidAlgorithmParameterException | NoSuchAlgorithmException | InvalidKeySpecException | NoSuchProviderException e) {
-							throw new IOException(e);
-						}
+						initCipherForEncryptWithNullIV(cipher);
 					}
 
 					if (associatedData != null && lenAD > 0)
@@ -303,10 +288,10 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 					os.getRandomInputStream().seek(p);
 					byte[] iv = new byte[getIVSizeBytesWithExternalCounter()];
 					ris.readFully(iv);
-					long mod=_pos % maxPlainTextSizeForEncoding;
-					int counter=(int)(mod/getCounterStepInBytes());
+					int mod=(int)(_pos % maxPlainTextSizeForEncoding);
+					int counter=mod/getCounterStepInBytes();
 					if (mod>0) {
-						mod = cipher.getOutputSize((int)mod)+getIVSizeBytesWithoutExternalCounter();
+						mod = cipher.getOutputSize(mod)+getIVSizeBytesWithoutExternalCounter();
 					}
 					p += mod;
 					os.seek(p);
@@ -319,11 +304,7 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 					if (add>0)
 						add+=getIVSizeBytesWithoutExternalCounter();
 					os.seek(initialOutPos + round * maxEncryptedPartLength+add);
-					try {
-						initCipherForEncryptWithNullIV(cipher);
-					} catch (InvalidKeyException | InvalidAlgorithmParameterException | NoSuchAlgorithmException | InvalidKeySpecException | NoSuchProviderException e) {
-						throw new IOException(e);
-					}
+					initCipherForEncryptWithNullIV(cipher);
 				}
 			}
 
@@ -373,14 +354,10 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 	public abstract int getMaxPlainTextSizeForEncoding();
 
 	void setMaxPlainTextSizeForEncoding(int maxPlainTextSizeForEncoding) throws IOException {
-		try {
-			initCipherForEncryptWithNullIV(cipher);
-			this.maxPlainTextSizeForEncoding=maxPlainTextSizeForEncoding;
-			int maxCipherTextLength = cipher.getOutputSize(maxPlainTextSizeForEncoding);
-			this.maxEncryptedPartLength =((long) maxCipherTextLength)+((long)getIVSizeBytesWithoutExternalCounter());
-		} catch (InvalidKeyException | InvalidAlgorithmParameterException | NoSuchAlgorithmException | InvalidKeySpecException | NoSuchProviderException e) {
-			throw new IOException(e);
-		}
+		initCipherForEncryptWithNullIV(cipher);
+		this.maxPlainTextSizeForEncoding=maxPlainTextSizeForEncoding;
+		int maxCipherTextLength = cipher.getOutputSize(maxPlainTextSizeForEncoding);
+		this.maxEncryptedPartLength =((long) maxCipherTextLength)+((long)getIVSizeBytesWithoutExternalCounter());
 
 	}
 
@@ -396,31 +373,24 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 			throw new IllegalArgumentException();
 		if (inputLen==0)
 			return 0;
-		try {
-			initCipherForEncryptWithNullIV(cipher);
-			long add=cipher.getOutputSize((int)(inputLen % maxPlainTextSizeForEncoding));
-			if (add>0)
-				add+=getIVSizeBytesWithoutExternalCounter();
-			return inputLen / maxPlainTextSizeForEncoding * maxEncryptedPartLength+add;
-		} catch (InvalidKeyException | InvalidAlgorithmParameterException | NoSuchAlgorithmException | InvalidKeySpecException | NoSuchProviderException e) {
-			throw new IOException(e);
-		}
+		initCipherForEncryptWithNullIV(cipher);
+		int add=cipher.getOutputSize((int)(inputLen % maxPlainTextSizeForEncoding));
+		if (add>0)
+			add+=getIVSizeBytesWithoutExternalCounter();
+		return inputLen / maxPlainTextSizeForEncoding * maxEncryptedPartLength+add;
 
 	}
 
 
 	protected abstract boolean includeIV();
-	public void initCipherForEncrypt(AbstractCipher cipher) throws InvalidKeyException,
-	InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
+	public void initCipherForEncrypt(AbstractCipher cipher) throws IOException {
 		initCipherForEncrypt(cipher, null);
 	}
 	public abstract byte[] initCipherForEncrypt(AbstractCipher cipher, byte[] externalCounter)
-			throws InvalidKeyException, InvalidAlgorithmParameterException,
-			NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException;
+			throws IOException;
 
 	public abstract void initCipherForEncryptWithNullIV(AbstractCipher cipher)
-			throws InvalidKeyException, InvalidAlgorithmParameterException,
-			NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException;
+			throws IOException;
 
 	public abstract boolean isPostQuantumEncryption();
 

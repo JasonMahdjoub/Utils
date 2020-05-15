@@ -45,6 +45,7 @@ import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
+import java.io.IOException;
 import java.security.AccessController;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
@@ -294,27 +295,32 @@ public enum SymmetricEncryptionType {
 			return algorithmName + "/" + blockMode + "/" + padding;
 	}
 
-	public AbstractCipher getCipherInstance() throws NoSuchAlgorithmException, NoSuchPaddingException, NoSuchProviderException {
+	public AbstractCipher getCipherInstance() throws IOException {
 		CodeProvider.ensureProviderLoaded(codeProviderForEncryption);
-		if (codeProviderForEncryption == CodeProvider.GNU_CRYPTO) {
-			return new GnuCipher(GnuFunctions.cipherGetInstance(getCipherAlgorithmName()));
+		try {
+			if (codeProviderForEncryption == CodeProvider.GNU_CRYPTO) {
+				return new GnuCipher(GnuFunctions.cipherGetInstance(getCipherAlgorithmName()));
 
-		} else if (codeProviderForEncryption == CodeProvider.BCFIPS || codeProviderForEncryption == CodeProvider.BC) {
-			if (this==CHACHA20_POLY1305)
-				return new JavaNativeCipher(this, Cipher.getInstance(getCipherAlgorithmName(), codeProviderForEncryption.name()));
-			else
-				return new BCCipher(this);
-					
-		} else {
-			if (this==CHACHA20 && invalidOSForChaCha)
-				throw new NoSuchAlgorithmException();
-			else if (this==CHACHA20_POLY1305 && invalidOSForChaCha)
-				return BC_CHACHA20_POLY1305.getCipherInstance();
-			if (OS.getCurrentJREVersionDouble()<1.8 && this.getAlgorithmName().equals(AES_GCM.getAlgorithmName()) && this.getBlockMode().equals(AES_GCM.getBlockMode()) && this.getPadding().equals(AES_GCM.getPadding()))
+			} else if (codeProviderForEncryption == CodeProvider.BCFIPS || codeProviderForEncryption == CodeProvider.BC) {
+				if (this == CHACHA20_POLY1305)
+					return new JavaNativeCipher(this, Cipher.getInstance(getCipherAlgorithmName(), codeProviderForEncryption.name()));
+				else
+					return new BCCipher(this);
+
+			} else {
+				if (this == CHACHA20 && invalidOSForChaCha)
+					throw new NoSuchAlgorithmException();
+				else if (this == CHACHA20_POLY1305 && invalidOSForChaCha)
+					return BC_CHACHA20_POLY1305.getCipherInstance();
+				if (OS.getCurrentJREVersionDouble() < 1.8 && this.getAlgorithmName().equals(AES_GCM.getAlgorithmName()) && this.getBlockMode().equals(AES_GCM.getBlockMode()) && this.getPadding().equals(AES_GCM.getPadding()))
 					return BC_FIPS_AES_GCM.getCipherInstance();
-			return new JavaNativeCipher(this, Cipher.getInstance(getCipherAlgorithmName(), codeProviderForEncryption.name()));
+				return new JavaNativeCipher(this, Cipher.getInstance(getCipherAlgorithmName(), codeProviderForEncryption.name()));
+			}
 		}
-
+		catch(NoSuchAlgorithmException | NoSuchPaddingException | NoSuchProviderException e)
+		{
+			throw new IOException(e);
+		}
 	}
 
 	public short getDefaultKeySizeBits() {

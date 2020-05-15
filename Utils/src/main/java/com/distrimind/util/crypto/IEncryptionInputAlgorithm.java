@@ -37,20 +37,12 @@ knowledge of the CeCILL-C license and that you accept its terms.
 
 import com.distrimind.util.io.RandomInputStream;
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.ShortBufferException;
-import java.io.*;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.spec.InvalidKeySpecException;
+import java.io.IOException;
+import java.io.OutputStream;
 
 /**
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 2.0
  * @since Utils 4.5.0
  */
 public interface IEncryptionInputAlgorithm extends IServer{
@@ -80,7 +72,7 @@ public interface IEncryptionInputAlgorithm extends IServer{
 	RandomInputStream getCipherInputStream(final RandomInputStream is, final byte[] associatedData, final int offAD, final int lenAD) throws IOException ;
 	RandomInputStream getCipherInputStream(final RandomInputStream is, final byte[] associatedData, final int offAD, final int lenAD, byte[] externalCounter) throws IOException ;
 
-	void initCipherForDecrypt(AbstractCipher cipher) throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException;
-	void initCipherForDecrypt(AbstractCipher cipher, byte[] iv) throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException;
+	void initCipherForDecrypt(AbstractCipher cipher) throws IOException;
+	void initCipherForDecrypt(AbstractCipher cipher, byte[] iv) throws IOException;
 
 }

@@ -35,22 +35,13 @@ The fact that you are presently reading this means that you have had
 knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.ShortBufferException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.spec.InvalidKeySpecException;
 
 /**
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 2.0
  * @since Utils 4.5.0
  */
 interface IServer {
@@ -61,10 +52,9 @@ interface IServer {
 
 
 	void initCipherForDecrypt(AbstractCipher cipher, byte[] iv, byte[] externalCounter)
-			throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException,
-			InvalidKeySpecException, NoSuchProviderException;
+			throws IOException;
 
-	AbstractCipher getCipherInstance() throws NoSuchAlgorithmException, NoSuchPaddingException, NoSuchProviderException;
+	AbstractCipher getCipherInstance() throws IOException;
 
 
 	boolean isPostQuantumEncryption();
@@ -74,13 +64,11 @@ interface IServer {
 
 
 	void decode(InputStream is, byte[] associatedData, int offAD, int lenAD, OutputStream os, int length, byte[] externalCounter)
-			throws InvalidKeyException, InvalidAlgorithmParameterException, IOException, IllegalBlockSizeException,
-			BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IllegalStateException, ShortBufferException;
+			throws IOException;
 
 
 
-	InputStream getCipherInputStream(InputStream is, byte[] externalCounter) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidKeySpecException, NoSuchProviderException, InvalidAlgorithmParameterException, IOException;
+	InputStream getCipherInputStream(InputStream is, byte[] externalCounter) throws IOException;
 	byte[] decode(byte[] bytes, int off, int len, byte[] associatedData, int offAD, int lenAD, byte[] externalCounter)
-			throws InvalidKeyException, InvalidAlgorithmParameterException, IOException, IllegalBlockSizeException,
-			BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IllegalStateException, ShortBufferException ;
+			throws IOException;
 }
