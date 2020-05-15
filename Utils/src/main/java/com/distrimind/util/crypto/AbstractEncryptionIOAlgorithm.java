@@ -254,7 +254,7 @@ public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOu
 								System.arraycopy(externalCounter, 0, iv, getIVSizeBytesWithoutExternalCounter(), externalCounter.length);
 							int counter = (int) (pos % maxEncryptedPartLength);
 							if (counter > 0)
-								counter = cipher.getOutputSize(counter);
+								counter = cipher.getOutputSize(counter)/8;
 							initCipherForDecryptionWithIvAndCounter(cipher, iv, counter);
 						}
 						else
@@ -369,8 +369,10 @@ public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOu
 
 					int counter = (int) (_pos % maxEncryptedPartLength);
 
-					if (counter > 0)
+					if (counter > 0) {
 						p += getIVSizeBytesWithoutExternalCounter() + (counter = cipher.getOutputSize(counter));
+						counter /= getCounterStepInBytes();
+					}
 					is.seek(p);
 					initCipherForDecryptionWithIvAndCounter(cipher, iv, counter);
 				}
