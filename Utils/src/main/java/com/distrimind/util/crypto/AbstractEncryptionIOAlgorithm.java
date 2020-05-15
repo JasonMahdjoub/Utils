@@ -405,27 +405,22 @@ public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOu
 		
 
 	}
-	@Override
-	public abstract int getMaxBlockSizeForDecoding();
-	@Override
-	public int getOutputSizeForDecryption(int inputLen) throws InvalidKeyException, InvalidAlgorithmParameterException,
-			NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
-		initCipherForDecrypt(cipher, nullIV);
-		if (includeIV()) {
-			inputLen -= getIVSizeBytesWithoutExternalCounter();
-		}
 
-		int maxBlockSize = getMaxBlockSizeForDecoding();
-		if (maxBlockSize == Integer.MAX_VALUE)
-			return cipher.getOutputSize(inputLen);
-		int div = inputLen / maxBlockSize;
-		int mod = inputLen % maxBlockSize;
-		int res = 0;
-		if (div > 0)
-			res += cipher.getOutputSize(maxBlockSize) * div;
-		if (mod > 0)
-			res += cipher.getOutputSize(mod);
-		return res;
+	@Override
+	public long getOutputSizeForDecryption(long inputLen) throws IOException {
+		if (inputLen<0)
+			throw new IllegalArgumentException();
+		if (inputLen==0)
+			return 0;
+		try {
+			initCipherForDecrypt(cipher, nullIV);
+			long add=cipher.getOutputSize((int)(inputLen % maxEncryptedPartLength));
+			if (add>0)
+				add+=getIVSizeBytesWithoutExternalCounter();
+			return inputLen / maxEncryptedPartLength * maxPlainTextSizeForEncoding+add;
+		} catch (InvalidKeyException | InvalidAlgorithmParameterException | NoSuchAlgorithmException | InvalidKeySpecException | NoSuchProviderException e) {
+			throw new IOException(e);
+		}
 	}
 
 

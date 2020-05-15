@@ -60,8 +60,6 @@ import javax.crypto.*;
  * @since Utils 1.4
  */
 public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm {
-	private static final int MAX_PLAIN_TEXT_PART_SIZE=(int)(1L<<31-1024);
-
 
 	private final SymmetricSecretKey key;
 
@@ -87,10 +85,6 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 	public SubStreamHashResult getIVAndPartialHashedSubStreamFromEncryptedStream(RandomInputStream encryptedInputStream, SubStreamParameters subStreamParameters, byte[] externalCounter) throws IOException, NoSuchProviderException, NoSuchAlgorithmException {
 		if (!getType().supportRandomReadWrite())
 			throw new IllegalStateException("Encryption type must support random read and write");
-		if (getMaxBlockSizeForDecoding()!=Integer.MAX_VALUE)
-			throw new IllegalAccessError();
-
-
 		byte[] iv=initIVAndCounter(readIV(encryptedInputStream, externalCounter), externalCounter);
 		//initCipherForDecrypt(cipher, iv, externalCounter);
 		byte[] hash=subStreamParameters.generateHash(encryptedInputStream);
@@ -194,7 +188,7 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 	}
 	public SymmetricEncryptionAlgorithm(AbstractSecureRandom random, SymmetricSecretKey key, byte blockModeCounterBytes, boolean internalCounter)
 			throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,
-			InvalidAlgorithmParameterException, NoSuchProviderException, InvalidKeySpecException {
+			InvalidAlgorithmParameterException, NoSuchProviderException, InvalidKeySpecException, IOException {
 		super(key.getEncryptionAlgorithmType().getCipherInstance(), key.getEncryptionAlgorithmType().getIVSizeBytes());
 
 		this.type = key.getEncryptionAlgorithmType();
@@ -208,7 +202,7 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 		this.internalCounter = internalCounter || blockModeCounterBytes==0;
 		this.key = key;
 		this.random = random;
-		this.maxPlainTextPartSize=MAX_PLAIN_TEXT_PART_SIZE;
+		this.maxPlainTextPartSize=key.getMaxPlainTextSizeForEncoding();
 		this.counterStepInBytes=type.getBlockSizeBits()/8;
 		iv = new byte[getIVSizeBytesWithExternalCounter()];
 		externalCounter=this.internalCounter?null:new byte[blockModeCounterBytes];
@@ -274,10 +268,6 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 		super.setMaxPlainTextSizeForEncoding(maxPlainTextSizeForEncoding);
 	}
 
-	@Override
-	public int getMaxBlockSizeForDecoding() {
-		return key.getMaxBlockSize();
-	}
 
 	
 

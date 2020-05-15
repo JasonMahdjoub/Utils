@@ -63,8 +63,8 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 
 	protected final byte[] buffer;
 	protected byte[] bufferOut;
-	private int maxPlainTextSizeForEncoding;
-	private long maxEncryptedPartLength;
+	protected int maxPlainTextSizeForEncoding;
+	protected long maxEncryptedPartLength;
 	private final byte[] one=new byte[1];
 	
 	public byte getBlockModeCounterBytes() {
@@ -100,8 +100,7 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 		setMaxPlainTextSizeForEncoding(getMaxPlainTextSizeForEncoding());
 	}
 
-	protected void initBufferAllocatorArgs()
-	{
+	protected void initBufferAllocatorArgs() throws IOException {
 		bufferOut=new byte[(int)getOutputSizeForEncryption(BUFFER_SIZE)];
 	}
 	
@@ -392,16 +391,21 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 		return getIVSizeBytesWithExternalCounter()-(useExternalCounter()?getBlockModeCounterBytes():0);
 	}
 
-	public long getOutputSizeForEncryption(long inputLen)
-	{
+	public long getOutputSizeForEncryption(long inputLen) throws IOException {
 		if (inputLen<0)
 			throw new IllegalArgumentException();
 		if (inputLen==0)
 			return 0;
-		long add=cipher.getOutputSize((int)(inputLen % maxPlainTextSizeForEncoding));
-		if (add>0)
-			add+=getIVSizeBytesWithoutExternalCounter();
-		return inputLen / maxPlainTextSizeForEncoding * maxEncryptedPartLength+add;
+		try {
+			initCipherForEncryptWithNullIV(cipher);
+			long add=cipher.getOutputSize((int)(inputLen % maxPlainTextSizeForEncoding));
+			if (add>0)
+				add+=getIVSizeBytesWithoutExternalCounter();
+			return inputLen / maxPlainTextSizeForEncoding * maxEncryptedPartLength+add;
+		} catch (InvalidKeyException | InvalidAlgorithmParameterException | NoSuchAlgorithmException | InvalidKeySpecException | NoSuchProviderException e) {
+			throw new IOException(e);
+		}
+
 	}
 
 

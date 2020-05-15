@@ -343,10 +343,10 @@ public class SymmetricSecretKey extends AbstractKey {
 		return keySizeBits;
 	}
 
-	private static final int maxBlockSize=1<<30;
+	private static final int maxPlainTextSizeForEncoding=(int)((1L<<31)-1024L);
 
-	public int getMaxBlockSize() {
-		return maxBlockSize;
+	public int getMaxPlainTextSizeForEncoding() {
+		return maxPlainTextSizeForEncoding;
 	}
 
 	@Override

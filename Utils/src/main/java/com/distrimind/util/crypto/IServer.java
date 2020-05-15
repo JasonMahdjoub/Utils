@@ -54,7 +54,10 @@ import java.security.spec.InvalidKeySpecException;
  * @since Utils 4.5.0
  */
 interface IServer {
-	int getMaxBlockSizeForDecoding();
+
+
+
+	int getMaxPlainTextSizeForEncoding();
 
 
 	void initCipherForDecrypt(AbstractCipher cipher, byte[] iv, byte[] externalCounter)
@@ -66,8 +69,8 @@ interface IServer {
 
 	boolean isPostQuantumEncryption();
 
-	int getOutputSizeForDecryption(int inputLen)
-			throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, InvalidAlgorithmParameterException;
+	long getOutputSizeForDecryption(long inputLen)
+			throws IOException;
 
 
 	void decode(InputStream is, byte[] associatedData, int offAD, int lenAD, OutputStream os, int length, byte[] externalCounter)
