@@ -34,16 +34,12 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
-import com.distrimind.util.Bits;
 import com.distrimind.util.io.LimitedRandomInputStream;
 import com.distrimind.util.io.RandomByteArrayInputStream;
 import com.distrimind.util.io.RandomInputStream;
 
-import javax.crypto.NoSuchPaddingException;
 import javax.crypto.ShortBufferException;
 import java.io.*;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
 
 /**
  * 
@@ -232,167 +228,197 @@ public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOu
 	protected abstract void initCipherForDecryptionWithIvAndCounter(AbstractCipher cipher, byte[] iv, int counter) throws IOException ;
 
 	@Override
-	public RandomInputStream getCipherInputStream(final RandomInputStream is, final byte[] associatedData, final int offAD, final int lenAD, byte[] externalCounter)
+	public RandomInputStream getCipherInputStream(final RandomInputStream is, final byte[] associatedData, final int offAD, final int lenAD, final byte[] externalCounter)
 			throws IOException {
-		try {
-			final AbstractCipher cipher = getCipherInstance();
-			final byte[] initialIV=readIV(is, externalCounter);
+		final AbstractCipher cipher = getCipherInstance();
+		final long initialIsPos=is.currentPosition();
+		final long length=is.length()-initialIsPos;
 
-			final int counterPos = initialIV==null?0:initialIV.length - 4;
-			final int initialCounter=initialIV==null?0:Bits.getInt(initialIV, counterPos);
-			final long initialIsPos=is.currentPosition();
-			final long length=is.length()-initialIsPos;
+		RandomInputStream ris=new RandomInputStream() {
+			private long pos=0;
+			boolean closed=false;
 
-			return new RandomInputStream() {
-				private long pos=0;
-				int round=0;
-				int counter=0;
-				private final byte[] buffer=new byte[BUFFER_SIZE];
-				final int maxBlockSize= getPlanTextSizeForEncoding();
-				boolean closed=false;
+			@Override
+			public long length() {
+				return length;
+			}
 
-				@Override
-				public long length() {
-					return length;
-				}
-
-				private int checkInit() throws IOException {
-					if (pos%maxBlockSize==0)
+			private int checkInit() throws IOException {
+				if (pos%maxEncryptedPartLength==0)
+				{
+					if (pos<length)
 					{
-						round=(int)(pos/maxBlockSize);
-						counter=round+initialCounter;
-						Bits.putInt(iv, counterPos, counter);
-						initCipherForDecrypt(cipher, iv);
+						if (includeIV()) {
+							is.readFully(iv, 0, getIVSizeBytesWithoutExternalCounter());
+							if (useExternalCounter())
+								System.arraycopy(externalCounter, 0, iv, getIVSizeBytesWithoutExternalCounter(), externalCounter.length);
+							int counter = (int) (pos % maxEncryptedPartLength);
+							if (counter > 0)
+								counter = cipher.getOutputSize(counter);
+							initCipherForDecryptionWithIvAndCounter(cipher, iv, counter);
+						}
+						else
+						{
+							initCipherForDecrypt(cipher);
+						}
 						if (associatedData!=null && lenAD>0)
 							cipher.updateAAD(associatedData, offAD, lenAD);
-						return maxBlockSize;
+						return maxEncryptedPartLength;
 					}
-					return (int) (pos % maxBlockSize);
-				}
-
-				@Override
-				public int read(byte[] b, int off, int len) throws IOException {
-					return read(b, off, len, false);
-				}
-
-				private int read(final byte[] b, final int off, final int len, final boolean fully) throws IOException {
-					if (closed)
-						throw new IOException("Stream closed");
-					checkLimits(b, off, len);
-					int total=0;
-					do {
-						int s=Math.min(checkInit(), len);
-
-						do {
-							int s3=Math.min(s, buffer.length);
-							try {
-								int s2=is.read(buffer, 0, s3);
-								if (s2==-1)
-								{
-									if (fully)
-									{
-										if (total!=len)
-											throw new EOFException();
-									}
-									if (total==0)
-									{
-										return -1;
-									}
-									else
-										return total;
-								}
-								int w=cipher.update(buffer, 0, s2, b, off);
-								s-=s2;
-								total+=w;
-								pos+=w;
-								if (!fully && s3!=s2)
-									return total;
-							} catch (ShortBufferException e) {
-								throw new IOException(e);
-							}
-
-						} while(s>0);
-					} while (len>total);
-					return total;
-				}
-
-				@Override
-				public int read() throws IOException {
-					if (closed)
-						throw new IOException("Stream closed");
-					checkInit();
-
-					int v=is.read(buffer, 0, 1);
-					++pos;
-					if (v<0)
-						return v;
 					else
+						return 0;
+
+				}
+				return (int) (pos % maxEncryptedPartLength);
+			}
+
+			@Override
+			public int read(byte[] b, int off, int len) throws IOException {
+				return read(b, off, len, false);
+			}
+
+			private int read(final byte[] b, final int off, final int len, final boolean fully) throws IOException {
+				if (closed)
+					throw new IOException("Stream closed");
+				checkLimits(b, off, len);
+				int total=0;
+				do {
+					int s=checkInit();
+					if (s<=0)
 					{
-						try
-						{
-							cipher.update(buffer, 0, 1, buffer, 1);
-							return buffer[1] & 0xFF;
+						if (fully)
+							throw new IOException();
+						else if (total==0)
+							return -1;
+						else
+							return total;
+					}
+					s=Math.min(s, len);
+
+					do {
+						int s3=Math.min(s, buffer.length);
+						try {
+							int s2=is.read(buffer, 0, s3);
+							if (s2==-1)
+							{
+								if (fully)
+								{
+									if (total!=len)
+										throw new EOFException();
+								}
+								if (total==0)
+								{
+									return -1;
+								}
+								else
+									return total;
+							}
+							int w=cipher.update(buffer, 0, s2, b, off);
+							s-=s2;
+							total+=w;
+							pos+=w;
+							if (!fully && s3!=s2)
+								return total;
 						} catch (ShortBufferException e) {
 							throw new IOException(e);
 						}
 
+					} while(s>0);
+				} while (len>total);
+				return total;
+			}
+
+			@Override
+			public int read() throws IOException {
+				if (closed)
+					throw new IOException("Stream closed");
+				checkInit();
+
+				int v=is.read(buffer, 0, 1);
+				++pos;
+				if (v<0)
+					return v;
+				else
+				{
+					try
+					{
+						cipher.update(buffer, 0, 1, buffer, 1);
+						return buffer[1] & 0xFF;
+					} catch (ShortBufferException e) {
+						throw new IOException(e);
 					}
+
 				}
+			}
 
-				@Override
-				public void seek(long _pos) throws IOException {
-					if (closed)
-						throw new IOException("Stream closed");
-					if (_pos<0)
-						throw new IllegalArgumentException();
-					if (_pos>length)
-						throw new IllegalArgumentException();
-					this.pos=_pos;
-					round=(int)(pos/maxBlockSize);
-					counter=(int)(pos%maxBlockSize+initialCounter+round);
-					Bits.putInt(iv, counterPos, counter);
-					initCipherForDecrypt(cipher, iv);
-					if (associatedData!=null && lenAD>0)
-						cipher.updateAAD(associatedData, offAD, lenAD);
+			@Override
+			public void seek(long _pos) throws IOException {
+				if (closed)
+					throw new IOException("Stream closed");
+				if (_pos<0)
+					throw new IllegalArgumentException();
+				if (_pos>length)
+					throw new IllegalArgumentException();
+
+				if (includeIV()) {
+					long p = _pos / maxEncryptedPartLength + initialIsPos;
+					is.seek(p);
+					is.readFully(iv, 0, getIVSizeBytesWithoutExternalCounter());
+					if (useExternalCounter())
+						System.arraycopy(externalCounter, 0, iv, getIVSizeBytesWithoutExternalCounter(), externalCounter.length);
+
+					int counter = (int) (_pos % maxEncryptedPartLength);
+
+					if (counter > 0)
+						p += getIVSizeBytesWithoutExternalCounter() + (counter = cipher.getOutputSize(counter));
+					is.seek(p);
+					initCipherForDecryptionWithIvAndCounter(cipher, iv, counter);
 				}
-
-				@Override
-				public long currentPosition() {
-					return pos;
+				else
+				{
+					long add=cipher.getOutputSize((int)(_pos % maxEncryptedPartLength));
+					if (add>0)
+						add+=getIVSizeBytesWithoutExternalCounter();
+					is.seek(_pos / maxEncryptedPartLength * maxPlainTextSizeForEncoding+add);
+					initCipherForDecrypt(cipher);
 				}
+				if (associatedData != null && lenAD > 0)
+					cipher.updateAAD(associatedData, offAD, lenAD);
+			}
 
-				@Override
-				public boolean isClosed() {
-					return closed;
-				}
+			@Override
+			public long currentPosition() {
+				return pos;
+			}
 
-				@Override
-				public void readFully(byte[] tab, int off, int len) throws IOException {
-					//noinspection ResultOfMethodCallIgnored
-					read(tab, off, len, true);
-				}
+			@Override
+			public boolean isClosed() {
+				return closed;
+			}
 
-				@Override
-				public void close() {
-					if (closed)
-						return;
-					closed=true;
-				}
+			@Override
+			public void readFully(byte[] tab, int off, int len) throws IOException {
+				//noinspection ResultOfMethodCallIgnored
+				read(tab, off, len, true);
+			}
 
-				@Deprecated
-				@Override
-				public String readLine() throws IOException {
-					return new DataInputStream(this).readLine();
-				}
+			@Override
+			public void close() {
+				if (closed)
+					return;
+				closed=true;
+			}
+
+			@Deprecated
+			@Override
+			public String readLine() throws IOException {
+				return new DataInputStream(this).readLine();
+			}
 
 
-			};
-		} catch (NoSuchAlgorithmException | NoSuchPaddingException | NoSuchProviderException e) {
-			throw new IOException(e);
-		}
-
-		
-
+		};
+		ris.seek(0);
+		return ris;
 	}
 
 	@Override
@@ -401,7 +427,7 @@ public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOu
 			throw new IllegalArgumentException();
 		if (inputLen==0)
 			return 0;
-		initCipherForDecrypt(cipher, nullIV);
+		initCipherForDecrypt(cipher, iv);
 		long add=cipher.getOutputSize((int)(inputLen % maxEncryptedPartLength));
 		if (add>0)
 			add+=getIVSizeBytesWithoutExternalCounter();

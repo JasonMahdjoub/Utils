@@ -40,7 +40,6 @@ import com.distrimind.util.io.*;
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import java.io.IOException;
-import java.util.Arrays;
 
 /**
  * 
@@ -53,13 +52,12 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 
 	protected final AbstractCipher cipher;
 
-	final byte[] nullIV;
-
 	protected final byte[] buffer;
 	protected byte[] bufferOut;
 	protected int maxPlainTextSizeForEncoding;
-	protected long maxEncryptedPartLength;
+	protected int maxEncryptedPartLength;
 	private final byte[] one=new byte[1];
+	protected final byte[] iv ;
 	
 	public byte getBlockModeCounterBytes() {
 		return (byte)0;
@@ -74,9 +72,9 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 	{
 		super();
 		cipher=null;
-		nullIV=null;
 		buffer=null;
 		bufferOut=null;
+		iv=null;
 	}
 
 	protected AbstractEncryptionOutputAlgorithm(AbstractCipher cipher, int ivSizeBytes) throws IOException {
@@ -84,11 +82,10 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 			throw new NullPointerException("cipher");
 		this.cipher = cipher;
 		if (includeIV()) {
-			nullIV = new byte[ivSizeBytes];
-			Arrays.fill(nullIV, (byte) 0);
+			iv = new byte[ivSizeBytes];
 		}
 		else
-			nullIV = null;
+			iv = null;
 
 		buffer=new byte[BUFFER_SIZE];
 		setMaxPlainTextSizeForEncoding(getMaxPlainTextSizeForEncoding());
@@ -286,8 +283,11 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 					long p = initialOutPos + round * maxEncryptedPartLength;
 					RandomInputStream ris = os.getRandomInputStream();
 					os.getRandomInputStream().seek(p);
-					byte[] iv = new byte[getIVSizeBytesWithExternalCounter()];
+
 					ris.readFully(iv);
+					if (useExternalCounter())
+						System.arraycopy(externalCounter, 0, iv, getIVSizeBytesWithoutExternalCounter(), externalCounter.length);
+
 					int mod=(int)(_pos % maxPlainTextSizeForEncoding);
 					int counter=mod/getCounterStepInBytes();
 					if (mod>0) {
@@ -295,7 +295,6 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 					}
 					p += mod;
 					os.seek(p);
-					System.arraycopy(externalCounter, 0, iv, getIVSizeBytesWithoutExternalCounter(), externalCounter.length);
 					initCipherForEncryptionWithIvAndCounter(cipher, iv, counter);
 				}
 				else
@@ -304,8 +303,10 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 					if (add>0)
 						add+=getIVSizeBytesWithoutExternalCounter();
 					os.seek(initialOutPos + round * maxEncryptedPartLength+add);
-					initCipherForEncryptWithNullIV(cipher);
+					initCipherForEncrypt(cipher);
 				}
+				if (associatedData!=null && lenAD>0)
+					cipher.updateAAD(associatedData, offAD, lenAD);
 			}
 
 			@Override
@@ -357,7 +358,7 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 		initCipherForEncryptWithNullIV(cipher);
 		this.maxPlainTextSizeForEncoding=maxPlainTextSizeForEncoding;
 		int maxCipherTextLength = cipher.getOutputSize(maxPlainTextSizeForEncoding);
-		this.maxEncryptedPartLength =((long) maxCipherTextLength)+((long)getIVSizeBytesWithoutExternalCounter());
+		this.maxEncryptedPartLength =maxCipherTextLength+getIVSizeBytesWithoutExternalCounter();
 
 	}
 

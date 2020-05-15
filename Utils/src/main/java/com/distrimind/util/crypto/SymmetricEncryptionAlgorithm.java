@@ -74,6 +74,7 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 	private byte[] externalCounter;
 	private int maxPlainTextPartSize;
 	private final int counterStepInBytes;
+	private final boolean supportRandomReadWrite;
 
 	@Override
 	public boolean isPostQuantumEncryption() {
@@ -212,6 +213,7 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 		this.random = random;
 		this.maxPlainTextPartSize=key.getMaxPlainTextSizeForEncoding();
 		this.counterStepInBytes=type.getBlockSizeBits()/8;
+		this.supportRandomReadWrite=type.supportRandomReadWrite();
 		iv = new byte[getIVSizeBytesWithExternalCounter()];
 		externalCounter=this.internalCounter?null:new byte[blockModeCounterBytes];
 		try {
@@ -341,7 +343,10 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 	@Override
 	protected void initCipherForDecryptionWithIvAndCounter(AbstractCipher cipher, byte[] iv, int counter) throws IOException {
 		try {
-			cipher.init(Cipher.DECRYPT_MODE, key, iv, counter);
+			if (supportRandomReadWrite)
+				cipher.init(Cipher.DECRYPT_MODE, key, iv, counter);
+			else
+				cipher.init(Cipher.DECRYPT_MODE, key, iv);
 		} catch (InvalidKeyException | NoSuchAlgorithmException | InvalidKeySpecException | InvalidAlgorithmParameterException e) {
 			throw new IOException(e);
 		}
@@ -350,7 +355,10 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 	@Override
 	protected void initCipherForEncryptionWithIvAndCounter(AbstractCipher cipher, byte[] iv, int counter) throws IOException {
 		try {
-			cipher.init(Cipher.ENCRYPT_MODE, key, iv, counter);
+			if (supportRandomReadWrite)
+				cipher.init(Cipher.ENCRYPT_MODE, key, iv, counter);
+			else
+				cipher.init(Cipher.ENCRYPT_MODE, key, iv);
 		} catch (InvalidKeyException | NoSuchAlgorithmException | InvalidKeySpecException | InvalidAlgorithmParameterException e) {
 			throw new IOException(e);
 		}
@@ -373,9 +381,9 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 	private final Random nonSecureRandom=new Random(System.currentTimeMillis());
 	@Override
 	public void initCipherForEncryptWithNullIV(AbstractCipher cipher) throws IOException {
-		nonSecureRandom.nextBytes(nullIV);
+		nonSecureRandom.nextBytes(iv);
 		try {
-			cipher.init(Cipher.ENCRYPT_MODE, key, nullIV);
+			cipher.init(Cipher.ENCRYPT_MODE, key, iv);
 		} catch (InvalidKeyException | NoSuchAlgorithmException | InvalidKeySpecException | InvalidAlgorithmParameterException e) {
 			throw new IOException(e);
 		}

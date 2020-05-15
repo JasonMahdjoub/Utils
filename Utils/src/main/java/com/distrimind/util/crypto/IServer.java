@@ -35,8 +35,9 @@ The fact that you are presently reading this means that you have had
 knowledge of the CeCILL-C license and that you accept its terms.
  */
 
+import com.distrimind.util.io.RandomInputStream;
+
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 
 /**
@@ -46,9 +47,6 @@ import java.io.OutputStream;
  */
 interface IServer {
 
-
-
-	int getMaxPlainTextSizeForEncoding();
 
 
 	void initCipherForDecrypt(AbstractCipher cipher, byte[] iv, byte[] externalCounter)
@@ -63,12 +61,12 @@ interface IServer {
 			throws IOException;
 
 
-	void decode(InputStream is, byte[] associatedData, int offAD, int lenAD, OutputStream os, int length, byte[] externalCounter)
+	void decode(RandomInputStream is, byte[] associatedData, int offAD, int lenAD, OutputStream os, int length, byte[] externalCounter)
 			throws IOException;
 
 
 
-	InputStream getCipherInputStream(InputStream is, byte[] externalCounter) throws IOException;
+	RandomInputStream getCipherInputStream(RandomInputStream is, byte[] externalCounter) throws IOException;
 	byte[] decode(byte[] bytes, int off, int len, byte[] associatedData, int offAD, int lenAD, byte[] externalCounter)
 			throws IOException;
 }
