@@ -61,7 +61,7 @@ public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOu
 		super();
 	}
 
-	protected AbstractEncryptionIOAlgorithm(AbstractCipher cipher, int ivSizeBytes) {
+	protected AbstractEncryptionIOAlgorithm(AbstractCipher cipher, int ivSizeBytes) throws IOException {
 		super(cipher, ivSizeBytes);
 
 	}

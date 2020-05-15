@@ -60,7 +60,7 @@ import javax.crypto.*;
  * @since Utils 1.4
  */
 public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm {
-
+	private static final int MAX_PLAIN_TEXT_PART_SIZE=(int)(1L<<31-1024);
 
 
 	private final SymmetricSecretKey key;
@@ -74,6 +74,8 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 	private final boolean internalCounter;
 	
 	private byte[] externalCounter;
+	private int maxPlainTextPartSize;
+	private final int counterStepInBytes;
 
 	@Override
 	public boolean isPostQuantumEncryption() {
@@ -128,7 +130,7 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 	}
 
 	public boolean checkPartialHashWithNonEncryptedStream(SubStreamHashResult hashResultFromEncryptedStream, SubStreamParameters subStreamParameters, RandomInputStream nonEncryptedInputStream, byte[] associatedData, int offAD, int lenAD, AbstractMessageDigest md) throws InvalidKeySpecException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, IOException {
-		if (getPlanTextSizeForEncoding()!=Integer.MAX_VALUE)
+		if (getMaxPlainTextSizeForEncoding()!=Integer.MAX_VALUE)
 			throw new IllegalAccessError();
 
 		List<SubStreamParameter> parameters=subStreamParameters.getParameters() ;
@@ -206,6 +208,8 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 		this.internalCounter = internalCounter || blockModeCounterBytes==0;
 		this.key = key;
 		this.random = random;
+		this.maxPlainTextPartSize=MAX_PLAIN_TEXT_PART_SIZE;
+		this.counterStepInBytes=type.getBlockSizeBits()/8;
 		iv = new byte[getIVSizeBytesWithExternalCounter()];
 		externalCounter=this.internalCounter?null:new byte[blockModeCounterBytes];
 		this.cipher.init(Cipher.ENCRYPT_MODE, this.key, generateIV());
@@ -222,6 +226,7 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 	{
 		return !internalCounter;
 	}
+
 
 	@Override
 	public int getIVSizeBytesWithExternalCounter()
@@ -254,15 +259,26 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 	}
 
 	@Override
+	protected int getCounterStepInBytes() {
+		return counterStepInBytes;
+	}
+
+	@Override
+	public int getMaxPlainTextSizeForEncoding() {
+		return maxPlainTextPartSize;
+	}
+
+	@Override
+	void setMaxPlainTextSizeForEncoding(int maxPlainTextSizeForEncoding) throws IOException {
+		this.maxPlainTextPartSize=maxPlainTextSizeForEncoding;
+		super.setMaxPlainTextSizeForEncoding(maxPlainTextSizeForEncoding);
+	}
+
+	@Override
 	public int getMaxBlockSizeForDecoding() {
 		return key.getMaxBlockSize();
 	}
 
-	@Override
-	public int getPlanTextSizeForEncoding() {
-		return key.getMaxBlockSize();
-	}
-	
 	
 
 	
