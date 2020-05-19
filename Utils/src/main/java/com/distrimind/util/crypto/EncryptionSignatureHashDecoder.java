@@ -47,7 +47,7 @@ import java.security.NoSuchProviderException;
  */
 public class EncryptionSignatureHashDecoder {
 
-	private final RandomInputStream inputStream;
+	private RandomInputStream inputStream=null;
 	private SymmetricEncryptionAlgorithm cipher=null;
 	private byte[] associatedData=null;
 	private int offAD=0;
@@ -56,13 +56,15 @@ public class EncryptionSignatureHashDecoder {
 	private ASymmetricAuthenticatedSignatureCheckerAlgorithm asymmetricChecker=null;
 	private AbstractMessageDigest digest=null;
 
-	public EncryptionSignatureHashDecoder(RandomInputStream inputStream) throws IOException {
+	public EncryptionSignatureHashDecoder() {
+	}
+	public EncryptionSignatureHashDecoder withRandomInputStream(RandomInputStream inputStream) throws IOException {
 		if (inputStream==null)
 			throw new NullPointerException();
 		if (inputStream.length()-inputStream.currentPosition()==0)
 			throw new IllegalArgumentException();
-
-		this.inputStream = inputStream;
+		this.inputStream=inputStream;
+		return this;
 	}
 
 	public EncryptionSignatureHashDecoder withSymmetricSecretKeyForEncryption(AbstractSecureRandom random, SymmetricSecretKey symmetricSecretKeyForEncryption) throws IOException {
@@ -180,5 +182,12 @@ public class EncryptionSignatureHashDecoder {
 		} catch (NoSuchProviderException | NoSuchAlgorithmException e) {
 			throw new IOException(e);
 		}
+	}
+	public long getMaximumOutputLength() throws IOException {
+		return EncryptionSignatureHashEncoder.getMaximumOutputLengthAfterDecoding(inputStream.length(), cipher, symmetricChecker, asymmetricChecker, digest);
+	}
+
+	public long getMaximumOutputLength(long inputStreamLength) throws IOException {
+		return EncryptionSignatureHashEncoder.getMaximumOutputLengthAfterDecoding(inputStreamLength, cipher, symmetricChecker, asymmetricChecker, digest);
 	}
 }

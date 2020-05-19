@@ -110,7 +110,7 @@ public class EncryptionSignatureHashEncoder {
 	{
 		return (code & 16)==16;
 	}
-	private final RandomInputStream inputStream;
+	private RandomInputStream inputStream=null;
 	private SymmetricEncryptionAlgorithm cipher=null;
 	private byte[] associatedData=null;
 	private int offAD=0;
@@ -118,12 +118,17 @@ public class EncryptionSignatureHashEncoder {
 	private SymmetricAuthenticatedSignerAlgorithm symmetricSigner=null;
 	private ASymmetricAuthenticatedSignerAlgorithm asymmetricSigner=null;
 	private AbstractMessageDigest digest=null;
-	public EncryptionSignatureHashEncoder(RandomInputStream inputStream) throws IOException {
+	public EncryptionSignatureHashEncoder() {
+
+	}
+
+	public EncryptionSignatureHashEncoder withRandomInputStream(RandomInputStream inputStream) throws IOException {
 		if (inputStream==null)
 			throw new NullPointerException();
 		if (inputStream.length()-inputStream.currentPosition()==0)
 			throw new IllegalArgumentException();
 		this.inputStream=inputStream;
+		return this;
 	}
 
 	public EncryptionSignatureHashEncoder withSymmetricSecretKeyForEncryption(AbstractSecureRandom random, SymmetricSecretKey symmetricSecretKeyForEncryption) throws IOException {
@@ -271,9 +276,61 @@ public class EncryptionSignatureHashEncoder {
 		} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
 			throw new IOException(e);
 		}
-
 	}
 
+	public long getMaximumOutputLength() throws IOException {
+		return getMaximumOutputLengthAfterEncoding(inputStream.length(), cipher, symmetricSigner, asymmetricSigner, digest);
+	}
+
+	public long getMaximumOutputLength(long inputStreamLength) throws IOException {
+		return getMaximumOutputLengthAfterEncoding(inputStreamLength, cipher, symmetricSigner, asymmetricSigner, digest);
+	}
+
+	static long getMaximumOutputLengthAfterEncoding(long inputStreamLength, SymmetricEncryptionAlgorithm cipher, SymmetricAuthenticatedSignerAlgorithm symmetricSigner, ASymmetricAuthenticatedSignerAlgorithm asymmetricSigner, AbstractMessageDigest digest) throws IOException {
+		if (inputStreamLength<=0)
+			throw new IllegalArgumentException();
+		long res=1;
+		if (cipher!=null)
+			res+=cipher.getOutputSizeForEncryption(inputStreamLength);
+		else
+			res+=inputStreamLength;
+		if (symmetricSigner!=null)
+			res+=symmetricSigner.getMacLengthBytes();
+		if(asymmetricSigner!=null)
+			res+=asymmetricSigner.getMacLengthBytes();
+		if (digest!=null || (asymmetricSigner!=null && symmetricSigner!=null))
+		{
+			if (digest==null)
+				res+=defaultMessageType.getDigestLengthInBits()/8;
+			else
+				res+=digest.getMessageDigestType().getDigestLengthInBits()/8;
+		}
+		return res;
+	}
+
+	static long getMaximumOutputLengthAfterDecoding(long inputStreamLength, SymmetricEncryptionAlgorithm cipher, SymmetricAuthenticatedSignatureCheckerAlgorithm symmetricChecker, ASymmetricAuthenticatedSignatureCheckerAlgorithm asymmetricChecker, AbstractMessageDigest digest) throws IOException {
+		if (inputStreamLength<=0)
+			throw new IllegalArgumentException();
+		long res=inputStreamLength-1;
+
+		if (symmetricChecker!=null)
+			res-=symmetricChecker.getMacLengthBytes();
+		if(asymmetricChecker!=null)
+			res-=asymmetricChecker.getMacLengthBytes();
+		if (digest!=null || (asymmetricChecker!=null && symmetricChecker!=null))
+		{
+			if (digest==null)
+				res-=defaultMessageType.getDigestLengthInBits()/8;
+			else
+				res-=digest.getMessageDigestType().getDigestLengthInBits()/8;
+		}
+		if (res<=0)
+			throw new IllegalArgumentException();
+		if (cipher!=null)
+			return cipher.getOutputSizeForDecryption(res);
+		else
+			return res;
+	}
 
 	private static void encryptAndSignImpl(RandomInputStream inputStream, RandomOutputStream originalOutputStream, SymmetricEncryptionAlgorithm cipher,byte[] associatedData, int offAD, int lenAD, SymmetricAuthenticatedSignerAlgorithm symmetricSigner, ASymmetricAuthenticatedSignerAlgorithm asymmetricSigner, AbstractMessageDigest digest) throws IOException {
 		if (inputStream==null)
@@ -289,9 +346,14 @@ public class EncryptionSignatureHashEncoder {
 		}
 
 		try {
+			long originalOutputLength=originalOutputStream.length();
+			long maximumOutputLengthAfterEncoding=getMaximumOutputLengthAfterEncoding(inputStream.length(), cipher, symmetricSigner, asymmetricSigner, digest);
+			originalOutputStream.ensureLength(maximumOutputLengthAfterEncoding);
+
 			byte code=getCode(cipher, associatedData, symmetricSigner, asymmetricSigner, digest);
 			if (symmetricSigner!=null && asymmetricSigner!=null && digest==null)
 				digest=defaultMessageType.getMessageDigestInstance();
+
 			RandomOutputStream outputStream=originalOutputStream;
 			if (digest!=null) {
 				digest.reset();
@@ -374,6 +436,11 @@ public class EncryptionSignatureHashEncoder {
 				byte[] signature = asymmetricSigner.getSignature();
 				originalOutputStream.writeBytesArray(signature, false, asymmetricSigner.getMacLengthBytes());
 			}
+			long curPos=outputStream.currentPosition();
+			if (curPos<maximumOutputLengthAfterEncoding && curPos>originalOutputLength)
+				outputStream.setLength(curPos);
+
+
 			outputStream.flush();
 		}
 		catch(InvalidKeyException | InvalidAlgorithmParameterException | NoSuchAlgorithmException | InvalidKeySpecException | NoSuchProviderException | SignatureException e)
@@ -439,6 +506,9 @@ public class EncryptionSignatureHashEncoder {
 			checkLimits(associatedData, offAD, lenAD);
 
 		try {
+			long originalOutputLength=outputStream.length();
+			long maximumOutputLengthAfterEncoding=getMaximumOutputLengthAfterDecoding(originalInputStream.length(), cipher, symmetricChecker, asymmetricChecker, digest);
+			outputStream.ensureLength(maximumOutputLengthAfterEncoding);
 			byte code=checkCode(cipher, originalInputStream, associatedData, offAD, lenAD, symmetricChecker, asymmetricChecker, digest);
 
 			if (symmetricChecker!=null && asymmetricChecker!=null && digest==null)
@@ -541,6 +611,9 @@ public class EncryptionSignatureHashEncoder {
 				if (!asymmetricChecker.verify())
 					throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
 			}
+			long curPos=outputStream.currentPosition();
+			if (curPos<maximumOutputLengthAfterEncoding && curPos>originalOutputLength)
+				outputStream.setLength(curPos);
 			outputStream.flush();
 		}
 		catch(InvalidKeyException | InvalidAlgorithmParameterException | NoSuchAlgorithmException | InvalidKeySpecException | NoSuchProviderException | SignatureException | InvalidParameterSpecException e)
