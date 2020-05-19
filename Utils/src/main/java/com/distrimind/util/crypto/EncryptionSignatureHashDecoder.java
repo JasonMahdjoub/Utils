@@ -36,13 +36,9 @@ package com.distrimind.util.crypto;
 
 import com.distrimind.util.io.*;
 
-import javax.crypto.NoSuchPaddingException;
 import java.io.IOException;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
-import java.security.spec.InvalidKeySpecException;
 
 /**
  * @author Jason Mahdjoub
@@ -70,21 +66,13 @@ public class EncryptionSignatureHashDecoder {
 	}
 
 	public EncryptionSignatureHashDecoder withSymmetricSecretKeyForEncryption(AbstractSecureRandom random, SymmetricSecretKey symmetricSecretKeyForEncryption) throws IOException {
-		try {
-			return withCipher(new SymmetricEncryptionAlgorithm(random, symmetricSecretKeyForEncryption));
-		} catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | InvalidAlgorithmParameterException | NoSuchProviderException | InvalidKeySpecException e) {
-			throw new IOException(e);
-		}
+		return withCipher(new SymmetricEncryptionAlgorithm(random, symmetricSecretKeyForEncryption));
 	}
 	public EncryptionSignatureHashDecoder withSymmetricSecretKeyForEncryptionAndAssociatedData(AbstractSecureRandom random, SymmetricSecretKey symmetricSecretKeyForEncryption, byte[] associatedData) throws IOException {
 		return withSymmetricSecretKeyForEncryptionAndAssociatedData(random, symmetricSecretKeyForEncryption, associatedData, 0, associatedData.length);
 	}
 	public EncryptionSignatureHashDecoder withSymmetricSecretKeyForEncryptionAndAssociatedData(AbstractSecureRandom random, SymmetricSecretKey symmetricSecretKeyForEncryption, byte[] associatedData, int offAD, int lenAD) throws IOException {
-		try {
-			return withCipherAndAssociatedData(new SymmetricEncryptionAlgorithm(random, symmetricSecretKeyForEncryption), associatedData, offAD, lenAD);
-		} catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | InvalidAlgorithmParameterException | NoSuchProviderException | InvalidKeySpecException e) {
-			throw new IOException(e);
-		}
+		return withCipherAndAssociatedData(new SymmetricEncryptionAlgorithm(random, symmetricSecretKeyForEncryption), associatedData, offAD, lenAD);
 	}
 
 	public EncryptionSignatureHashDecoder withCipher(SymmetricEncryptionAlgorithm cipher) throws IOException {
@@ -189,7 +177,7 @@ public class EncryptionSignatureHashDecoder {
 			} else {
 				return cipher.getIVAndPartialHashedSubStreamFromEncryptedStream(inputStream, subStreamParameters);
 			}
-		} catch (NoSuchProviderException | NoSuchAlgorithmException | InvalidAlgorithmParameterException | InvalidKeySpecException | InvalidKeyException e) {
+		} catch (NoSuchProviderException | NoSuchAlgorithmException e) {
 			throw new IOException(e);
 		}
 	}

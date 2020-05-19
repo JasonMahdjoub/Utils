@@ -198,12 +198,7 @@ public enum ASymmetricKeyWrapperType {
 			if (name().startsWith("BCPQC_MCELIECE_"))
 			{
 				ClientASymmetricEncryptionAlgorithm client=new ClientASymmetricEncryptionAlgorithm(random, publicKey);
-				try {
-					return client.encode(keyToWrap.encode());
-				} catch (BadPaddingException e) {
-					throw new IllegalStateException(e);
-				}
-
+				return client.encode(keyToWrap.encode());
 			}
 			else {
 
@@ -292,11 +287,7 @@ public enum ASymmetricKeyWrapperType {
 			HybridASymmetricPublicKey publicKey=(HybridASymmetricPublicKey)ipublicKey;
 			byte[] nonpqcwrap=wrapKey(random, publicKey.getNonPQCPublicKey(), keyToWrap);
 			ClientASymmetricEncryptionAlgorithm client=new ClientASymmetricEncryptionAlgorithm(random, publicKey.getPQCPublicKey());
-			try {
-				return client.encode(nonpqcwrap);
-			} catch (BadPaddingException e) {
-				throw new IllegalStateException(e);
-			}
+			return client.encode(nonpqcwrap);
 		}
 
 	}
@@ -307,26 +298,17 @@ public enum ASymmetricKeyWrapperType {
 		{
 			ASymmetricPrivateKey privateKey=(ASymmetricPrivateKey)iprivateKey;
 			ServerASymmetricEncryptionAlgorithm server = new ServerASymmetricEncryptionAlgorithm(privateKey);
-			try {
-				AbstractKey res=AbstractKey.decode(server.decode(keyToUnwrap));
-				if (res instanceof SymmetricSecretKey)
-					return (SymmetricSecretKey)res;
-				else
-					throw new InvalidKeyException();
-			}
-			catch (BadPaddingException | IllegalBlockSizeException | ShortBufferException e) {
-				throw new IllegalStateException(e);
-			}
+			AbstractKey res=AbstractKey.decode(server.decode(keyToUnwrap));
+			if (res instanceof SymmetricSecretKey)
+				return (SymmetricSecretKey)res;
+			else
+				throw new InvalidKeyException();
 		}
 		else if (iprivateKey instanceof HybridASymmetricPrivateKey) {
 			HybridASymmetricPrivateKey privateKey=(HybridASymmetricPrivateKey)iprivateKey;
 			ServerASymmetricEncryptionAlgorithm server=new ServerASymmetricEncryptionAlgorithm(privateKey.getPQCPrivateKey());
-			try {
-				byte[] b=server.decode(keyToUnwrap);
-				return unwrapKey(privateKey.getNonPQCPrivateKey(), b);
-			} catch (BadPaddingException | IllegalBlockSizeException | ShortBufferException e) {
-				throw new IllegalStateException(e);
-			}
+			byte[] b=server.decode(keyToUnwrap);
+			return unwrapKey(privateKey.getNonPQCPrivateKey(), b);
 
 		}
 		else if (isSignatureFromMetaData(keyToUnwrap))

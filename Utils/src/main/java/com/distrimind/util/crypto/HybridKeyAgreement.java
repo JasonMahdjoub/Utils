@@ -41,11 +41,10 @@ import org.bouncycastle.bccrypto.CryptoException;
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
+import java.io.IOException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
 
@@ -116,7 +115,7 @@ public class HybridKeyAgreement extends KeyAgreement{
 				else
 					secretKey=new SymmetricSecretKey(PQC.getEncryptionAlgorithmType(), shared);
 
-			} catch (NoSuchAlgorithmException | NoSuchProviderException | NoSuchPaddingException | InvalidKeyException | InvalidKeySpecException | IllegalBlockSizeException | BadPaddingException | InvalidAlgorithmParameterException e) {
+			} catch (NoSuchAlgorithmException | InvalidKeyException | InvalidKeySpecException | IllegalBlockSizeException | BadPaddingException | InvalidAlgorithmParameterException | IOException e) {
 				throw new CryptoException("", e);
 			}
 		}
