@@ -179,11 +179,15 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 
 	protected abstract int getCounterStepInBytes();
 
+	public abstract boolean supportRandomEncryptionAndRandomDecryption();
 	public RandomOutputStream getCipherOutputStream(final RandomOutputStream os, final byte[] associatedData, final int offAD, final int lenAD, final byte[] externalCounter) throws
 			IOException{
-
-		final long initialOutPos=os.currentPosition();
-
+		return getCipherOutputStream(os, associatedData, offAD, lenAD, externalCounter, null);
+	}
+	protected RandomOutputStream getCipherOutputStream(final RandomOutputStream os, final byte[] associatedData, final int offAD, final int lenAD, final byte[] externalCounter, final byte[][] manualIvs) throws
+			IOException{
+		os.seek(0);
+		final boolean supportRandomAccess=supportRandomEncryptionAndRandomDecryption();
 
 
 		return new RandomOutputStream() {
@@ -205,7 +209,21 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 						}
 					}
 					if (includeIV()) {
-						byte[] iv=initCipherForEncrypt(cipher, externalCounter);
+						byte[] iv;
+						if (manualIvs!=null)
+						{
+							if (externalCounter==null)
+								initCipherForEncryptionWithIvAndCounter(cipher, iv=manualIvs[(int)round], 0);
+							else {
+								System.arraycopy(manualIvs[(int) round], 0, iv = AbstractEncryptionOutputAlgorithm.this.iv, 0, getIVSizeBytesWithoutExternalCounter());
+								if (useExternalCounter())
+									System.arraycopy(externalCounter, 0, iv, getIVSizeBytesWithoutExternalCounter(), externalCounter.length);
+								initCipherForEncryptionWithIvAndCounter(cipher, iv, 0);
+							}
+						}
+						else {
+							iv = initCipherForEncrypt(cipher, externalCounter);
+						}
 						os.write(iv, 0, getIVSizeBytesWithoutExternalCounter());
 					}
 					else {
@@ -259,13 +277,13 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 				if (newLength<0)
 					throw new IllegalArgumentException();
 				if (newLength==0) {
-					os.setLength(initialOutPos);
+					os.setLength(0);
 					currentPos=0;
 					length=0;
 				}
 				else {
 					long round=newLength/ maxPlainTextSizeForEncoding;
-					newLength=initialOutPos + round * maxEncryptedPartLength+(newLength % maxPlainTextSizeForEncoding);
+					newLength=round * maxEncryptedPartLength+(newLength % maxPlainTextSizeForEncoding);
 					os.setLength(newLength);
 					length=newLength;
 					seek(Math.min(newLength, currentPos));
@@ -278,18 +296,29 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 					throw new IOException("Stream closed");
 				if (_pos<0 || _pos>length)
 					throw new IllegalArgumentException();
+				if (!supportRandomAccess)
+					throw new IOException("Random encryption impossible");
 				long round = _pos / maxPlainTextSizeForEncoding;
 				if (includeIV()) {
-					long p = initialOutPos + round * maxEncryptedPartLength;
-					RandomInputStream ris = os.getRandomInputStream();
-					os.getRandomInputStream().seek(p);
-
-					ris.readFully(iv);
+					long p = round * maxEncryptedPartLength;
+					int mod=(int)(_pos % maxPlainTextSizeForEncoding);
+					int counter=mod/getCounterStepInBytes();
+					byte[] iv;
+					if (manualIvs!=null)
+					{
+						if (useExternalCounter())
+							System.arraycopy(manualIvs[(int)round], 0, iv=AbstractEncryptionOutputAlgorithm.this.iv, 0, getIVSizeBytesWithoutExternalCounter());
+						else
+							iv=manualIvs[(int)round];
+					}
+					else {
+						RandomInputStream ris = os.getRandomInputStream();
+						os.getRandomInputStream().seek(p);
+						ris.readFully(iv=AbstractEncryptionOutputAlgorithm.this.iv);
+					}
 					if (useExternalCounter())
 						System.arraycopy(externalCounter, 0, iv, getIVSizeBytesWithoutExternalCounter(), externalCounter.length);
 
-					int mod=(int)(_pos % maxPlainTextSizeForEncoding);
-					int counter=mod/getCounterStepInBytes();
 					if (mod>0) {
 						mod = cipher.getOutputSize(mod)+getIVSizeBytesWithoutExternalCounter();
 					}
@@ -302,11 +331,12 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 					long add=cipher.getOutputSize((int)(_pos % maxPlainTextSizeForEncoding));
 					if (add>0)
 						add+=getIVSizeBytesWithoutExternalCounter();
-					os.seek(initialOutPos + round * maxEncryptedPartLength+add);
+					os.seek(round * maxEncryptedPartLength+add);
 					initCipherForEncrypt(cipher);
 				}
 				if (associatedData!=null && lenAD>0)
 					cipher.updateAAD(associatedData, offAD, lenAD);
+				currentPos=_pos;
 			}
 
 			@Override

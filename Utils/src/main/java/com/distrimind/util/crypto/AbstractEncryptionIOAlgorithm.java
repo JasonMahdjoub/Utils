@@ -227,35 +227,50 @@ public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOu
 	}
 	protected abstract void initCipherForDecryptionWithIvAndCounter(AbstractCipher cipher, byte[] iv, int counter) throws IOException ;
 
+	protected byte[][] readIvsFromEncryptedStream(final RandomInputStream is) throws IOException {
+		if (includeIV()) {
+			long initPos = is.currentPosition();
+			long l = is.length() - initPos;
+			int nbIv = l / maxEncryptedPartLength + l % maxEncryptedPartLength > 0 ? 1 : 0;
+			byte[][] res = new byte[nbIv][];
+			for (int i = 0; i < nbIv; i++) {
+				is.seek(initPos + (i * maxEncryptedPartLength));
+				res[i] = new byte[getIVSizeBytesWithoutExternalCounter()];
+				is.readFully(res[i]);
+			}
+			return res;
+		}
+		else
+			throw new IOException();
+	}
+
 	@Override
 	public RandomInputStream getCipherInputStream(final RandomInputStream is, final byte[] associatedData, final int offAD, final int lenAD, final byte[] externalCounter)
 			throws IOException {
 		final AbstractCipher cipher = getCipherInstance();
-		final long initialIsPos=is.currentPosition();
-		final long length=is.length()-initialIsPos;
+		is.seek(0);
 
+		final boolean supportRandomAccess=supportRandomEncryptionAndRandomDecryption();
 		RandomInputStream ris=new RandomInputStream() {
 			private long pos=0;
 			boolean closed=false;
 
 			@Override
-			public long length() {
-				return length;
+			public long length() throws IOException {
+				return is.length();
 			}
 
 			private int checkInit() throws IOException {
 				if (pos%maxEncryptedPartLength==0)
 				{
-					if (pos<length)
+					if (pos<is.length())
 					{
 						if (includeIV()) {
 							is.readFully(iv, 0, getIVSizeBytesWithoutExternalCounter());
 							if (useExternalCounter())
 								System.arraycopy(externalCounter, 0, iv, getIVSizeBytesWithoutExternalCounter(), externalCounter.length);
-							int counter = (int) (pos % maxEncryptedPartLength);
-							if (counter > 0)
-								counter = cipher.getOutputSize(counter)/8;
-							initCipherForDecryptionWithIvAndCounter(cipher, iv, counter);
+							initCipherForDecryptionWithIvAndCounter(cipher, iv, 0);
+							pos+=getIVSizeBytesWithoutExternalCounter();
 						}
 						else
 						{
@@ -357,35 +372,39 @@ public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOu
 					throw new IOException("Stream closed");
 				if (_pos<0)
 					throw new IllegalArgumentException();
-				if (_pos>length)
+				if (_pos>is.length())
 					throw new IllegalArgumentException();
+				if (!supportRandomAccess)
+					throw new IOException("Random decryption impossible");
 
 				if (includeIV()) {
-					long p = _pos / maxEncryptedPartLength + initialIsPos;
+					long p = _pos / maxEncryptedPartLength ;
 					is.seek(p);
 					is.readFully(iv, 0, getIVSizeBytesWithoutExternalCounter());
 					if (useExternalCounter())
 						System.arraycopy(externalCounter, 0, iv, getIVSizeBytesWithoutExternalCounter(), externalCounter.length);
 
-					int counter = (int) (_pos % maxEncryptedPartLength);
+					int counter = (int) (_pos % maxEncryptedPartLength)-getIVSizeBytesWithoutExternalCounter();
 
 					if (counter > 0) {
 						p += getIVSizeBytesWithoutExternalCounter() + (counter = cipher.getOutputSize(counter));
 						counter /= getCounterStepInBytes();
+
 					}
-					is.seek(p);
+					else
+						counter=0;
+					is.seek(pos=p);
 					initCipherForDecryptionWithIvAndCounter(cipher, iv, counter);
 				}
 				else
 				{
 					long add=cipher.getOutputSize((int)(_pos % maxEncryptedPartLength));
-					if (add>0)
-						add+=getIVSizeBytesWithoutExternalCounter();
-					is.seek(_pos / maxEncryptedPartLength * maxPlainTextSizeForEncoding+add);
+					is.seek(pos=(_pos / maxEncryptedPartLength * maxPlainTextSizeForEncoding+add));
 					initCipherForDecrypt(cipher);
 				}
 				if (associatedData != null && lenAD > 0)
 					cipher.updateAAD(associatedData, offAD, lenAD);
+
 			}
 
 			@Override
