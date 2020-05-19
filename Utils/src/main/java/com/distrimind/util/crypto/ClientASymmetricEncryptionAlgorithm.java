@@ -79,8 +79,8 @@ public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutpu
 			} catch (NoSuchAlgorithmException | NoSuchPaddingException | NoSuchProviderException e) {
 				throw new IOException(e);
 			}
-
 			this.hybridASymmetricPublicKey=distantPublicKey;
+			setMaxPlainTextSizeForEncoding(Math.min(nonPQCEncryption.getMaxPlainTextSizeForEncoding(), PQCEncryption.getMaxPlainTextSizeForEncoding()));
 		}
 
 		@Override
@@ -103,10 +103,6 @@ public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutpu
 			return false;
 		}
 
-		@Override
-		public int getMaxPlainTextSizeForEncoding() {
-			return Math.min(nonPQCEncryption.getMaxPlainTextSizeForEncoding(), PQCEncryption.getMaxPlainTextSizeForEncoding());
-		}
 
 		@Override
 		public int getIVSizeBytesWithExternalCounter() {
@@ -253,6 +249,11 @@ public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutpu
 	}
 
 	@Override
+	void setMaxPlainTextSizeForEncoding(int maxPlainTextSizeForEncoding) throws IOException {
+		client.setMaxPlainTextSizeForEncoding(maxPlainTextSizeForEncoding);
+	}
+
+	@Override
 	public int getIVSizeBytesWithExternalCounter() {
 		return client.getIVSizeBytesWithExternalCounter();
 	}
@@ -298,7 +299,6 @@ public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutpu
 
 		private final ASymmetricEncryptionType type;
 
-		private final int maxPleinTextSizeForEncoding;
 		private final AbstractSecureRandom random;
 
 		public Client(AbstractSecureRandom random, ASymmetricPublicKey distantPublicKey) throws NoSuchAlgorithmException, NoSuchPaddingException, NoSuchProviderException, IOException {
@@ -306,7 +306,7 @@ public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutpu
 			this.type = distantPublicKey.getEncryptionAlgorithmType();
 			this.distantPublicKey = distantPublicKey;
 			this.random = random;
-			this.maxPleinTextSizeForEncoding = distantPublicKey.getMaxBlockSize();
+			setMaxPlainTextSizeForEncoding(distantPublicKey.getMaxBlockSize());
 			initCipherForEncrypt(this.cipher);
 			initBufferAllocatorArgs();
 		}
@@ -342,11 +342,6 @@ public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutpu
 
 		public ASymmetricPublicKey getDistantPublicKey() {
 			return this.distantPublicKey;
-		}
-
-		@Override
-		public int getMaxPlainTextSizeForEncoding() {
-			return maxPleinTextSizeForEncoding;
 		}
 
 		@Override

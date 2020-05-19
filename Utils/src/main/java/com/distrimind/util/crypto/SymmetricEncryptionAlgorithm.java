@@ -70,7 +70,6 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 	private final boolean internalCounter;
 	
 	private byte[] externalCounter;
-	private int maxPlainTextPartSize;
 	private final int counterStepInBytes;
 	private final boolean supportRandomReadWrite;
 
@@ -199,7 +198,6 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 		this.internalCounter = internalCounter || blockModeCounterBytes==0;
 		this.key = key;
 		this.random = random;
-		this.maxPlainTextPartSize=key.getMaxPlainTextSizeForEncoding();
 		this.counterStepInBytes=type.getBlockSizeBits()/8;
 		this.supportRandomReadWrite=type.supportRandomReadWrite();
 		iv = new byte[getIVSizeBytesWithExternalCounter()];
@@ -209,7 +207,7 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 		} catch (InvalidKeyException | NoSuchAlgorithmException | InvalidKeySpecException | InvalidAlgorithmParameterException e) {
 			throw new IOException(e);
 		}
-
+		setMaxPlainTextSizeForEncoding(key.getMaxPlainTextSizeForEncoding());
 		initBufferAllocatorArgs();
 		
 	}
@@ -264,22 +262,6 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 		return type.supportRandomReadWrite();
 	}
 
-	@Override
-	public int getMaxPlainTextSizeForEncoding() {
-		return maxPlainTextPartSize;
-	}
-
-	@Override
-	void setMaxPlainTextSizeForEncoding(int maxPlainTextSizeForEncoding) throws IOException {
-		this.maxPlainTextPartSize=maxPlainTextSizeForEncoding;
-		super.setMaxPlainTextSizeForEncoding(maxPlainTextSizeForEncoding);
-	}
-
-
-	
-
-	
-	
 	public SymmetricSecretKey getSecretKey() {
 		return key;
 	}

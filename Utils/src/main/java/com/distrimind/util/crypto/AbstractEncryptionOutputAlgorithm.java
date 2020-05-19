@@ -77,7 +77,7 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 		iv=null;
 	}
 
-	protected AbstractEncryptionOutputAlgorithm(AbstractCipher cipher, int ivSizeBytes) throws IOException {
+	protected AbstractEncryptionOutputAlgorithm(AbstractCipher cipher, int ivSizeBytes) {
 		if (cipher == null)
 			throw new NullPointerException("cipher");
 		this.cipher = cipher;
@@ -88,7 +88,7 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 			iv = null;
 
 		buffer=new byte[BUFFER_SIZE];
-		setMaxPlainTextSizeForEncoding(getMaxPlainTextSizeForEncoding());
+
 	}
 
 	protected void initBufferAllocatorArgs() throws IOException {
@@ -382,7 +382,10 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 
 	}
 
-	public abstract int getMaxPlainTextSizeForEncoding();
+	public int getMaxPlainTextSizeForEncoding()
+	{
+		return maxPlainTextSizeForEncoding;
+	}
 
 	void setMaxPlainTextSizeForEncoding(int maxPlainTextSizeForEncoding) throws IOException {
 		initCipherForEncryptWithNullIV(cipher);
