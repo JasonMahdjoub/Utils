@@ -110,7 +110,8 @@ public class TestReadWriteEncryption {
 		r.nextBytes(in);
 		RandomByteArrayInputStream bais=new RandomByteArrayInputStream(in.clone());
 		RandomByteArrayOutputStream baos=new RandomByteArrayOutputStream();
-		EncryptionSignatureHashEncoder writer=new EncryptionSignatureHashEncoder(bais);
+		EncryptionSignatureHashEncoder writer=new EncryptionSignatureHashEncoder();
+		writer.withRandomInputStream(bais);
 		if (secretKeyForEncryption!=null) {
 			if (associatedData==null)
 				writer.withSymmetricSecretKeyForEncryption(SecureRandomType.DEFAULT.getInstance(null), secretKeyForEncryption);
@@ -186,7 +187,8 @@ public class TestReadWriteEncryption {
 	}
 
 	private EncryptionSignatureHashDecoder getReader(RandomByteArrayInputStream bais, SymmetricSecretKey secretKeyForEncryption, byte[] associatedData, SymmetricSecretKey secretKeyForSignature, ASymmetricKeyPair keyPairForSignature, MessageDigestType messageDigestType) throws IOException, NoSuchProviderException, NoSuchAlgorithmException {
-		EncryptionSignatureHashDecoder reader=new EncryptionSignatureHashDecoder(bais);
+		EncryptionSignatureHashDecoder reader=new EncryptionSignatureHashDecoder();
+		reader.withRandomInputStream(bais);
 		if (secretKeyForEncryption!=null) {
 			if (associatedData==null)
 				reader.withSymmetricSecretKeyForEncryption(SecureRandomType.DEFAULT.getInstance(null), secretKeyForEncryption);
@@ -238,7 +240,7 @@ public class TestReadWriteEncryption {
 		boolean symError=false;
 		try {
 			reader.decodeAndCheckHashAndSignaturesIfNecessary(baos);
-			Assert.fail(""+associatedData+" ; "+ed[0]);
+			Assert.fail(""+Arrays.toString(associatedData)+" ; "+ed[0]);
 		}
 		catch(NullPointerException e)
 		{

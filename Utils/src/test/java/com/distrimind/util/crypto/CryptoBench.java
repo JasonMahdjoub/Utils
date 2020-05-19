@@ -34,25 +34,18 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
+import com.distrimind.util.OS;
+import com.distrimind.util.Timer;
+import org.testng.Assert;
+import org.testng.annotations.DataProvider;
+
+import javax.crypto.ShortBufferException;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-
 import java.io.IOException;
 import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.InvalidParameterSpecException;
-
-
-import org.testng.Assert;
-import org.testng.annotations.DataProvider;
-
-import com.distrimind.util.OS;
-import com.distrimind.util.Timer;
-
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.ShortBufferException;
 
 
 /**
@@ -66,12 +59,12 @@ import javax.crypto.ShortBufferException;
 public class CryptoBench {
 	@SuppressWarnings("ResultOfMethodCallIgnored")
 	@org.testng.annotations.Test(dataProvider="provideDataForTestEncryptionAndSignatureSpeed")
-	public void testEncryptionAndSignatureSpeed(SymmetricEncryptionType type) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException, NoSuchProviderException, InvalidKeySpecException, IllegalStateException, IllegalBlockSizeException, BadPaddingException, IOException, SignatureException, ShortBufferException, InvalidParameterSpecException
+	public void testEncryptionAndSignatureSpeed(SymmetricEncryptionType type) throws InvalidKeyException, NoSuchAlgorithmException, InvalidAlgorithmParameterException, NoSuchProviderException, InvalidKeySpecException, IllegalStateException, IOException, SignatureException, ShortBufferException, InvalidParameterSpecException
 	{
 		System.out.println("JRE Version : "+OS.getCurrentJREVersionDouble());
 		byte[] toEncrypt = new byte[1024 * 1024 * 400];
 		int shift=32*1024;
-		SymmetricEncryptionAlgorithm cipher=new SymmetricEncryptionAlgorithm(SecureRandomType.FORTUNA_WITH_BC_FIPS_APPROVED.getInstance(null), type.getKeyGenerator(SecureRandomType.FORTUNA_WITH_BC_FIPS_APPROVED_FOR_KEYS.getInstance(null), (short)(type.getAlgorithmName().contains("AES")?256:type.getDefaultKeySizeBits())).generateKey());
+		SymmetricEncryptionAlgorithm cipher=new SymmetricEncryptionAlgorithm(SecureRandomType.FORTUNA_WITH_BC_FIPS_APPROVED.getInstance(null), type.getKeyGenerator(SecureRandomType.FORTUNA_WITH_BC_FIPS_APPROVED_FOR_KEYS.getInstance(null), type.getAlgorithmName().contains("AES")?256:type.getDefaultKeySizeBits()).generateKey());
 		SymmetricAuthentifiedSignatureType sigType;
 		SymmetricSecretKey sks;
 		SymmetricAuthenticatedSignerAlgorithm signer=null;
@@ -93,7 +86,7 @@ public class CryptoBench {
 		byte[] signatures=new byte[signatureSize*(toEncrypt.length/shift)];
 		int indexSignature=0;
 		Timer t=new Timer(true);
-		int sizeEncoded=cipher.getOutputSizeForEncryption(shift);
+		int sizeEncoded=(int)cipher.getOutputSizeForEncryption(shift);
 		ByteArrayOutputStream os=new ByteArrayOutputStream(toEncrypt.length/shift*sizeEncoded);
 		ByteArrayInputStream is=new ByteArrayInputStream(toEncrypt);
 		

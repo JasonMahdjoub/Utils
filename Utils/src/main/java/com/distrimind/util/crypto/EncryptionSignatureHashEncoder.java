@@ -467,7 +467,7 @@ public class EncryptionSignatureHashEncoder {
 		else if (hasAssociatedData && cipher==null)
 			throw new MessageExternalizationException(Integrity.FAIL, "associatedData");
 		else if (!hasAssociatedData && associatedData!=null)
-			throw new MessageExternalizationException(Integrity.FAIL, "associatedData");
+			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, "associatedData");
 		boolean hasCipher=hasCipher(code);
 		if (hasCipher && cipher==null)
 			throw new NullPointerException("cipher");
