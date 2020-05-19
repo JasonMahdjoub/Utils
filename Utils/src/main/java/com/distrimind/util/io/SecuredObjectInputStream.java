@@ -54,8 +54,6 @@ public abstract class SecuredObjectInputStream extends InputStream implements Da
 	private static final int MAX_BUFFER_SIZE = Integer.MAX_VALUE - 8;
 
 	private SerializationTools.ObjectResolver objectResolver=new SerializationTools.ObjectResolver();
-	private byte[] buffer;
-
 
 	@Override
 	public final boolean readBoolean() throws IOException {
@@ -235,8 +233,7 @@ public abstract class SecuredObjectInputStream extends InputStream implements Da
 	public long transferTo(OutputStream out, long maxLength) throws IOException {
 		Objects.requireNonNull(out, "out");
 		long transferred = 0;
-		if (buffer==null)
-			buffer = new byte[DEFAULT_BUFFER_SIZE];
+		byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];
 		int read;
 
 		while ((read = this.read(buffer, 0, maxLength>=0?(int)Math.min(maxLength, DEFAULT_BUFFER_SIZE):DEFAULT_BUFFER_SIZE)) >= 0) {

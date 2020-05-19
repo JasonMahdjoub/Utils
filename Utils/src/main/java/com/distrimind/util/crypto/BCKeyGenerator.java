@@ -104,7 +104,7 @@ public final class BCKeyGenerator extends AbstractKeyGenerator {
 		}
 		else
 		{
-			if (encryptionType.getAlgorithmName().equals(SymmetricEncryptionType.BC_CHACHA20.getAlgorithmName()) /*||
+			if (encryptionType.getAlgorithmName().equals(SymmetricEncryptionType.BC_CHACHA20_POLY1305.getAlgorithmName()) /*||
 					encryptionType.getAlgorithmName().equals(SymmetricEncryptionType.BC_CHACHA20_POLY1305.getAlgorithmName())*/) {
 				keyGenerator=new ChaCha20.KeyGenerator(random);
 				if (keySize!=256)

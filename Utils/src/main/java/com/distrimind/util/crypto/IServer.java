@@ -36,18 +36,19 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 
 import com.distrimind.util.io.RandomInputStream;
+import com.distrimind.util.io.RandomOutputStream;
 
 import java.io.IOException;
-import java.io.OutputStream;
 
 /**
  * @author Jason Mahdjoub
- * @version 2.0
+ * @version 3.0
  * @since Utils 4.5.0
  */
 interface IServer {
 
 
+	int getMaxPlainTextSizeForEncoding();
 
 	void initCipherForDecrypt(AbstractCipher cipher, byte[] iv, byte[] externalCounter)
 			throws IOException;
@@ -61,7 +62,7 @@ interface IServer {
 			throws IOException;
 
 
-	void decode(RandomInputStream is, byte[] associatedData, int offAD, int lenAD, OutputStream os, int length, byte[] externalCounter)
+	void decode(RandomInputStream is, byte[] associatedData, int offAD, int lenAD, RandomOutputStream os, int length, byte[] externalCounter)
 			throws IOException;
 
 
@@ -69,4 +70,5 @@ interface IServer {
 	RandomInputStream getCipherInputStream(RandomInputStream is, byte[] externalCounter) throws IOException;
 	byte[] decode(byte[] bytes, int off, int len, byte[] associatedData, int offAD, int lenAD, byte[] externalCounter)
 			throws IOException;
+	RandomInputStream getCipherInputStream(final RandomInputStream is,  byte[] associatedData, int offAD, int lenAD, final byte[] externalCounter) throws IOException;
 }

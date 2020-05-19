@@ -34,12 +34,9 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
-import com.distrimind.util.io.LimitedRandomInputStream;
-import com.distrimind.util.io.RandomByteArrayInputStream;
-import com.distrimind.util.io.RandomInputStream;
+import com.distrimind.util.io.*;
 
-import javax.crypto.ShortBufferException;
-import java.io.*;
+import java.io.IOException;
 
 /**
  * 
@@ -121,60 +118,60 @@ public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOu
 	@Override
 	public byte[] decode(RandomInputStream is, byte[] associatedData, int offAD, int lenAD, byte[] externalCounter)
 			throws IOException {
-		try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+		try (RandomByteArrayOutputStream baos = new RandomByteArrayOutputStream()) {
 			this.decode(is, associatedData, offAD, lenAD, baos, externalCounter);
-			return baos.toByteArray();
+			return baos.getBytes();
 		}
 	}
 	@Override
-	public void decode(RandomInputStream is, byte[] associatedData, OutputStream os) throws IOException
+	public void decode(RandomInputStream is, byte[] associatedData, RandomOutputStream os) throws IOException
 	{
 		decode(is, associatedData, 0, associatedData==null?0:associatedData.length, os);
 	}
 	@Override
-	public void decode(RandomInputStream is, OutputStream os, byte[] externalCounter) throws IOException
+	public void decode(RandomInputStream is, RandomOutputStream os, byte[] externalCounter) throws IOException
 	{
 		decode(is, os, -1, externalCounter);
 	}
 	@Override
-	public void decode(RandomInputStream is, OutputStream os) throws IOException
+	public void decode(RandomInputStream is, RandomOutputStream os) throws IOException
 	{
 		decode(is, null, 0, 0, os);
 	}
 	@Override
-	public void decode(RandomInputStream is, byte[] associatedData, int offAD, int lenAD, OutputStream os) throws IOException
+	public void decode(RandomInputStream is, byte[] associatedData, int offAD, int lenAD, RandomOutputStream os) throws IOException
 	{
 		decode(is, associatedData, offAD, lenAD, os, null);
 	}
 	@Override
-	public void decode(RandomInputStream is, byte[] associatedData, int offAD, int lenAD, OutputStream os, byte[] externalCounter) throws IOException
+	public void decode(RandomInputStream is, byte[] associatedData, int offAD, int lenAD, RandomOutputStream os, byte[] externalCounter) throws IOException
 	{
 		decode(is, associatedData, offAD, lenAD, os, -1, externalCounter);
 	}
 	@Override
-	public void decode(RandomInputStream is, OutputStream os, int length) throws IOException
+	public void decode(RandomInputStream is, RandomOutputStream os, int length) throws IOException
 	{
 		decode(is, null, 0, 0, os, length);
 	}
 	@Override
-	public void decode(RandomInputStream is, OutputStream os, int length, byte[] externalCounter) throws IOException
+	public void decode(RandomInputStream is, RandomOutputStream os, int length, byte[] externalCounter) throws IOException
 	{
 		decode(is, null, 0, 0, os, length, externalCounter);
 	}
 	@Override
-	public void decode(RandomInputStream is, byte[] associatedData, OutputStream os, int length) throws IOException
+	public void decode(RandomInputStream is, byte[] associatedData, RandomOutputStream os, int length) throws IOException
 	{
 		decode(is, associatedData, 0, associatedData==null?0:associatedData.length, os, length);
 	}
 
 	private byte[] iv = null;
 	@Override
-	public void decode(RandomInputStream is, byte[] associatedData, int offAD, int lenAD, OutputStream os, int length)
+	public void decode(RandomInputStream is, byte[] associatedData, int offAD, int lenAD, RandomOutputStream os, int length)
 			throws IOException{
 		decode(is, associatedData, offAD, lenAD, os, length, null);
 	}
 	
-	protected byte[] readIV(InputStream is, byte[] externalCounter) throws IOException
+	protected byte[] readIV(RandomInputStream is, byte[] externalCounter) throws IOException
 	{
 		if (includeIV()) {
 			if (this.iv==null)
@@ -201,7 +198,7 @@ public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOu
 
 
 	@Override
-	public void decode(RandomInputStream is, byte[] associatedData, int offAD, int lenAD, OutputStream os, int length,  byte[] externalCounter)
+	public void decode(RandomInputStream is, byte[] associatedData, int offAD, int lenAD, RandomOutputStream os, int length, byte[] externalCounter)
 			throws IOException{
 		try(RandomInputStream in = getCipherInputStream(is, associatedData, offAD, lenAD, externalCounter))
 		{
@@ -250,196 +247,25 @@ public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOu
 		final AbstractCipher cipher = getCipherInstance();
 		is.seek(0);
 
-		final boolean supportRandomAccess=supportRandomEncryptionAndRandomDecryption();
-		RandomInputStream ris=new RandomInputStream() {
-			private long pos=0;
-			boolean closed=false;
-
+		return new CommonCipherInputStream(maxEncryptedPartLength, is, includeIV(), iv, getIVSizeBytesWithoutExternalCounter(), useExternalCounter(), externalCounter, cipher, associatedData, offAD, lenAD, buffer, supportRandomEncryptionAndRandomDecryption(), getCounterStepInBytes(), maxPlainTextSizeForEncoding) {
 			@Override
-			public long length() throws IOException {
-				return is.length();
-			}
-
-			private int checkInit() throws IOException {
-				if (pos%maxEncryptedPartLength==0)
-				{
-					if (pos<is.length())
-					{
-						if (includeIV()) {
-							is.readFully(iv, 0, getIVSizeBytesWithoutExternalCounter());
-							if (useExternalCounter())
-								System.arraycopy(externalCounter, 0, iv, getIVSizeBytesWithoutExternalCounter(), externalCounter.length);
-							initCipherForDecryptionWithIvAndCounter(cipher, iv, 0);
-							pos+=getIVSizeBytesWithoutExternalCounter();
-						}
-						else
-						{
-							initCipherForDecrypt(cipher);
-						}
-						if (associatedData!=null && lenAD>0)
-							cipher.updateAAD(associatedData, offAD, lenAD);
-						return maxEncryptedPartLength;
-					}
-					else
-						return 0;
-
-				}
-				return (int) (pos % maxEncryptedPartLength);
+			protected void initCipherForDecryptionWithIvAndCounter(byte[] iv, int counter) throws IOException {
+				AbstractEncryptionIOAlgorithm.this.initCipherForDecryptionWithIvAndCounter(cipher, iv, counter);
 			}
 
 			@Override
-			public int read(byte[] b, int off, int len) throws IOException {
-				return read(b, off, len, false);
+			protected void initCipherForDecrypt() throws IOException {
+				AbstractEncryptionIOAlgorithm.this.initCipherForDecrypt(cipher);
 			}
-
-			private int read(final byte[] b, final int off, final int len, final boolean fully) throws IOException {
-				if (closed)
-					throw new IOException("Stream closed");
-				checkLimits(b, off, len);
-				int total=0;
-				do {
-					int s=checkInit();
-					if (s<=0)
-					{
-						if (fully)
-							throw new IOException();
-						else if (total==0)
-							return -1;
-						else
-							return total;
-					}
-					s=Math.min(s, len);
-
-					do {
-						int s3=Math.min(s, buffer.length);
-						try {
-							int s2=is.read(buffer, 0, s3);
-							if (s2==-1)
-							{
-								if (fully)
-								{
-									if (total!=len)
-										throw new EOFException();
-								}
-								if (total==0)
-								{
-									return -1;
-								}
-								else
-									return total;
-							}
-							int w=cipher.update(buffer, 0, s2, b, off);
-							s-=s2;
-							total+=w;
-							pos+=w;
-							if (!fully && s3!=s2)
-								return total;
-						} catch (ShortBufferException e) {
-							throw new IOException(e);
-						}
-
-					} while(s>0);
-				} while (len>total);
-				return total;
-			}
-
-			@Override
-			public int read() throws IOException {
-				if (closed)
-					throw new IOException("Stream closed");
-				checkInit();
-
-				int v=is.read(buffer, 0, 1);
-				++pos;
-				if (v<0)
-					return v;
-				else
-				{
-					try
-					{
-						cipher.update(buffer, 0, 1, buffer, 1);
-						return buffer[1] & 0xFF;
-					} catch (ShortBufferException e) {
-						throw new IOException(e);
-					}
-
-				}
-			}
-
-			@Override
-			public void seek(long _pos) throws IOException {
-				if (closed)
-					throw new IOException("Stream closed");
-				if (_pos<0)
-					throw new IllegalArgumentException();
-				if (_pos>is.length())
-					throw new IllegalArgumentException();
-				if (!supportRandomAccess)
-					throw new IOException("Random decryption impossible");
-
-				if (includeIV()) {
-					long p = _pos / maxEncryptedPartLength ;
-					is.seek(p);
-					is.readFully(iv, 0, getIVSizeBytesWithoutExternalCounter());
-					if (useExternalCounter())
-						System.arraycopy(externalCounter, 0, iv, getIVSizeBytesWithoutExternalCounter(), externalCounter.length);
-
-					int counter = (int) (_pos % maxEncryptedPartLength)-getIVSizeBytesWithoutExternalCounter();
-
-					if (counter > 0) {
-						p += getIVSizeBytesWithoutExternalCounter() + (counter = cipher.getOutputSize(counter));
-						counter /= getCounterStepInBytes();
-
-					}
-					else
-						counter=0;
-					is.seek(pos=p);
-					initCipherForDecryptionWithIvAndCounter(cipher, iv, counter);
-				}
-				else
-				{
-					long add=cipher.getOutputSize((int)(_pos % maxEncryptedPartLength));
-					is.seek(pos=(_pos / maxEncryptedPartLength * maxPlainTextSizeForEncoding+add));
-					initCipherForDecrypt(cipher);
-				}
-				if (associatedData != null && lenAD > 0)
-					cipher.updateAAD(associatedData, offAD, lenAD);
-
-			}
-
-			@Override
-			public long currentPosition() {
-				return pos;
-			}
-
-			@Override
-			public boolean isClosed() {
-				return closed;
-			}
-
-			@Override
-			public void readFully(byte[] tab, int off, int len) throws IOException {
-				//noinspection ResultOfMethodCallIgnored
-				read(tab, off, len, true);
-			}
-
-			@Override
-			public void close() {
-				if (closed)
-					return;
-				closed=true;
-			}
-
-			@Deprecated
-			@Override
-			public String readLine() throws IOException {
-				return new DataInputStream(this).readLine();
-			}
-
-
 		};
-		ris.seek(0);
-		return ris;
+	}
+
+	static long getOutputSizeForDecryption(AbstractCipher cipher, long inputLen, int maxEncryptedPartLength, int IVSizeBytesWithoutExternalCounter, int maxPlainTextSizeForEncoding)
+	{
+		long add=cipher.getOutputSize((int)(inputLen % maxEncryptedPartLength));
+		if (add>0)
+			add+=IVSizeBytesWithoutExternalCounter;
+		return inputLen / maxEncryptedPartLength * maxPlainTextSizeForEncoding+add;
 	}
 
 	@Override
@@ -449,10 +275,8 @@ public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOu
 		if (inputLen==0)
 			return 0;
 		initCipherForDecrypt(cipher, iv);
-		long add=cipher.getOutputSize((int)(inputLen % maxEncryptedPartLength));
-		if (add>0)
-			add+=getIVSizeBytesWithoutExternalCounter();
-		return inputLen / maxEncryptedPartLength * maxPlainTextSizeForEncoding+add;
+		return getOutputSizeForDecryption(cipher, inputLen, maxEncryptedPartLength,
+				getIVSizeBytesWithoutExternalCounter(),maxPlainTextSizeForEncoding );
 	}
 
 

@@ -36,9 +36,9 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 
 import com.distrimind.util.io.RandomInputStream;
+import com.distrimind.util.io.RandomOutputStream;
 
 import java.io.IOException;
-import java.io.OutputStream;
 
 /**
  * @author Jason Mahdjoub
@@ -57,16 +57,16 @@ public interface IEncryptionInputAlgorithm extends IServer{
 	byte[] decode(RandomInputStream is, byte[] associatedData, int offAD, int lenAD) throws IOException;
 	byte[] decode(RandomInputStream is, byte[] associatedData, int offAD, int lenAD, byte[] externalCounter)
 			throws IOException;
-	void decode(RandomInputStream is, byte[] associatedData, OutputStream os) throws IOException;
-	void decode(RandomInputStream is, OutputStream os, byte[] externalCounter) throws IOException;
-	void decode(RandomInputStream is, OutputStream os) throws IOException;
-	void decode(RandomInputStream is, byte[] associatedData, int offAD, int lenAD, OutputStream os) throws IOException;
-	void decode(RandomInputStream is, byte[] associatedData, int offAD, int lenAD, OutputStream os, byte[] externalCounter) throws IOException;
-	void decode(RandomInputStream is, OutputStream os, int length) throws IOException;
-	void decode(RandomInputStream is, OutputStream os, int length, byte[] externalCounter) throws IOException;
-	void decode(RandomInputStream is, byte[] associatedData, OutputStream os, int length) throws IOException;
-	void decode(RandomInputStream is, byte[] associatedData, int offAD, int lenAD, OutputStream os, int length) throws IOException;
-	void decode(RandomInputStream is, byte[] associatedData, int offAD, int lenAD, OutputStream os, int length,  byte[] externalCounter) throws IOException;
+	void decode(RandomInputStream is, byte[] associatedData, RandomOutputStream os) throws IOException;
+	void decode(RandomInputStream is, RandomOutputStream os, byte[] externalCounter) throws IOException;
+	void decode(RandomInputStream is, RandomOutputStream os) throws IOException;
+	void decode(RandomInputStream is, byte[] associatedData, int offAD, int lenAD, RandomOutputStream os) throws IOException;
+	void decode(RandomInputStream is, byte[] associatedData, int offAD, int lenAD, RandomOutputStream os, byte[] externalCounter) throws IOException;
+	void decode(RandomInputStream is, RandomOutputStream os, int length) throws IOException;
+	void decode(RandomInputStream is, RandomOutputStream os, int length, byte[] externalCounter) throws IOException;
+	void decode(RandomInputStream is, byte[] associatedData, RandomOutputStream os, int length) throws IOException;
+	void decode(RandomInputStream is, byte[] associatedData, int offAD, int lenAD, RandomOutputStream os, int length) throws IOException;
+	void decode(RandomInputStream is, byte[] associatedData, int offAD, int lenAD, RandomOutputStream os, int length,  byte[] externalCounter) throws IOException;
 	RandomInputStream getCipherInputStream(final RandomInputStream is) throws IOException ;
 	RandomInputStream getCipherInputStream(final RandomInputStream is, byte[] externalCounter) throws IOException ;
 	RandomInputStream getCipherInputStream(final RandomInputStream is, final byte[] associatedData, final int offAD, final int lenAD) throws IOException ;
