@@ -406,7 +406,11 @@ public class EncryptionSignatureHashEncoder {
 				byte []hash = digest.digest();
 
 				if (symmetricSigner != null) {
-					byte[] signature = symmetricSigner.sign(hash);
+					symmetricSigner.init();
+					if (associatedData!=null)
+						symmetricSigner.update(associatedData, offAD, lenAD);
+					symmetricSigner.update(hash);
+					byte[] signature = symmetricSigner.getSignature();
 					digest.reset();
 					digest.update(hash);
 					digest.update(signature);
@@ -415,7 +419,9 @@ public class EncryptionSignatureHashEncoder {
 				}
 
 				if (asymmetricSigner != null) {
-					byte[] signature = asymmetricSigner.sign(hash);
+					asymmetricSigner.init();
+					asymmetricSigner.update(hash);
+					byte[] signature = asymmetricSigner.getSignature();
 					digest.reset();
 					digest.update(hash);
 					digest.update(signature);
@@ -427,6 +433,8 @@ public class EncryptionSignatureHashEncoder {
 			{
 				symmetricSigner.update(code);
 				symmetricSigner.update(lenBuffer);
+				if (associatedData!=null)
+					symmetricSigner.update(associatedData, offAD, lenAD);
 				byte[] signature = symmetricSigner.getSignature();
 				originalOutputStream.writeBytesArray(signature, false, symmetricSigner.getMacLengthBytes());
 			} else if (asymmetricSigner!=null)
@@ -588,13 +596,18 @@ public class EncryptionSignatureHashEncoder {
 					throw new MessageExternalizationException(Integrity.FAIL);
 
 				if (symmetricChecker!=null) {
-
-					if (!symmetricChecker.verify(hash, symSign))
+					symmetricChecker.init(symSign, 0, symSign.length);
+					if (associatedData!=null)
+						symmetricChecker.update(associatedData, offAD, lenAD);
+					symmetricChecker.update(hash);
+					if (!symmetricChecker.verify())
 						throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
 				}
 
 				if (asymmetricChecker!=null) {
-					if (!asymmetricChecker.verify(hash2, asymSign))
+					asymmetricChecker.init(asymSign, 0, asymSign.length);
+					asymmetricChecker.update(hash);
+					if (!asymmetricChecker.verify())
 						throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
 				}
 			}
@@ -602,6 +615,8 @@ public class EncryptionSignatureHashEncoder {
 			{
 				symmetricChecker.update(code);
 				symmetricChecker.update(lenBuffer);
+				if (associatedData!=null)
+					symmetricChecker.update(associatedData, offAD, lenAD);
 				if (!symmetricChecker.verify())
 					throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
 			} else if (asymmetricChecker!=null)
