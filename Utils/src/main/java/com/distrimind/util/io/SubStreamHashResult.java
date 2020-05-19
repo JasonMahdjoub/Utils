@@ -13,43 +13,49 @@ import java.util.Arrays;
 public class SubStreamHashResult implements SecureExternalizable {
 	private static final int MAX_HASH_SIZE= MessageDigestType.getMaxDigestLengthInBytes();
 	private static final int MAX_IV_LENGTH=64;
+	private static final int MAX_IV_NUMBERS=Short.MAX_VALUE;
 	private byte[] hash;
-	private byte[] iv;
+	private byte[][] ivs;
 
-	public SubStreamHashResult(byte[] hash, byte[] iv) {
+	public SubStreamHashResult(byte[] hash, byte[][] ivs) {
 		if (hash==null)
 			throw new NullPointerException();
 		if (hash.length>MAX_HASH_SIZE)
 			throw new IllegalArgumentException();
-		if (iv!=null && iv.length>MAX_IV_LENGTH)
-			throw new IllegalArgumentException();
+		if (ivs!=null) {
+			if (ivs.length>MAX_IV_NUMBERS)
+				throw new IllegalArgumentException();
+			for (byte[] iv : ivs)
+				if (iv != null && iv.length > MAX_IV_LENGTH)
+					throw new IllegalArgumentException();
+		}
 		this.hash = hash;
-		this.iv = iv;
+		this.ivs = ivs;
 	}
 
 	public byte[] getHash() {
 		return hash;
 	}
 
-	public byte[] getIv() {
-		return iv;
+	public byte[][] getIvs() {
+		return ivs;
 	}
 
 	@Override
 	public int getInternalSerializedSize() {
-		return SerializationTools.getInternalSize(hash, MAX_HASH_SIZE)+SerializationTools.getInternalSize(iv, MAX_IV_LENGTH);
+		return SerializationTools.getInternalSize(hash, MAX_HASH_SIZE)+SerializationTools.getInternalSize(ivs, MAX_IV_NUMBERS);
 	}
 
 	@Override
 	public void writeExternal(SecuredObjectOutputStream out) throws IOException {
 		out.writeBytesArray(hash, false, MAX_HASH_SIZE);
-		out.writeBytesArray(iv, true, MAX_IV_LENGTH);
+		out.write2DBytesArray(ivs, true, false, MAX_IV_NUMBERS, MAX_IV_LENGTH);
 	}
 
 	@Override
 	public void readExternal(SecuredObjectInputStream in) throws IOException {
 		hash=in.readBytesArray(false, MAX_HASH_SIZE);
-		iv=in.readBytesArray(true, MAX_IV_LENGTH);
+		ivs=in.read2DBytesArray(true, false, MAX_IV_NUMBERS, MAX_IV_LENGTH);
 	}
 
 	@Override
@@ -57,8 +63,7 @@ public class SubStreamHashResult implements SecureExternalizable {
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
 		SubStreamHashResult that = (SubStreamHashResult) o;
-		return Arrays.equals(hash, that.hash) &&
-				Arrays.equals(iv, that.iv);
+		return Arrays.equals(hash, that.hash);
 	}
 
 	@Override

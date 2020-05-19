@@ -34,12 +34,12 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
-import com.distrimind.util.Bits;
 import com.distrimind.util.io.*;
 
-import java.io.EOFException;
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
@@ -49,8 +49,6 @@ import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
-
-import javax.crypto.*;
 
 
 /**
@@ -86,11 +84,9 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 	public SubStreamHashResult getIVAndPartialHashedSubStreamFromEncryptedStream(RandomInputStream encryptedInputStream, SubStreamParameters subStreamParameters, byte[] externalCounter) throws IOException {
 		if (!getType().supportRandomReadWrite())
 			throw new IllegalStateException("Encryption type must support random read and write");
-		byte[] iv=initIVAndCounter(readIV(encryptedInputStream, externalCounter), externalCounter);
-		//initCipherForDecrypt(cipher, iv, externalCounter);
 		try {
 			byte[] hash = subStreamParameters.generateHash(encryptedInputStream);
-			return new SubStreamHashResult(hash, iv);
+			return new SubStreamHashResult(hash, readIvsFromEncryptedStream(encryptedInputStream));
 		} catch (NoSuchProviderException | NoSuchAlgorithmException e) {
 			throw new IOException(e);
 		}
@@ -134,58 +130,50 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 
 	}
 
-	public boolean checkPartialHashWithNonEncryptedStream(SubStreamHashResult hashResultFromEncryptedStream, SubStreamParameters subStreamParameters, RandomInputStream nonEncryptedInputStream, byte[] associatedData, int offAD, int lenAD, AbstractMessageDigest md) throws IOException {
+	public boolean checkPartialHashWithNonEncryptedStream(SubStreamHashResult hashResultFromEncryptedStream, SubStreamParameters subStreamParameters,
+														  RandomInputStream nonEncryptedInputStream, byte[] associatedData, int offAD, int lenAD,
+														  AbstractMessageDigest md) throws IOException {
 
-		try {
-			List<SubStreamParameter> parameters = subStreamParameters.getParameters();
-			byte[] iv = hashResultFromEncryptedStream.getIv().clone();
-			int blockSizeBytes = iv.length;
-			if (blockSizeBytes != key.getEncryptionAlgorithmType().getBlockSizeBits())
+		List<SubStreamParameter> parameters = subStreamParameters.getParameters();
+		byte[][] ivs = hashResultFromEncryptedStream.getIvs();
+		for (byte[] iv : ivs)
+			if (iv.length != key.getEncryptionAlgorithmType().getIvLengthBytes())
 				throw new IOException();
-			int keySizeBytes = key.getKeySizeBits() / 8;
-			byte[] buffer = new byte[keySizeBytes * 32];
-			int indexPos = blockSizeBytes - 4;
-			final int counter = Bits.getInt(iv, indexPos);
 
-			for (SubStreamParameter p : parameters) {
-				long start = p.getStreamStartIncluded();
+		final int ivSizeWithoutExternalCounter=getIVSizeBytesWithoutExternalCounter();
+		HashRandomOutputStream hashOut=new HashRandomOutputStream(new NullRandomOutputStream(), md);
+		RandomOutputStream os=getCipherOutputStream(hashOut, associatedData, offAD, lenAD, null, ivs);
 
-				if (start < iv.length) {
-					md.update(hashResultFromEncryptedStream.getIv(), (int) start, (int) (Math.min(hashResultFromEncryptedStream.getIv().length, p.getStreamEndExcluded()) - start));
-					start = hashResultFromEncryptedStream.getIv().length;
+		for (SubStreamParameter p : parameters) {
+			long start = p.getStreamStartIncluded();
+			long end = p.getStreamEndExcluded();
+			int round=(int)(end/maxEncryptedPartLength);
+			long startIV=round*maxEncryptedPartLength;
+			long endIV=startIV+ivSizeWithoutExternalCounter;
+			if (start<startIV)
+			{
+				os.seek(start);
+				nonEncryptedInputStream.seek(start-round*ivSizeWithoutExternalCounter);
+				nonEncryptedInputStream.transferTo(os, startIV-start);
+				if (end>startIV)
+				{
+					md.update(ivs[round], 0, (int)Math.min(end-startIV, ivSizeWithoutExternalCounter));
 				}
-				long l = p.getStreamEndExcluded() - start;
-				if (l <= 0)
-					continue;
-				start -= hashResultFromEncryptedStream.getIv().length;
-
-				long startAligned = start / keySizeBytes * keySizeBytes;
-				int ivInc = (int) (startAligned / blockSizeBytes);
-				nonEncryptedInputStream.seek(startAligned);
-
-				Bits.putInt(iv, indexPos, ivInc + counter);
-				cipher.init(Cipher.ENCRYPT_MODE, key, iv);
-				InputStream cis = cipher.getCipherInputStream(nonEncryptedInputStream);
-				long toSkip = start - startAligned;
-				while (toSkip > 0) {
-					toSkip -= cis.read(buffer, 0, (int) toSkip);
-				}
-
-				do {
-					int s = (int) Math.min(buffer.length, l);
-					s = cis.read(buffer, 0, s);
-					if (s > 0)
-						md.update(buffer, 0, s);
-					if (s < 0)
-						throw new EOFException();
-					l -= s;
-				} while (l > 0);
 			}
-			return Arrays.equals(md.digest(), hashResultFromEncryptedStream.getHash());
-		} catch (NoSuchAlgorithmException | InvalidKeyException | InvalidAlgorithmParameterException | InvalidKeySpecException e) {
-			throw new IOException(e);
+			else if (start<endIV)
+			{
+				int off=(int)(startIV-start);
+				md.update(ivs[round], off, (int)Math.min(end-startIV, ivSizeWithoutExternalCounter-off));
+			}
+			if (end>endIV)
+			{
+				start=Math.max(endIV, start);
+				os.seek(start);
+				nonEncryptedInputStream.seek(start-(round+1)*ivSizeWithoutExternalCounter);
+				nonEncryptedInputStream.transferTo(os, end-start);
+			}
 		}
-
+		return Arrays.equals(md.digest(), hashResultFromEncryptedStream.getHash());
 	}
 
 	public SymmetricEncryptionAlgorithm(AbstractSecureRandom random, SymmetricSecretKey key)
@@ -269,6 +257,11 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 	@Override
 	protected int getCounterStepInBytes() {
 		return counterStepInBytes;
+	}
+
+	@Override
+	public boolean supportRandomEncryptionAndRandomDecryption() {
+		return type.supportRandomReadWrite();
 	}
 
 	@Override
