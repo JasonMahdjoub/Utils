@@ -59,8 +59,8 @@ public class Utils {
 		Calendar c = Calendar.getInstance();
 		c.set(2016, Calendar.JANUARY, 4);
 		Calendar c2 = Calendar.getInstance();
-		c.set(2019, Calendar.APRIL, 9);
-		VERSION = new Version("Utils", "Utils", (short)4, (short)16, (short)0, Version.Type.Stable, (short)0, c.getTime(), c2.getTime());
+		c.set(2020, Calendar.MAY, 19);
+		VERSION = new Version("Utils", "Utils", (short)5, (short)0, (short)0, Version.Type.Stable, (short)0, c.getTime(), c2.getTime());
 		try {
 
 			InputStream is = Utils.class.getResourceAsStream("build.txt");
@@ -73,16 +73,25 @@ public class Utils {
 			VERSION.addDeveloper(new PersonDeveloper("mahdjoub", "jason", c.getTime()));
 
 			c = Calendar.getInstance();
-			c.set(2019, Calendar.APRIL, 9);
-			Description d = new Description((short)4, (short)16, (short)0, Version.Type.Stable, (short)0, c.getTime());
+			c.set(2020, Calendar.MAY, 19);
+			Description d = new Description((short)5, (short)0, (short)0, Version.Type.Stable, (short)0, c.getTime());
 			d.addItem("Add class EncryptionTools");
 			d.addItem("Use temporary directory into RandomCacheFileCenter");
 			d.addItem("Fix issues into FilePermissions");
-			d.addItem("Implements EncryptionWriter and EncryptionReader");
+			d.addItem("Add Chacha20 encryption algorithm");
+			d.addItem("Add Chacha20-POLY1305 encryption algorithm");
+			d.addItem("Add AggregatedRandomInputStreams and AggregatedRandomOutputStreams");
+			d.addItem("Add DelegatedRandomInputStream and DelegatedRandomOutputStream with next implementations : HashRandomInputStream, HashRandomOutputStream, SignatureCheckerRandomInputStream, SignerRandomOutputStream");
+			d.addItem("Add FragmentedRandomInputStream and FragmentedRandomOutputStream");
+			d.addItem("Add FragmentedRandomInputStreamPerChannel and FragmentedRandomOutputStreamPerChannel");
+			d.addItem("Add NullRandomOutputStream");
+			d.addItem("Reimplement entirely AbstractEncryptionOutputAlgorithm, AbstractEncryptionIOAlgorithm and SymmetricEncryptionAlgorithm");
+			d.addItem("Implements EncryptionHashSignatureEncoder and EncryptionHashSignatureDecoder");
+			d.addItem("Add functionality to hash a stream partially thanks to a given map into order to be compared with distant data");
 			VERSION.addDescription(d);
 
 			c = Calendar.getInstance();
-			c.set(2019, Calendar.MARCH, 30);
+			c.set(2020, Calendar.MARCH, 30);
 			d = new Description((short)4, (short)15, (short)13, Version.Type.Stable, (short)0, c.getTime());
 			d.addItem("Update FIPS to a recompiled version compatible with Android");
 			d.addItem("Update commons-codec to 1.14");
@@ -95,20 +104,20 @@ public class Utils {
 			VERSION.addDescription(d);
 
 			c = Calendar.getInstance();
-			c.set(2019, Calendar.MARCH, 16);
+			c.set(2020, Calendar.MARCH, 16);
 			d = new Description((short)4, (short)13, (short)0, Version.Type.Stable, (short)0, c.getTime());
 			d.addItem("Add ProgressMonitor class");
 			VERSION.addDescription(d);
 
 
 			c = Calendar.getInstance();
-			c.set(2019, Calendar.FEBRUARY, 25);
+			c.set(2020, Calendar.FEBRUARY, 25);
 			d = new Description((short)4, (short)12, (short)0, Version.Type.Stable, (short)0, c.getTime());
 			d.addItem("Add FileTools.walkFileTree function");
 			VERSION.addDescription(d);
 
 			c = Calendar.getInstance();
-			c.set(2019, Calendar.FEBRUARY, 17);
+			c.set(2020, Calendar.FEBRUARY, 17);
 			d = new Description((short)4, (short)11, (short)0, Version.Type.Stable, (short)0, c.getTime());
 			d.addItem("Make FilePermissions compatible with old Android platforms");
 			d.addItem("Asymmetric signatures based on Eduard curves use now BC FIPS implementation");
@@ -117,20 +126,20 @@ public class Utils {
 			VERSION.addDescription(d);
 
 			c = Calendar.getInstance();
-			c.set(2019, Calendar.FEBRUARY, 15);
+			c.set(2020, Calendar.FEBRUARY, 15);
 			d = new Description((short)4, (short)10, (short)1, Version.Type.Stable, (short)0, c.getTime());
 			d.addItem("Update Bouncy Castle to 1.64");
 			d.addItem("Update Bouncy Castle FIPS to 1.0.2");
 			VERSION.addDescription(d);
 
 			c = Calendar.getInstance();
-			c.set(2019, Calendar.FEBRUARY, 11);
+			c.set(2020, Calendar.FEBRUARY, 11);
 			d = new Description((short)4, (short)9, (short)0, Version.Type.Stable, (short)0, c.getTime());
 			d.addItem("Add FilePermissions class");
 			VERSION.addDescription(d);
 
 			c = Calendar.getInstance();
-			c.set(2019, Calendar.JANUARY, 24);
+			c.set(2020, Calendar.JANUARY, 24);
 			d = new Description((short)4, (short)8, (short)6, Version.Type.Stable, (short)0, c.getTime());
 			d.addItem("Add PoolExecutor and ScheduledPoolExecutor");
 			d.addItem("Add CircularArrayList");
