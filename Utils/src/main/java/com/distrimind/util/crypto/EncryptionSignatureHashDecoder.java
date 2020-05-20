@@ -93,6 +93,8 @@ public class EncryptionSignatureHashDecoder {
 			throw new NullPointerException();
 		if (associatedData==null)
 			throw new NullPointerException();
+		if (!cipher.getType().supportAssociatedData())
+			throw new IllegalArgumentException("Cipher does not support associated data !");
 		EncryptionSignatureHashEncoder.checkLimits(associatedData, offAD, lenAD);
 		if (this.symmetricChecker!=null && cipher.getType().isAuthenticatedAlgorithm())
 			throw new IOException("Symmetric encryption use authentication and a symmetric authenticated signer is already used. No more symmetric authentication is needed. However ASymmetric authentication is possible.");

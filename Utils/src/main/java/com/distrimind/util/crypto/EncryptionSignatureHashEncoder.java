@@ -155,6 +155,8 @@ public class EncryptionSignatureHashEncoder {
 			throw new NullPointerException();
 		if (associatedData==null)
 			throw new NullPointerException();
+		if (!cipher.getType().supportAssociatedData())
+			throw new IllegalArgumentException("Cipher does not support associated data !");
 		checkLimits(associatedData, offAD, lenAD);
 		if (this.symmetricSigner!=null && cipher.getType().isAuthenticatedAlgorithm())
 			throw new IOException("Symmetric encryption use authentication and a symmetric authenticated signer is already used. No more symmetric authentication is needed. However ASymmetric authentication is possible.");
@@ -467,6 +469,8 @@ public class EncryptionSignatureHashEncoder {
 		else if (hasAssociatedData && cipher==null)
 			throw new MessageExternalizationException(Integrity.FAIL, "associatedData");
 		else if (!hasAssociatedData && associatedData!=null)
+			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, "associatedData");
+		if (hasAssociatedData && !cipher.getType().supportAssociatedData())
 			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, "associatedData");
 		boolean hasCipher=hasCipher(code);
 		if (hasCipher && cipher==null)
