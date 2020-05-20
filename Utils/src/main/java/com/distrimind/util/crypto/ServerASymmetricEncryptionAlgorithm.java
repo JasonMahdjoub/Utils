@@ -206,7 +206,7 @@ public class ServerASymmetricEncryptionAlgorithm implements IEncryptionInputAlgo
 
 			RandomInputStream bais = new RandomByteArrayInputStream(bytes);
 			try  {
-				if (len!=bytes.length)
+				if (len != bytes.length || off!=0)
 					bais=new LimitedRandomInputStream(bais, off, len);
 				return decode(bais, associatedData, offAD, lenAD, externalCounter);
 			}
@@ -351,7 +351,7 @@ public class ServerASymmetricEncryptionAlgorithm implements IEncryptionInputAlgo
 
 			RandomInputStream bais = new RandomByteArrayInputStream(bytes);
 			try  {
-				if (len!=bytes.length)
+				if (len != bytes.length || off!=0)
 					bais=new LimitedRandomInputStream(bais, off, len);
 				return decode(bais, associatedData, offAD, lenAD, externalCounter);
 			}
@@ -413,7 +413,7 @@ public class ServerASymmetricEncryptionAlgorithm implements IEncryptionInputAlgo
 
 		RandomInputStream bais = new RandomByteArrayInputStream(bytes);
 		try  {
-			if (len!=bytes.length)
+			if (len != bytes.length || off!=0)
 				bais=new LimitedRandomInputStream(bais, off, len);
 			return decode(bais, associatedData, offAD, lenAD, externalCounter);
 		}

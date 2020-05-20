@@ -136,7 +136,7 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 	public void encode(byte[] bytes, int off, int len, byte[] associatedData, int offAD, int lenAD, RandomOutputStream os, byte[] externalCounter) throws IOException{
 		RandomInputStream ris=new RandomByteArrayInputStream(bytes);
 		try {
-			if (len != bytes.length)
+			if (len != bytes.length || off!=0)
 				ris = new LimitedRandomInputStream(ris, off, len);
 			encode(ris, associatedData, offAD, lenAD, os, externalCounter);
 		}

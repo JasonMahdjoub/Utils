@@ -91,7 +91,7 @@ public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOu
 			throw new IllegalArgumentException("bytes.length=" + bytes.length + ", off=" + off + ", len=" + len);
 		RandomInputStream bais = new RandomByteArrayInputStream(bytes);
 		try  {
-			if (len!=bytes.length)
+			if (len != bytes.length || off!=0)
 				bais=new LimitedRandomInputStream(bais, off, len);
 			return decode(bais, associatedData, offAD, lenAD, externalCounter);
 		}
