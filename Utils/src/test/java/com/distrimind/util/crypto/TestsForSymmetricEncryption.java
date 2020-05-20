@@ -42,12 +42,9 @@ import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
-import javax.crypto.ShortBufferException;
 import java.io.IOException;
-import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
@@ -62,8 +59,8 @@ import java.util.Random;
 public class TestsForSymmetricEncryption {
 	@Test(dataProvider = "provideDataForSymetricEncryptions")
 	public void testSecretKeyEncoding(SymmetricEncryptionType type) throws NoSuchAlgorithmException,
-			InvalidKeyException, NoSuchPaddingException, InvalidAlgorithmParameterException, NoSuchProviderException,
-			IllegalArgumentException, InvalidKeySpecException, IOException {
+			NoSuchProviderException,
+			IllegalArgumentException, IOException {
 		System.out.println("Testing " + type);
 		AbstractSecureRandom random = SecureRandomType.DEFAULT.getSingleton(null);
 		SymmetricSecretKey key = type.getKeyGenerator(random).generateKey();
@@ -81,8 +78,8 @@ public class TestsForSymmetricEncryption {
 
 	@Test(dataProvider = "provideDataForSymetricEncryptions")
 	public void testSymmetricEncryptions(SymmetricEncryptionType type) throws NoSuchAlgorithmException,
-			NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IOException,
-			IllegalBlockSizeException, BadPaddingException, NoSuchProviderException, InvalidKeySpecException, IllegalStateException, ShortBufferException {
+			IOException,
+			NoSuchProviderException, IllegalStateException {
 		testSymmetricEncryptionsCompatibility(type, type);
 
 	}
@@ -102,8 +99,8 @@ public class TestsForSymmetricEncryption {
 
 	@Test(dataProvider = "provideDataForTestSymmetricEncryptionCompatibility", dependsOnMethods = "testSymmetricEncryptions")
 	public void testSymmetricEncryptionsCompatibility(SymmetricEncryptionType type1, SymmetricEncryptionType type2) throws NoSuchAlgorithmException,
-			NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IOException,
-			IllegalBlockSizeException, BadPaddingException, NoSuchProviderException, InvalidKeySpecException, IllegalStateException, ShortBufferException {
+			IOException,
+			NoSuchProviderException, IllegalStateException {
 		System.out.println("Testing " + type1+", "+type2);
 		AbstractSecureRandom random = SecureRandomType.DEFAULT.getSingleton(null);
 

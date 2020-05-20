@@ -81,7 +81,7 @@ public class TestASymmetricSignatures {
 		System.arraycopy(res, 0, res2, 0, index);
 		return res2;
 	}
-	public void testASymmetricKeyWrapperForSignature(AbstractSecureRandom rand, AbstractKeyPair kp, ASymmetricKeyWrapperType typeWrapper, ASymmetricEncryptionType asetype, SymmetricAuthentifiedSignatureType ssigtype) throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, IllegalStateException, IllegalBlockSizeException, NoSuchProviderException, InvalidAlgorithmParameterException, IOException, IllegalArgumentException, InvalidWrappingException
+	public void testASymmetricKeyWrapperForSignature(AbstractSecureRandom rand, AbstractKeyPair<?,?> kp, ASymmetricKeyWrapperType typeWrapper, ASymmetricEncryptionType asetype, SymmetricAuthentifiedSignatureType ssigtype) throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, IllegalStateException, IllegalBlockSizeException, NoSuchProviderException, InvalidAlgorithmParameterException, IOException, IllegalArgumentException, InvalidWrappingException
 	{
 		SymmetricSecretKey sk= ssigtype.getKeyGenerator(rand, ssigtype.getDefaultKeySizeBits()).generateKey();
 		byte[] wrappedKey=typeWrapper.wrapKey(rand, kp.getASymmetricPublicKey(), sk);
@@ -107,12 +107,12 @@ public class TestASymmetricSignatures {
 	}
 	@SuppressWarnings("deprecation")
 	@Test(dataProvider = "provideDataForASymmetricSignatureTest")
-	public void testAsymmetricSignatures(ASymmetricAuthenticatedSignatureType type, ASymmetricAuthenticatedSignatureType typePQC, AbstractKeyPair kpd, int keySize)
+	public void testAsymmetricSignatures(ASymmetricAuthenticatedSignatureType type, ASymmetricAuthenticatedSignatureType typePQC, AbstractKeyPair<?,?> kpd, int keySize)
 			throws NoSuchAlgorithmException, InvalidKeyException, SignatureException, InvalidKeySpecException,
 			NoSuchProviderException, IllegalStateException, InvalidAlgorithmParameterException, InvalidParameterSpecException, IOException {
 		System.out.println("Testing asymmetric signature : " +type+", "+ keySize+", "+kpd.getASymmetricPublicKey().getKeyBytes().length);
 		byte[] b = kpd.encode(true);
-		AbstractKeyPair kpd2=(AbstractKeyPair) DecentralizedValue.decode(b);
+		AbstractKeyPair<?,?> kpd2=(AbstractKeyPair<?,?>) DecentralizedValue.decode(b);
 		Assert.assertEquals(kpd2, kpd);
 		ASymmetricAuthenticatedSignerAlgorithm signer = new ASymmetricAuthenticatedSignerAlgorithm(kpd.getASymmetricPrivateKey());
 		ASymmetricAuthenticatedSignatureCheckerAlgorithm checker = new ASymmetricAuthenticatedSignatureCheckerAlgorithm(kpd.getASymmetricPublicKey());

@@ -44,7 +44,6 @@ import org.testng.annotations.Test;
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
-import javax.crypto.ShortBufferException;
 import java.io.IOException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
@@ -100,7 +99,7 @@ public class TestASymmetricEncryptions {
 		testASymmetricKeyWrapperForEncryption(rand, new HybridASymmetricKeyPair(kp, kppqc), typeWrapper, asetype, setype);
 
 	}
-	public void testASymmetricKeyWrapperForEncryption(AbstractSecureRandom rand, AbstractKeyPair kp,  ASymmetricKeyWrapperType typeWrapper, ASymmetricEncryptionType asetype, SymmetricEncryptionType setype)
+	public void testASymmetricKeyWrapperForEncryption(AbstractSecureRandom rand, AbstractKeyPair<?,?> kp,  ASymmetricKeyWrapperType typeWrapper, ASymmetricEncryptionType asetype, SymmetricEncryptionType setype)
 			throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, IllegalStateException, IllegalBlockSizeException, NoSuchProviderException, InvalidAlgorithmParameterException, IOException, IllegalArgumentException, InvalidWrappingException
 	{
 		SymmetricSecretKey sk= setype.getKeyGenerator(rand, setype.getDefaultKeySizeBits()).generateKey();
@@ -114,9 +113,9 @@ public class TestASymmetricEncryptions {
 	}
 	@Test(dataProvider = "provideDataForASymetricEncryptions", dependsOnMethods = { "testASymmetricKeyPairEncodingForEncryption" })
 	public void testP2PASymetricEncryptions(ASymmetricEncryptionType type)
-			throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,
-			InvalidAlgorithmParameterException, IOException, IllegalBlockSizeException,
-			BadPaddingException, NoSuchProviderException, InvalidKeySpecException, ShortBufferException, IllegalStateException {
+			throws NoSuchAlgorithmException,
+			InvalidAlgorithmParameterException, IOException,
+			NoSuchProviderException, IllegalStateException {
 		System.out.println("Testing " + type);
 		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getSingleton(null);
 		ASymmetricKeyPair kpd = type.getKeyPairGenerator(rand, (short)2048).generateKeyPair();
@@ -131,9 +130,9 @@ public class TestASymmetricEncryptions {
 	}
 	@Test(dataProvider = "provideDataForHybridASymetricEncryptions")
 	public void testHybridP2PASymetricEncryptions(HybridASymmetricEncryptionType type)
-			throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,
-			InvalidAlgorithmParameterException, IOException, IllegalBlockSizeException,
-			BadPaddingException, NoSuchProviderException, InvalidKeySpecException, ShortBufferException, IllegalStateException {
+			throws NoSuchAlgorithmException,
+			InvalidAlgorithmParameterException, IOException,
+			NoSuchProviderException, IllegalStateException {
 		System.out.println("Testing " + type);
 		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getSingleton(null);
 		ASymmetricKeyPair kpdnonpqc = type.getNonPQCASymmetricEncryptionType().getKeyPairGenerator(rand, (short)2048).generateKeyPair();
@@ -151,9 +150,9 @@ public class TestASymmetricEncryptions {
 
 	}
 	public void testP2PASymetricEncryptionsImpl(AbstractSecureRandom rand, Object type, P2PASymmetricEncryptionAlgorithm algoDistant, P2PASymmetricEncryptionAlgorithm algoLocal)
-			throws NoSuchAlgorithmException, InvalidKeyException,
-			InvalidAlgorithmParameterException, IOException, IllegalBlockSizeException,
-			BadPaddingException, NoSuchProviderException, InvalidKeySpecException, ShortBufferException, IllegalStateException {
+			throws
+			IOException,
+			IllegalStateException {
 
 
 		for (byte[] m : VariousTests.messagesToEncrypt) {
@@ -202,8 +201,8 @@ public class TestASymmetricEncryptions {
 	@Test(dataProvider = "provideDataForHybridEncryptions")
 	public void testHybridEncryptions(ASymmetricEncryptionType astype, SymmetricEncryptionType stype)
 			throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,
-			InvalidAlgorithmParameterException, IOException, IllegalBlockSizeException, BadPaddingException,
-			NoSuchProviderException, InvalidKeySpecException, IllegalStateException, IllegalArgumentException, InvalidWrappingException, ShortBufferException {
+			InvalidAlgorithmParameterException, IOException, IllegalBlockSizeException,
+			NoSuchProviderException, InvalidKeySpecException, IllegalStateException, IllegalArgumentException, InvalidWrappingException {
 		System.out.println("Testing " + astype + "/" + stype);
 		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getSingleton(null);
 		ASymmetricKeyPair kpd = astype.getKeyPairGenerator(rand, (short)1024).generateKeyPair();
@@ -239,9 +238,9 @@ public class TestASymmetricEncryptions {
 	}
 	@Test(dataProvider = "provideDataForHybridASymetricEncryptions")
 	public void testClientServerASymetricEncryptions(HybridASymmetricEncryptionType type)
-			throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,
-			InvalidAlgorithmParameterException, IOException, IllegalBlockSizeException,
-			BadPaddingException, NoSuchProviderException, InvalidKeySpecException, IllegalStateException, ShortBufferException {
+			throws NoSuchAlgorithmException,
+			InvalidAlgorithmParameterException, IOException,
+			NoSuchProviderException, IllegalStateException {
 		System.out.println("Testing " + type);
 		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getSingleton(null);
 		ASymmetricKeyPair kpnonpqc = type.getNonPQCASymmetricEncryptionType().getKeyPairGenerator(rand, type.getNonPQCASymmetricEncryptionType().name().startsWith("BCPQC_MCELIECE_")?type.getNonPQCASymmetricEncryptionType().getDefaultKeySizeBits():2048).generateKeyPair();
@@ -250,10 +249,10 @@ public class TestASymmetricEncryptions {
 
 	}
 
-	public void testClientServerASymetricEncryptions(AbstractKeyPair kp)
-			throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,
-			InvalidAlgorithmParameterException, IOException, IllegalBlockSizeException,
-			BadPaddingException, NoSuchProviderException, InvalidKeySpecException, IllegalStateException, ShortBufferException {
+	public void testClientServerASymetricEncryptions(AbstractKeyPair<?,?> kp)
+			throws NoSuchAlgorithmException,
+			IOException,
+			NoSuchProviderException, IllegalStateException {
 		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getSingleton(null);
 
 		ClientASymmetricEncryptionAlgorithm algoClient = new ClientASymmetricEncryptionAlgorithm(rand,
@@ -285,9 +284,9 @@ public class TestASymmetricEncryptions {
 
 	@Test(dataProvider = "provideDataForASymetricEncryptions", dependsOnMethods = { "testASymmetricKeyPairEncodingForEncryption" })
 	public void testClientServerASymetricEncryptions(ASymmetricEncryptionType type)
-			throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,
-			InvalidAlgorithmParameterException, IOException, IllegalBlockSizeException,
-			BadPaddingException, NoSuchProviderException, InvalidKeySpecException, IllegalStateException, ShortBufferException {
+			throws NoSuchAlgorithmException,
+			InvalidAlgorithmParameterException, IOException,
+			NoSuchProviderException, IllegalStateException {
 		System.out.println("Testing " + type);
 		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getSingleton(null);
 		ASymmetricKeyPair kp = type.getKeyPairGenerator(rand, type.name().startsWith("BCPQC_MCELIECE_")?type.getDefaultKeySizeBits():2048).generateKeyPair();
