@@ -203,8 +203,10 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 		} catch (InvalidKeyException | NoSuchAlgorithmException | InvalidKeySpecException | InvalidAlgorithmParameterException e) {
 			throw new IOException(e);
 		}
+
 		setMaxPlainTextSizeForEncoding(key.getMaxPlainTextSizeForEncoding());
 		initBufferAllocatorArgs();
+
 		
 	}
 	@Override

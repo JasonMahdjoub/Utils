@@ -307,6 +307,7 @@ public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutpu
 			this.distantPublicKey = distantPublicKey;
 			this.random = random;
 			setMaxPlainTextSizeForEncoding(distantPublicKey.getMaxBlockSize());
+
 			initCipherForEncrypt(this.cipher);
 			initBufferAllocatorArgs();
 		}

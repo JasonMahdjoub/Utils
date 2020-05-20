@@ -163,7 +163,6 @@ public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOu
 		decode(is, associatedData, 0, associatedData==null?0:associatedData.length, os, length);
 	}
 
-	private byte[] iv = null;
 	@Override
 	public void decode(RandomInputStream is, byte[] associatedData, int offAD, int lenAD, RandomOutputStream os, int length)
 			throws IOException{
@@ -173,9 +172,6 @@ public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOu
 	protected byte[] readIV(RandomInputStream is, byte[] externalCounter) throws IOException
 	{
 		if (includeIV()) {
-			if (this.iv==null)
-				this.iv = new byte[getIVSizeBytesWithExternalCounter()];
-			
 			if (useExternalCounter() && (externalCounter==null || externalCounter.length!=getBlockModeCounterBytes()))
 				throw new IllegalArgumentException("External counter must have the next pre-defined size ; "+getBlockModeCounterBytes());
 			int sizeWithoutExC=getIVSizeBytesWithoutExternalCounter();
@@ -245,8 +241,7 @@ public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOu
 			throws IOException {
 		final AbstractCipher cipher = getCipherInstance();
 		is.seek(0);
-		if (iv==null && includeIV())
-			iv=new byte[getIVSizeBytesWithExternalCounter()];
+
 		return new CommonCipherInputStream(maxEncryptedPartLength, is, includeIV(), iv, getIVSizeBytesWithoutExternalCounter(), useExternalCounter(), externalCounter, cipher, associatedData, offAD, lenAD, buffer, supportRandomEncryptionAndRandomDecryption(), getCounterStepInBytes(), maxPlainTextSizeForEncoding) {
 			@Override
 			protected void initCipherForDecryptionWithIvAndCounter(byte[] iv, int counter) throws IOException {
@@ -288,4 +283,5 @@ public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOu
 	{
 		initCipherForDecrypt(cipher, iv, null);
 	}
+
 }

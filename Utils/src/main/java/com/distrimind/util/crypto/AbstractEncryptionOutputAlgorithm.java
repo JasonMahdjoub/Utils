@@ -53,8 +53,9 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 
 	protected final AbstractCipher cipher;
 
-	protected final byte[] buffer;
-	protected byte[] bufferOut;
+	protected byte[] buffer;
+	protected int bufferInSize;
+	//protected byte[] bufferOut;
 	protected int maxPlainTextSizeForEncoding;
 	protected int maxEncryptedPartLength;
 	private final byte[] one=new byte[1];
@@ -74,7 +75,6 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 		super();
 		cipher=null;
 		buffer=null;
-		bufferOut=null;
 		iv=null;
 	}
 
@@ -87,13 +87,15 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 		}
 		else
 			iv = null;
-
-		buffer=new byte[BUFFER_SIZE];
-
 	}
 
 	protected void initBufferAllocatorArgs() throws IOException {
-		bufferOut=new byte[(int)getOutputSizeForEncryption(BUFFER_SIZE)];
+		int bol=(int)getOutputSizeForEncryption(bufferInSize =BUFFER_SIZE);
+		if (bol>BUFFER_SIZE*2)
+		{
+			bol=(int)getOutputSizeForEncryption(bufferInSize =4096);
+		}
+		buffer=new byte[bol];
 	}
 	
 
@@ -266,10 +268,11 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 				while (len>0) {
 					long l=checkInit();
 					int s=(int)Math.min(len, l);
-					int outLen=cipher.getOutputSize(s);
-					if (buffer.length<outLen)
-					{
-						buffer=new byte[outLen];
+					if (len> bufferInSize) {
+						int outLen = cipher.getOutputSize(s);
+						if (buffer.length < outLen) {
+							buffer = new byte[outLen];
+						}
 					}
 					try {
 						int w=cipher.update(b, off, s, buffer, 0);

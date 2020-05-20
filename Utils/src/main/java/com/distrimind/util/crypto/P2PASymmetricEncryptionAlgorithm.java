@@ -586,6 +586,7 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 			this.distantPublicKey = distantPublicKey;
 			this.signatureType = signatureType;
 			// initCipherForEncrypt(this.cipher);
+
 			setMaxPlainTextSizeForEncoding(distantPublicKey.getMaxBlockSize());
 			initBufferAllocatorArgs();
 		}

@@ -92,21 +92,21 @@ abstract class CommonCipherInputStream extends RandomInputStream {
 		this.offAD = offAD;
 		this.lenAD = lenAD;
 		this.buffer = buffer;
-		this.outputBuffer=new byte[128];
 		this.supportRandomAccess = supportRandomAccess;
 		this.counterStepInBytes = counterStepInBytes;
 		this.maxPlainTextSizeForEncoding = maxPlainTextSizeForEncoding;
+		this.outputBuffer=null;
 	}
 
 	@Override
 	public long length() throws IOException {
 		return is.length();
 	}
-	private long lastLoadedIvPos=-1;
 
 	private int checkInit() throws IOException {
-		if (pos!=lastLoadedIvPos && pos%maxEncryptedPartLength==0)
+		if (pos%maxEncryptedPartLength==0)
 		{
+			checkDoFinal();
 			if (pos<is.length())
 			{
 				if (includeIV) {
@@ -120,10 +120,8 @@ abstract class CommonCipherInputStream extends RandomInputStream {
 				{
 					initCipherForDecrypt();
 				}
-				lastLoadedIvPos=pos;
 				if (associatedData!=null && lenAD>0)
 					cipher.updateAAD(associatedData, offAD, lenAD);
-				return maxEncryptedPartLength;
 			}
 			else
 				return 0;
@@ -136,10 +134,15 @@ abstract class CommonCipherInputStream extends RandomInputStream {
 	public int read(byte[] b, int off, int len) throws IOException {
 		return read(b, off, len, false);
 	}
-
-	private void checkDoFinal() throws MessageExternalizationException {
-		if (doFinal && pos%maxEncryptedPartLength==0)
+	private void checkOutputBuffer()
+	{
+		if (outputBuffer==null)
+			outputBuffer=new byte[128+cipher.getOutputSize(this.buffer.length)];
+	}
+	private void checkDoFinal() throws IOException {
+		if (doFinal && (pos%maxEncryptedPartLength==0 || pos==is.length()))
 		{
+
 			try {
 				outputBufferLength +=cipher.doFinal(outputBuffer, outputBufferIndex);
 				doFinal=false;
@@ -153,14 +156,14 @@ abstract class CommonCipherInputStream extends RandomInputStream {
 		if (outputBufferLength >0) {
 			int s=Math.min(len, outputBufferLength);
 			System.arraycopy(outputBuffer, outputBufferIndex, b, off, s);
-			outputBufferIndex +=s;
-			if (outputBufferIndex == outputBufferLength)
+			outputBufferLength-=s;
+			if (outputBufferLength==0)
 			{
 				outputBufferIndex =0;
 				outputBufferLength =0;
 			}
 			else
-				outputBufferLength -=s;
+				outputBufferIndex +=s;
 			return s;
 		}
 		else
@@ -169,13 +172,12 @@ abstract class CommonCipherInputStream extends RandomInputStream {
 	private int readOutputBuffer() {
 		if (outputBufferLength >0) {
 			int v=outputBuffer[outputBufferIndex++] & 0xFF;
-			if (outputBufferIndex == outputBufferLength)
+
+			if (--outputBufferLength==0)
 			{
 				outputBufferIndex =0;
 				outputBufferLength =0;
 			}
-			else
-				--outputBufferLength;
 			return v;
 		}
 		else
@@ -184,6 +186,8 @@ abstract class CommonCipherInputStream extends RandomInputStream {
 	private int read(final byte[] b, int off, final int originalLen, final boolean fully) throws IOException {
 		if (closed)
 			throw new IOException("Stream closed");
+		if (originalLen==0)
+			return 0;
 		int len=originalLen;
 		checkLimits(b, off, len);
 		int total=0;
@@ -192,8 +196,9 @@ abstract class CommonCipherInputStream extends RandomInputStream {
 			len-=s;
 			off+=s;
 			total+=s;
-			if (len==0)
+			if (len==0) {
 				return total;
+			}
 			s=checkInit();
 			if (s<=0)
 			{
@@ -207,12 +212,12 @@ abstract class CommonCipherInputStream extends RandomInputStream {
 					return total;
 			}
 			s=Math.min(s, len);
-
+			checkOutputBuffer();
 			do {
 				int s3=Math.min(s, buffer.length);
 				try {
 					int s2=is.read(buffer, 0, s3);
-					pos+=s2;
+
 					if (s2==-1)
 					{
 						checkDoFinal();
@@ -230,9 +235,11 @@ abstract class CommonCipherInputStream extends RandomInputStream {
 						else
 							return total;
 					}
-					int w;
+					pos+=s2;
+					int w=0;
+
 					if (s2>0) {
-						int outLen=cipher.getOutputSize(s2);
+						/*int outLen=cipher.getOutputSize(s2);
 						if (outLen>len)
 						{
 							outLen+=outputBufferLength+outputBufferIndex;
@@ -247,12 +254,10 @@ abstract class CommonCipherInputStream extends RandomInputStream {
 							outputBufferLength+=w;
 							w=readOutputBuffer(b, off, len);
 						}
-						else
+						else*/
 							w = cipher.update(buffer, 0, s2, b, off);
 						doFinal = true;
 					}
-					else
-						w=0;
 
 					s-=s2;
 					total+=w;
@@ -266,8 +271,7 @@ abstract class CommonCipherInputStream extends RandomInputStream {
 				}
 
 			} while(s>0);
-			if (pos%maxEncryptedPartLength==0)
-				checkDoFinal();
+			checkDoFinal();
 		} while (len>0);
 		return total;
 	}
@@ -277,6 +281,7 @@ abstract class CommonCipherInputStream extends RandomInputStream {
 		if (closed)
 			throw new IOException("Stream closed");
 		checkInit();
+		checkOutputBuffer();
 		int v= readOutputBuffer();
 		if (v>=0)
 			return v;
@@ -290,6 +295,7 @@ abstract class CommonCipherInputStream extends RandomInputStream {
 		{
 			try
 			{
+
 				int w=cipher.update(one, 0, 1, outputBuffer, outputBufferLength);
 				doFinal = true;
 				if (w>0) {
@@ -322,7 +328,6 @@ abstract class CommonCipherInputStream extends RandomInputStream {
 			long p = _pos / maxEncryptedPartLength ;
 			is.seek(p);
 			is.readFully(iv, 0, IVSizeBytesWithoutExternalCounter);
-			lastLoadedIvPos=pos+IVSizeBytesWithoutExternalCounter;
 			if (externalCounter!=null)
 				System.arraycopy(externalCounter, 0, iv, IVSizeBytesWithoutExternalCounter, externalCounter.length);
 
@@ -341,7 +346,7 @@ abstract class CommonCipherInputStream extends RandomInputStream {
 		else
 		{
 			long add=cipher.getOutputSize((int)(_pos % maxEncryptedPartLength));
-			is.seek(pos=((lastLoadedIvPos=_pos / maxEncryptedPartLength * maxPlainTextSizeForEncoding)+add));
+			is.seek(pos=(_pos / maxEncryptedPartLength * maxPlainTextSizeForEncoding+add));
 			initCipherForDecrypt();
 		}
 		if (associatedData != null && lenAD > 0)
