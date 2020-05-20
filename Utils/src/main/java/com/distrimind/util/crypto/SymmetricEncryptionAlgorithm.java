@@ -141,38 +141,34 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 
 		final int ivSizeWithoutExternalCounter=getIVSizeBytesWithoutExternalCounter();
 		HashRandomOutputStream hashOut=new HashRandomOutputStream(new NullRandomOutputStream(), md);
-		RandomOutputStream os=getCipherOutputStream(hashOut, associatedData, offAD, lenAD, null, ivs);
+		try(RandomOutputStream os=getCipherOutputStream(hashOut, associatedData, offAD, lenAD, null, ivs)) {
 
-		for (SubStreamParameter p : parameters) {
-			long start = p.getStreamStartIncluded();
-			long end = p.getStreamEndExcluded();
-			int round=(int)(end/maxEncryptedPartLength);
-			long startIV=round*maxEncryptedPartLength;
-			long endIV=startIV+ivSizeWithoutExternalCounter;
-			if (start<startIV)
-			{
-				os.seek(start);
-				nonEncryptedInputStream.seek(start-round*ivSizeWithoutExternalCounter);
-				nonEncryptedInputStream.transferTo(os, startIV-start);
-				if (end>startIV)
-				{
-					md.update(ivs[round], 0, (int)Math.min(end-startIV, ivSizeWithoutExternalCounter));
+			for (SubStreamParameter p : parameters) {
+				long start = p.getStreamStartIncluded();
+				long end = p.getStreamEndExcluded();
+				int round = (int) (end / maxEncryptedPartLength);
+				long startIV = round * maxEncryptedPartLength;
+				long endIV = startIV + ivSizeWithoutExternalCounter;
+				if (start < startIV) {
+					os.seek(start);
+					nonEncryptedInputStream.seek(start - round * ivSizeWithoutExternalCounter);
+					nonEncryptedInputStream.transferTo(os, startIV - start);
+					if (end > startIV) {
+						md.update(ivs[round], 0, (int) Math.min(end - startIV, ivSizeWithoutExternalCounter));
+					}
+				} else if (start < endIV) {
+					int off = (int) (startIV - start);
+					md.update(ivs[round], off, (int) Math.min(end - startIV, ivSizeWithoutExternalCounter - off));
+				}
+				if (end > endIV) {
+					start = Math.max(endIV, start);
+					os.seek(start);
+					nonEncryptedInputStream.seek(start - (round + 1) * ivSizeWithoutExternalCounter);
+					nonEncryptedInputStream.transferTo(os, end - start);
 				}
 			}
-			else if (start<endIV)
-			{
-				int off=(int)(startIV-start);
-				md.update(ivs[round], off, (int)Math.min(end-startIV, ivSizeWithoutExternalCounter-off));
-			}
-			if (end>endIV)
-			{
-				start=Math.max(endIV, start);
-				os.seek(start);
-				nonEncryptedInputStream.seek(start-(round+1)*ivSizeWithoutExternalCounter);
-				nonEncryptedInputStream.transferTo(os, end-start);
-			}
+			return Arrays.equals(md.digest(), hashResultFromEncryptedStream.getHash());
 		}
-		return Arrays.equals(md.digest(), hashResultFromEncryptedStream.getHash());
 	}
 
 	public SymmetricEncryptionAlgorithm(AbstractSecureRandom random, SymmetricSecretKey key)

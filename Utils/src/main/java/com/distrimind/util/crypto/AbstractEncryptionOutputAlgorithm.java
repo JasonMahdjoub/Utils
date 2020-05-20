@@ -133,9 +133,14 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 
 	public void encode(byte[] bytes, int off, int len, byte[] associatedData, int offAD, int lenAD, RandomOutputStream os, byte[] externalCounter) throws IOException{
 		RandomInputStream ris=new RandomByteArrayInputStream(bytes);
-		if (len!=bytes.length)
-			ris=new LimitedRandomInputStream(ris, off, len);
-		encode(ris, associatedData, offAD, lenAD, os, externalCounter);
+		try {
+			if (len != bytes.length)
+				ris = new LimitedRandomInputStream(ris, off, len);
+			encode(ris, associatedData, offAD, lenAD, os, externalCounter);
+		}
+		finally {
+			ris.close();
+		}
 	}
 	public void encode(RandomInputStream is, RandomOutputStream os) throws IOException
 	{
@@ -196,16 +201,17 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 			long currentPos=0;
 			boolean closed=false;
 			private boolean doFinal=true;
+			private byte[] buffer=AbstractEncryptionOutputAlgorithm.this.buffer;
 
-			private void checkDoFinal() throws IOException {
-				if (doFinal && currentPos%maxPlainTextSizeForEncoding==0)
+			private void checkDoFinal(boolean force) throws IOException {
+				if (doFinal && (currentPos%maxPlainTextSizeForEncoding==0 || force))
 				{
 					try {
 						int s=cipher.doFinal(buffer, 0);
 						os.write(buffer, 0, s);
 						doFinal=false;
 					} catch (IllegalBlockSizeException | BadPaddingException | ShortBufferException e) {
-						throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, e);
+						throw new IOException(e);
 					}
 				}
 			}
@@ -214,7 +220,7 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 				if (currentPos % maxPlainTextSizeForEncoding == 0) {
 					long round=currentPos/ maxPlainTextSizeForEncoding;
 					if (round>0){
-						checkDoFinal();
+						checkDoFinal(false);
 					}
 					if (includeIV()) {
 						byte[] iv;
@@ -260,12 +266,26 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 				while (len>0) {
 					long l=checkInit();
 					int s=(int)Math.min(len, l);
-					os.write(cipher.update(b, off, s));
-					doFinal=true;
+					int outLen=cipher.getOutputSize(s);
+					if (buffer.length<outLen)
+					{
+						buffer=new byte[outLen];
+					}
+					try {
+						int w=cipher.update(b, off, s, buffer, 0);
+						doFinal=true;
+						currentPos+=s;
+						if (w>0) {
+							os.write(buffer, 0, w);
+						}
+					} catch (ShortBufferException e) {
+						throw new IOException(e);
+					}
+
 					len-=s;
 					off+=s;
-					currentPos+=s;
-					checkDoFinal();
+
+					checkDoFinal(false);
 				}
 				length=Math.max(length, currentPos);
 			}
@@ -276,10 +296,17 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 
 				checkInit();
 				one[0]=(byte)b;
-				os.write(cipher.update(one));
 				++currentPos;
-				doFinal=true;
-				checkDoFinal();
+				try {
+					int w=cipher.update(one, 0, 1, buffer, 0);
+					doFinal=true;
+					if (w>0) {
+						os.write(buffer, 0, w);
+					}
+				} catch (ShortBufferException e) {
+					throw new IOException(e);
+				}
+				checkDoFinal(false);
 			}
 
 			@Override
@@ -375,16 +402,7 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 			public void close() throws IOException {
 				if (closed)
 					return;
-				if (length>0) {
-
-					try {
-						byte[] f=cipher.doFinal();
-						if (f!=null && f.length>0)
-							os.write(f);
-					} catch (IllegalBlockSizeException | BadPaddingException e) {
-						throw new IOException(e);
-					}
-				}
+				checkDoFinal(true);
 				flush();
 				closed=true;
 			}
