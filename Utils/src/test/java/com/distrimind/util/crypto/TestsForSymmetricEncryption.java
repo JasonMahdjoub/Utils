@@ -140,11 +140,12 @@ public class TestsForSymmetricEncryption {
 
 
 
-		byte[] counter=new byte[counterSizeBytes];
+		byte[] counter=algoDistant.useExternalCounter()?new byte[counterSizeBytes]:null;
 		Random rand = new Random(System.currentTimeMillis());
 
 		for (byte[] m : VariousTests.messagesToEncrypt) {
-			rand.nextBytes(counter);
+			if (counter!=null)
+				rand.nextBytes(counter);
 			byte[] encrypted = algoLocal.encode(m, null, counter);
 			int mlength=m.length;
 

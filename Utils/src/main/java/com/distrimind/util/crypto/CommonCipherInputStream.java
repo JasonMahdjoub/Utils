@@ -39,6 +39,8 @@ import com.distrimind.util.io.Integrity;
 import com.distrimind.util.io.MessageExternalizationException;
 import com.distrimind.util.io.RandomInputStream;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.ShortBufferException;
 import java.io.DataInputStream;
 import java.io.EOFException;
@@ -66,6 +68,9 @@ abstract class CommonCipherInputStream extends RandomInputStream {
 	private final boolean supportRandomAccess;
 	private final int counterStepInBytes;
 	private final int maxPlainTextSizeForEncoding;
+	private boolean doFinal=false;
+	private int doFinalLength=0;
+	private int doFinalToWriteIndex=0;
 
 	protected abstract void initCipherForDecryptionWithIvAndCounter(byte[] iv, int counter) throws IOException;
 	protected abstract void initCipherForDecrypt() throws IOException;
@@ -74,7 +79,7 @@ abstract class CommonCipherInputStream extends RandomInputStream {
 		if (useExternalCounter && externalCounter==null)
 			throw new NullPointerException("External counter is null");
 		else if (!useExternalCounter && externalCounter!=null)
-			throw new IllegalArgumentException("External counter should not be null");
+			throw new IllegalArgumentException("External counter be null");
 		this.maxEncryptedPartLength = maxEncryptedPartLength;
 		this.is = is;
 		this.includeIV = includeIV;
@@ -128,13 +133,50 @@ abstract class CommonCipherInputStream extends RandomInputStream {
 		return read(b, off, len, false);
 	}
 
-	private int read(final byte[] b, final int off, final int len, final boolean fully) throws IOException {
+	private void checkDoFinal() throws MessageExternalizationException {
+		if (doFinal)
+		{
+			try {
+				doFinalLength=cipher.doFinal(buffer, 0);
+				doFinalToWriteIndex=0;
+				doFinal=false;
+			} catch (IllegalBlockSizeException | BadPaddingException | ShortBufferException e) {
+				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, e);
+			}
+		}
+	}
+
+	private int readDoFinal(final byte[] b, int off, final int len) {
+		if (doFinalToWriteIndex<doFinalLength) {
+			int s=Math.min(len, doFinalLength-doFinalToWriteIndex);
+			System.arraycopy(buffer, doFinalToWriteIndex, b, off, s);
+			doFinalToWriteIndex+=s;
+			return s;
+		}
+		else
+			return 0;
+	}
+	private int readDoFinal() {
+		if (doFinalToWriteIndex<doFinalLength) {
+			return buffer[doFinalToWriteIndex++] & 0xFF;
+		}
+		else
+			return -1;
+	}
+	private int read(final byte[] b, int off, final int originalLen, final boolean fully) throws IOException {
 		if (closed)
 			throw new IOException("Stream closed");
+		int len=originalLen;
 		checkLimits(b, off, len);
 		int total=0;
 		do {
-			int s=checkInit();
+			int s=readDoFinal(b, off, len);
+			len-=s;
+			off+=s;
+			total+=s;
+			if (len==0)
+				return total;
+			s=checkInit();
 			if (s<=0)
 			{
 				if (fully)
@@ -152,9 +194,12 @@ abstract class CommonCipherInputStream extends RandomInputStream {
 					int s2=is.read(buffer, 0, s3);
 					if (s2==-1)
 					{
+						checkDoFinal();
+						s=readDoFinal(b, off, len);
+						total+=s;
 						if (fully)
 						{
-							if (total!=len)
+							if (total!=originalLen)
 								throw new EOFException();
 						}
 						if (total==0)
@@ -165,8 +210,11 @@ abstract class CommonCipherInputStream extends RandomInputStream {
 							return total;
 					}
 					int w=cipher.update(buffer, 0, s2, b, off);
+					doFinal=true;
 					s-=s2;
 					total+=w;
+					off+=w;
+					len-=w;
 					pos+=w;
 					if (!fully && s3!=s2)
 						return total;
@@ -175,6 +223,8 @@ abstract class CommonCipherInputStream extends RandomInputStream {
 				}
 
 			} while(s>0);
+			if (pos%maxEncryptedPartLength==0)
+				checkDoFinal();
 		} while (len>total);
 		return total;
 	}
@@ -184,16 +234,23 @@ abstract class CommonCipherInputStream extends RandomInputStream {
 		if (closed)
 			throw new IOException("Stream closed");
 		checkInit();
-
-		int v=is.read(buffer, 0, 1);
-		++pos;
-		if (v<0)
+		int v=readDoFinal();
+		if (v>=0)
 			return v;
+		v=is.read(buffer, 0, 1);
+
+		if (v<0) {
+			return readDoFinal();
+		}
 		else
 		{
 			try
 			{
 				cipher.update(buffer, 0, 1, buffer, 1);
+				doFinal=true;
+				++pos;
+				if (pos%maxEncryptedPartLength==0)
+					checkDoFinal();
 				return buffer[1] & 0xFF;
 			} catch (ShortBufferException e) {
 				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, e);
@@ -263,6 +320,7 @@ abstract class CommonCipherInputStream extends RandomInputStream {
 	public void close() {
 		if (closed)
 			return;
+
 		closed=true;
 	}
 

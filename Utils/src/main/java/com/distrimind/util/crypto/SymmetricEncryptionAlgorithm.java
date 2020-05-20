@@ -136,7 +136,7 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 		List<SubStreamParameter> parameters = subStreamParameters.getParameters();
 		byte[][] ivs = hashResultFromEncryptedStream.getIvs();
 		for (byte[] iv : ivs)
-			if (iv.length != key.getEncryptionAlgorithmType().getIvLengthBytes())
+			if (iv.length != key.getEncryptionAlgorithmType().getIVSizeBytes())
 				throw new IOException();
 
 		final int ivSizeWithoutExternalCounter=getIVSizeBytesWithoutExternalCounter();

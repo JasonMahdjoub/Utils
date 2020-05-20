@@ -39,6 +39,7 @@ import com.distrimind.util.io.*;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.ShortBufferException;
 import java.io.IOException;
 
 /**
@@ -194,19 +195,26 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 			long length=0;
 			long currentPos=0;
 			boolean closed=false;
+			private boolean doFinal=true;
+
+			private void checkDoFinal() throws IOException {
+				if (doFinal && currentPos%maxPlainTextSizeForEncoding==0)
+				{
+					try {
+						int s=cipher.doFinal(buffer, 0);
+						os.write(buffer, 0, s);
+						doFinal=false;
+					} catch (IllegalBlockSizeException | BadPaddingException | ShortBufferException e) {
+						throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, e);
+					}
+				}
+			}
 
 			private long checkInit() throws IOException {
 				if (currentPos % maxPlainTextSizeForEncoding == 0) {
 					long round=currentPos/ maxPlainTextSizeForEncoding;
 					if (round>0){
-						try {
-							byte[] f=cipher.doFinal();
-							if (f!=null && f.length>0)
-								os.write(f);
-
-						} catch (IllegalBlockSizeException | BadPaddingException e) {
-							throw new IOException(e);
-						}
+						checkDoFinal();
 					}
 					if (includeIV()) {
 						byte[] iv;
@@ -248,16 +256,16 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 				checkLimits(b, off, len);
 				if (len==0)
 					return;
-				long l=checkInit();
+
 				while (len>0) {
+					long l=checkInit();
 					int s=(int)Math.min(len, l);
 					os.write(cipher.update(b, off, s));
+					doFinal=true;
 					len-=s;
+					off+=s;
 					currentPos+=s;
-					if (len>0) {
-						off+=s;
-						checkInit();
-					}
+					checkDoFinal();
 				}
 				length=Math.max(length, currentPos);
 			}
@@ -265,9 +273,13 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 			public void write(int b) throws IOException {
 				if (closed)
 					throw new IOException("Stream closed");
+
 				checkInit();
 				one[0]=(byte)b;
 				os.write(cipher.update(one));
+				++currentPos;
+				doFinal=true;
+				checkDoFinal();
 			}
 
 			@Override

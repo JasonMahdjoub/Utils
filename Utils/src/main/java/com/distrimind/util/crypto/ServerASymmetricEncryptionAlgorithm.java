@@ -204,8 +204,14 @@ public class ServerASymmetricEncryptionAlgorithm implements IEncryptionInputAlgo
 			if (off + len > bytes.length)
 				throw new IllegalArgumentException("bytes.length=" + bytes.length + ", off=" + off + ", len=" + len);
 
-			try (RandomInputStream bais = new LimitedRandomInputStream(new RandomByteArrayInputStream(bytes), off, len)) {
+			RandomInputStream bais = new RandomByteArrayInputStream(bytes);
+			try  {
+				if (len!=bytes.length)
+					bais=new LimitedRandomInputStream(bais, off, len);
 				return decode(bais, associatedData, offAD, lenAD, externalCounter);
+			}
+			finally {
+				bais.close();
 			}
 		}
 		public byte[] decode(RandomInputStream is, byte[] associatedData, int offAD, int lenAD, byte[] externalCounter)
@@ -343,9 +349,16 @@ public class ServerASymmetricEncryptionAlgorithm implements IEncryptionInputAlgo
 			if (off + len > bytes.length)
 				throw new IllegalArgumentException("bytes.length=" + bytes.length + ", off=" + off + ", len=" + len);
 
-			try (RandomInputStream bais = new LimitedRandomInputStream(new RandomByteArrayInputStream(bytes),off, len)) {
+			RandomInputStream bais = new RandomByteArrayInputStream(bytes);
+			try  {
+				if (len!=bytes.length)
+					bais=new LimitedRandomInputStream(bais, off, len);
 				return decode(bais, associatedData, offAD, lenAD, externalCounter);
 			}
+			finally {
+				bais.close();
+			}
+
 		}
 		public byte[] decode(RandomInputStream is, byte[] associatedData, int offAD, int lenAD, byte[] externalCounter)
 				throws IOException {
@@ -398,9 +411,16 @@ public class ServerASymmetricEncryptionAlgorithm implements IEncryptionInputAlgo
 		if (off + len > bytes.length)
 			throw new IllegalArgumentException("bytes.length=" + bytes.length + ", off=" + off + ", len=" + len);
 
-		try (RandomInputStream bais = new LimitedRandomInputStream(new RandomByteArrayInputStream(bytes), off, len)) {
+		RandomInputStream bais = new RandomByteArrayInputStream(bytes);
+		try  {
+			if (len!=bytes.length)
+				bais=new LimitedRandomInputStream(bais, off, len);
 			return decode(bais, associatedData, offAD, lenAD, externalCounter);
 		}
+		finally {
+			bais.close();
+		}
+
 	}
 	@Override
 	public byte[] decode(RandomInputStream is, byte[] associatedData) throws IOException

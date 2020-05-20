@@ -91,7 +91,6 @@ public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOu
 			throw new IllegalArgumentException("bytes.length=" + bytes.length + ", off=" + off + ", len=" + len);
 		RandomInputStream bais = new RandomByteArrayInputStream(bytes);
 		try  {
-
 			if (len!=bytes.length)
 				bais=new LimitedRandomInputStream(bais, off, len);
 			return decode(bais, associatedData, offAD, lenAD, externalCounter);
@@ -246,7 +245,8 @@ public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOu
 			throws IOException {
 		final AbstractCipher cipher = getCipherInstance();
 		is.seek(0);
-
+		if (iv==null && includeIV())
+			iv=new byte[getIVSizeBytesWithExternalCounter()];
 		return new CommonCipherInputStream(maxEncryptedPartLength, is, includeIV(), iv, getIVSizeBytesWithoutExternalCounter(), useExternalCounter(), externalCounter, cipher, associatedData, offAD, lenAD, buffer, supportRandomEncryptionAndRandomDecryption(), getCounterStepInBytes(), maxPlainTextSizeForEncoding) {
 			@Override
 			protected void initCipherForDecryptionWithIvAndCounter(byte[] iv, int counter) throws IOException {
