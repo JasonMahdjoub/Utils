@@ -144,8 +144,12 @@ public class LimitedRandomInputStream extends RandomInputStream{
 	@Override
 	public int read(byte[] b, int off, int len) throws IOException {
 		checkLimits(b, off, len);
-		int s = (int)Math.min(length()-currentPosition(), len);
-		return in.read(b, off, s);
+		long a=length()-currentPosition();
+		if (a<=0)
+			return -1;
+		if (len<=0)
+			return 0;
+		return in.read(b, off, (int)Math.min(a, len));
 	}
 
 	@Override
