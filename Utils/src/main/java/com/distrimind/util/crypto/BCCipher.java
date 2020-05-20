@@ -70,6 +70,11 @@ public class BCCipher extends AbstractCipher {
 	private KeyWrapper<?> wrapper;
 	private KeyUnwrapper<?> unwrapper;
 	private UpdateOutputStream aadStream=null;
+	private int mode;
+	@Override
+	public int getMode() {
+		return mode;
+	}
 	
 	BCCipher(SymmetricEncryptionType type)
 	{
@@ -215,6 +220,7 @@ public class BCCipher extends AbstractCipher {
 
 	@Override
 	public void init(int opmode, AbstractKey key, byte[] iv) throws NoSuchAlgorithmException, InvalidKeySpecException  {
+		mode=opmode;
 		this.iv=iv;
 		OutputDecryptor<?> decryptor ;
 		OutputEncryptor<?> encryptor ;

@@ -482,4 +482,6 @@ public abstract class AbstractCipher {
 		updateAAD(ad.array(), ad.position(), ad.remaining());
 	}
 
+	public abstract int getMode();
+
 }

@@ -62,6 +62,7 @@ import java.security.spec.InvalidKeySpecException;
 public final class JavaNativeCipher extends AbstractCipher {
 	private final SymmetricEncryptionType type;
 	private final Cipher cipher;
+	private int mode;
 
 
 
@@ -142,12 +143,14 @@ public final class JavaNativeCipher extends AbstractCipher {
 	@Override
 	public void init(int _opmode, AbstractKey _key, AbstractSecureRandom _random)
 			throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException {
+		mode=_opmode;
 		cipher.init(_opmode, _key.toJavaNativeKey(), setSecureRandom(_random));
 
 	}
 
 	@Override
 	public void init(int _opmode, AbstractKey _key) throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException {
+		mode=_opmode;
 		cipher.init(_opmode, _key.toJavaNativeKey());
 	}
 
@@ -155,6 +158,7 @@ public final class JavaNativeCipher extends AbstractCipher {
 	@Override
 	public void init(int _opmode, AbstractKey _key, byte[] _iv) throws InvalidKeyException, NoSuchAlgorithmException,
 			InvalidKeySpecException, InvalidAlgorithmParameterException {
+		mode=_opmode;
 		if (type!=null && type.getBlockMode().toUpperCase().equals("GCM"))
 			cipher.init(_opmode, _key.toJavaNativeKey(), new GCMParameterSpec(128, _iv));
 		else if (type!=null && type.getAlgorithmName().equals(SymmetricEncryptionType.CHACHA20.getAlgorithmName()))
@@ -181,6 +185,7 @@ public final class JavaNativeCipher extends AbstractCipher {
 
 	@Override
 	public void init(int opmode, AbstractKey key, byte[] iv, int counter) throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidAlgorithmParameterException {
+		mode=opmode;
 		if (type==SymmetricEncryptionType.CHACHA20)
 		{
 			try {
@@ -210,9 +215,11 @@ public final class JavaNativeCipher extends AbstractCipher {
 	public void updateAAD(byte[] ad, int offset, int size) {
 		cipher.updateAAD(ad, offset, size);
 	}
-	
 
-	
-	
+	@Override
+	public int getMode() {
+		return mode;
+	}
+
 
 }

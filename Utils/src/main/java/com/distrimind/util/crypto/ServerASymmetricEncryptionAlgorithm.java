@@ -334,7 +334,8 @@ public class ServerASymmetricEncryptionAlgorithm implements IEncryptionInputAlgo
 				throw new IllegalArgumentException();
 			if (inputLen==0)
 				return 0;
-			initCipherForDecrypt(cipher, null, null);
+			if (cipher.getMode()!=Cipher.DECRYPT_MODE)
+				initCipherForDecrypt(cipher, null, null);
 			return AbstractEncryptionIOAlgorithm.getOutputSizeForDecryption(cipher, inputLen, maxEncryptedPartLength,
 					0,maxPlainTextSizeForEncoding );
 		}

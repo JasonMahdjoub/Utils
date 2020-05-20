@@ -53,8 +53,11 @@ import java.security.spec.InvalidKeySpecException;
  */
 public final class GnuCipher extends AbstractCipher {
 	private final Object cipher;
-
-
+	private int mode;
+	@Override
+	public int getMode() {
+		return mode;
+	}
 
 	private Object setSecureRandom(AbstractSecureRandom random) {
 	    return random.getGnuSecureRandom();
@@ -126,6 +129,7 @@ public final class GnuCipher extends AbstractCipher {
 	@Override
 	public void init(int _opmode, AbstractKey _key)
 			throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException {
+		mode=_opmode;
 		GnuFunctions.cipherInit(cipher, _opmode, _key.toGnuKey());
 	}
 
@@ -133,6 +137,7 @@ public final class GnuCipher extends AbstractCipher {
 	@Override
 	public void init(int _opmode, AbstractKey _key, AbstractSecureRandom _random)
 			throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException {
+		mode=_opmode;
 		GnuFunctions.cipherInit(cipher, _opmode, _key.toGnuKey(), setSecureRandom(_random));
 
 	}
@@ -140,6 +145,7 @@ public final class GnuCipher extends AbstractCipher {
 	@Override
 	public void init(int _opmode, AbstractKey _key, byte[] _iv) throws InvalidKeyException, NoSuchAlgorithmException,
 			InvalidKeySpecException, InvalidAlgorithmParameterException {
+		mode=_opmode;
 		GnuFunctions.cipherInit(cipher, _opmode, _key.toGnuKey(), _iv);
 	}
 
@@ -165,5 +171,5 @@ public final class GnuCipher extends AbstractCipher {
 
 
 
-	
+
 }

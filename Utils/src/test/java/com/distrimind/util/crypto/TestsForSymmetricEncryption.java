@@ -119,8 +119,10 @@ public class TestsForSymmetricEncryption {
 			algoDistant = new SymmetricEncryptionAlgorithm(random, key1, counterSizeBytes, true);
 			Assert.assertEquals(algoDistant.getBlockModeCounterBytes(), counterSizeBytes);
 			Assert.assertFalse(algoDistant.useExternalCounter());
-			Assert.assertEquals(algoDistant.getIVSizeBytesWithExternalCounter(), type1.getIVSizeBytes()-counterSizeBytes);
-			Assert.assertEquals(algoDistant.getIVSizeBytesWithoutExternalCounter(), type1.getIVSizeBytes()-counterSizeBytes);
+			/*Assert.assertEquals(algoDistant.getIVSizeBytesWithExternalCounter(), type1.getIVSizeBytes()-counterSizeBytes);
+			Assert.assertEquals(algoDistant.getIVSizeBytesWithoutExternalCounter(), type1.getIVSizeBytes()-counterSizeBytes);*/
+			Assert.assertEquals(algoDistant.getIVSizeBytesWithExternalCounter(), type1.getIVSizeBytes());
+			Assert.assertEquals(algoDistant.getIVSizeBytesWithoutExternalCounter(), type1.getIVSizeBytes());
 		}
 
 

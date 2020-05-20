@@ -184,10 +184,10 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 		super(key.getEncryptionAlgorithmType().getCipherInstance(), key.getEncryptionAlgorithmType().getIVSizeBytes());
 
 		this.type = key.getEncryptionAlgorithmType();
-		if (internalCounter && type.getMaxCounterSizeInBytesUsedWithBlockMode()<blockModeCounterBytes)
-			throw new IllegalArgumentException(type+" cannot manage a internal counter size greater than "+type.getMaxCounterSizeInBytesUsedWithBlockMode());
-		if (!internalCounter && blockModeCounterBytes>8)
-			throw new IllegalArgumentException("The external counter size can't be greater than 8");
+		/*if (internalCounter && type.getMaxCounterSizeInBytesUsedWithBlockMode()<blockModeCounterBytes)
+			throw new IllegalArgumentException(type+" cannot manage a internal counter size greater than "+type.getMaxCounterSizeInBytesUsedWithBlockMode());*/
+		if (!internalCounter && blockModeCounterBytes>type.getMaxCounterSizeInBytesUsedWithBlockMode())
+			throw new IllegalArgumentException("The external counter size can't be greater than "+type.getMaxCounterSizeInBytesUsedWithBlockMode());
 		if (blockModeCounterBytes<0)
 			throw new IllegalArgumentException("The external counter size can't be lower than 0");
 		this.blockModeCounterBytes = blockModeCounterBytes;
@@ -223,7 +223,7 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 	@Override
 	public int getIVSizeBytesWithExternalCounter()
 	{
-		return type.getIVSizeBytes()-(internalCounter?blockModeCounterBytes:0);
+		return type.getIVSizeBytes();
 	}	
 	
 	private byte[] generateIV() {

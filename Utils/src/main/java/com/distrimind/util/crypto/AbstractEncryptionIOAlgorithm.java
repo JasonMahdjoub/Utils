@@ -36,6 +36,7 @@ package com.distrimind.util.crypto;
 
 import com.distrimind.util.io.*;
 
+import javax.crypto.Cipher;
 import java.io.IOException;
 
 /**
@@ -269,7 +270,8 @@ public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOu
 			throw new IllegalArgumentException();
 		if (inputLen==0)
 			return 0;
-		initCipherForDecrypt(cipher, iv);
+		if (cipher.getMode()!= Cipher.DECRYPT_MODE)
+			initCipherForDecrypt(cipher, iv);
 		return getOutputSizeForDecryption(cipher, inputLen, maxEncryptedPartLength,
 				getIVSizeBytesWithoutExternalCounter(),maxPlainTextSizeForEncoding );
 	}
