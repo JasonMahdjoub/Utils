@@ -241,7 +241,7 @@ public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOu
 	public RandomInputStream getCipherInputStream(final RandomInputStream is, final byte[] associatedData, final int offAD, final int lenAD, final byte[] externalCounter)
 			throws IOException {
 		final AbstractCipher cipher = getCipherInstance();
-		is.seek(0);
+
 
 		return new CommonCipherInputStream(maxEncryptedPartLength, is, includeIV(), iv, getIVSizeBytesWithoutExternalCounter(), useExternalCounter(), externalCounter, cipher, associatedData, offAD, lenAD, buffer, supportRandomEncryptionAndRandomDecryption(), getCounterStepInBytes(), maxPlainTextSizeForEncoding) {
 			@Override

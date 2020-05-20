@@ -80,7 +80,7 @@ public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutpu
 				throw new IOException(e);
 			}
 			this.hybridASymmetricPublicKey=distantPublicKey;
-			setMaxPlainTextSizeForEncoding(Math.min(nonPQCEncryption.getMaxPlainTextSizeForEncoding(), PQCEncryption.getMaxPlainTextSizeForEncoding()));
+			//setMaxPlainTextSizeForEncoding(Math.min(nonPQCEncryption.getMaxPlainTextSizeForEncoding(), PQCEncryption.getMaxPlainTextSizeForEncoding()));
 		}
 
 		@Override
@@ -120,7 +120,7 @@ public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutpu
 		}
 
 		@Override
-		public void initCipherForEncryptWithNullIV(AbstractCipher cipher) {
+		public void initCipherForEncryptWithNullIV(AbstractCipher cipher) throws IOException {
 			throw new IllegalAccessError();
 		}
 

@@ -265,7 +265,7 @@ public class TestASymmetricEncryptions {
 			if (!kp.isPostQuantumKey())
 				Assert.assertEquals(encodedBytes.length, algoClient.getOutputSizeForEncryption(m.length));
 			byte[] decodedBytes = algoServer.decode(encodedBytes);
-			Assert.assertEquals(m, decodedBytes);
+			Assert.assertEquals(decodedBytes, m);
 
 			int off = rand.nextInt(15);
 			int size = m.length;

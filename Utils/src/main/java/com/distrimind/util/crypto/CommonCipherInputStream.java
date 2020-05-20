@@ -76,7 +76,7 @@ abstract class CommonCipherInputStream extends RandomInputStream {
 	protected abstract void initCipherForDecryptionWithIvAndCounter(byte[] iv, int counter) throws IOException;
 	protected abstract void initCipherForDecrypt() throws IOException;
 
-	CommonCipherInputStream(int maxEncryptedPartLength, RandomInputStream is, boolean includeIV, byte[] iv, int IVSizeBytesWithoutExternalCounter, boolean useExternalCounter, byte[] externalCounter, AbstractCipher cipher, byte[] associatedData, int offAD, int lenAD, byte[] buffer, boolean supportRandomAccess, int counterStepInBytes, int maxPlainTextSizeForEncoding) {
+	CommonCipherInputStream(int maxEncryptedPartLength, RandomInputStream is, boolean includeIV, byte[] iv, int IVSizeBytesWithoutExternalCounter, boolean useExternalCounter, byte[] externalCounter, AbstractCipher cipher, byte[] associatedData, int offAD, int lenAD, byte[] buffer, boolean supportRandomAccess, int counterStepInBytes, int maxPlainTextSizeForEncoding) throws IOException {
 		if (useExternalCounter && externalCounter==null)
 			throw new NullPointerException("External counter is null");
 		else if (!useExternalCounter && externalCounter!=null)
@@ -96,6 +96,8 @@ abstract class CommonCipherInputStream extends RandomInputStream {
 		this.counterStepInBytes = counterStepInBytes;
 		this.maxPlainTextSizeForEncoding = maxPlainTextSizeForEncoding;
 		this.outputBuffer=null;
+		if (is.currentPosition()!=0)
+			is.seek(0);
 	}
 
 	@Override

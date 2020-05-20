@@ -194,7 +194,8 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 	}
 	protected RandomOutputStream getCipherOutputStream(final RandomOutputStream os, final byte[] associatedData, final int offAD, final int lenAD, final byte[] externalCounter, final byte[][] manualIvs) throws
 			IOException{
-		os.seek(0);
+		if (os.currentPosition()!=0)
+			os.seek(0);
 		final boolean supportRandomAccess=supportRandomEncryptionAndRandomDecryption();
 
 
@@ -423,7 +424,7 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 	void setMaxPlainTextSizeForEncoding(int maxPlainTextSizeForEncoding) throws IOException {
 		initCipherForEncryptWithNullIV(cipher);
 		this.maxPlainTextSizeForEncoding=maxPlainTextSizeForEncoding;
-		int maxCipherTextLength = cipher.getOutputSize(maxPlainTextSizeForEncoding);
+		int maxCipherTextLength = (int) cipher.getOutputSize(maxPlainTextSizeForEncoding);
 		this.maxEncryptedPartLength =maxCipherTextLength+getIVSizeBytesWithoutExternalCounter();
 
 	}

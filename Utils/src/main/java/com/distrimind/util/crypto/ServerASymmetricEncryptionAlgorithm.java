@@ -314,7 +314,6 @@ public class ServerASymmetricEncryptionAlgorithm implements IEncryptionInputAlgo
 		public RandomInputStream getCipherInputStream(final RandomInputStream is,  byte[] associatedData, int offAD, int lenAD, final byte[] externalCounter)
 				throws IOException {
 			final AbstractCipher cipher = getCipherInstance();
-			is.seek(0);
 
 			return new CommonCipherInputStream(maxEncryptedPartLength, is, false, null, 0, false, externalCounter, cipher, associatedData, offAD, lenAD, buffer, false, 0, maxPlainTextSizeForEncoding) {
 				@Override
