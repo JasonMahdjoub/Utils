@@ -55,6 +55,7 @@ public class EncryptionSignatureHashDecoder {
 	private SymmetricAuthenticatedSignatureCheckerAlgorithm symmetricChecker=null;
 	private ASymmetricAuthenticatedSignatureCheckerAlgorithm asymmetricChecker=null;
 	private AbstractMessageDigest digest=null;
+	Long minimumInputSize=null;
 
 	public EncryptionSignatureHashDecoder() {
 	}
@@ -109,6 +110,7 @@ public class EncryptionSignatureHashDecoder {
 		if (digest==null)
 			throw new NullPointerException();
 		this.digest=messageDigest;
+		minimumInputSize=null;
 		return this;
 	}
 	public EncryptionSignatureHashDecoder withMessageDigestType(MessageDigestType messageDigestType) throws IOException {
@@ -116,6 +118,7 @@ public class EncryptionSignatureHashDecoder {
 			throw new NullPointerException();
 		try {
 			this.digest=messageDigestType.getMessageDigestInstance();
+			minimumInputSize=null;
 		} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
 			throw new IOException(e);
 		}
@@ -127,6 +130,7 @@ public class EncryptionSignatureHashDecoder {
 		if (this.cipher!=null && this.cipher.getType().isAuthenticatedAlgorithm())
 			throw new IOException("Symmetric encryption use authentication. No more symmetric authentication is needed. However ASymmetric authentication is possible.");
 		this.symmetricChecker=symmetricChecker;
+		minimumInputSize=null;
 		return this;
 	}
 	public EncryptionSignatureHashDecoder withSymmetricSecretKeyForSignature(SymmetricSecretKey secretKeyForSignature) throws IOException {
@@ -146,6 +150,7 @@ public class EncryptionSignatureHashDecoder {
 		if (asymmetricChecker==null)
 			throw new NullPointerException();
 		this.asymmetricChecker=asymmetricChecker;
+		minimumInputSize=null;
 		return this;
 	}
 
@@ -156,16 +161,24 @@ public class EncryptionSignatureHashDecoder {
 			throw new IllegalArgumentException();
 		try {
 			this.asymmetricChecker=new ASymmetricAuthenticatedSignatureCheckerAlgorithm(publicKeyForSignature);
+			minimumInputSize=null;
 		} catch (NoSuchProviderException | NoSuchAlgorithmException e) {
 			throw new IOException(e);
 		}
 		return this;
 	}
 
+	private long getMinimumInputSize()
+	{
+		if (minimumInputSize==null)
+			minimumInputSize=EncryptionSignatureHashEncoder.getMinimumInputLengthAfterDecoding(symmetricChecker, asymmetricChecker, digest);
+		return minimumInputSize;
+	}
+
 	public void decodeAndCheckHashAndSignaturesIfNecessary(RandomOutputStream outputStream) throws IOException {
 		if (outputStream==null)
 			throw new NullPointerException();
-		EncryptionSignatureHashEncoder.decryptAndCheckHashAndSignaturesImpl(inputStream, outputStream, cipher, associatedData, offAD, lenAD, symmetricChecker,asymmetricChecker, digest);
+		EncryptionSignatureHashEncoder.decryptAndCheckHashAndSignaturesImpl(inputStream, outputStream, cipher, associatedData, offAD, lenAD, symmetricChecker,asymmetricChecker, digest, getMinimumInputSize());
 	}
 	public Integrity checkHashAndSignature() throws IOException {
 		return EncryptionSignatureHashEncoder.checkHashAndSignatureImpl(inputStream, symmetricChecker,asymmetricChecker, digest);
@@ -186,10 +199,10 @@ public class EncryptionSignatureHashDecoder {
 		}
 	}
 	public long getMaximumOutputLength() throws IOException {
-		return EncryptionSignatureHashEncoder.getMaximumOutputLengthAfterDecoding(inputStream.length(), cipher, symmetricChecker, asymmetricChecker, digest);
+		return EncryptionSignatureHashEncoder.getMaximumOutputLengthAfterDecoding(inputStream.length(), cipher, getMinimumInputSize());
 	}
 
 	public long getMaximumOutputLength(long inputStreamLength) throws IOException {
-		return EncryptionSignatureHashEncoder.getMaximumOutputLengthAfterDecoding(inputStreamLength, cipher, symmetricChecker, asymmetricChecker, digest);
+		return EncryptionSignatureHashEncoder.getMaximumOutputLengthAfterDecoding(inputStreamLength, cipher, getMinimumInputSize());
 	}
 }

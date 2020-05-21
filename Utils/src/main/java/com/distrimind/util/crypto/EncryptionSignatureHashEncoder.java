@@ -118,6 +118,7 @@ public class EncryptionSignatureHashEncoder {
 	private SymmetricAuthenticatedSignerAlgorithm symmetricSigner=null;
 	private ASymmetricAuthenticatedSignerAlgorithm asymmetricSigner=null;
 	private AbstractMessageDigest digest=null;
+	private Long minimumOutputSize=null;
 	public EncryptionSignatureHashEncoder() {
 
 	}
@@ -183,6 +184,7 @@ public class EncryptionSignatureHashEncoder {
 		if (this.cipher!=null && this.cipher.getType().isAuthenticatedAlgorithm())
 			throw new IOException("Symmetric encryption use authentication. No more symmetric authentication is needed. However ASymmetric authentication is possible.");
 		this.symmetricSigner=symmetricSigner;
+		minimumOutputSize=null;
 		return this;
 	}
 	public EncryptionSignatureHashEncoder withASymmetricSigner(ASymmetricAuthenticatedSignerAlgorithm asymmetricSigner)
@@ -190,6 +192,7 @@ public class EncryptionSignatureHashEncoder {
 		if (asymmetricSigner==null)
 			throw new NullPointerException();
 		this.asymmetricSigner=asymmetricSigner;
+		minimumOutputSize=null;
 		return this;
 	}
 	public EncryptionSignatureHashEncoder withASymmetricPrivateKeyForSignature(ASymmetricPrivateKey privateKeyForSignature) throws IOException{
@@ -199,6 +202,7 @@ public class EncryptionSignatureHashEncoder {
 			throw new IllegalArgumentException();
 		try {
 			this.asymmetricSigner=new ASymmetricAuthenticatedSignerAlgorithm(privateKeyForSignature);
+			minimumOutputSize=null;
 		} catch (NoSuchProviderException | NoSuchAlgorithmException e) {
 			throw new IOException(e);
 		}
@@ -209,6 +213,7 @@ public class EncryptionSignatureHashEncoder {
 		if (digest==null)
 			throw new NullPointerException();
 		this.digest=messageDigest;
+		minimumOutputSize=null;
 		return this;
 	}
 	public EncryptionSignatureHashEncoder withMessageDigestType(MessageDigestType messageDigestType) throws IOException {
@@ -216,6 +221,7 @@ public class EncryptionSignatureHashEncoder {
 			throw new NullPointerException();
 		try {
 			this.digest=messageDigestType.getMessageDigestInstance();
+			minimumOutputSize=null;
 		} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
 			throw new IOException(e);
 		}
@@ -224,7 +230,7 @@ public class EncryptionSignatureHashEncoder {
 	public void encode(RandomOutputStream outputStream) throws IOException {
 		if (outputStream==null)
 			throw new NullPointerException();
-		encryptAndSignImpl(inputStream, outputStream, cipher, associatedData, offAD, lenAD, symmetricSigner, asymmetricSigner, digest);
+		encryptAndSignImpl(inputStream, outputStream, cipher, associatedData, offAD, lenAD, symmetricSigner, asymmetricSigner, digest, getMinimumOutputSize());
 	}
 
 	public boolean checkPartialHash(SubStreamParameters subStreamParameters, SubStreamHashResult hashResultFromEncryptedStream) throws IOException {
@@ -280,24 +286,38 @@ public class EncryptionSignatureHashEncoder {
 		}
 	}
 
+	private long getMinimumOutputSize()
+	{
+		if (minimumOutputSize==null)
+			minimumOutputSize=getMinimumOutputLengthAfterEncoding(symmetricSigner, asymmetricSigner, digest);
+		return minimumOutputSize;
+	}
+
 	public long getMaximumOutputLength() throws IOException {
-		return getMaximumOutputLengthAfterEncoding(inputStream.length(), cipher, symmetricSigner, asymmetricSigner, digest);
+
+		return getMaximumOutputLengthAfterEncoding(inputStream.length(), cipher, getMinimumOutputSize());
 	}
 
 	public long getMaximumOutputLength(long inputStreamLength) throws IOException {
-		return getMaximumOutputLengthAfterEncoding(inputStreamLength, cipher, symmetricSigner, asymmetricSigner, digest);
+		return getMaximumOutputLengthAfterEncoding(inputStreamLength, cipher, getMinimumOutputSize());
 	}
 
-	static long getMaximumOutputLengthAfterEncoding(long inputStreamLength, SymmetricEncryptionAlgorithm cipher, SymmetricAuthenticatedSignerAlgorithm symmetricSigner, ASymmetricAuthenticatedSignerAlgorithm asymmetricSigner, AbstractMessageDigest digest) throws IOException {
+	static long getMaximumOutputLengthAfterEncoding(long inputStreamLength, SymmetricEncryptionAlgorithm cipher, long minimumOuputSize) throws IOException {
 		if (inputStreamLength<=0)
 			throw new IllegalArgumentException();
-		long res=9;
+		long res=minimumOuputSize;
 
 		if (cipher!=null) {
 			res += cipher.getOutputSizeForEncryption(inputStreamLength);
 		}
 		else
 			res+=inputStreamLength;
+		return res;
+	}
+	static long getMinimumOutputLengthAfterEncoding(SymmetricAuthenticatedSignerAlgorithm symmetricSigner, ASymmetricAuthenticatedSignerAlgorithm asymmetricSigner, AbstractMessageDigest digest)
+	{
+		long res=9;
+
 		if (symmetricSigner!=null) {
 			int v=symmetricSigner.getMacLengthBytes();
 			res += v + (v>Short.MAX_VALUE?4:2);
@@ -323,21 +343,19 @@ public class EncryptionSignatureHashEncoder {
 		}
 		return res;
 	}
-
-	static long getMaximumOutputLengthAfterDecoding(long inputStreamLength, SymmetricEncryptionAlgorithm cipher, SymmetricAuthenticatedSignatureCheckerAlgorithm symmetricChecker, ASymmetricAuthenticatedSignatureCheckerAlgorithm asymmetricChecker, AbstractMessageDigest digest) throws IOException {
-		if (inputStreamLength<=0)
-			throw new IllegalArgumentException();
-		long res=inputStreamLength-9;
+	static long getMinimumInputLengthAfterDecoding(SymmetricAuthenticatedSignatureCheckerAlgorithm symmetricChecker, ASymmetricAuthenticatedSignatureCheckerAlgorithm asymmetricChecker, AbstractMessageDigest digest)
+	{
+		long res=9;
 
 		if (symmetricChecker!=null) {
 			int v=symmetricChecker.getMacLengthBytes();
-			res -= v+(v>Short.MAX_VALUE?4:2);
+			res += v + (v>Short.MAX_VALUE?4:2);
 		}
 		if(asymmetricChecker!=null) {
 			int v=asymmetricChecker.getMacLengthBytes();
-			res -= v+(v>Short.MAX_VALUE?4:2);
+			res += v + (v>Short.MAX_VALUE?4:2);
 		}
-		if (digest!=null || (asymmetricChecker!=null && symmetricChecker!=null))
+		if (digest!=null || (symmetricChecker!=null && asymmetricChecker!=null))
 		{
 			int v;
 			if (digest==null) {
@@ -350,8 +368,15 @@ public class EncryptionSignatureHashEncoder {
 				v+=4;
 			else
 				v+=2;
-			res-=v;
+			res+=v;
 		}
+		return res;
+	}
+	static long getMaximumOutputLengthAfterDecoding(long inputStreamLength, SymmetricEncryptionAlgorithm cipher, long minimumInputSize) throws IOException {
+		if (inputStreamLength<=0)
+			throw new IllegalArgumentException();
+		long res=inputStreamLength-minimumInputSize;
+
 		if (res<=0)
 			throw new IllegalArgumentException();
 		if (cipher!=null)
@@ -360,7 +385,7 @@ public class EncryptionSignatureHashEncoder {
 			return res;
 	}
 
-	private static void encryptAndSignImpl(RandomInputStream inputStream, RandomOutputStream originalOutputStream, SymmetricEncryptionAlgorithm cipher,byte[] associatedData, int offAD, int lenAD, SymmetricAuthenticatedSignerAlgorithm symmetricSigner, ASymmetricAuthenticatedSignerAlgorithm asymmetricSigner, AbstractMessageDigest digest) throws IOException {
+	private static void encryptAndSignImpl(RandomInputStream inputStream, RandomOutputStream originalOutputStream, SymmetricEncryptionAlgorithm cipher,byte[] associatedData, int offAD, int lenAD, SymmetricAuthenticatedSignerAlgorithm symmetricSigner, ASymmetricAuthenticatedSignerAlgorithm asymmetricSigner, AbstractMessageDigest digest, long minimumOutputSize) throws IOException {
 		if (inputStream==null)
 			throw new NullPointerException();
 		if (inputStream.length()<=0)
@@ -375,7 +400,7 @@ public class EncryptionSignatureHashEncoder {
 
 		try {
 			long originalOutputLength=originalOutputStream.length();
-			long maximumOutputLengthAfterEncoding=getMaximumOutputLengthAfterEncoding(inputStream.length(), cipher, symmetricSigner, asymmetricSigner, digest);
+			long maximumOutputLengthAfterEncoding=getMaximumOutputLengthAfterEncoding(inputStream.length(), cipher, minimumOutputSize);
 			originalOutputStream.ensureLength(maximumOutputLengthAfterEncoding);
 
 			byte code=getCode(cipher, associatedData, symmetricSigner, asymmetricSigner, digest);
@@ -533,7 +558,7 @@ public class EncryptionSignatureHashEncoder {
 		return code;
 	}
 
-	static void decryptAndCheckHashAndSignaturesImpl(RandomInputStream originalInputStream, RandomOutputStream outputStream, SymmetricEncryptionAlgorithm cipher, byte[] associatedData, int offAD, int lenAD, SymmetricAuthenticatedSignatureCheckerAlgorithm symmetricChecker, ASymmetricAuthenticatedSignatureCheckerAlgorithm asymmetricChecker, AbstractMessageDigest digest) throws IOException {
+	static void decryptAndCheckHashAndSignaturesImpl(RandomInputStream originalInputStream, RandomOutputStream outputStream, SymmetricEncryptionAlgorithm cipher, byte[] associatedData, int offAD, int lenAD, SymmetricAuthenticatedSignatureCheckerAlgorithm symmetricChecker, ASymmetricAuthenticatedSignatureCheckerAlgorithm asymmetricChecker, AbstractMessageDigest digest, long minimumInputLength) throws IOException {
 		if (originalInputStream==null)
 			throw new NullPointerException();
 		if (originalInputStream.length()<=0)
@@ -545,7 +570,7 @@ public class EncryptionSignatureHashEncoder {
 
 		try {
 			long originalOutputLength=outputStream.length();
-			long maximumOutputLengthAfterEncoding=getMaximumOutputLengthAfterDecoding(originalInputStream.length(), cipher, symmetricChecker, asymmetricChecker, digest);
+			long maximumOutputLengthAfterEncoding=getMaximumOutputLengthAfterDecoding(originalInputStream.length(), cipher, minimumInputLength);
 			outputStream.ensureLength(maximumOutputLengthAfterEncoding);
 			byte code=checkCode(cipher, originalInputStream, associatedData, offAD, lenAD, symmetricChecker, asymmetricChecker, digest);
 
