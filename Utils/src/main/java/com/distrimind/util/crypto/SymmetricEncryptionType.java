@@ -61,9 +61,9 @@ import java.util.Arrays;
  */
 public enum SymmetricEncryptionType {
 
-	AES_CBC_PKCS5Padding("AES", "CBC", "PKCS5Padding", (short) 128, CodeProvider.SunJCE, CodeProvider.SunJCE, SymmetricAuthentifiedSignatureType.HMAC_SHA2_256, org.bouncycastle.crypto.general.AES.ALGORITHM, (short)128, false, (short)118, (short)146, (short)132, (short)148, (short)291, (short)612, true, true, true, true, true, true, (short)16),
-	AES_GCM("AES", "GCM", "NoPadding", (short) 128, CodeProvider.SunJCE, CodeProvider.SunJCE, SymmetricAuthentifiedSignatureType.HMAC_SHA2_256, org.bouncycastle.crypto.general.AES.ALGORITHM, (short)128, true, (short)40, (short)48, (short)58, (short) 58, (short)144, (short)539, true, true, true, true, true, true, (short)12),
-	AES_CTR("AES", "CTR", "NoPadding", (short) 128, CodeProvider.SunJCE, CodeProvider.SunJCE, SymmetricAuthentifiedSignatureType.HMAC_SHA2_256, org.bouncycastle.crypto.general.AES.ALGORITHM, (short)128, false, (short)126, (short)112, (short)111, (short) 117, (short)384, (short)487, true, true, true, true, true, true, (short)16),
+	AES_CBC_PKCS5Padding("AES", "CBC", "PKCS5Padding", (short) 128, CodeProvider.SunJCE, CodeProvider.SunJCE, SymmetricAuthentifiedSignatureType.HMAC_SHA2_256, org.bouncycastle.crypto.general.AES.ALGORITHM, (short)128, false, (short)118, (short)146, (short)132, (short)148, (short)322, (short)583, true, true, true, true, true, true, (short)16),
+	AES_GCM("AES", "GCM", "NoPadding", (short) 128, CodeProvider.SunJCE, CodeProvider.SunJCE, SymmetricAuthentifiedSignatureType.HMAC_SHA2_256, org.bouncycastle.crypto.general.AES.ALGORITHM, (short)128, true, (short)40, (short)48, (short)58, (short) 58, (short)144, (short)613, true, true, true, true, true, true, (short)12),
+	AES_CTR("AES", "CTR", "NoPadding", (short) 128, CodeProvider.SunJCE, CodeProvider.SunJCE, SymmetricAuthentifiedSignatureType.HMAC_SHA2_256, org.bouncycastle.crypto.general.AES.ALGORITHM, (short)128, false, (short)126, (short)112, (short)111, (short) 117, (short)560, (short)252, true, true, true, true, true, true, (short)16),
 	@Deprecated
 	DES_CBC_PKCS5Padding("DES", "CBC", "PKCS5Padding", (short) 56, (short) 8, CodeProvider.SunJCE, CodeProvider.SunJCE, SymmetricAuthentifiedSignatureType.HMAC_SHA2_384, org.bouncycastle.crypto.general.DES.ALGORITHM, (short)64, false, (short)41, (short)39, (short)40, (short)37, (short)36, (short)45, true, true, true,true, true, true, (short)8),
 	@Deprecated
@@ -90,16 +90,16 @@ public enum SymmetricEncryptionType {
 	/**
 	 * CHACHA20 works only with Java 11 ou Android 28
 	 */
-	CHACHA20("ChaCha20", "", "", (short) 256, CodeProvider.SunJCE, CodeProvider.SunJCE, SymmetricAuthentifiedSignatureType.HMAC_SHA2_256, org.bouncycastle.crypto.general.AES.ALGORITHM, (short)512, false, (short)113, (short)79, (short)113, (short) 79, (short)260, (short)284, false, false, false,  true, false, false, (short)12),
+	CHACHA20("ChaCha20", "", "", (short) 256, CodeProvider.SunJCE, CodeProvider.SunJCE, SymmetricAuthentifiedSignatureType.HMAC_SHA2_256, org.bouncycastle.crypto.general.AES.ALGORITHM, (short)512, false, (short)113, (short)79, (short)113, (short) 79, (short)278, (short)274, false, false, false,  true, false, false, (short)12),
 	/**
 	 * CHACHA20_POLY1307 works with Java 7
 	 */
-	CHACHA20_POLY1305("ChaCha20-Poly1305", "", "", (short) 256, CodeProvider.SunJCE, CodeProvider.SunJCE, SymmetricAuthentifiedSignatureType.HMAC_SHA2_256, org.bouncycastle.crypto.general.AES.ALGORITHM, (short)512, true, (short)113, (short)79, (short)113, (short) 79, (short)195, (short)179, false, false, false,  true, false, false, (short)12),
+	CHACHA20_POLY1305("ChaCha20-Poly1305", "", "", (short) 256, CodeProvider.SunJCE, CodeProvider.SunJCE, SymmetricAuthentifiedSignatureType.HMAC_SHA2_256, org.bouncycastle.crypto.general.AES.ALGORITHM, (short)512, true, (short)113, (short)79, (short)113, (short) 79, (short)204, (short)192, false, false, false,  true, false, false, (short)12),
 	//BC_CHACHA20("ChaCha20", "", "", (short) 256, CodeProvider.BC, CodeProvider.BC, SymmetricAuthentifiedSignatureType.BC_FIPS_HMAC_SHA2_256, ChaCha20.ALGORITHM, (short)512, false, (short)40, (short)48, (short)58, (short) 58, (short)202, (short)475, false, false, false,  true, false, false),
 	/**
 	 * CHACHA20_POLY1307 works with Java 7
 	 */
-	BC_CHACHA20_POLY1305("ChaCha20-Poly1305", "", "", (short) 256, CodeProvider.BC, CodeProvider.BC, SymmetricAuthentifiedSignatureType.BC_FIPS_HMAC_SHA2_256, ChaCha20.ALGORITHM, (short)512, true, (short)113, (short)79, (short)113, (short) 79, (short)113, (short)79, false, false, false,  true, false, false, (short)12),
+	BC_CHACHA20_POLY1305("ChaCha20-Poly1305", "", "", (short) 256, CodeProvider.BC, CodeProvider.BC, SymmetricAuthentifiedSignatureType.BC_FIPS_HMAC_SHA2_256, ChaCha20.ALGORITHM, (short)512, true, (short)113, (short)79, (short)113, (short) 79, (short)121, (short)81, false, false, false,  true, false, false, (short)12),
 	DEFAULT(AES_CTR);
 	
 
