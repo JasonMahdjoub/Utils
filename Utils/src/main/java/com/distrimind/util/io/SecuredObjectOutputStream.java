@@ -92,7 +92,7 @@ public abstract class SecuredObjectOutputStream extends OutputStream implements 
 		write((v) & 0xFF);
 	}
 
-	private byte[] writeBuffer = new byte[8];
+	private final byte[] writeBuffer = new byte[8];
 
 	@Override
 	public final void writeLong(long v) throws IOException {

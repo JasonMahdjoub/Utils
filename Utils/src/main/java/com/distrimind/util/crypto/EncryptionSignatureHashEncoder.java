@@ -353,6 +353,7 @@ public class EncryptionSignatureHashEncoder {
 			originalOutputStream.ensureLength(maximumOutputLengthAfterEncoding);
 
 			byte code=getCode(cipher, associatedData, symmetricSigner, asymmetricSigner, digest);
+
 			if (symmetricSigner!=null && asymmetricSigner!=null && digest==null)
 				digest=defaultMessageType.getMessageDigestInstance();
 
@@ -371,7 +372,6 @@ public class EncryptionSignatureHashEncoder {
 				outputStream=new SignerRandomOutputStream(outputStream, asymmetricSigner);
 			}
 
-
 			long dataLen;
 			originalOutputStream.writeByte(code);
 			if (cipher != null) {
@@ -379,9 +379,9 @@ public class EncryptionSignatureHashEncoder {
 				originalOutputStream.writeLong(-1);
 				long dataPos=originalOutputStream.currentPosition();
 				if (associatedData!=null)
-					cipher.encode(inputStream, associatedData, offAD, lenAD, outputStream);
+					cipher.encode(inputStream, associatedData, offAD, lenAD, new LimitedRandomOutputStream(outputStream, dataPos));
 				else
-					cipher.encode(inputStream, outputStream);
+					cipher.encode(inputStream, new LimitedRandomOutputStream(outputStream, dataPos));
 				long newPos=originalOutputStream.currentPosition();
 				dataLen=newPos-dataPos;
 				originalOutputStream.seek(dataPos-8);
