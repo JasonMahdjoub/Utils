@@ -203,7 +203,7 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 			long length=0;
 			long currentPos=0;
 			boolean closed=false;
-			private boolean doFinal=true;
+			private boolean doFinal=false;
 			private byte[] buffer=AbstractEncryptionOutputAlgorithm.this.buffer;
 
 			private void checkDoFinal(boolean force) throws IOException {
@@ -211,7 +211,8 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 				{
 					try {
 						int s=cipher.doFinal(buffer, 0);
-						os.write(buffer, 0, s);
+						if (s>0)
+							os.write(buffer, 0, s);
 						doFinal=false;
 					} catch (IllegalBlockSizeException | BadPaddingException | ShortBufferException e) {
 						throw new IOException(e);
@@ -239,8 +240,9 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 						}
 						else {
 							iv = initCipherForEncrypt(cipher, externalCounter);
+							os.write(iv, 0, getIVSizeBytesWithoutExternalCounter());
 						}
-						os.write(iv, 0, getIVSizeBytesWithoutExternalCounter());
+
 					}
 					else {
 						initCipherForEncryptWithNullIV(cipher);
@@ -267,6 +269,7 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 				while (len>0) {
 					long l=checkInit();
 					int s=(int)Math.min(len, l);
+					assert s>0;
 					if (len> bufferInSize) {
 						int outLen = cipher.getOutputSize(s);
 						if (buffer.length < outLen) {
@@ -422,8 +425,7 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 	void setMaxPlainTextSizeForEncoding(int maxPlainTextSizeForEncoding) throws IOException {
 		initCipherForEncryptWithNullIV(cipher);
 		this.maxPlainTextSizeForEncoding=maxPlainTextSizeForEncoding;
-		int maxCipherTextLength = cipher.getOutputSize(maxPlainTextSizeForEncoding);
-		this.maxEncryptedPartLength =maxCipherTextLength+getIVSizeBytesWithoutExternalCounter();
+		this.maxEncryptedPartLength =cipher.getOutputSize(maxPlainTextSizeForEncoding)+getIVSizeBytesWithoutExternalCounter();
 
 	}
 
@@ -444,7 +446,7 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 			initCipherForEncryptWithNullIV(cipher);
 			add = cipher.getOutputSize((int)add)+getIVSizeBytesWithoutExternalCounter();
 		}
-		return (inputLen / maxPlainTextSizeForEncoding * maxEncryptedPartLength)+add;
+		return ((inputLen / maxPlainTextSizeForEncoding) * maxEncryptedPartLength)+add;
 
 	}
 
