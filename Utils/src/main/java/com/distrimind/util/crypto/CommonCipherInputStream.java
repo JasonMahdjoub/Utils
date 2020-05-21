@@ -106,7 +106,8 @@ abstract class CommonCipherInputStream extends RandomInputStream {
 	}
 
 	private int checkInit() throws IOException {
-		if (pos%maxEncryptedPartLength==0)
+		long mod=pos%maxEncryptedPartLength;
+		if (mod==0)
 		{
 			checkDoFinal();
 			if (pos<is.length())
@@ -124,12 +125,13 @@ abstract class CommonCipherInputStream extends RandomInputStream {
 				}
 				if (associatedData!=null && lenAD>0)
 					cipher.updateAAD(associatedData, offAD, lenAD);
+				mod=pos%maxEncryptedPartLength;
 			}
 			else
 				return 0;
 
 		}
-		return (int) (pos % maxEncryptedPartLength);
+		return (int) ( maxEncryptedPartLength-mod);
 	}
 
 	@Override
@@ -146,7 +148,7 @@ abstract class CommonCipherInputStream extends RandomInputStream {
 		{
 
 			try {
-				outputBufferLength +=cipher.doFinal(outputBuffer, outputBufferIndex);
+				outputBufferLength +=cipher.doFinal(outputBuffer, outputBufferLength+outputBufferIndex);
 				doFinal=false;
 			} catch (IllegalBlockSizeException | BadPaddingException | ShortBufferException e) {
 				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, e);
@@ -188,20 +190,22 @@ abstract class CommonCipherInputStream extends RandomInputStream {
 	private int read(final byte[] b, int off, final int originalLen, final boolean fully) throws IOException {
 		if (closed)
 			throw new IOException("Stream closed");
+		checkLimits(b, off, originalLen);
 		if (originalLen==0)
 			return 0;
 		int len=originalLen;
-		checkLimits(b, off, len);
+
 		int total=0;
 		do {
-			int s= readOutputBuffer(b, off, len);
-			len-=s;
-			off+=s;
-			total+=s;
+
+			int s=checkInit();
+			int s2= readOutputBuffer(b, off, len);
+			len-=s2;
+			off+=s2;
+			total+=s2;
 			if (len==0) {
 				return total;
 			}
-			s=checkInit();
 			if (s<=0)
 			{
 				if (fully) {
@@ -218,7 +222,7 @@ abstract class CommonCipherInputStream extends RandomInputStream {
 			do {
 				int s3=Math.min(s, buffer.length);
 				try {
-					int s2=is.read(buffer, 0, s3);
+					s2=is.read(buffer, 0, s3);
 
 					if (s2==-1)
 					{
@@ -283,13 +287,14 @@ abstract class CommonCipherInputStream extends RandomInputStream {
 		if (closed)
 			throw new IOException("Stream closed");
 		checkInit();
-		checkOutputBuffer();
+
 		int v= readOutputBuffer();
 		if (v>=0)
 			return v;
 		v=is.read(one, 0, 1);
 		++pos;
 		if (v<0) {
+			checkOutputBuffer();
 			checkDoFinal();
 			return readOutputBuffer();
 		}

@@ -258,9 +258,10 @@ public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOu
 
 	static long getOutputSizeForDecryption(AbstractCipher cipher, long inputLen, int maxEncryptedPartLength, int IVSizeBytesWithoutExternalCounter, int maxPlainTextSizeForEncoding)
 	{
-		long add=cipher.getOutputSize((int)(inputLen % maxEncryptedPartLength));
-		if (add>0)
-			add+=IVSizeBytesWithoutExternalCounter;
+		long add=inputLen % maxEncryptedPartLength;
+		if (add>0) {
+			add = cipher.getOutputSize((int) (add - IVSizeBytesWithoutExternalCounter));
+		}
 		return inputLen / maxEncryptedPartLength * maxPlainTextSizeForEncoding+add;
 	}
 

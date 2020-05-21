@@ -220,11 +220,10 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 			}
 
 			private long checkInit() throws IOException {
-				if (currentPos % maxPlainTextSizeForEncoding == 0) {
+				long mod=currentPos % maxPlainTextSizeForEncoding;
+				if (mod == 0) {
 					long round=currentPos/ maxPlainTextSizeForEncoding;
-					if (round>0){
-						checkDoFinal(false);
-					}
+					checkDoFinal(false);
 					if (includeIV()) {
 						byte[] iv;
 						if (manualIvs!=null)
@@ -249,9 +248,8 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 
 					if (associatedData != null && lenAD > 0)
 						cipher.updateAAD(associatedData, offAD, lenAD);
-					return maxPlainTextSizeForEncoding;
 				}
-				return (int) (currentPos % maxPlainTextSizeForEncoding);
+				return (int) (maxPlainTextSizeForEncoding-mod);
 			}
 			@Override
 			public long length() {
@@ -424,7 +422,7 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 	void setMaxPlainTextSizeForEncoding(int maxPlainTextSizeForEncoding) throws IOException {
 		initCipherForEncryptWithNullIV(cipher);
 		this.maxPlainTextSizeForEncoding=maxPlainTextSizeForEncoding;
-		int maxCipherTextLength = (int) cipher.getOutputSize(maxPlainTextSizeForEncoding);
+		int maxCipherTextLength = cipher.getOutputSize(maxPlainTextSizeForEncoding);
 		this.maxEncryptedPartLength =maxCipherTextLength+getIVSizeBytesWithoutExternalCounter();
 
 	}
@@ -441,11 +439,12 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 			throw new IllegalArgumentException();
 		if (inputLen==0)
 			return 0;
-		initCipherForEncryptWithNullIV(cipher);
-		int add=cipher.getOutputSize((int)(inputLen % maxPlainTextSizeForEncoding));
-		if (add>0)
-			add+=getIVSizeBytesWithoutExternalCounter();
-		return inputLen / maxPlainTextSizeForEncoding * maxEncryptedPartLength+add;
+		long add=inputLen % maxPlainTextSizeForEncoding;
+		if (add>0) {
+			initCipherForEncryptWithNullIV(cipher);
+			add = cipher.getOutputSize((int)add)+getIVSizeBytesWithoutExternalCounter();
+		}
+		return (inputLen / maxPlainTextSizeForEncoding * maxEncryptedPartLength)+add;
 
 	}
 

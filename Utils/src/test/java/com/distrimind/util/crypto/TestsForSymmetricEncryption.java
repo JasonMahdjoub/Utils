@@ -127,11 +127,13 @@ public class TestsForSymmetricEncryption {
 
 
 		algoDistant = new SymmetricEncryptionAlgorithm(random, key1, counterSizeBytes, false);
+		algoDistant.setMaxPlainTextSizeForEncoding(2000);
 		Assert.assertEquals(algoDistant.getBlockModeCounterBytes(), counterSizeBytes);
 		Assert.assertEquals(algoDistant.useExternalCounter(), counterSizeBytes>0);
 		Assert.assertEquals(algoDistant.getIVSizeBytesWithExternalCounter(), type1.getIVSizeBytes());
 		Assert.assertEquals(algoDistant.getIVSizeBytesWithoutExternalCounter(), type1.getIVSizeBytes()-counterSizeBytes);
 		SymmetricEncryptionAlgorithm algoLocal = new SymmetricEncryptionAlgorithm(random, key2, counterSizeBytes, false);
+		algoLocal.setMaxPlainTextSizeForEncoding(2000);
 		Assert.assertEquals(algoLocal.getBlockModeCounterBytes(), counterSizeBytes);
 		Assert.assertEquals(algoLocal.useExternalCounter(), counterSizeBytes>0);
 		Assert.assertEquals(algoLocal.getIVSizeBytesWithExternalCounter(), type1.getIVSizeBytes());
