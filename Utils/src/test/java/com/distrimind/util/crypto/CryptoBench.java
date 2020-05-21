@@ -36,16 +36,16 @@ package com.distrimind.util.crypto;
 
 import com.distrimind.util.OS;
 import com.distrimind.util.Timer;
-import org.testng.Assert;
+import com.distrimind.util.io.LimitedRandomInputStream;
+import com.distrimind.util.io.RandomByteArrayInputStream;
+import com.distrimind.util.io.RandomByteArrayOutputStream;
 import org.testng.annotations.DataProvider;
 
-import javax.crypto.ShortBufferException;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.security.*;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.InvalidParameterSpecException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.util.ArrayList;
+import java.util.Random;
 
 
 /**
@@ -57,90 +57,60 @@ import java.security.spec.InvalidParameterSpecException;
  *
  */
 public class CryptoBench {
-	@SuppressWarnings("ResultOfMethodCallIgnored")
 	@org.testng.annotations.Test(dataProvider="provideDataForTestEncryptionAndSignatureSpeed")
-	public void testEncryptionAndSignatureSpeed(SymmetricEncryptionType type) throws InvalidKeyException, NoSuchAlgorithmException, InvalidAlgorithmParameterException, NoSuchProviderException, InvalidKeySpecException, IllegalStateException, IOException, SignatureException, ShortBufferException, InvalidParameterSpecException
+	public void testEncryptionAndSignatureSpeed(SymmetricEncryptionType type) throws NoSuchAlgorithmException,NoSuchProviderException, IllegalStateException, IOException
 	{
 		System.out.println("JRE Version : "+OS.getCurrentJREVersionDouble());
 		byte[] toEncrypt = new byte[1024 * 1024 * 400];
 		int shift=32*1024;
-		SymmetricEncryptionAlgorithm cipher=new SymmetricEncryptionAlgorithm(SecureRandomType.FORTUNA_WITH_BC_FIPS_APPROVED.getInstance(null), type.getKeyGenerator(SecureRandomType.FORTUNA_WITH_BC_FIPS_APPROVED_FOR_KEYS.getInstance(null), type.getAlgorithmName().contains("AES")?256:type.getDefaultKeySizeBits()).generateKey());
-		SymmetricAuthentifiedSignatureType sigType;
-		SymmetricSecretKey sks;
-		SymmetricAuthenticatedSignerAlgorithm signer=null;
-		SymmetricAuthenticatedSignatureCheckerAlgorithm checker=null;
-		sigType=type.getDefaultSignatureAlgorithm();
-		if (!type.isAuthenticatedAlgorithm())
-		{
-			
-			sks=sigType.getKeyGenerator(SecureRandomType.FORTUNA_WITH_BC_FIPS_APPROVED_FOR_KEYS.getInstance(null), (short)(type.getAlgorithmName().contains("AES")?256:128)).generateKey();
-			signer=new SymmetricAuthenticatedSignerAlgorithm(sks);
-			checker=new SymmetricAuthenticatedSignatureCheckerAlgorithm(sks);
-		}
-		double nb=0;
+		Random random=new Random(System.currentTimeMillis());
+		random.nextBytes(toEncrypt);
 
-		
-		
-		
-		int signatureSize=sigType.getSignatureSizeInBits()/8;
-		byte[] signatures=new byte[signatureSize*(toEncrypt.length/shift)];
-		int indexSignature=0;
-		Timer t=new Timer(true);
-		int sizeEncoded=(int)cipher.getOutputSizeForEncryption(shift);
-		ByteArrayOutputStream os=new ByteArrayOutputStream(toEncrypt.length/shift*sizeEncoded);
-		ByteArrayInputStream is=new ByteArrayInputStream(toEncrypt);
-		
-		while (is.available()>=shift)
-		{
-			byte[] tmp = new byte[shift];
-			int i=is.read(tmp);
-			if (i==shift)
-			{
-				byte[] encoded=cipher.encode(tmp);
-				if (!type.isAuthenticatedAlgorithm())
-				{
-					signer.sign(encoded, 0, encoded.length, signatures, indexSignature, signatureSize);
-					indexSignature+=signatureSize;
-				}
-				os.write(encoded);
-				nb+=shift;
+
+		SymmetricSecretKey secretKeyForEncryption=type.getKeyGenerator(SecureRandomType.FORTUNA_WITH_BC_FIPS_APPROVED_FOR_KEYS.getInstance(null), type.getDefaultKeySizeBits()==128?256:type.getDefaultKeySizeBits()).generateKey();
+		EncryptionSignatureHashEncoder encoder=new EncryptionSignatureHashEncoder()
+				.withSymmetricSecretKeyForEncryption(SecureRandomType.FORTUNA_WITH_BC_FIPS_APPROVED.getInstance(null), secretKeyForEncryption);
+		SymmetricSecretKey secretKeyForSignature=null;
+		SymmetricAuthentifiedSignatureType sigType=type.getDefaultSignatureAlgorithm();
+		if (!type.isAuthenticatedAlgorithm()) {
+			secretKeyForSignature=sigType.getKeyGenerator(SecureRandomType.FORTUNA_WITH_BC_FIPS_APPROVED_FOR_KEYS.getInstance(null), type.getDefaultKeySizeBits() >= 128 ? 256 : type.getDefaultKeySizeBits()).generateKey();
+			encoder.withSymmetricSecretKeyForSignature(secretKeyForSignature);
+		}
+		EncryptionSignatureHashDecoder decoder=new EncryptionSignatureHashDecoder()
+				.withSymmetricSecretKeyForEncryption(SecureRandomType.FORTUNA_WITH_BC_FIPS_APPROVED.getInstance(null), secretKeyForEncryption);
+		if (secretKeyForSignature!=null)
+			decoder.withSymmetricSecretKeyForSignature(secretKeyForSignature);
+
+		Timer timer=new Timer(true);
+
+		ArrayList<byte[]> messages=new ArrayList<>(toEncrypt.length/shift+1);
+		for (int index=0;index<toEncrypt.length;index+=shift) {
+			int l=Math.min(toEncrypt.length-index, shift);
+			try(RandomByteArrayOutputStream out=new RandomByteArrayOutputStream()) {
+				encoder.withRandomInputStream(new LimitedRandomInputStream(new RandomByteArrayInputStream(toEncrypt), index, l))
+						.encode(out);
+				byte[] message=out.getBytes();
+				messages.add(message);
 			}
 		}
-		double ms=t.getMilid();
-		double speedEncoding=(nb/(ms/1000.0)/1024.0/1024.0);
+		double ms=timer.getMilid();
+		double speedEncoding=(toEncrypt.length/(ms/1000.0)/1024.0/1024.0);
 		System.out.println(type+" - Encryption speed  : "+speedEncoding+" MiO/s");
-		is.close();
-		
-		
-		is=new ByteArrayInputStream(os.toByteArray());
-		os.close();
-		os=new ByteArrayOutputStream(toEncrypt.length/shift*sizeEncoded);
-		Timer t2=new Timer(true);
-		indexSignature=0;
-		while (is.available()>0)
-		{
-			byte[] tmp = new byte[sizeEncoded];
-			is.read(tmp);
-			
-			os.write(cipher.decode(tmp));
-			if (!type.isAuthenticatedAlgorithm())
-			{
-				//signer.sign(tmp);
-				Assert.assertTrue(checker.verify(tmp, 0, tmp.length, signatures, indexSignature, signatureSize));
-				indexSignature+=signatureSize;
+
+		timer.reset();
+
+		for (byte[] message : messages) {
+			try(RandomByteArrayOutputStream out=new RandomByteArrayOutputStream()) {
+				decoder.withRandomInputStream(new RandomByteArrayInputStream(message))
+						.decodeAndCheckHashAndSignaturesIfNecessary(out);
 			}
-			
-			
 		}
-		double ms2=t2.getMilid();
-		double speedEncodingAndDecoding=(nb/((ms2+ms)/1000.0)/1024.0/1024.0);
-		double speedDecoding=(nb/(ms2/1000.0)/1024.0/1024.0);
-		
-		
+		double ms2=timer.getMilid();
+
+		double speedDecoding=(toEncrypt.length/(ms2/1000.0)/1024.0/1024.0);
+		double averageSpeedEncodingAndDecoding=(speedDecoding+speedEncoding)/2.0;
 		System.out.println(type+"Decryption speed  : "+speedDecoding+" MiO/s");
-		System.out.println(type+"Encryption and decryption speed  : "+speedEncodingAndDecoding+" MiO/s");
-		is.close();
-		os.close();
+		System.out.println(type+"Average encryption and decryption speed  : "+averageSpeedEncodingAndDecoding+" MiO/s");
 	}
 
 	@DataProvider( name="provideDataForTestEncryptionAndSignatureSpeed")
