@@ -53,7 +53,7 @@ public class LimitedRandomOutputStream extends RandomOutputStream{
 
 	@Override
 	public void write(int b) throws IOException {
-		if (pos+1>maxLength)
+		if (maxLength>=0 && pos+1>maxLength)
 			throw new EOFException();
 		out.write(b);
 		++pos;
@@ -64,7 +64,7 @@ public class LimitedRandomOutputStream extends RandomOutputStream{
 	public void write(byte[] b, int off, int len) throws IOException {
 		if (len<0)
 			throw new IllegalArgumentException();
-		if (pos+len>maxLength)
+		if (maxLength>=0 && pos+len>maxLength)
 			throw new EOFException();
 		out.write(b, off, len);
 		pos+=len;
@@ -73,7 +73,7 @@ public class LimitedRandomOutputStream extends RandomOutputStream{
 
 	@Override
 	public void setLength(long newLength) throws IOException {
-		if (newLength>maxLength)
+		if (maxLength>=0 && newLength>maxLength)
 			throw new EOFException();
 		out.setLength(off+newLength);
 		this.length=newLength;
