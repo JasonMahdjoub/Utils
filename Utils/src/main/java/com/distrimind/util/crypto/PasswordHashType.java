@@ -95,6 +95,14 @@ public enum PasswordHashType {
 	
 	private final byte id;
 
+	public boolean equals(PasswordHashType type)
+	{
+		if (type==null)
+			return false;
+		//noinspection StringEquality
+		return type.algorithmName==this.algorithmName && type.codeProvider==this.codeProvider;
+	}
+
 	PasswordHashType(PasswordHashType type) {
 		this(type.algorithmName, type.hashLength, type.codeProvider, type.fipsDigestAlgorithm, type.id);
 		this.defaultOf = type;

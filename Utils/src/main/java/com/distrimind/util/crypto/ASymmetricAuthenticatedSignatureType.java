@@ -86,6 +86,17 @@ public enum ASymmetricAuthenticatedSignatureType {
 
 	private final String curveName;
 
+	public boolean equals(ASymmetricAuthenticatedSignatureType type)
+	{
+		if (type==this)
+			return true;
+		if (type==null)
+			return false;
+		//noinspection StringEquality
+		return type.signatureAlgorithmName==this.signatureAlgorithmName && type.keyGeneratorAlgorithmName==this.keyGeneratorAlgorithmName
+				&& type.codeProviderKeyGenerator==this.codeProviderKeyGenerator && type.codeProviderSignature==this.codeProviderSignature;
+	}
+
 	ASymmetricAuthenticatedSignatureType(String signatureAlgorithmName, String keyGeneratorAlgorithmName, CodeProvider codeProviderSignature, CodeProvider codeProviderKeyGenerator, int keySizeBits, long expirationTimeMilis, Algorithm bcAlgorithm, boolean isPostQuantumAlgorithm) {
 		this(signatureAlgorithmName, keyGeneratorAlgorithmName, codeProviderSignature, codeProviderKeyGenerator, keySizeBits, expirationTimeMilis, bcAlgorithm, isPostQuantumAlgorithm, null);
 	}

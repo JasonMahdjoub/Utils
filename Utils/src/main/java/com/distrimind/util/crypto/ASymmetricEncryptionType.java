@@ -324,6 +324,16 @@ public enum ASymmetricEncryptionType {
 
 	private final boolean pqc;
 
+	public boolean equals(ASymmetricEncryptionType type)
+	{
+		if (type==this)
+			return true;
+		if (type==null)
+			return false;
+		//noinspection StringEquality
+		return type.algorithmName==this.algorithmName && type.blockMode==this.blockMode && type.padding==this.padding && type.codeProviderForEncryption==this.codeProviderForEncryption && type.codeProviderForKeyGenerator==this.codeProviderForKeyGenerator;
+	}
+
 	ASymmetricEncryptionType(ASymmetricEncryptionType type) {
 		this(type.algorithmName, type.blockMode, type.padding, type.signature, type.keySizeBits, type.expirationTimeMilis,
 				type.blockSizeDecrement, type.codeProviderForEncryption, type.codeProviderForKeyGenerator, type.bcAlgorithm, type.pqc);

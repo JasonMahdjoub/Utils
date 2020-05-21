@@ -93,13 +93,15 @@ public enum EllipticCurveDiffieHellmanType {
 	private final FipsDigestAlgorithm fipsDigestAlgorithm;
 	private final FipsKDF.AgreementKDFPRF agreementKDFPRF;
 	private final boolean useKDF;
+
 	
 	public boolean equals(EllipticCurveDiffieHellmanType t)
 	{
 		if (t==null)
 			return false;
+		//noinspection StringEquality
 		return t.codeProvider==codeProvider && t.keySizeBits==keySizeBits && t.ECDHKeySizeBits==ECDHKeySizeBits && aSymmetricAuthenticatedSignatureType ==t.aSymmetricAuthenticatedSignatureType
-				&& keyAgreementName.equals(t.keyAgreementName);
+				&& keyAgreementName==t.keyAgreementName;
 	}
 	
 	EllipticCurveDiffieHellmanType(short keySizeBits, short ECDHKeySizeBits,

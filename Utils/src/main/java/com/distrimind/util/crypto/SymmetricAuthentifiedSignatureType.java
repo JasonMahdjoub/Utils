@@ -83,7 +83,17 @@ public enum SymmetricAuthentifiedSignatureType {
 	private final AuthParameters messageDigestAuth;
     private final SymmetricAuthentifiedSignatureType replacer;
 
-	
+
+    public boolean equals(SymmetricAuthentifiedSignatureType type)
+	{
+		if (type==this)
+			return true;
+		if (type==null)
+			return false;
+		//noinspection StringEquality
+		return this.algorithmName==type.algorithmName && this.codeProviderForSignature==type.codeProviderForSignature && this.codeProviderForKeyGenerator==type.codeProviderForKeyGenerator;
+	}
+
 	SymmetricAuthentifiedSignatureType(String algorithmName, CodeProvider codeProviderForSignature, CodeProvider codeProviderForKeyGenerator, short keySizeBits, short keySizeBytes, MessageDigestType messageDigestType, AuthParameters messageDigestAuth) {
         this(algorithmName,codeProviderForSignature, codeProviderForKeyGenerator, keySizeBits, keySizeBytes, messageDigestType, messageDigestAuth, null);
 

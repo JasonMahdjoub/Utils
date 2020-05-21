@@ -55,7 +55,9 @@ public enum P2PLoginAgreementType {
 	ASYMMETRIC_SECRET_MESSAGE_EXCHANGER_AND_AGREEMENT_WITH_SYMMETRIC_SIGNATURE(false);
 
 	private final boolean pqc;
-	private P2PLoginAgreementType(boolean pqc)
+
+
+	P2PLoginAgreementType(boolean pqc)
 	{
 		this.pqc=pqc;
 	}

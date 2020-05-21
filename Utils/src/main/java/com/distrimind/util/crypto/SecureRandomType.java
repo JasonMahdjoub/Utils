@@ -83,7 +83,7 @@ public enum SecureRandomType {
 	FORTUNA_WITH_BC_FIPS_APPROVED_FOR_KEYS_With_NativePRNG("FORTUNA_WITH_BC_FIPS_APPROVED_FOR_KEYS_With_NativePRNG", CodeProvider.BC, false, true),
 	DEFAULT(BC_FIPS_APPROVED);
 
-	private final String algorithmeName;
+	private final String algorithmName;
 
 	private final CodeProvider provider;
 
@@ -92,9 +92,17 @@ public enum SecureRandomType {
 	private final boolean needInitialSeed;
 	
 	private static final Map<SecureRandomType, AbstractSecureRandom> singletons=Collections.synchronizedMap(new HashMap<SecureRandomType, AbstractSecureRandom>());
-	
+
+	public boolean equals(SecureRandomType type)
+	{
+		if (type==null)
+			return false;
+		//noinspection StringEquality
+		return this.algorithmName ==type.algorithmName && this.provider==type.provider;
+	}
+
 	SecureRandomType(SecureRandomType type) {
-		this(type.algorithmeName, type.provider, type.gnuVersion, type.needInitialSeed);
+		this(type.algorithmName, type.provider, type.gnuVersion, type.needInitialSeed);
 	}
 	
 	boolean needInitialSeed()
@@ -103,7 +111,7 @@ public enum SecureRandomType {
 	}
 
 	SecureRandomType(String algorithmName, CodeProvider provider, boolean gnuVersion, boolean needInitialSeed) {
-		this.algorithmeName = algorithmName;
+		this.algorithmName = algorithmName;
 		this.provider = provider;
 		this.gnuVersion = gnuVersion;
 		this.needInitialSeed=needInitialSeed;
@@ -111,7 +119,7 @@ public enum SecureRandomType {
 	
 	public String getAlgorithmName()
 	{
-		return algorithmeName;
+		return algorithmName;
 	}
 	
 	/**
@@ -161,15 +169,15 @@ public enum SecureRandomType {
 		CodeProvider.ensureProviderLoaded(provider);
 		AbstractSecureRandom res;
 		if (gnuVersion) {
-			if (algorithmeName == null)
+			if (algorithmName == null)
 				res=new GnuSecureRandom(this, GnuFunctions.secureRandomGetInstance());
 			else
-				res=new GnuSecureRandom(this, GnuFunctions.secureRandomGetInstance(algorithmeName));
+				res=new GnuSecureRandom(this, GnuFunctions.secureRandomGetInstance(algorithmName));
 		} else {
-			if (BC_FIPS_APPROVED.algorithmeName.equals(this.algorithmeName) || BC_FIPS_APPROVED_FOR_KEYS.algorithmeName.equals(this.algorithmeName) || BC_FIPS_APPROVED_FOR_KEYS_With_NativePRNG.algorithmeName.equals(this.algorithmeName))
+			if (BC_FIPS_APPROVED.algorithmName.equals(this.algorithmName) || BC_FIPS_APPROVED_FOR_KEYS.algorithmName.equals(this.algorithmName) || BC_FIPS_APPROVED_FOR_KEYS_With_NativePRNG.algorithmName.equals(this.algorithmName))
 			{
 
-				SecureRandom srSource=BC_FIPS_APPROVED_FOR_KEYS_With_NativePRNG.algorithmeName.equals(this.algorithmeName)?SecureRandomType.NativePRNG.getSingleton(null):SecureRandomType.NativePRNGNonBlocking.getSingleton(null);
+				SecureRandom srSource=BC_FIPS_APPROVED_FOR_KEYS_With_NativePRNG.algorithmName.equals(this.algorithmName)?SecureRandomType.NativePRNG.getSingleton(null):SecureRandomType.NativePRNGNonBlocking.getSingleton(null);
 				if (nonce==null)
 				{
 					nonce=SecureRandomType.nonce;
@@ -183,10 +191,10 @@ public enum SecureRandomType {
 				{
 					drgbBldr=drgbBldr.setPersonalizationString(personalizationString);
 				}
-				res=new JavaNativeSecureRandom(this, drgbBldr.build(nonce,BC_FIPS_APPROVED_FOR_KEYS.algorithmeName.equals(this.algorithmeName) || BC_FIPS_APPROVED_FOR_KEYS_With_NativePRNG.algorithmeName.equals(this.algorithmeName)), false);
+				res=new JavaNativeSecureRandom(this, drgbBldr.build(nonce,BC_FIPS_APPROVED_FOR_KEYS.algorithmName.equals(this.algorithmName) || BC_FIPS_APPROVED_FOR_KEYS_With_NativePRNG.algorithmName.equals(this.algorithmName)), false);
 				return res;
 			}
-			else if (DEFAULT_BC_FIPS_APPROVED.algorithmeName.equals(this.algorithmeName))
+			else if (DEFAULT_BC_FIPS_APPROVED.equals(this))
 			{
 				SecureRandom srSource=SecureRandomType.NativePRNGNonBlocking.getSingleton(null);
 				if (nonce==null)
@@ -204,10 +212,10 @@ public enum SecureRandomType {
 				}
 				return new JavaNativeSecureRandom(this, drgbBldr.build(nonce,true), false);
 			}
-			else if (algorithmeName.startsWith("FORTUNA")) {
+			else if (algorithmName.startsWith("FORTUNA")) {
 				return new FortunaSecureRandom(this, nonce, personalizationString);
 			}
-			else if (NativePRNGNonBlocking.algorithmeName.equals(algorithmeName))
+			else if (NativePRNGNonBlocking.algorithmName.equals(algorithmName))
 			{
 				return new NativeNonBlockingSecureRandom();
 			}
@@ -216,7 +224,7 @@ public enum SecureRandomType {
 				if (OSVersion.getCurrentOSVersion().getOS()==OS.ANDROID)
 					res=new JavaNativeSecureRandom(this, new SecureRandom());
 				else
-					res=new JavaNativeSecureRandom(this, SecureRandom.getInstance(algorithmeName, provider.checkProviderWithCurrentOS().name()));
+					res=new JavaNativeSecureRandom(this, SecureRandom.getInstance(algorithmName, provider.checkProviderWithCurrentOS().name()));
 			}
 		}
 		if (nonce!=null) {

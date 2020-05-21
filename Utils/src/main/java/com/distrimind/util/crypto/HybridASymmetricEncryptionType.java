@@ -61,6 +61,20 @@ public final class HybridASymmetricEncryptionType {
 		this.PQCASymmetricEncryptionType = PQCASymmetricEncryptionType;
 	}
 
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		HybridASymmetricEncryptionType that = (HybridASymmetricEncryptionType) o;
+		return nonPQCASymmetricEncryptionType.equals(that.nonPQCASymmetricEncryptionType) &&
+				PQCASymmetricEncryptionType.equals(that.PQCASymmetricEncryptionType);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(nonPQCASymmetricEncryptionType, PQCASymmetricEncryptionType);
+	}
+
 	public ASymmetricEncryptionType getNonPQCASymmetricEncryptionType() {
 		return nonPQCASymmetricEncryptionType;
 	}
@@ -80,20 +94,6 @@ public final class HybridASymmetricEncryptionType {
 		ASymmetricKeyPair kp=nonPQCASymmetricEncryptionType.getKeyPairGenerator(random, keySizeBits, expirationTimeUTC ).generateKeyPair();
 		ASymmetricKeyPair pqcKP=PQCASymmetricEncryptionType.getKeyPairGenerator(random, keySizeBits, expirationTimeUTC ).generateKeyPair();
 		return new HybridASymmetricKeyPair(kp, pqcKP);
-	}
-
-	@Override
-	public boolean equals(Object o) {
-		if (this == o) return true;
-		if (o == null || getClass() != o.getClass()) return false;
-		HybridASymmetricEncryptionType that = (HybridASymmetricEncryptionType) o;
-		return nonPQCASymmetricEncryptionType == that.nonPQCASymmetricEncryptionType &&
-				PQCASymmetricEncryptionType == that.PQCASymmetricEncryptionType;
-	}
-
-	@Override
-	public int hashCode() {
-		return Objects.hash(nonPQCASymmetricEncryptionType, PQCASymmetricEncryptionType);
 	}
 
 	@Override

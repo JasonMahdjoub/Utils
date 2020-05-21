@@ -96,7 +96,15 @@ public enum ASymmetricKeyWrapperType {
 	private final FipsDigestAlgorithm bcShaDigestAlgorithm;
 	private final boolean pqc;
 	
-	
+	public boolean equals(ASymmetricKeyWrapperType type)
+	{
+		if (type==null)
+			return false;
+		//noinspection StringEquality
+		return type.algorithmName==this.algorithmName && type.provider==this.provider && type.shaAlgorithm==this.shaAlgorithm;
+	}
+
+
 	ASymmetricKeyWrapperType(String algorithmName, CodeProvider provider, boolean withParameters, String shaAlgorithm, FipsDigestAlgorithm bcShaDigestAlgorithm, boolean pqc) {
 		this.algorithmName = algorithmName;
 		this.provider = provider;

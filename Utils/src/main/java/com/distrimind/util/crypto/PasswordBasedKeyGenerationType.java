@@ -61,6 +61,14 @@ public enum PasswordBasedKeyGenerationType {
 	
 	
 	private final PasswordHashType passwordHashType;
+
+	public boolean equals(PasswordBasedKeyGenerationType type)
+	{
+		if (type==null)
+			return false;
+		return type.passwordHashType.equals(this.passwordHashType);
+	}
+
 	PasswordBasedKeyGenerationType(PasswordHashType passwordHashType)
 	{
 		this.passwordHashType=passwordHashType;

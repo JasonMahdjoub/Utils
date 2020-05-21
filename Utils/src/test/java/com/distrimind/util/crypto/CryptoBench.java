@@ -67,7 +67,7 @@ public class CryptoBench {
 		random.nextBytes(toEncrypt);
 
 
-		SymmetricSecretKey secretKeyForEncryption=type.getKeyGenerator(SecureRandomType.FORTUNA_WITH_BC_FIPS_APPROVED_FOR_KEYS.getInstance(null), (type.getDefaultKeySizeBits()==128 && type.equals(SymmetricEncryptionType.GNU_SQUARE_CBC__PKCS5Padding))?256:type.getDefaultKeySizeBits()).generateKey();
+		SymmetricSecretKey secretKeyForEncryption=type.getKeyGenerator(SecureRandomType.FORTUNA_WITH_BC_FIPS_APPROVED_FOR_KEYS.getInstance(null), (type.getDefaultKeySizeBits()==128 && !type.equals(SymmetricEncryptionType.GNU_SQUARE_CBC__PKCS5Padding))?256:type.getDefaultKeySizeBits()).generateKey();
 		EncryptionSignatureHashEncoder encoder=new EncryptionSignatureHashEncoder()
 				.withSymmetricSecretKeyForEncryption(SecureRandomType.FORTUNA_WITH_BC_FIPS_APPROVED.getInstance(null), secretKeyForEncryption);
 		SymmetricSecretKey secretKeyForSignature=null;

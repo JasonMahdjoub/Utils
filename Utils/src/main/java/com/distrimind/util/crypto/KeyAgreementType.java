@@ -59,19 +59,19 @@ public enum KeyAgreementType {
 	private final boolean isNewHope;
 	private final EllipticCurveDiffieHellmanType ecdhType;
 
+	public boolean equals(KeyAgreementType type)
+	{
+		if (type==null)
+			return false;
+		return type.isPQC==this.isPQC && type.isNewHope==this.isNewHope && type.ecdhType.equals(this.ecdhType);
+	}
+
 	KeyAgreementType(boolean isPQC, boolean isNewHope, EllipticCurveDiffieHellmanType ecdhType) {
 		this.isPQC = (ecdhType==null || ecdhType.isPostQuantumAlgorithm()) && isPQC;
 		this.isNewHope = isNewHope;
 		this.ecdhType = ecdhType;
 	}
 
-	public boolean equals(KeyAgreementType o)
-	{
-		if (o==null)
-			return false;
-		
-		return o.isNewHope==isNewHope && o.ecdhType.equals(ecdhType);
-	}
 	public boolean isPostQuantumAlgorithm() {
 		return isPQC;
 	}

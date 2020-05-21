@@ -62,7 +62,15 @@ public enum SymmetricKeyWrapperType {
 	
 	private final String algorithmName;
 	private final CodeProvider provider;
-	
+
+	public boolean equals(SymmetricKeyWrapperType type)
+	{
+
+		if (type==null)
+			return false;
+		//noinspection StringEquality
+		return this.algorithmName==type.algorithmName && this.provider==type.provider;
+	}
 	
 	SymmetricKeyWrapperType(String algorithmName, CodeProvider provider) {
 		this.algorithmName = algorithmName;

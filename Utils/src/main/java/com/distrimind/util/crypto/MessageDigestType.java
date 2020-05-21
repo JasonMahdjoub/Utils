@@ -101,6 +101,14 @@ public enum MessageDigestType {
 
 	private final MessageDigestType replacer;
 
+	public boolean equals(MessageDigestType type)
+	{
+		if (type==null)
+			return false;
+		//noinspection StringEquality
+		return type.algorithmName==this.algorithmName && type.codeProvider==this.codeProvider;
+	}
+
 	MessageDigestType(MessageDigestType type) {
 		this(type.algorithmName, type.codeProvider, type.digestLengthBits, type.replacer);
 	}

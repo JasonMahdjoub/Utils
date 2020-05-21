@@ -61,6 +61,20 @@ public final class HybridASymmetricAuthenticatedSignatureType {
 		this.PQCASymmetricAuthenticatedSignatureType = PQCASymmetricAuthenticatedSignatureType;
 	}
 
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		HybridASymmetricAuthenticatedSignatureType that = (HybridASymmetricAuthenticatedSignatureType) o;
+		return nonPQCASymmetricAuthenticatedSignatureType.equals(that.nonPQCASymmetricAuthenticatedSignatureType) &&
+				PQCASymmetricAuthenticatedSignatureType.equals(that.PQCASymmetricAuthenticatedSignatureType);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(nonPQCASymmetricAuthenticatedSignatureType, PQCASymmetricAuthenticatedSignatureType);
+	}
+
 	public ASymmetricAuthenticatedSignatureType getNonPQCASymmetricAuthenticatedSignatureType() {
 		return nonPQCASymmetricAuthenticatedSignatureType;
 	}
@@ -79,20 +93,6 @@ public final class HybridASymmetricAuthenticatedSignatureType {
 		ASymmetricKeyPair kp=nonPQCASymmetricAuthenticatedSignatureType.getKeyPairGenerator(random, keySizeBits, expirationTimeUTC ).generateKeyPair();
 		ASymmetricKeyPair pqcKP=PQCASymmetricAuthenticatedSignatureType.getKeyPairGenerator(random, keySizeBits, expirationTimeUTC ).generateKeyPair();
 		return new HybridASymmetricKeyPair(kp, pqcKP);
-	}
-
-	@Override
-	public boolean equals(Object o) {
-		if (this == o) return true;
-		if (o == null || getClass() != o.getClass()) return false;
-		HybridASymmetricAuthenticatedSignatureType that = (HybridASymmetricAuthenticatedSignatureType) o;
-		return nonPQCASymmetricAuthenticatedSignatureType == that.nonPQCASymmetricAuthenticatedSignatureType &&
-				PQCASymmetricAuthenticatedSignatureType == that.PQCASymmetricAuthenticatedSignatureType;
-	}
-
-	@Override
-	public int hashCode() {
-		return Objects.hash(nonPQCASymmetricAuthenticatedSignatureType, PQCASymmetricAuthenticatedSignatureType);
 	}
 
 	@Override

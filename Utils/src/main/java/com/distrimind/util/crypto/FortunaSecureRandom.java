@@ -72,17 +72,17 @@ public class FortunaSecureRandom extends AbstractSecureRandom implements Seriali
 			super(false);
 			if (scheduledExecutorService==null)
 				throw new NullPointerException();
-			if (type== SecureRandomType.FORTUNA_WITH_BC_FIPS_APPROVED) {
+			if (type.equals(SecureRandomType.FORTUNA_WITH_BC_FIPS_APPROVED)) {
 				fortuna=new Fortuna(scheduledExecutorService,
 						SecureRandomType.SHA1PRNG.getSingleton(nonce, personalizationString),
 						SecureRandomType.BC_FIPS_APPROVED.getSingleton(nonce, personalizationString));
 			}
-			else if (type== SecureRandomType.FORTUNA_WITH_BC_FIPS_APPROVED_FOR_KEYS) {
+			else if (type.equals(SecureRandomType.FORTUNA_WITH_BC_FIPS_APPROVED_FOR_KEYS)) {
 				fortuna=new Fortuna(scheduledExecutorService,
 						SecureRandomType.SHA1PRNG.getSingleton(nonce, personalizationString),
 						SecureRandomType.BC_FIPS_APPROVED_FOR_KEYS.getSingleton(nonce, personalizationString));
 			}
-			else if (type== SecureRandomType.FORTUNA_WITH_BC_FIPS_APPROVED_FOR_KEYS_With_NativePRNG) {
+			else if (type.equals(SecureRandomType.FORTUNA_WITH_BC_FIPS_APPROVED_FOR_KEYS_With_NativePRNG)) {
 				fortuna=new Fortuna(scheduledExecutorService,
 						SecureRandomType.SHA1PRNG.getSingleton(nonce, personalizationString),
 						SecureRandomType.BC_FIPS_APPROVED_FOR_KEYS_With_NativePRNG.getSingleton(nonce, personalizationString));
@@ -92,17 +92,17 @@ public class FortunaSecureRandom extends AbstractSecureRandom implements Seriali
 		}
 		protected SRSpi(SecureRandomType type, byte[] nonce, byte[] personalizationString) throws NoSuchProviderException, NoSuchAlgorithmException {
 			super(false);
-			if (type.getAlgorithmName().equals(SecureRandomType.FORTUNA_WITH_BC_FIPS_APPROVED.getAlgorithmName())) {
+			if (type.equals(SecureRandomType.FORTUNA_WITH_BC_FIPS_APPROVED)) {
 				fortuna=new Fortuna(
 						SecureRandomType.SHA1PRNG.getSingleton(nonce, personalizationString),
 						SecureRandomType.BC_FIPS_APPROVED.getSingleton(nonce, personalizationString));
 			}
-			else if (type.getAlgorithmName().equals(SecureRandomType.FORTUNA_WITH_BC_FIPS_APPROVED_FOR_KEYS.getAlgorithmName())) {
+			else if (type.equals(SecureRandomType.FORTUNA_WITH_BC_FIPS_APPROVED_FOR_KEYS)) {
 				fortuna=new Fortuna(
 						SecureRandomType.SHA1PRNG.getSingleton(nonce, personalizationString),
 						SecureRandomType.BC_FIPS_APPROVED_FOR_KEYS.getSingleton(nonce, personalizationString));
 			}
-			else if (type.getAlgorithmName().equals(SecureRandomType.FORTUNA_WITH_BC_FIPS_APPROVED_FOR_KEYS_With_NativePRNG.getAlgorithmName())) {
+			else if (type.equals(SecureRandomType.FORTUNA_WITH_BC_FIPS_APPROVED_FOR_KEYS_With_NativePRNG)) {
 				fortuna=new Fortuna(
 						SecureRandomType.SHA1PRNG.getSingleton(nonce, personalizationString),
 						SecureRandomType.BC_FIPS_APPROVED_FOR_KEYS_With_NativePRNG.getSingleton(nonce, personalizationString));

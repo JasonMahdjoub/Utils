@@ -233,7 +233,7 @@ public class BCCipher extends AbstractCipher {
 		if (opmode==Cipher.ENCRYPT_MODE)
 		{
 			
-			if (type.getAlgorithmName().equals(SymmetricEncryptionType.BC_FIPS_AES_CBC_PKCS7Padding.getAlgorithmName()))
+			if (type.equals(SymmetricEncryptionType.BC_FIPS_AES_CBC_PKCS7Padding))
 			{
 				if (type.getBlockMode().toUpperCase().equals("CBC") && type.getPadding().toUpperCase().equals("PKCS7PADDING"))
 				{
@@ -281,7 +281,7 @@ public class BCCipher extends AbstractCipher {
 					throw new IllegalAccessError();
 				}
 			}
-			else if (type.getAlgorithmName().equals(SymmetricEncryptionType.BC_SERPENT_CBC_PKCS7Padding.getAlgorithmName()))
+			else if (type.equals(SymmetricEncryptionType.BC_SERPENT_CBC_PKCS7Padding))
 			{
 				if (type.getBlockMode().toUpperCase().equals("CBC") && type.getPadding().toUpperCase().equals("PKCS7PADDING"))
 				{
@@ -328,7 +328,7 @@ public class BCCipher extends AbstractCipher {
 					throw new IllegalAccessError();
 				}
 			} 
-			else if (type.getAlgorithmName().equals(SymmetricEncryptionType.BC_TWOFISH_CBC_PKCS7Padding.getAlgorithmName()))
+			else if (type.equals(SymmetricEncryptionType.BC_TWOFISH_CBC_PKCS7Padding))
 			{
 				if (type.getBlockMode().toUpperCase().equals("CBC") && type.getPadding().toUpperCase().equals("PKCS7PADDING"))
 				{
@@ -397,7 +397,7 @@ public class BCCipher extends AbstractCipher {
 		}
 		else if (opmode==Cipher.DECRYPT_MODE)
 		{
-			if (type.getAlgorithmName().equals(SymmetricEncryptionType.BC_FIPS_AES_CBC_PKCS7Padding.getAlgorithmName()))
+			if (type.equals(SymmetricEncryptionType.BC_FIPS_AES_CBC_PKCS7Padding))
 			{
 				if (type.getBlockMode().toUpperCase().equals("CBC") && type.getPadding().toUpperCase().equals("PKCS7PADDING"))
 				{
@@ -445,7 +445,7 @@ public class BCCipher extends AbstractCipher {
 				}
 			}
 			
-			else if (type.getAlgorithmName().equals(SymmetricEncryptionType.BC_SERPENT_CBC_PKCS7Padding.getAlgorithmName()))
+			else if (type.equals(SymmetricEncryptionType.BC_SERPENT_CBC_PKCS7Padding))
 			{
 				if (type.getBlockMode().toUpperCase().equals("CBC") && type.getPadding().toUpperCase().equals("PKCS7PADDING"))
 				{
@@ -492,7 +492,7 @@ public class BCCipher extends AbstractCipher {
 					throw new IllegalAccessError();
 				}
 			} 
-			else if (type.getAlgorithmName().equals(SymmetricEncryptionType.BC_TWOFISH_CBC_PKCS7Padding.getAlgorithmName()))
+			else if (type.equals(SymmetricEncryptionType.BC_TWOFISH_CBC_PKCS7Padding))
 			{
 				if (type.getBlockMode().toUpperCase().equals("CBC") && type.getPadding().toUpperCase().equals("PKCS7PADDING"))
 				{
@@ -557,13 +557,13 @@ public class BCCipher extends AbstractCipher {
 		else if (opmode==Cipher.WRAP_MODE)
 		{
 
-			if (keyWrapperType.getAlgorithmName().equals(SymmetricKeyWrapperType.BC_FIPS_AES.getAlgorithmName()))
+			if (keyWrapperType.equals(SymmetricKeyWrapperType.BC_FIPS_AES))
 			{
 				FipsAES.KeyWrapOperatorFactory factory = new	FipsAES.KeyWrapOperatorFactory();
 				wrapper = factory.createKeyWrapper((SymmetricSecretKey)key.toBouncyCastleKey(),	FipsAES.	KW);
 				
 			}
-			else if (keyWrapperType.getAlgorithmName().equals(SymmetricKeyWrapperType.BC_FIPS_AES_WITH_PADDING.getAlgorithmName()))
+			else if (keyWrapperType.equals(SymmetricKeyWrapperType.BC_FIPS_AES_WITH_PADDING))
 			{
 					FipsAES.KeyWrapOperatorFactory factory = new	FipsAES.KeyWrapOperatorFactory();
 					wrapper = factory.createKeyWrapper((SymmetricSecretKey)key.toBouncyCastleKey(),	FipsAES.	KWP);
@@ -574,13 +574,13 @@ public class BCCipher extends AbstractCipher {
 		}
 		else if (opmode==Cipher.UNWRAP_MODE)
 		{
-			if (keyWrapperType.getAlgorithmName().equals(SymmetricKeyWrapperType.BC_FIPS_AES.getAlgorithmName()))
+			if (keyWrapperType.equals(SymmetricKeyWrapperType.BC_FIPS_AES))
 			{
 				FipsAES.KeyWrapOperatorFactory factory = new	FipsAES.KeyWrapOperatorFactory();
 				unwrapper = factory.createKeyUnwrapper((SymmetricSecretKey)key.toBouncyCastleKey(),	FipsAES.	KW);
 				
 			}
-			else if (keyWrapperType.getAlgorithmName().equals(SymmetricKeyWrapperType.BC_FIPS_AES_WITH_PADDING.getAlgorithmName()))
+			else if (keyWrapperType.equals(SymmetricKeyWrapperType.BC_FIPS_AES_WITH_PADDING))
 			{
 				FipsAES.KeyWrapOperatorFactory factory = new	FipsAES.KeyWrapOperatorFactory();
 				unwrapper = factory.createKeyUnwrapper((SymmetricSecretKey)key.toBouncyCastleKey(),	FipsAES.	KWP);
