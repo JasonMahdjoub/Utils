@@ -62,12 +62,12 @@ public class CryptoBench {
 	{
 		System.out.println("JRE Version : "+OS.getCurrentJREVersionDouble());
 		byte[] toEncrypt = new byte[1024 * 1024 * 400];
-		int shift=32*1024;
+		int shift=64*1024;
 		Random random=new Random(System.currentTimeMillis());
 		random.nextBytes(toEncrypt);
 
 
-		SymmetricSecretKey secretKeyForEncryption=type.getKeyGenerator(SecureRandomType.FORTUNA_WITH_BC_FIPS_APPROVED_FOR_KEYS.getInstance(null), type.getDefaultKeySizeBits()==128?256:type.getDefaultKeySizeBits()).generateKey();
+		SymmetricSecretKey secretKeyForEncryption=type.getKeyGenerator(SecureRandomType.FORTUNA_WITH_BC_FIPS_APPROVED_FOR_KEYS.getInstance(null), (type.getDefaultKeySizeBits()==128 && type.equals(SymmetricEncryptionType.GNU_SQUARE_CBC__PKCS5Padding))?256:type.getDefaultKeySizeBits()).generateKey();
 		EncryptionSignatureHashEncoder encoder=new EncryptionSignatureHashEncoder()
 				.withSymmetricSecretKeyForEncryption(SecureRandomType.FORTUNA_WITH_BC_FIPS_APPROVED.getInstance(null), secretKeyForEncryption);
 		SymmetricSecretKey secretKeyForSignature=null;
