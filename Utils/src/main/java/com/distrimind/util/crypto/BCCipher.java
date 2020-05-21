@@ -233,7 +233,7 @@ public class BCCipher extends AbstractCipher {
 		if (opmode==Cipher.ENCRYPT_MODE)
 		{
 			
-			if (type.equals(SymmetricEncryptionType.BC_FIPS_AES_CBC_PKCS7Padding))
+			if (type.getAlgorithmName().equals(SymmetricEncryptionType.BC_FIPS_AES_CBC_PKCS7Padding.getAlgorithmName()))
 			{
 				if (type.getBlockMode().toUpperCase().equals("CBC") && type.getPadding().toUpperCase().equals("PKCS7PADDING"))
 				{
@@ -281,7 +281,7 @@ public class BCCipher extends AbstractCipher {
 					throw new IllegalAccessError();
 				}
 			}
-			else if (type.equals(SymmetricEncryptionType.BC_SERPENT_CBC_PKCS7Padding))
+			else if (type.getAlgorithmName().equals(SymmetricEncryptionType.BC_SERPENT_CBC_PKCS7Padding.getAlgorithmName()))
 			{
 				if (type.getBlockMode().toUpperCase().equals("CBC") && type.getPadding().toUpperCase().equals("PKCS7PADDING"))
 				{
@@ -328,7 +328,7 @@ public class BCCipher extends AbstractCipher {
 					throw new IllegalAccessError();
 				}
 			} 
-			else if (type.equals(SymmetricEncryptionType.BC_TWOFISH_CBC_PKCS7Padding))
+			else if (type.getAlgorithmName().equals(SymmetricEncryptionType.BC_TWOFISH_CBC_PKCS7Padding.getAlgorithmName()))
 			{
 				if (type.getBlockMode().toUpperCase().equals("CBC") && type.getPadding().toUpperCase().equals("PKCS7PADDING"))
 				{
@@ -397,7 +397,7 @@ public class BCCipher extends AbstractCipher {
 		}
 		else if (opmode==Cipher.DECRYPT_MODE)
 		{
-			if (type.equals(SymmetricEncryptionType.BC_FIPS_AES_CBC_PKCS7Padding))
+			if (type.getAlgorithmName().equals(SymmetricEncryptionType.BC_FIPS_AES_CBC_PKCS7Padding.getAlgorithmName()))
 			{
 				if (type.getBlockMode().toUpperCase().equals("CBC") && type.getPadding().toUpperCase().equals("PKCS7PADDING"))
 				{
@@ -445,7 +445,7 @@ public class BCCipher extends AbstractCipher {
 				}
 			}
 			
-			else if (type.equals(SymmetricEncryptionType.BC_SERPENT_CBC_PKCS7Padding))
+			else if (type.getAlgorithmName().equals(SymmetricEncryptionType.BC_SERPENT_CBC_PKCS7Padding.getAlgorithmName()))
 			{
 				if (type.getBlockMode().toUpperCase().equals("CBC") && type.getPadding().toUpperCase().equals("PKCS7PADDING"))
 				{
@@ -492,7 +492,7 @@ public class BCCipher extends AbstractCipher {
 					throw new IllegalAccessError();
 				}
 			} 
-			else if (type.equals(SymmetricEncryptionType.BC_TWOFISH_CBC_PKCS7Padding))
+			else if (type.getAlgorithmName().equals(SymmetricEncryptionType.BC_TWOFISH_CBC_PKCS7Padding.getAlgorithmName()))
 			{
 				if (type.getBlockMode().toUpperCase().equals("CBC") && type.getPadding().toUpperCase().equals("PKCS7PADDING"))
 				{
