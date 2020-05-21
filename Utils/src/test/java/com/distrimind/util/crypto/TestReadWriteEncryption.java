@@ -124,13 +124,17 @@ public class TestReadWriteEncryption {
 			writer.withASymmetricPrivateKeyForSignature(keyPairForSignature.getASymmetricPrivateKey());
 		if (messageDigestType!=null)
 			writer.withMessageDigestType(messageDigestType);
+		long expectedLength=writer.getMaximumOutputLength();
 		writer.encode(baos);
 		byte[] res=baos.getBytes();
+		Assert.assertTrue(expectedLength>=res.length, "expectedLength="+expectedLength+", actual="+res.length);
 		bais=new RandomByteArrayInputStream(res.clone());
 		baos=new RandomByteArrayOutputStream();
 		EncryptionSignatureHashDecoder reader=getReader(bais, secretKeyForEncryption, associatedData, secretKeyForSignature, keyPairForSignature, messageDigestType);
+		expectedLength=reader.getMaximumOutputLength(bais.length());
 		reader.decodeAndCheckHashAndSignaturesIfNecessary(baos);
 		Assert.assertEquals(baos.getBytes(), in);
+		Assert.assertTrue(expectedLength>=in.length);
 		bais.seek(0);
 		Assert.assertEquals(reader.checkHashAndSignature(), Integrity.OK);
 		bais.seek(0);

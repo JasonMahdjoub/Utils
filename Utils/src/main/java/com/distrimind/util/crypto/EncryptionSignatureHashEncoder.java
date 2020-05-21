@@ -291,21 +291,35 @@ public class EncryptionSignatureHashEncoder {
 	static long getMaximumOutputLengthAfterEncoding(long inputStreamLength, SymmetricEncryptionAlgorithm cipher, SymmetricAuthenticatedSignerAlgorithm symmetricSigner, ASymmetricAuthenticatedSignerAlgorithm asymmetricSigner, AbstractMessageDigest digest) throws IOException {
 		if (inputStreamLength<=0)
 			throw new IllegalArgumentException();
-		long res=1;
-		if (cipher!=null)
-			res+=cipher.getOutputSizeForEncryption(inputStreamLength);
+		long res=9;
+
+		if (cipher!=null) {
+			res += cipher.getOutputSizeForEncryption(inputStreamLength);
+		}
 		else
 			res+=inputStreamLength;
-		if (symmetricSigner!=null)
-			res+=symmetricSigner.getMacLengthBytes();
-		if(asymmetricSigner!=null)
-			res+=asymmetricSigner.getMacLengthBytes();
+		if (symmetricSigner!=null) {
+			int v=symmetricSigner.getMacLengthBytes();
+			res += v + (v>Short.MAX_VALUE?4:2);
+		}
+		if(asymmetricSigner!=null) {
+			int v=asymmetricSigner.getMacLengthBytes();
+			res += v + (v>Short.MAX_VALUE?4:2);
+		}
 		if (digest!=null || (asymmetricSigner!=null && symmetricSigner!=null))
 		{
-			if (digest==null)
-				res+=defaultMessageType.getDigestLengthInBits()/8;
+			int v;
+			if (digest==null) {
+				v=defaultMessageType.getDigestLengthInBits() / 8;
+			}
+			else {
+				v=digest.getMessageDigestType().getDigestLengthInBits() / 8;
+			}
+			if (v>Short.MAX_VALUE)
+				v+=4;
 			else
-				res+=digest.getMessageDigestType().getDigestLengthInBits()/8;
+				v+=2;
+			res+=v;
 		}
 		return res;
 	}
@@ -313,18 +327,30 @@ public class EncryptionSignatureHashEncoder {
 	static long getMaximumOutputLengthAfterDecoding(long inputStreamLength, SymmetricEncryptionAlgorithm cipher, SymmetricAuthenticatedSignatureCheckerAlgorithm symmetricChecker, ASymmetricAuthenticatedSignatureCheckerAlgorithm asymmetricChecker, AbstractMessageDigest digest) throws IOException {
 		if (inputStreamLength<=0)
 			throw new IllegalArgumentException();
-		long res=inputStreamLength-1;
+		long res=inputStreamLength-9;
 
-		if (symmetricChecker!=null)
-			res-=symmetricChecker.getMacLengthBytes();
-		if(asymmetricChecker!=null)
-			res-=asymmetricChecker.getMacLengthBytes();
+		if (symmetricChecker!=null) {
+			int v=symmetricChecker.getMacLengthBytes();
+			res -= v+(v>Short.MAX_VALUE?4:2);
+		}
+		if(asymmetricChecker!=null) {
+			int v=asymmetricChecker.getMacLengthBytes();
+			res -= v+(v>Short.MAX_VALUE?4:2);
+		}
 		if (digest!=null || (asymmetricChecker!=null && symmetricChecker!=null))
 		{
-			if (digest==null)
-				res-=defaultMessageType.getDigestLengthInBits()/8;
+			int v;
+			if (digest==null) {
+				v=defaultMessageType.getDigestLengthInBits() / 8;
+			}
+			else {
+				v=digest.getMessageDigestType().getDigestLengthInBits() / 8;
+			}
+			if (v>Short.MAX_VALUE)
+				v+=4;
 			else
-				res-=digest.getMessageDigestType().getDigestLengthInBits()/8;
+				v+=2;
+			res-=v;
 		}
 		if (res<=0)
 			throw new IllegalArgumentException();
@@ -446,9 +472,9 @@ public class EncryptionSignatureHashEncoder {
 				byte[] signature = asymmetricSigner.getSignature();
 				originalOutputStream.writeBytesArray(signature, false, asymmetricSigner.getMacLengthBytes());
 			}
-			long curPos=outputStream.currentPosition();
+			long curPos=originalOutputStream.currentPosition();
 			if (curPos<maximumOutputLengthAfterEncoding && curPos>originalOutputLength)
-				outputStream.setLength(curPos);
+				originalOutputStream.setLength(Math.max(curPos, originalOutputLength));
 
 
 			outputStream.flush();
@@ -632,7 +658,7 @@ public class EncryptionSignatureHashEncoder {
 			}
 			long curPos=outputStream.currentPosition();
 			if (curPos<maximumOutputLengthAfterEncoding && curPos>originalOutputLength)
-				outputStream.setLength(curPos);
+				outputStream.setLength(Math.max(curPos, originalOutputLength));
 			outputStream.flush();
 		}
 		catch(InvalidKeyException | InvalidAlgorithmParameterException | NoSuchAlgorithmException | InvalidKeySpecException | NoSuchProviderException | SignatureException | InvalidParameterSpecException e)

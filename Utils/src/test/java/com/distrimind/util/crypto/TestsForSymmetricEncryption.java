@@ -147,15 +147,17 @@ public class TestsForSymmetricEncryption {
 		for (byte[] m : VariousTests.messagesToEncrypt) {
 			if (counter!=null)
 				rand.nextBytes(counter);
-			byte[] encrypted = algoLocal.encode(m, null, counter);
 			int mlength=m.length;
+			long expectedLength=algoLocal.getOutputSizeForEncryption(mlength);
+			byte[] encrypted = algoLocal.encode(m, null, counter);
 
-			Assert.assertEquals(encrypted.length, algoLocal.getOutputSizeForEncryption(mlength), "length=" + m.length);
+
+			Assert.assertEquals(encrypted.length, expectedLength, "length=" + m.length);
 
 			Assert.assertTrue(encrypted.length >= m.length);
 			byte[] decrypted = algoDistant.decode(encrypted, null, counter);
 			Assert.assertEquals(decrypted.length, m.length, "Testing size " + type1+", "+type2);
-			Assert.assertEquals(decrypted, m, "Testing " + type1+", "+type2);
+			Assert.assertEquals(decrypted, m, "Testing " + type1+", "+type2+", useExternalCounter="+algoLocal.useExternalCounter());
 			byte[] md = decrypted;
 			Assert.assertEquals(md.length, m.length, "Testing size " + type1+", "+type2);
 			Assert.assertEquals(md, m, "Testing " + type1+", "+type2);

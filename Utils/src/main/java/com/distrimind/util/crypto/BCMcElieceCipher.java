@@ -864,7 +864,7 @@ public class BCMcElieceCipher extends AbstractCipher{
 	}
 
 	@Override
-	public void init(int opmode, AbstractKey key, byte[] iv) throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidAlgorithmParameterException {
+	protected void initImpl(int opmode, AbstractKey key, byte[] iv) throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidAlgorithmParameterException {
 		mode=opmode;
 		try {
 			init(opmode, key, SecureRandomType.BC_FIPS_APPROVED_FOR_KEYS.getSingleton(null));

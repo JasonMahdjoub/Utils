@@ -64,7 +64,7 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 	private final SymmetricEncryptionType type;
 
 	private final AbstractSecureRandom random;
-	private final byte[] iv;
+	private byte[] iv;
 	
 	private final byte blockModeCounterBytes;
 	private final boolean internalCounter;
@@ -227,6 +227,8 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 	}	
 	
 	private byte[] generateIV() {
+		if (supportRandomEncryptionAndRandomDecryption())
+			iv=new byte[iv.length];
 		random.nextBytes(iv);
 		if (!internalCounter)
 		{

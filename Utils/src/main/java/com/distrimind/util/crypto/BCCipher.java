@@ -209,17 +209,17 @@ public class BCCipher extends AbstractCipher {
 	@Override
 	public void init(int opmode, AbstractKey key) throws NoSuchAlgorithmException, InvalidKeySpecException
 	{
-		init(opmode, key, (byte[])null);
+		initImpl(opmode, key, null);
 	}
 
 	@Override
 	public void init(int opmode, AbstractKey key, AbstractSecureRandom random) throws NoSuchAlgorithmException, InvalidKeySpecException
 	{
-		init(opmode, key, (byte[])null);
+		initImpl(opmode, key, null);
 	}
 
 	@Override
-	public void init(int opmode, AbstractKey key, byte[] iv) throws NoSuchAlgorithmException, InvalidKeySpecException  {
+	protected void initImpl(int opmode, AbstractKey key, byte[] iv) throws NoSuchAlgorithmException, InvalidKeySpecException  {
 		mode=opmode;
 		this.iv=iv;
 		OutputDecryptor<?> decryptor ;

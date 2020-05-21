@@ -143,7 +143,7 @@ public final class GnuCipher extends AbstractCipher {
 	}
 
 	@Override
-	public void init(int _opmode, AbstractKey _key, byte[] _iv) throws InvalidKeyException, NoSuchAlgorithmException,
+	protected void initImpl(int _opmode, AbstractKey _key, byte[] _iv) throws InvalidKeyException, NoSuchAlgorithmException,
 			InvalidKeySpecException, InvalidAlgorithmParameterException {
 		mode=_opmode;
 		GnuFunctions.cipherInit(cipher, _opmode, _key.toGnuKey(), _iv);

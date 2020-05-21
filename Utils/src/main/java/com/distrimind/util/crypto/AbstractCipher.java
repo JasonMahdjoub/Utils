@@ -286,6 +286,7 @@ public abstract class AbstractCipher {
 	public abstract void init(int opmode, AbstractKey key)
 			throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException;
 
+
 	/**
 	 * <p>
 	 * Initialize this cipher with the supplied key and source of randomness.
@@ -340,8 +341,22 @@ public abstract class AbstractCipher {
 	 * @throws NoSuchAlgorithmException if the algorithm was not found
 	 * @throws InvalidAlgorithmParameterException the algorithm parameters are invalid
 	 */
-	public abstract void init(int opmode, AbstractKey key, byte[] iv) throws InvalidKeyException, NoSuchAlgorithmException,
+	protected abstract void initImpl(int opmode, AbstractKey key, byte[] iv) throws InvalidKeyException, NoSuchAlgorithmException,
 			InvalidKeySpecException, InvalidAlgorithmParameterException;
+
+	public final void init(int opmode, AbstractKey key, byte[] iv) throws InvalidKeyException, NoSuchAlgorithmException,
+			InvalidKeySpecException, InvalidAlgorithmParameterException
+	{
+		if (iv!=null) {
+			if (previousIV != iv) {
+				previousIV = iv;
+				counterPos = iv.length - 4;
+				initialCounterPart = Bits.getInt(iv, counterPos);
+			}
+			iv = previousIV.clone();
+		}
+		initImpl(opmode, key, iv);
+	}
 
 	private byte[] previousIV=null;
 	private int initialCounterPart;
@@ -359,7 +374,7 @@ public abstract class AbstractCipher {
 			iv = previousIV.clone();
 			Bits.putInt(iv, counterPos, initialCounterPart + counter);
 		}
-		init(opmode, key, iv);
+		initImpl(opmode, key, iv);
 	}
 
 	/**
