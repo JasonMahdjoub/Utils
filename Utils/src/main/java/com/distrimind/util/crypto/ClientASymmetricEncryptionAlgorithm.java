@@ -132,12 +132,12 @@ public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutpu
 
 		@Override
 		public long getOutputSizeForEncryption(long inputLen) throws IOException {
-			return nonPQCEncryption.getOutputSizeForEncryption(PQCEncryption.getOutputSizeForEncryption(inputLen));
+			return PQCEncryption.getOutputSizeForEncryption(nonPQCEncryption.getOutputSizeForEncryption(inputLen));
 		}
 
 		@Override
 		protected RandomOutputStream getCipherOutputStream(final RandomOutputStream os, byte[] associatedData, int offAD, int lenAD, final byte[] externalCounter, byte[][] manualIVs) throws IOException {
-			return nonPQCEncryption.getCipherOutputStream(PQCEncryption.getCipherOutputStream(os, associatedData, offAD, lenAD, externalCounter), associatedData, offAD, lenAD, externalCounter);
+			return PQCEncryption.getCipherOutputStream(nonPQCEncryption.getCipherOutputStream(os, associatedData, offAD, lenAD, externalCounter), associatedData, offAD, lenAD, externalCounter);
 		}
 	}
 
