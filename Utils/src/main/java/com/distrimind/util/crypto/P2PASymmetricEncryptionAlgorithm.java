@@ -419,6 +419,7 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 		p2pencryption.initCipherForEncrypt(cipher);
 	}
 
+
 	private static class HybridP2PEncryption extends AbstractEncryptionIOAlgorithm
 	{
 		private final P2PEncryption nonPQCEncryption, PQCEncryption;

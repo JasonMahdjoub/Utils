@@ -251,8 +251,8 @@ public class ServerASymmetricEncryptionAlgorithm implements IEncryptionInputAlgo
 				this.myPrivateKey = myPrivateKey;
 				cipher = type.getCipherInstance();
 				cipher.init(Cipher.DECRYPT_MODE, myPrivateKey);
-				maxEncryptedPartLength = myPrivateKey.getMaxBlockSize();
-				maxPlainTextSizeForEncoding = cipher.getOutputSize(maxEncryptedPartLength);
+				maxPlainTextSizeForEncoding = myPrivateKey.getMaxBlockSize();
+				maxEncryptedPartLength = cipher.getOutputSize(maxPlainTextSizeForEncoding);
 				initCipherForDecrypt(cipher, null, null);
 			} catch (NoSuchAlgorithmException | InvalidKeyException | InvalidKeySpecException | NoSuchPaddingException | NoSuchProviderException e) {
 				throw new IOException();

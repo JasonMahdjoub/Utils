@@ -132,12 +132,12 @@ public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutpu
 
 		@Override
 		public long getOutputSizeForEncryption(long inputLen) throws IOException {
-			return PQCEncryption.getOutputSizeForEncryption(nonPQCEncryption.getOutputSizeForEncryption(inputLen));
+			return nonPQCEncryption.getOutputSizeForEncryption(PQCEncryption.getOutputSizeForEncryption(inputLen));
 		}
 
 		@Override
 		protected RandomOutputStream getCipherOutputStream(final RandomOutputStream os, byte[] associatedData, int offAD, int lenAD, final byte[] externalCounter, byte[][] manualIVs) throws IOException {
-			return PQCEncryption.getCipherOutputStream(nonPQCEncryption.getCipherOutputStream(os, associatedData, offAD, lenAD, externalCounter), associatedData, offAD, lenAD, externalCounter);
+			return nonPQCEncryption.getCipherOutputStream(PQCEncryption.getCipherOutputStream(os, associatedData, offAD, lenAD, externalCounter), associatedData, offAD, lenAD, externalCounter);
 		}
 	}
 
@@ -361,8 +361,8 @@ public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutpu
 		public void initCipherForEncryptWithNullIV(AbstractCipher _cipher)
 				throws IOException {
 			try {
-				_cipher.init(Cipher.ENCRYPT_MODE, distantPublicKey, random);
-			} catch (InvalidKeyException | NoSuchAlgorithmException | InvalidKeySpecException e) {
+				_cipher.init(Cipher.ENCRYPT_MODE, distantPublicKey);
+			} catch (InvalidKeyException | NoSuchAlgorithmException | InvalidKeySpecException | NoSuchProviderException e) {
 				throw new IOException(e);
 			}
 
