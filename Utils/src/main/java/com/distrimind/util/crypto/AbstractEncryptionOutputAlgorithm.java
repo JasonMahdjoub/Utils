@@ -90,10 +90,10 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 	}
 
 	protected void initBufferAllocatorArgs() throws IOException {
-		int bol=(int)getOutputSizeForEncryption(bufferInSize =BUFFER_SIZE);
+		int bol=(int) getOutputSizeAfterEncryption(bufferInSize =BUFFER_SIZE);
 		if (bol>BUFFER_SIZE*2)
 		{
-			bol=(int)getOutputSizeForEncryption(bufferInSize =4096);
+			bol=(int) getOutputSizeAfterEncryption(bufferInSize =4096);
 		}
 		buffer=new byte[bol];
 	}
@@ -118,7 +118,7 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 		return encode(bytes, off, len, associatedData, offAD, lenAD, (byte[])null);
 	}
 	public byte[] encode(byte[] bytes, int off, int len, byte[] associatedData, int offAD, int lenAD, byte[] externalCounter) throws IOException{
-		try (RandomByteArrayOutputStream baos = new RandomByteArrayOutputStream((int)getOutputSizeForEncryption(len))) {
+		try (RandomByteArrayOutputStream baos = new RandomByteArrayOutputStream()) {
 			encode(bytes, off, len, associatedData, offAD, lenAD, baos, externalCounter);
 			return baos.getBytes();
 		}
@@ -158,7 +158,7 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 
 	public void encode(RandomInputStream is, byte[] associatedData, int offAD, int lenAD, RandomOutputStream os, byte[] externalCounter) throws IOException {
 
-		try(RandomOutputStream cos = getCipherOutputStream(os, associatedData, offAD, lenAD, externalCounter))
+		try(RandomOutputStream cos = getCipherOutputStreamForEncryption(os, false, associatedData, offAD, lenAD, externalCounter))
 		{
 			is.transferTo(cos);
 		}
@@ -172,27 +172,28 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 		if ((off | len) < 0 || len > b.length - off)
 			throw new IndexOutOfBoundsException();
 	}
-	public RandomOutputStream getCipherOutputStream(final RandomOutputStream os) throws IOException
-	{
-		return getCipherOutputStream(os, null, 0,0, null);
-	}
-	public RandomOutputStream getCipherOutputStream(final RandomOutputStream os, final byte[] associatedData, final int offAD, final int lenAD) throws IOException
-	{
-		return getCipherOutputStream(os, associatedData, offAD, lenAD, null);
-	}
-	public RandomOutputStream getCipherOutputStream(final RandomOutputStream os, byte[] externalCounter) throws IOException
-	{
-		return getCipherOutputStream(os, null, 0,0, externalCounter);
-	}
-
 	protected abstract int getCounterStepInBytes();
 
 	public abstract boolean supportRandomEncryptionAndRandomDecryption();
-	public RandomOutputStream getCipherOutputStream(final RandomOutputStream os, final byte[] associatedData, final int offAD, final int lenAD, final byte[] externalCounter) throws
-			IOException{
-		return getCipherOutputStream(os, associatedData, offAD, lenAD, externalCounter, null);
+
+	public RandomOutputStream getCipherOutputStreamForEncryption(final RandomOutputStream os, boolean closeOutputStreamWhenClosingCipherOutputStream) throws IOException
+	{
+		return getCipherOutputStreamForEncryption(os, closeOutputStreamWhenClosingCipherOutputStream, null, 0,0, null);
 	}
-	protected RandomOutputStream getCipherOutputStream(final RandomOutputStream os, final byte[] associatedData, final int offAD, final int lenAD, final byte[] externalCounter, final byte[][] manualIvs) throws
+	public RandomOutputStream getCipherOutputStreamForEncryption(final RandomOutputStream os, boolean closeOutputStreamWhenClosingCipherOutputStream, final byte[] associatedData, final int offAD, final int lenAD) throws IOException
+	{
+		return getCipherOutputStreamForEncryption(os, closeOutputStreamWhenClosingCipherOutputStream, associatedData, offAD, lenAD, null);
+	}
+	public RandomOutputStream getCipherOutputStreamForEncryption(final RandomOutputStream os, boolean closeOutputStreamWhenClosingCipherOutputStream, byte[] externalCounter) throws IOException
+	{
+		return getCipherOutputStreamForEncryption(os, closeOutputStreamWhenClosingCipherOutputStream, null, 0,0, externalCounter);
+	}
+
+	public RandomOutputStream getCipherOutputStreamForEncryption(final RandomOutputStream os, boolean closeOutputStreamWhenClosingCipherOutputStream, final byte[] associatedData, final int offAD, final int lenAD, final byte[] externalCounter) throws
+			IOException{
+		return getCipherOutputStreamForEncryption(os, closeOutputStreamWhenClosingCipherOutputStream, associatedData, offAD, lenAD, externalCounter, null);
+	}
+	protected RandomOutputStream getCipherOutputStreamForEncryption(final RandomOutputStream os, final boolean closeOutputStreamWhenClosingCipherOutputStream, final byte[] associatedData, final int offAD, final int lenAD, final byte[] externalCounter, final byte[][] manualIvs) throws
 			IOException{
 		if (os.currentPosition()!=0)
 			os.seek(0);
@@ -239,13 +240,13 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 							}
 						}
 						else {
-							iv = initCipherForEncrypt(cipher, externalCounter);
+							iv = initCipherForEncryption(cipher, externalCounter);
 							os.write(iv, 0, getIVSizeBytesWithoutExternalCounter());
 						}
 
 					}
 					else {
-						initCipherForEncryptWithNullIV(cipher);
+						initCipherForEncryptionWithNullIV(cipher);
 					}
 
 					if (associatedData != null && lenAD > 0)
@@ -376,7 +377,7 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 					if (add>0)
 						add+=getIVSizeBytesWithoutExternalCounter();
 					os.seek(round * maxEncryptedPartLength+add);
-					initCipherForEncrypt(cipher);
+					initCipherForEncryption(cipher);
 				}
 				if (associatedData!=null && lenAD>0)
 					cipher.updateAAD(associatedData, offAD, lenAD);
@@ -409,6 +410,8 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 					return;
 				checkDoFinal(true);
 				flush();
+				if (closeOutputStreamWhenClosingCipherOutputStream)
+					os.close();
 				closed=true;
 			}
 
@@ -423,7 +426,7 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 	}
 
 	void setMaxPlainTextSizeForEncoding(int maxPlainTextSizeForEncoding) throws IOException {
-		initCipherForEncryptWithNullIV(cipher);
+		initCipherForEncryptionWithNullIV(cipher);
 		this.maxPlainTextSizeForEncoding=maxPlainTextSizeForEncoding;
 		this.maxEncryptedPartLength =cipher.getOutputSize(maxPlainTextSizeForEncoding)+getIVSizeBytesWithoutExternalCounter();
 
@@ -436,14 +439,14 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 		return getIVSizeBytesWithExternalCounter()-(useExternalCounter()?getBlockModeCounterBytes():0);
 	}
 
-	public long getOutputSizeForEncryption(long inputLen) throws IOException {
+	public long getOutputSizeAfterEncryption(long inputLen) throws IOException {
 		if (inputLen<0)
 			throw new IllegalArgumentException();
 		if (inputLen==0)
 			return 0;
 		long add=inputLen % maxPlainTextSizeForEncoding;
 		if (add>0) {
-			initCipherForEncryptWithNullIV(cipher);
+			initCipherForEncryptionWithNullIV(cipher);
 			add = cipher.getOutputSize((int)add)+getIVSizeBytesWithoutExternalCounter();
 		}
 		return ((inputLen / maxPlainTextSizeForEncoding) * maxEncryptedPartLength)+add;
@@ -452,13 +455,13 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 
 
 	protected abstract boolean includeIV();
-	public void initCipherForEncrypt(AbstractCipher cipher) throws IOException {
-		initCipherForEncrypt(cipher, null);
+	public void initCipherForEncryption(AbstractCipher cipher) throws IOException {
+		initCipherForEncryption(cipher, null);
 	}
-	public abstract byte[] initCipherForEncrypt(AbstractCipher cipher, byte[] externalCounter)
+	public abstract byte[] initCipherForEncryption(AbstractCipher cipher, byte[] externalCounter)
 			throws IOException;
 
-	public abstract void initCipherForEncryptWithNullIV(AbstractCipher cipher)
+	public abstract void initCipherForEncryptionWithNullIV(AbstractCipher cipher)
 			throws IOException;
 
 	public abstract boolean isPostQuantumEncryption();

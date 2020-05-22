@@ -308,7 +308,7 @@ public class EncryptionSignatureHashEncoder {
 		long res=minimumOuputSize;
 
 		if (cipher!=null) {
-			res += cipher.getOutputSizeForEncryption(inputStreamLength);
+			res += cipher.getOutputSizeAfterEncryption(inputStreamLength);
 		}
 		else
 			res+=inputStreamLength;
@@ -380,7 +380,7 @@ public class EncryptionSignatureHashEncoder {
 		if (res<=0)
 			throw new IllegalArgumentException();
 		if (cipher!=null)
-			return cipher.getOutputSizeForDecryption(res);
+			return cipher.getOutputSizeAfterDecryption(res);
 		else
 			return res;
 	}

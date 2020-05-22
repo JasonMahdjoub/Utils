@@ -67,12 +67,12 @@ public interface IEncryptionInputAlgorithm extends IServer{
 	void decode(RandomInputStream is, byte[] associatedData, RandomOutputStream os, int length) throws IOException;
 	void decode(RandomInputStream is, byte[] associatedData, int offAD, int lenAD, RandomOutputStream os, int length) throws IOException;
 	void decode(RandomInputStream is, byte[] associatedData, int offAD, int lenAD, RandomOutputStream os, int length,  byte[] externalCounter) throws IOException;
-	RandomInputStream getCipherInputStream(final RandomInputStream is) throws IOException ;
-	RandomInputStream getCipherInputStream(final RandomInputStream is, byte[] externalCounter) throws IOException ;
-	RandomInputStream getCipherInputStream(final RandomInputStream is, final byte[] associatedData, final int offAD, final int lenAD) throws IOException ;
-	RandomInputStream getCipherInputStream(final RandomInputStream is, final byte[] associatedData, final int offAD, final int lenAD, byte[] externalCounter) throws IOException ;
+	RandomInputStream getCipherInputStreamForDecryption(final RandomInputStream is) throws IOException ;
+	RandomInputStream getCipherInputStreamForDecryption(final RandomInputStream is, byte[] externalCounter) throws IOException ;
+	RandomInputStream getCipherInputStreamForDecryption(final RandomInputStream is, final byte[] associatedData, final int offAD, final int lenAD) throws IOException ;
+	RandomInputStream getCipherInputStreamForDecryption(final RandomInputStream is, final byte[] associatedData, final int offAD, final int lenAD, byte[] externalCounter) throws IOException ;
 
-	void initCipherForDecrypt(AbstractCipher cipher) throws IOException;
-	void initCipherForDecrypt(AbstractCipher cipher, byte[] iv) throws IOException;
+	void initCipherForDecryption(AbstractCipher cipher) throws IOException;
+	void initCipherForDecryption(AbstractCipher cipher, byte[] iv) throws IOException;
 
 }

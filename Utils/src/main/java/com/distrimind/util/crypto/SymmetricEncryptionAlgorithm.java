@@ -141,7 +141,7 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 
 		final int ivSizeWithoutExternalCounter=getIVSizeBytesWithoutExternalCounter();
 		HashRandomOutputStream hashOut=new HashRandomOutputStream(new NullRandomOutputStream(), md);
-		try(RandomOutputStream os=getCipherOutputStream(hashOut, associatedData, offAD, lenAD, null, ivs)) {
+		try(RandomOutputStream os= getCipherOutputStreamForEncryption(hashOut, false, associatedData, offAD, lenAD, null, ivs)) {
 
 			for (SubStreamParameter p : parameters) {
 				long start = p.getStreamStartIncluded();
@@ -300,7 +300,7 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 	}
 
 	@Override
-	public void initCipherForDecrypt(AbstractCipher cipher, byte[] iv, byte[] externalCounter)
+	public void initCipherForDecryption(AbstractCipher cipher, byte[] iv, byte[] externalCounter)
 			throws IOException {
 		iv=initIVAndCounter(iv, externalCounter);
 
@@ -340,7 +340,7 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 	}
 
 	@Override
-	public byte[] initCipherForEncrypt(AbstractCipher cipher, byte[] externalCounter) throws IOException {
+	public byte[] initCipherForEncryption(AbstractCipher cipher, byte[] externalCounter) throws IOException {
 		if (!internalCounter && (externalCounter==null || externalCounter.length!=blockModeCounterBytes))
 			throw new IllegalArgumentException("Please use external counters at every initialization with the defined size "+blockModeCounterBytes);
 		this.externalCounter=externalCounter;
@@ -355,7 +355,7 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 	}
 	private final Random nonSecureRandom=new Random(System.currentTimeMillis());
 	@Override
-	public void initCipherForEncryptWithNullIV(AbstractCipher cipher) throws IOException {
+	public void initCipherForEncryptionWithNullIV(AbstractCipher cipher) throws IOException {
 		nonSecureRandom.nextBytes(iv);
 		try {
 			cipher.init(Cipher.ENCRYPT_MODE, key, iv);
@@ -366,8 +366,8 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 
 
 	@Override
-	public void initCipherForDecrypt(AbstractCipher cipher) throws IOException{
-		initCipherForDecrypt(cipher, null, null);
+	public void initCipherForDecryption(AbstractCipher cipher) throws IOException{
+		initCipherForDecryption(cipher, null, null);
 	}
 
 

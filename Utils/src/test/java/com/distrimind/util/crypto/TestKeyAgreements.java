@@ -315,7 +315,7 @@ public class TestKeyAgreements {
 
 		for (byte[] m : VariousTests.messagesToEncrypt) {
 			byte[] encrypted = algoLocal.encode(m);
-			Assert.assertEquals(encrypted.length, algoLocal.getOutputSizeForEncryption(m.length), "length=" + m.length);
+			Assert.assertEquals(encrypted.length, algoLocal.getOutputSizeAfterEncryption(m.length), "length=" + m.length);
 
 			Assert.assertTrue(encrypted.length >= m.length);
 			byte[] decrypted = algoDistant.decode(encrypted);
@@ -325,7 +325,7 @@ public class TestKeyAgreements {
 			Assert.assertEquals(md.length, m.length, "Testing size " + type);
 			Assert.assertEquals(md, m, "Testing " + type);
 			encrypted = algoDistant.encode(m);
-			Assert.assertEquals(encrypted.length, algoDistant.getOutputSizeForEncryption(m.length));
+			Assert.assertEquals(encrypted.length, algoDistant.getOutputSizeAfterEncryption(m.length));
 			Assert.assertTrue(encrypted.length >= m.length);
 			md = algoLocal.decode(encrypted);
 			Assert.assertEquals(md.length, m.length, "Testing size " + type);
@@ -337,7 +337,7 @@ public class TestKeyAgreements {
 
 			encrypted = algoLocal.encode(m, off, size);
 
-			Assert.assertEquals(encrypted.length, algoLocal.getOutputSizeForEncryption(size));
+			Assert.assertEquals(encrypted.length, algoLocal.getOutputSizeAfterEncryption(size));
 			Assert.assertTrue(encrypted.length >= size);
 			decrypted = algoDistant.decode(encrypted);
 			Assert.assertEquals(decrypted.length, size, "Testing size " + type);
@@ -351,7 +351,7 @@ public class TestKeyAgreements {
 				Assert.assertEquals(md[i], m[i + off]);
 
 			encrypted = algoDistant.encode(m, off, size);
-			Assert.assertEquals(encrypted.length, algoDistant.getOutputSizeForEncryption(size));
+			Assert.assertEquals(encrypted.length, algoDistant.getOutputSizeAfterEncryption(size));
 			Assert.assertTrue(encrypted.length >= size);
 
 			md = algoLocal.decode(encrypted);

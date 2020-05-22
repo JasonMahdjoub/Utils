@@ -50,7 +50,7 @@ interface IServer {
 
 	int getMaxPlainTextSizeForEncoding();
 
-	void initCipherForDecrypt(AbstractCipher cipher, byte[] iv, byte[] externalCounter)
+	void initCipherForDecryption(AbstractCipher cipher, byte[] iv, byte[] externalCounter)
 			throws IOException;
 
 	AbstractCipher getCipherInstance() throws IOException;
@@ -58,7 +58,7 @@ interface IServer {
 
 	boolean isPostQuantumEncryption();
 
-	long getOutputSizeForDecryption(long inputLen)
+	long getOutputSizeAfterDecryption(long inputLen)
 			throws IOException;
 
 
@@ -67,8 +67,8 @@ interface IServer {
 
 
 
-	RandomInputStream getCipherInputStream(RandomInputStream is, byte[] externalCounter) throws IOException;
+	RandomInputStream getCipherInputStreamForDecryption(RandomInputStream is, byte[] externalCounter) throws IOException;
 	byte[] decode(byte[] bytes, int off, int len, byte[] associatedData, int offAD, int lenAD, byte[] externalCounter)
 			throws IOException;
-	RandomInputStream getCipherInputStream(final RandomInputStream is,  byte[] associatedData, int offAD, int lenAD, final byte[] externalCounter) throws IOException;
+	RandomInputStream getCipherInputStreamForDecryption(final RandomInputStream is, byte[] associatedData, int offAD, int lenAD, final byte[] externalCounter) throws IOException;
 }

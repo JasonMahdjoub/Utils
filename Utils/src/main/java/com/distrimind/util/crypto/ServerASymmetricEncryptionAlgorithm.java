@@ -81,13 +81,13 @@ public class ServerASymmetricEncryptionAlgorithm implements IEncryptionInputAlgo
 			return ((Server)server).getMyKeyPair();
 	}
 	@Override
-	public long getOutputSizeForDecryption(long inputLen) throws IOException {
-		return server.getOutputSizeForDecryption(inputLen);
+	public long getOutputSizeAfterDecryption(long inputLen) throws IOException {
+		return server.getOutputSizeAfterDecryption(inputLen);
 	}
 
 	@Override
-	public void initCipherForDecrypt(AbstractCipher cipher, byte[] iv, byte[] externalCounter) throws IOException {
-		server.initCipherForDecrypt(cipher, iv, externalCounter);
+	public void initCipherForDecryption(AbstractCipher cipher, byte[] iv, byte[] externalCounter) throws IOException {
+		server.initCipherForDecryption(cipher, iv, externalCounter);
 	}
 	@Override
 	public AbstractCipher getCipherInstance() throws IOException {
@@ -102,18 +102,20 @@ public class ServerASymmetricEncryptionAlgorithm implements IEncryptionInputAlgo
 		server.decode(is, associatedData, offAD, lenAD, os, length, externalCounter);
 	}
 	@Override
-	public RandomInputStream getCipherInputStream(RandomInputStream is, byte[] associatedData, int offAD, int lenAD, byte[] externalCounter) throws IOException {
-		return server.getCipherInputStream(is, associatedData, offAD, lenAD, externalCounter);
+	public RandomInputStream getCipherInputStreamForDecryption(RandomInputStream is, byte[] associatedData, int offAD, int lenAD, byte[] externalCounter) throws IOException {
+		return server.getCipherInputStreamForDecryption(is, associatedData, offAD, lenAD, externalCounter);
 	}
 	@Override
-	public RandomInputStream getCipherInputStream(RandomInputStream is, byte[] externalCounter) throws IOException {
-		return server.getCipherInputStream(is, externalCounter);
+	public RandomInputStream getCipherInputStreamForDecryption(RandomInputStream is, byte[] externalCounter) throws IOException {
+		return server.getCipherInputStreamForDecryption(is, externalCounter);
 	}
 
 	@Override
-	public RandomInputStream getCipherInputStream(RandomInputStream is, byte[] associatedData, int offAD, int lenAD) throws IOException {
-		return server.getCipherInputStream(is, associatedData, offAD, lenAD, null);
+	public RandomInputStream getCipherInputStreamForDecryption(RandomInputStream is, byte[] associatedData, int offAD, int lenAD) throws IOException {
+		return server.getCipherInputStreamForDecryption(is, associatedData, offAD, lenAD, null);
 	}
+
+
 
 	static class HybridServer implements IServer
 	{
@@ -134,7 +136,7 @@ public class ServerASymmetricEncryptionAlgorithm implements IEncryptionInputAlgo
 
 
 		@Override
-		public void initCipherForDecrypt(AbstractCipher cipher,byte[] iv, byte[] externalCounter)  {
+		public void initCipherForDecryption(AbstractCipher cipher, byte[] iv, byte[] externalCounter)  {
 			throw new IllegalAccessError();
 		}
 
@@ -150,10 +152,6 @@ public class ServerASymmetricEncryptionAlgorithm implements IEncryptionInputAlgo
 			return true;
 		}
 
-		@Override
-		public long getOutputSizeForDecryption(long inputLen) throws IOException {
-			return PQCEncryption.getOutputSizeForDecryption(nonPQCEncryption.getOutputSizeForDecryption(inputLen));
-		}
 
 		/*static void privDecode(IServer PQCEncryption, IServer nonPQCEncryption, RandomInputStream is, byte[] associatedData, int offAD, int lenAD, RandomOutputStream os, byte[] externalCounter)
 				throws IOException
@@ -172,25 +170,27 @@ public class ServerASymmetricEncryptionAlgorithm implements IEncryptionInputAlgo
 
 		@Override
 		public void decode(RandomInputStream is, byte[] associatedData, int offAD, int lenAD, RandomOutputStream os, int length, byte[] externalCounter) throws IOException {
-			try(RandomInputStream in = getCipherInputStream(is, externalCounter))
+			try(RandomInputStream in = getCipherInputStreamForDecryption(is, externalCounter))
 			{
 				in.transferTo(os, length);
 			}
 			os.flush();
 		}
 
-
 		@Override
-		public RandomInputStream getCipherInputStream(final RandomInputStream is, final byte[] externalCounter) throws IOException {
-			return getCipherInputStreamImpl(PQCEncryption, nonPQCEncryption, is, null, 0, 0, externalCounter);
-		}
-		@Override
-		public RandomInputStream getCipherInputStream(final RandomInputStream is, byte[] associatedData, int offAD, int lenAD, final byte[] externalCounter) throws IOException {
-			return getCipherInputStreamImpl(PQCEncryption, nonPQCEncryption, is, associatedData, offAD, lenAD, externalCounter);
+		public RandomInputStream getCipherInputStreamForDecryption(RandomInputStream is, byte[] externalCounter) throws IOException {
+			return getCipherInputStreamForDecryption(is, null, 0, 0, externalCounter);
 		}
 
-		static RandomInputStream getCipherInputStreamImpl(final IServer PQCEncryption, final IServer nonPQCEncryption, final RandomInputStream is, byte[] associatedData, int offAD, int lenAD, final byte[] externalCounter) throws IOException {
-			return nonPQCEncryption.getCipherInputStream(PQCEncryption.getCipherInputStream(is, associatedData, offAD, lenAD, externalCounter), associatedData, offAD, lenAD, externalCounter);
+
+		@Override
+		public long getOutputSizeAfterDecryption(long inputLen) throws IOException {
+			return PQCEncryption.getOutputSizeAfterDecryption(nonPQCEncryption.getOutputSizeAfterDecryption(inputLen));
+		}
+
+		@Override
+		public RandomInputStream getCipherInputStreamForDecryption(RandomInputStream is, byte[] associatedData, int offAD, int lenAD, byte[] externalCounter) throws IOException {
+			return nonPQCEncryption.getCipherInputStreamForDecryption(PQCEncryption.getCipherInputStreamForDecryption(is, associatedData, offAD, lenAD, externalCounter), associatedData, offAD, lenAD, externalCounter);
 		}
 
 
@@ -237,6 +237,7 @@ public class ServerASymmetricEncryptionAlgorithm implements IEncryptionInputAlgo
 		protected final byte[] buffer=new byte[BUFFER_SIZE];
 		private final int maxEncryptedPartLength;
 
+
 		public Server(ASymmetricKeyPair myKeyPair)
 				throws IOException {
 			this(myKeyPair.getASymmetricPrivateKey());
@@ -253,7 +254,7 @@ public class ServerASymmetricEncryptionAlgorithm implements IEncryptionInputAlgo
 				cipher.init(Cipher.DECRYPT_MODE, myPrivateKey);
 				maxPlainTextSizeForEncoding = myPrivateKey.getMaxBlockSize();
 				maxEncryptedPartLength = cipher.getOutputSize(maxPlainTextSizeForEncoding);
-				initCipherForDecrypt(cipher, null, null);
+				initCipherForDecryption(cipher, null, null);
 			} catch (NoSuchAlgorithmException | InvalidKeyException | InvalidKeySpecException | NoSuchPaddingException | NoSuchProviderException e) {
 				throw new IOException();
 			}
@@ -286,7 +287,7 @@ public class ServerASymmetricEncryptionAlgorithm implements IEncryptionInputAlgo
 		}
 
 		@Override
-		public void initCipherForDecrypt(AbstractCipher _cipher, byte[] iv, byte[] externalCounter)
+		public void initCipherForDecryption(AbstractCipher _cipher, byte[] iv, byte[] externalCounter)
 				throws IOException {
 			try {
 				_cipher.init(Cipher.DECRYPT_MODE, myPrivateKey);
@@ -299,7 +300,7 @@ public class ServerASymmetricEncryptionAlgorithm implements IEncryptionInputAlgo
 		@Override
 		public void decode(RandomInputStream is, byte[] associatedData, int offAD, int lenAD, RandomOutputStream os, int length,  byte[] externalCounter)
 				throws IOException {
-			try(RandomInputStream in = getCipherInputStream(is, associatedData, offAD, lenAD, externalCounter))
+			try(RandomInputStream in = getCipherInputStreamForDecryption(is, associatedData, offAD, lenAD, externalCounter))
 			{
 				in.transferTo(os, length);
 			}
@@ -307,34 +308,43 @@ public class ServerASymmetricEncryptionAlgorithm implements IEncryptionInputAlgo
 		}
 
 		@Override
-		public RandomInputStream getCipherInputStream(final RandomInputStream is,  final byte[] externalCounter) throws IOException {
-			return getCipherInputStream(is, null, 0, 0, externalCounter);
+		public RandomInputStream getCipherInputStreamForDecryption(final RandomInputStream is, final byte[] externalCounter) throws IOException {
+			return getCipherInputStreamForDecryption(is, null, 0, 0, externalCounter);
 		}
+		private long getOutputSizeForEncryption(long length) throws IOException {
+			return getOutputSizeAfterDecryption(length);
+		}
+
 		@Override
-		public RandomInputStream getCipherInputStream(final RandomInputStream is,  byte[] associatedData, int offAD, int lenAD, final byte[] externalCounter)
+		public RandomInputStream getCipherInputStreamForDecryption(final RandomInputStream is, byte[] associatedData, int offAD, int lenAD, final byte[] externalCounter)
 				throws IOException {
 
-			return new CommonCipherInputStream(maxEncryptedPartLength, is, false, null, 0, false, externalCounter, cipher, associatedData, offAD, lenAD, buffer, false, 0, maxPlainTextSizeForEncoding) {
+			return new CommonCipherInputStream(maxEncryptedPartLength, is, false, null, 0, false, externalCounter, cipher, associatedData, offAD, lenAD, buffer, false, 0, maxPlainTextSizeForEncoding, getOutputSizeAfterDecryption(is.length())) {
 				@Override
 				protected void initCipherForDecryptionWithIvAndCounter(byte[] iv, int counter) throws IOException {
-					Server.this.initCipherForDecrypt(cipher, iv, externalCounter);
+					Server.this.initCipherForDecryption(cipher, iv, externalCounter);
 				}
 
 				@Override
 				protected void initCipherForDecrypt() throws IOException {
-					Server.this.initCipherForDecrypt(cipher, null, externalCounter);
+					Server.this.initCipherForDecryption(cipher, null, externalCounter);
+				}
+
+				@Override
+				protected long getOutputSizeAfterEncryption(long length) throws IOException {
+					return Server.this.getOutputSizeForEncryption(length);
 				}
 			};
 		}
 		@Override
-		public long getOutputSizeForDecryption(long inputLen) throws IOException {
+		public long getOutputSizeAfterDecryption(long inputLen) throws IOException {
 			if (inputLen<0)
 				throw new IllegalArgumentException();
 			if (inputLen==0)
 				return 0;
 			if (cipher.getMode()!=Cipher.DECRYPT_MODE)
-				initCipherForDecrypt(cipher, null, null);
-			return AbstractEncryptionIOAlgorithm.getOutputSizeForDecryption(cipher, inputLen, maxEncryptedPartLength,
+				initCipherForDecryption(cipher, null, null);
+			return AbstractEncryptionIOAlgorithm.getOutputSizeAfterDecryption(cipher, inputLen, maxEncryptedPartLength,
 					0,maxPlainTextSizeForEncoding );
 		}
 
@@ -492,19 +502,19 @@ public class ServerASymmetricEncryptionAlgorithm implements IEncryptionInputAlgo
 	}
 
 	@Override
-	public RandomInputStream getCipherInputStream(RandomInputStream is)
+	public RandomInputStream getCipherInputStreamForDecryption(RandomInputStream is)
 			throws IOException {
-		return getCipherInputStream(is, null);
+		return getCipherInputStreamForDecryption(is, null);
 	}
 	@Override
-	public void initCipherForDecrypt(AbstractCipher cipher) throws IOException {
-		initCipherForDecrypt(cipher,null,  null);
+	public void initCipherForDecryption(AbstractCipher cipher) throws IOException {
+		initCipherForDecryption(cipher,null,  null);
 	}
 
 	@Override
-	public void initCipherForDecrypt(AbstractCipher cipher, byte[] iv) throws IOException
+	public void initCipherForDecryption(AbstractCipher cipher, byte[] iv) throws IOException
 	{
-		initCipherForDecrypt(cipher,iv,  null);
+		initCipherForDecryption(cipher,iv,  null);
 	}
 
 }

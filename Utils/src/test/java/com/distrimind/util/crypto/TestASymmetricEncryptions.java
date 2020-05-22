@@ -157,15 +157,16 @@ public class TestASymmetricEncryptions {
 
 		for (byte[] m : VariousTests.messagesToEncrypt) {
 			byte[] encoded = algoLocal.encode(m);
+			Assert.assertTrue(encoded.length>0);
 			if (!type.toString().startsWith("BCPQC_MCELIECE_") && type.getClass()!=HybridASymmetricEncryptionType.class)
-				Assert.assertEquals(encoded.length, algoLocal.getOutputSizeForEncryption(m.length));
+				Assert.assertEquals(encoded.length, algoLocal.getOutputSizeAfterEncryption(m.length));
 			byte[] md = algoDistant.decode(encoded);
-			Assert.assertEquals(md.length, m.length, "Testing size " + type);
+			Assert.assertEquals(md.length, m.length, "Testing size " + type+", encryptedLength="+encoded.length);
 			Assert.assertEquals(md, m, "Testing " + type);
 
 			encoded = algoDistant.encode(m);
 			if (!type.toString().startsWith("BCPQC_MCELIECE_") && type.getClass()!=HybridASymmetricEncryptionType.class)
-				Assert.assertEquals(encoded.length, algoLocal.getOutputSizeForEncryption(m.length));
+				Assert.assertEquals(encoded.length, algoLocal.getOutputSizeAfterEncryption(m.length));
 			md = algoLocal.decode(encoded);
 
 			Assert.assertEquals(md.length, m.length, "Testing size " + type);
@@ -178,7 +179,7 @@ public class TestASymmetricEncryptions {
 
 			encoded = algoLocal.encode(m, off, size);
 			if (!type.toString().startsWith("BCPQC_MCELIECE_") && type.getClass()!=HybridASymmetricEncryptionType.class)
-				Assert.assertEquals(encoded.length, algoLocal.getOutputSizeForEncryption(size));
+				Assert.assertEquals(encoded.length, algoLocal.getOutputSizeAfterEncryption(size));
 			md = algoDistant.decode(encoded);
 			Assert.assertEquals(md.length, size, "Testing size " + type);
 			for (int i = 0; i < size; i++)
@@ -186,7 +187,7 @@ public class TestASymmetricEncryptions {
 
 			encoded = algoDistant.encode(m, off, size);
 			if (!type.toString().startsWith("BCPQC_MCELIECE_") && type.getClass()!=HybridASymmetricEncryptionType.class)
-				Assert.assertEquals(encoded.length, algoLocal.getOutputSizeForEncryption(size));
+				Assert.assertEquals(encoded.length, algoLocal.getOutputSizeAfterEncryption(size));
 			md = algoLocal.decode(encoded);
 
 			Assert.assertEquals(md.length, size, "Testing size " + type);
@@ -261,9 +262,9 @@ public class TestASymmetricEncryptions {
 
 		for (byte[] m : VariousTests.messagesToEncrypt) {
 			byte[] encodedBytes = algoClient.encode(m);
-			Assert.assertTrue(encodedBytes.length>0);
+			Assert.assertTrue(encodedBytes.length>0, ""+m.length);
 			if (!kp.isPostQuantumKey())
-				Assert.assertEquals(encodedBytes.length, algoClient.getOutputSizeForEncryption(m.length));
+				Assert.assertEquals(encodedBytes.length, algoClient.getOutputSizeAfterEncryption(m.length));
 			byte[] decodedBytes = algoServer.decode(encodedBytes);
 			Assert.assertEquals(decodedBytes, m);
 
@@ -273,7 +274,7 @@ public class TestASymmetricEncryptions {
 
 			encodedBytes = algoClient.encode(m, off, size);
 			if (!kp.isPostQuantumKey())
-				Assert.assertEquals(encodedBytes.length, algoClient.getOutputSizeForEncryption(size));
+				Assert.assertEquals(encodedBytes.length, algoClient.getOutputSizeAfterEncryption(size));
 			decodedBytes = algoServer.decode(encodedBytes);
 			for (int i = 0; i < size; i++)
 				Assert.assertEquals(decodedBytes[i], m[i + off]);
