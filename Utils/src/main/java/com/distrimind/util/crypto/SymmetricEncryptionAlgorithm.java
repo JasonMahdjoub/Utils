@@ -140,7 +140,10 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 				throw new IOException();
 
 		final int ivSizeWithoutExternalCounter=getIVSizeBytesWithoutExternalCounter();
-		HashRandomOutputStream hashOut=new HashRandomOutputStream(new NullRandomOutputStream(), md);
+		NullRandomOutputStream nullStream=new NullRandomOutputStream();
+		nullStream.setLength(getOutputSizeAfterEncryption(nonEncryptedInputStream.length()));
+		HashRandomOutputStream hashOut=new HashRandomOutputStream(nullStream, md);
+
 		try(RandomOutputStream os= getCipherOutputStreamForEncryption(hashOut, false, associatedData, offAD, lenAD, null, ivs)) {
 
 			for (SubStreamParameter p : parameters) {

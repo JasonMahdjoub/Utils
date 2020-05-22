@@ -44,38 +44,52 @@ import java.io.IOException;
  */
 public class NullRandomOutputStream extends RandomOutputStream{
 	private boolean closed=false;
+	private long length=0;
+	private long pos=0;
 	@Override
 	public long length() {
-		return 0;
+		return length;
 	}
 
 	@Override
 	public void write(int b) throws IOException {
 		if (closed)
 			throw new IOException("closed");
+		++pos;
+		length=Math.max(pos, length);
 	}
 
 	@Override
 	public void write(byte[] b, int off, int len) throws IOException {
 		if (closed)
 			throw new IOException("closed");
+		RandomInputStream.checkLimits(b, off, len);
+		pos+=len;
+		length=Math.max(pos, length);
 	}
 
 	@Override
 	public void setLength(long newLength) throws IOException {
 		if (closed)
 			throw new IOException("closed");
+		if (newLength<0)
+			throw new IllegalArgumentException();
+		length=newLength;
+		pos=Math.min(pos, length);
 	}
 
 	@Override
 	public void seek(long _pos) throws IOException {
 		if (closed)
 			throw new IOException("closed");
+		if (_pos<0 || _pos>length)
+			throw new IllegalArgumentException();
+		pos=_pos;
 	}
 
 	@Override
 	public long currentPosition() {
-		return 0;
+		return pos;
 	}
 
 	@Override

@@ -339,8 +339,8 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 			public void seek(long _pos) throws IOException {
 				if (closed)
 					throw new IOException("Stream closed");
-				if (_pos<0 || _pos>length)
-					throw new IllegalArgumentException();
+				/*if (_pos<0 || _pos>length)
+					throw new IllegalArgumentException();*/
 				if (!supportRandomAccess)
 					throw new IOException("Random encryption impossible");
 				long round = _pos / maxPlainTextSizeForEncoding;
