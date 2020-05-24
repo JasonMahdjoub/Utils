@@ -105,6 +105,8 @@ public class EncryptionSignatureHashEncoder {
 	private final LimitedRandomOutputStream limitedRandomOutputStream;
 	private static final NullRandomOutputStream nullRandomInputStream=new NullRandomOutputStream();
 	private final Reference<AbstractMessageDigest> defaultMessageDigest=new Reference<>();
+	private AbstractEncryptionOutputAlgorithm.CommonCipherOutputStream cipherOutputStream;
+	private byte[] externalCounter=null;
 	public EncryptionSignatureHashEncoder() throws IOException {
 		limitedRandomOutputStream=new LimitedRandomOutputStream(nullRandomInputStream, 0);
 	}
@@ -115,6 +117,12 @@ public class EncryptionSignatureHashEncoder {
 		if (inputStream.length()-inputStream.currentPosition()==0)
 			throw new IllegalArgumentException();
 		this.inputStream=inputStream;
+		return this;
+	}
+	public EncryptionSignatureHashEncoder withExternalCounter(byte[] externalCounter) {
+		if (externalCounter==null)
+			throw new NullPointerException();
+		this.externalCounter=externalCounter;
 		return this;
 	}
 
@@ -284,10 +292,23 @@ public class EncryptionSignatureHashEncoder {
 					{
 						System.arraycopy(associatedData, offAD, buffer, 9, lenAD);
 					}
-					cipher.encode(inputStream, buffer, 0, lenBuffer, limitedRandomOutputStream);
+					if (cipherOutputStream==null)
+						cipherOutputStream=cipher.getCipherOutputStreamForEncryption(limitedRandomOutputStream, false, buffer, 0, lenBuffer, externalCounter);
+					else
+						cipherOutputStream.set(limitedRandomOutputStream, null, externalCounter, buffer, 0, lenBuffer, false);
 				}
-				else
-					cipher.encode(inputStream, limitedRandomOutputStream);
+				else {
+					if (cipherOutputStream == null)
+						cipherOutputStream = cipher.getCipherOutputStreamForEncryption(limitedRandomOutputStream, false, null,0 ,0, externalCounter);
+					else
+						cipherOutputStream.set(limitedRandomOutputStream, null, externalCounter, null, 0,0, false);
+				}
+				try {
+					inputStream.transferTo(cipherOutputStream);
+				}
+				finally {
+					cipherOutputStream.close();
+				}
 			}
 			else
 			{

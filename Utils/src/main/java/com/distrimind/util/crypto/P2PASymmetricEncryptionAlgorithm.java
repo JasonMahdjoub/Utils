@@ -117,7 +117,7 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 	}
 
 	@Override
-	public RandomOutputStream getCipherOutputStreamForEncryption(RandomOutputStream os, boolean closeOutputStreamWhenClosingCipherOutputStream, byte[] externalCounter) throws IOException {
+	public CommonCipherOutputStream getCipherOutputStreamForEncryption(RandomOutputStream os, boolean closeOutputStreamWhenClosingCipherOutputStream, byte[] externalCounter) throws IOException {
 		return p2pencryption.getCipherOutputStreamForEncryption(os, closeOutputStreamWhenClosingCipherOutputStream, externalCounter);
 	}
 
@@ -217,7 +217,7 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 	}
 
 	@Override
-	public RandomInputStream getCipherInputStreamForDecryption(RandomInputStream is) throws IOException {
+	public CommonCipherInputStream getCipherInputStreamForDecryption(RandomInputStream is) throws IOException {
 		return p2pencryption.getCipherInputStreamForDecryption(is);
 	}
 
@@ -284,12 +284,12 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 	}
 
 	@Override
-	public RandomInputStream getCipherInputStreamForDecryption(RandomInputStream is, byte[] externalCounter) throws IOException {
+	public CommonCipherInputStream getCipherInputStreamForDecryption(RandomInputStream is, byte[] externalCounter) throws IOException {
 		return p2pencryption.getCipherInputStreamForDecryption(is, externalCounter);
 	}
 
 	@Override
-	public RandomInputStream getCipherInputStreamForDecryption(RandomInputStream is, byte[] associatedData, int offAD, int lenAD) throws IOException {
+	public CommonCipherInputStream getCipherInputStreamForDecryption(RandomInputStream is, byte[] associatedData, int offAD, int lenAD) throws IOException {
 		return p2pencryption.getCipherInputStreamForDecryption(is, associatedData, offAD, lenAD);
 	}
 
@@ -332,7 +332,7 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 	}
 
 	@Override
-	public RandomInputStream getCipherInputStreamForDecryption(RandomInputStream is, byte[] associatedData, int offAD, int lenAD, byte[] externalCounter) throws IOException {
+	public CommonCipherInputStream getCipherInputStreamForDecryption(RandomInputStream is, byte[] associatedData, int offAD, int lenAD, byte[] externalCounter) throws IOException {
 		return p2pencryption.getCipherInputStreamForDecryption(is, associatedData, offAD, lenAD, externalCounter);
 	}
 
@@ -347,22 +347,22 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 	}
 
 	@Override
-	public RandomOutputStream getCipherOutputStreamForEncryption(RandomOutputStream os, boolean closeOutputStreamWhenClosingCipherOutputStream) throws IOException {
+	public CommonCipherOutputStream getCipherOutputStreamForEncryption(RandomOutputStream os, boolean closeOutputStreamWhenClosingCipherOutputStream) throws IOException {
 		return p2pencryption.getCipherOutputStreamForEncryption(os, closeOutputStreamWhenClosingCipherOutputStream);
 	}
 
 	@Override
-	public RandomOutputStream getCipherOutputStreamForEncryption(RandomOutputStream os, boolean closeOutputStreamWhenClosingCipherOutputStream, byte[] associatedData, int offAD, int lenAD) throws IOException {
+	public CommonCipherOutputStream getCipherOutputStreamForEncryption(RandomOutputStream os, boolean closeOutputStreamWhenClosingCipherOutputStream, byte[] associatedData, int offAD, int lenAD) throws IOException {
 		return p2pencryption.getCipherOutputStreamForEncryption(os, closeOutputStreamWhenClosingCipherOutputStream, associatedData, offAD, lenAD);
 	}
 
 	@Override
-	public RandomOutputStream getCipherOutputStreamForEncryption(RandomOutputStream os, boolean closeOutputStreamWhenClosingCipherOutputStream, byte[] associatedData, int offAD, int lenAD, byte[] externalCounter) throws IOException {
+	public CommonCipherOutputStream getCipherOutputStreamForEncryption(RandomOutputStream os, boolean closeOutputStreamWhenClosingCipherOutputStream, byte[] associatedData, int offAD, int lenAD, byte[] externalCounter) throws IOException {
 		return p2pencryption.getCipherOutputStreamForEncryption(os, closeOutputStreamWhenClosingCipherOutputStream, associatedData, offAD, lenAD, externalCounter);
 	}
 
 	@Override
-	protected RandomOutputStream getCipherOutputStreamForEncryption(RandomOutputStream os, boolean closeOutputStreamWhenClosingCipherOutputStream, byte[] associatedData, int offAD, int lenAD, byte[] externalCounter, byte[][] manualIvs) throws IOException {
+	protected CommonCipherOutputStream getCipherOutputStreamForEncryption(RandomOutputStream os, boolean closeOutputStreamWhenClosingCipherOutputStream, byte[] associatedData, int offAD, int lenAD, byte[] externalCounter, byte[][] manualIvs) throws IOException {
 		return p2pencryption.getCipherOutputStreamForEncryption(os, closeOutputStreamWhenClosingCipherOutputStream, associatedData, offAD, lenAD, externalCounter, manualIvs);
 	}
 
@@ -546,12 +546,12 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 		}
 
 		@Override
-		protected RandomOutputStream getCipherOutputStreamForEncryption(final RandomOutputStream os, boolean closeOutputStreamWhenClosingCipherOutputStream, byte[] associatedData, int offAD, int lenAD, final byte[] externalCounter, byte[][] manualIVs) throws IOException {
+		protected CommonCipherOutputStream getCipherOutputStreamForEncryption(final RandomOutputStream os, boolean closeOutputStreamWhenClosingCipherOutputStream, byte[] associatedData, int offAD, int lenAD, final byte[] externalCounter, byte[][] manualIVs) throws IOException {
 			return nonPQCEncryption.getCipherOutputStreamForEncryption(PQCEncryption.getCipherOutputStreamForEncryption(os, closeOutputStreamWhenClosingCipherOutputStream, associatedData, offAD, lenAD, externalCounter, manualIVs), true, associatedData, offAD, lenAD, externalCounter, manualIVs);
 		}
 
 		@Override
-		public RandomInputStream getCipherInputStreamForDecryption(RandomInputStream is, byte[] associatedData, int offAD, int lenAD, byte[] externalCounter) throws IOException {
+		public CommonCipherInputStream getCipherInputStreamForDecryption(RandomInputStream is, byte[] associatedData, int offAD, int lenAD, byte[] externalCounter) throws IOException {
 			return nonPQCEncryption.getCipherInputStreamForDecryption(PQCEncryption.getCipherInputStreamForDecryption(is, associatedData, offAD, lenAD, externalCounter), associatedData, offAD, lenAD, externalCounter);
 		}
 

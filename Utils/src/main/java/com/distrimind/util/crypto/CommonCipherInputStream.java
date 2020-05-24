@@ -52,60 +52,73 @@ import java.io.IOException;
  * @since Utils 5.0.0
  */
 abstract class CommonCipherInputStream extends RandomInputStream {
-	private long posEncrypted =0;
-	private long posPlainText=0;
-	private boolean closed=false;
+	private long posEncrypted;
+	private long posPlainText;
+	private boolean closed;
+	private boolean doFinal;
+
 
 	private final int maxEncryptedPartLength;
-	private final RandomInputStream is;
+	private RandomInputStream is;
 	private final boolean includeIV;
 	private byte[] iv;
 	private final int IVSizeBytesWithoutExternalCounter;
-	private final byte[] externalCounter;
-	protected final AbstractCipher cipher;
-	private final byte[] associatedData;
-	private final int offAD, lenAD;
+	private byte[] externalCounter;
+	protected AbstractCipher cipher;
+	private byte[] associatedData;
+	private int offAD, lenAD;
 	private final byte[] buffer;
 	private byte[] outputBuffer;
 	private final boolean supportRandomAccess;
 	private final int counterStepInBytes;
 	private final int maxPlainTextSizeForEncoding;
-	private boolean doFinal=false;
 	private int outputBufferLength =0;
 	private int outputBufferIndex =0;
-	private final long length;
+	private Long length;
 
 	protected abstract void initCipherForDecryptionWithIvAndCounter(byte[] iv, int counter) throws IOException;
 	protected abstract void initCipherForDecryptionWithIv(byte[] iv) throws IOException;
 	protected abstract void initCipherForDecrypt() throws IOException;
+	protected abstract long getOutputSizeAfterDecryption(long inputLength) throws IOException;
 
-	CommonCipherInputStream(int maxEncryptedPartLength, RandomInputStream is, boolean includeIV, byte[] iv, int IVSizeBytesWithoutExternalCounter, boolean useExternalCounter, byte[] externalCounter, AbstractCipher cipher, byte[] associatedData, int offAD, int lenAD, byte[] buffer, boolean supportRandomAccess, int counterStepInBytes, int maxPlainTextSizeForEncoding, long length) throws IOException {
+	CommonCipherInputStream(int maxEncryptedPartLength, RandomInputStream is, boolean includeIV, byte[] iv, int IVSizeBytesWithoutExternalCounter, boolean useExternalCounter, byte[] externalCounter, AbstractCipher cipher, byte[] associatedData, int offAD, int lenAD, byte[] buffer, boolean supportRandomAccess, int counterStepInBytes, int maxPlainTextSizeForEncoding) throws IOException {
 		if (useExternalCounter && externalCounter==null)
 			throw new NullPointerException("External counter is null");
 		else if (!useExternalCounter && externalCounter!=null)
 			throw new IllegalArgumentException("External counter be null");
 		this.maxEncryptedPartLength = maxEncryptedPartLength;
-		this.is = is;
 		this.includeIV = includeIV;
 		this.iv = iv;
 		this.IVSizeBytesWithoutExternalCounter = IVSizeBytesWithoutExternalCounter;
-		this.externalCounter = externalCounter;
 		this.cipher = cipher;
-		this.associatedData = associatedData;
-		this.offAD = offAD;
-		this.lenAD = lenAD;
 		this.buffer = buffer;
 		this.supportRandomAccess = supportRandomAccess;
 		this.counterStepInBytes = counterStepInBytes;
 		this.maxPlainTextSizeForEncoding = maxPlainTextSizeForEncoding;
+		set(is, associatedData, offAD, lenAD, externalCounter);
+	}
+
+	void set(final RandomInputStream is, final byte[] associatedData, final int offAD, final int lenAD, final byte[] externalCounter) throws IOException {
+
+		posEncrypted =0;
+		posPlainText=0;
+		closed=false;
+		doFinal=false;
+
+		this.is = is;
+		this.externalCounter = externalCounter;
+		this.associatedData = associatedData;
+		this.offAD = offAD;
+		this.lenAD = lenAD;
 		this.outputBuffer=null;
 		if (is.currentPosition()!=0)
 			is.seek(0);
-		this.length=length;
 	}
 
 	@Override
-	public long length() {
+	public long length() throws IOException {
+		if (length==null)
+			length= getOutputSizeAfterDecryption(is.length());
 		return length;
 	}
 

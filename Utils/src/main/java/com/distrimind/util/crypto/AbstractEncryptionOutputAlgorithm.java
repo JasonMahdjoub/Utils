@@ -177,249 +177,274 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 
 	public abstract boolean supportRandomEncryptionAndRandomDecryption();
 
-	public RandomOutputStream getCipherOutputStreamForEncryption(final RandomOutputStream os, boolean closeOutputStreamWhenClosingCipherOutputStream) throws IOException
+	public CommonCipherOutputStream getCipherOutputStreamForEncryption(final RandomOutputStream os, boolean closeOutputStreamWhenClosingCipherOutputStream) throws IOException
 	{
 		return getCipherOutputStreamForEncryption(os, closeOutputStreamWhenClosingCipherOutputStream, null, 0,0, null);
 	}
-	public RandomOutputStream getCipherOutputStreamForEncryption(final RandomOutputStream os, boolean closeOutputStreamWhenClosingCipherOutputStream, final byte[] associatedData, final int offAD, final int lenAD) throws IOException
+	public CommonCipherOutputStream getCipherOutputStreamForEncryption(final RandomOutputStream os, boolean closeOutputStreamWhenClosingCipherOutputStream, final byte[] associatedData, final int offAD, final int lenAD) throws IOException
 	{
 		return getCipherOutputStreamForEncryption(os, closeOutputStreamWhenClosingCipherOutputStream, associatedData, offAD, lenAD, null);
 	}
-	public RandomOutputStream getCipherOutputStreamForEncryption(final RandomOutputStream os, boolean closeOutputStreamWhenClosingCipherOutputStream, byte[] externalCounter) throws IOException
+	public CommonCipherOutputStream getCipherOutputStreamForEncryption(final RandomOutputStream os, boolean closeOutputStreamWhenClosingCipherOutputStream, byte[] externalCounter) throws IOException
 	{
 		return getCipherOutputStreamForEncryption(os, closeOutputStreamWhenClosingCipherOutputStream, null, 0,0, externalCounter);
 	}
 
-	public RandomOutputStream getCipherOutputStreamForEncryption(final RandomOutputStream os, boolean closeOutputStreamWhenClosingCipherOutputStream, final byte[] associatedData, final int offAD, final int lenAD, final byte[] externalCounter) throws
+	public CommonCipherOutputStream getCipherOutputStreamForEncryption(final RandomOutputStream os, boolean closeOutputStreamWhenClosingCipherOutputStream, final byte[] associatedData, final int offAD, final int lenAD, final byte[] externalCounter) throws
 			IOException{
 		return getCipherOutputStreamForEncryption(os, closeOutputStreamWhenClosingCipherOutputStream, associatedData, offAD, lenAD, externalCounter, null);
 	}
-	protected RandomOutputStream getCipherOutputStreamForEncryption(final RandomOutputStream os, final boolean closeOutputStreamWhenClosingCipherOutputStream, final byte[] associatedData, final int offAD, final int lenAD, final byte[] externalCounter, final byte[][] manualIvs) throws
-			IOException{
-		if (os.currentPosition()!=0)
-			os.seek(0);
-		final boolean supportRandomAccess=supportRandomEncryptionAndRandomDecryption();
+	class CommonCipherOutputStream extends RandomOutputStream
+	{
+		long length;
+		long currentPos;
+		boolean closed;
+		private boolean doFinal;
+		boolean supportRandomAccess;
+
+		private RandomOutputStream os;
+		private byte[][] manualIvs;
+		private byte[] externalCounter;
+		private byte[] associatedData;
+		private int offAD, lenAD;
+		private boolean closeOutputStreamWhenClosingCipherOutputStream;
 
 
-		return new RandomOutputStream() {
-			long length=0;
-			long currentPos=0;
-			boolean closed=false;
-			private boolean doFinal=false;
-			private byte[] buffer=AbstractEncryptionOutputAlgorithm.this.buffer;
+		CommonCipherOutputStream(RandomOutputStream os, byte[][] manualIvs, byte[] externalCounter, byte[] associatedData, int offAD, int lenAD, boolean closeOutputStreamWhenClosingCipherOutputStream) throws IOException {
+			set(os, manualIvs, externalCounter, associatedData, offAD, lenAD, closeOutputStreamWhenClosingCipherOutputStream);
+		}
 
-			private void checkDoFinal(boolean force) throws IOException {
-				if (doFinal && (currentPos%maxPlainTextSizeForEncoding==0 || force))
-				{
-					try {
-						int s=cipher.doFinal(buffer, 0);
-						if (s>0)
-							os.write(buffer, 0, s);
-						doFinal=false;
-					} catch (IllegalBlockSizeException | BadPaddingException | ShortBufferException e) {
-						throw new IOException(e);
-					}
+		void set(RandomOutputStream os, byte[][] manualIvs, byte[] externalCounter, byte[] associatedData, int offAD, int lenAD, boolean closeOutputStreamWhenClosingCipherOutputStream) throws IOException {
+			length=0;
+			currentPos=0;
+			closed=false;
+			doFinal=false;
+			supportRandomAccess=supportRandomEncryptionAndRandomDecryption();
+
+			this.os = os;
+			this.manualIvs = manualIvs;
+			this.externalCounter = externalCounter;
+			this.associatedData = associatedData;
+			this.offAD = offAD;
+			this.lenAD = lenAD;
+			this.closeOutputStreamWhenClosingCipherOutputStream = closeOutputStreamWhenClosingCipherOutputStream;
+			if (os.currentPosition()!=0)
+				os.seek(0);
+		}
+
+		private void checkDoFinal(boolean force) throws IOException {
+			if (doFinal && (currentPos%maxPlainTextSizeForEncoding==0 || force))
+			{
+				try {
+					int s=cipher.doFinal(buffer, 0);
+					if (s>0)
+						os.write(buffer, 0, s);
+					doFinal=false;
+				} catch (IllegalBlockSizeException | BadPaddingException | ShortBufferException e) {
+					throw new IOException(e);
 				}
 			}
+		}
 
-			private long checkInit() throws IOException {
-				long mod=currentPos % maxPlainTextSizeForEncoding;
-				if (mod == 0) {
-					long round=currentPos/ maxPlainTextSizeForEncoding;
-					checkDoFinal(false);
-					if (includeIV()) {
-						byte[] iv;
-						if (manualIvs!=null)
-						{
-							if (externalCounter==null)
-								initCipherForEncryptionWithIv(cipher, manualIvs[(int)round]);
-							else {
-								System.arraycopy(manualIvs[(int) round], 0, iv = AbstractEncryptionOutputAlgorithm.this.iv, 0, getIVSizeBytesWithoutExternalCounter());
-								if (useExternalCounter())
-									System.arraycopy(externalCounter, 0, iv, getIVSizeBytesWithoutExternalCounter(), externalCounter.length);
-								initCipherForEncryptionWithIv(cipher, iv);
-							}
-						}
+		private long checkInit() throws IOException {
+			long mod=currentPos % maxPlainTextSizeForEncoding;
+			if (mod == 0) {
+				long round=currentPos/ maxPlainTextSizeForEncoding;
+				checkDoFinal(false);
+				if (includeIV()) {
+					byte[] iv;
+					if (manualIvs!=null)
+					{
+						if (externalCounter==null)
+							initCipherForEncryptionWithIv(cipher, manualIvs[(int)round]);
 						else {
-							iv = initCipherForEncryption(cipher, externalCounter);
-							os.write(iv, 0, getIVSizeBytesWithoutExternalCounter());
+							System.arraycopy(manualIvs[(int) round], 0, iv = AbstractEncryptionOutputAlgorithm.this.iv, 0, getIVSizeBytesWithoutExternalCounter());
+							if (useExternalCounter())
+								System.arraycopy(externalCounter, 0, iv, getIVSizeBytesWithoutExternalCounter(), externalCounter.length);
+							initCipherForEncryptionWithIv(cipher, iv);
 						}
-
 					}
 					else {
-						initCipherForEncryptionWithNullIV(cipher);
+						iv = initCipherForEncryption(cipher, externalCounter);
+						os.write(iv, 0, getIVSizeBytesWithoutExternalCounter());
 					}
 
-					if (associatedData != null && lenAD > 0)
-						cipher.updateAAD(associatedData, offAD, lenAD);
 				}
-				return (int) (maxPlainTextSizeForEncoding-mod);
-			}
-			@Override
-			public long length() {
-				return length;
-			}
-
-			@Override
-			public void write(byte[] b, int off, int len) throws IOException {
-				if (closed)
-					throw new IOException("Stream closed");
-				checkLimits(b, off, len);
-				if (len==0)
-					return;
-
-				while (len>0) {
-					long l=checkInit();
-					int s=(int)Math.min(len, l);
-					assert s>0;
-					if (len> bufferInSize) {
-						int outLen = cipher.getOutputSize(s);
-						if (buffer.length < outLen) {
-							buffer = new byte[outLen];
-						}
-					}
-					try {
-						int w=cipher.update(b, off, s, buffer, 0);
-						doFinal=true;
-						currentPos+=s;
-						if (w>0) {
-							os.write(buffer, 0, w);
-						}
-					} catch (ShortBufferException e) {
-						throw new IOException(e);
-					}
-
-					len-=s;
-					off+=s;
-
-					checkDoFinal(false);
+				else {
+					initCipherForEncryptionWithNullIV(cipher);
 				}
-				length=Math.max(length, currentPos);
-			}
-			@Override
-			public void write(int b) throws IOException {
-				if (closed)
-					throw new IOException("Stream closed");
 
-				checkInit();
-				one[0]=(byte)b;
-				++currentPos;
+				if (associatedData != null && lenAD > 0)
+					cipher.updateAAD(associatedData, offAD, lenAD);
+			}
+			return (int) (maxPlainTextSizeForEncoding-mod);
+		}
+		@Override
+		public long length() {
+			return length;
+		}
+
+		@Override
+		public void write(byte[] b, int off, int len) throws IOException {
+			if (closed)
+				throw new IOException("Stream closed");
+			checkLimits(b, off, len);
+			if (len==0)
+				return;
+
+			while (len>0) {
+				long l=checkInit();
+				int s=(int)Math.min(len, l);
+				assert s>0;
+				if (len> bufferInSize) {
+					int outLen = cipher.getOutputSize(s);
+					if (buffer.length < outLen) {
+						buffer = new byte[outLen];
+					}
+				}
 				try {
-					int w=cipher.update(one, 0, 1, buffer, 0);
+					int w=cipher.update(b, off, s, buffer, 0);
 					doFinal=true;
+					currentPos+=s;
 					if (w>0) {
 						os.write(buffer, 0, w);
 					}
 				} catch (ShortBufferException e) {
 					throw new IOException(e);
 				}
+
+				len-=s;
+				off+=s;
+
 				checkDoFinal(false);
 			}
+			length=Math.max(length, currentPos);
+		}
+		@Override
+		public void write(int b) throws IOException {
+			if (closed)
+				throw new IOException("Stream closed");
 
-			@Override
-			public void setLength(long newLength) throws IOException {
-				if (closed)
-					throw new IOException("Stream closed");
-				if (newLength<0)
-					throw new IllegalArgumentException();
-				if (newLength==0) {
-					os.setLength(0);
-					currentPos=0;
-					length=0;
+			checkInit();
+			one[0]=(byte)b;
+			++currentPos;
+			try {
+				int w=cipher.update(one, 0, 1, buffer, 0);
+				doFinal=true;
+				if (w>0) {
+					os.write(buffer, 0, w);
 				}
-				else {
-					long round=newLength/ maxPlainTextSizeForEncoding;
-					newLength=round * maxEncryptedPartLength+(newLength % maxPlainTextSizeForEncoding);
-					os.setLength(newLength);
-					length=newLength;
-					seek(Math.min(newLength, currentPos));
-				}
+			} catch (ShortBufferException e) {
+				throw new IOException(e);
 			}
+			checkDoFinal(false);
+		}
 
-			@Override
-			public void seek(long _pos) throws IOException {
-				if (closed)
-					throw new IOException("Stream closed");
+		@Override
+		public void setLength(long newLength) throws IOException {
+			if (closed)
+				throw new IOException("Stream closed");
+			if (newLength<0)
+				throw new IllegalArgumentException();
+			if (newLength==0) {
+				os.setLength(0);
+				currentPos=0;
+				length=0;
+			}
+			else {
+				long round=newLength/ maxPlainTextSizeForEncoding;
+				newLength=round * maxEncryptedPartLength+(newLength % maxPlainTextSizeForEncoding);
+				os.setLength(newLength);
+				length=newLength;
+				seek(Math.min(newLength, currentPos));
+			}
+		}
+
+		@Override
+		public void seek(long _pos) throws IOException {
+			if (closed)
+				throw new IOException("Stream closed");
 				/*if (_pos<0 || _pos>length)
 					throw new IllegalArgumentException();*/
-				if (!supportRandomAccess)
-					throw new IOException("Random encryption impossible");
-				long round = _pos / maxPlainTextSizeForEncoding;
-				if (includeIV()) {
-					long p = round * maxEncryptedPartLength;
-					int mod=(int)(_pos % maxPlainTextSizeForEncoding);
-					int counter=mod/getCounterStepInBytes();
+			if (!supportRandomEncryptionAndRandomDecryption())
+				throw new IOException("Random encryption impossible");
+			long round = _pos / maxPlainTextSizeForEncoding;
+			if (includeIV()) {
+				long p = round * maxEncryptedPartLength;
+				int mod=(int)(_pos % maxPlainTextSizeForEncoding);
+				int counter=mod/getCounterStepInBytes();
 
-					if (manualIvs!=null)
-					{
-						if (useExternalCounter())
-							System.arraycopy(manualIvs[(int)round], 0, iv, 0, getIVSizeBytesWithoutExternalCounter());
-						else
-							System.arraycopy(manualIvs[(int)round], 0, iv, 0, iv.length);
-					}
-					else {
-						RandomInputStream ris = os.getRandomInputStream();
-						os.getRandomInputStream().seek(p);
-						ris.readFully(iv);
-					}
-					if (useExternalCounter())
-						System.arraycopy(externalCounter, 0, iv, getIVSizeBytesWithoutExternalCounter(), externalCounter.length);
-
-					if (mod>0) {
-						mod = cipher.getOutputSize(mod)+getIVSizeBytesWithoutExternalCounter();
-					}
-					p += mod;
-
-					os.seek(p);
-					initCipherForEncryptionWithIvAndCounter(cipher, iv, counter);
-				}
-				else
+				if (manualIvs!=null)
 				{
-					long add=cipher.getOutputSize((int)(_pos % maxPlainTextSizeForEncoding));
-					if (add>0)
-						add+=getIVSizeBytesWithoutExternalCounter();
-					os.seek(round * maxEncryptedPartLength+add);
-					initCipherForEncryption(cipher);
+					if (useExternalCounter())
+						System.arraycopy(manualIvs[(int)round], 0, iv, 0, getIVSizeBytesWithoutExternalCounter());
+					else
+						System.arraycopy(manualIvs[(int)round], 0, iv, 0, iv.length);
 				}
-				if (associatedData!=null && lenAD>0)
-					cipher.updateAAD(associatedData, offAD, lenAD);
-				currentPos=_pos;
+				else {
+					RandomInputStream ris = os.getRandomInputStream();
+					os.getRandomInputStream().seek(p);
+					ris.readFully(iv);
+				}
+				if (useExternalCounter())
+					System.arraycopy(externalCounter, 0, iv, getIVSizeBytesWithoutExternalCounter(), externalCounter.length);
+
+				if (mod>0) {
+					mod = cipher.getOutputSize(mod)+getIVSizeBytesWithoutExternalCounter();
+				}
+				p += mod;
+
+				os.seek(p);
+				initCipherForEncryptionWithIvAndCounter(cipher, iv, counter);
 			}
-
-			@Override
-			public long currentPosition() {
-				return currentPos;
+			else
+			{
+				long add=cipher.getOutputSize((int)(_pos % maxPlainTextSizeForEncoding));
+				if (add>0)
+					add+=getIVSizeBytesWithoutExternalCounter();
+				os.seek(round * maxEncryptedPartLength+add);
+				initCipherForEncryption(cipher);
 			}
+			if (associatedData!=null && lenAD>0)
+				cipher.updateAAD(associatedData, offAD, lenAD);
+			currentPos=_pos;
+		}
 
-			@Override
-			public boolean isClosed() {
-				return closed;
-			}
+		@Override
+		public long currentPosition() {
+			return currentPos;
+		}
 
-			@Override
-			protected RandomInputStream getRandomInputStreamImpl() throws IOException {
-				throw new IOException(new IllegalAccessException());
-			}
+		@Override
+		public boolean isClosed() {
+			return closed;
+		}
 
-			@Override
-			public void flush() throws IOException {
-				os.flush();
-			}
+		@Override
+		protected RandomInputStream getRandomInputStreamImpl() throws IOException {
+			throw new IOException(new IllegalAccessException());
+		}
 
-			@Override
-			public void close() throws IOException {
-				if (closed)
-					return;
-				checkDoFinal(true);
-				flush();
-				if (closeOutputStreamWhenClosingCipherOutputStream)
-					os.close();
-				closed=true;
-			}
+		@Override
+		public void flush() throws IOException {
+			os.flush();
+		}
 
+		@Override
+		public void close() throws IOException {
+			if (closed)
+				return;
+			checkDoFinal(true);
+			flush();
+			if (closeOutputStreamWhenClosingCipherOutputStream)
+				os.close();
+			closed=true;
+		}
 
-		};
-
+	}
+	protected CommonCipherOutputStream getCipherOutputStreamForEncryption(final RandomOutputStream os, final boolean closeOutputStreamWhenClosingCipherOutputStream, final byte[] associatedData, final int offAD, final int lenAD, final byte[] externalCounter, final byte[][] manualIvs) throws
+			IOException{
+		return new CommonCipherOutputStream(os, manualIvs, externalCounter, associatedData, offAD, lenAD, closeOutputStreamWhenClosingCipherOutputStream);
 	}
 
 	public int getMaxPlainTextSizeForEncoding()

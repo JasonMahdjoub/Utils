@@ -308,18 +308,16 @@ public class ServerASymmetricEncryptionAlgorithm implements IEncryptionInputAlgo
 		}
 
 		@Override
-		public RandomInputStream getCipherInputStreamForDecryption(final RandomInputStream is, final byte[] externalCounter) throws IOException {
+		public CommonCipherInputStream getCipherInputStreamForDecryption(final RandomInputStream is, final byte[] externalCounter) throws IOException {
 			return getCipherInputStreamForDecryption(is, null, 0, 0, externalCounter);
 		}
-		private long getOutputSizeForEncryption(long length) throws IOException {
-			return getOutputSizeAfterDecryption(length);
-		}
+
 
 		@Override
-		public RandomInputStream getCipherInputStreamForDecryption(final RandomInputStream is, byte[] associatedData, int offAD, int lenAD, final byte[] externalCounter)
+		public CommonCipherInputStream getCipherInputStreamForDecryption(final RandomInputStream is, byte[] associatedData, int offAD, final int lenAD, final byte[] externalCounter)
 				throws IOException {
 
-			return new CommonCipherInputStream(maxEncryptedPartLength, is, false, null, 0, false, externalCounter, cipher, associatedData, offAD, lenAD, buffer, false, 0, maxPlainTextSizeForEncoding, getOutputSizeAfterDecryption(is.length())) {
+			return new CommonCipherInputStream(maxEncryptedPartLength, is, false, null, 0, false, externalCounter, cipher, associatedData, offAD, lenAD, buffer, false, 0, maxPlainTextSizeForEncoding) {
 				@Override
 				protected void initCipherForDecryptionWithIvAndCounter(byte[] iv, int counter) throws IOException {
 					Server.this.initCipherForDecryption(cipher, iv, externalCounter);
@@ -336,8 +334,13 @@ public class ServerASymmetricEncryptionAlgorithm implements IEncryptionInputAlgo
 				}
 
 				@Override
+				protected long getOutputSizeAfterDecryption(long inputLength) throws IOException {
+					return Server.this.getOutputSizeAfterDecryption(inputLength);
+				}
+
+				@Override
 				protected long getOutputSizeAfterEncryption(long length) throws IOException {
-					return Server.this.getOutputSizeForEncryption(length);
+					return Server.this.getOutputSizeAfterDecryption(length);
 				}
 			};
 		}

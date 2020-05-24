@@ -65,6 +65,8 @@ public class EncryptionSignatureHashDecoder {
 	private final LimitedRandomInputStream limitedRandomInputStream;
 	static final RandomInputStream nullRandomInputStream=new RandomByteArrayInputStream(new byte[0]);
 	private AbstractMessageDigest defaultMessageDigest=null;
+	private byte[] externalCounter=null;
+	private CommonCipherInputStream cipherInputStream=null;
 
 	public EncryptionSignatureHashDecoder() throws IOException {
 		limitedRandomInputStream=new LimitedRandomInputStream(nullRandomInputStream, 0);
@@ -75,6 +77,12 @@ public class EncryptionSignatureHashDecoder {
 		if (inputStream.length()-inputStream.currentPosition()==0)
 			throw new IllegalArgumentException();
 		this.inputStream=inputStream;
+		return this;
+	}
+	public EncryptionSignatureHashDecoder withExternalCounter(byte[] externalCounter) {
+		if (externalCounter==null)
+			throw new NullPointerException();
+		this.externalCounter=externalCounter;
 		return this;
 	}
 
@@ -351,10 +359,25 @@ public class EncryptionSignatureHashDecoder {
 					{
 						System.arraycopy(associatedData, offAD, buffer, 9, lenAD);
 					}
-					cipher.decode(limitedRandomInputStream, buffer, 0, lenBuffer, outputStream);
+					if (cipherInputStream==null)
+						cipherInputStream=cipher.getCipherInputStreamForDecryption(limitedRandomInputStream,buffer, 0, lenBuffer, externalCounter );
+					else
+						cipherInputStream.set(limitedRandomInputStream,buffer, 0, lenBuffer, externalCounter );
+
 				}
-				else
-					cipher.decode(limitedRandomInputStream, outputStream);
+				else {
+					if (cipherInputStream==null)
+						cipherInputStream=cipher.getCipherInputStreamForDecryption(limitedRandomInputStream,null, 0, 0, externalCounter );
+					else
+						cipherInputStream.set(limitedRandomInputStream,null, 0, 0, externalCounter );
+				}
+				try {
+					cipherInputStream.transferTo(outputStream);
+				}
+				finally {
+					cipherInputStream.close();
+				}
+
 			}
 			else
 			{
