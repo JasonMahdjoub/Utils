@@ -113,10 +113,9 @@ public class TestReadWriteEncryption {
 		EncryptionSignatureHashEncoder writer=new EncryptionSignatureHashEncoder();
 		writer.withRandomInputStream(bais);
 		if (secretKeyForEncryption!=null) {
-			if (associatedData==null)
-				writer.withSymmetricSecretKeyForEncryption(SecureRandomType.DEFAULT.getInstance(null), secretKeyForEncryption);
-			else
-				writer.withSymmetricSecretKeyForEncryptionAndAssociatedData(SecureRandomType.DEFAULT.getInstance(null), secretKeyForEncryption, associatedData);
+			writer.withSymmetricSecretKeyForEncryption(SecureRandomType.DEFAULT.getInstance(null), secretKeyForEncryption);
+			if (associatedData!=null)
+				writer.withAssociatedData(associatedData);
 		}
 		if (secretKeyForSignature!=null)
 			writer.withSymmetricSecretKeyForSignature(secretKeyForSignature);
@@ -194,10 +193,9 @@ public class TestReadWriteEncryption {
 		EncryptionSignatureHashDecoder reader=new EncryptionSignatureHashDecoder();
 		reader.withRandomInputStream(bais);
 		if (secretKeyForEncryption!=null) {
-			if (associatedData==null)
-				reader.withSymmetricSecretKeyForEncryption(SecureRandomType.DEFAULT.getInstance(null), secretKeyForEncryption);
-			else
-				reader.withSymmetricSecretKeyForEncryptionAndAssociatedData(SecureRandomType.DEFAULT.getInstance(null), secretKeyForEncryption, associatedData);
+			reader.withSymmetricSecretKeyForEncryption(SecureRandomType.DEFAULT.getInstance(null), secretKeyForEncryption);
+			if (associatedData!=null)
+				reader.withAssociatedData(associatedData);
 		}
 		if (secretKeyForSignature!=null)
 			reader.withSymmetricSecretKeyForSignature(secretKeyForSignature);

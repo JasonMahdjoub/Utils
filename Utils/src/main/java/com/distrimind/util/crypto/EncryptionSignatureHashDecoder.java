@@ -34,6 +34,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
+import com.distrimind.util.Reference;
 import com.distrimind.util.io.*;
 
 import java.io.IOException;
@@ -55,6 +56,7 @@ public class EncryptionSignatureHashDecoder {
 	private SymmetricAuthenticatedSignatureCheckerAlgorithm symmetricChecker=null;
 	private ASymmetricAuthenticatedSignatureCheckerAlgorithm asymmetricChecker=null;
 	private AbstractMessageDigest digest=null;
+	private final Reference<byte[]> bufferRef=new Reference<>(new byte[256]);
 	Long minimumInputSize=null;
 
 	public EncryptionSignatureHashDecoder() {
@@ -71,35 +73,29 @@ public class EncryptionSignatureHashDecoder {
 	public EncryptionSignatureHashDecoder withSymmetricSecretKeyForEncryption(AbstractSecureRandom random, SymmetricSecretKey symmetricSecretKeyForEncryption) throws IOException {
 		return withCipher(new SymmetricEncryptionAlgorithm(random, symmetricSecretKeyForEncryption));
 	}
-	public EncryptionSignatureHashDecoder withSymmetricSecretKeyForEncryptionAndAssociatedData(AbstractSecureRandom random, SymmetricSecretKey symmetricSecretKeyForEncryption, byte[] associatedData) throws IOException {
-		return withSymmetricSecretKeyForEncryptionAndAssociatedData(random, symmetricSecretKeyForEncryption, associatedData, 0, associatedData.length);
-	}
-	public EncryptionSignatureHashDecoder withSymmetricSecretKeyForEncryptionAndAssociatedData(AbstractSecureRandom random, SymmetricSecretKey symmetricSecretKeyForEncryption, byte[] associatedData, int offAD, int lenAD) throws IOException {
-		return withCipherAndAssociatedData(new SymmetricEncryptionAlgorithm(random, symmetricSecretKeyForEncryption), associatedData, offAD, lenAD);
-	}
 
-	public EncryptionSignatureHashDecoder withCipher(SymmetricEncryptionAlgorithm cipher) throws IOException {
+	public EncryptionSignatureHashDecoder withCipher(SymmetricEncryptionAlgorithm cipher) {
 		if (cipher==null)
 			throw new NullPointerException();
-		if (this.symmetricChecker!=null && cipher.getType().isAuthenticatedAlgorithm())
-			throw new IOException("Symmetric encryption use authentication and a symmetric authenticated signer is already used. No more symmetric authentication is needed. However ASymmetric authentication is possible.");
 		this.cipher=cipher;
-		this.associatedData=null;
 		return this;
-
 	}
-
-	public EncryptionSignatureHashDecoder withCipherAndAssociatedData(SymmetricEncryptionAlgorithm cipher, byte[] associatedData, int offAD, int lenAD) throws IOException {
-		if (cipher==null)
-			throw new NullPointerException();
+	public EncryptionSignatureHashDecoder withoutAssociatedData()
+	{
+		this.associatedData=null;
+		this.offAD=0;
+		this.lenAD=0;
+		return this;
+	}
+	public EncryptionSignatureHashDecoder withAssociatedData(byte[] associatedData)
+	{
+		return withAssociatedData(associatedData, 0, associatedData.length);
+	}
+	public EncryptionSignatureHashDecoder withAssociatedData(byte[] associatedData, int offAD, int lenAD)
+	{
 		if (associatedData==null)
 			throw new NullPointerException();
-		if (!cipher.getType().supportAssociatedData())
-			throw new IllegalArgumentException("Cipher does not support associated data !");
 		EncryptionSignatureHashEncoder.checkLimits(associatedData, offAD, lenAD);
-		if (this.symmetricChecker!=null && cipher.getType().isAuthenticatedAlgorithm())
-			throw new IOException("Symmetric encryption use authentication and a symmetric authenticated signer is already used. No more symmetric authentication is needed. However ASymmetric authentication is possible.");
-		this.cipher=cipher;
 		this.associatedData=associatedData;
 		this.offAD=offAD;
 		this.lenAD=lenAD;
@@ -178,7 +174,7 @@ public class EncryptionSignatureHashDecoder {
 	public void decodeAndCheckHashAndSignaturesIfNecessary(RandomOutputStream outputStream) throws IOException {
 		if (outputStream==null)
 			throw new NullPointerException();
-		EncryptionSignatureHashEncoder.decryptAndCheckHashAndSignaturesImpl(inputStream, outputStream, cipher, associatedData, offAD, lenAD, symmetricChecker,asymmetricChecker, digest, getMinimumInputSize());
+		EncryptionSignatureHashEncoder.decryptAndCheckHashAndSignaturesImpl(bufferRef, inputStream, outputStream, cipher, associatedData, offAD, lenAD, symmetricChecker,asymmetricChecker, digest, getMinimumInputSize());
 	}
 	public Integrity checkHashAndSignature() throws IOException {
 		return EncryptionSignatureHashEncoder.checkHashAndSignatureImpl(inputStream, symmetricChecker,asymmetricChecker, digest);
