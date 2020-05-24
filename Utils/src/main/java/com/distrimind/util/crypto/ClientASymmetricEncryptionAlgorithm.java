@@ -68,6 +68,7 @@ public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutpu
 		}
 	}
 
+
 	private static class HybridClient extends AbstractEncryptionOutputAlgorithm {
 		private final Client nonPQCEncryption, PQCEncryption;
 		private final HybridASymmetricPublicKey hybridASymmetricPublicKey;
@@ -85,6 +86,11 @@ public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutpu
 
 		@Override
 		protected void initCipherForEncryptionWithIvAndCounter(AbstractCipher cipher, byte[] iv, int counter) throws IOException {
+			initCipherForEncryption(cipher);
+		}
+
+		@Override
+		protected void initCipherForEncryptionWithIv(AbstractCipher cipher, byte[] iv) throws IOException {
 			initCipherForEncryption(cipher);
 		}
 
@@ -231,6 +237,11 @@ public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutpu
 	}
 
 	@Override
+	protected void initCipherForEncryptionWithIv(AbstractCipher cipher, byte[] iv) throws IOException {
+		client.initCipherForEncryptionWithIv(cipher, iv);
+	}
+
+	@Override
 	public void encode(byte[] bytes, int off, int len, byte[] associatedData, int offAD, int lenAD, RandomOutputStream os, byte[] externalCounter) throws IOException {
 		client.encode(bytes, off, len, associatedData, offAD, lenAD, os, externalCounter);
 	}
@@ -348,6 +359,11 @@ public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutpu
 
 		@Override
 		protected void initCipherForEncryptionWithIvAndCounter(AbstractCipher cipher, byte[] iv, int counter) throws IOException {
+			this.initCipherForEncryption(cipher);
+		}
+
+		@Override
+		protected void initCipherForEncryptionWithIv(AbstractCipher cipher, byte[] iv) throws IOException {
 			this.initCipherForEncryption(cipher);
 		}
 

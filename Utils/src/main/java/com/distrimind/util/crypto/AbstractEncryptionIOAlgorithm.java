@@ -219,7 +219,7 @@ public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOu
 		return getCipherInputStreamForDecryption(is, associatedData, offAD, lenAD, null);
 	}
 	protected abstract void initCipherForDecryptionWithIvAndCounter(AbstractCipher cipher, byte[] iv, int counter) throws IOException ;
-
+	public abstract void initCipherForDecryptionWithIv(AbstractCipher cipher, byte[] iv) throws IOException ;
 	protected byte[][] readIvsFromEncryptedStream(final RandomInputStream is) throws IOException {
 		if (includeIV()) {
 			long initPos = is.currentPosition();
@@ -250,6 +250,11 @@ public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOu
 			}
 
 			@Override
+			protected void initCipherForDecryptionWithIv(byte[] iv) throws IOException {
+				AbstractEncryptionIOAlgorithm.this.initCipherForDecryptionWithIv(cipher, iv);
+			}
+
+			@Override
 			protected void initCipherForDecrypt() throws IOException {
 				AbstractEncryptionIOAlgorithm.this.initCipherForDecryption(cipher);
 			}
@@ -269,15 +274,27 @@ public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOu
 		}
 		return ((inputLen / maxEncryptedPartLength) * maxPlainTextSizeForEncoding)+add;
 	}
-
+	protected boolean mustAlterIVForOutputSizeComputation()
+	{
+		return false;
+	}
 	@Override
 	public long getOutputSizeAfterDecryption(long inputLen) throws IOException {
 		if (inputLen<0)
 			throw new IllegalArgumentException();
 		if (inputLen==0)
 			return 0;
-		if (cipher.getMode()!= Cipher.DECRYPT_MODE)
-			initCipherForDecryption(cipher, iv);
+
+		if (cipher.getMode()!= Cipher.DECRYPT_MODE) {
+			if (mustAlterIVForOutputSizeComputation())
+			{
+				byte[] iv = this.iv.clone();
+				iv[0] = (byte) ~iv[0];
+				initCipherForDecryptionWithIv(cipher, iv);
+			}
+			else
+				initCipherForDecryptionWithIv(cipher, iv);
+		}
 		return getOutputSizeAfterDecryption(cipher, inputLen, maxEncryptedPartLength,
 				getIVSizeBytesWithoutExternalCounter(),maxPlainTextSizeForEncoding );
 	}
@@ -286,10 +303,6 @@ public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOu
 	@Override
 	public abstract void initCipherForDecryption(AbstractCipher cipher, byte[] iv, byte[] externalCounter)
 			throws IOException;
-	@Override
-	public void initCipherForDecryption(AbstractCipher cipher, byte[] iv) throws IOException
-	{
-		initCipherForDecryption(cipher, iv, null);
-	}
+
 
 }

@@ -76,6 +76,7 @@ abstract class CommonCipherInputStream extends RandomInputStream {
 	private final long length;
 
 	protected abstract void initCipherForDecryptionWithIvAndCounter(byte[] iv, int counter) throws IOException;
+	protected abstract void initCipherForDecryptionWithIv(byte[] iv) throws IOException;
 	protected abstract void initCipherForDecrypt() throws IOException;
 
 	CommonCipherInputStream(int maxEncryptedPartLength, RandomInputStream is, boolean includeIV, byte[] iv, int IVSizeBytesWithoutExternalCounter, boolean useExternalCounter, byte[] externalCounter, AbstractCipher cipher, byte[] associatedData, int offAD, int lenAD, byte[] buffer, boolean supportRandomAccess, int counterStepInBytes, int maxPlainTextSizeForEncoding, long length) throws IOException {
@@ -121,7 +122,7 @@ abstract class CommonCipherInputStream extends RandomInputStream {
 					is.readFully(iv, 0, IVSizeBytesWithoutExternalCounter);
 					if (externalCounter!=null)
 						System.arraycopy(externalCounter, 0, iv, IVSizeBytesWithoutExternalCounter, externalCounter.length);
-					initCipherForDecryptionWithIvAndCounter(iv, 0);
+					initCipherForDecryptionWithIv(iv);
 					posEncrypted +=IVSizeBytesWithoutExternalCounter;
 				}
 				else

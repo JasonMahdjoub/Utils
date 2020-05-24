@@ -132,6 +132,7 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 	}
 
 	protected abstract void initCipherForEncryptionWithIvAndCounter(AbstractCipher cipher, byte[] iv, int counter) throws IOException;
+	protected abstract void initCipherForEncryptionWithIv(AbstractCipher cipher, byte[] iv) throws IOException;
 
 	public void encode(byte[] bytes, int off, int len, byte[] associatedData, int offAD, int lenAD, RandomOutputStream os, byte[] externalCounter) throws IOException{
 		RandomInputStream ris=new RandomByteArrayInputStream(bytes);
@@ -231,12 +232,12 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 						if (manualIvs!=null)
 						{
 							if (externalCounter==null)
-								initCipherForEncryptionWithIvAndCounter(cipher, iv=manualIvs[(int)round], 0);
+								initCipherForEncryptionWithIv(cipher, manualIvs[(int)round]);
 							else {
 								System.arraycopy(manualIvs[(int) round], 0, iv = AbstractEncryptionOutputAlgorithm.this.iv, 0, getIVSizeBytesWithoutExternalCounter());
 								if (useExternalCounter())
 									System.arraycopy(externalCounter, 0, iv, getIVSizeBytesWithoutExternalCounter(), externalCounter.length);
-								initCipherForEncryptionWithIvAndCounter(cipher, iv, 0);
+								initCipherForEncryptionWithIv(cipher, iv);
 							}
 						}
 						else {
@@ -348,18 +349,18 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 					long p = round * maxEncryptedPartLength;
 					int mod=(int)(_pos % maxPlainTextSizeForEncoding);
 					int counter=mod/getCounterStepInBytes();
-					byte[] iv;
+
 					if (manualIvs!=null)
 					{
 						if (useExternalCounter())
-							System.arraycopy(manualIvs[(int)round], 0, iv=AbstractEncryptionOutputAlgorithm.this.iv, 0, getIVSizeBytesWithoutExternalCounter());
+							System.arraycopy(manualIvs[(int)round], 0, iv, 0, getIVSizeBytesWithoutExternalCounter());
 						else
-							iv=manualIvs[(int)round];
+							System.arraycopy(manualIvs[(int)round], 0, iv, 0, iv.length);
 					}
 					else {
 						RandomInputStream ris = os.getRandomInputStream();
 						os.getRandomInputStream().seek(p);
-						ris.readFully(iv=AbstractEncryptionOutputAlgorithm.this.iv);
+						ris.readFully(iv);
 					}
 					if (useExternalCounter())
 						System.arraycopy(externalCounter, 0, iv, getIVSizeBytesWithoutExternalCounter(), externalCounter.length);
@@ -368,6 +369,7 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 						mod = cipher.getOutputSize(mod)+getIVSizeBytesWithoutExternalCounter();
 					}
 					p += mod;
+
 					os.seek(p);
 					initCipherForEncryptionWithIvAndCounter(cipher, iv, counter);
 				}

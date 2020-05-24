@@ -341,40 +341,20 @@ public abstract class AbstractCipher {
 	 * @throws NoSuchAlgorithmException if the algorithm was not found
 	 * @throws InvalidAlgorithmParameterException the algorithm parameters are invalid
 	 */
-	protected abstract void initImpl(int opmode, AbstractKey key, byte[] iv) throws InvalidKeyException, NoSuchAlgorithmException,
+	public abstract void init(int opmode, AbstractKey key, byte[] iv) throws InvalidKeyException, NoSuchAlgorithmException,
 			InvalidKeySpecException, InvalidAlgorithmParameterException;
 
-	public final void init(int opmode, AbstractKey key, byte[] iv) throws InvalidKeyException, NoSuchAlgorithmException,
-			InvalidKeySpecException, InvalidAlgorithmParameterException
-	{
-		if (iv!=null) {
-			if (previousIV != iv) {
-				previousIV = iv;
-				counterPos = iv.length - 4;
-				initialCounterPart = Bits.getInt(iv, counterPos);
-			}
-			iv = previousIV.clone();
-		}
-		initImpl(opmode, key, iv);
-	}
 
-	private byte[] previousIV=null;
-	private int initialCounterPart;
-	private int counterPos;
 
 	public void init(int opmode, AbstractKey key, byte[] iv, int counter) throws InvalidKeyException, NoSuchAlgorithmException,
 			InvalidKeySpecException, InvalidAlgorithmParameterException
 	{
 		if (iv!=null) {
-			if (previousIV != iv) {
-				previousIV = iv;
-				counterPos = iv.length - 4;
-				initialCounterPart = Bits.getInt(iv, counterPos);
-			}
-			iv = previousIV.clone();
-			Bits.putInt(iv, counterPos, initialCounterPart + counter);
+			int counterPos = iv.length - 4;
+			iv = iv.clone();
+			Bits.putInt(iv, counterPos, Bits.getInt(iv, counterPos) + counter);
 		}
-		initImpl(opmode, key, iv);
+		init(opmode, key, iv);
 	}
 
 	/**

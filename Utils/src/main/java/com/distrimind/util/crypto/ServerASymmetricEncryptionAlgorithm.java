@@ -326,6 +326,11 @@ public class ServerASymmetricEncryptionAlgorithm implements IEncryptionInputAlgo
 				}
 
 				@Override
+				protected void initCipherForDecryptionWithIv(byte[] iv) throws IOException {
+					Server.this.initCipherForDecryption(cipher, iv, null);
+				}
+
+				@Override
 				protected void initCipherForDecrypt() throws IOException {
 					Server.this.initCipherForDecryption(cipher, null, externalCounter);
 				}
@@ -512,9 +517,9 @@ public class ServerASymmetricEncryptionAlgorithm implements IEncryptionInputAlgo
 	}
 
 	@Override
-	public void initCipherForDecryption(AbstractCipher cipher, byte[] iv) throws IOException
-	{
-		initCipherForDecryption(cipher,iv,  null);
+	public void initCipherForDecryptionWithIv(AbstractCipher cipher, byte[] iv) throws IOException {
+		initCipherForDecryption(cipher, iv, null);
 	}
+
 
 }

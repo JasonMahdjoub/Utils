@@ -64,7 +64,7 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 	private final SymmetricEncryptionType type;
 
 	private final AbstractSecureRandom random;
-	private byte[] iv;
+	//private byte[] iv;
 	
 	private final byte blockModeCounterBytes;
 	private final boolean internalCounter;
@@ -72,6 +72,7 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 	private byte[] externalCounter;
 	private final int counterStepInBytes;
 	private final boolean supportRandomReadWrite;
+	private final boolean chacha;
 
 	@Override
 	public boolean isPostQuantumEncryption() {
@@ -199,8 +200,9 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 		this.random = random;
 		this.counterStepInBytes=type.getBlockSizeBits()/8;
 		this.supportRandomReadWrite=type.supportRandomReadWrite();
-		iv = new byte[getIVSizeBytesWithExternalCounter()];
+		//iv = new byte[getIVSizeBytesWithExternalCounter()];
 		externalCounter=this.internalCounter?null:new byte[blockModeCounterBytes];
+		this.chacha=type.getAlgorithmName().toUpperCase().startsWith(SymmetricEncryptionType.CHACHA20.getAlgorithmName().toUpperCase());
 		try {
 			this.cipher.init(Cipher.ENCRYPT_MODE, this.key, generateIV());
 		} catch (InvalidKeyException | NoSuchAlgorithmException | InvalidKeySpecException | InvalidAlgorithmParameterException e) {
@@ -230,8 +232,8 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 	}	
 	
 	private byte[] generateIV() {
-		if (supportRandomEncryptionAndRandomDecryption())
-			iv=new byte[iv.length];
+		/*if (supportRandomEncryptionAndRandomDecryption())
+			iv=new byte[iv.length];*/
 		random.nextBytes(iv);
 		if (!internalCounter)
 		{
@@ -321,22 +323,40 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 	@Override
 	protected void initCipherForDecryptionWithIvAndCounter(AbstractCipher cipher, byte[] iv, int counter) throws IOException {
 		try {
-			if (supportRandomReadWrite)
-				cipher.init(Cipher.DECRYPT_MODE, key, iv, counter);
-			else
-				cipher.init(Cipher.DECRYPT_MODE, key, iv);
+			if (!supportRandomReadWrite)
+				throw new IllegalAccessError();
+			cipher.init(Cipher.DECRYPT_MODE, key, iv, counter);
 		} catch (InvalidKeyException | NoSuchAlgorithmException | InvalidKeySpecException | InvalidAlgorithmParameterException e) {
 			throw new IOException(e);
 		}
 	}
 
 	@Override
+	public void initCipherForDecryptionWithIv(AbstractCipher cipher, byte[] iv) throws IOException {
+
+		try {
+
+			cipher.init(Cipher.DECRYPT_MODE, key, iv);
+		} catch (InvalidKeyException | NoSuchAlgorithmException | InvalidKeySpecException | InvalidAlgorithmParameterException e) {
+			throw new IOException(e);
+		}
+	}
+
+
+	@Override
 	protected void initCipherForEncryptionWithIvAndCounter(AbstractCipher cipher, byte[] iv, int counter) throws IOException {
 		try {
-			if (supportRandomReadWrite)
-				cipher.init(Cipher.ENCRYPT_MODE, key, iv, counter);
-			else
-				cipher.init(Cipher.ENCRYPT_MODE, key, iv);
+			if (!supportRandomReadWrite)
+				throw new IllegalAccessError();
+			cipher.init(Cipher.ENCRYPT_MODE, key, iv, counter);
+		} catch (InvalidKeyException | NoSuchAlgorithmException | InvalidKeySpecException | InvalidAlgorithmParameterException e) {
+			throw new IOException(e);
+		}
+	}
+	@Override
+	protected void initCipherForEncryptionWithIv(AbstractCipher cipher, byte[] iv) throws IOException {
+		try {
+			cipher.init(Cipher.ENCRYPT_MODE, key, iv);
 		} catch (InvalidKeyException | NoSuchAlgorithmException | InvalidKeySpecException | InvalidAlgorithmParameterException e) {
 			throw new IOException(e);
 		}
@@ -357,6 +377,10 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 
 	}
 	private final Random nonSecureRandom=new Random(System.currentTimeMillis());
+	protected boolean mustAlterIVForOutputSizeComputation()
+	{
+		return chacha;
+	}
 	@Override
 	public void initCipherForEncryptionWithNullIV(AbstractCipher cipher) throws IOException {
 		nonSecureRandom.nextBytes(iv);
