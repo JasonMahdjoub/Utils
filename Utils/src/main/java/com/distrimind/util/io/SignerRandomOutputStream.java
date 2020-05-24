@@ -46,10 +46,17 @@ import java.security.SignatureException;
  * @since Utils 4.16.0
  */
 public class SignerRandomOutputStream extends DelegatedRandomOutputStream{
-	private final AbstractAuthenticatedSignerAlgorithm signer;
+	private AbstractAuthenticatedSignerAlgorithm signer;
 	private final byte[] b=new byte[1];
 	public SignerRandomOutputStream(RandomOutputStream out, AbstractAuthenticatedSignerAlgorithm signer) {
 		super(out);
+		if (signer==null)
+			throw new NullPointerException();
+		this.signer=signer;
+	}
+	public void set(RandomOutputStream out, AbstractAuthenticatedSignerAlgorithm signer)
+	{
+		set(out);
 		if (signer==null)
 			throw new NullPointerException();
 		this.signer=signer;

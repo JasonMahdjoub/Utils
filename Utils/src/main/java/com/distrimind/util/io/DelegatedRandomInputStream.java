@@ -44,9 +44,14 @@ import java.io.IOException;
  * @since Utils 4.16.0
  */
 public abstract class DelegatedRandomInputStream extends RandomInputStream {
-	protected final RandomInputStream in;
+	protected RandomInputStream in;
 
 	public DelegatedRandomInputStream(RandomInputStream in)  {
+		set(in);
+	}
+
+	protected void set(RandomInputStream in)
+	{
 		if (in==null)
 			throw new NullPointerException();
 		this.in = in;

@@ -11,7 +11,7 @@ import java.io.IOException;
 public class LimitedRandomOutputStream extends RandomOutputStream{
 	private RandomOutputStream out;
 	private long off;
-	private final long maxLength;
+	private long maxLength;
 	private long length;
 	private long pos;
 	public LimitedRandomOutputStream(RandomOutputStream out, long off) throws IOException {
@@ -19,6 +19,13 @@ public class LimitedRandomOutputStream extends RandomOutputStream{
 		init(out, off);
 	}
 	public LimitedRandomOutputStream(RandomOutputStream out, long off, long maxLength) throws IOException {
+		set(out, off, maxLength);
+	}
+	public void set(RandomOutputStream out, long off) throws IOException {
+		this.maxLength = -1;
+		init(out, off);
+	}
+	public void set(RandomOutputStream out, long off, long maxLength) throws IOException {
 		if (maxLength<0)
 			throw new IllegalArgumentException();
 		this.maxLength = maxLength;

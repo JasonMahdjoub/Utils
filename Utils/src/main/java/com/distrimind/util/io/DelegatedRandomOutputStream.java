@@ -43,9 +43,14 @@ import java.io.IOException;
  * @since Utils  4.16.0
  */
 public abstract class DelegatedRandomOutputStream extends RandomOutputStream{
-	protected final RandomOutputStream out;
+	protected RandomOutputStream out;
 
 	public DelegatedRandomOutputStream(RandomOutputStream out) {
+		set(out);
+	}
+
+	protected void set(RandomOutputStream out)
+	{
 		if (out==null)
 			throw new NullPointerException();
 		this.out = out;

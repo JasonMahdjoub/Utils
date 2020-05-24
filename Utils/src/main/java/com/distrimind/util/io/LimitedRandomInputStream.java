@@ -45,13 +45,19 @@ import java.io.IOException;
  * @since Utils 4.16.0
  */
 public class LimitedRandomInputStream extends RandomInputStream{
-	private final RandomInputStream in;
-	private final long off;
-	private final long len;
+	private RandomInputStream in;
+	private long off;
+	private long len;
 	public LimitedRandomInputStream(RandomInputStream in, long off) throws IOException {
-		this(in, off, in.length()-off);
+		set(in, off);
 	}
 	public LimitedRandomInputStream(RandomInputStream in, long off, long len) throws IOException {
+		set(in, off, len);
+	}
+	public void set(RandomInputStream in, long off) throws IOException {
+		set(in, off, in.length()-off);
+	}
+	public void set(RandomInputStream in, long off, long len) throws IOException {
 		if (in==null)
 			throw new NullPointerException();
 		if (off<0 || off>in.length())

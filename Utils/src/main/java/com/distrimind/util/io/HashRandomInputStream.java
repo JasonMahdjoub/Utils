@@ -43,9 +43,16 @@ import com.distrimind.util.crypto.AbstractMessageDigest;
  * @since Utils 4.16.0
  */
 public class HashRandomInputStream extends DelegatedRandomInputStream{
-	private final AbstractMessageDigest messageDigest;
+	private AbstractMessageDigest messageDigest;
 	public HashRandomInputStream(RandomInputStream in, AbstractMessageDigest messageDigest) {
 		super(in);
+		if (messageDigest==null)
+			throw new NullPointerException();
+		this.messageDigest=messageDigest;
+	}
+	public void set(RandomInputStream in, AbstractMessageDigest messageDigest)
+	{
+		set(in);
 		if (messageDigest==null)
 			throw new NullPointerException();
 		this.messageDigest=messageDigest;

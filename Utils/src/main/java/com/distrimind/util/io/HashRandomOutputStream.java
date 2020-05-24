@@ -45,10 +45,18 @@ import java.io.IOException;
  * @since Utils 4.16.0
  */
 public class HashRandomOutputStream extends DelegatedRandomOutputStream{
-	private final AbstractMessageDigest messageDigest;
+	private AbstractMessageDigest messageDigest;
 
 	public HashRandomOutputStream(RandomOutputStream out, AbstractMessageDigest messageDigest) {
 		super(out);
+		if (messageDigest==null)
+			throw new NullPointerException();
+		this.messageDigest=messageDigest;
+	}
+
+	public void set(RandomOutputStream out, AbstractMessageDigest messageDigest)
+	{
+		set(out);
 		if (messageDigest==null)
 			throw new NullPointerException();
 		this.messageDigest=messageDigest;

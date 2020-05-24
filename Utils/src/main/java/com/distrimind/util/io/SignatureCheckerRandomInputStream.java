@@ -47,10 +47,17 @@ import java.security.SignatureException;
  */
 public class SignatureCheckerRandomInputStream extends DelegatedRandomInputStream{
 
-	private final AbstractAuthenticatedCheckerAlgorithm checker;
+	private AbstractAuthenticatedCheckerAlgorithm checker;
 	private final byte[] b=new byte[1];
 	public SignatureCheckerRandomInputStream(RandomInputStream in, AbstractAuthenticatedCheckerAlgorithm checker) {
 		super(in);
+		if (checker==null)
+			throw new NullPointerException();
+		this.checker=checker;
+	}
+	public void set(RandomInputStream in, AbstractAuthenticatedCheckerAlgorithm checker)
+	{
+		set(in);
 		if (checker==null)
 			throw new NullPointerException();
 		this.checker=checker;
