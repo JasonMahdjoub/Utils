@@ -70,7 +70,7 @@ public class BCCipher extends AbstractCipher {
 	private KeyWrapper<?> wrapper;
 	private KeyUnwrapper<?> unwrapper;
 	private UpdateOutputStream aadStream=null;
-	private int mode;
+	private int mode=-1;
 	@Override
 	public int getMode() {
 		return mode;

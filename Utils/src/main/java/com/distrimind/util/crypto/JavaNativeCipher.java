@@ -60,7 +60,7 @@ import java.security.spec.InvalidKeySpecException;
 public final class JavaNativeCipher extends AbstractCipher {
 	private final SymmetricEncryptionType type;
 	private final Cipher cipher;
-	private int mode;
+	private int mode=-1;
 
 
 

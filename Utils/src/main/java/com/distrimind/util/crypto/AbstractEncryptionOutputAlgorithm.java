@@ -38,6 +38,7 @@ import com.distrimind.util.FileTools;
 import com.distrimind.util.io.*;
 
 import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.ShortBufferException;
 import java.io.IOException;
@@ -465,7 +466,10 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 	{
 		return getIVSizeBytesWithExternalCounter()-(useExternalCounter()?getBlockModeCounterBytes():0);
 	}
-
+	protected boolean mustAlterIVForOutputSizeComputation()
+	{
+		return false;
+	}
 	public long getOutputSizeAfterEncryption(long inputLen) throws IOException {
 		if (inputLen<0)
 			throw new IllegalArgumentException();
@@ -473,7 +477,11 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 			return 0;
 		long add=inputLen % maxPlainTextSizeForEncoding;
 		if (add>0) {
-			initCipherForEncryptionWithNullIV(cipher);
+
+			if (cipher.getMode()!= Cipher.ENCRYPT_MODE || mustAlterIVForOutputSizeComputation())
+			{
+				initCipherForEncryptionWithNullIV(cipher);
+			}
 			add = cipher.getOutputSize((int)add)+getIVSizeBytesWithoutExternalCounter();
 		}
 		return ((inputLen / maxPlainTextSizeForEncoding) * maxEncryptedPartLength)+add;

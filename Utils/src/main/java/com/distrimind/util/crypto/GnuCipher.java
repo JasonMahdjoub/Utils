@@ -53,7 +53,7 @@ import java.security.spec.InvalidKeySpecException;
  */
 public final class GnuCipher extends AbstractCipher {
 	private final Object cipher;
-	private int mode;
+	private int mode=-1;
 	@Override
 	public int getMode() {
 		return mode;

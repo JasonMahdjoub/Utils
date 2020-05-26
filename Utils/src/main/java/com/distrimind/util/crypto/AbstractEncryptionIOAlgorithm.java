@@ -279,10 +279,7 @@ public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOu
 		}
 		return ((inputLen / maxEncryptedPartLength) * maxPlainTextSizeForEncoding)+add;
 	}
-	protected boolean mustAlterIVForOutputSizeComputation()
-	{
-		return false;
-	}
+
 	@Override
 	public long getOutputSizeAfterDecryption(long inputLen) throws IOException {
 		if (inputLen<0)
@@ -293,12 +290,9 @@ public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOu
 		if (cipher.getMode()!= Cipher.DECRYPT_MODE) {
 			if (mustAlterIVForOutputSizeComputation())
 			{
-				byte[] iv = this.iv.clone();
 				iv[0] = (byte) ~iv[0];
-				initCipherForDecryptionWithIv(cipher, iv);
 			}
-			else
-				initCipherForDecryptionWithIv(cipher, iv);
+			initCipherForDecryptionWithIv(cipher, iv);
 		}
 		return getOutputSizeAfterDecryption(cipher, inputLen, maxEncryptedPartLength,
 				getIVSizeBytesWithoutExternalCounter(),maxPlainTextSizeForEncoding );

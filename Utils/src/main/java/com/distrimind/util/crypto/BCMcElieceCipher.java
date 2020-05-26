@@ -82,7 +82,7 @@ public class BCMcElieceCipher extends AbstractCipher{
 
 	private final ByteArrayOutputStream out=new ByteArrayOutputStream();
 	private boolean encrypt;
-	private int mode;
+	private int mode=-1;
 	@Override
 	public int getMode() {
 		return mode;

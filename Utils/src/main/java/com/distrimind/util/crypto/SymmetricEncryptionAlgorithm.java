@@ -73,6 +73,7 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 	private final int counterStepInBytes;
 	private final boolean supportRandomReadWrite;
 	private final boolean chacha;
+	private final boolean gcm;
 
 	@Override
 	public boolean isPostQuantumEncryption() {
@@ -202,7 +203,8 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 		this.supportRandomReadWrite=type.supportRandomReadWrite();
 		//iv = new byte[getIVSizeBytesWithExternalCounter()];
 		externalCounter=this.internalCounter?null:new byte[blockModeCounterBytes];
-		this.chacha=type.getAlgorithmName().toUpperCase().startsWith(SymmetricEncryptionType.CHACHA20.getAlgorithmName().toUpperCase());
+		this.chacha =type.getAlgorithmName().toUpperCase().startsWith(SymmetricEncryptionType.CHACHA20.getAlgorithmName().toUpperCase());
+		this.gcm =type.getBlockMode().toUpperCase().equals("GCM");
 		try {
 			this.cipher.init(Cipher.ENCRYPT_MODE, this.key, generateIV());
 		} catch (InvalidKeyException | NoSuchAlgorithmException | InvalidKeySpecException | InvalidAlgorithmParameterException e) {
@@ -383,12 +385,17 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 	}
 	@Override
 	public void initCipherForEncryptionWithNullIV(AbstractCipher cipher) throws IOException {
-		nonSecureRandom.nextBytes(iv);
-		try {
-			cipher.init(Cipher.ENCRYPT_MODE, key, iv);
-		} catch (InvalidKeyException | NoSuchAlgorithmException | InvalidKeySpecException | InvalidAlgorithmParameterException e) {
-			throw new IOException(e);
+		byte[] iv=this.iv;
+		if (mustAlterIVForOutputSizeComputation() || gcm)
+		{
+			/*iv = cipher.getIV();
+			if (iv == null)
+				iv = this.iv;*/
+
+			iv[0] = (byte) ~iv[0];
 		}
+
+		initCipherForEncryptionWithIv(cipher, iv);
 	}
 
 
