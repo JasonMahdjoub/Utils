@@ -329,7 +329,7 @@ public class ServerASymmetricEncryptionAlgorithm implements IEncryptionInputAlgo
 				}
 
 				@Override
-				protected void initCipherForDecrypt() throws IOException {
+				protected void initCipherForDecryption() throws IOException {
 					Server.this.initCipherForDecryption(cipher, null, externalCounter);
 				}
 

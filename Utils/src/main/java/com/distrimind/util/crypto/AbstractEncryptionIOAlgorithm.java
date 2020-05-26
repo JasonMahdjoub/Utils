@@ -255,7 +255,7 @@ public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOu
 			}
 
 			@Override
-			protected void initCipherForDecrypt() throws IOException {
+			protected void initCipherForDecryption() throws IOException {
 				AbstractEncryptionIOAlgorithm.this.initCipherForDecryption(cipher);
 			}
 
@@ -288,7 +288,7 @@ public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOu
 			return 0;
 
 		if (cipher.getMode()!= Cipher.DECRYPT_MODE) {
-			if (mustAlterIVForOutputSizeComputation())
+			if (includeIV() && mustAlterIVForOutputSizeComputation())
 			{
 				iv[0] = (byte) ~iv[0];
 			}

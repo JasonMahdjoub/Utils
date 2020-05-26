@@ -78,7 +78,7 @@ abstract class CommonCipherInputStream extends RandomInputStream {
 
 	protected abstract void initCipherForDecryptionWithIvAndCounter(byte[] iv, int counter) throws IOException;
 	protected abstract void initCipherForDecryptionWithIv(byte[] iv) throws IOException;
-	protected abstract void initCipherForDecrypt() throws IOException;
+	protected abstract void initCipherForDecryption() throws IOException;
 	protected abstract long getOutputSizeAfterDecryption(long inputLength) throws IOException;
 
 	CommonCipherInputStream(int maxEncryptedPartLength, RandomInputStream is, boolean includeIV, byte[] iv, int IVSizeBytesWithoutExternalCounter, boolean useExternalCounter, byte[] externalCounter, AbstractCipher cipher, byte[] associatedData, int offAD, int lenAD, byte[] buffer, boolean supportRandomAccess, int counterStepInBytes, int maxPlainTextSizeForEncoding) throws IOException {
@@ -140,7 +140,7 @@ abstract class CommonCipherInputStream extends RandomInputStream {
 				}
 				else
 				{
-					initCipherForDecrypt();
+					initCipherForDecryption();
 				}
 				if (associatedData!=null && lenAD>0)
 					cipher.updateAAD(associatedData, offAD, lenAD);
@@ -357,7 +357,7 @@ abstract class CommonCipherInputStream extends RandomInputStream {
 		{
 			long add=cipher.getOutputSize((int)(_pos % maxPlainTextSizeForEncoding));
 			is.seek(posEncrypted =((_pos / maxPlainTextSizeForEncoding * maxEncryptedPartLength)+add));
-			initCipherForDecrypt();
+			initCipherForDecryption();
 		}
 		posPlainText=_pos;
 		if (associatedData != null && lenAD > 0)

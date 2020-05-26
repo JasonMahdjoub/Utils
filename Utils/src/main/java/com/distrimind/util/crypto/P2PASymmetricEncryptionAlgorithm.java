@@ -162,6 +162,11 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 	}
 
 	@Override
+	protected boolean mustAlterIVForOutputSizeComputation() {
+		return p2pencryption.mustAlterIVForOutputSizeComputation();
+	}
+
+	@Override
 	public byte[] decode(RandomInputStream is, byte[] associatedData, int offAD, int lenAD) throws IOException {
 		return p2pencryption.decode(is, associatedData, offAD, lenAD);
 	}
@@ -610,8 +615,6 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 			this.myKeyPair = myKeyPair;
 			this.distantPublicKey = distantPublicKey;
 			this.signatureType = signatureType;
-			// initCipherForEncrypt(this.cipher);
-
 			setMaxPlainTextSizeForEncoding(distantPublicKey.getMaxBlockSize());
 			initBufferAllocatorArgs();
 		}
@@ -621,10 +624,12 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 			initCipherForEncryption(cipher );
 		}
 
+
 		@Override
 		protected void initCipherForEncryptionWithIvAndCounter(AbstractCipher cipher, byte[] iv, int counter) throws IOException {
 			initCipherForEncryption(cipher );
 		}
+
 
 		@Override
 		public AbstractCipher getCipherInstance() throws IOException {
@@ -633,6 +638,11 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 			} catch (NoSuchAlgorithmException | NoSuchPaddingException | NoSuchProviderException e) {
 				throw new IOException(e);
 			}
+		}
+
+		@Override
+		public void initCipherForEncryption(AbstractCipher cipher) throws IOException {
+			initCipherForEncryptionWithNullIV(cipher);
 		}
 
 		@Override
@@ -676,11 +686,7 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 		@Override
 		public void initCipherForDecryption(AbstractCipher _cipher, byte[] iv, byte[] externalCounter)
 				throws IOException {
-			try {
-				_cipher.init(Cipher.DECRYPT_MODE, myKeyPair.getASymmetricPrivateKey());
-			} catch (InvalidKeyException | NoSuchAlgorithmException | InvalidKeySpecException | NoSuchProviderException e) {
-				throw new IOException(e);
-			}
+			initCipherForDecryption(_cipher);
 		}
 
 		@Override
@@ -709,7 +715,12 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 
 		@Override
 		public void initCipherForDecryption(AbstractCipher cipher) throws IOException {
-			initCipherForEncryptionWithNullIV(cipher);
+			try {
+				cipher.init(Cipher.DECRYPT_MODE, myKeyPair.getASymmetricPrivateKey());
+			} catch (InvalidKeyException | NoSuchAlgorithmException | InvalidKeySpecException | NoSuchProviderException e) {
+				throw new IOException(e);
+			}
 		}
+
 	}
 }
