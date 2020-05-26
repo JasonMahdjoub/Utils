@@ -186,7 +186,7 @@ public class EncryptionSignatureHashEncoder {
 		this.asymmetricSigner=asymmetricSigner;
 		minimumOutputSize=null;
 		if (signerOut==null)
-			signerOut=new SignerRandomOutputStream(nullRandomInputStream, this.symmetricSigner );
+			signerOut=new SignerRandomOutputStream(nullRandomInputStream, this.asymmetricSigner );
 		return this;
 	}
 	public EncryptionSignatureHashEncoder withASymmetricPrivateKeyForSignature(ASymmetricPrivateKey privateKeyForSignature) throws IOException{
@@ -198,7 +198,7 @@ public class EncryptionSignatureHashEncoder {
 			this.asymmetricSigner=new ASymmetricAuthenticatedSignerAlgorithm(privateKeyForSignature);
 			minimumOutputSize=null;
 			if (signerOut==null)
-				signerOut=new SignerRandomOutputStream(nullRandomInputStream, this.symmetricSigner );
+				signerOut=new SignerRandomOutputStream(nullRandomInputStream, this.asymmetricSigner );
 		} catch (NoSuchProviderException | NoSuchAlgorithmException e) {
 			throw new IOException(e);
 		}
