@@ -373,6 +373,8 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 			if (includeIV()) {
 				long p = round * maxEncryptedPartLength;
 				int mod=(int)(_pos % maxPlainTextSizeForEncoding);
+				if (mod%getCounterStepInBytes()!=0)
+					throw new IOException("The position is not aligned with the cipher block size");
 				int counter=mod/getCounterStepInBytes();
 
 				if (manualIvs!=null)

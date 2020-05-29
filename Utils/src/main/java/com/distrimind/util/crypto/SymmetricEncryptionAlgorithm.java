@@ -131,9 +131,28 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 
 	}
 
+	private void partialHash(RandomInputStream nonEncryptedInputStream, NullRandomOutputStream nullStream, AbstractMessageDigest nullMD, AbstractMessageDigest md, HashRandomOutputStream hashOut, RandomOutputStream os, long pos, long len) throws IOException {
+		long mod=pos%maxEncryptedPartLength;
+		if (mod>0)
+			mod-=getIVSizeBytesWithoutExternalCounter();
+		assert mod>=0;
+		pos=(pos/maxEncryptedPartLength)*maxPlainTextSizeForEncoding+mod;
+		long p=(pos/getCounterStepInBytes())*getCounterStepInBytes();
+		long off=pos-p;
+		nonEncryptedInputStream.seek(p);
+		os.seek(p);
+		if (off>0)
+		{
+			hashOut.set(nullStream, nullMD);
+			nonEncryptedInputStream.transferTo(os, off);
+		}
+		hashOut.set(nullStream, md);
+		nonEncryptedInputStream.transferTo(os, len);
+	}
+
 	public boolean checkPartialHashWithNonEncryptedStream(SubStreamHashResult hashResultFromEncryptedStream, SubStreamParameters subStreamParameters,
 														  RandomInputStream nonEncryptedInputStream, byte[] associatedData, int offAD, int lenAD,
-														  AbstractMessageDigest md) throws IOException {
+														  AbstractMessageDigest md) throws IOException, NoSuchProviderException {
 
 		List<SubStreamParameter> parameters = subStreamParameters.getParameters();
 		byte[][] ivs = hashResultFromEncryptedStream.getIvs();
@@ -144,7 +163,15 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 		final int ivSizeWithoutExternalCounter=getIVSizeBytesWithoutExternalCounter();
 		NullRandomOutputStream nullStream=new NullRandomOutputStream();
 		nullStream.setLength(getOutputSizeAfterEncryption(nonEncryptedInputStream.length()));
-		HashRandomOutputStream hashOut=new HashRandomOutputStream(nullStream, md);
+		AbstractMessageDigest nullMD;
+		HashRandomOutputStream hashOut;
+		try {
+			nullMD=MessageDigestType.DEFAULT.getMessageDigestInstance();
+			hashOut=new HashRandomOutputStream(nullStream, nullMD);
+		} catch (NoSuchAlgorithmException e) {
+			throw new IOException(e);
+		}
+
 
 		try(RandomOutputStream os= getCipherOutputStreamForEncryption(hashOut, false, associatedData, offAD, lenAD, null, ivs)) {
 
@@ -155,9 +182,7 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 				long startIV = round * maxEncryptedPartLength;
 				long endIV = startIV + ivSizeWithoutExternalCounter;
 				if (start < startIV) {
-					os.seek(start);
-					nonEncryptedInputStream.seek(start - round * ivSizeWithoutExternalCounter);
-					nonEncryptedInputStream.transferTo(os, startIV - start);
+					partialHash(nonEncryptedInputStream, nullStream, nullMD, md, hashOut, os, start, startIV - start);
 					if (end > startIV) {
 						md.update(ivs[round], 0, (int) Math.min(end - startIV, ivSizeWithoutExternalCounter));
 					}
@@ -167,9 +192,7 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 				}
 				if (end > endIV) {
 					start = Math.max(endIV, start);
-					os.seek(start);
-					nonEncryptedInputStream.seek(start - (round + 1) * ivSizeWithoutExternalCounter);
-					nonEncryptedInputStream.transferTo(os, end - start);
+					partialHash(nonEncryptedInputStream, nullStream, nullMD, md, hashOut, os, start, end - start);
 				}
 			}
 			return Arrays.equals(md.digest(), hashResultFromEncryptedStream.getHash());
