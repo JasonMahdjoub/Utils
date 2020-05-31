@@ -105,7 +105,7 @@ public class TestReadWriteEncryption {
 
 	@Test(dataProvider = "provideParameters")
 	public void testEncryption(SymmetricSecretKey secretKeyForEncryption, byte[] associatedData, SymmetricSecretKey secretKeyForSignature, ASymmetricKeyPair keyPairForSignature, MessageDigestType messageDigestType) throws IOException, NoSuchProviderException, NoSuchAlgorithmException {
-		System.out.println("Encryption type : "+secretKeyForEncryption.getEncryptionAlgorithmType());
+		System.out.println("Encryption type : "+(secretKeyForEncryption==null?"null":secretKeyForEncryption.getEncryptionAlgorithmType()));
 		Random r=new Random(System.currentTimeMillis());
 		byte[] in=new byte[10000*r.nextInt(1000)];
 		r.nextBytes(in);

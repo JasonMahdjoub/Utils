@@ -247,11 +247,14 @@ public class EncryptionSignatureHashEncoder {
 			originalOutputStream.ensureLength(maximumOutputLengthAfterEncoding);
 
 			byte code=getCode(cipher, associatedData, symmetricSigner, asymmetricSigner, digest);
-
+			AbstractMessageDigest digest=this.digest;
 			if (symmetricSigner!=null && asymmetricSigner!=null && digest==null) {
 				digest = defaultMessageDigest.get();
-				if (digest==null)
-					defaultMessageDigest.set(digest=defaultMessageType.getMessageDigestInstance());
+				if (digest==null) {
+					defaultMessageDigest.set(digest = defaultMessageType.getMessageDigestInstance());
+					if (hashOut == null)
+						hashOut = new HashRandomOutputStream(nullRandomInputStream, this.digest);
+				}
 			}
 
 			RandomOutputStream outputStream=originalOutputStream;

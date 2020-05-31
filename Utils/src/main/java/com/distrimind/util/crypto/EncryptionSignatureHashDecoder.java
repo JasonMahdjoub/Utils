@@ -307,8 +307,11 @@ public class EncryptionSignatureHashDecoder {
 			byte code=checkCodeForDecode();
 			AbstractMessageDigest digest=this.digest;
 			if (symmetricChecker!=null && asymmetricChecker!=null && digest==null) {
-				if (defaultMessageDigest==null)
-					defaultMessageDigest=digest=EncryptionSignatureHashEncoder.defaultMessageType.getMessageDigestInstance();
+				if (defaultMessageDigest==null) {
+					defaultMessageDigest = digest = EncryptionSignatureHashEncoder.defaultMessageType.getMessageDigestInstance();
+					if (hashIn==null)
+						hashIn=new HashRandomInputStream(nullRandomInputStream, digest);
+				}
 				else
 					digest = defaultMessageDigest;
 
