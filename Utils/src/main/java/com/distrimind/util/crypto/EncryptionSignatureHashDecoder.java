@@ -124,8 +124,6 @@ public class EncryptionSignatureHashDecoder {
 			throw new NullPointerException();
 		this.digest=messageDigest;
 		minimumInputSize=null;
-		if (hashIn==null)
-			hashIn=new HashRandomInputStream(nullRandomInputStream, digest);
 		return this;
 	}
 	@SuppressWarnings("UnusedReturnValue")
@@ -135,8 +133,6 @@ public class EncryptionSignatureHashDecoder {
 		try {
 			this.digest=messageDigestType.getMessageDigestInstance();
 			minimumInputSize=null;
-			if (hashIn==null)
-				hashIn=new HashRandomInputStream(nullRandomInputStream, digest);
 		} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
 			throw new IOException(e);
 		}
@@ -149,8 +145,7 @@ public class EncryptionSignatureHashDecoder {
 			throw new IOException("Symmetric encryption use authentication. No more symmetric authentication is needed. However ASymmetric authentication is possible.");
 		this.symmetricChecker=symmetricChecker;
 		minimumInputSize=null;
-		if (checkerIn==null)
-			checkerIn=new SignatureCheckerRandomInputStream(nullRandomInputStream, symmetricChecker);
+
 		return this;
 	}
 	@SuppressWarnings("UnusedReturnValue")
@@ -172,8 +167,6 @@ public class EncryptionSignatureHashDecoder {
 			throw new NullPointerException();
 		this.asymmetricChecker=asymmetricChecker;
 		minimumInputSize=null;
-		if (checkerIn==null)
-			checkerIn=new SignatureCheckerRandomInputStream(nullRandomInputStream, asymmetricChecker);
 		return this;
 	}
 
@@ -186,8 +179,6 @@ public class EncryptionSignatureHashDecoder {
 		try {
 			this.asymmetricChecker=new ASymmetricAuthenticatedSignatureCheckerAlgorithm(publicKeyForSignature);
 			minimumInputSize=null;
-			if (checkerIn==null)
-				checkerIn=new SignatureCheckerRandomInputStream(nullRandomInputStream, asymmetricChecker);
 		} catch (NoSuchProviderException | NoSuchAlgorithmException e) {
 			throw new IOException(e);
 		}
@@ -277,14 +268,14 @@ public class EncryptionSignatureHashDecoder {
 		return code;
 	}
 
-	private static void free(SignatureCheckerRandomInputStream checkerIn, HashRandomInputStream hashIn, LimitedRandomInputStream limitedRandomInputStream, SymmetricAuthenticatedSignatureCheckerAlgorithm symmetricChecker, ASymmetricAuthenticatedSignatureCheckerAlgorithm asymmetricChecker, AbstractMessageDigest digest) throws IOException {
+	private void freeAll() throws IOException {
 		if (checkerIn!=null)
-			checkerIn.set(EncryptionSignatureHashDecoder.nullRandomInputStream, symmetricChecker==null?asymmetricChecker:symmetricChecker);
+			checkerIn.set(EncryptionSignatureHashDecoder.nullRandomInputStream, symmetricChecker);
 		if (hashIn!=null)
 			hashIn.set(EncryptionSignatureHashDecoder.nullRandomInputStream, digest);
-		free(limitedRandomInputStream);
+		freeLimitedRandomInputStream();
 	}
-	private static void free(LimitedRandomInputStream limitedRandomInputStream) throws IOException {
+	private void freeLimitedRandomInputStream() throws IOException {
 		limitedRandomInputStream.set(EncryptionSignatureHashDecoder.nullRandomInputStream, 0);
 	}
 
@@ -297,9 +288,6 @@ public class EncryptionSignatureHashDecoder {
 		if (originalInputStream.length()<=0)
 			throw new IllegalArgumentException();
 
-		if (associatedData!=null)
-			EncryptionSignatureHashEncoder.checkLimits(associatedData, offAD, lenAD);
-
 		try {
 			long originalOutputLength=outputStream.length();
 			long maximumOutputLengthAfterEncoding=getMaximumOutputLengthAfterDecoding(originalInputStream.length(), cipher, getMinimumInputSize());
@@ -309,8 +297,6 @@ public class EncryptionSignatureHashDecoder {
 			if (symmetricChecker!=null && asymmetricChecker!=null && digest==null) {
 				if (defaultMessageDigest==null) {
 					defaultMessageDigest = digest = EncryptionSignatureHashEncoder.defaultMessageType.getMessageDigestInstance();
-					if (hashIn==null)
-						hashIn=new HashRandomInputStream(nullRandomInputStream, digest);
 				}
 				else
 					digest = defaultMessageDigest;
@@ -322,21 +308,30 @@ public class EncryptionSignatureHashDecoder {
 			RandomInputStream inputStream=originalInputStream;
 			if (digest!=null) {
 				digest.reset();
-				hashIn.set(inputStream, digest);
+				if (hashIn==null)
+					hashIn=new HashRandomInputStream(inputStream, digest);
+				else
+					hashIn.set(inputStream, digest);
 				inputStream = hashIn;
 			}
 			else if (symmetricChecker!=null)
 			{
 				originalInputStream.seek(dataPos+dataLen);
 				symmetricChecker.init(originalInputStream.readBytesArray(false, symmetricChecker.getMacLengthBytes()));
-				checkerIn.set(inputStream, symmetricChecker);
+				if (checkerIn==null)
+					checkerIn=new SignatureCheckerRandomInputStream(inputStream, symmetricChecker);
+				else
+					checkerIn.set(inputStream, symmetricChecker);
 				inputStream=checkerIn;
 			}
 			else if (asymmetricChecker!=null)
 			{
 				originalInputStream.seek(dataPos+dataLen);
 				asymmetricChecker.init(originalInputStream.readBytesArray(false, asymmetricChecker.getMacLengthBytes()));
-				checkerIn.set(inputStream, asymmetricChecker);
+				if (checkerIn==null)
+					checkerIn=new SignatureCheckerRandomInputStream(inputStream, asymmetricChecker);
+				else
+					checkerIn.set(inputStream, asymmetricChecker);
 				inputStream=checkerIn;
 			}
 
@@ -435,7 +430,7 @@ public class EncryptionSignatureHashDecoder {
 				if (asymmetricChecker!=null) {
 					assert asymSign != null;
 					asymmetricChecker.init(asymSign, 0, asymSign.length);
-					asymmetricChecker.update(hash);
+					asymmetricChecker.update(hash2);
 					if (!asymmetricChecker.verify())
 						throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
 				}
@@ -469,7 +464,7 @@ public class EncryptionSignatureHashDecoder {
 			throw new IOException(e);
 		}
 		finally {
-			free(checkerIn, hashIn, limitedRandomInputStream, symmetricChecker, asymmetricChecker, digest);
+			freeAll();
 		}
 	}
 	public Integrity checkHashAndSignature() throws IOException {
@@ -582,7 +577,7 @@ public class EncryptionSignatureHashDecoder {
 			return Integrity.FAIL;
 		}
 		finally {
-			free(limitedRandomInputStream);
+			freeLimitedRandomInputStream();
 		}
 	}
 	public Integrity checkHashAndPublicSignature() throws IOException {
@@ -674,7 +669,7 @@ public class EncryptionSignatureHashDecoder {
 			return Integrity.FAIL;
 		}
 		finally {
-			free(limitedRandomInputStream);
+			freeLimitedRandomInputStream();
 		}
 	}
 	public SubStreamHashResult computePartialHash(SubStreamParameters subStreamParameters) throws IOException {

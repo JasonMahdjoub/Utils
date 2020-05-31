@@ -99,7 +99,7 @@ public class EncryptionSignatureHashEncoder {
 	private ASymmetricAuthenticatedSignerAlgorithm asymmetricSigner=null;
 	private AbstractMessageDigest digest=null;
 	private Long minimumOutputSize=null;
-	private final Reference<byte[]> bufferRef=new Reference<>(new byte[256]);
+	private byte[] bufferRef=new byte[256];
 	private SignerRandomOutputStream signerOut;
 	private HashRandomOutputStream hashOut;
 	private final LimitedRandomOutputStream limitedRandomOutputStream;
@@ -175,8 +175,6 @@ public class EncryptionSignatureHashEncoder {
 			throw new IOException("Symmetric encryption use authentication. No more symmetric authentication is needed. However ASymmetric authentication is possible.");
 		this.symmetricSigner=symmetricSigner;
 		minimumOutputSize=null;
-		if (signerOut==null)
-			signerOut=new SignerRandomOutputStream(nullRandomInputStream, this.symmetricSigner );
 		return this;
 	}
 	public EncryptionSignatureHashEncoder withASymmetricSigner(ASymmetricAuthenticatedSignerAlgorithm asymmetricSigner)
@@ -185,8 +183,6 @@ public class EncryptionSignatureHashEncoder {
 			throw new NullPointerException();
 		this.asymmetricSigner=asymmetricSigner;
 		minimumOutputSize=null;
-		if (signerOut==null)
-			signerOut=new SignerRandomOutputStream(nullRandomInputStream, this.asymmetricSigner );
 		return this;
 	}
 	public EncryptionSignatureHashEncoder withASymmetricPrivateKeyForSignature(ASymmetricPrivateKey privateKeyForSignature) throws IOException{
@@ -197,8 +193,6 @@ public class EncryptionSignatureHashEncoder {
 		try {
 			this.asymmetricSigner=new ASymmetricAuthenticatedSignerAlgorithm(privateKeyForSignature);
 			minimumOutputSize=null;
-			if (signerOut==null)
-				signerOut=new SignerRandomOutputStream(nullRandomInputStream, this.asymmetricSigner );
 		} catch (NoSuchProviderException | NoSuchAlgorithmException e) {
 			throw new IOException(e);
 		}
@@ -210,8 +204,6 @@ public class EncryptionSignatureHashEncoder {
 			throw new NullPointerException();
 		this.digest=messageDigest;
 		minimumOutputSize=null;
-		if (hashOut==null)
-			hashOut=new HashRandomOutputStream(nullRandomInputStream, this.digest);
 		return this;
 	}
 	public EncryptionSignatureHashEncoder withMessageDigestType(MessageDigestType messageDigestType) throws IOException {
@@ -220,8 +212,6 @@ public class EncryptionSignatureHashEncoder {
 		try {
 			this.digest=messageDigestType.getMessageDigestInstance();
 			minimumOutputSize=null;
-			if (hashOut==null)
-				hashOut=new HashRandomOutputStream(nullRandomInputStream, this.digest);
 		} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
 			throw new IOException(e);
 		}
@@ -235,11 +225,6 @@ public class EncryptionSignatureHashEncoder {
 
 		if (originalOutputStream==null)
 			throw new NullPointerException();
-		if (associatedData!=null) {
-			if (cipher==null)
-				throw new IllegalArgumentException();
-			checkLimits(associatedData, offAD, lenAD);
-		}
 
 		try {
 			long originalOutputLength=originalOutputStream.length();
@@ -252,26 +237,34 @@ public class EncryptionSignatureHashEncoder {
 				digest = defaultMessageDigest.get();
 				if (digest==null) {
 					defaultMessageDigest.set(digest = defaultMessageType.getMessageDigestInstance());
-					if (hashOut == null)
-						hashOut = new HashRandomOutputStream(nullRandomInputStream, this.digest);
 				}
+
 			}
 
 			RandomOutputStream outputStream=originalOutputStream;
 			if (digest!=null) {
 				digest.reset();
-				hashOut.set(outputStream, digest);
+				if (hashOut == null)
+					hashOut = new HashRandomOutputStream(outputStream, this.digest);
+				else
+					hashOut.set(outputStream, digest);
 				outputStream = hashOut;
 			}
 			else if (symmetricSigner!=null)
 			{
 				symmetricSigner.init();
-				signerOut.set(outputStream, symmetricSigner);
+				if (signerOut==null)
+					signerOut=new SignerRandomOutputStream(outputStream, this.symmetricSigner );
+				else
+					signerOut.set(outputStream, symmetricSigner);
 				outputStream=signerOut;
 			} else if (asymmetricSigner!=null)
 			{
 				asymmetricSigner.init();
-				signerOut.set(outputStream, asymmetricSigner);
+				if (signerOut==null)
+					signerOut=new SignerRandomOutputStream(outputStream, this.asymmetricSigner );
+				else
+					signerOut.set(outputStream, asymmetricSigner);
 				outputStream=signerOut;
 			}
 
@@ -285,10 +278,10 @@ public class EncryptionSignatureHashEncoder {
 				limitedRandomOutputStream.set(outputStream, originalOutputStream.currentPosition(), dataLen);
 
 				if (cipher.getType().supportAssociatedData()) {
-					buffer=bufferRef.get();
+					buffer=bufferRef;
 					lenBuffer=9+(associatedData!=null?lenAD:0);
 					if (buffer.length<lenBuffer)
-						bufferRef.set(buffer=new byte[lenBuffer]);
+						bufferRef=buffer=new byte[lenBuffer];
 					Bits.putLong(buffer, 0, dataLen);
 					buffer[8]=code;
 					if (associatedData!=null)
@@ -320,7 +313,7 @@ public class EncryptionSignatureHashEncoder {
 				outputStream.write(inputStream);
 			}
 			if (outputStream!=originalOutputStream && buffer==null) {
-				buffer=bufferRef.get();
+				buffer=bufferRef;
 				lenBuffer=8;
 				Bits.putLong(buffer, 0, dataLen);
 			}
