@@ -270,9 +270,9 @@ public class EncryptionSignatureHashDecoder {
 
 	private void freeAll() throws IOException {
 		if (checkerIn!=null)
-			checkerIn.set(EncryptionSignatureHashDecoder.nullRandomInputStream, symmetricChecker);
+			checkerIn.set(EncryptionSignatureHashDecoder.nullRandomInputStream, symmetricChecker==null?asymmetricChecker:symmetricChecker);
 		if (hashIn!=null)
-			hashIn.set(EncryptionSignatureHashDecoder.nullRandomInputStream, digest);
+			hashIn.set(EncryptionSignatureHashDecoder.nullRandomInputStream, digest==null?defaultMessageDigest:digest);
 		freeLimitedRandomInputStream();
 	}
 	private void freeLimitedRandomInputStream() throws IOException {

@@ -36,7 +36,6 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 
 import com.distrimind.util.Bits;
-import com.distrimind.util.Reference;
 import com.distrimind.util.io.*;
 
 import java.io.IOException;
@@ -104,7 +103,7 @@ public class EncryptionSignatureHashEncoder {
 	private HashRandomOutputStream hashOut;
 	private final LimitedRandomOutputStream limitedRandomOutputStream;
 	private static final NullRandomOutputStream nullRandomInputStream=new NullRandomOutputStream();
-	private final Reference<AbstractMessageDigest> defaultMessageDigest=new Reference<>();
+	private AbstractMessageDigest defaultMessageDigest=null;
 	private AbstractEncryptionOutputAlgorithm.CommonCipherOutputStream cipherOutputStream;
 	private byte[] externalCounter=null;
 	public EncryptionSignatureHashEncoder() throws IOException {
@@ -234,9 +233,9 @@ public class EncryptionSignatureHashEncoder {
 			byte code=getCode(cipher, associatedData, symmetricSigner, asymmetricSigner, digest);
 			AbstractMessageDigest digest=this.digest;
 			if (symmetricSigner!=null && asymmetricSigner!=null && digest==null) {
-				digest = defaultMessageDigest.get();
+				digest = defaultMessageDigest;
 				if (digest==null) {
-					defaultMessageDigest.set(digest = defaultMessageType.getMessageDigestInstance());
+					defaultMessageDigest=digest = defaultMessageType.getMessageDigestInstance();
 				}
 
 			}
@@ -245,7 +244,7 @@ public class EncryptionSignatureHashEncoder {
 			if (digest!=null) {
 				digest.reset();
 				if (hashOut == null)
-					hashOut = new HashRandomOutputStream(outputStream, this.digest);
+					hashOut = new HashRandomOutputStream(outputStream, digest);
 				else
 					hashOut.set(outputStream, digest);
 				outputStream = hashOut;
@@ -254,7 +253,7 @@ public class EncryptionSignatureHashEncoder {
 			{
 				symmetricSigner.init();
 				if (signerOut==null)
-					signerOut=new SignerRandomOutputStream(outputStream, this.symmetricSigner );
+					signerOut=new SignerRandomOutputStream(outputStream, symmetricSigner );
 				else
 					signerOut.set(outputStream, symmetricSigner);
 				outputStream=signerOut;
@@ -262,7 +261,7 @@ public class EncryptionSignatureHashEncoder {
 			{
 				asymmetricSigner.init();
 				if (signerOut==null)
-					signerOut=new SignerRandomOutputStream(outputStream, this.asymmetricSigner );
+					signerOut=new SignerRandomOutputStream(outputStream, asymmetricSigner );
 				else
 					signerOut.set(outputStream, asymmetricSigner);
 				outputStream=signerOut;
@@ -543,7 +542,7 @@ public class EncryptionSignatureHashEncoder {
 		if (signerOut!=null)
 			signerOut.set(nullRandomInputStream, symmetricSigner==null?asymmetricSigner:symmetricSigner);
 		if (hashOut!=null)
-			hashOut.set(nullRandomInputStream, digest);
+			hashOut.set(nullRandomInputStream, digest==null?defaultMessageDigest:digest);
 		limitedRandomOutputStream.set(nullRandomInputStream, 0);
 	}
 
