@@ -91,7 +91,7 @@ public class TestReadWriteEncryption {
 						{
 							res[i][0]=ske;
 							res[i][1]=associatedData;
-							res[i][2]=sks;
+							res[i][2]=(ske!=null && ske.getEncryptionAlgorithmType().isAuthenticatedAlgorithm())?null:sks;
 							res[i][3]=kp;
 							res[i][4]=md;
 							++i;
@@ -105,6 +105,7 @@ public class TestReadWriteEncryption {
 
 	@Test(dataProvider = "provideParameters")
 	public void testEncryption(SymmetricSecretKey secretKeyForEncryption, byte[] associatedData, SymmetricSecretKey secretKeyForSignature, ASymmetricKeyPair keyPairForSignature, MessageDigestType messageDigestType) throws IOException, NoSuchProviderException, NoSuchAlgorithmException {
+		System.out.println("Encryption type : "+secretKeyForEncryption.getEncryptionAlgorithmType());
 		Random r=new Random(System.currentTimeMillis());
 		byte[] in=new byte[10000*r.nextInt(1000)];
 		r.nextBytes(in);
