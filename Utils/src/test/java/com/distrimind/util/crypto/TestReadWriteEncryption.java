@@ -54,7 +54,7 @@ import java.util.Random;
  */
 public class TestReadWriteEncryption {
 
-	@DataProvider(name = "provideParameters", parallel = false)
+	@DataProvider(name = "provideParameters", parallel = true)
 	public Object[][] provideParameters() throws NoSuchProviderException, NoSuchAlgorithmException, InvalidAlgorithmParameterException {
 		Random rand=new Random(System.currentTimeMillis());
 		Object[][] res=new Object[32][5];
