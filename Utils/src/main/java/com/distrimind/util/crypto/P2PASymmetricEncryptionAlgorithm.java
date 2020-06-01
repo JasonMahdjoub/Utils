@@ -304,6 +304,11 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 	}
 
 	@Override
+	protected boolean allOutputGeneratedIntoDoFinalFunction() {
+		return false;
+	}
+
+	@Override
 	protected void initCipherForEncryptionWithIvAndCounter(AbstractCipher cipher, byte[] iv, int counter) throws IOException {
 		p2pencryption.initCipherForEncryptionWithIvAndCounter(cipher, iv, counter);
 	}
@@ -541,6 +546,11 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 		}
 
 		@Override
+		protected boolean allOutputGeneratedIntoDoFinalFunction() {
+			return false;
+		}
+
+		@Override
 		public long getOutputSizeAfterDecryption(long inputLen) throws IOException {
 			return nonPQCEncryption.getOutputSizeAfterDecryption(PQCEncryption.getOutputSizeAfterDecryption(inputLen));
 		}
@@ -680,6 +690,11 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 		@Override
 		public void initCipherForDecryptionWithIv(AbstractCipher cipher, byte[] iv) throws IOException {
 			initCipherForDecryption(cipher);
+		}
+
+		@Override
+		protected boolean allOutputGeneratedIntoDoFinalFunction() {
+			return false;
 		}
 
 

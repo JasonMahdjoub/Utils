@@ -343,10 +343,10 @@ public class EncryptionSignatureHashDecoder {
 				throw new IOException(e);
 			}
 			byte[] buffer=null;
-
+			int lenBuffer=0;
 			if (cipher != null) {
 				if (cipher.getType().supportAssociatedData()) {
-					int lenBuffer=9+(associatedData!=null?lenAD:0);
+					lenBuffer=9+(associatedData!=null?lenAD:0);
 					if (this.buffer.length<lenBuffer)
 						buffer=this.buffer=new byte[lenBuffer];
 					else
@@ -384,14 +384,13 @@ public class EncryptionSignatureHashDecoder {
 			if (buffer==null && (digest!=null || symmetricChecker!=null || asymmetricChecker!=null)) {
 				buffer=this.buffer;
 				Bits.putLong(buffer, 0, dataLen);
+				lenBuffer=8;
 
 			}
 
 			if (digest!=null) {
 				digest.update(code);
 				digest.update(buffer, 0, 8);
-				if (associatedData!=null)
-					digest.update(associatedData, offAD, lenAD);
 				byte[] hash = digest.digest();
 				byte[] hash2=hash;
 				byte[] hash3=hash;
@@ -420,8 +419,8 @@ public class EncryptionSignatureHashDecoder {
 				if (symmetricChecker!=null) {
 					assert symSign != null;
 					symmetricChecker.init(symSign, 0, symSign.length);
-					if (associatedData!=null)
-						symmetricChecker.update(associatedData, offAD, lenAD);
+					if (lenBuffer>8)
+						symmetricChecker.update(buffer, 9, lenBuffer-8);
 					symmetricChecker.update(hash);
 					if (!symmetricChecker.verify())
 						throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
@@ -438,19 +437,13 @@ public class EncryptionSignatureHashDecoder {
 			else if (symmetricChecker!=null)
 			{
 				symmetricChecker.update(code);
-				symmetricChecker.update(buffer, 0, 8);
-				if (associatedData!=null)
-					symmetricChecker.update(associatedData, offAD, lenAD);
-				if (associatedData!=null)
-					symmetricChecker.update(associatedData, offAD, lenAD);
+				symmetricChecker.update(buffer, 0, lenBuffer);
 				if (!symmetricChecker.verify())
 					throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
 			} else if (asymmetricChecker!=null)
 			{
 				asymmetricChecker.update(code);
 				asymmetricChecker.update(buffer, 0, 8);
-				if (associatedData!=null)
-					asymmetricChecker.update(associatedData, offAD, lenAD);
 				if (!asymmetricChecker.verify())
 					throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
 			}

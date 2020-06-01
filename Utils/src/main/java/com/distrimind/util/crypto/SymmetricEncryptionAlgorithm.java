@@ -48,7 +48,6 @@ import java.security.NoSuchProviderException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Random;
 
 
 /**
@@ -367,6 +366,11 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 		}
 	}
 
+	@Override
+	protected boolean allOutputGeneratedIntoDoFinalFunction() {
+		return gcm;
+	}
+
 
 	@Override
 	protected void initCipherForEncryptionWithIvAndCounter(AbstractCipher cipher, byte[] iv, int counter) throws IOException {
@@ -401,7 +405,7 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 		}
 
 	}
-	private final Random nonSecureRandom=new Random(System.currentTimeMillis());
+	//private final Random nonSecureRandom=new Random(System.currentTimeMillis());
 	protected boolean mustAlterIVForOutputSizeComputation()
 	{
 		return chacha;

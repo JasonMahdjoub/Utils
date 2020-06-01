@@ -237,13 +237,15 @@ public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOu
 			throw new IOException();
 	}
 
+	protected abstract boolean allOutputGeneratedIntoDoFinalFunction();
+
 	@Override
 	public CommonCipherInputStream getCipherInputStreamForDecryption(final RandomInputStream is, final byte[] associatedData, final int offAD, final int lenAD, final byte[] externalCounter)
 			throws IOException {
 		final AbstractCipher cipher = getCipherInstance();
 
 
-		return new CommonCipherInputStream(maxEncryptedPartLength, is, includeIV(), iv, getIVSizeBytesWithoutExternalCounter(), useExternalCounter(), externalCounter, cipher, associatedData, offAD, lenAD, buffer, supportRandomEncryptionAndRandomDecryption(), getCounterStepInBytes(), maxPlainTextSizeForEncoding) {
+		return new CommonCipherInputStream(allOutputGeneratedIntoDoFinalFunction(), maxEncryptedPartLength, is, includeIV(), iv, getIVSizeBytesWithoutExternalCounter(), useExternalCounter(), externalCounter, cipher, associatedData, offAD, lenAD, buffer, supportRandomEncryptionAndRandomDecryption(), getCounterStepInBytes(), maxPlainTextSizeForEncoding) {
 			@Override
 			protected void initCipherForDecryptionWithIvAndCounter(byte[] iv, int counter) throws IOException {
 				AbstractEncryptionIOAlgorithm.this.initCipherForDecryptionWithIvAndCounter(cipher, iv, counter);

@@ -75,17 +75,19 @@ abstract class CommonCipherInputStream extends RandomInputStream {
 	private int outputBufferLength =0;
 	private int outputBufferIndex =0;
 	private Long length;
+	private final boolean allInDoFinal;
 
 	protected abstract void initCipherForDecryptionWithIvAndCounter(byte[] iv, int counter) throws IOException;
 	protected abstract void initCipherForDecryptionWithIv(byte[] iv) throws IOException;
 	protected abstract void initCipherForDecryption() throws IOException;
 	protected abstract long getOutputSizeAfterDecryption(long inputLength) throws IOException;
 
-	CommonCipherInputStream(int maxEncryptedPartLength, RandomInputStream is, boolean includeIV, byte[] iv, int IVSizeBytesWithoutExternalCounter, boolean useExternalCounter, byte[] externalCounter, AbstractCipher cipher, byte[] associatedData, int offAD, int lenAD, byte[] buffer, boolean supportRandomAccess, int counterStepInBytes, int maxPlainTextSizeForEncoding) throws IOException {
+	CommonCipherInputStream(boolean allInDoFinal, int maxEncryptedPartLength, RandomInputStream is, boolean includeIV, byte[] iv, int IVSizeBytesWithoutExternalCounter, boolean useExternalCounter, byte[] externalCounter, AbstractCipher cipher, byte[] associatedData, int offAD, int lenAD, byte[] buffer, boolean supportRandomAccess, int counterStepInBytes, int maxPlainTextSizeForEncoding) throws IOException {
 		if (useExternalCounter && externalCounter==null)
 			throw new NullPointerException("External counter is null");
 		else if (!useExternalCounter && externalCounter!=null)
 			throw new IllegalArgumentException("External counter be null");
+		this.allInDoFinal=allInDoFinal;
 		this.maxEncryptedPartLength = maxEncryptedPartLength;
 		this.includeIV = includeIV;
 		this.iv = iv;
@@ -168,7 +170,31 @@ abstract class CommonCipherInputStream extends RandomInputStream {
 		if (doFinal && (posEncrypted %maxEncryptedPartLength==0 || endStream))
 		{
 			try {
-				outputBufferLength +=cipher.doFinal(outputBuffer, outputBufferLength+outputBufferIndex);
+				if (allInDoFinal)
+				{
+					byte[] f=cipher.doFinal();
+					if (outputBufferLength>0) {
+						int l = f.length + outputBufferLength;
+						if (outputBuffer.length < l + outputBufferIndex) {
+							byte[] b = new byte[l];
+							System.arraycopy(outputBuffer, outputBufferIndex, b, 0, outputBufferLength);
+							System.arraycopy(f, 0, b, outputBufferLength, f.length);
+							outputBufferIndex = 0;
+							outputBuffer=b;
+						}
+						else
+							System.arraycopy(f, 0, outputBuffer, outputBufferIndex+outputBufferLength, f.length);
+						outputBufferLength+=f.length;
+					}
+					else
+					{
+						outputBuffer=f;
+						outputBufferLength=f.length;
+						outputBufferIndex=0;
+					}
+				}
+				else
+					outputBufferLength +=cipher.doFinal(outputBuffer, outputBufferLength+outputBufferIndex);
 				doFinal=false;
 			} catch (IllegalBlockSizeException | BadPaddingException | ShortBufferException e) {
 				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, e);
