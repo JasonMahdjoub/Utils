@@ -420,7 +420,7 @@ public class EncryptionSignatureHashDecoder {
 					assert symSign != null;
 					symmetricChecker.init(symSign, 0, symSign.length);
 					if (lenBuffer>8)
-						symmetricChecker.update(buffer, 9, lenBuffer-8);
+						symmetricChecker.update(associatedData, offAD, lenAD);
 					symmetricChecker.update(hash);
 					if (!symmetricChecker.verify())
 						throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
@@ -443,12 +443,8 @@ public class EncryptionSignatureHashDecoder {
 					throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
 			} else if (asymmetricChecker!=null)
 			{
-				if (lenBuffer==8) {
-					asymmetricChecker.update(code);
-					asymmetricChecker.update(buffer, 0, 8);
-				}
-				else
-					asymmetricChecker.update(buffer, 0, 9 );
+				asymmetricChecker.update(code);
+				asymmetricChecker.update(buffer, 0, 8);
 				if (!asymmetricChecker.verify())
 					throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
 			}
@@ -509,6 +505,8 @@ public class EncryptionSignatureHashDecoder {
 				{
 					symSign=inputStream.readBytesArray(false, symmetricChecker.getMacLengthBytes());
 					digest.reset();
+					if (associatedData!=null)
+						symmetricChecker.update(associatedData, offAD, lenAD);
 					digest.update(hash);
 					digest.update(symSign);
 					hash3=hash2=digest.digest();

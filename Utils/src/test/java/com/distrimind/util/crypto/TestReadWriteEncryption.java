@@ -164,26 +164,26 @@ public class TestReadWriteEncryption {
 		testFail(res, res.length-100, secretKeyForEncryption, associatedData, secretKeyForSignature, keyPairForSignature, messageDigestType, null);
 
 		if (secretKeyForEncryption!=null) {
-			testBadParameters(res, null, associatedData, secretKeyForSignature, keyPairForSignature, messageDigestType);
+			testBadParameters(res, null, associatedData, secretKeyForSignature, keyPairForSignature, messageDigestType, false, false, false);
 			if (associatedData!=null) {
-				testBadParameters(res, secretKeyForEncryption, null, secretKeyForSignature, keyPairForSignature, messageDigestType);
+				testBadParameters(res, secretKeyForEncryption, null, secretKeyForSignature, keyPairForSignature, messageDigestType, false, secretKeyForSignature!=null, false);
 				byte code=EncryptionSignatureHashEncoder.getCode(null, secretKeyForSignature, keyPairForSignature, messageDigestType);
 				testTruncateCode(code,res, secretKeyForEncryption, associatedData, secretKeyForSignature, keyPairForSignature, messageDigestType);
 			}
 
 		}
 		if (secretKeyForSignature!=null) {
-			testBadParameters(res, secretKeyForEncryption, associatedData, null, keyPairForSignature, messageDigestType);
+			testBadParameters(res, secretKeyForEncryption, associatedData, null, keyPairForSignature, messageDigestType, false, true, false);
 			byte code = EncryptionSignatureHashEncoder.getCode(associatedData, null, keyPairForSignature, messageDigestType);
 			testTruncateCode(code, res, secretKeyForEncryption, associatedData, secretKeyForSignature, keyPairForSignature, messageDigestType);
 		}
 		if (keyPairForSignature!=null) {
-			testBadParameters(res, secretKeyForEncryption, associatedData, secretKeyForSignature, null, messageDigestType);
+			testBadParameters(res, secretKeyForEncryption, associatedData, secretKeyForSignature, null, messageDigestType, false, false, true);
 			byte code = EncryptionSignatureHashEncoder.getCode(associatedData, secretKeyForSignature, null, messageDigestType);
 			testTruncateCode(code, res, secretKeyForEncryption, associatedData, secretKeyForSignature, keyPairForSignature, messageDigestType);
 		}
 		if (messageDigestType!=null) {
-			testBadParameters(res, secretKeyForEncryption, associatedData, secretKeyForSignature, keyPairForSignature, null);
+			testBadParameters(res, secretKeyForEncryption, associatedData, secretKeyForSignature, keyPairForSignature, null, true, false, false);
 			byte code = EncryptionSignatureHashEncoder.getCode(associatedData, secretKeyForSignature, keyPairForSignature, null);
 			testTruncateCode(code, res, secretKeyForEncryption, associatedData, secretKeyForSignature, keyPairForSignature, messageDigestType);
 		}
@@ -235,7 +235,7 @@ public class TestReadWriteEncryption {
 			return null;
 	}
 
-	private void testBadParameters(byte[] res, SymmetricSecretKey secretKeyForEncryption, byte[] associatedData, SymmetricSecretKey secretKeyForSignature, ASymmetricKeyPair keyPairForSignature, MessageDigestType messageDigestType) throws NoSuchProviderException, NoSuchAlgorithmException, IOException {
+	private void testBadParameters(byte[] res, SymmetricSecretKey secretKeyForEncryption, byte[] associatedData, SymmetricSecretKey secretKeyForSignature, ASymmetricKeyPair keyPairForSignature, MessageDigestType messageDigestType, boolean changeHash, boolean changeSymSig, boolean changeASymSig) throws NoSuchProviderException, NoSuchAlgorithmException, IOException {
 		byte[] ed=res.clone();
 		RandomByteArrayInputStream bais=new RandomByteArrayInputStream(ed);
 		RandomByteArrayOutputStream baos=new RandomByteArrayOutputStream();
@@ -252,11 +252,17 @@ public class TestReadWriteEncryption {
 
 		if (messageDigestType!=null || keyPairForSignature!=null || secretKeyForSignature!=null) {
 			bais.seek(0);
-			Assert.assertNotEquals(reader.checkHashAndSignature(), Integrity.OK);
+			if (changeHash || changeSymSig || changeASymSig)
+				Assert.assertNotEquals(reader.checkHashAndSignature(), Integrity.OK);
+			else
+				Assert.assertEquals(reader.checkHashAndSignature(), Integrity.OK);
 		}
 		if (!symError && (messageDigestType!=null || keyPairForSignature!=null)) {
 			bais.seek(0);
-			Assert.assertNotEquals(reader.checkHashAndPublicSignature(), Integrity.OK, "");
+			if (changeHash || changeASymSig)
+				Assert.assertNotEquals(reader.checkHashAndPublicSignature(), Integrity.OK, "");
+			else
+				Assert.assertEquals(reader.checkHashAndPublicSignature(), Integrity.OK, "");
 		}
 	}
 	private void testTruncateCode(byte code, byte[] res, SymmetricSecretKey secretKeyForEncryption, byte[] associatedData, SymmetricSecretKey secretKeyForSignature, ASymmetricKeyPair keyPairForSignature, MessageDigestType messageDigestType) throws NoSuchProviderException, NoSuchAlgorithmException, IOException {

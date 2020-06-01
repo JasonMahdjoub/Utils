@@ -326,7 +326,7 @@ public class EncryptionSignatureHashEncoder {
 				if (symmetricSigner != null) {
 					symmetricSigner.init();
 					if (lenBuffer>8)
-						symmetricSigner.update(buffer, 9, lenBuffer);
+						symmetricSigner.update(associatedData, offAD, lenAD);
 					symmetricSigner.update(hash);
 					byte[] signature = symmetricSigner.getSignature();
 					digest.reset();
@@ -356,12 +356,8 @@ public class EncryptionSignatureHashEncoder {
 				originalOutputStream.writeBytesArray(signature, false, symmetricSigner.getMacLengthBytes());
 			} else if (asymmetricSigner!=null)
 			{
-				if (lenBuffer==8) {
-					asymmetricSigner.update(code);
-					asymmetricSigner.update(buffer, 0, 8);
-				}
-				else
-					asymmetricSigner.update(buffer, 0, 9 );
+				asymmetricSigner.update(code);
+				asymmetricSigner.update(buffer, 0, 8);
 				byte[] signature = asymmetricSigner.getSignature();
 				originalOutputStream.writeBytesArray(signature, false, asymmetricSigner.getMacLengthBytes());
 			}
