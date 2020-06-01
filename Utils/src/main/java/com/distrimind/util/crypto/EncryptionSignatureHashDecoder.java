@@ -304,6 +304,7 @@ public class EncryptionSignatureHashDecoder {
 			}
 
 			long dataLen=originalInputStream.readLong();
+			checkDataLength(inputStream, dataLen);
 			long dataPos=originalInputStream.currentPosition();
 			RandomInputStream inputStream=originalInputStream;
 			if (digest!=null) {
@@ -461,6 +462,12 @@ public class EncryptionSignatureHashDecoder {
 			freeAll();
 		}
 	}
+	private void checkDataLength(RandomInputStream inputStream, long dataLen) throws IOException {
+		if (dataLen<=0)
+			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
+		if (dataLen>inputStream.length()-inputStream.currentPosition())
+			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
+	}
 	public Integrity checkHashAndSignature() throws IOException {
 		if (inputStream==null)
 			throw new NullPointerException();
@@ -483,6 +490,7 @@ public class EncryptionSignatureHashDecoder {
 			}
 
 			long dataLen=inputStream.readLong();
+			checkDataLength(inputStream, dataLen);
 			long dataPos=inputStream.currentPosition();
 
 			Bits.putLong(buffer, 0, dataLen);
@@ -598,6 +606,7 @@ public class EncryptionSignatureHashDecoder {
 			if (asymmetricChecker==null && digest==null)
 				return Integrity.OK;
 			long dataLen=inputStream.readLong();
+			checkDataLength(inputStream, dataLen);
 			long dataPos=inputStream.currentPosition();
 
 			Bits.putLong(buffer, 0, dataLen);
