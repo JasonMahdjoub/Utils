@@ -35,10 +35,12 @@ knowledge of the CeCILL-C license and that you accept its terms.
 
 package com.distrimind.util.crypto;
 
+import org.bouncycastle.bcjcajce.provider.symmetric.ChaCha;
 import org.bouncycastle.crypto.SymmetricSecretKey;
 import org.bouncycastle.crypto.*;
 import org.bouncycastle.crypto.fips.FipsAES;
 import org.bouncycastle.crypto.general.AES;
+import org.bouncycastle.crypto.general.ChaCha20;
 import org.bouncycastle.crypto.general.Serpent;
 import org.bouncycastle.crypto.general.Twofish;
 
@@ -374,7 +376,7 @@ public class BCCipher extends AbstractCipher {
 					throw new IllegalAccessError();
 				}
 			}
-			/*else if (type.getAlgorithmName().equals(SymmetricEncryptionType.BC_CHACHA20.getAlgorithmName()))
+			else if (type.getAlgorithmName().equals(SymmetricEncryptionType.BC_CHACHA20_NO_RANDOM_ACCESS.getAlgorithmName()))
 			{
 				new ChaCha.BaseCC20P1305();
 				ChaCha20.OperatorFactory factory=new ChaCha20.OperatorFactory();
@@ -382,7 +384,7 @@ public class BCCipher extends AbstractCipher {
 				if (iv!=null)
 					param=param.withIV(iv);
 				encryptor = factory.createOutputEncryptor((SymmetricSecretKey)key.toBouncyCastleKey(),param);
-			}*/
+			}
 			else
 				throw new IllegalAccessError();
 			cipher= encryptor;
@@ -533,18 +535,18 @@ public class BCCipher extends AbstractCipher {
 					
 					decryptor = aeadDecryptor = fipsSymmetricFactory.createOutputAEADDecryptor((SymmetricSecretKey)key.toBouncyCastleKey(),param);
 				}
-				/*else if (type.getAlgorithmName().equals(SymmetricEncryptionType.BC_CHACHA20.getAlgorithmName()))
-				{
-					ChaCha20.OperatorFactory factory=new ChaCha20.OperatorFactory();
-					ChaCha20.Parameters param=ChaCha20.STREAM;
-					if (iv!=null)
-						param=param.withIV(iv);
-					decryptor = factory.createOutputDecryptor((SymmetricSecretKey)key.toBouncyCastleKey(),param);
-				}*/
 				else
 				{
 					throw new IllegalAccessError();
 				}
+			}
+			else if (type.getAlgorithmName().equals(SymmetricEncryptionType.BC_CHACHA20_NO_RANDOM_ACCESS.getAlgorithmName()))
+			{
+				ChaCha20.OperatorFactory factory=new ChaCha20.OperatorFactory();
+				ChaCha20.Parameters param=ChaCha20.STREAM;
+				if (iv!=null)
+					param=param.withIV(iv);
+				decryptor = factory.createOutputDecryptor((SymmetricSecretKey)key.toBouncyCastleKey(),param);
 			}
 			else 
 				throw new IllegalAccessError();

@@ -349,14 +349,19 @@ public class EncryptionSignatureHashEncoder {
 				originalOutputStream.writeBytesArray(hash, false, digest.getDigestLength());
 			} else if (symmetricSigner!=null)
 			{
-				symmetricSigner.update(code);
+				if (lenBuffer==8)
+					symmetricSigner.update(code);
 				symmetricSigner.update(buffer, 0, lenBuffer);
 				byte[] signature = symmetricSigner.getSignature();
 				originalOutputStream.writeBytesArray(signature, false, symmetricSigner.getMacLengthBytes());
 			} else if (asymmetricSigner!=null)
 			{
-				asymmetricSigner.update(code);
-				asymmetricSigner.update(buffer, 0, 8);
+				if (lenBuffer==8) {
+					asymmetricSigner.update(code);
+					asymmetricSigner.update(buffer, 0, 8);
+				}
+				else
+					asymmetricSigner.update(buffer, 0, 9 );
 				byte[] signature = asymmetricSigner.getSignature();
 				originalOutputStream.writeBytesArray(signature, false, asymmetricSigner.getMacLengthBytes());
 			}

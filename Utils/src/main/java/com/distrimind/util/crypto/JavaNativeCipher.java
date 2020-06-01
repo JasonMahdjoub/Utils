@@ -159,7 +159,7 @@ public final class JavaNativeCipher extends AbstractCipher {
 		mode=_opmode;
 		if (type!=null && type.getBlockMode().toUpperCase().equals("GCM"))
 			cipher.init(_opmode, _key.toJavaNativeKey(), new GCMParameterSpec(128, _iv));
-		else if (type!=null && type.getAlgorithmName().equals(SymmetricEncryptionType.CHACHA20.getAlgorithmName()))
+		else if (type!=null && type.equals(SymmetricEncryptionType.CHACHA20_NO_RANDOM_ACCESS))
 			init(_opmode, _key, _iv, 0);
 		else
 			cipher.init(_opmode, _key.toJavaNativeKey(), new IvParameterSpec(_iv));
@@ -185,7 +185,7 @@ public final class JavaNativeCipher extends AbstractCipher {
 	public void init(int opmode, AbstractKey key, byte[] iv, int counter) throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidAlgorithmParameterException {
 
 		mode=opmode;
-		if (type.getAlgorithmName().equals(SymmetricEncryptionType.CHACHA20.getAlgorithmName()))
+		if (type.equals(SymmetricEncryptionType.CHACHA20_NO_RANDOM_ACCESS))
 		{
 			try {
 

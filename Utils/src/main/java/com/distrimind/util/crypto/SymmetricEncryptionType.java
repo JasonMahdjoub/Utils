@@ -87,18 +87,9 @@ public enum SymmetricEncryptionType {
 	BC_SERPENT_CTR("Serpent", "CTR", "NoPadding",(short) 128, CodeProvider.BC, CodeProvider.BC,SymmetricAuthentifiedSignatureType.BC_FIPS_HMAC_SHA2_512, Serpent.ALGORITHM, (short)128, false, (short)33, (short)37,(short)35, (short)40, (short)49, (short)50, false, false, false, false, false, false, (short)16),
 	BC_SERPENT_GCM("Serpent", "GCM", "NoPadding",(short) 128, CodeProvider.BC, CodeProvider.BC,SymmetricAuthentifiedSignatureType.BC_FIPS_HMAC_SHA2_512, Serpent.ALGORITHM, (short)128, true, (short)31, (short)35, (short)33, (short)38, (short)43, (short)43, false, false, false, false, false, false, (short)12),
 	BC_SERPENT_EAX("Serpent", "EAX", "NoPadding",(short) 128, CodeProvider.BC, CodeProvider.BC,SymmetricAuthentifiedSignatureType.BC_FIPS_HMAC_SHA2_512, Serpent.ALGORITHM, (short)128, true, (short)22, (short)24, (short)23, (short)24, (short)26, (short)26, false, false, false, false, false, false, (short)16),
-	/**
-	 * CHACHA20 works only with Java 11 ou Android 28
-	 */
-	CHACHA20("ChaCha20", "", "", (short) 256, CodeProvider.SunJCE, CodeProvider.SunJCE, SymmetricAuthentifiedSignatureType.HMAC_SHA2_256, org.bouncycastle.crypto.general.AES.ALGORITHM, (short)512, false, (short)113, (short)79, (short)113, (short) 79, (short)278, (short)274, false, false, false,  true, false, false, (short)12),
-	/**
-	 * CHACHA20_POLY1307 works with Java 7
-	 */
+	CHACHA20_NO_RANDOM_ACCESS("ChaCha20", "", "", (short) 256, CodeProvider.SunJCE, CodeProvider.SunJCE, SymmetricAuthentifiedSignatureType.HMAC_SHA2_256, org.bouncycastle.crypto.general.AES.ALGORITHM, (short)512, false, (short)113, (short)79, (short)113, (short) 79, (short)278, (short)274, false, false, false,  true, false, false, (short)12),
 	CHACHA20_POLY1305("ChaCha20-Poly1305", "", "", (short) 256, CodeProvider.SunJCE, CodeProvider.SunJCE, SymmetricAuthentifiedSignatureType.HMAC_SHA2_256, org.bouncycastle.crypto.general.AES.ALGORITHM, (short)512, true, (short)113, (short)79, (short)113, (short) 79, (short)204, (short)192, false, false, false,  true, false, false, (short)12),
-	//BC_CHACHA20("ChaCha20", "", "", (short) 256, CodeProvider.BC, CodeProvider.BC, SymmetricAuthentifiedSignatureType.BC_FIPS_HMAC_SHA2_256, ChaCha20.ALGORITHM, (short)512, false, (short)40, (short)48, (short)58, (short) 58, (short)202, (short)475, false, false, false,  true, false, false),
-	/**
-	 * CHACHA20_POLY1307 works with Java 7
-	 */
+	BC_CHACHA20_NO_RANDOM_ACCESS("ChaCha20", "", "", (short) 256, CodeProvider.BC, CodeProvider.BC, SymmetricAuthentifiedSignatureType.BC_FIPS_HMAC_SHA2_256, ChaCha20.ALGORITHM, (short)512, false, (short)113, (short)79, (short)113, (short) 79, (short)121, (short)81, false, false, false,  true, false, false, (short)12),
 	BC_CHACHA20_POLY1305("ChaCha20-Poly1305", "", "", (short) 256, CodeProvider.BC, CodeProvider.BC, SymmetricAuthentifiedSignatureType.BC_FIPS_HMAC_SHA2_256, ChaCha20.ALGORITHM, (short)512, true, (short)113, (short)79, (short)113, (short) 79, (short)121, (short)81, false, false, false,  true, false, false, (short)12),
 	DEFAULT(AES_CTR);
 	
@@ -332,8 +323,8 @@ public enum SymmetricEncryptionType {
 					return new BCCipher(this);
 
 			} else {
-				if (this.equals(CHACHA20) && invalidOSForChaCha)
-					throw new NoSuchAlgorithmException();
+				if (this.equals(CHACHA20_NO_RANDOM_ACCESS) && invalidOSForChaCha)
+					return BC_CHACHA20_NO_RANDOM_ACCESS.getCipherInstance();
 				else if (this.equals(CHACHA20_POLY1305) && invalidOSForChaCha)
 					return BC_CHACHA20_POLY1305.getCipherInstance();
 				if (OS.getCurrentJREVersionDouble() < 1.8 && this.equals(AES_GCM))
@@ -370,15 +361,15 @@ public enum SymmetricEncryptionType {
 			res = new BCKeyGenerator(this);
 
 		} else {
-			if (this==CHACHA20 && invalidOSForChaCha)
-				throw new NoSuchAlgorithmException();
-			else if (this==CHACHA20_POLY1305 && invalidOSForChaCha)
+			if (this.equals(CHACHA20_NO_RANDOM_ACCESS) && invalidOSForChaCha)
+				return BC_CHACHA20_NO_RANDOM_ACCESS.getKeyGenerator(random, keySizeBits);
+			else if (this.equals(CHACHA20_POLY1305) && invalidOSForChaCha)
 				return BC_CHACHA20_POLY1305.getKeyGenerator(random, keySizeBits);
 			if (OS.getCurrentJREVersionDouble()<1.8 && this.getAlgorithmName().equals(AES_GCM.getAlgorithmName()) && this.getBlockMode().equals(AES_GCM.getBlockMode()) && this.getPadding().equals(AES_GCM.getPadding()))
 				return BC_FIPS_AES_GCM.getKeyGenerator(random, keySizeBits);
 			String alg=algorithmName;
 			if (alg.equals(CHACHA20_POLY1305.algorithmName))
-				alg=CHACHA20.algorithmName;
+				alg=CHACHA20_NO_RANDOM_ACCESS.algorithmName;
 			res = new JavaNativeKeyGenerator(this, javax.crypto.KeyGenerator.getInstance(alg, CodeProviderForKeyGenerator.checkProviderWithCurrentOS().name()));
 		}
 		res.init(keySizeBits, random);
@@ -493,7 +484,7 @@ public enum SymmetricEncryptionType {
 
 	public boolean supportRandomReadWrite()
 	{
-		return this.algorithmName.equals(CHACHA20.algorithmName) || blockMode.equals("CTR");
+		return /*this.algorithmName.equals(CHACHA20.algorithmName) || */blockMode.equals("CTR");
 	}
 
 	public boolean timingAttackPossibleWithSomeImplementations()

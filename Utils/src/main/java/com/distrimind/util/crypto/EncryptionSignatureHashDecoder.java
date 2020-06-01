@@ -436,14 +436,19 @@ public class EncryptionSignatureHashDecoder {
 			}
 			else if (symmetricChecker!=null)
 			{
-				symmetricChecker.update(code);
+				if (lenBuffer==8)
+					symmetricChecker.update(code);
 				symmetricChecker.update(buffer, 0, lenBuffer);
 				if (!symmetricChecker.verify())
 					throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
 			} else if (asymmetricChecker!=null)
 			{
-				asymmetricChecker.update(code);
-				asymmetricChecker.update(buffer, 0, 8);
+				if (lenBuffer==8) {
+					asymmetricChecker.update(code);
+					asymmetricChecker.update(buffer, 0, 8);
+				}
+				else
+					asymmetricChecker.update(buffer, 0, 9 );
 				if (!asymmetricChecker.verify())
 					throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
 			}

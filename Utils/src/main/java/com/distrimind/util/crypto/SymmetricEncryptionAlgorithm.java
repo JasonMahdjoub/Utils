@@ -225,7 +225,7 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 		this.supportRandomReadWrite=type.supportRandomReadWrite();
 		//iv = new byte[getIVSizeBytesWithExternalCounter()];
 		externalCounter=this.internalCounter?null:new byte[blockModeCounterBytes];
-		this.chacha =type.getAlgorithmName().toUpperCase().startsWith(SymmetricEncryptionType.CHACHA20.getAlgorithmName().toUpperCase());
+		this.chacha =type.getAlgorithmName().toUpperCase().startsWith(SymmetricEncryptionType.CHACHA20_NO_RANDOM_ACCESS.getAlgorithmName().toUpperCase());
 		this.gcm =type.getBlockMode().toUpperCase().equals("GCM");
 		try {
 			this.cipher.init(Cipher.ENCRYPT_MODE, this.key, generateIV());

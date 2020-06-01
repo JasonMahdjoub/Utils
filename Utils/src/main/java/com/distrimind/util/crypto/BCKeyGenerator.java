@@ -104,8 +104,7 @@ public final class BCKeyGenerator extends AbstractKeyGenerator {
 		}
 		else
 		{
-			if (encryptionType.equals(SymmetricEncryptionType.BC_CHACHA20_POLY1305) /*||
-					encryptionType.getAlgorithmName().equals(SymmetricEncryptionType.BC_CHACHA20_POLY1305.getAlgorithmName())*/) {
+			if (encryptionType.equals(SymmetricEncryptionType.BC_CHACHA20_NO_RANDOM_ACCESS) || encryptionType.equals(SymmetricEncryptionType.BC_CHACHA20_POLY1305)) {
 				keyGenerator=new ChaCha20.KeyGenerator(random);
 				if (keySize!=256)
 					throw new IllegalAccessError("Key size must be equal to 256 with BouncyCastle ChaCha20");
