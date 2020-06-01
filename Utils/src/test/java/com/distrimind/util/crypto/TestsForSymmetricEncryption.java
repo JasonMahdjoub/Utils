@@ -348,7 +348,9 @@ public class TestsForSymmetricEncryption {
 				{SymmetricEncryptionType.GNU_AES_CBC_PKCS5Padding, SymmetricEncryptionType.BC_FIPS_AES_CBC_PKCS7Padding},
 				{SymmetricEncryptionType.GNU_TWOFISH_CBC_PKCS5Padding, SymmetricEncryptionType.BC_TWOFISH_CBC_PKCS7Padding},
 				{SymmetricEncryptionType.GNU_SERPENT_CBC_PKCS5Padding, SymmetricEncryptionType.BC_SERPENT_CBC_PKCS7Padding},
-				{SymmetricEncryptionType.GNU_AES_CBC_PKCS5Padding, SymmetricEncryptionType.AES_CBC_PKCS5Padding}
+				{SymmetricEncryptionType.GNU_AES_CBC_PKCS5Padding, SymmetricEncryptionType.AES_CBC_PKCS5Padding},
+				{SymmetricEncryptionType.CHACHA20_NO_RANDOM_ACCESS, SymmetricEncryptionType.BC_CHACHA20_NO_RANDOM_ACCESS},
+				{SymmetricEncryptionType.CHACHA20_POLY1305, SymmetricEncryptionType.BC_CHACHA20_POLY1305}
 		};
 		Object[][] res2 = new Object[res.length*2][2];
 		int j=0;
