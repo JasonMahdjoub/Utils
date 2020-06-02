@@ -35,7 +35,6 @@ knowledge of the CeCILL-C license and that you accept its terms.
 
 package com.distrimind.util.crypto;
 
-import org.bouncycastle.bcjcajce.provider.symmetric.ChaCha;
 import org.bouncycastle.crypto.SymmetricSecretKey;
 import org.bouncycastle.crypto.*;
 import org.bouncycastle.crypto.fips.FipsAES;
@@ -378,7 +377,6 @@ public class BCCipher extends AbstractCipher {
 			}
 			else if (type.getAlgorithmName().equals(SymmetricEncryptionType.BC_CHACHA20_NO_RANDOM_ACCESS.getAlgorithmName()))
 			{
-				new ChaCha.BaseCC20P1305();
 				ChaCha20.OperatorFactory factory=new ChaCha20.OperatorFactory();
 				ChaCha20.Parameters param=ChaCha20.STREAM;
 				if (iv!=null)
