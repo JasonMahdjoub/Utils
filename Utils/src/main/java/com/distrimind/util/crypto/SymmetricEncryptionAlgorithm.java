@@ -46,6 +46,7 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.spec.InvalidKeySpecException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -85,7 +86,9 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 		if (!getType().supportRandomReadWrite())
 			throw new IllegalStateException("Encryption type must support random read and write");
 		try {
+			long pos=encryptedInputStream.currentPosition();
 			byte[] hash = subStreamParameters.generateHash(encryptedInputStream);
+			encryptedInputStream.seek(pos);
 			return new SubStreamHashResult(hash, readIvsFromEncryptedStream(encryptedInputStream));
 		} catch (NoSuchProviderException | NoSuchAlgorithmException e) {
 			throw new IOException(e);
@@ -173,23 +176,31 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 
 
 		try(RandomOutputStream os= getCipherOutputStreamForEncryption(hashOut, false, associatedData, offAD, lenAD, null, ivs)) {
-
+			ArrayList<SubStreamParameter> ssp=new ArrayList<>(parameters.size());
 			for (SubStreamParameter p : parameters) {
+				int round1 = (int) (p.getStreamStartIncluded() / maxEncryptedPartLength);
+				int round2 = (int) (p.getStreamEndExcluded() / maxEncryptedPartLength);
+				if (round1==round2 || p.getStreamEndExcluded() % maxEncryptedPartLength==0)
+					ssp.add(p);
+				else
+				{
+					long siv=round2 * maxEncryptedPartLength;
+					ssp.add(new SubStreamParameter(p.getStreamStartIncluded(), siv));
+					ssp.add(new SubStreamParameter(siv, p.getStreamEndExcluded()));
+				}
+			}
+
+			for (SubStreamParameter p : ssp) {
 				long start = p.getStreamStartIncluded();
 				long end = p.getStreamEndExcluded();
-				int round = (int) (end / maxEncryptedPartLength);
+				int round = (int) (start / maxEncryptedPartLength);
 				long startIV = round * maxEncryptedPartLength;
 				long endIV = startIV + ivSizeWithoutExternalCounter;
-				if (start < startIV) {
-					partialHash(nonEncryptedInputStream, nullStream, nullMD, md, hashOut, os, start, startIV - start);
-					if (end > startIV) {
-						md.update(ivs[round], 0, (int) Math.min(end - startIV, ivSizeWithoutExternalCounter));
-					}
-				} else if (start < endIV) {
-					int off = (int) (startIV - start);
-					md.update(ivs[round], off, (int) Math.min(end - startIV, ivSizeWithoutExternalCounter - off));
+				if (start<endIV) {
+					md.update(ivs[round], (int)(start-startIV), (int) Math.min(end - start, endIV-start));
 				}
-				if (end > endIV) {
+				if (end>startIV)
+				{
 					start = Math.max(endIV, start);
 					partialHash(nonEncryptedInputStream, nullStream, nullMD, md, hashOut, os, start, end - start);
 				}

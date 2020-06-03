@@ -188,7 +188,7 @@ public class EncryptionSignatureHashDecoder {
 	private long getMinimumInputSize()
 	{
 		if (minimumInputSize==null)
-			minimumInputSize=EncryptionSignatureHashEncoder.getMinimumInputLengthAfterDecoding(symmetricChecker, asymmetricChecker, digest);
+			minimumInputSize=getMinimumInputLengthAfterDecoding();
 		return minimumInputSize;
 	}
 	private static final int maxSymSigSizeBytes;
@@ -290,7 +290,7 @@ public class EncryptionSignatureHashDecoder {
 
 		try {
 			long originalOutputLength=outputStream.length();
-			long maximumOutputLengthAfterEncoding=getMaximumOutputLengthAfterDecoding(originalInputStream.length(), cipher, getMinimumInputSize());
+			long maximumOutputLengthAfterEncoding=getMaximumOutputLength();
 			outputStream.ensureLength(maximumOutputLengthAfterEncoding);
 			byte code=checkCodeForDecode();
 			AbstractMessageDigest digest=this.digest;
@@ -690,16 +690,13 @@ public class EncryptionSignatureHashDecoder {
 		}
 	}
 	public long getMaximumOutputLength() throws IOException {
-		return EncryptionSignatureHashEncoder.getMaximumOutputLengthAfterDecoding(inputStream.length(), cipher, getMinimumInputSize());
+		return getMaximumOutputLength(inputStream.length());
 	}
 
 	public long getMaximumOutputLength(long inputStreamLength) throws IOException {
-		return EncryptionSignatureHashEncoder.getMaximumOutputLengthAfterDecoding(inputStreamLength, cipher, getMinimumInputSize());
-	}
-	static long getMaximumOutputLengthAfterDecoding(long inputStreamLength, SymmetricEncryptionAlgorithm cipher, long minimumInputSize) throws IOException {
 		if (inputStreamLength<=0)
 			throw new IllegalArgumentException();
-		long res=inputStreamLength-minimumInputSize;
+		long res=inputStreamLength-getMinimumInputSize();
 
 		if (res<=0)
 			throw new IllegalArgumentException();
@@ -708,4 +705,35 @@ public class EncryptionSignatureHashDecoder {
 		else
 			return res;
 	}
+
+	private long getMinimumInputLengthAfterDecoding()
+	{
+		long res=9;
+
+		if (symmetricChecker!=null) {
+			int v=symmetricChecker.getMacLengthBytes();
+			res += v + (v>Short.MAX_VALUE?4:2);
+		}
+		if(asymmetricChecker!=null) {
+			int v=asymmetricChecker.getMacLengthBytes();
+			res += v + (v>Short.MAX_VALUE?4:2);
+		}
+		if (digest!=null || (symmetricChecker!=null && asymmetricChecker!=null))
+		{
+			int v;
+			if (digest==null) {
+				v=EncryptionSignatureHashEncoder.defaultMessageType.getDigestLengthInBits() / 8;
+			}
+			else {
+				v=digest.getMessageDigestType().getDigestLengthInBits() / 8;
+			}
+			if (v>Short.MAX_VALUE)
+				v+=4;
+			else
+				v+=2;
+			res+=v;
+		}
+		return res;
+	}
+
 }

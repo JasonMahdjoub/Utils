@@ -41,9 +41,7 @@ import com.distrimind.util.io.*;
 import java.io.IOException;
 import java.security.*;
 import java.security.spec.InvalidKeySpecException;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 /**
  * @author Jason Mahdjoub
@@ -76,16 +74,20 @@ public class EncryptionSignatureHashEncoder {
 		return (byte)res;
 
 	}
-	static byte getCode(SymmetricEncryptionAlgorithm cipher, byte[] associatedData, SymmetricAuthenticatedSignerAlgorithm symmetricSigner, ASymmetricAuthenticatedSignerAlgorithm asymmetricSigner, AbstractMessageDigest digest)
+	private byte getCode()
 	{
-		if (associatedData!=null && (cipher==null || !cipher.getType().supportAssociatedData()) && symmetricSigner==null && asymmetricSigner==null)
-			throw new IllegalArgumentException();
-		int res=symmetricSigner==null?0:1;
-		res+=asymmetricSigner==null?0:2;
-		res+=digest==null?0:4;
-		res+=associatedData==null?0:8;
-		res+=cipher==null?0:16;
-		return (byte)res;
+		if (code==null)
+		{
+			if (associatedData != null && (cipher == null || !cipher.getType().supportAssociatedData()) && symmetricSigner == null && asymmetricSigner == null)
+				throw new IllegalArgumentException();
+			int res = symmetricSigner == null ? 0 : 1;
+			res += asymmetricSigner == null ? 0 : 2;
+			res += digest == null ? 0 : 4;
+			res += associatedData == null ? 0 : 8;
+			res += cipher == null ? 0 : 16;
+			code=(byte)res;
+		}
+		return code;
 	}
 
 
@@ -106,6 +108,7 @@ public class EncryptionSignatureHashEncoder {
 	private AbstractMessageDigest defaultMessageDigest=null;
 	private AbstractEncryptionOutputAlgorithm.CommonCipherOutputStream cipherOutputStream;
 	private byte[] externalCounter=null;
+	private Byte code=null;
 	public EncryptionSignatureHashEncoder() throws IOException {
 		limitedRandomOutputStream=new LimitedRandomOutputStream(nullRandomInputStream, 0);
 	}
@@ -133,6 +136,7 @@ public class EncryptionSignatureHashEncoder {
 		if (cipher==null)
 			throw new NullPointerException();
 		this.cipher=cipher;
+		code=null;
 		return this;
 	}
 	public EncryptionSignatureHashEncoder withoutAssociatedData()
@@ -140,6 +144,7 @@ public class EncryptionSignatureHashEncoder {
 		this.associatedData=null;
 		this.offAD=0;
 		this.lenAD=0;
+		code=null;
 		return this;
 	}
 	public EncryptionSignatureHashEncoder withAssociatedData(byte[] associatedData)
@@ -154,6 +159,7 @@ public class EncryptionSignatureHashEncoder {
 		this.associatedData=associatedData;
 		this.offAD=offAD;
 		this.lenAD=lenAD;
+		code=null;
 		return this;
 	}
 	public EncryptionSignatureHashEncoder withSymmetricSecretKeyForSignature(SymmetricSecretKey secretKeyForSignature) throws IOException {
@@ -174,6 +180,7 @@ public class EncryptionSignatureHashEncoder {
 			throw new IOException("Symmetric encryption use authentication. No more symmetric authentication is needed. However ASymmetric authentication is possible.");
 		this.symmetricSigner=symmetricSigner;
 		minimumOutputSize=null;
+		code=null;
 		return this;
 	}
 	public EncryptionSignatureHashEncoder withASymmetricSigner(ASymmetricAuthenticatedSignerAlgorithm asymmetricSigner)
@@ -182,6 +189,7 @@ public class EncryptionSignatureHashEncoder {
 			throw new NullPointerException();
 		this.asymmetricSigner=asymmetricSigner;
 		minimumOutputSize=null;
+		code=null;
 		return this;
 	}
 	public EncryptionSignatureHashEncoder withASymmetricPrivateKeyForSignature(ASymmetricPrivateKey privateKeyForSignature) throws IOException{
@@ -192,6 +200,7 @@ public class EncryptionSignatureHashEncoder {
 		try {
 			this.asymmetricSigner=new ASymmetricAuthenticatedSignerAlgorithm(privateKeyForSignature);
 			minimumOutputSize=null;
+			code=null;
 		} catch (NoSuchProviderException | NoSuchAlgorithmException e) {
 			throw new IOException(e);
 		}
@@ -203,6 +212,7 @@ public class EncryptionSignatureHashEncoder {
 			throw new NullPointerException();
 		this.digest=messageDigest;
 		minimumOutputSize=null;
+		code=null;
 		return this;
 	}
 	public EncryptionSignatureHashEncoder withMessageDigestType(MessageDigestType messageDigestType) throws IOException {
@@ -211,10 +221,28 @@ public class EncryptionSignatureHashEncoder {
 		try {
 			this.digest=messageDigestType.getMessageDigestInstance();
 			minimumOutputSize=null;
+			code=null;
 		} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
 			throw new IOException(e);
 		}
 		return this;
+	}
+	private int computeAssociatedData() throws IOException {
+		return computeAssociatedData(cipher.getOutputSizeAfterEncryption(inputStream.length()-inputStream.currentPosition()));
+	}
+	private int computeAssociatedData(long dataLen)
+	{
+		int lenBuffer=9+(associatedData!=null?lenAD:0);
+		if (bufferRef.length<lenBuffer)
+			bufferRef=new byte[lenBuffer];
+		Bits.putLong(bufferRef, 0, dataLen);
+		bufferRef[8]=getCode();
+		if (associatedData!=null)
+		{
+			System.arraycopy(associatedData, offAD, bufferRef, 9, lenAD);
+		}
+		return lenBuffer;
+
 	}
 	public void encode(final RandomOutputStream originalOutputStream) throws IOException {
 		if (inputStream==null)
@@ -227,10 +255,11 @@ public class EncryptionSignatureHashEncoder {
 
 		try {
 			long originalOutputLength=originalOutputStream.length();
-			long maximumOutputLengthAfterEncoding=getMaximumOutputLengthAfterEncoding(inputStream.length(), cipher, getMinimumOutputSize());
+			long dataInputLength=inputStream.length()-inputStream.currentPosition();
+			long maximumOutputLengthAfterEncoding=getMaximumOutputLength(dataInputLength);
 			originalOutputStream.ensureLength(maximumOutputLengthAfterEncoding);
 
-			byte code=getCode(cipher, associatedData, symmetricSigner, asymmetricSigner, digest);
+			byte code=getCode();
 			AbstractMessageDigest digest=this.digest;
 			if (symmetricSigner!=null && asymmetricSigner!=null && digest==null) {
 				digest = defaultMessageDigest;
@@ -272,21 +301,13 @@ public class EncryptionSignatureHashEncoder {
 			byte[] buffer=null;
 			int lenBuffer=0;
 			if (cipher != null) {
-				dataLen=cipher.getOutputSizeAfterEncryption(inputStream.length()-inputStream.currentPosition());
+				dataLen=cipher.getOutputSizeAfterEncryption(dataInputLength);
 				originalOutputStream.writeLong(dataLen);
 				limitedRandomOutputStream.set(outputStream, originalOutputStream.currentPosition(), dataLen);
 
 				if (cipher.getType().supportAssociatedData()) {
+					lenBuffer=computeAssociatedData(dataLen);
 					buffer=bufferRef;
-					lenBuffer=9+(associatedData!=null?lenAD:0);
-					if (buffer.length<lenBuffer)
-						bufferRef=buffer=new byte[lenBuffer];
-					Bits.putLong(buffer, 0, dataLen);
-					buffer[8]=code;
-					if (associatedData!=null)
-					{
-						System.arraycopy(associatedData, offAD, buffer, 9, lenAD);
-					}
 					if (cipherOutputStream==null)
 						cipherOutputStream=cipher.getCipherOutputStreamForEncryption(limitedRandomOutputStream, false, buffer, 0, lenBuffer, externalCounter);
 					else
@@ -383,7 +404,7 @@ public class EncryptionSignatureHashEncoder {
 		try {
 			AbstractMessageDigest md = subStreamParameters.getMessageDigestType().getMessageDigestInstance();
 			md.reset();
-			byte[] head=null;
+			/*byte[] head=null;
 			byte code;
 			List<SubStreamParameter> lparameters=subStreamParameters.getParameters();
 			for (SubStreamParameter p : lparameters)
@@ -418,14 +439,20 @@ public class EncryptionSignatureHashEncoder {
 				else
 					l.add(new SubStreamParameter(p.getStreamStartIncluded()-9, p.getStreamEndExcluded()-9));
 			}
-			subStreamParameters=new SubStreamParameters(subStreamParameters.getMessageDigestType(), l);
+			subStreamParameters=new SubStreamParameters(subStreamParameters.getMessageDigestType(), l);*/
 			if (cipher==null)
 			{
 				byte[] hash=subStreamParameters.partialHash(inputStream, md).digest();
 				return Arrays.equals(hash, hashResultFromEncryptedStream.getHash());
 			}
 			else {
-				return cipher.checkPartialHashWithNonEncryptedStream(hashResultFromEncryptedStream, subStreamParameters, inputStream, associatedData, offAD, lenAD, md);
+				byte[] buffer=null;
+				int bufferLen=0;
+				if (cipher.getType().supportAssociatedData()) {
+					bufferLen = computeAssociatedData();
+					buffer=bufferRef;
+				}
+				return cipher.checkPartialHashWithNonEncryptedStream(hashResultFromEncryptedStream, subStreamParameters, inputStream, buffer, 0, bufferLen, md);
 			}
 		} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
 			throw new IOException(e);
@@ -435,23 +462,19 @@ public class EncryptionSignatureHashEncoder {
 	private long getMinimumOutputSize()
 	{
 		if (minimumOutputSize==null)
-			minimumOutputSize=getMinimumOutputLengthAfterEncoding(symmetricSigner, asymmetricSigner, digest);
+			minimumOutputSize=getMinimumOutputLengthAfterEncoding();
 		return minimumOutputSize;
 	}
 
 	public long getMaximumOutputLength() throws IOException {
 
-		return getMaximumOutputLengthAfterEncoding(inputStream.length(), cipher, getMinimumOutputSize());
+		return getMaximumOutputLength(inputStream.length()-inputStream.currentPosition());
 	}
 
 	public long getMaximumOutputLength(long inputStreamLength) throws IOException {
-		return getMaximumOutputLengthAfterEncoding(inputStreamLength, cipher, getMinimumOutputSize());
-	}
-
-	static long getMaximumOutputLengthAfterEncoding(long inputStreamLength, SymmetricEncryptionAlgorithm cipher, long minimumOuputSize) throws IOException {
 		if (inputStreamLength<=0)
 			throw new IllegalArgumentException();
-		long res=minimumOuputSize;
+		long res=getMinimumOutputSize();
 
 		if (cipher!=null) {
 			res += cipher.getOutputSizeAfterEncryption(inputStreamLength);
@@ -460,7 +483,7 @@ public class EncryptionSignatureHashEncoder {
 			res+=inputStreamLength;
 		return res;
 	}
-	static long getMinimumOutputLengthAfterEncoding(SymmetricAuthenticatedSignerAlgorithm symmetricSigner, ASymmetricAuthenticatedSignerAlgorithm asymmetricSigner, AbstractMessageDigest digest)
+	long getMinimumOutputLengthAfterEncoding()
 	{
 		long res=9;
 
@@ -489,47 +512,8 @@ public class EncryptionSignatureHashEncoder {
 		}
 		return res;
 	}
-	static long getMinimumInputLengthAfterDecoding(SymmetricAuthenticatedSignatureCheckerAlgorithm symmetricChecker, ASymmetricAuthenticatedSignatureCheckerAlgorithm asymmetricChecker, AbstractMessageDigest digest)
-	{
-		long res=9;
 
-		if (symmetricChecker!=null) {
-			int v=symmetricChecker.getMacLengthBytes();
-			res += v + (v>Short.MAX_VALUE?4:2);
-		}
-		if(asymmetricChecker!=null) {
-			int v=asymmetricChecker.getMacLengthBytes();
-			res += v + (v>Short.MAX_VALUE?4:2);
-		}
-		if (digest!=null || (symmetricChecker!=null && asymmetricChecker!=null))
-		{
-			int v;
-			if (digest==null) {
-				v=defaultMessageType.getDigestLengthInBits() / 8;
-			}
-			else {
-				v=digest.getMessageDigestType().getDigestLengthInBits() / 8;
-			}
-			if (v>Short.MAX_VALUE)
-				v+=4;
-			else
-				v+=2;
-			res+=v;
-		}
-		return res;
-	}
-	static long getMaximumOutputLengthAfterDecoding(long inputStreamLength, SymmetricEncryptionAlgorithm cipher, long minimumInputSize) throws IOException {
-		if (inputStreamLength<=0)
-			throw new IllegalArgumentException();
-		long res=inputStreamLength-minimumInputSize;
 
-		if (res<=0)
-			throw new IllegalArgumentException();
-		if (cipher!=null)
-			return cipher.getOutputSizeAfterDecryption(res);
-		else
-			return res;
-	}
 	private void free() throws IOException {
 		if (signerOut!=null)
 			signerOut.set(nullRandomInputStream, symmetricSigner==null?asymmetricSigner:symmetricSigner);
