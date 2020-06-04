@@ -59,7 +59,7 @@ public class TestReadWriteEncryption {
 		Random rand=new Random(System.currentTimeMillis());
 		Object[][] res=new Object[16*6][6];
 		int i=0;
-		for (SymmetricSecretKey ske : new SymmetricSecretKey[]{
+		for (SymmetricSecretKey ske : new SymmetricSecretKey[]{//TODO test all algorithms
 				SymmetricEncryptionType.AES_CBC_PKCS5Padding.getKeyGenerator(SecureRandomType.DEFAULT.getInstance(null)).generateKey(),
 				SymmetricEncryptionType.AES_CTR.getKeyGenerator(SecureRandomType.DEFAULT.getInstance(null)).generateKey(),
 				SymmetricEncryptionType.AES_GCM.getKeyGenerator(SecureRandomType.DEFAULT.getInstance(null)).generateKey(),

@@ -196,7 +196,7 @@ abstract class CommonCipherInputStream extends RandomInputStream {
 				else
 					outputBufferLength +=cipher.doFinal(outputBuffer, outputBufferLength+outputBufferIndex);
 				doFinal=false;
-			} catch (IllegalBlockSizeException | BadPaddingException | ShortBufferException e) {
+			} catch (IllegalBlockSizeException | BadPaddingException | ShortBufferException | IllegalStateException e) {
 				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, e);
 			}
 		}

@@ -382,8 +382,10 @@ public class EncryptionSignatureHashEncoder {
 				originalOutputStream.writeBytesArray(signature, false, asymmetricSigner.getMacLengthBytes());
 			}
 			long curPos=originalOutputStream.currentPosition();
-			if (curPos<maximumOutputLengthAfterEncoding && curPos>originalOutputLength)
+			if (curPos<maximumOutputLengthAfterEncoding && curPos>originalOutputLength) {
 				originalOutputStream.setLength(Math.max(curPos, originalOutputLength));
+			}
+			else
 
 
 			outputStream.flush();
