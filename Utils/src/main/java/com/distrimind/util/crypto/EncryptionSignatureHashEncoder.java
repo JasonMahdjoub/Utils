@@ -91,7 +91,7 @@ public class EncryptionSignatureHashEncoder {
 	}
 
 
-	private RandomInputStream inputStream=null;
+	RandomInputStream inputStream=null;
 	private SymmetricEncryptionAlgorithm cipher=null;
 	private byte[] associatedData=null;
 	private int offAD=0;
@@ -116,7 +116,7 @@ public class EncryptionSignatureHashEncoder {
 	public EncryptionSignatureHashEncoder withRandomInputStream(RandomInputStream inputStream) throws IOException {
 		if (inputStream==null)
 			throw new NullPointerException();
-		if (inputStream.length()-inputStream.currentPosition()==0)
+		if (inputStream.length()==0)
 			throw new IllegalArgumentException();
 		this.inputStream=inputStream;
 		return this;
@@ -227,9 +227,9 @@ public class EncryptionSignatureHashEncoder {
 		}
 		return this;
 	}
-	private int computeAssociatedData() throws IOException {
+	/*private int computeAssociatedData() throws IOException {
 		return computeAssociatedData(cipher.getOutputSizeAfterEncryption(inputStream.length()-inputStream.currentPosition()));
-	}
+	}*/
 	private int computeAssociatedData(long dataLen)
 	{
 		int lenBuffer=9+(associatedData!=null?lenAD:0);
@@ -255,7 +255,7 @@ public class EncryptionSignatureHashEncoder {
 
 		try {
 			long originalOutputLength=originalOutputStream.length();
-			long dataInputLength=inputStream.length()-inputStream.currentPosition();
+			long dataInputLength=inputStream.length();
 			long maximumOutputLengthAfterEncoding=getMaximumOutputLength(dataInputLength);
 			originalOutputStream.ensureLength(maximumOutputLengthAfterEncoding);
 
@@ -328,8 +328,7 @@ public class EncryptionSignatureHashEncoder {
 			}
 			else
 			{
-				dataLen=inputStream.length()-inputStream.currentPosition();
-				originalOutputStream.writeLong(dataLen);
+				originalOutputStream.writeLong(dataLen=dataInputLength);
 				outputStream.write(inputStream);
 			}
 			if (outputStream!=originalOutputStream && buffer==null) {
@@ -404,55 +403,27 @@ public class EncryptionSignatureHashEncoder {
 		try {
 			AbstractMessageDigest md = subStreamParameters.getMessageDigestType().getMessageDigestInstance();
 			md.reset();
-			/*byte[] head=null;
-			byte code;
-			List<SubStreamParameter> lparameters=subStreamParameters.getParameters();
-			for (SubStreamParameter p : lparameters)
-			{
-				if (p.getStreamStartIncluded()>=9)
-					break;
-				else
-				{
-					long end=Math.min(9, p.getStreamEndExcluded());
-					if (head==null)
-					{
-						RandomByteArrayOutputStream out=new RandomByteArrayOutputStream(9);
-						code=getCode(cipher, associatedData, symmetricSigner, asymmetricSigner, digest);
-						out.writeByte(code);
-						out.writeLong(inputStream.length());
-						out.flush();
-						head=out.getBytes();
-					}
-					md.update(head, (int)p.getStreamStartIncluded(), (int)(end-p.getStreamStartIncluded()));
-				}
-			}
-			ArrayList<SubStreamParameter> l=new ArrayList<>(lparameters.size());
-			for (SubStreamParameter p : lparameters)
-			{
-				if (p.getStreamStartIncluded()<9)
-				{
-					if (p.getStreamEndExcluded()>9)
-					{
-						l.add(new SubStreamParameter(0, p.getStreamEndExcluded()-9));
-					}
-				}
-				else
-					l.add(new SubStreamParameter(p.getStreamStartIncluded()-9, p.getStreamEndExcluded()-9));
-			}
-			subStreamParameters=new SubStreamParameters(subStreamParameters.getMessageDigestType(), l);*/
+			long dataLen=inputStream.length();
+			RandomByteArrayOutputStream out=new RandomByteArrayOutputStream(9);
+			code=getCode();
+			out.writeByte(code);
+			out.writeLong(dataLen);
+			out.flush();
+
 			if (cipher==null)
 			{
-				byte[] hash=subStreamParameters.partialHash(inputStream, md).digest();
+				RandomInputStream in=new AggregatedRandomInputStreams(new RandomByteArrayInputStream(out.getBytes()), inputStream);
+				byte[] hash=subStreamParameters.partialHash(in, md).digest();
 				return Arrays.equals(hash, hashResultFromEncryptedStream.getHash());
 			}
 			else {
-				byte[] buffer=null;
-				int bufferLen=0;
+
 				if (cipher.getType().supportAssociatedData()) {
-					bufferLen = computeAssociatedData();
-					buffer=bufferRef;
+					lenAD = computeAssociatedData(dataLen);
+					associatedData=bufferRef;
+					offAD=0;
 				}
-				return cipher.checkPartialHashWithNonEncryptedStream(hashResultFromEncryptedStream, subStreamParameters, inputStream, buffer, 0, bufferLen, md);
+				return cipher.checkPartialHashWithNonEncryptedStream(out.getBytes(), hashResultFromEncryptedStream, subStreamParameters, inputStream, associatedData, offAD, lenAD, md);
 			}
 		} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
 			throw new IOException(e);
@@ -468,7 +439,7 @@ public class EncryptionSignatureHashEncoder {
 
 	public long getMaximumOutputLength() throws IOException {
 
-		return getMaximumOutputLength(inputStream.length()-inputStream.currentPosition());
+		return getMaximumOutputLength(inputStream.length());
 	}
 
 	public long getMaximumOutputLength(long inputStreamLength) throws IOException {

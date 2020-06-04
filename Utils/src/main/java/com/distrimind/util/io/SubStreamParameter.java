@@ -43,6 +43,7 @@ import java.io.IOException;
  * @since Utils 4.16.0
  */
 public class SubStreamParameter implements SecureExternalizable, Comparable<SubStreamParameter>{
+	public static final int MAX_INTERVAL_LENGTH_IN_BYTES=512;
 	private long streamStartIncluded;
 	private long streamEndExcluded;
 
@@ -54,6 +55,8 @@ public class SubStreamParameter implements SecureExternalizable, Comparable<SubS
 		if (streamStartIncluded<0)
 			throw new IllegalArgumentException();
 		if (streamEndExcluded<=streamStartIncluded)
+			throw new IllegalArgumentException();
+		if (streamEndExcluded-streamStartIncluded>MAX_INTERVAL_LENGTH_IN_BYTES)
 			throw new IllegalArgumentException();
 		this.streamStartIncluded = streamStartIncluded;
 		this.streamEndExcluded = streamEndExcluded;
@@ -85,6 +88,8 @@ public class SubStreamParameter implements SecureExternalizable, Comparable<SubS
 		if (streamStartIncluded<0)
 			throw new MessageExternalizationException(Integrity.FAIL);
 		if (streamEndExcluded<=streamStartIncluded)
+			throw new MessageExternalizationException(Integrity.FAIL);
+		if (streamEndExcluded-streamStartIncluded>MAX_INTERVAL_LENGTH_IN_BYTES)
 			throw new MessageExternalizationException(Integrity.FAIL);
 	}
 

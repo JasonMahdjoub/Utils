@@ -86,20 +86,18 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 		if (!getType().supportRandomReadWrite())
 			throw new IllegalStateException("Encryption type must support random read and write");
 		try {
-			long pos=encryptedInputStream.currentPosition();
 			byte[] hash = subStreamParameters.generateHash(encryptedInputStream);
-			encryptedInputStream.seek(pos);
 			return new SubStreamHashResult(hash, readIvsFromEncryptedStream(encryptedInputStream));
 		} catch (NoSuchProviderException | NoSuchAlgorithmException e) {
 			throw new IOException(e);
 		}
 
 	}
-	public boolean checkPartialHashWithNonEncryptedStream(SubStreamHashResult hashResultFromEncryptedStream, SubStreamParameters subStreamParameters, RandomInputStream nonEncryptedInputStream, byte[] associatedData, int offAD, int lenAD) throws IOException{
+	public boolean checkPartialHashWithNonEncryptedStream(byte[] head, SubStreamHashResult hashResultFromEncryptedStream, SubStreamParameters subStreamParameters, RandomInputStream nonEncryptedInputStream, byte[] associatedData, int offAD, int lenAD) throws IOException{
 		try {
 			AbstractMessageDigest md = subStreamParameters.getMessageDigestType().getMessageDigestInstance();
 			md.reset();
-			return checkPartialHashWithNonEncryptedStream(hashResultFromEncryptedStream, subStreamParameters, nonEncryptedInputStream, associatedData, offAD, lenAD, md);
+			return checkPartialHashWithNonEncryptedStream(head, hashResultFromEncryptedStream, subStreamParameters, nonEncryptedInputStream, associatedData, offAD, lenAD, md);
 		} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
 			throw new IOException(e);
 		}
@@ -135,36 +133,44 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 
 	private void partialHash(RandomInputStream nonEncryptedInputStream, NullRandomOutputStream nullStream, AbstractMessageDigest nullMD, AbstractMessageDigest md, HashRandomOutputStream hashOut, RandomOutputStream os, long pos, long len) throws IOException {
 		long mod=pos%maxEncryptedPartLength;
-		if (mod>0)
-			mod-=getIVSizeBytesWithoutExternalCounter();
+		mod-=getIVSizeBytesWithoutExternalCounter();
 		assert mod>=0;
 		pos=(pos/maxEncryptedPartLength)*maxPlainTextSizeForEncoding+mod;
 		long p=(pos/getCounterStepInBytes())*getCounterStepInBytes();
 		long off=pos-p;
 		nonEncryptedInputStream.seek(p);
 		os.seek(p);
-		if (off>0)
-		{
-			hashOut.set(nullStream, nullMD);
-			nonEncryptedInputStream.transferTo(os, off);
-		}
-		hashOut.set(nullStream, md);
-		nonEncryptedInputStream.transferTo(os, len);
+		long l=pos+len;
+		if (l%getCounterStepInBytes()!=0)
+			l=((l/getCounterStepInBytes())*getCounterStepInBytes())+getCounterStepInBytes();
+		l=Math.min(nonEncryptedInputStream.length(), l);
+		l-=p;
+		assert l%getCounterStepInBytes()==0;
+		RandomByteArrayOutputStream out=new RandomByteArrayOutputStream((int)l);
+		hashOut.set(out, nullMD);
+		nonEncryptedInputStream.transferTo(os, l);
+		md.update(out.getBytes(), (int)off,(int)len);
+		hashOut.set(nullStream, nullMD);
 	}
 
-	public boolean checkPartialHashWithNonEncryptedStream(SubStreamHashResult hashResultFromEncryptedStream, SubStreamParameters subStreamParameters,
+	public boolean checkPartialHashWithNonEncryptedStream(byte[] head, SubStreamHashResult hashResultFromEncryptedStream, SubStreamParameters subStreamParameters,
 														  RandomInputStream nonEncryptedInputStream, byte[] associatedData, int offAD, int lenAD,
 														  AbstractMessageDigest md) throws IOException, NoSuchProviderException {
 
+		if (nonEncryptedInputStream.currentPosition()!=0)
+			nonEncryptedInputStream.seek(0);
 		List<SubStreamParameter> parameters = subStreamParameters.getParameters();
 		byte[][] ivs = hashResultFromEncryptedStream.getIvs();
 		for (byte[] iv : ivs)
+			if (iv==null)
+				throw new IOException();
 			if (iv.length != key.getEncryptionAlgorithmType().getIVSizeBytes())
 				throw new IOException();
 
 		final int ivSizeWithoutExternalCounter=getIVSizeBytesWithoutExternalCounter();
 		NullRandomOutputStream nullStream=new NullRandomOutputStream();
-		nullStream.setLength(getOutputSizeAfterEncryption(nonEncryptedInputStream.length()));
+		long dataLen=nonEncryptedInputStream.length();
+		nullStream.setLength(getOutputSizeAfterEncryption(dataLen));
 		AbstractMessageDigest nullMD;
 		HashRandomOutputStream hashOut;
 		try {
@@ -176,21 +182,36 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 
 
 		try(RandomOutputStream os= getCipherOutputStreamForEncryption(hashOut, false, associatedData, offAD, lenAD, null, ivs)) {
-			ArrayList<SubStreamParameter> ssp=new ArrayList<>(parameters.size());
-			for (SubStreamParameter p : parameters) {
+
+			List<SubStreamParameter> ssp;
+			if (head!=null) {
+				ssp=new ArrayList<>(parameters.size());
+				for (SubStreamParameter p : subStreamParameters.getParameters()) {
+					if (p.getStreamStartIncluded() < head.length) {
+						md.update(head, (int) p.getStreamStartIncluded(), (int) Math.min(p.getStreamEndExcluded()-p.getStreamStartIncluded(), head.length-p.getStreamStartIncluded()));
+						if (p.getStreamEndExcluded() > head.length)
+							ssp.add(new SubStreamParameter(0, p.getStreamEndExcluded()-head.length));
+					} else
+						ssp.add(new SubStreamParameter(p.getStreamStartIncluded()-head.length, p.getStreamEndExcluded()-head.length));
+				}
+			}
+			else
+				ssp=parameters;
+			ArrayList<SubStreamParameter> ssp2=new ArrayList<>(ssp.size());
+			for (SubStreamParameter p : ssp) {
 				int round1 = (int) (p.getStreamStartIncluded() / maxEncryptedPartLength);
 				int round2 = (int) (p.getStreamEndExcluded() / maxEncryptedPartLength);
 				if (round1==round2 || p.getStreamEndExcluded() % maxEncryptedPartLength==0)
-					ssp.add(p);
+					ssp2.add(p);
 				else
 				{
 					long siv=round2 * maxEncryptedPartLength;
-					ssp.add(new SubStreamParameter(p.getStreamStartIncluded(), siv));
-					ssp.add(new SubStreamParameter(siv, p.getStreamEndExcluded()));
+					ssp2.add(new SubStreamParameter(p.getStreamStartIncluded(), siv));
+					ssp2.add(new SubStreamParameter(siv, p.getStreamEndExcluded()));
 				}
 			}
 
-			for (SubStreamParameter p : ssp) {
+			for (SubStreamParameter p : ssp2) {
 				long start = p.getStreamStartIncluded();
 				long end = p.getStreamEndExcluded();
 				int round = (int) (start / maxEncryptedPartLength);
@@ -199,7 +220,7 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 				if (start<endIV) {
 					md.update(ivs[round], (int)(start-startIV), (int) Math.min(end - start, endIV-start));
 				}
-				if (end>startIV)
+				if (end>endIV)
 				{
 					start = Math.max(endIV, start);
 					partialHash(nonEncryptedInputStream, nullStream, nullMD, md, hashOut, os, start, end - start);

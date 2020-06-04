@@ -382,23 +382,27 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 					if (useExternalCounter())
 						System.arraycopy(manualIvs[(int)round], 0, iv, 0, getIVSizeBytesWithoutExternalCounter());
 					else
-						System.arraycopy(manualIvs[(int)round], 0, iv, 0, iv.length);
+						System.arraycopy(manualIvs[(int)round], 0, iv, 0, getIVSizeBytesWithExternalCounter());
 				}
 				else {
 					RandomInputStream ris = os.getRandomInputStream();
 					os.getRandomInputStream().seek(p);
 					ris.readFully(iv);
 				}
-				if (useExternalCounter())
+				if (useExternalCounter()) {
 					System.arraycopy(externalCounter, 0, iv, getIVSizeBytesWithoutExternalCounter(), externalCounter.length);
-
-				if (mod>0) {
-					mod = cipher.getOutputSize(mod)+getIVSizeBytesWithoutExternalCounter();
+				}
+				initCipherForEncryptionWithIvAndCounter(cipher, iv, counter);
+				if (mod>0 || manualIvs!=null) {
+					if (mod>0) {
+						mod = cipher.getOutputSize(mod);
+					}
+					mod+=getIVSizeBytesWithoutExternalCounter();
 				}
 				p += mod;
 
 				os.seek(p);
-				initCipherForEncryptionWithIvAndCounter(cipher, iv, counter);
+
 			}
 			else
 			{

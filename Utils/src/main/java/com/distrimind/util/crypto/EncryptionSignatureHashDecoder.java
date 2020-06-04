@@ -74,7 +74,7 @@ public class EncryptionSignatureHashDecoder {
 	public EncryptionSignatureHashDecoder withRandomInputStream(RandomInputStream inputStream) throws IOException {
 		if (inputStream==null)
 			throw new NullPointerException();
-		if (inputStream.length()-inputStream.currentPosition()==0)
+		if (inputStream.length()==0)
 			throw new IllegalArgumentException();
 		this.inputStream=inputStream;
 		return this;
@@ -282,6 +282,8 @@ public class EncryptionSignatureHashDecoder {
 	public void decodeAndCheckHashAndSignaturesIfNecessary(RandomOutputStream outputStream) throws IOException {
 		if (outputStream==null)
 			throw new NullPointerException();
+		if (inputStream.currentPosition()!=0)
+			inputStream.seek(0);
 		RandomInputStream originalInputStream=inputStream;
 		if (originalInputStream==null)
 			throw new NullPointerException();
@@ -465,7 +467,7 @@ public class EncryptionSignatureHashDecoder {
 	private void checkDataLength(RandomInputStream inputStream, long dataLen) throws IOException {
 		if (dataLen<=0)
 			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
-		if (dataLen>inputStream.length()-inputStream.currentPosition())
+		if (dataLen>inputStream.length())
 			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
 	}
 	public Integrity checkHashAndSignature() throws IOException {
@@ -473,7 +475,8 @@ public class EncryptionSignatureHashDecoder {
 			throw new NullPointerException();
 		if (inputStream.length()<=0)
 			throw new IllegalArgumentException();
-
+		if (inputStream.currentPosition()!=0)
+			inputStream.seek(0);
 
 		try {
 
@@ -589,7 +592,8 @@ public class EncryptionSignatureHashDecoder {
 			throw new NullPointerException();
 		if (inputStream.length()<=0)
 			throw new IllegalArgumentException();
-
+		if (inputStream.currentPosition()!=0)
+			inputStream.seek(0);
 
 		try {
 
@@ -678,7 +682,8 @@ public class EncryptionSignatureHashDecoder {
 		}
 	}
 	public SubStreamHashResult computePartialHash(SubStreamParameters subStreamParameters) throws IOException {
-
+		if (inputStream.currentPosition()!=0)
+			inputStream.seek(0);
 		try {
 			if (cipher == null) {
 				return new SubStreamHashResult(subStreamParameters.generateHash(inputStream), null);
