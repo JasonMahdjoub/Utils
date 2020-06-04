@@ -688,7 +688,7 @@ public class EncryptionSignatureHashDecoder {
 			if (cipher == null) {
 				return new SubStreamHashResult(subStreamParameters.generateHash(inputStream), null);
 			} else {
-				return cipher.getIVAndPartialHashedSubStreamFromEncryptedStream(inputStream, subStreamParameters);
+				return cipher.getIVAndPartialHashedSubStreamFromEncryptedStream(inputStream, subStreamParameters, 9);
 			}
 		} catch (NoSuchProviderException | NoSuchAlgorithmException e) {
 			throw new IOException(e);

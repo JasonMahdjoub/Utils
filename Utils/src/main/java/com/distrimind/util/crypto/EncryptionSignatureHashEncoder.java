@@ -407,16 +407,18 @@ public class EncryptionSignatureHashEncoder {
 			RandomByteArrayOutputStream out=new RandomByteArrayOutputStream(9);
 			code=getCode();
 			out.writeByte(code);
-			out.writeLong(dataLen);
-			out.flush();
 
 			if (cipher==null)
 			{
+				out.writeLong(dataLen);
+				out.flush();
 				RandomInputStream in=new AggregatedRandomInputStreams(new RandomByteArrayInputStream(out.getBytes()), inputStream);
 				byte[] hash=subStreamParameters.partialHash(in, md).digest();
 				return Arrays.equals(hash, hashResultFromEncryptedStream.getHash());
 			}
 			else {
+				out.writeLong(dataLen=cipher.getOutputSizeAfterEncryption(dataLen));
+				out.flush();
 
 				if (cipher.getType().supportAssociatedData()) {
 					lenAD = computeAssociatedData(dataLen);

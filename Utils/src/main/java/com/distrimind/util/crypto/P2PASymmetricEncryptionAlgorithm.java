@@ -299,8 +299,8 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 	}
 
 	@Override
-	protected byte[][] readIvsFromEncryptedStream(RandomInputStream is) throws IOException {
-		return p2pencryption.readIvsFromEncryptedStream(is);
+	protected byte[][] readIvsFromEncryptedStream(RandomInputStream is, int headLengthBytes) throws IOException {
+		return p2pencryption.readIvsFromEncryptedStream(is, headLengthBytes);
 	}
 
 	@Override

@@ -220,13 +220,13 @@ public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOu
 	}
 	protected abstract void initCipherForDecryptionWithIvAndCounter(AbstractCipher cipher, byte[] iv, int counter) throws IOException ;
 	public abstract void initCipherForDecryptionWithIv(AbstractCipher cipher, byte[] iv) throws IOException ;
-	protected byte[][] readIvsFromEncryptedStream(final RandomInputStream is) throws IOException {
+	protected byte[][] readIvsFromEncryptedStream(final RandomInputStream is, int headLengthBytes) throws IOException {
 		if (includeIV()) {
-			long l = is.length();
-			int nbIv = l / maxEncryptedPartLength + l % maxEncryptedPartLength > 0 ? 1 : 0;
+			long l = is.length()-headLengthBytes;
+			int nbIv = (int)((l / maxEncryptedPartLength) + (l % maxEncryptedPartLength > 0 ? 1 : 0));
 			byte[][] res = new byte[nbIv][];
 			for (int i = 0; i < nbIv; i++) {
-				is.seek(i * maxEncryptedPartLength);
+				is.seek(i * maxEncryptedPartLength+headLengthBytes);
 				res[i] = new byte[getIVSizeBytesWithoutExternalCounter()];
 				is.readFully(res[i]);
 			}

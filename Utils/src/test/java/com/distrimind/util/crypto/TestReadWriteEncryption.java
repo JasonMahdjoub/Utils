@@ -54,13 +54,17 @@ import java.util.Random;
  */
 public class TestReadWriteEncryption {
 
-	@DataProvider(name = "provideParameters", parallel = false)
+	@DataProvider(name = "provideParameters", parallel = true)
 	public Object[][] provideParameters() throws NoSuchProviderException, NoSuchAlgorithmException, InvalidAlgorithmParameterException {
 		Random rand=new Random(System.currentTimeMillis());
-		Object[][] res=new Object[32][5];
+		Object[][] res=new Object[16*6][6];
 		int i=0;
 		for (SymmetricSecretKey ske : new SymmetricSecretKey[]{
+				SymmetricEncryptionType.AES_CBC_PKCS5Padding.getKeyGenerator(SecureRandomType.DEFAULT.getInstance(null)).generateKey(),
 				SymmetricEncryptionType.AES_CTR.getKeyGenerator(SecureRandomType.DEFAULT.getInstance(null)).generateKey(),
+				SymmetricEncryptionType.AES_GCM.getKeyGenerator(SecureRandomType.DEFAULT.getInstance(null)).generateKey(),
+				SymmetricEncryptionType.CHACHA20_NO_RANDOM_ACCESS.getKeyGenerator(SecureRandomType.DEFAULT.getInstance(null)).generateKey(),
+				SymmetricEncryptionType.CHACHA20_POLY1305.getKeyGenerator(SecureRandomType.DEFAULT.getInstance(null)).generateKey(),
 				null
 		})
 		{
@@ -89,11 +93,12 @@ public class TestReadWriteEncryption {
 								null
 						})
 						{
-							res[i][0]=ske;
-							res[i][1]=associatedData;
-							res[i][2]=(ske!=null && ske.getEncryptionAlgorithmType().isAuthenticatedAlgorithm())?null:sks;
-							res[i][3]=kp;
-							res[i][4]=md;
+							res[i][0]=ske==null?null:ske.getEncryptionAlgorithmType();
+							res[i][1]=ske;
+							res[i][2]=associatedData;
+							res[i][3]=(ske!=null && ske.getEncryptionAlgorithmType().isAuthenticatedAlgorithm())?null:sks;
+							res[i][4]=kp;
+							res[i][5]=md;
 							++i;
 						}
 					}
@@ -104,7 +109,7 @@ public class TestReadWriteEncryption {
 	}
 
 	@Test(dataProvider = "provideParameters")
-	public void testEncryption(SymmetricSecretKey secretKeyForEncryption, byte[] associatedData, SymmetricSecretKey secretKeyForSignature, ASymmetricKeyPair keyPairForSignature, MessageDigestType messageDigestType) throws IOException, NoSuchProviderException, NoSuchAlgorithmException {
+	public void testEncryption(SymmetricEncryptionType encryptionType, SymmetricSecretKey secretKeyForEncryption, byte[] associatedData, SymmetricSecretKey secretKeyForSignature, ASymmetricKeyPair keyPairForSignature, MessageDigestType messageDigestType) throws IOException, NoSuchProviderException, NoSuchAlgorithmException {
 		System.out.println("Encryption type : "+(secretKeyForEncryption==null?"null":secretKeyForEncryption.getEncryptionAlgorithmType()));
 		Random r=new Random(System.currentTimeMillis());
 		byte[] in=new byte[10000*r.nextInt(1000)];

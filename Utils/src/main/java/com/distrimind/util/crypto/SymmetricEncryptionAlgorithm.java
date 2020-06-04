@@ -40,7 +40,6 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -79,15 +78,15 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 	public boolean isPostQuantumEncryption() {
 		return key.isPostQuantumKey();
 	}
-	public SubStreamHashResult getIVAndPartialHashedSubStreamFromEncryptedStream(RandomInputStream encryptedInputStream, SubStreamParameters subStreamParameters) throws IOException {
-		return getIVAndPartialHashedSubStreamFromEncryptedStream(encryptedInputStream, subStreamParameters, null);
+	public SubStreamHashResult getIVAndPartialHashedSubStreamFromEncryptedStream(RandomInputStream encryptedInputStream, SubStreamParameters subStreamParameters, int headLengthBytes) throws IOException {
+		return getIVAndPartialHashedSubStreamFromEncryptedStream(encryptedInputStream, subStreamParameters,headLengthBytes, null);
 	}
-	public SubStreamHashResult getIVAndPartialHashedSubStreamFromEncryptedStream(RandomInputStream encryptedInputStream, SubStreamParameters subStreamParameters, byte[] externalCounter) throws IOException {
+	public SubStreamHashResult getIVAndPartialHashedSubStreamFromEncryptedStream(RandomInputStream encryptedInputStream, SubStreamParameters subStreamParameters, int headLengthBytes, byte[] externalCounter) throws IOException {
 		if (!getType().supportRandomReadWrite())
 			throw new IllegalStateException("Encryption type must support random read and write");
 		try {
 			byte[] hash = subStreamParameters.generateHash(encryptedInputStream);
-			return new SubStreamHashResult(hash, readIvsFromEncryptedStream(encryptedInputStream));
+			return new SubStreamHashResult(hash, readIvsFromEncryptedStream(encryptedInputStream, headLengthBytes));
 		} catch (NoSuchProviderException | NoSuchAlgorithmException e) {
 			throw new IOException(e);
 		}
@@ -103,35 +102,9 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 		}
 
 	}
-	public static void main(String[] args) throws NoSuchProviderException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, InvalidAlgorithmParameterException, BadPaddingException, IllegalBlockSizeException, IOException {
-		byte[] iv=new byte[16];
-		AbstractSecureRandom random=SecureRandomType.DEFAULT.getInstance(null);
-		random.nextBytes(iv);
-		SymmetricSecretKey key=SymmetricEncryptionType.AES_CTR.getKeyGenerator(random).generateKey();
-		SymmetricEncryptionAlgorithm enc=new SymmetricEncryptionAlgorithm(random, key);
-		enc.cipher.init(Cipher.ENCRYPT_MODE, key, iv);
-		byte[] message=new byte[10000];
-		byte[] encMessage=enc.cipher.doFinal(message);
-		int blockSizeBytes=key.getEncryptionAlgorithmType().getBlockSizeBits()/8;
-		ByteBuffer biv= ByteBuffer.allocate(blockSizeBytes);
-		int indexPos= blockSizeBytes - 4;
-		biv.put(iv);
-		biv.putInt(indexPos, 12+biv.getInt(indexPos));
-		enc.cipher.init(Cipher.ENCRYPT_MODE, key, biv.array());
-		byte[] encM2=enc.cipher.doFinal(message, 12*blockSizeBytes, 64);
-		for (int i=0;i<encM2.length;i++)
-		{
-			if (encM2[i]!=encMessage[i+12*blockSizeBytes])
-			{
-				System.out.println("Failed");
-				break;
-			}
-		}
-		System.out.println("Finished");
 
-	}
 
-	private void partialHash(RandomInputStream nonEncryptedInputStream, NullRandomOutputStream nullStream, AbstractMessageDigest nullMD, AbstractMessageDigest md, HashRandomOutputStream hashOut, RandomOutputStream os, long pos, long len) throws IOException {
+	private void partialHash(RandomInputStream nonEncryptedInputStream, NullRandomOutputStream nullStream, AbstractMessageDigest md, CommonCipherOutputStream os, long pos, long len) throws IOException {
 		long mod=pos%maxEncryptedPartLength;
 		mod-=getIVSizeBytesWithoutExternalCounter();
 		assert mod>=0;
@@ -142,20 +115,35 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 		os.seek(p);
 		long l=pos+len;
 		if (l%getCounterStepInBytes()!=0)
-			l=((l/getCounterStepInBytes())*getCounterStepInBytes())+getCounterStepInBytes();
-		l=Math.min(nonEncryptedInputStream.length(), l);
-		l-=p;
+			l=(((l/getCounterStepInBytes())+1)*getCounterStepInBytes());
 		assert l%getCounterStepInBytes()==0;
+		assert p%getCounterStepInBytes()==0;
+		boolean doFinal=false;
+		if (l>nonEncryptedInputStream.length()) {
+			doFinal=true;
+			l = nonEncryptedInputStream.length();
+		}
+		l-=p;
 		RandomByteArrayOutputStream out=new RandomByteArrayOutputStream((int)l);
-		hashOut.set(out, nullMD);
+		os.os=out;
 		nonEncryptedInputStream.transferTo(os, l);
-		md.update(out.getBytes(), (int)off,(int)len);
-		hashOut.set(nullStream, nullMD);
+		out.flush();
+		byte[] b=out.getBytes();
+		md.update(b, (int)off,(int)len);
+		if (doFinal) {
+			try {
+				byte[] f = cipher.doFinal();
+				md.update(f, 0, f.length);
+			} catch (IllegalBlockSizeException | BadPaddingException e) {
+				throw new IOException(e);
+			}
+		}
+		os.os=nullStream;
 	}
 
 	public boolean checkPartialHashWithNonEncryptedStream(byte[] head, SubStreamHashResult hashResultFromEncryptedStream, SubStreamParameters subStreamParameters,
 														  RandomInputStream nonEncryptedInputStream, byte[] associatedData, int offAD, int lenAD,
-														  AbstractMessageDigest md) throws IOException, NoSuchProviderException {
+														  AbstractMessageDigest md) throws IOException {
 
 		if (nonEncryptedInputStream.currentPosition()!=0)
 			nonEncryptedInputStream.seek(0);
@@ -169,19 +157,10 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 
 		final int ivSizeWithoutExternalCounter=getIVSizeBytesWithoutExternalCounter();
 		NullRandomOutputStream nullStream=new NullRandomOutputStream();
-		long dataLen=nonEncryptedInputStream.length();
-		nullStream.setLength(getOutputSizeAfterEncryption(dataLen));
-		AbstractMessageDigest nullMD;
-		HashRandomOutputStream hashOut;
-		try {
-			nullMD=MessageDigestType.DEFAULT.getMessageDigestInstance();
-			hashOut=new HashRandomOutputStream(nullStream, nullMD);
-		} catch (NoSuchAlgorithmException e) {
-			throw new IOException(e);
-		}
+		nullStream.setLength(getOutputSizeAfterEncryption(nonEncryptedInputStream.length()));
 
 
-		try(RandomOutputStream os= getCipherOutputStreamForEncryption(hashOut, false, associatedData, offAD, lenAD, null, ivs)) {
+		try(CommonCipherOutputStream os= getCipherOutputStreamForEncryption(nullStream, false, associatedData, offAD, lenAD, null, ivs)) {
 
 			List<SubStreamParameter> ssp;
 			if (head!=null) {
@@ -201,7 +180,7 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 			for (SubStreamParameter p : ssp) {
 				int round1 = (int) (p.getStreamStartIncluded() / maxEncryptedPartLength);
 				int round2 = (int) (p.getStreamEndExcluded() / maxEncryptedPartLength);
-				if (round1==round2 || p.getStreamEndExcluded() % maxEncryptedPartLength==0)
+				if (round1==round2 || (p.getStreamEndExcluded() % maxEncryptedPartLength)==0)
 					ssp2.add(p);
 				else
 				{
@@ -223,7 +202,7 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 				if (end>endIV)
 				{
 					start = Math.max(endIV, start);
-					partialHash(nonEncryptedInputStream, nullStream, nullMD, md, hashOut, os, start, end - start);
+					partialHash(nonEncryptedInputStream, nullStream, md, os, start, end - start);
 				}
 			}
 			return Arrays.equals(md.digest(), hashResultFromEncryptedStream.getHash());
@@ -400,7 +379,7 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 
 	@Override
 	protected boolean allOutputGeneratedIntoDoFinalFunction() {
-		return gcm;
+		return gcm || (chacha && type.getAlgorithmName().toUpperCase().contains("POLY1305"));
 	}
 
 

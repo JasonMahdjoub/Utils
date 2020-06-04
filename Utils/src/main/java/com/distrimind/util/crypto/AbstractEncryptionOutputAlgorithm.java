@@ -203,7 +203,7 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 		private boolean doFinal;
 		boolean supportRandomAccess;
 
-		private RandomOutputStream os;
+		RandomOutputStream os;
 		private byte[][] manualIvs;
 		private byte[] externalCounter;
 		private byte[] associatedData;
@@ -394,13 +394,9 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 				}
 				initCipherForEncryptionWithIvAndCounter(cipher, iv, counter);
 				if (mod>0 || manualIvs!=null) {
-					if (mod>0) {
-						mod = cipher.getOutputSize(mod);
-					}
 					mod+=getIVSizeBytesWithoutExternalCounter();
 				}
 				p += mod;
-
 				os.seek(p);
 
 			}

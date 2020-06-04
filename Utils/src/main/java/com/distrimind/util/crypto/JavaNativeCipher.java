@@ -195,7 +195,7 @@ public final class JavaNativeCipher extends AbstractCipher {
 			}
 		}
 		else
-			init(opmode, key, iv);
+			super.init(opmode, key, iv, counter);
 
 	}
 
