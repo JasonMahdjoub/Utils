@@ -36,6 +36,8 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 
 import com.distrimind.util.DecentralizedValue;
+import com.distrimind.util.io.RandomByteArrayInputStream;
+import com.distrimind.util.io.RandomInputStream;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
 import org.testng.Assert;
@@ -49,6 +51,7 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.spec.InvalidKeySpecException;
+import java.util.Arrays;
 import java.util.Random;
 
 /**
@@ -127,13 +130,13 @@ public class TestsForSymmetricEncryption {
 
 
 		algoDistant = new SymmetricEncryptionAlgorithm(random, key1, counterSizeBytes, false);
-		algoDistant.setMaxPlainTextSizeForEncoding(2000);
+		algoDistant.setMaxPlainTextSizeForEncoding(1000);
 		Assert.assertEquals(algoDistant.getBlockModeCounterBytes(), counterSizeBytes);
 		Assert.assertEquals(algoDistant.useExternalCounter(), counterSizeBytes>0);
 		Assert.assertEquals(algoDistant.getIVSizeBytesWithExternalCounter(), type1.getIVSizeBytes());
 		Assert.assertEquals(algoDistant.getIVSizeBytesWithoutExternalCounter(), type1.getIVSizeBytes()-counterSizeBytes);
 		SymmetricEncryptionAlgorithm algoLocal = new SymmetricEncryptionAlgorithm(random, key2, counterSizeBytes, false);
-		algoLocal.setMaxPlainTextSizeForEncoding(2000);
+		algoLocal.setMaxPlainTextSizeForEncoding(1000);
 		Assert.assertEquals(algoLocal.getBlockModeCounterBytes(), counterSizeBytes);
 		Assert.assertEquals(algoLocal.useExternalCounter(), counterSizeBytes>0);
 		Assert.assertEquals(algoLocal.getIVSizeBytesWithExternalCounter(), type1.getIVSizeBytes());
@@ -158,6 +161,23 @@ public class TestsForSymmetricEncryption {
 			byte[] decrypted = algoDistant.decode(encrypted, null, counter);
 			Assert.assertEquals(decrypted.length, m.length, "Testing size " + type1+", "+type2);
 			Assert.assertEquals(decrypted, m, "Testing " + type1+", "+type2+", useExternalCounter="+algoLocal.useExternalCounter());
+			if (algoLocal.supportRandomEncryptionAndRandomDecryption()) {
+				RandomInputStream ris = algoDistant.getCipherInputStreamForDecryption(new RandomByteArrayInputStream(encrypted), counter);
+				int p = 5 * (type1.getBlockSizeBits() / 8);
+				p=Math.min(p, ((m.length-32-algoLocal.getIVSizeBytesWithoutExternalCounter())/algoLocal.getCounterStepInBytes())*algoLocal.getCounterStepInBytes());
+				ris.seek(p);
+				byte[] b = new byte[32];
+				ris.readFully(b);
+				for (int i = 0; i < 64; i++)
+					Assert.assertEquals(b[i], m[p + i], "pos="+i);
+				p = 80 * (type1.getBlockSizeBits() / 8);
+				p=Math.min(p, ((m.length-64-algoLocal.getIVSizeBytesWithoutExternalCounter())/algoLocal.getCounterStepInBytes())*algoLocal.getCounterStepInBytes());
+				ris.seek(p);
+				b = new byte[64];
+				ris.readFully(b);
+				for (int i = 0; i < 64; i++)
+					Assert.assertEquals(b[i], m[p + i], "pos="+i);
+			}
 			byte[] md = decrypted;
 			Assert.assertEquals(md.length, m.length, "Testing size " + type1+", "+type2);
 			Assert.assertEquals(md, m, "Testing " + type1+", "+type2);

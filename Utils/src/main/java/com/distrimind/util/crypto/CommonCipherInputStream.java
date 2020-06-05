@@ -357,25 +357,22 @@ abstract class CommonCipherInputStream extends RandomInputStream {
 			throw new IOException("Stream closed");
 		if (_pos<0)
 			throw new IllegalArgumentException();
-		if (_pos>is.length())
+		if (_pos>length())
 			throw new IllegalArgumentException();
 		if (!supportRandomAccess)
 			throw new IOException("Random decryption impossible");
 
 		if (includeIV) {
-			long p = _pos / maxPlainTextSizeForEncoding*maxEncryptedPartLength ;
+			long counter = _pos % maxPlainTextSizeForEncoding;
+			if (counter%counterStepInBytes!=0)
+				throw new IOException("The position is not aligned with the cipher block size");
+			long p = (_pos / maxPlainTextSizeForEncoding)*maxEncryptedPartLength;
 			is.seek(p);
 			is.readFully(iv, 0, IVSizeBytesWithoutExternalCounter);
 			if (externalCounter!=null)
 				System.arraycopy(externalCounter, 0, iv, IVSizeBytesWithoutExternalCounter, externalCounter.length);
-
-			long counter = _pos % maxPlainTextSizeForEncoding;
-
-
-			if (counter > 0) {
-				p += IVSizeBytesWithoutExternalCounter + (getOutputSizeAfterEncryption(counter));
-				counter /= counterStepInBytes;
-			}
+			p += counter+IVSizeBytesWithoutExternalCounter;
+			counter/=counterStepInBytes;
 			is.seek(posEncrypted =p);
 			initCipherForDecryptionWithIvAndCounter(iv, (int)counter);
 		}
