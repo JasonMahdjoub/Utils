@@ -83,6 +83,7 @@ public enum SymmetricAuthentifiedSignatureType {
 	private final AuthParameters messageDigestAuth;
     private final SymmetricAuthentifiedSignatureType replacer;
 
+	public final static int MAX_SYMMETRIC_SIGNATURE_SIZE=64;
 
     public boolean equals(SymmetricAuthentifiedSignatureType type)
 	{

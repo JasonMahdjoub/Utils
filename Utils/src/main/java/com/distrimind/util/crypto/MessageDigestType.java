@@ -101,6 +101,8 @@ public enum MessageDigestType {
 
 	private final MessageDigestType replacer;
 
+	public static final int MAX_HASH_LENGTH=64;
+
 	public boolean equals(MessageDigestType type)
 	{
 		if (type==null)

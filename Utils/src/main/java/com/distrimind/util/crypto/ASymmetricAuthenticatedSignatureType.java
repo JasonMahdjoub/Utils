@@ -86,6 +86,22 @@ public enum ASymmetricAuthenticatedSignatureType {
 
 	private final String curveName;
 
+
+	public static final int MAX_NON_PQC_NON_RSA_SIGNATURE_PUBLIC_KEY_SIZE_IN_BYTES =140;
+	public static final int MAX_NON_PQC_NON_RSA_SIGNATURE_PRIVATE_KEY_SIZE_IN_BYTES = MAX_NON_PQC_NON_RSA_SIGNATURE_PUBLIC_KEY_SIZE_IN_BYTES;
+
+	public static final int MAX_RSA_PUBLIC_KEY_SIZE_IN_BYTES=1024;
+	public static final int MAX_RSA_PRIVATE_KEY_SIZE_IN_BYTES =MAX_RSA_PUBLIC_KEY_SIZE_IN_BYTES/3*2;
+	public static final int MAX_NON_PQC_SIGNATURE_PUBLIC_KEY_SIZE_IN_BYTES =Math.max(MAX_NON_PQC_NON_RSA_SIGNATURE_PUBLIC_KEY_SIZE_IN_BYTES, MAX_RSA_PUBLIC_KEY_SIZE_IN_BYTES);
+	public static final int MAX_NON_PQC_SIGNATURE_PRIVATE_KEY_SIZE_IN_BYTES = Math.max(MAX_NON_PQC_NON_RSA_SIGNATURE_PRIVATE_KEY_SIZE_IN_BYTES, MAX_RSA_PRIVATE_KEY_SIZE_IN_BYTES);;
+	public static final int MAX_PQC_SIGNATURE_PUBLIC_KEY_SIZE_IN_BYTES=140;
+	public static final int MAX_PQC_SIGNATURE_PRIVATE_KEY_SIZE_IN_BYTES = MAX_PQC_SIGNATURE_PUBLIC_KEY_SIZE_IN_BYTES;
+
+
+	public final static int MAX_NON_PQC_ASYMMETRIC_SIGNATURE_SIZE=442;
+	public final static int MAX_PQC_ASYMMETRIC_SIGNATURE_SIZE=41000;
+
+
 	public boolean equals(ASymmetricAuthenticatedSignatureType type)
 	{
 		if (type==this)
