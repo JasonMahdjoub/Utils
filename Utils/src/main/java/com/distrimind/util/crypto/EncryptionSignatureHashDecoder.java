@@ -681,6 +681,11 @@ public class EncryptionSignatureHashDecoder {
 			freeLimitedRandomInputStream();
 		}
 	}
+	public SubStreamHashResult computePartialHash(MessageDigestType messageDigestType, long subStreamLengthInBytes, AbstractSecureRandom random) throws IOException {
+		inputStream.seek(1);
+		long dataLen=inputStream.readLong()+9;
+		return computePartialHash(new SubStreamParameters(messageDigestType, dataLen, subStreamLengthInBytes, random, cipher==null?1:cipher.getCounterStepInBytes()));
+	}
 	public SubStreamHashResult computePartialHash(SubStreamParameters subStreamParameters) throws IOException {
 		if (inputStream.currentPosition()!=0)
 			inputStream.seek(0);
