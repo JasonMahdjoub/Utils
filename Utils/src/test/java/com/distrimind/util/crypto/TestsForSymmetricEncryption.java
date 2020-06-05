@@ -130,13 +130,13 @@ public class TestsForSymmetricEncryption {
 
 
 		algoDistant = new SymmetricEncryptionAlgorithm(random, key1, counterSizeBytes, false);
-		algoDistant.setMaxPlainTextSizeForEncoding(1000);
+		algoDistant.setMaxPlainTextSizeForEncoding(1024);
 		Assert.assertEquals(algoDistant.getBlockModeCounterBytes(), counterSizeBytes);
 		Assert.assertEquals(algoDistant.useExternalCounter(), counterSizeBytes>0);
 		Assert.assertEquals(algoDistant.getIVSizeBytesWithExternalCounter(), type1.getIVSizeBytes());
 		Assert.assertEquals(algoDistant.getIVSizeBytesWithoutExternalCounter(), type1.getIVSizeBytes()-counterSizeBytes);
 		SymmetricEncryptionAlgorithm algoLocal = new SymmetricEncryptionAlgorithm(random, key2, counterSizeBytes, false);
-		algoLocal.setMaxPlainTextSizeForEncoding(1000);
+		algoLocal.setMaxPlainTextSizeForEncoding(1024);
 		Assert.assertEquals(algoLocal.getBlockModeCounterBytes(), counterSizeBytes);
 		Assert.assertEquals(algoLocal.useExternalCounter(), counterSizeBytes>0);
 		Assert.assertEquals(algoLocal.getIVSizeBytesWithExternalCounter(), type1.getIVSizeBytes());
@@ -168,7 +168,7 @@ public class TestsForSymmetricEncryption {
 				ris.seek(p);
 				byte[] b = new byte[32];
 				ris.readFully(b);
-				for (int i = 0; i < 64; i++)
+				for (int i = 0; i < 32; i++)
 					Assert.assertEquals(b[i], m[p + i], "pos="+i);
 				p = 80 * (type1.getBlockSizeBits() / 8);
 				p=Math.min(p, ((m.length-64-algoLocal.getIVSizeBytesWithoutExternalCounter())/algoLocal.getCounterStepInBytes())*algoLocal.getCounterStepInBytes());
