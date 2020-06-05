@@ -54,6 +54,7 @@ public class EncryptionSignatureHashEncoder {
 	static final MessageDigestType defaultMessageType=MessageDigestType.SHA2_256;
 	public static final int maxKeyIdentifierValue=(1<<16)-1;
 	static final int headSize=11;
+	static final int headSizeMinusOne=headSize-1;
 	static void checkLimits(byte[] data, int off, int len)
 	{
 		if (data==null)
@@ -111,6 +112,8 @@ public class EncryptionSignatureHashEncoder {
 	private AbstractEncryptionOutputAlgorithm.CommonCipherOutputStream cipherOutputStream;
 	private byte[] externalCounter=null;
 	private Byte code=null;
+	private short currentKeyID=-1;
+	private SecretKeyProvider secretKeyProvider=null;
 
 	public EncryptionSignatureHashEncoder() throws IOException {
 		limitedRandomOutputStream=new LimitedRandomOutputStream(nullRandomInputStream, 0);
@@ -130,6 +133,21 @@ public class EncryptionSignatureHashEncoder {
 		this.externalCounter=externalCounter;
 		return this;
 	}
+	public EncryptionSignatureHashEncoder withSecretKeyProvider(AbstractSecureRandom random, SecretKeyProvider secretKeyProvider) throws IOException {
+		return withSecretKeyProvider(random, secretKeyProvider, secretKeyProvider.getDefaultKeyID());
+	}
+	public EncryptionSignatureHashEncoder withSecretKeyProvider(AbstractSecureRandom random, SecretKeyProvider secretKeyProvider, short keyID) throws IOException {
+		if (random==null)
+			throw new NullPointerException();
+		if (secretKeyProvider==null)
+			throw new NullPointerException();
+		this.cipher=new SymmetricEncryptionAlgorithm(random, secretKeyProvider.getSecretKey(keyID));
+		code=null;
+		this.currentKeyID=keyID;
+		this.secretKeyProvider=secretKeyProvider;
+		return this;
+	}
+
 
 	public EncryptionSignatureHashEncoder withSymmetricSecretKeyForEncryption(AbstractSecureRandom random, SymmetricSecretKey symmetricSecretKeyForEncryption) throws IOException {
 		return withCipher(new SymmetricEncryptionAlgorithm(random, symmetricSecretKeyForEncryption));
@@ -140,6 +158,7 @@ public class EncryptionSignatureHashEncoder {
 			throw new NullPointerException();
 		this.cipher=cipher;
 		code=null;
+		this.currentKeyID=0;
 		return this;
 	}
 	public EncryptionSignatureHashEncoder withoutAssociatedData()
@@ -235,14 +254,15 @@ public class EncryptionSignatureHashEncoder {
 	}*/
 	private int computeAssociatedData(long dataLen)
 	{
-		int lenBuffer=9+(associatedData!=null?lenAD:0);
+		int lenBuffer=headSize+(associatedData!=null?lenAD:0);
 		if (bufferRef.length<lenBuffer)
 			bufferRef=new byte[lenBuffer];
-		Bits.putLong(bufferRef, 0, dataLen);
-		bufferRef[8]=getCode();
+		Bits.putShort(bufferRef, 0, currentKeyID);
+		Bits.putLong(bufferRef, 2, dataLen);
+		bufferRef[10]=getCode();
 		if (associatedData!=null)
 		{
-			System.arraycopy(associatedData, offAD, bufferRef, 9, lenAD);
+			System.arraycopy(associatedData, offAD, bufferRef, headSize, lenAD);
 		}
 		return lenBuffer;
 
@@ -301,6 +321,7 @@ public class EncryptionSignatureHashEncoder {
 
 			long dataLen;
 			originalOutputStream.writeByte(code);
+			originalOutputStream.writeShort(currentKeyID);
 			byte[] buffer=null;
 			int lenBuffer=0;
 			if (cipher != null) {
@@ -336,19 +357,20 @@ public class EncryptionSignatureHashEncoder {
 			}
 			if (outputStream!=originalOutputStream && buffer==null) {
 				buffer=bufferRef;
-				lenBuffer=8;
-				Bits.putLong(buffer, 0, dataLen);
+				lenBuffer=10;
+				Bits.putShort(buffer, 0, currentKeyID);
+				Bits.putLong(buffer, 2, dataLen);
 			}
 
 
 			if (digest!=null) {
 				digest.update(code);
-				digest.update(buffer, 0, 8);
+				digest.update(buffer, 0, headSizeMinusOne);
 				byte []hash = digest.digest();
 
 				if (symmetricSigner != null) {
 					symmetricSigner.init();
-					if (lenBuffer>8)
+					if (associatedData!=null)
 						symmetricSigner.update(associatedData, offAD, lenAD);
 					symmetricSigner.update(hash);
 					byte[] signature = symmetricSigner.getSignature();
@@ -372,7 +394,7 @@ public class EncryptionSignatureHashEncoder {
 				originalOutputStream.writeBytesArray(hash, false, digest.getDigestLength());
 			} else if (symmetricSigner!=null)
 			{
-				if (lenBuffer==8)
+				if (lenBuffer==headSizeMinusOne)
 					symmetricSigner.update(code);
 				symmetricSigner.update(buffer, 0, lenBuffer);
 				byte[] signature = symmetricSigner.getSignature();
@@ -380,7 +402,7 @@ public class EncryptionSignatureHashEncoder {
 			} else if (asymmetricSigner!=null)
 			{
 				asymmetricSigner.update(code);
-				asymmetricSigner.update(buffer, 0, 8);
+				asymmetricSigner.update(buffer, 0, headSizeMinusOne);
 				byte[] signature = asymmetricSigner.getSignature();
 				originalOutputStream.writeBytesArray(signature, false, asymmetricSigner.getMacLengthBytes());
 			}
@@ -409,9 +431,10 @@ public class EncryptionSignatureHashEncoder {
 			AbstractMessageDigest md = subStreamParameters.getMessageDigestType().getMessageDigestInstance();
 			md.reset();
 			long dataLen=inputStream.length();
-			RandomByteArrayOutputStream out=new RandomByteArrayOutputStream(9);
+			RandomByteArrayOutputStream out=new RandomByteArrayOutputStream(headSize);
 			code=getCode();
 			out.writeByte(code);
+			out.writeShort(currentKeyID);
 
 			if (cipher==null)
 			{
@@ -463,7 +486,7 @@ public class EncryptionSignatureHashEncoder {
 	}
 	long getMinimumOutputLengthAfterEncoding()
 	{
-		long res=9;
+		long res=headSize;
 
 		if (symmetricSigner!=null) {
 			int v=symmetricSigner.getMacLengthBytes();
