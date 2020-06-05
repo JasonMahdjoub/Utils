@@ -52,6 +52,8 @@ import java.util.Arrays;
 public class EncryptionSignatureHashEncoder {
 
 	static final MessageDigestType defaultMessageType=MessageDigestType.SHA2_256;
+	public static final int maxKeyIdentifierValue=(1<<16)-1;
+	static final int headSize=11;
 	static void checkLimits(byte[] data, int off, int len)
 	{
 		if (data==null)
@@ -109,6 +111,7 @@ public class EncryptionSignatureHashEncoder {
 	private AbstractEncryptionOutputAlgorithm.CommonCipherOutputStream cipherOutputStream;
 	private byte[] externalCounter=null;
 	private Byte code=null;
+
 	public EncryptionSignatureHashEncoder() throws IOException {
 		limitedRandomOutputStream=new LimitedRandomOutputStream(nullRandomInputStream, 0);
 	}
