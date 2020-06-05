@@ -1,6 +1,6 @@
 Utils
 =====
-4.15.13 Stable (Build: 1692) (from 30/03/2019 to 30/03/2020)
+5.0.0 Stable (Build: 1721) (from 05/06/2020 to 05/06/2020)
 
 # Creator(s):
 Jason MAHDJOUB
@@ -11,7 +11,26 @@ Jason MAHDJOUB (Entred in the team at 04/01/2016)
 # Modifications:
 
 
-### 4.15.13 Stable (30/03/2019)
+### 5.0.0 Stable (05/06/2020)
+* Add class EncryptionTools
+* Use temporary directory into RandomCacheFileCenter
+* Fix issues into FilePermissions
+* Add Chacha20 encryption algorithm with Java BC implementation
+* Add Chacha20-POLY1305 encryption algorithm with Java BC implementation
+* Add AggregatedRandomInputStreams and AggregatedRandomOutputStreams
+* Add DelegatedRandomInputStream and DelegatedRandomOutputStream with next implementations : HashRandomInputStream, HashRandomOutputStream, SignatureCheckerRandomInputStream, SignerRandomOutputStream
+* Add FragmentedRandomInputStream and FragmentedRandomOutputStream
+* Add FragmentedRandomInputStreamPerChannel and FragmentedRandomOutputStreamPerChannel
+* Add NullRandomOutputStream
+* Reimplement entirely AbstractEncryptionOutputAlgorithm, AbstractEncryptionIOAlgorithm and SymmetricEncryptionAlgorithm
+* Implements EncryptionHashSignatureEncoder and EncryptionHashSignatureDecoder
+* Add functionality to hash a stream partially thanks to a given map into order to be compared with distant data
+* Reimplement exceptions scheme
+* Add maximum sizes of signatures and public/private/secret keys
+* Add EncryptionProfileProvider class which enables to permit keys choosing during decryption and signature checking
+
+
+### 4.15.13 Stable (30/03/2020)
 * Update FIPS to a recompiled version compatible with Android
 * Update commons-codec to 1.14
 * Update snakeyaml to 2.26
@@ -22,31 +41,31 @@ Jason MAHDJOUB (Entred in the team at 04/01/2016)
 * Add predefined classes into SerializationTools
 
 
-### 4.13.0 Stable (16/03/2019)
+### 4.13.0 Stable (16/03/2020)
 * Add ProgressMonitor class
 
 
-### 4.12.0 Stable (25/02/2019)
+### 4.12.0 Stable (25/02/2020)
 * Add FileTools.walkFileTree function
 
 
-### 4.11.0 Stable (17/02/2019)
+### 4.11.0 Stable (17/02/2020)
 * Make FilePermissions compatible with old Android platforms
 * Asymmetric signatures based on Eduard curves use now BC FIPS implementation
 * Key agreements based on Eduard curves use now BC FIPS implementation
 * SHA3-HMAC use now BC FIPS implementation
 
 
-### 4.10.1 Stable (15/02/2019)
+### 4.10.1 Stable (15/02/2020)
 * Update Bouncy Castle to 1.64
 * Update Bouncy Castle FIPS to 1.0.2
 
 
-### 4.9.0 Stable (11/02/2019)
+### 4.9.0 Stable (11/02/2020)
 * Add FilePermissions class
 
 
-### 4.8.6 Stable (24/01/2019)
+### 4.8.6 Stable (24/01/2020)
 * Add PoolExecutor and ScheduledPoolExecutor
 * Add CircularArrayList
 * Change hash code computation in AbstractDecentralizedIDGenerator
