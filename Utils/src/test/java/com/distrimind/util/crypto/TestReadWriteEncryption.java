@@ -57,16 +57,17 @@ public class TestReadWriteEncryption {
 	@DataProvider(name = "provideParameters", parallel = true)
 	public Object[][] provideParameters() throws NoSuchProviderException, NoSuchAlgorithmException, InvalidAlgorithmParameterException {
 		Random rand=new Random(System.currentTimeMillis());
-		Object[][] res=new Object[16*6][6];
-		int i=0;
-		for (SymmetricSecretKey ske : new SymmetricSecretKey[]{//TODO test all algorithms
-				SymmetricEncryptionType.AES_CBC_PKCS5Padding.getKeyGenerator(SecureRandomType.DEFAULT.getInstance(null)).generateKey(),
-				SymmetricEncryptionType.AES_CTR.getKeyGenerator(SecureRandomType.DEFAULT.getInstance(null)).generateKey(),
-				SymmetricEncryptionType.AES_GCM.getKeyGenerator(SecureRandomType.DEFAULT.getInstance(null)).generateKey(),
-				SymmetricEncryptionType.CHACHA20_NO_RANDOM_ACCESS.getKeyGenerator(SecureRandomType.DEFAULT.getInstance(null)).generateKey(),
-				SymmetricEncryptionType.CHACHA20_POLY1305.getKeyGenerator(SecureRandomType.DEFAULT.getInstance(null)).generateKey(),
-				null
-		})
+		SymmetricSecretKey[] secretKeys=new SymmetricSecretKey[SymmetricEncryptionType.values().length+1];
+		Object[][] res=new Object[16*secretKeys.length][6];
+		secretKeys[0]=null;
+		int i=1;
+		for (SymmetricEncryptionType t : SymmetricEncryptionType.values())
+		{
+			secretKeys[i++]=t.getKeyGenerator(SecureRandomType.DEFAULT.getInstance(null)).generateKey();
+		}
+
+		i=0;
+		for (SymmetricSecretKey ske : secretKeys)
 		{
 			for (byte[] associatedData : new byte[][]{
 					null,
@@ -112,7 +113,7 @@ public class TestReadWriteEncryption {
 	public void testEncryption(SymmetricEncryptionType encryptionType, SymmetricSecretKey secretKeyForEncryption, byte[] associatedData, SymmetricSecretKey secretKeyForSignature, ASymmetricKeyPair keyPairForSignature, MessageDigestType messageDigestType) throws IOException, NoSuchProviderException, NoSuchAlgorithmException {
 		System.out.println("Encryption type : "+(secretKeyForEncryption==null?"null":secretKeyForEncryption.getEncryptionAlgorithmType()));
 		Random r=new Random(System.currentTimeMillis());
-		byte[] in=new byte[10000*r.nextInt(1000)];
+		byte[] in=new byte[10+r.nextInt(10000000)];
 		r.nextBytes(in);
 		RandomByteArrayInputStream bais=new RandomByteArrayInputStream(in.clone());
 		RandomByteArrayOutputStream baos=new RandomByteArrayOutputStream();

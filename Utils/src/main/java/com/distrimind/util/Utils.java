@@ -78,8 +78,8 @@ public class Utils {
 			d.addItem("Add class EncryptionTools");
 			d.addItem("Use temporary directory into RandomCacheFileCenter");
 			d.addItem("Fix issues into FilePermissions");
-			d.addItem("Add Chacha20 encryption algorithm");
-			d.addItem("Add Chacha20-POLY1305 encryption algorithm");
+			d.addItem("Add Chacha20 encryption algorithm with Java BC implementation");
+			d.addItem("Add Chacha20-POLY1305 encryption algorithm with Java BC implementation");
 			d.addItem("Add AggregatedRandomInputStreams and AggregatedRandomOutputStreams");
 			d.addItem("Add DelegatedRandomInputStream and DelegatedRandomOutputStream with next implementations : HashRandomInputStream, HashRandomOutputStream, SignatureCheckerRandomInputStream, SignerRandomOutputStream");
 			d.addItem("Add FragmentedRandomInputStream and FragmentedRandomOutputStream");
