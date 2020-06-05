@@ -34,16 +34,14 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
-import java.io.IOException;
-import java.security.*;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.MGF1ParameterSpec;
-import java.security.spec.PSSParameterSpec;
-
-
 import com.distrimind.util.Bits;
 
-import javax.crypto.ShortBufferException;
+import java.io.IOException;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.spec.MGF1ParameterSpec;
+import java.security.spec.PSSParameterSpec;
 
 /**
  * 
@@ -67,18 +65,18 @@ public class ASymmetricAuthenticatedSignerAlgorithm extends AbstractAuthenticate
 		return signer.isPostQuantumSigner();
 	}
 	@Override
-	public void init() throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidAlgorithmParameterException {
+	public void init() throws IOException {
 		signer.init();
 	}
 
 
 	@Override
-	public void update(byte[] message, int offm, int lenm) throws SignatureException {
+	public void update(byte[] message, int offm, int lenm) throws IOException {
 		signer.update(message, offm, lenm);
 	}
 
 	@Override
-	public int getSignature(byte[] signature, int off_sig) throws ShortBufferException, IllegalStateException, SignatureException, IOException {
+	public int getSignature(byte[] signature, int off_sig) throws IOException {
 		return signer.getSignature(signature, off_sig);
 	}
 
@@ -88,7 +86,7 @@ public class ASymmetricAuthenticatedSignerAlgorithm extends AbstractAuthenticate
 	}
 
 	@Override
-	public byte[] getSignature() throws SignatureException, IllegalStateException, IOException {
+	public byte[] getSignature() throws IOException {
 		return signer.getSignature();
 	}
 
@@ -102,19 +100,19 @@ public class ASymmetricAuthenticatedSignerAlgorithm extends AbstractAuthenticate
 			PQCSigner=new Signer(localPrivateKey.getPQCPrivateKey());
 		}
 		@Override
-		public void init() throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidAlgorithmParameterException {
+		public void init() throws IOException {
 			nonPQCSigner.init();
 			PQCSigner.init();
 		}
 
 		@Override
-		public void update(byte[] message, int offm, int lenm) throws SignatureException {
+		public void update(byte[] message, int offm, int lenm) throws IOException {
 			nonPQCSigner.update(message, offm, lenm);
 			PQCSigner.update(message, offm, lenm);
 		}
 
 		@Override
-		public int getSignature(byte[] signature, int off_sig) throws ShortBufferException, IllegalStateException, SignatureException, IOException {
+		public int getSignature(byte[] signature, int off_sig) throws IOException {
 			int nb1=nonPQCSigner.getSignature(signature, off_sig+3);
 			int nb2=PQCSigner.getSignature(signature, off_sig+3+nb1);
 			Bits.putPositiveInteger(signature, off_sig, nb1, 3);
@@ -128,7 +126,7 @@ public class ASymmetricAuthenticatedSignerAlgorithm extends AbstractAuthenticate
 		}
 
 		@Override
-		public byte[] getSignature() throws SignatureException, IllegalStateException, IOException {
+		public byte[] getSignature() throws IOException {
 			byte[] sig1=nonPQCSigner.getSignature();
 			byte[] sig2=PQCSigner.getSignature();
 			byte[] res=new byte[sig1.length+sig2.length+3];
@@ -167,39 +165,44 @@ public class ASymmetricAuthenticatedSignerAlgorithm extends AbstractAuthenticate
 			this.macLength = type.getSignatureSizeBytes(localPrivateKey.getKeySizeBits());
 		}
 
-		public ASymmetricPrivateKey getLocalPrivateKey() {
+		/*public ASymmetricPrivateKey getLocalPrivateKey() {
 			return localPrivateKey;
 		}
 
 		public AbstractSignature getSignatureAlgorithm() {
 			return signature;
-		}
+		}*/
 
 
 		@Override
-		public void init() throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidAlgorithmParameterException {
-			includeParameter = false;
-			if (type == ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA256withRSAandMGF1) {
-				((JavaNativeSignature) signature).getSignature().setParameter(new PSSParameterSpec("SHA-256", "MGF1", new MGF1ParameterSpec("SHA-256"), 0, PSSParameterSpec.DEFAULT.getTrailerField()));
-				includeParameter = true;
-			} else if (type == ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA384withRSAandMGF1) {
-				((JavaNativeSignature) signature).getSignature().setParameter(new PSSParameterSpec("SHA-384", "MGF1", new MGF1ParameterSpec("SHA-384"), 0, PSSParameterSpec.DEFAULT.getTrailerField()));
-				includeParameter = true;
-			} else if (type == ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA512withRSAandMGF1) {
-				((JavaNativeSignature) signature).getSignature().setParameter(new PSSParameterSpec("SHA-512", "MGF1", new MGF1ParameterSpec("SHA-512"), 0, PSSParameterSpec.DEFAULT.getTrailerField()));
-				includeParameter = true;
+		public void init() throws IOException {
+			try {
+				includeParameter = false;
+
+				if (type == ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA256withRSAandMGF1) {
+					((JavaNativeSignature) signature).getSignature().setParameter(new PSSParameterSpec("SHA-256", "MGF1", new MGF1ParameterSpec("SHA-256"), 0, PSSParameterSpec.DEFAULT.getTrailerField()));
+					includeParameter = true;
+				} else if (type == ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA384withRSAandMGF1) {
+					((JavaNativeSignature) signature).getSignature().setParameter(new PSSParameterSpec("SHA-384", "MGF1", new MGF1ParameterSpec("SHA-384"), 0, PSSParameterSpec.DEFAULT.getTrailerField()));
+					includeParameter = true;
+				} else if (type == ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA512withRSAandMGF1) {
+					((JavaNativeSignature) signature).getSignature().setParameter(new PSSParameterSpec("SHA-512", "MGF1", new MGF1ParameterSpec("SHA-512"), 0, PSSParameterSpec.DEFAULT.getTrailerField()));
+					includeParameter = true;
+				}
+			} catch (InvalidAlgorithmParameterException e) {
+				throw new IOException(e);
 			}
 
 			signature.initSign(localPrivateKey);
 		}
 
 		@Override
-		public void update(byte[] message, int offm, int lenm) throws SignatureException {
+		public void update(byte[] message, int offm, int lenm) throws IOException {
 			this.signature.update(message, offm, lenm);
 		}
 
 		@Override
-		public byte[] getSignature() throws IllegalStateException, SignatureException, IOException {
+		public byte[] getSignature() throws IOException {
 
 			byte[] s = this.signature.sign();
 			if (includeParameter) {
@@ -215,8 +218,7 @@ public class ASymmetricAuthenticatedSignerAlgorithm extends AbstractAuthenticate
 		}
 
 		@Override
-		public int getSignature(byte[] signature, int off_sig) throws IllegalStateException,
-				SignatureException, IOException {
+		public int getSignature(byte[] signature, int off_sig) throws IOException {
 			if (includeParameter) {
 				byte[] s = getSignature();
 				System.arraycopy(s, 0, signature, off_sig, s.length);

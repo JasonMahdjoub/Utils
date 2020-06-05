@@ -35,6 +35,10 @@ knowledge of the CeCILL-C license and that you accept its terms.
 
 package com.distrimind.util.crypto;
 
+import com.distrimind.util.io.Integrity;
+import com.distrimind.util.io.MessageExternalizationException;
+
+import java.io.IOException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -68,35 +72,49 @@ public final class JavaNativeKeyAgreement extends AbstractKeyAgreement {
 
 
 	@Override
-	public void doPhase(AbstractKey key, boolean lastPhase) throws IllegalStateException, InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException {
-		
-		this.keyAgreement.doPhase(key.toJavaNativeKey(), lastPhase);
+	public void doPhase(AbstractKey key, boolean lastPhase) throws IOException {
+
+		try {
+			this.keyAgreement.doPhase(key.toJavaNativeKey(), lastPhase);
+		} catch (InvalidKeyException | InvalidKeySpecException e) {
+			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, e);
+		} catch (NoSuchAlgorithmException e) {
+			throw new MessageExternalizationException(Integrity.FAIL, e);
+		}
 	}
 
 
 	@Override
-	public byte[] generateSecret() throws IllegalStateException {
+	public byte[] generateSecret() {
 		
 		return this.keyAgreement.generateSecret();
 	}
 
 
 	@Override
-	public int generateSecret(byte[] sharedSecret, int offset) throws IllegalStateException, ShortBufferException {
-		return this.keyAgreement.generateSecret(sharedSecret, offset);
+	public int generateSecret(byte[] sharedSecret, int offset) throws IOException {
+		try {
+			return this.keyAgreement.generateSecret(sharedSecret, offset);
+		} catch (ShortBufferException e) {
+			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, e);
+		}
 	}
 
 
 	@SuppressWarnings("ConstantConditions")
     @Override
 	public SymmetricSecretKey generateSecretKey(short keySize)
-			throws InvalidKeyException, NoSuchAlgorithmException {
-		if (encryptionType==null)
-		{
-			return new SymmetricSecretKey(signatureType, this.keyAgreement.generateSecret("AES["+keySize+"]"), keySize);
+			throws IOException {
+		try {
+			if (encryptionType == null) {
+				return new SymmetricSecretKey(signatureType, this.keyAgreement.generateSecret("AES[" + keySize + "]"), keySize);
+			} else
+				return new SymmetricSecretKey(encryptionType, this.keyAgreement.generateSecret(encryptionType.getAlgorithmName() + "[" + keySize + "]"), keySize);
+		} catch (NoSuchAlgorithmException e) {
+			throw new MessageExternalizationException(Integrity.FAIL, e);
+		} catch (InvalidKeyException e) {
+			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, e);
 		}
-		else
-			return new SymmetricSecretKey(encryptionType, this.keyAgreement.generateSecret(encryptionType.getAlgorithmName()+"["+keySize+"]"), keySize);
 	}
 
 
@@ -110,9 +128,15 @@ public final class JavaNativeKeyAgreement extends AbstractKeyAgreement {
 
 	@Override
 	public void init(AbstractKey key, Object params, AbstractSecureRandom random)
-			throws InvalidAlgorithmParameterException, InvalidKeyException, NoSuchAlgorithmException,InvalidKeySpecException  {
-		
-		keyAgreement.init(key.toJavaNativeKey(), (AlgorithmParameterSpec)params, random);
+			throws IOException  {
+
+		try {
+			keyAgreement.init(key.toJavaNativeKey(), (AlgorithmParameterSpec)params, random);
+		} catch (InvalidKeyException | InvalidKeySpecException | InvalidAlgorithmParameterException e) {
+			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, e);
+		} catch (NoSuchAlgorithmException e) {
+			throw new MessageExternalizationException(Integrity.FAIL, e);
+		}
 
 	}
 

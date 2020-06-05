@@ -36,14 +36,8 @@ package com.distrimind.util.crypto;
 
 import com.distrimind.util.io.RandomInputStream;
 
-import javax.crypto.ShortBufferException;
 import java.io.IOException;
-
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 import java.security.SignatureException;
-import java.security.spec.InvalidKeySpecException;
 
 /**
  * 
@@ -53,14 +47,12 @@ import java.security.spec.InvalidKeySpecException;
  */
 public abstract class AbstractAuthenticatedSignerAlgorithm {
 	public byte[] sign(byte[] bytes)
-			throws InvalidKeyException, SignatureException,
-			NoSuchAlgorithmException, InvalidKeySpecException, IllegalStateException, InvalidAlgorithmParameterException, IOException {
+			throws IOException {
 		return sign(bytes, 0, bytes.length);
 	}
 
 	public byte[] sign(byte[] bytes, int off, int len)
-			throws InvalidKeyException, SignatureException,
-			NoSuchAlgorithmException, InvalidKeySpecException, IllegalStateException, InvalidAlgorithmParameterException, IOException
+			throws IOException
 	{
 		init();
 		update(bytes, off, len);
@@ -68,8 +60,7 @@ public abstract class AbstractAuthenticatedSignerAlgorithm {
 	}
 
 	public void sign(byte[] message, int offm, int lenm, byte[] signature, int off_sig, int len_sig)
-			throws InvalidKeyException, SignatureException,
-			NoSuchAlgorithmException, InvalidKeySpecException, ShortBufferException, InvalidAlgorithmParameterException, IllegalStateException, IOException
+			throws IOException
 	{
 		init();
 		update(message, offm, lenm);
@@ -77,22 +68,22 @@ public abstract class AbstractAuthenticatedSignerAlgorithm {
 		
 	}
 	
-	public abstract void init() throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidAlgorithmParameterException;
+	public abstract void init() throws IOException;
 
 	private final byte[] one=new byte[1];
 
-	public void update(byte c) throws SignatureException
+	public void update(byte c) throws IOException
 	{
 		one[0]=c;
 		update(one);
 	}
 
-	public void update(byte[] message) throws SignatureException
+	public void update(byte[] message) throws IOException
 	{
 		update(message,0, message.length);
 	}
 	
-	public abstract void update(byte[] message, int offm, int lenm) throws SignatureException ;
+	public abstract void update(byte[] message, int offm, int lenm) throws IOException ;
 
 	/**
 	 * Generates signature bytes of all the data fed to this instance and stores it
@@ -116,17 +107,11 @@ public abstract class AbstractAuthenticatedSignerAlgorithm {
 	 * @param off_sig
 	 *            the offset to start at in the array.
 	 * @return the real number of bytes used.
-	 * @throws SignatureException
-	 *             if the engine is not properly initialized.
-	 * @throws ShortBufferException
-	 *             if an IO issue occurs.
-	 * @throws IllegalStateException
-	 *             if an IO issue occurs.
 	 * @throws IOException
 	 *             if an IO issue occurs.
 	 *
 	 */
-	public abstract int getSignature(byte[] signature, int off_sig) throws ShortBufferException, IllegalStateException, SignatureException, IOException;
+	public abstract int getSignature(byte[] signature, int off_sig) throws IOException;
 	
     /**
      * Returns the length of the MAC in bytes.
@@ -135,13 +120,13 @@ public abstract class AbstractAuthenticatedSignerAlgorithm {
      */
 	public abstract int getMacLengthBytes();
 	
-	public abstract byte[] getSignature() throws SignatureException, IllegalStateException, IOException;
+	public abstract byte[] getSignature() throws IOException;
 
 	public abstract boolean isPostQuantumSigner();
 
 	private byte[] buffer=null;
 
-	public void update(RandomInputStream inputStream) throws IOException, SignatureException {
+	public void update(RandomInputStream inputStream) throws IOException {
 		long l=inputStream.length()-inputStream.currentPosition();
 		if (l==0)
 			return;

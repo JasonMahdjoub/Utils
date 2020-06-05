@@ -35,10 +35,7 @@ The fact that you are presently reading this means that you have had
 knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-import com.distrimind.util.io.RandomByteArrayOutputStream;
-import com.distrimind.util.io.SecureExternalizableWithoutInnerSizeControl;
-import com.distrimind.util.io.SecuredObjectInputStream;
-import com.distrimind.util.io.SecuredObjectOutputStream;
+import com.distrimind.util.io.*;
 import org.bouncycastle.bccrypto.AsymmetricCipherKeyPair;
 import org.bouncycastle.bccrypto.Digest;
 import org.bouncycastle.bccrypto.InvalidCipherTextException;
@@ -54,16 +51,11 @@ import org.bouncycastle.pqc.math.linearalgebra.GF2mField;
 import org.bouncycastle.pqc.math.linearalgebra.Permutation;
 import org.bouncycastle.pqc.math.linearalgebra.PolynomialGF2mSmallM;
 
-import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.ShortBufferException;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.spec.InvalidKeySpecException;
@@ -294,7 +286,7 @@ public class BCMcElieceCipher extends AbstractCipher{
 			if (o==this)
 				return true;
 			if (o.getClass()==this.getClass()) {
-				return Arrays.equals(getEncoded(), ((PrivateKey) o).getEncoded());
+				return Arrays.equals(getEncoded(), ((PrivateKeyCCA2) o).getEncoded());
 			}
 			return false;
 		}
@@ -416,7 +408,7 @@ public class BCMcElieceCipher extends AbstractCipher{
 			if (o==this)
 				return true;
 			if (o.getClass()==this.getClass()) {
-				return Arrays.equals(getEncoded(), ((PrivateKey) o).getEncoded());
+				return Arrays.equals(getEncoded(), ((PublicKey) o).getEncoded());
 			}
 			return false;
 		}
@@ -513,7 +505,7 @@ public class BCMcElieceCipher extends AbstractCipher{
 			if (o==this)
 				return true;
 			if (o.getClass()==this.getClass()) {
-				return Arrays.equals(getEncoded(), ((PrivateKey) o).getEncoded());
+				return Arrays.equals(getEncoded(), ((PublicKeyCCA2) o).getEncoded());
 			}
 			return false;
 		}
@@ -634,8 +626,12 @@ public class BCMcElieceCipher extends AbstractCipher{
 		}
 
 		@Override
-		public void initialize(int keysize, long expirationTime) throws NoSuchProviderException, NoSuchAlgorithmException {
-			initialize(keysize, expirationTime, SecureRandomType.BC_FIPS_APPROVED_FOR_KEYS.getSingleton(null));
+		public void initialize(int keysize, long expirationTime) throws IOException {
+			try {
+				initialize(keysize, expirationTime, SecureRandomType.BC_FIPS_APPROVED_FOR_KEYS.getSingleton(null));
+			} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
+				throw new IOException(e);
+			}
 		}
 
 		@Override
@@ -686,8 +682,12 @@ public class BCMcElieceCipher extends AbstractCipher{
 		}
 
 		@Override
-		public void initialize(int keysize, long expirationTime) throws NoSuchProviderException, NoSuchAlgorithmException {
-			initialize(keysize, expirationTime, SecureRandomType.BC_FIPS_APPROVED_FOR_KEYS.getSingleton(null));
+		public void initialize(int keysize, long expirationTime) throws IOException {
+			try {
+				initialize(keysize, expirationTime, SecureRandomType.BC_FIPS_APPROVED_FOR_KEYS.getSingleton(null));
+			} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
+				throw new IOException(e);
+			}
 		}
 
 		@Override
@@ -700,13 +700,12 @@ public class BCMcElieceCipher extends AbstractCipher{
 	}
 
 	@Override
-	public byte[] doFinal() throws IllegalStateException, IllegalBlockSizeException, BadPaddingException {
+	public byte[] doFinal() throws IOException {
 		try {
+			byte[] b = out.toByteArray();
 			if (encrypt) {
-				byte[] b = out.toByteArray();
 				return mcElieceCipher.messageEncrypt(b);
 			} else {
-				byte[] b = out.toByteArray();
 				try {
 					return mcElieceCipher.messageDecrypt(b);
 				} catch (InvalidCipherTextException e) {
@@ -720,20 +719,20 @@ public class BCMcElieceCipher extends AbstractCipher{
 	}
 
 	@Override
-	public int doFinal(byte[] output, int outputOffset) throws IllegalStateException, IllegalBlockSizeException, BadPaddingException, ShortBufferException {
+	public int doFinal(byte[] output, int outputOffset) throws IOException {
 		byte[] res=doFinal();
 		System.arraycopy(res, 0, output, outputOffset, res.length);
 		return res.length;
 	}
 
 	@Override
-	public byte[] doFinal(byte[] input, int inputOffset, int inputLength) throws IllegalStateException, IllegalBlockSizeException, BadPaddingException {
+	public byte[] doFinal(byte[] input, int inputOffset, int inputLength) throws IOException {
 		update(input, inputOffset, inputLength);
 		return doFinal();
 	}
 
 	@Override
-	public int doFinal(byte[] input, int inputOffset, int inputLength, byte[] output, int outputOffset) throws IllegalStateException, IllegalBlockSizeException, BadPaddingException, ShortBufferException {
+	public int doFinal(byte[] input, int inputOffset, int inputLength, byte[] output, int outputOffset) throws IOException {
 		update(input, inputOffset, inputLength, output, outputOffset);
 		return doFinal(output, outputOffset);
 	}
@@ -764,11 +763,7 @@ public class BCMcElieceCipher extends AbstractCipher{
 							break;
 						out.write(buf, 0, nb);
 					}
-					try {
-						data=doFinal(out.toByteArray());
-					} catch (IllegalBlockSizeException | BadPaddingException e) {
-						throw new IOException(e);
-					}
+					data=doFinal(out.toByteArray());
 
 				}
 			}
@@ -796,7 +791,7 @@ public class BCMcElieceCipher extends AbstractCipher{
 	@Override
 	public OutputStream getCipherOutputStream(final OutputStream out) {
 		return new OutputStream() {
-			private ByteArrayOutputStream buf=new ByteArrayOutputStream();
+			private final ByteArrayOutputStream buf=new ByteArrayOutputStream();
 			@Override
 			public void write(int b) {
 				buf.write(b);
@@ -809,12 +804,8 @@ public class BCMcElieceCipher extends AbstractCipher{
 
 			@Override
 			public void close() throws IOException {
-				try {
-					byte[] res=doFinal(buf.toByteArray());
-					out.write(res);
-				} catch (IllegalBlockSizeException | BadPaddingException e) {
-					throw new IOException(e);
-				}
+				byte[] res=doFinal(buf.toByteArray());
+				out.write(res);
 			}
 		};
 	}
@@ -830,46 +821,46 @@ public class BCMcElieceCipher extends AbstractCipher{
 		return inputLength;
 	}
 	@Override
-	public void init(int opmode, AbstractKey key) throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException {
+	public void init(int opmode, AbstractKey key) throws IOException {
 		init(opmode, key, (AbstractSecureRandom)null);
 	}
 	@Override
-	public void init(int opmode, AbstractKey key, AbstractSecureRandom random) throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException {
+	public void init(int opmode, AbstractKey key, AbstractSecureRandom random) throws IOException {
 		mode=opmode;
 		out.reset();
 		encrypt=opmode== Cipher.ENCRYPT_MODE || opmode==Cipher.WRAP_MODE;
 		mcElieceCipher=getMcElieceCipher();
-		if (cca2)
-		{
-			if (key instanceof ASymmetricPrivateKey)
-			{
-				mcElieceCipher.init(encrypt, ((PrivateKeyCCA2)key.toBouncyCastleKey()).privateKeyParameters);
-			}
-			else {
+		try {
+			if (cca2) {
+				if (key instanceof ASymmetricPrivateKey) {
+					mcElieceCipher.init(encrypt, ((PrivateKeyCCA2) key.toBouncyCastleKey()).privateKeyParameters);
+				} else {
 
-				mcElieceCipher.init(encrypt, new ParametersWithRandom(((PublicKeyCCA2)key.toBouncyCastleKey()).publicKeyParameters, random));
-			}
-		}
-		else {
+					mcElieceCipher.init(encrypt, new ParametersWithRandom(((PublicKeyCCA2) key.toBouncyCastleKey()).publicKeyParameters, random));
+				}
+			} else {
 
-			if (key instanceof ASymmetricPrivateKey)
-			{
-				mcElieceCipher.init(encrypt, ((PrivateKey)key.toBouncyCastleKey()).privateKeyParameters);
+				if (key instanceof ASymmetricPrivateKey) {
+					mcElieceCipher.init(encrypt, ((PrivateKey) key.toBouncyCastleKey()).privateKeyParameters);
+				} else {
+					mcElieceCipher.init(encrypt, new ParametersWithRandom(((PublicKey) key.toBouncyCastleKey()).publicKeyParameters));
+				}
 			}
-			else {
-				mcElieceCipher.init(encrypt, new ParametersWithRandom(((PublicKey)key.toBouncyCastleKey()).publicKeyParameters));
-			}
+		} catch (NoSuchAlgorithmException e) {
+			throw new IOException(e);
+		} catch (InvalidKeySpecException e) {
+			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
 		}
 
 	}
 
 	@Override
-	public void init(int opmode, AbstractKey key, byte[] iv) throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidAlgorithmParameterException {
+	public void init(int opmode, AbstractKey key, byte[] iv) throws IOException {
 		mode=opmode;
 		try {
 			init(opmode, key, SecureRandomType.BC_FIPS_APPROVED_FOR_KEYS.getSingleton(null));
-		} catch (NoSuchProviderException e) {
-			throw new InvalidAlgorithmParameterException(e);
+		} catch (NoSuchProviderException | NoSuchAlgorithmException e) {
+			throw new IOException(e);
 		}
 	}
 
@@ -881,7 +872,7 @@ public class BCMcElieceCipher extends AbstractCipher{
 	private final byte[] empty=new byte[0];
 
 	@Override
-	public int update(byte[] input, int inputOffset, int inputLength, byte[] output, int outputOffset) throws IllegalStateException, ShortBufferException {
+	public int update(byte[] input, int inputOffset, int inputLength, byte[] output, int outputOffset) throws IOException {
 		out.write(input, inputOffset, inputLength);
 		return 0;
 	}

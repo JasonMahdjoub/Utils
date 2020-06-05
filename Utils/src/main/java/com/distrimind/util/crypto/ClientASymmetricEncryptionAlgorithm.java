@@ -38,12 +38,9 @@ import com.distrimind.util.io.RandomInputStream;
 import com.distrimind.util.io.RandomOutputStream;
 
 import javax.crypto.Cipher;
-import javax.crypto.NoSuchPaddingException;
 import java.io.IOException;
-import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
-import java.security.spec.InvalidKeySpecException;
 
 /**
  * 
@@ -62,7 +59,7 @@ public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutpu
 		else {
 			try {
 				client=new Client(random, (ASymmetricPublicKey)distantPublicKey);
-			} catch (NoSuchAlgorithmException | NoSuchPaddingException | NoSuchProviderException e) {
+			} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
 				throw new IOException(e);
 			}
 		}
@@ -77,7 +74,7 @@ public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutpu
 			try {
 				this.nonPQCEncryption=new Client(random, distantPublicKey.getNonPQCPublicKey());
 				this.PQCEncryption=new Client(random, distantPublicKey.getPQCPublicKey());
-			} catch (NoSuchAlgorithmException | NoSuchPaddingException | NoSuchProviderException e) {
+			} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
 				throw new IOException(e);
 			}
 			this.hybridASymmetricPublicKey=distantPublicKey;
@@ -341,7 +338,7 @@ public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutpu
 
 		private final AbstractSecureRandom random;
 
-		public Client(AbstractSecureRandom random, ASymmetricPublicKey distantPublicKey) throws NoSuchAlgorithmException, NoSuchPaddingException, NoSuchProviderException, IOException {
+		public Client(AbstractSecureRandom random, ASymmetricPublicKey distantPublicKey) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
 			super(distantPublicKey.getEncryptionAlgorithmType().getCipherInstance(), 0);
 			this.type = distantPublicKey.getEncryptionAlgorithmType();
 			this.distantPublicKey = distantPublicKey;
@@ -371,7 +368,7 @@ public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutpu
 		protected AbstractCipher getCipherInstance() throws IOException {
 			try {
 				return type.getCipherInstance();
-			} catch (NoSuchAlgorithmException | NoSuchPaddingException | NoSuchProviderException e) {
+			} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
 				throw new IOException(e);
 			}
 		}
@@ -405,11 +402,7 @@ public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutpu
 		@Override
 		public void initCipherForEncryptionWithNullIV(AbstractCipher _cipher)
 				throws IOException {
-			try {
-				_cipher.init(Cipher.ENCRYPT_MODE, distantPublicKey, random);
-			} catch (InvalidKeyException | NoSuchAlgorithmException | InvalidKeySpecException e) {
-				throw new IOException(e);
-			}
+			_cipher.init(Cipher.ENCRYPT_MODE, distantPublicKey, random);
 
 		}
 

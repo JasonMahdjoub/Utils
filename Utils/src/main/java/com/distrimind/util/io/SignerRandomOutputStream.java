@@ -38,7 +38,6 @@ knowledge of the CeCILL-C license and that you accept its terms.
 import com.distrimind.util.crypto.AbstractAuthenticatedSignerAlgorithm;
 
 import java.io.IOException;
-import java.security.SignatureException;
 
 /**
  * @author Jason Mahdjoub
@@ -70,11 +69,7 @@ public class SignerRandomOutputStream extends DelegatedRandomOutputStream{
 
 	@Override
 	protected void derivedWrite(byte[] b, int off, int len) throws IOException {
-		try {
-			this.signer.update(b, off, len);
-		} catch (SignatureException e) {
-			throw new IOException(e);
-		}
+		this.signer.update(b, off, len);
 	}
 
 	@Override

@@ -34,6 +34,8 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
+import com.distrimind.util.io.Integrity;
+import com.distrimind.util.io.MessageExternalizationException;
 import org.apache.commons.codec.binary.Base64;
 import org.bouncycastle.bccrypto.CryptoException;
 import org.bouncycastle.bccrypto.agreement.jpake.*;
@@ -42,9 +44,8 @@ import org.bouncycastle.bccrypto.digests.SHA512Digest;
 import java.io.*;
 import java.lang.reflect.Field;
 import java.math.BigInteger;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.security.*;
-import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
 
 /**
@@ -70,14 +71,12 @@ public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
 		this(secureRandom, participantID, message, 0, message.length, null, -1, -1, messageIsKey);
 	}*/
 
-	private char[] getHashedPassword(char[] message, byte[] salt, int offset_salt, int len_salt) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException
-	{
+	private char[] getHashedPassword(char[] message, byte[] salt, int offset_salt, int len_salt) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
 		byte[] m = hashMessage(MessageDigestType.BC_FIPS_SHA3_256.getMessageDigestInstance(), message, salt,
 				offset_salt, len_salt, PasswordHashType.BC_BCRYPT, (byte)15);
 		return convertToChar(m);
 	}
-	private char[] getHashedPassword(byte[] message, int offset, int len, byte[] salt, int offset_salt, int len_salt, boolean messageIsKey) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException
-	{
+	private char[] getHashedPassword(byte[] message, int offset, int len, byte[] salt, int offset_salt, int len_salt, boolean messageIsKey) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
 		byte[] m = hashMessage(MessageDigestType.BC_FIPS_SHA3_256.getMessageDigestInstance(), message, offset, len,
 				salt, offset_salt, len_salt, messageIsKey ? null : PasswordHashType.BC_FIPS_PBKFD2WithHMacSHA2_512, messageIsKey?(byte)6:(byte)15);
 		char[] res=convertToChar(m);
@@ -93,13 +92,13 @@ public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
 		return res;
 	}
 	
-	private String getParticipanIDString(byte[] participantID)
+	private String getParticipantIDString(byte[] participantID)
 	{
 		return Base64.encodeBase64URLSafeString(participantID);
 	}
 	
 	P2PJPAKESecretMessageExchanger(AbstractSecureRandom secureRandom, byte[] participantID, char[] message, byte[] salt, int offset_salt,
-								   int len_salt) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
+								   int len_salt) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
 		super(3, 3);
 		if (message == null)
 			throw new NullPointerException("message");
@@ -107,14 +106,14 @@ public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
 			throw new IllegalArgumentException("salt");
 
 		
-		jpake = new JPAKEParticipant(getParticipanIDString(participantID), getHashedPassword(message, salt, offset_salt, len_salt), JPAKEPrimeOrderGroups.NIST_3072, new SHA512Digest(),
+		jpake = new JPAKEParticipant(getParticipantIDString(participantID), getHashedPassword(message, salt, offset_salt, len_salt), JPAKEPrimeOrderGroups.NIST_3072, new SHA512Digest(),
 				secureRandom);
 		this.keyMaterial = null;
 	}
 
 	P2PJPAKESecretMessageExchanger(AbstractSecureRandom secureRandom, byte[] participantID, byte[] message, int offset, int len, byte[] salt,
 								   int offset_salt, int len_salt, boolean messageIsKey)
-			throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
+			throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
 		super(3, 3);
 		if (message == null)
 			throw new NullPointerException("message");
@@ -123,14 +122,14 @@ public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
 		if (salt != null && salt.length - offset_salt < len_salt)
 			throw new IllegalArgumentException("salt");
 
-		jpake = new JPAKEParticipant(getParticipanIDString(participantID), getHashedPassword(message, offset, len, salt, offset_salt, len_salt, messageIsKey), JPAKEPrimeOrderGroups.NIST_3072, new SHA512Digest(),
+		jpake = new JPAKEParticipant(getParticipantIDString(participantID), getHashedPassword(message, offset, len, salt, offset_salt, len_salt, messageIsKey), JPAKEPrimeOrderGroups.NIST_3072, new SHA512Digest(),
 				secureRandom);
 		this.keyMaterial = null;
 	}
 
 	private static byte[] hashMessage(AbstractMessageDigest messageDigest, byte[] data, int off, int len, byte[] salt,
 									  int offset_salt, int len_salt, PasswordHashType passwordHashType, byte cost)
-			throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
+			throws IOException {
 		if (passwordHashType != null && salt != null && len_salt > 0) {
 			byte[] s = new byte[len_salt];
 			System.arraycopy(salt, offset_salt, s, 0, len_salt);
@@ -147,7 +146,7 @@ public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
 	@SuppressWarnings("SameParameterValue")
 	private static byte[] hashMessage(AbstractMessageDigest messageDigest, char[] password, byte[] salt,
 									  int offset_salt, int len_salt, PasswordHashType passwordHashType, byte cost)
-			throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
+			throws IOException {
 		if (salt != null && len_salt > 0) {
 			byte[] s = new byte[len_salt];
 			System.arraycopy(salt, offset_salt, s, 0, len_salt);
@@ -172,7 +171,7 @@ public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
 	}
 
 	@Override
-	protected byte[] getDataToSend(int stepNumber) throws Exception {
+	protected byte[] getDataToSend(int stepNumber) throws IOException {
 		valid=false;
 		switch(stepNumber)
 		{
@@ -223,7 +222,7 @@ public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
 						oos.write(tab);
 
 					}
-					tab=toSerialize.getParticipantId().getBytes(Charset.forName("utf-8"));
+					tab=toSerialize.getParticipantId().getBytes(StandardCharsets.UTF_8);
 					if (tab.length>Short.MAX_VALUE)
 						throw new IOException();
 					oos.writeShort(tab.length);
@@ -259,7 +258,7 @@ public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
 						oos.writeShort(tab.length);
 						oos.write(tab);
 					}
-					tab=toSerialize.getParticipantId().getBytes(Charset.forName("utf-8"));
+					tab=toSerialize.getParticipantId().getBytes(StandardCharsets.UTF_8);
 					if (tab.length>Short.MAX_VALUE)
 						throw new IOException();
 					oos.writeShort(tab.length);
@@ -281,7 +280,7 @@ public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
 					oos.writeShort(tab.length);
 					oos.write(tab);
 
-					tab=toSerialize.getParticipantId().getBytes(Charset.forName("utf-8"));
+					tab=toSerialize.getParticipantId().getBytes(StandardCharsets.UTF_8);
 					if (tab.length>Short.MAX_VALUE)
 						throw new IOException();
 					oos.writeShort(tab.length);
@@ -298,7 +297,7 @@ public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
 	}
 
 	@Override
-	protected void receiveData(int stepNumber, byte[] dataReceived) throws CryptoException {
+	protected void receiveData(int stepNumber, byte[] dataReceived) throws IOException {
 		valid=false;
 		switch(stepNumber)
 		{
@@ -359,7 +358,7 @@ public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
 							throw new IOException();
 						tab=new byte[s];
 						ois.readFully(tab);
-						String pid=new String(tab, Charset.forName("utf-8"));
+						String pid=new String(tab, StandardCharsets.UTF_8);
 						if (knowledgeProofForX1==null)
 							throw new IOException();
 						if (knowledgeProofForX2==null)
@@ -378,9 +377,9 @@ public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
 			{
 				valid = false;
 				if (e instanceof CryptoException)
-					throw (CryptoException)e;
+					throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, e);
 				else
-					throw new CryptoException("", e);
+					throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException("", e));
 			}
 			break;
 		case 1:
@@ -418,7 +417,7 @@ public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
 							throw new IOException();
 						tab=new byte[s];
 						ois.readFully(tab);
-						String pid=new String(tab, Charset.forName("utf-8"));
+						String pid=new String(tab, StandardCharsets.UTF_8);
 
 						if (knowledgeProofForX2s==null)
 							throw new IOException();
@@ -437,9 +436,9 @@ public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
 			{
 				valid = false;
 				if (e instanceof CryptoException)
-					throw (CryptoException)e;
+					throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, e);
 				else
-					throw new CryptoException("", e);
+					throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException("", e));
 			}
 			break;
 		case 2:
@@ -461,7 +460,7 @@ public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
 							throw new IOException();
 						tab=new byte[s];
 						ois.readFully(tab);
-						String pid=new String(tab, Charset.forName("utf-8"));
+						String pid=new String(tab, StandardCharsets.UTF_8);
 
 						r3=new JPAKERound3Payload(pid, magTag);
 					}
@@ -478,9 +477,9 @@ public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
 			{
 				valid = false;
 				if (e instanceof CryptoException)
-					throw (CryptoException)e;
+					throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, e);
 				else
-					throw new CryptoException("", e);
+					throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException("", e));
 			}
 			break;
 		default:

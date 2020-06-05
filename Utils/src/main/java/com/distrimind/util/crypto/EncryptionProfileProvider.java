@@ -35,13 +35,19 @@ The fact that you are presently reading this means that you have had
 knowledge of the CeCILL-C license and that you accept its terms.
  */
 
+import java.io.IOException;
+
 /**
  * @author Jason Mahdjoub
  * @version 1.0
  * @since Utils 5.0.0
  */
-public interface SecretKeyProvider {
-	SymmetricSecretKey getSecretKey(short keyID);
+public interface EncryptionProfileProvider {
+	MessageDigestType getMessageDigest(short keyID, boolean duringDecryptionPhase) throws IOException;
+	IASymmetricPrivateKey getSecretKeyForPrivateKey(short keyID) throws IOException;
+	IASymmetricPublicKey getSecretKeyForPublicKey(short keyID) throws IOException;
+	SymmetricSecretKey getSecretKeyForSignature(short keyID, boolean duringDecryptionPhase) throws IOException;
+	SymmetricSecretKey getSecretKeyForEncryption(short keyID, boolean duringDecryptionPhase) throws IOException;
 
 	short getDefaultKeyID();
 }

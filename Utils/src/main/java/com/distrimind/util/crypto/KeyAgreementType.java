@@ -34,7 +34,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
-import java.security.InvalidAlgorithmParameterException;
+import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 
@@ -75,17 +75,17 @@ public enum KeyAgreementType {
 	public boolean isPostQuantumAlgorithm() {
 		return isPQC;
 	}
-	public KeyAgreement getKeyAgreementClient(AbstractSecureRandom randomForKeys, SymmetricAuthentifiedSignatureType signatureType) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException
+	public KeyAgreement getKeyAgreementClient(AbstractSecureRandom randomForKeys, SymmetricAuthentifiedSignatureType signatureType) throws NoSuchAlgorithmException, NoSuchProviderException, IOException
 	{
 		return getKeyAgreementClient(randomForKeys, signatureType, getDefaultKeySizeBits());
 	}
-	public KeyAgreement getKeyAgreementClient(AbstractSecureRandom randomForKeys, SymmetricAuthentifiedSignatureType signatureType, short keySizeBits) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException
+	public KeyAgreement getKeyAgreementClient(AbstractSecureRandom randomForKeys, SymmetricAuthentifiedSignatureType signatureType, short keySizeBits) throws NoSuchAlgorithmException, NoSuchProviderException, IOException
 	{
 		return getKeyAgreementClient(randomForKeys, signatureType, keySizeBits, null);
 	}
 	public KeyAgreement getKeyAgreementClient(AbstractSecureRandom randomForKeys,
 											  SymmetricAuthentifiedSignatureType signatureType,
-											  short keySizeBits, byte[] keyingMaterial) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException
+											  short keySizeBits, byte[] keyingMaterial) throws NoSuchAlgorithmException, NoSuchProviderException, IOException
 	{
 		if (keySizeBits<0)
 			keySizeBits=getDefaultKeySizeBits();
@@ -99,19 +99,19 @@ public enum KeyAgreementType {
 			throw new InternalError();
 			
 	}
-	public KeyAgreement getKeyAgreementClient(AbstractSecureRandom randomForKeys, SymmetricEncryptionType encryptionType) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException
+	public KeyAgreement getKeyAgreementClient(AbstractSecureRandom randomForKeys, SymmetricEncryptionType encryptionType) throws NoSuchAlgorithmException, NoSuchProviderException, IOException
 	{
 		
 		return getKeyAgreementClient(randomForKeys, encryptionType, getDefaultKeySizeBits());
 	}
-	public KeyAgreement getKeyAgreementClient(AbstractSecureRandom randomForKeys, SymmetricEncryptionType encryptionType, short keySizeBits) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException
+	public KeyAgreement getKeyAgreementClient(AbstractSecureRandom randomForKeys, SymmetricEncryptionType encryptionType, short keySizeBits) throws NoSuchAlgorithmException, NoSuchProviderException, IOException
 	{
 		return getKeyAgreementClient(randomForKeys, encryptionType, keySizeBits, null);
 	}
 	public KeyAgreement getKeyAgreementClient(AbstractSecureRandom randomForKeys,
 											  SymmetricEncryptionType encryptionType,
 											  short keySizeBits,
-											  byte[] keyingMaterial) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException
+											  byte[] keyingMaterial) throws NoSuchAlgorithmException, NoSuchProviderException, IOException
 	{
 		if (keySizeBits<0)
 			keySizeBits=getDefaultKeySizeBits();
@@ -125,18 +125,18 @@ public enum KeyAgreementType {
 			throw new InternalError();
 			
 	}
-	public KeyAgreement getKeyAgreementServer(AbstractSecureRandom randomForKeys, SymmetricAuthentifiedSignatureType signatureType) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException
+	public KeyAgreement getKeyAgreementServer(AbstractSecureRandom randomForKeys, SymmetricAuthentifiedSignatureType signatureType) throws NoSuchAlgorithmException, NoSuchProviderException, IOException
 	{
 		return getKeyAgreementServer(randomForKeys, signatureType, getDefaultKeySizeBits());
 	}
-	public KeyAgreement getKeyAgreementServer(AbstractSecureRandom randomForKeys, SymmetricAuthentifiedSignatureType signatureType, short keySizeBits) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException
+	public KeyAgreement getKeyAgreementServer(AbstractSecureRandom randomForKeys, SymmetricAuthentifiedSignatureType signatureType, short keySizeBits) throws NoSuchAlgorithmException, NoSuchProviderException, IOException
 	{
 		return getKeyAgreementServer(randomForKeys, signatureType, keySizeBits, null);
 	}
 	public KeyAgreement getKeyAgreementServer(AbstractSecureRandom randomForKeys,
 											  SymmetricAuthentifiedSignatureType signatureType,
 											  short keySizeBits,
-											  byte[] keyingMaterial) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException
+											  byte[] keyingMaterial) throws NoSuchAlgorithmException, NoSuchProviderException, IOException
 	{
 		if (keySizeBits<0)
 			keySizeBits=getDefaultKeySizeBits();
@@ -151,18 +151,18 @@ public enum KeyAgreementType {
 			throw new InternalError();
 			
 	}
-	public KeyAgreement getKeyAgreementServer(AbstractSecureRandom randomForKeys, SymmetricEncryptionType encryptionType) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException
+	public KeyAgreement getKeyAgreementServer(AbstractSecureRandom randomForKeys, SymmetricEncryptionType encryptionType) throws NoSuchAlgorithmException, NoSuchProviderException, IOException
 	{
 		return getKeyAgreementServer(randomForKeys, encryptionType, getDefaultKeySizeBits());
 	}
-	public KeyAgreement getKeyAgreementServer(AbstractSecureRandom randomForKeys, SymmetricEncryptionType encryptionType, short keySizeBits) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException
+	public KeyAgreement getKeyAgreementServer(AbstractSecureRandom randomForKeys, SymmetricEncryptionType encryptionType, short keySizeBits) throws NoSuchAlgorithmException, NoSuchProviderException, IOException
 	{
 		return getKeyAgreementServer(randomForKeys, encryptionType, keySizeBits, null);
 	}
 	public KeyAgreement getKeyAgreementServer(AbstractSecureRandom randomForKeys,
 											  SymmetricEncryptionType encryptionType,
 											  short keySizeBits,
-											  byte[] keyingMaterial) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException
+											  byte[] keyingMaterial) throws NoSuchAlgorithmException, NoSuchProviderException, IOException
 	{
 		if (keySizeBits<0)
 			keySizeBits=getDefaultKeySizeBits();

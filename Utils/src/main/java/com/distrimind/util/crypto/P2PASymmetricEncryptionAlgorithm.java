@@ -38,12 +38,9 @@ import com.distrimind.util.io.RandomInputStream;
 import com.distrimind.util.io.RandomOutputStream;
 
 import javax.crypto.Cipher;
-import javax.crypto.NoSuchPaddingException;
 import java.io.IOException;
-import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
-import java.security.spec.InvalidKeySpecException;
 
 /**
  * 
@@ -67,7 +64,7 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 				p2pencryption = new P2PEncryption((ASymmetricKeyPair) myKeyPair, (ASymmetricPublicKey) distantPublicKey);
 			else
 				throw new IllegalArgumentException();
-		} catch (NoSuchAlgorithmException | NoSuchPaddingException | NoSuchProviderException e) {
+		} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
 			throw new IOException(e);
 		}
 	}
@@ -86,7 +83,7 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 		super();
 		try {
 			p2pencryption=new P2PEncryption(signatureType, myKeyPair, distantPublicKey);
-		} catch (NoSuchPaddingException | NoSuchAlgorithmException | NoSuchProviderException e) {
+		} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
 			throw new IOException(e);
 		}
 	}
@@ -454,7 +451,7 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 				this.distantPublicKey=distantPublicKey;
 				//setMaxPlainTextSizeForEncoding(getMaxPlainTextSizeForEncoding());
 
-			} catch (NoSuchAlgorithmException | NoSuchPaddingException | NoSuchProviderException e) {
+			} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
 				throw new IOException(e);
 			}
 
@@ -473,7 +470,7 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 				this.myKeyPair = myKeyPair;
 				this.distantPublicKey = distantPublicKey;
 				setMaxPlainTextSizeForEncoding(Math.min(nonPQCEncryption.getMaxPlainTextSizeForEncoding(), PQCEncryption.getMaxPlainTextSizeForEncoding()));
-			} catch (NoSuchPaddingException | NoSuchAlgorithmException | NoSuchProviderException e) {
+			} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
 				throw new IOException(e);
 			}
 		}
@@ -608,13 +605,13 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 		}
 
 		public P2PEncryption(ASymmetricKeyPair myKeyPair, ASymmetricPublicKey distantPublicKey)
-				throws NoSuchAlgorithmException, NoSuchPaddingException,
+				throws NoSuchAlgorithmException,
 				NoSuchProviderException, IOException {
 			this(myKeyPair.getEncryptionAlgorithmType().getDefaultSignatureAlgorithm(), myKeyPair, distantPublicKey);
 		}
 
 		public P2PEncryption(ASymmetricAuthenticatedSignatureType signatureType, ASymmetricKeyPair myKeyPair,
-												ASymmetricPublicKey distantPublicKey) throws IOException, NoSuchPaddingException, NoSuchAlgorithmException, NoSuchProviderException {
+												ASymmetricPublicKey distantPublicKey) throws IOException, NoSuchAlgorithmException, NoSuchProviderException {
 			super(myKeyPair.getEncryptionAlgorithmType().getCipherInstance(), 0);
 			if (signatureType == null)
 				throw new NullPointerException("signatureType");
@@ -645,7 +642,7 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 		public AbstractCipher getCipherInstance() throws IOException {
 			try {
 				return type.getCipherInstance();
-			} catch (NoSuchAlgorithmException | NoSuchPaddingException | NoSuchProviderException e) {
+			} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
 				throw new IOException(e);
 			}
 		}
@@ -714,11 +711,7 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 		@Override
 		public void initCipherForEncryptionWithNullIV(AbstractCipher _cipher)
 				throws IOException {
-			try {
-				_cipher.init(Cipher.ENCRYPT_MODE, distantPublicKey);
-			} catch (InvalidKeyException | NoSuchAlgorithmException | InvalidKeySpecException | NoSuchProviderException e) {
-				throw new IOException(e);
-			}
+			_cipher.init(Cipher.ENCRYPT_MODE, distantPublicKey);
 
 		}
 
@@ -730,11 +723,7 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 
 		@Override
 		public void initCipherForDecryption(AbstractCipher cipher) throws IOException {
-			try {
-				cipher.init(Cipher.DECRYPT_MODE, myKeyPair.getASymmetricPrivateKey());
-			} catch (InvalidKeyException | NoSuchAlgorithmException | InvalidKeySpecException | NoSuchProviderException e) {
-				throw new IOException(e);
-			}
+			cipher.init(Cipher.DECRYPT_MODE, myKeyPair.getASymmetricPrivateKey());
 		}
 
 	}

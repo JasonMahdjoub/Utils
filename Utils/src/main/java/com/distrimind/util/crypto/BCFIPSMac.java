@@ -34,6 +34,8 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
+import com.distrimind.util.io.Integrity;
+import com.distrimind.util.io.MessageExternalizationException;
 import org.bouncycastle.crypto.UpdateOutputStream;
 import org.bouncycastle.crypto.fips.FipsOutputMACCalculator;
 import org.bouncycastle.crypto.fips.FipsSHS;
@@ -96,14 +98,22 @@ public final class BCFIPSMac extends AbstractMac {
 	}
 
 	@Override
-	public void init(AbstractKey _key) throws NoSuchAlgorithmException, InvalidKeySpecException {
-		init((org.bouncycastle.crypto.SymmetricSecretKey)_key.toBouncyCastleKey());
+	public void init(AbstractKey _key) throws IOException {
+		try {
+			init((org.bouncycastle.crypto.SymmetricSecretKey)_key.toBouncyCastleKey());
+		} catch (NoSuchAlgorithmException e) {
+			throw new IOException(e);
+		}
+		catch (InvalidKeySpecException e)
+		{
+			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, e);
+		}
 	}
 	
-	public void init(org.bouncycastle.crypto.SymmetricSecretKey _key) throws NoSuchAlgorithmException {
+	public void init(org.bouncycastle.crypto.SymmetricSecretKey _key) throws IOException {
 		if (type.getCodeProviderForSignature()==CodeProvider.BC)
 		{
-			throw new NoSuchAlgorithmException(type.toString());
+			throw new IOException(new NoSuchAlgorithmException(type.toString()));
 		}
 		else {
 			FipsSHS.MACOperatorFactory fipsFacto = new FipsSHS.MACOperatorFactory();
@@ -113,42 +123,20 @@ public final class BCFIPSMac extends AbstractMac {
 	}
 
 	@Override
-	public void update(byte _input) throws IllegalStateException {
-		try
-		{
-			macStream.write(_input);
-		}
-		catch(IOException e)
-		{
-			throw new IllegalStateException(e);
-		}
-		
+	public void update(byte _input) throws IOException {
+		macStream.write(_input);
 	}
 
 	@Override
-	public void update(byte[] _input) throws IllegalStateException {
-		try
-		{
-			macStream.write(_input);
-		}
-		catch(IOException e)
-		{
-			throw new IllegalStateException(e);
-		}
-		
+	public void update(byte[] _input) throws IOException {
+		macStream.write(_input);
+
 	}
 
 	@Override
-	public void update(byte[] _input, int _offset, int _len) throws IllegalStateException {
-		try
-		{
-			macStream.write(_input, _offset, _len);
-		}
-		catch(IOException e)
-		{
-			throw new IllegalStateException(e);
-		}
-		
+	public void update(byte[] _input, int _offset, int _len) throws IOException {
+		macStream.write(_input, _offset, _len);
+
 	}
 
 	@Override
@@ -157,36 +145,22 @@ public final class BCFIPSMac extends AbstractMac {
 	}
 
 	@Override
-	public byte[] doFinal() throws IllegalStateException {
-		try
-		{
-			macStream.close();
-			byte[] res = mac.getMAC();
-			reset();
-			return res;
-		}
-		catch(IOException e)
-		{
-			throw new IllegalStateException(e);
-		}
+	public byte[] doFinal() throws IOException {
+		macStream.close();
+		byte[] res = mac.getMAC();
+		reset();
+		return res;
 	}
 
 	@Override
-	public void doFinal(byte[] _output, int _outOffset) throws IllegalStateException {
-		try
-		{
-			macStream.close();
-			mac.getMAC(_output, _outOffset);
-			reset();
-		}
-		catch(IOException e)
-		{
-			throw new IllegalStateException(e);
-		}
+	public void doFinal(byte[] _output, int _outOffset) throws IOException {
+		macStream.close();
+		mac.getMAC(_output, _outOffset);
+		reset();
 	}
 
 	@Override
-	public byte[] doFinal(byte[] _input) throws IllegalStateException {
+	public byte[] doFinal(byte[] _input) throws IOException {
 		update(_input);
 		return doFinal();
 	}
@@ -202,7 +176,7 @@ public final class BCFIPSMac extends AbstractMac {
         BCFIPSMac res=new BCFIPSMac(type);
 		try {
 			res.init(secretKey);
-		} catch (NoSuchAlgorithmException e) {
+		} catch (IOException e) {
 			throw new CloneNotSupportedException(e.getMessage());
 		}
         return res;

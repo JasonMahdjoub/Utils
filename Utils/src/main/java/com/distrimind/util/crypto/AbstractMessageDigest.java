@@ -39,7 +39,6 @@ import com.distrimind.util.io.RandomInputStream;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.security.DigestException;
 
 /**
  * 
@@ -118,9 +117,9 @@ public abstract class AbstractMessageDigest implements Cloneable {
 	 * @param len
 	 *            the length of the buffer.
 	 * @return Returns the length of the buffer.
-	 * @throws DigestException if a problem occurs
+	 * @throws IOException if a problem occurs
 	 */
-	public abstract int digest(byte[] buf, int offset, int len) throws DigestException;
+	public abstract int digest(byte[] buf, int offset, int len) throws IOException;
 
 	/**
 	 * Returns the name of message digest algorithm.

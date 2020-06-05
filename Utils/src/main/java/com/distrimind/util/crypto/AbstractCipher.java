@@ -36,20 +36,10 @@ package com.distrimind.util.crypto;
 
 import com.distrimind.util.Bits;
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.ShortBufferException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
-import java.nio.ReadOnlyBufferException;
-
-
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.spec.InvalidKeySpecException;
 
 /**
  * 
@@ -67,14 +57,9 @@ public abstract class AbstractCipher {
 	 * @throws java.lang.IllegalStateException
 	 *             If this instance has not been initialized, or if a
 	 *             <b>doFinal</b> call has already been made.
-	 * @throws IllegalBlockSizeException
-	 *             If this instance has no padding and the input is not a multiple
-	 *             of this cipher's block size.
-	 * @throws BadPaddingException
-	 *             If this instance is decrypting and the padding bytes do not match
-	 *             this instance's padding scheme.
+	 * @throws IOException if a problem occurs
 	 */
-	public abstract byte[] doFinal() throws IllegalStateException, IllegalBlockSizeException, BadPaddingException;
+	public abstract byte[] doFinal() throws IOException;
 
 	/**
 	 * Finishes a multi-part transformation or does an entire transformation on the
@@ -86,15 +71,10 @@ public abstract class AbstractCipher {
 	 * @throws java.lang.IllegalStateException
 	 *             If this instance has not been initialized, or if a
 	 *             <b>doFinal</b> call has already been made.
-	 * @throws IllegalBlockSizeException
-	 *             If this instance has no padding and the input is not a multiple
-	 *             of this cipher's block size.
-	 * @throws BadPaddingException
-	 *             If this instance is decrypting and the padding bytes do not match
-	 *             this instance's padding scheme.
+	 * @throws IOException if a problem occurs
 	 */
 	public byte[] doFinal(byte[] input)
-			throws IllegalStateException, IllegalBlockSizeException, BadPaddingException
+			throws IOException
 	{
 		return doFinal(input, 0, input.length);
 	}
@@ -108,21 +88,10 @@ public abstract class AbstractCipher {
 	 * @param outputOffset
 	 *            The offset in <b>output</b> to start storing bytes.
 	 * @return The number of bytes placed into the output array.
-	 * @throws java.lang.IllegalStateException
-	 *             If this instance has not been initialized, or if a
-	 *             <b>doFinal</b> call has already been made.
-	 * @throws IllegalBlockSizeException
-	 *             If this instance has no padding and the input is not a multiple
-	 *             of this cipher's block size.
-	 * @throws BadPaddingException
-	 *             If this instance is decrypting and the padding bytes do not match
-	 *             this instance's padding scheme.
-	 * @throws ShortBufferException
-	 *             If the output array is not large enough to hold the transformed
-	 *             bytes.
+	 * @throws IOException if a problem occurs
 	 */
 	public abstract int doFinal(byte[] output, int outputOffset)
-			throws IllegalStateException, IllegalBlockSizeException, BadPaddingException, ShortBufferException;
+			throws IOException;
 
 	/**
 	 * Finishes a multi-part transformation or does an entire transformation on the
@@ -135,21 +104,13 @@ public abstract class AbstractCipher {
 	 * @param inputLength
 	 *            The number of bytes to read from the input.
 	 * @return The final transformed bytes.
-	 * @throws java.lang.IllegalStateException
-	 *             If this instance has not been initialized, or if a
-	 *             <b>doFinal</b> call has already been made.
-	 * @throws IllegalBlockSizeException
-	 *             If this instance has no padding and the input is not a multiple
-	 *             of this cipher's block size.
-	 * @throws BadPaddingException
-	 *             If this instance is decrypting and the padding bytes do not match
-	 *             this instance's padding scheme.
+	 * @throws IOException if a problem occurs
 	 */
 	public abstract byte[] doFinal(byte[] input, int inputOffset, int inputLength)
-			throws IllegalStateException, IllegalBlockSizeException, BadPaddingException;
+			throws IOException;
 
 	public int doFinal(byte[] input, int inputOffset, int inputLength, byte[] output)
-			throws IllegalStateException, IllegalBlockSizeException, BadPaddingException, ShortBufferException
+			throws IOException
 	{
 		return doFinal(input, inputOffset, inputLength, output, 0);
 	}
@@ -169,21 +130,10 @@ public abstract class AbstractCipher {
 	 * @param outputOffset
 	 *            The index in <b>output</b> to start.
 	 * @return The number of bytes placed into the output array.
-	 * @throws java.lang.IllegalStateException
-	 *             If this instance has not been initialized, or if a
-	 *             <b>doFinal</b> call has already been made.
-	 * @throws IllegalBlockSizeException
-	 *             If this instance has no padding and the input is not a multiple
-	 *             of this cipher's block size.
-	 * @throws BadPaddingException
-	 *             If this instance is decrypting and the padding bytes do not match
-	 *             this instance's padding scheme.
-	 * @throws ShortBufferException
-	 *             If the output array is not large enough to hold the transformed
-	 *             bytes.
+	 * @throws IOException if a problem occurs
 	 */
 	public abstract int doFinal(byte[] input, int inputOffset, int inputLength, byte[] output, int outputOffset)
-			throws IllegalStateException, IllegalBlockSizeException, BadPaddingException, ShortBufferException;
+			throws IOException;
 
 	/**
 	 * Finishes a multi-part transformation with, or completely transforms, a byte
@@ -194,25 +144,11 @@ public abstract class AbstractCipher {
 	 * @param output
 	 *            The output buffer.
 	 * @return The number of bytes stored into the output buffer.
-	 * @throws IllegalArgumentException
-	 *             If the input and output buffers are the same object.
-	 * @throws IllegalStateException
-	 *             If this cipher was not initialized for encryption or decryption.
-	 * @throws ReadOnlyBufferException
-	 *             If the output buffer is not writable.
-	 * @throws IllegalBlockSizeException
-	 *             If this cipher requires a total input that is a multiple of its
-	 *             block size to complete this transformation.
-	 * @throws ShortBufferException
-	 *             If the output buffer is not large enough to hold the transformed
-	 *             bytes.
-	 * @throws BadPaddingException
-	 *             If the cipher is a block cipher with a padding scheme, and the
-	 *             decrypted bytes do not end with a valid padding.
+	 * @throws IOException if a problem occurs
 	 * @since 1.5
 	 */
 	public int doFinal(ByteBuffer input, ByteBuffer output)
-			throws ReadOnlyBufferException, ShortBufferException, BadPaddingException, IllegalBlockSizeException
+			throws IOException
 	{
 		return doFinal(input.array(), input.position(), input.remaining(), output.array(), output.position());
 	}
@@ -254,7 +190,7 @@ public abstract class AbstractCipher {
 	 *             If this instance has not been initialized, or if a
 	 *             <b>doFinal</b> call has already been made.
 	 */
-	public abstract int getOutputSize(int inputLength) throws IllegalStateException;
+	public abstract int getOutputSize(int inputLength) throws IOException;
 
 	/**
 	 * <p>
@@ -278,13 +214,10 @@ public abstract class AbstractCipher {
 	 *            The operation mode to use.
 	 * @param key
 	 *            The key.
-	 * @throws InvalidKeySpecException if key is invalid
-	 * @throws InvalidKeyException if key is invalid
-	 * @throws NoSuchAlgorithmException if the algorithm as not found
-	 * @throws NoSuchProviderException if the provider was not found
+	 * @throws IOException if a problem occurs
 	 */
 	public abstract void init(int opmode, AbstractKey key)
-			throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException;
+			throws IOException;
 
 
 	/**
@@ -305,12 +238,10 @@ public abstract class AbstractCipher {
 	 * @param random
 	 *            The source of randomness to use.
 
-	 * @throws InvalidKeySpecException if the key is invalid
-	 * @throws InvalidKeyException if key is invalid
-	 * @throws NoSuchAlgorithmException if the algoirithm was not found
+	 * @throws IOException if a problem occurs
 	 */
 	public abstract void init(int opmode, AbstractKey key, AbstractSecureRandom random)
-			throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException;
+			throws IOException;
 
 	/**
 	 * <p>
@@ -336,18 +267,13 @@ public abstract class AbstractCipher {
 	 *            The key.
 	 * @param iv
 	 *            the iv parameter
-	 * @throws InvalidKeySpecException if the key is invalid
-	 * @throws InvalidKeyException if key is invalid
-	 * @throws NoSuchAlgorithmException if the algorithm was not found
-	 * @throws InvalidAlgorithmParameterException the algorithm parameters are invalid
+	 * @throws IOException if a problem occurs
 	 */
-	public abstract void init(int opmode, AbstractKey key, byte[] iv) throws InvalidKeyException, NoSuchAlgorithmException,
-			InvalidKeySpecException, InvalidAlgorithmParameterException;
+	public abstract void init(int opmode, AbstractKey key, byte[] iv) throws IOException;
 
 
 
-	public void init(int opmode, AbstractKey key, byte[] iv, int counter) throws InvalidKeyException, NoSuchAlgorithmException,
-			InvalidKeySpecException, InvalidAlgorithmParameterException
+	public void init(int opmode, AbstractKey key, byte[] iv, int counter) throws IOException
 	{
 		if (iv!=null) {
 			int counterPos = iv.length - 4;
@@ -364,10 +290,9 @@ public abstract class AbstractCipher {
 	 * @param input
 	 *            The input bytes.
 	 * @return The transformed bytes.
-	 * @throws java.lang.IllegalStateException
-	 *             If this cipher was not initialized for encryption or decryption.
+	 * @throws IOException if a problem occurs
 	 */
-	public byte[] update(byte[] input) throws IllegalStateException
+	public byte[] update(byte[] input) throws IOException
 	{
 		return update(input, 0, input.length);
 	}
@@ -383,10 +308,9 @@ public abstract class AbstractCipher {
 	 * @param inputLength
 	 *            The number of bytes to transform.
 	 * @return The transformed bytes.
-	 * @throws java.lang.IllegalStateException
-	 *             If this cipher was not initialized for encryption or decryption.
+	 * @throws IOException if a problem occurs
 	 */
-	public abstract byte[] update(byte[] input, int inputOffset, int inputLength) throws IllegalStateException;
+	public abstract byte[] update(byte[] input, int inputOffset, int inputLength) throws IOException;
 
 	/**
 	 * Continue a multi-part transformation on part of a byte array, placing the
@@ -401,14 +325,10 @@ public abstract class AbstractCipher {
 	 * @param output
 	 *            The output byte array.
 	 * @return The number of transformed bytes.
-	 * @throws java.lang.IllegalStateException
-	 *             If this cipher was not initialized for encryption or decryption.
-	 * @throws ShortBufferException
-	 *             If there is not enough room in the output array to hold the
-	 *             transformed bytes.
+	 * @throws IOException if a problem occurs
 	 */
 	public int update(byte[] input, int inputOffset, int inputLength, byte[] output)
-			throws IllegalStateException, ShortBufferException
+			throws IOException
 	{
 		return update(input, inputOffset, inputLength, output, 0);
 	}
@@ -428,14 +348,10 @@ public abstract class AbstractCipher {
 	 * @param outputOffset
 	 *            The index in the output array to start.
 	 * @return The number of transformed bytes.
-	 * @throws java.lang.IllegalStateException
-	 *             If this cipher was not initialized for encryption or decryption.
-	 * @throws ShortBufferException
-	 *             If there is not enough room in the output array to hold the
-	 *             transformed bytes.
+	 * @throws IOException if a problem occurs
 	 */
 	public abstract int update(byte[] input, int inputOffset, int inputLength, byte[] output, int outputOffset)
-			throws IllegalStateException, ShortBufferException;
+			throws IOException;
 
 	/**
 	 * Continue a multi-part transformation on a byte buffer, storing the
@@ -446,19 +362,11 @@ public abstract class AbstractCipher {
 	 * @param output
 	 *            The output buffer.
 	 * @return The number of bytes stored in <i>output</i>.
-	 * @throws IllegalArgumentException
-	 *             If the two buffers are the same object.
-	 * @throws IllegalStateException
-	 *             If this cipher was not initialized for encrypting or decrypting.
-	 * @throws ReadOnlyBufferException
-	 *             If the output buffer is not writable.
-	 * @throws ShortBufferException
-	 *             If the output buffer does not have enough available space for the
-	 *             transformed bytes.
+	 * @throws IOException if a problem occurs
 	 * @since 1.5
 	 */
 	public int update(ByteBuffer input, ByteBuffer output)
-			throws ReadOnlyBufferException, ShortBufferException
+			throws IOException
 	{
 		return update(input.array(), input.position(), input.remaining(), output.array(), output.position());
 	}

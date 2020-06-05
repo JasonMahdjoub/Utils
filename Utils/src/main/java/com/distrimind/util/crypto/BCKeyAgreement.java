@@ -36,6 +36,8 @@ package com.distrimind.util.crypto;
 
 
 
+import com.distrimind.util.io.Integrity;
+import com.distrimind.util.io.MessageExternalizationException;
 import org.bouncycastle.crypto.AsymmetricPrivateKey;
 import org.bouncycastle.crypto.AsymmetricPublicKey;
 import org.bouncycastle.crypto.KDFCalculator;
@@ -48,6 +50,7 @@ import org.bouncycastle.crypto.fips.FipsKDF;
 import org.bouncycastle.crypto.fips.FipsKDF.AgreementKDFParameters;
 
 import javax.crypto.ShortBufferException;
+import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 
@@ -78,27 +81,35 @@ public final class BCKeyAgreement extends AbstractKeyAgreement{
 
 	@Override
 	public void doPhase(AbstractKey key, boolean lastPhase)
-			throws IllegalStateException, NoSuchAlgorithmException, InvalidKeySpecException {
+			throws IOException {
 		if (agreement==null)
 			throw new NullPointerException();
-		secret=agreement.calculate((AsymmetricPublicKey)key.toBouncyCastleKey());
+		try {
+			secret=agreement.calculate((AsymmetricPublicKey)key.toBouncyCastleKey());
+		} catch (NoSuchAlgorithmException e) {
+			throw new IOException(e);
+		}
+		catch (InvalidKeySpecException e)
+		{
+			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, e);
+		}
 	}
 
 	@Override
-	public byte[] generateSecret() throws IllegalStateException {
+	public byte[] generateSecret() {
 		byte[] res = secret;
 		secret=null;
 		return res;
 	}
 
 	@Override
-	public int generateSecret(byte[] sharedSecret, int offset) throws IllegalStateException, ShortBufferException {
+	public int generateSecret(byte[] sharedSecret, int offset) throws IOException {
 		byte[] secret = generateSecret();
 
         if (sharedSecret.length - offset < secret.length)
         {
-            throw new ShortBufferException(getAlgorithm() + " key agreement: need "
-                + secret.length + " bytes");
+            throw new IOException(new ShortBufferException(getAlgorithm() + " key agreement: need "
+                + secret.length + " bytes"));
         }
 
         System.arraycopy(secret, 0, sharedSecret, offset, secret.length);
@@ -108,7 +119,7 @@ public final class BCKeyAgreement extends AbstractKeyAgreement{
 
 	@Override
 	public SymmetricSecretKey generateSecretKey(short keySize)
-			throws IllegalStateException {
+			 {
 		byte[] secret = generateSecret();
 		if (type.useKDF())
         {
@@ -153,35 +164,39 @@ public final class BCKeyAgreement extends AbstractKeyAgreement{
     
 	
 	@Override
-	public void init(AbstractKey key, Object params, AbstractSecureRandom random) throws NoSuchAlgorithmException, InvalidKeySpecException {
+	public void init(AbstractKey key, Object params, AbstractSecureRandom random) throws IOException {
+		try {
+			if (type.isECCDHType() || type.isXDHType()) {
 
-		if (type.isECCDHType() || type.isXDHType())
-		{
+				paramskeymaterial = ((UserKeyingMaterialSpec) params).getUserKeyingMaterial();
+				AgreementParameters aparams = FipsEC.CDH.withDigest(type.getBCFipsDigestAlgorithm())
+						.withKDF(kdfAlgorithm = FipsKDF.CONCATENATION.withPRF(type.getBCFipsAgreementKDFPRF()), paramskeymaterial, paramskeymaterial.length);
+				FipsEC.DHAgreementFactory agreementFact = new FipsEC.DHAgreementFactory();
 
-			paramskeymaterial=((UserKeyingMaterialSpec)params).getUserKeyingMaterial();
-			AgreementParameters aparams=FipsEC.CDH.withDigest(type.getBCFipsDigestAlgorithm())
-				.withKDF(kdfAlgorithm=FipsKDF.CONCATENATION.withPRF(type.getBCFipsAgreementKDFPRF()), paramskeymaterial, paramskeymaterial.length);
-			FipsEC.DHAgreementFactory agreementFact=new FipsEC.DHAgreementFactory();
+				agreement = agreementFact.createAgreement((AsymmetricPrivateKey) key.toBouncyCastleKey(), aparams);
 
-			agreement=agreementFact.createAgreement((AsymmetricPrivateKey)key.toBouncyCastleKey(), aparams);
-			
+			} else if (type.isECMQVType()) {
+				Object[] p = (Object[]) params;
+				org.bouncycastle.crypto.fips.FipsEC.MQVAgreementParameters mqvparam = (org.bouncycastle.crypto.fips.FipsEC.MQVAgreementParameters) p[0];
+				paramskeymaterial = (byte[]) p[1];
+
+				mqvparam = mqvparam.withDigest(type.getBCFipsDigestAlgorithm())
+						.withKDF(kdfAlgorithm = FipsKDF.CONCATENATION.withPRF(type.getBCFipsAgreementKDFPRF()), paramskeymaterial, paramskeymaterial.length);
+
+				FipsEC.MQVAgreementFactory mqvagreementfact = new FipsEC.MQVAgreementFactory();
+
+				agreement = mqvagreementfact.createAgreement((AsymmetricPrivateKey) key.toBouncyCastleKey(), mqvparam);
+			} else
+				throw new InternalError();
+			secret = null;
 		}
-		else if (type.isECMQVType())
-		{
-			Object [] p=(Object[])params;
-			org.bouncycastle.crypto.fips.FipsEC.MQVAgreementParameters mqvparam=(org.bouncycastle.crypto.fips.FipsEC.MQVAgreementParameters)p[0];
-			paramskeymaterial=(byte[])p[1];
-			
-			mqvparam=mqvparam.withDigest(type.getBCFipsDigestAlgorithm())
-					.withKDF(kdfAlgorithm=FipsKDF.CONCATENATION.withPRF(type.getBCFipsAgreementKDFPRF()), paramskeymaterial, paramskeymaterial.length);
-			
-			FipsEC.MQVAgreementFactory mqvagreementfact=new FipsEC.MQVAgreementFactory();
-			
-			agreement=mqvagreementfact.createAgreement((AsymmetricPrivateKey)key.toBouncyCastleKey(), mqvparam);
+		catch (NoSuchAlgorithmException e) {
+			throw new IOException(e);
 		}
-		else
-			throw new InternalError();
-		secret=null;
+		catch (InvalidKeySpecException e)
+		{
+			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, e);
+		}
 		
 	}
 

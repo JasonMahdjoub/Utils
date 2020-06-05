@@ -36,16 +36,12 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 
 import com.distrimind.util.Bits;
+import com.distrimind.util.io.Integrity;
+import com.distrimind.util.io.MessageExternalizationException;
 import org.bouncycastle.bccrypto.CryptoException;
 
-import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
 import java.io.IOException;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
 
 /**
@@ -82,7 +78,7 @@ public class HybridKeyAgreement extends KeyAgreement{
 	}
 
 
-	private void checkSymmetricSecretKey() throws CryptoException
+	private void checkSymmetricSecretKey() throws IOException
 	{
 		if (secretKey==null && hasFinishedReception() && hasFinishedSend())
 		{
@@ -91,33 +87,29 @@ public class HybridKeyAgreement extends KeyAgreement{
 
 			byte[] PQCBytes=PQC.getKeyBytes();
 
-			try {
-				SymmetricSecretKey k=nonPQC;
-				if (k.getEncryptionAlgorithmType()==null)
-					k=new SymmetricSecretKey(SymmetricEncryptionType.AES_CBC_PKCS5Padding, k.getKeyBytes());
-				AbstractCipher cipher=k.getEncryptionAlgorithmType().getCipherInstance();
-				byte[] iv=new byte[k.getEncryptionAlgorithmType().getIVSizeBytes()];
-				Arrays.fill(iv, (byte)0);
-				cipher.init(Cipher.ENCRYPT_MODE, k, iv);
-				byte[] shared=cipher.doFinal(PQCBytes, 0, PQCBytes.length);
-				int s=shared.length-PQCBytes.length;
-				if (s>0) {
-					for (int i = 0; i < s; i++) {
-						shared[i] ^= shared[i + PQCBytes.length];
-					}
-					shared=Arrays.copyOfRange(shared, 0, PQCBytes.length);
+			SymmetricSecretKey k=nonPQC;
+			if (k.getEncryptionAlgorithmType()==null)
+				k=new SymmetricSecretKey(SymmetricEncryptionType.AES_CBC_PKCS5Padding, k.getKeyBytes());
+			AbstractCipher cipher=k.getEncryptionAlgorithmType().getCipherInstance();
+			byte[] iv=new byte[k.getEncryptionAlgorithmType().getIVSizeBytes()];
+			Arrays.fill(iv, (byte)0);
+			cipher.init(Cipher.ENCRYPT_MODE, k, iv);
+			byte[] shared=cipher.doFinal(PQCBytes, 0, PQCBytes.length);
+			int s=shared.length-PQCBytes.length;
+			if (s>0) {
+				for (int i = 0; i < s; i++) {
+					shared[i] ^= shared[i + PQCBytes.length];
 				}
-
-				if (shared.length<32)
-					throw new CryptoException();
-				if (PQC.getEncryptionAlgorithmType()==null)
-					secretKey=new SymmetricSecretKey(PQC.getAuthenticatedSignatureAlgorithmType(), shared);
-				else
-					secretKey=new SymmetricSecretKey(PQC.getEncryptionAlgorithmType(), shared);
-
-			} catch (NoSuchAlgorithmException | InvalidKeyException | InvalidKeySpecException | IllegalBlockSizeException | BadPaddingException | InvalidAlgorithmParameterException | IOException e) {
-				throw new CryptoException("", e);
+				shared=Arrays.copyOfRange(shared, 0, PQCBytes.length);
 			}
+
+			if (shared.length<32)
+				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException());
+			if (PQC.getEncryptionAlgorithmType()==null)
+				secretKey=new SymmetricSecretKey(PQC.getAuthenticatedSignatureAlgorithmType(), shared);
+			else
+				secretKey=new SymmetricSecretKey(PQC.getEncryptionAlgorithmType(), shared);
+
 		}
 	}
 
@@ -127,7 +119,7 @@ public class HybridKeyAgreement extends KeyAgreement{
 	}
 
 	@Override
-	protected byte[] getDataToSend(int stepNumber) throws Exception {
+	protected byte[] getDataToSend(int stepNumber) throws IOException {
 		try {
 			byte[] nonPQC = null, PQC = null;
 			boolean nonPQCb=false, PQCb=false;
@@ -164,13 +156,13 @@ public class HybridKeyAgreement extends KeyAgreement{
 	}
 
 	@Override
-	protected void receiveData(int stepNumber, byte[] data) throws CryptoException {
+	protected void receiveData(int stepNumber, byte[] data) throws IOException {
 		try {
 			byte[] nonPQC = null, PQC = null;
 			if (!nonPQCKeyAgreement.hasFinishedReception() && !PQCKeyAgreement.hasFinishedReception()) {
 				int s = (int) Bits.getPositiveInteger(data, 0, 3);
 				if (s + 36 > data.length)
-					throw new CryptoException();
+					throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException());
 				nonPQC = new byte[s];
 				PQC = new byte[data.length - s - 3];
 				System.arraycopy(data, 3, nonPQC, 0, nonPQC.length);

@@ -35,6 +35,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
 package com.distrimind.util.crypto;
 
 
+import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 
@@ -96,8 +97,12 @@ public abstract class AbstractKeyGenerator {
 	}
 
 
-	public void init(short keySize) throws NoSuchAlgorithmException, NoSuchProviderException {
-		init(keySize, SecureRandomType.FORTUNA_WITH_BC_FIPS_APPROVED_FOR_KEYS.getSingleton(SecureRandomType.nonce));
+	public void init(short keySize) throws IOException {
+		try {
+			init(keySize, SecureRandomType.FORTUNA_WITH_BC_FIPS_APPROVED_FOR_KEYS.getSingleton(SecureRandomType.nonce));
+		} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
+			throw new IOException(e);
+		}
 	}
 
 	/**

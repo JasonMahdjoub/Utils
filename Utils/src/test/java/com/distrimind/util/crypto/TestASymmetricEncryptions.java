@@ -36,7 +36,6 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 
 import com.distrimind.util.DecentralizedValue;
-import org.bouncycastle.crypto.InvalidWrappingException;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -87,8 +86,7 @@ public class TestASymmetricEncryptions {
 	}
 	@Test(dataProvider="provideDataASymmetricKeyWrapperForEncryption")
 	public void testASymmetricKeyWrapperForEncryption(ASymmetricKeyWrapperType typeWrapper, ASymmetricEncryptionType asetype, SymmetricEncryptionType setype)
-			throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, IllegalStateException, IllegalBlockSizeException, NoSuchProviderException, InvalidAlgorithmParameterException, IOException, IllegalArgumentException, InvalidWrappingException
-	{
+			throws NoSuchAlgorithmException, IllegalStateException, NoSuchProviderException, IOException, IllegalArgumentException {
 		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getSingleton(null);
 		ASymmetricKeyPair kp=asetype.getKeyPairGenerator(rand, (short)2048).generateKeyPair();
 
@@ -100,8 +98,7 @@ public class TestASymmetricEncryptions {
 
 	}
 	public void testASymmetricKeyWrapperForEncryption(AbstractSecureRandom rand, AbstractKeyPair<?,?> kp,  ASymmetricKeyWrapperType typeWrapper, ASymmetricEncryptionType asetype, SymmetricEncryptionType setype)
-			throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, IllegalStateException, IllegalBlockSizeException, NoSuchProviderException, InvalidAlgorithmParameterException, IOException, IllegalArgumentException, InvalidWrappingException
-	{
+			throws NoSuchAlgorithmException, IllegalStateException, NoSuchProviderException, IOException, IllegalArgumentException {
 		SymmetricSecretKey sk= setype.getKeyGenerator(rand, setype.getDefaultKeySizeBits()).generateKey();
 		byte[] wrappedKey=typeWrapper.wrapKey(rand, kp.getASymmetricPublicKey(), sk);
 		SymmetricSecretKey sk2=typeWrapper.unwrapKey(kp.getASymmetricPrivateKey(), wrappedKey);
@@ -114,7 +111,7 @@ public class TestASymmetricEncryptions {
 	@Test(dataProvider = "provideDataForASymetricEncryptions", dependsOnMethods = { "testASymmetricKeyPairEncodingForEncryption" })
 	public void testP2PASymetricEncryptions(ASymmetricEncryptionType type)
 			throws NoSuchAlgorithmException,
-			InvalidAlgorithmParameterException, IOException,
+			IOException,
 			NoSuchProviderException, IllegalStateException {
 		System.out.println("Testing " + type);
 		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getSingleton(null);
@@ -131,7 +128,7 @@ public class TestASymmetricEncryptions {
 	@Test(dataProvider = "provideDataForHybridASymetricEncryptions")
 	public void testHybridP2PASymetricEncryptions(HybridASymmetricEncryptionType type)
 			throws NoSuchAlgorithmException,
-			InvalidAlgorithmParameterException, IOException,
+			IOException,
 			NoSuchProviderException, IllegalStateException {
 		System.out.println("Testing " + type);
 		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getSingleton(null);
@@ -201,9 +198,9 @@ public class TestASymmetricEncryptions {
 
 	@Test(dataProvider = "provideDataForHybridEncryptions")
 	public void testHybridEncryptions(ASymmetricEncryptionType astype, SymmetricEncryptionType stype)
-			throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,
-			InvalidAlgorithmParameterException, IOException, IllegalBlockSizeException,
-			NoSuchProviderException, InvalidKeySpecException, IllegalStateException, IllegalArgumentException, InvalidWrappingException {
+			throws NoSuchAlgorithmException,
+			IOException,
+			NoSuchProviderException, IllegalStateException, IllegalArgumentException {
 		System.out.println("Testing " + astype + "/" + stype);
 		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getSingleton(null);
 		ASymmetricKeyPair kpd = astype.getKeyPairGenerator(rand, (short)1024).generateKeyPair();
@@ -240,7 +237,7 @@ public class TestASymmetricEncryptions {
 	@Test(dataProvider = "provideDataForHybridASymetricEncryptions")
 	public void testClientServerASymetricEncryptions(HybridASymmetricEncryptionType type)
 			throws NoSuchAlgorithmException,
-			InvalidAlgorithmParameterException, IOException,
+			IOException,
 			NoSuchProviderException, IllegalStateException {
 		System.out.println("Testing " + type);
 		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getSingleton(null);
@@ -286,7 +283,7 @@ public class TestASymmetricEncryptions {
 	@Test(dataProvider = "provideDataForASymetricEncryptions", dependsOnMethods = { "testASymmetricKeyPairEncodingForEncryption" })
 	public void testClientServerASymetricEncryptions(ASymmetricEncryptionType type)
 			throws NoSuchAlgorithmException,
-			InvalidAlgorithmParameterException, IOException,
+			IOException,
 			NoSuchProviderException, IllegalStateException {
 		System.out.println("Testing " + type);
 		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getSingleton(null);
@@ -296,10 +293,10 @@ public class TestASymmetricEncryptions {
 
 	}
 	@Test(dataProvider = "provideDataForASymetricEncryptions")
-	public void testASymmetricKeyExpirationTimeChange(ASymmetricEncryptionType type) throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException {
+	public void testASymmetricKeyExpirationTimeChange(ASymmetricEncryptionType type) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
 		TestASymmetricSignatures.testASymmetricKeyExpirationTimeChange(generateKeyPair(type));
 	}
-	private ASymmetricKeyPair generateKeyPair(ASymmetricEncryptionType type) throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException {
+	private ASymmetricKeyPair generateKeyPair(ASymmetricEncryptionType type) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
 		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getSingleton(null);
 		return type.getKeyPairGenerator(rand, (short)1024).generateKeyPair();
 	}
@@ -319,7 +316,7 @@ public class TestASymmetricEncryptions {
 	}
 	@Test(dataProvider = "provideDataForASymetricEncryptions")
 	public void testASymmetricKeyPairEncodingForEncryption(ASymmetricEncryptionType type)
-			throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException, InvalidKeySpecException, IOException {
+			throws NoSuchAlgorithmException, NoSuchProviderException, InvalidKeySpecException, IOException {
 		System.out.println("Testing ASymmetricKeyPairEncoding " + type);
 
 		ASymmetricKeyPair kpd=generateKeyPair(type);
@@ -416,7 +413,7 @@ public class TestASymmetricEncryptions {
 	@Test(dataProvider = "provideDataForASymetricEncryptions")
 	public void testASymmetricSecretMessageExchanger(ASymmetricEncryptionType type)
 			throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,
-			InvalidAlgorithmParameterException, IOException, IllegalAccessException, InvalidKeySpecException,
+			InvalidAlgorithmParameterException, IOException, InvalidKeySpecException,
 			IllegalBlockSizeException, BadPaddingException, NoSuchProviderException, IllegalStateException {
 		System.out.println("Testing ASymmetricSecretMessageExchanger " + type);
 		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getSingleton(null);

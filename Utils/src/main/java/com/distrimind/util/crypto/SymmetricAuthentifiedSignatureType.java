@@ -40,7 +40,7 @@ import org.bouncycastle.crypto.fips.FipsSHS;
 import org.bouncycastle.crypto.fips.FipsSHS.AuthParameters;
 
 import javax.crypto.spec.SecretKeySpec;
-import java.security.InvalidAlgorithmParameterException;
+import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.util.Arrays;
@@ -251,7 +251,7 @@ public enum SymmetricAuthentifiedSignatureType {
 	}
 
 
-	public static void main(String []args) throws NoSuchProviderException, NoSuchAlgorithmException, InvalidAlgorithmParameterException {
+	public static void main(String []args) throws NoSuchProviderException, NoSuchAlgorithmException, IOException {
 		System.out.println(ASymmetricAuthenticatedSignatureType.BC_FIPS_Ed25519.getKeyPairGenerator(SecureRandomType.DEFAULT.getSingleton(null) ).generateKeyPair().getASymmetricPublicKey());
 	}
 }

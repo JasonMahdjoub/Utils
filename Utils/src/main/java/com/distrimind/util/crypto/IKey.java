@@ -1,5 +1,6 @@
 package com.distrimind.util.crypto;
 
+import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 
@@ -10,7 +11,7 @@ import java.security.spec.InvalidKeySpecException;
  */
 public interface IKey {
 	Object toGnuKey()
-			throws InvalidKeySpecException, NoSuchAlgorithmException;
+			throws InvalidKeySpecException, NoSuchAlgorithmException, IOException;
 
 	java.security.Key toJavaNativeKey()
 			throws NoSuchAlgorithmException, InvalidKeySpecException;

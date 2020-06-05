@@ -34,6 +34,10 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
+import com.distrimind.util.io.Integrity;
+import com.distrimind.util.io.MessageExternalizationException;
+
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.security.DigestException;
 import java.security.MessageDigest;
@@ -69,8 +73,12 @@ public final class JavaNativeMessageDigest extends AbstractMessageDigest {
 	}
 
 	@Override
-	public int digest(byte[] _buf, int _offset, int _len) throws DigestException {
-		return messageDigest.digest(_buf, _offset, _len);
+	public int digest(byte[] _buf, int _offset, int _len) throws IOException {
+		try {
+			return messageDigest.digest(_buf, _offset, _len);
+		} catch (DigestException e) {
+			throw new MessageExternalizationException(Integrity.FAIL, e);
+		}
 	}
 
 	@Override

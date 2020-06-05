@@ -35,9 +35,6 @@ knowledge of the CeCILL-C license and that you accept its terms.
 package com.distrimind.util.crypto;
 
 
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-
 /**
  * 
  * @author Jason Mahdjoub

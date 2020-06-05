@@ -40,9 +40,8 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
-import java.security.*;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.InvalidParameterSpecException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.util.Random;
 
 /**
@@ -73,7 +72,7 @@ public class VariousTests {
 	}
 
 	static final int[] keySizes = { 1024, 2048, 3072, 4096 };
-	static byte[] testSignature(AbstractAuthenticatedSignerAlgorithm signer, AbstractAuthenticatedCheckerAlgorithm checker) throws InvalidKeyException, SignatureException, NoSuchAlgorithmException, InvalidKeySpecException, IllegalStateException, NoSuchProviderException, InvalidAlgorithmParameterException, InvalidParameterSpecException, IOException
+	static byte[] testSignature(AbstractAuthenticatedSignerAlgorithm signer, AbstractAuthenticatedCheckerAlgorithm checker) throws IllegalStateException, IOException
 	{
 		byte[] m = new byte[100000];
 		Random r=new Random(System.currentTimeMillis());

@@ -65,11 +65,7 @@ public class SignatureCheckerRandomInputStream extends DelegatedRandomInputStrea
 
 	@Override
 	protected void derivedRead(byte[] b, int off, int len) throws IOException {
-		try {
-			checker.update(b, off, len);
-		} catch (SignatureException e) {
-			throw new IOException();
-		}
+		checker.update(b, off, len);
 	}
 
 	@Override

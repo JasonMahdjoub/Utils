@@ -35,11 +35,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
 package com.distrimind.util.crypto;
 
 
-import javax.crypto.ShortBufferException;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.spec.InvalidKeySpecException;
+import java.io.IOException;
 
 /**
  * 
@@ -72,18 +68,18 @@ public abstract class AbstractKeyAgreement {
 
 
 
-	public abstract void doPhase(AbstractKey key, boolean lastPhase) throws IllegalStateException, InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException;
+	public abstract void doPhase(AbstractKey key, boolean lastPhase) throws IOException;
 
 	
-	public abstract byte[] generateSecret() throws IllegalStateException;
+	public abstract byte[] generateSecret() throws IOException;
 		
 
 	public abstract int generateSecret(byte[] sharedSecret, int offset)
-            throws IllegalStateException, ShortBufferException;
+            throws IOException;
 
 	
 	public abstract SymmetricSecretKey generateSecretKey(short keySize)
-			throws IllegalStateException, InvalidKeyException, NoSuchAlgorithmException;
+			throws IOException;
 
 	
 	public abstract String getAlgorithm();
@@ -91,7 +87,7 @@ public abstract class AbstractKeyAgreement {
 
 	
 	public abstract void init(AbstractKey key, Object params, AbstractSecureRandom random)
-			throws InvalidAlgorithmParameterException, InvalidKeyException, NoSuchAlgorithmException,InvalidKeySpecException;
+			throws IOException;
 
 	
 }

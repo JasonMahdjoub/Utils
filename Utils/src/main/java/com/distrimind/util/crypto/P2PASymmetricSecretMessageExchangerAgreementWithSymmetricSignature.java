@@ -1,13 +1,10 @@
 package com.distrimind.util.crypto;
 
-import org.bouncycastle.bccrypto.CryptoException;
+import com.distrimind.util.io.MessageExternalizationException;
 
-import javax.crypto.NoSuchPaddingException;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
+import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
-import java.security.spec.InvalidKeySpecException;
 
 /**
  * @author Jason Mahdjoub
@@ -37,7 +34,7 @@ public class P2PASymmetricSecretMessageExchangerAgreementWithSymmetricSignature 
         this(random, participantID, message, null, 0, 0, secretKeyForSignature);
     }*/
     P2PASymmetricSecretMessageExchangerAgreementWithSymmetricSignature(AbstractSecureRandom random, char[] message, byte[] salt,
-                              int offset_salt, int len_salt, SymmetricSecretKey secretKeyForSignature,MessageDigestType messageDigestType, PasswordHashType passwordHashType, ASymmetricPublicKey myPublicKey) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, NoSuchPaddingException, InvalidAlgorithmParameterException, InvalidKeyException {
+                              int offset_salt, int len_salt, SymmetricSecretKey secretKeyForSignature,MessageDigestType messageDigestType, PasswordHashType passwordHashType, ASymmetricPublicKey myPublicKey) throws NoSuchAlgorithmException, NoSuchProviderException, MessageExternalizationException {
         super(secretKeyForSignature==null?2:4, secretKeyForSignature==null?2:4);
         p2PASymmetricSecretMessageExchangerAgreement=new P2PASymmetricSecretMessageExchangerAgreement(random, messageDigestType, passwordHashType, myPublicKey, salt, offset_salt, len_salt, message);
         if (secretKeyForSignature==null)
@@ -50,7 +47,7 @@ public class P2PASymmetricSecretMessageExchangerAgreementWithSymmetricSignature 
         this(random, participantID, message, 0, message.length,null, 0, 0, messageIsKey, secretKeyForSignature);
     }*/
     P2PASymmetricSecretMessageExchangerAgreementWithSymmetricSignature(AbstractSecureRandom random, byte[] message, int offset, int len, byte[] salt,
-                                                                       int offset_salt, int len_salt, boolean messageIsKey, SymmetricSecretKey secretKeyForSignature, MessageDigestType messageDigestType, PasswordHashType passwordHashType, ASymmetricPublicKey myPublicKey) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, NoSuchPaddingException, InvalidAlgorithmParameterException, InvalidKeyException {
+                                                                       int offset_salt, int len_salt, boolean messageIsKey, SymmetricSecretKey secretKeyForSignature, MessageDigestType messageDigestType, PasswordHashType passwordHashType, ASymmetricPublicKey myPublicKey) throws NoSuchAlgorithmException, NoSuchProviderException, MessageExternalizationException {
         super(secretKeyForSignature==null?2:4, secretKeyForSignature==null?2:4);
         p2PASymmetricSecretMessageExchangerAgreement=new P2PASymmetricSecretMessageExchangerAgreement(random,messageDigestType, passwordHashType, myPublicKey, salt, offset_salt, len_salt, message, offset, len, messageIsKey);
         if (secretKeyForSignature==null)
@@ -64,14 +61,14 @@ public class P2PASymmetricSecretMessageExchangerAgreementWithSymmetricSignature 
         return p2PASymmetricSecretMessageExchangerAgreement.isAgreementProcessValidImpl() && (login==null || login.isAgreementProcessValidImpl());
     }
     @Override
-    protected byte[] getDataToSend(int stepNumber) throws Exception {
+    protected byte[] getDataToSend(int stepNumber) throws IOException {
         if (login!=null && stepNumber<2)
             return login.getDataToSend();
         else
             return p2PASymmetricSecretMessageExchangerAgreement.getDataToSend();
     }
     @Override
-    protected void receiveData(int stepNumber, byte[] data) throws CryptoException {
+    protected void receiveData(int stepNumber, byte[] data) throws IOException {
         if (login!=null && stepNumber<2)
             login.receiveData(data);
         else

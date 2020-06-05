@@ -35,9 +35,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
 package com.distrimind.util.crypto;
 
 import javax.crypto.spec.SecretKeySpec;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.spec.InvalidKeySpecException;
+import java.io.IOException;
 
 /**
  * 
@@ -77,16 +75,15 @@ public enum PasswordBasedKeyGenerationType {
 	{
 		this(other.passwordHashType);
 	}
-	public SymmetricSecretKey derivateKey(char[] password, byte[] salt, SymmetricEncryptionType type) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException
+	public SymmetricSecretKey derivateKey(char[] password, byte[] salt, SymmetricEncryptionType type) throws IOException
 	{
 		return derivateKey(password, salt, PasswordHash.DEFAULT_COST, type, type.getDefaultKeySizeBits());
 	}
-	public SymmetricSecretKey derivateKey(char[] password, byte[] salt, byte cost, SymmetricEncryptionType type) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException
+	public SymmetricSecretKey derivateKey(char[] password, byte[] salt, byte cost, SymmetricEncryptionType type) throws IOException
 	{
 		return derivateKey(password, salt, cost, type, type.getDefaultKeySizeBits());
 	}
-	public SymmetricSecretKey derivateKey(char[] password, byte[] salt, byte cost, SymmetricEncryptionType type, short keySizeBits) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException
-	{
+	public SymmetricSecretKey derivateKey(char[] password, byte[] salt, byte cost, SymmetricEncryptionType type, short keySizeBits) throws IOException {
 		if (cost<4 || cost>31)
 			throw new IllegalArgumentException("cost must be greater or equals than 4 and lower or equals than 31");
 		if (getCodeProvider()==CodeProvider.GNU_CRYPTO)
@@ -98,17 +95,16 @@ public enum PasswordBasedKeyGenerationType {
 			return new SymmetricSecretKey(type, new SecretKeySpec(passwordHashType.hash(password, salt, cost, (byte)(keySizeBits/8)), type.getAlgorithmName()), keySizeBits);
 		}
 	}
-	public SymmetricSecretKey derivateKey(char[] password, byte[] salt, byte cost, SymmetricAuthentifiedSignatureType type) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException
+	public SymmetricSecretKey derivateKey(char[] password, byte[] salt, byte cost, SymmetricAuthentifiedSignatureType type) throws IOException
 	{
 		return derivateKey(password, salt, cost, type, type.getDefaultKeySizeBits());
 	}
-	public SymmetricSecretKey derivateKey(char[] password, byte[] salt, SymmetricAuthentifiedSignatureType type) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException
+	public SymmetricSecretKey derivateKey(char[] password, byte[] salt, SymmetricAuthentifiedSignatureType type) throws IOException
 	{
 		return derivateKey(password, salt, PasswordHash.DEFAULT_COST, type, type.getDefaultKeySizeBits());
 	}
 	
-	public SymmetricSecretKey derivateKey(char[] password, byte[] salt, byte cost, SymmetricAuthentifiedSignatureType type, short keySizeBits) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException
-	{
+	public SymmetricSecretKey derivateKey(char[] password, byte[] salt, byte cost, SymmetricAuthentifiedSignatureType type, short keySizeBits) throws IOException {
 		if (cost<4 || cost>31)
 			throw new IllegalArgumentException("cost must be greater or equals than 4 and lower or equals than 31");
 		return new SymmetricSecretKey(type, new SecretKeySpec(passwordHashType.hash(password, salt, cost, (byte)(keySizeBits/8)), type.getAlgorithmName()), keySizeBits);

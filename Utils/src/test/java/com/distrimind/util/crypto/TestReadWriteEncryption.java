@@ -41,7 +41,6 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
-import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.util.Arrays;
@@ -55,7 +54,7 @@ import java.util.Random;
 public class TestReadWriteEncryption {
 
 	@DataProvider(name = "provideParameters", parallel = true)
-	public Object[][] provideParameters() throws NoSuchProviderException, NoSuchAlgorithmException, InvalidAlgorithmParameterException {
+	public Object[][] provideParameters() throws NoSuchProviderException, NoSuchAlgorithmException, IOException {
 		Random rand=new Random(System.currentTimeMillis());
 		SymmetricSecretKey[] secretKeys=new SymmetricSecretKey[SymmetricEncryptionType.values().length+1];
 		Object[][] res=new Object[16*secretKeys.length][6];
@@ -114,16 +113,44 @@ public class TestReadWriteEncryption {
 		Random r=new Random(System.currentTimeMillis());
 		byte[] in=new byte[10+r.nextInt(10000000)];
 		r.nextBytes(in);
-		SecretKeyProvider secretKeyProvider=new SecretKeyProvider() {
+		EncryptionProfileProvider encryptionProfileProvider =new EncryptionProfileProvider() {
 			final SymmetricSecretKey symmetricSecretKey1=SymmetricEncryptionType.DEFAULT.getKeyGenerator(SecureRandomType.DEFAULT.getSingleton(null)).generateKey();
 			final SymmetricSecretKey symmetricSecretKey2=SymmetricEncryptionType.DEFAULT.getKeyGenerator(SecureRandomType.DEFAULT.getSingleton(null)).generateKey();
+			final SymmetricSecretKey secretKeyForSignature1 = SymmetricAuthentifiedSignatureType.DEFAULT.getKeyGenerator(SecureRandomType.DEFAULT.getSingleton(null)).generateKey();
+			final SymmetricSecretKey secretKeyForSignature2 = SymmetricAuthentifiedSignatureType.DEFAULT.getKeyGenerator(SecureRandomType.DEFAULT.getSingleton(null)).generateKey();
+
+
 			@Override
-			public SymmetricSecretKey getSecretKey(short keyID) {
+			public MessageDigestType getMessageDigest(short keyID, boolean duringDecryptionPhase)  {
+				return null;
+			}
+
+			@Override
+			public IASymmetricPrivateKey getSecretKeyForPrivateKey(short keyID)  {
+				return null;
+			}
+
+			@Override
+			public IASymmetricPublicKey getSecretKeyForPublicKey(short keyID)  {
+				return null;
+			}
+
+			@Override
+			public SymmetricSecretKey getSecretKeyForSignature(short keyID, boolean duringDecryptionPhase) throws IOException {
+				if (keyID==0)
+					return secretKeyForSignature1;
+				else if (keyID==1)
+					return secretKeyForSignature2;
+				throw new MessageExternalizationException(duringDecryptionPhase?Integrity.FAIL_AND_CANDIDATE_TO_BAN:Integrity.FAIL);
+			}
+
+			@Override
+			public SymmetricSecretKey getSecretKeyForEncryption(short keyID, boolean duringDecryptionPhase) throws IOException {
 				if (keyID==0)
 					return symmetricSecretKey1;
 				else if (keyID==1)
 					return symmetricSecretKey2;
-				return null;
+				throw new MessageExternalizationException(duringDecryptionPhase?Integrity.FAIL_AND_CANDIDATE_TO_BAN:Integrity.FAIL);
 			}
 
 			@Override
@@ -133,13 +160,11 @@ public class TestReadWriteEncryption {
 		};
 		for (short secretKeyID=0;secretKeyID<2;secretKeyID++) {
 
-			SymmetricSecretKey secretKeyForSignature = SymmetricAuthentifiedSignatureType.DEFAULT.getKeyGenerator(SecureRandomType.DEFAULT.getSingleton(null)).generateKey();
 			RandomByteArrayInputStream bais = new RandomByteArrayInputStream(in.clone());
 			RandomByteArrayOutputStream baos = new RandomByteArrayOutputStream();
 			EncryptionSignatureHashEncoder writer = new EncryptionSignatureHashEncoder()
 					.withRandomInputStream(bais)
-					.withSecretKeyProvider(SecureRandomType.DEFAULT.getSingleton(null), secretKeyProvider, secretKeyID)
-					.withSymmetricSecretKeyForSignature(secretKeyForSignature);
+					.withSecretKeyProvider(SecureRandomType.DEFAULT.getSingleton(null), encryptionProfileProvider, secretKeyID);
 			long expectedLength = writer.getMaximumOutputLength();
 			writer.encode(baos);
 			byte[] res = baos.getBytes();
@@ -148,8 +173,7 @@ public class TestReadWriteEncryption {
 			baos = new RandomByteArrayOutputStream();
 			EncryptionSignatureHashDecoder reader = new EncryptionSignatureHashDecoder()
 					.withRandomInputStream(bais)
-					.withSecretKeyProvider(SecureRandomType.DEFAULT.getSingleton(null), secretKeyProvider)
-					.withSymmetricSecretKeyForSignature(secretKeyForSignature);
+					.withSecretKeyProvider(SecureRandomType.DEFAULT.getSingleton(null), encryptionProfileProvider);
 
 			expectedLength = reader.getMaximumOutputLength(bais.length());
 			reader.decodeAndCheckHashAndSignaturesIfNecessary(baos);

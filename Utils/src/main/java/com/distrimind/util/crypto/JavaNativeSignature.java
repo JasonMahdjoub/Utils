@@ -34,6 +34,10 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
+import com.distrimind.util.io.Integrity;
+import com.distrimind.util.io.MessageExternalizationException;
+
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -75,41 +79,53 @@ public final class JavaNativeSignature extends AbstractSignature {
 	}
 	@Override
 	public void initSign(ASymmetricPrivateKey _privateKey)
-			throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException {
-		signature.initSign(_privateKey.toJavaNativeKey());
+			throws IOException {
+		try {
+			signature.initSign(_privateKey.toJavaNativeKey());
+		} catch (InvalidKeyException | NoSuchAlgorithmException | InvalidKeySpecException e) {
+			throw new MessageExternalizationException(Integrity.FAIL, e);
+		}
 	}
 
 	@Override
 	public void initSign(ASymmetricPrivateKey _privateKey, AbstractSecureRandom _random)
-			throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException {
+			throws IOException {
 		try {
 			signature.initSign(_privateKey.toJavaNativeKey(), _random.getJavaNativeSecureRandom());
-		} catch (java.security.InvalidKeyException e) {
-			throw new InvalidKeyException(e);
+		} catch (InvalidKeyException | NoSuchAlgorithmException | InvalidKeySpecException e) {
+			throw new MessageExternalizationException(Integrity.FAIL, e);
 		}
 
 	}
 
 	@Override
 	public void initVerify(ASymmetricPublicKey _publicKey)
-			throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException {
+			throws IOException {
 		try {
 			signature.initVerify(_publicKey.toJavaNativeKey());
-		} catch (java.security.InvalidKeyException e) {
-			throw new InvalidKeyException(e);
+		} catch (InvalidKeyException | NoSuchAlgorithmException | InvalidKeySpecException e) {
+			throw new MessageExternalizationException(Integrity.FAIL, e);
 		}
 
 	}
 
 	@Override
-	public byte[] sign() throws SignatureException {
-		return signature.sign();
+	public byte[] sign() throws IOException {
+		try {
+			return signature.sign();
+		} catch (SignatureException e) {
+			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, e);
+		}
 
 	}
 
 	@Override
-	public int sign(byte[] _outbuf, int _offset, int _len) throws SignatureException {
-		return signature.sign(_outbuf, _offset, _len);
+	public int sign(byte[] _outbuf, int _offset, int _len) throws IOException {
+		try {
+			return signature.sign(_outbuf, _offset, _len);
+		} catch (SignatureException e) {
+			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, e);
+		}
 
 	}
 
@@ -120,38 +136,58 @@ public final class JavaNativeSignature extends AbstractSignature {
 	}
 
 	@Override
-	public void update(byte _b) throws SignatureException {
+	public void update(byte _b) throws IOException {
 		try {
 			signature.update(_b);
 		} catch (java.security.SignatureException e) {
-			throw new SignatureException(e);
+			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, e);
 		}
 
 	}
 
 	@Override
-	public void update(byte[] _data) throws SignatureException {
-		signature.update(_data);
+	public void update(byte[] _data) throws IOException {
+		try {
+			signature.update(_data);
+		} catch (SignatureException e) {
+			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, e);
+		}
 	}
 
 	@Override
-	public void update(byte[] _data, int _off, int _len) throws SignatureException {
-		signature.update(_data, _off, _len);
+	public void update(byte[] _data, int _off, int _len) throws IOException {
+		try {
+			signature.update(_data, _off, _len);
+		} catch (SignatureException e) {
+			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, e);
+		}
 	}
 
 	@Override
-	public void update(ByteBuffer _input) throws SignatureException {
-		signature.update(_input);
+	public void update(ByteBuffer _input) throws IOException {
+		try {
+			signature.update(_input);
+		} catch (SignatureException e) {
+			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, e);
+		}
 	}
 
 	@Override
-	public boolean verify(byte[] _signature) throws SignatureException {
-		return signature.verify(_signature);
+	public boolean verify(byte[] _signature) throws IOException {
+		try {
+			return signature.verify(_signature);
+		} catch (SignatureException e) {
+			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, e);
+		}
 	}
 
 	@Override
-	public boolean verify(byte[] _signature, int _offset, int _length) throws SignatureException {
-		return signature.verify(_signature, _offset, _length);
+	public boolean verify(byte[] _signature, int _offset, int _length) throws IOException {
+		try {
+			return signature.verify(_signature, _offset, _length);
+		} catch (SignatureException e) {
+			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, e);
+		}
 	}
 
 }

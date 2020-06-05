@@ -35,8 +35,11 @@ knowledge of the CeCILL-C license and that you accept its terms.
 package com.distrimind.util.crypto;
 
 
+import com.distrimind.util.io.Integrity;
+import com.distrimind.util.io.MessageExternalizationException;
 import org.bouncycastle.bccrypto.CryptoException;
 
+import java.io.IOException;
 import java.util.Arrays;
 
 /**
@@ -85,9 +88,9 @@ public class P2PLoginWithSymmetricSignature extends P2PLoginAgreement {
 	}
 
 	@Override
-	protected byte[] getDataToSend(int stepNumber) throws Exception {
+	protected byte[] getDataToSend(int stepNumber) throws IOException {
 		if (!valid)
-			throw new CryptoException();
+			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException());
 
 		try {
 			switch (stepNumber) {
@@ -113,13 +116,13 @@ public class P2PLoginWithSymmetricSignature extends P2PLoginAgreement {
 		catch(Exception e)
 		{
 			valid=false;
-			throw e;
+			throw new MessageExternalizationException(Integrity.FAIL, e);
 		}
 		
 	}
 
 	@Override
-	protected void receiveData(int stepNumber, byte[] data) throws CryptoException {
+	protected void receiveData(int stepNumber, byte[] data) throws IOException {
 		try {
 			if (!valid)
 				throw new CryptoException();
@@ -158,9 +161,9 @@ public class P2PLoginWithSymmetricSignature extends P2PLoginAgreement {
 		{
 			valid = false;
 			if (e instanceof CryptoException)
-				throw (CryptoException)e;
+				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, e);
 			else
-				throw new CryptoException("", e);
+				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException("", e));
 		}
 	}
 

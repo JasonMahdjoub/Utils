@@ -34,6 +34,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
+import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.spec.InvalidKeySpecException;
@@ -42,6 +43,8 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 
 import com.distrimind.util.OSVersion;
+import com.distrimind.util.io.Integrity;
+import com.distrimind.util.io.MessageExternalizationException;
 import org.bouncycastle.crypto.PasswordBasedDeriver;
 import org.bouncycastle.crypto.PasswordConverter;
 import org.bouncycastle.crypto.fips.FipsDigestAlgorithm;
@@ -135,168 +138,173 @@ public enum PasswordHashType {
 	}
 	@SuppressWarnings("fallthrough")
 	byte[] hash(byte[] data, int off, int len, byte[] salt, byte cost, byte hashLength)
-			throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
-		CodeProvider.ensureProviderLoaded(codeProvider);
-		if (cost<4 || cost>31)
-			throw new IllegalArgumentException("cost must be greater or equals than 4 and lower or equals than 31");
+			throws IOException {
+		try {
+			CodeProvider.ensureProviderLoaded(codeProvider);
+			if (cost < 4 || cost > 31)
+				throw new IllegalArgumentException("cost must be greater or equals than 4 and lower or equals than 31");
 
-		if (defaultOf != null)
-			return defaultOf.hash(data, off, len, salt, cost, hashLength);
-		
-		if (OSVersion.getCurrentOSVersion()!=null && OSVersion.getCurrentOSVersion().getOS()==OS.MAC_OS_X)
-		{
-			if (this== PBKDF2WithHMacSHA2_256)
-				return PasswordHashType.BC_FIPS_PBKFD2WithHMacSHA2_256.hash(data, off, len, salt, cost, hashLength);
-			if (this== PBKDF2WithHMacSHA2_384)
-				return PasswordHashType.BC_FIPS_PBKFD2WithHMacSHA2_384.hash(data, off, len, salt, cost, hashLength);
-			if (this== PBKDF2WithHMacSHA2_512)
-				return PasswordHashType.BC_FIPS_PBKFD2WithHMacSHA2_512.hash(data, off, len, salt, cost, hashLength);
+			if (defaultOf != null)
+				return defaultOf.hash(data, off, len, salt, cost, hashLength);
+
+			if (OSVersion.getCurrentOSVersion() != null && OSVersion.getCurrentOSVersion().getOS() == OS.MAC_OS_X) {
+				if (this == PBKDF2WithHMacSHA2_256)
+					return PasswordHashType.BC_FIPS_PBKFD2WithHMacSHA2_256.hash(data, off, len, salt, cost, hashLength);
+				if (this == PBKDF2WithHMacSHA2_384)
+					return PasswordHashType.BC_FIPS_PBKFD2WithHMacSHA2_384.hash(data, off, len, salt, cost, hashLength);
+				if (this == PBKDF2WithHMacSHA2_512)
+					return PasswordHashType.BC_FIPS_PBKFD2WithHMacSHA2_512.hash(data, off, len, salt, cost, hashLength);
+			}
+			int scryptN = 1 << 18;
+			int iterations = 1 << (cost - 1);
+			switch (this) {
+				case DEFAULT:
+				case PBKDF2WithHmacSHA1:
+				case PBKDF2WithHMacSHA2_256:
+				case PBKDF2WithHMacSHA2_384:
+				case PBKDF2WithHMacSHA2_512: {
+					int size = len / 2;
+					char[] password = new char[size + len % 2];
+					for (int i = 0; i < size; i++) {
+						password[i] = (char) ((data[off + i * 2] & 0xFF) & ((data[off + i * 2 + 1] << 8) & 0xFF));
+					}
+					if (size < password.length)
+						password[size] = (char) (data[off + size * 2] & 0xFF);
+
+					PBEKeySpec spec = new PBEKeySpec(password, salt, iterations, (hashLength) * 8);
+					SecretKeyFactory skf = SecretKeyFactory.getInstance(algorithmName, codeProvider.checkProviderWithCurrentOS().name());
+					return skf.generateSecret(spec).getEncoded();
+				}
+				case GNU_PBKDF2WithHMacSHA2_256:
+				case GNU_PBKDF2WithHMacSHA2_384:
+				case GNU_PBKDF2WithHMacSHA2_512:
+				case GNU_PBKDF2WithHMacWhirlpool:
+				case GNU_PBKDF2WithHmacSHA1: {
+					int size = len / 2;
+					char[] password = new char[size + len % 2];
+					for (int i = 0; i < size; i++) {
+						password[i] = (char) ((data[off + i * 2] & 0xFF) & ((data[off + i * 2 + 1] << 8) & 0xFF));
+					}
+					if (size < password.length)
+						password[size] = (char) (data[off + size * 2] & 0xFF);
+
+					Object spec = GnuFunctions.PBEKeySpecGetInstance(password, salt,
+							iterations, (hashLength));
+					Object skf = GnuFunctions.secretKeyFactoryGetInstance(algorithmName);
+					return GnuFunctions.keyGetEncoded(GnuFunctions.secretKeyFactoryGenerateSecret(skf, spec));
+				}
+				case BC_BCRYPT: {
+					byte[] passwordb;
+					if (off != 0 || len != data.length) {
+						passwordb = new byte[len];
+						System.arraycopy(data, off, passwordb, 0, len);
+					} else
+						passwordb = data;
+
+					salt = uniformizeSaltLength(salt, 16);
+
+					return BCrypt.generate(passwordb, salt, cost);
+				}
+				case BC_FIPS_PBKFD2WithHMacSHA2_256:
+				case BC_FIPS_PBKFD2WithHMacSHA2_384:
+				case BC_FIPS_PBKFD2WithHMacSHA2_512: {
+					PasswordBasedDeriver<org.bouncycastle.crypto.fips.FipsPBKD.Parameters> deriver =
+							new FipsPBKD.DeriverFactory().createDeriver(FipsPBKD.PBKDF2.using(fipsDigestAlgorithm, data)
+									.withIterationCount(iterations)
+									.withSalt(salt));
+					return deriver.deriveKey(PasswordBasedDeriver.KeyType.CIPHER, ((hashLength * 8) + 7) / 8);
+				}
+				case BC_SCRYPT_FOR_LOGIN:
+
+					scryptN = 1 << 13;
+
+				case BC_SCRYPT_FOR_DATAENCRYPTION: {
+					byte[] d;
+					if (len == data.length && off == 0)
+						d = data;
+					else {
+						d = new byte[len];
+						System.arraycopy(data, off, d, 0, len);
+					}
+					return SCrypt.generate(d, salt, scryptN, 8, 1, hashLength);
+				}
+				default:
+					break;
+			}
+
+		} catch (NoSuchAlgorithmException | NoSuchProviderException | InvalidKeySpecException e) {
+			throw new MessageExternalizationException(Integrity.FAIL, e);
 		}
-		int scryptN=1<<18;
-		int iterations=1<<(cost-1);
-		switch (this) {
-			case DEFAULT:
-			case PBKDF2WithHmacSHA1:
-			case PBKDF2WithHMacSHA2_256:
-			case PBKDF2WithHMacSHA2_384:
-			case PBKDF2WithHMacSHA2_512: {
-				int size = len / 2;
-				char[] password = new char[size + len % 2];
-				for (int i = 0; i < size; i++) {
-					password[i] = (char) ((data[off + i * 2] & 0xFF) & ((data[off + i * 2 + 1] << 8) & 0xFF));
-				}
-				if (size < password.length)
-					password[size] = (char) (data[off + size * 2] & 0xFF);
-
-				PBEKeySpec spec = new PBEKeySpec(password, salt, iterations, (hashLength) * 8);
-				SecretKeyFactory skf = SecretKeyFactory.getInstance(algorithmName, codeProvider.checkProviderWithCurrentOS().name());
-				return skf.generateSecret(spec).getEncoded();
-			}
-			case GNU_PBKDF2WithHMacSHA2_256:
-			case GNU_PBKDF2WithHMacSHA2_384:
-			case GNU_PBKDF2WithHMacSHA2_512:
-			case GNU_PBKDF2WithHMacWhirlpool:
-			case GNU_PBKDF2WithHmacSHA1: {
-				int size = len / 2;
-				char[] password = new char[size + len % 2];
-				for (int i = 0; i < size; i++) {
-					password[i] = (char) ((data[off + i * 2] & 0xFF) & ((data[off + i * 2 + 1] << 8) & 0xFF));
-				}
-				if (size < password.length)
-					password[size] = (char) (data[off + size * 2] & 0xFF);
-
-				Object spec = GnuFunctions.PBEKeySpecGetInstance(password, salt,
-						iterations, (hashLength));
-				Object skf = GnuFunctions.secretKeyFactoryGetInstance(algorithmName);
-				return GnuFunctions.keyGetEncoded(GnuFunctions.secretKeyFactoryGenerateSecret(skf, spec));
-			}
-			case BC_BCRYPT: {
-				byte[] passwordb ;
-				if (off != 0 || len != data.length) {
-					passwordb = new byte[len];
-					System.arraycopy(data, off, passwordb, 0, len);
-				} else
-					passwordb = data;
-
-				salt = uniformizeSaltLength(salt, 16);
-
-				return BCrypt.generate(passwordb, salt, cost);
-			}
-			case BC_FIPS_PBKFD2WithHMacSHA2_256:
-			case BC_FIPS_PBKFD2WithHMacSHA2_384:
-			case BC_FIPS_PBKFD2WithHMacSHA2_512: {
-				PasswordBasedDeriver<org.bouncycastle.crypto.fips.FipsPBKD.Parameters> deriver =
-						new FipsPBKD.DeriverFactory().createDeriver(FipsPBKD.PBKDF2.using(fipsDigestAlgorithm, data)
-								.withIterationCount(iterations)
-								.withSalt(salt));
-				return deriver.deriveKey(PasswordBasedDeriver.KeyType.CIPHER, ((hashLength * 8) + 7) / 8);
-			}
-			case BC_SCRYPT_FOR_LOGIN:
-
-				scryptN = 1 << 13;
-
-			case BC_SCRYPT_FOR_DATAENCRYPTION: {
-				byte[] d ;
-				if (len == data.length && off == 0)
-					d = data;
-				else {
-					d = new byte[len];
-					System.arraycopy(data, off, d, 0, len);
-				}
-				return SCrypt.generate(d, salt, scryptN, 8, 1, hashLength);
-			}
-			default:
-				break;
-		}
-			
-
 		throw new InternalError();
 	}
 
-	byte[] hash(char[] password, byte[] salt, byte cost, byte hashLength) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
-		CodeProvider.ensureProviderLoaded(codeProvider);
-		if (cost<4 || cost>31)
-			throw new IllegalArgumentException("cost must be greater or equals than 4 and lower or equals than 31");
+	byte[] hash(char[] password, byte[] salt, byte cost, byte hashLength) throws IOException {
+		try {
+			CodeProvider.ensureProviderLoaded(codeProvider);
+			if (cost < 4 || cost > 31)
+				throw new IllegalArgumentException("cost must be greater or equals than 4 and lower or equals than 31");
 
-		if (defaultOf != null)
-			return defaultOf.hash(password, salt, cost, hashLength);
-		if (OSVersion.getCurrentOSVersion()!=null && OSVersion.getCurrentOSVersion().getOS()==OS.MAC_OS_X)
-		{
-			if (this== PBKDF2WithHMacSHA2_256)
-				return PasswordHashType.BC_FIPS_PBKFD2WithHMacSHA2_256.hash(password, salt, cost, hashLength);
-			if (this== PBKDF2WithHMacSHA2_384)
-				return PasswordHashType.BC_FIPS_PBKFD2WithHMacSHA2_384.hash(password, salt, cost, hashLength);
-			if (this== PBKDF2WithHMacSHA2_512)
-				return PasswordHashType.BC_FIPS_PBKFD2WithHMacSHA2_512.hash(password, salt, cost, hashLength);
-		}
-		int iterations=1<<(cost-1);
-		int scryptN=1<<18;
-		switch (this) {
-		case DEFAULT:
-		case PBKDF2WithHmacSHA1:
-		case PBKDF2WithHMacSHA2_256:
-		case PBKDF2WithHMacSHA2_384:
-		case PBKDF2WithHMacSHA2_512:{
-			PBEKeySpec spec = new PBEKeySpec(password, salt, iterations, (hashLength) * 8);
-			SecretKeyFactory skf = SecretKeyFactory.getInstance(algorithmName, codeProvider.checkProviderWithCurrentOS().name());
-			return skf.generateSecret(spec).getEncoded();
-		}
-		case GNU_PBKDF2WithHMacSHA2_256:
-		case GNU_PBKDF2WithHMacSHA2_384:
-		case GNU_PBKDF2WithHMacSHA2_512:
-		case GNU_PBKDF2WithHMacWhirlpool:
-		case GNU_PBKDF2WithHmacSHA1: {
-			Object spec = GnuFunctions.PBEKeySpecGetInstance(password, salt,
-					iterations, hashLength );
-			Object skf = GnuFunctions.secretKeyFactoryGetInstance(algorithmName);
-			return GnuFunctions.keyGetEncoded(GnuFunctions.secretKeyFactoryGenerateSecret(skf, spec));
-		}
-		case BC_BCRYPT: {
-			
-			salt = uniformizeSaltLength(salt, 16);
-			return BCrypt.generate(BCrypt.passwordToByteArray(password), salt, cost);
-		}
-		case BC_FIPS_PBKFD2WithHMacSHA2_256:
-		case BC_FIPS_PBKFD2WithHMacSHA2_384:
-		case BC_FIPS_PBKFD2WithHMacSHA2_512:
-		{
-			PasswordBasedDeriver<org.bouncycastle.crypto.fips.FipsPBKD.Parameters> deriver =
-						new FipsPBKD.DeriverFactory().createDeriver(FipsPBKD.PBKDF2.using(fipsDigestAlgorithm, PasswordConverter.UTF8.convert(password))
-												.withIterationCount(iterations)
-												.withSalt(salt));
-			return deriver.deriveKey(PasswordBasedDeriver.KeyType.CIPHER,((hashLength*8) +7) / 8);
-		}
-		case BC_SCRYPT_FOR_LOGIN:
-			scryptN=1<<13;
-			
-		case BC_SCRYPT_FOR_DATAENCRYPTION:
-			byte[] passwordb = new byte[password.length * 2];
-			for (int i = 0; i < password.length; i++) {
-				passwordb[i * 2] = (byte) (password[i] & 0xFF);
-				passwordb[i * 2 + 1] = (byte) ((password[i] >> 8 & 0xFFFF) & 0xFF);
+			if (defaultOf != null)
+				return defaultOf.hash(password, salt, cost, hashLength);
+			if (OSVersion.getCurrentOSVersion() != null && OSVersion.getCurrentOSVersion().getOS() == OS.MAC_OS_X) {
+				if (this == PBKDF2WithHMacSHA2_256)
+					return PasswordHashType.BC_FIPS_PBKFD2WithHMacSHA2_256.hash(password, salt, cost, hashLength);
+				if (this == PBKDF2WithHMacSHA2_384)
+					return PasswordHashType.BC_FIPS_PBKFD2WithHMacSHA2_384.hash(password, salt, cost, hashLength);
+				if (this == PBKDF2WithHMacSHA2_512)
+					return PasswordHashType.BC_FIPS_PBKFD2WithHMacSHA2_512.hash(password, salt, cost, hashLength);
 			}
-			
-			return SCrypt.generate(passwordb, salt, scryptN, 8, 1, hashLength);
+			int iterations = 1 << (cost - 1);
+			int scryptN = 1 << 18;
+			switch (this) {
+				case DEFAULT:
+				case PBKDF2WithHmacSHA1:
+				case PBKDF2WithHMacSHA2_256:
+				case PBKDF2WithHMacSHA2_384:
+				case PBKDF2WithHMacSHA2_512: {
+					PBEKeySpec spec = new PBEKeySpec(password, salt, iterations, (hashLength) * 8);
+					SecretKeyFactory skf = SecretKeyFactory.getInstance(algorithmName, codeProvider.checkProviderWithCurrentOS().name());
+					return skf.generateSecret(spec).getEncoded();
+				}
+				case GNU_PBKDF2WithHMacSHA2_256:
+				case GNU_PBKDF2WithHMacSHA2_384:
+				case GNU_PBKDF2WithHMacSHA2_512:
+				case GNU_PBKDF2WithHMacWhirlpool:
+				case GNU_PBKDF2WithHmacSHA1: {
+					Object spec = GnuFunctions.PBEKeySpecGetInstance(password, salt,
+							iterations, hashLength);
+					Object skf = GnuFunctions.secretKeyFactoryGetInstance(algorithmName);
+					return GnuFunctions.keyGetEncoded(GnuFunctions.secretKeyFactoryGenerateSecret(skf, spec));
+				}
+				case BC_BCRYPT: {
+
+					salt = uniformizeSaltLength(salt, 16);
+					return BCrypt.generate(BCrypt.passwordToByteArray(password), salt, cost);
+				}
+				case BC_FIPS_PBKFD2WithHMacSHA2_256:
+				case BC_FIPS_PBKFD2WithHMacSHA2_384:
+				case BC_FIPS_PBKFD2WithHMacSHA2_512: {
+					PasswordBasedDeriver<org.bouncycastle.crypto.fips.FipsPBKD.Parameters> deriver =
+							new FipsPBKD.DeriverFactory().createDeriver(FipsPBKD.PBKDF2.using(fipsDigestAlgorithm, PasswordConverter.UTF8.convert(password))
+									.withIterationCount(iterations)
+									.withSalt(salt));
+					return deriver.deriveKey(PasswordBasedDeriver.KeyType.CIPHER, ((hashLength * 8) + 7) / 8);
+				}
+				case BC_SCRYPT_FOR_LOGIN:
+					scryptN = 1 << 13;
+
+				case BC_SCRYPT_FOR_DATAENCRYPTION:
+					byte[] passwordb = new byte[password.length * 2];
+					for (int i = 0; i < password.length; i++) {
+						passwordb[i * 2] = (byte) (password[i] & 0xFF);
+						passwordb[i * 2 + 1] = (byte) ((password[i] >> 8 & 0xFFFF) & 0xFF);
+					}
+
+					return SCrypt.generate(passwordb, salt, scryptN, 8, 1, hashLength);
+			}
+		}
+		catch (NoSuchAlgorithmException | NoSuchProviderException | InvalidKeySpecException e) {
+			throw new MessageExternalizationException(Integrity.FAIL, e);
 		}
 		throw new InternalError();
 	}

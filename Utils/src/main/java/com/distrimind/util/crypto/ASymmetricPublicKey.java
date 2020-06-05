@@ -333,7 +333,7 @@ public class ASymmetricPublicKey extends AbstractKey implements IASymmetricPubli
 
 	@Override
 	public Object toGnuKey()
-			throws NoSuchAlgorithmException, InvalidKeySpecException {
+			throws NoSuchAlgorithmException, IOException {
 		if (gnuPublicKey == null)
 			gnuPublicKey = ASymmetricEncryptionType.decodeGnuPublicKey(publicKey, encryptionType==null?signatureType.getKeyGeneratorAlgorithmName():encryptionType.getAlgorithmName());
 

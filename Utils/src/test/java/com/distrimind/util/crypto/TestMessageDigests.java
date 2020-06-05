@@ -39,10 +39,10 @@ import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.SecureRandom;
-import java.security.spec.InvalidKeySpecException;
 
 /**
  * @author Jason Mahdjoub
@@ -71,7 +71,7 @@ public class TestMessageDigests {
 
 
 	@Test(dataProvider = "providePasswordHashTypes")
-	public void testPasswordHash(PasswordHashType type) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
+	public void testPasswordHash(PasswordHashType type) throws IOException {
 		SecureRandom random = new SecureRandom();
 		PasswordHash ph = new PasswordHash(type, random);
 		String password = "password";

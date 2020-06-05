@@ -34,11 +34,9 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
-import org.bouncycastle.bccrypto.CryptoException;
-
+import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
-import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
 
 /**
@@ -69,7 +67,7 @@ public class P2PJPakeAndLoginAgreement extends P2PLoginAgreement {
 	}
 
 	P2PJPakeAndLoginAgreement(AbstractSecureRandom random, byte[] participantID, char[] message, byte[] salt,
-			int offset_salt, int len_salt, SymmetricSecretKey secretKeyForSignature) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
+			int offset_salt, int len_salt, SymmetricSecretKey secretKeyForSignature) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
 		super(secretKeyForSignature==null?3:5, secretKeyForSignature==null?3:5);
 		jpake=new P2PJPAKESecretMessageExchanger(random, participantID, message.clone(), salt, offset_salt, len_salt);
 		if (secretKeyForSignature==null)
@@ -82,7 +80,7 @@ public class P2PJPakeAndLoginAgreement extends P2PLoginAgreement {
 		this(random, participantID, message, 0, message.length,null, 0, 0, messageIsKey, secretKeyForSignature);
 	}*/
 	P2PJPakeAndLoginAgreement(AbstractSecureRandom random, byte[] participantID, byte[] message, int offset, int len, byte[] salt,
-							  int offset_salt, int len_salt, boolean messageIsKey, SymmetricSecretKey secretKeyForSignature) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
+							  int offset_salt, int len_salt, boolean messageIsKey, SymmetricSecretKey secretKeyForSignature) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
 		super(secretKeyForSignature==null?3:5, secretKeyForSignature==null?3:5);
 		jpake=new P2PJPAKESecretMessageExchanger(random, participantID, Arrays.copyOfRange(message, offset, len+offset), 0, len, salt, offset_salt, len_salt, messageIsKey);
 		if (secretKeyForSignature==null)
@@ -96,14 +94,14 @@ public class P2PJPakeAndLoginAgreement extends P2PLoginAgreement {
 		return jpake.isAgreementProcessValidImpl() && (login==null || login.isAgreementProcessValidImpl());
 	}
 	@Override
-	protected byte[] getDataToSend(int stepNumber) throws Exception {
+	protected byte[] getDataToSend(int stepNumber) throws IOException {
 		if (login!=null && stepNumber<2)
 			return login.getDataToSend();
 		else
 			return jpake.getDataToSend();
 	}
 	@Override
-	protected void receiveData(int stepNumber, byte[] data) throws CryptoException {
+	protected void receiveData(int stepNumber, byte[] data) throws IOException {
 		if (login!=null && stepNumber<2)
 			login.receiveData(data);
 		else

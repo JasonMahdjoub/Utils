@@ -34,11 +34,9 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
-import javax.crypto.ShortBufferException;
+import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.security.spec.InvalidKeySpecException;
 
 
 /**
@@ -87,17 +85,17 @@ public final class GnuMac extends AbstractMac {
 	}
 
 	@Override
-	public final byte[] doFinal() throws IllegalStateException {
+	public final byte[] doFinal() throws IOException {
 		return GnuFunctions.macDoFinal(mac);
 	}
 
 	@Override
-	public final byte[] doFinal(byte[] _input) throws IllegalStateException {
+	public final byte[] doFinal(byte[] _input) throws IOException {
 		return GnuFunctions.macDoFinal(mac, _input);
 	}
 
 	@Override
-	public final void doFinal(byte[] _output, int _outOffset) throws IllegalStateException, ShortBufferException {
+	public final void doFinal(byte[] _output, int _outOffset) throws IOException {
 		GnuFunctions.macDoFinal(mac, _output, _outOffset);
 	}
 
@@ -117,8 +115,12 @@ public final class GnuMac extends AbstractMac {
 	}
 
 	@Override
-	public final void init(AbstractKey _key) throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException {
-		GnuFunctions.macInit(mac, _key);
+	public final void init(AbstractKey _key) throws IOException {
+		try {
+			GnuFunctions.macInit(mac, _key);
+		} catch (NoSuchAlgorithmException e) {
+			throw new IOException(e);
+		}
 	}
 
 	@Override
@@ -127,17 +129,17 @@ public final class GnuMac extends AbstractMac {
 	}
 
 	@Override
-	public final void update(byte _input) throws IllegalStateException {
+	public final void update(byte _input) throws IOException {
 		GnuFunctions.macUpdate(mac, _input);
 	}
 
 	@Override
-	public final void update(byte[] _input) throws IllegalStateException {
+	public final void update(byte[] _input) throws IOException {
 		GnuFunctions.macUpdate(mac, _input, 0, _input.length);
 	}
 
 	@Override
-	public final void update(byte[] _input, int _offset, int _length) throws IllegalStateException {
+	public final void update(byte[] _input, int _offset, int _length) throws IOException {
 		GnuFunctions.macUpdate(mac, _input, _offset, _length);
 	}
 

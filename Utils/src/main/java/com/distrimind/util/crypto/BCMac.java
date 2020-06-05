@@ -34,10 +34,13 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 
+import com.distrimind.util.io.Integrity;
+import com.distrimind.util.io.MessageExternalizationException;
 import org.bouncycastle.bccrypto.Digest;
 import org.bouncycastle.bccrypto.digests.Blake2bDigest;
 import org.bouncycastle.bccrypto.digests.SHA3Digest;
@@ -97,11 +100,19 @@ public final class BCMac extends AbstractMac {
 	}
 
 	@Override
-	public void init(AbstractKey _key) throws NoSuchAlgorithmException, InvalidKeySpecException {
-		init((org.bouncycastle.crypto.SymmetricSecretKey)_key.toBouncyCastleKey());
+	public void init(AbstractKey _key) throws IOException {
+		try {
+			init((org.bouncycastle.crypto.SymmetricSecretKey)_key.toBouncyCastleKey());
+		} catch (NoSuchAlgorithmException e) {
+			throw new IOException(e);
+		}
+		catch (InvalidKeySpecException e)
+		{
+			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, e);
+		}
 	}
 	
-	public void init(org.bouncycastle.crypto.SymmetricSecretKey _key) throws NoSuchAlgorithmException {
+	public void init(org.bouncycastle.crypto.SymmetricSecretKey _key) throws IOException {
 		Digest d;
 		if (type.getCodeProviderForSignature()==CodeProvider.BC)
 		{
@@ -121,11 +132,11 @@ public final class BCMac extends AbstractMac {
 					d=new Blake2bDigest(type.getMessageDigestType().getDigestLengthInBits());
 				break;
 				default:
-					throw new NoSuchAlgorithmException(type.toString());
+					throw new IOException(new NoSuchAlgorithmException(type.toString()));
 			}
 		}
 		else {
-			throw new NoSuchAlgorithmException(type.toString());
+			throw new IOException(new NoSuchAlgorithmException(type.toString()));
 		}
 		mac=new HMac(d);
 		mac.init(new KeyParameter((secretKey=_key).getKeyBytes()));
@@ -134,19 +145,19 @@ public final class BCMac extends AbstractMac {
 	}
 
 	@Override
-	public void update(byte _input) throws IllegalStateException {
+	public void update(byte _input)  {
 		mac.update(_input);
 
 	}
 
 	@Override
-	public void update(byte[] _input) throws IllegalStateException {
+	public void update(byte[] _input)  {
 		this.update(_input, 0, _input.length);
 
 	}
 
 	@Override
-	public void update(byte[] _input, int _offset, int _len) throws IllegalStateException {
+	public void update(byte[] _input, int _offset, int _len) {
 		mac.update(_input, _offset,_len);
 
 	}
@@ -157,21 +168,21 @@ public final class BCMac extends AbstractMac {
 	}
 
 	@Override
-	public byte[] doFinal() throws IllegalStateException {
+	public byte[] doFinal()  {
 		byte[] res=new byte[mac.getMacSize()];
 		doFinal(res, 0);
 		return res;
 	}
 
 	@Override
-	public void doFinal(byte[] _output, int _outOffset) throws IllegalStateException {
+	public void doFinal(byte[] _output, int _outOffset) {
 		mac.doFinal(_output, _outOffset);
 		reset();
 
 	}
 
 	@Override
-	public byte[] doFinal(byte[] _input) throws IllegalStateException {
+	public byte[] doFinal(byte[] _input) {
 		update(_input);
 		return doFinal();
 	}
@@ -187,7 +198,7 @@ public final class BCMac extends AbstractMac {
         BCMac res=new BCMac(type);
 		try {
 			res.init(secretKey);
-		} catch (NoSuchAlgorithmException e) {
+		} catch (IOException e) {
 			throw new CloneNotSupportedException(e.getMessage());
 		}
 		return res;

@@ -88,6 +88,9 @@ public class Utils {
 			d.addItem("Reimplement entirely AbstractEncryptionOutputAlgorithm, AbstractEncryptionIOAlgorithm and SymmetricEncryptionAlgorithm");
 			d.addItem("Implements EncryptionHashSignatureEncoder and EncryptionHashSignatureDecoder");
 			d.addItem("Add functionality to hash a stream partially thanks to a given map into order to be compared with distant data");
+			d.addItem("Reimplement exceptions scheme");
+			d.addItem("Add maximum sizes of signatures and public/private/secret keys");
+			d.addItem("Add EncryptionProfileProvider class which enables to permit keys choosing during decryption and signature checking");
 			VERSION.addDescription(d);
 
 			c = Calendar.getInstance();

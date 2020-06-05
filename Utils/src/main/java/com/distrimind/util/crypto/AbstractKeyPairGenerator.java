@@ -35,9 +35,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
 package com.distrimind.util.crypto;
 
 
-import java.security.InvalidAlgorithmParameterException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
+import java.io.IOException;
 
 /**
  * 
@@ -96,12 +94,10 @@ public abstract class AbstractKeyPairGenerator {
 	 *            the keysize. This is an algorithm-specific metric, such as modulus
 	 *            length, specified in number of bits.
 	 * @param expirationTime the key expiration tiume
-	 * @throws NoSuchProviderException if a problem occurs
-	 * @throws NoSuchAlgorithmException if a problem occurs
-	 * @throws InvalidAlgorithmParameterException if a problem occurs
+	 * @throws IOException if a problem occurs
 
 	 */
-	public abstract void initialize(int keysize, long expirationTime) throws NoSuchProviderException, NoSuchAlgorithmException, InvalidAlgorithmParameterException;
+	public abstract void initialize(int keysize, long expirationTime) throws IOException;
 
 	/**
 	 * Initializes the key pair generator for a certain keysize with the given
@@ -114,11 +110,11 @@ public abstract class AbstractKeyPairGenerator {
 	 * @param random
 	 *            the source of randomness.
 	 *
-	 * @throws InvalidAlgorithmParameterException if the algorithm parameters are invalid
+	 * @throws IOException if the algorithm parameters are invalid
 	 *                
 	 *
 	 * @since 1.2
 	 */
-	public abstract void initialize(int keysize, long expirationTime, AbstractSecureRandom random) throws InvalidAlgorithmParameterException;
+	public abstract void initialize(int keysize, long expirationTime, AbstractSecureRandom random) throws IOException;
 
 }

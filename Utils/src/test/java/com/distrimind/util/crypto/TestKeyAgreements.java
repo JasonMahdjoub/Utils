@@ -39,11 +39,9 @@ import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import javax.crypto.NoSuchPaddingException;
 import java.io.IOException;
-import java.security.*;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.InvalidParameterSpecException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -197,8 +195,7 @@ public class TestKeyAgreements {
 		testEncryptionAfterKeyExchange(random, type, keyClient);
 	}
 
-	private void testSignatureAfterKeyExchange(SymmetricSecretKey keySigner, SymmetricSecretKey keyChecker) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidKeyException, SignatureException, InvalidKeySpecException, IllegalStateException, InvalidAlgorithmParameterException, IOException, InvalidParameterSpecException
-	{
+	private void testSignatureAfterKeyExchange(SymmetricSecretKey keySigner, SymmetricSecretKey keyChecker) throws NoSuchAlgorithmException, NoSuchProviderException, IllegalStateException, IOException {
 		SymmetricAuthenticatedSignatureCheckerAlgorithm checker=new SymmetricAuthenticatedSignatureCheckerAlgorithm(keyChecker);
 		SymmetricAuthenticatedSignerAlgorithm signer=new SymmetricAuthenticatedSignerAlgorithm(keySigner);
 
@@ -384,7 +381,7 @@ public class TestKeyAgreements {
 
 	@Test(dataProvider = "provideDataForP2PJPAKEPasswordExchanger")
 	public void testP2PJPAKEPasswordExchanger(boolean expectedVerify, byte[] salt, boolean messageIsKey)
-			throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException{
+			throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
 		char[] password = "password".toCharArray();
 		char[] falsePassword = "falsePassword".toCharArray();
 		AbstractSecureRandom random=SecureRandomType.DEFAULT.getSingleton(null);
@@ -463,7 +460,7 @@ public class TestKeyAgreements {
 
 
 	@DataProvider(name = "provideDataForP2PLoginAgreement", parallel = true)
-	public Object[][] provideDataForP2PLoginAgreement() throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException {
+	public Object[][] provideDataForP2PLoginAgreement() throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
 		byte[] salt = new byte[] { (byte) 21, (byte) 5645, (byte) 512, (byte) 42310, (byte) 24, (byte) 0, (byte) 1,
 				(byte) 1231, (byte) 34 };
 
@@ -497,7 +494,7 @@ public class TestKeyAgreements {
 
 	@Test(dataProvider = "provideDataForP2PLoginAgreement")
 	public void testP2PLoginAgreement(P2PLoginAgreementType type, ASymmetricLoginAgreementType asType, boolean expectedVerify, boolean messageIsKey, byte[] salt, byte[] m, SymmetricSecretKey secretKey, ASymmetricKeyPair keyPair)
-			throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, InvalidAlgorithmParameterException, NoSuchPaddingException, InvalidKeyException {
+			throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
 		AbstractSecureRandom r = SecureRandomType.DEFAULT.getSingleton(null);
 		byte[] falseMessage = new byte[10];
 		r.nextBytes(falseMessage);

@@ -405,8 +405,7 @@ public class ASymmetricKeyPair extends AbstractKeyPair<ASymmetricPrivateKey, ASy
 	}
 
 	@Override
-	public Object toGnuKeyPair()throws NoSuchAlgorithmException, InvalidKeySpecException
-	{
+	public Object toGnuKeyPair() throws NoSuchAlgorithmException, IOException {
 		if (gnuKeyPair == null)
 			gnuKeyPair = GnuFunctions.getKeyPairInstance(publicKey.toGnuKey(), privateKey.toGnuKey());
 

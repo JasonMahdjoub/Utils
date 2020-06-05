@@ -39,6 +39,7 @@ import org.bouncycastle.crypto.fips.FipsEC;
 import org.bouncycastle.crypto.fips.FipsRSA;
 import org.bouncycastle.pqc.jcajce.provider.sphincs.Sphincs256KeyPairGeneratorSpi;
 
+import java.io.IOException;
 import java.security.*;
 
 /**
@@ -93,7 +94,7 @@ public enum ASymmetricAuthenticatedSignatureType {
 	public static final int MAX_RSA_PUBLIC_KEY_SIZE_IN_BYTES=1024;
 	public static final int MAX_RSA_PRIVATE_KEY_SIZE_IN_BYTES =MAX_RSA_PUBLIC_KEY_SIZE_IN_BYTES/3*2;
 	public static final int MAX_NON_PQC_SIGNATURE_PUBLIC_KEY_SIZE_IN_BYTES =Math.max(MAX_NON_PQC_NON_RSA_SIGNATURE_PUBLIC_KEY_SIZE_IN_BYTES, MAX_RSA_PUBLIC_KEY_SIZE_IN_BYTES);
-	public static final int MAX_NON_PQC_SIGNATURE_PRIVATE_KEY_SIZE_IN_BYTES = Math.max(MAX_NON_PQC_NON_RSA_SIGNATURE_PRIVATE_KEY_SIZE_IN_BYTES, MAX_RSA_PRIVATE_KEY_SIZE_IN_BYTES);;
+	public static final int MAX_NON_PQC_SIGNATURE_PRIVATE_KEY_SIZE_IN_BYTES = Math.max(MAX_NON_PQC_NON_RSA_SIGNATURE_PRIVATE_KEY_SIZE_IN_BYTES, MAX_RSA_PRIVATE_KEY_SIZE_IN_BYTES);
 	public static final int MAX_PQC_SIGNATURE_PUBLIC_KEY_SIZE_IN_BYTES=140;
 	public static final int MAX_PQC_SIGNATURE_PRIVATE_KEY_SIZE_IN_BYTES = MAX_PQC_SIGNATURE_PUBLIC_KEY_SIZE_IN_BYTES;
 
@@ -258,17 +259,17 @@ public enum ASymmetricAuthenticatedSignatureType {
 		return keySizeBits / 8 - blockSizeDecrement;
 	}*/
 	public AbstractKeyPairGenerator getKeyPairGenerator(AbstractSecureRandom random)
-			throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException {
+			throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
 		return getKeyPairGenerator(random, keySizeBits, System.currentTimeMillis() + expirationTimeMilis);
 	}
 
 	public AbstractKeyPairGenerator getKeyPairGenerator(AbstractSecureRandom random, int keySize)
-			throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException {
+			throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
 		return getKeyPairGenerator(random, keySize, System.currentTimeMillis() + expirationTimeMilis);
 	}
 
 	public AbstractKeyPairGenerator getKeyPairGenerator(AbstractSecureRandom random, int keySizeBits,
-			long expirationTimeUTC) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException {
+			long expirationTimeUTC) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
 		if (keySizeBits<0)
 			keySizeBits= this.keySizeBits;
 		if (expirationTimeUTC==Long.MIN_VALUE)

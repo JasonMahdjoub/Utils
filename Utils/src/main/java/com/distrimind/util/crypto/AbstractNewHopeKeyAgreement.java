@@ -52,8 +52,8 @@ import org.bouncycastle.pqc.crypto.newhope.NHPrivateKeyParameters;
  * @since Utils 3.10.0
  */
 public abstract class AbstractNewHopeKeyAgreement extends KeyAgreement{
-	private SymmetricEncryptionType encryptionType;
-	private SymmetricAuthentifiedSignatureType signatureType;
+	private final SymmetricEncryptionType encryptionType;
+	private final SymmetricAuthentifiedSignatureType signatureType;
 	protected short agreementSize;
 	protected byte[] shared;
 	private SymmetricSecretKey secretKey=null;

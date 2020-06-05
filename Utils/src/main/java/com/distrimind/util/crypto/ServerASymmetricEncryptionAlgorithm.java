@@ -37,12 +37,9 @@ package com.distrimind.util.crypto;
 import com.distrimind.util.io.*;
 
 import javax.crypto.Cipher;
-import javax.crypto.NoSuchPaddingException;
 import java.io.IOException;
-import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
-import java.security.spec.InvalidKeySpecException;
 
 
 /**
@@ -255,7 +252,7 @@ public class ServerASymmetricEncryptionAlgorithm implements IEncryptionInputAlgo
 				maxPlainTextSizeForEncoding = myPrivateKey.getMaxBlockSize();
 				maxEncryptedPartLength = cipher.getOutputSize(maxPlainTextSizeForEncoding);
 				initCipherForDecryption(cipher, null, null);
-			} catch (NoSuchAlgorithmException | InvalidKeyException | InvalidKeySpecException | NoSuchPaddingException | NoSuchProviderException e) {
+			} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
 				throw new IOException();
 			}
 
@@ -266,7 +263,7 @@ public class ServerASymmetricEncryptionAlgorithm implements IEncryptionInputAlgo
 		public AbstractCipher getCipherInstance() throws IOException {
 			try {
 				return type.getCipherInstance();
-			} catch (NoSuchAlgorithmException | NoSuchPaddingException | NoSuchProviderException e) {
+			} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
 				throw new IOException(e);
 			}
 		}
@@ -289,11 +286,7 @@ public class ServerASymmetricEncryptionAlgorithm implements IEncryptionInputAlgo
 		@Override
 		public void initCipherForDecryption(AbstractCipher _cipher, byte[] iv, byte[] externalCounter)
 				throws IOException {
-			try {
-				_cipher.init(Cipher.DECRYPT_MODE, myPrivateKey);
-			} catch (InvalidKeyException | NoSuchAlgorithmException | InvalidKeySpecException | NoSuchProviderException e) {
-				throw new IOException();
-			}
+			_cipher.init(Cipher.DECRYPT_MODE, myPrivateKey);
 		}
 
 

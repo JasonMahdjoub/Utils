@@ -1,13 +1,12 @@
 package com.distrimind.util.crypto;
 
+import com.distrimind.util.io.Integrity;
+import com.distrimind.util.io.MessageExternalizationException;
 import org.bouncycastle.bccrypto.CryptoException;
 
-import javax.crypto.NoSuchPaddingException;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
+import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
-import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
 
 /**
@@ -17,7 +16,7 @@ import java.util.Arrays;
  */
 public class P2PASymmetricSecretMessageExchangerAgreement extends P2PLoginAgreement {
 
-    private P2PASymmetricSecretMessageExchanger p2PASymmetricSecretMessageExchanger;
+    private final P2PASymmetricSecretMessageExchanger p2PASymmetricSecretMessageExchanger;
 
 
 
@@ -48,7 +47,7 @@ public class P2PASymmetricSecretMessageExchangerAgreement extends P2PLoginAgreem
 
     P2PASymmetricSecretMessageExchangerAgreement(AbstractSecureRandom secureRandom, MessageDigestType messageDigestType, PasswordHashType passwordHashType,
                                                         ASymmetricPublicKey myPublicKey, byte[] salt, int offset_salt, int len_salt, byte[] bytesPassword, int offset_password, int length_password,
-                                                        boolean passwordIsKey) throws NoSuchPaddingException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException, InvalidKeyException, InvalidKeySpecException {
+                                                        boolean passwordIsKey) throws NoSuchAlgorithmException, NoSuchProviderException, MessageExternalizationException {
         this(secureRandom, messageDigestType, passwordHashType, myPublicKey, salt, offset_salt, len_salt);
         if (bytesPassword==null)
             throw new NullPointerException();
@@ -60,7 +59,7 @@ public class P2PASymmetricSecretMessageExchangerAgreement extends P2PLoginAgreem
         this.charPassword=null;
     }
     P2PASymmetricSecretMessageExchangerAgreement(AbstractSecureRandom secureRandom, MessageDigestType messageDigestType, PasswordHashType passwordHashType,
-                                                        ASymmetricPublicKey myPublicKey, byte[] salt, int offset_salt, int len_salt, char[] charPassword) throws NoSuchPaddingException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException, InvalidKeyException, InvalidKeySpecException {
+                                                        ASymmetricPublicKey myPublicKey, byte[] salt, int offset_salt, int len_salt, char[] charPassword) throws NoSuchAlgorithmException, NoSuchProviderException, MessageExternalizationException {
         this(secureRandom, messageDigestType, passwordHashType, myPublicKey, salt, offset_salt, len_salt);
         if (charPassword==null)
             throw new NullPointerException();
@@ -75,7 +74,7 @@ public class P2PASymmetricSecretMessageExchangerAgreement extends P2PLoginAgreem
         this(secureRandom, messageDigestType, passwordHashType, myPublicKey, salt, offset_salt, len_salt, password.toCharArray());
     }*/
     private P2PASymmetricSecretMessageExchangerAgreement(AbstractSecureRandom secureRandom, MessageDigestType messageDigestType, PasswordHashType passwordHashType,
-                                                        ASymmetricPublicKey myPublicKey, byte[] salt, int offset_salt, int len_salt) throws NoSuchPaddingException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException, InvalidKeyException, InvalidKeySpecException {
+                                                        ASymmetricPublicKey myPublicKey, byte[] salt, int offset_salt, int len_salt) throws NoSuchAlgorithmException, NoSuchProviderException, MessageExternalizationException {
         super(2, 2);
         this.p2PASymmetricSecretMessageExchanger = new P2PASymmetricSecretMessageExchanger(secureRandom, messageDigestType, passwordHashType, myPublicKey);
         this.salt=salt;
@@ -89,9 +88,9 @@ public class P2PASymmetricSecretMessageExchangerAgreement extends P2PLoginAgreem
     }
 
     @Override
-    protected byte[] getDataToSend(int stepNumber) throws Exception{
+    protected byte[] getDataToSend(int stepNumber) throws IOException {
         if (!valid)
-            throw new CryptoException();
+            throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException());
 
         try {
             switch (stepNumber) {
@@ -110,20 +109,20 @@ public class P2PASymmetricSecretMessageExchangerAgreement extends P2PLoginAgreem
         catch(Exception e)
         {
             valid=false;
-            throw e;
+            throw new MessageExternalizationException(Integrity.FAIL, e);
         }
     }
 
     @Override
-    protected void receiveData(int stepNumber, byte[] data) throws CryptoException {
+    protected void receiveData(int stepNumber, byte[] data) throws IOException {
         if (!valid)
-            throw new CryptoException();
+            throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException());
 
 
         if (data==null || data.length==0)
         {
             valid=false;
-            throw new CryptoException();
+            throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException());
         }
         try {
             switch (stepNumber) {
@@ -144,7 +143,7 @@ public class P2PASymmetricSecretMessageExchangerAgreement extends P2PLoginAgreem
         catch(Exception e)
         {
             valid=false;
-            throw new CryptoException("",e);
+            throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException("",e));
         }
     }
 

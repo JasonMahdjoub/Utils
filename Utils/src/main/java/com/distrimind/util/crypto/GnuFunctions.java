@@ -36,15 +36,18 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.ShortBufferException;
+import com.distrimind.util.io.Integrity;
+import com.distrimind.util.io.MessageExternalizationException;
+
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.*;
 import java.nio.ByteBuffer;
-import java.security.*;
+import java.security.AccessController;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivilegedAction;
 import java.security.spec.InvalidKeySpecException;
 
 /**
@@ -52,6 +55,7 @@ import java.security.spec.InvalidKeySpecException;
  * @version 1.0
  * @since Utils 4.0.0
  */
+@SuppressWarnings("RedundantCast")
 class GnuFunctions {
 	private static volatile boolean gnuLoaded=false;
 	private static Method getSignatureAlgo=null;
@@ -248,7 +252,7 @@ class GnuFunctions {
 	}
 
 
-	static Object decodeGnuPrivateKey(byte[] encodedKey, String algorithm) throws NoSuchAlgorithmException, InvalidKeySpecException {
+	static Object decodeGnuPrivateKey(byte[] encodedKey, String algorithm) throws NoSuchAlgorithmException, MessageExternalizationException {
 		checkGnuLoaded();
 		try {
 			return keyFactGeneratePrivate.invoke(keyFactGetInstance.invoke(null, algorithm),constPKCS8EncodedKeySpec.newInstance((Object)encodedKey));
@@ -258,7 +262,7 @@ class GnuFunctions {
 			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.NoSuchAlgorithmException"))
 				throw new NoSuchAlgorithmException(e.getTargetException());
 			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.spec.InvalidKeySpecException"))
-				throw new InvalidKeySpecException(e.getTargetException());
+				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, (Exception)e.getTargetException());
 			throw new IllegalStateException(e);
 		}
 	}
@@ -369,7 +373,7 @@ class GnuFunctions {
 		}
 	}
 
-	static Object decodeGnuPublicKey(byte[] encodedKey, String algorithm) throws NoSuchAlgorithmException, InvalidKeySpecException {
+	static Object decodeGnuPublicKey(byte[] encodedKey, String algorithm) throws NoSuchAlgorithmException, IOException {
 		checkGnuLoaded();
 		try {
 			return keyFactGeneratePublic.invoke(keyFactGetInstance.invoke(null, algorithm),constX509EncodedKeySpec.newInstance((Object)encodedKey));
@@ -379,7 +383,7 @@ class GnuFunctions {
 			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.NoSuchAlgorithmException"))
 				throw new NoSuchAlgorithmException(e.getTargetException());
 			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.spec.InvalidKeySpecException"))
-				throw new InvalidKeySpecException(e.getTargetException());
+				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, (Exception)e.getTargetException());
 			throw new IllegalStateException(e);
 		}
 	}
@@ -407,21 +411,21 @@ class GnuFunctions {
 		}
 	}
 
-	static void cipherInitWrapMode(Object cipher, Object publicKey, Object random) throws InvalidKeyException {
+	static void cipherInitWrapMode(Object cipher, Object publicKey, Object random) throws IOException {
 
 		try {
 			cipherInitIntKeyRandom.invoke(cipher, WRAP_MODE, publicKey, random);
 		} catch (IllegalAccessException e) {
 			throw new IllegalStateException(e);
 		} catch (InvocationTargetException e) {
-			throw new InvalidKeyException(e.getTargetException());
+			throw new MessageExternalizationException(Integrity.FAIL, (Exception)e.getTargetException());
 		}
 	}
 
 
 
 	@SuppressWarnings("SameParameterValue")
-	static void cipherInit(Object cipher, int mode, SymmetricSecretKey secretKey) throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException {
+	static void cipherInit(Object cipher, int mode, SymmetricSecretKey secretKey) throws IOException, NoSuchAlgorithmException {
 
 		try {
 			cipherInitIntSymKey.invoke(cipher, mode, secretKey.toGnuKey());
@@ -431,17 +435,17 @@ class GnuFunctions {
 			if (e.getTargetException() instanceof IllegalStateException)
 				throw (IllegalStateException)e.getTargetException();
 			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.InvalidKeyException") )
-				throw new InvalidKeyException(e.getTargetException());
+				throw new MessageExternalizationException(Integrity.FAIL, (Exception)e.getTargetException());
 			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.NoSuchAlgorithmException") )
 				throw new NoSuchAlgorithmException(e.getTargetException());
 			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.spec.InvalidKeySpecException") )
-				throw new InvalidKeySpecException(e.getTargetException());
+				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, (Exception)e.getTargetException());
 			throw new IllegalStateException(e.getTargetException());
 		}
 	}
 
 	@SuppressWarnings("SameParameterValue")
-	static void cipherInit(Object cipher, int mode, Object publicKey) throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException {
+	static void cipherInit(Object cipher, int mode, Object publicKey) throws NoSuchAlgorithmException, IOException {
 
 		try {
 			cipherInitIntKey.invoke(cipher, mode, publicKey);
@@ -451,15 +455,15 @@ class GnuFunctions {
 			if (e.getTargetException() instanceof IllegalStateException)
 				throw (IllegalStateException)e.getTargetException();
 			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.InvalidKeyException") )
-				throw new InvalidKeyException(e.getTargetException());
+				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, (Exception)e.getTargetException());
 			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.NoSuchAlgorithmException") )
 				throw new NoSuchAlgorithmException(e.getTargetException());
 			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.spec.InvalidKeySpecException") )
-				throw new InvalidKeySpecException(e.getTargetException());
+				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, (Exception)e.getTargetException());
 			throw new IllegalStateException(e.getTargetException());
 		}
 	}
-	static void cipherInit(Object cipher, int mode, Object publicKey, Object random) throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException {
+	static void cipherInit(Object cipher, int mode, Object publicKey, Object random) throws NoSuchAlgorithmException, IOException {
 
 		try {
 			cipherInitIntKeyRandom.invoke(cipher, mode, publicKey, random);
@@ -469,15 +473,15 @@ class GnuFunctions {
 			if (e.getTargetException() instanceof IllegalStateException)
 				throw (IllegalStateException)e.getTargetException();
 			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.InvalidKeyException") )
-				throw new InvalidKeyException(e.getTargetException());
+				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, (Exception)e.getTargetException());
 			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.NoSuchAlgorithmException") )
 				throw new NoSuchAlgorithmException(e.getTargetException());
 			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.spec.InvalidKeySpecException") )
-				throw new InvalidKeySpecException(e.getTargetException());
+				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, (Exception)e.getTargetException());
 			throw new IllegalStateException(e.getTargetException());
 		}
 	}
-	static Object cipherGetInstance(String name) throws NoSuchAlgorithmException, NoSuchPaddingException {
+	static Object cipherGetInstance(String name) throws NoSuchAlgorithmException, MessageExternalizationException {
 		checkGnuLoaded();
 		try {
 			return cipherGetInstance.invoke(null, name);
@@ -489,11 +493,11 @@ class GnuFunctions {
 			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.NoSuchAlgorithmException") )
 				throw new NoSuchAlgorithmException(e.getTargetException());
 			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnux.crypto.NoSuchPaddingException") )
-				throw new NoSuchPaddingException(e.getTargetException().getMessage());
+				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, (Exception)e.getTargetException());
 			throw new IllegalStateException(e.getTargetException());
 		}
 	}
-	static void cipherInit(Object cipher, int mode, Object publicKey, byte[] _iv) throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidAlgorithmParameterException {
+	static void cipherInit(Object cipher, int mode, Object publicKey, byte[] _iv) throws NoSuchAlgorithmException, MessageExternalizationException {
 
 		try {
 			cipherInitIntKeyParamSpec.invoke(cipher, mode, publicKey, IVparamSpec.newInstance((Object)_iv));
@@ -503,66 +507,66 @@ class GnuFunctions {
 			if (e.getTargetException() instanceof IllegalStateException)
 				throw (IllegalStateException)e.getTargetException();
 			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.InvalidKeyException") )
-				throw new InvalidKeyException(e.getTargetException());
+				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, (Exception)e.getTargetException());
 			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.NoSuchAlgorithmException") )
 				throw new NoSuchAlgorithmException(e.getTargetException());
 			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.spec.InvalidKeySpecException") )
-				throw new InvalidKeySpecException(e.getTargetException());
+				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, (Exception)e.getTargetException());
 			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.InvalidAlgorithmParameterException") )
-				throw new InvalidAlgorithmParameterException(e.getTargetException());
+				throw new MessageExternalizationException(Integrity.FAIL, (Exception)e.getTargetException());
 			throw new IllegalStateException(e.getTargetException());
 
 		}
 	}
-	static byte[] cipherDoFinal(Object cipher) throws IllegalStateException, IllegalBlockSizeException, BadPaddingException {
+	static byte[] cipherDoFinal(Object cipher) throws IOException {
 		try {
 			return (byte[])cipherDoFinal.invoke(cipher);
 		} catch (IllegalAccessException e) {
 			throw new IllegalStateException(e);
 		} catch (InvocationTargetException e) {
 			if (e.getTargetException() instanceof IllegalStateException)
-				throw (IllegalStateException)e.getTargetException();
+				throw new MessageExternalizationException(Integrity.FAIL, (Exception)e.getTargetException());
 			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnux.crypto.IllegalBlockSizeException") )
-				throw new IllegalBlockSizeException(e.getTargetException().getMessage());
+				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, (Exception)e.getTargetException());
 			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnux.crypto.BadPaddingException") )
-				throw new BadPaddingException(e.getTargetException().getMessage());
+				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, (Exception)e.getTargetException());
 			throw new IllegalStateException(e.getTargetException());
 		}
 	}
-	static int cipherDoFinal(Object cipher, byte[] _output, int _outputOffset) throws IllegalStateException, IllegalBlockSizeException, BadPaddingException, ShortBufferException {
+	static int cipherDoFinal(Object cipher, byte[] _output, int _outputOffset) throws IOException{
 		try {
 			return (int)cipherDoFinalBytesInt.invoke(cipher, _output, _outputOffset);
 		} catch (IllegalAccessException e) {
 			throw new IllegalStateException(e);
 		} catch (InvocationTargetException e) {
 			if (e.getTargetException() instanceof IllegalStateException)
-				throw (IllegalStateException)e.getTargetException();
+				throw new MessageExternalizationException(Integrity.FAIL, (Exception)e.getTargetException());
 			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnux.crypto.ShortBufferException") )
-				throw new ShortBufferException(e.getTargetException().getMessage());
+				throw new MessageExternalizationException(Integrity.FAIL, (Exception)e.getTargetException());
 			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnux.crypto.IllegalBlockSizeException") )
-				throw new IllegalBlockSizeException(e.getTargetException().getMessage());
+				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, (Exception)e.getTargetException());
 			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnux.crypto.BadPaddingException") )
-				throw new BadPaddingException(e.getTargetException().getMessage());
+				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, (Exception)e.getTargetException());
 			throw new IllegalStateException(e.getTargetException());
 		}
 	}
-	static byte[] cipherDoFinal(Object cipher, byte[] _input, int _inputOffset, int _inputLength) throws IllegalStateException, IllegalBlockSizeException, BadPaddingException {
+	static byte[] cipherDoFinal(Object cipher, byte[] _input, int _inputOffset, int _inputLength) throws IOException {
 		try {
 			return (byte[])cipherDoFinalBytesIntInt.invoke(cipher, _input, _inputOffset, _inputLength);
 		} catch (IllegalAccessException e) {
 			throw new IllegalStateException(e);
 		} catch (InvocationTargetException e) {
 			if (e.getTargetException() instanceof IllegalStateException)
-				throw (IllegalStateException)e.getTargetException();
+				throw new MessageExternalizationException(Integrity.FAIL, (Exception)e.getTargetException());
 			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnux.crypto.IllegalBlockSizeException") )
-				throw new IllegalBlockSizeException(e.getTargetException().getMessage());
+				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, (Exception)e.getTargetException());
 			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnux.crypto.BadPaddingException") )
-				throw new BadPaddingException(e.getTargetException().getMessage());
-			throw new IllegalStateException(e.getTargetException());
+				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, (Exception)e.getTargetException());
+			throw new MessageExternalizationException(Integrity.FAIL, (Exception)e.getTargetException());
 		}
 	}
 
-	static int cipherDoFinal(Object cipher, byte[] _input, int _inputOffset, int _inputLength, byte[] _output, int _outputOffset) throws IllegalStateException, IllegalBlockSizeException, BadPaddingException, ShortBufferException {
+	static int cipherDoFinal(Object cipher, byte[] _input, int _inputOffset, int _inputLength, byte[] _output, int _outputOffset) throws IOException {
 		try {
 			return (int)cipherDoFinalBytesIntIntBytesInt.invoke(cipher, _input, _inputOffset, _inputLength, _output, _outputOffset);
 		} catch (IllegalAccessException e) {
@@ -571,17 +575,18 @@ class GnuFunctions {
 			if (e.getTargetException() instanceof IllegalStateException)
 				throw (IllegalStateException)e.getTargetException();
 			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnux.crypto.ShortBufferException") )
-				throw new ShortBufferException(e.getTargetException().getMessage());
+				throw new MessageExternalizationException(Integrity.FAIL, (Exception)e.getTargetException());
 			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnux.crypto.IllegalBlockSizeException") )
-				throw new IllegalBlockSizeException(e.getTargetException().getMessage());
+				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, (Exception)e.getTargetException());
 			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnux.crypto.BadPaddingException") )
-				throw new BadPaddingException(e.getTargetException().getMessage());
-			throw new IllegalStateException(e.getTargetException());
+				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, (Exception)e.getTargetException());
+			throw new MessageExternalizationException(Integrity.FAIL, (Exception)(e.getTargetException()));
 		}
 	}
 
 	static void secureRandomSetSeed(Object secureRandom, byte[] seed)  {
 		try {
+			//noinspection RedundantCast
 			secureRandomSetSeed.invoke(secureRandom, (Object)seed);
 		} catch (IllegalAccessException e) {
 			throw new IllegalStateException(e);
@@ -592,6 +597,7 @@ class GnuFunctions {
 
 	static void secureRandomNextBytes(Object secureRandom, byte[] bytes)  {
 		try {
+			//noinspection RedundantCast
 			secureRandomNextBytes.invoke(secureRandom, (Object)bytes);
 		} catch (IllegalAccessException e) {
 			throw new IllegalStateException(e);
@@ -634,134 +640,135 @@ class GnuFunctions {
 
 
 
-	static boolean signatureVerify(Object signature,byte[] _signature, int _offset, int _length) throws SignatureException {
+	static boolean signatureVerify(Object signature,byte[] _signature, int _offset, int _length) throws IOException {
 		try {
 			return (boolean)signatureVerifyBytesIntInt.invoke(signature,_signature, _offset, _length);
 		} catch (IllegalAccessException e) {
 			throw new IllegalStateException(e);
 		} catch (InvocationTargetException e) {
 			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.SignatureException"))
-				throw new SignatureException(e.getTargetException());
-			throw new IllegalStateException(e.getTargetException());
+				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, (Exception)e.getTargetException());
+			throw new MessageExternalizationException(Integrity.FAIL, (Exception)(e.getTargetException()));
 		}
 	}
 
-	static boolean signatureVerify(Object signature,byte[] _signature) throws SignatureException {
+	static boolean signatureVerify(Object signature,byte[] _signature) throws IOException {
 		try {
+			//noinspection RedundantCast
 			return (boolean)signatureVerifyBytes.invoke(signature,(Object)_signature);
 		} catch (IllegalAccessException e) {
 			throw new IllegalStateException(e);
 		} catch (InvocationTargetException e) {
 			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.SignatureException"))
-				throw new SignatureException(e.getTargetException());
-			throw new IllegalStateException(e.getTargetException());
+				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, (Exception)e.getTargetException());
+			throw new MessageExternalizationException(Integrity.FAIL, (Exception)e.getTargetException());
 		}
 	}
 
-	static void signatureUpdate(Object signature,ByteBuffer _input) throws SignatureException {
+	static void signatureUpdate(Object signature,ByteBuffer _input) throws IOException {
 		try {
 			signatureUpdateByteBuffer.invoke(signature,_input);
 		} catch (IllegalAccessException e) {
 			throw new IllegalStateException(e);
 		} catch (InvocationTargetException e) {
 			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.SignatureException"))
-				throw new SignatureException(e.getTargetException());
-			throw new IllegalStateException(e.getTargetException());
+				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, (Exception)e.getTargetException());
+			throw new MessageExternalizationException(Integrity.FAIL, (Exception)e.getTargetException());
 		}
 	}
 
-	static void signatureUpdate(Object signature, byte[] _data, int _off, int _len) throws SignatureException {
+	static void signatureUpdate(Object signature, byte[] _data, int _off, int _len) throws IOException {
 		try {
 			signatureUpdateBytesIntInt.invoke(signature,_data, _off, _len);
 		} catch (IllegalAccessException e) {
 			throw new IllegalStateException(e);
 		} catch (InvocationTargetException e) {
 			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.SignatureException"))
-				throw new SignatureException(e.getTargetException());
-			throw new IllegalStateException(e.getTargetException());
+				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, (Exception)(e.getTargetException()));
+			throw new MessageExternalizationException(Integrity.FAIL, (Exception)e.getTargetException());
 		}
 	}
 
-	static void signatureUpdate(Object signature, byte[] _b) throws SignatureException {
+	static void signatureUpdate(Object signature, byte[] _b) throws IOException {
 		try {
 			signatureUpdateBytes.invoke(signature, (Object)_b);
 		} catch (IllegalAccessException e) {
 			throw new IllegalStateException(e);
 		} catch (InvocationTargetException e) {
 			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.SignatureException"))
-				throw new SignatureException(e.getTargetException());
-			throw new IllegalStateException(e.getTargetException());
+				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, (Exception)e.getTargetException());
+			throw new MessageExternalizationException(Integrity.FAIL, (Exception)e.getTargetException());
 		}
 	}
 
-	static void signatureUpdate(Object signature, byte _b) throws SignatureException {
+	static void signatureUpdate(Object signature, byte _b) throws IOException {
 		try {
 			signatureUpdateByte.invoke(signature, _b);
 		} catch (IllegalAccessException e) {
 			throw new IllegalStateException(e);
 		} catch (InvocationTargetException e) {
 			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.SignatureException"))
-				throw new SignatureException(e.getTargetException());
-			throw new IllegalStateException(e.getTargetException());
+				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, (Exception)e.getTargetException());
+			throw new MessageExternalizationException(Integrity.FAIL, (Exception)e.getTargetException());
 		}
 	}
 
-	static int signatureSign(Object signature, byte[] _outbuf, int _offset, int _len) throws SignatureException {
+	static int signatureSign(Object signature, byte[] _outbuf, int _offset, int _len) throws IOException {
 		try {
 			return (int)signatureSignBytesIntInt.invoke(signature, _outbuf, _offset, _len);
 		} catch (IllegalAccessException e) {
 			throw new IllegalStateException(e);
 		} catch (InvocationTargetException e) {
 			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.SignatureException"))
-				throw new SignatureException(e.getTargetException());
-			throw new IllegalStateException(e.getTargetException());
+				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, (Exception)e.getTargetException());
+			throw new MessageExternalizationException(Integrity.FAIL, (Exception)e.getTargetException());
 		}
 	}
 
-	static byte[] signatureSign(Object signature) throws SignatureException {
+	static byte[] signatureSign(Object signature) throws IOException {
 		try {
 			return (byte[])signatureSign.invoke(signature);
 		} catch (IllegalAccessException e) {
 			throw new IllegalStateException(e);
 		} catch (InvocationTargetException e) {
 			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.SignatureException"))
-				throw new SignatureException(e.getTargetException());
-			throw new IllegalStateException(e.getTargetException());
+				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, (Exception)e.getTargetException());
+			throw new MessageExternalizationException(Integrity.FAIL, (Exception)e.getTargetException());
 		}
 	}
 
-	static void signatureInitVerify(Object signature, ASymmetricPublicKey _publicKey) throws InvalidKeySpecException, NoSuchAlgorithmException, InvalidKeyException {
+	static void signatureInitVerify(Object signature, ASymmetricPublicKey _publicKey) throws NoSuchAlgorithmException, IOException {
 		try {
 			signatureInitVerifPub.invoke(signature, _publicKey.toGnuKey());
-		} catch (IllegalAccessException e) {
-			throw new IllegalStateException(e);
+		} catch (IllegalAccessException  e) {
+			throw new MessageExternalizationException(Integrity.FAIL, e);
 		} catch (InvocationTargetException e) {
 			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.InvalidKeyException"))
-				throw new InvalidKeyException(e.getTargetException());
-			throw new IllegalStateException(e.getTargetException());
+				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, (Exception)e.getTargetException());
+			throw new MessageExternalizationException(Integrity.FAIL, (Exception)e.getTargetException());
 		}
 	}
 
-	static void signatureInitSign(Object signature, ASymmetricPrivateKey _privateKey, AbstractSecureRandom _random) throws InvalidKeySpecException, NoSuchAlgorithmException, InvalidKeyException {
+	static void signatureInitSign(Object signature, ASymmetricPrivateKey _privateKey, AbstractSecureRandom _random) throws NoSuchAlgorithmException, MessageExternalizationException {
 		try {
 			signatureInitSignPrivRand.invoke(signature, _privateKey.toGnuKey(), _random.getGnuSecureRandom());
-		} catch (IllegalAccessException e) {
-			throw new IllegalStateException(e);
+		} catch (IllegalAccessException  e) {
+			throw new MessageExternalizationException(Integrity.FAIL, e);
 		} catch (InvocationTargetException e) {
 			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.InvalidKeyException"))
-				throw new InvalidKeyException(e.getTargetException());
-			throw new IllegalStateException(e.getTargetException());
+				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, (Exception)e.getTargetException());
+			throw new MessageExternalizationException(Integrity.FAIL, (Exception)e.getTargetException());
 		}
 	}
-	static void signatureInitSign(Object signature, ASymmetricPrivateKey _privateKey) throws InvalidKeySpecException, NoSuchAlgorithmException, InvalidKeyException {
+	static void signatureInitSign(Object signature, ASymmetricPrivateKey _privateKey) throws NoSuchAlgorithmException, MessageExternalizationException {
 		try {
 			signatureInitSignPriv.invoke(signature, _privateKey.toGnuKey());
-		} catch (IllegalAccessException e) {
-			throw new IllegalStateException(e);
+		} catch (IllegalAccessException  e) {
+			throw new MessageExternalizationException(Integrity.FAIL, e);
 		} catch (InvocationTargetException e) {
 			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.InvalidKeyException"))
-				throw new InvalidKeyException(e.getTargetException());
-			throw new IllegalStateException(e.getTargetException());
+				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, (Exception)e.getTargetException());
+			throw new MessageExternalizationException(Integrity.FAIL, (Exception)e.getTargetException());
 		}
 	}
 
@@ -826,6 +833,7 @@ class GnuFunctions {
 
 	static void digestUpdate(Object digest, byte[] _input) {
 		try {
+			//noinspection RedundantCast
 			digestUpdateBytes.invoke(digest, (Object) _input);
 		} catch (IllegalAccessException e) {
 			throw new IllegalStateException(e);
@@ -873,20 +881,21 @@ class GnuFunctions {
 		}
 	}
 
-	static int digestDigest(Object digest,byte[] _buf, int _offset, int _len) throws DigestException {
+	static int digestDigest(Object digest,byte[] _buf, int _offset, int _len) throws IOException {
 		try {
 			return (int)digestDigestBytesIntInt.invoke(digest, _buf, _offset, _len);
 		} catch (IllegalAccessException e) {
 			throw new IllegalStateException(e);
 		} catch (InvocationTargetException e) {
 			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.DigestException"))
-				throw new DigestException(e);
+				throw new MessageExternalizationException(Integrity.FAIL, e);
 			throw new IllegalStateException(e.getTargetException());
 		}
 	}
 
 	static byte[] digestDigest(Object digest, byte[] _input) {
 		try {
+			//noinspection RedundantCast
 			return (byte[])digestDigestBytes.invoke(digest, (Object)_input);
 		} catch (IllegalAccessException e) {
 			throw new IllegalStateException(e);
@@ -924,61 +933,62 @@ class GnuFunctions {
 			throw new IllegalStateException(e.getTargetException());
 		}
 	}
-	static byte[] macDoFinal(Object cipher) throws IllegalStateException {
+	static byte[] macDoFinal(Object cipher) throws IOException {
 		try {
 			return (byte[])macDoFinal.invoke(cipher);
 		} catch (IllegalAccessException e) {
-			throw new IllegalStateException(e);
+			throw new MessageExternalizationException(Integrity.FAIL, e);
 		} catch (InvocationTargetException e) {
 			if (e.getTargetException() instanceof IllegalStateException)
-				throw (IllegalStateException)e.getTargetException();
-			throw new IllegalStateException(e.getTargetException());
+				throw new MessageExternalizationException(Integrity.FAIL, (Exception)e.getTargetException());
+			throw new MessageExternalizationException(Integrity.FAIL, (Exception)e.getTargetException());
 		}
 	}
-	static byte[] macDoFinal(Object cipher, byte[] _input) throws IllegalStateException {
+	static byte[] macDoFinal(Object cipher, byte[] _input) throws MessageExternalizationException {
 		try {
+			//noinspection RedundantCast
 			return (byte[])macDoFinalBytes.invoke(cipher, (Object)_input);
 		} catch (IllegalAccessException e) {
-			throw new IllegalStateException(e);
+			throw new MessageExternalizationException(Integrity.FAIL, (Exception)e);
 		} catch (InvocationTargetException e) {
 			if (e.getTargetException() instanceof IllegalStateException)
-				throw (IllegalStateException)e.getTargetException();
-			throw new IllegalStateException(e.getTargetException());
+				throw new MessageExternalizationException(Integrity.FAIL, (Exception)e.getTargetException());
+			throw new MessageExternalizationException(Integrity.FAIL, (Exception)e.getTargetException());
 		}
 	}
-	static void macDoFinal(Object cipher, byte[] _output, int _outOffset) throws IllegalStateException, ShortBufferException {
+	static void macDoFinal(Object cipher, byte[] _output, int _outOffset) throws IOException {
 		try {
 			macDoFinalBytesInt.invoke(cipher, _output, _outOffset);
 		} catch (IllegalAccessException e) {
-			throw new IllegalStateException(e);
+			throw new MessageExternalizationException(Integrity.FAIL, (Exception)e);
 		} catch (InvocationTargetException e) {
 			if (e.getTargetException() instanceof IllegalStateException)
 				throw (IllegalStateException)e.getTargetException();
 			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnux.crypto.ShortBufferException") )
-				throw new ShortBufferException(e.getTargetException().getMessage());
-			throw new IllegalStateException(e.getTargetException());
+				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, (Exception)e.getTargetException());
+			throw new MessageExternalizationException(Integrity.FAIL, (Exception)e.getTargetException());
 		}
 	}
-	static void macUpdate(Object cipher, byte _input) throws IllegalStateException {
+	static void macUpdate(Object cipher, byte _input) throws IOException {
 		try {
 			macUpdateByte.invoke(cipher, _input);
 		} catch (IllegalAccessException e) {
-			throw new IllegalStateException(e);
+			throw new MessageExternalizationException(Integrity.FAIL, e);
 		} catch (InvocationTargetException e) {
 			if (e.getTargetException() instanceof IllegalStateException)
-				throw (IllegalStateException)e.getTargetException();
-			throw new IllegalStateException(e.getTargetException());
+				throw new MessageExternalizationException(Integrity.FAIL, (Exception)e.getTargetException());
+			throw new MessageExternalizationException(Integrity.FAIL, (Exception)e.getTargetException());
 		}
 	}
-	static void macUpdate(Object cipher, byte[] _input, int _offset, int _length) throws IllegalStateException {
+	static void macUpdate(Object cipher, byte[] _input, int _offset, int _length) throws IOException {
 		try {
 			macUpdateBytesIntInt.invoke(cipher, _input, _offset, _length);
 		} catch (IllegalAccessException e) {
-			throw new IllegalStateException(e);
+			throw new MessageExternalizationException(Integrity.FAIL, e);
 		} catch (InvocationTargetException e) {
 			if (e.getTargetException() instanceof IllegalStateException)
-				throw (IllegalStateException)e.getTargetException();
-			throw new IllegalStateException(e.getTargetException());
+				throw new MessageExternalizationException(Integrity.FAIL, (Exception)e.getTargetException());
+			throw new MessageExternalizationException(Integrity.FAIL, (Exception)e.getTargetException());
 		}
 	}
 	static void macUpdate(Object cipher, ByteBuffer _buffer) {
@@ -992,17 +1002,17 @@ class GnuFunctions {
 			throw new IllegalStateException(e.getTargetException());
 		}
 	}
-	static void macInit(Object cipher, AbstractKey key) throws InvalidKeySpecException, NoSuchAlgorithmException, InvalidKeyException {
+	static void macInit(Object cipher, AbstractKey key) throws NoSuchAlgorithmException, IOException {
 		try {
 			macInit.invoke(cipher, constSecretKeySpec.newInstance(keyGetEncoded(key.toGnuKey()), macGetAlgorithm(cipher)));
-		} catch (IllegalAccessException | InstantiationException e) {
-			throw new IllegalStateException(e);
+		} catch (IllegalAccessException | InstantiationException | InvalidKeySpecException e) {
+			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, e);
 		} catch (InvocationTargetException e) {
 			if (e.getTargetException() instanceof IllegalStateException)
-				throw (IllegalStateException)e.getTargetException();
+				throw new MessageExternalizationException(Integrity.FAIL, (Exception)e.getTargetException());
 			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.InvalidKeyException") )
-				throw new InvalidKeyException(e.getTargetException());
-			throw new IllegalStateException(e.getTargetException());
+				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, (Exception)e.getTargetException());
+			throw new MessageExternalizationException(Integrity.FAIL, (Exception)e.getTargetException());
 		}
 	}
 	static String keyGeneratorGetAlgorithm(Object keyGenerator)  {
@@ -1100,41 +1110,41 @@ class GnuFunctions {
 			throw new IllegalStateException(e.getTargetException());
 		}
 	}
-	static int cipherGetOutputSize(Object cipher, int _inputLength) throws IllegalStateException {
+	static int cipherGetOutputSize(Object cipher, int _inputLength) throws IOException {
 
 		try {
 			return (int)cipherGetOutputSize.invoke(cipher, _inputLength);
 		} catch (IllegalAccessException e) {
-			throw new IllegalStateException(e);
+			throw new MessageExternalizationException(Integrity.FAIL, e);
 		} catch (InvocationTargetException e) {
 			if (e.getTargetException() instanceof IllegalStateException)
-				throw (IllegalStateException)e.getTargetException();
-			throw new IllegalStateException(e.getTargetException());
+				throw new MessageExternalizationException(Integrity.FAIL, (Exception)e.getTargetException());
+			throw new MessageExternalizationException(Integrity.FAIL, (Exception)e.getTargetException());
 		}
 	}
 
-	static byte[] cipherUpdate(Object cipher,byte[] _input, int _inputOffset, int _inputLength) throws IllegalStateException {
+	static byte[] cipherUpdate(Object cipher,byte[] _input, int _inputOffset, int _inputLength) throws IOException {
 		try {
 			return (byte[])cipherUpdateBytesIntInt.invoke(cipher, _input, _inputOffset, _inputLength);
 		} catch (IllegalAccessException e) {
-			throw new IllegalStateException(e);
+			throw new MessageExternalizationException(Integrity.FAIL, (Exception)e);
 		} catch (InvocationTargetException e) {
 			if (e.getTargetException() instanceof IllegalStateException)
-				throw (IllegalStateException)e.getTargetException();
-			throw new IllegalStateException(e.getTargetException());
+				throw new MessageExternalizationException(Integrity.FAIL, (Exception)e.getTargetException());
+			throw new MessageExternalizationException(Integrity.FAIL, (Exception)e.getTargetException());
 		}
 	}
-	static int cipherUpdate(Object cipher,byte[] _input, int _inputOffset, int _inputLength, byte[] _output, int _outputOffset) throws IllegalStateException, ShortBufferException {
+	static int cipherUpdate(Object cipher,byte[] _input, int _inputOffset, int _inputLength, byte[] _output, int _outputOffset) throws IOException {
 		try {
 			return (int)cipherUpdateBytesIntIntBytesInt.invoke(cipher, _input, _inputOffset, _inputLength, _output, _outputOffset);
 		} catch (IllegalAccessException e) {
-			throw new IllegalStateException(e);
+			throw new MessageExternalizationException(Integrity.FAIL, (Exception)e);
 		} catch (InvocationTargetException e) {
 			if (e.getTargetException() instanceof IllegalStateException)
-				throw (IllegalStateException)e.getTargetException();
+				throw new MessageExternalizationException(Integrity.FAIL, (Exception)e.getTargetException());
 			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnux.crypto.ShortBufferException") )
-				throw new ShortBufferException(e.getTargetException().getMessage());
-			throw new IllegalStateException(e.getTargetException());
+				throw new MessageExternalizationException(Integrity.FAIL, (Exception)e.getTargetException());
+			throw new MessageExternalizationException(Integrity.FAIL, (Exception)e.getTargetException());
 		}
 	}
 	static InputStream cipherGetCipherInputStream(Object cipher,InputStream in)  {
@@ -1156,18 +1166,18 @@ class GnuFunctions {
 		}
 	}
 
-	static void cipherInitUnwrapMode(Object cipher, Object privateKey) throws InvalidKeyException {
+	static void cipherInitUnwrapMode(Object cipher, Object privateKey) throws IOException {
 		try {
 			cipherInitUnwrap.invoke(cipher, UNWRAP_MODE, privateKey);
 		} catch (IllegalAccessException e) {
 			throw new IllegalStateException(e);
 		} catch (InvocationTargetException e) {
-			throw new InvalidKeyException(e.getTargetException());
+			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, (Exception)e.getTargetException());
 		}
 	}
 
 
-	static byte[] cipherWrap(Object cipher, Object keyToWrap) throws IllegalStateException, IllegalBlockSizeException, InvalidKeyException {
+	static byte[] cipherWrap(Object cipher, Object keyToWrap) throws IOException {
 		try {
 			return (byte[])cipherWrap.invoke(cipher, keyToWrap);
 		} catch (IllegalAccessException e) {
@@ -1176,18 +1186,18 @@ class GnuFunctions {
 			if (e.getTargetException() instanceof IllegalStateException)
 			 	throw (IllegalStateException)e.getTargetException();
 			if (e.getTargetException() instanceof InvalidKeyException)
-				throw (InvalidKeyException)e.getTargetException();
+				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, (Exception)e.getTargetException());
 			else if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnux.crypto.InvalidKeyException"))
-				throw new InvalidKeyException(e.getTargetException());
+				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, (Exception)(e.getTargetException()));
 			else if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnux.crypto.IllegalBlockSizeException"))
-				throw new IllegalBlockSizeException(e.getTargetException().getMessage());
+				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, (Exception)e.getTargetException());
 			else if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.InvalidKeyException"))
-				throw new InvalidKeyException(e.getTargetException());
-			throw new IllegalStateException(e);
+				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, (Exception)e.getTargetException());
+			throw new MessageExternalizationException(Integrity.FAIL, e);
 		}
 	}
 
-	static Object cipherUnwrap(Object cipher, byte[] keyToUnwrap, String algorithmName) throws IllegalStateException, InvalidKeyException, NoSuchAlgorithmException  {
+	static Object cipherUnwrap(Object cipher, byte[] keyToUnwrap, String algorithmName) throws IOException  {
 		try {
 			return cipherUnwrapByteStringInt.invoke(cipher, keyToUnwrap, algorithmName, SECRET_KEY);
 		} catch (IllegalAccessException e) {
@@ -1196,12 +1206,12 @@ class GnuFunctions {
 			if (e.getTargetException() instanceof IllegalStateException)
 				throw (IllegalStateException)e.getTargetException();
 			if (e.getTargetException() instanceof InvalidKeyException)
-				throw (InvalidKeyException)e.getTargetException();
+				throw new IOException(e.getTargetException());
 			else if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnux.crypto.InvalidKeyException"))
-				throw new InvalidKeyException(e.getTargetException());
+				throw new IOException(e.getTargetException());
 			else if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.NoSuchAlgorithmException"))
-				throw new NoSuchAlgorithmException(e.getTargetException());
-			throw new IllegalStateException(e);
+				throw new IOException(e.getTargetException());
+			throw new MessageExternalizationException(Integrity.FAIL, e);
 		}
 	}
 
@@ -1232,7 +1242,7 @@ class GnuFunctions {
 		}
 	}
 
-	static Object getKeyPairInstance(Object publicKey, Object privateKey) throws NoSuchAlgorithmException, InvalidKeySpecException {
+	static Object getKeyPairInstance(Object publicKey, Object privateKey) throws NoSuchAlgorithmException, IOException {
 		checkGnuLoaded();
 		try {
 			return keyPairConstructorPublicPrivate.newInstance(publicKey, privateKey);
@@ -1242,8 +1252,8 @@ class GnuFunctions {
 			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.NoSuchAlgorithmException"))
 				throw new NoSuchAlgorithmException(e.getTargetException());
 			else if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.spec.InvalidKeySpecException"))
-				throw new InvalidKeySpecException(e.getTargetException());
-			throw new IllegalStateException(e);
+				throw new IOException(e.getTargetException());
+			throw new MessageExternalizationException(Integrity.FAIL, (Exception)e);
 		}
 	}
 

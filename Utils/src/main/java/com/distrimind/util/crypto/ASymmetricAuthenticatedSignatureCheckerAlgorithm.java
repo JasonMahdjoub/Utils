@@ -34,13 +34,17 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
+import com.distrimind.util.Bits;
+import com.distrimind.util.io.Integrity;
+import com.distrimind.util.io.MessageExternalizationException;
+
 import java.io.IOException;
-import java.security.*;
-import java.security.spec.InvalidKeySpecException;
+import java.security.AlgorithmParameters;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.spec.InvalidParameterSpecException;
 import java.security.spec.PSSParameterSpec;
-
-import com.distrimind.util.Bits;
 
 
 /**
@@ -64,18 +68,18 @@ public class ASymmetricAuthenticatedSignatureCheckerAlgorithm extends AbstractAu
 	}
 
 	@Override
-	public void init(byte[] signature, int offs, int lens) throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, InvalidAlgorithmParameterException, InvalidParameterSpecException, IOException {
+	public void init(byte[] signature, int offs, int lens) throws IOException {
 		checker.init(signature, offs, lens);
 	}
 
 
 	@Override
-	public void update(byte[] message, int offm, int lenm) throws SignatureException {
+	public void update(byte[] message, int offm, int lenm) throws IOException {
 		checker.update(message, offm, lenm);
 	}
 
 	@Override
-	public boolean verify() throws SignatureException, IllegalStateException {
+	public boolean verify() throws IOException {
 		return checker.verify();
 	}
 
@@ -104,7 +108,7 @@ public class ASymmetricAuthenticatedSignatureCheckerAlgorithm extends AbstractAu
 		}
 
 		@Override
-		public void init(byte[] signature, int offs, int lens) throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, InvalidAlgorithmParameterException, InvalidParameterSpecException, IOException {
+		public void init(byte[] signature, int offs, int lens) throws IOException {
 			int len=(int)Bits.getPositiveInteger(signature, offs, 3);
 			signatureValid=len+3<lens;
 			if (signatureValid) {
@@ -114,7 +118,7 @@ public class ASymmetricAuthenticatedSignatureCheckerAlgorithm extends AbstractAu
 		}
 
 		@Override
-		public void update(byte[] message, int offm, int lenm) throws SignatureException {
+		public void update(byte[] message, int offm, int lenm) throws IOException {
 			if (signatureValid) {
 				checkerNonPQC.update(message, offm, lenm);
 				checkerPQC.update(message, offm, lenm);
@@ -122,7 +126,7 @@ public class ASymmetricAuthenticatedSignatureCheckerAlgorithm extends AbstractAu
 		}
 
 		@Override
-		public boolean verify() throws SignatureException, IllegalStateException {
+		public boolean verify() throws IOException {
 			if (signatureValid)
 				return checkerNonPQC.verify() && checkerPQC.verify();
 			else
@@ -170,17 +174,21 @@ public class ASymmetricAuthenticatedSignatureCheckerAlgorithm extends AbstractAu
 
 		@Override
 		public void init(byte[] signature, int offs, int lens)
-				throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, InvalidAlgorithmParameterException, InvalidParameterSpecException, IOException {
+				throws IOException {
 			if (type == ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA256withRSAandMGF1 || type == ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA384withRSAandMGF1 || type == ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA512withRSAandMGF1) {
 				byte[][] tmp = Bits.separateEncodingsWithIntSizedTabs(signature, offs, lens);
 				this.signature = tmp[0];
 				byte[] encParameters = tmp[1];
 				AlgorithmParameters pssParameters;
-				pssParameters = AlgorithmParameters.getInstance("PSS", "BCFIPS");
-				pssParameters.init(encParameters);
+				try {
+					pssParameters = AlgorithmParameters.getInstance("PSS", "BCFIPS");
+					pssParameters.init(encParameters);
 
-				PSSParameterSpec pssParameterSpec = pssParameters.getParameterSpec(PSSParameterSpec.class);
-				((JavaNativeSignature) signer).getSignature().setParameter(pssParameterSpec);
+					PSSParameterSpec pssParameterSpec = pssParameters.getParameterSpec(PSSParameterSpec.class);
+					((JavaNativeSignature) signer).getSignature().setParameter(pssParameterSpec);
+				} catch (NoSuchAlgorithmException | NoSuchProviderException | InvalidParameterSpecException | InvalidAlgorithmParameterException e) {
+					throw new MessageExternalizationException(Integrity.FAIL, e);
+				}
 			} else {
 				this.signature = new byte[lens];
 
@@ -192,14 +200,14 @@ public class ASymmetricAuthenticatedSignatureCheckerAlgorithm extends AbstractAu
 		}
 
 		@Override
-		public void update(byte[] message, int offm, int lenm) throws SignatureException {
+		public void update(byte[] message, int offm, int lenm) throws IOException {
 			signer.update(message, offm, lenm);
 
 
 		}
 
 		@Override
-		public boolean verify() throws SignatureException, IllegalStateException {
+		public boolean verify() throws IOException {
 			try {
 				return signer.verify(signature);
 			} finally {

@@ -40,8 +40,6 @@ import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
 import java.io.IOException;
 import java.security.*;
 import java.security.spec.InvalidKeySpecException;
@@ -104,8 +102,7 @@ public class TestsForSymmetricSignatures {
 		return res2;
 	}
 	@Test(dataProvider="provideDataSymmetricKeyWrapperForSignature")
-	public void testSymmetricKeyWrapperForSignature(SymmetricKeyWrapperType typeWrapper, SymmetricEncryptionType asetype, SymmetricAuthentifiedSignatureType setype) throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, IllegalStateException, IllegalBlockSizeException, NoSuchProviderException
-	{
+	public void testSymmetricKeyWrapperForSignature(SymmetricKeyWrapperType typeWrapper, SymmetricEncryptionType asetype, SymmetricAuthentifiedSignatureType setype) throws NoSuchAlgorithmException, IllegalStateException, NoSuchProviderException, IOException {
 		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getSingleton(null);
 		SymmetricSecretKey kp=asetype.getKeyGenerator(rand, (short)128).generateKey();
 		SymmetricSecretKey sk= setype.getKeyGenerator(rand, (short)128).generateKey();
@@ -143,7 +140,7 @@ public class TestsForSymmetricSignatures {
 		return res2;
 	}
 	@Test(dataProvider = "providePasswordKeyDerivationTypesForSymmetricSignatures")
-	public void testPasswordKeyDerivation(PasswordBasedKeyGenerationType derivationType, SymmetricAuthentifiedSignatureType signatureType) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
+	public void testPasswordKeyDerivation(PasswordBasedKeyGenerationType derivationType, SymmetricAuthentifiedSignatureType signatureType) throws IOException {
 		String password = "password";
 		String invalidPassword = "invalid password";
 		Random r=new Random(System.currentTimeMillis());

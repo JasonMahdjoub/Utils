@@ -36,15 +36,10 @@ package com.distrimind.util.crypto;
 
 import com.distrimind.util.io.*;
 
-import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
 import java.io.IOException;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
-import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -131,12 +126,8 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 		byte[] b=out.getBytes();
 		md.update(b, (int)off,(int)len);
 		if (doFinal) {
-			try {
-				byte[] f = cipher.doFinal();
-				md.update(f, 0, f.length);
-			} catch (IllegalBlockSizeException | BadPaddingException e) {
-				throw new IOException(e);
-			}
+			byte[] f = cipher.doFinal();
+			md.update(f, 0, f.length);
 		}
 		os.os=nullStream;
 	}
@@ -238,11 +229,7 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 		externalCounter=this.internalCounter?null:new byte[blockModeCounterBytes];
 		this.chacha =type.getAlgorithmName().toUpperCase().startsWith(SymmetricEncryptionType.CHACHA20_NO_RANDOM_ACCESS.getAlgorithmName().toUpperCase());
 		this.gcm =type.getBlockMode().toUpperCase().equals("GCM");
-		try {
-			this.cipher.init(Cipher.ENCRYPT_MODE, this.key, generateIV());
-		} catch (InvalidKeyException | NoSuchAlgorithmException | InvalidKeySpecException | InvalidAlgorithmParameterException e) {
-			throw new IOException(e);
-		}
+		this.cipher.init(Cipher.ENCRYPT_MODE, this.key, generateIV());
 
 		setMaxPlainTextSizeForEncoding(key.getMaxPlainTextSizeForEncoding());
 		initBufferAllocatorArgs();
@@ -344,37 +331,24 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 			throws IOException {
 		iv=initIVAndCounter(iv, externalCounter);
 
-		try {
-			if (iv != null) {
-				cipher.init(Cipher.DECRYPT_MODE, key, iv);
-			} else
-				cipher.init(Cipher.DECRYPT_MODE, key);
-		}
-		catch (NoSuchAlgorithmException | InvalidKeyException | InvalidAlgorithmParameterException | NoSuchProviderException | InvalidKeySpecException e) {
-			throw new IOException(e);
-		}
+		if (iv != null) {
+			cipher.init(Cipher.DECRYPT_MODE, key, iv);
+		} else
+			cipher.init(Cipher.DECRYPT_MODE, key);
 	}
 
 	@Override
 	protected void initCipherForDecryptionWithIvAndCounter(AbstractCipher cipher, byte[] iv, int counter) throws IOException {
-		try {
-			if (!supportRandomReadWrite)
-				throw new IllegalAccessError();
-			cipher.init(Cipher.DECRYPT_MODE, key, iv, counter);
-		} catch (InvalidKeyException | NoSuchAlgorithmException | InvalidKeySpecException | InvalidAlgorithmParameterException e) {
-			throw new IOException(e);
-		}
+		if (!supportRandomReadWrite)
+			throw new IllegalAccessError();
+		cipher.init(Cipher.DECRYPT_MODE, key, iv, counter);
+
 	}
 
 	@Override
 	public void initCipherForDecryptionWithIv(AbstractCipher cipher, byte[] iv) throws IOException {
 
-		try {
-
-			cipher.init(Cipher.DECRYPT_MODE, key, iv);
-		} catch (InvalidKeyException | NoSuchAlgorithmException | InvalidKeySpecException | InvalidAlgorithmParameterException e) {
-			throw new IOException(e);
-		}
+		cipher.init(Cipher.DECRYPT_MODE, key, iv);
 	}
 
 	@Override
@@ -385,21 +359,13 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 
 	@Override
 	protected void initCipherForEncryptionWithIvAndCounter(AbstractCipher cipher, byte[] iv, int counter) throws IOException {
-		try {
-			if (!supportRandomReadWrite)
-				throw new IllegalAccessError();
-			cipher.init(Cipher.ENCRYPT_MODE, key, iv, counter);
-		} catch (InvalidKeyException | NoSuchAlgorithmException | InvalidKeySpecException | InvalidAlgorithmParameterException e) {
-			throw new IOException(e);
-		}
+		if (!supportRandomReadWrite)
+			throw new IllegalAccessError();
+		cipher.init(Cipher.ENCRYPT_MODE, key, iv, counter);
 	}
 	@Override
 	protected void initCipherForEncryptionWithIv(AbstractCipher cipher, byte[] iv) throws IOException {
-		try {
-			cipher.init(Cipher.ENCRYPT_MODE, key, iv);
-		} catch (InvalidKeyException | NoSuchAlgorithmException | InvalidKeySpecException | InvalidAlgorithmParameterException e) {
-			throw new IOException(e);
-		}
+		cipher.init(Cipher.ENCRYPT_MODE, key, iv);
 	}
 
 	@Override
@@ -408,12 +374,8 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 			throw new IllegalArgumentException("Please use external counters at every initialization with the defined size "+blockModeCounterBytes);
 		this.externalCounter=externalCounter;
 		byte[] iv=generateIV();
-		try {
-			cipher.init(Cipher.ENCRYPT_MODE, key, iv);
-			return iv;
-		} catch (InvalidKeyException | NoSuchAlgorithmException | InvalidKeySpecException | InvalidAlgorithmParameterException e) {
-			throw new IOException(e);
-		}
+		cipher.init(Cipher.ENCRYPT_MODE, key, iv);
+		return iv;
 
 	}
 	//private final Random nonSecureRandom=new Random(System.currentTimeMillis());

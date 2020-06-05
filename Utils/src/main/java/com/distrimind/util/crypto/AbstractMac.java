@@ -34,11 +34,8 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
-import javax.crypto.ShortBufferException;
+import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.spec.InvalidKeySpecException;
 
 /**
  * 
@@ -61,21 +58,21 @@ public abstract class AbstractMac {
 	public abstract int getMacLengthBytes();
 
 	public abstract void init(AbstractKey _key)
-			throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException;
+			throws IOException;
 
-	public abstract void update(byte _input) throws IllegalStateException;
+	public abstract void update(byte _input) throws IOException;
 
-	public abstract void update(byte[] _input) throws IllegalStateException;
+	public abstract void update(byte[] _input) throws IOException;
 
-	public abstract void update(byte[] _input, int _offset, int _len) throws IllegalStateException;
+	public abstract void update(byte[] _input, int _offset, int _len) throws IOException;
 
 	public abstract void update(ByteBuffer _input);
 
-	public abstract byte[] doFinal() throws IllegalStateException;
+	public abstract byte[] doFinal() throws IOException;
 
-	public abstract void doFinal(byte[] _output, int _outOffset) throws ShortBufferException, IllegalStateException;
+	public abstract void doFinal(byte[] _output, int _outOffset) throws IOException;
 
-	public abstract byte[] doFinal(byte[] _input) throws IllegalStateException;
+	public abstract byte[] doFinal(byte[] _input) throws IOException;
 
 	public abstract void reset();
 

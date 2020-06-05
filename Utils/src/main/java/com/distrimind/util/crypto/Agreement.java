@@ -35,7 +35,10 @@ knowledge of the CeCILL-C license and that you accept its terms.
 package com.distrimind.util.crypto;
 
 
-import org.bouncycastle.bccrypto.CryptoException;
+import com.distrimind.util.io.Integrity;
+import com.distrimind.util.io.MessageExternalizationException;
+
+import java.io.IOException;
 
 /**
  * 
@@ -90,30 +93,21 @@ public abstract class Agreement {
 	
 	protected abstract boolean isAgreementProcessValidImpl(); 
 	
-	public byte[] getDataToSend() throws Exception
+	public byte[] getDataToSend() throws IOException
 	{
 		if (hasFinishedSend())
-			throw new IllegalAccessException("The process has finished");
+			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new IllegalAccessException("The process has finished"));
 		return getDataToSend(actualStepForSend++);
 	}
-	public void receiveData(byte[] data) throws CryptoException
+	public void receiveData(byte[] data) throws IOException
 	{
-		try {
-			if (hasFinishedReception())
-				throw new IllegalAccessException("The process has finished");
-			receiveData(actualStepForReception++, data);
-		}
-		catch(Exception e)
-		{
-			if (e instanceof CryptoException)
-				throw (CryptoException)e;
-			else
-				throw new CryptoException("", e);
-		}
+		if (hasFinishedReception())
+			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new IllegalAccessException("The process has finished"));
+		receiveData(actualStepForReception++, data);
 	}
 
-	protected abstract byte[] getDataToSend(int stepNumber) throws Exception;
-	protected abstract void receiveData(int stepNumber, byte[] data) throws CryptoException;
+	protected abstract byte[] getDataToSend(int stepNumber) throws IOException;
+	protected abstract void receiveData(int stepNumber, byte[] data) throws IOException;
 
 	public abstract void zeroize();
 

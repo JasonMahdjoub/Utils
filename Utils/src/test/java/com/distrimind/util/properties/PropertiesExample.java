@@ -34,42 +34,22 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.properties;
 
-import java.io.File;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.UnknownHostException;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.logging.Level;
-
-import javax.lang.model.SourceVersion;
-
-import org.testng.Assert;
-
 import com.distrimind.util.DecentralizedIDGenerator;
 import com.distrimind.util.Utils;
-import com.distrimind.util.crypto.ASymmetricEncryptionType;
-import com.distrimind.util.crypto.ASymmetricKeyPair;
-import com.distrimind.util.crypto.ASymmetricPrivateKey;
-import com.distrimind.util.crypto.ASymmetricPublicKey;
-import com.distrimind.util.crypto.AbstractSecureRandom;
-import com.distrimind.util.crypto.MessageDigestType;
-import com.distrimind.util.crypto.SecureRandomType;
-import com.distrimind.util.crypto.SymmetricEncryptionType;
-import com.distrimind.util.crypto.SymmetricSecretKey;
-
+import com.distrimind.util.crypto.*;
 import com.distrimind.util.version.Version;
+import org.testng.Assert;
+
+import javax.lang.model.SourceVersion;
+import java.io.File;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.URL;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.util.*;
+import java.util.logging.Level;
 
 /**
  * 
@@ -301,8 +281,8 @@ public class PropertiesExample extends MultiFormatProperties {
 			return false;
 	}
 
-	void generateValues() throws MalformedURLException, UnknownHostException,
-			NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException {
+	void generateValues() throws IOException,
+			NoSuchAlgorithmException, NoSuchProviderException {
 		Random rand = new Random(System.currentTimeMillis());
 		intValue = rand.nextInt();
 		shortValue = (short) rand.nextInt();

@@ -38,14 +38,6 @@ import com.distrimind.util.io.RandomInputStream;
 
 import java.io.IOException;
 
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.SignatureException;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.InvalidParameterSpecException;
-
 
 /**
  * 
@@ -55,35 +47,35 @@ import java.security.spec.InvalidParameterSpecException;
  */
 public abstract class AbstractAuthenticatedCheckerAlgorithm {
 
-	public void init(byte[] signature) throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, InvalidAlgorithmParameterException, InvalidParameterSpecException, IOException
+	public void init(byte[] signature) throws IOException
 	{
 		init(signature, 0, signature.length);
 	}
-	public abstract void init(byte[] signature, int offs, int lens) throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, InvalidAlgorithmParameterException, InvalidParameterSpecException, IOException;
+	public abstract void init(byte[] signature, int offs, int lens) throws IOException;
 	
-	public void update(byte[] message) throws SignatureException
+	public void update(byte[] message) throws IOException
 	{
 		update(message,0, message.length);
 	}
 	private final byte[] one=new byte[1];
-	public void update(byte c) throws SignatureException {
+	public void update(byte c) throws IOException {
 		one[0]=c;
 		update(one);
 	}
 	
 	
-	public abstract void update(byte[] message, int offm, int lenm) throws SignatureException ;
+	public abstract void update(byte[] message, int offm, int lenm) throws IOException ;
 
 	public abstract boolean verify()
-			throws SignatureException, IllegalStateException;
+			throws IOException;
 
 	public boolean verify(byte[] message, byte[] signature)
-			throws SignatureException, InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, IllegalStateException, IOException, NoSuchProviderException, InvalidAlgorithmParameterException, InvalidParameterSpecException {
+			throws IOException {
 		return this.verify(message, 0, message.length, signature, 0, signature.length);
 	}
 
 	public boolean verify(byte[] message, int offm, int lenm, byte[] signature, int offs, int lens)
-			throws SignatureException, InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, IllegalStateException, IOException, NoSuchProviderException, InvalidAlgorithmParameterException, InvalidParameterSpecException
+			throws IOException
 	{
 		init(signature, offs, lens);
 		update(message, offm, lenm);
@@ -101,7 +93,7 @@ public abstract class AbstractAuthenticatedCheckerAlgorithm {
 
 	private byte[] buffer=null;
 
-	public void update(RandomInputStream inputStream) throws IOException, SignatureException {
+	public void update(RandomInputStream inputStream) throws IOException {
 		long l=inputStream.length()-inputStream.currentPosition();
 		if (l==0)
 			return;

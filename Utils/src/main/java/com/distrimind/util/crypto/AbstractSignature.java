@@ -34,11 +34,9 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 import java.security.SignatureException;
-import java.security.spec.InvalidKeySpecException;
 
 
 /**
@@ -82,14 +80,11 @@ public abstract class AbstractSignature implements Cloneable {
 	 *
 	 * @param privateKey
 	 *            the private key to sign with.
-	 * @throws InvalidKeyException
-	 *             if the key is invalid.
-	 * @throws InvalidKeySpecException if the key is invalid
-	 * @throws NoSuchAlgorithmException if the algorithm was not found
-	 * @throws InvalidKeyException if the key is invalid
+	 * @throws IOException
+	 *             if a problem occurs
 	 */
 	public abstract void initSign(ASymmetricPrivateKey privateKey)
-			throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException;
+			throws IOException;
 
 	/**
 	 * Initializes this class with the private key and source of randomness for
@@ -99,38 +94,32 @@ public abstract class AbstractSignature implements Cloneable {
 	 *            the private key to sign with.
 	 * @param random
 	 *            the {@link java.security.SecureRandom} to use.
-	 * @throws InvalidKeyException
-	 *             if the key is invalid.
-	 * @throws InvalidKeySpecException if the key is invalid
-	 * @throws NoSuchAlgorithmException if the algorithm was not found
-	 * @throws InvalidKeyException if the key is invalid
+	 * @throws IOException
+	 *             if a problem occurs
 	 */
 	public abstract void initSign(ASymmetricPrivateKey privateKey, AbstractSecureRandom random)
-			throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException;
+			throws IOException;
 
 	/**
 	 * Initializes this instance with the public key for verification purposes.
 	 *
 	 * @param publicKey
 	 *            the public key to verify with.
-	 * @throws InvalidKeyException
-	 *             if the key is invalid.
-	 * @throws InvalidKeySpecException if the key is invalid
-	 * @throws NoSuchAlgorithmException if the algorithm was not found
-	 * @throws InvalidKeyException if the key is invalid
+	 * @throws IOException
+	 *             if a problem occurs
 	 */
 	public abstract void initVerify(ASymmetricPublicKey publicKey)
-			throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException;
+			throws IOException;
 
 	/**
 	 * Returns the signature bytes of all the data fed to this instance. The format
 	 * of the output depends on the underlying signature algorithm.
 	 *
 	 * @return the signature bytes.
-	 * @throws SignatureException
+	 * @throws IOException
 	 *             if the engine is not properly initialized.
 	 */
-	public abstract byte[] sign() throws SignatureException;
+	public abstract byte[] sign() throws IOException;
 
 	/**
 	 * Generates signature bytes of all the data fed to this instance and stores it
@@ -156,11 +145,11 @@ public abstract class AbstractSignature implements Cloneable {
 	 * @param len
 	 *            the number of the bytes to use in the array.
 	 * @return the real number of bytes used.
-	 * @throws SignatureException
+	 * @throws IOException
 	 *             if the engine is not properly initialized.
 	 * @since 1.2
 	 */
-	public abstract int sign(byte[] outbuf, int offset, int len) throws SignatureException;
+	public abstract int sign(byte[] outbuf, int offset, int len) throws IOException;
 
 	/**
 	 * Returns a rstring representation of this instance.
@@ -175,20 +164,20 @@ public abstract class AbstractSignature implements Cloneable {
 	 *
 	 * @param b
 	 *            the byte to update with.
-	 * @throws SignatureException
+	 * @throws IOException
 	 *             if the engine is not properly initialized.
 	 */
-	public abstract void update(byte b) throws SignatureException;
+	public abstract void update(byte b) throws IOException;
 
 	/**
 	 * Updates the data to be signed or verified with the specified bytes.
 	 *
 	 * @param data
 	 *            the array of bytes to use.
-	 * @throws SignatureException
+	 * @throws IOException
 	 *             if the engine is not properly initialized.
 	 */
-	public abstract void update(byte[] data) throws SignatureException;
+	public abstract void update(byte[] data) throws IOException;
 
 	/**
 	 * Updates the data to be signed or verified with the specified bytes.
@@ -199,10 +188,10 @@ public abstract class AbstractSignature implements Cloneable {
 	 *            the offset to start at in the array.
 	 * @param len
 	 *            the number of bytes to use from the array.
-	 * @throws SignatureException
+	 * @throws IOException
 	 *             if the engine is not properly initialized.
 	 */
-	public abstract void update(byte[] data, int off, int len) throws SignatureException;
+	public abstract void update(byte[] data, int off, int len) throws IOException;
 
 	/**
 	 * Update this signature with the {@link java.nio.Buffer#remaining()} bytes of
@@ -210,10 +199,10 @@ public abstract class AbstractSignature implements Cloneable {
 	 *
 	 * @param input
 	 *            The input buffer.
-	 * @throws SignatureException
+	 * @throws IOException
 	 *             If this instance was not properly initialized.
 	 */
-	public abstract void update(ByteBuffer input) throws SignatureException;
+	public abstract void update(ByteBuffer input) throws IOException;
 
 	/**
 	 * Verifies a designated signature.
@@ -221,11 +210,11 @@ public abstract class AbstractSignature implements Cloneable {
 	 * @param signature
 	 *            the signature bytes to verify.
 	 * @return <code>true</code> if verified, <code>false</code> otherwise.
-	 * @throws SignatureException
+	 * @throws IOException
 	 *             if the engine is not properly initialized or the signature does
 	 *             not check.
 	 */
-	public abstract boolean verify(byte[] signature) throws SignatureException;
+	public abstract boolean verify(byte[] signature) throws IOException;
 
 	/**
 	 * Verifies a designated signature.
@@ -243,10 +232,10 @@ public abstract class AbstractSignature implements Cloneable {
 	 *             <code>0</code>, or the sum of the <code>offset</code> and
 	 *             <code>length</code> is greater than the length of the
 	 *             <code>signature</code> byte array.
-	 * @throws SignatureException
+	 * @throws IOException
 	 *             if the engine is not properly initialized or the signature does
 	 *             not check.
 	 */
-	public abstract boolean verify(byte[] signature, int offset, int length) throws SignatureException;
+	public abstract boolean verify(byte[] signature, int offset, int length) throws IOException;
 
 }

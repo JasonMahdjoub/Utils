@@ -34,8 +34,8 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.security.DigestException;
 
 /**
  * 
@@ -67,7 +67,7 @@ public final class GnuMessageDigest extends AbstractMessageDigest {
 	}
 
 	@Override
-	public int digest(byte[] _buf, int _offset, int _len) throws DigestException {
+	public int digest(byte[] _buf, int _offset, int _len) throws IOException {
 		return GnuFunctions.digestDigest(messageDigest, _buf, _offset, _len);
 	}
 

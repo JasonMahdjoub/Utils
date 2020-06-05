@@ -37,10 +37,7 @@ package com.distrimind.util.crypto;
 import com.distrimind.util.FileTools;
 import com.distrimind.util.io.*;
 
-import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.ShortBufferException;
 import java.io.IOException;
 
 /**
@@ -236,14 +233,10 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 		private void checkDoFinal(boolean force) throws IOException {
 			if (doFinal && (currentPos%maxPlainTextSizeForEncoding==0 || force))
 			{
-				try {
-					int s=cipher.doFinal(buffer, 0);
-					if (s>0)
-						os.write(buffer, 0, s);
-					doFinal=false;
-				} catch (IllegalBlockSizeException | BadPaddingException | ShortBufferException e) {
-					throw new IOException(e);
-				}
+				int s=cipher.doFinal(buffer, 0);
+				if (s>0)
+					os.write(buffer, 0, s);
+				doFinal=false;
 			}
 		}
 
@@ -303,15 +296,11 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 						buffer = new byte[outLen];
 					}
 				}
-				try {
-					int w=cipher.update(b, off, s, buffer, 0);
-					doFinal=true;
-					currentPos+=s;
-					if (w>0) {
-						os.write(buffer, 0, w);
-					}
-				} catch (ShortBufferException e) {
-					throw new IOException(e);
+				int w=cipher.update(b, off, s, buffer, 0);
+				doFinal=true;
+				currentPos+=s;
+				if (w>0) {
+					os.write(buffer, 0, w);
 				}
 
 				len-=s;
@@ -329,14 +318,10 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 			checkInit();
 			one[0]=(byte)b;
 			++currentPos;
-			try {
-				int w=cipher.update(one, 0, 1, buffer, 0);
-				doFinal=true;
-				if (w>0) {
-					os.write(buffer, 0, w);
-				}
-			} catch (ShortBufferException e) {
-				throw new IOException(e);
+			int w=cipher.update(one, 0, 1, buffer, 0);
+			doFinal=true;
+			if (w>0) {
+				os.write(buffer, 0, w);
 			}
 			checkDoFinal(false);
 		}

@@ -34,11 +34,12 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
-import javax.crypto.ShortBufferException;
-import java.security.InvalidKeyException;
+import com.distrimind.util.io.Integrity;
+import com.distrimind.util.io.MessageExternalizationException;
+
+import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
-import java.security.spec.InvalidKeySpecException;
 
 /**
  * 
@@ -80,25 +81,37 @@ public class SymmetricAuthenticatedSignerAlgorithm extends AbstractAuthenticated
 
 
 	@Override
-	public void init() throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException {
+	public void init() throws IOException {
 		mac.init(secretKey);
 	}
 
 	@Override
-	public void update(byte[] message, int offm, int lenm) {
+	public void update(byte[] message, int offm, int lenm) throws IOException {
 		mac.update(message, offm, lenm);
-		
+
 	}
 
 	@Override
-	public int getSignature(byte[] signature, int off_sig) throws ShortBufferException, IllegalStateException {
-		mac.doFinal(signature, off_sig);
-		return secretKey.getAuthenticatedSignatureAlgorithmType().getSignatureSizeInBits()/8;
+	public int getSignature(byte[] signature, int off_sig) throws IOException {
+		try {
+			mac.doFinal(signature, off_sig);
+			return secretKey.getAuthenticatedSignatureAlgorithmType().getSignatureSizeInBits() / 8;
+		}
+		catch (IllegalStateException e)
+		{
+			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, e);
+		}
 	}
 
 	@Override
-	public byte[] getSignature() throws IllegalStateException {
-		return mac.doFinal();
+	public byte[] getSignature() throws IOException {
+		try {
+			return mac.doFinal();
+		}
+		catch (IllegalStateException e)
+		{
+			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, e);
+		}
 	}
 
 

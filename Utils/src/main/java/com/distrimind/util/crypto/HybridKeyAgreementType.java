@@ -35,7 +35,7 @@ The fact that you are presently reading this means that you have had
 knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-import java.security.InvalidAlgorithmParameterException;
+import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.util.Objects;
@@ -86,70 +86,59 @@ public final class HybridKeyAgreementType {
 		return PQCKeyAgreementType;
 	}
 
-	public KeyAgreement getKeyAgreementClient(AbstractSecureRandom randomForKeys, SymmetricAuthentifiedSignatureType signatureType) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException
-	{
+	public KeyAgreement getKeyAgreementClient(AbstractSecureRandom randomForKeys, SymmetricAuthentifiedSignatureType signatureType) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
 		return getKeyAgreementClient(randomForKeys, signatureType, (short)-1);
 	}
-	public KeyAgreement getKeyAgreementClient(AbstractSecureRandom randomForKeys, SymmetricAuthentifiedSignatureType signatureType, short keySizeBits) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException
-	{
+	public KeyAgreement getKeyAgreementClient(AbstractSecureRandom randomForKeys, SymmetricAuthentifiedSignatureType signatureType, short keySizeBits) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
 		return getKeyAgreementClient(randomForKeys, signatureType, keySizeBits, null);
 	}
 	public KeyAgreement getKeyAgreementClient(AbstractSecureRandom randomForKeys,
 											  SymmetricAuthentifiedSignatureType signatureType,
-											  short keySizeBits, byte[] keyingMaterial) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException {
+											  short keySizeBits, byte[] keyingMaterial) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
 		return new HybridKeyAgreement(
 				nonPQCKeyAgreementType.getKeyAgreementClient(randomForKeys, signatureType, keySizeBits, keyingMaterial),
 				PQCKeyAgreementType.getKeyAgreementClient(randomForKeys, signatureType, keySizeBits, keyingMaterial));
 	}
 
-	public KeyAgreement getKeyAgreementClient(AbstractSecureRandom randomForKeys, SymmetricEncryptionType encryptionType) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException
-	{
+	public KeyAgreement getKeyAgreementClient(AbstractSecureRandom randomForKeys, SymmetricEncryptionType encryptionType) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
 
 		return getKeyAgreementClient(randomForKeys, encryptionType, (short)-1);
 	}
-	public KeyAgreement getKeyAgreementClient(AbstractSecureRandom randomForKeys, SymmetricEncryptionType encryptionType, short keySizeBits) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException
-	{
+	public KeyAgreement getKeyAgreementClient(AbstractSecureRandom randomForKeys, SymmetricEncryptionType encryptionType, short keySizeBits) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
 		return getKeyAgreementClient(randomForKeys, encryptionType, keySizeBits, null);
 	}
 	public KeyAgreement getKeyAgreementClient(AbstractSecureRandom randomForKeys,
 											  SymmetricEncryptionType encryptionType,
 											  short keySizeBits,
-											  byte[] keyingMaterial) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException
-	{
+											  byte[] keyingMaterial) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
 		return new HybridKeyAgreement(
 				nonPQCKeyAgreementType.getKeyAgreementClient(randomForKeys, encryptionType, keySizeBits, keyingMaterial),
 				PQCKeyAgreementType.getKeyAgreementClient(randomForKeys, encryptionType, keySizeBits, keyingMaterial));
 	}
-	public KeyAgreement getKeyAgreementServer(AbstractSecureRandom randomForKeys, SymmetricAuthentifiedSignatureType signatureType) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException
-	{
+	public KeyAgreement getKeyAgreementServer(AbstractSecureRandom randomForKeys, SymmetricAuthentifiedSignatureType signatureType) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
 		return getKeyAgreementServer(randomForKeys, signatureType, (short)-1);
 	}
-	public KeyAgreement getKeyAgreementServer(AbstractSecureRandom randomForKeys, SymmetricAuthentifiedSignatureType signatureType, short keySizeBits) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException
-	{
+	public KeyAgreement getKeyAgreementServer(AbstractSecureRandom randomForKeys, SymmetricAuthentifiedSignatureType signatureType, short keySizeBits) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
 		return getKeyAgreementServer(randomForKeys, signatureType, keySizeBits, null);
 	}
 	public KeyAgreement getKeyAgreementServer(AbstractSecureRandom randomForKeys,
 											  SymmetricAuthentifiedSignatureType signatureType,
 											  short keySizeBits,
-											  byte[] keyingMaterial) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException
-	{
+											  byte[] keyingMaterial) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
 		return new HybridKeyAgreement(
 				nonPQCKeyAgreementType.getKeyAgreementServer(randomForKeys, signatureType, keySizeBits, keyingMaterial),
 				PQCKeyAgreementType.getKeyAgreementServer(randomForKeys, signatureType, keySizeBits, keyingMaterial));
 	}
-	public KeyAgreement getKeyAgreementServer(AbstractSecureRandom randomForKeys, SymmetricEncryptionType encryptionType) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException
-	{
+	public KeyAgreement getKeyAgreementServer(AbstractSecureRandom randomForKeys, SymmetricEncryptionType encryptionType) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
 		return getKeyAgreementServer(randomForKeys, encryptionType, (short)-1);
 	}
-	public KeyAgreement getKeyAgreementServer(AbstractSecureRandom randomForKeys, SymmetricEncryptionType encryptionType, short keySizeBits) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException
-	{
+	public KeyAgreement getKeyAgreementServer(AbstractSecureRandom randomForKeys, SymmetricEncryptionType encryptionType, short keySizeBits) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
 		return getKeyAgreementServer(randomForKeys, encryptionType, keySizeBits, null);
 	}
 	public KeyAgreement getKeyAgreementServer(AbstractSecureRandom randomForKeys,
 											  SymmetricEncryptionType encryptionType,
 											  short keySizeBits,
-											  byte[] keyingMaterial) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException
-	{
+											  byte[] keyingMaterial) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
 		return new HybridKeyAgreement(
 				nonPQCKeyAgreementType.getKeyAgreementServer(randomForKeys, encryptionType, keySizeBits, keyingMaterial),
 				PQCKeyAgreementType.getKeyAgreementServer(randomForKeys, encryptionType, keySizeBits, keyingMaterial));

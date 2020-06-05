@@ -35,10 +35,9 @@ knowledge of the CeCILL-C license and that you accept its terms.
 package com.distrimind.util.crypto;
 
 
-import java.security.InvalidKeyException;
+import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
-import java.security.spec.InvalidKeySpecException;
 
 /**
  * 
@@ -77,7 +76,7 @@ public class SymmetricAuthenticatedSignatureCheckerAlgorithm extends AbstractAut
 
 
 	@Override
-	public void init(byte[] signature, int off, int len) throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException {
+	public void init(byte[] signature, int off, int len) throws IOException {
 		this.signature=new byte[len];
 		
 		System.arraycopy(signature, off, this.signature, 0, this.signature.length);
@@ -86,7 +85,7 @@ public class SymmetricAuthenticatedSignatureCheckerAlgorithm extends AbstractAut
 	}
 
 	@Override
-	public void update(byte[] message, int offm, int lenm)  {
+	public void update(byte[] message, int offm, int lenm) throws IOException {
 		signer.update(message, offm, lenm);
 		
 	}
@@ -105,8 +104,9 @@ public class SymmetricAuthenticatedSignatureCheckerAlgorithm extends AbstractAut
 				if (mySignature[i] != signature[i])
 					return false;
 			return true;
-		}
-		finally
+		} catch (IOException e) {
+			return false;
+		} finally
 		{
 			signature=null;
 		}

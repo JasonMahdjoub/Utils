@@ -35,6 +35,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
 package com.distrimind.util.crypto;
 
 import com.distrimind.util.Bits;
+import com.distrimind.util.io.MessageExternalizationException;
 import com.distrimind.util.io.RandomByteArrayInputStream;
 import org.bouncycastle.crypto.Algorithm;
 import org.bouncycastle.crypto.AsymmetricKey;
@@ -288,7 +289,7 @@ public class ASymmetricPrivateKey extends AbstractKey implements IASymmetricPriv
 	}
 
 	@Override
-	public Object toGnuKey() throws InvalidKeySpecException, NoSuchAlgorithmException {
+	public Object toGnuKey() throws NoSuchAlgorithmException, MessageExternalizationException {
 		if (gnuPrivateKey == null)
 			gnuPrivateKey = ASymmetricEncryptionType.decodeGnuPrivateKey(privateKey, encryptionType==null?signatureType.getKeyGeneratorAlgorithmName():encryptionType.getAlgorithmName());
 

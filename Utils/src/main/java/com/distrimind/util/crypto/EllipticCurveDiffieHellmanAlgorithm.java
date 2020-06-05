@@ -34,12 +34,17 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
-import java.security.*;
-import java.security.spec.InvalidKeySpecException;
-import java.util.Arrays;
-
+import com.distrimind.util.io.Integrity;
+import com.distrimind.util.io.MessageExternalizationException;
 import org.bouncycastle.bccrypto.CryptoException;
 import org.bouncycastle.jcajce.spec.UserKeyingMaterialSpec;
+
+import java.io.IOException;
+import java.security.InvalidKeyException;
+import java.security.KeyPairGenerator;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.util.Arrays;
 
 /**
  * 
@@ -64,16 +69,16 @@ public class EllipticCurveDiffieHellmanAlgorithm extends KeyAgreement {
 	}
 
 
-	private byte[] keyingMaterial;
-	EllipticCurveDiffieHellmanAlgorithm(AbstractSecureRandom randomForKeys, EllipticCurveDiffieHellmanType type, short keySizeBits, byte[] keyingMaterial, SymmetricAuthentifiedSignatureType signatureType) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException {
+	private final byte[] keyingMaterial;
+	EllipticCurveDiffieHellmanAlgorithm(AbstractSecureRandom randomForKeys, EllipticCurveDiffieHellmanType type, short keySizeBits, byte[] keyingMaterial, SymmetricAuthentifiedSignatureType signatureType) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
 		this(randomForKeys, type, keySizeBits, keyingMaterial);
 		this.signatureType=signatureType;
 	}
-	EllipticCurveDiffieHellmanAlgorithm(AbstractSecureRandom randomForKeys, EllipticCurveDiffieHellmanType type, short keySizeBits, byte[] keyingMaterial, SymmetricEncryptionType encryptionType) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException {
+	EllipticCurveDiffieHellmanAlgorithm(AbstractSecureRandom randomForKeys, EllipticCurveDiffieHellmanType type, short keySizeBits, byte[] keyingMaterial, SymmetricEncryptionType encryptionType) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
 		this(randomForKeys, type, keySizeBits, keyingMaterial);
 		this.encryptionType=encryptionType;
 	}
-	private EllipticCurveDiffieHellmanAlgorithm(AbstractSecureRandom randomForKeys, EllipticCurveDiffieHellmanType type, short keySizeBits, byte[] keyingMaterial) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException {
+	private EllipticCurveDiffieHellmanAlgorithm(AbstractSecureRandom randomForKeys, EllipticCurveDiffieHellmanType type, short keySizeBits, byte[] keyingMaterial) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
 		super(1, 1);
 		if (type == null)
 			throw new NullPointerException();
@@ -107,35 +112,27 @@ public class EllipticCurveDiffieHellmanAlgorithm extends KeyAgreement {
 		myKeyPair = null;
 		myPublicKeyBytes = null;
 	}
-	private void generateAndSetKeyPair() throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException  {
+	private void generateAndSetKeyPair() throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
 		generateAndSetKeyPair(type.getECDHKeySizeBits());
 	}
 	/*private ASymmetricKeyPair generateAndSetKeyPair(short keySize) throws NoSuchAlgorithmException, spec.InvalidKeySpecException, NoSuchProviderException, InvalidAlgorithmParameterException  {
 		return generateAndSetKeyPair(keySize, System.currentTimeMillis()+(24*60*60*1000));
 	}¨*/
-	private void generateAndSetKeyPair(short keySize) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException  {
+	private void generateAndSetKeyPair(short keySize) throws NoSuchAlgorithmException, NoSuchProviderException, IOException  {
 		valid=false;
 
 		ASymmetricKeyPair kp;
 		ASymmetricAuthenticatedSignatureType t=type.getASymmetricAuthentifiedSignatureType();
 		if (t== ASymmetricAuthenticatedSignatureType.BC_FIPS_Ed448 || t== ASymmetricAuthenticatedSignatureType.BC_FIPS_Ed25519) {
-			try {
-				KeyPairGenerator kpg ;
-				if (t== ASymmetricAuthenticatedSignatureType.BC_FIPS_Ed448)
-					kpg= KeyPairGenerator.getInstance("X448", CodeProvider.BCFIPS.name());
-				else
-					kpg= KeyPairGenerator.getInstance("X25519", CodeProvider.BCFIPS.name());
+			KeyPairGenerator kpg ;
+			if (t== ASymmetricAuthenticatedSignatureType.BC_FIPS_Ed448)
+				kpg= KeyPairGenerator.getInstance("X448", CodeProvider.BCFIPS.name());
+			else
+				kpg= KeyPairGenerator.getInstance("X25519", CodeProvider.BCFIPS.name());
 
-				JavaNativeKeyPairGenerator res = new JavaNativeKeyPairGenerator(t, kpg);
-				res.initialize(keySize, Long.MAX_VALUE, randomForKeys);
-				kp=res.generateKeyPair();
-			} catch (NoSuchAlgorithmException e) {
-				throw new NoSuchAlgorithmException(e);
-			}
-			catch(java.security.NoSuchProviderException e)
-			{
-				throw new NoSuchProviderException(e.getMessage());
-			}
+			JavaNativeKeyPairGenerator res = new JavaNativeKeyPairGenerator(t, kpg);
+			res.initialize(keySize, Long.MAX_VALUE, randomForKeys);
+			kp=res.generateKeyPair();
 
 		}
 		else
@@ -164,8 +161,7 @@ public class EllipticCurveDiffieHellmanAlgorithm extends KeyAgreement {
 		return myPublicKeyBytes;
 	}
 
-	private void setDistantPublicKey(byte[] distantPublicKeyBytes, SymmetricEncryptionType symmetricEncryptionType, SymmetricAuthentifiedSignatureType symmetricSignatureType, byte[] keyingMaterial) throws 
-			NoSuchAlgorithmException, InvalidKeyException, InvalidKeySpecException, InvalidAlgorithmParameterException {
+	private void setDistantPublicKey(byte[] distantPublicKeyBytes, SymmetricEncryptionType symmetricEncryptionType, SymmetricAuthentifiedSignatureType symmetricSignatureType, byte[] keyingMaterial) throws IOException {
 		CodeProvider.ensureProviderLoaded(type.getCodeProvider());
 		try
 		{
@@ -181,7 +177,7 @@ public class EllipticCurveDiffieHellmanAlgorithm extends KeyAgreement {
 						"A key exchange process has already been begun. Use reset fonction before calling this function.");
 			ASymmetricPublicKey distantPublicKey=(ASymmetricPublicKey) AbstractKey.decode(distantPublicKeyBytes);
 			if (myKeyPair.getASymmetricPublicKey().equals(distantPublicKey))
-				throw new InvalidKeyException("The local et distant public keys cannot be similar !");
+				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new InvalidKeyException("The local et distant public keys cannot be similar !"));
 	
 			AbstractKeyAgreement ka ;
 			if (symmetricEncryptionType==null)
@@ -218,13 +214,9 @@ public class EllipticCurveDiffieHellmanAlgorithm extends KeyAgreement {
 				derivedKey=ka.generateSecretKey((short)(keySizeBits/8));
 			valid=true;
 		}
-		catch(NoSuchAlgorithmException e)
-		{
-			throw new NoSuchAlgorithmException(e);
+		catch (NoSuchAlgorithmException | NoSuchProviderException e) {
+			throw new IOException(e);
 		}
-		catch (NoSuchProviderException e) {
-			throw new NoSuchAlgorithmException(e.getMessage());
-		}		
 	}
 
 	public SymmetricSecretKey getDerivedKey() {
@@ -242,34 +234,34 @@ public class EllipticCurveDiffieHellmanAlgorithm extends KeyAgreement {
 	}
 
 	@Override
-	protected byte[] getDataToSend(int stepNumber) throws Exception {
+	protected byte[] getDataToSend(int stepNumber) throws IOException {
 		if (!valid)
-			throw new CryptoException();
+			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException());
 
 		if (stepNumber == 0)
 			return getEncodedPublicKey();
 		else {
 			valid = false;
-			throw new IllegalAccessException();
+			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new IllegalAccessException());
 		}
 
 	}
 
 	@Override
-	protected void receiveData(int stepNumber, byte[] data) throws CryptoException {
+	protected void receiveData(int stepNumber, byte[] data) throws MessageExternalizationException {
 		if (!valid)
-			throw new CryptoException();
+			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException());
 
 		try {
 			if (stepNumber == 0) {
 				setDistantPublicKey(data, encryptionType, signatureType, keyingMaterial);
 			} else
-				throw new IllegalAccessException();
+				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new IllegalAccessException());
 		}
 		catch(Exception e)
 		{
 			valid=false;
-			throw new CryptoException("", e);
+			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException());
 		}
 	}
 

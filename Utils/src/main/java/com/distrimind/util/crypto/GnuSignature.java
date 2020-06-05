@@ -34,11 +34,9 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.security.SignatureException;
-import java.security.spec.InvalidKeySpecException;
 
 
 /**
@@ -73,32 +71,44 @@ public final class GnuSignature extends AbstractSignature {
 
 	@Override
 	public void initSign(ASymmetricPrivateKey _privateKey)
-			throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException {
-		GnuFunctions.signatureInitSign(signature, _privateKey);
+			throws IOException {
+		try {
+			GnuFunctions.signatureInitSign(signature, _privateKey);
+		} catch (NoSuchAlgorithmException e) {
+			throw new IOException(e);
+		}
 
 	}
 
 	@Override
 	public void initSign(ASymmetricPrivateKey _privateKey, AbstractSecureRandom _random)
-			throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException {
-		GnuFunctions.signatureInitSign(signature, _privateKey, _random);
+			throws IOException {
+		try {
+			GnuFunctions.signatureInitSign(signature, _privateKey, _random);
+		} catch (NoSuchAlgorithmException e) {
+			throw new IOException(e);
+		}
 
 	}
 
 	@Override
 	public void initVerify(ASymmetricPublicKey _publicKey)
-			throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException {
-		GnuFunctions.signatureInitVerify(signature, _publicKey);
+			throws IOException {
+		try {
+			GnuFunctions.signatureInitVerify(signature, _publicKey);
+		} catch (NoSuchAlgorithmException e) {
+			throw new IOException(e);
+		}
 
 	}
 
 	@Override
-	public byte[] sign() throws SignatureException {
+	public byte[] sign() throws IOException {
 		return GnuFunctions.signatureSign(signature);
 	}
 
 	@Override
-	public int sign(byte[] _outbuf, int _offset, int _len) throws SignatureException {
+	public int sign(byte[] _outbuf, int _offset, int _len) throws IOException {
 		return GnuFunctions.signatureSign(signature, _outbuf, _offset, _len);
 	}
 
@@ -109,35 +119,35 @@ public final class GnuSignature extends AbstractSignature {
 	}
 
 	@Override
-	public void update(byte _b) throws SignatureException {
+	public void update(byte _b) throws IOException {
 		GnuFunctions.signatureUpdate(signature, _b);
 	}
 
 	@Override
-	public void update(byte[] _data) throws SignatureException {
+	public void update(byte[] _data) throws IOException {
 		GnuFunctions.signatureUpdate(signature, _data);
 
 	}
 
 	@Override
-	public void update(byte[] _data, int _off, int _len) throws SignatureException {
+	public void update(byte[] _data, int _off, int _len) throws IOException {
 		GnuFunctions.signatureUpdate(signature, _data, _off, _len);
 
 	}
 
 	@Override
-	public void update(ByteBuffer _input) throws SignatureException {
+	public void update(ByteBuffer _input) throws IOException {
 		GnuFunctions.signatureUpdate(signature, _input);
 
 	}
 
 	@Override
-	public boolean verify(byte[] _signature) throws SignatureException {
+	public boolean verify(byte[] _signature) throws IOException {
 		return GnuFunctions.signatureVerify(signature, _signature);
 	}
 
 	@Override
-	public boolean verify(byte[] _signature, int _offset, int _length) throws SignatureException {
+	public boolean verify(byte[] _signature, int _offset, int _length) throws IOException {
 		return GnuFunctions.signatureVerify(signature, _signature, _offset, _length);
 	}
 }

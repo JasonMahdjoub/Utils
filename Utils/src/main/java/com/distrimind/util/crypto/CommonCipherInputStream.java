@@ -39,9 +39,6 @@ import com.distrimind.util.io.Integrity;
 import com.distrimind.util.io.MessageExternalizationException;
 import com.distrimind.util.io.RandomInputStream;
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.ShortBufferException;
 import java.io.DataInputStream;
 import java.io.EOFException;
 import java.io.IOException;
@@ -159,8 +156,7 @@ abstract class CommonCipherInputStream extends RandomInputStream {
 	public int read(byte[] b, int off, int len) throws IOException {
 		return read(b, off, len, false);
 	}
-	private void checkOutputBuffer()
-	{
+	private void checkOutputBuffer() throws IOException {
 		if (outputBuffer==null)
 			outputBuffer=new byte[128+cipher.getOutputSize(this.buffer.length)];
 	}
@@ -196,7 +192,7 @@ abstract class CommonCipherInputStream extends RandomInputStream {
 				else
 					outputBufferLength +=cipher.doFinal(outputBuffer, outputBufferLength+outputBufferIndex);
 				doFinal=false;
-			} catch (IllegalBlockSizeException | BadPaddingException | ShortBufferException | IllegalStateException e) {
+			} catch (IllegalStateException e) {
 				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, e);
 			}
 		}
@@ -269,46 +265,42 @@ abstract class CommonCipherInputStream extends RandomInputStream {
 			checkOutputBuffer();
 			do {
 				int s3=Math.min(s, buffer.length);
-				try {
-					s2=is.read(buffer, 0, s3);
+				s2=is.read(buffer, 0, s3);
 
-					if (s2==-1)
+				if (s2==-1)
+				{
+					//length=is.currentPosition();
+					checkDoFinal(true);
+					s= readOutputBuffer(b, off, len);
+					total+=s;
+					if (fully)
 					{
-						//length=is.currentPosition();
-						checkDoFinal(true);
-						s= readOutputBuffer(b, off, len);
-						total+=s;
-						if (fully)
-						{
-							if (total!=originalLen)
-								throw new EOFException();
-						}
-						if (total==0)
-						{
-							return -1;
-						}
-						else
-							return total;
+						if (total!=originalLen)
+							throw new EOFException();
 					}
-					posEncrypted +=s2;
-					int w=0;
-
-					if (s2>0) {
-						w = cipher.update(buffer, 0, s2, b, off);
-						posPlainText+=w;
-						doFinal = true;
+					if (total==0)
+					{
+						return -1;
 					}
-
-					s-=s2;
-					total+=w;
-					off+=w;
-					len-=w;
-
-					if (!fully && s3!=s2)
+					else
 						return total;
-				} catch (ShortBufferException e) {
-					throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, e);
 				}
+				posEncrypted +=s2;
+				int w=0;
+
+				if (s2>0) {
+					w = cipher.update(buffer, 0, s2, b, off);
+					posPlainText+=w;
+					doFinal = true;
+				}
+
+				s-=s2;
+				total+=w;
+				off+=w;
+				len-=w;
+
+				if (!fully && s3!=s2)
+					return total;
 
 			} while(s>0);
 			checkDoFinal(false);
@@ -332,18 +324,13 @@ abstract class CommonCipherInputStream extends RandomInputStream {
 				checkDoFinal(true);
 				return readOutputBuffer();
 			} else {
-				try {
+				int w = cipher.update(one, 0, 1, outputBuffer, outputBufferLength);
 
-					int w = cipher.update(one, 0, 1, outputBuffer, outputBufferLength);
-
-					doFinal = true;
-					if (w > 0) {
-						outputBufferLength += w;
-						posPlainText += w;
-						return readOutputBuffer();
-					}
-				} catch (ShortBufferException e) {
-					throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, e);
+				doFinal = true;
+				if (w > 0) {
+					outputBufferLength += w;
+					posPlainText += w;
+					return readOutputBuffer();
 				}
 
 			}

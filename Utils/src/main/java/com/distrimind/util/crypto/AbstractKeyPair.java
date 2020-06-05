@@ -77,7 +77,7 @@ public abstract class AbstractKeyPair<PrivKey extends IASymmetricPrivateKey, Pub
 	public abstract boolean isPostQuantumKey();
 
 
-	public abstract Object toGnuKeyPair()throws NoSuchAlgorithmException, InvalidKeySpecException;
+	public abstract Object toGnuKeyPair() throws NoSuchAlgorithmException, InvalidKeySpecException, IOException;
 
 
 	public abstract java.security.KeyPair toJavaNativeKeyPair()

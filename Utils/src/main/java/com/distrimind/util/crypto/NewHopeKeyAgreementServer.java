@@ -35,10 +35,13 @@ knowledge of the CeCILL-C license and that you accept its terms.
 package com.distrimind.util.crypto;
 
 
+import com.distrimind.util.io.Integrity;
+import com.distrimind.util.io.MessageExternalizationException;
 import org.bouncycastle.bccrypto.CryptoException;
 import org.bouncycastle.pqc.crypto.ExchangePair;
 import org.bouncycastle.pqc.crypto.newhope.NHPublicKeyParameters;
 
+import java.io.IOException;
 import java.util.Arrays;
 
 /**
@@ -110,41 +113,41 @@ public class NewHopeKeyAgreementServer extends AbstractNewHopeKeyAgreement{
 		return valid;
 	}
 	@Override
-	protected byte[] getDataToSend(int stepNumber) throws Exception {
+	protected byte[] getDataToSend(int stepNumber) throws IOException {
 		if (!valid)
-			throw new CryptoException();
+			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException());
 
 		try {
 			if (stepNumber == 0)
 				return getDataPhase2();
 			else {
 				valid = false;
-				throw new IllegalAccessException();
+				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN,new IllegalAccessException());
 			}
 		}
 		catch(Exception e)
 		{
 			valid=false;
-			throw e;
+			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, e);
 		}
 
 
 	}
 	@Override
-	protected void receiveData(int stepNumber, byte[] data) throws CryptoException {
+	protected void receiveData(int stepNumber, byte[] data) throws IOException {
 		if (!valid)
-			throw new CryptoException();
+			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException());
 
 		try {
 			if (stepNumber == 0)
 				setDataPhase1(data);
 			else
-				throw new IllegalAccessException();
+				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new IllegalAccessException());
 		}
 		catch(Exception e)
 		{
 			valid=false;
-			throw new CryptoException("", e);
+			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException("", e));
 		}
 
 

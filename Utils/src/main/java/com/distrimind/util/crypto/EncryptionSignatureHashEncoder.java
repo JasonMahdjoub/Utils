@@ -39,8 +39,8 @@ import com.distrimind.util.Bits;
 import com.distrimind.util.io.*;
 
 import java.io.IOException;
-import java.security.*;
-import java.security.spec.InvalidKeySpecException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.util.Arrays;
 
 /**
@@ -113,7 +113,7 @@ public class EncryptionSignatureHashEncoder {
 	private byte[] externalCounter=null;
 	private Byte code=null;
 	private short currentKeyID=-1;
-	private SecretKeyProvider secretKeyProvider=null;
+	//private SecretKeyProvider secretKeyProvider=null;
 
 	public EncryptionSignatureHashEncoder() throws IOException {
 		limitedRandomOutputStream=new LimitedRandomOutputStream(nullRandomInputStream, 0);
@@ -133,18 +133,29 @@ public class EncryptionSignatureHashEncoder {
 		this.externalCounter=externalCounter;
 		return this;
 	}
-	public EncryptionSignatureHashEncoder withSecretKeyProvider(AbstractSecureRandom random, SecretKeyProvider secretKeyProvider) throws IOException {
-		return withSecretKeyProvider(random, secretKeyProvider, secretKeyProvider.getDefaultKeyID());
+	public EncryptionSignatureHashEncoder withSecretKeyProvider(AbstractSecureRandom random, EncryptionProfileProvider encryptionProfileProvider) throws IOException {
+		return withSecretKeyProvider(random, encryptionProfileProvider, encryptionProfileProvider.getDefaultKeyID());
 	}
-	public EncryptionSignatureHashEncoder withSecretKeyProvider(AbstractSecureRandom random, SecretKeyProvider secretKeyProvider, short keyID) throws IOException {
+	public EncryptionSignatureHashEncoder withSecretKeyProvider(AbstractSecureRandom random, EncryptionProfileProvider encryptionProfileProvider, short keyID) throws IOException {
 		if (random==null)
 			throw new NullPointerException();
-		if (secretKeyProvider==null)
+		if (encryptionProfileProvider ==null)
 			throw new NullPointerException();
-		this.cipher=new SymmetricEncryptionAlgorithm(random, secretKeyProvider.getSecretKey(keyID));
+		SymmetricSecretKey secretKey=encryptionProfileProvider.getSecretKeyForEncryption(keyID, false);
+		this.cipher=secretKey==null?null:new SymmetricEncryptionAlgorithm(random, secretKey);
+		try {
+			MessageDigestType t=encryptionProfileProvider.getMessageDigest(keyID, false);
+			this.digest=t==null?null:t.getMessageDigestInstance();
+			secretKey=encryptionProfileProvider.getSecretKeyForSignature(keyID, false);
+			this.symmetricSigner=secretKey==null?null:new SymmetricAuthenticatedSignerAlgorithm(secretKey);
+			IASymmetricPrivateKey privateKey=encryptionProfileProvider.getSecretKeyForPrivateKey(keyID);
+			this.asymmetricSigner=privateKey==null?null:new ASymmetricAuthenticatedSignerAlgorithm(privateKey);
+
+		} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
+			throw new IOException(e);
+		}
 		code=null;
 		this.currentKeyID=keyID;
-		this.secretKeyProvider=secretKeyProvider;
 		return this;
 	}
 
@@ -214,7 +225,7 @@ public class EncryptionSignatureHashEncoder {
 		code=null;
 		return this;
 	}
-	public EncryptionSignatureHashEncoder withASymmetricPrivateKeyForSignature(ASymmetricPrivateKey privateKeyForSignature) throws IOException{
+	public EncryptionSignatureHashEncoder withASymmetricPrivateKeyForSignature(IASymmetricPrivateKey privateKeyForSignature) throws IOException{
 		if (privateKeyForSignature==null)
 			throw new NullPointerException();
 		if (!privateKeyForSignature.useAuthenticatedSignatureAlgorithm())
@@ -415,7 +426,7 @@ public class EncryptionSignatureHashEncoder {
 
 			outputStream.flush();
 		}
-		catch(InvalidKeyException | InvalidAlgorithmParameterException | NoSuchAlgorithmException | InvalidKeySpecException | NoSuchProviderException | SignatureException e)
+		catch(NoSuchAlgorithmException | NoSuchProviderException e)
 		{
 			throw new IOException(e);
 		}

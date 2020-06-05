@@ -34,6 +34,8 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
+import com.distrimind.util.io.Integrity;
+import com.distrimind.util.io.MessageExternalizationException;
 import org.bouncycastle.crypto.Algorithm;
 import org.bouncycastle.crypto.asymmetric.AsymmetricEdDSAPublicKey;
 import org.bouncycastle.crypto.asymmetric.AsymmetricXDHPrivateKey;
@@ -88,12 +90,12 @@ public enum ASymmetricEncryptionType {
 
 
 	static Object decodeGnuPrivateKey(byte[] encodedKey, String algorithm)
-			throws NoSuchAlgorithmException, InvalidKeySpecException {
+			throws NoSuchAlgorithmException, MessageExternalizationException {
 		return GnuFunctions.decodeGnuPrivateKey(encodedKey, algorithm);
 	}
 
 	static Object decodeGnuPublicKey(byte[] encodedKey, String algorithm)
-			throws NoSuchAlgorithmException, InvalidKeySpecException {
+			throws NoSuchAlgorithmException, IOException {
 		return GnuFunctions.decodeGnuPublicKey(encodedKey, algorithm);
 	}
 
@@ -364,7 +366,7 @@ public enum ASymmetricEncryptionType {
 	}
 
 	public AbstractCipher getCipherInstance()
-			throws NoSuchAlgorithmException, NoSuchPaddingException, NoSuchProviderException {
+			throws NoSuchAlgorithmException, NoSuchProviderException, MessageExternalizationException {
 		CodeProvider.ensureProviderLoaded(codeProviderForEncryption);
 		String name = algorithmName+"/" + blockMode + "/" + padding;
 		if (codeProviderForEncryption == CodeProvider.GNU_CRYPTO) {
@@ -379,7 +381,11 @@ public enum ASymmetricEncryptionType {
 		} else if (codeProviderForEncryption == CodeProvider.BCFIPS || codeProviderForEncryption == CodeProvider.BC) {
 			throw new IllegalAccessError();
 		} else {
-			return new JavaNativeCipher(Cipher.getInstance(name, codeProviderForEncryption.checkProviderWithCurrentOS().name()));
+			try {
+				return new JavaNativeCipher(Cipher.getInstance(name, codeProviderForEncryption.checkProviderWithCurrentOS().name()));
+			} catch (NoSuchPaddingException e) {
+				throw new MessageExternalizationException(Integrity.FAIL, e);
+			}
 		}
 	}
 
@@ -398,17 +404,17 @@ public enum ASymmetricEncryptionType {
 	}
 
 	public AbstractKeyPairGenerator getKeyPairGenerator(AbstractSecureRandom random)
-			throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException {
+			throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
 		return getKeyPairGenerator(random, keySizeBits, System.currentTimeMillis() + expirationTimeMilis);
 	}
 
 	public AbstractKeyPairGenerator getKeyPairGenerator(AbstractSecureRandom random, int keySizeBits)
-			throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException {
+			throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
 		return getKeyPairGenerator(random, keySizeBits, System.currentTimeMillis() + expirationTimeMilis);
 	}
 
 	public AbstractKeyPairGenerator getKeyPairGenerator(AbstractSecureRandom random, int keySizeBits,
-			long expirationTimeUTC) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException {
+			long expirationTimeUTC) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
 		if (keySizeBits<0)
 			keySizeBits= this.keySizeBits;
 		if (expirationTimeUTC==Long.MIN_VALUE)

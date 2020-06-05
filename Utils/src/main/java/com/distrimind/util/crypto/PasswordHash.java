@@ -34,14 +34,12 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.SecureRandom;
-import java.security.spec.InvalidKeySpecException;
-import java.util.Arrays;
-
 import com.distrimind.util.Bits;
 import com.distrimind.util.sizeof.ObjectSizer;
+
+import java.io.IOException;
+import java.security.SecureRandom;
+import java.util.Arrays;
 
 
 /**
@@ -136,19 +134,19 @@ public class PasswordHash {
 	}
 
 	public byte[] hash(char[] password)
-			throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
+			throws IOException {
 		return hash(password, null, type.getDefaultHashLengthBytes());
 	}
 	public byte[] hash(char[] password, byte defaultHashLengthBytes)
-			throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
+			throws IOException {
 		return hash(password, null, defaultHashLengthBytes);
 	}
-	public byte[] hash(char[] password, byte[] staticAdditionalSalt) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException
+	public byte[] hash(char[] password, byte[] staticAdditionalSalt) throws IOException
 	{
 		return hash(password, staticAdditionalSalt, type.getDefaultHashLengthBytes());
 	}
 	public byte[] hash(char[] password, byte[] staticAdditionalSalt, byte hashLengthBytes)
-			throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
+			throws IOException {
 		if (password == null)
 			throw new NullPointerException("password");
 
@@ -177,19 +175,19 @@ public class PasswordHash {
 		return res;
 	}*/
 	public byte[] hash(String password)
-			throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
+			throws IOException {
 		return hash(password.toCharArray());
 	}
 	public byte[] hash(String password, byte defaultHashLengthBytes)
-			throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
+			throws IOException {
 		return hash(password.toCharArray(), defaultHashLengthBytes);
 	}
-	public byte[] hash(String password, byte[] staticAdditionalSalt) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException
+	public byte[] hash(String password, byte[] staticAdditionalSalt) throws IOException
 	{
 		return hash(password, staticAdditionalSalt, type.getDefaultHashLengthBytes());
 	}
 	public byte[] hash(String password, byte[] staticAdditionalSalt, byte defaultHashLengthBytes)
-			throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
+			throws IOException {
 		return hash(password.toCharArray(), staticAdditionalSalt, defaultHashLengthBytes);
 	}
 

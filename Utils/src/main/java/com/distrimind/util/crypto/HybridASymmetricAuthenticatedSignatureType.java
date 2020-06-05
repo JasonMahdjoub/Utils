@@ -35,7 +35,7 @@ The fact that you are presently reading this means that you have had
 knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-import java.security.InvalidAlgorithmParameterException;
+import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.util.Objects;
@@ -85,14 +85,14 @@ public final class HybridASymmetricAuthenticatedSignatureType {
 	public ASymmetricAuthenticatedSignatureType getPQCASymmetricAuthenticatedSignatureType() {
 		return PQCASymmetricAuthenticatedSignatureType;
 	}
-	public HybridASymmetricKeyPair generateKeyPair(AbstractSecureRandom random) throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException {
+	public HybridASymmetricKeyPair generateKeyPair(AbstractSecureRandom random) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
 		return generateKeyPair(random, -1);
 	}
-	public HybridASymmetricKeyPair generateKeyPair(AbstractSecureRandom random, int keySizeBits) throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException {
+	public HybridASymmetricKeyPair generateKeyPair(AbstractSecureRandom random, int keySizeBits) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
 		return generateKeyPair(random, keySizeBits, Long.MAX_VALUE);
 	}
 	public HybridASymmetricKeyPair generateKeyPair(AbstractSecureRandom random, int keySizeBits,
-												   long expirationTimeUTC) throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException {
+												   long expirationTimeUTC) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
 		ASymmetricKeyPair kp=nonPQCASymmetricAuthenticatedSignatureType.getKeyPairGenerator(random, keySizeBits, expirationTimeUTC ).generateKeyPair();
 		ASymmetricKeyPair pqcKP=PQCASymmetricAuthenticatedSignatureType.getKeyPairGenerator(random, keySizeBits, expirationTimeUTC ).generateKeyPair();
 		return new HybridASymmetricKeyPair(kp, pqcKP);

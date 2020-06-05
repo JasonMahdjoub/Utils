@@ -35,8 +35,11 @@ knowledge of the CeCILL-C license and that you accept its terms.
 package com.distrimind.util.crypto;
 
 
+import com.distrimind.util.io.Integrity;
+import com.distrimind.util.io.MessageExternalizationException;
 import org.bouncycastle.bccrypto.CryptoException;
 
+import java.io.IOException;
 import java.util.Arrays;
 
 /**
@@ -70,7 +73,7 @@ public class P2PLoginCheckerWithASymmetricSignature extends P2PLoginAgreement{
         if (publicKey==null)
             throw new NullPointerException();
         if (publicKey instanceof HybridASymmetricPublicKey) {
-            if (((HybridASymmetricPublicKey) publicKey).getNonPQCPublicKey().getAuthenticatedSignatureAlgorithmType() == null
+            if (publicKey.getNonPQCPublicKey().getAuthenticatedSignatureAlgorithmType() == null
                     || ((HybridASymmetricPublicKey) publicKey).getPQCPublicKey().getAuthenticatedSignatureAlgorithmType() == null)
                 throw new IllegalArgumentException("The given public key is not usable for signature");
         }
@@ -89,9 +92,9 @@ public class P2PLoginCheckerWithASymmetricSignature extends P2PLoginAgreement{
 
     private final static byte[] emptyTab=new byte[0];
     @Override
-    protected byte[] getDataToSend(int stepNumber) throws CryptoException {
+    protected byte[] getDataToSend(int stepNumber) throws IOException {
         if (!valid)
-            throw new CryptoException();
+            throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException());
 
         switch(stepNumber)
         {
@@ -108,9 +111,9 @@ public class P2PLoginCheckerWithASymmetricSignature extends P2PLoginAgreement{
     }
 
     @Override
-    protected void receiveData(int stepNumber, byte[] data) throws CryptoException {
+    protected void receiveData(int stepNumber, byte[] data) throws IOException {
         if (!valid)
-            throw new CryptoException();
+            throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException());
 
         try {
             switch (stepNumber) {
@@ -125,7 +128,7 @@ public class P2PLoginCheckerWithASymmetricSignature extends P2PLoginAgreement{
                 case 1: {
                     if (otherMessage == null) {
                         valid = false;
-                        throw new CryptoException();
+                        throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException());
                     }
                     ASymmetricAuthenticatedSignatureCheckerAlgorithm checker = new ASymmetricAuthenticatedSignatureCheckerAlgorithm(publicKey);
                     checker.init(data);
@@ -137,16 +140,16 @@ public class P2PLoginCheckerWithASymmetricSignature extends P2PLoginAgreement{
                 break;
                 default:
                     valid = false;
-                    throw new CryptoException("" + stepNumber);
+                    throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException("" + stepNumber));
             }
         }
         catch (Exception e)
         {
             valid = false;
             if (e instanceof CryptoException)
-                throw (CryptoException)e;
+                throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, e);
             else
-                throw new CryptoException("", e);
+                throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException("", e));
         }
     }
 }

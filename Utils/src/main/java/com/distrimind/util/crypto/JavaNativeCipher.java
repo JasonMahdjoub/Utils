@@ -34,9 +34,13 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
+import com.distrimind.util.io.Integrity;
+import com.distrimind.util.io.MessageExternalizationException;
+
 import javax.crypto.*;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.IvParameterSpec;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Constructor;
@@ -76,8 +80,12 @@ public final class JavaNativeCipher extends AbstractCipher {
 	}
 
 	@Override
-	public byte[] doFinal() throws IllegalStateException, IllegalBlockSizeException, BadPaddingException {
-		return cipher.doFinal();
+	public byte[] doFinal() throws IOException {
+		try {
+			return cipher.doFinal();
+		} catch (IllegalBlockSizeException | BadPaddingException e) {
+			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, e);
+		}
 
 	}
 
@@ -85,15 +93,23 @@ public final class JavaNativeCipher extends AbstractCipher {
 
 	@Override
 	public int doFinal(byte[] _output, int _outputOffset)
-			throws IllegalStateException, IllegalBlockSizeException, BadPaddingException, ShortBufferException {
-		return cipher.doFinal(_output, _outputOffset);
+			throws IOException {
+		try {
+			return cipher.doFinal(_output, _outputOffset);
+		} catch (IllegalBlockSizeException | ShortBufferException | BadPaddingException e) {
+			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, e);
+		}
 
 	}
 
 	@Override
 	public byte[] doFinal(byte[] _input, int _inputOffset, int _inputLength)
-			throws IllegalStateException, IllegalBlockSizeException, BadPaddingException {
-		return cipher.doFinal(_input, _inputOffset, _inputLength);
+			throws IOException {
+		try {
+			return cipher.doFinal(_input, _inputOffset, _inputLength);
+		} catch (IllegalBlockSizeException | BadPaddingException e) {
+			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, e);
+		}
 
 	}
 
@@ -101,8 +117,12 @@ public final class JavaNativeCipher extends AbstractCipher {
 
 	@Override
 	public int doFinal(byte[] _input, int _inputOffset, int _inputLength, byte[] _output, int _outputOffset)
-			throws IllegalStateException, IllegalBlockSizeException, BadPaddingException, ShortBufferException {
-		return cipher.doFinal(_input, _inputOffset, _inputLength, _output, _outputOffset);
+			throws IOException {
+		try {
+			return cipher.doFinal(_input, _inputOffset, _inputLength, _output, _outputOffset);
+		} catch (ShortBufferException | IllegalBlockSizeException | BadPaddingException e) {
+			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, e);
+		}
 	}
 
 
@@ -133,36 +153,53 @@ public final class JavaNativeCipher extends AbstractCipher {
 	}
 
 	@Override
-	public int getOutputSize(int _inputLength) throws IllegalStateException {
-		return cipher.getOutputSize(_inputLength);
+	public int getOutputSize(int _inputLength) throws IOException {
+		try {
+			return cipher.getOutputSize(_inputLength);
+		}
+		catch (IllegalStateException e)
+		{
+			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, e);
+		}
 	}
 
 
 	@Override
 	public void init(int _opmode, AbstractKey _key, AbstractSecureRandom _random)
-			throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException {
+			throws IOException {
 		mode=_opmode;
-		cipher.init(_opmode, _key.toJavaNativeKey(), setSecureRandom(_random));
+		try {
+			cipher.init(_opmode, _key.toJavaNativeKey(), setSecureRandom(_random));
+		} catch (InvalidKeyException | InvalidKeySpecException | NoSuchAlgorithmException e) {
+			throw new MessageExternalizationException(Integrity.FAIL, e);
+		}
 
 	}
 
 	@Override
-	public void init(int _opmode, AbstractKey _key) throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException {
+	public void init(int _opmode, AbstractKey _key) throws IOException {
 		mode=_opmode;
-		cipher.init(_opmode, _key.toJavaNativeKey());
+		try {
+			cipher.init(_opmode, _key.toJavaNativeKey());
+		} catch (InvalidKeyException | InvalidKeySpecException | NoSuchAlgorithmException e) {
+			throw new MessageExternalizationException(Integrity.FAIL, e);
+		}
 	}
 
 
 	@Override
-	public void init(int _opmode, AbstractKey _key, byte[] _iv) throws InvalidKeyException, NoSuchAlgorithmException,
-			InvalidKeySpecException, InvalidAlgorithmParameterException {
+	public void init(int _opmode, AbstractKey _key, byte[] _iv) throws IOException {
 		mode=_opmode;
-		if (type!=null && type.getBlockMode().toUpperCase().equals("GCM"))
-			cipher.init(_opmode, _key.toJavaNativeKey(), new GCMParameterSpec(128, _iv));
-		else if (type!=null && type.equals(SymmetricEncryptionType.CHACHA20_NO_RANDOM_ACCESS))
-			init(_opmode, _key, _iv, 0);
-		else
-			cipher.init(_opmode, _key.toJavaNativeKey(), new IvParameterSpec(_iv));
+		try {
+			if (type != null && type.getBlockMode().toUpperCase().equals("GCM"))
+				cipher.init(_opmode, _key.toJavaNativeKey(), new GCMParameterSpec(128, _iv));
+			else if (type != null && type.equals(SymmetricEncryptionType.CHACHA20_NO_RANDOM_ACCESS))
+				init(_opmode, _key, _iv, 0);
+			else
+				cipher.init(_opmode, _key.toJavaNativeKey(), new IvParameterSpec(_iv));
+		}catch (InvalidKeyException | InvalidKeySpecException | InvalidAlgorithmParameterException | NoSuchAlgorithmException e) {
+			throw new MessageExternalizationException(Integrity.FAIL, e);
+		}
 
 	}
 
@@ -182,7 +219,7 @@ public final class JavaNativeCipher extends AbstractCipher {
 	}
 
 	@Override
-	public void init(int opmode, AbstractKey key, byte[] iv, int counter) throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidAlgorithmParameterException {
+	public void init(int opmode, AbstractKey key, byte[] iv, int counter) throws IOException {
 
 		mode=opmode;
 		if (type.equals(SymmetricEncryptionType.CHACHA20_NO_RANDOM_ACCESS))
@@ -191,7 +228,12 @@ public final class JavaNativeCipher extends AbstractCipher {
 
 				cipher.init(opmode, key.toJavaNativeKey(), constChachaParam.newInstance(iv, counter));
 			} catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
-				throw new InvalidAlgorithmParameterException(e.getCause());
+				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, (Exception)e.getCause());
+			}
+			catch (InvalidKeyException | InvalidKeySpecException | InvalidAlgorithmParameterException e) {
+				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, e);
+			} catch (NoSuchAlgorithmException e) {
+				throw new MessageExternalizationException(Integrity.FAIL, e);
 			}
 		}
 		else
@@ -200,15 +242,19 @@ public final class JavaNativeCipher extends AbstractCipher {
 	}
 
 	@Override
-	public byte[] update(byte[] _input, int _inputOffset, int _inputLength) throws IllegalStateException {
+	public byte[] update(byte[] _input, int _inputOffset, int _inputLength) {
 		return cipher.update(_input, _inputOffset, _inputLength);
 	}
 
 
 	@Override
 	public int update(byte[] _input, int _inputOffset, int _inputLength, byte[] _output, int _outputOffset)
-			throws IllegalStateException, ShortBufferException {
-		return cipher.update(_input, _inputOffset, _inputLength, _output, _outputOffset);
+			throws IOException {
+		try {
+			return cipher.update(_input, _inputOffset, _inputLength, _output, _outputOffset);
+		} catch (ShortBufferException e) {
+			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, e);
+		}
 
 	}
 	@Override

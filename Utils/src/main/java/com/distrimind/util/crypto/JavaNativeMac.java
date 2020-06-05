@@ -34,6 +34,10 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
+import com.distrimind.util.io.Integrity;
+import com.distrimind.util.io.MessageExternalizationException;
+
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -50,7 +54,7 @@ import javax.crypto.spec.SecretKeySpec;
  * @since Utils 2.10.0
  */
 public final class JavaNativeMac extends AbstractMac {
-	private Mac mac;
+	private final Mac mac;
 
 	JavaNativeMac(Mac mac) {
 		if (mac == null)
@@ -89,23 +93,45 @@ public final class JavaNativeMac extends AbstractMac {
 	}
 
 	@Override
-	public final void init(AbstractKey _key) throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException {
-		mac.init(new SecretKeySpec(_key.toJavaNativeKey().getEncoded(), mac.getAlgorithm()));
+	public final void init(AbstractKey _key) throws IOException {
+		try {
+			mac.init(new SecretKeySpec(_key.toJavaNativeKey().getEncoded(), mac.getAlgorithm()));
+		} catch (InvalidKeyException | NoSuchAlgorithmException | InvalidKeySpecException e) {
+			throw new IOException(e);
+		}
 	}
 
 	@Override
-	public final void update(byte _input) throws IllegalStateException {
-		mac.update(_input);
+	public final void update(byte _input) throws IOException {
+		try {
+			mac.update(_input);
+		}
+		catch (IllegalStateException e)
+		{
+			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, e);
+		}
 	}
 
 	@Override
-	public final void update(byte[] _input) throws IllegalStateException {
-		mac.update(_input);
+	public final void update(byte[] _input) throws IOException {
+		try {
+			mac.update(_input);
+		}
+		catch (IllegalStateException e)
+		{
+			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, e);
+		}
 	}
 
 	@Override
-	public final void update(byte[] _input, int _offset, int _len) throws IllegalStateException {
-		mac.update(_input, _offset, _len);
+	public final void update(byte[] _input, int _offset, int _len) throws IOException {
+		try {
+			mac.update(_input, _offset, _len);
+		}
+		catch (IllegalStateException e)
+		{
+			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, e);
+		}
 	}
 
 	@Override
@@ -114,18 +140,39 @@ public final class JavaNativeMac extends AbstractMac {
 	}
 
 	@Override
-	public final byte[] doFinal() throws IllegalStateException {
-		return mac.doFinal();
+	public final byte[] doFinal() throws IOException {
+		try {
+			return mac.doFinal();
+		}
+		catch (IllegalStateException e)
+		{
+			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, e);
+		}
+
 	}
 
 	@Override
-	public final void doFinal(byte[] _output, int _outOffset) throws ShortBufferException, IllegalStateException {
-		mac.doFinal(_output, _outOffset);
+	public final void doFinal(byte[] _output, int _outOffset) throws IOException {
+		try {
+			mac.doFinal(_output, _outOffset);
+		}
+		catch (IllegalStateException e)
+		{
+			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, e);
+		} catch (ShortBufferException e) {
+			throw new MessageExternalizationException(Integrity.FAIL, e);
+		}
 	}
 
 	@Override
-	public final byte[] doFinal(byte[] _input) throws IllegalStateException {
-		return mac.doFinal(_input);
+	public final byte[] doFinal(byte[] _input) throws IOException {
+		try {
+			return mac.doFinal(_input);
+		}
+		catch (IllegalStateException e)
+		{
+			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, e);
+		}
 	}
 
 	@Override

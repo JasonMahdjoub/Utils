@@ -59,7 +59,7 @@ public enum ASymmetricLoginAgreementType {
 
     }
 
-    public boolean isPostQuantumAlgorithm(AbstractKeyPair keyPair)
+    public boolean isPostQuantumAlgorithm(AbstractKeyPair<?, ?> keyPair)
     {
         return pqc && keyPair!=null && keyPair.isPostQuantumKey();
     }
