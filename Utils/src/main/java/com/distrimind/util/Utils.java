@@ -59,8 +59,8 @@ public class Utils {
 		Calendar c = Calendar.getInstance();
 		c.set(2016, Calendar.JANUARY, 4);
 		Calendar c2 = Calendar.getInstance();
-		c.set(2020, Calendar.JUNE, 5);
-		VERSION = new Version("Utils", "Utils", (short)5, (short)0, (short)0, Version.Type.Stable, (short)0, c.getTime(), c2.getTime());
+		c.set(2020, Calendar.JUNE, 9);
+		VERSION = new Version("Utils", "Utils", (short)5, (short)1, (short)0, Version.Type.Stable, (short)0, c.getTime(), c2.getTime());
 		try {
 
 			InputStream is = Utils.class.getResourceAsStream("build.txt");
@@ -73,8 +73,14 @@ public class Utils {
 			VERSION.addDeveloper(new PersonDeveloper("mahdjoub", "jason", c.getTime()));
 
 			c = Calendar.getInstance();
+			c.set(2020, Calendar.JUNE, 9);
+			Description d = new Description((short)5, (short)1, (short)0, Version.Type.Stable, (short)0, c.getTime());
+			d.addItem("Add function EncryptionSignatureHashEncoder.getRandomOutputStream(RandomOutputStream)");
+			VERSION.addDescription(d);
+
+			c = Calendar.getInstance();
 			c.set(2020, Calendar.JUNE, 5);
-			Description d = new Description((short)5, (short)0, (short)0, Version.Type.Stable, (short)0, c.getTime());
+			d = new Description((short)5, (short)0, (short)0, Version.Type.Stable, (short)0, c.getTime());
 			d.addItem("Add class EncryptionTools");
 			d.addItem("Use temporary directory into RandomCacheFileCenter");
 			d.addItem("Fix issues into FilePermissions");

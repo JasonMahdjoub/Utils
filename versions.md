@@ -1,6 +1,6 @@
 Utils
 =====
-5.0.0 Stable (Build: 1721) (from 05/06/2020 to 05/06/2020)
+5.1.0 Stable (Build: 1724) (from 09/06/2020 to 09/06/2020)
 
 # Creator(s):
 Jason MAHDJOUB
@@ -9,6 +9,10 @@ Jason MAHDJOUB
 Jason MAHDJOUB (Entred in the team at 04/01/2016)
 
 # Modifications:
+
+
+### 5.1.0 Stable (09/06/2020)
+* Add function EncryptionSignatureHashEncoder.getRandomOutputStream(RandomOutputStream)
 
 
 ### 5.0.0 Stable (05/06/2020)
