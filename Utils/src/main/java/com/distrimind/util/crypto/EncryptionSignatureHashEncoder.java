@@ -113,6 +113,7 @@ public class EncryptionSignatureHashEncoder {
 	private byte[] externalCounter=null;
 	private Byte code=null;
 	private short currentKeyID=-1;
+	private ROSForEncryption rosForEncryption=null;
 	//private SecretKeyProvider secretKeyProvider=null;
 
 	public EncryptionSignatureHashEncoder() throws IOException {
@@ -283,94 +284,188 @@ public class EncryptionSignatureHashEncoder {
 			throw new NullPointerException();
 		if (inputStream.length()<=0)
 			throw new IllegalArgumentException();
+		try(RandomOutputStream ros=getRandomOutputStream(originalOutputStream, inputStream.length()))
+		{
+			inputStream.transferTo(ros);
+		}
+	}
+	public RandomOutputStream getRandomOutputStream(final RandomOutputStream originalOutputStream) throws IOException {
+		return getRandomOutputStream(originalOutputStream, -1);
+	}
 
-		if (originalOutputStream==null)
-			throw new NullPointerException();
-
-		try {
-			long originalOutputLength=originalOutputStream.length();
-			long dataInputLength=inputStream.length();
-			long maximumOutputLengthAfterEncoding=getMaximumOutputLength(dataInputLength);
-			originalOutputStream.ensureLength(maximumOutputLengthAfterEncoding);
-
-			byte code=getCode();
-			AbstractMessageDigest digest=this.digest;
-			if (symmetricSigner!=null && asymmetricSigner!=null && digest==null) {
-				digest = defaultMessageDigest;
-				if (digest==null) {
-					defaultMessageDigest=digest = defaultMessageType.getMessageDigestInstance();
-				}
-
-			}
-
-			RandomOutputStream outputStream=originalOutputStream;
-			if (digest!=null) {
-				digest.reset();
-				if (hashOut == null)
-					hashOut = new HashRandomOutputStream(outputStream, digest);
-				else
-					hashOut.set(outputStream, digest);
-				outputStream = hashOut;
-			}
-			else if (symmetricSigner!=null)
+	private class ROSForEncryption extends RandomOutputStream
+	{
+		private RandomOutputStream originalOutputStream;
+		private long inputStreamLength;
+		private long originalOutputLength;
+		private long maximumOutputLengthAfterEncoding;
+		private int lenBuffer;
+		private byte[] buffer;
+		private long dataLen;
+		private boolean closed;
+		private RandomOutputStream outputStream;
+		private AbstractMessageDigest digest;
+		private ROSForEncryption(final RandomOutputStream originalOutputStream, final long inputStreamLength) throws IOException {
+			init(originalOutputStream, inputStreamLength);
+		}
+		void init(final RandomOutputStream originalOutputStream, final long inputStreamLength) throws IOException {
+			if (originalOutputStream==null)
+				throw new NullPointerException();
+			if (inputStreamLength<0 && cipher.getType().isAuthenticatedAlgorithm())
+				throw new IllegalArgumentException("Cannot use RandomOutputStream for encryption when using authenticated algorithm");
+			this.originalOutputStream=originalOutputStream;
+			this.inputStreamLength=inputStreamLength;
+			this.closed=false;
+			try
 			{
-				symmetricSigner.init();
-				if (signerOut==null)
-					signerOut=new SignerRandomOutputStream(outputStream, symmetricSigner );
-				else
-					signerOut.set(outputStream, symmetricSigner);
-				outputStream=signerOut;
-			} else if (asymmetricSigner!=null)
-			{
-				asymmetricSigner.init();
-				if (signerOut==null)
-					signerOut=new SignerRandomOutputStream(outputStream, asymmetricSigner );
-				else
-					signerOut.set(outputStream, asymmetricSigner);
-				outputStream=signerOut;
-			}
-
-			long dataLen;
-			originalOutputStream.writeByte(code);
-			originalOutputStream.writeShort(currentKeyID);
-			byte[] buffer=null;
-			int lenBuffer=0;
-			if (cipher != null) {
-				dataLen=cipher.getOutputSizeAfterEncryption(dataInputLength);
-				originalOutputStream.writeLong(dataLen);
-				limitedRandomOutputStream.set(outputStream, originalOutputStream.currentPosition(), dataLen);
-
-				if (cipher.getType().supportAssociatedData()) {
-					lenBuffer=computeAssociatedData(dataLen);
-					buffer=bufferRef;
-					if (cipherOutputStream==null)
-						cipherOutputStream=cipher.getCipherOutputStreamForEncryption(limitedRandomOutputStream, false, buffer, 0, lenBuffer, externalCounter);
-					else
-						cipherOutputStream.set(limitedRandomOutputStream, null, externalCounter, buffer, 0, lenBuffer, false);
+				//long dataInputLength = inputStream.length();
+				if (inputStreamLength==0)
+					throw new IllegalArgumentException();
+				if (inputStreamLength>0) {
+					originalOutputLength = originalOutputStream.length();
+					maximumOutputLengthAfterEncoding = getMaximumOutputLength(inputStreamLength);
+					originalOutputStream.ensureLength(maximumOutputLengthAfterEncoding);
 				}
 				else {
-					if (cipherOutputStream == null)
-						cipherOutputStream = cipher.getCipherOutputStreamForEncryption(limitedRandomOutputStream, false, null,0 ,0, externalCounter);
+					originalOutputLength = -1;
+					maximumOutputLengthAfterEncoding = -1;
+				}
+				byte code = getCode();
+				digest = EncryptionSignatureHashEncoder.this.digest;
+				if (symmetricSigner != null && asymmetricSigner != null && digest == null) {
+					digest = defaultMessageDigest;
+					if (digest == null) {
+						defaultMessageDigest = digest = defaultMessageType.getMessageDigestInstance();
+					}
+
+				}
+
+				outputStream = originalOutputStream;
+				if (digest != null) {
+					digest.reset();
+					if (hashOut == null)
+						hashOut = new HashRandomOutputStream(outputStream, digest);
 					else
-						cipherOutputStream.set(limitedRandomOutputStream, null, externalCounter, null, 0,0, false);
+						hashOut.set(outputStream, digest);
+					outputStream = hashOut;
+				} else if (symmetricSigner != null) {
+					symmetricSigner.init();
+					if (signerOut == null)
+						signerOut = new SignerRandomOutputStream(outputStream, symmetricSigner);
+					else
+						signerOut.set(outputStream, symmetricSigner);
+					outputStream = signerOut;
+				} else if (asymmetricSigner != null) {
+					asymmetricSigner.init();
+					if (signerOut == null)
+						signerOut = new SignerRandomOutputStream(outputStream, asymmetricSigner);
+					else
+						signerOut.set(outputStream, asymmetricSigner);
+					outputStream = signerOut;
 				}
-				try {
-					inputStream.transferTo(cipherOutputStream);
+
+
+				originalOutputStream.writeByte(code);
+				originalOutputStream.writeShort(currentKeyID);
+				buffer = null;
+				lenBuffer = 0;
+
+				if (cipher != null) {
+					dataLen = inputStreamLength>0?cipher.getOutputSizeAfterEncryption(inputStreamLength):-1;
+					originalOutputStream.writeLong(dataLen);
+					limitedRandomOutputStream.set(outputStream, originalOutputStream.currentPosition(), dataLen);
+
+					if (cipher.getType().supportAssociatedData()) {
+						lenBuffer = computeAssociatedData(dataLen);
+						buffer = bufferRef;
+						if (cipherOutputStream == null)
+							cipherOutputStream = cipher.getCipherOutputStreamForEncryption(limitedRandomOutputStream, false, buffer, 0, lenBuffer, externalCounter);
+						else
+							cipherOutputStream.set(limitedRandomOutputStream, null, externalCounter, buffer, 0, lenBuffer, false);
+					} else {
+						if (cipherOutputStream == null)
+							cipherOutputStream = cipher.getCipherOutputStreamForEncryption(limitedRandomOutputStream, false, null, 0, 0, externalCounter);
+						else
+							cipherOutputStream.set(limitedRandomOutputStream, null, externalCounter, null, 0, 0, false);
+					}
+					outputStream=cipherOutputStream;
+				} else {
+					originalOutputStream.writeLong(dataLen = inputStreamLength);
+					outputStream=new LimitedRandomOutputStream(outputStream, outputStream.currentPosition());
 				}
-				finally {
-					cipherOutputStream.close();
+				if (outputStream != originalOutputStream && buffer == null) {
+					buffer = bufferRef;
+					lenBuffer = 10;
+					Bits.putShort(buffer, 0, currentKeyID);
+					if (dataLen>0)
+						Bits.putLong(buffer, 2, dataLen);
 				}
-			}
-			else
+			}catch(NoSuchAlgorithmException | NoSuchProviderException e)
 			{
-				originalOutputStream.writeLong(dataLen=dataInputLength);
-				outputStream.write(inputStream);
+				closed=true;
+				free();
+				throw new IOException(e);
 			}
-			if (outputStream!=originalOutputStream && buffer==null) {
-				buffer=bufferRef;
-				lenBuffer=10;
-				Bits.putShort(buffer, 0, currentKeyID);
-				Bits.putLong(buffer, 2, dataLen);
+
+		}
+
+		@Override
+		public long length() throws IOException {
+			return outputStream.length();
+		}
+
+		@Override
+		public void write(byte[] b, int off, int len) throws IOException {
+			if (closed)
+				throw new IOException("Stream closed");
+			outputStream.write(b, off, len);
+		}
+
+		@Override
+		public void setLength(long newLength) throws IOException {
+			if (closed)
+				throw new IOException("Stream closed");
+			outputStream.setLength(newLength);
+		}
+
+		@Override
+		public void seek(long _pos) throws IOException {
+			if (closed)
+				throw new IOException("Stream closed");
+			outputStream.setLength(_pos);
+		}
+
+		@Override
+		public long currentPosition() throws IOException {
+			return outputStream.currentPosition();
+		}
+
+		@Override
+		public boolean isClosed() {
+			return closed;
+		}
+
+		@Override
+		protected RandomInputStream getRandomInputStreamImpl() throws IOException {
+			if (closed)
+				throw new IOException("Stream closed");
+			return outputStream.getRandomInputStream();
+		}
+
+		@Override
+		public void flush() throws IOException {
+			if (closed)
+				throw new IOException("Stream closed");
+			outputStream.flush();
+		}
+
+		@Override
+		public void close() throws IOException {
+			if (cipher!=null)
+				outputStream.close();
+			if (inputStreamLength<0)
+			{
+				Bits.putLong(buffer, 2, dataLen=outputStream.currentPosition());
 			}
 
 
@@ -418,21 +513,32 @@ public class EncryptionSignatureHashEncoder {
 				originalOutputStream.writeBytesArray(signature, false, asymmetricSigner.getMacLengthBytes());
 			}
 			long curPos=originalOutputStream.currentPosition();
-			if (curPos<maximumOutputLengthAfterEncoding && curPos>originalOutputLength) {
+			if (maximumOutputLengthAfterEncoding>0 && curPos<maximumOutputLengthAfterEncoding && curPos>originalOutputLength) {
 				originalOutputStream.setLength(Math.max(curPos, originalOutputLength));
 			}
-			else
-
-
 			outputStream.flush();
-		}
-		catch(NoSuchAlgorithmException | NoSuchProviderException e)
-		{
-			throw new IOException(e);
-		}
-		finally {
+			if (inputStreamLength<0) {
+				long p=originalOutputStream.currentPosition();
+				originalOutputStream.seek(3);
+				originalOutputStream.writeLong(dataLen);
+				originalOutputStream.seek(p);
+			}
 			free();
+			closed=true;
 		}
+
+		@Override
+		public void write(int b) throws IOException {
+
+		}
+	}
+
+	private RandomOutputStream getRandomOutputStream(final RandomOutputStream originalOutputStream, final long inputStreamLength) throws IOException {
+		if (rosForEncryption==null)
+			rosForEncryption=new ROSForEncryption(originalOutputStream, inputStreamLength);
+		else
+			rosForEncryption.init(originalOutputStream, inputStreamLength);
+		return rosForEncryption;
 	}
 
 
