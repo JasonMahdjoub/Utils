@@ -44,7 +44,7 @@ import java.util.Arrays;
 
 /**
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 1.1
  * @since Utils 4.16.0
  */
 public class EncryptionSignatureHashDecoder {
@@ -371,7 +371,6 @@ public class EncryptionSignatureHashDecoder {
 
 			long dataLen=originalInputStream.readLong();
 			checkDataLength(inputStream, dataLen);
-			long dataPos=originalInputStream.currentPosition();
 			RandomInputStream inputStream=originalInputStream;
 			if (digest!=null) {
 				digest.reset();
@@ -383,7 +382,7 @@ public class EncryptionSignatureHashDecoder {
 			}
 			else if (symmetricChecker!=null)
 			{
-				originalInputStream.seek(dataPos+dataLen);
+				originalInputStream.seek(EncryptionSignatureHashEncoder.headSize+dataLen);
 				symmetricChecker.init(originalInputStream.readBytesArray(false, symmetricChecker.getMacLengthBytes()));
 				if (checkerIn==null)
 					checkerIn=new SignatureCheckerRandomInputStream(inputStream, symmetricChecker);
@@ -393,7 +392,7 @@ public class EncryptionSignatureHashDecoder {
 			}
 			else if (asymmetricChecker!=null)
 			{
-				originalInputStream.seek(dataPos+dataLen);
+				originalInputStream.seek(EncryptionSignatureHashEncoder.headSize+dataLen);
 				asymmetricChecker.init(originalInputStream.readBytesArray(false, asymmetricChecker.getMacLengthBytes()));
 				if (checkerIn==null)
 					checkerIn=new SignatureCheckerRandomInputStream(inputStream, asymmetricChecker);
@@ -403,7 +402,7 @@ public class EncryptionSignatureHashDecoder {
 			}
 
 			try {
-				limitedRandomInputStream.set(inputStream, dataPos, dataLen);
+				limitedRandomInputStream.set(inputStream, EncryptionSignatureHashEncoder.headSize, dataLen);
 			}
 			catch (IllegalArgumentException | NullPointerException e)
 			{
@@ -812,5 +811,54 @@ public class EncryptionSignatureHashDecoder {
 		}
 		return res;
 	}
+
+	public SymmetricSecretKey getSymmetricSecretKeyForEncryption()
+	{
+		return cipher==null?null:cipher.getSecretKey();
+	}
+
+	public SymmetricSecretKey getSymmetricSecretKeyForSignature()
+	{
+		return symmetricChecker==null?null:symmetricChecker.getSecretKey();
+	}
+
+	public IASymmetricPublicKey getPublicKeyForSignature()
+	{
+		return asymmetricChecker==null?null:asymmetricChecker.getDistantPublicKey();
+	}
+
+	public MessageDigestType getMessageDigestType()
+	{
+		return digest==null?null:digest.getMessageDigestType();
+	}
+
+	public EncryptionSignatureHashDecoder withoutSymmetricEncryption()
+	{
+		cipher=null;
+		this.randomForCipher=null;
+		minimumInputSize=null;
+		return this;
+	}
+
+	public EncryptionSignatureHashDecoder withoutSymmetricSignature()
+	{
+		symmetricChecker=null;
+		minimumInputSize=null;
+		return this;
+	}
+	public EncryptionSignatureHashDecoder withoutASymmetricSignature()
+	{
+		asymmetricChecker=null;
+		minimumInputSize=null;
+		return this;
+	}
+
+	public EncryptionSignatureHashDecoder withoutMessageDigest()
+	{
+		digest=null;
+		minimumInputSize=null;
+		return this;
+	}
+
 
 }

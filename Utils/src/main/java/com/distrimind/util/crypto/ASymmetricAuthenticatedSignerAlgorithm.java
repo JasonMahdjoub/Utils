@@ -52,8 +52,10 @@ import java.security.spec.PSSParameterSpec;
 public class ASymmetricAuthenticatedSignerAlgorithm extends AbstractAuthenticatedSignerAlgorithm {
 
 	private final AbstractAuthenticatedSignerAlgorithm signer;
+	private final IASymmetricPrivateKey localPrivateKey;
 
 	public ASymmetricAuthenticatedSignerAlgorithm(IASymmetricPrivateKey localPrivateKey) throws NoSuchProviderException, NoSuchAlgorithmException {
+		this.localPrivateKey=localPrivateKey;
 		if (localPrivateKey instanceof ASymmetricPrivateKey)
 			signer=new Signer((ASymmetricPrivateKey)localPrivateKey);
 		else
@@ -227,5 +229,10 @@ public class ASymmetricAuthenticatedSignerAlgorithm extends AbstractAuthenticate
 				return this.signature.sign(signature, off_sig, macLength);
 			}
 		}
+	}
+
+	public IASymmetricPrivateKey getPrivateKey()
+	{
+		return localPrivateKey;
 	}
 }

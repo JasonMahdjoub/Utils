@@ -45,7 +45,7 @@ import java.util.Arrays;
 
 /**
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 1.1
  * @since Utils 4.16.0
  */
 @SuppressWarnings("UnusedReturnValue")
@@ -305,6 +305,8 @@ public class EncryptionSignatureHashEncoder {
 		private boolean closed;
 		private RandomOutputStream outputStream;
 		private AbstractMessageDigest digest;
+		private RandomOutputStream dataOutputStream;
+		private boolean bufferToInit;
 		private ROSForEncryption(final RandomOutputStream originalOutputStream, final long inputStreamLength) throws IOException {
 			init(originalOutputStream, inputStreamLength);
 		}
@@ -369,11 +371,13 @@ public class EncryptionSignatureHashEncoder {
 				originalOutputStream.writeShort(currentKeyID);
 				buffer = null;
 				lenBuffer = 0;
-
 				if (cipher != null) {
 					dataLen = inputStreamLength>0?cipher.getOutputSizeAfterEncryption(inputStreamLength):-1;
 					originalOutputStream.writeLong(dataLen);
-					limitedRandomOutputStream.set(outputStream, originalOutputStream.currentPosition(), dataLen);
+					if (dataLen>0)
+						limitedRandomOutputStream.set(outputStream, outputStream.currentPosition(), dataLen);
+					else
+						limitedRandomOutputStream.set(outputStream, outputStream.currentPosition());
 
 					if (cipher.getType().supportAssociatedData()) {
 						lenBuffer = computeAssociatedData(dataLen);
@@ -388,17 +392,21 @@ public class EncryptionSignatureHashEncoder {
 						else
 							cipherOutputStream.set(limitedRandomOutputStream, null, externalCounter, null, 0, 0, false);
 					}
-					outputStream=cipherOutputStream;
+					dataOutputStream=cipherOutputStream;
 				} else {
 					originalOutputStream.writeLong(dataLen = inputStreamLength);
-					outputStream=new LimitedRandomOutputStream(outputStream, outputStream.currentPosition());
+					limitedRandomOutputStream.set(outputStream, outputStream.currentPosition());
+					dataOutputStream=limitedRandomOutputStream;
 				}
+				bufferToInit=false;
 				if (outputStream != originalOutputStream && buffer == null) {
 					buffer = bufferRef;
 					lenBuffer = 10;
 					Bits.putShort(buffer, 0, currentKeyID);
-					if (dataLen>0)
+					if (dataLen>0) {
 						Bits.putLong(buffer, 2, dataLen);
+						bufferToInit = true;
+					}
 				}
 			}catch(NoSuchAlgorithmException | NoSuchProviderException e)
 			{
@@ -411,33 +419,37 @@ public class EncryptionSignatureHashEncoder {
 
 		@Override
 		public long length() throws IOException {
-			return outputStream.length();
+			if (closed)
+				throw new IOException("Stream closed");
+			return dataOutputStream.length();
 		}
 
 		@Override
 		public void write(byte[] b, int off, int len) throws IOException {
 			if (closed)
 				throw new IOException("Stream closed");
-			outputStream.write(b, off, len);
+			dataOutputStream.write(b, off, len);
 		}
 
 		@Override
 		public void setLength(long newLength) throws IOException {
 			if (closed)
 				throw new IOException("Stream closed");
-			outputStream.setLength(newLength);
+			dataOutputStream.setLength(newLength);
 		}
 
 		@Override
 		public void seek(long _pos) throws IOException {
 			if (closed)
 				throw new IOException("Stream closed");
-			outputStream.setLength(_pos);
+			dataOutputStream.setLength(_pos);
 		}
 
 		@Override
 		public long currentPosition() throws IOException {
-			return outputStream.currentPosition();
+			if (closed)
+				throw new IOException("Stream closed");
+			return dataOutputStream.currentPosition();
 		}
 
 		@Override
@@ -449,25 +461,31 @@ public class EncryptionSignatureHashEncoder {
 		protected RandomInputStream getRandomInputStreamImpl() throws IOException {
 			if (closed)
 				throw new IOException("Stream closed");
-			return outputStream.getRandomInputStream();
+			return dataOutputStream.getRandomInputStream();
 		}
 
 		@Override
 		public void flush() throws IOException {
 			if (closed)
 				throw new IOException("Stream closed");
-			outputStream.flush();
+			dataOutputStream.flush();
 		}
 
 		@Override
 		public void close() throws IOException {
 			if (cipher!=null)
-				outputStream.close();
+				dataOutputStream.close();
+			else
+				dataOutputStream.flush();
 			if (inputStreamLength<0)
 			{
-				Bits.putLong(buffer, 2, dataLen=outputStream.currentPosition());
+				dataLen=dataOutputStream.currentPosition();
+				if (bufferToInit)
+					Bits.putLong(buffer, 2, dataLen);
 			}
 
+
+			dataOutputStream=null;
 
 			if (digest!=null) {
 				digest.update(code);
@@ -513,16 +531,15 @@ public class EncryptionSignatureHashEncoder {
 				originalOutputStream.writeBytesArray(signature, false, asymmetricSigner.getMacLengthBytes());
 			}
 			long curPos=originalOutputStream.currentPosition();
+			if (inputStreamLength<0) {
+				originalOutputStream.seek(3);
+				originalOutputStream.writeLong(dataLen);
+				originalOutputStream.seek(curPos);
+			}
 			if (maximumOutputLengthAfterEncoding>0 && curPos<maximumOutputLengthAfterEncoding && curPos>originalOutputLength) {
 				originalOutputStream.setLength(Math.max(curPos, originalOutputLength));
 			}
 			outputStream.flush();
-			if (inputStreamLength<0) {
-				long p=originalOutputStream.currentPosition();
-				originalOutputStream.seek(3);
-				originalOutputStream.writeLong(dataLen);
-				originalOutputStream.seek(p);
-			}
 			free();
 			closed=true;
 		}
@@ -641,8 +658,56 @@ public class EncryptionSignatureHashEncoder {
 	}
 
 
+	public SymmetricSecretKey getSymmetricSecretKeyForEncryption()
+	{
+		return cipher==null?null:cipher.getSecretKey();
+	}
 
+	public SymmetricSecretKey getSymmetricSecretKeyForSignature()
+	{
+		return symmetricSigner==null?null:symmetricSigner.getSecretKey();
+	}
 
+	public IASymmetricPrivateKey getPrivateKeyForSignature()
+	{
+		return asymmetricSigner==null?null:asymmetricSigner.getPrivateKey();
+	}
 
+	public MessageDigestType getMessageDigestType()
+	{
+		return digest==null?null:digest.getMessageDigestType();
+	}
+
+	public EncryptionSignatureHashEncoder withoutSymmetricEncryption()
+	{
+		cipher=null;
+		this.currentKeyID=0;
+		minimumOutputSize=null;
+		code=null;
+		return this;
+	}
+
+	public EncryptionSignatureHashEncoder withoutSymmetricSignature()
+	{
+		symmetricSigner=null;
+		minimumOutputSize=null;
+		code=null;
+		return this;
+	}
+	public EncryptionSignatureHashEncoder withoutASymmetricSignature()
+	{
+		asymmetricSigner=null;
+		minimumOutputSize=null;
+		code=null;
+		return this;
+	}
+
+	public EncryptionSignatureHashEncoder withoutMessageDigest()
+	{
+		digest=null;
+		minimumOutputSize=null;
+		code=null;
+		return this;
+	}
 
 }

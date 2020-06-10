@@ -166,7 +166,10 @@ public class TestReadWriteEncryption {
 					.withRandomInputStream(bais)
 					.withSecretKeyProvider(SecureRandomType.DEFAULT.getSingleton(null), encryptionProfileProvider, secretKeyID);
 			long expectedLength = writer.getMaximumOutputLength();
-			writer.encode(baos);
+			try(RandomOutputStream out=writer.getRandomOutputStream(baos))
+			{
+				bais.transferTo(out);
+			}
 			byte[] res = baos.getBytes();
 			Assert.assertTrue(expectedLength >= res.length, "expectedLength=" + expectedLength + ", actual=" + res.length);
 			bais = new RandomByteArrayInputStream(res.clone());
