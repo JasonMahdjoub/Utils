@@ -211,6 +211,14 @@ public class TestReadWriteEncryption {
 		long expectedLength=writer.getMaximumOutputLength();
 		writer.encode(baos);
 		byte[] res=baos.getBytes();
+		byte[] res2=null;
+		if (secretKeyForEncryption!=null && !secretKeyForEncryption.getEncryptionAlgorithmType().isAuthenticatedAlgorithm()) {
+			try (RandomOutputStream cout = writer.getRandomOutputStream(baos = new RandomByteArrayOutputStream())) {
+				bais.seek(0);
+				bais.transferTo(cout);
+			}
+			res2=baos.getBytes();
+		}
 		Assert.assertTrue(expectedLength>=res.length, "expectedLength="+expectedLength+", actual="+res.length);
 		bais=new RandomByteArrayInputStream(res.clone());
 		baos=new RandomByteArrayOutputStream();
@@ -218,6 +226,15 @@ public class TestReadWriteEncryption {
 		expectedLength=reader.getMaximumOutputLength(bais.length());
 		reader.decodeAndCheckHashAndSignaturesIfNecessary(baos);
 		Assert.assertEquals(baos.getBytes(), in);
+		if (secretKeyForEncryption!=null && !secretKeyForEncryption.getEncryptionAlgorithmType().isAuthenticatedAlgorithm()) {
+			baos=new RandomByteArrayOutputStream();
+			assert res2 != null;
+			bais=new RandomByteArrayInputStream(res2.clone());
+			reader=getReader(bais, secretKeyForEncryption, associatedData, secretKeyForSignature, keyPairForSignature, messageDigestType);
+			expectedLength=reader.getMaximumOutputLength(bais.length());
+			reader.decodeAndCheckHashAndSignaturesIfNecessary(baos);
+			Assert.assertEquals(baos.getBytes(), in);
+		}
 		Assert.assertTrue(expectedLength>=in.length);
 		Assert.assertEquals(reader.checkHashAndSignature(), Integrity.OK);
 		Assert.assertEquals(reader.checkHashAndPublicSignature(), Integrity.OK);
