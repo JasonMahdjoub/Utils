@@ -405,8 +405,9 @@ public class EncryptionSignatureHashEncoder {
 					Bits.putShort(buffer, 0, currentKeyID);
 					if (dataLen>0) {
 						Bits.putLong(buffer, 2, dataLen);
-						bufferToInit = true;
 					}
+					else
+						bufferToInit = true;
 				}
 			}catch(NoSuchAlgorithmException | NoSuchProviderException e)
 			{
@@ -477,15 +478,16 @@ public class EncryptionSignatureHashEncoder {
 				dataOutputStream.close();
 			else
 				dataOutputStream.flush();
+			dataOutputStream=null;
 			if (inputStreamLength<0)
 			{
-				dataLen=dataOutputStream.currentPosition();
+				dataLen=originalOutputStream.currentPosition()-headSize;
 				if (bufferToInit)
 					Bits.putLong(buffer, 2, dataLen);
 			}
 
 
-			dataOutputStream=null;
+
 
 			if (digest!=null) {
 				digest.update(code);
