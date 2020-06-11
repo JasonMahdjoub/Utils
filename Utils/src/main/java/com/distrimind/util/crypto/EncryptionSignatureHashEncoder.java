@@ -95,10 +95,11 @@ public class EncryptionSignatureHashEncoder {
 
 
 	RandomInputStream inputStream=null;
-	private SymmetricEncryptionAlgorithm cipher=null;
+	SymmetricEncryptionAlgorithm cipher=null;
 	private byte[] associatedData=null;
 	private int offAD=0;
 	private int lenAD=0;
+	private SymmetricSecretKey originalSecretKeyForEncryption=null;
 	private SymmetricAuthenticatedSignerAlgorithm symmetricSigner=null;
 	private ASymmetricAuthenticatedSignerAlgorithm asymmetricSigner=null;
 	private AbstractMessageDigest digest=null;
@@ -112,9 +113,48 @@ public class EncryptionSignatureHashEncoder {
 	private AbstractEncryptionOutputAlgorithm.CommonCipherOutputStream cipherOutputStream;
 	private byte[] externalCounter=null;
 	private Byte code=null;
-	private short currentKeyID=-1;
+	short currentKeyID=-1;
 	private ROSForEncryption rosForEncryption=null;
-	//private SecretKeyProvider secretKeyProvider=null;
+	private boolean useProvider=false;
+	long generatedIVCounter=0;
+	private EncryptionSignatureHashDecoder decoder=null;
+
+	void incrementIVCounter() throws IOException {
+		if (originalSecretKeyForEncryption==null)
+			return;
+		if (useProvider)
+			return;
+		++generatedIVCounter;
+		if (generatedIVCounter>cipher.getType().getMaxIVGenerationWithOneSecretKey())
+		{
+			generatedIVCounter=0;
+			++currentKeyID;
+			reloadCipher();
+		}
+	}
+
+	static SymmetricEncryptionAlgorithm reloadCipher(AbstractSecureRandom random, SymmetricSecretKey originalSecretKeyForEncryption, short currentKeyID) throws IOException {
+		try {
+			SymmetricSecretKey sk = currentKeyID==0?originalSecretKeyForEncryption:originalSecretKeyForEncryption.getHashedSecretKey(MessageDigestType.BC_FIPS_SHA3_256, currentKeyID & 0xFF);
+			return new SymmetricEncryptionAlgorithm(random, sk);
+		} catch (NoSuchProviderException | NoSuchAlgorithmException e) {
+			throw new IOException(e);
+		}
+	}
+
+	void reloadCipher() throws IOException {
+		if (currentKeyID!=0 || cipher.getSecretKey()!=originalSecretKeyForEncryption)
+			cipher=reloadCipher(cipher.getSecureRandom(), originalSecretKeyForEncryption, currentKeyID);
+		if (decoder!=null)
+			decoder.cipher=new SymmetricEncryptionAlgorithm(cipher.getSecureRandom(), cipher.getSecretKey());
+	}
+
+	public EncryptionSignatureHashEncoder connectWithDecoder(EncryptionSignatureHashDecoder decoder)
+	{
+		decoder.encoder=this;
+		this.decoder=decoder;
+		return this;
+	}
 
 	public EncryptionSignatureHashEncoder() throws IOException {
 		limitedRandomOutputStream=new LimitedRandomOutputStream(nullRandomInputStream, 0);
@@ -144,6 +184,8 @@ public class EncryptionSignatureHashEncoder {
 			throw new NullPointerException();
 		SymmetricSecretKey secretKey=encryptionProfileProvider.getSecretKeyForEncryption(keyID, false);
 		this.cipher=secretKey==null?null:new SymmetricEncryptionAlgorithm(random, secretKey);
+		this.useProvider=true;
+		this.originalSecretKeyForEncryption=null;
 		try {
 			MessageDigestType t=encryptionProfileProvider.getMessageDigest(keyID, false);
 			this.digest=t==null?null:t.getMessageDigestInstance();
@@ -168,9 +210,11 @@ public class EncryptionSignatureHashEncoder {
 	public EncryptionSignatureHashEncoder withCipher(SymmetricEncryptionAlgorithm cipher) {
 		if (cipher==null)
 			throw new NullPointerException();
+		this.originalSecretKeyForEncryption=cipher.getSecretKey();
 		this.cipher=cipher;
 		code=null;
 		this.currentKeyID=0;
+		this.useProvider=false;
 		return this;
 	}
 	public EncryptionSignatureHashEncoder withoutAssociatedData()
@@ -207,12 +251,15 @@ public class EncryptionSignatureHashEncoder {
 			throw new IOException(e);
 		}
 	}
+
+
 	public EncryptionSignatureHashEncoder withSymmetricSigner(SymmetricAuthenticatedSignerAlgorithm symmetricSigner) throws IOException {
 		if (symmetricSigner==null)
 			throw new NullPointerException();
 		if (this.cipher!=null && this.cipher.getType().isAuthenticatedAlgorithm())
 			throw new IOException("Symmetric encryption use authentication. No more symmetric authentication is needed. However ASymmetric authentication is possible.");
 		this.symmetricSigner=symmetricSigner;
+		this.useProvider=false;
 		minimumOutputSize=null;
 		code=null;
 		return this;
@@ -222,6 +269,7 @@ public class EncryptionSignatureHashEncoder {
 		if (asymmetricSigner==null)
 			throw new NullPointerException();
 		this.asymmetricSigner=asymmetricSigner;
+		this.useProvider=false;
 		minimumOutputSize=null;
 		code=null;
 		return this;
@@ -233,6 +281,7 @@ public class EncryptionSignatureHashEncoder {
 			throw new IllegalArgumentException();
 		try {
 			this.asymmetricSigner=new ASymmetricAuthenticatedSignerAlgorithm(privateKeyForSignature);
+			this.useProvider=false;
 			minimumOutputSize=null;
 			code=null;
 		} catch (NoSuchProviderException | NoSuchAlgorithmException e) {
@@ -245,6 +294,7 @@ public class EncryptionSignatureHashEncoder {
 		if (digest==null)
 			throw new NullPointerException();
 		this.digest=messageDigest;
+		this.useProvider=false;
 		minimumOutputSize=null;
 		code=null;
 		return this;
@@ -254,6 +304,7 @@ public class EncryptionSignatureHashEncoder {
 			throw new NullPointerException();
 		try {
 			this.digest=messageDigestType.getMessageDigestInstance();
+			this.useProvider=false;
 			minimumOutputSize=null;
 			code=null;
 		} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
@@ -318,6 +369,7 @@ public class EncryptionSignatureHashEncoder {
 			this.originalOutputStream=originalOutputStream;
 			this.inputStreamLength=inputStreamLength;
 			this.closed=false;
+			incrementIVCounter();
 			try
 			{
 				//long dataInputLength = inputStream.length();

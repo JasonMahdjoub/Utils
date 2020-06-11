@@ -297,6 +297,11 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 		return type;
 	}
 
+	AbstractSecureRandom getSecureRandom()
+	{
+		return random;
+	}
+
 	@Override
 	protected boolean includeIV() {
 		return true;

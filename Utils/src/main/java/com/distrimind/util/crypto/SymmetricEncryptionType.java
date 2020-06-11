@@ -216,7 +216,7 @@ public enum SymmetricEncryptionType {
 	private final boolean acousticAttackPossible;
 	private final boolean dfaAttackPossible;//Differential fault analysis
 	private final short ivLengthBytes;
-	private final long maxIVGenerationWithOneSecretKey;
+	private long maxIVGenerationWithOneSecretKey;
 	private static final boolean invalidOSForChaCha =(OSVersion.getCurrentOSVersion().getOS()!=OS.ANDROID && OS.getCurrentJREVersionByte()<11) || (OSVersion.getCurrentOSVersion().getOS()==OS.ANDROID && OSVersion.getCurrentOSVersion().compareTo(OSVersion.ANDROID_28_P)<0);
 
 	public boolean equals(SymmetricEncryptionType o)
@@ -534,5 +534,9 @@ public enum SymmetricEncryptionType {
 	public long getMaxIVGenerationWithOneSecretKey()
 	{
 		return maxIVGenerationWithOneSecretKey;
+	}
+	void setMaxIVGenerationWithOneSecretKey(long maxIVGenerationWithOneSecretKey)
+	{
+		this.maxIVGenerationWithOneSecretKey=maxIVGenerationWithOneSecretKey;
 	}
 }

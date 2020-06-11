@@ -1,6 +1,6 @@
 Utils
 =====
-5.2.0 Stable (Build: 1736) (from 10/06/2020 to 10/06/2020)
+5.3.0 Stable (Build: 1738) (from 11/06/2020 to 11/06/2020)
 
 # Creator(s):
 Jason MAHDJOUB
@@ -9,6 +9,10 @@ Jason MAHDJOUB
 Jason MAHDJOUB (Entred in the team at 04/01/2016)
 
 # Modifications:
+
+
+### 5.3.0 Stable (11/06/2020)
+* Manage secret key regeneration obsolescence into EncryptionHashSignatureEncoder and into EncryptionHashSignatureDecoder when generating too much Initialisation Vectors
 
 
 ### 5.2.0 Stable (10/06/2020)

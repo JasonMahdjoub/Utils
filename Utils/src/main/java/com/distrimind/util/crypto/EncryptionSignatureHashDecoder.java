@@ -50,7 +50,7 @@ import java.util.Arrays;
 public class EncryptionSignatureHashDecoder {
 
 	private RandomInputStream inputStream=null;
-	private SymmetricEncryptionAlgorithm cipher=null;
+	SymmetricEncryptionAlgorithm cipher=null;
 	private byte[] associatedData=null;
 	private int offAD=0;
 	private int lenAD=0;
@@ -66,10 +66,19 @@ public class EncryptionSignatureHashDecoder {
 	private AbstractMessageDigest defaultMessageDigest=null;
 	private byte[] externalCounter=null;
 	private CommonCipherInputStream cipherInputStream=null;
-
+	private SymmetricSecretKey originalSecretKeyForEncryption=null;
 	private EncryptionProfileProvider encryptionProfileProvider =null;
 	private AbstractSecureRandom randomForCipher=null;
 	private short secretKeyID=-1;
+	private short oldSecretKeyID=-1;
+	EncryptionSignatureHashEncoder encoder=null;
+	private boolean changeCipherOfEncoder=false;
+
+	public EncryptionSignatureHashDecoder connectWithEncoder(EncryptionSignatureHashEncoder encoder)
+	{
+		encoder.connectWithDecoder(this);
+		return this;
+	}
 
 	public EncryptionSignatureHashDecoder() throws IOException {
 		limitedRandomInputStream=new LimitedRandomInputStream(nullRandomInputStream, 0);
@@ -98,6 +107,7 @@ public class EncryptionSignatureHashDecoder {
 			throw new NullPointerException();
 		this.cipher=cipher;
 		this.randomForCipher=null;
+		originalSecretKeyForEncryption=cipher.getSecretKey();
 		return this;
 	}
 	private void checkProfileLoadedForPrivateCheck() throws IOException {
@@ -142,6 +152,27 @@ public class EncryptionSignatureHashDecoder {
 			else if (cipher == null || secretKey != cipher.getSecretKey())
 				cipher = new SymmetricEncryptionAlgorithm(randomForCipher, secretKey);
 		}
+		else if (cipher!=null)
+		{
+			if (encoder!=null)
+				encoder.incrementIVCounter();
+			changeCipherOfEncoder=false;
+			if (encoder!=null && secretKeyID!=encoder.currentKeyID) {
+				int oldRound = encoder.currentKeyID & 0xFF;
+				int round = secretKeyID & 0xFF;
+				if (oldRound + 1 == round) {
+					changeCipherOfEncoder = true;
+				}
+			}
+			if (oldSecretKeyID!=secretKeyID || changeCipherOfEncoder)
+			{
+				oldSecretKeyID=secretKeyID;
+				if (secretKeyID!=0 || cipher.getSecretKey()!=originalSecretKeyForEncryption)
+					cipher=EncryptionSignatureHashEncoder.reloadCipher(cipher.getSecureRandom(), originalSecretKeyForEncryption, secretKeyID);
+
+			}
+
+		}
 	}
 
 	public EncryptionSignatureHashDecoder withSecretKeyProvider(AbstractSecureRandom random, EncryptionProfileProvider encryptionProfileProvider) {
@@ -152,6 +183,7 @@ public class EncryptionSignatureHashDecoder {
 		this.randomForCipher=random;
 		this.encryptionProfileProvider = encryptionProfileProvider;
 		this.cipher=null;
+		originalSecretKeyForEncryption=null;
 		return this;
 	}
 	public EncryptionSignatureHashDecoder withoutAssociatedData()
@@ -339,6 +371,7 @@ public class EncryptionSignatureHashDecoder {
 		freeLimitedRandomInputStream();
 	}
 	private void freeLimitedRandomInputStream() throws IOException {
+		changeCipherOfEncoder=false;
 		limitedRandomInputStream.set(EncryptionSignatureHashDecoder.nullRandomInputStream, 0);
 	}
 
@@ -520,6 +553,12 @@ public class EncryptionSignatureHashDecoder {
 			if (curPos<maximumOutputLengthAfterEncoding && curPos>originalOutputLength)
 				outputStream.setLength(Math.max(curPos, originalOutputLength));
 			outputStream.flush();
+			if (changeCipherOfEncoder)
+			{
+				encoder.cipher=cipher;
+				encoder.generatedIVCounter=0;
+				encoder.currentKeyID=secretKeyID;
+			}
 		}
 		catch(NoSuchAlgorithmException | NoSuchProviderException e)
 		{

@@ -187,6 +187,46 @@ public class TestReadWriteEncryption {
 		}
 	}
 
+	@Test(dependsOnMethods = {"testEncryption"})
+	public void testSecretKeyRound() throws IOException, NoSuchProviderException, NoSuchAlgorithmException {
+		Random r=new Random(System.currentTimeMillis());
+		byte[] in=new byte[10+r.nextInt(10000000)];
+		r.nextBytes(in);
+		final SymmetricSecretKey symmetricSecretKey1=SymmetricEncryptionType.DEFAULT.getKeyGenerator(SecureRandomType.DEFAULT.getSingleton(null)).generateKey();
+		final SymmetricSecretKey secretKeyForSignature1 = SymmetricAuthentifiedSignatureType.DEFAULT.getKeyGenerator(SecureRandomType.DEFAULT.getSingleton(null)).generateKey();
+		symmetricSecretKey1.getEncryptionAlgorithmType().setMaxIVGenerationWithOneSecretKey(2);
+		for (int i=0;i<20;i++) {
+
+			RandomByteArrayInputStream bais = new RandomByteArrayInputStream(in.clone());
+			RandomByteArrayOutputStream baos = new RandomByteArrayOutputStream();
+			EncryptionSignatureHashEncoder writer = new EncryptionSignatureHashEncoder()
+					.withRandomInputStream(bais)
+					.withSymmetricSecretKeyForEncryption(SecureRandomType.DEFAULT.getSingleton(null), symmetricSecretKey1)
+					.withSymmetricSecretKeyForSignature(secretKeyForSignature1);
+
+			long expectedLength = writer.getMaximumOutputLength();
+			try(RandomOutputStream out=writer.getRandomOutputStream(baos))
+			{
+				bais.transferTo(out);
+			}
+			byte[] res = baos.getBytes();
+			Assert.assertTrue(expectedLength >= res.length, "expectedLength=" + expectedLength + ", actual=" + res.length);
+			bais = new RandomByteArrayInputStream(res.clone());
+			baos = new RandomByteArrayOutputStream();
+			EncryptionSignatureHashDecoder reader = new EncryptionSignatureHashDecoder()
+					.withRandomInputStream(bais)
+					.withSymmetricSecretKeyForEncryption(SecureRandomType.DEFAULT.getSingleton(null), symmetricSecretKey1)
+					.withSymmetricSecretKeyForSignature(secretKeyForSignature1);
+
+			expectedLength = reader.getMaximumOutputLength(bais.length());
+			reader.decodeAndCheckHashAndSignaturesIfNecessary(baos);
+			Assert.assertEquals(baos.getBytes(), in);
+			Assert.assertTrue(expectedLength >= in.length);
+			Assert.assertEquals(reader.checkHashAndSignature(), Integrity.OK);
+			Assert.assertEquals(reader.checkHashAndPublicSignature(), Integrity.OK);
+		}
+	}
+
 	@Test(dataProvider = "provideParameters", dependsOnMethods = {"testSecretKeyProvider"})
 	public void testEncryption(SymmetricEncryptionType encryptionType, SymmetricSecretKey secretKeyForEncryption, byte[] associatedData, SymmetricSecretKey secretKeyForSignature, ASymmetricKeyPair keyPairForSignature, MessageDigestType messageDigestType) throws IOException, NoSuchProviderException, NoSuchAlgorithmException {
 		System.out.println("Encryption type : "+(secretKeyForEncryption==null?"null":secretKeyForEncryption.getEncryptionAlgorithmType()));
