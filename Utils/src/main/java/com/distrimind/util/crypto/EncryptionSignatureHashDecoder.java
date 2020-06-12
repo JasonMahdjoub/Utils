@@ -44,7 +44,7 @@ import java.util.Arrays;
 
 /**
  * @author Jason Mahdjoub
- * @version 1.1
+ * @version 1.2
  * @since Utils 4.16.0
  */
 public class EncryptionSignatureHashDecoder {
@@ -97,9 +97,19 @@ public class EncryptionSignatureHashDecoder {
 		this.externalCounter=externalCounter;
 		return this;
 	}
+	public EncryptionSignatureHashDecoder withoutExternalCounter() {
+		this.externalCounter=null;
+		return this;
+	}
 
 	public EncryptionSignatureHashDecoder withSymmetricSecretKeyForEncryption(AbstractSecureRandom random, SymmetricSecretKey symmetricSecretKeyForEncryption) throws IOException {
-		return withCipher(new SymmetricEncryptionAlgorithm(random, symmetricSecretKeyForEncryption));
+		return withSymmetricSecretKeyForEncryption(random, symmetricSecretKeyForEncryption, (byte)0);
+	}
+	public EncryptionSignatureHashDecoder withSymmetricSecretKeyForEncryption(AbstractSecureRandom random, SymmetricSecretKey symmetricSecretKeyForEncryption, byte externalCounterLength) throws IOException {
+		if (externalCounterLength>0)
+			return withCipher(new SymmetricEncryptionAlgorithm(random, symmetricSecretKeyForEncryption));
+		else
+			return withCipher(new SymmetricEncryptionAlgorithm(random, symmetricSecretKeyForEncryption, externalCounterLength));
 	}
 
 	public EncryptionSignatureHashDecoder withCipher(SymmetricEncryptionAlgorithm cipher) {
@@ -164,11 +174,13 @@ public class EncryptionSignatureHashDecoder {
 					changeCipherOfEncoder = true;
 				}
 			}
-			if (oldSecretKeyID!=secretKeyID || changeCipherOfEncoder)
+			boolean externalCounterSizeChanged=(externalCounter==null && cipher.getBlockModeCounterBytes()!=0)
+							|| (externalCounter!=null && cipher.getBlockModeCounterBytes()!=externalCounter.length);
+			if (externalCounterSizeChanged|| oldSecretKeyID!=secretKeyID || changeCipherOfEncoder)
 			{
 				oldSecretKeyID=secretKeyID;
-				if (secretKeyID!=0 || cipher.getSecretKey()!=originalSecretKeyForEncryption)
-					cipher=EncryptionSignatureHashEncoder.reloadCipher(cipher.getSecureRandom(), originalSecretKeyForEncryption, secretKeyID);
+				if (externalCounterSizeChanged || (secretKeyID!=0 || cipher.getSecretKey()!=originalSecretKeyForEncryption))
+					cipher=EncryptionSignatureHashEncoder.reloadCipher(cipher.getSecureRandom(), originalSecretKeyForEncryption, secretKeyID, externalCounter);
 
 			}
 

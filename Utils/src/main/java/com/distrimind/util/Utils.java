@@ -59,8 +59,8 @@ public class Utils {
 		Calendar c = Calendar.getInstance();
 		c.set(2016, Calendar.JANUARY, 4);
 		Calendar c2 = Calendar.getInstance();
-		c.set(2020, Calendar.JUNE, 11);
-		VERSION = new Version("Utils", "Utils", (short)5, (short)3, (short)0, Version.Type.Stable, (short)0, c.getTime(), c2.getTime());
+		c.set(2020, Calendar.JUNE, 12);
+		VERSION = new Version("Utils", "Utils", (short)5, (short)4, (short)0, Version.Type.Stable, (short)0, c.getTime(), c2.getTime());
 		try {
 
 			InputStream is = Utils.class.getResourceAsStream("build.txt");
@@ -73,8 +73,14 @@ public class Utils {
 			VERSION.addDeveloper(new PersonDeveloper("mahdjoub", "jason", c.getTime()));
 
 			c = Calendar.getInstance();
+			c.set(2020, Calendar.JUNE, 12);
+			Description d = new Description((short)5, (short)4, (short)0, Version.Type.Stable, (short)0, c.getTime());
+			d.addItem("Better manage external counter during encryption");
+			VERSION.addDescription(d);
+
+			c = Calendar.getInstance();
 			c.set(2020, Calendar.JUNE, 11);
-			Description d = new Description((short)5, (short)3, (short)0, Version.Type.Stable, (short)0, c.getTime());
+			d = new Description((short)5, (short)3, (short)0, Version.Type.Stable, (short)0, c.getTime());
 			d.addItem("Manage secret key regeneration obsolescence into EncryptionHashSignatureEncoder and into EncryptionHashSignatureDecoder when generating too much Initialisation Vectors");
 			VERSION.addDescription(d);
 
