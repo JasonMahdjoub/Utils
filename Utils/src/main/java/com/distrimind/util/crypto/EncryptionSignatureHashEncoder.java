@@ -217,7 +217,7 @@ public class EncryptionSignatureHashEncoder {
 		return withSymmetricSecretKeyForEncryption(random, symmetricSecretKeyForEncryption, (byte)0);
 	}
 	public EncryptionSignatureHashEncoder withSymmetricSecretKeyForEncryption(AbstractSecureRandom random, SymmetricSecretKey symmetricSecretKeyForEncryption, byte externalCounterLength) throws IOException {
-		if (externalCounterLength>0)
+		if (externalCounterLength<=0)
 			return withCipher(new SymmetricEncryptionAlgorithm(random, symmetricSecretKeyForEncryption));
 		else
 			return withCipher(new SymmetricEncryptionAlgorithm(random, symmetricSecretKeyForEncryption, externalCounterLength));

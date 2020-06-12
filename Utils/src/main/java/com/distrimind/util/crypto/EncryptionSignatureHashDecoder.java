@@ -73,6 +73,8 @@ public class EncryptionSignatureHashDecoder {
 	private short oldSecretKeyID=-1;
 	EncryptionSignatureHashEncoder encoder=null;
 	private boolean changeCipherOfEncoder=false;
+	private Byte code=null;
+	private long dataLen=-1;
 
 	public EncryptionSignatureHashDecoder connectWithEncoder(EncryptionSignatureHashEncoder encoder)
 	{
@@ -89,6 +91,7 @@ public class EncryptionSignatureHashDecoder {
 		if (inputStream.length()==0)
 			throw new IllegalArgumentException();
 		this.inputStream=inputStream;
+		this.code=null;
 		return this;
 	}
 	public EncryptionSignatureHashDecoder withExternalCounter(byte[] externalCounter) {
@@ -106,7 +109,7 @@ public class EncryptionSignatureHashDecoder {
 		return withSymmetricSecretKeyForEncryption(random, symmetricSecretKeyForEncryption, (byte)0);
 	}
 	public EncryptionSignatureHashDecoder withSymmetricSecretKeyForEncryption(AbstractSecureRandom random, SymmetricSecretKey symmetricSecretKeyForEncryption, byte externalCounterLength) throws IOException {
-		if (externalCounterLength>0)
+		if (externalCounterLength<=0)
 			return withCipher(new SymmetricEncryptionAlgorithm(random, symmetricSecretKeyForEncryption));
 		else
 			return withCipher(new SymmetricEncryptionAlgorithm(random, symmetricSecretKeyForEncryption, externalCounterLength));
@@ -135,8 +138,10 @@ public class EncryptionSignatureHashDecoder {
 		}
 	}
 	private void checkProfileLoadedForPublicCheck() throws IOException {
+
 		if (encryptionProfileProvider !=null)
 		{
+			checkHeadRead();
 			try {
 				IASymmetricPublicKey publicKey=encryptionProfileProvider.getSecretKeyForPublicKey(secretKeyID);
 				if (publicKey == null)
@@ -301,65 +306,61 @@ public class EncryptionSignatureHashDecoder {
 		}
 		maxSymSigSizeBytes=v;
 	}
-	private static boolean hasSymmetricSignature(byte code)
-	{
+	public boolean hasSymmetricSignature() throws IOException {
+		checkHeadRead();
 		return (code & 1)==1;
 	}
 
-	private static boolean hasASymmetricSignature(byte code)
-	{
+	public boolean hasASymmetricSignature() throws IOException {
+		checkHeadRead();
 		return (code & 2)==2;
 	}
 
-	private static boolean hasHash(byte code)
-	{
+	public boolean isHashed() throws IOException {
+		checkHeadRead();
 		return (code & 4)==4;
 	}
-	private static boolean hasAssociatedData(byte code)
-	{
+	public boolean hasAssociatedData() throws IOException {
+		checkHeadRead();
 		return (code & 8)==8;
 	}
-	private static boolean hasCipher(byte code)
-	{
+	public boolean isEncrypted() throws IOException {
+		checkHeadRead();
 		return (code & 16)==16;
 	}
-	private byte checkCodeForDecode() throws IOException {
+	private void checkCodeForDecode() throws IOException {
 		if (associatedData!=null)
 			EncryptionSignatureHashEncoder.checkLimits(associatedData, offAD, lenAD);
 
-		byte code=checkCodeForCheckHashAndSignature();
+		checkCodeForCheckHashAndSignature();
 		checkProfileLoadedForDecryption();
-		boolean hasAssociatedData=hasAssociatedData(code);
+		boolean hasAssociatedData=hasAssociatedData();
 		if (hasAssociatedData && associatedData==null)
 			throw new NullPointerException("associatedData");
 		else if (!hasAssociatedData && associatedData!=null)
 			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, "associatedData");
 		if (hasAssociatedData && (cipher==null || !cipher.getType().supportAssociatedData()) && symmetricChecker==null && asymmetricChecker==null)
 			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, "associatedData");
-		boolean hasCipher=hasCipher(code);
+		boolean hasCipher= isEncrypted();
 		if (hasCipher && cipher==null)
 			throw new NullPointerException("cipher");
-		else if (!hasCipher && cipher!=null)
-			throw new MessageExternalizationException(Integrity.FAIL, "cipher");
-		return code;
+		/*else if (!hasCipher && cipher!=null)
+			throw new MessageExternalizationException(Integrity.FAIL, "cipher");*/
 	}
-	private byte checkCodeForCheckHashAndSignature() throws IOException {
-		byte code=checkCodeForCheckHashAndPublicSignature();
+	private void checkCodeForCheckHashAndSignature() throws IOException {
+		checkCodeForCheckHashAndPublicSignature();
 		checkProfileLoadedForPrivateCheck();
-		boolean symCheckOK=hasSymmetricSignature(code);
+		boolean symCheckOK=hasSymmetricSignature();
 		if (symCheckOK && symmetricChecker==null)
 			throw new NullPointerException("symmetricChecker");
 		else if(!symCheckOK && symmetricChecker!=null)
 			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, "symmetricChecker");
-		return code;
 	}
-	private byte checkCodeForCheckHashAndPublicSignature() throws IOException {
-		byte code=inputStream.readByte();
-		secretKeyID=inputStream.readShort();
+	private void checkCodeForCheckHashAndPublicSignature() throws IOException {
 		checkProfileLoadedForPublicCheck();
 
-		boolean asymCheckOK=hasASymmetricSignature(code);
-		boolean hashCheckOK=hasHash(code);
+		boolean asymCheckOK=hasASymmetricSignature();
+		boolean hashCheckOK= isHashed();
 
 		if (asymCheckOK && asymmetricChecker==null)
 			throw new NullPointerException("asymmetricChecker");
@@ -371,7 +372,6 @@ public class EncryptionSignatureHashDecoder {
 		}
 		else if (digest!=null && digest.getMessageDigestType()!=EncryptionSignatureHashEncoder.defaultMessageType)
 			throw new MessageExternalizationException(Integrity.FAIL, "digest");
-		return code;
 	}
 
 	private void freeAll() throws IOException {
@@ -387,22 +387,56 @@ public class EncryptionSignatureHashDecoder {
 		limitedRandomInputStream.set(EncryptionSignatureHashDecoder.nullRandomInputStream, 0);
 	}
 
-	public void decodeAndCheckHashAndSignaturesIfNecessary(RandomOutputStream outputStream) throws IOException {
+	private void checkHeadRead() throws IOException {
+		if (inputStream==null)
+			throw new NullPointerException();
+		if (inputStream.length()<=EncryptionSignatureHashEncoder.headSize)
+			throw new IOException();
+		if (code==null)
+		{
+			if (inputStream.currentPosition()!=0)
+				inputStream.seek(0);
+			code=inputStream.readByte();
+			secretKeyID=inputStream.readShort();
+			dataLen=inputStream.readLong();
+		}
+	}
+
+	public long getDataStartPosition() {
+		return EncryptionSignatureHashEncoder.headSize;
+	}
+
+	public long getDataSizeInBytesBeforeDecryption() throws IOException {
+		checkHeadRead();
+		return dataLen;
+	}
+
+	public long getDataSizeInBytesAfterDecryption() throws IOException {
+		checkHeadRead();
+		if (isEncrypted())
+			return cipher.getOutputSizeAfterDecryption(dataLen);
+		else
+			return dataLen;
+	}
+
+	@SuppressWarnings("UnusedReturnValue")
+	public long decodeAndCheckHashAndSignaturesIfNecessary(RandomOutputStream outputStream) throws IOException {
 		if (outputStream==null)
 			throw new NullPointerException();
-		if (inputStream.currentPosition()!=0)
-			inputStream.seek(0);
+
 		RandomInputStream originalInputStream=inputStream;
 		if (originalInputStream==null)
 			throw new NullPointerException();
 		if (originalInputStream.length()<=0)
 			throw new IllegalArgumentException();
-
+		long res;
 		try {
 			long originalOutputLength=outputStream.length();
 			long maximumOutputLengthAfterEncoding=getMaximumOutputLength();
 			outputStream.ensureLength(maximumOutputLengthAfterEncoding);
-			byte code=checkCodeForDecode();
+			checkCodeForDecode();
+			if (inputStream.currentPosition()!=EncryptionSignatureHashEncoder.headSize)
+				inputStream.seek(EncryptionSignatureHashEncoder.headSize);
 
 			AbstractMessageDigest digest=this.digest;
 			if (symmetricChecker!=null && asymmetricChecker!=null && digest==null) {
@@ -414,7 +448,6 @@ public class EncryptionSignatureHashDecoder {
 
 			}
 
-			long dataLen=originalInputStream.readLong();
 			checkDataLength(inputStream, dataLen);
 			RandomInputStream inputStream=originalInputStream;
 			if (digest!=null) {
@@ -455,7 +488,7 @@ public class EncryptionSignatureHashDecoder {
 			}
 			byte[] buffer=null;
 			int lenBuffer=0;
-			if (cipher != null) {
+			if (isEncrypted()) {
 				if (cipher.getType().supportAssociatedData()) {
 					lenBuffer=EncryptionSignatureHashEncoder.headSize+(associatedData!=null?lenAD:0);
 					if (this.buffer.length<lenBuffer)
@@ -482,7 +515,7 @@ public class EncryptionSignatureHashDecoder {
 						cipherInputStream.set(limitedRandomInputStream,null, 0, 0, externalCounter );
 				}
 				try {
-					cipherInputStream.transferTo(outputStream);
+					res=cipherInputStream.transferTo(outputStream);
 				}
 				finally {
 					cipherInputStream.close();
@@ -492,6 +525,7 @@ public class EncryptionSignatureHashDecoder {
 			else
 			{
 				outputStream.write(limitedRandomInputStream);
+				res=limitedRandomInputStream.length();
 			}
 			if (buffer==null && (digest!=null || symmetricChecker!=null || asymmetricChecker!=null)) {
 				buffer=this.buffer;
@@ -571,6 +605,7 @@ public class EncryptionSignatureHashDecoder {
 				encoder.generatedIVCounter=0;
 				encoder.currentKeyID=secretKeyID;
 			}
+			return res;
 		}
 		catch(NoSuchAlgorithmException | NoSuchProviderException e)
 		{
@@ -587,16 +622,10 @@ public class EncryptionSignatureHashDecoder {
 			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
 	}
 	public Integrity checkHashAndSignature() throws IOException {
-		if (inputStream==null)
-			throw new NullPointerException();
-		if (inputStream.length()<=0)
-			throw new IllegalArgumentException();
-		if (inputStream.currentPosition()!=0)
-			inputStream.seek(0);
+
 
 		try {
-
-			byte code=checkCodeForCheckHashAndSignature();
+			checkCodeForCheckHashAndSignature();
 
 			if (symmetricChecker==null && asymmetricChecker==null && digest==null)
 				return Integrity.OK;
@@ -607,8 +636,9 @@ public class EncryptionSignatureHashDecoder {
 				else
 					digest = defaultMessageDigest;
 			}
+			if (inputStream.currentPosition()!=EncryptionSignatureHashEncoder.headSize)
+				inputStream.seek(EncryptionSignatureHashEncoder.headSize);
 
-			long dataLen=inputStream.readLong();
 			checkDataLength(inputStream, dataLen);
 			long dataPos=inputStream.currentPosition();
 			Bits.putShort(buffer, 0, secretKeyID);
@@ -704,17 +734,12 @@ public class EncryptionSignatureHashDecoder {
 		}
 	}
 	public Integrity checkHashAndPublicSignature() throws IOException {
-		if (inputStream==null)
-			throw new NullPointerException();
-		if (inputStream.length()<=0)
-			throw new IllegalArgumentException();
-		if (inputStream.currentPosition()!=0)
-			inputStream.seek(0);
+
 
 		try {
 
-			byte code=checkCodeForCheckHashAndPublicSignature();
-			boolean symCheckOK=hasSymmetricSignature(code);
+			checkCodeForCheckHashAndPublicSignature();
+			boolean symCheckOK=hasSymmetricSignature();
 			AbstractMessageDigest digest=this.digest;
 			if (symCheckOK && asymmetricChecker!=null && digest==null)
 			{
@@ -725,7 +750,9 @@ public class EncryptionSignatureHashDecoder {
 			}
 			if (asymmetricChecker==null && digest==null)
 				return Integrity.OK;
-			long dataLen=inputStream.readLong();
+			if (inputStream.currentPosition()!=EncryptionSignatureHashEncoder.headSize)
+				inputStream.seek(EncryptionSignatureHashEncoder.headSize);
+
 			checkDataLength(inputStream, dataLen);
 			long dataPos=inputStream.currentPosition();
 
