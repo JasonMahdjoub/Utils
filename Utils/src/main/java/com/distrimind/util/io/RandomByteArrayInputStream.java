@@ -58,6 +58,12 @@ public class RandomByteArrayInputStream extends RandomInputStream {
 		outputStream=new RandomByteArrayOutputStream(_bytes);
 		current_pos = 0;
 	}
+	public void init(byte[] _bytes) {
+		if (_bytes == null)
+			throw new NullPointerException("_bytes");
+		outputStream.init(_bytes);
+		current_pos = 0;
+	}
 
 	RandomByteArrayInputStream(RandomByteArrayOutputStream outputStream) {
 		if (outputStream == null)
@@ -200,5 +206,6 @@ public class RandomByteArrayInputStream extends RandomInputStream {
 	public byte[] getBytes() {
 		return outputStream==null?null:outputStream.bytes;
 	}
+
 
 }

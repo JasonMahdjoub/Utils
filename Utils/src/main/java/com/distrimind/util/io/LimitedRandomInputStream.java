@@ -49,15 +49,15 @@ public class LimitedRandomInputStream extends RandomInputStream{
 	private long off;
 	private long len;
 	public LimitedRandomInputStream(RandomInputStream in, long off) throws IOException {
-		set(in, off);
+		init(in, off);
 	}
 	public LimitedRandomInputStream(RandomInputStream in, long off, long len) throws IOException {
-		set(in, off, len);
+		init(in, off, len);
 	}
-	public void set(RandomInputStream in, long off) throws IOException {
-		set(in, off, in.length()-off);
+	public void init(RandomInputStream in, long off) throws IOException {
+		init(in, off, in.length()-off);
 	}
-	public void set(RandomInputStream in, long off, long len) throws IOException {
+	public void init(RandomInputStream in, long off, long len) throws IOException {
 		if (in==null)
 			throw new NullPointerException();
 		if (off<0 || off>in.length())

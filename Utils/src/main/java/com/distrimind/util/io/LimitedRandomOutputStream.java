@@ -19,20 +19,20 @@ public class LimitedRandomOutputStream extends RandomOutputStream{
 		init(out, off);
 	}
 	public LimitedRandomOutputStream(RandomOutputStream out, long off, long maxLength) throws IOException {
-		set(out, off, maxLength);
+		init(out, off, maxLength);
 	}
-	public void set(RandomOutputStream out, long off) throws IOException {
+	public void init(RandomOutputStream out, long off) throws IOException {
 		this.maxLength = -1;
-		init(out, off);
+		set(out, off);
 	}
-	public void set(RandomOutputStream out, long off, long maxLength) throws IOException {
+	public void init(RandomOutputStream out, long off, long maxLength) throws IOException {
 		if (maxLength<0)
 			throw new IllegalArgumentException();
 		this.maxLength = maxLength;
-		init(out, off);
+		set(out, off);
 	}
 
-	private void init(RandomOutputStream out, long off) throws IOException {
+	private void set(RandomOutputStream out, long off) throws IOException {
 		if (out==null)
 			throw new NullPointerException();
 		if (off<0)

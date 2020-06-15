@@ -54,6 +54,13 @@ public class RandomByteArrayOutputStream extends RandomOutputStream {
 	static final int MAX_ARRAY_SIZE = Integer.MAX_VALUE - 8;
 
 	public RandomByteArrayOutputStream(byte[] _bytes) {
+		init(_bytes);
+	}
+
+	public void init(byte[] _bytes)
+	{
+		if (_bytes==null)
+			throw new NullPointerException();
 		bytes = _bytes;
 		current_pos = 0;
 		length=_bytes.length;

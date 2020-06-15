@@ -75,6 +75,12 @@ public class EncryptionSignatureHashDecoder {
 	private boolean changeCipherOfEncoder=false;
 	private Byte code=null;
 	private long dataLen=-1;
+	private final RandomByteArrayInputStream randomByteArrayInputStream=new RandomByteArrayInputStream(emptyTab);
+	private final LimitedRandomInputStream limitedRandomInputStream2=new LimitedRandomInputStream(randomByteArrayInputStream, 0 );
+	private final RandomByteArrayOutputStream randomByteArrayOutputStream=new RandomByteArrayOutputStream();
+	private final LimitedRandomOutputStream randomOutputStream=new LimitedRandomOutputStream(randomByteArrayOutputStream, 0 );
+	private final NullRandomOutputStream nullRandomOutputStream=new NullRandomOutputStream();
+	private static final byte[] emptyTab=new byte[0];
 
 	public EncryptionSignatureHashDecoder connectWithEncoder(EncryptionSignatureHashEncoder encoder)
 	{
@@ -379,12 +385,15 @@ public class EncryptionSignatureHashDecoder {
 			checkerIn.set(EncryptionSignatureHashDecoder.nullRandomInputStream, symmetricChecker==null?asymmetricChecker:symmetricChecker);
 		if (hashIn!=null)
 			hashIn.set(EncryptionSignatureHashDecoder.nullRandomInputStream, digest==null?defaultMessageDigest:digest);
-
+		randomByteArrayOutputStream.init(emptyTab);
+		randomOutputStream.init(randomByteArrayOutputStream, 0);
 		freeLimitedRandomInputStream();
 	}
 	private void freeLimitedRandomInputStream() throws IOException {
 		changeCipherOfEncoder=false;
-		limitedRandomInputStream.set(EncryptionSignatureHashDecoder.nullRandomInputStream, 0);
+		limitedRandomInputStream.init(EncryptionSignatureHashDecoder.nullRandomInputStream, 0);
+		randomByteArrayInputStream.init(emptyTab);
+		limitedRandomInputStream2.init(randomByteArrayInputStream, 0 );
 	}
 
 	private void checkHeadRead() throws IOException {
@@ -418,11 +427,39 @@ public class EncryptionSignatureHashDecoder {
 		else
 			return dataLen;
 	}
+	public long decodeAndCheckHashAndSignaturesIfNecessary(byte[] cipherText, int cipherTextOff, int cipherTextLen, byte[] data, int dataOff, int dataLen) throws IOException {
+		EncryptionSignatureHashEncoder.checkLimits(cipherText, cipherTextOff, cipherTextLen);
+		EncryptionSignatureHashEncoder.checkLimits(data, dataOff, dataLen);
+		if (cipherTextLen<=0)
+			throw new IllegalArgumentException();
+		if (dataLen<=0)
+			throw new IllegalArgumentException();
+		randomByteArrayInputStream.init(cipherText);
+		limitedRandomInputStream2.init(randomByteArrayInputStream, cipherTextOff, cipherTextLen);
+		withRandomInputStream(limitedRandomInputStream2);
+		randomByteArrayOutputStream.init(data);
+		randomOutputStream.init(randomByteArrayOutputStream, dataOff, dataLen);
+		return decodeAndCheckHashAndSignaturesIfNecessary(randomOutputStream);
+	}
+	public long decodeAndCheckHashAndSignaturesIfNecessaryWithSameInputAndOutputStreamSource(byte[] data, int dataOff, int dataLen) throws IOException {
+		EncryptionSignatureHashEncoder.checkLimits(data, dataOff, dataLen);
+		if (dataLen<=0)
+			throw new IllegalArgumentException();
+		randomByteArrayInputStream.init(data);
+		limitedRandomInputStream2.init(randomByteArrayInputStream, dataOff, dataLen);
+		withRandomInputStream(limitedRandomInputStream2);
+		randomByteArrayOutputStream.init(data);
+		randomOutputStream.init(randomByteArrayOutputStream, dataOff+EncryptionSignatureHashEncoder.headSize, dataLen-EncryptionSignatureHashEncoder.headSize);
+		return decodeAndCheckHashAndSignaturesIfNecessary(randomOutputStream, true);
 
-	@SuppressWarnings("UnusedReturnValue")
+	}
 	public long decodeAndCheckHashAndSignaturesIfNecessary(RandomOutputStream outputStream) throws IOException {
+		return decodeAndCheckHashAndSignaturesIfNecessary(outputStream, false);
+	}
+	private long decodeAndCheckHashAndSignaturesIfNecessary(RandomOutputStream outputStream, boolean sameInputOutputSource) throws IOException {
 		if (outputStream==null)
 			throw new NullPointerException();
+
 
 		RandomInputStream originalInputStream=inputStream;
 		if (originalInputStream==null)
@@ -435,6 +472,8 @@ public class EncryptionSignatureHashDecoder {
 			long maximumOutputLengthAfterEncoding=getMaximumOutputLength();
 			outputStream.ensureLength(maximumOutputLengthAfterEncoding);
 			checkCodeForDecode();
+			if (sameInputOutputSource && isEncrypted())
+				throw new IOException("You must use a different input/output stream when using a encryption");
 			if (inputStream.currentPosition()!=EncryptionSignatureHashEncoder.headSize)
 				inputStream.seek(EncryptionSignatureHashEncoder.headSize);
 
@@ -480,7 +519,7 @@ public class EncryptionSignatureHashDecoder {
 			}
 
 			try {
-				limitedRandomInputStream.set(inputStream, EncryptionSignatureHashEncoder.headSize, dataLen);
+				limitedRandomInputStream.init(inputStream, EncryptionSignatureHashEncoder.headSize, dataLen);
 			}
 			catch (IllegalArgumentException | NullPointerException e)
 			{
@@ -524,8 +563,21 @@ public class EncryptionSignatureHashDecoder {
 			}
 			else
 			{
-				outputStream.write(limitedRandomInputStream);
-				res=limitedRandomInputStream.length();
+				if (sameInputOutputSource) {
+					res = limitedRandomInputStream.length();
+					if (inputStream!=originalInputStream) {
+						nullRandomOutputStream.write(limitedRandomInputStream);
+						nullRandomOutputStream.setLength(0);
+					}
+					else
+						limitedRandomInputStream.seek(res);
+					outputStream.seek(outputStream.currentPosition()+res);
+				}
+				else {
+					outputStream.write(limitedRandomInputStream);
+					res = limitedRandomInputStream.length();
+				}
+
 			}
 			if (buffer==null && (digest!=null || symmetricChecker!=null || asymmetricChecker!=null)) {
 				buffer=this.buffer;
@@ -621,6 +673,15 @@ public class EncryptionSignatureHashDecoder {
 		if (dataLen>inputStream.length())
 			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
 	}
+	public Integrity checkHashAndSignature(byte[] cipherText, int cipherTextOff, int cipherTextLen) throws IOException {
+		EncryptionSignatureHashEncoder.checkLimits(cipherText, cipherTextOff, cipherTextLen);
+		if (cipherTextLen<=0)
+			throw new IllegalArgumentException();
+		randomByteArrayInputStream.init(cipherText);
+		limitedRandomInputStream2.init(randomByteArrayInputStream, cipherTextOff, cipherTextLen);
+		withRandomInputStream(limitedRandomInputStream2);
+		return checkHashAndSignature();
+	}
 	public Integrity checkHashAndSignature() throws IOException {
 
 
@@ -647,7 +708,7 @@ public class EncryptionSignatureHashDecoder {
 			if (digest!=null) {
 
 				digest.reset();
-				limitedRandomInputStream.set(inputStream, dataPos, dataLen);
+				limitedRandomInputStream.init(inputStream, dataPos, dataLen);
 				digest.update(limitedRandomInputStream);
 				digest.update(code);
 				digest.update(buffer, 0, EncryptionSignatureHashEncoder.headSizeMinusOne);
@@ -696,7 +757,7 @@ public class EncryptionSignatureHashDecoder {
 
 				inputStream.seek(dataPos+dataLen);
 				symmetricChecker.init(inputStream.readBytesArray(false, symmetricChecker.getMacLengthBytes()));
-				limitedRandomInputStream.set(inputStream, dataPos, dataLen);
+				limitedRandomInputStream.init(inputStream, dataPos, dataLen);
 				symmetricChecker.update(limitedRandomInputStream);
 				symmetricChecker.update(code);
 				symmetricChecker.update(buffer, 0, EncryptionSignatureHashEncoder.headSizeMinusOne);
@@ -711,7 +772,7 @@ public class EncryptionSignatureHashDecoder {
 
 				inputStream.seek(dataPos+dataLen);
 				asymmetricChecker.init(inputStream.readBytesArray(false, asymmetricChecker.getMacLengthBytes()));
-				limitedRandomInputStream.set(inputStream, dataPos, dataLen);
+				limitedRandomInputStream.init(inputStream, dataPos, dataLen);
 				asymmetricChecker.update(limitedRandomInputStream);
 				asymmetricChecker.update(code);
 				asymmetricChecker.update(buffer, 0, EncryptionSignatureHashEncoder.headSizeMinusOne);
@@ -732,6 +793,15 @@ public class EncryptionSignatureHashDecoder {
 		finally {
 			freeLimitedRandomInputStream();
 		}
+	}
+	public Integrity checkHashAndPublicSignature(byte[] cipherText, int cipherTextOff, int cipherTextLen) throws IOException {
+		EncryptionSignatureHashEncoder.checkLimits(cipherText, cipherTextOff, cipherTextLen);
+		if (cipherTextLen<=0)
+			throw new IllegalArgumentException();
+		randomByteArrayInputStream.init(cipherText);
+		limitedRandomInputStream2.init(randomByteArrayInputStream, cipherTextOff, cipherTextLen);
+		withRandomInputStream(limitedRandomInputStream2);
+		return checkHashAndPublicSignature();
 	}
 	public Integrity checkHashAndPublicSignature() throws IOException {
 
@@ -761,7 +831,7 @@ public class EncryptionSignatureHashDecoder {
 
 			if (digest!=null) {
 				digest.reset();
-				limitedRandomInputStream.set(inputStream, dataPos, dataLen);
+				limitedRandomInputStream.init(inputStream, dataPos, dataLen);
 				digest.update(limitedRandomInputStream);
 				digest.update(code);
 				digest.update(buffer, 0, EncryptionSignatureHashEncoder.headSizeMinusOne);
@@ -803,7 +873,7 @@ public class EncryptionSignatureHashDecoder {
 
 				inputStream.seek(dataPos+dataLen);
 				asymmetricChecker.init(inputStream.readBytesArray(false, asymmetricChecker.getMacLengthBytes()));
-				limitedRandomInputStream.set(inputStream, dataPos, dataLen);
+				limitedRandomInputStream.init(inputStream, dataPos, dataLen);
 				asymmetricChecker.update(limitedRandomInputStream);
 				asymmetricChecker.update(code);
 				asymmetricChecker.update(buffer, 0, EncryptionSignatureHashEncoder.headSizeMinusOne);
