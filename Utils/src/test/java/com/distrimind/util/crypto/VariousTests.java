@@ -59,7 +59,7 @@ public class VariousTests {
 		Random rand = new Random(System.currentTimeMillis());
 		messagesToEncrypt = new byte[30][];
 		for (int i = 0; i < messagesToEncrypt.length; i++) {
-			byte[] b = new byte[50 + rand.nextInt(20000)];
+			byte[] b = new byte[96 + rand.nextInt(20000)];
 			for (int j = 0; j < b.length; j++)
 				b[j] = (byte) rand.nextInt();
 
