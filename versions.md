@@ -1,6 +1,6 @@
 Utils
 =====
-5.5.0 Stable (Build: 1756) (from 15/06/2020 to 15/06/2020)
+5.5.1 Stable (Build: 1762) (from 22/06/2020 to 22/06/2020)
 
 # Creator(s):
 Jason MAHDJOUB
@@ -9,6 +9,10 @@ Jason MAHDJOUB
 Jason MAHDJOUB (Entred in the team at 04/01/2016)
 
 # Modifications:
+
+
+### 5.5.1 Stable (22/06/2020)
+* Alter RandomCacheFileCenter initialization
 
 
 ### 5.5.0 Stable (15/06/2020)

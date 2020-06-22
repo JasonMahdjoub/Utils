@@ -40,14 +40,36 @@ import java.io.IOException;
 
 /**
  * @author Jason Mahdjoub
- * @version 1.1
+ * @version 1.2
  * @since Utils 4.6.0
  */
 public class RandomCacheFileCenter {
-	private final long maxMemoryUsedToStoreDataIntoMemoryInsteadOfFiles;
+	private volatile long maxMemoryUsedToStoreDataIntoMemoryInsteadOfFiles;
 	private long memoryUsedToStoreDataIntoMemoryInsteadOfFiles;
 	private static final String prefixTmpFileName="DistriMindCacheFileCenter";
 	private static final String suffixTmpFileName="data";
+	private static final RandomCacheFileCenter singleton=new RandomCacheFileCenter();
+
+
+	private RandomCacheFileCenter() {
+		this(getContextualizedMaxMemorySize());
+	}
+
+	private static long getContextualizedMaxMemorySize()
+	{
+		double mm=Runtime.getRuntime().maxMemory();
+		if (mm<128.0)
+			return 8;
+		else
+		{
+			return (long)(0.0074*mm+7.0551);
+		}
+	}
+
+	public static RandomCacheFileCenter getSingleton()
+	{
+		return singleton;
+	}
 
 	public RandomCacheFileCenter(long maxMemoryUsedToStoreDataIntoMemoryInsteadOfFiles) {
 		this.maxMemoryUsedToStoreDataIntoMemoryInsteadOfFiles=maxMemoryUsedToStoreDataIntoMemoryInsteadOfFiles;
@@ -56,6 +78,11 @@ public class RandomCacheFileCenter {
 	public RandomCacheFileOutputStream getNewRandomCacheFileOutputStream() throws IOException {
 		return getNewRandomCacheFileOutputStream(true);
 	}
+
+	public void setMaxMemoryUsedToStoreDataIntoMemoryInsteadOfFiles(long maxMemoryUsedToStoreDataIntoMemoryInsteadOfFiles) {
+		this.maxMemoryUsedToStoreDataIntoMemoryInsteadOfFiles = maxMemoryUsedToStoreDataIntoMemoryInsteadOfFiles;
+	}
+
 	public RandomCacheFileOutputStream getNewRandomCacheFileOutputStream(boolean removeFileWhenClosingStream) throws IOException {
 		return getNewRandomCacheFileOutputStream(File.createTempFile(prefixTmpFileName, suffixTmpFileName), removeFileWhenClosingStream, RandomFileOutputStream.AccessMode.READ_AND_WRITE);
 	}
