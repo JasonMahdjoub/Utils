@@ -1,6 +1,6 @@
 Utils
 =====
-5.5.1 Stable (Build: 1768) (from 22/06/2020 to 23/06/2020)
+5.5.1 Stable (Build: 1772) (from 22/06/2020 to 23/06/2020)
 
 # Creator(s):
 Jason MAHDJOUB
@@ -17,6 +17,7 @@ Jason MAHDJOUB (Entred in the team at 04/01/2016)
 * Add SymmetricEncryptionType.MAX_IV_SIZE_IN_BYTES
 * Add SymmetricEncryptionType.getMaxOutputSizeInBytesAfterEncryption(long)
 * Add SymmetricEncryptionType.getMaxPlainTextSizeForEncoding()
+* Add EncryptionSignatureHashEncoder.getMaximumOutputLengthWhateverParameters(long)
 
 
 ### 5.5.0 Stable (15/06/2020)

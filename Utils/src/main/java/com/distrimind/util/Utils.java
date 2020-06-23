@@ -80,6 +80,7 @@ public class Utils {
 			d.addItem("Add SymmetricEncryptionType.MAX_IV_SIZE_IN_BYTES");
 			d.addItem("Add SymmetricEncryptionType.getMaxOutputSizeInBytesAfterEncryption(long)");
 			d.addItem("Add SymmetricEncryptionType.getMaxPlainTextSizeForEncoding()");
+			d.addItem("Add EncryptionSignatureHashEncoder.getMaximumOutputLengthWhateverParameters(long)");
 			VERSION.addDescription(d);
 
 			c = Calendar.getInstance();

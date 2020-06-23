@@ -45,11 +45,16 @@ import java.util.Arrays;
 
 /**
  * @author Jason Mahdjoub
- * @version 1.3
+ * @version 1.4
  * @since Utils 4.16.0
  */
 @SuppressWarnings("UnusedReturnValue")
 public class EncryptionSignatureHashEncoder {
+
+	public static long getMaximumOutputLengthWhateverParameters(long inputSizeInBytes)
+	{
+		return SymmetricEncryptionType.getMaxOutputSizeInBytesAfterEncryption(inputSizeInBytes)+SymmetricAuthentifiedSignatureType.MAX_SYMMETRIC_SIGNATURE_SIZE+HybridASymmetricAuthenticatedSignatureType.MAX_HYBRID_ASYMMETRIC_SIGNATURE_SIZE+MessageDigestType.MAX_HASH_LENGTH;
+	}
 
 	static final MessageDigestType defaultMessageType=MessageDigestType.SHA2_256;
 	public static final int maxKeyIdentifierValue=(1<<16)-1;
