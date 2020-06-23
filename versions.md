@@ -1,6 +1,6 @@
 Utils
 =====
-5.5.1 Stable (Build: 1762) (from 22/06/2020 to 22/06/2020)
+5.5.1 Stable (Build: 1765) (from 22/06/2020 to 23/06/2020)
 
 # Creator(s):
 Jason MAHDJOUB
@@ -13,6 +13,7 @@ Jason MAHDJOUB (Entred in the team at 04/01/2016)
 
 ### 5.5.1 Stable (22/06/2020)
 * Alter RandomCacheFileCenter initialization
+* Rename functions withSecretKeyProvider to withEncryptionProfileProvider into EncryptionSignatureHashEncoder and EncryptionSignatureHashDecoder
 
 
 ### 5.5.0 Stable (15/06/2020)

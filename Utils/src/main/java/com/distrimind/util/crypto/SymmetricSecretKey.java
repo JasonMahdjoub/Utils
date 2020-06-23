@@ -343,12 +343,6 @@ public class SymmetricSecretKey extends AbstractKey {
 		return keySizeBits;
 	}
 
-	private static final int maxPlainTextSizeForEncoding=(int)((1L<<31)-1024L);
-
-	public int getMaxPlainTextSizeForEncoding() {
-		return maxPlainTextSizeForEncoding;
-	}
-
 	@Override
 	public int hashCode() {
 		return hashCode;

@@ -45,7 +45,7 @@ import java.util.Arrays;
 
 /**
  * @author Jason Mahdjoub
- * @version 1.2
+ * @version 1.3
  * @since Utils 4.16.0
  */
 @SuppressWarnings("UnusedReturnValue")
@@ -190,10 +190,10 @@ public class EncryptionSignatureHashEncoder {
 			cipher=reloadCipher(cipher.getSecureRandom(), originalSecretKeyForEncryption, currentKeyID, null);
 		return this;
 	}
-	public EncryptionSignatureHashEncoder withSecretKeyProvider(AbstractSecureRandom random, EncryptionProfileProvider encryptionProfileProvider) throws IOException {
-		return withSecretKeyProvider(random, encryptionProfileProvider, encryptionProfileProvider.getDefaultKeyID());
+	public EncryptionSignatureHashEncoder withEncryptionProfileProvider(AbstractSecureRandom random, EncryptionProfileProvider encryptionProfileProvider) throws IOException {
+		return withEncryptionProfileProvider(random, encryptionProfileProvider, encryptionProfileProvider.getDefaultKeyID());
 	}
-	public EncryptionSignatureHashEncoder withSecretKeyProvider(AbstractSecureRandom random, EncryptionProfileProvider encryptionProfileProvider, short keyID) throws IOException {
+	public EncryptionSignatureHashEncoder withEncryptionProfileProvider(AbstractSecureRandom random, EncryptionProfileProvider encryptionProfileProvider, short keyID) throws IOException {
 		if (random==null)
 			throw new NullPointerException();
 		if (encryptionProfileProvider ==null)

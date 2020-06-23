@@ -76,6 +76,7 @@ public class Utils {
 			c.set(2020, Calendar.JUNE, 22);
 			Description d = new Description((short)5, (short)5, (short)1, Version.Type.Stable, (short)0, c.getTime());
 			d.addItem("Alter RandomCacheFileCenter initialization");
+			d.addItem("Rename functions withSecretKeyProvider to withEncryptionProfileProvider into EncryptionSignatureHashEncoder and EncryptionSignatureHashDecoder");
 			VERSION.addDescription(d);
 
 			c = Calendar.getInstance();

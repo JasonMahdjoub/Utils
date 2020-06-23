@@ -77,7 +77,7 @@ public class CryptoBench {
 			encoder.withSymmetricSecretKeyForSignature(secretKeyForSignature);
 		}
 		EncryptionSignatureHashDecoder decoder=new EncryptionSignatureHashDecoder()
-				.withSymmetricSecretKeyForEncryption(SecureRandomType.FORTUNA_WITH_BC_FIPS_APPROVED.getInstance(null), secretKeyForEncryption);
+				.withSymmetricSecretKeyForEncryption(secretKeyForEncryption);
 		if (secretKeyForSignature!=null)
 			decoder.withSymmetricSecretKeyForSignature(secretKeyForSignature);
 

@@ -44,7 +44,7 @@ import java.util.Arrays;
 
 /**
  * @author Jason Mahdjoub
- * @version 1.2
+ * @version 1.3
  * @since Utils 4.16.0
  */
 public class EncryptionSignatureHashDecoder {
@@ -111,14 +111,18 @@ public class EncryptionSignatureHashDecoder {
 		return this;
 	}
 
-	public EncryptionSignatureHashDecoder withSymmetricSecretKeyForEncryption(AbstractSecureRandom random, SymmetricSecretKey symmetricSecretKeyForEncryption) throws IOException {
-		return withSymmetricSecretKeyForEncryption(random, symmetricSecretKeyForEncryption, (byte)0);
+	public EncryptionSignatureHashDecoder withSymmetricSecretKeyForEncryption(SymmetricSecretKey symmetricSecretKeyForEncryption) throws IOException {
+		return withSymmetricSecretKeyForEncryption(symmetricSecretKeyForEncryption, (byte)0);
 	}
-	public EncryptionSignatureHashDecoder withSymmetricSecretKeyForEncryption(AbstractSecureRandom random, SymmetricSecretKey symmetricSecretKeyForEncryption, byte externalCounterLength) throws IOException {
-		if (externalCounterLength<=0)
-			return withCipher(new SymmetricEncryptionAlgorithm(random, symmetricSecretKeyForEncryption));
-		else
-			return withCipher(new SymmetricEncryptionAlgorithm(random, symmetricSecretKeyForEncryption, externalCounterLength));
+	public EncryptionSignatureHashDecoder withSymmetricSecretKeyForEncryption(SymmetricSecretKey symmetricSecretKeyForEncryption, byte externalCounterLength) throws IOException {
+		try {
+			if (externalCounterLength <= 0)
+				return withCipher(new SymmetricEncryptionAlgorithm(SecureRandomType.DEFAULT.getSingleton(null), symmetricSecretKeyForEncryption));
+			else
+				return withCipher(new SymmetricEncryptionAlgorithm(SecureRandomType.DEFAULT.getSingleton(null), symmetricSecretKeyForEncryption, externalCounterLength));
+		} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
+			throw new IOException(e);
+		}
 	}
 
 	public EncryptionSignatureHashDecoder withCipher(SymmetricEncryptionAlgorithm cipher) {
@@ -198,12 +202,14 @@ public class EncryptionSignatureHashDecoder {
 		}
 	}
 
-	public EncryptionSignatureHashDecoder withSecretKeyProvider(AbstractSecureRandom random, EncryptionProfileProvider encryptionProfileProvider) {
-		if (random==null)
-			throw new NullPointerException();
+	public EncryptionSignatureHashDecoder withEncryptionProfileProvider(EncryptionProfileProvider encryptionProfileProvider) throws IOException {
 		if (encryptionProfileProvider ==null)
 			throw new NullPointerException();
-		this.randomForCipher=random;
+		try {
+			this.randomForCipher=SecureRandomType.DEFAULT.getInstance(null);
+		} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
+			throw new IOException(e);
+		}
 		this.encryptionProfileProvider = encryptionProfileProvider;
 		this.cipher=null;
 		originalSecretKeyForEncryption=null;
