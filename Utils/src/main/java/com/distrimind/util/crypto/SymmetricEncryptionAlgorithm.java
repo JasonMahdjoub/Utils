@@ -231,7 +231,7 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 		this.gcm =type.getBlockMode().toUpperCase().equals("GCM");
 		this.cipher.init(Cipher.ENCRYPT_MODE, this.key, generateIV());
 
-		setMaxPlainTextSizeForEncoding(key.getMaxPlainTextSizeForEncoding());
+		setMaxPlainTextSizeForEncoding(type.getMaxPlainTextSizeForEncoding());
 		initBufferAllocatorArgs();
 
 		

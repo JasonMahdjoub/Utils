@@ -56,7 +56,7 @@ import java.util.Arrays;
  * List of symmetric encryption algorithms
  * 
  * @author Jason Mahdjoub
- * @version 5.1
+ * @version 5.2
  * @since Utils 1.4
  */
 public enum SymmetricEncryptionType {
@@ -93,6 +93,23 @@ public enum SymmetricEncryptionType {
 	BC_CHACHA20_POLY1305("ChaCha20-Poly1305", "", "", (short) 256, CodeProvider.BC, CodeProvider.BC, SymmetricAuthentifiedSignatureType.BC_FIPS_HMAC_SHA2_256, ChaCha20.ALGORITHM, (short)512, true, (short)114, (short)81, (short)114, (short) 81, (short)114, (short)81, false, false, false,  true, false, false, (short)12, 13_000_000_000L),
 	DEFAULT(AES_CTR);
 	
+
+	public static final int MAX_IV_SIZE_IN_BYTES=16;
+
+	public static long getMaxOutputSizeInBytesAfterEncryption(long size)
+	{
+		int m=maxPlainTextSizeForEncoding;
+		for (SymmetricEncryptionType e : SymmetricEncryptionType.values())
+			m=Math.min(e.getMaxPlainTextSizeForEncoding(), m);
+		long nb=size/m+size%m==0?0:1;
+		return nb*MAX_IV_SIZE_IN_BYTES+size+31;
+	}
+
+	private static final int maxPlainTextSizeForEncoding=(int)((1L<<31)-1024L);
+
+	public int getMaxPlainTextSizeForEncoding() {
+		return maxPlainTextSizeForEncoding;
+	}
 
 	static Object decodeGnuSecretKey(byte[] encodedSecretKey, String algorithmName) {
 		return decodeGnuSecretKey(encodedSecretKey, 0, encodedSecretKey.length, algorithmName);

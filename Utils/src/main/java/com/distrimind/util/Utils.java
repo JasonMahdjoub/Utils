@@ -77,6 +77,9 @@ public class Utils {
 			Description d = new Description((short)5, (short)5, (short)1, Version.Type.Stable, (short)0, c.getTime());
 			d.addItem("Alter RandomCacheFileCenter initialization");
 			d.addItem("Rename functions withSecretKeyProvider to withEncryptionProfileProvider into EncryptionSignatureHashEncoder and EncryptionSignatureHashDecoder");
+			d.addItem("Add SymmetricEncryptionType.MAX_IV_SIZE_IN_BYTES");
+			d.addItem("Add SymmetricEncryptionType.getMaxOutputSizeInBytesAfterEncryption(long)");
+			d.addItem("Add SymmetricEncryptionType.getMaxPlainTextSizeForEncoding()");
 			VERSION.addDescription(d);
 
 			c = Calendar.getInstance();
