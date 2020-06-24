@@ -1,6 +1,6 @@
 Utils
 =====
-5.5.1 Stable (Build: 1772) (from 22/06/2020 to 23/06/2020)
+5.5.1 Stable (Build: 1776) (from 22/06/2020 to 24/06/2020)
 
 # Creator(s):
 Jason MAHDJOUB

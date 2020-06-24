@@ -46,8 +46,8 @@ import java.util.Arrays;
  */
 public class BufferedRandomInputStream extends RandomInputStream {
 
-	static final int MAX_BUFFERS_NUMBER=3;
-	static final int MAX_BUFFER_SIZE=8192;
+	public static final int DEFAULT_MAX_BUFFERS_NUMBER =3;
+	public static final int DEFAULT_MAX_BUFFER_SIZE =8192;
 
 	private final RandomInputStream in;
 	private final byte[][] buffers;
@@ -60,10 +60,10 @@ public class BufferedRandomInputStream extends RandomInputStream {
 	private final int maxBufferSizeDiv2;
 
 	public BufferedRandomInputStream(RandomInputStream in) throws IOException {
-		this(in, MAX_BUFFER_SIZE);
+		this(in, DEFAULT_MAX_BUFFER_SIZE);
 	}
 	public BufferedRandomInputStream(RandomInputStream in, int maxBufferSize) throws IOException {
-		this(in, maxBufferSize, MAX_BUFFERS_NUMBER);
+		this(in, maxBufferSize, DEFAULT_MAX_BUFFERS_NUMBER);
 	}
 	public BufferedRandomInputStream(RandomInputStream in, int maxBufferSize, int maxBuffersNumber) throws IOException {
 		this.in = in;

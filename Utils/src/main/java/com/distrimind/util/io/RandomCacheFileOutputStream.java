@@ -55,10 +55,11 @@ public class RandomCacheFileOutputStream extends RandomOutputStream{
 	private final boolean removeFileWhenClosed;
 	private boolean closed=false;
 	private RandomInputStream in=null;
-	RandomCacheFileOutputStream(RandomCacheFileCenter randomCacheFileCenter, File fileName, boolean removeFileWhenClosed, RandomFileOutputStream.AccessMode accessMode,int maxBufferSize, int maxBuffersNumber)
-	{
+	RandomCacheFileOutputStream(RandomCacheFileCenter randomCacheFileCenter, File fileName, boolean removeFileWhenClosed, RandomFileOutputStream.AccessMode accessMode,int maxBufferSize, int maxBuffersNumber) throws IOException {
 		this.randomCacheFileCenter=randomCacheFileCenter;
 		this.out=new RandomByteArrayOutputStream();
+		if (maxBufferSize>0)
+			this.out=new BufferedRandomOutputStream(out, maxBufferSize, maxBuffersNumber);
 		this.fileName=fileName;
 		this.fileUsed=false;
 		this.accessMode=accessMode;
@@ -74,9 +75,10 @@ public class RandomCacheFileOutputStream extends RandomOutputStream{
 		RandomOutputStream fout=new RandomFileOutputStream(fileName, accessMode);
 		if (maxBufferSize>0)
 			fout=new BufferedRandomOutputStream(fout, maxBufferSize, maxBuffersNumber);
-
-		fout.write(((RandomByteArrayOutputStream)out).getBytes());
-		randomCacheFileCenter.releaseDataFromMemory(out.length());
+		out.flush();
+		RandomByteArrayOutputStream baos=maxBufferSize>0?(RandomByteArrayOutputStream)((BufferedRandomOutputStream)out).getRandomOutputStreamSource():(RandomByteArrayOutputStream)out;
+		fout.write(baos.getBytes());
+		randomCacheFileCenter.releaseDataFromMemory(baos.length());
 		out=fout;
 		if (in!=null)
 			in=out.getRandomInputStream();

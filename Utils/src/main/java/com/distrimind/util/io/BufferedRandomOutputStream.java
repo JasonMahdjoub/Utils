@@ -38,8 +38,8 @@ knowledge of the CeCILL-C license and that you accept its terms.
 import java.io.IOException;
 import java.util.Arrays;
 
-import static com.distrimind.util.io.BufferedRandomInputStream.MAX_BUFFER_SIZE;
-import static com.distrimind.util.io.BufferedRandomInputStream.MAX_BUFFERS_NUMBER;
+import static com.distrimind.util.io.BufferedRandomInputStream.DEFAULT_MAX_BUFFER_SIZE;
+import static com.distrimind.util.io.BufferedRandomInputStream.DEFAULT_MAX_BUFFERS_NUMBER;
 
 /**
  * @author Jason Mahdjoub
@@ -62,10 +62,10 @@ public class BufferedRandomOutputStream extends RandomOutputStream{
 	private long length;
 
 	public BufferedRandomOutputStream(RandomOutputStream out) throws IOException {
-		this(out, MAX_BUFFER_SIZE);
+		this(out, DEFAULT_MAX_BUFFER_SIZE);
 	}
 	public BufferedRandomOutputStream(RandomOutputStream out, int maxBufferSize) throws IOException {
-		this(out, maxBufferSize, MAX_BUFFERS_NUMBER);
+		this(out, maxBufferSize, DEFAULT_MAX_BUFFERS_NUMBER);
 	}
 	public BufferedRandomOutputStream(RandomOutputStream out, int maxBufferSize, int maxBuffersNumber) throws IOException {
 		this.out = out;
