@@ -59,8 +59,8 @@ public class Utils {
 		Calendar c = Calendar.getInstance();
 		c.set(2016, Calendar.JANUARY, 4);
 		Calendar c2 = Calendar.getInstance();
-		c.set(2020, Calendar.JUNE, 22);
-		VERSION = new Version("Utils", "Utils", (short)5, (short)5, (short)1, Version.Type.Stable, (short)0, c.getTime(), c2.getTime());
+		c.set(2020, Calendar.JULY, 9);
+		VERSION = new Version("Utils", "Utils", (short)5, (short)5, (short)2, Version.Type.Stable, (short)0, c.getTime(), c2.getTime());
 		try {
 
 			InputStream is = Utils.class.getResourceAsStream("build.txt");
@@ -73,8 +73,15 @@ public class Utils {
 			VERSION.addDeveloper(new PersonDeveloper("mahdjoub", "jason", c.getTime()));
 
 			c = Calendar.getInstance();
+			c.set(2020, Calendar.JULY, 9);
+			Description d = new Description((short)5, (short)5, (short)2, Version.Type.Stable, (short)0, c.getTime());
+			d.addItem("Update BouncyCastle to 1.66");
+			d.addItem("Minimum JVM version must now be compatible with Java 8");
+			VERSION.addDescription(d);
+
+			c = Calendar.getInstance();
 			c.set(2020, Calendar.JUNE, 22);
-			Description d = new Description((short)5, (short)5, (short)1, Version.Type.Stable, (short)0, c.getTime());
+			d = new Description((short)5, (short)5, (short)1, Version.Type.Stable, (short)0, c.getTime());
 			d.addItem("Alter RandomCacheFileCenter initialization");
 			d.addItem("Rename functions withSecretKeyProvider to withEncryptionProfileProvider into EncryptionSignatureHashEncoder and EncryptionSignatureHashDecoder");
 			d.addItem("Add SymmetricEncryptionType.MAX_IV_SIZE_IN_BYTES");
