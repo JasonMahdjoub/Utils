@@ -1,6 +1,6 @@
 Utils
 =====
-5.5.1 Stable (Build: 1776) (from 22/06/2020 to 24/06/2020)
+5.5.2 Stable (Build: 1779) (from 09/07/2020 to 09/07/2020)
 
 # Creator(s):
 Jason MAHDJOUB
@@ -9,6 +9,11 @@ Jason MAHDJOUB
 Jason MAHDJOUB (Entred in the team at 04/01/2016)
 
 # Modifications:
+
+
+### 5.5.2 Stable (09/07/2020)
+* Update BouncyCastle to 1.66
+* Minimum JVM version must now be compatible with Java 8
 
 
 ### 5.5.1 Stable (22/06/2020)
