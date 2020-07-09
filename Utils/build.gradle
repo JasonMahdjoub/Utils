@@ -61,7 +61,7 @@ dependencies {
     testImplementation 'org.hamcrest:hamcrest-core:2.2'
 
     api(group:'org.bouncycastle', name: 'bc-fips', version: '1.0.2-DMRECOMPILE')
-    api(group:'org.bouncycastle', name: 'bc-prov', version: '1.65-DMRECOMPILE')
+    api(group:'org.bouncycastle', name: 'bc-prov', version: '1.66-DMRECOMPILE')
 
 
     testImplementation(group:'gnu', name: 'Gnu-Crypt', version: '1.3.0')
@@ -71,7 +71,7 @@ dependencies {
 
 }
 
-def javaVersion="7"
+def javaVersion="8"
 sourceCompatibility = javaVersion
 targetCompatibility= javaVersion
 
