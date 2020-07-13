@@ -109,9 +109,12 @@ public class RandomByteArrayInputStream extends RandomInputStream {
 		if (outputStream == null)
 			throw new IOException("The current RandomByteArrayInputStream is closed !");
 		checkLimits(_bytes, _offset, _length);
-		if (getFreeSpace()==0 && _length>0)
+		if (_length==0)
+			return 0;
+		int freeSpace=getFreeSpace();
+		if (freeSpace==0)
 			return -1;
-		int readed = Math.min(Math.min(_length, getFreeSpace()), _bytes.length - _offset);
+		int readed = Math.min(Math.min(_length, freeSpace), _bytes.length - _offset);
 		System.arraycopy(outputStream.bytes, current_pos, _bytes, _offset, readed);
 		current_pos += readed;
 		return readed;

@@ -59,22 +59,28 @@ public class Utils {
 		Calendar c = Calendar.getInstance();
 		c.set(2016, Calendar.JANUARY, 4);
 		Calendar c2 = Calendar.getInstance();
-		c.set(2020, Calendar.JULY, 9);
-		VERSION = new Version("Utils", "Utils", (short)5, (short)5, (short)2, Version.Type.Stable, (short)0, c.getTime(), c2.getTime());
+		c.set(2020, Calendar.JULY, 13);
+		VERSION = new Version("Utils", "Utils", (short)5, (short)5, (short)3, Version.Type.Stable, (short)0, c.getTime(), c2.getTime());
 		try {
 
 			InputStream is = Utils.class.getResourceAsStream("build.txt");
 			if (is!=null)
 				VERSION.loadBuildNumber(is);
-			
+
 			VERSION.addCreator(new Person("mahdjoub", "jason"));
 			c = Calendar.getInstance();
 			c.set(2016, Calendar.JANUARY, 4);
 			VERSION.addDeveloper(new PersonDeveloper("mahdjoub", "jason", c.getTime()));
 
 			c = Calendar.getInstance();
+			c.set(2020, Calendar.JULY, 13);
+			Description d = new Description((short)5, (short)5, (short)3, Version.Type.Stable, (short)0, c.getTime());
+			d.addItem("Fix end stream detection issue with BufferedRandomInputStream");
+			VERSION.addDescription(d);
+
+			c = Calendar.getInstance();
 			c.set(2020, Calendar.JULY, 9);
-			Description d = new Description((short)5, (short)5, (short)2, Version.Type.Stable, (short)0, c.getTime());
+			d = new Description((short)5, (short)5, (short)2, Version.Type.Stable, (short)0, c.getTime());
 			d.addItem("Update BouncyCastle to 1.66");
 			d.addItem("Minimum JVM version must now be compatible with Java 8");
 			VERSION.addDescription(d);
