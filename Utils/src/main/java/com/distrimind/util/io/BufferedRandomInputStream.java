@@ -305,12 +305,13 @@ public class BufferedRandomInputStream extends RandomInputStream {
 		checkLimits(b, off, len);
 		int res=0;
 		boolean first=true;
-
+		boolean firstCycle=true;
 		while(len>0)
 		{
 			long available=length()-currentPosition;
 			if (available==0)
-				return 0;
+				return firstCycle?-1:0;
+
 			long curPos=positions[currentBufferIndex];
 
 			if (currentPosition>=curPos+maxBufferSize)
@@ -343,6 +344,7 @@ public class BufferedRandomInputStream extends RandomInputStream {
 			currentPosition+=copyLen;
 			if (copyLen==available)
 				return res;
+			firstCycle=false;
 		}
 		return res;
 	}
