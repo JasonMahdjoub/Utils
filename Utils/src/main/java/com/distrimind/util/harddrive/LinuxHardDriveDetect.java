@@ -139,7 +139,7 @@ class LinuxHardDriveDetect extends UnixHardDriveDetect {
 			try (FileInputStream fis = new FileInputStream(file)) {
 				try (InputStreamReader isr = new InputStreamReader(fis)) {
 					try (BufferedReader br = new BufferedReader(isr)) {
-						size=Long.valueOf(br.readLine());
+						size=Long.parseLong(br.readLine());
 						
 					}
 				}
@@ -160,7 +160,7 @@ class LinuxHardDriveDetect extends UnixHardDriveDetect {
 			try (FileInputStream fis = new FileInputStream(file)) {
 				try (InputStreamReader isr = new InputStreamReader(fis)) {
 					try (BufferedReader br = new BufferedReader(isr)) {
-						removable=Integer.valueOf(br.readLine())==1;
+						removable=Integer.parseInt(br.readLine())==1;
 					}
 				}
 			}

@@ -48,7 +48,7 @@ public class Accumulator {
     }
 
     public void shutdownSources() {
-        for (ScheduledFuture s : entropyFutures)
+        for (ScheduledFuture<?> s : entropyFutures)
         {
             s.cancel(false);
         }

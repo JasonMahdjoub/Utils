@@ -186,7 +186,7 @@ public abstract class AbstractCipher {
 	 * @param inputLength
 	 *            The input length.
 	 * @return The output length given this input length.
-	 * @throws java.lang.IllegalStateException
+	 * @throws IOException
 	 *             If this instance has not been initialized, or if a
 	 *             <b>doFinal</b> call has already been made.
 	 */

@@ -1,6 +1,6 @@
 Utils
 =====
-5.5.3 Stable (Build: 1784) (from 13/07/2020 to 13/07/2020)
+5.5.3 Stable (Build: 1804) (from 13/07/2020 to 13/07/2020)
 
 # Creator(s):
 Jason MAHDJOUB
@@ -13,6 +13,7 @@ Jason MAHDJOUB (Entred in the team at 04/01/2016)
 
 ### 5.5.3 Stable (13/07/2020)
 * Fix end stream detection issue with BufferedRandomInputStream
+* Clean code
 
 
 ### 5.5.2 Stable (09/07/2020)

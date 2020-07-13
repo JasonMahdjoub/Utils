@@ -62,6 +62,7 @@ import java.security.spec.X509EncodedKeySpec;
  * @version 4.1
  * @since Utils 1.4
  */
+@SuppressWarnings("unchecked")
 public enum ASymmetricEncryptionType {
 	RSA_OAEPWithSHA256AndMGF1Padding("RSA", "ECB", "OAEPWITHSHA-256ANDMGF1PADDING", ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA384withRSA,
 			3072, 31536000000L, (short) 66, CodeProvider.SunJCE,CodeProvider.SunRsaSign, FipsRSA.ALGORITHM, false),

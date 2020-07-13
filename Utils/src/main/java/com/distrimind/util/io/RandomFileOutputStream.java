@@ -69,7 +69,7 @@ public class RandomFileOutputStream extends RandomOutputStream {
 		 */
 		READ_AND_WRITE_WITH_SYNCHRONOUS_CONTENT_AND_METADATA("rws");
 
-		private String mode;
+		private final String mode;
 
 		AccessMode(String mode) {
 			this.mode = mode;
@@ -105,6 +105,7 @@ public class RandomFileOutputStream extends RandomOutputStream {
 		return new RandomFileInputStream(raf);
 	}
 
+	@SuppressWarnings("RedundantThrows")
 	@Override
 	public void flush() throws IOException {
 

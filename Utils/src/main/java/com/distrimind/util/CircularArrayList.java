@@ -41,14 +41,15 @@ import java.util.*;
  * @version 1.0
  * @since Utils 4.8.0
  */
+@SuppressWarnings("unchecked")
 public class CircularArrayList<E> extends AbstractList<E> implements List<E>, Deque<E>, Cloneable, java.io.Serializable, RandomAccess{
 	final static int DEFAULT_BASE_SIZE=32;
 	final static boolean DEFAULT_EXTENSIBLE=true;
 
 	private Object[] array;
-	private int baseSize;
+	private final int baseSize;
 	private int size;
-	private boolean extensibleSize;
+	private final boolean extensibleSize;
 	private int position;
 	public CircularArrayList() {
 		this(DEFAULT_BASE_SIZE, DEFAULT_EXTENSIBLE);
@@ -187,12 +188,12 @@ public class CircularArrayList<E> extends AbstractList<E> implements List<E>, De
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public E removeFirst() {
 		if (size==0)
 			throw new NoSuchElementException();
 		--size;
-		//noinspection unchecked
 		E r=(E)array[position];
 		array[position++]=null;
 		position%=array.length;
@@ -200,14 +201,14 @@ public class CircularArrayList<E> extends AbstractList<E> implements List<E>, De
 		return r;
 	}
 
+
 	@Override
 	public E removeLast() {
 		if (size==0)
 			throw new NoSuchElementException();
 
 		int i=(position+(--size))%array.length;
-		//noinspection unchecked
-		E r= (E)array[i];
+		@SuppressWarnings("unchecked") E r= (E)array[i];
 		array[i]=null;
 		ensureSizeReduction();
 		return r;
@@ -228,11 +229,11 @@ public class CircularArrayList<E> extends AbstractList<E> implements List<E>, De
 		return removeLast();
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public E getFirst() {
 		if (size==0)
 			throw new NoSuchElementException();
-		//noinspection unchecked
 		return (E)array[position];
 
 	}
@@ -241,7 +242,6 @@ public class CircularArrayList<E> extends AbstractList<E> implements List<E>, De
 	public E getLast() {
 		if (size==0)
 			throw new NoSuchElementException();
-		//noinspection unchecked
 		return (E)array[(position+size-1)%array.length];
 	}
 
@@ -249,7 +249,6 @@ public class CircularArrayList<E> extends AbstractList<E> implements List<E>, De
 	public E peekFirst() {
 		if (size==0)
 			return null;
-		//noinspection unchecked
 		return (E)array[position];
 	}
 
@@ -257,7 +256,6 @@ public class CircularArrayList<E> extends AbstractList<E> implements List<E>, De
 	public E peekLast() {
 		if (size==0)
 			return null;
-		//noinspection unchecked
 		return (E)array[(position+size-1)%array.length];
 	}
 
@@ -332,7 +330,6 @@ public class CircularArrayList<E> extends AbstractList<E> implements List<E>, De
 			@Override
 			public E next() {
 				if (hasNext()) {
-					//noinspection unchecked
 					return (E) array[(--index+position)%array.length];
 				}
 				else
@@ -387,12 +384,10 @@ public class CircularArrayList<E> extends AbstractList<E> implements List<E>, De
 	@Override
 	public <T> T[] toArray(T[] a) {
 		if (a.length < size)
-			//noinspection unchecked
 			a = (T[])java.lang.reflect.Array.newInstance(
 					a.getClass().getComponentType(), size);
 		int i=0;
 		for (E e : this)
-			//noinspection unchecked
 			a[i++]=(T)e;
 		for (int j=i;j<a.length;j++)
 			a[j]=null;
@@ -501,7 +496,6 @@ public class CircularArrayList<E> extends AbstractList<E> implements List<E>, De
 	public E get(int index) {
 		if (index<0 || index>=size)
 			throw new IndexOutOfBoundsException();
-		//noinspection unchecked
 		return (E)array[(index+position)%array.length];
 	}
 
@@ -511,7 +505,6 @@ public class CircularArrayList<E> extends AbstractList<E> implements List<E>, De
 			throw new IndexOutOfBoundsException();
 
 		int p=(index+position)%array.length;
-		//noinspection unchecked
 		E res=(E)array[p];
 		array[p]=element;
 		return res;
@@ -626,7 +619,6 @@ public class CircularArrayList<E> extends AbstractList<E> implements List<E>, De
 
 		@Override
 		public E next() {
-			//noinspection unchecked
 			return (E) array[(nextIndex()+position)%array.length];
 		}
 
@@ -638,7 +630,6 @@ public class CircularArrayList<E> extends AbstractList<E> implements List<E>, De
 
 		@Override
 		public E previous() {
-			//noinspection unchecked
 			return (E) array[(previousIndex()+position)%array.length];
 
 		}
@@ -694,7 +685,6 @@ public class CircularArrayList<E> extends AbstractList<E> implements List<E>, De
 	public CircularArrayList<E> subList(int fromIndex, int toIndex) {
 		CircularArrayList<E> list=new CircularArrayList<>(baseSize, extensibleSize);
 		for (int i=fromIndex;i<toIndex;i++)
-			//noinspection unchecked
 			list.add((E)array[(i+position)%array.length]);
 		return list;
 	}

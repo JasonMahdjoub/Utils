@@ -80,7 +80,7 @@ public abstract class NITools {
 		return instance.get();
 	}
 
-	public static void main(String args[]) throws SocketException {
+	public static void main(String[] args) throws SocketException {
 		Enumeration<NetworkInterface> e = NetworkInterface.getNetworkInterfaces();
 		while (e.hasMoreElements()) {
 			NetworkInterface ni = e.nextElement();

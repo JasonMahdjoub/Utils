@@ -130,7 +130,7 @@ public final class DataBufferInt extends DataBuffer implements Cloneable, Serial
 				char[] s = (char[]) _data;
 				int[] b = new int[s.length];
 				for (int i = 0; i < s.length; i++) {
-					b[i] = (int) s[i];
+					b[i] = s[i];
 				}
 				m_buffer = b;
 				m_size = s.length;
@@ -140,7 +140,7 @@ public final class DataBufferInt extends DataBuffer implements Cloneable, Serial
 				short[] s = (short[]) _data;
 				int[] b = new int[s.length];
 				for (int i = 0; i < s.length; i++) {
-					b[i] = (int) s[i];
+					b[i] = s[i];
 				}
 				m_buffer = b;
 				m_size = s.length;
@@ -150,7 +150,7 @@ public final class DataBufferInt extends DataBuffer implements Cloneable, Serial
 				byte[] s = (byte[]) _data;
 				int[] b = new int[s.length];
 				for (int i = 0; i < s.length; i++) {
-					b[i] = (int) s[i];
+					b[i] = s[i];
 				}
 				m_buffer = b;
 				m_size = s.length;

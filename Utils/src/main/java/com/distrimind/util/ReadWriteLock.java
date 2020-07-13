@@ -47,7 +47,7 @@ import java.util.Map;
  */
 public class ReadWriteLock {
 
-	public abstract class Lock implements AutoCloseable {
+	public abstract static class Lock implements AutoCloseable {
 		@Override
 		public abstract void close();
 	}

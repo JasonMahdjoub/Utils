@@ -156,7 +156,7 @@ public class ObjectSizer {
 
 		// this array will simply hold a bunch of references, such that
 		// the objects cannot be garbage-collected
-		Object[] objects = new Object[fSAMPLE_SIZE];
+		@SuppressWarnings("MismatchedReadAndWriteOfArray") Object[] objects = new Object[fSAMPLE_SIZE];
 
 		// build a bunch of identical objects
 		try {

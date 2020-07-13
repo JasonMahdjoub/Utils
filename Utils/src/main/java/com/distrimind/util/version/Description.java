@@ -51,6 +51,7 @@ import com.distrimind.util.version.Version.Type;
  * @since Utils 1.5
  * @see Version
  */
+@SuppressWarnings("FieldMayBeFinal")
 public class Description extends MultiFormatProperties {
 
 	/**

@@ -239,6 +239,8 @@ public abstract class SecuredObjectInputStream extends InputStream implements Da
 		int read;
 
 		while ((read = this.read(buffer, 0, maxLength>=0?(int)Math.min(maxLength, DEFAULT_BUFFER_SIZE):DEFAULT_BUFFER_SIZE)) >= 0) {
+			if (read==0)
+				continue;
 			out.write(buffer, 0, read);
 			transferred += read;
 			if (maxLength>=0) {

@@ -764,7 +764,7 @@ public class SerializationTools {
 	public final static int MAX_CLASS_LENGTH=2048;
 
 
-	@SuppressWarnings("SameParameterValue")
+	@SuppressWarnings({"SameParameterValue", "unchecked"})
 	static Enum<?> readEnum(final SecuredObjectInputStream ois, boolean supportNull) throws IOException, ClassNotFoundException
 	{
 		if (!supportNull || ois.readBoolean())
@@ -932,14 +932,10 @@ public class SerializationTools {
 			if (c==null)
 			{
 				final Constructor<?> cons=clazz.getDeclaredConstructor();
-				c=AccessController.doPrivileged(new PrivilegedAction<Constructor<?>>() {
+				c=AccessController.doPrivileged((PrivilegedAction<Constructor<?>>) () -> {
 
-					@Override
-					public Constructor<?> run() {
-
-						cons.setAccessible(true);
-						return cons;
-					}
+					cons.setAccessible(true);
+					return cons;
 				});
 				constructors.put(clazz, c);
 			}
@@ -1373,17 +1369,11 @@ public class SerializationTools {
 				throw new IllegalArgumentException("Too much given predefined classes");
 			if (classes.size()>0) {
 				cls = new ArrayList<>(cls);
-				for (Iterator<Class<? extends SecureExternalizableWithoutInnerSizeControl>> it = cls.iterator(); it.hasNext(); ) {
-					if (classes.contains(it.next()))
-						it.remove();
-				}
+				cls.removeIf(classes::contains);
 			}
 			if (enums.size()>0) {
 				enms = new ArrayList<>(enms);
-				for (Iterator<Class<? extends Enum<?>>> it = enms.iterator(); it.hasNext(); ) {
-					if (enums.contains(it.next()))
-						it.remove();
-				}
+				enms.removeIf(enums::contains);
 			}
 
 			classes.addAll(cls);

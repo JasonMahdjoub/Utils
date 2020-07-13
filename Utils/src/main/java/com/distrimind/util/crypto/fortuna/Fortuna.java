@@ -167,6 +167,7 @@ public class Fortuna extends Random {
                 if (scheduler instanceof ScheduledPoolExecutor)
                     ((ScheduledPoolExecutor)scheduler).sleep(10, TimeUnit.MILLISECONDS);
                 else
+                    //noinspection BusyWait
                     Thread.sleep(10);
             } catch (InterruptedException e) {
                 throw new Error("Interrupted while waiting for initialization", e);

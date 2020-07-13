@@ -130,7 +130,7 @@ public final class DataBufferDouble extends DataBuffer implements Cloneable, Ser
 				char[] s = (char[]) _data;
 				double[] b = new double[s.length];
 				for (int i = 0; i < s.length; i++) {
-					b[i] = (double) s[i];
+					b[i] = s[i];
 				}
 				m_buffer = b;
 				m_size = s.length;
@@ -140,7 +140,7 @@ public final class DataBufferDouble extends DataBuffer implements Cloneable, Ser
 				short[] s = (short[]) _data;
 				double[] b = new double[s.length];
 				for (int i = 0; i < s.length; i++) {
-					b[i] = (double) s[i];
+					b[i] = s[i];
 				}
 				m_buffer = b;
 				m_size = s.length;
@@ -150,7 +150,7 @@ public final class DataBufferDouble extends DataBuffer implements Cloneable, Ser
 				int[] s = (int[]) _data;
 				double[] b = new double[s.length];
 				for (int i = 0; i < s.length; i++) {
-					b[i] = (double) s[i];
+					b[i] = s[i];
 				}
 				m_buffer = b;
 				m_size = s.length;
@@ -170,7 +170,7 @@ public final class DataBufferDouble extends DataBuffer implements Cloneable, Ser
 				float[] s = (float[]) _data;
 				double[] b = new double[s.length];
 				for (int i = 0; i < s.length; i++) {
-					b[i] = (double) s[i];
+					b[i] = s[i];
 				}
 				m_buffer = b;
 				m_size = s.length;

@@ -198,7 +198,7 @@ public abstract class MultiFormatProperties implements Cloneable, Serializable {
 					continue;
 				f.setAccessible(true);
                 try {
-                    if (referenceProperties!=null && canExclude(referenceProperties, f, f.get(this)))
+                    if (canExclude(referenceProperties, f, f.get(this)))
                         continue;
                 } catch (IllegalAccessException e) {
                     throw new PropertiesParseException(e, "");
@@ -609,12 +609,12 @@ public abstract class MultiFormatProperties implements Cloneable, Serializable {
 		return null;
 	}
 
-	private Class<?> equals(Field f, String keys[], AtomicInteger keyOff) {
+	private Class<?> equals(Field f, String[] keys, AtomicInteger keyOff) {
 		if (keys.length - keyOff.get() <= 0)
 			return null;
 
 		if (MultiFormatProperties.class.isAssignableFrom(f.getType())) {
-			String fExplodedClass[] = f.getType().getName().split("\\.");
+			String[] fExplodedClass = f.getType().getName().split("\\.");
 
 			if (keys.length - keyOff.get() - 2 < fExplodedClass.length)
 				return null;
@@ -1004,7 +1004,7 @@ public abstract class MultiFormatProperties implements Cloneable, Serializable {
                 }
 
             }
-            return reference == value || (reference != null && reference.equals(value));
+            return Objects.equals(reference, value);
         }
         return false;
     }
@@ -1356,7 +1356,7 @@ public abstract class MultiFormatProperties implements Cloneable, Serializable {
 					if (value.startsWith("{") && value.endsWith("}")) {
 						value = value.substring(1, value.length() - 1);
 						for (String v : value.split(";")) {
-							String split[] = v.split(":");
+							String[] split = v.split(":");
 							if (split.length == 4 && !split[0].equals("null")) {
 								Class<?> key_map_class = Class.forName(split[0]);
 								Class<?> value_map_class = null;
@@ -1389,7 +1389,7 @@ public abstract class MultiFormatProperties implements Cloneable, Serializable {
 		}
 	}
 
-	boolean setField(MultiFormatProperties instance, String keys[], int current_index, String value)
+	boolean setField(MultiFormatProperties instance, String[] keys, int current_index, String value)
 			throws IllegalArgumentException {
 		try {
 			if (instance == null)
@@ -1467,7 +1467,7 @@ public abstract class MultiFormatProperties implements Cloneable, Serializable {
 				if (isValid(f)) {
 					f.setAccessible(true);
                     try {
-                        if (referenceProperties==null || !canExclude(referenceProperties, f, f.get(this)))
+                        if (!canExclude(referenceProperties, f, f.get(this)))
                             writeField(document, element, f, referenceProperties);
                     } catch (IllegalAccessException e) {
                         throw new PropertiesParseException(e, "");

@@ -50,8 +50,8 @@ import java.util.*;
  * @since Utils 4.14.8
  */
 public class AndroidHardDriveDetect extends UnixHardDriveDetect{
-	private Set<Partition> partitions=new HashSet<>();
-	private Set<Disk> disks=new HashSet<>();
+	private final Set<Partition> partitions=new HashSet<>();
+	private final Set<Disk> disks=new HashSet<>();
 	AndroidHardDriveDetect()
 	{
 

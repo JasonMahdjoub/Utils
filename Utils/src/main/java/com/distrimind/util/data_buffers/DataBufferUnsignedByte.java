@@ -205,7 +205,7 @@ public final class DataBufferUnsignedByte extends DataBuffer {
 
 	@Override
 	public double getDouble(int _i) {
-		return (double) (0xFF & m_buffer[_i]);
+		return 0xFF & m_buffer[_i];
 	}
 
 	@Override

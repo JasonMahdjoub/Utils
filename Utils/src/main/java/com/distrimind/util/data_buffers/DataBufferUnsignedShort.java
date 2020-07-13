@@ -141,7 +141,7 @@ public final class DataBufferUnsignedShort extends DataBuffer {
 				byte[] s = (byte[]) _data;
 				short[] b = new short[s.length];
 				for (int i = 0; i < s.length; i++) {
-					b[i] = (short) s[i];
+					b[i] = s[i];
 				}
 				m_buffer = b;
 				m_size = s.length;
@@ -209,7 +209,7 @@ public final class DataBufferUnsignedShort extends DataBuffer {
 
 	@Override
 	public double getDouble(int _i) {
-		return (double) (0xFFFF & m_buffer[_i]);
+		return 0xFFFF & m_buffer[_i];
 	}
 
 	@Override
@@ -293,7 +293,7 @@ public final class DataBufferUnsignedShort extends DataBuffer {
 
 	@Override
 	public void setByte(int _i, byte _val) {
-		m_buffer[_i] = (short) _val;
+		m_buffer[_i] = _val;
 	}
 
 	@Override

@@ -119,7 +119,7 @@ final class ClassMetaData {
 		} else {
 			m_size = ObjectSizer.OBJECT_SHELL_SIZE;
 
-			Field fields[];
+			Field[] fields;
 			synchronized (capa) {
 				capa.setContext(m_class);
 				try {
@@ -133,7 +133,7 @@ final class ClassMetaData {
 			for (Field f : fields) {
 				if ((f.getModifiers() & Modifier.STATIC) != 0 && (f.getModifiers() & Modifier.PUBLIC) != 0) {
 					if (f.getName().contains("m_not_to_compute_size_fields")) {
-						if (f.getType() == (new ArrayList<Field>()).getClass()) {
+						if (f.getType() == ArrayList.class) {
 							try {
 								fields_to_avoid = (ArrayList<Field>) f.get(null);
 							} catch (IllegalArgumentException | IllegalAccessException e) {

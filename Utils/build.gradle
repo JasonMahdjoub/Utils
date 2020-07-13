@@ -151,7 +151,11 @@ allprojects {
 
     if (JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_1_9))
     	javadoc.options.addStringOption("html5", "-quiet")
-
+    gradle.projectsEvaluated {
+        tasks.withType(JavaCompile) {
+            options.compilerArgs << "-Xlint:unchecked"
+        }
+    }
 }
 
 

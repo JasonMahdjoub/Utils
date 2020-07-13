@@ -62,7 +62,7 @@ public class TestStreams {
 		byte[] tab=new byte[1000000];
 		rand.nextBytes(tab);
 		RandomByteArrayInputStream ris=new RandomByteArrayInputStream(tab);
-		res[0][0]=new BufferedRandomInputStream(new RandomByteArrayInputStream(tab.clone()));
+		res[0][0]=new BufferedRandomInputStream(new RandomByteArrayInputStream(tab));
 		res[0][1]=ris;
 		tab=new byte[1000];
 		rand.nextBytes(tab);

@@ -552,7 +552,7 @@ public enum SymmetricEncryptionType {
 	{
 		return maxIVGenerationWithOneSecretKey;
 	}
-	void setMaxIVGenerationWithOneSecretKey(long maxIVGenerationWithOneSecretKey)
+	void setMaxIVGenerationWithOneSecretKey(@SuppressWarnings("SameParameterValue") long maxIVGenerationWithOneSecretKey)
 	{
 		this.maxIVGenerationWithOneSecretKey=maxIVGenerationWithOneSecretKey;
 	}

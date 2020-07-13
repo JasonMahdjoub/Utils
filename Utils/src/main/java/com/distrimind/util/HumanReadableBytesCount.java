@@ -52,16 +52,16 @@ import java.util.regex.Pattern;
  */
 public class HumanReadableBytesCount {
 
-    private static final String units[]=new String[]{"octet", "byte"};
+    private static final String[] units =new String[]{"octet", "byte"};
     //private static final String pluralUnits[]=new String[]{"octets", "bytes"};
-    private static final String presSI[]=new String[]{"", "kilo","mega", "giga", "tera", "peta", "exa", "zetta"};
-    private static final String presBin[]=new String[]{"", "kibio","mebio", "gibio", "tebio", "pebio", "exbio", "zebio"};
-    private static final String presSIShort[]=new String[]{"", "k","M", "G", "T", "P", "E", "Z"};
-    private static final String presBinShort[]=new String[]{"", "K","M", "G", "T", "P", "E", "Z"};
+    private static final String[] presSI =new String[]{"", "kilo","mega", "giga", "tera", "peta", "exa", "zetta"};
+    private static final String[] presBin =new String[]{"", "kibio","mebio", "gibio", "tebio", "pebio", "exbio", "zebio"};
+    private static final String[] presSIShort =new String[]{"", "k","M", "G", "T", "P", "E", "Z"};
+    private static final String[] presBinShort =new String[]{"", "K","M", "G", "T", "P", "E", "Z"};
     private static final DecimalFormatSymbols decimalFormatSymbols=((DecimalFormat)DecimalFormat.getInstance(Locale.getDefault())).getDecimalFormatSymbols();
     //private static final char decimalSeparator=decimalFormatSymbols.getDecimalSeparator();
 
-    private static final String unitsShort[]=new String[]{"o", "B"};
+    private static final String[] unitsShort =new String[]{"o", "B"};
 
     public static String convertToString(long quantityInBytes)
     {
@@ -97,8 +97,8 @@ public class HumanReadableBytesCount {
         if (precision==0)
             val=Math.round(val);
 
-        String units[]=longFormat?HumanReadableBytesCount.units:unitsShort;
-        String pres[]=longFormat?(si?presSI:presBin):(si?presSIShort:presBinShort);
+        String[] units =longFormat?HumanReadableBytesCount.units:unitsShort;
+        String[] pres =longFormat?(si?presSI:presBin):(si?presSIShort:presBinShort);
 
         String pre=pres[exp]+((longFormat || exp==0 || si)?"":"i");
         String unit=(useOctet?units[0]:units[1])+((val<=1.0 || !longFormat)?"":"s");

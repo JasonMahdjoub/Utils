@@ -61,6 +61,7 @@ import java.security.spec.InvalidKeySpecException;
  * @version 2.0
  * @since Utils 2.0
  */
+@SuppressWarnings("unchecked")
 public final class JavaNativeCipher extends AbstractCipher {
 	private final SymmetricEncryptionType type;
 	private final Cipher cipher;

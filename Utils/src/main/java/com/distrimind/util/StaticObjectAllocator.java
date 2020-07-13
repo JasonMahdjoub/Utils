@@ -36,6 +36,7 @@ package com.distrimind.util;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
 
 /**
  * Gives several system functions, independently from current OS running
@@ -48,10 +49,10 @@ import java.lang.reflect.InvocationTargetException;
 public class StaticObjectAllocator<T> {
 	private final int maxAllocations;
 	private final Constructor<? extends T> constructor;
-	private final Object allocations[];
+	private final Object[] allocations;
 	private final boolean isByteArray;
 	private static final Class<? extends byte[]> byteArrayClass=byte[].class;
-	private Object staticArgs[]=new Object[0];
+	private Object[] staticArgs =new Object[0];
 	public StaticObjectAllocator(int maxAllocations, Class<? extends T> concernedClass, Class<?> ...constructorParamters) throws NoSuchMethodException, SecurityException
 	{
 		this.maxAllocations=maxAllocations;
@@ -60,8 +61,7 @@ public class StaticObjectAllocator<T> {
 		else
 			this.constructor=concernedClass.getDeclaredConstructor(constructorParamters);
 		this.allocations=new Object[maxAllocations];
-		for (int i=0;i<this.allocations.length;i++)
-			this.allocations[i]=null;
+		Arrays.fill(this.allocations, null);
 	}
 	
 	public int getMaxAllocations()

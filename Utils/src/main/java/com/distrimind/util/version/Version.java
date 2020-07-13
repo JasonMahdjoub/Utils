@@ -73,6 +73,7 @@ import com.distrimind.util.properties.MultiFormatProperties;
  * @see Person
  * @see PersonDeveloper
  */
+@SuppressWarnings("FieldMayBeFinal")
 public class Version extends MultiFormatProperties implements Comparable<Version> {
 	public enum Type {
 		Stable, Alpha, Beta, RC

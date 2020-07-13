@@ -34,7 +34,6 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util;
 
-import com.distrimind.util.crypto.ASymmetricKeyPair;
 import com.distrimind.util.crypto.AbstractKey;
 import com.distrimind.util.crypto.AbstractKeyPair;
 import org.apache.commons.codec.binary.Base64;

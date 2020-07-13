@@ -319,7 +319,7 @@ public class FilePermissions implements SecureExternalizable {
 	}
 
 
-
+	@SuppressWarnings("unchecked")
 	public void applyTo(Path path) throws IOException {
 		if (!permissionsFromUnixSystem || !isOSCompatibleWithUnix()) {
 			applyTo(getFile(path));

@@ -130,7 +130,7 @@ public final class DataBufferLong extends DataBuffer implements Cloneable, Seria
 				char[] s = (char[]) _data;
 				long[] b = new long[s.length];
 				for (int i = 0; i < s.length; i++) {
-					b[i] = (long) s[i];
+					b[i] = s[i];
 				}
 				m_buffer = b;
 				m_size = s.length;
@@ -140,7 +140,7 @@ public final class DataBufferLong extends DataBuffer implements Cloneable, Seria
 				short[] s = (short[]) _data;
 				long[] b = new long[s.length];
 				for (int i = 0; i < s.length; i++) {
-					b[i] = (long) s[i];
+					b[i] = s[i];
 				}
 				m_buffer = b;
 				m_size = s.length;
@@ -150,7 +150,7 @@ public final class DataBufferLong extends DataBuffer implements Cloneable, Seria
 				int[] s = (int[]) _data;
 				long[] b = new long[s.length];
 				for (int i = 0; i < s.length; i++) {
-					b[i] = (long) s[i];
+					b[i] = s[i];
 				}
 				m_buffer = b;
 				m_size = s.length;
@@ -160,7 +160,7 @@ public final class DataBufferLong extends DataBuffer implements Cloneable, Seria
 				byte[] s = (byte[]) _data;
 				long[] b = new long[s.length];
 				for (int i = 0; i < s.length; i++) {
-					b[i] = (long) s[i];
+					b[i] = s[i];
 				}
 				m_buffer = b;
 				m_size = s.length;
@@ -291,12 +291,12 @@ public final class DataBufferLong extends DataBuffer implements Cloneable, Seria
 
 	@Override
 	public void setByte(int _i, byte _val) {
-		m_buffer[_i] = (long) _val;
+		m_buffer[_i] = _val;
 	}
 
 	@Override
 	public void setChar(int _i, char _val) {
-		m_buffer[_i] = (long) _val;
+		m_buffer[_i] = _val;
 	}
 
 	@Override
@@ -311,7 +311,7 @@ public final class DataBufferLong extends DataBuffer implements Cloneable, Seria
 
 	@Override
 	public void setInt(int _i, int _val) {
-		m_buffer[_i] = (long) _val;
+		m_buffer[_i] = _val;
 	}
 
 	@Override
@@ -321,7 +321,7 @@ public final class DataBufferLong extends DataBuffer implements Cloneable, Seria
 
 	@Override
 	public void setShort(int _i, short _val) {
-		m_buffer[_i] = (long) _val;
+		m_buffer[_i] = _val;
 	}
 
 	@Override

@@ -45,7 +45,7 @@ import java.io.IOException;
 public class FragmentedRandomOutputStreamPerChannel extends RandomOutputStream{
 	private final RandomOutputStream out;
 	private final FragmentedStreamParameters params;
-	private int offsetToApply=0;
+	private int offsetToApply;
 
 	public FragmentedRandomOutputStreamPerChannel(FragmentedStreamParameters fragmentedStreamParameters, RandomOutputStream out) throws IOException {
 		if (out==null)

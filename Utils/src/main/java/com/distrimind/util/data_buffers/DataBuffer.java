@@ -98,13 +98,13 @@ public abstract class DataBuffer implements Cloneable, Serializable {
 			"UNSIGNED BYTE", "UNSIGNED SHORT" };
 
 	/** Classes of the data types indexed by DataType tags defined above */
-	public static final Class<?>[] TYPE_CLASSES = { (new boolean[1]).getClass(), (new byte[1]).getClass(),
-			(new char[1]).getClass(), (new short[1]).getClass(), (new int[1]).getClass(), (new long[1]).getClass(),
-			(new float[1]).getClass(), (new double[1]).getClass(), (new byte[1]).getClass(),
-			(new short[1]).getClass() };
+	public static final Class<?>[] TYPE_CLASSES = {boolean[].class, byte[].class,
+			char[].class, short[].class, int[].class, long[].class,
+			float[].class, double[].class, byte[].class,
+			short[].class};
 
 	/** Sizes of the data types indexed by DataType tags defined above */
-	private static final int dataTypeSize[] = { 1, 8, 16, 16, 32, 64, 32, 64, 8, 16 };
+	private static final int[] dataTypeSize = { 1, 8, 16, 16, 32, 64, 32, 64, 8, 16 };
 
 	/** The size type of this DataBuffer. */
 	protected int m_size;
@@ -213,21 +213,21 @@ public abstract class DataBuffer implements Cloneable, Serializable {
 		setDouble(_i, _val);
 	}
 
-	public abstract void insertBooleans(int _i, boolean _vals[]);
+	public abstract void insertBooleans(int _i, boolean[] _vals);
 
-	public abstract void insertBytes(int _i, byte _vals[]);
+	public abstract void insertBytes(int _i, byte[] _vals);
 
-	public abstract void insertChars(int _i, char _vals[]);
+	public abstract void insertChars(int _i, char[] _vals);
 
-	public abstract void insertShorts(int _i, short _vals[]);
+	public abstract void insertShorts(int _i, short[] _vals);
 
-	public abstract void insertInts(int _i, int _vals[]);
+	public abstract void insertInts(int _i, int[] _vals);
 
-	public abstract void insertLongs(int _i, long _vals[]);
+	public abstract void insertLongs(int _i, long[] _vals);
 
-	public abstract void insertFloats(int _i, float _vals[]);
+	public abstract void insertFloats(int _i, float[] _vals);
 
-	public abstract void insertDoubles(int _i, double _vals[]);
+	public abstract void insertDoubles(int _i, double[] _vals);
 
 	public abstract void insertData(int _i, DataBuffer _d);
 

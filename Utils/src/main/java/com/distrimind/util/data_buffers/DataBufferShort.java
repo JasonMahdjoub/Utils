@@ -141,7 +141,7 @@ public final class DataBufferShort extends DataBuffer implements Cloneable, Seri
 				byte[] s = (byte[]) _data;
 				short[] b = new short[s.length];
 				for (int i = 0; i < s.length; i++) {
-					b[i] = (short) s[i];
+					b[i] = s[i];
 				}
 				m_buffer = b;
 				m_size = s.length;
@@ -209,22 +209,22 @@ public final class DataBufferShort extends DataBuffer implements Cloneable, Seri
 
 	@Override
 	public double getDouble(int _i) {
-		return (double) m_buffer[_i];
+		return m_buffer[_i];
 	}
 
 	@Override
 	public float getFloat(int _i) {
-		return (float) m_buffer[_i];
+		return m_buffer[_i];
 	}
 
 	@Override
 	public int getInt(int _i) {
-		return (int) m_buffer[_i];
+		return m_buffer[_i];
 	}
 
 	@Override
 	public long getLong(int _i) {
-		return (long) m_buffer[_i];
+		return m_buffer[_i];
 	}
 
 	@Override
@@ -292,7 +292,7 @@ public final class DataBufferShort extends DataBuffer implements Cloneable, Seri
 
 	@Override
 	public void setByte(int _i, byte _val) {
-		m_buffer[_i] = (short) _val;
+		m_buffer[_i] = _val;
 	}
 
 	@Override

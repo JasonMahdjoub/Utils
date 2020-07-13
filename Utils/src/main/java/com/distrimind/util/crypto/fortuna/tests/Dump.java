@@ -6,7 +6,6 @@ import com.distrimind.util.crypto.fortuna.Fortuna;
 import java.io.BufferedOutputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigInteger;
 import java.util.Arrays;
@@ -72,7 +71,7 @@ public class Dump {
         System.err.println("Will generate <megabytes> of data and output them either to <file> or stdout if <file> is not specified");
     }
 
-    public static void otherMain(String[] args) throws IOException, InterruptedException {
+    public static void otherMain(String[] args) throws InterruptedException {
         boolean hasLimit = false;
         BigInteger limit = BigInteger.ZERO;
         if (args.length == 1) {
@@ -123,7 +122,6 @@ public class Dump {
                 buffer = new byte[chunk.intValue()];
             }
             fortuna.nextBytes(buffer);
-            System.out.write(buffer);
         }
         fortuna.shutdown();
     }

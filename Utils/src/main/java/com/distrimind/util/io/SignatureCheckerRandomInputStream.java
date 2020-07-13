@@ -38,7 +38,6 @@ knowledge of the CeCILL-C license and that you accept its terms.
 import com.distrimind.util.crypto.AbstractAuthenticatedCheckerAlgorithm;
 
 import java.io.IOException;
-import java.security.SignatureException;
 
 /**
  * @author Jason Mahdjoub

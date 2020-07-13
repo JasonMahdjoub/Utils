@@ -176,7 +176,7 @@ class MacOSHardDriveDetect extends UnixHardDriveDetect {
 										case "VolumeAllocationBlockSize":
 											if (descN.getNodeName().equals("integer")) {
 												try {
-													volumeBlockSize = Integer.valueOf(descN.getTextContent());
+													volumeBlockSize = Integer.parseInt(descN.getTextContent());
 												} catch (Exception e) {
 													volumeBlockSize = -1;
 												}
@@ -185,7 +185,7 @@ class MacOSHardDriveDetect extends UnixHardDriveDetect {
 										case "DeviceBlockSize":
 											if (descN.getNodeName().equals("integer")) {
 												try {
-													deviceBlockSize = Integer.valueOf(descN.getTextContent());
+													deviceBlockSize = Integer.parseInt(descN.getTextContent());
 												} catch (Exception e) {
 													deviceBlockSize = -1;
 												}
@@ -225,7 +225,7 @@ class MacOSHardDriveDetect extends UnixHardDriveDetect {
 										case "Size":
 											try {
 												if (descN.getNodeName().equals("integer"))
-													diskSize = Long.valueOf(descN.getTextContent());
+													diskSize = Long.parseLong(descN.getTextContent());
 											} catch (Exception e) {
 												diskSize = -1;
 											}
@@ -233,7 +233,7 @@ class MacOSHardDriveDetect extends UnixHardDriveDetect {
 										case "VolumeSize":
 											try {
 												if (descN.getNodeName().equals("integer"))
-													size = Long.valueOf(descN.getTextContent());
+													size = Long.parseLong(descN.getTextContent());
 											} catch (Exception e) {
 												size = -1;
 											}

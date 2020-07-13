@@ -78,7 +78,7 @@ public abstract class TraceRoute {
 		return instance.get();
 	}
 
-	public static void main(String args[]) throws UnknownHostException {
+	public static void main(String[] args) throws UnknownHostException {
 		for (InetAddress ia : getInstance().tracePath(InetAddress.getByName("192.168.0.14"), -1, -1))
 			System.out.println(ia);
 

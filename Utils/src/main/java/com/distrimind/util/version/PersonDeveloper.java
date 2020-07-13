@@ -48,6 +48,7 @@ import java.util.Locale;
  * @see Version
  * @see Person
  */
+@SuppressWarnings("FieldMayBeFinal")
 public class PersonDeveloper extends Person {
 	/**
 	 * 

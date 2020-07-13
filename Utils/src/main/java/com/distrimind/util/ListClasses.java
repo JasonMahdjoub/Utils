@@ -65,7 +65,7 @@ public class ListClasses {
 		return classes;
 	}
 
-	public static void main(String args[]) {
+	public static void main(String[] args) {
 		File f = new File("/home/jason/misfont.log");
 		System.out.println(f.getName());
 	}

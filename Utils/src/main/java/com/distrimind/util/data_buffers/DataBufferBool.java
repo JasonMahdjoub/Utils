@@ -112,7 +112,7 @@ public final class DataBufferBool extends DataBuffer implements Cloneable, Seria
 			m_size = m_buffer.length;
 		} else
 			throw new IllegalArgumentException(
-					"Cannot convert a " + (new boolean[1]).getClass() + " to a " + _data.getClass());
+					"Cannot convert a " + boolean[].class + " to a " + _data.getClass());
 	}
 
 	@Override

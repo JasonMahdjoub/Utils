@@ -49,16 +49,16 @@ import java.security.spec.InvalidKeySpecException;
  * @since MaDKitLanEdition 4.5.0
  */
 public abstract class AbstractKeyPair<PrivKey extends IASymmetricPrivateKey, PubKey extends IASymmetricPublicKey> extends DecentralizedValue {
-	public static AbstractKeyPair decode(byte[] b) throws IllegalArgumentException {
+	public static AbstractKeyPair<?, ?> decode(byte[] b) throws IllegalArgumentException {
 		return decode(b, true);
 	}
-	public static AbstractKeyPair decode(byte[] b, int off, int len) throws IllegalArgumentException {
+	public static AbstractKeyPair<?, ?> decode(byte[] b, int off, int len) throws IllegalArgumentException {
 		return decode(b, off, len,true);
 	}
-	public static AbstractKeyPair decode(byte[] b, boolean fillArrayWithZerosWhenDecoded) throws IllegalArgumentException {
+	public static AbstractKeyPair<?, ?> decode(byte[] b, boolean fillArrayWithZerosWhenDecoded) throws IllegalArgumentException {
 		return decode(b, 0, b.length, fillArrayWithZerosWhenDecoded);
 	}
-	public static AbstractKeyPair decode(byte[] b, int off, int len, boolean fillArrayWithZerosWhenDecoded) throws IllegalArgumentException
+	public static AbstractKeyPair<?, ?> decode(byte[] b, int off, int len, boolean fillArrayWithZerosWhenDecoded) throws IllegalArgumentException
 	{
 		if (off<0 || len<0 || len+off>b.length)
 			throw new IllegalArgumentException();
@@ -70,7 +70,7 @@ public abstract class AbstractKeyPair<PrivKey extends IASymmetricPrivateKey, Pub
 			return ASymmetricKeyPair.decode(b, off, len, fillArrayWithZerosWhenDecoded);
 	}
 
-	public static AbstractKeyPair valueOf(String key) throws IllegalArgumentException, IOException {
+	public static AbstractKeyPair<?, ?> valueOf(String key) throws IllegalArgumentException, IOException {
 		return decode(Bits.checkByteArrayAndReturnsItWithoutCheckSum(Base64.decodeBase64(key)));
 	}
 

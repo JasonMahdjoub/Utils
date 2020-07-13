@@ -101,7 +101,7 @@ class WindowsHardDriveDetect extends HardDriveDetect {
                         long volumeSize=-1;
                         try
                         {
-                            volumeSize=Long.valueOf(tab[3]);
+                            volumeSize=Long.parseLong(tab[3]);
                         }
                         catch (Exception e)
                         {
@@ -111,7 +111,7 @@ class WindowsHardDriveDetect extends HardDriveDetect {
                         int volumeBlockSize=-1;
                         try
                         {
-                            volumeBlockSize=Integer.valueOf(tab[5]);
+                            volumeBlockSize=Integer.parseInt(tab[5]);
                         }
                         catch (Exception e)
                         {
@@ -126,7 +126,7 @@ class WindowsHardDriveDetect extends HardDriveDetect {
                         long diskSize=-1;
                         try
                         {
-                            diskSize=Long.valueOf(tab[8]);
+                            diskSize=Long.parseLong(tab[8]);
                         }
                         catch (Exception e)
                         {
@@ -170,7 +170,7 @@ class WindowsHardDriveDetect extends HardDriveDetect {
                         long volumeSize=-1;
                         try
                         {
-                            volumeSize=Long.valueOf(tab[4]);
+                            volumeSize=Long.parseLong(tab[4]);
                         }
                         catch (Exception e)
                         {
