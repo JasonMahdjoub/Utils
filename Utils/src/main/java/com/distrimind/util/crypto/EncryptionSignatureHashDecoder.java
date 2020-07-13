@@ -136,6 +136,7 @@ public class EncryptionSignatureHashDecoder {
 	private void checkProfileLoadedForPrivateCheck() throws IOException {
 		if (encryptionProfileProvider !=null)
 		{
+			minimumInputSize=null;
 			try {
 				SymmetricSecretKey secretKey = encryptionProfileProvider.getSecretKeyForSignature(secretKeyID, true);
 				if (secretKey == null)
@@ -152,6 +153,7 @@ public class EncryptionSignatureHashDecoder {
 		if (encryptionProfileProvider !=null)
 		{
 			checkHeadRead();
+			minimumInputSize=null;
 			try {
 				IASymmetricPublicKey publicKey=encryptionProfileProvider.getSecretKeyForPublicKey(secretKeyID);
 				if (publicKey == null)
@@ -171,6 +173,7 @@ public class EncryptionSignatureHashDecoder {
 	private void checkProfileLoadedForDecryption() throws IOException {
 		if (encryptionProfileProvider !=null)
 		{
+			minimumInputSize=null;
 			SymmetricSecretKey secretKey = encryptionProfileProvider.getSecretKeyForEncryption(secretKeyID, true);
 			if (secretKey == null)
 				cipher = null;
@@ -474,10 +477,11 @@ public class EncryptionSignatureHashDecoder {
 			throw new IllegalArgumentException();
 		long res;
 		try {
+			//checkCodeForDecode(); done into getMaximumOutputLength
 			long originalOutputLength=outputStream.length();
 			long maximumOutputLengthAfterEncoding=getMaximumOutputLength();
 			outputStream.ensureLength(maximumOutputLengthAfterEncoding);
-			checkCodeForDecode();
+
 			if (sameInputOutputSource && isEncrypted())
 				throw new IOException("You must use a different input/output stream when using a encryption");
 			if (inputStream.currentPosition()!=EncryptionSignatureHashEncoder.headSize)
@@ -920,10 +924,15 @@ public class EncryptionSignatureHashDecoder {
 		}
 	}
 	public long getMaximumOutputLength() throws IOException {
-		return getMaximumOutputLength(inputStream.length());
+		checkCodeForDecode();
+		return getMaximumOutputLengthImpl(inputStream.length());
 	}
-
 	public long getMaximumOutputLength(long inputStreamLength) throws IOException {
+		if (encryptionProfileProvider!=null)
+			throw new IOException("Cannot use this function when using encryption profile provider. You must set an input stream and call method getMaximumOutputLength");
+		return getMaximumOutputLengthImpl(inputStreamLength);
+	}
+	private long getMaximumOutputLengthImpl(long inputStreamLength) throws IOException {
 		if (inputStreamLength<=0)
 			throw new IllegalArgumentException();
 		long res=inputStreamLength-getMinimumInputSize();

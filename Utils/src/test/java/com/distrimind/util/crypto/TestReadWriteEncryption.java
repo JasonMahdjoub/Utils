@@ -178,7 +178,7 @@ public class TestReadWriteEncryption {
 					.withRandomInputStream(bais)
 					.withEncryptionProfileProvider(encryptionProfileProvider);
 
-			expectedLength = reader.getMaximumOutputLength(bais.length());
+			expectedLength = reader.getMaximumOutputLength();
 			reader.decodeAndCheckHashAndSignaturesIfNecessary(baos);
 			Assert.assertEquals(baos.getBytes(), in);
 			Assert.assertTrue(expectedLength >= in.length);
