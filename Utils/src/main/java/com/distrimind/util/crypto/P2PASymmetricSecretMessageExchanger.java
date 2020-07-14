@@ -121,10 +121,16 @@ public class P2PASymmetricSecretMessageExchanger {
 		public java.security.SecureRandom getJavaNativeSecureRandom() {
 			return this;
 		}
-		
-		
 
+		@Override
+		void setSeed(byte[] seed, boolean mixWithPreviousSeed) {
+			super.unmodifiedSetSeed(seed);
+		}
 
+		@Override
+		public void setSeed(byte[] seed) {
+			super.unmodifiedSetSeed(seed);
+		}
 	}
 
 	protected static final BigInteger maxLongValue = BigInteger.valueOf(1).shiftLeft(63);

@@ -495,6 +495,7 @@ public class TestKeyAgreements {
 	@Test(dataProvider = "provideDataForP2PLoginAgreement")
 	public void testP2PLoginAgreement(P2PLoginAgreementType type, ASymmetricLoginAgreementType asType, boolean expectedVerify, boolean messageIsKey, byte[] salt, byte[] m, SymmetricSecretKey secretKey, ASymmetricKeyPair keyPair)
 			throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
+		System.out.println(type+";"+asType);
 		AbstractSecureRandom r = SecureRandomType.DEFAULT.getSingleton(null);
 		byte[] falseMessage = new byte[10];
 		r.nextBytes(falseMessage);

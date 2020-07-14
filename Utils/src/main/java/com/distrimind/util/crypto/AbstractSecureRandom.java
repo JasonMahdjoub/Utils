@@ -147,11 +147,17 @@ public abstract class AbstractSecureRandom extends SecureRandom {
 	public void setSeed(byte[] seed) {
 		setSeed(seed, true);
 	}
+	void unmodifiedSetSeed(byte[] seed)
+	{
+		super.setSeed(seed);
+	}
 	void setSeed(byte[] seed, boolean mixWithPreviousSeed) {
+
 		byte[] tab=new byte[Math.min(32, seed.length)];
 		nextBytes(tab);
 		if (mixWithPreviousSeed) {
-			for (int i = 0; i < tab.length; i++)
+			int s=Math.min(tab.length, seed.length);
+			for (int i = 0; i < s; i++)
 				tab[i] ^= seed[i];
 		}
 		super.setSeed(tab);

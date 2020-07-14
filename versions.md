@@ -1,6 +1,6 @@
 Utils
 =====
-5.5.4 Stable (Build: 1806) (from 13/07/2020 to 13/07/2020)
+5.5.5 Stable (Build: 1812) (from 13/07/2020 to 14/07/2020)
 
 # Creator(s):
 Jason MAHDJOUB
@@ -11,7 +11,7 @@ Jason MAHDJOUB (Entred in the team at 04/01/2016)
 # Modifications:
 
 
-### 5.5.4 Stable (13/07/2020)
+### 5.5.5 Stable (13/07/2020)
 * Fix end stream detection issue with BufferedRandomInputStream
 * Fix issue with EncryptionSignatureHashDecoder.getMaximumOutputSize() when using EncryptionProfileProvider
 * Clean code
