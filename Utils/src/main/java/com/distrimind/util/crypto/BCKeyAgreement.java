@@ -44,7 +44,7 @@ import com.distrimind.bcfips.crypto.KDFCalculator;
 import com.distrimind.bcfips.crypto.fips.FipsAgreement;
 import com.distrimind.bcfips.crypto.fips.FipsEC;
 import com.distrimind.bcfips.crypto.fips.FipsEC.AgreementParameters;
-import com.distrimind.bcfips.jcajce.spec.UserKeyingMaterialSpec;
+import com.distrimind.bouncycastle.jcajce.spec.UserKeyingMaterialSpec;
 import com.distrimind.bcfips.util.Arrays;
 import com.distrimind.bcfips.crypto.fips.FipsKDF;
 import com.distrimind.bcfips.crypto.fips.FipsKDF.AgreementKDFParameters;

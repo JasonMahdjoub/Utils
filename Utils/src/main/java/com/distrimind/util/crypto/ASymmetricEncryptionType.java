@@ -236,18 +236,18 @@ public enum ASymmetricEncryptionType {
 			tmpConstructorBCXDHPrivateKey=BCXDHPrivateKey.class.getDeclaredConstructor(AsymmetricKeyParameter.class);
 			tmpConstructorBCXDHPrivateKey.setAccessible(true);*/
 
-			tmpProvEdDSAPublicKeyBaseKey=Class.forName("org.bouncycastle.jcajce.provider.ProvEdDSAPublicKey").getDeclaredField("baseKey");
+			tmpProvEdDSAPublicKeyBaseKey=Class.forName("com.distrimind.bcfips.jcajce.provider.ProvEdDSAPublicKey").getDeclaredField("baseKey");
 			tmpProvEdDSAPublicKeyBaseKey.setAccessible(true);
-			tmpProvXDHPublicKeyBaseKey=Class.forName("org.bouncycastle.jcajce.provider.ProvXDHPublicKey").getDeclaredField("baseKey");
+			tmpProvXDHPublicKeyBaseKey=Class.forName("com.distrimind.bcfips.jcajce.provider.ProvXDHPublicKey").getDeclaredField("baseKey");
 			tmpProvXDHPublicKeyBaseKey.setAccessible(true);
 			//noinspection unchecked
-			tmpConstructorProvEdDSAPublicKey= (Constructor<PublicKey>) Class.forName("org.bouncycastle.jcajce.provider.ProvEdDSAPublicKey").getDeclaredConstructor(AsymmetricEdDSAPublicKey.class);
+			tmpConstructorProvEdDSAPublicKey= (Constructor<PublicKey>) Class.forName("com.distrimind.bcfips.jcajce.provider.ProvEdDSAPublicKey").getDeclaredConstructor(AsymmetricEdDSAPublicKey.class);
 			tmpConstructorProvEdDSAPublicKey.setAccessible(true);
 			//noinspection unchecked
-			tmpConstructorProvXDHPublicKey= (Constructor<PublicKey>) Class.forName("org.bouncycastle.jcajce.provider.ProvXDHPublicKey").getDeclaredConstructor(AsymmetricXDHPublicKey.class);
+			tmpConstructorProvXDHPublicKey= (Constructor<PublicKey>) Class.forName("com.distrimind.bcfips.jcajce.provider.ProvXDHPublicKey").getDeclaredConstructor(AsymmetricXDHPublicKey.class);
 			tmpConstructorProvXDHPublicKey.setAccessible(true);
 			//noinspection unchecked
-			tmpConstructorProvXDHPrivateKey= (Constructor<PrivateKey>) Class.forName("org.bouncycastle.jcajce.provider.ProvXDHPrivateKey").getDeclaredConstructor(AsymmetricXDHPrivateKey.class);
+			tmpConstructorProvXDHPrivateKey= (Constructor<PrivateKey>) Class.forName("com.distrimind.bcfips.jcajce.provider.ProvXDHPrivateKey").getDeclaredConstructor(AsymmetricXDHPrivateKey.class);
 			tmpConstructorProvXDHPrivateKey.setAccessible(true);
 
 		} catch (NoSuchFieldException | NoSuchMethodException | ClassNotFoundException e) {

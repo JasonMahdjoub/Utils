@@ -80,7 +80,7 @@ public class HybridKeyAgreement extends KeyAgreement{
 
 	private void checkSymmetricSecretKey() throws IOException
 	{
-		if (secretKey==null && hasFinishedReception() && hasFinishedSend())
+		if (secretKey==null && hasFinishedReception() && hasFinishedSend() && isAgreementProcessValid())
 		{
 			SymmetricSecretKey nonPQC=nonPQCKeyAgreement.getDerivedKey();
 			SymmetricSecretKey PQC=PQCKeyAgreement.getDerivedKey();

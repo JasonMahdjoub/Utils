@@ -60,7 +60,7 @@ public class Utils {
 		c.set(2016, Calendar.JANUARY, 4);
 		Calendar c2 = Calendar.getInstance();
 		c.set(2020, Calendar.JULY, 13);
-		VERSION = new Version("Utils", "Utils", (short)5, (short)5, (short)6, Version.Type.Stable, (short)0, c.getTime(), c2.getTime());
+		VERSION = new Version("Utils", "Utils", (short)5, (short)5, (short)7, Version.Type.Stable, (short)0, c.getTime(), c2.getTime());
 		try {
 
 			InputStream is = Utils.class.getResourceAsStream("build.txt");
@@ -74,9 +74,11 @@ public class Utils {
 
 			c = Calendar.getInstance();
 			c.set(2020, Calendar.JULY, 13);
-			Description d = new Description((short)5, (short)5, (short)6, Version.Type.Stable, (short)0, c.getTime());
+			Description d = new Description((short)5, (short)5, (short)7, Version.Type.Stable, (short)0, c.getTime());
 			d.addItem("Fix end stream detection issue with BufferedRandomInputStream");
 			d.addItem("Fix issue with EncryptionSignatureHashDecoder.getMaximumOutputSize() when using EncryptionProfileProvider");
+			d.addItem("Rebase org.bouncycastle package to com.distrimind.bouncycastle and com.distrimind.bcfips");
+			d.addItem("Rebase gnu package to com.distrimind.gnu");
 			d.addItem("Clean code");
 			VERSION.addDescription(d);
 

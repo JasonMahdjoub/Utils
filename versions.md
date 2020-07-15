@@ -1,6 +1,6 @@
 Utils
 =====
-5.5.6 Stable (Build: 1890) (from 13/07/2020 to 15/07/2020)
+5.5.7 Stable (Build: 1893) (from 13/07/2020 to 15/07/2020)
 
 # Creator(s):
 Jason MAHDJOUB
@@ -11,9 +11,11 @@ Jason MAHDJOUB (Entred in the team at 04/01/2016)
 # Modifications:
 
 
-### 5.5.6 Stable (13/07/2020)
+### 5.5.7 Stable (13/07/2020)
 * Fix end stream detection issue with BufferedRandomInputStream
 * Fix issue with EncryptionSignatureHashDecoder.getMaximumOutputSize() when using EncryptionProfileProvider
+* Rebase org.bouncycastle package to com.distrimind.bouncycastle and com.distrimind.bcfips
+* Rebase gnu package to com.distrimind.gnu
 * Clean code
 
 

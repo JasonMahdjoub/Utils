@@ -122,7 +122,7 @@ public abstract class AbstractNewHopeKeyAgreement extends KeyAgreement{
     		Class<?> newHopeClass=null;
     		try
     		{
-    			newHopeClass=Class.forName("org.bouncycastle.pqc.crypto.newhope.NewHope");
+    			newHopeClass=Class.forName("com.distrimind.bouncycastle.pqc.crypto.newhope.NewHope");
     		
 	    		/*try
 	    		{
@@ -143,6 +143,7 @@ public abstract class AbstractNewHopeKeyAgreement extends KeyAgreement{
 	    		catch(Exception e)
 	    		{
 	    			e.printStackTrace();
+					System.exit(-1);
 	    		}
     		}
     		catch(Exception e)
@@ -193,15 +194,11 @@ public abstract class AbstractNewHopeKeyAgreement extends KeyAgreement{
     private static Method getMethod(final Class<?> c, final String method_name, final Class<?>... parameters) {
 		try {
 			
-			return AccessController.doPrivileged(new PrivilegedExceptionAction<Method>() {
-
-                @Override
-                public Method run() throws Exception {
-                    Method m = c.getDeclaredMethod(method_name, parameters);
-                    m.setAccessible(true);
-                    return m;
-                }
-            });
+			return AccessController.doPrivileged((PrivilegedExceptionAction<Method>) () -> {
+				Method m = c.getDeclaredMethod(method_name, parameters);
+				m.setAccessible(true);
+				return m;
+			});
 
 				
 		} catch (SecurityException | PrivilegedActionException  e) {
@@ -220,15 +217,11 @@ public abstract class AbstractNewHopeKeyAgreement extends KeyAgreement{
 	private static Field getField(final Class<?> c, final String method_name) {
 		try {
 			
-			return AccessController.doPrivileged(new PrivilegedExceptionAction<Field>() {
-
-                @Override
-                public Field run() throws Exception {
-                    Field m = c.getDeclaredField(method_name);
-                    m.setAccessible(true);
-                    return m;
-                }
-            });
+			return AccessController.doPrivileged((PrivilegedExceptionAction<Field>) () -> {
+				Field m = c.getDeclaredField(method_name);
+				m.setAccessible(true);
+				return m;
+			});
 
 				
 		} catch (SecurityException | PrivilegedActionException  e) {
