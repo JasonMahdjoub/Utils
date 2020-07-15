@@ -37,9 +37,9 @@ package com.distrimind.util.crypto;
 import com.distrimind.util.io.Integrity;
 import com.distrimind.util.io.MessageExternalizationException;
 import org.apache.commons.codec.binary.Base64;
-import org.bouncycastle.bccrypto.CryptoException;
-import org.bouncycastle.bccrypto.agreement.jpake.*;
-import org.bouncycastle.bccrypto.digests.SHA512Digest;
+import com.distrimind.bouncycastle.crypto.CryptoException;
+import com.distrimind.bouncycastle.crypto.agreement.jpake.*;
+import com.distrimind.bouncycastle.crypto.digests.SHA512Digest;
 
 import java.io.*;
 import java.lang.reflect.Field;
@@ -525,15 +525,11 @@ public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
 	private static Field getField(final Class<?> c, final String fieldName) {
 		try {
 			
-			return AccessController.doPrivileged(new PrivilegedExceptionAction<Field>() {
-
-                @Override
-                public Field run() throws Exception {
-                    Field m = c.getDeclaredField(fieldName);
-                    m.setAccessible(true);
-                    return m;
-                }
-            });
+			return AccessController.doPrivileged((PrivilegedExceptionAction<Field>) () -> {
+				Field m = c.getDeclaredField(fieldName);
+				m.setAccessible(true);
+				return m;
+			});
 
 				
 		} catch (SecurityException | PrivilegedActionException  e) {

@@ -36,20 +36,20 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 
 import com.distrimind.util.io.*;
-import org.bouncycastle.bccrypto.AsymmetricCipherKeyPair;
-import org.bouncycastle.bccrypto.Digest;
-import org.bouncycastle.bccrypto.InvalidCipherTextException;
-import org.bouncycastle.bccrypto.digests.*;
-import org.bouncycastle.bccrypto.params.ParametersWithRandom;
-import org.bouncycastle.crypto.Algorithm;
-import org.bouncycastle.crypto.AsymmetricPrivateKey;
-import org.bouncycastle.crypto.AsymmetricPublicKey;
-import org.bouncycastle.pqc.crypto.MessageEncryptor;
-import org.bouncycastle.pqc.crypto.mceliece.*;
-import org.bouncycastle.pqc.math.linearalgebra.GF2Matrix;
-import org.bouncycastle.pqc.math.linearalgebra.GF2mField;
-import org.bouncycastle.pqc.math.linearalgebra.Permutation;
-import org.bouncycastle.pqc.math.linearalgebra.PolynomialGF2mSmallM;
+import com.distrimind.bouncycastle.crypto.AsymmetricCipherKeyPair;
+import com.distrimind.bouncycastle.crypto.Digest;
+import com.distrimind.bouncycastle.crypto.InvalidCipherTextException;
+import com.distrimind.bouncycastle.crypto.digests.*;
+import com.distrimind.bouncycastle.crypto.params.ParametersWithRandom;
+import com.distrimind.bcfips.crypto.Algorithm;
+import com.distrimind.bcfips.crypto.AsymmetricPrivateKey;
+import com.distrimind.bcfips.crypto.AsymmetricPublicKey;
+import com.distrimind.bouncycastle.pqc.crypto.MessageEncryptor;
+import com.distrimind.bouncycastle.pqc.crypto.mceliece.*;
+import com.distrimind.bouncycastle.pqc.math.linearalgebra.GF2Matrix;
+import com.distrimind.bouncycastle.pqc.math.linearalgebra.GF2mField;
+import com.distrimind.bouncycastle.pqc.math.linearalgebra.Permutation;
+import com.distrimind.bouncycastle.pqc.math.linearalgebra.PolynomialGF2mSmallM;
 
 import javax.crypto.Cipher;
 import java.io.ByteArrayOutputStream;

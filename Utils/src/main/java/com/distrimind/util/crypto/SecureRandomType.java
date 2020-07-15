@@ -48,10 +48,10 @@ import java.security.Security;
 import java.util.*;
 
 import com.distrimind.util.OSVersion;
-import org.bouncycastle.crypto.CryptoServicesRegistrar;
-import org.bouncycastle.crypto.EntropySourceProvider;
-import org.bouncycastle.crypto.fips.FipsDRBG;
-import org.bouncycastle.crypto.util.BasicEntropySourceProvider;
+import com.distrimind.bouncycastle.crypto.CryptoServicesRegistrar;
+import com.distrimind.bcfips.crypto.EntropySourceProvider;
+import com.distrimind.bcfips.crypto.fips.FipsDRBG;
+import com.distrimind.bcfips.crypto.util.BasicEntropySourceProvider;
 
 import com.distrimind.util.Bits;
 import com.distrimind.util.OS;
@@ -91,7 +91,7 @@ public enum SecureRandomType {
 	
 	private final boolean needInitialSeed;
 	
-	private static final Map<SecureRandomType, AbstractSecureRandom> singletons=Collections.synchronizedMap(new HashMap<SecureRandomType, AbstractSecureRandom>());
+	private static final Map<SecureRandomType, AbstractSecureRandom> singletons=Collections.synchronizedMap(new HashMap<>());
 
 	public boolean equals(SecureRandomType type)
 	{
@@ -440,28 +440,23 @@ public enum SecureRandomType {
 		else if (OSVersion.getCurrentOSVersion()!=null && OSVersion.getCurrentOSVersion().getOS().isUnix())
 		{
 			
-			AccessController.doPrivileged(new PrivilegedAction<Void>() {
+			AccessController.doPrivileged((PrivilegedAction<Void>) () -> {
+					synchronized(NativeNonBlockingSecureRandom.class)
+					{
+						File randomSource=getURandomPath();
 
-				@SuppressWarnings("ResultOfMethodCallIgnored")
-                @Override
-				public Void run() {
-						synchronized(NativeNonBlockingSecureRandom.class)
-						{
-							File randomSource=getURandomPath();
-						
-							try (InputStream in = new FileInputStream(randomSource)) {
-								in.read(buffer);
-								return null;
-							}
-							catch(IOException e)
-							{
-								e.printStackTrace();
-							}
-							getDefaultNativeNonBlockingSeedSingleton().nextBytes(buffer);
+						try (InputStream in = new FileInputStream(randomSource)) {
+							in.read(buffer);
+							return null;
 						}
+						catch(IOException e)
+						{
+							e.printStackTrace();
+						}
+						getDefaultNativeNonBlockingSeedSingleton().nextBytes(buffer);
+					}
 
-					return null;
-				}
+				return null;
 			});
 
 		}
@@ -515,23 +510,18 @@ public enum SecureRandomType {
 				}
 			}
 				
-			return AccessController.doPrivileged(new PrivilegedAction<byte[]>() {
+			return AccessController.doPrivileged((PrivilegedAction<byte[]>) () -> {
+				synchronized (NativeNonBlockingSecureRandom.class) {
+					File randomSource = getURandomPath();
 
-				@SuppressWarnings("ResultOfMethodCallIgnored")
-				@Override
-				public byte[] run() {
-					synchronized (NativeNonBlockingSecureRandom.class) {
-						File randomSource = getURandomPath();
-
-						try (InputStream in = new FileInputStream(randomSource)) {
-							byte[] buffer = new byte[numBytes];
-							in.read(buffer);
-							return buffer;
-						} catch (IOException e) {
-							e.printStackTrace();
-						}
-						return getDefaultNativeNonBlockingSeedSingleton().generateSeed(numBytes);
+					try (InputStream in = new FileInputStream(randomSource)) {
+						byte[] buffer = new byte[numBytes];
+						in.read(buffer);
+						return buffer;
+					} catch (IOException e) {
+						e.printStackTrace();
 					}
+					return getDefaultNativeNonBlockingSeedSingleton().generateSeed(numBytes);
 				}
 			});
 

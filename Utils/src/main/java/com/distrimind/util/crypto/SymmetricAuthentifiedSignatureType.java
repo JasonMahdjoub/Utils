@@ -35,9 +35,9 @@ knowledge of the CeCILL-C license and that you accept its terms.
 package com.distrimind.util.crypto;
 
 
-import org.bouncycastle.crypto.Algorithm;
-import org.bouncycastle.crypto.fips.FipsSHS;
-import org.bouncycastle.crypto.fips.FipsSHS.AuthParameters;
+import com.distrimind.bcfips.crypto.Algorithm;
+import com.distrimind.bcfips.crypto.fips.FipsSHS;
+import com.distrimind.bcfips.crypto.fips.FipsSHS.AuthParameters;
 
 import javax.crypto.spec.SecretKeySpec;
 import java.io.IOException;
@@ -242,7 +242,7 @@ public enum SymmetricAuthentifiedSignatureType {
 	}
 	Algorithm getBouncyCastleAlgorithm()
 	{
-		return org.bouncycastle.crypto.general.AES.ALGORITHM;
+		return com.distrimind.bcfips.crypto.general.AES.ALGORITHM;
 	}
 	
 	public boolean isPostQuantumAlgorithm(short keySizeBits) 

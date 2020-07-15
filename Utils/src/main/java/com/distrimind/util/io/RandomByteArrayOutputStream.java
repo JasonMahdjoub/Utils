@@ -37,7 +37,7 @@
  */
 package com.distrimind.util.io;
 
-import org.bouncycastle.util.Arrays;
+import com.distrimind.bouncycastle.util.Arrays;
 
 import java.io.IOException;
 

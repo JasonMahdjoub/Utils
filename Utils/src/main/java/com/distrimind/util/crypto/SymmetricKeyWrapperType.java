@@ -41,8 +41,8 @@ import com.distrimind.util.Bits;
 import com.distrimind.util.io.Integrity;
 import com.distrimind.util.io.MessageExternalizationException;
 import org.apache.commons.codec.binary.Base64;
-import org.bouncycastle.crypto.InvalidWrappingException;
-import org.bouncycastle.crypto.PlainInputProcessingException;
+import com.distrimind.bcfips.crypto.InvalidWrappingException;
+import com.distrimind.bcfips.crypto.PlainInputProcessingException;
 
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;

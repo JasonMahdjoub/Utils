@@ -36,8 +36,8 @@ package com.distrimind.util.crypto;
 
 import com.distrimind.util.io.Integrity;
 import com.distrimind.util.io.MessageExternalizationException;
-import org.bouncycastle.bccrypto.CryptoException;
-import org.bouncycastle.jcajce.spec.UserKeyingMaterialSpec;
+import com.distrimind.bouncycastle.crypto.CryptoException;
+import com.distrimind.bouncycastle.jcajce.spec.UserKeyingMaterialSpec;
 
 import java.io.IOException;
 import java.security.InvalidKeyException;

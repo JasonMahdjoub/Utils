@@ -35,7 +35,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
 package com.distrimind.util.crypto;
 
 import com.distrimind.util.Bits;
-import org.bouncycastle.crypto.Algorithm;
+import com.distrimind.bcfips.crypto.Algorithm;
 
 import javax.crypto.SecretKey;
 import java.security.NoSuchAlgorithmException;
@@ -72,7 +72,7 @@ public class SymmetricSecretKey extends AbstractKey {
 
 	private transient Object gnuSecretKey = null;
 	
-	private transient org.bouncycastle.crypto.SymmetricSecretKey bcfipsNativeSecretKey=null;
+	private transient com.distrimind.bcfips.crypto.SymmetricSecretKey bcfipsNativeSecretKey=null;
 
 	public SymmetricSecretKey getHashedSecretKey(MessageDigestType messageDigestType, long customApplicationCode) throws NoSuchProviderException, NoSuchAlgorithmException {
 		byte[] tab=new byte[8];
@@ -244,23 +244,23 @@ public class SymmetricSecretKey extends AbstractKey {
 		this.javaNativeSecretKey=secretKey;
 	}
 	
-	SymmetricSecretKey(SymmetricEncryptionType type, org.bouncycastle.crypto.SymmetricSecretKey secretKey, short keySize) {
+	SymmetricSecretKey(SymmetricEncryptionType type, com.distrimind.bcfips.crypto.SymmetricSecretKey secretKey, short keySize) {
 		this(SymmetricEncryptionType.encodeSecretKey(secretKey), keySize);
 		if (type.getCodeProviderForEncryption() == CodeProvider.GNU_CRYPTO)
 			throw new IllegalAccessError();
 		this.encryptionType = type;
 		this.signatureType=null;
 		
-		this.bcfipsNativeSecretKey=new org.bouncycastle.crypto.SymmetricSecretKey(getBouncyCastleAlgorithm(), secretKey.getKeyBytes());
+		this.bcfipsNativeSecretKey=new com.distrimind.bcfips.crypto.SymmetricSecretKey(getBouncyCastleAlgorithm(), secretKey.getKeyBytes());
 	}
 	
-	SymmetricSecretKey(SymmetricAuthentifiedSignatureType type, org.bouncycastle.crypto.SymmetricSecretKey secretKey, short keySize) {
+	SymmetricSecretKey(SymmetricAuthentifiedSignatureType type, com.distrimind.bcfips.crypto.SymmetricSecretKey secretKey, short keySize) {
 		this(SymmetricEncryptionType.encodeSecretKey(secretKey), keySize);
 		if (type.getCodeProviderForSignature() == CodeProvider.GNU_CRYPTO)
 			throw new IllegalAccessError();
 		this.encryptionType = null;
 		this.signatureType=type;
-		this.bcfipsNativeSecretKey=new org.bouncycastle.crypto.SymmetricSecretKey(getBouncyCastleAlgorithm(), secretKey.getKeyBytes());
+		this.bcfipsNativeSecretKey=new com.distrimind.bcfips.crypto.SymmetricSecretKey(getBouncyCastleAlgorithm(), secretKey.getKeyBytes());
 	}
 	
 	private SymmetricSecretKey(byte[] secretKey, short keySize) {
@@ -399,7 +399,7 @@ public class SymmetricSecretKey extends AbstractKey {
 	}
 	
 	@Override
-	public org.bouncycastle.crypto.SymmetricSecretKey toBouncyCastleKey() {
+	public com.distrimind.bcfips.crypto.SymmetricSecretKey toBouncyCastleKey() {
 		
 		if (bcfipsNativeSecretKey == null)
 			bcfipsNativeSecretKey = SymmetricEncryptionType.decodeBCSecretKey(getBouncyCastleAlgorithm(), secretKey);

@@ -37,7 +37,7 @@ package com.distrimind.util.crypto;
 
 import com.distrimind.util.io.Integrity;
 import com.distrimind.util.io.MessageExternalizationException;
-import org.bouncycastle.bccrypto.CryptoException;
+import com.distrimind.bouncycastle.crypto.CryptoException;
 
 import java.io.IOException;
 import java.util.Arrays;

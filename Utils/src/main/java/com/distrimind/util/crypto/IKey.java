@@ -16,7 +16,7 @@ public interface IKey {
 	java.security.Key toJavaNativeKey()
 			throws NoSuchAlgorithmException, InvalidKeySpecException;
 
-	org.bouncycastle.crypto.Key toBouncyCastleKey() throws NoSuchAlgorithmException, InvalidKeySpecException;
+	com.distrimind.bcfips.crypto.Key toBouncyCastleKey() throws NoSuchAlgorithmException, InvalidKeySpecException;
 
 	byte[] encode();
 	void zeroize();

@@ -113,131 +113,128 @@ class GnuFunctions {
 				if (!gnuLoaded)
 				{
 					try {
-						secretKeyFactoryGetInstance=Class.forName("gnu.vm.jgnux.crypto.SecretKeyFactory").getDeclaredMethod("getInstance", String.class);
-						secretKeyFactoryGenerateSecret =Class.forName("gnu.vm.jgnux.crypto.SecretKeyFactory").getDeclaredMethod("generateSecret", Class.forName("gnu.vm.jgnu.security.spec.KeySpec") );
-						constPBEKeySpecCharsBytesIntInt=Class.forName("gnu.vm.jgnux.crypto.spec.PBEKeySpec").getDeclaredConstructor(char[].class, byte[].class, int.class, int.class);
+						secretKeyFactoryGetInstance=Class.forName("com.distrimind.gnu.vm.jgnux.crypto.SecretKeyFactory").getDeclaredMethod("getInstance", String.class);
+						secretKeyFactoryGenerateSecret =Class.forName("com.distrimind.gnu.vm.jgnux.crypto.SecretKeyFactory").getDeclaredMethod("generateSecret", Class.forName("com.distrimind.gnuvm.jgnu.security.spec.KeySpec") );
+						constPBEKeySpecCharsBytesIntInt=Class.forName("com.distrimind.gnu.vm.jgnux.crypto.spec.PBEKeySpec").getDeclaredConstructor(char[].class, byte[].class, int.class, int.class);
 
-						getSignatureAlgo=Class.forName("gnu.vm.jgnu.security.Signature").getDeclaredMethod("getInstance", String.class);
-						getCihperAlgo=Class.forName("gnu.vm.jgnux.crypto.Cipher").getDeclaredMethod("getInstance", String.class);
-						getPublicKey=Class.forName("gnu.vm.jgnu.security.KeyPair").getDeclaredMethod("getPublic");
-						getPrivateKey=Class.forName("gnu.vm.jgnu.security.KeyPair").getDeclaredMethod("getPrivate");
-						getPrivateKey=Class.forName("gnu.vm.jgnu.security.KeyPair").getDeclaredMethod("getPrivate");
-						getEncoded=Class.forName("gnu.vm.jgnu.security.Key").getDeclaredMethod("getEncoded");
-						keyPairConstructorPublicPrivate =Class.forName("gnu.vm.jgnu.security.KeyPair").getDeclaredConstructor(Class.forName("gnu.vm.jgnu.security.PublicKey"), Class.forName("gnu.vm.jgnu.security.PrivateKey"));
-						keyPairGeneratorConstructorString =Class.forName("gnu.vm.jgnu.security.KeyPairGenerator").getDeclaredConstructor(String.class);
-						cipherInitIntSymKey =Class.forName("gnu.vm.jgnux.crypto.Cipher").getDeclaredMethod("init", int.class,Class.forName("gnu.vm.jgnu.security.Key"));
-						cipherInitIntKeyRandom =Class.forName("gnu.vm.jgnux.crypto.Cipher").getDeclaredMethod("init", int.class,Class.forName("gnu.vm.jgnu.security.Key"), Class.forName("gnu.vm.jgnu.security.SecureRandom") );
-						cipherInitIntKeyParamSpec =Class.forName("gnu.vm.jgnux.crypto.Cipher").getDeclaredMethod("init", int.class, Class.forName("gnu.vm.jgnu.security.Key"), Class.forName("gnu.vm.jgnu.security.spec.AlgorithmParameterSpec"));
-						cipherInitUnwrap=Class.forName("gnu.vm.jgnux.crypto.Cipher").getDeclaredMethod("init", int.class,Class.forName("gnu.vm.jgnu.security.Key"));
-						cipherWrap=Class.forName("gnu.vm.jgnux.crypto.Cipher").getDeclaredMethod("wrap", Class.forName("gnu.vm.jgnu.security.Key"));
-						cipherUnwrapByteStringInt =Class.forName("gnu.vm.jgnux.crypto.Cipher").getDeclaredMethod("unwrap", byte[].class, String.class, int.class);
-						cipherInitIntKey =Class.forName("gnu.vm.jgnux.crypto.Cipher").getDeclaredMethod("init", int.class, Class.forName("gnu.vm.jgnu.security.Key"));
-						cipherDoFinal=Class.forName("gnu.vm.jgnux.crypto.Cipher").getDeclaredMethod("doFinal");
+						getSignatureAlgo=Class.forName("com.distrimind.gnu.vm.jgnu.security.Signature").getDeclaredMethod("getInstance", String.class);
+						getCihperAlgo=Class.forName("com.distrimind.gnu.vm.jgnux.crypto.Cipher").getDeclaredMethod("getInstance", String.class);
+						getPublicKey=Class.forName("com.distrimind.gnu.vm.jgnu.security.KeyPair").getDeclaredMethod("getPublic");
+						getPrivateKey=Class.forName("com.distrimind.gnu.vm.jgnu.security.KeyPair").getDeclaredMethod("getPrivate");
+						getPrivateKey=Class.forName("com.distrimind.gnu.vm.jgnu.security.KeyPair").getDeclaredMethod("getPrivate");
+						getEncoded=Class.forName("com.distrimind.gnu.vm.jgnu.security.Key").getDeclaredMethod("getEncoded");
+						keyPairConstructorPublicPrivate =Class.forName("com.distrimind.gnu.vm.jgnu.security.KeyPair").getDeclaredConstructor(Class.forName("com.distrimind.gnuvm.jgnu.security.PublicKey"), Class.forName("com.distrimind.gnuvm.jgnu.security.PrivateKey"));
+						keyPairGeneratorConstructorString =Class.forName("com.distrimind.gnu.vm.jgnu.security.KeyPairGenerator").getDeclaredConstructor(String.class);
+						cipherInitIntSymKey =Class.forName("com.distrimind.gnu.vm.jgnux.crypto.Cipher").getDeclaredMethod("init", int.class,Class.forName("com.distrimind.gnuvm.jgnu.security.Key"));
+						cipherInitIntKeyRandom =Class.forName("com.distrimind.gnu.vm.jgnux.crypto.Cipher").getDeclaredMethod("init", int.class,Class.forName("com.distrimind.gnuvm.jgnu.security.Key"), Class.forName("com.distrimind.gnuvm.jgnu.security.SecureRandom") );
+						cipherInitIntKeyParamSpec =Class.forName("com.distrimind.gnu.vm.jgnux.crypto.Cipher").getDeclaredMethod("init", int.class, Class.forName("com.distrimind.gnuvm.jgnu.security.Key"), Class.forName("com.distrimind.gnuvm.jgnu.security.spec.AlgorithmParameterSpec"));
+						cipherInitUnwrap=Class.forName("com.distrimind.gnu.vm.jgnux.crypto.Cipher").getDeclaredMethod("init", int.class,Class.forName("com.distrimind.gnuvm.jgnu.security.Key"));
+						cipherWrap=Class.forName("com.distrimind.gnu.vm.jgnux.crypto.Cipher").getDeclaredMethod("wrap", Class.forName("com.distrimind.gnuvm.jgnu.security.Key"));
+						cipherUnwrapByteStringInt =Class.forName("com.distrimind.gnu.vm.jgnux.crypto.Cipher").getDeclaredMethod("unwrap", byte[].class, String.class, int.class);
+						cipherInitIntKey =Class.forName("com.distrimind.gnu.vm.jgnux.crypto.Cipher").getDeclaredMethod("init", int.class, Class.forName("com.distrimind.gnuvm.jgnu.security.Key"));
+						cipherDoFinal=Class.forName("com.distrimind.gnu.vm.jgnux.crypto.Cipher").getDeclaredMethod("doFinal");
 
-						cipherDoFinalBytesInt=Class.forName("gnu.vm.jgnux.crypto.Cipher").getDeclaredMethod("doFinal", byte[].class, int.class);
-						cipherDoFinalBytesIntInt=Class.forName("gnu.vm.jgnux.crypto.Cipher").getDeclaredMethod("doFinal", byte[].class, int.class, int.class);
-						cipherDoFinalBytesIntIntBytesInt=Class.forName("gnu.vm.jgnux.crypto.Cipher").getDeclaredMethod("doFinal", byte[].class, int.class, int.class, byte[].class, int.class);
-						cipherGetAlgorithm=Class.forName("gnu.vm.jgnux.crypto.Cipher").getDeclaredMethod("getAlgorithm");
-						cipherGetIv=Class.forName("gnu.vm.jgnux.crypto.Cipher").getDeclaredMethod("getIV");
-						cipherGetBlockSize=Class.forName("gnu.vm.jgnux.crypto.Cipher").getDeclaredMethod("getBlockSize");
-						cipherGetOutputSize=Class.forName("gnu.vm.jgnux.crypto.Cipher").getDeclaredMethod("getOutputSize", int.class);
-						cipherUpdateBytesIntInt=Class.forName("gnu.vm.jgnux.crypto.Cipher").getDeclaredMethod("update", byte[].class, int.class, int.class);
-						cipherUpdateBytesIntIntBytesInt=Class.forName("gnu.vm.jgnux.crypto.Cipher").getDeclaredMethod("update", byte[].class, int.class, int.class, byte[].class, int.class);
-						cipherGetInstance=Class.forName("gnu.vm.jgnux.crypto.Cipher").getDeclaredMethod("getInstance", String.class);
-						IVparamSpec=Class.forName("gnu.vm.jgnux.crypto.spec.IvParameterSpec").getDeclaredConstructor(byte[].class);
-						constCipherInputStream=Class.forName("gnu.vm.jgnux.crypto.CipherInputStream").getDeclaredConstructor(InputStream.class, Class.forName("gnu.vm.jgnux.crypto.Cipher"));
-						consCipherOutputStream=Class.forName("gnu.vm.jgnux.crypto.CipherOutputStream").getDeclaredConstructor(OutputStream.class, Class.forName("gnu.vm.jgnux.crypto.Cipher"));
-
-
-						keyGeneratorGetInstance=Class.forName("gnu.vm.jgnux.crypto.KeyGenerator").getDeclaredMethod("getInstance", String.class);
+						cipherDoFinalBytesInt=Class.forName("com.distrimind.gnu.vm.jgnux.crypto.Cipher").getDeclaredMethod("doFinal", byte[].class, int.class);
+						cipherDoFinalBytesIntInt=Class.forName("com.distrimind.gnu.vm.jgnux.crypto.Cipher").getDeclaredMethod("doFinal", byte[].class, int.class, int.class);
+						cipherDoFinalBytesIntIntBytesInt=Class.forName("com.distrimind.gnu.vm.jgnux.crypto.Cipher").getDeclaredMethod("doFinal", byte[].class, int.class, int.class, byte[].class, int.class);
+						cipherGetAlgorithm=Class.forName("com.distrimind.gnu.vm.jgnux.crypto.Cipher").getDeclaredMethod("getAlgorithm");
+						cipherGetIv=Class.forName("com.distrimind.gnu.vm.jgnux.crypto.Cipher").getDeclaredMethod("getIV");
+						cipherGetBlockSize=Class.forName("com.distrimind.gnu.vm.jgnux.crypto.Cipher").getDeclaredMethod("getBlockSize");
+						cipherGetOutputSize=Class.forName("com.distrimind.gnu.vm.jgnux.crypto.Cipher").getDeclaredMethod("getOutputSize", int.class);
+						cipherUpdateBytesIntInt=Class.forName("com.distrimind.gnu.vm.jgnux.crypto.Cipher").getDeclaredMethod("update", byte[].class, int.class, int.class);
+						cipherUpdateBytesIntIntBytesInt=Class.forName("com.distrimind.gnu.vm.jgnux.crypto.Cipher").getDeclaredMethod("update", byte[].class, int.class, int.class, byte[].class, int.class);
+						cipherGetInstance=Class.forName("com.distrimind.gnu.vm.jgnux.crypto.Cipher").getDeclaredMethod("getInstance", String.class);
+						IVparamSpec=Class.forName("com.distrimind.gnu.vm.jgnux.crypto.spec.IvParameterSpec").getDeclaredConstructor(byte[].class);
+						constCipherInputStream=Class.forName("com.distrimind.gnu.vm.jgnux.crypto.CipherInputStream").getDeclaredConstructor(InputStream.class, Class.forName("com.distrimind.gnuvm.jgnux.crypto.Cipher"));
+						consCipherOutputStream=Class.forName("com.distrimind.gnu.vm.jgnux.crypto.CipherOutputStream").getDeclaredConstructor(OutputStream.class, Class.forName("com.distrimind.gnuvm.jgnux.crypto.Cipher"));
 
 
-						WRAP_MODE=(int)Class.forName("gnu.vm.jgnux.crypto.Cipher").getDeclaredField("WRAP_MODE").get(null);
-						UNWRAP_MODE=(int)Class.forName("gnu.vm.jgnux.crypto.Cipher").getDeclaredField("UNWRAP_MODE").get(null);
-						SECRET_KEY=(int)Class.forName("gnu.vm.jgnux.crypto.Cipher").getDeclaredField("SECRET_KEY").get(null);
-
-						engineSetSeed=Class.forName("gnu.vm.jgnu.security.SecureRandomSpi").getDeclaredMethod("engineSetSeed", byte[].class);
-						engineNextBytes=Class.forName("gnu.vm.jgnu.security.SecureRandomSpi").getDeclaredMethod("engineNextBytes", byte[].class);
-						engineGenerateSeed=Class.forName("gnu.vm.jgnu.security.SecureRandomSpi").getDeclaredMethod("engineGenerateSeed", int.class);
-						secureRandomFromSpiConstructor=Class.forName("gnu.vm.jgnu.security.SecureRandom").getDeclaredConstructor(Class.forName("gnu.vm.jgnu.security.SecureRandomSpi"), Class.forName("gnu.vm.jgnu.security.Provider"));
-						constSecureRandom=Class.forName("gnu.vm.jgnu.security.SecureRandom").getDeclaredConstructor();
-						secureRandomGetInstance=Class.forName("gnu.vm.jgnu.security.SecureRandom").getDeclaredMethod("getInstance", String.class);
+						keyGeneratorGetInstance=Class.forName("com.distrimind.gnu.vm.jgnux.crypto.KeyGenerator").getDeclaredMethod("getInstance", String.class);
 
 
-						keyGeneratorGenerateKey=Class.forName("gnu.vm.jgnux.crypto.KeyGenerator").getDeclaredMethod("generateKey" );
-						keyGeneratorGetAlgorithm=Class.forName("gnu.vm.jgnux.crypto.KeyGenerator").getDeclaredMethod("getAlgorithm");
-						keyGeneratorGetProvider =Class.forName("gnu.vm.jgnux.crypto.KeyGenerator").getDeclaredMethod("getProvider");
-						keyGeneratorInit=Class.forName("gnu.vm.jgnux.crypto.KeyGenerator").getDeclaredMethod("init", int.class, Class.forName("gnu.vm.jgnu.security.SecureRandom"));
+						WRAP_MODE=(int)Class.forName("com.distrimind.gnu.vm.jgnux.crypto.Cipher").getDeclaredField("WRAP_MODE").get(null);
+						UNWRAP_MODE=(int)Class.forName("com.distrimind.gnu.vm.jgnux.crypto.Cipher").getDeclaredField("UNWRAP_MODE").get(null);
+						SECRET_KEY=(int)Class.forName("com.distrimind.gnu.vm.jgnux.crypto.Cipher").getDeclaredField("SECRET_KEY").get(null);
 
-						keyPairGeneratorGenerateKeyPair=Class.forName("gnu.vm.jgnu.security.KeyPairGenerator").getDeclaredMethod("generateKeyPair" );
-						keyPairGeneratorGetAlgorithm=Class.forName("gnu.vm.jgnu.security.KeyPairGenerator").getDeclaredMethod("getAlgorithm");
-						keyPairGeneratorInitRandom=Class.forName("gnu.vm.jgnu.security.KeyPairGenerator").getDeclaredMethod("initialize", int.class, Class.forName("gnu.vm.jgnu.security.SecureRandom"));
-						keyPairGeneratorInit=Class.forName("gnu.vm.jgnu.security.KeyPairGenerator").getDeclaredMethod("initialize", int.class);
+						engineSetSeed=Class.forName("com.distrimind.gnu.vm.jgnu.security.SecureRandomSpi").getDeclaredMethod("engineSetSeed", byte[].class);
+						engineNextBytes=Class.forName("com.distrimind.gnu.vm.jgnu.security.SecureRandomSpi").getDeclaredMethod("engineNextBytes", byte[].class);
+						engineGenerateSeed=Class.forName("com.distrimind.gnu.vm.jgnu.security.SecureRandomSpi").getDeclaredMethod("engineGenerateSeed", int.class);
+						secureRandomFromSpiConstructor=Class.forName("com.distrimind.gnu.vm.jgnu.security.SecureRandom").getDeclaredConstructor(Class.forName("com.distrimind.gnuvm.jgnu.security.SecureRandomSpi"), Class.forName("com.distrimind.gnuvm.jgnu.security.Provider"));
+						constSecureRandom=Class.forName("com.distrimind.gnu.vm.jgnu.security.SecureRandom").getDeclaredConstructor();
+						secureRandomGetInstance=Class.forName("com.distrimind.gnu.vm.jgnu.security.SecureRandom").getDeclaredMethod("getInstance", String.class);
 
 
-						macGetAlgorithm=Class.forName("gnu.vm.jgnux.crypto.Mac").getDeclaredMethod("getAlgorithm");
-						macGetMacLength=Class.forName("gnu.vm.jgnux.crypto.Mac").getDeclaredMethod("getMacLength");
-						macDoFinal=Class.forName("gnu.vm.jgnux.crypto.Mac").getDeclaredMethod("doFinal");
-						macGetInstance=Class.forName("gnu.vm.jgnux.crypto.Mac").getDeclaredMethod("getInstance", String.class);
-						macDoFinalBytes=Class.forName("gnu.vm.jgnux.crypto.Mac").getDeclaredMethod("doFinal", byte[].class);
-						macDoFinalBytesInt=Class.forName("gnu.vm.jgnux.crypto.Mac").getDeclaredMethod("doFinal", byte[].class, int.class);
-						macInit=Class.forName("gnu.vm.jgnux.crypto.Mac").getDeclaredMethod("init", Class.forName("gnu.vm.jgnu.security.Key"));
-						macReset=Class.forName("gnu.vm.jgnux.crypto.Mac").getDeclaredMethod("reset");
-						macUpdateByte=Class.forName("gnu.vm.jgnux.crypto.Mac").getDeclaredMethod("update", byte.class);
-						macUpdateBytesIntInt=Class.forName("gnu.vm.jgnux.crypto.Mac").getDeclaredMethod("update", byte[].class, int.class, int.class);
-						macUpdateByteBuffer=Class.forName("gnu.vm.jgnux.crypto.Mac").getDeclaredMethod("update", ByteBuffer.class);
-						constSecretKeySpec=Class.forName("gnu.vm.jgnux.crypto.spec.SecretKeySpec").getDeclaredConstructor(byte[].class, String.class);
-						constSecretKeySpecBytesIntIntString=Class.forName("gnu.vm.jgnux.crypto.spec.SecretKeySpec").getDeclaredConstructor(byte[].class, int.class, int.class, String.class);
+						keyGeneratorGenerateKey=Class.forName("com.distrimind.gnu.vm.jgnux.crypto.KeyGenerator").getDeclaredMethod("generateKey" );
+						keyGeneratorGetAlgorithm=Class.forName("com.distrimind.gnu.vm.jgnux.crypto.KeyGenerator").getDeclaredMethod("getAlgorithm");
+						keyGeneratorGetProvider =Class.forName("com.distrimind.gnu.vm.jgnux.crypto.KeyGenerator").getDeclaredMethod("getProvider");
+						keyGeneratorInit=Class.forName("com.distrimind.gnu.vm.jgnux.crypto.KeyGenerator").getDeclaredMethod("init", int.class, Class.forName("com.distrimind.gnuvm.jgnu.security.SecureRandom"));
+
+						keyPairGeneratorGenerateKeyPair=Class.forName("com.distrimind.gnu.vm.jgnu.security.KeyPairGenerator").getDeclaredMethod("generateKeyPair" );
+						keyPairGeneratorGetAlgorithm=Class.forName("com.distrimind.gnu.vm.jgnu.security.KeyPairGenerator").getDeclaredMethod("getAlgorithm");
+						keyPairGeneratorInitRandom=Class.forName("com.distrimind.gnu.vm.jgnu.security.KeyPairGenerator").getDeclaredMethod("initialize", int.class, Class.forName("com.distrimind.gnuvm.jgnu.security.SecureRandom"));
+						keyPairGeneratorInit=Class.forName("com.distrimind.gnu.vm.jgnu.security.KeyPairGenerator").getDeclaredMethod("initialize", int.class);
+
+
+						macGetAlgorithm=Class.forName("com.distrimind.gnu.vm.jgnux.crypto.Mac").getDeclaredMethod("getAlgorithm");
+						macGetMacLength=Class.forName("com.distrimind.gnu.vm.jgnux.crypto.Mac").getDeclaredMethod("getMacLength");
+						macDoFinal=Class.forName("com.distrimind.gnu.vm.jgnux.crypto.Mac").getDeclaredMethod("doFinal");
+						macGetInstance=Class.forName("com.distrimind.gnu.vm.jgnux.crypto.Mac").getDeclaredMethod("getInstance", String.class);
+						macDoFinalBytes=Class.forName("com.distrimind.gnu.vm.jgnux.crypto.Mac").getDeclaredMethod("doFinal", byte[].class);
+						macDoFinalBytesInt=Class.forName("com.distrimind.gnu.vm.jgnux.crypto.Mac").getDeclaredMethod("doFinal", byte[].class, int.class);
+						macInit=Class.forName("com.distrimind.gnu.vm.jgnux.crypto.Mac").getDeclaredMethod("init", Class.forName("com.distrimind.gnuvm.jgnu.security.Key"));
+						macReset=Class.forName("com.distrimind.gnu.vm.jgnux.crypto.Mac").getDeclaredMethod("reset");
+						macUpdateByte=Class.forName("com.distrimind.gnu.vm.jgnux.crypto.Mac").getDeclaredMethod("update", byte.class);
+						macUpdateBytesIntInt=Class.forName("com.distrimind.gnu.vm.jgnux.crypto.Mac").getDeclaredMethod("update", byte[].class, int.class, int.class);
+						macUpdateByteBuffer=Class.forName("com.distrimind.gnu.vm.jgnux.crypto.Mac").getDeclaredMethod("update", ByteBuffer.class);
+						constSecretKeySpec=Class.forName("com.distrimind.gnu.vm.jgnux.crypto.spec.SecretKeySpec").getDeclaredConstructor(byte[].class, String.class);
+						constSecretKeySpecBytesIntIntString=Class.forName("com.distrimind.gnu.vm.jgnux.crypto.spec.SecretKeySpec").getDeclaredConstructor(byte[].class, int.class, int.class, String.class);
 						clone=Object.class.getDeclaredMethod("clone");
 
-						keyFactGetInstance=Class.forName("gnu.vm.jgnu.security.KeyFactory").getDeclaredMethod("getInstance", String.class);
-						keyFactGeneratePrivate=Class.forName("gnu.vm.jgnu.security.KeyFactory").getDeclaredMethod("generatePrivate", Class.forName("gnu.vm.jgnu.security.spec.KeySpec"));
-						keyFactGeneratePublic=Class.forName("gnu.vm.jgnu.security.KeyFactory").getDeclaredMethod("generatePublic", Class.forName("gnu.vm.jgnu.security.spec.KeySpec"));
-						constPKCS8EncodedKeySpec=Class.forName("gnu.vm.jgnu.security.spec.PKCS8EncodedKeySpec").getDeclaredConstructor(byte[].class);
-						constX509EncodedKeySpec=Class.forName("gnu.vm.jgnu.security.spec.X509EncodedKeySpec").getDeclaredConstructor(byte[].class);
+						keyFactGetInstance=Class.forName("com.distrimind.gnu.vm.jgnu.security.KeyFactory").getDeclaredMethod("getInstance", String.class);
+						keyFactGeneratePrivate=Class.forName("com.distrimind.gnu.vm.jgnu.security.KeyFactory").getDeclaredMethod("generatePrivate", Class.forName("com.distrimind.gnuvm.jgnu.security.spec.KeySpec"));
+						keyFactGeneratePublic=Class.forName("com.distrimind.gnu.vm.jgnu.security.KeyFactory").getDeclaredMethod("generatePublic", Class.forName("com.distrimind.gnuvm.jgnu.security.spec.KeySpec"));
+						constPKCS8EncodedKeySpec=Class.forName("com.distrimind.gnu.vm.jgnu.security.spec.PKCS8EncodedKeySpec").getDeclaredConstructor(byte[].class);
+						constX509EncodedKeySpec=Class.forName("com.distrimind.gnu.vm.jgnu.security.spec.X509EncodedKeySpec").getDeclaredConstructor(byte[].class);
 
-						digestDigest=Class.forName("gnu.vm.jgnu.security.MessageDigest").getDeclaredMethod("digest");
-						digestDigestBytes=Class.forName("gnu.vm.jgnu.security.MessageDigest").getDeclaredMethod("digest", byte[].class);
-						digestDigestBytesIntInt=Class.forName("gnu.vm.jgnu.security.MessageDigest").getDeclaredMethod("digest", byte[].class, int.class, int.class);
-						digestGetAlgorithm=Class.forName("gnu.vm.jgnu.security.MessageDigest").getDeclaredMethod("getAlgorithm");
-						digestGetDigestLength=Class.forName("gnu.vm.jgnu.security.MessageDigest").getDeclaredMethod("getDigestLength");
-						digestGetProvider=Class.forName("gnu.vm.jgnu.security.MessageDigest").getDeclaredMethod("getProvider");
-						digestReset=Class.forName("gnu.vm.jgnu.security.MessageDigest").getDeclaredMethod("reset");
-						digestUpdateByte=Class.forName("gnu.vm.jgnu.security.MessageDigest").getDeclaredMethod("update", byte.class);
-						digestUpdateBytes=Class.forName("gnu.vm.jgnu.security.MessageDigest").getDeclaredMethod("update", byte[].class);
-						digestUpdateBytesIntInt=Class.forName("gnu.vm.jgnu.security.MessageDigest").getDeclaredMethod("update", byte[].class, int.class, int.class);
-						digestUpdateByteBuffer=Class.forName("gnu.vm.jgnu.security.MessageDigest").getDeclaredMethod("update", ByteBuffer.class);
-						digestGetInstance=Class.forName("gnu.vm.jgnu.security.MessageDigest").getDeclaredMethod("getInstance", String.class);
-						providerGetName=Class.forName("gnu.vm.jgnu.security.Provider").getDeclaredMethod("getName");
+						digestDigest=Class.forName("com.distrimind.gnu.vm.jgnu.security.MessageDigest").getDeclaredMethod("digest");
+						digestDigestBytes=Class.forName("com.distrimind.gnu.vm.jgnu.security.MessageDigest").getDeclaredMethod("digest", byte[].class);
+						digestDigestBytesIntInt=Class.forName("com.distrimind.gnu.vm.jgnu.security.MessageDigest").getDeclaredMethod("digest", byte[].class, int.class, int.class);
+						digestGetAlgorithm=Class.forName("com.distrimind.gnu.vm.jgnu.security.MessageDigest").getDeclaredMethod("getAlgorithm");
+						digestGetDigestLength=Class.forName("com.distrimind.gnu.vm.jgnu.security.MessageDigest").getDeclaredMethod("getDigestLength");
+						digestGetProvider=Class.forName("com.distrimind.gnu.vm.jgnu.security.MessageDigest").getDeclaredMethod("getProvider");
+						digestReset=Class.forName("com.distrimind.gnu.vm.jgnu.security.MessageDigest").getDeclaredMethod("reset");
+						digestUpdateByte=Class.forName("com.distrimind.gnu.vm.jgnu.security.MessageDigest").getDeclaredMethod("update", byte.class);
+						digestUpdateBytes=Class.forName("com.distrimind.gnu.vm.jgnu.security.MessageDigest").getDeclaredMethod("update", byte[].class);
+						digestUpdateBytesIntInt=Class.forName("com.distrimind.gnu.vm.jgnu.security.MessageDigest").getDeclaredMethod("update", byte[].class, int.class, int.class);
+						digestUpdateByteBuffer=Class.forName("com.distrimind.gnu.vm.jgnu.security.MessageDigest").getDeclaredMethod("update", ByteBuffer.class);
+						digestGetInstance=Class.forName("com.distrimind.gnu.vm.jgnu.security.MessageDigest").getDeclaredMethod("getInstance", String.class);
+						providerGetName=Class.forName("com.distrimind.gnu.vm.jgnu.security.Provider").getDeclaredMethod("getName");
 
-						secureRandomSetSeed=Class.forName("gnu.vm.jgnu.security.SecureRandom").getDeclaredMethod("setSeed", byte[].class);
-						secureRandomNextBytes=Class.forName("gnu.vm.jgnu.security.SecureRandom").getDeclaredMethod("nextBytes", byte[].class);
-						secureRandomGenerateSeed=Class.forName("gnu.vm.jgnu.security.SecureRandom").getDeclaredMethod("generateSeed", int.class);
+						secureRandomSetSeed=Class.forName("com.distrimind.gnu.vm.jgnu.security.SecureRandom").getDeclaredMethod("setSeed", byte[].class);
+						secureRandomNextBytes=Class.forName("com.distrimind.gnu.vm.jgnu.security.SecureRandom").getDeclaredMethod("nextBytes", byte[].class);
+						secureRandomGenerateSeed=Class.forName("com.distrimind.gnu.vm.jgnu.security.SecureRandom").getDeclaredMethod("generateSeed", int.class);
 
-						signatureGetAlgorithm=Class.forName("gnu.vm.jgnu.security.Signature").getDeclaredMethod("getAlgorithm");
-						signatureGetProviderName=Class.forName("gnu.vm.jgnu.security.Signature").getDeclaredMethod("getProvider");
-						signatureInitSignPriv=Class.forName("gnu.vm.jgnu.security.Signature").getDeclaredMethod("initSign", Class.forName("gnu.vm.jgnu.security.PrivateKey"));
-						signatureInitSignPrivRand=Class.forName("gnu.vm.jgnu.security.Signature").getDeclaredMethod("initSign", Class.forName("gnu.vm.jgnu.security.PrivateKey"), Class.forName("gnu.vm.jgnu.security.SecureRandom"));
-						signatureInitVerifPub=Class.forName("gnu.vm.jgnu.security.Signature").getDeclaredMethod("initVerify", Class.forName("gnu.vm.jgnu.security.PublicKey"));
-						signatureSign=Class.forName("gnu.vm.jgnu.security.Signature").getDeclaredMethod("sign");
-						signatureSignBytesIntInt=Class.forName("gnu.vm.jgnu.security.Signature").getDeclaredMethod("sign", byte[].class, int.class, int.class);
-						signatureUpdateByte=Class.forName("gnu.vm.jgnu.security.Signature").getDeclaredMethod("update", byte.class);
-						signatureUpdateBytes=Class.forName("gnu.vm.jgnu.security.Signature").getDeclaredMethod("update", byte[].class);
-						signatureUpdateBytesIntInt=Class.forName("gnu.vm.jgnu.security.Signature").getDeclaredMethod("update", byte[].class, int.class, int.class);
-						signatureUpdateByteBuffer=Class.forName("gnu.vm.jgnu.security.Signature").getDeclaredMethod("update", ByteBuffer.class);
-						signatureVerifyBytes=Class.forName("gnu.vm.jgnu.security.Signature").getDeclaredMethod("verify", byte[].class);
-						signatureVerifyBytesIntInt=Class.forName("gnu.vm.jgnu.security.Signature").getDeclaredMethod("verify", byte[].class, int.class, int.class);
-
-
+						signatureGetAlgorithm=Class.forName("com.distrimind.gnu.vm.jgnu.security.Signature").getDeclaredMethod("getAlgorithm");
+						signatureGetProviderName=Class.forName("com.distrimind.gnu.vm.jgnu.security.Signature").getDeclaredMethod("getProvider");
+						signatureInitSignPriv=Class.forName("com.distrimind.gnu.vm.jgnu.security.Signature").getDeclaredMethod("initSign", Class.forName("com.distrimind.gnuvm.jgnu.security.PrivateKey"));
+						signatureInitSignPrivRand=Class.forName("com.distrimind.gnu.vm.jgnu.security.Signature").getDeclaredMethod("initSign", Class.forName("com.distrimind.gnuvm.jgnu.security.PrivateKey"), Class.forName("com.distrimind.gnuvm.jgnu.security.SecureRandom"));
+						signatureInitVerifPub=Class.forName("com.distrimind.gnu.vm.jgnu.security.Signature").getDeclaredMethod("initVerify", Class.forName("com.distrimind.gnuvm.jgnu.security.PublicKey"));
+						signatureSign=Class.forName("com.distrimind.gnu.vm.jgnu.security.Signature").getDeclaredMethod("sign");
+						signatureSignBytesIntInt=Class.forName("com.distrimind.gnu.vm.jgnu.security.Signature").getDeclaredMethod("sign", byte[].class, int.class, int.class);
+						signatureUpdateByte=Class.forName("com.distrimind.gnu.vm.jgnu.security.Signature").getDeclaredMethod("update", byte.class);
+						signatureUpdateBytes=Class.forName("com.distrimind.gnu.vm.jgnu.security.Signature").getDeclaredMethod("update", byte[].class);
+						signatureUpdateBytesIntInt=Class.forName("com.distrimind.gnu.vm.jgnu.security.Signature").getDeclaredMethod("update", byte[].class, int.class, int.class);
+						signatureUpdateByteBuffer=Class.forName("com.distrimind.gnu.vm.jgnu.security.Signature").getDeclaredMethod("update", ByteBuffer.class);
+						signatureVerifyBytes=Class.forName("com.distrimind.gnu.vm.jgnu.security.Signature").getDeclaredMethod("verify", byte[].class);
+						signatureVerifyBytesIntInt=Class.forName("com.distrimind.gnu.vm.jgnu.security.Signature").getDeclaredMethod("verify", byte[].class, int.class, int.class);
 
 
-						AccessController.doPrivileged(new PrivilegedAction<Void>() {
-							@Override
-							public Void run() {
-								secureRandomFromSpiConstructor.setAccessible(true);
-								macUpdateByteBuffer.setAccessible(true);
-								return null;
-							}
+
+
+						AccessController.doPrivileged((PrivilegedAction<Void>) () -> {
+							secureRandomFromSpiConstructor.setAccessible(true);
+							macUpdateByteBuffer.setAccessible(true);
+							return null;
 						});
 
 
@@ -259,9 +256,9 @@ class GnuFunctions {
 		} catch (IllegalAccessException | InstantiationException e) {
 			throw new IllegalStateException(e);
 		} catch (InvocationTargetException e) {
-			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.NoSuchAlgorithmException"))
+			if (e.getTargetException().getClass().getName().equals("com.distrimind.gnu.vm.jgnu.security.NoSuchAlgorithmException"))
 				throw new NoSuchAlgorithmException(e.getTargetException());
-			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.spec.InvalidKeySpecException"))
+			if (e.getTargetException().getClass().getName().equals("com.distrimind.gnu.vm.jgnu.security.spec.InvalidKeySpecException"))
 				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, (Exception)e.getTargetException());
 			throw new IllegalStateException(e);
 		}
@@ -274,7 +271,7 @@ class GnuFunctions {
 		} catch (IllegalAccessException e) {
 			throw new IllegalStateException(e);
 		} catch (InvocationTargetException e) {
-			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.NoSuchAlgorithmException"))
+			if (e.getTargetException().getClass().getName().equals("com.distrimind.gnu.vm.jgnu.security.NoSuchAlgorithmException"))
 				throw new NoSuchAlgorithmException(e.getTargetException());
 			throw new IllegalStateException(e);
 		}
@@ -286,7 +283,7 @@ class GnuFunctions {
 		} catch (IllegalAccessException e) {
 			throw new IllegalStateException(e);
 		} catch (InvocationTargetException e) {
-			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.NoSuchAlgorithmException"))
+			if (e.getTargetException().getClass().getName().equals("com.distrimind.gnuvm.jgnu.security.NoSuchAlgorithmException"))
 				throw new NoSuchAlgorithmException(e.getTargetException());
 			throw new IllegalStateException(e);
 		}
@@ -306,7 +303,7 @@ class GnuFunctions {
 		} catch (IllegalAccessException e) {
 			throw new IllegalStateException(e);
 		} catch (InvocationTargetException e) {
-			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.NoSuchAlgorithmException"))
+			if (e.getTargetException().getClass().getName().equals("com.distrimind.gnuvm.jgnu.security.NoSuchAlgorithmException"))
 				throw new NoSuchAlgorithmException(e.getTargetException());
 			throw new IllegalStateException(e);
 		}
@@ -336,7 +333,7 @@ class GnuFunctions {
 		} catch (IllegalAccessException e) {
 			throw new IllegalStateException(e);
 		} catch (InvocationTargetException e) {
-			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.NoSuchAlgorithmException"))
+			if (e.getTargetException().getClass().getName().equals("com.distrimind.gnuvm.jgnu.security.NoSuchAlgorithmException"))
 				throw new NoSuchAlgorithmException(e.getTargetException());
 			throw new IllegalStateException(e);
 		}
@@ -349,7 +346,7 @@ class GnuFunctions {
 		} catch (IllegalAccessException e) {
 			throw new IllegalStateException(e);
 		} catch (InvocationTargetException e) {
-			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.NoSuchAlgorithmException"))
+			if (e.getTargetException().getClass().getName().equals("com.distrimind.gnuvm.jgnu.security.NoSuchAlgorithmException"))
 				throw new NoSuchAlgorithmException(e.getTargetException());
 			throw new IllegalStateException(e);
 		}
@@ -380,9 +377,9 @@ class GnuFunctions {
 		} catch (IllegalAccessException | InstantiationException e) {
 			throw new IllegalStateException(e);
 		} catch (InvocationTargetException e) {
-			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.NoSuchAlgorithmException"))
+			if (e.getTargetException().getClass().getName().equals("com.distrimind.gnuvm.jgnu.security.NoSuchAlgorithmException"))
 				throw new NoSuchAlgorithmException(e.getTargetException());
-			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.spec.InvalidKeySpecException"))
+			if (e.getTargetException().getClass().getName().equals("com.distrimind.gnuvm.jgnu.security.spec.InvalidKeySpecException"))
 				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, (Exception)e.getTargetException());
 			throw new IllegalStateException(e);
 		}
@@ -434,11 +431,11 @@ class GnuFunctions {
 		} catch (InvocationTargetException e) {
 			if (e.getTargetException() instanceof IllegalStateException)
 				throw (IllegalStateException)e.getTargetException();
-			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.InvalidKeyException") )
+			if (e.getTargetException().getClass().getName().equals("com.distrimind.gnuvm.jgnu.security.InvalidKeyException") )
 				throw new MessageExternalizationException(Integrity.FAIL, (Exception)e.getTargetException());
-			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.NoSuchAlgorithmException") )
+			if (e.getTargetException().getClass().getName().equals("com.distrimind.gnuvm.jgnu.security.NoSuchAlgorithmException") )
 				throw new NoSuchAlgorithmException(e.getTargetException());
-			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.spec.InvalidKeySpecException") )
+			if (e.getTargetException().getClass().getName().equals("com.distrimind.gnuvm.jgnu.security.spec.InvalidKeySpecException") )
 				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, (Exception)e.getTargetException());
 			throw new IllegalStateException(e.getTargetException());
 		}
@@ -454,11 +451,11 @@ class GnuFunctions {
 		} catch (InvocationTargetException e) {
 			if (e.getTargetException() instanceof IllegalStateException)
 				throw (IllegalStateException)e.getTargetException();
-			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.InvalidKeyException") )
+			if (e.getTargetException().getClass().getName().equals("com.distrimind.gnuvm.jgnu.security.InvalidKeyException") )
 				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, (Exception)e.getTargetException());
-			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.NoSuchAlgorithmException") )
+			if (e.getTargetException().getClass().getName().equals("com.distrimind.gnuvm.jgnu.security.NoSuchAlgorithmException") )
 				throw new NoSuchAlgorithmException(e.getTargetException());
-			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.spec.InvalidKeySpecException") )
+			if (e.getTargetException().getClass().getName().equals("com.distrimind.gnuvm.jgnu.security.spec.InvalidKeySpecException") )
 				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, (Exception)e.getTargetException());
 			throw new IllegalStateException(e.getTargetException());
 		}
@@ -472,11 +469,11 @@ class GnuFunctions {
 		} catch (InvocationTargetException e) {
 			if (e.getTargetException() instanceof IllegalStateException)
 				throw (IllegalStateException)e.getTargetException();
-			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.InvalidKeyException") )
+			if (e.getTargetException().getClass().getName().equals("com.distrimind.gnuvm.jgnu.security.InvalidKeyException") )
 				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, (Exception)e.getTargetException());
-			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.NoSuchAlgorithmException") )
+			if (e.getTargetException().getClass().getName().equals("com.distrimind.gnuvm.jgnu.security.NoSuchAlgorithmException") )
 				throw new NoSuchAlgorithmException(e.getTargetException());
-			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.spec.InvalidKeySpecException") )
+			if (e.getTargetException().getClass().getName().equals("com.distrimind.gnuvm.jgnu.security.spec.InvalidKeySpecException") )
 				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, (Exception)e.getTargetException());
 			throw new IllegalStateException(e.getTargetException());
 		}
@@ -490,9 +487,9 @@ class GnuFunctions {
 		} catch (InvocationTargetException e) {
 			if (e.getTargetException() instanceof IllegalStateException)
 				throw (IllegalStateException)e.getTargetException();
-			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.NoSuchAlgorithmException") )
+			if (e.getTargetException().getClass().getName().equals("com.distrimind.gnuvm.jgnu.security.NoSuchAlgorithmException") )
 				throw new NoSuchAlgorithmException(e.getTargetException());
-			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnux.crypto.NoSuchPaddingException") )
+			if (e.getTargetException().getClass().getName().equals("com.distrimind.gnuvm.jgnux.crypto.NoSuchPaddingException") )
 				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, (Exception)e.getTargetException());
 			throw new IllegalStateException(e.getTargetException());
 		}
@@ -506,13 +503,13 @@ class GnuFunctions {
 		} catch (InvocationTargetException e) {
 			if (e.getTargetException() instanceof IllegalStateException)
 				throw (IllegalStateException)e.getTargetException();
-			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.InvalidKeyException") )
+			if (e.getTargetException().getClass().getName().equals("com.distrimind.gnuvm.jgnu.security.InvalidKeyException") )
 				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, (Exception)e.getTargetException());
-			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.NoSuchAlgorithmException") )
+			if (e.getTargetException().getClass().getName().equals("com.distrimind.gnuvm.jgnu.security.NoSuchAlgorithmException") )
 				throw new NoSuchAlgorithmException(e.getTargetException());
-			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.spec.InvalidKeySpecException") )
+			if (e.getTargetException().getClass().getName().equals("com.distrimind.gnuvm.jgnu.security.spec.InvalidKeySpecException") )
 				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, (Exception)e.getTargetException());
-			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.InvalidAlgorithmParameterException") )
+			if (e.getTargetException().getClass().getName().equals("com.distrimind.gnuvm.jgnu.security.InvalidAlgorithmParameterException") )
 				throw new MessageExternalizationException(Integrity.FAIL, (Exception)e.getTargetException());
 			throw new IllegalStateException(e.getTargetException());
 
@@ -526,9 +523,9 @@ class GnuFunctions {
 		} catch (InvocationTargetException e) {
 			if (e.getTargetException() instanceof IllegalStateException)
 				throw new MessageExternalizationException(Integrity.FAIL, (Exception)e.getTargetException());
-			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnux.crypto.IllegalBlockSizeException") )
+			if (e.getTargetException().getClass().getName().equals("com.distrimind.gnuvm.jgnux.crypto.IllegalBlockSizeException") )
 				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, (Exception)e.getTargetException());
-			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnux.crypto.BadPaddingException") )
+			if (e.getTargetException().getClass().getName().equals("com.distrimind.gnuvm.jgnux.crypto.BadPaddingException") )
 				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, (Exception)e.getTargetException());
 			throw new IllegalStateException(e.getTargetException());
 		}
@@ -541,11 +538,11 @@ class GnuFunctions {
 		} catch (InvocationTargetException e) {
 			if (e.getTargetException() instanceof IllegalStateException)
 				throw new MessageExternalizationException(Integrity.FAIL, (Exception)e.getTargetException());
-			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnux.crypto.ShortBufferException") )
+			if (e.getTargetException().getClass().getName().equals("com.distrimind.gnuvm.jgnux.crypto.ShortBufferException") )
 				throw new MessageExternalizationException(Integrity.FAIL, (Exception)e.getTargetException());
-			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnux.crypto.IllegalBlockSizeException") )
+			if (e.getTargetException().getClass().getName().equals("com.distrimind.gnuvm.jgnux.crypto.IllegalBlockSizeException") )
 				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, (Exception)e.getTargetException());
-			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnux.crypto.BadPaddingException") )
+			if (e.getTargetException().getClass().getName().equals("com.distrimind.gnuvm.jgnux.crypto.BadPaddingException") )
 				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, (Exception)e.getTargetException());
 			throw new IllegalStateException(e.getTargetException());
 		}
@@ -558,9 +555,9 @@ class GnuFunctions {
 		} catch (InvocationTargetException e) {
 			if (e.getTargetException() instanceof IllegalStateException)
 				throw new MessageExternalizationException(Integrity.FAIL, (Exception)e.getTargetException());
-			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnux.crypto.IllegalBlockSizeException") )
+			if (e.getTargetException().getClass().getName().equals("com.distrimind.gnuvm.jgnux.crypto.IllegalBlockSizeException") )
 				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, (Exception)e.getTargetException());
-			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnux.crypto.BadPaddingException") )
+			if (e.getTargetException().getClass().getName().equals("com.distrimind.gnuvm.jgnux.crypto.BadPaddingException") )
 				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, (Exception)e.getTargetException());
 			throw new MessageExternalizationException(Integrity.FAIL, (Exception)e.getTargetException());
 		}
@@ -574,11 +571,11 @@ class GnuFunctions {
 		} catch (InvocationTargetException e) {
 			if (e.getTargetException() instanceof IllegalStateException)
 				throw (IllegalStateException)e.getTargetException();
-			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnux.crypto.ShortBufferException") )
+			if (e.getTargetException().getClass().getName().equals("com.distrimind.gnuvm.jgnux.crypto.ShortBufferException") )
 				throw new MessageExternalizationException(Integrity.FAIL, (Exception)e.getTargetException());
-			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnux.crypto.IllegalBlockSizeException") )
+			if (e.getTargetException().getClass().getName().equals("com.distrimind.gnuvm.jgnux.crypto.IllegalBlockSizeException") )
 				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, (Exception)e.getTargetException());
-			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnux.crypto.BadPaddingException") )
+			if (e.getTargetException().getClass().getName().equals("com.distrimind.gnuvm.jgnux.crypto.BadPaddingException") )
 				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, (Exception)e.getTargetException());
 			throw new MessageExternalizationException(Integrity.FAIL, (Exception)(e.getTargetException()));
 		}
@@ -646,7 +643,7 @@ class GnuFunctions {
 		} catch (IllegalAccessException e) {
 			throw new IllegalStateException(e);
 		} catch (InvocationTargetException e) {
-			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.SignatureException"))
+			if (e.getTargetException().getClass().getName().equals("com.distrimind.gnuvm.jgnu.security.SignatureException"))
 				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, (Exception)e.getTargetException());
 			throw new MessageExternalizationException(Integrity.FAIL, (Exception)(e.getTargetException()));
 		}
@@ -659,7 +656,7 @@ class GnuFunctions {
 		} catch (IllegalAccessException e) {
 			throw new IllegalStateException(e);
 		} catch (InvocationTargetException e) {
-			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.SignatureException"))
+			if (e.getTargetException().getClass().getName().equals("com.distrimind.gnuvm.jgnu.security.SignatureException"))
 				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, (Exception)e.getTargetException());
 			throw new MessageExternalizationException(Integrity.FAIL, (Exception)e.getTargetException());
 		}
@@ -671,7 +668,7 @@ class GnuFunctions {
 		} catch (IllegalAccessException e) {
 			throw new IllegalStateException(e);
 		} catch (InvocationTargetException e) {
-			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.SignatureException"))
+			if (e.getTargetException().getClass().getName().equals("com.distrimind.gnuvm.jgnu.security.SignatureException"))
 				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, (Exception)e.getTargetException());
 			throw new MessageExternalizationException(Integrity.FAIL, (Exception)e.getTargetException());
 		}
@@ -683,7 +680,7 @@ class GnuFunctions {
 		} catch (IllegalAccessException e) {
 			throw new IllegalStateException(e);
 		} catch (InvocationTargetException e) {
-			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.SignatureException"))
+			if (e.getTargetException().getClass().getName().equals("com.distrimind.gnuvm.jgnu.security.SignatureException"))
 				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, (Exception)(e.getTargetException()));
 			throw new MessageExternalizationException(Integrity.FAIL, (Exception)e.getTargetException());
 		}
@@ -695,7 +692,7 @@ class GnuFunctions {
 		} catch (IllegalAccessException e) {
 			throw new IllegalStateException(e);
 		} catch (InvocationTargetException e) {
-			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.SignatureException"))
+			if (e.getTargetException().getClass().getName().equals("com.distrimind.gnuvm.jgnu.security.SignatureException"))
 				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, (Exception)e.getTargetException());
 			throw new MessageExternalizationException(Integrity.FAIL, (Exception)e.getTargetException());
 		}
@@ -707,7 +704,7 @@ class GnuFunctions {
 		} catch (IllegalAccessException e) {
 			throw new IllegalStateException(e);
 		} catch (InvocationTargetException e) {
-			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.SignatureException"))
+			if (e.getTargetException().getClass().getName().equals("com.distrimind.gnuvm.jgnu.security.SignatureException"))
 				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, (Exception)e.getTargetException());
 			throw new MessageExternalizationException(Integrity.FAIL, (Exception)e.getTargetException());
 		}
@@ -719,7 +716,7 @@ class GnuFunctions {
 		} catch (IllegalAccessException e) {
 			throw new IllegalStateException(e);
 		} catch (InvocationTargetException e) {
-			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.SignatureException"))
+			if (e.getTargetException().getClass().getName().equals("com.distrimind.gnuvm.jgnu.security.SignatureException"))
 				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, (Exception)e.getTargetException());
 			throw new MessageExternalizationException(Integrity.FAIL, (Exception)e.getTargetException());
 		}
@@ -731,7 +728,7 @@ class GnuFunctions {
 		} catch (IllegalAccessException e) {
 			throw new IllegalStateException(e);
 		} catch (InvocationTargetException e) {
-			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.SignatureException"))
+			if (e.getTargetException().getClass().getName().equals("com.distrimind.gnuvm.jgnu.security.SignatureException"))
 				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, (Exception)e.getTargetException());
 			throw new MessageExternalizationException(Integrity.FAIL, (Exception)e.getTargetException());
 		}
@@ -743,7 +740,7 @@ class GnuFunctions {
 		} catch (IllegalAccessException  e) {
 			throw new MessageExternalizationException(Integrity.FAIL, e);
 		} catch (InvocationTargetException e) {
-			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.InvalidKeyException"))
+			if (e.getTargetException().getClass().getName().equals("com.distrimind.gnuvm.jgnu.security.InvalidKeyException"))
 				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, (Exception)e.getTargetException());
 			throw new MessageExternalizationException(Integrity.FAIL, (Exception)e.getTargetException());
 		}
@@ -755,7 +752,7 @@ class GnuFunctions {
 		} catch (IllegalAccessException  e) {
 			throw new MessageExternalizationException(Integrity.FAIL, e);
 		} catch (InvocationTargetException e) {
-			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.InvalidKeyException"))
+			if (e.getTargetException().getClass().getName().equals("com.distrimind.gnuvm.jgnu.security.InvalidKeyException"))
 				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, (Exception)e.getTargetException());
 			throw new MessageExternalizationException(Integrity.FAIL, (Exception)e.getTargetException());
 		}
@@ -766,7 +763,7 @@ class GnuFunctions {
 		} catch (IllegalAccessException  e) {
 			throw new MessageExternalizationException(Integrity.FAIL, e);
 		} catch (InvocationTargetException e) {
-			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.InvalidKeyException"))
+			if (e.getTargetException().getClass().getName().equals("com.distrimind.gnuvm.jgnu.security.InvalidKeyException"))
 				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, (Exception)e.getTargetException());
 			throw new MessageExternalizationException(Integrity.FAIL, (Exception)e.getTargetException());
 		}
@@ -887,7 +884,7 @@ class GnuFunctions {
 		} catch (IllegalAccessException e) {
 			throw new IllegalStateException(e);
 		} catch (InvocationTargetException e) {
-			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.DigestException"))
+			if (e.getTargetException().getClass().getName().equals("com.distrimind.gnuvm.jgnu.security.DigestException"))
 				throw new MessageExternalizationException(Integrity.FAIL, e);
 			throw new IllegalStateException(e.getTargetException());
 		}
@@ -964,7 +961,7 @@ class GnuFunctions {
 		} catch (InvocationTargetException e) {
 			if (e.getTargetException() instanceof IllegalStateException)
 				throw (IllegalStateException)e.getTargetException();
-			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnux.crypto.ShortBufferException") )
+			if (e.getTargetException().getClass().getName().equals("com.distrimind.gnuvm.jgnux.crypto.ShortBufferException") )
 				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, (Exception)e.getTargetException());
 			throw new MessageExternalizationException(Integrity.FAIL, (Exception)e.getTargetException());
 		}
@@ -1010,7 +1007,7 @@ class GnuFunctions {
 		} catch (InvocationTargetException e) {
 			if (e.getTargetException() instanceof IllegalStateException)
 				throw new MessageExternalizationException(Integrity.FAIL, (Exception)e.getTargetException());
-			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.InvalidKeyException") )
+			if (e.getTargetException().getClass().getName().equals("com.distrimind.gnuvm.jgnu.security.InvalidKeyException") )
 				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, (Exception)e.getTargetException());
 			throw new MessageExternalizationException(Integrity.FAIL, (Exception)e.getTargetException());
 		}
@@ -1142,7 +1139,7 @@ class GnuFunctions {
 		} catch (InvocationTargetException e) {
 			if (e.getTargetException() instanceof IllegalStateException)
 				throw new MessageExternalizationException(Integrity.FAIL, (Exception)e.getTargetException());
-			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnux.crypto.ShortBufferException") )
+			if (e.getTargetException().getClass().getName().equals("com.distrimind.gnuvm.jgnux.crypto.ShortBufferException") )
 				throw new MessageExternalizationException(Integrity.FAIL, (Exception)e.getTargetException());
 			throw new MessageExternalizationException(Integrity.FAIL, (Exception)e.getTargetException());
 		}
@@ -1187,11 +1184,11 @@ class GnuFunctions {
 			 	throw (IllegalStateException)e.getTargetException();
 			if (e.getTargetException() instanceof InvalidKeyException)
 				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, (Exception)e.getTargetException());
-			else if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnux.crypto.InvalidKeyException"))
+			else if (e.getTargetException().getClass().getName().equals("com.distrimind.gnuvm.jgnux.crypto.InvalidKeyException"))
 				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, (Exception)(e.getTargetException()));
-			else if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnux.crypto.IllegalBlockSizeException"))
+			else if (e.getTargetException().getClass().getName().equals("com.distrimind.gnuvm.jgnux.crypto.IllegalBlockSizeException"))
 				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, (Exception)e.getTargetException());
-			else if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.InvalidKeyException"))
+			else if (e.getTargetException().getClass().getName().equals("com.distrimind.gnuvm.jgnu.security.InvalidKeyException"))
 				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, (Exception)e.getTargetException());
 			throw new MessageExternalizationException(Integrity.FAIL, e);
 		}
@@ -1207,9 +1204,9 @@ class GnuFunctions {
 				throw (IllegalStateException)e.getTargetException();
 			if (e.getTargetException() instanceof InvalidKeyException)
 				throw new IOException(e.getTargetException());
-			else if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnux.crypto.InvalidKeyException"))
+			else if (e.getTargetException().getClass().getName().equals("com.distrimind.gnuvm.jgnux.crypto.InvalidKeyException"))
 				throw new IOException(e.getTargetException());
-			else if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.NoSuchAlgorithmException"))
+			else if (e.getTargetException().getClass().getName().equals("com.distrimind.gnuvm.jgnu.security.NoSuchAlgorithmException"))
 				throw new IOException(e.getTargetException());
 			throw new MessageExternalizationException(Integrity.FAIL, e);
 		}
@@ -1249,9 +1246,9 @@ class GnuFunctions {
 		} catch (InstantiationException | IllegalAccessException e) {
 			throw new IllegalStateException(e);
 		} catch (InvocationTargetException e) {
-			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.NoSuchAlgorithmException"))
+			if (e.getTargetException().getClass().getName().equals("com.distrimind.gnuvm.jgnu.security.NoSuchAlgorithmException"))
 				throw new NoSuchAlgorithmException(e.getTargetException());
-			else if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.spec.InvalidKeySpecException"))
+			else if (e.getTargetException().getClass().getName().equals("com.distrimind.gnuvm.jgnu.security.spec.InvalidKeySpecException"))
 				throw new IOException(e.getTargetException());
 			throw new MessageExternalizationException(Integrity.FAIL, (Exception)e);
 		}
@@ -1264,7 +1261,7 @@ class GnuFunctions {
 		} catch (InstantiationException | IllegalAccessException e) {
 			throw new IllegalStateException(e);
 		} catch (InvocationTargetException e) {
-			if (e.getTargetException().getClass().getName().equals("gnu.vm.jgnu.security.NoSuchAlgorithmException"))
+			if (e.getTargetException().getClass().getName().equals("com.distrimind.gnuvm.jgnu.security.NoSuchAlgorithmException"))
 				throw new NoSuchAlgorithmException(e.getTargetException());
 			throw new IllegalStateException(e);
 		}
@@ -1299,7 +1296,7 @@ class GnuFunctions {
 	static Object getGnuRandomInterface(final AbstractSecureRandom.AbstractSecureRandomSpi secureRandom) {
 		checkGnuLoaded();
 		try {
-			Class<?> c= Class.forName("gnu.vm.jgnu.security.SecureRandomSpi");
+			Class<?> c= Class.forName("com.distrimind.gnuvm.jgnu.security.SecureRandomSpi");
 			IHForGnuInterface ihForGnuInterface =new IHForGnuInterface(secureRandom);
 			Object o= Proxy.newProxyInstance(c.getClassLoader(),
 					new Class[]{c},

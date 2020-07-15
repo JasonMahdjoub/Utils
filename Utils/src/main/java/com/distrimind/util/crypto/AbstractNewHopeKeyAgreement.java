@@ -43,7 +43,7 @@ import java.security.PrivilegedExceptionAction;
 import java.security.SecureRandom;
 import java.util.Arrays;
 
-import org.bouncycastle.pqc.crypto.newhope.NHPrivateKeyParameters;
+import com.distrimind.bouncycastle.pqc.crypto.newhope.NHPrivateKeyParameters;
 
 /**
  * 

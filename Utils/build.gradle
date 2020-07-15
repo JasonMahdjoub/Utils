@@ -11,6 +11,7 @@ apply plugin: 'java-library'
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 apply plugin: 'idea'
+apply plugin: 'signing'
 
 Properties props = new Properties()
 def propFile = file('gradle.properties')
@@ -60,11 +61,12 @@ dependencies {
     testImplementation 'org.testng:testng:7.1.0'
     testImplementation 'org.hamcrest:hamcrest-core:2.2'
 
-    api(group:'org.bouncycastle', name: 'bc-fips', version: '1.0.2-DMRECOMPILE')
-    api(group:'org.bouncycastle', name: 'bc-prov', version: '1.65-DMRECOMPILE')
+    api(group:'com.distrimind.bcfips', name: 'BouncyCastle-FIPS', version: '1.0.2-DMRECOMPILE')
+    api(group:'com.distrimind.bouncycastle', name: 'core', version: '1.66-DMRECOMPILE')
+    api(group:'com.distrimind.bouncycastle', name: 'prov', version: '1.66-DMRECOMPILE')
 
 
-    testImplementation(group:'gnu', name: 'Gnu-Crypt', version: '1.3.0')
+    testImplementation(group:'com.distrimind.gnu', name: 'Gnu-Crypt', version: '1.3.0')
     api(group:'commons-codec', name: 'commons-codec', version: '1.14')
     api(group:'org.yaml', name: 'snakeyaml', version: '1.26')
     testImplementation(group:'org.apache.commons', name: 'commons-math3', version: '3.6.1')
@@ -178,7 +180,7 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
 }
 
 artifacts {
-
+    archives jar
     archives sourcesJar
     archives javadocJar
 }
@@ -218,7 +220,36 @@ publishing {
             from components.java
             artifact sourcesJar
             artifact javadocJar
-            
+            pom {
+                name = 'Utils'
+                description = 'Set of Java tools'
+                url = 'https://github.com/JazZ51/Utils'
+                developers {
+                    developer {
+                        id = 'mahdjoub'
+                        name = 'Jason Mahdjoub'
+                        email = 'jason.mahdjoub@distri-mind.fr'
+                    }
+                }
+                organization {
+                    name = 'DistriMind'
+                    url = 'https://github.com/JazZ51'
+                }
+                issueManagement {
+                    system = 'GitHub'
+                    url = 'https://github.com/JazZ51/Utils/issues'
+                }
+                scm {
+                    connection = 'https://github.com/JazZ51/Utils'
+                }
+                licenses {
+                    license {
+                        name = 'CeCILL-C FREE SOFTWARE LICENSE AGREEMENT'
+                        url = 'http://cecill.info/licences/Licence_CeCILL-C_V1-en.txt'
+                    }
+                }
+
+            }
         }
     }
     repositories {
@@ -231,7 +262,15 @@ publishing {
         }
     }
 }
+signing {
+    useGpgCmd()
+    sign configurations.archives
+    sign publishing.publications.mavenJava
+}
 
-
-
+javadoc {
+    if(JavaVersion.current().isJava9Compatible()) {
+        options.addBooleanOption('html5', true)
+    }
+}
 

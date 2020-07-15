@@ -37,9 +37,9 @@ package com.distrimind.util.crypto;
 
 import com.distrimind.util.io.Integrity;
 import com.distrimind.util.io.MessageExternalizationException;
-import org.bouncycastle.bccrypto.CryptoException;
-import org.bouncycastle.pqc.crypto.ExchangePair;
-import org.bouncycastle.pqc.crypto.newhope.NHPublicKeyParameters;
+import com.distrimind.bouncycastle.crypto.CryptoException;
+import com.distrimind.bouncycastle.pqc.crypto.ExchangePair;
+import com.distrimind.bouncycastle.pqc.crypto.newhope.NHPublicKeyParameters;
 
 import java.io.IOException;
 import java.util.Arrays;

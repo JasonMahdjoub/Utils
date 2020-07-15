@@ -67,7 +67,7 @@ public final class GnuMac extends AbstractMac {
 			return mac.equals(((GnuMac) _obj).mac);
 		else {
 			try {
-				if (Class.forName("gnu.vm.jgnux.crypto.Mac").isAssignableFrom(_obj.getClass()))
+				if (Class.forName("com.distrimind.gnuvm.jgnux.crypto.Mac").isAssignableFrom(_obj.getClass()))
 					return mac.equals(_obj);
 				else
 					return false;

@@ -38,7 +38,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
 import com.distrimind.util.Bits;
 import com.distrimind.util.io.Integrity;
 import com.distrimind.util.io.MessageExternalizationException;
-import org.bouncycastle.bccrypto.CryptoException;
+import com.distrimind.bouncycastle.crypto.CryptoException;
 
 import javax.crypto.Cipher;
 import java.io.IOException;

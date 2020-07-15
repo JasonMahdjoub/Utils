@@ -36,13 +36,13 @@ package com.distrimind.util.crypto;
 
 import com.distrimind.util.io.Integrity;
 import com.distrimind.util.io.MessageExternalizationException;
-import org.bouncycastle.crypto.Algorithm;
-import org.bouncycastle.crypto.asymmetric.AsymmetricEdDSAPublicKey;
-import org.bouncycastle.crypto.asymmetric.AsymmetricXDHPrivateKey;
-import org.bouncycastle.crypto.asymmetric.AsymmetricXDHPublicKey;
-import org.bouncycastle.crypto.fips.FipsRSA;
-import org.bouncycastle.crypto.general.EdEC;
-import org.bouncycastle.pqc.jcajce.provider.sphincs.Sphincs256KeyFactorySpi;
+import com.distrimind.bcfips.crypto.Algorithm;
+import com.distrimind.bcfips.crypto.asymmetric.AsymmetricEdDSAPublicKey;
+import com.distrimind.bcfips.crypto.asymmetric.AsymmetricXDHPrivateKey;
+import com.distrimind.bcfips.crypto.asymmetric.AsymmetricXDHPublicKey;
+import com.distrimind.bcfips.crypto.fips.FipsRSA;
+import com.distrimind.bcfips.crypto.general.EdEC;
+import com.distrimind.bouncycastle.pqc.jcajce.provider.sphincs.Sphincs256KeyFactorySpi;
 
 import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;

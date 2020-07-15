@@ -39,12 +39,12 @@ import java.util.Arrays;
 
 import com.distrimind.util.io.Integrity;
 import com.distrimind.util.io.MessageExternalizationException;
-import org.bouncycastle.bccrypto.AsymmetricCipherKeyPair;
-import org.bouncycastle.bccrypto.CryptoException;
-import org.bouncycastle.bccrypto.KeyGenerationParameters;
-import org.bouncycastle.pqc.crypto.newhope.NHKeyPairGenerator;
-import org.bouncycastle.pqc.crypto.newhope.NHPrivateKeyParameters;
-import org.bouncycastle.pqc.crypto.newhope.NHPublicKeyParameters;
+import com.distrimind.bouncycastle.crypto.AsymmetricCipherKeyPair;
+import com.distrimind.bouncycastle.crypto.CryptoException;
+import com.distrimind.bouncycastle.crypto.KeyGenerationParameters;
+import com.distrimind.bouncycastle.pqc.crypto.newhope.NHKeyPairGenerator;
+import com.distrimind.bouncycastle.pqc.crypto.newhope.NHPrivateKeyParameters;
+import com.distrimind.bouncycastle.pqc.crypto.newhope.NHPublicKeyParameters;
 
 /**
  * 
