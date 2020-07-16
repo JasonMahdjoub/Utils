@@ -75,7 +75,7 @@ public class Utils {
 			c = Calendar.getInstance();
 			c.set(2020, Calendar.JULY, 16);
 			Description d = new Description((short)5, (short)5, (short)8, Version.Type.Stable, (short)0, c.getTime());
-			d.addItem("Fix issue with associated data using into EncryptionSignatureHashEncoder");
+			d.addItem("Fix issue with associated data used into EncryptionSignatureHashEncoder");
 			VERSION.addDescription(d);
 
 			c = Calendar.getInstance();
