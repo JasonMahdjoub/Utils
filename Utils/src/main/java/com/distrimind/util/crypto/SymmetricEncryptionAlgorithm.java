@@ -48,7 +48,7 @@ import java.util.List;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 4.0
+ * @version 4.1
  * @since Utils 1.4
  */
 public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm {
@@ -87,11 +87,11 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 		}
 
 	}
-	public boolean checkPartialHashWithNonEncryptedStream(byte[] head, SubStreamHashResult hashResultFromEncryptedStream, SubStreamParameters subStreamParameters, RandomInputStream nonEncryptedInputStream, byte[] associatedData, int offAD, int lenAD) throws IOException{
+	public boolean checkPartialHashWithNonEncryptedStream(byte[] head, SubStreamHashResult hashResultFromEncryptedStream, SubStreamParameters subStreamParameters, RandomInputStream nonEncryptedInputStream) throws IOException{
 		try {
 			AbstractMessageDigest md = subStreamParameters.getMessageDigestType().getMessageDigestInstance();
 			md.reset();
-			return checkPartialHashWithNonEncryptedStream(head, hashResultFromEncryptedStream, subStreamParameters, nonEncryptedInputStream, associatedData, offAD, lenAD, md);
+			return checkPartialHashWithNonEncryptedStream(head, hashResultFromEncryptedStream, subStreamParameters, nonEncryptedInputStream, md);
 		} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
 			throw new IOException(e);
 		}
@@ -133,7 +133,7 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 	}
 
 	public boolean checkPartialHashWithNonEncryptedStream(byte[] head, SubStreamHashResult hashResultFromEncryptedStream, SubStreamParameters subStreamParameters,
-														  RandomInputStream nonEncryptedInputStream, byte[] associatedData, int offAD, int lenAD,
+														  RandomInputStream nonEncryptedInputStream,
 														  AbstractMessageDigest md) throws IOException {
 
 		if (nonEncryptedInputStream.currentPosition()!=0)
@@ -151,7 +151,7 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 		nullStream.setLength(getOutputSizeAfterEncryption(nonEncryptedInputStream.length()));
 
 
-		try(CommonCipherOutputStream os= getCipherOutputStreamForEncryption(nullStream, false, associatedData, offAD, lenAD, null, ivs)) {
+		try(CommonCipherOutputStream os= getCipherOutputStreamForEncryption(nullStream, false, null, 0, 0, null, ivs)) {
 
 			List<SubStreamParameter> ssp;
 			if (head!=null) {

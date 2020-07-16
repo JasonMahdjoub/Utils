@@ -44,7 +44,7 @@ import java.util.Arrays;
 
 /**
  * @author Jason Mahdjoub
- * @version 1.3
+ * @version 1.4
  * @since Utils 4.16.0
  */
 public class EncryptionSignatureHashDecoder {
@@ -354,11 +354,11 @@ public class EncryptionSignatureHashDecoder {
 			throw new NullPointerException("associatedData");
 		else if (!hasAssociatedData && associatedData!=null)
 			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, "associatedData");
-		if (hasAssociatedData && (cipher==null || !cipher.getType().supportAssociatedData()) && symmetricChecker==null && asymmetricChecker==null)
-			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, "associatedData");
 		boolean hasCipher= isEncrypted();
 		if (hasCipher && cipher==null)
 			throw new NullPointerException("cipher");
+		if (hasAssociatedData && (cipher==null || !cipher.getType().supportAssociatedData()) && symmetricChecker==null)
+			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, "associatedData");
 		/*else if (!hasCipher && cipher!=null)
 			throw new MessageExternalizationException(Integrity.FAIL, "cipher");*/
 	}
@@ -628,7 +628,7 @@ public class EncryptionSignatureHashDecoder {
 				if (symmetricChecker!=null) {
 					assert symSign != null;
 					symmetricChecker.init(symSign, 0, symSign.length);
-					if (lenBuffer>EncryptionSignatureHashEncoder.headSizeMinusOne)
+					if (associatedData!=null)
 						symmetricChecker.update(associatedData, offAD, lenAD);
 					symmetricChecker.update(hash);
 					if (!symmetricChecker.verify())
@@ -648,6 +648,8 @@ public class EncryptionSignatureHashDecoder {
 				if (lenBuffer==EncryptionSignatureHashEncoder.headSizeMinusOne)
 					symmetricChecker.update(code);
 				symmetricChecker.update(buffer, 0, lenBuffer);
+				if (lenBuffer==EncryptionSignatureHashEncoder.headSizeMinusOne && associatedData!=null)
+					symmetricChecker.update(associatedData, offAD, lenAD);
 				if (!symmetricChecker.verify())
 					throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
 			} else if (asymmetricChecker!=null)
@@ -683,16 +685,16 @@ public class EncryptionSignatureHashDecoder {
 		if (dataLen>inputStream.length())
 			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
 	}
-	public Integrity checkHashAndSignature(byte[] cipherText, int cipherTextOff, int cipherTextLen) throws IOException {
+	public Integrity checkHashAndSignatures(byte[] cipherText, int cipherTextOff, int cipherTextLen) throws IOException {
 		EncryptionSignatureHashEncoder.checkLimits(cipherText, cipherTextOff, cipherTextLen);
 		if (cipherTextLen<=0)
 			throw new IllegalArgumentException();
 		randomByteArrayInputStream.init(cipherText);
 		limitedRandomInputStream2.init(randomByteArrayInputStream, cipherTextOff, cipherTextLen);
 		withRandomInputStream(limitedRandomInputStream2);
-		return checkHashAndSignature();
+		return checkHashAndSignatures();
 	}
-	public Integrity checkHashAndSignature() throws IOException {
+	public Integrity checkHashAndSignatures() throws IOException {
 
 
 		try {
@@ -727,14 +729,15 @@ public class EncryptionSignatureHashDecoder {
 				byte[] hash = digest.digest();
 				byte[] hash2=hash;
 				byte[] hash3=hash;
-				byte[] symSign=null;
 				byte[] asymSign=null;
 				if (symmetricChecker!=null)
 				{
-					symSign=inputStream.readBytesArray(false, symmetricChecker.getMacLengthBytes());
+					byte[] symSign=inputStream.readBytesArray(false, symmetricChecker.getMacLengthBytes());
 					digest.reset();
+					symmetricChecker.init(symSign);
 					if (associatedData!=null)
 						symmetricChecker.update(associatedData, offAD, lenAD);
+					symmetricChecker.update(hash);
 					digest.update(hash);
 					digest.update(symSign);
 					hash3=hash2=digest.digest();
@@ -752,7 +755,7 @@ public class EncryptionSignatureHashDecoder {
 					return Integrity.FAIL;
 
 				if (symmetricChecker!=null) {
-					if (!symmetricChecker.verify(hash, symSign))
+					if (!symmetricChecker.verify())
 						return Integrity.FAIL_AND_CANDIDATE_TO_BAN;
 				}
 
@@ -771,6 +774,8 @@ public class EncryptionSignatureHashDecoder {
 				symmetricChecker.update(limitedRandomInputStream);
 				symmetricChecker.update(code);
 				symmetricChecker.update(buffer, 0, EncryptionSignatureHashEncoder.headSizeMinusOne);
+				if (associatedData!=null)
+					symmetricChecker.update(associatedData, offAD, lenAD);
 				if (symmetricChecker.verify())
 					return Integrity.OK;
 				else

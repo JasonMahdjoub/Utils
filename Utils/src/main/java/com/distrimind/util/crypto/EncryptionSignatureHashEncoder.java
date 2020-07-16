@@ -45,7 +45,7 @@ import java.util.Arrays;
 
 /**
  * @author Jason Mahdjoub
- * @version 1.4
+ * @version 1.5
  * @since Utils 4.16.0
  */
 @SuppressWarnings("UnusedReturnValue")
@@ -86,7 +86,7 @@ public class EncryptionSignatureHashEncoder {
 	{
 		if (code==null)
 		{
-			if (associatedData != null && (cipher == null || !cipher.getType().supportAssociatedData()) && symmetricSigner == null && asymmetricSigner == null)
+			if (associatedData != null && (cipher == null || !cipher.getType().supportAssociatedData()) && symmetricSigner == null)
 				throw new IllegalArgumentException();
 			int res = symmetricSigner == null ? 0 : 1;
 			res += asymmetricSigner == null ? 0 : 2;
@@ -523,7 +523,7 @@ public class EncryptionSignatureHashEncoder {
 				bufferToInit=false;
 				if (outputStream != originalOutputStream && buffer == null) {
 					buffer = bufferRef;
-					lenBuffer = 10;
+					lenBuffer = headSizeMinusOne;
 					Bits.putShort(buffer, 0, currentKeyID);
 					if (dataLen>0) {
 						Bits.putLong(buffer, 2, dataLen);
@@ -645,9 +645,11 @@ public class EncryptionSignatureHashEncoder {
 				originalOutputStream.writeBytesArray(hash, false, digest.getDigestLength());
 			} else if (symmetricSigner!=null)
 			{
-				if (lenBuffer==headSizeMinusOne)
+				if (lenBuffer<=headSizeMinusOne)
 					symmetricSigner.update(code);
 				symmetricSigner.update(buffer, 0, lenBuffer);
+				if (lenBuffer<=headSizeMinusOne && associatedData!=null)
+					symmetricSigner.update(associatedData, offAD, lenAD);
 				byte[] signature = symmetricSigner.getSignature();
 				originalOutputStream.writeBytesArray(signature, false, symmetricSigner.getMacLengthBytes());
 			} else if (asymmetricSigner!=null)
@@ -690,7 +692,10 @@ public class EncryptionSignatureHashEncoder {
 		return rosForEncryption;
 	}
 
-
+	public boolean supportPartialHash()
+	{
+		return cipher==null || cipher.supportRandomEncryptionAndRandomDecryption();
+	}
 
 	public boolean checkPartialHash(SubStreamParameters subStreamParameters, SubStreamHashResult hashResultFromEncryptedStream) throws IOException {
 		try {
@@ -719,7 +724,7 @@ public class EncryptionSignatureHashEncoder {
 					associatedData=bufferRef;
 					offAD=0;
 				}
-				return cipher.checkPartialHashWithNonEncryptedStream(out.getBytes(), hashResultFromEncryptedStream, subStreamParameters, inputStream, associatedData, offAD, lenAD, md);
+				return cipher.checkPartialHashWithNonEncryptedStream(out.getBytes(), hashResultFromEncryptedStream, subStreamParameters, inputStream, md);
 			}
 		} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
 			throw new IOException(e);

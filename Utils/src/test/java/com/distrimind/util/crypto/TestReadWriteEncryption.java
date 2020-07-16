@@ -48,7 +48,7 @@ import java.util.Random;
 
 /**
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 1.1
  * @since Utils 4.16.0
  */
 public class TestReadWriteEncryption {
@@ -75,8 +75,6 @@ public class TestReadWriteEncryption {
 			{
 				if (associatedData!=null) {
 					rand.nextBytes(associatedData);
-					if (ske!=null)
-						ske = SymmetricEncryptionType.AES_GCM.getKeyGenerator(SecureRandomType.DEFAULT.getInstance(null)).generateKey();
 				}
 				for (SymmetricSecretKey sks : new SymmetricSecretKey[]{
 						SymmetricAuthentifiedSignatureType.DEFAULT.getKeyGenerator(SecureRandomType.DEFAULT.getInstance(null)).generateKey(),
@@ -93,6 +91,8 @@ public class TestReadWriteEncryption {
 								null
 						})
 						{
+							if (associatedData != null && (ske == null || !ske.getEncryptionAlgorithmType().supportAssociatedData()) && sks == null)
+								ske = SymmetricEncryptionType.AES_GCM.getKeyGenerator(SecureRandomType.DEFAULT.getInstance(null)).generateKey();
 							res[i][0]=ske==null?null:ske.getEncryptionAlgorithmType();
 							res[i][1]=ske;
 							res[i][2]=associatedData;
@@ -182,7 +182,7 @@ public class TestReadWriteEncryption {
 			reader.decodeAndCheckHashAndSignaturesIfNecessary(baos);
 			Assert.assertEquals(baos.getBytes(), in);
 			Assert.assertTrue(expectedLength >= in.length);
-			Assert.assertEquals(reader.checkHashAndSignature(), Integrity.OK);
+			Assert.assertEquals(reader.checkHashAndSignatures(), Integrity.OK);
 			Assert.assertEquals(reader.checkHashAndPublicSignature(), Integrity.OK);
 		}
 	}
@@ -222,7 +222,7 @@ public class TestReadWriteEncryption {
 			reader.decodeAndCheckHashAndSignaturesIfNecessary(baos);
 			Assert.assertEquals(baos.getBytes(), in);
 			Assert.assertTrue(expectedLength >= in.length);
-			Assert.assertEquals(reader.checkHashAndSignature(), Integrity.OK);
+			Assert.assertEquals(reader.checkHashAndSignatures(), Integrity.OK);
 			Assert.assertEquals(reader.checkHashAndPublicSignature(), Integrity.OK);
 		}
 	}
@@ -239,9 +239,9 @@ public class TestReadWriteEncryption {
 		writer.withRandomInputStream(bais);
 		if (secretKeyForEncryption!=null) {
 			writer.withSymmetricSecretKeyForEncryption(SecureRandomType.DEFAULT.getInstance(null), secretKeyForEncryption);
-			if (associatedData!=null)
-				writer.withAssociatedData(associatedData);
 		}
+		if (associatedData!=null)
+			writer.withAssociatedData(associatedData);
 		if (secretKeyForSignature!=null)
 			writer.withSymmetricSecretKeyForSignature(secretKeyForSignature);
 		if (keyPairForSignature!=null)
@@ -276,12 +276,12 @@ public class TestReadWriteEncryption {
 			Assert.assertEquals(baos.getBytes(), in);
 		}
 		Assert.assertTrue(expectedLength>=in.length);
-		Assert.assertEquals(reader.checkHashAndSignature(), Integrity.OK);
+		Assert.assertEquals(reader.checkHashAndSignatures(), Integrity.OK);
 		Assert.assertEquals(reader.checkHashAndPublicSignature(), Integrity.OK);
 		long s;
 		SubStreamParameters ssp=null;
 		SubStreamHashResult sshr;
-		if (secretKeyForEncryption==null || secretKeyForEncryption.getEncryptionAlgorithmType().supportRandomReadWrite()) {
+		if (writer.supportPartialHash()) {
 			ssp = new SubStreamParameters(MessageDigestType.DEFAULT, Arrays.asList(
 					new SubStreamParameter(s = r.nextInt(8), s + 12 + r.nextInt(10)),
 					new SubStreamParameter(s = r.nextInt(100) + 200, s + 10 + r.nextInt(10)),
@@ -333,9 +333,9 @@ public class TestReadWriteEncryption {
 		reader.withRandomInputStream(bais);
 		if (secretKeyForEncryption!=null) {
 			reader.withSymmetricSecretKeyForEncryption(secretKeyForEncryption);
-			if (associatedData!=null)
-				reader.withAssociatedData(associatedData);
 		}
+		if (associatedData!=null)
+			reader.withAssociatedData(associatedData);
 		if (secretKeyForSignature!=null)
 			reader.withSymmetricSecretKeyForSignature(secretKeyForSignature);
 		if (keyPairForSignature!=null)
@@ -360,7 +360,7 @@ public class TestReadWriteEncryption {
 		{
 		}
 		if (messageDigestType!=null || keyPairForSignature!=null || secretKeyForSignature!=null) {
-			Assert.assertNotEquals(reader.checkHashAndSignature(), Integrity.OK);
+			Assert.assertNotEquals(reader.checkHashAndSignatures(), Integrity.OK);
 		}
 		if (messageDigestType!=null || keyPairForSignature!=null) {
 			Assert.assertNotEquals(reader.checkHashAndPublicSignature(), Integrity.OK, "");
@@ -388,9 +388,10 @@ public class TestReadWriteEncryption {
 
 		if (messageDigestType!=null || keyPairForSignature!=null || secretKeyForSignature!=null) {
 			if (changeHash || changeSymSig || changeASymSig)
-				Assert.assertNotEquals(reader.checkHashAndSignature(), Integrity.OK);
-			else
-				Assert.assertEquals(reader.checkHashAndSignature(), Integrity.OK);
+				Assert.assertNotEquals(reader.checkHashAndSignatures(), Integrity.OK);
+			else {
+				Assert.assertEquals(reader.checkHashAndSignatures(), Integrity.OK);
+			}
 		}
 		if (!symError && (messageDigestType!=null || keyPairForSignature!=null)) {
 			if (changeHash || changeASymSig)
@@ -415,7 +416,7 @@ public class TestReadWriteEncryption {
 			symError=e.getMessage().equals("symmetricChecker");
 		}
 		if (messageDigestType!=null || keyPairForSignature!=null || secretKeyForSignature!=null) {
-			Assert.assertNotEquals(reader.checkHashAndSignature(), Integrity.OK);
+			Assert.assertNotEquals(reader.checkHashAndSignatures(), Integrity.OK);
 		}
 		if (!symError && (messageDigestType!=null || keyPairForSignature!=null)) {
 			Assert.assertNotEquals(reader.checkHashAndPublicSignature(), Integrity.OK, "");

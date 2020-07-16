@@ -1,6 +1,6 @@
 Utils
 =====
-5.5.7 Stable (Build: 1893) (from 13/07/2020 to 15/07/2020)
+5.5.8 Stable (Build: 1896) (from 16/07/2020 to 16/07/2020)
 
 # Creator(s):
 Jason MAHDJOUB
@@ -9,6 +9,10 @@ Jason MAHDJOUB
 Jason MAHDJOUB (Entred in the team at 04/01/2016)
 
 # Modifications:
+
+
+### 5.5.8 Stable (16/07/2020)
+* Fix issue with associated data using into EncryptionSignatureHashEncoder
 
 
 ### 5.5.7 Stable (13/07/2020)
