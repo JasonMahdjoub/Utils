@@ -412,13 +412,12 @@ public final class FileTools {
 			throw new IllegalAccessError("The directory of destination does not exists !");
 		if (!_directory_dst.isDirectory())
 			throw new IllegalAccessError("The directory of destination is not a directory !");
+		_directory_dst=_directory_dst.getCanonicalFile();
 		try(FileInputStream fis = new FileInputStream(_zip_file);ZipInputStream zis = new ZipInputStream(fis)) {
 			ZipEntry entry;
 			byte[] data = new byte[BUFFER_SIZE];
 			while ((entry = zis.getNextEntry()) != null) {
 				String entryName=entry.getName();
-				if (entryName.contains(".."))
-					continue;
 				if (!matchString(entryName, regex_exclude, regex_include))
 					continue;
 
@@ -432,6 +431,8 @@ public final class FileTools {
 					// System.out.println("Extracting: " +new File(_directory_dst,
 					// entry.getName()));
 					File f = new File(_directory_dst, entryName);
+					if (!f.getCanonicalFile().toString().startsWith(_directory_dst.toString()))
+						throw new IOException("Bad zip entry");
 					checkFolderRecursive(f.getParentFile());
 					try (FileOutputStream fos = new FileOutputStream(f)) {
 						while ((count = zis.read(data, 0, data.length)) != -1) {
@@ -562,12 +563,11 @@ public final class FileTools {
 	}
 	private static boolean walkDirTree(File directory, final FileVisitor fv)
 	{
-		for (File f : Objects.requireNonNull(directory.listFiles(((fv.acceptDirectories || fv.visitSubDirectories) && fv.acceptFiles)?null:new FileFilter() {
-			@Override
-			public boolean accept(File pathname) {
-				return ((fv.acceptDirectories || fv.visitSubDirectories) && pathname.isDirectory()) || (fv.acceptFiles && pathname.isFile());
-			}
-		}))) {
+		for (File f : Objects.requireNonNull(
+				directory.listFiles(
+						((fv.acceptDirectories || fv.visitSubDirectories) && fv.acceptFiles)?
+								null:
+								pathname -> ((fv.acceptDirectories || fv.visitSubDirectories) && pathname.isDirectory()) || (fv.acceptFiles && pathname.isFile())))) {
 			if (fv.acceptFiles && f.isFile())
 				if (!fv.visitFile(f))
 					return false;
