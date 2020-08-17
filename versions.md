@@ -1,6 +1,6 @@
 Utils
 =====
-5.5.9 Stable (Build: 1932) (from 17/08/2020 to 17/08/2020)
+5.5.10 Stable (Build: 1944) (from 17/08/2020 to 17/08/2020)
 
 # Creator(s):
 Jason MAHDJOUB
@@ -11,8 +11,9 @@ Jason MAHDJOUB (Entred in the team at 04/01/2016)
 # Modifications:
 
 
-### 5.5.9 Stable (17/08/2020)
+### 5.5.10 Stable (17/08/2020)
 * Remove dependency common-codecs
+* Fix GitHub codeQL alerts
 
 
 ### 5.5.8 Stable (16/07/2020)
