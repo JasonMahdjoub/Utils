@@ -36,11 +36,11 @@ package com.distrimind.util.crypto;
 
 import java.io.IOException;
 import java.security.*;
+import java.util.Base64;
 
 import com.distrimind.util.Bits;
 import com.distrimind.util.io.Integrity;
 import com.distrimind.util.io.MessageExternalizationException;
-import org.apache.commons.codec.binary.Base64;
 import com.distrimind.bcfips.crypto.InvalidWrappingException;
 import com.distrimind.bcfips.crypto.PlainInputProcessingException;
 
@@ -112,11 +112,11 @@ public enum SymmetricKeyWrapperType {
 
 	}
 	public String wrapKeyString(PasswordHashType passwordHashType, String password, SymmetricSecretKey secretKeyToWrap, AbstractSecureRandom random) throws IOException {
-		return Base64.encodeBase64URLSafeString(Bits.getByteArrayWithCheckSum(wrapKey(passwordHashType, password, secretKeyToWrap, random)));
+		return Base64.getUrlEncoder().encodeToString(Bits.getByteArrayWithCheckSum(wrapKey(passwordHashType, password, secretKeyToWrap, random)));
 	}
 
 	public SymmetricSecretKey unwrapKey(PasswordHashType passwordHashType, String password, String encryptedSecretKey) throws IOException {
-		return unwrapKey(passwordHashType, password, Bits.checkByteArrayAndReturnsItWithoutCheckSum(Base64.decodeBase64(encryptedSecretKey)));
+		return unwrapKey(passwordHashType, password, Bits.checkByteArrayAndReturnsItWithoutCheckSum(Base64.getUrlDecoder().decode(encryptedSecretKey)));
 	}
 	public SymmetricSecretKey unwrapKey(PasswordHashType passwordHashType, String password, byte[] encryptedSecretKey) throws IOException {
 		if (encryptedSecretKey==null)
@@ -133,7 +133,7 @@ public enum SymmetricKeyWrapperType {
 
 	public String wrapKeyString(SymmetricSecretKey key, SymmetricSecretKey keyToWrap, AbstractSecureRandom random) throws IOException
 	{
-		return Base64.encodeBase64URLSafeString(Bits.getByteArrayWithCheckSum(wrapKey(key, keyToWrap, random)));
+		return Base64.getUrlEncoder().encodeToString(Bits.getByteArrayWithCheckSum(wrapKey(key, keyToWrap, random)));
 	}
 	public byte[] wrapKey(SymmetricSecretKey key, SymmetricSecretKey keyToWrap, AbstractSecureRandom random) throws IOException
 	{
@@ -177,7 +177,7 @@ public enum SymmetricKeyWrapperType {
 
 
 	public SymmetricSecretKey unwrapKey(SymmetricSecretKey key, String keyToUnwrap) throws IOException {
-		return unwrapKey(key, Bits.checkByteArrayAndReturnsItWithoutCheckSum(Base64.decodeBase64(keyToUnwrap)) );
+		return unwrapKey(key, Bits.checkByteArrayAndReturnsItWithoutCheckSum(Base64.getUrlDecoder().decode(keyToUnwrap)) );
 	}
 	public SymmetricSecretKey unwrapKey(SymmetricSecretKey key, byte[] keyToUnwrap) throws IOException {
 		try {

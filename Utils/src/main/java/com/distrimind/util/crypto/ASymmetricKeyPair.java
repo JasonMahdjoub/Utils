@@ -39,8 +39,8 @@ import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
+import java.util.Base64;
 
-import org.apache.commons.codec.binary.Base64;
 
 import com.distrimind.util.Bits;
 
@@ -59,7 +59,7 @@ public class ASymmetricKeyPair extends AbstractKeyPair<ASymmetricPrivateKey, ASy
 
 
 	public static ASymmetricKeyPair valueOf(String key) throws IllegalArgumentException, IOException {
-		return decode(Bits.checkByteArrayAndReturnsItWithoutCheckSum(Base64.decodeBase64(key)));
+		return decode(Bits.checkByteArrayAndReturnsItWithoutCheckSum(Base64.getUrlDecoder().decode(key)));
 	}
 
 	private ASymmetricPrivateKey privateKey;

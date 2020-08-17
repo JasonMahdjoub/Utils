@@ -59,8 +59,8 @@ public class Utils {
 		Calendar c = Calendar.getInstance();
 		c.set(2016, Calendar.JANUARY, 4);
 		Calendar c2 = Calendar.getInstance();
-		c.set(2020, Calendar.JULY, 16);
-		VERSION = new Version("Utils", "Utils", (short)5, (short)5, (short)8, Version.Type.Stable, (short)0, c.getTime(), c2.getTime());
+		c.set(2020, Calendar.AUGUST, 17);
+		VERSION = new Version("Utils", "Utils", (short)5, (short)5, (short)9, Version.Type.Stable, (short)0, c.getTime(), c2.getTime());
 		try {
 
 			InputStream is = Utils.class.getResourceAsStream("build.txt");
@@ -73,8 +73,14 @@ public class Utils {
 			VERSION.addDeveloper(new PersonDeveloper("mahdjoub", "jason", c.getTime()));
 
 			c = Calendar.getInstance();
+			c.set(2020, Calendar.AUGUST, 17);
+			Description d = new Description((short)5, (short)5, (short)9, Version.Type.Stable, (short)0, c.getTime());
+			d.addItem("Remove dependency common-codecs");
+			VERSION.addDescription(d);
+
+			c = Calendar.getInstance();
 			c.set(2020, Calendar.JULY, 16);
-			Description d = new Description((short)5, (short)5, (short)8, Version.Type.Stable, (short)0, c.getTime());
+			d = new Description((short)5, (short)5, (short)8, Version.Type.Stable, (short)0, c.getTime());
 			d.addItem("Fix issue with associated data used into EncryptionSignatureHashEncoder");
 			VERSION.addDescription(d);
 
@@ -952,62 +958,59 @@ public class Utils {
 				processesToFlush.add(p);
 				if (thread==null) {
 
-					thread = new Thread(new Runnable() {
-						@Override
-						public void run() {
+					thread = new Thread(() -> {
 
 
-							while(true) {
-								List<Process> processes;
-								synchronized (processesToFlush) {
-									if (processesToFlush.isEmpty()) {
-										try {
-											processesToFlush.wait(10000);
-										} catch (InterruptedException e) {
-											e.printStackTrace();
-										}
-
-									}
-									if (processesToFlush.isEmpty()) {
-
-										thread=null;
-										return;
-									}
-									else
-										processes=new ArrayList<>(processesToFlush);
-								}
-								for (Process p : processes) {
-									try (InputStream is = p.getInputStream(); InputStream es = p.getErrorStream()) {
-										boolean inClosed = false, outClosed = false;
-
-
-										try {
-											int c = is.read();
-											while (c != -1) {
-												c = is.read();
-											}
-										} catch (IOException ignored) {
-											/*if (!e.getMessage().equalsIgnoreCase("Stream Closed"))
-												e.printStackTrace();*/
-											inClosed = true;
-										}
-										try {
-											int c = es.read();
-											while (c != -1)
-												c = es.read();
-										} catch (IOException ignored) {
-											/*if (!e.getMessage().equalsIgnoreCase("Stream closed"))
-												e.printStackTrace();*/
-											outClosed = true;
-										}
-										if (inClosed && outClosed) {
-											synchronized (processesToFlush) {
-												processesToFlush.remove(p);
-											}
-										}
-									} catch (IOException e) {
+						while(true) {
+							List<Process> processes;
+							synchronized (processesToFlush) {
+								if (processesToFlush.isEmpty()) {
+									try {
+										processesToFlush.wait(10000);
+									} catch (InterruptedException e) {
 										e.printStackTrace();
 									}
+
+								}
+								if (processesToFlush.isEmpty()) {
+
+									thread=null;
+									return;
+								}
+								else
+									processes=new ArrayList<>(processesToFlush);
+							}
+							for (Process p1 : processes) {
+								try (InputStream is = p1.getInputStream(); InputStream es = p1.getErrorStream()) {
+									boolean inClosed = false, outClosed = false;
+
+
+									try {
+										int c = is.read();
+										while (c != -1) {
+											c = is.read();
+										}
+									} catch (IOException ignored1) {
+										/*if (!e.getMessage().equalsIgnoreCase("Stream Closed"))
+											e.printStackTrace();*/
+										inClosed = true;
+									}
+									try {
+										int c = es.read();
+										while (c != -1)
+											c = es.read();
+									} catch (IOException ignored1) {
+										/*if (!e.getMessage().equalsIgnoreCase("Stream closed"))
+											e.printStackTrace();*/
+										outClosed = true;
+									}
+									if (inClosed && outClosed) {
+										synchronized (processesToFlush) {
+											processesToFlush.remove(p1);
+										}
+									}
+								} catch (IOException e) {
+									e.printStackTrace();
 								}
 							}
 						}

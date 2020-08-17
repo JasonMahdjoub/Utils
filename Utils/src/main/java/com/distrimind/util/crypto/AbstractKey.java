@@ -37,10 +37,10 @@ package com.distrimind.util.crypto;
 
 import com.distrimind.util.Bits;
 import com.distrimind.util.DecentralizedValue;
-import org.apache.commons.codec.binary.Base64;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Base64;
 
 /**
  * 
@@ -288,7 +288,7 @@ public abstract class AbstractKey extends DecentralizedValue implements IKey{
 	public static AbstractKey valueOf(String key) throws IllegalArgumentException, IOException {
 		if (key==null)
 			throw new NullPointerException();
-		return decode(Bits.checkByteArrayAndReturnsItWithoutCheckSum(Base64.decodeBase64(key)));
+		return decode(Bits.checkByteArrayAndReturnsItWithoutCheckSum(Base64.getUrlDecoder().decode(key)));
 	}
 
 

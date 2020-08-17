@@ -36,7 +36,6 @@ package com.distrimind.util.crypto;
 
 import com.distrimind.util.io.Integrity;
 import com.distrimind.util.io.MessageExternalizationException;
-import org.apache.commons.codec.binary.Base64;
 import com.distrimind.bouncycastle.crypto.CryptoException;
 import com.distrimind.bouncycastle.crypto.agreement.jpake.*;
 import com.distrimind.bouncycastle.crypto.digests.SHA512Digest;
@@ -47,6 +46,7 @@ import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.util.Arrays;
+import java.util.Base64;
 
 /**
  * 
@@ -94,7 +94,7 @@ public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
 	
 	private String getParticipantIDString(byte[] participantID)
 	{
-		return Base64.encodeBase64URLSafeString(participantID);
+		return Base64.getUrlEncoder().encodeToString(participantID);
 	}
 	
 	P2PJPAKESecretMessageExchanger(AbstractSecureRandom secureRandom, byte[] participantID, char[] message, byte[] salt, int offset_salt,

@@ -36,10 +36,10 @@ package com.distrimind.util;
 
 import com.distrimind.util.crypto.AbstractKey;
 import com.distrimind.util.crypto.AbstractKeyPair;
-import org.apache.commons.codec.binary.Base64;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.Base64;
 
 /**
  * @author Jason Mahdjoub
@@ -73,7 +73,7 @@ public abstract class DecentralizedValue implements Serializable {
 	}
 
 	public final String encodeString() {
-		return Base64.encodeBase64URLSafeString(Bits.getByteArrayWithCheckSum(encode()));
+		return Base64.getUrlEncoder().encodeToString(Bits.getByteArrayWithCheckSum(encode()));
 	}
 
 	@Override
@@ -85,7 +85,7 @@ public abstract class DecentralizedValue implements Serializable {
 	public static DecentralizedValue valueOf(String key) throws IllegalArgumentException, IOException {
 		if (key==null)
 			throw new NullPointerException();
-		return decode(Bits.checkByteArrayAndReturnsItWithoutCheckSum(Base64.decodeBase64(key)));
+		return decode(Bits.checkByteArrayAndReturnsItWithoutCheckSum(Base64.getUrlDecoder().decode(key)));
 	}
 
 }

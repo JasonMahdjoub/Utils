@@ -50,7 +50,6 @@ import java.util.regex.Pattern;
 import javax.lang.model.SourceVersion;
 
 import com.distrimind.util.*;
-import org.apache.commons.codec.binary.Base64;
 
 
 
@@ -159,7 +158,7 @@ public class DefaultMultiFormatObjectParser extends AbstractMultiFormatObjectPar
 	public String convertObjectToString(Class<?> field_type, Object object)  {
 		if (field_type == byte[].class) {
 			
-			return Base64.encodeBase64URLSafeString((byte[]) object);
+			return Base64.getUrlEncoder().encodeToString((byte[]) object);
 		} else if (field_type == char[].class) {
 			return new String((char[]) object);
 		} else if (field_type == int[].class) {
@@ -170,7 +169,7 @@ public class DefaultMultiFormatObjectParser extends AbstractMultiFormatObjectPar
 			byte[] btab = new byte[tab.length * s];
 			for (int i = 0; i < tab.length; i++)
 				Bits.putInt(btab, i * s, tab[i]);
-			return Base64.encodeBase64URLSafeString(btab);
+			return Base64.getUrlEncoder().encodeToString(btab);
 		} else if (field_type == short[].class) {
 			if (object == null)
 				return null;
@@ -179,7 +178,7 @@ public class DefaultMultiFormatObjectParser extends AbstractMultiFormatObjectPar
 			byte[] btab = new byte[tab.length * s];
 			for (int i = 0; i < tab.length; i++)
 				Bits.putShort(btab, i * s, tab[i]);
-			return Base64.encodeBase64URLSafeString(btab);
+			return Base64.getUrlEncoder().encodeToString(btab);
 		} else if (field_type == float[].class) {
 			if (object == null)
 				return null;
@@ -188,7 +187,7 @@ public class DefaultMultiFormatObjectParser extends AbstractMultiFormatObjectPar
 			byte[] btab = new byte[tab.length * s];
 			for (int i = 0; i < tab.length; i++)
 				Bits.putFloat(btab, i * s, tab[i]);
-			return Base64.encodeBase64URLSafeString(btab);
+			return Base64.getUrlEncoder().encodeToString(btab);
 		} else if (field_type == double[].class) {
 			if (object == null)
 				return null;
@@ -197,7 +196,7 @@ public class DefaultMultiFormatObjectParser extends AbstractMultiFormatObjectPar
 			byte[] btab = new byte[tab.length * s];
 			for (int i = 0; i < tab.length; i++)
 				Bits.putDouble(btab, i * s, tab[i]);
-			return Base64.encodeBase64URLSafeString(btab);
+			return Base64.getUrlEncoder().encodeToString(btab);
 		} else if (field_type == long[].class) {
 			if (object == null)
 				return null;
@@ -206,7 +205,7 @@ public class DefaultMultiFormatObjectParser extends AbstractMultiFormatObjectPar
 			byte[] btab = new byte[tab.length * s];
 			for (int i = 0; i < tab.length; i++)
 				Bits.putLong(btab, i * s, tab[i]);
-			return Base64.encodeBase64URLSafeString(btab);
+			return Base64.getUrlEncoder().encodeToString(btab);
 		} else if (field_type == boolean[].class) {
 			if (object == null)
 				return null;
@@ -214,7 +213,7 @@ public class DefaultMultiFormatObjectParser extends AbstractMultiFormatObjectPar
 			byte[] btab = new byte[tab.length];
 			for (int i = 0; i < tab.length; i++)
 				btab[i] = tab[i] ? (byte) 1 : (byte) 0;
-			return Base64.encodeBase64URLSafeString(btab);
+			return Base64.getUrlEncoder().encodeToString(btab);
 		} else if (field_type == Boolean.class) {
 			return object.toString();
 		} else if (field_type == Byte.class) {
@@ -285,11 +284,11 @@ public class DefaultMultiFormatObjectParser extends AbstractMultiFormatObjectPar
 			return null;
 		nodeValue = nodeValue.trim();
 		if (field_type == byte[].class) {
-			return Base64.decodeBase64(nodeValue);
+			return Base64.getUrlDecoder().decode(nodeValue);
 		} else if (field_type == char[].class) {
 			return nodeValue.toCharArray();
 		} else if (field_type == int[].class) {
-			byte[] btab = Base64.decodeBase64(nodeValue);
+			byte[] btab = Base64.getUrlDecoder().decode(nodeValue);
 			int s = Integer.SIZE / 8;
 			if (btab.length % s != 0)
 				throw new PropertiesParseException("Invalid tab data");
@@ -298,7 +297,7 @@ public class DefaultMultiFormatObjectParser extends AbstractMultiFormatObjectPar
 				tab[i] = Bits.getInt(btab, i * s);
 			return tab;
 		} else if (field_type == float[].class) {
-			byte[] btab = Base64.decodeBase64(nodeValue);
+			byte[] btab = Base64.getUrlDecoder().decode(nodeValue);
 			int s = Float.SIZE / 8;
 			if (btab.length % s != 0)
 				throw new PropertiesParseException("Invalid tab data");
@@ -307,7 +306,7 @@ public class DefaultMultiFormatObjectParser extends AbstractMultiFormatObjectPar
 				tab[i] = Bits.getFloat(btab, i * s);
 			return tab;
 		} else if (field_type == double[].class) {
-			byte[] btab = Base64.decodeBase64(nodeValue);
+			byte[] btab = Base64.getUrlDecoder().decode(nodeValue);
 			int s = Double.SIZE / 8;
 			if (btab.length % s != 0)
 				throw new PropertiesParseException("Invalid tab data");
@@ -316,7 +315,7 @@ public class DefaultMultiFormatObjectParser extends AbstractMultiFormatObjectPar
 				tab[i] = Bits.getDouble(btab, i * s);
 			return tab;
 		} else if (field_type == short[].class) {
-			byte[] btab = Base64.decodeBase64(nodeValue);
+			byte[] btab = Base64.getUrlDecoder().decode(nodeValue);
 			int s = Short.SIZE / 8;
 			if (btab.length % s != 0)
 				throw new PropertiesParseException("Invalid tab data");
@@ -325,7 +324,7 @@ public class DefaultMultiFormatObjectParser extends AbstractMultiFormatObjectPar
 				tab[i] = Bits.getShort(btab, i * s);
 			return tab;
 		} else if (field_type == long[].class) {
-			byte[] btab = Base64.decodeBase64(nodeValue);
+			byte[] btab = Base64.getUrlDecoder().decode(nodeValue);
 			int s = Long.SIZE / 8;
 			if (btab.length % s != 0)
 				throw new PropertiesParseException("Invalid tab data");
@@ -334,7 +333,7 @@ public class DefaultMultiFormatObjectParser extends AbstractMultiFormatObjectPar
 				tab[i] = Bits.getLong(btab, i * s);
 			return tab;
 		} else if (field_type == boolean[].class) {
-			byte[] btab = Base64.decodeBase64(nodeValue);
+			byte[] btab = Base64.getUrlDecoder().decode(nodeValue);
 			boolean[] tab = new boolean[btab.length];
 			for (int i = 0; i < tab.length; i++)
 				tab[i] = btab[i] != 0;
