@@ -35,15 +35,14 @@ The fact that you are presently reading this means that you have had
 knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-import org.apache.commons.codec.binary.Base64;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
-import java.security.*;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.InvalidParameterSpecException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.util.Base64;
 import java.util.Random;
 
 /**
@@ -54,8 +53,8 @@ import java.util.Random;
 public class TestsForSymmetricSignatures {
 	@Test(dataProvider = "provideDataForSymmetricSignatureTest")
 	public void testSymmetricSignatures(SymmetricAuthentifiedSignatureType type, SymmetricSecretKey secretKey)
-			throws NoSuchAlgorithmException, InvalidKeyException, SignatureException, InvalidKeySpecException,
-			NoSuchProviderException, IllegalStateException, InvalidAlgorithmParameterException, InvalidParameterSpecException, IOException {
+			throws NoSuchAlgorithmException,
+			NoSuchProviderException, IllegalStateException, IOException {
 		System.out.println("Testing symmetric signature : " + secretKey.getAuthenticatedSignatureAlgorithmType());
 		SymmetricAuthenticatedSignerAlgorithm signer = new SymmetricAuthenticatedSignerAlgorithm(secretKey);
 		SymmetricAuthenticatedSignatureCheckerAlgorithm checker = new SymmetricAuthenticatedSignatureCheckerAlgorithm(secretKey);
@@ -69,8 +68,8 @@ public class TestsForSymmetricSignatures {
 		SymmetricSecretKey key1=signatureType.getKeyGenerator(SecureRandomType.DEFAULT.getSingleton(null), signatureType.getDefaultKeySizeBits()).generateKey();
 
 		Assert.assertEquals(key1.getKeySizeBits(), signatureType.getDefaultKeySizeBits());
-		System.out.println("Key encryption : \n\t"+ Base64.encodeBase64URLSafeString(key1.getKeyBytes()));
-		System.out.println("Key encryption (complete): \n\t"+ Base64.encodeBase64URLSafeString(key1.encode()));
+		System.out.println("Key encryption : \n\t"+ Base64.getUrlEncoder().encodeToString(key1.getKeyBytes()));
+		System.out.println("Key encryption (complete): \n\t"+ Base64.getUrlEncoder().encodeToString(key1.encode()));
 		Assert.assertEquals(key1.getKeyBytes().length, signatureType.getDefaultKeySizeBytes());
 	}
 
@@ -113,7 +112,7 @@ public class TestsForSymmetricSignatures {
 		Assert.assertEquals(sk.getAuthenticatedSignatureAlgorithmType(), sk2.getAuthenticatedSignatureAlgorithmType());
 		Assert.assertEquals(sk.getEncryptionAlgorithmType(), sk2.getEncryptionAlgorithmType());
 
-		Assert.assertEquals(sk.getKeyBytes(), sk2.getKeyBytes(), sk+" , "+sk2+" , "+Base64.encodeBase64URLSafeString(wrappedKey));
+		Assert.assertEquals(sk.getKeyBytes(), sk2.getKeyBytes(), sk+" , "+sk2+" , "+Base64.getUrlEncoder().encodeToString(wrappedKey));
 		Assert.assertEquals(sk.toJavaNativeKey().getEncoded(), sk2.toJavaNativeKey().getEncoded());
 		Assert.assertEquals(sk.toBouncyCastleKey().getKeyBytes(), sk2.toBouncyCastleKey().getKeyBytes());
 	}

@@ -38,8 +38,6 @@ knowledge of the CeCILL-C license and that you accept its terms.
 import com.distrimind.util.DecentralizedValue;
 import com.distrimind.util.io.RandomByteArrayInputStream;
 import com.distrimind.util.io.RandomInputStream;
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.codec.binary.Hex;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -47,6 +45,7 @@ import org.testng.annotations.Test;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
+import java.util.Base64;
 import java.util.Random;
 
 /**
@@ -236,8 +235,8 @@ public class TestsForSymmetricEncryption {
 		SymmetricSecretKey key1=encryptionType.getKeyGenerator(SecureRandomType.DEFAULT.getSingleton(null), encryptionType.getDefaultKeySizeBits()).generateKey();
 
 		Assert.assertEquals(key1.getKeySizeBits(), encryptionType.getDefaultKeySizeBits());
-		System.out.println("Key encryption : \n\t"+ Base64.encodeBase64URLSafeString(key1.getKeyBytes()));
-		System.out.println("Key encryption (complete): \n\t"+ Base64.encodeBase64URLSafeString(key1.encode()));
+		System.out.println("Key encryption : \n\t"+ Base64.getUrlEncoder().encodeToString(key1.getKeyBytes()));
+		System.out.println("Key encryption (complete): \n\t"+ Base64.getUrlEncoder().encodeToString(key1.encode()));
 		Assert.assertEquals(key1.getKeyBytes().length, encryptionType.getDefaultKeySizeBytes());
 	}
 
@@ -247,7 +246,7 @@ public class TestsForSymmetricEncryption {
 		PasswordHashType passwordHashType=PasswordHashType.BC_SCRYPT_FOR_DATAENCRYPTION;
 		byte[] encryptedSecretKey=keyWrapperType.wrapKey(passwordHashType, password, secretKey, SecureRandomType.DEFAULT.getSingleton(null));
 		System.out.println("Bytes tab length : "+encryptedSecretKey.length);
-		System.out.println(Hex.encodeHexString(encryptedSecretKey));
+		System.out.println(Base64.getUrlEncoder().encodeToString(encryptedSecretKey));
 		SymmetricSecretKey decodedSecretKey=keyWrapperType.unwrapKey(passwordHashType, password, encryptedSecretKey);
 		Assert.assertEquals(decodedSecretKey, secretKey);
 
