@@ -417,10 +417,11 @@ public final class FileTools {
 			byte[] data = new byte[BUFFER_SIZE];
 			while ((entry = zis.getNextEntry()) != null) {
 				String entryName=entry.getName();
+				if (entryName.contains(".."))
+					continue;
 				if (!matchString(entryName, regex_exclude, regex_include))
 					continue;
-				if (entryName.contains("."))
-					continue;
+
 				if (entry.isDirectory()) {
 					checkFolderRecursive(new File(_directory_dst, entryName));
 				} else {
@@ -443,6 +444,11 @@ public final class FileTools {
 
 	}
 
+	public static void main(String [] args) throws IOException {
+		File dir=new File("/home/jason/Téléchargements_desync/gradle-6.6-bin");
+		dir.mkdir();
+		unzipFile(new File("/home/jason/Téléchargements_desync/gradle-6.6-bin.zip"), dir);
+	}
 	/**
 	 * Zip a directory and its content into a ZIP/JAR file
 	 * 
