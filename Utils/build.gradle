@@ -264,8 +264,12 @@ publishing {
 }
 signing {
     useGpgCmd()
-    sign configurations.archives
-    sign publishing.publications.mavenJava
+    required {!project.hasProperty('disableSigning')}
+    if (required) {
+        sign configurations.archives
+        sign publishing.publications.mavenJava
+    }
+
 }
 
 javadoc {
