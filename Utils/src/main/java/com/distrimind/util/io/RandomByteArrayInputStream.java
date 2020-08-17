@@ -155,7 +155,8 @@ public class RandomByteArrayInputStream extends RandomInputStream {
 			throw new IOException("The current RandomByteArrayInputStream is closed !");
 
 		long skipped = Math.min(getFreeSpace(), _nb);
-		current_pos += skipped;
+
+		current_pos += (int)skipped;
 		return skipped;
 	}
 

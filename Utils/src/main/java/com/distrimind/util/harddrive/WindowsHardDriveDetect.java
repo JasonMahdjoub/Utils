@@ -76,7 +76,7 @@ class WindowsHardDriveDetect extends HardDriveDetect {
         HashMap<String, Disk> disksMap=new HashMap<>();
         HashMap<String, Partition> partitionsMap=new HashMap<>();
         File sfile=getScriptFile();
-        Process p = Runtime.getRuntime().exec("cscript //NoLogo " + sfile.getPath());
+        Process p = Runtime.getRuntime().exec(new String[]{"cscript //NoLogo",sfile.getPath()});
 
         try (InputStreamReader isr = new InputStreamReader(p.getInputStream())) {
             try (BufferedReader input = new BufferedReader(isr)) {

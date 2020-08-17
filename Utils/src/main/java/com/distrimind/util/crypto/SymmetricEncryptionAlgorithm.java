@@ -175,7 +175,7 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 					ssp2.add(p);
 				else
 				{
-					long siv=round2 * maxEncryptedPartLength;
+					long siv=(long)round2 * (long)maxEncryptedPartLength;
 					ssp2.add(new SubStreamParameter(p.getStreamStartIncluded(), siv));
 					ssp2.add(new SubStreamParameter(siv, p.getStreamEndExcluded()));
 				}
@@ -185,7 +185,7 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 				long start = p.getStreamStartIncluded();
 				long end = p.getStreamEndExcluded();
 				int round = (int) (start / maxEncryptedPartLength);
-				long startIV = round * maxEncryptedPartLength;
+				long startIV = (long)round * (long)maxEncryptedPartLength;
 				long endIV = startIV + ivSizeWithoutExternalCounter;
 				if (start<endIV) {
 					md.update(ivs[round], (int)(start-startIV), (int) Math.min(end - start, endIV-start));

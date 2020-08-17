@@ -194,7 +194,7 @@ class LinuxHardDriveDetect extends UnixHardDriveDetect {
     private String getCorrespondance(String searchPath, String nodeShort) throws IOException {
         String path="../../"+nodeShort;
 
-        Process p = Runtime.getRuntime().exec("ls -g -o --time-style=+ "+searchPath);
+        Process p = Runtime.getRuntime().exec(new String[]{"ls","-g","-o","--time-style=+",searchPath});
         try (InputStreamReader isr = new InputStreamReader(p.getInputStream())) {
             try (BufferedReader br = new BufferedReader(isr)) {
                 String line;

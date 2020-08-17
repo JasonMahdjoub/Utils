@@ -72,27 +72,11 @@ public final class Timer {
 	}
 
 	public double getDeltaMilid() {
-		if (m_stoped)
-			return 0.0f;
-		float res;
-		if (m_paused)
-			res = m_previous_pause_time - m_previous_time;
-		else
-			res = System.currentTimeMillis() - m_previous_time;
-		m_previous_time += res;
-		return res;
+		return (double)getDeltaMili();
 	}
 
 	public float getDeltaMilif() {
-		if (m_stoped)
-			return 0.0f;
-		float res;
-		if (m_paused)
-			res = m_previous_pause_time - m_previous_time;
-		else
-			res = System.currentTimeMillis() - m_previous_time;
-		m_previous_time += res;
-		return res;
+		return (float)getDeltaMili();
 	}
 
 	public long getMili() {
@@ -105,21 +89,11 @@ public final class Timer {
 	}
 
 	public double getMilid() {
-		if (m_stoped)
-			return 0;
-		if (m_paused)
-			return m_previous_pause_time - m_previous_time;
-		else
-			return System.currentTimeMillis() - m_previous_time;
+		return (double)getMili();
 	}
 
 	public float getMilif() {
-		if (m_stoped)
-			return 0;
-		if (m_paused)
-			return m_previous_pause_time - m_previous_time;
-		else
-			return System.currentTimeMillis() - m_previous_time;
+		return (float)getMili();
 	}
 
 	public boolean isPaused() {

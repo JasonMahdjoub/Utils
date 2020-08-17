@@ -62,8 +62,22 @@ class WindowsTraceRoute extends TraceRoute {
 			ArrayList<InetAddress> res = new ArrayList<>();
 			if (depth > 0)
 				++depth;
-			Process p = Runtime.getRuntime().exec("tracert -d " + (depth < 0 ? "" : ("-h " + depth + " "))
-					+ (time_out_ms < 0 ? "" : ("-w " + (time_out_ms) + " ")) + _ia.getHostAddress());
+			int s=3;
+			if (depth >= 0)
+				++s;
+			if (time_out_ms>=0)
+				++s;
+			String[] cmd=new String[s];
+			int i=0;
+			cmd[i++]="tracert";
+			cmd[i++]="-d";
+			if (depth >= 0)
+				cmd[i++]="-h " + depth;
+			if (time_out_ms >= 0)
+				cmd[i++]="-w " + (time_out_ms);
+			cmd[i]=_ia.getHostAddress();
+
+			Process p = Runtime.getRuntime().exec(cmd);
 
 			try (InputStreamReader isr = new InputStreamReader(p.getInputStream())) {
 				try (BufferedReader input = new BufferedReader(isr)) {

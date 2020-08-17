@@ -226,7 +226,7 @@ public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOu
 			int nbIv = (int)((l / maxEncryptedPartLength) + (l % maxEncryptedPartLength > 0 ? 1 : 0));
 			byte[][] res = new byte[nbIv][];
 			for (int i = 0; i < nbIv; i++) {
-				is.seek(i * maxEncryptedPartLength+headLengthBytes);
+				is.seek((long)i * (long)maxEncryptedPartLength+(long)headLengthBytes);
 				res[i] = new byte[getIVSizeBytesWithoutExternalCounter()];
 				is.readFully(res[i]);
 			}

@@ -69,9 +69,19 @@ class LinuxTraceRoute extends TraceRoute {
 	public List<InetAddress> tracePath(InetAddress _ia, int depth, int time_out_ms) {
 		try {
 			ArrayList<InetAddress> res = new ArrayList<>();
+			int s=4;
+			if (time_out_ms >= 0)
+				++s;
+			String[] cmd=new String[s];
+			int i=0;
+			cmd[i++]="mtr";
+			cmd[i++]="--raw";
+			cmd[i++]="-c 1";
 
-			Process p = Runtime.getRuntime().exec("mtr --raw -c 1 "
-					+ (time_out_ms < 0 ? "" : ("--timeout " + time_out_ms / 1000 + " ")) + _ia.getHostAddress());
+			if (time_out_ms >= 0)
+				cmd[i++]="--timeout " + time_out_ms / 1000;
+			cmd[i]=_ia.getHostAddress();
+			Process p = Runtime.getRuntime().exec(cmd);
 
 			try (InputStreamReader isr = new InputStreamReader(p.getInputStream())) {
 				try (BufferedReader input = new BufferedReader(isr)) {

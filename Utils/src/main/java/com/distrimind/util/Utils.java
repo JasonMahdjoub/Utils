@@ -60,7 +60,7 @@ public class Utils {
 		c.set(2016, Calendar.JANUARY, 4);
 		Calendar c2 = Calendar.getInstance();
 		c.set(2020, Calendar.AUGUST, 17);
-		VERSION = new Version("Utils", "Utils", (short)5, (short)5, (short)9, Version.Type.Stable, (short)0, c.getTime(), c2.getTime());
+		VERSION = new Version("Utils", "Utils", (short)5, (short)5, (short)10, Version.Type.Stable, (short)0, c.getTime(), c2.getTime());
 		try {
 
 			InputStream is = Utils.class.getResourceAsStream("build.txt");
@@ -74,8 +74,9 @@ public class Utils {
 
 			c = Calendar.getInstance();
 			c.set(2020, Calendar.AUGUST, 17);
-			Description d = new Description((short)5, (short)5, (short)9, Version.Type.Stable, (short)0, c.getTime());
+			Description d = new Description((short)5, (short)5, (short)10, Version.Type.Stable, (short)0, c.getTime());
 			d.addItem("Remove dependency common-codecs");
+			d.addItem("Fix GitHub codeQL alerts");
 			VERSION.addDescription(d);
 
 			c = Calendar.getInstance();

@@ -134,7 +134,7 @@ class MacOSHardDriveDetect extends UnixHardDriveDetect {
 				Utils.flushAndDestroyProcess(p);
 			}
 			for (String partitionIdentifier : partitionIdentifiers) {
-				Process p2 = Runtime.getRuntime().exec("diskutil info -plist " + partitionIdentifier);
+				Process p2 = Runtime.getRuntime().exec(new String[]{"diskutil", "info", "-plist",partitionIdentifier});
 				try {
 
 					Document d = MultiFormatProperties.getDOM(p2.getInputStream());

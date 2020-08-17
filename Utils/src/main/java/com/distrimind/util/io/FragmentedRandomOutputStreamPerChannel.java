@@ -105,7 +105,7 @@ public class FragmentedRandomOutputStreamPerChannel extends RandomOutputStream{
 		if (len==0)
 			return;
 		long p;
-		long s=(p=out.currentPosition()+offsetToApply)+1+params.getStreamPartNumbers()*(len-1);
+		long s=(p=out.currentPosition()+offsetToApply)+1L+((long)params.getStreamPartNumbers())*(long)(len-1);
 		out.ensureLength(s);
 		int end=off+len;
 		for (int i = off ; i < end ; i++) {

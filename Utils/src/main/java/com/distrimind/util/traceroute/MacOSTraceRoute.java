@@ -70,8 +70,23 @@ class MacOSTraceRoute extends TraceRoute {
 			ArrayList<InetAddress> res = new ArrayList<>();
 			if (depth > 0)
 				++depth;
-			Process p = Runtime.getRuntime().exec("traceroute -n -I " + (depth < 0 ? "" : ("-m " + depth + " "))
-					+ (time_out < 0 ? "" : ("-w " + (time_out / 1000) + " ")) + _ia.getHostAddress());
+			int s=4;
+			if (depth >= 0)
+				++s;
+			if (time_out>=0)
+				++s;
+			String[] cmd=new String[s];
+			int i=0;
+			cmd[i++]="traceroute";
+			cmd[i++]="-n";
+			cmd[i++]="-I";
+			if (depth >= 0)
+				cmd[i++]="-m " + depth;
+			if (time_out >= 0)
+				cmd[i++]="-w " + (time_out / 1000);
+			cmd[i]=_ia.getHostAddress();
+
+			Process p = Runtime.getRuntime().exec(cmd);
 
 			try (InputStreamReader isr = new InputStreamReader(p.getInputStream())) {
 				try (BufferedReader input = new BufferedReader(isr)) {
@@ -81,7 +96,7 @@ class MacOSTraceRoute extends TraceRoute {
 					while ((line = input.readLine()) != null) {
 						String[] split = line.split(" ");
 						String first_string = null;
-						int i = 0;
+						i = 0;
 						for (; i < split.length; i++) {
 							if (split[i].length() > 0) {
 								first_string = split[i];

@@ -60,7 +60,7 @@ class MacOSXNITools extends NITools {
 		try {
 			if (_network_interface.isLoopback())
 				return Long.MAX_VALUE;
-			Process p = Runtime.getRuntime().exec("ifconfig " + _network_interface.getName());
+			Process p = Runtime.getRuntime().exec(new String[]{"ifconfig", _network_interface.getName()});
 			long res = -1;
 			try (InputStreamReader isr = new InputStreamReader(p.getInputStream())) {
 				try (BufferedReader input = new BufferedReader(isr)) {
