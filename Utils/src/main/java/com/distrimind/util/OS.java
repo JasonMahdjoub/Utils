@@ -160,7 +160,7 @@ public enum OS {
 		{
 			try
 			{
-				Process p=Runtime.getRuntime().exec(getJVMLocation()+" -XX:+PrintFlagsFinal -version");
+				Process p=Runtime.getRuntime().exec(new String[]{getJVMLocation(), "-XX:+PrintFlagsFinal", "-version"});
 				
 				try(InputStream is=p.getInputStream();InputStreamReader isr=new InputStreamReader(is); BufferedReader br=new BufferedReader(isr))
 				{
