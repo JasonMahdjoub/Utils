@@ -444,11 +444,6 @@ public final class FileTools {
 
 	}
 
-	public static void main(String [] args) throws IOException {
-		File dir=new File("/home/jason/Téléchargements_desync/gradle-6.6-bin");
-		dir.mkdir();
-		unzipFile(new File("/home/jason/Téléchargements_desync/gradle-6.6-bin.zip"), dir);
-	}
 	/**
 	 * Zip a directory and its content into a ZIP/JAR file
 	 * 
