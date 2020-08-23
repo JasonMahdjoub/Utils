@@ -59,8 +59,8 @@ public class Utils {
 		Calendar c = Calendar.getInstance();
 		c.set(2016, Calendar.JANUARY, 4);
 		Calendar c2 = Calendar.getInstance();
-		c.set(2020, Calendar.AUGUST, 17);
-		VERSION = new Version("Utils", "Utils", (short)5, (short)5, (short)10, Version.Type.Stable, (short)0, c.getTime(), c2.getTime());
+		c.set(2020, Calendar.AUGUST, 23);
+		VERSION = new Version("Utils", "Utils", (short)5, (short)5, (short)11, Version.Type.Stable, (short)0, c.getTime(), c2.getTime());
 		try {
 
 			InputStream is = Utils.class.getResourceAsStream("build.txt");
@@ -73,8 +73,14 @@ public class Utils {
 			VERSION.addDeveloper(new PersonDeveloper("mahdjoub", "jason", c.getTime()));
 
 			c = Calendar.getInstance();
+			c.set(2020, Calendar.AUGUST, 23);
+			Description d = new Description((short)5, (short)5, (short)11, Version.Type.Stable, (short)0, c.getTime());
+			d.addItem("Fix issue with instantiation of default random secure random");
+			VERSION.addDescription(d);
+
+			c = Calendar.getInstance();
 			c.set(2020, Calendar.AUGUST, 17);
-			Description d = new Description((short)5, (short)5, (short)10, Version.Type.Stable, (short)0, c.getTime());
+			d = new Description((short)5, (short)5, (short)10, Version.Type.Stable, (short)0, c.getTime());
 			d.addItem("Remove dependency common-codecs");
 			d.addItem("Fix GitHub codeQL alerts");
 			VERSION.addDescription(d);

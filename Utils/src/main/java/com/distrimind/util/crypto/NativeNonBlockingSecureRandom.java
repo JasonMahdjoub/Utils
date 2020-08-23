@@ -54,7 +54,7 @@ public class NativeNonBlockingSecureRandom extends AbstractSecureRandom {
 
 	private volatile Object secureGnuRandom;
 
-	static class Spi extends AbstractSecureRandomSpi
+	public static class Spi extends AbstractSecureRandomSpi
 	{
 		private static final long serialVersionUID = 3887548046414173231L;
 		private final SecureRandom secureRandom;

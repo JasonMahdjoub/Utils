@@ -59,13 +59,9 @@ class UtilsSecurityProvider extends Provider{
 	UtilsSecurityProvider() {
 		super(providerName, 1.0, "Provider destinated to override default java secure random by a non native blocking secure random.");
 		if (OSVersion.getCurrentOSVersion().getOS()!= OS.ANDROID) {
-			AccessController.doPrivileged(new PrivilegedAction<Void>() {
-
-				@Override
-				public Void run() {
-					put("SecureRandom.DEFAULT", NativeNonBlockingSecureRandom.Spi.class.getName());
-					return null;
-				}
+			AccessController.doPrivileged((PrivilegedAction<Void>) () -> {
+				put("SecureRandom.DEFAULT", NativeNonBlockingSecureRandom.Spi.class.getName());
+				return null;
 			});
 		}
 	}
