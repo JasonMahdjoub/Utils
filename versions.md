@@ -1,6 +1,6 @@
 Utils
 =====
-5.5.10 Stable (Build: 1947) (from 17/08/2020 to 17/08/2020)
+5.5.11 Stable (Build: 1949) (from 23/08/2020 to 24/08/2020)
 
 # Creator(s):
 Jason MAHDJOUB
@@ -9,6 +9,10 @@ Jason MAHDJOUB
 Jason MAHDJOUB (Entred in the team at 04/01/2016)
 
 # Modifications:
+
+
+### 5.5.11 Stable (23/08/2020)
+* Fix issue with instantiation of default random secure random
 
 
 ### 5.5.10 Stable (17/08/2020)
