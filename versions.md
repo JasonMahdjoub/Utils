@@ -1,14 +1,19 @@
 Utils
 =====
-5.5.11 Stable (Build: 1957) (from 23/08/2020 to 23/09/2020)
+5.5.12 Stable (Build: 1967) (from 20/10/2020 to 20/10/2020)
 
 # Creator(s):
 Jason MAHDJOUB
 
 # Developer(s):
-Jason MAHDJOUB (Entred in the team at 04/01/2016)
+Jason MAHDJOUB (Entered in the team at 04/01/2016)
 
 # Modifications:
+
+
+### 5.5.12 Stable (20/10/2020)
+* Typography corrections
+* Update Snake YML to 1.27
 
 
 ### 5.5.11 Stable (23/08/2020)
@@ -186,7 +191,7 @@ Jason MAHDJOUB (Entred in the team at 04/01/2016)
 * Add BufferedRandomInputStream abd BufferedRandomOutputStream.
 * Pre-allocate bytes arrays with random byte array streams.
 * Gnu library dependency is now optional. It is possible to compile without it.
-* DecentralizedID and encryptions keys have a common abstract class : DecentralizedValue.
+* DecentralizedID and encryption keys have a common abstract class : DecentralizedValue.
 
 
 ### 3.29.1 Stable (26/05/2019)
@@ -231,8 +236,8 @@ Jason MAHDJOUB (Entred in the team at 04/01/2016)
 
 
 ### 3.24.0 Stable (17/12/2018)
-* Add P2PLopinKeyAgreementType.ASYMMETRIC_SECRET_MESSAGE_EXCHANGER
-* Add P2PLopinKeyAgreementType.ASYMMETRIC_SECRET_MESSAGE_EXCHANGER_AND_AGREEMENT_WITH_SYMMETRIC_SIGNATURE
+* Add P2PLoginKeyAgreementType.ASYMMETRIC_SECRET_MESSAGE_EXCHANGER
+* Add P2PLoginKeyAgreementType.ASYMMETRIC_SECRET_MESSAGE_EXCHANGER_AND_AGREEMENT_WITH_SYMMETRIC_SIGNATURE
 * Change Agreement.receiveData(int stepNumber, byte[] data) signature
 * Several minimal security fix
 
@@ -285,7 +290,7 @@ Jason MAHDJOUB (Entred in the team at 04/01/2016)
 
 ### 3.16.1 Stable (11/07/2018)
 * Add HumanReadableBytesCount class.
-* Update hardrive and partitions detections.
+* Update hard drive and partitions detections.
 * Clean code.
 
 
@@ -322,7 +327,7 @@ Jason MAHDJOUB (Entred in the team at 04/01/2016)
 * Add SHA2-512/256 message digest.
 * Add SHA2-512/224 HMAC.
 * Add SHA2-512/256 HMAC.
-* Add functions isPostQuantomAlgorithm into several classes.
+* Add functions isPostQuantumAlgorithm into several classes.
 
 
 ### 3.13.4 Stable (09/04/2018)
@@ -338,7 +343,7 @@ Jason MAHDJOUB (Entred in the team at 04/01/2016)
 
 ### 3.13.0 Stable (26/03/2018)
 * Add CTR mode support.
-* Optmizations of Numbers allocations.
+* Optimizations of Numbers allocations.
 * Add function OSValidator.getJVMLocation.
 * Add function OSValidator.supportAESIntrinsicsAcceleration.
 
@@ -349,11 +354,11 @@ Jason MAHDJOUB (Entred in the team at 04/01/2016)
 
 
 ### 3.11.1 Stable (10/03/2018)
-* Add speed indexes for symmetric encryptions.
+* Add speed indexes for symmetric encryption.
 
 
 ### 3.11.0 Stable (08/03/2018)
-* Add BouncyCastle GCM and EAX authenticated block modes for symmetric encryptions.
+* Add BouncyCastle GCM and EAX authenticated block modes for symmetric encryption.
 
 
 ### 3.10.5 Stable (10/02/2018)
@@ -386,7 +391,7 @@ Jason MAHDJOUB (Entred in the team at 04/01/2016)
 * Use now BouncyCastle implementation of BCrypt (instead of Berry)
 * Use now BouncyCastle implementation of SCrypt (instead of Tamaya
 * Removing dependencies with JUnit. Use only TestNG.
-* Change iteration numver variable to cost variable with PBKF.
+* Change iteration number variable to cost variable with PBKF.
 * Add curve 25519 for asymmetric signatures.
 
 
@@ -429,7 +434,7 @@ Jason MAHDJOUB (Entred in the team at 04/01/2016)
 ### 3.1.1 Stable (06/10/2017)
 * Adding abstract random into class ClientASymmetricEncryptionAlgorithm
 * Adding function MessageDigestType.getDigestLengthInBits()
-* Adding function SymmetricAuthentifiedSignatureType.getSignatureSizeInBits()
+* Adding function SymmetricAuthenticatedSignatureType.getSignatureSizeInBits()
 
 
 ### 3.1.0 Stable (05/10/2017)
@@ -449,17 +454,17 @@ Jason MAHDJOUB (Entred in the team at 04/01/2016)
 * Add symmetric and asymmetric key wrappers classes
 * Add BCFIPS password hash algorithms
 * Add password key derivation class
-* Add generic aggreement protocol class
+* Add generic agreement protocol class
 
 
 ### 2.16.2 Stable (01/09/2017)
-* Renforcing MAC address anonymization
-* Possibility to convert UUID to DencentelizedID
+* Reinforcing MAC address anonymization
+* Possibility to convert UUID to DecentralizedID
 
 
 ### 2.16.0 Stable (01/09/2017)
 * Adding support for SHA3
-* Dencentralized ID's use now anonymized MAC address and random numbers
+* Decentralized ID's use now anonymous MAC address and random numbers
 * Adding NIST SP 800 support with DRBG_BOUNCYCASTLE SecureRandomType
 * Adding NIST SP 800 support with Fortuna
 
@@ -475,7 +480,7 @@ Jason MAHDJOUB (Entred in the team at 04/01/2016)
 
 
 ### 2.14.0 Stable (13/08/2017)
-* Debuging EllipticCurveDiffieHellmanAlgorithm
+* Debugging EllipticCurveDiffieHellmanAlgorithm
 
 
 ### 2.12.0 Stable (10/08/2017)
@@ -491,8 +496,8 @@ Jason MAHDJOUB (Entred in the team at 04/01/2016)
 
 
 ### 2.10.0 Stable (19/06/2017)
-* Adding symmetric signture algorithms
-* Altereging P2PJPAKESecretMessageExchanger class
+* Adding symmetric signature algorithms
+* Altering P2PJPAKESecretMessageExchanger class
 
 
 ### 2.9.0 Stable (18/06/2017)
@@ -525,7 +530,7 @@ Jason MAHDJOUB (Entred in the team at 04/01/2016)
 
 
 ### 2.5.0 Stable (07/03/2017)
-* Improving and renforcing P2PAsymmetricSecretMessageExchanger
+* Improving and reinforcing P2PAsymmetricSecretMessageExchanger
 * Additional manifest content possibility for projects export
 
 
@@ -547,7 +552,7 @@ Jason MAHDJOUB (Entred in the team at 04/01/2016)
 
 
 ### 2.0.1 Stable (23/12/2016)
-* Changing gnu cryto packages
+* Changing gnu crypto packages
 
 
 ### 2.0.0 Stable (17/12/2016)
@@ -560,7 +565,7 @@ Jason MAHDJOUB (Entred in the team at 04/01/2016)
 
 
 ### 1.8.0 Stable (13/10/2016)
-* Adding password hash (PBKDF and bcrypt)
+* Adding password hash (PBKF and bcrypt)
 
 
 ### 1.7.2 Stable (15/09/2016)
@@ -593,7 +598,7 @@ Jason MAHDJOUB (Entred in the team at 04/01/2016)
 * Changing license to CECILL-C.
 * Correcting bugs into DecentralizedIDGenerator classes
 * Adding salt management into SecuredIDGenerator class
-* Adding salt management into PeerToPeerASymetricSecretMessageExanger class
+* Adding salt management into PeerToPeerASymmetricSecretMessageExchanger class
 
 
 ### 1.6.0 Stable (15/03/2016)
@@ -604,7 +609,7 @@ Jason MAHDJOUB (Entred in the team at 04/01/2016)
 
 ### 1.5.0 Stable (09/03/2016)
 * Adding PeerToPeerASymmetricSecretMessageExchanger class
-* Adding ObjectSizer class (determins sizeof each java object instance)
+* Adding ObjectSizer class (determines sizeof each java object instance)
 * Adding keys encoding
 * Adding decentralized id encoding/decoding
 
@@ -631,5 +636,5 @@ Jason MAHDJOUB (Entred in the team at 04/01/2016)
 
 
 ### 1.0.0 Stable (04/02/2016)
-* Realeasing first version of Utils
+* Releasing first version of Utils
 

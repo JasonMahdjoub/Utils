@@ -58,7 +58,7 @@ repositories {
 }
 
 dependencies {
-    testImplementation 'org.testng:testng:7.1.0'
+    testImplementation 'org.testng:testng:7.3.0'
     testImplementation 'org.hamcrest:hamcrest-core:2.2'
 
     api(group:'com.distrimind.bcfips', name: 'BouncyCastle-FIPS', version: '1.0.2-DMRECOMPILE')
@@ -68,7 +68,7 @@ dependencies {
 
     testImplementation(group:'com.distrimind.gnu', name: 'Gnu-Crypt', version: '1.3.0')
     //api(group:'commons-codec', name: 'commons-codec', version: '1.14')
-    api(group:'org.yaml', name: 'snakeyaml', version: '1.26')
+    api(group:'org.yaml', name: 'snakeyaml', version: '1.27')
     testImplementation(group:'org.apache.commons', name: 'commons-math3', version: '3.6.1')
 
 }

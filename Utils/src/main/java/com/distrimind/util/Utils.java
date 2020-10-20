@@ -59,7 +59,7 @@ public class Utils {
 		Calendar c = Calendar.getInstance();
 		c.set(2016, Calendar.JANUARY, 4);
 		Calendar c2 = Calendar.getInstance();
-		c.set(2020, Calendar.AUGUST, 23);
+		c.set(2020, Calendar.OCTOBER, 20);
 		VERSION = new Version("Utils", "Utils", (short)5, (short)5, (short)12, Version.Type.Stable, (short)0, c.getTime(), c2.getTime());
 		try {
 
@@ -73,9 +73,10 @@ public class Utils {
 			VERSION.addDeveloper(new PersonDeveloper("mahdjoub", "jason", c.getTime()));
 
 			c = Calendar.getInstance();
-			c.set(2020, Calendar.AUGUST, 23);
+			c.set(2020, Calendar.OCTOBER, 20);
 			Description d = new Description((short)5, (short)5, (short)12, Version.Type.Stable, (short)0, c.getTime());
 			d.addItem("Typography corrections");
+			d.addItem("Update Snake YML to 1.27");
 			VERSION.addDescription(d);
 
 			c = Calendar.getInstance();
