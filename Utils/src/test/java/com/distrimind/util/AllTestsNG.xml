@@ -1,4 +1,4 @@
-<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
 <suite name="TestAll">
 	<test name="testBufferedStreams">
 		<classes>
@@ -37,7 +37,7 @@
 		</classes>
 	</test>
 
-	<test name="testDencentralizedIDGenerator">
+	<test name="testDecentralizedIDGenerator">
 		<classes>
 		    <class name="com.distrimind.util.DecentralizedIDTests" />
 		</classes>
@@ -56,7 +56,7 @@
 			<class name="com.distrimind.util.crypto.TestsForSymmetricEncryption" />
 			<class name="com.distrimind.util.crypto.TestsForSymmetricSignatures" />
 			<class name="com.distrimind.util.crypto.TestASymmetricSignatures" />
-			<class name="com.distrimind.util.crypto.TestASymmetricEncryptions" />
+			<class name="com.distrimind.util.crypto.TestASymmetricEncryption" />
 			<class name="com.distrimind.util.crypto.TestKeyAgreements" />
 			<class name="com.distrimind.util.crypto.TestReadWriteEncryption" />
 
