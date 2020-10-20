@@ -287,7 +287,8 @@ public enum SecureRandomType {
 		}
 		if (result==0)
 			result=result2;
-		nonce=("La piethagore\n" + 
+		//noinspection SpellCheckingInspection
+		nonce=("La piethagore\n" +
 				"dans le ciel bleu\n" + 
 				"décrit des figures\n" + 
 				"géométriques.\n" + 

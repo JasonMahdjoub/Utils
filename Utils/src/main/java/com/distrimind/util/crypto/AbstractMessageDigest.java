@@ -59,18 +59,18 @@ public abstract class AbstractMessageDigest implements Cloneable {
 	/**
 	 * Does a simple byte comparison of the two digests.
 	 *
-	 * @param digesta
+	 * @param digestA
 	 *            first digest to compare.
-	 * @param digestb
+	 * @param digestB
 	 *            second digest to compare.
 	 * @return <code>true</code> if both are equal, <code>false</code> otherwise.
 	 */
-	public static boolean isEqual(byte[] digesta, byte[] digestb) {
-		if (digesta.length != digestb.length)
+	public static boolean isEqual(byte[] digestA, byte[] digestB) {
+		if (digestA.length != digestB.length)
 			return false;
 
-		for (int i = digesta.length - 1; i >= 0; --i)
-			if (digesta[i] != digestb[i])
+		for (int i = digestA.length - 1; i >= 0; --i)
+			if (digestA[i] != digestB[i])
 				return false;
 
 		return true;

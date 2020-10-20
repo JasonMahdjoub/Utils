@@ -65,9 +65,9 @@ public final class BCKeyAgreement extends AbstractKeyAgreement{
 	private FipsAgreement<?> agreement;
 	private byte []secret;
 	private FipsKDF.AgreementKDFParametersBuilder kdfAlgorithm;
-	private byte[] paramskeymaterial;
+	private byte[] paramsKeyMaterial;
 	
-	protected BCKeyAgreement(SymmetricAuthentifiedSignatureType signatureType, EllipticCurveDiffieHellmanType type) {
+	protected BCKeyAgreement(SymmetricAuthenticatedSignatureType signatureType, EllipticCurveDiffieHellmanType type) {
 		super(signatureType);
 		this.type=type;
 		CodeProvider.ensureProviderLoaded(type.getCodeProvider());
@@ -125,7 +125,7 @@ public final class BCKeyAgreement extends AbstractKeyAgreement{
         {
             byte[] keyBytes = new byte[keySize];
 
-            FipsKDF.AgreementKDFParameters params = kdfAlgorithm.using(secret).withIV(paramskeymaterial);
+            FipsKDF.AgreementKDFParameters params = kdfAlgorithm.using(secret).withIV(paramsKeyMaterial);
 
             FipsKDF.AgreementOperatorFactory kdfOperatorFactory= new FipsKDF.AgreementOperatorFactory();
             
@@ -168,20 +168,20 @@ public final class BCKeyAgreement extends AbstractKeyAgreement{
 		try {
 			if (type.isECCDHType() || type.isXDHType()) {
 
-				paramskeymaterial = ((UserKeyingMaterialSpec) params).getUserKeyingMaterial();
-				AgreementParameters aparams = FipsEC.CDH.withDigest(type.getBCFipsDigestAlgorithm())
-						.withKDF(kdfAlgorithm = FipsKDF.CONCATENATION.withPRF(type.getBCFipsAgreementKDFPRF()), paramskeymaterial, paramskeymaterial.length);
+				paramsKeyMaterial = ((UserKeyingMaterialSpec) params).getUserKeyingMaterial();
+				AgreementParameters aParams = FipsEC.CDH.withDigest(type.getBCFipsDigestAlgorithm())
+						.withKDF(kdfAlgorithm = FipsKDF.CONCATENATION.withPRF(type.getBCFipsAgreementKDFPRF()), paramsKeyMaterial, paramsKeyMaterial.length);
 				FipsEC.DHAgreementFactory agreementFact = new FipsEC.DHAgreementFactory();
 
-				agreement = agreementFact.createAgreement((AsymmetricPrivateKey) key.toBouncyCastleKey(), aparams);
+				agreement = agreementFact.createAgreement((AsymmetricPrivateKey) key.toBouncyCastleKey(), aParams);
 
 			} else if (type.isECMQVType()) {
 				Object[] p = (Object[]) params;
 				com.distrimind.bcfips.crypto.fips.FipsEC.MQVAgreementParameters mqvparam = (com.distrimind.bcfips.crypto.fips.FipsEC.MQVAgreementParameters) p[0];
-				paramskeymaterial = (byte[]) p[1];
+				paramsKeyMaterial = (byte[]) p[1];
 
 				mqvparam = mqvparam.withDigest(type.getBCFipsDigestAlgorithm())
-						.withKDF(kdfAlgorithm = FipsKDF.CONCATENATION.withPRF(type.getBCFipsAgreementKDFPRF()), paramskeymaterial, paramskeymaterial.length);
+						.withKDF(kdfAlgorithm = FipsKDF.CONCATENATION.withPRF(type.getBCFipsAgreementKDFPRF()), paramsKeyMaterial, paramsKeyMaterial.length);
 
 				FipsEC.MQVAgreementFactory mqvagreementfact = new FipsEC.MQVAgreementFactory();
 

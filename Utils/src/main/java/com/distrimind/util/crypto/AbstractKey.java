@@ -212,7 +212,7 @@ public abstract class AbstractKey extends DecentralizedValue implements IKey{
 				int codedTypeSize = SymmetricSecretKey.ENCODED_TYPE_SIZE;
 				byte[] secretKey = new byte[len - 2 - codedTypeSize];
 				System.arraycopy(b, 2 + codedTypeSize+off, secretKey, 0, secretKey.length);
-				return new SymmetricSecretKey(SymmetricAuthentifiedSignatureType.valueOf((int) Bits.getPositiveInteger(b, off+1, codedTypeSize)), secretKey,
+				return new SymmetricSecretKey(SymmetricAuthenticatedSignatureType.valueOf((int) Bits.getPositiveInteger(b, off+1, codedTypeSize)), secretKey,
 						SymmetricSecretKey.decodeKeySizeBits(b[codedTypeSize + 1+off]));
 			} else if (type == 2) {
 

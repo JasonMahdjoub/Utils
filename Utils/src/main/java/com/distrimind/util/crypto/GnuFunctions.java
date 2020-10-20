@@ -59,7 +59,7 @@ import java.security.spec.InvalidKeySpecException;
 class GnuFunctions {
 	private static volatile boolean gnuLoaded=false;
 	private static Method getSignatureAlgo=null;
-	private static Method getCihperAlgo=null;
+	private static Method getCipherAlgo =null;
 	private static Method getPublicKey=null;
 	private static Method getPrivateKey=null;
 	private static Method getEncoded=null;
@@ -118,7 +118,7 @@ class GnuFunctions {
 						constPBEKeySpecCharsBytesIntInt=Class.forName("com.distrimind.gnu.vm.jgnux.crypto.spec.PBEKeySpec").getDeclaredConstructor(char[].class, byte[].class, int.class, int.class);
 
 						getSignatureAlgo=Class.forName("com.distrimind.gnu.vm.jgnu.security.Signature").getDeclaredMethod("getInstance", String.class);
-						getCihperAlgo=Class.forName("com.distrimind.gnu.vm.jgnux.crypto.Cipher").getDeclaredMethod("getInstance", String.class);
+						getCipherAlgo =Class.forName("com.distrimind.gnu.vm.jgnux.crypto.Cipher").getDeclaredMethod("getInstance", String.class);
 						getPublicKey=Class.forName("com.distrimind.gnu.vm.jgnu.security.KeyPair").getDeclaredMethod("getPublic");
 						getPrivateKey=Class.forName("com.distrimind.gnu.vm.jgnu.security.KeyPair").getDeclaredMethod("getPrivate");
 						getPrivateKey=Class.forName("com.distrimind.gnu.vm.jgnu.security.KeyPair").getDeclaredMethod("getPrivate");
@@ -400,7 +400,7 @@ class GnuFunctions {
 	static Object getCipherAlgorithm(String signatureName) throws NoSuchAlgorithmException {
 		checkGnuLoaded();
 		try {
-			return getCihperAlgo.invoke(null, signatureName);
+			return getCipherAlgo.invoke(null, signatureName);
 		} catch (IllegalAccessException e) {
 			throw new IllegalStateException(e);
 		} catch (InvocationTargetException e) {

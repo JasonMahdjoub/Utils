@@ -46,8 +46,9 @@ import java.lang.annotation.Target;
  * @version 1.0
  * @since Utils 1.5
  */
+
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface DontComputeSizeForInnerCollectionElements {
-
+public @interface DoNotComputeSize {
+	int depth() default 0;
 }

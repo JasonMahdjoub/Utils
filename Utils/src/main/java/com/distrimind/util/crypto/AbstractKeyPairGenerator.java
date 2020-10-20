@@ -84,29 +84,29 @@ public abstract class AbstractKeyPairGenerator {
 	public abstract String getAlgorithm();
 
 	/**
-	 * Initializes the key pair generator for a certain keysize using a default
+	 * Initializes the key pair generator for a certain keySize using a default
 	 * parameter set and the <code>SecureRandom</code> implementation of the
 	 * highest-priority installed provider as the source of randomness. (If none of
 	 * the installed providers supply an implementation of
 	 * <code>SecureRandom</code>, a system-provided source of randomness is used.)
 	 *
-	 * @param keysize
-	 *            the keysize. This is an algorithm-specific metric, such as modulus
+	 * @param keySize
+	 *            the keySize. This is an algorithm-specific metric, such as modulus
 	 *            length, specified in number of bits.
-	 * @param expirationTime the key expiration tiume
+	 * @param expirationTime the key expiration time
 	 * @throws IOException if a problem occurs
 
 	 */
-	public abstract void initialize(int keysize, long expirationTime) throws IOException;
+	public abstract void initialize(int keySize, long expirationTime) throws IOException;
 
 	/**
-	 * Initializes the key pair generator for a certain keysize with the given
+	 * Initializes the key pair generator for a certain keySize with the given
 	 * source of randomness (and a default parameter set).
 	 *
-	 * @param keysize
-	 *            the keysize. This is an algorithm-specific metric, such as modulus
+	 * @param keySize
+	 *            the keySize. This is an algorithm-specific metric, such as modulus
 	 *            length, specified in number of bits.
-	 * @param expirationTime the key expiration tiume
+	 * @param expirationTime the key expiration time
 	 * @param random
 	 *            the source of randomness.
 	 *
@@ -115,6 +115,6 @@ public abstract class AbstractKeyPairGenerator {
 	 *
 	 * @since 1.2
 	 */
-	public abstract void initialize(int keysize, long expirationTime, AbstractSecureRandom random) throws IOException;
+	public abstract void initialize(int keySize, long expirationTime, AbstractSecureRandom random) throws IOException;
 
 }

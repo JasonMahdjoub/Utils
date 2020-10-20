@@ -59,7 +59,7 @@ public class OutputDataPackagerWithRandomValues {
 				bytes.length + ObjectSizer.INT_FIELD_SIZE, max_random_values_size, rand);
 		o.writeInt(bytes.length);
 		o.writeData(bytes, 0, bytes.length);
-		o.finilizeTab();
+		o.finalizeTab();
 		return o.getBytesArray();
 	}
 
@@ -69,7 +69,7 @@ public class OutputDataPackagerWithRandomValues {
 	// private int data_size;
 	private int cursor;
 	private int nextRandValuePos;
-	protected int randamValuesWrited = 0;
+	protected int randomValuesWritten = 0;
 	private int dataRemaining;
 
 	private OutputDataPackagerWithRandomValues(int bufferSize, int max_random_values_size, AbstractSecureRandom rand) {
@@ -91,13 +91,6 @@ public class OutputDataPackagerWithRandomValues {
 
 	}
 
-	/*
-	 * private int getWritedData() { return cursor-randamValuesWrited; }
-	 * 
-	 * 
-	 * private boolean writeData(byte d) { byte t[]=new byte[1]; t[0]=d; return
-	 * writeData(t, 0, 1)==1; }
-	 */
 
 	@SuppressWarnings("SameParameterValue")
 	private int writeData(byte[] d, int offset, int size) {
@@ -145,14 +138,14 @@ public class OutputDataPackagerWithRandomValues {
 				return;
 			}
 
-			int nbrandmax = Math.min(random_values_size_remaining - getMiniRandomValueSize() + 1,
+			int nbRandMax = Math.min(random_values_size_remaining - getMiniRandomValueSize() + 1,
 					getMaximumLocalRandomValues() - 1);
-			final byte nbrand = (byte) (random.nextInt(nbrandmax) + 1);
-			byte[] tabrand = new byte[nbrand];
-			random.nextBytes(tabrand);
+			final byte nbRand = (byte) (random.nextInt(nbRandMax) + 1);
+			byte[] tabRand = new byte[nbRand];
+			random.nextBytes(tabRand);
 			byte nextRand = 0;
-			if (random_values_size_remaining - nbrand - 2 >= getMiniRandomValueSize()
-					&& tab.length - cursor - nbrand - 2 - getMiniRandomValueSize() >= dataRemaining) {
+			if (random_values_size_remaining - nbRand - 2 >= getMiniRandomValueSize()
+					&& tab.length - cursor - nbRand - 2 - getMiniRandomValueSize() >= dataRemaining) {
 				int v = random_values_size_remaining / (((int) getMaxIntervalOfRandomValues()) / 2);
 				if (v == 0)
 					v = 1;
@@ -160,19 +153,19 @@ public class OutputDataPackagerWithRandomValues {
 						.max(Math.min(getMaxIntervalOfRandomValues() - 1, tab.length - cursor) / v, 1);
 				nextRand = (byte) (random.nextInt(maxNextRand) + 1);
 			}
-			tab[cursor++] = encodeLocalNumberRandomVal(nbrand, random);
-			for (byte aTabrand : tabrand) tab[cursor++] = aTabrand;
+			tab[cursor++] = encodeLocalNumberRandomVal(nbRand, random);
+			for (byte aTabRand : tabRand) tab[cursor++] = aTabRand;
 			tab[cursor++] = encodeLocalPosNextRandomVal(nextRand, random);
-			randamValuesWrited += 2 + nbrand;
+			randomValuesWritten += 2 + nbRand;
 			if (nextRand == 0)
 				nextRandValuePos = tab.length;
 			else
 				nextRandValuePos = cursor + nextRand;
-			random_values_size_remaining -= (nbrand + 2);
+			random_values_size_remaining -= (nbRand + 2);
 		}
 	}
 
-	private void finilizeTab() {
+	private void finalizeTab() {
 		if (cursor < tab.length) {
 			byte[] rands = new byte[tab.length - cursor];
 
@@ -181,7 +174,7 @@ public class OutputDataPackagerWithRandomValues {
 			cursor += rands.length;
 			nextRandValuePos = tab.length;
 			random_values_size_remaining -= rands.length;
-			randamValuesWrited += rands.length;
+			randomValuesWritten += rands.length;
 		}
 	}
 

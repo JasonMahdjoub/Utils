@@ -53,13 +53,13 @@ public class StaticObjectAllocator<T> {
 	private final boolean isByteArray;
 	private static final Class<? extends byte[]> byteArrayClass=byte[].class;
 	private Object[] staticArgs =new Object[0];
-	public StaticObjectAllocator(int maxAllocations, Class<? extends T> concernedClass, Class<?> ...constructorParamters) throws NoSuchMethodException, SecurityException
+	public StaticObjectAllocator(int maxAllocations, Class<? extends T> concernedClass, Class<?> ...constructorParameters) throws NoSuchMethodException, SecurityException
 	{
 		this.maxAllocations=maxAllocations;
 		if (isByteArray=concernedClass.equals(byteArrayClass))
 			this.constructor=null;
 		else
-			this.constructor=concernedClass.getDeclaredConstructor(constructorParamters);
+			this.constructor=concernedClass.getDeclaredConstructor(constructorParameters);
 		this.allocations=new Object[maxAllocations];
 		Arrays.fill(this.allocations, null);
 	}

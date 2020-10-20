@@ -176,22 +176,22 @@ class LinuxHardDriveDetect extends UnixHardDriveDetect {
 	}
 
 	private UUID getPartitionUUID(String nodeShort) throws IOException {
-	    String r=getCorrespondance("/dev/disk/by-partuuid", nodeShort);
+	    String r= getCorrespondence("/dev/disk/by-partuuid", nodeShort);
 	    if (r==null)
 	    	return null;
 	    else
 	    	return UUID.fromString(r);
     }
     private String getPartitionLabel(String nodeShort) throws IOException {
-	    String res=getCorrespondance("/dev/disk/by-partlabel", nodeShort);
+	    String res= getCorrespondence("/dev/disk/by-partlabel", nodeShort);
 	    if (res==null)
-	        res=getCorrespondance("/dev/disk/by-label", nodeShort);
+	        res= getCorrespondence("/dev/disk/by-label", nodeShort);
 	    return res;
     }
     private String getProtocol(String nodeShort) throws IOException {
-        return getCorrespondance("/dev/disk/by-path", nodeShort);
+        return getCorrespondence("/dev/disk/by-path", nodeShort);
     }
-    private String getCorrespondance(String searchPath, String nodeShort) throws IOException {
+    private String getCorrespondence(String searchPath, String nodeShort) throws IOException {
         String path="../../"+nodeShort;
 
         Process p = Runtime.getRuntime().exec(new String[]{"ls","-g","-o","--time-style=+",searchPath});

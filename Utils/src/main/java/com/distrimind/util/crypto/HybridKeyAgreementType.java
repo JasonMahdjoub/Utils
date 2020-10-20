@@ -6,7 +6,7 @@ jason.mahdjoub@distri-mind.fr
 
 This software (Object Oriented Database (OOD)) is a computer program 
 whose purpose is to manage a local database with the object paradigm 
-and the java langage 
+and the java language
 
 This software is governed by the CeCILL-C license under French law and
 abiding by the rules of distribution of free software.  You can  use, 
@@ -86,14 +86,14 @@ public final class HybridKeyAgreementType {
 		return PQCKeyAgreementType;
 	}
 
-	public KeyAgreement getKeyAgreementClient(AbstractSecureRandom randomForKeys, SymmetricAuthentifiedSignatureType signatureType) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
+	public KeyAgreement getKeyAgreementClient(AbstractSecureRandom randomForKeys, SymmetricAuthenticatedSignatureType signatureType) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
 		return getKeyAgreementClient(randomForKeys, signatureType, (short)-1);
 	}
-	public KeyAgreement getKeyAgreementClient(AbstractSecureRandom randomForKeys, SymmetricAuthentifiedSignatureType signatureType, short keySizeBits) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
+	public KeyAgreement getKeyAgreementClient(AbstractSecureRandom randomForKeys, SymmetricAuthenticatedSignatureType signatureType, short keySizeBits) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
 		return getKeyAgreementClient(randomForKeys, signatureType, keySizeBits, null);
 	}
 	public KeyAgreement getKeyAgreementClient(AbstractSecureRandom randomForKeys,
-											  SymmetricAuthentifiedSignatureType signatureType,
+											  SymmetricAuthenticatedSignatureType signatureType,
 											  short keySizeBits, byte[] keyingMaterial) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
 		return new HybridKeyAgreement(
 				nonPQCKeyAgreementType.getKeyAgreementClient(randomForKeys, signatureType, keySizeBits, keyingMaterial),
@@ -115,14 +115,14 @@ public final class HybridKeyAgreementType {
 				nonPQCKeyAgreementType.getKeyAgreementClient(randomForKeys, encryptionType, keySizeBits, keyingMaterial),
 				PQCKeyAgreementType.getKeyAgreementClient(randomForKeys, encryptionType, keySizeBits, keyingMaterial));
 	}
-	public KeyAgreement getKeyAgreementServer(AbstractSecureRandom randomForKeys, SymmetricAuthentifiedSignatureType signatureType) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
+	public KeyAgreement getKeyAgreementServer(AbstractSecureRandom randomForKeys, SymmetricAuthenticatedSignatureType signatureType) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
 		return getKeyAgreementServer(randomForKeys, signatureType, (short)-1);
 	}
-	public KeyAgreement getKeyAgreementServer(AbstractSecureRandom randomForKeys, SymmetricAuthentifiedSignatureType signatureType, short keySizeBits) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
+	public KeyAgreement getKeyAgreementServer(AbstractSecureRandom randomForKeys, SymmetricAuthenticatedSignatureType signatureType, short keySizeBits) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
 		return getKeyAgreementServer(randomForKeys, signatureType, keySizeBits, null);
 	}
 	public KeyAgreement getKeyAgreementServer(AbstractSecureRandom randomForKeys,
-											  SymmetricAuthentifiedSignatureType signatureType,
+											  SymmetricAuthenticatedSignatureType signatureType,
 											  short keySizeBits,
 											  byte[] keyingMaterial) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
 		return new HybridKeyAgreement(

@@ -199,7 +199,7 @@ public abstract class AbstractCipher {
 	 *
 	 *
 	 * <p>
-	 * If this cipher requires any random bytes (for example for an initilization
+	 * If this cipher requires any random bytes (for example for an initialization
 	 * vector) than the {@link java.security.SecureRandom} with the highest priority
 	 * is used as the source of these bytes.
 	 * </p>
@@ -210,13 +210,13 @@ public abstract class AbstractCipher {
 	 * <code>init</code> method.
 	 * </p>
 	 *
-	 * @param opmode
+	 * @param opMode
 	 *            The operation mode to use.
 	 * @param key
 	 *            The key.
 	 * @throws IOException if a problem occurs
 	 */
-	public abstract void init(int opmode, AbstractKey key)
+	public abstract void init(int opMode, AbstractKey key)
 			throws IOException;
 
 
@@ -231,7 +231,7 @@ public abstract class AbstractCipher {
 	 * <code>init</code> method.
 	 * </p>
 	 *
-	 * @param opmode
+	 * @param opMode
 	 *            The operation mode to use.
 	 * @param key
 	 *            The key.
@@ -240,7 +240,7 @@ public abstract class AbstractCipher {
 
 	 * @throws IOException if a problem occurs
 	 */
-	public abstract void init(int opmode, AbstractKey key, AbstractSecureRandom random)
+	public abstract void init(int opMode, AbstractKey key, AbstractSecureRandom random)
 			throws IOException;
 
 	/**
@@ -250,7 +250,7 @@ public abstract class AbstractCipher {
 	 *
 	 *
 	 * <p>
-	 * If this cipher requires any random bytes (for example for an initilization
+	 * If this cipher requires any random bytes (for example for an initialization
 	 * vector) than the {@link java.security.SecureRandom} with the highest priority
 	 * is used as the source of these bytes.
 	 * </p>
@@ -261,7 +261,7 @@ public abstract class AbstractCipher {
 	 * <code>init</code> method.
 	 * </p>
 	 *
-	 * @param opmode
+	 * @param opMode
 	 *            The operation mode to use.
 	 * @param key
 	 *            The key.
@@ -269,18 +269,18 @@ public abstract class AbstractCipher {
 	 *            the iv parameter
 	 * @throws IOException if a problem occurs
 	 */
-	public abstract void init(int opmode, AbstractKey key, byte[] iv) throws IOException;
+	public abstract void init(int opMode, AbstractKey key, byte[] iv) throws IOException;
 
 
 
-	public void init(int opmode, AbstractKey key, byte[] iv, int counter) throws IOException
+	public void init(int opMode, AbstractKey key, byte[] iv, int counter) throws IOException
 	{
 		if (iv!=null) {
 			int counterPos = iv.length - 4;
 			iv = iv.clone();
 			Bits.putInt(iv, counterPos, Bits.getInt(iv, counterPos) + counter);
 		}
-		init(opmode, key, iv);
+		init(opMode, key, iv);
 	}
 
 	/**

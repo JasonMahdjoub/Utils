@@ -49,6 +49,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * @version 1.0
  * @since Utils 4.8.0
  */
+@SuppressWarnings("NullableProblems")
 public class PoolExecutor implements ExecutorService {
 
 
@@ -641,24 +642,18 @@ public class PoolExecutor implements ExecutorService {
 
 	@Override
 	public <T> Future<T> submit(final Runnable task, final T result) {
-		return submit(new Callable<T>() {
-			@Override
-			public T call() {
-				task.run();
-				return result;
-			}
+		return submit(() -> {
+			task.run();
+			return result;
 		});
 
 	}
 
 	@Override
 	public Future<?> submit(final Runnable task) {
-		return submit(new Callable<Void>() {
-			@Override
-			public Void call() {
-				task.run();
-				return null;
-			}
+		return submit((Callable<Void>) () -> {
+			task.run();
+			return null;
 		});
 	}
 
@@ -826,12 +821,9 @@ public class PoolExecutor implements ExecutorService {
 			if (command instanceof Future<?>)
 				f=(Future<?>)command;
 			else
-				f=new Future<>(new Callable<Void>() {
-					@Override
-					public Void call() {
-						command.run();
-						return null;
-					}
+				f=new Future<>((Callable<Void>) () -> {
+					command.run();
+					return null;
 				});
 			if (!workQueue.add(f))
 				throw new RejectedExecutionException();

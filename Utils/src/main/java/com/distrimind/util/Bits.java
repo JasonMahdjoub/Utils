@@ -187,40 +187,40 @@ public class Bits {
             throw new IllegalArgumentException();
     }
 
-	public static byte[][] separateEncodingsWithIntSizedTabs(byte[] concatedEncodedElement) {
-		return separateEncodingsWithIntSizedTabs(concatedEncodedElement, 0, concatedEncodedElement.length);
+	public static byte[][] separateEncodingsWithIntSizedTabs(byte[] concatenatedEncodedElement) {
+		return separateEncodingsWithIntSizedTabs(concatenatedEncodedElement, 0, concatenatedEncodedElement.length);
 	}
 
-	public static byte[][] separateEncodingsWithIntSizedTabs(byte[] concatedEncodedElement, int off, int len) {
-		return separateEncodingsWithSizedTabs(concatedEncodedElement, off, len, 4);
+	public static byte[][] separateEncodingsWithIntSizedTabs(byte[] concatenatedEncodedElement, int off, int len) {
+		return separateEncodingsWithSizedTabs(concatenatedEncodedElement, off, len, 4);
 	}
 
-	public static byte[][] separateEncodingsWithShortIntSizedTabs(byte[] concatedEncodedElement) {
-		return separateEncodingsWithShortIntSizedTabs(concatedEncodedElement, 0, concatedEncodedElement.length);
+	public static byte[][] separateEncodingsWithShortIntSizedTabs(byte[] concatenatedEncodedElement) {
+		return separateEncodingsWithShortIntSizedTabs(concatenatedEncodedElement, 0, concatenatedEncodedElement.length);
 	}
 
-	public static byte[][] separateEncodingsWithShortIntSizedTabs(byte[] concatedEncodedElement, int off, int len) {
-		return separateEncodingsWithSizedTabs(concatedEncodedElement, off, len, 3);
+	public static byte[][] separateEncodingsWithShortIntSizedTabs(byte[] concatenatedEncodedElement, int off, int len) {
+		return separateEncodingsWithSizedTabs(concatenatedEncodedElement, off, len, 3);
 	}
 
-	private static byte[][] separateEncodingsWithSizedTabs(byte[] concatedEncodedElement, int off, int len, int sizePrecision) {
-		int sizePar1 = (int)Bits.getPositiveInteger(concatedEncodedElement, off, sizePrecision);
+	private static byte[][] separateEncodingsWithSizedTabs(byte[] concatenatedEncodedElement, int off, int len, int sizePrecision) {
+		int sizePar1 = (int)Bits.getPositiveInteger(concatenatedEncodedElement, off, sizePrecision);
 		byte[] part1 = new byte[sizePar1];
 		byte[] part2 = new byte[len - sizePrecision - sizePar1];
-		System.arraycopy(concatedEncodedElement, off + sizePrecision, part1, 0, sizePar1);
-		System.arraycopy(concatedEncodedElement, off + sizePrecision + sizePar1, part2, 0, part2.length);
+		System.arraycopy(concatenatedEncodedElement, off + sizePrecision, part1, 0, sizePar1);
+		System.arraycopy(concatenatedEncodedElement, off + sizePrecision + sizePar1, part2, 0, part2.length);
 		byte[][] res = new byte[2][];
 		res[0] = part1;
 		res[1] = part2;
 		return res;
 	}
 
-	public static byte[][] separateEncodingsWithShortSizedTabs(byte[] concatedEncodedElement) {
-		return separateEncodingsWithShortSizedTabs(concatedEncodedElement, 0, concatedEncodedElement.length);
+	public static byte[][] separateEncodingsWithShortSizedTabs(byte[] concatenatedEncodedElement) {
+		return separateEncodingsWithShortSizedTabs(concatenatedEncodedElement, 0, concatenatedEncodedElement.length);
 	}
 
-	public static byte[][] separateEncodingsWithShortSizedTabs(byte[] concatedEncodedElement, int off, int len) {
-		return separateEncodingsWithSizedTabs(concatedEncodedElement, off, len, 2);
+	public static byte[][] separateEncodingsWithShortSizedTabs(byte[] concatenatedEncodedElement, int off, int len) {
+		return separateEncodingsWithSizedTabs(concatenatedEncodedElement, off, len, 2);
 	}
 
 	private static int computeByteParity(byte b)

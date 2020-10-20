@@ -84,9 +84,9 @@ public final class JavaNativeKeyPairGenerator extends AbstractKeyPairGenerator {
 	}
 
 	@Override
-	public void initialize(int _keysize, long expirationTime) throws IOException {
+	public void initialize(int keySize, long expirationTime) throws IOException {
 		try {
-			this.initialize(_keysize, expirationTime, SecureRandomType.BC_FIPS_APPROVED_FOR_KEYS.getSingleton(null));
+			this.initialize(keySize, expirationTime, SecureRandomType.BC_FIPS_APPROVED_FOR_KEYS.getSingleton(null));
 		} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
 			throw new IOException(e);
 		}
@@ -115,9 +115,9 @@ public final class JavaNativeKeyPairGenerator extends AbstractKeyPairGenerator {
 
     }*/
 	@Override
-	public void initialize(int _keySize, long expirationTime, AbstractSecureRandom _random) throws IOException {
+	public void initialize(int keySize, long expirationTime, AbstractSecureRandom _random) throws IOException {
 		try {
-			this.keySizeBits = _keySize;
+			this.keySizeBits = keySize;
 			this.expirationTime = expirationTime;
 			if (signatureType != null && signatureType.getKeyGeneratorAlgorithmName().equals(ASymmetricAuthenticatedSignatureType.BCPQC_SPHINCS256_SHA3_512.getKeyGeneratorAlgorithmName())) {
 				this.keySizeBits = signatureType.getDefaultKeySize();
@@ -126,7 +126,7 @@ public final class JavaNativeKeyPairGenerator extends AbstractKeyPairGenerator {
 				this.keySizeBits = signatureType.getDefaultKeySize();
 				keyPairGenerator.initialize(new SPHINCS256KeyGenParameterSpec(SPHINCS256KeyGenParameterSpec.SHA512_256), _random.getJavaNativeSecureRandom());
 			} else if (signatureType == null || signatureType.getCurveName() == null)
-				keyPairGenerator.initialize(new RSAKeyGenParameterSpec(_keySize, RSAKeyGenParameterSpec.F4), _random.getJavaNativeSecureRandom());
+				keyPairGenerator.initialize(new RSAKeyGenParameterSpec(keySize, RSAKeyGenParameterSpec.F4), _random.getJavaNativeSecureRandom());
 			else {
 				switch (signatureType.getCurveName()) {
 					case "P-256":

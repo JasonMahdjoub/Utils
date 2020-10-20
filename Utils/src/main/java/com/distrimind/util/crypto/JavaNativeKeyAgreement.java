@@ -65,8 +65,8 @@ public final class JavaNativeKeyAgreement extends AbstractKeyAgreement {
 		this.keyAgreement = keyAgreement;
 	}
 	
-	JavaNativeKeyAgreement(SymmetricAuthentifiedSignatureType signatyreType, KeyAgreement keyAgreement) {
-		super(signatyreType);
+	JavaNativeKeyAgreement(SymmetricAuthenticatedSignatureType signatureType, KeyAgreement keyAgreement) {
+		super(signatureType);
 		this.keyAgreement = keyAgreement;
 	}
 

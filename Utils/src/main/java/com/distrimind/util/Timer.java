@@ -45,7 +45,7 @@ package com.distrimind.util;
 public final class Timer {
 	private long m_previous_time;
 
-	private boolean m_stoped = true;
+	private boolean m_stopped = true;
 
 	private boolean m_paused = false;
 
@@ -59,8 +59,8 @@ public final class Timer {
 			play();
 	}
 
-	public long getDeltaMili() {
-		if (m_stoped)
+	public long getDeltaMilli() {
+		if (m_stopped)
 			return 0;
 		long res;
 		if (m_paused)
@@ -71,16 +71,16 @@ public final class Timer {
 		return res;
 	}
 
-	public double getDeltaMilid() {
-		return (double)getDeltaMili();
+	public double getDeltaMilliDouble() {
+		return (double) getDeltaMilli();
 	}
 
-	public float getDeltaMilif() {
-		return (float)getDeltaMili();
+	public float getDeltaMilliFloat() {
+		return (float) getDeltaMilli();
 	}
 
-	public long getMili() {
-		if (m_stoped)
+	public long getMilli() {
+		if (m_stopped)
 			return 0;
 		if (m_paused)
 			return m_previous_pause_time - m_previous_time;
@@ -88,32 +88,32 @@ public final class Timer {
 			return System.currentTimeMillis() - m_previous_time;
 	}
 
-	public double getMilid() {
-		return (double)getMili();
+	public double getMilliDouble() {
+		return (double) getMilli();
 	}
 
-	public float getMilif() {
-		return (float)getMili();
+	public float getMilliFloat() {
+		return (float) getMilli();
 	}
 
 	public boolean isPaused() {
 		return m_paused;
 	}
 
-	public boolean isStoped() {
-		return m_stoped;
+	public boolean isStopped() {
+		return m_stopped;
 	}
 
 	public void pause() {
-		if (!m_paused && !m_stoped) {
+		if (!m_paused && !m_stopped) {
 			m_paused = true;
 			m_previous_pause_time = System.currentTimeMillis();
 		}
 	}
 
 	public void play() {
-		if (m_stoped) {
-			m_stoped = false;
+		if (m_stopped) {
+			m_stopped = false;
 			m_previous_time = System.currentTimeMillis();
 		} else if (m_paused) {
 			m_previous_time += System.currentTimeMillis() - m_previous_pause_time;
@@ -130,7 +130,7 @@ public final class Timer {
 	}
 
 	public void setMilli(long ms) {
-		if (!m_stoped) {
+		if (!m_stopped) {
 			if (m_paused) {
 				m_previous_time = m_previous_pause_time - ms;
 			} else {
@@ -141,7 +141,7 @@ public final class Timer {
 	}
 
 	public void stop() {
-		m_stoped = true;
+		m_stopped = true;
 		m_paused = false;
 	}
 

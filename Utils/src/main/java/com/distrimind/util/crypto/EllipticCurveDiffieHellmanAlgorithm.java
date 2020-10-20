@@ -60,7 +60,7 @@ public class EllipticCurveDiffieHellmanAlgorithm extends KeyAgreement {
 	private final AbstractSecureRandom randomForKeys;
 	private boolean valid=true;
 	private SymmetricEncryptionType encryptionType;
-	private SymmetricAuthentifiedSignatureType signatureType;
+	private SymmetricAuthenticatedSignatureType signatureType;
 	private final short keySizeBits;
 
 	@Override
@@ -70,7 +70,7 @@ public class EllipticCurveDiffieHellmanAlgorithm extends KeyAgreement {
 
 
 	private final byte[] keyingMaterial;
-	EllipticCurveDiffieHellmanAlgorithm(AbstractSecureRandom randomForKeys, EllipticCurveDiffieHellmanType type, short keySizeBits, byte[] keyingMaterial, SymmetricAuthentifiedSignatureType signatureType) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
+	EllipticCurveDiffieHellmanAlgorithm(AbstractSecureRandom randomForKeys, EllipticCurveDiffieHellmanType type, short keySizeBits, byte[] keyingMaterial, SymmetricAuthenticatedSignatureType signatureType) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
 		this(randomForKeys, type, keySizeBits, keyingMaterial);
 		this.signatureType=signatureType;
 	}
@@ -122,7 +122,7 @@ public class EllipticCurveDiffieHellmanAlgorithm extends KeyAgreement {
 		valid=false;
 
 		ASymmetricKeyPair kp;
-		ASymmetricAuthenticatedSignatureType t=type.getASymmetricAuthentifiedSignatureType();
+		ASymmetricAuthenticatedSignatureType t=type.getASymmetricAuthenticatedSignatureType();
 		if (t== ASymmetricAuthenticatedSignatureType.BC_FIPS_Ed448 || t== ASymmetricAuthenticatedSignatureType.BC_FIPS_Ed25519) {
 			KeyPairGenerator kpg ;
 			if (t== ASymmetricAuthenticatedSignatureType.BC_FIPS_Ed448)
@@ -161,7 +161,7 @@ public class EllipticCurveDiffieHellmanAlgorithm extends KeyAgreement {
 		return myPublicKeyBytes;
 	}
 
-	private void setDistantPublicKey(byte[] distantPublicKeyBytes, SymmetricEncryptionType symmetricEncryptionType, SymmetricAuthentifiedSignatureType symmetricSignatureType, byte[] keyingMaterial) throws IOException {
+	private void setDistantPublicKey(byte[] distantPublicKeyBytes, SymmetricEncryptionType symmetricEncryptionType, SymmetricAuthenticatedSignatureType symmetricSignatureType, byte[] keyingMaterial) throws IOException {
 		CodeProvider.ensureProviderLoaded(type.getCodeProvider());
 		try
 		{
@@ -174,7 +174,7 @@ public class EllipticCurveDiffieHellmanAlgorithm extends KeyAgreement {
 				throw new IllegalArgumentException();
 			if (derivedKey != null)
 				throw new IllegalArgumentException(
-						"A key exchange process has already been begun. Use reset fonction before calling this function.");
+						"A key exchange process has already been begun. Use reset function before calling this function.");
 			ASymmetricPublicKey distantPublicKey=(ASymmetricPublicKey) AbstractKey.decode(distantPublicKeyBytes);
 			if (myKeyPair.getASymmetricPublicKey().equals(distantPublicKey))
 				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new InvalidKeyException("The local et distant public keys cannot be similar !"));

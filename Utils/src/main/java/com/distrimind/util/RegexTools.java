@@ -60,20 +60,20 @@ public class RegexTools {
 	 * @param punctuation
 	 *            the character must be include a punctuation :
 	 *            <p>!"#$%&amp;'()*+,-./:;&lt;=&gt;?@[\]^_`{|}~</p>
-	 * @param spaceortab
+	 * @param spaceOrTab
 	 *            the character must include space or tab's
 	 * @param exDecimalDigit
-	 *            the character must be an exadicimal number
+	 *            the character must be an Hexadecimal number
 	 * @param digit
-	 *            the character must be an dicimal number
-	 * @param uppperCase
+	 *            the character must be an decimal number
+	 * @param upperCase
 	 *            the character must be an upper case character
 	 * @param lowerCase
 	 *            the character must be lower case character
 	 * @return the compiled regex
 	 */
 	public static String getRegexCharMatch(boolean latin, boolean greek, boolean internationalChars,
-			boolean punctuation, boolean spaceortab, boolean exDecimalDigit, boolean digit, boolean uppperCase,
+			boolean punctuation, boolean spaceOrTab, boolean exDecimalDigit, boolean digit, boolean upperCase,
 			boolean lowerCase) {
 		StringBuilder pattern = new StringBuilder("[");
 		StringBuilder patternNot = new StringBuilder("&&[");
@@ -101,7 +101,7 @@ public class RegexTools {
 			pattern.append("\\p{Punct}");
 		else
 			patternNot.append("^\\p{Punct}");
-		if (spaceortab)
+		if (spaceOrTab)
 			pattern.append("\\p{Blank}");
 		else
 			patternNot.append("^\\p{Blank}");
@@ -111,9 +111,9 @@ public class RegexTools {
 			pattern.append("\\p{Digit}");
 		else if (!exDecimalDigit)
 			patternNot.append("^\\p{Digit}");
-		if (uppperCase && !lowerCase)
+		if (upperCase && !lowerCase)
 			pattern.append("\\p{Lu}");
-		if (lowerCase && !uppperCase)
+		if (lowerCase && !upperCase)
 			patternNot.append("^\\p{Lu}");
 		if (patternNot.length() > 3) {
 			patternNot.append("]");

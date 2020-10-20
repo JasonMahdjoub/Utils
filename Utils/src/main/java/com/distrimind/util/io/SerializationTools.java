@@ -1347,7 +1347,7 @@ public class SerializationTools {
 			MessageDigestType.class,
 			SecureRandomType.class,
 			SymmetricEncryptionType.class,
-			SymmetricAuthentifiedSignatureType.class,
+			SymmetricAuthenticatedSignatureType.class,
 			ASymmetricEncryptionType.class,
 			ASymmetricAuthenticatedSignatureType.class,
 			KeyAgreementType.class,

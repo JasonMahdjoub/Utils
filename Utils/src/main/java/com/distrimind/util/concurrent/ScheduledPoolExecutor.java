@@ -46,6 +46,7 @@ import java.util.concurrent.*;
  * @version 1.0
  * @since Utils 4.8.0
  */
+@SuppressWarnings("NullableProblems")
 public class ScheduledPoolExecutor extends PoolExecutor implements ScheduledExecutorService {
 	private final TreeSet<SF<?>> scheduledFutures=new TreeSet<>();
 	private boolean pull=false;
@@ -83,6 +84,7 @@ public class ScheduledPoolExecutor extends PoolExecutor implements ScheduledExec
 		super(minimumPoolSize, maximumPoolSize, keepAliveTime, unit, queueBaseSize, threadFactory, handler);
 	}
 
+	@SuppressWarnings("NullableProblems")
 	private class SF<T> extends PoolExecutor.Future<T> implements ScheduledFuture<T>
 	{
 		long start;
@@ -217,12 +219,9 @@ public class ScheduledPoolExecutor extends PoolExecutor implements ScheduledExec
 	public ScheduledFuture<?> schedule(final Runnable command, long delay, TimeUnit unit) {
 		if (command==null)
 			throw new NullPointerException();
-		SF<Void> r=new SF<>(new Callable<Void>() {
-			@Override
-			public Void call() {
-				command.run();
-				return null;
-			}
+		SF<Void> r=new SF<>(() -> {
+			command.run();
+			return null;
 		}, delay, unit);
 		if (delay<=0) {
 			execute(r);
@@ -249,12 +248,9 @@ public class ScheduledPoolExecutor extends PoolExecutor implements ScheduledExec
 	public ScheduledFuture<?> scheduleAtFixedRate(final Runnable command, long initialDelay, long period, TimeUnit unit) {
 		if (command==null)
 			throw new NullPointerException();
-		return schedule(new RatedSF<>(new Callable<Void>() {
-			@Override
-			public Void call()  {
-				command.run();
-				return null;
-			}
+		return schedule(new RatedSF<>((Callable<Void>) () -> {
+			command.run();
+			return null;
 		}, initialDelay, period, unit));
 	}
 
@@ -262,12 +258,9 @@ public class ScheduledPoolExecutor extends PoolExecutor implements ScheduledExec
 	public ScheduledFuture<?> scheduleWithFixedDelay(final Runnable command, long initialDelay, long delay, TimeUnit unit) {
 		if (command==null)
 			throw new NullPointerException();
-		return schedule(new DelayedSF<>(new Callable<Void>() {
-			@Override
-			public Void call() {
-				command.run();
-				return null;
-			}
+		return schedule(new DelayedSF<>((Callable<Void>) () -> {
+			command.run();
+			return null;
 		}, initialDelay, delay, unit));
 	}
 

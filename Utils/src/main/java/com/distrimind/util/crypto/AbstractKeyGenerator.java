@@ -47,13 +47,13 @@ import java.security.NoSuchProviderException;
  */
 public abstract class AbstractKeyGenerator {
 	protected final SymmetricEncryptionType encryptionType;
-	protected final SymmetricAuthentifiedSignatureType signatureType;
+	protected final SymmetricAuthenticatedSignatureType signatureType;
 
 	AbstractKeyGenerator(SymmetricEncryptionType type) {
 		this.encryptionType = type;
 		this.signatureType = null;
 	}
-	AbstractKeyGenerator(SymmetricAuthentifiedSignatureType type) {
+	AbstractKeyGenerator(SymmetricAuthenticatedSignatureType type) {
 		this.encryptionType = null;
 		this.signatureType = type;
 	}

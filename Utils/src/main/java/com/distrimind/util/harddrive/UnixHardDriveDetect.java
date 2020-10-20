@@ -52,7 +52,7 @@ abstract class UnixHardDriveDetect extends HardDriveDetect {
 		private final Partition partition;
 
 
-		private final ArrayList<UnixPartition> childs = new ArrayList<>();
+		private final ArrayList<UnixPartition> children = new ArrayList<>();
 
 		UnixPartition(Partition partition) {
 			this.partition=partition;
@@ -63,11 +63,11 @@ abstract class UnixHardDriveDetect extends HardDriveDetect {
 				return true;
 			} else {
 				if (_partition.partition.getMountPointOrLetter().getAbsolutePath().startsWith(partition.getMountPointOrLetter().getAbsolutePath())) {
-					for (UnixPartition hd : childs) {
+					for (UnixPartition hd : children) {
 						if (hd.addPartition(_partition))
 							return true;
 					}
-					childs.add(_partition);
+					children.add(_partition);
 					return true;
 				} else {
 					return false;
@@ -78,7 +78,7 @@ abstract class UnixHardDriveDetect extends HardDriveDetect {
 
 		private Partition getHardDriveIdentifier(String _canonical_path) {
 			if (_canonical_path.startsWith(partition.getMountPointOrLetter().getAbsolutePath())) {
-				for (UnixPartition p : childs) {
+				for (UnixPartition p : children) {
                     Partition res = p.getHardDriveIdentifier(_canonical_path);
 					if (res != null)
 						return res;

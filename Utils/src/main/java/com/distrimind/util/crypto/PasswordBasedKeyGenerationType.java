@@ -54,7 +54,7 @@ public enum PasswordBasedKeyGenerationType {
 	BC_FIPS_PBKFD2WithHMacSHA2_384(PasswordHashType.BC_FIPS_PBKFD2WithHMacSHA2_384),
 	BC_FIPS_PBKFD2WithHMacSHA2_512(PasswordHashType.BC_FIPS_PBKFD2WithHMacSHA2_512),
 	BC_SCRYPT_FOR_LOGIN(PasswordHashType.BC_SCRYPT_FOR_LOGIN),
-	BC_SCRYPT_FOR_DATAENCRYPTION(PasswordHashType.BC_SCRYPT_FOR_LOGIN),
+	BC_SCRYPT_FOR_DATA_ENCRYPTION(PasswordHashType.BC_SCRYPT_FOR_LOGIN),
 	DEFAULT(BC_FIPS_PBKFD2WithHMacSHA2_384);
 	
 	
@@ -75,15 +75,15 @@ public enum PasswordBasedKeyGenerationType {
 	{
 		this(other.passwordHashType);
 	}
-	public SymmetricSecretKey derivateKey(char[] password, byte[] salt, SymmetricEncryptionType type) throws IOException
+	public SymmetricSecretKey derivativeKey(char[] password, byte[] salt, SymmetricEncryptionType type) throws IOException
 	{
-		return derivateKey(password, salt, PasswordHash.DEFAULT_COST, type, type.getDefaultKeySizeBits());
+		return derivativeKey(password, salt, PasswordHash.DEFAULT_COST, type, type.getDefaultKeySizeBits());
 	}
-	public SymmetricSecretKey derivateKey(char[] password, byte[] salt, byte cost, SymmetricEncryptionType type) throws IOException
+	public SymmetricSecretKey derivativeKey(char[] password, byte[] salt, byte cost, SymmetricEncryptionType type) throws IOException
 	{
-		return derivateKey(password, salt, cost, type, type.getDefaultKeySizeBits());
+		return derivativeKey(password, salt, cost, type, type.getDefaultKeySizeBits());
 	}
-	public SymmetricSecretKey derivateKey(char[] password, byte[] salt, byte cost, SymmetricEncryptionType type, short keySizeBits) throws IOException {
+	public SymmetricSecretKey derivativeKey(char[] password, byte[] salt, byte cost, SymmetricEncryptionType type, short keySizeBits) throws IOException {
 		if (cost<4 || cost>31)
 			throw new IllegalArgumentException("cost must be greater or equals than 4 and lower or equals than 31");
 		if (getCodeProvider()==CodeProvider.GNU_CRYPTO)
@@ -95,16 +95,16 @@ public enum PasswordBasedKeyGenerationType {
 			return new SymmetricSecretKey(type, new SecretKeySpec(passwordHashType.hash(password, salt, cost, (byte)(keySizeBits/8)), type.getAlgorithmName()), keySizeBits);
 		}
 	}
-	public SymmetricSecretKey derivateKey(char[] password, byte[] salt, byte cost, SymmetricAuthentifiedSignatureType type) throws IOException
+	public SymmetricSecretKey derivativeKey(char[] password, byte[] salt, byte cost, SymmetricAuthenticatedSignatureType type) throws IOException
 	{
-		return derivateKey(password, salt, cost, type, type.getDefaultKeySizeBits());
+		return derivativeKey(password, salt, cost, type, type.getDefaultKeySizeBits());
 	}
-	public SymmetricSecretKey derivateKey(char[] password, byte[] salt, SymmetricAuthentifiedSignatureType type) throws IOException
+	public SymmetricSecretKey derivativeKey(char[] password, byte[] salt, SymmetricAuthenticatedSignatureType type) throws IOException
 	{
-		return derivateKey(password, salt, PasswordHash.DEFAULT_COST, type, type.getDefaultKeySizeBits());
+		return derivativeKey(password, salt, PasswordHash.DEFAULT_COST, type, type.getDefaultKeySizeBits());
 	}
 	
-	public SymmetricSecretKey derivateKey(char[] password, byte[] salt, byte cost, SymmetricAuthentifiedSignatureType type, short keySizeBits) throws IOException {
+	public SymmetricSecretKey derivativeKey(char[] password, byte[] salt, byte cost, SymmetricAuthenticatedSignatureType type, short keySizeBits) throws IOException {
 		if (cost<4 || cost>31)
 			throw new IllegalArgumentException("cost must be greater or equals than 4 and lower or equals than 31");
 		return new SymmetricSecretKey(type, new SecretKeySpec(passwordHashType.hash(password, salt, cost, (byte)(keySizeBits/8)), type.getAlgorithmName()), keySizeBits);

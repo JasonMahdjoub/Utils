@@ -55,6 +55,7 @@ public class HumanReadableBytesCount {
     private static final String[] units =new String[]{"octet", "byte"};
     //private static final String pluralUnits[]=new String[]{"octets", "bytes"};
     private static final String[] presSI =new String[]{"", "kilo","mega", "giga", "tera", "peta", "exa", "zetta"};
+    @SuppressWarnings("SpellCheckingInspection")
     private static final String[] presBin =new String[]{"", "kibio","mebio", "gibio", "tebio", "pebio", "exbio", "zebio"};
     private static final String[] presSIShort =new String[]{"", "k","M", "G", "T", "P", "E", "Z"};
     private static final String[] presBinShort =new String[]{"", "K","M", "G", "T", "P", "E", "Z"};

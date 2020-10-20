@@ -64,7 +64,7 @@ public class SymmetricSecretKey extends AbstractKey {
 	private final short keySizeBits;
 
 	private SymmetricEncryptionType encryptionType;
-	private SymmetricAuthentifiedSignatureType signatureType;
+	private SymmetricAuthenticatedSignatureType signatureType;
 
 	private final int hashCode;
 
@@ -111,10 +111,10 @@ public class SymmetricSecretKey extends AbstractKey {
 	public SymmetricSecretKeyPair getDerivedSecretKeyPair(MessageDigestType messageDigestType, SymmetricEncryptionType encryptionType) throws NoSuchProviderException, NoSuchAlgorithmException {
 		return getDerivedSecretKeyPair(messageDigestType, encryptionType, signatureType);
 	}
-	public SymmetricSecretKeyPair getDerivedSecretKeyPair(MessageDigestType messageDigestType, SymmetricAuthentifiedSignatureType signatureType) throws NoSuchProviderException, NoSuchAlgorithmException {
+	public SymmetricSecretKeyPair getDerivedSecretKeyPair(MessageDigestType messageDigestType, SymmetricAuthenticatedSignatureType signatureType) throws NoSuchProviderException, NoSuchAlgorithmException {
 		return getDerivedSecretKeyPair(messageDigestType, encryptionType, signatureType);
 	}
-	private SymmetricSecretKeyPair getDerivedSecretKeyPair(MessageDigestType messageDigestType, SymmetricEncryptionType encryptionType, SymmetricAuthentifiedSignatureType signatureType) throws NoSuchProviderException, NoSuchAlgorithmException {
+	private SymmetricSecretKeyPair getDerivedSecretKeyPair(MessageDigestType messageDigestType, SymmetricEncryptionType encryptionType, SymmetricAuthenticatedSignatureType signatureType) throws NoSuchProviderException, NoSuchAlgorithmException {
 		if (messageDigestType.getDigestLengthInBits()/2<keySizeBits)
 			throw new IllegalArgumentException("The message digest digest length must be twice the size the key");
 		if (signatureType==null)
@@ -188,7 +188,7 @@ public class SymmetricSecretKey extends AbstractKey {
 		hashCode = Arrays.hashCode(this.secretKey);
 		Arrays.fill(secretKey, (byte)0);
 	}
-	SymmetricSecretKey(SymmetricAuthentifiedSignatureType type, byte[] secretKey, short keySize) {
+	SymmetricSecretKey(SymmetricAuthenticatedSignatureType type, byte[] secretKey, short keySize) {
 		this(secretKey, keySize);
 		if (type == null)
 			throw new NullPointerException("type");
@@ -196,7 +196,7 @@ public class SymmetricSecretKey extends AbstractKey {
 		this.signatureType=type;
 		//Arrays.fill(secretKey, (byte)0);
 	}
-	SymmetricSecretKey(SymmetricAuthentifiedSignatureType type, byte[] secretKey) {
+	SymmetricSecretKey(SymmetricAuthenticatedSignatureType type, byte[] secretKey) {
 		if (type == null)
 			throw new NullPointerException("type");
 		if (secretKey == null)
@@ -218,7 +218,7 @@ public class SymmetricSecretKey extends AbstractKey {
 	}
 	
 	
-	SymmetricSecretKey(SymmetricAuthentifiedSignatureType type, Object secretKey, short keySize) {
+	SymmetricSecretKey(SymmetricAuthenticatedSignatureType type, Object secretKey, short keySize) {
 		this(SymmetricEncryptionType.encodeGnuSecretKey(secretKey), keySize);
 		if (type.getCodeProviderForSignature() != CodeProvider.GNU_CRYPTO)
 			throw new IllegalAccessError();
@@ -235,7 +235,7 @@ public class SymmetricSecretKey extends AbstractKey {
 		this.signatureType=null;
 		this.javaNativeSecretKey=secretKey;
 	}
-	SymmetricSecretKey(SymmetricAuthentifiedSignatureType type, SecretKey secretKey, short keySize) {
+	SymmetricSecretKey(SymmetricAuthenticatedSignatureType type, SecretKey secretKey, short keySize) {
 		this(SymmetricEncryptionType.encodeSecretKey(secretKey), keySize);
 		if (type.getCodeProviderForSignature() == CodeProvider.GNU_CRYPTO)
 			throw new IllegalAccessError();
@@ -254,7 +254,7 @@ public class SymmetricSecretKey extends AbstractKey {
 		this.bcfipsNativeSecretKey=new com.distrimind.bcfips.crypto.SymmetricSecretKey(getBouncyCastleAlgorithm(), secretKey.getKeyBytes());
 	}
 	
-	SymmetricSecretKey(SymmetricAuthentifiedSignatureType type, com.distrimind.bcfips.crypto.SymmetricSecretKey secretKey, short keySize) {
+	SymmetricSecretKey(SymmetricAuthenticatedSignatureType type, com.distrimind.bcfips.crypto.SymmetricSecretKey secretKey, short keySize) {
 		this(SymmetricEncryptionType.encodeSecretKey(secretKey), keySize);
 		if (type.getCodeProviderForSignature() == CodeProvider.GNU_CRYPTO)
 			throw new IllegalAccessError();
@@ -273,7 +273,7 @@ public class SymmetricSecretKey extends AbstractKey {
 
 	static final int ENCODED_TYPE_SIZE;
 	static {
-		int max=Math.max(SymmetricEncryptionType.values().length, SymmetricAuthentifiedSignatureType.values().length);
+		int max=Math.max(SymmetricEncryptionType.values().length, SymmetricAuthenticatedSignatureType.values().length);
 		if (max<=0xFF)
 			ENCODED_TYPE_SIZE=1;
 		else if (max<=0xFFFF)
@@ -334,7 +334,7 @@ public class SymmetricSecretKey extends AbstractKey {
 	public SymmetricEncryptionType getEncryptionAlgorithmType() {
 		return encryptionType;
 	}
-	public SymmetricAuthentifiedSignatureType getAuthenticatedSignatureAlgorithmType() {
+	public SymmetricAuthenticatedSignatureType getAuthenticatedSignatureAlgorithmType() {
 		return signatureType;
 	}
 

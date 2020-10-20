@@ -50,7 +50,7 @@ public class GnuKeyGenerator extends AbstractKeyGenerator {
 		super(type);
 		this.keyGenerator = keyGenerator;
 	}
-	GnuKeyGenerator(SymmetricAuthentifiedSignatureType type, Object keyGenerator) {
+	GnuKeyGenerator(SymmetricAuthenticatedSignatureType type, Object keyGenerator) {
 		super(type);
 		this.keyGenerator = keyGenerator;
 	}

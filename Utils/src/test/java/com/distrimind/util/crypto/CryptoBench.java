@@ -71,7 +71,7 @@ public class CryptoBench {
 		EncryptionSignatureHashEncoder encoder=new EncryptionSignatureHashEncoder()
 				.withSymmetricSecretKeyForEncryption(SecureRandomType.FORTUNA_WITH_BC_FIPS_APPROVED.getInstance(null), secretKeyForEncryption);
 		SymmetricSecretKey secretKeyForSignature=null;
-		SymmetricAuthentifiedSignatureType sigType=type.getDefaultSignatureAlgorithm();
+		SymmetricAuthenticatedSignatureType sigType=type.getDefaultSignatureAlgorithm();
 		if (!type.isAuthenticatedAlgorithm()) {
 			secretKeyForSignature=sigType.getKeyGenerator(SecureRandomType.FORTUNA_WITH_BC_FIPS_APPROVED_FOR_KEYS.getInstance(null), type.getDefaultKeySizeBits() >= 128 ? 256 : type.getDefaultKeySizeBits()).generateKey();
 			encoder.withSymmetricSecretKeyForSignature(secretKeyForSignature);
@@ -93,7 +93,7 @@ public class CryptoBench {
 				messages.add(message);
 			}
 		}
-		double ms=timer.getMilid();
+		double ms=timer.getMilliDouble();
 		double speedEncoding=(toEncrypt.length/(ms/1000.0)/1024.0/1024.0);
 		System.out.println(type+" - Encryption speed  : "+speedEncoding+" MiO/s");
 
@@ -105,7 +105,7 @@ public class CryptoBench {
 						.decodeAndCheckHashAndSignaturesIfNecessary(out);
 			}
 		}
-		double ms2=timer.getMilid();
+		double ms2=timer.getMilliDouble();
 
 		double speedDecoding=(toEncrypt.length/(ms2/1000.0)/1024.0/1024.0);
 		double averageSpeedEncodingAndDecoding=(speedDecoding+speedEncoding)/2.0;

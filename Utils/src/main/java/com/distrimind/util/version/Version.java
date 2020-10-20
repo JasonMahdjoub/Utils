@@ -73,7 +73,7 @@ import com.distrimind.util.properties.MultiFormatProperties;
  * @see Person
  * @see PersonDeveloper
  */
-@SuppressWarnings("FieldMayBeFinal")
+@SuppressWarnings({"FieldMayBeFinal", "NullableProblems"})
 public class Version extends MultiFormatProperties implements Comparable<Version> {
 	public enum Type {
 		Stable, Alpha, Beta, RC
@@ -320,10 +320,10 @@ public class Version extends MultiFormatProperties implements Comparable<Version
 
 			JLabel j = new JLabel(this.getHTMLCode());
 			j.setAlignmentY(Component.TOP_ALIGNMENT);
-			JScrollPane scrollpane = new JScrollPane(j);
-			scrollpane.getVerticalScrollBar().setUnitIncrement(15);
-			scrollpane.setAlignmentY(Component.TOP_ALIGNMENT);
-			f.add(scrollpane, BorderLayout.CENTER);
+			JScrollPane scrollPane = new JScrollPane(j);
+			scrollPane.getVerticalScrollBar().setUnitIncrement(15);
+			scrollPane.setAlignmentY(Component.TOP_ALIGNMENT);
+			f.add(scrollPane, BorderLayout.CENTER);
 			f.setSize(800, 600);
 			f.setResizable(false);
 		}
@@ -400,8 +400,8 @@ public class Version extends MultiFormatProperties implements Comparable<Version
 		getJFrame().setVisible(true);
 	}
 
-	public void setBuildNumber(int _buil_number) {
-		m_build_number = _buil_number;
+	public void setBuildNumber(int _build_number) {
+		m_build_number = _build_number;
 	}
 
 	@Override
@@ -435,6 +435,6 @@ public class Version extends MultiFormatProperties implements Comparable<Version
 				+ ((m_type.equals(Type.Alpha) || m_type.equals(Type.Beta))
 						? " " + Integer.toString(m_alpha_beta_version)
 						: "")
-				+ " (Build: " + Integer.toString(m_build_number) + ")";
+				+ " (Build: " + m_build_number + ")";
 	}
 }

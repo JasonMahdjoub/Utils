@@ -166,11 +166,11 @@ public final class JavaNativeCipher extends AbstractCipher {
 
 
 	@Override
-	public void init(int _opmode, AbstractKey _key, AbstractSecureRandom _random)
+	public void init(int opMode, AbstractKey _key, AbstractSecureRandom _random)
 			throws IOException {
-		mode=_opmode;
+		mode= opMode;
 		try {
-			cipher.init(_opmode, _key.toJavaNativeKey(), setSecureRandom(_random));
+			cipher.init(opMode, _key.toJavaNativeKey(), setSecureRandom(_random));
 		} catch (InvalidKeyException | InvalidKeySpecException | NoSuchAlgorithmException e) {
 			throw new MessageExternalizationException(Integrity.FAIL, e);
 		}
@@ -178,10 +178,10 @@ public final class JavaNativeCipher extends AbstractCipher {
 	}
 
 	@Override
-	public void init(int _opmode, AbstractKey _key) throws IOException {
-		mode=_opmode;
+	public void init(int opMode, AbstractKey _key) throws IOException {
+		mode= opMode;
 		try {
-			cipher.init(_opmode, _key.toJavaNativeKey());
+			cipher.init(opMode, _key.toJavaNativeKey());
 		} catch (InvalidKeyException | InvalidKeySpecException | NoSuchAlgorithmException e) {
 			throw new MessageExternalizationException(Integrity.FAIL, e);
 		}
@@ -189,15 +189,15 @@ public final class JavaNativeCipher extends AbstractCipher {
 
 
 	@Override
-	public void init(int _opmode, AbstractKey _key, byte[] _iv) throws IOException {
-		mode=_opmode;
+	public void init(int opMode, AbstractKey _key, byte[] _iv) throws IOException {
+		mode= opMode;
 		try {
 			if (type != null && type.getBlockMode().toUpperCase().equals("GCM"))
-				cipher.init(_opmode, _key.toJavaNativeKey(), new GCMParameterSpec(128, _iv));
+				cipher.init(opMode, _key.toJavaNativeKey(), new GCMParameterSpec(128, _iv));
 			else if (type != null && type.equals(SymmetricEncryptionType.CHACHA20_NO_RANDOM_ACCESS))
-				init(_opmode, _key, _iv, 0);
+				init(opMode, _key, _iv, 0);
 			else
-				cipher.init(_opmode, _key.toJavaNativeKey(), new IvParameterSpec(_iv));
+				cipher.init(opMode, _key.toJavaNativeKey(), new IvParameterSpec(_iv));
 		}catch (InvalidKeyException | InvalidKeySpecException | InvalidAlgorithmParameterException | NoSuchAlgorithmException e) {
 			throw new MessageExternalizationException(Integrity.FAIL, e);
 		}
@@ -220,14 +220,14 @@ public final class JavaNativeCipher extends AbstractCipher {
 	}
 
 	@Override
-	public void init(int opmode, AbstractKey key, byte[] iv, int counter) throws IOException {
+	public void init(int opMode, AbstractKey key, byte[] iv, int counter) throws IOException {
 
-		mode=opmode;
+		mode= opMode;
 		if (type.equals(SymmetricEncryptionType.CHACHA20_NO_RANDOM_ACCESS))
 		{
 			try {
 
-				cipher.init(opmode, key.toJavaNativeKey(), constChachaParam.newInstance(iv, counter));
+				cipher.init(opMode, key.toJavaNativeKey(), constChachaParam.newInstance(iv, counter));
 			} catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
 				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, (Exception)e.getCause());
 			}
@@ -238,7 +238,7 @@ public final class JavaNativeCipher extends AbstractCipher {
 			}
 		}
 		else
-			super.init(opmode, key, iv, counter);
+			super.init(opMode, key, iv, counter);
 
 	}
 

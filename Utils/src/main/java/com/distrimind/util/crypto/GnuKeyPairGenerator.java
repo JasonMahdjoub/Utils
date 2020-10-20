@@ -72,17 +72,17 @@ public final class GnuKeyPairGenerator extends AbstractKeyPairGenerator {
 	}
 
 	@Override
-	public void initialize(int _keysize, long expirationTime) {
+	public void initialize(int keySize, long expirationTime) {
 
-		GnuFunctions.keyPairGeneratorInit(keyPairGenerator, _keysize);
-		this.keySize = _keysize;
+		GnuFunctions.keyPairGeneratorInit(keyPairGenerator, keySize);
+		this.keySize = keySize;
 		this.expirationTime = expirationTime;
 	}
 
 	@Override
-	public void initialize(int _keysize, long expirationTime, AbstractSecureRandom _random) {
-		GnuFunctions.keyPairGeneratorInit(keyPairGenerator, _keysize, _random);
-		this.keySize = _keysize;
+	public void initialize(int keySize, long expirationTime, AbstractSecureRandom _random) {
+		GnuFunctions.keyPairGeneratorInit(keyPairGenerator, keySize, _random);
+		this.keySize = keySize;
 		this.expirationTime = expirationTime;
 
 	}

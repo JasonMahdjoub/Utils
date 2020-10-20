@@ -47,6 +47,7 @@ import java.io.IOException;
  * @version 1.0
  * @since Utils 3.27.0
  */
+@SuppressWarnings("NullableProblems")
 public abstract class RandomOutputStream extends SecuredObjectOutputStream implements AutoCloseable {
 	/*
 	 * public int write(byte[] _bytes) throws OutputStreamException; public int

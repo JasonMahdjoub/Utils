@@ -51,7 +51,7 @@ import java.util.Arrays;
  * @version 3.1
  * @since Utils 2.10.0
  */
-public enum SymmetricAuthentifiedSignatureType {
+public enum SymmetricAuthenticatedSignatureType {
 	HMAC_SHA2_256("HmacSHA256", CodeProvider.SunJCE, CodeProvider.SunJCE, (short)128, (short)16, MessageDigestType.SHA2_256, null), 
 	HMAC_SHA2_384("HmacSHA384", CodeProvider.SunJCE, CodeProvider.SunJCE, (short)128, (short)16, MessageDigestType.SHA2_384, null), 
 	HMAC_SHA2_512("HmacSHA512", CodeProvider.SunJCE, CodeProvider.SunJCE, (short)128, (short)16, MessageDigestType.SHA2_512, null),
@@ -81,11 +81,11 @@ public enum SymmetricAuthentifiedSignatureType {
 	private final short keySizeBytes;
 	private final MessageDigestType messageDigestType;
 	private final AuthParameters messageDigestAuth;
-    private final SymmetricAuthentifiedSignatureType replacer;
+    private final SymmetricAuthenticatedSignatureType replacer;
 
 	public final static int MAX_SYMMETRIC_SIGNATURE_SIZE=64;
 
-    public boolean equals(SymmetricAuthentifiedSignatureType type)
+    public boolean equals(SymmetricAuthenticatedSignatureType type)
 	{
 		if (type==this)
 			return true;
@@ -95,11 +95,11 @@ public enum SymmetricAuthentifiedSignatureType {
 		return this.algorithmName==type.algorithmName && this.codeProviderForSignature==type.codeProviderForSignature && this.codeProviderForKeyGenerator==type.codeProviderForKeyGenerator;
 	}
 
-	SymmetricAuthentifiedSignatureType(String algorithmName, CodeProvider codeProviderForSignature, CodeProvider codeProviderForKeyGenerator, short keySizeBits, short keySizeBytes, MessageDigestType messageDigestType, AuthParameters messageDigestAuth) {
+	SymmetricAuthenticatedSignatureType(String algorithmName, CodeProvider codeProviderForSignature, CodeProvider codeProviderForKeyGenerator, short keySizeBits, short keySizeBytes, MessageDigestType messageDigestType, AuthParameters messageDigestAuth) {
         this(algorithmName,codeProviderForSignature, codeProviderForKeyGenerator, keySizeBits, keySizeBytes, messageDigestType, messageDigestAuth, null);
 
 	}
-    SymmetricAuthentifiedSignatureType(String algorithmName, CodeProvider codeProviderForSignature, CodeProvider codeProviderForKeyGenerator, short keySizeBits, short keySizeBytes, MessageDigestType messageDigestType, AuthParameters messageDigestAuth, SymmetricAuthentifiedSignatureType replacer) {
+    SymmetricAuthenticatedSignatureType(String algorithmName, CodeProvider codeProviderForSignature, CodeProvider codeProviderForKeyGenerator, short keySizeBits, short keySizeBytes, MessageDigestType messageDigestType, AuthParameters messageDigestAuth, SymmetricAuthenticatedSignatureType replacer) {
         this.algorithmName = algorithmName;
         this.codeProviderForSignature = codeProviderForSignature;
         this.codeProviderForKeyGenerator=codeProviderForKeyGenerator;
@@ -130,7 +130,7 @@ public enum SymmetricAuthentifiedSignatureType {
 
 
 
-	SymmetricAuthentifiedSignatureType(SymmetricAuthentifiedSignatureType other) {
+	SymmetricAuthenticatedSignatureType(SymmetricAuthenticatedSignatureType other) {
 		
 		this(other.algorithmName, other.codeProviderForSignature, other.codeProviderForKeyGenerator, other.keySizeBits, other.keySizeBytes, other.messageDigestType, other.messageDigestAuth, other.replacer);
 	}
@@ -189,8 +189,8 @@ public enum SymmetricAuthentifiedSignatureType {
 		return getKeyGenerator(random, keySizeBits);
 	}
 	
-	static SymmetricAuthentifiedSignatureType valueOf(int ordinal) throws IllegalArgumentException {
-		for (SymmetricAuthentifiedSignatureType a : values()) {
+	static SymmetricAuthenticatedSignatureType valueOf(int ordinal) throws IllegalArgumentException {
+		for (SymmetricAuthenticatedSignatureType a : values()) {
 			if (a.ordinal() == ordinal)
 				return a;
 		}

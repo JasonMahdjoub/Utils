@@ -65,7 +65,7 @@ public class TestsForSymmetricEncryption {
 		new SymmetricEncryptionAlgorithm(random, key);
 		Assert.assertEquals(DecentralizedValue.decode(key.encode()), key);
 		Assert.assertEquals(DecentralizedValue.valueOf(key.encodeString()), key);
-		SymmetricSecretKeyPair keyPair=key.getDerivedSecretKeyPair(MessageDigestType.BC_FIPS_SHA3_512, SymmetricAuthentifiedSignatureType.HMAC_SHA2_256);
+		SymmetricSecretKeyPair keyPair=key.getDerivedSecretKeyPair(MessageDigestType.BC_FIPS_SHA3_512, SymmetricAuthenticatedSignatureType.HMAC_SHA2_256);
 		Assert.assertEquals(DecentralizedValue.decode(keyPair.encode()), keyPair);
 		Assert.assertEquals(DecentralizedValue.valueOf(keyPair.encodeString()), keyPair);
 
@@ -83,7 +83,7 @@ public class TestsForSymmetricEncryption {
 
 	@Test(dependsOnMethods = {"testSymmetricEncryptions"})
 	public void testSymmetricKeyPair() throws NoSuchProviderException, NoSuchAlgorithmException {
-		SymmetricAuthentifiedSignatureType sigType=SymmetricAuthentifiedSignatureType.HMAC_SHA2_256;
+		SymmetricAuthenticatedSignatureType sigType= SymmetricAuthenticatedSignatureType.HMAC_SHA2_256;
 		SymmetricSecretKey ke=SymmetricEncryptionType.DEFAULT.getKeyGenerator(SecureRandomType.DEFAULT.getSingleton(null), (short)256).generateKey();
 		SymmetricSecretKeyPair ske=ke.getDerivedSecretKeyPair(MessageDigestType.BC_FIPS_SHA3_512, sigType);
 		Assert.assertEquals(ke.getEncryptionAlgorithmType(), ske.getSecretKeyForEncryption().getEncryptionAlgorithmType());
@@ -243,7 +243,7 @@ public class TestsForSymmetricEncryption {
 	@Test(dataProvider = "getSymmetricSecretKeysToTestForSecretKeyWrappingWithPassword")
 	public void testSymmetricSecretKeyWrappingWithPassword(SymmetricKeyWrapperType keyWrapperType, SymmetricSecretKey secretKey) throws NoSuchProviderException, NoSuchAlgorithmException, IOException {
 		String password="MyPassword";
-		PasswordHashType passwordHashType=PasswordHashType.BC_SCRYPT_FOR_DATAENCRYPTION;
+		PasswordHashType passwordHashType=PasswordHashType.BC_SCRYPT_FOR_DATA_ENCRYPTION;
 		byte[] encryptedSecretKey=keyWrapperType.wrapKey(passwordHashType, password, secretKey, SecureRandomType.DEFAULT.getSingleton(null));
 		System.out.println("Bytes tab length : "+encryptedSecretKey.length);
 		System.out.println(Base64.getUrlEncoder().encodeToString(encryptedSecretKey));
@@ -270,7 +270,7 @@ public class TestsForSymmetricEncryption {
 					if (encryption) {
 						res[index++][1] = SymmetricEncryptionType.AES_CBC_PKCS5Padding.getKeyGenerator(SecureRandomType.DEFAULT.getSingleton(null), keySize).generateKey();
 					} else {
-						res[index++][1] = SymmetricAuthentifiedSignatureType.HMAC_SHA2_256.getKeyGenerator(SecureRandomType.DEFAULT.getSingleton(null), keySize).generateKey();
+						res[index++][1] = SymmetricAuthenticatedSignatureType.HMAC_SHA2_256.getKeyGenerator(SecureRandomType.DEFAULT.getSingleton(null), keySize).generateKey();
 					}
 				}
 			}
@@ -347,11 +347,11 @@ public class TestsForSymmetricEncryption {
 		Random r=new Random(System.currentTimeMillis());
 		byte[] salt=new byte[32];
 		r.nextBytes(salt);
-		SymmetricSecretKey key1=derivationType.derivateKey(password.toCharArray(), salt, (byte)7, encryptionType);
+		SymmetricSecretKey key1=derivationType.derivativeKey(password.toCharArray(), salt, (byte)7, encryptionType);
 		Assert.assertEquals(key1.getKeySizeBits(), encryptionType.getDefaultKeySizeBits());
 		Assert.assertEquals(key1.getEncryptionAlgorithmType(), encryptionType);
-		Assert.assertEquals(key1.encode(), derivationType.derivateKey(password.toCharArray(), salt, (byte)7, encryptionType).encode());
-		Assert.assertNotEquals(key1.encode(), derivationType.derivateKey(invalidPassword.toCharArray(), salt,(byte) 7, encryptionType).encode());
+		Assert.assertEquals(key1.encode(), derivationType.derivativeKey(password.toCharArray(), salt, (byte)7, encryptionType).encode());
+		Assert.assertNotEquals(key1.encode(), derivationType.derivativeKey(invalidPassword.toCharArray(), salt,(byte) 7, encryptionType).encode());
 	}
 	@DataProvider(name = "provideDataForTestSymmetricEncryptionCompatibility", parallel = true)
 	public Object[][] provideDataForTestSymmetricEncryptionCompatibility() {

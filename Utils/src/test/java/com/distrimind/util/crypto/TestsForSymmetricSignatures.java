@@ -52,7 +52,7 @@ import java.util.Random;
  */
 public class TestsForSymmetricSignatures {
 	@Test(dataProvider = "provideDataForSymmetricSignatureTest")
-	public void testSymmetricSignatures(SymmetricAuthentifiedSignatureType type, SymmetricSecretKey secretKey)
+	public void testSymmetricSignatures(SymmetricAuthenticatedSignatureType type, SymmetricSecretKey secretKey)
 			throws NoSuchAlgorithmException,
 			NoSuchProviderException, IllegalStateException, IOException {
 		System.out.println("Testing symmetric signature : " + secretKey.getAuthenticatedSignatureAlgorithmType());
@@ -63,7 +63,7 @@ public class TestsForSymmetricSignatures {
 	}
 
 	@Test(dataProvider = "symmetricSignatures")
-	public void testBase64(SymmetricAuthentifiedSignatureType signatureType) throws NoSuchProviderException, NoSuchAlgorithmException {
+	public void testBase64(SymmetricAuthenticatedSignatureType signatureType) throws NoSuchProviderException, NoSuchAlgorithmException {
 
 		SymmetricSecretKey key1=signatureType.getKeyGenerator(SecureRandomType.DEFAULT.getSingleton(null), signatureType.getDefaultKeySizeBits()).generateKey();
 
@@ -76,13 +76,13 @@ public class TestsForSymmetricSignatures {
 	@DataProvider(name="provideDataSymmetricKeyWrapperForSignature", parallel=true)
 	public Object[][] provideDataSymmetricKeyWrapperForSignature()
 	{
-		Object [][] res=new Object[SymmetricKeyWrapperType.values().length*SymmetricEncryptionType.values().length*SymmetricAuthentifiedSignatureType.values().length][];
+		Object [][] res=new Object[SymmetricKeyWrapperType.values().length*SymmetricEncryptionType.values().length* SymmetricAuthenticatedSignatureType.values().length][];
 		int index=0;
 		for (SymmetricKeyWrapperType akpw : SymmetricKeyWrapperType.values())
 		{
 			for (SymmetricEncryptionType aet : SymmetricEncryptionType.values())
 			{
-				for (SymmetricAuthentifiedSignatureType set : SymmetricAuthentifiedSignatureType.values())
+				for (SymmetricAuthenticatedSignatureType set : SymmetricAuthenticatedSignatureType.values())
 				{
 					if ((akpw.getCodeProvider()==CodeProvider.GNU_CRYPTO)==(aet.getCodeProviderForEncryption()==CodeProvider.GNU_CRYPTO) && (akpw.getCodeProvider()==CodeProvider.GNU_CRYPTO)==(set.getCodeProviderForSignature()==CodeProvider.GNU_CRYPTO)
 							&& akpw.getAlgorithmName().startsWith(aet.getAlgorithmName()))
@@ -101,7 +101,7 @@ public class TestsForSymmetricSignatures {
 		return res2;
 	}
 	@Test(dataProvider="provideDataSymmetricKeyWrapperForSignature")
-	public void testSymmetricKeyWrapperForSignature(SymmetricKeyWrapperType typeWrapper, SymmetricEncryptionType asetype, SymmetricAuthentifiedSignatureType setype) throws NoSuchAlgorithmException, IllegalStateException, NoSuchProviderException, IOException {
+	public void testSymmetricKeyWrapperForSignature(SymmetricKeyWrapperType typeWrapper, SymmetricEncryptionType asetype, SymmetricAuthenticatedSignatureType setype) throws NoSuchAlgorithmException, IllegalStateException, NoSuchProviderException, IOException {
 		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getSingleton(null);
 		SymmetricSecretKey kp=asetype.getKeyGenerator(rand, (short)128).generateKey();
 		SymmetricSecretKey sk= setype.getKeyGenerator(rand, (short)128).generateKey();
@@ -119,11 +119,11 @@ public class TestsForSymmetricSignatures {
 	@DataProvider(name="providePasswordKeyDerivationTypesForSymmetricSignatures", parallel=true)
 	public Object[][] providePasswordKeyDerivationTypesForSymmetricSignatures()
 	{
-		Object[][] res=new Object[PasswordBasedKeyGenerationType.values().length*SymmetricAuthentifiedSignatureType.values().length][];
+		Object[][] res=new Object[PasswordBasedKeyGenerationType.values().length* SymmetricAuthenticatedSignatureType.values().length][];
 		int index=0;
 		for (PasswordBasedKeyGenerationType p : PasswordBasedKeyGenerationType.values())
 		{
-			for (SymmetricAuthentifiedSignatureType s : SymmetricAuthentifiedSignatureType.values())
+			for (SymmetricAuthenticatedSignatureType s : SymmetricAuthenticatedSignatureType.values())
 			{
 				if ((p.getCodeProvider()==CodeProvider.GNU_CRYPTO)==(s.getCodeProviderForSignature()==CodeProvider.GNU_CRYPTO))
 				{
@@ -139,24 +139,24 @@ public class TestsForSymmetricSignatures {
 		return res2;
 	}
 	@Test(dataProvider = "providePasswordKeyDerivationTypesForSymmetricSignatures")
-	public void testPasswordKeyDerivation(PasswordBasedKeyGenerationType derivationType, SymmetricAuthentifiedSignatureType signatureType) throws IOException {
+	public void testPasswordKeyDerivation(PasswordBasedKeyGenerationType derivationType, SymmetricAuthenticatedSignatureType signatureType) throws IOException {
 		String password = "password";
 		String invalidPassword = "invalid password";
 		Random r=new Random(System.currentTimeMillis());
 		byte[] salt=new byte[32];
 		r.nextBytes(salt);
-		SymmetricSecretKey key1=derivationType.derivateKey(password.toCharArray(), salt, (byte)7, signatureType);
+		SymmetricSecretKey key1=derivationType.derivativeKey(password.toCharArray(), salt, (byte)7, signatureType);
 		Assert.assertEquals(key1.getKeySizeBits(), signatureType.getDefaultKeySizeBits());
 		Assert.assertEquals(key1.getAuthenticatedSignatureAlgorithmType(), signatureType);
-		Assert.assertEquals(key1.encode(), derivationType.derivateKey(password.toCharArray(), salt, (byte)7, signatureType).encode());
-		Assert.assertNotEquals(key1.encode(), derivationType.derivateKey(invalidPassword.toCharArray(), salt, (byte)7, signatureType).encode());
+		Assert.assertEquals(key1.encode(), derivationType.derivativeKey(password.toCharArray(), salt, (byte)7, signatureType).encode());
+		Assert.assertNotEquals(key1.encode(), derivationType.derivativeKey(invalidPassword.toCharArray(), salt, (byte)7, signatureType).encode());
 	}
 
 	@DataProvider(name = "symmetricSignatures", parallel = true)
 	public Object[][] provideDataForSymetricSignatures() {
-		Object[][] res = new Object[SymmetricAuthentifiedSignatureType.values().length][];
+		Object[][] res = new Object[SymmetricAuthenticatedSignatureType.values().length][];
 		int i = 0;
-		for (SymmetricAuthentifiedSignatureType v : SymmetricAuthentifiedSignatureType.values()) {
+		for (SymmetricAuthenticatedSignatureType v : SymmetricAuthenticatedSignatureType.values()) {
 			Object[] o = new Object[1];
 			o[0] = v;
 			res[i++] = o;
@@ -165,17 +165,17 @@ public class TestsForSymmetricSignatures {
 	}
 	@DataProvider(name = "provideDataForSymmetricSignatureTest", parallel = true)
 	public Object[][] provideDataForSymmetricSignatureTest() throws NoSuchAlgorithmException, NoSuchProviderException {
-		Object[][] res = new Object[SymmetricAuthentifiedSignatureType.values().length*2][];
+		Object[][] res = new Object[SymmetricAuthenticatedSignatureType.values().length*2][];
 		int i = 0;
 		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getSingleton(null);
-		for (SymmetricAuthentifiedSignatureType ast : SymmetricAuthentifiedSignatureType.values()) {
+		for (SymmetricAuthenticatedSignatureType ast : SymmetricAuthenticatedSignatureType.values()) {
 			Object[] o = new Object[2];
 			o[0] = ast;
 
 			o[1] = ast.getKeyGenerator(rand, (short)256).generateKey();
 			res[i++] = o;
 		}
-		for (SymmetricAuthentifiedSignatureType ast : SymmetricAuthentifiedSignatureType.values()) {
+		for (SymmetricAuthenticatedSignatureType ast : SymmetricAuthenticatedSignatureType.values()) {
 			Object[] o = new Object[2];
 			o[0] = ast;
 

@@ -53,7 +53,7 @@ public final class BCKeyGenerator extends AbstractKeyGenerator {
 	private SymmetricKeyGenerator<com.distrimind.bcfips.crypto.SymmetricSecretKey> keyGenerator;
 	private short keySizeBits;
 	
-	BCKeyGenerator(SymmetricAuthentifiedSignatureType type) {
+	BCKeyGenerator(SymmetricAuthenticatedSignatureType type) {
 		super(type);
 	}
 	

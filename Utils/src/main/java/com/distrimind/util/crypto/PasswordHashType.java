@@ -72,7 +72,7 @@ public enum PasswordHashType {
 	PBKDF2WithHMacSHA2_512("PBKDF2WithHMacSHA512", (byte) 32, CodeProvider.SunJCE, (byte)4),
 	BC_BCRYPT("BC_BCRYPT", (byte) 24, CodeProvider.SUN, (byte)5),
 	BC_SCRYPT_FOR_LOGIN("SCRYPT", (byte)32, CodeProvider.BC, (byte)6),
-	BC_SCRYPT_FOR_DATAENCRYPTION("SCRYPT", (byte)32, CodeProvider.BC, (byte)7),
+	BC_SCRYPT_FOR_DATA_ENCRYPTION("SCRYPT", (byte)32, CodeProvider.BC, (byte)7),
 	GNU_PBKDF2WithHmacSHA1("PBKDF2WithHMacSHA1", (byte) 32, CodeProvider.GNU_CRYPTO, (byte)8), 
 	GNU_PBKDF2WithHMacSHA2_256("PBKDF2WithHMacSHA256",(byte) 32, CodeProvider.GNU_CRYPTO, (byte)9),
 	GNU_PBKDF2WithHMacSHA2_384("PBKDF2WithHMacSHA384", (byte) 32, CodeProvider.GNU_CRYPTO, (byte)10),
@@ -208,17 +208,17 @@ public enum PasswordHashType {
 				case BC_FIPS_PBKFD2WithHMacSHA2_256:
 				case BC_FIPS_PBKFD2WithHMacSHA2_384:
 				case BC_FIPS_PBKFD2WithHMacSHA2_512: {
-					PasswordBasedDeriver<com.distrimind.bcfips.crypto.fips.FipsPBKD.Parameters> deriver =
+					PasswordBasedDeriver<com.distrimind.bcfips.crypto.fips.FipsPBKD.Parameters> derivative =
 							new FipsPBKD.DeriverFactory().createDeriver(FipsPBKD.PBKDF2.using(fipsDigestAlgorithm, data)
 									.withIterationCount(iterations)
 									.withSalt(salt));
-					return deriver.deriveKey(PasswordBasedDeriver.KeyType.CIPHER, ((hashLength * 8) + 7) / 8);
+					return derivative.deriveKey(PasswordBasedDeriver.KeyType.CIPHER, ((hashLength * 8) + 7) / 8);
 				}
 				case BC_SCRYPT_FOR_LOGIN:
 
 					scryptN = 1 << 13;
 
-				case BC_SCRYPT_FOR_DATAENCRYPTION: {
+				case BC_SCRYPT_FOR_DATA_ENCRYPTION: {
 					byte[] d;
 					if (len == data.length && off == 0)
 						d = data;
@@ -284,16 +284,16 @@ public enum PasswordHashType {
 				case BC_FIPS_PBKFD2WithHMacSHA2_256:
 				case BC_FIPS_PBKFD2WithHMacSHA2_384:
 				case BC_FIPS_PBKFD2WithHMacSHA2_512: {
-					PasswordBasedDeriver<com.distrimind.bcfips.crypto.fips.FipsPBKD.Parameters> deriver =
+					PasswordBasedDeriver<com.distrimind.bcfips.crypto.fips.FipsPBKD.Parameters> derivative =
 							new FipsPBKD.DeriverFactory().createDeriver(FipsPBKD.PBKDF2.using(fipsDigestAlgorithm, PasswordConverter.UTF8.convert(password))
 									.withIterationCount(iterations)
 									.withSalt(salt));
-					return deriver.deriveKey(PasswordBasedDeriver.KeyType.CIPHER, ((hashLength * 8) + 7) / 8);
+					return derivative.deriveKey(PasswordBasedDeriver.KeyType.CIPHER, ((hashLength * 8) + 7) / 8);
 				}
 				case BC_SCRYPT_FOR_LOGIN:
 					scryptN = 1 << 13;
 
-				case BC_SCRYPT_FOR_DATAENCRYPTION:
+				case BC_SCRYPT_FOR_DATA_ENCRYPTION:
 					byte[] passwordb = new byte[password.length * 2];
 					for (int i = 0; i < password.length; i++) {
 						passwordb[i * 2] = (byte) (password[i] & 0xFF);

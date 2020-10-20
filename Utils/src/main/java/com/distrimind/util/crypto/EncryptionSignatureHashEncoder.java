@@ -6,7 +6,7 @@ jason.mahdjoub@distri-mind.fr
 
 This software (Object Oriented Database (OOD)) is a computer program 
 whose purpose is to manage a local database with the object paradigm 
-and the java langage 
+and the java language
 
 This software is governed by the CeCILL-C license under French law and
 abiding by the rules of distribution of free software.  You can  use, 
@@ -53,7 +53,7 @@ public class EncryptionSignatureHashEncoder {
 
 	public static long getMaximumOutputLengthWhateverParameters(long inputSizeInBytes)
 	{
-		return SymmetricEncryptionType.getMaxOutputSizeInBytesAfterEncryption(inputSizeInBytes)+SymmetricAuthentifiedSignatureType.MAX_SYMMETRIC_SIGNATURE_SIZE+HybridASymmetricAuthenticatedSignatureType.MAX_HYBRID_ASYMMETRIC_SIGNATURE_SIZE+MessageDigestType.MAX_HASH_LENGTH;
+		return SymmetricEncryptionType.getMaxOutputSizeInBytesAfterEncryption(inputSizeInBytes)+ SymmetricAuthenticatedSignatureType.MAX_SYMMETRIC_SIGNATURE_SIZE+HybridASymmetricAuthenticatedSignatureType.MAX_HYBRID_ASYMMETRIC_SIGNATURE_SIZE+MessageDigestType.MAX_HASH_LENGTH;
 	}
 
 	static final MessageDigestType defaultMessageType=MessageDigestType.SHA2_256;
@@ -666,7 +666,7 @@ public class EncryptionSignatureHashEncoder {
 				originalOutputStream.seek(curPos);
 			}
 			if (maximumOutputLengthAfterEncoding>0 && curPos<maximumOutputLengthAfterEncoding && curPos>originalOutputLength) {
-				originalOutputStream.setLength(Math.max(curPos, originalOutputLength));
+				originalOutputStream.setLength(curPos);
 			}
 			outputStream.flush();
 			free();

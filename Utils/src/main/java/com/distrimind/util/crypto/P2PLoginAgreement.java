@@ -42,8 +42,8 @@ package com.distrimind.util.crypto;
  */
 public abstract class P2PLoginAgreement extends Agreement {
 
-	protected P2PLoginAgreement(int stepsNumberForReceiption, int stepsNumberForSend) {
-		super(stepsNumberForReceiption, stepsNumberForSend);
+	protected P2PLoginAgreement(int stepsNumberForReception, int stepsNumberForSend) {
+		super(stepsNumberForReception, stepsNumberForSend);
 	}
 
 	

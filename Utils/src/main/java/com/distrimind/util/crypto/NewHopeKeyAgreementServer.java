@@ -67,10 +67,10 @@ public class NewHopeKeyAgreementServer extends AbstractNewHopeKeyAgreement{
 		return true;
 	}
 
-	protected NewHopeKeyAgreementServer(SymmetricAuthentifiedSignatureType type, AbstractSecureRandom randomForKeys) {
+	protected NewHopeKeyAgreementServer(SymmetricAuthenticatedSignatureType type, AbstractSecureRandom randomForKeys) {
 		this(type, (short)256, randomForKeys);
 	}
-	protected NewHopeKeyAgreementServer(SymmetricAuthentifiedSignatureType type, short keySizeBits, AbstractSecureRandom randomForKeys) {
+	protected NewHopeKeyAgreementServer(SymmetricAuthenticatedSignatureType type, short keySizeBits, AbstractSecureRandom randomForKeys) {
 		super(type, (short)(keySizeBits/8));
 		this.randomForKeys=randomForKeys;
 	}

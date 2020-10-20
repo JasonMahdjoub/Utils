@@ -79,6 +79,7 @@ public abstract class AbstractDecentralizedIDGenerator extends AbstractDecentral
 		AbstractMessageDigest messageDigest=null;
 		byte[] digestion48 = null;
 		try {
+			@SuppressWarnings("SpellCheckingInspection")
 			byte[] nonce=("Que(3) j(1)'aime(4) à(1) faire(5) apprendre ce nombre utile aux sages !\n" +
 					"Immortel Archimède, artiste ingénieur,\n" +
 					"Qui de ton jugement peut priser la valeur ?\n" +

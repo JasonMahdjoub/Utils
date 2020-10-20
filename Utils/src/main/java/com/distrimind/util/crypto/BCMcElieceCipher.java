@@ -6,7 +6,7 @@ jason.mahdjoub@distri-mind.fr
 
 This software (Object Oriented Database (OOD)) is a computer program 
 whose purpose is to manage a local database with the object paradigm 
-and the java langage 
+and the java language
 
 This software is governed by the CeCILL-C license under French law and
 abiding by the rules of distribution of free software.  You can  use, 
@@ -66,6 +66,7 @@ import java.util.Arrays;
  * @version 1.0
  * @since Utils 4.5.0
  */
+@SuppressWarnings("NullableProblems")
 public class BCMcElieceCipher extends AbstractCipher{
 
 	private MessageEncryptor mcElieceCipher;
@@ -626,20 +627,20 @@ public class BCMcElieceCipher extends AbstractCipher{
 		}
 
 		@Override
-		public void initialize(int keysize, long expirationTime) throws IOException {
+		public void initialize(int keySize, long expirationTime) throws IOException {
 			try {
-				initialize(keysize, expirationTime, SecureRandomType.BC_FIPS_APPROVED_FOR_KEYS.getSingleton(null));
+				initialize(keySize, expirationTime, SecureRandomType.BC_FIPS_APPROVED_FOR_KEYS.getSingleton(null));
 			} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
 				throw new IOException(e);
 			}
 		}
 
 		@Override
-		public void initialize(int keysize, long expirationTime, AbstractSecureRandom random) {
-			this.keySize=keysize;
+		public void initialize(int keySize, long expirationTime, AbstractSecureRandom random) {
+			this.keySize= keySize;
 			this.keyExpiration=expirationTime;
 			mcElieceKeyPairGenerator=new McElieceKeyPairGenerator();
-			mcElieceKeyPairGenerator.init(new McElieceKeyGenerationParameters(random, new McElieceParameters(/*keysize, */getDigest())));
+			mcElieceKeyPairGenerator.init(new McElieceKeyGenerationParameters(random, new McElieceParameters(getDigest())));
 		}
 	}
 
@@ -682,20 +683,20 @@ public class BCMcElieceCipher extends AbstractCipher{
 		}
 
 		@Override
-		public void initialize(int keysize, long expirationTime) throws IOException {
+		public void initialize(int keySize, long expirationTime) throws IOException {
 			try {
-				initialize(keysize, expirationTime, SecureRandomType.BC_FIPS_APPROVED_FOR_KEYS.getSingleton(null));
+				initialize(keySize, expirationTime, SecureRandomType.BC_FIPS_APPROVED_FOR_KEYS.getSingleton(null));
 			} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
 				throw new IOException(e);
 			}
 		}
 
 		@Override
-		public void initialize(int keysize, long expirationTime, AbstractSecureRandom random) {
-			this.keySize=keysize;
+		public void initialize(int keySize, long expirationTime, AbstractSecureRandom random) {
+			this.keySize= keySize;
 			this.keyExpiration=expirationTime;
 			mcElieceKeyPairGenerator=new McElieceCCA2KeyPairGenerator();
-			mcElieceKeyPairGenerator.init(new McElieceCCA2KeyGenerationParameters(random, new McElieceCCA2Parameters(/*keysize/8, */digest)));
+			mcElieceKeyPairGenerator.init(new McElieceCCA2KeyGenerationParameters(random, new McElieceCCA2Parameters(digest)));
 		}
 	}
 
@@ -821,14 +822,14 @@ public class BCMcElieceCipher extends AbstractCipher{
 		return inputLength;
 	}
 	@Override
-	public void init(int opmode, AbstractKey key) throws IOException {
-		init(opmode, key, (AbstractSecureRandom)null);
+	public void init(int opMode, AbstractKey key) throws IOException {
+		init(opMode, key, (AbstractSecureRandom)null);
 	}
 	@Override
-	public void init(int opmode, AbstractKey key, AbstractSecureRandom random) throws IOException {
-		mode=opmode;
+	public void init(int opMode, AbstractKey key, AbstractSecureRandom random) throws IOException {
+		mode= opMode;
 		out.reset();
-		encrypt=opmode== Cipher.ENCRYPT_MODE || opmode==Cipher.WRAP_MODE;
+		encrypt= opMode == Cipher.ENCRYPT_MODE || opMode ==Cipher.WRAP_MODE;
 		mcElieceCipher=getMcElieceCipher();
 		try {
 			if (cca2) {
@@ -855,10 +856,10 @@ public class BCMcElieceCipher extends AbstractCipher{
 	}
 
 	@Override
-	public void init(int opmode, AbstractKey key, byte[] iv) throws IOException {
-		mode=opmode;
+	public void init(int opMode, AbstractKey key, byte[] iv) throws IOException {
+		mode= opMode;
 		try {
-			init(opmode, key, SecureRandomType.BC_FIPS_APPROVED_FOR_KEYS.getSingleton(null));
+			init(opMode, key, SecureRandomType.BC_FIPS_APPROVED_FOR_KEYS.getSingleton(null));
 		} catch (NoSuchProviderException | NoSuchAlgorithmException e) {
 			throw new IOException(e);
 		}

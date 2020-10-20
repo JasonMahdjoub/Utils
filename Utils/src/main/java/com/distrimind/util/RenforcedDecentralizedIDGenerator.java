@@ -109,7 +109,7 @@ public class RenforcedDecentralizedIDGenerator extends AbstractDecentralizedIDGe
 
 	@Override
 	byte getType() {
-		return AbstractDecentralizedID.RENFORCED_DECENTRALIZED_ID_GENERATOR_TYPE;
+		return AbstractDecentralizedID.REINFORCED_DECENTRALIZED_ID_GENERATOR_TYPE;
 	}
 
 	@Override

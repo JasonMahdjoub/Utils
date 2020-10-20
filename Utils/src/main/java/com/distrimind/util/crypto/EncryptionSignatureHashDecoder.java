@@ -316,7 +316,7 @@ public class EncryptionSignatureHashDecoder {
 	private static final int maxSymSigSizeBytes;
 	static {
 		int v=0;
-		for (SymmetricAuthentifiedSignatureType t : SymmetricAuthentifiedSignatureType.values()){
+		for (SymmetricAuthenticatedSignatureType t : SymmetricAuthenticatedSignatureType.values()){
 			v=Math.max(t.getSignatureSizeInBits()/8, v);
 		}
 		maxSymSigSizeBytes=v;

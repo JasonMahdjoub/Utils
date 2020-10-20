@@ -50,7 +50,7 @@ import java.security.NoSuchProviderException;
  */
 public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm {
 
-	private final AbstractEncryptionIOAlgorithm p2pencryption;
+	private final AbstractEncryptionIOAlgorithm p2pEncryption;
 
 	public P2PASymmetricEncryptionAlgorithm(AbstractKeyPair<?, ?> myKeyPair, IASymmetricPublicKey distantPublicKey)
 			throws IOException {
@@ -59,9 +59,9 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 			throw new NullPointerException("distantPublicKey");
 		try {
 			if (myKeyPair instanceof HybridASymmetricKeyPair && distantPublicKey instanceof HybridASymmetricPublicKey) {
-				p2pencryption = new HybridP2PEncryption((HybridASymmetricKeyPair) myKeyPair, (HybridASymmetricPublicKey) distantPublicKey);
+				p2pEncryption = new HybridP2PEncryption((HybridASymmetricKeyPair) myKeyPair, (HybridASymmetricPublicKey) distantPublicKey);
 			} else if (myKeyPair instanceof ASymmetricKeyPair && distantPublicKey instanceof ASymmetricPublicKey)
-				p2pencryption = new P2PEncryption((ASymmetricKeyPair) myKeyPair, (ASymmetricPublicKey) distantPublicKey);
+				p2pEncryption = new P2PEncryption((ASymmetricKeyPair) myKeyPair, (ASymmetricPublicKey) distantPublicKey);
 			else
 				throw new IllegalArgumentException();
 		} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
@@ -75,14 +75,14 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 		super();
 		if (distantPublicKey == null)
 			throw new NullPointerException("distantPublicKey");
-		p2pencryption=new HybridP2PEncryption(nonPQCSignatureType, PQCSignatureType, myKeyPair, distantPublicKey);
+		p2pEncryption =new HybridP2PEncryption(nonPQCSignatureType, PQCSignatureType, myKeyPair, distantPublicKey);
 	}
 
 	public P2PASymmetricEncryptionAlgorithm(ASymmetricAuthenticatedSignatureType signatureType, ASymmetricKeyPair myKeyPair,
 						 ASymmetricPublicKey distantPublicKey) throws IOException {
 		super();
 		try {
-			p2pencryption=new P2PEncryption(signatureType, myKeyPair, distantPublicKey);
+			p2pEncryption =new P2PEncryption(signatureType, myKeyPair, distantPublicKey);
 		} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
 			throw new IOException(e);
 		}
@@ -90,214 +90,214 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 
 	@Override
 	public int getMaxPlainTextSizeForEncoding() {
-		return p2pencryption.getMaxPlainTextSizeForEncoding();
+		return p2pEncryption.getMaxPlainTextSizeForEncoding();
 	}
 
 	@Override
 	void setMaxPlainTextSizeForEncoding(int maxPlainTextSizeForEncoding) throws IOException {
-		p2pencryption.setMaxPlainTextSizeForEncoding(maxPlainTextSizeForEncoding);
+		p2pEncryption.setMaxPlainTextSizeForEncoding(maxPlainTextSizeForEncoding);
 	}
 
 	@Override
 	public void decode(RandomInputStream is, byte[] associatedData, int offAD, int lenAD, RandomOutputStream os, int length, byte[] externalCounter)
 			throws IOException
 	{
-		p2pencryption.decode(is, associatedData, offAD, lenAD, os, lenAD, externalCounter );
+		p2pEncryption.decode(is, associatedData, offAD, lenAD, os, lenAD, externalCounter );
 	}
 	@Override
 	public void encode(byte[] bytes, int off, int len, byte[] associatedData, int offAD, int lenAD, RandomOutputStream os, byte[] externalCounter) throws IOException {
-		p2pencryption.encode(bytes, off, len, associatedData, offAD, lenAD, os, externalCounter);
+		p2pEncryption.encode(bytes, off, len, associatedData, offAD, lenAD, os, externalCounter);
 	}
 	@Override
 	public void encode(RandomInputStream is, byte[] associatedData, int offAD, int lenAD, RandomOutputStream os, byte[] externalCounter) throws IOException {
-		p2pencryption.encode(is, associatedData, offAD, lenAD, os, externalCounter);
+		p2pEncryption.encode(is, associatedData, offAD, lenAD, os, externalCounter);
 	}
 
 	@Override
 	public CommonCipherOutputStream getCipherOutputStreamForEncryption(RandomOutputStream os, boolean closeOutputStreamWhenClosingCipherOutputStream, byte[] externalCounter) throws IOException {
-		return p2pencryption.getCipherOutputStreamForEncryption(os, closeOutputStreamWhenClosingCipherOutputStream, externalCounter);
+		return p2pEncryption.getCipherOutputStreamForEncryption(os, closeOutputStreamWhenClosingCipherOutputStream, externalCounter);
 	}
 
 	@Override
 	public byte[] decode(byte[] bytes) throws IOException {
-		return p2pencryption.decode(bytes);
+		return p2pEncryption.decode(bytes);
 	}
 
 	@Override
 	public byte[] decode(byte[] bytes, byte[] associatedData, byte[] externalCounter) throws IOException {
-		return p2pencryption.decode(bytes, associatedData, externalCounter);
+		return p2pEncryption.decode(bytes, associatedData, externalCounter);
 	}
 
 	@Override
 	public byte[] decode(byte[] bytes, byte[] associatedData) throws IOException {
-		return p2pencryption.decode(bytes, associatedData);
+		return p2pEncryption.decode(bytes, associatedData);
 	}
 
 	@Override
 	public byte[] decode(byte[] bytes, int off, int len) throws IOException {
-		return p2pencryption.decode(bytes, off, len);
+		return p2pEncryption.decode(bytes, off, len);
 	}
 
 	@Override
 	public byte[] decode(byte[] bytes, int off, int len, byte[] associatedData, int offAD, int lenAD) throws IOException {
-		return p2pencryption.decode(bytes, off, len, associatedData, offAD, lenAD);
+		return p2pEncryption.decode(bytes, off, len, associatedData, offAD, lenAD);
 	}
 
 	@Override
 	public byte[] decode(byte[] bytes, int off, int len, byte[] associatedData, int offAD, int lenAD, byte[] externalCounter) throws IOException {
-		return p2pencryption.decode(bytes, off, len, associatedData, offAD, lenAD, externalCounter);
+		return p2pEncryption.decode(bytes, off, len, associatedData, offAD, lenAD, externalCounter);
 	}
 
 	@Override
 	public byte[] decode(RandomInputStream is, byte[] associatedData) throws IOException {
-		return p2pencryption.decode(is, associatedData);
+		return p2pEncryption.decode(is, associatedData);
 	}
 
 	@Override
 	public byte[] decode(RandomInputStream is) throws IOException {
-		return p2pencryption.decode(is);
+		return p2pEncryption.decode(is);
 	}
 
 	@Override
 	protected boolean mustAlterIVForOutputSizeComputation() {
-		return p2pencryption.mustAlterIVForOutputSizeComputation();
+		return p2pEncryption.mustAlterIVForOutputSizeComputation();
 	}
 
 	@Override
 	public byte[] decode(RandomInputStream is, byte[] associatedData, int offAD, int lenAD) throws IOException {
-		return p2pencryption.decode(is, associatedData, offAD, lenAD);
+		return p2pEncryption.decode(is, associatedData, offAD, lenAD);
 	}
 
 	@Override
 	public byte[] decode(RandomInputStream is, byte[] associatedData, int offAD, int lenAD, byte[] externalCounter) throws IOException {
-		return p2pencryption.decode(is, associatedData, offAD, lenAD, externalCounter);
+		return p2pEncryption.decode(is, associatedData, offAD, lenAD, externalCounter);
 	}
 
 	@Override
 	public void decode(RandomInputStream is, byte[] associatedData, RandomOutputStream os) throws IOException {
-		p2pencryption.decode(is, associatedData, os);
+		p2pEncryption.decode(is, associatedData, os);
 	}
 
 	@Override
 	public void decode(RandomInputStream is, RandomOutputStream os, byte[] externalCounter) throws IOException {
-		p2pencryption.decode(is, os, externalCounter);
+		p2pEncryption.decode(is, os, externalCounter);
 	}
 
 	@Override
 	public void decode(RandomInputStream is, RandomOutputStream os) throws IOException {
-		p2pencryption.decode(is, os);
+		p2pEncryption.decode(is, os);
 	}
 
 	@Override
 	public void decode(RandomInputStream is, byte[] associatedData, int offAD, int lenAD, RandomOutputStream os) throws IOException {
-		p2pencryption.decode(is, associatedData, offAD, lenAD, os);
+		p2pEncryption.decode(is, associatedData, offAD, lenAD, os);
 	}
 
 	@Override
 	public void decode(RandomInputStream is, byte[] associatedData, int offAD, int lenAD, RandomOutputStream os, byte[] externalCounter) throws IOException {
-		p2pencryption.decode(is, associatedData, offAD, lenAD, os, externalCounter);
+		p2pEncryption.decode(is, associatedData, offAD, lenAD, os, externalCounter);
 	}
 
 	@Override
 	public void decode(RandomInputStream is, RandomOutputStream os, int length) throws IOException {
-		p2pencryption.decode(is, os, length);
+		p2pEncryption.decode(is, os, length);
 	}
 
 	@Override
 	public void decode(RandomInputStream is, RandomOutputStream os, int length, byte[] externalCounter) throws IOException {
-		p2pencryption.decode(is, os, length, externalCounter);
+		p2pEncryption.decode(is, os, length, externalCounter);
 	}
 
 	@Override
 	public void decode(RandomInputStream is, byte[] associatedData, RandomOutputStream os, int length) throws IOException {
-		p2pencryption.decode(is, associatedData, os, length);
+		p2pEncryption.decode(is, associatedData, os, length);
 	}
 
 	@Override
 	public void decode(RandomInputStream is, byte[] associatedData, int offAD, int lenAD, RandomOutputStream os, int length) throws IOException {
-		p2pencryption.decode(is, associatedData, offAD, lenAD, os, length);
+		p2pEncryption.decode(is, associatedData, offAD, lenAD, os, length);
 	}
 
 	@Override
 	public CommonCipherInputStream getCipherInputStreamForDecryption(RandomInputStream is) throws IOException {
-		return p2pencryption.getCipherInputStreamForDecryption(is);
+		return p2pEncryption.getCipherInputStreamForDecryption(is);
 	}
 
 
 	@Override
 	public byte[] encode(byte[] bytes) throws IOException {
-		return p2pencryption.encode(bytes);
+		return p2pEncryption.encode(bytes);
 	}
 
 	@Override
 	public byte[] encode(byte[] bytes, byte[] associatedData) throws IOException {
-		return p2pencryption.encode(bytes, associatedData);
+		return p2pEncryption.encode(bytes, associatedData);
 	}
 
 	@Override
 	public byte[] encode(byte[] bytes, byte[] associatedData, byte[] externalCounter) throws IOException {
-		return p2pencryption.encode(bytes, associatedData, externalCounter);
+		return p2pEncryption.encode(bytes, associatedData, externalCounter);
 	}
 
 	@Override
 	public byte[] encode(byte[] bytes, int off, int len) throws IOException {
-		return p2pencryption.encode(bytes, off, len);
+		return p2pEncryption.encode(bytes, off, len);
 	}
 
 	@Override
 	public byte[] encode(byte[] bytes, int off, int len, byte[] associatedData, int offAD, int lenAD) throws IOException {
-		return p2pencryption.encode(bytes, off, len, associatedData, offAD, lenAD);
+		return p2pEncryption.encode(bytes, off, len, associatedData, offAD, lenAD);
 	}
 
 	@Override
 	public byte[] encode(byte[] bytes, int off, int len, byte[] associatedData, int offAD, int lenAD, byte[] externalCounter) throws IOException {
-		return p2pencryption.encode(bytes, off, len, associatedData, offAD, lenAD, externalCounter);
+		return p2pEncryption.encode(bytes, off, len, associatedData, offAD, lenAD, externalCounter);
 	}
 
 	@Override
 	public void encode(byte[] bytes, int off, int len, RandomOutputStream os) throws IOException {
-		p2pencryption.encode(bytes, off, len, os);
+		p2pEncryption.encode(bytes, off, len, os);
 	}
 
 	@Override
 	public void encode(byte[] bytes, int off, int len, byte[] associatedData, int offAD, int lenAD, RandomOutputStream os) throws IOException {
-		p2pencryption.encode(bytes, off, len, associatedData, offAD, lenAD, os);
+		p2pEncryption.encode(bytes, off, len, associatedData, offAD, lenAD, os);
 	}
 
 	@Override
 	public void encode(RandomInputStream is, RandomOutputStream os) throws IOException {
-		p2pencryption.encode(is, os);
+		p2pEncryption.encode(is, os);
 	}
 
 	@Override
 	public void encode(RandomInputStream is, byte[] associatedData, RandomOutputStream os) throws IOException {
-		p2pencryption.encode(is, associatedData, os);
+		p2pEncryption.encode(is, associatedData, os);
 	}
 
 	@Override
 	public void encode(RandomInputStream is, byte[] associatedData, int offAD, int lenAD, RandomOutputStream os) throws IOException {
-		p2pencryption.encode(is, associatedData, offAD, lenAD, os);
+		p2pEncryption.encode(is, associatedData, offAD, lenAD, os);
 	}
 
 
 	@Override
 	protected byte[] readIV(RandomInputStream is, byte[] externalCounter) throws IOException {
-		return p2pencryption.readIV(is, externalCounter);
+		return p2pEncryption.readIV(is, externalCounter);
 	}
 
 	@Override
 	public CommonCipherInputStream getCipherInputStreamForDecryption(RandomInputStream is, byte[] externalCounter) throws IOException {
-		return p2pencryption.getCipherInputStreamForDecryption(is, externalCounter);
+		return p2pEncryption.getCipherInputStreamForDecryption(is, externalCounter);
 	}
 
 	@Override
 	public CommonCipherInputStream getCipherInputStreamForDecryption(RandomInputStream is, byte[] associatedData, int offAD, int lenAD) throws IOException {
-		return p2pencryption.getCipherInputStreamForDecryption(is, associatedData, offAD, lenAD);
+		return p2pEncryption.getCipherInputStreamForDecryption(is, associatedData, offAD, lenAD);
 	}
 
 	@Override
 	protected byte[][] readIvsFromEncryptedStream(RandomInputStream is, int headLengthBytes) throws IOException {
-		return p2pencryption.readIvsFromEncryptedStream(is, headLengthBytes);
+		return p2pEncryption.readIvsFromEncryptedStream(is, headLengthBytes);
 	}
 
 	@Override
@@ -307,131 +307,131 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 
 	@Override
 	protected void initCipherForEncryptionWithIvAndCounter(AbstractCipher cipher, byte[] iv, int counter) throws IOException {
-		p2pencryption.initCipherForEncryptionWithIvAndCounter(cipher, iv, counter);
+		p2pEncryption.initCipherForEncryptionWithIvAndCounter(cipher, iv, counter);
 	}
 
 	@Override
 	protected int getCounterStepInBytes() {
-		return p2pencryption.getCounterStepInBytes();
+		return p2pEncryption.getCounterStepInBytes();
 	}
 
 	@Override
 	public boolean supportRandomEncryptionAndRandomDecryption() {
-		return p2pencryption.supportRandomEncryptionAndRandomDecryption();
+		return p2pEncryption.supportRandomEncryptionAndRandomDecryption();
 	}
 
 
 
 	@Override
 	protected void initCipherForDecryptionWithIvAndCounter(AbstractCipher cipher, byte[] iv, int counter) throws IOException {
-		p2pencryption.initCipherForDecryptionWithIvAndCounter(cipher, iv, counter);
+		p2pEncryption.initCipherForDecryptionWithIvAndCounter(cipher, iv, counter);
 	}
 
 	@Override
 	public void initCipherForDecryptionWithIv(AbstractCipher cipher, byte[] iv) throws IOException {
-		p2pencryption.initCipherForDecryptionWithIv(cipher, iv);
+		p2pEncryption.initCipherForDecryptionWithIv(cipher, iv);
 	}
 
 
 	@Override
 	protected void initCipherForEncryptionWithIv(AbstractCipher cipher, byte[] iv) throws IOException {
-		p2pencryption.initCipherForEncryptionWithIv(cipher, iv);
+		p2pEncryption.initCipherForEncryptionWithIv(cipher, iv);
 	}
 
 	@Override
 	public CommonCipherInputStream getCipherInputStreamForDecryption(RandomInputStream is, byte[] associatedData, int offAD, int lenAD, byte[] externalCounter) throws IOException {
-		return p2pencryption.getCipherInputStreamForDecryption(is, associatedData, offAD, lenAD, externalCounter);
+		return p2pEncryption.getCipherInputStreamForDecryption(is, associatedData, offAD, lenAD, externalCounter);
 	}
 
 	@Override
 	public void initCipherForDecryption(AbstractCipher cipher) throws IOException {
-		p2pencryption.initCipherForDecryption(cipher);
+		p2pEncryption.initCipherForDecryption(cipher);
 	}
 
 	@Override
 	public long getOutputSizeAfterDecryption(long inputLen) throws IOException {
-		return p2pencryption.getOutputSizeAfterDecryption(inputLen);
+		return p2pEncryption.getOutputSizeAfterDecryption(inputLen);
 	}
 
 	@Override
 	public CommonCipherOutputStream getCipherOutputStreamForEncryption(RandomOutputStream os, boolean closeOutputStreamWhenClosingCipherOutputStream) throws IOException {
-		return p2pencryption.getCipherOutputStreamForEncryption(os, closeOutputStreamWhenClosingCipherOutputStream);
+		return p2pEncryption.getCipherOutputStreamForEncryption(os, closeOutputStreamWhenClosingCipherOutputStream);
 	}
 
 	@Override
 	public CommonCipherOutputStream getCipherOutputStreamForEncryption(RandomOutputStream os, boolean closeOutputStreamWhenClosingCipherOutputStream, byte[] associatedData, int offAD, int lenAD) throws IOException {
-		return p2pencryption.getCipherOutputStreamForEncryption(os, closeOutputStreamWhenClosingCipherOutputStream, associatedData, offAD, lenAD);
+		return p2pEncryption.getCipherOutputStreamForEncryption(os, closeOutputStreamWhenClosingCipherOutputStream, associatedData, offAD, lenAD);
 	}
 
 	@Override
 	public CommonCipherOutputStream getCipherOutputStreamForEncryption(RandomOutputStream os, boolean closeOutputStreamWhenClosingCipherOutputStream, byte[] associatedData, int offAD, int lenAD, byte[] externalCounter) throws IOException {
-		return p2pencryption.getCipherOutputStreamForEncryption(os, closeOutputStreamWhenClosingCipherOutputStream, associatedData, offAD, lenAD, externalCounter);
+		return p2pEncryption.getCipherOutputStreamForEncryption(os, closeOutputStreamWhenClosingCipherOutputStream, associatedData, offAD, lenAD, externalCounter);
 	}
 
 	@Override
 	protected CommonCipherOutputStream getCipherOutputStreamForEncryption(RandomOutputStream os, boolean closeOutputStreamWhenClosingCipherOutputStream, byte[] associatedData, int offAD, int lenAD, byte[] externalCounter, byte[][] manualIvs) throws IOException {
-		return p2pencryption.getCipherOutputStreamForEncryption(os, closeOutputStreamWhenClosingCipherOutputStream, associatedData, offAD, lenAD, externalCounter, manualIvs);
+		return p2pEncryption.getCipherOutputStreamForEncryption(os, closeOutputStreamWhenClosingCipherOutputStream, associatedData, offAD, lenAD, externalCounter, manualIvs);
 	}
 
 	@Override
 	public void initCipherForDecryption(AbstractCipher cipher, byte[] iv, byte[] externalCounter) throws IOException {
-		p2pencryption.initCipherForDecryption(cipher, iv, externalCounter);
+		p2pEncryption.initCipherForDecryption(cipher, iv, externalCounter);
 	}
 
 	@Override
 	public AbstractCipher getCipherInstance() throws IOException {
-		return p2pencryption.getCipherInstance();
+		return p2pEncryption.getCipherInstance();
 	}
 
 	@Override
 	public int getIVSizeBytesWithExternalCounter() {
-		return p2pencryption.getIVSizeBytesWithExternalCounter();
+		return p2pEncryption.getIVSizeBytesWithExternalCounter();
 	}
 
 	@Override
 	protected boolean includeIV() {
-		return p2pencryption.includeIV();
+		return p2pEncryption.includeIV();
 	}
 
 	@Override
 	public byte[] initCipherForEncryption(AbstractCipher cipher, byte[] externalCounter) throws IOException {
-		return p2pencryption.initCipherForEncryption(cipher, externalCounter);
+		return p2pEncryption.initCipherForEncryption(cipher, externalCounter);
 	}
 
 	@Override
 	public void initCipherForEncryptionWithNullIV(AbstractCipher cipher) throws IOException {
-		p2pencryption.initCipherForEncryptionWithNullIV(cipher);
+		p2pEncryption.initCipherForEncryptionWithNullIV(cipher);
 	}
 
 	@Override
 	public boolean isPostQuantumEncryption() {
-		return p2pencryption.isPostQuantumEncryption();
+		return p2pEncryption.isPostQuantumEncryption();
 	}
 
 
 	@Override
 	public byte getBlockModeCounterBytes() {
-		return p2pencryption.getBlockModeCounterBytes();
+		return p2pEncryption.getBlockModeCounterBytes();
 	}
 
 	@Override
 	public boolean useExternalCounter() {
-		return p2pencryption.useExternalCounter();
+		return p2pEncryption.useExternalCounter();
 	}
 
 	@Override
 	public void initBufferAllocatorArgs() throws IOException {
-		p2pencryption.initBufferAllocatorArgs();
+		p2pEncryption.initBufferAllocatorArgs();
 	}
 
 	@Override
 	public long getOutputSizeAfterEncryption(long inputLen) throws IOException {
-		return p2pencryption.getOutputSizeAfterEncryption(inputLen);
+		return p2pEncryption.getOutputSizeAfterEncryption(inputLen);
 	}
 
 	@Override
 	public void initCipherForEncryption(AbstractCipher cipher) throws IOException {
-		p2pencryption.initCipherForEncryption(cipher);
+		p2pEncryption.initCipherForEncryption(cipher);
 	}
 
 	private static class HybridP2PEncryption extends AbstractEncryptionIOAlgorithm
@@ -576,16 +576,16 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 	}
 
 	public IASymmetricPublicKey getDistantPublicKey() {
-		if (this.p2pencryption instanceof P2PEncryption)
-			return ((P2PEncryption)p2pencryption).getDistantPublicKey();
+		if (this.p2pEncryption instanceof P2PEncryption)
+			return ((P2PEncryption) p2pEncryption).getDistantPublicKey();
 		else
-			return ((HybridP2PEncryption)p2pencryption).distantPublicKey;
+			return ((HybridP2PEncryption) p2pEncryption).distantPublicKey;
 	}
 	public AbstractKeyPair<?, ?> getMyKeyPair() {
-		if (this.p2pencryption instanceof P2PEncryption)
-			return ((P2PEncryption)p2pencryption).getMyKeyPair();
+		if (this.p2pEncryption instanceof P2PEncryption)
+			return ((P2PEncryption) p2pEncryption).getMyKeyPair();
 		else
-			return ((HybridP2PEncryption)p2pencryption).myKeyPair;
+			return ((HybridP2PEncryption) p2pEncryption).myKeyPair;
 	}
 
 

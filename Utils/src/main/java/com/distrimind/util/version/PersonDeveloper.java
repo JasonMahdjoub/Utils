@@ -88,7 +88,7 @@ public class PersonDeveloper extends Person {
 
 	@Override
 	public String toString() {
-		return m_first_name + " " + m_name + " (Entred in the team at "
+		return m_first_name + " " + m_name + " (Entered in the team at "
 				+ DateFormat.getDateInstance(DateFormat.SHORT, Locale.FRANCE).format(m_date_begin_development) + ")";
 	}
 

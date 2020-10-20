@@ -53,7 +53,7 @@ import com.distrimind.bouncycastle.pqc.crypto.newhope.NHPrivateKeyParameters;
  */
 public abstract class AbstractNewHopeKeyAgreement extends KeyAgreement{
 	private final SymmetricEncryptionType encryptionType;
-	private final SymmetricAuthentifiedSignatureType signatureType;
+	private final SymmetricAuthenticatedSignatureType signatureType;
 	protected short agreementSize;
 	protected byte[] shared;
 	private SymmetricSecretKey secretKey=null;
@@ -75,7 +75,7 @@ public abstract class AbstractNewHopeKeyAgreement extends KeyAgreement{
 		return agreementSize;
 	}
 	
-	protected AbstractNewHopeKeyAgreement(SymmetricAuthentifiedSignatureType type, short agreementSize)
+	protected AbstractNewHopeKeyAgreement(SymmetricAuthenticatedSignatureType type, short agreementSize)
 	{
 		super(1, 1);
 		this.encryptionType=null;

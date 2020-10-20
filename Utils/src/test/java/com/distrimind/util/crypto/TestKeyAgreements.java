@@ -52,7 +52,7 @@ import java.util.Random;
  */
 public class TestKeyAgreements {
 	@Test(invocationCount = 5, dataProvider = "provideDataForHybridKeyAgreementsSignature")
-	public void testKeyAgreementsForSignature(HybridKeyAgreementType keyAgreementType, SymmetricAuthentifiedSignatureType type)
+	public void testKeyAgreementsForSignature(HybridKeyAgreementType keyAgreementType, SymmetricAuthenticatedSignatureType type)
 			throws Exception {
 		AbstractSecureRandom random = SecureRandomType.DEFAULT.getSingleton(null);
 		byte[] keyingMaterial=new byte[100];
@@ -65,7 +65,7 @@ public class TestKeyAgreements {
 	}
 
 	@Test(invocationCount = 5, dataProvider = "provideDataForKeyAgreementsSignature")
-	public void testKeyAgreementsForSignature(KeyAgreementType keyAgreementType, SymmetricAuthentifiedSignatureType type)
+	public void testKeyAgreementsForSignature(KeyAgreementType keyAgreementType, SymmetricAuthenticatedSignatureType type)
 			throws Exception {
 		AbstractSecureRandom random = SecureRandomType.DEFAULT.getSingleton(null);
 		byte[] keyingMaterial=new byte[100];
@@ -76,7 +76,7 @@ public class TestKeyAgreements {
 
 		testKeyAgreementsForSignature(client, server, type);
 	}
-	public void testKeyAgreementsForSignature(KeyAgreement client, KeyAgreement server, SymmetricAuthentifiedSignatureType type)
+	public void testKeyAgreementsForSignature(KeyAgreement client, KeyAgreement server, SymmetricAuthenticatedSignatureType type)
 			throws Exception {
 
 		do
@@ -261,7 +261,7 @@ public class TestKeyAgreements {
 
 
 		for (KeyAgreementType type : KeyAgreementType.values()) {
-			for (SymmetricAuthentifiedSignatureType etype : SymmetricAuthentifiedSignatureType.values())
+			for (SymmetricAuthenticatedSignatureType etype : SymmetricAuthenticatedSignatureType.values())
 			{
 				if (!type.isPostQuantumAlgorithm() || etype.isPostQuantumAlgorithm((short)256))
 				{
@@ -293,7 +293,7 @@ public class TestKeyAgreements {
 
 				Object[] o = new Object[2];
 				o[0]=new HybridKeyAgreementType(type, type2);
-				o[1]=SymmetricAuthentifiedSignatureType.HMAC_SHA2_256;
+				o[1]= SymmetricAuthenticatedSignatureType.HMAC_SHA2_256;
 				l.add(o);
 			}
 		}
@@ -465,7 +465,7 @@ public class TestKeyAgreements {
 				(byte) 1231, (byte) 34 };
 
 		ArrayList<Object[]> res = new ArrayList<>();
-		SymmetricSecretKey secretKey=SymmetricAuthentifiedSignatureType.BC_FIPS_HMAC_SHA2_384.getKeyGenerator(SecureRandomType.DEFAULT.getInstance(null)).generateKey();
+		SymmetricSecretKey secretKey= SymmetricAuthenticatedSignatureType.BC_FIPS_HMAC_SHA2_384.getKeyGenerator(SecureRandomType.DEFAULT.getInstance(null)).generateKey();
 		ASymmetricKeyPair keyPair= ASymmetricAuthenticatedSignatureType.BC_FIPS_Ed25519.getKeyPairGenerator(SecureRandomType.DEFAULT.getInstance(null)).generateKeyPair();
 		for (byte[] m : VariousTests.messagesToEncrypt) {
 			for (boolean expectedVerify : new boolean[] { true, false }) {

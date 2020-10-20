@@ -135,7 +135,7 @@ public class P2PASymmetricSecretMessageExchanger {
 
 	protected static final BigInteger maxLongValue = BigInteger.valueOf(1).shiftLeft(63);
 
-	private static AbstractCipher getCipherInstancePriv(ASymmetricEncryptionType type)
+	private static AbstractCipher getCipherInstancePrivate(ASymmetricEncryptionType type)
 			throws NoSuchAlgorithmException, NoSuchProviderException, MessageExternalizationException {
 		return type.getCipherInstance();
 	}
@@ -186,7 +186,7 @@ public class P2PASymmetricSecretMessageExchanger {
 		if (distantPublicKey != null)
 			setDistantPublicKey(distantPublicKey);
 		random = new FakeSecureRandom();
-		cipher = getCipherInstancePriv(type);
+		cipher = getCipherInstancePrivate(type);
 		this.messageDigestType = messageDigestType;
 		this.messageDigest = messageDigestType.getMessageDigestInstance();
 		this.messageDigest.reset();

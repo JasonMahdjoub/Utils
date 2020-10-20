@@ -47,6 +47,7 @@ import java.io.IOException;
  * @version 1.0
  * @since Utils 3.27.0
  */
+@SuppressWarnings("NullableProblems")
 public class RandomByteArrayOutputStream extends RandomOutputStream {
 	byte[] bytes;
 	private int current_pos;

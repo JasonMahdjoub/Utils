@@ -57,12 +57,12 @@ import com.distrimind.bouncycastle.crypto.params.KeyParameter;
  */
 public final class BCMac extends AbstractMac {
 
-	private final SymmetricAuthentifiedSignatureType type;
+	private final SymmetricAuthenticatedSignatureType type;
 
 	private com.distrimind.bcfips.crypto.SymmetricSecretKey secretKey;
 	private HMac mac;
 
-	BCMac(SymmetricAuthentifiedSignatureType type)
+	BCMac(SymmetricAuthenticatedSignatureType type)
 	{
 		this.type=type;
 

@@ -45,6 +45,7 @@ import java.io.*;
  * @version 2.0
  * @since Utils 3.27.0
  */
+@SuppressWarnings("NullableProblems")
 public abstract class RandomInputStream extends SecuredObjectInputStream implements AutoCloseable {
 	private long mark = -1;
 	private int readLimit = -1;
@@ -92,11 +93,11 @@ public abstract class RandomInputStream extends SecuredObjectInputStream impleme
 	 * {@inheritDoc}
 	 */
 	@Override
-	public synchronized void mark(int readlimit) {
-		if (readlimit > 0) {
+	public synchronized void mark(int readLimit) {
+		if (readLimit > 0) {
 			try {
 				mark = currentPosition();
-				this.readLimit = readlimit;
+				this.readLimit = readLimit;
 			} catch (Exception e) {
 				mark = -1;
 				this.readLimit = -1;

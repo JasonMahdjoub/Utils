@@ -117,7 +117,7 @@ public enum EllipticCurveDiffieHellmanType {
 		
 	}
 	
-	public ASymmetricAuthenticatedSignatureType getASymmetricAuthentifiedSignatureType()
+	public ASymmetricAuthenticatedSignatureType getASymmetricAuthenticatedSignatureType()
 	{
 		return aSymmetricAuthenticatedSignatureType;
 	}
@@ -168,7 +168,7 @@ public enum EllipticCurveDiffieHellmanType {
 		else
 			return new JavaNativeKeyAgreement(type, KeyAgreement.getInstance(getKeyAgreementAlgorithmName(), getCodeProvider().checkProviderWithCurrentOS().name()));
 	}
-	AbstractKeyAgreement getKeyAgreementInstance(SymmetricAuthentifiedSignatureType type) throws NoSuchAlgorithmException, NoSuchProviderException
+	AbstractKeyAgreement getKeyAgreementInstance(SymmetricAuthenticatedSignatureType type) throws NoSuchAlgorithmException, NoSuchProviderException
 	{
 		CodeProvider.ensureProviderLoaded(codeProvider);
 		if ((codeProvider==CodeProvider.BC || codeProvider==CodeProvider.BCFIPS) && !isXDHType()) {

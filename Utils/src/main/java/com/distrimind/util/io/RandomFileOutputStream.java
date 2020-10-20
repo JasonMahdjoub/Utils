@@ -49,6 +49,7 @@ import java.nio.file.Path;
  * @version 1.0
  * @since Utils 3.27.0
  */
+@SuppressWarnings("NullableProblems")
 public class RandomFileOutputStream extends RandomOutputStream {
 	public enum AccessMode {
 		/**

@@ -47,6 +47,7 @@ import java.io.IOException;
  * @version 1.0
  * @since Utils 3.27.0
  */
+@SuppressWarnings("NullableProblems")
 public class RandomByteArrayInputStream extends RandomInputStream {
 	private RandomByteArrayOutputStream outputStream;
 	private int current_pos;
@@ -114,10 +115,10 @@ public class RandomByteArrayInputStream extends RandomInputStream {
 		int freeSpace=getFreeSpace();
 		if (freeSpace==0)
 			return -1;
-		int readed = Math.min(Math.min(_length, freeSpace), _bytes.length - _offset);
-		System.arraycopy(outputStream.bytes, current_pos, _bytes, _offset, readed);
-		current_pos += readed;
-		return readed;
+		int read = Math.min(Math.min(_length, freeSpace), _bytes.length - _offset);
+		System.arraycopy(outputStream.bytes, current_pos, _bytes, _offset, read);
+		current_pos += read;
+		return read;
 	}
 
 	/**

@@ -77,7 +77,7 @@ public class TestReadWriteEncryption {
 					rand.nextBytes(associatedData);
 				}
 				for (SymmetricSecretKey sks : new SymmetricSecretKey[]{
-						SymmetricAuthentifiedSignatureType.DEFAULT.getKeyGenerator(SecureRandomType.DEFAULT.getInstance(null)).generateKey(),
+						SymmetricAuthenticatedSignatureType.DEFAULT.getKeyGenerator(SecureRandomType.DEFAULT.getInstance(null)).generateKey(),
 						null
 				})
 				{
@@ -116,8 +116,8 @@ public class TestReadWriteEncryption {
 		EncryptionProfileProvider encryptionProfileProvider =new EncryptionProfileProvider() {
 			final SymmetricSecretKey symmetricSecretKey1=SymmetricEncryptionType.DEFAULT.getKeyGenerator(SecureRandomType.DEFAULT.getSingleton(null)).generateKey();
 			final SymmetricSecretKey symmetricSecretKey2=SymmetricEncryptionType.DEFAULT.getKeyGenerator(SecureRandomType.DEFAULT.getSingleton(null)).generateKey();
-			final SymmetricSecretKey secretKeyForSignature1 = SymmetricAuthentifiedSignatureType.DEFAULT.getKeyGenerator(SecureRandomType.DEFAULT.getSingleton(null)).generateKey();
-			final SymmetricSecretKey secretKeyForSignature2 = SymmetricAuthentifiedSignatureType.DEFAULT.getKeyGenerator(SecureRandomType.DEFAULT.getSingleton(null)).generateKey();
+			final SymmetricSecretKey secretKeyForSignature1 = SymmetricAuthenticatedSignatureType.DEFAULT.getKeyGenerator(SecureRandomType.DEFAULT.getSingleton(null)).generateKey();
+			final SymmetricSecretKey secretKeyForSignature2 = SymmetricAuthenticatedSignatureType.DEFAULT.getKeyGenerator(SecureRandomType.DEFAULT.getSingleton(null)).generateKey();
 
 
 			@Override
@@ -193,7 +193,7 @@ public class TestReadWriteEncryption {
 		byte[] in=new byte[10+r.nextInt(10000000)];
 		r.nextBytes(in);
 		final SymmetricSecretKey symmetricSecretKey1=SymmetricEncryptionType.DEFAULT.getKeyGenerator(SecureRandomType.DEFAULT.getSingleton(null)).generateKey();
-		final SymmetricSecretKey secretKeyForSignature1 = SymmetricAuthentifiedSignatureType.DEFAULT.getKeyGenerator(SecureRandomType.DEFAULT.getSingleton(null)).generateKey();
+		final SymmetricSecretKey secretKeyForSignature1 = SymmetricAuthenticatedSignatureType.DEFAULT.getKeyGenerator(SecureRandomType.DEFAULT.getSingleton(null)).generateKey();
 		symmetricSecretKey1.getEncryptionAlgorithmType().setMaxIVGenerationWithOneSecretKey(2);
 		for (int i=0;i<20;i++) {
 

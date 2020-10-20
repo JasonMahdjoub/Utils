@@ -6,7 +6,7 @@ jason.mahdjoub@distri-mind.fr
 
 This software (Object Oriented Database (OOD)) is a computer program 
 whose purpose is to manage a local database with the object paradigm 
-and the java langage 
+and the java language
 
 This software is governed by the CeCILL-C license under French law and
 abiding by the rules of distribution of free software.  You can  use, 
@@ -44,6 +44,7 @@ import java.util.Arrays;
  * @version 1.1
  * @since Utils 3.30.0
  */
+@SuppressWarnings("NullableProblems")
 public class BufferedRandomInputStream extends RandomInputStream {
 
 	public static final int DEFAULT_MAX_BUFFERS_NUMBER =3;
@@ -267,7 +268,7 @@ public class BufferedRandomInputStream extends RandomInputStream {
 	}
 
 	@Override
-	public synchronized void mark(int readlimit) {
+	public synchronized void mark(int readLimit) {
 		if (isClosed())
 			return;
 		try {
@@ -275,7 +276,7 @@ public class BufferedRandomInputStream extends RandomInputStream {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		in.mark(readlimit);
+		in.mark(readLimit);
 	}
 
 	@Override

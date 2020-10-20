@@ -134,15 +134,15 @@ public final class FileTools {
 	 *            Source directory.
 	 * @param destinationFolder
 	 *            Destination directory.
-	 * @param include_source_forder
+	 * @param include_source_folder
 	 *            tells if the source directory must be included with the copy, and
 	 *            not only its content
 	 * @throws IOException
 	 *             if a problem occurs
 	 */
-	public static void copyFolderToFolder(File sourceFolder, File destinationFolder, boolean include_source_forder)
+	public static void copyFolderToFolder(File sourceFolder, File destinationFolder, boolean include_source_folder)
 			throws IOException {
-		copyFolderToFolder(sourceFolder, destinationFolder, include_source_forder, null, null);
+		copyFolderToFolder(sourceFolder, destinationFolder, include_source_folder, null, null);
 	}
 
 	/**
@@ -152,7 +152,7 @@ public final class FileTools {
 	 *            Source directory.
 	 * @param destinationFolder
 	 *            Destination directory.
-	 * @param include_source_forder
+	 * @param include_source_folder
 	 *            tells if the source directory must be included with the copy, and
 	 *            not only its content
 	 * @param _exclude_regex
@@ -162,9 +162,9 @@ public final class FileTools {
 	 * @throws IOException
 	 *             if a problem occurs
 	 */
-	public static void copyFolderToFolder(File sourceFolder, File destinationFolder, boolean include_source_forder,
+	public static void copyFolderToFolder(File sourceFolder, File destinationFolder, boolean include_source_folder,
 			String _exclude_regex, String _include_regex) throws IOException {
-		copyFolderToFolder(sourceFolder, include_source_forder ? sourceFolder.getName() : "",
+		copyFolderToFolder(sourceFolder, include_source_folder ? sourceFolder.getName() : "",
 				destinationFolder, _exclude_regex, _include_regex);
 	}
 
@@ -257,18 +257,7 @@ public final class FileTools {
 		return path.delete();
 	}
 
-	/*
-	 * public static void deleteDirectory(FTPClient ftpClient, String _directory)
-	 * throws IOException { if (!_directory.endsWith("/")) _directory += "/";
-	 * FTPListParseEngine ftplpe = ftpClient.initiateListParsing(_directory);
-	 * FTPFile files[] = ftplpe.getFiles(); for (FTPFile f : files) { if
-	 * (!f.getName().equals(".") && !f.getName().equals("..")) { if
-	 * (f.isDirectory()) deleteDirectory(ftpClient, _directory + f.getName() + "/");
-	 * else ftpClient.deleteFile(_directory + f.getName()); } }
-	 * ftpClient.removeDirectory(_directory);
-	 * 
-	 * }
-	 */
+
 
 	private static String getRelativePath(String base, String path) {
 		if (path.startsWith(base))
@@ -453,18 +442,18 @@ public final class FileTools {
 	 * @param _include_directory
 	 *            tells if the directory must be included into the ZIP/JAR file, or
 	 *            if only its content must be included
-	 * @param _zipfile
+	 * @param _zipFile
 	 *            the destination ZIP/JAR file
 	 * @throws IOException
 	 *             if a problem occurs
 	 */
-	public static void zipDirectory(File _directory, boolean _include_directory, File _zipfile) throws IOException {
+	public static void zipDirectory(File _directory, boolean _include_directory, File _zipFile) throws IOException {
 		if (!_directory.exists())
 			throw new IllegalAccessError("The directory " + _directory + " does not exists !");
 		if (!_directory.isDirectory())
 			throw new IllegalAccessError("The directory " + _directory + " is not a directory !");
 
-		try(FileOutputStream dest = new FileOutputStream(_zipfile);ZipOutputStream out = new ZipOutputStream(dest)) {
+		try(FileOutputStream dest = new FileOutputStream(_zipFile);ZipOutputStream out = new ZipOutputStream(dest)) {
 			String dir = _directory.getAbsolutePath();
 			if (_include_directory) {
 				int l = dir.lastIndexOf(_directory.getName());

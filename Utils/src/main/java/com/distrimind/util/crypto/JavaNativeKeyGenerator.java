@@ -51,7 +51,7 @@ public class JavaNativeKeyGenerator extends AbstractKeyGenerator {
 		super(type);
 		this.keyGenerator = keyGenerator;
 	}
-	JavaNativeKeyGenerator(SymmetricAuthentifiedSignatureType type, KeyGenerator keyGenerator) {
+	JavaNativeKeyGenerator(SymmetricAuthenticatedSignatureType type, KeyGenerator keyGenerator) {
 		super(type);
 		this.keyGenerator = keyGenerator;
 	}

@@ -94,15 +94,15 @@ public class ListClasses {
 		if (_directory.exists() && _directory.isDirectory()) {
 			// we filter the directory entries
 			FilenameFilter filter = new DotClassFilter();
-			File[] liste = _directory.listFiles(filter);
+			File[] list = _directory.listFiles(filter);
 			// for each element present on the directory, we add it into the
 			// classes list.
-			if (liste!=null) {
+			if (list!=null) {
 
-				for (File aListe : liste) {
+				for (File aList : list) {
 					try {
 						classes.add(Class.forName(_package.getName() + "."
-								+ aListe.getName().substring(0, aListe.getName().length() - 6)));
+								+ aList.getName().substring(0, aList.getName().length() - 6)));
 					} catch (Exception ignored) {
 
 					}
@@ -129,17 +129,17 @@ public class ListClasses {
 		Set<Class<?>> classes = new HashSet<>();
 
 		try {
-			JarFile jfile = new JarFile(_jar_file);
-			String pkgpath = _package.getName().replace(".", "/");
+			JarFile jFile = new JarFile(_jar_file);
+			String pkgPath = _package.getName().replace(".", "/");
 
 			// for each jar entry
-			for (Enumeration<JarEntry> entries = jfile.entries(); entries.hasMoreElements();) {
+			for (Enumeration<JarEntry> entries = jFile.entries(); entries.hasMoreElements();) {
 				JarEntry element = entries.nextElement();
 
 				// if the name begins with the package path and ends with .class
-				if (element.getName().startsWith(pkgpath) && element.getName().endsWith(".class")) {
+				if (element.getName().startsWith(pkgPath) && element.getName().endsWith(".class")) {
 
-					String class_name = element.getName().substring(pkgpath.length() + 1,
+					String class_name = element.getName().substring(pkgPath.length() + 1,
 							element.getName().length() - 6);
 
 					try {
@@ -151,7 +151,7 @@ public class ListClasses {
 				}
 
 			}
-			jfile.close();
+			jFile.close();
 		} catch (Exception ignored) {
 
 		}

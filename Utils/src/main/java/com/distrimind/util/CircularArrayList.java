@@ -41,7 +41,7 @@ import java.util.*;
  * @version 1.0
  * @since Utils 4.8.0
  */
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"unchecked", "NullableProblems"})
 public class CircularArrayList<E> extends AbstractList<E> implements List<E>, Deque<E>, Cloneable, java.io.Serializable, RandomAccess{
 	final static int DEFAULT_BASE_SIZE=32;
 	final static boolean DEFAULT_EXTENSIBLE=true;

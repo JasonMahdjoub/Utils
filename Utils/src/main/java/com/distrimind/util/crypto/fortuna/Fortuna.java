@@ -129,13 +129,7 @@ public class Fortuna extends Random {
         AtomicReference<SecureRandomSource> secureRandomSource=new AtomicReference<>();
         this.accumulator = createAccumulator(scheduler, secureRandomSource, secureRandoms);
         this.secureRandomSource=secureRandomSource.get();
-        this.randomDataPrefetcher = new PrefetchingSupplier<>(new Callable<byte[]>() {
-            @Override
-            public byte[] call() {
-                return Fortuna.this.randomData();
-            }
-
-        }, scheduler);
+        this.randomDataPrefetcher = new PrefetchingSupplier<>(Fortuna.this::randomData, scheduler);
         this.scheduler = scheduler;
     }
 

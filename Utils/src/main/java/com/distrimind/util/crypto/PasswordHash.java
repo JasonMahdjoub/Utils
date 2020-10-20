@@ -168,12 +168,6 @@ public class PasswordHash {
 	
 	
 	
-	/*tatic byte[] getHashFromIdentifiedHash(byte identifiedHash[])
-	{
-		byte res[]=new byte[identifiedHash.length-2];
-		System.arraycopy(identifiedHash, 2, res, 0, res.length);
-		return res;
-	}*/
 	public byte[] hash(String password)
 			throws IOException {
 		return hash(password.toCharArray());

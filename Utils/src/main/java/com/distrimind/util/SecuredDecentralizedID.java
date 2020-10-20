@@ -155,7 +155,7 @@ public class SecuredDecentralizedID extends AbstractDecentralizedID {
 		if (idLongs == null)
 			throw new NullPointerException("idLongs");
 		if (idLongs.length == 0)
-			throw new IllegalArgumentException("idLongs.lendth");
+			throw new IllegalArgumentException("idLongs.length");
 		this.idLongs = idLongs;
 		this.hashCode = computeHashCode(idLongs);
 	}

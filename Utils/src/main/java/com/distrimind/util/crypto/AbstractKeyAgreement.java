@@ -47,7 +47,7 @@ public abstract class AbstractKeyAgreement {
 	
 	
 	protected final SymmetricEncryptionType encryptionType;
-	protected final SymmetricAuthentifiedSignatureType signatureType;
+	protected final SymmetricAuthenticatedSignatureType signatureType;
 	
 	
 
@@ -59,7 +59,7 @@ public abstract class AbstractKeyAgreement {
 	
 	
 
-	protected AbstractKeyAgreement(SymmetricAuthentifiedSignatureType signatureType) {
+	protected AbstractKeyAgreement(SymmetricAuthenticatedSignatureType signatureType) {
 		super();
 		this.encryptionType=null;
 		this.signatureType = signatureType;

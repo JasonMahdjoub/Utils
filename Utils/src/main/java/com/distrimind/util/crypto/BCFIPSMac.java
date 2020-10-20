@@ -54,13 +54,13 @@ import java.security.spec.InvalidKeySpecException;
  */
 public final class BCFIPSMac extends AbstractMac {
 
-	private final SymmetricAuthentifiedSignatureType type;
+	private final SymmetricAuthenticatedSignatureType type;
 	private final int macLength;
 	private com.distrimind.bcfips.crypto.SymmetricSecretKey secretKey;
 	private FipsOutputMACCalculator<AuthParameters> mac;
 	private UpdateOutputStream macStream;
 
-	BCFIPSMac(SymmetricAuthentifiedSignatureType type)
+	BCFIPSMac(SymmetricAuthenticatedSignatureType type)
 	{
 		this.type=type;
 		macLength=type.getSignatureSizeInBits()/8;

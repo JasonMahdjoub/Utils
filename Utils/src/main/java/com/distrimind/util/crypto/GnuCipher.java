@@ -126,11 +126,11 @@ public final class GnuCipher extends AbstractCipher {
 	}
 
 	@Override
-	public void init(int _opmode, AbstractKey _key)
+	public void init(int opMode, AbstractKey _key)
 			throws IOException {
-		mode=_opmode;
+		mode= opMode;
 		try {
-			GnuFunctions.cipherInit(cipher, _opmode, _key.toGnuKey());
+			GnuFunctions.cipherInit(cipher, opMode, _key.toGnuKey());
 		} catch (NoSuchAlgorithmException e) {
 			throw new MessageExternalizationException(Integrity.FAIL, e);
 		} catch (InvalidKeySpecException e) {
@@ -140,11 +140,11 @@ public final class GnuCipher extends AbstractCipher {
 
 
 	@Override
-	public void init(int _opmode, AbstractKey _key, AbstractSecureRandom _random)
+	public void init(int opMode, AbstractKey _key, AbstractSecureRandom _random)
 			throws IOException {
-		mode=_opmode;
+		mode= opMode;
 		try {
-			GnuFunctions.cipherInit(cipher, _opmode, _key.toGnuKey(), setSecureRandom(_random));
+			GnuFunctions.cipherInit(cipher, opMode, _key.toGnuKey(), setSecureRandom(_random));
 		} catch (NoSuchAlgorithmException e) {
 			throw new MessageExternalizationException(Integrity.FAIL, e);
 		} catch (InvalidKeySpecException e) {
@@ -153,10 +153,10 @@ public final class GnuCipher extends AbstractCipher {
 	}
 
 	@Override
-	public void init(int _opmode, AbstractKey _key, byte[] _iv) throws IOException {
-		mode=_opmode;
+	public void init(int opMode, AbstractKey _key, byte[] _iv) throws IOException {
+		mode= opMode;
 		try {
-			GnuFunctions.cipherInit(cipher, _opmode, _key.toGnuKey(), _iv);
+			GnuFunctions.cipherInit(cipher, opMode, _key.toGnuKey(), _iv);
 		}catch (NoSuchAlgorithmException e) {
 			throw new MessageExternalizationException(Integrity.FAIL, e);
 		} catch (InvalidKeySpecException e) {

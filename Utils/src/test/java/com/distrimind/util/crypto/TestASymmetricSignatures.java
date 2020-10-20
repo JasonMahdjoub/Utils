@@ -55,13 +55,13 @@ public class TestASymmetricSignatures {
 	@DataProvider(name="provideDataASymmetricKeyWrapperForSignature", parallel=true)
 	public Object[][] provideDataASymmetricKeyWrapperForSignature()
 	{
-		Object [][] res=new Object[ASymmetricKeyWrapperType.values().length*ASymmetricEncryptionType.values().length*SymmetricAuthentifiedSignatureType.values().length][];
+		Object [][] res=new Object[ASymmetricKeyWrapperType.values().length*ASymmetricEncryptionType.values().length* SymmetricAuthenticatedSignatureType.values().length][];
 		int index=0;
 		for (ASymmetricKeyWrapperType akpw : ASymmetricKeyWrapperType.values())
 		{
 			for (ASymmetricEncryptionType aet : ASymmetricEncryptionType.values())
 			{
-				for (SymmetricAuthentifiedSignatureType set : SymmetricAuthentifiedSignatureType.values())
+				for (SymmetricAuthenticatedSignatureType set : SymmetricAuthenticatedSignatureType.values())
 				{
 					if (akpw.getCodeProvider().equals(aet.getCodeProviderForEncryption()) && akpw.getCodeProvider().equals(set.getCodeProviderForSignature()))
 					{
@@ -78,7 +78,7 @@ public class TestASymmetricSignatures {
 		System.arraycopy(res, 0, res2, 0, index);
 		return res2;
 	}
-	public void testASymmetricKeyWrapperForSignature(AbstractSecureRandom rand, AbstractKeyPair<?,?> kp, ASymmetricKeyWrapperType typeWrapper, ASymmetricEncryptionType asetype, SymmetricAuthentifiedSignatureType ssigtype) throws NoSuchAlgorithmException, IllegalStateException, NoSuchProviderException, IOException, IllegalArgumentException {
+	public void testASymmetricKeyWrapperForSignature(AbstractSecureRandom rand, AbstractKeyPair<?,?> kp, ASymmetricKeyWrapperType typeWrapper, ASymmetricEncryptionType asetype, SymmetricAuthenticatedSignatureType ssigtype) throws NoSuchAlgorithmException, IllegalStateException, NoSuchProviderException, IOException, IllegalArgumentException {
 		SymmetricSecretKey sk= ssigtype.getKeyGenerator(rand, ssigtype.getDefaultKeySizeBits()).generateKey();
 		byte[] wrappedKey=typeWrapper.wrapKey(rand, kp.getASymmetricPublicKey(), sk);
 		SymmetricSecretKey sk2=typeWrapper.unwrapKey(kp.getASymmetricPrivateKey(), wrappedKey);
@@ -90,7 +90,7 @@ public class TestASymmetricSignatures {
 
 	}
 	@Test(dataProvider="provideDataASymmetricKeyWrapperForSignature")
-	public void testASymmetricKeyWrapperForSignature(ASymmetricKeyWrapperType typeWrapper, ASymmetricEncryptionType asetype, SymmetricAuthentifiedSignatureType ssigtype) throws NoSuchAlgorithmException, IllegalStateException, NoSuchProviderException, IOException, IllegalArgumentException {
+	public void testASymmetricKeyWrapperForSignature(ASymmetricKeyWrapperType typeWrapper, ASymmetricEncryptionType asetype, SymmetricAuthenticatedSignatureType ssigtype) throws NoSuchAlgorithmException, IllegalStateException, NoSuchProviderException, IOException, IllegalArgumentException {
 		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getSingleton(null);
 		ASymmetricKeyPair kp=asetype.getKeyPairGenerator(rand, (short)2048).generateKeyPair();
 

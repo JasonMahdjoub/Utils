@@ -166,10 +166,10 @@ final class ClassMetaData {
 					m_size += ObjectSizer.OBJREF_SIZE;
 
 					if (fields_to_avoid == null || !fields_to_avoid.contains(f)) {
-						DontComputeSize a = f.getAnnotation(DontComputeSize.class);
+						DoNotComputeSize a = f.getAnnotation(DoNotComputeSize.class);
 						if (a == null) {
-							DontComputeSizeForInnerCollectionElements d = f
-									.getAnnotation(DontComputeSizeForInnerCollectionElements.class);
+							DoNotComputeSizeForInnerCollectionElements d = f
+									.getAnnotation(DoNotComputeSizeForInnerCollectionElements.class);
 							if (d == null)
 								m_fields.add(new PersonalField(f));
 							else {

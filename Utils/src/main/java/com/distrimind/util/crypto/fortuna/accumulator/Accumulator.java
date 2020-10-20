@@ -29,18 +29,10 @@ public class Accumulator {
         int sourceId = sourceCount.getAndIncrement();
         final EventAdder eventAdder = new EventAdderImpl(sourceId, pools);
         final AtomicBoolean scheduled = new AtomicBoolean();
-        entropySource.schedule((new EventScheduler() {
-            @Override
-            public void schedule(long delay, TimeUnit timeUnit) {
+        entropySource.schedule(((delay, timeUnit) -> {
 
-                entropyFutures.add(scheduler.scheduleWithFixedDelay(new Runnable() {
-                    @Override
-                    public void run() {
-                        entropySource.event(eventAdder);
-                    }
-                }, 0, delay, timeUnit));
-                scheduled.set(true);
-            }
+            entropyFutures.add(scheduler.scheduleWithFixedDelay(() -> entropySource.event(eventAdder), 0, delay, timeUnit));
+            scheduled.set(true);
         }));
         if (!scheduled.get()) {
             throw new IllegalStateException("Entropy source " + entropySource.getClass().getName() + " was not scheduled to run");

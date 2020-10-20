@@ -57,16 +57,10 @@ public class NewHopeKeyAgreementClient extends AbstractNewHopeKeyAgreement{
 	private final AbstractSecureRandom randomForKeys;
 	private NHPrivateKeyParameters priv;
 	private boolean valid=true;
-	/*NewHopeKeyAgreementClient(SymmetricAuthentifiedSignatureType type, AbstractSecureRandom randomForKeys) {
-		this(type, (short)256, randomForKeys);
-	}*/
-	NewHopeKeyAgreementClient(SymmetricAuthentifiedSignatureType type, short keySizeBits, AbstractSecureRandom randomForKeys) {
+	NewHopeKeyAgreementClient(SymmetricAuthenticatedSignatureType type, short keySizeBits, AbstractSecureRandom randomForKeys) {
 		super(type, (short)(keySizeBits/8));
 		this.randomForKeys=randomForKeys;
 	}
-	/*NewHopeKeyAgreementClient(SymmetricEncryptionType type, AbstractSecureRandom randomForKeys) {
-		this(type, (short)256, randomForKeys);
-	}*/
 	NewHopeKeyAgreementClient(SymmetricEncryptionType type, short keySizeBits, AbstractSecureRandom randomForKeys) {
 		super(type, (short)(keySizeBits/8));
 		this.randomForKeys=randomForKeys;

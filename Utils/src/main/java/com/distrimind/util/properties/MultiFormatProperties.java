@@ -344,7 +344,7 @@ public abstract class MultiFormatProperties implements Cloneable, Serializable {
 				throw new PropertiesParseException("The element tagged by " + id + " was not found.");
 			else
 				throw new PropertiesParseException(
-						"The element tagged by " + id + " was found in more than one occurences.");
+						"The element tagged by " + id + " was found in more than one occurrences.");
 		}
 		res.append(nodeValue, previous_index, nodeValue.length());
 		return res.toString();
@@ -918,7 +918,7 @@ public abstract class MultiFormatProperties implements Cloneable, Serializable {
 	{
 		
 		
-		Yaml yaml=new Yaml(new YamlRepresenter(referenceProperties),getDumperOptions());
+		Yaml yaml=new Yaml(new YamlRepresenting(referenceProperties),getDumperOptions());
 
 		yaml.setBeanAccess(BeanAccess.FIELD);
 		yaml.setName(this.getClass().getSimpleName());
@@ -1055,10 +1055,10 @@ public abstract class MultiFormatProperties implements Cloneable, Serializable {
         return true;
     }
 
-	private class YamlRepresenter extends Representer
+	private class YamlRepresenting extends Representer
 	{
 		final MultiFormatProperties mfp;
-		YamlRepresenter(MultiFormatProperties mfp)
+		YamlRepresenting(MultiFormatProperties mfp)
 		{
 		    if (mfp!=null && mfp.getClass()==MultiFormatProperties.this.getClass())
 			    this.mfp=mfp;
