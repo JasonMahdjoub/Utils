@@ -148,6 +148,9 @@ public class PropertiesExample extends MultiFormatProperties {
 	ArrayList<String> list3 = null;
 
 	List<String> list4 = null;
+	Set<String> set1 = null;
+	HashSet<String> set2 = null;
+	TreeSet<String> set3 = null;
 
 	AbstractSubProperties subProperties = null;
 
@@ -252,6 +255,12 @@ public class PropertiesExample extends MultiFormatProperties {
 				return false;
 			if (!equals(list4, pe.list4))
 				return false;
+			if (!equals(set1, pe.set1))
+				return false;
+			if (!equals(set2, pe.set2))
+				return false;
+			if (!equals(set3, pe.set3))
+				return false;
 			if (!equals(className, pe.className))
 				return false;
 			if (!equals(getFreeStringProperties(), pe.getFreeStringProperties()))
@@ -324,6 +333,15 @@ public class PropertiesExample extends MultiFormatProperties {
 			list2.add(getString(rand));
 		list3 = (ArrayList<String>) list;
 		list4 = list2;
+		set1 = new HashSet<>();
+		for (int i = 0; i < 10; i++)
+			set1.add(getString(rand));
+		set2 = new HashSet<>();
+		for (int i = 0; i < 10; i++)
+			set2.add(getString(rand));
+		set3 = new TreeSet<>();
+		for (int i = 0; i < 10; i++)
+			set3.add(getString(rand));
 		SubProperties sb = new SubProperties();
 		sb.value = getString(rand);
 		subProperties = sb;
