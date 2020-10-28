@@ -206,7 +206,7 @@ public abstract class MultiFormatProperties implements Cloneable, Serializable {
 				try {
 					if (f.getType().isPrimitive()) {
 						res.put(f.getName(), getPrimitiveValue(f));
-					} else if (List.class.isAssignableFrom(f.getType())) {
+					} else if (List.class.isAssignableFrom(f.getType()) || Set.class.isAssignableFrom(f.getType())) {
 						StringBuilder buffer = new StringBuilder();
 						Object o = f.get(this);
 						if (o == null)
@@ -215,7 +215,7 @@ public abstract class MultiFormatProperties implements Cloneable, Serializable {
 							Class<?> element_list_class=getGenericType(f);
 							
 							buffer.append("{");
-							List<?> l = (List<?>) o;
+							Collection<?> l = (Collection<?>) o;
 							boolean first = true;
 							for (Object e : l) {
 								String s;
@@ -236,7 +236,8 @@ public abstract class MultiFormatProperties implements Cloneable, Serializable {
 							buffer.append("}");
 						}
 						res.put(f.getName(), buffer.toString());
-					} else if (Map.class.isAssignableFrom(f.getType())) {
+					}
+					else if (Map.class.isAssignableFrom(f.getType())) {
 						StringBuilder buffer = new StringBuilder();
 						Object o = f.get(this);
 						if (o == null)
@@ -463,6 +464,7 @@ public abstract class MultiFormatProperties implements Cloneable, Serializable {
 			return false;
 		return MultiFormatProperties.class.isAssignableFrom(field.getType()) || Map.class.isAssignableFrom(field.getType())
 				|| List.class.isAssignableFrom(field.getType())
+				|| Set.class.isAssignableFrom(field.getType())
 				|| default_xml_object_parser_instance.isValid(field.getType())
 				|| (optional_xml_object_parser_instance != null
 						&& optional_xml_object_parser_instance.isValid(field.getType()));
@@ -643,7 +645,40 @@ public abstract class MultiFormatProperties implements Cloneable, Serializable {
 		}
 		return null;
 	}
+	@SuppressWarnings("unchecked")
+	private Collection<Object> initCollection(Class<?> type) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
 
+		if (Set.class.isAssignableFrom(type))
+		{
+			{
+				if (Modifier.isAbstract(type.getModifiers()))
+					return new HashSet<>();
+				else
+				{
+					return (Set<Object>)type.getDeclaredConstructor().newInstance();
+				}
+
+			}
+		}
+		else if (List.class.isAssignableFrom(type))
+		{
+			if (type.isArray()) {
+				return new ArrayList<>();
+			} else {
+
+				if (Modifier.isAbstract(type.getModifiers())) {
+					if (AbstractSequentialList.class.isAssignableFrom(type))
+						return new LinkedList<>();
+					else
+						return new ArrayList<>();
+				} else {
+					return (List<Object>) type.getDeclaredConstructor().newInstance();
+				}
+			}
+		}
+		else
+			throw new IllegalAccessError();
+	}
 	void readField(Document document, Field field, Class<?> type, Node node) throws PropertiesParseException {
 
 		// deal with map
@@ -701,32 +736,12 @@ public abstract class MultiFormatProperties implements Cloneable, Serializable {
 		} catch (InstantiationException | IllegalAccessException | DOMException | ClassNotFoundException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
 			throw new PropertiesParseException(e, "Impossible to read the type " + type.getName());
 		}
-		else if (List.class.isAssignableFrom(type) /* || type.isArray() */) // TODO
-		// add
-		// array
-		// management
+		else if (List.class.isAssignableFrom(type) || Set.class.isAssignableFrom(type))
+			// TODO add array management
 		{
-			// deal with list
-
 			try {
-				List<Object> l ;
-				{
-					if (type.isArray()) {
-						l = new ArrayList<>();
-					} else {
+				Collection<Object> collection=initCollection(type);
 
-						if (Modifier.isAbstract(type.getModifiers())) {
-							if (AbstractSequentialList.class.isAssignableFrom(type))
-								l = new LinkedList<>();
-							else
-								l = new ArrayList<>();
-						} else {
-							@SuppressWarnings("unchecked")
-							List<Object> newInstance = (List<Object>) type.getDeclaredConstructor().newInstance();
-							l = newInstance;
-						}
-					}
-				}
 
 				// Class<?> element_list_class= (Class<?>) ((ParameterizedType)
 				// field.getGenericType()).getActualTypeArguments()[0];
@@ -738,20 +753,21 @@ public abstract class MultiFormatProperties implements Cloneable, Serializable {
 								.forName(n.getAttributes().getNamedItem("ElementType").getNodeValue());
 						Object o = getValue(document, field.getName(), element_list_class, n);
 						if (!(o != null && o == Void.TYPE))
-							l.add(o);
+							collection.add(o);
 					}
 				}
 				if (type.isArray()) {
-					field.set(this, l.toArray());
+					field.set(this, collection.toArray());
 				} else {
-					field.set(this, l);
+					field.set(this, collection);
 				}
 
 			} catch (InstantiationException | IllegalAccessException | DOMException | ClassNotFoundException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
 				throw new PropertiesParseException(e, "Impossible to read the type " + type.getName());
 			}
 
-		} else if (MultiFormatProperties.class.isAssignableFrom(type)) {
+		}
+		else if (MultiFormatProperties.class.isAssignableFrom(type)) {
 			// deal with Properties instance
 
 			try {
@@ -805,7 +821,7 @@ public abstract class MultiFormatProperties implements Cloneable, Serializable {
 				} else if (type == char.class) {
 					field.setChar(this, nodeValue.charAt(0));
 				} else
-					throw new PropertiesParseException("Unknow primitive type " + type.getName());
+					throw new PropertiesParseException("Unknown primitive type " + type.getName());
 
 			} catch (IllegalArgumentException | IllegalAccessException e) {
 				throw new PropertiesParseException(e, "Impossible read the field " + field.getName());
@@ -998,10 +1014,10 @@ public abstract class MultiFormatProperties implements Cloneable, Serializable {
                 {
                     return canExclude((Map<?, ?>)value, (Map<?, ?>)reference);
                 }
-                else if (field.getDeclaringClass().isAssignableFrom(List.class))
-                {
-                    return canExclude((List<?>)value, (List<?>)value);
-                }
+                else if (field.getDeclaringClass().isAssignableFrom(List.class) || field.getDeclaringClass().isAssignableFrom(Set.class))
+				{
+					return canExclude((Collection<?>)value, (Collection<?>)value);
+				}
 
             }
             return Objects.equals(reference, value);
@@ -1043,7 +1059,7 @@ public abstract class MultiFormatProperties implements Cloneable, Serializable {
         return true;
     }
 
-    private boolean canExclude(List<?> value, List<?> reference) {
+    private boolean canExclude(Collection<?> value, Collection<?> reference) {
         if (value.size()!=reference.size())
             return false;
         for (Object v : value)
@@ -1054,6 +1070,7 @@ public abstract class MultiFormatProperties implements Cloneable, Serializable {
 
         return true;
     }
+
 
 	private class YamlRepresenting extends Representer
 	{
@@ -1318,28 +1335,23 @@ public abstract class MultiFormatProperties implements Cloneable, Serializable {
 					}
 
 				}
-			} else if (List.class.isAssignableFrom(field_type)) {
+			} else if (List.class.isAssignableFrom(field_type) || Set.class.isAssignableFrom(field_type)) {
 				if (value == null || value.equals("null"))
 					field.set(this, null);
 				else {
 
 					Class<?> element_list_class = getGenericType(field);
-					List<Object> l ;
-
-					if (Modifier.isAbstract(field_type.getModifiers()))
-						l = new ArrayList<>();
-					else
-						l = (List<Object>) field_type.getDeclaredConstructor().newInstance();
+					Collection<Object> collection=initCollection(field_type);
 
 					if (value.startsWith("{") && value.endsWith("}")) {
 						value = value.substring(1, value.length() - 1);
 						for (String v : value.split(";")) {
 							Object o = getValue(element_list_class, v);
 							if (o != null && o != Void.TYPE)
-								l.add(o);
+								collection.add(o);
 						}
 
-						field.set(this, l);
+						field.set(this, collection);
 					}
 				}
 
@@ -1533,12 +1545,12 @@ public abstract class MultiFormatProperties implements Cloneable, Serializable {
 				throw new PropertiesParseException(e, "Impossible to read the type " + type.getName());
 			}
 
-		} else if (List.class.isAssignableFrom(type)) {
+		} else if (List.class.isAssignableFrom(type) || Set.class.isAssignableFrom(type)) {
 			// deal with list
 
 			try {
 				@SuppressWarnings("unchecked")
-				List<Object> l = (List<Object>) field.get(this);
+				Collection<Object> l = (Collection<Object>) field.get(this);
 				if (l == null)
 					return;
 
