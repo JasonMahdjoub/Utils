@@ -66,7 +66,7 @@ public class Description extends AbstractVersion<Description> {
 	 * @param _revision revision
 	 * @param _type version type (stable, alpha, beta)
 	 * @param _alpha_beta_version if type is equal to alpha or beta, alpha/beta version
-	 * @param _date the version date (see {@link java.time.format.DateTimeFormatter#ISO_LOCAL_DATE})
+	 * @param _date the version date (format YYYY-MM-DD, i.e. 2020-10-28))
 	 */
 	public Description(short _major, short _minor, short _revision, Version.Type _type, short _alpha_beta_version, String _date) {
 		super(_major, _minor, _revision, _type, _alpha_beta_version, _date);

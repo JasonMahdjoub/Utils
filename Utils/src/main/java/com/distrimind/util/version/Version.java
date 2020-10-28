@@ -35,30 +35,16 @@ knowledge of the CeCILL-C license and that you accept its terms.
 
 package com.distrimind.util.version;
 
-import java.awt.BorderLayout;
-import java.awt.Component;
-import java.awt.FlowLayout;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
+import java.io.*;
 import java.text.DateFormat;
 import java.time.Instant;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 
 /**
  * Represent the description of all versions of a software, including the
@@ -128,12 +114,12 @@ public class Version extends AbstractVersion<Version> {
 	 * @param _revision revision
 	 * @param _type version type (stable, alpha, beta)
 	 * @param _alpha_beta_version if type is equal to alpha or beta, alpha/beta version
-	 * @param _date_start_project the start project date (see {@link java.time.format.DateTimeFormatter#ISO_LOCAL_DATE})
-	 * @param _date_end_project the end project date (see {@link java.time.format.DateTimeFormatter#ISO_LOCAL_DATE})
+	 * @param _date_start_project the start project date (format YYYY-MM-DD, i.e. 2020-10-28)
+	 * @param _date_end_project the end project date (format YYYY-MM-DD, i.e. 2020-10-28)
 	 */
 	public Version(String _program_name, String shortProgramName, short _major, short _minor, short _revision, Type _type,
 				   short _alpha_beta_version, String _date_start_project, String _date_end_project) {
-		this(_program_name, shortProgramName, _major, _minor, _revision, _type, _alpha_beta_version, Date.from(Instant.from(DateTimeFormatter.ISO_LOCAL_DATE.parse(_date_start_project))), Date.from(Instant.from(DateTimeFormatter.ISO_LOCAL_DATE.parse(_date_end_project))));
+		this(_program_name, shortProgramName, _major, _minor, _revision, _type, _alpha_beta_version, parse(_date_start_project), parse(_date_end_project));
 	}
 	/**
 	 *
@@ -155,11 +141,18 @@ public class Version extends AbstractVersion<Version> {
 	 *
 	 * @param _program_name the program name
 	 * @param shortProgramName the short program name
-	 * @param _date_start_project the start project date (see {@link java.time.format.DateTimeFormatter#ISO_LOCAL_DATE})
+	 * @param _date_start_project the start project date (format YYYY-MM-DD, i.e. 2020-10-28)
 	 */
 	public Version(String _program_name, String shortProgramName, String _date_start_project) {
-		this(_program_name, shortProgramName, Date.from(Instant.from(DateTimeFormatter.ISO_LOCAL_DATE.parse(_date_start_project))));
+		this(_program_name, shortProgramName, parse(_date_start_project));
 	}
+
+	static Date parse(String date)
+	{
+		return Date.from(Instant.from(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.systemDefault())
+				.parse(date+" 00:00:00")));
+	}
+
 	/**
 	 *
 	 * @param _program_name the program name
@@ -293,9 +286,10 @@ public class Version extends AbstractVersion<Version> {
 		}
 		if (descriptions.size() > 0) {
 			s.append("<BR>");
-			for (Description d : descriptions) {
+			for (Iterator<Description> it=descriptions.descendingIterator();it.hasNext();)
+			{
 				s.append("<BR>");
-				s.append(d.getHTML());
+				s.append(it.next().getHTML());
 			}
 		}
 
@@ -340,9 +334,10 @@ public class Version extends AbstractVersion<Version> {
 		s.append("# Modifications:");
 		s.append("\n");
 		if (descriptions.size() > 0) {
-			for (Description d : descriptions) {
+			for (Iterator<Description> it=descriptions.descendingIterator();it.hasNext();)
+			{
 				s.append("\n");
-				s.append(d.getMarkdownCode());
+				s.append(it.next().getMarkdownCode());
 			}
 		}
 		s.append("\n");

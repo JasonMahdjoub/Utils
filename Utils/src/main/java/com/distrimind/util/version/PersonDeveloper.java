@@ -36,8 +36,6 @@ knowledge of the CeCILL-C license and that you accept its terms.
 package com.distrimind.util.version;
 
 import java.text.DateFormat;
-import java.time.Instant;
-import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
@@ -68,10 +66,10 @@ public class PersonDeveloper extends Person implements Comparable<PersonDevelope
 	 *
 	 * @param lastName the last name
 	 * @param firstName the first name
-	 * @param developmentBeginDate the date when the developer entered into the team (see {@link java.time.format.DateTimeFormatter#ISO_LOCAL_DATE})
+	 * @param developmentBeginDate the date when the developer entered into the team (format YYYY-MM-DD, i.e. 2020-10-28)
 	 */
 	public PersonDeveloper(String lastName, String firstName, String developmentBeginDate) {
-		this(lastName, firstName, Date.from(Instant.from(DateTimeFormatter.ISO_LOCAL_DATE.parse(developmentBeginDate))));
+		this(lastName, firstName, Version.parse(developmentBeginDate));
 	}
 	/**
 	 *

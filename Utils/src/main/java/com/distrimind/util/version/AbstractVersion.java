@@ -3,8 +3,6 @@ package com.distrimind.util.version;
 import com.distrimind.util.properties.MultiFormatProperties;
 
 import java.text.DateFormat;
-import java.time.Instant;
-import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
@@ -43,10 +41,10 @@ public abstract class AbstractVersion<V extends AbstractVersion<V>> extends Mult
 	 * @param _revision revision
 	 * @param _type version type (stable, alpha, beta)
 	 * @param _alpha_beta_version if type is equal to alpha or beta, alpha/beta version
-	 * @param _date the version date (see {@link java.time.format.DateTimeFormatter#ISO_LOCAL_DATE})
+	 * @param _date the version date (format YYYY-MM-DD, i.e. 2020-10-28)
 	 */
 	protected AbstractVersion(short _major, short _minor, short _revision, Version.Type _type, short _alpha_beta_version, String _date) {
-		this(_major, _minor, _revision, _type, _alpha_beta_version, Date.from(Instant.from(DateTimeFormatter.ISO_LOCAL_DATE.parse(_date))));
+		this(_major, _minor, _revision, _type, _alpha_beta_version, Version.parse(_date));
 	}
 	/**
 	 * @param _major major version
