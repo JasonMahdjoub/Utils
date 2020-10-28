@@ -36,6 +36,9 @@ knowledge of the CeCILL-C license and that you accept its terms.
 package com.distrimind.util.version;
 
 import java.text.DateFormat;
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
@@ -49,23 +52,47 @@ import java.util.Locale;
  * @see Person
  */
 @SuppressWarnings("FieldMayBeFinal")
-public class PersonDeveloper extends Person {
+public class PersonDeveloper extends Person implements Comparable<PersonDeveloper>{
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 6519819432111179436L;
 
-	private Date m_date_begin_development;
+	private Date developmentBeginDate;
 
 	protected PersonDeveloper() {
 		this("", "", new Date());
 	}
 
-	public PersonDeveloper(String _name, String _first_name, Date _date_begin_development) {
-		super(_name, _first_name);
-		if (_date_begin_development == null)
-			throw new NullPointerException("_date_begin_development");
-		m_date_begin_development = _date_begin_development;
+	/**
+	 *
+	 * @param lastName the last name
+	 * @param firstName the first name
+	 * @param developmentBeginDate the date when the developer entered into the team (see {@link java.time.format.DateTimeFormatter#ISO_LOCAL_DATE})
+	 */
+	public PersonDeveloper(String lastName, String firstName, String developmentBeginDate) {
+		this(lastName, firstName, Date.from(Instant.from(DateTimeFormatter.ISO_LOCAL_DATE.parse(developmentBeginDate))));
+	}
+	/**
+	 *
+	 * @param lastName the last name
+	 * @param firstName the first name
+	 * @param developmentBeginDate the date when the developer entered into the team
+	 */
+	public PersonDeveloper(String lastName, String firstName, Calendar developmentBeginDate) {
+		this(lastName, firstName, developmentBeginDate.getTime());
+	}
+	/**
+	 *
+	 * @param lastName the last name
+	 * @param firstName the first name
+	 * @param developmentBeginDate the date when the developer entered into the team
+	 */
+	public PersonDeveloper(String lastName, String firstName, Date developmentBeginDate) {
+		super(lastName, firstName);
+		if (developmentBeginDate == null)
+			throw new NullPointerException("developmentBeginDate");
+		this.developmentBeginDate = developmentBeginDate;
 	}
 	
 	@Override
@@ -76,20 +103,24 @@ public class PersonDeveloper extends Person {
 			return true;
 		if (o instanceof PersonDeveloper) {
 			PersonDeveloper p = ((PersonDeveloper) o);
-			return m_first_name.equals(p.m_first_name) && m_name.equals(p.m_name)
-					&& m_date_begin_development.equals(p.m_date_begin_development);
+			return firstName.equals(p.firstName) && lastName.equals(p.lastName)
+					&& developmentBeginDate.equals(p.developmentBeginDate);
 		}
 		return false;
 	}
 
 	public Date getDateBeginDevelopment() {
-		return m_date_begin_development;
+		return developmentBeginDate;
 	}
 
 	@Override
 	public String toString() {
-		return m_first_name + " " + m_name + " (Entered in the team at "
-				+ DateFormat.getDateInstance(DateFormat.SHORT, Locale.FRANCE).format(m_date_begin_development) + ")";
+		return firstName + " " + lastName + " (Entered in the team at "
+				+ DateFormat.getDateInstance(DateFormat.SHORT, Locale.FRANCE).format(developmentBeginDate) + ")";
 	}
 
+	@Override
+	public int compareTo(PersonDeveloper p) {
+		return developmentBeginDate.compareTo(p.developmentBeginDate);
+	}
 }

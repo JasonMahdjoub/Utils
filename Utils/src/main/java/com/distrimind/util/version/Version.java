@@ -50,17 +50,15 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.text.DateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Locale;
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-
-import com.distrimind.util.properties.MultiFormatProperties;
 
 /**
  * Represent the description of all versions of a software, including the
@@ -73,10 +71,10 @@ import com.distrimind.util.properties.MultiFormatProperties;
  * @see Person
  * @see PersonDeveloper
  */
-@SuppressWarnings({"FieldMayBeFinal", "NullableProblems"})
-public class Version extends MultiFormatProperties implements Comparable<Version> {
+@SuppressWarnings({"FieldMayBeFinal"})
+public class Version extends AbstractVersion<Version> {
 	public enum Type {
-		Stable, Alpha, Beta, RC
+		ALPHA, BETA, RELEASE_CANDIDATE, STABLE
 	}
 
 	/**
@@ -84,107 +82,173 @@ public class Version extends MultiFormatProperties implements Comparable<Version
 	 */
 	private static final long serialVersionUID = -183708465780440306L;
 
-	private short m_major;
+	private Date projectStartDate;
 
-	private short m_minor;
+	private int buildNumber = 1;
 
-	private short m_revision;
+	private String programName;
 
-	private Type m_type;
+	private String shortProgramName;
 
-	private short m_alpha_beta_version;
+	final ArrayList<Person> creators = new ArrayList<>();
 
-	private Date m_date_start_project;
+	final TreeSet<PersonDeveloper> developers = new TreeSet<>();
 
-	private Date m_date_end_project;
+	final TreeSet<Description> descriptions = new TreeSet<>();
 
-	private int m_build_number = 1;
-
-	private String m_program_name;
-
-	private String m_short_program_name;
-
-	final ArrayList<Person> m_creators = new ArrayList<>();
-
-	final ArrayList<PersonDeveloper> m_developers = new ArrayList<>();
-
-	final ArrayList<Description> m_descriptions = new ArrayList<>();
-
-	private JFrame m_frame = null;
+	private JFrame frame = null;
 
 	protected Version() {
-		this("", "", (short)0, (short)0, (short)0, Type.Alpha, (short)0, new Date(), new Date());
+		this("", "", (short)0, (short)0, (short)0, Type.ALPHA, (short)0, new Date(), new Date());
 	}
 
+	@Override
+	public boolean equals(Object o) {
+		if (o == null)
+			return false;
+		if (o == this)
+			return true;
+		if (o instanceof Version) {
+			Version d = (Version) o;
+
+			return compareTo(d)==0 &&
+					programName.equals(d.programName) &&
+					shortProgramName.equals(d.shortProgramName) &&
+					buildNumber==d.buildNumber;
+		}
+		return false;
+	}
+
+	/**
+	 *
+	 * @param _program_name the program name
+	 * @param shortProgramName the short program name
+	 * @param _major major version
+	 * @param _minor minor version
+	 * @param _revision revision
+	 * @param _type version type (stable, alpha, beta)
+	 * @param _alpha_beta_version if type is equal to alpha or beta, alpha/beta version
+	 * @param _date_start_project the start project date (see {@link java.time.format.DateTimeFormatter#ISO_LOCAL_DATE})
+	 * @param _date_end_project the end project date (see {@link java.time.format.DateTimeFormatter#ISO_LOCAL_DATE})
+	 */
+	public Version(String _program_name, String shortProgramName, short _major, short _minor, short _revision, Type _type,
+				   short _alpha_beta_version, String _date_start_project, String _date_end_project) {
+		this(_program_name, shortProgramName, _major, _minor, _revision, _type, _alpha_beta_version, Date.from(Instant.from(DateTimeFormatter.ISO_LOCAL_DATE.parse(_date_start_project))), Date.from(Instant.from(DateTimeFormatter.ISO_LOCAL_DATE.parse(_date_end_project))));
+	}
+	/**
+	 *
+	 * @param _program_name the program name
+	 * @param shortProgramName the short program name
+	 * @param _major major version
+	 * @param _minor minor version
+	 * @param _revision revision
+	 * @param _type version type (stable, alpha, beta)
+	 * @param _alpha_beta_version if type is equal to alpha or beta, alpha/beta version
+	 * @param _date_start_project the start project date
+	 * @param _date_end_project the end project date
+	 */
+	public Version(String _program_name, String shortProgramName, short _major, short _minor, short _revision, Type _type,
+				   short _alpha_beta_version, Calendar _date_start_project, Calendar _date_end_project) {
+		this(_program_name, shortProgramName, _major, _minor, _revision, _type, _alpha_beta_version, _date_start_project.getTime(), _date_end_project.getTime());
+	}
+	/**
+	 *
+	 * @param _program_name the program name
+	 * @param shortProgramName the short program name
+	 * @param _date_start_project the start project date (see {@link java.time.format.DateTimeFormatter#ISO_LOCAL_DATE})
+	 */
+	public Version(String _program_name, String shortProgramName, String _date_start_project) {
+		this(_program_name, shortProgramName, Date.from(Instant.from(DateTimeFormatter.ISO_LOCAL_DATE.parse(_date_start_project))));
+	}
+	/**
+	 *
+	 * @param _program_name the program name
+	 * @param shortProgramName the short program name
+	 * @param _date_start_project the start project date
+	 */
+	public Version(String _program_name, String shortProgramName, Calendar _date_start_project) {
+		this(_program_name, shortProgramName, _date_start_project.getTime());
+	}
+	/**
+	 *
+	 * @param _program_name the program name
+	 * @param shortProgramName the short program name
+	 * @param _date_start_project the start project date
+	 */
+	public Version(String _program_name, String shortProgramName, Date _date_start_project) {
+		this(_program_name, shortProgramName, (short)0, (short)0, (short)0, Type.ALPHA, (short)0, _date_start_project, new Date());
+	}
+	/**
+	 *
+	 * @param _program_name the program name
+	 * @param shortProgramName the short program name
+	 * @param _major major version
+	 * @param _minor minor version
+	 * @param _revision revision
+	 * @param _type version type (stable, alpha, beta)
+	 * @param _alpha_beta_version if type is equal to alpha or beta, alpha/beta version
+	 * @param _date_start_project the start project date
+	 * @param _date_end_project the end project date
+	 */
 	public Version(String _program_name, String shortProgramName, short _major, short _minor, short _revision, Type _type,
 				   short _alpha_beta_version, Date _date_start_project, Date _date_end_project) {
-		super(null);
+		super(_major, _minor, _revision, _type, _alpha_beta_version, _date_end_project);
 		if (_program_name == null)
 			throw new NullPointerException("_program_name");
 		if (shortProgramName == null)
 			throw new NullPointerException("shortProgramName");
-		if (_type == null)
-			throw new NullPointerException("_type");
 		if (_date_start_project == null)
 			throw new NullPointerException("_date_start_project");
-		if (_date_end_project == null)
-			throw new NullPointerException("_date_end_project");
 
-		m_major = _major;
-		m_minor = _minor;
-		m_revision = _revision;
-		m_type = _type;
-		m_alpha_beta_version = _alpha_beta_version;
-		m_date_start_project = _date_start_project;
-		m_date_end_project = _date_end_project;
-		m_program_name = _program_name;
-		m_short_program_name = shortProgramName;
+		projectStartDate = _date_start_project;
+		this.programName = _program_name;
+		this.shortProgramName = shortProgramName;
 	}
 
-	public void addCreator(Person p) {
+	public Version addCreator(Person p) {
 		if (p == null)
 			throw new NullPointerException("p");
-		m_creators.add(p);
+		creators.add(p);
+		return this;
 	}
 
-	public void addDescription(Description _d) {
-		if (_d == null)
-			throw new NullPointerException("_d");
-		m_descriptions.add(_d);
+	public Version addDescription(Description d) {
+		if (d == null)
+			throw new NullPointerException("d");
+		descriptions.add(d);
+		d=descriptions.last();
+		major=d.getMajor();
+		minor=d.getMinor();
+		revision=d.getRevision();
+		type=d.getType();
+		date=d.getDate();
+		alphaBetaRCVersion =d.getAlphaBetaRCVersion();
+		return this;
 	}
 
-	public void addDeveloper(PersonDeveloper p) {
+	public Version addDeveloper(PersonDeveloper p) {
 		if (p == null)
 			throw new NullPointerException("p");
-		m_developers.add(p);
+		developers.add(p);
+		return this;
 	}
 
-	@Override
-	public int compareTo(Version b) {
-		if (b == null)
-			throw new NullPointerException("b");
 
-		return this.m_build_number - b.m_build_number;
-	}
-
-	public short getAlphaBetaVersion() {
-		return m_alpha_beta_version;
-	}
 
 	public int getBuildNumber() {
-		return m_build_number;
+		return buildNumber;
 	}
 
 	public ArrayList<Person> getCreators() {
-		return m_creators;
+		return creators;
 	}
 
-	public ArrayList<Description> getDescriptions() {
-		return m_descriptions;
+	public TreeSet<Description> getDescriptions() {
+		return descriptions;
 	}
 
-	public ArrayList<PersonDeveloper> getDevelopers() {
-		return m_developers;
+	public TreeSet<PersonDeveloper> getDevelopers() {
+		return developers;
 	}
 
 	public String getFileHeadName() {
@@ -194,41 +258,42 @@ public class Version extends MultiFormatProperties implements Comparable<Version
 	public String getFileHeadVersion() {
 		return Integer.toString(getMajor()) + "." + Integer.toString(getMinor()) + "." + Integer.toString(getRevision())
 				+ "-" + getType()
-				+ ((getType().equals(Version.Type.Beta) || getType().equals(Version.Type.Alpha))
-						? Integer.toString(getAlphaBetaVersion())
+				+ ((getType().equals(Version.Type.BETA) || getType().equals(Version.Type.ALPHA))
+						? Integer.toString(getAlphaBetaRCVersion())
 						: "");
 	}
+
 
 	public String getHTMLCode() {
 		StringBuilder s = new StringBuilder();
 		s.append("<html><table><tr><td><H1>");
-		s.append(m_program_name).append("</H1>");
-		s.append(Integer.toString(m_major)).append(".").append(Integer.toString(m_minor)).append(".").append(Integer.toString(m_revision)).append(" ").append(m_type).append((m_type.equals(Type.Alpha) || m_type.equals(Type.Beta)) ? " " + m_alpha_beta_version : "").append(" (Build: ").append(m_build_number).append(")");
-		s.append(" (from ").append(DateFormat.getDateInstance(DateFormat.SHORT, Locale.FRANCE).format(m_date_start_project)).append(" to ").append(DateFormat.getDateInstance(DateFormat.SHORT, Locale.FRANCE).format(m_date_end_project)).append(")");
+		s.append(programName).append("</H1>");
+		appendVersionPart(s, buildNumber);
+		s.append(" (from ").append(DateFormat.getDateInstance(DateFormat.SHORT, Locale.FRANCE).format(projectStartDate)).append(" to ").append(DateFormat.getDateInstance(DateFormat.SHORT, Locale.FRANCE).format(getProjectEndDate())).append(")");
 		s.append("</H1><BR>");
-		if (m_creators.size() > 0) {
+		if (creators.size() > 0) {
 			s.append("<BR><BR>");
 			s.append("<H2>Creator(s) :</H2><ul>");
-			for (Person p : m_creators) {
+			for (Person p : creators) {
 				s.append("<li>");
 				s.append(p);
 				s.append("</li>");
 			}
 			s.append("</ul>");
 		}
-		if (m_developers.size() > 0) {
+		if (developers.size() > 0) {
 			s.append("<BR><BR>");
 			s.append("<H2>Developer(s) :</H2><ul>");
-			for (PersonDeveloper p : m_developers) {
+			for (PersonDeveloper p : developers) {
 				s.append("<li>");
 				s.append(p);
 				s.append("</li>");
 			}
 			s.append("</ul>");
 		}
-		if (m_descriptions.size() > 0) {
+		if (descriptions.size() > 0) {
 			s.append("<BR>");
-			for (Description d : m_descriptions) {
+			for (Description d : descriptions) {
 				s.append("<BR>");
 				s.append(d.getHTML());
 			}
@@ -241,32 +306,32 @@ public class Version extends MultiFormatProperties implements Comparable<Version
 	public String getMarkdownCode() {
 		StringBuilder s = new StringBuilder();
 		
-		s.append(m_program_name);
+		s.append(programName);
 		s.append("\n");
-		int nb=m_program_name.length();
+		int nb= programName.length();
 		for (int i=0;i<nb;i++)
 			s.append("=");
 		s.append("\n");
-		s.append(Integer.toString(m_major)).append(".").append(Integer.toString(m_minor)).append(".").append(Integer.toString(m_revision)).append(" ").append(m_type).append((m_type.equals(Type.Alpha) || m_type.equals(Type.Beta)) ? " " + m_alpha_beta_version : "").append(" (Build: ").append(m_build_number).append(")");
-		s.append(" (from ").append(DateFormat.getDateInstance(DateFormat.SHORT, Locale.FRANCE).format(m_date_start_project)).append(" to ").append(DateFormat.getDateInstance(DateFormat.SHORT, Locale.FRANCE).format(m_date_end_project)).append(")");
+		appendVersionPart(s, buildNumber);
+		s.append(" (from ").append(DateFormat.getDateInstance(DateFormat.SHORT, Locale.FRANCE).format(projectStartDate)).append(" to ").append(DateFormat.getDateInstance(DateFormat.SHORT, Locale.FRANCE).format(getProjectEndDate())).append(")");
 		s.append("\n");
 		
 		
 		
-		if (m_creators.size() > 0) {
+		if (creators.size() > 0) {
 			s.append("\n");
 			s.append("# Creator(s):");
 			s.append("\n");
-			for (Person p : m_creators) {
+			for (Person p : creators) {
 				s.append(p);
 				s.append("\n");
 			}
 			s.append("\n");
 		}
-		if (m_developers.size() > 0) {
+		if (developers.size() > 0) {
 			s.append("# Developer(s):");
 			s.append("\n");
-			for (PersonDeveloper p : m_developers) {
+			for (PersonDeveloper p : developers) {
 				s.append(p);
 				s.append("\n");
 			}
@@ -274,8 +339,8 @@ public class Version extends MultiFormatProperties implements Comparable<Version
 		}
 		s.append("# Modifications:");
 		s.append("\n");
-		if (m_descriptions.size() > 0) {
-			for (Description d : m_descriptions) {
+		if (descriptions.size() > 0) {
+			for (Description d : descriptions) {
 				s.append("\n");
 				s.append(d.getMarkdownCode());
 			}
@@ -285,8 +350,8 @@ public class Version extends MultiFormatProperties implements Comparable<Version
 		return s.toString();
 	}
 	public JFrame getJFrame() {
-		if (m_frame == null) {
-			final JFrame f = m_frame = new JFrame("About " + m_program_name);
+		if (frame == null) {
+			final JFrame f = frame = new JFrame("About " + programName);
 			f.add(new JPanel(new BorderLayout()));
 			JPanel ps = new JPanel(new FlowLayout(FlowLayout.CENTER));
 			JButton b = new JButton("Close");
@@ -327,43 +392,30 @@ public class Version extends MultiFormatProperties implements Comparable<Version
 			f.setSize(800, 600);
 			f.setResizable(false);
 		}
-		return m_frame;
-	}
-
-	public short getMajor() {
-		return m_major;
-	}
-
-	public short getMinor() {
-		return m_minor;
+		return frame;
 	}
 
 	public String getProgramName() {
-		return m_program_name;
-	}
-
-	public Date getProjectEndDate() {
-		return m_date_end_project;
+		return programName;
 	}
 
 	public Date getProjectStartDate() {
-		return m_date_start_project;
+		return projectStartDate;
 	}
 
-	public short getRevision() {
-		return m_revision;
+	public Date getProjectEndDate()
+	{
+		return getDate();
 	}
+
 
 	public String getShortProgramName() {
-		return m_short_program_name;
+		return shortProgramName;
 	}
 
-	public Type getType() {
-		return m_type;
-	}
 
 	public void incrementBuildNumber() {
-		this.m_build_number++;
+		this.buildNumber++;
 	}
 
 	public void loadBuildNumber(File buildFile) throws NumberFormatException, IOException {
@@ -401,27 +453,27 @@ public class Version extends MultiFormatProperties implements Comparable<Version
 	}
 
 	public void setBuildNumber(int _build_number) {
-		m_build_number = _build_number;
+		buildNumber = _build_number;
 	}
 
 	@Override
 	public String toString() {
 		StringBuilder s = new StringBuilder();
-		s.append(m_program_name).append(" ");
+		s.append(programName).append(" ");
 		s.append(toStringShort());
-		s.append("\n from ").append(DateFormat.getDateInstance(DateFormat.SHORT, Locale.FRANCE).format(m_date_start_project)).append(" to ").append(DateFormat.getDateInstance(DateFormat.SHORT, Locale.FRANCE).format(m_date_end_project));
-		if (m_creators.size() > 0) {
+		s.append("\n from ").append(DateFormat.getDateInstance(DateFormat.SHORT, Locale.FRANCE).format(projectStartDate)).append(" to ").append(DateFormat.getDateInstance(DateFormat.SHORT, Locale.FRANCE).format(getProjectEndDate()));
+		if (creators.size() > 0) {
 			s.append("\n\n");
 			s.append("Creator(s) :");
-			for (Person p : m_creators) {
+			for (Person p : creators) {
 				s.append("\n\t");
 				s.append(p);
 			}
 		}
-		if (m_developers.size() > 0) {
+		if (developers.size() > 0) {
 			s.append("\n\n");
 			s.append("Developer(s) :");
-			for (PersonDeveloper p : m_developers) {
+			for (PersonDeveloper p : developers) {
 				s.append("\n\t");
 				s.append(p);
 			}
@@ -430,11 +482,8 @@ public class Version extends MultiFormatProperties implements Comparable<Version
 	}
 
 	public String toStringShort() {
-		return Integer.toString(m_major) + "." + Integer.toString(m_minor) + "." + Integer.toString(m_revision) + " "
-				+ m_type
-				+ ((m_type.equals(Type.Alpha) || m_type.equals(Type.Beta))
-						? " " + Integer.toString(m_alpha_beta_version)
-						: "")
-				+ " (Build: " + m_build_number + ")";
+		StringBuilder s=new StringBuilder();
+		appendVersionPart(s, buildNumber);
+		return s.toString();
 	}
 }

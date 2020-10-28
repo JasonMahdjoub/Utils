@@ -46,35 +46,35 @@ import com.distrimind.util.properties.MultiFormatProperties;
  * @see Version
  * @see PersonDeveloper
  */
-public class Person extends MultiFormatProperties {
+public class Person extends MultiFormatProperties{
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 6907388594593576340L;
 
-	protected String m_name, m_first_name;
+	protected String lastName, firstName;
 
 	protected Person() {
 		this("", "");
 	}
 
-	public Person(String _name, String _first_name) {
+	public Person(String lastName, String firstName) {
 		super(null);
-		if (_name == null)
-			throw new NullPointerException("_name");
-		if (_first_name == null)
-			throw new NullPointerException("_first_name");
-		m_name = _name.toUpperCase();
-		if (_first_name.length() > 0)
-			m_first_name = _first_name.substring(0, 1).toUpperCase() + _first_name.substring(1).toLowerCase();
+		if (lastName == null)
+			throw new NullPointerException("lastName");
+		if (firstName == null)
+			throw new NullPointerException("firstName");
+		this.lastName = lastName.toUpperCase();
+		if (firstName.length() > 0)
+			this.firstName = firstName.substring(0, 1).toUpperCase() + firstName.substring(1).toLowerCase();
 		else
-			m_first_name = "";
+			this.firstName = "";
 	}
 
 	@Override
 	public int hashCode()
 	{
-		return m_name.hashCode()+m_first_name.hashCode();
+		return lastName.hashCode()+ firstName.hashCode();
 	}
 	
 	@Override
@@ -85,22 +85,23 @@ public class Person extends MultiFormatProperties {
 			return true;
 		if (o instanceof Person) {
 			Person p = ((Person) o);
-			return m_first_name.equals(p.m_first_name) && m_name.equals(p.m_name);
+			return firstName.equals(p.firstName) && lastName.equals(p.lastName);
 		}
 		return false;
 	}
 
 	public String getFirstName() {
-		return m_first_name;
+		return firstName;
 	}
 
-	public String getName() {
-		return m_name;
+	public String getLastName() {
+		return lastName;
 	}
 
 	@Override
 	public String toString() {
-		return m_first_name + " " + m_name;
+		return firstName + " " + lastName;
 	}
+
 
 }

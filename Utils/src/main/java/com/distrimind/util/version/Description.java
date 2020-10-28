@@ -35,13 +35,9 @@ knowledge of the CeCILL-C license and that you accept its terms.
 
 package com.distrimind.util.version;
 
-import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
-import java.util.Locale;
-
-import com.distrimind.util.properties.MultiFormatProperties;
-import com.distrimind.util.version.Version.Type;
 
 /**
  * Represents the description of program version
@@ -52,53 +48,59 @@ import com.distrimind.util.version.Version.Type;
  * @see Version
  */
 @SuppressWarnings("FieldMayBeFinal")
-public class Description extends MultiFormatProperties {
+public class Description extends AbstractVersion<Description> {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = -5480559682819518935L;
 
-	private final ArrayList<String> m_items = new ArrayList<>();
-
-	private short m_major;
-
-	private short m_minor;
-
-	private short m_revision;
-
-	private Version.Type m_type;
-
-	private short m_alpha_beta_version;
-
-	private Date m_date;
+	private final ArrayList<String> items = new ArrayList<>();
 
 	protected Description() {
-		this((short)0, (short)0, (short)0, Version.Type.Alpha, (short)0, new Date());
+		super();
 	}
-
+	/**
+	 * @param _major major version
+	 * @param _minor minor version
+	 * @param _revision revision
+	 * @param _type version type (stable, alpha, beta)
+	 * @param _alpha_beta_version if type is equal to alpha or beta, alpha/beta version
+	 * @param _date the version date (see {@link java.time.format.DateTimeFormatter#ISO_LOCAL_DATE})
+	 */
+	public Description(short _major, short _minor, short _revision, Version.Type _type, short _alpha_beta_version, String _date) {
+		super(_major, _minor, _revision, _type, _alpha_beta_version, _date);
+	}
+	/**
+	 * @param _major major version
+	 * @param _minor minor version
+	 * @param _revision revision
+	 * @param _type version type (stable, alpha, beta)
+	 * @param _alpha_beta_version if type is equal to alpha or beta, alpha/beta version
+	 * @param _date the version date
+	 */
+	public Description(short _major, short _minor, short _revision, Version.Type _type, short _alpha_beta_version, Calendar _date) {
+		super(_major, _minor, _revision, _type, _alpha_beta_version, _date);
+	}
+	/**
+	 * @param _major major version
+	 * @param _minor minor version
+	 * @param _revision revision
+	 * @param _type version type (stable, alpha, beta)
+	 * @param _alpha_beta_version if type is equal to alpha or beta, alpha/beta version
+	 * @param _date the version date
+	 */
 	public Description(short _major, short _minor, short _revision, Version.Type _type, short _alpha_beta_version, Date _date) {
-		super(null);
-		if (_date == null)
-			throw new NullPointerException("_date");
-		m_major = _major;
-		m_minor = _minor;
-		m_revision = _revision;
-		m_type = _type;
-		m_alpha_beta_version = _alpha_beta_version;
-		m_date = _date;
+		super(_major, _minor, _revision, _type, _alpha_beta_version, _date);
 	}
 
-	@Override
-	public int hashCode()
-	{
-		return m_major<<24+m_minor<<16+m_revision<<8+m_alpha_beta_version;
-	}
+
 	
-	public void addItem(String d) {
+	public Description addItem(String d) {
 		if (d == null)
 			throw new NullPointerException();
-		m_items.add(d);
+		items.add(d);
+		return this;
 	}
 
 	@Override
@@ -109,28 +111,19 @@ public class Description extends MultiFormatProperties {
 			return true;
 		if (o instanceof Description) {
 			Description d = (Description) o;
-			return d.m_alpha_beta_version == m_alpha_beta_version && d.m_date.equals(m_date)
-					&& d.m_items.equals(m_items) && d.m_major == m_major && d.m_minor == m_minor
-					&& d.m_revision == m_revision && d.m_type.equals(m_type);
+
+			return compareTo(d)==0 &&
+					d.items.equals(items);
 		}
 		return false;
 	}
 
-	public short getAlphaBetaVersion() {
-		return m_alpha_beta_version;
-	}
 
-	public Date getDate() {
-		return m_date;
-	}
 
 	public String getHTML() {
-		StringBuilder s = new StringBuilder();
-		s.append("<BR><H2>").append(m_major).append(".").append(m_minor).append(".").append(m_revision).append(" ").append(m_type).append((m_type.equals(Type.Alpha) || m_type.equals(Type.Beta))
-				? " " + Integer.toString(m_alpha_beta_version)
-				: "").append(" (").append(DateFormat.getDateInstance(DateFormat.SHORT, Locale.FRANCE).format(m_date)).append(")</H2>");
+		StringBuilder s = getHTMLVersionPart();
 		s.append("<ul>");
-		for (String d : m_items) {
+		for (String d : items) {
 			s.append("<li>");
 			s.append(d);
 			s.append("</li>");
@@ -140,13 +133,8 @@ public class Description extends MultiFormatProperties {
 	}
 
 	public String getMarkdownCode() {
-		StringBuilder s = new StringBuilder();
-		s.append("\n");
-		s.append("### ").append(m_major).append(".").append(m_minor).append(".").append(m_revision).append(" ").append(m_type).append((m_type.equals(Type.Alpha) || m_type.equals(Type.Beta))
-				? " " + Integer.toString(m_alpha_beta_version)
-				: "").append(" (").append(DateFormat.getDateInstance(DateFormat.SHORT, Locale.FRANCE).format(m_date)).append(")");
-		s.append("\n");
-		for (String d : m_items) {
+		StringBuilder s = getMarkdownVersionPartCode();
+		for (String d : items) {
 			s.append("* ");
 			s.append(d);
 			s.append("\n");
@@ -155,22 +143,7 @@ public class Description extends MultiFormatProperties {
 		return s.toString();
 	}
 	public ArrayList<String> getItems() {
-		return m_items;
+		return items;
 	}
 
-	public short getMajor() {
-		return m_major;
-	}
-
-	public short getMinor() {
-		return m_minor;
-	}
-
-	public short getRevision() {
-		return m_revision;
-	}
-
-	public Type getType() {
-		return m_type;
-	}
 }
