@@ -55,7 +55,9 @@ import java.net.InetSocketAddress;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.*;
-
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 
 /**
@@ -376,6 +378,127 @@ public class SerializationTools {
 			writeObject(oos, o, sizeMax, true);
 		}
 	}
+	static void writeCollection(final SecuredObjectOutputStream oos, Collection<?> collection, int sizeMax, boolean supportNull) throws IOException
+	{
+		if (sizeMax<0)
+			throw new IllegalArgumentException();
+
+
+		if (collection==null)
+		{
+			if (!supportNull)
+				throw new IOException();
+			if (sizeMax>Short.MAX_VALUE)
+				oos.writeInt(-1);
+			else
+				oos.writeShort(-1);
+			return;
+
+		}
+		Class<?> lClass=collection.getClass();
+		try {
+			if (!Modifier.isPublic(lClass.getModifiers()))
+				throw new IOException("The collection "+lClass+" must be a public class");
+			Constructor<?> c=lClass.getDeclaredConstructor();
+			if (!Modifier.isPublic(c.getModifiers()))
+				throw new IOException("The collection "+lClass+" must have a default public constructor");
+
+		} catch (NoSuchMethodException e) {
+			throw new IOException(e);
+		}
+
+		if (collection.size()>sizeMax)
+			throw new IOException();
+		int i;
+		for (i=0;i<collectionsClasses.length;i++)
+		{
+			if (collectionsClasses[i].equals(lClass))
+				break;
+		}
+		if (i<collectionsClasses.length)
+			oos.writeByte(i);
+		else {
+			oos.writeByte(-1);
+			writeClass(oos, lClass, false, Collection.class);
+		}
+
+		if (sizeMax>Short.MAX_VALUE)
+			oos.writeInt(collection.size());
+		else
+			oos.writeShort(collection.size());
+		sizeMax-=collection.size();
+		for (Object o : collection)
+		{
+			writeObject(oos, o, sizeMax, true);
+		}
+	}
+	@SuppressWarnings({"rawtypes", "unchecked"})
+	static Collection readCollection(final SecuredObjectInputStream ois, int sizeMax, boolean supportNull) throws IOException, ClassNotFoundException
+	{
+		if (sizeMax<0)
+			throw new IllegalArgumentException();
+
+		int size;
+		if (sizeMax>Short.MAX_VALUE)
+			size=ois.readInt();
+		else
+			size=ois.readShort();
+		if (size==-1)
+		{
+			if (!supportNull)
+				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
+			return null;
+		}
+		if (size<0 || size>sizeMax)
+			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
+
+		int cIndex=ois.readByte();
+		Class<?> cClass;
+		if (cIndex==-1)
+		{
+			cClass=readClass(ois, false, Collection.class);
+		}
+		else
+		{
+			if (cIndex<0 || cIndex>collectionsClasses.length)
+				throw new IOException("Invalid class index : "+cIndex);
+			cClass=collectionsClasses[cIndex];
+		}
+		try {
+			assert cClass != null;
+			Collection collection=(Collection)cClass.getDeclaredConstructor().newInstance();
+
+			sizeMax-=size;
+			for (int i=0;i<size;i++)
+			{
+				collection.add(readObject(ois, sizeMax, true));
+			}
+
+			return collection;
+		} catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+			throw new IOException(e);
+		}
+	}
+	private static final Class<?>[] collectionsClasses={ArrayList.class,
+			LinkedList.class,
+			Stack.class,
+			Vector.class,
+			HashSet.class,
+			TreeSet.class,
+			EnumSet.class,
+			LinkedHashSet.class,
+			ConcurrentSkipListSet.class,
+			CopyOnWriteArraySet.class};
+	private static final Class<?>[] mapClasses={
+			HashMap.class,
+			ConcurrentHashMap.class,
+			EnumMap.class,
+			Hashtable.class,
+			LinkedHashMap.class,
+			Properties.class,
+			IdentityHashMap.class,
+			TreeMap.class,
+			WeakHashMap.class};
 
 	@SuppressWarnings("SameParameterValue")
 	static Object[] readObjects(final SecuredObjectInputStream ois, int sizeMax, boolean supportNull) throws IOException, ClassNotFoundException
