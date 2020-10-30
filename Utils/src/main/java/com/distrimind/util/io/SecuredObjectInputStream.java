@@ -307,6 +307,7 @@ public abstract class SecuredObjectInputStream extends InputStream implements Da
 		}
 	}
 
+
 	public Object readObject(boolean nullAccepted) throws IOException, ClassNotFoundException {
 		return readObject(nullAccepted, -1);
 	}

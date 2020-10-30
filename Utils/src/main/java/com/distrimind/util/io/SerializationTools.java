@@ -67,27 +67,16 @@ public class SerializationTools {
 	
 	static void writeString(final SecuredObjectOutputStream oos, String s, int sizeMax, boolean supportNull) throws IOException
 	{
-		if (sizeMax<0)
-			throw new IllegalArgumentException();
 
 		if (s==null)
 		{
 			if (!supportNull)
 				throw new IOException();
-			if (sizeMax>Short.MAX_VALUE)
-				oos.writeInt(-1);
-			else
-				oos.writeShort(-1);
+			writeSize(oos, true, 0, sizeMax);
 			return;
 			
 		}
-			
-		if (s.length()>sizeMax)
-			throw new IOException();
-		if (sizeMax>Short.MAX_VALUE)
-			oos.writeInt(s.length());
-		else
-			oos.writeShort(s.length());
+		writeSize(oos, false, s.length(), sizeMax);
 		oos.writeChars(s);
 	}
 	private static final Object stringLocker=new Object();
@@ -96,21 +85,13 @@ public class SerializationTools {
 
 	static String readString(final SecuredObjectInputStream ois, int sizeMax, boolean supportNull) throws IOException
 	{
-		if (sizeMax<0)
-			throw new IllegalArgumentException();
-		int size;
-		if (sizeMax>Short.MAX_VALUE)
-			size=ois.readInt();
-		else
-			size=ois.readShort();
+		int size=readSize(ois, sizeMax);
 		if (size==-1)
 		{
 			if (!supportNull)
 				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
 			return null;
 		}
-		if (size<0 || size>sizeMax)
-			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, "size="+size+", sizeMax="+sizeMax);
 		if (sizeMax<MAX_CHAR_BUFFER_SIZE)
 		{
 			synchronized(stringLocker)
@@ -140,26 +121,16 @@ public class SerializationTools {
 	@SuppressWarnings("SameParameterValue")
 	static void writeBytes(final SecuredObjectOutputStream oos, byte[] tab, int off, int size, int sizeMax, boolean supportNull) throws IOException
 	{
-		if (sizeMax<0)
-			throw new IllegalArgumentException();
 
 		if (tab==null)
 		{
 			if (!supportNull)
 				throw new IOException();
-			if (sizeMax>Short.MAX_VALUE)
-				oos.writeInt(-1);
-			else
-				oos.writeShort(-1);
+			writeSize(oos, true, 0, sizeMax);
 			return;
 			
 		}
-		if (size>sizeMax)
-			throw new IOException();
-		if (sizeMax>Short.MAX_VALUE)
-			oos.writeInt(size);
-		else
-			oos.writeShort(size);
+		writeSize(oos, false, size, sizeMax);
 		oos.write(tab, off, size);
 	}
 	@SuppressWarnings("SameParameterValue")
@@ -170,28 +141,16 @@ public class SerializationTools {
 	@SuppressWarnings("SameParameterValue")
 	static void writeBytes2D(final SecuredObjectOutputStream oos, byte[][] tab, int off, int size, int sizeMax1, int sizeMax2, boolean supportNull1, boolean supportNull2) throws IOException
 	{
-		if (sizeMax1<0)
-			throw new IllegalArgumentException();
-		if (sizeMax2<0)
-			throw new IllegalArgumentException();
 
 		if (tab==null)
 		{
 			if (!supportNull1)
 				throw new IOException();
-			if (sizeMax1>Short.MAX_VALUE)
-				oos.writeInt(-1);
-			else
-				oos.writeShort(-1);
+			writeSize(oos, true, 0, sizeMax1);
 			return;
 			
 		}
-		if (size>sizeMax1)
-			throw new IOException();
-		if (sizeMax1>Short.MAX_VALUE)
-			oos.writeInt(size);
-		else
-			oos.writeShort(size);
+		writeSize(oos, false, size, sizeMax1);
 		for (int i=off;i<size;i++) {
 			byte[] b=tab[i];
 			SerializationTools.writeBytes(oos, b, 0, b==null?0:b.length, sizeMax2, supportNull2);
@@ -200,26 +159,15 @@ public class SerializationTools {
 	@SuppressWarnings("SameParameterValue")
 	static byte[][] readBytes2D(final SecuredObjectInputStream ois, int sizeMax1, int sizeMax2, boolean supportNull1, boolean supportNull2) throws IOException
 	{
-		if (sizeMax1<0)
-			throw new IllegalArgumentException();
-		if (sizeMax2<0)
-			throw new IllegalArgumentException();
+		int size=readSize(ois, sizeMax1);
 
-
-		int size;
-		if (sizeMax1>Short.MAX_VALUE)
-			size=ois.readInt();
-		else
-			size=ois.readShort();
 		if (size==-1)
 		{
 			if (!supportNull1)
 				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
 			return null;
 		}
-		if (size<0 || size>sizeMax1)
-			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
-		
+
 		byte [][]tab=new byte[size][];
 		for (int i=0;i<size;i++)
 			tab[i]=readBytes(ois, supportNull2, null, 0, sizeMax2);
@@ -231,22 +179,14 @@ public class SerializationTools {
 	@SuppressWarnings("SameParameterValue")
 	static byte[] readBytes(final SecuredObjectInputStream ois, boolean supportNull, byte[] tab, int off, int sizeMax) throws IOException
 	{
-		if (sizeMax<0)
-			throw new IllegalArgumentException();
 
-		int size;
-		if (sizeMax>Short.MAX_VALUE)
-			size=ois.readInt();
-		else
-			size=ois.readShort();
+		int size=readSize(ois, sizeMax );
 		if (size==-1)
 		{
 			if (!supportNull)
 				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
 			return null;
 		}
-		if (size<0 || size>sizeMax)
-			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, "size="+size);
 		if (tab==null) {
 			tab = new byte[size];
 			off = 0;
@@ -346,26 +286,16 @@ public class SerializationTools {
 	@SuppressWarnings("SameParameterValue")
 	static void writeObjects(final SecuredObjectOutputStream oos, Object[] tab, int sizeMax, boolean supportNull) throws IOException
 	{
-		if (sizeMax<0)
-			throw new IllegalArgumentException();
 
 		if (tab==null)
 		{
 			if (!supportNull)
 				throw new IOException();
-			if (sizeMax>Short.MAX_VALUE)
-				oos.writeInt(-1);
-			else
-				oos.writeShort(-1);
+			writeSize(oos, true, 0, sizeMax);
 			return;
 
 		}
-		if (tab.length>sizeMax)
-			throw new IOException();
-		if (sizeMax>Short.MAX_VALUE)
-			oos.writeInt(tab.length);
-		else
-			oos.writeShort(tab.length);
+		writeSize(oos, false, tab.length, sizeMax);
 		sizeMax-=tab.length;
 		for (Object o : tab)
 		{
@@ -374,18 +304,12 @@ public class SerializationTools {
 	}
 	static void writeCollection(final SecuredObjectOutputStream oos, Collection<?> collection, int sizeMax, boolean supportNull) throws IOException
 	{
-		if (sizeMax<0)
-			throw new IllegalArgumentException();
-
 
 		if (collection==null)
 		{
 			if (!supportNull)
 				throw new IOException();
-			if (sizeMax>Short.MAX_VALUE)
-				oos.writeInt(-1);
-			else
-				oos.writeShort(-1);
+			writeSize(oos, true, 0, sizeMax);
 			return;
 
 		}
@@ -401,8 +325,6 @@ public class SerializationTools {
 			throw new IOException(e);
 		}
 
-		if (collection.size()>sizeMax)
-			throw new IOException();
 		int i;
 		for (i=0;i<collectionsClasses.length;i++)
 		{
@@ -414,11 +336,8 @@ public class SerializationTools {
 		else {
 			throw new IOException("Invalid class "+lClass);
 		}
+		writeSize(oos, false, collection.size(), sizeMax);
 
-		if (sizeMax>Short.MAX_VALUE)
-			oos.writeInt(collection.size());
-		else
-			oos.writeShort(collection.size());
 		sizeMax-=collection.size();
 		for (Object o : collection)
 		{
@@ -428,22 +347,13 @@ public class SerializationTools {
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	static Collection readCollection(final SecuredObjectInputStream ois, int sizeMax, boolean supportNull) throws IOException, ClassNotFoundException
 	{
-		if (sizeMax<0)
-			throw new IllegalArgumentException();
-
-		int size;
-		if (sizeMax>Short.MAX_VALUE)
-			size=ois.readInt();
-		else
-			size=ois.readShort();
+		int size=readSize(ois, sizeMax);
 		if (size==-1)
 		{
 			if (!supportNull)
 				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
 			return null;
 		}
-		if (size<0 || size>sizeMax)
-			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
 
 		int cIndex=ois.readByte();
 
@@ -466,18 +376,13 @@ public class SerializationTools {
 	}
 	static void writeMap(final SecuredObjectOutputStream oos, Map<?, ?> map, int sizeMax, boolean supportNull) throws IOException
 	{
-		if (sizeMax<0)
-			throw new IllegalArgumentException();
 
 
 		if (map==null)
 		{
 			if (!supportNull)
 				throw new IOException();
-			if (sizeMax>Short.MAX_VALUE)
-				oos.writeInt(-1);
-			else
-				oos.writeShort(-1);
+			writeSize(oos, true, 0, sizeMax);
 			return;
 
 		}
@@ -493,8 +398,6 @@ public class SerializationTools {
 			throw new IOException(e);
 		}
 
-		if (map.size()>sizeMax)
-			throw new IOException();
 		int i;
 		for (i=0;i<mapClasses.length;i++)
 		{
@@ -507,10 +410,7 @@ public class SerializationTools {
 			throw new IOException("Invalid class "+mClass);
 		}
 
-		if (sizeMax>Short.MAX_VALUE)
-			oos.writeInt(map.size());
-		else
-			oos.writeShort(map.size());
+		writeSize(oos, false, map.size(), sizeMax);
 		sizeMax-=map.size();
 		for (Map.Entry<?, ?> e : map.entrySet())
 		{
@@ -521,22 +421,13 @@ public class SerializationTools {
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	static Map readMap(final SecuredObjectInputStream ois, int sizeMax, boolean supportNull) throws IOException, ClassNotFoundException
 	{
-		if (sizeMax<0)
-			throw new IllegalArgumentException();
-
-		int size;
-		if (sizeMax>Short.MAX_VALUE)
-			size=ois.readInt();
-		else
-			size=ois.readShort();
+		int size=readSize(ois, sizeMax);
 		if (size==-1)
 		{
 			if (!supportNull)
 				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
 			return null;
 		}
-		if (size<0 || size>sizeMax)
-			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
 
 		int cIndex=ois.readByte();
 
@@ -597,22 +488,13 @@ public class SerializationTools {
 	@SuppressWarnings("SameParameterValue")
 	static Object[] readObjects(final SecuredObjectInputStream ois, int sizeMax, boolean supportNull) throws IOException, ClassNotFoundException
 	{
-		if (sizeMax<0)
-			throw new IllegalArgumentException();
-
-		int size;
-		if (sizeMax>Short.MAX_VALUE)
-			size=ois.readInt();
-		else
-			size=ois.readShort();
+		int size=readSize(ois, sizeMax);
 		if (size==-1)
 		{
 			if (!supportNull)
 				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
 			return null;
 		}
-		if (size<0 || size>sizeMax)
-			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
 
 		Object []tab=new Object[size];
 		sizeMax-=tab.length;
@@ -624,36 +506,7 @@ public class SerializationTools {
 		return tab;
 
 	}
-	@SuppressWarnings("SameParameterValue")
-	static ArrayList<Object> readListObjects(final SecuredObjectInputStream ois, int sizeMax, boolean supportNull) throws IOException, ClassNotFoundException
-	{
-		if (sizeMax<0)
-			throw new IllegalArgumentException();
 
-		int size;
-		if (sizeMax>Short.MAX_VALUE)
-			size=ois.readInt();
-		else
-			size=ois.readShort();
-		if (size==-1)
-		{
-			if (!supportNull)
-				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
-			return null;
-		}
-		if (size<0 || size>sizeMax)
-			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
-
-		ArrayList<Object> tab=new ArrayList<>(size);
-		sizeMax-=size;
-		for (int i=0;i<size;i++)
-		{
-			tab.add(readObject(ois, sizeMax, true));
-		}
-
-		return tab;
-
-	}
 	/*public static void writeExternalizableAndSizables(final SecuredObjectOutputStream oos, ExternalizableAndSizable[] tab, int sizeMaxBytes, boolean supportNull) throws IOException
 	{
 		if (tab==null)
@@ -1328,7 +1181,7 @@ public class SerializationTools {
 			}
 			else if (code==2)
 			{
-				short id=readObjectCode(objectInput);
+				int id=readObjectCode(objectInput);
 				id-=classesStartIndex;
 				if (id>=0 && id<classes.size()) {
 					c = classes.get(id);
@@ -1384,7 +1237,7 @@ public class SerializationTools {
 		writeObject(oos, o, sizeMax, supportNull, true);
 	}
 	@SuppressWarnings("BooleanMethodIsAlwaysInverted")
-	public static boolean isObjectSerializable(Object o)
+	public static boolean isSerializable(Object o)
 	{
 		if (o==null)
 			return true;
@@ -1395,7 +1248,7 @@ public class SerializationTools {
 			if (c.equals(clazz)) {
 				for (Object ol : (Collection<?>)o)
 				{
-					if (!isObjectSerializable(ol))
+					if (!isSerializable(ol))
 						return false;
 				}
 				return true;
@@ -1405,9 +1258,9 @@ public class SerializationTools {
 			if (c.equals(clazz)) {
 				for (Map.Entry<?, ?> e : ((Map<?, ?>)o).entrySet())
 				{
-					if (!isObjectSerializable(e.getKey()))
+					if (!isSerializable(e.getKey()))
 						return false;
-					if (!isObjectSerializable(e.getValue()))
+					if (!isSerializable(e.getValue()))
 						return false;
 				}
 				return true;
@@ -1416,7 +1269,7 @@ public class SerializationTools {
 		if (o instanceof Object[])
 		{
 			for (Object ot : (Object[])o) {
-				if (!isObjectSerializable(ot))
+				if (!isSerializable(ot))
 					return false;
 			}
 			return true;
@@ -1437,22 +1290,114 @@ public class SerializationTools {
 		return enumsEndIndex>254?2:1;
 	}
 	private static void writeObjectCode(final SecuredObjectOutputStream oos, int code) throws IOException {
-		if (code>Short.MAX_VALUE || code<0)
+		if (code>MAX_UNSIGNED_SHORT_VALUE || code<0)
 			throw new IllegalAccessError();
 		if (enumsEndIndex>254)
-			oos.writeShort(code);
+			oos.writeUnsignedShort(code);
 		else
-			oos.write((byte)code);
+			oos.writeUnsignedByte(code);
 	}
-	private static short readObjectCode(final SecuredObjectInputStream ois) throws IOException {
+	private static int readObjectCode(final SecuredObjectInputStream ois) throws IOException {
 		if (enumsEndIndex>254)
 		{
-			return ois.readShort();
+			return ois.readUnsignedShort();
 		}
 		else
 		{
-			return (short)(ois.readByte() & 0xFF);
+			return ois.readUnsignedByte();
 		}
+	}
+	private static int getSizeCoderSize(int maxSize)  {
+		if (maxSize<0)
+			throw new IllegalArgumentException();
+		if (maxSize>254)
+		{
+			if (maxSize>MAX_UNSIGNED_SHORT_VALUE) {
+				if (maxSize>MAX_UNSIGNED_SHORT_INT_VALUE)
+					return 4;
+				else
+					return 3;
+			}
+			else
+				return 2;
+		}
+		else
+			return 0;
+	}
+	private static final int MAX_UNSIGNED_SHORT_INT_VALUE=1<<24-2;
+	private static final int MAX_UNSIGNED_SHORT_VALUE=1<<16-2;
+
+	private static void writeSize(final SecuredObjectOutputStream oos, boolean nullObject, int size, int maxSize) throws IOException {
+		if (maxSize<0)
+			throw new IllegalArgumentException();
+		if (size<0)
+			throw new IllegalArgumentException();
+		if (size>maxSize)
+			throw new IllegalArgumentException();
+
+		if (maxSize>254) {
+
+			if (maxSize > MAX_UNSIGNED_SHORT_VALUE) {
+				if (maxSize>MAX_UNSIGNED_SHORT_INT_VALUE) {
+					if (nullObject)
+						oos.writeInt(-1);
+					else
+						oos.writeInt(size);
+				}
+				else {
+					if (nullObject)
+						oos.writeUnsignedShortInt(MAX_UNSIGNED_SHORT_INT_VALUE+1);
+					else
+						oos.writeUnsignedShortInt(size);
+				}
+			}
+			else{
+				if (nullObject)
+					oos.writeUnsignedShort(MAX_UNSIGNED_SHORT_VALUE+1);
+				else
+					oos.writeUnsignedShort(size);
+			}
+		}
+		else{
+			if (nullObject)
+				oos.writeUnsignedByte(255);
+			else
+				oos.writeUnsignedByte(size);
+		}
+	}
+	private static int readSize(final SecuredObjectInputStream ois, int maxSize) throws IOException {
+		if (maxSize<0)
+			throw new IllegalArgumentException();
+		int res;
+		if (maxSize>254)
+		{
+			if (maxSize>MAX_UNSIGNED_SHORT_VALUE)
+			{
+				if (maxSize>MAX_UNSIGNED_SHORT_INT_VALUE)
+				{
+					res=ois.readInt();
+				}
+				else {
+					res = ois.readUnsignedShortInt();
+					if (res==MAX_UNSIGNED_SHORT_INT_VALUE+1)
+						res=-1;
+				}
+			}
+			else {
+				res = ois.readUnsignedShort();
+				if (res==MAX_UNSIGNED_SHORT_VALUE+1)
+					res=-1;
+			}
+		}
+		else
+		{
+			res=ois.readUnsignedByte();
+			if (res==255)
+				res=-1;
+		}
+		if (res<-1 || res>maxSize)
+			throw new MessageExternalizationException(Integrity.FAIL);
+		return res;
 	}
 	private static void writeObject(final SecuredObjectOutputStream oos, Object o, int sizeMax, boolean supportNull, boolean OOSreplaceObject) throws IOException
 	{
@@ -1471,7 +1416,7 @@ public class SerializationTools {
 				writeObjectCode(oos, 28);
 				writeCollection(oos, (Collection<?>) o, sizeMax, supportNull);
 			} else if (o instanceof Map) {
-				writeObjectCode(oos, 29);
+				writeObjectCode(oos, 13);
 				writeMap(oos, (Map<?, ?>) o, sizeMax, supportNull);
 			} else if (clazz == FilePermissions.class) {
 				writeObjectCode(oos, 27);
@@ -1578,7 +1523,7 @@ public class SerializationTools {
 
 	static Object readObject(final SecuredObjectInputStream ois, int sizeMax, boolean supportNull) throws IOException, ClassNotFoundException
 	{
-		short type=readObjectCode(ois);
+		int type=readObjectCode(ois);
 		if (type>=classesStartIndex)
 		{
 			if (type<=classesEndIndex)
@@ -1632,7 +1577,7 @@ public class SerializationTools {
 				case 12:
 					return readEnum(ois, false);
 				case 13:
-					return readListObjects(ois, sizeMax, false);
+					return readMap(ois, sizeMax, supportNull);
 				case 14:
 					return readClass(ois, false, Object.class);
 				case 15:
@@ -1667,9 +1612,6 @@ public class SerializationTools {
 				case 28: {
 					return readCollection(ois, sizeMax, supportNull);
 				}
-				case 29: {
-					return readMap(ois, sizeMax, supportNull);
-				}
 
 		/*case Byte.MAX_VALUE:
 			return ois.readObject();*/
@@ -1680,7 +1622,7 @@ public class SerializationTools {
 		
 	}
 
-	private static final short lastObjectCode=29;
+	private static final short lastObjectCode=28;
 	private static final short classesStartIndex=lastObjectCode+1;
 	private static short classesEndIndex=0;
 	private static short enumsStartIndex=0;
@@ -1717,7 +1659,7 @@ public class SerializationTools {
 	public static void addPredefinedClasses(List<Class<? extends SecureExternalizableWithoutInnerSizeControl>> cls, List<Class<? extends Enum<?>>> enms)
 	{
 		synchronized (SerializationTools.class) {
-			if (classes.size() + enums.size() + cls.size() + enms.size() + classesStartIndex > Short.MAX_VALUE)
+			if (classes.size() + enums.size() + cls.size() + enms.size() + classesStartIndex > MAX_UNSIGNED_SHORT_VALUE)
 				throw new IllegalArgumentException("Too much given predefined classes");
 			if (classes.size()>0) {
 				cls = new ArrayList<>(cls);
@@ -1734,7 +1676,7 @@ public class SerializationTools {
 			short currentID = lastObjectCode;
 			for (Class<?> c : classes)
 				assert !Modifier.isAbstract(c.getModifiers()) : "" + c;
-			assert currentID + classes.size() < Short.MAX_VALUE;
+			assert currentID + classes.size() < MAX_UNSIGNED_SHORT_VALUE;
 			for (Class<? extends SecureExternalizableWithoutInnerSizeControl> c : classes) {
 				short id = ++currentID;
 				identifiersPerClasses.put(c, id);
@@ -1742,7 +1684,7 @@ public class SerializationTools {
 			classesEndIndex = currentID;
 
 
-			assert currentID + enums.size() < Short.MAX_VALUE;
+			assert currentID + enums.size() < MAX_UNSIGNED_SHORT_VALUE;
 			enumsStartIndex = (short)(currentID + 1);
 			for (Class<? extends Enum<?>> c : enums) {
 				short id = (++currentID);
@@ -1845,32 +1787,32 @@ public class SerializationTools {
 	public static int getInternalSize(byte[] array, int maxSizeInBytes)
 	{
 		if (array==null)
-			return maxSizeInBytes>Short.MAX_VALUE?4:2;
+			return getSizeCoderSize(maxSizeInBytes);
 		return getInternalSize((Object)array, maxSizeInBytes);
 	}
 	public static int getInternalSize(Object[] array, int maxSizeInBytes)
 	{
 		if (array==null)
-			return maxSizeInBytes>Short.MAX_VALUE?4:2;
+			return getSizeCoderSize(maxSizeInBytes);
 		return getInternalSize((Object)array, maxSizeInBytes);
 	}
 	public static int getInternalSize(String text, int maxSizeInBytes)
 	{
 		if (text==null)
-			return maxSizeInBytes>Short.MAX_VALUE?4:2;
+			return getSizeCoderSize(maxSizeInBytes);
 		return getInternalSize((Object)text, maxSizeInBytes);
 	}
 	public static int getInternalSize(Collection<Object> array, int maxSizeInBytes)
 	{
 		if (array==null)
-			return maxSizeInBytes>Short.MAX_VALUE?4:2;
+			return getSizeCoderSize(maxSizeInBytes);
 		return getInternalSize((Object)array, maxSizeInBytes);
 	}
 	public static int getInternalSize(byte[][] array, int maxSizeInBytes1, int maxSizeInBytes2)
 	{
-		int res=maxSizeInBytes1>Short.MAX_VALUE?4:2;
+		int res=getSizeCoderSize(maxSizeInBytes1);
 		for (byte[] b : array)
-			res+=(maxSizeInBytes2>Short.MAX_VALUE?4:2)+(b==null?0:b.length);
+			res+=getSizeCoderSize(maxSizeInBytes2)+(b==null?0:b.length);
 		return res;
 	}
 
@@ -1882,16 +1824,12 @@ public class SerializationTools {
 		Class<?> clazz=o.getClass();
 		if (clazz==String.class)
 		{
-			return getObjectCodeSizeBytes()+((String)o).length()*2+sizeMax>Short.MAX_VALUE?4:2;
+			return getObjectCodeSizeBytes()+((String)o).length()*2+getSizeCoderSize(sizeMax);
 		}
 		else if (o instanceof Collection)
 		{
 			Collection<?> c=(Collection<?>)o;
-			int res=getObjectCodeSizeBytes();
-			if (c.size()>Short.MAX_VALUE)
-				res+=2;
-			else
-				res+=4;
+			int res=getObjectCodeSizeBytes()+getSizeCoderSize(sizeMax);
 			sizeMax-=c.size();
 			for (Object oc : c)
 				res+=getInternalSize(oc, sizeMax);
@@ -1901,11 +1839,7 @@ public class SerializationTools {
 		else if (o instanceof Map)
 		{
 			Map<?, ?> m=(Map<?, ?>)o;
-			int res=getObjectCodeSizeBytes();
-			if (m.size()>Short.MAX_VALUE)
-				res+=2;
-			else
-				res+=4;
+			int res=getObjectCodeSizeBytes()+getSizeCoderSize(sizeMax);
 			sizeMax-=m.size();
 			for (Map.Entry<?, ?> e: m.entrySet())
 				res+=getInternalSize(e.getKey(), sizeMax)+getInternalSize(e.getValue(), sizeMax);
@@ -1914,14 +1848,14 @@ public class SerializationTools {
 		}
 		else if (o instanceof byte[])
 		{
-			return getObjectCodeSizeBytes()+((byte[])o).length+sizeMax>Short.MAX_VALUE?4:2;
+			return getObjectCodeSizeBytes()+((byte[])o).length+getSizeCoderSize(sizeMax);
 		}
 		else if (o instanceof byte[][])
 		{
 			byte[][] tab = ((byte[][]) o);
-			int res=getObjectCodeSizeBytes()+sizeMax>Short.MAX_VALUE?4:2;
+			int res=getObjectCodeSizeBytes()+getSizeCoderSize(sizeMax);
 			for (byte[] b : tab) {
-				res += sizeMax>Short.MAX_VALUE?5:3 + (b == null ? 0 : b.length);
+				res += getObjectCodeSizeBytes()+getSizeCoderSize(sizeMax) + (b == null ? 0 : b.length);
 			}
 			return res;
 		}
@@ -1934,7 +1868,7 @@ public class SerializationTools {
 		}
 		else if (o instanceof SecureExternalizable[])
 		{
-			int size=getObjectCodeSizeBytes()+sizeMax>Short.MAX_VALUE?4:2;
+			int size=getObjectCodeSizeBytes()+getSizeCoderSize(sizeMax);
 			for (SecureExternalizable s : (SecureExternalizable[])o) {
 				size+=1;
 				if (s!=null) {
@@ -1948,7 +1882,7 @@ public class SerializationTools {
 		else if (o instanceof Object[])
 		{
 			Object[] tab = (Object[]) o;
-			int size=getObjectCodeSizeBytes()+sizeMax>Short.MAX_VALUE?4:2;
+			int size=getObjectCodeSizeBytes()+getSizeCoderSize(sizeMax);
 			for (Object so : tab)
 			{
 				size+=getInternalSize(so, sizeMax-size);

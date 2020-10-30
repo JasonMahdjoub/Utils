@@ -67,6 +67,11 @@ public class Utils {
 			VERSION.addCreator(new Person("mahdjoub", "jason"))
 					.addDeveloper(new PersonDeveloper("mahdjoub", "jason", "2016-01-04"))
 					.addDescription(
+							new Description((short)5, (short)7, (short)0, Version.Type.STABLE, (short)0, "2020-10-28")
+									.addItem("Support of collections and maps into SerializationTools")
+									.addItem("Add function SerializationTools.isSerializable(Object)")
+					)
+					.addDescription(
 							new Description((short)5, (short)6, (short)0, Version.Type.STABLE, (short)0, "2020-10-28")
 									.addItem("Support sets into MultiFormatProperties")
 									.addItem("Revisit versioning classes")

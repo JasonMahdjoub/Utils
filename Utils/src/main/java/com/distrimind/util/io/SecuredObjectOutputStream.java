@@ -66,7 +66,11 @@ public abstract class SecuredObjectOutputStream extends OutputStream implements 
 		write((v) & 0xFF);
 
 	}
-
+	public final void writeUnsignedByte(int v) throws IOException {
+		if (v<0)
+			throw new IllegalArgumentException();
+		write((byte)v);
+	}
 	public final void writeUnsignedShort(int v) throws IOException {
 		if (v<0)
 			throw new IllegalArgumentException();
