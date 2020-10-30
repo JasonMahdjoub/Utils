@@ -38,13 +38,9 @@
 package com.distrimind.util.io;
 
 
-import com.distrimind.util.AbstractDecentralizedID;
-import com.distrimind.util.OS;
-import com.distrimind.util.OSVersion;
-import com.distrimind.util.ReflectionTools;
+import com.distrimind.util.*;
 import com.distrimind.util.crypto.*;
 import com.distrimind.util.harddrive.FilePermissions;
-import com.distrimind.util.sizeof.ObjectSizer;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
@@ -55,9 +51,7 @@ import java.net.InetSocketAddress;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentSkipListSet;
-import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.*;
 
 
 /**
@@ -418,8 +412,7 @@ public class SerializationTools {
 		if (i<collectionsClasses.length)
 			oos.writeByte(i);
 		else {
-			oos.writeByte(-1);
-			writeClass(oos, lClass, false, Collection.class);
+			throw new IOException("Invalid class "+lClass);
 		}
 
 		if (sizeMax>Short.MAX_VALUE)
@@ -453,20 +446,12 @@ public class SerializationTools {
 			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
 
 		int cIndex=ois.readByte();
-		Class<?> cClass;
-		if (cIndex==-1)
-		{
-			cClass=readClass(ois, false, Collection.class);
-		}
-		else
-		{
-			if (cIndex<0 || cIndex>collectionsClasses.length)
-				throw new IOException("Invalid class index : "+cIndex);
-			cClass=collectionsClasses[cIndex];
-		}
+
+		if (cIndex<0 || cIndex>collectionsClasses.length)
+			throw new IOException("Invalid class index : "+cIndex);
+		Class<? extends Collection<?>> cClass=collectionsClasses[cIndex];
 		try {
-			assert cClass != null;
-			Collection collection=(Collection)cClass.getDeclaredConstructor().newInstance();
+			Collection collection=cClass.getDeclaredConstructor().newInstance();
 
 			sizeMax-=size;
 			for (int i=0;i<size;i++)
@@ -479,7 +464,103 @@ public class SerializationTools {
 			throw new IOException(e);
 		}
 	}
-	private static final Class<?>[] collectionsClasses={ArrayList.class,
+	static void writeMap(final SecuredObjectOutputStream oos, Map<?, ?> map, int sizeMax, boolean supportNull) throws IOException
+	{
+		if (sizeMax<0)
+			throw new IllegalArgumentException();
+
+
+		if (map==null)
+		{
+			if (!supportNull)
+				throw new IOException();
+			if (sizeMax>Short.MAX_VALUE)
+				oos.writeInt(-1);
+			else
+				oos.writeShort(-1);
+			return;
+
+		}
+		Class<?> mClass=map.getClass();
+		try {
+			if (!Modifier.isPublic(mClass.getModifiers()))
+				throw new IOException("The map "+mClass+" must be a public class");
+			Constructor<?> c=mClass.getDeclaredConstructor();
+			if (!Modifier.isPublic(c.getModifiers()))
+				throw new IOException("The map "+mClass+" must have a default public constructor");
+
+		} catch (NoSuchMethodException e) {
+			throw new IOException(e);
+		}
+
+		if (map.size()>sizeMax)
+			throw new IOException();
+		int i;
+		for (i=0;i<mapClasses.length;i++)
+		{
+			if (mapClasses[i].equals(mClass))
+				break;
+		}
+		if (i<mapClasses.length)
+			oos.writeByte(i);
+		else {
+			throw new IOException("Invalid class "+mClass);
+		}
+
+		if (sizeMax>Short.MAX_VALUE)
+			oos.writeInt(map.size());
+		else
+			oos.writeShort(map.size());
+		sizeMax-=map.size();
+		for (Map.Entry<?, ?> e : map.entrySet())
+		{
+			writeObject(oos, e.getKey(), sizeMax, true);
+			writeObject(oos, e.getValue(), sizeMax, true);
+		}
+	}
+	@SuppressWarnings({"rawtypes", "unchecked"})
+	static Map readMap(final SecuredObjectInputStream ois, int sizeMax, boolean supportNull) throws IOException, ClassNotFoundException
+	{
+		if (sizeMax<0)
+			throw new IllegalArgumentException();
+
+		int size;
+		if (sizeMax>Short.MAX_VALUE)
+			size=ois.readInt();
+		else
+			size=ois.readShort();
+		if (size==-1)
+		{
+			if (!supportNull)
+				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
+			return null;
+		}
+		if (size<0 || size>sizeMax)
+			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
+
+		int cIndex=ois.readByte();
+
+		if (cIndex<0 || cIndex>mapClasses.length)
+			throw new IOException("Invalid class index : "+cIndex);
+		Class<? extends Map<?, ?>> cClass=mapClasses[cIndex];
+		try {
+			Map map=cClass.getDeclaredConstructor().newInstance();
+
+			sizeMax-=size;
+			for (int i=0;i<size;i++)
+			{
+				Object k=readObject(ois, sizeMax, true);
+				Object v=readObject(ois, sizeMax, true);
+				map.put(k,v);
+			}
+
+			return map;
+		} catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+			throw new IOException(e);
+		}
+	}
+	@SuppressWarnings("unchecked")
+	private static final Class<? extends Collection<?>>[] collectionsClasses=new Class[]{ArrayList.class,
 			LinkedList.class,
 			Stack.class,
 			Vector.class,
@@ -488,10 +569,23 @@ public class SerializationTools {
 			EnumSet.class,
 			LinkedHashSet.class,
 			ConcurrentSkipListSet.class,
-			CopyOnWriteArraySet.class};
-	private static final Class<?>[] mapClasses={
+			CopyOnWriteArraySet.class,
+			ArrayBlockingQueue.class,
+			ArrayDeque.class,
+			ConcurrentLinkedQueue.class,
+			ConcurrentLinkedDeque.class,
+			DelayQueue.class,
+			LinkedBlockingQueue.class,
+			LinkedBlockingDeque.class,
+			LinkedTransferQueue.class,
+			PriorityBlockingQueue.class,
+			PriorityQueue.class,
+			SynchronousQueue.class};
+	@SuppressWarnings("unchecked")
+	private static final Class<? extends Map<?, ?>>[] mapClasses=new Class[]{
 			HashMap.class,
 			ConcurrentHashMap.class,
+			ConcurrentSkipListMap.class,
 			EnumMap.class,
 			Hashtable.class,
 			LinkedHashMap.class,
@@ -825,19 +919,26 @@ public class SerializationTools {
 	@SuppressWarnings("SameParameterValue")
 	static void writeEnum(final SecuredObjectOutputStream oos, Enum<?> e, boolean supportNull) throws IOException
 	{
-		if (supportNull)
-			oos.writeBoolean(e!=null);
 		if (e==null)
 		{
 			if (!supportNull)
 				throw new IOException();
-
+			oos.writeByte(0);
 			return;
 
 		}
-
-		SerializationTools.writeString(oos, e.getClass().getName(), MAX_CLASS_LENGTH, false);
-		SerializationTools.writeString(oos, e.name(), 1000, false);
+		Class<?> clazz=e.getClass();
+		Short id=identifiersPerEnums.get(clazz);
+		if (id==null) {
+			oos.writeByte(1);
+			SerializationTools.writeString(oos, e.getClass().getName(), MAX_CLASS_LENGTH, false);
+		}
+		else
+		{
+			oos.writeByte(2);
+			writeObjectCode(oos, id);
+		}
+		oos.writeInt(e.ordinal());
 	}
 	static void writeHybridKeyAgreementType(final SecuredObjectOutputStream oos, HybridKeyAgreementType e, @SuppressWarnings("SameParameterValue") boolean supportNull) throws IOException
 	{
@@ -851,8 +952,8 @@ public class SerializationTools {
 			return;
 
 		}
-		SerializationTools.writeString(oos, e.getNonPQCKeyAgreementType().name(), 1000, false);
-		SerializationTools.writeString(oos, e.getPQCKeyAgreementType().name(), 1000, false);
+		oos.writeInt(e.getNonPQCKeyAgreementType().ordinal());
+		oos.writeInt(e.getPQCKeyAgreementType().ordinal());
 	}
 	static void writeHybridASymmetricEncryptionType(final SecuredObjectOutputStream oos, HybridASymmetricEncryptionType e, @SuppressWarnings("SameParameterValue") boolean supportNull) throws IOException
 	{
@@ -866,8 +967,8 @@ public class SerializationTools {
 			return;
 
 		}
-		SerializationTools.writeString(oos, e.getNonPQCASymmetricEncryptionType().name(), 1000, false);
-		SerializationTools.writeString(oos, e.getPQCASymmetricEncryptionType().name(), 1000, false);
+		oos.writeInt(e.getNonPQCASymmetricEncryptionType().ordinal());
+		oos.writeInt(e.getPQCASymmetricEncryptionType().ordinal());
 	}
 	static void writeHybridASymmetricAuthenticatedSignatureType(final SecuredObjectOutputStream oos, HybridASymmetricAuthenticatedSignatureType e, @SuppressWarnings("SameParameterValue") boolean supportNull) throws IOException
 	{
@@ -881,8 +982,8 @@ public class SerializationTools {
 			return;
 
 		}
-		SerializationTools.writeString(oos, e.getNonPQCASymmetricAuthenticatedSignatureType().name(), 1000, false);
-		SerializationTools.writeString(oos, e.getPQCASymmetricAuthenticatedSignatureType().name(), 1000, false);
+		oos.writeInt(e.getNonPQCASymmetricAuthenticatedSignatureType().ordinal());
+		oos.writeInt(e.getPQCASymmetricAuthenticatedSignatureType().ordinal());
 	}
 	public final static int MAX_CLASS_LENGTH=2048;
 
@@ -890,26 +991,38 @@ public class SerializationTools {
 	@SuppressWarnings({"SameParameterValue", "unchecked"})
 	static Enum<?> readEnum(final SecuredObjectInputStream ois, boolean supportNull) throws IOException, ClassNotFoundException
 	{
-		if (!supportNull || ois.readBoolean())
+		byte code=ois.readByte();
+		if (!supportNull || code>0)
 		{
-			String clazz=SerializationTools.readString(ois, MAX_CLASS_LENGTH, false);
-			String value=SerializationTools.readString(ois, 1000, false);
-			@SuppressWarnings("rawtypes")
-			Class c=Class.forName(clazz, false, ReflectionTools.getClassLoader());
-			if (!c.isEnum())
-				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
-			try
+			Class<? extends Enum<?>> clazz;
+			if (code==2)
 			{
-				if (value==null)
-					throw new MessageExternalizationException(Integrity.FAIL);
-
-				return Enum.valueOf(c, value);
+				int id=readObjectCode(ois);
+				id-=enumsStartIndex;
+				if (id>=0 && id<enums.size()) {
+					clazz = enums.get(id);
+				}
+				else
+					throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
 			}
-			catch(ClassCastException e)
-			{
+			else if (code==1){
+				String clazzString = SerializationTools.readString(ois, MAX_CLASS_LENGTH, false);
+
+				Class<?> c = Class.forName(clazzString, false, ReflectionTools.getClassLoader());
+				if (!c.isEnum())
+					throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
+				clazz=(Class<? extends Enum<?>>)c;
+			}
+			else
 				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
+			int ordinal=ois.readInt();
+			for (Enum<?> e : clazz.getEnumConstants())
+			{
+				if (e.ordinal()==ordinal)
+					return e;
 			}
 
+			throw new MessageExternalizationException(Integrity.FAIL);
 		}
 		else
 			return null;
@@ -919,8 +1032,30 @@ public class SerializationTools {
 	{
 		if (!supportNull || ois.readBoolean())
 		{
-			KeyAgreementType ka=KeyAgreementType.valueOf(SerializationTools.readString(ois, 1000, false));
-			KeyAgreementType pqcka=KeyAgreementType.valueOf(SerializationTools.readString(ois, 1000, false));
+			int kao=ois.readInt();
+			int pqckao=ois.readInt();
+			KeyAgreementType ka=null;
+			for (KeyAgreementType t : KeyAgreementType.values())
+			{
+				if (t.ordinal()==kao)
+				{
+					ka=t;
+					break;
+				}
+			}
+			if (ka==null)
+				throw new MessageExternalizationException(Integrity.FAIL);
+			KeyAgreementType pqcka=null;
+			for (KeyAgreementType t : KeyAgreementType.values())
+			{
+				if (t.ordinal()==pqckao)
+				{
+					pqcka=t;
+					break;
+				}
+			}
+			if (pqcka==null)
+				throw new MessageExternalizationException(Integrity.FAIL);
 			try {
 				return new HybridKeyAgreementType(ka, pqcka);
 			}
@@ -936,8 +1071,30 @@ public class SerializationTools {
 	{
 		if (!supportNull || ois.readBoolean())
 		{
-			ASymmetricAuthenticatedSignatureType ka=ASymmetricAuthenticatedSignatureType.valueOf(SerializationTools.readString(ois, 1000, false));
-			ASymmetricAuthenticatedSignatureType pqcka=ASymmetricAuthenticatedSignatureType.valueOf(SerializationTools.readString(ois, 1000, false));
+			int kao=ois.readInt();
+			int pqckao=ois.readInt();
+			ASymmetricAuthenticatedSignatureType ka=null;
+			for (ASymmetricAuthenticatedSignatureType t : ASymmetricAuthenticatedSignatureType.values())
+			{
+				if (t.ordinal()==kao)
+				{
+					ka=t;
+					break;
+				}
+			}
+			if (ka==null)
+				throw new MessageExternalizationException(Integrity.FAIL);
+			ASymmetricAuthenticatedSignatureType pqcka=null;
+			for (ASymmetricAuthenticatedSignatureType t : ASymmetricAuthenticatedSignatureType.values())
+			{
+				if (t.ordinal()==pqckao)
+				{
+					pqcka=t;
+					break;
+				}
+			}
+			if (pqcka==null)
+				throw new MessageExternalizationException(Integrity.FAIL);
 			try {
 				return new HybridASymmetricAuthenticatedSignatureType(ka, pqcka);
 			}
@@ -953,8 +1110,30 @@ public class SerializationTools {
 	{
 		if (!supportNull || ois.readBoolean())
 		{
-			ASymmetricEncryptionType ka=ASymmetricEncryptionType.valueOf(SerializationTools.readString(ois, 1000, false));
-			ASymmetricEncryptionType pqcka=ASymmetricEncryptionType.valueOf(SerializationTools.readString(ois, 1000, false));
+			int kao=ois.readInt();
+			int pqckao=ois.readInt();
+			ASymmetricEncryptionType ka=null;
+			for (ASymmetricEncryptionType t : ASymmetricEncryptionType.values())
+			{
+				if (t.ordinal()==kao)
+				{
+					ka=t;
+					break;
+				}
+			}
+			if (ka==null)
+				throw new MessageExternalizationException(Integrity.FAIL);
+			ASymmetricEncryptionType pqcka=null;
+			for (ASymmetricEncryptionType t : ASymmetricEncryptionType.values())
+			{
+				if (t.ordinal()==pqckao)
+				{
+					pqcka=t;
+					break;
+				}
+			}
+			if (pqcka==null)
+				throw new MessageExternalizationException(Integrity.FAIL);
 			try {
 				return new HybridASymmetricEncryptionType(ka, pqcka);
 			}
@@ -1006,12 +1185,24 @@ public class SerializationTools {
 	static void writeClass(final SecuredObjectOutputStream objectOutput, Class<?> clazz, boolean supportNull, Class<?> rootClass) throws IOException {
 		if (rootClass==null)
 			rootClass=Object.class;
-		if (supportNull)
-			objectOutput.writeBoolean(clazz!=null);
-		if (clazz!=null) {
+		if (clazz==null) {
+			if (supportNull)
+				objectOutput.writeByte(0);
+			else
+				throw new IOException();
+		}
+		else {
 			if (!rootClass.isAssignableFrom(clazz))
 				throw new IOException();
-			SerializationTools.writeString(objectOutput, clazz.getName(), MAX_CLASS_LENGTH, supportNull);
+			Short id=identifiersPerClasses.get(clazz);
+			if (id==null) {
+				objectOutput.writeByte(1);
+				SerializationTools.writeString(objectOutput, clazz.getName(), MAX_CLASS_LENGTH, supportNull);
+			}
+			else {
+				objectOutput.writeByte(2);
+				writeObjectCode(objectOutput, id);
+			}
 		}
 
 
@@ -1119,19 +1310,39 @@ public class SerializationTools {
 	static <RT> Class<? extends RT> readClass(final SecuredObjectInputStream objectInput, boolean supportNull, Class<RT> rootClass) throws IOException, ClassNotFoundException {
 		if (rootClass==null)
 			throw new NullPointerException();
-
-		if (!supportNull || objectInput.readBoolean())
+		byte code=objectInput.readByte();
+		if (!supportNull || code>0)
 		{
-			String clazz=SerializationTools.readString(objectInput, MAX_CLASS_LENGTH, false);
+			Class<?> c;
+			boolean doubleCheck = rootClass != Object.class;
+			if (code==1) {
+				String clazz = SerializationTools.readString(objectInput, MAX_CLASS_LENGTH, false);
 
-			boolean doubleCheck=rootClass!=Object.class;
-			Class<?> c=objectInput.getObjectResolver().resolveClass(clazz, !doubleCheck);
 
-			if (doubleCheck) {
-				if (!rootClass.isAssignableFrom(c))
-					throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, "rootClass : "+rootClass+" ; class="+c);
-				c = Class.forName(clazz, true, ReflectionTools.getClassLoader());
+				c = objectInput.getObjectResolver().resolveClass(clazz, !doubleCheck);
+				if (doubleCheck) {
+					if (!rootClass.isAssignableFrom(c))
+						throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, "rootClass : "+rootClass+" ; class="+c);
+					c = Class.forName(clazz, true, ReflectionTools.getClassLoader());
+				}
 			}
+			else if (code==2)
+			{
+				short id=readObjectCode(objectInput);
+				id-=classesStartIndex;
+				if (id>=0 && id<classes.size()) {
+					c = classes.get(id);
+				}
+				else
+					throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
+				if (doubleCheck) {
+					if (!rootClass.isAssignableFrom(c))
+						throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, "rootClass : "+rootClass+" ; class="+c);
+				}
+			}
+			else
+				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
+
 			return (Class<? extends RT>)c;
 		}
 		else
@@ -1167,9 +1378,81 @@ public class SerializationTools {
 			return null;
 
 	}
+
 	static void writeObject(final SecuredObjectOutputStream oos, Object o, int sizeMax, boolean supportNull) throws IOException
 	{
 		writeObject(oos, o, sizeMax, supportNull, true);
+	}
+	@SuppressWarnings("BooleanMethodIsAlwaysInverted")
+	public static boolean isObjectSerializable(Object o)
+	{
+		if (o==null)
+			return true;
+		Class<?> clazz=o.getClass();
+		if (SecureExternalizableWithoutInnerSizeControl.class.isAssignableFrom(clazz))
+			return true;
+		for (Class<?> c : collectionsClasses) {
+			if (c.equals(clazz)) {
+				for (Object ol : (Collection<?>)o)
+				{
+					if (!isObjectSerializable(ol))
+						return false;
+				}
+				return true;
+			}
+		}
+		for (Class<?> c : mapClasses) {
+			if (c.equals(clazz)) {
+				for (Map.Entry<?, ?> e : ((Map<?, ?>)o).entrySet())
+				{
+					if (!isObjectSerializable(e.getKey()))
+						return false;
+					if (!isObjectSerializable(e.getValue()))
+						return false;
+				}
+				return true;
+			}
+		}
+		if (o instanceof Object[])
+		{
+			for (Object ot : (Object[])o) {
+				if (!isObjectSerializable(ot))
+					return false;
+			}
+			return true;
+		}
+		return FilePermissions.class==clazz
+				|| Enum.class.isAssignableFrom(clazz)
+				|| String.class==clazz
+				|| byte[].class.isAssignableFrom(clazz)
+				|| byte[][].class.isAssignableFrom(clazz)
+				|| SecureExternalizable[].class.isAssignableFrom(clazz)
+				|| InetSocketAddress.class==clazz
+				|| InetAddress.class==clazz
+				|| Number.class.isAssignableFrom(clazz);
+
+	}
+	private static int getObjectCodeSizeBytes()
+	{
+		return enumsEndIndex>254?2:1;
+	}
+	private static void writeObjectCode(final SecuredObjectOutputStream oos, int code) throws IOException {
+		if (code>Short.MAX_VALUE || code<0)
+			throw new IllegalAccessError();
+		if (enumsEndIndex>254)
+			oos.writeShort(code);
+		else
+			oos.write((byte)code);
+	}
+	private static short readObjectCode(final SecuredObjectInputStream ois) throws IOException {
+		if (enumsEndIndex>254)
+		{
+			return ois.readShort();
+		}
+		else
+		{
+			return (short)(ois.readByte() & 0xFF);
+		}
 	}
 	private static void writeObject(final SecuredObjectOutputStream oos, Object o, int sizeMax, boolean supportNull, boolean OOSreplaceObject) throws IOException
 	{
@@ -1179,187 +1462,123 @@ public class SerializationTools {
 		{
 			if (!supportNull)
 				throw new IOException();
-			
-			oos.write(0);
-		}
-		else if (o instanceof FilePermissions)
-		{
-			oos.write(27);
-			((FilePermissions) o).writeExternal(oos);
-		}
-		else if (o instanceof SecureExternalizableWithoutInnerSizeControl && (id=identifiersPerClasses.get(o.getClass()))!=null)
-		{
-			if (OOSreplaceObject)
-			{
-				try
-				{
-					o=oos.getObjectResolver().replaceObject((SecureExternalizableWithoutInnerSizeControl)o);
-					if (o==null)
-						throw new IOException();
-					writeObject(oos,o,sizeMax, false, false);
-					return;
-				}
-				catch(Exception e2)
-				{
-					throw new IOException(e2);
-				}
-			}
 
-			oos.write(id.byteValue());
-			writeExternalizable(oos, (SecureExternalizableWithoutInnerSizeControl)o);
+			writeObjectCode(oos, 0);
 		}
-		else
-			if (o instanceof Enum && (id=identifiersPerEnums.get(o.getClass()))!=null)
-		{
-			oos.writeByte(id.byteValue());
-			oos.writeInt(((Enum<?>)o).ordinal());
-		}
-		else if (o instanceof SecureExternalizableWithoutInnerSizeControl)
-		{
-			oos.write(1);
-			writeExternalizable(oos, (SecureExternalizableWithoutInnerSizeControl) o, false);
-		}
-		else if (o instanceof String)
-		{
-			oos.write(2);
-			writeString(oos, (String)o, sizeMax, false);
-		}
-		else if (o instanceof byte[])
-		{
-			oos.write(3);
-			writeBytes(oos, (byte[])o, sizeMax, false);
-		}
-		else if (o instanceof byte[][])
-		{
-			oos.write(4);
-			writeBytes2D(oos, (byte[][])o, sizeMax, sizeMax, false, false);
-		}
-		else if (o instanceof SecureExternalizable[])
-		{
-			oos.write(5);
-			writeExternalizables(oos, (SecureExternalizable[])o, sizeMax, false);
-		}
-		else if (o instanceof Object[])
-		{
-			oos.write(6);
-			writeObjects(oos, (Object[])o, sizeMax, false);
-		}
-		else if (o instanceof InetSocketAddress)
-		{
-			oos.write(7);
-			writeInetSocketAddress(oos, (InetSocketAddress)o, false);
-		}
-		else if (o instanceof InetAddress)
-		{
-			oos.write(8);
-			writeInetAddress(oos, (InetAddress)o, false);
-		}
-		else if (o instanceof AbstractDecentralizedID)
-		{
-			oos.write(9);
-			writeDecentralizedID(oos, (AbstractDecentralizedID)o, false);
-		}
-		else if (o instanceof AbstractKey)
-		{
-			oos.write(10);
-			writeKey(oos, (AbstractKey)o, false);
-		}
-		else if (o instanceof AbstractKeyPair)
-		{
-			oos.write(11);
-			writeKeyPair(oos, (AbstractKeyPair<?, ?>)o, false);
-		}
-		else if (o instanceof Enum<?>)
-		{
-			oos.write(12);
-			writeEnum(oos, (Enum<?>)o, false);
-		}
-		else if (o instanceof Collection)
-		{
-			oos.write(13);
-			Collection<?> c=(Collection<?>)o;
-			Object[] tab=new Object[c.size()];
-			int i=0;
-			for (Object r : c)
-				tab[i++]=r;
-			writeObjects(oos, tab, sizeMax, false);
-		}
-		else if (o instanceof Class)
-		{
-			oos.write(14);
-			writeClass(oos, (Class<?>)o, false, Object.class);
-		}
-		else if (o instanceof Date)
-		{
-			oos.write(15);
-			writeDate(oos, (Date)o, false);
-		}
-		else if (o instanceof HybridKeyAgreementType)
-		{
-			oos.write(16);
-			writeHybridKeyAgreementType(oos, (HybridKeyAgreementType)o, false);
-		}
-		else if (o instanceof HybridASymmetricAuthenticatedSignatureType)
-		{
-			oos.write(17);
-			writeHybridASymmetricAuthenticatedSignatureType(oos, (HybridASymmetricAuthenticatedSignatureType)o, false);
-		}
-		else if (o instanceof HybridASymmetricEncryptionType)
-		{
-			oos.write(18);
-			writeHybridASymmetricEncryptionType(oos, (HybridASymmetricEncryptionType)o, false);
-		}
-		else if (o instanceof Long)
-		{
-			oos.write(19);
-			oos.writeLong(((Long) o));
-		}
-		else if (o instanceof Byte)
-		{
-			oos.write(20);
-			oos.write(((Byte) o));
-		}
-		else if (o instanceof Short)
-		{
-			oos.write(21);
-			oos.writeShort(((Short) o));
-		}
-		else if (o instanceof Integer)
-		{
-			oos.write(22);
-			oos.writeInt(((Integer) o));
-		}
-		else if (o instanceof Character)
-		{
-			oos.write(23);
-			oos.writeChar(((Character) o));
-		}
-		else if (o instanceof Boolean)
-		{
-			oos.write(24);
-			oos.writeBoolean(((Boolean) o));
-		}
-		else if (o instanceof Float)
-		{
-			oos.write(25);
-			oos.writeFloat(((Float) o));
-		}
-		else if (o instanceof Double)
-		{
-			oos.write(26);
-			oos.writeDouble(((Double) o));
-		}
-		else
-		{
-			throw new IOException();
-			/*oos.write(Byte.MAX_VALUE);
-			oos.writeObject(o);*/
+		else {
+			Class<?> clazz=o.getClass();
+			if (o instanceof Collection) {
+				writeObjectCode(oos, 28);
+				writeCollection(oos, (Collection<?>) o, sizeMax, supportNull);
+			} else if (o instanceof Map) {
+				writeObjectCode(oos, 29);
+				writeMap(oos, (Map<?, ?>) o, sizeMax, supportNull);
+			} else if (clazz == FilePermissions.class) {
+				writeObjectCode(oos, 27);
+				((FilePermissions) o).writeExternal(oos);
+			} else if (o instanceof SecureExternalizableWithoutInnerSizeControl && (id = identifiersPerClasses.get(o.getClass())) != null) {
+				if (OOSreplaceObject) {
+					try {
+						o = oos.getObjectResolver().replaceObject((SecureExternalizableWithoutInnerSizeControl) o);
+						if (o == null)
+							throw new IOException();
+						writeObject(oos, o, sizeMax, false, false);
+						return;
+					} catch (Exception e2) {
+						throw new IOException(e2);
+					}
+				}
+
+				writeObjectCode(oos, id);
+				writeExternalizable(oos, (SecureExternalizableWithoutInnerSizeControl) o);
+			} else if (o instanceof Enum && (id = identifiersPerEnums.get(o.getClass())) != null) {
+				writeObjectCode(oos, id);
+				oos.writeInt(((Enum<?>) o).ordinal());
+			} else if (o instanceof SecureExternalizableWithoutInnerSizeControl) {
+				writeObjectCode(oos, 1);
+				writeExternalizable(oos, (SecureExternalizableWithoutInnerSizeControl) o, false);
+			} else if (clazz == String.class) {
+				writeObjectCode(oos, 2);
+				writeString(oos, (String) o, sizeMax, false);
+			} else if (clazz == byte[].class) {
+				writeObjectCode(oos, 3);
+				writeBytes(oos, (byte[]) o, sizeMax, false);
+			} else if (clazz == byte[][].class) {
+				writeObjectCode(oos, 4);
+				writeBytes2D(oos, (byte[][]) o, sizeMax, sizeMax, false, false);
+			} else if (o instanceof SecureExternalizable[]) {
+				writeObjectCode(oos, 5);
+				writeExternalizables(oos, (SecureExternalizable[]) o, sizeMax, false);
+			} else if (o instanceof Object[]) {
+				writeObjectCode(oos, 6);
+				writeObjects(oos, (Object[]) o, sizeMax, false);
+			} else if (clazz == InetSocketAddress.class) {
+				writeObjectCode(oos, 7);
+				writeInetSocketAddress(oos, (InetSocketAddress) o, false);
+			} else if (clazz == InetAddress.class) {
+				writeObjectCode(oos, 8);
+				writeInetAddress(oos, (InetAddress) o, false);
+			} else if (o instanceof AbstractDecentralizedID) {
+				writeObjectCode(oos, 9);
+				writeDecentralizedID(oos, (AbstractDecentralizedID) o, false);
+			} else if (o instanceof AbstractKey) {
+				writeObjectCode(oos, 10);
+				writeKey(oos, (AbstractKey) o, false);
+			} else if (o instanceof AbstractKeyPair) {
+				writeObjectCode(oos, 11);
+				writeKeyPair(oos, (AbstractKeyPair<?, ?>) o, false);
+			} else if (o instanceof Enum<?>) {
+				writeObjectCode(oos, 12);
+				writeEnum(oos, (Enum<?>) o, false);
+			} else if (o instanceof Class) {
+				writeObjectCode(oos, 14);
+				writeClass(oos, (Class<?>) o, false, Object.class);
+			} else if (clazz == Date.class) {
+				writeObjectCode(oos, 15);
+				writeDate(oos, (Date) o, false);
+			} else if (o instanceof HybridKeyAgreementType) {
+				writeObjectCode(oos, 16);
+				writeHybridKeyAgreementType(oos, (HybridKeyAgreementType) o, false);
+			} else if (o instanceof HybridASymmetricAuthenticatedSignatureType) {
+				writeObjectCode(oos, 17);
+				writeHybridASymmetricAuthenticatedSignatureType(oos, (HybridASymmetricAuthenticatedSignatureType) o, false);
+			} else if (o instanceof HybridASymmetricEncryptionType) {
+				writeObjectCode(oos, 18);
+				writeHybridASymmetricEncryptionType(oos, (HybridASymmetricEncryptionType) o, false);
+			} else if (clazz == Long.class) {
+				writeObjectCode(oos, 19);
+				oos.writeLong(((Long) o));
+			} else if (clazz == Byte.class) {
+				writeObjectCode(oos, 20);
+				oos.write(((Byte) o));
+			} else if (clazz == Short.class) {
+				writeObjectCode(oos, 21);
+				oos.writeShort(((Short) o));
+			} else if (clazz == Integer.class) {
+				writeObjectCode(oos, 22);
+				oos.writeInt(((Integer) o));
+			} else if (clazz == Character.class) {
+				writeObjectCode(oos, 23);
+				oos.writeChar(((Character) o));
+			} else if (clazz==Boolean.class) {
+				writeObjectCode(oos, 24);
+				oos.writeBoolean(((Boolean) o));
+			} else if (clazz==Float.class) {
+				writeObjectCode(oos, 25);
+				oos.writeFloat(((Float) o));
+			} else if (clazz==Double.class) {
+				writeObjectCode(oos, 26);
+				oos.writeDouble(((Double) o));
+			} else {
+				throw new IOException();
+
+			}
 		}
 	}
-	
+
 	static Object readObject(final SecuredObjectInputStream ois, int sizeMax, boolean supportNull) throws IOException, ClassNotFoundException
 	{
-		short type=(short)(ois.readByte() & 0xFF);
+		short type=readObjectCode(ois);
 		if (type>=classesStartIndex)
 		{
 			if (type<=classesEndIndex)
@@ -1445,6 +1664,12 @@ public class SerializationTools {
 					fp.readExternal(ois);
 					return fp;
 				}
+				case 28: {
+					return readCollection(ois, sizeMax, supportNull);
+				}
+				case 29: {
+					return readMap(ois, sizeMax, supportNull);
+				}
 
 		/*case Byte.MAX_VALUE:
 			return ois.readObject();*/
@@ -1455,40 +1680,44 @@ public class SerializationTools {
 		
 	}
 
-	private static final byte lastObjectCode=27;
+	private static final short lastObjectCode=29;
 	private static final short classesStartIndex=lastObjectCode+1;
 	private static short classesEndIndex=0;
 	private static short enumsStartIndex=0;
 	private static short enumsEndIndex=0;
-	private static final ArrayList<Class<? extends SecureExternalizableWithoutInnerSizeControl>> classes= new ArrayList<>(
-			Arrays.asList((Class<? extends SecureExternalizableWithoutInnerSizeControl>) FilePermissions.class,
-					SubStreamParameter.class,
-					SubStreamParameters.class,
-					FragmentedStreamParameters.class));
+	private static final ArrayList<Class<? extends SecureExternalizableWithoutInnerSizeControl>> classes= new ArrayList<>();
 	private static final Map<Class<? extends SecureExternalizableWithoutInnerSizeControl>, Short> identifiersPerClasses=new HashMap<>();
-	private static final ArrayList<Class<? extends Enum<?>>> enums=new ArrayList<>(Arrays.asList(
-			MessageDigestType.class,
-			SecureRandomType.class,
-			SymmetricEncryptionType.class,
-			SymmetricAuthenticatedSignatureType.class,
-			ASymmetricEncryptionType.class,
-			ASymmetricAuthenticatedSignatureType.class,
-			KeyAgreementType.class,
-			PasswordHashType.class,
-			SymmetricKeyWrapperType.class,
-			ASymmetricKeyWrapperType.class,
-			ASymmetricLoginAgreementType.class,
-			CodeProvider.class,
-			EllipticCurveDiffieHellmanType.class,
-			P2PLoginAgreementType.class,
-			PasswordBasedKeyGenerationType.class,
-			OS.class,
-			OSVersion.class));
+	private static final ArrayList<Class<? extends Enum<?>>> enums=new ArrayList<>();
+	static {
+		setPredefinedClasses( new ArrayList<>(
+				Arrays.asList((Class<? extends SecureExternalizableWithoutInnerSizeControl>) FilePermissions.class,
+						SubStreamParameter.class,
+						SubStreamParameters.class,
+						FragmentedStreamParameters.class)),
+				new ArrayList<>(Arrays.asList(
+						MessageDigestType.class,
+						SecureRandomType.class,
+						SymmetricEncryptionType.class,
+						SymmetricAuthenticatedSignatureType.class,
+						ASymmetricEncryptionType.class,
+						ASymmetricAuthenticatedSignatureType.class,
+						KeyAgreementType.class,
+						PasswordHashType.class,
+						SymmetricKeyWrapperType.class,
+						ASymmetricKeyWrapperType.class,
+						ASymmetricLoginAgreementType.class,
+						CodeProvider.class,
+						EllipticCurveDiffieHellmanType.class,
+						P2PLoginAgreementType.class,
+						PasswordBasedKeyGenerationType.class,
+						OS.class,
+						OSVersion.class)));
+	}
 	private static final Map<Class<? extends Enum<?>>, Short> identifiersPerEnums=new HashMap<>();
 	public static void addPredefinedClasses(List<Class<? extends SecureExternalizableWithoutInnerSizeControl>> cls, List<Class<? extends Enum<?>>> enms)
 	{
 		synchronized (SerializationTools.class) {
-			if (classes.size() + enums.size() + cls.size() + enms.size() + classesStartIndex > 254)
+			if (classes.size() + enums.size() + cls.size() + enms.size() + classesStartIndex > Short.MAX_VALUE)
 				throw new IllegalArgumentException("Too much given predefined classes");
 			if (classes.size()>0) {
 				cls = new ArrayList<>(cls);
@@ -1505,7 +1734,7 @@ public class SerializationTools {
 			short currentID = lastObjectCode;
 			for (Class<?> c : classes)
 				assert !Modifier.isAbstract(c.getModifiers()) : "" + c;
-			assert currentID + classes.size() < 255;
+			assert currentID + classes.size() < Short.MAX_VALUE;
 			for (Class<? extends SecureExternalizableWithoutInnerSizeControl> c : classes) {
 				short id = ++currentID;
 				identifiersPerClasses.put(c, id);
@@ -1513,8 +1742,8 @@ public class SerializationTools {
 			classesEndIndex = currentID;
 
 
-			assert currentID + enums.size() < 255;
-			enumsStartIndex = (byte) (currentID + 1);
+			assert currentID + enums.size() < Short.MAX_VALUE;
+			enumsStartIndex = (short)(currentID + 1);
 			for (Class<? extends Enum<?>> c : enums) {
 				short id = (++currentID);
 				identifiersPerEnums.put(c, id);
@@ -1522,6 +1751,7 @@ public class SerializationTools {
 			enumsEndIndex = currentID;
 		}
 	}
+
 	public static void setPredefinedClasses(List<Class<? extends SecureExternalizableWithoutInnerSizeControl>> cls, List<Class<? extends Enum<?>>> enms)
 	{
 		synchronized (SerializationTools.class) {
@@ -1545,7 +1775,6 @@ public class SerializationTools {
 			return 1;
 		return getInternalSize(key, 0);
 	}
-
 
 	public static int getInternalSize(IKey key)
 	{
@@ -1649,27 +1878,48 @@ public class SerializationTools {
 	public static int getInternalSize(Object o, int sizeMax)
 	{
 		if (o ==null)
-			return 0;
-		if (o instanceof String)
+			return getObjectCodeSizeBytes();
+		Class<?> clazz=o.getClass();
+		if (clazz==String.class)
 		{
-			return ((String)o).length()*2+sizeMax>Short.MAX_VALUE?5:3;
+			return getObjectCodeSizeBytes()+((String)o).length()*2+sizeMax>Short.MAX_VALUE?4:2;
+		}
+		else if (o instanceof Collection)
+		{
+			Collection<?> c=(Collection<?>)o;
+			int res=getObjectCodeSizeBytes();
+			if (c.size()>Short.MAX_VALUE)
+				res+=2;
+			else
+				res+=4;
+			sizeMax-=c.size();
+			for (Object oc : c)
+				res+=getInternalSize(oc, sizeMax);
+
+			return res;
+		}
+		else if (o instanceof Map)
+		{
+			Map<?, ?> m=(Map<?, ?>)o;
+			int res=getObjectCodeSizeBytes();
+			if (m.size()>Short.MAX_VALUE)
+				res+=2;
+			else
+				res+=4;
+			sizeMax-=m.size();
+			for (Map.Entry<?, ?> e: m.entrySet())
+				res+=getInternalSize(e.getKey(), sizeMax)+getInternalSize(e.getValue(), sizeMax);
+
+			return res;
 		}
 		else if (o instanceof byte[])
 		{
-			return ((byte[])o).length+sizeMax>Short.MAX_VALUE?5:3;
-		}
-		else if (o instanceof AbstractKey)
-		{
-			return 4+((AbstractKey)o).encode().length;
-		}
-		else if (o instanceof AbstractKeyPair)
-		{
-			return 4+((AbstractKeyPair<?, ?>)o).encode().length;
+			return getObjectCodeSizeBytes()+((byte[])o).length+sizeMax>Short.MAX_VALUE?4:2;
 		}
 		else if (o instanceof byte[][])
 		{
 			byte[][] tab = ((byte[][]) o);
-			int res=sizeMax>Short.MAX_VALUE?5:3;
+			int res=getObjectCodeSizeBytes()+sizeMax>Short.MAX_VALUE?4:2;
 			for (byte[] b : tab) {
 				res += sizeMax>Short.MAX_VALUE?5:3 + (b == null ? 0 : b.length);
 			}
@@ -1677,68 +1927,104 @@ public class SerializationTools {
 		}
 		else if (o instanceof SecureExternalizable)
 		{
-			return ((SecureExternalizable)o).getInternalSerializedSize()+getInternalSize(o.getClass().getName(), MAX_CLASS_LENGTH);
+			int res=getObjectCodeSizeBytes()+((SecureExternalizable)o).getInternalSerializedSize();
+			if (!classes.contains(o.getClass()))
+				res+=getInternalSize(o.getClass().getName(), MAX_CLASS_LENGTH);
+			return res;
 		}
 		else if (o instanceof SecureExternalizable[])
 		{
-			int size=sizeMax>Short.MAX_VALUE?4:2;
+			int size=getObjectCodeSizeBytes()+sizeMax>Short.MAX_VALUE?4:2;
 			for (SecureExternalizable s : (SecureExternalizable[])o) {
-				size+=s==null?0:getInternalSize(s.getClass().getName(), MAX_CLASS_LENGTH);
-				size += s==null?1:s.getInternalSerializedSize();
+				size+=1;
+				if (s!=null) {
+					if (!classes.contains(o.getClass()))
+						size += getInternalSize(s.getClass().getName(), MAX_CLASS_LENGTH) ;
+					size += s.getInternalSerializedSize();
+				}
 			}
 			return size;
 		}
 		else if (o instanceof Object[])
 		{
 			Object[] tab = (Object[]) o;
-			int size=sizeMax>Short.MAX_VALUE?5:3;
+			int size=getObjectCodeSizeBytes()+sizeMax>Short.MAX_VALUE?4:2;
 			for (Object so : tab)
 			{
 				size+=getInternalSize(so, sizeMax-size);
 			}
 			return size;
 		}
-		else if (o instanceof Collection)
+		else if (clazz==InetAddress.class)
 		{
-			Collection<?> c=(Collection<?>)o;
-			int size=sizeMax>Short.MAX_VALUE?5:3;
-
-			for (Object so : c)
-			{
-				size+=getInternalSize(so, sizeMax-size);
-			}
-			return size;
+			return getObjectCodeSizeBytes()+((InetAddress)o).getAddress().length+2;
 		}
-		else if (o instanceof InetAddress)
+		else if (clazz==InetSocketAddress.class)
 		{
-			return ((InetAddress)o).getAddress().length+4;
+			return getObjectCodeSizeBytes()+((InetSocketAddress)o).getAddress().getAddress().length+6;
 		}
-		else if (o instanceof InetSocketAddress)
+		else if (o instanceof DecentralizedValue)
 		{
-			return ((InetSocketAddress)o).getAddress().getAddress().length+8;
-		}
-		else if (o instanceof AbstractDecentralizedID)
-		{
-			return ((AbstractDecentralizedID) o).encode().length+3;
+			return getObjectCodeSizeBytes()+4+((DecentralizedValue) o).encode().length;
 		}
 		else if (o instanceof Enum<?>)
 		{
-			return 6+((Enum<?>)o).name().length()*2+getInternalSize(o.getClass().getName(), MAX_CLASS_LENGTH);
+			int res=getObjectCodeSizeBytes()+4;
+			if (enums.contains(clazz))
+				res+=2;
+			else
+				res+=getInternalSize(o.getClass().getName(), MAX_CLASS_LENGTH);
+			return res;
+		}
+		else if (clazz==Class.class){
+			int res=getObjectCodeSizeBytes();
+			if (enums.contains(clazz))
+				res+=2;
+			else
+				res+=SerializationTools.getInternalSize(clazz.getName(), MAX_CLASS_LENGTH);
+			return res;
+		}
+		else if (clazz==Date.class){
+			return getObjectCodeSizeBytes()+8;
 		}
 		else if (o instanceof HybridKeyAgreementType)
 		{
-			return 6+((HybridKeyAgreementType)o).getNonPQCKeyAgreementType().name().length()*2+((HybridKeyAgreementType)o).getPQCKeyAgreementType().name().length()*2;
+			return getObjectCodeSizeBytes()+16;
 		}
 		else if (o instanceof HybridASymmetricAuthenticatedSignatureType)
 		{
-			return 6+((HybridASymmetricAuthenticatedSignatureType)o).getNonPQCASymmetricAuthenticatedSignatureType().name().length()*2+((HybridASymmetricAuthenticatedSignatureType)o).getPQCASymmetricAuthenticatedSignatureType().name().length()*2;
+			return getObjectCodeSizeBytes()+16;
 		}
 		else if (o instanceof HybridASymmetricEncryptionType)
 		{
-			return 6+((HybridASymmetricEncryptionType)o).getNonPQCASymmetricEncryptionType().name().length()*2+((HybridASymmetricEncryptionType)o).getPQCASymmetricEncryptionType().name().length()*2;
+			return getObjectCodeSizeBytes()+16;
+		}
+		else if (clazz==Long.class){
+			return getObjectCodeSizeBytes()+8;
+		}
+		else if (clazz==Integer.class){
+			return getObjectCodeSizeBytes()+4;
+		}
+		else if (clazz==Byte.class){
+			return getObjectCodeSizeBytes()+1;
+		}
+		else if (clazz==Short.class){
+			return getObjectCodeSizeBytes()+2;
+		}
+		else if (clazz==Float.class){
+			return getObjectCodeSizeBytes()+4;
+		}
+		else if (clazz==Double.class){
+			return getObjectCodeSizeBytes()+8;
+		}
+		else if (clazz==Character.class){
+			return getObjectCodeSizeBytes()+2;
+		}
+		else if (clazz==Boolean.class){
+			return getObjectCodeSizeBytes()+1;
 		}
 		else
-			return 1+ObjectSizer.sizeOf(o);
+			throw new IllegalArgumentException();
 	}
 
 	public static class ObjectResolver

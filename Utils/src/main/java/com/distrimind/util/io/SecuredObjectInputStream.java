@@ -39,10 +39,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
 import com.distrimind.util.FileTools;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * @author Jason Mahdjoub
@@ -281,6 +278,33 @@ public abstract class SecuredObjectInputStream extends InputStream implements Da
 
 	public String readString(boolean nullAccepted, int maxSizeInBytes) throws IOException {
 		return SerializationTools.readString(this, maxSizeInBytes, nullAccepted);
+	}
+
+	public Collection<?> readCollection(boolean nullAccepted, int maxSize) throws IOException, ClassNotFoundException {
+		return SerializationTools.readCollection(this, maxSize, nullAccepted);
+	}
+	public Map<?, ?> readMap(boolean nullAccepted, int maxSize) throws IOException, ClassNotFoundException {
+		return SerializationTools.readMap(this, maxSize, nullAccepted);
+	}
+	@SuppressWarnings("unchecked")
+	public <T> Collection<T> readCollection(boolean nullAccepted, int maxSize, Class<T> elementsClass) throws IOException, ClassNotFoundException {
+		try {
+			return (Collection<T>) readCollection(nullAccepted, maxSize);
+		}
+		catch (ClassCastException e)
+		{
+			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, e);
+		}
+	}
+	@SuppressWarnings("unchecked")
+	public <K, V> Map<K, V> readMap(boolean nullAccepted, int maxSize, Class<K> keysClass, Class<V> valuesClass) throws IOException, ClassNotFoundException {
+		try {
+			return (Map<K, V>) readMap(nullAccepted, maxSize);
+		}
+		catch (ClassCastException e)
+		{
+			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, e);
+		}
 	}
 
 	public Object readObject(boolean nullAccepted) throws IOException, ClassNotFoundException {

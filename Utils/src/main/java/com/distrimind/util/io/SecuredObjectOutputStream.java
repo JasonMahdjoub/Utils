@@ -38,6 +38,8 @@ knowledge of the CeCILL-C license and that you accept its terms.
 import java.io.DataOutput;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Collection;
+import java.util.Map;
 
 /**
  * @author Jason Mahdjoub
@@ -143,6 +145,12 @@ public abstract class SecuredObjectOutputStream extends OutputStream implements 
 		throw new IOException(new IllegalAccessException());
 	}
 
+	public void writeCollection(Collection<?> collection, boolean nullAccepted, int maxSize) throws IOException {
+		SerializationTools.writeCollection(this, collection, maxSize, nullAccepted);
+	}
+	public void writeMap(Map<?, ?> map, boolean nullAccepted, int maxSize) throws IOException {
+		SerializationTools.writeMap(this, map, maxSize, nullAccepted);
+	}
 
 	public void writeString(String s, boolean nullAccepted, int maxSizeInBytes) throws IOException {
 		SerializationTools.writeString(this, s, maxSizeInBytes, nullAccepted);
