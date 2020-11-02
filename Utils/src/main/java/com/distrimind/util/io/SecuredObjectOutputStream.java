@@ -38,12 +38,14 @@ knowledge of the CeCILL-C license and that you accept its terms.
 import java.io.DataOutput;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.Collection;
 import java.util.Map;
 
 /**
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 2.0
  * @since Utils 4.4.0
  */
 @SuppressWarnings("NullableProblems")
@@ -147,6 +149,13 @@ public abstract class SecuredObjectOutputStream extends OutputStream implements 
 	@Override
 	public final void writeUTF(String str) throws IOException {
 		throw new IOException(new IllegalAccessException());
+	}
+
+	public void writeBigDecimal(BigDecimal bigDecimal, boolean nullAccepted) throws IOException {
+		SerializationTools.writeBigDecimal(this, bigDecimal, nullAccepted);
+	}
+	public void writeBigInteger(BigInteger bigInteger, boolean nullAccepted) throws IOException {
+		SerializationTools.writeBigInteger(this, bigInteger, nullAccepted);
 	}
 
 	public void writeCollection(Collection<?> collection, boolean nullAccepted, int maxSize) throws IOException {

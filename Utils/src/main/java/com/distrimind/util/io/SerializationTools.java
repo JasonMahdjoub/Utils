@@ -46,6 +46,8 @@ import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.security.AccessController;
@@ -58,7 +60,7 @@ import java.util.concurrent.*;
  * 
  * @author Jason Mahdjoub
  * @since Utils 4.5.0
- * @version 2.1
+ * @version 3.0
  * 
  */
 
@@ -200,6 +202,7 @@ public class SerializationTools {
 	}
 	
 	public static final int MAX_KEY_SIZE=Short.MAX_VALUE;
+	public static final int MAX_BIG_INTEGER_SIZE=Short.MAX_VALUE;
 	@SuppressWarnings("SameParameterValue")
 	static void writeKey(final SecuredObjectOutputStream oos, AbstractKey key, boolean supportNull) throws IOException
 	{
@@ -450,6 +453,79 @@ public class SerializationTools {
 			throw new IOException(e);
 		}
 	}
+	static void writeBigDecimal(final SecuredObjectOutputStream oos, BigDecimal bigDecimal, boolean supportNull) throws IOException {
+		if (supportNull)
+			oos.writeBoolean(bigDecimal!=null);
+
+		if (bigDecimal==null)
+		{
+			if (!supportNull)
+				throw new IOException();
+
+			return;
+
+		}
+		oos.writeInt(bigDecimal.scale());
+		writeBytes(oos, bigDecimal.unscaledValue().toByteArray(), MAX_BIG_INTEGER_SIZE, false);
+	}
+	static BigDecimal readBigDecimal(final SecuredObjectInputStream in, boolean supportNull) throws IOException
+	{
+		if (!supportNull || in.readBoolean())
+		{
+			int scale=in.readInt();
+			byte[] bd=readBytes(in, false, null, 0, MAX_BIG_INTEGER_SIZE);
+			try
+			{
+				if (bd == null)
+					throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
+				return new BigDecimal(new BigInteger(bd), scale);
+			}
+			catch(Exception e)
+			{
+				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
+			}
+		}
+		else
+		{
+			return null;
+		}
+	}
+	static void writeBigInteger(final SecuredObjectOutputStream oos, BigInteger bigInteger, boolean supportNull) throws IOException {
+		if (supportNull)
+			oos.writeBoolean(bigInteger!=null);
+
+		if (bigInteger==null)
+		{
+			if (!supportNull)
+				throw new IOException();
+
+			return;
+
+		}
+		writeBytes(oos, bigInteger.toByteArray(), MAX_BIG_INTEGER_SIZE, false);
+	}
+	static BigInteger readBigInteger(final SecuredObjectInputStream in, boolean supportNull) throws IOException
+	{
+		if (!supportNull || in.readBoolean())
+		{
+			byte[] bd=readBytes(in, false, null, 0, MAX_BIG_INTEGER_SIZE);
+			try
+			{
+				if (bd == null)
+					throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
+				return new BigInteger(bd);
+			}
+			catch(Exception e)
+			{
+				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
+			}
+		}
+		else
+		{
+			return null;
+		}
+	}
+
 	@SuppressWarnings("unchecked")
 	private static final Class<? extends Collection<?>>[] collectionsClasses=new Class[]{ArrayList.class,
 			LinkedList.class,
@@ -1282,7 +1358,9 @@ public class SerializationTools {
 				|| SecureExternalizable[].class.isAssignableFrom(clazz)
 				|| InetSocketAddress.class==clazz
 				|| InetAddress.class==clazz
-				|| Number.class.isAssignableFrom(clazz);
+				|| Number.class.isAssignableFrom(clazz)
+				|| BigInteger.class==clazz
+				|| BigDecimal.class==clazz;
 
 	}
 	private static int getObjectCodeSizeBytes()
@@ -1514,6 +1592,12 @@ public class SerializationTools {
 			} else if (clazz==Double.class) {
 				writeObjectCode(oos, 26);
 				oos.writeDouble(((Double) o));
+			} else if (clazz==BigDecimal.class) {
+				writeObjectCode(oos, 29);
+				writeBigDecimal(oos, (BigDecimal)o, false);
+			} else if (clazz==BigInteger.class) {
+				writeObjectCode(oos, 30);
+				writeBigInteger(oos, (BigInteger)o, false);
 			} else {
 				throw new IOException();
 
@@ -1612,6 +1696,12 @@ public class SerializationTools {
 				case 28: {
 					return readCollection(ois, sizeMax, supportNull);
 				}
+				case 29: {
+					return readBigDecimal(ois, supportNull);
+				}
+				case 30: {
+					return readBigInteger(ois, supportNull);
+				}
 
 		/*case Byte.MAX_VALUE:
 			return ois.readObject();*/
@@ -1622,7 +1712,7 @@ public class SerializationTools {
 		
 	}
 
-	private static final short lastObjectCode=28;
+	private static final short lastObjectCode=30;
 	private static final short classesStartIndex=lastObjectCode+1;
 	private static short classesEndIndex=0;
 	private static short enumsStartIndex=0;

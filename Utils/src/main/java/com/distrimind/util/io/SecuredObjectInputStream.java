@@ -39,11 +39,13 @@ knowledge of the CeCILL-C license and that you accept its terms.
 import com.distrimind.util.FileTools;
 
 import java.io.*;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.*;
 
 /**
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 2.0
  * @since Utils 4.4.0
  */
 @SuppressWarnings("NullableProblems")
@@ -278,6 +280,12 @@ public abstract class SecuredObjectInputStream extends InputStream implements Da
 
 	public String readString(boolean nullAccepted, int maxSizeInBytes) throws IOException {
 		return SerializationTools.readString(this, maxSizeInBytes, nullAccepted);
+	}
+	public BigInteger readBigInteger(boolean nullAccepted) throws IOException {
+		return SerializationTools.readBigInteger(this, nullAccepted);
+	}
+	public BigDecimal readBigDecimal(boolean nullAccepted) throws IOException {
+		return SerializationTools.readBigDecimal(this, nullAccepted);
 	}
 
 	public Collection<?> readCollection(boolean nullAccepted, int maxSize) throws IOException, ClassNotFoundException {
