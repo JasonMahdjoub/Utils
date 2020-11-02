@@ -62,7 +62,7 @@ import java.security.spec.X509EncodedKeySpec;
  * @version 4.1
  * @since Utils 1.4
  */
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"unchecked", "ConstantConditions"})
 public enum ASymmetricEncryptionType {
 	RSA_OAEPWithSHA256AndMGF1Padding("RSA", "ECB", "OAEPWITHSHA-256ANDMGF1PADDING", ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA384withRSA,
 			3072, 31536000000L, (short) 66, CodeProvider.SunJCE,CodeProvider.SunRsaSign, FipsRSA.ALGORITHM, false),
@@ -87,7 +87,18 @@ public enum ASymmetricEncryptionType {
 	//BC_FIPS_RSA_OAEPWithSHA256AndMGF1Padding("RSA", "NONE", "OAEPwithSHA256andMGF1Padding", ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA384withRSAandMGF1, (short) 3072, 31536000000l, (short) 66,CodeProvider.BCFIPS,CodeProvider.BCFIPS, FipsRSA.ALGORITHM),
 	//BC_FIPS_RSA_PKCS1Padding("RSA", "NONE", "PKCS1Padding", ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA384withRSAandMGF1, (short) 3072, 31536000000l, (short) 11,CodeProvider.BCFIPS,CodeProvider.BCFIPS, FipsRSA.ALGORITHM),
 	DEFAULT(RSA_OAEPWithSHA512AndMGF1Padding);
-	
+
+
+	public static final int MAX_NON_PQC_PUBLIC_KEY_SIZE_IN_BYTES =ASymmetricAuthenticatedSignatureType.MAX_NON_PQC_PUBLIC_KEY_SIZE_IN_BYTES;
+	public static final int MAX_NON_PQC_PRIVATE_KEY_SIZE_IN_BYTES = ASymmetricAuthenticatedSignatureType.MAX_NON_PQC_PRIVATE_KEY_SIZE_IN_BYTES;
+	public static final int MAX_PQC_PUBLIC_KEY_SIZE_IN_BYTES =131072;
+	public static final int MAX_PQC_PRIVATE_KEY_SIZE_IN_BYTES = 131072;
+
+	public static final int MAX_NON_PQC_KEY_PAIR_SIZE_IN_BYTES =MAX_NON_PQC_PUBLIC_KEY_SIZE_IN_BYTES+MAX_NON_PQC_PRIVATE_KEY_SIZE_IN_BYTES+16;
+	public static final int MAX_PQC_KEY_PAIR_SIZE_IN_BYTES =MAX_PQC_PUBLIC_KEY_SIZE_IN_BYTES+MAX_PQC_PRIVATE_KEY_SIZE_IN_BYTES+16;
+	public static final int MAX_KEY_PAIR_SIZE_IN_BYTES =Math.max(MAX_PQC_KEY_PAIR_SIZE_IN_BYTES, MAX_NON_PQC_KEY_PAIR_SIZE_IN_BYTES);
+	public static final int MAX_KEY_SIZE_IN_BYTES=Math.max(Math.max(Math.max(MAX_NON_PQC_PUBLIC_KEY_SIZE_IN_BYTES, MAX_NON_PQC_PRIVATE_KEY_SIZE_IN_BYTES),MAX_PQC_PUBLIC_KEY_SIZE_IN_BYTES),MAX_PQC_PRIVATE_KEY_SIZE_IN_BYTES);
+
 
 
 	static Object decodeGnuPrivateKey(byte[] encodedKey, String algorithm)

@@ -95,6 +95,7 @@ public enum SymmetricEncryptionType {
 	
 
 	public static final int MAX_IV_SIZE_IN_BYTES=16;
+	public final static int MAX_SYMMETRIC_KEY_SIZE=32;
 
 	public static long getMaxOutputSizeInBytesAfterEncryption(long size)
 	{

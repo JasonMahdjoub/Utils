@@ -287,17 +287,22 @@ public abstract class SecuredObjectInputStream extends InputStream implements Da
 	public BigDecimal readBigDecimal(boolean nullAccepted) throws IOException {
 		return SerializationTools.readBigDecimal(this, nullAccepted);
 	}
-
 	public Collection<?> readCollection(boolean nullAccepted, int maxSize) throws IOException, ClassNotFoundException {
-		return SerializationTools.readCollection(this, maxSize, nullAccepted);
+		return readCollection(nullAccepted, maxSize, true);
+	}
+	public Collection<?> readCollection(boolean nullAccepted, int maxSize, boolean supportNullCollectionElements) throws IOException, ClassNotFoundException {
+		return SerializationTools.readCollection(this, maxSize, nullAccepted, supportNullCollectionElements);
 	}
 	public Map<?, ?> readMap(boolean nullAccepted, int maxSize) throws IOException, ClassNotFoundException {
-		return SerializationTools.readMap(this, maxSize, nullAccepted);
+		return readMap(nullAccepted, maxSize, true, true);
+	}
+	public Map<?, ?> readMap(boolean nullAccepted, int maxSize, boolean supportNullMapKey, boolean supportNullMapValue) throws IOException, ClassNotFoundException {
+		return SerializationTools.readMap(this, maxSize, nullAccepted, supportNullMapKey, supportNullMapValue);
 	}
 	@SuppressWarnings("unchecked")
-	public <T> Collection<T> readCollection(boolean nullAccepted, int maxSize, Class<T> elementsClass) throws IOException, ClassNotFoundException {
+	public <T> Collection<T> readCollection(boolean nullAccepted, boolean supportNullCollectionElements, int maxSize, Class<T> elementsClass) throws IOException, ClassNotFoundException {
 		try {
-			return (Collection<T>) readCollection(nullAccepted, maxSize);
+			return (Collection<T>) readCollection(nullAccepted, maxSize, supportNullCollectionElements);
 		}
 		catch (ClassCastException e)
 		{
@@ -305,9 +310,9 @@ public abstract class SecuredObjectInputStream extends InputStream implements Da
 		}
 	}
 	@SuppressWarnings("unchecked")
-	public <K, V> Map<K, V> readMap(boolean nullAccepted, int maxSize, Class<K> keysClass, Class<V> valuesClass) throws IOException, ClassNotFoundException {
+	public <K, V> Map<K, V> readMap(boolean nullAccepted, int maxSize, boolean supportNullMapKey, boolean supportNullMapValue, Class<K> keysClass, Class<V> valuesClass) throws IOException, ClassNotFoundException {
 		try {
-			return (Map<K, V>) readMap(nullAccepted, maxSize);
+			return (Map<K, V>) readMap(nullAccepted, maxSize, supportNullMapKey, supportNullMapValue);
 		}
 		catch (ClassCastException e)
 		{

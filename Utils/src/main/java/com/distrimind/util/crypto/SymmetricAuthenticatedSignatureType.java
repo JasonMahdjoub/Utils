@@ -84,6 +84,7 @@ public enum SymmetricAuthenticatedSignatureType {
     private final SymmetricAuthenticatedSignatureType replacer;
 
 	public final static int MAX_SYMMETRIC_SIGNATURE_SIZE=64;
+	public final static int MAX_SYMMETRIC_KEY_SIZE=32;
 
     public boolean equals(SymmetricAuthenticatedSignatureType type)
 	{

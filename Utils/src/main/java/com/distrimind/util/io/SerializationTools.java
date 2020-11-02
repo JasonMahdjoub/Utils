@@ -48,6 +48,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.net.Inet4Address;
+import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.security.AccessController;
@@ -201,7 +203,7 @@ public class SerializationTools {
 		
 	}
 	
-	public static final int MAX_KEY_SIZE=Short.MAX_VALUE;
+
 	public static final int MAX_BIG_INTEGER_SIZE=Short.MAX_VALUE;
 	@SuppressWarnings("SameParameterValue")
 	static void writeKey(final SecuredObjectOutputStream oos, AbstractKey key, boolean supportNull) throws IOException
@@ -218,7 +220,7 @@ public class SerializationTools {
 			
 		}
 
-		writeBytes(oos, key.encode(), MAX_KEY_SIZE, false);
+		writeBytes(oos, key.encode(), AbstractKey.MAX_KEY_SIZE_IN_BYTES, false);
 	}
 
 	@SuppressWarnings("SameParameterValue")
@@ -226,7 +228,7 @@ public class SerializationTools {
 	{
 		if (!supportNull || in.readBoolean())
 		{
-			byte[] k=readBytes(in, false, null, 0, MAX_KEY_SIZE);
+			byte[] k=readBytes(in, false, null, 0, AbstractKey.MAX_KEY_SIZE_IN_BYTES);
 			try
 			{
 				if (k == null)
@@ -260,8 +262,8 @@ public class SerializationTools {
 			
 		}
 
-		
-		writeBytes(oos, keyPair.encode(), MAX_KEY_SIZE*2, false);
+
+		writeBytes(oos, keyPair.encode(), AbstractKey.MAX_KEY_PAIR_SIZE_IN_BYTES, false);
 	}
 
 	@SuppressWarnings("SameParameterValue")
@@ -269,7 +271,7 @@ public class SerializationTools {
 	{
 		if (!supportNull || in.readBoolean())
 		{
-			byte[] k=readBytes(in, false, null, 0, MAX_KEY_SIZE*2);
+			byte[] k=readBytes(in, false, null, 0, AbstractKey.MAX_KEY_PAIR_SIZE_IN_BYTES);
 			try
 			{
 				if (k==null)
@@ -305,7 +307,7 @@ public class SerializationTools {
 			writeObject(oos, o, sizeMax, true);
 		}
 	}
-	static void writeCollection(final SecuredObjectOutputStream oos, Collection<?> collection, int sizeMax, boolean supportNull) throws IOException
+	static void writeCollection(final SecuredObjectOutputStream oos, Collection<?> collection, int sizeMax, boolean supportNull, boolean supportNullCollectionElements) throws IOException
 	{
 
 		if (collection==null)
@@ -318,11 +320,23 @@ public class SerializationTools {
 		}
 		Class<?> lClass=collection.getClass();
 		try {
-			if (!Modifier.isPublic(lClass.getModifiers()))
-				throw new IOException("The collection "+lClass+" must be a public class");
-			Constructor<?> c=lClass.getDeclaredConstructor();
-			if (!Modifier.isPublic(c.getModifiers()))
-				throw new IOException("The collection "+lClass+" must have a default public constructor");
+			if (!Modifier.isPublic(lClass.getModifiers())) {
+				if (List.class.isAssignableFrom(lClass)) {
+					if (RandomAccess.class.isAssignableFrom(lClass))
+						lClass = ArrayList.class;
+					else
+						lClass = LinkedList.class;
+				}
+				else if (Set.class.isAssignableFrom(lClass))
+					lClass=HashSet.class;
+				else
+					throw new IOException("The collection " + lClass + " must be a public class");
+			}
+			else {
+				Constructor<?> c = lClass.getDeclaredConstructor();
+				if (!Modifier.isPublic(c.getModifiers()))
+					throw new IOException("The collection " + lClass + " must have a default public constructor");
+			}
 
 		} catch (NoSuchMethodException e) {
 			throw new IOException(e);
@@ -334,21 +348,24 @@ public class SerializationTools {
 			if (collectionsClasses[i].equals(lClass))
 				break;
 		}
-		if (i<collectionsClasses.length)
-			oos.writeByte(i);
+		if (i<collectionsClasses.length) {
+			writeSize(oos, false, collection.size(), sizeMax);
+			oos.writeUnsignedByte(i);
+			sizeMax-=collection.size();
+			for (Object o : collection)
+			{
+				writeObject(oos, o, sizeMax, supportNullCollectionElements);
+			}
+		}
 		else {
 			throw new IOException("Invalid class "+lClass);
 		}
-		writeSize(oos, false, collection.size(), sizeMax);
 
-		sizeMax-=collection.size();
-		for (Object o : collection)
-		{
-			writeObject(oos, o, sizeMax, true);
-		}
+
+
 	}
 	@SuppressWarnings({"rawtypes", "unchecked"})
-	static Collection readCollection(final SecuredObjectInputStream ois, int sizeMax, boolean supportNull) throws IOException, ClassNotFoundException
+	static Collection readCollection(final SecuredObjectInputStream ois, int sizeMax, boolean supportNull, boolean supportNullCollectionElements) throws IOException, ClassNotFoundException
 	{
 		int size=readSize(ois, sizeMax);
 		if (size==-1)
@@ -358,7 +375,7 @@ public class SerializationTools {
 			return null;
 		}
 
-		int cIndex=ois.readByte();
+		int cIndex=ois.readUnsignedByte();
 
 		if (cIndex<0 || cIndex>collectionsClasses.length)
 			throw new IOException("Invalid class index : "+cIndex);
@@ -369,7 +386,7 @@ public class SerializationTools {
 			sizeMax-=size;
 			for (int i=0;i<size;i++)
 			{
-				collection.add(readObject(ois, sizeMax, true));
+				collection.add(readObject(ois, sizeMax, supportNullCollectionElements));
 			}
 
 			return collection;
@@ -377,7 +394,7 @@ public class SerializationTools {
 			throw new IOException(e);
 		}
 	}
-	static void writeMap(final SecuredObjectOutputStream oos, Map<?, ?> map, int sizeMax, boolean supportNull) throws IOException
+	static void writeMap(final SecuredObjectOutputStream oos, Map<?, ?> map, int sizeMax, boolean supportNull, boolean supportNullMapKey, boolean supportNullMapValue) throws IOException
 	{
 
 
@@ -407,22 +424,24 @@ public class SerializationTools {
 			if (mapClasses[i].equals(mClass))
 				break;
 		}
-		if (i<mapClasses.length)
-			oos.writeByte(i);
+		if (i<mapClasses.length) {
+			writeSize(oos, false, map.size(), sizeMax);
+			oos.writeUnsignedByte(i);
+			sizeMax-=map.size();
+			for (Map.Entry<?, ?> e : map.entrySet())
+			{
+				writeObject(oos, e.getKey(), sizeMax, supportNullMapKey);
+				writeObject(oos, e.getValue(), sizeMax, supportNullMapValue);
+			}
+		}
 		else {
 			throw new IOException("Invalid class "+mClass);
 		}
 
-		writeSize(oos, false, map.size(), sizeMax);
-		sizeMax-=map.size();
-		for (Map.Entry<?, ?> e : map.entrySet())
-		{
-			writeObject(oos, e.getKey(), sizeMax, true);
-			writeObject(oos, e.getValue(), sizeMax, true);
-		}
+
 	}
 	@SuppressWarnings({"rawtypes", "unchecked"})
-	static Map readMap(final SecuredObjectInputStream ois, int sizeMax, boolean supportNull) throws IOException, ClassNotFoundException
+	static Map readMap(final SecuredObjectInputStream ois, int sizeMax, boolean supportNull, boolean supportNullMapKey, boolean supportNullMapValue) throws IOException, ClassNotFoundException
 	{
 		int size=readSize(ois, sizeMax);
 		if (size==-1)
@@ -432,7 +451,7 @@ public class SerializationTools {
 			return null;
 		}
 
-		int cIndex=ois.readByte();
+		int cIndex=ois.readUnsignedByte();
 
 		if (cIndex<0 || cIndex>mapClasses.length)
 			throw new IOException("Invalid class index : "+cIndex);
@@ -443,8 +462,8 @@ public class SerializationTools {
 			sizeMax-=size;
 			for (int i=0;i<size;i++)
 			{
-				Object k=readObject(ois, sizeMax, true);
-				Object v=readObject(ois, sizeMax, true);
+				Object k=readObject(ois, sizeMax, supportNullMapKey);
+				Object v=readObject(ois, sizeMax, supportNullMapValue);
 				map.put(k,v);
 			}
 
@@ -1492,10 +1511,10 @@ public class SerializationTools {
 			Class<?> clazz=o.getClass();
 			if (o instanceof Collection) {
 				writeObjectCode(oos, 28);
-				writeCollection(oos, (Collection<?>) o, sizeMax, supportNull);
+				writeCollection(oos, (Collection<?>) o, sizeMax, false, true);
 			} else if (o instanceof Map) {
 				writeObjectCode(oos, 13);
-				writeMap(oos, (Map<?, ?>) o, sizeMax, supportNull);
+				writeMap(oos, (Map<?, ?>) o, sizeMax, false, true, true);
 			} else if (clazz == FilePermissions.class) {
 				writeObjectCode(oos, 27);
 				((FilePermissions) o).writeExternal(oos);
@@ -1538,7 +1557,7 @@ public class SerializationTools {
 			} else if (clazz == InetSocketAddress.class) {
 				writeObjectCode(oos, 7);
 				writeInetSocketAddress(oos, (InetSocketAddress) o, false);
-			} else if (clazz == InetAddress.class) {
+			} else if (clazz == Inet6Address.class || clazz == Inet4Address.class) {
 				writeObjectCode(oos, 8);
 				writeInetAddress(oos, (InetAddress) o, false);
 			} else if (o instanceof AbstractDecentralizedID) {
@@ -1599,7 +1618,7 @@ public class SerializationTools {
 				writeObjectCode(oos, 30);
 				writeBigInteger(oos, (BigInteger)o, false);
 			} else {
-				throw new IOException();
+				throw new IOException(""+clazz);
 
 			}
 		}
@@ -1661,7 +1680,7 @@ public class SerializationTools {
 				case 12:
 					return readEnum(ois, false);
 				case 13:
-					return readMap(ois, sizeMax, supportNull);
+					return readMap(ois, sizeMax, false, true, true);
 				case 14:
 					return readClass(ois, false, Object.class);
 				case 15:
@@ -1694,13 +1713,13 @@ public class SerializationTools {
 					return fp;
 				}
 				case 28: {
-					return readCollection(ois, sizeMax, supportNull);
+					return readCollection(ois, sizeMax, false, true);
 				}
 				case 29: {
-					return readBigDecimal(ois, supportNull);
+					return readBigDecimal(ois, false);
 				}
 				case 30: {
-					return readBigInteger(ois, supportNull);
+					return readBigInteger(ois, false);
 				}
 
 		/*case Byte.MAX_VALUE:
@@ -1855,6 +1874,14 @@ public class SerializationTools {
 	public static int getInternalSize(Class<?> clazz)
 	{
 		return getInternalSize( clazz, MAX_CLASS_LENGTH);
+	}
+	public static int getInternalSize(BigInteger bigInteger)
+	{
+		return getInternalSize( bigInteger, 0);
+	}
+	public static int getInternalSize(BigDecimal bigDecimal)
+	{
+		return getInternalSize( bigDecimal, 0);
 	}
 	public static int getInternalSize(AbstractDecentralizedID abstractDecentralizedID)
 	{

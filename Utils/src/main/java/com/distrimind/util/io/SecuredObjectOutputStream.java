@@ -157,12 +157,17 @@ public abstract class SecuredObjectOutputStream extends OutputStream implements 
 	public void writeBigInteger(BigInteger bigInteger, boolean nullAccepted) throws IOException {
 		SerializationTools.writeBigInteger(this, bigInteger, nullAccepted);
 	}
-
 	public void writeCollection(Collection<?> collection, boolean nullAccepted, int maxSize) throws IOException {
-		SerializationTools.writeCollection(this, collection, maxSize, nullAccepted);
+		writeCollection(collection, nullAccepted, maxSize, true);
+	}
+	public void writeCollection(Collection<?> collection, boolean nullAccepted, int maxSize, boolean supportNullCollectionElements) throws IOException {
+		SerializationTools.writeCollection(this, collection, maxSize, nullAccepted, supportNullCollectionElements);
 	}
 	public void writeMap(Map<?, ?> map, boolean nullAccepted, int maxSize) throws IOException {
-		SerializationTools.writeMap(this, map, maxSize, nullAccepted);
+		writeMap(map, nullAccepted, maxSize, true, true);
+	}
+	public void writeMap(Map<?, ?> map, boolean nullAccepted, int maxSize, boolean supportNullMapKey, boolean supportNullMapValue) throws IOException {
+		SerializationTools.writeMap(this, map, maxSize, nullAccepted, supportNullMapKey, supportNullMapValue);
 	}
 
 	public void writeString(String s, boolean nullAccepted, int maxSizeInBytes) throws IOException {

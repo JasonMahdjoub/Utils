@@ -1,6 +1,6 @@
 Utils
 =====
-5.6.0 STABLE (Build: 1985) (from 04/01/2016 to 28/10/2020)
+5.7.0 STABLE (Build: 2011) (from 04/01/2016 to 02/11/2020)
 
 # Creator(s):
 Jason MAHDJOUB
@@ -9,6 +9,12 @@ Jason MAHDJOUB
 Jason MAHDJOUB (Entered in the team at 04/01/2016)
 
 # Modifications:
+
+
+### 5.7.0 STABLE (02/11/2020)
+* Add possibility to serialize collections and maps into SerializationTools, SecuredObjectOutputStream and SecuredObjectInputStream
+* Add possibility to serialize BigInteger, BigDecimal into SerializationTools, SecuredObjectOutputStream and SecuredObjectInputStream
+* Add function SerializationTools.isSerializable(Object)
 
 
 ### 5.6.0 STABLE (28/10/2020)
