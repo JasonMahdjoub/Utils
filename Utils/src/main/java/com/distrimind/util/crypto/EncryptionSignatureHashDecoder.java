@@ -313,14 +313,6 @@ public class EncryptionSignatureHashDecoder {
 			minimumInputSize=getMinimumInputLengthAfterDecoding();
 		return minimumInputSize;
 	}
-	private static final int maxSymSigSizeBytes;
-	static {
-		int v=0;
-		for (SymmetricAuthenticatedSignatureType t : SymmetricAuthenticatedSignatureType.values()){
-			v=Math.max(t.getSignatureSizeInBits()/8, v);
-		}
-		maxSymSigSizeBytes=v;
-	}
 	public boolean hasSymmetricSignature() throws IOException {
 		checkHeadRead();
 		return (code & 1)==1;
@@ -510,7 +502,7 @@ public class EncryptionSignatureHashDecoder {
 			else if (symmetricChecker!=null)
 			{
 				originalInputStream.seek(EncryptionSignatureHashEncoder.headSize+dataLen);
-				symmetricChecker.init(originalInputStream.readBytesArray(false, symmetricChecker.getMacLengthBytes()));
+				symmetricChecker.init(originalInputStream.readBytesArray(false, SymmetricAuthenticatedSignatureType.MAX_SYMMETRIC_SIGNATURE_SIZE));
 				if (checkerIn==null)
 					checkerIn=new SignatureCheckerRandomInputStream(inputStream, symmetricChecker);
 				else
@@ -520,7 +512,7 @@ public class EncryptionSignatureHashDecoder {
 			else if (asymmetricChecker!=null)
 			{
 				originalInputStream.seek(EncryptionSignatureHashEncoder.headSize+dataLen);
-				asymmetricChecker.init(originalInputStream.readBytesArray(false, asymmetricChecker.getMacLengthBytes()));
+				asymmetricChecker.init(originalInputStream.readBytesArray(false, ASymmetricAuthenticatedSignatureType.MAX_ASYMMETRIC_SIGNATURE_SIZE));
 				if (checkerIn==null)
 					checkerIn=new SignatureCheckerRandomInputStream(inputStream, asymmetricChecker);
 				else
@@ -607,7 +599,7 @@ public class EncryptionSignatureHashDecoder {
 				byte[] asymSign=null;
 				if (symmetricChecker!=null)
 				{
-					symSign=inputStream.readBytesArray(false, symmetricChecker.getMacLengthBytes());
+					symSign=inputStream.readBytesArray(false, SymmetricAuthenticatedSignatureType.MAX_SYMMETRIC_SIGNATURE_SIZE);
 					digest.reset();
 					digest.update(hash);
 					digest.update(symSign);
@@ -615,13 +607,13 @@ public class EncryptionSignatureHashDecoder {
 				}
 				if (asymmetricChecker!=null)
 				{
-					asymSign=inputStream.readBytesArray(false, asymmetricChecker.getMacLengthBytes());
+					asymSign=inputStream.readBytesArray(false, ASymmetricAuthenticatedSignatureType.MAX_ASYMMETRIC_SIGNATURE_SIZE);
 					digest.reset();
 					digest.update(hash2);
 					digest.update(asymSign);
 					hash3=digest.digest();
 				}
-				byte[] hashToCheck=inputStream.readBytesArray(false, digest.getDigestLength());
+				byte[] hashToCheck=inputStream.readBytesArray(false, MessageDigestType.MAX_HASH_LENGTH);
 				if (!Arrays.equals(hash3, hashToCheck))
 					throw new MessageExternalizationException(Integrity.FAIL);
 
@@ -661,7 +653,7 @@ public class EncryptionSignatureHashDecoder {
 			}
 			long curPos=outputStream.currentPosition();
 			if (curPos<maximumOutputLengthAfterEncoding && curPos>originalOutputLength)
-				outputStream.setLength(Math.max(curPos, originalOutputLength));
+				outputStream.setLength(curPos);
 			outputStream.flush();
 			if (changeCipherOfEncoder)
 			{
@@ -732,7 +724,7 @@ public class EncryptionSignatureHashDecoder {
 				byte[] asymSign=null;
 				if (symmetricChecker!=null)
 				{
-					byte[] symSign=inputStream.readBytesArray(false, symmetricChecker.getMacLengthBytes());
+					byte[] symSign=inputStream.readBytesArray(false, SymmetricAuthenticatedSignatureType.MAX_SYMMETRIC_SIGNATURE_SIZE);
 					digest.reset();
 					symmetricChecker.init(symSign);
 					if (associatedData!=null)
@@ -744,13 +736,13 @@ public class EncryptionSignatureHashDecoder {
 				}
 				if (asymmetricChecker!=null)
 				{
-					asymSign=inputStream.readBytesArray(false, asymmetricChecker.getMacLengthBytes());
+					asymSign=inputStream.readBytesArray(false, ASymmetricAuthenticatedSignatureType.MAX_ASYMMETRIC_SIGNATURE_SIZE);
 					digest.reset();
 					digest.update(hash2);
 					digest.update(asymSign);
 					hash3=digest.digest();
 				}
-				byte[] hashToCheck=inputStream.readBytesArray(false, digest.getDigestLength());
+				byte[] hashToCheck=inputStream.readBytesArray(false, MessageDigestType.MAX_HASH_LENGTH);
 				if (!Arrays.equals(hash3, hashToCheck))
 					return Integrity.FAIL;
 
@@ -769,7 +761,7 @@ public class EncryptionSignatureHashDecoder {
 			{
 
 				inputStream.seek(dataPos+dataLen);
-				symmetricChecker.init(inputStream.readBytesArray(false, symmetricChecker.getMacLengthBytes()));
+				symmetricChecker.init(inputStream.readBytesArray(false, SymmetricAuthenticatedSignatureType.MAX_SYMMETRIC_SIGNATURE_SIZE));
 				limitedRandomInputStream.init(inputStream, dataPos, dataLen);
 				symmetricChecker.update(limitedRandomInputStream);
 				symmetricChecker.update(code);
@@ -786,7 +778,7 @@ public class EncryptionSignatureHashDecoder {
 			{
 
 				inputStream.seek(dataPos+dataLen);
-				asymmetricChecker.init(inputStream.readBytesArray(false, asymmetricChecker.getMacLengthBytes()));
+				asymmetricChecker.init(inputStream.readBytesArray(false, ASymmetricAuthenticatedSignatureType.MAX_ASYMMETRIC_SIGNATURE_SIZE));
 				limitedRandomInputStream.init(inputStream, dataPos, dataLen);
 				asymmetricChecker.update(limitedRandomInputStream);
 				asymmetricChecker.update(code);
@@ -858,7 +850,7 @@ public class EncryptionSignatureHashDecoder {
 				byte[] asymSign=null;
 				if (symCheckOK)
 				{
-					byte[] symSign=inputStream.readBytesArray(false, maxSymSigSizeBytes);
+					byte[] symSign=inputStream.readBytesArray(false, SymmetricAuthenticatedSignatureType.MAX_SYMMETRIC_SIGNATURE_SIZE);
 					digest.reset();
 					digest.update(hash);
 					digest.update(symSign);
@@ -866,13 +858,13 @@ public class EncryptionSignatureHashDecoder {
 				}
 				if (asymmetricChecker!=null)
 				{
-					asymSign=inputStream.readBytesArray(false, asymmetricChecker.getMacLengthBytes());
+					asymSign=inputStream.readBytesArray(false, ASymmetricAuthenticatedSignatureType.MAX_ASYMMETRIC_SIGNATURE_SIZE);
 					digest.reset();
 					digest.update(hash2);
 					digest.update(asymSign);
 					hash3=digest.digest();
 				}
-				byte[] hashToCheck=inputStream.readBytesArray(false, digest.getDigestLength());
+				byte[] hashToCheck=inputStream.readBytesArray(false, MessageDigestType.MAX_HASH_LENGTH);
 				if (!Arrays.equals(hash3, hashToCheck))
 					return Integrity.FAIL;
 
@@ -887,7 +879,7 @@ public class EncryptionSignatureHashDecoder {
 			{
 
 				inputStream.seek(dataPos+dataLen);
-				asymmetricChecker.init(inputStream.readBytesArray(false, asymmetricChecker.getMacLengthBytes()));
+				asymmetricChecker.init(inputStream.readBytesArray(false, ASymmetricAuthenticatedSignatureType.MAX_ASYMMETRIC_SIGNATURE_SIZE));
 				limitedRandomInputStream.init(inputStream, dataPos, dataLen);
 				asymmetricChecker.update(limitedRandomInputStream);
 				asymmetricChecker.update(code);
@@ -955,27 +947,21 @@ public class EncryptionSignatureHashDecoder {
 		long res=EncryptionSignatureHashEncoder.headSize;
 
 		if (symmetricChecker!=null) {
-			int v=symmetricChecker.getMacLengthBytes();
-			res += v + (v>Short.MAX_VALUE?4:2);
+			res += symmetricChecker.getMacLengthBytes() + SerializationTools.getSizeCoderSize(SymmetricAuthenticatedSignatureType.MAX_SYMMETRIC_SIGNATURE_SIZE);
 		}
 		if(asymmetricChecker!=null) {
-			int v=asymmetricChecker.getMacLengthBytes();
-			res += v + (v>Short.MAX_VALUE?4:2);
+			res += asymmetricChecker.getMacLengthBytes() + SerializationTools.getSizeCoderSize(ASymmetricAuthenticatedSignatureType.MAX_ASYMMETRIC_SIGNATURE_SIZE);
 		}
 		if (digest!=null || (symmetricChecker!=null && asymmetricChecker!=null))
 		{
-			int v;
+			res+=SerializationTools.getSizeCoderSize(MessageDigestType.MAX_HASH_LENGTH);
 			if (digest==null) {
-				v=EncryptionSignatureHashEncoder.defaultMessageType.getDigestLengthInBits() / 8;
+				res+=EncryptionSignatureHashEncoder.defaultMessageType.getDigestLengthInBits() / 8;
 			}
 			else {
-				v=digest.getMessageDigestType().getDigestLengthInBits() / 8;
+				res+=digest.getMessageDigestType().getDigestLengthInBits() / 8;
 			}
-			if (v>Short.MAX_VALUE)
-				v+=4;
-			else
-				v+=2;
-			res+=v;
+
 		}
 		return res;
 	}

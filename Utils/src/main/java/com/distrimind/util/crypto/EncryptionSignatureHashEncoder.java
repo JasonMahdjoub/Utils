@@ -629,7 +629,7 @@ public class EncryptionSignatureHashEncoder {
 					digest.update(hash);
 					digest.update(signature);
 					hash=digest.digest();
-					originalOutputStream.writeBytesArray(signature, false, symmetricSigner.getMacLengthBytes());
+					originalOutputStream.writeBytesArray(signature, false, SymmetricAuthenticatedSignatureType.MAX_SYMMETRIC_SIGNATURE_SIZE);
 				}
 
 				if (asymmetricSigner != null) {
@@ -640,9 +640,9 @@ public class EncryptionSignatureHashEncoder {
 					digest.update(hash);
 					digest.update(signature);
 					hash=digest.digest();
-					originalOutputStream.writeBytesArray(signature, false, asymmetricSigner.getMacLengthBytes());
+					originalOutputStream.writeBytesArray(signature, false, ASymmetricAuthenticatedSignatureType.MAX_ASYMMETRIC_SIGNATURE_SIZE);
 				}
-				originalOutputStream.writeBytesArray(hash, false, digest.getDigestLength());
+				originalOutputStream.writeBytesArray(hash, false, MessageDigestType.MAX_HASH_LENGTH);
 			} else if (symmetricSigner!=null)
 			{
 				if (lenBuffer<=headSizeMinusOne)
@@ -651,13 +651,13 @@ public class EncryptionSignatureHashEncoder {
 				if (lenBuffer<=headSizeMinusOne && associatedData!=null)
 					symmetricSigner.update(associatedData, offAD, lenAD);
 				byte[] signature = symmetricSigner.getSignature();
-				originalOutputStream.writeBytesArray(signature, false, symmetricSigner.getMacLengthBytes());
+				originalOutputStream.writeBytesArray(signature, false, SymmetricAuthenticatedSignatureType.MAX_SYMMETRIC_SIGNATURE_SIZE);
 			} else if (asymmetricSigner!=null)
 			{
 				asymmetricSigner.update(code);
 				asymmetricSigner.update(buffer, 0, headSizeMinusOne);
 				byte[] signature = asymmetricSigner.getSignature();
-				originalOutputStream.writeBytesArray(signature, false, asymmetricSigner.getMacLengthBytes());
+				originalOutputStream.writeBytesArray(signature, false, ASymmetricAuthenticatedSignatureType.MAX_ASYMMETRIC_SIGNATURE_SIZE);
 			}
 			long curPos=originalOutputStream.currentPosition();
 			if (inputStreamLength<0) {
@@ -760,27 +760,21 @@ public class EncryptionSignatureHashEncoder {
 		long res=headSize;
 
 		if (symmetricSigner!=null) {
-			int v=symmetricSigner.getMacLengthBytes();
-			res += v + (v>Short.MAX_VALUE?4:2);
+			res += symmetricSigner.getMacLengthBytes() + SerializationTools.getSizeCoderSize(SymmetricAuthenticatedSignatureType.MAX_SYMMETRIC_KEY_SIZE);
 		}
 		if(asymmetricSigner!=null) {
-			int v=asymmetricSigner.getMacLengthBytes();
-			res += v + (v>Short.MAX_VALUE?4:2);
+			res += asymmetricSigner.getMacLengthBytes() + SerializationTools.getSizeCoderSize(ASymmetricAuthenticatedSignatureType.MAX_ASYMMETRIC_SIGNATURE_SIZE);
 		}
 		if (digest!=null || (asymmetricSigner!=null && symmetricSigner!=null))
 		{
-			int v;
+			res+=SerializationTools.getSizeCoderSize(MessageDigestType.MAX_HASH_LENGTH);
 			if (digest==null) {
-				v=defaultMessageType.getDigestLengthInBits() / 8;
+				res+=defaultMessageType.getDigestLengthInBits() / 8;
 			}
 			else {
-				v=digest.getMessageDigestType().getDigestLengthInBits() / 8;
+				res+=digest.getMessageDigestType().getDigestLengthInBits() / 8;
 			}
-			if (v>Short.MAX_VALUE)
-				v+=4;
-			else
-				v+=2;
-			res+=v;
+
 		}
 		return res;
 	}

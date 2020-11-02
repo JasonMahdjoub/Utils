@@ -1404,7 +1404,7 @@ public class SerializationTools {
 			return ois.readUnsignedByte();
 		}
 	}
-	private static int getSizeCoderSize(int maxSize)  {
+	public static int getSizeCoderSize(int maxSize)  {
 		if (maxSize<0)
 			throw new IllegalArgumentException();
 		if (maxSize>254)
@@ -1419,10 +1419,12 @@ public class SerializationTools {
 				return 2;
 		}
 		else
-			return 0;
+			return 1;
 	}
 	private static final int MAX_UNSIGNED_SHORT_INT_VALUE=1<<24-2;
 	private static final int MAX_UNSIGNED_SHORT_VALUE=1<<16-2;
+	private static final int NULL_UNSIGNED_SHORT_INT_TAB=MAX_UNSIGNED_SHORT_INT_VALUE+1;
+	private static final int NULL_UNSIGNED_SHORT_TAB=MAX_UNSIGNED_SHORT_VALUE+1;
 
 	private static void writeSize(final SecuredObjectOutputStream oos, boolean nullObject, int size, int maxSize) throws IOException {
 		if (maxSize<0)
@@ -1443,14 +1445,14 @@ public class SerializationTools {
 				}
 				else {
 					if (nullObject)
-						oos.writeUnsignedShortInt(MAX_UNSIGNED_SHORT_INT_VALUE+1);
+						oos.writeUnsignedShortInt(NULL_UNSIGNED_SHORT_INT_TAB);
 					else
 						oos.writeUnsignedShortInt(size);
 				}
 			}
 			else{
 				if (nullObject)
-					oos.writeUnsignedShort(MAX_UNSIGNED_SHORT_VALUE+1);
+					oos.writeUnsignedShort(NULL_UNSIGNED_SHORT_TAB);
 				else
 					oos.writeUnsignedShort(size);
 			}
@@ -1476,13 +1478,13 @@ public class SerializationTools {
 				}
 				else {
 					res = ois.readUnsignedShortInt();
-					if (res==MAX_UNSIGNED_SHORT_INT_VALUE+1)
+					if (res==NULL_UNSIGNED_SHORT_INT_TAB)
 						res=-1;
 				}
 			}
 			else {
 				res = ois.readUnsignedShort();
-				if (res==MAX_UNSIGNED_SHORT_VALUE+1)
+				if (res==NULL_UNSIGNED_SHORT_TAB)
 					res=-1;
 			}
 		}
