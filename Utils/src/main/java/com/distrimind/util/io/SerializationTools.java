@@ -2047,6 +2047,14 @@ public class SerializationTools {
 		else if (clazz==Boolean.class){
 			return getObjectCodeSizeBytes()+1;
 		}
+		else if (clazz==BigInteger.class){
+			BigInteger b=(BigInteger)o;
+			return getObjectCodeSizeBytes()+getInternalSize(b.toByteArray().length, MAX_BIG_INTEGER_SIZE);
+		}
+		else if (clazz==BigDecimal.class){
+			BigDecimal b=(BigDecimal)o;
+			return getObjectCodeSizeBytes()+4+getInternalSize(b.unscaledValue().toByteArray().length, MAX_BIG_INTEGER_SIZE);
+		}
 		else
 			throw new IllegalArgumentException();
 	}
