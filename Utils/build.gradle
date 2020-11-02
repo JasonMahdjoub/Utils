@@ -58,7 +58,7 @@ repositories {
 }
 
 dependencies {
-    testImplementation 'org.testng:testng:7.3.0'
+    testImplementation 'org.testng:testng:7.1.0'
     testImplementation 'org.hamcrest:hamcrest-core:2.2'
 
     api(group:'com.distrimind.bcfips', name: 'BouncyCastle-FIPS', version: '1.0.2-DMRECOMPILE')
@@ -153,11 +153,12 @@ allprojects {
         compileJava.options.compilerArgs.addAll(['--release', javaVersion] as Collection<? extends String>)
         javadoc.options.addStringOption("html5", "-quiet")
     }
-    gradle.projectsEvaluated {
+
+    /*gradle.projectsEvaluated {
         tasks.withType(JavaCompile) {
             options.compilerArgs << "-Xlint:unchecked"
         }
-    }
+    }*/
 }
 
 
