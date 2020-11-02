@@ -1719,6 +1719,7 @@ public class SerializationTools {
 	private static short enumsEndIndex=0;
 	private static final ArrayList<Class<? extends SecureExternalizableWithoutInnerSizeControl>> classes= new ArrayList<>();
 	private static final Map<Class<? extends SecureExternalizableWithoutInnerSizeControl>, Short> identifiersPerClasses=new HashMap<>();
+	private static final Map<Class<? extends Enum<?>>, Short> identifiersPerEnums=new HashMap<>();
 	private static final ArrayList<Class<? extends Enum<?>>> enums=new ArrayList<>();
 	static {
 		setPredefinedClasses( new ArrayList<>(
@@ -1745,7 +1746,7 @@ public class SerializationTools {
 						OS.class,
 						OSVersion.class)));
 	}
-	private static final Map<Class<? extends Enum<?>>, Short> identifiersPerEnums=new HashMap<>();
+
 	public static void addPredefinedClasses(List<Class<? extends SecureExternalizableWithoutInnerSizeControl>> cls, List<Class<? extends Enum<?>>> enms)
 	{
 		synchronized (SerializationTools.class) {
