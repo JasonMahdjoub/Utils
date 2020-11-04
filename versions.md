@@ -1,6 +1,6 @@
 Utils
 =====
-5.7.0 STABLE (Build: 2057) (from 04/01/2016 to 02/11/2020)
+5.8.0 STABLE (Build: 2061) (from 04/01/2016 to 04/11/2020)
 
 # Creator(s):
 Jason MAHDJOUB
@@ -9,6 +9,27 @@ Jason MAHDJOUB
 Jason MAHDJOUB (Entered in the team at 04/01/2016)
 
 # Modifications:
+
+
+### 5.8.0 STABLE (04/11/2020)
+* Add function SecuredObjectInputStream.readDate(boolean)
+* Add function SecuredObjectInputStream.readDecentralizedID(boolean)
+* Add function SecuredObjectInputStream.readDecentralizedID(boolean, Class)
+* Add function SecuredObjectInputStream.readInetAddress(boolean)
+* Add function SecuredObjectInputStream.readInetSocketAddress(boolean)
+* Add function SecuredObjectInputStream.readKey(boolean)
+* Add function SecuredObjectInputStream.readKey(boolean, Class)
+* Add function SecuredObjectInputStream.readKeyPair(boolean)
+* Add function SecuredObjectInputStream.readKeyPair(boolean, Class)
+* Add function SecuredObjectInputStream.readEnum(boolean)
+* Add function SecuredObjectInputStream.readEnum(boolean, Class)
+* Add function SecuredObjectOutputStream.writeDate(Date, boolean)
+* Add function SecuredObjectOutputStream.writeDecentralizedID(AbstractDecentralizedID, boolean)
+* Add function SecuredObjectOutputStream.writeInetAddress(InetAddress, boolean)
+* Add function SecuredObjectOutputStream.writeInetSocketAddress(InetSocketAddress, boolean)
+* Add function SecuredObjectOutputStream.writeKey(AbstractKey, boolean)
+* Add function SecuredObjectOutputStream.writeKetPair(AbstractKeyPair, boolean)
+* Add function SecuredObjectOutputStream.writeEnum(Enum, boolean)
 
 
 ### 5.7.0 STABLE (02/11/2020)
