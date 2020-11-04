@@ -36,11 +36,16 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 
 
+import com.distrimind.util.AbstractDecentralizedID;
 import com.distrimind.util.FileTools;
+import com.distrimind.util.crypto.AbstractKey;
+import com.distrimind.util.crypto.AbstractKeyPair;
 
 import java.io.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.util.*;
 
 /**
@@ -287,6 +292,7 @@ public abstract class SecuredObjectInputStream extends InputStream implements Da
 	public BigDecimal readBigDecimal(boolean nullAccepted) throws IOException {
 		return SerializationTools.readBigDecimal(this, nullAccepted);
 	}
+
 	public Collection<?> readCollection(boolean nullAccepted, int maxSize) throws IOException, ClassNotFoundException {
 		return readCollection(nullAccepted, maxSize, true);
 	}
@@ -330,11 +336,15 @@ public abstract class SecuredObjectInputStream extends InputStream implements Da
 	public <TK> TK readObject(boolean nullAccepted, Class<TK> classType) throws IOException, ClassNotFoundException {
 		return readObject(nullAccepted, -1, classType);
 	}
-	@SuppressWarnings("unchecked")
+
 	public <TK> TK readObject(boolean nullAccepted, int maxSizeInBytes, Class<TK> classType) throws IOException, ClassNotFoundException {
 		if (classType==null)
 			throw new NullPointerException();
 		Object e=readObject(nullAccepted, maxSizeInBytes);
+		return checkType(e, classType);
+	}
+	@SuppressWarnings("unchecked")
+	private <TK> TK checkType(Object e, Class<TK> classType) throws MessageExternalizationException {
 		if (e==null)
 		{
 			return null;
@@ -343,6 +353,41 @@ public abstract class SecuredObjectInputStream extends InputStream implements Da
 			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, "found : "+e.getClass());
 
 		return (TK)e;
+	}
+
+
+	public Date readDate(boolean nullAccepted) throws IOException {
+		return SerializationTools.readDate(this, nullAccepted);
+	}
+	public AbstractDecentralizedID readDecentralizedID(boolean nullAccepted) throws IOException {
+		return SerializationTools.readDecentralizedID(this, nullAccepted);
+	}
+	public <TK extends AbstractDecentralizedID> TK readDecentralizedID(boolean nullAccepted, Class<TK> classType) throws IOException {
+		return checkType(readDecentralizedID(nullAccepted), classType);
+	}
+	public InetAddress readInetAddress(boolean nullAccepted) throws IOException {
+		return SerializationTools.readInetAddress(this, nullAccepted);
+	}
+	public InetSocketAddress readInetSocketAddress(boolean nullAccepted) throws IOException {
+		return SerializationTools.readInetSocketAddress(this, nullAccepted);
+	}
+	public AbstractKey readKey(boolean nullAccepted) throws IOException {
+		return SerializationTools.readKey(this, nullAccepted);
+	}
+	public <TK extends AbstractKey> TK readKey(boolean nullAccepted, Class<TK> classType) throws IOException {
+		return checkType(readKey(nullAccepted), classType);
+	}
+	public <TK extends AbstractKeyPair<?, ?>> TK readKeyPair(boolean nullAccepted, Class<TK> classType) throws IOException {
+		return checkType(readKeyPair(nullAccepted), classType);
+	}
+	public AbstractKeyPair<?, ?> readKeyPair(boolean nullAccepted) throws IOException {
+		return SerializationTools.readKeyPair(this, nullAccepted);
+	}
+	public <TK extends Enum<?>> TK readEnum(boolean nullAccepted, Class<TK> classType) throws IOException, ClassNotFoundException {
+		return checkType(readEnum(nullAccepted), classType);
+	}
+	public Enum<?> readEnum(boolean nullAccepted) throws IOException, ClassNotFoundException {
+		return SerializationTools.readEnum(this, nullAccepted);
 	}
 	public Class<?> readClass(boolean nullAccepted) throws IOException, ClassNotFoundException {
 		return readClass(nullAccepted, Object.class);

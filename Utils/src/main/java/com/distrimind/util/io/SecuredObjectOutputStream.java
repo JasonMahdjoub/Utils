@@ -35,12 +35,19 @@ The fact that you are presently reading this means that you have had
 knowledge of the CeCILL-C license and that you accept its terms.
  */
 
+import com.distrimind.util.AbstractDecentralizedID;
+import com.distrimind.util.crypto.AbstractKey;
+import com.distrimind.util.crypto.AbstractKeyPair;
+
 import java.io.DataOutput;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.util.Collection;
+import java.util.Date;
 import java.util.Map;
 
 /**
@@ -210,5 +217,28 @@ public abstract class SecuredObjectOutputStream extends OutputStream implements 
 			throw new NullPointerException();
 		this.objectResolver = objectResolver;
 	}
+
+	public void writeDate(Date date, boolean nullAccepted) throws IOException {
+		SerializationTools.writeDate(this, date, nullAccepted);
+	}
+	public void writeDecentralizedID(AbstractDecentralizedID did, boolean nullAccepted) throws IOException {
+		SerializationTools.writeDecentralizedID(this, did, nullAccepted);
+	}
+	public void writeEnum(Enum<?> e, boolean nullAccepted) throws IOException {
+		SerializationTools.writeEnum(this, e, nullAccepted);
+	}
+	public void writeInetAddress(InetAddress ia, boolean nullAccepted) throws IOException {
+		SerializationTools.writeInetAddress(this, ia, nullAccepted);
+	}
+	public void writeInetSocketAddress(InetSocketAddress isa, boolean nullAccepted) throws IOException {
+		SerializationTools.writeInetSocketAddress(this, isa, nullAccepted);
+	}
+	public void writeKey(AbstractKey key, boolean nullAccepted) throws IOException {
+		SerializationTools.writeKey(this, key, nullAccepted);
+	}
+	public void writeKeyPair(AbstractKeyPair<?, ?> kp, boolean nullAccepted) throws IOException {
+		SerializationTools.writeKeyPair(this, kp, nullAccepted);
+	}
+
 
 }
