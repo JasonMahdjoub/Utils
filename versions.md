@@ -1,6 +1,6 @@
 Utils
 =====
-5.8.0 STABLE (Build: 2061) (from 04/01/2016 to 04/11/2020)
+5.9.0 STABLE (Build: 2064) (from 04/01/2016 to 08/11/2020)
 
 # Creator(s):
 Jason MAHDJOUB
@@ -9,6 +9,10 @@ Jason MAHDJOUB
 Jason MAHDJOUB (Entered in the team at 04/01/2016)
 
 # Modifications:
+
+
+### 5.9.0 STABLE (08/11/2020)
+* Update BouncyCastle to 1.67
 
 
 ### 5.8.0 STABLE (04/11/2020)

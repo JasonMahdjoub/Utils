@@ -67,6 +67,10 @@ public class Utils {
 			VERSION.addCreator(new Person("mahdjoub", "jason"))
 					.addDeveloper(new PersonDeveloper("mahdjoub", "jason", "2016-01-04"))
 					.addDescription(
+							new Description((short)5, (short)9, (short)0, Version.Type.STABLE, (short)0, "2020-11-08")
+									.addItem("Update BouncyCastle to 1.67")
+					)
+					.addDescription(
 							new Description((short)5, (short)8, (short)0, Version.Type.STABLE, (short)0, "2020-11-04")
 									.addItem("Add function SecuredObjectInputStream.readDate(boolean)")
 									.addItem("Add function SecuredObjectInputStream.readDecentralizedID(boolean)")
