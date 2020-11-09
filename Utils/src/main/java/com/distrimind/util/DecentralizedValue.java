@@ -34,8 +34,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util;
 
-import com.distrimind.util.crypto.AbstractKey;
-import com.distrimind.util.crypto.AbstractKeyPair;
+import com.distrimind.util.crypto.*;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -47,6 +46,13 @@ import java.util.Base64;
  * @since Utils 4.3.0
  */
 public abstract class DecentralizedValue implements Serializable {
+
+	//public static final int MAX_SIZE_IN_BYTES_OF_NON_HYBRID_PRIVATE_KEY = MAX_SIZE_IN_BYTES_OF_NON_HYBRID_PRIVATE_KEY_FOR_ENCRYPTION;
+	public static final int MAX_SIZE_IN_BYTES_OF_NON_HYBRID_KEY_PAIR = ASymmetricEncryptionType.MAX_SIZE_IN_BYTES_OF_NON_HYBRID_PUBLIC_KEY_FOR_ENCRYPTION + ASymmetricEncryptionType.MAX_SIZE_IN_BYTES_OF_NON_HYBRID_PRIVATE_KEY_FOR_ENCRYPTION +ASymmetricAuthenticatedSignatureType.META_DATA_SIZE_IN_BYTES_FOR_NON_HYBRID_KEY_PAIR;
+	public static final int MAX_SIZE_IN_BYTES_OF_HYBRID_KEY_PAIR= ASymmetricEncryptionType.MAX_SIZE_IN_BYTES_OF_HYBRID_PUBLIC_KEY_FOR_ENCRYPTION+ASymmetricEncryptionType.MAX_SIZE_IN_BYTES_OF_HYBRID_PRIVATE_KEY_FOR_ENCRYPTION+ASymmetricAuthenticatedSignatureType.META_DATA_SIZE_IN_BYTES_FOR_HYBRID_KEY_PAIR;
+	public static final int MAX_SIZE_IN_BYTES_OF_KEY_PAIR= MAX_SIZE_IN_BYTES_OF_HYBRID_KEY_PAIR;
+
+	public static final int MAX_SIZE_IN_BYTES_OF_DECENTRALIZED_VALUE= MAX_SIZE_IN_BYTES_OF_KEY_PAIR;
 
 	public abstract byte[] encode();
 	public static DecentralizedValue decode(byte[] encodedValue)

@@ -64,10 +64,20 @@ public class ASymmetricPublicKey extends AbstractKey implements IASymmetricPubli
 	 * 
 	 */
 	private static final long serialVersionUID = 1279365581082525690L;
+	public static final int MAX_SIZE_IN_BYTES_OF_NON_PQC_NON_RSA_NON_HYBRID_PUBLIC_KEY_FOR_SIGNATURE =ASymmetricAuthenticatedSignatureType.MAX_SIZE_IN_BYTES_OF_NON_PQC_NON_RSA_NON_HYBRID_PUBLIC_KEY_FOR_SIGNATURE;
+	public static final int MAX_SIZE_IN_BYTES_OF_NON_PQC_RSA_NON_HYBRID_PUBLIC_KEY =ASymmetricAuthenticatedSignatureType.MAX_SIZE_IN_BYTES_OF_NON_PQC_RSA_NON_HYBRID_PUBLIC_KEY;
+	public static final int MAX_SIZE_IN_BYTES_OF_NON_PQC_NON_HYBRID_PUBLIC_KEY_FOR_SIGNATURE = ASymmetricAuthenticatedSignatureType.MAX_SIZE_IN_BYTES_OF_NON_PQC_NON_HYBRID_PUBLIC_KEY_FOR_SIGNATURE;
+	public static final int MAX_SIZE_IN_BYTES_OF_PQC_NON_HYBRID_PUBLIC_KEY_FOR_SIGNATURE =ASymmetricAuthenticatedSignatureType.MAX_SIZE_IN_BYTES_OF_PQC_NON_HYBRID_PUBLIC_KEY_FOR_SIGNATURE;
+	public static final int MAX_SIZE_IN_BYTES_OF_NON_HYBRID_PUBLIC_KEY_FOR_SIGNATURE = ASymmetricAuthenticatedSignatureType.MAX_SIZE_IN_BYTES_OF_NON_HYBRID_PUBLIC_KEY_FOR_SIGNATURE;
 
+	public static final int MAX_SIZE_IN_BYTES_OF_NON_PQC_RSA_NON_HYBRID_PUBLIC_KEY_FOR_ENCRYPTION = ASymmetricEncryptionType.MAX_SIZE_IN_BYTES_OF_NON_PQC_RSA_NON_HYBRID_PUBLIC_KEY_FOR_ENCRYPTION;
+	public static final int MAX_SIZE_IN_BYTES_OF_NON_PQC_NON_HYBRID_PUBLIC_KEY_FOR_ENCRYPTION = ASymmetricEncryptionType.MAX_SIZE_IN_BYTES_OF_NON_PQC_NON_HYBRID_PUBLIC_KEY_FOR_ENCRYPTION;
+	public static final int MAX_SIZE_IN_BYTES_OF_PQC_NON_HYBRID_PUBLIC_KEY_FOR_ENCRYPTION =ASymmetricEncryptionType.MAX_SIZE_IN_BYTES_OF_PQC_NON_HYBRID_PUBLIC_KEY_FOR_ENCRYPTION;
+	public static final int MAX_SIZE_IN_BYTES_OF_NON_HYBRID_PUBLIC_KEY_FOR_ENCRYPTION = ASymmetricEncryptionType.MAX_SIZE_IN_BYTES_OF_NON_HYBRID_PUBLIC_KEY_FOR_ENCRYPTION;
 
-	public static final int MAX_KEY_SIZE_BITS=ASymmetricPrivateKey.MAX_KEY_SIZE_BITS;
-	
+	public static final int MAX_SIZE_IN_BYTES_OF_NON_HYBRID_PUBLIC_KEY = MAX_SIZE_IN_BYTES_OF_NON_HYBRID_PUBLIC_KEY_FOR_ENCRYPTION;
+	private static final int MAX_SIZE_IN_BITS_OF_NON_HYBRID_PUBLIC_KEY = MAX_SIZE_IN_BYTES_OF_NON_HYBRID_PUBLIC_KEY*8;
+
 
 	// private final PublicKey publicKey;
 	private byte[] publicKey;
@@ -204,7 +214,7 @@ public class ASymmetricPublicKey extends AbstractKey implements IASymmetricPubli
 			throw new NullPointerException("publicKey");
 		if (keySize < 256)
 			throw new IllegalArgumentException("keySize");
-		if (keySize>MAX_KEY_SIZE_BITS)
+		if (keySize>MAX_SIZE_IN_BITS_OF_NON_HYBRID_PUBLIC_KEY)
 			throw new IllegalArgumentException("keySize");
 
 		this.publicKey = publicKey;
@@ -231,7 +241,7 @@ public class ASymmetricPublicKey extends AbstractKey implements IASymmetricPubli
 			throw new NullPointerException("publicKey");
 		if (keySize < 256)
 			throw new IllegalArgumentException("keySize");
-		if (keySize>MAX_KEY_SIZE_BITS)
+		if (keySize>MAX_SIZE_IN_BITS_OF_NON_HYBRID_PUBLIC_KEY)
 			throw new IllegalArgumentException("keySize");
 
 		this.publicKey = ASymmetricEncryptionType.encodeGnuPublicKey(publicKey);

@@ -52,6 +52,10 @@ import java.util.Arrays;
  */
 public class SymmetricSecretKey extends AbstractKey {
 
+	public final static int MAX_SYMMETRIC_KEY_SIZE_IN_BYTES_FOR_SIGNATURE=SymmetricAuthenticatedSignatureType.MAX_SYMMETRIC_KEY_SIZE;
+	public final static int MAX_SYMMETRIC_KEY_SIZE_IN_BYTES_FOR_ENCRYPTION=SymmetricEncryptionType.MAX_SYMMETRIC_KEY_SIZE;
+	public final static int MAX_SYMMETRIC_KEY_SIZE_IN_BYTES=SymmetricEncryptionType.MAX_SYMMETRIC_KEY_SIZE;
+
 	/**
 	 * 
 	 */

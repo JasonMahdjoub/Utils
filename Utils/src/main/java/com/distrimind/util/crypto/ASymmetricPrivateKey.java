@@ -66,9 +66,24 @@ public class ASymmetricPrivateKey extends AbstractKey implements IASymmetricPriv
 	 */
 	private static final long serialVersionUID = 1279365581082525690L;
 
+	public static final int MAX_SIZE_IN_BYTES_OF_NON_PQC_NON_RSA_NON_HYBRID_PRIVATE_KEY_FOR_SIGNATURE = ASymmetricAuthenticatedSignatureType.MAX_SIZE_IN_BYTES_OF_NON_PQC_NON_RSA_NON_HYBRID_PRIVATE_KEY_FOR_SIGNATURE;
+	public static final int MAX_SIZE_IN_BYTES_OF_NON_PQC_RSA_NON_HYBRID_PRIVATE_KEY =ASymmetricAuthenticatedSignatureType.MAX_SIZE_IN_BYTES_OF_NON_PQC_RSA_NON_HYBRID_PRIVATE_KEY;
+	public static final int MAX_SIZE_IN_BYTES_OF_NON_PQC_NON_HYBRID_PRIVATE_KEY_FOR_SIGNATURE = ASymmetricAuthenticatedSignatureType.MAX_SIZE_IN_BYTES_OF_NON_PQC_NON_HYBRID_PRIVATE_KEY_FOR_SIGNATURE;
+	public static final int MAX_SIZE_IN_BYTES_OF_PQC_NON_HYBRID_PRIVATE_KEY_FOR_SIGNATURE = ASymmetricAuthenticatedSignatureType.MAX_SIZE_IN_BYTES_OF_PQC_NON_HYBRID_PRIVATE_KEY_FOR_SIGNATURE;
+	public static final int MAX_SIZE_IN_BYTES_OF_NON_HYBRID_PRIVATE_KEY_FOR_SIGNATURE = ASymmetricAuthenticatedSignatureType.MAX_SIZE_IN_BYTES_OF_NON_HYBRID_PRIVATE_KEY_FOR_SIGNATURE;
+
+	public static final int MAX_SIZE_IN_BYTES_OF_NON_PQC_RSA_NON_HYBRID_PRIVATE_KEY_FOR_ENCRYPTION = ASymmetricEncryptionType.MAX_SIZE_IN_BYTES_OF_NON_PQC_RSA_NON_HYBRID_PRIVATE_KEY_FOR_ENCRYPTION;
+	public static final int MAX_SIZE_IN_BYTES_OF_NON_PQC_NON_HYBRID_PRIVATE_KEY_FOR_ENCRYPTION = ASymmetricEncryptionType.MAX_SIZE_IN_BYTES_OF_NON_PQC_NON_HYBRID_PRIVATE_KEY_FOR_ENCRYPTION;
+	public static final int MAX_SIZE_IN_BYTES_OF_PQC_NON_HYBRID_PRIVATE_KEY_FOR_ENCRYPTION = ASymmetricEncryptionType.MAX_SIZE_IN_BYTES_OF_PQC_NON_HYBRID_PRIVATE_KEY_FOR_ENCRYPTION;
+	public static final int MAX_SIZE_IN_BYTES_OF_NON_HYBRID_PRIVATE_KEY_FOR_ENCRYPTION = ASymmetricEncryptionType.MAX_SIZE_IN_BYTES_OF_NON_HYBRID_PRIVATE_KEY_FOR_ENCRYPTION;
+
+	public static final int MAX_SIZE_IN_BYTES_OF_NON_HYBRID_PRIVATE_KEY = MAX_SIZE_IN_BYTES_OF_NON_HYBRID_PRIVATE_KEY_FOR_ENCRYPTION;
+
+	private static final int MAX_SIZE_IN_BITS_OF_NON_HYBRID_PRIVATE_KEY=MAX_SIZE_IN_BYTES_OF_NON_HYBRID_PRIVATE_KEY*8;
+
 
 	// private final PrivateKey privateKey;
-	public static final int MAX_KEY_SIZE_BITS=1<<24-1;
+	//public static final int MAX_KEY_SIZE_BITS=1<<24-1;
 	private byte[] privateKey;
 
 	private final int keySizeBits;
@@ -199,7 +214,7 @@ public class ASymmetricPrivateKey extends AbstractKey implements IASymmetricPriv
 			throw new NullPointerException("privateKey");
 		if (keySize < 256)
 			throw new IllegalArgumentException("keySize");
-		if (keySize>MAX_KEY_SIZE_BITS)
+		if (keySize>MAX_SIZE_IN_BITS_OF_NON_HYBRID_PRIVATE_KEY)
 			throw new IllegalArgumentException("keySize");
 		this.privateKey = privateKey;
 		this.keySizeBits = keySize;
@@ -211,7 +226,7 @@ public class ASymmetricPrivateKey extends AbstractKey implements IASymmetricPriv
 			throw new NullPointerException("privateKey");
 		if (keySize < 256)
 			throw new IllegalArgumentException("keySize");
-		if (keySize>MAX_KEY_SIZE_BITS)
+		if (keySize>MAX_SIZE_IN_BITS_OF_NON_HYBRID_PRIVATE_KEY)
 			throw new IllegalArgumentException("keySize");
 		this.privateKey = ASymmetricEncryptionType.encodeGnuPrivateKey(privateKey);
 		this.keySizeBits = keySize;

@@ -41,6 +41,9 @@ knowledge of the CeCILL-C license and that you accept its terms.
  * @since Utils 4.5.0
  */
 public interface IHybridKey {
+	int MAX_SIZE_IN_BYTES_OF_KEY_FOR_SIGNATURE=IKey.MAX_SIZE_IN_BYTES_OF_KEY_FOR_SIGNATURE;
+	int MAX_SIZE_IN_BYTES_OF_KEY_FOR_ENCRYPTION=IKey.MAX_SIZE_IN_BYTES_OF_KEY_FOR_ENCRYPTION;
+	int MAX_SIZE_IN_BYTES_OF_KEY=IKey.MAX_SIZE_IN_BYTES_OF_KEY;
 
 	byte[] encode();
 	void zeroize();

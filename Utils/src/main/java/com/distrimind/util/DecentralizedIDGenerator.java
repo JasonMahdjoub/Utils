@@ -51,6 +51,8 @@ public class DecentralizedIDGenerator extends AbstractDecentralizedIDGenerator {
 	 */
 	private static final long serialVersionUID = 5093130008197172104L;
 
+
+
 	private static final AtomicInteger sequencer = new AtomicInteger(0);
 
 	static final String ToStringHead = "DecentralizedID";

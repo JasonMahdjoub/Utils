@@ -220,7 +220,7 @@ public class SerializationTools {
 			
 		}
 
-		writeBytes(oos, key.encode(), AbstractKey.MAX_KEY_SIZE_IN_BYTES, false);
+		writeBytes(oos, key.encode(), AbstractKey.MAX_SIZE_IN_BYTES_OF_KEY, false);
 	}
 
 	@SuppressWarnings("SameParameterValue")
@@ -228,7 +228,7 @@ public class SerializationTools {
 	{
 		if (!supportNull || in.readBoolean())
 		{
-			byte[] k=readBytes(in, false, null, 0, AbstractKey.MAX_KEY_SIZE_IN_BYTES);
+			byte[] k=readBytes(in, false, null, 0, AbstractKey.MAX_SIZE_IN_BYTES_OF_KEY);
 			try
 			{
 				if (k == null)
@@ -263,7 +263,7 @@ public class SerializationTools {
 		}
 
 
-		writeBytes(oos, keyPair.encode(), AbstractKey.MAX_KEY_PAIR_SIZE_IN_BYTES, false);
+		writeBytes(oos, keyPair.encode(), AbstractKeyPair.MAX_SIZE_IN_BYTES_OF_KEY_PAIR, false);
 	}
 
 	@SuppressWarnings("SameParameterValue")
@@ -271,7 +271,7 @@ public class SerializationTools {
 	{
 		if (!supportNull || in.readBoolean())
 		{
-			byte[] k=readBytes(in, false, null, 0, AbstractKey.MAX_KEY_PAIR_SIZE_IN_BYTES);
+			byte[] k=readBytes(in, false, null, 0, AbstractKeyPair.MAX_SIZE_IN_BYTES_OF_KEY_PAIR);
 			try
 			{
 				if (k==null)

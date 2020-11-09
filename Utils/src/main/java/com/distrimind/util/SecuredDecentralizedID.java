@@ -62,6 +62,8 @@ public class SecuredDecentralizedID extends AbstractDecentralizedID {
 	 */
 	private static final long serialVersionUID = 4728193961114275589L;
 
+	public static final int MAX_SECURED_DECENTRALIZED_ID_LENGTH=AbstractDecentralizedID.PRIVATE_MAX_SECURED_DECENTRALIZED_ID_SIZE_IN_BYTES;
+
 	private static final AtomicReference<AbstractMessageDigest> message_digest = new AtomicReference<>(null);
 
 	public static final MessageDigestType DEFAULT_MESSAGE_DIGEST_TYPE = MessageDigestType.BC_FIPS_SHA3_256;

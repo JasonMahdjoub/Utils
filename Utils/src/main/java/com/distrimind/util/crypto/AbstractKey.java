@@ -52,9 +52,6 @@ import java.util.Base64;
 public abstract class AbstractKey extends DecentralizedValue implements IKey{
 
 
-	public static final int MAX_KEY_PAIR_SIZE_IN_BYTES =Math.max(ASymmetricEncryptionType.MAX_KEY_PAIR_SIZE_IN_BYTES, ASymmetricAuthenticatedSignatureType.MAX_KEY_PAIR_SIZE_IN_BYTES);
-	public static final int MAX_KEY_SIZE_IN_BYTES=Math.max(Math.max(Math.max(ASymmetricEncryptionType.MAX_KEY_SIZE_IN_BYTES, ASymmetricAuthenticatedSignatureType.MAX_KEY_SIZE_IN_BYTES), SymmetricAuthenticatedSignatureType.MAX_SYMMETRIC_KEY_SIZE), SymmetricEncryptionType.MAX_SYMMETRIC_KEY_SIZE);
-
 	/**
 	 *
 	 */
