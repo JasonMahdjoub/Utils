@@ -69,6 +69,7 @@ public class Utils {
 					.addDescription(
 							new Description((short)5, (short)9, (short)2, Version.Type.STABLE, (short)0, "2020-11-08")
 									.addItem("Revisit collections serialization")
+									.addItem("Add method SerializationTools.isSerializableType(Class)")
 					)
 					.addDescription(
 							new Description((short)5, (short)9, (short)1, Version.Type.STABLE, (short)0, "2020-11-08")

@@ -1414,8 +1414,6 @@ public class SerializationTools {
 		if (o==null)
 			return true;
 		Class<?> clazz=o.getClass();
-		if (SecureExternalizableWithoutInnerSizeControl.class.isAssignableFrom(clazz))
-			return true;
 		for (Class<?> c : collectionsClasses) {
 			if (c.equals(clazz)) {
 				for (Object ol : (Collection<?>)o)
@@ -1446,7 +1444,22 @@ public class SerializationTools {
 			}
 			return true;
 		}
-		return FilePermissions.class==clazz
+		return isSerializableType(clazz);
+	}
+
+	public static boolean isSerializableType(Class<?> clazz)
+	{
+
+		if (clazz==null)
+			throw new NullPointerException();
+		if (SecureExternalizableWithoutInnerSizeControl.class.isAssignableFrom(clazz))
+			return true;
+
+
+		return Object[].class==clazz
+				|| Collection.class.isAssignableFrom(clazz)
+				|| Map.class.isAssignableFrom(clazz)
+				|| FilePermissions.class==clazz
 				|| Enum.class.isAssignableFrom(clazz)
 				|| String.class==clazz
 				|| byte[].class.isAssignableFrom(clazz)
