@@ -1,1 +1,1 @@
-5.9.1-STABLE
+5.9.2-STABLE
