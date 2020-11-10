@@ -6,7 +6,7 @@ jason.mahdjoub@distri-mind.fr
 
 This software (Object Oriented Database (OOD)) is a computer program 
 whose purpose is to manage a local database with the object paradigm 
-and the java langage 
+and the java language
 
 This software is governed by the CeCILL-C license under French law and
 abiding by the rules of distribution of free software.  You can  use, 
@@ -270,12 +270,14 @@ public class TestSerializationTools {
 			try {
 				for (Object o : objectsToTests)
 				{
-					specificWriter.write(out, o, nullSupport, 10);
-					out.writeObject(o, nullSupport, 10);
+					specificWriter.write(out, o, nullSupport, 100);
+					out.writeObject(o, nullSupport, 100);
 					specificWriter.write(out, o, nullSupport, 1000);
 					out.writeObject(o, nullSupport, 1000);
-					specificWriter.write(out, o, nullSupport, 1000000);
-					out.writeObject(o, nullSupport, 1000000);
+					specificWriter.write(out, o, nullSupport, 1<<22);
+					out.writeObject(o, nullSupport, 1<<22);
+					specificWriter.write(out, o, nullSupport, Integer.MAX_VALUE);
+					out.writeObject(o, nullSupport, Integer.MAX_VALUE);
 				}
 				if (areCollections) {
 					try {
@@ -286,7 +288,7 @@ public class TestSerializationTools {
 					{
 
 					}
-					specificWriter.write(out, objectsToTests.get(0), nullSupport, 10);
+					specificWriter.write(out, objectsToTests.get(0), nullSupport, 100);
 				}
 
 				out.flush();
@@ -299,12 +301,14 @@ public class TestSerializationTools {
 					}
 					for (Object o : objectsToTests)
 					{
-						Assert.assertEquals(specificReader.read(in, nullSupport, 10), o);
-						Assert.assertEquals(in.readObject(nullSupport, 10), o);
+						Assert.assertEquals(specificReader.read(in, nullSupport, 100), o);
+						Assert.assertEquals(in.readObject(nullSupport, 100), o);
 						Assert.assertEquals(specificReader.read(in, nullSupport, 1000), o);
 						Assert.assertEquals(in.readObject(nullSupport, 1000), o);
-						Assert.assertEquals(specificReader.read(in, nullSupport, 1000000), o);
-						Assert.assertEquals(in.readObject(nullSupport, 1000000), o);
+						Assert.assertEquals(specificReader.read(in, nullSupport, 1<<22), o);
+						Assert.assertEquals(in.readObject(nullSupport, 1<<22), o);
+						Assert.assertEquals(specificReader.read(in, nullSupport, Integer.MAX_VALUE), o);
+						Assert.assertEquals(in.readObject(nullSupport, Integer.MAX_VALUE), o);
 					}
 					if (areCollections) {
 						try {

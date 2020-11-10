@@ -109,7 +109,7 @@ public class SerializationTools {
 		}
 		else
 		{
-			char []chars=new char[sizeMax];
+			char []chars=new char[size];
 			for (int i=0;i<size;i++)
 				chars[i]=ois.readChar();
 			return new String(chars, 0, size);
@@ -289,35 +289,47 @@ public class SerializationTools {
 		}
 	}
 	@SuppressWarnings("SameParameterValue")
-	static void writeObjects(final SecuredObjectOutputStream oos, Object[] tab, int sizeMax, boolean supportNull) throws IOException
+	static void writeObjects(final SecuredObjectOutputStream oos, Object[] tab, int globalMaxSizeInBytes, boolean supportNull) throws IOException
 	{
-
+		int maxElements=getMaxElements(globalMaxSizeInBytes);
 		if (tab==null)
 		{
 			if (!supportNull)
 				throw new IOException();
-			writeSize(oos, true, 0, sizeMax);
+			writeSize(oos, true, 0, maxElements);
 			return;
 
 		}
-		writeSize(oos, false, tab.length, sizeMax);
-		sizeMax-=tab.length;
+		writeSize(oos, false, tab.length, maxElements);
+		globalMaxSizeInBytes-=getSizeCoderSize(maxElements);
 		for (Object o : tab)
 		{
-			writeObject(oos, o, sizeMax, true);
+			long s=oos.currentPosition();
+			writeObject(oos, o, globalMaxSizeInBytes, true);
+			s=oos.currentPosition()-s;
+			if (s>Integer.MAX_VALUE)
+				throw new IOException();
+			globalMaxSizeInBytes-=s;
+			if (globalMaxSizeInBytes<0)
+				throw new IOException("Max size limit reached !");
 		}
 	}
-	static void writeCollection(final SecuredObjectOutputStream oos, Collection<?> collection, int sizeMax, boolean supportNull, boolean supportNullCollectionElements) throws IOException
+	private static int getMaxElements(int globalMaxSizeInBytes)
 	{
-
+		return (globalMaxSizeInBytes-2)/2;
+	}
+	static void writeCollection(final SecuredObjectOutputStream oos, Collection<?> collection, int globalMaxSizeInBytes, boolean supportNull, boolean supportNullCollectionElements) throws IOException
+	{
+		int maxElements=getMaxElements(globalMaxSizeInBytes);
 		if (collection==null)
 		{
 			if (!supportNull)
 				throw new IOException();
-			writeSize(oos, true, 0, sizeMax);
+			writeSize(oos, true, 0, maxElements);
 			return;
 
 		}
+
 		Class<?> lClass=collection.getClass();
 		try {
 			if (!Modifier.isPublic(lClass.getModifiers())) {
@@ -349,12 +361,22 @@ public class SerializationTools {
 				break;
 		}
 		if (i<collectionsClasses.length) {
-			writeSize(oos, false, collection.size(), sizeMax);
+			writeSize(oos, false, collection.size(), maxElements);
 			oos.writeUnsignedByte(i);
-			sizeMax-=collection.size();
+			globalMaxSizeInBytes-=getSizeCoderSize(maxElements)+1;
+
+			if (globalMaxSizeInBytes<0)
+				throw new IOException("global max size reached !");
 			for (Object o : collection)
 			{
-				writeObject(oos, o, sizeMax, supportNullCollectionElements);
+				long s=oos.currentPosition();
+				writeObject(oos, o, globalMaxSizeInBytes, supportNullCollectionElements);
+				s=oos.currentPosition()-s;
+				if (s>Integer.MAX_VALUE)
+					throw new IOException();
+				globalMaxSizeInBytes-=s;
+				if (globalMaxSizeInBytes<0)
+					throw new IOException("global max size reached !");
 			}
 		}
 		else {
@@ -365,9 +387,11 @@ public class SerializationTools {
 
 	}
 	@SuppressWarnings({"rawtypes", "unchecked"})
-	static Collection readCollection(final SecuredObjectInputStream ois, int sizeMax, boolean supportNull, boolean supportNullCollectionElements) throws IOException, ClassNotFoundException
+	static Collection readCollection(final SecuredObjectInputStream ois, int globalMaxSizeInBytes, boolean supportNull, boolean supportNullCollectionElements) throws IOException, ClassNotFoundException
 	{
-		int size=readSize(ois, sizeMax);
+		int maxElements=getMaxElements(globalMaxSizeInBytes);
+
+		int size=readSize(ois, maxElements);
 		if (size==-1)
 		{
 			if (!supportNull)
@@ -376,6 +400,9 @@ public class SerializationTools {
 		}
 
 		int cIndex=ois.readUnsignedByte();
+		globalMaxSizeInBytes-=getSizeCoderSize(maxElements)+1;
+		if (globalMaxSizeInBytes<0)
+			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, "global max size reached !");
 
 		if (cIndex<0 || cIndex>collectionsClasses.length)
 			throw new IOException("Invalid class index : "+cIndex);
@@ -383,10 +410,16 @@ public class SerializationTools {
 		try {
 			Collection collection=cClass.getDeclaredConstructor().newInstance();
 
-			sizeMax-=size;
 			for (int i=0;i<size;i++)
 			{
-				collection.add(readObject(ois, sizeMax, supportNullCollectionElements));
+				long s=ois.currentPosition();
+				collection.add(readObject(ois, globalMaxSizeInBytes, supportNullCollectionElements));
+				s=ois.currentPosition()-s;
+				if (s>Integer.MAX_VALUE)
+					throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
+				globalMaxSizeInBytes-=s;
+				if (globalMaxSizeInBytes<0)
+					throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, "global max size reached !");
 			}
 
 			return collection;
@@ -394,15 +427,16 @@ public class SerializationTools {
 			throw new IOException(e);
 		}
 	}
-	static void writeMap(final SecuredObjectOutputStream oos, Map<?, ?> map, int sizeMax, boolean supportNull, boolean supportNullMapKey, boolean supportNullMapValue) throws IOException
+	static void writeMap(final SecuredObjectOutputStream oos, Map<?, ?> map, int globalMaxSizeInBytes, boolean supportNull, boolean supportNullMapKey, boolean supportNullMapValue) throws IOException
 	{
+		int maxElements=getMaxElements(globalMaxSizeInBytes);
 
 
 		if (map==null)
 		{
 			if (!supportNull)
 				throw new IOException();
-			writeSize(oos, true, 0, sizeMax);
+			writeSize(oos, true, 0, maxElements);
 			return;
 
 		}
@@ -425,13 +459,28 @@ public class SerializationTools {
 				break;
 		}
 		if (i<mapClasses.length) {
-			writeSize(oos, false, map.size(), sizeMax);
+			writeSize(oos, false, map.size(), maxElements);
 			oos.writeUnsignedByte(i);
-			sizeMax-=map.size();
+			globalMaxSizeInBytes-=getSizeCoderSize(maxElements)+1;
 			for (Map.Entry<?, ?> e : map.entrySet())
 			{
-				writeObject(oos, e.getKey(), sizeMax, supportNullMapKey);
-				writeObject(oos, e.getValue(), sizeMax, supportNullMapValue);
+				long s=oos.currentPosition();
+				writeObject(oos, e.getKey(), globalMaxSizeInBytes, supportNullMapKey);
+				s=oos.currentPosition()-s;
+				if (s>Integer.MAX_VALUE)
+					throw new IOException();
+				globalMaxSizeInBytes-=s;
+				if (globalMaxSizeInBytes<0)
+					throw new IOException("global max size reached !");
+				s=oos.currentPosition();
+				writeObject(oos, e.getValue(), globalMaxSizeInBytes, supportNullMapValue);
+				s=oos.currentPosition()-s;
+				if (s>Integer.MAX_VALUE)
+					throw new IOException();
+				globalMaxSizeInBytes-=s;
+				if (globalMaxSizeInBytes<0)
+					throw new IOException("global max size reached !");
+
 			}
 		}
 		else {
@@ -441,9 +490,10 @@ public class SerializationTools {
 
 	}
 	@SuppressWarnings({"rawtypes", "unchecked"})
-	static Map readMap(final SecuredObjectInputStream ois, int sizeMax, boolean supportNull, boolean supportNullMapKey, boolean supportNullMapValue) throws IOException, ClassNotFoundException
+	static Map readMap(final SecuredObjectInputStream ois, int globalMaxSizeInBytes, boolean supportNull, boolean supportNullMapKey, boolean supportNullMapValue) throws IOException, ClassNotFoundException
 	{
-		int size=readSize(ois, sizeMax);
+		int maxElements=getMaxElements(globalMaxSizeInBytes);
+		int size=readSize(ois, maxElements);
 		if (size==-1)
 		{
 			if (!supportNull)
@@ -452,6 +502,9 @@ public class SerializationTools {
 		}
 
 		int cIndex=ois.readUnsignedByte();
+		globalMaxSizeInBytes-=getSizeCoderSize(maxElements)+1;
+		if (globalMaxSizeInBytes<0)
+			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, "global max size reached !");
 
 		if (cIndex<0 || cIndex>mapClasses.length)
 			throw new IOException("Invalid class index : "+cIndex);
@@ -459,11 +512,24 @@ public class SerializationTools {
 		try {
 			Map map=cClass.getDeclaredConstructor().newInstance();
 
-			sizeMax-=size;
 			for (int i=0;i<size;i++)
 			{
-				Object k=readObject(ois, sizeMax, supportNullMapKey);
-				Object v=readObject(ois, sizeMax, supportNullMapValue);
+				long s=ois.currentPosition();
+				Object k=readObject(ois, globalMaxSizeInBytes, supportNullMapKey);
+				s=ois.currentPosition()-s;
+				if (s>Integer.MAX_VALUE)
+					throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
+				globalMaxSizeInBytes-=s;
+				if (globalMaxSizeInBytes<0)
+					throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, "global max size reached !");
+				s=ois.currentPosition();
+				Object v=readObject(ois, globalMaxSizeInBytes, supportNullMapValue);
+				s=ois.currentPosition()-s;
+				if (s>Integer.MAX_VALUE)
+					throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
+				globalMaxSizeInBytes-=s;
+				if (globalMaxSizeInBytes<0)
+					throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, "global max size reached !");
 				map.put(k,v);
 			}
 
@@ -581,9 +647,11 @@ public class SerializationTools {
 			WeakHashMap.class};
 
 	@SuppressWarnings("SameParameterValue")
-	static Object[] readObjects(final SecuredObjectInputStream ois, int sizeMax, boolean supportNull) throws IOException, ClassNotFoundException
+	static Object[] readObjects(final SecuredObjectInputStream ois, int globalMaxSizeInBytes, boolean supportNull) throws IOException, ClassNotFoundException
 	{
-		int size=readSize(ois, sizeMax);
+		int maxElements=getMaxElements(globalMaxSizeInBytes);
+		int size=readSize(ois, maxElements);
+
 		if (size==-1)
 		{
 			if (!supportNull)
@@ -592,10 +660,19 @@ public class SerializationTools {
 		}
 
 		Object []tab=new Object[size];
-		sizeMax-=tab.length;
+		globalMaxSizeInBytes-=getSizeCoderSize(maxElements);
+		if (globalMaxSizeInBytes<0)
+			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, "global size limit reached !");
 		for (int i=0;i<size;i++)
 		{
-			tab[i]=readObject(ois, sizeMax, true);
+			long s=ois.currentPosition();
+			tab[i]=readObject(ois, globalMaxSizeInBytes, true);
+			s=ois.currentPosition()-s;
+			if (s>Integer.MAX_VALUE)
+				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, "global size limit reached !");
+			globalMaxSizeInBytes-=s;
+			if (globalMaxSizeInBytes<0)
+				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, "global size limit reached !");
 		}
 
 		return tab;

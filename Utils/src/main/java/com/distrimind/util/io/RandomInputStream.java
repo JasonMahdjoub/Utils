@@ -78,16 +78,7 @@ public abstract class RandomInputStream extends SecuredObjectInputStream impleme
 	 */
 	public abstract void seek(long _pos) throws IOException;
 
-	// public void skipBytes(int _nb) throws InputStreamException;
-	/**
-	 * Returns the current position in this stream.
-	 *
-	 * @return the offset from the beginning of the stream, in bytes, at which the
-	 *         next read or write occurs.
-	 * @exception IOException
-	 *                if an I/O error occurs.
-	 */
-	public abstract long currentPosition() throws IOException;
+
 
 	/**
 	 * {@inheritDoc}

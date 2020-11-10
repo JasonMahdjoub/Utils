@@ -60,6 +60,17 @@ public abstract class SecuredObjectInputStream extends InputStream implements Da
 
 	private SerializationTools.ObjectResolver objectResolver=new SerializationTools.ObjectResolver();
 
+	// public void skipBytes(int _nb) throws InputStreamException;
+	/**
+	 * Returns the current position in this stream.
+	 *
+	 * @return the offset from the beginning of the stream, in bytes, at which the
+	 *         next read or write occurs.
+	 * @exception IOException
+	 *                if an I/O error occurs.
+	 */
+	public abstract long currentPosition() throws IOException;
+
 	@Override
 	public final boolean readBoolean() throws IOException {
 		int ch = read();
@@ -293,22 +304,22 @@ public abstract class SecuredObjectInputStream extends InputStream implements Da
 		return SerializationTools.readBigDecimal(this, nullAccepted);
 	}
 
-	public Collection<?> readCollection(boolean nullAccepted, int maxSize) throws IOException, ClassNotFoundException {
-		return readCollection(nullAccepted, maxSize, true);
+	public Collection<?> readCollection(boolean nullAccepted, int globalMaxSizeInBytes) throws IOException, ClassNotFoundException {
+		return readCollection(nullAccepted, globalMaxSizeInBytes, true);
 	}
-	public Collection<?> readCollection(boolean nullAccepted, int maxSize, boolean supportNullCollectionElements) throws IOException, ClassNotFoundException {
-		return SerializationTools.readCollection(this, maxSize, nullAccepted, supportNullCollectionElements);
+	public Collection<?> readCollection(boolean nullAccepted, int globalMaxSizeInBytes, boolean supportNullCollectionElements) throws IOException, ClassNotFoundException {
+		return SerializationTools.readCollection(this, globalMaxSizeInBytes, nullAccepted, supportNullCollectionElements);
 	}
-	public Map<?, ?> readMap(boolean nullAccepted, int maxSize) throws IOException, ClassNotFoundException {
-		return readMap(nullAccepted, maxSize, true, true);
+	public Map<?, ?> readMap(boolean nullAccepted, int globalMaxSizeInBytes) throws IOException, ClassNotFoundException {
+		return readMap(nullAccepted, globalMaxSizeInBytes, true, true);
 	}
-	public Map<?, ?> readMap(boolean nullAccepted, int maxSize, boolean supportNullMapKey, boolean supportNullMapValue) throws IOException, ClassNotFoundException {
-		return SerializationTools.readMap(this, maxSize, nullAccepted, supportNullMapKey, supportNullMapValue);
+	public Map<?, ?> readMap(boolean nullAccepted, int globalMaxSizeInBytes, boolean supportNullMapKey, boolean supportNullMapValue) throws IOException, ClassNotFoundException {
+		return SerializationTools.readMap(this, globalMaxSizeInBytes, nullAccepted, supportNullMapKey, supportNullMapValue);
 	}
 	@SuppressWarnings("unchecked")
-	public <T> Collection<T> readCollection(boolean nullAccepted, boolean supportNullCollectionElements, int maxSize, Class<T> elementsClass) throws IOException, ClassNotFoundException {
+	public <T> Collection<T> readCollection(boolean nullAccepted, boolean supportNullCollectionElements, int globalMaxSizeInBytes, Class<T> elementsClass) throws IOException, ClassNotFoundException {
 		try {
-			return (Collection<T>) readCollection(nullAccepted, maxSize, supportNullCollectionElements);
+			return (Collection<T>) readCollection(nullAccepted, globalMaxSizeInBytes, supportNullCollectionElements);
 		}
 		catch (ClassCastException e)
 		{
@@ -316,9 +327,9 @@ public abstract class SecuredObjectInputStream extends InputStream implements Da
 		}
 	}
 	@SuppressWarnings("unchecked")
-	public <K, V> Map<K, V> readMap(boolean nullAccepted, int maxSize, boolean supportNullMapKey, boolean supportNullMapValue, Class<K> keysClass, Class<V> valuesClass) throws IOException, ClassNotFoundException {
+	public <K, V> Map<K, V> readMap(boolean nullAccepted, int globalMaxSizeInBytes, boolean supportNullMapKey, boolean supportNullMapValue, Class<K> keysClass, Class<V> valuesClass) throws IOException, ClassNotFoundException {
 		try {
-			return (Map<K, V>) readMap(nullAccepted, maxSize, supportNullMapKey, supportNullMapValue);
+			return (Map<K, V>) readMap(nullAccepted, globalMaxSizeInBytes, supportNullMapKey, supportNullMapValue);
 		}
 		catch (ClassCastException e)
 		{

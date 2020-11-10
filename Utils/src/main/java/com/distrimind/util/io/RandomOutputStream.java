@@ -106,15 +106,7 @@ public abstract class RandomOutputStream extends SecuredObjectOutputStream imple
 	 */
 	public abstract void seek(long _pos) throws IOException;
 
-	/**
-	 * Returns the current position in this stream.
-	 *
-	 * @return the offset from the beginning of the stream, in bytes, at which the
-	 *         next read or write occurs.
-	 * @exception IOException
-	 *                if an I/O error occurs.
-	 */
-	public abstract long currentPosition() throws IOException;
+
 
 	/**
 	 * Change the length of the stream source if the current length is lower than
