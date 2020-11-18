@@ -203,7 +203,7 @@ public class TestSerializationTools {
 					false,
 					(SpecificWriter) (out, o, nullSupport1, maxSize) -> out.writeObject(o, nullSupport1),
 					(SpecificReader) SecuredObjectInputStream::readObject,
-					(SpecificSizeComputer) SerializationTools::getInternalSize
+					null
 			});
 
 			lp.add(new Object[]{
@@ -312,11 +312,13 @@ public class TestSerializationTools {
 	private void write(RandomOutputStream out, SpecificSizeComputer specificSizeComputer, boolean nullSupport, Object o, SpecificWriter specificWriter, int sizeMax) throws IOException {
 		Assert.assertTrue(SerializationTools.isSerializable(o));
 		long p=out.currentPosition();
-		long cs=specificSizeComputer.getInternalSize(o, sizeMax);
+		long cs=specificSizeComputer==null?0:specificSizeComputer.getInternalSize(o, sizeMax);
 		specificWriter.write(out, o, nullSupport, sizeMax);
 		long l=out.currentPosition()-p;
-		Assert.assertTrue(l<=cs, "l="+l+", cs="+cs+" o.class="+o.getClass());
-		Assert.assertTrue(l>=cs-1, "l="+l+", cs="+cs+" o.class="+o.getClass());
+		if (specificSizeComputer!=null) {
+			Assert.assertTrue(l <= cs, "l=" + l + ", cs=" + cs + " o.class=" + o.getClass());
+			Assert.assertTrue(l >= cs - 1, "l=" + l + ", cs=" + cs + " o.class=" + o.getClass());
+		}
 		p=out.currentPosition();
 		cs=SerializationTools.getInternalSize(o, sizeMax);
 		out.writeObject(o, nullSupport, sizeMax);

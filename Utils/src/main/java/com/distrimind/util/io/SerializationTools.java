@@ -2215,11 +2215,11 @@ public class SerializationTools {
 			} else if (o instanceof byte[][]) {
 				res += getInternalSize((byte[][]) o, sizeMax);
 			} else if (o instanceof SecureExternalizable) {
-				res += getInternalSize((SecureExternalizable) o)-1;
+				res += getInternalSize((SecureExternalizable) o);
 			} else if (o instanceof SecureExternalizable[]) {
-				res += getInternalSize((SecureExternalizable[]) o, sizeMax)-1;
+				res += getInternalSize((SecureExternalizable[]) o, sizeMax);
 			} else if (o instanceof Object[]) {
-				res += getInternalSize((Object[]) o, sizeMax)-1;
+				res += getInternalSize((Object[]) o, sizeMax);
 			} else if (InetAddress.class.isAssignableFrom(clazz)) {
 				res += getInternalSize((InetAddress) o);
 			} else if (clazz == InetSocketAddress.class) {
@@ -2231,7 +2231,7 @@ public class SerializationTools {
 			} else if (o instanceof AbstractKeyPair) {
 				res += getInternalSize((AbstractKeyPair<?, ?>) o);
 			} else if (o instanceof Enum<?>) {
-				res += getInternalSize((Enum<?>) o)-1;
+				res += getInternalSize((Enum<?>) o);
 			} else if (clazz == Class.class) {
 				res += getInternalSize((Class<?>) o);
 			} else if (clazz == Date.class) {
