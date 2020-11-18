@@ -34,19 +34,20 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
-import java.io.IOException;
-import java.security.*;
-import java.util.Base64;
-
-import com.distrimind.util.Bits;
-import com.distrimind.util.io.Integrity;
-import com.distrimind.util.io.MessageExternalizationException;
 import com.distrimind.bcfips.crypto.InvalidWrappingException;
 import com.distrimind.bcfips.crypto.PlainInputProcessingException;
+import com.distrimind.util.io.Integrity;
+import com.distrimind.util.io.MessageExternalizationException;
 
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
+import java.io.IOException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.SecureRandom;
+import java.util.Arrays;
 
 
 /**
@@ -92,16 +93,16 @@ public enum SymmetricKeyWrapperType {
 		return algorithmName;
 	}
 
-	static SymmetricSecretKey hashPasswordForSecretKeyEncryption(PasswordHashType passwordHashType, String password) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
+	static SymmetricSecretKey hashPasswordForSecretKeyEncryption(PasswordHashType passwordHashType, Password password) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
 		if (password==null)
 			throw new NullPointerException();
 		if (passwordHashType==null)
 			throw new NullPointerException();
 		PasswordHash ph = new PasswordHash(passwordHashType, new SecureRandom(), (byte)16, (byte)0);
-		return SymmetricEncryptionType.AES_CBC_PKCS5Padding.generateSecretKeyFromByteArray(ph.hash(password, null), (short)256);
+		return SymmetricEncryptionType.AES_CBC_PKCS5Padding.generateSecretKeyFromHashedPassword(ph.hash(password, null), (short)256);
 	}
 
-	public byte[] wrapKey(PasswordHashType passwordHashType, String password, SymmetricSecretKey secretKeyToWrap, AbstractSecureRandom random) throws IOException {
+	public WrappedSymmetricKey wrapKey(PasswordHashType passwordHashType, Password password, SymmetricSecretKey secretKeyToWrap, AbstractSecureRandom random) throws IOException {
 
 		try {
 			SymmetricSecretKey secretKey = hashPasswordForSecretKeyEncryption(passwordHashType, password);
@@ -111,14 +112,14 @@ public enum SymmetricKeyWrapperType {
 		}
 
 	}
-	public String wrapKeyString(PasswordHashType passwordHashType, String password, SymmetricSecretKey secretKeyToWrap, AbstractSecureRandom random) throws IOException {
-		return Base64.getUrlEncoder().encodeToString(Bits.getByteArrayWithCheckSum(wrapKey(passwordHashType, password, secretKeyToWrap, random)));
+	public WrappedSymmetricKeyString wrapKeyString(PasswordHashType passwordHashType, Password password, SymmetricSecretKey secretKeyToWrap, AbstractSecureRandom random) throws IOException {
+		return new WrappedSymmetricKeyString(wrapKey(passwordHashType, password, secretKeyToWrap, random));
 	}
 
-	public SymmetricSecretKey unwrapKey(PasswordHashType passwordHashType, String password, String encryptedSecretKey) throws IOException {
-		return unwrapKey(passwordHashType, password, Bits.checkByteArrayAndReturnsItWithoutCheckSum(Base64.getUrlDecoder().decode(encryptedSecretKey)));
+	public SymmetricSecretKey unwrapKey(PasswordHashType passwordHashType, Password password, WrappedSymmetricKeyString encryptedSecretKey) throws IOException {
+		return unwrapKey(passwordHashType, password, new WrappedSymmetricKey(encryptedSecretKey));
 	}
-	public SymmetricSecretKey unwrapKey(PasswordHashType passwordHashType, String password, byte[] encryptedSecretKey) throws IOException {
+	public SymmetricSecretKey unwrapKey(PasswordHashType passwordHashType, Password password, WrappedSymmetricKey encryptedSecretKey) throws IOException {
 		if (encryptedSecretKey==null)
 			throw new NullPointerException();
 
@@ -131,11 +132,11 @@ public enum SymmetricKeyWrapperType {
 
 	}
 
-	public String wrapKeyString(SymmetricSecretKey key, SymmetricSecretKey keyToWrap, AbstractSecureRandom random) throws IOException
+	public WrappedSymmetricKeyString wrapKeyString(SymmetricSecretKey key, SymmetricSecretKey keyToWrap, AbstractSecureRandom random) throws IOException
 	{
-		return Base64.getUrlEncoder().encodeToString(Bits.getByteArrayWithCheckSum(wrapKey(key, keyToWrap, random)));
+		return new WrappedSymmetricKeyString(wrapKey(key, keyToWrap, random));
 	}
-	public byte[] wrapKey(SymmetricSecretKey key, SymmetricSecretKey keyToWrap, AbstractSecureRandom random) throws IOException
+	public WrappedSymmetricKey wrapKey(SymmetricSecretKey key, SymmetricSecretKey keyToWrap, AbstractSecureRandom random) throws IOException
 	{
 		try {
 			CodeProvider.ensureProviderLoaded(provider);
@@ -150,14 +151,20 @@ public enum SymmetricKeyWrapperType {
 
 				Object cipher = GnuFunctions.cipherGetInstance(algorithmName);
 				GnuFunctions.cipherInit(cipher, Cipher.WRAP_MODE, key);
-				return ASymmetricKeyWrapperType.wrapKeyWithMetaData(GnuFunctions.cipherWrap(cipher, keyToWrap.toGnuKey()), keyToWrap);
+				byte[] wrappedKey=GnuFunctions.cipherWrap(cipher, keyToWrap.toGnuKey());
+				byte[] res=ASymmetricKeyWrapperType.wrapKeyWithMetaData(wrappedKey, keyToWrap);
+				Arrays.fill(wrappedKey, (byte)0);
+				return new WrappedSymmetricKey(res);
 			} else if (provider.equals(CodeProvider.BC) || provider.equals(CodeProvider.BCFIPS)) {
 
 				BCCipher cipher = new BCCipher(this);
 
 				cipher.init(javax.crypto.Cipher.WRAP_MODE, key, random);
 				try {
-					return ASymmetricKeyWrapperType.wrapKeyWithMetaData(cipher.wrap(keyToWrap), keyToWrap);
+					byte[] wrappedKey=cipher.wrap(keyToWrap);
+					byte[] res=ASymmetricKeyWrapperType.wrapKeyWithMetaData(wrappedKey, keyToWrap);
+					Arrays.fill(wrappedKey, (byte)0);
+					return new WrappedSymmetricKey(res);
 				} catch (PlainInputProcessingException e) {
 					throw new IllegalStateException(e);
 				}
@@ -166,7 +173,10 @@ public enum SymmetricKeyWrapperType {
 				cipher = javax.crypto.Cipher.getInstance(algorithmName, provider.checkProviderWithCurrentOS().name());
 
 				cipher.init(javax.crypto.Cipher.WRAP_MODE, key.toJavaNativeKey());
-				return ASymmetricKeyWrapperType.wrapKeyWithMetaData(cipher.wrap(keyToWrap.toJavaNativeKey()), keyToWrap);
+				byte[] wrappedKey=cipher.wrap(keyToWrap.toJavaNativeKey());
+				byte[] res=ASymmetricKeyWrapperType.wrapKeyWithMetaData(wrappedKey, keyToWrap);
+				Arrays.fill(wrappedKey, (byte)0);
+				return new WrappedSymmetricKey(res);
 
 			}
 		} catch (NoSuchAlgorithmException | NoSuchProviderException | InvalidKeyException | NoSuchPaddingException | IllegalBlockSizeException e) {
@@ -176,15 +186,19 @@ public enum SymmetricKeyWrapperType {
 	}
 
 
-	public SymmetricSecretKey unwrapKey(SymmetricSecretKey key, String keyToUnwrap) throws IOException {
-		return unwrapKey(key, Bits.checkByteArrayAndReturnsItWithoutCheckSum(Base64.getUrlDecoder().decode(keyToUnwrap)) );
+	public SymmetricSecretKey unwrapKey(SymmetricSecretKey key, WrappedSymmetricKeyString keyToUnwrap) throws IOException {
+		return unwrapKey(key, new WrappedSymmetricKey(keyToUnwrap));
 	}
-	public SymmetricSecretKey unwrapKey(SymmetricSecretKey key, byte[] keyToUnwrap) throws IOException {
+	public SymmetricSecretKey unwrapKey(SymmetricSecretKey key, WrappedSymmetricKey keyToUnwrap) throws IOException {
 		try {
+			byte[] ktu=ASymmetricKeyWrapperType.getWrappedKeyFromMetaData(keyToUnwrap);
+			SymmetricSecretKey res;
 			if (ASymmetricKeyWrapperType.isSignatureFromMetaData(keyToUnwrap))
-				return unwrapKey(key, ASymmetricKeyWrapperType.getWrappedKeyFromMetaData(keyToUnwrap), null, ASymmetricKeyWrapperType.getSignatureTypeFromMetaData(keyToUnwrap), ASymmetricKeyWrapperType.getKeySizeFromMetaData(keyToUnwrap));
+				res=unwrapKey(key, ktu, null, ASymmetricKeyWrapperType.getSignatureTypeFromMetaData(keyToUnwrap), ASymmetricKeyWrapperType.getKeySizeFromMetaData(keyToUnwrap));
 			else
-				return unwrapKey(key, ASymmetricKeyWrapperType.getWrappedKeyFromMetaData(keyToUnwrap), ASymmetricKeyWrapperType.getEncryptionTypeFromMetaData(keyToUnwrap), null, ASymmetricKeyWrapperType.getKeySizeFromMetaData(keyToUnwrap));
+				res=unwrapKey(key, ktu, ASymmetricKeyWrapperType.getEncryptionTypeFromMetaData(keyToUnwrap), null, ASymmetricKeyWrapperType.getKeySizeFromMetaData(keyToUnwrap));
+			Arrays.fill(ktu, (byte)0);
+			return res;
 		} catch (InvalidKeyException e) {
 			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, e);
 		}

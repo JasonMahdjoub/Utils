@@ -242,20 +242,22 @@ public class TestsForSymmetricEncryption {
 
 	@Test(dataProvider = "getSymmetricSecretKeysToTestForSecretKeyWrappingWithPassword")
 	public void testSymmetricSecretKeyWrappingWithPassword(SymmetricKeyWrapperType keyWrapperType, SymmetricSecretKey secretKey) throws NoSuchProviderException, NoSuchAlgorithmException, IOException {
-		String password="MyPassword";
+		Password password=new Password("MyPassword");
 		PasswordHashType passwordHashType=PasswordHashType.BC_SCRYPT_FOR_DATA_ENCRYPTION;
-		byte[] encryptedSecretKey=keyWrapperType.wrapKey(passwordHashType, password, secretKey, SecureRandomType.DEFAULT.getSingleton(null));
-		System.out.println("Bytes tab length : "+encryptedSecretKey.length);
-		System.out.println(Base64.getUrlEncoder().encodeToString(encryptedSecretKey));
+		WrappedSymmetricKey encryptedSecretKey=keyWrapperType.wrapKey(passwordHashType, password, secretKey, SecureRandomType.DEFAULT.getSingleton(null));
+		System.out.println("Bytes tab length : "+encryptedSecretKey.getBytes().length);
+		System.out.println(Base64.getUrlEncoder().encodeToString(encryptedSecretKey.getBytes()));
 		SymmetricSecretKey decodedSecretKey=keyWrapperType.unwrapKey(passwordHashType, password, encryptedSecretKey);
 		Assert.assertEquals(decodedSecretKey, secretKey);
 
 
-		String encryptedSecretKeyString=keyWrapperType.wrapKeyString(passwordHashType, password, secretKey, SecureRandomType.DEFAULT.getSingleton(null));
-		System.out.println("String length : "+encryptedSecretKeyString.length());
+
+		WrappedSymmetricKeyString encryptedSecretKeyString=keyWrapperType.wrapKeyString(passwordHashType, password, secretKey, SecureRandomType.DEFAULT.getSingleton(null));
+		System.out.println("String length : "+encryptedSecretKeyString.getChars().length);
 		System.out.println(encryptedSecretKeyString);
 		decodedSecretKey=keyWrapperType.unwrapKey(passwordHashType, password, encryptedSecretKeyString);
 		Assert.assertEquals(decodedSecretKey, secretKey);
+		password.zeroize();
 
 	}
 
@@ -309,7 +311,7 @@ public class TestsForSymmetricEncryption {
 		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getSingleton(null);
 		SymmetricSecretKey kp=asetype.getKeyGenerator(rand, asetype.getDefaultKeySizeBits()).generateKey();
 		SymmetricSecretKey sk= setype.getKeyGenerator(rand, setype.getDefaultKeySizeBits()).generateKey();
-		byte[] wrappedKey=typeWrapper.wrapKey(kp, sk, rand);
+		WrappedSymmetricKey wrappedKey=typeWrapper.wrapKey(kp, sk, rand);
 		SymmetricSecretKey sk2=typeWrapper.unwrapKey(kp, wrappedKey);
 		Assert.assertEquals(sk.getKeySizeBits(), sk2.getKeySizeBits());
 		Assert.assertEquals(sk.getAuthenticatedSignatureAlgorithmType(), sk2.getAuthenticatedSignatureAlgorithmType());

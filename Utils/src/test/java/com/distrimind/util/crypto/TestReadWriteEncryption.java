@@ -126,12 +126,12 @@ public class TestReadWriteEncryption {
 			}
 
 			@Override
-			public IASymmetricPrivateKey getSecretKeyForPrivateKey(short keyID)  {
+			public IASymmetricPrivateKey getPrivateKeyForSignature(short keyID)  {
 				return null;
 			}
 
 			@Override
-			public IASymmetricPublicKey getSecretKeyForPublicKey(short keyID)  {
+			public IASymmetricPublicKey getPublicKeyForSignature(short keyID)  {
 				return null;
 			}
 

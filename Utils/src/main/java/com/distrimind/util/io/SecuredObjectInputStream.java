@@ -294,8 +294,11 @@ public abstract class SecuredObjectInputStream extends InputStream implements Da
 		return SerializationTools.readBytes(this, nullAccepted, array, offset, len);
 	}
 
-	public String readString(boolean nullAccepted, int maxSizeInBytes) throws IOException {
-		return SerializationTools.readString(this, maxSizeInBytes, nullAccepted);
+	public char[] readChars(boolean nullAccepted, int maxCharsNumber) throws IOException {
+		return SerializationTools.readChars(this, maxCharsNumber*2, nullAccepted);
+	}
+	public String readString(boolean nullAccepted, int maxCharsNumber) throws IOException {
+		return SerializationTools.readString(this, maxCharsNumber*2, nullAccepted);
 	}
 	public BigInteger readBigInteger(boolean nullAccepted) throws IOException {
 		return SerializationTools.readBigInteger(this, nullAccepted);

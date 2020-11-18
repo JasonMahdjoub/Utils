@@ -106,7 +106,7 @@ public class BCMcElieceCipher extends AbstractCipher{
 
 	private static final int MAX_GF2MATRIX_SIZE=30*1024*1024;
 
-	static class PrivateKey implements AsymmetricPrivateKey, SecureExternalizableWithoutInnerSizeControl {
+	static class PrivateKey implements AsymmetricPrivateKey, SecureExternalizableWithoutInnerSizeControl, Zeroizable {
 		private McEliecePrivateKeyParameters privateKeyParameters;
 		private volatile byte []encoded=null;
 		private volatile Integer hashCode=null;
@@ -218,6 +218,7 @@ public class BCMcElieceCipher extends AbstractCipher{
 			}
 		}
 
+		@Override
 		public void zeroize()
 		{
 			if (privateKeyParameters!=null)
@@ -230,7 +231,7 @@ public class BCMcElieceCipher extends AbstractCipher{
 
 	}
 
-	static class PrivateKeyCCA2 implements AsymmetricPrivateKey, SecureExternalizableWithoutInnerSizeControl {
+	static class PrivateKeyCCA2 implements AsymmetricPrivateKey, SecureExternalizableWithoutInnerSizeControl, Zeroizable {
 		private McElieceCCA2PrivateKeyParameters privateKeyParameters;
 		private volatile byte []encoded=null;
 		private volatile Integer hashCode=null;
@@ -303,6 +304,7 @@ public class BCMcElieceCipher extends AbstractCipher{
 				writeExternal(out, true);
 		}
 
+		@Override
 		public void zeroize()
 		{
 			if (privateKeyParameters!=null)
@@ -364,7 +366,7 @@ public class BCMcElieceCipher extends AbstractCipher{
 		}
 	}
 
-	static class PublicKey implements AsymmetricPublicKey, SecureExternalizableWithoutInnerSizeControl {
+	static class PublicKey implements AsymmetricPublicKey, SecureExternalizableWithoutInnerSizeControl, Zeroizable {
 		private McEliecePublicKeyParameters publicKeyParameters;
 		private volatile byte []encoded=null;
 		private volatile Integer hashCode=null;
@@ -420,6 +422,7 @@ public class BCMcElieceCipher extends AbstractCipher{
 				hashCode=Arrays.hashCode(getEncoded());
 			return hashCode;
 		}
+		@Override
 		public void zeroize()
 		{
 			if (publicKeyParameters!=null)
@@ -452,7 +455,7 @@ public class BCMcElieceCipher extends AbstractCipher{
 		}
 	}
 
-	static class PublicKeyCCA2 implements AsymmetricPublicKey, SecureExternalizableWithoutInnerSizeControl {
+	static class PublicKeyCCA2 implements AsymmetricPublicKey, SecureExternalizableWithoutInnerSizeControl, Zeroizable {
 		private McElieceCCA2PublicKeyParameters publicKeyParameters;
 		private volatile byte []encoded=null;
 		private volatile Integer hashCode=null;
@@ -464,6 +467,7 @@ public class BCMcElieceCipher extends AbstractCipher{
 		public PublicKeyCCA2() {
 			publicKeyParameters=null;
 		}
+		@Override
 		public void zeroize()
 		{
 			if (publicKeyParameters!=null)

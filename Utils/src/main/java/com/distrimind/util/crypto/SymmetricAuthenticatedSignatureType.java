@@ -111,15 +111,15 @@ public enum SymmetricAuthenticatedSignatureType {
         this.replacer=replacer;
     }
 
-	public SymmetricSecretKey generateSecretKeyFromByteArray(byte[] tab) throws NoSuchProviderException, NoSuchAlgorithmException {
-		return generateSecretKeyFromByteArray(tab, getDefaultKeySizeBits());
+	public SymmetricSecretKey generateSecretKeyFromByteArray(SecretData secretData) throws NoSuchProviderException, NoSuchAlgorithmException {
+		return generateSecretKeyFromByteArray(secretData, getDefaultKeySizeBits());
 	}
 
-	public SymmetricSecretKey generateSecretKeyFromByteArray(byte[] tab, short keySizeBits) throws NoSuchProviderException, NoSuchAlgorithmException {
+	public SymmetricSecretKey generateSecretKeyFromByteArray(SecretData secretData, short keySizeBits) throws NoSuchProviderException, NoSuchAlgorithmException {
 		if (keySizeBits<56 || keySizeBits>512)
 			throw new IllegalArgumentException();
 		AbstractMessageDigest md=(keySizeBits>256?MessageDigestType.SHA3_512:MessageDigestType.SHA3_256).getMessageDigestInstance();
-		md.update(tab);
+		md.update(secretData.getBytes());
 		byte[] d=md.digest();
 		return new SymmetricSecretKey(this, Arrays.copyOfRange(d, 0, keySizeBits/8), keySizeBits);
 	}

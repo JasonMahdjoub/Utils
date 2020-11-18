@@ -38,6 +38,7 @@ import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.spec.InvalidKeySpecException;
+import java.util.Arrays;
 
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
@@ -195,15 +196,20 @@ public enum PasswordHashType {
 				}
 				case BC_BCRYPT: {
 					byte[] passwordb;
+					boolean fill=false;
 					if (off != 0 || len != data.length) {
 						passwordb = new byte[len];
 						System.arraycopy(data, off, passwordb, 0, len);
+						fill=true;
 					} else
 						passwordb = data;
 
 					salt = uniformizeSaltLength(salt, 16);
 
-					return BCrypt.generate(passwordb, salt, cost);
+					byte[] res= BCrypt.generate(passwordb, salt, cost);
+					if (fill)
+						Arrays.fill(passwordb, (byte)0);
+					return res;
 				}
 				case BC_FIPS_PBKFD2WithHMacSHA2_256:
 				case BC_FIPS_PBKFD2WithHMacSHA2_384:
@@ -220,13 +226,18 @@ public enum PasswordHashType {
 
 				case BC_SCRYPT_FOR_DATA_ENCRYPTION: {
 					byte[] d;
+					boolean fill=false;
 					if (len == data.length && off == 0)
 						d = data;
 					else {
 						d = new byte[len];
 						System.arraycopy(data, off, d, 0, len);
+						fill=true;
 					}
-					return SCrypt.generate(d, salt, scryptN, 8, 1, hashLength);
+					byte[] res=SCrypt.generate(d, salt, scryptN, 8, 1, hashLength);
+					if (fill)
+						Arrays.fill(d, (byte)0);
+					return res;
 				}
 				default:
 					break;
@@ -279,7 +290,10 @@ public enum PasswordHashType {
 				case BC_BCRYPT: {
 
 					salt = uniformizeSaltLength(salt, 16);
-					return BCrypt.generate(BCrypt.passwordToByteArray(password), salt, cost);
+					byte[] t=BCrypt.passwordToByteArray(password);
+					byte[] res=BCrypt.generate(t, salt, cost);
+					Arrays.fill(t, (byte)0);
+					return res;
 				}
 				case BC_FIPS_PBKFD2WithHMacSHA2_256:
 				case BC_FIPS_PBKFD2WithHMacSHA2_384:
@@ -300,7 +314,9 @@ public enum PasswordHashType {
 						passwordb[i * 2 + 1] = (byte) ((password[i] >> 8 & 0xFFFF) & 0xFF);
 					}
 
-					return SCrypt.generate(passwordb, salt, scryptN, 8, 1, hashLength);
+					byte[] res=SCrypt.generate(passwordb, salt, scryptN, 8, 1, hashLength);
+					Arrays.fill(passwordb, (byte)0);
+					return res;
 			}
 		}
 		catch (NoSuchAlgorithmException | NoSuchProviderException | InvalidKeySpecException e) {
@@ -332,11 +348,12 @@ public enum PasswordHashType {
 		return salt;
 	}
 
-	public static PasswordHashType valueOf(byte[] identifiedHash)
+	public static PasswordHashType valueOf(HashedPassword identifiedHash)
 	{
-		if (identifiedHash.length<2)
+		byte[] t=identifiedHash.getBytes();
+		if (t.length<2)
 			throw new IllegalArgumentException();
-		byte id=identifiedHash[0];
+		byte id=t[0];
 		for (PasswordHashType p : PasswordHashType.values())
 		{
 			if (p.getID()==id)
@@ -345,26 +362,28 @@ public enum PasswordHashType {
 		return null;
 	}
 	
-	public static byte getCost(byte[] identifiedHash)
+	public static byte getCost(HashedPassword identifiedHash)
 	{
-		if (identifiedHash.length<2)
+		byte[] t=identifiedHash.getBytes();
+		if (t.length<2)
 			throw new IllegalArgumentException();
-		return identifiedHash[1];
+		return t[1];
 	}
 	
-	public static byte getPasswordHashLengthBytes(byte[] identifiedHash)
+	public static byte getPasswordHashLengthBytes(HashedPassword identifiedHash)
 	{
-		short size=Bits.getShort(identifiedHash, 2);
+		short size=Bits.getShort(identifiedHash.getBytes(), 2);
 		
 		if (size>Byte.MAX_VALUE)
 			throw new IllegalArgumentException();
 		return (byte)size;
 	}
 	
-	public static byte getSaltSizeBytes(byte[] identifiedHash)
+	public static byte getSaltSizeBytes(HashedPassword identifiedHash)
 	{
-		int size=Bits.getShort(identifiedHash, 2);
-		size=identifiedHash.length-2 - ObjectSizer.SHORT_FIELD_SIZE - size;
+		byte[] t=identifiedHash.getBytes();
+		int size=Bits.getShort(t, 2);
+		size=t.length-2 - ObjectSizer.SHORT_FIELD_SIZE - size;
 		
 		if (size>Byte.MAX_VALUE)
 			throw new IllegalArgumentException();

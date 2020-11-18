@@ -71,6 +71,22 @@ public enum P2PLoginAgreementType {
 	private ASymmetricPublicKey generateASymmetricPublicKey(AbstractSecureRandom random) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
 		return ASymmetricEncryptionType.DEFAULT.getKeyPairGenerator(random).generateKeyPair().getASymmetricPublicKey();
 	}
+	public P2PLoginAgreement getAgreementAlgorithm(AbstractSecureRandom random, byte[] participantID, Password password, SymmetricSecretKey secretKeyForSignature) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
+		return getAgreementAlgorithm(random, participantID, password.getChars(), secretKeyForSignature, getDefaultMessageDigestType(), getDefaultPasswordHashType(), generateASymmetricPublicKey(random));
+	}
+	public P2PLoginAgreement getAgreementAlgorithm(AbstractSecureRandom random, byte[] participantID, Password password, SymmetricSecretKey secretKeyForSignature,MessageDigestType messageDigestType, PasswordHashType passwordHashType,
+												   ASymmetricPublicKey myPublicKey) throws NoSuchAlgorithmException,  NoSuchProviderException, IOException{
+		return getAgreementAlgorithm(random, participantID, password.getChars(), null, 0, 0, secretKeyForSignature, messageDigestType, passwordHashType, myPublicKey);
+	}
+	public P2PLoginAgreement getAgreementAlgorithm(AbstractSecureRandom random, byte[] participantID, Password password, byte[] salt,
+												   int offset_salt, int len_salt, SymmetricSecretKey secretKeyForSignature) throws NoSuchAlgorithmException, NoSuchProviderException, IOException{
+		return getAgreementAlgorithm(random, participantID, password.getChars(), salt, offset_salt, len_salt, secretKeyForSignature, getDefaultMessageDigestType(), getDefaultPasswordHashType(), generateASymmetricPublicKey(random));
+	}
+	public P2PLoginAgreement getAgreementAlgorithm(AbstractSecureRandom random, byte[] participantID, Password password, byte[] salt,
+												   int offset_salt, int len_salt, SymmetricSecretKey secretKeyForSignature,MessageDigestType messageDigestType, PasswordHashType passwordHashType,
+												   ASymmetricPublicKey myPublicKey) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
+		return getAgreementAlgorithm(random, participantID, password.getChars(), salt, offset_salt, len_salt, secretKeyForSignature, messageDigestType, passwordHashType, myPublicKey);
+	}
 	public P2PLoginAgreement getAgreementAlgorithm(AbstractSecureRandom random, byte[] participantID, char[] message, SymmetricSecretKey secretKeyForSignature) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
 		return getAgreementAlgorithm(random, participantID, message, secretKeyForSignature, getDefaultMessageDigestType(), getDefaultPasswordHashType(), generateASymmetricPublicKey(random));
 	}

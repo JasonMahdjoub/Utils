@@ -212,7 +212,7 @@ public class EncryptionSignatureHashEncoder {
 			this.digest=t==null?null:t.getMessageDigestInstance();
 			secretKey=encryptionProfileProvider.getSecretKeyForSignature(keyID, false);
 			this.symmetricSigner=secretKey==null?null:new SymmetricAuthenticatedSignerAlgorithm(secretKey);
-			IASymmetricPrivateKey privateKey=encryptionProfileProvider.getSecretKeyForPrivateKey(keyID);
+			IASymmetricPrivateKey privateKey=encryptionProfileProvider.getPrivateKeyForSignature(keyID);
 			this.asymmetricSigner=privateKey==null?null:new ASymmetricAuthenticatedSignerAlgorithm(privateKey);
 
 		} catch (NoSuchAlgorithmException | NoSuchProviderException e) {

@@ -35,19 +35,37 @@ The fact that you are presently reading this means that you have had
 knowledge of the CeCILL-C license and that you accept its terms.
  */
 
+import com.distrimind.util.io.Integrity;
+import com.distrimind.util.io.MessageExternalizationException;
+
 import java.io.IOException;
 
 /**
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 2.0
  * @since Utils 5.0.0
  */
 public interface EncryptionProfileProvider {
+
+	default boolean isLockable()
+	{
+		return false;
+	}
+	default boolean isProviderLocked()
+	{
+		return false;
+	}
+	default void lock()
+	{
+
+	}
+
 	MessageDigestType getMessageDigest(short keyID, boolean duringDecryptionPhase) throws IOException;
-	IASymmetricPrivateKey getSecretKeyForPrivateKey(short keyID) throws IOException;
-	IASymmetricPublicKey getSecretKeyForPublicKey(short keyID) throws IOException;
+	IASymmetricPrivateKey getPrivateKeyForSignature(short keyID) throws IOException;
+	IASymmetricPublicKey getPublicKeyForSignature(short keyID) throws IOException;
 	SymmetricSecretKey getSecretKeyForSignature(short keyID, boolean duringDecryptionPhase) throws IOException;
 	SymmetricSecretKey getSecretKeyForEncryption(short keyID, boolean duringDecryptionPhase) throws IOException;
+
 
 	short getDefaultKeyID();
 }

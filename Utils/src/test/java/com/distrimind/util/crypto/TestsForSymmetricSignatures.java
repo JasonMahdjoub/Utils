@@ -105,14 +105,14 @@ public class TestsForSymmetricSignatures {
 		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getSingleton(null);
 		SymmetricSecretKey kp=asetype.getKeyGenerator(rand, (short)128).generateKey();
 		SymmetricSecretKey sk= setype.getKeyGenerator(rand, (short)128).generateKey();
-		byte[] wrappedKey=typeWrapper.wrapKey(kp, sk, rand);
+		WrappedSymmetricKey wrappedKey=typeWrapper.wrapKey(kp, sk, rand);
 
 		SymmetricSecretKey sk2=typeWrapper.unwrapKey(kp, wrappedKey);
 		Assert.assertEquals(sk.getKeySizeBits(), sk2.getKeySizeBits());
 		Assert.assertEquals(sk.getAuthenticatedSignatureAlgorithmType(), sk2.getAuthenticatedSignatureAlgorithmType());
 		Assert.assertEquals(sk.getEncryptionAlgorithmType(), sk2.getEncryptionAlgorithmType());
 
-		Assert.assertEquals(sk.getKeyBytes(), sk2.getKeyBytes(), sk+" , "+sk2+" , "+Base64.getUrlEncoder().encodeToString(wrappedKey));
+		Assert.assertEquals(sk.getKeyBytes(), sk2.getKeyBytes(), sk+" , "+sk2+" , "+Base64.getUrlEncoder().encodeToString(wrappedKey.getBytes()));
 		Assert.assertEquals(sk.toJavaNativeKey().getEncoded(), sk2.toJavaNativeKey().getEncoded());
 		Assert.assertEquals(sk.toBouncyCastleKey().getKeyBytes(), sk2.toBouncyCastleKey().getKeyBytes());
 	}

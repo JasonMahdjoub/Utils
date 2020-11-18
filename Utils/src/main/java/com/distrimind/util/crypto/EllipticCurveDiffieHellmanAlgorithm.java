@@ -93,6 +93,7 @@ public class EllipticCurveDiffieHellmanAlgorithm extends KeyAgreement {
 		generateAndSetKeyPair();
 	}
 
+	@Override
 	public void zeroize()
 	{
 		derivedKey=null;

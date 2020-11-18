@@ -162,6 +162,13 @@ public abstract class SecuredObjectOutputStream extends OutputStream implements 
 		}
 	}
 
+	public final void writeChars(char[] s) throws IOException {
+		for (int v : s) {
+			write((v >>> 8) & 0xFF);
+			write((v) & 0xFF);
+		}
+	}
+
 	@Deprecated
 	@Override
 	public final void writeUTF(String str) throws IOException {
@@ -186,9 +193,11 @@ public abstract class SecuredObjectOutputStream extends OutputStream implements 
 	public void writeMap(Map<?, ?> map, boolean nullAccepted, int globalMaxSizeInBytes, boolean supportNullMapKey, boolean supportNullMapValue) throws IOException {
 		SerializationTools.writeMap(this, map, globalMaxSizeInBytes, nullAccepted, supportNullMapKey, supportNullMapValue);
 	}
-
-	public void writeString(String s, boolean nullAccepted, int maxSizeInBytes) throws IOException {
-		SerializationTools.writeString(this, s, maxSizeInBytes, nullAccepted);
+	public void writeChars(char[] s, boolean nullAccepted, int maxCharsNumber) throws IOException {
+		SerializationTools.writeChars(this, s, maxCharsNumber*2, nullAccepted);
+	}
+	public void writeString(String s, boolean nullAccepted, int maxCharsNumber) throws IOException {
+		SerializationTools.writeString(this, s, maxCharsNumber*2, nullAccepted);
 	}
 	public void write2DBytesArray(byte[][] array, boolean nullAcceptedForLevel1, boolean nullAcceptedForLevel2, int maxLevel1SizeInByte, int maxLevel2SizeInByte) throws IOException {
 		SerializationTools.writeBytes2D(this, array, maxLevel1SizeInByte, maxLevel2SizeInByte, nullAcceptedForLevel1, nullAcceptedForLevel2);

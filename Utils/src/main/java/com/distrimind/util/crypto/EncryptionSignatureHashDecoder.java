@@ -155,7 +155,7 @@ public class EncryptionSignatureHashDecoder {
 			checkHeadRead();
 			minimumInputSize=null;
 			try {
-				IASymmetricPublicKey publicKey=encryptionProfileProvider.getSecretKeyForPublicKey(secretKeyID);
+				IASymmetricPublicKey publicKey=encryptionProfileProvider.getPublicKeyForSignature(secretKeyID);
 				if (publicKey == null)
 					asymmetricChecker = null;
 				else if (asymmetricChecker == null || publicKey != asymmetricChecker.getDistantPublicKey())

@@ -46,7 +46,7 @@ import java.io.IOException;
  * @version 1.1
  * @since Utils 3.0
  */
-public abstract class Agreement {
+public abstract class Agreement implements Zeroizable {
 	
 	private int actualStepForReception, actualStepForSend;
 	private final int stepsNumberForReception;
@@ -109,7 +109,6 @@ public abstract class Agreement {
 	protected abstract byte[] getDataToSend(int stepNumber) throws IOException;
 	protected abstract void receiveData(int stepNumber, byte[] data) throws IOException;
 
-	public abstract void zeroize();
 
 	@SuppressWarnings("deprecation")
 	@Override

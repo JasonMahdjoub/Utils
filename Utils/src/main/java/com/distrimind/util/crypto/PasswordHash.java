@@ -95,35 +95,35 @@ public class PasswordHash {
 	}
 
 
-	public static boolean checkValidHashedPassword(char[] password, byte[] goodHash) {
+	public static boolean checkValidHashedPassword(Password password, HashedPassword goodHash) {
 		return checkValidHashedPassword(password, goodHash, null);
 	}
 
-	public static boolean checkValidHashedPassword(char[] password, byte[] goodHash, byte[] staticAdditionalSalt) {
+	public static boolean checkValidHashedPassword(Password password, HashedPassword goodHash, byte[] staticAdditionalSalt) {
 		PasswordHashType type=PasswordHashType.valueOf(goodHash);
 		byte cost=PasswordHashType.getCost(goodHash);
 		try {
 			
 			
 			//byte []composedHash=getHashFromIdentifiedHash(goodHash);
-			byte[][] separated = Bits.separateEncodingsWithShortSizedTabs(goodHash, 2, goodHash.length-2);
+			byte[][] separated = Bits.separateEncodingsWithShortSizedTabs(goodHash.getBytes(), 2, goodHash.getBytes().length-2);
 			byte[] generatedSalt = separated[1];
 			byte[] salt = mixSaltWithStaticSalt(generatedSalt, staticAdditionalSalt);
 			byte[] hash = separated[0];
 
 			assert type != null;
-			return Arrays.equals(type.hash(password, salt, cost, (byte)hash.length), hash);
+			char[] charArray=password.getChars();
+			boolean res=Arrays.equals(type.hash(charArray, salt, cost, (byte)hash.length), hash);
+			Arrays.fill(generatedSalt, (byte)0);
+			Arrays.fill(salt, (byte)0);
+			Arrays.fill(hash, (byte)0);
+			Arrays.fill(charArray, '0');
+			return res;
 		} catch (Exception e) {
 			return false;
 		}
 	}
 
-	public static boolean checkValidHashedPassword(String password, byte[] goodHash) {
-		return checkValidHashedPassword(password.toCharArray(), goodHash);
-	}
-	public static boolean checkValidHashedPassword(String password, byte[] goodHash, byte[] staticAdditionalSalt) {
-		return checkValidHashedPassword(password.toCharArray(), goodHash, staticAdditionalSalt);
-	}
 
 	public byte getCost() {
 		return cost;
@@ -133,56 +133,44 @@ public class PasswordHash {
 		return saltSize;
 	}
 
-	public byte[] hash(char[] password)
+	public HashedPassword hash(Password password)
 			throws IOException {
 		return hash(password, null, type.getDefaultHashLengthBytes());
 	}
-	public byte[] hash(char[] password, byte defaultHashLengthBytes)
+	public HashedPassword hash(Password password, byte defaultHashLengthBytes)
 			throws IOException {
 		return hash(password, null, defaultHashLengthBytes);
 	}
-	public byte[] hash(char[] password, byte[] staticAdditionalSalt) throws IOException
+	public HashedPassword hash(Password password, byte[] staticAdditionalSalt) throws IOException
 	{
 		return hash(password, staticAdditionalSalt, type.getDefaultHashLengthBytes());
 	}
-	public byte[] hash(char[] password, byte[] staticAdditionalSalt, byte hashLengthBytes)
+	public HashedPassword hash(Password password, byte[] staticAdditionalSalt, byte hashLengthBytes)
 			throws IOException {
 		if (password == null)
 			throw new NullPointerException("password");
 
 		byte[] generatedSalt = generateSalt(random, saltSize);
 		byte[] salt = mixSaltWithStaticSalt(generatedSalt, staticAdditionalSalt);
-		return getIdentifiedHash(Bits.concatenateEncodingWithShortSizedTabs(type.hash(password, salt, cost, hashLengthBytes), generatedSalt));
+		byte[] hash=type.hash(password.getChars(), salt, cost, hashLengthBytes);
+		byte[] concatenated=Bits.concatenateEncodingWithShortSizedTabs(hash, generatedSalt);
+		HashedPassword res=getIdentifiedHash(concatenated);
+		Arrays.fill(generatedSalt, (byte)0);
+		Arrays.fill(salt, (byte)0);
+		Arrays.fill(hash, (byte)0);
+		Arrays.fill(concatenated, (byte)0);
+		return res;
+
 		
 	}
 	
-	private byte[] getIdentifiedHash(byte[] hash)
+	private HashedPassword getIdentifiedHash(byte[] hash)
 	{
 		byte[] res = new byte[hash.length + 2];
 		res[0]=type.getID();
 		res[1]=cost;
 		System.arraycopy(hash, 0, res, ObjectSizer.SHORT_FIELD_SIZE, hash.length);
-		return res;
-	}
-
-	
-	
-	
-	public byte[] hash(String password)
-			throws IOException {
-		return hash(password.toCharArray());
-	}
-	public byte[] hash(String password, byte defaultHashLengthBytes)
-			throws IOException {
-		return hash(password.toCharArray(), defaultHashLengthBytes);
-	}
-	public byte[] hash(String password, byte[] staticAdditionalSalt) throws IOException
-	{
-		return hash(password, staticAdditionalSalt, type.getDefaultHashLengthBytes());
-	}
-	public byte[] hash(String password, byte[] staticAdditionalSalt, byte defaultHashLengthBytes)
-			throws IOException {
-		return hash(password.toCharArray(), staticAdditionalSalt, defaultHashLengthBytes);
+		return new HashedPassword(res);
 	}
 
 	private static byte[] mixSaltWithStaticSalt(byte[] salt, byte[] staticAdditionalSalt) {
