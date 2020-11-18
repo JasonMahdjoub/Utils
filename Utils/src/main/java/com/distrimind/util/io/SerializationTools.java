@@ -62,13 +62,28 @@ import java.util.concurrent.*;
  * 
  * @author Jason Mahdjoub
  * @since Utils 4.5.0
- * @version 3.0
+ * @version 3.1
  * 
  */
 
 public class SerializationTools {
 	private static final int MAX_CHAR_BUFFER_SIZE=Short.MAX_VALUE*5;
-	
+	private static final int MAX_SIZE_INET_ADDRESS=20;
+
+	static void writeChars(final SecuredObjectOutputStream oos, char []s, int sizeMax, boolean supportNull) throws IOException
+	{
+
+		if (s==null)
+		{
+			if (!supportNull)
+				throw new IOException();
+			writeSize(oos, true, 0, sizeMax);
+			return;
+
+		}
+		writeSize(oos, false, s.length*2, sizeMax);
+		oos.writeChars(s);
+	}
 	static void writeString(final SecuredObjectOutputStream oos, String s, int sizeMax, boolean supportNull) throws IOException
 	{
 
@@ -80,7 +95,7 @@ public class SerializationTools {
 			return;
 			
 		}
-		writeSize(oos, false, s.length(), sizeMax);
+		writeSize(oos, false, s.length()*2, sizeMax);
 		oos.writeChars(s);
 	}
 	private static final Object stringLocker=new Object();
@@ -96,6 +111,9 @@ public class SerializationTools {
 				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
 			return null;
 		}
+		if (size%2==1)
+			throw new MessageExternalizationException(Integrity.FAIL);
+		size/=2;
 		if (sizeMax<MAX_CHAR_BUFFER_SIZE)
 		{
 			synchronized(stringLocker)
@@ -115,6 +133,23 @@ public class SerializationTools {
 			return new String(chars, 0, size);
 			
 		}
+	}
+	static char[] readChars(final SecuredObjectInputStream ois, int sizeMax, boolean supportNull) throws IOException
+	{
+		int size=readSize(ois, sizeMax);
+		if (size==-1)
+		{
+			if (!supportNull)
+				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
+			return null;
+		}
+		if (size%2==1)
+			throw new MessageExternalizationException(Integrity.FAIL);
+		size/=2;
+		char[] chars=new char[size];
+		for (int i=0;i<size;i++)
+			chars[i]=ois.readChar();
+		return chars;
 	}
 	
 	@SuppressWarnings("SameParameterValue")
@@ -815,7 +850,7 @@ public class SerializationTools {
 
 		}
 
-		writeBytes(oos, inetAddress.getAddress(), 20, false);
+		writeBytes(oos, inetAddress.getAddress(), MAX_SIZE_INET_ADDRESS, false);
 	}
 	@SuppressWarnings("SameParameterValue")
 	static void writeDate(final SecuredObjectOutputStream oos, Date date, boolean supportNull) throws IOException
@@ -849,7 +884,7 @@ public class SerializationTools {
 
 		}
 
-		writeBytes(oos, id.encode(), 513, false);
+		writeBytes(oos, id.encode(), AbstractDecentralizedID.MAX_DECENTRALIZED_ID_SIZE_IN_BYTES, false);
 	}
 	@SuppressWarnings("SameParameterValue")
 	static AbstractDecentralizedID readDecentralizedID(final SecuredObjectInputStream in, boolean supportNull) throws IOException
@@ -858,7 +893,7 @@ public class SerializationTools {
 		{
 			try
 			{
-				return AbstractDecentralizedID.decode(Objects.requireNonNull(readBytes(in, false, null, 0, 513)));
+				return AbstractDecentralizedID.decode(Objects.requireNonNull(readBytes(in, false, null, 0, AbstractDecentralizedID.MAX_DECENTRALIZED_ID_SIZE_IN_BYTES)));
 			}
 			catch(Exception e)
 			{
@@ -873,7 +908,7 @@ public class SerializationTools {
 	static InetAddress readInetAddress(final SecuredObjectInputStream ois, boolean supportNull) throws IOException {
 		if (!supportNull || ois.readBoolean())
 		{
-			byte[] address=readBytes(ois, false, null, 0, 20);
+			byte[] address=readBytes(ois, false, null, 0, MAX_SIZE_INET_ADDRESS);
 			try
 			{
 				if (address==null)
@@ -1408,7 +1443,7 @@ public class SerializationTools {
 	{
 		writeObject(oos, o, sizeMax, supportNull, true);
 	}
-	@SuppressWarnings("BooleanMethodIsAlwaysInverted")
+
 	public static boolean isSerializable(Object o)
 	{
 		if (o==null)
@@ -1439,8 +1474,9 @@ public class SerializationTools {
 		if (o instanceof Object[])
 		{
 			for (Object ot : (Object[])o) {
-				if (!isSerializable(ot))
+				if (!isSerializable(ot)) {
 					return false;
+				}
 			}
 			return true;
 		}
@@ -1468,11 +1504,22 @@ public class SerializationTools {
 				|| InetSocketAddress.class==clazz
 				|| InetAddress.class==clazz
 				|| Number.class.isAssignableFrom(clazz)
+				|| Character.class==clazz
+				|| Boolean.class==clazz
 				|| BigInteger.class==clazz
-				|| BigDecimal.class==clazz;
+				|| BigDecimal.class==clazz
+				|| char[].class==clazz
+				|| DecentralizedValue.class.isAssignableFrom(clazz)
+				|| IKey.class.isAssignableFrom(clazz)
+				|| AbstractKeyPair.class.isAssignableFrom(clazz)
+				|| Inet4Address.class.isAssignableFrom(clazz)
+				|| Inet6Address.class.isAssignableFrom(clazz)
+				|| HybridASymmetricAuthenticatedSignatureType.class==clazz
+				|| HybridASymmetricEncryptionType.class==clazz
+				|| HybridKeyAgreementType.class==clazz;
 
 	}
-	private static int getObjectCodeSizeBytes()
+	static int getObjectCodeSizeBytes()
 	{
 		return enumsEndIndex>254?2:1;
 	}
@@ -1709,6 +1756,9 @@ public class SerializationTools {
 			} else if (clazz==BigInteger.class) {
 				writeObjectCode(oos, 30);
 				writeBigInteger(oos, (BigInteger)o, false);
+			}else if (clazz==char[].class) {
+				writeObjectCode(oos, 31);
+				writeChars(oos, (char[])o, sizeMax,false);
 			} else {
 				throw new IOException(""+clazz);
 
@@ -1813,6 +1863,9 @@ public class SerializationTools {
 				case 30: {
 					return readBigInteger(ois, false);
 				}
+				case 31: {
+					return readChars(ois, sizeMax,false);
+				}
 
 		/*case Byte.MAX_VALUE:
 			return ois.readObject();*/
@@ -1823,7 +1876,7 @@ public class SerializationTools {
 		
 	}
 
-	private static final short lastObjectCode=30;
+	private static final short lastObjectCode=31;
 	private static final short classesStartIndex=lastObjectCode+1;
 	private static short classesEndIndex=0;
 	private static short enumsStartIndex=0;
@@ -1837,7 +1890,15 @@ public class SerializationTools {
 				Arrays.asList((Class<? extends SecureExternalizableWithoutInnerSizeControl>) FilePermissions.class,
 						SubStreamParameter.class,
 						SubStreamParameters.class,
-						FragmentedStreamParameters.class)),
+						FragmentedStreamParameters.class,
+						Password.class,
+						HashedPassword.class,
+						SecretData.class,
+						WrappedASymmetricSecretKey.class,
+						WrappedSymmetricKey.class,
+						SecretDataString.class,
+						WrappedASymmetricSecretKeyString.class,
+						WrappedSymmetricKeyString.class)),
 				new ArrayList<>(Arrays.asList(
 						MessageDigestType.class,
 						SecureRandomType.class,
@@ -1913,270 +1974,299 @@ public class SerializationTools {
 		return Collections.unmodifiableList(enums);
 	}
 
-	public static int getInternalSize(Number key)
+	public static int getInternalSize(long key)
 	{
-		if (key==null)
-			return 1;
-		return getInternalSize(key, 0);
+		return 8;
+	}
+	public static int getInternalSize(int key)
+	{
+		return 4;
+	}
+	public static int getInternalSize(char key)
+	{
+		return 2;
+	}
+	public static int getInternalSize(boolean key)
+	{
+		return 1;
+	}
+	public static int getInternalSize(short key)
+	{
+		return 2;
+	}
+	public static int getInternalSize(byte key)
+	{
+		return 1;
+	}
+	public static int getInternalSize(float key)
+	{
+		return 4;
+	}
+	public static int getInternalSize(double key)
+	{
+		return 8;
+	}
+	public static int getInternalChar(char key)
+	{
+		return 2;
+	}
+	public static int getInternalSize(Date date)
+	{
+		int res=1;
+		if (date!=null)
+			res+=8;
+		return res;
 	}
 
 	public static int getInternalSize(IKey key)
 	{
-		if (key==null)
-			return 1;
-		return getInternalSize(key, 0);
+		int res=1;
+		if (key!=null)
+			res+=getInternalSize(key.encode(), IKey.MAX_SIZE_IN_BYTES_OF_KEY);
+		return res;
 	}
 
 	public static int getInternalSize(AbstractKeyPair<?, ?> keyPair)
 	{
-		if (keyPair==null)
-			return 1;
-		return getInternalSize(keyPair, 0);
+		int res=1;
+		if (keyPair!=null)
+			res+=getInternalSize(keyPair.encode(), AbstractKeyPair.MAX_SIZE_IN_BYTES_OF_KEY_PAIR);
+		return res;
 	}
 	public static int getInternalSize(InetAddress inetAddress)
 	{
-		if (inetAddress==null)
-			return 1;
-		return getInternalSize(inetAddress, 0);
+		int res=1;
+		if (inetAddress!=null)
+		{
+			res+=getInternalSize(inetAddress.getAddress(), MAX_SIZE_INET_ADDRESS);
+		}
+		return res;
 	}
 	public static int getInternalSize(HybridKeyAgreementType v)
 	{
-		if (v==null)
-			return 1;
-		return getInternalSize(v, 0);
+		int res=1;
+		if (v!=null)
+			res+=8;
+		return res;
 	}
 	public static int getInternalSize(HybridASymmetricAuthenticatedSignatureType v)
 	{
-		if (v==null)
-			return 1;
-		return getInternalSize(v, 0);
+		int res=1;
+		if (v!=null)
+			res+=8;
+		return res;
 	}
 	public static int getInternalSize(HybridASymmetricEncryptionType v)
 	{
-		if (v==null)
-			return 1;
-		return getInternalSize(v, 0);
+		int res=1;
+		if (v!=null)
+			res+=8;
+		return res;
 	}
 	public static int getInternalSize(InetSocketAddress inetSocketAddress)
 	{
-		if (inetSocketAddress==null)
-			return 1;
-		return getInternalSize(inetSocketAddress, 0);
+		int res=1;
+		if (inetSocketAddress!=null)
+		{
+			res+=getInternalSize(inetSocketAddress.getAddress())+3;
+		}
+		return res;
 	}
 	public static int getInternalSize(Class<?> clazz)
 	{
-		return getInternalSize( clazz, MAX_CLASS_LENGTH);
+		int res=1;
+		if (clazz!=null) {
+			res+= getInternalSize(clazz.getName(), MAX_CLASS_LENGTH);
+		}
+		return res;
 	}
 	public static int getInternalSize(BigInteger bigInteger)
 	{
-		return getInternalSize( bigInteger, 0);
+		int res=1;
+		if (bigInteger!=null)
+			res+=getInternalSize(bigInteger.toByteArray(), MAX_BIG_INTEGER_SIZE);
+		return res;
 	}
 	public static int getInternalSize(BigDecimal bigDecimal)
 	{
-		return getInternalSize( bigDecimal, 0);
+		int res=1;
+		if (bigDecimal!=null)
+			res+=4+getInternalSize(bigDecimal.unscaledValue().toByteArray(), MAX_BIG_INTEGER_SIZE);
+		return res;
 	}
+
 	public static int getInternalSize(AbstractDecentralizedID abstractDecentralizedID)
 	{
-		if (abstractDecentralizedID==null)
-			return 1;
-		return getInternalSize(abstractDecentralizedID, 0);
+		int res=1;
+		if (abstractDecentralizedID!=null)
+			res+=getInternalSize(abstractDecentralizedID.encode(), AbstractDecentralizedID.MAX_DECENTRALIZED_ID_SIZE_IN_BYTES);
+		return res;
 	}
 	public static int getInternalSize(SecureExternalizable secureExternalizable)
 	{
-		if (secureExternalizable==null)
-			return 1;
-
-		return getInternalSize(secureExternalizable, 0);
+		int res=1;
+		if (secureExternalizable!=null) {
+			Class<?> clazz = secureExternalizable.getClass();
+			res+=secureExternalizable.getInternalSerializedSize();
+			if (!classes.contains(clazz))
+				res += getInternalSize(clazz.getName(), MAX_CLASS_LENGTH);
+		}
+		return res;
 	}
 	public static int getInternalSize(Enum<?> e)
 	{
-		if (e==null)
-			return 1;
-		return getInternalSize(e, 0);
+		int res=0;
+
+		if (e!=null) {
+			Class<?> clazz = e.getClass();
+			res += 4;
+			if (enums.contains(clazz))
+				res += getObjectCodeSizeBytes();
+			else
+				res += getInternalSize(clazz.getName(), MAX_CLASS_LENGTH);
+		}
+		return res;
 	}
 	public static int getInternalSize(byte[] array, int maxSizeInBytes)
 	{
-		if (array==null)
-			return getSizeCoderSize(maxSizeInBytes);
-		return getInternalSize((Object)array, maxSizeInBytes);
+		int res=getSizeCoderSize(maxSizeInBytes);
+		if (array!=null)
+			res+=array.length;
+		return res;
 	}
-	public static int getInternalSize(Object[] array, int maxSizeInBytes)
+
+	public static int getInternalSize(Object[] tab, int maxSizeInBytes)
 	{
-		if (array==null)
-			return getSizeCoderSize(maxSizeInBytes);
-		return getInternalSize((Object)array, maxSizeInBytes);
+		int size=getSizeCoderSize(maxSizeInBytes)+1;
+		if (tab!=null) {
+			maxSizeInBytes-=size;
+			for (Object so : tab) {
+				int s= getInternalSize(so, maxSizeInBytes);
+				maxSizeInBytes-=s;
+				size+=s;
+			}
+		}
+		return size;
+
+
 	}
-	public static int getInternalSize(String text, int maxSizeInBytes)
+	public static int getInternalSize(Map<?, ?> m, int maxSizeInBytes)
 	{
-		if (text==null)
-			return getSizeCoderSize(maxSizeInBytes);
-		return getInternalSize((Object)text, maxSizeInBytes);
+		int res=getSizeCoderSize(maxSizeInBytes)+1;
+		if (m!=null) {
+			maxSizeInBytes -= m.size();
+			for (Map.Entry<?, ?> e : m.entrySet())
+				res += getInternalSize(e.getKey(), maxSizeInBytes) + getInternalSize(e.getValue(), maxSizeInBytes);
+		}
+		return res;
+
 	}
-	public static int getInternalSize(Collection<Object> array, int maxSizeInBytes)
+	public static int getInternalSize(Collection<?> c, int maxSizeInBytes)
 	{
-		if (array==null)
-			return getSizeCoderSize(maxSizeInBytes);
-		return getInternalSize((Object)array, maxSizeInBytes);
+		int res=getSizeCoderSize(maxSizeInBytes)+1;
+		if (c!=null) {
+			maxSizeInBytes -= c.size();
+			for (Object oc : c)
+				res += getInternalSize(oc, maxSizeInBytes);
+			return res;
+		}
+		return res;
 	}
 	public static int getInternalSize(byte[][] array, int maxSizeInBytes1, int maxSizeInBytes2)
 	{
 		int res=getSizeCoderSize(maxSizeInBytes1);
-		for (byte[] b : array)
-			res+=getSizeCoderSize(maxSizeInBytes2)+(b==null?0:b.length);
+		if (array!=null) {
+			for (byte[] b : array) {
+				res += getObjectCodeSizeBytes() + getSizeCoderSize(maxSizeInBytes2) + (b == null ? 0 : b.length);
+			}
+		}
 		return res;
 	}
-
-
+	public static int getInternalSize(char[] o, int maxCharsNumber)
+	{
+		int res=getSizeCoderSize(maxCharsNumber*2);
+		if (o!=null)
+			res+=o.length*2;
+		return res;
+	}
+	public static int getInternalSize(String o, int maxCharsNumber)
+	{
+		int res=getSizeCoderSize(maxCharsNumber*2);
+		if (o!=null)
+			res+=o.length()*2;
+		return res;
+	}
 	public static int getInternalSize(Object o, int sizeMax)
 	{
-		if (o ==null)
-			return getObjectCodeSizeBytes();
-		Class<?> clazz=o.getClass();
-		if (clazz==String.class)
-		{
-			return getObjectCodeSizeBytes()+((String)o).length()*2+getSizeCoderSize(sizeMax);
-		}
-		else if (o instanceof Collection)
-		{
-			Collection<?> c=(Collection<?>)o;
-			int res=getObjectCodeSizeBytes()+getSizeCoderSize(sizeMax);
-			sizeMax-=c.size();
-			for (Object oc : c)
-				res+=getInternalSize(oc, sizeMax);
+		int res=getObjectCodeSizeBytes();
 
-			return res;
-		}
-		else if (o instanceof Map)
-		{
-			Map<?, ?> m=(Map<?, ?>)o;
-			int res=getObjectCodeSizeBytes()+getSizeCoderSize(sizeMax);
-			sizeMax-=m.size();
-			for (Map.Entry<?, ?> e: m.entrySet())
-				res+=getInternalSize(e.getKey(), sizeMax)+getInternalSize(e.getValue(), sizeMax);
-
-			return res;
-		}
-		else if (o instanceof byte[])
-		{
-			return getObjectCodeSizeBytes()+((byte[])o).length+getSizeCoderSize(sizeMax);
-		}
-		else if (o instanceof byte[][])
-		{
-			byte[][] tab = ((byte[][]) o);
-			int res=getObjectCodeSizeBytes()+getSizeCoderSize(sizeMax);
-			for (byte[] b : tab) {
-				res += getObjectCodeSizeBytes()+getSizeCoderSize(sizeMax) + (b == null ? 0 : b.length);
+		if (o !=null) {
+			Class<?> clazz = o.getClass();
+			if (clazz == String.class) {
+				res += getInternalSize((String) o, sizeMax / 2);
+			} else if (o instanceof Collection) {
+				res += getInternalSize((Collection<?>) o, sizeMax);
+			} else if (o instanceof Map) {
+				res += getInternalSize((Map<?, ?>) o, sizeMax);
+			} else if (o instanceof byte[]) {
+				res += getInternalSize((byte[]) o, sizeMax);
+			} else if (o instanceof char[]) {
+				res += getInternalSize((char[]) o, sizeMax / 2);
+			} else if (o instanceof byte[][]) {
+				res += getInternalSize((byte[][]) o, sizeMax);
+			} else if (o instanceof SecureExternalizable) {
+				res += getInternalSize((SecureExternalizable) o)-1;
+			} else if (o instanceof SecureExternalizable[]) {
+				res += getInternalSize((SecureExternalizable[]) o, sizeMax)-1;
+			} else if (o instanceof Object[]) {
+				res += getInternalSize((Object[]) o, sizeMax)-1;
+			} else if (InetAddress.class.isAssignableFrom(clazz)) {
+				res += getInternalSize((InetAddress) o);
+			} else if (clazz == InetSocketAddress.class) {
+				res += getInternalSize((InetSocketAddress) o);
+			} else if (o instanceof AbstractDecentralizedID) {
+				res += getInternalSize((AbstractDecentralizedID) o);
+			} else if (o instanceof IKey) {
+				res += getInternalSize((IKey) o);
+			} else if (o instanceof AbstractKeyPair) {
+				res += getInternalSize((AbstractKeyPair<?, ?>) o);
+			} else if (o instanceof Enum<?>) {
+				res += getInternalSize((Enum<?>) o);
+			} else if (clazz == Class.class) {
+				res += getInternalSize((Class<?>) o);
+			} else if (clazz == Date.class) {
+				res += getInternalSize((Date) o);
+			} else if (o instanceof HybridKeyAgreementType) {
+				res += getInternalSize((HybridKeyAgreementType) o);
+			} else if (o instanceof HybridASymmetricAuthenticatedSignatureType) {
+				res += getInternalSize((HybridASymmetricAuthenticatedSignatureType) o);
+			} else if (o instanceof HybridASymmetricEncryptionType) {
+				res += getInternalSize((HybridASymmetricEncryptionType) o);
+			} else if (clazz == Long.class) {
+				res += getInternalSize((Long) o);
+			} else if (clazz == Integer.class) {
+				res += getInternalSize((Integer) o);
+			} else if (clazz == Byte.class) {
+				res += getInternalSize((Byte) o);
+			} else if (clazz == Short.class) {
+				res += getInternalSize((Short) o);
+			} else if (clazz == Float.class) {
+				res += getInternalSize((Float) o);
+			} else if (clazz == Double.class) {
+				res += getInternalSize((Double) o);
+			} else if (clazz == Character.class) {
+				res += getInternalSize((Character) o);
+			} else if (clazz == Boolean.class) {
+				res += getInternalSize((Boolean) o);
+			} else if (clazz == BigInteger.class) {
+				res += getInternalSize((BigInteger) o);
+			} else if (clazz == BigDecimal.class) {
+				res += getInternalSize((BigDecimal) o);
 			}
-			return res;
-		}
-		else if (o instanceof SecureExternalizable)
-		{
-			int res=getObjectCodeSizeBytes()+((SecureExternalizable)o).getInternalSerializedSize();
-			if (!classes.contains(o.getClass()))
-				res+=getInternalSize(o.getClass().getName(), MAX_CLASS_LENGTH);
-			return res;
-		}
-		else if (o instanceof SecureExternalizable[])
-		{
-			int size=getObjectCodeSizeBytes()+getSizeCoderSize(sizeMax);
-			for (SecureExternalizable s : (SecureExternalizable[])o) {
-				size+=1;
-				if (s!=null) {
-					if (!classes.contains(o.getClass()))
-						size += getInternalSize(s.getClass().getName(), MAX_CLASS_LENGTH) ;
-					size += s.getInternalSerializedSize();
-				}
-			}
-			return size;
-		}
-		else if (o instanceof Object[])
-		{
-			Object[] tab = (Object[]) o;
-			int size=getObjectCodeSizeBytes()+getSizeCoderSize(sizeMax);
-			for (Object so : tab)
-			{
-				size+=getInternalSize(so, sizeMax-size);
-			}
-			return size;
-		}
-		else if (clazz==InetAddress.class)
-		{
-			return getObjectCodeSizeBytes()+((InetAddress)o).getAddress().length+2;
-		}
-		else if (clazz==InetSocketAddress.class)
-		{
-			return getObjectCodeSizeBytes()+((InetSocketAddress)o).getAddress().getAddress().length+6;
-		}
-		else if (o instanceof DecentralizedValue)
-		{
-			return getObjectCodeSizeBytes()+4+((DecentralizedValue) o).encode().length;
-		}
-		else if (o instanceof Enum<?>)
-		{
-			int res=getObjectCodeSizeBytes()+4;
-			if (enums.contains(clazz))
-				res+=2;
 			else
-				res+=getInternalSize(o.getClass().getName(), MAX_CLASS_LENGTH);
-			return res;
+				throw new IllegalArgumentException("o.class="+clazz);
 		}
-		else if (clazz==Class.class){
-			int res=getObjectCodeSizeBytes();
-			if (enums.contains(clazz))
-				res+=2;
-			else
-				res+=SerializationTools.getInternalSize(clazz.getName(), MAX_CLASS_LENGTH);
-			return res;
-		}
-		else if (clazz==Date.class){
-			return getObjectCodeSizeBytes()+8;
-		}
-		else if (o instanceof HybridKeyAgreementType)
-		{
-			return getObjectCodeSizeBytes()+16;
-		}
-		else if (o instanceof HybridASymmetricAuthenticatedSignatureType)
-		{
-			return getObjectCodeSizeBytes()+16;
-		}
-		else if (o instanceof HybridASymmetricEncryptionType)
-		{
-			return getObjectCodeSizeBytes()+16;
-		}
-		else if (clazz==Long.class){
-			return getObjectCodeSizeBytes()+8;
-		}
-		else if (clazz==Integer.class){
-			return getObjectCodeSizeBytes()+4;
-		}
-		else if (clazz==Byte.class){
-			return getObjectCodeSizeBytes()+1;
-		}
-		else if (clazz==Short.class){
-			return getObjectCodeSizeBytes()+2;
-		}
-		else if (clazz==Float.class){
-			return getObjectCodeSizeBytes()+4;
-		}
-		else if (clazz==Double.class){
-			return getObjectCodeSizeBytes()+8;
-		}
-		else if (clazz==Character.class){
-			return getObjectCodeSizeBytes()+2;
-		}
-		else if (clazz==Boolean.class){
-			return getObjectCodeSizeBytes()+1;
-		}
-		else if (clazz==BigInteger.class){
-			BigInteger b=(BigInteger)o;
-			return getObjectCodeSizeBytes()+getInternalSize(b.toByteArray().length, MAX_BIG_INTEGER_SIZE);
-		}
-		else if (clazz==BigDecimal.class){
-			BigDecimal b=(BigDecimal)o;
-			return getObjectCodeSizeBytes()+4+getInternalSize(b.unscaledValue().toByteArray().length, MAX_BIG_INTEGER_SIZE);
-		}
-		else
-			throw new IllegalArgumentException();
+		return res;
 	}
 
 	public static class ObjectResolver
