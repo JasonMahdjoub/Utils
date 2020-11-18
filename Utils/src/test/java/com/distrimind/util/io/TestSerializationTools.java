@@ -278,6 +278,31 @@ public class TestSerializationTools {
 					(SpecificReader) (in, supportNull1, maxSize) -> in.readBoolean(),
 					(SpecificSizeComputer)	(v, m)->SerializationTools.getInternalSize((Boolean)v)
 			});
+			lp.add(new Object[]{
+					nullSupport,
+					Collections.singletonList(SymmetricEncryptionType.AES_CTR),
+					false,
+					(SpecificWriter) (out, o, nullSupport1, maxSize) -> out.writeEnum((Enum<?>)o, nullSupport),
+					(SpecificReader) (in, supportNull1, maxSize) -> in.readEnum(supportNull1),
+					(SpecificSizeComputer)	(v, m)->SerializationTools.getInternalSize((Enum<?>)v)
+			});
+			lp.add(new Object[]{
+					nullSupport,
+					Arrays.asList(InetAddress.getByName("127.0.0.1"), InetAddress.getByName("::1")),
+					false,
+					(SpecificWriter) (out, o, nullSupport1, maxSize) -> out.writeInetAddress((InetAddress)o, nullSupport),
+					(SpecificReader) (in, supportNull1, maxSize) -> in.readInetAddress(supportNull1),
+					(SpecificSizeComputer)	(v, m)->SerializationTools.getInternalSize((InetAddress)v)
+			});
+			lp.add(new Object[]{
+					nullSupport,
+					Arrays.asList(new InetSocketAddress(InetAddress.getByName("127.0.0.1"), 20),
+							new InetSocketAddress(InetAddress.getByName("::1"), 20)),
+					false,
+					(SpecificWriter) (out, o, nullSupport1, maxSize) -> out.writeInetSocketAddress((InetSocketAddress)o, nullSupport),
+					(SpecificReader) (in, supportNull1, maxSize) -> in.readInetSocketAddress(supportNull1),
+					(SpecificSizeComputer)	(v, m)->SerializationTools.getInternalSize((InetSocketAddress)v)
+			});
 		}
 		Object[][] res=new Object[lp.size()][3];
 		for (int i=0;i<res.length;i++)

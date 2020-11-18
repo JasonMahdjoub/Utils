@@ -2115,7 +2115,7 @@ public class SerializationTools {
 	}
 	public static int getInternalSize(Enum<?> e)
 	{
-		int res=0;
+		int res=1;
 
 		if (e!=null) {
 			Class<?> clazz = e.getClass();
@@ -2231,7 +2231,7 @@ public class SerializationTools {
 			} else if (o instanceof AbstractKeyPair) {
 				res += getInternalSize((AbstractKeyPair<?, ?>) o);
 			} else if (o instanceof Enum<?>) {
-				res += getInternalSize((Enum<?>) o);
+				res += getInternalSize((Enum<?>) o)-1;
 			} else if (clazz == Class.class) {
 				res += getInternalSize((Class<?>) o);
 			} else if (clazz == Date.class) {
