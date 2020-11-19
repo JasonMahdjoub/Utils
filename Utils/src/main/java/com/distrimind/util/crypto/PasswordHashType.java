@@ -348,7 +348,7 @@ public enum PasswordHashType {
 		return salt;
 	}
 
-	public static PasswordHashType valueOf(HashedPassword identifiedHash)
+	public static PasswordHashType valueOf(WrappedHashedPassword identifiedHash)
 	{
 		byte[] t=identifiedHash.getBytes();
 		if (t.length<2)
@@ -362,7 +362,7 @@ public enum PasswordHashType {
 		return null;
 	}
 	
-	public static byte getCost(HashedPassword identifiedHash)
+	public static byte getCost(WrappedHashedPassword identifiedHash)
 	{
 		byte[] t=identifiedHash.getBytes();
 		if (t.length<2)
@@ -370,7 +370,7 @@ public enum PasswordHashType {
 		return t[1];
 	}
 	
-	public static byte getPasswordHashLengthBytes(HashedPassword identifiedHash)
+	public static byte getPasswordHashLengthBytes(WrappedHashedPassword identifiedHash)
 	{
 		short size=Bits.getShort(identifiedHash.getBytes(), 2);
 		
@@ -379,7 +379,7 @@ public enum PasswordHashType {
 		return (byte)size;
 	}
 	
-	public static byte getSaltSizeBytes(HashedPassword identifiedHash)
+	public static byte getSaltSizeBytes(WrappedHashedPassword identifiedHash)
 	{
 		byte[] t=identifiedHash.getBytes();
 		int size=Bits.getShort(t, 2);

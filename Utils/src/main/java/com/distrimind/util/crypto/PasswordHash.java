@@ -95,11 +95,11 @@ public class PasswordHash {
 	}
 
 
-	public static boolean checkValidHashedPassword(Password password, HashedPassword goodHash) {
+	public static boolean checkValidHashedPassword(WrappedPassword password, WrappedHashedPassword goodHash) {
 		return checkValidHashedPassword(password, goodHash, null);
 	}
 
-	public static boolean checkValidHashedPassword(Password password, HashedPassword goodHash, byte[] staticAdditionalSalt) {
+	public static boolean checkValidHashedPassword(WrappedPassword password, WrappedHashedPassword goodHash, byte[] staticAdditionalSalt) {
 		PasswordHashType type=PasswordHashType.valueOf(goodHash);
 		byte cost=PasswordHashType.getCost(goodHash);
 		try {
@@ -133,19 +133,19 @@ public class PasswordHash {
 		return saltSize;
 	}
 
-	public HashedPassword hash(Password password)
+	public WrappedHashedPassword hash(WrappedPassword password)
 			throws IOException {
 		return hash(password, null, type.getDefaultHashLengthBytes());
 	}
-	public HashedPassword hash(Password password, byte defaultHashLengthBytes)
+	public WrappedHashedPassword hash(WrappedPassword password, byte defaultHashLengthBytes)
 			throws IOException {
 		return hash(password, null, defaultHashLengthBytes);
 	}
-	public HashedPassword hash(Password password, byte[] staticAdditionalSalt) throws IOException
+	public WrappedHashedPassword hash(WrappedPassword password, byte[] staticAdditionalSalt) throws IOException
 	{
 		return hash(password, staticAdditionalSalt, type.getDefaultHashLengthBytes());
 	}
-	public HashedPassword hash(Password password, byte[] staticAdditionalSalt, byte hashLengthBytes)
+	public WrappedHashedPassword hash(WrappedPassword password, byte[] staticAdditionalSalt, byte hashLengthBytes)
 			throws IOException {
 		if (password == null)
 			throw new NullPointerException("password");
@@ -154,7 +154,7 @@ public class PasswordHash {
 		byte[] salt = mixSaltWithStaticSalt(generatedSalt, staticAdditionalSalt);
 		byte[] hash=type.hash(password.getChars(), salt, cost, hashLengthBytes);
 		byte[] concatenated=Bits.concatenateEncodingWithShortSizedTabs(hash, generatedSalt);
-		HashedPassword res=getIdentifiedHash(concatenated);
+		WrappedHashedPassword res=getIdentifiedHash(concatenated);
 		Arrays.fill(generatedSalt, (byte)0);
 		Arrays.fill(salt, (byte)0);
 		Arrays.fill(hash, (byte)0);
@@ -164,13 +164,13 @@ public class PasswordHash {
 		
 	}
 	
-	private HashedPassword getIdentifiedHash(byte[] hash)
+	private WrappedHashedPassword getIdentifiedHash(byte[] hash)
 	{
 		byte[] res = new byte[hash.length + 2];
 		res[0]=type.getID();
 		res[1]=cost;
 		System.arraycopy(hash, 0, res, ObjectSizer.SHORT_FIELD_SIZE, hash.length);
-		return new HashedPassword(res);
+		return new WrappedHashedPassword(res);
 	}
 
 	private static byte[] mixSaltWithStaticSalt(byte[] salt, byte[] staticAdditionalSalt) {
