@@ -35,7 +35,6 @@ The fact that you are presently reading this means that you have had
 knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-import com.distrimind.util.data_buffers.WrappedSecretData;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -84,14 +83,14 @@ public class TestKeyAgreements {
 		{
 			if (!client.hasFinishedSend())
 			{
-				WrappedSecretData clientData=client.getDataToSend();
+				byte[] clientData=client.getDataToSend();
 
 				server.receiveData(clientData);
 
 			}
 			if (!server.hasFinishedSend())
 			{
-				WrappedSecretData serverData=server.getDataToSend();
+				byte[] serverData=server.getDataToSend();
 
 				client.receiveData(serverData);
 
@@ -170,14 +169,14 @@ public class TestKeyAgreements {
 		{
 			if (!client.hasFinishedSend())
 			{
-				WrappedSecretData clientData=client.getDataToSend();
+				byte[] clientData=client.getDataToSend();
 
 				server.receiveData(clientData);
 
 			}
 			if (!server.hasFinishedSend())
 			{
-				WrappedSecretData serverData=server.getDataToSend();
+				byte[] serverData=server.getDataToSend();
 
 				client.receiveData(serverData);
 
@@ -392,8 +391,8 @@ public class TestKeyAgreements {
 				expectedVerify ? password : falsePassword, salt, 0, salt == null ? 0 : salt.length);
 		try {
 
-			WrappedSecretData step11 = exchanger1.getDataToSend();
-			WrappedSecretData step21 = exchanger2.getDataToSend();
+			byte[] step11 = exchanger1.getDataToSend();
+			byte[] step21 = exchanger2.getDataToSend();
 
 			Assert.assertFalse(exchanger1.isAgreementProcessValid());
 			Assert.assertFalse(exchanger2.isAgreementProcessValid());
@@ -412,8 +411,8 @@ public class TestKeyAgreements {
 			Assert.assertFalse(exchanger1.hasFinishedSend());
 			Assert.assertFalse(exchanger2.hasFinishedSend());
 
-			WrappedSecretData step12 = exchanger1.getDataToSend();
-			WrappedSecretData step22 = exchanger2.getDataToSend();
+			byte[] step12 = exchanger1.getDataToSend();
+			byte[] step22 = exchanger2.getDataToSend();
 
 			Assert.assertFalse(exchanger1.isAgreementProcessValid());
 			Assert.assertFalse(exchanger2.isAgreementProcessValid());
@@ -432,8 +431,8 @@ public class TestKeyAgreements {
 			Assert.assertFalse(exchanger1.hasFinishedSend());
 			Assert.assertFalse(exchanger2.hasFinishedSend());
 
-			WrappedSecretData step13 = exchanger1.getDataToSend();
-			WrappedSecretData step23 = exchanger2.getDataToSend();
+			byte[] step13 = exchanger1.getDataToSend();
+			byte[] step23 = exchanger2.getDataToSend();
 
 			Assert.assertFalse(exchanger1.isAgreementProcessValid());
 			Assert.assertFalse(exchanger2.isAgreementProcessValid());
@@ -520,15 +519,15 @@ public class TestKeyAgreements {
 			int send=0, received=0;
 			while (!exchanger1.hasFinishedSend())
 			{
-				WrappedSecretData step1 = exchanger1.getDataToSend();
-				WrappedSecretData step2 = exchanger2.getDataToSend();
+				byte[] step1 = exchanger1.getDataToSend();
+				byte[] step2 = exchanger2.getDataToSend();
 				send++;
 				if (!expectedVerify)
 				{
-					for (int i=0;i<step1.getBytes().length;i++)
-						step1.getBytes()[i]=(byte)~step1.getBytes()[i];
-					for (int i=0;i<step1.getBytes().length;i++)
-						step2.getBytes()[i]=(byte)~step2.getBytes()[i];
+					for (int i=0;i<step1.length;i++)
+						step1[i]=(byte)~step1[i];
+					for (int i=0;i<step1.length;i++)
+						step2[i]=(byte)~step2[i];
 				}
 				Assert.assertFalse(exchanger1.isAgreementProcessValid());
 				Assert.assertFalse(exchanger2.isAgreementProcessValid());
@@ -542,8 +541,8 @@ public class TestKeyAgreements {
 				received++;
 				if (exchanger1.hasFinishedReception())
 				{
-					Assert.assertEquals(exchanger1.isAgreementProcessValid(), expectedVerify);
-					Assert.assertEquals(exchanger2.isAgreementProcessValid(), expectedVerify);
+					Assert.assertEquals(exchanger1.isAgreementProcessValid(), expectedVerify, ""+exchanger1.getClass());
+					Assert.assertEquals(exchanger2.isAgreementProcessValid(), expectedVerify, ""+exchanger2.getClass());
 				}
 				else
 				{

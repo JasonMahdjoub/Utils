@@ -1,6 +1,5 @@
 package com.distrimind.util.crypto;
 
-import com.distrimind.util.data_buffers.WrappedSecretData;
 import com.distrimind.util.io.Integrity;
 import com.distrimind.util.io.MessageExternalizationException;
 import com.distrimind.bouncycastle.crypto.CryptoException;
@@ -47,8 +46,8 @@ public class P2PASymmetricSecretMessageExchangerAgreement extends P2PLoginAgreem
 
 
     P2PASymmetricSecretMessageExchangerAgreement(AbstractSecureRandom secureRandom, MessageDigestType messageDigestType, PasswordHashType passwordHashType,
-                                                        ASymmetricPublicKey myPublicKey, byte[] salt, int offset_salt, int len_salt, byte[] bytesPassword, int offset_password, int length_password,
-                                                        boolean passwordIsKey) throws NoSuchAlgorithmException, NoSuchProviderException, MessageExternalizationException {
+                                                 ASymmetricPublicKey myPublicKey, byte[] salt, int offset_salt, int len_salt, byte[] bytesPassword, int offset_password, int length_password,
+                                                 boolean passwordIsKey) throws NoSuchAlgorithmException, NoSuchProviderException, MessageExternalizationException {
         this(secureRandom, messageDigestType, passwordHashType, myPublicKey, salt, offset_salt, len_salt);
         if (bytesPassword==null)
             throw new NullPointerException();
@@ -60,7 +59,7 @@ public class P2PASymmetricSecretMessageExchangerAgreement extends P2PLoginAgreem
         this.charPassword=null;
     }
     P2PASymmetricSecretMessageExchangerAgreement(AbstractSecureRandom secureRandom, MessageDigestType messageDigestType, PasswordHashType passwordHashType,
-                                                        ASymmetricPublicKey myPublicKey, byte[] salt, int offset_salt, int len_salt, char[] charPassword) throws NoSuchAlgorithmException, NoSuchProviderException, MessageExternalizationException {
+                                                 ASymmetricPublicKey myPublicKey, byte[] salt, int offset_salt, int len_salt, char[] charPassword) throws NoSuchAlgorithmException, NoSuchProviderException, MessageExternalizationException {
         this(secureRandom, messageDigestType, passwordHashType, myPublicKey, salt, offset_salt, len_salt);
         if (charPassword==null)
             throw new NullPointerException();
@@ -75,7 +74,7 @@ public class P2PASymmetricSecretMessageExchangerAgreement extends P2PLoginAgreem
         this(secureRandom, messageDigestType, passwordHashType, myPublicKey, salt, offset_salt, len_salt, password.toCharArray());
     }*/
     private P2PASymmetricSecretMessageExchangerAgreement(AbstractSecureRandom secureRandom, MessageDigestType messageDigestType, PasswordHashType passwordHashType,
-                                                        ASymmetricPublicKey myPublicKey, byte[] salt, int offset_salt, int len_salt) throws NoSuchAlgorithmException, NoSuchProviderException, MessageExternalizationException {
+                                                         ASymmetricPublicKey myPublicKey, byte[] salt, int offset_salt, int len_salt) throws NoSuchAlgorithmException, NoSuchProviderException, MessageExternalizationException {
         super(2, 2);
         this.p2PASymmetricSecretMessageExchanger = new P2PASymmetricSecretMessageExchanger(secureRandom, messageDigestType, passwordHashType, myPublicKey);
         this.salt=salt;
@@ -89,19 +88,19 @@ public class P2PASymmetricSecretMessageExchangerAgreement extends P2PLoginAgreem
     }
 
     @Override
-    protected WrappedSecretData getDataToSend(int stepNumber) throws IOException {
+    protected byte[] getDataToSend(int stepNumber) throws IOException {
         if (!valid)
             throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException());
 
         try {
             switch (stepNumber) {
                 case 0:
-                    return p2PASymmetricSecretMessageExchanger.encodeMyPublicKey().transformToSecretData();
+                    return p2PASymmetricSecretMessageExchanger.encodeMyPublicKey().getBytes().clone();
                 case 1:
                     if (bytesPassword != null)
-                        return new WrappedSecretData(p2PASymmetricSecretMessageExchanger.encode(bytesPassword, 0,bytesPassword.length, salt, offset_salt, length_salt, passwordIsKey));
+                        return p2PASymmetricSecretMessageExchanger.encode(bytesPassword, 0,bytesPassword.length, salt, offset_salt, length_salt, passwordIsKey);
                     else
-                        return new WrappedSecretData(p2PASymmetricSecretMessageExchanger.encode(charPassword, salt, offset_salt, length_salt));
+                        return p2PASymmetricSecretMessageExchanger.encode(charPassword, salt, offset_salt, length_salt);
                 default:
                     valid = false;
                     throw new IllegalAccessError();
@@ -115,12 +114,12 @@ public class P2PASymmetricSecretMessageExchangerAgreement extends P2PLoginAgreem
     }
 
     @Override
-    protected void receiveData(int stepNumber, WrappedSecretData data) throws IOException {
+    protected void receiveData(int stepNumber, byte[] data) throws IOException {
         if (!valid)
             throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException());
 
 
-        if (data==null || data.getBytes().length==0)
+        if (data==null || data.length==0)
         {
             valid=false;
             throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException());
@@ -128,13 +127,13 @@ public class P2PASymmetricSecretMessageExchangerAgreement extends P2PLoginAgreem
         try {
             switch (stepNumber) {
                 case 0:
-                    p2PASymmetricSecretMessageExchanger.setDistantPublicKey(data.getBytes());
+                    p2PASymmetricSecretMessageExchanger.setDistantPublicKey(data);
                     break;
                 case 1:
                     if (bytesPassword != null)
-                        valid = p2PASymmetricSecretMessageExchanger.verifyDistantMessage(bytesPassword, 0, bytesPassword.length, salt, offset_salt, length_salt, data.getBytes(), 0, data.getBytes().length, passwordIsKey);
+                        valid = p2PASymmetricSecretMessageExchanger.verifyDistantMessage(bytesPassword, 0, bytesPassword.length, salt, offset_salt, length_salt, data, 0, data.length, passwordIsKey);
                     else
-                        valid = p2PASymmetricSecretMessageExchanger.verifyDistantMessage(charPassword, salt, offset_salt, length_salt, data.getBytes(), 0, data.getBytes().length);
+                        valid = p2PASymmetricSecretMessageExchanger.verifyDistantMessage(charPassword, salt, offset_salt, length_salt, data, 0, data.length);
                     break;
                 default:
                     valid = false;

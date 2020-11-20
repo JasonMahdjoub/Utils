@@ -34,25 +34,23 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
-import com.distrimind.util.data_buffers.WrappedSecretData;
-
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.util.Arrays;
 
 /**
- * 
+ *
  * @author Jason Mahdjoub
  * @version 3.0
  * @since Utils 3.15.0
  */
 public class P2PJPakeAndLoginAgreement extends P2PLoginAgreement {
-	
+
 	private final P2PJPAKESecretMessageExchanger jpake;
 	private final P2PLoginWithSymmetricSignature login;
 	/*P2PJPakeAndLoginAgreement(AbstractSecureRandom random, Serializable participantID, char[] message, SymmetricSecretKey secretKeyForSignature) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException {
-	
+
 		this(random, participantID, message, null, 0, 0, secretKeyForSignature);
 	}*/
 	@Override
@@ -69,7 +67,7 @@ public class P2PJPakeAndLoginAgreement extends P2PLoginAgreement {
 	}
 
 	P2PJPakeAndLoginAgreement(AbstractSecureRandom random, byte[] participantID, char[] message, byte[] salt,
-			int offset_salt, int len_salt, SymmetricSecretKey secretKeyForSignature) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
+							  int offset_salt, int len_salt, SymmetricSecretKey secretKeyForSignature) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
 		super(secretKeyForSignature==null?3:5, secretKeyForSignature==null?3:5);
 		jpake=new P2PJPAKESecretMessageExchanger(random, participantID, message.clone(), salt, offset_salt, len_salt);
 		if (secretKeyForSignature==null)
@@ -78,7 +76,7 @@ public class P2PJPakeAndLoginAgreement extends P2PLoginAgreement {
 			login=new P2PLoginWithSymmetricSignature(secretKeyForSignature, random);
 	}
 	/*P2PJPakeAndLoginAgreement(AbstractSecureRandom random, Serializable participantID, byte[] message, boolean messageIsKey, SymmetricSecretKey secretKeyForSignature) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException {
-		
+
 		this(random, participantID, message, 0, message.length,null, 0, 0, messageIsKey, secretKeyForSignature);
 	}*/
 	P2PJPakeAndLoginAgreement(AbstractSecureRandom random, byte[] participantID, byte[] message, int offset, int len, byte[] salt,
@@ -92,23 +90,23 @@ public class P2PJPakeAndLoginAgreement extends P2PLoginAgreement {
 	}
 	@Override
 	protected boolean isAgreementProcessValidImpl() {
-		
+
 		return jpake.isAgreementProcessValidImpl() && (login==null || login.isAgreementProcessValidImpl());
 	}
 	@Override
-	protected WrappedSecretData getDataToSend(int stepNumber) throws IOException {
+	protected byte[] getDataToSend(int stepNumber) throws IOException {
 		if (login!=null && stepNumber<2)
 			return login.getDataToSend();
 		else
 			return jpake.getDataToSend();
 	}
 	@Override
-	protected void receiveData(int stepNumber, WrappedSecretData data) throws IOException {
+	protected void receiveData(int stepNumber, byte[] data) throws IOException {
 		if (login!=null && stepNumber<2)
 			login.receiveData(data);
 		else
 			jpake.receiveData(data);
-		
+
 	}
 
 }

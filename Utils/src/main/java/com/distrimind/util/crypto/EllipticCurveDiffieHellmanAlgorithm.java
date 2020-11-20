@@ -34,22 +34,20 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
-import com.distrimind.util.data_buffers.WrappedData;
-import com.distrimind.util.data_buffers.WrappedSecretData;
-import com.distrimind.util.io.Integrity;
-import com.distrimind.util.io.MessageExternalizationException;
 import com.distrimind.bouncycastle.crypto.CryptoException;
 import com.distrimind.bouncycastle.jcajce.spec.UserKeyingMaterialSpec;
+import com.distrimind.util.data_buffers.WrappedData;
+import com.distrimind.util.io.Integrity;
+import com.distrimind.util.io.MessageExternalizationException;
 
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
-import java.util.Arrays;
 
 /**
- * 
+ *
  * @author Jason Mahdjoub
  * @version 3.0
  * @since Utils 2.9
@@ -88,7 +86,7 @@ public class EllipticCurveDiffieHellmanAlgorithm extends KeyAgreement {
 			throw new NullPointerException();
 		this.type = type;
 		this.randomForKeys=randomForKeys;
-		
+
 		this.keyingMaterial=keyingMaterial;
 		this.keySizeBits=keySizeBits;
 		reset();
@@ -100,12 +98,7 @@ public class EllipticCurveDiffieHellmanAlgorithm extends KeyAgreement {
 	{
 		derivedKey=null;
 		myKeyPair=null;
-		if (myPublicKeyBytes!=null)
-		{
-			Arrays.fill(myPublicKeyBytes.getBytes(), (byte)0);
-			myPublicKeyBytes=null;
-		}
-		
+
 	}
 
 
@@ -144,7 +137,7 @@ public class EllipticCurveDiffieHellmanAlgorithm extends KeyAgreement {
 		valid=true;
 
 	}
-	
+
 	private void setKeyPair(ASymmetricKeyPair keyPair)
 	{
 		if (keyPair==null)
@@ -153,18 +146,18 @@ public class EllipticCurveDiffieHellmanAlgorithm extends KeyAgreement {
 		myKeyPair = keyPair;
 		myPublicKeyBytes = myKeyPair.getASymmetricPublicKey().encode();
 	}
-	
+
 	/*private ASymmetricKeyPair getKeyPair()
 	{
 		return myKeyPair;
 	}*/
-	
+
 	private WrappedData getEncodedPublicKey()
 	{
 		return myPublicKeyBytes;
 	}
 
-	private void setDistantPublicKey(WrappedSecretData distantPublicKeyBytes, SymmetricEncryptionType symmetricEncryptionType, SymmetricAuthenticatedSignatureType symmetricSignatureType, byte[] keyingMaterial) throws IOException {
+	private void setDistantPublicKey(byte[] distantPublicKeyBytes, SymmetricEncryptionType symmetricEncryptionType, SymmetricAuthenticatedSignatureType symmetricSignatureType, byte[] keyingMaterial) throws IOException {
 		CodeProvider.ensureProviderLoaded(type.getCodeProvider());
 		try
 		{
@@ -181,7 +174,7 @@ public class EllipticCurveDiffieHellmanAlgorithm extends KeyAgreement {
 			ASymmetricPublicKey distantPublicKey=(ASymmetricPublicKey) AbstractKey.decode(distantPublicKeyBytes);
 			if (myKeyPair.getASymmetricPublicKey().equals(distantPublicKey))
 				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new InvalidKeyException("The local et distant public keys cannot be similar !"));
-	
+
 			AbstractKeyAgreement ka ;
 			if (symmetricEncryptionType==null)
 				ka = type.getKeyAgreementInstance(symmetricSignatureType);
@@ -237,12 +230,12 @@ public class EllipticCurveDiffieHellmanAlgorithm extends KeyAgreement {
 	}
 
 	@Override
-	protected WrappedSecretData getDataToSend(int stepNumber) throws IOException {
+	protected byte[] getDataToSend(int stepNumber) throws IOException {
 		if (!valid)
 			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException());
 
 		if (stepNumber == 0)
-			return getEncodedPublicKey().transformToSecretData();
+			return getEncodedPublicKey().getBytes().clone();
 		else {
 			valid = false;
 			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new IllegalAccessException());
@@ -251,7 +244,7 @@ public class EllipticCurveDiffieHellmanAlgorithm extends KeyAgreement {
 	}
 
 	@Override
-	protected void receiveData(int stepNumber, WrappedSecretData data) throws MessageExternalizationException {
+	protected void receiveData(int stepNumber, byte[] data) throws MessageExternalizationException {
 		if (!valid)
 			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException());
 

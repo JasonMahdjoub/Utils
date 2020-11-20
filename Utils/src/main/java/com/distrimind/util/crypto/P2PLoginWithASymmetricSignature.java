@@ -35,12 +35,12 @@ knowledge of the CeCILL-C license and that you accept its terms.
 package com.distrimind.util.crypto;
 
 
-import com.distrimind.util.data_buffers.WrappedSecretData;
 import com.distrimind.util.io.Integrity;
 import com.distrimind.util.io.MessageExternalizationException;
 import com.distrimind.bouncycastle.crypto.CryptoException;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 /**
  * @author Jason Mahdjoub
@@ -49,20 +49,19 @@ import java.io.IOException;
  */
 public class P2PLoginWithASymmetricSignature extends P2PLoginAgreement{
     private final IASymmetricPrivateKey privateKey;
-    private WrappedSecretData myMessage, otherMessage=null;
+    private byte[] myMessage, otherMessage=null;
     static final int messageSize=32;
     private boolean valid=true;
 
-	@Override
-	public void zeroize() {
-
-	    if (myMessage!=null)
-            myMessage.zeroize();
-	    if (otherMessage!=null)
-            otherMessage.zeroize();
-		myMessage=null;
-		otherMessage=null;
-	}
+    @Override
+    public void zeroize() {
+        if (myMessage!=null)
+            Arrays.fill(myMessage, (byte)0);
+        if (otherMessage!=null)
+            Arrays.fill(otherMessage, (byte)0);
+        myMessage=null;
+        otherMessage=null;
+    }
 
     @Override
     public boolean isPostQuantumAgreement() {
@@ -79,8 +78,8 @@ public class P2PLoginWithASymmetricSignature extends P2PLoginAgreement{
         }
 
         this.privateKey=keyPair.getASymmetricPrivateKey();
-        myMessage=new WrappedSecretData(new byte[messageSize]);
-        random.nextBytes(myMessage.getBytes());
+        myMessage=new byte[messageSize];
+        random.nextBytes(myMessage);
 
     }
 
@@ -90,7 +89,7 @@ public class P2PLoginWithASymmetricSignature extends P2PLoginAgreement{
     }
 
     @Override
-    protected WrappedSecretData getDataToSend(int stepNumber) throws IOException {
+    protected byte[] getDataToSend(int stepNumber) throws IOException {
         if (!valid)
             throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException());
 
@@ -105,9 +104,9 @@ public class P2PLoginWithASymmetricSignature extends P2PLoginAgreement{
                     }
                     ASymmetricAuthenticatedSignerAlgorithm signer = new ASymmetricAuthenticatedSignerAlgorithm(privateKey);
                     signer.init();
-                    signer.update(myMessage.getBytes());
-                    signer.update(otherMessage.getBytes());
-                    return new WrappedSecretData(signer.getSignature());
+                    signer.update(myMessage);
+                    signer.update(otherMessage);
+                    return signer.getSignature();
 
                 }
                 default:
@@ -124,7 +123,7 @@ public class P2PLoginWithASymmetricSignature extends P2PLoginAgreement{
     }
 
     @Override
-    protected void receiveData(int stepNumber, WrappedSecretData data) throws IOException {
+    protected void receiveData(int stepNumber, byte[] data) throws IOException {
         if (!valid)
             throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException());
 
@@ -137,7 +136,7 @@ public class P2PLoginWithASymmetricSignature extends P2PLoginAgreement{
                     valid=false;
                     throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException());
                 }
-                if (data.getBytes().length!=messageSize)
+                if (data.length!=messageSize)
                 {
                     valid=false;
                     throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException());
@@ -147,7 +146,7 @@ public class P2PLoginWithASymmetricSignature extends P2PLoginAgreement{
             break;
             case 1:
             {
-                if (data.getBytes().length!=0)
+                if (data.length!=0)
                 {
                     valid=false;
                     throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException());

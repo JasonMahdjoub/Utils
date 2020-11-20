@@ -35,13 +35,12 @@ knowledge of the CeCILL-C license and that you accept its terms.
 package com.distrimind.util.crypto;
 
 
-import com.distrimind.util.data_buffers.WrappedSecretData;
 import com.distrimind.util.io.Integrity;
 import com.distrimind.util.io.MessageExternalizationException;
 import com.distrimind.bouncycastle.crypto.CryptoException;
 
 import java.io.IOException;
-
+import java.util.Arrays;
 
 /**
  * @author Jason Mahdjoub
@@ -50,19 +49,19 @@ import java.io.IOException;
  */
 public class P2PLoginCheckerWithASymmetricSignature extends P2PLoginAgreement{
     private final IASymmetricPublicKey publicKey;
-    private WrappedSecretData myMessage, otherMessage=null;
+    private byte[] myMessage, otherMessage=null;
 
     private boolean valid=true;
 
-	@Override
-	public void zeroize() {
-	    if (myMessage!=null)
-		    myMessage.zeroize();
-		myMessage=null;
-		if (otherMessage!=null)
-		    otherMessage.zeroize();
-		otherMessage=null;
-	}
+    @Override
+    public void zeroize() {
+        if (myMessage!=null)
+            Arrays.fill(myMessage, (byte)0);
+        myMessage=null;
+        if (otherMessage!=null)
+            Arrays.fill(otherMessage, (byte)0);
+        otherMessage=null;
+    }
 
     @Override
     public boolean isPostQuantumAgreement() {
@@ -79,10 +78,10 @@ public class P2PLoginCheckerWithASymmetricSignature extends P2PLoginAgreement{
                 throw new IllegalArgumentException("The given public key is not usable for signature");
         }
         else if (((ASymmetricPublicKey) publicKey).getAuthenticatedSignatureAlgorithmType()==null)
-                throw new IllegalArgumentException("The given public key is not usable for signature");
+            throw new IllegalArgumentException("The given public key is not usable for signature");
         this.publicKey=publicKey;
-        myMessage=new WrappedSecretData(new byte[P2PLoginWithASymmetricSignature.messageSize]);
-        random.nextBytes(myMessage.getBytes());
+        myMessage=new byte[P2PLoginWithASymmetricSignature.messageSize];
+        random.nextBytes(myMessage);
 
     }
 
@@ -91,9 +90,9 @@ public class P2PLoginCheckerWithASymmetricSignature extends P2PLoginAgreement{
         return valid;
     }
 
-    private final static WrappedSecretData emptyTab=new WrappedSecretData(new byte[0]);
+    private final static byte[] emptyTab=new byte[0];
     @Override
-    protected WrappedSecretData getDataToSend(int stepNumber) throws IOException {
+    protected byte[] getDataToSend(int stepNumber) throws IOException {
         if (!valid)
             throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException());
 
@@ -112,14 +111,14 @@ public class P2PLoginCheckerWithASymmetricSignature extends P2PLoginAgreement{
     }
 
     @Override
-    protected void receiveData(int stepNumber, WrappedSecretData data) throws IOException {
+    protected void receiveData(int stepNumber, byte[] data) throws IOException {
         if (!valid)
             throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException());
 
         try {
             switch (stepNumber) {
                 case 0: {
-                    if (data.getBytes().length != P2PLoginWithASymmetricSignature.messageSize) {
+                    if (data.length != P2PLoginWithASymmetricSignature.messageSize) {
                         valid = false;
                         throw new CryptoException();
                     }
@@ -132,9 +131,9 @@ public class P2PLoginCheckerWithASymmetricSignature extends P2PLoginAgreement{
                         throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException());
                     }
                     ASymmetricAuthenticatedSignatureCheckerAlgorithm checker = new ASymmetricAuthenticatedSignatureCheckerAlgorithm(publicKey);
-                    checker.init(data.getBytes());
-                    checker.update(otherMessage.getBytes());
-                    checker.update(myMessage.getBytes());
+                    checker.init(data);
+                    checker.update(otherMessage);
+                    checker.update(myMessage);
 
                     valid = checker.verify();
                 }

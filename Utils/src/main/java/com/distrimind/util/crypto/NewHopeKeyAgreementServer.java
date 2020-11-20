@@ -35,7 +35,6 @@ knowledge of the CeCILL-C license and that you accept its terms.
 package com.distrimind.util.crypto;
 
 
-import com.distrimind.util.data_buffers.WrappedSecretData;
 import com.distrimind.util.io.Integrity;
 import com.distrimind.util.io.MessageExternalizationException;
 import com.distrimind.bouncycastle.crypto.CryptoException;
@@ -46,7 +45,7 @@ import java.io.IOException;
 import java.util.Arrays;
 
 /**
- * 
+ *
  * @author Jason Mahdjoub
  * @version 1.0
  * @since Utils 3.10.0
@@ -84,37 +83,37 @@ public class NewHopeKeyAgreementServer extends AbstractNewHopeKeyAgreement{
 		super(type, (short)(keySizeBits/8));
 		this.randomForKeys=randomForKeys;
 	}
-	
-	
-	public void setDataPhase1(WrappedSecretData data)
+
+
+	public void setDataPhase1(byte []data)
 	{
 		valid=false;
-        byte[] sharedValue = new byte[agreementSize];
-        byte[] publicKeyValue = new byte[SENDB_BYTES];
+		byte[] sharedValue = new byte[agreementSize];
+		byte[] publicKeyValue = new byte[SENDB_BYTES];
 
-        AbstractNewHopeKeyAgreement.sharedB(randomForKeys, sharedValue, publicKeyValue, data.getBytes());
+		AbstractNewHopeKeyAgreement.sharedB(randomForKeys, sharedValue, publicKeyValue, data);
 
-		
-        exchangePair=new ExchangePair(new NHPublicKeyParameters(publicKeyValue), sharedValue);
-        shared=exchangePair.getSharedValue();
-        assert shared!=null;
-        valid=true;
+
+		exchangePair=new ExchangePair(new NHPublicKeyParameters(publicKeyValue), sharedValue);
+		shared=exchangePair.getSharedValue();
+		assert shared!=null;
+		valid=true;
 	}
-	
-	public WrappedSecretData getDataPhase2()
+
+	public byte[] getDataPhase2()
 	{
 		valid=false;
-		WrappedSecretData res= new WrappedSecretData(((NHPublicKeyParameters)exchangePair.getPublicKey()).getPubData());
+		byte[] res= ((NHPublicKeyParameters)exchangePair.getPublicKey()).getPubData();
 		valid=true;
 		return res;
 	}
-	
+
 	@Override
 	protected boolean isAgreementProcessValidImpl() {
 		return valid;
 	}
 	@Override
-	protected WrappedSecretData getDataToSend(int stepNumber) throws IOException {
+	protected byte[] getDataToSend(int stepNumber) throws IOException {
 		if (!valid)
 			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException());
 
@@ -135,7 +134,7 @@ public class NewHopeKeyAgreementServer extends AbstractNewHopeKeyAgreement{
 
 	}
 	@Override
-	protected void receiveData(int stepNumber, WrappedSecretData data) throws IOException {
+	protected void receiveData(int stepNumber, byte[] data) throws IOException {
 		if (!valid)
 			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException());
 
@@ -153,7 +152,7 @@ public class NewHopeKeyAgreementServer extends AbstractNewHopeKeyAgreement{
 
 
 	}
-	
-    
-	
+
+
+
 }

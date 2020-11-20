@@ -34,7 +34,6 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
-import com.distrimind.util.data_buffers.WrappedSecretData;
 import com.distrimind.util.io.Integrity;
 import com.distrimind.util.io.MessageExternalizationException;
 import com.distrimind.bouncycastle.crypto.CryptoException;
@@ -50,7 +49,7 @@ import java.util.Arrays;
 import java.util.Base64;
 
 /**
- * 
+ *
  * @author Jason Mahdjoub
  * @version 4.0
  * @since Utils 2.9.0
@@ -84,7 +83,7 @@ public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
 		Arrays.fill(m, (byte)0);
 		return res;
 	}
-	
+
 	private char[] convertToChar(byte[] m)
 	{
 		char[] res=new char[m.length];
@@ -92,12 +91,12 @@ public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
 			res[i]=(char)m[i];
 		return res;
 	}
-	
+
 	private String getParticipantIDString(byte[] participantID)
 	{
 		return Base64.getUrlEncoder().encodeToString(participantID);
 	}
-	
+
 	P2PJPAKESecretMessageExchanger(AbstractSecureRandom secureRandom, byte[] participantID, char[] message, byte[] salt, int offset_salt,
 								   int len_salt) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
 		super(3, 3);
@@ -106,7 +105,7 @@ public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
 		if (salt != null && salt.length - offset_salt < len_salt)
 			throw new IllegalArgumentException("salt");
 
-		
+
 		jpake = new JPAKEParticipant(getParticipantIDString(participantID), getHashedPassword(message, salt, offset_salt, len_salt), JPAKEPrimeOrderGroups.NIST_3072, new SHA512Digest(),
 				secureRandom);
 		this.keyMaterial = null;
@@ -172,125 +171,125 @@ public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
 	}
 
 	@Override
-	protected WrappedSecretData getDataToSend(int stepNumber) throws IOException {
+	protected byte[] getDataToSend(int stepNumber) throws IOException {
 		valid=false;
 		switch(stepNumber)
 		{
-		case 0:
-			try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-				try (DataOutputStream oos = new DataOutputStream(baos)) {
+			case 0:
+				try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+					try (DataOutputStream oos = new DataOutputStream(baos)) {
 
-					JPAKERound1Payload toSerialize = jpake.createRound1PayloadToSend();
-					byte[] tab=toSerialize.getGx1().toByteArray();
-					if (tab.length>Short.MAX_VALUE)
-						throw new IOException();
-					oos.writeShort(tab.length);
-					oos.write(tab);
-					tab=toSerialize.getGx2().toByteArray();
-					if (tab.length>Short.MAX_VALUE)
-						throw new IOException();
-					oos.writeShort(tab.length);
-					oos.write(tab);
-
-					BigInteger[] b=toSerialize.getKnowledgeProofForX1();
-					if (b==null)
-						oos.writeInt(0);
-					else
-						oos.writeInt(b.length);
-					if (b==null)
-						throw new IOException();
-
-					for (BigInteger bi : b) {
-						tab=bi.toByteArray();
+						JPAKERound1Payload toSerialize = jpake.createRound1PayloadToSend();
+						byte[] tab=toSerialize.getGx1().toByteArray();
 						if (tab.length>Short.MAX_VALUE)
 							throw new IOException();
 						oos.writeShort(tab.length);
 						oos.write(tab);
-					}
-					b=toSerialize.getKnowledgeProofForX2();
-					if (b==null)
-						oos.writeInt(0);
-					else
-						oos.writeInt(b.length);
-					if (b==null)
-						throw new IOException();
-
-					for (BigInteger bi : b) {
-						tab=bi.toByteArray();
+						tab=toSerialize.getGx2().toByteArray();
 						if (tab.length>Short.MAX_VALUE)
 							throw new IOException();
 						oos.writeShort(tab.length);
 						oos.write(tab);
 
-					}
-					tab=toSerialize.getParticipantId().getBytes(StandardCharsets.UTF_8);
-					if (tab.length>Short.MAX_VALUE)
-						throw new IOException();
-					oos.writeShort(tab.length);
-					oos.write(tab);
-				}
-				valid=true;
-				return new WrappedSecretData(baos.toByteArray());
-			}
-			
-		case 1:
-			try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-				try (DataOutputStream oos = new DataOutputStream(baos)) {
+						BigInteger[] b=toSerialize.getKnowledgeProofForX1();
+						if (b==null)
+							oos.writeInt(0);
+						else
+							oos.writeInt(b.length);
+						if (b==null)
+							throw new IOException();
 
-					JPAKERound2Payload toSerialize = jpake.createRound2PayloadToSend();
-					byte[] tab=toSerialize.getA().toByteArray();
-					if (tab.length>Short.MAX_VALUE)
-						throw new IOException();
-					oos.writeShort(tab.length);
-					oos.write(tab);
+						for (BigInteger bi : b) {
+							tab=bi.toByteArray();
+							if (tab.length>Short.MAX_VALUE)
+								throw new IOException();
+							oos.writeShort(tab.length);
+							oos.write(tab);
+						}
+						b=toSerialize.getKnowledgeProofForX2();
+						if (b==null)
+							oos.writeInt(0);
+						else
+							oos.writeInt(b.length);
+						if (b==null)
+							throw new IOException();
 
-					BigInteger[] b=toSerialize.getKnowledgeProofForX2s();
-					if (b==null)
-						oos.writeInt(0);
-					else
-						oos.writeInt(b.length);
-					if (b==null)
-						throw new IOException();
+						for (BigInteger bi : b) {
+							tab=bi.toByteArray();
+							if (tab.length>Short.MAX_VALUE)
+								throw new IOException();
+							oos.writeShort(tab.length);
+							oos.write(tab);
 
-					for (BigInteger bi : b) {
-						tab=bi.toByteArray();
+						}
+						tab=toSerialize.getParticipantId().getBytes(StandardCharsets.UTF_8);
 						if (tab.length>Short.MAX_VALUE)
 							throw new IOException();
 						oos.writeShort(tab.length);
 						oos.write(tab);
 					}
-					tab=toSerialize.getParticipantId().getBytes(StandardCharsets.UTF_8);
-					if (tab.length>Short.MAX_VALUE)
-						throw new IOException();
-					oos.writeShort(tab.length);
-					oos.write(tab);
+					valid=true;
+					return baos.toByteArray();
 				}
-				valid=true;
-				return new WrappedSecretData(baos.toByteArray());
-			}
-			
-		case 2:
-			try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-				try (DataOutputStream oos = new DataOutputStream(baos)) {
 
-					keyMaterial = jpake.calculateKeyingMaterial();
-					JPAKERound3Payload toSerialize = jpake.createRound3PayloadToSend(keyMaterial);
-					byte[] tab=toSerialize.getMacTag().toByteArray();
-					if (tab.length>Short.MAX_VALUE)
-						throw new IOException();
-					oos.writeShort(tab.length);
-					oos.write(tab);
+			case 1:
+				try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+					try (DataOutputStream oos = new DataOutputStream(baos)) {
 
-					tab=toSerialize.getParticipantId().getBytes(StandardCharsets.UTF_8);
-					if (tab.length>Short.MAX_VALUE)
-						throw new IOException();
-					oos.writeShort(tab.length);
-					oos.write(tab);
+						JPAKERound2Payload toSerialize = jpake.createRound2PayloadToSend();
+						byte[] tab=toSerialize.getA().toByteArray();
+						if (tab.length>Short.MAX_VALUE)
+							throw new IOException();
+						oos.writeShort(tab.length);
+						oos.write(tab);
+
+						BigInteger[] b=toSerialize.getKnowledgeProofForX2s();
+						if (b==null)
+							oos.writeInt(0);
+						else
+							oos.writeInt(b.length);
+						if (b==null)
+							throw new IOException();
+
+						for (BigInteger bi : b) {
+							tab=bi.toByteArray();
+							if (tab.length>Short.MAX_VALUE)
+								throw new IOException();
+							oos.writeShort(tab.length);
+							oos.write(tab);
+						}
+						tab=toSerialize.getParticipantId().getBytes(StandardCharsets.UTF_8);
+						if (tab.length>Short.MAX_VALUE)
+							throw new IOException();
+						oos.writeShort(tab.length);
+						oos.write(tab);
+					}
+					valid=true;
+					return baos.toByteArray();
 				}
-				valid=true;
-				return new WrappedSecretData(baos.toByteArray());
-			}
-			
+
+			case 2:
+				try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+					try (DataOutputStream oos = new DataOutputStream(baos)) {
+
+						keyMaterial = jpake.calculateKeyingMaterial();
+						JPAKERound3Payload toSerialize = jpake.createRound3PayloadToSend(keyMaterial);
+						byte[] tab=toSerialize.getMacTag().toByteArray();
+						if (tab.length>Short.MAX_VALUE)
+							throw new IOException();
+						oos.writeShort(tab.length);
+						oos.write(tab);
+
+						tab=toSerialize.getParticipantId().getBytes(StandardCharsets.UTF_8);
+						if (tab.length>Short.MAX_VALUE)
+							throw new IOException();
+						oos.writeShort(tab.length);
+						oos.write(tab);
+					}
+					valid=true;
+					return baos.toByteArray();
+				}
+
 			default:
 				throw new IllegalAccessError();
 
@@ -298,199 +297,199 @@ public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
 	}
 
 	@Override
-	protected void receiveData(int stepNumber, WrappedSecretData dataReceived) throws IOException {
+	protected void receiveData(int stepNumber, byte[] dataReceived) throws IOException {
 		valid=false;
 		switch(stepNumber)
 		{
-		case 0:
-			try (ByteArrayInputStream bais = new ByteArrayInputStream(dataReceived.getBytes())) {
-				try (DataInputStream ois = new DataInputStream(bais)) {
-					JPAKERound1Payload r1;
-					try
-					{
-						short s=ois.readShort();
-						if (s<=0)
-							throw new IOException();
-						byte[] tab=new byte[s];
-						ois.readFully(tab);
-						BigInteger gx1 = new BigInteger(tab);
-
-						s=ois.readShort();
-						if (s<=0)
-							throw new IOException();
-						tab=new byte[s];
-						ois.readFully(tab);
-						BigInteger gx2 = new BigInteger(tab);
-
-						int size=ois.readInt();
-						BigInteger[] knowledgeProofForX1 = null;
-						if (size>0)
+			case 0:
+				try (ByteArrayInputStream bais = new ByteArrayInputStream(dataReceived)) {
+					try (DataInputStream ois = new DataInputStream(bais)) {
+						JPAKERound1Payload r1;
+						try
 						{
-							if (size>100)
-								throw new CryptoException("illegal argument exception");
-							knowledgeProofForX1=new BigInteger[size];
-							for (int i=0;i<size;i++) {
-								s=ois.readShort();
-								if (s<=0)
-									throw new IOException();
-								tab=new byte[s];
-								ois.readFully(tab);
-								knowledgeProofForX1[i] = new BigInteger(tab);
+							short s=ois.readShort();
+							if (s<=0)
+								throw new IOException();
+							byte[] tab=new byte[s];
+							ois.readFully(tab);
+							BigInteger gx1 = new BigInteger(tab);
+
+							s=ois.readShort();
+							if (s<=0)
+								throw new IOException();
+							tab=new byte[s];
+							ois.readFully(tab);
+							BigInteger gx2 = new BigInteger(tab);
+
+							int size=ois.readInt();
+							BigInteger[] knowledgeProofForX1 = null;
+							if (size>0)
+							{
+								if (size>100)
+									throw new CryptoException("illegal argument exception");
+								knowledgeProofForX1=new BigInteger[size];
+								for (int i=0;i<size;i++) {
+									s=ois.readShort();
+									if (s<=0)
+										throw new IOException();
+									tab=new byte[s];
+									ois.readFully(tab);
+									knowledgeProofForX1[i] = new BigInteger(tab);
+								}
 							}
+							size=ois.readInt();
+							BigInteger[] knowledgeProofForX2 = null;
+							if (size>0)
+							{
+								if (size>100)
+									throw new CryptoException("illegal argument exception");
+								knowledgeProofForX2=new BigInteger[size];
+								for (int i=0;i<size;i++) {
+									s=ois.readShort();
+									if (s<=0)
+										throw new IOException();
+									tab=new byte[s];
+									ois.readFully(tab);
+									knowledgeProofForX2[i] = new BigInteger(tab);
+								}
+							}
+							s=ois.readShort();
+							if (s<=0)
+								throw new IOException();
+							tab=new byte[s];
+							ois.readFully(tab);
+							String pid=new String(tab, StandardCharsets.UTF_8);
+							if (knowledgeProofForX1==null)
+								throw new IOException();
+							if (knowledgeProofForX2==null)
+								throw new IOException();
+							r1=new JPAKERound1Payload(pid, gx1, gx2, knowledgeProofForX1, knowledgeProofForX2);
 						}
-						size=ois.readInt();
-						BigInteger[] knowledgeProofForX2 = null;
-						if (size>0)
+						catch(Exception e)
 						{
-							if (size>100)
-								throw new CryptoException("illegal argument exception");
-							knowledgeProofForX2=new BigInteger[size];
-							for (int i=0;i<size;i++) {
-								s=ois.readShort();
-								if (s<=0)
-									throw new IOException();
-								tab=new byte[s];
-								ois.readFully(tab);
-								knowledgeProofForX2[i] = new BigInteger(tab);
-							}
+							valid=false;
+							throw new CryptoException("data received is not a valid instance of JPAKERound1Payload", e);
 						}
-						s=ois.readShort();
-						if (s<=0)
-							throw new IOException();
-						tab=new byte[s];
-						ois.readFully(tab);
-						String pid=new String(tab, StandardCharsets.UTF_8);
-						if (knowledgeProofForX1==null)
-							throw new IOException();
-						if (knowledgeProofForX2==null)
-							throw new IOException();
-						r1=new JPAKERound1Payload(pid, gx1, gx2, knowledgeProofForX1, knowledgeProofForX2);
+						jpake.validateRound1PayloadReceived(r1);
 					}
-					catch(Exception e)
-					{
-						valid=false;
-						throw new CryptoException("data received is not a valid instance of JPAKERound1Payload", e);
-					}
-					jpake.validateRound1PayloadReceived(r1);
 				}
-			}
-			catch (Exception e)
-			{
-				valid = false;
-				if (e instanceof CryptoException)
-					throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, e);
-				else
-					throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException("", e));
-			}
-			break;
-		case 1:
-			try (ByteArrayInputStream bais = new ByteArrayInputStream(dataReceived.getBytes())) {
-				try (DataInputStream ois = new DataInputStream(bais)) {
-					JPAKERound2Payload r2;
-					try
-					{
-						short s=ois.readShort();
-						if (s<=0)
-							throw new IOException();
-						byte[] tab=new byte[s];
-						ois.readFully(tab);
-						BigInteger A = new BigInteger(tab);
-
-
-						int size=ois.readInt();
-						BigInteger[] knowledgeProofForX2s = null;
-						if (size>0)
+				catch (Exception e)
+				{
+					valid = false;
+					if (e instanceof CryptoException)
+						throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, e);
+					else
+						throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException("", e));
+				}
+				break;
+			case 1:
+				try (ByteArrayInputStream bais = new ByteArrayInputStream(dataReceived)) {
+					try (DataInputStream ois = new DataInputStream(bais)) {
+						JPAKERound2Payload r2;
+						try
 						{
-							if (size>100)
-								throw new CryptoException("illegal argument exception");
-							knowledgeProofForX2s=new BigInteger[size];
-							for (int i=0;i<size;i++) {
-								s=ois.readShort();
-								if (s<=0)
-									throw new IOException();
-								tab=new byte[s];
-								ois.readFully(tab);
-								knowledgeProofForX2s[i] = new BigInteger(tab);
+							short s=ois.readShort();
+							if (s<=0)
+								throw new IOException();
+							byte[] tab=new byte[s];
+							ois.readFully(tab);
+							BigInteger A = new BigInteger(tab);
+
+
+							int size=ois.readInt();
+							BigInteger[] knowledgeProofForX2s = null;
+							if (size>0)
+							{
+								if (size>100)
+									throw new CryptoException("illegal argument exception");
+								knowledgeProofForX2s=new BigInteger[size];
+								for (int i=0;i<size;i++) {
+									s=ois.readShort();
+									if (s<=0)
+										throw new IOException();
+									tab=new byte[s];
+									ois.readFully(tab);
+									knowledgeProofForX2s[i] = new BigInteger(tab);
+								}
 							}
+							s=ois.readShort();
+							if (s<=0)
+								throw new IOException();
+							tab=new byte[s];
+							ois.readFully(tab);
+							String pid=new String(tab, StandardCharsets.UTF_8);
+
+							if (knowledgeProofForX2s==null)
+								throw new IOException();
+
+							r2=new JPAKERound2Payload(pid, A, knowledgeProofForX2s);
 						}
-						s=ois.readShort();
-						if (s<=0)
-							throw new IOException();
-						tab=new byte[s];
-						ois.readFully(tab);
-						String pid=new String(tab, StandardCharsets.UTF_8);
-
-						if (knowledgeProofForX2s==null)
-							throw new IOException();
-
-						r2=new JPAKERound2Payload(pid, A, knowledgeProofForX2s);
+						catch(Exception e)
+						{
+							valid=false;
+							throw new CryptoException("data received is not a valid instance of JPAKERound2Payload", e);
+						}
+						jpake.validateRound2PayloadReceived(r2);
 					}
-					catch(Exception e)
-					{
-						valid=false;
-						throw new CryptoException("data received is not a valid instance of JPAKERound2Payload", e);
-					}
-					jpake.validateRound2PayloadReceived(r2);
 				}
-			}
-			catch (Exception e)
-			{
-				valid = false;
-				if (e instanceof CryptoException)
-					throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, e);
-				else
-					throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException("", e));
-			}
-			break;
-		case 2:
-			try (ByteArrayInputStream bais = new ByteArrayInputStream(dataReceived.getBytes())) {
-				try (DataInputStream ois = new DataInputStream(bais)) {
-					JPAKERound3Payload r3;
-					try
-					{
-						short s=ois.readShort();
-						if (s<=0)
-							throw new IOException();
-						byte[] tab=new byte[s];
-						ois.readFully(tab);
-						BigInteger magTag = new BigInteger(tab);
-
-
-						s=ois.readShort();
-						if (s<=0)
-							throw new IOException();
-						tab=new byte[s];
-						ois.readFully(tab);
-						String pid=new String(tab, StandardCharsets.UTF_8);
-
-						r3=new JPAKERound3Payload(pid, magTag);
-					}
-					catch(Exception e)
-					{
-						valid=false;
-						throw new CryptoException("data received is not a valid instance of JPAKERound2Payload", e);
-					}
-					
-					jpake.validateRound3PayloadReceived(r3, keyMaterial);
+				catch (Exception e)
+				{
+					valid = false;
+					if (e instanceof CryptoException)
+						throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, e);
+					else
+						throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException("", e));
 				}
-			}
-			catch (Exception e)
-			{
-				valid = false;
-				if (e instanceof CryptoException)
-					throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, e);
-				else
-					throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException("", e));
-			}
-			break;
-		default:
-			throw new IllegalAccessError();
-			
-			
+				break;
+			case 2:
+				try (ByteArrayInputStream bais = new ByteArrayInputStream(dataReceived)) {
+					try (DataInputStream ois = new DataInputStream(bais)) {
+						JPAKERound3Payload r3;
+						try
+						{
+							short s=ois.readShort();
+							if (s<=0)
+								throw new IOException();
+							byte[] tab=new byte[s];
+							ois.readFully(tab);
+							BigInteger magTag = new BigInteger(tab);
+
+
+							s=ois.readShort();
+							if (s<=0)
+								throw new IOException();
+							tab=new byte[s];
+							ois.readFully(tab);
+							String pid=new String(tab, StandardCharsets.UTF_8);
+
+							r3=new JPAKERound3Payload(pid, magTag);
+						}
+						catch(Exception e)
+						{
+							valid=false;
+							throw new CryptoException("data received is not a valid instance of JPAKERound2Payload", e);
+						}
+
+						jpake.validateRound3PayloadReceived(r3, keyMaterial);
+					}
+				}
+				catch (Exception e)
+				{
+					valid = false;
+					if (e instanceof CryptoException)
+						throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, e);
+					else
+						throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException("", e));
+				}
+				break;
+			default:
+				throw new IllegalAccessError();
+
+
 		}
 		valid=true;
 	}
-	
+
 	@Override
 	public void zeroize()
 	{
@@ -500,12 +499,12 @@ public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
 				char[] chars = (char[]) jpakeFieldPassword.get(jpake);
 				if (chars!=null)
 					Arrays.fill(chars, (char)0);
-				
-				
+
+
 			} catch (IllegalArgumentException | IllegalAccessException e) {
 				e.printStackTrace();
 			}
-			
+
 			jpake=null;
 		}
 		keyMaterial=null;
@@ -525,14 +524,14 @@ public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
 	@SuppressWarnings("SameParameterValue")
 	private static Field getField(final Class<?> c, final String fieldName) {
 		try {
-			
+
 			return AccessController.doPrivileged((PrivilegedExceptionAction<Field>) () -> {
 				Field m = c.getDeclaredField(fieldName);
 				m.setAccessible(true);
 				return m;
 			});
 
-				
+
 		} catch (SecurityException | PrivilegedActionException  e) {
 			e.printStackTrace();
 			System.exit(-1);

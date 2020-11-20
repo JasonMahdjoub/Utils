@@ -35,11 +35,11 @@ The fact that you are presently reading this means that you have had
 knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-import com.distrimind.bouncycastle.crypto.CryptoException;
 import com.distrimind.util.Bits;
 import com.distrimind.util.data_buffers.WrappedSecretData;
 import com.distrimind.util.io.Integrity;
 import com.distrimind.util.io.MessageExternalizationException;
+import com.distrimind.bouncycastle.crypto.CryptoException;
 
 import javax.crypto.Cipher;
 import java.io.IOException;
@@ -120,9 +120,9 @@ public class HybridKeyAgreement extends KeyAgreement{
 	}
 
 	@Override
-	protected WrappedSecretData getDataToSend(int stepNumber) throws IOException {
+	protected byte[] getDataToSend(int stepNumber) throws IOException {
 		try {
-			WrappedSecretData nonPQC = null, PQC = null;
+			byte[] nonPQC = null, PQC = null;
 			boolean nonPQCb=false, PQCb=false;
 			if (!nonPQCKeyAgreement.hasFinishedSend()) {
 				nonPQC = nonPQCKeyAgreement.getDataToSend();
@@ -133,11 +133,11 @@ public class HybridKeyAgreement extends KeyAgreement{
 				PQCb = true;
 			}
 			if (nonPQCb && PQCb) {
-				byte[] res = new byte[nonPQC.getBytes().length + PQC.getBytes().length + 3];
-				Bits.putPositiveInteger(res, 0, nonPQC.getBytes().length, 3);
-				System.arraycopy(nonPQC.getBytes(), 0, res, 3, nonPQC.getBytes().length);
-				System.arraycopy(PQC.getBytes(), 0, res, 3 + nonPQC.getBytes().length, PQC.getBytes().length);
-				return new WrappedSecretData(res);
+				byte[] res = new byte[nonPQC.length + PQC.length + 3];
+				Bits.putPositiveInteger(res, 0, nonPQC.length, 3);
+				System.arraycopy(nonPQC, 0, res, 3, nonPQC.length);
+				System.arraycopy(PQC, 0, res, 3 + nonPQC.length, PQC.length);
+				return res;
 			} else if (nonPQCb)
 				return nonPQC;
 			else
@@ -157,17 +157,17 @@ public class HybridKeyAgreement extends KeyAgreement{
 	}
 
 	@Override
-	protected void receiveData(int stepNumber, WrappedSecretData data) throws IOException {
+	protected void receiveData(int stepNumber, byte[] data) throws IOException {
 		try {
-			WrappedSecretData nonPQC = null, PQC = null;
+			byte[] nonPQC = null, PQC = null;
 			if (!nonPQCKeyAgreement.hasFinishedReception() && !PQCKeyAgreement.hasFinishedReception()) {
-				int s = (int) Bits.getPositiveInteger(data.getBytes(), 0, 3);
-				if (s + 36 > data.getBytes().length)
+				int s = (int) Bits.getPositiveInteger(data, 0, 3);
+				if (s + 36 > data.length)
 					throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException());
-				nonPQC = new WrappedSecretData(new byte[s]);
-				PQC = new WrappedSecretData(new byte[data.getBytes().length - s - 3]);
-				System.arraycopy(data.getBytes(), 3, nonPQC.getBytes(), 0, nonPQC.getBytes().length);
-				System.arraycopy(data.getBytes(), 3 + s, PQC.getBytes(), 0, PQC.getBytes().length);
+				nonPQC = new byte[s];
+				PQC = new byte[data.length - s - 3];
+				System.arraycopy(data, 3, nonPQC, 0, nonPQC.length);
+				System.arraycopy(data, 3 + s, PQC, 0, PQC.length);
 			} else if (!nonPQCKeyAgreement.hasFinishedReception())
 				nonPQC = data;
 			else
