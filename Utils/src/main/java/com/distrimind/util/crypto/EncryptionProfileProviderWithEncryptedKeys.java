@@ -7,36 +7,61 @@ import java.io.IOException;
  * @version 1.0
  * @since Utils 5.10.0
  */
-public interface EncryptionProfileProviderWithEncryptedKeys extends EncryptionProfileProvider{
+public abstract class EncryptionProfileProviderWithEncryptedKeys implements EncryptionProfileProvider{
 
-	WrappedEncryptedSymmetricSecretKey getEncryptedSecretKeyForSignature(short keyID, boolean duringDecryptionPhase);
-	WrappedEncryptedSymmetricSecretKey getEncryptedSecretKeyForEncryption(short keyID, boolean duringDecryptionPhase);
-	WrappedEncryptedASymmetricPrivateKey getEncryptedPrivateKeyForSignature(short keyID);
-	KeyWrapperAlgorithm getKeyWrapperAlgorithm();
+	private KeyWrapperAlgorithm keyWrapperAlgorithm=null;
+
+	public abstract WrappedEncryptedSymmetricSecretKey getEncryptedSecretKeyForSignature(short keyID, boolean duringDecryptionPhase);
+	public abstract WrappedEncryptedSymmetricSecretKey getEncryptedSecretKeyForEncryption(short keyID, boolean duringDecryptionPhase);
+	public abstract WrappedEncryptedASymmetricPrivateKey getEncryptedPrivateKeyForSignature(short keyID);
+	public abstract KeyWrapperAlgorithm getKeyWrapperAlgorithm();
+
+	private KeyWrapperAlgorithm loadKeyWrapperAlgorithm()
+	{
+		if (keyWrapperAlgorithm==null)
+			keyWrapperAlgorithm=getKeyWrapperAlgorithm();
+		return keyWrapperAlgorithm;
+	}
 
 
 	@Override
-	default IASymmetricPrivateKey getPrivateKeyForSignature(short keyID) throws IOException
+	public IASymmetricPrivateKey getPrivateKeyForSignature(short keyID) throws IOException
 	{
-		KeyWrapperAlgorithm kwa=getKeyWrapperAlgorithm();
+		KeyWrapperAlgorithm kwa=loadKeyWrapperAlgorithm();
 		WrappedEncryptedASymmetricPrivateKey wk=getEncryptedPrivateKeyForSignature(keyID);
 		return kwa.unwrap(wk);
 	}
 
 	@Override
-	default SymmetricSecretKey getSecretKeyForSignature(short keyID, boolean duringDecryptionPhase) throws IOException
+	public SymmetricSecretKey getSecretKeyForSignature(short keyID, boolean duringDecryptionPhase) throws IOException
 	{
-		KeyWrapperAlgorithm kwa=getKeyWrapperAlgorithm();
+		KeyWrapperAlgorithm kwa=loadKeyWrapperAlgorithm();
 		WrappedEncryptedSymmetricSecretKey wk=getEncryptedSecretKeyForSignature(keyID, duringDecryptionPhase);
 		return kwa.unwrap(wk);
 	}
 
 	@Override
-	default SymmetricSecretKey getSecretKeyForEncryption(short keyID, boolean duringDecryptionPhase) throws IOException
+	public SymmetricSecretKey getSecretKeyForEncryption(short keyID, boolean duringDecryptionPhase) throws IOException
 	{
-		KeyWrapperAlgorithm kwa=getKeyWrapperAlgorithm();
+		KeyWrapperAlgorithm kwa=loadKeyWrapperAlgorithm();
 		WrappedEncryptedSymmetricSecretKey wk=getEncryptedSecretKeyForEncryption(keyID, duringDecryptionPhase);
 		return kwa.unwrap(wk);
 
+	}
+
+	public void lock()
+	{
+		keyWrapperAlgorithm=null;
+	}
+
+	@Override
+	public void unlock()
+	{
+		loadKeyWrapperAlgorithm();
+	}
+
+	@Override
+	public final boolean isLockable() {
+		return true;
 	}
 }

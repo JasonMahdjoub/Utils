@@ -10,28 +10,29 @@ import java.io.IOException;
  * @version 1.0
  * @since Utils 5.10.0
  */
-public abstract class LockableEncryptionProfileProvider implements EncryptionProfileProvider {
+public final class SessionLockableEncryptionProfileProvider implements EncryptionProfileProvider {
 	private static final long MIN_UNLOCK_DURATION_IN_MS=2000;
 	private long lastUnlockTimeUTCInMs;
 	private final long unlockDurationInMs;
 	private final boolean permitLiveUnlock;
+	private final EncryptionProfileProvider encryptionProfileProvider;
 
-	protected LockableEncryptionProfileProvider(long unlockDurationInMs, boolean permitLiveUnlock) {
+
+	protected SessionLockableEncryptionProfileProvider(EncryptionProfileProvider encryptionProfileProvider, long unlockDurationInMs, boolean permitLiveUnlock) {
+		if (encryptionProfileProvider==null)
+			throw new NullPointerException();
 		if (unlockDurationInMs<MIN_UNLOCK_DURATION_IN_MS)
 			unlockDurationInMs=MIN_UNLOCK_DURATION_IN_MS;
 		lastUnlockTimeUTCInMs=Long.MIN_VALUE;
 		this.unlockDurationInMs=unlockDurationInMs;
 		this.permitLiveUnlock=permitLiveUnlock;
+		this.encryptionProfileProvider=encryptionProfileProvider;
 	}
 
 	private void checkProviderLocked() throws MessageExternalizationException {
 		if (isProviderLocked()) {
 			if (permitLiveUnlock) {
-				try {
-					unlock();
-				} catch (IOException e) {
-					throw new MessageExternalizationException(Integrity.FAIL, e);
-				}
+				unlock();
 			}
 			else
 				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
@@ -39,19 +40,11 @@ public abstract class LockableEncryptionProfileProvider implements EncryptionPro
 	}
 
 
-
-	protected abstract IASymmetricPrivateKey getProtectedPrivateKeyForSignature(short keyID) throws IOException;
-
-	protected abstract SymmetricSecretKey getProtectedSecretKeyForSignature(short keyID, boolean duringDecryptionPhase) throws IOException;
-	protected abstract SymmetricSecretKey getProtectedSecretKeyForEncryption(short keyID, boolean duringDecryptionPhase) throws IOException;
-
-
-
 	@Override
 	public final IASymmetricPrivateKey getPrivateKeyForSignature(short keyID) throws IOException
 	{
 		checkProviderLocked();
-		return getProtectedPrivateKeyForSignature(keyID);
+		return encryptionProfileProvider.getPrivateKeyForSignature(keyID);
 	}
 
 
@@ -60,23 +53,35 @@ public abstract class LockableEncryptionProfileProvider implements EncryptionPro
 	{
 		if (!duringDecryptionPhase)
 			checkProviderLocked();
-		return getProtectedSecretKeyForSignature(keyID, duringDecryptionPhase);
+		return encryptionProfileProvider.getSecretKeyForSignature(keyID, duringDecryptionPhase);
 	}
 	@Override
 	public final SymmetricSecretKey getSecretKeyForEncryption(short keyID, boolean duringDecryptionPhase) throws IOException
 	{
 		if (!duringDecryptionPhase)
 			checkProviderLocked();
-		return getProtectedSecretKeyForEncryption(keyID, duringDecryptionPhase);
+		return encryptionProfileProvider.getSecretKeyForEncryption(keyID, duringDecryptionPhase);
+	}
+
+	@Override
+	public MessageDigestType getMessageDigest(short keyID, boolean duringDecryptionPhase) throws IOException {
+		return encryptionProfileProvider.getMessageDigest(keyID, duringDecryptionPhase);
+	}
+
+	@Override
+	public IASymmetricPublicKey getPublicKeyForSignature(short keyID) throws IOException {
+		return encryptionProfileProvider.getPublicKeyForSignature(keyID);
+	}
+
+	@Override
+	public short getDefaultKeyID() {
+		return encryptionProfileProvider.getDefaultKeyID();
 	}
 
 
-	public abstract void unlockImpl() throws IOException;
-	public abstract void lockImpl();
-	public abstract boolean isProviderLockedImpl();
-
-	public final void unlock() throws IOException {
-		unlockImpl();
+	@Override
+	public final void unlock() {
+		encryptionProfileProvider.unlock();
 		lastUnlockTimeUTCInMs=System.currentTimeMillis();
 	}
 
@@ -88,13 +93,15 @@ public abstract class LockableEncryptionProfileProvider implements EncryptionPro
 
 	@Override
 	public final boolean isProviderLocked() {
-		return isProviderLockedImpl() || System.currentTimeMillis() - unlockDurationInMs >= lastUnlockTimeUTCInMs;
+		return System.currentTimeMillis() - unlockDurationInMs >= lastUnlockTimeUTCInMs;
 	}
 
 	@Override
 	public final void lock()
 	{
-		lockImpl();
+		encryptionProfileProvider.lock();
 		lastUnlockTimeUTCInMs=Long.MIN_VALUE;
 	}
+
+
 }

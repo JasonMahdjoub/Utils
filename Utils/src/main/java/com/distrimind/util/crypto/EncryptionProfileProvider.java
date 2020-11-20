@@ -60,6 +60,10 @@ public interface EncryptionProfileProvider {
 
 	}
 
+	default void unlock() {
+
+	}
+
 	MessageDigestType getMessageDigest(short keyID, boolean duringDecryptionPhase) throws IOException;
 	IASymmetricPrivateKey getPrivateKeyForSignature(short keyID) throws IOException;
 	IASymmetricPublicKey getPublicKeyForSignature(short keyID) throws IOException;
