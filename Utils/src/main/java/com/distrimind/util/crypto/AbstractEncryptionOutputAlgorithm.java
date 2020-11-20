@@ -39,6 +39,7 @@ import com.distrimind.util.io.*;
 
 import javax.crypto.Cipher;
 import java.io.IOException;
+import java.util.Arrays;
 
 /**
  * 
@@ -46,7 +47,7 @@ import java.io.IOException;
  * @version 5.0
  * @since Utils 1.5
  */
-public abstract class AbstractEncryptionOutputAlgorithm {
+public abstract class AbstractEncryptionOutputAlgorithm implements Zeroizable {
 	final static int BUFFER_SIZE = FileTools.BUFFER_SIZE;
 
 	protected final AbstractCipher cipher;
@@ -58,7 +59,20 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 	protected int maxEncryptedPartLength;
 	private final byte[] one=new byte[1];
 	protected final byte[] iv ;
-	
+
+	@Override
+	public void zeroize() {
+		if (buffer!=null) {
+			Arrays.fill(buffer, (byte) 0);
+			buffer = null;
+		}
+	}
+
+	@Override
+	protected void finalize() {
+		zeroize();
+	}
+
 	public byte getBlockModeCounterBytes() {
 		return (byte)0;
 	}
@@ -93,6 +107,7 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 		{
 			bol=(int) getOutputSizeAfterEncryption(bufferInSize =4096);
 		}
+		zeroize();
 		buffer=new byte[bol];
 	}
 	
@@ -293,6 +308,7 @@ public abstract class AbstractEncryptionOutputAlgorithm {
 				if (len> bufferInSize) {
 					int outLen = cipher.getOutputSize(s);
 					if (buffer.length < outLen) {
+						zeroize();
 						buffer = new byte[outLen];
 					}
 				}

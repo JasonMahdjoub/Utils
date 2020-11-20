@@ -68,6 +68,14 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 	private final boolean supportRandomReadWrite;
 	private final boolean chacha;
 	private final boolean gcm;
+	@Override
+	public void zeroize() {
+		super.zeroize();
+		if (externalCounter!=null) {
+			Arrays.fill(externalCounter, (byte) 0);
+			externalCounter=null;
+		}
+	}
 
 	@Override
 	public boolean isPostQuantumEncryption() {

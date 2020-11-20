@@ -40,6 +40,7 @@ import javax.crypto.Cipher;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
+import java.util.Arrays;
 
 
 /**
@@ -223,7 +224,7 @@ public class ServerASymmetricEncryptionAlgorithm implements IEncryptionInputAlgo
 	}
 
 
-	private static class Server implements IServer{
+	private static class Server implements IServer, Zeroizable{
 		private final ASymmetricPrivateKey myPrivateKey;
 
 		private final ASymmetricEncryptionType type;
@@ -234,6 +235,15 @@ public class ServerASymmetricEncryptionAlgorithm implements IEncryptionInputAlgo
 		protected final byte[] buffer=new byte[BUFFER_SIZE];
 		private final int maxEncryptedPartLength;
 
+		@Override
+		public void zeroize() {
+			Arrays.fill(buffer, (byte)0);
+		}
+
+		@Override
+		protected void finalize() {
+			zeroize();
+		}
 
 		public Server(ASymmetricKeyPair myKeyPair)
 				throws IOException {
