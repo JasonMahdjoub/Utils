@@ -58,7 +58,7 @@ import java.util.ArrayList;
  * @since Utils 4.7.0
  */
 public class TestASymmetricEncryption {
-	@DataProvider(name="provideDataASymmetricKeyWrapperForEncryption", parallel=true)
+	@DataProvider(name="provideDataKeyWrapperForSymmetricSecretKey", parallel=true)
 	public Object[][] provideDataKeyWrapperForSymmetricSecretKey()
 	{
 		Object [][] res=new Object[ASymmetricKeyWrapperType.values().length*ASymmetricEncryptionType.values().length*SymmetricEncryptionType.values().length][];
