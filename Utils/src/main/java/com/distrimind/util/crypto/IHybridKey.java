@@ -35,6 +35,8 @@ The fact that you are presently reading this means that you have had
 knowledge of the CeCILL-C license and that you accept its terms.
  */
 
+import com.distrimind.util.data_buffers.WrappedData;
+
 /**
  * @author Jason Mahdjoub
  * @version 2.0
@@ -45,7 +47,7 @@ public interface IHybridKey extends Zeroizable{
 	int MAX_SIZE_IN_BYTES_OF_KEY_FOR_ENCRYPTION=IKey.MAX_SIZE_IN_BYTES_OF_KEY_FOR_ENCRYPTION;
 	int MAX_SIZE_IN_BYTES_OF_KEY=IKey.MAX_SIZE_IN_BYTES_OF_KEY;
 
-	byte[] encode();
+	WrappedData encode();
 
 
 

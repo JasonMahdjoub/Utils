@@ -34,6 +34,8 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util;
 
+import com.distrimind.util.data_buffers.WrappedString;
+
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -56,8 +58,10 @@ public class DecentralizedIDGenerator extends AbstractDecentralizedIDGenerator {
 	private static final AtomicInteger sequencer = new AtomicInteger(0);
 
 	static final String ToStringHead = "DecentralizedID";
-
 	public static DecentralizedIDGenerator valueOf(String value) {
+		return valueOf(new WrappedString(value));
+	}
+	public static DecentralizedIDGenerator valueOf(WrappedString value) {
 		AbstractDecentralizedID res = AbstractDecentralizedID.valueOf(value);
 		if (res instanceof DecentralizedIDGenerator) {
 			return (DecentralizedIDGenerator) res;

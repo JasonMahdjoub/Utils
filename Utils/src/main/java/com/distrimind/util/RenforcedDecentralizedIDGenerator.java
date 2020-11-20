@@ -35,6 +35,8 @@ knowledge of the CeCILL-C license and that you accept its terms.
 
 package com.distrimind.util;
 
+import com.distrimind.util.data_buffers.WrappedString;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -58,8 +60,10 @@ public class RenforcedDecentralizedIDGenerator extends AbstractDecentralizedIDGe
 	private static final long serialVersionUID = 4279383128706805738L;
 
 	static final String ToStringHead = "RenforcedDecentralizedID";
-
 	public static RenforcedDecentralizedIDGenerator valueOf(String value) {
+		return valueOf(new WrappedString(value));
+	}
+	public static RenforcedDecentralizedIDGenerator valueOf(WrappedString value) {
 		AbstractDecentralizedID res = AbstractDecentralizedID.valueOf(value);
 		if (res instanceof RenforcedDecentralizedIDGenerator) {
 			return (RenforcedDecentralizedIDGenerator) res;

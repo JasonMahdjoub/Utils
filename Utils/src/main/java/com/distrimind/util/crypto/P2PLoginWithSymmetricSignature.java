@@ -35,12 +35,12 @@ knowledge of the CeCILL-C license and that you accept its terms.
 package com.distrimind.util.crypto;
 
 
+import com.distrimind.util.data_buffers.WrappedSecretData;
 import com.distrimind.util.io.Integrity;
 import com.distrimind.util.io.MessageExternalizationException;
 import com.distrimind.bouncycastle.crypto.CryptoException;
 
 import java.io.IOException;
-import java.util.Arrays;
 
 /**
  * 
@@ -51,16 +51,16 @@ import java.util.Arrays;
 public class P2PLoginWithSymmetricSignature extends P2PLoginAgreement {
 
 	private final SymmetricSecretKey secretKey;
-	private byte[] myMessage, otherMessage=null;
+	private WrappedSecretData myMessage, otherMessage=null;
 	private static final int messageSize=32;
 	private boolean valid=true;
 
 	@Override
 	public void zeroize() {
 		if (myMessage!=null)
-			Arrays.fill(myMessage, (byte)0);
+			myMessage.zeroize();
 		if (otherMessage!=null)
-			Arrays.fill(otherMessage, (byte)0);
+			otherMessage.zeroize();
 		myMessage=null;
 		otherMessage=null;
 	}
@@ -77,8 +77,8 @@ public class P2PLoginWithSymmetricSignature extends P2PLoginAgreement {
 		if (secretKey.getAuthenticatedSignatureAlgorithmType()==null)
 			throw new IllegalArgumentException("The given secret key is not usable for signature");
 		this.secretKey=secretKey;
-		myMessage=new byte[messageSize];
-		random.nextBytes(myMessage);
+		myMessage=new WrappedSecretData(new byte[messageSize]);
+		random.nextBytes(myMessage.getBytes());
 		
 	}
 
@@ -88,7 +88,7 @@ public class P2PLoginWithSymmetricSignature extends P2PLoginAgreement {
 	}
 
 	@Override
-	protected byte[] getDataToSend(int stepNumber) throws IOException {
+	protected WrappedSecretData getDataToSend(int stepNumber) throws IOException {
 		if (!valid)
 			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException());
 
@@ -103,9 +103,9 @@ public class P2PLoginWithSymmetricSignature extends P2PLoginAgreement {
 					}
 					SymmetricAuthenticatedSignerAlgorithm signer = new SymmetricAuthenticatedSignerAlgorithm(secretKey);
 					signer.init();
-					signer.update(myMessage);
-					signer.update(otherMessage);
-					return signer.getSignature();
+					signer.update(myMessage.getBytes());
+					signer.update(otherMessage.getBytes());
+					return new WrappedSecretData(signer.getSignature());
 
 				}
 				default:
@@ -122,7 +122,7 @@ public class P2PLoginWithSymmetricSignature extends P2PLoginAgreement {
 	}
 
 	@Override
-	protected void receiveData(int stepNumber, byte[] data) throws IOException {
+	protected void receiveData(int stepNumber, WrappedSecretData data) throws IOException {
 		try {
 			if (!valid)
 				throw new CryptoException();
@@ -132,7 +132,7 @@ public class P2PLoginWithSymmetricSignature extends P2PLoginAgreement {
 						valid = false;
 						throw new CryptoException();
 					}
-					if (data.length != messageSize) {
+					if (data.getBytes().length != messageSize) {
 						valid = false;
 						throw new CryptoException();
 					}
@@ -145,9 +145,9 @@ public class P2PLoginWithSymmetricSignature extends P2PLoginAgreement {
 						throw new CryptoException();
 					}
 					SymmetricAuthenticatedSignatureCheckerAlgorithm checker = new SymmetricAuthenticatedSignatureCheckerAlgorithm(secretKey);
-					checker.init(data);
-					checker.update(otherMessage);
-					checker.update(myMessage);
+					checker.init(data.getBytes());
+					checker.update(otherMessage.getBytes());
+					checker.update(myMessage.getBytes());
 
 					valid = checker.verify();
 				}

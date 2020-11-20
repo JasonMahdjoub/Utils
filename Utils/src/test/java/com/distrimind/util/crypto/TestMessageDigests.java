@@ -74,10 +74,10 @@ public class TestMessageDigests {
 	public void testPasswordHash(PasswordHashType type) throws IOException {
 		SecureRandom random = new SecureRandom();
 		PasswordHash ph = new PasswordHash(type, random);
-		Password password = new Password("password");
-		Password invalidPassword = new Password("invalid password");
+		WrappedPassword password = new WrappedPassword("password");
+		WrappedPassword invalidPassword = new WrappedPassword("invalid password");
 		ph.setCost((byte)7);
-		HashedPassword hashedValue = ph.hash(password);
+		WrappedHashedPassword hashedValue = ph.hash(password);
 		Assert.assertTrue(PasswordHash.checkValidHashedPassword(password, hashedValue));
 		Assert.assertFalse(PasswordHash.checkValidHashedPassword(invalidPassword, hashedValue));
 		Assert.assertEquals(PasswordHashType.getPasswordHashLengthBytes(hashedValue), type.getDefaultHashLengthBytes());

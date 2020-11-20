@@ -34,6 +34,8 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
+import com.distrimind.util.data_buffers.WrappedData;
+import com.distrimind.util.data_buffers.WrappedSecretData;
 import com.distrimind.util.io.Integrity;
 import com.distrimind.util.io.MessageExternalizationException;
 import com.distrimind.bouncycastle.crypto.CryptoException;
@@ -56,7 +58,7 @@ public class EllipticCurveDiffieHellmanAlgorithm extends KeyAgreement {
 	private final EllipticCurveDiffieHellmanType type;
 	private SymmetricSecretKey derivedKey;
 	private ASymmetricKeyPair myKeyPair;
-	private byte[] myPublicKeyBytes;
+	private WrappedData myPublicKeyBytes;
 	private final AbstractSecureRandom randomForKeys;
 	private boolean valid=true;
 	private SymmetricEncryptionType encryptionType;
@@ -100,7 +102,7 @@ public class EllipticCurveDiffieHellmanAlgorithm extends KeyAgreement {
 		myKeyPair=null;
 		if (myPublicKeyBytes!=null)
 		{
-			Arrays.fill(myPublicKeyBytes, (byte)0);
+			Arrays.fill(myPublicKeyBytes.getBytes(), (byte)0);
 			myPublicKeyBytes=null;
 		}
 		
@@ -157,12 +159,12 @@ public class EllipticCurveDiffieHellmanAlgorithm extends KeyAgreement {
 		return myKeyPair;
 	}*/
 	
-	private byte[] getEncodedPublicKey()
+	private WrappedData getEncodedPublicKey()
 	{
 		return myPublicKeyBytes;
 	}
 
-	private void setDistantPublicKey(byte[] distantPublicKeyBytes, SymmetricEncryptionType symmetricEncryptionType, SymmetricAuthenticatedSignatureType symmetricSignatureType, byte[] keyingMaterial) throws IOException {
+	private void setDistantPublicKey(WrappedSecretData distantPublicKeyBytes, SymmetricEncryptionType symmetricEncryptionType, SymmetricAuthenticatedSignatureType symmetricSignatureType, byte[] keyingMaterial) throws IOException {
 		CodeProvider.ensureProviderLoaded(type.getCodeProvider());
 		try
 		{
@@ -235,12 +237,12 @@ public class EllipticCurveDiffieHellmanAlgorithm extends KeyAgreement {
 	}
 
 	@Override
-	protected byte[] getDataToSend(int stepNumber) throws IOException {
+	protected WrappedSecretData getDataToSend(int stepNumber) throws IOException {
 		if (!valid)
 			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException());
 
 		if (stepNumber == 0)
-			return getEncodedPublicKey();
+			return getEncodedPublicKey().transformToSecretData();
 		else {
 			valid = false;
 			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new IllegalAccessException());
@@ -249,7 +251,7 @@ public class EllipticCurveDiffieHellmanAlgorithm extends KeyAgreement {
 	}
 
 	@Override
-	protected void receiveData(int stepNumber, byte[] data) throws MessageExternalizationException {
+	protected void receiveData(int stepNumber, WrappedSecretData data) throws MessageExternalizationException {
 		if (!valid)
 			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException());
 

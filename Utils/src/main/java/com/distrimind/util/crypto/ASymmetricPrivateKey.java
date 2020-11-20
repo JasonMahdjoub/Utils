@@ -34,9 +34,6 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
-import com.distrimind.util.Bits;
-import com.distrimind.util.io.MessageExternalizationException;
-import com.distrimind.util.io.RandomByteArrayInputStream;
 import com.distrimind.bcfips.crypto.Algorithm;
 import com.distrimind.bcfips.crypto.AsymmetricKey;
 import com.distrimind.bcfips.crypto.AsymmetricPrivateKey;
@@ -44,6 +41,11 @@ import com.distrimind.bcfips.crypto.asymmetric.AsymmetricECPrivateKey;
 import com.distrimind.bcfips.crypto.asymmetric.AsymmetricRSAPrivateKey;
 import com.distrimind.bouncycastle.pqc.jcajce.provider.mceliece.BCMcElieceCCA2PrivateKey;
 import com.distrimind.bouncycastle.pqc.jcajce.provider.mceliece.BCMcEliecePrivateKey;
+import com.distrimind.util.Bits;
+import com.distrimind.util.data_buffers.WrappedSecretData;
+import com.distrimind.util.data_buffers.WrappedSecretString;
+import com.distrimind.util.io.MessageExternalizationException;
+import com.distrimind.util.io.RandomByteArrayInputStream;
 
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
@@ -131,8 +133,8 @@ public class ASymmetricPrivateKey extends AbstractKey implements IASymmetricPriv
 
 
     @Override
-	public byte[] getKeyBytes() {
-        return privateKey;
+	public WrappedSecretData getKeyBytes() {
+        return new WrappedSecretData(privateKey.clone());
     }
 
 	@Override
@@ -251,14 +253,19 @@ public class ASymmetricPrivateKey extends AbstractKey implements IASymmetricPriv
 	}
 
 	@Override
-	public byte[] encode()
+	public WrappedSecretData encode()
 	{
 		byte[] tab = new byte[4+ENCODED_TYPE_SIZE+privateKey.length];
 		tab[0]=encryptionType==null?(byte)((xdhKey? AbstractKey.IS_XDH_KEY:0)|2):(byte)3;
 		Bits.putPositiveInteger(tab, 1, keySizeBits, 3);
 		Bits.putPositiveInteger(tab, 4, encryptionType==null?signatureType.ordinal():encryptionType.ordinal(), ENCODED_TYPE_SIZE);
         System.arraycopy(privateKey, 0, tab, ENCODED_TYPE_SIZE+4, privateKey.length);
-        return tab;
+        return new WrappedSecretData(tab);
+	}
+
+	@Override
+	public WrappedSecretString encodeString() {
+		return new WrappedSecretString(encode());
 	}
 
 	@Override

@@ -34,6 +34,8 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
+import com.distrimind.util.data_buffers.WrappedSecretData;
+
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
@@ -94,14 +96,14 @@ public class P2PJPakeAndLoginAgreement extends P2PLoginAgreement {
 		return jpake.isAgreementProcessValidImpl() && (login==null || login.isAgreementProcessValidImpl());
 	}
 	@Override
-	protected byte[] getDataToSend(int stepNumber) throws IOException {
+	protected WrappedSecretData getDataToSend(int stepNumber) throws IOException {
 		if (login!=null && stepNumber<2)
 			return login.getDataToSend();
 		else
 			return jpake.getDataToSend();
 	}
 	@Override
-	protected void receiveData(int stepNumber, byte[] data) throws IOException {
+	protected void receiveData(int stepNumber, WrappedSecretData data) throws IOException {
 		if (login!=null && stepNumber<2)
 			login.receiveData(data);
 		else

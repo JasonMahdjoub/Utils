@@ -35,6 +35,10 @@ knowledge of the CeCILL-C license and that you accept its terms.
 package com.distrimind.util.crypto;
 
 import com.distrimind.util.Bits;
+import com.distrimind.util.data_buffers.WrappedData;
+import com.distrimind.util.data_buffers.WrappedSecretData;
+import com.distrimind.util.data_buffers.WrappedSecretString;
+import com.distrimind.util.data_buffers.WrappedString;
 import com.distrimind.util.io.RandomByteArrayInputStream;
 import com.distrimind.bcfips.crypto.Algorithm;
 import com.distrimind.bcfips.crypto.AsymmetricKey;
@@ -137,8 +141,8 @@ public class ASymmetricPublicKey extends AbstractKey implements IASymmetricPubli
 	}
 
 	@Override
-	public byte[] getKeyBytes() {
-        return publicKey;
+	public WrappedSecretData getKeyBytes() {
+        return new WrappedSecretData(publicKey.clone());
     }
 
 
@@ -253,11 +257,17 @@ public class ASymmetricPublicKey extends AbstractKey implements IASymmetricPubli
 
 
 
-	public byte[] encode() {
+	public WrappedData encode() {
 		return encode(true);
 	}
+
 	@Override
-	public byte[] encode(boolean includeTimeExpiration)
+	public WrappedString encodeString() {
+		return new WrappedString(encode());
+	}
+
+	@Override
+	public WrappedData encode(boolean includeTimeExpiration)
 	{
 		if (getTimeExpirationUTC()==Long.MAX_VALUE)
 			includeTimeExpiration=false;
@@ -276,7 +286,7 @@ public class ASymmetricPublicKey extends AbstractKey implements IASymmetricPubli
 		}
 
 		System.arraycopy(publicKey, 0, tab, pos, publicKey.length);
-		return tab;
+		return new WrappedData(tab);
 	}
 
 	@Override

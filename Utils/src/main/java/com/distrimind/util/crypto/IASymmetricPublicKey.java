@@ -1,5 +1,8 @@
 package com.distrimind.util.crypto;
 
+import com.distrimind.util.data_buffers.WrappedData;
+import com.distrimind.util.data_buffers.WrappedSecretData;
+
 /**
  * @author Jason Mahdjoub
  * @version 2.0
@@ -20,7 +23,7 @@ public interface IASymmetricPublicKey extends IKey {
 	ASymmetricAuthenticatedSignatureType getAuthenticatedSignatureAlgorithmType() ;*/
 
 	long getTimeExpirationUTC() ;
-	byte[] encode(boolean includeTimeExpiration);
+	WrappedData encode(boolean includeTimeExpiration);
 
 
 

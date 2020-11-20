@@ -13,28 +13,28 @@ import java.io.IOException;
  * @version 1.0
  * @since Utils 5.10.0
  */
-public class WrappedASymmetricWrappedSecretKeyString extends WrappedSecretString implements SecureExternalizable {
-	private static final int MAX_CHARS_NUMBER=WrappedASymmetricPrivateKey.MAX_SIZE_IN_BYTES_OF_KEY*4/3;
-	public WrappedASymmetricWrappedSecretKeyString() {
+public class WrappedEncryptedSymmetricWrappedSecretKeyString extends WrappedSecretString implements SecureExternalizable {
+	private static final int MAX_CHARS_NUMBER= WrappedEncryptedSymmetricSecretKey.MAX_SIZE_IN_BYTES_OF_KEY*4/3;
+	protected WrappedEncryptedSymmetricWrappedSecretKeyString() {
 	}
 
-	public WrappedASymmetricWrappedSecretKeyString(char[] secretData) {
+	public WrappedEncryptedSymmetricWrappedSecretKeyString(char[] secretData) {
 		super(secretData);
 		if (secretData.length>MAX_CHARS_NUMBER)
 			throw new IllegalArgumentException();
 	}
 
-	public WrappedASymmetricWrappedSecretKeyString(String secretData) {
+	public WrappedEncryptedSymmetricWrappedSecretKeyString(String secretData) {
 		super(secretData);
 		if (secretData.length()>MAX_CHARS_NUMBER)
 			throw new IllegalArgumentException();
 	}
 
-	public WrappedASymmetricWrappedSecretKeyString(WrappedASymmetricWrappedSecretKeyString secretDataString) {
+	public WrappedEncryptedSymmetricWrappedSecretKeyString(WrappedEncryptedSymmetricWrappedSecretKeyString secretDataString) {
 		super(secretDataString);
 	}
 
-	public WrappedASymmetricWrappedSecretKeyString(WrappedASymmetricPrivateKey secretData) {
+	public WrappedEncryptedSymmetricWrappedSecretKeyString(WrappedEncryptedSymmetricSecretKey secretData) {
 		super(secretData);
 	}
 

@@ -1,5 +1,6 @@
 package com.distrimind.util.crypto;
 
+import com.distrimind.util.data_buffers.WrappedSecretData;
 import com.distrimind.util.io.MessageExternalizationException;
 
 import java.io.IOException;
@@ -61,14 +62,14 @@ public class P2PASymmetricSecretMessageExchangerAgreementWithSymmetricSignature 
         return p2PASymmetricSecretMessageExchangerAgreement.isAgreementProcessValidImpl() && (login==null || login.isAgreementProcessValidImpl());
     }
     @Override
-    protected byte[] getDataToSend(int stepNumber) throws IOException {
+    protected WrappedSecretData getDataToSend(int stepNumber) throws IOException {
         if (login!=null && stepNumber<2)
             return login.getDataToSend();
         else
             return p2PASymmetricSecretMessageExchangerAgreement.getDataToSend();
     }
     @Override
-    protected void receiveData(int stepNumber, byte[] data) throws IOException {
+    protected void receiveData(int stepNumber, WrappedSecretData data) throws IOException {
         if (login!=null && stepNumber<2)
             login.receiveData(data);
         else

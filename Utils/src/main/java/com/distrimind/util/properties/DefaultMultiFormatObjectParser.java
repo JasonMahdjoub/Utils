@@ -50,7 +50,7 @@ import java.util.regex.Pattern;
 import javax.lang.model.SourceVersion;
 
 import com.distrimind.util.*;
-
+import com.distrimind.util.data_buffers.WrappedString;
 
 
 /**
@@ -264,7 +264,7 @@ public class DefaultMultiFormatObjectParser extends AbstractMultiFormatObjectPar
 		 * object.toString(); }
 		 */
 		else if (DecentralizedValue.class.isAssignableFrom(field_type )) {
-			return ((DecentralizedValue)object).encodeString();
+			return ((DecentralizedValue)object).encodeString().toString();
 		}
 		else if (field_type.isEnum()) {
 			return ((Enum<?>) object).name();
@@ -423,7 +423,7 @@ public class DefaultMultiFormatObjectParser extends AbstractMultiFormatObjectPar
 		 * SymmetricSecretKeyType.valueOf(nodeValue); }
 		 */
 		else if (DecentralizedValue.class.isAssignableFrom(field_type)) {
-			return DecentralizedValue.valueOf(nodeValue);
+			return DecentralizedValue.valueOf(new WrappedString(nodeValue));
 		}
 		else if (field_type.isEnum()) {
 			for (Enum<?> e : (Enum<?>[]) field_type.getEnumConstants()) {

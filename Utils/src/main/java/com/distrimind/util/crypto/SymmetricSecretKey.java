@@ -34,14 +34,15 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
-import com.distrimind.util.Bits;
 import com.distrimind.bcfips.crypto.Algorithm;
+import com.distrimind.util.Bits;
+import com.distrimind.util.data_buffers.WrappedSecretData;
+import com.distrimind.util.data_buffers.WrappedSecretString;
 
 import javax.crypto.SecretKey;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.util.Arrays;
-
 
 
 /**
@@ -50,7 +51,7 @@ import java.util.Arrays;
  * @version 3.0
  * @since Utils 2.0.0
  */
-public class SymmetricSecretKey extends AbstractKey {
+public class SymmetricSecretKey extends AbstractKey implements ISecretDecentralizedValue{
 
 	public final static int MAX_SYMMETRIC_KEY_SIZE_IN_BYTES_FOR_SIGNATURE=SymmetricAuthenticatedSignatureType.MAX_SYMMETRIC_KEY_SIZE;
 	public final static int MAX_SYMMETRIC_KEY_SIZE_IN_BYTES_FOR_ENCRYPTION=SymmetricEncryptionType.MAX_SYMMETRIC_KEY_SIZE;
@@ -170,6 +171,9 @@ public class SymmetricSecretKey extends AbstractKey {
 		this.signatureType=null;
 		//Arrays.fill(secretKey, (byte)0);
 	}
+	SymmetricSecretKey(SymmetricEncryptionType type, WrappedSecretData secretKey) {
+		this(type, secretKey.getBytes().clone());
+	}
 	SymmetricSecretKey(SymmetricEncryptionType type, byte[] secretKey) {
 		if (type == null)
 			throw new NullPointerException("type");
@@ -266,7 +270,7 @@ public class SymmetricSecretKey extends AbstractKey {
 		this.signatureType=type;
 		this.bcfipsNativeSecretKey=new com.distrimind.bcfips.crypto.SymmetricSecretKey(getBouncyCastleAlgorithm(), secretKey.getKeyBytes());
 	}
-	
+
 	private SymmetricSecretKey(byte[] secretKey, short keySize) {
 		if (secretKey == null)
 			throw new NullPointerException("secretKey");
@@ -308,7 +312,7 @@ public class SymmetricSecretKey extends AbstractKey {
 
 
 	@Override
-	public byte[] encode() {
+	public WrappedSecretData encode() {
 	    int codedTypeSize=ENCODED_TYPE_SIZE;
 		byte[] tab = new byte[2+codedTypeSize+secretKey.length];
 		if (keySizeBits<56)
@@ -319,7 +323,12 @@ public class SymmetricSecretKey extends AbstractKey {
 		Bits.putPositiveInteger(tab, 1, encryptionType==null?signatureType.ordinal():encryptionType.ordinal(), codedTypeSize);
         tab[codedTypeSize+1]=(byte)encodeKeySizeBits(keySizeBits);
         System.arraycopy(secretKey, 0, tab, codedTypeSize+2, secretKey.length);
-        return tab;
+        return new WrappedSecretData(tab);
+	}
+
+	@Override
+	public WrappedSecretString encodeString() {
+		return new WrappedSecretString(encode());
 	}
 
 	@Override
@@ -369,9 +378,9 @@ public class SymmetricSecretKey extends AbstractKey {
 	}
 
 	@Override
-    public byte[] getKeyBytes()
+    public WrappedSecretData getKeyBytes()
 	{
-		return secretKey;
+		return new WrappedSecretData(secretKey.clone());
 	}
 
 	@Override

@@ -36,6 +36,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 
 import com.distrimind.util.DecentralizedValue;
+import com.distrimind.util.data_buffers.WrappedData;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -100,7 +101,7 @@ public class TestASymmetricEncryption {
 	public void testASymmetricKeyWrapperForEncryption(AbstractSecureRandom rand, AbstractKeyPair<?,?> kp,  ASymmetricKeyWrapperType typeWrapper, ASymmetricEncryptionType asetype, SymmetricEncryptionType setype)
 			throws NoSuchAlgorithmException, IllegalStateException, NoSuchProviderException, IOException, IllegalArgumentException {
 		SymmetricSecretKey sk= setype.getKeyGenerator(rand, setype.getDefaultKeySizeBits()).generateKey();
-		WrappedSymmetricKey wrappedKey=typeWrapper.wrapKey(rand, kp.getASymmetricPublicKey(), sk);
+		WrappedEncryptedSymmetricSecretKey wrappedKey=typeWrapper.wrapKey(rand, kp.getASymmetricPublicKey(), sk);
 		SymmetricSecretKey sk2=typeWrapper.unwrapKey(kp.getASymmetricPrivateKey(), wrappedKey);
 		Assert.assertEquals(sk.getKeySizeBits(), sk2.getKeySizeBits());
 		Assert.assertEquals(sk.getAuthenticatedSignatureAlgorithmType(), sk2.getAuthenticatedSignatureAlgorithmType());
@@ -216,7 +217,7 @@ public class TestASymmetricEncryption {
 			kw=ASymmetricKeyWrapperType.BC_FIPS_RSA_OAEP_SHA3_512;
 
 
-		WrappedSymmetricKey localEncryptedKey = kw.wrapKey(rand, kpd.getASymmetricPublicKey(), localKey);
+		WrappedEncryptedSymmetricSecretKey localEncryptedKey = kw.wrapKey(rand, kpd.getASymmetricPublicKey(), localKey);
 		SymmetricSecretKey decryptedKey=kw.unwrapKey(kpd.getASymmetricPrivateKey(), localEncryptedKey);
 		Assert.assertEquals(localKey.getAuthenticatedSignatureAlgorithmType(), decryptedKey.getAuthenticatedSignatureAlgorithmType());
 		Assert.assertEquals(localKey.getEncryptionAlgorithmType(), decryptedKey.getEncryptionAlgorithmType());
@@ -321,14 +322,14 @@ public class TestASymmetricEncryption {
 
 		ASymmetricKeyPair kpd=generateKeyPair(type);
 
-		byte[] b = kpd.encode(false);
+		WrappedData b = kpd.encode(false);
 		ASymmetricKeyPair kpd2=(ASymmetricKeyPair)DecentralizedValue.decode(b);
 		testASymmetricKeyPairEqualityForEncryption(kpd, kpd2);
 		testASymmetricKeyPairEqualityForEncryption(kpd, (ASymmetricKeyPair)DecentralizedValue.valueOf(kpd.encodeString()));
 		Assert.assertEquals(kpd2.getASymmetricPublicKey().getTimeExpirationUTC(), Long.MAX_VALUE);
 
 		b = kpd.getASymmetricPublicKey().encode(false);
-		Assert.assertEquals(b.length, kpd.getASymmetricPublicKey().encode(true).length-8);
+		Assert.assertEquals(b.getBytes().length, kpd.getASymmetricPublicKey().encode(true).getBytes().length-8);
 		ASymmetricPublicKey pk=(ASymmetricPublicKey) DecentralizedValue.decode(b);
 		Assert.assertEquals(pk.toJavaNativeKey().getEncoded(), kpd.getASymmetricPublicKey().toJavaNativeKey().getEncoded());
 		Assert.assertEquals(pk.getAuthenticatedSignatureAlgorithmType(), kpd.getASymmetricPublicKey().getAuthenticatedSignatureAlgorithmType());
@@ -425,8 +426,8 @@ public class TestASymmetricEncryption {
 					kpl.getASymmetricPublicKey());
 			P2PASymmetricSecretMessageExchanger algoDistant = new P2PASymmetricSecretMessageExchanger(rand,
 					kpd.getASymmetricPublicKey());
-			algoLocal.setDistantPublicKey(algoDistant.encodeMyPublicKey());
-			algoDistant.setDistantPublicKey(algoLocal.encodeMyPublicKey());
+			algoLocal.setDistantPublicKey(algoDistant.encodeMyPublicKey().getBytes());
+			algoDistant.setDistantPublicKey(algoLocal.encodeMyPublicKey().getBytes());
 			algoLocal.setCost((byte)11);
 			algoDistant.setCost((byte)11);
 

@@ -37,6 +37,7 @@ package com.distrimind.util.crypto;
 import java.io.IOException;
 import java.util.Arrays;
 
+import com.distrimind.util.data_buffers.WrappedSecretData;
 import com.distrimind.util.io.Integrity;
 import com.distrimind.util.io.MessageExternalizationException;
 import com.distrimind.bouncycastle.crypto.AsymmetricCipherKeyPair;
@@ -87,7 +88,7 @@ public class NewHopeKeyAgreementClient extends AbstractNewHopeKeyAgreement{
 		return true;
 	}
 
-	private byte[] getDataPhase1()
+	private WrappedSecretData getDataPhase1()
 	{
 		valid=false;
 		//init key pair
@@ -100,16 +101,16 @@ public class NewHopeKeyAgreementClient extends AbstractNewHopeKeyAgreement{
         
         byte[] res=pub.getPubData();
         valid=true;
-        return res;
+        return new WrappedSecretData(res);
 	}
 	
-	private void setDataPhase2(byte []data)
+	private void setDataPhase2(WrappedSecretData data)
 	{
 		//calculate agreement
 		valid=false;
         shared = new byte[agreementSize];
 
-        sharedA(shared, priv.getSecData(), data);
+        sharedA(shared, priv.getSecData(), data.getBytes());
         valid=true;
 	}
 	@Override
@@ -117,7 +118,7 @@ public class NewHopeKeyAgreementClient extends AbstractNewHopeKeyAgreement{
 		return valid;
 	}
 	@Override
-	protected byte[] getDataToSend(int stepNumber) throws IOException {
+	protected WrappedSecretData getDataToSend(int stepNumber) throws IOException {
 		if (!valid)
 			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException());
 
@@ -136,7 +137,7 @@ public class NewHopeKeyAgreementClient extends AbstractNewHopeKeyAgreement{
 		}
 	}
 	@Override
-	protected void receiveData(int stepNumber, byte[] data) throws IOException {
+	protected void receiveData(int stepNumber, WrappedSecretData data) throws IOException {
 		if (!valid)
 			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException());
 

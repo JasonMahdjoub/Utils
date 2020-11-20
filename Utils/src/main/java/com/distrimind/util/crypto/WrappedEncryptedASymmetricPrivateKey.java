@@ -13,23 +13,22 @@ import java.io.IOException;
  * @version 1.0
  * @since Utils 5.10.0
  */
-public class WrappedSymmetricSecretKey extends WrappedSecretData implements SecureExternalizable {
-	static final int MAX_SIZE_IN_BYTES_OF_KEY=SymmetricSecretKey.MAX_SYMMETRIC_KEY_SIZE_IN_BYTES;
+public class WrappedEncryptedASymmetricPrivateKey extends WrappedSecretData implements SecureExternalizable {
+	static final int MAX_SIZE_IN_BYTES_OF_KEY=ASymmetricPrivateKey.MAX_SIZE_IN_BYTES_OF_PRIVATE_KEY;
 	public static final int MAX_SIZE_IN_BYTES_OF_DATA=MAX_SIZE_IN_BYTES_OF_KEY+7;
-	protected WrappedSymmetricSecretKey() {
+	protected WrappedEncryptedASymmetricPrivateKey() {
 	}
 
-	WrappedSymmetricSecretKey(byte[] secretData) {
-		super(secretData);
-		if (getBytes().length>MAX_SIZE_IN_BYTES_OF_KEY)
+	WrappedEncryptedASymmetricPrivateKey(byte[] data) {
+		super(data);
+		if (data.length>MAX_SIZE_IN_BYTES_OF_KEY)
 			throw new IllegalArgumentException();
 	}
 
-	public WrappedSymmetricSecretKey(WrappedSymmetricWrappedSecretKeyString secretData) throws IOException {
-		super(secretData);
-	}
 
-	public WrappedSymmetricSecretKey(WrappedSymmetricSecretKey secretData) {
+
+
+	public WrappedEncryptedASymmetricPrivateKey(WrappedEncryptedASymmetricPrivateKey secretData) {
 		super(secretData);
 	}
 
@@ -47,6 +46,4 @@ public class WrappedSymmetricSecretKey extends WrappedSecretData implements Secu
 	public final void readExternal(SecuredObjectInputStream in) throws IOException {
 		setData(in.readBytesArray(false, MAX_SIZE_IN_BYTES_OF_KEY));
 	}
-
-
 }

@@ -34,6 +34,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
+import com.distrimind.util.data_buffers.WrappedSecretData;
 import com.distrimind.util.io.Integrity;
 import com.distrimind.util.io.MessageExternalizationException;
 import com.distrimind.bouncycastle.crypto.CryptoException;
@@ -171,7 +172,7 @@ public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
 	}
 
 	@Override
-	protected byte[] getDataToSend(int stepNumber) throws IOException {
+	protected WrappedSecretData getDataToSend(int stepNumber) throws IOException {
 		valid=false;
 		switch(stepNumber)
 		{
@@ -229,7 +230,7 @@ public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
 					oos.write(tab);
 				}
 				valid=true;
-				return baos.toByteArray();
+				return new WrappedSecretData(baos.toByteArray());
 			}
 			
 		case 1:
@@ -265,7 +266,7 @@ public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
 					oos.write(tab);
 				}
 				valid=true;
-				return baos.toByteArray();
+				return new WrappedSecretData(baos.toByteArray());
 			}
 			
 		case 2:
@@ -287,7 +288,7 @@ public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
 					oos.write(tab);
 				}
 				valid=true;
-				return baos.toByteArray();
+				return new WrappedSecretData(baos.toByteArray());
 			}
 			
 			default:
@@ -297,12 +298,12 @@ public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
 	}
 
 	@Override
-	protected void receiveData(int stepNumber, byte[] dataReceived) throws IOException {
+	protected void receiveData(int stepNumber, WrappedSecretData dataReceived) throws IOException {
 		valid=false;
 		switch(stepNumber)
 		{
 		case 0:
-			try (ByteArrayInputStream bais = new ByteArrayInputStream(dataReceived)) {
+			try (ByteArrayInputStream bais = new ByteArrayInputStream(dataReceived.getBytes())) {
 				try (DataInputStream ois = new DataInputStream(bais)) {
 					JPAKERound1Payload r1;
 					try
@@ -383,7 +384,7 @@ public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
 			}
 			break;
 		case 1:
-			try (ByteArrayInputStream bais = new ByteArrayInputStream(dataReceived)) {
+			try (ByteArrayInputStream bais = new ByteArrayInputStream(dataReceived.getBytes())) {
 				try (DataInputStream ois = new DataInputStream(bais)) {
 					JPAKERound2Payload r2;
 					try
@@ -442,7 +443,7 @@ public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
 			}
 			break;
 		case 2:
-			try (ByteArrayInputStream bais = new ByteArrayInputStream(dataReceived)) {
+			try (ByteArrayInputStream bais = new ByteArrayInputStream(dataReceived.getBytes())) {
 				try (DataInputStream ois = new DataInputStream(bais)) {
 					JPAKERound3Payload r3;
 					try

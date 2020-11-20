@@ -40,6 +40,7 @@ import com.distrimind.bcfips.crypto.Algorithm;
 import com.distrimind.bcfips.crypto.general.ChaCha20;
 import com.distrimind.bcfips.crypto.general.Serpent;
 import com.distrimind.bcfips.crypto.general.Twofish;
+import com.distrimind.util.data_buffers.WrappedSecretData;
 
 import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
@@ -144,15 +145,15 @@ public enum SymmetricEncryptionType {
 		return new org.bouncycastle.crypto.SymmetricSecretKey(algorithmName, encodedSecretKey);
 	}*/
 
-	public SymmetricSecretKey generateSecretKeyFromHashedPassword(SecretData secretData) throws NoSuchProviderException, NoSuchAlgorithmException {
-		return generateSecretKeyFromHashedPassword(secretData, getDefaultKeySizeBits());
+	public SymmetricSecretKey generateSecretKeyFromHashedPassword(WrappedSecretData wrappedSecretData) throws NoSuchProviderException, NoSuchAlgorithmException {
+		return generateSecretKeyFromHashedPassword(wrappedSecretData, getDefaultKeySizeBits());
 	}
 
-	public SymmetricSecretKey generateSecretKeyFromHashedPassword(SecretData secretData, short keySizeBits) throws NoSuchProviderException, NoSuchAlgorithmException {
+	public SymmetricSecretKey generateSecretKeyFromHashedPassword(WrappedSecretData wrappedSecretData, short keySizeBits) throws NoSuchProviderException, NoSuchAlgorithmException {
 		if (keySizeBits<56 || keySizeBits>512)
 			throw new IllegalArgumentException();
 		AbstractMessageDigest md=(keySizeBits>256?MessageDigestType.SHA3_512:MessageDigestType.SHA3_256).getMessageDigestInstance();
-		md.update(secretData.getBytes());
+		md.update(wrappedSecretData.getBytes());
 		byte[] d=md.digest();
 		SymmetricSecretKey ssk=new SymmetricSecretKey(this, Arrays.copyOfRange(d, 0, keySizeBits/8), keySizeBits);
 		Arrays.fill(d, (byte)0);

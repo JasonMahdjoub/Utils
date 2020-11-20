@@ -68,9 +68,9 @@ public class TestsForSymmetricSignatures {
 		SymmetricSecretKey key1=signatureType.getKeyGenerator(SecureRandomType.DEFAULT.getSingleton(null), signatureType.getDefaultKeySizeBits()).generateKey();
 
 		Assert.assertEquals(key1.getKeySizeBits(), signatureType.getDefaultKeySizeBits());
-		System.out.println("Key encryption : \n\t"+ Base64.getUrlEncoder().encodeToString(key1.getKeyBytes()));
-		System.out.println("Key encryption (complete): \n\t"+ Base64.getUrlEncoder().encodeToString(key1.encode()));
-		Assert.assertEquals(key1.getKeyBytes().length, signatureType.getDefaultKeySizeBytes());
+		System.out.println("Key encryption : \n\t"+ Base64.getUrlEncoder().encodeToString(key1.getKeyBytes().getBytes()));
+		System.out.println("Key encryption (complete): \n\t"+ Base64.getUrlEncoder().encodeToString(key1.encode().getBytes()));
+		Assert.assertEquals(key1.getKeyBytes().getBytes().length, signatureType.getDefaultKeySizeBytes());
 	}
 
 	@DataProvider(name="provideDataSymmetricKeyWrapperForSignature", parallel=true)
@@ -105,7 +105,7 @@ public class TestsForSymmetricSignatures {
 		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getSingleton(null);
 		SymmetricSecretKey kp=asetype.getKeyGenerator(rand, (short)128).generateKey();
 		SymmetricSecretKey sk= setype.getKeyGenerator(rand, (short)128).generateKey();
-		WrappedSymmetricKey wrappedKey=typeWrapper.wrapKey(kp, sk, rand);
+		WrappedEncryptedSymmetricSecretKey wrappedKey=typeWrapper.wrapKey(kp, sk, rand);
 
 		SymmetricSecretKey sk2=typeWrapper.unwrapKey(kp, wrappedKey);
 		Assert.assertEquals(sk.getKeySizeBits(), sk2.getKeySizeBits());

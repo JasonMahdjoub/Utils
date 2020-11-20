@@ -58,7 +58,7 @@ public class WrappedString {
 		this.chars =dataString.chars;
 		this.string=dataString.string;
 	}
-	protected WrappedString(WrappedData wrappedSecretData) {
+	public WrappedString(WrappedData wrappedSecretData) {
 		byte[] d= Bits.getByteArrayWithCheckSum(wrappedSecretData.getBytes());
 		this.string= Base64.getUrlEncoder().encodeToString(d);
 		this.chars=this.string.toCharArray();

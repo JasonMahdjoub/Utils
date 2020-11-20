@@ -45,6 +45,8 @@ import javax.crypto.spec.OAEPParameterSpec;
 import javax.crypto.spec.PSource;
 
 import com.distrimind.util.OSVersion;
+import com.distrimind.util.data_buffers.WrappedData;
+import com.distrimind.util.data_buffers.WrappedSecretData;
 import com.distrimind.util.io.Integrity;
 import com.distrimind.util.io.MessageExternalizationException;
 import com.distrimind.bcfips.crypto.InvalidWrappingException;
@@ -142,33 +144,33 @@ public enum ASymmetricKeyWrapperType {
 		System.arraycopy(wrappedKey, 0, res, 2+SymmetricSecretKey.ENCODED_TYPE_SIZE, wrappedKey.length);
 		return res;
 	}
-	static byte[] getWrappedKeyFromMetaData(SecretData secretData) throws InvalidKeyException
+	static byte[] getWrappedKeyFromMetaData(WrappedSecretData wrappedSecretData) throws InvalidKeyException
 	{
-		byte[] wk=secretData.getBytes();
+		byte[] wk= wrappedSecretData.getBytes();
 		if (wk.length<9)
 			throw new InvalidKeyException();
 		byte[] res=new byte[wk.length-2-SymmetricSecretKey.ENCODED_TYPE_SIZE];
 		System.arraycopy(wk, 2+SymmetricSecretKey.ENCODED_TYPE_SIZE, res, 0, res.length);
 		return res;
 	}
-	static boolean isSignatureFromMetaData(SecretData secretData) throws InvalidKeyException
+	static boolean isSignatureFromMetaData(WrappedSecretData wrappedSecretData) throws InvalidKeyException
 	{
-		byte[] wk=secretData.getBytes();
+		byte[] wk= wrappedSecretData.getBytes();
 		if (wk.length<9)
 			throw new InvalidKeyException();
 		return wk[0]==1;
 	}
-	static short getKeySizeFromMetaData(SecretData secretData) throws InvalidKeyException
+	static short getKeySizeFromMetaData(WrappedSecretData wrappedSecretData) throws InvalidKeyException
 	{
-		byte[] wk=secretData.getBytes();
+		byte[] wk= wrappedSecretData.getBytes();
 		if (wk.length<9)
 			throw new InvalidKeyException();
 		return SymmetricSecretKey.decodeKeySizeBits(wk[1+SymmetricSecretKey.ENCODED_TYPE_SIZE]);
 	}
 	
-	static SymmetricAuthenticatedSignatureType getSignatureTypeFromMetaData(SecretData secretData) throws InvalidKeyException
+	static SymmetricAuthenticatedSignatureType getSignatureTypeFromMetaData(WrappedSecretData wrappedSecretData) throws InvalidKeyException
 	{
-		byte[] wk=secretData.getBytes();
+		byte[] wk= wrappedSecretData.getBytes();
 		if (wk.length<9)
 			throw new InvalidKeyException();
 		int ordinal=(int)Bits.getPositiveInteger(wk, 1, SymmetricSecretKey.ENCODED_TYPE_SIZE);
@@ -179,9 +181,9 @@ public enum ASymmetricKeyWrapperType {
 		}
 		throw new InvalidKeyException();
 	}
-	static SymmetricEncryptionType getEncryptionTypeFromMetaData(SecretData secretData) throws InvalidKeyException
+	static SymmetricEncryptionType getEncryptionTypeFromMetaData(WrappedSecretData wrappedSecretData) throws InvalidKeyException
 	{
-		byte[] wk=secretData.getBytes();
+		byte[] wk= wrappedSecretData.getBytes();
 		if (wk.length<9)
 			throw new InvalidKeyException();
 		int ordinal=(int)Bits.getPositiveInteger(wk, 1, SymmetricSecretKey.ENCODED_TYPE_SIZE);
@@ -202,7 +204,7 @@ public enum ASymmetricKeyWrapperType {
 		return OAEPParams;
 	}
 	
-	public WrappedSymmetricKey wrapKey(AbstractSecureRandom random, IASymmetricPublicKey ipublicKey, SymmetricSecretKey keyToWrap)
+	public WrappedEncryptedSymmetricSecretKey wrapKey(AbstractSecureRandom random, IASymmetricPublicKey ipublicKey, SymmetricSecretKey keyToWrap)
 			throws IOException {
 
 		try {
@@ -211,7 +213,7 @@ public enum ASymmetricKeyWrapperType {
 				CodeProvider.ensureProviderLoaded(provider);
 				if (name().startsWith("BCPQC_MCELIECE_")) {
 					ClientASymmetricEncryptionAlgorithm client = new ClientASymmetricEncryptionAlgorithm(random, publicKey);
-					return new WrappedSymmetricKey(client.encode(keyToWrap.encode()));
+					return new WrappedEncryptedSymmetricSecretKey(client.encode(keyToWrap.encode().getBytes()));
 				} else {
 
 					if ((publicKey.getAuthenticatedSignatureAlgorithmType() != null && ((provider == CodeProvider.GNU_CRYPTO) != (publicKey.getAuthenticatedSignatureAlgorithmType().getCodeProviderForSignature() == CodeProvider.GNU_CRYPTO)))
@@ -225,7 +227,7 @@ public enum ASymmetricKeyWrapperType {
 						byte[] t=GnuFunctions.cipherWrap(c, keyToWrap.toGnuKey());
 						byte[] res=wrapKeyWithMetaData(t, keyToWrap);
 						Arrays.fill(t, (byte)0);
-						return new WrappedSymmetricKey(res);
+						return new WrappedEncryptedSymmetricSecretKey(res);
 					} else {
 						javax.crypto.Cipher c;
 						if (provider.equals(CodeProvider.BCFIPS) || (OSVersion.getCurrentOSVersion() != null && OSVersion.getCurrentOSVersion().getOS() == OS.MAC_OS_X && (this.getCodeProvider() == CodeProvider.SunJCE))) {
@@ -233,7 +235,7 @@ public enum ASymmetricKeyWrapperType {
 
 							AsymmetricRSAPublicKey bcPK = (AsymmetricRSAPublicKey) publicKey.toBouncyCastleKey();
 
-							byte[] encodedKey = keyToWrap.encode();
+							WrappedData encodedKey = keyToWrap.encode();
 
 							OAEPParameters OAEPParams = getOAEPParams(PSource.PSpecified.DEFAULT.getValue());
 
@@ -259,7 +261,7 @@ public enum ASymmetricKeyWrapperType {
 											.withSecureRandom(random);
 
 
-							byte[] wrapedKey = wrapper.wrap(encodedKey, 0, encodedKey.length);
+							byte[] wrapedKey = wrapper.wrap(encodedKey.getBytes(), 0, encodedKey.getBytes().length);
 							byte[] res;
 							if (withParameters) {
 								byte[] encodedParameters = OAEPParams.getEncodingParams();
@@ -269,7 +271,7 @@ public enum ASymmetricKeyWrapperType {
 							} else
 								res=wrapKeyWithMetaData(wrapedKey, keyToWrap);
 							Arrays.fill(wrapedKey, (byte)0);
-							return new WrappedSymmetricKey(res);
+							return new WrappedEncryptedSymmetricSecretKey(res);
 
 						}
 		/*if (OSValidator.getCurrentOS()==OSValidator.MACOS && (this==RSA_OAEP || this==ASymmetricKeyWrapperType.RSA_OAEP_WITH_PARAMETERS))
@@ -290,7 +292,7 @@ public enum ASymmetricKeyWrapperType {
 							byte[] res=wrapKeyWithMetaData(concat, keyToWrap);
 							Arrays.fill(concat, (byte)0);
 							Arrays.fill(wrapedKey, (byte)0);
-							return new WrappedSymmetricKey(res);
+							return new WrappedEncryptedSymmetricSecretKey(res);
 						}
 		/*else if (this.algorithmName.equals(BC_FIPS_RSA_KTS_KTM.algorithmName))
 		{
@@ -302,15 +304,15 @@ public enum ASymmetricKeyWrapperType {
 							byte[] wrappedKey=c.wrap(keyToWrap.toJavaNativeKey());
 							byte[] res=wrapKeyWithMetaData(wrappedKey, keyToWrap);
 							Arrays.fill(wrappedKey, (byte)0);
-							return new WrappedSymmetricKey(res);
+							return new WrappedEncryptedSymmetricSecretKey(res);
 						}
 					}
 				}
 			} else {
 				HybridASymmetricPublicKey publicKey = (HybridASymmetricPublicKey) ipublicKey;
-				WrappedSymmetricKey nonPQCWrap = wrapKey(random, publicKey.getNonPQCPublicKey(), keyToWrap);
+				WrappedEncryptedSymmetricSecretKey nonPQCWrap = wrapKey(random, publicKey.getNonPQCPublicKey(), keyToWrap);
 				ClientASymmetricEncryptionAlgorithm client = new ClientASymmetricEncryptionAlgorithm(random, publicKey.getPQCPublicKey());
-				return new WrappedSymmetricKey(client.encode(nonPQCWrap.getBytes()));
+				return new WrappedEncryptedSymmetricSecretKey(client.encode(nonPQCWrap.getBytes()));
 			}
 		} catch (InvalidKeySpecException | NoSuchAlgorithmException | NoSuchProviderException | InvalidKeyException | InvalidAlgorithmParameterException | NoSuchPaddingException | IllegalBlockSizeException e) {
 			throw new IOException(e);
@@ -318,7 +320,7 @@ public enum ASymmetricKeyWrapperType {
 
 	}
 	
-	public SymmetricSecretKey unwrapKey(IASymmetricPrivateKey iPrivateKey, WrappedSymmetricKey keyToUnwrap) throws IOException
+	public SymmetricSecretKey unwrapKey(IASymmetricPrivateKey iPrivateKey, WrappedEncryptedSymmetricSecretKey keyToUnwrap) throws IOException
 	{
 		try {
 			if (name().startsWith("BCPQC_MCELIECE_")) {
@@ -333,7 +335,7 @@ public enum ASymmetricKeyWrapperType {
 				HybridASymmetricPrivateKey privateKey = (HybridASymmetricPrivateKey) iPrivateKey;
 				ServerASymmetricEncryptionAlgorithm server = new ServerASymmetricEncryptionAlgorithm(privateKey.getPQCPrivateKey());
 				byte[] b = server.decode(keyToUnwrap.getBytes());
-				return unwrapKey(privateKey.getNonPQCPrivateKey(), new WrappedSymmetricKey(b));
+				return unwrapKey(privateKey.getNonPQCPrivateKey(), new WrappedEncryptedSymmetricSecretKey(b));
 
 			} else if (isSignatureFromMetaData(keyToUnwrap)) {
 				byte[] ktu = getWrappedKeyFromMetaData(keyToUnwrap);

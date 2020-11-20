@@ -35,20 +35,20 @@ The fact that you are presently reading this means that you have had
 knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-import com.distrimind.util.Bits;
 import com.distrimind.util.DecentralizedValue;
+import com.distrimind.util.data_buffers.WrappedSecretData;
+import com.distrimind.util.data_buffers.WrappedSecretString;
 
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
-import java.util.Base64;
 
 /**
  * @author Jason Mahdjoub
  * @version 1.0
  * @since MaDKitLanEdition 4.5.0
  */
-public abstract class AbstractKeyPair<TPrivateKey extends IASymmetricPrivateKey, PubKey extends IASymmetricPublicKey> extends DecentralizedValue {
+public abstract class AbstractKeyPair<TPrivateKey extends IASymmetricPrivateKey, PubKey extends IASymmetricPublicKey> extends DecentralizedValue implements ISecretDecentralizedValue {
 
 	public static final int MAX_SIZE_IN_BYTES_OF_KEY_PAIR_WITH_RSA_FOR_SIGNATURE = ASymmetricAuthenticatedSignatureType.MAX_SIZE_IN_BYTES_OF_HYBRID_KEY_PAIR_WITH_RSA_FOR_SIGNATURE;
 	public static final int MAX_SIZE_IN_BYTES_OF_KEY_PAIR_WITHOUT_RSA_FOR_SIGNATURE =ASymmetricAuthenticatedSignatureType.MAX_SIZE_IN_BYTES_OF_HYBRID_KEY_PAIR_WITHOUT_RSA_FOR_SIGNATURE;
@@ -56,7 +56,9 @@ public abstract class AbstractKeyPair<TPrivateKey extends IASymmetricPrivateKey,
 	public static final int MAX_SIZE_IN_BYTES_OF_KEY_PAIR_WITH_RSA_FOR_ENCRYPTION = ASymmetricEncryptionType.MAX_SIZE_IN_BYTES_OF_HYBRID_KEY_PAIR_WITH_RSA_FOR_ENCRYPTION;
 	public static final int MAX_SIZE_IN_BYTES_OF_KEY_PAIR_FOR_ENCRYPTION= ASymmetricEncryptionType.MAX_SIZE_IN_BYTES_OF_HYBRID_KEY_PAIR_FOR_ENCRYPTION;
 
-
+	public static AbstractKeyPair<?, ?> decode(WrappedSecretData b) throws IllegalArgumentException {
+		return decode(b.getBytes(), false);
+	}
 	public static AbstractKeyPair<?, ?> decode(byte[] b) throws IllegalArgumentException {
 		return decode(b, true);
 	}
@@ -78,8 +80,8 @@ public abstract class AbstractKeyPair<TPrivateKey extends IASymmetricPrivateKey,
 			return ASymmetricKeyPair.decode(b, off, len, fillArrayWithZerosWhenDecoded);
 	}
 
-	public static AbstractKeyPair<?, ?> valueOf(String key) throws IllegalArgumentException, IOException {
-		return decode(Bits.checkByteArrayAndReturnsItWithoutCheckSum(Base64.getUrlDecoder().decode(key)));
+	public static AbstractKeyPair<?, ?> valueOf(WrappedSecretString key) throws IllegalArgumentException, IOException {
+		return decode(new WrappedSecretData(key));
 	}
 
 	public abstract boolean isPostQuantumKey();
@@ -100,7 +102,12 @@ public abstract class AbstractKeyPair<TPrivateKey extends IASymmetricPrivateKey,
 
 	public abstract void zeroize();
 
-	public abstract byte[] encode(boolean includeTimeExpiration);
+	public abstract WrappedSecretData encode(boolean includeTimeExpiration);
+
+	@Override
+	public final WrappedSecretString encodeString() {
+		return new WrappedSecretString(encode());
+	}
 
 	@SuppressWarnings("deprecation")
 	@Override public void finalize()

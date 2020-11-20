@@ -1,5 +1,8 @@
 package com.distrimind.util.crypto;
 
+import com.distrimind.util.data_buffers.WrappedData;
+import com.distrimind.util.data_buffers.WrappedSecretData;
+
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
@@ -22,10 +25,10 @@ public interface IKey extends Zeroizable{
 
 	com.distrimind.bcfips.crypto.Key toBouncyCastleKey() throws NoSuchAlgorithmException, InvalidKeySpecException;
 
-	byte[] encode();
+	WrappedData encode();
 
 
-	byte[] getKeyBytes();
+	WrappedData getKeyBytes();
 
 	boolean isPostQuantumKey();
 

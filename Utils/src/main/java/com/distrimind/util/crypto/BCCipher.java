@@ -35,6 +35,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
 
 package com.distrimind.util.crypto;
 
+import com.distrimind.util.data_buffers.WrappedData;
 import com.distrimind.util.io.Integrity;
 import com.distrimind.util.io.MessageExternalizationException;
 import com.distrimind.bcfips.crypto.SymmetricSecretKey;
@@ -537,8 +538,8 @@ public class BCCipher extends AbstractCipher {
 	}
 
 	public byte[] wrap(AbstractKey key) throws PlainInputProcessingException {
-		byte[] b = key.getKeyBytes();
-		return wrapper.wrap(b, 0, b.length);
+		WrappedData b = key.getKeyBytes();
+		return wrapper.wrap(b.getBytes(), 0, b.getBytes().length);
 	}
 	
 	public final byte[] unwrap(byte[] wrappedKey)

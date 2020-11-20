@@ -36,6 +36,8 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 
 import com.distrimind.util.Bits;
+import com.distrimind.util.data_buffers.WrappedData;
+import com.distrimind.util.data_buffers.WrappedSecretData;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -130,22 +132,28 @@ public class HybridASymmetricKeyPair extends AbstractKeyPair<HybridASymmetricPri
 	}
 
 
-	public byte[] encode() {
+	public WrappedSecretData encode() {
 		return encode(true);
 	}
+
+
+
 	@Override
-	public byte[] encode(boolean includeTimeExpiration)
+	public WrappedSecretData encode(boolean includeTimeExpiration)
 	{
 
-		byte[] encodedPrivKey=privateKey.encode();
-		byte[] encodedPubKey=publicKey.encode(includeTimeExpiration);
+		WrappedSecretData encodedPrivKey=privateKey.encode();
+		WrappedData encodedPubKey=publicKey.encode(includeTimeExpiration);
 
-		byte[] res=new byte[encodedPrivKey.length+encodedPubKey.length+4];
+		byte[] res=new byte[encodedPrivKey.getBytes().length+encodedPubKey.getBytes().length+4];
 		res[0]= AbstractKey.IS_HYBRID_KEY_PAIR;
-		Bits.putPositiveInteger(res, 1, encodedPrivKey.length, 3);
-		System.arraycopy(encodedPrivKey, 0, res, 4, encodedPrivKey.length );
-		System.arraycopy(encodedPubKey, 0, res, 4+encodedPrivKey.length, encodedPubKey.length );
-		return res;
+		Bits.putPositiveInteger(res, 1, encodedPrivKey.getBytes().length, 3);
+		System.arraycopy(encodedPrivKey.getBytes(), 0, res, 4, encodedPrivKey.getBytes().length );
+		System.arraycopy(encodedPubKey.getBytes(), 0, res, 4+encodedPrivKey.getBytes().length, encodedPubKey.getBytes().length );
+		encodedPrivKey.zeroize();
+
+		return new WrappedSecretData(res);
+
 
 	}
 

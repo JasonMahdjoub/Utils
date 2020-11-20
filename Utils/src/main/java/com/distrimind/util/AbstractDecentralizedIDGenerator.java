@@ -42,10 +42,9 @@ import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.util.Enumeration;
 
-import com.distrimind.util.crypto.AbstractMessageDigest;
-import com.distrimind.util.crypto.AbstractSecureRandom;
-import com.distrimind.util.crypto.MessageDigestType;
-import com.distrimind.util.crypto.SecureRandomType;
+import com.distrimind.util.crypto.*;
+import com.distrimind.util.data_buffers.WrappedData;
+import com.distrimind.util.data_buffers.WrappedSecretData;
 import com.distrimind.util.sizeof.ObjectSizer;
 
 /**
@@ -331,7 +330,7 @@ public abstract class AbstractDecentralizedIDGenerator extends AbstractDecentral
 	}
 
 	@Override
-	public byte[] encode() {
+	public WrappedData encode() {
 		long ts = getTimeStamp();
 		long wid = getWorkerIDAndSequence();
 		int sizeLong = ObjectSizer.sizeOf(ts);
@@ -339,7 +338,7 @@ public abstract class AbstractDecentralizedIDGenerator extends AbstractDecentral
 		res[0] = getType();
 		Bits.putLong(res, 1, ts);
 		Bits.putLong(res, sizeLong + 1, wid);
-		return res;
+		return new WrappedData(res);
 	}
 
 	protected abstract short getNewSequence();

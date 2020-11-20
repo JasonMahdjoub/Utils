@@ -38,6 +38,7 @@ package com.distrimind.util.crypto;
 import com.distrimind.bcfips.crypto.Algorithm;
 import com.distrimind.bcfips.crypto.fips.FipsSHS;
 import com.distrimind.bcfips.crypto.fips.FipsSHS.AuthParameters;
+import com.distrimind.util.data_buffers.WrappedSecretData;
 
 import javax.crypto.spec.SecretKeySpec;
 import java.io.IOException;
@@ -111,15 +112,15 @@ public enum SymmetricAuthenticatedSignatureType {
         this.replacer=replacer;
     }
 
-	public SymmetricSecretKey generateSecretKeyFromByteArray(SecretData secretData) throws NoSuchProviderException, NoSuchAlgorithmException {
-		return generateSecretKeyFromByteArray(secretData, getDefaultKeySizeBits());
+	public SymmetricSecretKey generateSecretKeyFromByteArray(WrappedSecretData wrappedSecretData) throws NoSuchProviderException, NoSuchAlgorithmException {
+		return generateSecretKeyFromByteArray(wrappedSecretData, getDefaultKeySizeBits());
 	}
 
-	public SymmetricSecretKey generateSecretKeyFromByteArray(SecretData secretData, short keySizeBits) throws NoSuchProviderException, NoSuchAlgorithmException {
+	public SymmetricSecretKey generateSecretKeyFromByteArray(WrappedSecretData wrappedSecretData, short keySizeBits) throws NoSuchProviderException, NoSuchAlgorithmException {
 		if (keySizeBits<56 || keySizeBits>512)
 			throw new IllegalArgumentException();
 		AbstractMessageDigest md=(keySizeBits>256?MessageDigestType.SHA3_512:MessageDigestType.SHA3_256).getMessageDigestInstance();
-		md.update(secretData.getBytes());
+		md.update(wrappedSecretData.getBytes());
 		byte[] d=md.digest();
 		return new SymmetricSecretKey(this, Arrays.copyOfRange(d, 0, keySizeBits/8), keySizeBits);
 	}

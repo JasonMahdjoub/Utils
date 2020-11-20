@@ -37,10 +37,12 @@ package com.distrimind.util.crypto;
 
 import com.distrimind.util.Bits;
 import com.distrimind.util.DecentralizedValue;
+import com.distrimind.util.data_buffers.WrappedData;
+import com.distrimind.util.data_buffers.WrappedSecretData;
+import com.distrimind.util.data_buffers.WrappedString;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Base64;
 
 /**
  * 
@@ -48,7 +50,7 @@ import java.util.Base64;
  * @version 2.2
  * @since Utils 2.0
  */
-@SuppressWarnings("ConstantConditions")
+
 public abstract class AbstractKey extends DecentralizedValue implements IKey{
 
 
@@ -74,7 +76,10 @@ public abstract class AbstractKey extends DecentralizedValue implements IKey{
 	static final byte IS_HYBRID_KEY_PAIR=(byte)(19);
 	static final byte IS_HYBRID_PUBLIC_KEY=(byte)(20);
 	static final byte IS_HYBRID_PRIVATE_KEY=(byte)(21);
-
+	public static boolean isPublicKey(WrappedData b)
+	{
+		return isPublicKey(b.getBytes());
+	}
 	public static boolean isPublicKey(byte[] b)
 	{
 		return isPublicKey(b, 0);
@@ -87,6 +92,10 @@ public abstract class AbstractKey extends DecentralizedValue implements IKey{
 		type&=~IS_XDH_KEY;
 		return type==4 || type==5;
 
+	}
+	public static boolean isValidType(WrappedData wrappedData)
+	{
+		return isValidType(wrappedData.getBytes(), 0);
 	}
 	public static boolean isValidType(byte[] b, int off)
 	{
@@ -105,6 +114,8 @@ public abstract class AbstractKey extends DecentralizedValue implements IKey{
 			return type >= 0 && type <= 5;
 		}
 	}
+
+
 	public static AbstractKey decode(byte[] b, boolean fillArrayWithZerosWhenDecoded) throws IllegalArgumentException {
 		return decode(b, 0, b.length, fillArrayWithZerosWhenDecoded);
 	}
@@ -112,17 +123,26 @@ public abstract class AbstractKey extends DecentralizedValue implements IKey{
 		return decode(b, off, len, !isPublicKey(b, off));
 	}
 
-	static byte[] encodeHybridKey(AbstractKey nonPQCKey, AbstractKey PQCKey, boolean includeTimeExpiration)
+	static WrappedData encodeHybridKey(AbstractKey nonPQCKey, AbstractKey PQCKey, boolean includeTimeExpiration)
 	{
-		byte[] encodedNonPQC=nonPQCKey instanceof IASymmetricPublicKey?((IASymmetricPublicKey)nonPQCKey).encode(includeTimeExpiration):nonPQCKey.encode();
-		byte[] encodedPQC=PQCKey instanceof IASymmetricPublicKey?((IASymmetricPublicKey)PQCKey).encode(includeTimeExpiration):PQCKey.encode();
+		WrappedData encodedNonPQC=nonPQCKey instanceof IASymmetricPublicKey?((IASymmetricPublicKey)nonPQCKey).encode(includeTimeExpiration):nonPQCKey.encode();
+		WrappedData encodedPQC=PQCKey instanceof IASymmetricPublicKey?((IASymmetricPublicKey)PQCKey).encode(includeTimeExpiration):PQCKey.encode();
 
-		byte[] res=new byte[encodedNonPQC.length+encodedPQC.length+4];
+		byte[] res=new byte[encodedNonPQC.getBytes().length+encodedPQC.getBytes().length+4];
 		res[0]=((nonPQCKey instanceof HybridASymmetricPublicKey)?IS_HYBRID_PUBLIC_KEY:IS_HYBRID_PRIVATE_KEY);
-		Bits.putPositiveInteger(res, 1, encodedNonPQC.length, 3);
-		System.arraycopy(encodedNonPQC, 0, res, 4, encodedNonPQC.length );
-		System.arraycopy(encodedPQC, 0, res, 4+encodedNonPQC.length, encodedPQC.length );
-		return res;
+		Bits.putPositiveInteger(res, 1, encodedNonPQC.getBytes().length, 3);
+		System.arraycopy(encodedNonPQC.getBytes(), 0, res, 4, encodedNonPQC.getBytes().length );
+		System.arraycopy(encodedPQC.getBytes(), 0, res, 4+encodedNonPQC.getBytes().length, encodedPQC.getBytes().length );
+		if (encodedNonPQC instanceof Zeroizable) {
+			((Zeroizable) encodedNonPQC).zeroize();
+			((Zeroizable) encodedPQC).zeroize();
+			return new WrappedSecretData(res);
+		}
+		else
+		{
+			return new WrappedData(res);
+		}
+
 	}
 
 	static IHybridKey decodeHybridKey(byte[] encoded, int off, int len, boolean fillArrayWithZerosWhenDecoded)
@@ -174,7 +194,12 @@ public abstract class AbstractKey extends DecentralizedValue implements IKey{
 		}
 	}
 
-
+	public static AbstractKey decode(WrappedData wrappedData) throws IllegalArgumentException {
+		AbstractKey k=decode(wrappedData.getBytes(), false);
+		if (k instanceof ISecretDecentralizedValue)
+			wrappedData.transformToSecretData();
+		return k;
+	}
 	public static AbstractKey decode(byte[] b, int off, int len, boolean fillArrayWithZerosWhenDecoded) throws IllegalArgumentException {
 		if (off<0 || len<0 || len+off>b.length)
 			throw new IllegalArgumentException();
@@ -285,10 +310,13 @@ public abstract class AbstractKey extends DecentralizedValue implements IKey{
 
 
 
-	public static AbstractKey valueOf(String key) throws IllegalArgumentException, IOException {
+	public static AbstractKey valueOf(WrappedString key) throws IllegalArgumentException, IOException {
 		if (key==null)
 			throw new NullPointerException();
-		return decode(Bits.checkByteArrayAndReturnsItWithoutCheckSum(Base64.getUrlDecoder().decode(key)));
+		AbstractKey k=decode(new WrappedSecretData(key));
+		if (k instanceof ISecretDecentralizedValue)
+			key.transformToSecretString();
+		return k;
 	}
 
 

@@ -43,6 +43,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import com.distrimind.util.crypto.AbstractMessageDigest;
 import com.distrimind.util.crypto.AbstractSecureRandom;
 import com.distrimind.util.crypto.MessageDigestType;
+import com.distrimind.util.data_buffers.WrappedSecretData;
+import com.distrimind.util.data_buffers.WrappedString;
 import com.distrimind.util.sizeof.ObjectSizer;
 
 
@@ -87,8 +89,11 @@ public class SecuredDecentralizedID extends AbstractDecentralizedID {
 		}
 		return md;
 	}
-
 	public static SecuredDecentralizedID valueOf(String value) {
+		return valueOf(new WrappedString(value));
+
+	}
+	public static SecuredDecentralizedID valueOf(WrappedString value) {
 		AbstractDecentralizedID res = AbstractDecentralizedID.valueOf(value);
 		if (res instanceof SecuredDecentralizedID) {
 			return (SecuredDecentralizedID) res;
@@ -203,7 +208,7 @@ public class SecuredDecentralizedID extends AbstractDecentralizedID {
 	}
 
 	@Override
-	public byte[] encode() {
+	public WrappedSecretData encode() {
 		int sizeLong = ObjectSizer.sizeOf(idLongs[0]);
 		byte[] res = new byte[idLongs.length * sizeLong + 1];
 		res[0] = getType();
@@ -211,7 +216,7 @@ public class SecuredDecentralizedID extends AbstractDecentralizedID {
 		for (int i = 0; i < idLongs.length; i++) {
 			Bits.putLong(res, i * sizeLong + 1, idLongs[i]);
 		}
-		return res;
+		return new WrappedSecretData(res);
 	}
 
 	@Override

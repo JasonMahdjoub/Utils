@@ -38,6 +38,8 @@ import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.util.EnumSet;
 
+import com.distrimind.util.data_buffers.WrappedData;
+import com.distrimind.util.data_buffers.WrappedSecretData;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -168,7 +170,7 @@ public class DecentralizedIDTests {
 
 	@Test(dataProvider = "getDEncetralizedIDs")
 	public void testToBytes(AbstractDecentralizedID id) {
-		byte[] bytes = id.encode();
+		WrappedData bytes = id.encode();
 		AbstractDecentralizedID id2 = (AbstractDecentralizedID)DecentralizedValue.decode(bytes);
 		Assert.assertEquals(id, id2);
 		Assert.assertEquals(id.hashCode(), id2.hashCode());

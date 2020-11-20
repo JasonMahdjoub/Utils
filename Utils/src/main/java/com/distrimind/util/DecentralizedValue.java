@@ -35,10 +35,12 @@ knowledge of the CeCILL-C license and that you accept its terms.
 package com.distrimind.util;
 
 import com.distrimind.util.crypto.*;
+import com.distrimind.util.data_buffers.WrappedData;
+import com.distrimind.util.data_buffers.WrappedSecretData;
+import com.distrimind.util.data_buffers.WrappedString;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.Base64;
 
 /**
  * @author Jason Mahdjoub
@@ -54,19 +56,29 @@ public abstract class DecentralizedValue implements Serializable {
 
 	public static final int MAX_SIZE_IN_BYTES_OF_DECENTRALIZED_VALUE= MAX_SIZE_IN_BYTES_OF_KEY_PAIR;
 
-	public abstract byte[] encode();
+	public abstract WrappedData encode();
+	public static DecentralizedValue decode(WrappedData encodedValue)
+	{
+		DecentralizedValue dv=decode(encodedValue.getBytes());
+		if (dv instanceof ISecretDecentralizedValue)
+			encodedValue.transformToSecretData();
+		return dv;
+	}
 	public static DecentralizedValue decode(byte[] encodedValue)
 	{
 		return decode(encodedValue, 0, encodedValue.length);
 	}
+
 	public static DecentralizedValue decode(byte[] encodedValue, int off, int len)
 	{
 		return decode(encodedValue, off, len, false);
 	}
+
 	public static DecentralizedValue decode(byte[] encodedValue, boolean fillArrayWithZerosWhenDecoded)
 	{
 		return decode(encodedValue, 0, encodedValue.length, fillArrayWithZerosWhenDecoded);
 	}
+
 	public static DecentralizedValue decode(byte[] encodedValue, int off, int len, boolean fillArrayWithZerosWhenDecoded)
 	{
 		if (AbstractDecentralizedID.isValidType(encodedValue, off))
@@ -78,9 +90,7 @@ public abstract class DecentralizedValue implements Serializable {
 
 	}
 
-	public final String encodeString() {
-		return Base64.getUrlEncoder().encodeToString(Bits.getByteArrayWithCheckSum(encode()));
-	}
+	public abstract WrappedString encodeString() ;
 
 	@Override
 	public String toString()
@@ -88,10 +98,13 @@ public abstract class DecentralizedValue implements Serializable {
 		return this.getClass().getSimpleName()+"["+encodeString()+"]";
 	}
 
-	public static DecentralizedValue valueOf(String key) throws IllegalArgumentException, IOException {
+	public static DecentralizedValue valueOf(WrappedString key) throws IllegalArgumentException, IOException {
 		if (key==null)
 			throw new NullPointerException();
-		return decode(Bits.checkByteArrayAndReturnsItWithoutCheckSum(Base64.getUrlDecoder().decode(key)));
+		DecentralizedValue dv=decode(new WrappedSecretData(key));
+		if (dv instanceof ISecretDecentralizedValue)
+			key.transformToSecretString();
+		return dv;
 	}
 
 }

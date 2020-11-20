@@ -40,6 +40,7 @@ package com.distrimind.util.io;
 
 import com.distrimind.util.*;
 import com.distrimind.util.crypto.*;
+import com.distrimind.util.data_buffers.*;
 import com.distrimind.util.harddrive.FilePermissions;
 
 import java.io.IOException;
@@ -254,8 +255,10 @@ public class SerializationTools {
 			return;
 			
 		}
-
-		writeBytes(oos, key.encode(), AbstractKey.MAX_SIZE_IN_BYTES_OF_KEY, false);
+		WrappedData sd=key.encode();
+		writeBytes(oos, sd.getBytes(), AbstractKey.MAX_SIZE_IN_BYTES_OF_KEY, false);
+		if (sd instanceof WrappedSecretData)
+			((WrappedSecretData) sd).zeroize();
 	}
 
 	@SuppressWarnings("SameParameterValue")
@@ -297,8 +300,10 @@ public class SerializationTools {
 			
 		}
 
-
-		writeBytes(oos, keyPair.encode(), AbstractKeyPair.MAX_SIZE_IN_BYTES_OF_KEY_PAIR, false);
+		WrappedData sd=keyPair.encode();
+		writeBytes(oos, sd.getBytes(), AbstractKeyPair.MAX_SIZE_IN_BYTES_OF_KEY_PAIR, false);
+		if (sd instanceof WrappedSecretData)
+			((WrappedSecretData) sd).zeroize();
 	}
 
 	@SuppressWarnings("SameParameterValue")
@@ -883,8 +888,10 @@ public class SerializationTools {
 			return;
 
 		}
-
-		writeBytes(oos, id.encode(), AbstractDecentralizedID.MAX_DECENTRALIZED_ID_SIZE_IN_BYTES, false);
+		WrappedData wd=id.encode();
+		writeBytes(oos, wd.getBytes(), AbstractDecentralizedID.MAX_DECENTRALIZED_ID_SIZE_IN_BYTES, false);
+		if (wd instanceof WrappedSecretData)
+			((WrappedSecretData) wd).zeroize();
 	}
 	@SuppressWarnings("SameParameterValue")
 	static AbstractDecentralizedID readDecentralizedID(final SecuredObjectInputStream in, boolean supportNull) throws IOException
@@ -1519,7 +1526,7 @@ public class SerializationTools {
 				|| HybridKeyAgreementType.class==clazz;
 
 	}
-	static int getObjectCodeSizeBytes()
+	public static int getObjectCodeSizeBytes()
 	{
 		return enumsEndIndex>254?2:1;
 	}
@@ -1891,14 +1898,13 @@ public class SerializationTools {
 						SubStreamParameter.class,
 						SubStreamParameters.class,
 						FragmentedStreamParameters.class,
-						Password.class,
-						HashedPassword.class,
-						SecretData.class,
-						WrappedASymmetricSecretKey.class,
-						WrappedSymmetricKey.class,
-						SecretDataString.class,
-						WrappedASymmetricSecretKeyString.class,
-						WrappedSymmetricKeyString.class)),
+						WrappedPassword.class,
+						WrappedHashedPassword.class,
+						WrappedHashedPasswordString.class,
+						WrappedEncryptedASymmetricPrivateKey.class,
+						WrappedEncryptedSymmetricSecretKey.class,
+						WrappedEncryptedASymmetricWrappedSecretKeyString.class,
+						WrappedEncryptedSymmetricWrappedSecretKeyString.class)),
 				new ArrayList<>(Arrays.asList(
 						MessageDigestType.class,
 						SecureRandomType.class,

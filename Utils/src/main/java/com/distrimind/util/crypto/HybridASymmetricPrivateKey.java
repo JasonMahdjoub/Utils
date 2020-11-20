@@ -36,6 +36,9 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 
 
+import com.distrimind.util.data_buffers.WrappedSecretData;
+import com.distrimind.util.data_buffers.WrappedSecretString;
+
 import java.util.Objects;
 
 /**
@@ -109,8 +112,13 @@ public class HybridASymmetricPrivateKey extends AbstractKey implements IHybridKe
 		throw new IllegalAccessError();
 	}
 
-	public byte[] encode() {
-		return AbstractKey.encodeHybridKey(nonPQCPrivateKey, PQCPrivateKey, true);
+	public WrappedSecretData encode() {
+		return (WrappedSecretData)AbstractKey.encodeHybridKey(nonPQCPrivateKey, PQCPrivateKey, true);
+	}
+
+	@Override
+	public WrappedSecretString encodeString() {
+		return new WrappedSecretString(encode());
 	}
 
 
@@ -122,7 +130,7 @@ public class HybridASymmetricPrivateKey extends AbstractKey implements IHybridKe
 
 
 	@Override
-	public byte[] getKeyBytes() {
+	public WrappedSecretData getKeyBytes() {
 		return encode();
 	}
 

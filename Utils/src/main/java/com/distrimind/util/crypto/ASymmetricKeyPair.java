@@ -43,6 +43,9 @@ import java.util.Base64;
 
 
 import com.distrimind.util.Bits;
+import com.distrimind.util.data_buffers.WrappedSecretData;
+import com.distrimind.util.data_buffers.WrappedSecretString;
+import com.distrimind.util.data_buffers.WrappedString;
 
 /**
  * 
@@ -238,11 +241,11 @@ public class ASymmetricKeyPair extends AbstractKeyPair<ASymmetricPrivateKey, ASy
 		this.nativeKeyPair=keyPair;
 	}
 
-	public byte[] encode() {
+	public WrappedSecretData encode() {
 		return encode(true);
 	}
 	@Override
-	public byte[] encode(boolean includeTimeExpiration)
+	public WrappedSecretData encode(boolean includeTimeExpiration)
 	{
 		if (getTimeExpirationUTC()==Long.MAX_VALUE)
 			includeTimeExpiration=false;
@@ -262,7 +265,8 @@ public class ASymmetricKeyPair extends AbstractKeyPair<ASymmetricPrivateKey, ASy
 			pos += 8;
 		}
 		System.arraycopy(kp, 0, tab, pos, kp.length);
-		return tab;
+		Arrays.fill(kp, (byte)0);
+		return new WrappedSecretData(tab);
 	}
 	public static boolean isValidType(byte[] b, int off)
 	{
@@ -345,6 +349,9 @@ public class ASymmetricKeyPair extends AbstractKeyPair<ASymmetricPrivateKey, ASy
 
 
     }
+
+
+
 	@Override
 	public boolean equals(Object o) {
 		if (o == null)

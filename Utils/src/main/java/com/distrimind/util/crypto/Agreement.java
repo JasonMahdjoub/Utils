@@ -35,6 +35,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
 package com.distrimind.util.crypto;
 
 
+import com.distrimind.util.data_buffers.WrappedSecretData;
 import com.distrimind.util.io.Integrity;
 import com.distrimind.util.io.MessageExternalizationException;
 
@@ -93,21 +94,21 @@ public abstract class Agreement implements Zeroizable {
 	
 	protected abstract boolean isAgreementProcessValidImpl(); 
 	
-	public byte[] getDataToSend() throws IOException
+	public WrappedSecretData getDataToSend() throws IOException
 	{
 		if (hasFinishedSend())
 			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new IllegalAccessException("The process has finished"));
 		return getDataToSend(actualStepForSend++);
 	}
-	public void receiveData(byte[] data) throws IOException
+	public void receiveData(WrappedSecretData data) throws IOException
 	{
 		if (hasFinishedReception())
 			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new IllegalAccessException("The process has finished"));
 		receiveData(actualStepForReception++, data);
 	}
 
-	protected abstract byte[] getDataToSend(int stepNumber) throws IOException;
-	protected abstract void receiveData(int stepNumber, byte[] data) throws IOException;
+	protected abstract WrappedSecretData getDataToSend(int stepNumber) throws IOException;
+	protected abstract void receiveData(int stepNumber, WrappedSecretData data) throws IOException;
 
 
 	@SuppressWarnings("deprecation")

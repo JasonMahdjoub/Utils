@@ -35,6 +35,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
 package com.distrimind.util.crypto;
 
 
+import com.distrimind.util.data_buffers.WrappedSecretData;
 import com.distrimind.util.io.Integrity;
 import com.distrimind.util.io.MessageExternalizationException;
 import com.distrimind.bouncycastle.crypto.CryptoException;
@@ -85,13 +86,13 @@ public class NewHopeKeyAgreementServer extends AbstractNewHopeKeyAgreement{
 	}
 	
 	
-	public void setDataPhase1(byte []data)
+	public void setDataPhase1(WrappedSecretData data)
 	{
 		valid=false;
         byte[] sharedValue = new byte[agreementSize];
         byte[] publicKeyValue = new byte[SENDB_BYTES];
 
-        AbstractNewHopeKeyAgreement.sharedB(randomForKeys, sharedValue, publicKeyValue, data);
+        AbstractNewHopeKeyAgreement.sharedB(randomForKeys, sharedValue, publicKeyValue, data.getBytes());
 
 		
         exchangePair=new ExchangePair(new NHPublicKeyParameters(publicKeyValue), sharedValue);
@@ -100,10 +101,10 @@ public class NewHopeKeyAgreementServer extends AbstractNewHopeKeyAgreement{
         valid=true;
 	}
 	
-	public byte[] getDataPhase2()
+	public WrappedSecretData getDataPhase2()
 	{
 		valid=false;
-		byte[] res= ((NHPublicKeyParameters)exchangePair.getPublicKey()).getPubData();
+		WrappedSecretData res= new WrappedSecretData(((NHPublicKeyParameters)exchangePair.getPublicKey()).getPubData());
 		valid=true;
 		return res;
 	}
@@ -113,7 +114,7 @@ public class NewHopeKeyAgreementServer extends AbstractNewHopeKeyAgreement{
 		return valid;
 	}
 	@Override
-	protected byte[] getDataToSend(int stepNumber) throws IOException {
+	protected WrappedSecretData getDataToSend(int stepNumber) throws IOException {
 		if (!valid)
 			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException());
 
@@ -134,7 +135,7 @@ public class NewHopeKeyAgreementServer extends AbstractNewHopeKeyAgreement{
 
 	}
 	@Override
-	protected void receiveData(int stepNumber, byte[] data) throws IOException {
+	protected void receiveData(int stepNumber, WrappedSecretData data) throws IOException {
 		if (!valid)
 			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException());
 

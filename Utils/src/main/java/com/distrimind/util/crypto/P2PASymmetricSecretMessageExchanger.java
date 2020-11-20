@@ -34,6 +34,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
+import com.distrimind.util.data_buffers.WrappedData;
 import com.distrimind.util.io.Integrity;
 import com.distrimind.util.io.MessageExternalizationException;
 
@@ -331,7 +332,7 @@ public class P2PASymmetricSecretMessageExchanger {
 		return encode(message.toCharArray(), salt, offset_salt, len_salt);
 	}
 
-	public byte[] encodeMyPublicKey() {
+	public WrappedData encodeMyPublicKey() {
 		return myPublicKey.encode();
 	}
 

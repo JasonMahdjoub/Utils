@@ -36,6 +36,8 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 
 import com.distrimind.util.Bits;
+import com.distrimind.util.data_buffers.WrappedSecretData;
+import com.distrimind.util.data_buffers.WrappedSecretString;
 
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
@@ -47,7 +49,7 @@ import java.util.Objects;
  * @version 1.0
  * @since Utils 4.7.0
  */
-public class SymmetricSecretKeyPair extends AbstractKey{
+public class SymmetricSecretKeyPair extends AbstractKey implements ISecretDecentralizedValue{
 	private SymmetricSecretKey secretKeyForEncryption;
 	private SymmetricSecretKey secretKeyForSignature;
 
@@ -106,19 +108,24 @@ public class SymmetricSecretKeyPair extends AbstractKey{
 
 
 	@Override
-	public byte[] encode()
+	public WrappedSecretData encode()
 	{
-		byte[] encodedSecretKeyForEncryption=secretKeyForEncryption.encode();
-		byte[] encodedSecretKeyForSignature=secretKeyForSignature.encode();
-		byte[] tab = new byte[2+encodedSecretKeyForEncryption.length+encodedSecretKeyForSignature.length];
+		WrappedSecretData encodedSecretKeyForEncryption=secretKeyForEncryption.encode();
+		WrappedSecretData encodedSecretKeyForSignature=secretKeyForSignature.encode();
+		byte[] tab = new byte[2+encodedSecretKeyForEncryption.getBytes().length+encodedSecretKeyForSignature.getBytes().length];
 		tab[0]=AbstractKey.IS_XDH_KEY;
-		if (encodedSecretKeyForEncryption.length>255)
+		if (encodedSecretKeyForEncryption.getBytes().length>255)
 			throw new IllegalAccessError();
-		tab[1]=(byte)encodedSecretKeyForEncryption.length;
-		System.arraycopy(encodedSecretKeyForEncryption, 0, tab, 2, encodedSecretKeyForEncryption.length);
-		System.arraycopy(encodedSecretKeyForSignature, 0, tab, encodedSecretKeyForEncryption.length+2, encodedSecretKeyForSignature.length);
-		return tab;
+		tab[1]=(byte)encodedSecretKeyForEncryption.getBytes().length;
+		System.arraycopy(encodedSecretKeyForEncryption.getBytes(), 0, tab, 2, encodedSecretKeyForEncryption.getBytes().length);
+		System.arraycopy(encodedSecretKeyForSignature.getBytes(), 0, tab, encodedSecretKeyForEncryption.getBytes().length+2, encodedSecretKeyForSignature.getBytes().length);
+		return new WrappedSecretData(tab);
 
+	}
+
+	@Override
+	public WrappedSecretString encodeString() {
+		return new WrappedSecretString(encode());
 	}
 
 	public SymmetricSecretKeyPair getHashedSecretKeyPair(MessageDigestType messageDigestType, long customApplicationCode) throws NoSuchProviderException, NoSuchAlgorithmException {
@@ -141,7 +148,7 @@ public class SymmetricSecretKeyPair extends AbstractKey{
 	}
 
 	@Override
-	public byte[] getKeyBytes() {
+	public WrappedSecretData getKeyBytes() {
 		return encode();
 	}
 

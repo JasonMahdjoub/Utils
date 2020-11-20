@@ -34,11 +34,13 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util;
 
+import com.distrimind.util.data_buffers.WrappedData;
+import com.distrimind.util.data_buffers.WrappedString;
+import com.distrimind.util.sizeof.ObjectSizer;
+
 import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import com.distrimind.util.sizeof.ObjectSizer;
 
 /**
  * This class represents a unique identifier. Uniqueness is guaranteed over the
@@ -63,22 +65,35 @@ public abstract class AbstractDecentralizedID extends DecentralizedValue {
 	static final byte REINFORCED_DECENTRALIZED_ID_GENERATOR_TYPE = 17;
 
 	static final byte SECURED_DECENTRALIZED_ID_TYPE = 18;
-
+	public static AbstractDecentralizedID decode(WrappedData bytes) {
+		return decode(bytes.getBytes());
+	}
 	public static AbstractDecentralizedID decode(byte[] bytes) {
 		return decode(bytes, 0, bytes.length);
 	}
-
+	public static boolean isValidType(WrappedData bytes)
+	{
+		return isValidType(bytes.getBytes(), 0);
+	}
 	public static boolean isValidType(byte[] bytes, int off)
 	{
 		return bytes[off]==AbstractDecentralizedID.DECENTRALIZED_ID_GENERATOR_TYPE
 				|| bytes[off]==AbstractDecentralizedID.REINFORCED_DECENTRALIZED_ID_GENERATOR_TYPE
 				|| bytes[off]==AbstractDecentralizedID.SECURED_DECENTRALIZED_ID_TYPE;
 	}
+
 	public static AbstractDecentralizedID decode(byte[] bytes, int off, int len)
 	{
 		return decode(bytes, off, len, false);
 	}
+
+	@Override
+	public final WrappedString encodeString() {
+		return new WrappedString(encode());
+	}
+
 	public static AbstractDecentralizedID decode(byte[] bytes, int off, int len, boolean fillArrayWithZerosWhenDecoded) {
+
 		if (bytes == null)
 			throw new NullPointerException("bytes");
 		if (off<0 || len<0 || len+off>bytes.length)
@@ -112,13 +127,15 @@ public abstract class AbstractDecentralizedID extends DecentralizedValue {
 			}
 		}
 		finally {
-			if (fillArrayWithZerosWhenDecoded)
-				Arrays.fill(bytes, off, off+len, (byte)0);
+			if (fillArrayWithZerosWhenDecoded) {
+				Arrays.fill(bytes, off, off + len, (byte) 0);
+			}
 		}
 
 	}
 
-	public static AbstractDecentralizedID valueOf(String value) {
+	public static AbstractDecentralizedID valueOf(WrappedString wrappedString) {
+		String value=wrappedString.toString();
 		if (value.startsWith(DecentralizedIDGenerator.ToStringHead + "[")) {
 			Pattern p = Pattern.compile("(-?\\d*);(-?\\d*);(-?\\d*)");
 			Matcher m = p
@@ -152,7 +169,6 @@ public abstract class AbstractDecentralizedID extends DecentralizedValue {
 				for (int i = 0; i < vals.length; i++) {
 					vals[i] = Long.parseLong(values[i]);
 				}
-
 				return new SecuredDecentralizedID(vals);
 			}
 		}
@@ -163,7 +179,7 @@ public abstract class AbstractDecentralizedID extends DecentralizedValue {
 	public abstract boolean equals(Object obj);
 
 	@Override
-	public abstract byte[] encode();
+	public abstract WrappedData encode();
 
 	abstract byte getType();
 

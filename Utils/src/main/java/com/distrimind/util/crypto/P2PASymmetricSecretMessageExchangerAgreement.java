@@ -1,5 +1,6 @@
 package com.distrimind.util.crypto;
 
+import com.distrimind.util.data_buffers.WrappedSecretData;
 import com.distrimind.util.io.Integrity;
 import com.distrimind.util.io.MessageExternalizationException;
 import com.distrimind.bouncycastle.crypto.CryptoException;
@@ -88,19 +89,19 @@ public class P2PASymmetricSecretMessageExchangerAgreement extends P2PLoginAgreem
     }
 
     @Override
-    protected byte[] getDataToSend(int stepNumber) throws IOException {
+    protected WrappedSecretData getDataToSend(int stepNumber) throws IOException {
         if (!valid)
             throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException());
 
         try {
             switch (stepNumber) {
                 case 0:
-                    return p2PASymmetricSecretMessageExchanger.encodeMyPublicKey();
+                    return p2PASymmetricSecretMessageExchanger.encodeMyPublicKey().transformToSecretData();
                 case 1:
                     if (bytesPassword != null)
-                        return p2PASymmetricSecretMessageExchanger.encode(bytesPassword, 0,bytesPassword.length, salt, offset_salt, length_salt, passwordIsKey);
+                        return new WrappedSecretData(p2PASymmetricSecretMessageExchanger.encode(bytesPassword, 0,bytesPassword.length, salt, offset_salt, length_salt, passwordIsKey));
                     else
-                        return p2PASymmetricSecretMessageExchanger.encode(charPassword, salt, offset_salt, length_salt);
+                        return new WrappedSecretData(p2PASymmetricSecretMessageExchanger.encode(charPassword, salt, offset_salt, length_salt));
                 default:
                     valid = false;
                     throw new IllegalAccessError();
@@ -114,12 +115,12 @@ public class P2PASymmetricSecretMessageExchangerAgreement extends P2PLoginAgreem
     }
 
     @Override
-    protected void receiveData(int stepNumber, byte[] data) throws IOException {
+    protected void receiveData(int stepNumber, WrappedSecretData data) throws IOException {
         if (!valid)
             throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException());
 
 
-        if (data==null || data.length==0)
+        if (data==null || data.getBytes().length==0)
         {
             valid=false;
             throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException());
@@ -127,13 +128,13 @@ public class P2PASymmetricSecretMessageExchangerAgreement extends P2PLoginAgreem
         try {
             switch (stepNumber) {
                 case 0:
-                    p2PASymmetricSecretMessageExchanger.setDistantPublicKey(data);
+                    p2PASymmetricSecretMessageExchanger.setDistantPublicKey(data.getBytes());
                     break;
                 case 1:
                     if (bytesPassword != null)
-                        valid = p2PASymmetricSecretMessageExchanger.verifyDistantMessage(bytesPassword, 0, bytesPassword.length, salt, offset_salt, length_salt, data, 0, data.length, passwordIsKey);
+                        valid = p2PASymmetricSecretMessageExchanger.verifyDistantMessage(bytesPassword, 0, bytesPassword.length, salt, offset_salt, length_salt, data.getBytes(), 0, data.getBytes().length, passwordIsKey);
                     else
-                        valid = p2PASymmetricSecretMessageExchanger.verifyDistantMessage(charPassword, salt, offset_salt, length_salt, data, 0, data.length);
+                        valid = p2PASymmetricSecretMessageExchanger.verifyDistantMessage(charPassword, salt, offset_salt, length_salt, data.getBytes(), 0, data.getBytes().length);
                     break;
                 default:
                     valid = false;
