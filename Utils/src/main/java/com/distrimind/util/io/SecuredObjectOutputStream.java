@@ -194,10 +194,10 @@ public abstract class SecuredObjectOutputStream extends OutputStream implements 
 		SerializationTools.writeMap(this, map, globalMaxSizeInBytes, nullAccepted, supportNullMapKey, supportNullMapValue);
 	}
 	public void writeChars(char[] s, boolean nullAccepted, int maxCharsNumber) throws IOException {
-		SerializationTools.writeChars(this, s, maxCharsNumber*2, nullAccepted);
+		SerializationTools.writeChars(this, s, (int)Math.min(2L*maxCharsNumber, Integer.MAX_VALUE), nullAccepted);
 	}
 	public void writeString(String s, boolean nullAccepted, int maxCharsNumber) throws IOException {
-		SerializationTools.writeString(this, s, maxCharsNumber*2, nullAccepted);
+		SerializationTools.writeString(this, s, (int)Math.min(2L*maxCharsNumber, Integer.MAX_VALUE), nullAccepted);
 	}
 	public void write2DBytesArray(byte[][] array, boolean nullAcceptedForLevel1, boolean nullAcceptedForLevel2, int maxLevel1SizeInByte, int maxLevel2SizeInByte) throws IOException {
 		SerializationTools.writeBytes2D(this, array, maxLevel1SizeInByte, maxLevel2SizeInByte, nullAcceptedForLevel1, nullAcceptedForLevel2);
