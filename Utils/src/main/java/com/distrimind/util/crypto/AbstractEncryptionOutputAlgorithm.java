@@ -248,10 +248,18 @@ public abstract class AbstractEncryptionOutputAlgorithm implements Zeroizable {
 		private void checkDoFinal(boolean force) throws IOException {
 			if (doFinal && (currentPos%maxPlainTextSizeForEncoding==0 || force))
 			{
-				int s=cipher.doFinal(buffer, 0);
-				if (s>0)
-					os.write(buffer, 0, s);
-				doFinal=false;
+				if (cipher.getClass()==BCMcElieceCipher.class)
+				{
+					byte[] res=cipher.doFinal();
+					if (res!=null && res.length>0)
+						os.write(res);
+				}
+				else {
+					int s = cipher.doFinal(buffer, 0);
+					if (s > 0)
+						os.write(buffer, 0, s);
+				}
+				doFinal = false;
 			}
 		}
 

@@ -194,21 +194,21 @@ public class TestASymmetricEncryption {
 	}
 	public void testASymmetricKeyWrapperForEncryption(AbstractSecureRandom rand, AbstractKeyPair<?,?> kp,  ASymmetricKeyWrapperType typeWrapper, ASymmetricEncryptionType asetype, ASymmetricEncryptionType asetypeToCode)
 			throws NoSuchAlgorithmException, IllegalStateException, NoSuchProviderException, IOException, IllegalArgumentException, InvalidKeySpecException {
-		ASymmetricKeyPair kpToCode= asetypeToCode.getKeyPairGenerator(rand, asetypeToCode.getDefaultKeySizeBits()).generateKeyPair();
+		AbstractKeyPair<?, ?> kpToCode= asetypeToCode.getKeyPairGenerator(rand, asetypeToCode.getDefaultKeySizeBits()).generateKeyPair();
 		KeyWrapperAlgorithm keyWrapper=new KeyWrapperAlgorithm(typeWrapper, kp);
 		WrappedEncryptedASymmetricPrivateKey wrappedKey=keyWrapper.wrap(rand, kpToCode.getASymmetricPrivateKey());
 		IASymmetricPrivateKey kp2=keyWrapper.unwrap(wrappedKey);
-		Assert.assertEquals(kp.getASymmetricPrivateKey().encode(), kp2.encode());
-		Assert.assertEquals(kp.getASymmetricPrivateKey().toJavaNativeKey().getEncoded(), kp2.toJavaNativeKey().getEncoded());
+		Assert.assertEquals(kpToCode.getASymmetricPrivateKey().encode().getBytes(), kp2.encode().getBytes());
+		Assert.assertEquals(kpToCode.getASymmetricPrivateKey().toJavaNativeKey().getEncoded(), kp2.toJavaNativeKey().getEncoded());
 	}
 	public void testASymmetricKeyWrapperForEncryption(AbstractSecureRandom rand, AbstractKeyPair<?,?> kp,  ASymmetricKeyWrapperType typeWrapper, ASymmetricEncryptionType asetype, ASymmetricAuthenticatedSignatureType asstypeToCode)
 			throws NoSuchAlgorithmException, IllegalStateException, NoSuchProviderException, IOException, IllegalArgumentException, InvalidKeySpecException {
-		ASymmetricKeyPair kpToCode= asstypeToCode.getKeyPairGenerator(rand).generateKeyPair();
+		AbstractKeyPair<?, ?> kpToCode= asstypeToCode.getKeyPairGenerator(rand).generateKeyPair();
 		KeyWrapperAlgorithm keyWrapper=new KeyWrapperAlgorithm(typeWrapper, kp);
 		WrappedEncryptedASymmetricPrivateKey wrappedKey=keyWrapper.wrap(rand, kpToCode.getASymmetricPrivateKey());
 		IASymmetricPrivateKey kp2=keyWrapper.unwrap(wrappedKey);
-		Assert.assertEquals(kp.getASymmetricPrivateKey().encode(), kp2.encode());
-		Assert.assertEquals(kp.getASymmetricPrivateKey().toJavaNativeKey().getEncoded(), kp2.toJavaNativeKey().getEncoded());
+		Assert.assertEquals(kpToCode.getASymmetricPrivateKey().encode(), kp2.encode());
+		Assert.assertEquals(kpToCode.getASymmetricPrivateKey().toJavaNativeKey().getEncoded(), kp2.toJavaNativeKey().getEncoded());
 	}
 	@Test(dataProvider = "provideDataForASymetricEncryptions", dependsOnMethods = { "testASymmetricKeyPairEncodingForEncryption" })
 	public void testP2PASymetricEncryptions(ASymmetricEncryptionType type)

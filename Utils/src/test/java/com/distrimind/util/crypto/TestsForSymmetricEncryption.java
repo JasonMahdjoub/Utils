@@ -262,7 +262,7 @@ public class TestsForSymmetricEncryption {
 
 	}
 
-	@DataProvider(name = "getSymmetricSecretKeysToTestForSecretKeyWrappingWithPassword")
+	@DataProvider(name = "getSymmetricSecretKeysToTestForSecretKeyWrappingWithPassword", parallel = true)
 	public Object[][] getSymmetricSecretKeysToTestForSecretKeyEncryptionWithPassword() throws NoSuchProviderException, NoSuchAlgorithmException {
 		Object[][]res=new Object[4*SymmetricKeyWrapperType.values().length][2];
 		int index=0;
@@ -280,7 +280,7 @@ public class TestsForSymmetricEncryption {
 		}
 		return res;
 	}
-	@DataProvider(name="provideDataWrapperForSymmetricSecretKey")
+	@DataProvider(name="provideDataWrapperForSymmetricSecretKey", parallel = true)
 	public Object[][] provideDataWrapperForSymmetricSecretKey()
 	{
 		Object [][] res=new Object[SymmetricKeyWrapperType.values().length*SymmetricEncryptionType.values().length*SymmetricEncryptionType.values().length][];
@@ -307,7 +307,7 @@ public class TestsForSymmetricEncryption {
 		System.arraycopy(res, 0, res2, 0, index);
 		return res2;
 	}
-	@DataProvider(name="provideDataWrapperForASymmetricPrivateKeyForEncryption")
+	@DataProvider(name="provideDataWrapperForASymmetricPrivateKeyForEncryption", parallel = true)
 	public Object[][] provideDataWrapperForASymmetricPrivateKeyForEncryption()
 	{
 		Object [][] res=new Object[SymmetricKeyWrapperType.values().length*SymmetricEncryptionType.values().length*ASymmetricEncryptionType.values().length][];
@@ -334,7 +334,7 @@ public class TestsForSymmetricEncryption {
 		System.arraycopy(res, 0, res2, 0, index);
 		return res2;
 	}
-	@DataProvider(name="provideDataWrapperForASymmetricPrivateKeyForSignature")
+	@DataProvider(name="provideDataWrapperForASymmetricPrivateKeyForSignature", parallel = true)
 	public Object[][] provideDataWrapperForASymmetricPrivateKeyForSignature()
 	{
 		Object [][] res=new Object[SymmetricKeyWrapperType.values().length*SymmetricEncryptionType.values().length*ASymmetricAuthenticatedSignatureType.values().length][];

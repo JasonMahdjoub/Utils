@@ -167,7 +167,7 @@ abstract class CommonCipherInputStream extends RandomInputStream {
 		if (doFinal && (posEncrypted %maxEncryptedPartLength==0 || endStream))
 		{
 			try {
-				if (allInDoFinal)
+				if (allInDoFinal || cipher.getClass()==BCMcElieceCipher.class)
 				{
 					byte[] f=cipher.doFinal();
 					if (outputBufferLength>0) {
@@ -190,8 +190,9 @@ abstract class CommonCipherInputStream extends RandomInputStream {
 						outputBufferIndex=0;
 					}
 				}
-				else
-					outputBufferLength +=cipher.doFinal(outputBuffer, outputBufferLength+outputBufferIndex);
+				else {
+					outputBufferLength += cipher.doFinal(outputBuffer, outputBufferLength + outputBufferIndex);
+				}
 				doFinal=false;
 			} catch (IllegalStateException e) {
 				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, e);
