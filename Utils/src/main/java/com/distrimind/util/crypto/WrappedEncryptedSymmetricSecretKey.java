@@ -25,7 +25,7 @@ public class WrappedEncryptedSymmetricSecretKey extends WrappedSecretData implem
 			throw new IllegalArgumentException();
 	}
 
-	public WrappedEncryptedSymmetricSecretKey(WrappedEncryptedSymmetricWrappedSecretKeyString secretData) throws IOException {
+	public WrappedEncryptedSymmetricSecretKey(WrappedEncryptedSymmetricSecretKeyString secretData) throws IOException {
 		super(secretData);
 	}
 

@@ -102,7 +102,7 @@ public enum SymmetricKeyWrapperType {
 		return SymmetricEncryptionType.AES_CBC_PKCS5Padding.generateSecretKeyFromHashedPassword(ph.hash(password, null), (short)256);
 	}
 
-	public WrappedEncryptedSymmetricSecretKey wrapKey(PasswordHashType passwordHashType, WrappedPassword password, SymmetricSecretKey secretKeyToWrap, AbstractSecureRandom random) throws IOException {
+	WrappedEncryptedSymmetricSecretKey wrapKey(PasswordHashType passwordHashType, WrappedPassword password, SymmetricSecretKey secretKeyToWrap, AbstractSecureRandom random) throws IOException {
 
 		try {
 			SymmetricSecretKey secretKey = hashPasswordForSecretKeyEncryption(passwordHashType, password);
@@ -112,14 +112,14 @@ public enum SymmetricKeyWrapperType {
 		}
 
 	}
-	public WrappedEncryptedSymmetricWrappedSecretKeyString wrapKeyString(PasswordHashType passwordHashType, WrappedPassword password, SymmetricSecretKey secretKeyToWrap, AbstractSecureRandom random) throws IOException {
-		return new WrappedEncryptedSymmetricWrappedSecretKeyString(wrapKey(passwordHashType, password, secretKeyToWrap, random));
+	WrappedEncryptedSymmetricSecretKeyString wrapKeyString(PasswordHashType passwordHashType, WrappedPassword password, SymmetricSecretKey secretKeyToWrap, AbstractSecureRandom random) throws IOException {
+		return new WrappedEncryptedSymmetricSecretKeyString(wrapKey(passwordHashType, password, secretKeyToWrap, random));
 	}
 
-	public SymmetricSecretKey unwrapKey(PasswordHashType passwordHashType, WrappedPassword password, WrappedEncryptedSymmetricWrappedSecretKeyString encryptedSecretKey) throws IOException {
+	SymmetricSecretKey unwrapKey(PasswordHashType passwordHashType, WrappedPassword password, WrappedEncryptedSymmetricSecretKeyString encryptedSecretKey) throws IOException {
 		return unwrapKey(passwordHashType, password, new WrappedEncryptedSymmetricSecretKey(encryptedSecretKey));
 	}
-	public SymmetricSecretKey unwrapKey(PasswordHashType passwordHashType, WrappedPassword password, WrappedEncryptedSymmetricSecretKey encryptedSecretKey) throws IOException {
+	SymmetricSecretKey unwrapKey(PasswordHashType passwordHashType, WrappedPassword password, WrappedEncryptedSymmetricSecretKey encryptedSecretKey) throws IOException {
 		if (encryptedSecretKey==null)
 			throw new NullPointerException();
 
@@ -132,11 +132,7 @@ public enum SymmetricKeyWrapperType {
 
 	}
 
-	public WrappedEncryptedSymmetricWrappedSecretKeyString wrapKeyString(SymmetricSecretKey key, SymmetricSecretKey keyToWrap, AbstractSecureRandom random) throws IOException
-	{
-		return new WrappedEncryptedSymmetricWrappedSecretKeyString(wrapKey(key, keyToWrap, random));
-	}
-	public WrappedEncryptedSymmetricSecretKey wrapKey(SymmetricSecretKey key, SymmetricSecretKey keyToWrap, AbstractSecureRandom random) throws IOException
+	WrappedEncryptedSymmetricSecretKey wrapKey(SymmetricSecretKey key, SymmetricSecretKey keyToWrap, AbstractSecureRandom random) throws IOException
 	{
 		try {
 			CodeProvider.ensureProviderLoaded(provider);
@@ -186,10 +182,7 @@ public enum SymmetricKeyWrapperType {
 	}
 
 
-	public SymmetricSecretKey unwrapKey(SymmetricSecretKey key, WrappedEncryptedSymmetricWrappedSecretKeyString keyToUnwrap) throws IOException {
-		return unwrapKey(key, new WrappedEncryptedSymmetricSecretKey(keyToUnwrap));
-	}
-	public SymmetricSecretKey unwrapKey(SymmetricSecretKey key, WrappedEncryptedSymmetricSecretKey keyToUnwrap) throws IOException {
+	SymmetricSecretKey unwrapKey(SymmetricSecretKey key, WrappedEncryptedSymmetricSecretKey keyToUnwrap) throws IOException {
 		try {
 			byte[] ktu=ASymmetricKeyWrapperType.getWrappedKeyFromMetaData(keyToUnwrap);
 			SymmetricSecretKey res;

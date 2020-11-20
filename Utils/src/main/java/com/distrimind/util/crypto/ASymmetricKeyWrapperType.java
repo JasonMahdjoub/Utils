@@ -204,7 +204,7 @@ public enum ASymmetricKeyWrapperType {
 		return OAEPParams;
 	}
 	
-	public WrappedEncryptedSymmetricSecretKey wrapKey(AbstractSecureRandom random, IASymmetricPublicKey ipublicKey, SymmetricSecretKey keyToWrap)
+	WrappedEncryptedSymmetricSecretKey wrapKey(AbstractSecureRandom random, IASymmetricPublicKey ipublicKey, SymmetricSecretKey keyToWrap)
 			throws IOException {
 
 		try {
@@ -320,7 +320,7 @@ public enum ASymmetricKeyWrapperType {
 
 	}
 	
-	public SymmetricSecretKey unwrapKey(IASymmetricPrivateKey iPrivateKey, WrappedEncryptedSymmetricSecretKey keyToUnwrap) throws IOException
+	SymmetricSecretKey unwrapKey(IASymmetricPrivateKey iPrivateKey, WrappedEncryptedSymmetricSecretKey keyToUnwrap) throws IOException
 	{
 		try {
 			if (name().startsWith("BCPQC_MCELIECE_")) {

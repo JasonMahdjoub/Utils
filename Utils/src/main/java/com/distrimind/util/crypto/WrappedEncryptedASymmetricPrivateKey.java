@@ -31,6 +31,9 @@ public class WrappedEncryptedASymmetricPrivateKey extends WrappedSecretData impl
 	public WrappedEncryptedASymmetricPrivateKey(WrappedEncryptedASymmetricPrivateKey secretData) {
 		super(secretData);
 	}
+	public WrappedEncryptedASymmetricPrivateKey(WrappedEncryptedASymmetricPrivateKeyString secretData) throws IOException {
+		super(secretData);
+	}
 
 	@Override
 	public final int getInternalSerializedSize() {

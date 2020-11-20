@@ -300,10 +300,9 @@ public class SerializationTools {
 			
 		}
 
-		WrappedData sd=keyPair.encode();
+		WrappedSecretData sd=keyPair.encode();
 		writeBytes(oos, sd.getBytes(), AbstractKeyPair.MAX_SIZE_IN_BYTES_OF_KEY_PAIR, false);
-		if (sd instanceof WrappedSecretData)
-			((WrappedSecretData) sd).zeroize();
+		sd.zeroize();
 	}
 
 	@SuppressWarnings("SameParameterValue")
@@ -1898,13 +1897,14 @@ public class SerializationTools {
 						SubStreamParameter.class,
 						SubStreamParameters.class,
 						FragmentedStreamParameters.class,
+						KeyWrapperAlgorithm.class,
 						WrappedPassword.class,
 						WrappedHashedPassword.class,
 						WrappedHashedPasswordString.class,
 						WrappedEncryptedASymmetricPrivateKey.class,
 						WrappedEncryptedSymmetricSecretKey.class,
-						WrappedEncryptedASymmetricWrappedSecretKeyString.class,
-						WrappedEncryptedSymmetricWrappedSecretKeyString.class)),
+						WrappedEncryptedASymmetricPrivateKeyString.class,
+						WrappedEncryptedSymmetricSecretKeyString.class)),
 				new ArrayList<>(Arrays.asList(
 						MessageDigestType.class,
 						SecureRandomType.class,
