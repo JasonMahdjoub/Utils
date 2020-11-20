@@ -2028,7 +2028,7 @@ public class SerializationTools {
 	{
 		int res=1;
 		if (key!=null)
-			res+=getInternalSize(key.encode(), IKey.MAX_SIZE_IN_BYTES_OF_KEY);
+			res+=getInternalSize(key.encode().getBytes(), IKey.MAX_SIZE_IN_BYTES_OF_KEY);
 		return res;
 	}
 
@@ -2036,7 +2036,7 @@ public class SerializationTools {
 	{
 		int res=1;
 		if (keyPair!=null)
-			res+=getInternalSize(keyPair.encode(), AbstractKeyPair.MAX_SIZE_IN_BYTES_OF_KEY_PAIR);
+			res+=getInternalSize(keyPair.encode().getBytes(), AbstractKeyPair.MAX_SIZE_IN_BYTES_OF_KEY_PAIR);
 		return res;
 	}
 	public static int getInternalSize(InetAddress inetAddress)
@@ -2105,7 +2105,7 @@ public class SerializationTools {
 	{
 		int res=1;
 		if (abstractDecentralizedID!=null)
-			res+=getInternalSize(abstractDecentralizedID.encode(), AbstractDecentralizedID.MAX_DECENTRALIZED_ID_SIZE_IN_BYTES);
+			res+=getInternalSize(abstractDecentralizedID.encode().getBytes(), AbstractDecentralizedID.MAX_DECENTRALIZED_ID_SIZE_IN_BYTES);
 		return res;
 	}
 	public static int getInternalSize(SecureExternalizable secureExternalizable)
