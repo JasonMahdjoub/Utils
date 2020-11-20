@@ -3,8 +3,6 @@ package com.distrimind.util.data_buffers;
 import com.distrimind.util.Bits;
 
 import java.lang.reflect.Field;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Objects;
@@ -66,12 +64,12 @@ public class WrappedString {
 
 	public static void zeroizeString(String secretData)
 	{
-		try {
+		/*try {
 			byte[] t=(byte[])valueField.get(secretData);
 			Arrays.fill(t, (byte)0);
 		} catch (IllegalAccessException e) {
 			e.printStackTrace();
-		}
+		}*/
 	}
 	@Override
 	public String toString()
@@ -101,22 +99,19 @@ public class WrappedString {
 	{
 		return chars;
 	}
-	private static final Field valueField;
+	/*private static final Field valueField;
 	static
 	{
 		Field f=null;
 		try {
 			final Field f2=String.class.getDeclaredField("value");
-			AccessController.doPrivileged((PrivilegedAction<Object>) () -> {
-				f2.setAccessible(true);
-				return null;
-			});
+			f2.setAccessible(true);
 			f=f2;
 
 		} catch (NoSuchFieldException e) {
 			e.printStackTrace();
 		}
 		valueField=f;
-	}
+	}*/
 
 }
