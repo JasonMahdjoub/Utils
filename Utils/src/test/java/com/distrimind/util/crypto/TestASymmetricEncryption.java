@@ -59,7 +59,7 @@ import java.util.ArrayList;
  */
 public class TestASymmetricEncryption {
 	@DataProvider(name="provideDataASymmetricKeyWrapperForEncryption", parallel=true)
-	public Object[][] provideDataASymmetricKeyWrapperForEncryption()
+	public Object[][] provideDataKeyWrapperForSymmetricSecretKey()
 	{
 		Object [][] res=new Object[ASymmetricKeyWrapperType.values().length*ASymmetricEncryptionType.values().length*SymmetricEncryptionType.values().length][];
 		int index=0;
@@ -83,10 +83,65 @@ public class TestASymmetricEncryption {
 		Object[][] res2 = new Object[index][];
 		System.arraycopy(res, 0, res2, 0, index);
 		return res2;
+	}
+
+	@DataProvider(name="provideDataKeyWrapperForASymmetricKeyForEncryption", parallel=true)
+	public Object[][] provideDataKeyWrapperForASymmetricKeyForEncryption()
+	{
+		Object [][] res=new Object[ASymmetricKeyWrapperType.values().length*ASymmetricEncryptionType.values().length*ASymmetricEncryptionType.values().length][];
+		int index=0;
+		for (ASymmetricKeyWrapperType akpw : ASymmetricKeyWrapperType.values())
+		{
+			for (ASymmetricEncryptionType aet : ASymmetricEncryptionType.values())
+			{
+				for (ASymmetricEncryptionType set : ASymmetricEncryptionType.values())
+				{
+					if (akpw.getCodeProvider().equals(aet.getCodeProviderForEncryption()) && akpw.getCodeProvider().equals(set.getCodeProviderForEncryption()))
+					{
+						Object[] params = new Object[3];
+						params[0]=akpw;
+						params[1]=aet;
+						params[2]=set;
+						res[index++]=params;
+					}
+				}
+			}
+		}
+		Object[][] res2 = new Object[index][];
+		System.arraycopy(res, 0, res2, 0, index);
+		return res2;
 
 	}
-	@Test(dataProvider="provideDataASymmetricKeyWrapperForEncryption")
-	public void testASymmetricKeyWrapperForEncryption(ASymmetricKeyWrapperType typeWrapper, ASymmetricEncryptionType asetype, SymmetricEncryptionType setype)
+
+	@DataProvider(name="provideDataKeyWrapperForASymmetricKeyForSignature", parallel=true)
+	public Object[][] provideDataKeyWrapperForASymmetricKeyForSignature()
+	{
+		Object [][] res=new Object[ASymmetricKeyWrapperType.values().length*ASymmetricEncryptionType.values().length*ASymmetricAuthenticatedSignatureType.values().length][];
+		int index=0;
+		for (ASymmetricKeyWrapperType akpw : ASymmetricKeyWrapperType.values())
+		{
+			for (ASymmetricEncryptionType aet : ASymmetricEncryptionType.values())
+			{
+				for (ASymmetricAuthenticatedSignatureType set : ASymmetricAuthenticatedSignatureType.values())
+				{
+					if (akpw.getCodeProvider().equals(aet.getCodeProviderForEncryption()) && akpw.getCodeProvider().equals(set.getCodeProviderForSignature()))
+					{
+						Object[] params = new Object[3];
+						params[0]=akpw;
+						params[1]=aet;
+						params[2]=set;
+						res[index++]=params;
+					}
+				}
+			}
+		}
+		Object[][] res2 = new Object[index][];
+		System.arraycopy(res, 0, res2, 0, index);
+		return res2;
+
+	}
+	@Test(dataProvider= "provideDataKeyWrapperForSymmetricSecretKey")
+	public void testKeyWrapperForSymmetricKey(ASymmetricKeyWrapperType typeWrapper, ASymmetricEncryptionType asetype, SymmetricEncryptionType setype)
 			throws NoSuchAlgorithmException, IllegalStateException, NoSuchProviderException, IOException, IllegalArgumentException {
 		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getSingleton(null);
 		ASymmetricKeyPair kp=asetype.getKeyPairGenerator(rand, (short)2048).generateKeyPair();
@@ -98,6 +153,33 @@ public class TestASymmetricEncryption {
 		testASymmetricKeyWrapperForEncryption(rand, new HybridASymmetricKeyPair(kp, kppqc), typeWrapper, asetype, setype);
 
 	}
+
+	@Test(dataProvider="provideDataKeyWrapperForASymmetricKeyForEncryption")
+	public void testKeyWrapperForASymmetricKeyForEncryption(ASymmetricKeyWrapperType typeWrapper, ASymmetricEncryptionType asetype, ASymmetricEncryptionType asetypeToCode)
+			throws NoSuchAlgorithmException, IllegalStateException, NoSuchProviderException, IOException, IllegalArgumentException, InvalidKeySpecException {
+		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getSingleton(null);
+		ASymmetricKeyPair kp=asetype.getKeyPairGenerator(rand, (short)2048).generateKeyPair();
+
+		testASymmetricKeyWrapperForEncryption(rand, kp, typeWrapper, asetype, asetypeToCode);
+		if (typeWrapper.isPostQuantumKeyAlgorithm())
+			return;
+		ASymmetricKeyPair kppqc= ASymmetricEncryptionType.BCPQC_MCELIECE_FUJISAKI_CCA2_SHA256.getKeyPairGenerator(rand, ASymmetricEncryptionType.BCPQC_MCELIECE_FUJISAKI_CCA2_SHA256.getDefaultKeySizeBits(), Long.MAX_VALUE).generateKeyPair();
+		testASymmetricKeyWrapperForEncryption(rand, new HybridASymmetricKeyPair(kp, kppqc), typeWrapper, asetype, asetypeToCode);
+
+	}
+	@Test(dataProvider="provideDataKeyWrapperForASymmetricKeyForSignature")
+	public void testKeyWrapperForASymmetricKeyForSignature(ASymmetricKeyWrapperType typeWrapper, ASymmetricEncryptionType asetype, ASymmetricAuthenticatedSignatureType asstypeToCode)
+			throws NoSuchAlgorithmException, IllegalStateException, NoSuchProviderException, IOException, IllegalArgumentException, InvalidKeySpecException {
+		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getSingleton(null);
+		ASymmetricKeyPair kp=asetype.getKeyPairGenerator(rand, (short)2048).generateKeyPair();
+
+		testASymmetricKeyWrapperForEncryption(rand, kp, typeWrapper, asetype, asstypeToCode);
+		if (typeWrapper.isPostQuantumKeyAlgorithm())
+			return;
+		ASymmetricKeyPair kppqc= ASymmetricEncryptionType.BCPQC_MCELIECE_FUJISAKI_CCA2_SHA256.getKeyPairGenerator(rand, ASymmetricEncryptionType.BCPQC_MCELIECE_FUJISAKI_CCA2_SHA256.getDefaultKeySizeBits(), Long.MAX_VALUE).generateKeyPair();
+		testASymmetricKeyWrapperForEncryption(rand, new HybridASymmetricKeyPair(kp, kppqc), typeWrapper, asetype, asstypeToCode);
+	}
+
 	public void testASymmetricKeyWrapperForEncryption(AbstractSecureRandom rand, AbstractKeyPair<?,?> kp,  ASymmetricKeyWrapperType typeWrapper, ASymmetricEncryptionType asetype, SymmetricEncryptionType setype)
 			throws NoSuchAlgorithmException, IllegalStateException, NoSuchProviderException, IOException, IllegalArgumentException {
 		SymmetricSecretKey sk= setype.getKeyGenerator(rand, setype.getDefaultKeySizeBits()).generateKey();
@@ -109,6 +191,24 @@ public class TestASymmetricEncryption {
 		Assert.assertEquals(sk.getEncryptionAlgorithmType(), sk2.getEncryptionAlgorithmType());
 		Assert.assertEquals(sk.toJavaNativeKey().getEncoded(), sk2.toJavaNativeKey().getEncoded());
 		Assert.assertEquals(sk.toBouncyCastleKey().getKeyBytes(), sk2.toBouncyCastleKey().getKeyBytes());
+	}
+	public void testASymmetricKeyWrapperForEncryption(AbstractSecureRandom rand, AbstractKeyPair<?,?> kp,  ASymmetricKeyWrapperType typeWrapper, ASymmetricEncryptionType asetype, ASymmetricEncryptionType asetypeToCode)
+			throws NoSuchAlgorithmException, IllegalStateException, NoSuchProviderException, IOException, IllegalArgumentException, InvalidKeySpecException {
+		ASymmetricKeyPair kpToCode= asetypeToCode.getKeyPairGenerator(rand, asetypeToCode.getDefaultKeySizeBits()).generateKeyPair();
+		KeyWrapperAlgorithm keyWrapper=new KeyWrapperAlgorithm(typeWrapper, kp);
+		WrappedEncryptedASymmetricPrivateKey wrappedKey=keyWrapper.wrap(rand, kpToCode.getASymmetricPrivateKey());
+		IASymmetricPrivateKey kp2=keyWrapper.unwrap(wrappedKey);
+		Assert.assertEquals(kp.getASymmetricPrivateKey().encode(), kp2.encode());
+		Assert.assertEquals(kp.getASymmetricPrivateKey().toJavaNativeKey().getEncoded(), kp2.toJavaNativeKey().getEncoded());
+	}
+	public void testASymmetricKeyWrapperForEncryption(AbstractSecureRandom rand, AbstractKeyPair<?,?> kp,  ASymmetricKeyWrapperType typeWrapper, ASymmetricEncryptionType asetype, ASymmetricAuthenticatedSignatureType asstypeToCode)
+			throws NoSuchAlgorithmException, IllegalStateException, NoSuchProviderException, IOException, IllegalArgumentException, InvalidKeySpecException {
+		ASymmetricKeyPair kpToCode= asstypeToCode.getKeyPairGenerator(rand).generateKeyPair();
+		KeyWrapperAlgorithm keyWrapper=new KeyWrapperAlgorithm(typeWrapper, kp);
+		WrappedEncryptedASymmetricPrivateKey wrappedKey=keyWrapper.wrap(rand, kpToCode.getASymmetricPrivateKey());
+		IASymmetricPrivateKey kp2=keyWrapper.unwrap(wrappedKey);
+		Assert.assertEquals(kp.getASymmetricPrivateKey().encode(), kp2.encode());
+		Assert.assertEquals(kp.getASymmetricPrivateKey().toJavaNativeKey().getEncoded(), kp2.toJavaNativeKey().getEncoded());
 	}
 	@Test(dataProvider = "provideDataForASymetricEncryptions", dependsOnMethods = { "testASymmetricKeyPairEncodingForEncryption" })
 	public void testP2PASymetricEncryptions(ASymmetricEncryptionType type)
