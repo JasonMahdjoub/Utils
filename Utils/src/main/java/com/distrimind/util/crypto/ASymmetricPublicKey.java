@@ -140,8 +140,8 @@ public class ASymmetricPublicKey extends AbstractKey implements IASymmetricPubli
 	}
 
 	@Override
-	public WrappedSecretData getKeyBytes() {
-        return new WrappedSecretData(publicKey.clone());
+	public WrappedData getKeyBytes() {
+        return new WrappedData(publicKey);
     }
 
 

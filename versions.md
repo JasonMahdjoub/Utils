@@ -1,6 +1,6 @@
 Utils
 =====
-5.9.2 STABLE (Build: 2074) (from 04/01/2016 to 08/11/2020)
+5.10.0 STABLE (Build: 2133) (from 04/01/2016 to 18/11/2020)
 
 # Creator(s):
 Jason MAHDJOUB
@@ -9,6 +9,24 @@ Jason MAHDJOUB
 Jason MAHDJOUB (Entered in the team at 04/01/2016)
 
 # Modifications:
+
+
+### 5.10.0 STABLE (18/11/2020)
+* Add SessionLockableEncryptionProfileProvider class
+* Add EncryptionProfileProviderWithEncryptedKeys class
+* Add KeyWrapperAlgorithm class
+* Security : Better zeroize secrets data
+* Security : Add WrappedPassword class
+* Security : Add WrappedHashedPassword class
+* Security : Add WrappedHashedPasswordString class
+* Security : Add WrappedSecretDataString class
+* Security : Add WrappedSecretData class
+* Security : Add WrappedEncryptedSymmetricSecretKey class
+* Security : Add WrappedEncryptedASymmetricPrivateKey class
+* Security : Add WrappedEncryptedSymmetricSecretKeyString class
+* Security : Add WrappedEncryptedASymmetricPrivateKeyString class
+* Add SecureObjectOutputStream.writeChars(char[], boolean, int)
+* Add SecureObjectInputStream.readChars(boolean, int)
 
 
 ### 5.9.2 STABLE (08/11/2020)
