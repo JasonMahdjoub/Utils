@@ -107,7 +107,7 @@ public class TestsForSymmetricEncryption {
 		if (type2.getCodeProviderForEncryption()!=CodeProvider.GNU_CRYPTO && type2.getCodeProviderForEncryption()!=CodeProvider.BC && type2.getCodeProviderForEncryption()==CodeProvider.BCFIPS)
 			key2=new SymmetricSecretKey(type2, key1.toJavaNativeKey(), key1.getKeySizeBits());
 		else
-			key2=new SymmetricSecretKey(type2, key1.getKeyBytes(), key1.getKeySizeBits());
+			key2=new SymmetricSecretKey(type2, key1.getKeyBytes().getBytes().clone(), key1.getKeySizeBits());
 
 		byte counterSizeBytes=(byte)random.nextInt(key1.getEncryptionAlgorithmType().getMaxCounterSizeInBytesUsedWithBlockMode()+1);
 		SymmetricEncryptionAlgorithm algoDistant;
