@@ -107,4 +107,10 @@ public abstract class DecentralizedValue implements Serializable {
 		return dv;
 	}
 
+	@Override
+	public abstract boolean equals(Object other);
+
+	@Override
+	public abstract int hashCode();
+
 }
