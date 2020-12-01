@@ -245,18 +245,20 @@ public class TestsForSymmetricEncryption {
 	public void testSymmetricSecretKeyWrappingWithPassword(SymmetricKeyWrapperType keyWrapperType, SymmetricSecretKey secretKey) throws NoSuchProviderException, NoSuchAlgorithmException, IOException {
 		WrappedPassword password=new WrappedPassword("MyPassword");
 		PasswordHashType passwordHashType=PasswordHashType.BC_SCRYPT_FOR_DATA_ENCRYPTION;
-		WrappedEncryptedSymmetricSecretKey encryptedSecretKey=keyWrapperType.wrapKey(passwordHashType, password, secretKey, SecureRandomType.DEFAULT.getSingleton(null));
+
+		KeyWrapperAlgorithm keyWrapperAlgorithm=new KeyWrapperAlgorithm(keyWrapperType, passwordHashType, password);
+		WrappedEncryptedSymmetricSecretKey encryptedSecretKey=keyWrapperAlgorithm.wrap(SecureRandomType.DEFAULT.getInstance(null), secretKey);
 		System.out.println("Bytes tab length : "+encryptedSecretKey.getBytes().length);
 		System.out.println(Base64.getUrlEncoder().encodeToString(encryptedSecretKey.getBytes()));
-		SymmetricSecretKey decodedSecretKey=keyWrapperType.unwrapKey(passwordHashType, password, encryptedSecretKey);
+		SymmetricSecretKey decodedSecretKey=keyWrapperAlgorithm.unwrap(encryptedSecretKey);
 		Assert.assertEquals(decodedSecretKey, secretKey);
 
 
 
-		WrappedEncryptedSymmetricSecretKeyString encryptedSecretKeyString=keyWrapperType.wrapKeyString(passwordHashType, password, secretKey, SecureRandomType.DEFAULT.getSingleton(null));
+		WrappedEncryptedSymmetricSecretKeyString encryptedSecretKeyString=keyWrapperAlgorithm.wrapString(SecureRandomType.DEFAULT.getInstance(null), secretKey);
 		System.out.println("String length : "+encryptedSecretKeyString.getChars().length);
 		System.out.println(encryptedSecretKeyString);
-		decodedSecretKey=keyWrapperType.unwrapKey(passwordHashType, password, encryptedSecretKeyString);
+		decodedSecretKey=keyWrapperAlgorithm.unwrap(encryptedSecretKeyString);
 		Assert.assertEquals(decodedSecretKey, secretKey);
 		password.zeroize();
 
@@ -283,23 +285,18 @@ public class TestsForSymmetricEncryption {
 	@DataProvider(name="provideDataWrapperForSymmetricSecretKey", parallel = true)
 	public Object[][] provideDataWrapperForSymmetricSecretKey()
 	{
-		Object [][] res=new Object[SymmetricKeyWrapperType.values().length*SymmetricEncryptionType.values().length*SymmetricEncryptionType.values().length][];
+		Object [][] res=new Object[SymmetricKeyWrapperType.values().length*SymmetricEncryptionType.values().length][];
 		int index=0;
 		for (SymmetricKeyWrapperType akpw : SymmetricKeyWrapperType.values())
 		{
-			for (SymmetricEncryptionType aet : SymmetricEncryptionType.values())
+			for (SymmetricEncryptionType set : SymmetricEncryptionType.values())
 			{
-				for (SymmetricEncryptionType set : SymmetricEncryptionType.values())
+				if (set.getCodeProviderForEncryption()!=CodeProvider.GNU_CRYPTO)
 				{
-					if ((akpw.getCodeProvider()==CodeProvider.GNU_CRYPTO)==(aet.getCodeProviderForEncryption()==CodeProvider.GNU_CRYPTO) && (akpw.getCodeProvider()==CodeProvider.GNU_CRYPTO)==(set.getCodeProviderForEncryption()==CodeProvider.GNU_CRYPTO)
-							&& akpw.getAlgorithmName().startsWith(aet.getAlgorithmName()))
-					{
-						Object[] params = new Object[3];
-						params[0]=akpw;
-						params[1]=aet;
-						params[2]=set;
-						res[index++]=params;
-					}
+					Object[] params = new Object[2];
+					params[0]=akpw;
+					params[1]=set;
+					res[index++]=params;
 				}
 			}
 		}
@@ -310,23 +307,19 @@ public class TestsForSymmetricEncryption {
 	@DataProvider(name="provideDataWrapperForASymmetricPrivateKeyForEncryption", parallel = true)
 	public Object[][] provideDataWrapperForASymmetricPrivateKeyForEncryption()
 	{
-		Object [][] res=new Object[SymmetricKeyWrapperType.values().length*SymmetricEncryptionType.values().length*ASymmetricEncryptionType.values().length][];
+		Object [][] res=new Object[SymmetricKeyWrapperType.values().length*ASymmetricEncryptionType.values().length][];
 		int index=0;
 		for (SymmetricKeyWrapperType akpw : SymmetricKeyWrapperType.values())
 		{
-			for (SymmetricEncryptionType aet : SymmetricEncryptionType.values())
+			for (ASymmetricEncryptionType set : ASymmetricEncryptionType.values())
 			{
-				for (ASymmetricEncryptionType set : ASymmetricEncryptionType.values())
+				if (set.getCodeProviderForEncryption()!=CodeProvider.GNU_CRYPTO)
+				//if ((akpw.getCodeProvider()==CodeProvider.GNU_CRYPTO)==(aet.getCodeProviderForEncryption()==CodeProvider.GNU_CRYPTO) && (akpw.getCodeProvider()==CodeProvider.GNU_CRYPTO)==(set.getCodeProviderForEncryption()==CodeProvider.GNU_CRYPTO))
 				{
-					if ((akpw.getCodeProvider()==CodeProvider.GNU_CRYPTO)==(aet.getCodeProviderForEncryption()==CodeProvider.GNU_CRYPTO) && (akpw.getCodeProvider()==CodeProvider.GNU_CRYPTO)==(set.getCodeProviderForEncryption()==CodeProvider.GNU_CRYPTO)
-							&& akpw.getAlgorithmName().startsWith(aet.getAlgorithmName()))
-					{
-						Object[] params = new Object[3];
-						params[0]=akpw;
-						params[1]=aet;
-						params[2]=set;
-						res[index++]=params;
-					}
+					Object[] params = new Object[2];
+					params[0]=akpw;
+					params[1]=set;
+					res[index++]=params;
 				}
 			}
 		}
@@ -337,23 +330,19 @@ public class TestsForSymmetricEncryption {
 	@DataProvider(name="provideDataWrapperForASymmetricPrivateKeyForSignature", parallel = true)
 	public Object[][] provideDataWrapperForASymmetricPrivateKeyForSignature()
 	{
-		Object [][] res=new Object[SymmetricKeyWrapperType.values().length*SymmetricEncryptionType.values().length*ASymmetricAuthenticatedSignatureType.values().length][];
+		Object [][] res=new Object[SymmetricKeyWrapperType.values().length*ASymmetricAuthenticatedSignatureType.values().length][];
 		int index=0;
 		for (SymmetricKeyWrapperType akpw : SymmetricKeyWrapperType.values())
 		{
-			for (SymmetricEncryptionType aet : SymmetricEncryptionType.values())
+			for (ASymmetricAuthenticatedSignatureType set : ASymmetricAuthenticatedSignatureType.values())
 			{
-				for (ASymmetricAuthenticatedSignatureType set : ASymmetricAuthenticatedSignatureType.values())
+				if (set.getCodeProviderForSignature()!=CodeProvider.GNU_CRYPTO)
+				//if ((akpw.getCodeProvider()==CodeProvider.GNU_CRYPTO)==(aet.getCodeProviderForEncryption()==CodeProvider.GNU_CRYPTO) && (akpw.getCodeProvider()==CodeProvider.GNU_CRYPTO)==(set.getCodeProviderForSignature()==CodeProvider.GNU_CRYPTO))
 				{
-					if ((akpw.getCodeProvider()==CodeProvider.GNU_CRYPTO)==(aet.getCodeProviderForEncryption()==CodeProvider.GNU_CRYPTO) && (akpw.getCodeProvider()==CodeProvider.GNU_CRYPTO)==(set.getCodeProviderForSignature()==CodeProvider.GNU_CRYPTO)
-							&& akpw.getAlgorithmName().startsWith(aet.getAlgorithmName()))
-					{
-						Object[] params = new Object[3];
-						params[0]=akpw;
-						params[1]=aet;
-						params[2]=set;
-						res[index++]=params;
-					}
+					Object[] params = new Object[2];
+					params[0]=akpw;
+					params[1]=set;
+					res[index++]=params;
 				}
 			}
 		}
@@ -362,9 +351,9 @@ public class TestsForSymmetricEncryption {
 		return res2;
 	}
 	@Test(dataProvider= "provideDataWrapperForSymmetricSecretKey")
-	public void testWrapperForSymmetricSecretKey(SymmetricKeyWrapperType typeWrapper, SymmetricEncryptionType asetype, SymmetricEncryptionType setype) throws NoSuchAlgorithmException, IllegalStateException, NoSuchProviderException, IOException {
+	public void testWrapperForSymmetricSecretKey(SymmetricKeyWrapperType typeWrapper, SymmetricEncryptionType setype) throws NoSuchAlgorithmException, IllegalStateException, NoSuchProviderException, IOException {
 		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getSingleton(null);
-		SymmetricSecretKey kp=asetype.getKeyGenerator(rand, asetype.getDefaultKeySizeBits()).generateKey();
+		SymmetricSecretKey kp=typeWrapper.getKeyGenerator(rand).generateKey();
 		SymmetricSecretKey sk= setype.getKeyGenerator(rand, setype.getDefaultKeySizeBits()).generateKey();
 		KeyWrapperAlgorithm keyWrapper=new KeyWrapperAlgorithm(typeWrapper, kp);
 		WrappedEncryptedSymmetricSecretKey wrappedKey=keyWrapper.wrap(rand, sk);
@@ -377,9 +366,9 @@ public class TestsForSymmetricEncryption {
 		Assert.assertEquals(sk.toBouncyCastleKey().getKeyBytes(), sk2.toBouncyCastleKey().getKeyBytes());
 	}
 	@Test(dataProvider= "provideDataWrapperForASymmetricPrivateKeyForEncryption")
-	public void testWrapperForASymmetricPrivateKeyForEncryption(SymmetricKeyWrapperType typeWrapper, SymmetricEncryptionType asetype, ASymmetricEncryptionType asetypeToEncode) throws NoSuchAlgorithmException, IllegalStateException, NoSuchProviderException, IOException, InvalidKeySpecException {
+	public void testWrapperForASymmetricPrivateKeyForEncryption(SymmetricKeyWrapperType typeWrapper, ASymmetricEncryptionType asetypeToEncode) throws NoSuchAlgorithmException, IllegalStateException, NoSuchProviderException, IOException, InvalidKeySpecException {
 		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getSingleton(null);
-		SymmetricSecretKey kp=asetype.getKeyGenerator(rand, asetype.getDefaultKeySizeBits()).generateKey();
+		SymmetricSecretKey kp=typeWrapper.getKeyGenerator(rand, typeWrapper.getDefaultKeySizeBits()).generateKey();
 		AbstractKeyPair<?, ?> sk= asetypeToEncode.getKeyPairGenerator(rand, asetypeToEncode.getDefaultKeySizeBits()).generateKeyPair();
 		KeyWrapperAlgorithm keyWrapper=new KeyWrapperAlgorithm(typeWrapper, kp);
 		WrappedEncryptedASymmetricPrivateKey wrappedKey=keyWrapper.wrap(rand, sk.getASymmetricPrivateKey());
@@ -388,9 +377,9 @@ public class TestsForSymmetricEncryption {
 		Assert.assertEquals(sk.getASymmetricPrivateKey().toJavaNativeKey().getEncoded(), sk2.toJavaNativeKey().getEncoded());
 	}
 	@Test(dataProvider= "provideDataWrapperForASymmetricPrivateKeyForSignature")
-	public void testWrapperForASymmetricPrivateKeyForSignature(SymmetricKeyWrapperType typeWrapper, SymmetricEncryptionType asetype, ASymmetricAuthenticatedSignatureType asstypeToEncode) throws NoSuchAlgorithmException, IllegalStateException, NoSuchProviderException, IOException, InvalidKeySpecException {
+	public void testWrapperForASymmetricPrivateKeyForSignature(SymmetricKeyWrapperType typeWrapper, ASymmetricAuthenticatedSignatureType asstypeToEncode) throws NoSuchAlgorithmException, IllegalStateException, NoSuchProviderException, IOException, InvalidKeySpecException {
 		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getSingleton(null);
-		SymmetricSecretKey kp=asetype.getKeyGenerator(rand, asetype.getDefaultKeySizeBits()).generateKey();
+		SymmetricSecretKey kp=typeWrapper.getKeyGenerator(rand, typeWrapper.getDefaultKeySizeBits()).generateKey();
 		AbstractKeyPair<?, ?> sk= asstypeToEncode.getKeyPairGenerator(rand).generateKeyPair();
 		KeyWrapperAlgorithm keyWrapper=new KeyWrapperAlgorithm(typeWrapper, kp);
 		WrappedEncryptedASymmetricPrivateKey wrappedKey=keyWrapper.wrap(rand, sk.getASymmetricPrivateKey());

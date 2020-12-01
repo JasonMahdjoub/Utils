@@ -36,6 +36,7 @@ package com.distrimind.util.crypto;
 
 import com.distrimind.bcfips.crypto.InvalidWrappingException;
 import com.distrimind.bcfips.crypto.PlainInputProcessingException;
+import com.distrimind.util.data_buffers.WrappedSecretData;
 import com.distrimind.util.io.Integrity;
 import com.distrimind.util.io.MessageExternalizationException;
 
@@ -53,17 +54,19 @@ import java.util.Arrays;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 2.0
+ * @version 2.1
  * @since Utils 1.17.0
  */
 public enum SymmetricKeyWrapperType {
 
-	BC_FIPS_AES("AESKW", CodeProvider.BCFIPS),
-	BC_FIPS_AES_WITH_PADDING("AESKWP", CodeProvider.BCFIPS),
+	BC_FIPS_AES("AESKW", CodeProvider.BCFIPS, SymmetricEncryptionType.AES_GCM),
+	BC_FIPS_AES_WITH_PADDING("AESKWP", CodeProvider.BCFIPS, SymmetricEncryptionType.AES_GCM),
+	BC_CHACHA20_POLY1305(null, CodeProvider.BC, SymmetricEncryptionType.BC_CHACHA20_POLY1305),
 	DEFAULT(BC_FIPS_AES_WITH_PADDING);
 	
 	private final String algorithmName;
 	private final CodeProvider provider;
+	private final SymmetricEncryptionType symmetricEncryptionType;
 
 	public boolean equals(SymmetricKeyWrapperType type)
 	{
@@ -71,19 +74,52 @@ public enum SymmetricKeyWrapperType {
 		if (type==null)
 			return false;
 		//noinspection StringEquality
-		return this.algorithmName==type.algorithmName && this.provider==type.provider;
+		return this.algorithmName==type.algorithmName && this.provider==type.provider && this.symmetricEncryptionType==type.symmetricEncryptionType;
 	}
 	
-	SymmetricKeyWrapperType(String algorithmName, CodeProvider provider) {
+	SymmetricKeyWrapperType(String algorithmName, CodeProvider provider, SymmetricEncryptionType symmetricEncryptionType) {
 		this.algorithmName = algorithmName;
 		this.provider = provider;
+		this.symmetricEncryptionType=symmetricEncryptionType;
 	}
-	
+
+
 	SymmetricKeyWrapperType(SymmetricKeyWrapperType other)
 	{
-		this(other.algorithmName, other.provider);
+		this(other.algorithmName, other.provider, other.symmetricEncryptionType);
 	}
-	
+
+	SymmetricEncryptionType getSymmetricEncryptionType() {
+		return symmetricEncryptionType;
+	}
+
+	public short getDefaultKeySizeBits()
+	{
+		return symmetricEncryptionType.getDefaultKeySizeBits();
+	}
+	public short getDefaultKeySizeBytes()
+	{
+		return symmetricEncryptionType.getDefaultKeySizeBytes();
+	}
+
+	public AbstractKeyGenerator getKeyGenerator(AbstractSecureRandom random, short keySizeBits) throws NoSuchProviderException, NoSuchAlgorithmException {
+		return symmetricEncryptionType.getKeyGenerator(random, keySizeBits);
+	}
+
+	public AbstractKeyGenerator getKeyGenerator(AbstractSecureRandom random) throws NoSuchProviderException, NoSuchAlgorithmException {
+		return symmetricEncryptionType.getKeyGenerator(random);
+	}
+
+	public SymmetricSecretKey generateSecretKeyFromHashedPassword(WrappedSecretData wrappedSecretData) throws NoSuchProviderException, NoSuchAlgorithmException {
+		return symmetricEncryptionType.generateSecretKeyFromHashedPassword(wrappedSecretData);
+	}
+
+	public SymmetricSecretKey generateSecretKeyFromHashedPassword(WrappedSecretData wrappedSecretData, short keySizeBits) throws NoSuchProviderException, NoSuchAlgorithmException {
+		return symmetricEncryptionType.generateSecretKeyFromHashedPassword(wrappedSecretData, keySizeBits);
+	}
+
+
+
 	public CodeProvider getCodeProvider()
 	{
 		return provider;
@@ -93,19 +129,19 @@ public enum SymmetricKeyWrapperType {
 		return algorithmName;
 	}
 
-	static SymmetricSecretKey hashPasswordForSecretKeyEncryption(PasswordHashType passwordHashType, WrappedPassword password) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
+	static SymmetricSecretKey hashPasswordForSecretKeyEncryption(SymmetricEncryptionType symmetricEncryptionType, PasswordHashType passwordHashType, WrappedPassword password) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
 		if (password==null)
 			throw new NullPointerException();
 		if (passwordHashType==null)
 			throw new NullPointerException();
 		PasswordHash ph = new PasswordHash(passwordHashType, new SecureRandom(), (byte)16, (byte)0);
-		return SymmetricEncryptionType.AES_CBC_PKCS5Padding.generateSecretKeyFromHashedPassword(ph.hash(password, null), (short)256);
+		return symmetricEncryptionType.generateSecretKeyFromHashedPassword(ph.hash(password, null), (short)256);
 	}
 
 	WrappedEncryptedSymmetricSecretKey wrapKey(PasswordHashType passwordHashType, WrappedPassword password, SymmetricSecretKey secretKeyToWrap, AbstractSecureRandom random) throws IOException {
 
 		try {
-			SymmetricSecretKey secretKey = hashPasswordForSecretKeyEncryption(passwordHashType, password);
+			SymmetricSecretKey secretKey = hashPasswordForSecretKeyEncryption(symmetricEncryptionType, passwordHashType, password);
 			return wrapKey(secretKey, secretKeyToWrap, random);
 		} catch (NoSuchAlgorithmException | NoSuchProviderException  e) {
 			throw new IOException(e);
@@ -124,7 +160,7 @@ public enum SymmetricKeyWrapperType {
 			throw new NullPointerException();
 
 		try {
-			SymmetricSecretKey secretKey=  hashPasswordForSecretKeyEncryption(passwordHashType, password);
+			SymmetricSecretKey secretKey=  hashPasswordForSecretKeyEncryption(symmetricEncryptionType, passwordHashType, password);
 			return unwrapKey(secretKey, encryptedSecretKey);
 		} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
 			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, e);

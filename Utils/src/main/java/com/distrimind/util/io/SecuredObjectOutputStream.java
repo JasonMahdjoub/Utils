@@ -52,7 +52,7 @@ import java.util.Map;
 
 /**
  * @author Jason Mahdjoub
- * @version 2.0
+ * @version 2.1
  * @since Utils 4.4.0
  */
 @SuppressWarnings("NullableProblems")
@@ -85,23 +85,47 @@ public abstract class SecuredObjectOutputStream extends OutputStream implements 
 		write((v) & 0xFF);
 
 	}
-	public final void writeUnsignedByte(int v) throws IOException {
+	public final void writeUnsignedInt8Bits(int v) throws IOException {
+		if (v>0xFF)
+			throw new IllegalArgumentException("val cannot be greater than "+0xFF);
 		if (v<0)
-			throw new IllegalArgumentException();
+			throw new IllegalArgumentException("val cannot be negative");
 		write((byte)v);
 	}
-	public final void writeUnsignedShort(int v) throws IOException {
+	public final void writeUnsignedInt16Bits(int v) throws IOException {
+		if (v>0xFFFF)
+			throw new IllegalArgumentException("val cannot be greater than "+0xFFFF);
 		if (v<0)
-			throw new IllegalArgumentException();
+			throw new IllegalArgumentException("val cannot be negative");
 		writeShort(v);
 	}
 
-	public final void writeUnsignedShortInt(int v) throws IOException {
+	public final void writeUnsignedInt24Bits(int v) throws IOException {
+		if (v>0xFFFFFF)
+			throw new IllegalArgumentException("val cannot be greater than "+0xFFFFFF);
 		if (v<0)
-			throw new IllegalArgumentException();
+			throw new IllegalArgumentException("val cannot be negative");
 		write((v >>> 16) & 0xFF);
 		write((v >>> 8) & 0xFF);
 		write((v) & 0xFF);
+	}
+
+	public final void writeUnsignedInt(long val, int valueSizeInBytes) throws IOException {
+		if (val<0)
+			throw new IllegalArgumentException();
+		if (valueSizeInBytes>8) {
+			throw new IllegalArgumentException();
+		}
+		else if (valueSizeInBytes>=1) {
+			int i=valueSizeInBytes-1;
+			while (--i>0)
+			{
+				writeByte((byte) (val));
+				val>>>=8;
+			}
+		}
+
+
 	}
 
 	@Override

@@ -106,7 +106,7 @@ public class HybridASymmetricKeyPair extends AbstractKeyPair<HybridASymmetricPri
 				throw new IllegalArgumentException();
 			if (encoded[off] != AbstractKey.IS_HYBRID_KEY_PAIR)
 				throw new IllegalArgumentException();
-			int size = (int) Bits.getPositiveInteger(encoded, off + 1, 3);
+			int size = (int) Bits.getUnsignedInt(encoded, off + 1, 3);
 			if (size + 36 > len)
 				throw new IllegalArgumentException();
 			IHybridKey privateKey = AbstractKey.decodeHybridKey(encoded, off + 4, size, fillArrayWithZerosWhenDecoded);
@@ -147,7 +147,7 @@ public class HybridASymmetricKeyPair extends AbstractKeyPair<HybridASymmetricPri
 
 		byte[] res=new byte[encodedPrivKey.getBytes().length+encodedPubKey.getBytes().length+4];
 		res[0]= AbstractKey.IS_HYBRID_KEY_PAIR;
-		Bits.putPositiveInteger(res, 1, encodedPrivKey.getBytes().length, 3);
+		Bits.putUnsignedInt(res, 1, encodedPrivKey.getBytes().length, 3);
 		System.arraycopy(encodedPrivKey.getBytes(), 0, res, 4, encodedPrivKey.getBytes().length );
 		System.arraycopy(encodedPubKey.getBytes(), 0, res, 4+encodedPrivKey.getBytes().length, encodedPubKey.getBytes().length );
 		encodedPrivKey.zeroize();

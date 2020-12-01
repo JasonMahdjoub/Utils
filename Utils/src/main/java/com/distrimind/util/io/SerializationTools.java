@@ -401,7 +401,7 @@ public class SerializationTools {
 		}
 		if (i<collectionsClasses.length) {
 			writeSize(oos, false, collection.size(), maxElements);
-			oos.writeUnsignedByte(i);
+			oos.writeUnsignedInt8Bits(i);
 			globalMaxSizeInBytes-=getSizeCoderSize(maxElements)+1;
 
 			if (globalMaxSizeInBytes<0)
@@ -499,7 +499,7 @@ public class SerializationTools {
 		}
 		if (i<mapClasses.length) {
 			writeSize(oos, false, map.size(), maxElements);
-			oos.writeUnsignedByte(i);
+			oos.writeUnsignedInt8Bits(i);
 			globalMaxSizeInBytes-=getSizeCoderSize(maxElements)+1;
 			for (Map.Entry<?, ?> e : map.entrySet())
 			{
@@ -1533,9 +1533,9 @@ public class SerializationTools {
 		if (code>MAX_UNSIGNED_SHORT_VALUE || code<0)
 			throw new IllegalAccessError();
 		if (enumsEndIndex>254)
-			oos.writeUnsignedShort(code);
+			oos.writeUnsignedInt16Bits(code);
 		else
-			oos.writeUnsignedByte(code);
+			oos.writeUnsignedInt8Bits(code);
 	}
 	private static int readObjectCode(final SecuredObjectInputStream ois) throws IOException {
 		if (enumsEndIndex>254)
@@ -1588,23 +1588,23 @@ public class SerializationTools {
 				}
 				else {
 					if (nullObject)
-						oos.writeUnsignedShortInt(NULL_UNSIGNED_SHORT_INT_TAB);
+						oos.writeUnsignedInt24Bits(NULL_UNSIGNED_SHORT_INT_TAB);
 					else
-						oos.writeUnsignedShortInt(size);
+						oos.writeUnsignedInt24Bits(size);
 				}
 			}
 			else{
 				if (nullObject)
-					oos.writeUnsignedShort(NULL_UNSIGNED_SHORT_TAB);
+					oos.writeUnsignedInt16Bits(NULL_UNSIGNED_SHORT_TAB);
 				else
-					oos.writeUnsignedShort(size);
+					oos.writeUnsignedInt16Bits(size);
 			}
 		}
 		else{
 			if (nullObject)
-				oos.writeUnsignedByte(255);
+				oos.writeUnsignedInt8Bits(255);
 			else
-				oos.writeUnsignedByte(size);
+				oos.writeUnsignedInt8Bits(size);
 		}
 	}
 	private static int readSize(final SecuredObjectInputStream ois, int maxSize) throws IOException {
@@ -1620,7 +1620,7 @@ public class SerializationTools {
 					res=ois.readInt();
 				}
 				else {
-					res = ois.readUnsignedShortInt();
+					res = ois.readUnsignedShort24Bits();
 					if (res==NULL_UNSIGNED_SHORT_INT_TAB)
 						res=-1;
 				}

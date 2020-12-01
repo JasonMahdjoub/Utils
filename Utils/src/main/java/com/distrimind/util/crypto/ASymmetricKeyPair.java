@@ -44,8 +44,6 @@ import java.util.Base64;
 
 import com.distrimind.util.Bits;
 import com.distrimind.util.data_buffers.WrappedSecretData;
-import com.distrimind.util.data_buffers.WrappedSecretString;
-import com.distrimind.util.data_buffers.WrappedString;
 
 /**
  * 
@@ -257,8 +255,8 @@ public class ASymmetricKeyPair extends AbstractKeyPair<ASymmetricPrivateKey, ASy
 			tab[0]|= AbstractKey.INCLUDE_KEY_EXPIRATION_CODE;
 		if (privateKey.xdhKey)
 			tab[0]|= AbstractKey.IS_XDH_KEY;
-		Bits.putPositiveInteger(tab, 1, keySizeBits, 3);
-		Bits.putPositiveInteger(tab, 4, encryptionType==null?signatureType.ordinal():encryptionType.ordinal(), ASymmetricPrivateKey.ENCODED_TYPE_SIZE);
+		Bits.putUnsignedInt(tab, 1, keySizeBits, 3);
+		Bits.putUnsignedInt(tab, 4, encryptionType==null?signatureType.ordinal():encryptionType.ordinal(), ASymmetricPrivateKey.ENCODED_TYPE_SIZE);
 		int pos=4+ASymmetricPrivateKey.ENCODED_TYPE_SIZE;
 		if (includeTimeExpiration) {
 			Bits.putLong(tab, 4 + ASymmetricPrivateKey.ENCODED_TYPE_SIZE, publicKey.getTimeExpirationUTC());
@@ -292,7 +290,7 @@ public class ASymmetricKeyPair extends AbstractKeyPair<ASymmetricPrivateKey, ASy
 
 		try {
 			int codedTypeSize = SymmetricSecretKey.ENCODED_TYPE_SIZE;
-			int keySize = (int)(Bits.getPositiveInteger(b, 1+off, 3));
+			int keySize = (int)(Bits.getUnsignedInt(b, 1+off, 3));
 			int posKey=codedTypeSize+4+off;
 			long expirationUTC;
 			byte type=b[off];
@@ -316,7 +314,7 @@ public class ASymmetricKeyPair extends AbstractKeyPair<ASymmetricPrivateKey, ASy
 			byte[][] keys = Bits.separateEncodingsWithShortIntSizedTabs(kp);
 
 			if (type == 9) {
-				ASymmetricAuthenticatedSignatureType type2 = ASymmetricAuthenticatedSignatureType.valueOf((int) Bits.getPositiveInteger(b, 4+off, codedTypeSize));
+				ASymmetricAuthenticatedSignatureType type2 = ASymmetricAuthenticatedSignatureType.valueOf((int) Bits.getUnsignedInt(b, 4+off, codedTypeSize));
 
 				ASymmetricKeyPair res=new ASymmetricKeyPair(type2, new ASymmetricPrivateKey(type2, keys[0], keySize),
 						new ASymmetricPublicKey(type2, keys[1], keySize, expirationUTC), keySize);
@@ -324,7 +322,7 @@ public class ASymmetricKeyPair extends AbstractKeyPair<ASymmetricPrivateKey, ASy
 				res.getASymmetricPrivateKey().xdhKey=kdhKey;
 				return res;
 			} else if (type == 8) {
-				ASymmetricEncryptionType type2 = ASymmetricEncryptionType.valueOf((int) Bits.getPositiveInteger(b, 4+off, codedTypeSize));
+				ASymmetricEncryptionType type2 = ASymmetricEncryptionType.valueOf((int) Bits.getUnsignedInt(b, 4+off, codedTypeSize));
 
 				ASymmetricKeyPair res=new ASymmetricKeyPair(type2, new ASymmetricPrivateKey(type2, keys[0], keySize),
 						new ASymmetricPublicKey(type2, keys[1], keySize, expirationUTC), keySize);

@@ -320,7 +320,7 @@ public class SymmetricSecretKey extends AbstractKey implements ISecretDecentrali
         if (keySizeBits>maxKeySizeBits(8))
             throw new InternalError();
 		tab[0]=encryptionType==null?(byte)1:(byte)0;
-		Bits.putPositiveInteger(tab, 1, encryptionType==null?signatureType.ordinal():encryptionType.ordinal(), codedTypeSize);
+		Bits.putUnsignedInt(tab, 1, encryptionType==null?signatureType.ordinal():encryptionType.ordinal(), codedTypeSize);
         tab[codedTypeSize+1]=(byte)encodeKeySizeBits(keySizeBits);
         System.arraycopy(secretKey, 0, tab, codedTypeSize+2, secretKey.length);
         return new WrappedSecretData(tab);

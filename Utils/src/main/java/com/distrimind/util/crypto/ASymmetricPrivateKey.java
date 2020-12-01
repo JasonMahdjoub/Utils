@@ -257,8 +257,8 @@ public class ASymmetricPrivateKey extends AbstractKey implements IASymmetricPriv
 	{
 		byte[] tab = new byte[4+ENCODED_TYPE_SIZE+privateKey.length];
 		tab[0]=encryptionType==null?(byte)((xdhKey? AbstractKey.IS_XDH_KEY:0)|2):(byte)3;
-		Bits.putPositiveInteger(tab, 1, keySizeBits, 3);
-		Bits.putPositiveInteger(tab, 4, encryptionType==null?signatureType.ordinal():encryptionType.ordinal(), ENCODED_TYPE_SIZE);
+		Bits.putUnsignedInt(tab, 1, keySizeBits, 3);
+		Bits.putUnsignedInt(tab, 4, encryptionType==null?signatureType.ordinal():encryptionType.ordinal(), ENCODED_TYPE_SIZE);
         System.arraycopy(privateKey, 0, tab, ENCODED_TYPE_SIZE+4, privateKey.length);
         return new WrappedSecretData(tab);
 	}

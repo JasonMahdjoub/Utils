@@ -67,6 +67,11 @@ public class Utils {
 			VERSION.addCreator(new Person("mahdjoub", "jason"))
 					.addDeveloper(new PersonDeveloper("mahdjoub", "jason", "2016-01-04"))
 					.addDescription(
+							new Description((short)5, (short)11, (short)0, Version.Type.STABLE, (short)0, "2020-11-30")
+									.addItem("Reimplement KeyWrapperAlgorithm")
+									.addItem("Refactoring of SecuredObjectOutputStream, SecuredObjectInputStream and Bits")
+					)
+					.addDescription(
 							new Description((short)5, (short)10, (short)0, Version.Type.STABLE, (short)0, "2020-11-18")
 									.addItem("Add SessionLockableEncryptionProfileProvider class")
 									.addItem("Add EncryptionProfileProviderWithEncryptedKeys class")

@@ -43,7 +43,6 @@ import com.distrimind.bouncycastle.pqc.jcajce.provider.mceliece.BCMcElieceCCA2Pu
 import com.distrimind.bouncycastle.pqc.jcajce.provider.mceliece.BCMcEliecePublicKey;
 import com.distrimind.util.Bits;
 import com.distrimind.util.data_buffers.WrappedData;
-import com.distrimind.util.data_buffers.WrappedSecretData;
 import com.distrimind.util.data_buffers.WrappedString;
 import com.distrimind.util.io.RandomByteArrayInputStream;
 
@@ -276,8 +275,8 @@ public class ASymmetricPublicKey extends AbstractKey implements IASymmetricPubli
 			tab[0]|= AbstractKey.INCLUDE_KEY_EXPIRATION_CODE;
 		if (xdhKey)
 			tab[0]|= AbstractKey.IS_XDH_KEY;
-		Bits.putPositiveInteger(tab, 1, keySizeBits, 3);
-		Bits.putPositiveInteger(tab, 4, encryptionType==null?signatureType.ordinal():encryptionType.ordinal(), ASymmetricPrivateKey.ENCODED_TYPE_SIZE);
+		Bits.putUnsignedInt(tab, 1, keySizeBits, 3);
+		Bits.putUnsignedInt(tab, 4, encryptionType==null?signatureType.ordinal():encryptionType.ordinal(), ASymmetricPrivateKey.ENCODED_TYPE_SIZE);
 		int pos=4+ASymmetricPrivateKey.ENCODED_TYPE_SIZE;
 		if (includeTimeExpiration) {
 			Bits.putLong(tab, pos, expirationUTC);

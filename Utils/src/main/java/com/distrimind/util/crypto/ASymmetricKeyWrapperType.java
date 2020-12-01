@@ -139,7 +139,7 @@ public enum ASymmetricKeyWrapperType {
 	{
 		byte[] res=new byte[wrappedKey.length+2+SymmetricSecretKey.ENCODED_TYPE_SIZE];
 		res[0]=keyToWrap.useAuthenticatedSignatureAlgorithm()?(byte)1:(byte)0;
-		Bits.putPositiveInteger(res, 1, keyToWrap.getAuthenticatedSignatureAlgorithmType()!=null?keyToWrap.getAuthenticatedSignatureAlgorithmType().ordinal():keyToWrap.getEncryptionAlgorithmType().ordinal(), SymmetricSecretKey.ENCODED_TYPE_SIZE);
+		Bits.putUnsignedInt(res, 1, keyToWrap.getAuthenticatedSignatureAlgorithmType()!=null?keyToWrap.getAuthenticatedSignatureAlgorithmType().ordinal():keyToWrap.getEncryptionAlgorithmType().ordinal(), SymmetricSecretKey.ENCODED_TYPE_SIZE);
 		res[1+SymmetricSecretKey.ENCODED_TYPE_SIZE]=(byte)SymmetricSecretKey.encodeKeySizeBits(keyToWrap.getKeySizeBits());
 		System.arraycopy(wrappedKey, 0, res, 2+SymmetricSecretKey.ENCODED_TYPE_SIZE, wrappedKey.length);
 		return res;
@@ -173,7 +173,7 @@ public enum ASymmetricKeyWrapperType {
 		byte[] wk= wrappedSecretData.getBytes();
 		if (wk.length<9)
 			throw new InvalidKeyException();
-		int ordinal=(int)Bits.getPositiveInteger(wk, 1, SymmetricSecretKey.ENCODED_TYPE_SIZE);
+		int ordinal=(int)Bits.getUnsignedInt(wk, 1, SymmetricSecretKey.ENCODED_TYPE_SIZE);
 		for (SymmetricAuthenticatedSignatureType t : SymmetricAuthenticatedSignatureType.values())
 		{
 			if (t.ordinal()==ordinal)
@@ -186,7 +186,7 @@ public enum ASymmetricKeyWrapperType {
 		byte[] wk= wrappedSecretData.getBytes();
 		if (wk.length<9)
 			throw new InvalidKeyException();
-		int ordinal=(int)Bits.getPositiveInteger(wk, 1, SymmetricSecretKey.ENCODED_TYPE_SIZE);
+		int ordinal=(int)Bits.getUnsignedInt(wk, 1, SymmetricSecretKey.ENCODED_TYPE_SIZE);
 		for (SymmetricEncryptionType t : SymmetricEncryptionType.values())
 		{
 			if (t.ordinal()==ordinal)

@@ -50,7 +50,7 @@ import java.util.*;
 
 /**
  * @author Jason Mahdjoub
- * @version 2.0
+ * @version 2.1
  * @since Utils 4.4.0
  */
 @SuppressWarnings("NullableProblems")
@@ -104,7 +104,12 @@ public abstract class SecuredObjectInputStream extends InputStream implements Da
 			throw new EOFException();
 		return (short)((ch1 << 8) + (ch2));
 	}
-
+	public final int readUnsignedInt8Bits() throws IOException {
+		return readUnsignedByte();
+	}
+	public final int readUnsignedInt16Bits() throws IOException {
+		return readUnsignedShort();
+	}
 	@Override
 	public final int readUnsignedShort() throws IOException {
 		int ch1 = read();
@@ -114,13 +119,33 @@ public abstract class SecuredObjectInputStream extends InputStream implements Da
 		return (ch1 << 8) + (ch2);
 	}
 
-	public final int readUnsignedShortInt() throws IOException {
+	public final int readUnsignedShort24Bits() throws IOException {
 		int ch1 = read();
 		int ch2 = read();
 		int ch3 = read();
 		if ((ch1 | ch2 | ch3) < 0)
 			throw new EOFException();
 		return (ch1 << 16) + (ch2 << 8) + (ch3);
+	}
+	public long readUnsignedInt(int valueSizeInBytes) throws IOException {
+		if (valueSizeInBytes<1)
+			return -1;
+		else if (valueSizeInBytes<=8) {
+			int i=valueSizeInBytes-1;
+			long res=0;
+			int decal=0;
+			while(--i>0)
+			{
+				if (decal==0)
+					res += (read() & 0xFFL);
+				else
+					res+=(read() & 0xFFL) << decal;
+				decal+=8;
+			}
+			return res;
+		}
+		else
+			throw new IllegalArgumentException();
 	}
 
 	@Override

@@ -130,7 +130,7 @@ public abstract class AbstractKey extends DecentralizedValue implements IKey{
 
 		byte[] res=new byte[encodedNonPQC.getBytes().length+encodedPQC.getBytes().length+4];
 		res[0]=((nonPQCKey instanceof HybridASymmetricPublicKey)?IS_HYBRID_PUBLIC_KEY:IS_HYBRID_PRIVATE_KEY);
-		Bits.putPositiveInteger(res, 1, encodedNonPQC.getBytes().length, 3);
+		Bits.putUnsignedInt(res, 1, encodedNonPQC.getBytes().length, 3);
 		System.arraycopy(encodedNonPQC.getBytes(), 0, res, 4, encodedNonPQC.getBytes().length );
 		System.arraycopy(encodedPQC.getBytes(), 0, res, 4+encodedNonPQC.getBytes().length, encodedPQC.getBytes().length );
 		if (encodedNonPQC instanceof Zeroizable) {
@@ -156,7 +156,7 @@ public abstract class AbstractKey extends DecentralizedValue implements IKey{
 				throw new IllegalArgumentException();
 			if (encoded[off] != IS_HYBRID_PRIVATE_KEY && encoded[off] != IS_HYBRID_PUBLIC_KEY)
 				throw new IllegalArgumentException(""+(encoded[off] & 0xFF));
-			int size = (int) Bits.getPositiveInteger(encoded, off + 1, 3);
+			int size = (int) Bits.getUnsignedInt(encoded, off + 1, 3);
 			if (size + 36 > len)
 				throw new IllegalArgumentException();
 			AbstractKey nonPQCKey = decode(encoded, off + 4, size);
@@ -230,29 +230,29 @@ public abstract class AbstractKey extends DecentralizedValue implements IKey{
 					int codedTypeSize = SymmetricSecretKey.ENCODED_TYPE_SIZE;
 					byte[] secretKey = new byte[len - 2 - codedTypeSize];
 					System.arraycopy(b, 2 + codedTypeSize + off, secretKey, 0, secretKey.length);
-					return new SymmetricSecretKey(SymmetricEncryptionType.valueOf((int) Bits.getPositiveInteger(b, off + 1, codedTypeSize)), secretKey,
+					return new SymmetricSecretKey(SymmetricEncryptionType.valueOf((int) Bits.getUnsignedInt(b, off + 1, codedTypeSize)), secretKey,
 							SymmetricSecretKey.decodeKeySizeBits(b[codedTypeSize + 1 + off]));
 				}
 			} else if (type == (byte) 1) {
 				int codedTypeSize = SymmetricSecretKey.ENCODED_TYPE_SIZE;
 				byte[] secretKey = new byte[len - 2 - codedTypeSize];
 				System.arraycopy(b, 2 + codedTypeSize+off, secretKey, 0, secretKey.length);
-				return new SymmetricSecretKey(SymmetricAuthenticatedSignatureType.valueOf((int) Bits.getPositiveInteger(b, off+1, codedTypeSize)), secretKey,
+				return new SymmetricSecretKey(SymmetricAuthenticatedSignatureType.valueOf((int) Bits.getUnsignedInt(b, off+1, codedTypeSize)), secretKey,
 						SymmetricSecretKey.decodeKeySizeBits(b[codedTypeSize + 1+off]));
 			} else if (type == 2) {
 
 				byte[] privateKey = new byte[len - 4 - ASymmetricPrivateKey.ENCODED_TYPE_SIZE];
 				System.arraycopy(b, 4 + ASymmetricPrivateKey.ENCODED_TYPE_SIZE+off, privateKey, 0, privateKey.length);
-				ASymmetricPrivateKey res=new ASymmetricPrivateKey(ASymmetricAuthenticatedSignatureType.valueOf((int) Bits.getPositiveInteger(b, off+4, ASymmetricPrivateKey.ENCODED_TYPE_SIZE)), privateKey,
-						(int)Bits.getPositiveInteger(b, off+1, 3));
+				ASymmetricPrivateKey res=new ASymmetricPrivateKey(ASymmetricAuthenticatedSignatureType.valueOf((int) Bits.getUnsignedInt(b, off+4, ASymmetricPrivateKey.ENCODED_TYPE_SIZE)), privateKey,
+						(int)Bits.getUnsignedInt(b, off+1, 3));
 				res.xdhKey=isXdh;
 				return res;
 			} else if (type == 3) {
 
 				byte[] privateKey = new byte[len - 4 - ASymmetricPrivateKey.ENCODED_TYPE_SIZE];
 				System.arraycopy(b, 4 + ASymmetricPrivateKey.ENCODED_TYPE_SIZE+off, privateKey, 0, privateKey.length);
-				return new ASymmetricPrivateKey(ASymmetricEncryptionType.valueOf((int) Bits.getPositiveInteger(b, off+4, ASymmetricPrivateKey.ENCODED_TYPE_SIZE)), privateKey,
-						(int)Bits.getPositiveInteger(b, off+1, 3));
+				return new ASymmetricPrivateKey(ASymmetricEncryptionType.valueOf((int) Bits.getUnsignedInt(b, off+4, ASymmetricPrivateKey.ENCODED_TYPE_SIZE)), privateKey,
+						(int)Bits.getUnsignedInt(b, off+1, 3));
 			} else if (type == 4) {
 				fillArrayWithZerosWhenDecoded=false;
 
@@ -267,8 +267,8 @@ public abstract class AbstractKey extends DecentralizedValue implements IKey{
 				else
 					timeExpiration=Long.MAX_VALUE;
 				System.arraycopy(b, posKey, publicKey, 0, publicKey.length);
-				return new ASymmetricPublicKey(ASymmetricEncryptionType.valueOf((int) Bits.getPositiveInteger(b, off+4, ASymmetricPrivateKey.ENCODED_TYPE_SIZE)), publicKey,
-						(int)Bits.getPositiveInteger(b, off+1, 3), timeExpiration);
+				return new ASymmetricPublicKey(ASymmetricEncryptionType.valueOf((int) Bits.getUnsignedInt(b, off+4, ASymmetricPrivateKey.ENCODED_TYPE_SIZE)), publicKey,
+						(int)Bits.getUnsignedInt(b, off+1, 3), timeExpiration);
 			} else if (type == 5) {
 				fillArrayWithZerosWhenDecoded=false;
 
@@ -283,8 +283,8 @@ public abstract class AbstractKey extends DecentralizedValue implements IKey{
 				else
 					timeExpiration=Long.MAX_VALUE;
 				System.arraycopy(b, posKey, publicKey, 0, publicKey.length);
-				ASymmetricPublicKey res=new ASymmetricPublicKey(ASymmetricAuthenticatedSignatureType.valueOf((int) Bits.getPositiveInteger(b, off+4, ASymmetricPrivateKey.ENCODED_TYPE_SIZE)), publicKey,
-						(int)Bits.getPositiveInteger(b, off+1, 3), timeExpiration);
+				ASymmetricPublicKey res=new ASymmetricPublicKey(ASymmetricAuthenticatedSignatureType.valueOf((int) Bits.getUnsignedInt(b, off+4, ASymmetricPrivateKey.ENCODED_TYPE_SIZE)), publicKey,
+						(int)Bits.getUnsignedInt(b, off+1, 3), timeExpiration);
 				res.xdhKey=isXdh;
 				return res;
 			} else if (type==IS_HYBRID_PRIVATE_KEY || type==IS_HYBRID_PUBLIC_KEY)

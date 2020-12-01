@@ -117,7 +117,7 @@ public class ASymmetricAuthenticatedSignerAlgorithm extends AbstractAuthenticate
 		public int getSignature(byte[] signature, int off_sig) throws IOException {
 			int nb1=nonPQCSigner.getSignature(signature, off_sig+3);
 			int nb2=PQCSigner.getSignature(signature, off_sig+3+nb1);
-			Bits.putPositiveInteger(signature, off_sig, nb1, 3);
+			Bits.putUnsignedInt(signature, off_sig, nb1, 3);
 			return nb1+nb2+3;
 		}
 
@@ -132,7 +132,7 @@ public class ASymmetricAuthenticatedSignerAlgorithm extends AbstractAuthenticate
 			byte[] sig1=nonPQCSigner.getSignature();
 			byte[] sig2=PQCSigner.getSignature();
 			byte[] res=new byte[sig1.length+sig2.length+3];
-			Bits.putPositiveInteger(res, 0, sig1.length, 3);
+			Bits.putUnsignedInt(res, 0, sig1.length, 3);
 			System.arraycopy(sig1, 0, res, 3, sig1.length);
 			System.arraycopy(sig2, 0, res, 3+sig1.length, sig2.length);
 			return res;

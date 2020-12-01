@@ -51,7 +51,7 @@ public class Bits {
 	private static byte[] concatenateEncodingWithSizedTabs(byte[] part1, byte[] part2, int sizePrecision) {
 		int sizePart1 = part1.length;
 		byte[] res = new byte[part2.length + part1.length + sizePrecision];
-		Bits.putPositiveInteger(res, 0, sizePart1, sizePrecision);
+		Bits.putUnsignedInt(res, 0, sizePart1, sizePrecision);
 		System.arraycopy(part1, 0, res, sizePrecision, sizePart1);
 		System.arraycopy(part2, 0, res, sizePrecision + sizePart1, part2.length);
 		return res;
@@ -135,7 +135,15 @@ public class Bits {
 		b[off + 1] = (byte) (val);
 		b[off] = (byte) (val >>> 8);
 	}
-	public static void putPositiveShortInt(byte[] b, int off, int val) {
+
+	public static void putUnsignedInt16Bits(byte[] b, int off, int val) {
+		if (val>0xFFFF)
+			throw new IllegalArgumentException("val cannot be greater than "+0xFFFF);
+		if (val<0)
+			throw new IllegalArgumentException("val cannot be negative");
+		putShort(b, off, (short)val);
+	}
+	public static void putUnsignedInt24Bits(byte[] b, int off, int val) {
 		if (val>0xFFFFFF)
 			throw new IllegalArgumentException("val cannot be greater than "+0xFFFFFF);
 		if (val<0)
@@ -145,10 +153,13 @@ public class Bits {
 		b[off] = (byte) (val >>> 16);
 	}
 
-    public static int getPositiveShortInt(byte[] b, int off) {
+    public static int getUnsignedInt24Bits(byte[] b, int off) {
         return ((b[off + 2] & 0xFF)) + ((b[off + 1] & 0xFF) << 8) + ((b[off] & 0xFF) << 16);
     }
-	public static void putPositiveInteger(byte[] b, int off, long val, int valueSizeInBytes) {
+	public static int getUnsignedInt16Bits(byte[] b, int off) {
+		return ((b[off + 1] & 0xFF)) + ((b[off] & 0xFF) << 8);
+	}
+	public static void putUnsignedInt(byte[] b, int off, long val, int valueSizeInBytes) {
 	    if (val<0)
 	        throw new IllegalArgumentException();
 		if (valueSizeInBytes>8) {
@@ -166,7 +177,7 @@ public class Bits {
 
 	}
 
-    public static long getPositiveInteger(byte[] b, int off, int valueSizeInBytes) {
+    public static long getUnsignedInt(byte[] b, int off, int valueSizeInBytes) {
         if (valueSizeInBytes<1)
             return -1;
         else if (valueSizeInBytes<=8) {
@@ -204,7 +215,7 @@ public class Bits {
 	}
 
 	private static byte[][] separateEncodingsWithSizedTabs(byte[] concatenatedEncodedElement, int off, int len, int sizePrecision) {
-		int sizePar1 = (int)Bits.getPositiveInteger(concatenatedEncodedElement, off, sizePrecision);
+		int sizePar1 = (int)Bits.getUnsignedInt(concatenatedEncodedElement, off, sizePrecision);
 		byte[] part1 = new byte[sizePar1];
 		byte[] part2 = new byte[len - sizePrecision - sizePar1];
 		System.arraycopy(concatenatedEncodedElement, off + sizePrecision, part1, 0, sizePar1);
@@ -272,5 +283,6 @@ public class Bits {
 			throw new IOException("Invalid check sum");
 		return res;
 	}
+
 
 }

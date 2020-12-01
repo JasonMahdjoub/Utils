@@ -134,7 +134,7 @@ public class HybridKeyAgreement extends KeyAgreement{
 			}
 			if (nonPQCb && PQCb) {
 				byte[] res = new byte[nonPQC.length + PQC.length + 3];
-				Bits.putPositiveInteger(res, 0, nonPQC.length, 3);
+				Bits.putUnsignedInt(res, 0, nonPQC.length, 3);
 				System.arraycopy(nonPQC, 0, res, 3, nonPQC.length);
 				System.arraycopy(PQC, 0, res, 3 + nonPQC.length, PQC.length);
 				return res;
@@ -161,7 +161,7 @@ public class HybridKeyAgreement extends KeyAgreement{
 		try {
 			byte[] nonPQC = null, PQC = null;
 			if (!nonPQCKeyAgreement.hasFinishedReception() && !PQCKeyAgreement.hasFinishedReception()) {
-				int s = (int) Bits.getPositiveInteger(data, 0, 3);
+				int s = (int) Bits.getUnsignedInt(data, 0, 3);
 				if (s + 36 > data.length)
 					throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException());
 				nonPQC = new byte[s];

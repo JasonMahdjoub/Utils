@@ -109,7 +109,7 @@ public class ASymmetricAuthenticatedSignatureCheckerAlgorithm extends AbstractAu
 
 		@Override
 		public void init(byte[] signature, int offs, int lens) throws IOException {
-			int len=(int)Bits.getPositiveInteger(signature, offs, 3);
+			int len=(int)Bits.getUnsignedInt(signature, offs, 3);
 			signatureValid=len+3<lens;
 			if (signatureValid) {
 				checkerNonPQC.init(signature, offs+3, len);
