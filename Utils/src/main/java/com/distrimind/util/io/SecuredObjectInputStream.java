@@ -335,29 +335,44 @@ public abstract class SecuredObjectInputStream extends InputStream implements Da
 	public Collection<?> readCollection(boolean nullAccepted, int globalMaxSizeInBytes) throws IOException, ClassNotFoundException {
 		return readCollection(nullAccepted, globalMaxSizeInBytes, true);
 	}
-	public Collection<?> readCollection(boolean nullAccepted, int globalMaxSizeInBytes, boolean supportNullCollectionElements) throws IOException, ClassNotFoundException {
-		return SerializationTools.readCollection(this, globalMaxSizeInBytes, nullAccepted, supportNullCollectionElements);
+	@SuppressWarnings("unchecked")
+	public <CT extends Collection<?>> CT readCollection(boolean nullAccepted, int globalMaxSizeInBytes, boolean supportNullCollectionElements) throws IOException, ClassNotFoundException {
+		try {
+			return (CT)SerializationTools.readCollection(this, globalMaxSizeInBytes, nullAccepted, supportNullCollectionElements);
+		}
+		catch (ClassCastException e)
+		{
+			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, e);
+		}
+
 	}
 	public Map<?, ?> readMap(boolean nullAccepted, int globalMaxSizeInBytes) throws IOException, ClassNotFoundException {
 		return readMap(nullAccepted, globalMaxSizeInBytes, true, true);
-	}
-	public Map<?, ?> readMap(boolean nullAccepted, int globalMaxSizeInBytes, boolean supportNullMapKey, boolean supportNullMapValue) throws IOException, ClassNotFoundException {
-		return SerializationTools.readMap(this, globalMaxSizeInBytes, nullAccepted, supportNullMapKey, supportNullMapValue);
+
 	}
 	@SuppressWarnings("unchecked")
-	public <T> Collection<T> readCollection(boolean nullAccepted, boolean supportNullCollectionElements, int globalMaxSizeInBytes, Class<T> elementsClass) throws IOException, ClassNotFoundException {
+	public <CM extends Map<?, ?>> CM readMap(boolean nullAccepted, int globalMaxSizeInBytes, boolean supportNullMapKey, boolean supportNullMapValue) throws IOException, ClassNotFoundException {
+
 		try {
-			return (Collection<T>) readCollection(nullAccepted, globalMaxSizeInBytes, supportNullCollectionElements);
+			return (CM)SerializationTools.readMap(this, globalMaxSizeInBytes, nullAccepted, supportNullMapKey, supportNullMapValue);
 		}
 		catch (ClassCastException e)
 		{
 			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, e);
 		}
 	}
-	@SuppressWarnings("unchecked")
+	public <T> Collection<T> readCollection(boolean nullAccepted, int globalMaxSizeInBytes, boolean supportNullCollectionElements, Class<T> elementsClass) throws IOException, ClassNotFoundException {
+		try {
+			return this.readCollection(nullAccepted, globalMaxSizeInBytes, supportNullCollectionElements);
+		}
+		catch (ClassCastException e)
+		{
+			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, e);
+		}
+	}
 	public <K, V> Map<K, V> readMap(boolean nullAccepted, int globalMaxSizeInBytes, boolean supportNullMapKey, boolean supportNullMapValue, Class<K> keysClass, Class<V> valuesClass) throws IOException, ClassNotFoundException {
 		try {
-			return (Map<K, V>) readMap(nullAccepted, globalMaxSizeInBytes, supportNullMapKey, supportNullMapValue);
+			return readMap(nullAccepted, globalMaxSizeInBytes, supportNullMapKey, supportNullMapValue);
 		}
 		catch (ClassCastException e)
 		{
@@ -369,8 +384,15 @@ public abstract class SecuredObjectInputStream extends InputStream implements Da
 	public Object readObject(boolean nullAccepted) throws IOException, ClassNotFoundException {
 		return readObject(nullAccepted, -1);
 	}
-	public Object readObject(boolean nullAccepted, int maxSizeInBytes) throws IOException, ClassNotFoundException {
-		return SerializationTools.readObject(this, maxSizeInBytes, nullAccepted);
+	@SuppressWarnings("unchecked")
+	public <T> T readObject(boolean nullAccepted, int maxSizeInBytes) throws IOException, ClassNotFoundException {
+		try {
+			return (T)SerializationTools.readObject(this, maxSizeInBytes, nullAccepted);
+		}
+		catch (ClassCastException e)
+		{
+			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, e);
+		}
 	}
 	public <TK> TK readObject(boolean nullAccepted, Class<TK> classType) throws IOException, ClassNotFoundException {
 		return readObject(nullAccepted, -1, classType);
