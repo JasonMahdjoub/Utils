@@ -35,9 +35,6 @@ The fact that you are presently reading this means that you have had
 knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-import com.distrimind.util.io.Integrity;
-import com.distrimind.util.io.MessageExternalizationException;
-
 import java.io.IOException;
 
 /**
@@ -70,6 +67,6 @@ public interface EncryptionProfileProvider {
 	SymmetricSecretKey getSecretKeyForSignature(short keyID, boolean duringDecryptionPhase) throws IOException;
 	SymmetricSecretKey getSecretKeyForEncryption(short keyID, boolean duringDecryptionPhase) throws IOException;
 
-
+	Short getKeyID(IASymmetricPublicKey publicKeyForSignature);
 	short getDefaultKeyID();
 }

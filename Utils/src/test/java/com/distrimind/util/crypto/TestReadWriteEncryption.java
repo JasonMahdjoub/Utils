@@ -157,6 +157,11 @@ public class TestReadWriteEncryption {
 			public short getDefaultKeyID() {
 				return 0;
 			}
+
+			@Override
+			public Short getKeyID(IASymmetricPublicKey publicKeyForSignature) {
+				return null;
+			}
 		};
 		for (short secretKeyID=0;secretKeyID<2;secretKeyID++) {
 

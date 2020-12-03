@@ -67,6 +67,10 @@ public class Utils {
 			VERSION.addCreator(new Person("mahdjoub", "jason"))
 					.addDeveloper(new PersonDeveloper("mahdjoub", "jason", "2016-01-04"))
 					.addDescription(
+							new Description((short)5, (short)11, (short)1, Version.Type.STABLE, (short)0, "2020-12-03")
+									.addItem("Add function EncryptionProfileProvider.getKeyID(IASymmetricPublicKey)")
+					)
+					.addDescription(
 							new Description((short)5, (short)11, (short)0, Version.Type.STABLE, (short)0, "2020-11-30")
 									.addItem("Reimplement KeyWrapperAlgorithm")
 									.addItem("Refactoring of SecuredObjectOutputStream, SecuredObjectInputStream and Bits")

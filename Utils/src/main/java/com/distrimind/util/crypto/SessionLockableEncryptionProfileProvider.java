@@ -78,6 +78,10 @@ public final class SessionLockableEncryptionProfileProvider implements Encryptio
 		return encryptionProfileProvider.getDefaultKeyID();
 	}
 
+	@Override
+	public Short getKeyID(IASymmetricPublicKey publicKeyForSignature) {
+		return encryptionProfileProvider.getKeyID(publicKeyForSignature);
+	}
 
 	@Override
 	public final void unlock() {
