@@ -17,7 +17,7 @@ import java.util.Arrays;
  * @since Utils 5.10.0
  */
 public class KeyWrapperAlgorithm extends MultiFormatProperties implements SecureExternalizable{
-	public static final int MAX_SIZE_OF_WRAPPED_SYMMETRIC_SECRET_KEY_WITH_SYMMETRIC_ALGORITHM=SymmetricSecretKey.MAX_SYMMETRIC_KEY_SIZE_IN_BYTES+16;
+	public static final int MAX_SIZE_OF_WRAPPED_SYMMETRIC_SECRET_KEY_WITH_SYMMETRIC_ALGORITHM=SymmetricSecretKey.MAX_SIZE_IN_BYTES_OF_SYMMETRIC_KEY_FOR_SIGNATURE +16;
 	public static final int MAX_SIZE_OF_WRAPPED_ASYMMETRIC_PRIVATE_KEY_WITH_SYMMETRIC_ALGORITHM=IASymmetricPrivateKey.MAX_SIZE_IN_BYTES_OF_PRIVATE_KEY+16;
 
 	private SymmetricKeyWrapperType symmetricKeyWrapperType;

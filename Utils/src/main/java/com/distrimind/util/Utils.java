@@ -67,7 +67,7 @@ public class Utils {
 			VERSION.addCreator(new Person("mahdjoub", "jason"))
 					.addDeveloper(new PersonDeveloper("mahdjoub", "jason", "2016-01-04"))
 					.addDescription(
-							new Description((short)5, (short)11, (short)3, Version.Type.STABLE, (short)0, "2020-12-03")
+							new Description((short)5, (short)11, (short)5, Version.Type.STABLE, (short)0, "2020-12-03")
 									.addItem("Alter SecureObjectInputStream.readCollection")
 					)
 					.addDescription(

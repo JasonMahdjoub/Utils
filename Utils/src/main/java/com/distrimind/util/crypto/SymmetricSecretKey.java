@@ -53,9 +53,11 @@ import java.util.Arrays;
  */
 public class SymmetricSecretKey extends AbstractKey implements ISecretDecentralizedValue{
 
-	public final static int MAX_SYMMETRIC_KEY_SIZE_IN_BYTES_FOR_SIGNATURE=SymmetricAuthenticatedSignatureType.MAX_SYMMETRIC_KEY_SIZE;
-	public final static int MAX_SYMMETRIC_KEY_SIZE_IN_BYTES_FOR_ENCRYPTION=SymmetricEncryptionType.MAX_SYMMETRIC_KEY_SIZE;
-	public final static int MAX_SYMMETRIC_KEY_SIZE_IN_BYTES=SymmetricEncryptionType.MAX_SYMMETRIC_KEY_SIZE;
+	public final static int MAX_SIZE_IN_BYTES_OF_SYMMETRIC_SIGNATURE =SymmetricAuthenticatedSignatureType.MAX_SYMMETRIC_KEY_SIZE;
+	public final static int MAX_SIZE_IN_BYTES_OF_SYMMETRIC_KEY_FOR_ENCRYPTION =SymmetricEncryptionType.MAX_SYMMETRIC_KEY_SIZE;
+	public final static int MAX_SIZE_IN_BYTES_OF_SYMMETRIC_KEY_FOR_SIGNATURE =SymmetricEncryptionType.MAX_SYMMETRIC_KEY_SIZE;
+	public final static int MAX_SIZE_IN_BYTES_OF_SYMMETRIC_KEY =SymmetricEncryptionType.MAX_SYMMETRIC_KEY_SIZE;
+
 
 	/**
 	 * 

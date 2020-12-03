@@ -332,47 +332,49 @@ public abstract class SecuredObjectInputStream extends InputStream implements Da
 		return SerializationTools.readBigDecimal(this, nullAccepted);
 	}
 
-	public Collection<?> readCollection(boolean nullAccepted, int globalMaxSizeInBytes) throws IOException, ClassNotFoundException {
-		return readCollection(nullAccepted, globalMaxSizeInBytes, true);
+	public <T, C extends Collection<T>> C readCollection(boolean nullAccepted, int globalMaxSizeInBytes, Class<T> elementsClass) throws IOException, ClassNotFoundException {
+		return readCollection(nullAccepted, globalMaxSizeInBytes, true, elementsClass);
+	}
+
+	public <K, V, M extends Map<K, V>> M readMap(boolean nullAccepted, int globalMaxSizeInBytes, Class<K> keysClass, Class<V> valuesClass) throws IOException, ClassNotFoundException {
+		return readMap(nullAccepted, globalMaxSizeInBytes, true, true, keysClass, valuesClass);
+
+	}
+
+	@SuppressWarnings("unchecked")
+	public <T, C extends Collection<T>> C readCollection(boolean nullAccepted, int globalMaxSizeInBytes, boolean supportNullCollectionElements, Class<T> elementsClass) throws IOException, ClassNotFoundException {
+		try {
+			C res=(C)SerializationTools.readCollection(this, globalMaxSizeInBytes, nullAccepted, supportNullCollectionElements);
+			if (res==null)
+				return null;
+			for (T e : res)
+			{
+				if (e!=null && !elementsClass.isAssignableFrom(e.getClass()))
+					throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
+			}
+			return res;
+
+		}
+		catch (ClassCastException e)
+		{
+			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, e);
+		}
 	}
 	@SuppressWarnings("unchecked")
-	public <CT extends Collection<?>> CT readCollection(boolean nullAccepted, int globalMaxSizeInBytes, boolean supportNullCollectionElements) throws IOException, ClassNotFoundException {
+	public <K, V, M extends Map<K, V>> M readMap(boolean nullAccepted, int globalMaxSizeInBytes, boolean supportNullMapKey, boolean supportNullMapValue, Class<K> keysClass, Class<V> valuesClass) throws IOException, ClassNotFoundException {
 		try {
-			return (CT)SerializationTools.readCollection(this, globalMaxSizeInBytes, nullAccepted, supportNullCollectionElements);
-		}
-		catch (ClassCastException e)
-		{
-			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, e);
-		}
+			M res=(M)SerializationTools.readMap(this, globalMaxSizeInBytes, nullAccepted, supportNullMapKey, supportNullMapValue);
+			if (res==null)
+				return null;
+			for (Map.Entry<K, V> e : res.entrySet())
+			{
+				if (e.getKey()!=null && !keysClass.isAssignableFrom(e.getKey().getClass()))
+					throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
+				if (e.getValue()!=null && !valuesClass.isAssignableFrom(e.getValue().getClass()))
+					throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
+			}
+			return res;
 
-	}
-	public Map<?, ?> readMap(boolean nullAccepted, int globalMaxSizeInBytes) throws IOException, ClassNotFoundException {
-		return readMap(nullAccepted, globalMaxSizeInBytes, true, true);
-
-	}
-	@SuppressWarnings("unchecked")
-	public <CM extends Map<?, ?>> CM readMap(boolean nullAccepted, int globalMaxSizeInBytes, boolean supportNullMapKey, boolean supportNullMapValue) throws IOException, ClassNotFoundException {
-
-		try {
-			return (CM)SerializationTools.readMap(this, globalMaxSizeInBytes, nullAccepted, supportNullMapKey, supportNullMapValue);
-		}
-		catch (ClassCastException e)
-		{
-			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, e);
-		}
-	}
-	public <T> Collection<T> readCollection(boolean nullAccepted, int globalMaxSizeInBytes, boolean supportNullCollectionElements, Class<T> elementsClass) throws IOException, ClassNotFoundException {
-		try {
-			return this.readCollection(nullAccepted, globalMaxSizeInBytes, supportNullCollectionElements);
-		}
-		catch (ClassCastException e)
-		{
-			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, e);
-		}
-	}
-	public <K, V> Map<K, V> readMap(boolean nullAccepted, int globalMaxSizeInBytes, boolean supportNullMapKey, boolean supportNullMapValue, Class<K> keysClass, Class<V> valuesClass) throws IOException, ClassNotFoundException {
-		try {
-			return readMap(nullAccepted, globalMaxSizeInBytes, supportNullMapKey, supportNullMapValue);
 		}
 		catch (ClassCastException e)
 		{
@@ -381,7 +383,7 @@ public abstract class SecuredObjectInputStream extends InputStream implements Da
 	}
 
 
-	public Object readObject(boolean nullAccepted) throws IOException, ClassNotFoundException {
+	public <T> T readObject(boolean nullAccepted) throws IOException, ClassNotFoundException {
 		return readObject(nullAccepted, -1);
 	}
 	@SuppressWarnings("unchecked")
@@ -412,8 +414,13 @@ public abstract class SecuredObjectInputStream extends InputStream implements Da
 		}
 		if (!classType.isAssignableFrom(e.getClass()))
 			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, "found : "+e.getClass());
-
-		return (TK)e;
+		try {
+			return (TK) e;
+		}
+		catch (ClassCastException e2)
+		{
+			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, e2);
+		}
 	}
 
 
@@ -467,4 +474,6 @@ public abstract class SecuredObjectInputStream extends InputStream implements Da
 			throw new NullPointerException();
 		this.objectResolver = objectResolver;
 	}
+
+
 }

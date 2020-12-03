@@ -87,7 +87,7 @@ public class TestSerializationTools {
 						new HashSet<>(Arrays.asList("s7", "s8"))),
 					true,
 				(SpecificWriter) (out, o, nullSupport1, maxSize) -> out.writeCollection((Collection<?>)o, nullSupport1, maxSize),
-				(SpecificReader) SecuredObjectInputStream::readCollection,
+				(SpecificReader) (in, nullSupport1, maxSize) -> in.readCollection(nullSupport1, maxSize, String.class),
 				(SpecificSizeComputer)	(v, m)->SerializationTools.getInternalSize((Collection<?>)v, m)
 			});
 
@@ -104,7 +104,7 @@ public class TestSerializationTools {
 					Arrays.asList(map, map2),
 					true,
 					(SpecificWriter) (out, o, nullSupport1, maxSize) -> out.writeMap((Map<?,?>)o, nullSupport1, maxSize),
-					(SpecificReader) SecuredObjectInputStream::readMap,
+					(SpecificReader) (in, nullSupport1, maxSize) -> in.readMap(nullSupport1, maxSize, String.class, Integer.class),
 					(SpecificSizeComputer)	(v, m)->SerializationTools.getInternalSize((Map<?,?>)v, m)
 
 			});
