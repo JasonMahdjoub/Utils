@@ -1,6 +1,6 @@
 Utils
 =====
-5.11.5 STABLE (Build: 2172) (from 04/01/2016 to 03/12/2020)
+5.11.6 STABLE (Build: 2174) (from 04/01/2016 to 15/12/2020)
 
 # Creator(s):
 Jason MAHDJOUB
@@ -9,6 +9,10 @@ Jason MAHDJOUB
 Jason MAHDJOUB (Entered in the team at 04/01/2016)
 
 # Modifications:
+
+
+### 5.11.6 STABLE (15/12/2020)
+* Add EncryptionProfileProviderFactory class
 
 
 ### 5.11.5 STABLE (03/12/2020)
