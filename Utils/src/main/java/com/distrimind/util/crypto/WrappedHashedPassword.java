@@ -19,15 +19,10 @@ public final class WrappedHashedPassword extends WrappedSecretData implements Se
 	protected WrappedHashedPassword() {
 	}
 
-	WrappedHashedPassword(byte[] hashedPassword) {
+	public WrappedHashedPassword(byte[] hashedPassword) {
 		super(hashedPassword);
 	}
 
-
-
-	public WrappedHashedPassword(WrappedPassword secretData) throws IOException {
-		super(secretData);
-	}
 
 	public WrappedHashedPassword(WrappedHashedPassword hashedPassword) {
 		super(hashedPassword);

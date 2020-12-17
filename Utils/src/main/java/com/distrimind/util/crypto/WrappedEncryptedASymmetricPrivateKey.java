@@ -19,7 +19,7 @@ public class WrappedEncryptedASymmetricPrivateKey extends WrappedSecretData impl
 	protected WrappedEncryptedASymmetricPrivateKey() {
 	}
 
-	WrappedEncryptedASymmetricPrivateKey(byte[] data) {
+	public WrappedEncryptedASymmetricPrivateKey(byte[] data) {
 		super(data);
 		if (data.length>MAX_SIZE_IN_BYTES_OF_KEY)
 			throw new IllegalArgumentException(""+data.length);

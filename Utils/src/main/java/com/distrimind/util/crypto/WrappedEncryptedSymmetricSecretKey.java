@@ -19,7 +19,7 @@ public class WrappedEncryptedSymmetricSecretKey extends WrappedSecretData implem
 	protected WrappedEncryptedSymmetricSecretKey() {
 	}
 
-	WrappedEncryptedSymmetricSecretKey(byte[] secretData) {
+	public WrappedEncryptedSymmetricSecretKey(byte[] secretData) {
 		super(secretData);
 		if (getBytes().length>MAX_SIZE_IN_BYTES_OF_KEY)
 			throw new IllegalArgumentException();

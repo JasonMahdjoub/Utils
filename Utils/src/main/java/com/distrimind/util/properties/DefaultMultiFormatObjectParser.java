@@ -50,6 +50,10 @@ import java.util.regex.Pattern;
 import javax.lang.model.SourceVersion;
 
 import com.distrimind.util.*;
+import com.distrimind.util.crypto.*;
+import com.distrimind.util.data_buffers.WrappedData;
+import com.distrimind.util.data_buffers.WrappedSecretData;
+import com.distrimind.util.data_buffers.WrappedSecretString;
 import com.distrimind.util.data_buffers.WrappedString;
 
 
@@ -109,7 +113,8 @@ public class DefaultMultiFormatObjectParser extends AbstractMultiFormatObjectPar
 			supportedClasses[i++]=c;
 	}
 	private static final Class<?>[] supportedMultiClasses=new Class<?>[] {
-		DecentralizedValue.class, MultiFormatProperties.class,Enum.class,Calendar.class
+		DecentralizedValue.class, MultiFormatProperties.class,Enum.class,Calendar.class,
+			WrappedData.class, WrappedString.class
 	};
 	private SimpleDateFormat getSimpleDateFormat()
 	{
@@ -269,6 +274,13 @@ public class DefaultMultiFormatObjectParser extends AbstractMultiFormatObjectPar
 		else if (field_type.isEnum()) {
 			return ((Enum<?>) object).name();
 		}
+		else if(WrappedData.class.isAssignableFrom(field_type))
+		{
+			return Base64.getUrlEncoder().encodeToString(((WrappedData)object).getBytes());
+		}
+		else if (WrappedString.class.isAssignableFrom(field_type))
+			//noinspection StringOperationCanBeSimplified
+			return new String(object.toString());
 		else
 			return null;
 	}
@@ -432,17 +444,50 @@ public class DefaultMultiFormatObjectParser extends AbstractMultiFormatObjectPar
 			}
 			return null;
 		}
+		else if(WrappedData.class.isAssignableFrom(field_type))
+		{
+			byte[] tab=Base64.getUrlDecoder().decode(nodeValue);
+			if (WrappedEncryptedASymmetricPrivateKey.class.isAssignableFrom(field_type))
+			{
+				return new WrappedEncryptedASymmetricPrivateKey(tab);
+			}
+			else if (WrappedEncryptedSymmetricSecretKey.class.isAssignableFrom(field_type))
+			{
+				return new WrappedEncryptedSymmetricSecretKey(tab);
+			}
+			else if (WrappedHashedPassword.class.isAssignableFrom(field_type))
+			{
+				return new WrappedHashedPassword(tab);
+			}
+			else if (WrappedSecretData.class.isAssignableFrom(field_type))
+			{
+				return new WrappedSecretData(tab);
+			}
+			else
+				return new WrappedData(tab);
+		}
+		else if (WrappedString.class.isAssignableFrom(field_type)) {
+			if (WrappedEncryptedASymmetricPrivateKeyString.class.isAssignableFrom(field_type)) {
+				return new WrappedEncryptedASymmetricPrivateKeyString(nodeValue);
+			}
+			else if (WrappedEncryptedSymmetricSecretKeyString.class.isAssignableFrom(field_type)) {
+				return new WrappedEncryptedSymmetricSecretKeyString(nodeValue);
+			}
+			else if (WrappedPassword.class.isAssignableFrom(field_type)) {
+				return new WrappedPassword(nodeValue);
+			}
+			else if (WrappedSecretString.class.isAssignableFrom(field_type)) {
+				return new WrappedSecretString(nodeValue);
+			}
+			else
+				return new WrappedString(nodeValue);
+		}
 
 		return Void.TYPE;
 	}
 
 
 
-	/*SimpleDateFormat getSimpleDateFormat() {
-		SimpleDateFormat format = new SimpleDateFormat("yyyy:MM:dd HH:mm:ss:SSSS z");
-		format.setTimeZone(TimeZone.getTimeZone("GMT"));
-		return format;
-	}*/
 
 	/**
 	 * {@inheritDoc}
