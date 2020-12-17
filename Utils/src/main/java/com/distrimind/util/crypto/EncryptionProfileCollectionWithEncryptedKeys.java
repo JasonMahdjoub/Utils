@@ -57,13 +57,14 @@ public abstract class EncryptionProfileCollectionWithEncryptedKeys extends Encry
 		super(null);
 	}
 
+	@SuppressWarnings("FieldMayBeFinal")
 	public static class Profile extends MultiFormatProperties
 	{
 		private MessageDigestType messageDigestType;
 		private IASymmetricPublicKey publicKeyForSignature;
 		private WrappedEncryptedASymmetricPrivateKey encryptedPrivateKeyForSignature;
-		private WrappedEncryptedSymmetricSecretKey encryptedSecretKeysForSignature;
-		private WrappedEncryptedSymmetricSecretKey encryptedSecretKeysForEncryption;
+		private WrappedEncryptedSymmetricSecretKey encryptedSecretKeyForSignature;
+		private WrappedEncryptedSymmetricSecretKey encryptedSecretKeyForEncryption;
 
 		public MessageDigestType getMessageDigestType() {
 			return messageDigestType;
@@ -77,23 +78,23 @@ public abstract class EncryptionProfileCollectionWithEncryptedKeys extends Encry
 			return encryptedPrivateKeyForSignature;
 		}
 
-		public WrappedEncryptedSymmetricSecretKey getEncryptedSecretKeysForSignature() {
-			return encryptedSecretKeysForSignature;
+		public WrappedEncryptedSymmetricSecretKey getEncryptedSecretKeyForSignature() {
+			return encryptedSecretKeyForSignature;
 		}
 
-		public WrappedEncryptedSymmetricSecretKey getEncryptedSecretKeysForEncryption() {
-			return encryptedSecretKeysForEncryption;
+		public WrappedEncryptedSymmetricSecretKey getEncryptedSecretKeyForEncryption() {
+			return encryptedSecretKeyForEncryption;
 		}
 
-		public Profile(MessageDigestType messageDigestType, IASymmetricPublicKey publicKeyForSignature, WrappedEncryptedASymmetricPrivateKey encryptedPrivateKeys, WrappedEncryptedSymmetricSecretKey encryptedSecretKeysForSignature, WrappedEncryptedSymmetricSecretKey encryptedSecretKeysForEncryption) {
+		public Profile(MessageDigestType messageDigestType, IASymmetricPublicKey publicKeyForSignature, WrappedEncryptedASymmetricPrivateKey encryptedPrivateKeyForSignature, WrappedEncryptedSymmetricSecretKey encryptedSecretKeyForSignature, WrappedEncryptedSymmetricSecretKey encryptedSecretKeyForEncryption) {
 			super(null);
-			if (messageDigestType==null && publicKeyForSignature ==null && encryptedPrivateKeys==null && encryptedSecretKeysForSignature==null && encryptedSecretKeysForEncryption==null)
+			if (messageDigestType==null && publicKeyForSignature ==null && encryptedPrivateKeyForSignature==null && encryptedSecretKeyForSignature ==null && encryptedSecretKeyForEncryption ==null)
 				throw new NullPointerException();
 			this.messageDigestType = messageDigestType;
 			this.publicKeyForSignature = publicKeyForSignature;
-			this.encryptedPrivateKeyForSignature = encryptedPrivateKeys;
-			this.encryptedSecretKeysForSignature = encryptedSecretKeysForSignature;
-			this.encryptedSecretKeysForEncryption = encryptedSecretKeysForEncryption;
+			this.encryptedPrivateKeyForSignature = encryptedPrivateKeyForSignature;
+			this.encryptedSecretKeyForSignature = encryptedSecretKeyForSignature;
+			this.encryptedSecretKeyForEncryption = encryptedSecretKeyForEncryption;
 		}
 	}
 
@@ -177,12 +178,12 @@ public abstract class EncryptionProfileCollectionWithEncryptedKeys extends Encry
 
 	@Override
 	public WrappedEncryptedSymmetricSecretKey getEncryptedSecretKeyForSignature(short keyID, boolean duringDecryptionPhase) throws IOException {
-		return getProfile(keyID, duringDecryptionPhase).getEncryptedSecretKeysForSignature();
+		return getProfile(keyID, duringDecryptionPhase).getEncryptedSecretKeyForSignature();
 	}
 
 	@Override
 	public WrappedEncryptedSymmetricSecretKey getEncryptedSecretKeyForEncryption(short keyID, boolean duringDecryptionPhase) throws IOException {
-		return getProfile(keyID, duringDecryptionPhase).getEncryptedSecretKeysForEncryption();
+		return getProfile(keyID, duringDecryptionPhase).getEncryptedSecretKeyForEncryption();
 	}
 
 	@Override
