@@ -279,8 +279,7 @@ public class DefaultMultiFormatObjectParser extends AbstractMultiFormatObjectPar
 			return Base64.getUrlEncoder().encodeToString(((WrappedData)object).getBytes());
 		}
 		else if (WrappedString.class.isAssignableFrom(field_type))
-			//noinspection StringOperationCanBeSimplified
-			return new String(object.toString());
+			return object.toString();
 		else
 			return null;
 	}
