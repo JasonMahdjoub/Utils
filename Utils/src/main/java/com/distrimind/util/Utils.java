@@ -67,6 +67,10 @@ public class Utils {
 			VERSION.addCreator(new Person("mahdjoub", "jason"))
 					.addDeveloper(new PersonDeveloper("mahdjoub", "jason", "2016-01-04"))
 					.addDescription(
+							new Description((short)5, (short)12, (short)2, Version.Type.STABLE, (short)0, "2020-12-15")
+									.addItem("Fix issue with SerializationTools.isSerializableType(Class)")
+					)
+					.addDescription(
 							new Description((short)5, (short)12, (short)1, Version.Type.STABLE, (short)0, "2020-12-15")
 									.addItem("Add EncryptionProfileProviderFactory class")
 									.addItem("Add EncryptionProfileCollection class")

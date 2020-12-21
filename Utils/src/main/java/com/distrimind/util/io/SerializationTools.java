@@ -63,7 +63,7 @@ import java.util.concurrent.*;
  * 
  * @author Jason Mahdjoub
  * @since Utils 4.5.0
- * @version 3.1
+ * @version 3.2
  * 
  */
 
@@ -1498,7 +1498,8 @@ public class SerializationTools {
 			return true;
 
 
-		return Object[].class==clazz
+		return Class.class==clazz
+				|| Object[].class==clazz
 				|| Collection.class.isAssignableFrom(clazz)
 				|| Map.class.isAssignableFrom(clazz)
 				|| FilePermissions.class==clazz
