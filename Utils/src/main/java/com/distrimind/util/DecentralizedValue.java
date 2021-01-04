@@ -47,39 +47,39 @@ import java.io.Serializable;
  * @version 1.0
  * @since Utils 4.3.0
  */
-public abstract class DecentralizedValue implements Serializable {
+public interface DecentralizedValue extends Serializable {
 
-	//public static final int MAX_SIZE_IN_BYTES_OF_NON_HYBRID_PRIVATE_KEY = MAX_SIZE_IN_BYTES_OF_NON_HYBRID_PRIVATE_KEY_FOR_ENCRYPTION;
-	public static final int MAX_SIZE_IN_BYTES_OF_NON_HYBRID_KEY_PAIR = ASymmetricEncryptionType.MAX_SIZE_IN_BYTES_OF_NON_HYBRID_PUBLIC_KEY_FOR_ENCRYPTION + ASymmetricEncryptionType.MAX_SIZE_IN_BYTES_OF_NON_HYBRID_PRIVATE_KEY_FOR_ENCRYPTION +ASymmetricAuthenticatedSignatureType.META_DATA_SIZE_IN_BYTES_FOR_NON_HYBRID_KEY_PAIR;
-	public static final int MAX_SIZE_IN_BYTES_OF_HYBRID_KEY_PAIR= ASymmetricEncryptionType.MAX_SIZE_IN_BYTES_OF_HYBRID_PUBLIC_KEY_FOR_ENCRYPTION+ASymmetricEncryptionType.MAX_SIZE_IN_BYTES_OF_HYBRID_PRIVATE_KEY_FOR_ENCRYPTION+ASymmetricAuthenticatedSignatureType.META_DATA_SIZE_IN_BYTES_FOR_HYBRID_KEY_PAIR;
-	public static final int MAX_SIZE_IN_BYTES_OF_KEY_PAIR= MAX_SIZE_IN_BYTES_OF_HYBRID_KEY_PAIR;
+	//int MAX_SIZE_IN_BYTES_OF_NON_HYBRID_PRIVATE_KEY = MAX_SIZE_IN_BYTES_OF_NON_HYBRID_PRIVATE_KEY_FOR_ENCRYPTION;
+	int MAX_SIZE_IN_BYTES_OF_NON_HYBRID_KEY_PAIR = ASymmetricEncryptionType.MAX_SIZE_IN_BYTES_OF_NON_HYBRID_PUBLIC_KEY_FOR_ENCRYPTION + ASymmetricEncryptionType.MAX_SIZE_IN_BYTES_OF_NON_HYBRID_PRIVATE_KEY_FOR_ENCRYPTION +ASymmetricAuthenticatedSignatureType.META_DATA_SIZE_IN_BYTES_FOR_NON_HYBRID_KEY_PAIR;
+	int MAX_SIZE_IN_BYTES_OF_HYBRID_KEY_PAIR= ASymmetricEncryptionType.MAX_SIZE_IN_BYTES_OF_HYBRID_PUBLIC_KEY_FOR_ENCRYPTION+ASymmetricEncryptionType.MAX_SIZE_IN_BYTES_OF_HYBRID_PRIVATE_KEY_FOR_ENCRYPTION+ASymmetricAuthenticatedSignatureType.META_DATA_SIZE_IN_BYTES_FOR_HYBRID_KEY_PAIR;
+	int MAX_SIZE_IN_BYTES_OF_KEY_PAIR= MAX_SIZE_IN_BYTES_OF_HYBRID_KEY_PAIR;
 
-	public static final int MAX_SIZE_IN_BYTES_OF_DECENTRALIZED_VALUE= MAX_SIZE_IN_BYTES_OF_KEY_PAIR;
+	int MAX_SIZE_IN_BYTES_OF_DECENTRALIZED_VALUE= MAX_SIZE_IN_BYTES_OF_KEY_PAIR;
 
-	public abstract WrappedData encode();
-	public static DecentralizedValue decode(WrappedData encodedValue)
+	WrappedData encode();
+	static DecentralizedValue decode(WrappedData encodedValue)
 	{
 		DecentralizedValue dv=decode(encodedValue.getBytes());
 		if (dv instanceof ISecretDecentralizedValue)
 			encodedValue.transformToSecretData();
 		return dv;
 	}
-	public static DecentralizedValue decode(byte[] encodedValue)
+	static DecentralizedValue decode(byte[] encodedValue)
 	{
 		return decode(encodedValue, 0, encodedValue.length);
 	}
 
-	public static DecentralizedValue decode(byte[] encodedValue, int off, int len)
+	static DecentralizedValue decode(byte[] encodedValue, int off, int len)
 	{
 		return decode(encodedValue, off, len, false);
 	}
 
-	public static DecentralizedValue decode(byte[] encodedValue, boolean fillArrayWithZerosWhenDecoded)
+	static DecentralizedValue decode(byte[] encodedValue, boolean fillArrayWithZerosWhenDecoded)
 	{
 		return decode(encodedValue, 0, encodedValue.length, fillArrayWithZerosWhenDecoded);
 	}
 
-	public static DecentralizedValue decode(byte[] encodedValue, int off, int len, boolean fillArrayWithZerosWhenDecoded)
+	static DecentralizedValue decode(byte[] encodedValue, int off, int len, boolean fillArrayWithZerosWhenDecoded)
 	{
 		if (AbstractDecentralizedID.isValidType(encodedValue, off))
 			return AbstractDecentralizedID.decode(encodedValue, off, len, fillArrayWithZerosWhenDecoded);
@@ -90,15 +90,10 @@ public abstract class DecentralizedValue implements Serializable {
 
 	}
 
-	public abstract WrappedString encodeString() ;
+	WrappedString encodeString() ;
 
-	@Override
-	public String toString()
-	{
-		return this.getClass().getSimpleName()+"["+encodeString()+"]";
-	}
 
-	public static DecentralizedValue valueOf(WrappedString key) throws IllegalArgumentException, IOException {
+	static DecentralizedValue valueOf(WrappedString key) throws IllegalArgumentException, IOException {
 		if (key==null)
 			throw new NullPointerException();
 		DecentralizedValue dv=decode(new WrappedSecretData(key));
@@ -107,10 +102,6 @@ public abstract class DecentralizedValue implements Serializable {
 		return dv;
 	}
 
-	@Override
-	public abstract boolean equals(Object other);
 
-	@Override
-	public abstract int hashCode();
 
 }

@@ -51,7 +51,7 @@ import java.util.regex.Pattern;
  * @since Utils 1.3
  * 
  */
-public abstract class AbstractDecentralizedID extends DecentralizedValue {
+public abstract class AbstractDecentralizedID extends AbstractDecentralizedValue {
 	/**
 	 * 
 	 */

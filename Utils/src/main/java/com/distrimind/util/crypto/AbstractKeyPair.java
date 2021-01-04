@@ -35,7 +35,7 @@ The fact that you are presently reading this means that you have had
 knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-import com.distrimind.util.DecentralizedValue;
+import com.distrimind.util.AbstractDecentralizedValue;
 import com.distrimind.util.data_buffers.WrappedSecretData;
 import com.distrimind.util.data_buffers.WrappedSecretString;
 
@@ -48,7 +48,7 @@ import java.security.spec.InvalidKeySpecException;
  * @version 1.0
  * @since MaDKitLanEdition 4.5.0
  */
-public abstract class AbstractKeyPair<TPrivateKey extends IASymmetricPrivateKey, PubKey extends IASymmetricPublicKey> extends DecentralizedValue implements ISecretDecentralizedValue {
+public abstract class AbstractKeyPair<TPrivateKey extends IASymmetricPrivateKey, PubKey extends IASymmetricPublicKey> extends AbstractDecentralizedValue implements ISecretDecentralizedValue {
 
 	public static final int MAX_SIZE_IN_BYTES_OF_KEY_PAIR_WITH_RSA_FOR_SIGNATURE = ASymmetricAuthenticatedSignatureType.MAX_SIZE_IN_BYTES_OF_HYBRID_KEY_PAIR_WITH_RSA_FOR_SIGNATURE;
 	public static final int MAX_SIZE_IN_BYTES_OF_KEY_PAIR_WITHOUT_RSA_FOR_SIGNATURE =ASymmetricAuthenticatedSignatureType.MAX_SIZE_IN_BYTES_OF_HYBRID_KEY_PAIR_WITHOUT_RSA_FOR_SIGNATURE;
@@ -127,4 +127,5 @@ public abstract class AbstractKeyPair<TPrivateKey extends IASymmetricPrivateKey,
 	public abstract boolean useAuthenticatedSignatureAlgorithm();
 
 	public abstract ASymmetricKeyPair getNonPQCKeyPair();
+
 }

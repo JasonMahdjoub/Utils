@@ -35,8 +35,8 @@ knowledge of the CeCILL-C license and that you accept its terms.
 package com.distrimind.util.crypto;
 
 
+import com.distrimind.util.AbstractDecentralizedValue;
 import com.distrimind.util.Bits;
-import com.distrimind.util.DecentralizedValue;
 import com.distrimind.util.data_buffers.WrappedData;
 import com.distrimind.util.data_buffers.WrappedSecretData;
 import com.distrimind.util.data_buffers.WrappedString;
@@ -51,7 +51,7 @@ import java.util.Arrays;
  * @since Utils 2.0
  */
 
-public abstract class AbstractKey extends DecentralizedValue implements IKey{
+public abstract class AbstractKey extends AbstractDecentralizedValue implements IKey{
 
 
 	/**

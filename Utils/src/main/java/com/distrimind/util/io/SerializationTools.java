@@ -718,30 +718,6 @@ public class SerializationTools {
 
 	}
 
-	/*public static void writeExternalizableAndSizables(final SecuredObjectOutputStream oos, ExternalizableAndSizable[] tab, int sizeMaxBytes, boolean supportNull) throws IOException
-	{
-		if (tab==null)
-		{
-			if (!supportNull)
-				throw new IOException();
-			oos.writeInt(-1);
-			return;
-
-		}
-		if (tab.length*4>sizeMaxBytes)
-			throw new IOException();
-		oos.writeInt(tab.length);
-		int total=4;
-
-		for (ExternalizableAndSizable o : tab)
-		{
-			writeExternalizableAndSizable(oos, o, true);
-			total+=o.getInternalSerializedSize();
-
-			if (total>=sizeMaxBytes)
-				throw new IOException();
-		}
-	}*/
 
 	@SuppressWarnings("SameParameterValue")
 	static void writeExternalizables(final SecuredObjectOutputStream objectOutput, SecureExternalizable[] tab, int sizeMaxBytes, boolean supportNull) throws IOException
@@ -774,35 +750,7 @@ public class SerializationTools {
 	}
 
 
-	/*public static ExternalizableAndSizable[] readExternalizableAndSizables(final SecuredObjectInputStream ois, int sizeMaxBytes, boolean supportNull) throws IOException, ClassNotFoundException
-	{
-		int size=ois.readInt();
-		if (size==-1)
-		{
-			if (!supportNull)
-				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
-			return null;
-		}
-		if (size<0 || size*4>sizeMaxBytes)
-			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
 
-		ExternalizableAndSizable []tab=new ExternalizableAndSizable[size];
-		sizeMaxBytes-=4;
-		for (int i=0;i<size;i++)
-		{
-			Externalizable o=readExternalizableAndSizable(ois, true);
-			if (!(o instanceof ExternalizableAndSizable))
-				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
-			ExternalizableAndSizable s=(ExternalizableAndSizable)o;
-			sizeMaxBytes-=s.getInternalSerializedSize();
-			if (sizeMaxBytes<0)
-				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
-			tab[i]=s;
-		}
-
-		return tab;
-
-	}*/
 
 	@SuppressWarnings("SameParameterValue")
 	static SecureExternalizable[] readExternalizables(final SecuredObjectInputStream ois, int sizeMaxBytes, boolean supportNull) throws IOException, ClassNotFoundException
@@ -1212,40 +1160,6 @@ public class SerializationTools {
 			return null;
 	}
 
-	/*public static void writeExternalizableAndSizable(final SecuredObjectOutputStream oos, Externalizable e, boolean supportNull) throws IOException
-	{
-		if (e==null)
-		{
-			if (!supportNull)
-				throw new IOException();
-			oos.writeBoolean(false);
-			return;
-
-		}
-		Class<?> clazz=e.getClass();
-		if (!ExternalizableAndSizable.class.isAssignableFrom(clazz) && !SystemMessage.class.isAssignableFrom(clazz))
-			throw new IOException();
-
-		if (oos.getClass()==oosClazz)
-		{
-			try
-			{
-				e=(Externalizable)invoke(replaceObject, oos, e);
-				if (e!=null)
-					clazz=e.getClass();
-			}
-			catch(Exception e2)
-			{
-				throw new IOException(e2);
-			}
-		}
-		oos.writeBoolean(true);
-		SerializationTools.writeString(oos, clazz.getName(), MAX_CLASS_LENGTH, false);
-		if (e==null)
-			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
-		e.writeExternal(oos);
-
-	}*/
 
 	@SuppressWarnings("SameParameterValue")
 	static void writeClass(final SecuredObjectOutputStream objectOutput, Class<?> clazz, boolean supportNull, Class<?> rootClass) throws IOException {
@@ -1328,49 +1242,6 @@ public class SerializationTools {
 
 
 
-	/*public static Externalizable readExternalizableAndSizable(final SecuredObjectInputStream ois, boolean supportNull) throws IOException, ClassNotFoundException
-	{
-		if (ois.readBoolean())
-		{
-			String clazz=SerializationTools.readString(ois, MAX_CLASS_LENGTH, false);
-
-
-
-
-			try
-			{
-				Class<?> c;
-				boolean isOIS=ois.getClass()==oisClazz;
-				if (isOIS)
-					c= ((FilteredObjectInputStream)ois).resolveClass(clazz);
-				else
-					c= Class.forName(clazz, false, MadkitClassLoader.getSystemClassLoader());
-				if (!ExternalizableAndSizable.class.isAssignableFrom(c) && !SystemMessage.class.isAssignableFrom(c))
-					throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
-				if (!isOIS)
-					c= Class.forName(clazz, true, MadkitClassLoader.getSystemClassLoader());
-				Constructor<?> cons=getDefaultConstructor(c);
-				Externalizable res=(Externalizable)cons.newInstance();
-
-				res.readExternal(ois);
-				if (isOIS)
-				{
-					res=(Externalizable)invoke(resolveObject, ois, res);
-				}
-				return res;
-			}
-			catch(InvocationTargetException | NoSuchMethodException | IllegalAccessException | InstantiationException e)
-			{
-				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, e);
-			}
-
-		}
-		else if (!supportNull)
-			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
-		else
-			return null;
-
-	}*/
 
 	@SuppressWarnings("unchecked")
 	static <RT> Class<? extends RT> readClass(final SecuredObjectInputStream objectInput, boolean supportNull, Class<RT> rootClass) throws IOException, ClassNotFoundException {
@@ -1874,8 +1745,6 @@ public class SerializationTools {
 					return readChars(ois, sizeMax,false);
 				}
 
-		/*case Byte.MAX_VALUE:
-			return ois.readObject();*/
 				default:
 					throw new MessageExternalizationException(Integrity.FAIL);
 			}
@@ -2101,7 +1970,13 @@ public class SerializationTools {
 			res+=4+getInternalSize(bigDecimal.unscaledValue().toByteArray(), MAX_BIG_INTEGER_SIZE);
 		return res;
 	}
-
+	public static int getInternalSize(DecentralizedValue decentralizedValue)
+	{
+		int res=1;
+		if (decentralizedValue!=null)
+			res+=getInternalSize(decentralizedValue.encode().getBytes(), DecentralizedValue.MAX_SIZE_IN_BYTES_OF_DECENTRALIZED_VALUE);
+		return res;
+	}
 	public static int getInternalSize(AbstractDecentralizedID abstractDecentralizedID)
 	{
 		int res=1;

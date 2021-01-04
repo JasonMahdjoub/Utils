@@ -1,6 +1,6 @@
 Utils
 =====
-5.12.2 STABLE (Build: 2183) (from 04/01/2016 to 15/12/2020)
+5.12.3 STABLE (Build: 2186) (from 04/01/2016 to 15/12/2020)
 
 # Creator(s):
 Jason MAHDJOUB
@@ -9,6 +9,10 @@ Jason MAHDJOUB
 Jason MAHDJOUB (Entered in the team at 04/01/2016)
 
 # Modifications:
+
+
+### 5.12.3 STABLE (15/12/2020)
+* make DecentralizedValue class an interface
 
 
 ### 5.12.2 STABLE (15/12/2020)
