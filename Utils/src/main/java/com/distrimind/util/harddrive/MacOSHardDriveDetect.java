@@ -274,8 +274,9 @@ class MacOSHardDriveDetect extends UnixHardDriveDetect {
 							}
 
 							if (volumeUUID == null) {
-								if (deviceNode != null && diskSize != -1)
+								if (deviceNode != null && diskSize != -1 && diskUUID!=null) {
 									disks.add(new Disk(diskUUID, diskSize, internal, deviceBlockSize, protocol, deviceNode, mediaName));
+								}
 							} else if (deviceIdentifier != null && mountPoint != null && volumeUUID != null && deviceNode != null) {
 								int li = -1;
 								for (int m = deviceNode.length() - 1; m >= 4; m--) {
@@ -290,12 +291,18 @@ class MacOSHardDriveDetect extends UnixHardDriveDetect {
 									continue;
 
 								String diskDevice = deviceNode.substring(0, li);
+								Disk foundDisk=null;
 								for (Disk disk : disks) {
 									if (disk.getDeviceNode().equals(diskDevice)) {
-										partitions.add(new Partition(volumeUUID, new File(mountPoint), deviceIdentifier, fileSystemType, fileSystemName, volumeBlockSize, writable, volumeName, size, disk));
+										foundDisk=disk;
 										break;
 									}
 								}
+								if (foundDisk==null)
+								{
+									disks.add(foundDisk=new Disk(diskUUID, diskSize, internal, deviceBlockSize, protocol, deviceNode, mediaName));
+								}
+								partitions.add(new Partition(volumeUUID, new File(mountPoint), deviceIdentifier, fileSystemType, fileSystemName, volumeBlockSize, writable, volumeName, size, foundDisk));
 							}
 							break;
 						}
@@ -317,5 +324,6 @@ class MacOSHardDriveDetect extends UnixHardDriveDetect {
 
 
 	}
+
 
 }
