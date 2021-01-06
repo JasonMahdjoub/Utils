@@ -1,6 +1,6 @@
 Utils
 =====
-5.12.3 STABLE (Build: 2186) (from 04/01/2016 to 15/12/2020)
+5.12.4 STABLE (Build: 2205) (from 04/01/2016 to 06/01/2020)
 
 # Creator(s):
 Jason MAHDJOUB
@@ -11,7 +11,11 @@ Jason MAHDJOUB (Entered in the team at 04/01/2016)
 # Modifications:
 
 
-### 5.12.3 STABLE (15/12/2020)
+### 5.12.4 STABLE (06/01/2020)
+* Fix issue with disk and partition detection with macos
+
+
+### 5.12.3 STABLE (05/01/2020)
 * make DecentralizedValue class an interface
 
 
