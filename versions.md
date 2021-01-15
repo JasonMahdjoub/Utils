@@ -1,6 +1,6 @@
 Utils
 =====
-5.12.4 STABLE (Build: 2205) (from 04/01/2016 to 06/01/2020)
+5.12.5 STABLE (Build: 2271) (from 04/01/2016 to 15/01/2020)
 
 # Creator(s):
 Jason MAHDJOUB
@@ -9,6 +9,10 @@ Jason MAHDJOUB
 Jason MAHDJOUB (Entered in the team at 04/01/2016)
 
 # Modifications:
+
+
+### 5.12.5 STABLE (15/01/2020)
+* Improve detection of drives and partitions
 
 
 ### 5.12.4 STABLE (06/01/2020)
