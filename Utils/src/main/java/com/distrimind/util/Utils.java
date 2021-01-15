@@ -67,8 +67,8 @@ public class Utils {
 			VERSION.addCreator(new Person("mahdjoub", "jason"))
 					.addDeveloper(new PersonDeveloper("mahdjoub", "jason", "2016-01-04"))
 					.addDescription(
-							new Description((short)5, (short)13, (short)0, Version.Type.STABLE, (short)0, "2020-01-11")
-									.addItem("Use tools of Oshi for hard drive detection")
+							new Description((short)5, (short)12, (short)5, Version.Type.STABLE, (short)0, "2020-01-15")
+									.addItem("Improve detection of drives and partitions")
 					)
 					.addDescription(
 							new Description((short)5, (short)12, (short)4, Version.Type.STABLE, (short)0, "2020-01-06")

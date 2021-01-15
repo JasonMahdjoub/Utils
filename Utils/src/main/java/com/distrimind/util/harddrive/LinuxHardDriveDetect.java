@@ -55,6 +55,7 @@ import java.util.*;
 class LinuxHardDriveDetect extends UnixHardDriveDetect {
 	private Set<Disk> disks;
 	private Set<Partition> partitions;
+
 	LinuxHardDriveDetect() {
 
 	}
@@ -69,38 +70,80 @@ class LinuxHardDriveDetect extends UnixHardDriveDetect {
 		return partitions;
 	}
 
+	private List<String[]> scanUUIDs() throws IOException {
+		List<String[]> scannedUUIDs=new ArrayList<>();
+		Process p=Runtime.getRuntime().exec(new String[]{"blkid"});
+		try (InputStreamReader isr = new InputStreamReader(p.getInputStream())) {
+			try (BufferedReader br = new BufferedReader(isr)) {
+				String line;
+				while ((line=br.readLine())!=null)
+				{
+					scannedUUIDs.add(line.split(" "));
+				}
+			}
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+		finally {
+			Utils.flushAndDestroyProcess(p);
+		}
+
+		return scannedUUIDs;
+	}
+
 	@Override
 	void scanDisksAndPartitions() {
 		disks=new HashSet<>();
 		partitions=new HashSet<>();
+
+
+
+
 		HashMap<String, Disk> disksString=new HashMap<>();
 
 		File file = new File("/proc/mounts");
 		try (FileInputStream fis = new FileInputStream(file)) {
 			try (InputStreamReader isr = new InputStreamReader(fis)) {
 				try (BufferedReader br = new BufferedReader(isr)) {
+					List<String[]> scannedUUIDs=scanUUIDs();
 					String line = br.readLine();
 					while (line != null) {
 						String[] values = line.split(" ");
 						if (values.length > 2) {
 							String node = values[0];
-							if (node.startsWith("/dev/")) {
+							if (node.startsWith("/dev/") && !node.startsWith("/dev/loop")) {
 								try {
+									String originalNode=node;
 									node = new File(node).getCanonicalPath();
 									if (node.endsWith("/"))
 										node=node.substring(0, node.length()-1);
-									String disk=node;
-									char last_char = disk.charAt(disk.length() - 1);
-									while (last_char >= '0' && last_char <= '9') {
-										disk = disk.substring(0, disk.length() - 1);
-										if (disk.length() > 0) {
-											last_char = disk.charAt(disk.length() - 1);
-										} else
-											break;
+									String disk=originalNode;
+									if (disk.startsWith("/dev/sd")) {
+										char last_char = disk.charAt(disk.length() - 1);
+										while (last_char >= '0' && last_char <= '9') {
+											disk = disk.substring(0, disk.length() - 1);
+											if (disk.length() > 0) {
+												last_char = disk.charAt(disk.length() - 1);
+											} else
+												break;
+										}
 									}
+									else if (disk.startsWith("/dev/nvme")) {
+										char last_char = disk.charAt(disk.length() - 1);
+										while (last_char >= '0' && last_char <= '9') {
+											disk = disk.substring(0, disk.length() - 1);
+											if (disk.length() > 0) {
+												last_char = disk.charAt(disk.length() - 1);
+											} else
+												break;
+										}
+										disk=disk.substring(0, disk.length()-1);
+									}
+
 									int li=node.lastIndexOf("/")+1;
 									String nodeShort=node.substring(li);
-
                                     li=disk.lastIndexOf("/")+1;
                                     String diskNodeShort=disk.substring(li);
 
@@ -113,7 +156,7 @@ class LinuxHardDriveDetect extends UnixHardDriveDetect {
                                             disksString.put(disk, d);
                                         }
                                         File mountPoint=new File(values[1]);
-                                        Partition p=new Partition(getPartitionUUID(nodeShort),mountPoint, node, values[2], values[2], -1, mountPoint.canWrite(), getPartitionLabel(nodeShort), getDiskOrPartitionSize(nodeShort), d);
+                                        Partition p=new Partition(getPartitionUUID(scannedUUIDs, nodeShort, originalNode),mountPoint, node, values[2], values[2], -1, mountPoint.canWrite(), getPartitionLabel(nodeShort), getDiskOrPartitionSize(nodeShort), d);
                                         partitions.add(p);
 									}
 								} catch (IOException e) {
@@ -174,13 +217,39 @@ class LinuxHardDriveDetect extends UnixHardDriveDetect {
 		else
 			return node.startsWith("/media") || node.startsWith("/mnt");
 	}
+	private static final String emptyUUID="00000000-0000-0000-0000-000000000000";
+	private UUID getPartitionUUID(List<String[]> scannedUUIDs, String nodeShort, String originalNode) throws IOException {
+		for (String[] line : scannedUUIDs)
+		{
+			if (line[0].equals(originalNode+":"))
+			{
+				try {
+					return UUID.fromString(line[1].substring(6, line[1].length()-1));
+				}
+				catch (IllegalArgumentException ignored)
+				{
 
-	private UUID getPartitionUUID(String nodeShort) throws IOException {
+				}
+			}
+		}
+
+
 	    String r= getCorrespondence("/dev/disk/by-partuuid", nodeShort);
+
 	    if (r==null)
 	    	return null;
-	    else
-	    	return UUID.fromString(r);
+	    else {
+			if (r.length()<emptyUUID.length())
+				r=r+emptyUUID.substring(r.length());
+			try {
+				return UUID.fromString(r);
+			}
+			catch (IllegalArgumentException ignored)
+			{
+				return null;
+			}
+
+		}
     }
     private String getPartitionLabel(String nodeShort) throws IOException {
 	    String res= getCorrespondence("/dev/disk/by-partlabel", nodeShort);
