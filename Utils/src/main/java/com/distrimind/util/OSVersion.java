@@ -113,7 +113,8 @@ public enum OSVersion {
     SEARCH_BOT_SLURP(".*(slurp).*",OS.SEARCH_BOT),
     SEARCH_BOT_MSNBOT(".*(msnbot).*",OS.SEARCH_BOT),
     SEARCH_BOT_ASK_JEEVES_TEOMA(".*(ask jeeves/teoma).*",OS.SEARCH_BOT),
-    SEARCH_BOT_ASK_QWANT(".*(qwant).*",OS.SEARCH_BOT);
+    SEARCH_BOT_ASK_QWANT(".*(qwant).*",OS.SEARCH_BOT),
+    FREE_BSD_UNKNWON(".*(freebsd).*",OS.FREE_BSD);
 
     private final Pattern pattern;
     private final OS os;

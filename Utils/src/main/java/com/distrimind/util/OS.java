@@ -65,7 +65,8 @@ public enum OS {
     OS_2(".*os/2.*"),
 	WINDOWS(".*win.*"),
 	ANDROID(".*(android).*"),
-    SEARCH_BOT(".*((nuhk)|(googlebot)|(yammybot)|(openbot)|(slurp)|(mnsbot)|(ssk jeeves/teoma)).*");
+    SEARCH_BOT(".*((nuhk)|(googlebot)|(yammybot)|(openbot)|(slurp)|(mnsbot)|(ssk jeeves/teoma)).*"),
+	FREE_BSD(".*freebsd.*");
 
 	final Pattern pattern;
 

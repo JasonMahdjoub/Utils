@@ -67,6 +67,10 @@ public class Utils {
 			VERSION.addCreator(new Person("mahdjoub", "jason"))
 					.addDeveloper(new PersonDeveloper("mahdjoub", "jason", "2016-01-04"))
 					.addDescription(
+							new Description((short)5, (short)13, (short)0, Version.Type.STABLE, (short)0, "2020-01-11")
+									.addItem("Use tools of Oshi for hard drive detection")
+					)
+					.addDescription(
 							new Description((short)5, (short)12, (short)4, Version.Type.STABLE, (short)0, "2020-01-06")
 									.addItem("Fix issue with disk and partition detection with macos")
 					)
@@ -1046,8 +1050,6 @@ public class Utils {
 		}
 		catch(IllegalThreadStateException ignored)
 		{
-			//final AtomicReference<IOException> exception=new AtomicReference<>(null);
-			//final AtomicReference<Exception> exception2=new AtomicReference<>(null);
 			synchronized (processesToFlush) {
 				processesToFlush.add(p);
 				if (thread==null) {
@@ -1085,8 +1087,6 @@ public class Utils {
 											c = is.read();
 										}
 									} catch (IOException ignored1) {
-										/*if (!e.getMessage().equalsIgnoreCase("Stream Closed"))
-											e.printStackTrace();*/
 										inClosed = true;
 									}
 									try {
@@ -1094,8 +1094,6 @@ public class Utils {
 										while (c != -1)
 											c = es.read();
 									} catch (IOException ignored1) {
-										/*if (!e.getMessage().equalsIgnoreCase("Stream closed"))
-											e.printStackTrace();*/
 										outClosed = true;
 									}
 									if (inClosed && outClosed) {

@@ -101,7 +101,7 @@ class LinuxHardDriveDetect extends UnixHardDriveDetect {
 									int li=node.lastIndexOf("/")+1;
 									String nodeShort=node.substring(li);
 
-                                    li=node.lastIndexOf("/")+1;
+                                    li=disk.lastIndexOf("/")+1;
                                     String diskNodeShort=disk.substring(li);
 
 									if (disk.length() > 1) {
