@@ -1,6 +1,6 @@
 Utils
 =====
-5.12.5 STABLE (Build: 2271) (from 04/01/2016 to 15/01/2020)
+5.13.0 STABLE (Build: 2312) (from 04/01/2016 to 18/01/2020)
 
 # Creator(s):
 Jason MAHDJOUB
@@ -9,6 +9,12 @@ Jason MAHDJOUB
 Jason MAHDJOUB (Entered in the team at 04/01/2016)
 
 # Modifications:
+
+
+### 5.13.0 STABLE (18/01/2020)
+* Add class ProfileProviderTree
+* Add interface SecureExternalizableWithEncryptionProfileProvider
+* Add equals, hashCode, toString functions into Reference class
 
 
 ### 5.12.5 STABLE (15/01/2020)
