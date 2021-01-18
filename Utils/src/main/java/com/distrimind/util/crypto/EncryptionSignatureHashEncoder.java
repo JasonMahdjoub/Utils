@@ -423,7 +423,7 @@ public class EncryptionSignatureHashEncoder {
 		void init(final RandomOutputStream originalOutputStream, final long inputStreamLength, boolean sameInputOutputStream) throws IOException {
 			if (originalOutputStream==null)
 				throw new NullPointerException();
-			if (inputStreamLength<0 && cipher.getType().isAuthenticatedAlgorithm())
+			if (inputStreamLength<0 && cipher!=null && cipher.getType().isAuthenticatedAlgorithm())
 				throw new IllegalArgumentException("Cannot use RandomOutputStream for encryption when using authenticated algorithm");
 			if (sameInputOutputStream && cipher!=null)
 				throw new IOException("You must use a different input/output stream when using a cipher");

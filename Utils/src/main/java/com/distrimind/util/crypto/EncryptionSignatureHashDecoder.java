@@ -35,6 +35,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
 package com.distrimind.util.crypto;
 
 import com.distrimind.util.Bits;
+import com.distrimind.util.Reference;
 import com.distrimind.util.io.*;
 
 import java.io.IOException;
@@ -351,8 +352,6 @@ public class EncryptionSignatureHashDecoder {
 			throw new NullPointerException("cipher");
 		if (hasAssociatedData && (cipher==null || !cipher.getType().supportAssociatedData()) && symmetricChecker==null)
 			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, "associatedData");
-		/*else if (!hasCipher && cipher!=null)
-			throw new MessageExternalizationException(Integrity.FAIL, "cipher");*/
 	}
 	private void checkCodeForCheckHashAndSignature() throws IOException {
 		checkCodeForCheckHashAndPublicSignature();
@@ -451,13 +450,33 @@ public class EncryptionSignatureHashDecoder {
 		withRandomInputStream(limitedRandomInputStream2);
 		randomByteArrayOutputStream.init(data);
 		randomOutputStream.init(randomByteArrayOutputStream, dataOff+EncryptionSignatureHashEncoder.headSize, dataLen-EncryptionSignatureHashEncoder.headSize);
-		return decodeAndCheckHashAndSignaturesIfNecessary(randomOutputStream, true);
+		return decodeAndCheckHashAndSignaturesIfNecessary(randomOutputStream, true, null);
 
 	}
-	public long decodeAndCheckHashAndSignaturesIfNecessary(RandomOutputStream outputStream) throws IOException {
-		return decodeAndCheckHashAndSignaturesIfNecessary(outputStream, false);
+	public RandomInputStream decodeAndCheckHashAndSignaturesIfNecessary() throws IOException {
+		return decodeAndCheckHashAndSignaturesIfNecessary((Reference<Long>)null);
 	}
-	private long decodeAndCheckHashAndSignaturesIfNecessary(RandomOutputStream outputStream, boolean sameInputOutputSource) throws IOException {
+	public RandomInputStream decodeAndCheckHashAndSignaturesIfNecessary(Reference<Long> positionOfRandomInputStreamAfterDecoding) throws IOException {
+		if (isEncrypted()) {
+			RandomOutputStream out=RandomCacheFileCenter.getSingleton().getNewBufferedRandomCacheFileOutputStream(true);
+			decodeAndCheckHashAndSignaturesIfNecessary(out,  false, positionOfRandomInputStreamAfterDecoding);
+			return out.getRandomInputStream();
+		}
+		else
+		{
+			long length=decodeAndCheckHashAndSignaturesIfNecessary(new NullRandomOutputStream(), true, positionOfRandomInputStreamAfterDecoding);
+			return new LimitedRandomInputStream(this.inputStream, EncryptionSignatureHashEncoder.headSize, length){
+				@Override
+				public void close() {
+
+				}
+			};
+		}
+	}
+	public long decodeAndCheckHashAndSignaturesIfNecessary(RandomOutputStream outputStream) throws IOException {
+		return decodeAndCheckHashAndSignaturesIfNecessary(outputStream, false, null);
+	}
+	private long decodeAndCheckHashAndSignaturesIfNecessary(final RandomOutputStream outputStream, final boolean sameInputOutputSource, final Reference<Long> positionOfRandomInputStreamAfterDecoding) throws IOException {
 		if (outputStream==null)
 			throw new NullPointerException();
 
@@ -470,7 +489,7 @@ public class EncryptionSignatureHashDecoder {
 		long res;
 		try {
 			//checkCodeForDecode(); done into getMaximumOutputLength
-			long originalOutputLength=outputStream.length();
+			long originalOutputLength = outputStream.length();
 			long maximumOutputLengthAfterEncoding=getMaximumOutputLength();
 			outputStream.ensureLength(maximumOutputLengthAfterEncoding);
 
@@ -503,6 +522,8 @@ public class EncryptionSignatureHashDecoder {
 			{
 				originalInputStream.seek(EncryptionSignatureHashEncoder.headSize+dataLen);
 				symmetricChecker.init(originalInputStream.readBytesArray(false, SymmetricAuthenticatedSignatureType.MAX_SYMMETRIC_SIGNATURE_SIZE));
+				if (positionOfRandomInputStreamAfterDecoding!=null)
+					positionOfRandomInputStreamAfterDecoding.set(originalInputStream.currentPosition());
 				if (checkerIn==null)
 					checkerIn=new SignatureCheckerRandomInputStream(inputStream, symmetricChecker);
 				else
@@ -513,12 +534,15 @@ public class EncryptionSignatureHashDecoder {
 			{
 				originalInputStream.seek(EncryptionSignatureHashEncoder.headSize+dataLen);
 				asymmetricChecker.init(originalInputStream.readBytesArray(false, ASymmetricAuthenticatedSignatureType.MAX_ASYMMETRIC_SIGNATURE_SIZE));
+				if (positionOfRandomInputStreamAfterDecoding!=null)
+					positionOfRandomInputStreamAfterDecoding.set(originalInputStream.currentPosition());
 				if (checkerIn==null)
 					checkerIn=new SignatureCheckerRandomInputStream(inputStream, asymmetricChecker);
 				else
 					checkerIn.set(inputStream, asymmetricChecker);
 				inputStream=checkerIn;
-			}
+			} else if (positionOfRandomInputStreamAfterDecoding!=null)
+				positionOfRandomInputStreamAfterDecoding.set(EncryptionSignatureHashEncoder.headSize+dataLen);
 
 			try {
 				limitedRandomInputStream.init(inputStream, EncryptionSignatureHashEncoder.headSize, dataLen);
@@ -614,6 +638,8 @@ public class EncryptionSignatureHashDecoder {
 					hash3=digest.digest();
 				}
 				byte[] hashToCheck=inputStream.readBytesArray(false, MessageDigestType.MAX_HASH_LENGTH);
+				if (positionOfRandomInputStreamAfterDecoding!=null)
+					positionOfRandomInputStreamAfterDecoding.set(originalInputStream.currentPosition());
 				if (!Arrays.equals(hash3, hashToCheck))
 					throw new MessageExternalizationException(Integrity.FAIL);
 
@@ -651,8 +677,8 @@ public class EncryptionSignatureHashDecoder {
 				if (!asymmetricChecker.verify())
 					throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
 			}
-			long curPos=outputStream.currentPosition();
-			if (curPos<maximumOutputLengthAfterEncoding && curPos>originalOutputLength)
+			long curPos = outputStream.currentPosition();
+			if (curPos < maximumOutputLengthAfterEncoding && curPos > originalOutputLength)
 				outputStream.setLength(curPos);
 			outputStream.flush();
 			if (changeCipherOfEncoder)

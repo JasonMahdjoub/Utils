@@ -41,7 +41,7 @@ public class LimitedRandomOutputStream extends RandomOutputStream{
 			throw new IllegalArgumentException();
 		this.out = out;
 		this.off = off;
-		this.pos=off;
+		this.pos=0;
 		out.seek(off);
 		this.length=computeLength();
 	}

@@ -401,4 +401,110 @@ public class TestSerializationTools {
 
 		}
 	}
+
+	public static class SWEPP implements SecureExternalizableWithEncryptionProfileProvider
+	{
+		private byte[] array;
+
+		public SWEPP() {
+		}
+
+		public SWEPP(byte[] array) {
+			this.array = array.clone();
+		}
+
+		@Override
+		public void writeExternalWithoutEncryption(SecuredObjectOutputStream out) throws IOException {
+			out.writeBytesArray(array, false, Short.MAX_VALUE);
+		}
+
+		@Override
+		public void readExternalWithoutEncryption(SecuredObjectInputStream in) throws IOException, ClassNotFoundException {
+			array=in.readBytesArray(false, Short.MAX_VALUE);
+		}
+
+		@Override
+		public int getInternalSerializedSizeWithoutEncryption() {
+			return SerializationTools.getInternalSize(array, Short.MAX_VALUE);
+		}
+	}
+
+	@DataProvider(name = "getDataForSerializationWithEncryptionProfileProvider")
+	public Object[][] getDataForSerializationWithEncryptionProfileProvider() throws NoSuchProviderException, NoSuchAlgorithmException, IOException {
+		Object[][] res=new Object[15][1];
+		int index=0;
+		for (SymmetricEncryptionType set : Arrays.asList(SymmetricEncryptionType.DEFAULT, null))
+		{
+			for (ASymmetricAuthenticatedSignatureType aast : Arrays.asList(ASymmetricAuthenticatedSignatureType.DEFAULT, null))
+			{
+				for (SymmetricAuthenticatedSignatureType sast : Arrays.asList(SymmetricAuthenticatedSignatureType.DEFAULT, null))
+				{
+					for (MessageDigestType mdt : Arrays.asList(MessageDigestType.DEFAULT, null))
+					{
+						if (set==null && aast==null && sast==null && mdt==null)
+							continue;
+						final AbstractKeyPair<?, ?> kp=aast==null?null:aast.getKeyPairGenerator(SecureRandomType.DEFAULT.getSingleton(null)).generateKeyPair();
+						final SymmetricSecretKey ske=set==null?null:set.getKeyGenerator(SecureRandomType.DEFAULT.getSingleton(null)).generateKey();
+						final SymmetricSecretKey sks=sast==null?null:sast.getKeyGenerator(SecureRandomType.DEFAULT.getSingleton(null)).generateKey();
+						res[index++][0]=new EncryptionProfileProvider() {
+							@Override
+							public MessageDigestType getMessageDigest(short keyID, boolean duringDecryptionPhase) {
+								return mdt;
+							}
+
+							@Override
+							public IASymmetricPrivateKey getPrivateKeyForSignature(short keyID) {
+								return kp==null?null:kp.getASymmetricPrivateKey();
+							}
+
+							@Override
+							public IASymmetricPublicKey getPublicKeyForSignature(short keyID) {
+								return kp==null?null:kp.getASymmetricPublicKey();
+							}
+
+							@Override
+							public SymmetricSecretKey getSecretKeyForSignature(short keyID, boolean duringDecryptionPhase) {
+								return sks;
+							}
+
+							@Override
+							public SymmetricSecretKey getSecretKeyForEncryption(short keyID, boolean duringDecryptionPhase) {
+								return ske;
+							}
+
+							@Override
+							public Short getKeyID(IASymmetricPublicKey publicKeyForSignature) {
+								return 0;
+							}
+
+							@Override
+							public short getDefaultKeyID() {
+								return 0;
+							}
+						};
+					}
+				}
+			}
+		}
+		return res;
+	}
+
+	@Test(dataProvider = "getDataForSerializationWithEncryptionProfileProvider")
+	public void testSerializationWithEncryptionProfileProvider(EncryptionProfileProvider encryptionProfileProvider) throws NoSuchProviderException, NoSuchAlgorithmException, IOException, ClassNotFoundException {
+		byte[] array=new byte[32];
+		Random r=new Random(System.currentTimeMillis());
+		r.nextBytes(array);
+		SWEPP s=new SWEPP(array);
+		ProfileProviderTree.putEncryptionProfileProvider(SWEPP.class, encryptionProfileProvider, SecureRandomType.DEFAULT.getSingleton(null));
+		try(RandomByteArrayOutputStream out=new RandomByteArrayOutputStream())
+		{
+			out.writeObject(s, false);
+			out.flush();
+			RandomInputStream ris=out.getRandomInputStream();
+			s=ris.readObject(false);
+			Assert.assertEquals(s.array, array);
+			Assert.assertEquals(ris.currentPosition(), ris.length());
+		}
+
+	}
 }

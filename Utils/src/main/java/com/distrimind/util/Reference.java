@@ -35,6 +35,8 @@ The fact that you are presently reading this means that you have had
 knowledge of the CeCILL-C license and that you accept its terms.
  */
 
+import java.util.Objects;
+
 /**
  * @author Jason Mahdjoub
  * @version 1.0
@@ -53,11 +55,6 @@ public class Reference<T> {
 		this.value = value;
 	}
 
-	public Reference(Reference<T> reference)
-	{
-		this.value=reference.value;
-	}
-
 	public T get() {
 		return value;
 	}
@@ -66,4 +63,23 @@ public class Reference<T> {
 		this.value = value;
 	}
 
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		Reference<?> reference = (Reference<?>) o;
+		return Objects.equals(value, reference.value);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(value);
+	}
+
+	@Override
+	public String toString() {
+		return "Reference[" +
+				"value=" + value +
+				']';
+	}
 }

@@ -187,6 +187,7 @@ public class RandomCacheFileOutputStream extends RandomOutputStream{
 
 			public void close() throws IOException {
 				in.close();
+				RandomCacheFileOutputStream.this.close();
 			}
 
 			public long skip(long n) throws IOException {
