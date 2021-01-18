@@ -43,7 +43,7 @@ import java.io.IOException;
 
 /**
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 2.0
  * @since Utils 5.13.0
  */
 public interface SecureExternalizableWithEncryptionProfileProvider extends SecureExternalizable{
@@ -87,7 +87,7 @@ public interface SecureExternalizableWithEncryptionProfileProvider extends Secur
 	{
 		if (!(out instanceof RandomOutputStream))
 			throw new IOException();
-		ProfileProviderTree.EPV epv=getEncryptionProfileProvider();
+		ProfileProviderTree.EPV epv=getEncryptionProfileProviderForEncoding();
 		try(RandomOutputStream o=new EncryptionSignatureHashEncoder()
 				.withEncryptionProfileProvider(epv.getSecureRandom(), epv.getEncryptionProfileProvider())
 				.getRandomOutputStream(new LimitedRandomOutputStream((RandomOutputStream) out, out.currentPosition())))
@@ -104,14 +104,19 @@ public interface SecureExternalizableWithEncryptionProfileProvider extends Secur
 		return epv;
 	}
 
-
+	default ProfileProviderTree.EPV getEncryptionProfileProviderForEncoding() throws IOException {
+		return getEncryptionProfileProvider();
+	}
+	default ProfileProviderTree.EPV getEncryptionProfileProviderForDecoding() throws IOException {
+		return getEncryptionProfileProvider();
+	}
 
 	@Override
 	default void readExternal(SecuredObjectInputStream in) throws IOException, ClassNotFoundException
 	{
 		if (!(in instanceof RandomInputStream))
 			throw new IOException();
-		ProfileProviderTree.EPV epv=getEncryptionProfileProvider();
+		ProfileProviderTree.EPV epv=getEncryptionProfileProviderForDecoding();
 
 		Reference<Long> positionOfRandomInputStreamAfterDecoding=new Reference<>();
 		long oldCurPos=in.currentPosition();
@@ -132,15 +137,7 @@ public interface SecureExternalizableWithEncryptionProfileProvider extends Secur
 	@Override
 	default int getInternalSerializedSize()
 	{
-		int is=getInternalSerializedSizeWithoutEncryption();
-		try {
-			ProfileProviderTree.EPV epv=getEncryptionProfileProvider();
-			return (int)Math.max(new EncryptionSignatureHashEncoder()
-					.withEncryptionProfileProvider(epv.getSecureRandom(), epv.getEncryptionProfileProvider())
-					.getMaximumOutputLength(is), Integer.MAX_VALUE);
-		} catch (IOException e) {
-			return is;
-		}
+		return (int)Math.max(EncryptionSignatureHashEncoder.getMaximumOutputLengthWhateverParameters(getInternalSerializedSizeWithoutEncryption()), Integer.MAX_VALUE);
 	}
 
 }
