@@ -67,6 +67,13 @@ public class Utils {
 			VERSION.addCreator(new Person("mahdjoub", "jason"))
 					.addDeveloper(new PersonDeveloper("mahdjoub", "jason", "2016-01-04"))
 					.addDescription(
+							new Description((short)5, (short)15, (short)0, Version.Type.STABLE, (short)0, "2020-01-19")
+									.addItem("rename class SecureExternalizableWithEncryptionProfileProvider to SecureExternalizableWithEncryptionEncoder")
+									.addItem("Add class SecureExternalizableWithPublicKeysSignatures")
+									.addItem("Add class SecureExternalizableThatUseEncryptionProfileProvider")
+									.addItem("Reimplement ProfileFileTree")
+					)
+					.addDescription(
 							new Description((short)5, (short)14, (short)0, Version.Type.STABLE, (short)0, "2020-01-18")
 									.addItem("Alter SecureExternalizableWithEncryptionProfileProvider")
 					)

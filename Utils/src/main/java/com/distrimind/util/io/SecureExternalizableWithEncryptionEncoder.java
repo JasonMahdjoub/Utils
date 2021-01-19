@@ -46,7 +46,7 @@ import java.io.IOException;
  * @version 2.0
  * @since Utils 5.13.0
  */
-public interface SecureExternalizableWithEncryptionProfileProvider extends SecureExternalizable{
+public interface SecureExternalizableWithEncryptionEncoder extends SecureExternalizableThatUseEncryptionProfileProvider{
 
 
 
@@ -81,6 +81,8 @@ public interface SecureExternalizableWithEncryptionProfileProvider extends Secur
 	 *              restored cannot be found.
 	 */
 	void readExternalWithoutEncryption(SecuredObjectInputStream in) throws IOException, ClassNotFoundException;
+
+	int getInternalSerializedSizeWithoutEncryption();
 
 	@Override
 	default void writeExternal(SecuredObjectOutputStream out) throws IOException
@@ -132,7 +134,7 @@ public interface SecureExternalizableWithEncryptionProfileProvider extends Secur
 			((RandomInputStream)in).seek(oldCurPos);
 	}
 
-	int getInternalSerializedSizeWithoutEncryption();
+
 
 	@Override
 	default int getInternalSerializedSize()

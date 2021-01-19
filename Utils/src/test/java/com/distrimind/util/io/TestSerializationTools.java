@@ -402,7 +402,7 @@ public class TestSerializationTools {
 		}
 	}
 
-	public static class SWEPP implements SecureExternalizableWithEncryptionProfileProvider
+	public static class SWEPP implements SecureExternalizableWithEncryptionEncoder
 	{
 		private byte[] array;
 

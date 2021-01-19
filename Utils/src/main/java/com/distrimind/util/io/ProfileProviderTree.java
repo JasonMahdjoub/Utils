@@ -38,8 +38,8 @@ knowledge of the CeCILL-C license and that you accept its terms.
 import com.distrimind.util.crypto.AbstractSecureRandom;
 import com.distrimind.util.crypto.EncryptionProfileProvider;
 
-import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.*;
+import java.util.function.Function;
 
 /**
  * @author Jason Mahdjoub
@@ -49,7 +49,7 @@ import java.util.Iterator;
 public class ProfileProviderTree {
 	public static class EPV
 	{
-		private EncryptionProfileProvider encryptionProfileProvider;
+		private final EncryptionProfileProvider encryptionProfileProvider;
 		private final AbstractSecureRandom random;
 
 		public EPV(EncryptionProfileProvider encryptionProfileProvider, AbstractSecureRandom random) {
@@ -69,77 +69,112 @@ public class ProfileProviderTree {
 			return random;
 		}
 	}
+
+
 	private static class Node
 	{
-		private final Class<? extends SecureExternalizableWithEncryptionProfileProvider> clazz;
-		private final EPV encryptionProfileProvider;
-		private ArrayList<Node> childs=null;
+		private final Class<? extends SecureExternalizableThatUseEncryptionProfileProvider> clazz;
+		private Function<SecureExternalizableThatUseEncryptionProfileProvider, EPV> functionThatGivesEncryptionProfileProvider;
+		private List<Node> childs=null;
 
-		Node(Class<? extends SecureExternalizableWithEncryptionProfileProvider> clazz, EncryptionProfileProvider encryptionProfileProvider, AbstractSecureRandom random) {
+
+		Node() {
+			this.clazz = SecureExternalizableThatUseEncryptionProfileProvider.class;
+			this.functionThatGivesEncryptionProfileProvider=null;
+		}
+		Node(Class<? extends SecureExternalizableWithEncryptionEncoder> clazz, Function<SecureExternalizableThatUseEncryptionProfileProvider, EPV> functionThatGivesEncryptionProfileProvider) {
 			if (clazz==null)
 				throw new NullPointerException();
-			if (encryptionProfileProvider==null && clazz!=SecureExternalizableWithEncryptionProfileProvider.class)
+			if (functionThatGivesEncryptionProfileProvider==null)
 				throw new NullPointerException();
-			if (encryptionProfileProvider!=null && random==null)
-				throw new NullPointerException();
+
+
 			this.clazz = clazz;
-			this.encryptionProfileProvider=encryptionProfileProvider==null?null:new EPV(encryptionProfileProvider, random);
+			this.functionThatGivesEncryptionProfileProvider=functionThatGivesEncryptionProfileProvider;
 		}
 
-		void put(Class<? extends SecureExternalizableWithEncryptionProfileProvider> clazz, EncryptionProfileProvider encryptionProfileProvider, AbstractSecureRandom random)
+		void put(Class<? extends SecureExternalizableWithEncryptionEncoder> clazz, Function<SecureExternalizableThatUseEncryptionProfileProvider, EPV> functionThatGivesEncryptionProfileProvider)
 		{
 			if (clazz==null)
 				throw new NullPointerException();
-			if (encryptionProfileProvider!=null && random==null)
+			if (functionThatGivesEncryptionProfileProvider==null)
 				throw new NullPointerException();
-			if (clazz==this.clazz)
-				this.encryptionProfileProvider.encryptionProfileProvider=encryptionProfileProvider;
+			if (clazz==this.clazz) {
+				this.functionThatGivesEncryptionProfileProvider=functionThatGivesEncryptionProfileProvider;
+			}
 			else if (this.clazz.isAssignableFrom(clazz))
 			{
 				if (childs==null)
 				{
-					if (encryptionProfileProvider!=null)
-						childs=new ArrayList<>();
+					childs=new ArrayList<>();
 				}
 				else
 				{
-					for (Iterator<Node> it = childs.iterator(); it.hasNext();)
+					for (Node n : childs)
 					{
-						Node n=it.next();
-						if (encryptionProfileProvider==null && n.clazz==clazz)
+						if (n.clazz.isAssignableFrom(clazz))
 						{
-							it.remove();
-						}
-						else if (n.clazz.isAssignableFrom(clazz))
-						{
-							n.put(clazz, encryptionProfileProvider, random);
+							n.put(clazz, functionThatGivesEncryptionProfileProvider);
 							return;
 						}
 					}
 				}
-				if (encryptionProfileProvider!=null) {
-					for (int i = 0; i < childs.size(); i++) {
-						Node n = childs.get(i);
-						if (clazz.isAssignableFrom(n.clazz)) {
-							Node nn = new Node(clazz, encryptionProfileProvider, random);
-							nn.childs = new ArrayList<>();
-							nn.childs.add(n);
-							childs.set(i, nn);
-							return;
-						}
+				for (int i = 0; i < childs.size(); i++) {
+					Node n = childs.get(i);
+					if (clazz.isAssignableFrom(n.clazz)) {
+						Node nn = new Node(clazz, functionThatGivesEncryptionProfileProvider);
+						nn.childs = new ArrayList<>();
+						nn.childs.add(n);
+						childs.set(i, nn);
+						return;
 					}
-					childs.add(new Node(clazz, encryptionProfileProvider, random));
 				}
+				childs.add(new Node(clazz, functionThatGivesEncryptionProfileProvider));
 			}
 			else
 				throw new IllegalAccessError();
 		}
-		EPV getEncryptionProfileProvider(Class<? extends SecureExternalizableWithEncryptionProfileProvider> clazz)
+		boolean remove(Class<? extends SecureExternalizableWithEncryptionEncoder> clazz)
 		{
 			if (clazz==null)
 				throw new NullPointerException();
-			if (clazz==this.clazz)
-				return this.encryptionProfileProvider;
+			if (functionThatGivesEncryptionProfileProvider==null)
+				throw new NullPointerException();
+			if (clazz==this.clazz) {
+				throw new IllegalArgumentException();
+			}
+			else if (this.clazz.isAssignableFrom(clazz))
+			{
+				if (childs==null)
+				{
+					return false;
+				}
+				else
+				{
+					for (Iterator<Node> it=childs.iterator();it.hasNext();)
+					{
+						Node n=it.next();
+						if (n.clazz==clazz)
+							it.remove();
+						else if (n.clazz.isAssignableFrom(clazz))
+						{
+							return n.remove(clazz);
+						}
+					}
+				}
+				return false;
+			}
+			else
+				throw new IllegalAccessError();
+		}
+		EPV getEncryptionProfileProvider(SecureExternalizableThatUseEncryptionProfileProvider externalizable)
+		{
+			if (externalizable==null)
+				throw new NullPointerException();
+			Class<? extends SecureExternalizableThatUseEncryptionProfileProvider> clazz=externalizable.getClass();
+			if (clazz==this.clazz) {
+				return this.functionThatGivesEncryptionProfileProvider.apply(externalizable);
+			}
 			else if (this.clazz.isAssignableFrom(clazz))
 			{
 				if (childs!=null)
@@ -148,36 +183,34 @@ public class ProfileProviderTree {
 					{
 						if (n.clazz.isAssignableFrom(clazz))
 						{
-							return n.getEncryptionProfileProvider(clazz);
+							return n.getEncryptionProfileProvider(externalizable);
 						}
 					}
 				}
-				return encryptionProfileProvider;
+				return this.functionThatGivesEncryptionProfileProvider.apply(externalizable);
 			}
 			else
 				throw new IllegalAccessError();
 		}
 	}
 
-	private static final Node root=new Node(SecureExternalizableWithEncryptionProfileProvider.class, null, null);
-	public static void putEncryptionProfileProvider(Class<? extends SecureExternalizableWithEncryptionProfileProvider> clazz, EncryptionProfileProvider encryptionProfileProvider, AbstractSecureRandom random)
+	private static final Node root=new Node();
+	public static void putEncryptionProfileProvider(Class<? extends SecureExternalizableWithEncryptionEncoder> clazz, Function<SecureExternalizableThatUseEncryptionProfileProvider, EPV> functionThatGivesEncryptionProfileProvider)
 	{
 		synchronized (ProfileProviderTree.class) {
-			if (encryptionProfileProvider == null)
-				throw new NullPointerException();
-			root.put(clazz, encryptionProfileProvider, random);
+			root.put(clazz, functionThatGivesEncryptionProfileProvider);
 		}
 	}
-	public static void removeEncryptionProfileProvider(Class<? extends SecureExternalizableWithEncryptionProfileProvider> clazz)
+	public static boolean removeEncryptionProfileProvider(Class<? extends SecureExternalizableWithEncryptionEncoder> clazz)
 	{
 		synchronized (ProfileProviderTree.class) {
-			root.put(clazz, null, null);
+			return root.remove(clazz);
 		}
 	}
-	public static EPV getEncryptionProfileProvider(Class<? extends SecureExternalizableWithEncryptionProfileProvider> clazz)
+	public static EPV getEncryptionProfileProvider(SecureExternalizableThatUseEncryptionProfileProvider externalizable)
 	{
 		synchronized (ProfileProviderTree.class) {
-			return root.getEncryptionProfileProvider(clazz);
+			return root.getEncryptionProfileProvider(externalizable);
 		}
 	}
 
