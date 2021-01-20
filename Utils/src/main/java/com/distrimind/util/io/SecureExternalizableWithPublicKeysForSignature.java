@@ -37,17 +37,64 @@ knowledge of the CeCILL-C license and that you accept its terms.
 
 import com.distrimind.util.crypto.ASymmetricPrivateKey;
 import com.distrimind.util.crypto.AbstractKeyPair;
+import com.distrimind.util.crypto.IASymmetricPrivateKey;
+import com.distrimind.util.crypto.IASymmetricPublicKey;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
 /**
  * @author Jason Mahdjoub
  * @version 1.0
  * @since Utils 5.15.0
  */
-public interface SecureExternalizableWithPublicKeysSignatures extends SecureExternalizableThatUseEncryptionProfileProvider{
+public interface SecureExternalizableWithPublicKeysForSignature extends SecureExternalizableThatUseEncryptionProfileProvider{
 
-	class KeyPairWithAdditionalData
+	/*private SecureExternalizable secureExternalizable;
+	private Set<KeyPairWithAdditionalData> keyPairsWithAdditionalData;
+
+	private SecureExternalizableWithPublicKeysForSignature()
+	{
+
+	}
+	public SecureExternalizableWithPublicKeysForSignature(boolean useAllAvailableKeysIntoEncryptionProfileProvider)
+	{
+
+	}
+	public SecureExternalizableWithPublicKeysForSignature(List<AbstractKeyPair<?, ?>> keyPairsList)
+	{
+
+	}
+
+	public <TKP> SecureExternalizableWithPublicKeysForSignature(SecureExternalizable secureExternalizable, Set<TKP> keyPairsWithAdditionalData)
+	{
+
+	}
+
+	public enum KeyStoreMode
+	{
+		USE_HYBRID_KEYS_AND_STORE_NON_PQC_PUBLIC_KEYS,
+		USE_HYBRID_KEYS_AND_STORE_NON_PQC_PUBLIC_KEYS_BUT_CHECK_THEM_WITH_ENCRYPTION_PROFILE_PROVIDER,
+		STORE_ALL_PUBLIC_KEYS,
+		STORE_ALL_PUBLIC_KEYS_BUT_CHECK_THEM_WITH_ENCRYPTION_PROFILE_PROVIDER,
+		DO_NOT_STORE_PUBLIC_KEYS_ANS_USE_ENCRYPTION_PROFILE_PROVIDER;
+	}
+
+
+	public abstract boolean storeOnlyNonPQCPublicKeysForSignature();
+	public abstract boolean mustCheckKeyValidityIntoEncryptionProfileProvider();
+
+	public interface KeyPairAccessor
+	{
+		IASymmetricPublicKey getASymmetricPublicKey();
+		IASymmetricPrivateKey getASymmetricPrivateKey();
+	}
+
+
+
+	public class KeyPairWithAdditionalData
 	{
 		private final AbstractKeyPair<?, ?> keyPair;
 		private final Object externalizableKeyPairVersion;
@@ -57,12 +104,14 @@ public interface SecureExternalizableWithPublicKeysSignatures extends SecureExte
 				throw new NullPointerException();
 			if (externalizableKeyPairVersion==null)
 				throw new NullPointerException();
+			if (!SerializationTools.isSerializable(externalizableKeyPairVersion))
+				throw new IllegalArgumentException();
 			this.keyPair = keyPair;
 			this.externalizableKeyPairVersion = externalizableKeyPairVersion;
 		}
 
 		public KeyPairWithAdditionalData(AbstractKeyPair<?, ?> keyPair) {
-			this(keyPair, keyPair);
+			this(keyPair, keyPair.get);
 		}
 
 		public AbstractKeyPair<?, ?> getKeyPair() {
@@ -72,9 +121,23 @@ public interface SecureExternalizableWithPublicKeysSignatures extends SecureExte
 		public Object getExternalizableKeyPairVersion() {
 			return externalizableKeyPairVersion;
 		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (this == o) return true;
+			if (o == null || getClass() != o.getClass()) return false;
+			KeyPairWithAdditionalData that = (KeyPairWithAdditionalData) o;
+			return Objects.equals(keyPair.getASymmetricPublicKey(), that.keyPair.getASymmetricPublicKey());
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(keyPair);
+		}
 	}
 
-	Iterable<KeyPairWithAdditionalData> parseKeyPairsWithAdditionalData
+	Iterable<KeyPairWithAdditionalData> parseKeyPairsWithAdditionalData();
+
 
 	@Override
 	default int getInternalSerializedSize()
@@ -92,7 +155,7 @@ public interface SecureExternalizableWithPublicKeysSignatures extends SecureExte
 	default void readExternal(SecuredObjectInputStream in) throws IOException, ClassNotFoundException
 	{
 
-	}
+	}*/
 
 	/**
 	 * The object implements the writeExternal method to save its contents

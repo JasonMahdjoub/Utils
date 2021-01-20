@@ -100,7 +100,7 @@ public interface SecureExternalizableWithEncryptionEncoder extends SecureExterna
 	}
 
 	default ProfileProviderTree.EPV getEncryptionProfileProvider() throws IOException {
-		ProfileProviderTree.EPV epv=ProfileProviderTree.getEncryptionProfileProvider(this.getClass());
+		ProfileProviderTree.EPV epv=ProfileProviderTree.getEncryptionProfileProvider(this);
 		if (epv==null)
 			throw new IOException();
 		return epv;
