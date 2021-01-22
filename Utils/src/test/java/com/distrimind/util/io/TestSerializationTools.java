@@ -473,7 +473,7 @@ public class TestSerializationTools {
 							}
 
 							@Override
-							public Short getKeyID(IASymmetricPublicKey publicKeyForSignature) {
+							public Short getValidKeyID(IASymmetricPublicKey publicKeyForSignature) {
 								return 0;
 							}
 
@@ -495,7 +495,8 @@ public class TestSerializationTools {
 		Random r=new Random(System.currentTimeMillis());
 		r.nextBytes(array);
 		SWEPP s=new SWEPP(array);
-		ProfileProviderTree.putEncryptionProfileProvider(SWEPP.class, encryptionProfileProvider, SecureRandomType.DEFAULT.getSingleton(null));
+		final AbstractSecureRandom random=SecureRandomType.DEFAULT.getSingleton(null);
+		ProfileProviderTree.putEncryptionProfileProvider(SWEPP.class, o -> new ProfileProviderTree.EPV(encryptionProfileProvider, random));
 		try(RandomByteArrayOutputStream out=new RandomByteArrayOutputStream())
 		{
 			out.writeObject(s, false);

@@ -159,7 +159,7 @@ public class TestReadWriteEncryption {
 			}
 
 			@Override
-			public Short getKeyID(IASymmetricPublicKey publicKeyForSignature) {
+			public Short getValidKeyID(IASymmetricPublicKey publicKeyForSignature) {
 				return null;
 			}
 		};

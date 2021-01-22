@@ -79,8 +79,8 @@ public final class SessionLockableEncryptionProfileProvider implements Encryptio
 	}
 
 	@Override
-	public Short getKeyID(IASymmetricPublicKey publicKeyForSignature) {
-		return encryptionProfileProvider.getKeyID(publicKeyForSignature);
+	public Short getValidKeyID(IASymmetricPublicKey publicKeyForSignature) {
+		return encryptionProfileProvider.getValidKeyID(publicKeyForSignature);
 	}
 
 	@Override

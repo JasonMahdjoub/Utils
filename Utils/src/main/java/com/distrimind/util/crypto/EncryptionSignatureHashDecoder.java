@@ -450,7 +450,7 @@ public class EncryptionSignatureHashDecoder {
 		withRandomInputStream(limitedRandomInputStream2);
 		randomByteArrayOutputStream.init(data);
 		randomOutputStream.init(randomByteArrayOutputStream, dataOff+EncryptionSignatureHashEncoder.headSize, dataLen-EncryptionSignatureHashEncoder.headSize);
-		return decodeAndCheckHashAndSignaturesIfNecessary(randomOutputStream, true, null);
+		return decodeAndCheckHashAndSignaturesIfNecessary(randomOutputStream, true, null, false);
 
 	}
 	public RandomInputStream decodeAndCheckHashAndSignaturesIfNecessary() throws IOException {
@@ -459,12 +459,12 @@ public class EncryptionSignatureHashDecoder {
 	public RandomInputStream decodeAndCheckHashAndSignaturesIfNecessary(Reference<Long> positionOfRandomInputStreamAfterDecoding) throws IOException {
 		if (isEncrypted()) {
 			RandomOutputStream out=RandomCacheFileCenter.getSingleton().getNewBufferedRandomCacheFileOutputStream(true);
-			decodeAndCheckHashAndSignaturesIfNecessary(out,  false, positionOfRandomInputStreamAfterDecoding);
+			decodeAndCheckHashAndSignaturesIfNecessary(out,  false, positionOfRandomInputStreamAfterDecoding, false);
 			return out.getRandomInputStream();
 		}
 		else
 		{
-			long length=decodeAndCheckHashAndSignaturesIfNecessary(new NullRandomOutputStream(), true, positionOfRandomInputStreamAfterDecoding);
+			long length=decodeAndCheckHashAndSignaturesIfNecessary(null, true, positionOfRandomInputStreamAfterDecoding, true);
 			return new LimitedRandomInputStream(this.inputStream, EncryptionSignatureHashEncoder.headSize, length){
 				@Override
 				public void close() {
@@ -474,11 +474,13 @@ public class EncryptionSignatureHashDecoder {
 		}
 	}
 	public long decodeAndCheckHashAndSignaturesIfNecessary(RandomOutputStream outputStream) throws IOException {
-		return decodeAndCheckHashAndSignaturesIfNecessary(outputStream, false, null);
+		return decodeAndCheckHashAndSignaturesIfNecessary(outputStream, false, null, false);
 	}
-	private long decodeAndCheckHashAndSignaturesIfNecessary(final RandomOutputStream outputStream, final boolean sameInputOutputSource, final Reference<Long> positionOfRandomInputStreamAfterDecoding) throws IOException {
-		if (outputStream==null)
+	private long decodeAndCheckHashAndSignaturesIfNecessary(final RandomOutputStream outputStream, final boolean sameInputOutputSource, final Reference<Long> positionOfRandomInputStreamAfterDecoding, boolean outputStreamNull) throws IOException {
+		if (outputStream==null && !outputStreamNull)
 			throw new NullPointerException();
+		if (outputStreamNull && !sameInputOutputSource)
+			throw new IllegalAccessError();
 
 
 		RandomInputStream originalInputStream=inputStream;
@@ -488,10 +490,17 @@ public class EncryptionSignatureHashDecoder {
 			throw new IllegalArgumentException();
 		long res;
 		try {
-			//checkCodeForDecode(); done into getMaximumOutputLength
-			long originalOutputLength = outputStream.length();
-			long maximumOutputLengthAfterEncoding=getMaximumOutputLength();
-			outputStream.ensureLength(maximumOutputLengthAfterEncoding);
+			long originalOutputLength=-1;
+			long maximumOutputLengthAfterEncoding=-1;
+			if (outputStream==null) {
+				checkCodeForDecode();
+			}
+			else
+			{
+				originalOutputLength = outputStream.length();
+				maximumOutputLengthAfterEncoding = getMaximumOutputLength();
+				outputStream.ensureLength(maximumOutputLengthAfterEncoding);
+			}
 
 			if (sameInputOutputSource && isEncrypted())
 				throw new IOException("You must use a different input/output stream when using a encryption");
@@ -580,6 +589,7 @@ public class EncryptionSignatureHashDecoder {
 						cipherInputStream.set(limitedRandomInputStream,null, 0, 0, externalCounter );
 				}
 				try {
+					assert outputStream!=null;
 					res=cipherInputStream.transferTo(outputStream);
 				}
 				finally {
@@ -597,7 +607,8 @@ public class EncryptionSignatureHashDecoder {
 					}
 					else
 						limitedRandomInputStream.seek(res);
-					outputStream.seek(outputStream.currentPosition()+res);
+					if (outputStream!=null)
+						outputStream.seek(outputStream.currentPosition()+res);
 				}
 				else {
 					outputStream.write(limitedRandomInputStream);
@@ -677,10 +688,12 @@ public class EncryptionSignatureHashDecoder {
 				if (!asymmetricChecker.verify())
 					throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
 			}
-			long curPos = outputStream.currentPosition();
-			if (curPos < maximumOutputLengthAfterEncoding && curPos > originalOutputLength)
-				outputStream.setLength(curPos);
-			outputStream.flush();
+			if (outputStream!=null) {
+				long curPos = outputStream.currentPosition();
+				if (curPos < maximumOutputLengthAfterEncoding && curPos > originalOutputLength)
+					outputStream.setLength(curPos);
+				outputStream.flush();
+			}
 			if (changeCipherOfEncoder)
 			{
 				encoder.cipher=cipher;

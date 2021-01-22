@@ -162,7 +162,7 @@ public abstract class EncryptionProfileCollectionWithEncryptedKeys extends Encry
 	}
 
 	@Override
-	public Short getKeyID(IASymmetricPublicKey publicKeyForSignature) {
+	public Short getValidKeyID(IASymmetricPublicKey publicKeyForSignature) {
 		if (publicKeyForSignature==null)
 			return null;
 		return profiles.entrySet().stream().filter(p -> publicKeyForSignature.equals(p.getValue().publicKeyForSignature))

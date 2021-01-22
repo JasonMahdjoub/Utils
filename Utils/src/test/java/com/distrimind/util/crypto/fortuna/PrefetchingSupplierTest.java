@@ -23,7 +23,8 @@ public class PrefetchingSupplierTest {
 
     @AfterTest
     public void tearDown() {
-        executorService.shutdown();
+        if (executorService!=null)
+            executorService.shutdown();
     }
 
     @Test

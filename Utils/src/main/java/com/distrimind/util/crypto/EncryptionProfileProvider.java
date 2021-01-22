@@ -68,10 +68,10 @@ public interface EncryptionProfileProvider {
 	SymmetricSecretKey getSecretKeyForEncryption(short keyID, boolean duringDecryptionPhase) throws IOException;
 
 	Short getValidKeyID(IASymmetricPublicKey publicKeyForSignature);
-	Short getValidKeyID(ASymmetricPublicKey publicKeyForSignature, boolean isHybrid);
+	//Short getValidKeyID(ASymmetricPublicKey publicKeyForSignature, boolean isHybrid);
 	short getDefaultKeyID();
 
-	default boolean useAllSignaturesKeysDuringEncoding()
+	/*default boolean useAllSignaturesKeysDuringEncoding()
 	{
 		return false;
 	}
@@ -99,5 +99,5 @@ public interface EncryptionProfileProvider {
 		ENCODE_KEY_IDENTIFIERS_AND_CHECK_THEIR_VALIDITY_DURING_DECODING,
 		ENCODE_NON_PQC_PUBLIC_KEYS_WHEN_USING_HYBRID_KEYS_AND_CHECK_THEIR_VALIDITY_DURING_DECODING,
 		ENCODE_ENTIRE_PUBLIC_KEYS_BUT_DO_NOT_CHECK_THEIR_VALIDITY;
-	}
+	}*/
 }
