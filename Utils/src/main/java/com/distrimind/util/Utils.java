@@ -72,6 +72,7 @@ public class Utils {
 									.addItem("Add class SecureExternalizableWithPublicKeysSignatures")
 									.addItem("Add class SecureExternalizableThatUseEncryptionProfileProvider")
 									.addItem("Reimplement ProfileFileTree")
+									.addItem("Fix a possibility of vulnerability when EncryptionProfileProvider's user does not generate an exception when the profile id is not valid. Add the function EncryptionProfileProvider.isValidProfileID.")
 					)
 					.addDescription(
 							new Description((short)5, (short)14, (short)0, Version.Type.STABLE, (short)0, "2020-01-18")

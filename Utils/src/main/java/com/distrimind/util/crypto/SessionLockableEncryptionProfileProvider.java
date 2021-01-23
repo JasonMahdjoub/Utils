@@ -64,6 +64,11 @@ public final class SessionLockableEncryptionProfileProvider implements Encryptio
 	}
 
 	@Override
+	public boolean isValidProfileID(short id) {
+		return encryptionProfileProvider.isValidProfileID(id);
+	}
+
+	@Override
 	public MessageDigestType getMessageDigest(short keyID, boolean duringDecryptionPhase) throws IOException {
 		return encryptionProfileProvider.getMessageDigest(keyID, duringDecryptionPhase);
 	}
@@ -79,8 +84,8 @@ public final class SessionLockableEncryptionProfileProvider implements Encryptio
 	}
 
 	@Override
-	public Short getValidKeyID(IASymmetricPublicKey publicKeyForSignature) {
-		return encryptionProfileProvider.getValidKeyID(publicKeyForSignature);
+	public Short getValidProfileIDFromPublicKeyForSignature(IASymmetricPublicKey publicKeyForSignature) {
+		return encryptionProfileProvider.getValidProfileIDFromPublicKeyForSignature(publicKeyForSignature);
 	}
 
 	@Override

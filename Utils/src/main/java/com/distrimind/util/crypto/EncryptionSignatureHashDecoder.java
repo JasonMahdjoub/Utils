@@ -155,6 +155,8 @@ public class EncryptionSignatureHashDecoder {
 		{
 			checkHeadRead();
 			minimumInputSize=null;
+			if (!encryptionProfileProvider.isValidProfileID(secretKeyID))
+				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
 			try {
 				IASymmetricPublicKey publicKey=encryptionProfileProvider.getPublicKeyForSignature(secretKeyID);
 				if (publicKey == null)

@@ -114,7 +114,12 @@ public class EncryptionProfileCollection extends EncryptionProfileProviderFactor
 	}
 
 	@Override
-	public Short getValidKeyID(IASymmetricPublicKey publicKeyForSignature) {
+	public boolean isValidProfileID(short id) {
+		return profiles.containsKey(id);
+	}
+
+	@Override
+	public Short getValidProfileIDFromPublicKeyForSignature(IASymmetricPublicKey publicKeyForSignature) {
 		if (publicKeyForSignature==null)
 			return null;
 		return profiles.entrySet().stream().filter(p -> publicKeyForSignature.equals(p.getValue().publicKeyForSignature))

@@ -154,12 +154,17 @@ public class TestReadWriteEncryption {
 			}
 
 			@Override
+			public boolean isValidProfileID(short id) {
+				return id==0 || id==1;
+			}
+
+			@Override
 			public short getDefaultKeyID() {
 				return 0;
 			}
 
 			@Override
-			public Short getValidKeyID(IASymmetricPublicKey publicKeyForSignature) {
+			public Short getValidProfileIDFromPublicKeyForSignature(IASymmetricPublicKey publicKeyForSignature) {
 				return null;
 			}
 		};

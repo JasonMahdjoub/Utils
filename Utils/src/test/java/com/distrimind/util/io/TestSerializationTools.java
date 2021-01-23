@@ -127,17 +127,7 @@ public class TestSerializationTools {
 					(SpecificSizeComputer)	(v, m)->SerializationTools.getInternalSize((byte[])v, m)
 			});
 
-			/*lp.add(new Object[]{
-					nullSupport,
-					Arrays.asList(new byte[][]{
-									{(byte)142, 41},
-									{57, 45}
-								}
-								),
-					true,
-					(SpecificWriter) (out, o, nullSupport1, maxSize) -> out.write2DBytesArray((byte[][])o, nullSupport1, true, maxSize, 1000),
-					(SpecificReader) (in, supportNull1, maxSize) -> in.read2DBytesArray(nullSupport, true, maxSize, 1000 )
-			});*/
+
 			lp.add(new Object[]{
 					nullSupport,
 					Arrays.asList("string1",
@@ -419,7 +409,7 @@ public class TestSerializationTools {
 		}
 
 		@Override
-		public void readExternalWithoutEncryption(SecuredObjectInputStream in) throws IOException, ClassNotFoundException {
+		public void readExternalWithoutEncryption(SecuredObjectInputStream in) throws IOException {
 			array=in.readBytesArray(false, Short.MAX_VALUE);
 		}
 
@@ -473,7 +463,12 @@ public class TestSerializationTools {
 							}
 
 							@Override
-							public Short getValidKeyID(IASymmetricPublicKey publicKeyForSignature) {
+							public boolean isValidProfileID(short id) {
+								return id==0;
+							}
+
+							@Override
+							public Short getValidProfileIDFromPublicKeyForSignature(IASymmetricPublicKey publicKeyForSignature) {
 								return 0;
 							}
 

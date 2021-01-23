@@ -66,8 +66,8 @@ public interface EncryptionProfileProvider {
 	IASymmetricPublicKey getPublicKeyForSignature(short keyID) throws IOException;
 	SymmetricSecretKey getSecretKeyForSignature(short keyID, boolean duringDecryptionPhase) throws IOException;
 	SymmetricSecretKey getSecretKeyForEncryption(short keyID, boolean duringDecryptionPhase) throws IOException;
-
-	Short getValidKeyID(IASymmetricPublicKey publicKeyForSignature);
+	boolean isValidProfileID(short id);
+	Short getValidProfileIDFromPublicKeyForSignature(IASymmetricPublicKey publicKeyForSignature);
 	//Short getValidKeyID(ASymmetricPublicKey publicKeyForSignature, boolean isHybrid);
 	short getDefaultKeyID();
 
