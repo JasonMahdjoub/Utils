@@ -45,7 +45,7 @@ import java.util.Arrays;
 
 /**
  * @author Jason Mahdjoub
- * @version 1.4
+ * @version 1.5
  * @since Utils 4.16.0
  */
 public class EncryptionSignatureHashDecoder {
@@ -454,6 +454,40 @@ public class EncryptionSignatureHashDecoder {
 		randomOutputStream.init(randomByteArrayOutputStream, dataOff+EncryptionSignatureHashEncoder.headSize, dataLen-EncryptionSignatureHashEncoder.headSize);
 		return decodeAndCheckHashAndSignaturesIfNecessary(randomOutputStream, true, null, false);
 
+	}
+	private void init(RandomInputStream hashAndSignatures, RandomInputStream data) throws IOException {
+		withRandomInputStream(new AggregatedRandomInputStreams(
+				new LimitedRandomInputStream(hashAndSignatures, 0, EncryptionSignatureHashEncoder.headSize),
+				data, new AggregatedRandomInputStreams(new LimitedRandomInputStream(hashAndSignatures, EncryptionSignatureHashEncoder.headSize, hashAndSignatures.length()-EncryptionSignatureHashEncoder.headSize))
+		));
+
+	}
+	private void init(byte[] hashAndSignatures, int hashAndSignaturesOff, int hashAndSignaturesLen, byte[] data, int dataOff, int dataLen) throws IOException {
+		EncryptionSignatureHashEncoder.checkLimits(hashAndSignatures, hashAndSignaturesOff, hashAndSignaturesLen);
+		EncryptionSignatureHashEncoder.checkLimits(data, dataOff, dataLen);
+		RandomByteArrayInputStream hashAndSignaturesS=new RandomByteArrayInputStream(hashAndSignatures);
+		RandomByteArrayInputStream dataS=new RandomByteArrayInputStream(data);
+		withRandomInputStream(new AggregatedRandomInputStreams(
+				new LimitedRandomInputStream(hashAndSignaturesS, hashAndSignaturesOff, EncryptionSignatureHashEncoder.headSize+dataOff),
+				new LimitedRandomInputStream(dataS, dataOff, dataLen),
+				new AggregatedRandomInputStreams(new LimitedRandomInputStream(hashAndSignaturesS, EncryptionSignatureHashEncoder.headSize+hashAndSignaturesOff, hashAndSignaturesLen-EncryptionSignatureHashEncoder.headSize))
+			));
+	}
+	public Integrity checkHashAndPublicSignature(byte[] hashAndSignatures, int hashAndSignaturesOff, int hashAndSignaturesLen, byte[] data, int dataOff, int dataLen) throws IOException {
+		init(hashAndSignatures, hashAndSignaturesOff, hashAndSignaturesLen, data, dataOff, dataLen);
+		return checkHashAndPublicSignature();
+	}
+	public Integrity checkHashAndPublicSignature(RandomInputStream hashAndSignatures, RandomInputStream data) throws IOException {
+		init(hashAndSignatures, data);
+		return checkHashAndPublicSignature();
+	}
+	public Integrity checkHashAndSignatures(byte[] hashAndSignatures, int hashAndSignaturesOff, int hashAndSignaturesLen, byte[] data, int dataOff, int dataLen) throws IOException {
+		init(hashAndSignatures, hashAndSignaturesOff, hashAndSignaturesLen, data, dataOff, dataLen);
+		return checkHashAndSignatures();
+	}
+	public Integrity checkHashAndSignatures(RandomInputStream hashAndSignatures, RandomInputStream data) throws IOException {
+		init(hashAndSignatures, data);
+		return checkHashAndSignatures();
 	}
 	public RandomInputStream decodeAndCheckHashAndSignaturesIfNecessary() throws IOException {
 		return decodeAndCheckHashAndSignaturesIfNecessary((Reference<Long>)null);

@@ -74,6 +74,7 @@ public class Utils {
 									.addItem("Reimplement ProfileFileTree")
 									.addItem("Fix a possibility of vulnerability when EncryptionProfileProvider's user does not generate an exception when the profile id is not valid. Add the function EncryptionProfileProvider.isValidProfileID.")
 									.addItem("Add class CachedSecureExternalizable")
+									.addItem("Add possibility to generate only hash and signatures into EncryptionSignatureHashEncoder and into EncryptionSignatureHashDecoder")
 					)
 					.addDescription(
 							new Description((short)5, (short)14, (short)0, Version.Type.STABLE, (short)0, "2020-01-18")
