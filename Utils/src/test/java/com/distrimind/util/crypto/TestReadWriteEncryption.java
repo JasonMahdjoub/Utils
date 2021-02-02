@@ -276,7 +276,6 @@ public class TestReadWriteEncryption {
 				EncryptionSignatureHashDecoder reader = getReader(bais, secretKeyForEncryption, associatedData, secretKeyForSignature, keyPairForSignature, messageDigestType);
 				Assert.assertEquals(Integrity.OK, reader.checkHashAndPublicSignature(baos2.getRandomInputStream(), bais));
 				Assert.assertEquals(Integrity.OK, reader.checkHashAndSignatures(baos2.getRandomInputStream(), bais));
-				bais.seek(0);
 			}
 
 		}
