@@ -475,7 +475,8 @@ public class EncryptionSignatureHashEncoder {
 			this.originalOutputStream=originalOutputStream;
 			this.inputStreamLength=inputStreamLength;
 			this.closed=false;
-			EncryptionSignatureHashEncoder.this.inputStream.seek(0);
+			if (EncryptionSignatureHashEncoder.this.inputStream!=null)
+				EncryptionSignatureHashEncoder.this.inputStream.seek(0);
 			incrementIVCounter();
 			try
 			{
