@@ -40,6 +40,7 @@ import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
@@ -259,9 +260,31 @@ public class TestReadWriteEncryption {
 		if (messageDigestType!=null)
 			writer.withMessageDigestType(messageDigestType);
 		long expectedLength=writer.getMaximumOutputLength();
+		if (secretKeyForEncryption != null || (secretKeyForSignature == null && keyPairForSignature == null && messageDigestType == null)) {
+			try {
+				writer.getRandomOutputStreamAndGeneratesOnlyHashAndSignatures(new RandomByteArrayOutputStream());
+				Assert.fail();
+			} catch (IllegalArgumentException ignored) {
+
+			}
+		} else {
+			try(RandomByteArrayOutputStream baos2=new RandomByteArrayOutputStream()) {
+				try (RandomOutputStream cout = writer.getRandomOutputStreamAndGeneratesOnlyHashAndSignatures(baos2)) {
+					bais.seek(0);
+					bais.transferTo(cout);
+				}
+				EncryptionSignatureHashDecoder reader = getReader(bais, secretKeyForEncryption, associatedData, secretKeyForSignature, keyPairForSignature, messageDigestType);
+				Assert.assertEquals(Integrity.OK, reader.checkHashAndPublicSignature(baos2.getRandomInputStream(), bais));
+				Assert.assertEquals(Integrity.OK, reader.checkHashAndSignatures(baos2.getRandomInputStream(), bais));
+				bais.seek(0);
+			}
+
+		}
 		writer.encode(baos);
 		byte[] res=baos.getBytes();
 		byte[] res2=null;
+
+
 		if (secretKeyForEncryption!=null && !secretKeyForEncryption.getEncryptionAlgorithmType().isAuthenticatedAlgorithm()) {
 			try (RandomOutputStream cout = writer.getRandomOutputStream(baos = new RandomByteArrayOutputStream())) {
 				bais.seek(0);

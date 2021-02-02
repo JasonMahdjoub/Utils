@@ -40,13 +40,13 @@ import java.io.IOException;
 
 /**
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 1.1
  * @since Utils 4.16.0
  */
 public class AggregatedRandomOutputStreams extends RandomOutputStream {
 	private final RandomOutputStream[] outs;
 	private final long[] lengths;
-	private int selectedInputStreamPos;
+	private int selectedOutputStreamPos;
 	private long posOff;
 	private boolean closed;
 	public AggregatedRandomOutputStreams(RandomOutputStream[] outs, long[] lengths) throws IOException {
@@ -75,7 +75,7 @@ public class AggregatedRandomOutputStreams extends RandomOutputStream {
 		}
 		this.outs = outs;
 		this.lengths=lengths;
-		selectedInputStreamPos=0;
+		selectedOutputStreamPos =0;
 		posOff=0;
 		closed=false;
 		outs[0].seek(0);
@@ -84,50 +84,47 @@ public class AggregatedRandomOutputStreams extends RandomOutputStream {
 	@Override
 	public long length() throws IOException {
 		long l=0;
-		for (RandomOutputStream o : outs)
-			l+=o.length();
+		for (int i=0;i<outs.length;i++)
+			l+=Math.min(outs[i].length(), lengths[i]);
 		return l;
 	}
 
 	@Override
 	public void write(int b) throws IOException {
-		RandomOutputStream ros=outs[selectedInputStreamPos];
+		RandomOutputStream ros=actualizeCurrentOutputStream(true);
 		ros.write(b);
-		if (ros.currentPosition()==lengths[selectedInputStreamPos])
+	}
+	private RandomOutputStream actualizeCurrentOutputStream(boolean wantToWrite) throws IOException {
+		RandomOutputStream ros=outs[selectedOutputStreamPos];
+		long l=lengths[selectedOutputStreamPos];
+		if (ros.currentPosition()==l)
 		{
-			if (++selectedInputStreamPos==outs.length)
-			{
-				--selectedInputStreamPos;
-				throw new EOFException();
+			if (++selectedOutputStreamPos ==outs.length) {
+				--selectedOutputStreamPos;
+				if (wantToWrite)
+					throw new EOFException();
+				else
+					return ros;
 			}
 			else {
-				posOff+=ros.length();
-				outs[selectedInputStreamPos].seek(0);
+				posOff+=l;
+				ros = outs[selectedOutputStreamPos];
+				ros.seek(0);
 			}
 		}
+		return ros;
 	}
 
 	@Override
 	public void write(byte[] tab, int off, int len) throws IOException {
 		if (closed)
 			throw new IOException("Stream closed");
-		ensureLength(currentPosition()+len);
+		//ensureLength(currentPosition()+len);
 		RandomInputStream.checkLimits(tab, off, len);
-		RandomOutputStream ros=outs[selectedInputStreamPos];
 		do {
-			if (ros.currentPosition()==lengths[selectedInputStreamPos])
-			{
-				if (++selectedInputStreamPos==outs.length) {
-					--selectedInputStreamPos;
-					throw new EOFException();
-				}
-				else {
-					posOff+=ros.length();
-					ros = outs[selectedInputStreamPos];
-					ros.seek(0);
-				}
-			}
-			int s=(int)Math.min(len, lengths[selectedInputStreamPos]-ros.currentPosition());
+			RandomOutputStream ros=actualizeCurrentOutputStream(true);
+
+			int s=(int)Math.min(len, lengths[selectedOutputStreamPos]-ros.currentPosition());
 
 			ros.write(tab, off, s);
 			off += s;
@@ -150,6 +147,8 @@ public class AggregatedRandomOutputStreams extends RandomOutputStream {
 				long l=acc+lengths[i];
 				if (l>=newLength)
 					outs[i].setLength(newLength-acc);
+				else
+					outs[i].ensureLength(lengths[i]);
 				acc=l;
 			}
 		}
@@ -173,7 +172,7 @@ public class AggregatedRandomOutputStreams extends RandomOutputStream {
 			{
 				ris.seek(_pos-off);
 				posOff=off;
-				this.selectedInputStreamPos=i;
+				this.selectedOutputStreamPos =i;
 				return;
 			}
 			else
@@ -184,7 +183,7 @@ public class AggregatedRandomOutputStreams extends RandomOutputStream {
 
 	@Override
 	public long currentPosition() throws IOException {
-		return outs[selectedInputStreamPos].currentPosition()+posOff;
+		return actualizeCurrentOutputStream(false).currentPosition()+posOff;
 	}
 
 	@Override
@@ -195,8 +194,14 @@ public class AggregatedRandomOutputStreams extends RandomOutputStream {
 	@Override
 	protected RandomInputStream getRandomInputStreamImpl() throws IOException {
 		RandomInputStream[] ins=new RandomInputStream[outs.length];
-		for (int i=0;i<outs.length;i++)
-			ins[i]=outs[i].getRandomInputStream();
+		for (int i=0;i<outs.length;i++) {
+			long l=lengths[i];
+			long l2=outs[i].length();
+			if (l==l2)
+				ins[i] = outs[i].getRandomInputStream();
+			else
+				ins[i] = new LimitedRandomInputStream(outs[i].getRandomInputStream(), 0, Math.min(l,l2));
+		}
 		return new AggregatedRandomInputStreams(ins);
 	}
 

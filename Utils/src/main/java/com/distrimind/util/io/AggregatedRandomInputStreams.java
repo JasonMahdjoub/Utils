@@ -42,7 +42,7 @@ import java.util.List;
 
 /**
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 1.1
  * @since Utils 4.16.0
  */
 @SuppressWarnings("NullableProblems")
@@ -81,7 +81,7 @@ public class AggregatedRandomInputStreams extends RandomInputStream{
 
 	@Override
 	public long length() {
-		return length;
+		return length;//recalculate ?
 	}
 
 	@Override
@@ -110,7 +110,7 @@ public class AggregatedRandomInputStreams extends RandomInputStream{
 
 	@Override
 	public long currentPosition() throws IOException {
-		return inputStreams[selectedInputStreamPos].currentPosition()+posOff;
+		return actualizeCurrentRandomInputStream(false).currentPosition()+posOff;
 	}
 
 	@Override
@@ -131,7 +131,26 @@ public class AggregatedRandomInputStreams extends RandomInputStream{
 			ris.close();
 		closed=true;
 	}
+	private RandomInputStream actualizeCurrentRandomInputStream(boolean wantToRead) throws IOException {
+		RandomInputStream ris=inputStreams[selectedInputStreamPos];
 
+		if (ris.currentPosition()==ris.length())
+		{
+			if (++selectedInputStreamPos==inputStreams.length) {
+				--selectedInputStreamPos;
+				if (wantToRead)
+					throw new EOFException();
+				else
+					return ris;
+			}
+			else {
+				posOff+=ris.length();
+				ris = inputStreams[selectedInputStreamPos];
+				ris.seek(0);
+			}
+		}
+		return ris;
+	}
 	@Override
 	public void readFully(byte[] tab, int off, int len) throws IOException {
 		if (closed)
@@ -139,20 +158,8 @@ public class AggregatedRandomInputStreams extends RandomInputStream{
 		checkLimits(tab, off, len);
 		if (len==0)
 			return;
-		RandomInputStream ris=inputStreams[selectedInputStreamPos];
 		do {
-			if (ris.currentPosition()==ris.length())
-			{
-				if (++selectedInputStreamPos==inputStreams.length) {
-					--selectedInputStreamPos;
-					throw new EOFException();
-				}
-				else {
-					posOff+=ris.length();
-					ris = inputStreams[selectedInputStreamPos];
-					ris.seek(0);
-				}
-			}
+			RandomInputStream ris=actualizeCurrentRandomInputStream(true);
 			int s=(int)Math.min(len, ris.length()-ris.currentPosition());
 			if (s>0)
 				ris.readFully(tab, off, s);
@@ -174,19 +181,7 @@ public class AggregatedRandomInputStreams extends RandomInputStream{
 	public int read() throws IOException {
 		if (closed)
 			throw new IOException("Stream closed");
-		RandomInputStream ris=inputStreams[selectedInputStreamPos];
-		if (ris.currentPosition()==ris.length())
-		{
-			if (++selectedInputStreamPos==inputStreams.length) {
-				--selectedInputStreamPos;
-				return -1;
-			}
-			else {
-				posOff+=ris.length();
-				ris = inputStreams[selectedInputStreamPos];
-				ris.seek(0);
-			}
-		}
+		RandomInputStream ris=actualizeCurrentRandomInputStream(true);
 
 		return ris.read();
 	}
@@ -196,35 +191,24 @@ public class AggregatedRandomInputStreams extends RandomInputStream{
 		if (closed)
 			throw new IOException("Stream closed");
 		checkLimits(tab, off, len);
-		RandomInputStream ris=inputStreams[selectedInputStreamPos];
+
 		int total=0;
 		do {
-			if (ris.currentPosition()==ris.length())
-			{
-				if (++selectedInputStreamPos==inputStreams.length) {
-					--selectedInputStreamPos;
-					if (total==0)
-						return -1;
-					else
-						return total;
-				}
-				else {
-					posOff+=ris.length();
-					ris = inputStreams[selectedInputStreamPos];
-					ris.seek(0);
-				}
-			}
+			RandomInputStream ris=actualizeCurrentRandomInputStream(true);
 			int s=(int)Math.min(len, ris.length()-ris.currentPosition());
-
+			int ns;
 			if (s>0)
-				s=ris.read(tab, off, s);
-			if (s>0) {
+				ns=ris.read(tab, off, s);
+			else
+				ns=0;
+			if (ns>0) {
 				off += s;
 				len -= s;
 				total+=s;
-			} else if (s<0)
+			}
+			if (ns<s)
 			{
-				if (total==0)
+				if (ns<0 && selectedInputStreamPos+1==inputStreams.length)
 					return -1;
 				else
 					return total;

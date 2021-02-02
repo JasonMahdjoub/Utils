@@ -39,7 +39,7 @@ import java.io.IOException;
 
 /**
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 1.1
  * @since Utils 4.16.0
  */
 public class NullRandomOutputStream extends RandomOutputStream{
@@ -99,7 +99,7 @@ public class NullRandomOutputStream extends RandomOutputStream{
 
 	@Override
 	protected RandomInputStream getRandomInputStreamImpl()  {
-		return new RandomByteArrayInputStream(new byte[0]);
+		return new NullRandomInputStream(length);
 	}
 
 	@Override
