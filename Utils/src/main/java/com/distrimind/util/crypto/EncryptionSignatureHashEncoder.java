@@ -371,6 +371,7 @@ public class EncryptionSignatureHashEncoder {
 
 		try(RandomOutputStream ros=getRandomOutputStreamAndGeneratesOnlyHashAndSignatures(originalOutputStream))
 		{
+			inputStream.seek(0);
 			inputStream.transferTo(ros);
 		}
 	}

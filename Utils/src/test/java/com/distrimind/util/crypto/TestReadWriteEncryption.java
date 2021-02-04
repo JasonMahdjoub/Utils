@@ -177,6 +177,7 @@ public class TestReadWriteEncryption {
 					.withRandomInputStream(bais)
 					.withEncryptionProfileProvider(SecureRandomType.DEFAULT.getSingleton(null), encryptionProfileProvider, secretKeyID);
 			long expectedLength = writer.getMaximumOutputLength();
+
 			try(RandomOutputStream out=writer.getRandomOutputStream(baos))
 			{
 				bais.transferTo(out);
@@ -195,6 +196,90 @@ public class TestReadWriteEncryption {
 			Assert.assertTrue(expectedLength >= in.length);
 			Assert.assertEquals(reader.checkHashAndSignatures(), Integrity.OK);
 			Assert.assertEquals(reader.checkHashAndPublicSignature(), Integrity.OK);
+		}
+	}
+
+	@Test
+	public void testSecretKeyProviderWhenJustGeneratingHashAndSignatures() throws IOException, NoSuchProviderException, NoSuchAlgorithmException {
+		Random r=new Random(System.currentTimeMillis());
+		byte[] in=new byte[10+r.nextInt(10000000)];
+		r.nextBytes(in);
+		EncryptionProfileProvider encryptionProfileProvider =new EncryptionProfileProvider() {
+			final SymmetricSecretKey secretKeyForSignature1 = SymmetricAuthenticatedSignatureType.DEFAULT.getKeyGenerator(SecureRandomType.DEFAULT.getSingleton(null)).generateKey();
+			final SymmetricSecretKey secretKeyForSignature2 = SymmetricAuthenticatedSignatureType.DEFAULT.getKeyGenerator(SecureRandomType.DEFAULT.getSingleton(null)).generateKey();
+			final ASymmetricKeyPair keyPair1=ASymmetricAuthenticatedSignatureType.DEFAULT.getKeyPairGenerator(SecureRandomType.DEFAULT.getSingleton(null)).generateKeyPair();
+			final ASymmetricKeyPair keyPair2=ASymmetricAuthenticatedSignatureType.DEFAULT.getKeyPairGenerator(SecureRandomType.DEFAULT.getSingleton(null)).generateKeyPair();
+
+
+			@Override
+			public MessageDigestType getMessageDigest(short keyID, boolean duringDecryptionPhase)  {
+				return null;
+			}
+
+			@Override
+			public IASymmetricPrivateKey getPrivateKeyForSignature(short keyID) throws MessageExternalizationException {
+				if (keyID==0)
+					return keyPair1.getASymmetricPrivateKey();
+				else if (keyID==1)
+					return keyPair2.getASymmetricPrivateKey();
+				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
+			}
+
+			@Override
+			public IASymmetricPublicKey getPublicKeyForSignature(short keyID) throws MessageExternalizationException {
+				if (keyID==0)
+					return keyPair1.getASymmetricPublicKey();
+				else if (keyID==1)
+					return keyPair2.getASymmetricPublicKey();
+				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
+			}
+
+			@Override
+			public SymmetricSecretKey getSecretKeyForSignature(short keyID, boolean duringDecryptionPhase) throws IOException {
+				if (keyID==0)
+					return secretKeyForSignature1;
+				else if (keyID==1)
+					return secretKeyForSignature2;
+				throw new MessageExternalizationException(duringDecryptionPhase?Integrity.FAIL_AND_CANDIDATE_TO_BAN:Integrity.FAIL);
+			}
+
+			@Override
+			public SymmetricSecretKey getSecretKeyForEncryption(short keyID, boolean duringDecryptionPhase) throws IOException {
+				return null;
+			}
+
+			@Override
+			public boolean isValidProfileID(short id) {
+				return id==0 || id==1;
+			}
+
+			@Override
+			public short getDefaultKeyID() {
+				return 0;
+			}
+
+			@Override
+			public Short getValidProfileIDFromPublicKeyForSignature(IASymmetricPublicKey publicKeyForSignature) {
+				return null;
+			}
+		};
+		for (short secretKeyID=0;secretKeyID<2;secretKeyID++) {
+
+			RandomByteArrayInputStream bais = new RandomByteArrayInputStream(in.clone());
+			RandomByteArrayOutputStream baosSig = new RandomByteArrayOutputStream();
+			EncryptionSignatureHashEncoder writerSig = new EncryptionSignatureHashEncoder()
+					.withRandomInputStream(bais)
+					.withEncryptionProfileProvider(SecureRandomType.DEFAULT.getSingleton(null), encryptionProfileProvider, secretKeyID);
+			long expectedLength=writerSig.getMaximumOutputLengthWithOnlyHashAndSignatures();
+			writerSig.generatesOnlyHashAndSignatures(baosSig);
+			byte[] resSig = baosSig.getBytes();
+			Assert.assertTrue(resSig.length<=expectedLength );
+			bais = new RandomByteArrayInputStream(in.clone());
+			EncryptionSignatureHashDecoder readerSig = new EncryptionSignatureHashDecoder()
+					.withRandomInputStream(bais)
+					.withEncryptionProfileProvider(encryptionProfileProvider);
+
+			Assert.assertEquals(readerSig.checkHashAndSignatures(new RandomByteArrayInputStream(resSig), bais),Integrity.OK );
 		}
 	}
 

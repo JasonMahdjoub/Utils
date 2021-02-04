@@ -1,6 +1,6 @@
 Utils
 =====
-5.15.0 STABLE (Build: 2385) (from 04/01/2016 to 19/01/2020)
+5.15.1 STABLE (Build: 2392) (from 04/01/2016 to 04/02/2020)
 
 # Creator(s):
 Jason MAHDJOUB
@@ -11,7 +11,11 @@ Jason MAHDJOUB (Entered in the team at 04/01/2016)
 # Modifications:
 
 
-### 5.15.0 STABLE (19/01/2020)
+### 5.15.1 STABLE (04/02/2020)
+* Fix issues when checking signatures with EncryptionProfileProvider
+
+
+### 5.15.0 STABLE (03/02/2020)
 * rename class SecureExternalizableWithEncryptionProfileProvider to SecureExternalizableWithEncryptionEncoder
 * Add class SecureExternalizableWithPublicKeysSignatures
 * Add class SecureExternalizableThatUseEncryptionProfileProvider

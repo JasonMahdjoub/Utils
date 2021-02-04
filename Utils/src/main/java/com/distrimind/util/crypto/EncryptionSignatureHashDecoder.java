@@ -219,6 +219,9 @@ public class EncryptionSignatureHashDecoder {
 		this.encryptionProfileProvider = encryptionProfileProvider;
 		this.cipher=null;
 		originalSecretKeyForEncryption=null;
+		this.digest=null;
+		this.asymmetricChecker=null;
+		this.symmetricChecker=null;
 		return this;
 	}
 	public EncryptionSignatureHashDecoder withoutAssociatedData()
@@ -476,17 +479,19 @@ public class EncryptionSignatureHashDecoder {
 	}
 	public Integrity checkHashAndPublicSignature(byte[] hashAndSignatures, int hashAndSignaturesOff, int hashAndSignaturesLen, byte[] data, int dataOff, int dataLen) throws IOException {
 		init(hashAndSignatures, hashAndSignaturesOff, hashAndSignaturesLen, data, dataOff, dataLen);
-		Integrity i=checkParametersForHashAndSignaturesAlone(true);
+
+		Integrity i=checkHashAndPublicSignature();
 		if (i!=Integrity.OK)
 			return i;
-		return checkHashAndPublicSignature();
+		return checkParametersForHashAndSignaturesAlone(true);
 	}
 	public Integrity checkHashAndPublicSignature(RandomInputStream hashAndSignatures, RandomInputStream data) throws IOException {
 		init(hashAndSignatures, data);
-		Integrity i=checkParametersForHashAndSignaturesAlone(true);
+
+		Integrity i= checkHashAndPublicSignature();
 		if (i!=Integrity.OK)
 			return i;
-		return checkHashAndPublicSignature();
+		return checkParametersForHashAndSignaturesAlone(true);
 	}
 	private Integrity checkParametersForHashAndSignaturesAlone(boolean duringPublicSignatureChecking) throws IOException {
 		if (isEncrypted())
@@ -497,17 +502,19 @@ public class EncryptionSignatureHashDecoder {
 	}
 	public Integrity checkHashAndSignatures(byte[] hashAndSignatures, int hashAndSignaturesOff, int hashAndSignaturesLen, byte[] data, int dataOff, int dataLen) throws IOException {
 		init(hashAndSignatures, hashAndSignaturesOff, hashAndSignaturesLen, data, dataOff, dataLen);
-		Integrity i=checkParametersForHashAndSignaturesAlone(false);
+
+		Integrity i=checkHashAndSignatures();
 		if (i!=Integrity.OK)
 			return i;
-		return checkHashAndSignatures();
+		return checkParametersForHashAndSignaturesAlone(false);
 	}
 	public Integrity checkHashAndSignatures(RandomInputStream hashAndSignatures, RandomInputStream data) throws IOException {
 		init(hashAndSignatures, data);
-		Integrity i=checkParametersForHashAndSignaturesAlone(false);
+
+		Integrity i=checkHashAndSignatures();
 		if (i!=Integrity.OK)
 			return i;
-		return checkHashAndSignatures();
+		return checkParametersForHashAndSignaturesAlone(false);
 	}
 	public RandomInputStream decodeAndCheckHashAndSignaturesIfNecessary() throws IOException {
 		return decodeAndCheckHashAndSignaturesIfNecessary((Reference<Long>)null);
