@@ -66,7 +66,7 @@ public abstract class Agreement implements Zeroizable {
 
 		int c=0;
 		for (int i=0;i<localMessage.length;i++)
-			c+=Integer.bitCount(localMessage[i]^distantMessage[i]);
+			c+=Integer.bitCount(localMessage[i]&distantMessage[i]);
 		if (c>=(4*localMessage.length)/5)
 			throw new MessageExternalizationException(Integrity.FAIL, new CryptoException());
 	}
