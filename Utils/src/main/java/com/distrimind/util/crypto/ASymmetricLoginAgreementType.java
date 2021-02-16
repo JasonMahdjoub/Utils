@@ -50,12 +50,12 @@ public enum ASymmetricLoginAgreementType {
     }
 
     public P2PLoginAgreement getAgreementAlgorithmForASymmetricSignatureRequester(AbstractSecureRandom random, AbstractKeyPair<?,?> keyPair) {
-        return new P2PLoginWithASymmetricSignature(keyPair, random);
+        return new ClientLoginSignerWithASymmetricSignature(keyPair, random);
 
     }
 
     public P2PLoginAgreement getAgreementAlgorithmForASymmetricSignatureReceiver(AbstractSecureRandom random, IASymmetricPublicKey publicKey) {
-        return new P2PLoginCheckerWithASymmetricSignature(publicKey, random);
+        return new ServerLoginCheckerWithASymmetricSignature(publicKey, random);
 
     }
 

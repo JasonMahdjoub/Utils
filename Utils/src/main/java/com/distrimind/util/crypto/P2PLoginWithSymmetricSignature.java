@@ -45,14 +45,14 @@ import java.util.Arrays;
 /**
  *
  * @author Jason Mahdjoub
- * @version 1.2
+ * @version 1.3
  * @since Utils 3.15.0
  */
 public class P2PLoginWithSymmetricSignature extends P2PLoginAgreement {
 
 	private final SymmetricSecretKey secretKey;
 	private byte[] myMessage, otherMessage=null;
-	private static final int messageSize=32;
+	private static final int messageSize=64;
 	private boolean valid=true;
 
 	@Override
@@ -103,7 +103,6 @@ public class P2PLoginWithSymmetricSignature extends P2PLoginAgreement {
 					}
 					SymmetricAuthenticatedSignerAlgorithm signer = new SymmetricAuthenticatedSignerAlgorithm(secretKey);
 					signer.init();
-					signer.update(myMessage);
 					signer.update(otherMessage);
 					return signer.getSignature();
 
@@ -130,25 +129,26 @@ public class P2PLoginWithSymmetricSignature extends P2PLoginAgreement {
 				case 0: {
 					if (otherMessage != null) {
 						valid = false;
-						throw new CryptoException();
+						throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException());
 					}
 					if (data.length != messageSize) {
 						valid = false;
-						throw new CryptoException();
+						throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException());
 					}
+					if (Arrays.equals(data, myMessage))
+						throw new MessageExternalizationException(Integrity.FAIL, new CryptoException());
+
 					otherMessage = data;
 				}
 				break;
 				case 1: {
 					if (otherMessage == null) {
 						valid = false;
-						throw new CryptoException();
+						throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException());
 					}
 					SymmetricAuthenticatedSignatureCheckerAlgorithm checker = new SymmetricAuthenticatedSignatureCheckerAlgorithm(secretKey);
 					checker.init(data);
-					checker.update(otherMessage);
 					checker.update(myMessage);
-
 					valid = checker.verify();
 				}
 				break;
