@@ -35,6 +35,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
 package com.distrimind.util.crypto;
 
 
+import com.distrimind.bouncycastle.crypto.CryptoException;
 import com.distrimind.util.io.Integrity;
 import com.distrimind.util.io.MessageExternalizationException;
 
@@ -47,7 +48,29 @@ import java.io.IOException;
  * @since Utils 3.0
  */
 public abstract class Agreement implements Zeroizable {
+	static void checkCompatibleMessages(byte[] localMessage, byte[] distantMessage) throws MessageExternalizationException {
 
+		if (distantMessage.length != localMessage.length) {
+			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException());
+		}
+
+		l1:for (int s=localMessage.length/2, i=s;i>=0;i--)
+		{
+			for (int j=i+s-1;j>=i;j--)
+			{
+				if (localMessage[j]!=distantMessage[j])
+					continue l1;
+			}
+			throw new MessageExternalizationException(Integrity.FAIL, new CryptoException());
+		}
+
+		int c=0;
+		for (int i=0;i<localMessage.length;i++)
+			c+=Integer.bitCount(localMessage[i]^distantMessage[i]);
+		if (c>=(4*localMessage.length)/5)
+			throw new MessageExternalizationException(Integrity.FAIL, new CryptoException());
+	}
+	static final int messageSize=64;
 	private int actualStepForReception, actualStepForSend;
 	private final int stepsNumberForReception;
 	private final int stepsNumberForSend;

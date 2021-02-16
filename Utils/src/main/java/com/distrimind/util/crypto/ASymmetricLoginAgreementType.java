@@ -49,12 +49,12 @@ public enum ASymmetricLoginAgreementType {
         this.pqc=pqc;
     }
 
-    public P2PLoginAgreement getAgreementAlgorithmForASymmetricSignatureRequester(AbstractSecureRandom random, AbstractKeyPair<?,?> keyPair) {
+    public ClientServerLoginAgreement getAgreementAlgorithmForASymmetricSignatureRequester(AbstractSecureRandom random, AbstractKeyPair<?,?> keyPair) {
         return new ClientLoginSignerWithASymmetricSignature(keyPair, random);
 
     }
 
-    public P2PLoginAgreement getAgreementAlgorithmForASymmetricSignatureReceiver(AbstractSecureRandom random, IASymmetricPublicKey publicKey) {
+    public ClientServerLoginAgreement getAgreementAlgorithmForASymmetricSignatureReceiver(AbstractSecureRandom random, IASymmetricPublicKey publicKey) {
         return new ServerLoginCheckerWithASymmetricSignature(publicKey, random);
 
     }

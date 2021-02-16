@@ -120,21 +120,14 @@ public class ServerLoginCheckerWithASymmetricSignature extends ClientServerLogin
                 case 0: {
                     if (otherMessage!=null)
                     {
-                        valid=false;
                         throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException());
                     }
-                    if (data.length != ClientLoginSignerWithASymmetricSignature.messageSize) {
-                        valid = false;
-                        throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException());
-                    }
-                    if (Arrays.equals(data, myMessage))
-                        throw new MessageExternalizationException(Integrity.FAIL, new CryptoException());
+                    checkCompatibleMessages(myMessage, data);
                     otherMessage = data;
                 }
                 break;
                 case 1: {
                     if (otherMessage == null) {
-                        valid = false;
                         throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException());
                     }
                     ASymmetricAuthenticatedSignatureCheckerAlgorithm checker = new ASymmetricAuthenticatedSignatureCheckerAlgorithm(publicKey);
@@ -146,17 +139,18 @@ public class ServerLoginCheckerWithASymmetricSignature extends ClientServerLogin
                 }
                 break;
                 default:
-                    valid = false;
                     throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException("" + stepNumber));
             }
+        }
+        catch (MessageExternalizationException e)
+        {
+            valid=false;
+            throw e;
         }
         catch (Exception e)
         {
             valid = false;
-            if (e instanceof CryptoException)
-                throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, e);
-            else
-                throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException("", e));
+            throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException("", e));
         }
     }
 }

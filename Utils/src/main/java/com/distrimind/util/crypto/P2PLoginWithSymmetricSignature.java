@@ -52,7 +52,7 @@ public class P2PLoginWithSymmetricSignature extends P2PLoginAgreement {
 
 	private final SymmetricSecretKey secretKey;
 	private byte[] myMessage, otherMessage=null;
-	private static final int messageSize=64;
+
 	private boolean valid=true;
 
 	@Override
@@ -120,6 +120,8 @@ public class P2PLoginWithSymmetricSignature extends P2PLoginAgreement {
 
 	}
 
+
+
 	@Override
 	protected void receiveData(int stepNumber, byte[] data) throws IOException {
 		try {
@@ -131,12 +133,7 @@ public class P2PLoginWithSymmetricSignature extends P2PLoginAgreement {
 						valid = false;
 						throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException());
 					}
-					if (data.length != messageSize) {
-						valid = false;
-						throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException());
-					}
-					if (Arrays.equals(data, myMessage))
-						throw new MessageExternalizationException(Integrity.FAIL, new CryptoException());
+					checkCompatibleMessages(myMessage, data);
 
 					otherMessage = data;
 				}
@@ -156,6 +153,11 @@ public class P2PLoginWithSymmetricSignature extends P2PLoginAgreement {
 					valid = false;
 					throw new CryptoException("" + stepNumber);
 			}
+		}
+		catch (MessageExternalizationException e)
+		{
+			valid = false;
+			throw e;
 		}
 		catch (Exception e)
 		{

@@ -126,38 +126,30 @@ public class ClientLoginSignerWithASymmetricSignature extends ClientServerLoginA
     protected void receiveData(int stepNumber, byte[] data) throws IOException {
         if (!valid)
             throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException());
-
-        switch(stepNumber)
+        try {
+            switch (stepNumber) {
+                case 0: {
+                    if (otherMessage != null) {
+                        throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException());
+                    }
+                    checkCompatibleMessages(myMessage, data);
+                    otherMessage = data;
+                }
+                break;
+                case 1: {
+                    if (data.length != 0) {
+                        throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException());
+                    }
+                }
+                break;
+                default:
+                    throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException("" + stepNumber));
+            }
+        }
+        catch (MessageExternalizationException e)
         {
-            case 0:
-            {
-                if (otherMessage!=null)
-                {
-                    valid=false;
-                    throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException());
-                }
-                if (data.length!=messageSize)
-                {
-                    valid=false;
-                    throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException());
-                }
-                if (Arrays.equals(data, myMessage))
-                    throw new MessageExternalizationException(Integrity.FAIL, new CryptoException());
-                otherMessage=data;
-            }
-            break;
-            case 1:
-            {
-                if (data.length!=0)
-                {
-                    valid=false;
-                    throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException());
-                }
-            }
-            break;
-            default:
-                valid=false;
-                throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException(""+stepNumber));
+            valid=false;
+            throw e;
         }
     }
 }
