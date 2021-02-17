@@ -130,12 +130,7 @@ public class ServerLoginCheckerWithASymmetricSignature extends ClientServerLogin
                     if (otherMessage == null) {
                         throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException());
                     }
-                    ASymmetricAuthenticatedSignatureCheckerAlgorithm checker = new ASymmetricAuthenticatedSignatureCheckerAlgorithm(publicKey);
-                    checker.init(data);
-                    checker.update(otherMessage);
-                    checker.update(myMessage);
-
-                    valid = checker.verify();
+                    valid = checkSignature(myMessage, otherMessage, new ASymmetricAuthenticatedSignatureCheckerAlgorithm(publicKey), data, 0, data.length);
                 }
                 break;
                 default:

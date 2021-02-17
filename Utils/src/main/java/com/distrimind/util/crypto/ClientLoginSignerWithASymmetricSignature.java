@@ -102,12 +102,7 @@ public class ClientLoginSignerWithASymmetricSignature extends ClientServerLoginA
                         valid = false;
                         throw new IllegalAccessError();
                     }
-                    ASymmetricAuthenticatedSignerAlgorithm signer = new ASymmetricAuthenticatedSignerAlgorithm(privateKey);
-                    signer.init();
-                    signer.update(myMessage);
-                    signer.update(otherMessage);
-                    return signer.getSignature();
-
+                    return generateSignature(myMessage, otherMessage, new ASymmetricAuthenticatedSignerAlgorithm(privateKey));
                 }
                 default:
                     valid = false;
