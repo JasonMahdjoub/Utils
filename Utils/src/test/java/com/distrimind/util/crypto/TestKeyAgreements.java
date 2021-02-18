@@ -467,19 +467,20 @@ public class TestKeyAgreements {
 		ArrayList<Object[]> res = new ArrayList<>();
 		SymmetricSecretKey secretKey= SymmetricAuthenticatedSignatureType.BC_FIPS_HMAC_SHA2_384.getKeyGenerator(SecureRandomType.DEFAULT.getInstance(null)).generateKey();
 		ASymmetricKeyPair keyPair= ASymmetricAuthenticatedSignatureType.BC_FIPS_Ed25519.getKeyPairGenerator(SecureRandomType.DEFAULT.getInstance(null)).generateKeyPair();
+		ASymmetricKeyPair distantKeyPair= ASymmetricAuthenticatedSignatureType.BC_FIPS_Ed25519.getKeyPairGenerator(SecureRandomType.DEFAULT.getInstance(null)).generateKeyPair();
 		for (byte[] m : VariousTests.messagesToEncrypt) {
 			for (boolean expectedVerify : new boolean[] { true, false }) {
 				for (byte[] s : new byte[][] { null, salt }) {
 					for (boolean messageIsKey : new boolean[] { true, false }) {
 						for (P2PLoginAgreementType t : P2PLoginAgreementType.values())
 						{
-							res.add(new Object[] { t, null, expectedVerify, messageIsKey, s, m , secretKey, null});
+							res.add(new Object[] { t, null, expectedVerify, messageIsKey, s, m , secretKey, keyPair, distantKeyPair});
 							if (t==P2PLoginAgreementType.JPAKE_AND_AGREEMENT_WITH_SYMMETRIC_SIGNATURE || t==P2PLoginAgreementType.ASYMMETRIC_SECRET_MESSAGE_EXCHANGER_AND_AGREEMENT_WITH_SYMMETRIC_SIGNATURE)
-								res.add(new Object[] { t, null, expectedVerify, messageIsKey, s, m , null, null});
+								res.add(new Object[] { t, null, expectedVerify, messageIsKey, s, m , secretKey, null, null});
 						}
 						for (ASymmetricLoginAgreementType t : ASymmetricLoginAgreementType.values())
 						{
-							res.add(new Object[] { null, t, expectedVerify, messageIsKey, s, m , null, keyPair});
+							res.add(new Object[] { null, t, expectedVerify, messageIsKey, s, m , null, keyPair, distantKeyPair});
 						}
 					}
 				}
@@ -493,15 +494,15 @@ public class TestKeyAgreements {
 	}
 
 	@Test(dataProvider = "provideDataForP2PLoginAgreement")
-	public void testP2PLoginAgreement(P2PLoginAgreementType type, ASymmetricLoginAgreementType asType, boolean expectedVerify, boolean messageIsKey, byte[] salt, byte[] m, SymmetricSecretKey secretKey, ASymmetricKeyPair keyPair)
+	public void testP2PLoginAgreement(P2PLoginAgreementType type, ASymmetricLoginAgreementType asType, boolean expectedVerify, boolean messageIsKey, byte[] salt, byte[] m, SymmetricSecretKey secretKey, ASymmetricKeyPair keyPair, ASymmetricKeyPair distantKeyPair)
 			throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
 		System.out.println(type+";"+asType);
 		AbstractSecureRandom r = SecureRandomType.DEFAULT.getSingleton(null);
 		byte[] falseMessage = new byte[10];
 		r.nextBytes(falseMessage);
 		SymmetricSecretKey falseSecretKey=secretKey==null?null:secretKey.getAuthenticatedSignatureAlgorithmType().getKeyGenerator(r).generateKey();
-		P2PLoginAgreement exchanger1;
-		P2PLoginAgreement exchanger2;
+		Agreement exchanger1;
+		Agreement exchanger2;
 		if (asType!=null)
 		{
 			exchanger1=asType.getAgreementAlgorithmForASymmetricSignatureRequester(r, keyPair);
@@ -510,10 +511,10 @@ public class TestKeyAgreements {
 		}
 		else {
 			exchanger1 = type.getAgreementAlgorithm(r, "participant id 1".getBytes(), m, 0,
-					m.length, salt, 0, salt == null ? 0 : salt.length, messageIsKey, (expectedVerify ? secretKey : falseSecretKey));
+					m.length, salt, 0, salt == null ? 0 : salt.length, messageIsKey, (expectedVerify ? secretKey : falseSecretKey), keyPair==null?null:keyPair.getASymmetricPrivateKey(), distantKeyPair==null?null:distantKeyPair.getASymmetricPublicKey());
 			exchanger2 = type.getAgreementAlgorithm(r, "participant id 2".getBytes(),
 					expectedVerify ? m : falseMessage, 0, (expectedVerify ? m : falseMessage).length, salt, 0,
-					salt == null ? 0 : salt.length, messageIsKey, (expectedVerify ? secretKey : falseSecretKey));
+					salt == null ? 0 : salt.length, messageIsKey, (expectedVerify ? secretKey : falseSecretKey), distantKeyPair==null?null:distantKeyPair.getASymmetricPrivateKey(), keyPair==null?null:keyPair.getASymmetricPublicKey());
 		}
 		try {
 			int send=0, received=0;

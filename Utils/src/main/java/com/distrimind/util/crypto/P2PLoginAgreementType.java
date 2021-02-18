@@ -47,7 +47,11 @@ import java.security.NoSuchProviderException;
 public enum P2PLoginAgreementType {
 	JPAKE(false),
 	AGREEMENT_WITH_SYMMETRIC_SIGNATURE(true),
+	AGREEMENT_WITH_SYMMETRIC_AND_ASYMMETRIC_SIGNATURES(true),
+	AGREEMENT_WITH_ASYMMETRIC_SIGNATURE(true),
 	JPAKE_AND_AGREEMENT_WITH_SYMMETRIC_SIGNATURE(false),
+	JPAKE_AND_AGREEMENT_WITH_ASYMMETRIC_SIGNATURE(false),
+	JPAKE_AND_AGREEMENT_WITH_SYMMETRIC_AND_ASYMMETRIC_SIGNATURES(false),
 	ASYMMETRIC_SECRET_MESSAGE_EXCHANGER(false),
 	ASYMMETRIC_SECRET_MESSAGE_EXCHANGER_AND_AGREEMENT_WITH_SYMMETRIC_SIGNATURE(false);
 
@@ -75,46 +79,65 @@ public enum P2PLoginAgreementType {
 		return getAgreementAlgorithm(random, participantID, password.getChars(), secretKeyForSignature, getDefaultMessageDigestType(), getDefaultPasswordHashType(), generateASymmetricPublicKey(random));
 	}
 	public P2PLoginAgreement getAgreementAlgorithm(AbstractSecureRandom random, byte[] participantID, WrappedPassword password, SymmetricSecretKey secretKeyForSignature, MessageDigestType messageDigestType, PasswordHashType passwordHashType,
-												   ASymmetricPublicKey myPublicKey) throws NoSuchAlgorithmException,  NoSuchProviderException, IOException{
-		return getAgreementAlgorithm(random, participantID, password.getChars(), null, 0, 0, secretKeyForSignature, messageDigestType, passwordHashType, myPublicKey);
+												   ASymmetricPublicKey myPublicKeyForEncryptionDestinedToSecretMessageExchanger) throws NoSuchAlgorithmException,  NoSuchProviderException, IOException{
+		return getAgreementAlgorithm(random, participantID, password.getChars(), null, 0, 0, secretKeyForSignature, messageDigestType, passwordHashType, myPublicKeyForEncryptionDestinedToSecretMessageExchanger, null, null);
 	}
 	public P2PLoginAgreement getAgreementAlgorithm(AbstractSecureRandom random, byte[] participantID, WrappedPassword password, byte[] salt,
 												   int offset_salt, int len_salt, SymmetricSecretKey secretKeyForSignature) throws NoSuchAlgorithmException, NoSuchProviderException, IOException{
-		return getAgreementAlgorithm(random, participantID, password.getChars(), salt, offset_salt, len_salt, secretKeyForSignature, getDefaultMessageDigestType(), getDefaultPasswordHashType(), generateASymmetricPublicKey(random));
+		return getAgreementAlgorithm(random, participantID, password.getChars(), salt, offset_salt, len_salt, secretKeyForSignature, getDefaultMessageDigestType(), getDefaultPasswordHashType(), generateASymmetricPublicKey(random), null, null);
 	}
 	public P2PLoginAgreement getAgreementAlgorithm(AbstractSecureRandom random, byte[] participantID, WrappedPassword password, byte[] salt,
 												   int offset_salt, int len_salt, SymmetricSecretKey secretKeyForSignature, MessageDigestType messageDigestType, PasswordHashType passwordHashType,
-												   ASymmetricPublicKey myPublicKey) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
-		return getAgreementAlgorithm(random, participantID, password.getChars(), salt, offset_salt, len_salt, secretKeyForSignature, messageDigestType, passwordHashType, myPublicKey);
+												   ASymmetricPublicKey myPublicKeyForEncryptionDestinedToSecretMessageExchanger) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
+		return getAgreementAlgorithm(random, participantID, password.getChars(), salt, offset_salt, len_salt, secretKeyForSignature, messageDigestType, passwordHashType, myPublicKeyForEncryptionDestinedToSecretMessageExchanger, null, null);
 	}
 	public P2PLoginAgreement getAgreementAlgorithm(AbstractSecureRandom random, byte[] participantID, char[] message, SymmetricSecretKey secretKeyForSignature) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
 		return getAgreementAlgorithm(random, participantID, message, secretKeyForSignature, getDefaultMessageDigestType(), getDefaultPasswordHashType(), generateASymmetricPublicKey(random));
 	}
 	public P2PLoginAgreement getAgreementAlgorithm(AbstractSecureRandom random, byte[] participantID, char[] message, SymmetricSecretKey secretKeyForSignature,MessageDigestType messageDigestType, PasswordHashType passwordHashType,
-												   ASymmetricPublicKey myPublicKey) throws NoSuchAlgorithmException,  NoSuchProviderException, IOException{
-		return getAgreementAlgorithm(random, participantID, message, null, 0, 0, secretKeyForSignature, messageDigestType, passwordHashType, myPublicKey);
+												   ASymmetricPublicKey myPublicKeyForEncryptionDestinedToSecretMessageExchanger) throws NoSuchAlgorithmException,  NoSuchProviderException, IOException{
+		return getAgreementAlgorithm(random, participantID, message, null, 0, 0, secretKeyForSignature, messageDigestType, passwordHashType, myPublicKeyForEncryptionDestinedToSecretMessageExchanger, null, null);
 	}
 	public P2PLoginAgreement getAgreementAlgorithm(AbstractSecureRandom random, byte[] participantID, char[] message, byte[] salt,
 												   int offset_salt, int len_salt, SymmetricSecretKey secretKeyForSignature) throws NoSuchAlgorithmException, NoSuchProviderException, IOException{
-		return getAgreementAlgorithm(random, participantID, message, salt, offset_salt, len_salt, secretKeyForSignature, getDefaultMessageDigestType(), getDefaultPasswordHashType(), generateASymmetricPublicKey(random));
+		return getAgreementAlgorithm(random, participantID, message, salt, offset_salt, len_salt, secretKeyForSignature, getDefaultMessageDigestType(), getDefaultPasswordHashType(), generateASymmetricPublicKey(random), null, null);
+	}
+	public P2PLoginAgreement getAgreementAlgorithm(AbstractSecureRandom random, byte[] participantID, char[] message, byte[] salt,
+												   int offset_salt, int len_salt, SymmetricSecretKey secretKeyForSignature, IASymmetricPrivateKey myPrivateKeyForSignature, IASymmetricPublicKey otherPublicKeyForSignature) throws NoSuchAlgorithmException, NoSuchProviderException, IOException{
+		return getAgreementAlgorithm(random, participantID, message, salt, offset_salt, len_salt, secretKeyForSignature, getDefaultMessageDigestType(), getDefaultPasswordHashType(),
+				generateASymmetricPublicKey(random), myPrivateKeyForSignature, otherPublicKeyForSignature);
 	}
 	public P2PLoginAgreement getAgreementAlgorithm(AbstractSecureRandom random, byte[] participantID, char[] message, byte[] salt,
 												   int offset_salt, int len_salt, SymmetricSecretKey secretKeyForSignature,MessageDigestType messageDigestType, PasswordHashType passwordHashType,
-												   ASymmetricPublicKey myPublicKey) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
+												   IASymmetricPrivateKey myPrivateKeyForSignature, IASymmetricPublicKey otherPublicKeyForSignature) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
+		return getAgreementAlgorithm(random, participantID, message, salt, offset_salt, len_salt, secretKeyForSignature, messageDigestType, passwordHashType,
+				generateASymmetricPublicKey(random), myPrivateKeyForSignature, otherPublicKeyForSignature);
+	}
+	public P2PLoginAgreement getAgreementAlgorithm(AbstractSecureRandom random, byte[] participantID, char[] message, byte[] salt,
+												   int offset_salt, int len_salt, SymmetricSecretKey secretKeyForSignature,MessageDigestType messageDigestType, PasswordHashType passwordHashType, ASymmetricPublicKey myPublicKeyForEncryptionDestinedToSecretMessageExchanger,
+												   IASymmetricPrivateKey myPrivateKeyForSignature, IASymmetricPublicKey otherPublicKeyForSignature) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
 		
 		switch(this)
 		{
-		case AGREEMENT_WITH_SYMMETRIC_SIGNATURE:
-			return new P2PLoginWithSymmetricSignature(secretKeyForSignature, random);
-		case JPAKE:
-			return new P2PJPAKESecretMessageExchanger(random, participantID, message, salt, offset_salt, len_salt);
-		case JPAKE_AND_AGREEMENT_WITH_SYMMETRIC_SIGNATURE:
-			return new P2PJPakeAndLoginAgreement(random, participantID, message, salt, offset_salt, len_salt, secretKeyForSignature);
-		case ASYMMETRIC_SECRET_MESSAGE_EXCHANGER:
-			return new P2PASymmetricSecretMessageExchangerAgreement(random, messageDigestType, passwordHashType, myPublicKey, salt, offset_salt, len_salt, message);
+			case AGREEMENT_WITH_SYMMETRIC_SIGNATURE:
+				return new P2PLoginWithSymmetricSignature(secretKeyForSignature, random);
+			case AGREEMENT_WITH_ASYMMETRIC_SIGNATURE:
+				return new P2PLoginWithAsymmetricSignature(random, myPrivateKeyForSignature, otherPublicKeyForSignature);
+			case JPAKE:
+				return new P2PJPAKESecretMessageExchanger(random, participantID, message, salt, offset_salt, len_salt);
+			case JPAKE_AND_AGREEMENT_WITH_SYMMETRIC_SIGNATURE:
+				return new AggregatedP2PLoginAgreements(new P2PLoginWithSymmetricSignature(secretKeyForSignature, random), new P2PJPAKESecretMessageExchanger(random, participantID, message, salt, offset_salt, len_salt));
+			case ASYMMETRIC_SECRET_MESSAGE_EXCHANGER:
+				return new P2PASymmetricSecretMessageExchangerAgreement(random, messageDigestType, passwordHashType, myPublicKeyForEncryptionDestinedToSecretMessageExchanger, salt, offset_salt, len_salt, message);
 
-		case ASYMMETRIC_SECRET_MESSAGE_EXCHANGER_AND_AGREEMENT_WITH_SYMMETRIC_SIGNATURE:
-			return new P2PASymmetricSecretMessageExchangerAgreementWithSymmetricSignature(random, message, salt, offset_salt, len_salt, secretKeyForSignature, messageDigestType, passwordHashType, myPublicKey);
+			case ASYMMETRIC_SECRET_MESSAGE_EXCHANGER_AND_AGREEMENT_WITH_SYMMETRIC_SIGNATURE:
+				return new P2PASymmetricSecretMessageExchangerAgreementWithSymmetricSignature(random, message, salt, offset_salt, len_salt, secretKeyForSignature, messageDigestType, passwordHashType, myPublicKeyForEncryptionDestinedToSecretMessageExchanger);
+			case AGREEMENT_WITH_SYMMETRIC_AND_ASYMMETRIC_SIGNATURES:
+				return new AggregatedP2PLoginAgreements(new P2PLoginWithSymmetricSignature(secretKeyForSignature, random), new P2PLoginWithAsymmetricSignature(random, myPrivateKeyForSignature, otherPublicKeyForSignature));
+			case JPAKE_AND_AGREEMENT_WITH_ASYMMETRIC_SIGNATURE:
+				return new AggregatedP2PLoginAgreements(new P2PLoginWithAsymmetricSignature(random, myPrivateKeyForSignature, otherPublicKeyForSignature), new P2PJPAKESecretMessageExchanger(random, participantID, message, salt, offset_salt, len_salt));
+			case JPAKE_AND_AGREEMENT_WITH_SYMMETRIC_AND_ASYMMETRIC_SIGNATURES:
+				return new AggregatedP2PLoginAgreements(new P2PLoginWithSymmetricSignature(secretKeyForSignature, random), new P2PLoginWithAsymmetricSignature(random, myPrivateKeyForSignature, otherPublicKeyForSignature), new P2PJPAKESecretMessageExchanger(random, participantID, message, salt, offset_salt, len_salt));
 		}
 
 		throw new IllegalAccessError();
@@ -123,32 +146,58 @@ public enum P2PLoginAgreementType {
 		return getAgreementAlgorithm(random, participantID, message, messageIsKey, secretKeyForSignature,getDefaultMessageDigestType(), getDefaultPasswordHashType(), generateASymmetricPublicKey(random));
 	}
 	public P2PLoginAgreement getAgreementAlgorithm(AbstractSecureRandom random, byte[] participantID, byte[] message, boolean messageIsKey, SymmetricSecretKey secretKeyForSignature,MessageDigestType messageDigestType, PasswordHashType passwordHashType,
-												   ASymmetricPublicKey myPublicKey) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
-		return getAgreementAlgorithm(random, participantID, message, 0, message.length,null, 0, 0, messageIsKey, secretKeyForSignature, messageDigestType, passwordHashType, myPublicKey);
+												   ASymmetricPublicKey myPublicKeyForEncryptionDestinedToSecretMessageExchanger) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
+		return getAgreementAlgorithm(random, participantID, message, 0, message.length,null, 0, 0, messageIsKey, secretKeyForSignature, messageDigestType, passwordHashType, myPublicKeyForEncryptionDestinedToSecretMessageExchanger, null, null);
 	}
 	public P2PLoginAgreement getAgreementAlgorithm(AbstractSecureRandom random, byte[] participantID, byte[] message, int offset, int len, byte[] salt,
 												   int offset_salt, int len_salt, boolean messageIsKey, SymmetricSecretKey secretKeyForSignature) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
-		return getAgreementAlgorithm(random, participantID, message, offset, len, salt, offset_salt, len_salt, messageIsKey, secretKeyForSignature,getDefaultMessageDigestType(), getDefaultPasswordHashType(), generateASymmetricPublicKey(random));
+		return getAgreementAlgorithm(random, participantID, message, offset, len, salt, offset_salt, len_salt, messageIsKey, secretKeyForSignature,getDefaultMessageDigestType(), getDefaultPasswordHashType(), generateASymmetricPublicKey(random), null, null);
 	}
-
+	public P2PLoginAgreement getAgreementAlgorithm(AbstractSecureRandom random, byte[] participantID, byte[] message, int offset, int len, byte[] salt,
+												   int offset_salt, int len_salt, boolean messageIsKey, SymmetricSecretKey secretKeyForSignature, ASymmetricPublicKey myPublicKeyForEncryptionDestinedToSecretMessageExchanger,
+												   IASymmetricPrivateKey myPrivateKeyForSignature, IASymmetricPublicKey otherPublicKeyForSignature) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
+		return getAgreementAlgorithm(random, participantID, message, offset, len, salt, offset_salt, len_salt, messageIsKey, secretKeyForSignature,getDefaultMessageDigestType(), getDefaultPasswordHashType(), myPublicKeyForEncryptionDestinedToSecretMessageExchanger, myPrivateKeyForSignature, otherPublicKeyForSignature);
+	}
+	public P2PLoginAgreement getAgreementAlgorithm(AbstractSecureRandom random, byte[] participantID, byte[] message, int offset, int len, byte[] salt,
+												   int offset_salt, int len_salt, boolean messageIsKey, SymmetricSecretKey secretKeyForSignature, IASymmetricPrivateKey myPrivateKeyForSignature, IASymmetricPublicKey otherPublicKeyForSignature) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
+		return getAgreementAlgorithm(random, participantID, message, offset, len, salt, offset_salt, len_salt, messageIsKey, secretKeyForSignature,getDefaultMessageDigestType(), getDefaultPasswordHashType(),
+				generateASymmetricPublicKey(random), myPrivateKeyForSignature, otherPublicKeyForSignature);
+	}
 	public P2PLoginAgreement getAgreementAlgorithm(AbstractSecureRandom random, byte[] participantID, byte[] message, int offset, int len, byte[] salt,
 												   int offset_salt, int len_salt, boolean messageIsKey, SymmetricSecretKey secretKeyForSignature,MessageDigestType messageDigestType, PasswordHashType passwordHashType,
-												   ASymmetricPublicKey myPublicKey) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
+												   IASymmetricPrivateKey myPrivateKeyForSignature, IASymmetricPublicKey otherPublicKeyForSignature) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
+		return getAgreementAlgorithm(random, participantID, message, offset, len, salt, offset_salt, len_salt,
+				messageIsKey, secretKeyForSignature, messageDigestType, passwordHashType,
+				generateASymmetricPublicKey(random), myPrivateKeyForSignature, otherPublicKeyForSignature);
+	}
+	public P2PLoginAgreement getAgreementAlgorithm(AbstractSecureRandom random, byte[] participantID, byte[] message, int offset, int len, byte[] salt,
+												   int offset_salt, int len_salt, boolean messageIsKey, SymmetricSecretKey secretKeyForSignature,MessageDigestType messageDigestType, PasswordHashType passwordHashType,
+												   ASymmetricPublicKey myPublicKeyForEncryptionDestinedToSecretMessageExchanger,
+												   IASymmetricPrivateKey myPrivateKeyForSignature, IASymmetricPublicKey otherPublicKeyForSignature) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
 		switch(this)
 		{
-		case AGREEMENT_WITH_SYMMETRIC_SIGNATURE:
-			return new P2PLoginWithSymmetricSignature(secretKeyForSignature, random);
-		case JPAKE:
-			return new P2PJPAKESecretMessageExchanger(random, participantID, message, offset, len, salt, offset_salt, len_salt, messageIsKey);
-		case JPAKE_AND_AGREEMENT_WITH_SYMMETRIC_SIGNATURE:
-			return new P2PJPakeAndLoginAgreement(random, participantID, message, offset, len, salt, offset_salt, len_salt, messageIsKey, secretKeyForSignature);
-		case ASYMMETRIC_SECRET_MESSAGE_EXCHANGER:
-			return new P2PASymmetricSecretMessageExchangerAgreement(random, messageDigestType, passwordHashType, myPublicKey, salt, offset_salt, len_salt, message, offset, len, messageIsKey);
+			case AGREEMENT_WITH_SYMMETRIC_SIGNATURE:
+				return new P2PLoginWithSymmetricSignature(secretKeyForSignature, random);
+			case AGREEMENT_WITH_ASYMMETRIC_SIGNATURE:
+				return new P2PLoginWithAsymmetricSignature(random, myPrivateKeyForSignature, otherPublicKeyForSignature);
+			case JPAKE:
+				return new P2PJPAKESecretMessageExchanger(random, participantID, message, offset, len, salt, offset_salt, len_salt, messageIsKey);
+			case JPAKE_AND_AGREEMENT_WITH_SYMMETRIC_SIGNATURE:
+				return new AggregatedP2PLoginAgreements(new P2PLoginWithSymmetricSignature(secretKeyForSignature, random), new P2PJPAKESecretMessageExchanger(random, participantID, message, offset, len, salt, offset_salt, len_salt, messageIsKey));
+			case ASYMMETRIC_SECRET_MESSAGE_EXCHANGER:
+				return new P2PASymmetricSecretMessageExchangerAgreement(random, messageDigestType, passwordHashType, myPublicKeyForEncryptionDestinedToSecretMessageExchanger, salt, offset_salt, len_salt, message, offset, len, messageIsKey);
 
-		case ASYMMETRIC_SECRET_MESSAGE_EXCHANGER_AND_AGREEMENT_WITH_SYMMETRIC_SIGNATURE:
-			return new P2PASymmetricSecretMessageExchangerAgreementWithSymmetricSignature(random, message, offset, len, salt, offset_salt, len_salt, messageIsKey, secretKeyForSignature, messageDigestType, passwordHashType, myPublicKey);
+			case ASYMMETRIC_SECRET_MESSAGE_EXCHANGER_AND_AGREEMENT_WITH_SYMMETRIC_SIGNATURE:
+				return new P2PASymmetricSecretMessageExchangerAgreementWithSymmetricSignature(random, message, offset, len, salt, offset_salt, len_salt, messageIsKey, secretKeyForSignature, messageDigestType, passwordHashType, myPublicKeyForEncryptionDestinedToSecretMessageExchanger);
+			case AGREEMENT_WITH_SYMMETRIC_AND_ASYMMETRIC_SIGNATURES:
+				return new AggregatedP2PLoginAgreements(new P2PLoginWithSymmetricSignature(secretKeyForSignature, random), new P2PLoginWithAsymmetricSignature(random, myPrivateKeyForSignature, otherPublicKeyForSignature));
+			case JPAKE_AND_AGREEMENT_WITH_ASYMMETRIC_SIGNATURE:
+				return new AggregatedP2PLoginAgreements(new P2PLoginWithAsymmetricSignature(random, myPrivateKeyForSignature, otherPublicKeyForSignature), new P2PJPAKESecretMessageExchanger(random, participantID, message, offset, len, salt, offset_salt, len_salt, messageIsKey));
+			case JPAKE_AND_AGREEMENT_WITH_SYMMETRIC_AND_ASYMMETRIC_SIGNATURES:
+				return new AggregatedP2PLoginAgreements(new P2PLoginWithSymmetricSignature(secretKeyForSignature, random), new P2PLoginWithAsymmetricSignature(random, myPrivateKeyForSignature, otherPublicKeyForSignature), new P2PJPAKESecretMessageExchanger(random, participantID, message, offset, len, salt, offset_salt, len_salt, messageIsKey));
+
 		}
-		throw new IllegalAccessError();
+		throw new IllegalAccessError(this.name());
 	}
 
 	public boolean isPostQuantumAlgorithm(SymmetricSecretKey secretKey)

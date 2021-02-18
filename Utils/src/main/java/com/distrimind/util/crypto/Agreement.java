@@ -36,6 +36,7 @@ package com.distrimind.util.crypto;
 
 
 import com.distrimind.bouncycastle.crypto.CryptoException;
+import com.distrimind.util.Bits;
 import com.distrimind.util.io.Integrity;
 import com.distrimind.util.io.MessageExternalizationException;
 
@@ -49,17 +50,17 @@ import java.io.IOException;
  */
 public abstract class Agreement implements Zeroizable {
 	static final int messageSize=128;
-	static final int acceptableCommonBits=96;
-	static final int acceptableCommonLinearBits=messageSize/2;
+	static final int acceptableCommonBits=96*8;
+	static final int acceptableCommonLinearBytes =messageSize/2;
 	static void checkCompatibleMessages(byte[] localMessage, byte[] distantMessage) throws MessageExternalizationException {
 
-		if (distantMessage.length != localMessage.length) {
+		if (distantMessage.length != localMessage.length || localMessage.length!=messageSize) {
 			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException());
 		}
 
-		l1:for (int i=acceptableCommonLinearBits;i>=0;i--)
+		l1:for (int i = acceptableCommonLinearBytes; i>=0; i--)
 		{
-			for (int j=i+acceptableCommonLinearBits-1;j>=i;j--)
+			for (int j = i+ acceptableCommonLinearBytes -1; j>=i; j--)
 			{
 				if (localMessage[j]!=distantMessage[j])
 					continue l1;
@@ -68,10 +69,11 @@ public abstract class Agreement implements Zeroizable {
 		}
 
 		int c=0;
-		for (int i=0;i<localMessage.length;i++)
-			c+=Integer.bitCount(localMessage[i]&distantMessage[i]);
+		for (int i=0;i<localMessage.length;i+=8) {
+			c += Long.bitCount(Bits.getLong(localMessage, i) & Bits.getLong(distantMessage, i));
+		}
 		if (c>=acceptableCommonBits)
-			throw new MessageExternalizationException(Integrity.FAIL, new CryptoException());
+			throw new MessageExternalizationException(Integrity.FAIL, new CryptoException(""+c));
 	}
 
 	byte[] generateSignature(byte[] localMessage, byte[] distantMessage, AbstractAuthenticatedSignerAlgorithm signer) throws IOException {

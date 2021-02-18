@@ -50,7 +50,6 @@ import java.util.Arrays;
 public class ClientLoginSignerWithASymmetricSignature extends ClientServerLoginAgreement{
     private final IASymmetricPrivateKey privateKey;
     private byte[] myMessage, otherMessage=null;
-    static final int messageSize=64;
     private boolean valid=true;
 
     @Override

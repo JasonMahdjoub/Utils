@@ -35,9 +35,6 @@ knowledge of the CeCILL-C license and that you accept its terms.
 package com.distrimind.util.crypto;
 
 import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.util.Arrays;
 
 /**
  *
@@ -45,28 +42,65 @@ import java.util.Arrays;
  * @version 3.0
  * @since Utils 3.15.0
  */
-public class P2PJPakeAndLoginAgreement extends P2PLoginAgreement {
+public class AggregatedP2PLoginAgreements extends P2PLoginAgreement {
 
-	private final P2PJPAKESecretMessageExchanger jpake;
-	private final P2PLoginWithSymmetricSignature login;
+	private final P2PLoginAgreement[] loginAgreements;
+
 	/*P2PJPakeAndLoginAgreement(AbstractSecureRandom random, Serializable participantID, char[] message, SymmetricSecretKey secretKeyForSignature) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException {
 
 		this(random, participantID, message, null, 0, 0, secretKeyForSignature);
 	}*/
 	@Override
 	public void zeroize() {
-		if (jpake!=null)
-			jpake.zeroize();
-		if (login!=null)
-			login.zeroize();
+		if (loginAgreements!=null) {
+			for (P2PLoginAgreement la: loginAgreements)
+				la.zeroize();
+		}
 	}
 
 	@Override
 	public boolean isPostQuantumAgreement() {
-		return (jpake!=null && jpake.isPostQuantumAgreement()) && (login!=null && login.isPostQuantumAgreement());
+		for (P2PLoginAgreement p : loginAgreements) {
+			if (!p.isPostQuantumAgreement())
+				return false;
+		}
+		return true;
+	}
+	private static int getStepsNumberForSend(P2PLoginAgreement[] loginAgreements) {
+		if (loginAgreements==null)
+			throw new NullPointerException();
+		if (loginAgreements.length==0)
+			throw new IllegalArgumentException();
+		int res=0;
+		for (P2PLoginAgreement la : loginAgreements)
+		{
+			if (la == null)
+				throw new NullPointerException();
+			res+=la.getStepsNumberForSend();
+		}
+		return res;
+	}
+	private static int getStepsNumberForReception(P2PLoginAgreement[] loginAgreements) {
+		if (loginAgreements==null)
+			throw new NullPointerException();
+		if (loginAgreements.length==0)
+			throw new IllegalArgumentException();
+		int res=0;
+		for (P2PLoginAgreement la : loginAgreements)
+		{
+			if (la == null)
+				throw new NullPointerException();
+			res+=la.getStepsNumberForReception();
+		}
+		return res;
 	}
 
-	P2PJPakeAndLoginAgreement(AbstractSecureRandom random, byte[] participantID, char[] message, byte[] salt,
+	AggregatedP2PLoginAgreements(P2PLoginAgreement ...loginAgreements)
+	{
+		super(getStepsNumberForReception(loginAgreements), getStepsNumberForSend(loginAgreements));
+		this.loginAgreements=loginAgreements;
+	}
+	/*P2PJPakeAndLoginAgreement(AbstractSecureRandom random, byte[] participantID, char[] message, byte[] salt,
 							  int offset_salt, int len_salt, SymmetricSecretKey secretKeyForSignature) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
 		super(secretKeyForSignature==null?3:5, secretKeyForSignature==null?3:5);
 		jpake=new P2PJPAKESecretMessageExchanger(random, participantID, message.clone(), salt, offset_salt, len_salt);
@@ -75,10 +109,6 @@ public class P2PJPakeAndLoginAgreement extends P2PLoginAgreement {
 		else
 			login=new P2PLoginWithSymmetricSignature(secretKeyForSignature, random);
 	}
-	/*P2PJPakeAndLoginAgreement(AbstractSecureRandom random, Serializable participantID, byte[] message, boolean messageIsKey, SymmetricSecretKey secretKeyForSignature) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException {
-
-		this(random, participantID, message, 0, message.length,null, 0, 0, messageIsKey, secretKeyForSignature);
-	}*/
 	P2PJPakeAndLoginAgreement(AbstractSecureRandom random, byte[] participantID, byte[] message, int offset, int len, byte[] salt,
 							  int offset_salt, int len_salt, boolean messageIsKey, SymmetricSecretKey secretKeyForSignature) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
 		super(secretKeyForSignature==null?3:5, secretKeyForSignature==null?3:5);
@@ -87,25 +117,37 @@ public class P2PJPakeAndLoginAgreement extends P2PLoginAgreement {
 			login=null;
 		else
 			login=new P2PLoginWithSymmetricSignature(secretKeyForSignature, random);
-	}
+	}*/
 	@Override
 	protected boolean isAgreementProcessValidImpl() {
 
-		return jpake.isAgreementProcessValidImpl() && (login==null || login.isAgreementProcessValidImpl());
+		for (P2PLoginAgreement p : loginAgreements) {
+			if (!p.isAgreementProcessValidImpl())
+				return false;
+		}
+		return true;
 	}
 	@Override
 	protected byte[] getDataToSend(int stepNumber) throws IOException {
-		if (login!=null && stepNumber<2)
-			return login.getDataToSend();
-		else
-			return jpake.getDataToSend();
+		int off=0;
+		for (P2PLoginAgreement loginAgreement : loginAgreements) {
+			off += loginAgreement.getStepsNumberForSend();
+			if (off > stepNumber)
+				return loginAgreement.getDataToSend();
+		}
+		throw new IllegalAccessError();
 	}
 	@Override
 	protected void receiveData(int stepNumber, byte[] data) throws IOException {
-		if (login!=null && stepNumber<2)
-			login.receiveData(data);
-		else
-			jpake.receiveData(data);
+		int off=0;
+		for (P2PLoginAgreement loginAgreement : loginAgreements) {
+			off += loginAgreement.getStepsNumberForReception();
+			if (off > stepNumber) {
+				loginAgreement.receiveData(data);
+				return;
+			}
+		}
+		throw new IllegalAccessError();
 
 	}
 
