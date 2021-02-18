@@ -34,7 +34,11 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util;
 
+import com.distrimind.util.data_buffers.WrappedSecretString;
+
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Base64;
 
 /**
  * Utility methods for packing/unpacking primitive values in/out of byte arrays
@@ -245,7 +249,41 @@ public class Bits {
 		}
 		return res;
 	}
+	public static String toBase64String(byte[] bytes, boolean zeroiseIntermediateArrays)
+	{
+		byte[] d= Bits.getByteArrayWithCheckSum(bytes);
+		String res=Base64.getUrlEncoder().encodeToString(d);
+		if (zeroiseIntermediateArrays)
+			Arrays.fill(d, (byte)0);
+		return res;
+	}
+	public static String toBase64String(byte[] bytes)
+	{
+		return toBase64String(bytes, false);
+	}
+	public static byte[] toBytesArrayFromBase64String(String base64String) throws IOException {
+		return toBytesArrayFromBase64String(base64String, false);
+	}
+	public static byte[] toBytesArrayFromBase64String(char[] base64String) throws IOException {
+		return toBytesArrayFromBase64String(base64String, false);
+	}
+	public static byte[] toBytesArrayFromBase64String(char[] base64String, boolean zeroiseIntermediateArrays) throws IOException {
+		String s=new String(base64String);
+		byte[] res=toBytesArrayFromBase64String(s, zeroiseIntermediateArrays);
+		if (zeroiseIntermediateArrays) {
+			WrappedSecretString.zeroizeString(s);
+		}
+		return res;
+	}
+	public static byte[] toBytesArrayFromBase64String(String base64String, boolean zeroiseIntermediateArrays) throws IOException {
 
+		byte[] d=Base64.getUrlDecoder().decode(base64String);
+		byte[] res= Bits.checkByteArrayAndReturnsItWithoutCheckSum(d);
+		if (zeroiseIntermediateArrays) {
+			Arrays.fill(d, (byte) 0);
+		}
+		return res;
+	}
 	public static byte[] getByteArrayWithCheckSum(byte[] tab)
 	{
 		if (tab==null)

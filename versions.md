@@ -1,6 +1,6 @@
 Utils
 =====
-5.16.0 STABLE (Build: 2410) (from 04/01/2016 to 04/02/2020)
+5.16.1 STABLE (Build: 2414) (from 04/01/2016 to 18/02/2020)
 
 # Creator(s):
 Jason MAHDJOUB
@@ -11,7 +11,11 @@ Jason MAHDJOUB (Entered in the team at 04/01/2016)
 # Modifications:
 
 
-### 5.16.0 STABLE (04/02/2020)
+### 5.16.1 STABLE (18/02/2020)
+* Add functions into WrappedData and WrappedString
+
+
+### 5.16.0 STABLE (18/02/2020)
 * Add Client/server login agreement
 * Fix security issue : fix P2P login agreement with asymmetric key pairs
 * Fix security issue : fix P2P login agreement with symmetric secret key when salt is the same with the two peers

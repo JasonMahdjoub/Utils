@@ -1,10 +1,13 @@
 package com.distrimind.util.data_buffers;
 
+import com.distrimind.util.Bits;
+
+import java.io.IOException;
 import java.util.Arrays;
 
 /**
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 1.1
  * @since Utils 5.10.0
  */
 public class WrappedData  {
@@ -24,6 +27,11 @@ public class WrappedData  {
 			throw new NullPointerException();
 		this.data=data.data;
 	}
+	public WrappedData(WrappedString secretData) throws IOException {
+		super();
+
+		setData(Bits.toBytesArrayFromBase64String(secretData.toString(), false));
+	}
 	public byte[] getBytes() {
 		return data;
 	}
@@ -36,6 +44,7 @@ public class WrappedData  {
 		this.secretData=null;
 	}
 
+	@SuppressWarnings("UnusedReturnValue")
 	public WrappedSecretData transformToSecretData()
 	{
 		if (secretData==null)
@@ -49,6 +58,11 @@ public class WrappedData  {
 		if (o == null || getClass() != o.getClass()) return false;
 		WrappedData that = (WrappedData) o;
 		return Arrays.equals(data, that.data);
+	}
+
+	public WrappedString toWrappedString()
+	{
+		return new WrappedString(this);
 	}
 
 	@Override

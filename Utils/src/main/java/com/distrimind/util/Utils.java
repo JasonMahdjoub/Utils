@@ -67,7 +67,11 @@ public class Utils {
 			VERSION.addCreator(new Person("mahdjoub", "jason"))
 					.addDeveloper(new PersonDeveloper("mahdjoub", "jason", "2016-01-04"))
 					.addDescription(
-							new Description((short)5, (short)16, (short)0, Version.Type.STABLE, (short)0, "2020-02-04")
+							new Description((short)5, (short)16, (short)1, Version.Type.STABLE, (short)0, "2020-02-18")
+									.addItem("Add functions into WrappedData and WrappedString")
+					)
+					.addDescription(
+							new Description((short)5, (short)16, (short)0, Version.Type.STABLE, (short)0, "2020-02-18")
 									.addItem("Add Client/server login agreement")
 									.addItem("Fix security issue : fix P2P login agreement with asymmetric key pairs")
 									.addItem("Fix security issue : fix P2P login agreement with symmetric secret key when salt is the same with the two peers")

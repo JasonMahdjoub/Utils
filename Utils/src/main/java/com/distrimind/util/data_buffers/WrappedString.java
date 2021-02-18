@@ -2,6 +2,7 @@ package com.distrimind.util.data_buffers;
 
 import com.distrimind.util.Bits;
 
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Base64;
@@ -9,7 +10,7 @@ import java.util.Objects;
 
 /**
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 1.1
  * @since MaDKitLanEdition 5.10.0
  */
 public class WrappedString {
@@ -56,10 +57,12 @@ public class WrappedString {
 		this.chars =dataString.chars;
 		this.string=dataString.string;
 	}
-	public WrappedString(WrappedData wrappedSecretData) {
-		byte[] d= Bits.getByteArrayWithCheckSum(wrappedSecretData.getBytes());
-		this.string= Base64.getUrlEncoder().encodeToString(d);
+	protected WrappedString(WrappedData wrappedSecretData, boolean zeroiseIntermediateArrays) {
+		this.string= Bits.toBase64String(wrappedSecretData.getBytes(), zeroiseIntermediateArrays);
 		this.chars=this.string.toCharArray();
+	}
+	public WrappedString(WrappedData wrappedSecretData) {
+		this(wrappedSecretData,false);
 	}
 
 	public static void zeroizeString(String secretData)
@@ -98,6 +101,10 @@ public class WrappedString {
 	public char[] getChars()
 	{
 		return chars;
+	}
+
+	public WrappedData toWrappedData() throws IOException {
+		return new WrappedData(this);
 	}
 	/*private static final Field valueField;
 	static

@@ -2,6 +2,7 @@ package com.distrimind.util.data_buffers;
 
 import com.distrimind.util.crypto.Zeroizable;
 
+import java.io.IOException;
 import java.util.Arrays;
 
 /**
@@ -39,7 +40,7 @@ public class WrappedSecretString extends WrappedString implements Zeroizable {
 		toZeroize=true;
 	}
 	public WrappedSecretString(WrappedData wrappedSecretData) {
-		super(wrappedSecretData);
+		super(wrappedSecretData, true);
 		toZeroize=true;
 	}
 
@@ -65,7 +66,10 @@ public class WrappedSecretString extends WrappedString implements Zeroizable {
 	{
 		zeroize();
 	}
-
+	@Override
+	public WrappedSecretData toWrappedData() throws IOException {
+		return new WrappedSecretData(this);
+	}
 	@Override
 	public WrappedSecretString transformToSecretString() {
 		return this;

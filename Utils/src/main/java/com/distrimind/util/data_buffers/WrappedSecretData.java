@@ -24,12 +24,7 @@ public class WrappedSecretData extends WrappedData implements Zeroizable {
 	}
 	public WrappedSecretData(WrappedString secretData) throws IOException {
 		super();
-
-		String s=new String(secretData.getChars());
-		byte[] d=Base64.getUrlDecoder().decode(s);
-		setData(Bits.checkByteArrayAndReturnsItWithoutCheckSum(d));
-		WrappedSecretString.zeroizeString(s);
-		Arrays.fill(d, (byte)0);
+		setData(Bits.toBytesArrayFromBase64String(secretData.toString(), true));
 	}
 
 
@@ -63,6 +58,12 @@ public class WrappedSecretData extends WrappedData implements Zeroizable {
 	public void finalize()
 	{
 		zeroize();
+	}
+
+	@Override
+	public WrappedSecretString toWrappedString()
+	{
+		return new WrappedSecretString(this);
 	}
 
 	@Override
