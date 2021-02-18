@@ -35,6 +35,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
 package com.distrimind.util.crypto;
 
 
+import com.distrimind.bouncycastle.crypto.CryptoException;
 import com.distrimind.util.io.Integrity;
 import com.distrimind.util.io.MessageExternalizationException;
 
@@ -47,6 +48,45 @@ import java.io.IOException;
  * @since Utils 3.0
  */
 public abstract class Agreement implements Zeroizable {
+	static final int messageSize=128;
+	static final int acceptableCommonBits=96;
+	static final int acceptableCommonLinearBits=messageSize/2;
+	static void checkCompatibleMessages(byte[] localMessage, byte[] distantMessage) throws MessageExternalizationException {
+
+		if (distantMessage.length != localMessage.length) {
+			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException());
+		}
+
+		l1:for (int i=acceptableCommonLinearBits;i>=0;i--)
+		{
+			for (int j=i+acceptableCommonLinearBits-1;j>=i;j--)
+			{
+				if (localMessage[j]!=distantMessage[j])
+					continue l1;
+			}
+			throw new MessageExternalizationException(Integrity.FAIL, new CryptoException());
+		}
+
+		int c=0;
+		for (int i=0;i<localMessage.length;i++)
+			c+=Integer.bitCount(localMessage[i]&distantMessage[i]);
+		if (c>=acceptableCommonBits)
+			throw new MessageExternalizationException(Integrity.FAIL, new CryptoException());
+	}
+
+	byte[] generateSignature(byte[] localMessage, byte[] distantMessage, AbstractAuthenticatedSignerAlgorithm signer) throws IOException {
+		signer.init();
+		signer.update(localMessage);
+		signer.update(distantMessage);
+		return signer.getSignature();
+	}
+
+	boolean checkSignature(byte[] localMessage, byte[] distantMessage, AbstractAuthenticatedCheckerAlgorithm checker, byte[] signature, int offSig, int lenSig) throws IOException {
+		checker.init(signature, offSig, lenSig);
+		checker.update(distantMessage);
+		checker.update(localMessage);
+		return checker.verify();
+	}
 
 	private int actualStepForReception, actualStepForSend;
 	private final int stepsNumberForReception;

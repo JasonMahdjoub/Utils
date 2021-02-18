@@ -44,13 +44,13 @@ import java.util.Arrays;
 
 /**
  * @author Jason Mahdjoub
- * @version 1.1
- * @since MaDKitLanEdition 3.23.0
+ * @version 2.0
+ * @since MaDKitLanEdition 5.16.0
  */
-public class P2PLoginWithASymmetricSignature extends P2PLoginAgreement{
+public class ClientLoginSignerWithASymmetricSignature extends ClientServerLoginAgreement{
     private final IASymmetricPrivateKey privateKey;
     private byte[] myMessage, otherMessage=null;
-    static final int messageSize=32;
+    static final int messageSize=64;
     private boolean valid=true;
 
     @Override
@@ -69,7 +69,7 @@ public class P2PLoginWithASymmetricSignature extends P2PLoginAgreement{
     }
 
 
-    P2PLoginWithASymmetricSignature(AbstractKeyPair<?, ?> keyPair, AbstractSecureRandom random) {
+    ClientLoginSignerWithASymmetricSignature(AbstractKeyPair<?, ?> keyPair, AbstractSecureRandom random) {
         super(2, 2);
         if (keyPair==null)
             throw new NullPointerException();
@@ -102,12 +102,7 @@ public class P2PLoginWithASymmetricSignature extends P2PLoginAgreement{
                         valid = false;
                         throw new IllegalAccessError();
                     }
-                    ASymmetricAuthenticatedSignerAlgorithm signer = new ASymmetricAuthenticatedSignerAlgorithm(privateKey);
-                    signer.init();
-                    signer.update(myMessage);
-                    signer.update(otherMessage);
-                    return signer.getSignature();
-
+                    return generateSignature(myMessage, otherMessage, new ASymmetricAuthenticatedSignerAlgorithm(privateKey));
                 }
                 default:
                     valid = false;
@@ -126,36 +121,30 @@ public class P2PLoginWithASymmetricSignature extends P2PLoginAgreement{
     protected void receiveData(int stepNumber, byte[] data) throws IOException {
         if (!valid)
             throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException());
-
-        switch(stepNumber)
+        try {
+            switch (stepNumber) {
+                case 0: {
+                    if (otherMessage != null) {
+                        throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException());
+                    }
+                    checkCompatibleMessages(myMessage, data);
+                    otherMessage = data;
+                }
+                break;
+                case 1: {
+                    if (data.length != 0) {
+                        throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException());
+                    }
+                }
+                break;
+                default:
+                    throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException("" + stepNumber));
+            }
+        }
+        catch (MessageExternalizationException e)
         {
-            case 0:
-            {
-                if (otherMessage!=null)
-                {
-                    valid=false;
-                    throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException());
-                }
-                if (data.length!=messageSize)
-                {
-                    valid=false;
-                    throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException());
-                }
-                otherMessage=data;
-            }
-            break;
-            case 1:
-            {
-                if (data.length!=0)
-                {
-                    valid=false;
-                    throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException());
-                }
-            }
-            break;
-            default:
-                valid=false;
-                throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException(""+stepNumber));
+            valid=false;
+            throw e;
         }
     }
 }

@@ -35,35 +35,18 @@ knowledge of the CeCILL-C license and that you accept its terms.
 package com.distrimind.util.crypto;
 
 
-import com.distrimind.util.io.Integrity;
-import com.distrimind.util.io.MessageExternalizationException;
-import com.distrimind.bouncycastle.crypto.CryptoException;
-
-import java.io.IOException;
-import java.util.Arrays;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 
 /**
  *
  * @author Jason Mahdjoub
- * @version 1.2
+ * @version 1.3
  * @since Utils 3.15.0
  */
-public class P2PLoginWithSymmetricSignature extends P2PLoginAgreement {
+public class P2PLoginWithSymmetricSignature extends AbstractP2PLoginWithSignature {
 
 	private final SymmetricSecretKey secretKey;
-	private byte[] myMessage, otherMessage=null;
-	private static final int messageSize=32;
-	private boolean valid=true;
-
-	@Override
-	public void zeroize() {
-		if (myMessage!=null)
-			Arrays.fill(myMessage, (byte)0);
-		if (otherMessage!=null)
-			Arrays.fill(otherMessage, (byte)0);
-		myMessage=null;
-		otherMessage=null;
-	}
 
 	@Override
 	public boolean isPostQuantumAgreement() {
@@ -71,102 +54,23 @@ public class P2PLoginWithSymmetricSignature extends P2PLoginAgreement {
 	}
 
 	P2PLoginWithSymmetricSignature(SymmetricSecretKey secretKey, AbstractSecureRandom random) {
-		super(2, 2);
+		super(random);
 		if (secretKey==null)
 			throw new NullPointerException();
 		if (secretKey.getAuthenticatedSignatureAlgorithmType()==null)
 			throw new IllegalArgumentException("The given secret key is not usable for signature");
 		this.secretKey=secretKey;
-		myMessage=new byte[messageSize];
-		random.nextBytes(myMessage);
-
 	}
 
 	@Override
-	protected boolean isAgreementProcessValidImpl() {
-		return valid;
+	protected AbstractAuthenticatedSignerAlgorithm getSigner() throws NoSuchProviderException, NoSuchAlgorithmException {
+		return new SymmetricAuthenticatedSignerAlgorithm(secretKey);
 	}
 
 	@Override
-	protected byte[] getDataToSend(int stepNumber) throws IOException {
-		if (!valid)
-			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException());
-
-		try {
-			switch (stepNumber) {
-				case 0:
-					return myMessage;
-				case 1: {
-					if (otherMessage == null) {
-						valid = false;
-						throw new IllegalAccessError();
-					}
-					SymmetricAuthenticatedSignerAlgorithm signer = new SymmetricAuthenticatedSignerAlgorithm(secretKey);
-					signer.init();
-					signer.update(myMessage);
-					signer.update(otherMessage);
-					return signer.getSignature();
-
-				}
-				default:
-					valid = false;
-					throw new IllegalAccessError();
-			}
-		}
-		catch(Exception e)
-		{
-			valid=false;
-			throw new MessageExternalizationException(Integrity.FAIL, e);
-		}
-
+	protected AbstractAuthenticatedCheckerAlgorithm getChecker() throws NoSuchProviderException, NoSuchAlgorithmException {
+		return new SymmetricAuthenticatedSignatureCheckerAlgorithm(secretKey);
 	}
-
-	@Override
-	protected void receiveData(int stepNumber, byte[] data) throws IOException {
-		try {
-			if (!valid)
-				throw new CryptoException();
-			switch (stepNumber) {
-				case 0: {
-					if (otherMessage != null) {
-						valid = false;
-						throw new CryptoException();
-					}
-					if (data.length != messageSize) {
-						valid = false;
-						throw new CryptoException();
-					}
-					otherMessage = data;
-				}
-				break;
-				case 1: {
-					if (otherMessage == null) {
-						valid = false;
-						throw new CryptoException();
-					}
-					SymmetricAuthenticatedSignatureCheckerAlgorithm checker = new SymmetricAuthenticatedSignatureCheckerAlgorithm(secretKey);
-					checker.init(data);
-					checker.update(otherMessage);
-					checker.update(myMessage);
-
-					valid = checker.verify();
-				}
-				break;
-				default:
-					valid = false;
-					throw new CryptoException("" + stepNumber);
-			}
-		}
-		catch (Exception e)
-		{
-			valid = false;
-			if (e instanceof CryptoException)
-				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, e);
-			else
-				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException("", e));
-		}
-	}
-
 
 
 }

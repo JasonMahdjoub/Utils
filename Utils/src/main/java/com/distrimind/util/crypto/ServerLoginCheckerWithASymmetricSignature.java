@@ -44,10 +44,10 @@ import java.util.Arrays;
 
 /**
  * @author Jason Mahdjoub
- * @version 1.0
- * @since MaDKitLanEdition 3.23.0
+ * @version 2.0
+ * @since MaDKitLanEdition 5.16.0
  */
-public class P2PLoginCheckerWithASymmetricSignature extends P2PLoginAgreement{
+public class ServerLoginCheckerWithASymmetricSignature extends ClientServerLoginAgreement{
     private final IASymmetricPublicKey publicKey;
     private byte[] myMessage, otherMessage=null;
 
@@ -68,7 +68,7 @@ public class P2PLoginCheckerWithASymmetricSignature extends P2PLoginAgreement{
         return publicKey!=null && publicKey.isPostQuantumKey();
     }
 
-    P2PLoginCheckerWithASymmetricSignature(IASymmetricPublicKey publicKey, AbstractSecureRandom random) {
+    ServerLoginCheckerWithASymmetricSignature(IASymmetricPublicKey publicKey, AbstractSecureRandom random) {
         super(2, 2);
         if (publicKey==null)
             throw new NullPointerException();
@@ -80,7 +80,7 @@ public class P2PLoginCheckerWithASymmetricSignature extends P2PLoginAgreement{
         else if (((ASymmetricPublicKey) publicKey).getAuthenticatedSignatureAlgorithmType()==null)
             throw new IllegalArgumentException("The given public key is not usable for signature");
         this.publicKey=publicKey;
-        myMessage=new byte[P2PLoginWithASymmetricSignature.messageSize];
+        myMessage=new byte[ClientLoginSignerWithASymmetricSignature.messageSize];
         random.nextBytes(myMessage);
 
     }
@@ -118,38 +118,34 @@ public class P2PLoginCheckerWithASymmetricSignature extends P2PLoginAgreement{
         try {
             switch (stepNumber) {
                 case 0: {
-                    if (data.length != P2PLoginWithASymmetricSignature.messageSize) {
-                        valid = false;
-                        throw new CryptoException();
+                    if (otherMessage!=null)
+                    {
+                        throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException());
                     }
+                    checkCompatibleMessages(myMessage, data);
                     otherMessage = data;
                 }
                 break;
                 case 1: {
                     if (otherMessage == null) {
-                        valid = false;
                         throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException());
                     }
-                    ASymmetricAuthenticatedSignatureCheckerAlgorithm checker = new ASymmetricAuthenticatedSignatureCheckerAlgorithm(publicKey);
-                    checker.init(data);
-                    checker.update(otherMessage);
-                    checker.update(myMessage);
-
-                    valid = checker.verify();
+                    valid = checkSignature(myMessage, otherMessage, new ASymmetricAuthenticatedSignatureCheckerAlgorithm(publicKey), data, 0, data.length);
                 }
                 break;
                 default:
-                    valid = false;
                     throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException("" + stepNumber));
             }
+        }
+        catch (MessageExternalizationException e)
+        {
+            valid=false;
+            throw e;
         }
         catch (Exception e)
         {
             valid = false;
-            if (e instanceof CryptoException)
-                throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, e);
-            else
-                throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException("", e));
+            throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException("", e));
         }
     }
 }
