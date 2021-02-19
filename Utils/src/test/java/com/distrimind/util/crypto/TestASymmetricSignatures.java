@@ -107,7 +107,8 @@ public class TestASymmetricSignatures {
 	public void testAsymmetricSignatures(ASymmetricAuthenticatedSignatureType type, ASymmetricAuthenticatedSignatureType typePQC, AbstractKeyPair<?,?> kpd, int keySize)
 			throws NoSuchAlgorithmException,
 			NoSuchProviderException, IllegalStateException, IOException {
-		System.out.println("Testing asymmetric signature : " +type+", "+ keySize+", "+kpd.getASymmetricPublicKey().getKeyBytes().getBytes().length);
+		WrappedData wd=kpd.getASymmetricPublicKey().getKeyBytes();
+		System.out.println("Testing asymmetric signature : " +type+", "+ keySize+", "+wd.getBytes().length);
 		WrappedSecretData b = kpd.encode(true);
 		AbstractKeyPair<?,?> kpd2=(AbstractKeyPair<?,?>) DecentralizedValue.decode(b);
 		Assert.assertEquals(kpd2, kpd);

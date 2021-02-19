@@ -35,6 +35,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
 package com.distrimind.util.crypto;
 
 
+import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 
@@ -63,12 +64,12 @@ public class P2PLoginWithSymmetricSignature extends AbstractP2PLoginWithSignatur
 	}
 
 	@Override
-	protected AbstractAuthenticatedSignerAlgorithm getSigner() throws NoSuchProviderException, NoSuchAlgorithmException {
+	protected AbstractAuthenticatedSignerAlgorithm getSigner() throws NoSuchProviderException, NoSuchAlgorithmException, IOException {
 		return new SymmetricAuthenticatedSignerAlgorithm(secretKey);
 	}
 
 	@Override
-	protected AbstractAuthenticatedCheckerAlgorithm getChecker() throws NoSuchProviderException, NoSuchAlgorithmException {
+	protected AbstractAuthenticatedCheckerAlgorithm getChecker() throws NoSuchProviderException, NoSuchAlgorithmException, IOException {
 		return new SymmetricAuthenticatedSignatureCheckerAlgorithm(secretKey);
 	}
 

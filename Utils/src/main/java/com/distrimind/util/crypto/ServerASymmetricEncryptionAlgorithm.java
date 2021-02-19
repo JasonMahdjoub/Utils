@@ -46,7 +46,7 @@ import java.util.Arrays;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 5.0
+ * @version 5.1
  * @since Utils 1.7.0
  */
 public class ServerASymmetricEncryptionAlgorithm implements IEncryptionInputAlgorithm {
@@ -414,7 +414,7 @@ public class ServerASymmetricEncryptionAlgorithm implements IEncryptionInputAlgo
 	@Override
 	public byte[] decode(byte[] bytes, int off, int len) throws IOException
 	{
-		return decode(bytes, 0, bytes.length, null, 0, 0);
+		return decode(bytes, off, len, null, 0, 0);
 	}
 	@Override
 	public byte[] decode(byte[] bytes, int off, int len, byte[] associatedData, int offAD, int lenAD) throws IOException

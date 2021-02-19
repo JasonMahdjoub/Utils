@@ -1897,16 +1897,20 @@ public class SerializationTools {
 	public static int getInternalSize(IKey key)
 	{
 		int res=1;
-		if (key!=null)
-			res+=getInternalSize(key.encode().getBytes(), IKey.MAX_SIZE_IN_BYTES_OF_KEY);
+		if (key!=null) {
+			WrappedData wd=key.encode();
+			res += getInternalSize(wd.getBytes(), IKey.MAX_SIZE_IN_BYTES_OF_KEY);
+		}
 		return res;
 	}
 
 	public static int getInternalSize(AbstractKeyPair<?, ?> keyPair)
 	{
 		int res=1;
-		if (keyPair!=null)
-			res+=getInternalSize(keyPair.encode().getBytes(), AbstractKeyPair.MAX_SIZE_IN_BYTES_OF_KEY_PAIR);
+		if (keyPair!=null) {
+			WrappedData wd=keyPair.encode();
+			res += getInternalSize(wd.getBytes(), AbstractKeyPair.MAX_SIZE_IN_BYTES_OF_KEY_PAIR);
+		}
 		return res;
 	}
 	public static int getInternalSize(InetAddress inetAddress)
@@ -1973,15 +1977,19 @@ public class SerializationTools {
 	public static int getInternalSize(DecentralizedValue decentralizedValue)
 	{
 		int res=1;
-		if (decentralizedValue!=null)
-			res+=getInternalSize(decentralizedValue.encode().getBytes(), DecentralizedValue.MAX_SIZE_IN_BYTES_OF_DECENTRALIZED_VALUE);
+		if (decentralizedValue!=null) {
+			WrappedData wd=decentralizedValue.encode();
+			res += getInternalSize(wd.getBytes(), DecentralizedValue.MAX_SIZE_IN_BYTES_OF_DECENTRALIZED_VALUE);
+		}
 		return res;
 	}
 	public static int getInternalSize(AbstractDecentralizedID abstractDecentralizedID)
 	{
 		int res=1;
-		if (abstractDecentralizedID!=null)
-			res+=getInternalSize(abstractDecentralizedID.encode().getBytes(), AbstractDecentralizedID.MAX_DECENTRALIZED_ID_SIZE_IN_BYTES);
+		if (abstractDecentralizedID!=null) {
+			WrappedData wd=abstractDecentralizedID.encode();
+			res += getInternalSize(wd.getBytes(), AbstractDecentralizedID.MAX_DECENTRALIZED_ID_SIZE_IN_BYTES);
+		}
 		return res;
 	}
 	public static int getInternalSize(SecureExternalizable secureExternalizable)

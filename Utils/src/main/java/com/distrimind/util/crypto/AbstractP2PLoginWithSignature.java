@@ -78,8 +78,8 @@ public abstract class AbstractP2PLoginWithSignature extends P2PLoginAgreement {
 		return valid;
 	}
 
-	protected abstract AbstractAuthenticatedSignerAlgorithm getSigner() throws NoSuchProviderException, NoSuchAlgorithmException;
-	protected abstract AbstractAuthenticatedCheckerAlgorithm getChecker() throws NoSuchProviderException, NoSuchAlgorithmException;
+	protected abstract AbstractAuthenticatedSignerAlgorithm getSigner() throws NoSuchProviderException, NoSuchAlgorithmException, IOException;
+	protected abstract AbstractAuthenticatedCheckerAlgorithm getChecker() throws NoSuchProviderException, NoSuchAlgorithmException, IOException;
 
 	@Override
 	protected byte[] getDataToSend(int stepNumber) throws IOException {

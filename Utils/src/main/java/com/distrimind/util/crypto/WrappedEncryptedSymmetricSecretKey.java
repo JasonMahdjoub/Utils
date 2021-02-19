@@ -14,7 +14,7 @@ import java.io.IOException;
  * @since Utils 5.10.0
  */
 public class WrappedEncryptedSymmetricSecretKey extends WrappedSecretData implements SecureExternalizable {
-	static final int MAX_SIZE_IN_BYTES_OF_KEY=SymmetricSecretKey.MAX_SIZE_IN_BYTES_OF_SYMMETRIC_KEY_FOR_SIGNATURE *1024;
+	static final int MAX_SIZE_IN_BYTES_OF_KEY=SymmetricSecretKey.MAX_SIZE_IN_BYTES_OF_SYMMETRIC_KEY_FOR_SIGNATURE*1024+HybridASymmetricAuthenticatedSignatureType.MAX_HYBRID_ASYMMETRIC_SIGNATURE_SIZE+SymmetricAuthenticatedSignatureType.MAX_SYMMETRIC_SIGNATURE_SIZE;
 	public static final int MAX_SIZE_IN_BYTES_OF_DATA=MAX_SIZE_IN_BYTES_OF_KEY+7;
 	protected WrappedEncryptedSymmetricSecretKey() {
 	}
@@ -22,7 +22,7 @@ public class WrappedEncryptedSymmetricSecretKey extends WrappedSecretData implem
 	public WrappedEncryptedSymmetricSecretKey(byte[] secretData) {
 		super(secretData);
 		if (getBytes().length>MAX_SIZE_IN_BYTES_OF_KEY)
-			throw new IllegalArgumentException();
+			throw new IllegalArgumentException(""+getBytes().length);
 	}
 
 	public WrappedEncryptedSymmetricSecretKey(WrappedEncryptedSymmetricSecretKeyString secretData) throws IOException {

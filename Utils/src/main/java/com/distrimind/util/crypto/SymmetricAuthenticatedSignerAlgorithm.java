@@ -67,8 +67,9 @@ public class SymmetricAuthenticatedSignerAlgorithm extends AbstractAuthenticated
 		this.secretKey = secretKey;
 	}
 
-	public SymmetricAuthenticatedSignerAlgorithm(SymmetricSecretKey secretKey) throws NoSuchAlgorithmException, NoSuchProviderException {
+	public SymmetricAuthenticatedSignerAlgorithm(SymmetricSecretKey secretKey) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
 		this(secretKey.getAuthenticatedSignatureAlgorithmType().getHMacInstance(), secretKey);
+		mac.init(secretKey);
 	}
 
 	public AbstractMac getMac() {
@@ -82,7 +83,7 @@ public class SymmetricAuthenticatedSignerAlgorithm extends AbstractAuthenticated
 
 	@Override
 	public void init() throws IOException {
-		mac.init(secretKey);
+
 	}
 
 	@Override

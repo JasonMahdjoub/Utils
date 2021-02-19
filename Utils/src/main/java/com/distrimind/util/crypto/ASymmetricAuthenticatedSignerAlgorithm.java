@@ -54,12 +54,13 @@ public class ASymmetricAuthenticatedSignerAlgorithm extends AbstractAuthenticate
 	private final AbstractAuthenticatedSignerAlgorithm signer;
 	private final IASymmetricPrivateKey localPrivateKey;
 
-	public ASymmetricAuthenticatedSignerAlgorithm(IASymmetricPrivateKey localPrivateKey) throws NoSuchProviderException, NoSuchAlgorithmException {
+	public ASymmetricAuthenticatedSignerAlgorithm(IASymmetricPrivateKey localPrivateKey) throws NoSuchProviderException, NoSuchAlgorithmException, IOException {
 		this.localPrivateKey=localPrivateKey;
 		if (localPrivateKey instanceof ASymmetricPrivateKey)
 			signer=new Signer((ASymmetricPrivateKey)localPrivateKey);
 		else
 			signer=new HybridSigner((HybridASymmetricPrivateKey) localPrivateKey);
+		signer.init();
 	}
 
 	@Override
@@ -68,7 +69,7 @@ public class ASymmetricAuthenticatedSignerAlgorithm extends AbstractAuthenticate
 	}
 	@Override
 	public void init() throws IOException {
-		signer.init();
+
 	}
 
 

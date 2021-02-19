@@ -213,7 +213,8 @@ public enum ASymmetricKeyWrapperType {
 				CodeProvider.ensureProviderLoaded(provider);
 				if (name().startsWith("BCPQC_MCELIECE_")) {
 					ClientASymmetricEncryptionAlgorithm client = new ClientASymmetricEncryptionAlgorithm(random, publicKey);
-					return new WrappedEncryptedSymmetricSecretKey(client.encode(keyToWrap.encode().getBytes()));
+					WrappedSecretData wsd=keyToWrap.encode();
+					return new WrappedEncryptedSymmetricSecretKey(client.encode(wsd.getBytes()));
 				} else {
 
 					if ((publicKey.getAuthenticatedSignatureAlgorithmType() != null && ((provider == CodeProvider.GNU_CRYPTO) != (publicKey.getAuthenticatedSignatureAlgorithmType().getCodeProviderForSignature() == CodeProvider.GNU_CRYPTO)))

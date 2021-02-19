@@ -74,7 +74,7 @@ public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOu
 	@Override
 	public byte[] decode(byte[] bytes, int off, int len) throws IOException
 	{
-		return decode(bytes, 0, bytes.length, null, 0, 0);
+		return decode(bytes, off, len, null, 0, 0);
 	}
 	@Override
 	public byte[] decode(byte[] bytes, int off, int len, byte[] associatedData, int offAD, int lenAD) throws IOException

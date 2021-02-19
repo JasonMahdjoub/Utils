@@ -1,5 +1,6 @@
 package com.distrimind.util.crypto;
 
+import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 
@@ -24,7 +25,7 @@ public class P2PLoginWithAsymmetricSignature extends AbstractP2PLoginWithSignatu
 	}
 
 	@Override
-	protected AbstractAuthenticatedSignerAlgorithm getSigner() throws NoSuchProviderException, NoSuchAlgorithmException {
+	protected AbstractAuthenticatedSignerAlgorithm getSigner() throws NoSuchProviderException, NoSuchAlgorithmException, IOException {
 		return new ASymmetricAuthenticatedSignerAlgorithm(myPrivateKey);
 	}
 

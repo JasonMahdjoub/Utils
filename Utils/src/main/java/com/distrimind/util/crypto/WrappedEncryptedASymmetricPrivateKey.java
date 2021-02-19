@@ -14,7 +14,7 @@ import java.io.IOException;
  * @since Utils 5.10.0
  */
 public class WrappedEncryptedASymmetricPrivateKey extends WrappedSecretData implements SecureExternalizable {
-	static final int MAX_SIZE_IN_BYTES_OF_KEY=ASymmetricPrivateKey.MAX_SIZE_IN_BYTES_OF_PRIVATE_KEY*3;
+	static final int MAX_SIZE_IN_BYTES_OF_KEY=ASymmetricPrivateKey.MAX_SIZE_IN_BYTES_OF_PRIVATE_KEY*3+HybridASymmetricAuthenticatedSignatureType.MAX_HYBRID_ASYMMETRIC_SIGNATURE_SIZE+SymmetricAuthenticatedSignatureType.MAX_SYMMETRIC_SIGNATURE_SIZE;
 	public static final int MAX_SIZE_IN_BYTES_OF_DATA=MAX_SIZE_IN_BYTES_OF_KEY+7;
 	protected WrappedEncryptedASymmetricPrivateKey() {
 	}

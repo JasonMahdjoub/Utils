@@ -145,6 +145,8 @@ public class LimitedRandomInputStream extends RandomInputStream{
 	@Override
 	public void reset() throws IOException {
 		in.reset();
+		if (in.currentPosition()<off)
+			in.seek(off);
 	}
 
 

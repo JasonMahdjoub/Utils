@@ -35,6 +35,7 @@ The fact that you are presently reading this means that you have had
 knowledge of the CeCILL-C license and that you accept its terms.
  */
 
+import com.distrimind.util.data_buffers.WrappedData;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -68,9 +69,12 @@ public class TestsForSymmetricSignatures {
 		SymmetricSecretKey key1=signatureType.getKeyGenerator(SecureRandomType.DEFAULT.getSingleton(null), signatureType.getDefaultKeySizeBits()).generateKey();
 
 		Assert.assertEquals(key1.getKeySizeBits(), signatureType.getDefaultKeySizeBits());
-		System.out.println("Key encryption : \n\t"+ Base64.getUrlEncoder().encodeToString(key1.getKeyBytes().getBytes()));
-		System.out.println("Key encryption (complete): \n\t"+ Base64.getUrlEncoder().encodeToString(key1.encode().getBytes()));
-		Assert.assertEquals(key1.getKeyBytes().getBytes().length, signatureType.getDefaultKeySizeBytes());
+		WrappedData wd=key1.getKeyBytes();
+		System.out.println("Key encryption : \n\t"+ Base64.getUrlEncoder().encodeToString(wd.getBytes()));
+		wd=key1.encode();
+		System.out.println("Key encryption (complete): \n\t"+ Base64.getUrlEncoder().encodeToString(wd.getBytes()));
+		wd=key1.getKeyBytes();
+		Assert.assertEquals(wd.getBytes().length, signatureType.getDefaultKeySizeBytes());
 	}
 
 	@DataProvider(name="provideDataSymmetricKeyWrapperForSignature", parallel=true)

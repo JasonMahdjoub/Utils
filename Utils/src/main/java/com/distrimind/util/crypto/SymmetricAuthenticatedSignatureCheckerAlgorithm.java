@@ -65,8 +65,9 @@ public class SymmetricAuthenticatedSignatureCheckerAlgorithm extends AbstractAut
 		return signer.getMacLengthBytes();
 	}
 
-	public SymmetricAuthenticatedSignatureCheckerAlgorithm(SymmetricSecretKey secretKey) throws NoSuchAlgorithmException, NoSuchProviderException {
+	public SymmetricAuthenticatedSignatureCheckerAlgorithm(SymmetricSecretKey secretKey) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
 		this(new SymmetricAuthenticatedSignerAlgorithm(secretKey));
+
 	}
 
 	public SymmetricSecretKey getSecretKey() {

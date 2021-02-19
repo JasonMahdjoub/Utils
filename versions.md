@@ -1,6 +1,6 @@
 Utils
 =====
-5.16.1 STABLE (Build: 2414) (from 04/01/2016 to 18/02/2020)
+5.17.0 STABLE (Build: 2484) (from 04/01/2016 to 18/02/2020)
 
 # Creator(s):
 Jason MAHDJOUB
@@ -11,8 +11,11 @@ Jason MAHDJOUB (Entered in the team at 04/01/2016)
 # Modifications:
 
 
-### 5.16.1 STABLE (18/02/2020)
+### 5.17.0 STABLE (18/02/2020)
 * Add functions into WrappedData and WrappedString
+* Fix bad parameter into function ServerASymmetricEncryptionAlgorithm.decode(byte[], int, int)
+* Fix security issue into KeyWrapperAlgorithm class : signatures where not always generated
+* Complete KeyWrapperAlgorithm class
 
 
 ### 5.16.0 STABLE (18/02/2020)
