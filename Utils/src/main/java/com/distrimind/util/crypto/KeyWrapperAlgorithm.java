@@ -336,7 +336,7 @@ public class KeyWrapperAlgorithm extends MultiFormatProperties implements Secure
 					SymmetricEncryptionAlgorithm cipher = new SymmetricEncryptionAlgorithm(SecureRandomType.DEFAULT.getInstance(null), secretKeyForEncryption);
 					int off=checkSignature(encryptedSecretKey.getBytes());
 					AbstractKey ak=SymmetricSecretKey.decode(cipher.decode(encryptedSecretKey.getBytes(), off, encryptedSecretKey.getBytes().length-off));
-					encryptedSecretKey.getBytes();
+					encryptedSecretKey.getBytes();//gc delayed
 					if (ak instanceof SymmetricSecretKey)
 						return (SymmetricSecretKey)ak;
 					else
@@ -349,7 +349,7 @@ public class KeyWrapperAlgorithm extends MultiFormatProperties implements Secure
 				int off=checkSignature(encryptedSecretKey.getBytes());
 				if (off>0)
 					encryptedSecretKey=new WrappedEncryptedSymmetricSecretKey(Arrays.copyOfRange(encryptedSecretKey.getBytes(), off, encryptedSecretKey.getBytes().length));
-				encryptedSecretKey.getBytes();
+				encryptedSecretKey.getBytes();//gc delayed
 				return symmetricKeyWrapperType.unwrapKey(secretKeyForEncryption, encryptedSecretKey);
 			}
 		}
@@ -398,7 +398,7 @@ public class KeyWrapperAlgorithm extends MultiFormatProperties implements Secure
 			}
 			int offM=checkSignature(privateKeyToUnwrap.getBytes());
 			DecentralizedValue dv = DecentralizedValue.decode(cipher.decode(privateKeyToUnwrap.getBytes(), offM, privateKeyToUnwrap.getBytes().length - offM), true);
-			privateKeyToUnwrap.getBytes();
+			privateKeyToUnwrap.getBytes();//gc delayed
 			if (!(dv instanceof IASymmetricPrivateKey))
 				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
 			return (IASymmetricPrivateKey) dv;
