@@ -67,7 +67,7 @@ import com.distrimind.util.OS;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 3.0
+ * @version 3.1
  * @since Utils 1.17.0
  */
 @SuppressWarnings("ConstantConditions")
@@ -448,6 +448,11 @@ public enum ASymmetricKeyWrapperType {
 	public boolean isPostQuantumKeyAlgorithm()
 	{
 		return pqc;
+	}
+
+	boolean wrappingIncludeSignature()
+	{
+		return getCodeProvider()!=CodeProvider.BCPQC;
 	}
 
 }
