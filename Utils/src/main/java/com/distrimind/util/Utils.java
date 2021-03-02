@@ -67,6 +67,11 @@ public class Utils {
 			VERSION.addCreator(new Person("mahdjoub", "jason"))
 					.addDeveloper(new PersonDeveloper("mahdjoub", "jason", "2016-01-04"))
 					.addDescription(
+							new Description((short)5, (short)17, (short)2, Version.Type.STABLE, (short)0, "2020-02-21")
+									.addItem("Add function MessageDigestType.isPostQuantumAlgorithm()")
+									.addItem("Use post quantum HMacs as default signature algorithms associated with symmetric encryption algorithms")
+					)
+					.addDescription(
 							new Description((short)5, (short)17, (short)1, Version.Type.STABLE, (short)0, "2020-02-21")
 									.addItem("Exclude wrapping when wrapped keys are not authenticated")
 					)

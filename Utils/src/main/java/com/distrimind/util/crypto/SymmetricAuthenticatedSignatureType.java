@@ -49,7 +49,7 @@ import java.util.Arrays;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 3.1
+ * @version 3.2
  * @since Utils 2.10.0
  */
 public enum SymmetricAuthenticatedSignatureType {
@@ -249,7 +249,7 @@ public enum SymmetricAuthenticatedSignatureType {
 	
 	public boolean isPostQuantumAlgorithm(short keySizeBits) 
 	{
-		return keySizeBits >= 256;
+		return keySizeBits >= 256 && messageDigestType.isPostQuantumAlgorithm();
 	}
 
 

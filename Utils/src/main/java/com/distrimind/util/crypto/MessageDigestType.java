@@ -41,7 +41,7 @@ import java.security.NoSuchProviderException;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 2.2
+ * @version 2.3
  * @since Utils 1.4
  */
 public enum MessageDigestType {
@@ -157,4 +157,7 @@ public enum MessageDigestType {
 		return codeProvider;
 	}
 
+	public boolean isPostQuantumAlgorithm() {
+		return digestLengthBits>=384;
+	}
 }
