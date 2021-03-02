@@ -382,27 +382,34 @@ public class TestsForSymmetricEncryption {
 		SymmetricSecretKey sks=sastype==null?null:sastype.getKeyGenerator(rand).generateKey();
 
 		KeyWrapperAlgorithm keyWrapper;
-		if (kps==null) {
-			if (sks==null)
-				keyWrapper=new KeyWrapperAlgorithm(typeWrapper, kp);
-			else
-				keyWrapper=new KeyWrapperAlgorithm(typeWrapper, kp, sks);
+		try {
+			if (kps == null) {
+				if (sks == null)
+					keyWrapper = new KeyWrapperAlgorithm(typeWrapper, kp);
+				else
+					keyWrapper = new KeyWrapperAlgorithm(typeWrapper, kp, sks);
+			} else {
+				if (sks == null)
+					keyWrapper = new KeyWrapperAlgorithm(typeWrapper, kp, kps);
+				else
+					keyWrapper = new KeyWrapperAlgorithm(typeWrapper, kp, sks, kps);
+			}
+			Assert.assertTrue(typeWrapper.getAlgorithmName()!=null || kp.getEncryptionAlgorithmType().isAuthenticatedAlgorithm() || sks!=null || kps!=null);
+			WrappedEncryptedSymmetricSecretKey wrappedKey = keyWrapper.wrap(rand, sk);
+			SymmetricSecretKey sk2 = keyWrapper.unwrap(wrappedKey);
+			Assert.assertEquals(sk.getKeySizeBits(), sk2.getKeySizeBits());
+			Assert.assertEquals(sk.getAuthenticatedSignatureAlgorithmType(), sk2.getAuthenticatedSignatureAlgorithmType());
+			Assert.assertEquals(sk.getEncryptionAlgorithmType(), sk2.getEncryptionAlgorithmType());
+			Assert.assertEquals(sk.getKeyBytes(), sk2.getKeyBytes());
+			Assert.assertEquals(sk.toJavaNativeKey().getEncoded(), sk2.toJavaNativeKey().getEncoded());
+			Assert.assertEquals(sk.toBouncyCastleKey().getKeyBytes(), sk2.toBouncyCastleKey().getKeyBytes());
 		}
-		else
+		catch (IllegalArgumentException ignored)
 		{
-			if (sks==null)
-				keyWrapper=new KeyWrapperAlgorithm(typeWrapper, kp, kps);
-			else
-				keyWrapper=new KeyWrapperAlgorithm(typeWrapper, kp, sks, kps);
+			Assert.assertTrue(typeWrapper.getAlgorithmName()==null && !kp.getEncryptionAlgorithmType().isAuthenticatedAlgorithm() && sks==null && kps==null);
 		}
-		WrappedEncryptedSymmetricSecretKey wrappedKey=keyWrapper.wrap(rand, sk);
-		SymmetricSecretKey sk2=keyWrapper.unwrap(wrappedKey);
-		Assert.assertEquals(sk.getKeySizeBits(), sk2.getKeySizeBits());
-		Assert.assertEquals(sk.getAuthenticatedSignatureAlgorithmType(), sk2.getAuthenticatedSignatureAlgorithmType());
-		Assert.assertEquals(sk.getEncryptionAlgorithmType(), sk2.getEncryptionAlgorithmType());
-		Assert.assertEquals(sk.getKeyBytes(), sk2.getKeyBytes());
-		Assert.assertEquals(sk.toJavaNativeKey().getEncoded(), sk2.toJavaNativeKey().getEncoded());
-		Assert.assertEquals(sk.toBouncyCastleKey().getKeyBytes(), sk2.toBouncyCastleKey().getKeyBytes());
+
+
 	}
 	@Test(dataProvider= "provideDataWrapperForASymmetricPrivateKeyForEncryption")
 	public void testWrapperForASymmetricPrivateKeyForEncryption(SymmetricKeyWrapperType typeWrapper, ASymmetricEncryptionType asetypeToEncode, ASymmetricAuthenticatedSignatureType asstype, SymmetricAuthenticatedSignatureType sastype) throws NoSuchAlgorithmException, IllegalStateException, NoSuchProviderException, IOException, InvalidKeySpecException {
@@ -413,23 +420,31 @@ public class TestsForSymmetricEncryption {
 		SymmetricSecretKey sks=sastype==null?null:sastype.getKeyGenerator(rand).generateKey();
 
 		KeyWrapperAlgorithm keyWrapper;
-		if (kps==null) {
-			if (sks==null)
-				keyWrapper=new KeyWrapperAlgorithm(typeWrapper, kp);
-			else
-				keyWrapper=new KeyWrapperAlgorithm(typeWrapper, kp, sks);
+		try {
+			if (kps == null) {
+				if (sks == null)
+					keyWrapper = new KeyWrapperAlgorithm(typeWrapper, kp);
+				else
+					keyWrapper = new KeyWrapperAlgorithm(typeWrapper, kp, sks);
+			} else {
+				if (sks == null)
+					keyWrapper = new KeyWrapperAlgorithm(typeWrapper, kp, kps);
+				else
+					keyWrapper = new KeyWrapperAlgorithm(typeWrapper, kp, sks, kps);
+			}
+			Assert.assertTrue(typeWrapper.getAlgorithmName()!=null || kp.getEncryptionAlgorithmType().isAuthenticatedAlgorithm() || sks!=null || kps!=null);
+
+			WrappedEncryptedASymmetricPrivateKey wrappedKey=keyWrapper.wrap(rand, sk.getASymmetricPrivateKey());
+			IASymmetricPrivateKey sk2=keyWrapper.unwrap(wrappedKey);
+			Assert.assertEquals(sk.getASymmetricPrivateKey().encode(), sk2.encode());
+			Assert.assertEquals(sk.getASymmetricPrivateKey().toJavaNativeKey().getEncoded(), sk2.toJavaNativeKey().getEncoded());
+
 		}
-		else
+		catch (IllegalArgumentException ignored)
 		{
-			if (sks==null)
-				keyWrapper=new KeyWrapperAlgorithm(typeWrapper, kp, kps);
-			else
-				keyWrapper=new KeyWrapperAlgorithm(typeWrapper, kp, sks, kps);
+			Assert.assertTrue(typeWrapper.getAlgorithmName()==null && !kp.getEncryptionAlgorithmType().isAuthenticatedAlgorithm() && sks==null && kps==null);
 		}
-		WrappedEncryptedASymmetricPrivateKey wrappedKey=keyWrapper.wrap(rand, sk.getASymmetricPrivateKey());
-		IASymmetricPrivateKey sk2=keyWrapper.unwrap(wrappedKey);
-		Assert.assertEquals(sk.getASymmetricPrivateKey().encode(), sk2.encode());
-		Assert.assertEquals(sk.getASymmetricPrivateKey().toJavaNativeKey().getEncoded(), sk2.toJavaNativeKey().getEncoded());
+
 	}
 	@Test(dataProvider= "provideDataWrapperForASymmetricPrivateKeyForSignature")
 	public void testWrapperForASymmetricPrivateKeyForSignature(SymmetricKeyWrapperType typeWrapper, ASymmetricAuthenticatedSignatureType asstypeToEncode, ASymmetricAuthenticatedSignatureType asstype, SymmetricAuthenticatedSignatureType sastype) throws NoSuchAlgorithmException, IllegalStateException, NoSuchProviderException, IOException, InvalidKeySpecException {
@@ -440,23 +455,29 @@ public class TestsForSymmetricEncryption {
 		SymmetricSecretKey sks=sastype==null?null:sastype.getKeyGenerator(rand).generateKey();
 
 		KeyWrapperAlgorithm keyWrapper;
-		if (kps==null) {
-			if (sks==null)
-				keyWrapper=new KeyWrapperAlgorithm(typeWrapper, kp);
-			else
-				keyWrapper=new KeyWrapperAlgorithm(typeWrapper, kp, sks);
+		try {
+			if (kps == null) {
+				if (sks == null)
+					keyWrapper = new KeyWrapperAlgorithm(typeWrapper, kp);
+				else
+					keyWrapper = new KeyWrapperAlgorithm(typeWrapper, kp, sks);
+			} else {
+				if (sks == null)
+					keyWrapper = new KeyWrapperAlgorithm(typeWrapper, kp, kps);
+				else
+					keyWrapper = new KeyWrapperAlgorithm(typeWrapper, kp, sks, kps);
+			}
+			Assert.assertTrue(typeWrapper.getAlgorithmName()!=null || kp.getEncryptionAlgorithmType().isAuthenticatedAlgorithm() || sks!=null || kps!=null);
+			WrappedEncryptedASymmetricPrivateKey wrappedKey = keyWrapper.wrap(rand, sk.getASymmetricPrivateKey());
+			IASymmetricPrivateKey sk2 = keyWrapper.unwrap(wrappedKey);
+			Assert.assertEquals(sk.getASymmetricPrivateKey().encode(), sk2.encode());
+			Assert.assertEquals(sk.getASymmetricPrivateKey().toJavaNativeKey().getEncoded(), sk2.toJavaNativeKey().getEncoded());
 		}
-		else
+		catch (IllegalArgumentException ignored)
 		{
-			if (sks==null)
-				keyWrapper=new KeyWrapperAlgorithm(typeWrapper, kp, kps);
-			else
-				keyWrapper=new KeyWrapperAlgorithm(typeWrapper, kp, sks, kps);
+			Assert.assertTrue(typeWrapper.getAlgorithmName()==null && !kp.getEncryptionAlgorithmType().isAuthenticatedAlgorithm() && sks==null && kps==null);
 		}
-		WrappedEncryptedASymmetricPrivateKey wrappedKey=keyWrapper.wrap(rand, sk.getASymmetricPrivateKey());
-		IASymmetricPrivateKey sk2=keyWrapper.unwrap(wrappedKey);
-		Assert.assertEquals(sk.getASymmetricPrivateKey().encode(), sk2.encode());
-		Assert.assertEquals(sk.getASymmetricPrivateKey().toJavaNativeKey().getEncoded(), sk2.toJavaNativeKey().getEncoded());
+
 	}
 	@DataProvider(name="providePasswordKeyDerivationTypesForSymmetricEncryptions", parallel=true)
 	public Object[][] providePasswordKeyDerivationTypesForSymmetricEncryptions()

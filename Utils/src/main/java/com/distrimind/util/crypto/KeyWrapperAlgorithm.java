@@ -112,10 +112,7 @@ public class KeyWrapperAlgorithm extends MultiFormatProperties implements Secure
 			throw new NullPointerException();
 		if (includeSecretKeyForSignature && secretKeyForSignature==null)
 			throw new NullPointerException();
-		if (symmetricKeyWrapperType.getAlgorithmName()==null && (secretKeyForEncryption.getEncryptionAlgorithmType()==null ||
-				(!secretKeyForEncryption.getEncryptionAlgorithmType().isAuthenticatedAlgorithm()
-						&& !useSignature())))
-			throw new IllegalArgumentException("This key wrapping type and this secret key for encryption must be used with a signature algorithm");
+
 		this.symmetricKeyWrapperType = symmetricKeyWrapperType;
 		this.secretKeyForEncryption = secretKeyForEncryption;
 		this.secretKeyForSignature=secretKeyForSignature;
@@ -126,7 +123,10 @@ public class KeyWrapperAlgorithm extends MultiFormatProperties implements Secure
 			this.mode+=SIGNATURE_WITH_ASYMMETRIC_KEY_PAIR;
 		if (includeSecretKeyForSignature)
 			this.mode+=SIGNATURE_WITH_SYMMETRIC_SECRET_KEY;
-
+		if (symmetricKeyWrapperType.getAlgorithmName()==null && (secretKeyForEncryption.getEncryptionAlgorithmType()==null ||
+				(!secretKeyForEncryption.getEncryptionAlgorithmType().isAuthenticatedAlgorithm()
+						&& !useSignature())))
+			throw new IllegalArgumentException("This key wrapping type and this secret key for encryption must be used with a signature algorithm");
 	}
 	public KeyWrapperAlgorithm(ASymmetricKeyWrapperType aSymmetricKeyWrapperType, IASymmetricPublicKey publicKeyForEncryption) {
 		this(aSymmetricKeyWrapperType, publicKeyForEncryption, null, null, null, null, false, false);
@@ -180,9 +180,7 @@ public class KeyWrapperAlgorithm extends MultiFormatProperties implements Secure
 			throw new NullPointerException();
 		if (includeSecretKeyForSignature && secretKeyForSignature==null)
 			throw new NullPointerException();
-		if (!aSymmetricKeyWrapperType.wrappingIncludeSignature()
-				&& !useSignature())
-			throw new IllegalArgumentException("This key wrapping type and this public key for encryption must be used with a signature algorithm");
+
 		assert includeSecretKeyForSignature || secretKeyForSignature==null;
 		assert includeASymmetricSignature || (privateKeyForSignature==null && publicKeyForSignature==null);
 		this.aSymmetricKeyWrapperType = aSymmetricKeyWrapperType;
@@ -198,7 +196,9 @@ public class KeyWrapperAlgorithm extends MultiFormatProperties implements Secure
 			this.mode+=SIGNATURE_WITH_ASYMMETRIC_KEY_PAIR;
 		if (includeSecretKeyForSignature)
 			this.mode+=SIGNATURE_WITH_SYMMETRIC_SECRET_KEY;
-
+		if (!aSymmetricKeyWrapperType.wrappingIncludeSignature()
+				&& !useSignature())
+			throw new IllegalArgumentException("This key wrapping type and this public key for encryption must be used with a signature algorithm");
 	}
 
 	public KeyWrapperAlgorithm(SymmetricKeyWrapperType symmetricKeyWrapperType, PasswordHashType passwordHashType, WrappedPassword password) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
@@ -301,8 +301,8 @@ public class KeyWrapperAlgorithm extends MultiFormatProperties implements Secure
 	@SuppressWarnings("BooleanMethodIsAlwaysInverted")
 	private boolean useSignature()
 	{
-		return ((this.mode & SIGNATURE_WITH_SYMMETRIC_SECRET_KEY)==SIGNATURE_WITH_SYMMETRIC_SECRET_KEY) && publicKeyForEncryption==null
-				|| ((this.mode & SIGNATURE_WITH_ASYMMETRIC_KEY_PAIR)==SIGNATURE_WITH_ASYMMETRIC_KEY_PAIR) && publicKeyForEncryption==null;
+		return ((this.mode & SIGNATURE_WITH_SYMMETRIC_SECRET_KEY)==SIGNATURE_WITH_SYMMETRIC_SECRET_KEY)
+				|| ((this.mode & SIGNATURE_WITH_ASYMMETRIC_KEY_PAIR)==SIGNATURE_WITH_ASYMMETRIC_KEY_PAIR);
 	}
 
 	public WrappedEncryptedSymmetricSecretKey wrap(AbstractSecureRandom random, SymmetricSecretKey secretKeyToWrap) throws IOException {
