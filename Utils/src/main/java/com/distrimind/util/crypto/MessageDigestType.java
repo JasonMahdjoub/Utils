@@ -74,7 +74,7 @@ public enum MessageDigestType {
 	SHA3_256("SHA3-256", CodeProvider.SUN, 256, BC_FIPS_SHA3_256),
 	SHA3_384("SHA3-384",	CodeProvider.SUN, 384, BC_FIPS_SHA3_384),
 	SHA3_512("SHA3-512", CodeProvider.SUN, 512, BC_FIPS_SHA3_512),
-	DEFAULT(BC_FIPS_SHA3_384);
+	DEFAULT(SHA2_384);
 
 	private static final int MAX_DIGEST_LENGTH_IN_BITS;
 	static

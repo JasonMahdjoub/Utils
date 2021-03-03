@@ -293,7 +293,7 @@ public class TestKeyAgreements {
 
 				Object[] o = new Object[2];
 				o[0]=new HybridKeyAgreementType(type, type2);
-				o[1]= SymmetricAuthenticatedSignatureType.HMAC_SHA2_256;
+				o[1]= SymmetricAuthenticatedSignatureType.HMAC_SHA2_384;
 				l.add(o);
 			}
 		}

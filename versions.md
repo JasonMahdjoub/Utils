@@ -1,6 +1,6 @@
 Utils
 =====
-5.17.1 STABLE (Build: 2507) (from 04/01/2016 to 21/02/2020)
+5.17.2 STABLE (Build: 2519) (from 04/01/2016 to 21/02/2020)
 
 # Creator(s):
 Jason MAHDJOUB
@@ -9,6 +9,11 @@ Jason MAHDJOUB
 Jason MAHDJOUB (Entered in the team at 04/01/2016)
 
 # Modifications:
+
+
+### 5.17.2 STABLE (21/02/2020)
+* Add function MessageDigestType.isPostQuantumAlgorithm()
+* Use post quantum HMacs as default signature algorithms associated with symmetric encryption algorithms
 
 
 ### 5.17.1 STABLE (21/02/2020)
