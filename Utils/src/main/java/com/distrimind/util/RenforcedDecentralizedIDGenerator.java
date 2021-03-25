@@ -96,7 +96,7 @@ public class RenforcedDecentralizedIDGenerator extends AbstractDecentralizedIDGe
 					throw new IOException();
 				final ByteBuffer b = ByteBuffer.allocate(2);
 				if (channel.read(b, 0)<2)
-					tmp=0;
+					tmp=(short)(RANDOM.nextInt(((int)Short.MAX_VALUE)-((int)Short.MIN_VALUE))+Short.MIN_VALUE);
 				else
 					tmp = ((short) (b.getShort(0) + 1));
 				
