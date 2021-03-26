@@ -52,7 +52,7 @@ import com.distrimind.util.sizeof.ObjectSizer;
  * network.
  * 
  * @author Jason Mahdjoub
- * @version 2.2
+ * @version 2.3
  * @since Utils 1.0
  * 
  */
@@ -67,7 +67,7 @@ public abstract class AbstractDecentralizedIDGenerator extends AbstractDecentral
 	private final static transient byte []LOCAL_MAC_BYTES;
 	//private final static transient long SHORT_LOCAL_MAC;
 	private final static transient byte[] SHORT_LOCAL_MAC_BYTES;
-	private final static transient AbstractSecureRandom RANDOM;
+	protected final static transient AbstractSecureRandom RANDOM;
 	private final static transient AbstractMessageDigest MESSAGE_DIGEST;
 	
 	

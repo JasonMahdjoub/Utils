@@ -44,7 +44,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * network.
  * 
  * @author Jason Mahdjoub
- * @version 2.1
+ * @version 2.2
  * @since Utils 1.0
  */
 public class DecentralizedIDGenerator extends AbstractDecentralizedIDGenerator {
@@ -55,7 +55,7 @@ public class DecentralizedIDGenerator extends AbstractDecentralizedIDGenerator {
 
 
 
-	private static final AtomicInteger sequencer = new AtomicInteger(0);
+	private static final AtomicInteger sequencer = new AtomicInteger(RANDOM.nextInt(((int)Short.MAX_VALUE)-((int)Short.MIN_VALUE))+Short.MIN_VALUE);
 
 	static final String ToStringHead = "DecentralizedID";
 	public static DecentralizedIDGenerator valueOf(String value) {
@@ -87,7 +87,7 @@ public class DecentralizedIDGenerator extends AbstractDecentralizedIDGenerator {
 
 	@Override
 	protected short getNewSequence() {
-		return (short) sequencer.incrementAndGet();
+		return (short)sequencer.incrementAndGet();
 	}
 
 	@Override
