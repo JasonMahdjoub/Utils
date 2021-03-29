@@ -1,6 +1,6 @@
 Utils
 =====
-5.17.2 STABLE (Build: 2519) (from 04/01/2016 to 21/02/2020)
+5.17.3 STABLE (Build: 2529) (from 04/01/2016 to 25/03/2020)
 
 # Creator(s):
 Jason MAHDJOUB
@@ -9,6 +9,10 @@ Jason MAHDJOUB
 Jason MAHDJOUB (Entered in the team at 04/01/2016)
 
 # Modifications:
+
+
+### 5.17.3 STABLE (25/03/2020)
+* Decentralized IDs are now generated with random initial sequence
 
 
 ### 5.17.2 STABLE (21/02/2020)
