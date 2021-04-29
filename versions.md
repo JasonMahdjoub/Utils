@@ -1,6 +1,6 @@
 Utils
 =====
-5.17.3 STABLE (Build: 2529) (from 04/01/2016 to 25/03/2020)
+5.17.4 STABLE (Build: 2545) (from 04/01/2016 to 29/04/2020)
 
 # Creator(s):
 Jason MAHDJOUB
@@ -9,6 +9,10 @@ Jason MAHDJOUB
 Jason MAHDJOUB (Entered in the team at 04/01/2016)
 
 # Modifications:
+
+
+### 5.17.4 STABLE (29/04/2020)
+* Minimal corrections into function signatures into SecuredObjectInputStream
 
 
 ### 5.17.3 STABLE (25/03/2020)
