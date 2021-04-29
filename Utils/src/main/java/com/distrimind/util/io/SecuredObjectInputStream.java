@@ -50,7 +50,7 @@ import java.util.*;
 
 /**
  * @author Jason Mahdjoub
- * @version 2.1
+ * @version 2.2
  * @since Utils 4.4.0
  */
 @SuppressWarnings("NullableProblems")
@@ -119,7 +119,7 @@ public abstract class SecuredObjectInputStream extends InputStream implements Da
 		return (ch1 << 8) + (ch2);
 	}
 
-	public final int readUnsignedShort24Bits() throws IOException {
+	public final int readUnsignedInt24Bits() throws IOException {
 		int ch1 = read();
 		int ch2 = read();
 		int ch3 = read();
@@ -454,8 +454,15 @@ public abstract class SecuredObjectInputStream extends InputStream implements Da
 	public <TK extends Enum<?>> TK readEnum(boolean nullAccepted, Class<TK> classType) throws IOException, ClassNotFoundException {
 		return checkType(readEnum(nullAccepted), classType);
 	}
-	public Enum<?> readEnum(boolean nullAccepted) throws IOException, ClassNotFoundException {
-		return SerializationTools.readEnum(this, nullAccepted);
+	@SuppressWarnings("unchecked")
+	public <TK extends Enum<?>> TK readEnum(boolean nullAccepted) throws IOException, ClassNotFoundException {
+		try {
+			return (TK)SerializationTools.readEnum(this, nullAccepted);
+		}
+		catch (ClassCastException e)
+		{
+			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, e);
+		}
 	}
 	public Class<?> readClass(boolean nullAccepted) throws IOException, ClassNotFoundException {
 		return readClass(nullAccepted, Object.class);

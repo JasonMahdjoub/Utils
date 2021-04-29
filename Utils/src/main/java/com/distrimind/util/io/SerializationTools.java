@@ -1492,7 +1492,7 @@ public class SerializationTools {
 					res=ois.readInt();
 				}
 				else {
-					res = ois.readUnsignedShort24Bits();
+					res = ois.readUnsignedInt24Bits();
 					if (res==NULL_UNSIGNED_SHORT_INT_TAB)
 						res=-1;
 				}
