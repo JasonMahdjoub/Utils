@@ -53,10 +53,9 @@ import java.util.*;
  * @version 2.2
  * @since Utils 4.4.0
  */
-@SuppressWarnings("NullableProblems")
 public abstract class SecuredObjectInputStream extends InputStream implements DataInput  {
 	private static final int DEFAULT_BUFFER_SIZE = FileTools.BUFFER_SIZE;
-	private static final int MAX_BUFFER_SIZE = Integer.MAX_VALUE - 8;
+	//private static final int MAX_BUFFER_SIZE = Integer.MAX_VALUE - 8;
 
 	private SerializationTools.ObjectResolver objectResolver=new SerializationTools.ObjectResolver();
 
@@ -202,12 +201,22 @@ public abstract class SecuredObjectInputStream extends InputStream implements Da
 
 
 
-	public byte[] readNBytes(int len) throws IOException {
+	@Override
+	public abstract int available() throws IOException;
+
+	byte[] readFully(int len) throws IOException
+	{
 		if (len < 0) {
 			throw new IllegalArgumentException("len < 0");
 		}
+		byte[] res=new byte[len];
+		readFully(res);
+		return res;
+	}
 
-		List<byte[]> bufs = null;
+	public byte[] readNBytes(int len) throws IOException {
+		return readFully(Math.min(len, available()));
+		/*List<byte[]> bufs = null;
 		byte[] result = null;
 		int total = 0;
 		int remaining = len;
@@ -260,7 +269,7 @@ public abstract class SecuredObjectInputStream extends InputStream implements Da
 			remaining -= count;
 		}
 
-		return result;
+		return result;*/
 	}
 
 
@@ -309,14 +318,14 @@ public abstract class SecuredObjectInputStream extends InputStream implements Da
 	}
 
 	public byte[] readBytesArray(boolean nullAccepted, int maxSizeInBytes) throws IOException {
-		return SerializationTools.readBytes(this, nullAccepted, null, 0, maxSizeInBytes);
+		return SerializationTools.readBytes(this, nullAccepted, maxSizeInBytes);
 	}
-	public byte[] readBytesArray(byte[] array, boolean nullAccepted) throws IOException {
+	public int readBytesArray(byte[] array, boolean nullAccepted) throws IOException {
 		return SerializationTools.readBytes(this, nullAccepted, array, 0, array.length);
 	}
 
-	public byte[] readBytesArray(byte[] array, int offset, int len, boolean nullAccepted) throws IOException {
-		return SerializationTools.readBytes(this, nullAccepted, array, offset, len);
+	public int readBytesArray(byte[] array, int offset, boolean nullAccepted, int maxSizeBytes) throws IOException {
+		return SerializationTools.readBytes(this, nullAccepted, array, offset, maxSizeBytes);
 	}
 
 	public char[] readChars(boolean nullAccepted, int maxCharsNumber) throws IOException {
