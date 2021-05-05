@@ -210,14 +210,13 @@ public class SerializationTools {
 
 		byte [][]tab=new byte[size][];
 		for (int i=0;i<size;i++)
-			tab[i]=readBytes(ois, supportNull2, null, 0, sizeMax2);
+			tab[i]=readBytes(ois, supportNull2,  sizeMax2);
 		
 		
 		return tab;
 		
 	}
-	@SuppressWarnings("SameParameterValue")
-	static byte[] readBytes(final SecuredObjectInputStream ois, boolean supportNull, byte[] tab, int off, int sizeMax) throws IOException
+	static byte[] readBytes(final SecuredObjectInputStream ois, boolean supportNull, int sizeMax) throws IOException
 	{
 
 		int size=readSize(ois, sizeMax );
@@ -227,16 +226,26 @@ public class SerializationTools {
 				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
 			return null;
 		}
-		if (tab==null) {
-			tab = new byte[size];
-			off = 0;
+
+		return ois.readFully(size);
+	}
+	static int readBytes(final SecuredObjectInputStream ois, boolean supportNull, byte[] tab, int off, int sizeMax) throws IOException
+	{
+		if (tab==null)
+			throw new NullPointerException();
+
+		int size=readSize(ois, sizeMax );
+		if (size==-1)
+		{
+			if (!supportNull)
+				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
+			return -1;
 		}
 
-
 		ois.readFully(tab, off, size);
-		
-		return tab;
-		
+
+		return size;
+
 	}
 	
 
@@ -266,7 +275,7 @@ public class SerializationTools {
 	{
 		if (!supportNull || in.readBoolean())
 		{
-			byte[] k=readBytes(in, false, null, 0, AbstractKey.MAX_SIZE_IN_BYTES_OF_KEY);
+			byte[] k=readBytes(in, false, AbstractKey.MAX_SIZE_IN_BYTES_OF_KEY);
 			try
 			{
 				if (k == null)
@@ -310,7 +319,7 @@ public class SerializationTools {
 	{
 		if (!supportNull || in.readBoolean())
 		{
-			byte[] k=readBytes(in, false, null, 0, AbstractKeyPair.MAX_SIZE_IN_BYTES_OF_KEY_PAIR);
+			byte[] k=readBytes(in, false, AbstractKeyPair.MAX_SIZE_IN_BYTES_OF_KEY_PAIR);
 			try
 			{
 				if (k==null)
@@ -597,7 +606,7 @@ public class SerializationTools {
 		if (!supportNull || in.readBoolean())
 		{
 			int scale=in.readInt();
-			byte[] bd=readBytes(in, false, null, 0, MAX_BIG_INTEGER_SIZE);
+			byte[] bd=readBytes(in, false, MAX_BIG_INTEGER_SIZE);
 			try
 			{
 				if (bd == null)
@@ -632,7 +641,7 @@ public class SerializationTools {
 	{
 		if (!supportNull || in.readBoolean())
 		{
-			byte[] bd=readBytes(in, false, null, 0, MAX_BIG_INTEGER_SIZE);
+			byte[] bd=readBytes(in, false, MAX_BIG_INTEGER_SIZE);
 			try
 			{
 				if (bd == null)
@@ -847,7 +856,7 @@ public class SerializationTools {
 		{
 			try
 			{
-				return AbstractDecentralizedID.decode(Objects.requireNonNull(readBytes(in, false, null, 0, AbstractDecentralizedID.MAX_DECENTRALIZED_ID_SIZE_IN_BYTES)));
+				return AbstractDecentralizedID.decode(Objects.requireNonNull(readBytes(in, false, AbstractDecentralizedID.MAX_DECENTRALIZED_ID_SIZE_IN_BYTES)));
 			}
 			catch(Exception e)
 			{
@@ -862,7 +871,7 @@ public class SerializationTools {
 	static InetAddress readInetAddress(final SecuredObjectInputStream ois, boolean supportNull) throws IOException {
 		if (!supportNull || ois.readBoolean())
 		{
-			byte[] address=readBytes(ois, false, null, 0, MAX_SIZE_INET_ADDRESS);
+			byte[] address=readBytes(ois, false, MAX_SIZE_INET_ADDRESS);
 			try
 			{
 				if (address==null)
@@ -1492,7 +1501,7 @@ public class SerializationTools {
 					res=ois.readInt();
 				}
 				else {
-					res = ois.readUnsignedShort24Bits();
+					res = ois.readUnsignedInt24Bits();
 					if (res==NULL_UNSIGNED_SHORT_INT_TAB)
 						res=-1;
 				}
@@ -1680,7 +1689,7 @@ public class SerializationTools {
 				case 2:
 					return readString(ois, sizeMax, false);
 				case 3:
-					return readBytes(ois, false, null, 0, sizeMax);
+					return readBytes(ois, false, sizeMax);
 				case 4:
 					return readBytes2D(ois, sizeMax, sizeMax, false, false);
 				case 5:

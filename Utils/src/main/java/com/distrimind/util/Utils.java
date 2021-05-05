@@ -67,6 +67,15 @@ public class Utils {
 			VERSION.addCreator(new Person("mahdjoub", "jason"))
 					.addDeveloper(new PersonDeveloper("mahdjoub", "jason", "2016-01-04"))
 					.addDescription(
+							new Description((short)5, (short)17, (short)5, Version.Type.STABLE, (short)0, "2020-04-30")
+									.addItem("Add function SecuredObjectInputStream.readBytesArray(byte[] array, int offset, boolean nullAccepted, int maxSizeBytes)")
+									.addItem("Remove function SecuredObjectInputStream.readBytesArray(byte[] array, int offset, int size, boolean nullAccepted)")
+					)
+					.addDescription(
+							new Description((short)5, (short)17, (short)4, Version.Type.STABLE, (short)0, "2020-04-29")
+									.addItem("Minimal corrections into function signatures into SecuredObjectInputStream")
+					)
+					.addDescription(
 							new Description((short)5, (short)17, (short)3, Version.Type.STABLE, (short)0, "2020-03-25")
 									.addItem("Decentralized IDs are now generated with random initial sequence")
 					)
