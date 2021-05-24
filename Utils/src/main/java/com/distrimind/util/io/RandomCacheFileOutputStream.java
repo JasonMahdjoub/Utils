@@ -56,11 +56,9 @@ public class RandomCacheFileOutputStream extends RandomOutputStream{
 	private final boolean removeFileWhenClosed;
 	private boolean closed=false;
 	private RandomInputStream in=null;
-	RandomCacheFileOutputStream(RandomCacheFileCenter randomCacheFileCenter, File fileName, boolean removeFileWhenClosed, RandomFileOutputStream.AccessMode accessMode,int maxBufferSize, int maxBuffersNumber) throws IOException {
+	RandomCacheFileOutputStream(RandomCacheFileCenter randomCacheFileCenter, File fileName, boolean removeFileWhenClosed, RandomFileOutputStream.AccessMode accessMode,int maxBufferSize, int maxBuffersNumber) {
 		this.randomCacheFileCenter=randomCacheFileCenter;
 		this.out=new RandomByteArrayOutputStream();
-		if (maxBufferSize>0)
-			this.out=new BufferedRandomOutputStream(out, maxBufferSize, maxBuffersNumber);
 		this.fileName=fileName;
 		this.fileUsed=false;
 		this.accessMode=accessMode;
@@ -77,14 +75,25 @@ public class RandomCacheFileOutputStream extends RandomOutputStream{
 		if (maxBufferSize>0)
 			fout=new BufferedRandomOutputStream(fout, maxBufferSize, maxBuffersNumber);
 		out.flush();
-		RandomByteArrayOutputStream baos=maxBufferSize>0?(RandomByteArrayOutputStream)((BufferedRandomOutputStream)out).getRandomOutputStreamSource():(RandomByteArrayOutputStream)out;
-		fout.write(baos.getBytes());
-		randomCacheFileCenter.releaseDataFromMemory(baos.length());
+		RandomByteArrayOutputStream baos=(RandomByteArrayOutputStream)out;
+		assert fout.length()==0;
+		assert fout.currentPosition()==0;
+		long cp=out.currentPosition();
+		assert cp>=0;
+		fout.write(baos.bytes, 0, baos.length);
+		randomCacheFileCenter.releaseDataFromMemory(baos.length);
+		fout.seek(cp);
+		if (in!=null) {
+			cp=in.currentPosition();
+			in = fout.getRandomInputStream();
+			in.seek(cp);
+		}
+		out.close();
 		out=fout;
-		if (in!=null)
-			in=out.getRandomInputStream();
+
 		fileUsed=true;
 	}
+
 
 
 	@Override
@@ -96,7 +105,13 @@ public class RandomCacheFileOutputStream extends RandomOutputStream{
 	public void setLength(long newLength) throws IOException {
 		if (closed)
 			throw new IOException("Stream closed !");
-		if (!fileUsed) {
+		if (newLength<0)
+			throw new IllegalArgumentException();
+		if (fileUsed) {
+			out.setLength(newLength);
+		}
+		else{
+
 			long dataQuantity = newLength-out.length();
 			if (dataQuantity!=0) {
 				if (dataQuantity < 0) {
@@ -107,8 +122,6 @@ public class RandomCacheFileOutputStream extends RandomOutputStream{
 				out.setLength(newLength);
 			}
 		}
-		else
-			out.setLength(newLength);
 
 
 	}
@@ -129,6 +142,8 @@ public class RandomCacheFileOutputStream extends RandomOutputStream{
 	public boolean isClosed() {
 		return closed;
 	}
+
+
 
 	@Override
 	protected RandomInputStream getRandomInputStreamImpl() throws IOException {
@@ -187,7 +202,6 @@ public class RandomCacheFileOutputStream extends RandomOutputStream{
 
 			public void close() throws IOException {
 				in.close();
-				RandomCacheFileOutputStream.this.close();
 			}
 
 			public long skip(long n) throws IOException {
@@ -217,12 +231,19 @@ public class RandomCacheFileOutputStream extends RandomOutputStream{
 		};
 	}
 
+	private void tryToAddNewDataIntoMemory(int len) throws IOException {
+		if (fileUsed)
+			return;
+		long s=((long)len)-(out.length()-out.currentPosition());
+		if (s>0 && !randomCacheFileCenter.tryToAddNewDataIntoMemory(s))
+			forceWritingMemoryCacheToFile();
+	}
+
 	@Override
 	public void write(int b) throws IOException {
 		if (closed)
 			throw new IOException("Stream closed !");
-		if (!fileUsed && !randomCacheFileCenter.tryToAddNewDataIntoMemory(1))
-			forceWritingMemoryCacheToFile();
+		tryToAddNewDataIntoMemory(1);
 		out.write(b);
 	}
 
@@ -230,9 +251,7 @@ public class RandomCacheFileOutputStream extends RandomOutputStream{
 	public void write(byte[] b, int off, int len) throws IOException {
 		if (closed)
 			throw new IOException("Stream closed !");
-		RandomInputStream.checkLimits(b, off, len);
-		if (!fileUsed && !randomCacheFileCenter.tryToAddNewDataIntoMemory(len))
-			forceWritingMemoryCacheToFile();
+		tryToAddNewDataIntoMemory(len);
 		out.write(b, off, len);
 	}
 
@@ -246,10 +265,12 @@ public class RandomCacheFileOutputStream extends RandomOutputStream{
 			}
 			if (!out.isClosed())
 				out.close();
-			if (fileUsed && removeFileWhenClosed)
-				if (fileName.exists())
+			if (fileUsed && removeFileWhenClosed) {
+				if (fileName.exists()) {
 					if (!fileName.delete())
-						throw new IOException("Impossible to delete file "+fileName);
+						throw new IOException("Impossible to delete file " + fileName);
+				}
+			}
 		}
 		finally {
 			closed=true;

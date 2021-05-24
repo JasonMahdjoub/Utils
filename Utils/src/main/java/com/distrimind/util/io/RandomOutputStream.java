@@ -130,6 +130,7 @@ public abstract class RandomOutputStream extends SecuredObjectOutputStream imple
 	public final RandomInputStream getRandomInputStream() throws IOException {
 		if (isClosed())
 			throw new IOException();
+		flush();
 		if (randomInputStream==null)
 			randomInputStream=getRandomInputStreamImpl();
 		return randomInputStream;
