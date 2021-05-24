@@ -521,9 +521,53 @@ public class EncryptionSignatureHashDecoder {
 	}
 	public RandomInputStream decodeAndCheckHashAndSignaturesIfNecessary(Reference<Long> positionOfRandomInputStreamAfterDecoding) throws IOException {
 		if (isEncrypted()) {
-			RandomOutputStream out=RandomCacheFileCenter.getSingleton().getNewBufferedRandomCacheFileOutputStream(true);
+			final RandomOutputStream out=RandomCacheFileCenter.getSingleton().getNewBufferedRandomCacheFileOutputStream(true);
 			decodeAndCheckHashAndSignaturesIfNecessary(out,  false, positionOfRandomInputStreamAfterDecoding, false);
-			return out.getRandomInputStream();
+
+			return new RandomInputStream(){
+				final RandomOutputStream rout=out;
+				final RandomInputStream ris=out.getRandomInputStream();
+				@Override
+				public long currentPosition() throws IOException {
+					return ris.currentPosition();
+				}
+
+				@Override
+				public long length() throws IOException {
+					return ris.length();
+				}
+
+				@Override
+				public void seek(long _pos) throws IOException {
+					ris.seek(_pos);
+				}
+
+				@Override
+				public boolean isClosed() {
+					return ris.isClosed();
+				}
+
+				@Override
+				public void readFully(byte[] tab, int off, int len) throws IOException {
+					ris.readFully(tab, off, len);
+				}
+
+				@Override
+				public String readLine() throws IOException {
+					return ris.readLine();
+				}
+
+				@Override
+				public int read() throws IOException {
+					return ris.read();
+				}
+
+				@Override
+				public void close() throws IOException {
+					rout.close();
+					ris.close();
+				}
+			};
 		}
 		else
 		{

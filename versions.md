@@ -1,6 +1,6 @@
 Utils
 =====
-5.17.5 STABLE (Build: 2557) (from 04/01/2016 to 30/04/2020)
+5.17.6 STABLE (Build: 2561) (from 04/01/2016 to 24/05/2020)
 
 # Creator(s):
 Jason MAHDJOUB
@@ -9,6 +9,10 @@ Jason MAHDJOUB
 Jason MAHDJOUB (Entered in the team at 04/01/2016)
 
 # Modifications:
+
+
+### 5.17.6 STABLE (24/05/2020)
+* Fix issue with stream closed too quickly when decoding encrypted data
 
 
 ### 5.17.5 STABLE (30/04/2020)
