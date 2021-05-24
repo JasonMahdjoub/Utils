@@ -69,6 +69,8 @@ public class Utils {
 					.addDescription(
 							new Description((short)5, (short)17, (short)6, Version.Type.STABLE, (short)0, "2020-05-24")
 									.addItem("Fix issue with stream closed too quickly when decoding encrypted data")
+									.addItem("Fix memory allocation issues with RandomCacheFileCenter")
+									.addItem("Fix file position update issue when using file in both read and write modes")
 					)
 					.addDescription(
 							new Description((short)5, (short)17, (short)5, Version.Type.STABLE, (short)0, "2020-04-30")

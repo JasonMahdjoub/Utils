@@ -83,6 +83,8 @@ public class RandomFileOutputStream extends RandomOutputStream {
 
 	private final RandomAccessFile raf;
 	private boolean closed=false;
+	private long position;
+	private boolean checkPosition=false;
 
 	public RandomFileOutputStream(Path p, AccessMode mode) throws FileNotFoundException {
 		this(p.toFile(), mode);
@@ -98,18 +100,23 @@ public class RandomFileOutputStream extends RandomOutputStream {
 
 	public RandomFileOutputStream(File f) throws FileNotFoundException {
 		this(f, AccessMode.READ_AND_WRITE);
+		position=0;
+	}
+	private void checkPosition() throws IOException {
+		if (checkPosition && position!=raf.getFilePointer())
+			raf.seek(position);
 	}
 
 	@Override
 	protected RandomFileInputStream getRandomInputStreamImpl()
 	{
+		checkPosition=true;
 		return new RandomFileInputStream(raf);
 	}
 
 	@SuppressWarnings("RedundantThrows")
 	@Override
 	public void flush() throws IOException {
-
 	}
 
 	public RandomAccessFile getRandomAccessFile() {
@@ -121,7 +128,9 @@ public class RandomFileOutputStream extends RandomOutputStream {
 	 */
 	@Override
 	public void write(int b) throws IOException {
+		checkPosition();
 		raf.write(b);
+		position+=1;
 	}
 
 	/**
@@ -129,7 +138,9 @@ public class RandomFileOutputStream extends RandomOutputStream {
 	 */
 	@Override
 	public void write(byte[] _bytes) throws IOException {
+		checkPosition();
 		raf.write(_bytes);
+		position+=_bytes.length;
 	}
 
 	/**
@@ -138,7 +149,9 @@ public class RandomFileOutputStream extends RandomOutputStream {
 	@Override
 	public void write(byte[] _bytes, int _offset, int _length) throws IOException {
 		RandomInputStream.checkLimits(_bytes, _offset, _length);
+		checkPosition();
 		raf.write(_bytes, _offset, _length);
+		position+=_length;
 	}
 
 
@@ -157,7 +170,12 @@ public class RandomFileOutputStream extends RandomOutputStream {
 	public void setLength(long _length) throws IOException {
 		if (_length<0)
 			throw new IllegalArgumentException();
+		//long p=raf.getFilePointer();
 		raf.setLength(_length);
+		position=Math.min(position, _length);
+
+		/*if (p>_length)
+			raf.seek(_length);*/
 	}
 
 	/**
@@ -167,7 +185,9 @@ public class RandomFileOutputStream extends RandomOutputStream {
 	public void seek(long _pos) throws IOException {
 		if (_pos<0 || _pos>length())
 			throw new IllegalArgumentException();
-		raf.seek(_pos);
+		position=_pos;
+		if (!checkPosition)
+			raf.seek(_pos);
 	}
 
 	/**
@@ -175,7 +195,7 @@ public class RandomFileOutputStream extends RandomOutputStream {
 	 */
 	@Override
 	public long currentPosition() throws IOException {
-		return raf.getFilePointer();
+		return position;
 	}
 
 	@Override
@@ -189,6 +209,7 @@ public class RandomFileOutputStream extends RandomOutputStream {
 	@Override
 	public void close() throws IOException {
 		closed=true;
+		flush();
 		raf.close();
 	}
 
@@ -198,7 +219,6 @@ public class RandomFileOutputStream extends RandomOutputStream {
 	{
 		if (!isClosed()) {
 			try {
-				flush();
 				close();
 			} catch (IOException e) {
 				e.printStackTrace();

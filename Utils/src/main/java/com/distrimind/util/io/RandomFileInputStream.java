@@ -52,6 +52,8 @@ public class RandomFileInputStream extends RandomInputStream {
 
 	private final RandomAccessFile raf;
 	private boolean closed=false;
+	private long position;
+	private boolean checkPosition;
 
 
 	public RandomFileInputStream(Path p) throws FileNotFoundException {
@@ -60,6 +62,8 @@ public class RandomFileInputStream extends RandomInputStream {
 
 	public RandomFileInputStream(File f) throws FileNotFoundException {
 		raf = new RandomAccessFile(f, "r");
+		this.position=0;
+		this.checkPosition=false;
 	}
 
 	RandomFileInputStream(RandomAccessFile raf)
@@ -67,6 +71,13 @@ public class RandomFileInputStream extends RandomInputStream {
 		if (raf==null)
 			throw new NullPointerException();
 		this.raf=raf;
+		this.position=0;
+		this.checkPosition=true;
+	}
+
+	private void checkPosition() throws IOException {
+		if (checkPosition && position!=raf.getFilePointer())
+			raf.seek(position);
 	}
 
 	/**
@@ -74,7 +85,10 @@ public class RandomFileInputStream extends RandomInputStream {
 	 */
 	@Override
 	public int read() throws IOException {
-		return raf.read();
+		checkPosition();
+		int res=raf.read();
+		++position;
+		return res;
 	}
 
 	/**
@@ -82,7 +96,10 @@ public class RandomFileInputStream extends RandomInputStream {
 	 */
 	@Override
 	public int read(byte[] _bytes) throws IOException {
-		return raf.read(_bytes);
+		checkPosition();
+		int res= raf.read(_bytes);
+		position+=res;
+		return res;
 	}
 
 	/**
@@ -90,8 +107,12 @@ public class RandomFileInputStream extends RandomInputStream {
 	 */
 	@Override
 	public int read(byte[] _bytes, int _offset, int _length) throws IOException {
+
 		checkLimits(_bytes, _offset, _length);
-		return raf.read(_bytes, _offset, _length);
+		checkPosition();
+		int res= raf.read(_bytes, _offset, _length);
+		position+=res;
+		return res;
 	}
 
 	/**
@@ -111,7 +132,9 @@ public class RandomFileInputStream extends RandomInputStream {
 			throw new IllegalArgumentException();
 		if (_pos > length())
 			throw new IOException("The position must be lower that the size of the file");
-		raf.seek(_pos);
+		position=_pos;
+		if (!checkPosition)
+			raf.seek(_pos);
 	}
 
 	private long getFreeSpace() throws IOException {
@@ -124,7 +147,7 @@ public class RandomFileInputStream extends RandomInputStream {
 	@Override
 	public long skip(long _nb) throws IOException {
 		long skipped = Math.min(getFreeSpace(), _nb);
-		raf.seek(currentPosition() + skipped);
+		position=position + skipped;
 		return skipped;
 	}
 
@@ -135,7 +158,7 @@ public class RandomFileInputStream extends RandomInputStream {
 	 */
 	@Override
 	public long currentPosition() throws IOException {
-		return raf.getFilePointer();
+		return position;
 	}
 
 	@Override
@@ -146,12 +169,17 @@ public class RandomFileInputStream extends RandomInputStream {
 	@Override
 	public void readFully(byte[] tab, int off, int len) throws IOException{
 		checkLimits(tab, off, len);
+		checkPosition();
 		raf.readFully(tab, off, len);
+		position+=len;
 	}
 
 	@Override
 	public String readLine() throws IOException {
-		return raf.readLine();
+		checkPosition();
+		String res=raf.readLine();
+		position=raf.getFilePointer();
+		return res;
 	}
 
 
