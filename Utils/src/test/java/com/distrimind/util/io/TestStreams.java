@@ -215,7 +215,7 @@ public class TestStreams {
 
 	}
 
-	@Test(/*dependsOnMethods = "testInputStreams", */invocationCount = 1000, threadPoolSize = 16, dataProvider = "provideOutputStreams")
+	@Test(dependsOnMethods = "testInputStreams", invocationCount = 1000, threadPoolSize = 16, dataProvider = "provideOutputStreams")
 	public void testOutputStreams(RandomOutputStream dest, RandomOutputStream outputStream) throws IOException {
 		int maxCycles=10000;
 		Random rand=new Random(System.currentTimeMillis());
