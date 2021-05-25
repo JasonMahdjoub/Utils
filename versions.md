@@ -1,6 +1,6 @@
 Utils
 =====
-5.17.6 STABLE (Build: 2614) (from 04/01/2016 to 24/05/2020)
+5.17.7 STABLE (Build: 2620) (from 04/01/2016 to 25/05/2020)
 
 # Creator(s):
 Jason MAHDJOUB
@@ -9,6 +9,10 @@ Jason MAHDJOUB
 Jason MAHDJOUB (Entered in the team at 04/01/2016)
 
 # Modifications:
+
+
+### 5.17.7 STABLE (25/05/2020)
+* Fix issue with RandomFileInputStream when reading a byte whereas end of file has been reached : the file position shouldn't be incremented !
 
 
 ### 5.17.6 STABLE (24/05/2020)

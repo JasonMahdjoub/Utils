@@ -67,6 +67,10 @@ public class Utils {
 			VERSION.addCreator(new Person("mahdjoub", "jason"))
 					.addDeveloper(new PersonDeveloper("mahdjoub", "jason", "2016-01-04"))
 					.addDescription(
+							new Description((short)5, (short)17, (short)7, Version.Type.STABLE, (short)0, "2020-05-25")
+									.addItem("Fix issue with RandomFileInputStream when reading a byte whereas end of file has been reached : the file position shouldn't be incremented !")
+					)
+					.addDescription(
 							new Description((short)5, (short)17, (short)6, Version.Type.STABLE, (short)0, "2020-05-24")
 									.addItem("Fix issue with stream closed too quickly when decoding encrypted data")
 									.addItem("Fix memory allocation issues with RandomCacheFileCenter")

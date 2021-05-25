@@ -53,7 +53,7 @@ public class RandomFileInputStream extends RandomInputStream {
 	private final RandomAccessFile raf;
 	private boolean closed=false;
 	private long position;
-	private boolean checkPosition;
+	private final boolean checkPosition;
 
 
 	public RandomFileInputStream(Path p) throws FileNotFoundException {
@@ -87,7 +87,8 @@ public class RandomFileInputStream extends RandomInputStream {
 	public int read() throws IOException {
 		checkPosition();
 		int res=raf.read();
-		++position;
+		if (res!=-1)
+			++position;
 		return res;
 	}
 
