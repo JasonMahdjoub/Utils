@@ -79,6 +79,14 @@ public enum P2PLoginAgreementType {
 		return getAgreementAlgorithm(random, participantID, password.getChars(), secretKeyForSignature, getDefaultMessageDigestType(), getDefaultPasswordHashType(), generateASymmetricPublicKey(random));
 	}
 	public P2PLoginAgreement getAgreementAlgorithm(AbstractSecureRandom random, byte[] participantID, WrappedPassword password, SymmetricSecretKey secretKeyForSignature, MessageDigestType messageDigestType, PasswordHashType passwordHashType,
+												   ASymmetricPrivateKey myPrivateKeyForSignature, ASymmetricPublicKey otherPublicKeyForSignature   ) throws NoSuchAlgorithmException,  NoSuchProviderException, IOException{
+		return getAgreementAlgorithm(random, participantID, password.getChars(), null, 0, 0, secretKeyForSignature, messageDigestType, passwordHashType, null, myPrivateKeyForSignature, otherPublicKeyForSignature);
+	}
+	public P2PLoginAgreement getAgreementAlgorithm(AbstractSecureRandom random, byte[] participantID, WrappedPassword password, SymmetricSecretKey secretKeyForSignature, MessageDigestType messageDigestType, PasswordHashType passwordHashType,
+												   ASymmetricPublicKey myPublicKeyForEncryptionDestinedToSecretMessageExchanger, ASymmetricPrivateKey myPrivateKeyForSignature, ASymmetricPublicKey otherPublicKeyForSignature   ) throws NoSuchAlgorithmException,  NoSuchProviderException, IOException{
+		return getAgreementAlgorithm(random, participantID, password.getChars(), null, 0, 0, secretKeyForSignature, messageDigestType, passwordHashType, myPublicKeyForEncryptionDestinedToSecretMessageExchanger, myPrivateKeyForSignature, otherPublicKeyForSignature);
+	}
+	public P2PLoginAgreement getAgreementAlgorithm(AbstractSecureRandom random, byte[] participantID, WrappedPassword password, SymmetricSecretKey secretKeyForSignature, MessageDigestType messageDigestType, PasswordHashType passwordHashType,
 												   ASymmetricPublicKey myPublicKeyForEncryptionDestinedToSecretMessageExchanger) throws NoSuchAlgorithmException,  NoSuchProviderException, IOException{
 		return getAgreementAlgorithm(random, participantID, password.getChars(), null, 0, 0, secretKeyForSignature, messageDigestType, passwordHashType, myPublicKeyForEncryptionDestinedToSecretMessageExchanger, null, null);
 	}
@@ -144,6 +152,14 @@ public enum P2PLoginAgreementType {
 	}
 	public P2PLoginAgreement getAgreementAlgorithm(AbstractSecureRandom random, byte[] participantID, byte[] message, boolean messageIsKey, SymmetricSecretKey secretKeyForSignature) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
 		return getAgreementAlgorithm(random, participantID, message, messageIsKey, secretKeyForSignature,getDefaultMessageDigestType(), getDefaultPasswordHashType(), generateASymmetricPublicKey(random));
+	}
+	public P2PLoginAgreement getAgreementAlgorithm(AbstractSecureRandom random, byte[] participantID, byte[] message, boolean messageIsKey, SymmetricSecretKey secretKeyForSignature,MessageDigestType messageDigestType, PasswordHashType passwordHashType,
+												   ASymmetricPrivateKey myPrivateKeyForSignature, ASymmetricPublicKey otherPublicKeyForSignature) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
+		return getAgreementAlgorithm(random, participantID, message, 0, message.length,null, 0, 0, messageIsKey, secretKeyForSignature, messageDigestType, passwordHashType, null, myPrivateKeyForSignature, otherPublicKeyForSignature);
+	}
+	public P2PLoginAgreement getAgreementAlgorithm(AbstractSecureRandom random, byte[] participantID, byte[] message, boolean messageIsKey, SymmetricSecretKey secretKeyForSignature,MessageDigestType messageDigestType, PasswordHashType passwordHashType,
+												   ASymmetricPublicKey myPublicKeyForEncryptionDestinedToSecretMessageExchanger, ASymmetricPrivateKey myPrivateKeyForSignature, ASymmetricPublicKey otherPublicKeyForSignature) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
+		return getAgreementAlgorithm(random, participantID, message, 0, message.length,null, 0, 0, messageIsKey, secretKeyForSignature, messageDigestType, passwordHashType, myPublicKeyForEncryptionDestinedToSecretMessageExchanger, myPrivateKeyForSignature, otherPublicKeyForSignature);
 	}
 	public P2PLoginAgreement getAgreementAlgorithm(AbstractSecureRandom random, byte[] participantID, byte[] message, boolean messageIsKey, SymmetricSecretKey secretKeyForSignature,MessageDigestType messageDigestType, PasswordHashType passwordHashType,
 												   ASymmetricPublicKey myPublicKeyForEncryptionDestinedToSecretMessageExchanger) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
