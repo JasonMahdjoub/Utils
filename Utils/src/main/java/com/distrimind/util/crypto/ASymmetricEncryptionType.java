@@ -62,7 +62,6 @@ import java.security.spec.X509EncodedKeySpec;
  * @version 4.1
  * @since Utils 1.4
  */
-@SuppressWarnings({"unchecked", "ConstantConditions"})
 public enum ASymmetricEncryptionType {
 	RSA_OAEPWithSHA256AndMGF1Padding("RSA", "ECB", "OAEPWITHSHA-256ANDMGF1PADDING", ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA384withRSA,
 			3072, 31536000000L, (short) 66, CodeProvider.SunJCE,CodeProvider.SunRsaSign, FipsRSA.ALGORITHM, false),
@@ -438,16 +437,16 @@ public enum ASymmetricEncryptionType {
 
 	public AbstractKeyPairGenerator getKeyPairGenerator(AbstractSecureRandom random)
 			throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
-		return getKeyPairGenerator(random, keySizeBits, System.currentTimeMillis() + expirationTimeMilis);
+		return getKeyPairGenerator(random, keySizeBits, System.currentTimeMillis(), System.currentTimeMillis() + expirationTimeMilis);
 	}
 
 	public AbstractKeyPairGenerator getKeyPairGenerator(AbstractSecureRandom random, int keySizeBits)
 			throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
-		return getKeyPairGenerator(random, keySizeBits, System.currentTimeMillis() + expirationTimeMilis);
+		return getKeyPairGenerator(random, keySizeBits, System.currentTimeMillis(), System.currentTimeMillis() + expirationTimeMilis);
 	}
 
 	public AbstractKeyPairGenerator getKeyPairGenerator(AbstractSecureRandom random, int keySizeBits,
-			long expirationTimeUTC) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
+			long publicKeyValidityBeginDateUTC, long expirationTimeUTC) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
 		if (keySizeBits<0)
 			keySizeBits= this.keySizeBits;
 		if (expirationTimeUTC==Long.MIN_VALUE)
@@ -457,7 +456,7 @@ public enum ASymmetricEncryptionType {
 		if (codeProviderForKeyGenerator == CodeProvider.GNU_CRYPTO) {
 			Object kpg=GnuFunctions.getKeyPairGenerator(algorithmName);
 			GnuKeyPairGenerator res = new GnuKeyPairGenerator(this, kpg);
-			res.initialize(keySizeBits, expirationTimeUTC, random);
+			res.initialize(keySizeBits, publicKeyValidityBeginDateUTC, expirationTimeUTC, random);
 
 			return res;
 		} else if (codeProviderForKeyGenerator == CodeProvider.BCPQC) {
@@ -468,7 +467,7 @@ public enum ASymmetricEncryptionType {
 					res=new BCMcElieceCipher.KeyPairGeneratorCCA2(this);
 				else
 					res=new BCMcElieceCipher.KeyPairGenerator(this);
-				res.initialize(keySizeBits, expirationTimeUTC, random);
+				res.initialize(keySizeBits, publicKeyValidityBeginDateUTC, expirationTimeUTC, random);
 				return res;
 			}
 			else
@@ -478,14 +477,14 @@ public enum ASymmetricEncryptionType {
 
 				KeyPairGenerator kgp = KeyPairGenerator.getInstance(algorithmName, CodeProvider.BCFIPS.name());
 				JavaNativeKeyPairGenerator res = new JavaNativeKeyPairGenerator(this, kgp);
-				res.initialize(keySizeBits, expirationTimeUTC, random);
+				res.initialize(keySizeBits, expirationTimeUTC, publicKeyValidityBeginDateUTC, random);
 
 				return res;
 
 		} else {
 			KeyPairGenerator kgp = KeyPairGenerator.getInstance(algorithmName, codeProviderForKeyGenerator.checkProviderWithCurrentOS().name());
 			JavaNativeKeyPairGenerator res = new JavaNativeKeyPairGenerator(this, kgp);
-			res.initialize(keySizeBits, expirationTimeUTC, random);
+			res.initialize(keySizeBits, expirationTimeUTC, publicKeyValidityBeginDateUTC, random);
 
 			return res;
 

@@ -54,6 +54,7 @@ public final class JavaNativeKeyPairGenerator extends AbstractKeyPairGenerator {
 
 	private int keySizeBits = -1;
 	private long expirationTime = -1;
+	private long publicKeyValidityBeginDateUTC;
 
 	JavaNativeKeyPairGenerator(ASymmetricEncryptionType type, KeyPairGenerator keyPairGenerator) {
 		super(type);
@@ -73,9 +74,9 @@ public final class JavaNativeKeyPairGenerator extends AbstractKeyPairGenerator {
 	public ASymmetricKeyPair generateKeyPair() {
 		KeyPair kp = keyPairGenerator.generateKeyPair();
 		if (encryptionType==null)
-			return new ASymmetricKeyPair(signatureType, kp, keySizeBits, expirationTime, isXDHKey());
+			return new ASymmetricKeyPair(signatureType, kp, keySizeBits, publicKeyValidityBeginDateUTC, expirationTime, isXDHKey());
 		else
-			return new ASymmetricKeyPair(encryptionType, kp, keySizeBits, expirationTime);
+			return new ASymmetricKeyPair(encryptionType, kp, keySizeBits, publicKeyValidityBeginDateUTC, expirationTime);
 	}
 
 	@Override
@@ -84,9 +85,9 @@ public final class JavaNativeKeyPairGenerator extends AbstractKeyPairGenerator {
 	}
 
 	@Override
-	public void initialize(int keySize, long expirationTime) throws IOException {
+	public void initialize(int keySize, long publicKeyValidityBeginDateUTC, long expirationTime) throws IOException {
 		try {
-			this.initialize(keySize, expirationTime, SecureRandomType.BC_FIPS_APPROVED_FOR_KEYS.getSingleton(null));
+			this.initialize(keySize, publicKeyValidityBeginDateUTC, expirationTime, SecureRandomType.BC_FIPS_APPROVED_FOR_KEYS.getSingleton(null));
 		} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
 			throw new IOException(e);
 		}
@@ -115,10 +116,11 @@ public final class JavaNativeKeyPairGenerator extends AbstractKeyPairGenerator {
 
     }*/
 	@Override
-	public void initialize(int keySize, long expirationTime, AbstractSecureRandom _random) throws IOException {
+	public void initialize(int keySize, long publicKeyValidityBeginDateUTC, long expirationTime, AbstractSecureRandom _random) throws IOException {
 		try {
 			this.keySizeBits = keySize;
 			this.expirationTime = expirationTime;
+			this.publicKeyValidityBeginDateUTC=publicKeyValidityBeginDateUTC;
 			if (signatureType != null && signatureType.getKeyGeneratorAlgorithmName().equals(ASymmetricAuthenticatedSignatureType.BCPQC_SPHINCS256_SHA3_512.getKeyGeneratorAlgorithmName())) {
 				this.keySizeBits = signatureType.getDefaultKeySize();
 				keyPairGenerator.initialize(new SPHINCS256KeyGenParameterSpec(SPHINCS256KeyGenParameterSpec.SHA3_256), _random.getJavaNativeSecureRandom());

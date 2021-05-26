@@ -102,7 +102,7 @@ public abstract class AbstractKeyPair<TPrivateKey extends IASymmetricPrivateKey,
 
 	public abstract void zeroize();
 
-	public abstract WrappedSecretData encode(boolean includeTimeExpiration);
+	public abstract WrappedSecretData encode(boolean includeTimes);
 
 	@Override
 	public final WrappedSecretString encodeString() {

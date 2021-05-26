@@ -139,11 +139,11 @@ public class HybridASymmetricKeyPair extends AbstractKeyPair<HybridASymmetricPri
 
 
 	@Override
-	public WrappedSecretData encode(boolean includeTimeExpiration)
+	public WrappedSecretData encode(boolean includeTimes)
 	{
 
 		WrappedSecretData encodedPrivKey=privateKey.encode();
-		WrappedData encodedPubKey=publicKey.encode(includeTimeExpiration);
+		WrappedData encodedPubKey=publicKey.encode(includeTimes);
 
 		byte[] res=new byte[encodedPrivKey.getBytes().length+encodedPubKey.getBytes().length+4];
 		res[0]= AbstractKey.IS_HYBRID_KEY_PAIR;

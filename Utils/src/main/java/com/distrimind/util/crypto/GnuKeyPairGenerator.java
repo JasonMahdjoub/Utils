@@ -46,6 +46,7 @@ public final class GnuKeyPairGenerator extends AbstractKeyPairGenerator {
 
 	private int keySize = -1;
 	private long expirationTime = -1;
+	private long publicKeyValidityBeginDateUTC;
 
 	GnuKeyPairGenerator(ASymmetricEncryptionType type, Object keyPairGenerator) {
 		super(type);
@@ -61,9 +62,9 @@ public final class GnuKeyPairGenerator extends AbstractKeyPairGenerator {
 
 		Object kp = GnuFunctions.keyPairGeneratorGeneratorKeyPair(keyPairGenerator);
 		if (encryptionType==null)
-			return new ASymmetricKeyPair(signatureType, kp, keySize, expirationTime);
+			return new ASymmetricKeyPair(signatureType, kp, keySize, publicKeyValidityBeginDateUTC, expirationTime);
 		else
-			return new ASymmetricKeyPair(encryptionType, kp, keySize, expirationTime);
+			return new ASymmetricKeyPair(encryptionType, kp, keySize, publicKeyValidityBeginDateUTC, expirationTime);
 	}
 
 	@Override
@@ -72,18 +73,20 @@ public final class GnuKeyPairGenerator extends AbstractKeyPairGenerator {
 	}
 
 	@Override
-	public void initialize(int keySize, long expirationTime) {
+	public void initialize(int keySize, long publicKeyValidityBeginDateUTC, long expirationTime) {
 
 		GnuFunctions.keyPairGeneratorInit(keyPairGenerator, keySize);
 		this.keySize = keySize;
 		this.expirationTime = expirationTime;
+		this.publicKeyValidityBeginDateUTC=publicKeyValidityBeginDateUTC;
 	}
 
 	@Override
-	public void initialize(int keySize, long expirationTime, AbstractSecureRandom _random) {
+	public void initialize(int keySize, long publicKeyValidityBeginDateUTC, long expirationTime, AbstractSecureRandom _random) {
 		GnuFunctions.keyPairGeneratorInit(keyPairGenerator, keySize, _random);
 		this.keySize = keySize;
 		this.expirationTime = expirationTime;
+		this.publicKeyValidityBeginDateUTC=publicKeyValidityBeginDateUTC;
 
 	}
 
