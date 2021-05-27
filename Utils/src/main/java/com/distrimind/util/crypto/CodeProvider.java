@@ -63,6 +63,10 @@ public enum CodeProvider {
 	private static volatile boolean init=false;
 
 	static void ensureProviderLoaded(CodeProvider provider) {
+		if (!init)
+		{
+			Security.insertProviderAt(new UtilsSecurityProvider(), 1);
+		}
 		switch (provider)
 		{
 			case BCFIPS:
@@ -81,7 +85,7 @@ public enum CodeProvider {
 		if (!init)
 		{
 			CodeProvider.init=true;
-			Security.insertProviderAt(new UtilsSecurityProvider(), 1);
+
 			try {
 				AbstractSecureRandom random=SecureRandomType.DEFAULT.getSingleton(null);
 				org.bouncycastle.crypto.CryptoServicesRegistrar.setSecureRandom(random);
