@@ -157,7 +157,7 @@ public class TestASymmetricEncryption {
 		testASymmetricKeyWrapperForEncryption(rand, kpe, keyPairForSignature, typeWrapper, asetype, seetype, secretKeyForSignature);
 		if (keyPairForSignature.isPostQuantumKey() || kpe.isPostQuantumKey())
 			return;
-		ASymmetricKeyPair kppqc= ASymmetricEncryptionType.BCPQC_MCELIECE_FUJISAKI_CCA2_SHA256.getKeyPairGenerator(rand, ASymmetricEncryptionType.BCPQC_MCELIECE_FUJISAKI_CCA2_SHA256.getDefaultKeySizeBits(), Long.MAX_VALUE).generateKeyPair();
+		ASymmetricKeyPair kppqc= ASymmetricEncryptionType.BCPQC_MCELIECE_FUJISAKI_CCA2_SHA256.getKeyPairGenerator(rand, ASymmetricEncryptionType.BCPQC_MCELIECE_FUJISAKI_CCA2_SHA256.getDefaultKeySizeBits(), System.currentTimeMillis(), Long.MAX_VALUE).generateKeyPair();
 		ASymmetricKeyPair keyPairForSignaturePQC=ASymmetricAuthenticatedSignatureType.BCPQC_SPHINCS256_SHA2_512_256.getKeyPairGenerator(rand).generateKeyPair();
 		testASymmetricKeyWrapperForEncryption(rand, new HybridASymmetricKeyPair(kpe, kppqc), null, typeWrapper, asetype, seetype, null);
 		testASymmetricKeyWrapperForEncryption(rand, new HybridASymmetricKeyPair(kpe, kppqc), null, typeWrapper, asetype, seetype, secretKeyForSignature);
@@ -180,7 +180,7 @@ public class TestASymmetricEncryption {
 		testASymmetricKeyWrapperForEncryption(rand, kp, keyPairForSignature, typeWrapper, asetype, asetypeToCode, secretKeyForSignature);
 		if (keyPairForSignature.isPostQuantumKey() || kp.isPostQuantumKey())
 			return;
-		ASymmetricKeyPair kppqc= ASymmetricEncryptionType.BCPQC_MCELIECE_FUJISAKI_CCA2_SHA256.getKeyPairGenerator(rand, ASymmetricEncryptionType.BCPQC_MCELIECE_FUJISAKI_CCA2_SHA256.getDefaultKeySizeBits(), Long.MAX_VALUE).generateKeyPair();
+		ASymmetricKeyPair kppqc= ASymmetricEncryptionType.BCPQC_MCELIECE_FUJISAKI_CCA2_SHA256.getKeyPairGenerator(rand, ASymmetricEncryptionType.BCPQC_MCELIECE_FUJISAKI_CCA2_SHA256.getDefaultKeySizeBits(), System.currentTimeMillis(), Long.MAX_VALUE).generateKeyPair();
 		ASymmetricKeyPair keyPairForSignaturePQC=ASymmetricAuthenticatedSignatureType.BCPQC_SPHINCS256_SHA2_512_256.getKeyPairGenerator(rand).generateKeyPair();
 		testASymmetricKeyWrapperForEncryption(rand, new HybridASymmetricKeyPair(kp, kppqc), null, typeWrapper, asetype, asetypeToCode, null);
 		testASymmetricKeyWrapperForEncryption(rand, new HybridASymmetricKeyPair(kp, kppqc), null, typeWrapper, asetype, asetypeToCode, secretKeyForSignature);
@@ -202,7 +202,7 @@ public class TestASymmetricEncryption {
 		testASymmetricKeyWrapperForEncryption(rand, kp, keyPairForSignature, typeWrapper, asetype, asstypeToCode, secretKeyForSignature);
 		if (keyPairForSignature.isPostQuantumKey() || kp.isPostQuantumKey())
 			return;
-		ASymmetricKeyPair kppqc= ASymmetricEncryptionType.BCPQC_MCELIECE_FUJISAKI_CCA2_SHA256.getKeyPairGenerator(rand, ASymmetricEncryptionType.BCPQC_MCELIECE_FUJISAKI_CCA2_SHA256.getDefaultKeySizeBits(), Long.MAX_VALUE).generateKeyPair();
+		ASymmetricKeyPair kppqc= ASymmetricEncryptionType.BCPQC_MCELIECE_FUJISAKI_CCA2_SHA256.getKeyPairGenerator(rand, ASymmetricEncryptionType.BCPQC_MCELIECE_FUJISAKI_CCA2_SHA256.getDefaultKeySizeBits(), System.currentTimeMillis(), Long.MAX_VALUE).generateKeyPair();
 		ASymmetricKeyPair keyPairForSignaturePQC=ASymmetricAuthenticatedSignatureType.BCPQC_SPHINCS256_SHA2_512_256.getKeyPairGenerator(rand).generateKeyPair();
 		testASymmetricKeyWrapperForEncryption(rand, new HybridASymmetricKeyPair(kp, kppqc), null, typeWrapper, asetype, asstypeToCode, null);
 		testASymmetricKeyWrapperForEncryption(rand, new HybridASymmetricKeyPair(kp, kppqc), null, typeWrapper, asetype, asstypeToCode, secretKeyForSignature);
@@ -519,7 +519,7 @@ public class TestASymmetricEncryption {
 		Assert.assertEquals(kpd2.getASymmetricPublicKey().getTimeExpirationUTC(), Long.MAX_VALUE);
 
 		b = kpd.getASymmetricPublicKey().encode(false);
-		Assert.assertEquals(b.getBytes().length, kpd.getASymmetricPublicKey().encode(true).getBytes().length-8);
+		Assert.assertEquals(b.getBytes().length, kpd.getASymmetricPublicKey().encode(true).getBytes().length-16);
 		ASymmetricPublicKey pk=(ASymmetricPublicKey) DecentralizedValue.decode(b);
 		Assert.assertEquals(pk.toJavaNativeKey().getEncoded(), kpd.getASymmetricPublicKey().toJavaNativeKey().getEncoded());
 		Assert.assertEquals(pk.getAuthenticatedSignatureAlgorithmType(), kpd.getASymmetricPublicKey().getAuthenticatedSignatureAlgorithmType());

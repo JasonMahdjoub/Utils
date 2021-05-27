@@ -252,7 +252,7 @@ public abstract class AbstractKey extends AbstractDecentralizedValue implements 
 			} else if (type == 4) {
 				fillArrayWithZerosWhenDecoded=false;
 
-				byte[] publicKey = new byte[len - 4 - ASymmetricPrivateKey.ENCODED_TYPE_SIZE-(includeKeyExpiration?8:0)];
+				byte[] publicKey = new byte[len - 4 - ASymmetricPrivateKey.ENCODED_TYPE_SIZE-(includeKeyExpiration?16:0)];
 				int posKey=ASymmetricPrivateKey.ENCODED_TYPE_SIZE+4+off;
 				long timeExpiration;
 				long publicKeyBeginDateUTC;
@@ -273,7 +273,7 @@ public abstract class AbstractKey extends AbstractDecentralizedValue implements 
 			} else if (type == 5) {
 				fillArrayWithZerosWhenDecoded=false;
 
-				byte[] publicKey = new byte[len - 4 - ASymmetricPrivateKey.ENCODED_TYPE_SIZE - (includeKeyExpiration ? 8 : 0)];
+				byte[] publicKey = new byte[len - 4 - ASymmetricPrivateKey.ENCODED_TYPE_SIZE - (includeKeyExpiration ? 16 : 0)];
 				int posKey=ASymmetricPrivateKey.ENCODED_TYPE_SIZE+4+off;
 				long timeExpiration;
 				long publicKeyBeginDateUTC;

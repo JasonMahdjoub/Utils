@@ -249,7 +249,7 @@ public class ASymmetricKeyPair extends AbstractKeyPair<ASymmetricPrivateKey, ASy
 			includeTimes =false;
 
 		byte[] kp=Bits.concatenateEncodingWithShortIntSizedTabs(privateKey.getBytesPrivateKey(), publicKey.getBytesPublicKey());
-		byte[] tab = new byte[4+ASymmetricPrivateKey.ENCODED_TYPE_SIZE+kp.length+(includeTimes ?8:0)];
+		byte[] tab = new byte[4+ASymmetricPrivateKey.ENCODED_TYPE_SIZE+kp.length+(includeTimes ?16:0)];
 		tab[0]=encryptionType==null?(byte)9:(byte)8;
 		if (includeTimes)
 			tab[0]|= AbstractKey.INCLUDE_KEY_EXPIRATION_CODE;
@@ -316,7 +316,7 @@ public class ASymmetricKeyPair extends AbstractKeyPair<ASymmetricPrivateKey, ASy
 				timeExpiration = Long.MAX_VALUE;
 			}
 
-			byte[] kp = new byte[len - 4 - codedTypeSize-(includeKeyExpiration?8:0)];
+			byte[] kp = new byte[len - 4 - codedTypeSize-(includeKeyExpiration?16:0)];
 			System.arraycopy(b, posKey, kp, 0, kp.length);
 			byte[][] keys = Bits.separateEncodingsWithShortIntSizedTabs(kp);
 

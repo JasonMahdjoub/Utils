@@ -236,10 +236,6 @@ public enum ASymmetricEncryptionType {
 	}
 
 
-	/*static final Field xdhPublicKeyField;
-	private static final Constructor<BCXDHPublicKey> constructorBCXDHPublicKey;
-	static final Field xdhPrivateKeyField;
-	private static final Constructor<BCXDHPrivateKey> constructorBCXDHPrivateKey;*/
 	private static final Field provEdDSAPublicKeyBaseKey;
 	private static final Field provXDHPublicKeyBaseKey;
 	private static final Constructor<PublicKey> constructorProvEdDSAPublicKey;
@@ -247,10 +243,6 @@ public enum ASymmetricEncryptionType {
 	private static final Constructor<PrivateKey> constructorProvXDHPrivateKey;
 	static
 	{
-		/*Field tmpXdhPublicKeyField=null;
-		Constructor<BCXDHPublicKey> tmpConstructorBCXDHPublicKey=null;
-		Field tmpXdhPrivateKeyField=null;
-		Constructor<BCXDHPrivateKey> tmpConstructorBCXDHPrivateKey=null;*/
 		Field tmpProvEdDSAPublicKeyBaseKey=null;
 		Field tmpProvXDHPublicKeyBaseKey=null;
 		Constructor<PublicKey> tmpConstructorProvEdDSAPublicKey=null;
@@ -258,14 +250,6 @@ public enum ASymmetricEncryptionType {
 		Constructor<PrivateKey> tmpConstructorProvXDHPrivateKey=null;
 
 		try {
-			/*tmpXdhPublicKeyField=BCXDHPublicKey.class.getDeclaredField("xdhPublicKey");
-			tmpXdhPublicKeyField.setAccessible(true);
-			tmpConstructorBCXDHPublicKey=BCXDHPublicKey.class.getDeclaredConstructor(AsymmetricKeyParameter.class);
-			tmpConstructorBCXDHPublicKey.setAccessible(true);
-			tmpXdhPrivateKeyField=BCXDHPrivateKey.class.getDeclaredField("xdhPrivateKey");
-			tmpXdhPrivateKeyField.setAccessible(true);
-			tmpConstructorBCXDHPrivateKey=BCXDHPrivateKey.class.getDeclaredConstructor(AsymmetricKeyParameter.class);
-			tmpConstructorBCXDHPrivateKey.setAccessible(true);*/
 
 			tmpProvEdDSAPublicKeyBaseKey=Class.forName("com.distrimind.bcfips.jcajce.provider.ProvEdDSAPublicKey").getDeclaredField("baseKey");
 			tmpProvEdDSAPublicKeyBaseKey.setAccessible(true);
@@ -285,10 +269,6 @@ public enum ASymmetricEncryptionType {
 			e.printStackTrace();
 			System.exit(-1);
 		}
-		/*xdhPublicKeyField=tmpXdhPublicKeyField;
-		constructorBCXDHPublicKey=tmpConstructorBCXDHPublicKey;
-		xdhPrivateKeyField=tmpXdhPrivateKeyField;
-		constructorBCXDHPrivateKey=tmpConstructorBCXDHPrivateKey;*/
 		provEdDSAPublicKeyBaseKey =tmpProvEdDSAPublicKeyBaseKey;
 		provXDHPublicKeyBaseKey =tmpProvXDHPublicKeyBaseKey;
 		constructorProvEdDSAPublicKey=tmpConstructorProvEdDSAPublicKey;
@@ -477,14 +457,14 @@ public enum ASymmetricEncryptionType {
 
 				KeyPairGenerator kgp = KeyPairGenerator.getInstance(algorithmName, CodeProvider.BCFIPS.name());
 				JavaNativeKeyPairGenerator res = new JavaNativeKeyPairGenerator(this, kgp);
-				res.initialize(keySizeBits, expirationTimeUTC, publicKeyValidityBeginDateUTC, random);
+				res.initialize(keySizeBits, publicKeyValidityBeginDateUTC, expirationTimeUTC, random);
 
 				return res;
 
 		} else {
 			KeyPairGenerator kgp = KeyPairGenerator.getInstance(algorithmName, codeProviderForKeyGenerator.checkProviderWithCurrentOS().name());
 			JavaNativeKeyPairGenerator res = new JavaNativeKeyPairGenerator(this, kgp);
-			res.initialize(keySizeBits, expirationTimeUTC, publicKeyValidityBeginDateUTC, random);
+			res.initialize(keySizeBits, publicKeyValidityBeginDateUTC, expirationTimeUTC, random);
 
 			return res;
 

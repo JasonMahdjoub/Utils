@@ -310,7 +310,7 @@ public enum ASymmetricAuthenticatedSignatureType {
 		if (codeProviderKeyGenerator == CodeProvider.GNU_CRYPTO) {
 			KeyPairGenerator kgp = KeyPairGenerator.getInstance(keyGeneratorAlgorithmName);
 			GnuKeyPairGenerator res = new GnuKeyPairGenerator(this, kgp);
-			res.initialize(keySizeBits, expirationTimeUTC, publicKeyValidityBeginDateUTC, random);
+			res.initialize(keySizeBits, publicKeyValidityBeginDateUTC, expirationTimeUTC, random);
 
 			return res;
 		} else if (codeProviderKeyGenerator == CodeProvider.BCFIPS || codeProviderKeyGenerator == CodeProvider.BC || codeProviderKeyGenerator == CodeProvider.BCPQC) {
@@ -326,14 +326,14 @@ public enum ASymmetricAuthenticatedSignatureType {
 			else
 				kgp = KeyPairGenerator.getInstance(keyGeneratorAlgorithmName, codeProviderKeyGenerator.name());
 			JavaNativeKeyPairGenerator res = new JavaNativeKeyPairGenerator(this, kgp);
-			res.initialize(keySizeBits, expirationTimeUTC, publicKeyValidityBeginDateUTC, random);
+			res.initialize(keySizeBits, publicKeyValidityBeginDateUTC, expirationTimeUTC, random);
 
 			return res;
 		} else {
 			KeyPairGenerator kgp = KeyPairGenerator.getInstance(keyGeneratorAlgorithmName, codeProviderKeyGenerator.checkProviderWithCurrentOS().name());
 
 			JavaNativeKeyPairGenerator res = new JavaNativeKeyPairGenerator(this, kgp);
-			res.initialize(keySizeBits, expirationTimeUTC, publicKeyValidityBeginDateUTC, random);
+			res.initialize(keySizeBits, publicKeyValidityBeginDateUTC, expirationTimeUTC, random);
 
 			return res;
 
