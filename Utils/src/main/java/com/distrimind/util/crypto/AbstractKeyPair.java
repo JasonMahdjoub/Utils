@@ -128,4 +128,6 @@ public abstract class AbstractKeyPair<TPrivateKey extends IASymmetricPrivateKey,
 
 	public abstract ASymmetricKeyPair getNonPQCKeyPair();
 
+	public abstract boolean areTimesValid();
+
 }

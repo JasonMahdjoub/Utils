@@ -240,4 +240,9 @@ public class HybridASymmetricKeyPair extends AbstractKeyPair<HybridASymmetricPri
 	public int hashCode() {
 		return Objects.hash(privateKey, publicKey);
 	}
+
+	@Override
+	public boolean areTimesValid() {
+		return publicKey.areTimesValid();
+	}
 }

@@ -464,4 +464,8 @@ public class ASymmetricKeyPair extends AbstractKeyPair<ASymmetricPrivateKey, ASy
 		return encryptionType==null?signatureType.isPostQuantumAlgorithm():encryptionType.isPostQuantumAlgorithm();
 	}
 
+	@Override
+	public boolean areTimesValid() {
+		return publicKey.areTimesValid();
+	}
 }
