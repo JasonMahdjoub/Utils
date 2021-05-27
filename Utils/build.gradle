@@ -63,7 +63,7 @@ dependencies {
     testImplementation 'org.testng:testng:7.1.0'
     testImplementation 'org.hamcrest:hamcrest-core:2.2'
 
-    api(group:'com.distrimind.bcfips', name: 'BouncyCastle-FIPS', version: '1.0.2-DMRECOMPILE')
+    api(group: 'org.bouncycastle', name: 'bc-fips', version: '1.0.2')
     api(group:'com.distrimind.bouncycastle', name: 'core', version: '1.68-DMRECOMPILE')
     api(group:'com.distrimind.bouncycastle', name: 'prov', version: '1.68-DMRECOMPILE')
 

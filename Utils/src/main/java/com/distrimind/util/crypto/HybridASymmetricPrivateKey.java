@@ -108,7 +108,7 @@ public class HybridASymmetricPrivateKey extends AbstractKey implements IHybridKe
 	}
 
 	@Override
-	public com.distrimind.bcfips.crypto.Key toBouncyCastleKey() {
+	public org.bouncycastle.crypto.Key toBouncyCastleKey() {
 		throw new IllegalAccessError();
 	}
 

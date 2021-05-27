@@ -34,11 +34,11 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
-import com.distrimind.bcfips.crypto.Algorithm;
-import com.distrimind.bcfips.crypto.AsymmetricKey;
-import com.distrimind.bcfips.crypto.AsymmetricPrivateKey;
-import com.distrimind.bcfips.crypto.asymmetric.AsymmetricECPrivateKey;
-import com.distrimind.bcfips.crypto.asymmetric.AsymmetricRSAPrivateKey;
+import org.bouncycastle.crypto.Algorithm;
+import org.bouncycastle.crypto.AsymmetricKey;
+import org.bouncycastle.crypto.AsymmetricPrivateKey;
+import org.bouncycastle.crypto.asymmetric.AsymmetricECPrivateKey;
+import org.bouncycastle.crypto.asymmetric.AsymmetricRSAPrivateKey;
 import com.distrimind.bouncycastle.pqc.jcajce.provider.mceliece.BCMcElieceCCA2PrivateKey;
 import com.distrimind.bouncycastle.pqc.jcajce.provider.mceliece.BCMcEliecePrivateKey;
 import com.distrimind.util.Bits;

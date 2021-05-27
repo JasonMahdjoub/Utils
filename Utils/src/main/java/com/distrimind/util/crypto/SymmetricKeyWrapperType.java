@@ -34,8 +34,8 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
-import com.distrimind.bcfips.crypto.InvalidWrappingException;
-import com.distrimind.bcfips.crypto.PlainInputProcessingException;
+import org.bouncycastle.crypto.InvalidWrappingException;
+import org.bouncycastle.crypto.PlainInputProcessingException;
 import com.distrimind.util.data_buffers.WrappedSecretData;
 import com.distrimind.util.io.Integrity;
 import com.distrimind.util.io.MessageExternalizationException;

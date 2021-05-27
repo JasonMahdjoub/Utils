@@ -102,7 +102,7 @@ public class SymmetricSecretKeyPair extends AbstractKey implements ISecretDecent
 
 	@Override
 	@Deprecated
-	public com.distrimind.bcfips.crypto.Key toBouncyCastleKey() {
+	public org.bouncycastle.crypto.Key toBouncyCastleKey() {
 		throw new IllegalAccessError();
 	}
 

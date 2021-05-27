@@ -39,9 +39,9 @@ import java.security.NoSuchProviderException;
 
 import javax.crypto.KeyAgreement;
 
-import com.distrimind.bcfips.crypto.fips.FipsDigestAlgorithm;
-import com.distrimind.bcfips.crypto.fips.FipsKDF;
-import com.distrimind.bcfips.crypto.fips.FipsSHS;
+import org.bouncycastle.crypto.fips.FipsDigestAlgorithm;
+import org.bouncycastle.crypto.fips.FipsKDF;
+import org.bouncycastle.crypto.fips.FipsSHS;
 
 /**
  * 

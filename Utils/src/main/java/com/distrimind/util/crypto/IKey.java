@@ -24,7 +24,7 @@ public interface IKey extends Zeroizable, DecentralizedValue {
 	java.security.Key toJavaNativeKey()
 			throws NoSuchAlgorithmException, InvalidKeySpecException;
 
-	com.distrimind.bcfips.crypto.Key toBouncyCastleKey() throws NoSuchAlgorithmException, InvalidKeySpecException;
+	org.bouncycastle.crypto.Key toBouncyCastleKey() throws NoSuchAlgorithmException, InvalidKeySpecException;
 
 	WrappedData encode();
 

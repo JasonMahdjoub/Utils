@@ -49,9 +49,9 @@ import java.util.*;
 
 import com.distrimind.util.OSVersion;
 import com.distrimind.bouncycastle.crypto.CryptoServicesRegistrar;
-import com.distrimind.bcfips.crypto.EntropySourceProvider;
-import com.distrimind.bcfips.crypto.fips.FipsDRBG;
-import com.distrimind.bcfips.crypto.util.BasicEntropySourceProvider;
+import org.bouncycastle.crypto.EntropySourceProvider;
+import org.bouncycastle.crypto.fips.FipsDRBG;
+import org.bouncycastle.crypto.util.BasicEntropySourceProvider;
 
 import com.distrimind.util.Bits;
 import com.distrimind.util.OS;

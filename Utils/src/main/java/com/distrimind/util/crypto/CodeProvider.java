@@ -41,7 +41,7 @@ import java.security.Security;
 
 import com.distrimind.util.OSVersion;
 import com.distrimind.bouncycastle.crypto.CryptoServicesRegistrar;
-import com.distrimind.bcfips.jcajce.provider.BouncyCastleFipsProvider;
+import org.bouncycastle.jcajce.provider.BouncyCastleFipsProvider;
 import com.distrimind.bouncycastle.jce.provider.BouncyCastleProvider;
 import com.distrimind.bouncycastle.pqc.jcajce.provider.BouncyCastlePQCProvider;
 
