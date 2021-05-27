@@ -81,9 +81,11 @@ public enum CodeProvider {
 		if (!init)
 		{
 			CodeProvider.init=true;
-
+			Security.insertProviderAt(new UtilsSecurityProvider(), 1);
 			try {
-				CryptoServicesRegistrar.setSecureRandom(SecureRandomType.DEFAULT.getSingleton(null));
+				AbstractSecureRandom random=SecureRandomType.DEFAULT.getSingleton(null);
+				org.bouncycastle.crypto.CryptoServicesRegistrar.setSecureRandom(random);
+				CryptoServicesRegistrar.setSecureRandom(random);
 			} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
 				e.printStackTrace();
 			}
@@ -114,10 +116,12 @@ public enum CodeProvider {
 	}
 
 	private static void ensureBCFIPSProviderLoaded() {
+
 		ensureBouncyCastleProviderLoaded();
 		if (bouncyProviderFIPS == null) {
 
 			synchronized (CodeProvider.class) {
+
 				if (bouncyProviderFIPS == null) {
 					BouncyCastleFipsProvider bc = new BouncyCastleFipsProvider();
 					Security.insertProviderAt(bc, Security.getProviders().length+1);
@@ -128,10 +132,12 @@ public enum CodeProvider {
 	}
 
 	private static void ensureBQCProviderLoaded() {
+
 		ensureBouncyCastleProviderLoaded();
 		if (bouncyProviderPQC == null) {
 
 			synchronized (CodeProvider.class) {
+
 				if (bouncyProviderPQC == null) {
 					BouncyCastlePQCProvider bc = new BouncyCastlePQCProvider();
 					Security.insertProviderAt(bc, Security.getProviders().length+1);

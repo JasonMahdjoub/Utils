@@ -536,18 +536,7 @@ public enum SecureRandomType {
 		}
 	}
 
-	static
-	{
-		try
-		{
-			Security.insertProviderAt(new UtilsSecurityProvider(), 1);
-			CryptoServicesRegistrar.setSecureRandom(BC_FIPS_APPROVED_FOR_KEYS.getSingleton(nonce));
-		}
-		catch(Exception e)
-		{
-			e.printStackTrace();
-		}
-	}
+
 
 	
 }
