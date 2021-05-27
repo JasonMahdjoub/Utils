@@ -64,8 +64,8 @@ dependencies {
     testImplementation 'org.hamcrest:hamcrest-core:2.2'
 
     api(group:'com.distrimind.bcfips', name: 'BouncyCastle-FIPS', version: '1.0.2-DMRECOMPILE')
-    api(group:'com.distrimind.bouncycastle', name: 'core', version: '1.67-DMRECOMPILE')
-    api(group:'com.distrimind.bouncycastle', name: 'prov', version: '1.67-DMRECOMPILE')
+    api(group:'com.distrimind.bouncycastle', name: 'core', version: '1.68-DMRECOMPILE')
+    api(group:'com.distrimind.bouncycastle', name: 'prov', version: '1.68-DMRECOMPILE')
 
 
     testImplementation(group:'com.distrimind.gnu', name: 'Gnu-Crypt', version: '1.3.0')
