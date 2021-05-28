@@ -65,39 +65,56 @@ public enum CodeProvider {
 	static void ensureProviderLoaded(CodeProvider provider) {
 		if (!init)
 		{
+			CodeProvider.init=true;
 			Security.insertProviderAt(new UtilsSecurityProvider(), 1);
 		}
 		switch (provider)
 		{
 			case BCFIPS:
-				ensureBCFIPSProviderLoaded();
+				if (ensureBCFIPSProviderLoaded())
+				{
+					try {
+						if (bouncyProvider==null)
+						{
+							CryptoServicesRegistrar.setSecureRandom(SecureRandomType.BC_FIPS_APPROVED.getSingleton(null));
+						}
+						else {
+							AbstractSecureRandom random = SecureRandomType.DEFAULT.getSingleton(null);
+							org.bouncycastle.crypto.CryptoServicesRegistrar.setSecureRandom(random);
+							CryptoServicesRegistrar.setSecureRandom(random);
+						}
+					} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
+						e.printStackTrace();
+					}
+				}
 				break;
 			case BCPQC:
 				ensureBQCProviderLoaded();
 				break;
 			case BC:
-				ensureBouncyCastleProviderLoaded();
+				if (ensureBouncyCastleProviderLoaded())
+				{
+					try {
+						if (bouncyProviderFIPS==null)
+							CryptoServicesRegistrar.setSecureRandom(SecureRandomType.JAVA_STRONG_DRBG.getSingleton(null));
+						else {
+							AbstractSecureRandom random=SecureRandomType.DEFAULT.getSingleton(null);
+							CryptoServicesRegistrar.setSecureRandom(random);
+							org.bouncycastle.crypto.CryptoServicesRegistrar.setSecureRandom(random);
+						}
+					} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
+						e.printStackTrace();
+					}
+				}
+
 				break;
 			case GNU_CRYPTO:
 				GnuFunctions.checkGnuLoaded();
 				break;
 		}
-		if (!init)
-		{
-			CodeProvider.init=true;
-
-			try {
-				AbstractSecureRandom random=SecureRandomType.DEFAULT.getSingleton(null);
-				org.bouncycastle.crypto.CryptoServicesRegistrar.setSecureRandom(random);
-				CryptoServicesRegistrar.setSecureRandom(random);
-			} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
-				e.printStackTrace();
-			}
-		}
-
 	}
 
-	private static void ensureBouncyCastleProviderLoaded() {
+	private static boolean ensureBouncyCastleProviderLoaded() {
 
 		if (bouncyProvider == null) {
 
@@ -113,15 +130,15 @@ public enum CodeProvider {
 					}
 					else
 						Security.insertProviderAt(bc, Security.getProviders().length+1);
-
+					return true;
 				}
 			}
 		}
+		return false;
 	}
 
-	private static void ensureBCFIPSProviderLoaded() {
+	private static boolean ensureBCFIPSProviderLoaded() {
 
-		ensureBouncyCastleProviderLoaded();
 		if (bouncyProviderFIPS == null) {
 
 			synchronized (CodeProvider.class) {
@@ -130,14 +147,15 @@ public enum CodeProvider {
 					BouncyCastleFipsProvider bc = new BouncyCastleFipsProvider();
 					Security.insertProviderAt(bc, Security.getProviders().length+1);
 					bouncyProviderFIPS=bc;
+					return true;
 				}
 			}
 		}
+		return false;
 	}
 
 	private static void ensureBQCProviderLoaded() {
 
-		ensureBouncyCastleProviderLoaded();
 		if (bouncyProviderPQC == null) {
 
 			synchronized (CodeProvider.class) {

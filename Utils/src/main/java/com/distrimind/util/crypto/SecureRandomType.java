@@ -44,11 +44,9 @@ import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.PrivilegedAction;
 import java.security.SecureRandom;
-import java.security.Security;
 import java.util.*;
 
 import com.distrimind.util.OSVersion;
-import com.distrimind.bouncycastle.crypto.CryptoServicesRegistrar;
 import org.bouncycastle.crypto.EntropySourceProvider;
 import org.bouncycastle.crypto.fips.FipsDRBG;
 import org.bouncycastle.crypto.util.BasicEntropySourceProvider;
@@ -74,9 +72,10 @@ public enum SecureRandomType {
 	SPEEDIEST(GNU_SHA512PRNG), 
 	NativePRNG("NativePRNG", CodeProvider.SUN, false, false),
 	NativePRNGNonBlocking("NativePRNGNonBlocking", CodeProvider.SUN, false, false),
+	JAVA_STRONG_DRBG("JAVA_STRONG_DRBG", CodeProvider.SUN, false, true),
 	BC_FIPS_APPROVED("BC_FIPS_APPROVED", CodeProvider.BCFIPS, false, false),
 	BC_FIPS_APPROVED_FOR_KEYS("BC_FIPS_APPROVED_FOR_KEYS", CodeProvider.BCFIPS, false, false),
-	BC_FIPS_APPROVED_FOR_KEYS_With_NativePRNG("BC_FIPS_APPROVED_FOR_KEYS_With_NativePRNG", CodeProvider.BCFIPS, false, false),
+	BC_FIPS_APPROVED_FOR_KEYS_With_NATIVE_PRNG("BC_FIPS_APPROVED_FOR_KEYS_With_NativePRNG", CodeProvider.BCFIPS, false, false),
 	DEFAULT_BC_FIPS_APPROVED("DEFAULT_BC_FIPS_APPROVED", CodeProvider.BCFIPS, false, false),
 	FORTUNA_WITH_BC_FIPS_APPROVED("FORTUNA_WITH_BC_FIPS_APPROVED", CodeProvider.BC, false, false),
 	FORTUNA_WITH_BC_FIPS_APPROVED_FOR_KEYS("FORTUNA_WITH_BC_FIPS_APPROVED_FOR_KEYS", CodeProvider.BC, false, true),
@@ -174,10 +173,10 @@ public enum SecureRandomType {
 			else
 				res=new GnuSecureRandom(this, GnuFunctions.secureRandomGetInstance(algorithmName));
 		} else {
-			if (BC_FIPS_APPROVED.algorithmName.equals(this.algorithmName) || BC_FIPS_APPROVED_FOR_KEYS.algorithmName.equals(this.algorithmName) || BC_FIPS_APPROVED_FOR_KEYS_With_NativePRNG.algorithmName.equals(this.algorithmName))
+			if (BC_FIPS_APPROVED.algorithmName.equals(this.algorithmName) || BC_FIPS_APPROVED_FOR_KEYS.algorithmName.equals(this.algorithmName) || BC_FIPS_APPROVED_FOR_KEYS_With_NATIVE_PRNG.algorithmName.equals(this.algorithmName))
 			{
 
-				SecureRandom srSource=BC_FIPS_APPROVED_FOR_KEYS_With_NativePRNG.algorithmName.equals(this.algorithmName)?SecureRandomType.NativePRNG.getSingleton(null):SecureRandomType.NativePRNGNonBlocking.getSingleton(null);
+				SecureRandom srSource= BC_FIPS_APPROVED_FOR_KEYS_With_NATIVE_PRNG.algorithmName.equals(this.algorithmName)?SecureRandomType.NativePRNG.getSingleton(null):SecureRandomType.JAVA_STRONG_DRBG.getSingleton(null);
 				if (nonce==null)
 				{
 					nonce=SecureRandomType.nonce;
@@ -191,12 +190,12 @@ public enum SecureRandomType {
 				{
 					drgbBldr=drgbBldr.setPersonalizationString(personalizationString);
 				}
-				res=new JavaNativeSecureRandom(this, drgbBldr.build(nonce,BC_FIPS_APPROVED_FOR_KEYS.algorithmName.equals(this.algorithmName) || BC_FIPS_APPROVED_FOR_KEYS_With_NativePRNG.algorithmName.equals(this.algorithmName)), false);
+				res=new JavaNativeSecureRandom(this, drgbBldr.build(nonce,BC_FIPS_APPROVED_FOR_KEYS.algorithmName.equals(this.algorithmName) || BC_FIPS_APPROVED_FOR_KEYS_With_NATIVE_PRNG.algorithmName.equals(this.algorithmName)), false);
 				return res;
 			}
 			else if (DEFAULT_BC_FIPS_APPROVED.equals(this))
 			{
-				SecureRandom srSource=SecureRandomType.NativePRNGNonBlocking.getSingleton(null);
+				SecureRandom srSource=SecureRandomType.JAVA_STRONG_DRBG.getSingleton(null);
 				if (nonce==null)
 				{
 					nonce=SecureRandomType.nonce;
@@ -218,6 +217,10 @@ public enum SecureRandomType {
 			else if (NativePRNGNonBlocking.algorithmName.equals(algorithmName))
 			{
 				return new NativeNonBlockingSecureRandom();
+			}
+			else if (JAVA_STRONG_DRBG.algorithmName.equals(algorithmName))
+			{
+				res=new JavaNativeSecureRandom(this, SecureRandom.getInstanceStrong());
 			}
 			else
 			{
@@ -263,7 +266,6 @@ public enum SecureRandomType {
 			final Enumeration<NetworkInterface> e = NetworkInterface.getNetworkInterfaces();
 			while (e.hasMoreElements()) {
 				final NetworkInterface ni = e.nextElement();
-
 
 				if (!ni.isLoopback()) {
 
