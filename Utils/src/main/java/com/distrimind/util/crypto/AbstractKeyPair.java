@@ -115,9 +115,6 @@ public abstract class AbstractKeyPair<TPrivateKey extends IASymmetricPrivateKey,
 		zeroize();
 	}
 
-	/*public abstract ASymmetricEncryptionType getEncryptionAlgorithmType() ;
-
-	public abstract ASymmetricAuthenticatedSignatureType getAuthenticatedSignatureAlgorithmType() ;*/
 
 	public abstract TPrivateKey getASymmetricPrivateKey();
 	public abstract PubKey getASymmetricPublicKey();

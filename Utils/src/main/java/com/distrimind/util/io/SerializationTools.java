@@ -1795,7 +1795,7 @@ public class SerializationTools {
 						PasswordHashType.class,
 						SymmetricKeyWrapperType.class,
 						ASymmetricKeyWrapperType.class,
-						ASymmetricLoginAgreementType.class,
+						UnidirectionalASymmetricLoginAgreementType.class,
 						CodeProvider.class,
 						EllipticCurveDiffieHellmanType.class,
 						P2PLoginAgreementType.class,

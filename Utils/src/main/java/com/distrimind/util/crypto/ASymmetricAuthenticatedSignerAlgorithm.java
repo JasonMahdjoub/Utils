@@ -168,14 +168,6 @@ public class ASymmetricAuthenticatedSignerAlgorithm extends AbstractAuthenticate
 			this.macLength = type.getSignatureSizeBytes(localPrivateKey.getKeySizeBits());
 		}
 
-		/*public ASymmetricPrivateKey getLocalPrivateKey() {
-			return localPrivateKey;
-		}
-
-		public AbstractSignature getSignatureAlgorithm() {
-			return signature;
-		}*/
-
 
 		@Override
 		public void init() throws IOException {

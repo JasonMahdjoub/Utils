@@ -1,6 +1,6 @@
 Utils
 =====
-5.17.7 STABLE (Build: 2620) (from 04/01/2016 to 25/05/2020)
+5.18.0 STABLE (Build: 2704) (from 04/01/2016 to 28/05/2020)
 
 # Creator(s):
 Jason MAHDJOUB
@@ -9,6 +9,17 @@ Jason MAHDJOUB
 Jason MAHDJOUB (Entered in the team at 04/01/2016)
 
 # Modifications:
+
+
+### 5.18.0 STABLE (28/05/2020)
+* Update BouncyCastle to 1.68
+* Update BouncyCastle FIPS to 1.0.2.1. Use original BouncyCastle FIPS dependency and not recompiled one.
+* Add functions into P2PLoginAgreementType
+* Add functions into P2PUnidirectionalLoginSignerWithAsymmetricSignature
+* Add functions into P2PUnidirectionalLoginCheckerWithAsymmetricSignature
+* Add creation date for public keys
+* Reimplements provider's loading
+* Add Strong SecureRandom type
 
 
 ### 5.17.7 STABLE (25/05/2020)

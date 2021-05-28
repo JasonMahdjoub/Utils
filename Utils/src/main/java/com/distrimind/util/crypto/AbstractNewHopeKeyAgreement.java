@@ -124,16 +124,6 @@ public abstract class AbstractNewHopeKeyAgreement extends KeyAgreement{
     		{
     			newHopeClass=Class.forName("com.distrimind.bouncycastle.pqc.crypto.newhope.NewHope");
     		
-	    		/*try
-	    		{
-	    			Field f=newHopeClass.getDeclaredField("POLY_SIZE");
-	    			f.setAccessible(true);
-	    			polySize=f.getInt(null);
-	    		}
-	    		catch(Exception e)
-	    		{
-	    			e.printStackTrace();
-	    		}*/
 	    		try
 	    		{
 	    			Field f=newHopeClass.getDeclaredField("SENDB_BYTES");

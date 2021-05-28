@@ -67,9 +67,15 @@ public class Utils {
 			VERSION.addCreator(new Person("mahdjoub", "jason"))
 					.addDeveloper(new PersonDeveloper("mahdjoub", "jason", "2016-01-04"))
 					.addDescription(
-							new Description((short)5, (short)18, (short)0, Version.Type.STABLE, (short)0, "2020-05-26")
+							new Description((short)5, (short)18, (short)0, Version.Type.STABLE, (short)0, "2020-05-28")
+									.addItem("Update BouncyCastle to 1.68")
+									.addItem("Update BouncyCastle FIPS to 1.0.2.1. Use original BouncyCastle FIPS dependency and not recompiled one.")
 									.addItem("Add functions into P2PLoginAgreementType")
+									.addItem("Add functions into P2PUnidirectionalLoginSignerWithAsymmetricSignature")
+									.addItem("Add functions into P2PUnidirectionalLoginCheckerWithAsymmetricSignature")
 									.addItem("Add creation date for public keys")
+									.addItem("Reimplements provider's loading")
+									.addItem("Add Strong SecureRandom type")
 					)
 					.addDescription(
 							new Description((short)5, (short)17, (short)7, Version.Type.STABLE, (short)0, "2020-05-25")

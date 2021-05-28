@@ -240,6 +240,7 @@ public class ServerASymmetricEncryptionAlgorithm implements IEncryptionInputAlgo
 			Arrays.fill(buffer, (byte)0);
 		}
 
+		@SuppressWarnings("deprecation")
 		@Override
 		protected void finalize() {
 			zeroize();

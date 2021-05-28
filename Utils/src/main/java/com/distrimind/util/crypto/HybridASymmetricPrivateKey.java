@@ -154,13 +154,4 @@ public class HybridASymmetricPrivateKey extends AbstractKey implements IHybridKe
 		return Objects.hash(nonPQCPrivateKey, PQCPrivateKey);
 	}
 
-	/*@Override
-	public ASymmetricEncryptionType getEncryptionAlgorithmType() {
-		return nonPQCPrivateKey.getEncryptionAlgorithmType();
-	}
-
-	@Override
-	public ASymmetricAuthenticatedSignatureType getAuthenticatedSignatureAlgorithmType() {
-		return nonPQCPrivateKey.getAuthenticatedSignatureAlgorithmType();
-	}*/
 }

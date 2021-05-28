@@ -221,8 +221,6 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 		super(key.getEncryptionAlgorithmType().getCipherInstance(), key.getEncryptionAlgorithmType().getIVSizeBytes());
 
 		this.type = key.getEncryptionAlgorithmType();
-		/*if (internalCounter && type.getMaxCounterSizeInBytesUsedWithBlockMode()<blockModeCounterBytes)
-			throw new IllegalArgumentException(type+" cannot manage a internal counter size greater than "+type.getMaxCounterSizeInBytesUsedWithBlockMode());*/
 		if (!internalCounter && blockModeCounterBytes>type.getMaxCounterSizeInBytesUsedWithBlockMode())
 			throw new IllegalArgumentException("The external counter size can't be greater than "+type.getMaxCounterSizeInBytesUsedWithBlockMode());
 		if (blockModeCounterBytes<0)
@@ -236,7 +234,7 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 		//iv = new byte[getIVSizeBytesWithExternalCounter()];
 		externalCounter=this.internalCounter?null:new byte[blockModeCounterBytes];
 		this.chacha =type.getAlgorithmName().toUpperCase().startsWith(SymmetricEncryptionType.CHACHA20_NO_RANDOM_ACCESS.getAlgorithmName().toUpperCase());
-		this.gcm =type.getBlockMode().toUpperCase().equals("GCM");
+		this.gcm = type.getBlockMode().equalsIgnoreCase("GCM");
 		this.cipher.init(Cipher.ENCRYPT_MODE, this.key, generateIV());
 
 		setMaxPlainTextSizeForEncoding(type.getMaxPlainTextSizeForEncoding());
@@ -262,8 +260,6 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 	}	
 	
 	private byte[] generateIV() {
-		/*if (supportRandomEncryptionAndRandomDecryption())
-			iv=new byte[iv.length];*/
 		random.nextBytes(iv);
 		if (!internalCounter)
 		{
@@ -391,7 +387,6 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 		return iv;
 
 	}
-	//private final Random nonSecureRandom=new Random(System.currentTimeMillis());
 	protected boolean mustAlterIVForOutputSizeComputation()
 	{
 		return chacha;
@@ -401,9 +396,6 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 		byte[] iv=this.iv;
 		if (mustAlterIVForOutputSizeComputation() || gcm)
 		{
-			/*iv = cipher.getIV();
-			if (iv == null)
-				iv = this.iv;*/
 
 			iv[0] = (byte) ~iv[0];
 		}

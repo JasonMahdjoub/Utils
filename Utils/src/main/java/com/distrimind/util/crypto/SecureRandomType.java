@@ -34,35 +34,28 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.NetworkInterface;
-import java.security.AccessController;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.PrivilegedAction;
-import java.security.SecureRandom;
-import java.util.*;
-
+import com.distrimind.util.Bits;
+import com.distrimind.util.OS;
 import com.distrimind.util.OSVersion;
+import com.distrimind.util.io.RandomFileInputStream;
 import org.bouncycastle.crypto.EntropySourceProvider;
 import org.bouncycastle.crypto.fips.FipsDRBG;
 import org.bouncycastle.crypto.util.BasicEntropySourceProvider;
 
-import com.distrimind.util.Bits;
-import com.distrimind.util.OS;
+import java.io.File;
+import java.io.IOException;
+import java.net.NetworkInterface;
+import java.security.*;
+import java.util.*;
 
 /**
  * 
  * @author Jason Mahdjoub
- * @version 2.0.1
+ * @version 3.0.0
  * @since Utils 2.0
  */
 public enum SecureRandomType {
-	//SUN_DEFAULT(null, CodeProvider.SUN, false, true ),
-	SHA1PRNG("SHA1PRNG", CodeProvider.SUN, false, true), 
+	SHA1PRNG("SHA1PRNG", CodeProvider.SUN, false, true),
 	GNU_SHA1PRNG("SHA1PRNG", CodeProvider.GNU_CRYPTO, true, true), 
 	GNU_SHA256PRNG("SHA-256PRNG", CodeProvider.GNU_CRYPTO, true, true), 
 	GNU_SHA384PRNG("SHA-384PRNG", CodeProvider.GNU_CRYPTO, true, true), 
@@ -406,13 +399,6 @@ public enum SecureRandomType {
 		return defaultNativeNonBlockingSeed;
 	}
 
-    /*static byte[] tryToGenerateNativeNonBlockingRandomBytes(final int size) throws NoSuchAlgorithmException, NoSuchProviderException
-	{
-		byte[] res=new byte[size];
-		tryToGenerateNativeNonBlockingRandomBytes(res);
-		return res;
-	}*/
-	
 	private static volatile JavaNativeSecureRandom nativeNonBlockingSeed=null;
 	private static volatile boolean nativeNonBlockingSeedInitialized=false;
 	
@@ -448,8 +434,8 @@ public enum SecureRandomType {
 					{
 						File randomSource=getURandomPath();
 
-						try (InputStream in = new FileInputStream(randomSource)) {
-							in.read(buffer);
+						try (RandomFileInputStream in = new RandomFileInputStream(randomSource)) {
+							in.readFully(buffer);
 							return null;
 						}
 						catch(IOException e)
@@ -517,9 +503,9 @@ public enum SecureRandomType {
 				synchronized (NativeNonBlockingSecureRandom.class) {
 					File randomSource = getURandomPath();
 
-					try (InputStream in = new FileInputStream(randomSource)) {
+					try (RandomFileInputStream in = new RandomFileInputStream(randomSource)) {
 						byte[] buffer = new byte[numBytes];
-						in.read(buffer);
+						in.readFully(buffer);
 						return buffer;
 					} catch (IOException e) {
 						e.printStackTrace();

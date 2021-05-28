@@ -56,11 +56,6 @@ public final class JavaNativeSecureRandom extends AbstractSecureRandom {
 
 	private volatile Object secureGnuRandom;
 
-	/*JavaNativeSecureRandom(FakeSecureRandom random) throws NoSuchAlgorithmException, NoSuchProviderException {
-		this(SecureRandomType.DEFAULT, random, false);
-	}*/
-	
-	
 	JavaNativeSecureRandom(SecureRandomType type, java.security.SecureRandom secureRandom) {
 		this(type, secureRandom, type.needInitialSeed());
 	}

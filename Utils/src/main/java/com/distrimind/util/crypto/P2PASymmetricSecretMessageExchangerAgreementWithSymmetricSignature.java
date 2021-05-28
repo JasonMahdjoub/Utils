@@ -1,7 +1,5 @@
 package com.distrimind.util.crypto;
 
-import com.distrimind.util.io.MessageExternalizationException;
-
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
@@ -29,12 +27,8 @@ public class P2PASymmetricSecretMessageExchangerAgreementWithSymmetricSignature 
                 && (login!=null && login.isPostQuantumAgreement());
     }
 
-    /*P2PJPakeAndLoginAgreement(AbstractSecureRandom random, Serializable participantID, char[] message, SymmetricSecretKey secretKeyForSignature) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException {
-
-        this(random, participantID, message, null, 0, 0, secretKeyForSignature);
-    }*/
     P2PASymmetricSecretMessageExchangerAgreementWithSymmetricSignature(AbstractSecureRandom random, char[] message, byte[] salt,
-                                                                       int offset_salt, int len_salt, SymmetricSecretKey secretKeyForSignature,MessageDigestType messageDigestType, PasswordHashType passwordHashType, ASymmetricPublicKey myPublicKey) throws NoSuchAlgorithmException, NoSuchProviderException, MessageExternalizationException {
+                                                                       int offset_salt, int len_salt, SymmetricSecretKey secretKeyForSignature,MessageDigestType messageDigestType, PasswordHashType passwordHashType, ASymmetricPublicKey myPublicKey) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
         super(secretKeyForSignature==null?2:4, secretKeyForSignature==null?2:4);
         p2PASymmetricSecretMessageExchangerAgreement=new P2PASymmetricSecretMessageExchangerAgreement(random, messageDigestType, passwordHashType, myPublicKey, salt, offset_salt, len_salt, message);
         if (secretKeyForSignature==null)
@@ -42,12 +36,8 @@ public class P2PASymmetricSecretMessageExchangerAgreementWithSymmetricSignature 
         else
             login=new P2PLoginWithSymmetricSignature(secretKeyForSignature, random);
     }
-    /*P2PJPakeAndLoginAgreement(AbstractSecureRandom random, Serializable participantID, byte[] message, boolean messageIsKey, SymmetricSecretKey secretKeyForSignature) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException {
-
-        this(random, participantID, message, 0, message.length,null, 0, 0, messageIsKey, secretKeyForSignature);
-    }*/
     P2PASymmetricSecretMessageExchangerAgreementWithSymmetricSignature(AbstractSecureRandom random, byte[] message, int offset, int len, byte[] salt,
-                                                                       int offset_salt, int len_salt, boolean messageIsKey, SymmetricSecretKey secretKeyForSignature, MessageDigestType messageDigestType, PasswordHashType passwordHashType, ASymmetricPublicKey myPublicKey) throws NoSuchAlgorithmException, NoSuchProviderException, MessageExternalizationException {
+                                                                       int offset_salt, int len_salt, boolean messageIsKey, SymmetricSecretKey secretKeyForSignature, MessageDigestType messageDigestType, PasswordHashType passwordHashType, ASymmetricPublicKey myPublicKey) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
         super(secretKeyForSignature==null?2:4, secretKeyForSignature==null?2:4);
         p2PASymmetricSecretMessageExchangerAgreement=new P2PASymmetricSecretMessageExchangerAgreement(random,messageDigestType, passwordHashType, myPublicKey, salt, offset_salt, len_salt, message, offset, len, messageIsKey);
         if (secretKeyForSignature==null)

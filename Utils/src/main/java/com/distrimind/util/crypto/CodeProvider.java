@@ -51,7 +51,7 @@ import com.distrimind.util.OS;
  * List of asymmetric encryption algorithms
  * 
  * @author Jason Mahdjoub
- * @version 2.1
+ * @version 3.0
  * @since Utils 2.9.0
  */
 public enum CodeProvider {
@@ -76,7 +76,7 @@ public enum CodeProvider {
 					try {
 						if (bouncyProvider==null)
 						{
-							CryptoServicesRegistrar.setSecureRandom(SecureRandomType.BC_FIPS_APPROVED.getSingleton(null));
+							CryptoServicesRegistrar.setSecureRandom(SecureRandomType.DEFAULT_BC_FIPS_APPROVED.getSingleton(null));
 						}
 						else {
 							AbstractSecureRandom random = SecureRandomType.DEFAULT.getSingleton(null);

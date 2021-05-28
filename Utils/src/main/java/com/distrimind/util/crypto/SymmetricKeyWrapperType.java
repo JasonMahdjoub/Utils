@@ -138,35 +138,7 @@ public enum SymmetricKeyWrapperType {
 		return symmetricEncryptionType.generateSecretKeyFromHashedPassword(ph.hash(password, null), (short)256);
 	}
 
-	WrappedEncryptedSymmetricSecretKey wrapKey(PasswordHashType passwordHashType, WrappedPassword password, SymmetricSecretKey secretKeyToWrap, AbstractSecureRandom random) throws IOException {
 
-		try {
-			SymmetricSecretKey secretKey = hashPasswordForSecretKeyEncryption(symmetricEncryptionType, passwordHashType, password);
-			return wrapKey(secretKey, secretKeyToWrap, random);
-		} catch (NoSuchAlgorithmException | NoSuchProviderException  e) {
-			throw new IOException(e);
-		}
-
-	}
-	WrappedEncryptedSymmetricSecretKeyString wrapKeyString(PasswordHashType passwordHashType, WrappedPassword password, SymmetricSecretKey secretKeyToWrap, AbstractSecureRandom random) throws IOException {
-		return new WrappedEncryptedSymmetricSecretKeyString(wrapKey(passwordHashType, password, secretKeyToWrap, random));
-	}
-
-	SymmetricSecretKey unwrapKey(PasswordHashType passwordHashType, WrappedPassword password, WrappedEncryptedSymmetricSecretKeyString encryptedSecretKey) throws IOException {
-		return unwrapKey(passwordHashType, password, new WrappedEncryptedSymmetricSecretKey(encryptedSecretKey));
-	}
-	SymmetricSecretKey unwrapKey(PasswordHashType passwordHashType, WrappedPassword password, WrappedEncryptedSymmetricSecretKey encryptedSecretKey) throws IOException {
-		if (encryptedSecretKey==null)
-			throw new NullPointerException();
-
-		try {
-			SymmetricSecretKey secretKey=  hashPasswordForSecretKeyEncryption(symmetricEncryptionType, passwordHashType, password);
-			return unwrapKey(secretKey, encryptedSecretKey);
-		} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
-			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, e);
-		}
-
-	}
 
 	WrappedEncryptedSymmetricSecretKey wrapKey(SymmetricSecretKey key, SymmetricSecretKey keyToWrap, AbstractSecureRandom random) throws IOException
 	{

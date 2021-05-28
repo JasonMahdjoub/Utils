@@ -147,10 +147,6 @@ public class EllipticCurveDiffieHellmanAlgorithm extends KeyAgreement {
 		myPublicKeyBytes = myKeyPair.getASymmetricPublicKey().encode();
 	}
 
-	/*private ASymmetricKeyPair getKeyPair()
-	{
-		return myKeyPair;
-	}*/
 
 	private WrappedData getEncodedPublicKey()
 	{

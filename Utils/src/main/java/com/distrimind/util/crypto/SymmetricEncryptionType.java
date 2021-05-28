@@ -136,14 +136,7 @@ public enum SymmetricEncryptionType {
 	
 	static org.bouncycastle.crypto.SymmetricSecretKey decodeBCSecretKey(Algorithm algorithm, byte[] encodedSecretKey) {
         return new org.bouncycastle.crypto.SymmetricSecretKey(algorithm, encodedSecretKey);
-		//return decodeBCSecretKey(algorithm, encodedSecretKey, 0, encodedSecretKey.length, algorithmName);
 	}
-	/*@SuppressWarnings("SameParameterValue")
-	static org.bouncycastle.crypto.SymmetricSecretKey decodeBCSecretKey(Algorithm algorithm, byte[] encodedSecretKey, int off, int len, String algorithmName) {
-		//final byte[][] parts = Bits.separateEncodingsWithShortSizedTabs(encodedSecretKey, off, len);
-
-		return new org.bouncycastle.crypto.SymmetricSecretKey(algorithmName, encodedSecretKey);
-	}*/
 
 	public SymmetricSecretKey generateSecretKeyFromHashedPassword(WrappedSecretData wrappedSecretData) throws NoSuchProviderException, NoSuchAlgorithmException {
 		return generateSecretKeyFromHashedPassword(wrappedSecretData, getDefaultKeySizeBits());

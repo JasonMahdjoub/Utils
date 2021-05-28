@@ -192,7 +192,7 @@ public final class JavaNativeCipher extends AbstractCipher {
 	public void init(int opMode, AbstractKey _key, byte[] _iv) throws IOException {
 		mode= opMode;
 		try {
-			if (type != null && type.getBlockMode().toUpperCase().equals("GCM"))
+			if (type != null && type.getBlockMode().equalsIgnoreCase("GCM"))
 				cipher.init(opMode, _key.toJavaNativeKey(), new GCMParameterSpec(128, _iv));
 			else if (type != null && type.equals(SymmetricEncryptionType.CHACHA20_NO_RANDOM_ACCESS))
 				init(opMode, _key, _iv, 0);

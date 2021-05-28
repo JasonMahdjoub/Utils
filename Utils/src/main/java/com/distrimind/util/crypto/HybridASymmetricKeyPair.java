@@ -178,16 +178,6 @@ public class HybridASymmetricKeyPair extends AbstractKeyPair<HybridASymmetricPri
 		publicKey=null;
 	}
 
-	/*@Override
-	public ASymmetricEncryptionType getEncryptionAlgorithmType() {
-		return publicKey.getEncryptionAlgorithmType();
-	}
-
-	@Override
-	public ASymmetricAuthenticatedSignatureType getAuthenticatedSignatureAlgorithmType() {
-		return publicKey.getAuthenticatedSignatureAlgorithmType();
-	}*/
-
 	@Override
 	public HybridASymmetricPrivateKey getASymmetricPrivateKey() {
 		return privateKey;

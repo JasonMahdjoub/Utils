@@ -18,9 +18,6 @@ public interface IASymmetricPublicKey extends IKey {
 	int MAX_SIZE_IN_BYTES_OF_PUBLIC_KEY=MAX_SIZE_IN_BYTES_OF_PUBLIC_KEY_FOR_ENCRYPTION;
 	int TIME_COMPARISON_TOLERANCE_IN_MS=4*60*60*1000;
 
-	/*ASymmetricEncryptionType getEncryptionAlgorithmType() ;
-
-	ASymmetricAuthenticatedSignatureType getAuthenticatedSignatureAlgorithmType() ;*/
 
 	long getPublicKeyValidityBeginDateUTC();
 
