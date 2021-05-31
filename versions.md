@@ -1,6 +1,6 @@
 Utils
 =====
-5.18.0 STABLE (Build: 2704) (from 04/01/2016 to 28/05/2020)
+5.18.1 STABLE (Build: 2722) (from 04/01/2016 to 30/05/2020)
 
 # Creator(s):
 Jason MAHDJOUB
@@ -9,6 +9,11 @@ Jason MAHDJOUB
 Jason MAHDJOUB (Entered in the team at 04/01/2016)
 
 # Modifications:
+
+
+### 5.18.1 STABLE (30/05/2020)
+* Fix issue with function IASymmetricPublicKey.areTimesValid(). Overflow value was reached.
+* Change methods signatures into P2PLoginAgreementType class.
 
 
 ### 5.18.0 STABLE (28/05/2020)

@@ -67,6 +67,11 @@ public class Utils {
 			VERSION.addCreator(new Person("mahdjoub", "jason"))
 					.addDeveloper(new PersonDeveloper("mahdjoub", "jason", "2016-01-04"))
 					.addDescription(
+							new Description((short)5, (short)18, (short)1, Version.Type.STABLE, (short)0, "2020-05-30")
+									.addItem("Fix issue with function IASymmetricPublicKey.areTimesValid(). Overflow value was reached.")
+									.addItem("Change methods signatures into P2PLoginAgreementType class.")
+					)
+					.addDescription(
 							new Description((short)5, (short)18, (short)0, Version.Type.STABLE, (short)0, "2020-05-28")
 									.addItem("Update BouncyCastle to 1.68")
 									.addItem("Update BouncyCastle FIPS to 1.0.2.1. Use original BouncyCastle FIPS dependency and not recompiled one.")

@@ -87,7 +87,7 @@ public final class HybridASymmetricEncryptionType {
 		return generateKeyPair(random, -1);
 	}
 	public HybridASymmetricKeyPair generateKeyPair(AbstractSecureRandom random, int keySizeBits) throws IOException, NoSuchAlgorithmException, NoSuchProviderException {
-		return generateKeyPair(random, keySizeBits, System.currentTimeMillis(), Long.MIN_VALUE);
+		return generateKeyPair(random, keySizeBits, System.currentTimeMillis(), System.currentTimeMillis()+nonPQCASymmetricEncryptionType.getDefaultExpirationTimeMilis());
 	}
 	public HybridASymmetricKeyPair generateKeyPair(AbstractSecureRandom random, int keySizeBits,
 												   long publicKeyValidityBeginDateUTC, long expirationTimeUTC) throws IOException, NoSuchAlgorithmException, NoSuchProviderException {
