@@ -146,6 +146,10 @@ public enum ASymmetricAuthenticatedSignatureType {
 				&& type.codeProviderKeyGenerator==this.codeProviderKeyGenerator && type.codeProviderSignature==this.codeProviderSignature;
 	}
 
+	long getDefaultExpirationTimeMilis() {
+		return expirationTimeMilis;
+	}
+
 	ASymmetricAuthenticatedSignatureType(String signatureAlgorithmName, String keyGeneratorAlgorithmName, CodeProvider codeProviderSignature, CodeProvider codeProviderKeyGenerator, int keySizeBits, long expirationTimeMilis, Algorithm bcAlgorithm, boolean isPostQuantumAlgorithm) {
 		this(signatureAlgorithmName, keyGeneratorAlgorithmName, codeProviderSignature, codeProviderKeyGenerator, keySizeBits, expirationTimeMilis, bcAlgorithm, isPostQuantumAlgorithm, null);
 	}
@@ -161,6 +165,7 @@ public enum ASymmetricAuthenticatedSignatureType {
 		this.curveName=curveName;
 		
 	}
+
 	ASymmetricAuthenticatedSignatureType(ASymmetricAuthenticatedSignatureType other) {
 		this(other.signatureAlgorithmName, other.keyGeneratorAlgorithmName, other.codeProviderSignature, other.codeProviderKeyGenerator, other.keySizeBits, other.expirationTimeMilis, other.bcAlgorithm, other.isPostQuantumAlgorithm, other.curveName);
 	}
@@ -304,8 +309,6 @@ public enum ASymmetricAuthenticatedSignatureType {
 														long publicKeyValidityBeginDateUTC, long expirationTimeUTC) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
 		if (keySizeBits<0)
 			keySizeBits= this.keySizeBits;
-		if (expirationTimeUTC==Long.MIN_VALUE)
-			expirationTimeUTC=System.currentTimeMillis() + expirationTimeMilis;
 		CodeProvider.ensureProviderLoaded(codeProviderSignature);
 		if (codeProviderKeyGenerator == CodeProvider.GNU_CRYPTO) {
 			KeyPairGenerator kgp = KeyPairGenerator.getInstance(keyGeneratorAlgorithmName);

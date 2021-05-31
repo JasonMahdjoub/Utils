@@ -122,7 +122,7 @@ public final class HybridASymmetricAuthenticatedSignatureType {
 		return generateKeyPair(random, -1);
 	}
 	public HybridASymmetricKeyPair generateKeyPair(AbstractSecureRandom random, int keySizeBits) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
-		return generateKeyPair(random, keySizeBits,System.currentTimeMillis(), Long.MAX_VALUE);
+		return generateKeyPair(random, keySizeBits,System.currentTimeMillis(), System.currentTimeMillis()+nonPQCASymmetricAuthenticatedSignatureType.getDefaultExpirationTimeMilis());
 	}
 	public HybridASymmetricKeyPair generateKeyPair(AbstractSecureRandom random, int keySizeBits,
 												   long publicKeyValidityBeginDateUTC, long expirationTimeUTC) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {

@@ -79,12 +79,12 @@ def javaVersion="8"
 sourceCompatibility = javaVersion
 targetCompatibility= javaVersion
 
-idea {
+/*idea {
     project {
         jdkName = javaVersion
         languageLevel = javaVersion
     }
-}
+}*/
 
 version='??.??.??ToDefine'
 

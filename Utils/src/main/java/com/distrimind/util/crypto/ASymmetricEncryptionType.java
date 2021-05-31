@@ -424,13 +424,13 @@ public enum ASymmetricEncryptionType {
 			throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
 		return getKeyPairGenerator(random, keySizeBits, System.currentTimeMillis(), System.currentTimeMillis() + expirationTimeMilis);
 	}
-
+	long getDefaultExpirationTimeMilis() {
+		return expirationTimeMilis;
+	}
 	public AbstractKeyPairGenerator getKeyPairGenerator(AbstractSecureRandom random, int keySizeBits,
 			long publicKeyValidityBeginDateUTC, long expirationTimeUTC) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
 		if (keySizeBits<0)
 			keySizeBits= this.keySizeBits;
-		if (expirationTimeUTC==Long.MIN_VALUE)
-			expirationTimeUTC=System.currentTimeMillis() + expirationTimeMilis;
 
 		CodeProvider.ensureProviderLoaded(codeProviderForKeyGenerator);
 		if (codeProviderForKeyGenerator == CodeProvider.GNU_CRYPTO) {

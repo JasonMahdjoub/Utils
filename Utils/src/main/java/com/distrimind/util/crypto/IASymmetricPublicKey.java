@@ -31,7 +31,7 @@ public interface IASymmetricPublicKey extends IKey {
 	default boolean areTimesValid()
 	{
 		long curTime=System.currentTimeMillis();
-		return getPublicKeyValidityBeginDateUTC()-TIME_COMPARISON_TOLERANCE_IN_MS<=curTime && getTimeExpirationUTC()>=curTime;
+		return getPublicKeyValidityBeginDateUTC()<=curTime+TIME_COMPARISON_TOLERANCE_IN_MS && getTimeExpirationUTC()>=curTime;
 	}
 
 }
