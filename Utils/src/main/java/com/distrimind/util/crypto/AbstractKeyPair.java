@@ -102,7 +102,7 @@ public abstract class AbstractKeyPair<TPrivateKey extends IASymmetricPrivateKey,
 
 	public abstract void zeroize();
 
-	public abstract WrappedSecretData encode(boolean includeTimeExpiration);
+	public abstract WrappedSecretData encode(boolean includeTimes);
 
 	@Override
 	public final WrappedSecretString encodeString() {
@@ -115,9 +115,6 @@ public abstract class AbstractKeyPair<TPrivateKey extends IASymmetricPrivateKey,
 		zeroize();
 	}
 
-	/*public abstract ASymmetricEncryptionType getEncryptionAlgorithmType() ;
-
-	public abstract ASymmetricAuthenticatedSignatureType getAuthenticatedSignatureAlgorithmType() ;*/
 
 	public abstract TPrivateKey getASymmetricPrivateKey();
 	public abstract PubKey getASymmetricPublicKey();
@@ -127,5 +124,7 @@ public abstract class AbstractKeyPair<TPrivateKey extends IASymmetricPrivateKey,
 	public abstract boolean useAuthenticatedSignatureAlgorithm();
 
 	public abstract ASymmetricKeyPair getNonPQCKeyPair();
+
+	public abstract boolean areTimesValid();
 
 }

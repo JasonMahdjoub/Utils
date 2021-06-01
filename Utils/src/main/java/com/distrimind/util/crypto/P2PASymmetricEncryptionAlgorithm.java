@@ -34,6 +34,8 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
+import com.distrimind.util.io.Integrity;
+import com.distrimind.util.io.MessageExternalizationException;
 import com.distrimind.util.io.RandomInputStream;
 import com.distrimind.util.io.RandomOutputStream;
 
@@ -57,6 +59,10 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 		super();
 		if (distantPublicKey == null)
 			throw new NullPointerException("distantPublicKey");
+		if (!myKeyPair.areTimesValid())
+			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, "The key times are not valid !");
+		if (!distantPublicKey.areTimesValid())
+			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, "The key times are not valid !");
 		try {
 			if (myKeyPair instanceof HybridASymmetricKeyPair && distantPublicKey instanceof HybridASymmetricPublicKey) {
 				p2pEncryption = new HybridP2PEncryption((HybridASymmetricKeyPair) myKeyPair, (HybridASymmetricPublicKey) distantPublicKey);

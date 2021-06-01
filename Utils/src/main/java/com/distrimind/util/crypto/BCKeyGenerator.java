@@ -34,12 +34,12 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
-import com.distrimind.bcfips.crypto.SymmetricKeyGenerator;
-import com.distrimind.bcfips.crypto.fips.FipsAES;
-import com.distrimind.bcfips.crypto.general.AES;
-import com.distrimind.bcfips.crypto.general.ChaCha20;
-import com.distrimind.bcfips.crypto.general.Serpent;
-import com.distrimind.bcfips.crypto.general.Twofish;
+import org.bouncycastle.crypto.SymmetricKeyGenerator;
+import org.bouncycastle.crypto.fips.FipsAES;
+import org.bouncycastle.crypto.general.AES;
+import org.bouncycastle.crypto.general.ChaCha20;
+import org.bouncycastle.crypto.general.Serpent;
+import org.bouncycastle.crypto.general.Twofish;
 
 /**
  * 
@@ -50,7 +50,7 @@ import com.distrimind.bcfips.crypto.general.Twofish;
 @SuppressWarnings("ConstantConditions")
 public final class BCKeyGenerator extends AbstractKeyGenerator {
 
-	private SymmetricKeyGenerator<com.distrimind.bcfips.crypto.SymmetricSecretKey> keyGenerator;
+	private SymmetricKeyGenerator<org.bouncycastle.crypto.SymmetricSecretKey> keyGenerator;
 	private short keySizeBits;
 	
 	BCKeyGenerator(SymmetricAuthenticatedSignatureType type) {

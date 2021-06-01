@@ -162,8 +162,6 @@ abstract class CommonCipherInputStream extends RandomInputStream {
 			outputBuffer=new byte[128+cipher.getOutputSize(this.buffer.length)];
 	}
 	private void checkDoFinal(boolean endStream) throws IOException {
-		/*if (endStream)
-			length=posPlainText;*/
 		if (doFinal && (posEncrypted %maxEncryptedPartLength==0 || endStream))
 		{
 			try {
@@ -389,7 +387,6 @@ abstract class CommonCipherInputStream extends RandomInputStream {
 
 	@Override
 	public void readFully(byte[] tab, int off, int len) throws IOException {
-		//noinspection ResultOfMethodCallIgnored
 		read(tab, off, len, true);
 	}
 

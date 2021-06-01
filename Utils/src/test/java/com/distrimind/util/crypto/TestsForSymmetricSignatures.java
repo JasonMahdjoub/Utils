@@ -89,7 +89,7 @@ public class TestsForSymmetricSignatures {
 				for (SymmetricAuthenticatedSignatureType set : SymmetricAuthenticatedSignatureType.values())
 				{
 					if ((akpw.getCodeProvider()==CodeProvider.GNU_CRYPTO)==(aet.getCodeProviderForEncryption()==CodeProvider.GNU_CRYPTO) && (akpw.getCodeProvider()==CodeProvider.GNU_CRYPTO)==(set.getCodeProviderForSignature()==CodeProvider.GNU_CRYPTO)
-							&& akpw.getAlgorithmName().startsWith(aet.getAlgorithmName()))
+							&& ((akpw.getAlgorithmName()==null && aet.getAlgorithmName()==null) || (akpw.getAlgorithmName()!=null && akpw.getAlgorithmName().startsWith(aet.getAlgorithmName()))))
 					{
 						Object[] params = new Object[3];
 						params[0]=akpw;

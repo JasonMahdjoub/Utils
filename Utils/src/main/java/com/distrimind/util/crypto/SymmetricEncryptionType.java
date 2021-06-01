@@ -36,10 +36,10 @@ package com.distrimind.util.crypto;
 
 import com.distrimind.util.OS;
 import com.distrimind.util.OSVersion;
-import com.distrimind.bcfips.crypto.Algorithm;
-import com.distrimind.bcfips.crypto.general.ChaCha20;
-import com.distrimind.bcfips.crypto.general.Serpent;
-import com.distrimind.bcfips.crypto.general.Twofish;
+import org.bouncycastle.crypto.Algorithm;
+import org.bouncycastle.crypto.general.ChaCha20;
+import org.bouncycastle.crypto.general.Serpent;
+import org.bouncycastle.crypto.general.Twofish;
 import com.distrimind.util.data_buffers.WrappedSecretData;
 
 import javax.crypto.Cipher;
@@ -62,24 +62,24 @@ import java.util.Arrays;
  */
 public enum SymmetricEncryptionType {
 
-	AES_CBC_PKCS5Padding("AES", "CBC", "PKCS5Padding", (short) 128, CodeProvider.SunJCE, CodeProvider.SunJCE, SymmetricAuthenticatedSignatureType.HMAC_SHA2_384, com.distrimind.bcfips.crypto.general.AES.ALGORITHM, (short)128, false, (short)118, (short)146, (short)132, (short)148, (short)322, (short)583, true, true, true, true, true, true, (short)16, 1L<<32),
-	AES_GCM("AES", "GCM", "NoPadding", (short) 128, CodeProvider.SunJCE, CodeProvider.SunJCE, SymmetricAuthenticatedSignatureType.HMAC_SHA2_384, com.distrimind.bcfips.crypto.general.AES.ALGORITHM, (short)128, true, (short)40, (short)48, (short)58, (short) 58, (short)144, (short)613, true, true, true, true, true, true, (short)12, 1L<<32),
-	AES_CTR("AES", "CTR", "NoPadding", (short) 128, CodeProvider.SunJCE, CodeProvider.SunJCE, SymmetricAuthenticatedSignatureType.HMAC_SHA2_384, com.distrimind.bcfips.crypto.general.AES.ALGORITHM, (short)128, false, (short)126, (short)112, (short)111, (short) 117, (short)560, (short)252, true, true, true, true, true, true, (short)16, 1L<<32),
+	AES_CBC_PKCS5Padding("AES", "CBC", "PKCS5Padding", (short) 128, CodeProvider.SunJCE, CodeProvider.SunJCE, SymmetricAuthenticatedSignatureType.HMAC_SHA2_384, org.bouncycastle.crypto.general.AES.ALGORITHM, (short)128, false, (short)118, (short)146, (short)132, (short)148, (short)322, (short)583, true, true, true, true, true, true, (short)16, 1L<<32),
+	AES_GCM("AES", "GCM", "NoPadding", (short) 128, CodeProvider.SunJCE, CodeProvider.SunJCE, SymmetricAuthenticatedSignatureType.HMAC_SHA2_384, org.bouncycastle.crypto.general.AES.ALGORITHM, (short)128, true, (short)40, (short)48, (short)58, (short) 58, (short)144, (short)613, true, true, true, true, true, true, (short)12, 1L<<32),
+	AES_CTR("AES", "CTR", "NoPadding", (short) 128, CodeProvider.SunJCE, CodeProvider.SunJCE, SymmetricAuthenticatedSignatureType.HMAC_SHA2_384, org.bouncycastle.crypto.general.AES.ALGORITHM, (short)128, false, (short)126, (short)112, (short)111, (short) 117, (short)560, (short)252, true, true, true, true, true, true, (short)16, 1L<<32),
 	@Deprecated
-	DES_CBC_PKCS5Padding("DES", "CBC", "PKCS5Padding", (short) 56, (short) 8, CodeProvider.SunJCE, CodeProvider.SunJCE, SymmetricAuthenticatedSignatureType.HMAC_SHA2_384, com.distrimind.bcfips.crypto.general.DES.ALGORITHM, (short)64, false, (short)41, (short)39, (short)40, (short)37, (short)36, (short)45, true, true, true,true, true, true, (short)8, 1L<<32),
+	DES_CBC_PKCS5Padding("DES", "CBC", "PKCS5Padding", (short) 56, (short) 8, CodeProvider.SunJCE, CodeProvider.SunJCE, SymmetricAuthenticatedSignatureType.HMAC_SHA2_384, org.bouncycastle.crypto.general.DES.ALGORITHM, (short)64, false, (short)41, (short)39, (short)40, (short)37, (short)36, (short)45, true, true, true,true, true, true, (short)8, 1L<<32),
 	@Deprecated
-	DESede_CBC_PKCS5Padding("DESede", "CBC", "PKCS5Padding", (short) 168, (short) 24, CodeProvider.SunJCE, CodeProvider.SunJCE, SymmetricAuthenticatedSignatureType.HMAC_SHA2_384, com.distrimind.bcfips.crypto.general.DES.ALGORITHM, (short)64, false, (short)16, (short)16, (short)15, (short)15, (short)17, (short)17, true, true, true,true, true, true, (short)8, 1L<<32),
+	DESede_CBC_PKCS5Padding("DESede", "CBC", "PKCS5Padding", (short) 168, (short) 24, CodeProvider.SunJCE, CodeProvider.SunJCE, SymmetricAuthenticatedSignatureType.HMAC_SHA2_384, org.bouncycastle.crypto.general.DES.ALGORITHM, (short)64, false, (short)16, (short)16, (short)15, (short)15, (short)17, (short)17, true, true, true,true, true, true, (short)8, 1L<<32),
 	@Deprecated
-	Blowfish_CBC_PKCS5Padding("Blowfish", "CBC", "PKCS5Padding", (short) 128, CodeProvider.SunJCE, CodeProvider.SunJCE, SymmetricAuthenticatedSignatureType.HMAC_SHA2_384, com.distrimind.bcfips.crypto.general.Blowfish.ALGORITHM, (short)64, false, (short)49, (short)51, (short)55, (short)51, (short)69, (short)71, true, true, true, true, false, true, (short)8, 1L<<32),
-	GNU_AES_CBC_PKCS5Padding("AES", "CBC", "PKCS5Padding", (short) 128, CodeProvider.GNU_CRYPTO, CodeProvider.GNU_CRYPTO, SymmetricAuthenticatedSignatureType.BC_FIPS_HMAC_SHA2_512, com.distrimind.bcfips.crypto.general.AES.ALGORITHM, (short)128, false, (short)67, (short)63, (short)63, (short)64, (short)62, (short)4, true, true, true, true, true, true, (short)16, 1L<<32),
+	Blowfish_CBC_PKCS5Padding("Blowfish", "CBC", "PKCS5Padding", (short) 128, CodeProvider.SunJCE, CodeProvider.SunJCE, SymmetricAuthenticatedSignatureType.HMAC_SHA2_384, org.bouncycastle.crypto.general.Blowfish.ALGORITHM, (short)64, false, (short)49, (short)51, (short)55, (short)51, (short)69, (short)71, true, true, true, true, false, true, (short)8, 1L<<32),
+	GNU_AES_CBC_PKCS5Padding("AES", "CBC", "PKCS5Padding", (short) 128, CodeProvider.GNU_CRYPTO, CodeProvider.GNU_CRYPTO, SymmetricAuthenticatedSignatureType.BC_FIPS_HMAC_SHA2_512, org.bouncycastle.crypto.general.AES.ALGORITHM, (short)128, false, (short)67, (short)63, (short)63, (short)64, (short)62, (short)4, true, true, true, true, true, true, (short)16, 1L<<32),
 	GNU_TWOFISH_CBC_PKCS5Padding("TWOFISH","CBC", "PKCS5Padding", (short) 128, CodeProvider.GNU_CRYPTO, CodeProvider.GNU_CRYPTO, SymmetricAuthenticatedSignatureType.BC_FIPS_HMAC_SHA2_512, Twofish.ALGORITHM, (short)128, false, (short)57, (short)56, (short)55, (short)55, (short)66, (short)4, true, false, true, true, false, true, (short)16, 1L<<32),
 	GNU_SERPENT_CBC_PKCS5Padding("Serpent", "CBC", "PKCS5Padding", (short) 128, CodeProvider.GNU_CRYPTO, CodeProvider.GNU_CRYPTO, SymmetricAuthenticatedSignatureType.BC_FIPS_HMAC_SHA2_512, Serpent.ALGORITHM, (short)128, false, (short)37, (short)37, (short)35, (short)37, (short)40, (short)4, false, false, false, false, false, false, (short)16, 1L<<32),
 	GNU_ANUBIS_CBC_PKCS5Padding("Anubis", "CBC", "PKCS5Padding", (short) 128, CodeProvider.GNU_CRYPTO, CodeProvider.GNU_CRYPTO, SymmetricAuthenticatedSignatureType.BC_FIPS_HMAC_SHA2_512, null, (short)128, false, (short)61, (short)58, (short)57, (short)57, (short)67, (short)4, false, false, false, false, false, false, (short)16, 1L<<32),
 	GNU_SQUARE_CBC__PKCS5Padding("Square", "CBC", "PKCS5Padding", (short) 128, CodeProvider.GNU_CRYPTO, CodeProvider.GNU_CRYPTO, SymmetricAuthenticatedSignatureType.BC_FIPS_HMAC_SHA2_512, null, (short)128, false, (short)69, (short)67, (short)61, (short)62, (short)84, (short)4, false, false, false, false, false, false, (short)16, 1L<<32),
-	BC_FIPS_AES_CBC_PKCS7Padding("AES", "CBC", "PKCS7Padding", (short) 128, CodeProvider.BCFIPS, CodeProvider.BCFIPS, SymmetricAuthenticatedSignatureType.BC_FIPS_HMAC_SHA2_512, com.distrimind.bcfips.crypto.general.AES.ALGORITHM, (short)128, false, (short)60, (short)75, (short)60, (short)73, (short)76, (short)67, true, true, true, true, true, true, (short)16, 1L<<32),
-	BC_FIPS_AES_GCM("AES", "GCM", "NoPadding", (short) 128, CodeProvider.BCFIPS, CodeProvider.BCFIPS, SymmetricAuthenticatedSignatureType.BC_FIPS_HMAC_SHA2_512, com.distrimind.bcfips.crypto.general.AES.ALGORITHM, (short)128, true, (short)42, (short)48, (short)47, (short)57, (short)54, (short)55, true, true, true, true, true, true, (short)12, 1L<<32),
-	BC_AES_EAX("AES", "EAX", "NoPadding", (short) 128, CodeProvider.BC, CodeProvider.BC, SymmetricAuthenticatedSignatureType.BC_FIPS_HMAC_SHA2_512, com.distrimind.bcfips.crypto.general.AES.ALGORITHM, (short)128, true, (short)36, (short)43, (short)44, (short)39, (short)35, (short)35, true, true, true, true, true, true, (short)16, 1L<<32),
-	BC_FIPS_AES_CTR("AES", "CTR", "NoPadding", (short) 128, CodeProvider.BCFIPS, CodeProvider.BCFIPS, SymmetricAuthenticatedSignatureType.BC_FIPS_HMAC_SHA2_512, com.distrimind.bcfips.crypto.general.AES.ALGORITHM, (short)128, false, (short)50, (short)64, (short)52, (short)65, (short)63, (short)48, true, true, true, true, true, true, (short)16, 1L<<32),
+	BC_FIPS_AES_CBC_PKCS7Padding("AES", "CBC", "PKCS7Padding", (short) 128, CodeProvider.BCFIPS, CodeProvider.BCFIPS, SymmetricAuthenticatedSignatureType.BC_FIPS_HMAC_SHA2_512, org.bouncycastle.crypto.general.AES.ALGORITHM, (short)128, false, (short)60, (short)75, (short)60, (short)73, (short)76, (short)67, true, true, true, true, true, true, (short)16, 1L<<32),
+	BC_FIPS_AES_GCM("AES", "GCM", "NoPadding", (short) 128, CodeProvider.BCFIPS, CodeProvider.BCFIPS, SymmetricAuthenticatedSignatureType.BC_FIPS_HMAC_SHA2_512, org.bouncycastle.crypto.general.AES.ALGORITHM, (short)128, true, (short)42, (short)48, (short)47, (short)57, (short)54, (short)55, true, true, true, true, true, true, (short)12, 1L<<32),
+	BC_AES_EAX("AES", "EAX", "NoPadding", (short) 128, CodeProvider.BC, CodeProvider.BC, SymmetricAuthenticatedSignatureType.BC_FIPS_HMAC_SHA2_512, org.bouncycastle.crypto.general.AES.ALGORITHM, (short)128, true, (short)36, (short)43, (short)44, (short)39, (short)35, (short)35, true, true, true, true, true, true, (short)16, 1L<<32),
+	BC_FIPS_AES_CTR("AES", "CTR", "NoPadding", (short) 128, CodeProvider.BCFIPS, CodeProvider.BCFIPS, SymmetricAuthenticatedSignatureType.BC_FIPS_HMAC_SHA2_512, org.bouncycastle.crypto.general.AES.ALGORITHM, (short)128, false, (short)50, (short)64, (short)52, (short)65, (short)63, (short)48, true, true, true, true, true, true, (short)16, 1L<<32),
 	BC_TWOFISH_CBC_PKCS7Padding("TWOFISH", "CBC", "PKCS7Padding", (short) 128,CodeProvider.BC, CodeProvider.BC, SymmetricAuthenticatedSignatureType.BC_FIPS_HMAC_SHA2_512, Twofish.ALGORITHM, (short)128, false, (short)45, (short)56, (short)45, (short)57, (short)71, (short)72, true, false, true, true, false, true , (short)16, 1L<<32),
 	BC_TWOFISH_GCM("TWOFISH", "GCM", "NoPadding", (short) 128,CodeProvider.BC, CodeProvider.BC, SymmetricAuthenticatedSignatureType.BC_FIPS_HMAC_SHA2_512, Twofish.ALGORITHM, (short)128, true, (short)35, (short)41, (short)39, (short)46, (short)54, (short)56, true, false, true, true, false, true, (short)12, 1L<<32),
 	BC_TWOFISH_EAX("TWOFISH", "EAX", "NoPadding", (short) 128,CodeProvider.BC, CodeProvider.BC, SymmetricAuthenticatedSignatureType.BC_FIPS_HMAC_SHA2_512, Twofish.ALGORITHM, (short)128, true, (short)27, (short)30, (short)28, (short)31, (short)34, (short)35, true, false, true, true, false, true, (short)16, 1L<<32),
@@ -88,8 +88,8 @@ public enum SymmetricEncryptionType {
 	BC_SERPENT_CTR("Serpent", "CTR", "NoPadding",(short) 128, CodeProvider.BC, CodeProvider.BC, SymmetricAuthenticatedSignatureType.BC_FIPS_HMAC_SHA2_512, Serpent.ALGORITHM, (short)128, false, (short)33, (short)37,(short)35, (short)40, (short)49, (short)50, false, false, false, false, false, false, (short)16, 1L<<32),
 	BC_SERPENT_GCM("Serpent", "GCM", "NoPadding",(short) 128, CodeProvider.BC, CodeProvider.BC, SymmetricAuthenticatedSignatureType.BC_FIPS_HMAC_SHA2_512, Serpent.ALGORITHM, (short)128, true, (short)31, (short)35, (short)33, (short)38, (short)43, (short)43, false, false, false, false, false, false, (short)12, 1L<<32),
 	BC_SERPENT_EAX("Serpent", "EAX", "NoPadding",(short) 128, CodeProvider.BC, CodeProvider.BC, SymmetricAuthenticatedSignatureType.BC_FIPS_HMAC_SHA2_512, Serpent.ALGORITHM, (short)128, true, (short)22, (short)24, (short)23, (short)24, (short)26, (short)26, false, false, false, false, false, false, (short)16, 1L<<32),
-	CHACHA20_NO_RANDOM_ACCESS("ChaCha20", "", "", (short) 256, CodeProvider.SunJCE, CodeProvider.SunJCE, SymmetricAuthenticatedSignatureType.HMAC_SHA2_384, com.distrimind.bcfips.crypto.general.AES.ALGORITHM, (short)512, false, (short)113, (short)79, (short)113, (short) 79, (short)278, (short)274, false, false, false,  true, false, false, (short)12, 13_000_000_000L),
-	CHACHA20_POLY1305("ChaCha20-Poly1305", "", "", (short) 256, CodeProvider.SunJCE, CodeProvider.SunJCE, SymmetricAuthenticatedSignatureType.HMAC_SHA2_384, com.distrimind.bcfips.crypto.general.AES.ALGORITHM, (short)512, true, (short)113, (short)79, (short)113, (short) 79, (short)204, (short)192, false, false, false,  true, false, false, (short)12, 13_000_000_000L),
+	CHACHA20_NO_RANDOM_ACCESS("ChaCha20", "", "", (short) 256, CodeProvider.SunJCE, CodeProvider.SunJCE, SymmetricAuthenticatedSignatureType.HMAC_SHA2_384, org.bouncycastle.crypto.general.AES.ALGORITHM, (short)512, false, (short)113, (short)79, (short)113, (short) 79, (short)278, (short)274, false, false, false,  true, false, false, (short)12, 13_000_000_000L),
+	CHACHA20_POLY1305("ChaCha20-Poly1305", "", "", (short) 256, CodeProvider.SunJCE, CodeProvider.SunJCE, SymmetricAuthenticatedSignatureType.HMAC_SHA2_384, org.bouncycastle.crypto.general.AES.ALGORITHM, (short)512, true, (short)113, (short)79, (short)113, (short) 79, (short)204, (short)192, false, false, false,  true, false, false, (short)12, 13_000_000_000L),
 	BC_CHACHA20_NO_RANDOM_ACCESS("ChaCha20", "", "", (short) 256, CodeProvider.BC, CodeProvider.BC, SymmetricAuthenticatedSignatureType.BC_FIPS_HMAC_SHA2_384, ChaCha20.ALGORITHM, (short)512, false, (short)75, (short)78, (short)75, (short) 78, (short)75, (short)78, false, false, false,  true, false, false, (short)12, 13_000_000_000L),
 	BC_CHACHA20_POLY1305("ChaCha20-Poly1305", "", "", (short) 256, CodeProvider.BC, CodeProvider.BC, SymmetricAuthenticatedSignatureType.BC_FIPS_HMAC_SHA2_384, ChaCha20.ALGORITHM, (short)512, true, (short)114, (short)81, (short)114, (short) 81, (short)114, (short)81, false, false, false,  true, false, false, (short)12, 13_000_000_000L),
 	DEFAULT(AES_CTR);
@@ -134,16 +134,9 @@ public enum SymmetricEncryptionType {
 		return new SecretKeySpec(encodedSecretKey, off, len, algorithmName);
 	}
 	
-	static com.distrimind.bcfips.crypto.SymmetricSecretKey decodeBCSecretKey(Algorithm algorithm, byte[] encodedSecretKey) {
-        return new com.distrimind.bcfips.crypto.SymmetricSecretKey(algorithm, encodedSecretKey);
-		//return decodeBCSecretKey(algorithm, encodedSecretKey, 0, encodedSecretKey.length, algorithmName);
+	static org.bouncycastle.crypto.SymmetricSecretKey decodeBCSecretKey(Algorithm algorithm, byte[] encodedSecretKey) {
+        return new org.bouncycastle.crypto.SymmetricSecretKey(algorithm, encodedSecretKey);
 	}
-	/*@SuppressWarnings("SameParameterValue")
-	static org.bouncycastle.crypto.SymmetricSecretKey decodeBCSecretKey(Algorithm algorithm, byte[] encodedSecretKey, int off, int len, String algorithmName) {
-		//final byte[][] parts = Bits.separateEncodingsWithShortSizedTabs(encodedSecretKey, off, len);
-
-		return new org.bouncycastle.crypto.SymmetricSecretKey(algorithmName, encodedSecretKey);
-	}*/
 
 	public SymmetricSecretKey generateSecretKeyFromHashedPassword(WrappedSecretData wrappedSecretData) throws NoSuchProviderException, NoSuchAlgorithmException {
 		return generateSecretKeyFromHashedPassword(wrappedSecretData, getDefaultKeySizeBits());
@@ -168,7 +161,7 @@ public enum SymmetricEncryptionType {
 		return key.getEncoded();
 	}
 	
-	static byte[] encodeSecretKey(final com.distrimind.bcfips.crypto.SymmetricSecretKey key)
+	static byte[] encodeSecretKey(final org.bouncycastle.crypto.SymmetricSecretKey key)
 	{
 		return AccessController.doPrivileged((PrivilegedAction<byte[]>) key::getKeyBytes);
 	}

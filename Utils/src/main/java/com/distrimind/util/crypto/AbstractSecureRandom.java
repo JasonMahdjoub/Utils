@@ -156,7 +156,7 @@ public abstract class AbstractSecureRandom extends SecureRandom {
 		byte[] tab=new byte[Math.min(32, seed.length)];
 		nextBytes(tab);
 		if (mixWithPreviousSeed) {
-			int s=Math.min(tab.length, seed.length);
+			int s= tab.length;
 			for (int i = 0; i < s; i++)
 				tab[i] ^= seed[i];
 		}

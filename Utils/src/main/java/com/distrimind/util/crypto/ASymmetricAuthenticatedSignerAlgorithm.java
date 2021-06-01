@@ -162,19 +162,11 @@ public class ASymmetricAuthenticatedSignerAlgorithm extends AbstractAuthenticate
 				throw new NullPointerException("localPrivateKey");
 			type = localPrivateKey.getAuthenticatedSignatureAlgorithmType();
 			if (type == null)
-				throw new IllegalArgumentException("The given key is not destinated to a signature process");
+				throw new IllegalArgumentException("The given key is not destined to a signature process");
 			this.localPrivateKey = localPrivateKey;
 			this.signature = type.getSignatureInstance();
 			this.macLength = type.getSignatureSizeBytes(localPrivateKey.getKeySizeBits());
 		}
-
-		/*public ASymmetricPrivateKey getLocalPrivateKey() {
-			return localPrivateKey;
-		}
-
-		public AbstractSignature getSignatureAlgorithm() {
-			return signature;
-		}*/
 
 
 		@Override

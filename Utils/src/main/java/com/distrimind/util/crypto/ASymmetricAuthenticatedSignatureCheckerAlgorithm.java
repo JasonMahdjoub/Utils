@@ -209,7 +209,7 @@ public class ASymmetricAuthenticatedSignatureCheckerAlgorithm extends AbstractAu
 		@Override
 		public boolean verify() throws IOException {
 			try {
-				return signer.verify(signature);
+				return distantPublicKey.areTimesValid() && signer.verify(signature);
 			} finally {
 				signature = null;
 			}

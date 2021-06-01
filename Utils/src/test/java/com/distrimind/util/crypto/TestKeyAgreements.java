@@ -478,7 +478,7 @@ public class TestKeyAgreements {
 							if (t==P2PLoginAgreementType.JPAKE_AND_AGREEMENT_WITH_SYMMETRIC_SIGNATURE || t==P2PLoginAgreementType.ASYMMETRIC_SECRET_MESSAGE_EXCHANGER_AND_AGREEMENT_WITH_SYMMETRIC_SIGNATURE)
 								res.add(new Object[] { t, null, expectedVerify, messageIsKey, s, m , secretKey, null, null});
 						}
-						for (ASymmetricLoginAgreementType t : ASymmetricLoginAgreementType.values())
+						for (UnidirectionalASymmetricLoginAgreementType t : UnidirectionalASymmetricLoginAgreementType.values())
 						{
 							res.add(new Object[] { null, t, expectedVerify, messageIsKey, s, m , null, keyPair, distantKeyPair});
 						}
@@ -494,7 +494,7 @@ public class TestKeyAgreements {
 	}
 
 	@Test(dataProvider = "provideDataForP2PLoginAgreement")
-	public void testP2PLoginAgreement(P2PLoginAgreementType type, ASymmetricLoginAgreementType asType, boolean expectedVerify, boolean messageIsKey, byte[] salt, byte[] m, SymmetricSecretKey secretKey, ASymmetricKeyPair keyPair, ASymmetricKeyPair distantKeyPair)
+	public void testP2PLoginAgreement(P2PLoginAgreementType type, UnidirectionalASymmetricLoginAgreementType asType, boolean expectedVerify, boolean messageIsKey, byte[] salt, byte[] m, SymmetricSecretKey secretKey, ASymmetricKeyPair keyPair, ASymmetricKeyPair distantKeyPair)
 			throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
 		System.out.println(type+";"+asType);
 		AbstractSecureRandom r = SecureRandomType.DEFAULT.getSingleton(null);
@@ -511,50 +511,64 @@ public class TestKeyAgreements {
 		}
 		else {
 			exchanger1 = type.getAgreementAlgorithm(r, "participant id 1".getBytes(), m, 0,
-					m.length, salt, 0, salt == null ? 0 : salt.length, messageIsKey, (expectedVerify ? secretKey : falseSecretKey), keyPair==null?null:keyPair.getASymmetricPrivateKey(), distantKeyPair==null?null:distantKeyPair.getASymmetricPublicKey());
+					m.length, messageIsKey, salt, 0, salt == null ? 0 : salt.length, (expectedVerify ? secretKey : falseSecretKey), keyPair==null?null:keyPair.getASymmetricPrivateKey(), distantKeyPair==null?null:distantKeyPair.getASymmetricPublicKey());
 			exchanger2 = type.getAgreementAlgorithm(r, "participant id 2".getBytes(),
-					expectedVerify ? m : falseMessage, 0, (expectedVerify ? m : falseMessage).length, salt, 0,
-					salt == null ? 0 : salt.length, messageIsKey, (expectedVerify ? secretKey : falseSecretKey), distantKeyPair==null?null:distantKeyPair.getASymmetricPrivateKey(), keyPair==null?null:keyPair.getASymmetricPublicKey());
+					expectedVerify ? m : falseMessage, 0, (expectedVerify ? m : falseMessage).length, messageIsKey, salt, 0,
+					salt == null ? 0 : salt.length, (expectedVerify ? secretKey : falseSecretKey), distantKeyPair==null?null:distantKeyPair.getASymmetricPrivateKey(), keyPair==null?null:keyPair.getASymmetricPublicKey());
 		}
 		try {
-			int send=0, received=0;
+			int send1=0, received1=0;
+			int send2=0, received2=0;
 			while (!exchanger1.hasFinishedSend())
 			{
-				byte[] step1 = exchanger1.getDataToSend();
-				byte[] step2 = exchanger2.getDataToSend();
-				send++;
+				byte[] step1 = exchanger1.hasFinishedSend()?null:exchanger1.getDataToSend();
+				byte[] step2 = exchanger2.hasFinishedSend()?null:exchanger2.getDataToSend();
+				if (step1!=null)
+					send1++;
+				if (step2!=null)
+					send2++;
 				if (!expectedVerify)
 				{
-					for (int i=0;i<step1.length;i++)
-						step1[i]=(byte)~step1[i];
-					for (int i=0;i<step1.length;i++)
-						step2[i]=(byte)~step2[i];
+					if (step1!=null) {
+						for (int i = 0; i < step1.length; i++)
+							step1[i] = (byte) ~step1[i];
+					}
+					if (step2!=null) {
+						for (int i = 0; i < step2.length; i++)
+							step2[i] = (byte) ~step2[i];
+					}
 				}
-				Assert.assertFalse(exchanger1.isAgreementProcessValid());
-				Assert.assertFalse(exchanger2.isAgreementProcessValid());
-				Assert.assertEquals(exchanger1.hasFinishedReception(), received==exchanger1.getStepsNumberForReception());
-				Assert.assertEquals(exchanger2.hasFinishedReception(), received==exchanger2.getStepsNumberForReception());
-				Assert.assertEquals(exchanger1.hasFinishedSend(), send==exchanger1.getStepsNumberForReception());
-				Assert.assertEquals(exchanger2.hasFinishedSend(), send==exchanger2.getStepsNumberForReception());
+				Assert.assertEquals(exchanger1.isAgreementProcessValid(), exchanger1.hasFinishedReception() && exchanger1.hasFinishedSend());
+				Assert.assertEquals(exchanger2.isAgreementProcessValid(), exchanger2.hasFinishedReception() && exchanger2.hasFinishedSend());
+				Assert.assertEquals(exchanger1.hasFinishedReception(), received1==exchanger1.getStepsNumberForReception());
+				Assert.assertEquals(exchanger2.hasFinishedReception(), received2==exchanger2.getStepsNumberForReception());
+				Assert.assertEquals(exchanger1.hasFinishedSend(), send1==exchanger1.getStepsNumberForSend(), ""+send1+";"+exchanger1.getStepsNumberForSend()+";"+exchanger1.getActualStepForSendIndex());
+				Assert.assertEquals(exchanger2.hasFinishedSend(), send2==exchanger2.getStepsNumberForSend(), ""+send2+";"+exchanger2.getStepsNumberForSend()+";"+exchanger2.getActualStepForSendIndex());
+				if (step2!=null) {
+					received1++;
+					exchanger1.receiveData(step2);
+				}
+				if (step1!=null) {
+					received2++;
+					exchanger2.receiveData(step1);
+				}
 
-				exchanger1.receiveData(step2);
-				exchanger2.receiveData(step1);
-				received++;
-				if (exchanger1.hasFinishedReception())
+				if (exchanger1.hasFinishedReception() && exchanger1.hasFinishedSend())
 				{
-					Assert.assertEquals(exchanger1.isAgreementProcessValid(), expectedVerify, ""+exchanger1.getClass());
+					Assert.assertEquals(exchanger1.isAgreementProcessValid(), expectedVerify || asType!=null, ""+exchanger1.getClass());
 					Assert.assertEquals(exchanger2.isAgreementProcessValid(), expectedVerify, ""+exchanger2.getClass());
 				}
 				else
 				{
-					Assert.assertEquals(exchanger1.hasFinishedReception(), received==exchanger1.getStepsNumberForReception(), ""+received+" ; "+exchanger1.getStepsNumberForReception());
-					Assert.assertEquals(exchanger2.hasFinishedReception(), received==exchanger2.getStepsNumberForReception());
-					Assert.assertEquals(exchanger1.hasFinishedSend(), send==exchanger1.getStepsNumberForReception());
-					Assert.assertEquals(exchanger2.hasFinishedSend(), send==exchanger2.getStepsNumberForReception());
+					Assert.assertEquals(exchanger1.hasFinishedReception(), received1==exchanger1.getStepsNumberForReception(), ""+received1+" ; "+exchanger1.getStepsNumberForReception());
+					Assert.assertEquals(exchanger2.hasFinishedReception(), received2==exchanger2.getStepsNumberForReception());
+					Assert.assertEquals(exchanger1.hasFinishedSend(), send1==exchanger1.getStepsNumberForSend());
+					Assert.assertEquals(exchanger2.hasFinishedSend(), send2==exchanger2.getStepsNumberForSend());
 				}
 			}
-			Assert.assertEquals(send, received);
-			Assert.assertEquals(exchanger1.isAgreementProcessValid(), expectedVerify);
+			Assert.assertEquals(send1, received2);
+			Assert.assertEquals(send2, received1);
+			Assert.assertEquals(exchanger1.isAgreementProcessValid(), expectedVerify || asType!=null);
 			Assert.assertEquals(exchanger2.isAgreementProcessValid(), expectedVerify);
 			Assert.assertTrue(exchanger1.hasFinishedReception());
 			Assert.assertTrue(exchanger2.hasFinishedReception());

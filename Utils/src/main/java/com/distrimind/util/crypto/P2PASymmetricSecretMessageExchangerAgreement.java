@@ -69,10 +69,6 @@ public class P2PASymmetricSecretMessageExchangerAgreement extends P2PLoginAgreem
         this.passwordIsKey=false;
         this.charPassword=charPassword.clone();
     }
-    /*P2PASymmetricSecretMessageExchangerAgreement(AbstractSecureRandom secureRandom, MessageDigestType messageDigestType, PasswordHashType passwordHashType,
-                                                        ASymmetricPublicKey myPublicKey, byte[] salt, int offset_salt, int len_salt, String password) throws NoSuchPaddingException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException, InvalidKeyException, InvalidKeySpecException {
-        this(secureRandom, messageDigestType, passwordHashType, myPublicKey, salt, offset_salt, len_salt, password.toCharArray());
-    }*/
     private P2PASymmetricSecretMessageExchangerAgreement(AbstractSecureRandom secureRandom, MessageDigestType messageDigestType, PasswordHashType passwordHashType,
                                                          ASymmetricPublicKey myPublicKey, byte[] salt, int offset_salt, int len_salt) throws NoSuchAlgorithmException, NoSuchProviderException, MessageExternalizationException {
         super(2, 2);

@@ -46,10 +46,6 @@ public class AggregatedP2PLoginAgreements extends P2PLoginAgreement {
 
 	private final P2PLoginAgreement[] loginAgreements;
 
-	/*P2PJPakeAndLoginAgreement(AbstractSecureRandom random, Serializable participantID, char[] message, SymmetricSecretKey secretKeyForSignature) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException {
-
-		this(random, participantID, message, null, 0, 0, secretKeyForSignature);
-	}*/
 	@Override
 	public void zeroize() {
 		if (loginAgreements!=null) {
@@ -100,24 +96,6 @@ public class AggregatedP2PLoginAgreements extends P2PLoginAgreement {
 		super(getStepsNumberForReception(loginAgreements), getStepsNumberForSend(loginAgreements));
 		this.loginAgreements=loginAgreements;
 	}
-	/*P2PJPakeAndLoginAgreement(AbstractSecureRandom random, byte[] participantID, char[] message, byte[] salt,
-							  int offset_salt, int len_salt, SymmetricSecretKey secretKeyForSignature) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
-		super(secretKeyForSignature==null?3:5, secretKeyForSignature==null?3:5);
-		jpake=new P2PJPAKESecretMessageExchanger(random, participantID, message.clone(), salt, offset_salt, len_salt);
-		if (secretKeyForSignature==null)
-			login=null;
-		else
-			login=new P2PLoginWithSymmetricSignature(secretKeyForSignature, random);
-	}
-	P2PJPakeAndLoginAgreement(AbstractSecureRandom random, byte[] participantID, byte[] message, int offset, int len, byte[] salt,
-							  int offset_salt, int len_salt, boolean messageIsKey, SymmetricSecretKey secretKeyForSignature) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
-		super(secretKeyForSignature==null?3:5, secretKeyForSignature==null?3:5);
-		jpake=new P2PJPAKESecretMessageExchanger(random, participantID, Arrays.copyOfRange(message, offset, len+offset), 0, len, salt, offset_salt, len_salt, messageIsKey);
-		if (secretKeyForSignature==null)
-			login=null;
-		else
-			login=new P2PLoginWithSymmetricSignature(secretKeyForSignature, random);
-	}*/
 	@Override
 	protected boolean isAgreementProcessValidImpl() {
 

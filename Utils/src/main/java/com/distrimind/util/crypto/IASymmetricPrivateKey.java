@@ -1,6 +1,5 @@
 package com.distrimind.util.crypto;
 
-import com.distrimind.util.data_buffers.WrappedData;
 import com.distrimind.util.data_buffers.WrappedSecretData;
 
 /**
@@ -30,8 +29,4 @@ public interface IASymmetricPrivateKey extends IKey, ISecretDecentralizedValue {
 	@Override
 	WrappedSecretData getKeyBytes();
 
-
-	/*ASymmetricEncryptionType getEncryptionAlgorithmType() ;
-
-	ASymmetricAuthenticatedSignatureType getAuthenticatedSignatureAlgorithmType() ;*/
 }

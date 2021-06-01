@@ -38,13 +38,13 @@ package com.distrimind.util.crypto;
 import com.distrimind.util.data_buffers.WrappedData;
 import com.distrimind.util.io.Integrity;
 import com.distrimind.util.io.MessageExternalizationException;
-import com.distrimind.bcfips.crypto.SymmetricSecretKey;
-import com.distrimind.bcfips.crypto.*;
-import com.distrimind.bcfips.crypto.fips.FipsAES;
-import com.distrimind.bcfips.crypto.general.AES;
-import com.distrimind.bcfips.crypto.general.ChaCha20;
-import com.distrimind.bcfips.crypto.general.Serpent;
-import com.distrimind.bcfips.crypto.general.Twofish;
+import org.bouncycastle.crypto.SymmetricSecretKey;
+import org.bouncycastle.crypto.*;
+import org.bouncycastle.crypto.fips.FipsAES;
+import org.bouncycastle.crypto.general.AES;
+import org.bouncycastle.crypto.general.ChaCha20;
+import org.bouncycastle.crypto.general.Serpent;
+import org.bouncycastle.crypto.general.Twofish;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -241,13 +241,13 @@ public class BCCipher extends AbstractCipher {
 			if (opMode == Cipher.ENCRYPT_MODE) {
 
 				if (type.getAlgorithmName().equals(SymmetricEncryptionType.BC_FIPS_AES_CBC_PKCS7Padding.getAlgorithmName())) {
-					if (type.getBlockMode().toUpperCase().equals("CBC") && type.getPadding().toUpperCase().equals("PKCS7PADDING")) {
+					if (type.getBlockMode().equalsIgnoreCase("CBC") && type.getPadding().equalsIgnoreCase("PKCS7PADDING")) {
 						FipsAES.OperatorFactory fipsSymmetricFactory = new FipsAES.OperatorFactory();
 						FipsAES.Parameters param = FipsAES.CBCwithPKCS7;
 						if (iv != null)
 							param = param.withIV(iv);
 						encryptor = fipsSymmetricFactory.createOutputEncryptor((SymmetricSecretKey) key.toBouncyCastleKey(), param);
-					} else if (type.getBlockMode().toUpperCase().equals("GCM") && type.getPadding().toUpperCase().equals("NOPADDING")) {
+					} else if (type.getBlockMode().equalsIgnoreCase("GCM") && type.getPadding().equalsIgnoreCase("NOPADDING")) {
 						FipsAES.AEADOperatorFactory fipsSymmetricFactory = new FipsAES.AEADOperatorFactory();
 						FipsAES.AuthParameters param = FipsAES.GCM;
 
@@ -257,7 +257,7 @@ public class BCCipher extends AbstractCipher {
 							param = param.withMACSize(128);
 
 						encryptor = aeadEncryptor = fipsSymmetricFactory.createOutputAEADEncryptor((SymmetricSecretKey) key.toBouncyCastleKey(), param);
-					} else if (type.getBlockMode().toUpperCase().equals("EAX") && type.getPadding().toUpperCase().equals("NOPADDING")) {
+					} else if (type.getBlockMode().equalsIgnoreCase("EAX") && type.getPadding().equalsIgnoreCase("NOPADDING")) {
 						AES.AEADOperatorFactory fipsSymmetricFactory = new AES.AEADOperatorFactory();
 						AES.AuthParameters param = AES.EAX;
 
@@ -267,7 +267,7 @@ public class BCCipher extends AbstractCipher {
 							param = param.withMACSize(128);
 
 						encryptor = aeadEncryptor = fipsSymmetricFactory.createOutputAEADEncryptor((SymmetricSecretKey) key.toBouncyCastleKey(), param);
-					} else if (type.getBlockMode().toUpperCase().equals("CTR") && type.getPadding().toUpperCase().equals("NOPADDING")) {
+					} else if (type.getBlockMode().equalsIgnoreCase("CTR") && type.getPadding().equalsIgnoreCase("NOPADDING")) {
 						FipsAES.OperatorFactory fipsSymmetricFactory = new FipsAES.OperatorFactory();
 						FipsAES.Parameters param = FipsAES.CTR;
 						if (iv != null)
@@ -278,19 +278,19 @@ public class BCCipher extends AbstractCipher {
 						throw new IllegalAccessError();
 					}
 				} else if (type.getAlgorithmName().equals(SymmetricEncryptionType.BC_SERPENT_CBC_PKCS7Padding.getAlgorithmName())) {
-					if (type.getBlockMode().toUpperCase().equals("CBC") && type.getPadding().toUpperCase().equals("PKCS7PADDING")) {
+					if (type.getBlockMode().equalsIgnoreCase("CBC") && type.getPadding().equalsIgnoreCase("PKCS7PADDING")) {
 						Serpent.OperatorFactory fipsSymmetricFactory = new Serpent.OperatorFactory();
 						Serpent.Parameters param = Serpent.CBCwithPKCS7;
 						if (iv != null)
 							param = param.withIV(iv);
 						encryptor = fipsSymmetricFactory.createOutputEncryptor((SymmetricSecretKey) key.toBouncyCastleKey(), param);
-					} else if (type.getBlockMode().toUpperCase().equals("CTR") && type.getPadding().toUpperCase().equals("NOPADDING")) {
+					} else if (type.getBlockMode().equalsIgnoreCase("CTR") && type.getPadding().equalsIgnoreCase("NOPADDING")) {
 						Serpent.OperatorFactory fipsSymmetricFactory = new Serpent.OperatorFactory();
 						Serpent.Parameters param = Serpent.CTR;
 						if (iv != null)
 							param = param.withIV(iv);
 						encryptor = fipsSymmetricFactory.createOutputEncryptor((SymmetricSecretKey) key.toBouncyCastleKey(), param);
-					} else if (type.getBlockMode().toUpperCase().equals("GCM") && type.getPadding().toUpperCase().equals("NOPADDING")) {
+					} else if (type.getBlockMode().equalsIgnoreCase("GCM") && type.getPadding().equalsIgnoreCase("NOPADDING")) {
 						Serpent.AEADOperatorFactory fipsSymmetricFactory = new Serpent.AEADOperatorFactory();
 						Serpent.AuthParameters param = Serpent.GCM;
 
@@ -300,7 +300,7 @@ public class BCCipher extends AbstractCipher {
 							param = param.withMACSize(128);
 
 						encryptor = aeadEncryptor = fipsSymmetricFactory.createOutputAEADEncryptor((SymmetricSecretKey) key.toBouncyCastleKey(), param);
-					} else if (type.getBlockMode().toUpperCase().equals("EAX") && type.getPadding().toUpperCase().equals("NOPADDING")) {
+					} else if (type.getBlockMode().equalsIgnoreCase("EAX") && type.getPadding().equalsIgnoreCase("NOPADDING")) {
 						Serpent.AEADOperatorFactory fipsSymmetricFactory = new Serpent.AEADOperatorFactory();
 						Serpent.AuthParameters param = Serpent.EAX;
 
@@ -314,19 +314,19 @@ public class BCCipher extends AbstractCipher {
 						throw new IllegalAccessError();
 					}
 				} else if (type.getAlgorithmName().equals(SymmetricEncryptionType.BC_TWOFISH_CBC_PKCS7Padding.getAlgorithmName())) {
-					if (type.getBlockMode().toUpperCase().equals("CBC") && type.getPadding().toUpperCase().equals("PKCS7PADDING")) {
+					if (type.getBlockMode().equalsIgnoreCase("CBC") && type.getPadding().equalsIgnoreCase("PKCS7PADDING")) {
 						Twofish.OperatorFactory fipsSymmetricFactory = new Twofish.OperatorFactory();
 						Twofish.Parameters param = Twofish.CBCwithPKCS7;
 						if (iv != null)
 							param = param.withIV(iv);
 						encryptor = fipsSymmetricFactory.createOutputEncryptor((SymmetricSecretKey) key.toBouncyCastleKey(), param);
-					} else if (type.getBlockMode().toUpperCase().equals("CTR") && type.getPadding().toUpperCase().equals("NOPADDING")) {
+					} else if (type.getBlockMode().equalsIgnoreCase("CTR") && type.getPadding().equalsIgnoreCase("NOPADDING")) {
 						Twofish.OperatorFactory fipsSymmetricFactory = new Twofish.OperatorFactory();
 						Twofish.Parameters param = Twofish.CTR;
 						if (iv != null)
 							param = param.withIV(iv);
 						encryptor = fipsSymmetricFactory.createOutputEncryptor((SymmetricSecretKey) key.toBouncyCastleKey(), param);
-					} else if (type.getBlockMode().toUpperCase().equals("GCM") && type.getPadding().toUpperCase().equals("NOPADDING")) {
+					} else if (type.getBlockMode().equalsIgnoreCase("GCM") && type.getPadding().equalsIgnoreCase("NOPADDING")) {
 						Twofish.AEADOperatorFactory fipsSymmetricFactory = new Twofish.AEADOperatorFactory();
 						Twofish.AuthParameters param = Twofish.GCM;
 
@@ -336,7 +336,7 @@ public class BCCipher extends AbstractCipher {
 							param = param.withMACSize(128);
 
 						encryptor = aeadEncryptor = fipsSymmetricFactory.createOutputAEADEncryptor((SymmetricSecretKey) key.toBouncyCastleKey(), param);
-					} else if (type.getBlockMode().toUpperCase().equals("EAX") && type.getPadding().toUpperCase().equals("NOPADDING")) {
+					} else if (type.getBlockMode().equalsIgnoreCase("EAX") && type.getPadding().equalsIgnoreCase("NOPADDING")) {
 						Twofish.AEADOperatorFactory fipsSymmetricFactory = new Twofish.AEADOperatorFactory();
 						Twofish.AuthParameters param = Twofish.EAX;
 
@@ -366,19 +366,19 @@ public class BCCipher extends AbstractCipher {
 
 			} else if (opMode == Cipher.DECRYPT_MODE) {
 				if (type.getAlgorithmName().equals(SymmetricEncryptionType.BC_FIPS_AES_CBC_PKCS7Padding.getAlgorithmName())) {
-					if (type.getBlockMode().toUpperCase().equals("CBC") && type.getPadding().toUpperCase().equals("PKCS7PADDING")) {
+					if (type.getBlockMode().equalsIgnoreCase("CBC") && type.getPadding().equalsIgnoreCase("PKCS7PADDING")) {
 						FipsAES.OperatorFactory fipsSymmetricFactory = new FipsAES.OperatorFactory();
 						FipsAES.Parameters param = FipsAES.CBCwithPKCS7;
 						if (iv != null)
 							param = param.withIV(iv);
 						descriptor = fipsSymmetricFactory.createOutputDecryptor((SymmetricSecretKey) key.toBouncyCastleKey(), param);
-					} else if (type.getBlockMode().toUpperCase().equals("CTR") && type.getPadding().toUpperCase().equals("NOPADDING")) {
+					} else if (type.getBlockMode().equalsIgnoreCase("CTR") && type.getPadding().equalsIgnoreCase("NOPADDING")) {
 						FipsAES.OperatorFactory fipsSymmetricFactory = new FipsAES.OperatorFactory();
 						FipsAES.Parameters param = FipsAES.CTR;
 						if (iv != null)
 							param = param.withIV(iv);
 						descriptor = fipsSymmetricFactory.createOutputDecryptor((SymmetricSecretKey) key.toBouncyCastleKey(), param);
-					} else if (type.getBlockMode().toUpperCase().equals("GCM") && type.getPadding().toUpperCase().equals("NOPADDING")) {
+					} else if (type.getBlockMode().equalsIgnoreCase("GCM") && type.getPadding().equalsIgnoreCase("NOPADDING")) {
 						FipsAES.AEADOperatorFactory fipsSymmetricFactory = new FipsAES.AEADOperatorFactory();
 						FipsAES.AuthParameters param = FipsAES.GCM;
 
@@ -388,7 +388,7 @@ public class BCCipher extends AbstractCipher {
 							param = param.withMACSize(128);
 
 						descriptor = readDescriptor = fipsSymmetricFactory.createOutputAEADDecryptor((SymmetricSecretKey) key.toBouncyCastleKey(), param);
-					} else if (type.getBlockMode().toUpperCase().equals("EAX") && type.getPadding().toUpperCase().equals("NOPADDING")) {
+					} else if (type.getBlockMode().equalsIgnoreCase("EAX") && type.getPadding().equalsIgnoreCase("NOPADDING")) {
 						AES.AEADOperatorFactory fipsSymmetricFactory = new AES.AEADOperatorFactory();
 						AES.AuthParameters param = AES.EAX;
 
@@ -402,19 +402,19 @@ public class BCCipher extends AbstractCipher {
 						throw new IllegalAccessError();
 					}
 				} else if (type.getAlgorithmName().equals(SymmetricEncryptionType.BC_SERPENT_CBC_PKCS7Padding.getAlgorithmName())) {
-					if (type.getBlockMode().toUpperCase().equals("CBC") && type.getPadding().toUpperCase().equals("PKCS7PADDING")) {
+					if (type.getBlockMode().equalsIgnoreCase("CBC") && type.getPadding().equalsIgnoreCase("PKCS7PADDING")) {
 						Serpent.OperatorFactory fipsSymmetricFactory = new Serpent.OperatorFactory();
 						Serpent.Parameters param = Serpent.CBCwithPKCS7;
 						if (iv != null)
 							param = param.withIV(iv);
 						descriptor = fipsSymmetricFactory.createOutputDecryptor((SymmetricSecretKey) key.toBouncyCastleKey(), param);
-					} else if (type.getBlockMode().toUpperCase().equals("CTR") && type.getPadding().toUpperCase().equals("NOPADDING")) {
+					} else if (type.getBlockMode().equalsIgnoreCase("CTR") && type.getPadding().equalsIgnoreCase("NOPADDING")) {
 						Serpent.OperatorFactory fipsSymmetricFactory = new Serpent.OperatorFactory();
 						Serpent.Parameters param = Serpent.CTR;
 						if (iv != null)
 							param = param.withIV(iv);
 						descriptor = fipsSymmetricFactory.createOutputDecryptor((SymmetricSecretKey) key.toBouncyCastleKey(), param);
-					} else if (type.getBlockMode().toUpperCase().equals("GCM") && type.getPadding().toUpperCase().equals("NOPADDING")) {
+					} else if (type.getBlockMode().equalsIgnoreCase("GCM") && type.getPadding().equalsIgnoreCase("NOPADDING")) {
 						Serpent.AEADOperatorFactory fipsSymmetricFactory = new Serpent.AEADOperatorFactory();
 						Serpent.AuthParameters param = Serpent.GCM;
 
@@ -424,7 +424,7 @@ public class BCCipher extends AbstractCipher {
 							param = param.withMACSize(128);
 
 						descriptor = readDescriptor = fipsSymmetricFactory.createOutputAEADDecryptor((SymmetricSecretKey) key.toBouncyCastleKey(), param);
-					} else if (type.getBlockMode().toUpperCase().equals("EAX") && type.getPadding().toUpperCase().equals("NOPADDING")) {
+					} else if (type.getBlockMode().equalsIgnoreCase("EAX") && type.getPadding().equalsIgnoreCase("NOPADDING")) {
 						Serpent.AEADOperatorFactory fipsSymmetricFactory = new Serpent.AEADOperatorFactory();
 						Serpent.AuthParameters param = Serpent.EAX;
 
@@ -438,19 +438,19 @@ public class BCCipher extends AbstractCipher {
 						throw new IllegalAccessError();
 					}
 				} else if (type.getAlgorithmName().equals(SymmetricEncryptionType.BC_TWOFISH_CBC_PKCS7Padding.getAlgorithmName())) {
-					if (type.getBlockMode().toUpperCase().equals("CBC") && type.getPadding().toUpperCase().equals("PKCS7PADDING")) {
+					if (type.getBlockMode().equalsIgnoreCase("CBC") && type.getPadding().equalsIgnoreCase("PKCS7PADDING")) {
 						Twofish.OperatorFactory fipsSymmetricFactory = new Twofish.OperatorFactory();
 						Twofish.Parameters param = Twofish.CBCwithPKCS7;
 						if (iv != null)
 							param = param.withIV(iv);
 						descriptor = fipsSymmetricFactory.createOutputDecryptor((SymmetricSecretKey) key.toBouncyCastleKey(), param);
-					} else if (type.getBlockMode().toUpperCase().equals("CTR") && type.getPadding().toUpperCase().equals("NOPADDING")) {
+					} else if (type.getBlockMode().equalsIgnoreCase("CTR") && type.getPadding().equalsIgnoreCase("NOPADDING")) {
 						Twofish.OperatorFactory fipsSymmetricFactory = new Twofish.OperatorFactory();
 						Twofish.Parameters param = Twofish.CTR;
 						if (iv != null)
 							param = param.withIV(iv);
 						descriptor = fipsSymmetricFactory.createOutputDecryptor((SymmetricSecretKey) key.toBouncyCastleKey(), param);
-					} else if (type.getBlockMode().toUpperCase().equals("GCM") && type.getPadding().toUpperCase().equals("NOPADDING")) {
+					} else if (type.getBlockMode().equalsIgnoreCase("GCM") && type.getPadding().equalsIgnoreCase("NOPADDING")) {
 						Twofish.AEADOperatorFactory fipsSymmetricFactory = new Twofish.AEADOperatorFactory();
 						Twofish.AuthParameters param = Twofish.GCM;
 
@@ -460,7 +460,7 @@ public class BCCipher extends AbstractCipher {
 							param = param.withMACSize(128);
 
 						descriptor = readDescriptor = fipsSymmetricFactory.createOutputAEADDecryptor((SymmetricSecretKey) key.toBouncyCastleKey(), param);
-					} else if (type.getBlockMode().toUpperCase().equals("EAX") && type.getPadding().toUpperCase().equals("NOPADDING")) {
+					} else if (type.getBlockMode().equalsIgnoreCase("EAX") && type.getPadding().equalsIgnoreCase("NOPADDING")) {
 						Twofish.AEADOperatorFactory fipsSymmetricFactory = new Twofish.AEADOperatorFactory();
 						Twofish.AuthParameters param = Twofish.EAX;
 

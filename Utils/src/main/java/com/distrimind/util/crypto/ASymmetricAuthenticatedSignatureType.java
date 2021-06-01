@@ -34,9 +34,9 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
-import com.distrimind.bcfips.crypto.Algorithm;
-import com.distrimind.bcfips.crypto.fips.FipsEC;
-import com.distrimind.bcfips.crypto.fips.FipsRSA;
+import org.bouncycastle.crypto.Algorithm;
+import org.bouncycastle.crypto.fips.FipsEC;
+import org.bouncycastle.crypto.fips.FipsRSA;
 import com.distrimind.bouncycastle.pqc.jcajce.provider.sphincs.Sphincs256KeyPairGeneratorSpi;
 
 import java.io.IOException;
@@ -49,7 +49,6 @@ import java.security.*;
  * @version 5.2
  * @since Utils 1.4
  */
-@SuppressWarnings({"ConstantConditions"})
 public enum ASymmetricAuthenticatedSignatureType {
 	@Deprecated
 	SHA1withRSA("SHA1withRSA", "RSA", CodeProvider.SunRsaSign,CodeProvider.SunRsaSign, 3072, 31536000000L, FipsRSA.ALGORITHM, false),
@@ -87,7 +86,7 @@ public enum ASymmetricAuthenticatedSignatureType {
 
 	private final String curveName;
 
-	static final int META_DATA_SIZE_IN_BYTES_NON_HYBRID_PUBLIC_KEY=16;
+	static final int META_DATA_SIZE_IN_BYTES_NON_HYBRID_PUBLIC_KEY=24;
 	public static final int MAX_SIZE_IN_BYTES_OF_NON_PQC_NON_RSA_NON_HYBRID_PUBLIC_KEY_FOR_SIGNATURE =140+META_DATA_SIZE_IN_BYTES_NON_HYBRID_PUBLIC_KEY;
 	public static final int MAX_SIZE_IN_BYTES_OF_NON_PQC_RSA_NON_HYBRID_PUBLIC_KEY =1024+META_DATA_SIZE_IN_BYTES_NON_HYBRID_PUBLIC_KEY;
 	public static final int MAX_SIZE_IN_BYTES_OF_NON_PQC_NON_HYBRID_PUBLIC_KEY_FOR_SIGNATURE = MAX_SIZE_IN_BYTES_OF_NON_PQC_RSA_NON_HYBRID_PUBLIC_KEY;
@@ -101,7 +100,7 @@ public enum ASymmetricAuthenticatedSignatureType {
 	public static final int MAX_SIZE_IN_BYTES_OF_PQC_NON_HYBRID_PRIVATE_KEY_FOR_SIGNATURE = MAX_SIZE_IN_BYTES_OF_PQC_NON_HYBRID_PUBLIC_KEY_FOR_SIGNATURE;
 	public static final int MAX_SIZE_IN_BYTES_OF_NON_HYBRID_PRIVATE_KEY_FOR_SIGNATURE = MAX_SIZE_IN_BYTES_OF_NON_PQC_RSA_NON_HYBRID_PRIVATE_KEY;
 
-	public static final int META_DATA_SIZE_IN_BYTES_FOR_NON_HYBRID_KEY_PAIR =19;
+	public static final int META_DATA_SIZE_IN_BYTES_FOR_NON_HYBRID_KEY_PAIR =27;
 
 	public static final int MAX_SIZE_IN_BYTES_OF_NON_PQC_NON_RSA_NON_HYBRID_KEY_PAIR_FOR_SIGNATURE = MAX_SIZE_IN_BYTES_OF_NON_PQC_NON_RSA_NON_HYBRID_PUBLIC_KEY_FOR_SIGNATURE +MAX_SIZE_IN_BYTES_OF_NON_PQC_NON_RSA_NON_HYBRID_PRIVATE_KEY_FOR_SIGNATURE + META_DATA_SIZE_IN_BYTES_FOR_NON_HYBRID_KEY_PAIR;
 	public static final int MAX_SIZE_IN_BYTES_OF_NON_PQC_RSA_NON_HYBRID_KEY_PAIR =MAX_SIZE_IN_BYTES_OF_NON_PQC_RSA_NON_HYBRID_PUBLIC_KEY +MAX_SIZE_IN_BYTES_OF_NON_PQC_RSA_NON_HYBRID_PRIVATE_KEY + META_DATA_SIZE_IN_BYTES_FOR_NON_HYBRID_KEY_PAIR;
@@ -147,6 +146,10 @@ public enum ASymmetricAuthenticatedSignatureType {
 				&& type.codeProviderKeyGenerator==this.codeProviderKeyGenerator && type.codeProviderSignature==this.codeProviderSignature;
 	}
 
+	long getDefaultExpirationTimeMilis() {
+		return expirationTimeMilis;
+	}
+
 	ASymmetricAuthenticatedSignatureType(String signatureAlgorithmName, String keyGeneratorAlgorithmName, CodeProvider codeProviderSignature, CodeProvider codeProviderKeyGenerator, int keySizeBits, long expirationTimeMilis, Algorithm bcAlgorithm, boolean isPostQuantumAlgorithm) {
 		this(signatureAlgorithmName, keyGeneratorAlgorithmName, codeProviderSignature, codeProviderKeyGenerator, keySizeBits, expirationTimeMilis, bcAlgorithm, isPostQuantumAlgorithm, null);
 	}
@@ -162,6 +165,7 @@ public enum ASymmetricAuthenticatedSignatureType {
 		this.curveName=curveName;
 		
 	}
+
 	ASymmetricAuthenticatedSignatureType(ASymmetricAuthenticatedSignatureType other) {
 		this(other.signatureAlgorithmName, other.keyGeneratorAlgorithmName, other.codeProviderSignature, other.codeProviderKeyGenerator, other.keySizeBits, other.expirationTimeMilis, other.bcAlgorithm, other.isPostQuantumAlgorithm, other.curveName);
 	}
@@ -293,25 +297,23 @@ public enum ASymmetricAuthenticatedSignatureType {
 	}*/
 	public AbstractKeyPairGenerator getKeyPairGenerator(AbstractSecureRandom random)
 			throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
-		return getKeyPairGenerator(random, keySizeBits, System.currentTimeMillis() + expirationTimeMilis);
+		return getKeyPairGenerator(random, keySizeBits, System.currentTimeMillis(), System.currentTimeMillis() + expirationTimeMilis);
 	}
 
 	public AbstractKeyPairGenerator getKeyPairGenerator(AbstractSecureRandom random, int keySize)
 			throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
-		return getKeyPairGenerator(random, keySize, System.currentTimeMillis() + expirationTimeMilis);
+		return getKeyPairGenerator(random, keySize, System.currentTimeMillis(), System.currentTimeMillis() + expirationTimeMilis);
 	}
 
 	public AbstractKeyPairGenerator getKeyPairGenerator(AbstractSecureRandom random, int keySizeBits,
-			long expirationTimeUTC) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
+														long publicKeyValidityBeginDateUTC, long expirationTimeUTC) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
 		if (keySizeBits<0)
 			keySizeBits= this.keySizeBits;
-		if (expirationTimeUTC==Long.MIN_VALUE)
-			expirationTimeUTC=System.currentTimeMillis() + expirationTimeMilis;
 		CodeProvider.ensureProviderLoaded(codeProviderSignature);
 		if (codeProviderKeyGenerator == CodeProvider.GNU_CRYPTO) {
 			KeyPairGenerator kgp = KeyPairGenerator.getInstance(keyGeneratorAlgorithmName);
 			GnuKeyPairGenerator res = new GnuKeyPairGenerator(this, kgp);
-			res.initialize(keySizeBits, expirationTimeUTC, random);
+			res.initialize(keySizeBits, publicKeyValidityBeginDateUTC, expirationTimeUTC, random);
 
 			return res;
 		} else if (codeProviderKeyGenerator == CodeProvider.BCFIPS || codeProviderKeyGenerator == CodeProvider.BC || codeProviderKeyGenerator == CodeProvider.BCPQC) {
@@ -327,14 +329,14 @@ public enum ASymmetricAuthenticatedSignatureType {
 			else
 				kgp = KeyPairGenerator.getInstance(keyGeneratorAlgorithmName, codeProviderKeyGenerator.name());
 			JavaNativeKeyPairGenerator res = new JavaNativeKeyPairGenerator(this, kgp);
-			res.initialize(keySizeBits, expirationTimeUTC, random);
+			res.initialize(keySizeBits, publicKeyValidityBeginDateUTC, expirationTimeUTC, random);
 
 			return res;
 		} else {
 			KeyPairGenerator kgp = KeyPairGenerator.getInstance(keyGeneratorAlgorithmName, codeProviderKeyGenerator.checkProviderWithCurrentOS().name());
 
 			JavaNativeKeyPairGenerator res = new JavaNativeKeyPairGenerator(this, kgp);
-			res.initialize(keySizeBits, expirationTimeUTC, random);
+			res.initialize(keySizeBits, publicKeyValidityBeginDateUTC, expirationTimeUTC, random);
 
 			return res;
 

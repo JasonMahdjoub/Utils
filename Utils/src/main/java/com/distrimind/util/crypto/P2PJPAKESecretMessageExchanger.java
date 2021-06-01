@@ -61,15 +61,6 @@ public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
 
 
 
-	/*P2PJPAKESecretMessageExchanger(AbstractSecureRandom secureRandom, Serializable participantID, char[] message)
-			throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException {
-		this(secureRandom, participantID, message, null, -1, -1);
-	}
-
-	P2PJPAKESecretMessageExchanger(AbstractSecureRandom secureRandom, Serializable participantID, byte[] message, boolean messageIsKey)
-			throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, IOException {
-		this(secureRandom, participantID, message, 0, message.length, null, -1, -1, messageIsKey);
-	}*/
 
 	private char[] getHashedPassword(char[] message, byte[] salt, int offset_salt, int len_salt) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
 		byte[] m = hashMessage(MessageDigestType.BC_FIPS_SHA3_256.getMessageDigestInstance(), message, salt,

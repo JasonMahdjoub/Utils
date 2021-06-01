@@ -34,11 +34,11 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
-import com.distrimind.bcfips.crypto.Algorithm;
-import com.distrimind.bcfips.crypto.AsymmetricKey;
-import com.distrimind.bcfips.crypto.AsymmetricPrivateKey;
-import com.distrimind.bcfips.crypto.asymmetric.AsymmetricECPrivateKey;
-import com.distrimind.bcfips.crypto.asymmetric.AsymmetricRSAPrivateKey;
+import org.bouncycastle.crypto.Algorithm;
+import org.bouncycastle.crypto.AsymmetricKey;
+import org.bouncycastle.crypto.AsymmetricPrivateKey;
+import org.bouncycastle.crypto.asymmetric.AsymmetricECPrivateKey;
+import org.bouncycastle.crypto.asymmetric.AsymmetricRSAPrivateKey;
 import com.distrimind.bouncycastle.pqc.jcajce.provider.mceliece.BCMcElieceCCA2PrivateKey;
 import com.distrimind.bouncycastle.pqc.jcajce.provider.mceliece.BCMcEliecePrivateKey;
 import com.distrimind.util.Bits;
@@ -84,8 +84,6 @@ public class ASymmetricPrivateKey extends AbstractKey implements IASymmetricPriv
 	private static final int MAX_SIZE_IN_BITS_OF_NON_HYBRID_PRIVATE_KEY=MAX_SIZE_IN_BYTES_OF_NON_HYBRID_PRIVATE_KEY*8;
 
 
-	// private final PrivateKey privateKey;
-	//public static final int MAX_KEY_SIZE_BITS=1<<24-1;
 	private byte[] privateKey;
 
 	private final int keySizeBits;

@@ -35,27 +35,31 @@ knowledge of the CeCILL-C license and that you accept its terms.
 package com.distrimind.util.crypto;
 
 
+import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+
 /**
  * @author Jason Mahdjoub
  * @version 1.2
  * @since MaDKitLanEdition 3.23.0
  */
-public enum ASymmetricLoginAgreementType {
-    AGREEMENT_WITH_ASYMMETRIC_SIGNATURE(true);
+public enum UnidirectionalASymmetricLoginAgreementType {
+    UNIDIRECTIONAL_AGREEMENT_WITH_ASYMMETRIC_SIGNATURE(true);
 
     private final boolean pqc;
-    ASymmetricLoginAgreementType(boolean pqc)
+    UnidirectionalASymmetricLoginAgreementType(boolean pqc)
     {
         this.pqc=pqc;
     }
 
-    public ClientServerLoginAgreement getAgreementAlgorithmForASymmetricSignatureRequester(AbstractSecureRandom random, AbstractKeyPair<?,?> keyPair) {
-        return new ClientLoginSignerWithASymmetricSignature(keyPair, random);
+    public AbstractP2PLoginWithSignature getAgreementAlgorithmForASymmetricSignatureRequester(AbstractSecureRandom random, AbstractKeyPair<?,?> keyPair) throws NoSuchAlgorithmException, IOException, NoSuchProviderException {
+        return new P2PUnidirectionalLoginSignerWithAsymmetricSignature(random, keyPair);
 
     }
 
-    public ClientServerLoginAgreement getAgreementAlgorithmForASymmetricSignatureReceiver(AbstractSecureRandom random, IASymmetricPublicKey publicKey) {
-        return new ServerLoginCheckerWithASymmetricSignature(publicKey, random);
+    public AbstractP2PLoginWithSignature getAgreementAlgorithmForASymmetricSignatureReceiver(AbstractSecureRandom random, IASymmetricPublicKey publicKey) throws NoSuchAlgorithmException, NoSuchProviderException {
+        return new P2PUnidirectionalLoginCheckerWithAsymmetricSignature(random, publicKey);
 
     }
 

@@ -41,9 +41,9 @@ import com.distrimind.bouncycastle.crypto.Digest;
 import com.distrimind.bouncycastle.crypto.InvalidCipherTextException;
 import com.distrimind.bouncycastle.crypto.digests.*;
 import com.distrimind.bouncycastle.crypto.params.ParametersWithRandom;
-import com.distrimind.bcfips.crypto.Algorithm;
-import com.distrimind.bcfips.crypto.AsymmetricPrivateKey;
-import com.distrimind.bcfips.crypto.AsymmetricPublicKey;
+import org.bouncycastle.crypto.Algorithm;
+import org.bouncycastle.crypto.AsymmetricPrivateKey;
+import org.bouncycastle.crypto.AsymmetricPublicKey;
 import com.distrimind.bouncycastle.pqc.crypto.MessageEncryptor;
 import com.distrimind.bouncycastle.pqc.crypto.mceliece.*;
 import com.distrimind.bouncycastle.pqc.math.linearalgebra.GF2Matrix;
@@ -576,6 +576,7 @@ public class BCMcElieceCipher extends AbstractCipher{
 		private final String digest;
 		private int keySize;
 		private long keyExpiration;
+		private long publicKeyValidityBeginDateUTC;
 
 		KeyPairGenerator(ASymmetricEncryptionType encryptionType) {
 			super(encryptionType);
@@ -622,7 +623,7 @@ public class BCMcElieceCipher extends AbstractCipher{
 		public ASymmetricKeyPair generateKeyPair() {
 			AsymmetricCipherKeyPair res= mcElieceKeyPairGenerator.generateKeyPair();
 			return new ASymmetricKeyPair(new ASymmetricPrivateKey(encryptionType, new PrivateKey((McEliecePrivateKeyParameters) res.getPrivate()), keySize),
-					new ASymmetricPublicKey(encryptionType, new PublicKey((McEliecePublicKeyParameters) res.getPublic()), keySize, keyExpiration));
+					new ASymmetricPublicKey(encryptionType, new PublicKey((McEliecePublicKeyParameters) res.getPublic()), keySize, publicKeyValidityBeginDateUTC, keyExpiration));
 		}
 
 		@Override
@@ -631,18 +632,19 @@ public class BCMcElieceCipher extends AbstractCipher{
 		}
 
 		@Override
-		public void initialize(int keySize, long expirationTime) throws IOException {
+		public void initialize(int keySize, long publicKeyValidityBeginDateUTC, long expirationTime) throws IOException {
 			try {
-				initialize(keySize, expirationTime, SecureRandomType.BC_FIPS_APPROVED_FOR_KEYS.getSingleton(null));
+				initialize(keySize, publicKeyValidityBeginDateUTC, expirationTime, SecureRandomType.BC_FIPS_APPROVED_FOR_KEYS.getSingleton(null));
 			} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
 				throw new IOException(e);
 			}
 		}
 
 		@Override
-		public void initialize(int keySize, long expirationTime, AbstractSecureRandom random) {
+		public void initialize(int keySize, long publicKeyValidityBeginDateUTC, long expirationTime, AbstractSecureRandom random) {
 			this.keySize= keySize;
 			this.keyExpiration=expirationTime;
+			this.publicKeyValidityBeginDateUTC=publicKeyValidityBeginDateUTC;
 			mcElieceKeyPairGenerator=new McElieceKeyPairGenerator();
 			mcElieceKeyPairGenerator.init(new McElieceKeyGenerationParameters(random, new McElieceParameters(getDigest())));
 		}
@@ -655,6 +657,7 @@ public class BCMcElieceCipher extends AbstractCipher{
 		private final String digest;
 		private int keySize;
 		private long keyExpiration;
+		private long publicKeyValidityBeginDateUTC;
 
 		KeyPairGeneratorCCA2(ASymmetricEncryptionType encryptionType) {
 			super(encryptionType);
@@ -678,7 +681,7 @@ public class BCMcElieceCipher extends AbstractCipher{
 			AsymmetricCipherKeyPair res= mcElieceKeyPairGenerator.generateKeyPair();
 
 			return new ASymmetricKeyPair(new ASymmetricPrivateKey(encryptionType, new PrivateKeyCCA2((McElieceCCA2PrivateKeyParameters) res.getPrivate()), keySize),
-					new ASymmetricPublicKey(encryptionType, new PublicKeyCCA2((McElieceCCA2PublicKeyParameters) res.getPublic()), keySize, keyExpiration));
+					new ASymmetricPublicKey(encryptionType, new PublicKeyCCA2((McElieceCCA2PublicKeyParameters) res.getPublic()), keySize, publicKeyValidityBeginDateUTC, keyExpiration));
 		}
 
 		@Override
@@ -687,18 +690,19 @@ public class BCMcElieceCipher extends AbstractCipher{
 		}
 
 		@Override
-		public void initialize(int keySize, long expirationTime) throws IOException {
+		public void initialize(int keySize,long publicKeyValidityBeginDateUTC, long expirationTime) throws IOException {
 			try {
-				initialize(keySize, expirationTime, SecureRandomType.BC_FIPS_APPROVED_FOR_KEYS.getSingleton(null));
+				initialize(keySize, publicKeyValidityBeginDateUTC, expirationTime, SecureRandomType.BC_FIPS_APPROVED_FOR_KEYS.getSingleton(null));
 			} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
 				throw new IOException(e);
 			}
 		}
 
 		@Override
-		public void initialize(int keySize, long expirationTime, AbstractSecureRandom random) {
+		public void initialize(int keySize, long publicKeyValidityBeginDateUTC, long expirationTime, AbstractSecureRandom random) {
 			this.keySize= keySize;
 			this.keyExpiration=expirationTime;
+			this.publicKeyValidityBeginDateUTC=publicKeyValidityBeginDateUTC;
 			mcElieceKeyPairGenerator=new McElieceCCA2KeyPairGenerator();
 			mcElieceKeyPairGenerator.init(new McElieceCCA2KeyGenerationParameters(random, new McElieceCCA2Parameters(digest)));
 		}

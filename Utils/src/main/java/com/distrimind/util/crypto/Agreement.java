@@ -83,7 +83,7 @@ public abstract class Agreement implements Zeroizable {
 		return signer.getSignature();
 	}
 
-	boolean checkSignature(byte[] localMessage, byte[] distantMessage, AbstractAuthenticatedCheckerAlgorithm checker, byte[] signature, int offSig, int lenSig) throws IOException {
+	boolean checkSignature(byte[] localMessage, byte[] distantMessage, AbstractAuthenticatedCheckerAlgorithm checker, byte[] signature, @SuppressWarnings("SameParameterValue") int offSig, int lenSig) throws IOException {
 		checker.init(signature, offSig, lenSig);
 		checker.update(distantMessage);
 		checker.update(localMessage);

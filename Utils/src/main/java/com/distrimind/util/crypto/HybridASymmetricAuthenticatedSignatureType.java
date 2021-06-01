@@ -122,12 +122,12 @@ public final class HybridASymmetricAuthenticatedSignatureType {
 		return generateKeyPair(random, -1);
 	}
 	public HybridASymmetricKeyPair generateKeyPair(AbstractSecureRandom random, int keySizeBits) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
-		return generateKeyPair(random, keySizeBits, Long.MAX_VALUE);
+		return generateKeyPair(random, keySizeBits,System.currentTimeMillis(), System.currentTimeMillis()+nonPQCASymmetricAuthenticatedSignatureType.getDefaultExpirationTimeMilis());
 	}
 	public HybridASymmetricKeyPair generateKeyPair(AbstractSecureRandom random, int keySizeBits,
-												   long expirationTimeUTC) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
-		ASymmetricKeyPair kp=nonPQCASymmetricAuthenticatedSignatureType.getKeyPairGenerator(random, keySizeBits, expirationTimeUTC ).generateKeyPair();
-		ASymmetricKeyPair pqcKP=PQCASymmetricAuthenticatedSignatureType.getKeyPairGenerator(random, keySizeBits, expirationTimeUTC ).generateKeyPair();
+												   long publicKeyValidityBeginDateUTC, long expirationTimeUTC) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
+		ASymmetricKeyPair kp=nonPQCASymmetricAuthenticatedSignatureType.getKeyPairGenerator(random, keySizeBits, publicKeyValidityBeginDateUTC, expirationTimeUTC ).generateKeyPair();
+		ASymmetricKeyPair pqcKP=PQCASymmetricAuthenticatedSignatureType.getKeyPairGenerator(random, keySizeBits, publicKeyValidityBeginDateUTC, expirationTimeUTC ).generateKeyPair();
 		return new HybridASymmetricKeyPair(kp, pqcKP);
 	}
 

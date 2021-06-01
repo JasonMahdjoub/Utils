@@ -36,12 +36,12 @@ package com.distrimind.util.crypto;
 
 import com.distrimind.util.io.Integrity;
 import com.distrimind.util.io.MessageExternalizationException;
-import com.distrimind.bcfips.crypto.Algorithm;
-import com.distrimind.bcfips.crypto.asymmetric.AsymmetricEdDSAPublicKey;
-import com.distrimind.bcfips.crypto.asymmetric.AsymmetricXDHPrivateKey;
-import com.distrimind.bcfips.crypto.asymmetric.AsymmetricXDHPublicKey;
-import com.distrimind.bcfips.crypto.fips.FipsRSA;
-import com.distrimind.bcfips.crypto.general.EdEC;
+import org.bouncycastle.crypto.Algorithm;
+import org.bouncycastle.crypto.asymmetric.AsymmetricEdDSAPublicKey;
+import org.bouncycastle.crypto.asymmetric.AsymmetricXDHPrivateKey;
+import org.bouncycastle.crypto.asymmetric.AsymmetricXDHPublicKey;
+import org.bouncycastle.crypto.fips.FipsRSA;
+import org.bouncycastle.crypto.general.EdEC;
 import com.distrimind.bouncycastle.pqc.jcajce.provider.sphincs.Sphincs256KeyFactorySpi;
 
 import javax.crypto.Cipher;
@@ -62,7 +62,6 @@ import java.security.spec.X509EncodedKeySpec;
  * @version 4.1
  * @since Utils 1.4
  */
-@SuppressWarnings({"unchecked", "ConstantConditions"})
 public enum ASymmetricEncryptionType {
 	RSA_OAEPWithSHA256AndMGF1Padding("RSA", "ECB", "OAEPWITHSHA-256ANDMGF1PADDING", ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA384withRSA,
 			3072, 31536000000L, (short) 66, CodeProvider.SunJCE,CodeProvider.SunRsaSign, FipsRSA.ALGORITHM, false),
@@ -237,10 +236,6 @@ public enum ASymmetricEncryptionType {
 	}
 
 
-	/*static final Field xdhPublicKeyField;
-	private static final Constructor<BCXDHPublicKey> constructorBCXDHPublicKey;
-	static final Field xdhPrivateKeyField;
-	private static final Constructor<BCXDHPrivateKey> constructorBCXDHPrivateKey;*/
 	private static final Field provEdDSAPublicKeyBaseKey;
 	private static final Field provXDHPublicKeyBaseKey;
 	private static final Constructor<PublicKey> constructorProvEdDSAPublicKey;
@@ -248,10 +243,6 @@ public enum ASymmetricEncryptionType {
 	private static final Constructor<PrivateKey> constructorProvXDHPrivateKey;
 	static
 	{
-		/*Field tmpXdhPublicKeyField=null;
-		Constructor<BCXDHPublicKey> tmpConstructorBCXDHPublicKey=null;
-		Field tmpXdhPrivateKeyField=null;
-		Constructor<BCXDHPrivateKey> tmpConstructorBCXDHPrivateKey=null;*/
 		Field tmpProvEdDSAPublicKeyBaseKey=null;
 		Field tmpProvXDHPublicKeyBaseKey=null;
 		Constructor<PublicKey> tmpConstructorProvEdDSAPublicKey=null;
@@ -259,37 +250,25 @@ public enum ASymmetricEncryptionType {
 		Constructor<PrivateKey> tmpConstructorProvXDHPrivateKey=null;
 
 		try {
-			/*tmpXdhPublicKeyField=BCXDHPublicKey.class.getDeclaredField("xdhPublicKey");
-			tmpXdhPublicKeyField.setAccessible(true);
-			tmpConstructorBCXDHPublicKey=BCXDHPublicKey.class.getDeclaredConstructor(AsymmetricKeyParameter.class);
-			tmpConstructorBCXDHPublicKey.setAccessible(true);
-			tmpXdhPrivateKeyField=BCXDHPrivateKey.class.getDeclaredField("xdhPrivateKey");
-			tmpXdhPrivateKeyField.setAccessible(true);
-			tmpConstructorBCXDHPrivateKey=BCXDHPrivateKey.class.getDeclaredConstructor(AsymmetricKeyParameter.class);
-			tmpConstructorBCXDHPrivateKey.setAccessible(true);*/
 
-			tmpProvEdDSAPublicKeyBaseKey=Class.forName("com.distrimind.bcfips.jcajce.provider.ProvEdDSAPublicKey").getDeclaredField("baseKey");
+			tmpProvEdDSAPublicKeyBaseKey=Class.forName("org.bouncycastle.jcajce.provider.ProvEdDSAPublicKey").getDeclaredField("baseKey");
 			tmpProvEdDSAPublicKeyBaseKey.setAccessible(true);
-			tmpProvXDHPublicKeyBaseKey=Class.forName("com.distrimind.bcfips.jcajce.provider.ProvXDHPublicKey").getDeclaredField("baseKey");
+			tmpProvXDHPublicKeyBaseKey=Class.forName("org.bouncycastle.jcajce.provider.ProvXDHPublicKey").getDeclaredField("baseKey");
 			tmpProvXDHPublicKeyBaseKey.setAccessible(true);
 			//noinspection unchecked
-			tmpConstructorProvEdDSAPublicKey= (Constructor<PublicKey>) Class.forName("com.distrimind.bcfips.jcajce.provider.ProvEdDSAPublicKey").getDeclaredConstructor(AsymmetricEdDSAPublicKey.class);
+			tmpConstructorProvEdDSAPublicKey= (Constructor<PublicKey>) Class.forName("org.bouncycastle.jcajce.provider.ProvEdDSAPublicKey").getDeclaredConstructor(AsymmetricEdDSAPublicKey.class);
 			tmpConstructorProvEdDSAPublicKey.setAccessible(true);
 			//noinspection unchecked
-			tmpConstructorProvXDHPublicKey= (Constructor<PublicKey>) Class.forName("com.distrimind.bcfips.jcajce.provider.ProvXDHPublicKey").getDeclaredConstructor(AsymmetricXDHPublicKey.class);
+			tmpConstructorProvXDHPublicKey= (Constructor<PublicKey>) Class.forName("org.bouncycastle.jcajce.provider.ProvXDHPublicKey").getDeclaredConstructor(AsymmetricXDHPublicKey.class);
 			tmpConstructorProvXDHPublicKey.setAccessible(true);
 			//noinspection unchecked
-			tmpConstructorProvXDHPrivateKey= (Constructor<PrivateKey>) Class.forName("com.distrimind.bcfips.jcajce.provider.ProvXDHPrivateKey").getDeclaredConstructor(AsymmetricXDHPrivateKey.class);
+			tmpConstructorProvXDHPrivateKey= (Constructor<PrivateKey>) Class.forName("org.bouncycastle.jcajce.provider.ProvXDHPrivateKey").getDeclaredConstructor(AsymmetricXDHPrivateKey.class);
 			tmpConstructorProvXDHPrivateKey.setAccessible(true);
 
 		} catch (NoSuchFieldException | NoSuchMethodException | ClassNotFoundException e) {
 			e.printStackTrace();
 			System.exit(-1);
 		}
-		/*xdhPublicKeyField=tmpXdhPublicKeyField;
-		constructorBCXDHPublicKey=tmpConstructorBCXDHPublicKey;
-		xdhPrivateKeyField=tmpXdhPrivateKeyField;
-		constructorBCXDHPrivateKey=tmpConstructorBCXDHPrivateKey;*/
 		provEdDSAPublicKeyBaseKey =tmpProvEdDSAPublicKeyBaseKey;
 		provXDHPublicKeyBaseKey =tmpProvXDHPublicKeyBaseKey;
 		constructorProvEdDSAPublicKey=tmpConstructorProvEdDSAPublicKey;
@@ -438,26 +417,26 @@ public enum ASymmetricEncryptionType {
 
 	public AbstractKeyPairGenerator getKeyPairGenerator(AbstractSecureRandom random)
 			throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
-		return getKeyPairGenerator(random, keySizeBits, System.currentTimeMillis() + expirationTimeMilis);
+		return getKeyPairGenerator(random, keySizeBits, System.currentTimeMillis(), System.currentTimeMillis() + expirationTimeMilis);
 	}
 
 	public AbstractKeyPairGenerator getKeyPairGenerator(AbstractSecureRandom random, int keySizeBits)
 			throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
-		return getKeyPairGenerator(random, keySizeBits, System.currentTimeMillis() + expirationTimeMilis);
+		return getKeyPairGenerator(random, keySizeBits, System.currentTimeMillis(), System.currentTimeMillis() + expirationTimeMilis);
 	}
-
+	long getDefaultExpirationTimeMilis() {
+		return expirationTimeMilis;
+	}
 	public AbstractKeyPairGenerator getKeyPairGenerator(AbstractSecureRandom random, int keySizeBits,
-			long expirationTimeUTC) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
+			long publicKeyValidityBeginDateUTC, long expirationTimeUTC) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
 		if (keySizeBits<0)
 			keySizeBits= this.keySizeBits;
-		if (expirationTimeUTC==Long.MIN_VALUE)
-			expirationTimeUTC=System.currentTimeMillis() + expirationTimeMilis;
 
 		CodeProvider.ensureProviderLoaded(codeProviderForKeyGenerator);
 		if (codeProviderForKeyGenerator == CodeProvider.GNU_CRYPTO) {
 			Object kpg=GnuFunctions.getKeyPairGenerator(algorithmName);
 			GnuKeyPairGenerator res = new GnuKeyPairGenerator(this, kpg);
-			res.initialize(keySizeBits, expirationTimeUTC, random);
+			res.initialize(keySizeBits, publicKeyValidityBeginDateUTC, expirationTimeUTC, random);
 
 			return res;
 		} else if (codeProviderForKeyGenerator == CodeProvider.BCPQC) {
@@ -468,7 +447,7 @@ public enum ASymmetricEncryptionType {
 					res=new BCMcElieceCipher.KeyPairGeneratorCCA2(this);
 				else
 					res=new BCMcElieceCipher.KeyPairGenerator(this);
-				res.initialize(keySizeBits, expirationTimeUTC, random);
+				res.initialize(keySizeBits, publicKeyValidityBeginDateUTC, expirationTimeUTC, random);
 				return res;
 			}
 			else
@@ -478,14 +457,14 @@ public enum ASymmetricEncryptionType {
 
 				KeyPairGenerator kgp = KeyPairGenerator.getInstance(algorithmName, CodeProvider.BCFIPS.name());
 				JavaNativeKeyPairGenerator res = new JavaNativeKeyPairGenerator(this, kgp);
-				res.initialize(keySizeBits, expirationTimeUTC, random);
+				res.initialize(keySizeBits, publicKeyValidityBeginDateUTC, expirationTimeUTC, random);
 
 				return res;
 
 		} else {
 			KeyPairGenerator kgp = KeyPairGenerator.getInstance(algorithmName, codeProviderForKeyGenerator.checkProviderWithCurrentOS().name());
 			JavaNativeKeyPairGenerator res = new JavaNativeKeyPairGenerator(this, kgp);
-			res.initialize(keySizeBits, expirationTimeUTC, random);
+			res.initialize(keySizeBits, publicKeyValidityBeginDateUTC, expirationTimeUTC, random);
 
 			return res;
 

@@ -1,7 +1,6 @@
 package com.distrimind.util.crypto;
 
 import com.distrimind.util.data_buffers.WrappedData;
-import com.distrimind.util.data_buffers.WrappedSecretData;
 
 /**
  * @author Jason Mahdjoub
@@ -17,16 +16,22 @@ public interface IASymmetricPublicKey extends IKey {
 	int MAX_SIZE_IN_BYTES_OF_PUBLIC_KEY_FOR_ENCRYPTION=HybridASymmetricPublicKey.MAX_SIZE_IN_BYTES_OF_HYBRID_PUBLIC_KEY_FOR_ENCRYPTION;
 
 	int MAX_SIZE_IN_BYTES_OF_PUBLIC_KEY=MAX_SIZE_IN_BYTES_OF_PUBLIC_KEY_FOR_ENCRYPTION;
+	int TIME_COMPARISON_TOLERANCE_IN_MS=4*60*60*1000;
 
-	/*ASymmetricEncryptionType getEncryptionAlgorithmType() ;
 
-	ASymmetricAuthenticatedSignatureType getAuthenticatedSignatureAlgorithmType() ;*/
+	long getPublicKeyValidityBeginDateUTC();
 
 	long getTimeExpirationUTC() ;
-	WrappedData encode(boolean includeTimeExpiration);
+	WrappedData encode(boolean includeTimes);
 
 
 
 	ASymmetricPublicKey getNonPQCPublicKey();
+
+	default boolean areTimesValid()
+	{
+		long curTime=System.currentTimeMillis();
+		return getPublicKeyValidityBeginDateUTC()<=curTime+TIME_COMPARISON_TOLERANCE_IN_MS && getTimeExpirationUTC()>=curTime;
+	}
 
 }

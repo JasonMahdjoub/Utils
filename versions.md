@@ -1,6 +1,6 @@
 Utils
 =====
-5.17.5 STABLE (Build: 2557) (from 04/01/2016 to 30/04/2020)
+5.18.1 STABLE (Build: 2722) (from 04/01/2016 to 30/05/2020)
 
 # Creator(s):
 Jason MAHDJOUB
@@ -9,6 +9,32 @@ Jason MAHDJOUB
 Jason MAHDJOUB (Entered in the team at 04/01/2016)
 
 # Modifications:
+
+
+### 5.18.1 STABLE (30/05/2020)
+* Fix issue with function IASymmetricPublicKey.areTimesValid(). Overflow value was reached.
+* Change methods signatures into P2PLoginAgreementType class.
+
+
+### 5.18.0 STABLE (28/05/2020)
+* Update BouncyCastle to 1.68
+* Update BouncyCastle FIPS to 1.0.2.1. Use original BouncyCastle FIPS dependency and not recompiled one.
+* Add functions into P2PLoginAgreementType
+* Add functions into P2PUnidirectionalLoginSignerWithAsymmetricSignature
+* Add functions into P2PUnidirectionalLoginCheckerWithAsymmetricSignature
+* Add creation date for public keys
+* Reimplements provider's loading
+* Add Strong SecureRandom type
+
+
+### 5.17.7 STABLE (25/05/2020)
+* Fix issue with RandomFileInputStream when reading a byte whereas end of file has been reached : the file position shouldn't be incremented !
+
+
+### 5.17.6 STABLE (24/05/2020)
+* Fix issue with stream closed too quickly when decoding encrypted data
+* Fix memory allocation issues with RandomCacheFileCenter
+* Fix file position update issue when using file in both read and write modes
 
 
 ### 5.17.5 STABLE (30/04/2020)

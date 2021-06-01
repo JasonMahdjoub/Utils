@@ -2,7 +2,6 @@ package com.distrimind.util.crypto;
 
 import com.distrimind.util.DecentralizedValue;
 import com.distrimind.util.data_buffers.WrappedData;
-import com.distrimind.util.data_buffers.WrappedSecretData;
 
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
@@ -24,7 +23,7 @@ public interface IKey extends Zeroizable, DecentralizedValue {
 	java.security.Key toJavaNativeKey()
 			throws NoSuchAlgorithmException, InvalidKeySpecException;
 
-	com.distrimind.bcfips.crypto.Key toBouncyCastleKey() throws NoSuchAlgorithmException, InvalidKeySpecException;
+	org.bouncycastle.crypto.Key toBouncyCastleKey() throws NoSuchAlgorithmException, InvalidKeySpecException;
 
 	WrappedData encode();
 

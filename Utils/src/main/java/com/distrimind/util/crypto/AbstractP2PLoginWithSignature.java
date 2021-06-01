@@ -40,8 +40,6 @@ import com.distrimind.util.io.Integrity;
 import com.distrimind.util.io.MessageExternalizationException;
 
 import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
 import java.util.Arrays;
 
 /**
@@ -53,9 +51,11 @@ import java.util.Arrays;
 public abstract class AbstractP2PLoginWithSignature extends P2PLoginAgreement {
 
 	private byte[] myMessage, otherMessage=null;
+	private final AbstractAuthenticatedSignerAlgorithm signer;
+	private final AbstractAuthenticatedCheckerAlgorithm checker;
 
 	private boolean valid=true;
-
+	private final static byte[] emptyTab=new byte[0];
 	@Override
 	public void zeroize() {
 		if (myMessage!=null)
@@ -66,20 +66,20 @@ public abstract class AbstractP2PLoginWithSignature extends P2PLoginAgreement {
 		otherMessage=null;
 	}
 
-	AbstractP2PLoginWithSignature(AbstractSecureRandom random) {
+	AbstractP2PLoginWithSignature(AbstractSecureRandom random, AbstractAuthenticatedSignerAlgorithm signer, AbstractAuthenticatedCheckerAlgorithm checker) {
 		super(2, 2);
+		if (checker==null && signer==null)
+			throw new NullPointerException();
 		myMessage=new byte[messageSize];
 		random.nextBytes(myMessage);
-
+		this.signer=signer;
+		this.checker=checker;
 	}
 
 	@Override
 	protected boolean isAgreementProcessValidImpl() {
 		return valid;
 	}
-
-	protected abstract AbstractAuthenticatedSignerAlgorithm getSigner() throws NoSuchProviderException, NoSuchAlgorithmException, IOException;
-	protected abstract AbstractAuthenticatedCheckerAlgorithm getChecker() throws NoSuchProviderException, NoSuchAlgorithmException, IOException;
 
 	@Override
 	protected byte[] getDataToSend(int stepNumber) throws IOException {
@@ -95,7 +95,9 @@ public abstract class AbstractP2PLoginWithSignature extends P2PLoginAgreement {
 						valid = false;
 						throw new IllegalAccessError();
 					}
-					return generateSignature(myMessage, otherMessage, getSigner());
+					if (signer==null)
+						return emptyTab;
+					return generateSignature(myMessage, otherMessage, signer);
 				}
 				default:
 					valid = false;
@@ -133,7 +135,12 @@ public abstract class AbstractP2PLoginWithSignature extends P2PLoginAgreement {
 						valid = false;
 						throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException());
 					}
-					valid=checkSignature(myMessage, otherMessage, getChecker(), data, 0, data.length);
+					if (checker==null) {
+						if (data.length!=0)
+							throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException());
+					}
+					else
+						valid=checkSignature(myMessage, otherMessage, checker, data, 0, data.length);
 				}
 				break;
 				default:
@@ -156,6 +163,8 @@ public abstract class AbstractP2PLoginWithSignature extends P2PLoginAgreement {
 		}
 	}
 
-
-
+	@Override
+	public boolean isPostQuantumAgreement() {
+		return (signer==null || signer.isPostQuantumSigner()) && (checker==null || checker.isPostQuantumChecker());
+	}
 }

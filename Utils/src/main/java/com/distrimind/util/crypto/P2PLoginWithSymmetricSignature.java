@@ -47,30 +47,12 @@ import java.security.NoSuchProviderException;
  */
 public class P2PLoginWithSymmetricSignature extends AbstractP2PLoginWithSignature {
 
-	private final SymmetricSecretKey secretKey;
-
-	@Override
-	public boolean isPostQuantumAgreement() {
-		return secretKey!=null && secretKey.isPostQuantumKey();
-	}
-
-	P2PLoginWithSymmetricSignature(SymmetricSecretKey secretKey, AbstractSecureRandom random) {
-		super(random);
+	P2PLoginWithSymmetricSignature(SymmetricSecretKey secretKey, AbstractSecureRandom random) throws IOException, NoSuchAlgorithmException, NoSuchProviderException {
+		super(random, new SymmetricAuthenticatedSignerAlgorithm(secretKey), new SymmetricAuthenticatedSignatureCheckerAlgorithm(secretKey));
 		if (secretKey==null)
 			throw new NullPointerException();
 		if (secretKey.getAuthenticatedSignatureAlgorithmType()==null)
 			throw new IllegalArgumentException("The given secret key is not usable for signature");
-		this.secretKey=secretKey;
-	}
-
-	@Override
-	protected AbstractAuthenticatedSignerAlgorithm getSigner() throws NoSuchProviderException, NoSuchAlgorithmException, IOException {
-		return new SymmetricAuthenticatedSignerAlgorithm(secretKey);
-	}
-
-	@Override
-	protected AbstractAuthenticatedCheckerAlgorithm getChecker() throws NoSuchProviderException, NoSuchAlgorithmException, IOException {
-		return new SymmetricAuthenticatedSignatureCheckerAlgorithm(secretKey);
 	}
 
 

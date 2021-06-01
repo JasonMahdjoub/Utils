@@ -108,7 +108,7 @@ public class HybridASymmetricPrivateKey extends AbstractKey implements IHybridKe
 	}
 
 	@Override
-	public com.distrimind.bcfips.crypto.Key toBouncyCastleKey() {
+	public org.bouncycastle.crypto.Key toBouncyCastleKey() {
 		throw new IllegalAccessError();
 	}
 
@@ -154,13 +154,4 @@ public class HybridASymmetricPrivateKey extends AbstractKey implements IHybridKe
 		return Objects.hash(nonPQCPrivateKey, PQCPrivateKey);
 	}
 
-	/*@Override
-	public ASymmetricEncryptionType getEncryptionAlgorithmType() {
-		return nonPQCPrivateKey.getEncryptionAlgorithmType();
-	}
-
-	@Override
-	public ASymmetricAuthenticatedSignatureType getAuthenticatedSignatureAlgorithmType() {
-		return nonPQCPrivateKey.getAuthenticatedSignatureAlgorithmType();
-	}*/
 }

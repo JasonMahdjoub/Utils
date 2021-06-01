@@ -68,6 +68,7 @@ public abstract class AbstractEncryptionOutputAlgorithm implements Zeroizable {
 		}
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	protected void finalize() {
 		zeroize();

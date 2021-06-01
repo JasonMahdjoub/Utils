@@ -110,7 +110,7 @@ public class HybridASymmetricPublicKey extends AbstractKey implements IHybridKey
 	}
 
 	@Override
-	public com.distrimind.bcfips.crypto.Key toBouncyCastleKey() {
+	public org.bouncycastle.crypto.Key toBouncyCastleKey() {
 		throw new IllegalAccessError();
 	}
 
@@ -124,10 +124,10 @@ public class HybridASymmetricPublicKey extends AbstractKey implements IHybridKey
 	}
 
 	@Override
-	public WrappedData encode(boolean includeTimeExpiration)
+	public WrappedData encode(boolean includeTimes)
 	{
 
-		return AbstractKey.encodeHybridKey(nonPQCPublicKey, PQCPublicKey, includeTimeExpiration);
+		return AbstractKey.encodeHybridKey(nonPQCPublicKey, PQCPublicKey, includeTimes);
 	}
 
 	@Override
@@ -148,19 +148,13 @@ public class HybridASymmetricPublicKey extends AbstractKey implements IHybridKey
 	}
 
 
-	/*@Override
-	public ASymmetricEncryptionType getEncryptionAlgorithmType() {
-		return nonPQCPublicKey.getEncryptionAlgorithmType();
-	}
-
-	@Override
-	public ASymmetricAuthenticatedSignatureType getAuthenticatedSignatureAlgorithmType() {
-		return nonPQCPublicKey.getAuthenticatedSignatureAlgorithmType();
-	}*/
-
 	@Override
 	public long getTimeExpirationUTC() {
 		return Math.min(nonPQCPublicKey.getTimeExpirationUTC(), PQCPublicKey.getTimeExpirationUTC());
+	}
+	@Override
+	public long getPublicKeyValidityBeginDateUTC() {
+		return Math.max(nonPQCPublicKey.getPublicKeyValidityBeginDateUTC(), PQCPublicKey.getPublicKeyValidityBeginDateUTC());
 	}
 
 	@Override

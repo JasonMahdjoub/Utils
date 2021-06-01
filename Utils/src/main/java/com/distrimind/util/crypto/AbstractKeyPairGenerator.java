@@ -97,7 +97,7 @@ public abstract class AbstractKeyPairGenerator {
 	 * @throws IOException if a problem occurs
 
 	 */
-	public abstract void initialize(int keySize, long expirationTime) throws IOException;
+	public abstract void initialize(int keySize, long publicKeyValidityBeginDateUTC, long expirationTime) throws IOException;
 
 	/**
 	 * Initializes the key pair generator for a certain keySize with the given
@@ -115,6 +115,6 @@ public abstract class AbstractKeyPairGenerator {
 	 *
 	 * @since 1.2
 	 */
-	public abstract void initialize(int keySize, long expirationTime, AbstractSecureRandom random) throws IOException;
+	public abstract void initialize(int keySize, long publicKeyValidityBeginDateUTC, long expirationTime, AbstractSecureRandom random) throws IOException;
 
 }
