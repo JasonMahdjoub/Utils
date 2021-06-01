@@ -401,7 +401,7 @@ public class EncryptionSignatureHashEncoder {
 		generatesOnlyHashAndSignatures(randomOutputStream);
 	}
 
-	public void encodeWithSameInputAndOutputStreamSource(byte[] data, int dataOff, int dataLen) throws IOException {
+	public int encodeWithSameInputAndOutputStreamSource(byte[] data, int dataOff, int dataLen) throws IOException {
 		checkLimits(data, dataOff, dataLen);
 		if (dataOff<headSize)
 			throw new IllegalArgumentException("dataOff must be greater of equal to "+headSize+" in order to permit head encoding");
@@ -410,11 +410,12 @@ public class EncryptionSignatureHashEncoder {
 		limitedRandomInputStream.init(randomByteArrayInputStream, dataOff, dataLen);
 		withRandomInputStream(limitedRandomInputStream);
 		randomByteArrayOutputStream.init(data);
-		randomOutputStream.init(randomByteArrayOutputStream, dataOff-9, data.length-dataOff-dataLen);
+		randomOutputStream.init(randomByteArrayOutputStream, dataOff-EncryptionSignatureHashEncoder.headSize, data.length-dataOff+EncryptionSignatureHashEncoder.headSize);
 		try(RandomOutputStream ros=getRandomOutputStream(randomOutputStream, inputStream.length(), true))
 		{
 			inputStream.transferTo(ros);
 		}
+		return (int)randomOutputStream.currentPosition();
 	}
 	public RandomOutputStream getRandomOutputStream(final RandomOutputStream originalOutputStream) throws IOException {
 		return getRandomOutputStream(originalOutputStream, -1, false);
