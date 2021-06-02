@@ -341,6 +341,11 @@ public class EncryptionSignatureHashDecoder {
 		checkHeadRead();
 		return (code & 16)==16;
 	}
+	public static boolean isEncrypted(RandomInputStream ris) throws IOException {
+		if (ris.currentPosition()!=0)
+			ris.seek(0);
+		return (ris.readByte() & 16)==16;
+	}
 	private void checkCodeForDecode() throws IOException {
 		if (associatedData!=null)
 			EncryptionSignatureHashEncoder.checkLimits(associatedData, offAD, lenAD);
