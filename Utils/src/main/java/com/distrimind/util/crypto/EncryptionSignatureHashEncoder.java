@@ -67,11 +67,11 @@ public class EncryptionSignatureHashEncoder {
 		if (data.length==0)
 			throw new IllegalArgumentException();
 		if (off<0 || off>=data.length)
-			throw new IllegalArgumentException();
+			throw new IllegalArgumentException("data.length="+data.length+", off="+off+", len"+len);
 		if (len<=0)
-			throw new IllegalArgumentException();
+			throw new IllegalArgumentException("data.length="+data.length+", off="+off+", len"+len);
 		if (off+len>data.length)
-			throw new IllegalArgumentException();
+			throw new IllegalArgumentException("data.length="+data.length+", off="+off+", len="+len);
 	}
 	static byte getCode(byte[] associatedData, SymmetricSecretKey secretKeyForSignature, ASymmetricKeyPair keyPair, MessageDigestType messageDigestType)
 	{
@@ -87,7 +87,7 @@ public class EncryptionSignatureHashEncoder {
 		if (code==null)
 		{
 			if (associatedData != null && (cipher == null || !cipher.getType().supportAssociatedData()) && symmetricSigner == null)
-				throw new IllegalArgumentException();
+				throw new IllegalArgumentException("cipher="+cipher);
 			int res = symmetricSigner == null ? 0 : 1;
 			res += asymmetricSigner == null ? 0 : 2;
 			res += digest == null ? 0 : 4;
@@ -146,10 +146,11 @@ public class EncryptionSignatureHashEncoder {
 	static SymmetricEncryptionAlgorithm reloadCipher(AbstractSecureRandom random, SymmetricSecretKey originalSecretKeyForEncryption, short currentKeyID, byte[] externalCounter) throws IOException {
 		try {
 			SymmetricSecretKey sk = currentKeyID==0?originalSecretKeyForEncryption:originalSecretKeyForEncryption.getHashedSecretKey(MessageDigestType.BC_FIPS_SHA3_256, currentKeyID & 0xFF);
+			byte sc=sk.getEncryptionAlgorithmType().getMaxCounterSizeInBytesUsedWithBlockMode();
 			if (externalCounter==null)
 				return new SymmetricEncryptionAlgorithm(random, sk);
 			else
-				return new SymmetricEncryptionAlgorithm(random, sk, (byte)externalCounter.length);
+				return new SymmetricEncryptionAlgorithm(random, sk, (byte)(Math.min(externalCounter.length, sc)));
 		} catch (NoSuchProviderException | NoSuchAlgorithmException e) {
 			throw new IOException(e);
 		}
@@ -227,10 +228,11 @@ public class EncryptionSignatureHashEncoder {
 		return withSymmetricSecretKeyForEncryption(random, symmetricSecretKeyForEncryption, (byte)0);
 	}
 	public EncryptionSignatureHashEncoder withSymmetricSecretKeyForEncryption(AbstractSecureRandom random, SymmetricSecretKey symmetricSecretKeyForEncryption, byte externalCounterLength) throws IOException {
+		byte sc=symmetricSecretKeyForEncryption.getEncryptionAlgorithmType().getMaxCounterSizeInBytesUsedWithBlockMode();
 		if (externalCounterLength<=0)
 			return withCipher(new SymmetricEncryptionAlgorithm(random, symmetricSecretKeyForEncryption));
 		else
-			return withCipher(new SymmetricEncryptionAlgorithm(random, symmetricSecretKeyForEncryption, externalCounterLength));
+			return withCipher(new SymmetricEncryptionAlgorithm(random, symmetricSecretKeyForEncryption, (byte)Math.min(externalCounterLength, sc)));
 	}
 	public EncryptionSignatureHashEncoder withCipher(SymmetricEncryptionAlgorithm cipher) {
 		if (cipher==null)
@@ -391,7 +393,7 @@ public class EncryptionSignatureHashEncoder {
 		limitedRandomInputStream.init(randomByteArrayInputStream, dataOff, dataLen);
 		withRandomInputStream(limitedRandomInputStream);
 		randomByteArrayOutputStream.init(cipherText);
-		randomOutputStream.init(randomByteArrayOutputStream, cipherTextOff, cipherText.length-cipherTextOff-cipherTextLen);
+		randomOutputStream.init(randomByteArrayOutputStream, cipherTextOff, cipherTextLen);
 
 	}
 

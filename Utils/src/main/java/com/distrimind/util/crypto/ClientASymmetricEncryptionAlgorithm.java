@@ -183,6 +183,11 @@ public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutpu
 		return client.useExternalCounter();
 	}
 
+	public byte getMaxExternalCounterLength()
+	{
+		return client.getMaxExternalCounterLength();
+	}
+
 	@Override
 	public void initBufferAllocatorArgs() throws IOException {
 		client.initBufferAllocatorArgs();

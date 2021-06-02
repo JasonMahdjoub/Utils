@@ -83,6 +83,11 @@ public abstract class AbstractEncryptionOutputAlgorithm implements Zeroizable {
 		return false;
 	}
 
+	public byte getMaxExternalCounterLength()
+	{
+		return 0;
+	}
+
 	protected AbstractEncryptionOutputAlgorithm()
 	{
 		super();

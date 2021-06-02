@@ -117,10 +117,11 @@ public class EncryptionSignatureHashDecoder {
 	}
 	public EncryptionSignatureHashDecoder withSymmetricSecretKeyForEncryption(SymmetricSecretKey symmetricSecretKeyForEncryption, byte externalCounterLength) throws IOException {
 		try {
+			byte sc=symmetricSecretKeyForEncryption.getEncryptionAlgorithmType().getMaxCounterSizeInBytesUsedWithBlockMode();
 			if (externalCounterLength <= 0)
 				return withCipher(new SymmetricEncryptionAlgorithm(SecureRandomType.DEFAULT.getSingleton(null), symmetricSecretKeyForEncryption));
 			else
-				return withCipher(new SymmetricEncryptionAlgorithm(SecureRandomType.DEFAULT.getSingleton(null), symmetricSecretKeyForEncryption, externalCounterLength));
+				return withCipher(new SymmetricEncryptionAlgorithm(SecureRandomType.DEFAULT.getSingleton(null), symmetricSecretKeyForEncryption, (byte)(Math.min(externalCounterLength, sc))));
 		} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
 			throw new IOException(e);
 		}

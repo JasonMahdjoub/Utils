@@ -425,6 +425,11 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 		return p2pEncryption.useExternalCounter();
 	}
 
+	public byte getMaxExternalCounterLength()
+	{
+		return p2pEncryption.getMaxExternalCounterLength();
+	}
+
 	@Override
 	public void initBufferAllocatorArgs() throws IOException {
 		p2pEncryption.initBufferAllocatorArgs();

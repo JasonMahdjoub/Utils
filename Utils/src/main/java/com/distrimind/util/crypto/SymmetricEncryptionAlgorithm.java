@@ -252,6 +252,11 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 		return !internalCounter;
 	}
 
+	public byte getMaxExternalCounterLength()
+	{
+		return internalCounter?0:getSecretKey().getEncryptionAlgorithmType().getMaxCounterSizeInBytesUsedWithBlockMode();
+	}
+
 
 	@Override
 	public int getIVSizeBytesWithExternalCounter()

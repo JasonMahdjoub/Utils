@@ -67,6 +67,10 @@ public class Utils {
 			VERSION.addCreator(new Person("mahdjoub", "jason"))
 					.addDeveloper(new PersonDeveloper("mahdjoub", "jason", "2016-01-04"))
 					.addDescription(
+							new Description((short)5, (short)18, (short)2, Version.Type.STABLE, (short)0, "2020-06-02")
+									.addItem("Add function EncryptionSignatureHashDecoder.isEncrypted(RandomInputStream).")
+					)
+					.addDescription(
 							new Description((short)5, (short)18, (short)1, Version.Type.STABLE, (short)0, "2020-05-30")
 									.addItem("Fix issue with function IASymmetricPublicKey.areTimesValid(). Overflow value was reached.")
 									.addItem("Change methods signatures into P2PLoginAgreementType class.")
