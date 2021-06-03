@@ -412,7 +412,7 @@ public class EncryptionSignatureHashEncoder {
 		limitedRandomInputStream.init(randomByteArrayInputStream, dataOff, dataLen);
 		withRandomInputStream(limitedRandomInputStream);
 		randomByteArrayOutputStream.init(data);
-		randomOutputStream.init(randomByteArrayOutputStream, dataOff-EncryptionSignatureHashEncoder.headSize, data.length-dataOff);
+		randomOutputStream.init(randomByteArrayOutputStream, dataOff-EncryptionSignatureHashEncoder.headSize, data.length-dataOff+EncryptionSignatureHashEncoder.headSize);
 		try(RandomOutputStream ros=getRandomOutputStream(randomOutputStream, inputStream.length(), true))
 		{
 			inputStream.transferTo(ros);

@@ -83,7 +83,7 @@ public class SymmetricAuthenticatedSignerAlgorithm extends AbstractAuthenticated
 
 	@Override
 	public void init() throws IOException {
-
+		mac.init(secretKey);
 	}
 
 	@Override

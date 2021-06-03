@@ -81,7 +81,7 @@ public class LimitedRandomOutputStream extends RandomOutputStream{
 	@Override
 	public void setLength(long newLength) throws IOException {
 		if (maxLength>=0 && newLength>maxLength)
-			throw new EOFException();
+			throw new EOFException("maxLength="+maxLength+", newLength="+newLength);
 		out.setLength(off+newLength);
 		this.length=newLength;
 		this.pos=Math.min(this.length, this.pos);
