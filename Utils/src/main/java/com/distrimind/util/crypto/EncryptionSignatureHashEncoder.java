@@ -355,15 +355,20 @@ public class EncryptionSignatureHashEncoder {
 		return lenBuffer;
 
 	}
-	public void encode(final RandomOutputStream originalOutputStream) throws IOException {
+	public long encode(final RandomOutputStream originalOutputStream) throws IOException {
 		if (inputStream==null)
 			throw new NullPointerException();
 		if (inputStream.length()<=0)
 			throw new IllegalArgumentException();
-		try(RandomOutputStream ros=getRandomOutputStream(originalOutputStream, inputStream.length(), false))
+		ROSForEncryption ros=getRandomOutputStream(originalOutputStream, inputStream.length(), false);
+		try
 		{
 			inputStream.transferTo(ros);
 		}
+		finally {
+			ros.close();
+		}
+		return ros.bytesWritten;
 	}
 	public void generatesOnlyHashAndSignatures(final RandomOutputStream originalOutputStream) throws IOException {
 		if (inputStream==null)
@@ -377,9 +382,9 @@ public class EncryptionSignatureHashEncoder {
 			inputStream.transferTo(ros);
 		}
 	}
-	public void encode(byte[] data, int dataOff, int dataLen, byte[] cipherText, int cipherTextOff, int cipherTextLen) throws IOException {
+	public int encode(byte[] data, int dataOff, int dataLen, byte[] cipherText, int cipherTextOff, int cipherTextLen) throws IOException {
 		init(data, dataOff, dataLen, cipherText, cipherTextOff, cipherTextLen);
-		encode(randomOutputStream);
+		return (int)encode(randomOutputStream);
 	}
 
 	private void init(byte[] data, int dataOff, int dataLen, byte[] cipherText, int cipherTextOff, int cipherTextLen) throws IOException {
@@ -413,11 +418,15 @@ public class EncryptionSignatureHashEncoder {
 		withRandomInputStream(limitedRandomInputStream);
 		randomByteArrayOutputStream.init(data);
 		randomOutputStream.init(randomByteArrayOutputStream, dataOff-EncryptionSignatureHashEncoder.headSize, data.length-dataOff+EncryptionSignatureHashEncoder.headSize);
-		try(RandomOutputStream ros=getRandomOutputStream(randomOutputStream, inputStream.length(), true))
+		ROSForEncryption ros=getRandomOutputStream(randomOutputStream, inputStream.length(), true);
+		try
 		{
 			inputStream.transferTo(ros);
 		}
-		return (int)randomOutputStream.currentPosition();
+		finally {
+			ros.close();
+		}
+		return (int)ros.bytesWritten;
 	}
 	public RandomOutputStream getRandomOutputStream(final RandomOutputStream originalOutputStream) throws IOException {
 		return getRandomOutputStream(originalOutputStream, -1, false);
@@ -447,6 +456,7 @@ public class EncryptionSignatureHashEncoder {
 	private class ROSForEncryption extends RandomOutputStream
 	{
 		private RandomOutputStream originalOutputStream;
+		private long bytesWritten=0;
 		private long inputStreamLength;
 		private long originalOutputLength;
 		private long maximumOutputLengthAfterEncoding;
@@ -648,6 +658,7 @@ public class EncryptionSignatureHashEncoder {
 
 		@Override
 		public void close() throws IOException {
+			outputStream.flush();
 			if (cipher!=null)
 				dataOutputStream.close();
 			else
@@ -708,16 +719,16 @@ public class EncryptionSignatureHashEncoder {
 				byte[] signature = asymmetricSigner.getSignature();
 				originalOutputStream.writeBytesArray(signature, false, ASymmetricAuthenticatedSignatureType.MAX_ASYMMETRIC_SIGNATURE_SIZE);
 			}
-			long curPos=originalOutputStream.currentPosition();
+			this.bytesWritten=originalOutputStream.currentPosition();
 			if (inputStreamLength<0) {
 				originalOutputStream.seek(3);
 				originalOutputStream.writeLong(dataLen);
-				originalOutputStream.seek(curPos);
+				originalOutputStream.seek(this.bytesWritten);
 			}
-			if (maximumOutputLengthAfterEncoding>0 && curPos<maximumOutputLengthAfterEncoding && curPos>originalOutputLength) {
-				originalOutputStream.setLength(curPos);
+			if (!sameInputOutputStream && maximumOutputLengthAfterEncoding>0 && this.bytesWritten<maximumOutputLengthAfterEncoding && this.bytesWritten>originalOutputLength) {
+				originalOutputStream.setLength(this.bytesWritten);
 			}
-			outputStream.flush();
+			originalOutputStream.flush();
 			free();
 			closed=true;
 		}
@@ -733,7 +744,7 @@ public class EncryptionSignatureHashEncoder {
 		}
 	}
 
-	private RandomOutputStream getRandomOutputStream(final RandomOutputStream originalOutputStream, final long inputStreamLength, boolean sameInputOutputStream) throws IOException {
+	private ROSForEncryption getRandomOutputStream(final RandomOutputStream originalOutputStream, final long inputStreamLength, boolean sameInputOutputStream) throws IOException {
 		if (rosForEncryption==null)
 			rosForEncryption=new ROSForEncryption(originalOutputStream, inputStreamLength, sameInputOutputStream);
 		else
