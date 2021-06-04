@@ -128,7 +128,7 @@ public class SecuredDecentralizedID extends AbstractDecentralizedID {
 			Bits.putLong(idBytes, sizeLong, generator.getTimeStamp());
 
 			byte[] salt ;
-			int size = Math.max(messageDigest.getDigestLength(), idBytes.length) - idBytes.length;
+			int size = Math.max(messageDigest.getDigestLengthInBytes(), idBytes.length) - idBytes.length;
 			if (size >= 0)
 				salt = new byte[size];
 			else

@@ -87,7 +87,7 @@ public final class JavaNativeMessageDigest extends AbstractMessageDigest {
 	}
 
 	@Override
-	public int getDigestLength() {
+	public int getDigestLengthInBytes() {
 		return messageDigest.getDigestLength();
 	}
 

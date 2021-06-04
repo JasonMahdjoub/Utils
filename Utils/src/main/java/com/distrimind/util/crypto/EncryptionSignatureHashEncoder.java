@@ -500,6 +500,7 @@ public class EncryptionSignatureHashEncoder {
 				if (inputStreamLength>0) {
 					originalOutputLength = originalOutputStream.length();
 					maximumOutputLengthAfterEncoding = getMaximumOutputLength(inputStreamLength);
+					System.out.println("maximumOutputLengthAfterEncoding="+maximumOutputLengthAfterEncoding);
 					originalOutputStream.ensureLength(maximumOutputLengthAfterEncoding);
 				}
 				else {
