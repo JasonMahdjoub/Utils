@@ -301,6 +301,12 @@ public class EncryptionSignatureHashEncoder {
 		code=null;
 		return this;
 	}
+
+	public IASymmetricPrivateKey getASymmetricPrivateKey()
+	{
+		return asymmetricSigner==null?null:asymmetricSigner.getPrivateKey();
+	}
+
 	public EncryptionSignatureHashEncoder withASymmetricPrivateKeyForSignature(IASymmetricPrivateKey privateKeyForSignature) throws IOException{
 		if (privateKeyForSignature==null)
 			throw new NullPointerException();
