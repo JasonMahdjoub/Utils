@@ -418,7 +418,7 @@ public class EncryptionSignatureHashEncoder {
 		withRandomInputStream(limitedRandomInputStream);
 		randomByteArrayOutputStream.init(data);
 		randomOutputStream.init(randomByteArrayOutputStream, dataOff-EncryptionSignatureHashEncoder.headSize, data.length-dataOff+EncryptionSignatureHashEncoder.headSize);
-		ROSForEncryption ros=getRandomOutputStream(randomOutputStream, inputStream.length(), true);
+		ROSForEncryption ros=getRandomOutputStream(randomOutputStream, dataLen, true);
 		try
 		{
 			inputStream.transferTo(ros);
@@ -500,7 +500,6 @@ public class EncryptionSignatureHashEncoder {
 				if (inputStreamLength>0) {
 					originalOutputLength = originalOutputStream.length();
 					maximumOutputLengthAfterEncoding = getMaximumOutputLength(inputStreamLength);
-					System.out.println("maximumOutputLengthAfterEncoding="+maximumOutputLengthAfterEncoding);
 					originalOutputStream.ensureLength(maximumOutputLengthAfterEncoding);
 				}
 				else {
@@ -811,9 +810,9 @@ public class EncryptionSignatureHashEncoder {
 		if (inputStreamLength<=0)
 			throw new IllegalArgumentException();
 		long res=getMinimumOutputSize();
-
 		if (cipher!=null) {
 			res += cipher.getOutputSizeAfterEncryption(inputStreamLength);
+
 		}
 		else
 			res+=inputStreamLength;
