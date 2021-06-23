@@ -1,6 +1,6 @@
 Utils
 =====
-5.18.1 STABLE (Build: 2722) (from 04/01/2016 to 30/05/2020)
+5.18.2 STABLE (Build: 3029) (from 04/01/2016 to 07/06/2020)
 
 # Creator(s):
 Jason MAHDJOUB
@@ -9,6 +9,12 @@ Jason MAHDJOUB
 Jason MAHDJOUB (Entered in the team at 04/01/2016)
 
 # Modifications:
+
+
+### 5.18.2 STABLE (07/06/2020)
+* Add function EncryptionSignatureHashDecoder.isEncrypted(RandomInputStream).
+* Add function EncryptionSignatureHashDecoder.getLastDataLength().
+* Fix some issues into EncryptionSignatureHashEncoder and EncryptionSignatureHashDecoder.
 
 
 ### 5.18.1 STABLE (30/05/2020)

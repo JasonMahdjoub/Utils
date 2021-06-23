@@ -135,7 +135,7 @@ public abstract class AbstractMessageDigest implements Cloneable {
 	 * @return length of the message digest.
 	 * @since 1.2
 	 */
-	public abstract int getDigestLength();
+	public abstract int getDigestLengthInBytes();
 
 	/**
 	 * Returns the {@link java.security.Provider} of this instance.
