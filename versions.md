@@ -1,6 +1,6 @@
 Utils
 =====
-5.18.2 STABLE (Build: 3029) (from 04/01/2016 to 07/06/2020)
+5.18.3 STABLE (Build: 3036) (from 04/01/2016 to 30/06/2020)
 
 # Creator(s):
 Jason MAHDJOUB
@@ -9,6 +9,12 @@ Jason MAHDJOUB
 Jason MAHDJOUB (Entered in the team at 04/01/2016)
 
 # Modifications:
+
+
+### 5.18.3 STABLE (30/06/2020)
+* Permit to create a random cache file center into a personalized directory.
+* Change the permissions of the random cache file center directory.
+* Add possibility to serialize Files and Paths into RandomInputStreams and RandomOutputStreams.
 
 
 ### 5.18.2 STABLE (07/06/2020)

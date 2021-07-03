@@ -43,6 +43,7 @@ import com.distrimind.util.crypto.*;
 import com.distrimind.util.data_buffers.*;
 import com.distrimind.util.harddrive.FilePermissions;
 
+import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -53,6 +54,8 @@ import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.*;
@@ -70,10 +73,10 @@ import java.util.concurrent.*;
 public class SerializationTools {
 	private static final int MAX_CHAR_BUFFER_SIZE=Short.MAX_VALUE*5;
 	private static final int MAX_SIZE_INET_ADDRESS=20;
+	public static final int DEFAULT_MAX_FILE_NAME_LENGTH=4096;
 
 	static void writeChars(final SecuredObjectOutputStream oos, char []s, int sizeMax, boolean supportNull) throws IOException
 	{
-
 		if (s==null)
 		{
 			if (!supportNull)
@@ -84,6 +87,14 @@ public class SerializationTools {
 		}
 		writeSize(oos, false, s.length*2, sizeMax);
 		oos.writeChars(s);
+	}
+	static void writeFile(final SecuredObjectOutputStream oos, File file, int sizeMax, boolean supportNull) throws IOException
+	{
+		writeString(oos, convertFileToString(file), sizeMax, supportNull);
+	}
+	static void writePath(final SecuredObjectOutputStream oos, Path path, int sizeMax, boolean supportNull) throws IOException
+	{
+		writeString(oos, convertPathToString(path), sizeMax, supportNull);
 	}
 	static void writeString(final SecuredObjectOutputStream oos, String s, int sizeMax, boolean supportNull) throws IOException
 	{
@@ -102,7 +113,14 @@ public class SerializationTools {
 	private static final Object stringLocker=new Object();
 	
 	private static char[] chars=null;
-
+	static File readFile(final SecuredObjectInputStream ois, int sizeMax, boolean supportNull) throws IOException
+	{
+		return convertStringToFile(readString(ois, sizeMax, supportNull));
+	}
+	static Path readPath(final SecuredObjectInputStream ois, int sizeMax, boolean supportNull) throws IOException
+	{
+		return convertStringToPath(readString(ois, sizeMax, supportNull));
+	}
 	static String readString(final SecuredObjectInputStream ois, int sizeMax, boolean supportNull) throws IOException
 	{
 		int size=readSize(ois, sizeMax);
@@ -1379,6 +1397,8 @@ public class SerializationTools {
 
 
 		return Class.class==clazz
+				|| File.class.isAssignableFrom(clazz)
+				|| Path.class.isAssignableFrom(clazz)
 				|| Object[].class==clazz
 				|| Collection.class.isAssignableFrom(clazz)
 				|| Map.class.isAssignableFrom(clazz)
@@ -1646,7 +1666,14 @@ public class SerializationTools {
 			}else if (clazz==char[].class) {
 				writeObjectCode(oos, 31);
 				writeChars(oos, (char[])o, sizeMax,false);
-			} else {
+			} else if (File.class.isAssignableFrom(clazz)) {
+				writeObjectCode(oos, 32);
+				writeFile(oos, (File)o, sizeMax,false);
+			} else if (Path.class.isAssignableFrom(clazz)) {
+				writeObjectCode(oos, 33);
+				writePath(oos, (Path)o, sizeMax,false);
+			} else
+			{
 				throw new IOException(""+clazz);
 
 			}
@@ -1753,6 +1780,12 @@ public class SerializationTools {
 				case 31: {
 					return readChars(ois, sizeMax,false);
 				}
+				case 32: {
+					return readFile(ois, sizeMax,false);
+				}
+				case 33: {
+					return readPath(ois, sizeMax,false);
+				}
 
 				default:
 					throw new MessageExternalizationException(Integrity.FAIL);
@@ -1761,7 +1794,7 @@ public class SerializationTools {
 		
 	}
 
-	private static final short lastObjectCode=31;
+	private static final short lastObjectCode=33;
 	private static final short classesStartIndex=lastObjectCode+1;
 	private static short classesEndIndex=0;
 	private static short enumsStartIndex=0;
@@ -2083,18 +2116,35 @@ public class SerializationTools {
 	}
 	public static int getInternalSize(char[] o, int maxCharsNumber)
 	{
-		int res=getSizeCoderSize(maxCharsNumber*2);
+		int res=getSizeCoderSize((int)Math.min(2L*maxCharsNumber, Integer.MAX_VALUE));
 		if (o!=null)
 			res+=o.length*2;
 		return res;
 	}
 	public static int getInternalSize(String o, int maxCharsNumber)
 	{
-		int res=getSizeCoderSize(maxCharsNumber*2);
+		int res=getSizeCoderSize((int)Math.min(2L*maxCharsNumber, Integer.MAX_VALUE));
 		if (o!=null)
 			res+=o.length()*2;
 		return res;
 	}
+	public static int getInternalSize(File f, int maxCharsNumber)
+	{
+		return getInternalSize(f.toString(), maxCharsNumber);
+	}
+	public static int getInternalSize(File f)
+	{
+		return getInternalSize(f, DEFAULT_MAX_FILE_NAME_LENGTH);
+	}
+	public static int getInternalSize(Path p, int maxCharsNumber)
+	{
+		return getInternalSize(p.toString(), maxCharsNumber);
+	}
+	public static int getInternalSize(Path p)
+	{
+		return getInternalSize(p, DEFAULT_MAX_FILE_NAME_LENGTH);
+	}
+
 	public static int getInternalSize(Object o, int sizeMax)
 	{
 		int res=getObjectCodeSizeBytes();
@@ -2162,6 +2212,12 @@ public class SerializationTools {
 			} else if (clazz == BigDecimal.class) {
 				res += getInternalSize((BigDecimal) o);
 			}
+			else if (File.class.isAssignableFrom(clazz)) {
+				res += getInternalSize((File) o, sizeMax);
+			}
+			else if (Path.class.isAssignableFrom(clazz)) {
+				res += getInternalSize((Path) o, sizeMax);
+			}
 			else
 				throw new IllegalArgumentException("o.class="+clazz);
 		}
@@ -2198,6 +2254,38 @@ public class SerializationTools {
 		{
 			return o;
 		}
+	}
+
+	static String convertFileToString(File file)
+	{
+		return convertLocalFileToUniversalPath(file.toString());
+	}
+	static File convertStringToFile(String fileString)
+	{
+		return new File(convertUniversalPathToLocalFile(fileString));
+	}
+	static String convertPathToString(Path file)
+	{
+		return convertLocalFileToUniversalPath(file.toString());
+	}
+	static Path convertStringToPath(String fileString)
+	{
+		return FileSystems.getDefault().getPath(convertUniversalPathToLocalFile(fileString));
+	}
+
+	static String convertLocalFileToUniversalPath(String file)
+	{
+		if (File.separatorChar!='/')
+			return file.replace(File.separatorChar, '/');
+		else
+			return file;
+	}
+	static String convertUniversalPathToLocalFile(String fileString)
+	{
+		if (File.separatorChar!='/')
+			return fileString.replace('/', File.separatorChar);
+		else
+			return fileString;
 	}
 
 }

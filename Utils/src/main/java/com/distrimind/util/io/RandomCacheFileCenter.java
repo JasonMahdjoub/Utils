@@ -36,6 +36,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 
 import com.distrimind.util.FileTools;
+import com.distrimind.util.harddrive.FilePermissions;
 
 import java.io.File;
 import java.io.IOException;
@@ -74,10 +75,18 @@ public class RandomCacheFileCenter {
 	{
 		return singleton;
 	}
-	public RandomCacheFileCenter(long maxMemoryUsedToStoreDataIntoMemoryInsteadOfFiles) {
+	public RandomCacheFileCenter(File tmpDirectory, long maxMemoryUsedToStoreDataIntoMemoryInsteadOfFiles) {
 		this.maxMemoryUsedToStoreDataIntoMemoryInsteadOfFiles=maxMemoryUsedToStoreDataIntoMemoryInsteadOfFiles;
 		this.memoryUsedToStoreDataIntoMemoryInsteadOfFiles=0;
 		FileTools.checkFolderRecursive(tmpDirectory);
+		try {
+			FilePermissions.from((short)700).applyTo(tmpDirectory);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	public RandomCacheFileCenter(long maxMemoryUsedToStoreDataIntoMemoryInsteadOfFiles) {
+		this(tmpDirectory, maxMemoryUsedToStoreDataIntoMemoryInsteadOfFiles);
 	}
 	public RandomCacheFileOutputStream getNewRandomCacheFileOutputStream() throws IOException {
 		return getNewRandomCacheFileOutputStream(true);
@@ -117,8 +126,6 @@ public class RandomCacheFileCenter {
 		return getNewBufferedRandomCacheFileOutputStream(getTmpFile(), removeFileWhenClosingStream, accessMode, maxBufferSize, maxBuffersNumber);
 	}
 	private File getTmpFile() throws IOException {
-		/*DecentralizedIDGenerator did=new DecentralizedIDGenerator();
-		return new File(tmpDirectory, prefixTmpFileName+did.getWorkerIDAndSequence()+"."+did.getTimeStamp()+"."+suffixTmpFileName);*/
 		return File.createTempFile(prefixTmpFileName, suffixTmpFileName, tmpDirectory);
 	}
 

@@ -67,6 +67,12 @@ public class Utils {
 			VERSION.addCreator(new Person("mahdjoub", "jason"))
 					.addDeveloper(new PersonDeveloper("mahdjoub", "jason", "2016-01-04"))
 					.addDescription(
+							new Description((short)5, (short)18, (short)3, Version.Type.STABLE, (short)0, "2020-06-30")
+									.addItem("Permit to create a random cache file center into a personalized directory.")
+									.addItem("Change the permissions of the random cache file center directory.")
+									.addItem("Add possibility to serialize Files and Paths into RandomInputStreams and RandomOutputStreams.")
+					)
+					.addDescription(
 							new Description((short)5, (short)18, (short)2, Version.Type.STABLE, (short)0, "2020-06-07")
 									.addItem("Add function EncryptionSignatureHashDecoder.isEncrypted(RandomInputStream).")
 									.addItem("Add function EncryptionSignatureHashDecoder.getLastDataLength().")
