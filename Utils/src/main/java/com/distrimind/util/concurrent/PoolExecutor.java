@@ -1096,6 +1096,7 @@ public class PoolExecutor implements ExecutorService {
 					return true;
 				else
 					start=System.nanoTime();
+				timeOut=keepAliveTime;
 			}
 			else {
 				start = end;
