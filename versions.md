@@ -1,6 +1,6 @@
 Utils
 =====
-5.18.3 STABLE (Build: 3036) (from 04/01/2016 to 30/06/2020)
+5.18.4 STABLE (Build: 3102) (from 04/01/2016 to 05/07/2020)
 
 # Creator(s):
 Jason MAHDJOUB
@@ -9,6 +9,10 @@ Jason MAHDJOUB
 Jason MAHDJOUB (Entered in the team at 04/01/2016)
 
 # Modifications:
+
+
+### 5.18.4 STABLE (05/07/2020)
+* Fix high cpu usage issue when testing if thread must be killed.
 
 
 ### 5.18.3 STABLE (30/06/2020)
