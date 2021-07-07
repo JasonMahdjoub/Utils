@@ -34,9 +34,9 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
-import org.bouncycastle.crypto.Algorithm;
-import org.bouncycastle.crypto.fips.FipsEC;
-import org.bouncycastle.crypto.fips.FipsRSA;
+import com.distrimind.bcfips.crypto.Algorithm;
+import com.distrimind.bcfips.crypto.fips.FipsEC;
+import com.distrimind.bcfips.crypto.fips.FipsRSA;
 import com.distrimind.bouncycastle.pqc.jcajce.provider.sphincs.Sphincs256KeyPairGeneratorSpi;
 
 import java.io.IOException;

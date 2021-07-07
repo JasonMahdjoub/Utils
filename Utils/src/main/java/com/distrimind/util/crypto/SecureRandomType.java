@@ -38,9 +38,9 @@ import com.distrimind.util.Bits;
 import com.distrimind.util.OS;
 import com.distrimind.util.OSVersion;
 import com.distrimind.util.io.RandomFileInputStream;
-import org.bouncycastle.crypto.EntropySourceProvider;
-import org.bouncycastle.crypto.fips.FipsDRBG;
-import org.bouncycastle.crypto.util.BasicEntropySourceProvider;
+import com.distrimind.bcfips.crypto.EntropySourceProvider;
+import com.distrimind.bcfips.crypto.fips.FipsDRBG;
+import com.distrimind.bcfips.crypto.util.BasicEntropySourceProvider;
 
 import java.io.File;
 import java.io.IOException;

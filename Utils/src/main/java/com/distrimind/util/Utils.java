@@ -67,6 +67,10 @@ public class Utils {
 			VERSION.addCreator(new Person("mahdjoub", "jason"))
 					.addDeveloper(new PersonDeveloper("mahdjoub", "jason", "2016-01-04"))
 					.addDescription(
+							new Description((short)5, (short)18, (short)5, Version.Type.STABLE, (short)0, "2020-07-07")
+									.addItem("Use recompiled Bouncy Castle FIPS dependency in order to make it compatible with Android.")
+					)
+					.addDescription(
 							new Description((short)5, (short)18, (short)4, Version.Type.STABLE, (short)0, "2020-07-05")
 									.addItem("Fix high cpu usage issue when testing if thread must be killed.")
 					)
@@ -288,7 +292,7 @@ public class Utils {
 							new Description((short)5, (short)5, (short)7, Version.Type.STABLE, (short)0, "2020-07-13")
 									.addItem("Fix end stream detection issue with BufferedRandomInputStream")
 									.addItem("Fix issue with EncryptionSignatureHashDecoder.getMaximumOutputSize() when using EncryptionProfileProvider")
-									.addItem("Rebase org.bouncycastle package to com.distrimind.bouncycastle and com.distrimind.bcfips")
+									.addItem("Rebase com.distrimind.bcfips package to com.distrimind.bouncycastle and com.distrimind.bcfips")
 									.addItem("Rebase gnu package to com.distrimind.gnu")
 									.addItem("Clean code")
 					)
