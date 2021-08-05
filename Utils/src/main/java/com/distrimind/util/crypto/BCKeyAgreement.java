@@ -38,16 +38,16 @@ package com.distrimind.util.crypto;
 
 import com.distrimind.util.io.Integrity;
 import com.distrimind.util.io.MessageExternalizationException;
-import org.bouncycastle.crypto.AsymmetricPrivateKey;
-import org.bouncycastle.crypto.AsymmetricPublicKey;
-import org.bouncycastle.crypto.KDFCalculator;
-import org.bouncycastle.crypto.fips.FipsAgreement;
-import org.bouncycastle.crypto.fips.FipsEC;
-import org.bouncycastle.crypto.fips.FipsEC.AgreementParameters;
+import com.distrimind.bcfips.crypto.AsymmetricPrivateKey;
+import com.distrimind.bcfips.crypto.AsymmetricPublicKey;
+import com.distrimind.bcfips.crypto.KDFCalculator;
+import com.distrimind.bcfips.crypto.fips.FipsAgreement;
+import com.distrimind.bcfips.crypto.fips.FipsEC;
+import com.distrimind.bcfips.crypto.fips.FipsEC.AgreementParameters;
 import com.distrimind.bouncycastle.jcajce.spec.UserKeyingMaterialSpec;
-import org.bouncycastle.util.Arrays;
-import org.bouncycastle.crypto.fips.FipsKDF;
-import org.bouncycastle.crypto.fips.FipsKDF.AgreementKDFParameters;
+import com.distrimind.bcfips.util.Arrays;
+import com.distrimind.bcfips.crypto.fips.FipsKDF;
+import com.distrimind.bcfips.crypto.fips.FipsKDF.AgreementKDFParameters;
 
 import javax.crypto.ShortBufferException;
 import java.io.IOException;
@@ -149,9 +149,9 @@ public final class BCKeyAgreement extends AbstractKeyAgreement{
         }
 
         if (encryptionType==null)
-        		return new SymmetricSecretKey(signatureType, new org.bouncycastle.crypto.SymmetricSecretKey(signatureType.getBouncyCastleAlgorithm(), secret), (short)(keySize*8));
+        		return new SymmetricSecretKey(signatureType, new com.distrimind.bcfips.crypto.SymmetricSecretKey(signatureType.getBouncyCastleAlgorithm(), secret), (short)(keySize*8));
         else
-        		return new SymmetricSecretKey(encryptionType, new org.bouncycastle.crypto.SymmetricSecretKey(encryptionType.getBouncyCastleAlgorithm(), secret), (short)(keySize*8));
+        		return new SymmetricSecretKey(encryptionType, new com.distrimind.bcfips.crypto.SymmetricSecretKey(encryptionType.getBouncyCastleAlgorithm(), secret), (short)(keySize*8));
 	}
 
 	@Override
@@ -177,7 +177,7 @@ public final class BCKeyAgreement extends AbstractKeyAgreement{
 
 			} else if (type.isECMQVType()) {
 				Object[] p = (Object[]) params;
-				org.bouncycastle.crypto.fips.FipsEC.MQVAgreementParameters mqvparam = (org.bouncycastle.crypto.fips.FipsEC.MQVAgreementParameters) p[0];
+				com.distrimind.bcfips.crypto.fips.FipsEC.MQVAgreementParameters mqvparam = (com.distrimind.bcfips.crypto.fips.FipsEC.MQVAgreementParameters) p[0];
 				paramsKeyMaterial = (byte[]) p[1];
 
 				mqvparam = mqvparam.withDigest(type.getBCFipsDigestAlgorithm())

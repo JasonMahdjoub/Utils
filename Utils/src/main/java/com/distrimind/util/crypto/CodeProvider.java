@@ -41,7 +41,7 @@ import java.security.Security;
 
 import com.distrimind.util.OSVersion;
 import com.distrimind.bouncycastle.crypto.CryptoServicesRegistrar;
-import org.bouncycastle.jcajce.provider.BouncyCastleFipsProvider;
+import com.distrimind.bcfips.jcajce.provider.BouncyCastleFipsProvider;
 import com.distrimind.bouncycastle.jce.provider.BouncyCastleProvider;
 import com.distrimind.bouncycastle.pqc.jcajce.provider.BouncyCastlePQCProvider;
 
@@ -80,7 +80,7 @@ public enum CodeProvider {
 						}
 						else {
 							AbstractSecureRandom random = SecureRandomType.DEFAULT.getSingleton(null);
-							org.bouncycastle.crypto.CryptoServicesRegistrar.setSecureRandom(random);
+							com.distrimind.bcfips.crypto.CryptoServicesRegistrar.setSecureRandom(random);
 							CryptoServicesRegistrar.setSecureRandom(random);
 						}
 					} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
@@ -100,7 +100,7 @@ public enum CodeProvider {
 						else {
 							AbstractSecureRandom random=SecureRandomType.DEFAULT.getSingleton(null);
 							CryptoServicesRegistrar.setSecureRandom(random);
-							org.bouncycastle.crypto.CryptoServicesRegistrar.setSecureRandom(random);
+							com.distrimind.bcfips.crypto.CryptoServicesRegistrar.setSecureRandom(random);
 						}
 					} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
 						e.printStackTrace();

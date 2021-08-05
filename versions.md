@@ -1,6 +1,6 @@
 Utils
 =====
-5.18.3 STABLE (Build: 3036) (from 04/01/2016 to 30/06/2020)
+5.18.5 STABLE (Build: 3114) (from 04/01/2016 to 07/07/2020)
 
 # Creator(s):
 Jason MAHDJOUB
@@ -9,6 +9,14 @@ Jason MAHDJOUB
 Jason MAHDJOUB (Entered in the team at 04/01/2016)
 
 # Modifications:
+
+
+### 5.18.5 STABLE (07/07/2020)
+* Use recompiled Bouncy Castle FIPS dependency in order to make it compatible with Android.
+
+
+### 5.18.4 STABLE (05/07/2020)
+* Fix high cpu usage issue when testing if thread must be killed.
 
 
 ### 5.18.3 STABLE (30/06/2020)
@@ -227,7 +235,7 @@ Jason MAHDJOUB (Entered in the team at 04/01/2016)
 ### 5.5.7 STABLE (13/07/2020)
 * Fix end stream detection issue with BufferedRandomInputStream
 * Fix issue with EncryptionSignatureHashDecoder.getMaximumOutputSize() when using EncryptionProfileProvider
-* Rebase org.bouncycastle package to com.distrimind.bouncycastle and com.distrimind.bcfips
+* Rebase com.distrimind.bcfips package to com.distrimind.bouncycastle and com.distrimind.bcfips
 * Rebase gnu package to com.distrimind.gnu
 * Clean code
 

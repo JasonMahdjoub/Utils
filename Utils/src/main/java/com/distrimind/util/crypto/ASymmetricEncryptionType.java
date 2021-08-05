@@ -36,12 +36,12 @@ package com.distrimind.util.crypto;
 
 import com.distrimind.util.io.Integrity;
 import com.distrimind.util.io.MessageExternalizationException;
-import org.bouncycastle.crypto.Algorithm;
-import org.bouncycastle.crypto.asymmetric.AsymmetricEdDSAPublicKey;
-import org.bouncycastle.crypto.asymmetric.AsymmetricXDHPrivateKey;
-import org.bouncycastle.crypto.asymmetric.AsymmetricXDHPublicKey;
-import org.bouncycastle.crypto.fips.FipsRSA;
-import org.bouncycastle.crypto.general.EdEC;
+import com.distrimind.bcfips.crypto.Algorithm;
+import com.distrimind.bcfips.crypto.asymmetric.AsymmetricEdDSAPublicKey;
+import com.distrimind.bcfips.crypto.asymmetric.AsymmetricXDHPrivateKey;
+import com.distrimind.bcfips.crypto.asymmetric.AsymmetricXDHPublicKey;
+import com.distrimind.bcfips.crypto.fips.FipsRSA;
+import com.distrimind.bcfips.crypto.general.EdEC;
 import com.distrimind.bouncycastle.pqc.jcajce.provider.sphincs.Sphincs256KeyFactorySpi;
 
 import javax.crypto.Cipher;
@@ -252,18 +252,18 @@ public enum ASymmetricEncryptionType {
 
 		try {
 
-			tmpProvEdDSAPublicKeyBaseKey=Class.forName("org.bouncycastle.jcajce.provider.ProvEdDSAPublicKey").getDeclaredField("baseKey");
+			tmpProvEdDSAPublicKeyBaseKey=Class.forName("com.distrimind.bcfips.jcajce.provider.ProvEdDSAPublicKey").getDeclaredField("baseKey");
 			tmpProvEdDSAPublicKeyBaseKey.setAccessible(true);
-			tmpProvXDHPublicKeyBaseKey=Class.forName("org.bouncycastle.jcajce.provider.ProvXDHPublicKey").getDeclaredField("baseKey");
+			tmpProvXDHPublicKeyBaseKey=Class.forName("com.distrimind.bcfips.jcajce.provider.ProvXDHPublicKey").getDeclaredField("baseKey");
 			tmpProvXDHPublicKeyBaseKey.setAccessible(true);
 
-			tmpConstructorProvEdDSAPublicKey= (Constructor<PublicKey>) Class.forName("org.bouncycastle.jcajce.provider.ProvEdDSAPublicKey").getDeclaredConstructor(AsymmetricEdDSAPublicKey.class);
+			tmpConstructorProvEdDSAPublicKey= (Constructor<PublicKey>) Class.forName("com.distrimind.bcfips.jcajce.provider.ProvEdDSAPublicKey").getDeclaredConstructor(AsymmetricEdDSAPublicKey.class);
 			tmpConstructorProvEdDSAPublicKey.setAccessible(true);
 
-			tmpConstructorProvXDHPublicKey= (Constructor<PublicKey>) Class.forName("org.bouncycastle.jcajce.provider.ProvXDHPublicKey").getDeclaredConstructor(AsymmetricXDHPublicKey.class);
+			tmpConstructorProvXDHPublicKey= (Constructor<PublicKey>) Class.forName("com.distrimind.bcfips.jcajce.provider.ProvXDHPublicKey").getDeclaredConstructor(AsymmetricXDHPublicKey.class);
 			tmpConstructorProvXDHPublicKey.setAccessible(true);
 
-			tmpConstructorProvXDHPrivateKey= (Constructor<PrivateKey>) Class.forName("org.bouncycastle.jcajce.provider.ProvXDHPrivateKey").getDeclaredConstructor(AsymmetricXDHPrivateKey.class);
+			tmpConstructorProvXDHPrivateKey= (Constructor<PrivateKey>) Class.forName("com.distrimind.bcfips.jcajce.provider.ProvXDHPrivateKey").getDeclaredConstructor(AsymmetricXDHPrivateKey.class);
 			tmpConstructorProvXDHPrivateKey.setAccessible(true);
 
 		} catch (NoSuchFieldException | NoSuchMethodException | ClassNotFoundException e) {

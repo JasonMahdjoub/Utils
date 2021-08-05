@@ -46,11 +46,11 @@ import javax.crypto.spec.PBEKeySpec;
 import com.distrimind.util.OSVersion;
 import com.distrimind.util.io.Integrity;
 import com.distrimind.util.io.MessageExternalizationException;
-import org.bouncycastle.crypto.PasswordBasedDeriver;
-import org.bouncycastle.crypto.PasswordConverter;
-import org.bouncycastle.crypto.fips.FipsDigestAlgorithm;
-import org.bouncycastle.crypto.fips.FipsPBKD;
-import org.bouncycastle.crypto.fips.FipsSHS;
+import com.distrimind.bcfips.crypto.PasswordBasedDeriver;
+import com.distrimind.bcfips.crypto.PasswordConverter;
+import com.distrimind.bcfips.crypto.fips.FipsDigestAlgorithm;
+import com.distrimind.bcfips.crypto.fips.FipsPBKD;
+import com.distrimind.bcfips.crypto.fips.FipsSHS;
 import com.distrimind.bouncycastle.crypto.generators.BCrypt;
 import com.distrimind.bouncycastle.crypto.generators.SCrypt;
 
@@ -214,7 +214,7 @@ public enum PasswordHashType {
 				case BC_FIPS_PBKFD2WithHMacSHA2_256:
 				case BC_FIPS_PBKFD2WithHMacSHA2_384:
 				case BC_FIPS_PBKFD2WithHMacSHA2_512: {
-					PasswordBasedDeriver<org.bouncycastle.crypto.fips.FipsPBKD.Parameters> derivative =
+					PasswordBasedDeriver<com.distrimind.bcfips.crypto.fips.FipsPBKD.Parameters> derivative =
 							new FipsPBKD.DeriverFactory().createDeriver(FipsPBKD.PBKDF2.using(fipsDigestAlgorithm, data)
 									.withIterationCount(iterations)
 									.withSalt(salt));
@@ -298,7 +298,7 @@ public enum PasswordHashType {
 				case BC_FIPS_PBKFD2WithHMacSHA2_256:
 				case BC_FIPS_PBKFD2WithHMacSHA2_384:
 				case BC_FIPS_PBKFD2WithHMacSHA2_512: {
-					PasswordBasedDeriver<org.bouncycastle.crypto.fips.FipsPBKD.Parameters> derivative =
+					PasswordBasedDeriver<com.distrimind.bcfips.crypto.fips.FipsPBKD.Parameters> derivative =
 							new FipsPBKD.DeriverFactory().createDeriver(FipsPBKD.PBKDF2.using(fipsDigestAlgorithm, PasswordConverter.UTF8.convert(password))
 									.withIterationCount(iterations)
 									.withSalt(salt));

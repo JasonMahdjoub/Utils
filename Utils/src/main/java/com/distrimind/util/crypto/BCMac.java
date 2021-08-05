@@ -44,7 +44,7 @@ import com.distrimind.util.io.MessageExternalizationException;
 import com.distrimind.bouncycastle.crypto.Digest;
 import com.distrimind.bouncycastle.crypto.digests.Blake2bDigest;
 import com.distrimind.bouncycastle.crypto.digests.SHA3Digest;
-import org.bouncycastle.crypto.fips.FipsOutputMACCalculator;
+import com.distrimind.bcfips.crypto.fips.FipsOutputMACCalculator;
 
 import com.distrimind.bouncycastle.crypto.macs.HMac;
 import com.distrimind.bouncycastle.crypto.params.KeyParameter;
@@ -59,7 +59,7 @@ public final class BCMac extends AbstractMac {
 
 	private final SymmetricAuthenticatedSignatureType type;
 
-	private org.bouncycastle.crypto.SymmetricSecretKey secretKey;
+	private com.distrimind.bcfips.crypto.SymmetricSecretKey secretKey;
 	private HMac mac;
 
 	BCMac(SymmetricAuthenticatedSignatureType type)
@@ -102,7 +102,7 @@ public final class BCMac extends AbstractMac {
 	@Override
 	public void init(AbstractKey _key) throws IOException {
 		try {
-			init((org.bouncycastle.crypto.SymmetricSecretKey)_key.toBouncyCastleKey());
+			init((com.distrimind.bcfips.crypto.SymmetricSecretKey)_key.toBouncyCastleKey());
 		} catch (NoSuchAlgorithmException e) {
 			throw new IOException(e);
 		}
@@ -112,7 +112,7 @@ public final class BCMac extends AbstractMac {
 		}
 	}
 	
-	public void init(org.bouncycastle.crypto.SymmetricSecretKey _key) throws IOException {
+	public void init(com.distrimind.bcfips.crypto.SymmetricSecretKey _key) throws IOException {
 		Digest d;
 		if (type.getCodeProviderForSignature()==CodeProvider.BC)
 		{
