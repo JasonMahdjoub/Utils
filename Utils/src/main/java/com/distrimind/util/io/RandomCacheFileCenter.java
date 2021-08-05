@@ -35,6 +35,9 @@ The fact that you are presently reading this means that you have had
 knowledge of the CeCILL-C license and that you accept its terms.
  */
 
+import com.distrimind.util.FileTools;
+import com.distrimind.util.harddrive.FilePermissions;
+
 import java.io.File;
 import java.io.IOException;
 
@@ -44,9 +47,11 @@ import java.io.IOException;
  * @since Utils 4.6.0
  */
 public class RandomCacheFileCenter {
-	private volatile long maxMemoryUsedToStoreDataIntoMemoryInsteadOfFiles;
+	private long maxMemoryUsedToStoreDataIntoMemoryInsteadOfFiles;
 	private long memoryUsedToStoreDataIntoMemoryInsteadOfFiles;
-	private static final String prefixTmpFileName="DistriMindCacheFileCenter";
+	private static final String prefixTmpFileName="CFC";
+	private static final File tmpDirectory = new File(
+			System.getProperty("java.io.tmpdir"), "DistriMind"+File.pathSeparatorChar+"CacheFileCenter");
 	private static final String suffixTmpFileName="data";
 	private static final RandomCacheFileCenter singleton=new RandomCacheFileCenter();
 
@@ -59,7 +64,7 @@ public class RandomCacheFileCenter {
 	{
 		double mm=Runtime.getRuntime().maxMemory();
 		if (mm<128.0)
-			return 8;
+			return 128;
 		else
 		{
 			return (long)(0.0074*mm+7.0551);
@@ -70,26 +75,36 @@ public class RandomCacheFileCenter {
 	{
 		return singleton;
 	}
-
-	public RandomCacheFileCenter(long maxMemoryUsedToStoreDataIntoMemoryInsteadOfFiles) {
+	public RandomCacheFileCenter(File tmpDirectory, long maxMemoryUsedToStoreDataIntoMemoryInsteadOfFiles) {
 		this.maxMemoryUsedToStoreDataIntoMemoryInsteadOfFiles=maxMemoryUsedToStoreDataIntoMemoryInsteadOfFiles;
 		this.memoryUsedToStoreDataIntoMemoryInsteadOfFiles=0;
+		FileTools.checkFolderRecursive(tmpDirectory);
+		try {
+			FilePermissions.from((short)700).applyTo(tmpDirectory);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	public RandomCacheFileCenter(long maxMemoryUsedToStoreDataIntoMemoryInsteadOfFiles) {
+		this(tmpDirectory, maxMemoryUsedToStoreDataIntoMemoryInsteadOfFiles);
 	}
 	public RandomCacheFileOutputStream getNewRandomCacheFileOutputStream() throws IOException {
 		return getNewRandomCacheFileOutputStream(true);
 	}
 
 	public void setMaxMemoryUsedToStoreDataIntoMemoryInsteadOfFiles(long maxMemoryUsedToStoreDataIntoMemoryInsteadOfFiles) {
-		this.maxMemoryUsedToStoreDataIntoMemoryInsteadOfFiles = maxMemoryUsedToStoreDataIntoMemoryInsteadOfFiles;
+		synchronized (this) {
+			this.maxMemoryUsedToStoreDataIntoMemoryInsteadOfFiles = maxMemoryUsedToStoreDataIntoMemoryInsteadOfFiles;
+		}
 	}
 
 	public RandomCacheFileOutputStream getNewRandomCacheFileOutputStream(boolean removeFileWhenClosingStream) throws IOException {
-		return getNewRandomCacheFileOutputStream(File.createTempFile(prefixTmpFileName, suffixTmpFileName), removeFileWhenClosingStream, RandomFileOutputStream.AccessMode.READ_AND_WRITE);
+		return getNewRandomCacheFileOutputStream(getTmpFile(), removeFileWhenClosingStream, RandomFileOutputStream.AccessMode.READ_AND_WRITE);
 	}
-	public RandomCacheFileOutputStream getNewRandomCacheFileOutputStream(File fileName, boolean removeFileWhenClosingStream) throws IOException {
+	public RandomCacheFileOutputStream getNewRandomCacheFileOutputStream(File fileName, boolean removeFileWhenClosingStream) {
 		return getNewRandomCacheFileOutputStream(fileName, removeFileWhenClosingStream, RandomFileOutputStream.AccessMode.READ_AND_WRITE);
 	}
-	public RandomCacheFileOutputStream getNewRandomCacheFileOutputStream(File fileName, boolean removeFileWhenClosingStream, RandomFileOutputStream.AccessMode accessMode) throws IOException {
+	public RandomCacheFileOutputStream getNewRandomCacheFileOutputStream(File fileName, boolean removeFileWhenClosingStream, RandomFileOutputStream.AccessMode accessMode) {
 		return new RandomCacheFileOutputStream(this, fileName, removeFileWhenClosingStream, accessMode, -1,0);
 	}
 
@@ -108,49 +123,56 @@ public class RandomCacheFileCenter {
 		return getNewBufferedRandomCacheFileOutputStream(removeFileWhenClosingStream, accessMode, maxBufferSize, BufferedRandomInputStream.DEFAULT_MAX_BUFFERS_NUMBER);
 	}
 	public RandomCacheFileOutputStream getNewBufferedRandomCacheFileOutputStream(boolean removeFileWhenClosingStream, RandomFileOutputStream.AccessMode accessMode,  int maxBufferSize, int maxBuffersNumber) throws IOException {
-		return getNewBufferedRandomCacheFileOutputStream(File.createTempFile(prefixTmpFileName, suffixTmpFileName), removeFileWhenClosingStream, accessMode, maxBufferSize, maxBuffersNumber);
+		return getNewBufferedRandomCacheFileOutputStream(getTmpFile(), removeFileWhenClosingStream, accessMode, maxBufferSize, maxBuffersNumber);
+	}
+	private File getTmpFile() throws IOException {
+		return File.createTempFile(prefixTmpFileName, suffixTmpFileName, tmpDirectory);
 	}
 
-	public RandomCacheFileOutputStream getNewBufferedRandomCacheFileOutputStream(File fileName, boolean removeFileWhenClosingStream) throws IOException {
+	public RandomCacheFileOutputStream getNewBufferedRandomCacheFileOutputStream(File fileName, boolean removeFileWhenClosingStream) {
 		return getNewBufferedRandomCacheFileOutputStream(fileName, removeFileWhenClosingStream, BufferedRandomInputStream.DEFAULT_MAX_BUFFER_SIZE);
 	}
-	public RandomCacheFileOutputStream getNewBufferedRandomCacheFileOutputStream(File fileName, boolean removeFileWhenClosingStream, RandomFileOutputStream.AccessMode accessMode) throws IOException {
+	public RandomCacheFileOutputStream getNewBufferedRandomCacheFileOutputStream(File fileName, boolean removeFileWhenClosingStream, RandomFileOutputStream.AccessMode accessMode) {
 		return getNewBufferedRandomCacheFileOutputStream(fileName, removeFileWhenClosingStream, accessMode, BufferedRandomInputStream.DEFAULT_MAX_BUFFER_SIZE);
 	}
-	public RandomCacheFileOutputStream getNewBufferedRandomCacheFileOutputStream(File fileName,  boolean removeFileWhenClosingStream, int maxBufferSize) throws IOException {
+	public RandomCacheFileOutputStream getNewBufferedRandomCacheFileOutputStream(File fileName,  boolean removeFileWhenClosingStream, int maxBufferSize) {
 		return getNewBufferedRandomCacheFileOutputStream(fileName, removeFileWhenClosingStream, RandomFileOutputStream.AccessMode.READ_AND_WRITE, maxBufferSize, BufferedRandomInputStream.DEFAULT_MAX_BUFFERS_NUMBER);
 	}
-	public RandomCacheFileOutputStream getNewBufferedRandomCacheFileOutputStream(File fileName, boolean removeFileWhenClosingStream, RandomFileOutputStream.AccessMode accessMode,  int maxBufferSize) throws IOException {
+	public RandomCacheFileOutputStream getNewBufferedRandomCacheFileOutputStream(File fileName, boolean removeFileWhenClosingStream, RandomFileOutputStream.AccessMode accessMode,  int maxBufferSize) {
 		return getNewBufferedRandomCacheFileOutputStream(fileName, removeFileWhenClosingStream, accessMode, maxBufferSize, BufferedRandomInputStream.DEFAULT_MAX_BUFFERS_NUMBER);
 	}
 
-	public RandomCacheFileOutputStream getNewBufferedRandomCacheFileOutputStream(File fileName, boolean removeFileWhenClosingStream, RandomFileOutputStream.AccessMode accessMode,  int maxBufferSize, int maxBuffersNumber) throws IOException {
+	public RandomCacheFileOutputStream getNewBufferedRandomCacheFileOutputStream(File fileName, boolean removeFileWhenClosingStream, RandomFileOutputStream.AccessMode accessMode,  int maxBufferSize, int maxBuffersNumber) {
 		return new RandomCacheFileOutputStream(this, fileName, removeFileWhenClosingStream, accessMode, maxBufferSize, maxBuffersNumber);
 	}
 
 	@SuppressWarnings("BooleanMethodIsAlwaysInverted")
 	boolean tryToAddNewDataIntoMemory(long numberOfBytes )
 	{
+		assert numberOfBytes>=0;
 		synchronized (this)
 		{
-			this.memoryUsedToStoreDataIntoMemoryInsteadOfFiles+=numberOfBytes;
-			if (this.memoryUsedToStoreDataIntoMemoryInsteadOfFiles>maxMemoryUsedToStoreDataIntoMemoryInsteadOfFiles) {
-				this.memoryUsedToStoreDataIntoMemoryInsteadOfFiles-=numberOfBytes;
+			if (this.memoryUsedToStoreDataIntoMemoryInsteadOfFiles>maxMemoryUsedToStoreDataIntoMemoryInsteadOfFiles-numberOfBytes) {
 				return false;
 			}
-			return true;
+			else {
+				this.memoryUsedToStoreDataIntoMemoryInsteadOfFiles+=numberOfBytes;
+				return true;
+			}
 		}
 	}
 
 	void releaseDataFromMemory(long numberOfBytes )
 	{
-		this.memoryUsedToStoreDataIntoMemoryInsteadOfFiles-=numberOfBytes;
-		if (this.memoryUsedToStoreDataIntoMemoryInsteadOfFiles<0) {
-			this.memoryUsedToStoreDataIntoMemoryInsteadOfFiles = 0;
-			throw new InternalError();
+		assert numberOfBytes>=0;
+		synchronized (this) {
+			this.memoryUsedToStoreDataIntoMemoryInsteadOfFiles -= numberOfBytes;
+			if (this.memoryUsedToStoreDataIntoMemoryInsteadOfFiles < 0) {
+				this.memoryUsedToStoreDataIntoMemoryInsteadOfFiles = 0;
+				throw new InternalError();
+			}
 		}
 	}
-
 
 
 }

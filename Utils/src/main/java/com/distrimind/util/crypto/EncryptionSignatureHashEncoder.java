@@ -67,11 +67,11 @@ public class EncryptionSignatureHashEncoder {
 		if (data.length==0)
 			throw new IllegalArgumentException();
 		if (off<0 || off>=data.length)
-			throw new IllegalArgumentException();
+			throw new IllegalArgumentException("data.length="+data.length+", off="+off+", len"+len);
 		if (len<=0)
-			throw new IllegalArgumentException();
+			throw new IllegalArgumentException("data.length="+data.length+", off="+off+", len"+len);
 		if (off+len>data.length)
-			throw new IllegalArgumentException();
+			throw new IllegalArgumentException("data.length="+data.length+", off="+off+", len="+len);
 	}
 	static byte getCode(byte[] associatedData, SymmetricSecretKey secretKeyForSignature, ASymmetricKeyPair keyPair, MessageDigestType messageDigestType)
 	{
@@ -87,7 +87,7 @@ public class EncryptionSignatureHashEncoder {
 		if (code==null)
 		{
 			if (associatedData != null && (cipher == null || !cipher.getType().supportAssociatedData()) && symmetricSigner == null)
-				throw new IllegalArgumentException();
+				throw new IllegalArgumentException("cipher="+cipher);
 			int res = symmetricSigner == null ? 0 : 1;
 			res += asymmetricSigner == null ? 0 : 2;
 			res += digest == null ? 0 : 4;
@@ -146,10 +146,11 @@ public class EncryptionSignatureHashEncoder {
 	static SymmetricEncryptionAlgorithm reloadCipher(AbstractSecureRandom random, SymmetricSecretKey originalSecretKeyForEncryption, short currentKeyID, byte[] externalCounter) throws IOException {
 		try {
 			SymmetricSecretKey sk = currentKeyID==0?originalSecretKeyForEncryption:originalSecretKeyForEncryption.getHashedSecretKey(MessageDigestType.BC_FIPS_SHA3_256, currentKeyID & 0xFF);
+			byte sc=sk.getEncryptionAlgorithmType().getMaxCounterSizeInBytesUsedWithBlockMode();
 			if (externalCounter==null)
 				return new SymmetricEncryptionAlgorithm(random, sk);
 			else
-				return new SymmetricEncryptionAlgorithm(random, sk, (byte)externalCounter.length);
+				return new SymmetricEncryptionAlgorithm(random, sk, (byte)(Math.min(externalCounter.length, sc)));
 		} catch (NoSuchProviderException | NoSuchAlgorithmException e) {
 			throw new IOException(e);
 		}
@@ -227,10 +228,11 @@ public class EncryptionSignatureHashEncoder {
 		return withSymmetricSecretKeyForEncryption(random, symmetricSecretKeyForEncryption, (byte)0);
 	}
 	public EncryptionSignatureHashEncoder withSymmetricSecretKeyForEncryption(AbstractSecureRandom random, SymmetricSecretKey symmetricSecretKeyForEncryption, byte externalCounterLength) throws IOException {
+		byte sc=symmetricSecretKeyForEncryption.getEncryptionAlgorithmType().getMaxCounterSizeInBytesUsedWithBlockMode();
 		if (externalCounterLength<=0)
 			return withCipher(new SymmetricEncryptionAlgorithm(random, symmetricSecretKeyForEncryption));
 		else
-			return withCipher(new SymmetricEncryptionAlgorithm(random, symmetricSecretKeyForEncryption, externalCounterLength));
+			return withCipher(new SymmetricEncryptionAlgorithm(random, symmetricSecretKeyForEncryption, (byte)Math.min(externalCounterLength, sc)));
 	}
 	public EncryptionSignatureHashEncoder withCipher(SymmetricEncryptionAlgorithm cipher) {
 		if (cipher==null)
@@ -299,6 +301,12 @@ public class EncryptionSignatureHashEncoder {
 		code=null;
 		return this;
 	}
+
+	public IASymmetricPrivateKey getASymmetricPrivateKey()
+	{
+		return asymmetricSigner==null?null:asymmetricSigner.getPrivateKey();
+	}
+
 	public EncryptionSignatureHashEncoder withASymmetricPrivateKeyForSignature(IASymmetricPrivateKey privateKeyForSignature) throws IOException{
 		if (privateKeyForSignature==null)
 			throw new NullPointerException();
@@ -353,15 +361,20 @@ public class EncryptionSignatureHashEncoder {
 		return lenBuffer;
 
 	}
-	public void encode(final RandomOutputStream originalOutputStream) throws IOException {
+	public long encode(final RandomOutputStream originalOutputStream) throws IOException {
 		if (inputStream==null)
 			throw new NullPointerException();
 		if (inputStream.length()<=0)
 			throw new IllegalArgumentException();
-		try(RandomOutputStream ros=getRandomOutputStream(originalOutputStream, inputStream.length(), false))
+		ROSForEncryption ros=getRandomOutputStream(originalOutputStream, inputStream.length(), false);
+		try
 		{
 			inputStream.transferTo(ros);
 		}
+		finally {
+			ros.close();
+		}
+		return ros.bytesWritten;
 	}
 	public void generatesOnlyHashAndSignatures(final RandomOutputStream originalOutputStream) throws IOException {
 		if (inputStream==null)
@@ -375,9 +388,9 @@ public class EncryptionSignatureHashEncoder {
 			inputStream.transferTo(ros);
 		}
 	}
-	public void encode(byte[] data, int dataOff, int dataLen, byte[] cipherText, int cipherTextOff, int cipherTextLen) throws IOException {
+	public int encode(byte[] data, int dataOff, int dataLen, byte[] cipherText, int cipherTextOff, int cipherTextLen) throws IOException {
 		init(data, dataOff, dataLen, cipherText, cipherTextOff, cipherTextLen);
-		encode(randomOutputStream);
+		return (int)encode(randomOutputStream);
 	}
 
 	private void init(byte[] data, int dataOff, int dataLen, byte[] cipherText, int cipherTextOff, int cipherTextLen) throws IOException {
@@ -391,7 +404,7 @@ public class EncryptionSignatureHashEncoder {
 		limitedRandomInputStream.init(randomByteArrayInputStream, dataOff, dataLen);
 		withRandomInputStream(limitedRandomInputStream);
 		randomByteArrayOutputStream.init(cipherText);
-		randomOutputStream.init(randomByteArrayOutputStream, cipherTextOff, cipherText.length-cipherTextOff-cipherTextLen);
+		randomOutputStream.init(randomByteArrayOutputStream, cipherTextOff, cipherTextLen);
 
 	}
 
@@ -401,7 +414,7 @@ public class EncryptionSignatureHashEncoder {
 		generatesOnlyHashAndSignatures(randomOutputStream);
 	}
 
-	public void encodeWithSameInputAndOutputStreamSource(byte[] data, int dataOff, int dataLen) throws IOException {
+	public int encodeWithSameInputAndOutputStreamSource(byte[] data, int dataOff, int dataLen) throws IOException {
 		checkLimits(data, dataOff, dataLen);
 		if (dataOff<headSize)
 			throw new IllegalArgumentException("dataOff must be greater of equal to "+headSize+" in order to permit head encoding");
@@ -410,11 +423,16 @@ public class EncryptionSignatureHashEncoder {
 		limitedRandomInputStream.init(randomByteArrayInputStream, dataOff, dataLen);
 		withRandomInputStream(limitedRandomInputStream);
 		randomByteArrayOutputStream.init(data);
-		randomOutputStream.init(randomByteArrayOutputStream, dataOff-9, data.length-dataOff-dataLen);
-		try(RandomOutputStream ros=getRandomOutputStream(randomOutputStream, inputStream.length(), true))
+		randomOutputStream.init(randomByteArrayOutputStream, dataOff-EncryptionSignatureHashEncoder.headSize, data.length-dataOff+EncryptionSignatureHashEncoder.headSize);
+		ROSForEncryption ros=getRandomOutputStream(randomOutputStream, dataLen, true);
+		try
 		{
 			inputStream.transferTo(ros);
 		}
+		finally {
+			ros.close();
+		}
+		return (int)ros.bytesWritten;
 	}
 	public RandomOutputStream getRandomOutputStream(final RandomOutputStream originalOutputStream) throws IOException {
 		return getRandomOutputStream(originalOutputStream, -1, false);
@@ -444,6 +462,7 @@ public class EncryptionSignatureHashEncoder {
 	private class ROSForEncryption extends RandomOutputStream
 	{
 		private RandomOutputStream originalOutputStream;
+		private long bytesWritten=0;
 		private long inputStreamLength;
 		private long originalOutputLength;
 		private long maximumOutputLengthAfterEncoding;
@@ -645,6 +664,7 @@ public class EncryptionSignatureHashEncoder {
 
 		@Override
 		public void close() throws IOException {
+			outputStream.flush();
 			if (cipher!=null)
 				dataOutputStream.close();
 			else
@@ -705,16 +725,16 @@ public class EncryptionSignatureHashEncoder {
 				byte[] signature = asymmetricSigner.getSignature();
 				originalOutputStream.writeBytesArray(signature, false, ASymmetricAuthenticatedSignatureType.MAX_ASYMMETRIC_SIGNATURE_SIZE);
 			}
-			long curPos=originalOutputStream.currentPosition();
+			this.bytesWritten=originalOutputStream.currentPosition();
 			if (inputStreamLength<0) {
 				originalOutputStream.seek(3);
 				originalOutputStream.writeLong(dataLen);
-				originalOutputStream.seek(curPos);
+				originalOutputStream.seek(this.bytesWritten);
 			}
-			if (maximumOutputLengthAfterEncoding>0 && curPos<maximumOutputLengthAfterEncoding && curPos>originalOutputLength) {
-				originalOutputStream.setLength(curPos);
+			if (!sameInputOutputStream && maximumOutputLengthAfterEncoding>0 && this.bytesWritten<maximumOutputLengthAfterEncoding && this.bytesWritten>originalOutputLength) {
+				originalOutputStream.setLength(this.bytesWritten);
 			}
-			outputStream.flush();
+			originalOutputStream.flush();
 			free();
 			closed=true;
 		}
@@ -730,7 +750,7 @@ public class EncryptionSignatureHashEncoder {
 		}
 	}
 
-	private RandomOutputStream getRandomOutputStream(final RandomOutputStream originalOutputStream, final long inputStreamLength, boolean sameInputOutputStream) throws IOException {
+	private ROSForEncryption getRandomOutputStream(final RandomOutputStream originalOutputStream, final long inputStreamLength, boolean sameInputOutputStream) throws IOException {
 		if (rosForEncryption==null)
 			rosForEncryption=new ROSForEncryption(originalOutputStream, inputStreamLength, sameInputOutputStream);
 		else
@@ -796,9 +816,9 @@ public class EncryptionSignatureHashEncoder {
 		if (inputStreamLength<=0)
 			throw new IllegalArgumentException();
 		long res=getMinimumOutputSize();
-
 		if (cipher!=null) {
 			res += cipher.getOutputSizeAfterEncryption(inputStreamLength);
+
 		}
 		else
 			res+=inputStreamLength;

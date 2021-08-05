@@ -244,7 +244,7 @@ public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOu
 		final AbstractCipher cipher = getCipherInstance();
 
 
-		return new CommonCipherInputStream(allOutputGeneratedIntoDoFinalFunction(), maxEncryptedPartLength, is, includeIV(), iv, getIVSizeBytesWithoutExternalCounter(), useExternalCounter(), externalCounter, cipher, associatedData, offAD, lenAD, buffer, supportRandomEncryptionAndRandomDecryption(), getCounterStepInBytes(), maxPlainTextSizeForEncoding) {
+		return new CommonCipherInputStream(allOutputGeneratedIntoDoFinalFunction(), maxEncryptedPartLength, is, includeIV(), iv, getIVSizeBytesWithoutExternalCounter(), getMaxExternalCounterLength(), externalCounter, cipher, associatedData, offAD, lenAD, buffer, supportRandomEncryptionAndRandomDecryption(), getCounterStepInBytes(), maxPlainTextSizeForEncoding) {
 			@Override
 			protected void initCipherForDecryptionWithIvAndCounter(byte[] iv, int counter) throws IOException {
 				AbstractEncryptionIOAlgorithm.this.initCipherForDecryptionWithIvAndCounter(cipher, iv, counter);

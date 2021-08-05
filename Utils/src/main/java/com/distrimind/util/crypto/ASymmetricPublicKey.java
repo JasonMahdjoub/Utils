@@ -94,6 +94,8 @@ public class ASymmetricPublicKey extends AbstractKey implements IASymmetricPubli
 
 	private final long expirationUTC;
 
+	public final long publicKeyValidityBeginDateUTC;
+
 	private volatile transient PublicKey nativePublicKey = null;
 
 	private volatile transient Object gnuPublicKey = null;
@@ -138,21 +140,23 @@ public class ASymmetricPublicKey extends AbstractKey implements IASymmetricPubli
 
 	}
 
+
+
 	@Override
 	public WrappedData getKeyBytes() {
         return new WrappedData(publicKey);
     }
 
 
-    ASymmetricPublicKey(ASymmetricEncryptionType type, byte[] publicKey, int keySize, long expirationUTC) {
-		this(publicKey, keySize, expirationUTC);
+    ASymmetricPublicKey(ASymmetricEncryptionType type, byte[] publicKey, int keySize, long publicKeyValidityBeginDateUTC, long expirationUTC) {
+		this(publicKey, keySize, publicKeyValidityBeginDateUTC, expirationUTC);
 		if (type == null)
 			throw new NullPointerException("type");
 		this.encryptionType = type;
 		this.signatureType=null;
 	}
-	ASymmetricPublicKey(ASymmetricAuthenticatedSignatureType type, byte[] publicKey, int keySize, long expirationUTC) {
-		this(publicKey, keySize, expirationUTC);
+	ASymmetricPublicKey(ASymmetricAuthenticatedSignatureType type, byte[] publicKey, int keySize, long publicKeyValidityBeginDateUTC, long expirationUTC) {
+		this(publicKey, keySize, publicKeyValidityBeginDateUTC, expirationUTC);
 		if (type == null)
 			throw new NullPointerException("type");
 		this.encryptionType = null;
@@ -160,8 +164,8 @@ public class ASymmetricPublicKey extends AbstractKey implements IASymmetricPubli
 	}
 
 	ASymmetricPublicKey(ASymmetricEncryptionType type, Object publicKey, int keySize,
-			long expirationUTC) {
-		this(publicKey, keySize, expirationUTC);
+						long publicKeyValidityBeginDateUTC, long expirationUTC) {
+		this(publicKey, keySize, publicKeyValidityBeginDateUTC, expirationUTC);
 		if (type == null)
 			throw new NullPointerException("type");
 
@@ -169,8 +173,8 @@ public class ASymmetricPublicKey extends AbstractKey implements IASymmetricPubli
 		this.signatureType=null;
 	}
 	ASymmetricPublicKey(ASymmetricAuthenticatedSignatureType type, Object publicKey, int keySize,
-						long expirationUTC) {
-		this(publicKey, keySize, expirationUTC);
+						long publicKeyValidityBeginDateUTC, long expirationUTC) {
+		this(publicKey, keySize, publicKeyValidityBeginDateUTC, expirationUTC);
 		if (type == null)
 			throw new NullPointerException("type");
 
@@ -179,8 +183,8 @@ public class ASymmetricPublicKey extends AbstractKey implements IASymmetricPubli
 
 	}
 
-	ASymmetricPublicKey(ASymmetricEncryptionType type, PublicKey publicKey, int keySize, long expirationUTC) {
-		this(ASymmetricEncryptionType.encodePublicKey(publicKey, type), keySize, expirationUTC);
+	ASymmetricPublicKey(ASymmetricEncryptionType type, PublicKey publicKey, int keySize, long publicKeyValidityBeginDateUTC, long expirationUTC) {
+		this(ASymmetricEncryptionType.encodePublicKey(publicKey, type), keySize, publicKeyValidityBeginDateUTC, expirationUTC);
 		if (type == null)
 			throw new NullPointerException("type");
 		if (type.getCodeProviderForEncryption() == CodeProvider.GNU_CRYPTO)
@@ -189,8 +193,8 @@ public class ASymmetricPublicKey extends AbstractKey implements IASymmetricPubli
 		this.encryptionType = type;
 		this.signatureType=null;
 	}
-	ASymmetricPublicKey(ASymmetricEncryptionType type, AsymmetricPublicKey publicKey, int keySize, long expirationUTC) {
-		this(publicKey.getEncoded(), keySize, expirationUTC);
+	ASymmetricPublicKey(ASymmetricEncryptionType type, AsymmetricPublicKey publicKey, int keySize, long publicKeyValidityBeginDateUTC, long expirationUTC) {
+		this(publicKey.getEncoded(), keySize, publicKeyValidityBeginDateUTC, expirationUTC);
 		if (type == null)
 			throw new NullPointerException("type");
 		if (type.getCodeProviderForEncryption() == CodeProvider.GNU_CRYPTO)
@@ -200,8 +204,8 @@ public class ASymmetricPublicKey extends AbstractKey implements IASymmetricPubli
 		this.signatureType=null;
 		this.bouncyCastlePublicKey=publicKey;
 	}
-	ASymmetricPublicKey(ASymmetricAuthenticatedSignatureType type, PublicKey publicKey, int keySize, long expirationUTC, boolean xdhKey) {
-		this(ASymmetricEncryptionType.encodePublicKey(publicKey, type, xdhKey), keySize, expirationUTC);
+	ASymmetricPublicKey(ASymmetricAuthenticatedSignatureType type, PublicKey publicKey, int keySize, long publicKeyValidityBeginDateUTC, long expirationUTC, boolean xdhKey) {
+		this(ASymmetricEncryptionType.encodePublicKey(publicKey, type, xdhKey), keySize, publicKeyValidityBeginDateUTC, expirationUTC);
 		if (type == null)
 			throw new NullPointerException("type");
 		if (type.getCodeProviderForSignature() == CodeProvider.GNU_CRYPTO)
@@ -211,46 +215,51 @@ public class ASymmetricPublicKey extends AbstractKey implements IASymmetricPubli
 		this.signatureType=type;
 		this.xdhKey=xdhKey;
 	}
-	private ASymmetricPublicKey(byte[] publicKey, int keySize, long expirationUTC) {
+	private ASymmetricPublicKey(byte[] publicKey, int keySize, long publicKeyValidityBeginDateUTC, long expirationUTC) {
 		if (publicKey == null)
 			throw new NullPointerException("publicKey");
 		if (keySize < 256)
 			throw new IllegalArgumentException("keySize");
 		if (keySize>MAX_SIZE_IN_BITS_OF_NON_HYBRID_PUBLIC_KEY)
 			throw new IllegalArgumentException("keySize");
-
+		if (expirationUTC<= publicKeyValidityBeginDateUTC)
+			throw new IllegalArgumentException();
 		this.publicKey = publicKey;
 		this.keySizeBits = keySize;
 		hashCode = Arrays.hashCode(this.publicKey);
 		this.expirationUTC = expirationUTC;
+		this.publicKeyValidityBeginDateUTC = publicKeyValidityBeginDateUTC;
 	}
 
 	public ASymmetricPublicKey getPublicKeyWithNewExpirationTime(long timeExpirationUTC)
 	{
 		ASymmetricPublicKey res;
 		if (signatureType==null)
-			res=new ASymmetricPublicKey(this.encryptionType, publicKey.clone(), this.keySizeBits, timeExpirationUTC);
+			res=new ASymmetricPublicKey(this.encryptionType, publicKey.clone(), this.keySizeBits, this.publicKeyValidityBeginDateUTC, timeExpirationUTC);
 		else
-			res=new ASymmetricPublicKey(this.signatureType, publicKey.clone(), this.keySizeBits, timeExpirationUTC);
+			res=new ASymmetricPublicKey(this.signatureType, publicKey.clone(), this.keySizeBits, this.publicKeyValidityBeginDateUTC, timeExpirationUTC);
 		return res;
 	}
 
 
 
 	private ASymmetricPublicKey(Object publicKey, int keySize,
-			long expirationUTC) {
+								long publicKeyValidityBeginDateUTC, long expirationUTC) {
 		if (publicKey == null)
 			throw new NullPointerException("publicKey");
 		if (keySize < 256)
 			throw new IllegalArgumentException("keySize");
 		if (keySize>MAX_SIZE_IN_BITS_OF_NON_HYBRID_PUBLIC_KEY)
 			throw new IllegalArgumentException("keySize");
+		if (publicKeyValidityBeginDateUTC >=expirationUTC)
+			throw new IllegalArgumentException();
 
 		this.publicKey = ASymmetricEncryptionType.encodeGnuPublicKey(publicKey);
 		this.keySizeBits = keySize;
 		hashCode = Arrays.hashCode(this.publicKey);
 		this.expirationUTC = expirationUTC;
 		this.gnuPublicKey=null;
+		this.publicKeyValidityBeginDateUTC = publicKeyValidityBeginDateUTC;
 	}
 
 
@@ -265,20 +274,22 @@ public class ASymmetricPublicKey extends AbstractKey implements IASymmetricPubli
 	}
 
 	@Override
-	public WrappedData encode(boolean includeTimeExpiration)
+	public WrappedData encode(boolean includeTimes)
 	{
 		if (getTimeExpirationUTC()==Long.MAX_VALUE)
-			includeTimeExpiration=false;
-		byte[] tab = new byte[4+ASymmetricPrivateKey.ENCODED_TYPE_SIZE+publicKey.length+(includeTimeExpiration?8:0)];
+			includeTimes =false;
+		byte[] tab = new byte[4+ASymmetricPrivateKey.ENCODED_TYPE_SIZE+publicKey.length+(includeTimes ?16:0)];
 		tab[0]=encryptionType==null?(byte)5:(byte)4;
-		if (includeTimeExpiration)
+		if (includeTimes)
 			tab[0]|= AbstractKey.INCLUDE_KEY_EXPIRATION_CODE;
 		if (xdhKey)
 			tab[0]|= AbstractKey.IS_XDH_KEY;
 		Bits.putUnsignedInt(tab, 1, keySizeBits, 3);
 		Bits.putUnsignedInt(tab, 4, encryptionType==null?signatureType.ordinal():encryptionType.ordinal(), ASymmetricPrivateKey.ENCODED_TYPE_SIZE);
 		int pos=4+ASymmetricPrivateKey.ENCODED_TYPE_SIZE;
-		if (includeTimeExpiration) {
+		if (includeTimes) {
+			Bits.putLong(tab, pos, publicKeyValidityBeginDateUTC);
+			pos+=8;
 			Bits.putLong(tab, pos, expirationUTC);
 			pos+=8;
 		}
@@ -325,6 +336,12 @@ public class ASymmetricPublicKey extends AbstractKey implements IASymmetricPubli
 			return encryptionType.getMaxBlockSize(keySizeBits);
 	}
 
+	@Override
+	public long getPublicKeyValidityBeginDateUTC() {
+		return publicKeyValidityBeginDateUTC;
+	}
+
+	@Override
 	public long getTimeExpirationUTC() {
 		return expirationUTC;
 	}

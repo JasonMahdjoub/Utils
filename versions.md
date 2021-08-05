@@ -1,6 +1,6 @@
 Utils
 =====
-5.17.2 STABLE (Build: 2519) (from 04/01/2016 to 21/02/2020)
+5.18.5 STABLE (Build: 3114) (from 04/01/2016 to 07/07/2020)
 
 # Creator(s):
 Jason MAHDJOUB
@@ -9,6 +9,65 @@ Jason MAHDJOUB
 Jason MAHDJOUB (Entered in the team at 04/01/2016)
 
 # Modifications:
+
+
+### 5.18.5 STABLE (07/07/2020)
+* Use recompiled Bouncy Castle FIPS dependency in order to make it compatible with Android.
+
+
+### 5.18.4 STABLE (05/07/2020)
+* Fix high cpu usage issue when testing if thread must be killed.
+
+
+### 5.18.3 STABLE (30/06/2020)
+* Permit to create a random cache file center into a personalized directory.
+* Change the permissions of the random cache file center directory.
+* Add possibility to serialize Files and Paths into RandomInputStreams and RandomOutputStreams.
+
+
+### 5.18.2 STABLE (07/06/2020)
+* Add function EncryptionSignatureHashDecoder.isEncrypted(RandomInputStream).
+* Add function EncryptionSignatureHashDecoder.getLastDataLength().
+* Fix some issues into EncryptionSignatureHashEncoder and EncryptionSignatureHashDecoder.
+
+
+### 5.18.1 STABLE (30/05/2020)
+* Fix issue with function IASymmetricPublicKey.areTimesValid(). Overflow value was reached.
+* Change methods signatures into P2PLoginAgreementType class.
+
+
+### 5.18.0 STABLE (28/05/2020)
+* Update BouncyCastle to 1.68
+* Update BouncyCastle FIPS to 1.0.2.1. Use original BouncyCastle FIPS dependency and not recompiled one.
+* Add functions into P2PLoginAgreementType
+* Add functions into P2PUnidirectionalLoginSignerWithAsymmetricSignature
+* Add functions into P2PUnidirectionalLoginCheckerWithAsymmetricSignature
+* Add creation date for public keys
+* Reimplements provider's loading
+* Add Strong SecureRandom type
+
+
+### 5.17.7 STABLE (25/05/2020)
+* Fix issue with RandomFileInputStream when reading a byte whereas end of file has been reached : the file position shouldn't be incremented !
+
+
+### 5.17.6 STABLE (24/05/2020)
+* Fix issue with stream closed too quickly when decoding encrypted data
+* Fix memory allocation issues with RandomCacheFileCenter
+* Fix file position update issue when using file in both read and write modes
+
+
+### 5.17.5 STABLE (30/04/2020)
+* Add function SecuredObjectInputStream.readBytesArray(byte[] array, int offset, boolean nullAccepted, int maxSizeBytes)
+* Remove function SecuredObjectInputStream.readBytesArray(byte[] array, int offset, int size, boolean nullAccepted)
+
+
+### 5.17.4 STABLE (29/04/2020)
+* Minimal corrections into function signatures into SecuredObjectInputStream
+
+
+### 5.17.3 STABLE (25/03/2020)
+* Decentralized IDs are now generated with random initial sequence
 
 
 ### 5.17.2 STABLE (21/02/2020)
@@ -176,7 +235,7 @@ Jason MAHDJOUB (Entered in the team at 04/01/2016)
 ### 5.5.7 STABLE (13/07/2020)
 * Fix end stream detection issue with BufferedRandomInputStream
 * Fix issue with EncryptionSignatureHashDecoder.getMaximumOutputSize() when using EncryptionProfileProvider
-* Rebase org.bouncycastle package to com.distrimind.bouncycastle and com.distrimind.bcfips
+* Rebase com.distrimind.bcfips package to com.distrimind.bouncycastle and com.distrimind.bcfips
 * Rebase gnu package to com.distrimind.gnu
 * Clean code
 

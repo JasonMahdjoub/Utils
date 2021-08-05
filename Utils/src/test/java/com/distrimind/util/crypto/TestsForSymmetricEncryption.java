@@ -113,7 +113,7 @@ public class TestsForSymmetricEncryption {
 			key2 = new SymmetricSecretKey(type2,wd.getBytes().clone(), key1.getKeySizeBits());
 		}
 
-		byte counterSizeBytes=(byte)random.nextInt(key1.getEncryptionAlgorithmType().getMaxCounterSizeInBytesUsedWithBlockMode()+1);
+		byte counterSizeBytes=key1.getEncryptionAlgorithmType().getMaxCounterSizeInBytesUsedWithBlockMode();
 		SymmetricEncryptionAlgorithm algoDistant;
 		if (type1.isBlockModeSupportingCounter())
 		{

@@ -68,6 +68,7 @@ public abstract class AbstractEncryptionOutputAlgorithm implements Zeroizable {
 		}
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	protected void finalize() {
 		zeroize();
@@ -80,6 +81,11 @@ public abstract class AbstractEncryptionOutputAlgorithm implements Zeroizable {
 	public boolean useExternalCounter()
 	{
 		return false;
+	}
+
+	public byte getMaxExternalCounterLength()
+	{
+		return 0;
 	}
 
 	protected AbstractEncryptionOutputAlgorithm()

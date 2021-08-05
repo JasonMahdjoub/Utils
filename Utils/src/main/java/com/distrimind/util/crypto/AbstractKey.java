@@ -102,10 +102,6 @@ public abstract class AbstractKey extends AbstractDecentralizedValue implements 
 		if (b[0]==IS_HYBRID_PRIVATE_KEY || b[0]==IS_HYBRID_PUBLIC_KEY)
 		{
 			return true;
-			/*int s=(int)Bits.getPositiveInteger(b, off+1, 3);
-			if (b.length<off+36+s)
-				return false;
-			return isValidType(b, off+4) && isValidType(b, off+4+s);*/
 		}
 		else {
 			byte type = b[off];
@@ -123,10 +119,10 @@ public abstract class AbstractKey extends AbstractDecentralizedValue implements 
 		return decode(b, off, len, !isPublicKey(b, off));
 	}
 
-	static WrappedData encodeHybridKey(AbstractKey nonPQCKey, AbstractKey PQCKey, boolean includeTimeExpiration)
+	static WrappedData encodeHybridKey(AbstractKey nonPQCKey, AbstractKey PQCKey, boolean includeTimes)
 	{
-		WrappedData encodedNonPQC=nonPQCKey instanceof IASymmetricPublicKey?((IASymmetricPublicKey)nonPQCKey).encode(includeTimeExpiration):nonPQCKey.encode();
-		WrappedData encodedPQC=PQCKey instanceof IASymmetricPublicKey?((IASymmetricPublicKey)PQCKey).encode(includeTimeExpiration):PQCKey.encode();
+		WrappedData encodedNonPQC=nonPQCKey instanceof IASymmetricPublicKey?((IASymmetricPublicKey)nonPQCKey).encode(includeTimes):nonPQCKey.encode();
+		WrappedData encodedPQC=PQCKey instanceof IASymmetricPublicKey?((IASymmetricPublicKey)PQCKey).encode(includeTimes):PQCKey.encode();
 
 		byte[] res=new byte[encodedNonPQC.getBytes().length+encodedPQC.getBytes().length+4];
 		res[0]=((nonPQCKey instanceof HybridASymmetricPublicKey)?IS_HYBRID_PUBLIC_KEY:IS_HYBRID_PRIVATE_KEY);
@@ -256,35 +252,45 @@ public abstract class AbstractKey extends AbstractDecentralizedValue implements 
 			} else if (type == 4) {
 				fillArrayWithZerosWhenDecoded=false;
 
-				byte[] publicKey = new byte[len - 4 - ASymmetricPrivateKey.ENCODED_TYPE_SIZE-(includeKeyExpiration?8:0)];
+				byte[] publicKey = new byte[len - 4 - ASymmetricPrivateKey.ENCODED_TYPE_SIZE-(includeKeyExpiration?16:0)];
 				int posKey=ASymmetricPrivateKey.ENCODED_TYPE_SIZE+4+off;
 				long timeExpiration;
+				long publicKeyBeginDateUTC;
 				if (includeKeyExpiration) {
 
+					publicKeyBeginDateUTC=Bits.getLong(b, posKey);
+					posKey += 8;
 					timeExpiration=Bits.getLong(b, posKey);
 					posKey += 8;
 				}
-				else
-					timeExpiration=Long.MAX_VALUE;
+				else {
+					publicKeyBeginDateUTC=Long.MIN_VALUE;
+					timeExpiration = Long.MAX_VALUE;
+				}
 				System.arraycopy(b, posKey, publicKey, 0, publicKey.length);
 				return new ASymmetricPublicKey(ASymmetricEncryptionType.valueOf((int) Bits.getUnsignedInt(b, off+4, ASymmetricPrivateKey.ENCODED_TYPE_SIZE)), publicKey,
-						(int)Bits.getUnsignedInt(b, off+1, 3), timeExpiration);
+						(int)Bits.getUnsignedInt(b, off+1, 3), publicKeyBeginDateUTC, timeExpiration);
 			} else if (type == 5) {
 				fillArrayWithZerosWhenDecoded=false;
 
-				byte[] publicKey = new byte[len - 4 - ASymmetricPrivateKey.ENCODED_TYPE_SIZE - (includeKeyExpiration ? 8 : 0)];
+				byte[] publicKey = new byte[len - 4 - ASymmetricPrivateKey.ENCODED_TYPE_SIZE - (includeKeyExpiration ? 16 : 0)];
 				int posKey=ASymmetricPrivateKey.ENCODED_TYPE_SIZE+4+off;
 				long timeExpiration;
+				long publicKeyBeginDateUTC;
 				if (includeKeyExpiration) {
 
+					publicKeyBeginDateUTC=Bits.getLong(b, posKey);
+					posKey += 8;
 					timeExpiration=Bits.getLong(b, posKey);
 					posKey += 8;
 				}
-				else
-					timeExpiration=Long.MAX_VALUE;
+				else {
+					publicKeyBeginDateUTC=Long.MIN_VALUE;
+					timeExpiration = Long.MAX_VALUE;
+				}
 				System.arraycopy(b, posKey, publicKey, 0, publicKey.length);
 				ASymmetricPublicKey res=new ASymmetricPublicKey(ASymmetricAuthenticatedSignatureType.valueOf((int) Bits.getUnsignedInt(b, off+4, ASymmetricPrivateKey.ENCODED_TYPE_SIZE)), publicKey,
-						(int)Bits.getUnsignedInt(b, off+1, 3), timeExpiration);
+						(int)Bits.getUnsignedInt(b, off+1, 3), publicKeyBeginDateUTC, timeExpiration);
 				res.xdhKey=isXdh;
 				return res;
 			} else if (type==IS_HYBRID_PRIVATE_KEY || type==IS_HYBRID_PUBLIC_KEY)

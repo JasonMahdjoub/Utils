@@ -74,17 +74,26 @@ abstract class CommonCipherInputStream extends RandomInputStream {
 	private int outputBufferIndex =0;
 	private Long length;
 	private final boolean allInDoFinal;
+	private final byte counterLength;
 
 	protected abstract void initCipherForDecryptionWithIvAndCounter(byte[] iv, int counter) throws IOException;
 	protected abstract void initCipherForDecryptionWithIv(byte[] iv) throws IOException;
 	protected abstract void initCipherForDecryption() throws IOException;
 	protected abstract long getOutputSizeAfterDecryption(long inputLength) throws IOException;
 
-	CommonCipherInputStream(boolean allInDoFinal, int maxEncryptedPartLength, RandomInputStream is, boolean includeIV, byte[] iv, int IVSizeBytesWithoutExternalCounter, boolean useExternalCounter, byte[] externalCounter, AbstractCipher cipher, byte[] associatedData, int offAD, int lenAD, byte[] buffer, boolean supportRandomAccess, int counterStepInBytes, int maxPlainTextSizeForEncoding) throws IOException {
-		if (useExternalCounter && externalCounter==null)
-			throw new NullPointerException("External counter is null");
-		else if (!useExternalCounter && externalCounter!=null)
-			throw new IllegalArgumentException("External counter be null");
+	CommonCipherInputStream(boolean allInDoFinal, int maxEncryptedPartLength, RandomInputStream is, boolean includeIV, byte[] iv, int IVSizeBytesWithoutExternalCounter, byte maxCounterLength, byte[] externalCounter, AbstractCipher cipher, byte[] associatedData, int offAD, int lenAD, byte[] buffer, boolean supportRandomAccess, int counterStepInBytes, int maxPlainTextSizeForEncoding) throws IOException {
+		if (maxCounterLength>0) {
+			if (externalCounter == null)
+				throw new NullPointerException("External counter is null");
+			if (externalCounter.length < maxCounterLength)
+				throw new IllegalArgumentException();
+			counterLength=maxCounterLength;
+		}
+		else{
+			if (externalCounter!=null)
+				throw new IllegalArgumentException("External counter be null");
+			counterLength = 0;
+		}
 		this.allInDoFinal=allInDoFinal;
 		this.maxEncryptedPartLength = maxEncryptedPartLength;
 		this.includeIV = includeIV;
@@ -134,7 +143,7 @@ abstract class CommonCipherInputStream extends RandomInputStream {
 						iv=new byte[iv.length];
 					is.readFully(iv, 0, IVSizeBytesWithoutExternalCounter);
 					if (externalCounter!=null)
-						System.arraycopy(externalCounter, 0, iv, IVSizeBytesWithoutExternalCounter, externalCounter.length);
+						System.arraycopy(externalCounter, 0, iv, IVSizeBytesWithoutExternalCounter, counterLength);
 					initCipherForDecryptionWithIv(iv);
 					posEncrypted +=IVSizeBytesWithoutExternalCounter;
 				}
@@ -162,8 +171,6 @@ abstract class CommonCipherInputStream extends RandomInputStream {
 			outputBuffer=new byte[128+cipher.getOutputSize(this.buffer.length)];
 	}
 	private void checkDoFinal(boolean endStream) throws IOException {
-		/*if (endStream)
-			length=posPlainText;*/
 		if (doFinal && (posEncrypted %maxEncryptedPartLength==0 || endStream))
 		{
 			try {
@@ -389,7 +396,6 @@ abstract class CommonCipherInputStream extends RandomInputStream {
 
 	@Override
 	public void readFully(byte[] tab, int off, int len) throws IOException {
-		//noinspection ResultOfMethodCallIgnored
 		read(tab, off, len, true);
 	}
 

@@ -1,10 +1,12 @@
+package com.distrimind.util;
 /*
-Copyright or © or Copr. Jason Mahdjoub (04/02/2016)
+Copyright or © or Copr. Jason Mahdjoub (01/04/2013)
 
 jason.mahdjoub@distri-mind.fr
 
-This software (Utils) is a computer program whose purpose is to give several kind of tools for developers 
-(ciphers, XML readers, decentralized id generators, etc.).
+This software (Object Oriented Database (OOD)) is a computer program 
+whose purpose is to manage a local database with the object paradigm 
+and the java language 
 
 This software is governed by the CeCILL-C license under French law and
 abiding by the rules of distribution of free software.  You can  use, 
@@ -32,28 +34,27 @@ same conditions as regards security.
 The fact that you are presently reading this means that you have had
 knowledge of the CeCILL-C license and that you accept its terms.
  */
-package com.distrimind.util.crypto;
 
-
-import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
+import com.distrimind.util.progress_monitors.ProgressMonitorDM;
+import com.distrimind.util.progress_monitors.ProgressMonitorFactory;
+import com.distrimind.util.progress_monitors.ProgressMonitorParameters;
 
 /**
- *
  * @author Jason Mahdjoub
- * @version 1.3
- * @since Utils 3.15.0
+ * @version 1.0
+ * @since Utils 5.17.4
  */
-public class P2PLoginWithSymmetricSignature extends AbstractP2PLoginWithSignature {
+public class TestProgressBar {
+	public static void main(String[] args) throws InterruptedException {
+		ProgressMonitorParameters pmp=new ProgressMonitorParameters("Here my message", "Here my note" , 0,1000 );
+		pmp.setMillisToPopup(2000);
+		pmp.setMillisToDecideToPopup(2000);
+		ProgressMonitorDM progressMonitor =ProgressMonitorFactory.getDefaultProgressMonitorFactory().getProgressMonitor(pmp);
+		for (int i=0;i<=100;i++)
+		{
+			progressMonitor.setProgress(i*10);
+			Thread.sleep(50);
+		}
 
-	P2PLoginWithSymmetricSignature(SymmetricSecretKey secretKey, AbstractSecureRandom random) throws IOException, NoSuchAlgorithmException, NoSuchProviderException {
-		super(random, new SymmetricAuthenticatedSignerAlgorithm(secretKey), new SymmetricAuthenticatedSignatureCheckerAlgorithm(secretKey));
-		if (secretKey==null)
-			throw new NullPointerException();
-		if (secretKey.getAuthenticatedSignatureAlgorithmType()==null)
-			throw new IllegalArgumentException("The given secret key is not usable for signature");
 	}
-
-
 }

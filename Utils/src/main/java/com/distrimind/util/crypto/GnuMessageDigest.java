@@ -77,7 +77,7 @@ public final class GnuMessageDigest extends AbstractMessageDigest {
 	}
 
 	@Override
-	public int getDigestLength() {
+	public int getDigestLengthInBytes() {
 		return GnuFunctions.digestGetLength(messageDigest);
 	}
 

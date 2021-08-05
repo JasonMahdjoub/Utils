@@ -51,7 +51,7 @@ import com.distrimind.util.OS;
  * List of asymmetric encryption algorithms
  * 
  * @author Jason Mahdjoub
- * @version 2.1
+ * @version 3.0
  * @since Utils 2.9.0
  */
 public enum CodeProvider {
@@ -63,35 +63,58 @@ public enum CodeProvider {
 	private static volatile boolean init=false;
 
 	static void ensureProviderLoaded(CodeProvider provider) {
+		if (!init)
+		{
+			CodeProvider.init=true;
+			Security.insertProviderAt(new UtilsSecurityProvider(), 1);
+		}
 		switch (provider)
 		{
 			case BCFIPS:
-				ensureBCFIPSProviderLoaded();
+				if (ensureBCFIPSProviderLoaded())
+				{
+					try {
+						if (bouncyProvider==null)
+						{
+							CryptoServicesRegistrar.setSecureRandom(SecureRandomType.DEFAULT_BC_FIPS_APPROVED.getSingleton(null));
+						}
+						else {
+							AbstractSecureRandom random = SecureRandomType.DEFAULT.getSingleton(null);
+							com.distrimind.bcfips.crypto.CryptoServicesRegistrar.setSecureRandom(random);
+							CryptoServicesRegistrar.setSecureRandom(random);
+						}
+					} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
+						e.printStackTrace();
+					}
+				}
 				break;
 			case BCPQC:
 				ensureBQCProviderLoaded();
 				break;
 			case BC:
-				ensureBouncyCastleProviderLoaded();
+				if (ensureBouncyCastleProviderLoaded())
+				{
+					try {
+						if (bouncyProviderFIPS==null)
+							CryptoServicesRegistrar.setSecureRandom(SecureRandomType.JAVA_STRONG_DRBG.getSingleton(null));
+						else {
+							AbstractSecureRandom random=SecureRandomType.DEFAULT.getSingleton(null);
+							CryptoServicesRegistrar.setSecureRandom(random);
+							com.distrimind.bcfips.crypto.CryptoServicesRegistrar.setSecureRandom(random);
+						}
+					} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
+						e.printStackTrace();
+					}
+				}
+
 				break;
 			case GNU_CRYPTO:
 				GnuFunctions.checkGnuLoaded();
 				break;
 		}
-		if (!init)
-		{
-			CodeProvider.init=true;
-
-			try {
-				CryptoServicesRegistrar.setSecureRandom(SecureRandomType.DEFAULT.getSingleton(null));
-			} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
-				e.printStackTrace();
-			}
-		}
-
 	}
 
-	private static void ensureBouncyCastleProviderLoaded() {
+	private static boolean ensureBouncyCastleProviderLoaded() {
 
 		if (bouncyProvider == null) {
 
@@ -107,31 +130,36 @@ public enum CodeProvider {
 					}
 					else
 						Security.insertProviderAt(bc, Security.getProviders().length+1);
-
+					return true;
 				}
 			}
 		}
+		return false;
 	}
 
-	private static void ensureBCFIPSProviderLoaded() {
-		ensureBouncyCastleProviderLoaded();
+	private static boolean ensureBCFIPSProviderLoaded() {
+
 		if (bouncyProviderFIPS == null) {
 
 			synchronized (CodeProvider.class) {
+
 				if (bouncyProviderFIPS == null) {
 					BouncyCastleFipsProvider bc = new BouncyCastleFipsProvider();
 					Security.insertProviderAt(bc, Security.getProviders().length+1);
 					bouncyProviderFIPS=bc;
+					return true;
 				}
 			}
 		}
+		return false;
 	}
 
 	private static void ensureBQCProviderLoaded() {
-		ensureBouncyCastleProviderLoaded();
+
 		if (bouncyProviderPQC == null) {
 
 			synchronized (CodeProvider.class) {
+
 				if (bouncyProviderPQC == null) {
 					BouncyCastlePQCProvider bc = new BouncyCastlePQCProvider();
 					Security.insertProviderAt(bc, Security.getProviders().length+1);

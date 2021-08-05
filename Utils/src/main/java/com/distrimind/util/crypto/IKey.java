@@ -2,7 +2,6 @@ package com.distrimind.util.crypto;
 
 import com.distrimind.util.DecentralizedValue;
 import com.distrimind.util.data_buffers.WrappedData;
-import com.distrimind.util.data_buffers.WrappedSecretData;
 
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;

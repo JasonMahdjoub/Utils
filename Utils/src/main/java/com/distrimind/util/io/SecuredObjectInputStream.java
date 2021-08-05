@@ -46,17 +46,17 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.nio.file.Path;
 import java.util.*;
 
 /**
  * @author Jason Mahdjoub
- * @version 2.1
+ * @version 2.2
  * @since Utils 4.4.0
  */
-@SuppressWarnings("NullableProblems")
 public abstract class SecuredObjectInputStream extends InputStream implements DataInput  {
 	private static final int DEFAULT_BUFFER_SIZE = FileTools.BUFFER_SIZE;
-	private static final int MAX_BUFFER_SIZE = Integer.MAX_VALUE - 8;
+	//private static final int MAX_BUFFER_SIZE = Integer.MAX_VALUE - 8;
 
 	private SerializationTools.ObjectResolver objectResolver=new SerializationTools.ObjectResolver();
 
@@ -119,7 +119,7 @@ public abstract class SecuredObjectInputStream extends InputStream implements Da
 		return (ch1 << 8) + (ch2);
 	}
 
-	public final int readUnsignedShort24Bits() throws IOException {
+	public final int readUnsignedInt24Bits() throws IOException {
 		int ch1 = read();
 		int ch2 = read();
 		int ch3 = read();
@@ -202,12 +202,22 @@ public abstract class SecuredObjectInputStream extends InputStream implements Da
 
 
 
-	public byte[] readNBytes(int len) throws IOException {
+	@Override
+	public abstract int available() throws IOException;
+
+	byte[] readFully(int len) throws IOException
+	{
 		if (len < 0) {
 			throw new IllegalArgumentException("len < 0");
 		}
+		byte[] res=new byte[len];
+		readFully(res);
+		return res;
+	}
 
-		List<byte[]> bufs = null;
+	public byte[] readNBytes(int len) throws IOException {
+		return readFully(Math.min(len, available()));
+		/*List<byte[]> bufs = null;
 		byte[] result = null;
 		int total = 0;
 		int remaining = len;
@@ -260,7 +270,7 @@ public abstract class SecuredObjectInputStream extends InputStream implements Da
 			remaining -= count;
 		}
 
-		return result;
+		return result;*/
 	}
 
 
@@ -309,18 +319,30 @@ public abstract class SecuredObjectInputStream extends InputStream implements Da
 	}
 
 	public byte[] readBytesArray(boolean nullAccepted, int maxSizeInBytes) throws IOException {
-		return SerializationTools.readBytes(this, nullAccepted, null, 0, maxSizeInBytes);
+		return SerializationTools.readBytes(this, nullAccepted, maxSizeInBytes);
 	}
-	public byte[] readBytesArray(byte[] array, boolean nullAccepted) throws IOException {
+	public int readBytesArray(byte[] array, boolean nullAccepted) throws IOException {
 		return SerializationTools.readBytes(this, nullAccepted, array, 0, array.length);
 	}
 
-	public byte[] readBytesArray(byte[] array, int offset, int len, boolean nullAccepted) throws IOException {
-		return SerializationTools.readBytes(this, nullAccepted, array, offset, len);
+	public int readBytesArray(byte[] array, int offset, boolean nullAccepted, int maxSizeBytes) throws IOException {
+		return SerializationTools.readBytes(this, nullAccepted, array, offset, maxSizeBytes);
 	}
 
 	public char[] readChars(boolean nullAccepted, int maxCharsNumber) throws IOException {
 		return SerializationTools.readChars(this, (int)Math.min(2L*maxCharsNumber, Integer.MAX_VALUE), nullAccepted);
+	}
+	public File readFile(boolean nullAccepted) throws IOException {
+		return readFile(nullAccepted, SerializationTools.DEFAULT_MAX_FILE_NAME_LENGTH);
+	}
+	public File readFile(boolean nullAccepted, int maxCharsNumber) throws IOException {
+		return SerializationTools.readFile(this, (int)Math.min(2L*maxCharsNumber, Integer.MAX_VALUE), nullAccepted);
+	}
+	public Path readPath(boolean nullAccepted) throws IOException {
+		return readPath(nullAccepted, SerializationTools.DEFAULT_MAX_FILE_NAME_LENGTH);
+	}
+	public Path readPath(boolean nullAccepted, int maxCharsNumber) throws IOException {
+		return SerializationTools.readPath(this, (int)Math.min(2L*maxCharsNumber, Integer.MAX_VALUE), nullAccepted);
 	}
 	public String readString(boolean nullAccepted, int maxCharsNumber) throws IOException {
 		return SerializationTools.readString(this, (int)Math.min(2L*maxCharsNumber, Integer.MAX_VALUE), nullAccepted);
@@ -454,8 +476,15 @@ public abstract class SecuredObjectInputStream extends InputStream implements Da
 	public <TK extends Enum<?>> TK readEnum(boolean nullAccepted, Class<TK> classType) throws IOException, ClassNotFoundException {
 		return checkType(readEnum(nullAccepted), classType);
 	}
-	public Enum<?> readEnum(boolean nullAccepted) throws IOException, ClassNotFoundException {
-		return SerializationTools.readEnum(this, nullAccepted);
+	@SuppressWarnings("unchecked")
+	public <TK extends Enum<?>> TK readEnum(boolean nullAccepted) throws IOException, ClassNotFoundException {
+		try {
+			return (TK)SerializationTools.readEnum(this, nullAccepted);
+		}
+		catch (ClassCastException e)
+		{
+			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, e);
+		}
 	}
 	public Class<?> readClass(boolean nullAccepted) throws IOException, ClassNotFoundException {
 		return readClass(nullAccepted, Object.class);

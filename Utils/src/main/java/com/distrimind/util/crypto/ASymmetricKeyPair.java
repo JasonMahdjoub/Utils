@@ -150,7 +150,7 @@ public class ASymmetricKeyPair extends AbstractKeyPair<ASymmetricPrivateKey, ASy
 		return new ASymmetricKeyPair(this.privateKey.getNewClonedPrivateKey(), this.publicKey.getPublicKeyWithNewExpirationTime(timeExpirationUTC));
 	}
 
-	ASymmetricKeyPair(ASymmetricEncryptionType type, Object keyPair, int keySize,
+	ASymmetricKeyPair(ASymmetricEncryptionType type, Object keyPair, int keySize, long publicKeyValidityBeginDateUTC,
 			long expirationUTC) {
 		if (type == null)
 			throw new NullPointerException("type");
@@ -159,7 +159,7 @@ public class ASymmetricKeyPair extends AbstractKeyPair<ASymmetricPrivateKey, ASy
 		if (keySize < 256)
 			throw new IllegalArgumentException("keySize");
 		privateKey = new ASymmetricPrivateKey(type, GnuFunctions.getPrivateKey(keyPair), keySize);
-		publicKey = new ASymmetricPublicKey(type, GnuFunctions.getPublicKey(keyPair), keySize, expirationUTC);
+		publicKey = new ASymmetricPublicKey(type, GnuFunctions.getPublicKey(keyPair), keySize, publicKeyValidityBeginDateUTC, expirationUTC);
 		this.keySizeBits = keySize;
 		this.encryptionType = type;
 		this.signatureType=null;
@@ -168,7 +168,7 @@ public class ASymmetricKeyPair extends AbstractKeyPair<ASymmetricPrivateKey, ASy
 		this.gnuKeyPair=keyPair;
 	}
 
-	ASymmetricKeyPair(ASymmetricEncryptionType type, KeyPair keyPair, int keySize, long expirationUTC) {
+	ASymmetricKeyPair(ASymmetricEncryptionType type, KeyPair keyPair, int keySize, long publicKeyValidityBeginDateUTC, long expirationUTC) {
 		if (type == null)
 			throw new NullPointerException("type");
 		if (keyPair == null)
@@ -176,7 +176,7 @@ public class ASymmetricKeyPair extends AbstractKeyPair<ASymmetricPrivateKey, ASy
 		if (keySize < 256)
 			throw new IllegalArgumentException("keySize");
 		privateKey = new ASymmetricPrivateKey(type, keyPair.getPrivate(), keySize);
-		publicKey = new ASymmetricPublicKey(type, keyPair.getPublic(), keySize, expirationUTC);
+		publicKey = new ASymmetricPublicKey(type, keyPair.getPublic(), keySize, publicKeyValidityBeginDateUTC, expirationUTC);
 		this.keySizeBits = keySize;
 		this.encryptionType = type;
 		this.signatureType=null;
@@ -204,7 +204,7 @@ public class ASymmetricKeyPair extends AbstractKeyPair<ASymmetricPrivateKey, ASy
 		hashCode = privateKey.hashCode() + publicKey.hashCode();
 	}
 
-	ASymmetricKeyPair(ASymmetricAuthenticatedSignatureType type, Object keyPair, int keySize,
+	ASymmetricKeyPair(ASymmetricAuthenticatedSignatureType type, Object keyPair, int keySize, long publicKeyValidityBeginDateUTC,
 					  long expirationUTC) {
 		if (type == null)
 			throw new NullPointerException("type");
@@ -213,7 +213,7 @@ public class ASymmetricKeyPair extends AbstractKeyPair<ASymmetricPrivateKey, ASy
 		if (keySize < 256)
 			throw new IllegalArgumentException("keySize");
 		privateKey = new ASymmetricPrivateKey(type, GnuFunctions.getPrivateKey(keyPair), keySize);
-		publicKey = new ASymmetricPublicKey(type, GnuFunctions.getPublicKey(keyPair), keySize, expirationUTC);
+		publicKey = new ASymmetricPublicKey(type, GnuFunctions.getPublicKey(keyPair), keySize, publicKeyValidityBeginDateUTC, expirationUTC);
 		this.keySizeBits = keySize;
 		this.encryptionType = null;
 		this.signatureType=type;
@@ -222,7 +222,7 @@ public class ASymmetricKeyPair extends AbstractKeyPair<ASymmetricPrivateKey, ASy
 		this.gnuKeyPair=keyPair;
 	}
 
-	ASymmetricKeyPair(ASymmetricAuthenticatedSignatureType type, KeyPair keyPair, int keySize, long expirationUTC, boolean xdhKey) {
+	ASymmetricKeyPair(ASymmetricAuthenticatedSignatureType type, KeyPair keyPair, int keySize, long publicKeyValidityBeginDateUTC, long expirationUTC, boolean xdhKey) {
 		if (type == null)
 			throw new NullPointerException("type");
 		if (keyPair == null)
@@ -230,7 +230,7 @@ public class ASymmetricKeyPair extends AbstractKeyPair<ASymmetricPrivateKey, ASy
 		if (keySize < 256)
 			throw new IllegalArgumentException("keySize");
 		privateKey = new ASymmetricPrivateKey(type, keyPair.getPrivate(), keySize, xdhKey);
-		publicKey = new ASymmetricPublicKey(type, keyPair.getPublic(), keySize, expirationUTC, xdhKey);
+		publicKey = new ASymmetricPublicKey(type, keyPair.getPublic(), keySize, publicKeyValidityBeginDateUTC, expirationUTC, xdhKey);
 		this.keySizeBits = keySize;
 		this.encryptionType = null;
 		this.signatureType=type;
@@ -243,23 +243,25 @@ public class ASymmetricKeyPair extends AbstractKeyPair<ASymmetricPrivateKey, ASy
 		return encode(true);
 	}
 	@Override
-	public WrappedSecretData encode(boolean includeTimeExpiration)
+	public WrappedSecretData encode(boolean includeTimes)
 	{
 		if (getTimeExpirationUTC()==Long.MAX_VALUE)
-			includeTimeExpiration=false;
+			includeTimes =false;
 
 		byte[] kp=Bits.concatenateEncodingWithShortIntSizedTabs(privateKey.getBytesPrivateKey(), publicKey.getBytesPublicKey());
-		byte[] tab = new byte[4+ASymmetricPrivateKey.ENCODED_TYPE_SIZE+kp.length+(includeTimeExpiration?8:0)];
+		byte[] tab = new byte[4+ASymmetricPrivateKey.ENCODED_TYPE_SIZE+kp.length+(includeTimes ?16:0)];
 		tab[0]=encryptionType==null?(byte)9:(byte)8;
-		if (includeTimeExpiration)
+		if (includeTimes)
 			tab[0]|= AbstractKey.INCLUDE_KEY_EXPIRATION_CODE;
 		if (privateKey.xdhKey)
 			tab[0]|= AbstractKey.IS_XDH_KEY;
 		Bits.putUnsignedInt(tab, 1, keySizeBits, 3);
 		Bits.putUnsignedInt(tab, 4, encryptionType==null?signatureType.ordinal():encryptionType.ordinal(), ASymmetricPrivateKey.ENCODED_TYPE_SIZE);
 		int pos=4+ASymmetricPrivateKey.ENCODED_TYPE_SIZE;
-		if (includeTimeExpiration) {
-			Bits.putLong(tab, 4 + ASymmetricPrivateKey.ENCODED_TYPE_SIZE, publicKey.getTimeExpirationUTC());
+		if (includeTimes) {
+			Bits.putLong(tab, pos, publicKey.getPublicKeyValidityBeginDateUTC());
+			pos += 8;
+			Bits.putLong(tab, pos, publicKey.getTimeExpirationUTC());
 			pos += 8;
 		}
 		System.arraycopy(kp, 0, tab, pos, kp.length);
@@ -292,7 +294,6 @@ public class ASymmetricKeyPair extends AbstractKeyPair<ASymmetricPrivateKey, ASy
 			int codedTypeSize = SymmetricSecretKey.ENCODED_TYPE_SIZE;
 			int keySize = (int)(Bits.getUnsignedInt(b, 1+off, 3));
 			int posKey=codedTypeSize+4+off;
-			long expirationUTC;
 			byte type=b[off];
 
 			boolean includeKeyExpiration=(type & AbstractKey.INCLUDE_KEY_EXPIRATION_CODE) == AbstractKey.INCLUDE_KEY_EXPIRATION_CODE;
@@ -301,15 +302,21 @@ public class ASymmetricKeyPair extends AbstractKeyPair<ASymmetricPrivateKey, ASy
 				type-= AbstractKey.INCLUDE_KEY_EXPIRATION_CODE;
 			if (kdhKey)
 				type-= AbstractKey.IS_XDH_KEY;
+			long timeExpiration;
+			long publicKeyBeginDateUTC;
 			if (includeKeyExpiration) {
 
-				expirationUTC=Bits.getLong(b, posKey);
+				publicKeyBeginDateUTC=Bits.getLong(b, posKey);
+				posKey += 8;
+				timeExpiration=Bits.getLong(b, posKey);
 				posKey += 8;
 			}
-			else
-				expirationUTC=Long.MAX_VALUE;
+			else {
+				publicKeyBeginDateUTC=Long.MIN_VALUE;
+				timeExpiration = Long.MAX_VALUE;
+			}
 
-			byte[] kp = new byte[len - 4 - codedTypeSize-(includeKeyExpiration?8:0)];
+			byte[] kp = new byte[len - 4 - codedTypeSize-(includeKeyExpiration?16:0)];
 			System.arraycopy(b, posKey, kp, 0, kp.length);
 			byte[][] keys = Bits.separateEncodingsWithShortIntSizedTabs(kp);
 
@@ -317,7 +324,7 @@ public class ASymmetricKeyPair extends AbstractKeyPair<ASymmetricPrivateKey, ASy
 				ASymmetricAuthenticatedSignatureType type2 = ASymmetricAuthenticatedSignatureType.valueOf((int) Bits.getUnsignedInt(b, 4+off, codedTypeSize));
 
 				ASymmetricKeyPair res=new ASymmetricKeyPair(type2, new ASymmetricPrivateKey(type2, keys[0], keySize),
-						new ASymmetricPublicKey(type2, keys[1], keySize, expirationUTC), keySize);
+						new ASymmetricPublicKey(type2, keys[1], keySize, publicKeyBeginDateUTC, timeExpiration), keySize);
 				res.getASymmetricPublicKey().xdhKey=kdhKey;
 				res.getASymmetricPrivateKey().xdhKey=kdhKey;
 				return res;
@@ -325,7 +332,7 @@ public class ASymmetricKeyPair extends AbstractKeyPair<ASymmetricPrivateKey, ASy
 				ASymmetricEncryptionType type2 = ASymmetricEncryptionType.valueOf((int) Bits.getUnsignedInt(b, 4+off, codedTypeSize));
 
 				ASymmetricKeyPair res=new ASymmetricKeyPair(type2, new ASymmetricPrivateKey(type2, keys[0], keySize),
-						new ASymmetricPublicKey(type2, keys[1], keySize, expirationUTC), keySize);
+						new ASymmetricPublicKey(type2, keys[1], keySize, publicKeyBeginDateUTC, timeExpiration), keySize);
 				res.getASymmetricPublicKey().xdhKey=kdhKey;
 				res.getASymmetricPrivateKey().xdhKey=kdhKey;
 				return res;
@@ -457,4 +464,8 @@ public class ASymmetricKeyPair extends AbstractKeyPair<ASymmetricPrivateKey, ASy
 		return encryptionType==null?signatureType.isPostQuantumAlgorithm():encryptionType.isPostQuantumAlgorithm();
 	}
 
+	@Override
+	public boolean areTimesValid() {
+		return publicKey.areTimesValid();
+	}
 }

@@ -105,8 +105,8 @@ public class TestStreams {
 		Assert.assertEquals(inputStream.length(), referenceInputStream.length());
 		for (int i=0;i<maxCycles;i++)
 		{
-			if (i%(maxCycles/100)==0)
-				System.out.println(((i*100)/maxCycles));
+			/*if (i%(maxCycles/100)==0)
+				System.out.println(((i*100)/maxCycles));*/
 			Assert.assertEquals(inputStream.available(), referenceInputStream.available());
 			if (rand.nextDouble()<0.1) {
 				if (rand.nextDouble()<0.5) {
@@ -167,11 +167,22 @@ public class TestStreams {
 
 	@DataProvider(name = "provideOutputStreams")
 	public Object[][] provideOutputStreams() throws IOException {
-		Object[][] res=new Object[5][2];
+		Object[][] res=new Object[7][2];
 		RandomOutputStream dest=new RandomByteArrayOutputStream();
 		RandomOutputStream outputStream=new BufferedRandomOutputStream(dest);
 		res[0][0]=dest;
 		res[0][1]=outputStream;
+
+		RandomCacheFileCenter.getSingleton().setMaxMemoryUsedToStoreDataIntoMemoryInsteadOfFiles(1024*1024);
+		dest=RandomCacheFileCenter.getSingleton().getNewRandomCacheFileOutputStream(true);
+		outputStream=dest;
+		res[1][0]=dest;
+		res[1][1]=outputStream;
+
+		dest=RandomCacheFileCenter.getSingleton().getNewBufferedRandomCacheFileOutputStream(true);
+		outputStream=dest;
+		res[2][0]=dest;
+		res[2][1]=outputStream;
 
 		dest=new AggregatedRandomOutputStreams(new RandomOutputStream[]{
 				new RandomByteArrayOutputStream(),
@@ -182,23 +193,23 @@ public class TestStreams {
 		});
 		outputStream=dest;
 
-		res[1][0]=dest;
-		res[1][1]=outputStream;
-
-		dest=new FragmentedRandomOutputStream((byte)2,new RandomByteArrayOutputStream(), new RandomByteArrayOutputStream());
-		outputStream=dest;
-		res[2][0]=dest;
-		res[2][1]=outputStream;
-
-		dest=new FragmentedRandomOutputStreamPerChannel(new FragmentedStreamParameters((byte)2, (byte)0),new RandomByteArrayOutputStream());
-		outputStream=dest;
 		res[3][0]=dest;
 		res[3][1]=outputStream;
 
-		dest=new FragmentedRandomOutputStreamPerChannel(new FragmentedStreamParameters((byte)2, (byte)1),new RandomByteArrayOutputStream());
+		dest=new FragmentedRandomOutputStream((byte)2,new RandomByteArrayOutputStream(), new RandomByteArrayOutputStream());
 		outputStream=dest;
 		res[4][0]=dest;
 		res[4][1]=outputStream;
+
+		dest=new FragmentedRandomOutputStreamPerChannel(new FragmentedStreamParameters((byte)2, (byte)0),new RandomByteArrayOutputStream());
+		outputStream=dest;
+		res[5][0]=dest;
+		res[5][1]=outputStream;
+
+		dest=new FragmentedRandomOutputStreamPerChannel(new FragmentedStreamParameters((byte)2, (byte)1),new RandomByteArrayOutputStream());
+		outputStream=dest;
+		res[6][0]=dest;
+		res[6][1]=outputStream;
 
 		return res;
 
@@ -211,8 +222,8 @@ public class TestStreams {
 		RandomByteArrayOutputStream dest2=new RandomByteArrayOutputStream();
 		for (int i=0;i<maxCycles;i++)
 		{
-			if (i%(maxCycles/100)==0)
-				System.out.println(((i*100)/maxCycles));
+			/*if (i%(maxCycles/100)==0)
+				System.out.println(((i*100)/maxCycles));*/
 			if (outputStream.length()>100 && rand.nextDouble()<0.1)
 			{
 				if (rand.nextDouble()<0.2)

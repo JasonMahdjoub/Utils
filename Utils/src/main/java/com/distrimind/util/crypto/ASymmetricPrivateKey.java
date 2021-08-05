@@ -84,8 +84,6 @@ public class ASymmetricPrivateKey extends AbstractKey implements IASymmetricPriv
 	private static final int MAX_SIZE_IN_BITS_OF_NON_HYBRID_PRIVATE_KEY=MAX_SIZE_IN_BYTES_OF_NON_HYBRID_PRIVATE_KEY*8;
 
 
-	// private final PrivateKey privateKey;
-	//public static final int MAX_KEY_SIZE_BITS=1<<24-1;
 	private byte[] privateKey;
 
 	private final int keySizeBits;
