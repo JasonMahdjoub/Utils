@@ -60,7 +60,7 @@ repositories {
 }
 
 dependencies {
-    testImplementation 'org.testng:testng:7.1.0'
+    testImplementation 'org.testng:testng:7.4.0'
     testImplementation 'org.hamcrest:hamcrest-core:2.2'
 
     //api(group: 'org.bouncycastle', name: 'bc-fips', version: '1.0.2.1')
@@ -108,7 +108,7 @@ task generateVersionsFile(type:JavaExec, dependsOn:classes) {
             }
         }
 
-        main = 'com.distrimind.util.Utils'
+        mainClass = 'com.distrimind.util.Utils'
         classpath = sourceSets.main.runtimeClasspath
     }
 

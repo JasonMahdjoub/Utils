@@ -67,6 +67,10 @@ public class Utils {
 			VERSION.addCreator(new Person("mahdjoub", "jason"))
 					.addDeveloper(new PersonDeveloper("mahdjoub", "jason", "2016-01-04"))
 					.addDescription(
+							new Description((short)5, (short)19, (short)0, Version.Type.STABLE, (short)0, "2020-08-17")
+									.addItem("Add class DocumentBuilderFactoryWithNonDTD.")
+					)
+					.addDescription(
 							new Description((short)5, (short)18, (short)5, Version.Type.STABLE, (short)0, "2020-07-07")
 									.addItem("Use recompiled Bouncy Castle FIPS dependency in order to make it compatible with Android.")
 					)

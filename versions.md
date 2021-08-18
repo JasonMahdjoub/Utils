@@ -1,6 +1,6 @@
 Utils
 =====
-5.18.5 STABLE (Build: 3114) (from 04/01/2016 to 07/07/2020)
+5.19.0 STABLE (Build: 3156) (from 04/01/2016 to 17/08/2020)
 
 # Creator(s):
 Jason MAHDJOUB
@@ -9,6 +9,10 @@ Jason MAHDJOUB
 Jason MAHDJOUB (Entered in the team at 04/01/2016)
 
 # Modifications:
+
+
+### 5.19.0 STABLE (17/08/2020)
+* Add class DocumentBuilderFactoryWithNonDTD.
 
 
 ### 5.18.5 STABLE (07/07/2020)
