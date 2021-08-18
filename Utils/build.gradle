@@ -108,7 +108,7 @@ task generateVersionsFile(type:JavaExec, dependsOn:classes) {
             }
         }
 
-        main = 'com.distrimind.util.Utils'
+        mainClass = 'com.distrimind.util.Utils'
         classpath = sourceSets.main.runtimeClasspath
     }
 
