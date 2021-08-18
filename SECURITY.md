@@ -4,6 +4,7 @@
 
 | Version | Supported          |
 | ------- | ------------------ |
+| 5.19.0  | :heavy_check_mark: |
 | 5.18.5  | :heavy_check_mark: |
 | 5.18.4  | :heavy_check_mark: |
 | 5.18.3  | :heavy_check_mark: |
