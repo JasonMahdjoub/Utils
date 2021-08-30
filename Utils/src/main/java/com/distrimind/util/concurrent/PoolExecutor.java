@@ -46,7 +46,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 1.1
  * @since Utils 4.8.0
  */
 @SuppressWarnings("NullableProblems")
@@ -363,13 +363,6 @@ public class PoolExecutor implements ExecutorService {
 			this.started=false;
 		}
 
-		/*protected Future(Future<T> o) {
-			this.callable=o.callable;
-			this.flock=o.flock;
-			this.waitForComplete=o.waitForComplete;
-			this.started=false;
-		}*/
-
 		boolean take(boolean removeFromList)
 		{
 			flock.lock();
@@ -575,9 +568,9 @@ public class PoolExecutor implements ExecutorService {
 	{
 
 		private final Reference<Thread> threadReference;
-		private final ArrayList<java.util.concurrent.Future<?>> tasks;
+		private final List<java.util.concurrent.Future<?>> tasks;
 
-		public DedicatedRunnable(Reference<Thread> threadReference, ArrayList<java.util.concurrent.Future<?>> tasks) {
+		public DedicatedRunnable(Reference<Thread> threadReference, List<java.util.concurrent.Future<?>> tasks) {
 			this.threadReference = threadReference;
 			this.tasks = tasks;
 		}
@@ -605,8 +598,7 @@ public class PoolExecutor implements ExecutorService {
 			}
 		}
 	}
-
-	public List<java.util.concurrent.Future<?>> launchDedicatedThread(ThreadFactory threadFactory, List<Callable<?>> tasks)
+	public ArrayList<java.util.concurrent.Future<?>> getFutures(List<Callable<?>> tasks)
 	{
 		final ArrayList<java.util.concurrent.Future<?>> res=new ArrayList<>(tasks.size());
 		for (Callable<?> c : tasks)
@@ -615,9 +607,13 @@ public class PoolExecutor implements ExecutorService {
 			f.started=true;
 			res.add(f);
 		}
+		return res;
+	}
+	public void launchDedicatedThreadWithFutures(ThreadFactory threadFactory, List<java.util.concurrent.Future<?>> futures)
+	{
 		final Reference<Thread> ref=new Reference<>();
 		DedicatedRunnable dr;
-		ref.set(threadFactory.newThread(dr=new DedicatedRunnable(ref, res)));
+		ref.set(threadFactory.newThread(dr=new DedicatedRunnable(ref, futures)));
 
 		lock.lock();
 		try {
@@ -627,8 +623,12 @@ public class PoolExecutor implements ExecutorService {
 		finally {
 			lock.unlock();
 		}
+	}
 
-
+	public List<java.util.concurrent.Future<?>> launchDedicatedThread(ThreadFactory threadFactory, List<Callable<?>> tasks)
+	{
+		final ArrayList<java.util.concurrent.Future<?>> res=getFutures(tasks);
+		launchDedicatedThreadWithFutures(threadFactory, res);
 		return res;
 	}
 
@@ -1136,7 +1136,8 @@ public class PoolExecutor implements ExecutorService {
 									continue;
 
 								if (timeOut > timeToWait) {
-									waitEventsCondition.await(timeToWait + 1, TimeUnit.NANOSECONDS);
+									if (!waitEventsCondition.await(timeToWait + 1, TimeUnit.NANOSECONDS))
+										timeOut=-1;
 								} else {
 									if (!waitEventsCondition.await(timeOut + 1, TimeUnit.NANOSECONDS)/* && !core*/)
 										timeOut = -1;
@@ -1154,9 +1155,6 @@ public class PoolExecutor implements ExecutorService {
 							++workingThreads;
 							working = true;
 						}
-						/*while (needNewThreadUnsafe()) {
-							launchNewThreadUnsafe();
-						}*/
 
 					} finally {
 						lock.unlock();
