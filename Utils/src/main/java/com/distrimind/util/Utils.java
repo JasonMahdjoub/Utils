@@ -67,9 +67,20 @@ public class Utils {
 			VERSION.addCreator(new Person("mahdjoub", "jason"))
 					.addDeveloper(new PersonDeveloper("mahdjoub", "jason", "2016-01-04"))
 					.addDescription(
+							new Description((short)5, (short)19, (short)2, Version.Type.STABLE, (short)0, "2020-08-30")
+									.addItem("Delay garbage collector which zeroise unwrapped key.")
+					)
+					.addDescription(
+							new Description((short)5, (short)19, (short)1, Version.Type.STABLE, (short)0, "2020-08-30")
+									.addItem("Add functions into PoolExecutor.")
+									.addItem("Fix regression with MacOSHardDriveDetect.")
+									.addItem("Delay garbage collector which zeroise unwrapped key.")
+					)
+					.addDescription(
 							new Description((short)5, (short)19, (short)0, Version.Type.STABLE, (short)0, "2020-08-17")
 									.addItem("Add class DocumentBuilderFactoryWithNonDTD.")
 					)
+
 					.addDescription(
 							new Description((short)5, (short)18, (short)5, Version.Type.STABLE, (short)0, "2020-07-07")
 									.addItem("Use recompiled Bouncy Castle FIPS dependency in order to make it compatible with Android.")
@@ -1179,12 +1190,12 @@ public class Utils {
 								}
 								if (processesToFlush.isEmpty()) {
 
-									thread=null;
+									thread = null;
 									return;
-								}
-								else
-									processes=new ArrayList<>(processesToFlush);
+								} else
+									processes = new ArrayList<>(processesToFlush);
 							}
+
 							for (Process p1 : processes) {
 								try (InputStream is = p1.getInputStream(); InputStream es = p1.getErrorStream()) {
 									boolean inClosed = false, outClosed = false;

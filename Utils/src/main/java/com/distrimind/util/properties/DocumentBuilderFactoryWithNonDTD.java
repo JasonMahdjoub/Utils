@@ -47,18 +47,34 @@ import javax.xml.validation.Schema;
  * @since MaDKitLanEdition 5.19.0
  */
 public class DocumentBuilderFactoryWithNonDTD extends DocumentBuilderFactory {
+
     public static DocumentBuilderFactoryWithNonDTD newDocumentBuilderFactoryWithNonDTDInstance()
     {
+        return newDocumentBuilderFactoryWithNonDTDInstance(false);
+    }
+    public static DocumentBuilderFactoryWithNonDTD newDocumentBuilderFactoryWithNonDTDInstance(boolean enableDocType)
+    {
+        if (enableDocType) {
+            try {
+                return new DocumentBuilderFactoryWithNonDTD(true);
+            } catch (ParserConfigurationException e) {
+                return null;
+            }
+        }
         return (DocumentBuilderFactoryWithNonDTD)DocumentBuilderFactory.newInstance(DocumentBuilderFactoryWithNonDTD.class.getName(), ClassLoader.getSystemClassLoader());
     }
     private final DocumentBuilderFactory base;
     public DocumentBuilderFactoryWithNonDTD() throws ParserConfigurationException {
+        this(false);
+    }
+    public DocumentBuilderFactoryWithNonDTD(boolean enableDocType) throws ParserConfigurationException {
             base=DocumentBuilderFactory.newInstance();
             base.setValidating(false);
             base.setNamespaceAware(false);
             base.setCoalescing(false);
             base.setFeature("http://xml.org/sax/features/validation", false);
-            base.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+            if (!enableDocType)
+                base.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
             base.setFeature("http://apache.org/xml/features/nonvalidating/load-dtd-grammar", false);
             base.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
             base.setFeature("http://xml.org/sax/features/external-general-entities", false);

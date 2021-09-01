@@ -77,8 +77,8 @@ dependencies {
 }
 
 def javaVersion="8"
-sourceCompatibility = javaVersion
-targetCompatibility= javaVersion
+/*sourceCompatibility = javaVersion
+targetCompatibility= javaVersion*/
 
 /*idea {
     project {
@@ -108,7 +108,7 @@ task generateVersionsFile(type:JavaExec, dependsOn:classes) {
             }
         }
 
-        mainClass = 'com.distrimind.util.Utils'
+        getMainClass().set('com.distrimind.util.Utils')
         classpath = sourceSets.main.runtimeClasspath
     }
 
@@ -149,6 +149,7 @@ task generateMDFiles (dependsOn: generateVersionsFile) {
 
 
 }
+
 allprojects {
 	group='com.distrimind.util'
 

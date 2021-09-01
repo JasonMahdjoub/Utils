@@ -355,10 +355,15 @@ public class KeyWrapperAlgorithm extends MultiFormatProperties implements Secure
 			}
 			else {
 				int off=checkSignature(encryptedSecretKey.getBytes());
-				if (off>0)
-					encryptedSecretKey=new WrappedEncryptedSymmetricSecretKey(Arrays.copyOfRange(encryptedSecretKey.getBytes(), off, encryptedSecretKey.getBytes().length));
+				if (off>0) {
+					WrappedEncryptedSymmetricSecretKey e2 = new WrappedEncryptedSymmetricSecretKey(Arrays.copyOfRange(encryptedSecretKey.getBytes(), off, encryptedSecretKey.getBytes().length));
+					encryptedSecretKey.getBytes();//gc delayed
+					encryptedSecretKey=e2;
+				}
+
+				SymmetricSecretKey symmetricSecretKey=symmetricKeyWrapperType.unwrapKey(secretKeyForEncryption, encryptedSecretKey);
 				encryptedSecretKey.getBytes();//gc delayed
-				return symmetricKeyWrapperType.unwrapKey(secretKeyForEncryption, encryptedSecretKey);
+				return symmetricSecretKey;
 			}
 		}
 		else

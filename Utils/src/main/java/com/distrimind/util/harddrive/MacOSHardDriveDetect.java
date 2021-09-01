@@ -36,11 +36,13 @@ knowledge of the CeCILL-C license and that you accept its terms.
 package com.distrimind.util.harddrive;
 
 import com.distrimind.util.Utils;
+import com.distrimind.util.properties.DocumentBuilderFactoryWithNonDTD;
 import com.distrimind.util.properties.MultiFormatProperties;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
+import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
@@ -82,8 +84,8 @@ class MacOSHardDriveDetect extends UnixHardDriveDetect {
 			Process p = Runtime.getRuntime().exec("diskutil list -plist");
 			ArrayList<String> partitionIdentifiers = new ArrayList<>();
 			try {
-
-				Document d = MultiFormatProperties.getDOM(p.getInputStream());
+				DocumentBuilderFactory dbf= DocumentBuilderFactoryWithNonDTD.newDocumentBuilderFactoryWithNonDTDInstance(true);
+				Document d = dbf.newDocumentBuilder().parse(p.getInputStream());
 				Node rootNode = null;
 				for (int i = 0; i < d.getChildNodes().getLength(); i++) {
 					Node n = d.getChildNodes().item(i);
@@ -137,7 +139,9 @@ class MacOSHardDriveDetect extends UnixHardDriveDetect {
 				Process p2 = Runtime.getRuntime().exec(new String[]{"diskutil", "info", "-plist",partitionIdentifier});
 				try {
 
-					Document d = MultiFormatProperties.getDOM(p2.getInputStream());
+					DocumentBuilderFactory dbf= DocumentBuilderFactoryWithNonDTD.newDocumentBuilderFactoryWithNonDTDInstance(true);
+					Document d = dbf.newDocumentBuilder().parse(p2.getInputStream());
+
 					Node rootNode = null;
 					for (int i = 0; i < d.getChildNodes().getLength(); i++) {
 						Node n = d.getChildNodes().item(i);
