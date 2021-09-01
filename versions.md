@@ -1,6 +1,6 @@
 Utils
 =====
-5.19.0 STABLE (Build: 3156) (from 04/01/2016 to 17/08/2020)
+5.19.1 STABLE (Build: 3225) (from 04/01/2016 to 30/08/2020)
 
 # Creator(s):
 Jason MAHDJOUB
@@ -9,6 +9,10 @@ Jason MAHDJOUB
 Jason MAHDJOUB (Entered in the team at 04/01/2016)
 
 # Modifications:
+
+
+### 5.19.1 STABLE (30/08/2020)
+* Add functions into PoolExecutor.
 
 
 ### 5.19.0 STABLE (17/08/2020)

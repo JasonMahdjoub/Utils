@@ -69,6 +69,7 @@ public class Utils {
 					.addDescription(
 							new Description((short)5, (short)19, (short)1, Version.Type.STABLE, (short)0, "2020-08-30")
 									.addItem("Add functions into PoolExecutor.")
+									.addItem("Fix regression with MacOSHardDriveDetect.")
 					)
 					.addDescription(
 							new Description((short)5, (short)19, (short)0, Version.Type.STABLE, (short)0, "2020-08-17")
@@ -1173,22 +1174,22 @@ public class Utils {
 
 						while(true) {
 							List<Process> processes;
+							synchronized (processesToFlush) {
+								if (processesToFlush.isEmpty()) {
+									try {
+										processesToFlush.wait(10000);
+									} catch (InterruptedException e) {
+										e.printStackTrace();
+									}
 
-							if (processesToFlush.isEmpty()) {
-								try {
-									processesToFlush.wait(10000);
-								} catch (InterruptedException e) {
-									e.printStackTrace();
 								}
+								if (processesToFlush.isEmpty()) {
 
+									thread = null;
+									return;
+								} else
+									processes = new ArrayList<>(processesToFlush);
 							}
-							if (processesToFlush.isEmpty()) {
-
-								thread=null;
-								return;
-							}
-							else
-								processes=new ArrayList<>(processesToFlush);
 
 							for (Process p1 : processes) {
 								try (InputStream is = p1.getInputStream(); InputStream es = p1.getErrorStream()) {
