@@ -81,7 +81,7 @@ public class AndroidHardDriveDetect extends UnixHardDriveDetect{
 			int index=2;
 			for (File f : externalStorageVolumes) {
 				boolean removable=(boolean)isExternalStorageRemovable.invoke(null, f);
-				if (removable && ((String)getExternalStorageState.invoke(null, f)).toLowerCase().equals("mounted"))
+				if (removable && ((String)getExternalStorageState.invoke(null, f)).equalsIgnoreCase("mounted"))
 				{
 					Object stat=constStatFs.newInstance(f.getPath());
 					int blockSize=(int)(long)getBlockSizeLong.invoke(stat);
