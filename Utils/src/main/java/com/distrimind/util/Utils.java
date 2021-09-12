@@ -67,7 +67,7 @@ public class Utils {
 			VERSION.addCreator(new Person("mahdjoub", "jason"))
 					.addDeveloper(new PersonDeveloper("mahdjoub", "jason", "2016-01-04"))
 					.addDescription(
-							new Description((short)5, (short)19, (short)3, Version.Type.STABLE, (short)0, "2020-08-30")
+							new Description((short)5, (short)19, (short)4, Version.Type.STABLE, (short)0, "2020-08-30")
 									.addItem("Fix issue with human readable bytes quantity.")
 									.addItem("Fix issue with ethtool localisation into Debian OS.")
 					)

@@ -10,7 +10,7 @@ public class IDGeneratorIntTests {
 		int bufferSize = 20;
 		IDGeneratorInt generator = new IDGeneratorInt(bufferSize, startNumber);
 		int numberIds = 1000;
-		int ids[] = new int[numberIds];
+		int[] ids = new int[numberIds];
 		Assert.assertEquals(0, generator.getNumberOfMemorizedIds());
 		for (int i = 0; i < numberIds; i++) {
 			ids[i] = generator.getNewID();

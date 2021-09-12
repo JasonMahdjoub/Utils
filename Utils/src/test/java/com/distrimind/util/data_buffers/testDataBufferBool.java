@@ -58,10 +58,10 @@ import static org.testng.Assert.*;
  */
 public final class testDataBufferBool extends testDataBuffer {
 	protected static final int size = 50;
-	protected static boolean tab[] = null;
+	protected static boolean[] tab = null;
 
 	public static boolean[] getTab(int _size) {
-		boolean res[] = new boolean[_size];
+		boolean[] res = new boolean[_size];
 		Random r = new Random(System.currentTimeMillis());
 
 		for (int i = _size - 1; i >= 0; i--) {
@@ -134,7 +134,7 @@ public final class testDataBufferBool extends testDataBuffer {
 		} catch (IllegalAccessError ignored) {
 		}
 		try {
-			d.setDouble(0, (double) 0);
+			d.setDouble(0, 0);
 			fail("setting a double on a DataBufferBool should be imposible");
 		} catch (IllegalAccessError ignored) {
 		}
@@ -149,7 +149,7 @@ public final class testDataBufferBool extends testDataBuffer {
 		} catch (IllegalAccessError ignored) {
 		}
 		try {
-			d.setLong(0, (long) 0);
+			d.setLong(0, 0);
 			fail("setting a long on a DataBufferBool should be imposible");
 		} catch (IllegalAccessError ignored) {
 		}
@@ -238,7 +238,7 @@ public final class testDataBufferBool extends testDataBuffer {
 	@Override
 	@Test
 	public void insertData() {
-		boolean tab2[] = getTab(size);
+		boolean[] tab2 = getTab(size);
 
 		DataBufferBool d = new DataBufferBool(tab);
 		DataBufferBool dd = new DataBufferBool(tab2);

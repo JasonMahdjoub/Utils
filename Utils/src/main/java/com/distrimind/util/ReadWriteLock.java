@@ -173,7 +173,7 @@ public class ReadWriteLock {
 		synchronized (this) {
 			return "Locker["
 					+ (writingThread == null ? (writeAccesses + " Write")
-							: (writeAccesses + " x " + writingThread.toString()))
+							: (writeAccesses + " x " + writingThread))
 					+ "," + (readingThreads.size() == 0 ? "NoReads" : (readingThreads.size() + " Reads")) + "]";
 		}
 	}

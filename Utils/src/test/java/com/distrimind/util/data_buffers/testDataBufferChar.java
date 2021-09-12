@@ -58,10 +58,10 @@ import static org.testng.Assert.*;
  */
 public final class testDataBufferChar extends testDataBuffer {
 	protected static final int size = 50;
-	protected static char tab[] = null;
+	protected static char[] tab = null;
 
 	public static char[] getTab(int _size) {
-		char res[] = new char[_size];
+		char[] res = new char[_size];
 		Random r = new Random(System.currentTimeMillis());
 
 		for (int i = _size - 1; i >= 0; i--) {
@@ -114,10 +114,10 @@ public final class testDataBufferChar extends testDataBuffer {
 		for (int i = size - 1; i >= 0; i--) {
 			assertEquals((byte) tab[i], d.getByte(i));
 			assertEquals(tab[i], d.getChar(i));
-			assertEquals((double) tab[i], d.getDouble(i), 0.0);
+			assertEquals(tab[i], d.getDouble(i), 0.0);
 			assertEquals((float) tab[i], d.getFloat(i), 0.0);
-			assertEquals((int) tab[i], d.getInt(i));
-			assertEquals((long) tab[i], d.getLong(i));
+			assertEquals(tab[i], d.getInt(i));
+			assertEquals(tab[i], d.getLong(i));
 			assertEquals((short) tab[i], d.getShort(i));
 		}
 
@@ -133,20 +133,20 @@ public final class testDataBufferChar extends testDataBuffer {
 
 			dbool.setBoolean(i, tab[i] > 0);
 			db.setByte(i, (byte) tab[i]);
-			dd.setDouble(i, (double) tab[i]);
-			df.setFloat(i, (float) tab[i]);
-			di.setInt(i, (int) tab[i]);
-			dl.setLong(i, (long) tab[i]);
+			dd.setDouble(i, tab[i]);
+			df.setFloat(i, tab[i]);
+			di.setInt(i, tab[i]);
+			dl.setLong(i, tab[i]);
 			ds.setShort(i, (short) tab[i]);
 		}
 
 		for (int i = size - 1; i >= 0; i--) {
 			assertEquals((tab[i] > 0 ? 1 : 0), dbool.getChar(i));
 			assertEquals((byte) tab[i], db.getByte(i));
-			assertEquals((double) tab[i], dd.getDouble(i), 0.0);
+			assertEquals(tab[i], dd.getDouble(i), 0.0);
 			assertEquals((float) tab[i], df.getFloat(i), 0.0);
-			assertEquals((int) tab[i], di.getInt(i));
-			assertEquals((long) tab[i], dl.getLong(i));
+			assertEquals(tab[i], di.getInt(i));
+			assertEquals(tab[i], dl.getLong(i));
 			assertEquals((short) tab[i], ds.getShort(i));
 		}
 
@@ -188,43 +188,43 @@ public final class testDataBufferChar extends testDataBuffer {
 			assertEquals(tab[i], dd.getChar(i));
 		}
 
-		boolean tbool[] = testDataBufferBool.getTab(size);
+		boolean[] tbool = testDataBufferBool.getTab(size);
 		d.setData(tbool);
 		for (int i = size - 1; i >= 0; i--) {
 			assertTrue(tbool[i] != (d.getChar(i) % 2 == 0));
 		}
 
-		byte tb[] = testDataBufferByte.getTab(size);
+		byte[] tb = testDataBufferByte.getTab(size);
 		d.setData(tb);
 		for (int i = size - 1; i >= 0; i--) {
 			assertEquals((char) tb[i], d.getChar(i));
 		}
 
-        double td[] = testDataBufferDouble.getTab(size);
+        double[] td = testDataBufferDouble.getTab(size);
 		d.setData(td);
 		for (int i = size - 1; i >= 0; i--) {
 			assertEquals((char) td[i], d.getChar(i));
 		}
 
-        float tf[] = testDataBufferFloat.getTab(size);
+        float[] tf = testDataBufferFloat.getTab(size);
 		d.setData(tf);
 		for (int i = size - 1; i >= 0; i--) {
 			assertEquals((char) tf[i], d.getChar(i));
 		}
 
-        int ti[] = testDataBufferInt.getTab(size);
+        int[] ti = testDataBufferInt.getTab(size);
 		d.setData(ti);
 		for (int i = size - 1; i >= 0; i--) {
 			assertEquals((char) ti[i], d.getChar(i));
 		}
 
-        long tl[] = testDataBufferLong.getTab(size);
+        long[] tl = testDataBufferLong.getTab(size);
 		d.setData(tl);
 		for (int i = size - 1; i >= 0; i--) {
 			assertEquals((char) tl[i], d.getChar(i));
 		}
 
-        short ts[] = testDataBufferShort.getTab(size);
+        short[] ts = testDataBufferShort.getTab(size);
 		d.setData(ts);
 		for (int i = size - 1; i >= 0; i--) {
 			assertEquals((char) ts[i], d.getChar(i));
@@ -242,7 +242,7 @@ public final class testDataBufferChar extends testDataBuffer {
 	@Override
 	@Test
 	public void insertData() {
-		char tab2[] = getTab(size);
+		char[] tab2 = getTab(size);
 
 		DataBufferChar d = new DataBufferChar(tab);
 		DataBufferChar dd = new DataBufferChar(tab2);

@@ -1,6 +1,6 @@
 Utils
 =====
-5.19.3 STABLE (Build: 3328) (from 04/01/2016 to 30/08/2020)
+5.19.4 STABLE (Build: 3330) (from 04/01/2016 to 30/08/2020)
 
 # Creator(s):
 Jason MAHDJOUB
@@ -11,7 +11,7 @@ Jason MAHDJOUB (Entered in the team at 04/01/2016)
 # Modifications:
 
 
-### 5.19.3 STABLE (30/08/2020)
+### 5.19.4 STABLE (30/08/2020)
 * Fix issue with human readable bytes quantity.
 * Fix issue with ethtool localisation into Debian OS.
 
