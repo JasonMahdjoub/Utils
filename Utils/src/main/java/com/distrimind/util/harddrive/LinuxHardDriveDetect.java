@@ -72,7 +72,7 @@ class LinuxHardDriveDetect extends UnixHardDriveDetect {
 
 	private List<String[]> scanUUIDs() throws IOException {
 		List<String[]> scannedUUIDs=new ArrayList<>();
-		Process p=Runtime.getRuntime().exec(new String[]{"blkid"});
+		Process p=Runtime.getRuntime().exec(new String[]{"/sbin/blkid"});
 		try (InputStreamReader isr = new InputStreamReader(p.getInputStream())) {
 			try (BufferedReader br = new BufferedReader(isr)) {
 				String line;
