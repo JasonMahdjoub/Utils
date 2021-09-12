@@ -541,7 +541,7 @@ public class TestASymmetricEncryption {
 		Assert.assertEquals(DecentralizedValue.valueOf(kpd.getASymmetricPrivateKey().encodeString()), kpd.getASymmetricPrivateKey());
 
 		System.out.println(type+" :");
-		System.out.println("\tKey pair encoding : "+kpd.toString());
+		System.out.println("\tKey pair encoding : "+ kpd);
 		System.out.println("\tPublic key encoding : "+kpd.getASymmetricPublicKey().toString());
 		System.out.println("\tPrivate key encoding : "+kpd.getASymmetricPrivateKey().toString());
 	}

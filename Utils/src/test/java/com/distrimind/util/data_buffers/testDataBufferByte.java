@@ -58,10 +58,10 @@ import static org.testng.Assert.*;
  */
 public final class testDataBufferByte extends testDataBuffer {
 	protected static final int size = 50;
-	protected static byte tab[] = null;
+	protected static byte[] tab = null;
 
 	public static byte[] getTab(int _size) {
-		byte res[] = new byte[_size];
+		byte[] res = new byte[_size];
 		Random r = new Random(System.currentTimeMillis());
 
 		for (int i = _size - 1; i >= 0; i--) {
@@ -114,11 +114,11 @@ public final class testDataBufferByte extends testDataBuffer {
 		for (int i = size - 1; i >= 0; i--) {
 			assertEquals(tab[i], d.getByte(i));
 			assertEquals((char) tab[i], d.getChar(i));
-			assertEquals((double) tab[i], d.getDouble(i), 0.0);
+			assertEquals(tab[i], d.getDouble(i), 0.0);
 			assertEquals((float) tab[i], d.getFloat(i), 0.0);
-			assertEquals((int) tab[i], d.getInt(i));
-			assertEquals((long) tab[i], d.getLong(i));
-			assertEquals((short) tab[i], d.getShort(i));
+			assertEquals(tab[i], d.getInt(i));
+			assertEquals(tab[i], d.getLong(i));
+			assertEquals(tab[i], d.getShort(i));
 		}
 
 		DataBufferByte dbool = new DataBufferByte(size);
@@ -133,21 +133,21 @@ public final class testDataBufferByte extends testDataBuffer {
 
 			dbool.setBoolean(i, tab[i] > 0);
 			dc.setChar(i, (char) tab[i]);
-			dd.setDouble(i, (double) tab[i]);
-			df.setFloat(i, (float) tab[i]);
-			di.setInt(i, (int) tab[i]);
-			dl.setLong(i, (long) tab[i]);
-			ds.setShort(i, (short) tab[i]);
+			dd.setDouble(i, tab[i]);
+			df.setFloat(i, tab[i]);
+			di.setInt(i, tab[i]);
+			dl.setLong(i, tab[i]);
+			ds.setShort(i, tab[i]);
 		}
 
 		for (int i = size - 1; i >= 0; i--) {
 			assertEquals((tab[i] > 0 ? 1 : 0), dbool.getByte(i));
 			assertEquals((char) tab[i], dc.getChar(i));
-			assertEquals((double) tab[i], dd.getDouble(i), 0.0);
+			assertEquals(tab[i], dd.getDouble(i), 0.0);
 			assertEquals((float) tab[i], df.getFloat(i), 0.0);
-			assertEquals((int) tab[i], di.getInt(i));
-			assertEquals((long) tab[i], dl.getLong(i));
-			assertEquals((short) tab[i], ds.getShort(i));
+			assertEquals(tab[i], di.getInt(i));
+			assertEquals(tab[i], dl.getLong(i));
+			assertEquals(tab[i], ds.getShort(i));
 		}
 
 		try {
@@ -188,43 +188,43 @@ public final class testDataBufferByte extends testDataBuffer {
 			assertEquals(tab[i], dd.getByte(i));
 		}
 
-		boolean tbool[] = testDataBufferBool.getTab(size);
+		boolean[] tbool = testDataBufferBool.getTab(size);
 		d.setData(tbool);
 		for (int i = size - 1; i >= 0; i--) {
 			assertTrue(tbool[i] != (d.getByte(i) % 2 == 0));
 		}
 
-        char tc[] = testDataBufferChar.getTab(size);
+        char[] tc = testDataBufferChar.getTab(size);
 		d.setData(tc);
 		for (int i = size - 1; i >= 0; i--) {
 			assertEquals((byte) tc[i], d.getByte(i));
 		}
 
-        double td[] = testDataBufferDouble.getTab(size);
+        double[] td = testDataBufferDouble.getTab(size);
 		d.setData(td);
 		for (int i = size - 1; i >= 0; i--) {
 			assertEquals((byte) td[i], d.getByte(i));
 		}
 
-        float tf[] = testDataBufferFloat.getTab(size);
+        float[] tf = testDataBufferFloat.getTab(size);
 		d.setData(tf);
 		for (int i = size - 1; i >= 0; i--) {
 			assertEquals((byte) tf[i], d.getByte(i));
 		}
 
-        int ti[] = testDataBufferInt.getTab(size);
+        int[] ti = testDataBufferInt.getTab(size);
 		d.setData(ti);
 		for (int i = size - 1; i >= 0; i--) {
 			assertEquals((byte) ti[i], d.getByte(i));
 		}
 
-        long tl[] = testDataBufferLong.getTab(size);
+        long[] tl = testDataBufferLong.getTab(size);
 		d.setData(tl);
 		for (int i = size - 1; i >= 0; i--) {
 			assertEquals((byte) tl[i], d.getByte(i));
 		}
 
-        short ts[] = testDataBufferShort.getTab(size);
+        short[] ts = testDataBufferShort.getTab(size);
 		d.setData(ts);
 		for (int i = size - 1; i >= 0; i--) {
 			assertEquals((byte) ts[i], d.getByte(i));
@@ -242,7 +242,7 @@ public final class testDataBufferByte extends testDataBuffer {
 	@Override
 	@Test
 	public void insertData() {
-		byte tab2[] = getTab(size);
+		byte[] tab2 = getTab(size);
 
 		DataBufferByte d = new DataBufferByte(tab);
 		DataBufferByte dd = new DataBufferByte(tab2);
