@@ -209,12 +209,14 @@ public final class JavaNativeCipher extends AbstractCipher {
 	static
 	{
 		Constructor<? extends AlgorithmParameterSpec> c=null;
-		try {
-			//noinspection unchecked
-			c=(Constructor<? extends AlgorithmParameterSpec>)Class.forName("javax.crypto.spec.ChaCha20ParameterSpec").getConstructor(byte[].class, int.class);
-		} catch (NoSuchMethodException | ClassNotFoundException e) {
-			e.printStackTrace();
+		if (!SymmetricEncryptionType.invalidOSForChaCha) {
+			try {
+				//noinspection unchecked
+				c = (Constructor<? extends AlgorithmParameterSpec>) Class.forName("javax.crypto.spec.ChaCha20ParameterSpec").getConstructor(byte[].class, int.class);
+			} catch (NoSuchMethodException | ClassNotFoundException e) {
+				e.printStackTrace();
 
+			}
 		}
 		constChachaParam=c;
 	}
