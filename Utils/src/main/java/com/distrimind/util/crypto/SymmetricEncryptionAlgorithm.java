@@ -235,6 +235,7 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 		externalCounter=this.internalCounter?null:new byte[blockModeCounterBytes];
 		this.chacha =type.getAlgorithmName().toUpperCase().startsWith(SymmetricEncryptionType.CHACHA20_NO_RANDOM_ACCESS.getAlgorithmName().toUpperCase());
 		this.gcm = type.getBlockMode().equalsIgnoreCase("GCM");
+
 		this.cipher.init(Cipher.ENCRYPT_MODE, this.key, generateIV());
 
 		setMaxPlainTextSizeForEncoding(type.getMaxPlainTextSizeForEncoding());

@@ -88,8 +88,8 @@ public enum SymmetricEncryptionType {
 	BC_SERPENT_CTR("Serpent", "CTR", "NoPadding",(short) 128, CodeProvider.BC, CodeProvider.BC, SymmetricAuthenticatedSignatureType.BC_FIPS_HMAC_SHA2_512, Serpent.ALGORITHM, (short)128, false, (short)33, (short)37,(short)35, (short)40, (short)49, (short)50, false, false, false, false, false, false, (short)16, 1L<<32),
 	BC_SERPENT_GCM("Serpent", "GCM", "NoPadding",(short) 128, CodeProvider.BC, CodeProvider.BC, null, Serpent.ALGORITHM, (short)128, true, (short)31, (short)35, (short)33, (short)38, (short)43, (short)43, false, false, false, false, false, false, (short)12, 1L<<32),
 	BC_SERPENT_EAX("Serpent", "EAX", "NoPadding",(short) 128, CodeProvider.BC, CodeProvider.BC, null, Serpent.ALGORITHM, (short)128, true, (short)22, (short)24, (short)23, (short)24, (short)26, (short)26, false, false, false, false, false, false, (short)16, 1L<<32),
-	CHACHA20_NO_RANDOM_ACCESS("ChaCha20", "", "", (short) 256, CodeProvider.SunJCE, CodeProvider.SunJCE, SymmetricAuthenticatedSignatureType.HMAC_SHA2_384, com.distrimind.bcfips.crypto.general.AES.ALGORITHM, (short)512, false, (short)113, (short)79, (short)113, (short) 79, (short)278, (short)274, false, false, false,  true, false, false, (short)12, 13_000_000_000L),
-	CHACHA20_POLY1305("ChaCha20-Poly1305", "", "", (short) 256, CodeProvider.SunJCE, CodeProvider.SunJCE, null, com.distrimind.bcfips.crypto.general.AES.ALGORITHM, (short)512, true, (short)113, (short)79, (short)113, (short) 79, (short)204, (short)192, false, false, false,  true, false, false, (short)12, 13_000_000_000L),
+	CHACHA20_NO_RANDOM_ACCESS("ChaCha20", "", "", (short) 256, CodeProvider.SunJCE, CodeProvider.SunJCE, SymmetricAuthenticatedSignatureType.HMAC_SHA2_384, ChaCha20.ALGORITHM, (short)512, false, (short)113, (short)79, (short)113, (short) 79, (short)278, (short)274, false, false, false,  true, false, false, (short)12, 13_000_000_000L),
+	CHACHA20_POLY1305("ChaCha20-Poly1305", "", "", (short) 256, CodeProvider.SunJCE, CodeProvider.SunJCE, null, ChaCha20.ALGORITHM, (short)512, true, (short)113, (short)79, (short)113, (short) 79, (short)204, (short)192, false, false, false,  true, false, false, (short)12, 13_000_000_000L),
 	BC_CHACHA20_NO_RANDOM_ACCESS("ChaCha20", "", "", (short) 256, CodeProvider.BC, CodeProvider.BC, SymmetricAuthenticatedSignatureType.BC_FIPS_HMAC_SHA2_384, ChaCha20.ALGORITHM, (short)512, false, (short)75, (short)78, (short)75, (short) 78, (short)75, (short)78, false, false, false,  true, false, false, (short)12, 13_000_000_000L),
 	BC_CHACHA20_POLY1305("ChaCha20-Poly1305", "", "", (short) 256, CodeProvider.BC, CodeProvider.BC, null, ChaCha20.ALGORITHM, (short)512, true, (short)114, (short)81, (short)114, (short) 81, (short)114, (short)81, false, false, false,  true, false, false, (short)12, 13_000_000_000L),
 	DEFAULT(AES_CTR);
@@ -220,7 +220,7 @@ public enum SymmetricEncryptionType {
 	private final boolean dfaAttackPossible;//Differential fault analysis
 	private final short ivLengthBytes;
 	private long maxIVGenerationWithOneSecretKey;
-	private static final boolean invalidOSForChaCha =(OSVersion.getCurrentOSVersion().getOS()!=OS.ANDROID && OS.getCurrentJREVersionByte()<11) || (OSVersion.getCurrentOSVersion().getOS()==OS.ANDROID && OSVersion.getCurrentOSVersion().compareTo(OSVersion.ANDROID_28_P)<0);
+	static final boolean invalidOSForChaCha =(OSVersion.getCurrentOSVersion().getOS()!=OS.ANDROID && OS.getCurrentJREVersionByte()<11) || (OSVersion.getCurrentOSVersion().getOS()==OS.ANDROID && OSVersion.getCurrentOSVersion().compareTo(OSVersion.ANDROID_28_P)<0);
 
 	public boolean equals(SymmetricEncryptionType o)
 	{
