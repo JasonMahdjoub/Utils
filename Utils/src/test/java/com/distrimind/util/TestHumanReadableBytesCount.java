@@ -57,7 +57,7 @@ public class TestHumanReadableBytesCount {
                 result=result.substring(0, result.length()-1)+"b";
             if (result.endsWith("B"))
                 result=result.substring(0, result.length()-1)+"b";
-            quantityInBytes*=8;
+            quantityInBytes/=8;
             v=HumanReadableBytesCount.valueOf(result, siIsBin);
             Assert.assertTrue(quantityInBytes==0?v==quantityInBytes:((double)Math.abs(v-quantityInBytes))/((double)quantityInBytes)<0.004, "expected : "+result+", found : "+v);
 

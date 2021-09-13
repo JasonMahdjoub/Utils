@@ -156,13 +156,13 @@ public class HumanReadableBytesCount {
                 }
                 if (multiplier<=0)
                     throw new InternalError();
-                return ((long)(val*multiplier))*(bit?8:1);
+                return ((long)(val*multiplier))/(bit?8:1);
             }
             else
             {
                 preunit=preunit.toLowerCase();
                 if (preunit.startsWith("bit"))
-                    return ((long)val)*8;
+                    return ((long)val)/8;
                 else
                 {
                     for (String s : units)
@@ -175,7 +175,7 @@ public class HumanReadableBytesCount {
                     {
                         if (preunit.startsWith(presBin[i]))
                         {
-                            return ((long)(powerN(1024, i)*val))*(bit?8:1);
+                            return ((long)(powerN(1024, i)*val))/(bit?8:1);
                         }
                     }
                     for (int i=1;i<presSI.length;i++)
@@ -184,7 +184,7 @@ public class HumanReadableBytesCount {
                         {
                             long base=siIsBin?1024:1000;
 
-                            return ((long)(powerN(base, i)*val))*(bit?8:1);
+                            return ((long)(powerN(base, i)*val))/(bit?8:1);
                         }
                     }
                     throw new InternalError();

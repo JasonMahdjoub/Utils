@@ -35,6 +35,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
 
 package com.distrimind.util.nitools;
 
+import com.distrimind.util.HumanReadableBytesCount;
 import com.distrimind.util.Utils;
 
 import java.io.BufferedReader;
@@ -58,7 +59,7 @@ class LinuxNITools extends NITools {
 		try {
 			if (_network_interface.isLoopback())
 				return Long.MAX_VALUE;
-			Process p = Runtime.getRuntime().exec(new String[]{"ethtool", _network_interface.getName()});
+			Process p = Runtime.getRuntime().exec(new String[]{"/sbin/ethtool", _network_interface.getName()});
 			long res = -1;
 			try (InputStreamReader isr = new InputStreamReader(p.getInputStream())) {
 				try (BufferedReader input = new BufferedReader(isr)) {
@@ -67,7 +68,22 @@ class LinuxNITools extends NITools {
 						String[] split = line.split(" ");
 						for (int i = 0; i < split.length - 1; i++) {
 							if (split[i].contains("Speed:")) {
-								res = readLong(split[split.length - 1]);
+								String s=split[split.length - 1].trim();
+
+								if (s.endsWith("/s")) {
+									s = s.substring(0, s.length() - 2);
+									res = HumanReadableBytesCount.valueOf(s);
+								}
+								else {
+
+									try {
+										res = readLong(s);
+									}
+									catch (NumberFormatException ignored)
+									{
+
+									}
+								}
 								break;
 							}
 						}
