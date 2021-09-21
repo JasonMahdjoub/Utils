@@ -33,8 +33,8 @@ Set of Java tools :
 
 [See historical of changes](./versions.md)
 
-###### Requirements under Linux :
-  * Please install the package ethtool
+###### Requirements under Ubuntu/Debian :
+  * Please install the package ethtool, rng-tools, mtr(only debian)
 
 # How to use it ?
 ## With Gradle :
