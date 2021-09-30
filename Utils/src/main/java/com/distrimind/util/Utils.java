@@ -69,6 +69,7 @@ public class Utils {
 					.addDescription(
 							new Description((short)5, (short)19, (short)6, Version.Type.STABLE, (short)0, "2020-08-30")
 									.addItem("Fix issue with secure random loading when used with Android.")
+									.addItem("Disable Path serialization to make Utils compatible with Android.")
 					)
 					.addDescription(
 							new Description((short)5, (short)19, (short)5, Version.Type.STABLE, (short)0, "2020-08-30")

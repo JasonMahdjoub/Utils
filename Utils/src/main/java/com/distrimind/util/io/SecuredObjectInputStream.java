@@ -46,8 +46,10 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.nio.file.Path;
-import java.util.*;
+import java.util.Collection;
+import java.util.Date;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * @author Jason Mahdjoub
@@ -338,12 +340,12 @@ public abstract class SecuredObjectInputStream extends InputStream implements Da
 	public File readFile(boolean nullAccepted, int maxCharsNumber) throws IOException {
 		return SerializationTools.readFile(this, (int)Math.min(2L*maxCharsNumber, Integer.MAX_VALUE), nullAccepted);
 	}
-	public Path readPath(boolean nullAccepted) throws IOException {
+	/*public Path readPath(boolean nullAccepted) throws IOException {
 		return readPath(nullAccepted, SerializationTools.DEFAULT_MAX_FILE_NAME_LENGTH);
 	}
 	public Path readPath(boolean nullAccepted, int maxCharsNumber) throws IOException {
 		return SerializationTools.readPath(this, (int)Math.min(2L*maxCharsNumber, Integer.MAX_VALUE), nullAccepted);
-	}
+	}*/
 	public String readString(boolean nullAccepted, int maxCharsNumber) throws IOException {
 		return SerializationTools.readString(this, (int)Math.min(2L*maxCharsNumber, Integer.MAX_VALUE), nullAccepted);
 	}
