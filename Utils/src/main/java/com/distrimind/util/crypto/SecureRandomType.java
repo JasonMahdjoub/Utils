@@ -213,7 +213,10 @@ public enum SecureRandomType {
 			}
 			else if (JAVA_STRONG_DRBG.algorithmName.equals(algorithmName))
 			{
-				res=new JavaNativeSecureRandom(this, SecureRandom.getInstanceStrong());
+				if (OSVersion.getCurrentOSVersion().getOS()==OS.ANDROID)
+					res=new JavaNativeSecureRandom(this,new SecureRandom());
+				else
+					res=new JavaNativeSecureRandom(this, SecureRandom.getInstanceStrong());
 			}
 			else
 			{

@@ -1,6 +1,6 @@
 Utils
 =====
-5.19.5 STABLE (Build: 3346) (from 04/01/16 to 30/08/20)
+5.19.6 STABLE (Build: 3364) (from 04/01/16 to 30/08/20)
 
 # Creator(s):
 Jason MAHDJOUB
@@ -9,6 +9,11 @@ Jason MAHDJOUB
 Jason MAHDJOUB (Entered in the team at 04/01/16)
 
 # Modifications:
+
+
+### 5.19.6 STABLE (30/08/20)
+* Fix issue with secure random loading when used with Android.
+* Disable Path serialization to make Utils compatible with Android.
 
 
 ### 5.19.5 STABLE (30/08/20)
