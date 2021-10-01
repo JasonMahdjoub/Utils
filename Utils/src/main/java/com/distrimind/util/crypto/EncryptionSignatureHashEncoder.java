@@ -664,6 +664,8 @@ public class EncryptionSignatureHashEncoder {
 
 		@Override
 		public void close() throws IOException {
+			if (closed)
+				return;
 			outputStream.flush();
 			if (cipher!=null)
 				dataOutputStream.close();
