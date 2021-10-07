@@ -44,7 +44,7 @@ import java.io.Serializable;
 
 /**
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 1.1
  * @since Utils 4.3.0
  */
 public interface DecentralizedValue extends Serializable {
@@ -103,5 +103,9 @@ public interface DecentralizedValue extends Serializable {
 	}
 
 
+	default String getShortString()
+	{
+		return this.getClass().getSimpleName()+"[.."+encode().toShortData(8).toWrappedString().toString()+"..]";
+	}
 
 }

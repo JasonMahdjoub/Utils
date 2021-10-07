@@ -67,6 +67,10 @@ public class Utils {
 			VERSION.addCreator(new Person("mahdjoub", "jason"))
 					.addDeveloper(new PersonDeveloper("mahdjoub", "jason", "2016-01-04"))
 					.addDescription(
+							new Description((short)5, (short)20, (short)0, Version.Type.STABLE, (short)0, "2020-10-07")
+									.addItem("Add function DecentralizedValue.getShortString().")
+					)
+					.addDescription(
 							new Description((short)5, (short)19, (short)7, Version.Type.STABLE, (short)0, "2020-10-01")
 									.addItem("Fix null pointer exception with EncryptionSignatureHashEncoder.")
 					)

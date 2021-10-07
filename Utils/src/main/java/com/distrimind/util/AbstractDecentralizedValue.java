@@ -35,12 +35,18 @@ The fact that you are presently reading this means that you have had
 knowledge of the CeCILL-C license and that you accept its terms.
  */
 
+import com.distrimind.util.crypto.ISecretDecentralizedValue;
+import com.distrimind.util.data_buffers.WrappedSecretString;
+import com.distrimind.util.data_buffers.WrappedString;
+
 /**
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 1.1
  * @since Utils 5.12.3
  */
 public abstract class AbstractDecentralizedValue implements DecentralizedValue{
+
+	private transient WrappedString shortString=null;
 
 	@Override
 	public String toString()
@@ -53,4 +59,16 @@ public abstract class AbstractDecentralizedValue implements DecentralizedValue{
 
 	@Override
 	public abstract int hashCode();
+
+	@Override
+	public String getShortString() {
+		if (shortString==null) {
+			String s=DecentralizedValue.super.getShortString();
+			if (this instanceof ISecretDecentralizedValue)
+				shortString=new WrappedSecretString(s);
+			else
+				shortString=new WrappedString(s);
+		}
+		return shortString.toString();
+	}
 }

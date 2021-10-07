@@ -34,18 +34,18 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util;
 
-import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.util.Arrays;
-import java.util.concurrent.atomic.AtomicReference;
-
 import com.distrimind.util.crypto.AbstractMessageDigest;
 import com.distrimind.util.crypto.AbstractSecureRandom;
 import com.distrimind.util.crypto.MessageDigestType;
 import com.distrimind.util.data_buffers.WrappedSecretData;
 import com.distrimind.util.data_buffers.WrappedString;
 import com.distrimind.util.sizeof.ObjectSizer;
+
+import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicReference;
 
 
 /**
@@ -129,10 +129,8 @@ public class SecuredDecentralizedID extends AbstractDecentralizedID {
 
 			byte[] salt ;
 			int size = Math.max(messageDigest.getDigestLengthInBytes(), idBytes.length) - idBytes.length;
-			if (size >= 0)
-				salt = new byte[size];
-			else
-				salt = new byte[0];
+			salt = new byte[size];
+
 			rand.nextBytes(salt);
 			messageDigest.update(idBytes);
 			messageDigest.update(salt);

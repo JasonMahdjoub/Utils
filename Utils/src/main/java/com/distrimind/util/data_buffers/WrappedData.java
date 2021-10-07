@@ -7,7 +7,7 @@ import java.util.Arrays;
 
 /**
  * @author Jason Mahdjoub
- * @version 1.1
+ * @version 1.2
  * @since Utils 5.10.0
  */
 public class WrappedData  {
@@ -63,6 +63,29 @@ public class WrappedData  {
 	public WrappedString toWrappedString()
 	{
 		return new WrappedString(this);
+	}
+
+	public WrappedData toShortData(int bytesNumber)
+	{
+		if (bytesNumber<=0)
+			throw new IllegalArgumentException();
+		if (this.data==null)
+			return this;
+		if (bytesNumber>=this.data.length)
+			return this;
+		int step=this.data.length/bytesNumber;
+		byte[] res=new byte[bytesNumber];
+		System.arraycopy(this.data, 0, res, 0, res.length);
+		for (int i=step;i<this.data.length;)
+		{
+			int s=Math.min(this.data.length-i, res.length);
+			for (int j=0;j<s;j++)
+				res[j]^=this.data[i++];
+		}
+		if (this instanceof WrappedSecretData)
+			return new WrappedSecretData(res);
+		else
+			return new WrappedData(res);
 	}
 
 	@Override
