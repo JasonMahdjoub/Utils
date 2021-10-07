@@ -61,9 +61,9 @@ public abstract class AbstractDecentralizedValue implements DecentralizedValue{
 	public abstract int hashCode();
 
 	@Override
-	public String getShortString() {
+	public String toShortString() {
 		if (shortString==null) {
-			String s=DecentralizedValue.super.getShortString();
+			String s=DecentralizedValue.super.toShortString();
 			if (this instanceof ISecretDecentralizedValue)
 				shortString=new WrappedSecretString(s);
 			else

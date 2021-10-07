@@ -103,7 +103,7 @@ public interface DecentralizedValue extends Serializable {
 	}
 
 
-	default String getShortString()
+	default String toShortString()
 	{
 		return this.getClass().getSimpleName()+"[.."+encode().toShortData(8).toWrappedString().toString()+"..]";
 	}

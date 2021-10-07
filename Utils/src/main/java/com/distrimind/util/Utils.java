@@ -68,7 +68,8 @@ public class Utils {
 					.addDeveloper(new PersonDeveloper("mahdjoub", "jason", "2016-01-04"))
 					.addDescription(
 							new Description((short)5, (short)20, (short)0, Version.Type.STABLE, (short)0, "2020-10-07")
-									.addItem("Add function DecentralizedValue.getShortString().")
+									.addItem("Add function DecentralizedValue.toShortString().")
+									.addItem("Add function WrappedData.toShortData().")
 					)
 					.addDescription(
 							new Description((short)5, (short)19, (short)7, Version.Type.STABLE, (short)0, "2020-10-01")
