@@ -47,7 +47,7 @@ import java.util.regex.Pattern;
  * network.
  * 
  * @author Jason Mahdjoub
- * @version 1.1
+ * @version 1.2
  * @since Utils 1.3
  * 
  */
@@ -189,4 +189,9 @@ public abstract class AbstractDecentralizedID extends AbstractDecentralizedValue
 	@Override
 	public abstract String toString();
 
+	@Override
+	public String getShortClassName()
+	{
+		return "uuid";
+	}
 }

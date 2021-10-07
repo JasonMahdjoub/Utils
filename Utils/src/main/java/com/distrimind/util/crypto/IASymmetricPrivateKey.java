@@ -4,7 +4,7 @@ import com.distrimind.util.data_buffers.WrappedSecretData;
 
 /**
  * @author Jason Mahdjoub
- * @version 2.0
+ * @version 2.1
  * @since MaDKitLanEdition 4.5.0
  */
 public interface IASymmetricPrivateKey extends IKey, ISecretDecentralizedValue {
@@ -28,5 +28,11 @@ public interface IASymmetricPrivateKey extends IKey, ISecretDecentralizedValue {
 
 	@Override
 	WrappedSecretData getKeyBytes();
+
+	@Override
+	default String getShortClassName()
+	{
+		return "privKey";
+	}
 
 }

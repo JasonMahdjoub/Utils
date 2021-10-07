@@ -127,4 +127,9 @@ public abstract class AbstractKeyPair<TPrivateKey extends IASymmetricPrivateKey,
 
 	public abstract boolean areTimesValid();
 
+	@Override
+	public String getShortClassName()
+	{
+		return "keyPair";
+	}
 }

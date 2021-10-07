@@ -1,6 +1,6 @@
 Utils
 =====
-5.19.7 STABLE (Build: 3361) (from 04/01/2016 to 01/10/2020)
+5.20.0 STABLE (Build: 3375) (from 04/01/2016 to 07/10/2020)
 
 # Creator(s):
 Jason MAHDJOUB
@@ -9,6 +9,11 @@ Jason MAHDJOUB
 Jason MAHDJOUB (Entered in the team at 04/01/2016)
 
 # Modifications:
+
+
+### 5.20.0 STABLE (07/10/2020)
+* Add function DecentralizedValue.toShortString().
+* Add function WrappedData.toShortData().
 
 
 ### 5.19.7 STABLE (01/10/2020)

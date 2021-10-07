@@ -433,4 +433,10 @@ public class SymmetricSecretKey extends AbstractKey implements ISecretDecentrali
 	 * SymmetricSecretKey(SymmetricEncryptionType.DEFAULT,
 	 * SymmetricEncryptionType.DEFAULT.getKeyGenerator(random).generateKey()); }
 	 */
+
+	@Override
+	public String getShortClassName()
+	{
+		return "secretKey";
+	}
 }

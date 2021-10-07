@@ -46,7 +46,7 @@ import java.util.Objects;
 
 /**
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 1.1
  * @since Utils 4.7.0
  */
 public class SymmetricSecretKeyPair extends AbstractKey implements ISecretDecentralizedValue{
@@ -165,5 +165,11 @@ public class SymmetricSecretKeyPair extends AbstractKey implements ISecretDecent
 	@Override
 	public boolean useAuthenticatedSignatureAlgorithm() {
 		return true;
+	}
+
+	@Override
+	public String getShortClassName()
+	{
+		return "secretKeys";
 	}
 }

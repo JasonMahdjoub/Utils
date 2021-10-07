@@ -4,7 +4,7 @@ import com.distrimind.util.data_buffers.WrappedData;
 
 /**
  * @author Jason Mahdjoub
- * @version 2.0
+ * @version 2.1
  * @since MaDKitLanEdition 4.5.0
  */
 public interface IASymmetricPublicKey extends IKey {
@@ -34,4 +34,9 @@ public interface IASymmetricPublicKey extends IKey {
 		return getPublicKeyValidityBeginDateUTC()<=curTime+TIME_COMPARISON_TOLERANCE_IN_MS && getTimeExpirationUTC()>=curTime;
 	}
 
+	@Override
+	default String getShortClassName()
+	{
+		return "pubKey";
+	}
 }
