@@ -89,11 +89,11 @@ public class SecuredDecentralizedID extends AbstractDecentralizedID {
 		}
 		return md;
 	}
-	public static SecuredDecentralizedID valueOf(String value) {
+	public static SecuredDecentralizedID valueOf(String value) throws InvalidEncodedValue {
 		return valueOf(new WrappedString(value));
 
 	}
-	public static SecuredDecentralizedID valueOf(WrappedString value) {
+	public static SecuredDecentralizedID valueOf(WrappedString value) throws InvalidEncodedValue {
 		AbstractDecentralizedID res = AbstractDecentralizedID.valueOf(value);
 		if (res instanceof SecuredDecentralizedID) {
 			return (SecuredDecentralizedID) res;

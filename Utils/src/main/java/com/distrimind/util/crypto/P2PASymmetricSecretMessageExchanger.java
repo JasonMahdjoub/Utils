@@ -34,6 +34,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
+import com.distrimind.util.InvalidEncodedValue;
 import com.distrimind.util.data_buffers.WrappedData;
 import com.distrimind.util.io.Integrity;
 import com.distrimind.util.io.MessageExternalizationException;
@@ -80,15 +81,12 @@ public class P2PASymmetricSecretMessageExchanger {
 				
 				@Override
 				protected void engineSetSeed(byte[] seed) {
-					if (random!=null)
-					{
-						byte[] s = new byte[seed.length + 1];
-						s[0]=1;
-						System.arraycopy(seed, 0, s, 0, seed.length);
-						BigInteger num = new BigInteger(s);
-						random.setSeed(num.mod(maxLongValue).longValue());
-					}
-					
+					byte[] s = new byte[seed.length + 1];
+					s[0]=1;
+					System.arraycopy(seed, 0, s, 0, seed.length);
+					BigInteger num = new BigInteger(s);
+					random.setSeed(num.mod(maxLongValue).longValue());
+
 				}
 				
 				@Override
@@ -160,18 +158,14 @@ public class P2PASymmetricSecretMessageExchanger {
 	private byte cost = PasswordHash.DEFAULT_COST;
 
 	P2PASymmetricSecretMessageExchanger(AbstractSecureRandom secureRandom, ASymmetricPublicKey myPublicKey)
-			throws NoSuchAlgorithmException, NoSuchProviderException, MessageExternalizationException {
+			throws NoSuchAlgorithmException, NoSuchProviderException, MessageExternalizationException{
 		this(secureRandom, MessageDigestType.BC_FIPS_SHA3_512, PasswordHashType.BC_FIPS_PBKFD2WithHMacSHA2_512, myPublicKey);
 	}
 
 	P2PASymmetricSecretMessageExchanger(AbstractSecureRandom secureRandom, MessageDigestType messageDigestType, PasswordHashType passwordHashType,
-			ASymmetricPublicKey myPublicKey) throws NoSuchAlgorithmException, NoSuchProviderException, MessageExternalizationException {
-		this(secureRandom, messageDigestType, passwordHashType, myPublicKey, null);
-	}
+			ASymmetricPublicKey myPublicKey) throws NoSuchAlgorithmException, NoSuchProviderException, MessageExternalizationException{
 
-	P2PASymmetricSecretMessageExchanger(AbstractSecureRandom secureRandom, MessageDigestType messageDigestType, PasswordHashType passwordHashType,
-			ASymmetricPublicKey myPublicKey, byte[] distantPublicKey)
-			throws NoSuchAlgorithmException, NoSuchProviderException, MessageExternalizationException {
+
 		if (messageDigestType == null)
 			throw new NullPointerException("messageDigestType");
 		if (myPublicKey == null)
@@ -184,8 +178,7 @@ public class P2PASymmetricSecretMessageExchanger {
 		this.myPublicKey = myPublicKey;
 		this.secureRandom=secureRandom;
 
-		if (distantPublicKey != null)
-			setDistantPublicKey(distantPublicKey);
+
 		random = new FakeSecureRandom();
 		cipher = getCipherInstancePrivate(type);
 		this.messageDigestType = messageDigestType;
@@ -193,7 +186,16 @@ public class P2PASymmetricSecretMessageExchanger {
 		this.messageDigest.reset();
 		this.passwordHashType = passwordHashType;
 		this.messageDigest256 = MessageDigestType.BC_FIPS_SHA3_256.getMessageDigestInstance();
+
 	}
+
+	/*P2PASymmetricSecretMessageExchanger(AbstractSecureRandom secureRandom, MessageDigestType messageDigestType, PasswordHashType passwordHashType,
+			ASymmetricPublicKey myPublicKey, byte[] distantPublicKey)
+			throws NoSuchAlgorithmException, NoSuchProviderException, MessageExternalizationException, InvalidEncodedValue {
+		this(secureRandom, messageDigestType, passwordHashType, myPublicKey);
+		if (distantPublicKey != null)
+			setDistantPublicKey(distantPublicKey);
+	}*/
 
 	public byte[] encode(byte[] message, byte[] salt, boolean messageIsKey) throws IOException, InvalidKeyException,
 			IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException,
@@ -410,7 +412,7 @@ public class P2PASymmetricSecretMessageExchanger {
 	}
 
 	public void setDistantPublicKey(byte[] distantPublicKeyAndIV)
-			throws NoSuchAlgorithmException, NoSuchProviderException, MessageExternalizationException {
+			throws NoSuchAlgorithmException, NoSuchProviderException, MessageExternalizationException, InvalidEncodedValue {
 		distantMessageEncoder = new P2PASymmetricSecretMessageExchanger(secureRandom, messageDigestType, passwordHashType,
 				(ASymmetricPublicKey) AbstractKey.decode(distantPublicKeyAndIV));
 		if (myPublicKey.equals(distantMessageEncoder.myPublicKey))

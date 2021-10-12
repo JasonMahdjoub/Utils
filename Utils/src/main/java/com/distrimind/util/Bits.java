@@ -36,7 +36,6 @@ package com.distrimind.util;
 
 import com.distrimind.util.data_buffers.WrappedSecretString;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Base64;
 
@@ -261,13 +260,13 @@ public class Bits {
 	{
 		return toBase64String(bytes, false);
 	}
-	public static byte[] toBytesArrayFromBase64String(String base64String) throws IOException {
+	public static byte[] toBytesArrayFromBase64String(String base64String) throws InvalidEncodedValue {
 		return toBytesArrayFromBase64String(base64String, false);
 	}
-	public static byte[] toBytesArrayFromBase64String(char[] base64String) throws IOException {
+	public static byte[] toBytesArrayFromBase64String(char[] base64String) throws InvalidEncodedValue {
 		return toBytesArrayFromBase64String(base64String, false);
 	}
-	public static byte[] toBytesArrayFromBase64String(char[] base64String, boolean zeroiseIntermediateArrays) throws IOException {
+	public static byte[] toBytesArrayFromBase64String(char[] base64String, boolean zeroiseIntermediateArrays) throws InvalidEncodedValue {
 		String s=new String(base64String);
 		byte[] res=toBytesArrayFromBase64String(s, zeroiseIntermediateArrays);
 		if (zeroiseIntermediateArrays) {
@@ -275,14 +274,19 @@ public class Bits {
 		}
 		return res;
 	}
-	public static byte[] toBytesArrayFromBase64String(String base64String, boolean zeroiseIntermediateArrays) throws IOException {
-
-		byte[] d=Base64.getUrlDecoder().decode(base64String);
-		byte[] res= Bits.checkByteArrayAndReturnsItWithoutCheckSum(d);
-		if (zeroiseIntermediateArrays) {
-			Arrays.fill(d, (byte) 0);
+	public static byte[] toBytesArrayFromBase64String(String base64String, boolean zeroiseIntermediateArrays) throws InvalidEncodedValue {
+		try {
+			byte[] d = Base64.getUrlDecoder().decode(base64String);
+			byte[] res = Bits.checkByteArrayAndReturnsItWithoutCheckSum(d);
+			if (zeroiseIntermediateArrays) {
+				Arrays.fill(d, (byte) 0);
+			}
+			return res;
 		}
-		return res;
+		catch (IllegalArgumentException e)
+		{
+			throw new InvalidEncodedValue(e);
+		}
 	}
 	public static byte[] getByteArrayWithCheckSum(byte[] tab)
 	{
@@ -303,7 +307,7 @@ public class Bits {
 		return res;
 	}
 
-	public static byte[] checkByteArrayAndReturnsItWithoutCheckSum(byte[] tab) throws IOException {
+	public static byte[] checkByteArrayAndReturnsItWithoutCheckSum(byte[] tab) throws InvalidEncodedValue {
 		if (tab==null)
 			throw new NullPointerException();
 		if (tab.length==0)
@@ -318,7 +322,7 @@ public class Bits {
 			code^=computeByteParity(b)<<(i%8);
 		}
 		if (code!=expectedCode)
-			throw new IOException("Invalid check sum");
+			throw new InvalidEncodedValue("Invalid check sum");
 		return res;
 	}
 

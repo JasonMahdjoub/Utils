@@ -36,6 +36,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 
 import com.distrimind.util.AbstractDecentralizedValue;
+import com.distrimind.util.InvalidEncodedValue;
 import com.distrimind.util.data_buffers.WrappedSecretData;
 import com.distrimind.util.data_buffers.WrappedSecretString;
 
@@ -56,19 +57,19 @@ public abstract class AbstractKeyPair<TPrivateKey extends IASymmetricPrivateKey,
 	public static final int MAX_SIZE_IN_BYTES_OF_KEY_PAIR_WITH_RSA_FOR_ENCRYPTION = ASymmetricEncryptionType.MAX_SIZE_IN_BYTES_OF_HYBRID_KEY_PAIR_WITH_RSA_FOR_ENCRYPTION;
 	public static final int MAX_SIZE_IN_BYTES_OF_KEY_PAIR_FOR_ENCRYPTION= ASymmetricEncryptionType.MAX_SIZE_IN_BYTES_OF_HYBRID_KEY_PAIR_FOR_ENCRYPTION;
 
-	public static AbstractKeyPair<?, ?> decode(WrappedSecretData b) throws IllegalArgumentException {
+	public static AbstractKeyPair<?, ?> decode(WrappedSecretData b) throws InvalidEncodedValue {
 		return decode(b.getBytes(), false);
 	}
-	public static AbstractKeyPair<?, ?> decode(byte[] b) throws IllegalArgumentException {
+	public static AbstractKeyPair<?, ?> decode(byte[] b) throws InvalidEncodedValue {
 		return decode(b, true);
 	}
-	public static AbstractKeyPair<?, ?> decode(byte[] b, int off, int len) throws IllegalArgumentException {
+	public static AbstractKeyPair<?, ?> decode(byte[] b, int off, int len) throws InvalidEncodedValue {
 		return decode(b, off, len,true);
 	}
-	public static AbstractKeyPair<?, ?> decode(byte[] b, boolean fillArrayWithZerosWhenDecoded) throws IllegalArgumentException {
+	public static AbstractKeyPair<?, ?> decode(byte[] b, boolean fillArrayWithZerosWhenDecoded) throws InvalidEncodedValue {
 		return decode(b, 0, b.length, fillArrayWithZerosWhenDecoded);
 	}
-	public static AbstractKeyPair<?, ?> decode(byte[] b, int off, int len, boolean fillArrayWithZerosWhenDecoded) throws IllegalArgumentException
+	public static AbstractKeyPair<?, ?> decode(byte[] b, int off, int len, boolean fillArrayWithZerosWhenDecoded) throws InvalidEncodedValue
 	{
 		if (off<0 || len<0 || len+off>b.length)
 			throw new IllegalArgumentException();
@@ -80,7 +81,7 @@ public abstract class AbstractKeyPair<TPrivateKey extends IASymmetricPrivateKey,
 			return ASymmetricKeyPair.decode(b, off, len, fillArrayWithZerosWhenDecoded);
 	}
 
-	public static AbstractKeyPair<?, ?> valueOf(WrappedSecretString key) throws IllegalArgumentException, IOException {
+	public static AbstractKeyPair<?, ?> valueOf(WrappedSecretString key) throws InvalidEncodedValue {
 		return decode(new WrappedSecretData(key));
 	}
 

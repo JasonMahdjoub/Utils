@@ -1,11 +1,8 @@
 package com.distrimind.util.data_buffers;
 
 import com.distrimind.util.Bits;
+import com.distrimind.util.InvalidEncodedValue;
 
-import java.io.IOException;
-import java.lang.reflect.Field;
-import java.util.Arrays;
-import java.util.Base64;
 import java.util.Objects;
 
 /**
@@ -103,7 +100,7 @@ public class WrappedString {
 		return chars;
 	}
 
-	public WrappedData toWrappedData() throws IOException {
+	public WrappedData toWrappedData() throws InvalidEncodedValue {
 		return new WrappedData(this);
 	}
 	/*private static final Field valueField;

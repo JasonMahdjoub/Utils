@@ -65,10 +65,10 @@ public abstract class AbstractDecentralizedID extends AbstractDecentralizedValue
 	static final byte REINFORCED_DECENTRALIZED_ID_GENERATOR_TYPE = 17;
 
 	static final byte SECURED_DECENTRALIZED_ID_TYPE = 18;
-	public static AbstractDecentralizedID decode(WrappedData bytes) {
+	public static AbstractDecentralizedID decode(WrappedData bytes) throws InvalidEncodedValue {
 		return decode(bytes.getBytes());
 	}
-	public static AbstractDecentralizedID decode(byte[] bytes) {
+	public static AbstractDecentralizedID decode(byte[] bytes) throws InvalidEncodedValue {
 		return decode(bytes, 0, bytes.length);
 	}
 	public static boolean isValidType(WrappedData bytes)
@@ -82,8 +82,7 @@ public abstract class AbstractDecentralizedID extends AbstractDecentralizedValue
 				|| bytes[off]==AbstractDecentralizedID.SECURED_DECENTRALIZED_ID_TYPE;
 	}
 
-	public static AbstractDecentralizedID decode(byte[] bytes, int off, int len)
-	{
+	public static AbstractDecentralizedID decode(byte[] bytes, int off, int len) throws InvalidEncodedValue {
 		return decode(bytes, off, len, false);
 	}
 
@@ -92,7 +91,7 @@ public abstract class AbstractDecentralizedID extends AbstractDecentralizedValue
 		return new WrappedString(encode());
 	}
 
-	public static AbstractDecentralizedID decode(byte[] bytes, int off, int len, boolean fillArrayWithZerosWhenDecoded) {
+	public static AbstractDecentralizedID decode(byte[] bytes, int off, int len, boolean fillArrayWithZerosWhenDecoded) throws InvalidEncodedValue {
 
 		if (bytes == null)
 			throw new NullPointerException("bytes");
@@ -123,8 +122,12 @@ public abstract class AbstractDecentralizedID extends AbstractDecentralizedValue
 					return new SecuredDecentralizedID(idLongs);
 				}
 				default:
-					throw new IllegalArgumentException("Unknown type");
+					throw new InvalidEncodedValue("Unknown type");
 			}
+		}
+		catch (IllegalArgumentException e)
+		{
+			throw new InvalidEncodedValue(e);
 		}
 		finally {
 			if (fillArrayWithZerosWhenDecoded) {
@@ -134,45 +137,51 @@ public abstract class AbstractDecentralizedID extends AbstractDecentralizedValue
 
 	}
 
-	public static AbstractDecentralizedID valueOf(WrappedString wrappedString) {
-		String value=wrappedString.toString();
-		if (value.startsWith(DecentralizedIDGenerator.ToStringHead + "[")) {
-			Pattern p = Pattern.compile("(-?\\d*);(-?\\d*);(-?\\d*)");
-			Matcher m = p
-					.matcher(value.subSequence(DecentralizedIDGenerator.ToStringHead.length() + 1, value.length() - 1));
-			if (m.matches() && m.groupCount() == 3) {
-				long timeStamp = Long.parseLong(m.group(1));
-				long workerID = Long.parseLong(m.group(2));
-				long sequenceID = Long.parseLong(m.group(3));
+	public static AbstractDecentralizedID valueOf(WrappedString wrappedString) throws InvalidEncodedValue {
+		try {
+			String value = wrappedString.toString();
+			if (value.startsWith(DecentralizedIDGenerator.ToStringHead + "[")) {
+				Pattern p = Pattern.compile("(-?\\d*);(-?\\d*);(-?\\d*)");
+				Matcher m = p
+						.matcher(value.subSequence(DecentralizedIDGenerator.ToStringHead.length() + 1, value.length() - 1));
+				if (m.matches() && m.groupCount() == 3) {
+					long timeStamp = Long.parseLong(m.group(1));
+					long workerID = Long.parseLong(m.group(2));
+					long sequenceID = Long.parseLong(m.group(3));
 
-				return new DecentralizedIDGenerator(timeStamp, workerID | (sequenceID << 48));
-			}
-		}
-		if (value.startsWith(RenforcedDecentralizedIDGenerator.ToStringHead + "[")) {
-			Pattern p = Pattern.compile("(-?\\d*);(-?\\d*);(-?\\d*)");
-			Matcher m = p.matcher(
-					value.subSequence(RenforcedDecentralizedIDGenerator.ToStringHead.length() + 1, value.length() - 1));
-			if (m.matches() && m.groupCount() == 3) {
-				long timeStamp = Long.parseLong(m.group(1));
-				long workerID = Long.parseLong(m.group(2));
-				long sequenceID = Long.parseLong(m.group(3));
-
-				return new RenforcedDecentralizedIDGenerator(timeStamp, workerID | (sequenceID << 48));
-			}
-		}
-		if (value.startsWith(SecuredDecentralizedID.ToStringHead + "[")) {
-			Pattern p = Pattern.compile(";");
-			String[] values = p
-					.split(value.subSequence(SecuredDecentralizedID.ToStringHead.length() + 1, value.length() - 1));
-			if (values.length >= 1) {
-				long[] vals = new long[values.length];
-				for (int i = 0; i < vals.length; i++) {
-					vals[i] = Long.parseLong(values[i]);
+					return new DecentralizedIDGenerator(timeStamp, workerID | (sequenceID << 48));
 				}
-				return new SecuredDecentralizedID(vals);
 			}
+			if (value.startsWith(RenforcedDecentralizedIDGenerator.ToStringHead + "[")) {
+				Pattern p = Pattern.compile("(-?\\d*);(-?\\d*);(-?\\d*)");
+				Matcher m = p.matcher(
+						value.subSequence(RenforcedDecentralizedIDGenerator.ToStringHead.length() + 1, value.length() - 1));
+				if (m.matches() && m.groupCount() == 3) {
+					long timeStamp = Long.parseLong(m.group(1));
+					long workerID = Long.parseLong(m.group(2));
+					long sequenceID = Long.parseLong(m.group(3));
+
+					return new RenforcedDecentralizedIDGenerator(timeStamp, workerID | (sequenceID << 48));
+				}
+			}
+			if (value.startsWith(SecuredDecentralizedID.ToStringHead + "[")) {
+				Pattern p = Pattern.compile(";");
+				String[] values = p
+						.split(value.subSequence(SecuredDecentralizedID.ToStringHead.length() + 1, value.length() - 1));
+				if (values.length >= 1) {
+					long[] vals = new long[values.length];
+					for (int i = 0; i < vals.length; i++) {
+						vals[i] = Long.parseLong(values[i]);
+					}
+					return new SecuredDecentralizedID(vals);
+				}
+			}
+			throw new InvalidEncodedValue("Invalid value format : " + value);
 		}
-		throw new IllegalArgumentException("Invalid value format : " + value);
+		catch (IllegalArgumentException e)
+		{
+			throw new InvalidEncodedValue(e);
+		}
 	}
 
 	@Override

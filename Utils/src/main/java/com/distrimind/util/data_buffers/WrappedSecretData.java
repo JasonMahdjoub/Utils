@@ -1,11 +1,10 @@
 package com.distrimind.util.data_buffers;
 
 import com.distrimind.util.Bits;
+import com.distrimind.util.InvalidEncodedValue;
 import com.distrimind.util.crypto.Zeroizable;
 
-import java.io.IOException;
 import java.util.Arrays;
-import java.util.Base64;
 
 /**
  * @author Jason Mahdjoub
@@ -22,7 +21,7 @@ public class WrappedSecretData extends WrappedData implements Zeroizable {
 		super();
 		toZeroize=false;
 	}
-	public WrappedSecretData(WrappedString secretData) throws IOException {
+	public WrappedSecretData(WrappedString secretData) throws InvalidEncodedValue {
 		super();
 		setData(Bits.toBytesArrayFromBase64String(secretData.toString(), true));
 	}

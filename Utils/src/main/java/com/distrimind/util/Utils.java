@@ -67,6 +67,11 @@ public class Utils {
 			VERSION.addCreator(new Person("mahdjoub", "jason"))
 					.addDeveloper(new PersonDeveloper("mahdjoub", "jason", "2016-01-04"))
 					.addDescription(
+							new Description((short)5, (short)20, (short)2, Version.Type.STABLE, (short)0, "2020-10-12")
+									.addItem("Add exception InvalidEncodedValue.")
+									.addItem("Use exception InvalidEncodedValue during values decoding.")
+					)
+					.addDescription(
 							new Description((short)5, (short)20, (short)1, Version.Type.STABLE, (short)0, "2020-10-12")
 									.addItem("Add function DecentralizedValue.toShortString(DecentralizedValue).")
 									.addItem("Add function DecentralizedValue.toShortString(Collection<DecentralizedValue>).")
