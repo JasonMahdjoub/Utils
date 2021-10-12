@@ -1,6 +1,6 @@
 Utils
 =====
-5.20.0 STABLE (Build: 3375) (from 04/01/2016 to 07/10/2020)
+5.20.1 STABLE (Build: 3381) (from 04/01/2016 to 12/10/2020)
 
 # Creator(s):
 Jason MAHDJOUB
@@ -9,6 +9,11 @@ Jason MAHDJOUB
 Jason MAHDJOUB (Entered in the team at 04/01/2016)
 
 # Modifications:
+
+
+### 5.20.1 STABLE (12/10/2020)
+* Add function DecentralizedValue.toShortString(DecentralizedValue).
+* Add function DecentralizedValue.toShortString(Collection<DecentralizedValue>).
 
 
 ### 5.20.0 STABLE (07/10/2020)
