@@ -37,11 +37,11 @@ package com.distrimind.util.crypto;
 
 import com.distrimind.util.AbstractDecentralizedValue;
 import com.distrimind.util.Bits;
+import com.distrimind.util.InvalidEncodedValue;
 import com.distrimind.util.data_buffers.WrappedData;
 import com.distrimind.util.data_buffers.WrappedSecretData;
 import com.distrimind.util.data_buffers.WrappedString;
 
-import java.io.IOException;
 import java.util.Arrays;
 
 /**
@@ -64,7 +64,7 @@ public abstract class AbstractKey extends AbstractDecentralizedValue implements 
 
 
 
-	public static AbstractKey decode(byte[] b) throws IllegalArgumentException {
+	public static AbstractKey decode(byte[] b) throws InvalidEncodedValue {
 		return decode(b, !isPublicKey(b, 0));
 	}
 
@@ -112,10 +112,10 @@ public abstract class AbstractKey extends AbstractDecentralizedValue implements 
 	}
 
 
-	public static AbstractKey decode(byte[] b, boolean fillArrayWithZerosWhenDecoded) throws IllegalArgumentException {
+	public static AbstractKey decode(byte[] b, boolean fillArrayWithZerosWhenDecoded) throws InvalidEncodedValue {
 		return decode(b, 0, b.length, fillArrayWithZerosWhenDecoded);
 	}
-	public static AbstractKey decode(byte[] b, int off, int len) throws IllegalArgumentException {
+	public static AbstractKey decode(byte[] b, int off, int len) throws InvalidEncodedValue {
 		return decode(b, off, len, !isPublicKey(b, off));
 	}
 
@@ -141,45 +141,47 @@ public abstract class AbstractKey extends AbstractDecentralizedValue implements 
 
 	}
 
-	static IHybridKey decodeHybridKey(byte[] encoded, int off, int len, boolean fillArrayWithZerosWhenDecoded)
-			throws IllegalArgumentException
-	{
+	static IHybridKey decodeHybridKey(byte[] encoded, int off, int len, boolean fillArrayWithZerosWhenDecoded) throws InvalidEncodedValue {
 		try {
 			if (off < 0 || len < 0 || len + off > encoded.length)
 				throw new IllegalArgumentException();
+			try {
+				if (len < 68)
+					throw new InvalidEncodedValue();
+				if (encoded[off] != IS_HYBRID_PRIVATE_KEY && encoded[off] != IS_HYBRID_PUBLIC_KEY)
+					throw new InvalidEncodedValue("" + (encoded[off] & 0xFF));
+				int size = (int) Bits.getUnsignedInt(encoded, off + 1, 3);
+				if (size + 36 > len)
+					throw new InvalidEncodedValue();
+				AbstractKey nonPQCKey = decode(encoded, off + 4, size);
+				if (IHybridKey.class.isAssignableFrom(nonPQCKey.getClass()))
+					throw new InvalidEncodedValue();
+				if (!ASymmetricPrivateKey.class.equals(nonPQCKey.getClass())
+						&& !ASymmetricPublicKey.class.equals(nonPQCKey.getClass()))
+					throw new InvalidEncodedValue();
+				if (nonPQCKey.isPostQuantumKey())
+					throw new InvalidEncodedValue();
 
-			if (len < 68)
-				throw new IllegalArgumentException();
-			if (encoded[off] != IS_HYBRID_PRIVATE_KEY && encoded[off] != IS_HYBRID_PUBLIC_KEY)
-				throw new IllegalArgumentException(""+(encoded[off] & 0xFF));
-			int size = (int) Bits.getUnsignedInt(encoded, off + 1, 3);
-			if (size + 36 > len)
-				throw new IllegalArgumentException();
-			AbstractKey nonPQCKey = decode(encoded, off + 4, size);
-			if (IHybridKey.class.isAssignableFrom(nonPQCKey.getClass()))
-				throw new IllegalArgumentException();
-			if (!ASymmetricPrivateKey.class.equals(nonPQCKey.getClass())
-					&& !ASymmetricPublicKey.class.equals(nonPQCKey.getClass()))
-				throw new IllegalArgumentException();
-			if (nonPQCKey.isPostQuantumKey())
-				throw new IllegalArgumentException();
+				AbstractKey PQCKey = decode(encoded, off + 4 + size, len - size - 4);
 
-			AbstractKey PQCKey = decode(encoded, off + 4 + size, len - size - 4);
+				if (!PQCKey.getClass().equals(nonPQCKey.getClass()))
+					throw new InvalidEncodedValue();
+				if (!PQCKey.isPostQuantumKey())
+					throw new InvalidEncodedValue();
 
-			if (!PQCKey.getClass().equals(nonPQCKey.getClass()))
-				throw new IllegalArgumentException();
-			if (!PQCKey.isPostQuantumKey())
-				throw new IllegalArgumentException();
-
-			if (ASymmetricPrivateKey.class.equals(nonPQCKey.getClass())) {
-				return new HybridASymmetricPrivateKey((ASymmetricPrivateKey) nonPQCKey, (ASymmetricPrivateKey) PQCKey);
+				if (ASymmetricPrivateKey.class.equals(nonPQCKey.getClass())) {
+					return new HybridASymmetricPrivateKey((ASymmetricPrivateKey) nonPQCKey, (ASymmetricPrivateKey) PQCKey);
+				} else {
+					fillArrayWithZerosWhenDecoded = false;
+					return new HybridASymmetricPublicKey((ASymmetricPublicKey) nonPQCKey, (ASymmetricPublicKey) PQCKey);
+				}
 			}
-			else {
-				fillArrayWithZerosWhenDecoded = false;
-				return new HybridASymmetricPublicKey((ASymmetricPublicKey) nonPQCKey, (ASymmetricPublicKey) PQCKey);
+			catch (IllegalArgumentException e)
+			{
+				throw new InvalidEncodedValue(e);
 			}
 		}
-		catch (IllegalArgumentException e)
+		catch (InvalidEncodedValue e)
 		{
 			fillArrayWithZerosWhenDecoded=false;
 			throw e;
@@ -190,13 +192,13 @@ public abstract class AbstractKey extends AbstractDecentralizedValue implements 
 		}
 	}
 
-	public static AbstractKey decode(WrappedData wrappedData) throws IllegalArgumentException {
+	public static AbstractKey decode(WrappedData wrappedData) throws InvalidEncodedValue {
 		AbstractKey k=decode(wrappedData.getBytes(), false);
 		if (k instanceof ISecretDecentralizedValue)
 			wrappedData.transformToSecretData();
 		return k;
 	}
-	public static AbstractKey decode(byte[] b, int off, int len, boolean fillArrayWithZerosWhenDecoded) throws IllegalArgumentException {
+	public static AbstractKey decode(byte[] b, int off, int len, boolean fillArrayWithZerosWhenDecoded) throws InvalidEncodedValue {
 		if (off<0 || len<0 || len+off>b.length)
 			throw new IllegalArgumentException();
 			//byte[][] res = Bits.separateEncodingsWithShortSizedTabs(b);
@@ -216,10 +218,10 @@ public abstract class AbstractKey extends AbstractDecentralizedValue implements 
 
 					AbstractKey ke=decode(b, off+2, s, false);
 					if (!(ke instanceof SymmetricSecretKey))
-						throw new IllegalArgumentException();
+						throw new InvalidEncodedValue();
 					AbstractKey ks=decode(b, off+2+s, len-2-s, false);
 					if (!(ks instanceof SymmetricSecretKey))
-						throw new IllegalArgumentException();
+						throw new InvalidEncodedValue();
 					return new SymmetricSecretKeyPair((SymmetricSecretKey)ke, (SymmetricSecretKey)ks);
 				}
 				else {
@@ -298,14 +300,18 @@ public abstract class AbstractKey extends AbstractDecentralizedValue implements 
 				IHybridKey res=decodeHybridKey(b, off, len, fillArrayWithZerosWhenDecoded);
 				if (!res.getClass().equals(HybridASymmetricPrivateKey.class)
 						&& !res.getClass().equals(HybridASymmetricPublicKey.class)	)
-					throw new IllegalArgumentException();
+					throw new InvalidEncodedValue();
 				return (AbstractKey)res;
 			}
 			else {
 				fillArrayWithZerosWhenDecoded=false;
-				throw new IllegalArgumentException();
+				throw new InvalidEncodedValue();
 			}
 
+		}
+		catch (IllegalArgumentException e)
+		{
+			throw new InvalidEncodedValue(e);
 		}
 		finally
 		{
@@ -316,7 +322,7 @@ public abstract class AbstractKey extends AbstractDecentralizedValue implements 
 
 
 
-	public static AbstractKey valueOf(WrappedString key) throws IllegalArgumentException, IOException {
+	public static AbstractKey valueOf(WrappedString key) throws InvalidEncodedValue {
 		if (key==null)
 			throw new NullPointerException();
 		AbstractKey k=decode(new WrappedSecretData(key));

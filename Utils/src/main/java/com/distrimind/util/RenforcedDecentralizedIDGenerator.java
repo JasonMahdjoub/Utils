@@ -60,10 +60,10 @@ public class RenforcedDecentralizedIDGenerator extends AbstractDecentralizedIDGe
 	private static final long serialVersionUID = 4279383128706805738L;
 
 	static final String ToStringHead = "RenforcedDecentralizedID";
-	public static RenforcedDecentralizedIDGenerator valueOf(String value) {
+	public static RenforcedDecentralizedIDGenerator valueOf(String value) throws InvalidEncodedValue {
 		return valueOf(new WrappedString(value));
 	}
-	public static RenforcedDecentralizedIDGenerator valueOf(WrappedString value) {
+	public static RenforcedDecentralizedIDGenerator valueOf(WrappedString value) throws InvalidEncodedValue {
 		AbstractDecentralizedID res = AbstractDecentralizedID.valueOf(value);
 		if (res instanceof RenforcedDecentralizedIDGenerator) {
 			return (RenforcedDecentralizedIDGenerator) res;

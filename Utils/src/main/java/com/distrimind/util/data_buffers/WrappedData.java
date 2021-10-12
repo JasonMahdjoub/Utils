@@ -1,8 +1,8 @@
 package com.distrimind.util.data_buffers;
 
 import com.distrimind.util.Bits;
+import com.distrimind.util.InvalidEncodedValue;
 
-import java.io.IOException;
 import java.util.Arrays;
 
 /**
@@ -27,7 +27,7 @@ public class WrappedData  {
 			throw new NullPointerException();
 		this.data=data.data;
 	}
-	public WrappedData(WrappedString secretData) throws IOException {
+	public WrappedData(WrappedString secretData) throws InvalidEncodedValue {
 		super();
 
 		setData(Bits.toBytesArrayFromBase64String(secretData.toString(), false));

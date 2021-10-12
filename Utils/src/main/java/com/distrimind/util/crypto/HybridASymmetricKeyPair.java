@@ -36,6 +36,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 
 import com.distrimind.util.Bits;
+import com.distrimind.util.InvalidEncodedValue;
 import com.distrimind.util.data_buffers.WrappedData;
 import com.distrimind.util.data_buffers.WrappedSecretData;
 
@@ -96,31 +97,36 @@ public class HybridASymmetricKeyPair extends AbstractKeyPair<HybridASymmetricPri
 	}
 
 	static HybridASymmetricKeyPair decodeHybridKey(byte[] encoded, int off, int len, boolean fillArrayWithZerosWhenDecoded)
-			throws IllegalArgumentException
+			throws InvalidEncodedValue
 	{
 		try {
 			if (off < 0 || len < 0 || len + off > encoded.length)
 				throw new IllegalArgumentException();
+			try {
+				if (len < 68)
+					throw new InvalidEncodedValue();
+				if (encoded[off] != AbstractKey.IS_HYBRID_KEY_PAIR)
+					throw new InvalidEncodedValue();
+				int size = (int) Bits.getUnsignedInt(encoded, off + 1, 3);
+				if (size + 36 > len)
+					throw new InvalidEncodedValue();
+				IHybridKey privateKey = AbstractKey.decodeHybridKey(encoded, off + 4, size, fillArrayWithZerosWhenDecoded);
+				if (!privateKey.getClass().equals(HybridASymmetricPrivateKey.class))
+					throw new InvalidEncodedValue();
 
-			if (len < 68)
-				throw new IllegalArgumentException();
-			if (encoded[off] != AbstractKey.IS_HYBRID_KEY_PAIR)
-				throw new IllegalArgumentException();
-			int size = (int) Bits.getUnsignedInt(encoded, off + 1, 3);
-			if (size + 36 > len)
-				throw new IllegalArgumentException();
-			IHybridKey privateKey = AbstractKey.decodeHybridKey(encoded, off + 4, size, fillArrayWithZerosWhenDecoded);
-			if (!privateKey.getClass().equals(HybridASymmetricPrivateKey.class))
-				throw new IllegalArgumentException();
+				IHybridKey pubKey = AbstractKey.decodeHybridKey(encoded, off + 4 + size, len - size - 4, fillArrayWithZerosWhenDecoded);
 
-			IHybridKey pubKey = AbstractKey.decodeHybridKey(encoded, off + 4 + size, len - size - 4, fillArrayWithZerosWhenDecoded);
+				if (!pubKey.getClass().equals(HybridASymmetricPublicKey.class))
+					throw new InvalidEncodedValue();
 
-			if (!pubKey.getClass().equals(HybridASymmetricPublicKey.class))
-				throw new IllegalArgumentException();
-
-			return new HybridASymmetricKeyPair((HybridASymmetricPrivateKey)privateKey, (HybridASymmetricPublicKey)pubKey);
+				return new HybridASymmetricKeyPair((HybridASymmetricPrivateKey) privateKey, (HybridASymmetricPublicKey) pubKey);
+			}
+			catch (IllegalArgumentException e)
+			{
+				throw new InvalidEncodedValue(e);
+			}
 		}
-		catch (IllegalArgumentException e)
+		catch (InvalidEncodedValue | IllegalArgumentException e)
 		{
 			fillArrayWithZerosWhenDecoded=false;
 			throw e;

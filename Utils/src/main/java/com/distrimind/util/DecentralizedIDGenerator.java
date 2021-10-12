@@ -58,15 +58,15 @@ public class DecentralizedIDGenerator extends AbstractDecentralizedIDGenerator {
 	private static final AtomicInteger sequencer = new AtomicInteger(RANDOM.nextInt(((int)Short.MAX_VALUE)-((int)Short.MIN_VALUE))+Short.MIN_VALUE);
 
 	static final String ToStringHead = "DecentralizedID";
-	public static DecentralizedIDGenerator valueOf(String value) {
+	public static DecentralizedIDGenerator valueOf(String value) throws InvalidEncodedValue {
 		return valueOf(new WrappedString(value));
 	}
-	public static DecentralizedIDGenerator valueOf(WrappedString value) {
+	public static DecentralizedIDGenerator valueOf(WrappedString value) throws InvalidEncodedValue {
 		AbstractDecentralizedID res = AbstractDecentralizedID.valueOf(value);
 		if (res instanceof DecentralizedIDGenerator) {
 			return (DecentralizedIDGenerator) res;
 		} else
-			throw new IllegalArgumentException("Invalid format : " + value);
+			throw new InvalidEncodedValue("Invalid format : " + value);
 	}
 	public DecentralizedIDGenerator(UUID uuid)
 	{

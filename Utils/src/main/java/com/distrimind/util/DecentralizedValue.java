@@ -39,7 +39,6 @@ import com.distrimind.util.data_buffers.WrappedData;
 import com.distrimind.util.data_buffers.WrappedSecretData;
 import com.distrimind.util.data_buffers.WrappedString;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.Collection;
 
@@ -58,30 +57,25 @@ public interface DecentralizedValue extends Serializable {
 	int MAX_SIZE_IN_BYTES_OF_DECENTRALIZED_VALUE= MAX_SIZE_IN_BYTES_OF_KEY_PAIR;
 
 	WrappedData encode();
-	static DecentralizedValue decode(WrappedData encodedValue)
-	{
+	static DecentralizedValue decode(WrappedData encodedValue) throws InvalidEncodedValue {
 		DecentralizedValue dv=decode(encodedValue.getBytes());
 		if (dv instanceof ISecretDecentralizedValue)
 			encodedValue.transformToSecretData();
 		return dv;
 	}
-	static DecentralizedValue decode(byte[] encodedValue)
-	{
+	static DecentralizedValue decode(byte[] encodedValue) throws InvalidEncodedValue {
 		return decode(encodedValue, 0, encodedValue.length);
 	}
 
-	static DecentralizedValue decode(byte[] encodedValue, int off, int len)
-	{
+	static DecentralizedValue decode(byte[] encodedValue, int off, int len) throws InvalidEncodedValue {
 		return decode(encodedValue, off, len, false);
 	}
 
-	static DecentralizedValue decode(byte[] encodedValue, boolean fillArrayWithZerosWhenDecoded)
-	{
+	static DecentralizedValue decode(byte[] encodedValue, boolean fillArrayWithZerosWhenDecoded) throws InvalidEncodedValue {
 		return decode(encodedValue, 0, encodedValue.length, fillArrayWithZerosWhenDecoded);
 	}
 
-	static DecentralizedValue decode(byte[] encodedValue, int off, int len, boolean fillArrayWithZerosWhenDecoded)
-	{
+	static DecentralizedValue decode(byte[] encodedValue, int off, int len, boolean fillArrayWithZerosWhenDecoded) throws InvalidEncodedValue {
 		if (AbstractDecentralizedID.isValidType(encodedValue, off))
 			return AbstractDecentralizedID.decode(encodedValue, off, len, fillArrayWithZerosWhenDecoded);
 		else if (AbstractKey.isValidType(encodedValue, off))
@@ -94,7 +88,7 @@ public interface DecentralizedValue extends Serializable {
 	WrappedString encodeString() ;
 
 
-	static DecentralizedValue valueOf(WrappedString key) throws IllegalArgumentException, IOException {
+	static DecentralizedValue valueOf(WrappedString key) throws InvalidEncodedValue {
 		if (key==null)
 			throw new NullPointerException();
 		DecentralizedValue dv=decode(new WrappedSecretData(key));

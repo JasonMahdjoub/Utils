@@ -43,6 +43,7 @@ import java.util.Base64;
 
 
 import com.distrimind.util.Bits;
+import com.distrimind.util.InvalidEncodedValue;
 import com.distrimind.util.data_buffers.WrappedSecretData;
 
 /**
@@ -69,7 +70,7 @@ public class ASymmetricKeyPair extends AbstractKeyPair<ASymmetricPrivateKey, ASy
 
 
 
-	public static ASymmetricKeyPair valueOf(String key) throws IllegalArgumentException, IOException {
+	public static ASymmetricKeyPair valueOf(String key) throws InvalidEncodedValue {
 		return decode(Bits.checkByteArrayAndReturnsItWithoutCheckSum(Base64.getUrlDecoder().decode(key)));
 	}
 
@@ -275,73 +276,78 @@ public class ASymmetricKeyPair extends AbstractKeyPair<ASymmetricPrivateKey, ASy
 		type&=~AbstractKey.IS_XDH_KEY;
 		return type>=8 && type<=9;
 	}
-	public static ASymmetricKeyPair decode(byte[] b) throws IllegalArgumentException {
+	public static ASymmetricKeyPair decode(byte[] b) throws InvalidEncodedValue {
 		return decode(b, true);
 	}
-	public static ASymmetricKeyPair decode(byte[] b, int off, int len) throws IllegalArgumentException {
+	public static ASymmetricKeyPair decode(byte[] b, int off, int len) throws InvalidEncodedValue {
 		return decode(b, off, len,true);
 	}
-	public static ASymmetricKeyPair decode(byte[] b, boolean fillArrayWithZerosWhenDecoded) throws IllegalArgumentException {
+	public static ASymmetricKeyPair decode(byte[] b, boolean fillArrayWithZerosWhenDecoded) throws InvalidEncodedValue {
 		return decode(b, 0, b.length, fillArrayWithZerosWhenDecoded);
 	}
 
 
-	public static ASymmetricKeyPair decode(byte[] b, int off, int len, boolean fillArrayWithZerosWhenDecoded) throws IllegalArgumentException {
+	public static ASymmetricKeyPair decode(byte[] b, int off, int len, boolean fillArrayWithZerosWhenDecoded) throws InvalidEncodedValue {
 		if (off<0 || len<0 || len+off>b.length)
 			throw new IllegalArgumentException();
 
 		try {
-			int codedTypeSize = SymmetricSecretKey.ENCODED_TYPE_SIZE;
-			int keySize = (int)(Bits.getUnsignedInt(b, 1+off, 3));
-			int posKey=codedTypeSize+4+off;
-			byte type=b[off];
+			try {
+				int codedTypeSize = SymmetricSecretKey.ENCODED_TYPE_SIZE;
+				int keySize = (int) (Bits.getUnsignedInt(b, 1 + off, 3));
+				int posKey = codedTypeSize + 4 + off;
+				byte type = b[off];
 
-			boolean includeKeyExpiration=(type & AbstractKey.INCLUDE_KEY_EXPIRATION_CODE) == AbstractKey.INCLUDE_KEY_EXPIRATION_CODE;
-			boolean kdhKey=(type & AbstractKey.IS_XDH_KEY) == AbstractKey.IS_XDH_KEY;
-			if (includeKeyExpiration)
-				type-= AbstractKey.INCLUDE_KEY_EXPIRATION_CODE;
-			if (kdhKey)
-				type-= AbstractKey.IS_XDH_KEY;
-			long timeExpiration;
-			long publicKeyBeginDateUTC;
-			if (includeKeyExpiration) {
+				boolean includeKeyExpiration = (type & AbstractKey.INCLUDE_KEY_EXPIRATION_CODE) == AbstractKey.INCLUDE_KEY_EXPIRATION_CODE;
+				boolean kdhKey = (type & AbstractKey.IS_XDH_KEY) == AbstractKey.IS_XDH_KEY;
+				if (includeKeyExpiration)
+					type -= AbstractKey.INCLUDE_KEY_EXPIRATION_CODE;
+				if (kdhKey)
+					type -= AbstractKey.IS_XDH_KEY;
+				long timeExpiration;
+				long publicKeyBeginDateUTC;
+				if (includeKeyExpiration) {
 
-				publicKeyBeginDateUTC=Bits.getLong(b, posKey);
-				posKey += 8;
-				timeExpiration=Bits.getLong(b, posKey);
-				posKey += 8;
+					publicKeyBeginDateUTC = Bits.getLong(b, posKey);
+					posKey += 8;
+					timeExpiration = Bits.getLong(b, posKey);
+					posKey += 8;
+				} else {
+					publicKeyBeginDateUTC = Long.MIN_VALUE;
+					timeExpiration = Long.MAX_VALUE;
+				}
+
+				byte[] kp = new byte[len - 4 - codedTypeSize - (includeKeyExpiration ? 16 : 0)];
+				System.arraycopy(b, posKey, kp, 0, kp.length);
+				byte[][] keys = Bits.separateEncodingsWithShortIntSizedTabs(kp);
+
+				if (type == 9) {
+					ASymmetricAuthenticatedSignatureType type2 = ASymmetricAuthenticatedSignatureType.valueOf((int) Bits.getUnsignedInt(b, 4 + off, codedTypeSize));
+
+					ASymmetricKeyPair res = new ASymmetricKeyPair(type2, new ASymmetricPrivateKey(type2, keys[0], keySize),
+							new ASymmetricPublicKey(type2, keys[1], keySize, publicKeyBeginDateUTC, timeExpiration), keySize);
+					res.getASymmetricPublicKey().xdhKey = kdhKey;
+					res.getASymmetricPrivateKey().xdhKey = kdhKey;
+					return res;
+				} else if (type == 8) {
+					ASymmetricEncryptionType type2 = ASymmetricEncryptionType.valueOf((int) Bits.getUnsignedInt(b, 4 + off, codedTypeSize));
+
+					ASymmetricKeyPair res = new ASymmetricKeyPair(type2, new ASymmetricPrivateKey(type2, keys[0], keySize),
+							new ASymmetricPublicKey(type2, keys[1], keySize, publicKeyBeginDateUTC, timeExpiration), keySize);
+					res.getASymmetricPublicKey().xdhKey = kdhKey;
+					res.getASymmetricPrivateKey().xdhKey = kdhKey;
+					return res;
+				} else {
+
+					throw new InvalidEncodedValue();
+				}
 			}
-			else {
-				publicKeyBeginDateUTC=Long.MIN_VALUE;
-				timeExpiration = Long.MAX_VALUE;
-			}
-
-			byte[] kp = new byte[len - 4 - codedTypeSize-(includeKeyExpiration?16:0)];
-			System.arraycopy(b, posKey, kp, 0, kp.length);
-			byte[][] keys = Bits.separateEncodingsWithShortIntSizedTabs(kp);
-
-			if (type == 9) {
-				ASymmetricAuthenticatedSignatureType type2 = ASymmetricAuthenticatedSignatureType.valueOf((int) Bits.getUnsignedInt(b, 4+off, codedTypeSize));
-
-				ASymmetricKeyPair res=new ASymmetricKeyPair(type2, new ASymmetricPrivateKey(type2, keys[0], keySize),
-						new ASymmetricPublicKey(type2, keys[1], keySize, publicKeyBeginDateUTC, timeExpiration), keySize);
-				res.getASymmetricPublicKey().xdhKey=kdhKey;
-				res.getASymmetricPrivateKey().xdhKey=kdhKey;
-				return res;
-			} else if (type == 8) {
-				ASymmetricEncryptionType type2 = ASymmetricEncryptionType.valueOf((int) Bits.getUnsignedInt(b, 4+off, codedTypeSize));
-
-				ASymmetricKeyPair res=new ASymmetricKeyPair(type2, new ASymmetricPrivateKey(type2, keys[0], keySize),
-						new ASymmetricPublicKey(type2, keys[1], keySize, publicKeyBeginDateUTC, timeExpiration), keySize);
-				res.getASymmetricPublicKey().xdhKey=kdhKey;
-				res.getASymmetricPrivateKey().xdhKey=kdhKey;
-				return res;
-			} else {
-
-				throw new IllegalArgumentException();
+			catch (IllegalArgumentException e)
+			{
+				throw new InvalidEncodedValue(e);
 			}
 		}
-		catch (IllegalArgumentException e)
+		catch (InvalidEncodedValue e)
 		{
 			fillArrayWithZerosWhenDecoded=false;
 			throw e;
