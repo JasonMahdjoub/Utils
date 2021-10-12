@@ -39,7 +39,6 @@ import java.security.NoSuchProviderException;
 import java.util.EnumSet;
 
 import com.distrimind.util.data_buffers.WrappedData;
-import com.distrimind.util.data_buffers.WrappedSecretData;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -118,14 +117,14 @@ public class DecentralizedIDTests {
 	}
 
 	@Test
-	public void testDecentralizedID() throws NoSuchAlgorithmException, NoSuchProviderException {
+	public void testDecentralizedID() throws NoSuchAlgorithmException, NoSuchProviderException, InvalidEncodedValue {
 		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getSingleton(null);
 		for (MessageDigestType type : EnumSet.allOf(MessageDigestType.class)) {
 			testDecentralizedID(type, rand);
 		}
 	}
 
-	public void testDecentralizedID(MessageDigestType type, AbstractSecureRandom rand) throws NoSuchAlgorithmException, NoSuchProviderException {
+	public void testDecentralizedID(MessageDigestType type, AbstractSecureRandom rand) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidEncodedValue {
 		for (int i = 0; i < numberofTests; i++) {
 			testEquals(type, rand, new DecentralizedIDGenerator(), new DecentralizedIDGenerator());
 
@@ -133,7 +132,7 @@ public class DecentralizedIDTests {
 	}
 
 	private void testEquals(MessageDigestType type, AbstractSecureRandom rand, AbstractDecentralizedIDGenerator id1,
-			AbstractDecentralizedIDGenerator id2) throws NoSuchAlgorithmException, NoSuchProviderException {
+			AbstractDecentralizedIDGenerator id2) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidEncodedValue {
 		Assert.assertNotEquals(id1, id2);
 		SecuredDecentralizedID sid1 = new SecuredDecentralizedID(type, id1, rand);
 		SecuredDecentralizedID sid2 = new SecuredDecentralizedID(type, id2, rand);
@@ -154,7 +153,7 @@ public class DecentralizedIDTests {
 	}
 
 	@Test
-	public void testRenforcedDecentralizedID() throws NoSuchAlgorithmException, NoSuchProviderException {
+	public void testRenforcedDecentralizedID() throws NoSuchAlgorithmException, NoSuchProviderException, InvalidEncodedValue {
 		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getSingleton(null);
 		for (MessageDigestType type : EnumSet.allOf(MessageDigestType.class)) {
 			testRenforcedDecentralizedID(type, rand);
@@ -162,14 +161,14 @@ public class DecentralizedIDTests {
 	}
 
 	public void testRenforcedDecentralizedID(MessageDigestType type, AbstractSecureRandom rand)
-			throws NoSuchAlgorithmException, NoSuchProviderException {
+			throws NoSuchAlgorithmException, NoSuchProviderException, InvalidEncodedValue {
 		for (int i = 0; i < numberofTests; i++) {
 			testEquals(type, rand, new RenforcedDecentralizedIDGenerator(), new RenforcedDecentralizedIDGenerator());
 		}
 	}
 
 	@Test(dataProvider = "getDEncetralizedIDs")
-	public void testToBytes(AbstractDecentralizedID id) {
+	public void testToBytes(AbstractDecentralizedID id) throws InvalidEncodedValue {
 		WrappedData bytes = id.encode();
 		AbstractDecentralizedID id2 = (AbstractDecentralizedID)DecentralizedValue.decode(bytes);
 		Assert.assertEquals(id, id2);
@@ -178,22 +177,22 @@ public class DecentralizedIDTests {
 	}
 
 	@Test
-	public void testToStringAndValueOf() throws NoSuchAlgorithmException, NoSuchProviderException {
+	public void testToStringAndValueOf() throws NoSuchAlgorithmException, NoSuchProviderException, InvalidEncodedValue {
 		testToStringAndValueOf(new DecentralizedIDGenerator());
 		testToStringAndValueOf(new RenforcedDecentralizedIDGenerator());
 		testToStringAndValueOf(
 				new SecuredDecentralizedID(new DecentralizedIDGenerator(), SecureRandomType.DEFAULT.getSingleton(null)));
 	}
 
-	void testToStringAndValueOf(DecentralizedIDGenerator value) {
+	void testToStringAndValueOf(DecentralizedIDGenerator value) throws InvalidEncodedValue {
 		Assert.assertEquals(DecentralizedIDGenerator.valueOf(value.toString()), value);
 	}
 
-	void testToStringAndValueOf(RenforcedDecentralizedIDGenerator value) {
+	void testToStringAndValueOf(RenforcedDecentralizedIDGenerator value) throws InvalidEncodedValue {
 		Assert.assertEquals(RenforcedDecentralizedIDGenerator.valueOf(value.toString()), value);
 	}
 
-	void testToStringAndValueOf(SecuredDecentralizedID value) {
+	void testToStringAndValueOf(SecuredDecentralizedID value) throws InvalidEncodedValue {
 		Assert.assertEquals(SecuredDecentralizedID.valueOf(value.toString()), value);
 	}
 }
