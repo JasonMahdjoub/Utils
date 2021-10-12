@@ -1,8 +1,8 @@
 package com.distrimind.util.data_buffers;
 
+import com.distrimind.util.InvalidEncodedValue;
 import com.distrimind.util.crypto.Zeroizable;
 
-import java.io.IOException;
 import java.util.Arrays;
 
 /**
@@ -67,7 +67,7 @@ public class WrappedSecretString extends WrappedString implements Zeroizable {
 		zeroize();
 	}
 	@Override
-	public WrappedSecretData toWrappedData() throws IOException {
+	public WrappedSecretData toWrappedData() throws InvalidEncodedValue {
 		return new WrappedSecretData(this);
 	}
 	@Override
