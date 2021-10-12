@@ -41,10 +41,11 @@ import com.distrimind.util.data_buffers.WrappedString;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.Collection;
 
 /**
  * @author Jason Mahdjoub
- * @version 1.1
+ * @version 1.2
  * @since Utils 4.3.0
  */
 public interface DecentralizedValue extends Serializable {
@@ -109,4 +110,32 @@ public interface DecentralizedValue extends Serializable {
 	}
 
 	String getShortClassName();
+
+	static String toShortString(DecentralizedValue dv)
+	{
+		if (dv==null)
+			return "null";
+		else
+			return dv.toShortString();
+	}
+	static String toShortString(Collection<? extends DecentralizedValue> c)
+	{
+		if (c==null)
+			return "null";
+		else {
+			StringBuilder sb=new StringBuilder(c.getClass().getSimpleName());
+			sb.append("{");
+			boolean first=true;
+			for (DecentralizedValue dv : c)
+			{
+				if (first)
+					first=false;
+				else
+					sb.append(", ");
+				sb.append(dv.toShortString());
+			}
+			sb.append("}");
+			return sb.toString();
+		}
+	}
 }
