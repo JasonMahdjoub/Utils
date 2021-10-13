@@ -291,7 +291,18 @@ public class ScheduledPoolExecutor extends PoolExecutor implements ScheduledExec
 
 	@Override
 	boolean areWorkingQueuesEmptyUnsafe() {
-		return super.areWorkingQueuesEmptyUnsafe() && scheduledFutures.isEmpty();
+		if (super.areWorkingQueuesEmptyUnsafe()) {
+			 for (SF<?> f : scheduledFutures)
+			 {
+				 if (!f.isCancelled() && (!f.isDone() || f.isRepetitive()) && f.getDelay(TimeUnit.NANOSECONDS)<=0)
+				 {
+					 return false;
+				 }
+			 }
+			 return true;
+		}
+		else
+			return false;
 	}
 	@Override
 	protected void removeRepetitiveTasksUnsafe()

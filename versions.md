@@ -1,6 +1,6 @@
 Utils
 =====
-5.20.2 STABLE (Build: 3393) (from 04/01/2016 to 12/10/2020)
+5.20.3 STABLE (Build: 3410) (from 04/01/2016 to 12/10/2020)
 
 # Creator(s):
 Jason MAHDJOUB
@@ -9,6 +9,10 @@ Jason MAHDJOUB
 Jason MAHDJOUB (Entered in the team at 04/01/2016)
 
 # Modifications:
+
+
+### 5.20.3 STABLE (12/10/2020)
+* Pool executor : fix bad use of maximum number of threads, and permit to create more threads when the maximum of threads was not reached and when tasks are waiting to be executed.
 
 
 ### 5.20.2 STABLE (12/10/2020)
