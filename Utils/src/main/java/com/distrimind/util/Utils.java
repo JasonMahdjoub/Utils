@@ -67,6 +67,10 @@ public class Utils {
 			VERSION.addCreator(new Person("mahdjoub", "jason"))
 					.addDeveloper(new PersonDeveloper("mahdjoub", "jason", "2016-01-04"))
 					.addDescription(
+							new Description((short)5, (short)20, (short)3, Version.Type.STABLE, (short)0, "2020-10-12")
+									.addItem("Pool executor : fix bad use of maximum number of threads, and permit to create more threads when the maximum of threads was not reached and when tasks are waiting to be executed.")
+					)
+					.addDescription(
 							new Description((short)5, (short)20, (short)2, Version.Type.STABLE, (short)0, "2020-10-12")
 									.addItem("Add exception InvalidEncodedValue.")
 									.addItem("Use exception InvalidEncodedValue during values decoding.")
@@ -1215,6 +1219,7 @@ public class Utils {
 							synchronized (processesToFlush) {
 								if (processesToFlush.isEmpty()) {
 									try {
+										//noinspection WaitWhileHoldingTwoLocks
 										processesToFlush.wait(10000);
 									} catch (InterruptedException e) {
 										e.printStackTrace();

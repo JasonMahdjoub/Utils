@@ -1031,7 +1031,7 @@ public class PoolExecutor implements ExecutorService {
 	private boolean needNewThreadUnsafe()
 	{
 		int nonPausedThreads=executors.size()-pausedThreads;
-		return nonPausedThreads< minimumNumberOfThreads || (nonPausedThreads<maximumNumberOfThreads && workingThreads>=nonPausedThreads && areWorkingQueuesEmptyUnsafe());
+		return nonPausedThreads< minimumNumberOfThreads || (nonPausedThreads<maximumNumberOfThreads && workingThreads>=executors.size() && !areWorkingQueuesEmptyUnsafe());
 	}
 	private boolean canKillNewThreadUnsafe()
 	{
@@ -1066,10 +1066,6 @@ public class PoolExecutor implements ExecutorService {
 	{
 		return Long.MAX_VALUE;
 	}
-
-
-
-
 
 
 	private class Executor implements Runnable
