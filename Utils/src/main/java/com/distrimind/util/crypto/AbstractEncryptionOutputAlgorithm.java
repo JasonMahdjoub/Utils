@@ -284,12 +284,13 @@ public abstract class AbstractEncryptionOutputAlgorithm implements Zeroizable {
 							System.arraycopy(manualIvs[(int) round], 0, iv = AbstractEncryptionOutputAlgorithm.this.iv, 0, getIVSizeBytesWithoutExternalCounter());
 							if (useExternalCounter())
 								System.arraycopy(externalCounter, 0, iv, getIVSizeBytesWithoutExternalCounter(), externalCounter.length);
-							initCipherForEncryptionWithIv(cipher, iv);
+							initCipherForEncryption(cipher, iv);
 						}
 					}
 					else {
 						iv = initCipherForEncryption(cipher, externalCounter);
-						os.write(iv, 0, getIVSizeBytesWithoutExternalCounter());
+						int ivl=getIVSizeBytesWithoutExternalCounter();
+						os.write(iv, 0, ivl);
 					}
 
 				}

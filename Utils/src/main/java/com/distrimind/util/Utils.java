@@ -67,8 +67,9 @@ public class Utils {
 			VERSION.addCreator(new Person("mahdjoub", "jason"))
 					.addDeveloper(new PersonDeveloper("mahdjoub", "jason", "2016-01-04"))
 					.addDescription(
-							new Description((short)5, (short)20, (short)4, Version.Type.STABLE, (short)0, "2020-10-14")
+							new Description((short)5, (short)20, (short)4, Version.Type.STABLE, (short)0, "2020-10-18")
 									.addItem("Fix bad cipher initialisation when using external counter.")
+									.addItem("Better clean cache into EncryptionSignatureHashEncoder and EncryptionSignatureHashDecoder and fix issues with bad encryption/decryption.")
 					)
 					.addDescription(
 							new Description((short)5, (short)20, (short)3, Version.Type.STABLE, (short)0, "2020-10-12")

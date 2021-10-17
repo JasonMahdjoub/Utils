@@ -72,7 +72,7 @@ public class LimitedRandomOutputStream extends RandomOutputStream{
 		if (len<0)
 			throw new IllegalArgumentException();
 		if (maxLength>=0 && pos+len>maxLength)
-			throw new EOFException();
+			throw new EOFException("lacking="+(pos+len-maxLength));
 		out.write(b, off, len);
 		pos+=len;
 		length=Math.max(length, pos);

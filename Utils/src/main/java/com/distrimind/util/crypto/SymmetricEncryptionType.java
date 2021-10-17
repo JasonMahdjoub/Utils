@@ -266,7 +266,7 @@ public enum SymmetricEncryptionType {
 		this.decodingSpeedIndexJava8=decodingSpeedIndexJava8;
 		this.encodingSpeedIndexJava9=encodingSpeedIndexJava9;
 		this.decodingSpeedIndexJava9=decodingSpeedIndexJava9;
-		if (blockMode.equalsIgnoreCase("CTR") && !codeProviderForEncryption.equals(CodeProvider.SunJCE))
+		if (blockMode.equalsIgnoreCase("CTR"))
 			maxModeCounterSize=8;
 		else if (this.algorithmName.equalsIgnoreCase("CHACHA20"))
 			maxModeCounterSize=4;
