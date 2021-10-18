@@ -1,6 +1,6 @@
 Utils
 =====
-5.20.4 STABLE (Build: 3567) (from 04/01/2016 to 18/10/2020)
+5.20.5 STABLE (Build: 3569) (from 04/01/2016 to 18/10/2020)
 
 # Creator(s):
 Jason MAHDJOUB
@@ -9,6 +9,10 @@ Jason MAHDJOUB
 Jason MAHDJOUB (Entered in the team at 04/01/2016)
 
 # Modifications:
+
+
+### 5.20.5 STABLE (18/10/2020)
+* Fix issues with CircularArrayList class.
 
 
 ### 5.20.4 STABLE (18/10/2020)
