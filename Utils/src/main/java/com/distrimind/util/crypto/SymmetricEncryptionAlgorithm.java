@@ -219,7 +219,8 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 	public SymmetricEncryptionAlgorithm(AbstractSecureRandom random, SymmetricSecretKey key, byte blockModeCounterBytes, boolean internalCounter)
 			throws IOException {
 		super(key.getEncryptionAlgorithmType().getCipherInstance(), key.getEncryptionAlgorithmType().getIVSizeBytes());
-
+		if (random==null)
+			throw new NullPointerException();
 		this.type = key.getEncryptionAlgorithmType();
 		if (!internalCounter && blockModeCounterBytes>type.getMaxCounterSizeInBytesUsedWithBlockMode())
 			throw new IllegalArgumentException("The external counter size can't be greater than "+type.getMaxCounterSizeInBytesUsedWithBlockMode());
@@ -387,6 +388,8 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 	public byte[] initCipherForEncryption(AbstractCipher cipher, byte[] externalCounter) throws IOException {
 		if (!internalCounter && (externalCounter==null || externalCounter.length!=blockModeCounterBytes))
 			throw new IllegalArgumentException("Please use external counters at every initialization with the defined size "+blockModeCounterBytes);
+		if (internalCounter && externalCounter!=null && externalCounter.length>0)
+			throw new IllegalArgumentException("External counter should be empty : "+this);
 		this.externalCounter=externalCounter;
 		byte[] iv=generateIV();
 		cipher.init(Cipher.ENCRYPT_MODE, key, iv);
@@ -415,5 +418,7 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 		initCipherForDecryption(cipher, null, null);
 	}
 
-
+	boolean isInternalCounter() {
+		return internalCounter;
+	}
 }

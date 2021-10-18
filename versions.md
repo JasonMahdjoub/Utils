@@ -1,6 +1,6 @@
 Utils
 =====
-5.20.3 STABLE (Build: 3410) (from 04/01/2016 to 12/10/2020)
+5.20.4 STABLE (Build: 3567) (from 04/01/2016 to 18/10/2020)
 
 # Creator(s):
 Jason MAHDJOUB
@@ -9,6 +9,11 @@ Jason MAHDJOUB
 Jason MAHDJOUB (Entered in the team at 04/01/2016)
 
 # Modifications:
+
+
+### 5.20.4 STABLE (18/10/2020)
+* Fix bad cipher initialisation when using external counter.
+* Better clean cache into EncryptionSignatureHashEncoder and EncryptionSignatureHashDecoder and fix issues with bad encryption/decryption.
 
 
 ### 5.20.3 STABLE (12/10/2020)

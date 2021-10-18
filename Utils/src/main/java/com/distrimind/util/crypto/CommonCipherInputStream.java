@@ -85,9 +85,9 @@ abstract class CommonCipherInputStream extends RandomInputStream {
 		if (maxCounterLength>0) {
 			if (externalCounter == null)
 				throw new NullPointerException("External counter is null");
-			if (externalCounter.length < maxCounterLength)
-				throw new IllegalArgumentException();
-			counterLength=maxCounterLength;
+			if (externalCounter.length > maxCounterLength)
+				throw new IllegalArgumentException("maxCounterLength="+maxCounterLength+", externalCounter.length="+externalCounter.length);
+			counterLength=(byte)externalCounter.length;
 		}
 		else{
 			if (externalCounter!=null)
@@ -213,7 +213,7 @@ abstract class CommonCipherInputStream extends RandomInputStream {
 			System.arraycopy(outputBuffer, outputBufferIndex, b, off, s);
 			posPlainText+=s;
 			outputBufferLength-=s;
-			if (outputBufferLength==0)
+			if (outputBufferLength<=0)
 			{
 				outputBufferIndex =0;
 				outputBufferLength =0;
@@ -232,7 +232,6 @@ abstract class CommonCipherInputStream extends RandomInputStream {
 			if (--outputBufferLength==0)
 			{
 				outputBufferIndex =0;
-				outputBufferLength =0;
 			}
 			return v;
 		}
