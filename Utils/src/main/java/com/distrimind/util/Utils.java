@@ -67,6 +67,10 @@ public class Utils {
 			VERSION.addCreator(new Person("mahdjoub", "jason"))
 					.addDeveloper(new PersonDeveloper("mahdjoub", "jason", "2016-01-04"))
 					.addDescription(
+							new Description((short)5, (short)20, (short)6, Version.Type.STABLE, (short)0, "2020-10-18")
+									.addItem("Optimize CircularArrayList class.")
+					)
+					.addDescription(
 							new Description((short)5, (short)20, (short)5, Version.Type.STABLE, (short)0, "2020-10-18")
 									.addItem("Fix issues with CircularArrayList class.")
 					)
