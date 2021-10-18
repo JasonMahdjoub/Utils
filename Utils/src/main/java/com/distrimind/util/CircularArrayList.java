@@ -35,6 +35,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
 package com.distrimind.util;
 
 import java.util.*;
+import java.util.function.Predicate;
 
 /**
  * @author Jason Mahdjoub
@@ -73,6 +74,36 @@ public class CircularArrayList<E> extends AbstractList<E> implements List<E>, De
 		this.size = 0;
 		this.extensibleSize = extensibleSize;
 		this.position=0;
+	}
+	@Override
+	public boolean removeIf(Predicate<? super E> filter) {
+		if (size==0)
+			return false;
+		Object[] a=null;
+		int s=0;
+		for (E e : this)
+		{
+			if (!filter.test(e))
+			{
+				if (a==null)
+				{
+					a=new Object[array.length];
+				}
+				a[s++]=e;
+			}
+		}
+		if (a!=null)
+		{
+			array=a;
+			position=0;
+			size=s;
+			this.ensureSizeReduction();
+		}
+		else {
+			clear();
+		}
+		return true;
+
 	}
 	public CircularArrayList(Collection<E> collection) {
 		this(DEFAULT_BASE_SIZE, DEFAULT_EXTENSIBLE, collection);
@@ -464,10 +495,7 @@ public class CircularArrayList<E> extends AbstractList<E> implements List<E>, De
 
 	@Override
 	public boolean removeAll(Collection<?> c) {
-		boolean changed=false;
-		for (Object o : c)
-			changed|=remove(o);
-		return changed;
+		return removeIf(c::contains);
 
 	}
 
@@ -486,8 +514,14 @@ public class CircularArrayList<E> extends AbstractList<E> implements List<E>, De
 
 	@Override
 	public void clear() {
-		for (int i=0;i<size;i++)
-			array[(i+position)%array.length]=null;
+		if (extensibleSize && array.length > baseSize) {
+			array=new Object[baseSize];
+		}
+		else
+		{
+			for (int i=0;i<size;i++)
+				array[(i+position)%array.length]=null;
+		}
 		size=0;
 		position=0;
 	}
