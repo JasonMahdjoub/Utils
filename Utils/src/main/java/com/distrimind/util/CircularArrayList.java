@@ -546,7 +546,7 @@ public class CircularArrayList<E> extends AbstractList<E> implements List<E>, De
 		else {
 			int p = (index + position) % array.length;
 			res = (E) array[p];
-			int s = array.length - position;
+			int s = array.length - p;
 			if (size <= s) {
 				System.arraycopy(array, p + 1, array, p, size - 1);
 			} else {
@@ -608,12 +608,14 @@ public class CircularArrayList<E> extends AbstractList<E> implements List<E>, De
 	{
 
 		int index=0;
-		boolean getCalled=false;
+		boolean nextCalled =false;
+		boolean prevCalled =false;
 		int cur=0;
 
 		@Override
 		public boolean hasNext() {
-			getCalled=false;
+			nextCalled =false;
+			prevCalled=false;
 			return index<size;
 		}
 
@@ -624,6 +626,8 @@ public class CircularArrayList<E> extends AbstractList<E> implements List<E>, De
 
 		@Override
 		public boolean hasPrevious() {
+			nextCalled =false;
+			prevCalled=false;
 			return index>0;
 		}
 
@@ -638,10 +642,15 @@ public class CircularArrayList<E> extends AbstractList<E> implements List<E>, De
 		public int nextIndex() {
 			if (!hasNext())
 				throw new NoSuchElementException();
-			cur=index;
-			if (!getCalled) {
-				getCalled=true;
-				++index;
+			if (prevCalled)
+			{
+				cur=++index;
+				prevCalled=false;
+				nextCalled=true;
+			}
+			else if (!nextCalled) {
+				cur=index++;
+				nextCalled =true;
 			}
 			return cur;
 		}
@@ -651,12 +660,15 @@ public class CircularArrayList<E> extends AbstractList<E> implements List<E>, De
 			if (!hasPrevious())
 				throw new NoSuchElementException();
 
-			if (getCalled) {
-				cur=index;
+			if (nextCalled)
+			{
+				index=--cur;
+				prevCalled=true;
+				nextCalled=false;
 			}
-			else {
+			else if (!prevCalled) {
 				cur = --index;
-				getCalled = true;
+				prevCalled = true;
 			}
 			return cur;
 		}
@@ -666,6 +678,12 @@ public class CircularArrayList<E> extends AbstractList<E> implements List<E>, De
 			if( size==0)
 				throw new IllegalStateException();
 			CircularArrayList.this.remove(cur);
+			if (nextCalled)
+			{
+				--cur;
+				--index;
+			}
+
 		}
 
 		@Override
@@ -675,8 +693,13 @@ public class CircularArrayList<E> extends AbstractList<E> implements List<E>, De
 
 		@Override
 		public void add(E e) {
-			CircularArrayList.this.add(cur, e);
-			++index;
+			if (nextCalled) {
+				CircularArrayList.this.add(++cur, e);
+				++index;
+			}
+			else if (prevCalled)
+				CircularArrayList.this.add(cur, e);
+
 		}
 
 	}
