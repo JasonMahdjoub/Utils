@@ -35,6 +35,8 @@ knowledge of the CeCILL-C license and that you accept its terms.
 
 package com.distrimind.util.version;
 
+import com.distrimind.util.Utils;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
@@ -331,7 +333,7 @@ public class Version extends AbstractVersion<Version> {
 			}
 			s.append("\n");
 		}
-		s.append("# Modifications:");
+		s.append("# Changes:");
 		s.append("\n");
 		if (descriptions.size() > 0) {
 			for (Iterator<Description> it=descriptions.descendingIterator();it.hasNext();)
@@ -480,5 +482,9 @@ public class Version extends AbstractVersion<Version> {
 		StringBuilder s=new StringBuilder();
 		appendVersionPart(s, buildNumber);
 		return s.toString();
+	}
+	public static void main(String args[])
+	{
+		Utils.VERSION.screenVersion();
 	}
 }

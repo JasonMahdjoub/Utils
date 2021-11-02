@@ -55,7 +55,7 @@ public class Description extends AbstractVersion<Description> {
 	 */
 	private static final long serialVersionUID = -5480559682819518935L;
 
-	private final ArrayList<String> items = new ArrayList<>();
+	private final ArrayList<DescriptionItem> items = new ArrayList<>();
 
 	protected Description() {
 		super();
@@ -96,10 +96,8 @@ public class Description extends AbstractVersion<Description> {
 
 
 	
-	public Description addItem(String d) {
-		if (d == null)
-			throw new NullPointerException();
-		items.add(d);
+	public Description addItem(DescriptionType type, String d) {
+		items.add(new DescriptionItem(type, d));
 		return this;
 	}
 
@@ -122,11 +120,26 @@ public class Description extends AbstractVersion<Description> {
 
 	public String getHTML() {
 		StringBuilder s = getHTMLVersionPart();
-		s.append("<ul>");
-		for (String d : items) {
-			s.append("<li>");
-			s.append(d);
-			s.append("</li>");
+
+		s.append("<ul>\n");
+		for (DescriptionType dt : DescriptionType.values()) {
+			boolean first=true;
+			for (DescriptionItem d : items) {
+				if (d.getDescriptionType()==dt) {
+					if (first)
+					{
+						s.append("\t<li>")
+								.append(dt.getTitle())
+								.append("\n\t\t<ul>\n");
+						first=false;
+					}
+					s.append("\t\t\t<li>");
+					s.append(d.getDescriptionItem());
+					s.append("\t\t\t</li>\n");
+				}
+			}
+			if (!first)
+				s.append("\t\t</ul>\n\t</li>\n");
 		}
 		s.append("</ul>");
 		return s.toString();
@@ -134,16 +147,35 @@ public class Description extends AbstractVersion<Description> {
 
 	public String getMarkdownCode() {
 		StringBuilder s = getMarkdownVersionPartCode();
-		for (String d : items) {
-			s.append("* ");
-			s.append(d);
-			s.append("\n");
+		for (DescriptionType dt : DescriptionType.values()) {
+			boolean first=true;
+			for (DescriptionItem d : items) {
+				if (d.getDescriptionType()==dt) {
+					if (first)
+					{
+						s.append("##### ")
+								.append(dt.getTitle())
+								.append("\n");
+						first=false;
+
+					}
+					s.append("* ");
+					s.append(d.getDescriptionItem());
+					s.append("\n");
+				}
+			}
 		}
 		
 		return s.toString();
 	}
-	public ArrayList<String> getItems() {
+	public ArrayList<DescriptionItem> getItems() {
 		return items;
 	}
 
+	@Override
+	public String toString() {
+		return "Description{" +
+				"items=" + items +
+				'}';
+	}
 }
