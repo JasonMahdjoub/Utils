@@ -31,7 +31,7 @@ Set of Java tools :
 
 # Changes
 
-[See historical of changes](./versions.md)
+[See historical of changes](./changelog.md)
 
 ###### Requirements under Ubuntu/Debian :
   * Please install the package ethtool, rng-tools, mtr(only debian)
