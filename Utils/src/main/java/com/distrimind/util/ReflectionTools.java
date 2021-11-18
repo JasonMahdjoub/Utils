@@ -39,6 +39,7 @@ package com.distrimind.util;
 
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.security.AccessController;
@@ -59,7 +60,7 @@ public class ReflectionTools {
 		} catch (IllegalAccessException | IllegalArgumentException e) {
 			System.err.println("Impossible to access to the function " + m.getName() + " of the class "
 					+ m.getDeclaringClass()
-					+ ". This is an inner bug of MadKitLanEdition. Please contact the developers. Impossible to continue. See the next error :");
+					+ ". This is an inner bug. Please contact the developers. Impossible to continue. See the next error :");
 			e.printStackTrace();
 			System.exit(-1);
 			return null;
@@ -76,7 +77,7 @@ public class ReflectionTools {
 			} catch (SecurityException | NoSuchMethodException e) {
 				System.err.println("Impossible to access to the function " + method_name + " of the class "
 						+ c.getCanonicalName()
-						+ ". This is an inner bug of MadKitLanEdition. Please contact the developers. Impossible to continue. See the next error :");
+						+ ". This is an inner bug. Please contact the developers. Impossible to continue. See the next error :");
 				e.printStackTrace();
 				System.exit(-1);
 				return null;
@@ -84,7 +85,24 @@ public class ReflectionTools {
 		});
 		
 	}
+	public static Field getField(final Class<?> c, final String field_name) {
+		return AccessController.doPrivileged((PrivilegedAction<Field>) () -> {
+			try {
 
+				Field f = c.getDeclaredField(field_name);
+				f.setAccessible(true);
+				return f;
+			} catch (SecurityException | NoSuchFieldException e) {
+				System.err.println("Impossible to access to the field " + field_name + " of the class "
+						+ c.getCanonicalName()
+						+ ". This is an inner bug. Please contact the developers. Impossible to continue. See the next error :");
+				e.printStackTrace();
+				System.exit(-1);
+				return null;
+			}
+		});
+
+	}
 	public static <E> Constructor<E> getConstructor(final Class<E> c, final Class<?>... parameters) {
 		return AccessController.doPrivileged((PrivilegedAction<Constructor<E>>) () -> {
 			try {
@@ -93,7 +111,7 @@ public class ReflectionTools {
 				return m;
 			} catch (SecurityException | NoSuchMethodException e) {
 				System.err.println("Impossible to access to the constructor of the class " + c.getCanonicalName()
-						+ ". This is an inner bug of MadKitLanEdition. Please contact the developers. Impossible to continue. See the next error :");
+						+ ". This is an inner bug. Please contact the developers. Impossible to continue. See the next error :");
 				e.printStackTrace();
 				System.exit(-1);
 				return null;
@@ -107,7 +125,7 @@ public class ReflectionTools {
 			return Class.forName(class_name, true, classLoader);
 		} catch (SecurityException | ClassNotFoundException e) {
 			System.err.println("Impossible to access to the class " + class_name
-					+ ". This is an inner bug of MadKitLanEdition. Please contact the developers. Impossible to continue. See the next error :");
+					+ ". This is an inner bug. Please contact the developers. Impossible to continue. See the next error :");
 			e.printStackTrace();
 			System.exit(-1);
 			return null;
