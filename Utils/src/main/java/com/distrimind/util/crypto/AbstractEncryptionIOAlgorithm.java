@@ -46,7 +46,7 @@ import java.io.IOException;
  * @since Utils 1.5
  */
 public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOutputAlgorithm implements IEncryptionInputAlgorithm{
-
+	private long lastAskedOutputSizeAfterDecryption, lastUsedSizeForEncryption=-1;
 	protected AbstractEncryptionIOAlgorithm()
 	{
 		super();
@@ -286,6 +286,8 @@ public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOu
 			throw new IllegalArgumentException();
 		if (inputLen==0)
 			return 0;
+		if (inputLen==lastUsedSizeForEncryption)
+			return lastAskedOutputSizeAfterDecryption;
 
 		if (cipher.getMode()!= Cipher.DECRYPT_MODE) {
 			if (includeIV() && mustAlterIVForOutputSizeComputation())
@@ -294,7 +296,8 @@ public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOu
 			}
 			initCipherForDecryptionWithIv(cipher, iv);
 		}
-		return getOutputSizeAfterDecryption(cipher, inputLen, maxEncryptedPartLength,
+		lastUsedSizeForEncryption=inputLen;
+		return lastAskedOutputSizeAfterDecryption=getOutputSizeAfterDecryption(cipher, inputLen, maxEncryptedPartLength,
 				getIVSizeBytesWithoutExternalCounter(),maxPlainTextSizeForEncoding );
 	}
 

@@ -131,6 +131,7 @@ public class EncryptionSignatureHashEncoder {
 	private final LimitedRandomOutputStream randomOutputStream=new LimitedRandomOutputStream(randomByteArrayOutputStream, 0 );
 	private AbstractSecureRandom cipherRandom=null;
 	private static final byte[] emptyTab=new byte[0];
+	private long lastInputStreamLength =-1, lastMaximumOutputLength;
 	void incrementIVCounter() throws IOException {
 		if (originalSecretKeyForEncryption==null)
 			return;
@@ -848,6 +849,7 @@ public class EncryptionSignatureHashEncoder {
 		minimumOutputSize=null;
 		code=null;
 		cipherOutputStream=null;
+		lastInputStreamLength =-1;
 	}
 
 	public long getMaximumOutputLength() throws IOException {
@@ -860,14 +862,16 @@ public class EncryptionSignatureHashEncoder {
 	public long getMaximumOutputLength(long inputStreamLength) throws IOException {
 		if (inputStreamLength<=0)
 			throw new IllegalArgumentException();
-		long res=getMinimumOutputSize();
+		if (inputStreamLength== lastInputStreamLength)
+			return lastMaximumOutputLength;
+		lastMaximumOutputLength =getMinimumOutputSize();
 		if (cipher!=null) {
-			res += cipher.getOutputSizeAfterEncryption(inputStreamLength);
-
+			lastMaximumOutputLength += cipher.getOutputSizeAfterEncryption(inputStreamLength);
 		}
 		else
-			res+=inputStreamLength;
-		return res;
+			lastMaximumOutputLength +=inputStreamLength;
+		lastInputStreamLength =inputStreamLength;
+		return lastMaximumOutputLength;
 	}
 	long getMinimumOutputLengthAfterEncoding()
 	{

@@ -71,7 +71,7 @@ public class EncryptionSignatureHashDecoder {
 	private EncryptionProfileProvider encryptionProfileProvider =null;
 	private AbstractSecureRandom randomForCipher=null;
 	private short secretKeyID=-1;
-	private short oldSecretKeyID=-1;
+
 	EncryptionSignatureHashEncoder encoder=null;
 	private boolean changeCipherOfEncoder=false;
 	private Byte code=null;
@@ -82,7 +82,7 @@ public class EncryptionSignatureHashDecoder {
 	private final LimitedRandomOutputStream randomOutputStream=new LimitedRandomOutputStream(randomByteArrayOutputStream, 0 );
 	private final NullRandomOutputStream nullRandomOutputStream=new NullRandomOutputStream();
 	private static final byte[] emptyTab=new byte[0];
-
+	private long lastInputStreamLength =-1, lastMaximumOutputLength;
 	public EncryptionSignatureHashDecoder connectWithEncoder(EncryptionSignatureHashEncoder encoder)
 	{
 		encoder.connectWithDecoder(this);
@@ -1121,14 +1121,16 @@ public class EncryptionSignatureHashDecoder {
 	private long getMaximumOutputLengthImpl(long inputStreamLength) throws IOException {
 		if (inputStreamLength<=0)
 			throw new IllegalArgumentException();
-		long res=inputStreamLength-getMinimumInputSize();
+		if (inputStreamLength==lastInputStreamLength)
+			return lastMaximumOutputLength;
+		lastMaximumOutputLength=inputStreamLength-getMinimumInputSize();
 
-		if (res<=0)
+		if (lastMaximumOutputLength<=0)
 			throw new IllegalArgumentException();
 		if (cipher!=null)
-			return cipher.getOutputSizeAfterDecryption(res);
-		else
-			return res;
+			lastMaximumOutputLength=cipher.getOutputSizeAfterDecryption(lastMaximumOutputLength);
+		lastInputStreamLength=inputStreamLength;
+		return lastMaximumOutputLength;
 	}
 
 	private long getMinimumInputLengthAfterDecoding()
@@ -1220,5 +1222,6 @@ public class EncryptionSignatureHashDecoder {
 	void cleanCache() {
 		minimumInputSize=null;
 		cipherInputStream=null;
+		lastInputStreamLength=-1;
 	}
 }

@@ -1,6 +1,6 @@
 Utils
 =====
-5.21.0 STABLE (Build: 3600) (from 04/01/2016 to 02/11/2020)
+5.21.2 STABLE (Build: 3611) (from 04/01/2016 to 03/12/2020)
 
 # Creator(s):
 Jason MAHDJOUB
@@ -9,6 +9,18 @@ Jason MAHDJOUB
 Jason MAHDJOUB (Entered in the team at 04/01/2016)
 
 # Changes:
+
+
+### 5.21.2 STABLE (03/12/2020)
+##### Internal change(s)
+* Add optimisation when calculating encryption/decryption size, by using cache.
+
+
+### 5.21.1 STABLE (02/12/2020)
+##### New feature(s)
+* Add method ReflectionTools.getField(Class, String).
+##### Internal change(s)
+* Correction into RandomByteArrayOutputStream(long) when reserving memory into constructor.
 
 
 ### 5.21.0 STABLE (02/11/2020)

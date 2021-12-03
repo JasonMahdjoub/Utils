@@ -44,7 +44,7 @@ import java.io.IOException;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 1.1
  * @since Utils 3.27.0
  */
 @SuppressWarnings("NullableProblems")
@@ -73,12 +73,12 @@ public class RandomByteArrayOutputStream extends RandomOutputStream {
 		length=0;
 	}
 
-	public RandomByteArrayOutputStream(int length) {
-		if (length < 0)
+	public RandomByteArrayOutputStream(int capacity) {
+		if (capacity < 0)
 			throw new IllegalArgumentException("length must can't be negative");
-		bytes = new byte[length];
+		bytes = new byte[capacity];
 		current_pos = 0;
-		this.length=length;
+		this.length=0;
 	}
 
 	/**
@@ -193,7 +193,16 @@ public class RandomByteArrayOutputStream extends RandomOutputStream {
 	}
 
 	public byte[] getBytes() {
-		return Arrays.copyOf(bytes, length);
+		return getBytes(false);
+	}
+	public byte[] getBytes(boolean copy)
+	{
+		if (copy)
+			return Arrays.copyOf(bytes, length);
+		else if (bytes.length!=length)
+			return bytes=Arrays.copyOf(bytes, length);
+		else
+			return bytes;
 	}
 
 	/**

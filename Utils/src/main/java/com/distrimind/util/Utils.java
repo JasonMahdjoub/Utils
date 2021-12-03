@@ -68,6 +68,15 @@ public class Utils {
 			VERSION.addCreator(new Person("mahdjoub", "jason"))
 					.addDeveloper(new PersonDeveloper("mahdjoub", "jason", "2016-01-04"))
 					.addDescription(
+							new Description((short)5, (short)21, (short)2, Version.Type.STABLE, (short)0, "2020-12-03")
+									.addItem(INTERNAL_CHANGE, "Add optimisation when calculating encryption/decryption size, by using cache.")
+					)
+					.addDescription(
+							new Description((short)5, (short)21, (short)1, Version.Type.STABLE, (short)0, "2020-12-02")
+									.addItem(INTERNAL_CHANGE, "Correction into RandomByteArrayOutputStream(long) when reserving memory into constructor.")
+									.addItem(NEW_FEATURE, "Add method ReflectionTools.getField(Class, String).")
+					)
+					.addDescription(
 							new Description((short)5, (short)21, (short)0, Version.Type.STABLE, (short)0, "2020-11-02")
 									.addItem(INTERNAL_CHANGE, "Update BouncyCastle to 1.69.")
 									.addItem(INTERNAL_CHANGE, "Update Snake YML to 1.29")

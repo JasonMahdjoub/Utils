@@ -59,6 +59,9 @@ public abstract class AbstractEncryptionOutputAlgorithm implements Zeroizable {
 	protected int maxEncryptedPartLength;
 	private final byte[] one=new byte[1];
 	protected final byte[] iv ;
+	private long previousAskedLengthForEncryption=-1;
+	private long previousOutputSizeAfterEncryption;
+
 
 	@Override
 	public void zeroize() {
@@ -493,6 +496,8 @@ public abstract class AbstractEncryptionOutputAlgorithm implements Zeroizable {
 			throw new IllegalArgumentException();
 		if (inputLen==0)
 			return 0;
+		if (previousAskedLengthForEncryption==inputLen)
+			return previousOutputSizeAfterEncryption;
 		long add=inputLen % maxPlainTextSizeForEncoding;
 		if (add>0) {
 
@@ -502,7 +507,8 @@ public abstract class AbstractEncryptionOutputAlgorithm implements Zeroizable {
 			}
 			add = cipher.getOutputSize((int)add)+getIVSizeBytesWithoutExternalCounter();
 		}
-		return ((inputLen / maxPlainTextSizeForEncoding) * maxEncryptedPartLength)+add;
+		previousAskedLengthForEncryption=inputLen;
+		return previousOutputSizeAfterEncryption=((inputLen / maxPlainTextSizeForEncoding) * maxEncryptedPartLength)+add;
 
 	}
 

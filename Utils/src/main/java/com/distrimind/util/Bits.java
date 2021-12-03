@@ -104,8 +104,8 @@ public class Bits {
 	}
 
 	public static void putChar(byte[] b, int off, char val) {
-		b[off + 1] = (byte) (val);
 		b[off] = (byte) (val >>> 8);
+		b[off + 1] = (byte) (val);
 	}
 
 	public static void putDouble(byte[] b, int off, double val) {
@@ -117,21 +117,24 @@ public class Bits {
 	}
 
 	public static void putInt(byte[] b, int off, int val) {
-		b[off + 3] = (byte) (val);
-		b[off + 2] = (byte) (val >>> 8);
-		b[off + 1] = (byte) (val >>> 16);
+
+
+
 		b[off] = (byte) (val >>> 24);
+		b[off + 1] = (byte) (val >>> 16);
+		b[off + 2] = (byte) (val >>> 8);
+		b[off + 3] = (byte) (val);
 	}
 
 	public static void putLong(byte[] b, int off, long val) {
-		b[off + 7] = (byte) (val);
-		b[off + 6] = (byte) (val >>> 8);
-		b[off + 5] = (byte) (val >>> 16);
-		b[off + 4] = (byte) (val >>> 24);
-		b[off + 3] = (byte) (val >>> 32);
-		b[off + 2] = (byte) (val >>> 40);
-		b[off + 1] = (byte) (val >>> 48);
 		b[off] = (byte) (val >>> 56);
+		b[off + 1] = (byte) (val >>> 48);
+		b[off + 2] = (byte) (val >>> 40);
+		b[off + 3] = (byte) (val >>> 32);
+		b[off + 4] = (byte) (val >>> 24);
+		b[off + 5] = (byte) (val >>> 16);
+		b[off + 6] = (byte) (val >>> 8);
+		b[off + 7] = (byte) (val);
 	}
 
 	public static void putShort(byte[] b, int off, short val) {
@@ -151,9 +154,11 @@ public class Bits {
 			throw new IllegalArgumentException("val cannot be greater than "+0xFFFFFF);
 		if (val<0)
 			throw new IllegalArgumentException("val cannot be negative");
-		b[off + 2] = (byte) (val);
-		b[off + 1] = (byte) (val >>> 8);
+
+
 		b[off] = (byte) (val >>> 16);
+		b[off + 1] = (byte) (val >>> 8);
+		b[off + 2] = (byte) (val);
 	}
 
     public static int getUnsignedInt24Bits(byte[] b, int off) {
