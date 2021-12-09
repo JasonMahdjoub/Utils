@@ -549,9 +549,9 @@ public class CircularArrayList<E> extends AbstractList<E> implements List<E>, De
 		if (index<0 || index>size)
 			throw new IllegalArgumentException();
 		ensureCapacity(1);
-		int end=1+index;
+
 		size+=1;
-		for (int i=size;i>end;--i)
+		for (int i=size;i>index;--i)
 		{
 			array[(i+position)%array.length]=array[(i-1+position)%array.length];
 		}
