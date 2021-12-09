@@ -1,6 +1,6 @@
 Utils
 =====
-5.21.2 STABLE (Build: 3611) (from 04/01/2016 to 03/12/2020)
+5.21.3 STABLE (Build: 3615) (from 04/01/2016 to 09/12/2021)
 
 # Creator(s):
 Jason MAHDJOUB
@@ -11,19 +11,24 @@ Jason MAHDJOUB (Entered in the team at 04/01/2016)
 # Changes:
 
 
-### 5.21.2 STABLE (03/12/2020)
+### 5.21.3 STABLE (09/12/2021)
+##### Bug fixe(s)
+* Fix issue with add function into CircularArrayList class.
+
+
+### 5.21.2 STABLE (03/12/2021)
 ##### Internal change(s)
 * Add optimisation when calculating encryption/decryption size, by using cache.
 
 
-### 5.21.1 STABLE (02/12/2020)
+### 5.21.1 STABLE (02/12/2021)
 ##### New feature(s)
 * Add method ReflectionTools.getField(Class, String).
 ##### Internal change(s)
 * Correction into RandomByteArrayOutputStream(long) when reserving memory into constructor.
 
 
-### 5.21.0 STABLE (02/11/2020)
+### 5.21.0 STABLE (02/11/2021)
 ##### New feature(s)
 * Manage description type into versioning tools.
 ##### Internal change(s)
@@ -31,74 +36,74 @@ Jason MAHDJOUB (Entered in the team at 04/01/2016)
 * Update Snake YML to 1.29
 
 
-### 5.20.6 STABLE (18/10/2020)
+### 5.20.6 STABLE (18/10/2021)
 ##### Internal change(s)
 * Optimize CircularArrayList class.
 
 
-### 5.20.5 STABLE (18/10/2020)
+### 5.20.5 STABLE (18/10/2021)
 ##### Bug fixe(s)
 * Fix issues with CircularArrayList class.
 
 
-### 5.20.4 STABLE (18/10/2020)
+### 5.20.4 STABLE (18/10/2021)
 ##### Internal change(s)
 * Better clean cache into EncryptionSignatureHashEncoder and EncryptionSignatureHashDecoder and fix issues with bad encryption/decryption.
 ##### Bug fixe(s)
 * Fix bad cipher initialisation when using external counter. The bug was not producing security consequences.
 
 
-### 5.20.3 STABLE (12/10/2020)
+### 5.20.3 STABLE (12/10/2021)
 ##### Bug fixe(s)
 * Pool executor : fix bad use of maximum number of threads, and permit to create more threads when the maximum of threads was not reached and when tasks are waiting to be executed.
 
 
-### 5.20.2 STABLE (12/10/2020)
+### 5.20.2 STABLE (12/10/2021)
 ##### New feature(s)
 * Add exception InvalidEncodedValue.
 * Use exception InvalidEncodedValue during values decoding.
 
 
-### 5.20.1 STABLE (12/10/2020)
+### 5.20.1 STABLE (12/10/2021)
 ##### New feature(s)
 * Add function DecentralizedValue.toShortString(DecentralizedValue).
 * Add function DecentralizedValue.toShortString(Collection<DecentralizedValue>).
 
 
-### 5.20.0 STABLE (07/10/2020)
+### 5.20.0 STABLE (07/10/2021)
 ##### New feature(s)
 * Add function DecentralizedValue.toShortString().
 * Add function WrappedData.toShortData().
 
 
-### 5.19.7 STABLE (01/10/2020)
+### 5.19.7 STABLE (01/10/2021)
 ##### Bug fixe(s)
 * Fix null pointer exception with EncryptionSignatureHashEncoder.
 
 
-### 5.19.6 STABLE (30/09/2020)
+### 5.19.6 STABLE (30/09/2021)
 ##### Bug fixe(s)
 * Fix issue with secure random loading when used with Android.
 * Disable Path serialization to make Utils compatible with Android.
 
 
-### 5.19.5 STABLE (30/08/2020)
+### 5.19.5 STABLE (30/08/2021)
 ##### Bug fixe(s)
 * Fix issue with CHACHA20_NO_RANDOM_ACCESS driver when using Java 8.
 
 
-### 5.19.4 STABLE (30/08/2020)
+### 5.19.4 STABLE (30/08/2021)
 ##### Bug fixe(s)
 * Fix issue with human readable bytes quantity.
 * Fix issue with ethtool localisation into Debian OS.
 
 
-### 5.19.2 STABLE (30/08/2020)
+### 5.19.2 STABLE (30/08/2021)
 ##### Bug fixe(s)
 * Delay garbage collector which zeroise unwrapped key.
 
 
-### 5.19.1 STABLE (30/08/2020)
+### 5.19.1 STABLE (30/08/2021)
 ##### New feature(s)
 * Add functions into PoolExecutor.
 ##### Bug fixe(s)
@@ -106,22 +111,22 @@ Jason MAHDJOUB (Entered in the team at 04/01/2016)
 * Delay garbage collector which zeroise unwrapped key.
 
 
-### 5.19.0 STABLE (17/08/2020)
+### 5.19.0 STABLE (17/08/2021)
 ##### New feature(s)
 * Add class DocumentBuilderFactoryWithNonDTD.
 
 
-### 5.18.5 STABLE (07/07/2020)
+### 5.18.5 STABLE (07/07/2021)
 ##### Bug fixe(s)
 * Use recompiled Bouncy Castle FIPS dependency in order to make it compatible with Android.
 
 
-### 5.18.4 STABLE (05/07/2020)
+### 5.18.4 STABLE (05/07/2021)
 ##### Bug fixe(s)
 * Fix high cpu usage issue when testing if thread must be killed.
 
 
-### 5.18.3 STABLE (30/06/2020)
+### 5.18.3 STABLE (30/06/2021)
 ##### New feature(s)
 * Permit to create a random cache file center into a personalized directory.
 * Add possibility to serialize Files and Paths into RandomInputStreams and RandomOutputStreams.
@@ -129,7 +134,7 @@ Jason MAHDJOUB (Entered in the team at 04/01/2016)
 * Change the permissions of the random cache file center directory.
 
 
-### 5.18.2 STABLE (07/06/2020)
+### 5.18.2 STABLE (07/06/2021)
 ##### New feature(s)
 * Add function EncryptionSignatureHashDecoder.isEncrypted(RandomInputStream).
 * Add function EncryptionSignatureHashDecoder.getLastDataLength().
@@ -137,14 +142,14 @@ Jason MAHDJOUB (Entered in the team at 04/01/2016)
 * Fix some issues into EncryptionSignatureHashEncoder and EncryptionSignatureHashDecoder.
 
 
-### 5.18.1 STABLE (30/05/2020)
+### 5.18.1 STABLE (30/05/2021)
 ##### Internal change(s)
 * Change methods signatures into P2PLoginAgreementType class.
 ##### Security fixe(s)
 * Fix issue with function IASymmetricPublicKey.areTimesValid(). Overflow value was reached.
 
 
-### 5.18.0 STABLE (28/05/2020)
+### 5.18.0 STABLE (28/05/2021)
 ##### New feature(s)
 * Add functions into P2PLoginAgreementType
 * Add functions into P2PUnidirectionalLoginSignerWithAsymmetricSignature
@@ -157,46 +162,46 @@ Jason MAHDJOUB (Entered in the team at 04/01/2016)
 * Reimplements provider's loading
 
 
-### 5.17.7 STABLE (25/05/2020)
+### 5.17.7 STABLE (25/05/2021)
 ##### Bug fixe(s)
 * Fix issue with RandomFileInputStream when reading a byte whereas end of file has been reached : the file position shouldn't be incremented !
 
 
-### 5.17.6 STABLE (24/05/2020)
+### 5.17.6 STABLE (24/05/2021)
 ##### Bug fixe(s)
 * Fix issue with stream closed too quickly when decoding encrypted data
 * Fix memory allocation issues with RandomCacheFileCenter
 * Fix file position update issue when using file in both read and write modes
 
 
-### 5.17.5 STABLE (30/04/2020)
+### 5.17.5 STABLE (30/04/2021)
 ##### Internal change(s)
 * Add function SecuredObjectInputStream.readBytesArray(byte[] array, int offset, boolean nullAccepted, int maxSizeBytes)
 * Remove function SecuredObjectInputStream.readBytesArray(byte[] array, int offset, int size, boolean nullAccepted)
 
 
-### 5.17.4 STABLE (29/04/2020)
+### 5.17.4 STABLE (29/04/2021)
 ##### Internal change(s)
 * Minimal corrections into function signatures into SecuredObjectInputStream
 
 
-### 5.17.3 STABLE (25/03/2020)
+### 5.17.3 STABLE (25/03/2021)
 ##### Internal change(s)
 * Decentralized IDs are now generated with random initial sequence
 
 
-### 5.17.2 STABLE (21/02/2020)
+### 5.17.2 STABLE (21/02/2021)
 ##### New feature(s)
 * Add function MessageDigestType.isPostQuantumAlgorithm()
 * Use post quantum HMacs as default signature algorithms associated with symmetric encryption algorithms
 
 
-### 5.17.1 STABLE (21/02/2020)
+### 5.17.1 STABLE (21/02/2021)
 ##### New feature(s)
 * Exclude wrapping when wrapped keys are not authenticated
 
 
-### 5.17.0 STABLE (19/02/2020)
+### 5.17.0 STABLE (19/02/2021)
 ##### New feature(s)
 * Add functions into WrappedData and WrappedString
 * Complete KeyWrapperAlgorithm class with symmetric and asymmetric signatures
@@ -206,7 +211,7 @@ Jason MAHDJOUB (Entered in the team at 04/01/2016)
 * Fix bad parameter into function ServerASymmetricEncryptionAlgorithm.decode(byte[], int, int)
 
 
-### 5.16.0 STABLE (18/02/2020)
+### 5.16.0 STABLE (18/02/2021)
 ##### New feature(s)
 * Add Client/server login agreement
 ##### Security fixe(s)
@@ -214,12 +219,12 @@ Jason MAHDJOUB (Entered in the team at 04/01/2016)
 * Fix security issue : fix P2P login agreement with symmetric secret key when salt is the same with the two peers
 
 
-### 5.15.1 STABLE (04/02/2020)
+### 5.15.1 STABLE (04/02/2021)
 ##### Security fixe(s)
 * Fix issues when checking signatures with EncryptionProfileProvider
 
 
-### 5.15.0 STABLE (03/02/2020)
+### 5.15.0 STABLE (03/02/2021)
 ##### New feature(s)
 * Add class SecureExternalizableWithPublicKeysSignatures
 * Add class SecureExternalizableThatUseEncryptionProfileProvider
@@ -232,29 +237,29 @@ Jason MAHDJOUB (Entered in the team at 04/01/2016)
 * Fix a possibility of vulnerability when EncryptionProfileProvider's user does not generate an exception when the profile id is not valid. Add the function EncryptionProfileProvider.isValidProfileID.
 
 
-### 5.14.0 STABLE (18/01/2020)
+### 5.14.0 STABLE (18/01/2021)
 ##### Internal change(s)
 * Alter SecureExternalizableWithEncryptionProfileProvider
 
 
-### 5.13.0 STABLE (18/01/2020)
+### 5.13.0 STABLE (18/01/2021)
 ##### New feature(s)
 * Add class ProfileProviderTree
 * Add interface SecureExternalizableWithEncryptionProfileProvider
 * Add equals, hashCode, toString functions into Reference class
 
 
-### 5.12.5 STABLE (15/01/2020)
+### 5.12.5 STABLE (15/01/2021)
 ##### Bug fixe(s)
 * Improve detection of drives and partitions
 
 
-### 5.12.4 STABLE (06/01/2020)
+### 5.12.4 STABLE (06/01/2021)
 ##### Bug fixe(s)
 * Fix issue with disk and partition detection with macos
 
 
-### 5.12.3 STABLE (05/01/2020)
+### 5.12.3 STABLE (05/01/2021)
 ##### Internal change(s)
 * make DecentralizedValue class an interface
 
