@@ -46,7 +46,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @author Jason Mahdjoub
- * @version 1.1
+ * @version 1.2
  * @since Utils 4.8.0
  */
 @SuppressWarnings("NullableProblems")
@@ -1013,15 +1013,14 @@ public class PoolExecutor implements ExecutorService {
 			return true;
 		Executor executor=getExecutor(Thread.currentThread());
 		if (executor!=null) {
-			incrementMaxThreadNumber();
 			duration=unit.toMillis(duration);
-
-			try {
-				if (duration > 0)
+			if (duration > 0) {
+				incrementMaxThreadNumber();
+				try {
 					Thread.sleep(duration);
-
-			} finally {
-				decrementMaxThreadNumber();
+				} finally {
+					decrementMaxThreadNumber();
+				}
 			}
 			return true;
 		} else {
