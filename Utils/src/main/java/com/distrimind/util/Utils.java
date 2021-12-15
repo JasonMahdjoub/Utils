@@ -70,7 +70,7 @@ public class Utils {
 					.addDescription(
 							new Description((short)5, (short)21, (short)4, Version.Type.STABLE, (short)0, "2021-12-15")
 									.addItem(INTERNAL_CHANGE, "Optimization of sleep function into PoolExecutor.")
-									.addItem(INTERNAL_CHANGE, "Base Timer class on System.nanoTime() function and not on System.currentTimeMillis().")
+									.addItem(BUG_FIX, "Base Timer class on System.nanoTime() function and not on System.currentTimeMillis(). The timer could return negative elapsed durations with the old method.")
 					)
 					.addDescription(
 							new Description((short)5, (short)21, (short)3, Version.Type.STABLE, (short)0, "2021-12-09")

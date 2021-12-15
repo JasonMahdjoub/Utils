@@ -1,6 +1,6 @@
 Utils
 =====
-5.21.3 STABLE (Build: 3615) (from 04/01/2016 to 09/12/2021)
+5.21.4 STABLE (Build: 3632) (from 04/01/2016 to 15/12/2021)
 
 # Creator(s):
 Jason MAHDJOUB
@@ -9,6 +9,13 @@ Jason MAHDJOUB
 Jason MAHDJOUB (Entered in the team at 04/01/2016)
 
 # Changes:
+
+
+### 5.21.4 STABLE (15/12/2021)
+##### Internal change(s)
+* Optimization of sleep function into PoolExecutor.
+##### Bug fixe(s)
+* Base Timer class on System.nanoTime() function and not on System.currentTimeMillis(). The timer could return negative elapsed durations with the old method.
 
 
 ### 5.21.3 STABLE (09/12/2021)

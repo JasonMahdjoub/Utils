@@ -60,9 +60,11 @@ public final class Timer {
 	}
 
 	public long getDeltaMilli() {
-		return getDeltaNano()/1000;
+		return getDeltaNano()/1000000L;
 	}
-
+	public long getDeltaMicro() {
+		return getDeltaNano()/1000L;
+	}
 	public long getDeltaNano() {
 		if (m_stopped)
 			return 0;
@@ -76,10 +78,18 @@ public final class Timer {
 	}
 
 	public double getDeltaMilliDouble() {
-		return ((double) getDeltaNano())/1000.0;
+		return ((double) getDeltaNano())/1000000.0;
 	}
 
 	public float getDeltaMilliFloat() {
+		return ((float) getDeltaNano())/1000000.0f;
+	}
+
+	public double getDeltaMicroDouble() {
+		return ((double) getDeltaNano())/1000.0;
+	}
+
+	public float getDeltaMicroFloat() {
 		return ((float) getDeltaNano())/1000.0f;
 	}
 
@@ -92,9 +102,11 @@ public final class Timer {
 	}
 
 	public long getMilli() {
-		return getNano()/1000;
+		return getNano()/1000000L;
 	}
-
+	public long getMicro() {
+		return getNano()/1000L;
+	}
 	public long getNano() {
 		if (m_stopped)
 			return 0;
@@ -105,10 +117,15 @@ public final class Timer {
 	}
 
 	public double getMilliDouble() {
+		return ((double) getNano())/1000000.0;
+	}
+	public double getMicroDouble() {
 		return ((double) getNano())/1000.0;
 	}
-
 	public float getMilliFloat() {
+		return ((float) getNano())/1000000.0f;
+	}
+	public float getMicroFloat() {
 		return ((float) getNano())/1000.0f;
 	}
 
