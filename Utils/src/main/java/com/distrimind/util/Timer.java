@@ -39,7 +39,7 @@ package com.distrimind.util;
  * Represents a timer
  * 
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 1.1
  * @since Utils 1.0
  */
 public final class Timer {
@@ -60,40 +60,64 @@ public final class Timer {
 	}
 
 	public long getDeltaMilli() {
+		return getDeltaNano()/1000;
+	}
+
+	public long getDeltaNano() {
 		if (m_stopped)
 			return 0;
 		long res;
 		if (m_paused)
 			res = m_previous_pause_time - m_previous_time;
 		else
-			res = System.currentTimeMillis() - m_previous_time;
+			res = System.nanoTime() - m_previous_time;
 		m_previous_time += res;
 		return res;
 	}
 
 	public double getDeltaMilliDouble() {
-		return (double) getDeltaMilli();
+		return ((double) getDeltaNano())/1000.0;
 	}
 
 	public float getDeltaMilliFloat() {
-		return (float) getDeltaMilli();
+		return ((float) getDeltaNano())/1000.0f;
+	}
+
+	public double getDeltaNanoDouble() {
+		return (double) getDeltaNano();
+	}
+
+	public float getDeltaNanoFloat() {
+		return (float) getDeltaNano();
 	}
 
 	public long getMilli() {
+		return getNano()/1000;
+	}
+
+	public long getNano() {
 		if (m_stopped)
 			return 0;
 		if (m_paused)
 			return m_previous_pause_time - m_previous_time;
 		else
-			return System.currentTimeMillis() - m_previous_time;
+			return System.nanoTime() - m_previous_time;
 	}
 
 	public double getMilliDouble() {
-		return (double) getMilli();
+		return ((double) getNano())/1000.0;
 	}
 
 	public float getMilliFloat() {
-		return (float) getMilli();
+		return ((float) getNano())/1000.0f;
+	}
+
+	public double getNanoDouble() {
+		return (double) getNano();
+	}
+
+	public float getNanoFloat() {
+		return (float) getNano();
 	}
 
 	public boolean isPaused() {
@@ -107,16 +131,16 @@ public final class Timer {
 	public void pause() {
 		if (!m_paused && !m_stopped) {
 			m_paused = true;
-			m_previous_pause_time = System.currentTimeMillis();
+			m_previous_pause_time = System.nanoTime();
 		}
 	}
 
 	public void play() {
 		if (m_stopped) {
 			m_stopped = false;
-			m_previous_time = System.currentTimeMillis();
+			m_previous_time = System.nanoTime();
 		} else if (m_paused) {
-			m_previous_time += System.currentTimeMillis() - m_previous_pause_time;
+			m_previous_time += System.nanoTime() - m_previous_pause_time;
 			m_paused = false;
 		}
 	}
@@ -125,7 +149,7 @@ public final class Timer {
 		if (m_paused) {
 			m_previous_time = m_previous_pause_time;
 		} else {
-			m_previous_time = System.currentTimeMillis();
+			m_previous_time = System.nanoTime();
 		}
 	}
 
@@ -134,7 +158,7 @@ public final class Timer {
 			if (m_paused) {
 				m_previous_time = m_previous_pause_time - ms;
 			} else {
-				m_previous_time = System.currentTimeMillis() - ms;
+				m_previous_time = System.nanoTime() - ms;
 			}
 		}
 
