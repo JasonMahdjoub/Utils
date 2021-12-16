@@ -153,7 +153,7 @@ public class Description extends AbstractVersion<Description> {
 				if (d.getDescriptionType()==dt) {
 					if (first)
 					{
-						s.append("##### ")
+						s.append("#### ")
 								.append(dt.getTitle())
 								.append("\n");
 						first=false;

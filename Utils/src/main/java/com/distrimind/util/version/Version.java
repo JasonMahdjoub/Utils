@@ -319,6 +319,7 @@ public class Version extends AbstractVersion<Version> {
 			s.append("# Creator(s):");
 			s.append("\n");
 			for (Person p : creators) {
+				s.append("* ");
 				s.append(p);
 				s.append("\n");
 			}
@@ -328,6 +329,7 @@ public class Version extends AbstractVersion<Version> {
 			s.append("# Developer(s):");
 			s.append("\n");
 			for (PersonDeveloper p : developers) {
+				s.append("* ");
 				s.append(p);
 				s.append("\n");
 			}

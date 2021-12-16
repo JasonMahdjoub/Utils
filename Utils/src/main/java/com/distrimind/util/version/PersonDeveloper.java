@@ -119,6 +119,16 @@ public class PersonDeveloper extends Person implements Comparable<PersonDevelope
 
 	@Override
 	public int compareTo(PersonDeveloper p) {
-		return developmentBeginDate.compareTo(p.developmentBeginDate);
+
+		int c=developmentBeginDate.compareTo(p.developmentBeginDate);
+		if (c==0)
+		{
+			c=lastName.compareTo(p.lastName);
+			if (c==0)
+			{
+				c=firstName.compareTo(p.firstName);
+			}
+		}
+		return c;
 	}
 }

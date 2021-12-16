@@ -68,6 +68,11 @@ public class Utils {
 			VERSION.addCreator(new Person("mahdjoub", "jason"))
 					.addDeveloper(new PersonDeveloper("mahdjoub", "jason", "2016-01-04"))
 					.addDescription(
+							new Description((short)5, (short)21, (short)5, Version.Type.STABLE, (short)0, "2021-12-16")
+									.addItem(BUG_FIX, "Fix function PersonDeveloper.compareTo.")
+									.addItem(INTERNAL_CHANGE, "Better serialize Version class into markdown code.")
+					)
+					.addDescription(
 							new Description((short)5, (short)21, (short)4, Version.Type.STABLE, (short)0, "2021-12-15")
 									.addItem(INTERNAL_CHANGE, "Optimization of sleep function into PoolExecutor.")
 									.addItem(BUG_FIX, "Base Timer class on System.nanoTime() function and not on System.currentTimeMillis(). The timer could return negative elapsed durations with the old method.")
