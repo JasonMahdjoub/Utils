@@ -307,7 +307,11 @@ public class ASymmetricPublicKey extends AbstractKey implements IASymmetricPubli
 		if (o instanceof ASymmetricPublicKey) {
 
 			ASymmetricPublicKey other = (ASymmetricPublicKey) o;
-			return keySizeBits == other.keySizeBits && encryptionType == other.encryptionType && signatureType == other.signatureType && Arrays.equals(publicKey, other.publicKey);
+			boolean b=keySizeBits == other.keySizeBits;
+			b=encryptionType == other.encryptionType && b;
+			b=signatureType == other.signatureType && b;
+			b=com.distrimind.bouncycastle.util.Arrays.constantTimeAreEqual(publicKey, other.publicKey) && b;
+			return b;
 		}
 		return false;
 	}

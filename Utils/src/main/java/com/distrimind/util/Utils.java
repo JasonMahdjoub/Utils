@@ -68,6 +68,11 @@ public class Utils {
 			VERSION.addCreator(new Person("mahdjoub", "jason"))
 					.addDeveloper(new PersonDeveloper("mahdjoub", "jason", "2016-01-04"))
 					.addDescription(
+							new Description((short)5, (short)21, (short)6, Version.Type.STABLE, (short)0, "2021-12-22")
+									.addItem(SECURITY_FIX, "Fix bad arrays comparison, for example when comparing signatures. Comparison where not done in constant time. This should not produce necessary security issue, but if it does, this is a serious problem since secret message can be deduced. Symmetric signatures checking where concerned.")
+									.addItem(INTERNAL_CHANGE, "Alter P2PLoginAgreementType class and add functions.")
+					)
+					.addDescription(
 							new Description((short)5, (short)21, (short)5, Version.Type.STABLE, (short)0, "2021-12-16")
 									.addItem(BUG_FIX, "Fix function PersonDeveloper.compareTo.")
 									.addItem(INTERNAL_CHANGE, "Better serialize Version class into markdown code.")

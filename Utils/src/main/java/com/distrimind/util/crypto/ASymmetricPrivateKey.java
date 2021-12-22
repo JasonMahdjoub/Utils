@@ -274,7 +274,11 @@ public class ASymmetricPrivateKey extends AbstractKey implements IASymmetricPriv
 			return true;
 		if (o instanceof ASymmetricPrivateKey) {
 			ASymmetricPrivateKey other = (ASymmetricPrivateKey) o;
-			return keySizeBits == other.keySizeBits && encryptionType == other.encryptionType && signatureType == other.signatureType && Arrays.equals(privateKey, other.privateKey);
+			boolean b=com.distrimind.bouncycastle.util.Arrays.constantTimeAreEqual(privateKey, other.privateKey);
+			b=keySizeBits == other.keySizeBits && b;
+			b=encryptionType == other.encryptionType && b;
+			b=signatureType == other.signatureType && b;
+			return b;
 		}
 		return false;
 	}

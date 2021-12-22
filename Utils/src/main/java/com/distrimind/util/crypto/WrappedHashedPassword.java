@@ -29,17 +29,17 @@ public final class WrappedHashedPassword extends WrappedSecretData implements Se
 	}
 
 	@Override
-	public final int getInternalSerializedSize() {
+	public int getInternalSerializedSize() {
 		return SerializationTools.getInternalSize(getBytes(), MAX_SIZE_IN_BYTES_OF_HASHED_PASSWORD);
 	}
 
 	@Override
-	public final void writeExternal(SecuredObjectOutputStream out) throws IOException {
+	public void writeExternal(SecuredObjectOutputStream out) throws IOException {
 		out.writeBytesArray(getBytes(), false, MAX_SIZE_IN_BYTES_OF_HASHED_PASSWORD);
 	}
 
 	@Override
-	public final void readExternal(SecuredObjectInputStream in) throws IOException {
+	public void readExternal(SecuredObjectInputStream in) throws IOException {
 		setData(in.readBytesArray(false, MAX_SIZE_IN_BYTES_OF_HASHED_PASSWORD));
 	}
 }

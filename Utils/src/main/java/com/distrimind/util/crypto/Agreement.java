@@ -58,14 +58,17 @@ public abstract class Agreement implements Zeroizable {
 			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException());
 		}
 
-		l1:for (int i = acceptableCommonLinearBytes; i>=0; i--)
+		for (int i = acceptableCommonLinearBytes; i>=0; i--)
 		{
+			boolean ok=false;
 			for (int j = i+ acceptableCommonLinearBytes -1; j>=i; j--)
 			{
+				//noinspection IfStatementMissingBreakInLoop
 				if (localMessage[j]!=distantMessage[j])
-					continue l1;
+					ok=true;
 			}
-			throw new MessageExternalizationException(Integrity.FAIL, new CryptoException());
+			if (!ok)
+				throw new MessageExternalizationException(Integrity.FAIL, new CryptoException());
 		}
 
 		int c=0;

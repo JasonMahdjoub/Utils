@@ -57,7 +57,7 @@ import javax.crypto.spec.SecretKeySpec;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 4.1
+ * @version 4.2
  * @since Utils 1.4.1
  */
 public class P2PASymmetricSecretMessageExchanger {
@@ -188,14 +188,6 @@ public class P2PASymmetricSecretMessageExchanger {
 		this.messageDigest256 = MessageDigestType.BC_FIPS_SHA3_256.getMessageDigestInstance();
 
 	}
-
-	/*P2PASymmetricSecretMessageExchanger(AbstractSecureRandom secureRandom, MessageDigestType messageDigestType, PasswordHashType passwordHashType,
-			ASymmetricPublicKey myPublicKey, byte[] distantPublicKey)
-			throws NoSuchAlgorithmException, NoSuchProviderException, MessageExternalizationException, InvalidEncodedValue {
-		this(secureRandom, messageDigestType, passwordHashType, myPublicKey);
-		if (distantPublicKey != null)
-			setDistantPublicKey(distantPublicKey);
-	}*/
 
 	public byte[] encode(byte[] message, byte[] salt, boolean messageIsKey) throws IOException, InvalidKeyException,
 			IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeySpecException,
@@ -428,7 +420,13 @@ public class P2PASymmetricSecretMessageExchanger {
 		if (distantMessageEncoder != null)
 			distantMessageEncoder.setCost(cost);
 	}
-
+	public boolean verifyDistantMessage(WrappedData originalMessage, byte[] salt, WrappedData distantMessage,
+										boolean messageIsKey) throws IOException {
+		if (salt == null)
+			salt = new byte[0];
+		return this.verifyDistantMessage(originalMessage, 0, originalMessage.getBytes().length, salt, 0, salt.length,
+				distantMessage, 0, distantMessage.getBytes().length, messageIsKey);
+	}
 	public boolean verifyDistantMessage(byte[] originalMessage, byte[] salt, byte[] distantMessage,
 			boolean messageIsKey) throws IOException {
 		if (salt == null)
@@ -436,7 +434,14 @@ public class P2PASymmetricSecretMessageExchanger {
 		return this.verifyDistantMessage(originalMessage, 0, originalMessage.length, salt, 0, salt.length,
 				distantMessage, 0, distantMessage.length, messageIsKey);
 	}
-
+	public boolean verifyDistantMessage(WrappedData originalMessage, int offo, int leno, byte[] salt, int offset_salt,
+										int len_salt, WrappedData distantMessage, int offd, int lend, boolean messageIsKey)
+			throws IOException {
+		boolean r=verifyDistantMessage(originalMessage.getBytes(), offo, leno, salt, offset_salt, len_salt, distantMessage.getBytes(), offd, lend, messageIsKey);
+		originalMessage.getBytes();
+		distantMessage.getBytes();
+		return r;
+	}
 	public boolean verifyDistantMessage(byte[] originalMessage, int offo, int leno, byte[] salt, int offset_salt,
 			int len_salt, byte[] distantMessage, int offd, int lend, boolean messageIsKey)
 			throws IOException {
@@ -477,13 +482,7 @@ public class P2PASymmetricSecretMessageExchanger {
 	private boolean compareEncodedLevel2(byte[] encodedLevel2, byte[] distantLevel2) {
 		if (distantLevel2 == null)
 			return false;
-		if (encodedLevel2.length != distantLevel2.length)
-			return false;
-		for (int i = 0; i < encodedLevel2.length; i++) {
-			if (encodedLevel2[i] != distantLevel2[i])
-				return false;
-		}
-		return true;
+		return com.distrimind.bouncycastle.util.Arrays.constantTimeAreEqual(encodedLevel2, distantLevel2);
 	}
 
 	public boolean verifyDistantMessage(char[] originalMessage, byte[] salt, byte[] distantMessage)

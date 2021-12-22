@@ -127,8 +127,11 @@ public class ASymmetricAuthenticatedSignatureCheckerAlgorithm extends AbstractAu
 
 		@Override
 		public boolean verify() throws IOException {
-			if (signatureValid)
-				return checkerNonPQC.verify() && checkerPQC.verify();
+			if (signatureValid) {
+				boolean r=checkerNonPQC.verify();
+				r=checkerPQC.verify() && r;
+				return r;
+			}
 			else
 				return false;
 		}

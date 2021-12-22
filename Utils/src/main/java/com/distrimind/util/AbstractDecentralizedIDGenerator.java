@@ -44,7 +44,6 @@ import java.util.Enumeration;
 
 import com.distrimind.util.crypto.*;
 import com.distrimind.util.data_buffers.WrappedData;
-import com.distrimind.util.data_buffers.WrappedSecretData;
 import com.distrimind.util.sizeof.ObjectSizer;
 
 /**
@@ -52,7 +51,7 @@ import com.distrimind.util.sizeof.ObjectSizer;
  * network.
  * 
  * @author Jason Mahdjoub
- * @version 2.3
+ * @version 2.4
  * @since Utils 1.0
  * 
  */
@@ -315,7 +314,9 @@ public abstract class AbstractDecentralizedIDGenerator extends AbstractDecentral
 	public boolean equals(AbstractDecentralizedIDGenerator other) {
 		if (other == null)
 			return false;
-		return timestamp == other.timestamp && worker_id_and_sequence == other.worker_id_and_sequence;
+		boolean b=timestamp == other.timestamp;
+		b=worker_id_and_sequence == other.worker_id_and_sequence && b;
+		return b;
 	}
 
 	@Override

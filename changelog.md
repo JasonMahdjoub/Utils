@@ -1,6 +1,6 @@
 Utils
 =====
-5.21.5 STABLE (Build: 3636) (from 04/01/2016 to 16/12/2021)
+5.21.6 STABLE (Build: 3650) (from 04/01/2016 to 22/12/2021)
 
 # Creator(s):
 * Jason MAHDJOUB
@@ -9,6 +9,13 @@ Utils
 * Jason MAHDJOUB (Entered in the team at 04/01/2016)
 
 # Changes:
+
+
+### 5.21.6 STABLE (22/12/2021)
+#### Internal change(s)
+* Alter P2PLoginAgreementType class and add functions.
+#### Security fixe(s)
+* Fix bad arrays comparison, for example when comparing signatures. Comparison where not done in constant time. This should not produce necessary security issue, but if it does, this is a serious problem since secret message can be deduced. Symmetric signatures checking where concerned.
 
 
 ### 5.21.5 STABLE (16/12/2021)

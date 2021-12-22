@@ -97,7 +97,7 @@ public class SubStreamHashResult implements SecureExternalizable {
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
 		SubStreamHashResult that = (SubStreamHashResult) o;
-		return Arrays.equals(hash, that.hash);
+		return com.distrimind.bouncycastle.util.Arrays.constantTimeAreEqual(hash, that.hash);
 	}
 
 	@Override

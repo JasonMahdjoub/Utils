@@ -204,7 +204,7 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 					partialHash(nonEncryptedInputStream, nullStream, md, os, start, end - start);
 				}
 			}
-			return Arrays.equals(md.digest(), hashResultFromEncryptedStream.getHash());
+			return com.distrimind.bouncycastle.util.Arrays.constantTimeAreEqual(md.digest(), hashResultFromEncryptedStream.getHash());
 		}
 	}
 

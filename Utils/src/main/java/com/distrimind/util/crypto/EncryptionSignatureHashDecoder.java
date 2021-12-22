@@ -41,7 +41,6 @@ import com.distrimind.util.io.*;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
-import java.util.Arrays;
 
 /**
  * @author Jason Mahdjoub
@@ -795,7 +794,7 @@ public class EncryptionSignatureHashDecoder {
 				byte[] hashToCheck=inputStream.readBytesArray(false, MessageDigestType.MAX_HASH_LENGTH);
 				if (positionOfRandomInputStreamAfterDecoding!=null)
 					positionOfRandomInputStreamAfterDecoding.set(originalInputStream.currentPosition());
-				if (!Arrays.equals(hash3, hashToCheck))
+				if (!com.distrimind.bouncycastle.util.Arrays.constantTimeAreEqual(hash3, hashToCheck))
 					throw new MessageExternalizationException(Integrity.FAIL);
 
 				if (symmetricChecker!=null) {
@@ -932,7 +931,7 @@ public class EncryptionSignatureHashDecoder {
 					hash3=digest.digest();
 				}
 				byte[] hashToCheck=inputStream.readBytesArray(false, MessageDigestType.MAX_HASH_LENGTH);
-				if (!Arrays.equals(hash3, hashToCheck))
+				if (!com.distrimind.bouncycastle.util.Arrays.constantTimeAreEqual(hash3, hashToCheck))
 					return Integrity.FAIL;
 
 				if (symmetricChecker!=null) {
@@ -1054,7 +1053,7 @@ public class EncryptionSignatureHashDecoder {
 					hash3=digest.digest();
 				}
 				byte[] hashToCheck=inputStream.readBytesArray(false, MessageDigestType.MAX_HASH_LENGTH);
-				if (!Arrays.equals(hash3, hashToCheck))
+				if (!com.distrimind.bouncycastle.util.Arrays.constantTimeAreEqual(hash3, hashToCheck))
 					return Integrity.FAIL;
 
 				if (asymmetricChecker!=null) {

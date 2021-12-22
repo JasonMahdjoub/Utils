@@ -43,7 +43,13 @@ public class WrappedSecretData extends WrappedData implements Zeroizable {
 		toZeroize=true;
 		super.setData(data);
 	}
-
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		WrappedData that = (WrappedData) o;
+		return com.distrimind.bouncycastle.util.Arrays.constantTimeAreEqual(getBytes(), that.getBytes());
+	}
 	@Override
 	public void zeroize()
 	{

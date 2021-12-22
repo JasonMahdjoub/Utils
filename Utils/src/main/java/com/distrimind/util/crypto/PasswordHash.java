@@ -113,7 +113,7 @@ public class PasswordHash {
 
 			assert type != null;
 			char[] charArray=password.getChars();
-			boolean res=Arrays.equals(type.hash(charArray, salt, cost, (byte)hash.length), hash);
+			boolean res= com.distrimind.bouncycastle.util.Arrays.constantTimeAreEqual(type.hash(charArray, salt, cost, (byte)hash.length), hash);
 			Arrays.fill(generatedSalt, (byte)0);
 			Arrays.fill(salt, (byte)0);
 			Arrays.fill(hash, (byte)0);

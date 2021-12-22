@@ -71,8 +71,9 @@ public class SymmetricSecretKeyPair extends AbstractKey implements ISecretDecent
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
 		SymmetricSecretKeyPair that = (SymmetricSecretKeyPair) o;
-		return secretKeyForEncryption.equals(that.secretKeyForEncryption) &&
-				secretKeyForSignature.equals(that.secretKeyForSignature);
+		boolean b=secretKeyForEncryption.equals(that.secretKeyForEncryption);
+		b=secretKeyForSignature.equals(that.secretKeyForSignature) && b;
+		return b;
 	}
 
 	@Override

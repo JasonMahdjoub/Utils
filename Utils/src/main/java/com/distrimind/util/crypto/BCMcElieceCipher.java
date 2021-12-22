@@ -162,7 +162,7 @@ public class BCMcElieceCipher extends AbstractCipher{
 			if (o==this)
 				return true;
 			if (o.getClass()==this.getClass()) {
-				return Arrays.equals(getEncoded(), ((PrivateKey) o).getEncoded());
+				return com.distrimind.bouncycastle.util.Arrays.constantTimeAreEqual(getEncoded(), ((PrivateKey) o).getEncoded());
 			}
 			return false;
 		}
@@ -288,7 +288,7 @@ public class BCMcElieceCipher extends AbstractCipher{
 			if (o==this)
 				return true;
 			if (o.getClass()==this.getClass()) {
-				return Arrays.equals(getEncoded(), ((PrivateKeyCCA2) o).getEncoded());
+				return com.distrimind.bouncycastle.util.Arrays.constantTimeAreEqual(getEncoded(), ((PrivateKeyCCA2) o).getEncoded());
 			}
 			return false;
 		}
@@ -411,7 +411,7 @@ public class BCMcElieceCipher extends AbstractCipher{
 			if (o==this)
 				return true;
 			if (o.getClass()==this.getClass()) {
-				return Arrays.equals(getEncoded(), ((PublicKey) o).getEncoded());
+				return com.distrimind.bouncycastle.util.Arrays.constantTimeAreEqual(getEncoded(), ((PublicKey) o).getEncoded());
 			}
 			return false;
 		}
@@ -510,7 +510,7 @@ public class BCMcElieceCipher extends AbstractCipher{
 			if (o==this)
 				return true;
 			if (o.getClass()==this.getClass()) {
-				return Arrays.equals(getEncoded(), ((PublicKeyCCA2) o).getEncoded());
+				return com.distrimind.bouncycastle.util.Arrays.constantTimeAreEqual(getEncoded(), ((PublicKeyCCA2) o).getEncoded());
 			}
 			return false;
 		}

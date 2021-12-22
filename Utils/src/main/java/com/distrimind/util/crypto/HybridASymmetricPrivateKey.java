@@ -145,8 +145,9 @@ public class HybridASymmetricPrivateKey extends AbstractKey implements IHybridKe
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
 		HybridASymmetricPrivateKey that = (HybridASymmetricPrivateKey) o;
-		return nonPQCPrivateKey.equals(that.nonPQCPrivateKey) &&
-				PQCPrivateKey.equals(that.PQCPrivateKey);
+		boolean b=nonPQCPrivateKey.equals(that.nonPQCPrivateKey);
+		b=PQCPrivateKey.equals(that.PQCPrivateKey) && b;
+		return b;
 	}
 
 	@Override

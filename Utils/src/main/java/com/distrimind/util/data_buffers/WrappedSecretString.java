@@ -74,4 +74,64 @@ public class WrappedSecretString extends WrappedString implements Zeroizable {
 	public WrappedSecretString transformToSecretString() {
 		return this;
 	}
+	public static boolean constantTimeAreEqual(String expected, String supplied)
+	{
+		if (expected==null || supplied==null)
+			return false;
+		//noinspection StringEquality
+		if (expected == supplied)
+		{
+			return true;
+		}
+
+		//noinspection ManualMinMaxCalculation
+		int len = (expected.length() < supplied.length()) ? expected.length() : supplied.length();
+
+		int nonEqual = expected.length() ^ supplied.length();
+
+		for (int i = 0; i != len; i++)
+		{
+			nonEqual |= (expected.charAt(i) ^ supplied.charAt(i));
+		}
+		for (int i = len; i < supplied.length(); i++)
+		{
+			//noinspection PointlessBitwiseExpression
+			nonEqual |= (supplied.charAt(i) ^ ~supplied.charAt(i));
+		}
+
+		return nonEqual == 0;
+	}
+	public static boolean constantTimeAreEqual(char[] expected, char[] supplied)
+	{
+		if (expected==null || supplied==null)
+			return false;
+		if (expected == supplied)
+		{
+			return true;
+		}
+
+		//noinspection ManualMinMaxCalculation
+		int len = (expected.length < supplied.length) ? expected.length : supplied.length;
+
+		int nonEqual = expected.length ^ supplied.length;
+
+		for (int i = 0; i != len; i++)
+		{
+			nonEqual |= (expected[i] ^ supplied[i]);
+		}
+		for (int i = len; i < supplied.length; i++)
+		{
+			//noinspection PointlessBitwiseExpression
+			nonEqual |= (supplied[i] ^ ~supplied[i]);
+		}
+
+		return nonEqual == 0;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		return constantTimeAreEqual(getChars(), ((WrappedString) o).getChars());
+	}
 }

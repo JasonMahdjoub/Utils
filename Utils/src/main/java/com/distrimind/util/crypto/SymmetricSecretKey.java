@@ -341,7 +341,10 @@ public class SymmetricSecretKey extends AbstractKey implements ISecretDecentrali
 			return true;
 		if (o instanceof SymmetricSecretKey) {
 			SymmetricSecretKey other = ((SymmetricSecretKey) o);
-			return Arrays.equals(secretKey, other.secretKey) && encryptionType == other.encryptionType && signatureType == other.signatureType;
+			boolean b=com.distrimind.bouncycastle.util.Arrays.constantTimeAreEqual(secretKey, other.secretKey);
+			b=encryptionType == other.encryptionType && b;
+			b=signatureType == other.signatureType && b;
+			return b;
 		}
 		return false;
 	}

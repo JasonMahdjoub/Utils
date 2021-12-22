@@ -53,7 +53,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * network.
  * 
  * @author Jason Mahdjoub
- * @version 2.0
+ * @version 2.1
  * @since Utils 1.3
  * 
  */
@@ -182,11 +182,13 @@ public class SecuredDecentralizedID extends AbstractDecentralizedID {
 				return false;
 			if (sid.idLongs.length != idLongs.length)
 				return false;
+			boolean r=true;
 			for (int i = 0; i < idLongs.length; i++) {
+				//noinspection IfStatementMissingBreakInLoop
 				if (idLongs[i] != sid.idLongs[i])
-					return false;
+					r=false;
 			}
-			return true;
+			return r;
 		}
 		return false;
 	}

@@ -820,7 +820,7 @@ public class EncryptionSignatureHashEncoder {
 				out.flush();
 				RandomInputStream in=new AggregatedRandomInputStreams(new RandomByteArrayInputStream(out.getBytes()), inputStream);
 				byte[] hash=subStreamParameters.partialHash(in, md).digest();
-				return Arrays.equals(hash, hashResultFromEncryptedStream.getHash());
+				return com.distrimind.bouncycastle.util.Arrays.constantTimeAreEqual(hash, hashResultFromEncryptedStream.getHash());
 			}
 			else {
 				out.writeLong(dataLen=cipher.getOutputSizeAfterEncryption(dataLen));
