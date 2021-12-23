@@ -15,4 +15,10 @@ public class TestCircularArrayList extends TestList{
 	protected <T> List<T> getListInstance(Collection<T> c) {
 		return new CircularArrayList<>(c);
 	}
+
+
+
+
+
+
 }

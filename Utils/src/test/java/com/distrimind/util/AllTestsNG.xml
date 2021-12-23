@@ -96,7 +96,7 @@
 			<class name="com.distrimind.util.TestList" />
 			<class name="com.distrimind.util.TestCircularArrayList" />
 			<class name="com.distrimind.util.TestCircularDeque" />
-			<class name="com.distrimind.util.TestDeque" />
+			<class name="com.distrimind.util.CircularDequeTest" />
 		</classes>
 	</test>
 

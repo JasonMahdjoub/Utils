@@ -1,12 +1,10 @@
 package com.distrimind.util;
 
 import org.hamcrest.collection.IsEmptyCollection;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -97,7 +95,74 @@ public abstract class TestList {
 		assertThat(actual, everyItem(lessThan(10)));
 
 	}
+	@Test
+	public void testAddRemoveInsert() {
 
+		int i=9;
+		for (int addFirst=0;addFirst<4;addFirst++)
+		{
+			for (int addLast=0;addLast<4;addLast++)
+			{
+				for (int addMiddle=0;addMiddle<4;addMiddle++)
+				{
+					for (int removeFirst=0;removeFirst<2;removeFirst++)
+					{
+						for (int removeLast=0;removeLast<2;removeLast++)
+						{
+							for (int removeMiddle=0;removeMiddle<2;removeMiddle++)
+							{
+								List<String> l=new ArrayList<>(Arrays.asList("1", "2", "3", "4", "5", "6", "7", "8"));
+								List<String> lTest=getListInstance(l);
+								Assert.assertEquals(lTest, l);
+								for (int j=0;j<addFirst;j++)
+								{
+									l.add(0, ""+i);
+									lTest.add(0, ""+i);
+									++i;
+								}
+								Assert.assertEquals(lTest, l);
+								for (int j=0;j<addLast;j++)
+								{
+									l.add( ""+i);
+									lTest.add( ""+i);
+									++i;
+								}
+								Assert.assertEquals(lTest, l);
+								for (int j=0;j<addMiddle;j++)
+								{
+									int p=(int)(Math.random()*((float)(l.size()-2))+1.0f);
+									l.add(p, ""+i);
+									lTest.add(p, ""+i);
+									++i;
+								}
+								Assert.assertEquals(lTest, l);
+								for (int j=0;j<removeFirst;j++)
+								{
+									String v=l.remove(0);
+									Assert.assertEquals(lTest.remove(0), v);
+								}
+								Assert.assertEquals(lTest, l);
+								for (int j=0;j<removeLast;j++)
+								{
+									String v=l.remove(l.size()-1);
+									Assert.assertEquals(lTest.remove(lTest.size()-1), v);
+								}
+								Assert.assertEquals(lTest, l);
+								for (int j=0;j<removeMiddle;j++)
+								{
+									int p=(int)(Math.random()*((float)(l.size()-2))+1.0f);
+									String v=l.remove(p);
+									Assert.assertEquals(lTest.remove(p), v);
+								}
+								Assert.assertEquals(lTest, l);
+							}
+						}
+					}
+				}
+			}
+		}
+
+	}
 	@Test
 	public void testAssertListObjects() {
 

@@ -94,6 +94,8 @@ public class CircularArrayList<E> extends AbstractList<E> implements List<E>, De
 		}
 		if (a!=null)
 		{
+			if (s==size)
+				return false;
 			array=a;
 			position=0;
 			size=s;
@@ -124,15 +126,17 @@ public class CircularArrayList<E> extends AbstractList<E> implements List<E>, De
 		this.size = i;
 		this.extensibleSize = extensibleSize;
 	}
-
+	private static final int MAX_ARRAY_SIZE=Integer.MAX_VALUE-8;
 	private void ensureCapacity(int nb)
 	{
 		int requestedCapacity=size+nb;
+
 		if (array.length<requestedCapacity)
 		{
-			if (extensibleSize)
+			if (extensibleSize && requestedCapacity<=MAX_ARRAY_SIZE)
 			{
-				Object[] o=new Object[requestedCapacity*2];
+
+				Object[] o=new Object[Math.min(requestedCapacity*2, MAX_ARRAY_SIZE)];
 				int s=array.length-position;
 				if (size<=s)
 					System.arraycopy(array, position, o, 0, size);
@@ -178,6 +182,8 @@ public class CircularArrayList<E> extends AbstractList<E> implements List<E>, De
 
 	@Override
 	public void addFirst(E e) {
+		if (e==null)
+			throw new NullPointerException();
 		ensureCapacity(1);
 		if (--position<0)
 			position+=array.length;
@@ -188,6 +194,8 @@ public class CircularArrayList<E> extends AbstractList<E> implements List<E>, De
 
 	@Override
 	public void addLast(E e) {
+		if (e==null)
+			throw new NullPointerException();
 		ensureCapacity(1);
 		array[(position+(size++))%array.length]=e;
 	}
@@ -227,7 +235,10 @@ public class CircularArrayList<E> extends AbstractList<E> implements List<E>, De
 		--size;
 		E r=(E)array[position];
 		array[position++]=null;
-		position%=array.length;
+		if (size==0)
+			position=0;
+		else
+			position%=array.length;
 		ensureSizeReduction();
 		return r;
 	}
@@ -355,7 +366,7 @@ public class CircularArrayList<E> extends AbstractList<E> implements List<E>, De
 
 			@Override
 			public boolean hasNext() {
-				return index>=0;
+				return index>0;
 			}
 
 			@Override
@@ -372,7 +383,7 @@ public class CircularArrayList<E> extends AbstractList<E> implements List<E>, De
 			@Override
 			public void remove() {
 				if( size==0)
-					throw new IllegalStateException();
+					throw new UnsupportedOperationException();
 				CircularArrayList.this.remove(index);
 			}
 		};
@@ -437,26 +448,17 @@ public class CircularArrayList<E> extends AbstractList<E> implements List<E>, De
 
 	@Override
 	public boolean containsAll(Collection<?> c) {
-		LinkedList<?> l=new LinkedList<>(c);
-		for (Object e : this)
-		{
-			for (Iterator<?> it=l.iterator();it.hasNext();) {
-				if (Objects.equals(e, it.next())) {
-					it.remove();
-					break;
-				}
-			}
-			if (l.size()==0)
-				return true;
-		}
-		return false;
+		for (Object o : c)
+			if (!this.contains(o))
+				return false;
+		return true;
 	}
 
 	@Override
 	public boolean addAll(Collection<? extends E> c) {
 		try {
 			ensureCapacity(c.size());
-			int i=size+position;
+			int i=(size+position)%array.length;
 			for (Object o : c)
 				array[(i++)%array.length] = o;
 			size+=c.size();
@@ -478,9 +480,10 @@ public class CircularArrayList<E> extends AbstractList<E> implements List<E>, De
 			ensureCapacity(c.size());
 			int end=c.size()+index;
 			size+=c.size();
-			for (int i=size;i>end;--i)
+
+			for (int i=size-1;i>=end;--i)
 			{
-				array[(i+position)%array.length]=array[(i-1+position)%array.length];
+				array[(i+position)%array.length]=array[(i+position-c.size())%array.length];
 			}
 			int i=index;
 			for (Object o : c )
@@ -501,15 +504,7 @@ public class CircularArrayList<E> extends AbstractList<E> implements List<E>, De
 
 	@Override
 	public boolean retainAll(Collection<?> c) {
-		boolean changed=false;
-		for (Iterator<E> it=iterator();it.hasNext();)
-		{
-			if (!c.contains(it.next())) {
-				it.remove();
-				changed=true;
-			}
-		}
-		return changed;
+		return removeIf(o -> !c.contains(o));
 	}
 
 	@Override
@@ -550,11 +545,12 @@ public class CircularArrayList<E> extends AbstractList<E> implements List<E>, De
 			throw new IllegalArgumentException();
 		ensureCapacity(1);
 
-		size+=1;
+
 		for (int i=size;i>index;--i)
 		{
 			array[(i+position)%array.length]=array[(i-1+position)%array.length];
 		}
+		size+=1;
 
 		array[(index+position)%array.length]=element;
 	}
@@ -581,16 +577,18 @@ public class CircularArrayList<E> extends AbstractList<E> implements List<E>, De
 			int p = (index + position) % array.length;
 			res = (E) array[p];
 			int s = array.length - p;
-			if (size <= s) {
-				System.arraycopy(array, p + 1, array, p, size - 1);
+			int l=size-index;
+			if (l <= s) {
+				s=p+l-1;
+				if (s - p >= 0) System.arraycopy(array, p + 1, array, p, s - p);
 			} else {
-				System.arraycopy(array, p + 1, array, p, s - 1);
+				s=p+s-1;
+				if (s - p >= 0) System.arraycopy(array, p + 1, array, p, s - p);
 				array[array.length - 1] = array[0];
-				s = size - s - 1;
-				if (s > 0)
-					System.arraycopy(array, 1, array, 0, s);
-				array[s] = null;
+				s=size-(array.length - p)-1;
+				if (s >= 0) System.arraycopy(array, 1, array, 0, s);
 			}
+			array[s]=null;
 
 		}
 		--size;
@@ -613,7 +611,7 @@ public class CircularArrayList<E> extends AbstractList<E> implements List<E>, De
 
 	@Override
 	public int lastIndexOf(Object o) {
-		for (int i=0;i<size;i++)
+		for (int i=size-1;i>=0;i--)
 		{
 			Object e=array[(i+position)%array.length];
 			if (Objects.equals(e, o))
@@ -710,7 +708,7 @@ public class CircularArrayList<E> extends AbstractList<E> implements List<E>, De
 		@Override
 		public void remove() {
 			if( size==0)
-				throw new IllegalStateException();
+				throw new UnsupportedOperationException();
 			CircularArrayList.this.remove(cur);
 			if (nextCalled)
 			{
@@ -740,6 +738,10 @@ public class CircularArrayList<E> extends AbstractList<E> implements List<E>, De
 
 	@Override
 	public CircularArrayList<E> subList(int fromIndex, int toIndex) {
+		if (fromIndex<0 || fromIndex>=size)
+			throw new IllegalArgumentException();
+		if (toIndex<fromIndex || toIndex>size)
+			throw new IllegalArgumentException();
 		CircularArrayList<E> list=new CircularArrayList<>(baseSize, extensibleSize);
 		for (int i=fromIndex;i<toIndex;i++)
 			list.add((E)array[(i+position)%array.length]);
