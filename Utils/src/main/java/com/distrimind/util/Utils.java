@@ -68,6 +68,10 @@ public class Utils {
 			VERSION.addCreator(new Person("mahdjoub", "jason"))
 					.addDeveloper(new PersonDeveloper("mahdjoub", "jason", "2016-01-04"))
 					.addDescription(
+							new Description((short)5, (short)21, (short)8, Version.Type.STABLE, (short)0, "2022-01-13")
+									.addItem(NEW_FEATURE, "Add function MessageDigestType.isSecuredForSignature().")
+					)
+					.addDescription(
 							new Description((short)5, (short)21, (short)7, Version.Type.STABLE, (short)0, "2021-12-22")
 									.addItem(BUG_FIX, "Fix issues with CircularArrayList.")
 					)

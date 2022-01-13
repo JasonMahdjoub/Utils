@@ -41,7 +41,6 @@ import com.distrimind.util.io.*;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
-import java.util.Arrays;
 
 /**
  * @author Jason Mahdjoub
@@ -53,7 +52,7 @@ public class EncryptionSignatureHashEncoder {
 
 	public static long getMaximumOutputLengthWhateverParameters(long inputSizeInBytes)
 	{
-		return SymmetricEncryptionType.getMaxOutputSizeInBytesAfterEncryption(inputSizeInBytes)+ SymmetricAuthenticatedSignatureType.MAX_SYMMETRIC_SIGNATURE_SIZE+HybridASymmetricAuthenticatedSignatureType.MAX_HYBRID_ASYMMETRIC_SIGNATURE_SIZE+MessageDigestType.MAX_HASH_LENGTH;
+		return SymmetricEncryptionType.getMaxOutputSizeInBytesAfterEncryption(inputSizeInBytes)+ SymmetricAuthenticatedSignatureType.MAX_SYMMETRIC_SIGNATURE_SIZE+HybridASymmetricAuthenticatedSignatureType.MAX_HYBRID_ASYMMETRIC_SIGNATURE_SIZE+MessageDigestType.MAX_HASH_LENGTH_IN_BYTES;
 	}
 
 	static final MessageDigestType defaultMessageType=MessageDigestType.SHA2_256;
@@ -748,7 +747,7 @@ public class EncryptionSignatureHashEncoder {
 					hash=digest.digest();
 					originalOutputStream.writeBytesArray(signature, false, ASymmetricAuthenticatedSignatureType.MAX_ASYMMETRIC_SIGNATURE_SIZE);
 				}
-				originalOutputStream.writeBytesArray(hash, false, MessageDigestType.MAX_HASH_LENGTH);
+				originalOutputStream.writeBytesArray(hash, false, MessageDigestType.MAX_HASH_LENGTH_IN_BYTES);
 			} else if (symmetricSigner!=null)
 			{
 				if (lenBuffer<=headSizeMinusOne)
@@ -885,7 +884,7 @@ public class EncryptionSignatureHashEncoder {
 		}
 		if (digest!=null || (asymmetricSigner!=null && symmetricSigner!=null))
 		{
-			res+=SerializationTools.getSizeCoderSize(MessageDigestType.MAX_HASH_LENGTH);
+			res+=SerializationTools.getSizeCoderSize(MessageDigestType.MAX_HASH_LENGTH_IN_BYTES);
 			if (digest==null) {
 				res+=defaultMessageType.getDigestLengthInBits() / 8;
 			}

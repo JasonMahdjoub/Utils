@@ -791,7 +791,7 @@ public class EncryptionSignatureHashDecoder {
 					digest.update(asymSign);
 					hash3=digest.digest();
 				}
-				byte[] hashToCheck=inputStream.readBytesArray(false, MessageDigestType.MAX_HASH_LENGTH);
+				byte[] hashToCheck=inputStream.readBytesArray(false, MessageDigestType.MAX_HASH_LENGTH_IN_BYTES);
 				if (positionOfRandomInputStreamAfterDecoding!=null)
 					positionOfRandomInputStreamAfterDecoding.set(originalInputStream.currentPosition());
 				if (!com.distrimind.bouncycastle.util.Arrays.constantTimeAreEqual(hash3, hashToCheck))
@@ -930,7 +930,7 @@ public class EncryptionSignatureHashDecoder {
 					digest.update(asymSign);
 					hash3=digest.digest();
 				}
-				byte[] hashToCheck=inputStream.readBytesArray(false, MessageDigestType.MAX_HASH_LENGTH);
+				byte[] hashToCheck=inputStream.readBytesArray(false, MessageDigestType.MAX_HASH_LENGTH_IN_BYTES);
 				if (!com.distrimind.bouncycastle.util.Arrays.constantTimeAreEqual(hash3, hashToCheck))
 					return Integrity.FAIL;
 
@@ -1052,7 +1052,7 @@ public class EncryptionSignatureHashDecoder {
 					digest.update(asymSign);
 					hash3=digest.digest();
 				}
-				byte[] hashToCheck=inputStream.readBytesArray(false, MessageDigestType.MAX_HASH_LENGTH);
+				byte[] hashToCheck=inputStream.readBytesArray(false, MessageDigestType.MAX_HASH_LENGTH_IN_BYTES);
 				if (!com.distrimind.bouncycastle.util.Arrays.constantTimeAreEqual(hash3, hashToCheck))
 					return Integrity.FAIL;
 
@@ -1144,7 +1144,7 @@ public class EncryptionSignatureHashDecoder {
 		}
 		if (digest!=null || (symmetricChecker!=null && asymmetricChecker!=null))
 		{
-			res+=SerializationTools.getSizeCoderSize(MessageDigestType.MAX_HASH_LENGTH);
+			res+=SerializationTools.getSizeCoderSize(MessageDigestType.MAX_HASH_LENGTH_IN_BYTES);
 			if (digest==null) {
 				res+=EncryptionSignatureHashEncoder.defaultMessageType.getDigestLengthInBits() / 8;
 			}

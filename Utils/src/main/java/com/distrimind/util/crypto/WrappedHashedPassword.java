@@ -14,7 +14,7 @@ import java.io.IOException;
  * @since Utils 5.10.0
  */
 public final class WrappedHashedPassword extends WrappedSecretData implements SecureExternalizable {
-	private final static int MAX_SIZE_IN_BYTES_OF_HASHED_PASSWORD= MessageDigestType.MAX_HASH_LENGTH;
+	private final static int MAX_SIZE_IN_BYTES_OF_HASHED_PASSWORD= MessageDigestType.MAX_HASH_LENGTH_IN_BYTES;
 	public final static int MAX_SIZE_IN_BYTES_OF_DATA= MAX_SIZE_IN_BYTES_OF_HASHED_PASSWORD+10;
 	protected WrappedHashedPassword() {
 	}
