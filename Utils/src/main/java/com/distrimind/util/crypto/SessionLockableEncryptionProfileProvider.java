@@ -41,7 +41,7 @@ public final class SessionLockableEncryptionProfileProvider implements Encryptio
 
 
 	@Override
-	public final IASymmetricPrivateKey getPrivateKeyForSignature(short keyID) throws IOException
+	public IASymmetricPrivateKey getPrivateKeyForSignature(short keyID) throws IOException
 	{
 		checkProviderLocked();
 		return encryptionProfileProvider.getPrivateKeyForSignature(keyID);
@@ -49,14 +49,14 @@ public final class SessionLockableEncryptionProfileProvider implements Encryptio
 
 
 	@Override
-	public final SymmetricSecretKey getSecretKeyForSignature(short keyID, boolean duringDecryptionPhase) throws IOException
+	public SymmetricSecretKey getSecretKeyForSignature(short keyID, boolean duringDecryptionPhase) throws IOException
 	{
 		if (!duringDecryptionPhase)
 			checkProviderLocked();
 		return encryptionProfileProvider.getSecretKeyForSignature(keyID, duringDecryptionPhase);
 	}
 	@Override
-	public final SymmetricSecretKey getSecretKeyForEncryption(short keyID, boolean duringDecryptionPhase) throws IOException
+	public SymmetricSecretKey getSecretKeyForEncryption(short keyID, boolean duringDecryptionPhase) throws IOException
 	{
 		if (!duringDecryptionPhase)
 			checkProviderLocked();
@@ -89,24 +89,24 @@ public final class SessionLockableEncryptionProfileProvider implements Encryptio
 	}
 
 	@Override
-	public final void unlock() {
+	public void unlock() {
 		encryptionProfileProvider.unlock();
 		lastUnlockTimeUTCInMs=System.currentTimeMillis();
 	}
 
 	@Override
-	public final boolean isLockable() {
+	public boolean isLockable() {
 		return true;
 	}
 
 
 	@Override
-	public final boolean isProviderLocked() {
+	public boolean isProviderLocked() {
 		return System.currentTimeMillis() - unlockDurationInMs >= lastUnlockTimeUTCInMs;
 	}
 
 	@Override
-	public final void lock()
+	public void lock()
 	{
 		encryptionProfileProvider.lock();
 		lastUnlockTimeUTCInMs=Long.MIN_VALUE;
