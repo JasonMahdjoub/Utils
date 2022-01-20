@@ -68,8 +68,10 @@ public class Utils {
 			VERSION.addCreator(new Person("mahdjoub", "jason"))
 					.addDeveloper(new PersonDeveloper("mahdjoub", "jason", "2016-01-04"))
 					.addDescription(
-							new Description((short)5, (short)21, (short)8, Version.Type.STABLE, (short)0, "2022-01-13")
+							new Description((short)5, (short)22, (short)0, Version.Type.STABLE, (short)0, "2022-01-13")
 									.addItem(NEW_FEATURE, "Add function MessageDigestType.isSecuredForSignature().")
+									.addItem(NEW_FEATURE, "Add hybrid asymmetric key wrappers.")
+									.addItem(NEW_FEATURE, "Add max variables into ASymmetricKeyWrapperType and into SymmetricKeyWrapperType class that gives max size in byte of wrapped keys.")
 					)
 					.addDescription(
 							new Description((short)5, (short)21, (short)7, Version.Type.STABLE, (short)0, "2021-12-22")

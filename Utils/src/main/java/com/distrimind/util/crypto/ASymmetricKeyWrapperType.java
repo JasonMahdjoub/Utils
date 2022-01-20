@@ -39,6 +39,7 @@ import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.MGF1ParameterSpec;
 import java.util.Arrays;
+import java.util.Random;
 
 import javax.crypto.*;
 import javax.crypto.spec.OAEPParameterSpec;
@@ -81,14 +82,30 @@ public enum ASymmetricKeyWrapperType {
 	GNU_RSA_OAEP_SHA2_512("RSA/NONE/OAEPPadding",CodeProvider.GNU_CRYPTO, false, "SHA-512", FipsSHS.Algorithm.SHA512, false),
 	BC_FIPS_RSA_OAEP_WITH_SHA2_384("RSA/NONE/OAEPPadding",CodeProvider.BCFIPS, false, "SHA-384", FipsSHS.Algorithm.SHA384, false),
 	BC_FIPS_RSA_OAEP_WITH_PARAMETERS_SHA2_384("RSA/NONE/OAEPPadding",CodeProvider.BCFIPS, true, "SHA-384", FipsSHS.Algorithm.SHA384, false),
-	BC_FIPS_RSA_OAEP_SHA2_512("RSA/NONE/OAEPPadding",CodeProvider.BCFIPS, false, "SHA-384", FipsSHS.Algorithm.SHA512, false),
+	BC_FIPS_RSA_OAEP_WITH_SHA2_512("RSA/NONE/OAEPPadding",CodeProvider.BCFIPS, false, "SHA-384", FipsSHS.Algorithm.SHA512, false),
 	BC_FIPS_RSA_OAEP_WITH_PARAMETERS_SHA2_512("RSA/NONE/OAEPPadding",CodeProvider.BCFIPS, true, "SHA-384", FipsSHS.Algorithm.SHA512, false),
 	BC_FIPS_RSA_OAEP_WITH_SHA3_384("RSA/NONE/OAEPPadding",CodeProvider.BCFIPS, false, "SHA-384", FipsSHS.Algorithm.SHA3_384, false),
 	BC_FIPS_RSA_OAEP_WITH_PARAMETERS_SHA3_384("RSA/NONE/OAEPPadding",CodeProvider.BCFIPS, true, "SHA-384", FipsSHS.Algorithm.SHA3_384, false),
-	BC_FIPS_RSA_OAEP_SHA3_512("RSA/NONE/OAEPPadding",CodeProvider.BCFIPS, false, "SHA-384", FipsSHS.Algorithm.SHA3_512, false),
+	BC_FIPS_RSA_OAEP_WITH_SHA3_512("RSA/NONE/OAEPPadding",CodeProvider.BCFIPS, false, "SHA-384", FipsSHS.Algorithm.SHA3_512, false),
 	BC_FIPS_RSA_OAEP_WITH_PARAMETERS_SHA3_512("RSA/NONE/OAEPPadding",CodeProvider.BCFIPS, true, "SHA-384", FipsSHS.Algorithm.SHA3_512, false),
 	BCPQC_MCELIECE_FUJISAKI_CCA2_SHA256("McElieceFujisaki",CodeProvider.BCPQC, false, "SHA-256", FipsSHS.Algorithm.SHA256, true),
 	BCPQC_MCELIECE_POINTCHEVAL_CCA2_SHA256("McEliecePointCheval",CodeProvider.BCPQC, false, "SHA-256", FipsSHS.Algorithm.SHA256, true),
+	HYBRID_BCPQC_MCELIECE_FUJISAKI_CCA2_SHA256_AND_BC_FIPS_RSA_OAEP_WITH_SHA2_384(BCPQC_MCELIECE_FUJISAKI_CCA2_SHA256, BC_FIPS_RSA_OAEP_WITH_SHA2_384),
+	HYBRID_BCPQC_MCELIECE_FUJISAKI_CCA2_SHA256_AND_BC_FIPS_RSA_OAEP_WITH_PARAMETERS_SHA2_384(BCPQC_MCELIECE_FUJISAKI_CCA2_SHA256, BC_FIPS_RSA_OAEP_WITH_PARAMETERS_SHA2_384),
+	HYBRID_BCPQC_MCELIECE_FUJISAKI_CCA2_SHA256_AND_BC_FIPS_RSA_OAEP_WITH_SHA2_512(BCPQC_MCELIECE_FUJISAKI_CCA2_SHA256, BC_FIPS_RSA_OAEP_WITH_SHA2_512),
+	HYBRID_BCPQC_MCELIECE_FUJISAKI_CCA2_SHA256_AND_BC_FIPS_RSA_OAEP_WITH_PARAMETERS_SHA2_512(BCPQC_MCELIECE_FUJISAKI_CCA2_SHA256, BC_FIPS_RSA_OAEP_WITH_PARAMETERS_SHA2_512),
+	HYBRID_BCPQC_MCELIECE_FUJISAKI_CCA2_SHA256_AND_BC_FIPS_RSA_OAEP_WITH_SHA3_384(BCPQC_MCELIECE_FUJISAKI_CCA2_SHA256, BC_FIPS_RSA_OAEP_WITH_SHA3_384),
+	HYBRID_BCPQC_MCELIECE_FUJISAKI_CCA2_SHA256_AND_BC_FIPS_RSA_OAEP_WITH_PARAMETERS_SHA3_384(BCPQC_MCELIECE_FUJISAKI_CCA2_SHA256, BC_FIPS_RSA_OAEP_WITH_PARAMETERS_SHA3_384),
+	HYBRID_BCPQC_MCELIECE_FUJISAKI_CCA2_SHA256_AND_BC_FIPS_RSA_OAEP_WITH_SHA3_512(BCPQC_MCELIECE_FUJISAKI_CCA2_SHA256, BC_FIPS_RSA_OAEP_WITH_SHA3_512),
+	HYBRID_BCPQC_MCELIECE_FUJISAKI_CCA2_SHA256_AND_BC_FIPS_RSA_OAEP_WITH_PARAMETERS_SHA3_512(BCPQC_MCELIECE_FUJISAKI_CCA2_SHA256, BC_FIPS_RSA_OAEP_WITH_PARAMETERS_SHA3_512),
+	HYBRID_BCPQC_MCELIECE_POINTCHEVAL_CCA2_SHA256_AND_BC_FIPS_RSA_OAEP_WITH_SHA2_384(BCPQC_MCELIECE_POINTCHEVAL_CCA2_SHA256, BC_FIPS_RSA_OAEP_WITH_SHA2_384),
+	HYBRID_BCPQC_MCELIECE_POINTCHEVAL_CCA2_SHA256_AND_BC_FIPS_RSA_OAEP_WITH_PARAMETERS_SHA2_384(BCPQC_MCELIECE_POINTCHEVAL_CCA2_SHA256, BC_FIPS_RSA_OAEP_WITH_PARAMETERS_SHA2_384),
+	HYBRID_BCPQC_MCELIECE_POINTCHEVAL_CCA2_SHA256_AND_BC_FIPS_RSA_OAEP_WITH_SHA2_512(BCPQC_MCELIECE_POINTCHEVAL_CCA2_SHA256, BC_FIPS_RSA_OAEP_WITH_SHA2_512),
+	HYBRID_BCPQC_MCELIECE_POINTCHEVAL_CCA2_SHA256_AND_BC_FIPS_RSA_OAEP_WITH_PARAMETERS_SHA2_512(BCPQC_MCELIECE_POINTCHEVAL_CCA2_SHA256, BC_FIPS_RSA_OAEP_WITH_PARAMETERS_SHA2_512),
+	HYBRID_BCPQC_MCELIECE_POINTCHEVAL_CCA2_SHA256_AND_BC_FIPS_RSA_OAEP_WITH_SHA3_384(BCPQC_MCELIECE_POINTCHEVAL_CCA2_SHA256, BC_FIPS_RSA_OAEP_WITH_SHA3_384),
+	HYBRID_BCPQC_MCELIECE_POINTCHEVAL_CCA2_SHA256_AND_BC_FIPS_RSA_OAEP_WITH_PARAMETERS_SHA3_384(BCPQC_MCELIECE_POINTCHEVAL_CCA2_SHA256, BC_FIPS_RSA_OAEP_WITH_PARAMETERS_SHA3_384),
+	HYBRID_BCPQC_MCELIECE_POINTCHEVAL_CCA2_SHA256_AND_BC_FIPS_RSA_OAEP_WITH_SHA3_512(BCPQC_MCELIECE_POINTCHEVAL_CCA2_SHA256, BC_FIPS_RSA_OAEP_WITH_SHA3_512),
+	HYBRID_BCPQC_MCELIECE_POINTCHEVAL_CCA2_SHA256_AND_BC_FIPS_RSA_OAEP_WITH_PARAMETERS_SHA3_512(BCPQC_MCELIECE_POINTCHEVAL_CCA2_SHA256, BC_FIPS_RSA_OAEP_WITH_PARAMETERS_SHA3_512),
 	//BC_FIPS_RSA_KTS_KTM("RSA-KTS-KEM-KWS",CodeProvider.BCFIPS, false),
 	DEFAULT(BC_FIPS_RSA_OAEP_WITH_PARAMETERS_SHA3_384);
 	
@@ -100,7 +117,8 @@ public enum ASymmetricKeyWrapperType {
 	private final String shaAlgorithm;
 	private final FipsDigestAlgorithm bcShaDigestAlgorithm;
 	private final boolean pqc;
-	
+	private final ASymmetricKeyWrapperType nonPQCWrapper, pqcWrapper;
+
 	public boolean equals(ASymmetricKeyWrapperType type)
 	{
 		if (type==null)
@@ -108,7 +126,16 @@ public enum ASymmetricKeyWrapperType {
 		//noinspection StringEquality
 		return type.algorithmName==this.algorithmName && type.provider==this.provider && type.shaAlgorithm==this.shaAlgorithm;
 	}
-
+	ASymmetricKeyWrapperType(ASymmetricKeyWrapperType nonPQCWrapper, ASymmetricKeyWrapperType pqcWrapper) {
+		this.algorithmName = "";
+		this.provider = null;
+		this.withParameters=false;
+		this.shaAlgorithm="";
+		this.bcShaDigestAlgorithm=null;
+		this.pqc=true;
+		this.nonPQCWrapper=nonPQCWrapper;
+		this.pqcWrapper=pqcWrapper;
+	}
 
 	ASymmetricKeyWrapperType(String algorithmName, CodeProvider provider, boolean withParameters, String shaAlgorithm, FipsDigestAlgorithm bcShaDigestAlgorithm, boolean pqc) {
 		this.algorithmName = algorithmName;
@@ -117,13 +144,25 @@ public enum ASymmetricKeyWrapperType {
 		this.shaAlgorithm=shaAlgorithm;
 		this.bcShaDigestAlgorithm=bcShaDigestAlgorithm;
 		this.pqc=pqc;
+		this.nonPQCWrapper=null;
+		this.pqcWrapper=null;
 	}
 	
 	ASymmetricKeyWrapperType(ASymmetricKeyWrapperType other)
 	{
-		this(other.algorithmName, other.provider, other.withParameters, other.shaAlgorithm, other.bcShaDigestAlgorithm, other.pqc);
+		this.algorithmName = other.algorithmName;
+		this.provider = other.provider;
+		this.withParameters=other.withParameters;
+		this.shaAlgorithm=other.shaAlgorithm;
+		this.bcShaDigestAlgorithm=other.bcShaDigestAlgorithm;
+		this.pqc=other.pqc;
+		this.nonPQCWrapper=other.nonPQCWrapper;
+		this.pqcWrapper=other.pqcWrapper;
 	}
-	
+	public boolean isHybrid()
+	{
+		return nonPQCWrapper!=null && pqcWrapper!=null;
+	}
 	public CodeProvider getCodeProvider()
 	{
 		return provider;
@@ -133,7 +172,13 @@ public enum ASymmetricKeyWrapperType {
 		return algorithmName;
 	}
 
+	public ASymmetricKeyWrapperType getNonPQCWrapper() {
+		return nonPQCWrapper;
+	}
 
+	public ASymmetricKeyWrapperType getPqcWrapper() {
+		return pqcWrapper;
+	}
 
 	static byte[] wrapKeyWithMetaData(byte[] wrappedKey, SymmetricSecretKey keyToWrap)
 	{
@@ -209,19 +254,25 @@ public enum ASymmetricKeyWrapperType {
 
 		try {
 			if (ipublicKey instanceof ASymmetricPublicKey) {
+				if (isHybrid())
+					throw new IllegalArgumentException();
 				ASymmetricPublicKey publicKey = (ASymmetricPublicKey) ipublicKey;
+				if (publicKey.getAuthenticatedSignatureAlgorithmType() != null)
+					throw new IllegalArgumentException();
 				CodeProvider.ensureProviderLoaded(provider);
 				if (name().startsWith("BCPQC_MCELIECE_")) {
+					if (!publicKey.getEncryptionAlgorithmType().name().equals(name()))
+						throw new IllegalArgumentException(publicKey.getEncryptionAlgorithmType().toString()+" ; "+name());
 					ClientASymmetricEncryptionAlgorithm client = new ClientASymmetricEncryptionAlgorithm(random, publicKey);
 					WrappedSecretData wsd=keyToWrap.encode();
 					return new WrappedEncryptedSymmetricSecretKey(client.encode(wsd.getBytes()));
 				} else {
-
-					if ((publicKey.getAuthenticatedSignatureAlgorithmType() != null && ((provider == CodeProvider.GNU_CRYPTO) != (publicKey.getAuthenticatedSignatureAlgorithmType().getCodeProviderForSignature() == CodeProvider.GNU_CRYPTO)))
-							|| (publicKey.getEncryptionAlgorithmType() != null && ((provider == CodeProvider.GNU_CRYPTO) != (publicKey.getEncryptionAlgorithmType().getCodeProviderForEncryption() == CodeProvider.GNU_CRYPTO)))
+					if ( (publicKey.getEncryptionAlgorithmType() != null && ((provider == CodeProvider.GNU_CRYPTO) != (publicKey.getEncryptionAlgorithmType().getCodeProviderForEncryption() == CodeProvider.GNU_CRYPTO)))
 							|| (keyToWrap.getAuthenticatedSignatureAlgorithmType() != null && (provider == CodeProvider.GNU_CRYPTO) != (keyToWrap.getAuthenticatedSignatureAlgorithmType().getCodeProviderForSignature() == CodeProvider.GNU_CRYPTO))
 							|| (keyToWrap.getEncryptionAlgorithmType() != null && (provider == CodeProvider.GNU_CRYPTO) != (keyToWrap.getEncryptionAlgorithmType().getCodeProviderForEncryption() == CodeProvider.GNU_CRYPTO)))
 						throw new IllegalArgumentException("The keys must come from the same providers");
+					if (!algorithmName.contains(publicKey.getEncryptionAlgorithmType().getAlgorithmName()))
+						throw new IllegalArgumentException("The key must be compatible with algorithm " + algorithmName);
 					if (provider.equals(CodeProvider.GNU_CRYPTO)) {
 						Object c = GnuFunctions.getCipherAlgorithm(algorithmName);
 						GnuFunctions.cipherInitWrapMode(c, publicKey.toGnuKey(), random.getGnuSecureRandom());
@@ -310,8 +361,13 @@ public enum ASymmetricKeyWrapperType {
 					}
 				}
 			} else {
+				if (!isHybrid())
+					throw new IllegalArgumentException();
+
 				HybridASymmetricPublicKey publicKey = (HybridASymmetricPublicKey) ipublicKey;
-				WrappedEncryptedSymmetricSecretKey nonPQCWrap = wrapKey(random, publicKey.getNonPQCPublicKey(), keyToWrap);
+				if (!publicKey.getPQCPublicKey().getEncryptionAlgorithmType().name().equals(getPqcWrapper().name()))
+					throw new IllegalArgumentException();
+				WrappedEncryptedSymmetricSecretKey nonPQCWrap = nonPQCWrapper.wrapKey(random, publicKey.getNonPQCPublicKey(), keyToWrap);
 				ClientASymmetricEncryptionAlgorithm client = new ClientASymmetricEncryptionAlgorithm(random, publicKey.getPQCPublicKey());
 				return new WrappedEncryptedSymmetricSecretKey(client.encode(nonPQCWrap.getBytes()));
 			}
@@ -324,31 +380,46 @@ public enum ASymmetricKeyWrapperType {
 	SymmetricSecretKey unwrapKey(IASymmetricPrivateKey iPrivateKey, WrappedEncryptedSymmetricSecretKey keyToUnwrap) throws IOException
 	{
 		try {
-			if (name().startsWith("BCPQC_MCELIECE_")) {
+			if (iPrivateKey instanceof ASymmetricPrivateKey)
+			{
+				if (isHybrid())
+					throw new IllegalArgumentException();
 				ASymmetricPrivateKey privateKey = (ASymmetricPrivateKey) iPrivateKey;
-				ServerASymmetricEncryptionAlgorithm server = new ServerASymmetricEncryptionAlgorithm(privateKey);
-				AbstractKey res = AbstractKey.decode(server.decode(keyToUnwrap.getBytes()));
-				if (res instanceof SymmetricSecretKey)
-					return (SymmetricSecretKey) res;
-				else
-					throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
-			} else if (iPrivateKey instanceof HybridASymmetricPrivateKey) {
-				HybridASymmetricPrivateKey privateKey = (HybridASymmetricPrivateKey) iPrivateKey;
-				ServerASymmetricEncryptionAlgorithm server = new ServerASymmetricEncryptionAlgorithm(privateKey.getPQCPrivateKey());
-				byte[] b = server.decode(keyToUnwrap.getBytes());
-				return unwrapKey(privateKey.getNonPQCPrivateKey(), new WrappedEncryptedSymmetricSecretKey(b));
+				if (name().startsWith("BCPQC_MCELIECE_")) {
 
-			} else if (isSignatureFromMetaData(keyToUnwrap)) {
-				byte[] ktu = getWrappedKeyFromMetaData(keyToUnwrap);
-				SymmetricSecretKey res = unwrapKey((ASymmetricPrivateKey) iPrivateKey, ktu, null, getSignatureTypeFromMetaData(keyToUnwrap), getKeySizeFromMetaData(keyToUnwrap));
-				Arrays.fill(ktu, (byte)0);
-				return res;
+					if (!privateKey.getEncryptionAlgorithmType().name().equals(name()))
+						throw new IllegalArgumentException();
+					ServerASymmetricEncryptionAlgorithm server = new ServerASymmetricEncryptionAlgorithm(privateKey);
+					AbstractKey res = AbstractKey.decode(server.decode(keyToUnwrap.getBytes()));
+					if (res instanceof SymmetricSecretKey)
+						return (SymmetricSecretKey) res;
+					else
+						throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
+				} else {
+					if (!algorithmName.contains(privateKey.getEncryptionAlgorithmType().getAlgorithmName()))
+						throw new IllegalArgumentException("The key must be compatible with algorithm " + algorithmName);
+					if (isSignatureFromMetaData(keyToUnwrap)) {
+						byte[] ktu = getWrappedKeyFromMetaData(keyToUnwrap);
+						SymmetricSecretKey res = unwrapKey(privateKey, ktu, null, getSignatureTypeFromMetaData(keyToUnwrap), getKeySizeFromMetaData(keyToUnwrap));
+						Arrays.fill(ktu, (byte) 0);
+						return res;
+					} else {
+						byte[] ktu = getWrappedKeyFromMetaData(keyToUnwrap);
+						SymmetricSecretKey res = unwrapKey(privateKey, ktu, getEncryptionTypeFromMetaData(keyToUnwrap), null, getKeySizeFromMetaData(keyToUnwrap));
+						Arrays.fill(ktu, (byte) 0);
+						return res;
+					}
+				}
 			}
 			else {
-				byte[] ktu = getWrappedKeyFromMetaData(keyToUnwrap);
-				SymmetricSecretKey res = unwrapKey((ASymmetricPrivateKey) iPrivateKey, ktu, getEncryptionTypeFromMetaData(keyToUnwrap), null, getKeySizeFromMetaData(keyToUnwrap));
-				Arrays.fill(ktu, (byte)0);
-				return res;
+				if (!isHybrid())
+					throw new IllegalArgumentException();
+				HybridASymmetricPrivateKey privateKey = (HybridASymmetricPrivateKey) iPrivateKey;
+				if (!privateKey.getPQCPrivateKey().getEncryptionAlgorithmType().name().equals(getPqcWrapper().name()))
+					throw new IllegalArgumentException();
+				ServerASymmetricEncryptionAlgorithm server = new ServerASymmetricEncryptionAlgorithm(privateKey.getPQCPrivateKey());
+				byte[] b = server.decode(keyToUnwrap.getBytes());
+				return getNonPQCWrapper().unwrapKey(privateKey.getNonPQCPrivateKey(), new WrappedEncryptedSymmetricSecretKey(b));
 			}
 		} catch (InvalidKeyException e) {
 			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, e);
@@ -454,5 +525,64 @@ public enum ASymmetricKeyWrapperType {
 	{
 		return getCodeProvider()!=CodeProvider.BCPQC;
 	}
+
+	public static int getOutputSizeAfterEncryption(ASymmetricPublicKey publicKey, ASymmetricKeyWrapperType type, int size) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
+		WrappedData encodedKey = new WrappedData(new byte[size]);
+		Random r=new Random(System.currentTimeMillis());
+		r.nextBytes(encodedKey.getBytes());
+		if (type.name().startsWith("BCPQC_MCELIECE_")) {
+			ClientASymmetricEncryptionAlgorithm client = new ClientASymmetricEncryptionAlgorithm(SecureRandomType.DEFAULT.getInstance(null), publicKey);
+			return client.encode(encodedKey.getBytes()).length;
+		}
+		AsymmetricRSAPublicKey bcPK = (AsymmetricRSAPublicKey) publicKey.toBouncyCastleKey();
+
+
+
+		OAEPParameters OAEPParams = type.getOAEPParams(PSource.PSpecified.DEFAULT.getValue());
+		FipsRSA.KeyWrapOperatorFactory wrapFact = new FipsRSA.KeyWrapOperatorFactory();
+		KeyWrapperUsingSecureRandom<FipsRSA.WrapParameters> wrapper =
+				wrapFact.createKeyWrapper(bcPK, OAEPParams)
+						.withSecureRandom(SecureRandomType.DEFAULT.getInstance(null));
+
+
+		byte[] wrapedKey = wrapper.wrap(encodedKey.getBytes(), 0, encodedKey.getBytes().length);
+		if (type.withParameters) {
+			return wrapedKey.length+2+SymmetricSecretKey.ENCODED_TYPE_SIZE+OAEPParams.getEncodingParams().length+2;
+		} else
+			return wrapedKey.length+2+SymmetricSecretKey.ENCODED_TYPE_SIZE;
+	}
+	public static void main(String []args) throws NoSuchAlgorithmException, NoSuchProviderException, IOException, InvalidKeySpecException {
+		ASymmetricKeyWrapperType pqctype=ASymmetricKeyWrapperType.BCPQC_MCELIECE_POINTCHEVAL_CCA2_SHA256;
+		ASymmetricKeyWrapperType nonpqctype=ASymmetricKeyWrapperType.BC_FIPS_RSA_OAEP_WITH_PARAMETERS_SHA2_512;
+		ASymmetricKeyPair pqckp=ASymmetricEncryptionType.BCPQC_MCELIECE_POINTCHEVAL_CCA2_SHA256.getKeyPairGenerator(SecureRandomType.DEFAULT.getInstance(null)).generateKeyPair();
+		ASymmetricKeyPair nonpqckp=ASymmetricEncryptionType.RSA_OAEPWithSHA512AndMGF1Padding.getKeyPairGenerator(SecureRandomType.DEFAULT.getInstance(null)).generateKeyPair();
+		System.out.println(getOutputSizeAfterEncryption(pqckp.getASymmetricPublicKey(), pqctype, 64));
+		System.out.println(getOutputSizeAfterEncryption(nonpqckp.getASymmetricPublicKey(), nonpqctype,64));
+		System.out.println(getOutputSizeAfterEncryption(pqckp.getASymmetricPublicKey(), pqctype,getOutputSizeAfterEncryption(nonpqckp.getASymmetricPublicKey(), nonpqctype,64)));
+
+		System.out.println("----------- "+HybridASymmetricPrivateKey.MAX_SIZE_IN_BYTES_OF_PRIVATE_KEY_WITHOUT_RSA_FOR_SIGNATURE);
+		System.out.println(getOutputSizeAfterEncryption(pqckp.getASymmetricPublicKey(), pqctype,HybridASymmetricPrivateKey.MAX_SIZE_IN_BYTES_OF_PRIVATE_KEY_WITHOUT_RSA_FOR_SIGNATURE));
+		System.out.println(getOutputSizeAfterEncryption(nonpqckp.getASymmetricPublicKey(), nonpqctype,HybridASymmetricPrivateKey.MAX_SIZE_IN_BYTES_OF_PRIVATE_KEY_WITHOUT_RSA_FOR_SIGNATURE));
+		System.out.println(getOutputSizeAfterEncryption(pqckp.getASymmetricPublicKey(), pqctype,getOutputSizeAfterEncryption(nonpqckp.getASymmetricPublicKey(), nonpqctype,HybridASymmetricPrivateKey.MAX_SIZE_IN_BYTES_OF_PRIVATE_KEY_WITHOUT_RSA_FOR_SIGNATURE)));
+
+		System.out.println("----------- "+ASymmetricPrivateKey.MAX_SIZE_IN_BYTES_OF_NON_PQC_NON_RSA_NON_HYBRID_PRIVATE_KEY_FOR_SIGNATURE);
+		System.out.println(getOutputSizeAfterEncryption(pqckp.getASymmetricPublicKey(), pqctype,ASymmetricPrivateKey.MAX_SIZE_IN_BYTES_OF_NON_PQC_NON_RSA_NON_HYBRID_PRIVATE_KEY_FOR_SIGNATURE));
+		System.out.println(getOutputSizeAfterEncryption(nonpqckp.getASymmetricPublicKey(), nonpqctype,ASymmetricPrivateKey.MAX_SIZE_IN_BYTES_OF_NON_PQC_NON_RSA_NON_HYBRID_PRIVATE_KEY_FOR_SIGNATURE));
+		System.out.println(getOutputSizeAfterEncryption(pqckp.getASymmetricPublicKey(), pqctype,getOutputSizeAfterEncryption(nonpqckp.getASymmetricPublicKey(), nonpqctype,ASymmetricPrivateKey.MAX_SIZE_IN_BYTES_OF_NON_PQC_NON_RSA_NON_HYBRID_PRIVATE_KEY_FOR_SIGNATURE)));
+
+
+	}
+
+	public static final int MAX_SIZE_IN_BYTES_OF_WRAPPED_SYMMETRIC_SECRET_KEY_WITH_ASYMMETRIC_NON_PQC_ENCRYPTION =768;
+	public static final int MAX_SIZE_IN_BYTES_OF_WRAPPED_SYMMETRIC_SECRET_KEY_WITH_ASYMMETRIC_PQC_ENCRYPTION =512;
+	public static final int MAX_SIZE_IN_BYTES_OF_WRAPPED_SYMMETRIC_SECRET_KEY_WITH_ASYMMETRIC_HYBRID_ENCRYPTION =1024;
+
+	public static final int MAX_SIZE_IN_BYTES_OF_WRAPPED_ASYMMETRIC_PRIVATE_KEY_WITHOUT_RSA_FOR_SIGNATURE_WITH_ASYMMETRIC_NON_PQC_ENCRYPTION =1024;
+	public static final int MAX_SIZE_IN_BYTES_OF_WRAPPED_ASYMMETRIC_PRIVATE_KEY_WITHOUT_RSA_FOR_SIGNATURE_WITH_ASYMMETRIC_PQC_ENCRYPTION =512;
+	public static final int MAX_SIZE_IN_BYTES_OF_WRAPPED_ASYMMETRIC_PRIVATE_KEY_WITHOUT_RSA_FOR_SIGNATURE_WITH_ASYMMETRIC_HYBRID_ENCRYPTION =1024;
+
+	public static final int MAX_SIZE_IN_BYTES_OF_WRAPPED_ASYMMETRIC_NON_PQC_NON_RSA_NON_HYBRID_PRIVATE_KEY_FOR_SIGNATURE_WITH_ASYMMETRIC_NON_PQC_ENCRYPTION =1024;
+	public static final int MAX_SIZE_IN_BYTES_OF_WRAPPED_ASYMMETRIC_NON_PQC_NON_RSA_NON_HYBRID_PRIVATE_KEY_FOR_SIGNATURE_WITH_ASYMMETRIC_PQC_ENCRYPTION =512;
+	public static final int MAX_SIZE_IN_BYTES_OF_WRAPPED_ASYMMETRIC_NON_PQC_NON_RSA_NON_HYBRID_PRIVATE_KEY_FOR_SIGNATURE_WITH_ASYMMETRIC_HYBRID_ENCRYPTION =1024;
 
 }

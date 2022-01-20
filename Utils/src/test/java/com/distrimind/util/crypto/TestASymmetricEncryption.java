@@ -69,7 +69,7 @@ public class TestASymmetricEncryption {
 			{
 				for (ASymmetricAuthenticatedSignatureType ast : ASymmetricAuthenticatedSignatureType.values()) {
 
-					if (akpw.getCodeProvider().equals(aet.getCodeProviderForEncryption()) && akpw.getCodeProvider().equals(SymmetricEncryptionType.DEFAULT.getCodeProviderForEncryption())) {
+					if ((akpw.isHybrid() && akpw.getNonPQCWrapper().getCodeProvider().equals(aet.getCodeProviderForEncryption()) && akpw.getNonPQCWrapper().getCodeProvider().equals(SymmetricEncryptionType.DEFAULT.getCodeProviderForEncryption())) || (!akpw.isHybrid() && akpw.getCodeProvider().equals(aet.getCodeProviderForEncryption()) && akpw.getCodeProvider().equals(SymmetricEncryptionType.DEFAULT.getCodeProviderForEncryption()))) {
 						Object[] params = new Object[5];
 						params[0] = akpw;
 						params[1] = aet;
@@ -96,7 +96,7 @@ public class TestASymmetricEncryption {
 			for (ASymmetricEncryptionType aet : ASymmetricEncryptionType.values())
 			{
 				for (ASymmetricAuthenticatedSignatureType ast : ASymmetricAuthenticatedSignatureType.values()) {
-					if (akpw.getCodeProvider().equals(aet.getCodeProviderForEncryption()) && akpw.getCodeProvider().equals(SymmetricEncryptionType.DEFAULT.getCodeProviderForEncryption()) ) {
+					if ((akpw.isHybrid() && akpw.getNonPQCWrapper().getCodeProvider().equals(aet.getCodeProviderForEncryption()) && akpw.getNonPQCWrapper().getCodeProvider().equals(SymmetricEncryptionType.DEFAULT.getCodeProviderForEncryption())) || (!akpw.isHybrid() && akpw.getCodeProvider().equals(aet.getCodeProviderForEncryption()) && akpw.getCodeProvider().equals(SymmetricEncryptionType.DEFAULT.getCodeProviderForEncryption()))) {
 						Object[] params = new Object[5];
 						params[0] = akpw;
 						params[1] = aet;
@@ -126,7 +126,7 @@ public class TestASymmetricEncryption {
 				for (ASymmetricAuthenticatedSignatureType set : ASymmetricAuthenticatedSignatureType.values())
 				{
 
-					if (akpw.getCodeProvider().equals(aet.getCodeProviderForEncryption()) && akpw.getCodeProvider().equals(set.getCodeProviderForSignature())) {
+					if ((akpw.isHybrid() && akpw.getNonPQCWrapper().getCodeProvider().equals(aet.getCodeProviderForEncryption()) && akpw.getNonPQCWrapper().getCodeProvider().equals(SymmetricEncryptionType.DEFAULT.getCodeProviderForEncryption())) || (!akpw.isHybrid() && akpw.getCodeProvider().equals(aet.getCodeProviderForEncryption()) && akpw.getCodeProvider().equals(SymmetricEncryptionType.DEFAULT.getCodeProviderForEncryption()))) {
 						Object[] params = new Object[4];
 						params[0] = akpw;
 						params[1] = aet;
@@ -151,18 +151,22 @@ public class TestASymmetricEncryption {
 		SymmetricSecretKey secretKeyForSignature=sestype.getKeyGenerator(rand).generateKey();
 		ASymmetricKeyPair keyPairForSignature=asstype.getKeyPairGenerator(rand).generateKeyPair();
 
-		testASymmetricKeyWrapperForEncryption(rand, kpe, null, typeWrapper, asetype, seetype, null);
-		testASymmetricKeyWrapperForEncryption(rand, kpe, null, typeWrapper, asetype, seetype, secretKeyForSignature);
-		testASymmetricKeyWrapperForEncryption(rand, kpe, keyPairForSignature, typeWrapper, asetype, seetype, null);
-		testASymmetricKeyWrapperForEncryption(rand, kpe, keyPairForSignature, typeWrapper, asetype, seetype, secretKeyForSignature);
-		if (keyPairForSignature.isPostQuantumKey() || kpe.isPostQuantumKey())
-			return;
 		ASymmetricKeyPair kppqc= ASymmetricEncryptionType.BCPQC_MCELIECE_FUJISAKI_CCA2_SHA256.getKeyPairGenerator(rand, ASymmetricEncryptionType.BCPQC_MCELIECE_FUJISAKI_CCA2_SHA256.getDefaultKeySizeBits(), System.currentTimeMillis(), Long.MAX_VALUE).generateKeyPair();
 		ASymmetricKeyPair keyPairForSignaturePQC=ASymmetricAuthenticatedSignatureType.BCPQC_SPHINCS256_SHA2_512_256.getKeyPairGenerator(rand).generateKeyPair();
-		testASymmetricKeyWrapperForEncryption(rand, new HybridASymmetricKeyPair(kpe, kppqc), null, typeWrapper, asetype, seetype, null);
+		testASymmetricKeyWrapperForEncryption(rand, kpe,kppqc, null, typeWrapper, asetype, seetype, null);
+		testASymmetricKeyWrapperForEncryption(rand, kpe,kppqc, null, typeWrapper, asetype, seetype, secretKeyForSignature);
+		testASymmetricKeyWrapperForEncryption(rand, kpe,kppqc, keyPairForSignature, typeWrapper, asetype, seetype, null);
+		testASymmetricKeyWrapperForEncryption(rand, kpe,kppqc, keyPairForSignature, typeWrapper, asetype, seetype, secretKeyForSignature);
+		if (keyPairForSignature.isPostQuantumKey() || kpe.isPostQuantumKey())
+			return;
+		testASymmetricKeyWrapperForEncryption(rand, kpe,kppqc, new HybridASymmetricKeyPair(keyPairForSignature, keyPairForSignaturePQC), typeWrapper, asetype, seetype, null);
+		testASymmetricKeyWrapperForEncryption(rand, kpe,kppqc, new HybridASymmetricKeyPair(keyPairForSignature, keyPairForSignaturePQC), typeWrapper, asetype, seetype, secretKeyForSignature);
+
+
+		/*testASymmetricKeyWrapperForEncryption(rand, new HybridASymmetricKeyPair(kpe, kppqc), null, typeWrapper, asetype, seetype, null);
 		testASymmetricKeyWrapperForEncryption(rand, new HybridASymmetricKeyPair(kpe, kppqc), null, typeWrapper, asetype, seetype, secretKeyForSignature);
 		testASymmetricKeyWrapperForEncryption(rand, new HybridASymmetricKeyPair(kpe, kppqc), new HybridASymmetricKeyPair(keyPairForSignature, keyPairForSignaturePQC), typeWrapper, asetype, seetype, null);
-		testASymmetricKeyWrapperForEncryption(rand, new HybridASymmetricKeyPair(kpe, kppqc), new HybridASymmetricKeyPair(keyPairForSignature, keyPairForSignaturePQC), typeWrapper, asetype, seetype, secretKeyForSignature);
+		testASymmetricKeyWrapperForEncryption(rand, new HybridASymmetricKeyPair(kpe, kppqc), new HybridASymmetricKeyPair(keyPairForSignature, keyPairForSignaturePQC), typeWrapper, asetype, seetype, secretKeyForSignature);*/
 
 	}
 
@@ -210,9 +214,16 @@ public class TestASymmetricEncryption {
 		testASymmetricKeyWrapperForEncryption(rand, new HybridASymmetricKeyPair(kp, kppqc), new HybridASymmetricKeyPair(keyPairForSignature, keyPairForSignaturePQC), typeWrapper, asetype, asstypeToCode, secretKeyForSignature);
 	}
 
-	public void testASymmetricKeyWrapperForEncryption(AbstractSecureRandom rand, AbstractKeyPair<?,?> kpe, AbstractKeyPair<?,?> kps,  ASymmetricKeyWrapperType typeWrapper, ASymmetricEncryptionType asetype, SymmetricEncryptionType setype, SymmetricSecretKey secretKeyForSignature)
+	public void testASymmetricKeyWrapperForEncryption(AbstractSecureRandom rand, ASymmetricKeyPair nonpqckpe, ASymmetricKeyPair pqckpe, AbstractKeyPair<?,?> kps,  ASymmetricKeyWrapperType typeWrapper, ASymmetricEncryptionType asetype, SymmetricEncryptionType setype, SymmetricSecretKey secretKeyForSignature)
 			throws NoSuchAlgorithmException, IllegalStateException, NoSuchProviderException, IOException, IllegalArgumentException {
 		SymmetricSecretKey sk= setype.getKeyGenerator(rand, setype.getDefaultKeySizeBits()).generateKey();
+		AbstractKeyPair<?, ?> kpe;
+		if (typeWrapper.isHybrid())
+		{
+			kpe=new HybridASymmetricKeyPair(nonpqckpe, pqckpe);
+		}
+		else
+			kpe=nonpqckpe;
 		KeyWrapperAlgorithm keyWrapper;
 		try {
 			if (secretKeyForSignature != null) {
@@ -235,9 +246,13 @@ public class TestASymmetricEncryption {
 			Assert.assertEquals(sk.toJavaNativeKey().getEncoded(), sk2.toJavaNativeKey().getEncoded());
 			Assert.assertEquals(sk.toBouncyCastleKey().getKeyBytes(), sk2.toBouncyCastleKey().getKeyBytes());
 		}
-		catch (IllegalArgumentException ignored)
+		catch (IllegalArgumentException e)
 		{
-			Assert.assertTrue(secretKeyForSignature==null && kps==null && !typeWrapper.wrappingIncludeSignature());
+			if (!(secretKeyForSignature==null && kps==null && !typeWrapper.wrappingIncludeSignature()))
+			{
+				e.printStackTrace();
+				Assert.fail();
+			}
 		}
 
 	}
@@ -401,10 +416,12 @@ public class TestASymmetricEncryption {
 		ASymmetricKeyWrapperType kw;
 		if (astype.getCodeProviderForEncryption()==CodeProvider.GNU_CRYPTO)
 			kw=ASymmetricKeyWrapperType.GNU_RSA_OAEP_SHA2_384;
-		else if (astype.name().startsWith("BCPQC_MCELIECE_"))
+		else if (astype.name().startsWith("BCPQC_MCELIECE_FUJISAKI"))
 			kw=ASymmetricKeyWrapperType.BCPQC_MCELIECE_FUJISAKI_CCA2_SHA256;
+		else if (astype.name().startsWith("BCPQC_MCELIECE_POINTCHEVAL"))
+			kw=ASymmetricKeyWrapperType.BCPQC_MCELIECE_POINTCHEVAL_CCA2_SHA256;
 		else
-			kw=ASymmetricKeyWrapperType.BC_FIPS_RSA_OAEP_SHA3_512;
+			kw=ASymmetricKeyWrapperType.BC_FIPS_RSA_OAEP_WITH_SHA3_512;
 
 
 		WrappedEncryptedSymmetricSecretKey localEncryptedKey = kw.wrapKey(rand, kpd.getASymmetricPublicKey(), localKey);
