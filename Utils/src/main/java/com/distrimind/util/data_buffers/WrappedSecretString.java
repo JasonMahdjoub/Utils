@@ -1,5 +1,6 @@
 package com.distrimind.util.data_buffers;
 
+import com.distrimind.util.ISecretValue;
 import com.distrimind.util.InvalidEncodedValue;
 import com.distrimind.util.crypto.Zeroizable;
 
@@ -7,10 +8,10 @@ import java.util.Arrays;
 
 /**
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 1.1
  * @since Utils 5.10.0
  */
-public class WrappedSecretString extends WrappedString implements Zeroizable {
+public class WrappedSecretString extends WrappedString implements Zeroizable, ISecretValue {
 	private transient boolean toZeroize;
 
 	protected WrappedSecretString()
@@ -62,7 +63,7 @@ public class WrappedSecretString extends WrappedString implements Zeroizable {
 	}
 	@SuppressWarnings("deprecation")
 	@Override
-	public void finalize()
+	protected void finalize()
 	{
 		zeroize();
 	}

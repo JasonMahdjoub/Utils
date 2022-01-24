@@ -36,8 +36,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 
 import com.distrimind.util.AbstractDecentralizedID;
-import com.distrimind.util.crypto.AbstractKey;
-import com.distrimind.util.crypto.AbstractKeyPair;
+import com.distrimind.util.crypto.*;
 import com.distrimind.util.data_buffers.WrappedData;
 import com.distrimind.util.data_buffers.WrappedString;
 
@@ -55,7 +54,7 @@ import java.util.Map;
 
 /**
  * @author Jason Mahdjoub
- * @version 2.1
+ * @version 2.3
  * @since Utils 4.4.0
  */
 @SuppressWarnings("NullableProblems")
@@ -251,9 +250,29 @@ public abstract class SecuredObjectOutputStream extends OutputStream implements 
 	public void writeBytesArray(byte[] array, boolean nullAccepted, int maxSizeInBytes) throws IOException {
 		SerializationTools.writeBytes(this, array, maxSizeInBytes, nullAccepted);
 	}
-
+	public void writeWrappedData(WrappedEncryptedASymmetricPrivateKey wrappedData, boolean nullAccepted) throws IOException {
+		writeWrappedData(wrappedData,nullAccepted, WrappedEncryptedASymmetricPrivateKey.MAX_SIZE_IN_BYTES_OF_KEY);
+	}
+	public void writeWrappedData(WrappedEncryptedSymmetricSecretKey wrappedData, boolean nullAccepted) throws IOException {
+		writeWrappedData(wrappedData,nullAccepted, WrappedEncryptedSymmetricSecretKey.MAX_SIZE_IN_BYTES_OF_KEY);
+	}
+	public void writeWrappedData(WrappedHashedPassword wrappedData, boolean nullAccepted) throws IOException {
+		writeWrappedData(wrappedData,nullAccepted, WrappedHashedPassword.MAX_SIZE_IN_BYTES_OF_DATA);
+	}
 	public void writeWrappedData(WrappedData wrappedData, boolean nullAccepted, int maxSizeInBytes) throws IOException {
 		SerializationTools.writeWrappedData(this, wrappedData, maxSizeInBytes, nullAccepted);
+	}
+	public void writeWrappedString(WrappedEncryptedASymmetricPrivateKeyString wrappedString, boolean nullAccepted) throws IOException {
+		writeWrappedString(wrappedString, nullAccepted, WrappedEncryptedASymmetricPrivateKeyString.MAX_CHARS_NUMBER);
+	}
+	public void writeWrappedString(WrappedEncryptedSymmetricSecretKeyString wrappedString, boolean nullAccepted) throws IOException {
+		writeWrappedString(wrappedString, nullAccepted, WrappedEncryptedSymmetricSecretKeyString.MAX_CHARS_NUMBER);
+	}
+	public void writeWrappedString(WrappedHashedPasswordString wrappedString, boolean nullAccepted) throws IOException {
+		writeWrappedString(wrappedString, nullAccepted, WrappedHashedPasswordString.MAX_CHARS_NUMBER);
+	}
+	public void writeWrappedString(WrappedPassword wrappedString, boolean nullAccepted) throws IOException {
+		writeWrappedString(wrappedString, nullAccepted, WrappedPassword.MAX_CHARS_NUMBER);
 	}
 	public void writeWrappedString(WrappedString wrappedString, boolean nullAccepted, int maxSizeInBytes) throws IOException {
 		SerializationTools.writeWrappedString(this, wrappedString, maxSizeInBytes, nullAccepted);

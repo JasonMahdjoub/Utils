@@ -38,8 +38,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
 
 import com.distrimind.util.AbstractDecentralizedID;
 import com.distrimind.util.FileTools;
-import com.distrimind.util.crypto.AbstractKey;
-import com.distrimind.util.crypto.AbstractKeyPair;
+import com.distrimind.util.crypto.*;
 import com.distrimind.util.data_buffers.WrappedData;
 import com.distrimind.util.data_buffers.WrappedString;
 
@@ -55,7 +54,7 @@ import java.util.Objects;
 
 /**
  * @author Jason Mahdjoub
- * @version 2.2
+ * @version 2.3
  * @since Utils 4.4.0
  */
 public abstract class SecuredObjectInputStream extends InputStream implements DataInput  {
@@ -407,10 +406,18 @@ public abstract class SecuredObjectInputStream extends InputStream implements Da
 			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, e);
 		}
 	}
-
+	public WrappedEncryptedASymmetricPrivateKey readWrappedEncryptedASymmetricPrivateKey(boolean nullAccepted) throws IOException{
+		return readWrappedData(nullAccepted, WrappedEncryptedASymmetricPrivateKey.MAX_SIZE_IN_BYTES_OF_KEY);
+	}
+	public WrappedEncryptedSymmetricSecretKey readWrappedEncryptedSymmetricSecretKey(boolean nullAccepted) throws IOException{
+		return readWrappedData(nullAccepted, WrappedEncryptedSymmetricSecretKey.MAX_SIZE_IN_BYTES_OF_KEY);
+	}
+	public WrappedHashedPassword readWrappedHashedPassword(boolean nullAccepted) throws IOException{
+		return readWrappedData(nullAccepted, WrappedHashedPassword.MAX_SIZE_IN_BYTES_OF_DATA);
+	}
+	@SuppressWarnings("unchecked")
 	public <T extends WrappedData> T readWrappedData(boolean nullAccepted, int maxSizeInBytes) throws IOException{
 		try {
-			//noinspection unchecked
 			return (T)SerializationTools.readWrappedData(this, nullAccepted, maxSizeInBytes);
 		}
 		catch (ClassCastException e)
@@ -418,9 +425,21 @@ public abstract class SecuredObjectInputStream extends InputStream implements Da
 			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, e);
 		}
 	}
+	public WrappedEncryptedASymmetricPrivateKeyString readWrappedEncryptedASymmetricPrivateKeyString(boolean nullAccepted) throws IOException{
+		return readWrappedString(false, WrappedEncryptedASymmetricPrivateKeyString.MAX_CHARS_NUMBER);
+	}
+	public WrappedEncryptedSymmetricSecretKeyString readWrappedEncryptedSymmetricSecretKeyString(boolean nullAccepted) throws IOException{
+		return readWrappedString(false, WrappedEncryptedSymmetricSecretKeyString.MAX_CHARS_NUMBER);
+	}
+	public WrappedHashedPasswordString readWrappedHashedPasswordString(boolean nullAccepted) throws IOException{
+		return readWrappedString(false, WrappedHashedPasswordString.MAX_CHARS_NUMBER);
+	}
+	public WrappedPassword readWrappedPassword(boolean nullAccepted) throws IOException{
+		return readWrappedString(false, WrappedPassword.MAX_CHARS_NUMBER);
+	}
+	@SuppressWarnings("unchecked")
 	public <T extends WrappedString> T readWrappedString(boolean nullAccepted, int maxSizeInBytes) throws IOException{
 		try {
-			//noinspection unchecked
 			return (T)SerializationTools.readWrappedString(this, maxSizeInBytes, nullAccepted);
 		}
 		catch (ClassCastException e)

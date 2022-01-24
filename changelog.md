@@ -1,6 +1,6 @@
 Utils
 =====
-5.21.7 STABLE (Build: 3668) (from 04/01/2016 to 22/12/2021)
+5.22.0 STABLE (Build: 3729) (from 04/01/2016 to 24/01/2022)
 
 # Creator(s):
 * Jason MAHDJOUB
@@ -9,6 +9,14 @@ Utils
 * Jason MAHDJOUB (Entered in the team at 04/01/2016)
 
 # Changes:
+
+
+### 5.22.0 STABLE (24/01/2022)
+#### New feature(s)
+* Add function MessageDigestType.isSecuredForSignature().
+* Add hybrid asymmetric key wrappers.
+* Add max variables into ASymmetricKeyWrapperType and into SymmetricKeyWrapperType class that gives max size in byte of wrapped keys.
+* Add possibility to externalize wrapped data and wrapped strings.
 
 
 ### 5.21.7 STABLE (22/12/2021)

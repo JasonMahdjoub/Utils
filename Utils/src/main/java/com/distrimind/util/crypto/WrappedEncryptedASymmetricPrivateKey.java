@@ -1,52 +1,32 @@
 package com.distrimind.util.crypto;
 
+import com.distrimind.util.InvalidEncodedValue;
 import com.distrimind.util.data_buffers.WrappedSecretData;
-import com.distrimind.util.io.SecureExternalizable;
-import com.distrimind.util.io.SecuredObjectInputStream;
-import com.distrimind.util.io.SecuredObjectOutputStream;
-import com.distrimind.util.io.SerializationTools;
-
-import java.io.IOException;
 
 /**
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 1.1
  * @since Utils 5.10.0
  */
-public class WrappedEncryptedASymmetricPrivateKey extends WrappedSecretData implements SecureExternalizable {
-	static final int MAX_SIZE_IN_BYTES_OF_KEY=ASymmetricPrivateKey.MAX_SIZE_IN_BYTES_OF_PRIVATE_KEY*3+HybridASymmetricAuthenticatedSignatureType.MAX_HYBRID_ASYMMETRIC_SIGNATURE_SIZE+SymmetricAuthenticatedSignatureType.MAX_SYMMETRIC_SIGNATURE_SIZE;
-	public static final int MAX_SIZE_IN_BYTES_OF_DATA=MAX_SIZE_IN_BYTES_OF_KEY+7;
-	protected WrappedEncryptedASymmetricPrivateKey() {
-	}
-
+public class WrappedEncryptedASymmetricPrivateKey extends WrappedSecretData {
+	public static final int MAX_SIZE_IN_BYTES_OF_KEY=Math.max(SymmetricKeyWrapperType.MAX_SIZE_IN_BYTES_OF_WRAPPED_HYBRID_ASYMMETRIC_PRIVATE_KEY_WITH_SYMMETRIC_ENCRYPTION_AND_WITH_SYMMETRIC_AND_ASYMMETRIC_SIGNATURE, ASymmetricKeyWrapperType.MAX_SIZE_IN_BYTES_OF_WRAPPED_SYMMETRIC_SECRET_KEY_WITH_ASYMMETRIC_HYBRID_ENCRYPTION_WITH_SYMMETRIC_AND_HYBRID_ASYMMETRIC_SIGNATURE);
 	public WrappedEncryptedASymmetricPrivateKey(byte[] data) {
 		super(data);
 		if (data.length>MAX_SIZE_IN_BYTES_OF_KEY)
 			throw new IllegalArgumentException(""+data.length);
 	}
 
-
-
-
 	public WrappedEncryptedASymmetricPrivateKey(WrappedEncryptedASymmetricPrivateKey secretData) {
 		super(secretData);
 	}
-	public WrappedEncryptedASymmetricPrivateKey(WrappedEncryptedASymmetricPrivateKeyString secretData) throws IOException {
+	public WrappedEncryptedASymmetricPrivateKey(WrappedEncryptedASymmetricPrivateKeyString secretData) throws InvalidEncodedValue {
 		super(secretData);
 	}
 
-	@Override
-	public final int getInternalSerializedSize() {
-		return SerializationTools.getInternalSize(getBytes(), MAX_SIZE_IN_BYTES_OF_KEY);
-	}
 
 	@Override
-	public final void writeExternal(SecuredObjectOutputStream out) throws IOException {
-		out.writeBytesArray(getBytes(), false, MAX_SIZE_IN_BYTES_OF_KEY);
-	}
-
-	@Override
-	public final void readExternal(SecuredObjectInputStream in) throws IOException {
-		setData(in.readBytesArray(false, MAX_SIZE_IN_BYTES_OF_KEY));
+	public WrappedEncryptedASymmetricPrivateKeyString toWrappedString()
+	{
+		return new WrappedEncryptedASymmetricPrivateKeyString(this);
 	}
 }

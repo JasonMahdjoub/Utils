@@ -67,7 +67,7 @@ import java.util.concurrent.*;
  * 
  * @author Jason Mahdjoub
  * @since Utils 4.5.0
- * @version 3.2
+ * @version 3.3
  * 
  */
 
@@ -117,31 +117,33 @@ public class SerializationTools {
 			writeString(oos, null, sizeMax, supportNull);
 		else
 		{
-			writeString(oos, s.toString(), sizeMax, supportNull);
+			int type=0;
 			if (s instanceof WrappedEncryptedASymmetricPrivateKeyString)
 			{
-				oos.writeByte(2);
+				type=2;
+				sizeMax=Math.min(WrappedEncryptedASymmetricPrivateKeyString.MAX_CHARS_NUMBER, sizeMax);
 			}
 			else if (s instanceof WrappedEncryptedSymmetricSecretKeyString)
 			{
-				oos.writeByte(3);
+				type=3;
+				sizeMax=Math.min(WrappedEncryptedSymmetricSecretKeyString.MAX_CHARS_NUMBER, sizeMax);
 			}
 			else if (s instanceof WrappedHashedPasswordString)
 			{
-				oos.writeByte(4);
+				type=4;
+				sizeMax=Math.min(WrappedHashedPasswordString.MAX_CHARS_NUMBER, sizeMax);
 			}
 			else if (s instanceof WrappedPassword)
 			{
-				oos.writeByte(5);
+				type=5;
+				sizeMax=Math.min(WrappedPassword.MAX_CHARS_NUMBER, sizeMax);
 			}
 			else if (s instanceof WrappedSecretString)
 			{
-				oos.writeByte(1);
+				type=1;
 			}
-			else
-			{
-				oos.writeByte(0);
-			}
+			writeString(oos, s.toString(), sizeMax, supportNull);
+			oos.writeByte(type);
 		}
 
 	}
@@ -203,12 +205,20 @@ public class SerializationTools {
 				case 1:
 					return new WrappedSecretString(s);
 				case 2:
+					if (s.length()>WrappedEncryptedASymmetricPrivateKeyString.MAX_CHARS_NUMBER)
+						throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
 					return new WrappedEncryptedASymmetricPrivateKeyString(s);
 				case 3:
+					if (s.length()>WrappedEncryptedSymmetricSecretKeyString.MAX_CHARS_NUMBER)
+						throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
 					return new WrappedEncryptedSymmetricSecretKeyString(s);
 				case 4:
+					if (s.length()>WrappedHashedPasswordString.MAX_CHARS_NUMBER)
+						throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
 					return new WrappedHashedPasswordString(s);
 				case 5:
+					if (s.length()>WrappedPassword.MAX_CHARS_NUMBER)
+						throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
 					return new WrappedPassword(s);
 				default:
 					return new WrappedString(s);
@@ -238,27 +248,28 @@ public class SerializationTools {
 			writeBytes(oos, null, 0, 0, sizeMax, supportNull);
 		else
 		{
-			writeBytes(oos, tab.getBytes(), 0, tab.getBytes().length, sizeMax, supportNull);
+			int type=0;
 			if (tab instanceof WrappedEncryptedASymmetricPrivateKey)
 			{
-				oos.writeByte(2);
+				type=2;
+				sizeMax=Math.min(WrappedEncryptedASymmetricPrivateKey.MAX_SIZE_IN_BYTES_OF_KEY, sizeMax);
 			}
 			else if (tab instanceof WrappedEncryptedSymmetricSecretKey)
 			{
-				oos.writeByte(3);
+				type=3;
+				sizeMax=Math.min(WrappedEncryptedSymmetricSecretKey.MAX_SIZE_IN_BYTES_OF_KEY, sizeMax);
 			}
 			else if (tab instanceof WrappedHashedPassword)
 			{
-				oos.writeByte(4);
+				type=4;
+				sizeMax=Math.min(WrappedHashedPassword.MAX_SIZE_IN_BYTES_OF_DATA, sizeMax);
 			}
 			else if (tab instanceof WrappedSecretData)
 			{
-				oos.writeByte(1);
+				type=1;
 			}
-			else
-			{
-				oos.writeByte(0);
-			}
+			writeBytes(oos, tab.getBytes(), 0, tab.getBytes().length, sizeMax, supportNull);
+			oos.writeByte(type);
 		}
 	}
 	@SuppressWarnings("SameParameterValue")
@@ -350,10 +361,16 @@ public class SerializationTools {
 			case 1:
 				return new WrappedSecretData(t);
 			case 2:
+				if (t.length>WrappedEncryptedASymmetricPrivateKey.MAX_SIZE_IN_BYTES_OF_KEY)
+					throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
 				return new WrappedEncryptedASymmetricPrivateKey(t);
 			case 3:
+				if (t.length>WrappedEncryptedSymmetricSecretKey.MAX_SIZE_IN_BYTES_OF_KEY)
+					throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
 				return new WrappedEncryptedSymmetricSecretKey(t);
 			case 4:
+				if (t.length>WrappedHashedPassword.MAX_SIZE_IN_BYTES_OF_DATA)
+					throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
 				return new WrappedHashedPassword(t);
 			default:
 				return new WrappedData(t);
@@ -1946,14 +1963,7 @@ public class SerializationTools {
 						SubStreamParameter.class,
 						SubStreamParameters.class,
 						FragmentedStreamParameters.class,
-						KeyWrapperAlgorithm.class,
-						WrappedPassword.class,
-						WrappedHashedPassword.class,
-						WrappedHashedPasswordString.class,
-						WrappedEncryptedASymmetricPrivateKey.class,
-						WrappedEncryptedSymmetricSecretKey.class,
-						WrappedEncryptedASymmetricPrivateKeyString.class,
-						WrappedEncryptedSymmetricSecretKeyString.class)),
+						KeyWrapperAlgorithm.class)),
 				new ArrayList<>(Arrays.asList(
 						MessageDigestType.class,
 						SecureRandomType.class,
