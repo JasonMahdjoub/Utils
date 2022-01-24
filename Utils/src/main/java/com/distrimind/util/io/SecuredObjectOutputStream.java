@@ -38,6 +38,8 @@ knowledge of the CeCILL-C license and that you accept its terms.
 import com.distrimind.util.AbstractDecentralizedID;
 import com.distrimind.util.crypto.AbstractKey;
 import com.distrimind.util.crypto.AbstractKeyPair;
+import com.distrimind.util.data_buffers.WrappedData;
+import com.distrimind.util.data_buffers.WrappedString;
 
 import java.io.DataOutput;
 import java.io.File;
@@ -250,7 +252,12 @@ public abstract class SecuredObjectOutputStream extends OutputStream implements 
 		SerializationTools.writeBytes(this, array, maxSizeInBytes, nullAccepted);
 	}
 
-
+	public void writeWrappedData(WrappedData wrappedData, boolean nullAccepted, int maxSizeInBytes) throws IOException {
+		SerializationTools.writeWrappedData(this, wrappedData, maxSizeInBytes, nullAccepted);
+	}
+	public void writeWrappedString(WrappedString wrappedString, boolean nullAccepted, int maxSizeInBytes) throws IOException {
+		SerializationTools.writeWrappedString(this, wrappedString, maxSizeInBytes, nullAccepted);
+	}
 	public void writeObject(Object object, boolean nullAccepted) throws IOException {
 		writeObject(object, nullAccepted, -1);
 	}

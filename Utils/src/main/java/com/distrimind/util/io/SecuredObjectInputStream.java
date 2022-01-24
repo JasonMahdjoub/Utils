@@ -40,6 +40,8 @@ import com.distrimind.util.AbstractDecentralizedID;
 import com.distrimind.util.FileTools;
 import com.distrimind.util.crypto.AbstractKey;
 import com.distrimind.util.crypto.AbstractKeyPair;
+import com.distrimind.util.data_buffers.WrappedData;
+import com.distrimind.util.data_buffers.WrappedString;
 
 import java.io.*;
 import java.math.BigDecimal;
@@ -406,7 +408,26 @@ public abstract class SecuredObjectInputStream extends InputStream implements Da
 		}
 	}
 
-
+	public <T extends WrappedData> T readWrappedData(boolean nullAccepted, int maxSizeInBytes) throws IOException{
+		try {
+			//noinspection unchecked
+			return (T)SerializationTools.readWrappedData(this, nullAccepted, maxSizeInBytes);
+		}
+		catch (ClassCastException e)
+		{
+			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, e);
+		}
+	}
+	public <T extends WrappedString> T readWrappedString(boolean nullAccepted, int maxSizeInBytes) throws IOException{
+		try {
+			//noinspection unchecked
+			return (T)SerializationTools.readWrappedString(this, maxSizeInBytes, nullAccepted);
+		}
+		catch (ClassCastException e)
+		{
+			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, e);
+		}
+	}
 	public <T> T readObject(boolean nullAccepted) throws IOException, ClassNotFoundException {
 		return readObject(nullAccepted, -1);
 	}

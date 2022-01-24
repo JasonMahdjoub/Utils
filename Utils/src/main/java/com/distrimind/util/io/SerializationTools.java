@@ -42,6 +42,8 @@ import com.distrimind.util.*;
 import com.distrimind.util.crypto.*;
 import com.distrimind.util.data_buffers.WrappedData;
 import com.distrimind.util.data_buffers.WrappedSecretData;
+import com.distrimind.util.data_buffers.WrappedSecretString;
+import com.distrimind.util.data_buffers.WrappedString;
 import com.distrimind.util.harddrive.FilePermissions;
 
 import java.io.File;
@@ -109,6 +111,40 @@ public class SerializationTools {
 		writeSize(oos, false, s.length()*2, sizeMax);
 		oos.writeChars(s);
 	}
+	static void writeWrappedString(final SecuredObjectOutputStream oos, WrappedString s, int sizeMax, boolean supportNull) throws IOException
+	{
+		if (s==null)
+			writeString(oos, null, sizeMax, supportNull);
+		else
+		{
+			writeString(oos, s.toString(), sizeMax, supportNull);
+			if (s instanceof WrappedEncryptedASymmetricPrivateKeyString)
+			{
+				oos.writeByte(2);
+			}
+			else if (s instanceof WrappedEncryptedSymmetricSecretKeyString)
+			{
+				oos.writeByte(3);
+			}
+			else if (s instanceof WrappedHashedPasswordString)
+			{
+				oos.writeByte(4);
+			}
+			else if (s instanceof WrappedPassword)
+			{
+				oos.writeByte(5);
+			}
+			else if (s instanceof WrappedSecretString)
+			{
+				oos.writeByte(1);
+			}
+			else
+			{
+				oos.writeByte(0);
+			}
+		}
+
+	}
 	private static final Object stringLocker=new Object();
 	
 	private static char[] chars=null;
@@ -152,6 +188,33 @@ public class SerializationTools {
 			
 		}
 	}
+	static WrappedString readWrappedString(final SecuredObjectInputStream ois, int sizeMax, boolean supportNull) throws IOException
+	{
+		String s=readString(ois, sizeMax, supportNull);
+		if (s==null)
+			return null;
+		else
+		{
+			int type=ois.read();
+			if (type<0)
+				throw new MessageExternalizationException(Integrity.FAIL);
+			switch (type)
+			{
+				case 1:
+					return new WrappedSecretString(s);
+				case 2:
+					return new WrappedEncryptedASymmetricPrivateKeyString(s);
+				case 3:
+					return new WrappedEncryptedSymmetricSecretKeyString(s);
+				case 4:
+					return new WrappedHashedPasswordString(s);
+				case 5:
+					return new WrappedPassword(s);
+				default:
+					return new WrappedString(s);
+			}
+		}
+	}
 	static char[] readChars(final SecuredObjectInputStream ois, int sizeMax, boolean supportNull) throws IOException
 	{
 		int size=readSize(ois, sizeMax);
@@ -169,7 +232,35 @@ public class SerializationTools {
 			chars[i]=ois.readChar();
 		return chars;
 	}
-	
+	static void writeWrappedData(final SecuredObjectOutputStream oos, WrappedData tab, int sizeMax, boolean supportNull) throws IOException
+	{
+		if (tab==null)
+			writeBytes(oos, null, 0, 0, sizeMax, supportNull);
+		else
+		{
+			writeBytes(oos, tab.getBytes(), 0, tab.getBytes().length, sizeMax, supportNull);
+			if (tab instanceof WrappedEncryptedASymmetricPrivateKey)
+			{
+				oos.writeByte(2);
+			}
+			else if (tab instanceof WrappedEncryptedSymmetricSecretKey)
+			{
+				oos.writeByte(3);
+			}
+			else if (tab instanceof WrappedHashedPassword)
+			{
+				oos.writeByte(4);
+			}
+			else if (tab instanceof WrappedSecretData)
+			{
+				oos.writeByte(1);
+			}
+			else
+			{
+				oos.writeByte(0);
+			}
+		}
+	}
 	@SuppressWarnings("SameParameterValue")
 	static void writeBytes(final SecuredObjectOutputStream oos, byte[] tab, int sizeMax, boolean supportNull) throws IOException
 	{
@@ -245,6 +336,28 @@ public class SerializationTools {
 		}
 
 		return ois.readFully(size);
+	}
+	static WrappedData readWrappedData(final SecuredObjectInputStream ois, boolean supportNull, int sizeMax) throws IOException
+	{
+		byte[] t=readBytes(ois, supportNull, sizeMax);
+		if (t==null)
+			return null;
+		int type=ois.read();
+		if (type<0)
+			throw new MessageExternalizationException(Integrity.FAIL);
+		switch (type)
+		{
+			case 1:
+				return new WrappedSecretData(t);
+			case 2:
+				return new WrappedEncryptedASymmetricPrivateKey(t);
+			case 3:
+				return new WrappedEncryptedSymmetricSecretKey(t);
+			case 4:
+				return new WrappedHashedPassword(t);
+			default:
+				return new WrappedData(t);
+		}
 	}
 	static int readBytes(final SecuredObjectInputStream ois, boolean supportNull, byte[] tab, int off, int sizeMax) throws IOException
 	{
@@ -1598,13 +1711,13 @@ public class SerializationTools {
 			} else if (clazz == String.class) {
 				writeObjectCode(oos, 2);
 				writeString(oos, (String) o, sizeMax, false);
-			} else if (clazz == byte[].class) {
-				writeObjectCode(oos, 3);
-				writeBytes(oos, (byte[]) o, sizeMax, false);
 			} else if (clazz == byte[][].class) {
 				writeObjectCode(oos, 4);
 				writeBytes2D(oos, (byte[][]) o, sizeMax, sizeMax, false, false);
-			} else if (o instanceof SecureExternalizable[]) {
+			}else if (clazz == byte[].class) {
+				writeObjectCode(oos, 3);
+				writeBytes(oos, (byte[]) o, sizeMax, false);
+			}  else if (o instanceof SecureExternalizable[]) {
 				writeObjectCode(oos, 5);
 				writeExternalizables(oos, (SecureExternalizable[]) o, sizeMax, false);
 			} else if (o instanceof Object[]) {
@@ -1682,7 +1795,15 @@ public class SerializationTools {
 			} /*else if (pathClass!=null && pathClass.isAssignableFrom(clazz)) {
 				writeObjectCode(oos, 33);
 				writePath(oos, (Path)o, sizeMax,false);
-			} */else
+			} */
+			else if (clazz == WrappedData.class) {
+				writeObjectCode(oos, 33);
+				writeWrappedData(oos, (WrappedData) o, sizeMax, false);
+			}
+			else if (clazz == WrappedString.class) {
+				writeObjectCode(oos, 34);
+				writeWrappedString(oos, (WrappedString) o, sizeMax, false);
+			}else
 			{
 				throw new IOException(""+clazz);
 
@@ -1793,6 +1914,12 @@ public class SerializationTools {
 				case 32: {
 					return readFile(ois, sizeMax,false);
 				}
+				case 33: {
+					return readWrappedData(ois, false, sizeMax);
+				}
+				case 34: {
+					return readWrappedString(ois, sizeMax, false);
+				}
 				/*case 33: {
 					return readPath(ois, sizeMax,false);
 				}*/
@@ -1804,7 +1931,7 @@ public class SerializationTools {
 		
 	}
 
-	private static final short lastObjectCode=32;
+	private static final short lastObjectCode=34;
 	private static final short classesStartIndex=lastObjectCode+1;
 	private static short classesEndIndex=0;
 	private static short enumsStartIndex=0;
@@ -2076,6 +2203,13 @@ public class SerializationTools {
 			res+=array.length;
 		return res;
 	}
+	public static int getInternalSize(WrappedData array, int maxSizeInBytes)
+	{
+		int res=getSizeCoderSize(maxSizeInBytes);
+		if (array!=null)
+			res+=array.getBytes().length+1;
+		return res;
+	}
 
 	public static int getInternalSize(Object[] tab, int maxSizeInBytes)
 	{
@@ -2138,6 +2272,13 @@ public class SerializationTools {
 			res+=o.length()*2;
 		return res;
 	}
+	public static int getInternalSize(WrappedString o, int maxCharsNumber)
+	{
+		int res=getSizeCoderSize((int)Math.min(2L*maxCharsNumber, Integer.MAX_VALUE));
+		if (o!=null)
+			res+=o.toString().length()*2+1;
+		return res;
+	}
 	public static int getInternalSize(File f, int maxCharsNumber)
 	{
 		return getInternalSize(f.toString(), maxCharsNumber);
@@ -2163,16 +2304,20 @@ public class SerializationTools {
 			Class<?> clazz = o.getClass();
 			if (clazz == String.class) {
 				res += getInternalSize((String) o, sizeMax / 2);
+			} else if (clazz == WrappedString.class) {
+				res += getInternalSize((WrappedString) o, sizeMax / 2);
 			} else if (o instanceof Collection) {
 				res += getInternalSize((Collection<?>) o, sizeMax);
 			} else if (o instanceof Map) {
 				res += getInternalSize((Map<?, ?>) o, sizeMax);
-			} else if (o instanceof byte[]) {
-				res += getInternalSize((byte[]) o, sizeMax);
-			} else if (o instanceof char[]) {
+			}  else if (o instanceof char[]) {
 				res += getInternalSize((char[]) o, sizeMax / 2);
 			} else if (o instanceof byte[][]) {
 				res += getInternalSize((byte[][]) o, sizeMax);
+			} else if (o instanceof byte[]) {
+				res += getInternalSize((byte[]) o, sizeMax);
+			} else if (o instanceof WrappedData) {
+				res += getInternalSize((WrappedData) o, sizeMax);
 			} else if (o instanceof SecureExternalizable) {
 				res += getInternalSize((SecureExternalizable) o);
 			} else if (o instanceof SecureExternalizable[]) {
