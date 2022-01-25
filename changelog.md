@@ -1,6 +1,6 @@
 Utils
 =====
-5.22.0 STABLE (Build: 3729) (from 04/01/2016 to 24/01/2022)
+5.22.1 STABLE (Build: 3743) (from 04/01/2016 to 25/01/2022)
 
 # Creator(s):
 * Jason MAHDJOUB
@@ -9,6 +9,11 @@ Utils
 * Jason MAHDJOUB (Entered in the team at 04/01/2016)
 
 # Changes:
+
+
+### 5.22.1 STABLE (25/01/2022)
+#### Internal change(s)
+* Do not use BouncyCastle RSA implementation with hybrid asymmetric key wrapper type.
 
 
 ### 5.22.0 STABLE (24/01/2022)

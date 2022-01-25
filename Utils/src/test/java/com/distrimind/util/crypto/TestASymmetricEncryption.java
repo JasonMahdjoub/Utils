@@ -150,8 +150,15 @@ public class TestASymmetricEncryption {
 
 		SymmetricSecretKey secretKeyForSignature=sestype.getKeyGenerator(rand).generateKey();
 		ASymmetricKeyPair keyPairForSignature=asstype.getKeyPairGenerator(rand).generateKeyPair();
+		ASymmetricKeyPair kppqc=null;
+		if (typeWrapper.isHybrid())
+		{
+			if (typeWrapper.getPqcWrapper()==ASymmetricKeyWrapperType.BCPQC_MCELIECE_FUJISAKI_CCA2_SHA256)
+				kppqc= ASymmetricEncryptionType.BCPQC_MCELIECE_FUJISAKI_CCA2_SHA256.getKeyPairGenerator(rand).generateKeyPair();
+			else
+				kppqc= ASymmetricEncryptionType.BCPQC_MCELIECE_POINTCHEVAL_CCA2_SHA256.getKeyPairGenerator(rand).generateKeyPair();
+		}
 
-		ASymmetricKeyPair kppqc= ASymmetricEncryptionType.BCPQC_MCELIECE_FUJISAKI_CCA2_SHA256.getKeyPairGenerator(rand, ASymmetricEncryptionType.BCPQC_MCELIECE_FUJISAKI_CCA2_SHA256.getDefaultKeySizeBits(), System.currentTimeMillis(), Long.MAX_VALUE).generateKeyPair();
 		ASymmetricKeyPair keyPairForSignaturePQC=ASymmetricAuthenticatedSignatureType.BCPQC_SPHINCS256_SHA2_512_256.getKeyPairGenerator(rand).generateKeyPair();
 		testASymmetricKeyWrapperForEncryption(rand, kpe,kppqc, null, typeWrapper, asetype, seetype, null);
 		testASymmetricKeyWrapperForEncryption(rand, kpe,kppqc, null, typeWrapper, asetype, seetype, secretKeyForSignature);

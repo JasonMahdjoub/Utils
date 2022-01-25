@@ -68,6 +68,10 @@ public class Utils {
 			VERSION.addCreator(new Person("mahdjoub", "jason"))
 					.addDeveloper(new PersonDeveloper("mahdjoub", "jason", "2016-01-04"))
 					.addDescription(
+							new Description((short)5, (short)22, (short)1, Version.Type.STABLE, (short)0, "2022-01-25")
+									.addItem(INTERNAL_CHANGE, "Do not use BouncyCastle RSA implementation with hybrid asymmetric key wrapper type.")
+					)
+					.addDescription(
 							new Description((short)5, (short)22, (short)0, Version.Type.STABLE, (short)0, "2022-01-24")
 									.addItem(NEW_FEATURE, "Add function MessageDigestType.isSecuredForSignature().")
 									.addItem(NEW_FEATURE, "Add hybrid asymmetric key wrappers.")
