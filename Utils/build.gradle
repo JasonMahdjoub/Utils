@@ -230,7 +230,7 @@ publishing {
             pom {
                 name = 'Utils'
                 description = 'Set of Java tools'
-                url = 'https://github.com/JazZ51/Utils'
+                url = 'https://github.com/JasonMahdjoub/Utils'
                 developers {
                     developer {
                         id = 'mahdjoub'
@@ -240,14 +240,14 @@ publishing {
                 }
                 organization {
                     name = 'DistriMind'
-                    url = 'https://github.com/JazZ51'
+                    url = 'https://github.com/JasonMahdjoub'
                 }
                 issueManagement {
                     system = 'GitHub'
-                    url = 'https://github.com/JazZ51/Utils/issues'
+                    url = 'https://github.com/JasonMahdjoub/Utils/issues'
                 }
                 scm {
-                    connection = 'https://github.com/JazZ51/Utils'
+                    connection = 'https://github.com/JasonMahdjoub/Utils'
                 }
                 licenses {
                     license {

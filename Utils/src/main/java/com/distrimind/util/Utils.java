@@ -68,6 +68,10 @@ public class Utils {
 			VERSION.addCreator(new Person("mahdjoub", "jason"))
 					.addDeveloper(new PersonDeveloper("mahdjoub", "jason", "2016-01-04"))
 					.addDescription(
+							new Description((short)5, (short)22, (short)2, Version.Type.STABLE, (short)0, "2022-02-03")
+									.addItem(INTERNAL_CHANGE, "Update URLs.")
+					)
+					.addDescription(
 							new Description((short)5, (short)22, (short)1, Version.Type.STABLE, (short)0, "2022-01-25")
 									.addItem(INTERNAL_CHANGE, "Do not use BouncyCastle RSA implementation with hybrid asymmetric key wrapper type.")
 					)
