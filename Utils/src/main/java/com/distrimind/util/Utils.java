@@ -68,8 +68,9 @@ public class Utils {
 			VERSION.addCreator(new Person("mahdjoub", "jason"))
 					.addDeveloper(new PersonDeveloper("mahdjoub", "jason", "2016-01-04"))
 					.addDescription(
-							new Description((short)5, (short)22, (short)2, Version.Type.STABLE, (short)0, "2022-02-03")
+							new Description((short)5, (short)22, (short)2, Version.Type.STABLE, (short)0, "2022-02-04")
 									.addItem(INTERNAL_CHANGE, "Update URLs.")
+									.addItem(INTERNAL_CHANGE, "Fix bad android os detection with a false positive in some cases.")
 					)
 					.addDescription(
 							new Description((short)5, (short)22, (short)1, Version.Type.STABLE, (short)0, "2022-01-25")

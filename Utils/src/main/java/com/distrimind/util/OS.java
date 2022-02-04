@@ -126,17 +126,30 @@ public enum OS {
 
     }
 
+	private static final boolean isAndroid;
+	static
+	{
+		boolean b=false;
+		String s=System.getProperty("http.agent");
+		if (s!=null) {
+			if (s.toLowerCase().contains(" android "))
+			{
+				try {
+					Class.forName("android.os.Build$VERSION");
+					b=true;
+				} catch (ClassNotFoundException ignored) {
+
+				}
+			}
+		}
+		isAndroid=b;
+	}
 
 
 
 	static boolean isAndroid()
 	{
-		try {
-			Class.forName("android.os.Build$VERSION");
-			return true;
-		} catch (ClassNotFoundException e) {
-			return false;
-		}
+		return isAndroid;
 	}
 	
 

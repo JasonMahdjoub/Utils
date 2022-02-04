@@ -244,5 +244,6 @@ public enum OSVersion {
     {
         System.out.println(OS_VERSION);
     	System.out.println(getCurrentOSVersion());
+        System.out.println(getCurrentOSVersion().getOS());
     }
 }
