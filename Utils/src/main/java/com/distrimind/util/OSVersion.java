@@ -105,6 +105,8 @@ public enum OSVersion {
     ANDROID_27_O_MR1(".*(android).*",OS.ANDROID),
     ANDROID_28_P(".*(android).*",OS.ANDROID),
     ANDROID_29_Q(".*(android).*",OS.ANDROID),
+    ANDROID_30_R(".*(android).*",OS.ANDROID),
+    ANDROID_31_S(".*(android).*",OS.ANDROID),
     ANDROID_UNKNOWN(".*(android).*",OS.ANDROID),
     SEARCH_BOT_NUHK(".*(nuhk).*",OS.SEARCH_BOT),
     SEARCH_BOT_GOOGLEBOT(".*(googlebot).*",OS.SEARCH_BOT),

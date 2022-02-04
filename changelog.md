@@ -1,6 +1,6 @@
 Utils
 =====
-5.22.1 STABLE (Build: 3743) (from 04/01/2016 to 25/01/2022)
+5.22.2 STABLE (Build: 3779) (from 04/01/2016 to 04/02/2022)
 
 # Creator(s):
 * Jason MAHDJOUB
@@ -9,6 +9,14 @@ Utils
 * Jason MAHDJOUB (Entered in the team at 04/01/2016)
 
 # Changes:
+
+
+### 5.22.2 STABLE (04/02/2022)
+#### New feature(s)
+* Fix bad android os detection with a false positive in some cases.
+#### Internal change(s)
+* Update URLs.
+* Add detection of Android API 30 and 31
 
 
 ### 5.22.1 STABLE (25/01/2022)
