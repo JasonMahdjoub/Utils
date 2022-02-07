@@ -68,8 +68,9 @@ public class Utils {
 			VERSION.addCreator(new Person("mahdjoub", "jason"))
 					.addDeveloper(new PersonDeveloper("mahdjoub", "jason", "2016-01-04"))
 					.addDescription(
-							new Description((short)5, (short)22, (short)2, Version.Type.STABLE, (short)0, "2022-02-04")
+							new Description((short)5, (short)22, (short)2, Version.Type.STABLE, (short)0, "2022-02-07")
 									.addItem(INTERNAL_CHANGE, "Update URLs.")
+									.addItem(INTERNAL_CHANGE, "Update Snakeyaml to 1.30")
 									.addItem(NEW_FEATURE, "Fix bad android os detection with a false positive in some cases.")
 									.addItem(INTERNAL_CHANGE, "Add detection of Android API 30 and 31")
 					)
