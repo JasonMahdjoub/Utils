@@ -1,6 +1,6 @@
 Utils
 =====
-5.22.2 STABLE (Build: 3779) (from 04/01/2016 to 04/02/2022)
+5.22.2 STABLE (Build: 3789) (from 04/01/2016 to 04/02/2022)
 
 # Creator(s):
 * Jason MAHDJOUB
