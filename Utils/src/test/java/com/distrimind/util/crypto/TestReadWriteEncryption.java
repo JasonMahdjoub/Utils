@@ -366,6 +366,7 @@ public class TestReadWriteEncryption {
 		}
 		writer.encode(baos);
 		byte[] res=baos.getBytes();
+		Assert.assertTrue(res.length>=in.length);
 		byte[] res2=null;
 
 
@@ -375,9 +376,12 @@ public class TestReadWriteEncryption {
 				bais.transferTo(cout);
 			}
 			res2=baos.getBytes();
+			Assert.assertTrue(res2.length>=in.length);
 		}
+
 		Assert.assertTrue(expectedLength>=res.length, "expectedLength="+expectedLength+", actual="+res.length);
 		bais=new RandomByteArrayInputStream(res.clone());
+		Assert.assertTrue(bais.length()>=in.length);
 		baos=new RandomByteArrayOutputStream();
 		EncryptionSignatureHashDecoder reader=getReader(bais, secretKeyForEncryption, associatedData, secretKeyForSignature, keyPairForSignature, messageDigestType);
 		expectedLength=reader.getMaximumOutputLength(bais.length());
@@ -405,6 +409,7 @@ public class TestReadWriteEncryption {
 					new SubStreamParameter(s = r.nextInt(100) + 1000, s + 10 + r.nextInt(10)),
 					new SubStreamParameter(s = r.nextInt(100) + 2000, s + 10 + r.nextInt(10))
 			));
+			Assert.assertTrue(bais.length()>=in.length);
 			sshr = reader.computePartialHash(ssp);
 			Assert.assertTrue(writer.checkPartialHash(ssp, sshr));
 		}

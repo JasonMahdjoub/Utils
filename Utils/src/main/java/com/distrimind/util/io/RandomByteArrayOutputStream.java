@@ -68,7 +68,7 @@ public class RandomByteArrayOutputStream extends RandomOutputStream {
 	}
 
 	public RandomByteArrayOutputStream() {
-		bytes = new byte[0];
+		bytes = new byte[50];
 		current_pos = 0;
 		length=0;
 	}

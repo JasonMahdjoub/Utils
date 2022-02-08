@@ -1,6 +1,6 @@
 Utils
 =====
-5.22.2 STABLE (Build: 3789) (from 04/01/2016 to 04/02/2022)
+5.22.2 STABLE (Build: 3798) (from 04/01/2016 to 07/02/2022)
 
 # Creator(s):
 * Jason MAHDJOUB
@@ -11,11 +11,12 @@ Utils
 # Changes:
 
 
-### 5.22.2 STABLE (04/02/2022)
+### 5.22.2 STABLE (07/02/2022)
 #### New feature(s)
 * Fix bad android os detection with a false positive in some cases.
 #### Internal change(s)
 * Update URLs.
+* Update Snakeyaml to 1.30
 * Add detection of Android API 30 and 31
 
 
