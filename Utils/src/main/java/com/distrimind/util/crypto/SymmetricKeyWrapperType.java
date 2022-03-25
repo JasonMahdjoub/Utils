@@ -143,7 +143,7 @@ public enum SymmetricKeyWrapperType {
 	WrappedEncryptedSymmetricSecretKey wrapKey(SymmetricSecretKey key, SymmetricSecretKey keyToWrap, AbstractSecureRandom random) throws IOException
 	{
 		try {
-			CodeProvider.ensureProviderLoaded(provider);
+			//CodeProvider.ensureProviderLoaded(provider);
 			if (key.getAuthenticatedSignatureAlgorithmType() != null)
 				throw new IllegalArgumentException();
 			if ((key.getEncryptionAlgorithmType() != null && ((provider == CodeProvider.GNU_CRYPTO) != (key.getEncryptionAlgorithmType().getCodeProviderForEncryption() == CodeProvider.GNU_CRYPTO)))
@@ -175,7 +175,7 @@ public enum SymmetricKeyWrapperType {
 				}
 			} else {
 				javax.crypto.Cipher cipher;
-				cipher = javax.crypto.Cipher.getInstance(algorithmName, provider.checkProviderWithCurrentOS().name());
+				cipher = javax.crypto.Cipher.getInstance(algorithmName, provider.getCompatibleProvider());
 
 				cipher.init(javax.crypto.Cipher.WRAP_MODE, key.toJavaNativeKey());
 				byte[] wrappedKey=cipher.wrap(keyToWrap.toJavaNativeKey());
@@ -215,7 +215,7 @@ public enum SymmetricKeyWrapperType {
 					|| (encryptionType != null && (provider == CodeProvider.GNU_CRYPTO) != (encryptionType.getCodeProviderForEncryption() == CodeProvider.GNU_CRYPTO))
 					|| (signatureType != null && (provider == CodeProvider.GNU_CRYPTO) != (signatureType.getCodeProviderForSignature() == CodeProvider.GNU_CRYPTO)))
 				throw new IllegalArgumentException("The keys must come from the same providers");
-			CodeProvider.ensureProviderLoaded(provider);
+			//CodeProvider.ensureProviderLoaded(provider);
 			if (provider.equals(CodeProvider.GNU_CRYPTO)) {
 
 				Object cipher = GnuFunctions.cipherGetInstance(algorithmName);
@@ -241,7 +241,7 @@ public enum SymmetricKeyWrapperType {
 
 			} else {
 				javax.crypto.Cipher cipher;
-				cipher = javax.crypto.Cipher.getInstance(algorithmName, provider.checkProviderWithCurrentOS().name());
+				cipher = javax.crypto.Cipher.getInstance(algorithmName, provider.getCompatibleProvider());
 
 
 				cipher.init(Cipher.UNWRAP_MODE, key.toJavaNativeKey());

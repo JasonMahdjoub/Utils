@@ -135,7 +135,10 @@ public class HybridASymmetricPublicKey extends AbstractKey implements IHybridKey
 		nonPQCPublicKey=null;
 		PQCPublicKey=null;
 	}
-
+	@Override
+	public boolean isDestroyed() {
+		return nonPQCPublicKey==null && PQCPublicKey==null;
+	}
 
 	@Override
 	public WrappedData getKeyBytes() {

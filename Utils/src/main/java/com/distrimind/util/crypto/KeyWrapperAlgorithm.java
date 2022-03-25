@@ -66,6 +66,10 @@ public class KeyWrapperAlgorithm extends MultiFormatProperties implements Secure
 			secretKeyForSignature=null;
 		}
 	}
+	@Override
+	public boolean isDestroyed() {
+		return publicKeyForEncryption==null && privateKeyForEncryption==null && publicKeyForSignature==null && privateKeyForSignature==null && secretKeyForEncryption==null && secretKeyForSignature==null;
+	}
 
 	@SuppressWarnings("unused")
 	private KeyWrapperAlgorithm()

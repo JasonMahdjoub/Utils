@@ -47,7 +47,6 @@ import java.util.*;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
 
-import javax.lang.model.SourceVersion;
 
 import com.distrimind.util.*;
 import com.distrimind.util.crypto.*;
@@ -103,7 +102,7 @@ public class DefaultMultiFormatObjectParser extends AbstractMultiFormatObjectPar
 				Inet6Address.class,
 				InetSocketAddress.class));
 		try {
-			sc.add(Class.forName("javax.lang.model.SourceVersion"));
+			sc.add(UtilClassLoader.getLoader().loadClass("javax.lang.model.SourceVersion"));
 		} catch (ClassNotFoundException ignored) {
 
 		}
@@ -261,7 +260,7 @@ public class DefaultMultiFormatObjectParser extends AbstractMultiFormatObjectPar
 		} else if (field_type == InetSocketAddress.class) {
 			InetSocketAddress isa = (InetSocketAddress) object;
 			return isa.getAddress().getHostAddress() + ";" + isa.getPort();
-		} else if (field_type == SourceVersion.class) {
+		} else if (field_type.getName().equals("javax.lang.model.SourceVersion")) {
 			return object.toString();
 		}
 		/*
@@ -368,7 +367,7 @@ public class DefaultMultiFormatObjectParser extends AbstractMultiFormatObjectPar
 		} else if (field_type == String.class) {
 			return nodeValue;
 		} else if (field_type == Class.class) {
-			return Class.forName(nodeValue);
+			return UtilClassLoader.getLoader().loadClass(nodeValue);
 		} else if (field_type == Date.class) {
 			return parseDateString(nodeValue);
 		} else if (Calendar.class.isAssignableFrom(field_type)) {
@@ -426,8 +425,11 @@ public class DefaultMultiFormatObjectParser extends AbstractMultiFormatObjectPar
 			if (split.length != 2)
 				return Void.TYPE;
 			return new InetSocketAddress(InetAddress.getByName(split[0]), Integer.parseInt(split[1]));
-		} else if (field_type == SourceVersion.class) {
-			return SourceVersion.valueOf(nodeValue);
+		} else if (field_type.getName().equals("javax.lang.model.SourceVersion")) {
+
+			return UtilClassLoader.getLoader().loadClass("javax.lang.model.SourceVersion")
+					.getDeclaredMethod("valueOf", String.class)
+					.invoke(null, nodeValue);
 		}
 		/*
 		 * else if (field_type==SymmetricSecretKeyType.class) { return

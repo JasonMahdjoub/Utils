@@ -45,14 +45,14 @@ Adapt into your build.gradle file, the next code :
 	repositories {
 		...
 		maven {
-	       		url "https://artifactory.distri-mind.fr/artifactory/gradle-release"
+	       		url "https://artifactory.distri-mind.fr:443/artifactory/gradle-release/"
 	   	}
 		...
 	}
 	...
 	dependencies {
 		...
-		compile(group:'com.distrimind.util', name: 'Utils', version: '5.22.2-STABLE')
+		compile(group:'com.distrimind.util', name: 'Utils', version: '5.22.3-STABLE')
 		...
 		//choose one of these optional drivers for GnuCrypto algorithms
 			testCompile(group:'gnu', name: 'Gnu-Crypt', version: '1.3.0')
@@ -71,7 +71,7 @@ Adapt into your pom.xml file, the next code :
 			<dependency>
 				<groupId>com.distrimind.util</groupId>
 				<artifactId>Utils</artifactId>
-				<version>5.22.2-STABLE</version>
+				<version>5.22.3-STABLE</version>
 			</dependency>
 			<!-- choose one of these optional drivers for GnuCrypto algorithms-->
 			<dependency>
@@ -86,7 +86,7 @@ Adapt into your pom.xml file, the next code :
 			...
 			<repository>
 				<id>DistriMind-Public</id>
-				<url>https://artifactory.distri-mind.fr/artifactory/gradle-release</url>
+				<url>https://artifactory.distri-mind.fr:443/artifactory/gradle-release/</url>
 			</repository>
 			...
 		</repositories>

@@ -44,6 +44,7 @@ import java.security.SecureRandom;
 import java.util.Arrays;
 
 import com.distrimind.bouncycastle.pqc.crypto.newhope.NHPrivateKeyParameters;
+import com.distrimind.util.UtilClassLoader;
 
 /**
  * 
@@ -106,6 +107,11 @@ public abstract class AbstractNewHopeKeyAgreement extends KeyAgreement{
 		shared=null;
 		secretKey=null;
 	}
+
+	@Override
+	public boolean isDestroyed() {
+		return shared==null && secretKey==null;
+	}
 	
 
 	
@@ -122,7 +128,7 @@ public abstract class AbstractNewHopeKeyAgreement extends KeyAgreement{
     		Class<?> newHopeClass=null;
     		try
     		{
-    			newHopeClass=Class.forName("com.distrimind.bouncycastle.pqc.crypto.newhope.NewHope");
+    			newHopeClass= UtilClassLoader.getLoader().loadClass("com.distrimind.bouncycastle.pqc.crypto.newhope.NewHope");
     		
 	    		try
 	    		{

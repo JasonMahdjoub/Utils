@@ -36,6 +36,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 
 
+import com.distrimind.util.UtilClassLoader;
 import com.distrimind.util.io.Integrity;
 import com.distrimind.util.io.MessageExternalizationException;
 
@@ -113,120 +114,120 @@ class GnuFunctions {
 				if (!gnuLoaded)
 				{
 					try {
-						secretKeyFactoryGetInstance=Class.forName("com.distrimind.gnu.vm.jgnux.crypto.SecretKeyFactory").getDeclaredMethod("getInstance", String.class);
-						secretKeyFactoryGenerateSecret =Class.forName("com.distrimind.gnu.vm.jgnux.crypto.SecretKeyFactory").getDeclaredMethod("generateSecret", Class.forName("com.distrimind.gnu.vm.jgnu.security.spec.KeySpec") );
-						constPBEKeySpecCharsBytesIntInt=Class.forName("com.distrimind.gnu.vm.jgnux.crypto.spec.PBEKeySpec").getDeclaredConstructor(char[].class, byte[].class, int.class, int.class);
+						secretKeyFactoryGetInstance= UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnux.crypto.SecretKeyFactory").getDeclaredMethod("getInstance", String.class);
+						secretKeyFactoryGenerateSecret =UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnux.crypto.SecretKeyFactory").getDeclaredMethod("generateSecret", UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnu.security.spec.KeySpec") );
+						constPBEKeySpecCharsBytesIntInt=UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnux.crypto.spec.PBEKeySpec").getDeclaredConstructor(char[].class, byte[].class, int.class, int.class);
 
-						getSignatureAlgo=Class.forName("com.distrimind.gnu.vm.jgnu.security.Signature").getDeclaredMethod("getInstance", String.class);
-						getCipherAlgo =Class.forName("com.distrimind.gnu.vm.jgnux.crypto.Cipher").getDeclaredMethod("getInstance", String.class);
-						getPublicKey=Class.forName("com.distrimind.gnu.vm.jgnu.security.KeyPair").getDeclaredMethod("getPublic");
-						getPrivateKey=Class.forName("com.distrimind.gnu.vm.jgnu.security.KeyPair").getDeclaredMethod("getPrivate");
-						getPrivateKey=Class.forName("com.distrimind.gnu.vm.jgnu.security.KeyPair").getDeclaredMethod("getPrivate");
-						getEncoded=Class.forName("com.distrimind.gnu.vm.jgnu.security.Key").getDeclaredMethod("getEncoded");
-						keyPairConstructorPublicPrivate =Class.forName("com.distrimind.gnu.vm.jgnu.security.KeyPair").getDeclaredConstructor(Class.forName("com.distrimind.gnu.vm.jgnu.security.PublicKey"), Class.forName("com.distrimind.gnu.vm.jgnu.security.PrivateKey"));
-						keyPairGeneratorConstructorString =Class.forName("com.distrimind.gnu.vm.jgnu.security.KeyPairGenerator").getDeclaredConstructor(String.class);
-						cipherInitIntSymKey =Class.forName("com.distrimind.gnu.vm.jgnux.crypto.Cipher").getDeclaredMethod("init", int.class,Class.forName("com.distrimind.gnu.vm.jgnu.security.Key"));
-						cipherInitIntKeyRandom =Class.forName("com.distrimind.gnu.vm.jgnux.crypto.Cipher").getDeclaredMethod("init", int.class,Class.forName("com.distrimind.gnu.vm.jgnu.security.Key"), Class.forName("com.distrimind.gnu.vm.jgnu.security.SecureRandom") );
-						cipherInitIntKeyParamSpec =Class.forName("com.distrimind.gnu.vm.jgnux.crypto.Cipher").getDeclaredMethod("init", int.class, Class.forName("com.distrimind.gnu.vm.jgnu.security.Key"), Class.forName("com.distrimind.gnu.vm.jgnu.security.spec.AlgorithmParameterSpec"));
-						cipherInitUnwrap=Class.forName("com.distrimind.gnu.vm.jgnux.crypto.Cipher").getDeclaredMethod("init", int.class,Class.forName("com.distrimind.gnu.vm.jgnu.security.Key"));
-						cipherWrap=Class.forName("com.distrimind.gnu.vm.jgnux.crypto.Cipher").getDeclaredMethod("wrap", Class.forName("com.distrimind.gnu.vm.jgnu.security.Key"));
-						cipherUnwrapByteStringInt =Class.forName("com.distrimind.gnu.vm.jgnux.crypto.Cipher").getDeclaredMethod("unwrap", byte[].class, String.class, int.class);
-						cipherInitIntKey =Class.forName("com.distrimind.gnu.vm.jgnux.crypto.Cipher").getDeclaredMethod("init", int.class, Class.forName("com.distrimind.gnu.vm.jgnu.security.Key"));
-						cipherDoFinal=Class.forName("com.distrimind.gnu.vm.jgnux.crypto.Cipher").getDeclaredMethod("doFinal");
+						getSignatureAlgo=UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnu.security.Signature").getDeclaredMethod("getInstance", String.class);
+						getCipherAlgo =UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnux.crypto.Cipher").getDeclaredMethod("getInstance", String.class);
+						getPublicKey=UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnu.security.KeyPair").getDeclaredMethod("getPublic");
+						getPrivateKey=UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnu.security.KeyPair").getDeclaredMethod("getPrivate");
+						getPrivateKey=UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnu.security.KeyPair").getDeclaredMethod("getPrivate");
+						getEncoded=UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnu.security.Key").getDeclaredMethod("getEncoded");
+						keyPairConstructorPublicPrivate =UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnu.security.KeyPair").getDeclaredConstructor(UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnu.security.PublicKey"), UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnu.security.PrivateKey"));
+						keyPairGeneratorConstructorString =UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnu.security.KeyPairGenerator").getDeclaredConstructor(String.class);
+						cipherInitIntSymKey =UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnux.crypto.Cipher").getDeclaredMethod("init", int.class,UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnu.security.Key"));
+						cipherInitIntKeyRandom =UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnux.crypto.Cipher").getDeclaredMethod("init", int.class,UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnu.security.Key"), UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnu.security.SecureRandom") );
+						cipherInitIntKeyParamSpec =UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnux.crypto.Cipher").getDeclaredMethod("init", int.class, UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnu.security.Key"), UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnu.security.spec.AlgorithmParameterSpec"));
+						cipherInitUnwrap=UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnux.crypto.Cipher").getDeclaredMethod("init", int.class,UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnu.security.Key"));
+						cipherWrap=UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnux.crypto.Cipher").getDeclaredMethod("wrap", UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnu.security.Key"));
+						cipherUnwrapByteStringInt =UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnux.crypto.Cipher").getDeclaredMethod("unwrap", byte[].class, String.class, int.class);
+						cipherInitIntKey =UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnux.crypto.Cipher").getDeclaredMethod("init", int.class, UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnu.security.Key"));
+						cipherDoFinal=UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnux.crypto.Cipher").getDeclaredMethod("doFinal");
 
-						cipherDoFinalBytesInt=Class.forName("com.distrimind.gnu.vm.jgnux.crypto.Cipher").getDeclaredMethod("doFinal", byte[].class, int.class);
-						cipherDoFinalBytesIntInt=Class.forName("com.distrimind.gnu.vm.jgnux.crypto.Cipher").getDeclaredMethod("doFinal", byte[].class, int.class, int.class);
-						cipherDoFinalBytesIntIntBytesInt=Class.forName("com.distrimind.gnu.vm.jgnux.crypto.Cipher").getDeclaredMethod("doFinal", byte[].class, int.class, int.class, byte[].class, int.class);
-						cipherGetAlgorithm=Class.forName("com.distrimind.gnu.vm.jgnux.crypto.Cipher").getDeclaredMethod("getAlgorithm");
-						cipherGetIv=Class.forName("com.distrimind.gnu.vm.jgnux.crypto.Cipher").getDeclaredMethod("getIV");
-						cipherGetBlockSize=Class.forName("com.distrimind.gnu.vm.jgnux.crypto.Cipher").getDeclaredMethod("getBlockSize");
-						cipherGetOutputSize=Class.forName("com.distrimind.gnu.vm.jgnux.crypto.Cipher").getDeclaredMethod("getOutputSize", int.class);
-						cipherUpdateBytesIntInt=Class.forName("com.distrimind.gnu.vm.jgnux.crypto.Cipher").getDeclaredMethod("update", byte[].class, int.class, int.class);
-						cipherUpdateBytesIntIntBytesInt=Class.forName("com.distrimind.gnu.vm.jgnux.crypto.Cipher").getDeclaredMethod("update", byte[].class, int.class, int.class, byte[].class, int.class);
-						cipherGetInstance=Class.forName("com.distrimind.gnu.vm.jgnux.crypto.Cipher").getDeclaredMethod("getInstance", String.class);
-						IVparamSpec=Class.forName("com.distrimind.gnu.vm.jgnux.crypto.spec.IvParameterSpec").getDeclaredConstructor(byte[].class);
-						constCipherInputStream=Class.forName("com.distrimind.gnu.vm.jgnux.crypto.CipherInputStream").getDeclaredConstructor(InputStream.class, Class.forName("com.distrimind.gnu.vm.jgnux.crypto.Cipher"));
-						consCipherOutputStream=Class.forName("com.distrimind.gnu.vm.jgnux.crypto.CipherOutputStream").getDeclaredConstructor(OutputStream.class, Class.forName("com.distrimind.gnu.vm.jgnux.crypto.Cipher"));
-
-
-						keyGeneratorGetInstance=Class.forName("com.distrimind.gnu.vm.jgnux.crypto.KeyGenerator").getDeclaredMethod("getInstance", String.class);
+						cipherDoFinalBytesInt=UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnux.crypto.Cipher").getDeclaredMethod("doFinal", byte[].class, int.class);
+						cipherDoFinalBytesIntInt=UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnux.crypto.Cipher").getDeclaredMethod("doFinal", byte[].class, int.class, int.class);
+						cipherDoFinalBytesIntIntBytesInt=UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnux.crypto.Cipher").getDeclaredMethod("doFinal", byte[].class, int.class, int.class, byte[].class, int.class);
+						cipherGetAlgorithm=UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnux.crypto.Cipher").getDeclaredMethod("getAlgorithm");
+						cipherGetIv=UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnux.crypto.Cipher").getDeclaredMethod("getIV");
+						cipherGetBlockSize=UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnux.crypto.Cipher").getDeclaredMethod("getBlockSize");
+						cipherGetOutputSize=UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnux.crypto.Cipher").getDeclaredMethod("getOutputSize", int.class);
+						cipherUpdateBytesIntInt=UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnux.crypto.Cipher").getDeclaredMethod("update", byte[].class, int.class, int.class);
+						cipherUpdateBytesIntIntBytesInt=UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnux.crypto.Cipher").getDeclaredMethod("update", byte[].class, int.class, int.class, byte[].class, int.class);
+						cipherGetInstance=UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnux.crypto.Cipher").getDeclaredMethod("getInstance", String.class);
+						IVparamSpec=UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnux.crypto.spec.IvParameterSpec").getDeclaredConstructor(byte[].class);
+						constCipherInputStream=UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnux.crypto.CipherInputStream").getDeclaredConstructor(InputStream.class, UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnux.crypto.Cipher"));
+						consCipherOutputStream=UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnux.crypto.CipherOutputStream").getDeclaredConstructor(OutputStream.class, UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnux.crypto.Cipher"));
 
 
-						WRAP_MODE=(int)Class.forName("com.distrimind.gnu.vm.jgnux.crypto.Cipher").getDeclaredField("WRAP_MODE").get(null);
-						UNWRAP_MODE=(int)Class.forName("com.distrimind.gnu.vm.jgnux.crypto.Cipher").getDeclaredField("UNWRAP_MODE").get(null);
-						SECRET_KEY=(int)Class.forName("com.distrimind.gnu.vm.jgnux.crypto.Cipher").getDeclaredField("SECRET_KEY").get(null);
-
-						engineSetSeed=Class.forName("com.distrimind.gnu.vm.jgnu.security.SecureRandomSpi").getDeclaredMethod("engineSetSeed", byte[].class);
-						engineNextBytes=Class.forName("com.distrimind.gnu.vm.jgnu.security.SecureRandomSpi").getDeclaredMethod("engineNextBytes", byte[].class);
-						engineGenerateSeed=Class.forName("com.distrimind.gnu.vm.jgnu.security.SecureRandomSpi").getDeclaredMethod("engineGenerateSeed", int.class);
-						secureRandomFromSpiConstructor=Class.forName("com.distrimind.gnu.vm.jgnu.security.SecureRandom").getDeclaredConstructor(Class.forName("com.distrimind.gnu.vm.jgnu.security.SecureRandomSpi"), Class.forName("com.distrimind.gnu.vm.jgnu.security.Provider"));
-						constSecureRandom=Class.forName("com.distrimind.gnu.vm.jgnu.security.SecureRandom").getDeclaredConstructor();
-						secureRandomGetInstance=Class.forName("com.distrimind.gnu.vm.jgnu.security.SecureRandom").getDeclaredMethod("getInstance", String.class);
+						keyGeneratorGetInstance=UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnux.crypto.KeyGenerator").getDeclaredMethod("getInstance", String.class);
 
 
-						keyGeneratorGenerateKey=Class.forName("com.distrimind.gnu.vm.jgnux.crypto.KeyGenerator").getDeclaredMethod("generateKey" );
-						keyGeneratorGetAlgorithm=Class.forName("com.distrimind.gnu.vm.jgnux.crypto.KeyGenerator").getDeclaredMethod("getAlgorithm");
-						keyGeneratorGetProvider =Class.forName("com.distrimind.gnu.vm.jgnux.crypto.KeyGenerator").getDeclaredMethod("getProvider");
-						keyGeneratorInit=Class.forName("com.distrimind.gnu.vm.jgnux.crypto.KeyGenerator").getDeclaredMethod("init", int.class, Class.forName("com.distrimind.gnu.vm.jgnu.security.SecureRandom"));
+						WRAP_MODE=(int)UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnux.crypto.Cipher").getDeclaredField("WRAP_MODE").get(null);
+						UNWRAP_MODE=(int)UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnux.crypto.Cipher").getDeclaredField("UNWRAP_MODE").get(null);
+						SECRET_KEY=(int)UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnux.crypto.Cipher").getDeclaredField("SECRET_KEY").get(null);
 
-						keyPairGeneratorGenerateKeyPair=Class.forName("com.distrimind.gnu.vm.jgnu.security.KeyPairGenerator").getDeclaredMethod("generateKeyPair" );
-						keyPairGeneratorGetAlgorithm=Class.forName("com.distrimind.gnu.vm.jgnu.security.KeyPairGenerator").getDeclaredMethod("getAlgorithm");
-						keyPairGeneratorInitRandom=Class.forName("com.distrimind.gnu.vm.jgnu.security.KeyPairGenerator").getDeclaredMethod("initialize", int.class, Class.forName("com.distrimind.gnu.vm.jgnu.security.SecureRandom"));
-						keyPairGeneratorInit=Class.forName("com.distrimind.gnu.vm.jgnu.security.KeyPairGenerator").getDeclaredMethod("initialize", int.class);
+						engineSetSeed=UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnu.security.SecureRandomSpi").getDeclaredMethod("engineSetSeed", byte[].class);
+						engineNextBytes=UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnu.security.SecureRandomSpi").getDeclaredMethod("engineNextBytes", byte[].class);
+						engineGenerateSeed=UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnu.security.SecureRandomSpi").getDeclaredMethod("engineGenerateSeed", int.class);
+						secureRandomFromSpiConstructor=UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnu.security.SecureRandom").getDeclaredConstructor(UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnu.security.SecureRandomSpi"), UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnu.security.Provider"));
+						constSecureRandom=UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnu.security.SecureRandom").getDeclaredConstructor();
+						secureRandomGetInstance=UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnu.security.SecureRandom").getDeclaredMethod("getInstance", String.class);
 
 
-						macGetAlgorithm=Class.forName("com.distrimind.gnu.vm.jgnux.crypto.Mac").getDeclaredMethod("getAlgorithm");
-						macGetMacLength=Class.forName("com.distrimind.gnu.vm.jgnux.crypto.Mac").getDeclaredMethod("getMacLength");
-						macDoFinal=Class.forName("com.distrimind.gnu.vm.jgnux.crypto.Mac").getDeclaredMethod("doFinal");
-						macGetInstance=Class.forName("com.distrimind.gnu.vm.jgnux.crypto.Mac").getDeclaredMethod("getInstance", String.class);
-						macDoFinalBytes=Class.forName("com.distrimind.gnu.vm.jgnux.crypto.Mac").getDeclaredMethod("doFinal", byte[].class);
-						macDoFinalBytesInt=Class.forName("com.distrimind.gnu.vm.jgnux.crypto.Mac").getDeclaredMethod("doFinal", byte[].class, int.class);
-						macInit=Class.forName("com.distrimind.gnu.vm.jgnux.crypto.Mac").getDeclaredMethod("init", Class.forName("com.distrimind.gnu.vm.jgnu.security.Key"));
-						macReset=Class.forName("com.distrimind.gnu.vm.jgnux.crypto.Mac").getDeclaredMethod("reset");
-						macUpdateByte=Class.forName("com.distrimind.gnu.vm.jgnux.crypto.Mac").getDeclaredMethod("update", byte.class);
-						macUpdateBytesIntInt=Class.forName("com.distrimind.gnu.vm.jgnux.crypto.Mac").getDeclaredMethod("update", byte[].class, int.class, int.class);
-						macUpdateByteBuffer=Class.forName("com.distrimind.gnu.vm.jgnux.crypto.Mac").getDeclaredMethod("update", ByteBuffer.class);
-						constSecretKeySpec=Class.forName("com.distrimind.gnu.vm.jgnux.crypto.spec.SecretKeySpec").getDeclaredConstructor(byte[].class, String.class);
-						constSecretKeySpecBytesIntIntString=Class.forName("com.distrimind.gnu.vm.jgnux.crypto.spec.SecretKeySpec").getDeclaredConstructor(byte[].class, int.class, int.class, String.class);
+						keyGeneratorGenerateKey=UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnux.crypto.KeyGenerator").getDeclaredMethod("generateKey" );
+						keyGeneratorGetAlgorithm=UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnux.crypto.KeyGenerator").getDeclaredMethod("getAlgorithm");
+						keyGeneratorGetProvider =UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnux.crypto.KeyGenerator").getDeclaredMethod("getProvider");
+						keyGeneratorInit=UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnux.crypto.KeyGenerator").getDeclaredMethod("init", int.class, UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnu.security.SecureRandom"));
+
+						keyPairGeneratorGenerateKeyPair=UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnu.security.KeyPairGenerator").getDeclaredMethod("generateKeyPair" );
+						keyPairGeneratorGetAlgorithm=UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnu.security.KeyPairGenerator").getDeclaredMethod("getAlgorithm");
+						keyPairGeneratorInitRandom=UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnu.security.KeyPairGenerator").getDeclaredMethod("initialize", int.class, UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnu.security.SecureRandom"));
+						keyPairGeneratorInit=UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnu.security.KeyPairGenerator").getDeclaredMethod("initialize", int.class);
+
+
+						macGetAlgorithm=UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnux.crypto.Mac").getDeclaredMethod("getAlgorithm");
+						macGetMacLength=UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnux.crypto.Mac").getDeclaredMethod("getMacLength");
+						macDoFinal=UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnux.crypto.Mac").getDeclaredMethod("doFinal");
+						macGetInstance=UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnux.crypto.Mac").getDeclaredMethod("getInstance", String.class);
+						macDoFinalBytes=UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnux.crypto.Mac").getDeclaredMethod("doFinal", byte[].class);
+						macDoFinalBytesInt=UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnux.crypto.Mac").getDeclaredMethod("doFinal", byte[].class, int.class);
+						macInit=UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnux.crypto.Mac").getDeclaredMethod("init", UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnu.security.Key"));
+						macReset=UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnux.crypto.Mac").getDeclaredMethod("reset");
+						macUpdateByte=UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnux.crypto.Mac").getDeclaredMethod("update", byte.class);
+						macUpdateBytesIntInt=UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnux.crypto.Mac").getDeclaredMethod("update", byte[].class, int.class, int.class);
+						macUpdateByteBuffer=UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnux.crypto.Mac").getDeclaredMethod("update", ByteBuffer.class);
+						constSecretKeySpec=UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnux.crypto.spec.SecretKeySpec").getDeclaredConstructor(byte[].class, String.class);
+						constSecretKeySpecBytesIntIntString=UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnux.crypto.spec.SecretKeySpec").getDeclaredConstructor(byte[].class, int.class, int.class, String.class);
 						clone=Object.class.getDeclaredMethod("clone");
 
-						keyFactGetInstance=Class.forName("com.distrimind.gnu.vm.jgnu.security.KeyFactory").getDeclaredMethod("getInstance", String.class);
-						keyFactGeneratePrivate=Class.forName("com.distrimind.gnu.vm.jgnu.security.KeyFactory").getDeclaredMethod("generatePrivate", Class.forName("com.distrimind.gnu.vm.jgnu.security.spec.KeySpec"));
-						keyFactGeneratePublic=Class.forName("com.distrimind.gnu.vm.jgnu.security.KeyFactory").getDeclaredMethod("generatePublic", Class.forName("com.distrimind.gnu.vm.jgnu.security.spec.KeySpec"));
-						constPKCS8EncodedKeySpec=Class.forName("com.distrimind.gnu.vm.jgnu.security.spec.PKCS8EncodedKeySpec").getDeclaredConstructor(byte[].class);
-						constX509EncodedKeySpec=Class.forName("com.distrimind.gnu.vm.jgnu.security.spec.X509EncodedKeySpec").getDeclaredConstructor(byte[].class);
+						keyFactGetInstance=UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnu.security.KeyFactory").getDeclaredMethod("getInstance", String.class);
+						keyFactGeneratePrivate=UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnu.security.KeyFactory").getDeclaredMethod("generatePrivate", UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnu.security.spec.KeySpec"));
+						keyFactGeneratePublic=UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnu.security.KeyFactory").getDeclaredMethod("generatePublic", UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnu.security.spec.KeySpec"));
+						constPKCS8EncodedKeySpec=UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnu.security.spec.PKCS8EncodedKeySpec").getDeclaredConstructor(byte[].class);
+						constX509EncodedKeySpec=UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnu.security.spec.X509EncodedKeySpec").getDeclaredConstructor(byte[].class);
 
-						digestDigest=Class.forName("com.distrimind.gnu.vm.jgnu.security.MessageDigest").getDeclaredMethod("digest");
-						digestDigestBytes=Class.forName("com.distrimind.gnu.vm.jgnu.security.MessageDigest").getDeclaredMethod("digest", byte[].class);
-						digestDigestBytesIntInt=Class.forName("com.distrimind.gnu.vm.jgnu.security.MessageDigest").getDeclaredMethod("digest", byte[].class, int.class, int.class);
-						digestGetAlgorithm=Class.forName("com.distrimind.gnu.vm.jgnu.security.MessageDigest").getDeclaredMethod("getAlgorithm");
-						digestGetDigestLength=Class.forName("com.distrimind.gnu.vm.jgnu.security.MessageDigest").getDeclaredMethod("getDigestLength");
-						digestGetProvider=Class.forName("com.distrimind.gnu.vm.jgnu.security.MessageDigest").getDeclaredMethod("getProvider");
-						digestReset=Class.forName("com.distrimind.gnu.vm.jgnu.security.MessageDigest").getDeclaredMethod("reset");
-						digestUpdateByte=Class.forName("com.distrimind.gnu.vm.jgnu.security.MessageDigest").getDeclaredMethod("update", byte.class);
-						digestUpdateBytes=Class.forName("com.distrimind.gnu.vm.jgnu.security.MessageDigest").getDeclaredMethod("update", byte[].class);
-						digestUpdateBytesIntInt=Class.forName("com.distrimind.gnu.vm.jgnu.security.MessageDigest").getDeclaredMethod("update", byte[].class, int.class, int.class);
-						digestUpdateByteBuffer=Class.forName("com.distrimind.gnu.vm.jgnu.security.MessageDigest").getDeclaredMethod("update", ByteBuffer.class);
-						digestGetInstance=Class.forName("com.distrimind.gnu.vm.jgnu.security.MessageDigest").getDeclaredMethod("getInstance", String.class);
-						providerGetName=Class.forName("com.distrimind.gnu.vm.jgnu.security.Provider").getDeclaredMethod("getName");
+						digestDigest=UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnu.security.MessageDigest").getDeclaredMethod("digest");
+						digestDigestBytes=UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnu.security.MessageDigest").getDeclaredMethod("digest", byte[].class);
+						digestDigestBytesIntInt=UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnu.security.MessageDigest").getDeclaredMethod("digest", byte[].class, int.class, int.class);
+						digestGetAlgorithm=UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnu.security.MessageDigest").getDeclaredMethod("getAlgorithm");
+						digestGetDigestLength=UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnu.security.MessageDigest").getDeclaredMethod("getDigestLength");
+						digestGetProvider=UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnu.security.MessageDigest").getDeclaredMethod("getProvider");
+						digestReset=UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnu.security.MessageDigest").getDeclaredMethod("reset");
+						digestUpdateByte=UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnu.security.MessageDigest").getDeclaredMethod("update", byte.class);
+						digestUpdateBytes=UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnu.security.MessageDigest").getDeclaredMethod("update", byte[].class);
+						digestUpdateBytesIntInt=UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnu.security.MessageDigest").getDeclaredMethod("update", byte[].class, int.class, int.class);
+						digestUpdateByteBuffer=UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnu.security.MessageDigest").getDeclaredMethod("update", ByteBuffer.class);
+						digestGetInstance=UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnu.security.MessageDigest").getDeclaredMethod("getInstance", String.class);
+						providerGetName=UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnu.security.Provider").getDeclaredMethod("getName");
 
-						secureRandomSetSeed=Class.forName("com.distrimind.gnu.vm.jgnu.security.SecureRandom").getDeclaredMethod("setSeed", byte[].class);
-						secureRandomNextBytes=Class.forName("com.distrimind.gnu.vm.jgnu.security.SecureRandom").getDeclaredMethod("nextBytes", byte[].class);
-						secureRandomGenerateSeed=Class.forName("com.distrimind.gnu.vm.jgnu.security.SecureRandom").getDeclaredMethod("generateSeed", int.class);
+						secureRandomSetSeed=UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnu.security.SecureRandom").getDeclaredMethod("setSeed", byte[].class);
+						secureRandomNextBytes=UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnu.security.SecureRandom").getDeclaredMethod("nextBytes", byte[].class);
+						secureRandomGenerateSeed=UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnu.security.SecureRandom").getDeclaredMethod("generateSeed", int.class);
 
-						signatureGetAlgorithm=Class.forName("com.distrimind.gnu.vm.jgnu.security.Signature").getDeclaredMethod("getAlgorithm");
-						signatureGetProviderName=Class.forName("com.distrimind.gnu.vm.jgnu.security.Signature").getDeclaredMethod("getProvider");
-						signatureInitSignPriv=Class.forName("com.distrimind.gnu.vm.jgnu.security.Signature").getDeclaredMethod("initSign", Class.forName("com.distrimind.gnu.vm.jgnu.security.PrivateKey"));
-						signatureInitSignPrivRand=Class.forName("com.distrimind.gnu.vm.jgnu.security.Signature").getDeclaredMethod("initSign", Class.forName("com.distrimind.gnu.vm.jgnu.security.PrivateKey"), Class.forName("com.distrimind.gnu.vm.jgnu.security.SecureRandom"));
-						signatureInitVerifPub=Class.forName("com.distrimind.gnu.vm.jgnu.security.Signature").getDeclaredMethod("initVerify", Class.forName("com.distrimind.gnu.vm.jgnu.security.PublicKey"));
-						signatureSign=Class.forName("com.distrimind.gnu.vm.jgnu.security.Signature").getDeclaredMethod("sign");
-						signatureSignBytesIntInt=Class.forName("com.distrimind.gnu.vm.jgnu.security.Signature").getDeclaredMethod("sign", byte[].class, int.class, int.class);
-						signatureUpdateByte=Class.forName("com.distrimind.gnu.vm.jgnu.security.Signature").getDeclaredMethod("update", byte.class);
-						signatureUpdateBytes=Class.forName("com.distrimind.gnu.vm.jgnu.security.Signature").getDeclaredMethod("update", byte[].class);
-						signatureUpdateBytesIntInt=Class.forName("com.distrimind.gnu.vm.jgnu.security.Signature").getDeclaredMethod("update", byte[].class, int.class, int.class);
-						signatureUpdateByteBuffer=Class.forName("com.distrimind.gnu.vm.jgnu.security.Signature").getDeclaredMethod("update", ByteBuffer.class);
-						signatureVerifyBytes=Class.forName("com.distrimind.gnu.vm.jgnu.security.Signature").getDeclaredMethod("verify", byte[].class);
-						signatureVerifyBytesIntInt=Class.forName("com.distrimind.gnu.vm.jgnu.security.Signature").getDeclaredMethod("verify", byte[].class, int.class, int.class);
+						signatureGetAlgorithm=UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnu.security.Signature").getDeclaredMethod("getAlgorithm");
+						signatureGetProviderName=UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnu.security.Signature").getDeclaredMethod("getProvider");
+						signatureInitSignPriv=UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnu.security.Signature").getDeclaredMethod("initSign", UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnu.security.PrivateKey"));
+						signatureInitSignPrivRand=UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnu.security.Signature").getDeclaredMethod("initSign", UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnu.security.PrivateKey"), UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnu.security.SecureRandom"));
+						signatureInitVerifPub=UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnu.security.Signature").getDeclaredMethod("initVerify", UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnu.security.PublicKey"));
+						signatureSign=UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnu.security.Signature").getDeclaredMethod("sign");
+						signatureSignBytesIntInt=UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnu.security.Signature").getDeclaredMethod("sign", byte[].class, int.class, int.class);
+						signatureUpdateByte=UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnu.security.Signature").getDeclaredMethod("update", byte.class);
+						signatureUpdateBytes=UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnu.security.Signature").getDeclaredMethod("update", byte[].class);
+						signatureUpdateBytesIntInt=UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnu.security.Signature").getDeclaredMethod("update", byte[].class, int.class, int.class);
+						signatureUpdateByteBuffer=UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnu.security.Signature").getDeclaredMethod("update", ByteBuffer.class);
+						signatureVerifyBytes=UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnu.security.Signature").getDeclaredMethod("verify", byte[].class);
+						signatureVerifyBytesIntInt=UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnu.security.Signature").getDeclaredMethod("verify", byte[].class, int.class, int.class);
 
 
 
@@ -1296,7 +1297,7 @@ class GnuFunctions {
 	static Object getGnuRandomInterface(final AbstractSecureRandom.AbstractSecureRandomSpi secureRandom) {
 		checkGnuLoaded();
 		try {
-			Class<?> c= Class.forName("com.distrimind.gnu.vm.jgnu.security.SecureRandomSpi");
+			Class<?> c= UtilClassLoader.getLoader().loadClass("com.distrimind.gnu.vm.jgnu.security.SecureRandomSpi");
 			IHForGnuInterface ihForGnuInterface =new IHForGnuInterface(secureRandom);
 			Object o= Proxy.newProxyInstance(c.getClassLoader(),
 					new Class[]{c},

@@ -121,9 +121,16 @@ public abstract class AbstractSecureRandom extends SecureRandom {
 	private static final int maxDataGeneratedBeforeReseed=102400;
 	protected AbstractSecureRandomSpi secureRandomSpi;
 
-	
+	private static Provider getProvider(SecureRandomType type)
+	{
+		try {
+			return type!=null?type.getProvider().getCompatibleProvider():null;
+		} catch (NoSuchProviderException ignored) {
+			return null;
+		}
+	}
 	AbstractSecureRandom(AbstractSecureRandomSpi secureRandomSpi, SecureRandomType type) {
-		super(secureRandomSpi, type!=null?Security.getProvider(type.getProvider().name()):null);
+		super(secureRandomSpi, getProvider(type));
 		this.type = type;
 		this.secureRandomSpi=secureRandomSpi;
 	}

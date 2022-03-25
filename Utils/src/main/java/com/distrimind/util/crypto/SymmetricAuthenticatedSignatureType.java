@@ -152,7 +152,7 @@ public enum SymmetricAuthenticatedSignatureType {
 	}
 
 	public AbstractMac getHMacInstance() throws NoSuchAlgorithmException, NoSuchProviderException {
-		CodeProvider.ensureProviderLoaded(codeProviderForSignature);
+		//CodeProvider.ensureProviderLoaded(codeProviderForSignature);
 		if (codeProviderForSignature == CodeProvider.GNU_CRYPTO) {
 			return new GnuMac(GnuFunctions.macGetInstance(algorithmName));
 		} else if (codeProviderForSignature == CodeProvider.BCFIPS ) {
@@ -163,7 +163,7 @@ public enum SymmetricAuthenticatedSignatureType {
 
 		} else {
 			try {
-				return new JavaNativeMac(javax.crypto.Mac.getInstance(algorithmName, codeProviderForSignature.checkProviderWithCurrentOS().name()));
+				return new JavaNativeMac(javax.crypto.Mac.getInstance(algorithmName, codeProviderForSignature.getCompatibleProvider()));
 			} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
 			    if (replacer!=null)
 			        return replacer.getHMacInstance();
@@ -202,7 +202,7 @@ public enum SymmetricAuthenticatedSignatureType {
 
 	public AbstractKeyGenerator getKeyGenerator(AbstractSecureRandom random, short keySizeBits)
 			throws NoSuchAlgorithmException, NoSuchProviderException {
-		CodeProvider.ensureProviderLoaded(codeProviderForKeyGenerator);
+		//CodeProvider.ensureProviderLoaded(codeProviderForKeyGenerator);
 		AbstractKeyGenerator res ;
 		if (codeProviderForKeyGenerator == CodeProvider.GNU_CRYPTO) {
 			res = new GnuKeyGenerator(this, GnuFunctions.keyGeneratorGetInstance(algorithmName));
@@ -212,7 +212,7 @@ public enum SymmetricAuthenticatedSignatureType {
 
 		} else {
 			try {
-				res = new JavaNativeKeyGenerator(this, javax.crypto.KeyGenerator.getInstance(algorithmName, codeProviderForKeyGenerator.checkProviderWithCurrentOS().name()));
+				res = new JavaNativeKeyGenerator(this, javax.crypto.KeyGenerator.getInstance(algorithmName, codeProviderForKeyGenerator.getCompatibleProvider()));
 			} catch (java.security.NoSuchAlgorithmException e) {
 			    if (replacer!=null)
 			        return replacer.getKeyGenerator(random, keySizeBits);

@@ -47,6 +47,7 @@ import java.io.Serializable;
  *
  */
 public final class IDGeneratorInt implements Serializable {
+	public static final int DEFAULT_RESERVE_SIZE=20;
 	/**
 	 * 
 	 */
@@ -56,14 +57,14 @@ public final class IDGeneratorInt implements Serializable {
 
 	private int m_size = 0;
 
-	private final int m_reserve_max;
+	private final int m_reserve_size;
 
 	// private final int m_id_start;
 	private int m_last_id;
 	private final int idStart;
 
 	public IDGeneratorInt() {
-		this(20, 0);
+		this(DEFAULT_RESERVE_SIZE, 0);
 	}
 
 	int getRealTabSize() {
@@ -75,15 +76,15 @@ public final class IDGeneratorInt implements Serializable {
 	}
 
 	public IDGeneratorInt(int _id_start) {
-		this(20, _id_start);
+		this(DEFAULT_RESERVE_SIZE, _id_start);
 	}
 
-	public IDGeneratorInt(int _reserve_max, int _id_start) {
+	public IDGeneratorInt(int _reserve_size, int _id_start) {
 		// m_id_start=_id_start;
-		if (_reserve_max < 0)
-			_reserve_max = 0;
-		m_reserve_max = _reserve_max;
-		m_ids = new int[m_reserve_max];
+		if (_reserve_size < 0)
+			_reserve_size = 0;
+		m_reserve_size = _reserve_size;
+		m_ids = new int[m_reserve_size];
 		m_last_id = _id_start - 1;
 		idStart = _id_start;
 	}
@@ -96,18 +97,23 @@ public final class IDGeneratorInt implements Serializable {
 				i = 0;
 			else if (m_ids[m_size - 1] < res)
 				i = m_size;
+
+			if (i == -1) {
+				for (i = 0; i < m_size; ++i) {
+					if (m_ids[i] == res) {
+						++res;
+						++m_last_id;
+					} else if (m_ids[i] > res)
+						break;
+				}
+			}
 		}
-		if (i == -1) {
-			for (i = 0; i < m_size; ++i, ++res)
-				if (m_ids[i] > res)
-					break;
-		}
-		if (i < m_size) {
+		if (m_size>0 && i < m_size) {
 			if (getReserve() > 0) {
 				System.arraycopy(m_ids, i, m_ids, i + 1, m_size - i);
 				m_ids[i] = res;
 			} else {
-				int[] ids = new int[m_size + m_reserve_max + 1];
+				int[] ids = new int[m_size + m_reserve_size + 1];
 				System.arraycopy(m_ids, 0, ids, 0, i);
 				ids[i] = res;
 				System.arraycopy(m_ids, i + 1, ids, i, m_size - i);
@@ -116,7 +122,7 @@ public final class IDGeneratorInt implements Serializable {
 			++m_size;
 		} else {
 			if (getReserve() <= 0) {
-				int[] ids = new int[m_size + m_reserve_max + 1];
+				int[] ids = new int[m_size + m_reserve_size + 1];
 				System.arraycopy(m_ids, 0, ids, 0, m_size);
 				m_ids = ids;
 			}
@@ -144,8 +150,8 @@ public final class IDGeneratorInt implements Serializable {
 
 		}
 		if (i < m_size && m_ids[i] == _val) {
-			if (getReserve() > m_reserve_max * 2) {
-				int[] ids = new int[m_size + m_reserve_max];
+			if (getReserve() > m_reserve_size * 2) {
+				int[] ids = new int[m_size + m_reserve_size];
 				if (i > 0)
 					System.arraycopy(m_ids, 0, ids, 0, i);
 				int s = m_size - i - 1;
@@ -153,7 +159,7 @@ public final class IDGeneratorInt implements Serializable {
 					System.arraycopy(m_ids, i + 1, ids, i, s);
 				m_ids = ids;
 			} else {
-				System.arraycopy(m_ids, i + 1, m_ids, i + 1 - 1, m_size - i + 1);
+				System.arraycopy(m_ids, i + 1, m_ids, i, m_size - (i + 1));
 			}
 			--m_size;
 			if (m_size > 0)

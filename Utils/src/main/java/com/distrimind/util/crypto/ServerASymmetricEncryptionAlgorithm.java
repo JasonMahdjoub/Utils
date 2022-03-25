@@ -232,14 +232,18 @@ public class ServerASymmetricEncryptionAlgorithm implements IEncryptionInputAlgo
 		private final AbstractCipher cipher;
 
 		private final int maxPlainTextSizeForEncoding;
-		protected final byte[] buffer=new byte[BUFFER_SIZE];
+		protected byte[] buffer=new byte[BUFFER_SIZE];
 		private final int maxEncryptedPartLength;
 
 		@Override
 		public void zeroize() {
 			Arrays.fill(buffer, (byte)0);
+			buffer=null;
 		}
-
+		@Override
+		public boolean isDestroyed() {
+			return buffer==null;
+		}
 		@SuppressWarnings("deprecation")
 		@Override
 		protected void finalize() {

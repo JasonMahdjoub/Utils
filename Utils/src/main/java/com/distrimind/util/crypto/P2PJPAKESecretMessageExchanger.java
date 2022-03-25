@@ -502,6 +502,11 @@ public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
 	}
 
 	@Override
+	public boolean isDestroyed() {
+		return jpake==null && keyMaterial==null;
+	}
+
+	@Override
 	public boolean isPostQuantumAgreement() {
 		return false;
 	}

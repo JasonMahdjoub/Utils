@@ -35,12 +35,6 @@ knowledge of the CeCILL-C license and that you accept its terms.
 
 package com.distrimind.util.version;
 
-import com.distrimind.util.Utils;
-
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.io.*;
 import java.text.DateFormat;
 import java.time.Instant;
@@ -84,7 +78,7 @@ public class Version extends AbstractVersion<Version> {
 
 	final TreeSet<Description> descriptions = new TreeSet<>();
 
-	private JFrame frame = null;
+	//private JFrame frame = null;
 
 	protected Version() {
 		this("", "", (short)0, (short)0, (short)0, Type.ALPHA, (short)0, new Date(), new Date());
@@ -348,7 +342,7 @@ public class Version extends AbstractVersion<Version> {
 
 		return s.toString();
 	}
-	public JFrame getJFrame() {
+	/*public JFrame getJFrame() {
 		if (frame == null) {
 			final JFrame f = frame = new JFrame("About " + programName);
 			f.add(new JPanel(new BorderLayout()));
@@ -392,7 +386,7 @@ public class Version extends AbstractVersion<Version> {
 			f.setResizable(false);
 		}
 		return frame;
-	}
+	}*/
 
 	public String getProgramName() {
 		return programName;
@@ -447,9 +441,9 @@ public class Version extends AbstractVersion<Version> {
 		}
 	}
 
-	public void screenVersion() {
+	/*public void screenVersion() {
 		getJFrame().setVisible(true);
-	}
+	}*/
 
 	public void setBuildNumber(int _build_number) {
 		buildNumber = _build_number;
@@ -485,8 +479,8 @@ public class Version extends AbstractVersion<Version> {
 		appendVersionPart(s, buildNumber);
 		return s.toString();
 	}
-	public static void main(String args[])
+	/*public static void main(String args[])
 	{
 		Utils.VERSION.screenVersion();
-	}
+	}*/
 }

@@ -59,6 +59,10 @@ public class WrappedSecretData extends WrappedData implements Zeroizable, ISecre
 			toZeroize=false;
 		}
 	}
+	@Override
+	public boolean isDestroyed() {
+		return !toZeroize;
+	}
 	@SuppressWarnings("deprecation")
 	@Override
 	protected void finalize()

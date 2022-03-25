@@ -34,10 +34,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.Provider;
-import java.security.Security;
+import java.security.*;
 
 import com.distrimind.util.OSVersion;
 import com.distrimind.bouncycastle.crypto.CryptoServicesRegistrar;
@@ -62,17 +59,52 @@ public enum CodeProvider {
 	private static volatile Provider bouncyProviderPQC = null;
 	private static volatile boolean init=false;
 
-	static void ensureProviderLoaded(CodeProvider provider) {
-		if (!init)
-		{
-			CodeProvider.init=true;
-			Security.insertProviderAt(new UtilsSecurityProvider(), 1);
+	private static Provider getBouncyCastleProvider() {
+
+		if (bouncyProvider == null) {
+
+			synchronized (CodeProvider.class) {
+				if (bouncyProvider == null) {
+					BouncyCastleProvider bc = new BouncyCastleProvider();
+					bouncyProvider=bc;
+					if (OSVersion.getCurrentOSVersion().getOS()==OS.ANDROID)
+					{
+						if (OSVersion.getCurrentOSVersion().compareTo(OSVersion.ANDROID_28_P)>=0) {
+							Security.insertProviderAt(bc, Security.getProviders().length+1);
+						}
+
+					}
+					else
+						Security.insertProviderAt(bc, Security.getProviders().length+1);
+
+					try {
+						if (bouncyProviderFIPS==null)
+							CryptoServicesRegistrar.setSecureRandom(SecureRandomType.JAVA_STRONG_DRBG.getSingleton(null));
+						else {
+							AbstractSecureRandom random=SecureRandomType.DEFAULT.getSingleton(null);
+							CryptoServicesRegistrar.setSecureRandom(random);
+							com.distrimind.bcfips.crypto.CryptoServicesRegistrar.setSecureRandom(random);
+						}
+					} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
+						e.printStackTrace();
+					}
+
+				}
+			}
 		}
-		switch (provider)
-		{
-			case BCFIPS:
-				if (ensureBCFIPSProviderLoaded())
-				{
+		return bouncyProvider;
+	}
+
+	private static Provider getBCFIPSProvider() {
+
+		if (bouncyProviderFIPS == null) {
+
+			synchronized (CodeProvider.class) {
+
+				if (bouncyProviderFIPS == null) {
+					BouncyCastleFipsProvider bc = new BouncyCastleFipsProvider();
+					Security.insertProviderAt(bc, Security.getProviders().length+1);
+					bouncyProviderFIPS=bc;
 					try {
 						if (bouncyProvider==null)
 						{
@@ -87,74 +119,12 @@ public enum CodeProvider {
 						e.printStackTrace();
 					}
 				}
-				break;
-			case BCPQC:
-				ensureBQCProviderLoaded();
-				break;
-			case BC:
-				if (ensureBouncyCastleProviderLoaded())
-				{
-					try {
-						if (bouncyProviderFIPS==null)
-							CryptoServicesRegistrar.setSecureRandom(SecureRandomType.JAVA_STRONG_DRBG.getSingleton(null));
-						else {
-							AbstractSecureRandom random=SecureRandomType.DEFAULT.getSingleton(null);
-							CryptoServicesRegistrar.setSecureRandom(random);
-							com.distrimind.bcfips.crypto.CryptoServicesRegistrar.setSecureRandom(random);
-						}
-					} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
-						e.printStackTrace();
-					}
-				}
-
-				break;
-			case GNU_CRYPTO:
-				GnuFunctions.checkGnuLoaded();
-				break;
-		}
-	}
-
-	private static boolean ensureBouncyCastleProviderLoaded() {
-
-		if (bouncyProvider == null) {
-
-			synchronized (CodeProvider.class) {
-				if (bouncyProvider == null) {
-					BouncyCastleProvider bc = new BouncyCastleProvider();
-					bouncyProvider=bc;
-					if (OSVersion.getCurrentOSVersion().getOS()==OS.ANDROID)
-					{
-						if (OSVersion.getCurrentOSVersion().compareTo(OSVersion.ANDROID_28_P)<0) {
-							Security.insertProviderAt(bc, Security.getProviders().length+1);
-						}
-					}
-					else
-						Security.insertProviderAt(bc, Security.getProviders().length+1);
-					return true;
-				}
 			}
 		}
-		return false;
+		return bouncyProviderFIPS;
 	}
 
-	private static boolean ensureBCFIPSProviderLoaded() {
-
-		if (bouncyProviderFIPS == null) {
-
-			synchronized (CodeProvider.class) {
-
-				if (bouncyProviderFIPS == null) {
-					BouncyCastleFipsProvider bc = new BouncyCastleFipsProvider();
-					Security.insertProviderAt(bc, Security.getProviders().length+1);
-					bouncyProviderFIPS=bc;
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-
-	private static void ensureBQCProviderLoaded() {
+	private static Provider getBQCProvider() {
 
 		if (bouncyProviderPQC == null) {
 
@@ -167,24 +137,51 @@ public enum CodeProvider {
 				}
 			}
 		}
+		return bouncyProviderPQC;
+	}
+
+	public String getCompatibleCodeProviderName()
+	{
+		return convertProviderToCompatibleProviderWithCurrentOS().name();
+	}
+	public Provider getCompatibleProvider() throws NoSuchProviderException {
+		if (!init)
+		{
+			CodeProvider.init=true;
+			Security.insertProviderAt(new UtilsSecurityProvider(), 1);
+		}
+		switch (this)
+		{
+			case BCFIPS:
+				return getBCFIPSProvider();
+			case BCPQC:
+				return getBQCProvider();
+			case BC:
+				return getBouncyCastleProvider();
+			case GNU_CRYPTO:
+				GnuFunctions.checkGnuLoaded();
+			default: {
+				Provider p = Security.getProvider(getCompatibleCodeProviderName());
+				if (p == null)
+					throw new NoSuchProviderException();
+				return p;
+			}
+		}
 	}
 
 
 
-	CodeProvider checkProviderWithCurrentOS()
+	public CodeProvider convertProviderToCompatibleProviderWithCurrentOS()
 	{
 		if (OSVersion.getCurrentOSVersion()!=null && OSVersion.getCurrentOSVersion().getOS()==OS.ANDROID)
 		{
-			CodeProvider cp;
-			if (OSVersion.getCurrentOSVersion().compareTo(OSVersion.ANDROID_28_P)<0) {
-				cp=BC;
+			if (this==SUN || this==SunJCE || this==SunJSSE || this==SunRsaSign || this==SunEC) {
+				if (OSVersion.getCurrentOSVersion().compareTo(OSVersion.ANDROID_28_P) < 0) {
+					return BC;
+				} else {
+					return AndroidOpenSSL;
+				}
 			}
-			else {
-				cp=AndroidOpenSSL;
-			}
-
-			if (this==SUN || this==SunJCE || this==SunJSSE || this==SunRsaSign || this==SunEC)
-				return cp;
 		}
 		return this;
 	}

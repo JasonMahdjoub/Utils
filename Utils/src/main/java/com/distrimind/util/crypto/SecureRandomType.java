@@ -158,7 +158,7 @@ public enum SecureRandomType {
 	 */
 	public AbstractSecureRandom getInstance(byte[] nonce, byte[] personalizationString)
 			throws NoSuchAlgorithmException, NoSuchProviderException {
-		CodeProvider.ensureProviderLoaded(provider);
+		//CodeProvider.ensureProviderLoaded(provider);
 		AbstractSecureRandom res;
 		if (gnuVersion) {
 			if (algorithmName == null)
@@ -166,14 +166,15 @@ public enum SecureRandomType {
 			else
 				res=new GnuSecureRandom(this, GnuFunctions.secureRandomGetInstance(algorithmName));
 		} else {
+			if (nonce==null)
+			{
+				nonce=SecureRandomType.nonce;
+			}
 			if (BC_FIPS_APPROVED.algorithmName.equals(this.algorithmName) || BC_FIPS_APPROVED_FOR_KEYS.algorithmName.equals(this.algorithmName) || BC_FIPS_APPROVED_FOR_KEYS_With_NATIVE_PRNG.algorithmName.equals(this.algorithmName))
 			{
 
 				SecureRandom srSource= BC_FIPS_APPROVED_FOR_KEYS_With_NATIVE_PRNG.algorithmName.equals(this.algorithmName)?SecureRandomType.NativePRNG.getSingleton(null):SecureRandomType.JAVA_STRONG_DRBG.getSingleton(null);
-				if (nonce==null)
-				{
-					nonce=SecureRandomType.nonce;
-				}
+
 				EntropySourceProvider entSource = new BasicEntropySourceProvider(srSource, true);
 				FipsDRBG.Builder drgbBldr = FipsDRBG.SHA512_HMAC.fromEntropySource(entSource)
 						.setSecurityStrength(256)
@@ -189,10 +190,7 @@ public enum SecureRandomType {
 			else if (DEFAULT_BC_FIPS_APPROVED.equals(this))
 			{
 				SecureRandom srSource=SecureRandomType.JAVA_STRONG_DRBG.getSingleton(null);
-				if (nonce==null)
-				{
-					nonce=SecureRandomType.nonce;
-				}
+
 
 				EntropySourceProvider entSource = new BasicEntropySourceProvider(srSource, true);
 				FipsDRBG.Builder drgbBldr = FipsDRBG.SHA512.fromEntropySource(entSource)
@@ -223,7 +221,7 @@ public enum SecureRandomType {
 				if (OSVersion.getCurrentOSVersion().getOS()==OS.ANDROID)
 					res=new JavaNativeSecureRandom(this, new SecureRandom());
 				else
-					res=new JavaNativeSecureRandom(this, SecureRandom.getInstance(algorithmName, provider.checkProviderWithCurrentOS().name()));
+					res=new JavaNativeSecureRandom(this, SecureRandom.getInstance(algorithmName, provider.getCompatibleProvider()));
 			}
 		}
 		if (nonce!=null) {
@@ -366,11 +364,11 @@ public enum SecureRandomType {
 							if (OSVersion.getCurrentOSVersion().getOS()==OS.ANDROID)
 								sr=new SecureRandom();
 							else
-								sr=SecureRandom.getInstance("NativePRNG", CodeProvider.SUN.checkProviderWithCurrentOS().name());
+								sr=SecureRandom.getInstance("NativePRNG", CodeProvider.SUN.getCompatibleProvider());
 						} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
 							try
 							{
-								sr=SecureRandom.getInstance("SHA1PRNG", CodeProvider.SUN.checkProviderWithCurrentOS().name());
+								sr=SecureRandom.getInstance("SHA1PRNG", CodeProvider.SUN.getCompatibleProvider());
 							}
 							catch(NoSuchAlgorithmException | NoSuchProviderException e2)
 							{
@@ -386,7 +384,7 @@ public enum SecureRandomType {
 							if (Objects.requireNonNull(OSVersion.getCurrentOSVersion()).getOS()==OS.ANDROID)
 								sr=new SecureRandom();
 							else
-								sr=SecureRandom.getInstance("SHA1PRNG", CodeProvider.SUN.checkProviderWithCurrentOS().name());
+								sr=SecureRandom.getInstance("SHA1PRNG", CodeProvider.SUN.getCompatibleProvider());
 						}
 						catch(NoSuchAlgorithmException | NoSuchProviderException e2)
 						{
@@ -417,7 +415,7 @@ public enum SecureRandomType {
 					{
 						nativeNonBlockingSeedInitialized=true;
 						try {
-							nativeNonBlockingSeed=new JavaNativeSecureRandom(NativePRNGNonBlocking, SecureRandom.getInstance("NativePRNGNonBlocking", CodeProvider.SUN.checkProviderWithCurrentOS().name()), false);
+							nativeNonBlockingSeed=new JavaNativeSecureRandom(NativePRNGNonBlocking, SecureRandom.getInstance("NativePRNGNonBlocking", CodeProvider.SUN.getCompatibleProvider()), false);
 						} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
 							nativeNonBlockingSeed=null;
 						}
@@ -488,7 +486,7 @@ public enum SecureRandomType {
 						if (!nativeNonBlockingSeedInitialized)
 						{
 							try {
-								nativeNonBlockingSeed=new JavaNativeSecureRandom(NativePRNGNonBlocking, SecureRandom.getInstance("NativePRNGNonBlocking", CodeProvider.SUN.checkProviderWithCurrentOS().name()), false);
+								nativeNonBlockingSeed=new JavaNativeSecureRandom(NativePRNGNonBlocking, SecureRandom.getInstance("NativePRNGNonBlocking", CodeProvider.SUN.getCompatibleProvider()), false);
 							} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
 								nativeNonBlockingSeed=null;
 							}

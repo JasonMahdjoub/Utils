@@ -34,6 +34,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
+import com.distrimind.util.UtilClassLoader;
 import com.distrimind.util.io.Integrity;
 import com.distrimind.util.io.MessageExternalizationException;
 
@@ -212,7 +213,7 @@ public final class JavaNativeCipher extends AbstractCipher {
 		if (!SymmetricEncryptionType.invalidOSForChaCha) {
 			try {
 				//noinspection unchecked
-				c = (Constructor<? extends AlgorithmParameterSpec>) Class.forName("javax.crypto.spec.ChaCha20ParameterSpec").getConstructor(byte[].class, int.class);
+				c = (Constructor<? extends AlgorithmParameterSpec>) UtilClassLoader.getLoader().loadClass("javax.crypto.spec.ChaCha20ParameterSpec").getConstructor(byte[].class, int.class);
 			} catch (NoSuchMethodException | ClassNotFoundException e) {
 				e.printStackTrace();
 

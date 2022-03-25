@@ -61,6 +61,12 @@ public class WrappedSecretString extends WrappedString implements Zeroizable, IS
 			toZeroize=false;
 		}
 	}
+
+	@Override
+	public boolean isDestroyed() {
+		return !toZeroize;
+	}
+
 	@SuppressWarnings("deprecation")
 	@Override
 	protected void finalize()

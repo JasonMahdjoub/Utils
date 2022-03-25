@@ -44,14 +44,19 @@ import java.io.IOException;
  */
 public class AggregatedP2PLoginAgreements extends P2PLoginAgreement {
 
-	private final P2PLoginAgreement[] loginAgreements;
+	private P2PLoginAgreement[] loginAgreements;
 
 	@Override
 	public void zeroize() {
 		if (loginAgreements!=null) {
 			for (P2PLoginAgreement la: loginAgreements)
 				la.zeroize();
+			loginAgreements=null;
 		}
+	}
+	@Override
+	public boolean isDestroyed() {
+		return loginAgreements==null;
 	}
 
 	@Override

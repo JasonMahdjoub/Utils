@@ -76,7 +76,10 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 			externalCounter=null;
 		}
 	}
-
+	@Override
+	public boolean isDestroyed() {
+		return super.isDestroyed() && externalCounter==null;
+	}
 	@Override
 	public boolean isPostQuantumEncryption() {
 		return key.isPostQuantumKey();

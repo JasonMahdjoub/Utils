@@ -247,7 +247,7 @@ public enum ASymmetricKeyWrapperType {
 				ASymmetricPublicKey publicKey = (ASymmetricPublicKey) ipublicKey;
 				if (publicKey.getAuthenticatedSignatureAlgorithmType() != null)
 					throw new IllegalArgumentException();
-				CodeProvider.ensureProviderLoaded(provider);
+				//CodeProvider.ensureProviderLoaded(provider);
 				if (name().startsWith("BCPQC_MCELIECE_")) {
 					if (!publicKey.getEncryptionAlgorithmType().name().equals(name()))
 						throw new IllegalArgumentException(publicKey.getEncryptionAlgorithmType().toString()+" ; "+name());
@@ -318,10 +318,10 @@ public enum ASymmetricKeyWrapperType {
 		{
 			CodeProvider.ensureBouncyCastleProviderLoaded();
 
-			c=javax.crypto.Cipher.getInstance(algorithmName, CodeProvider.BCFIPS.name());
+			c=javax.crypto.Cipher.getInstance(algorithmName, CodeProvider.BCFIPS.getCompatibleProviderName());
 		}*/
 						else
-							c = javax.crypto.Cipher.getInstance(algorithmName, provider.checkProviderWithCurrentOS().name());
+							c = javax.crypto.Cipher.getInstance(algorithmName, provider.getCompatibleProvider());
 
 						if (withParameters) {
 							c.init(javax.crypto.Cipher.WRAP_MODE, publicKey.toJavaNativeKey(),
@@ -416,7 +416,7 @@ public enum ASymmetricKeyWrapperType {
 	private SymmetricSecretKey unwrapKey(ASymmetricPrivateKey privateKey, byte[] keyToUnwrap, SymmetricEncryptionType encryptionType, SymmetricAuthenticatedSignatureType signatureType, short keySize) throws IOException
 	{
 		try {
-			CodeProvider.ensureProviderLoaded(getCodeProvider());
+			//CodeProvider.ensureProviderLoaded(getCodeProvider());
 			if ((privateKey.getAuthenticatedSignatureAlgorithmType() != null && ((provider == CodeProvider.GNU_CRYPTO) != (privateKey.getAuthenticatedSignatureAlgorithmType().getCodeProviderForSignature() == CodeProvider.GNU_CRYPTO)))
 					|| (privateKey.getEncryptionAlgorithmType() != null && ((provider == CodeProvider.GNU_CRYPTO) != (privateKey.getEncryptionAlgorithmType().getCodeProviderForEncryption() == CodeProvider.GNU_CRYPTO)))
 					|| (encryptionType != null && (provider == CodeProvider.GNU_CRYPTO) != (encryptionType.getCodeProviderForEncryption() == CodeProvider.GNU_CRYPTO))
@@ -465,10 +465,10 @@ public enum ASymmetricKeyWrapperType {
 {
 	CodeProvider.ensureBouncyCastleProviderLoaded();
 
-	c=javax.crypto.Cipher.getInstance(algorithmName, CodeProvider.BCFIPS.name());
+	c=javax.crypto.Cipher.getInstance(algorithmName, CodeProvider.BCFIPS.getCompatibleProviderName());
 }*/
 				else
-					c = javax.crypto.Cipher.getInstance(algorithmName, provider.checkProviderWithCurrentOS().name());
+					c = javax.crypto.Cipher.getInstance(algorithmName, provider.getCompatibleProvider());
 
 				byte[] wrappedKey;
 				if (withParameters) {

@@ -162,20 +162,20 @@ public enum EllipticCurveDiffieHellmanType {
 	
 	AbstractKeyAgreement getKeyAgreementInstance(SymmetricEncryptionType type) throws NoSuchAlgorithmException, NoSuchProviderException
 	{
-		CodeProvider.ensureProviderLoaded(codeProvider);
+		//CodeProvider.ensureProviderLoaded(codeProvider);
 		if ((codeProvider==CodeProvider.BC || codeProvider==CodeProvider.BCFIPS) && !isXDHType())
 			return new BCKeyAgreement(type, this);
 		else
-			return new JavaNativeKeyAgreement(type, KeyAgreement.getInstance(getKeyAgreementAlgorithmName(), getCodeProvider().checkProviderWithCurrentOS().name()));
+			return new JavaNativeKeyAgreement(type, KeyAgreement.getInstance(getKeyAgreementAlgorithmName(), getCodeProvider().getCompatibleProvider()));
 	}
 	AbstractKeyAgreement getKeyAgreementInstance(SymmetricAuthenticatedSignatureType type) throws NoSuchAlgorithmException, NoSuchProviderException
 	{
-		CodeProvider.ensureProviderLoaded(codeProvider);
+		//CodeProvider.ensureProviderLoaded(codeProvider);
 		if ((codeProvider==CodeProvider.BC || codeProvider==CodeProvider.BCFIPS) && !isXDHType()) {
 			return new BCKeyAgreement(type, this);
 		}
 		else
-			return new JavaNativeKeyAgreement(type, KeyAgreement.getInstance(getKeyAgreementAlgorithmName(), getCodeProvider().checkProviderWithCurrentOS().name()));
+			return new JavaNativeKeyAgreement(type, KeyAgreement.getInstance(getKeyAgreementAlgorithmName(), getCodeProvider().getCompatibleProvider()));
 	}
 	
 	public boolean isECCDHType()

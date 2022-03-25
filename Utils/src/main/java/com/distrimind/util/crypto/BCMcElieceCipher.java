@@ -429,7 +429,12 @@ public class BCMcElieceCipher extends AbstractCipher{
 			{
 				for (int[] a : publicKeyParameters.getG().getIntArray())
 					Arrays.fill(a, 0);
+				publicKeyParameters=null;
 			}
+		}
+		@Override
+		public boolean isDestroyed() {
+			return publicKeyParameters==null;
 		}
 
 		@Override
@@ -474,7 +479,12 @@ public class BCMcElieceCipher extends AbstractCipher{
 			{
 				for (int[] a : publicKeyParameters.getG().getIntArray())
 					Arrays.fill(a, 0);
+				publicKeyParameters=null;
 			}
+		}
+		@Override
+		public boolean isDestroyed() {
+			return publicKeyParameters==null;
 		}
 
 

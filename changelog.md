@@ -1,6 +1,6 @@
 Utils
 =====
-5.22.2 STABLE (Build: 3798) (from 04/01/2016 to 07/02/2022)
+5.22.3 STABLE (Build: 3884) (from 04/01/2016 to 23/03/2022)
 
 # Creator(s):
 * Jason MAHDJOUB
@@ -9,6 +9,16 @@ Utils
 * Jason MAHDJOUB (Entered in the team at 04/01/2016)
 
 # Changes:
+
+
+### 5.22.3 STABLE (23/03/2022)
+#### Internal change(s)
+* Improve Utils class loader
+* Make MultiFormatProperties use UTF-8 as default encoding
+* Zeroizable interface now extends Destroyable interface
+#### Bug fixe(s)
+* Fix compatibility problems with Android
+* Fix array index error into IDGeneratorInt
 
 
 ### 5.22.2 STABLE (07/02/2022)

@@ -127,7 +127,10 @@ public class HybridASymmetricPrivateKey extends AbstractKey implements IHybridKe
 		nonPQCPrivateKey=null;
 		PQCPrivateKey=null;
 	}
-
+	@Override
+	public boolean isDestroyed() {
+		return nonPQCPrivateKey==null && PQCPrivateKey==null;
+	}
 
 	@Override
 	public WrappedSecretData getKeyBytes() {

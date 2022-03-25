@@ -186,7 +186,7 @@ public enum SymmetricEncryptionType {
 
 	private final short keySizeBytes;
 
-	private final CodeProvider codeProviderForEncryption, CodeProviderForKeyGenerator;
+	private final CodeProvider codeProviderForEncryption, codeProviderForKeyGenerator;
 
 	private final SymmetricAuthenticatedSignatureType defaultSignature;
 	
@@ -255,7 +255,7 @@ public enum SymmetricEncryptionType {
 		this.keySizeBits = keySizeBits;
 		this.keySizeBytes = keySizeBytes;
 		this.codeProviderForEncryption = codeProviderForEncryption;
-		this.CodeProviderForKeyGenerator=codeProviderForKeyGenerator;
+		this.codeProviderForKeyGenerator =codeProviderForKeyGenerator;
 		this.defaultSignature = defaultSignature;
 		this.bcAlgorithm=bcAlgorithm;
 		this.blockSizeBits=blockSize;
@@ -284,7 +284,7 @@ public enum SymmetricEncryptionType {
 
 	@SuppressWarnings("CopyConstructorMissesField")
 	SymmetricEncryptionType(SymmetricEncryptionType type) {
-		this(type.algorithmName, type.blockMode, type.padding, type.keySizeBits, type.keySizeBytes, type.codeProviderForEncryption, type.CodeProviderForKeyGenerator,
+		this(type.algorithmName, type.blockMode, type.padding, type.keySizeBits, type.keySizeBytes, type.codeProviderForEncryption, type.codeProviderForKeyGenerator,
 				type.defaultSignature, type.bcAlgorithm, type.blockSizeBits, type.authenticated, type.encodingSpeedIndexJava7, type.decodingSpeedIndexJava7, type.encodingSpeedIndexJava8, type.decodingSpeedIndexJava8, type.encodingSpeedIndexJava9, type.decodingSpeedIndexJava9,
 				type.timingAttackPossible, type.cacheAttackPossible, type.powerMonitoringAttackPossible, type.electromagneticAttackPossible, type.acousticAttackPossible, type.dfaAttackPossible, type.ivLengthBytes, type.maxIVGenerationWithOneSecretKey);
 	}
@@ -316,14 +316,14 @@ public enum SymmetricEncryptionType {
 	}
 
 	public AbstractCipher getCipherInstance() throws IOException {
-		CodeProvider.ensureProviderLoaded(codeProviderForEncryption);
+		//CodeProvider.ensureProviderLoaded(codeProviderForEncryption);
 		try {
 			if (codeProviderForEncryption == CodeProvider.GNU_CRYPTO) {
 				return new GnuCipher(GnuFunctions.cipherGetInstance(getCipherAlgorithmName()));
 
 			} else if (codeProviderForEncryption == CodeProvider.BCFIPS || codeProviderForEncryption == CodeProvider.BC) {
 				if (this.equals(BC_CHACHA20_POLY1305))
-					return new JavaNativeCipher(this, Cipher.getInstance(getCipherAlgorithmName(), codeProviderForEncryption.name()));
+					return new JavaNativeCipher(this, Cipher.getInstance(getCipherAlgorithmName(), codeProviderForEncryption.getCompatibleProvider()));
 				else
 					return new BCCipher(this);
 
@@ -334,7 +334,7 @@ public enum SymmetricEncryptionType {
 					return BC_CHACHA20_POLY1305.getCipherInstance();
 				if (OS.getCurrentJREVersionDouble() < 1.8 && this.equals(AES_GCM))
 					return BC_FIPS_AES_GCM.getCipherInstance();
-				return new JavaNativeCipher(this, Cipher.getInstance(getCipherAlgorithmName(), codeProviderForEncryption.name()));
+				return new JavaNativeCipher(this, Cipher.getInstance(getCipherAlgorithmName(), codeProviderForEncryption.getCompatibleProvider()));
 			}
 		}
 		catch(NoSuchAlgorithmException | NoSuchPaddingException | NoSuchProviderException e)
@@ -357,11 +357,11 @@ public enum SymmetricEncryptionType {
 
 	public AbstractKeyGenerator getKeyGenerator(AbstractSecureRandom random, short keySizeBits)
 			throws NoSuchAlgorithmException, NoSuchProviderException {
-		CodeProvider.ensureProviderLoaded(CodeProviderForKeyGenerator);
+		//CodeProvider.ensureProviderLoaded(codeProviderForKeyGenerator);
 		AbstractKeyGenerator res ;
-		if (CodeProviderForKeyGenerator == CodeProvider.GNU_CRYPTO) {
+		if (codeProviderForKeyGenerator == CodeProvider.GNU_CRYPTO) {
 			res = new GnuKeyGenerator(this, GnuFunctions.keyGeneratorGetInstance(algorithmName));
-		} else if (CodeProviderForKeyGenerator == CodeProvider.BCFIPS || CodeProviderForKeyGenerator == CodeProvider.BC) {
+		} else if (codeProviderForKeyGenerator == CodeProvider.BCFIPS || codeProviderForKeyGenerator == CodeProvider.BC) {
 
 			res = new BCKeyGenerator(this);
 
@@ -375,7 +375,7 @@ public enum SymmetricEncryptionType {
 			String alg=algorithmName;
 			if (alg.equals(CHACHA20_POLY1305.algorithmName))
 				alg=CHACHA20_NO_RANDOM_ACCESS.algorithmName;
-			res = new JavaNativeKeyGenerator(this, javax.crypto.KeyGenerator.getInstance(alg, CodeProviderForKeyGenerator.checkProviderWithCurrentOS().name()));
+			res = new JavaNativeKeyGenerator(this, javax.crypto.KeyGenerator.getInstance(alg, codeProviderForKeyGenerator.getCompatibleProvider()));
 		}
 		res.init(keySizeBits, random);
 		return res;
@@ -390,7 +390,7 @@ public enum SymmetricEncryptionType {
 		return codeProviderForEncryption;
 	}
 	public CodeProvider getCodeProviderForKeyGenerator() {
-		return CodeProviderForKeyGenerator;
+		return codeProviderForKeyGenerator;
 	}
 
 	public SymmetricAuthenticatedSignatureType getDefaultSignatureAlgorithm() {
@@ -402,9 +402,9 @@ public enum SymmetricEncryptionType {
 	}
 
 	public SymmetricSecretKey getSymmetricSecretKey(byte[] secretKey, short keySizeBits) {
-		if (CodeProviderForKeyGenerator == CodeProvider.BCFIPS || CodeProviderForKeyGenerator == CodeProvider.SunJCE) {
+		if (codeProviderForKeyGenerator == CodeProvider.BCFIPS || codeProviderForKeyGenerator == CodeProvider.SunJCE) {
 			return new SymmetricSecretKey(this, new SecretKeySpec(secretKey, getAlgorithmName()), keySizeBits);
-		} else if (CodeProviderForKeyGenerator == CodeProvider.GNU_CRYPTO) {
+		} else if (codeProviderForKeyGenerator == CodeProvider.GNU_CRYPTO) {
 			return new SymmetricSecretKey(this,GnuFunctions.secretKeySpecGetInstance(secretKey, getAlgorithmName()), keySizeBits);
 		} else
 			throw new IllegalAccessError();

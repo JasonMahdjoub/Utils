@@ -81,9 +81,9 @@ public final class BCKeyGenerator extends AbstractKeyGenerator {
 	@Override
 	public String getProvider() {
 		if (encryptionType==null)
-			return signatureType.getCodeProviderForKeyGenerator().name();
+			return signatureType.getCodeProviderForKeyGenerator().getCompatibleCodeProviderName();
 		else
-			return encryptionType.getCodeProviderForKeyGenerator().name();
+			return encryptionType.getCodeProviderForKeyGenerator().getCompatibleCodeProviderName();
 	}
 
 	

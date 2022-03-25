@@ -51,7 +51,7 @@ import java.util.Arrays;
  * @since Utils 4.5.0
  */
 public class HybridKeyAgreement extends KeyAgreement{
-	private final KeyAgreement nonPQCKeyAgreement, PQCKeyAgreement;
+	private KeyAgreement nonPQCKeyAgreement, PQCKeyAgreement;
 	private SymmetricSecretKey secretKey=null;
 
 	protected HybridKeyAgreement(KeyAgreement nonPQCKeyAgreement, KeyAgreement PQCKeyAgreement)
@@ -186,9 +186,17 @@ public class HybridKeyAgreement extends KeyAgreement{
 
 	@Override
 	public void zeroize() {
-		nonPQCKeyAgreement.zeroize();
-		PQCKeyAgreement.zeroize();
+		if (nonPQCKeyAgreement!=null)
+			nonPQCKeyAgreement.zeroize();
+		if (PQCKeyAgreement!=null)
+			PQCKeyAgreement.zeroize();
+		nonPQCKeyAgreement=null;
+		PQCKeyAgreement=null;
 		this.secretKey=null;
+	}
+	@Override
+	public boolean isDestroyed() {
+		return secretKey==null && nonPQCKeyAgreement==null && PQCKeyAgreement==null;
 	}
 
 	@Override

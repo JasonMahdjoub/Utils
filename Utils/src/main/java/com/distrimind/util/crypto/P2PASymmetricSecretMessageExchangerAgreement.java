@@ -43,6 +43,11 @@ public class P2PASymmetricSecretMessageExchangerAgreement extends P2PLoginAgreem
         charPassword=null;
     }
 
+    @Override
+    public boolean isDestroyed() {
+        return bytesPassword==null && charPassword==null;
+    }
+
 
 
     P2PASymmetricSecretMessageExchangerAgreement(AbstractSecureRandom secureRandom, MessageDigestType messageDigestType, PasswordHashType passwordHashType,

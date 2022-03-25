@@ -34,6 +34,8 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
+import com.distrimind.util.UtilClassLoader;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.security.NoSuchAlgorithmException;
@@ -67,7 +69,7 @@ public final class GnuMac extends AbstractMac {
 			return mac.equals(((GnuMac) _obj).mac);
 		else {
 			try {
-				if (Class.forName("com.distrimind.gnuvm.jgnux.crypto.Mac").isAssignableFrom(_obj.getClass()))
+				if (UtilClassLoader.getLoader().loadClass("com.distrimind.gnuvm.jgnux.crypto.Mac").isAssignableFrom(_obj.getClass()))
 					return mac.equals(_obj);
 				else
 					return false;

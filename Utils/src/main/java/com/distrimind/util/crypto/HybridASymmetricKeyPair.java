@@ -183,6 +183,10 @@ public class HybridASymmetricKeyPair extends AbstractKeyPair<HybridASymmetricPri
 		privateKey=null;
 		publicKey=null;
 	}
+	@Override
+	public boolean isDestroyed() {
+		return privateKey==null && publicKey==null;
+	}
 
 	@Override
 	public HybridASymmetricPrivateKey getASymmetricPrivateKey() {

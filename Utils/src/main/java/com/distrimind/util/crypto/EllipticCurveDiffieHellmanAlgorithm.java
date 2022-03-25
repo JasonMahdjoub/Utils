@@ -101,6 +101,11 @@ public class EllipticCurveDiffieHellmanAlgorithm extends KeyAgreement {
 
 	}
 
+	@Override
+	public boolean isDestroyed() {
+		return derivedKey==null && myKeyPair==null;
+	}
+
 
 
 	public void reset() {
@@ -122,9 +127,9 @@ public class EllipticCurveDiffieHellmanAlgorithm extends KeyAgreement {
 		if (t== ASymmetricAuthenticatedSignatureType.BC_FIPS_Ed448 || t== ASymmetricAuthenticatedSignatureType.BC_FIPS_Ed25519) {
 			KeyPairGenerator kpg ;
 			if (t== ASymmetricAuthenticatedSignatureType.BC_FIPS_Ed448)
-				kpg= KeyPairGenerator.getInstance("X448", CodeProvider.BCFIPS.name());
+				kpg= KeyPairGenerator.getInstance("X448", CodeProvider.BCFIPS.getCompatibleProvider());
 			else
-				kpg= KeyPairGenerator.getInstance("X25519", CodeProvider.BCFIPS.name());
+				kpg= KeyPairGenerator.getInstance("X25519", CodeProvider.BCFIPS.getCompatibleProvider());
 
 			JavaNativeKeyPairGenerator res = new JavaNativeKeyPairGenerator(t, kpg);
 			res.initialize(keySize, System.currentTimeMillis(), Long.MAX_VALUE, randomForKeys);
@@ -154,7 +159,7 @@ public class EllipticCurveDiffieHellmanAlgorithm extends KeyAgreement {
 	}
 
 	private void setDistantPublicKey(byte[] distantPublicKeyBytes, SymmetricEncryptionType symmetricEncryptionType, SymmetricAuthenticatedSignatureType symmetricSignatureType, byte[] keyingMaterial) throws IOException {
-		CodeProvider.ensureProviderLoaded(type.getCodeProvider());
+		//CodeProvider.ensureProviderLoaded(type.getCodeProvider());
 		try
 		{
 			valid=false;

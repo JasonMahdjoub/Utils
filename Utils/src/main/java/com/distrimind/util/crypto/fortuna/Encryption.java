@@ -17,7 +17,7 @@ class Encryption {
 
     public Encryption() {
         try {
-            this.cipher = Cipher.getInstance("AES/ECB/NoPadding", CodeProvider.SunJCE.name());
+            this.cipher = Cipher.getInstance("AES/ECB/NoPadding", CodeProvider.SunJCE.getCompatibleProvider());
             maxKeySize=Cipher.getMaxAllowedKeyLength("AES");
         } catch (NoSuchAlgorithmException | NoSuchProviderException | NoSuchPaddingException e) {
             throw new IllegalStateException(e);

@@ -34,6 +34,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
+import com.distrimind.util.UtilClassLoader;
 import com.distrimind.util.io.Integrity;
 import com.distrimind.util.io.MessageExternalizationException;
 import com.distrimind.bcfips.crypto.Algorithm;
@@ -152,7 +153,7 @@ public enum ASymmetricEncryptionType {
 				}
 				else {
 					PKCS8EncodedKeySpec pkcsKeySpec = new PKCS8EncodedKeySpec(encodedKey);
-					KeyFactory kf = KeyFactory.getInstance(algorithm, CodeProvider.BCFIPS.name());
+					KeyFactory kf = KeyFactory.getInstance(algorithm, CodeProvider.BCFIPS.getCompatibleProvider());
 					return kf.generatePrivate(pkcsKeySpec);
 				}
 			}
@@ -252,18 +253,18 @@ public enum ASymmetricEncryptionType {
 
 		try {
 
-			tmpProvEdDSAPublicKeyBaseKey=Class.forName("com.distrimind.bcfips.jcajce.provider.ProvEdDSAPublicKey").getDeclaredField("baseKey");
+			tmpProvEdDSAPublicKeyBaseKey= UtilClassLoader.getLoader().loadClass("com.distrimind.bcfips.jcajce.provider.ProvEdDSAPublicKey").getDeclaredField("baseKey");
 			tmpProvEdDSAPublicKeyBaseKey.setAccessible(true);
-			tmpProvXDHPublicKeyBaseKey=Class.forName("com.distrimind.bcfips.jcajce.provider.ProvXDHPublicKey").getDeclaredField("baseKey");
+			tmpProvXDHPublicKeyBaseKey=UtilClassLoader.getLoader().loadClass("com.distrimind.bcfips.jcajce.provider.ProvXDHPublicKey").getDeclaredField("baseKey");
 			tmpProvXDHPublicKeyBaseKey.setAccessible(true);
 
-			tmpConstructorProvEdDSAPublicKey= (Constructor<PublicKey>) Class.forName("com.distrimind.bcfips.jcajce.provider.ProvEdDSAPublicKey").getDeclaredConstructor(AsymmetricEdDSAPublicKey.class);
+			tmpConstructorProvEdDSAPublicKey= (Constructor<PublicKey>) UtilClassLoader.getLoader().loadClass("com.distrimind.bcfips.jcajce.provider.ProvEdDSAPublicKey").getDeclaredConstructor(AsymmetricEdDSAPublicKey.class);
 			tmpConstructorProvEdDSAPublicKey.setAccessible(true);
 
-			tmpConstructorProvXDHPublicKey= (Constructor<PublicKey>) Class.forName("com.distrimind.bcfips.jcajce.provider.ProvXDHPublicKey").getDeclaredConstructor(AsymmetricXDHPublicKey.class);
+			tmpConstructorProvXDHPublicKey= (Constructor<PublicKey>) UtilClassLoader.getLoader().loadClass("com.distrimind.bcfips.jcajce.provider.ProvXDHPublicKey").getDeclaredConstructor(AsymmetricXDHPublicKey.class);
 			tmpConstructorProvXDHPublicKey.setAccessible(true);
 
-			tmpConstructorProvXDHPrivateKey= (Constructor<PrivateKey>) Class.forName("com.distrimind.bcfips.jcajce.provider.ProvXDHPrivateKey").getDeclaredConstructor(AsymmetricXDHPrivateKey.class);
+			tmpConstructorProvXDHPrivateKey= (Constructor<PrivateKey>) UtilClassLoader.getLoader().loadClass("com.distrimind.bcfips.jcajce.provider.ProvXDHPrivateKey").getDeclaredConstructor(AsymmetricXDHPrivateKey.class);
 			tmpConstructorProvXDHPrivateKey.setAccessible(true);
 
 		} catch (NoSuchFieldException | NoSuchMethodException | ClassNotFoundException e) {
@@ -380,7 +381,7 @@ public enum ASymmetricEncryptionType {
 
 	public AbstractCipher getCipherInstance()
 			throws NoSuchAlgorithmException, NoSuchProviderException, MessageExternalizationException {
-		CodeProvider.ensureProviderLoaded(codeProviderForEncryption);
+		//CodeProvider.ensureProviderLoaded(codeProviderForEncryption);
 		String name = algorithmName+"/" + blockMode + "/" + padding;
 		if (codeProviderForEncryption == CodeProvider.GNU_CRYPTO) {
 			return new GnuCipher(GnuFunctions.cipherGetInstance(name));
@@ -395,7 +396,7 @@ public enum ASymmetricEncryptionType {
 			throw new IllegalAccessError();
 		} else {
 			try {
-				return new JavaNativeCipher(Cipher.getInstance(name, codeProviderForEncryption.checkProviderWithCurrentOS().name()));
+				return new JavaNativeCipher(Cipher.getInstance(name, codeProviderForEncryption.getCompatibleProvider()));
 			} catch (NoSuchPaddingException e) {
 				throw new MessageExternalizationException(Integrity.FAIL, e);
 			}
@@ -433,7 +434,7 @@ public enum ASymmetricEncryptionType {
 		if (keySizeBits<0)
 			keySizeBits= this.keySizeBits;
 
-		CodeProvider.ensureProviderLoaded(codeProviderForKeyGenerator);
+		//CodeProvider.ensureProviderLoaded(codeProviderForKeyGenerator);
 		if (codeProviderForKeyGenerator == CodeProvider.GNU_CRYPTO) {
 			Object kpg=GnuFunctions.getKeyPairGenerator(algorithmName);
 			GnuKeyPairGenerator res = new GnuKeyPairGenerator(this, kpg);
@@ -456,14 +457,14 @@ public enum ASymmetricEncryptionType {
 
 		} else if (codeProviderForKeyGenerator == CodeProvider.BCFIPS) {
 
-				KeyPairGenerator kgp = KeyPairGenerator.getInstance(algorithmName, CodeProvider.BCFIPS.name());
+				KeyPairGenerator kgp = KeyPairGenerator.getInstance(algorithmName, CodeProvider.BCFIPS.getCompatibleProvider());
 				JavaNativeKeyPairGenerator res = new JavaNativeKeyPairGenerator(this, kgp);
 				res.initialize(keySizeBits, publicKeyValidityBeginDateUTC, expirationTimeUTC, random);
 
 				return res;
 
 		} else {
-			KeyPairGenerator kgp = KeyPairGenerator.getInstance(algorithmName, codeProviderForKeyGenerator.checkProviderWithCurrentOS().name());
+			KeyPairGenerator kgp = KeyPairGenerator.getInstance(algorithmName, codeProviderForKeyGenerator.getCompatibleProvider());
 			JavaNativeKeyPairGenerator res = new JavaNativeKeyPairGenerator(this, kgp);
 			res.initialize(keySizeBits, publicKeyValidityBeginDateUTC, expirationTimeUTC, random);
 

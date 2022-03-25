@@ -149,7 +149,8 @@ public class SymmetricSecretKey extends AbstractKey implements ISecretDecentrali
 		}
 		if (javaNativeSecretKey!=null)
 		{
-			Arrays.fill(javaNativeSecretKey.getEncoded(), (byte)0);
+			if (!javaNativeSecretKey.isDestroyed())
+				Arrays.fill(javaNativeSecretKey.getEncoded(), (byte)0);
 			javaNativeSecretKey=null;
 		}
 		if (gnuSecretKey!=null)
@@ -159,11 +160,13 @@ public class SymmetricSecretKey extends AbstractKey implements ISecretDecentrali
 		}
 		if (bcfipsNativeSecretKey!=null)
 		{
-			Arrays.fill(bcfipsNativeSecretKey.getKeyBytes(), (byte)0);
 			bcfipsNativeSecretKey=null;
 		}
 	}
-	
+	@Override
+	public boolean isDestroyed() {
+		return secretKey==null && javaNativeSecretKey==null && gnuSecretKey==null && bcfipsNativeSecretKey==null;
+	}
 	
 	SymmetricSecretKey(SymmetricEncryptionType type, byte[] secretKey, short keySize) {
 		this(secretKey, keySize);

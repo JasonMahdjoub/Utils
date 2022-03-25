@@ -148,7 +148,7 @@ public enum OSVersion {
     private static int getAndroidVersionInt()
     {
         try {
-            Class<?> versionClass=Class.forName("android.os.Build$VERSION");
+            Class<?> versionClass=UtilClassLoader.getLoader().loadClass("android.os.Build$VERSION");
             return (int)versionClass.getDeclaredField("SDK_INT").get(null);
         } catch (ClassNotFoundException | IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException e) {
             return 0;
@@ -158,7 +158,7 @@ public enum OSVersion {
     /*private static String getAndroidVersion()
     {
         try {
-            Class<?> versionClass=Class.forName("android.os.Build.VERSION");
+            Class<?> versionClass=UtilClassLoader.getLoader().loadClass("android.os.Build.VERSION");
             return (String)versionClass.getDeclaredField("RELEASE").get(null);
         } catch (ClassNotFoundException | IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException e) {
             return null;

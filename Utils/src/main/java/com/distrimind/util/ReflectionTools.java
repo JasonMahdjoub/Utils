@@ -122,7 +122,7 @@ public class ReflectionTools {
 
 	public static Class<?> loadClass(String class_name) {
 		try {
-			return Class.forName(class_name, true, classLoader);
+			return UtilClassLoader.getLoader().loadClass(class_name);
 		} catch (SecurityException | ClassNotFoundException e) {
 			System.err.println("Impossible to access to the class " + class_name
 					+ ". This is an inner bug. Please contact the developers. Impossible to continue. See the next error :");
@@ -132,7 +132,7 @@ public class ReflectionTools {
 		}
 	}
 
-	private static volatile ClassLoader classLoader=ClassLoader.getSystemClassLoader();
+	private static volatile ClassLoader classLoader=UtilClassLoader.getLoader();
 
 	public static ClassLoader getClassLoader() {
 		return classLoader;

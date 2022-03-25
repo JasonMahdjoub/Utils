@@ -149,6 +149,11 @@ public class SymmetricSecretKeyPair extends AbstractKey implements ISecretDecent
 	}
 
 	@Override
+	public boolean isDestroyed() {
+		return secretKeyForEncryption==null && secretKeyForSignature==null;
+	}
+
+	@Override
 	public WrappedSecretData getKeyBytes() {
 		return encode();
 	}

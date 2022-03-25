@@ -1,6 +1,8 @@
 package com.distrimind.util.crypto.fortuna;
 
 
+import com.distrimind.util.OS;
+import com.distrimind.util.OSVersion;
 import com.distrimind.util.concurrent.ScheduledPoolExecutor;
 import com.distrimind.util.crypto.AbstractSecureRandom;
 import com.distrimind.util.crypto.SecureRandomType;
@@ -11,6 +13,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
+import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.Random;
 import java.util.concurrent.*;
@@ -116,13 +119,24 @@ public class Fortuna extends Random {
     }
 
     public Fortuna(AbstractSecureRandom ... secureRandoms)  {
-        this(createDefaultScheduler());
+        this(createDefaultScheduler(), secureRandoms);
         if (this.scheduler!=getPersonalDefaultScheduledExecutorService())
             this.createdScheduler = true;
     }
 
 
     public Fortuna(ScheduledExecutorService scheduler, AbstractSecureRandom ... secureRandoms) {
+        if (secureRandoms.length==0) {
+            try {
+                secureRandoms=new AbstractSecureRandom[]{
+                        SecureRandomType.NativePRNGNonBlocking.getSingleton(null),
+                        SecureRandomType.SHA1PRNG.getSingleton(null),
+                        SecureRandomType.BC_FIPS_APPROVED.getSingleton(null),
+                };
+            } catch (NoSuchAlgorithmException | NoSuchProviderException e) {
+                e.printStackTrace();
+            }
+        }
         this.createdScheduler = false;
         this.generator = new Generator();
         this.randomDataBuffer = new RandomDataBuffer();
@@ -140,13 +154,15 @@ public class Fortuna extends Random {
         }
         Accumulator accumulator = new Accumulator(pools, scheduler);
         accumulator.addSource(new SchedulingEntropySource());
-        accumulator.addSource(new GarbageCollectorEntropySource());
-        accumulator.addSource(new LoadAverageEntropySource());
+        if (OSVersion.getCurrentOSVersion().getOS()!= OS.ANDROID) {
+            accumulator.addSource(new GarbageCollectorEntropySource());
+            accumulator.addSource(new LoadAverageEntropySource());
+            accumulator.addSource(new ThreadTimeEntropySource());
+            accumulator.addSource(new UptimeEntropySource());
+            accumulator.addSource(new BufferPoolEntropySource());
+            accumulator.addSource(new MemoryPoolEntropySource());
+        }
         accumulator.addSource(new FreeMemoryEntropySource());
-        accumulator.addSource(new ThreadTimeEntropySource());
-        accumulator.addSource(new UptimeEntropySource());
-        accumulator.addSource(new BufferPoolEntropySource());
-        accumulator.addSource(new MemoryPoolEntropySource());
         secureRandomSource.set(new SecureRandomSource());
         accumulator.addSource(secureRandomSource.get());
         for (AbstractSecureRandom secureRandom : secureRandoms)

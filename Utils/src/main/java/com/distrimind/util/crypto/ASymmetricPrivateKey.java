@@ -110,7 +110,9 @@ public class ASymmetricPrivateKey extends AbstractKey implements IASymmetricPriv
 		}
 		if (nativePrivateKey!=null)
 		{
-			Arrays.fill(nativePrivateKey.getEncoded(), (byte)0);
+			if (!nativePrivateKey.isDestroyed()) {
+				Arrays.fill(nativePrivateKey.getEncoded(), (byte) 0);
+			}
 			nativePrivateKey=null;
 		}
 		if (gnuPrivateKey!=null)
@@ -126,6 +128,10 @@ public class ASymmetricPrivateKey extends AbstractKey implements IASymmetricPriv
 				((BCMcElieceCipher.PrivateKeyCCA2) bouncyCastlePrivateKey).zeroize();
 			bouncyCastlePrivateKey=null;
 		}
+	}
+	@Override
+	public boolean isDestroyed() {
+		return privateKey==null && nativePrivateKey==null && gnuPrivateKey==null && bouncyCastlePrivateKey==null;
 	}
 
 

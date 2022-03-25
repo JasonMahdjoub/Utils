@@ -70,6 +70,10 @@ public abstract class AbstractEncryptionOutputAlgorithm implements Zeroizable {
 			buffer = null;
 		}
 	}
+	@Override
+	public boolean isDestroyed() {
+		return buffer==null;
+	}
 
 	@SuppressWarnings("deprecation")
 	@Override

@@ -61,6 +61,10 @@ public class NewHopeKeyAgreementServer extends AbstractNewHopeKeyAgreement{
 		Arrays.fill(exchangePair.getSharedValue(), (byte)0);
 		exchangePair=null;
 	}
+	@Override
+	public boolean isDestroyed() {
+		return super.isDestroyed() && exchangePair==null;
+	}
 
 	@Override
 	public boolean isPostQuantumAgreement() {

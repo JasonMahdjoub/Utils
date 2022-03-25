@@ -1178,7 +1178,7 @@ public class SerializationTools {
 			else if (code==1){
 				String clazzString = SerializationTools.readString(ois, MAX_CLASS_LENGTH, false);
 
-				Class<?> c = Class.forName(clazzString, false, ReflectionTools.getClassLoader());
+				Class<?> c = UtilClassLoader.getLoader().loadClass(clazzString, false);
 				if (!c.isEnum())
 					throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
 				clazz=(Class<? extends Enum<?>>)c;
@@ -1416,7 +1416,7 @@ public class SerializationTools {
 				if (doubleCheck) {
 					if (!rootClass.isAssignableFrom(c))
 						throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, "rootClass : "+rootClass+" ; class="+c);
-					c = Class.forName(clazz, true, ReflectionTools.getClassLoader());
+					c = UtilClassLoader.getLoader().loadClass(clazz);
 				}
 			}
 			else if (code==2)
@@ -1520,7 +1520,7 @@ public class SerializationTools {
 	{
 		Class<?> c=null;
 		try {
-			c=Class.forName("java.nio.file.Path");
+			c=UtilClassLoader.getLoader().loadClass("java.nio.file.Path");
 		} catch (ClassNotFoundException ignored) {
 
 		}
@@ -2399,7 +2399,7 @@ public class SerializationTools {
 		{
 			try
 			{
-				return Class.forName(clazz, initialize, ReflectionTools.getClassLoader());
+				return UtilClassLoader.getLoader().loadClass(clazz, initialize);
 			}
 			catch(Exception e)
 			{

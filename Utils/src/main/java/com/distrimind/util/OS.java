@@ -135,7 +135,7 @@ public enum OS {
 			if (s.toLowerCase().contains(" android "))
 			{
 				try {
-					Class.forName("android.os.Build$VERSION");
+					UtilClassLoader.getLoader().loadClass("android.os.Build$VERSION");
 					b=true;
 				} catch (ClassNotFoundException ignored) {
 

@@ -37,6 +37,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
 
 import com.distrimind.util.OS;
 import com.distrimind.util.OSVersion;
+import com.distrimind.util.UtilClassLoader;
 
 import java.io.*;
 import java.lang.reflect.Constructor;
@@ -59,7 +60,8 @@ public class AndroidHardDriveDetect extends UnixHardDriveDetect{
 
 	@Override
 	void scanDisksAndPartitions(){
-
+		if (context==null)
+			System.err.println("Error : context was not defined. Please affect variable 'com.distrimind.util.harddrive.AndroidHardDriveDetect.context' according to Android context");
 		try
 		{
 			Disk disk=new Disk(null, 0, true, 0, "Unknown", "Root", "Root");
@@ -79,6 +81,7 @@ public class AndroidHardDriveDetect extends UnixHardDriveDetect{
 
 			File[] externalStorageVolumes =(File[])getExternalFilesDirs.invoke(null, context, null);
 			int index=2;
+
 			for (File f : externalStorageVolumes) {
 				boolean removable=(boolean)isExternalStorageRemovable.invoke(null, f);
 				if (removable && ((String)getExternalStorageState.invoke(null, f)).equalsIgnoreCase("mounted"))
@@ -139,10 +142,10 @@ public class AndroidHardDriveDetect extends UnixHardDriveDetect{
 		if (OSVersion.getCurrentOSVersion().getOS()== OS.ANDROID)
 		{
 			try {
-				tenvironmentClass=Class.forName("android.os.Environment");
-				ContextClass=Class.forName("android.content.Context");
-				ContextCompatClass=Class.forName("androidx.core.content.ContextCompat");
-				StatFsClass=Class.forName("android.os.StatFs");
+				tenvironmentClass= UtilClassLoader.getLoader().loadClass("android.os.Environment");
+				ContextClass=UtilClassLoader.getLoader().loadClass("android.content.Context");
+				ContextCompatClass=UtilClassLoader.getLoader().loadClass("androidx.core.content.ContextCompat");
+				StatFsClass=UtilClassLoader.getLoader().loadClass("android.os.StatFs");
 				tconstStatFs=StatFsClass.getDeclaredConstructor(String.class);
 				tisExternalStorageRemovable=tenvironmentClass.getDeclaredMethod("isExternalStorageRemovable", File.class);
 				tgetExternalStorageState=tenvironmentClass.getDeclaredMethod("getExternalStorageState" , File.class);

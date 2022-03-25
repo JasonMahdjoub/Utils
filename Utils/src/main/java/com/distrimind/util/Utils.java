@@ -68,6 +68,14 @@ public class Utils {
 			VERSION.addCreator(new Person("mahdjoub", "jason"))
 					.addDeveloper(new PersonDeveloper("mahdjoub", "jason", "2016-01-04"))
 					.addDescription(
+							new Description((short)5, (short)22, (short)3, Version.Type.STABLE, (short)0, "2022-03-25")
+									.addItem(INTERNAL_CHANGE, "Improve Utils class loader")
+									.addItem(BUG_FIX, "Fix compatibility problems with Android")
+									.addItem(BUG_FIX, "Fix array index error into IDGeneratorInt")
+									.addItem(INTERNAL_CHANGE, "Make MultiFormatProperties use UTF-8 as default encoding")
+									.addItem(INTERNAL_CHANGE, "Zeroizable interface now extends Destroyable interface")
+					)
+					.addDescription(
 							new Description((short)5, (short)22, (short)2, Version.Type.STABLE, (short)0, "2022-02-07")
 									.addItem(INTERNAL_CHANGE, "Update URLs.")
 									.addItem(INTERNAL_CHANGE, "Update Snakeyaml to 1.30")

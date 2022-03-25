@@ -36,6 +36,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
 package com.distrimind.util.properties;
 
 import com.distrimind.util.AbstractDecentralizedID;
+import com.distrimind.util.UtilClassLoader;
 import org.w3c.dom.*;
 import org.xml.sax.SAXException;
 import org.yaml.snakeyaml.DumperOptions;
@@ -65,6 +66,7 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.sql.Date;
 import java.util.*;
 import java.util.Map.Entry;
@@ -179,7 +181,7 @@ public abstract class MultiFormatProperties implements Cloneable, Serializable {
 	public Properties convertToStringProperties(MultiFormatProperties referenceProperties) throws PropertiesParseException {
 		Properties res = new Properties();
 		Class<?> c = this.getClass();
-		while (c != Object.class) {
+		while (c != Object.class && c!=null) {
 			for (Field f : c.getDeclaredFields()) {
 				if (!isValid(f))
 					continue;
@@ -586,7 +588,7 @@ public abstract class MultiFormatProperties implements Cloneable, Serializable {
 			return f.getType();
 		else if (MultiFormatProperties.class.isAssignableFrom(f.getType())) {
 			try {
-				Class<?> c = Class.forName(node_name.substring(0, node_name.lastIndexOf(".")));
+				Class<?> c = UtilClassLoader.getLoader().loadClass(node_name.substring(0, node_name.lastIndexOf(".")));
 				if (f.getType().isAssignableFrom(c))
 					return c;
 				else
@@ -615,7 +617,7 @@ public abstract class MultiFormatProperties implements Cloneable, Serializable {
 					cs.append(keys[i]);
 				}
 				try {
-					Class<?> c = Class.forName(cs.toString());
+					Class<?> c = UtilClassLoader.getLoader().loadClass(cs.toString());
 					if (MultiFormatProperties.class.isAssignableFrom(f.getType()) && f.getName().equals(keys[s])) {
 						keyOff.set(keyOff.get() + s + 1);
 						return c;
@@ -891,6 +893,7 @@ public abstract class MultiFormatProperties implements Cloneable, Serializable {
 			transformer.setOutputProperty(OutputKeys.METHOD, "xml");
 			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
 			transformer.setOutputProperty(OutputKeys.STANDALONE, "yes");
+			transformer.setOutputProperty(OutputKeys.ENCODING, StandardCharsets.UTF_8.displayName());
 			transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
 			transformer.transform(source, result);
 		} catch (ParserConfigurationException | TransformerException e) {
@@ -925,7 +928,7 @@ public abstract class MultiFormatProperties implements Cloneable, Serializable {
 
 		yaml.setBeanAccess(BeanAccess.FIELD);
 		yaml.setName(this.getClass().getSimpleName());
-		try(FileWriter fw = new FileWriter(yaml_file))
+		try(OutputStreamWriter fw = new OutputStreamWriter(new FileOutputStream(yaml_file), StandardCharsets.UTF_8))
 		{
 			yaml.dump(this, fw);
 		}
@@ -951,7 +954,7 @@ public abstract class MultiFormatProperties implements Cloneable, Serializable {
 	 */
 	public void loadYAML(File yamlFile) throws IOException {
 		
-		try(FileReader fr=new FileReader(yamlFile))
+		try(InputStreamReader fr=new InputStreamReader(new FileInputStream(yamlFile), StandardCharsets.UTF_8))
 		{
 			loadYAML(fr);
 		}
@@ -964,7 +967,7 @@ public abstract class MultiFormatProperties implements Cloneable, Serializable {
 			throw new IOException();
 	}
 	public void loadYAML(InputStream input) throws IOException {
-		try(InputStreamReader fr=new InputStreamReader(input))
+		try(InputStreamReader fr=new InputStreamReader(input, StandardCharsets.UTF_8))
 		{
 			loadYAML(fr);
 		}
@@ -1185,7 +1188,7 @@ public abstract class MultiFormatProperties implements Cloneable, Serializable {
 	            	for (Map.Entry<Tag, Construct> e: yamlAbstractConstructors.entrySet())
 	            	{
 	            		try {
-							if (node.getTag().getValue().equals(e.getKey().getValue()) || (e.getKey().getValue().startsWith(Tag.PREFIX) && e.getKey().getClassName().contains(".") && Class.forName(e.getKey().getClassName()).isAssignableFrom(node.getType())))
+							if (node.getTag().getValue().equals(e.getKey().getValue()) || (e.getKey().getValue().startsWith(Tag.PREFIX) && e.getKey().getClassName().contains(".") && UtilClassLoader.getLoader().loadClass(e.getKey().getClassName()).isAssignableFrom(node.getType())))
 							{
 								return e.getValue();
 							}
@@ -1223,7 +1226,7 @@ public abstract class MultiFormatProperties implements Cloneable, Serializable {
             for (Iterator<Map.Entry<Tag, Class<?>>> it=m.entrySet().iterator();it.hasNext();)
             {
                 try {
-                    if (Calendar.class.isAssignableFrom(Class.forName(it.next().getKey().getClassName())))
+                    if (Calendar.class.isAssignableFrom(UtilClassLoader.getLoader().loadClass(it.next().getKey().getClassName())))
                         it.remove();
                 } catch (ClassNotFoundException e) {
                     e.printStackTrace();
@@ -1357,10 +1360,10 @@ public abstract class MultiFormatProperties implements Cloneable, Serializable {
 						for (String v : value.split(";")) {
 							String[] split = v.split(":");
 							if (split.length == 4 && !split[0].equals("null")) {
-								Class<?> key_map_class = Class.forName(split[0]);
+								Class<?> key_map_class = UtilClassLoader.getLoader().loadClass(split[0]);
 								Class<?> value_map_class = null;
 								if (!split[2].equals("null"))
-									value_map_class = Class.forName(split[2]);
+									value_map_class = UtilClassLoader.getLoader().loadClass(split[2]);
 
 								Object ok = getValue(key_map_class, split[1]);
 								if (ok == null || ok != Void.TYPE) {

@@ -20,6 +20,10 @@ public class P2PASymmetricSecretMessageExchangerAgreementWithSymmetricSignature 
         if (p2PASymmetricSecretMessageExchangerAgreement!=null)
             p2PASymmetricSecretMessageExchangerAgreement.zeroize();
     }
+    @Override
+    public boolean isDestroyed() {
+        return (login==null || login.isDestroyed()) && p2PASymmetricSecretMessageExchangerAgreement.isDestroyed();
+    }
 
     @Override
     public boolean isPostQuantumAgreement() {

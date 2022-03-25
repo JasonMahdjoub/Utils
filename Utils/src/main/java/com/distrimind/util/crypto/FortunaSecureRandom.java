@@ -74,16 +74,19 @@ public class FortunaSecureRandom extends AbstractSecureRandom implements Seriali
 				throw new NullPointerException();
 			if (type.equals(SecureRandomType.FORTUNA_WITH_BC_FIPS_APPROVED)) {
 				fortuna=new Fortuna(scheduledExecutorService,
+						SecureRandomType.NativePRNGNonBlocking.getSingleton(nonce, personalizationString),
 						SecureRandomType.SHA1PRNG.getSingleton(nonce, personalizationString),
 						SecureRandomType.BC_FIPS_APPROVED.getSingleton(nonce, personalizationString));
 			}
 			else if (type.equals(SecureRandomType.FORTUNA_WITH_BC_FIPS_APPROVED_FOR_KEYS)) {
 				fortuna=new Fortuna(scheduledExecutorService,
+						SecureRandomType.NativePRNGNonBlocking.getSingleton(nonce, personalizationString),
 						SecureRandomType.SHA1PRNG.getSingleton(nonce, personalizationString),
 						SecureRandomType.BC_FIPS_APPROVED_FOR_KEYS.getSingleton(nonce, personalizationString));
 			}
 			else if (type.equals(SecureRandomType.FORTUNA_WITH_BC_FIPS_APPROVED_FOR_KEYS_With_NativePRNG)) {
 				fortuna=new Fortuna(scheduledExecutorService,
+						SecureRandomType.NativePRNGNonBlocking.getSingleton(nonce, personalizationString),
 						SecureRandomType.SHA1PRNG.getSingleton(nonce, personalizationString),
 						SecureRandomType.BC_FIPS_APPROVED_FOR_KEYS_With_NATIVE_PRNG.getSingleton(nonce, personalizationString));
 			}
@@ -94,16 +97,19 @@ public class FortunaSecureRandom extends AbstractSecureRandom implements Seriali
 			super(false);
 			if (type.equals(SecureRandomType.FORTUNA_WITH_BC_FIPS_APPROVED)) {
 				fortuna=new Fortuna(
+						SecureRandomType.NativePRNGNonBlocking.getSingleton(nonce, personalizationString),
 						SecureRandomType.SHA1PRNG.getSingleton(nonce, personalizationString),
 						SecureRandomType.BC_FIPS_APPROVED.getSingleton(nonce, personalizationString));
 			}
 			else if (type.equals(SecureRandomType.FORTUNA_WITH_BC_FIPS_APPROVED_FOR_KEYS)) {
 				fortuna=new Fortuna(
+						SecureRandomType.NativePRNGNonBlocking.getSingleton(nonce, personalizationString),
 						SecureRandomType.SHA1PRNG.getSingleton(nonce, personalizationString),
 						SecureRandomType.BC_FIPS_APPROVED_FOR_KEYS.getSingleton(nonce, personalizationString));
 			}
 			else if (type.equals(SecureRandomType.FORTUNA_WITH_BC_FIPS_APPROVED_FOR_KEYS_With_NativePRNG)) {
 				fortuna=new Fortuna(
+						SecureRandomType.NativePRNGNonBlocking.getSingleton(nonce, personalizationString),
 						SecureRandomType.SHA1PRNG.getSingleton(nonce, personalizationString),
 						SecureRandomType.BC_FIPS_APPROVED_FOR_KEYS_With_NATIVE_PRNG.getSingleton(nonce, personalizationString));
 			}

@@ -141,7 +141,7 @@ public enum PasswordHashType {
 	byte[] hash(byte[] data, int off, int len, byte[] salt, byte cost, byte hashLength)
 			throws IOException {
 		try {
-			CodeProvider.ensureProviderLoaded(codeProvider);
+			//CodeProvider.ensureProviderLoaded(codeProvider);
 			if (cost < 4 || cost > 31)
 				throw new IllegalArgumentException("cost must be greater or equals than 4 and lower or equals than 31");
 
@@ -173,7 +173,7 @@ public enum PasswordHashType {
 						password[size] = (char) (data[off + size * 2] & 0xFF);
 
 					PBEKeySpec spec = new PBEKeySpec(password, salt, iterations, (hashLength) * 8);
-					SecretKeyFactory skf = SecretKeyFactory.getInstance(algorithmName, codeProvider.checkProviderWithCurrentOS().name());
+					SecretKeyFactory skf = SecretKeyFactory.getInstance(algorithmName, codeProvider.getCompatibleProvider());
 					return skf.generateSecret(spec).getEncoded();
 				}
 				case GNU_PBKDF2WithHMacSHA2_256:
@@ -251,7 +251,7 @@ public enum PasswordHashType {
 
 	byte[] hash(char[] password, byte[] salt, byte cost, byte hashLength) throws IOException {
 		try {
-			CodeProvider.ensureProviderLoaded(codeProvider);
+			//CodeProvider.ensureProviderLoaded(codeProvider);
 			if (cost < 4 || cost > 31)
 				throw new IllegalArgumentException("cost must be greater or equals than 4 and lower or equals than 31");
 
@@ -274,7 +274,7 @@ public enum PasswordHashType {
 				case PBKDF2WithHMacSHA2_384:
 				case PBKDF2WithHMacSHA2_512: {
 					PBEKeySpec spec = new PBEKeySpec(password, salt, iterations, (hashLength) * 8);
-					SecretKeyFactory skf = SecretKeyFactory.getInstance(algorithmName, codeProvider.checkProviderWithCurrentOS().name());
+					SecretKeyFactory skf = SecretKeyFactory.getInstance(algorithmName, codeProvider.getCompatibleProvider());
 					return skf.generateSecret(spec).getEncoded();
 				}
 				case GNU_PBKDF2WithHMacSHA2_256:

@@ -133,6 +133,10 @@ public class ASymmetricPublicKey extends AbstractKey implements IASymmetricPubli
 		}
 
 	}
+	@Override
+	public boolean isDestroyed() {
+		return publicKey==null && nativePublicKey==null && gnuPublicKey==null && bouncyCastlePublicKey==null;
+	}
 
 	@SuppressWarnings({"MethodDoesntCallSuperMethod", "deprecation"})
 	@Override

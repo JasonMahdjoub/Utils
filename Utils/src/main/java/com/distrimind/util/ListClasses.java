@@ -101,7 +101,7 @@ public class ListClasses {
 
 				for (File aList : list) {
 					try {
-						classes.add(Class.forName(_package.getName() + "."
+						classes.add(UtilClassLoader.getLoader().loadClass(_package.getName() + "."
 								+ aList.getName().substring(0, aList.getName().length() - 6)));
 					} catch (Exception ignored) {
 
@@ -143,7 +143,7 @@ public class ListClasses {
 							element.getName().length() - 6);
 
 					try {
-						classes.add(Class.forName(_package.getName() + "." + class_name));
+						classes.add(UtilClassLoader.getLoader().loadClass(_package.getName() + "." + class_name));
 					} catch (Exception ignored) {
 
 					}

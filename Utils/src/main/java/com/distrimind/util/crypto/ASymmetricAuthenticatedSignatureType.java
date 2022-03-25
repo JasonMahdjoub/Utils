@@ -192,17 +192,17 @@ public enum ASymmetricAuthenticatedSignatureType {
 
 
 	public AbstractSignature getSignatureInstance() throws NoSuchAlgorithmException, NoSuchProviderException {
-		CodeProvider.ensureProviderLoaded(codeProviderSignature);
+		//CodeProvider.ensureProviderLoaded(codeProviderSignature);
 		if (codeProviderSignature == CodeProvider.GNU_CRYPTO) {
 			return new GnuSignature(GnuFunctions.getSignatureAlgorithm(signatureAlgorithmName));
 		} else if (codeProviderSignature == CodeProvider.BCFIPS || codeProviderSignature == CodeProvider.BC || codeProviderSignature == CodeProvider.BCPQC) {
 
-			Signature s=Signature.getInstance(signatureAlgorithmName, codeProviderSignature.name());
+			Signature s=Signature.getInstance(signatureAlgorithmName, codeProviderSignature.getCompatibleProvider());
 
 			return new JavaNativeSignature(s);
 
 		} else {
-			return new JavaNativeSignature(Signature.getInstance(signatureAlgorithmName, codeProviderSignature.checkProviderWithCurrentOS().name()));
+			return new JavaNativeSignature(Signature.getInstance(signatureAlgorithmName, codeProviderSignature.getCompatibleProvider()));
 		}
 	}
 	/**
@@ -309,7 +309,7 @@ public enum ASymmetricAuthenticatedSignatureType {
 														long publicKeyValidityBeginDateUTC, long expirationTimeUTC) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
 		if (keySizeBits<0)
 			keySizeBits= this.keySizeBits;
-		CodeProvider.ensureProviderLoaded(codeProviderSignature);
+		//CodeProvider.ensureProviderLoaded(codeProviderSignature);
 		if (codeProviderKeyGenerator == CodeProvider.GNU_CRYPTO) {
 			KeyPairGenerator kgp = KeyPairGenerator.getInstance(keyGeneratorAlgorithmName);
 			GnuKeyPairGenerator res = new GnuKeyPairGenerator(this, kgp);
@@ -327,13 +327,13 @@ public enum ASymmetricAuthenticatedSignatureType {
 
 			}
 			else
-				kgp = KeyPairGenerator.getInstance(keyGeneratorAlgorithmName, codeProviderKeyGenerator.name());
+				kgp = KeyPairGenerator.getInstance(keyGeneratorAlgorithmName, codeProviderKeyGenerator.getCompatibleProvider());
 			JavaNativeKeyPairGenerator res = new JavaNativeKeyPairGenerator(this, kgp);
 			res.initialize(keySizeBits, publicKeyValidityBeginDateUTC, expirationTimeUTC, random);
 
 			return res;
 		} else {
-			KeyPairGenerator kgp = KeyPairGenerator.getInstance(keyGeneratorAlgorithmName, codeProviderKeyGenerator.checkProviderWithCurrentOS().name());
+			KeyPairGenerator kgp = KeyPairGenerator.getInstance(keyGeneratorAlgorithmName, codeProviderKeyGenerator.getCompatibleProvider());
 
 			JavaNativeKeyPairGenerator res = new JavaNativeKeyPairGenerator(this, kgp);
 			res.initialize(keySizeBits, publicKeyValidityBeginDateUTC, expirationTimeUTC, random);

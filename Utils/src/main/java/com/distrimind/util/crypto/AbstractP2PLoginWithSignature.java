@@ -65,6 +65,10 @@ public abstract class AbstractP2PLoginWithSignature extends P2PLoginAgreement {
 		myMessage=null;
 		otherMessage=null;
 	}
+	@Override
+	public boolean isDestroyed() {
+		return myMessage==null && otherMessage==null;
+	}
 
 	AbstractP2PLoginWithSignature(AbstractSecureRandom random, AbstractAuthenticatedSignerAlgorithm signer, AbstractAuthenticatedCheckerAlgorithm checker) {
 		super(2, 2);

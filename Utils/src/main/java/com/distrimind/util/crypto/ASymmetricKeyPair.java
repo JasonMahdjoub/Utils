@@ -34,17 +34,17 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
-import java.io.IOException;
-import java.security.KeyPair;
-import java.security.NoSuchAlgorithmException;
-import java.security.spec.InvalidKeySpecException;
-import java.util.Arrays;
-import java.util.Base64;
-
-
 import com.distrimind.util.Bits;
 import com.distrimind.util.InvalidEncodedValue;
 import com.distrimind.util.data_buffers.WrappedSecretData;
+
+import java.io.IOException;
+import java.security.KeyPair;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.spec.InvalidKeySpecException;
+import java.util.Arrays;
+import java.util.Base64;
 
 /**
  * 
@@ -96,8 +96,11 @@ public class ASymmetricKeyPair extends AbstractKeyPair<ASymmetricPrivateKey, ASy
 		publicKey=null;
 		if (nativeKeyPair!=null)
 		{
-			Arrays.fill(nativeKeyPair.getPublic().getEncoded(), (byte)0);
-			Arrays.fill(nativeKeyPair.getPrivate().getEncoded(), (byte)0);
+			Arrays.fill(nativeKeyPair.getPublic().getEncoded(), (byte) 0);
+			PrivateKey privk=nativeKeyPair.getPrivate();
+			if (privk != null && !privk.isDestroyed()) {
+				Arrays.fill(privk.getEncoded(), (byte) 0);
+			}
 			nativeKeyPair=null;
 		}
 		if (gnuKeyPair!=null)

@@ -81,6 +81,10 @@ public class NewHopeKeyAgreementClient extends AbstractNewHopeKeyAgreement{
 			}
 		}
 	}
+	@Override
+	public boolean isDestroyed() {
+		return priv==null;
+	}
 
 	@Override
 	public boolean isPostQuantumAgreement() {
