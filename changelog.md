@@ -1,6 +1,6 @@
 Utils
 =====
-5.22.3 STABLE (Build: 3884) (from 04/01/2016 to 23/03/2022)
+5.22.3 STABLE (Build: 3894) (from 04/01/2016 to 25/03/2022)
 
 # Creator(s):
 * Jason MAHDJOUB
@@ -11,7 +11,7 @@ Utils
 # Changes:
 
 
-### 5.22.3 STABLE (23/03/2022)
+### 5.22.3 STABLE (25/03/2022)
 #### Internal change(s)
 * Improve Utils class loader
 * Make MultiFormatProperties use UTF-8 as default encoding
