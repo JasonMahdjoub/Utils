@@ -52,7 +52,7 @@ Adapt into your build.gradle file, the next code :
 	...
 	dependencies {
 		...
-		api(group:'com.distrimind.util', name: 'Utils', version: '5.22.3-STABLE')
+		api(group:'com.distrimind.util', name: 'Utils', version: '5.22.4-STABLE')
 		...
 		//choose one of these optional drivers for GnuCrypto algorithms
 			testImplementation(group:'gnu', name: 'Gnu-Crypt', version: '1.3.0')
@@ -71,7 +71,7 @@ Adapt into your pom.xml file, the next code :
 			<dependency>
 				<groupId>com.distrimind.util</groupId>
 				<artifactId>Utils</artifactId>
-				<version>5.22.3-STABLE</version>
+				<version>5.22.4-STABLE</version>
 			</dependency>
 			<!-- choose one of these optional drivers for GnuCrypto algorithms-->
 			<dependency>

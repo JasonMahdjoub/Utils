@@ -1,6 +1,6 @@
 Utils
 =====
-5.22.3 STABLE (Build: 3901) (from 04/01/2016 to 25/03/2022)
+5.22.4 STABLE (Build: 3906) (from 04/01/2016 to 29/03/2022)
 
 # Creator(s):
 * Jason MAHDJOUB
@@ -9,6 +9,11 @@ Utils
 * Jason MAHDJOUB (Entered in the team at 04/01/2016)
 
 # Changes:
+
+
+### 5.22.4 STABLE (29/03/2022)
+#### Internal change(s)
+* Declare dependencies as implementation instead of API gradle mode.
 
 
 ### 5.22.3 STABLE (25/03/2022)
