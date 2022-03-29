@@ -69,7 +69,7 @@ public class Utils {
 					.addDeveloper(new PersonDeveloper("mahdjoub", "jason", "2016-01-04"))
 					.addDescription(
 							new Description((short)5, (short)22, (short)4, Version.Type.STABLE, (short)0, "2022-03-29")
-									.addItem(INTERNAL_CHANGE, "Declare dependencies as implementation instead of API gradle mode")
+									.addItem(INTERNAL_CHANGE, "Declare dependencies as implementation instead of API gradle mode.")
 					)
 					.addDescription(
 							new Description((short)5, (short)22, (short)3, Version.Type.STABLE, (short)0, "2022-03-25")
