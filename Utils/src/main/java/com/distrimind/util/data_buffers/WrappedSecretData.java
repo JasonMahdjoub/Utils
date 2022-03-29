@@ -80,4 +80,9 @@ public class WrappedSecretData extends WrappedData implements Zeroizable, ISecre
 	public WrappedSecretData transformToSecretData() {
 		return this;
 	}
+
+	public static boolean constantTimeAreEqual(byte[] expected, byte[] supplied)
+	{
+		return com.distrimind.bouncycastle.util.Arrays.constantTimeAreEqual(expected, supplied);
+	}
 }
