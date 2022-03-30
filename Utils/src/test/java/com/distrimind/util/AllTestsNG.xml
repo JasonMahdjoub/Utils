@@ -91,6 +91,11 @@
 		</classes>
 	</test>
 
+	<test name="testCleanable">
+		<classes>
+			<class name="com.distrimind.util.TestCleanable" />
+		</classes>
+	</test>
 	<test name="testCollections">
 		<classes>
 			<class name="com.distrimind.util.TestList" />

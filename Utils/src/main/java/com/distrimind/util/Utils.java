@@ -68,6 +68,10 @@ public class Utils {
 			VERSION.addCreator(new Person("mahdjoub", "jason"))
 					.addDeveloper(new PersonDeveloper("mahdjoub", "jason", "2016-01-04"))
 					.addDescription(
+							new Description((short)5, (short)23, (short)0, Version.Type.STABLE, (short)0, "2022-03-30")
+									.addItem(NEW_FEATURE, "Add class Cleanable that use Cleanable java API when JVM version is greater than Java 8 and that use standard finalize method otherwise.")
+					)
+					.addDescription(
 							new Description((short)5, (short)22, (short)4, Version.Type.STABLE, (short)0, "2022-03-29")
 									.addItem(INTERNAL_CHANGE, "Declare dependencies as implementation instead of API gradle mode.")
 					)
