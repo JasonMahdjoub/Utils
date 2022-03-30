@@ -81,7 +81,7 @@ public abstract class Cleanable implements AutoCloseable {
 		@SuppressWarnings("deprecation")
 		protected final void finalize()
 		{
-			if (JAVA_CLEANER==null) {
+			if (m_create==null) {
 				run();
 			}
 		}
