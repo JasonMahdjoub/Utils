@@ -78,7 +78,8 @@ public class TestCleanable {
 		};
 	}
 	@Test(dataProvider = "data")
-	public void testCleanableAPI(boolean manuallyClean, boolean useThread) {
+	public void testCleanableAPI(boolean manuallyClean, boolean useThread) throws InterruptedException {
+		Reference<Boolean> threadOK=new Reference<>(false);
 		Runnable r=() -> {
 			Example e = new Example();
 			AtomicReference<Long> ref = e.f.ref;
@@ -88,6 +89,7 @@ public class TestCleanable {
 				e.clean();
 				Assert.assertTrue(e.isCleaned());
 			}
+			//noinspection UnusedAssignment
 			e = null;
 			System.gc();
 			try {
@@ -97,12 +99,17 @@ public class TestCleanable {
 			}
 			System.gc();
 			Assert.assertNotNull(ref.get());
+			threadOK.set(true);
 		};
 		if (useThread)
 		{
-			new Thread(r).start();
+			Thread t=new Thread(r);
+			t.start();
+			t.join();
+
 		}
 		else
 			r.run();
+		Assert.assertTrue(threadOK.get());
 	}
 }
