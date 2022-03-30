@@ -113,28 +113,25 @@ public abstract class Cleanable implements AutoCloseable {
 	private Cleaner cleaner=null;
 
 	protected final void registerCleaner(Cleaner cleaner) {
-		this.cleaner=cleaner;
+		this.cleaner = cleaner;
 
-		if (m_create!=null){
+		if (m_create != null) {
 
-		synchronized (Cleanable.class)
-		{
-			if (JAVA_CLEANER==null)
-			{
-				try {
-					JAVA_CLEANER=m_create.invoke(null);
-				} catch (IllegalAccessException | InvocationTargetException e) {
-					e.printStackTrace();
+			synchronized (Cleanable.class) {
+				if (JAVA_CLEANER == null) {
+					try {
+						JAVA_CLEANER = m_create.invoke(null);
+					} catch (IllegalAccessException | InvocationTargetException e) {
+						e.printStackTrace();
+					}
 				}
-				}
-			}
-			if (JAVA_CLEANER!=null)
-			{
-				try {
-					cleanable=m_register.invoke(JAVA_CLEANER, this, cleaner);
-				} catch (IllegalAccessException | InvocationTargetException e) {
-					e.printStackTrace();
-					System.exit(-1);
+				if (JAVA_CLEANER != null) {
+					try {
+						cleanable = m_register.invoke(JAVA_CLEANER, this, cleaner);
+					} catch (IllegalAccessException | InvocationTargetException e) {
+						e.printStackTrace();
+						System.exit(-1);
+					}
 				}
 			}
 		}
