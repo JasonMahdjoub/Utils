@@ -94,8 +94,9 @@ class CleanerTools {
 		synchronized (CleanerTools.class) {
 
 			Cleanable.Cleaner previousCleaner = cleaners.putIfAbsent(cleaner.reference=new WR(cleanable), cleaner);
-			if (previousCleaner != null)
+			if (previousCleaner != null) {
 				previousCleaner.setNext(cleaner);
+			}
 
 			if (m_create != null) {
 

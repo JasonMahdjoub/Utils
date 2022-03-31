@@ -84,9 +84,15 @@ public interface Cleanable extends AutoCloseable {
 		}
 
 		void setNext(Cleaner next) {
+			Cleaner n=null;
 			synchronized (this) {
-				this.next = next;
+				if (this.next!=null)
+					n=this.next;
+				else
+					this.next = next;
 			}
+			if (n!=null)
+				n.setNext(next);
 		}
 		Cleaner getNext() {
 			synchronized (this) {
