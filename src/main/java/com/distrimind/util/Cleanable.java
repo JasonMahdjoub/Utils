@@ -34,10 +34,6 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.concurrent.atomic.AtomicBoolean;
-
 /**
  *
  * This API aims to prevent future deactivation of finalize method calling by the garbage collector.
@@ -59,117 +55,113 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @since MaDKitLanEdition 5.23.0
  */
 @SuppressWarnings("deprecation")
-public abstract class Cleanable implements AutoCloseable {
-	public static abstract class Cleaner implements Runnable
+public interface Cleanable extends AutoCloseable {
+	abstract class Cleaner implements Runnable
 	{
-		private final AtomicBoolean cleaned=new AtomicBoolean(false);
+		private boolean isCleaned=false;
 		private Object cleanable=null;
+		private Cleaner next=null;
+		CleanerTools.WR reference=null;
 		protected abstract void performCleanup();
 
 		@Override
 		public final void run() {
-			if (cleaned.compareAndSet(false, true))
-			{
-				cleanable=null;
-				performCleanup();
+			runImpl(true);
+		}
+
+		Object getCleanable() {
+			synchronized (this) {
+				return cleanable;
 			}
 		}
-		public final boolean isCleaned()
+
+		void setCleanable(Object cleanable) {
+			if (cleanable==null)
+				return;
+			synchronized (this) {
+				this.cleanable = cleanable;
+			}
+		}
+
+		void setNext(Cleaner next) {
+			synchronized (this) {
+				this.next = next;
+			}
+		}
+		Cleaner getNext() {
+			synchronized (this) {
+				return this.next;
+			}
+		}
+
+		void runImpl(boolean removeFromRegister)
 		{
-			return cleaned.get();
+			boolean clean=false;
+			Cleaner next=null;
+			synchronized (this)
+			{
+				if (!isCleaned)
+				{
+					isCleaned=true;
+					cleanable=null;
+					next=this.next;
+					this.next=null;
+					clean=true;
+				}
+			}
+			if (clean)
+			{
+				if (removeFromRegister)
+				{
+					CleanerTools.removeCleaner(this);
+				}
+				try {
+					if (next!=null) {
+						next.runImpl(false);
+					}
+				}
+				finally {
+					performCleanup();
+				}
+			}
+		}
+		final boolean isCleaned()
+		{
+			synchronized (this)
+			{
+				return isCleaned;
+			}
 		}
 
 
 		@SuppressWarnings("deprecation")
 		protected final void finalize()
 		{
-			if (m_create==null) {
+			if (CleanerTools.m_create==null) {
 				run();
 			}
 		}
 	}
-	private static Object JAVA_CLEANER=null;
-	private static final Method m_register;
-	private static final Method m_clean;
-	private static final Method m_create;
-	static
+
+
+	default void registerCleaner(Cleanable.Cleaner cleaner)
 	{
-		Method mr, cl, mc;
-		try {
-			Class<?> cc=Class.forName("java.lang.ref.Cleaner");
-			Class<?> ccl=Class.forName("java.lang.ref.Cleaner$Cleanable");
-			mc=cc.getDeclaredMethod("create");
-			mr=cc.getDeclaredMethod("register", Object.class, Runnable.class);
-			cl=ccl.getDeclaredMethod("clean");
-
-		} catch (ClassNotFoundException | NoSuchMethodException ignored) {
-			mr=null;
-			cl=null;
-			mc=null;
-		}
-		m_register=mr;
-		m_clean=cl;
-		m_create=mc;
-	}
-
-	private Cleaner cleaner=null;
-
-	protected final void registerCleaner(Cleaner cleaner) {
-		this.cleaner = cleaner;
-
-		if (m_create != null) {
-
-			synchronized (Cleanable.class) {
-				if (JAVA_CLEANER == null) {
-					try {
-						JAVA_CLEANER = m_create.invoke(null);
-					} catch (IllegalAccessException | InvocationTargetException e) {
-						e.printStackTrace();
-					}
-				}
-				if (JAVA_CLEANER != null) {
-					try {
-						cleaner.cleanable = m_register.invoke(JAVA_CLEANER, this, cleaner);
-					} catch (IllegalAccessException | InvocationTargetException e) {
-						e.printStackTrace();
-						System.exit(-1);
-					}
-				}
-			}
-		}
-	}
-	protected final void clean()
-	{
-		if (cleaner!=null) {
-
-			if (m_create ==null) {
-				cleaner.run();
-			}
-			else
-			{
-				synchronized (Cleanable.class) {
-					if (JAVA_CLEANER==null)
-						cleaner.run();
-					else {
-						try {
-							m_clean.invoke(cleaner.cleanable);
-						} catch (IllegalAccessException | InvocationTargetException e) {
-							e.printStackTrace();
-						}
-					}
-				}
-			}
-		}
+		CleanerTools.registerCleaner(this, cleaner);
 	}
 
 
-	public final boolean isCleaned()
+	default void clean() {
+		CleanerTools.clean(this);
+	}
+
+
+	default boolean isCleaned()
 	{
-		return cleaner != null && cleaner.isCleaned();
+		return CleanerTools.isCleaned(this);
 	}
 
 	@Override
-	public void close() throws Exception {
+	default void close() throws Exception {
 		clean();
 	}
 }

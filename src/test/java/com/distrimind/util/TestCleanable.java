@@ -55,15 +55,27 @@ public class TestCleanable {
 			ref.set(System.currentTimeMillis());
 			System.out.println(this + " : free " + ref.get());
 		}
+		@Override
+		public String toString() {
+			return "Finalizer["+Integer.toHexString(hashCode())+", hasSub="+(getNext()!=null)+"]";
+		}
 	}
-	public static class Example extends Cleanable {
+
+	public static class Example implements Cleanable {
 
 
 		final Finalizer f;
 
-		public Example() {
+		public Example(boolean useSeveralFinalizers) {
 			f = new Finalizer();
 			registerCleaner(f);
+			if (useSeveralFinalizers)
+				registerCleaner(new Finalizer());
+		}
+
+		@Override
+		public String toString() {
+			return "Example["+Integer.toHexString(hashCode())+", hasSub="+(f.getNext()!=null)+"]";
 		}
 	}
 
@@ -71,18 +83,30 @@ public class TestCleanable {
 	public Object[][] data()
 	{
 		return new Object[][]{
-				{true, true},
-				{true, false},
-				{false, true},
-				{false, false},
+				{true, true, false},
+				{true, false, false},
+				{false, true, false},
+				{false, false, false},
+				{true, true, true},
+				{true, false, true},
+				{false, true, true},
+				{false, false, true},
 		};
 	}
 	@Test(dataProvider = "data")
-	public void testCleanableAPI(boolean manuallyClean, boolean useThread) throws InterruptedException {
+	public void testCleanableAPI(boolean manuallyClean, boolean useThread, boolean useSeveralFinalizers) throws InterruptedException {
 		Reference<Boolean> threadOK=new Reference<>(false);
 		Runnable r=() -> {
-			Example e = new Example();
+			Example e = new Example(useSeveralFinalizers);
 			AtomicReference<Long> ref = e.f.ref;
+			AtomicReference<Long> ref2 ;
+			if (useSeveralFinalizers)
+				ref2=((Finalizer)e.f.getNext()).ref;
+			else
+			{
+				ref2=null;
+				Assert.assertNull(e.f.getNext());
+			}
 			System.out.println(e);
 			Assert.assertFalse(e.isCleaned());
 			if (manuallyClean) {
@@ -99,6 +123,10 @@ public class TestCleanable {
 			}
 			System.gc();
 			Assert.assertNotNull(ref.get());
+			if (useSeveralFinalizers) {
+				Assert.assertNotNull(ref2.get());
+			}
+
 			threadOK.set(true);
 		};
 		if (useThread)
@@ -111,5 +139,6 @@ public class TestCleanable {
 		else
 			r.run();
 		Assert.assertTrue(threadOK.get());
+		Assert.assertTrue(CleanerTools.isCleanersEmpty());
 	}
 }
