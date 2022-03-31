@@ -63,12 +63,14 @@ public abstract class Cleanable implements AutoCloseable {
 	public static abstract class Cleaner implements Runnable
 	{
 		private final AtomicBoolean cleaned=new AtomicBoolean(false);
+		private Object cleanable=null;
 		protected abstract void performCleanup();
 
 		@Override
 		public final void run() {
 			if (cleaned.compareAndSet(false, true))
 			{
+				cleanable=null;
 				performCleanup();
 			}
 		}
@@ -109,7 +111,7 @@ public abstract class Cleanable implements AutoCloseable {
 		m_clean=cl;
 		m_create=mc;
 	}
-	private Object cleanable=null;
+
 	private Cleaner cleaner=null;
 
 	protected final void registerCleaner(Cleaner cleaner) {
@@ -127,7 +129,7 @@ public abstract class Cleanable implements AutoCloseable {
 				}
 				if (JAVA_CLEANER != null) {
 					try {
-						cleanable = m_register.invoke(JAVA_CLEANER, this, cleaner);
+						cleaner.cleanable = m_register.invoke(JAVA_CLEANER, this, cleaner);
 					} catch (IllegalAccessException | InvocationTargetException e) {
 						e.printStackTrace();
 						System.exit(-1);
@@ -138,7 +140,7 @@ public abstract class Cleanable implements AutoCloseable {
 	}
 	protected final void clean()
 	{
-		if (cleanable!=null) {
+		if (cleaner!=null) {
 
 			if (m_create ==null) {
 				cleaner.run();
@@ -150,7 +152,7 @@ public abstract class Cleanable implements AutoCloseable {
 						cleaner.run();
 					else {
 						try {
-							m_clean.invoke(cleanable);
+							m_clean.invoke(cleaner.cleanable);
 						} catch (IllegalAccessException | InvocationTargetException e) {
 							e.printStackTrace();
 						}
