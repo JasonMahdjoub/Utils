@@ -63,10 +63,6 @@ import java.util.Arrays;
  * @since Utils 1.7.1
  */
 public class ASymmetricPrivateKey extends AbstractKey implements IASymmetricPrivateKey {
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1279365581082525690L;
 
 	public static final int MAX_SIZE_IN_BYTES_OF_NON_PQC_NON_RSA_NON_HYBRID_PRIVATE_KEY_FOR_SIGNATURE = ASymmetricAuthenticatedSignatureType.MAX_SIZE_IN_BYTES_OF_NON_PQC_NON_RSA_NON_HYBRID_PRIVATE_KEY_FOR_SIGNATURE;
 	public static final int MAX_SIZE_IN_BYTES_OF_NON_PQC_RSA_NON_HYBRID_PRIVATE_KEY =ASymmetricAuthenticatedSignatureType.MAX_SIZE_IN_BYTES_OF_NON_PQC_RSA_NON_HYBRID_PRIVATE_KEY;
@@ -82,10 +78,45 @@ public class ASymmetricPrivateKey extends AbstractKey implements IASymmetricPriv
 	public static final int MAX_SIZE_IN_BYTES_OF_NON_HYBRID_PRIVATE_KEY = MAX_SIZE_IN_BYTES_OF_NON_HYBRID_PRIVATE_KEY_FOR_ENCRYPTION;
 
 	private static final int MAX_SIZE_IN_BITS_OF_NON_HYBRID_PRIVATE_KEY=MAX_SIZE_IN_BYTES_OF_NON_HYBRID_PRIVATE_KEY*8;
+	private static final class Finalizer extends Cleaner
+	{
+		private byte[] privateKey;
+		private volatile transient PrivateKey nativePrivateKey=null;
+
+		private volatile transient Object gnuPrivateKey=null;
+		private volatile transient AsymmetricPrivateKey bouncyCastlePrivateKey=null;
+		@Override
+		protected void performCleanup() {
+			if (privateKey!=null)
+			{
+				Arrays.fill(privateKey, (byte)0);
+				privateKey=null;
+			}
+			if (nativePrivateKey!=null)
+			{
+				if (!nativePrivateKey.isDestroyed()) {
+					Arrays.fill(nativePrivateKey.getEncoded(), (byte) 0);
+				}
+				nativePrivateKey=null;
+			}
+			if (gnuPrivateKey!=null)
+			{
+				Arrays.fill(GnuFunctions.keyGetEncoded(gnuPrivateKey), (byte)0);
+				gnuPrivateKey=null;
+			}
+			if (bouncyCastlePrivateKey==null)
+			{
+				if (bouncyCastlePrivateKey instanceof BCMcElieceCipher.PrivateKey)
+					((BCMcElieceCipher.PrivateKey) bouncyCastlePrivateKey).clean();
+				else if (bouncyCastlePrivateKey instanceof BCMcElieceCipher.PrivateKeyCCA2)
+					((BCMcElieceCipher.PrivateKeyCCA2) bouncyCastlePrivateKey).clean();
+				bouncyCastlePrivateKey=null;
+			}
+		}
+	}
 
 
-	private byte[] privateKey;
-
+	private final Finalizer finalizer;
 	private final int keySizeBits;
 
 	private ASymmetricEncryptionType encryptionType;
@@ -93,59 +124,24 @@ public class ASymmetricPrivateKey extends AbstractKey implements IASymmetricPriv
 
 	private final int hashCode;
 
-	private volatile transient PrivateKey nativePrivateKey=null;
 
-	private volatile transient Object gnuPrivateKey=null;
-	private volatile transient AsymmetricPrivateKey bouncyCastlePrivateKey=null;
 	boolean xdhKey=false;
-
-	
-	@Override
-	public void zeroize()
-	{
-		if (privateKey!=null)
-		{
-			Arrays.fill(privateKey, (byte)0);
-			privateKey=null;
-		}
-		if (nativePrivateKey!=null)
-		{
-			if (!nativePrivateKey.isDestroyed()) {
-				Arrays.fill(nativePrivateKey.getEncoded(), (byte) 0);
-			}
-			nativePrivateKey=null;
-		}
-		if (gnuPrivateKey!=null)
-		{
-			Arrays.fill(GnuFunctions.keyGetEncoded(gnuPrivateKey), (byte)0);
-			gnuPrivateKey=null;
-		}
-		if (bouncyCastlePrivateKey==null)
-		{
-			if (bouncyCastlePrivateKey instanceof BCMcElieceCipher.PrivateKey)
-				((BCMcElieceCipher.PrivateKey) bouncyCastlePrivateKey).zeroize();
-			else if (bouncyCastlePrivateKey instanceof BCMcElieceCipher.PrivateKeyCCA2)
-				((BCMcElieceCipher.PrivateKeyCCA2) bouncyCastlePrivateKey).zeroize();
-			bouncyCastlePrivateKey=null;
-		}
-	}
-	@Override
-	public boolean isDestroyed() {
-		return privateKey==null && nativePrivateKey==null && gnuPrivateKey==null && bouncyCastlePrivateKey==null;
-	}
-
-
 
     @Override
 	public WrappedSecretData getKeyBytes() {
-        return new WrappedSecretData(privateKey.clone());
+		checkNotDestroyed();
+        return new WrappedSecretData(finalizer.privateKey.clone());
     }
 
 	@Override
 	public boolean isPostQuantumKey() {
 		return encryptionType==null?signatureType.isPostQuantumAlgorithm():encryptionType.isPostQuantumAlgorithm();
 	}
-
+	private void checkNotDestroyed()
+	{
+		if (isCleaned())
+			throw new IllegalAccessError();
+	}
 	ASymmetricPrivateKey(ASymmetricEncryptionType type, byte[] privateKey, int keySize) {
 		this(privateKey, keySize);
 		if (type == null)
@@ -194,7 +190,7 @@ public class ASymmetricPrivateKey extends AbstractKey implements IASymmetricPriv
 			throw new IllegalAccessError();
 		this.encryptionType = type;
 		this.signatureType=null;
-		this.bouncyCastlePrivateKey=privateKey;
+		this.finalizer.bouncyCastlePrivateKey=privateKey;
 	}
 	ASymmetricPrivateKey(ASymmetricAuthenticatedSignatureType type, PrivateKey privateKey, int keySize, boolean xdhKey) {
 		this(ASymmetricEncryptionType.encodePrivateKey(privateKey, type, xdhKey), keySize);
@@ -209,10 +205,11 @@ public class ASymmetricPrivateKey extends AbstractKey implements IASymmetricPriv
 
 	ASymmetricPrivateKey getNewClonedPrivateKey()
 	{
+		checkNotDestroyed();
 		if (signatureType==null)
-			return new ASymmetricPrivateKey(encryptionType, privateKey.clone(), keySizeBits);
+			return new ASymmetricPrivateKey(encryptionType, finalizer.privateKey.clone(), keySizeBits);
 		else
-			return new ASymmetricPrivateKey(signatureType, privateKey.clone(), keySizeBits);
+			return new ASymmetricPrivateKey(signatureType, finalizer.privateKey.clone(), keySizeBits);
 	}
 
 	private ASymmetricPrivateKey(byte[] privateKey, int keySize) {
@@ -222,9 +219,11 @@ public class ASymmetricPrivateKey extends AbstractKey implements IASymmetricPriv
 			throw new IllegalArgumentException("keySize");
 		if (keySize>MAX_SIZE_IN_BITS_OF_NON_HYBRID_PRIVATE_KEY)
 			throw new IllegalArgumentException("keySize");
-		this.privateKey = privateKey;
+		this.finalizer=new Finalizer();
+		this.finalizer.privateKey = privateKey;
 		this.keySizeBits = keySize;
 		hashCode = Arrays.hashCode(privateKey);
+		registerCleaner(finalizer);
 	}
 
 	private ASymmetricPrivateKey(Object privateKey, int keySize) {
@@ -234,10 +233,12 @@ public class ASymmetricPrivateKey extends AbstractKey implements IASymmetricPriv
 			throw new IllegalArgumentException("keySize");
 		if (keySize>MAX_SIZE_IN_BITS_OF_NON_HYBRID_PRIVATE_KEY)
 			throw new IllegalArgumentException("keySize");
-		this.privateKey = ASymmetricEncryptionType.encodeGnuPrivateKey(privateKey);
+		this.finalizer=new Finalizer();
+		this.finalizer.privateKey = ASymmetricEncryptionType.encodeGnuPrivateKey(privateKey);
 		this.keySizeBits = keySize;
-		hashCode = Arrays.hashCode(this.privateKey);
-		this.gnuPrivateKey=null;
+		hashCode = Arrays.hashCode(this.finalizer.privateKey);
+		this.finalizer.gnuPrivateKey=null;
+		registerCleaner(finalizer);
 	}
 
 
@@ -259,11 +260,12 @@ public class ASymmetricPrivateKey extends AbstractKey implements IASymmetricPriv
 	@Override
 	public WrappedSecretData encode()
 	{
-		byte[] tab = new byte[4+ENCODED_TYPE_SIZE+privateKey.length];
+		checkNotDestroyed();
+		byte[] tab = new byte[4+ENCODED_TYPE_SIZE+finalizer.privateKey.length];
 		tab[0]=encryptionType==null?(byte)((xdhKey? AbstractKey.IS_XDH_KEY:0)|2):(byte)3;
 		Bits.putUnsignedInt(tab, 1, keySizeBits, 3);
 		Bits.putUnsignedInt(tab, 4, encryptionType==null?signatureType.ordinal():encryptionType.ordinal(), ENCODED_TYPE_SIZE);
-        System.arraycopy(privateKey, 0, tab, ENCODED_TYPE_SIZE+4, privateKey.length);
+        System.arraycopy(finalizer.privateKey, 0, tab, ENCODED_TYPE_SIZE+4, finalizer.privateKey.length);
         return new WrappedSecretData(tab);
 	}
 
@@ -280,7 +282,7 @@ public class ASymmetricPrivateKey extends AbstractKey implements IASymmetricPriv
 			return true;
 		if (o instanceof ASymmetricPrivateKey) {
 			ASymmetricPrivateKey other = (ASymmetricPrivateKey) o;
-			boolean b=com.distrimind.bouncycastle.util.Arrays.constantTimeAreEqual(privateKey, other.privateKey);
+			boolean b=com.distrimind.bouncycastle.util.Arrays.constantTimeAreEqual(finalizer.privateKey, other.finalizer.privateKey);
 			b=keySizeBits == other.keySizeBits && b;
 			b=encryptionType == other.encryptionType && b;
 			b=signatureType == other.signatureType && b;
@@ -299,7 +301,8 @@ public class ASymmetricPrivateKey extends AbstractKey implements IASymmetricPriv
 	}
 
 	byte[] getBytesPrivateKey() {
-		return privateKey;
+		checkNotDestroyed();
+		return finalizer.privateKey;
 	}
 
 	public int getKeySizeBits() {
@@ -320,29 +323,31 @@ public class ASymmetricPrivateKey extends AbstractKey implements IASymmetricPriv
 
 	@Override
 	public Object toGnuKey() throws NoSuchAlgorithmException, MessageExternalizationException {
-		if (gnuPrivateKey == null)
-			gnuPrivateKey = ASymmetricEncryptionType.decodeGnuPrivateKey(privateKey, encryptionType==null?signatureType.getKeyGeneratorAlgorithmName():encryptionType.getAlgorithmName());
+		checkNotDestroyed();
+		if (finalizer.gnuPrivateKey == null)
+			finalizer.gnuPrivateKey = ASymmetricEncryptionType.decodeGnuPrivateKey(finalizer.privateKey, encryptionType==null?signatureType.getKeyGeneratorAlgorithmName():encryptionType.getAlgorithmName());
 
-		return gnuPrivateKey;
+		return finalizer.gnuPrivateKey;
 	}
 
 	@Override
 	public PrivateKey toJavaNativeKey()
 			throws NoSuchAlgorithmException, InvalidKeySpecException {
+		checkNotDestroyed();
 		if (encryptionType!=null && encryptionType.name().startsWith("BCPQC_MCELIECE_"))
 		{
 			AsymmetricKey bk=toBouncyCastleKey();
 			if (bk instanceof BCMcElieceCipher.PrivateKeyCCA2)
-				nativePrivateKey= new BCMcElieceCCA2PrivateKey(((BCMcElieceCipher.PrivateKeyCCA2)bk).getPrivateKeyParameters());
+				finalizer.nativePrivateKey= new BCMcElieceCCA2PrivateKey(((BCMcElieceCipher.PrivateKeyCCA2)bk).getPrivateKeyParameters());
 			else
-				nativePrivateKey= new BCMcEliecePrivateKey(((BCMcElieceCipher.PrivateKey)bk).getPrivateKeyParameters());
+				finalizer.nativePrivateKey= new BCMcEliecePrivateKey(((BCMcElieceCipher.PrivateKey)bk).getPrivateKeyParameters());
 		}
 		else
-			if (nativePrivateKey == null)
-				nativePrivateKey = ASymmetricEncryptionType.decodeNativePrivateKey(privateKey, encryptionType==null?signatureType.getKeyGeneratorAlgorithmName():encryptionType.getAlgorithmName(),
+			if (finalizer.nativePrivateKey == null)
+				finalizer.nativePrivateKey = ASymmetricEncryptionType.decodeNativePrivateKey(finalizer.privateKey, encryptionType==null?signatureType.getKeyGeneratorAlgorithmName():encryptionType.getAlgorithmName(),
 					encryptionType==null?signatureType.name():encryptionType.name(), xdhKey);
 
-		return nativePrivateKey;
+		return finalizer.nativePrivateKey;
 	}
 
 
@@ -357,28 +362,29 @@ public class ASymmetricPrivateKey extends AbstractKey implements IASymmetricPriv
 
 	@Override
 	public AsymmetricKey toBouncyCastleKey() throws NoSuchAlgorithmException, InvalidKeySpecException {
+		checkNotDestroyed();
 		if (encryptionType!=null && encryptionType.name().startsWith("BCPQC_MCELIECE_"))
 		{
-			if (bouncyCastlePrivateKey==null) {
+			if (finalizer.bouncyCastlePrivateKey==null) {
 				if (encryptionType.name().contains("CCA2")) {
 					BCMcElieceCipher.PrivateKeyCCA2 res = new BCMcElieceCipher.PrivateKeyCCA2();
 					try {
-						res.readExternal(new RandomByteArrayInputStream(this.privateKey), encryptionType);
-						bouncyCastlePrivateKey=res;
+						res.readExternal(new RandomByteArrayInputStream(this.finalizer.privateKey), encryptionType);
+						finalizer.bouncyCastlePrivateKey=res;
 					} catch (IOException e) {
 						throw new InvalidKeySpecException(e);
 					}
 				} else {
 					BCMcElieceCipher.PrivateKey res = new BCMcElieceCipher.PrivateKey();
 					try {
-						res.readExternal(new RandomByteArrayInputStream(this.privateKey));
-						bouncyCastlePrivateKey=res;
+						res.readExternal(new RandomByteArrayInputStream(this.finalizer.privateKey));
+						finalizer.bouncyCastlePrivateKey=res;
 					} catch (IOException e) {
 						throw new InvalidKeySpecException(e);
 					}
 				}
 			}
-			return bouncyCastlePrivateKey;
+			return finalizer.bouncyCastlePrivateKey;
 		}
 		else {
 			PrivateKey pk = toJavaNativeKey();
@@ -409,6 +415,7 @@ public class ASymmetricPrivateKey extends AbstractKey implements IASymmetricPriv
 
 	@Override
 	public ASymmetricPrivateKey getNonPQCPrivateKey() {
+		checkNotDestroyed();
 		return this;
 	}
 }

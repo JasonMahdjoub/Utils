@@ -34,6 +34,9 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util;
 
+import java.io.IOException;
+import java.lang.reflect.Modifier;
+
 /**
  *
  * This API aims to prevent future deactivation of finalize method calling by the garbage collector.
@@ -56,6 +59,7 @@ package com.distrimind.util;
  */
 @SuppressWarnings("deprecation")
 public interface Cleanable extends AutoCloseable {
+
 	abstract class Cleaner implements Runnable
 	{
 		private boolean isCleaned=false;
@@ -63,6 +67,14 @@ public interface Cleanable extends AutoCloseable {
 		private Cleaner next=null;
 		CleanerTools.WR reference=null;
 		protected abstract void performCleanup();
+
+
+		protected Cleaner()
+		{
+			Class<? extends Cleaner> c=this.getClass();
+			if (c.isMemberClass() && !Modifier.isStatic(c.getModifiers()))
+				throw new IllegalAccessError("The class "+c+" which inherits from class "+Cleaner.class.getName()+" must be static");
+		}
 
 		@Override
 		public final void run() {
@@ -167,7 +179,8 @@ public interface Cleanable extends AutoCloseable {
 	}
 
 	@Override
-	default void close() throws Exception {
+	default void close() throws IOException {
 		clean();
 	}
+
 }

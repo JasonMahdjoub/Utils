@@ -55,11 +55,21 @@ import java.security.spec.PSSParameterSpec;
  */
 public class ASymmetricAuthenticatedSignatureCheckerAlgorithm extends AbstractAuthenticatedCheckerAlgorithm {
 	private final AbstractAuthenticatedCheckerAlgorithm checker;
+	private final IASymmetricPublicKey distantPublicKey;
 	public ASymmetricAuthenticatedSignatureCheckerAlgorithm(IASymmetricPublicKey distantPublicKey) throws NoSuchProviderException, NoSuchAlgorithmException {
+		if (distantPublicKey.isDestroyed())
+			throw new IllegalArgumentException();
+		this.distantPublicKey=distantPublicKey;
 		if (distantPublicKey instanceof ASymmetricPublicKey)
 			checker=new Checker((ASymmetricPublicKey)distantPublicKey);
 		else
 			checker=new HybridChecker((HybridASymmetricPublicKey)distantPublicKey);
+	}
+	@Override
+	protected void checkKeysNotCleaned()
+	{
+		if (distantPublicKey.isDestroyed())
+			throw new IllegalAccessError();
 	}
 
 	@Override
@@ -69,6 +79,7 @@ public class ASymmetricAuthenticatedSignatureCheckerAlgorithm extends AbstractAu
 
 	@Override
 	public void init(byte[] signature, int offs, int lens) throws IOException {
+		checkKeysNotCleaned();
 		checker.init(signature, offs, lens);
 	}
 
@@ -80,6 +91,8 @@ public class ASymmetricAuthenticatedSignatureCheckerAlgorithm extends AbstractAu
 
 	@Override
 	public boolean verify() throws IOException {
+		if (distantPublicKey.isDestroyed())
+			return false;
 		return checker.verify();
 	}
 
@@ -102,6 +115,8 @@ public class ASymmetricAuthenticatedSignatureCheckerAlgorithm extends AbstractAu
 		private final HybridASymmetricPublicKey distantPublicKey;
 		private boolean signatureValid=true;
 		HybridChecker(HybridASymmetricPublicKey distantPublicKey) throws NoSuchProviderException, NoSuchAlgorithmException {
+			if (distantPublicKey.isDestroyed())
+				throw new IllegalArgumentException();
 			checkerNonPQC=new Checker(distantPublicKey.getNonPQCPublicKey());
 			checkerPQC=new Checker(distantPublicKey.getPQCPublicKey());
 			this.distantPublicKey=distantPublicKey;
@@ -109,6 +124,7 @@ public class ASymmetricAuthenticatedSignatureCheckerAlgorithm extends AbstractAu
 
 		@Override
 		public void init(byte[] signature, int offs, int lens) throws IOException {
+			checkKeysNotCleaned();
 			int len=(int)Bits.getUnsignedInt(signature, offs, 3);
 			signatureValid=len+3<lens;
 			if (signatureValid) {
@@ -142,6 +158,12 @@ public class ASymmetricAuthenticatedSignatureCheckerAlgorithm extends AbstractAu
 		}
 
 		@Override
+		protected void checkKeysNotCleaned() {
+			if (distantPublicKey.isDestroyed())
+				throw new IllegalAccessError();
+		}
+
+		@Override
 		public boolean isPostQuantumChecker() {
 			return true;
 		}
@@ -163,6 +185,8 @@ public class ASymmetricAuthenticatedSignatureCheckerAlgorithm extends AbstractAu
 				throws NoSuchAlgorithmException, NoSuchProviderException {
 			if (distantPublicKey == null)
 				throw new NullPointerException("distantPublicKey");
+			if (distantPublicKey.isDestroyed())
+				throw new IllegalArgumentException();
 			type = distantPublicKey.getAuthenticatedSignatureAlgorithmType();
 			if (type == null)
 				throw new IllegalArgumentException("The given key is not destined to a signature process");
@@ -178,6 +202,7 @@ public class ASymmetricAuthenticatedSignatureCheckerAlgorithm extends AbstractAu
 		@Override
 		public void init(byte[] signature, int offs, int lens)
 				throws IOException {
+			checkKeysNotCleaned();
 			if (type == ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA256withRSAandMGF1 || type == ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA384withRSAandMGF1 || type == ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA512withRSAandMGF1) {
 				byte[][] tmp = Bits.separateEncodingsWithIntSizedTabs(signature, offs, lens);
 				this.signature = tmp[0];
@@ -221,6 +246,12 @@ public class ASymmetricAuthenticatedSignatureCheckerAlgorithm extends AbstractAu
 		@Override
 		public int getMacLengthBytes() {
 			return distantPublicKey.getAuthenticatedSignatureAlgorithmType().getSignatureSizeBytes(distantPublicKey.getKeySizeBits());
+		}
+
+		@Override
+		protected void checkKeysNotCleaned() {
+			if (distantPublicKey.isDestroyed())
+				throw new IllegalArgumentException();
 		}
 	}
 

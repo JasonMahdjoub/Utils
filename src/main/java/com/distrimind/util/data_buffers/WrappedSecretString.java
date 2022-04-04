@@ -2,77 +2,61 @@ package com.distrimind.util.data_buffers;
 
 import com.distrimind.util.ISecretValue;
 import com.distrimind.util.InvalidEncodedValue;
-import com.distrimind.util.crypto.Zeroizable;
-
-import java.util.Arrays;
+import com.distrimind.util.AutoZeroizable;
 
 /**
  * @author Jason Mahdjoub
  * @version 1.1
  * @since Utils 5.10.0
  */
-public class WrappedSecretString extends WrappedString implements Zeroizable, ISecretValue {
-	private transient boolean toZeroize;
+public class WrappedSecretString extends WrappedString implements AutoZeroizable, ISecretValue {
+
 
 	protected WrappedSecretString()
 	{
 		super();
-		toZeroize=false;
+		registerCleaner(finalizer);
+		finalizer.toZeroize=false;
 	}
 	public WrappedSecretString(char[] secretData) {
 		super(secretData);
-		toZeroize=true;
+		registerCleaner(finalizer);
+		finalizer.toZeroize=true;
 
 	}
 	WrappedSecretString(char[] data, String dataString) {
 		super(data, dataString);
-		toZeroize=true;
+		registerCleaner(finalizer);
+		finalizer.toZeroize=true;
 
 	}
 	public WrappedSecretString(String secretData) {
 		super(secretData);
-		toZeroize=true;
+		registerCleaner(finalizer);
+		finalizer.toZeroize=true;
 	}
 
 
 
 	public WrappedSecretString(WrappedString wrappedSecretString) {
 		super(wrappedSecretString);
-		toZeroize=true;
+		registerCleaner(finalizer);
+		finalizer.toZeroize=true;
 	}
 	public WrappedSecretString(WrappedData wrappedSecretData) {
 		super(wrappedSecretData, true);
-		toZeroize=true;
+		registerCleaner(finalizer);
+		finalizer.toZeroize=true;
 	}
 
 
 	protected void setChars(char[] chars)
 	{
-		zeroize();
-		toZeroize=true;
+		finalizer.performCleanup();
+		finalizer.toZeroize=true;
 		super.setChars(chars);
 	}
-	@Override
-	public void zeroize()
-	{
-		if (toZeroize) {
-			Arrays.fill(getChars(), '0');
-			zeroizeString(toString());
-			toZeroize=false;
-		}
-	}
 
-	@Override
-	public boolean isDestroyed() {
-		return !toZeroize;
-	}
-
-	@SuppressWarnings("deprecation")
-	@Override
-	protected void finalize()
-	{
-		zeroize();
-	}
 	@Override
 	public WrappedSecretData toWrappedData() throws InvalidEncodedValue {
 		return new WrappedSecretData(this);

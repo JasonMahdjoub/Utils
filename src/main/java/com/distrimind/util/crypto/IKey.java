@@ -1,6 +1,7 @@
 package com.distrimind.util.crypto;
 
 import com.distrimind.util.DecentralizedValue;
+import com.distrimind.util.Zeroizable;
 import com.distrimind.util.data_buffers.WrappedData;
 
 import java.io.IOException;

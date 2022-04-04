@@ -35,9 +35,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
 package com.distrimind.util.crypto;
 
 
-import com.distrimind.util.AbstractDecentralizedValue;
-import com.distrimind.util.Bits;
-import com.distrimind.util.InvalidEncodedValue;
+import com.distrimind.util.*;
 import com.distrimind.util.data_buffers.WrappedData;
 import com.distrimind.util.data_buffers.WrappedSecretData;
 import com.distrimind.util.data_buffers.WrappedString;
@@ -51,18 +49,7 @@ import java.util.Arrays;
  * @since Utils 2.0
  */
 
-public abstract class AbstractKey extends AbstractDecentralizedValue implements IKey{
-
-
-	/**
-	 *
-	 */
-	private static final long serialVersionUID = -8425241891004940479L;
-
-
-
-
-
+public abstract class AbstractKey extends AbstractDecentralizedValue implements IKey, Zeroizable {
 
 	public static AbstractKey decode(byte[] b) throws InvalidEncodedValue {
 		return decode(b, !isPublicKey(b, 0));
@@ -83,6 +70,13 @@ public abstract class AbstractKey extends AbstractDecentralizedValue implements 
 	public static boolean isPublicKey(byte[] b)
 	{
 		return isPublicKey(b, 0);
+	}
+
+	@Override
+	public String toString() {
+		if (isDestroyed())
+			return this.getClass().getSimpleName()+"[destroyed]";
+		return super.toString();
 	}
 
 	public static boolean isPublicKey(byte[] b, int off)
@@ -129,9 +123,9 @@ public abstract class AbstractKey extends AbstractDecentralizedValue implements 
 		Bits.putUnsignedInt(res, 1, encodedNonPQC.getBytes().length, 3);
 		System.arraycopy(encodedNonPQC.getBytes(), 0, res, 4, encodedNonPQC.getBytes().length );
 		System.arraycopy(encodedPQC.getBytes(), 0, res, 4+encodedNonPQC.getBytes().length, encodedPQC.getBytes().length );
-		if (encodedNonPQC instanceof Zeroizable) {
-			((Zeroizable) encodedNonPQC).zeroize();
-			((Zeroizable) encodedPQC).zeroize();
+		if (encodedNonPQC instanceof AutoZeroizable) {
+			((AutoZeroizable) encodedNonPQC).clean();
+			((AutoZeroizable) encodedPQC).clean();
 			return new WrappedSecretData(res);
 		}
 		else
@@ -333,12 +327,6 @@ public abstract class AbstractKey extends AbstractDecentralizedValue implements 
 
 
 
-	@SuppressWarnings("deprecation")
-	@Override
-	public void finalize()
-	{
-		zeroize();
-	}
 
 
 

@@ -239,7 +239,10 @@ public enum ASymmetricKeyWrapperType {
 	
 	WrappedEncryptedSymmetricSecretKey wrapKey(AbstractSecureRandom random, IASymmetricPublicKey ipublicKey, SymmetricSecretKey keyToWrap)
 			throws IOException {
-
+		if (ipublicKey.isDestroyed())
+			throw new IllegalArgumentException();
+		if (keyToWrap.isCleaned())
+			throw new IllegalArgumentException();
 		try {
 			if (ipublicKey instanceof ASymmetricPublicKey) {
 				if (isHybrid())
@@ -367,6 +370,10 @@ public enum ASymmetricKeyWrapperType {
 	
 	SymmetricSecretKey unwrapKey(IASymmetricPrivateKey iPrivateKey, WrappedEncryptedSymmetricSecretKey keyToUnwrap) throws IOException
 	{
+		if (keyToUnwrap.isCleaned())
+			throw new IllegalArgumentException();
+		if (iPrivateKey.isCleaned())
+			throw new IllegalArgumentException();
 		try {
 			if (iPrivateKey instanceof ASymmetricPrivateKey)
 			{
@@ -415,6 +422,9 @@ public enum ASymmetricKeyWrapperType {
 	}
 	private SymmetricSecretKey unwrapKey(ASymmetricPrivateKey privateKey, byte[] keyToUnwrap, SymmetricEncryptionType encryptionType, SymmetricAuthenticatedSignatureType signatureType, short keySize) throws IOException
 	{
+		if (privateKey.isCleaned())
+			throw new IllegalArgumentException();
+
 		try {
 			//CodeProvider.ensureProviderLoaded(getCodeProvider());
 			if ((privateKey.getAuthenticatedSignatureAlgorithmType() != null && ((provider == CodeProvider.GNU_CRYPTO) != (privateKey.getAuthenticatedSignatureAlgorithmType().getCodeProviderForSignature() == CodeProvider.GNU_CRYPTO)))
@@ -515,6 +525,8 @@ public enum ASymmetricKeyWrapperType {
 	}
 
 	public static int getOutputSizeAfterEncryption(ASymmetricPublicKey publicKey, ASymmetricKeyWrapperType type, int size) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
+		if (publicKey.isDestroyed())
+			throw new IllegalArgumentException();
 		WrappedData encodedKey = new WrappedData(new byte[size]);
 		Random r=new Random(System.currentTimeMillis());
 		r.nextBytes(encodedKey.getBytes());

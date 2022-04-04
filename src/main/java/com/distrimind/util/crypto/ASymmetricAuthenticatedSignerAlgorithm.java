@@ -55,6 +55,8 @@ public class ASymmetricAuthenticatedSignerAlgorithm extends AbstractAuthenticate
 	private final IASymmetricPrivateKey localPrivateKey;
 
 	public ASymmetricAuthenticatedSignerAlgorithm(IASymmetricPrivateKey localPrivateKey) throws NoSuchProviderException, NoSuchAlgorithmException, IOException {
+		if (localPrivateKey.isCleaned())
+			throw new IllegalArgumentException();
 		this.localPrivateKey=localPrivateKey;
 		if (localPrivateKey instanceof ASymmetricPrivateKey)
 			signer=new Signer((ASymmetricPrivateKey)localPrivateKey);
@@ -69,9 +71,15 @@ public class ASymmetricAuthenticatedSignerAlgorithm extends AbstractAuthenticate
 	}
 	@Override
 	public void init() throws IOException {
-
+		checkKeysNotCleaned();
 	}
 
+	@Override
+	protected void checkKeysNotCleaned()
+	{
+		if (localPrivateKey.isCleaned())
+			throw new IllegalAccessError();
+	}
 
 	@Override
 	public void update(byte[] message, int offm, int lenm) throws IOException {
@@ -80,6 +88,7 @@ public class ASymmetricAuthenticatedSignerAlgorithm extends AbstractAuthenticate
 
 	@Override
 	public int getSignature(byte[] signature, int off_sig) throws IOException {
+		checkKeysNotCleaned();
 		return signer.getSignature(signature, off_sig);
 	}
 
@@ -90,6 +99,7 @@ public class ASymmetricAuthenticatedSignerAlgorithm extends AbstractAuthenticate
 
 	@Override
 	public byte[] getSignature() throws IOException {
+		checkKeysNotCleaned();
 		return signer.getSignature();
 	}
 
@@ -142,6 +152,12 @@ public class ASymmetricAuthenticatedSignerAlgorithm extends AbstractAuthenticate
 		public boolean isPostQuantumSigner() {
 			return true;
 		}
+
+		@Override
+		protected void checkKeysNotCleaned() {
+			PQCSigner.checkKeysNotCleaned();
+			nonPQCSigner.checkKeysNotCleaned();
+		}
 	}
 
 	private static class Signer extends AbstractAuthenticatedSignerAlgorithm {
@@ -156,10 +172,18 @@ public class ASymmetricAuthenticatedSignerAlgorithm extends AbstractAuthenticate
 			return localPrivateKey.isPostQuantumKey();
 		}
 
+		@Override
+		protected void checkKeysNotCleaned() {
+			if (localPrivateKey.isCleaned())
+				throw new IllegalAccessError();
+		}
+
 		@SuppressWarnings("deprecation")
 		public Signer(ASymmetricPrivateKey localPrivateKey) throws NoSuchAlgorithmException, NoSuchProviderException {
 			if (localPrivateKey == null)
 				throw new NullPointerException("localPrivateKey");
+			if (localPrivateKey.isCleaned())
+				throw new IllegalArgumentException();
 			type = localPrivateKey.getAuthenticatedSignatureAlgorithmType();
 			if (type == null)
 				throw new IllegalArgumentException("The given key is not destined to a signature process");

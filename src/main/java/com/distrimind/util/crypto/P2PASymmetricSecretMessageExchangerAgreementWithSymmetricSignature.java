@@ -10,63 +10,65 @@ import java.security.NoSuchProviderException;
  * @since MaDKitLanEdition 3.24
  */
 public class P2PASymmetricSecretMessageExchangerAgreementWithSymmetricSignature extends P2PLoginAgreement {
-    private final P2PASymmetricSecretMessageExchangerAgreement p2PASymmetricSecretMessageExchangerAgreement;
-    private final P2PLoginWithSymmetricSignature login;
+    private static final class Finalizer extends Cleaner
+    {
+        private final P2PASymmetricSecretMessageExchangerAgreement p2PASymmetricSecretMessageExchangerAgreement;
+        private final P2PLoginWithSymmetricSignature login;
 
-    @Override
-    public void zeroize() {
-        if (login!=null)
-            login.zeroize();
-        if (p2PASymmetricSecretMessageExchangerAgreement!=null)
-            p2PASymmetricSecretMessageExchangerAgreement.zeroize();
+        private Finalizer(P2PASymmetricSecretMessageExchangerAgreement p2PASymmetricSecretMessageExchangerAgreement, P2PLoginWithSymmetricSignature login) {
+            this.p2PASymmetricSecretMessageExchangerAgreement = p2PASymmetricSecretMessageExchangerAgreement;
+            this.login = login;
+        }
+
+        @Override
+        protected void performCleanup() {
+            if (login!=null)
+                login.clean();
+            if (p2PASymmetricSecretMessageExchangerAgreement!=null)
+                p2PASymmetricSecretMessageExchangerAgreement.clean();
+        }
     }
-    @Override
-    public boolean isDestroyed() {
-        return (login==null || login.isDestroyed()) && p2PASymmetricSecretMessageExchangerAgreement.isDestroyed();
-    }
+    private final Finalizer finalizer;
+
 
     @Override
     public boolean isPostQuantumAgreement() {
-        return (p2PASymmetricSecretMessageExchangerAgreement!=null && p2PASymmetricSecretMessageExchangerAgreement.isPostQuantumAgreement())
-                && (login!=null && login.isPostQuantumAgreement());
+        return (finalizer.p2PASymmetricSecretMessageExchangerAgreement!=null && finalizer.p2PASymmetricSecretMessageExchangerAgreement.isPostQuantumAgreement())
+                && (finalizer.login!=null && finalizer.login.isPostQuantumAgreement());
     }
 
     P2PASymmetricSecretMessageExchangerAgreementWithSymmetricSignature(AbstractSecureRandom random, char[] message, byte[] salt,
                                                                        int offset_salt, int len_salt, SymmetricSecretKey secretKeyForSignature,MessageDigestType messageDigestType, PasswordHashType passwordHashType, ASymmetricPublicKey myPublicKey) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
         super(secretKeyForSignature==null?2:4, secretKeyForSignature==null?2:4);
-        p2PASymmetricSecretMessageExchangerAgreement=new P2PASymmetricSecretMessageExchangerAgreement(random, messageDigestType, passwordHashType, myPublicKey, salt, offset_salt, len_salt, message);
-        if (secretKeyForSignature==null)
-            login=null;
-        else
-            login=new P2PLoginWithSymmetricSignature(secretKeyForSignature, random);
+        finalizer=new Finalizer(new P2PASymmetricSecretMessageExchangerAgreement(random, messageDigestType, passwordHashType, myPublicKey, salt, offset_salt, len_salt, message),
+                secretKeyForSignature==null?null:new P2PLoginWithSymmetricSignature(secretKeyForSignature, random));
+        registerCleaner(finalizer);
     }
     P2PASymmetricSecretMessageExchangerAgreementWithSymmetricSignature(AbstractSecureRandom random, byte[] message, int offset, int len, byte[] salt,
                                                                        int offset_salt, int len_salt, boolean messageIsKey, SymmetricSecretKey secretKeyForSignature, MessageDigestType messageDigestType, PasswordHashType passwordHashType, ASymmetricPublicKey myPublicKey) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
         super(secretKeyForSignature==null?2:4, secretKeyForSignature==null?2:4);
-        p2PASymmetricSecretMessageExchangerAgreement=new P2PASymmetricSecretMessageExchangerAgreement(random,messageDigestType, passwordHashType, myPublicKey, salt, offset_salt, len_salt, message, offset, len, messageIsKey);
-        if (secretKeyForSignature==null)
-            login=null;
-        else
-            login=new P2PLoginWithSymmetricSignature(secretKeyForSignature, random);
+        finalizer=new Finalizer(new P2PASymmetricSecretMessageExchangerAgreement(random,messageDigestType, passwordHashType, myPublicKey, salt, offset_salt, len_salt, message, offset, len, messageIsKey),
+                secretKeyForSignature==null?null:new P2PLoginWithSymmetricSignature(secretKeyForSignature, random));
+        registerCleaner(finalizer);
     }
     @Override
     protected boolean isAgreementProcessValidImpl() {
 
-        return p2PASymmetricSecretMessageExchangerAgreement.isAgreementProcessValidImpl() && (login==null || login.isAgreementProcessValidImpl());
+        return finalizer.p2PASymmetricSecretMessageExchangerAgreement.isAgreementProcessValidImpl() && (finalizer.login==null || finalizer.login.isAgreementProcessValidImpl());
     }
     @Override
     protected byte[] getDataToSend(int stepNumber) throws IOException {
-        if (login!=null && stepNumber<2)
-            return login.getDataToSend();
+        if (finalizer.login!=null && stepNumber<2)
+            return finalizer.login.getDataToSend();
         else
-            return p2PASymmetricSecretMessageExchangerAgreement.getDataToSend();
+            return finalizer.p2PASymmetricSecretMessageExchangerAgreement.getDataToSend();
     }
     @Override
     protected void receiveData(int stepNumber, byte[] data) throws IOException {
-        if (login!=null && stepNumber<2)
-            login.receiveData(data);
+        if (finalizer.login!=null && stepNumber<2)
+            finalizer.login.receiveData(data);
         else
-            p2PASymmetricSecretMessageExchangerAgreement.receiveData(data);
+            finalizer.p2PASymmetricSecretMessageExchangerAgreement.receiveData(data);
 
     }
 

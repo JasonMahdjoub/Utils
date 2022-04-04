@@ -51,20 +51,19 @@ import java.util.Arrays;
  * @since Utils 3.10.0
  */
 public class NewHopeKeyAgreementServer extends AbstractNewHopeKeyAgreement{
+	private static final class Finalizer extends Cleaner
+	{
+		private ExchangePair exchangePair;
+		@Override
+		protected void performCleanup() {
+			Arrays.fill(exchangePair.getSharedValue(), (byte)0);
+			exchangePair=null;
+		}
+	}
+	private final Finalizer finalizer;
 	private final AbstractSecureRandom randomForKeys;
-	private ExchangePair exchangePair;
-	private boolean valid=true;
 
-	@Override
-	public void zeroize() {
-		super.zeroize();
-		Arrays.fill(exchangePair.getSharedValue(), (byte)0);
-		exchangePair=null;
-	}
-	@Override
-	public boolean isDestroyed() {
-		return super.isDestroyed() && exchangePair==null;
-	}
+	private boolean valid=true;
 
 	@Override
 	public boolean isPostQuantumAgreement() {
@@ -77,6 +76,8 @@ public class NewHopeKeyAgreementServer extends AbstractNewHopeKeyAgreement{
 	protected NewHopeKeyAgreementServer(SymmetricAuthenticatedSignatureType type, short keySizeBits, AbstractSecureRandom randomForKeys) {
 		super(type, (short)(keySizeBits/8));
 		this.randomForKeys=randomForKeys;
+		this.finalizer=new Finalizer();
+		registerCleaner(finalizer);
 	}
 
 	protected NewHopeKeyAgreementServer(SymmetricEncryptionType type, AbstractSecureRandom randomForKeys) {
@@ -86,6 +87,8 @@ public class NewHopeKeyAgreementServer extends AbstractNewHopeKeyAgreement{
 	protected NewHopeKeyAgreementServer(SymmetricEncryptionType type, short keySizeBits, AbstractSecureRandom randomForKeys) {
 		super(type, (short)(keySizeBits/8));
 		this.randomForKeys=randomForKeys;
+		this.finalizer=new Finalizer();
+		registerCleaner(finalizer);
 	}
 
 
@@ -98,16 +101,16 @@ public class NewHopeKeyAgreementServer extends AbstractNewHopeKeyAgreement{
 		AbstractNewHopeKeyAgreement.sharedB(randomForKeys, sharedValue, publicKeyValue, data);
 
 
-		exchangePair=new ExchangePair(new NHPublicKeyParameters(publicKeyValue), sharedValue);
-		shared=exchangePair.getSharedValue();
-		assert shared!=null;
+		finalizer.exchangePair=new ExchangePair(new NHPublicKeyParameters(publicKeyValue), sharedValue);
+		super.finalizer.shared=finalizer.exchangePair.getSharedValue();
+		assert super.finalizer.shared!=null;
 		valid=true;
 	}
 
 	public byte[] getDataPhase2()
 	{
 		valid=false;
-		byte[] res= ((NHPublicKeyParameters)exchangePair.getPublicKey()).getPubData();
+		byte[] res= ((NHPublicKeyParameters)finalizer.exchangePair.getPublicKey()).getPubData();
 		valid=true;
 		return res;
 	}

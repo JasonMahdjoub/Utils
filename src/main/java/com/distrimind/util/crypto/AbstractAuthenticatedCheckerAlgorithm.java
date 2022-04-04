@@ -106,5 +106,7 @@ public abstract class AbstractAuthenticatedCheckerAlgorithm {
 			l-=s;
 		} while (l>0);
 	}
+
+	protected abstract void checkKeysNotCleaned();
 	
 }

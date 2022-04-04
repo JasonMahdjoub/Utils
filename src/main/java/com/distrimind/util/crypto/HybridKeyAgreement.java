@@ -51,8 +51,28 @@ import java.util.Arrays;
  * @since Utils 4.5.0
  */
 public class HybridKeyAgreement extends KeyAgreement{
-	private KeyAgreement nonPQCKeyAgreement, PQCKeyAgreement;
-	private SymmetricSecretKey secretKey=null;
+
+	private static class Finalizer extends Cleaner
+	{
+		private KeyAgreement nonPQCKeyAgreement, PQCKeyAgreement;
+		private SymmetricSecretKey secretKey=null;
+		@Override
+		protected void performCleanup() {
+			if (nonPQCKeyAgreement!=null) {
+				nonPQCKeyAgreement.clean();
+				nonPQCKeyAgreement=null;
+			}
+			if (PQCKeyAgreement!=null) {
+				PQCKeyAgreement.clean();
+				PQCKeyAgreement=null;
+			}
+			if (secretKey!=null) {
+				this.secretKey = null;
+			}
+		}
+	}
+	private final Finalizer finalizer;
+
 
 	protected HybridKeyAgreement(KeyAgreement nonPQCKeyAgreement, KeyAgreement PQCKeyAgreement)
 	{
@@ -64,27 +84,29 @@ public class HybridKeyAgreement extends KeyAgreement{
 			throw new IllegalArgumentException();
 		if (!PQCKeyAgreement.isPostQuantumAgreement())
 			throw new IllegalArgumentException();
-		this.nonPQCKeyAgreement=nonPQCKeyAgreement;
-		this.PQCKeyAgreement=PQCKeyAgreement;
+		finalizer=new Finalizer();
+		this.finalizer.nonPQCKeyAgreement=nonPQCKeyAgreement;
+		this.finalizer.PQCKeyAgreement=PQCKeyAgreement;
+		registerCleaner(finalizer);
 	}
 
 	@Override
 	public SymmetricSecretKey getDerivedKey() {
-		return secretKey;
+		return finalizer.secretKey;
 	}
 
 	@Override
 	public short getDerivedKeySizeBytes() {
-		return  PQCKeyAgreement.getDerivedKeySizeBytes();
+		return  finalizer.PQCKeyAgreement.getDerivedKeySizeBytes();
 	}
 
 
 	private void checkSymmetricSecretKey() throws IOException
 	{
-		if (secretKey==null && hasFinishedReception() && hasFinishedSend() && isAgreementProcessValid())
+		if (finalizer.secretKey==null && hasFinishedReception() && hasFinishedSend() && isAgreementProcessValid())
 		{
-			SymmetricSecretKey nonPQC=nonPQCKeyAgreement.getDerivedKey();
-			SymmetricSecretKey PQC=PQCKeyAgreement.getDerivedKey();
+			SymmetricSecretKey nonPQC=finalizer.nonPQCKeyAgreement.getDerivedKey();
+			SymmetricSecretKey PQC=finalizer.PQCKeyAgreement.getDerivedKey();
 
 			WrappedSecretData PQCBytes=PQC.getKeyBytes();
 
@@ -107,16 +129,16 @@ public class HybridKeyAgreement extends KeyAgreement{
 			if (shared.length<32)
 				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException());
 			if (PQC.getEncryptionAlgorithmType()==null)
-				secretKey=new SymmetricSecretKey(PQC.getAuthenticatedSignatureAlgorithmType(), shared);
+				finalizer.secretKey=new SymmetricSecretKey(PQC.getAuthenticatedSignatureAlgorithmType(), shared);
 			else
-				secretKey=new SymmetricSecretKey(PQC.getEncryptionAlgorithmType(), shared);
+				finalizer.secretKey=new SymmetricSecretKey(PQC.getEncryptionAlgorithmType(), shared);
 
 		}
 	}
 
 	@Override
 	protected boolean isAgreementProcessValidImpl() {
-		return nonPQCKeyAgreement.isAgreementProcessValidImpl() && PQCKeyAgreement.isAgreementProcessValidImpl();
+		return finalizer.nonPQCKeyAgreement.isAgreementProcessValidImpl() && finalizer.PQCKeyAgreement.isAgreementProcessValidImpl();
 	}
 
 	@Override
@@ -124,12 +146,12 @@ public class HybridKeyAgreement extends KeyAgreement{
 		try {
 			byte[] nonPQC = null, PQC = null;
 			boolean nonPQCb=false, PQCb=false;
-			if (!nonPQCKeyAgreement.hasFinishedSend()) {
-				nonPQC = nonPQCKeyAgreement.getDataToSend();
+			if (!finalizer.nonPQCKeyAgreement.hasFinishedSend()) {
+				nonPQC = finalizer.nonPQCKeyAgreement.getDataToSend();
 				nonPQCb = true;
 			}
-			if (!PQCKeyAgreement.hasFinishedSend()) {
-				PQC = PQCKeyAgreement.getDataToSend();
+			if (!finalizer.PQCKeyAgreement.hasFinishedSend()) {
+				PQC = finalizer.PQCKeyAgreement.getDataToSend();
 				PQCb = true;
 			}
 			if (nonPQCb && PQCb) {
@@ -149,18 +171,18 @@ public class HybridKeyAgreement extends KeyAgreement{
 	}
 
 	KeyAgreement getNonPQCKeyAgreement() {
-		return nonPQCKeyAgreement;
+		return finalizer.nonPQCKeyAgreement;
 	}
 
 	KeyAgreement getPQCKeyAgreement() {
-		return PQCKeyAgreement;
+		return finalizer.PQCKeyAgreement;
 	}
 
 	@Override
 	protected void receiveData(int stepNumber, byte[] data) throws IOException {
 		try {
 			byte[] nonPQC = null, PQC = null;
-			if (!nonPQCKeyAgreement.hasFinishedReception() && !PQCKeyAgreement.hasFinishedReception()) {
+			if (!finalizer.nonPQCKeyAgreement.hasFinishedReception() && !finalizer.PQCKeyAgreement.hasFinishedReception()) {
 				int s = (int) Bits.getUnsignedInt(data, 0, 3);
 				if (s + 36 > data.length)
 					throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException());
@@ -168,14 +190,14 @@ public class HybridKeyAgreement extends KeyAgreement{
 				PQC = new byte[data.length - s - 3];
 				System.arraycopy(data, 3, nonPQC, 0, nonPQC.length);
 				System.arraycopy(data, 3 + s, PQC, 0, PQC.length);
-			} else if (!nonPQCKeyAgreement.hasFinishedReception())
+			} else if (!finalizer.nonPQCKeyAgreement.hasFinishedReception())
 				nonPQC = data;
 			else
 				PQC = data;
-			if (!nonPQCKeyAgreement.hasFinishedReception())
-				nonPQCKeyAgreement.receiveData(nonPQC);
-			if (!PQCKeyAgreement.hasFinishedReception())
-				PQCKeyAgreement.receiveData(PQC);
+			if (!finalizer.nonPQCKeyAgreement.hasFinishedReception())
+				finalizer.nonPQCKeyAgreement.receiveData(nonPQC);
+			if (!finalizer.PQCKeyAgreement.hasFinishedReception())
+				finalizer.PQCKeyAgreement.receiveData(PQC);
 		}
 		finally
 		{
@@ -184,20 +206,6 @@ public class HybridKeyAgreement extends KeyAgreement{
 
 	}
 
-	@Override
-	public void zeroize() {
-		if (nonPQCKeyAgreement!=null)
-			nonPQCKeyAgreement.zeroize();
-		if (PQCKeyAgreement!=null)
-			PQCKeyAgreement.zeroize();
-		nonPQCKeyAgreement=null;
-		PQCKeyAgreement=null;
-		this.secretKey=null;
-	}
-	@Override
-	public boolean isDestroyed() {
-		return secretKey==null && nonPQCKeyAgreement==null && PQCKeyAgreement==null;
-	}
 
 	@Override
 	public boolean isPostQuantumAgreement() {

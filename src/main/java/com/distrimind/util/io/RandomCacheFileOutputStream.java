@@ -35,6 +35,7 @@ The fact that you are presently reading this means that you have had
 knowledge of the CeCILL-C license and that you accept its terms.
  */
 
+import com.distrimind.util.Cleanable;
 import com.distrimind.util.FileTools;
 
 import java.io.File;
@@ -46,80 +47,129 @@ import java.io.IOException;
  * @since Utils 4.6.0
  */
 @SuppressWarnings("NullableProblems")
-public class RandomCacheFileOutputStream extends RandomOutputStream{
-	private final RandomCacheFileCenter randomCacheFileCenter;
-	private RandomOutputStream out;
-	private final File fileName;
+public class RandomCacheFileOutputStream extends RandomOutputStream implements Cleanable {
+
+
+
 	private final RandomFileOutputStream.AccessMode accessMode;
-	private boolean fileUsed;
+
 	private final int maxBufferSize, maxBuffersNumber;
-	private final boolean removeFileWhenClosed;
-	private boolean closed=false;
+
+
 	private RandomInputStream in=null;
+	private final Finalizer finalizer;
+
+	private static final class Finalizer extends Cleaner
+	{
+		private boolean closed=false;
+		private boolean fileUsed;
+		private final RandomCacheFileCenter randomCacheFileCenter;
+		private final boolean removeFileWhenClosed;
+		private final File fileName;
+		private RandomOutputStream out;
+
+		private Finalizer(RandomCacheFileCenter randomCacheFileCenter, boolean removeFileWhenClosed, File fileName) {
+			this.randomCacheFileCenter = randomCacheFileCenter;
+			this.removeFileWhenClosed = removeFileWhenClosed;
+			this.fileName = fileName;
+		}
+
+		@Override
+		protected void performCleanup() {
+			if (!closed) {
+				try {
+					close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		private void close() throws IOException {
+			if (closed)
+				return;
+			try {
+				if (!fileUsed) {
+					randomCacheFileCenter.releaseDataFromMemory(out.length());
+				}
+				if (!out.isClosed())
+					out.close();
+				if (fileUsed && removeFileWhenClosed) {
+					if (fileName.exists()) {
+						if (!fileName.delete())
+							throw new IOException("Impossible to delete file " + fileName);
+					}
+				}
+			}
+			finally {
+				closed=true;
+			}
+		}
+	}
+
 	RandomCacheFileOutputStream(RandomCacheFileCenter randomCacheFileCenter, File fileName, boolean removeFileWhenClosed, RandomFileOutputStream.AccessMode accessMode,int maxBufferSize, int maxBuffersNumber) {
-		this.randomCacheFileCenter=randomCacheFileCenter;
-		this.out=new RandomByteArrayOutputStream();
-		this.fileName=fileName;
-		this.fileUsed=false;
+		this.finalizer=new Finalizer(randomCacheFileCenter, removeFileWhenClosed, fileName);
+
+		this.registerCleaner(finalizer);
+		this.finalizer.out=new RandomByteArrayOutputStream();
+		this.finalizer.fileUsed=false;
 		this.accessMode=accessMode;
 		this.maxBufferSize=maxBufferSize;
 		this.maxBuffersNumber=maxBuffersNumber;
-		this.removeFileWhenClosed=removeFileWhenClosed;
 	}
 
 	public void forceWritingMemoryCacheToFile() throws IOException {
-		if (fileUsed)
+		if (finalizer.fileUsed)
 			return;
 
-		RandomOutputStream fout=new RandomFileOutputStream(fileName, accessMode);
+		RandomOutputStream fout=new RandomFileOutputStream(finalizer.fileName, accessMode);
 		if (maxBufferSize>0)
 			fout=new BufferedRandomOutputStream(fout, maxBufferSize, maxBuffersNumber);
-		out.flush();
-		RandomByteArrayOutputStream baos=(RandomByteArrayOutputStream)out;
+		finalizer.out.flush();
+		RandomByteArrayOutputStream baos=(RandomByteArrayOutputStream)finalizer.out;
 		assert fout.length()==0;
 		assert fout.currentPosition()==0;
-		long cp=out.currentPosition();
+		long cp=finalizer.out.currentPosition();
 		assert cp>=0;
 		fout.write(baos.bytes, 0, baos.length);
-		randomCacheFileCenter.releaseDataFromMemory(baos.length);
+		finalizer.randomCacheFileCenter.releaseDataFromMemory(baos.length);
 		fout.seek(cp);
 		if (in!=null) {
 			cp=in.currentPosition();
 			in = fout.getRandomInputStream();
 			in.seek(cp);
 		}
-		out.close();
-		out=fout;
+		finalizer.out.close();
+		finalizer.out=fout;
 
-		fileUsed=true;
+		finalizer.fileUsed=true;
 	}
 
 
 
 	@Override
 	public long length() throws IOException {
-		return out.length();
+		return finalizer.out.length();
 	}
 
 	@Override
 	public void setLength(long newLength) throws IOException {
-		if (closed)
+		if (finalizer.closed)
 			throw new IOException("Stream closed !");
 		if (newLength<0)
 			throw new IllegalArgumentException();
-		if (fileUsed) {
-			out.setLength(newLength);
+		if (finalizer.fileUsed) {
+			finalizer.out.setLength(newLength);
 		}
 		else{
 
-			long dataQuantity = newLength-out.length();
+			long dataQuantity = newLength-finalizer.out.length();
 			if (dataQuantity!=0) {
 				if (dataQuantity < 0) {
-					randomCacheFileCenter.releaseDataFromMemory(-dataQuantity);
-				} else if (!randomCacheFileCenter.tryToAddNewDataIntoMemory(dataQuantity)) {
+					finalizer.randomCacheFileCenter.releaseDataFromMemory(-dataQuantity);
+				} else if (!finalizer.randomCacheFileCenter.tryToAddNewDataIntoMemory(dataQuantity)) {
 					forceWritingMemoryCacheToFile();
 				}
-				out.setLength(newLength);
+				finalizer.out.setLength(newLength);
 			}
 		}
 
@@ -128,29 +178,29 @@ public class RandomCacheFileOutputStream extends RandomOutputStream{
 
 	@Override
 	public void seek(long _pos) throws IOException {
-		if (closed)
+		if (finalizer.closed)
 			throw new IOException("Stream closed !");
-		out.seek(_pos);
+		finalizer.out.seek(_pos);
 	}
 
 	@Override
 	public long currentPosition() throws IOException {
-		return out.currentPosition();
+		return finalizer.out.currentPosition();
 	}
 
 	@Override
 	public boolean isClosed() {
-		return closed;
+		return finalizer.closed;
 	}
 
 
 
 	@Override
 	protected RandomInputStream getRandomInputStreamImpl() throws IOException {
-		if (closed)
+		if (finalizer.closed)
 			throw new IOException("Stream closed !");
 		if (in==null)
-			in=out.getRandomInputStream();
+			in=finalizer.out.getRandomInputStream();
 		return new RandomInputStream() {
 			public long length() throws IOException {
 				return in.length();
@@ -235,79 +285,51 @@ public class RandomCacheFileOutputStream extends RandomOutputStream{
 	}
 
 	private void tryToAddNewDataIntoMemory(int len) throws IOException {
-		if (fileUsed)
+		if (finalizer.fileUsed)
 			return;
-		long s=((long)len)-(out.length()-out.currentPosition());
-		if (s>0 && !randomCacheFileCenter.tryToAddNewDataIntoMemory(s))
+		long s=((long)len)-(finalizer.out.length()-finalizer.out.currentPosition());
+		if (s>0 && !finalizer.randomCacheFileCenter.tryToAddNewDataIntoMemory(s))
 			forceWritingMemoryCacheToFile();
 	}
 
 	@Override
 	public void write(int b) throws IOException {
-		if (closed)
+		if (finalizer.closed)
 			throw new IOException("Stream closed !");
 		tryToAddNewDataIntoMemory(1);
-		out.write(b);
+		finalizer.out.write(b);
 	}
 
 	@Override
 	public void write(byte[] b, int off, int len) throws IOException {
-		if (closed)
+		if (finalizer.closed)
 			throw new IOException("Stream closed !");
 		tryToAddNewDataIntoMemory(len);
-		out.write(b, off, len);
+		finalizer.out.write(b, off, len);
 	}
 
 	@Override
 	public void close() throws IOException {
-		if (closed)
-			return;
-		try {
-			if (!fileUsed) {
-				randomCacheFileCenter.releaseDataFromMemory(out.length());
-			}
-			if (!out.isClosed())
-				out.close();
-			if (fileUsed && removeFileWhenClosed) {
-				if (fileName.exists()) {
-					if (!fileName.delete())
-						throw new IOException("Impossible to delete file " + fileName);
-				}
-			}
-		}
-		finally {
-			closed=true;
-		}
+		finalizer.close();
 	}
 
 	@Override
 	public void flush() throws IOException {
-		if (closed)
+		if (finalizer.closed)
 			throw new IOException("Stream closed !");
-		out.flush();
+		finalizer.out.flush();
 	}
 
-	@SuppressWarnings("deprecation")
-	@Override
-	public void finalize()
-	{
-		if (!isClosed()) {
-			try {
-				close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-	}
+
 	public void moveToFileAndCloseStream(File file) throws IOException {
 		moveToFileAndCloseStream(file, false);
 	}
 	public void moveToFileAndCloseStream(File file, boolean checkDestinationRecursive) throws IOException {
 		if (isClosed())
 			throw new IOException("Stream closed !");
-		if (fileUsed) {
-			out.close();
-			FileTools.move(fileName, file, checkDestinationRecursive);
+		if (finalizer.fileUsed) {
+			finalizer.out.close();
+			FileTools.move(finalizer.fileName, file, checkDestinationRecursive);
 		} else {
 			getRandomInputStream().transferTo(new RandomFileOutputStream(file));
 		}

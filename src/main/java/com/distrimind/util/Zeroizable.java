@@ -1,4 +1,4 @@
-package com.distrimind.util.crypto;
+package com.distrimind.util;
 /*
 Copyright or © or Copr. Jason Mahdjoub (01/04/2013)
 
@@ -6,7 +6,7 @@ jason.mahdjoub@distri-mind.fr
 
 This software (Object Oriented Database (OOD)) is a computer program 
 whose purpose is to manage a local database with the object paradigm 
-and the java language
+and the java language 
 
 This software is governed by the CeCILL-C license under French law and
 abiding by the rules of distribution of free software.  You can  use, 
@@ -35,23 +35,24 @@ The fact that you are presently reading this means that you have had
 knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-import com.distrimind.util.Zeroizable;
-import com.distrimind.util.data_buffers.WrappedData;
+import javax.security.auth.Destroyable;
 
 /**
  * @author Jason Mahdjoub
  * @version 2.0
- * @since Utils 4.5.0
+ * @since MaDKitLanEdition 5.10.0
  */
-public interface IHybridKey extends Zeroizable {
-	int MAX_SIZE_IN_BYTES_OF_KEY_FOR_SIGNATURE=IKey.MAX_SIZE_IN_BYTES_OF_KEY_FOR_SIGNATURE;
-	int MAX_SIZE_IN_BYTES_OF_KEY_FOR_ENCRYPTION=IKey.MAX_SIZE_IN_BYTES_OF_KEY_FOR_ENCRYPTION;
-	int MAX_SIZE_IN_BYTES_OF_KEY=IKey.MAX_SIZE_IN_BYTES_OF_KEY;
+public interface Zeroizable extends Destroyable {
+	default void zeroize()
+	{
+		clean();
+	}
+	void clean();
+	@Override
+	default void destroy() {
+		zeroize();
+	}
 
-	WrappedData encode();
-
-
-
-	boolean isPostQuantumKey();
-
+	@Override
+	boolean isDestroyed();
 }

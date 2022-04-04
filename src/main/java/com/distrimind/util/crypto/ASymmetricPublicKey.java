@@ -62,10 +62,7 @@ import java.util.Arrays;
  * @since Utils 1.7.1
  */
 public class ASymmetricPublicKey extends AbstractKey implements IASymmetricPublicKey {
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1279365581082525690L;
+
 	public static final int MAX_SIZE_IN_BYTES_OF_NON_PQC_NON_RSA_NON_HYBRID_PUBLIC_KEY_FOR_SIGNATURE =ASymmetricAuthenticatedSignatureType.MAX_SIZE_IN_BYTES_OF_NON_PQC_NON_RSA_NON_HYBRID_PUBLIC_KEY_FOR_SIGNATURE;
 	public static final int MAX_SIZE_IN_BYTES_OF_NON_PQC_RSA_NON_HYBRID_PUBLIC_KEY =ASymmetricAuthenticatedSignatureType.MAX_SIZE_IN_BYTES_OF_NON_PQC_RSA_NON_HYBRID_PUBLIC_KEY;
 	public static final int MAX_SIZE_IN_BYTES_OF_NON_PQC_NON_HYBRID_PUBLIC_KEY_FOR_SIGNATURE = ASymmetricAuthenticatedSignatureType.MAX_SIZE_IN_BYTES_OF_NON_PQC_NON_HYBRID_PUBLIC_KEY_FOR_SIGNATURE;
@@ -106,7 +103,7 @@ public class ASymmetricPublicKey extends AbstractKey implements IASymmetricPubli
 	boolean xdhKey=false;
 
 	@Override
-	public void zeroize()
+	public void clean()
 	{
 		if (publicKey!=null)
 		{
@@ -126,9 +123,9 @@ public class ASymmetricPublicKey extends AbstractKey implements IASymmetricPubli
 		if (bouncyCastlePublicKey==null)
 		{
 			if (bouncyCastlePublicKey instanceof BCMcElieceCipher.PublicKey)
-				((BCMcElieceCipher.PublicKey) bouncyCastlePublicKey).zeroize();
+				((BCMcElieceCipher.PublicKey) bouncyCastlePublicKey).clean();
 			else if (bouncyCastlePublicKey instanceof BCMcElieceCipher.PublicKeyCCA2)
-				((BCMcElieceCipher.PublicKeyCCA2) bouncyCastlePublicKey).zeroize();
+				((BCMcElieceCipher.PublicKeyCCA2) bouncyCastlePublicKey).clean();
 			bouncyCastlePublicKey=null;
 		}
 
@@ -138,16 +135,15 @@ public class ASymmetricPublicKey extends AbstractKey implements IASymmetricPubli
 		return publicKey==null && nativePublicKey==null && gnuPublicKey==null && bouncyCastlePublicKey==null;
 	}
 
-	@SuppressWarnings({"MethodDoesntCallSuperMethod", "deprecation"})
-	@Override
-	public void finalize() {
 
+	private void checkNotDestroyed()
+	{
+		if (isDestroyed())
+			throw new IllegalAccessError();
 	}
-
-
-
 	@Override
 	public WrappedData getKeyBytes() {
+		checkNotDestroyed();
         return new WrappedData(publicKey);
     }
 
@@ -237,6 +233,7 @@ public class ASymmetricPublicKey extends AbstractKey implements IASymmetricPubli
 
 	public ASymmetricPublicKey getPublicKeyWithNewExpirationTime(long timeExpirationUTC)
 	{
+		checkNotDestroyed();
 		ASymmetricPublicKey res;
 		if (signatureType==null)
 			res=new ASymmetricPublicKey(this.encryptionType, publicKey.clone(), this.keySizeBits, this.publicKeyValidityBeginDateUTC, timeExpirationUTC);
@@ -280,6 +277,7 @@ public class ASymmetricPublicKey extends AbstractKey implements IASymmetricPubli
 	@Override
 	public WrappedData encode(boolean includeTimes)
 	{
+		checkNotDestroyed();
 		if (getTimeExpirationUTC()==Long.MAX_VALUE)
 			includeTimes =false;
 		byte[] tab = new byte[4+ASymmetricPrivateKey.ENCODED_TYPE_SIZE+publicKey.length+(includeTimes ?16:0)];
@@ -330,6 +328,7 @@ public class ASymmetricPublicKey extends AbstractKey implements IASymmetricPubli
 	}
 
 	byte[] getBytesPublicKey() {
+		checkNotDestroyed();
 		return publicKey;
 	}
 
@@ -366,6 +365,7 @@ public class ASymmetricPublicKey extends AbstractKey implements IASymmetricPubli
 
 	@Override
 	public ASymmetricPublicKey getNonPQCPublicKey() {
+		checkNotDestroyed();
 		return this;
 	}
 
@@ -377,6 +377,7 @@ public class ASymmetricPublicKey extends AbstractKey implements IASymmetricPubli
 	@Override
 	public Object toGnuKey()
 			throws NoSuchAlgorithmException, IOException {
+		checkNotDestroyed();
 		if (gnuPublicKey == null)
 			gnuPublicKey = ASymmetricEncryptionType.decodeGnuPublicKey(publicKey, encryptionType==null?signatureType.getKeyGeneratorAlgorithmName():encryptionType.getAlgorithmName());
 
@@ -386,6 +387,7 @@ public class ASymmetricPublicKey extends AbstractKey implements IASymmetricPubli
 	@Override
 	public PublicKey toJavaNativeKey()
 			throws NoSuchAlgorithmException, InvalidKeySpecException {
+		checkNotDestroyed();
 		if (encryptionType!=null && encryptionType.name().startsWith("BCPQC_MCELIECE_"))
 		{
 			AsymmetricKey bk=toBouncyCastleKey();
@@ -414,6 +416,7 @@ public class ASymmetricPublicKey extends AbstractKey implements IASymmetricPubli
 	
 	@Override
 	public AsymmetricKey toBouncyCastleKey() throws NoSuchAlgorithmException, InvalidKeySpecException {
+		checkNotDestroyed();
 		if (encryptionType!=null && encryptionType.name().startsWith("BCPQC_MCELIECE_"))
 		{
 			if (bouncyCastlePublicKey==null) {

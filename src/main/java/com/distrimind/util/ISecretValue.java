@@ -40,5 +40,5 @@ knowledge of the CeCILL-C license and that you accept its terms.
  * @version 1.0
  * @since MaDKitLanEdition 5.22.0
  */
-public interface ISecretValue {
+public interface ISecretValue extends AutoZeroizable {
 }

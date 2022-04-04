@@ -55,8 +55,31 @@ import java.util.Base64;
  * @since Utils 2.9.0
  */
 public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
-	private JPAKEParticipant jpake;
-	private BigInteger keyMaterial;
+
+	private static final class Finalizer extends Cleaner
+	{
+		private JPAKEParticipant jpake;
+		private BigInteger keyMaterial;
+		@Override
+		protected void performCleanup() {
+			if (jpake!=null)
+			{
+				try {
+					char[] chars = (char[]) jpakeFieldPassword.get(jpake);
+					if (chars!=null)
+						Arrays.fill(chars, (char)0);
+
+
+				} catch (IllegalArgumentException | IllegalAccessException e) {
+					e.printStackTrace();
+				}
+
+				jpake=null;
+			}
+			keyMaterial=null;
+		}
+	}
+	private final Finalizer finalizer;
 	private boolean valid=true;
 
 
@@ -95,11 +118,12 @@ public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
 			throw new NullPointerException("message");
 		if (salt != null && salt.length - offset_salt < len_salt)
 			throw new IllegalArgumentException("salt");
+		finalizer=new Finalizer();
 
-
-		jpake = new JPAKEParticipant(getParticipantIDString(participantID), getHashedPassword(message, salt, offset_salt, len_salt), JPAKEPrimeOrderGroups.NIST_3072, new SHA512Digest(),
+		finalizer.jpake = new JPAKEParticipant(getParticipantIDString(participantID), getHashedPassword(message, salt, offset_salt, len_salt), JPAKEPrimeOrderGroups.NIST_3072, new SHA512Digest(),
 				secureRandom);
-		this.keyMaterial = null;
+		this.finalizer.keyMaterial = null;
+		registerCleaner(finalizer);
 	}
 
 	P2PJPAKESecretMessageExchanger(AbstractSecureRandom secureRandom, byte[] participantID, byte[] message, int offset, int len, byte[] salt,
@@ -112,10 +136,11 @@ public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
 			throw new IllegalArgumentException("message");
 		if (salt != null && salt.length - offset_salt < len_salt)
 			throw new IllegalArgumentException("salt");
-
-		jpake = new JPAKEParticipant(getParticipantIDString(participantID), getHashedPassword(message, offset, len, salt, offset_salt, len_salt, messageIsKey), JPAKEPrimeOrderGroups.NIST_3072, new SHA512Digest(),
+		finalizer=new Finalizer();
+		finalizer.jpake = new JPAKEParticipant(getParticipantIDString(participantID), getHashedPassword(message, offset, len, salt, offset_salt, len_salt, messageIsKey), JPAKEPrimeOrderGroups.NIST_3072, new SHA512Digest(),
 				secureRandom);
-		this.keyMaterial = null;
+		this.finalizer.keyMaterial = null;
+		registerCleaner(finalizer);
 	}
 
 	private static byte[] hashMessage(AbstractMessageDigest messageDigest, byte[] data, int off, int len, byte[] salt,
@@ -156,7 +181,7 @@ public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
 
 	@Override
 	protected boolean isAgreementProcessValidImpl() {
-		if (this.getActualStepForReceptionIndex()==this.getStepsNumberForReception() && this.getActualStepForSendIndex()==this.getStepsNumberForSend() && jpake.getState() != JPAKEParticipant.STATE_ROUND_3_VALIDATED)
+		if (this.getActualStepForReceptionIndex()==this.getStepsNumberForReception() && this.getActualStepForSendIndex()==this.getStepsNumberForSend() && finalizer.jpake.getState() != JPAKEParticipant.STATE_ROUND_3_VALIDATED)
 			return false;
 		return valid;
 	}
@@ -170,7 +195,7 @@ public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
 				try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
 					try (DataOutputStream oos = new DataOutputStream(baos)) {
 
-						JPAKERound1Payload toSerialize = jpake.createRound1PayloadToSend();
+						JPAKERound1Payload toSerialize = finalizer.jpake.createRound1PayloadToSend();
 						byte[] tab=toSerialize.getGx1().toByteArray();
 						if (tab.length>Short.MAX_VALUE)
 							throw new IOException();
@@ -227,7 +252,7 @@ public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
 				try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
 					try (DataOutputStream oos = new DataOutputStream(baos)) {
 
-						JPAKERound2Payload toSerialize = jpake.createRound2PayloadToSend();
+						JPAKERound2Payload toSerialize = finalizer.jpake.createRound2PayloadToSend();
 						byte[] tab=toSerialize.getA().toByteArray();
 						if (tab.length>Short.MAX_VALUE)
 							throw new IOException();
@@ -263,8 +288,8 @@ public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
 				try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
 					try (DataOutputStream oos = new DataOutputStream(baos)) {
 
-						keyMaterial = jpake.calculateKeyingMaterial();
-						JPAKERound3Payload toSerialize = jpake.createRound3PayloadToSend(keyMaterial);
+						finalizer.keyMaterial = finalizer.jpake.calculateKeyingMaterial();
+						JPAKERound3Payload toSerialize = finalizer.jpake.createRound3PayloadToSend(finalizer.keyMaterial);
 						byte[] tab=toSerialize.getMacTag().toByteArray();
 						if (tab.length>Short.MAX_VALUE)
 							throw new IOException();
@@ -289,6 +314,7 @@ public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
 
 	@Override
 	protected void receiveData(int stepNumber, byte[] dataReceived) throws IOException {
+		finalizer.performCleanup();
 		valid=false;
 		switch(stepNumber)
 		{
@@ -361,7 +387,7 @@ public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
 							valid=false;
 							throw new CryptoException("data received is not a valid instance of JPAKERound1Payload", e);
 						}
-						jpake.validateRound1PayloadReceived(r1);
+						finalizer.jpake.validateRound1PayloadReceived(r1);
 					}
 				}
 				catch (Exception e)
@@ -420,7 +446,7 @@ public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
 							valid=false;
 							throw new CryptoException("data received is not a valid instance of JPAKERound2Payload", e);
 						}
-						jpake.validateRound2PayloadReceived(r2);
+						finalizer.jpake.validateRound2PayloadReceived(r2);
 					}
 				}
 				catch (Exception e)
@@ -461,7 +487,7 @@ public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
 							throw new CryptoException("data received is not a valid instance of JPAKERound2Payload", e);
 						}
 
-						jpake.validateRound3PayloadReceived(r3, keyMaterial);
+						finalizer.jpake.validateRound3PayloadReceived(r3, finalizer.keyMaterial);
 					}
 				}
 				catch (Exception e)
@@ -481,30 +507,6 @@ public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
 		valid=true;
 	}
 
-	@Override
-	public void zeroize()
-	{
-		if (jpake!=null)
-		{
-			try {
-				char[] chars = (char[]) jpakeFieldPassword.get(jpake);
-				if (chars!=null)
-					Arrays.fill(chars, (char)0);
-
-
-			} catch (IllegalArgumentException | IllegalAccessException e) {
-				e.printStackTrace();
-			}
-
-			jpake=null;
-		}
-		keyMaterial=null;
-	}
-
-	@Override
-	public boolean isDestroyed() {
-		return jpake==null && keyMaterial==null;
-	}
 
 	@Override
 	public boolean isPostQuantumAgreement() {

@@ -37,6 +37,8 @@
  */
 package com.distrimind.util.io;
 
+import com.distrimind.util.Cleanable;
+
 import java.io.*;
 
 import java.nio.file.Path;
@@ -48,10 +50,34 @@ import java.nio.file.Path;
  * @since Utils 3.27.0
  */
 @SuppressWarnings("NullableProblems")
-public class RandomFileInputStream extends RandomInputStream {
+public class RandomFileInputStream extends RandomInputStream implements Cleanable {
+	private final static class Finalizer extends Cleanable.Cleaner
+	{
+		private final RandomAccessFile raf;
+		private boolean closed=false;
 
-	private final RandomAccessFile raf;
-	private boolean closed=false;
+		private Finalizer(RandomAccessFile raf) {
+			this.raf = raf;
+		}
+
+		@Override
+		protected void performCleanup() {
+			if (!closed) {
+				try {
+					close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+
+		private void close() throws IOException {
+			closed=true;
+			raf.close();
+		}
+	}
+	private final Finalizer finalizer;
+
 	private long position;
 	private final boolean checkPosition;
 
@@ -61,7 +87,8 @@ public class RandomFileInputStream extends RandomInputStream {
 	}
 
 	public RandomFileInputStream(File f) throws FileNotFoundException {
-		raf = new RandomAccessFile(f, "r");
+		finalizer=new Finalizer(new RandomAccessFile(f, "r"));
+		registerCleaner(finalizer);
 		this.position=0;
 		this.checkPosition=false;
 	}
@@ -70,14 +97,15 @@ public class RandomFileInputStream extends RandomInputStream {
 	{
 		if (raf==null)
 			throw new NullPointerException();
-		this.raf=raf;
+		finalizer=new Finalizer(raf);
+		registerCleaner(finalizer);
 		this.position=0;
 		this.checkPosition=true;
 	}
 
 	private void checkPosition() throws IOException {
-		if (checkPosition && position!=raf.getFilePointer())
-			raf.seek(position);
+		if (checkPosition && position!=finalizer.raf.getFilePointer())
+			finalizer.raf.seek(position);
 	}
 
 	/**
@@ -86,7 +114,7 @@ public class RandomFileInputStream extends RandomInputStream {
 	@Override
 	public int read() throws IOException {
 		checkPosition();
-		int res=raf.read();
+		int res=finalizer.raf.read();
 		if (res!=-1)
 			++position;
 		return res;
@@ -98,7 +126,7 @@ public class RandomFileInputStream extends RandomInputStream {
 	@Override
 	public int read(byte[] _bytes) throws IOException {
 		checkPosition();
-		int res= raf.read(_bytes);
+		int res= finalizer.raf.read(_bytes);
 		position+=res;
 		return res;
 	}
@@ -111,7 +139,7 @@ public class RandomFileInputStream extends RandomInputStream {
 
 		checkLimits(_bytes, _offset, _length);
 		checkPosition();
-		int res= raf.read(_bytes, _offset, _length);
+		int res= finalizer.raf.read(_bytes, _offset, _length);
 		position+=res;
 		return res;
 	}
@@ -121,7 +149,7 @@ public class RandomFileInputStream extends RandomInputStream {
 	 */
 	@Override
 	public long length() throws IOException {
-		return raf.length();
+		return finalizer.raf.length();
 	}
 
 	/**
@@ -135,7 +163,7 @@ public class RandomFileInputStream extends RandomInputStream {
 			throw new IOException("The position must be lower that the size of the file");
 		position=_pos;
 		if (!checkPosition)
-			raf.seek(_pos);
+			finalizer.raf.seek(_pos);
 	}
 
 	private long getFreeSpace() throws IOException {
@@ -164,22 +192,22 @@ public class RandomFileInputStream extends RandomInputStream {
 
 	@Override
 	public boolean isClosed() {
-		return closed;
+		return finalizer.closed;
 	}
 
 	@Override
 	public void readFully(byte[] tab, int off, int len) throws IOException{
 		checkLimits(tab, off, len);
 		checkPosition();
-		raf.readFully(tab, off, len);
+		finalizer.raf.readFully(tab, off, len);
 		position+=len;
 	}
 
 	@Override
 	public String readLine() throws IOException {
 		checkPosition();
-		String res=raf.readLine();
-		position=raf.getFilePointer();
+		String res=finalizer.raf.readLine();
+		position=finalizer.raf.getFilePointer();
 		return res;
 	}
 
@@ -190,22 +218,7 @@ public class RandomFileInputStream extends RandomInputStream {
 	 */
 	@Override
 	public void close() throws IOException {
-		closed=true;
-		raf.close();
-	}
-
-
-	@SuppressWarnings("deprecation")
-	@Override
-	public void finalize()
-	{
-		if (!isClosed()) {
-			try {
-				close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
+		finalizer.close();
 	}
 
 

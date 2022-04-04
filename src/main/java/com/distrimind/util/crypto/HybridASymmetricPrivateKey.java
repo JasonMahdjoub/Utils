@@ -56,7 +56,16 @@ public class HybridASymmetricPrivateKey extends AbstractKey implements IHybridKe
 	public static final int MAX_SIZE_IN_BYTES_OF_HYBRID_PRIVATE_KEY_FOR_ENCRYPTION=ASymmetricEncryptionType.MAX_SIZE_IN_BYTES_OF_HYBRID_PRIVATE_KEY_FOR_ENCRYPTION;
 
 	public static final int MAX_SIZE_IN_BYTES_OF_HYBRID_PRIVATE_KEY=MAX_SIZE_IN_BYTES_OF_HYBRID_PRIVATE_KEY_FOR_ENCRYPTION;
-	private ASymmetricPrivateKey nonPQCPrivateKey, PQCPrivateKey;
+	private static final class Finalizer extends Cleaner
+	{
+		private ASymmetricPrivateKey nonPQCPrivateKey, PQCPrivateKey;
+		@Override
+		protected void performCleanup() {
+			nonPQCPrivateKey=null;
+			PQCPrivateKey=null;
+		}
+	}
+	private final Finalizer finalizer;
 
 	public HybridASymmetricPrivateKey(ASymmetricPrivateKey nonPQCPrivateKey, ASymmetricPrivateKey PQCPrivateKey) {
 		if (nonPQCPrivateKey==null)
@@ -74,10 +83,16 @@ public class HybridASymmetricPrivateKey extends AbstractKey implements IHybridKe
 				&& !PQCPrivateKey.getAuthenticatedSignatureAlgorithmType().isPostQuantumAlgorithm())
 				|| (PQCPrivateKey.getEncryptionAlgorithmType()!=null && !PQCPrivateKey.getEncryptionAlgorithmType().isPostQuantumAlgorithm()))
 			throw new IllegalArgumentException("PQCPrivateKey must be a post quantum algorithm");
-		this.nonPQCPrivateKey = nonPQCPrivateKey;
-		this.PQCPrivateKey = PQCPrivateKey;
+		this.finalizer=new Finalizer();
+		this.finalizer.nonPQCPrivateKey = nonPQCPrivateKey;
+		this.finalizer.PQCPrivateKey = PQCPrivateKey;
+		registerCleaner(finalizer);
 	}
-
+	private void checkNotDestroyed()
+	{
+		if (isCleaned())
+			throw new IllegalAccessError();
+	}
 	@Override
 	public boolean useEncryptionAlgorithm() {
 		return getNonPQCPrivateKey().getEncryptionAlgorithmType()!=null;
@@ -90,11 +105,13 @@ public class HybridASymmetricPrivateKey extends AbstractKey implements IHybridKe
 
 	@Override
 	public ASymmetricPrivateKey getNonPQCPrivateKey() {
-		return nonPQCPrivateKey;
+		checkNotDestroyed();
+		return finalizer.nonPQCPrivateKey;
 	}
 
 	public ASymmetricPrivateKey getPQCPrivateKey() {
-		return PQCPrivateKey;
+		checkNotDestroyed();
+		return finalizer.PQCPrivateKey;
 	}
 
 	@Override
@@ -113,7 +130,8 @@ public class HybridASymmetricPrivateKey extends AbstractKey implements IHybridKe
 	}
 
 	public WrappedSecretData encode() {
-		return (WrappedSecretData)AbstractKey.encodeHybridKey(nonPQCPrivateKey, PQCPrivateKey, true);
+		checkNotDestroyed();
+		return (WrappedSecretData)AbstractKey.encodeHybridKey(finalizer.nonPQCPrivateKey, finalizer.PQCPrivateKey, true);
 	}
 
 	@Override
@@ -121,16 +139,6 @@ public class HybridASymmetricPrivateKey extends AbstractKey implements IHybridKe
 		return new WrappedSecretString(encode());
 	}
 
-
-	@Override
-	public void zeroize() {
-		nonPQCPrivateKey=null;
-		PQCPrivateKey=null;
-	}
-	@Override
-	public boolean isDestroyed() {
-		return nonPQCPrivateKey==null && PQCPrivateKey==null;
-	}
 
 	@Override
 	public WrappedSecretData getKeyBytes() {
@@ -148,14 +156,14 @@ public class HybridASymmetricPrivateKey extends AbstractKey implements IHybridKe
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
 		HybridASymmetricPrivateKey that = (HybridASymmetricPrivateKey) o;
-		boolean b=nonPQCPrivateKey.equals(that.nonPQCPrivateKey);
-		b=PQCPrivateKey.equals(that.PQCPrivateKey) && b;
+		boolean b=finalizer.nonPQCPrivateKey.equals(that.finalizer.nonPQCPrivateKey);
+		b=finalizer.PQCPrivateKey.equals(that.finalizer.PQCPrivateKey) && b;
 		return b;
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(nonPQCPrivateKey, PQCPrivateKey);
+		return Objects.hash(finalizer.nonPQCPrivateKey, finalizer.PQCPrivateKey);
 	}
 
 }

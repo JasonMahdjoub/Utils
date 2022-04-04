@@ -414,7 +414,7 @@ public class SerializationTools {
 		WrappedData sd=key.encode();
 		writeBytes(oos, sd.getBytes(), AbstractKey.MAX_SIZE_IN_BYTES_OF_KEY, false);
 		if (sd instanceof WrappedSecretData)
-			((WrappedSecretData) sd).zeroize();
+			((WrappedSecretData) sd).clean();
 	}
 
 	@SuppressWarnings("SameParameterValue")
@@ -456,9 +456,9 @@ public class SerializationTools {
 			
 		}
 
-		WrappedSecretData sd=keyPair.encode();
-		writeBytes(oos, sd.getBytes(), AbstractKeyPair.MAX_SIZE_IN_BYTES_OF_KEY_PAIR, false);
-		sd.zeroize();
+		try(WrappedSecretData sd=keyPair.encode()) {
+			writeBytes(oos, sd.getBytes(), AbstractKeyPair.MAX_SIZE_IN_BYTES_OF_KEY_PAIR, false);
+		}
 	}
 
 	@SuppressWarnings("SameParameterValue")
@@ -994,7 +994,7 @@ public class SerializationTools {
 		WrappedData wd=id.encode();
 		writeBytes(oos, wd.getBytes(), AbstractDecentralizedID.MAX_DECENTRALIZED_ID_SIZE_IN_BYTES, false);
 		if (wd instanceof WrappedSecretData)
-			((WrappedSecretData) wd).zeroize();
+			((WrappedSecretData) wd).clean();
 	}
 	@SuppressWarnings("SameParameterValue")
 	static AbstractDecentralizedID readDecentralizedID(final SecuredObjectInputStream in, boolean supportNull) throws IOException

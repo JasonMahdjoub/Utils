@@ -71,4 +71,5 @@ interface IServer {
 	byte[] decode(byte[] bytes, int off, int len, byte[] associatedData, int offAD, int lenAD, byte[] externalCounter)
 			throws IOException;
 	RandomInputStream getCipherInputStreamForDecryption(final RandomInputStream is, byte[] associatedData, int offAD, int lenAD, final byte[] externalCounter) throws IOException;
+	void checkKeysNotCleaned();
 }

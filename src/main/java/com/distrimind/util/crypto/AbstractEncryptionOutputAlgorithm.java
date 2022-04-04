@@ -34,6 +34,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
+import com.distrimind.util.AutoZeroizable;
 import com.distrimind.util.FileTools;
 import com.distrimind.util.io.*;
 
@@ -47,12 +48,23 @@ import java.util.Arrays;
  * @version 5.0
  * @since Utils 1.5
  */
-public abstract class AbstractEncryptionOutputAlgorithm implements Zeroizable {
+public abstract class AbstractEncryptionOutputAlgorithm implements AutoZeroizable {
 	final static int BUFFER_SIZE = FileTools.BUFFER_SIZE;
-
+	protected static final class Finalizer extends Cleaner
+	{
+		byte[] buffer;
+		@Override
+		protected void performCleanup() {
+			if (buffer!=null) {
+				Arrays.fill(buffer, (byte) 0);
+				buffer = null;
+			}
+		}
+	}
+	protected final Finalizer finalizer;
 	protected final AbstractCipher cipher;
 
-	protected byte[] buffer;
+
 	protected int bufferInSize;
 	//protected byte[] bufferOut;
 	protected int maxPlainTextSizeForEncoding;
@@ -63,23 +75,6 @@ public abstract class AbstractEncryptionOutputAlgorithm implements Zeroizable {
 	private long previousOutputSizeAfterEncryption;
 
 
-	@Override
-	public void zeroize() {
-		if (buffer!=null) {
-			Arrays.fill(buffer, (byte) 0);
-			buffer = null;
-		}
-	}
-	@Override
-	public boolean isDestroyed() {
-		return buffer==null;
-	}
-
-	@SuppressWarnings("deprecation")
-	@Override
-	protected void finalize() {
-		zeroize();
-	}
 
 	public byte getBlockModeCounterBytes() {
 		return (byte)0;
@@ -99,8 +94,10 @@ public abstract class AbstractEncryptionOutputAlgorithm implements Zeroizable {
 	{
 		super();
 		cipher=null;
-		buffer=null;
+		this.finalizer=new Finalizer();
+		finalizer.buffer=null;
 		iv=null;
+		registerCleaner(finalizer);
 	}
 
 	protected AbstractEncryptionOutputAlgorithm(AbstractCipher cipher, int ivSizeBytes) {
@@ -112,6 +109,8 @@ public abstract class AbstractEncryptionOutputAlgorithm implements Zeroizable {
 		}
 		else
 			iv = null;
+		this.finalizer=new Finalizer();
+		this.registerCleaner(finalizer);
 	}
 
 	protected void initBufferAllocatorArgs() throws IOException {
@@ -121,7 +120,7 @@ public abstract class AbstractEncryptionOutputAlgorithm implements Zeroizable {
 			bol=(int) getOutputSizeAfterEncryption(bufferInSize =4096);
 		}
 		zeroize();
-		buffer=new byte[bol];
+		finalizer.buffer=new byte[bol];
 	}
 	
 
@@ -241,6 +240,7 @@ public abstract class AbstractEncryptionOutputAlgorithm implements Zeroizable {
 		}
 
 		void set(RandomOutputStream os, byte[][] manualIvs, byte[] externalCounter, byte[] associatedData, int offAD, int lenAD, boolean closeOutputStreamWhenClosingCipherOutputStream) throws IOException {
+			checkKeysNotCleaned();
 			length=0;
 			currentPos=0;
 			closed=false;
@@ -268,9 +268,9 @@ public abstract class AbstractEncryptionOutputAlgorithm implements Zeroizable {
 						os.write(res);
 				}
 				else {
-					int s = cipher.doFinal(buffer, 0);
+					int s = cipher.doFinal(finalizer.buffer, 0);
 					if (s > 0)
-						os.write(buffer, 0, s);
+						os.write(finalizer.buffer, 0, s);
 				}
 				doFinal = false;
 			}
@@ -329,16 +329,16 @@ public abstract class AbstractEncryptionOutputAlgorithm implements Zeroizable {
 				assert s>0;
 				if (len> bufferInSize) {
 					int outLen = cipher.getOutputSize(s);
-					if (buffer.length < outLen) {
+					if (finalizer.buffer.length < outLen) {
 						zeroize();
-						buffer = new byte[outLen];
+						finalizer.buffer = new byte[outLen];
 					}
 				}
-				int w=cipher.update(b, off, s, buffer, 0);
+				int w=cipher.update(b, off, s, finalizer.buffer, 0);
 				doFinal=true;
 				currentPos+=s;
 				if (w>0) {
-					os.write(buffer, 0, w);
+					os.write(finalizer.buffer, 0, w);
 				}
 
 				len-=s;
@@ -356,10 +356,10 @@ public abstract class AbstractEncryptionOutputAlgorithm implements Zeroizable {
 			checkInit();
 			one[0]=(byte)b;
 			++currentPos;
-			int w=cipher.update(one, 0, 1, buffer, 0);
+			int w=cipher.update(one, 0, 1, finalizer.buffer, 0);
 			doFinal=true;
 			if (w>0) {
-				os.write(buffer, 0, w);
+				os.write(finalizer.buffer, 0, w);
 			}
 			checkDoFinal(false);
 		}
@@ -468,6 +468,7 @@ public abstract class AbstractEncryptionOutputAlgorithm implements Zeroizable {
 		}
 
 	}
+	protected abstract void checkKeysNotCleaned();
 	protected CommonCipherOutputStream getCipherOutputStreamForEncryption(final RandomOutputStream os, final boolean closeOutputStreamWhenClosingCipherOutputStream, final byte[] associatedData, final int offAD, final int lenAD, final byte[] externalCounter, final byte[][] manualIvs) throws
 			IOException{
 		return new CommonCipherOutputStream(os, manualIvs, externalCounter, associatedData, offAD, lenAD, closeOutputStreamWhenClosingCipherOutputStream);
@@ -528,5 +529,4 @@ public abstract class AbstractEncryptionOutputAlgorithm implements Zeroizable {
 			throws IOException;
 
 	public abstract boolean isPostQuantumEncryption();
-
 }

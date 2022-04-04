@@ -13,10 +13,6 @@ public class P2PLoginWithAsymmetricSignature extends AbstractP2PLoginWithSignatu
 
 	public P2PLoginWithAsymmetricSignature(AbstractSecureRandom random, IASymmetricPrivateKey myPrivateKey, IASymmetricPublicKey otherPublicKey) throws NoSuchAlgorithmException, IOException, NoSuchProviderException {
 		super(random, new ASymmetricAuthenticatedSignerAlgorithm(myPrivateKey), new ASymmetricAuthenticatedSignatureCheckerAlgorithm(otherPublicKey));
-		if (myPrivateKey==null)
-			throw new NullPointerException();
-		if (otherPublicKey==null)
-			throw new NullPointerException();
 	}
 
 }

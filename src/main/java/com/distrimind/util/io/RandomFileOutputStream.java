@@ -37,6 +37,8 @@
  */
 package com.distrimind.util.io;
 
+import com.distrimind.util.Cleanable;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -80,9 +82,32 @@ public class RandomFileOutputStream extends RandomOutputStream {
 			return mode;
 		}
 	}
+	private static final class Finalizer extends Cleanable.Cleaner
+	{
+		private final RandomAccessFile raf;
+		private boolean closed=false;
 
-	private final RandomAccessFile raf;
-	private boolean closed=false;
+		private Finalizer(RandomAccessFile raf) {
+			this.raf = raf;
+		}
+
+		@Override
+		protected void performCleanup() {
+			if (!closed) {
+				try {
+					close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		public void close() throws IOException {
+			closed=true;
+			raf.close();
+		}
+	}
+	private final Finalizer finalizer;
+
 	private long position;
 	private boolean checkPosition=false;
 
@@ -95,7 +120,7 @@ public class RandomFileOutputStream extends RandomOutputStream {
 	}
 
 	public RandomFileOutputStream(File f, AccessMode mode) throws FileNotFoundException {
-		raf = new RandomAccessFile(f, mode.getMode());
+		finalizer=new Finalizer(new RandomAccessFile(f, mode.getMode()));
 	}
 
 	public RandomFileOutputStream(File f) throws FileNotFoundException {
@@ -103,15 +128,15 @@ public class RandomFileOutputStream extends RandomOutputStream {
 		position=0;
 	}
 	private void checkPosition() throws IOException {
-		if (checkPosition && position!=raf.getFilePointer())
-			raf.seek(position);
+		if (checkPosition && position!=finalizer.raf.getFilePointer())
+			finalizer.raf.seek(position);
 	}
 
 	@Override
 	protected RandomFileInputStream getRandomInputStreamImpl()
 	{
 		checkPosition=true;
-		return new RandomFileInputStream(raf);
+		return new RandomFileInputStream(finalizer.raf);
 	}
 
 	@SuppressWarnings("RedundantThrows")
@@ -120,7 +145,7 @@ public class RandomFileOutputStream extends RandomOutputStream {
 	}
 
 	public RandomAccessFile getRandomAccessFile() {
-		return raf;
+		return finalizer.raf;
 	}
 
 	/**
@@ -129,7 +154,7 @@ public class RandomFileOutputStream extends RandomOutputStream {
 	@Override
 	public void write(int b) throws IOException {
 		checkPosition();
-		raf.write(b);
+		finalizer.raf.write(b);
 		position+=1;
 	}
 
@@ -139,7 +164,7 @@ public class RandomFileOutputStream extends RandomOutputStream {
 	@Override
 	public void write(byte[] _bytes) throws IOException {
 		checkPosition();
-		raf.write(_bytes);
+		finalizer.raf.write(_bytes);
 		position+=_bytes.length;
 	}
 
@@ -150,7 +175,7 @@ public class RandomFileOutputStream extends RandomOutputStream {
 	public void write(byte[] _bytes, int _offset, int _length) throws IOException {
 		RandomInputStream.checkLimits(_bytes, _offset, _length);
 		checkPosition();
-		raf.write(_bytes, _offset, _length);
+		finalizer.raf.write(_bytes, _offset, _length);
 		position+=_length;
 	}
 
@@ -160,7 +185,7 @@ public class RandomFileOutputStream extends RandomOutputStream {
 	 */
 	@Override
 	public long length() throws IOException {
-		return raf.length();
+		return finalizer.raf.length();
 	}
 
 	/**
@@ -171,7 +196,7 @@ public class RandomFileOutputStream extends RandomOutputStream {
 		if (_length<0)
 			throw new IllegalArgumentException();
 		//long p=raf.getFilePointer();
-		raf.setLength(_length);
+		finalizer.raf.setLength(_length);
 		position=Math.min(position, _length);
 
 		/*if (p>_length)
@@ -187,7 +212,7 @@ public class RandomFileOutputStream extends RandomOutputStream {
 			throw new IllegalArgumentException();
 		position=_pos;
 		if (!checkPosition)
-			raf.seek(_pos);
+			finalizer.raf.seek(_pos);
 	}
 
 	/**
@@ -200,7 +225,7 @@ public class RandomFileOutputStream extends RandomOutputStream {
 
 	@Override
 	public boolean isClosed() {
-		return closed;
+		return finalizer.closed;
 	}
 
 	/**
@@ -208,22 +233,8 @@ public class RandomFileOutputStream extends RandomOutputStream {
 	 */
 	@Override
 	public void close() throws IOException {
-		closed=true;
-		flush();
-		raf.close();
+		finalizer.close();
 	}
 
-	@SuppressWarnings("deprecation")
-	@Override
-	public void finalize()
-	{
-		if (!isClosed()) {
-			try {
-				close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-	}
 	
 }

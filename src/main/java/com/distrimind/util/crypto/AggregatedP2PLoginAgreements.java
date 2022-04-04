@@ -43,25 +43,23 @@ import java.io.IOException;
  * @since Utils 3.15.0
  */
 public class AggregatedP2PLoginAgreements extends P2PLoginAgreement {
-
-	private P2PLoginAgreement[] loginAgreements;
-
-	@Override
-	public void zeroize() {
-		if (loginAgreements!=null) {
-			for (P2PLoginAgreement la: loginAgreements)
-				la.zeroize();
-			loginAgreements=null;
+	private final static class Finalizer extends Cleaner
+	{
+		private P2PLoginAgreement[] loginAgreements;
+		@Override
+		protected void performCleanup() {
+			if (loginAgreements!=null) {
+				for (P2PLoginAgreement la: loginAgreements)
+					la.clean();
+				loginAgreements=null;
+			}
 		}
 	}
-	@Override
-	public boolean isDestroyed() {
-		return loginAgreements==null;
-	}
+	private final Finalizer finalizer;
 
 	@Override
 	public boolean isPostQuantumAgreement() {
-		for (P2PLoginAgreement p : loginAgreements) {
+		for (P2PLoginAgreement p : finalizer.loginAgreements) {
 			if (!p.isPostQuantumAgreement())
 				return false;
 		}
@@ -99,12 +97,14 @@ public class AggregatedP2PLoginAgreements extends P2PLoginAgreement {
 	AggregatedP2PLoginAgreements(P2PLoginAgreement ...loginAgreements)
 	{
 		super(getStepsNumberForReception(loginAgreements), getStepsNumberForSend(loginAgreements));
-		this.loginAgreements=loginAgreements;
+		this.finalizer=new Finalizer();
+		this.finalizer.loginAgreements=loginAgreements;
+		registerCleaner(finalizer);
 	}
 	@Override
 	protected boolean isAgreementProcessValidImpl() {
 
-		for (P2PLoginAgreement p : loginAgreements) {
+		for (P2PLoginAgreement p : finalizer.loginAgreements) {
 			if (!p.isAgreementProcessValidImpl())
 				return false;
 		}
@@ -113,7 +113,7 @@ public class AggregatedP2PLoginAgreements extends P2PLoginAgreement {
 	@Override
 	protected byte[] getDataToSend(int stepNumber) throws IOException {
 		int off=0;
-		for (P2PLoginAgreement loginAgreement : loginAgreements) {
+		for (P2PLoginAgreement loginAgreement : finalizer.loginAgreements) {
 			off += loginAgreement.getStepsNumberForSend();
 			if (off > stepNumber)
 				return loginAgreement.getDataToSend();
@@ -123,7 +123,7 @@ public class AggregatedP2PLoginAgreements extends P2PLoginAgreement {
 	@Override
 	protected void receiveData(int stepNumber, byte[] data) throws IOException {
 		int off=0;
-		for (P2PLoginAgreement loginAgreement : loginAgreements) {
+		for (P2PLoginAgreement loginAgreement : finalizer.loginAgreements) {
 			off += loginAgreement.getStepsNumberForReception();
 			if (off > stepNumber) {
 				loginAgreement.receiveData(data);

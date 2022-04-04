@@ -100,6 +100,10 @@ public class PasswordHash {
 	}
 
 	public static boolean checkValidHashedPassword(WrappedPassword password, WrappedHashedPassword goodHash, byte[] staticAdditionalSalt) {
+		if (password.isCleaned())
+			throw new IllegalArgumentException();
+		if (goodHash.isCleaned())
+			throw new IllegalArgumentException();
 		PasswordHashType type=PasswordHashType.valueOf(goodHash);
 		byte cost=PasswordHashType.getCost(goodHash);
 		try {
@@ -149,7 +153,8 @@ public class PasswordHash {
 			throws IOException {
 		if (password == null)
 			throw new NullPointerException("password");
-
+		if (password.isCleaned())
+			throw new IllegalArgumentException();
 		byte[] generatedSalt = generateSalt(random, saltSize);
 		byte[] salt = mixSaltWithStaticSalt(generatedSalt, staticAdditionalSalt);
 		byte[] hash=type.hash(password.getChars(), salt, cost, hashLengthBytes);

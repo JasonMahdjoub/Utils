@@ -50,9 +50,18 @@ import java.util.Objects;
  * @since Utils 4.7.0
  */
 public class SymmetricSecretKeyPair extends AbstractKey implements ISecretDecentralizedValue{
-	private SymmetricSecretKey secretKeyForEncryption;
-	private SymmetricSecretKey secretKeyForSignature;
+	private static final class Finalizer extends Cleaner
+	{
+		private SymmetricSecretKey secretKeyForEncryption;
+		private SymmetricSecretKey secretKeyForSignature;
 
+		@Override
+		protected void performCleanup() {
+			secretKeyForEncryption = null;
+			secretKeyForSignature = null;
+		}
+	}
+	private final Finalizer finalizer;
 	public SymmetricSecretKeyPair(SymmetricSecretKey secretKeyForEncryption, SymmetricSecretKey secretKeyForSignature) {
 		if (secretKeyForEncryption==null)
 			throw new NullPointerException();
@@ -62,8 +71,10 @@ public class SymmetricSecretKeyPair extends AbstractKey implements ISecretDecent
 			throw new IllegalArgumentException();
 		if (!secretKeyForSignature.useAuthenticatedSignatureAlgorithm())
 			throw new IllegalArgumentException();
-		this.secretKeyForEncryption = secretKeyForEncryption;
-		this.secretKeyForSignature = secretKeyForSignature;
+		finalizer=new Finalizer();
+		registerCleaner(finalizer);
+		this.finalizer.secretKeyForEncryption = secretKeyForEncryption;
+		this.finalizer.secretKeyForSignature = secretKeyForSignature;
 	}
 
 	@Override
@@ -71,22 +82,22 @@ public class SymmetricSecretKeyPair extends AbstractKey implements ISecretDecent
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
 		SymmetricSecretKeyPair that = (SymmetricSecretKeyPair) o;
-		boolean b=secretKeyForEncryption.equals(that.secretKeyForEncryption);
-		b=secretKeyForSignature.equals(that.secretKeyForSignature) && b;
+		boolean b=finalizer.secretKeyForEncryption.equals(that.finalizer.secretKeyForEncryption);
+		b=finalizer.secretKeyForSignature.equals(that.finalizer.secretKeyForSignature) && b;
 		return b;
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(secretKeyForEncryption, secretKeyForSignature);
+		return Objects.hash(finalizer.secretKeyForEncryption, finalizer.secretKeyForSignature);
 	}
 
 	public SymmetricSecretKey getSecretKeyForEncryption() {
-		return secretKeyForEncryption;
+		return finalizer.secretKeyForEncryption;
 	}
 
 	public SymmetricSecretKey getSecretKeyForSignature() {
-		return secretKeyForSignature;
+		return finalizer.secretKeyForSignature;
 	}
 
 	@Override
@@ -111,8 +122,8 @@ public class SymmetricSecretKeyPair extends AbstractKey implements ISecretDecent
 	@Override
 	public WrappedSecretData encode()
 	{
-		WrappedSecretData encodedSecretKeyForEncryption=secretKeyForEncryption.encode();
-		WrappedSecretData encodedSecretKeyForSignature=secretKeyForSignature.encode();
+		WrappedSecretData encodedSecretKeyForEncryption=finalizer.secretKeyForEncryption.encode();
+		WrappedSecretData encodedSecretKeyForSignature=finalizer.secretKeyForSignature.encode();
 		byte[] tab = new byte[2+encodedSecretKeyForEncryption.getBytes().length+encodedSecretKeyForSignature.getBytes().length];
 		tab[0]=AbstractKey.IS_XDH_KEY;
 		if (encodedSecretKeyForEncryption.getBytes().length>255)
@@ -138,20 +149,10 @@ public class SymmetricSecretKeyPair extends AbstractKey implements ISecretDecent
 		return getHashedSecretKeyPair(messageDigestType, null);
 	}
 	public SymmetricSecretKeyPair getHashedSecretKeyPair(MessageDigestType messageDigestType, byte[] customApplicationCode) throws NoSuchProviderException, NoSuchAlgorithmException {
-		return new SymmetricSecretKeyPair(secretKeyForEncryption.getHashedSecretKey(messageDigestType, customApplicationCode), secretKeyForSignature.getHashedSecretKey(messageDigestType, customApplicationCode));
+		return new SymmetricSecretKeyPair(finalizer.secretKeyForEncryption.getHashedSecretKey(messageDigestType, customApplicationCode), finalizer.secretKeyForSignature.getHashedSecretKey(messageDigestType, customApplicationCode));
 	}
 
 
-	@Override
-	public void zeroize() {
-		secretKeyForEncryption=null;
-		secretKeyForSignature=null;
-	}
-
-	@Override
-	public boolean isDestroyed() {
-		return secretKeyForEncryption==null && secretKeyForSignature==null;
-	}
 
 	@Override
 	public WrappedSecretData getKeyBytes() {
@@ -160,7 +161,7 @@ public class SymmetricSecretKeyPair extends AbstractKey implements ISecretDecent
 
 	@Override
 	public boolean isPostQuantumKey() {
-		return secretKeyForEncryption.isPostQuantumKey() && secretKeyForSignature.isPostQuantumKey();
+		return finalizer.secretKeyForEncryption.isPostQuantumKey() && finalizer.secretKeyForSignature.isPostQuantumKey();
 	}
 
 	@Override

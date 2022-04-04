@@ -51,9 +51,13 @@ import java.security.NoSuchProviderException;
 public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutputAlgorithm {
 
 	private final AbstractEncryptionOutputAlgorithm client;
+	private final IASymmetricPublicKey distantPublicKey;
 
 	public ClientASymmetricEncryptionAlgorithm(AbstractSecureRandom random, IASymmetricPublicKey distantPublicKey) throws IOException {
 		super();
+		if (distantPublicKey.isDestroyed())
+			throw new IllegalArgumentException();
+		this.distantPublicKey=distantPublicKey;
 		if (distantPublicKey instanceof HybridASymmetricPublicKey)
 			client=new HybridClient(random, (HybridASymmetricPublicKey)distantPublicKey);
 		else {
@@ -64,7 +68,12 @@ public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutpu
 			}
 		}
 	}
-
+	@Override
+	protected void checkKeysNotCleaned()
+	{
+		if (distantPublicKey.isDestroyed())
+			throw new IllegalAccessError();
+	}
 
 	private static class HybridClient extends AbstractEncryptionOutputAlgorithm {
 		private final Client nonPQCEncryption, PQCEncryption;
@@ -80,7 +89,12 @@ public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutpu
 			this.hybridASymmetricPublicKey=distantPublicKey;
 			//setMaxPlainTextSizeForEncoding(Math.min(nonPQCEncryption.getMaxPlainTextSizeForEncoding(), PQCEncryption.getMaxPlainTextSizeForEncoding()));
 		}
-
+		@Override
+		protected void checkKeysNotCleaned()
+		{
+			if (hybridASymmetricPublicKey.isDestroyed())
+				throw new IllegalAccessError();
+		}
 		@Override
 		protected void initCipherForEncryptionWithIvAndCounter(AbstractCipher cipher, byte[] iv, int counter) throws IOException {
 			initCipherForEncryption(cipher);
@@ -267,6 +281,8 @@ public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutpu
 
 	@Override
 	public AbstractCipher getCipherInstance() throws IOException {
+
+		checkKeysNotCleaned();
 		return client.getCipherInstance();
 	}
 
@@ -352,6 +368,12 @@ public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutpu
 
 			initCipherForEncryption(this.cipher);
 			initBufferAllocatorArgs();
+		}
+		@Override
+		protected void checkKeysNotCleaned()
+		{
+			if (distantPublicKey.isDestroyed())
+				throw new IllegalAccessError();
 		}
 
 		@Override

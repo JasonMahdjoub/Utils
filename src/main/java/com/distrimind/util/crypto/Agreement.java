@@ -36,6 +36,7 @@ package com.distrimind.util.crypto;
 
 
 import com.distrimind.bouncycastle.crypto.CryptoException;
+import com.distrimind.util.AutoZeroizable;
 import com.distrimind.util.Bits;
 import com.distrimind.util.io.Integrity;
 import com.distrimind.util.io.MessageExternalizationException;
@@ -48,7 +49,7 @@ import java.io.IOException;
  * @version 1.1
  * @since Utils 3.0
  */
-public abstract class Agreement implements Zeroizable {
+public abstract class Agreement implements AutoZeroizable {
 	static final int messageSize=128;
 	static final int acceptableCommonBits=96*8;
 	static final int acceptableCommonLinearBytes =messageSize/2;
@@ -154,13 +155,6 @@ public abstract class Agreement implements Zeroizable {
 	protected abstract byte[] getDataToSend(int stepNumber) throws IOException;
 	protected abstract void receiveData(int stepNumber, byte[] data) throws IOException;
 
-
-	@SuppressWarnings("deprecation")
-	@Override
-	public void finalize()
-	{
-		zeroize();
-	}
 
 	public abstract boolean isPostQuantumAgreement() ;
 

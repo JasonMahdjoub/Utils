@@ -101,21 +101,12 @@ public abstract class AbstractKeyPair<TPrivateKey extends IASymmetricPrivateKey,
 		return b[off]== AbstractKey.IS_HYBRID_KEY_PAIR;
 	}
 
-	public abstract void zeroize();
-
 	public abstract WrappedSecretData encode(boolean includeTimes);
 
 	@Override
 	public final WrappedSecretString encodeString() {
 		return new WrappedSecretString(encode());
 	}
-
-	@SuppressWarnings("deprecation")
-	@Override public void finalize()
-	{
-		zeroize();
-	}
-
 
 	public abstract TPrivateKey getASymmetricPrivateKey();
 	public abstract PubKey getASymmetricPublicKey();

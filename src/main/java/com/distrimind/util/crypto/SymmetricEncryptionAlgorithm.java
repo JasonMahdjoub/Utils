@@ -52,7 +52,17 @@ import java.util.List;
  * @since Utils 1.4
  */
 public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm {
-
+	private static final class Finalizer extends Cleaner
+	{
+		private byte[] externalCounter;
+		@Override
+		protected void performCleanup() {
+			if (externalCounter!=null) {
+				Arrays.fill(externalCounter, (byte) 0);
+				externalCounter=null;
+			}
+		}
+	}
 	private final SymmetricSecretKey key;
 
 	private final SymmetricEncryptionType type;
@@ -62,24 +72,13 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 	
 	private final byte blockModeCounterBytes;
 	private final boolean internalCounter;
-	
-	private byte[] externalCounter;
+	private final Finalizer finalizer;
+
 	private final int counterStepInBytes;
 	private final boolean supportRandomReadWrite;
 	private final boolean chacha;
 	private final boolean gcm;
-	@Override
-	public void zeroize() {
-		super.zeroize();
-		if (externalCounter!=null) {
-			Arrays.fill(externalCounter, (byte) 0);
-			externalCounter=null;
-		}
-	}
-	@Override
-	public boolean isDestroyed() {
-		return super.isDestroyed() && externalCounter==null;
-	}
+
 	@Override
 	public boolean isPostQuantumEncryption() {
 		return key.isPostQuantumKey();
@@ -222,6 +221,10 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 	public SymmetricEncryptionAlgorithm(AbstractSecureRandom random, SymmetricSecretKey key, byte blockModeCounterBytes, boolean internalCounter)
 			throws IOException {
 		super(key.getEncryptionAlgorithmType().getCipherInstance(), key.getEncryptionAlgorithmType().getIVSizeBytes());
+		if (key.isCleaned())
+			throw new IllegalArgumentException();
+		finalizer=new Finalizer();
+		registerCleaner(finalizer);
 		if (random==null)
 			throw new NullPointerException();
 		this.type = key.getEncryptionAlgorithmType();
@@ -236,7 +239,7 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 		this.counterStepInBytes=type.getBlockSizeBits()/8;
 		this.supportRandomReadWrite=type.supportRandomReadWrite();
 		//iv = new byte[getIVSizeBytesWithExternalCounter()];
-		externalCounter=this.internalCounter?null:new byte[blockModeCounterBytes];
+		finalizer.externalCounter=this.internalCounter?null:new byte[blockModeCounterBytes];
 		this.chacha =type.getAlgorithmName().toUpperCase().startsWith(SymmetricEncryptionType.CHACHA20_NO_RANDOM_ACCESS.getAlgorithmName().toUpperCase());
 		this.gcm = type.getBlockMode().equalsIgnoreCase("GCM");
 
@@ -274,9 +277,9 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 		if (!internalCounter)
 		{
 			int j=0;
-			for (int i=iv.length-externalCounter.length;i<iv.length;i++)
+			for (int i=iv.length-finalizer.externalCounter.length;i<iv.length;i++)
 			{
-				iv[i]=externalCounter[j++];
+				iv[i]=finalizer.externalCounter[j++];
 			}
 		}
 		return iv;
@@ -287,9 +290,15 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 	public int getBlockSizeBytes() {
 		return cipher.getBlockSize();
 	}
-
+	@Override
+	public void checkKeysNotCleaned()
+	{
+		if (key.isCleaned())
+			throw new IllegalAccessError();
+	}
 	@Override
 	public AbstractCipher getCipherInstance() throws IOException {
+		checkKeysNotCleaned();
 		return type.getCipherInstance();
 	}
 
@@ -327,7 +336,7 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 			throw new IllegalArgumentException("Please use external counters at every initialization with the defined size "+blockModeCounterBytes);
 		if (iv!=null && iv.length<getIVSizeBytesWithoutExternalCounter() && (externalCounter==null || externalCounter.length+iv.length<getIVSizeBytesWithExternalCounter()))
 			throw new IllegalArgumentException("Illegal iv size");
-		this.externalCounter=externalCounter;
+		this.finalizer.externalCounter=externalCounter;
 
 		if (iv != null)
 		{
@@ -348,6 +357,7 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 	@Override
 	public void initCipherForDecryption(AbstractCipher cipher, byte[] iv, byte[] externalCounter)
 			throws IOException {
+		checkKeysNotCleaned();
 		iv=initIVAndCounter(iv, externalCounter);
 
 		if (iv != null) {
@@ -360,13 +370,14 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 	protected void initCipherForDecryptionWithIvAndCounter(AbstractCipher cipher, byte[] iv, int counter) throws IOException {
 		if (!supportRandomReadWrite)
 			throw new IllegalAccessError();
+		checkKeysNotCleaned();
 		cipher.init(Cipher.DECRYPT_MODE, key, iv, counter);
 
 	}
 
 	@Override
 	public void initCipherForDecryptionWithIv(AbstractCipher cipher, byte[] iv) throws IOException {
-
+		checkKeysNotCleaned();
 		cipher.init(Cipher.DECRYPT_MODE, key, iv);
 	}
 
@@ -380,10 +391,12 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 	protected void initCipherForEncryptionWithIvAndCounter(AbstractCipher cipher, byte[] iv, int counter) throws IOException {
 		if (!supportRandomReadWrite)
 			throw new IllegalAccessError();
+		checkKeysNotCleaned();
 		cipher.init(Cipher.ENCRYPT_MODE, key, iv, counter);
 	}
 	@Override
 	protected void initCipherForEncryptionWithIv(AbstractCipher cipher, byte[] iv) throws IOException {
+		checkKeysNotCleaned();
 		cipher.init(Cipher.ENCRYPT_MODE, key, iv);
 	}
 
@@ -393,7 +406,8 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 			throw new IllegalArgumentException("Please use external counters at every initialization with the defined size "+blockModeCounterBytes);
 		if (internalCounter && externalCounter!=null && externalCounter.length>0)
 			throw new IllegalArgumentException("External counter should be empty : "+this);
-		this.externalCounter=externalCounter;
+		checkKeysNotCleaned();
+		this.finalizer.externalCounter=externalCounter;
 		byte[] iv=generateIV();
 		cipher.init(Cipher.ENCRYPT_MODE, key, iv);
 		return iv;
@@ -421,7 +435,7 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 		initCipherForDecryption(cipher, null, null);
 	}
 
-	boolean isInternalCounter() {
+	public boolean isInternalCounter() {
 		return internalCounter;
 	}
 }

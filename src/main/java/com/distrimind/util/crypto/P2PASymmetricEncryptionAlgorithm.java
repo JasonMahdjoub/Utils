@@ -47,12 +47,14 @@ import java.security.NoSuchProviderException;
 /**
  * 
  * @author Jason Mahdjoub
- * @version 3.1
+ * @version 3.2
  * @since Utils 1.4
  */
 public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm {
 
 	private final AbstractEncryptionIOAlgorithm p2pEncryption;
+	private final AbstractKeyPair<?, ?> myKeyPair;
+	private final IASymmetricPublicKey distantPublicKey;
 
 	public P2PASymmetricEncryptionAlgorithm(AbstractKeyPair<?, ?> myKeyPair, IASymmetricPublicKey distantPublicKey)
 			throws IOException {
@@ -63,6 +65,12 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, "The key times are not valid !");
 		if (!distantPublicKey.areTimesValid())
 			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, "The key times are not valid !");
+		if (distantPublicKey.isDestroyed())
+			throw new IllegalArgumentException();
+		if (myKeyPair.isCleaned())
+			throw new IllegalArgumentException();
+		this.myKeyPair=myKeyPair;
+		this.distantPublicKey=distantPublicKey;
 		try {
 			if (myKeyPair instanceof HybridASymmetricKeyPair && distantPublicKey instanceof HybridASymmetricPublicKey) {
 				p2pEncryption = new HybridP2PEncryption((HybridASymmetricKeyPair) myKeyPair, (HybridASymmetricPublicKey) distantPublicKey);
@@ -81,12 +89,24 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 		super();
 		if (distantPublicKey == null)
 			throw new NullPointerException("distantPublicKey");
+		if (distantPublicKey.isDestroyed())
+			throw new IllegalArgumentException();
+		if (myKeyPair.isCleaned())
+			throw new IllegalArgumentException();
+		this.myKeyPair=myKeyPair;
+		this.distantPublicKey=distantPublicKey;
 		p2pEncryption =new HybridP2PEncryption(nonPQCSignatureType, PQCSignatureType, myKeyPair, distantPublicKey);
 	}
 
 	public P2PASymmetricEncryptionAlgorithm(ASymmetricAuthenticatedSignatureType signatureType, ASymmetricKeyPair myKeyPair,
 						 ASymmetricPublicKey distantPublicKey) throws IOException {
 		super();
+		if (distantPublicKey.isDestroyed())
+			throw new IllegalArgumentException();
+		if (myKeyPair.isCleaned())
+			throw new IllegalArgumentException();
+		this.myKeyPair=myKeyPair;
+		this.distantPublicKey=distantPublicKey;
 		try {
 			p2pEncryption =new P2PEncryption(signatureType, myKeyPair, distantPublicKey);
 		} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
@@ -108,59 +128,71 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 	public void decode(RandomInputStream is, byte[] associatedData, int offAD, int lenAD, RandomOutputStream os, int length, byte[] externalCounter)
 			throws IOException
 	{
+
 		p2pEncryption.decode(is, associatedData, offAD, lenAD, os, lenAD, externalCounter );
 	}
 	@Override
 	public void encode(byte[] bytes, int off, int len, byte[] associatedData, int offAD, int lenAD, RandomOutputStream os, byte[] externalCounter) throws IOException {
+
 		p2pEncryption.encode(bytes, off, len, associatedData, offAD, lenAD, os, externalCounter);
 	}
 	@Override
 	public void encode(RandomInputStream is, byte[] associatedData, int offAD, int lenAD, RandomOutputStream os, byte[] externalCounter) throws IOException {
+
 		p2pEncryption.encode(is, associatedData, offAD, lenAD, os, externalCounter);
 	}
 
 	@Override
 	public CommonCipherOutputStream getCipherOutputStreamForEncryption(RandomOutputStream os, boolean closeOutputStreamWhenClosingCipherOutputStream, byte[] externalCounter) throws IOException {
+
 		return p2pEncryption.getCipherOutputStreamForEncryption(os, closeOutputStreamWhenClosingCipherOutputStream, externalCounter);
 	}
 
 	@Override
 	public byte[] decode(byte[] bytes) throws IOException {
+
 		return p2pEncryption.decode(bytes);
 	}
 
 	@Override
 	public byte[] decode(byte[] bytes, byte[] associatedData, byte[] externalCounter) throws IOException {
+
 		return p2pEncryption.decode(bytes, associatedData, externalCounter);
 	}
 
 	@Override
 	public byte[] decode(byte[] bytes, byte[] associatedData) throws IOException {
+
 		return p2pEncryption.decode(bytes, associatedData);
 	}
 
 	@Override
 	public byte[] decode(byte[] bytes, int off, int len) throws IOException {
+
 		return p2pEncryption.decode(bytes, off, len);
 	}
 
 	@Override
 	public byte[] decode(byte[] bytes, int off, int len, byte[] associatedData, int offAD, int lenAD) throws IOException {
+
 		return p2pEncryption.decode(bytes, off, len, associatedData, offAD, lenAD);
 	}
 
 	@Override
 	public byte[] decode(byte[] bytes, int off, int len, byte[] associatedData, int offAD, int lenAD, byte[] externalCounter) throws IOException {
+
 		return p2pEncryption.decode(bytes, off, len, associatedData, offAD, lenAD, externalCounter);
 	}
 
 	@Override
 	public byte[] decode(RandomInputStream is, byte[] associatedData) throws IOException {
+
 		return p2pEncryption.decode(is, associatedData);
 	}
 
 	@Override
 	public byte[] decode(RandomInputStream is) throws IOException {
+
 		return p2pEncryption.decode(is);
 	}
 
@@ -171,117 +203,140 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 
 	@Override
 	public byte[] decode(RandomInputStream is, byte[] associatedData, int offAD, int lenAD) throws IOException {
+
 		return p2pEncryption.decode(is, associatedData, offAD, lenAD);
 	}
 
 	@Override
 	public byte[] decode(RandomInputStream is, byte[] associatedData, int offAD, int lenAD, byte[] externalCounter) throws IOException {
+
 		return p2pEncryption.decode(is, associatedData, offAD, lenAD, externalCounter);
 	}
 
 	@Override
 	public void decode(RandomInputStream is, byte[] associatedData, RandomOutputStream os) throws IOException {
+
 		p2pEncryption.decode(is, associatedData, os);
 	}
 
 	@Override
 	public void decode(RandomInputStream is, RandomOutputStream os, byte[] externalCounter) throws IOException {
+
 		p2pEncryption.decode(is, os, externalCounter);
 	}
 
 	@Override
 	public void decode(RandomInputStream is, RandomOutputStream os) throws IOException {
+
 		p2pEncryption.decode(is, os);
 	}
 
 	@Override
 	public void decode(RandomInputStream is, byte[] associatedData, int offAD, int lenAD, RandomOutputStream os) throws IOException {
+
 		p2pEncryption.decode(is, associatedData, offAD, lenAD, os);
 	}
 
 	@Override
 	public void decode(RandomInputStream is, byte[] associatedData, int offAD, int lenAD, RandomOutputStream os, byte[] externalCounter) throws IOException {
+
 		p2pEncryption.decode(is, associatedData, offAD, lenAD, os, externalCounter);
 	}
 
 	@Override
 	public void decode(RandomInputStream is, RandomOutputStream os, int length) throws IOException {
+
 		p2pEncryption.decode(is, os, length);
 	}
 
 	@Override
 	public void decode(RandomInputStream is, RandomOutputStream os, int length, byte[] externalCounter) throws IOException {
+
 		p2pEncryption.decode(is, os, length, externalCounter);
 	}
 
 	@Override
 	public void decode(RandomInputStream is, byte[] associatedData, RandomOutputStream os, int length) throws IOException {
+
 		p2pEncryption.decode(is, associatedData, os, length);
 	}
 
 	@Override
 	public void decode(RandomInputStream is, byte[] associatedData, int offAD, int lenAD, RandomOutputStream os, int length) throws IOException {
+
 		p2pEncryption.decode(is, associatedData, offAD, lenAD, os, length);
 	}
 
 	@Override
 	public CommonCipherInputStream getCipherInputStreamForDecryption(RandomInputStream is) throws IOException {
+
 		return p2pEncryption.getCipherInputStreamForDecryption(is);
 	}
 
 
 	@Override
 	public byte[] encode(byte[] bytes) throws IOException {
+
 		return p2pEncryption.encode(bytes);
 	}
 
 	@Override
 	public byte[] encode(byte[] bytes, byte[] associatedData) throws IOException {
+
 		return p2pEncryption.encode(bytes, associatedData);
 	}
 
 	@Override
 	public byte[] encode(byte[] bytes, byte[] associatedData, byte[] externalCounter) throws IOException {
+
 		return p2pEncryption.encode(bytes, associatedData, externalCounter);
 	}
 
 	@Override
 	public byte[] encode(byte[] bytes, int off, int len) throws IOException {
+
 		return p2pEncryption.encode(bytes, off, len);
 	}
 
 	@Override
 	public byte[] encode(byte[] bytes, int off, int len, byte[] associatedData, int offAD, int lenAD) throws IOException {
+
 		return p2pEncryption.encode(bytes, off, len, associatedData, offAD, lenAD);
 	}
 
 	@Override
 	public byte[] encode(byte[] bytes, int off, int len, byte[] associatedData, int offAD, int lenAD, byte[] externalCounter) throws IOException {
+
 		return p2pEncryption.encode(bytes, off, len, associatedData, offAD, lenAD, externalCounter);
 	}
 
 	@Override
 	public void encode(byte[] bytes, int off, int len, RandomOutputStream os) throws IOException {
+
 		p2pEncryption.encode(bytes, off, len, os);
 	}
 
 	@Override
 	public void encode(byte[] bytes, int off, int len, byte[] associatedData, int offAD, int lenAD, RandomOutputStream os) throws IOException {
+
 		p2pEncryption.encode(bytes, off, len, associatedData, offAD, lenAD, os);
 	}
 
 	@Override
 	public void encode(RandomInputStream is, RandomOutputStream os) throws IOException {
+
 		p2pEncryption.encode(is, os);
 	}
 
 	@Override
 	public void encode(RandomInputStream is, byte[] associatedData, RandomOutputStream os) throws IOException {
+
 		p2pEncryption.encode(is, associatedData, os);
 	}
 
 	@Override
 	public void encode(RandomInputStream is, byte[] associatedData, int offAD, int lenAD, RandomOutputStream os) throws IOException {
+
 		p2pEncryption.encode(is, associatedData, offAD, lenAD, os);
 	}
 
@@ -293,11 +348,13 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 
 	@Override
 	public CommonCipherInputStream getCipherInputStreamForDecryption(RandomInputStream is, byte[] externalCounter) throws IOException {
+
 		return p2pEncryption.getCipherInputStreamForDecryption(is, externalCounter);
 	}
 
 	@Override
 	public CommonCipherInputStream getCipherInputStreamForDecryption(RandomInputStream is, byte[] associatedData, int offAD, int lenAD) throws IOException {
+
 		return p2pEncryption.getCipherInputStreamForDecryption(is, associatedData, offAD, lenAD);
 	}
 
@@ -313,6 +370,7 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 
 	@Override
 	protected void initCipherForEncryptionWithIvAndCounter(AbstractCipher cipher, byte[] iv, int counter) throws IOException {
+
 		p2pEncryption.initCipherForEncryptionWithIvAndCounter(cipher, iv, counter);
 	}
 
@@ -375,17 +433,28 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 	}
 
 	@Override
+	public void checkKeysNotCleaned() {
+		if (distantPublicKey.isDestroyed())
+			throw new IllegalAccessError();
+		if (myKeyPair.isCleaned())
+			throw new IllegalAccessError();
+	}
+
+	@Override
 	protected CommonCipherOutputStream getCipherOutputStreamForEncryption(RandomOutputStream os, boolean closeOutputStreamWhenClosingCipherOutputStream, byte[] associatedData, int offAD, int lenAD, byte[] externalCounter, byte[][] manualIvs) throws IOException {
+		checkKeysNotCleaned();
 		return p2pEncryption.getCipherOutputStreamForEncryption(os, closeOutputStreamWhenClosingCipherOutputStream, associatedData, offAD, lenAD, externalCounter, manualIvs);
 	}
 
 	@Override
 	public void initCipherForDecryption(AbstractCipher cipher, byte[] iv, byte[] externalCounter) throws IOException {
+		checkKeysNotCleaned();
 		p2pEncryption.initCipherForDecryption(cipher, iv, externalCounter);
 	}
 
 	@Override
 	public AbstractCipher getCipherInstance() throws IOException {
+		checkKeysNotCleaned();
 		return p2pEncryption.getCipherInstance();
 	}
 
@@ -401,11 +470,13 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 
 	@Override
 	public byte[] initCipherForEncryption(AbstractCipher cipher, byte[] externalCounter) throws IOException {
+
 		return p2pEncryption.initCipherForEncryption(cipher, externalCounter);
 	}
 
 	@Override
 	public void initCipherForEncryptionWithNullIV(AbstractCipher cipher) throws IOException {
+
 		p2pEncryption.initCipherForEncryptionWithNullIV(cipher);
 	}
 
@@ -442,6 +513,7 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 
 	@Override
 	public void initCipherForEncryption(AbstractCipher cipher) throws IOException {
+
 		p2pEncryption.initCipherForEncryption(cipher);
 	}
 
@@ -465,7 +537,14 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 			} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
 				throw new IOException(e);
 			}
-
+		}
+		@Override
+		public void checkKeysNotCleaned()
+		{
+			if (myKeyPair.isCleaned())
+				throw new IllegalAccessError();
+			if (distantPublicKey.isDestroyed())
+				throw new IllegalAccessError();
 		}
 
 		public HybridP2PEncryption(ASymmetricAuthenticatedSignatureType nonPQCSignatureType,
@@ -505,6 +584,10 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 
 		@Override
 		public AbstractCipher getCipherInstance()  {
+			if (myKeyPair.isCleaned())
+				throw new IllegalAccessError();
+			if (distantPublicKey.isDestroyed())
+				throw new IllegalAccessError();
 			throw new IllegalAccessError();
 		}
 
@@ -575,6 +658,7 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 
 		@Override
 		public CommonCipherInputStream getCipherInputStreamForDecryption(RandomInputStream is, byte[] associatedData, int offAD, int lenAD, byte[] externalCounter) throws IOException {
+			checkKeysNotCleaned();
 			return nonPQCEncryption.getCipherInputStreamForDecryption(PQCEncryption.getCipherInputStreamForDecryption(is, associatedData, offAD, lenAD, externalCounter), associatedData, offAD, lenAD, externalCounter);
 		}
 
@@ -614,6 +698,14 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 		public boolean isPostQuantumEncryption() {
 			return myKeyPair.isPostQuantumKey() && distantPublicKey.isPostQuantumKey();
 		}
+		@Override
+		public void checkKeysNotCleaned()
+		{
+			if (myKeyPair.isCleaned())
+				throw new IllegalAccessError();
+			if (distantPublicKey.isDestroyed())
+				throw new IllegalAccessError();
+		}
 
 		public P2PEncryption(ASymmetricKeyPair myKeyPair, ASymmetricPublicKey distantPublicKey)
 				throws NoSuchAlgorithmException,
@@ -651,6 +743,10 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 
 		@Override
 		public AbstractCipher getCipherInstance() throws IOException {
+			if (myKeyPair.isCleaned())
+				throw new IllegalAccessError();
+			if (distantPublicKey.isDestroyed())
+				throw new IllegalAccessError();
 			try {
 				return type.getCipherInstance();
 			} catch (NoSuchAlgorithmException | NoSuchProviderException e) {

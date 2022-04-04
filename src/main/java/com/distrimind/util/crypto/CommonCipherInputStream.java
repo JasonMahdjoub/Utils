@@ -106,9 +106,9 @@ abstract class CommonCipherInputStream extends RandomInputStream {
 		this.maxPlainTextSizeForEncoding = maxPlainTextSizeForEncoding;
 		set(is, associatedData, offAD, lenAD, externalCounter);
 	}
-
+	protected abstract void checkKeysNotCleaned();
 	void set(final RandomInputStream is, final byte[] associatedData, final int offAD, final int lenAD, final byte[] externalCounter) throws IOException {
-
+		checkKeysNotCleaned();
 		posEncrypted =0;
 		posPlainText=0;
 		closed=false;

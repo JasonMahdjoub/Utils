@@ -69,17 +69,21 @@ public class SymmetricAuthenticatedSignatureCheckerAlgorithm extends AbstractAut
 
 	public SymmetricAuthenticatedSignatureCheckerAlgorithm(SymmetricSecretKey secretKey) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
 		this(new SymmetricAuthenticatedSignerAlgorithm(secretKey));
-
 	}
 
 	public SymmetricSecretKey getSecretKey() {
 		return signer.getSecretKey();
 	}
 
-
+	@Override
+	protected void checkKeysNotCleaned()
+	{
+		signer.checkKeysNotCleaned();
+	}
 
 	@Override
 	public void init(byte[] signature, int off, int len) throws IOException {
+		checkKeysNotCleaned();
 		this.signature=new byte[len];
 		
 		System.arraycopy(signature, off, this.signature, 0, this.signature.length);
@@ -98,6 +102,8 @@ public class SymmetricAuthenticatedSignatureCheckerAlgorithm extends AbstractAut
 			throws IllegalStateException {
 		try
 		{
+			if (signer.getSecretKey().isCleaned())
+				return false;
 			if (signature == null)
 				return false;
 			byte[] mySignature = signer.getSignature();

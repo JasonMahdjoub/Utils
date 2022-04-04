@@ -12,7 +12,5 @@ public class P2PUnidirectionalLoginCheckerWithAsymmetricSignature extends Abstra
 
 	public P2PUnidirectionalLoginCheckerWithAsymmetricSignature(AbstractSecureRandom random, IASymmetricPublicKey otherPublicKey) throws NoSuchAlgorithmException, NoSuchProviderException {
 		super(random, null, new ASymmetricAuthenticatedSignatureCheckerAlgorithm(otherPublicKey));
-		if (otherPublicKey==null)
-			throw new NullPointerException();
 	}
 }

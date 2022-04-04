@@ -53,37 +53,38 @@ import com.distrimind.bouncycastle.pqc.crypto.newhope.NHPublicKeyParameters;
  * @since Utils 3.10.0
  */
 public class NewHopeKeyAgreementClient extends AbstractNewHopeKeyAgreement{
-
+	private static final class Finalizer extends Cleaner
+	{
+		private NHPrivateKeyParameters priv;
+		@Override
+		protected void performCleanup() {
+			if (priv!=null)
+			{
+				try {
+					short[] f = (short[])fieldSecData.get(priv);
+					Arrays.fill(f, (short)0);
+					priv=null;
+				} catch (IllegalArgumentException | IllegalAccessException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+	private final Finalizer finalizer;
 	private final AbstractSecureRandom randomForKeys;
-	private NHPrivateKeyParameters priv;
+
 	private boolean valid=true;
 	NewHopeKeyAgreementClient(SymmetricAuthenticatedSignatureType type, short keySizeBits, AbstractSecureRandom randomForKeys) {
 		super(type, (short)(keySizeBits/8));
 		this.randomForKeys=randomForKeys;
+		finalizer=new Finalizer();
+		registerCleaner(finalizer);
 	}
 	NewHopeKeyAgreementClient(SymmetricEncryptionType type, short keySizeBits, AbstractSecureRandom randomForKeys) {
 		super(type, (short)(keySizeBits/8));
 		this.randomForKeys=randomForKeys;
-	}
-
-	@Override
-	public void zeroize()
-	{
-		super.zeroize();
-		if (priv!=null)
-		{
-			try {
-				short[] f = (short[])fieldSecData.get(priv);
-				Arrays.fill(f, (short)0);
-				priv=null;
-			} catch (IllegalArgumentException | IllegalAccessException e) {
-				e.printStackTrace();
-			}
-		}
-	}
-	@Override
-	public boolean isDestroyed() {
-		return priv==null;
+		finalizer=new Finalizer();
+		registerCleaner(finalizer);
 	}
 
 	@Override
@@ -100,7 +101,7 @@ public class NewHopeKeyAgreementClient extends AbstractNewHopeKeyAgreement{
 		keyPairEngine.init(new KeyGenerationParameters(randomForKeys, 1024));
 		AsymmetricCipherKeyPair pair = keyPairEngine.generateKeyPair();
 		NHPublicKeyParameters pub = (NHPublicKeyParameters)pair.getPublic();
-		priv = (NHPrivateKeyParameters)pair.getPrivate();
+		finalizer.priv = (NHPrivateKeyParameters)pair.getPrivate();
 
 		byte[] res=pub.getPubData();
 		valid=true;
@@ -111,9 +112,9 @@ public class NewHopeKeyAgreementClient extends AbstractNewHopeKeyAgreement{
 	{
 		//calculate agreement
 		valid=false;
-		shared = new byte[agreementSize];
+		super.finalizer.shared = new byte[agreementSize];
 
-		sharedA(shared, priv.getSecData(), data);
+		sharedA(super.finalizer.shared, finalizer.priv.getSecData(), data);
 		valid=true;
 	}
 	@Override

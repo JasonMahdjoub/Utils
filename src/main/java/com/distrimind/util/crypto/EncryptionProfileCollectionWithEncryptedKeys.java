@@ -201,7 +201,7 @@ public abstract class EncryptionProfileCollectionWithEncryptedKeys extends Encry
 
 	@Override
 	public void unloadKeyWrapperAlgorithm() {
-		keyWrapperAlgorithm.zeroize();
+		keyWrapperAlgorithm.clean();
 		keyWrapperAlgorithm=null;
 	}
 

@@ -1,8 +1,8 @@
 package com.distrimind.util.crypto;
 
+import com.distrimind.bouncycastle.crypto.CryptoException;
 import com.distrimind.util.io.Integrity;
 import com.distrimind.util.io.MessageExternalizationException;
-import com.distrimind.bouncycastle.crypto.CryptoException;
 
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
@@ -18,34 +18,32 @@ public class P2PASymmetricSecretMessageExchangerAgreement extends P2PLoginAgreem
 
     private final P2PASymmetricSecretMessageExchanger p2PASymmetricSecretMessageExchanger;
 
-
+    private static final class Finalizer extends Cleaner
+    {
+        private byte[] bytesPassword;
+        private char[] charPassword;
+        @Override
+        protected void performCleanup() {
+            if (bytesPassword!=null)
+                Arrays.fill(bytesPassword, (byte)0);
+            if (charPassword!=null)
+                Arrays.fill(charPassword, (char)0);
+            bytesPassword=null;
+            charPassword=null;
+        }
+    }
 
     private boolean valid=true;
     private final byte[] salt;
     private final int offset_salt;
     private final int length_salt;
-    private byte[] bytesPassword;
     private boolean passwordIsKey;
-    private char[] charPassword;
+    private final Finalizer finalizer;
+
 
     @Override
     public boolean isPostQuantumAgreement() {
         return p2PASymmetricSecretMessageExchanger.getDistantPublicKey().isPostQuantumKey();
-    }
-
-    @Override
-    public void zeroize() {
-        if (bytesPassword!=null)
-            Arrays.fill(bytesPassword, (byte)0);
-        if (charPassword!=null)
-            Arrays.fill(charPassword, (char)0);
-        bytesPassword=null;
-        charPassword=null;
-    }
-
-    @Override
-    public boolean isDestroyed() {
-        return bytesPassword==null && charPassword==null;
     }
 
 
@@ -59,9 +57,9 @@ public class P2PASymmetricSecretMessageExchangerAgreement extends P2PLoginAgreem
         if (bytesPassword.length==0)
             throw new IllegalArgumentException();
 
-        this.bytesPassword=Arrays.copyOfRange(bytesPassword, offset_password, length_password+offset_password);
+        this.finalizer.bytesPassword=Arrays.copyOfRange(bytesPassword, offset_password, length_password+offset_password);
         this.passwordIsKey=passwordIsKey;
-        this.charPassword=null;
+        this.finalizer.charPassword=null;
     }
     P2PASymmetricSecretMessageExchangerAgreement(AbstractSecureRandom secureRandom, MessageDigestType messageDigestType, PasswordHashType passwordHashType,
                                                  ASymmetricPublicKey myPublicKey, byte[] salt, int offset_salt, int len_salt, char[] charPassword) throws NoSuchAlgorithmException, NoSuchProviderException, MessageExternalizationException {
@@ -70,17 +68,19 @@ public class P2PASymmetricSecretMessageExchangerAgreement extends P2PLoginAgreem
             throw new NullPointerException();
         if (charPassword.length==0)
             throw new IllegalArgumentException();
-        this.bytesPassword=null;
+        this.finalizer.bytesPassword=null;
         this.passwordIsKey=false;
-        this.charPassword=charPassword.clone();
+        this.finalizer.charPassword=charPassword.clone();
     }
     private P2PASymmetricSecretMessageExchangerAgreement(AbstractSecureRandom secureRandom, MessageDigestType messageDigestType, PasswordHashType passwordHashType,
                                                          ASymmetricPublicKey myPublicKey, byte[] salt, int offset_salt, int len_salt) throws NoSuchAlgorithmException, NoSuchProviderException, MessageExternalizationException {
         super(2, 2);
+        finalizer=new Finalizer();
         this.p2PASymmetricSecretMessageExchanger = new P2PASymmetricSecretMessageExchanger(secureRandom, messageDigestType, passwordHashType, myPublicKey);
         this.salt=salt;
         this.offset_salt=offset_salt;
         this.length_salt=len_salt;
+        registerCleaner(finalizer);
     }
 
     @Override
@@ -98,10 +98,10 @@ public class P2PASymmetricSecretMessageExchangerAgreement extends P2PLoginAgreem
                 case 0:
                     return p2PASymmetricSecretMessageExchanger.encodeMyPublicKey().getBytes().clone();
                 case 1:
-                    if (bytesPassword != null)
-                        return p2PASymmetricSecretMessageExchanger.encode(bytesPassword, 0,bytesPassword.length, salt, offset_salt, length_salt, passwordIsKey);
+                    if (finalizer.bytesPassword != null)
+                        return p2PASymmetricSecretMessageExchanger.encode(finalizer.bytesPassword, 0,finalizer.bytesPassword.length, salt, offset_salt, length_salt, passwordIsKey);
                     else
-                        return p2PASymmetricSecretMessageExchanger.encode(charPassword, salt, offset_salt, length_salt);
+                        return p2PASymmetricSecretMessageExchanger.encode(finalizer.charPassword, salt, offset_salt, length_salt);
                 default:
                     valid = false;
                     throw new IllegalAccessError();
@@ -131,10 +131,10 @@ public class P2PASymmetricSecretMessageExchangerAgreement extends P2PLoginAgreem
                     p2PASymmetricSecretMessageExchanger.setDistantPublicKey(data);
                     break;
                 case 1:
-                    if (bytesPassword != null)
-                        valid = p2PASymmetricSecretMessageExchanger.verifyDistantMessage(bytesPassword, 0, bytesPassword.length, salt, offset_salt, length_salt, data, 0, data.length, passwordIsKey);
+                    if (finalizer.bytesPassword != null)
+                        valid = p2PASymmetricSecretMessageExchanger.verifyDistantMessage(finalizer.bytesPassword, 0, finalizer.bytesPassword.length, salt, offset_salt, length_salt, data, 0, data.length, passwordIsKey);
                     else
-                        valid = p2PASymmetricSecretMessageExchanger.verifyDistantMessage(charPassword, salt, offset_salt, length_salt, data, 0, data.length);
+                        valid = p2PASymmetricSecretMessageExchanger.verifyDistantMessage(finalizer.charPassword, salt, offset_salt, length_salt, data, 0, data.length);
                     break;
                 default:
                     valid = false;
@@ -147,6 +147,5 @@ public class P2PASymmetricSecretMessageExchangerAgreement extends P2PLoginAgreem
             throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException("",e));
         }
     }
-
 
 }

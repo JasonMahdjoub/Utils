@@ -13,6 +13,8 @@ public class P2PUnidirectionalLoginSignerWithAsymmetricSignature extends Abstrac
 
 	public P2PUnidirectionalLoginSignerWithAsymmetricSignature(AbstractSecureRandom random, AbstractKeyPair<?,?> keyPair) throws NoSuchAlgorithmException, IOException, NoSuchProviderException {
 		super(random, new ASymmetricAuthenticatedSignerAlgorithm(keyPair.getASymmetricPrivateKey()), null);
+		if (keyPair.isCleaned())
+			throw new IllegalArgumentException();
 
 	}
 

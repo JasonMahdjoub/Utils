@@ -53,9 +53,26 @@ import java.security.NoSuchProviderException;
  * @since Utils 2.9
  */
 public class EllipticCurveDiffieHellmanAlgorithm extends KeyAgreement {
+	private static final class Finalizer extends Cleaner
+	{
+		private SymmetricSecretKey derivedKey;
+		private ASymmetricKeyPair myKeyPair;
+		@Override
+		protected void performCleanup() {
+			if (derivedKey!=null)
+			{
+				derivedKey=null;
+			}
+			if (myKeyPair!=null)
+			{
+				myKeyPair.clean();
+				myKeyPair=null;
+			}
+		}
+	}
+	private final Finalizer finalizer;
 	private final EllipticCurveDiffieHellmanType type;
-	private SymmetricSecretKey derivedKey;
-	private ASymmetricKeyPair myKeyPair;
+
 	private WrappedData myPublicKeyBytes;
 	private final AbstractSecureRandom randomForKeys;
 	private boolean valid=true;
@@ -84,33 +101,22 @@ public class EllipticCurveDiffieHellmanAlgorithm extends KeyAgreement {
 			throw new NullPointerException();
 		if (randomForKeys == null)
 			throw new NullPointerException();
+		this.finalizer=new Finalizer();
 		this.type = type;
 		this.randomForKeys=randomForKeys;
 
 		this.keyingMaterial=keyingMaterial;
 		this.keySizeBits=keySizeBits;
+
 		reset();
 		generateAndSetKeyPair();
-	}
-
-	@Override
-	public void zeroize()
-	{
-		derivedKey=null;
-		myKeyPair=null;
-
-	}
-
-	@Override
-	public boolean isDestroyed() {
-		return derivedKey==null && myKeyPair==null;
+		registerCleaner(finalizer);
 	}
 
 
 
 	public void reset() {
-		derivedKey = null;
-		myKeyPair = null;
+		finalizer.performCleanup();
 		myPublicKeyBytes = null;
 	}
 	private void generateAndSetKeyPair() throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
@@ -148,8 +154,8 @@ public class EllipticCurveDiffieHellmanAlgorithm extends KeyAgreement {
 		if (keyPair==null)
 			throw new NullPointerException("keyPair");
 		reset();
-		myKeyPair = keyPair;
-		myPublicKeyBytes = myKeyPair.getASymmetricPublicKey().encode();
+		finalizer.myKeyPair = keyPair;
+		myPublicKeyBytes = finalizer.myKeyPair.getASymmetricPublicKey().encode();
 	}
 
 
@@ -169,11 +175,11 @@ public class EllipticCurveDiffieHellmanAlgorithm extends KeyAgreement {
 				throw new NullPointerException();
 			if (keyingMaterial.length==0)
 				throw new IllegalArgumentException();
-			if (derivedKey != null)
+			if (finalizer.derivedKey != null)
 				throw new IllegalArgumentException(
 						"A key exchange process has already been begun. Use reset function before calling this function.");
 			ASymmetricPublicKey distantPublicKey=(ASymmetricPublicKey) AbstractKey.decode(distantPublicKeyBytes);
-			if (myKeyPair.getASymmetricPublicKey().equals(distantPublicKey))
+			if (finalizer.myKeyPair.getASymmetricPublicKey().equals(distantPublicKey))
 				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new InvalidKeyException("The local et distant public keys cannot be similar !"));
 
 			AbstractKeyAgreement ka ;
@@ -186,29 +192,23 @@ public class EllipticCurveDiffieHellmanAlgorithm extends KeyAgreement {
 				UserKeyingMaterialSpec spec=null;
 				if (type.useKDF())
 					spec=new UserKeyingMaterialSpec(keyingMaterial);
-				ka.init(myKeyPair.getASymmetricPrivateKey(), spec, randomForKeys);
+				ka.init(finalizer.myKeyPair.getASymmetricPrivateKey(), spec, randomForKeys);
 
 			}
 			else if (type.isXDHType()) {
-				ka.init(myKeyPair.getASymmetricPrivateKey(), null, randomForKeys);
+				ka.init(finalizer.myKeyPair.getASymmetricPrivateKey(), null, randomForKeys);
 			}
 			else if (type.isECMQVType())
 			{
 				throw new InternalError("Next code must use ephemeral and static keys. It must be completed/corrected.");
-				/*ka.init(myKeyPair.getASymmetricPrivateKey(), new Object[] {
-						FipsEC.MQV.using(
-								(AsymmetricECPublicKey)myKeyPair.getASymmetricPublicKey().toBouncyCastleKey(), (AsymmetricECPrivateKey)myKeyPair.getASymmetricPrivateKey().toBouncyCastleKey(), (AsymmetricECPublicKey)distantPublicKey.toBouncyCastleKey()),
-						keyingMaterial,
-					}
-				);*/
 			}
 			else
 				throw new InternalError(type.name());
 			ka.doPhase(distantPublicKey, true);
 			if (ka instanceof JavaNativeKeyAgreement)
-				derivedKey=ka.generateSecretKey(keySizeBits);
+				finalizer.derivedKey=ka.generateSecretKey(keySizeBits);
 			else
-				derivedKey=ka.generateSecretKey((short)(keySizeBits/8));
+				finalizer.derivedKey=ka.generateSecretKey((short)(keySizeBits/8));
 			valid=true;
 		}
 		catch (NoSuchAlgorithmException | NoSuchProviderException e) {
@@ -217,7 +217,7 @@ public class EllipticCurveDiffieHellmanAlgorithm extends KeyAgreement {
 	}
 
 	public SymmetricSecretKey getDerivedKey() {
-		return derivedKey;
+		return finalizer.derivedKey;
 	}
 
 	@Override

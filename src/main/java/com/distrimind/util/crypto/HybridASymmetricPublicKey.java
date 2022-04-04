@@ -78,7 +78,11 @@ public class HybridASymmetricPublicKey extends AbstractKey implements IHybridKey
 		this.nonPQCPublicKey = nonPQCPublicKey;
 		this.PQCPublicKey = PQCPublicKey;
 	}
-
+	private void checkNotDestroyed()
+	{
+		if (isDestroyed())
+			throw new IllegalAccessError();
+	}
 	@Override
 	public boolean useEncryptionAlgorithm() {
 		return getNonPQCPublicKey().getEncryptionAlgorithmType()!=null;
@@ -92,10 +96,12 @@ public class HybridASymmetricPublicKey extends AbstractKey implements IHybridKey
 
 	@Override
 	public ASymmetricPublicKey getNonPQCPublicKey() {
+		checkNotDestroyed();
 		return nonPQCPublicKey;
 	}
 
 	public ASymmetricPublicKey getPQCPublicKey() {
+		checkNotDestroyed();
 		return PQCPublicKey;
 	}
 
@@ -126,12 +132,12 @@ public class HybridASymmetricPublicKey extends AbstractKey implements IHybridKey
 	@Override
 	public WrappedData encode(boolean includeTimes)
 	{
-
+		checkNotDestroyed();
 		return AbstractKey.encodeHybridKey(nonPQCPublicKey, PQCPublicKey, includeTimes);
 	}
 
 	@Override
-	public void zeroize() {
+	public void clean() {
 		nonPQCPublicKey=null;
 		PQCPublicKey=null;
 	}

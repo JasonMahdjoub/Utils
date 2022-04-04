@@ -241,10 +241,11 @@ public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOu
 	@Override
 	public CommonCipherInputStream getCipherInputStreamForDecryption(final RandomInputStream is, final byte[] associatedData, final int offAD, final int lenAD, final byte[] externalCounter)
 			throws IOException {
+		checkKeysNotCleaned();
 		final AbstractCipher cipher = getCipherInstance();
 
 
-		return new CommonCipherInputStream(allOutputGeneratedIntoDoFinalFunction(), maxEncryptedPartLength, is, includeIV(), iv, getIVSizeBytesWithoutExternalCounter(), getMaxExternalCounterLength(), externalCounter, cipher, associatedData, offAD, lenAD, buffer, supportRandomEncryptionAndRandomDecryption(), getCounterStepInBytes(), maxPlainTextSizeForEncoding) {
+		return new CommonCipherInputStream(allOutputGeneratedIntoDoFinalFunction(), maxEncryptedPartLength, is, includeIV(), iv, getIVSizeBytesWithoutExternalCounter(), getMaxExternalCounterLength(), externalCounter, cipher, associatedData, offAD, lenAD, super.finalizer.buffer, supportRandomEncryptionAndRandomDecryption(), getCounterStepInBytes(), maxPlainTextSizeForEncoding) {
 			@Override
 			protected void initCipherForDecryptionWithIvAndCounter(byte[] iv, int counter) throws IOException {
 				AbstractEncryptionIOAlgorithm.this.initCipherForDecryptionWithIvAndCounter(cipher, iv, counter);
@@ -263,6 +264,11 @@ public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOu
 			@Override
 			protected long getOutputSizeAfterDecryption(long inputLength) throws IOException {
 				return AbstractEncryptionIOAlgorithm.this.getOutputSizeAfterDecryption(inputLength);
+			}
+
+			@Override
+			protected void checkKeysNotCleaned() {
+				AbstractEncryptionIOAlgorithm.this.checkKeysNotCleaned();
 			}
 
 			@Override

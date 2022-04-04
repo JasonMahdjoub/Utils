@@ -1,5 +1,6 @@
 package com.distrimind.util.crypto;
 
+import com.distrimind.util.AutoZeroizable;
 import com.distrimind.util.data_buffers.WrappedSecretData;
 
 /**
@@ -7,7 +8,7 @@ import com.distrimind.util.data_buffers.WrappedSecretData;
  * @version 2.1
  * @since MaDKitLanEdition 4.5.0
  */
-public interface IASymmetricPrivateKey extends IKey, ISecretDecentralizedValue {
+public interface IASymmetricPrivateKey extends IKey, ISecretDecentralizedValue, AutoZeroizable {
 	int MAX_SIZE_IN_BYTES_OF_PRIVATE_KEY_WITH_RSA_FOR_SIGNATURE=HybridASymmetricPrivateKey.MAX_SIZE_IN_BYTES_OF_HYBRID_PRIVATE_KEY_WITH_RSA_FOR_SIGNATURE;
 	int MAX_SIZE_IN_BYTES_OF_PRIVATE_KEY_WITHOUT_RSA_FOR_SIGNATURE=HybridASymmetricPrivateKey.MAX_SIZE_IN_BYTES_OF_HYBRID_PRIVATE_KEY_WITHOUT_RSA_FOR_SIGNATURE;
 	int MAX_SIZE_IN_BYTES_OF_PRIVATE_KEY_FOR_SIGNATURE=HybridASymmetricPrivateKey.MAX_SIZE_IN_BYTES_OF_HYBRID_PRIVATE_KEY_FOR_SIGNATURE;

@@ -53,13 +53,23 @@ import com.distrimind.util.UtilClassLoader;
  * @since Utils 3.10.0
  */
 public abstract class AbstractNewHopeKeyAgreement extends KeyAgreement{
+	protected static final class Finalizer extends Cleaner
+	{
+		protected byte[] shared;
+		private SymmetricSecretKey secretKey=null;
+		@Override
+		protected void performCleanup() {
+			if (shared!=null)
+				Arrays.fill(shared, (byte)0);
+			shared=null;
+			secretKey=null;
+		}
+	}
+	protected final Finalizer finalizer;
 	private final SymmetricEncryptionType encryptionType;
 	private final SymmetricAuthenticatedSignatureType signatureType;
 	protected short agreementSize;
-	protected byte[] shared;
-	private SymmetricSecretKey secretKey=null;
 
-	
 	protected AbstractNewHopeKeyAgreement(SymmetricEncryptionType type, short agreementSize)
 	{
 		super(1, 1);
@@ -69,6 +79,8 @@ public abstract class AbstractNewHopeKeyAgreement extends KeyAgreement{
 
 		if (!type.isPostQuantumAlgorithm((short)(agreementSize*8)))
 			throw new IllegalArgumentException("You must use post quantum compatible algorithms");
+		finalizer=new Finalizer();
+		registerCleaner(finalizer);
 	}
 
 	@Override
@@ -84,37 +96,23 @@ public abstract class AbstractNewHopeKeyAgreement extends KeyAgreement{
 		this.agreementSize=agreementSize;
 		if (!type.isPostQuantumAlgorithm((short)(agreementSize*8)))
 			throw new IllegalArgumentException("You must use post quantum compatible algorithms");
+		finalizer=new Finalizer();
+		registerCleaner(finalizer);
 	}
 	
 	public SymmetricSecretKey getDerivedKey()
 	{
-		if (secretKey==null)
+		if (finalizer.secretKey==null)
 		{
 			if (encryptionType==null)
-				secretKey=new SymmetricSecretKey(signatureType, shared);
+				finalizer.secretKey=new SymmetricSecretKey(signatureType, finalizer.shared);
 			else
-				secretKey=new SymmetricSecretKey(encryptionType, shared);
-			shared=null;
+				finalizer.secretKey=new SymmetricSecretKey(encryptionType, finalizer.shared);
+			finalizer.shared=null;
 		}
-		return secretKey;
+		return finalizer.secretKey;
 	}
 
-	@Override
-	public void zeroize()
-	{
-		if (shared!=null)
-			Arrays.fill(shared, (byte)0);
-		shared=null;
-		secretKey=null;
-	}
-
-	@Override
-	public boolean isDestroyed() {
-		return shared==null && secretKey==null;
-	}
-	
-
-	
     //static final int POLY_SIZE;
     static final int SENDB_BYTES;
     static final Method methodShareB;

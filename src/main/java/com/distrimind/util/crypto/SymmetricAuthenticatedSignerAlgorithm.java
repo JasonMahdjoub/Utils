@@ -63,6 +63,8 @@ public class SymmetricAuthenticatedSignerAlgorithm extends AbstractAuthenticated
 			throw new NullPointerException();
 		if (secretKey == null)
 			throw new NullPointerException();
+		if (secretKey.isCleaned())
+			throw new IllegalArgumentException();
 		this.mac = mac;
 		this.secretKey = secretKey;
 	}
@@ -79,10 +81,16 @@ public class SymmetricAuthenticatedSignerAlgorithm extends AbstractAuthenticated
 	public SymmetricSecretKey getSecretKey() {
 		return secretKey;
 	}
-
+	@Override
+	protected void checkKeysNotCleaned()
+	{
+		if (secretKey.isCleaned())
+			throw new IllegalAccessError();
+	}
 
 	@Override
 	public void init() throws IOException {
+		checkKeysNotCleaned();
 		mac.init(secretKey);
 	}
 
@@ -94,6 +102,7 @@ public class SymmetricAuthenticatedSignerAlgorithm extends AbstractAuthenticated
 
 	@Override
 	public int getSignature(byte[] signature, int off_sig) throws IOException {
+		checkKeysNotCleaned();
 		try {
 			mac.doFinal(signature, off_sig);
 			return secretKey.getAuthenticatedSignatureAlgorithmType().getSignatureSizeInBits() / 8;
@@ -106,6 +115,7 @@ public class SymmetricAuthenticatedSignerAlgorithm extends AbstractAuthenticated
 
 	@Override
 	public byte[] getSignature() throws IOException {
+		checkKeysNotCleaned();
 		try {
 			return mac.doFinal();
 		}

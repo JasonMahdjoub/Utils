@@ -34,6 +34,8 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
+import com.distrimind.util.AutoZeroizable;
+import com.distrimind.util.Cleanable;
 import com.distrimind.util.io.*;
 
 import javax.crypto.Cipher;
@@ -123,6 +125,8 @@ public class ServerASymmetricEncryptionAlgorithm implements IEncryptionInputAlgo
 			this(myKeyPair.getASymmetricPrivateKey());
 		}
 		public HybridServer(HybridASymmetricPrivateKey myPrivateKey) throws IOException{
+			if (myPrivateKey.isCleaned())
+				throw new IllegalArgumentException();
 			this.nonPQCEncryption=new Server(myPrivateKey.getNonPQCPrivateKey());
 			this.PQCEncryption=new Server(myPrivateKey.getPQCPrivateKey());
 			this.myPrivateKey=myPrivateKey;
@@ -151,21 +155,6 @@ public class ServerASymmetricEncryptionAlgorithm implements IEncryptionInputAlgo
 		}
 
 
-		/*static void privDecode(IServer PQCEncryption, IServer nonPQCEncryption, RandomInputStream is, byte[] associatedData, int offAD, int lenAD, RandomOutputStream os, byte[] externalCounter)
-				throws IOException
-		{
-
-
-			RandomByteArrayOutputStream baos=new RandomByteArrayOutputStream();
-			PQCEncryption.decode(is, associatedData, offAD, lenAD, baos, externalCounter);
-
-			byte []b=baos.getBytes();
-
-			os.write(nonPQCEncryption.decode(b, 0, b.length, associatedData, offAD, lenAD, externalCounter));
-
-
-		}*/
-
 		@Override
 		public void decode(RandomInputStream is, byte[] associatedData, int offAD, int lenAD, RandomOutputStream os, int length, byte[] externalCounter) throws IOException {
 			try(RandomInputStream in = getCipherInputStreamForDecryption(is, externalCounter))
@@ -189,6 +178,12 @@ public class ServerASymmetricEncryptionAlgorithm implements IEncryptionInputAlgo
 		@Override
 		public RandomInputStream getCipherInputStreamForDecryption(RandomInputStream is, byte[] associatedData, int offAD, int lenAD, byte[] externalCounter) throws IOException {
 			return nonPQCEncryption.getCipherInputStreamForDecryption(PQCEncryption.getCipherInputStreamForDecryption(is, associatedData, offAD, lenAD, externalCounter), associatedData, offAD, lenAD, externalCounter);
+		}
+
+		@Override
+		public void checkKeysNotCleaned() {
+			if (myPrivateKey.isCleaned())
+				throw new IllegalAccessError();
 		}
 
 
@@ -223,8 +218,19 @@ public class ServerASymmetricEncryptionAlgorithm implements IEncryptionInputAlgo
 
 	}
 
-
-	private static class Server implements IServer, Zeroizable{
+	private final static class ServerFinalizer extends Cleanable.Cleaner
+	{
+		private byte[] buffer=new byte[BUFFER_SIZE];
+		@Override
+		protected void performCleanup() {
+			if (buffer!=null) {
+				Arrays.fill(buffer, (byte) 0);
+				buffer = null;
+			}
+		}
+	}
+	private static class Server implements IServer, AutoZeroizable {
+		private final ServerFinalizer finalizer;
 		private final ASymmetricPrivateKey myPrivateKey;
 
 		private final ASymmetricEncryptionType type;
@@ -232,23 +238,9 @@ public class ServerASymmetricEncryptionAlgorithm implements IEncryptionInputAlgo
 		private final AbstractCipher cipher;
 
 		private final int maxPlainTextSizeForEncoding;
-		protected byte[] buffer=new byte[BUFFER_SIZE];
+
 		private final int maxEncryptedPartLength;
 
-		@Override
-		public void zeroize() {
-			Arrays.fill(buffer, (byte)0);
-			buffer=null;
-		}
-		@Override
-		public boolean isDestroyed() {
-			return buffer==null;
-		}
-		@SuppressWarnings("deprecation")
-		@Override
-		protected void finalize() {
-			zeroize();
-		}
 
 		public Server(ASymmetricKeyPair myKeyPair)
 				throws IOException {
@@ -259,6 +251,9 @@ public class ServerASymmetricEncryptionAlgorithm implements IEncryptionInputAlgo
 
 			if (myPrivateKey == null)
 				throw new NullPointerException("myKeyPair");
+			if (myPrivateKey.isCleaned())
+				throw new IllegalArgumentException();
+			finalizer=new ServerFinalizer();
 			try {
 				this.type = myPrivateKey.getEncryptionAlgorithmType();
 				this.myPrivateKey = myPrivateKey;
@@ -267,6 +262,7 @@ public class ServerASymmetricEncryptionAlgorithm implements IEncryptionInputAlgo
 				maxPlainTextSizeForEncoding = myPrivateKey.getMaxBlockSize();
 				maxEncryptedPartLength = cipher.getOutputSize(maxPlainTextSizeForEncoding);
 				initCipherForDecryption(cipher, null, null);
+				registerCleaner(finalizer);
 			} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
 				throw new IOException();
 			}
@@ -320,12 +316,16 @@ public class ServerASymmetricEncryptionAlgorithm implements IEncryptionInputAlgo
 			return getCipherInputStreamForDecryption(is, null, 0, 0, externalCounter);
 		}
 
-
+		@Override
+		public void checkKeysNotCleaned() {
+			if (myPrivateKey.isCleaned())
+				throw new IllegalAccessError();
+		}
 		@Override
 		public CommonCipherInputStream getCipherInputStreamForDecryption(final RandomInputStream is, byte[] associatedData, int offAD, final int lenAD, final byte[] externalCounter)
 				throws IOException {
 
-			return new CommonCipherInputStream(false, maxEncryptedPartLength, is, false, null, 0, (byte)0, externalCounter, cipher, associatedData, offAD, lenAD, buffer, false, 0, maxPlainTextSizeForEncoding) {
+			return new CommonCipherInputStream(false, maxEncryptedPartLength, is, false, null, 0, (byte)0, externalCounter, cipher, associatedData, offAD, lenAD, finalizer.buffer, false, 0, maxPlainTextSizeForEncoding) {
 				@Override
 				protected void initCipherForDecryptionWithIvAndCounter(byte[] iv, int counter) throws IOException {
 					Server.this.initCipherForDecryption(cipher, iv, externalCounter);
@@ -344,6 +344,11 @@ public class ServerASymmetricEncryptionAlgorithm implements IEncryptionInputAlgo
 				@Override
 				protected long getOutputSizeAfterDecryption(long inputLength) throws IOException {
 					return Server.this.getOutputSizeAfterDecryption(inputLength);
+				}
+
+				@Override
+				protected void checkKeysNotCleaned() {
+					Server.this.checkKeysNotCleaned();
 				}
 
 				@Override
@@ -530,6 +535,11 @@ public class ServerASymmetricEncryptionAlgorithm implements IEncryptionInputAlgo
 	@Override
 	public void initCipherForDecryptionWithIv(AbstractCipher cipher, byte[] iv) throws IOException {
 		initCipherForDecryption(cipher, iv, null);
+	}
+
+	@Override
+	public void checkKeysNotCleaned() {
+		server.checkKeysNotCleaned();
 	}
 
 

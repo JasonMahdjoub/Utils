@@ -35,6 +35,9 @@ The fact that you are presently reading this means that you have had
 knowledge of the CeCILL-C license and that you accept its terms.
  */
 
+import com.distrimind.util.AutoZeroizable;
+import com.distrimind.util.Cleanable;
+import com.distrimind.util.Zeroizable;
 import com.distrimind.util.io.*;
 import com.distrimind.bouncycastle.crypto.AsymmetricCipherKeyPair;
 import com.distrimind.bouncycastle.crypto.Digest;
@@ -105,35 +108,41 @@ public class BCMcElieceCipher extends AbstractCipher{
 	}
 
 	private static final int MAX_GF2MATRIX_SIZE=30*1024*1024;
-
-	static class PrivateKey implements AsymmetricPrivateKey, SecureExternalizableWithoutInnerSizeControl, Zeroizable {
+	private final static class PrivateKeyFinalizer extends Cleanable.Cleaner
+	{
 		private McEliecePrivateKeyParameters privateKeyParameters;
+		@Override
+		protected void performCleanup() {
+			if (privateKeyParameters!=null)
+			{
+				for (int[] a : privateKeyParameters.getH().getIntArray())
+					Arrays.fill(a, 0);
+			}
+		}
+	}
+	static class PrivateKey implements AsymmetricPrivateKey, SecureExternalizableWithoutInnerSizeControl, AutoZeroizable {
+
 		private volatile byte []encoded=null;
 		private volatile Integer hashCode=null;
-		private boolean destroyed=false;
+		private final PrivateKeyFinalizer finalizer;
+
 		PrivateKey()
 		{
-			privateKeyParameters=null;
-		}
-
-		@Override
-		public boolean isDestroyed() {
-			return destroyed;
-		}
-
-		@Override
-		public void destroy() {
-			zeroize();
+			finalizer=new PrivateKeyFinalizer();
+			finalizer.privateKeyParameters=null;
+			registerCleaner(finalizer);
 		}
 
 		public McEliecePrivateKeyParameters getPrivateKeyParameters() {
-			return privateKeyParameters;
+			return finalizer.privateKeyParameters;
 		}
 
 		PrivateKey(McEliecePrivateKeyParameters privateKeyParameters) {
 			if (privateKeyParameters==null)
 				throw new NullPointerException();
-			this.privateKeyParameters = privateKeyParameters;
+			finalizer=new PrivateKeyFinalizer();
+			this.finalizer.privateKeyParameters = privateKeyParameters;
+			registerCleaner(finalizer);
 		}
 
 		@Override
@@ -177,25 +186,26 @@ public class BCMcElieceCipher extends AbstractCipher{
 		@Override
 		public void writeExternal(SecuredObjectOutputStream out) throws IOException {
 
-			out.writeBytesArray(privateKeyParameters.getField().getEncoded(), false, Short.MAX_VALUE);
-			out.writeBytesArray(privateKeyParameters.getGoppaPoly().getEncoded(), false, Short.MAX_VALUE);
-			out.writeBytesArray(privateKeyParameters.getH().getEncoded(), false, MAX_GF2MATRIX_SIZE);
-			out.writeBytesArray(privateKeyParameters.getP1().getEncoded(), false, Short.MAX_VALUE);
-			out.writeBytesArray(privateKeyParameters.getP2().getEncoded(), false, Short.MAX_VALUE);
-			out.writeBytesArray(privateKeyParameters.getSInv().getEncoded(), false, MAX_GF2MATRIX_SIZE);
-			PolynomialGF2mSmallM[] qinv=privateKeyParameters.getQInv();
+			out.writeBytesArray(finalizer.privateKeyParameters.getField().getEncoded(), false, Short.MAX_VALUE);
+			out.writeBytesArray(finalizer.privateKeyParameters.getGoppaPoly().getEncoded(), false, Short.MAX_VALUE);
+			out.writeBytesArray(finalizer.privateKeyParameters.getH().getEncoded(), false, MAX_GF2MATRIX_SIZE);
+			out.writeBytesArray(finalizer.privateKeyParameters.getP1().getEncoded(), false, Short.MAX_VALUE);
+			out.writeBytesArray(finalizer.privateKeyParameters.getP2().getEncoded(), false, Short.MAX_VALUE);
+			out.writeBytesArray(finalizer.privateKeyParameters.getSInv().getEncoded(), false, MAX_GF2MATRIX_SIZE);
+			PolynomialGF2mSmallM[] qinv=finalizer.privateKeyParameters.getQInv();
 			if (qinv.length>Short.MAX_VALUE)
 				throw new IOException();
 			out.writeShort(qinv.length);
 			for (PolynomialGF2mSmallM polynomialGF2mSmallM : qinv)
 				out.writeBytesArray(polynomialGF2mSmallM.getEncoded(), false, Short.MAX_VALUE);
-			out.writeInt(privateKeyParameters.getK());
-			out.writeInt(privateKeyParameters.getN());
+			out.writeInt(finalizer.privateKeyParameters.getK());
+			out.writeInt(finalizer.privateKeyParameters.getN());
 		}
 
 		@Override
 		public void readExternal(SecuredObjectInputStream in) throws IOException {
 			try {
+				finalizer.performCleanup();
 				byte[] field=in.readBytesArray(false, Short.MAX_VALUE);
 				byte[] goppaPoly=in.readBytesArray(false, Short.MAX_VALUE);
 				byte[] h=in.readBytesArray(false, MAX_GF2MATRIX_SIZE);
@@ -210,7 +220,7 @@ public class BCMcElieceCipher extends AbstractCipher{
 					qinv[i]=in.readBytesArray(false, Short.MAX_VALUE);
 				int k=in.readInt();
 				int n=in.readInt();
-				privateKeyParameters=new McEliecePrivateKeyParameters(n, k, field, goppaPoly, sinv, p1, p2, h, qinv);
+				finalizer.privateKeyParameters=new McEliecePrivateKeyParameters(n, k, field, goppaPoly, sinv, p1, p2, h, qinv);
 			}
 			catch(Exception e)
 			{
@@ -218,48 +228,42 @@ public class BCMcElieceCipher extends AbstractCipher{
 			}
 		}
 
+
+	}
+	private static final class PrivateKeyCAA2Finalizer extends Cleanable.Cleaner
+	{
+		private McElieceCCA2PrivateKeyParameters privateKeyParameters;
 		@Override
-		public void zeroize()
-		{
+		protected void performCleanup() {
 			if (privateKeyParameters!=null)
 			{
-				destroyed=true;
 				for (int[] a : privateKeyParameters.getH().getIntArray())
 					Arrays.fill(a, 0);
 			}
 		}
-
 	}
-
-	static class PrivateKeyCCA2 implements AsymmetricPrivateKey, SecureExternalizableWithoutInnerSizeControl, Zeroizable {
-		private McElieceCCA2PrivateKeyParameters privateKeyParameters;
+	static class PrivateKeyCCA2 implements AsymmetricPrivateKey, SecureExternalizableWithoutInnerSizeControl, AutoZeroizable {
+		private final PrivateKeyCAA2Finalizer finalizer;
 		private volatile byte []encoded=null;
 		private volatile Integer hashCode=null;
-		private boolean destroyed=false;
 
 		public McElieceCCA2PrivateKeyParameters getPrivateKeyParameters() {
-			return privateKeyParameters;
+			return finalizer.privateKeyParameters;
 		}
 
 		PrivateKeyCCA2()
 		{
-			privateKeyParameters=null;
+			finalizer=new PrivateKeyCAA2Finalizer();
+			finalizer.privateKeyParameters=null;
+			registerCleaner(finalizer);
 		}
 
 		PrivateKeyCCA2(McElieceCCA2PrivateKeyParameters privateKeyParameters) {
 			if (privateKeyParameters==null)
 				throw new NullPointerException();
-			this.privateKeyParameters = privateKeyParameters;
-		}
-
-		@Override
-		public void destroy() {
-			zeroize();
-		}
-
-		@Override
-		public boolean isDestroyed() {
-			return destroyed;
+			this.finalizer=new PrivateKeyCAA2Finalizer();
+			this.finalizer.privateKeyParameters = privateKeyParameters;
+			registerCleaner(finalizer);
 		}
 
 		@Override
@@ -304,28 +308,17 @@ public class BCMcElieceCipher extends AbstractCipher{
 				writeExternal(out, true);
 		}
 
-		@Override
-		public void zeroize()
-		{
-			if (privateKeyParameters!=null)
-			{
-				destroyed=true;
-				for (int[] a : privateKeyParameters.getH().getIntArray())
-					Arrays.fill(a, 0);
-			}
-		}
-
 
 		public void writeExternal(SecuredObjectOutputStream out, boolean writeDigest) throws IOException {
 
-			out.writeBytesArray(privateKeyParameters.getField().getEncoded(), false, Short.MAX_VALUE);
-			out.writeBytesArray(privateKeyParameters.getGoppaPoly().getEncoded(), false, Short.MAX_VALUE);
-			out.writeBytesArray(privateKeyParameters.getH().getEncoded(), false, MAX_GF2MATRIX_SIZE);
-			out.writeBytesArray(privateKeyParameters.getP().getEncoded(), false, Short.MAX_VALUE);
+			out.writeBytesArray(finalizer.privateKeyParameters.getField().getEncoded(), false, Short.MAX_VALUE);
+			out.writeBytesArray(finalizer.privateKeyParameters.getGoppaPoly().getEncoded(), false, Short.MAX_VALUE);
+			out.writeBytesArray(finalizer.privateKeyParameters.getH().getEncoded(), false, MAX_GF2MATRIX_SIZE);
+			out.writeBytesArray(finalizer.privateKeyParameters.getP().getEncoded(), false, Short.MAX_VALUE);
 			if (writeDigest)
-				out.writeString(privateKeyParameters.getDigest(), false, 512);
-			out.writeInt(privateKeyParameters.getK());
-			out.writeInt(privateKeyParameters.getN());
+				out.writeString(finalizer.privateKeyParameters.getDigest(), false, 512);
+			out.writeInt(finalizer.privateKeyParameters.getK());
+			out.writeInt(finalizer.privateKeyParameters.getN());
 		}
 		@Override
 		public void readExternal(SecuredObjectInputStream in) throws IOException {
@@ -333,6 +326,7 @@ public class BCMcElieceCipher extends AbstractCipher{
 		}
 		public void readExternal(SecuredObjectInputStream in, ASymmetricEncryptionType type) throws IOException {
 			String digest;
+			finalizer.performCleanup();
 			if (type.name().contains("SHA256"))
 				digest="SHA-256";
 			else if (type.name().contains("SHA384"))
@@ -356,7 +350,7 @@ public class BCMcElieceCipher extends AbstractCipher{
 				int k=in.readInt();
 				int n=in.readInt();
 
-				privateKeyParameters=new McElieceCCA2PrivateKeyParameters(n, k, field, goppaPoly, h, p, digest);
+				finalizer.privateKeyParameters=new McElieceCCA2PrivateKeyParameters(n, k, field, goppaPoly, h, p, digest);
 
 			}
 			catch(Exception e)
@@ -423,7 +417,7 @@ public class BCMcElieceCipher extends AbstractCipher{
 			return hashCode;
 		}
 		@Override
-		public void zeroize()
+		public void clean()
 		{
 			if (publicKeyParameters!=null)
 			{
@@ -473,7 +467,7 @@ public class BCMcElieceCipher extends AbstractCipher{
 			publicKeyParameters=null;
 		}
 		@Override
-		public void zeroize()
+		public void clean()
 		{
 			if (publicKeyParameters!=null)
 			{
@@ -852,7 +846,7 @@ public class BCMcElieceCipher extends AbstractCipher{
 		try {
 			if (cca2) {
 				if (key instanceof ASymmetricPrivateKey) {
-					mcElieceCipher.init(encrypt, ((PrivateKeyCCA2) key.toBouncyCastleKey()).privateKeyParameters);
+					mcElieceCipher.init(encrypt, ((PrivateKeyCCA2) key.toBouncyCastleKey()).finalizer.privateKeyParameters);
 				} else {
 
 					mcElieceCipher.init(encrypt, new ParametersWithRandom(((PublicKeyCCA2) key.toBouncyCastleKey()).publicKeyParameters, random));
@@ -860,7 +854,7 @@ public class BCMcElieceCipher extends AbstractCipher{
 			} else {
 
 				if (key instanceof ASymmetricPrivateKey) {
-					mcElieceCipher.init(encrypt, ((PrivateKey) key.toBouncyCastleKey()).privateKeyParameters);
+					mcElieceCipher.init(encrypt, ((PrivateKey) key.toBouncyCastleKey()).finalizer.privateKeyParameters);
 				} else {
 					mcElieceCipher.init(encrypt, new ParametersWithRandom(((PublicKey) key.toBouncyCastleKey()).publicKeyParameters));
 				}

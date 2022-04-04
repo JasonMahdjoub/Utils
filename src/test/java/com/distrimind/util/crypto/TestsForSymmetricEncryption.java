@@ -266,7 +266,7 @@ public class TestsForSymmetricEncryption {
 		System.out.println(encryptedSecretKeyString);
 		decodedSecretKey=keyWrapperAlgorithm.unwrap(encryptedSecretKeyString);
 		Assert.assertEquals(decodedSecretKey, secretKey);
-		password.zeroize();
+		password.clean();
 
 	}
 

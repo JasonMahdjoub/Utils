@@ -134,6 +134,8 @@ public enum SymmetricKeyWrapperType {
 			throw new NullPointerException();
 		if (passwordHashType==null)
 			throw new NullPointerException();
+		if (password.isCleaned())
+			throw new IllegalArgumentException();
 		PasswordHash ph = new PasswordHash(passwordHashType, new SecureRandom(), (byte)16, (byte)0);
 		return symmetricEncryptionType.generateSecretKeyFromHashedPassword(ph.hash(password, null), (short)256);
 	}
@@ -145,6 +147,10 @@ public enum SymmetricKeyWrapperType {
 		try {
 			//CodeProvider.ensureProviderLoaded(provider);
 			if (key.getAuthenticatedSignatureAlgorithmType() != null)
+				throw new IllegalArgumentException();
+			if (key.isCleaned())
+				throw new IllegalArgumentException();
+			if (keyToWrap.isCleaned())
 				throw new IllegalArgumentException();
 			if ((key.getEncryptionAlgorithmType() != null && ((provider == CodeProvider.GNU_CRYPTO) != (key.getEncryptionAlgorithmType().getCodeProviderForEncryption() == CodeProvider.GNU_CRYPTO)))
 					|| (keyToWrap.getAuthenticatedSignatureAlgorithmType() != null && (provider == CodeProvider.GNU_CRYPTO) != (keyToWrap.getAuthenticatedSignatureAlgorithmType().getCodeProviderForSignature() == CodeProvider.GNU_CRYPTO))
@@ -192,6 +198,10 @@ public enum SymmetricKeyWrapperType {
 
 
 	SymmetricSecretKey unwrapKey(SymmetricSecretKey key, WrappedEncryptedSymmetricSecretKey keyToUnwrap) throws IOException {
+		if (key.isCleaned())
+			throw new IllegalArgumentException();
+		if (keyToUnwrap.isCleaned())
+			throw new IllegalArgumentException();
 		try {
 			if (!algorithmName.startsWith(key.getEncryptionAlgorithmType().getAlgorithmName()))
 				throw new IllegalArgumentException("The key must be compatible with algorithm " + algorithmName);
@@ -209,6 +219,8 @@ public enum SymmetricKeyWrapperType {
 	}
 	@SuppressWarnings("ConstantConditions")
 	private SymmetricSecretKey unwrapKey(SymmetricSecretKey key, byte[] keyToUnwrap, SymmetricEncryptionType encryptionType, SymmetricAuthenticatedSignatureType signatureType, short keySize) throws IOException {
+		if (key.isCleaned())
+			throw new IllegalArgumentException();
 		try {
 			if ((key.getAuthenticatedSignatureAlgorithmType() != null && ((provider == CodeProvider.GNU_CRYPTO) != (key.getAuthenticatedSignatureAlgorithmType().getCodeProviderForSignature() == CodeProvider.GNU_CRYPTO)))
 					|| (key.getEncryptionAlgorithmType() != null && ((provider == CodeProvider.GNU_CRYPTO) != (key.getEncryptionAlgorithmType().getCodeProviderForEncryption() == CodeProvider.GNU_CRYPTO)))

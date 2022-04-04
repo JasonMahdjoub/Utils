@@ -44,10 +44,10 @@ import java.util.Collection;
 
 /**
  * @author Jason Mahdjoub
- * @version 1.2
+ * @version 1.3
  * @since Utils 4.3.0
  */
-public interface DecentralizedValue extends Serializable {
+public interface DecentralizedValue {
 
 	//int MAX_SIZE_IN_BYTES_OF_NON_HYBRID_PRIVATE_KEY = MAX_SIZE_IN_BYTES_OF_NON_HYBRID_PRIVATE_KEY_FOR_ENCRYPTION;
 	int MAX_SIZE_IN_BYTES_OF_NON_HYBRID_KEY_PAIR = ASymmetricEncryptionType.MAX_SIZE_IN_BYTES_OF_NON_HYBRID_PUBLIC_KEY_FOR_ENCRYPTION + ASymmetricEncryptionType.MAX_SIZE_IN_BYTES_OF_NON_HYBRID_PRIVATE_KEY_FOR_ENCRYPTION +ASymmetricAuthenticatedSignatureType.META_DATA_SIZE_IN_BYTES_FOR_NON_HYBRID_KEY_PAIR;

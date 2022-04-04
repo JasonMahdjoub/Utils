@@ -57,10 +57,24 @@ public class HybridASymmetricKeyPair extends AbstractKeyPair<HybridASymmetricPri
 	public static final int MAX_SIZE_IN_BYTES_OF_HYBRID_KEY_PAIR_FOR_ENCRYPTION= ASymmetricEncryptionType.MAX_SIZE_IN_BYTES_OF_HYBRID_KEY_PAIR_FOR_ENCRYPTION;
 
 
-
-	private HybridASymmetricPrivateKey privateKey;
-	private HybridASymmetricPublicKey publicKey;
-
+	private static final class Finalizer extends Cleaner
+	{
+		private HybridASymmetricPrivateKey privateKey;
+		private HybridASymmetricPublicKey publicKey;
+		@Override
+		protected void performCleanup() {
+			if (privateKey!=null) {
+				privateKey = null;
+			}
+			publicKey = null;
+		}
+	}
+	private final Finalizer finalizer;
+	private void checkNotDestroyed()
+	{
+		if (isCleaned())
+			throw new IllegalAccessError();
+	}
 
 	public HybridASymmetricKeyPair(ASymmetricKeyPair nonPQCKeyPair, ASymmetricKeyPair PQCKeyPair) {
 		if (nonPQCKeyPair==null)
@@ -78,8 +92,10 @@ public class HybridASymmetricKeyPair extends AbstractKeyPair<HybridASymmetricPri
 				&& !PQCKeyPair.getAuthenticatedSignatureAlgorithmType().isPostQuantumAlgorithm())
 				|| (PQCKeyPair.getEncryptionAlgorithmType()!=null && !PQCKeyPair.getEncryptionAlgorithmType().isPostQuantumAlgorithm()))
 			throw new IllegalArgumentException("PQCPrivateKey must be a post quantum algorithm");
-		privateKey=new HybridASymmetricPrivateKey(nonPQCKeyPair.getASymmetricPrivateKey(), PQCKeyPair.getASymmetricPrivateKey());
-		publicKey=new HybridASymmetricPublicKey(nonPQCKeyPair.getASymmetricPublicKey(), PQCKeyPair.getASymmetricPublicKey());
+		finalizer=new Finalizer();
+		finalizer.privateKey=new HybridASymmetricPrivateKey(nonPQCKeyPair.getASymmetricPrivateKey(), PQCKeyPair.getASymmetricPrivateKey());
+		finalizer.publicKey=new HybridASymmetricPublicKey(nonPQCKeyPair.getASymmetricPublicKey(), PQCKeyPair.getASymmetricPublicKey());
+		registerCleaner(finalizer);
 	}
 	public HybridASymmetricKeyPair(HybridASymmetricPrivateKey privateKey, HybridASymmetricPublicKey publicKey) {
 		if (privateKey==null)
@@ -92,8 +108,10 @@ public class HybridASymmetricKeyPair extends AbstractKeyPair<HybridASymmetricPri
 		if ((privateKey.getPQCPrivateKey().getEncryptionAlgorithmType()==null)!=(publicKey.getPQCPublicKey().getEncryptionAlgorithmType()==null)
 				|| (privateKey.getPQCPrivateKey().getAuthenticatedSignatureAlgorithmType()==null)!=(publicKey.getPQCPublicKey().getAuthenticatedSignatureAlgorithmType()==null))
 			throw new IllegalArgumentException("The given keys must be used both for encryption or both for signature");
-		this.privateKey=privateKey;
-		this.publicKey=publicKey;
+		finalizer=new Finalizer();
+		this.finalizer.privateKey=privateKey;
+		this.finalizer.publicKey=publicKey;
+		registerCleaner(finalizer);
 	}
 
 	static HybridASymmetricKeyPair decodeHybridKey(byte[] encoded, int off, int len, boolean fillArrayWithZerosWhenDecoded)
@@ -147,16 +165,16 @@ public class HybridASymmetricKeyPair extends AbstractKeyPair<HybridASymmetricPri
 	@Override
 	public WrappedSecretData encode(boolean includeTimes)
 	{
-
-		WrappedSecretData encodedPrivKey=privateKey.encode();
-		WrappedData encodedPubKey=publicKey.encode(includeTimes);
+		checkNotDestroyed();
+		WrappedSecretData encodedPrivKey=finalizer.privateKey.encode();
+		WrappedData encodedPubKey=finalizer.publicKey.encode(includeTimes);
 
 		byte[] res=new byte[encodedPrivKey.getBytes().length+encodedPubKey.getBytes().length+4];
 		res[0]= AbstractKey.IS_HYBRID_KEY_PAIR;
 		Bits.putUnsignedInt(res, 1, encodedPrivKey.getBytes().length, 3);
 		System.arraycopy(encodedPrivKey.getBytes(), 0, res, 4, encodedPrivKey.getBytes().length );
 		System.arraycopy(encodedPubKey.getBytes(), 0, res, 4+encodedPrivKey.getBytes().length, encodedPubKey.getBytes().length );
-		encodedPrivKey.zeroize();
+		encodedPrivKey.clean();
 
 		return new WrappedSecretData(res);
 
@@ -175,37 +193,29 @@ public class HybridASymmetricKeyPair extends AbstractKeyPair<HybridASymmetricPri
 
 	@Override
 	public long getTimeExpirationUTC() {
-		return publicKey.getTimeExpirationUTC();
-	}
-
-	@Override
-	public void zeroize() {
-		privateKey=null;
-		publicKey=null;
-	}
-	@Override
-	public boolean isDestroyed() {
-		return privateKey==null && publicKey==null;
+		return finalizer.publicKey.getTimeExpirationUTC();
 	}
 
 	@Override
 	public HybridASymmetricPrivateKey getASymmetricPrivateKey() {
-		return privateKey;
+		checkNotDestroyed();
+		return finalizer.privateKey;
 	}
 
 	@Override
 	public HybridASymmetricPublicKey getASymmetricPublicKey() {
-		return publicKey;
+		checkNotDestroyed();
+		return finalizer.publicKey;
 	}
 
 	@Override
 	public boolean useEncryptionAlgorithm() {
-		return publicKey.getNonPQCPublicKey().getEncryptionAlgorithmType()!=null;
+		return finalizer.publicKey.getNonPQCPublicKey().getEncryptionAlgorithmType()!=null;
 	}
 
 	@Override
 	public boolean useAuthenticatedSignatureAlgorithm() {
-		return publicKey.getNonPQCPublicKey().getAuthenticatedSignatureAlgorithmType()!=null;
+		return finalizer.publicKey.getNonPQCPublicKey().getAuthenticatedSignatureAlgorithmType()!=null;
 	}
 
 
@@ -219,12 +229,14 @@ public class HybridASymmetricKeyPair extends AbstractKeyPair<HybridASymmetricPri
 	@Override
 	public ASymmetricKeyPair getNonPQCKeyPair()
 	{
-		return new ASymmetricKeyPair(privateKey.getNonPQCPrivateKey(), publicKey.getNonPQCPublicKey());
+		checkNotDestroyed();
+		return new ASymmetricKeyPair(finalizer.privateKey.getNonPQCPrivateKey(), finalizer.publicKey.getNonPQCPublicKey());
 	}
 
 	public ASymmetricKeyPair getPQCKeyPair()
 	{
-		return new ASymmetricKeyPair(privateKey.getPQCPrivateKey(), publicKey.getPQCPublicKey());
+		checkNotDestroyed();
+		return new ASymmetricKeyPair(finalizer.privateKey.getPQCPrivateKey(), finalizer.publicKey.getPQCPublicKey());
 	}
 
 	@Override
@@ -232,17 +244,17 @@ public class HybridASymmetricKeyPair extends AbstractKeyPair<HybridASymmetricPri
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
 		HybridASymmetricKeyPair that = (HybridASymmetricKeyPair) o;
-		return privateKey.equals(that.privateKey) &&
-				publicKey.equals(that.publicKey);
+		return finalizer.privateKey.equals(that.finalizer.privateKey) &&
+				finalizer.publicKey.equals(that.finalizer.publicKey);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(privateKey, publicKey);
+		return Objects.hash(finalizer.privateKey, finalizer.publicKey);
 	}
 
 	@Override
 	public boolean areTimesValid() {
-		return publicKey.areTimesValid();
+		return finalizer.publicKey.areTimesValid();
 	}
 }

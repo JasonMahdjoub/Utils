@@ -68,8 +68,11 @@ public class Utils {
 			VERSION.addCreator(new Person("mahdjoub", "jason"))
 					.addDeveloper(new PersonDeveloper("mahdjoub", "jason", "2016-01-04"))
 					.addDescription(
-							new Description((short)5, (short)23, (short)0, Version.Type.STABLE, (short)0, "2022-03-30")
-									.addItem(NEW_FEATURE, "Add class Cleanable that use Cleanable java API when JVM version is greater than Java 8 and that use standard finalize method otherwise.")
+							new Description((short)5, (short)23, (short)0, Version.Type.STABLE, (short)0, "2022-04-04")
+									.addItem(NEW_FEATURE, "Add interface Cleanable that use Cleanable java API when JVM version is greater than Java 8 and that use standard finalize method otherwise.")
+									.addItem(INTERNAL_CHANGE, "Remove finalize method into all key classes, and make them using Cleanable API")
+									.addItem(SECURITY_FIX, "Possible bad use of keys, if theses keys have been zeroized. Now an exception is thrown if these keys are used after being zeroized ")
+
 					)
 					.addDescription(
 							new Description((short)5, (short)22, (short)4, Version.Type.STABLE, (short)0, "2022-03-29")

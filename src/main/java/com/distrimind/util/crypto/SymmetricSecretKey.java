@@ -58,15 +58,41 @@ public class SymmetricSecretKey extends AbstractKey implements ISecretDecentrali
 	public final static int MAX_SIZE_IN_BYTES_OF_SYMMETRIC_KEY_FOR_SIGNATURE =SymmetricEncryptionType.MAX_SYMMETRIC_KEY_SIZE;
 	public final static int MAX_SIZE_IN_BYTES_OF_SYMMETRIC_KEY =SymmetricEncryptionType.MAX_SYMMETRIC_KEY_SIZE;
 
+	private static final class Finalizer extends Cleaner
+	{
+		private byte[] secretKey;
+		private transient SecretKey javaNativeSecretKey = null;
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -1811177031909192919L;
+		private transient Object gnuSecretKey = null;
 
+		private transient com.distrimind.bcfips.crypto.SymmetricSecretKey bcfipsNativeSecretKey=null;
+		@Override
+		protected void performCleanup() {
+			if (secretKey!=null)
+			{
+				Arrays.fill(secretKey, (byte)0);
+				secretKey=null;
+			}
+			if (javaNativeSecretKey!=null)
+			{
+				if (!javaNativeSecretKey.isDestroyed())
+					Arrays.fill(javaNativeSecretKey.getEncoded(), (byte)0);
+				javaNativeSecretKey=null;
+			}
+			if (gnuSecretKey!=null)
+			{
+				Arrays.fill(GnuFunctions.keyGetEncoded(gnuSecretKey), (byte)0);
+				gnuSecretKey=null;
+			}
+			if (bcfipsNativeSecretKey!=null)
+			{
+				bcfipsNativeSecretKey=null;
+			}
+		}
+	}
 	
+	private final Finalizer finalizer;
 
-	private byte[] secretKey;
 
 	private final short keySizeBits;
 
@@ -75,11 +101,12 @@ public class SymmetricSecretKey extends AbstractKey implements ISecretDecentrali
 
 	private final int hashCode;
 
-	private transient SecretKey javaNativeSecretKey = null;
 
-	private transient Object gnuSecretKey = null;
-	
-	private transient com.distrimind.bcfips.crypto.SymmetricSecretKey bcfipsNativeSecretKey=null;
+	private void checkNotDestroyed()
+	{
+		if (isCleaned())
+			throw new IllegalAccessError();
+	}
 
 	public SymmetricSecretKey getHashedSecretKey(MessageDigestType messageDigestType, long customApplicationCode) throws NoSuchProviderException, NoSuchAlgorithmException {
 		byte[] tab=new byte[8];
@@ -90,19 +117,20 @@ public class SymmetricSecretKey extends AbstractKey implements ISecretDecentrali
 		return getHashedSecretKey(messageDigestType, null);
 	}
 	public SymmetricSecretKey getHashedSecretKey(MessageDigestType messageDigestType, byte[] customApplicationCode) throws NoSuchProviderException, NoSuchAlgorithmException {
-		if (messageDigestType.getDigestLengthInBits()/8<secretKey.length)
+		checkNotDestroyed();
+		if (messageDigestType.getDigestLengthInBits()/8<finalizer.secretKey.length)
 			throw new IllegalArgumentException("The message digest length cannot be lower than the key size");
 		AbstractMessageDigest md=messageDigestType.getMessageDigestInstance();
 		md.reset();
-		md.update(secretKey);
+		md.update(finalizer.secretKey);
 		if (customApplicationCode!=null) {
 			md.update(encryptionType==null?signatureType.name().getBytes():encryptionType.name().getBytes());
 			md.update(customApplicationCode);
 		}
 		byte[] k=md.digest();
-		if (k.length>secretKey.length)
+		if (k.length>finalizer.secretKey.length)
 		{
-			byte[] k2=new byte[secretKey.length];
+			byte[] k2=new byte[finalizer.secretKey.length];
 			Arrays.fill(k2, (byte)0);
 			for (int i=0;i<k.length;i++)
 			{
@@ -122,6 +150,7 @@ public class SymmetricSecretKey extends AbstractKey implements ISecretDecentrali
 		return getDerivedSecretKeyPair(messageDigestType, encryptionType, signatureType);
 	}
 	private SymmetricSecretKeyPair getDerivedSecretKeyPair(MessageDigestType messageDigestType, SymmetricEncryptionType encryptionType, SymmetricAuthenticatedSignatureType signatureType) throws NoSuchProviderException, NoSuchAlgorithmException {
+		checkNotDestroyed();
 		if (messageDigestType.getDigestLengthInBits()/2<keySizeBits)
 			throw new IllegalArgumentException("The message digest digest length must be twice the size the key");
 		if (signatureType==null)
@@ -131,7 +160,7 @@ public class SymmetricSecretKey extends AbstractKey implements ISecretDecentrali
 
 		AbstractMessageDigest md = messageDigestType.getMessageDigestInstance();
 		md.reset();
-		md.update(secretKey);
+		md.update(finalizer.secretKey);
 		byte[] d=md.digest();
 		int keySizeBytes=keySizeBits/8;
 		return new SymmetricSecretKeyPair(
@@ -139,35 +168,7 @@ public class SymmetricSecretKey extends AbstractKey implements ISecretDecentrali
 				new SymmetricSecretKey(signatureType, Arrays.copyOfRange(d, keySizeBytes, keySizeBytes*2)));
 	}
 
-	@Override
-	public void zeroize()
-	{
-		if (secretKey!=null)
-		{
-			Arrays.fill(secretKey, (byte)0);
-			secretKey=null;
-		}
-		if (javaNativeSecretKey!=null)
-		{
-			if (!javaNativeSecretKey.isDestroyed())
-				Arrays.fill(javaNativeSecretKey.getEncoded(), (byte)0);
-			javaNativeSecretKey=null;
-		}
-		if (gnuSecretKey!=null)
-		{
-			Arrays.fill(GnuFunctions.keyGetEncoded(gnuSecretKey), (byte)0);
-			gnuSecretKey=null;
-		}
-		if (bcfipsNativeSecretKey!=null)
-		{
-			bcfipsNativeSecretKey=null;
-		}
-	}
-	@Override
-	public boolean isDestroyed() {
-		return secretKey==null && javaNativeSecretKey==null && gnuSecretKey==null && bcfipsNativeSecretKey==null;
-	}
-	
+
 	SymmetricSecretKey(SymmetricEncryptionType type, byte[] secretKey, short keySize) {
 		this(secretKey, keySize);
 		if (type == null)
@@ -184,7 +185,9 @@ public class SymmetricSecretKey extends AbstractKey implements ISecretDecentrali
 			throw new NullPointerException("type");
 		if (secretKey == null)
 			throw new NullPointerException("secretKey");
-		this.secretKey=secretKey.clone();
+		finalizer=new Finalizer();
+		registerCleaner(finalizer);
+		this.finalizer.secretKey=secretKey.clone();
 		switch (type.getAlgorithmName().toUpperCase()) {
 			case "DES":
 				this.keySizeBits = 56;
@@ -198,7 +201,7 @@ public class SymmetricSecretKey extends AbstractKey implements ISecretDecentrali
 		}
 		this.encryptionType = type;
 		this.signatureType=null;
-		hashCode = Arrays.hashCode(this.secretKey);
+		hashCode = Arrays.hashCode(this.finalizer.secretKey);
 		Arrays.fill(secretKey, (byte)0);
 	}
 	SymmetricSecretKey(SymmetricAuthenticatedSignatureType type, byte[] secretKey, short keySize) {
@@ -214,11 +217,13 @@ public class SymmetricSecretKey extends AbstractKey implements ISecretDecentrali
 			throw new NullPointerException("type");
 		if (secretKey == null)
 			throw new NullPointerException("secretKey");
-		this.secretKey=secretKey.clone();
+		finalizer=new Finalizer();
+		registerCleaner(finalizer);
+		this.finalizer.secretKey=secretKey.clone();
 		this.keySizeBits=(short)(secretKey.length*8);
 		this.encryptionType = null;
 		this.signatureType=type;
-		hashCode = Arrays.hashCode(this.secretKey);
+		hashCode = Arrays.hashCode(this.finalizer.secretKey);
 		Arrays.fill(secretKey, (byte)0);
 	}
 	SymmetricSecretKey(SymmetricEncryptionType type, Object secretKey, short keySize) {
@@ -227,7 +232,7 @@ public class SymmetricSecretKey extends AbstractKey implements ISecretDecentrali
 			throw new IllegalAccessError();
 		this.encryptionType = type;
 		this.signatureType=null;
-		this.gnuSecretKey=secretKey;
+		this.finalizer.gnuSecretKey=secretKey;
 	}
 	
 	
@@ -237,7 +242,7 @@ public class SymmetricSecretKey extends AbstractKey implements ISecretDecentrali
 			throw new IllegalAccessError();
 		this.encryptionType = null;
 		this.signatureType=type;
-		this.gnuSecretKey=secretKey;
+		this.finalizer.gnuSecretKey=secretKey;
 	}
 
 	SymmetricSecretKey(SymmetricEncryptionType type, SecretKey secretKey, short keySize) {
@@ -246,7 +251,7 @@ public class SymmetricSecretKey extends AbstractKey implements ISecretDecentrali
 			throw new IllegalAccessError();
 		this.encryptionType = type;
 		this.signatureType=null;
-		this.javaNativeSecretKey=secretKey;
+		this.finalizer.javaNativeSecretKey=secretKey;
 	}
 	SymmetricSecretKey(SymmetricAuthenticatedSignatureType type, SecretKey secretKey, short keySize) {
 		this(SymmetricEncryptionType.encodeSecretKey(secretKey), keySize);
@@ -254,7 +259,7 @@ public class SymmetricSecretKey extends AbstractKey implements ISecretDecentrali
 			throw new IllegalAccessError();
 		this.encryptionType = null;
 		this.signatureType=type;
-		this.javaNativeSecretKey=secretKey;
+		this.finalizer.javaNativeSecretKey=secretKey;
 	}
 	
 	SymmetricSecretKey(SymmetricEncryptionType type, com.distrimind.bcfips.crypto.SymmetricSecretKey secretKey, short keySize) {
@@ -264,7 +269,7 @@ public class SymmetricSecretKey extends AbstractKey implements ISecretDecentrali
 		this.encryptionType = type;
 		this.signatureType=null;
 		
-		this.bcfipsNativeSecretKey=new com.distrimind.bcfips.crypto.SymmetricSecretKey(getBouncyCastleAlgorithm(), secretKey.getKeyBytes());
+		this.finalizer.bcfipsNativeSecretKey=new com.distrimind.bcfips.crypto.SymmetricSecretKey(getBouncyCastleAlgorithm(), secretKey.getKeyBytes());
 	}
 	
 	SymmetricSecretKey(SymmetricAuthenticatedSignatureType type, com.distrimind.bcfips.crypto.SymmetricSecretKey secretKey, short keySize) {
@@ -273,15 +278,17 @@ public class SymmetricSecretKey extends AbstractKey implements ISecretDecentrali
 			throw new IllegalAccessError();
 		this.encryptionType = null;
 		this.signatureType=type;
-		this.bcfipsNativeSecretKey=new com.distrimind.bcfips.crypto.SymmetricSecretKey(getBouncyCastleAlgorithm(), secretKey.getKeyBytes());
+		this.finalizer.bcfipsNativeSecretKey=new com.distrimind.bcfips.crypto.SymmetricSecretKey(getBouncyCastleAlgorithm(), secretKey.getKeyBytes());
 	}
 
 	private SymmetricSecretKey(byte[] secretKey, short keySize) {
 		if (secretKey == null)
 			throw new NullPointerException("secretKey");
-		this.secretKey = secretKey;
+		finalizer=new Finalizer();
+		registerCleaner(finalizer);
+		this.finalizer.secretKey = secretKey;
 		this.keySizeBits = keySize;
-		hashCode = Arrays.hashCode(this.secretKey);
+		hashCode = Arrays.hashCode(this.finalizer.secretKey);
 	}
 
 	static final int ENCODED_TYPE_SIZE;
@@ -318,8 +325,9 @@ public class SymmetricSecretKey extends AbstractKey implements ISecretDecentrali
 
 	@Override
 	public WrappedSecretData encode() {
+		checkNotDestroyed();
 	    int codedTypeSize=ENCODED_TYPE_SIZE;
-		byte[] tab = new byte[2+codedTypeSize+secretKey.length];
+		byte[] tab = new byte[2+codedTypeSize+finalizer.secretKey.length];
 		if (keySizeBits<56)
 		    throw new InternalError();
         if (keySizeBits>maxKeySizeBits(8))
@@ -327,7 +335,7 @@ public class SymmetricSecretKey extends AbstractKey implements ISecretDecentrali
 		tab[0]=encryptionType==null?(byte)1:(byte)0;
 		Bits.putUnsignedInt(tab, 1, encryptionType==null?signatureType.ordinal():encryptionType.ordinal(), codedTypeSize);
         tab[codedTypeSize+1]=(byte)encodeKeySizeBits(keySizeBits);
-        System.arraycopy(secretKey, 0, tab, codedTypeSize+2, secretKey.length);
+        System.arraycopy(finalizer.secretKey, 0, tab, codedTypeSize+2, finalizer.secretKey.length);
         return new WrappedSecretData(tab);
 	}
 
@@ -344,7 +352,7 @@ public class SymmetricSecretKey extends AbstractKey implements ISecretDecentrali
 			return true;
 		if (o instanceof SymmetricSecretKey) {
 			SymmetricSecretKey other = ((SymmetricSecretKey) o);
-			boolean b=com.distrimind.bouncycastle.util.Arrays.constantTimeAreEqual(secretKey, other.secretKey);
+			boolean b=com.distrimind.bouncycastle.util.Arrays.constantTimeAreEqual(finalizer.secretKey, other.finalizer.secretKey);
 			b=encryptionType == other.encryptionType && b;
 			b=signatureType == other.signatureType && b;
 			return b;
@@ -371,24 +379,27 @@ public class SymmetricSecretKey extends AbstractKey implements ISecretDecentrali
 
 	@Override
 	public Object toGnuKey() {
-		if (gnuSecretKey == null)
-			gnuSecretKey = SymmetricEncryptionType.decodeGnuSecretKey(secretKey, encryptionType==null?signatureType.getAlgorithmName():encryptionType.getAlgorithmName());
+		checkNotDestroyed();
+		if (finalizer.gnuSecretKey == null)
+			finalizer.gnuSecretKey = SymmetricEncryptionType.decodeGnuSecretKey(finalizer.secretKey, encryptionType==null?signatureType.getAlgorithmName():encryptionType.getAlgorithmName());
 
-		return gnuSecretKey;
+		return finalizer.gnuSecretKey;
 	}
 
 	@Override
 	public SecretKey toJavaNativeKey() {
-		if (javaNativeSecretKey == null)
-			javaNativeSecretKey = SymmetricEncryptionType.decodeNativeSecretKey(secretKey, encryptionType==null?signatureType.getAlgorithmName():encryptionType.getAlgorithmName());
+		checkNotDestroyed();
+		if (finalizer.javaNativeSecretKey == null)
+			finalizer.javaNativeSecretKey = SymmetricEncryptionType.decodeNativeSecretKey(finalizer.secretKey, encryptionType==null?signatureType.getAlgorithmName():encryptionType.getAlgorithmName());
 
-		return javaNativeSecretKey;
+		return finalizer.javaNativeSecretKey;
 	}
 
 	@Override
     public WrappedSecretData getKeyBytes()
 	{
-		return new WrappedSecretData(secretKey.clone());
+		checkNotDestroyed();
+		return new WrappedSecretData(finalizer.secretKey.clone());
 	}
 
 	@Override
@@ -421,11 +432,11 @@ public class SymmetricSecretKey extends AbstractKey implements ISecretDecentrali
 	
 	@Override
 	public com.distrimind.bcfips.crypto.SymmetricSecretKey toBouncyCastleKey() {
+		checkNotDestroyed();
+		if (finalizer.bcfipsNativeSecretKey == null)
+			finalizer.bcfipsNativeSecretKey = SymmetricEncryptionType.decodeBCSecretKey(getBouncyCastleAlgorithm(), finalizer.secretKey);
 		
-		if (bcfipsNativeSecretKey == null)
-			bcfipsNativeSecretKey = SymmetricEncryptionType.decodeBCSecretKey(getBouncyCastleAlgorithm(), secretKey);
-		
-		return bcfipsNativeSecretKey;
+		return finalizer.bcfipsNativeSecretKey;
 		
 	}
 

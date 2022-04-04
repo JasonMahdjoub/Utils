@@ -161,6 +161,18 @@ class CleanerTools {
 		}
 
 	}
+	static void performCleanup(Cleanable cleanable)
+	{
+		Cleanable.Cleaner cleaner;
+		synchronized (CleanerTools.class)
+		{
+			cleaner=cleaners.get(new WR(cleanable));
+		}
+		if (cleaner!=null) {
+			cleaner.performCleanup();
+		}
+
+	}
 
 	static boolean isCleanersEmpty()
 	{

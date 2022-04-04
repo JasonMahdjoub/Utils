@@ -49,35 +49,36 @@ import java.util.Arrays;
  * @since Utils 3.15.0
  */
 public abstract class AbstractP2PLoginWithSignature extends P2PLoginAgreement {
-
-	private byte[] myMessage, otherMessage=null;
+	private static final class Finalizer extends Cleaner
+	{
+		private byte[] myMessage, otherMessage=null;
+		@Override
+		protected void performCleanup() {
+			if (myMessage!=null)
+				Arrays.fill(myMessage, (byte)0);
+			if (otherMessage!=null)
+				Arrays.fill(otherMessage, (byte)0);
+			myMessage=null;
+			otherMessage=null;
+		}
+	}
+	private final Finalizer finalizer;
 	private final AbstractAuthenticatedSignerAlgorithm signer;
 	private final AbstractAuthenticatedCheckerAlgorithm checker;
 
 	private boolean valid=true;
 	private final static byte[] emptyTab=new byte[0];
-	@Override
-	public void zeroize() {
-		if (myMessage!=null)
-			Arrays.fill(myMessage, (byte)0);
-		if (otherMessage!=null)
-			Arrays.fill(otherMessage, (byte)0);
-		myMessage=null;
-		otherMessage=null;
-	}
-	@Override
-	public boolean isDestroyed() {
-		return myMessage==null && otherMessage==null;
-	}
 
 	AbstractP2PLoginWithSignature(AbstractSecureRandom random, AbstractAuthenticatedSignerAlgorithm signer, AbstractAuthenticatedCheckerAlgorithm checker) {
 		super(2, 2);
 		if (checker==null && signer==null)
 			throw new NullPointerException();
-		myMessage=new byte[messageSize];
-		random.nextBytes(myMessage);
+		this.finalizer=new Finalizer();
+		finalizer.myMessage=new byte[messageSize];
+		random.nextBytes(finalizer.myMessage);
 		this.signer=signer;
 		this.checker=checker;
+		registerCleaner(finalizer);
 	}
 
 	@Override
@@ -93,15 +94,15 @@ public abstract class AbstractP2PLoginWithSignature extends P2PLoginAgreement {
 		try {
 			switch (stepNumber) {
 				case 0:
-					return myMessage;
+					return finalizer.myMessage;
 				case 1: {
-					if (otherMessage == null) {
+					if (finalizer.otherMessage == null) {
 						valid = false;
 						throw new IllegalAccessError();
 					}
 					if (signer==null)
 						return emptyTab;
-					return generateSignature(myMessage, otherMessage, signer);
+					return generateSignature(finalizer.myMessage, finalizer.otherMessage, signer);
 				}
 				default:
 					valid = false;
@@ -125,17 +126,17 @@ public abstract class AbstractP2PLoginWithSignature extends P2PLoginAgreement {
 				throw new CryptoException();
 			switch (stepNumber) {
 				case 0: {
-					if (otherMessage != null) {
+					if (finalizer.otherMessage != null) {
 						valid = false;
 						throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException());
 					}
-					checkCompatibleMessages(myMessage, data);
+					checkCompatibleMessages(finalizer.myMessage, data);
 
-					otherMessage = data;
+					finalizer.otherMessage = data;
 				}
 				break;
 				case 1: {
-					if (otherMessage == null) {
+					if (finalizer.otherMessage == null) {
 						valid = false;
 						throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException());
 					}
@@ -144,7 +145,7 @@ public abstract class AbstractP2PLoginWithSignature extends P2PLoginAgreement {
 							throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new CryptoException());
 					}
 					else
-						valid=checkSignature(myMessage, otherMessage, checker, data, 0, data.length);
+						valid=checkSignature(finalizer.myMessage, finalizer.otherMessage, checker, data, 0, data.length);
 				}
 				break;
 				default:
