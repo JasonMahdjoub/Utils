@@ -1,6 +1,6 @@
 # Utils
 
-[![CodeQL](https://github.com/JazZ51/Utils/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/JazZ51/Utils/actions/workflows/codeql-analysis.yml)
+[![CodeQL](https://github.com/JasonMahdjoub/Utils/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/JasonMahdjoub/Utils/actions/workflows/codeql-analysis.yml)
 
 Set of Java tools :
 * Decentralized identifier generation (similar to UUID, but with hash possibilities and some enforcement)
