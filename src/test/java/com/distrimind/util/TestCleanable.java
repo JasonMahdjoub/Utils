@@ -95,6 +95,7 @@ public class TestCleanable {
 	}
 	@Test(dataProvider = "data")
 	public void testCleanableAPI(boolean manuallyClean, boolean useThread, boolean useSeveralFinalizers) throws InterruptedException {
+
 		Reference<Boolean> threadOK=new Reference<>(false);
 		Runnable r=() -> {
 			Example e = new Example(useSeveralFinalizers);
@@ -115,13 +116,18 @@ public class TestCleanable {
 			}
 			//noinspection UnusedAssignment
 			e = null;
+			System.runFinalization();
 			System.gc();
+
+
 			try {
 				Thread.sleep(1000);
 			} catch (InterruptedException ex) {
 				ex.printStackTrace();
 			}
+			System.runFinalization();
 			System.gc();
+
 			Assert.assertNotNull(ref.get());
 			if (useSeveralFinalizers) {
 				Assert.assertNotNull(ref2.get());
@@ -139,6 +145,6 @@ public class TestCleanable {
 		else
 			r.run();
 		Assert.assertTrue(threadOK.get());
-		Assert.assertTrue(CleanerTools.isCleanersEmpty());
+		Assert.assertFalse(CleanerTools.doesCleanersContainsThisClass(Finalizer.class));
 	}
 }

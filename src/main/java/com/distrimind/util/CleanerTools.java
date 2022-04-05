@@ -174,11 +174,18 @@ class CleanerTools {
 
 	}
 
-	static boolean isCleanersEmpty()
+	/*static boolean isCleanersEmpty()
 	{
 		synchronized (CleanerTools.class)
 		{
 			return cleaners.isEmpty();
+		}
+	}*/
+	static boolean doesCleanersContainsThisClass(Class<? extends Cleanable.Cleaner> clazz)
+	{
+		synchronized (CleanerTools.class)
+		{
+			return cleaners.values().stream().anyMatch(c -> clazz.isAssignableFrom(c.getClass()));
 		}
 	}
 }

@@ -314,7 +314,6 @@ public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
 
 	@Override
 	protected void receiveData(int stepNumber, byte[] dataReceived) throws IOException {
-		finalizer.performCleanup();
 		valid=false;
 		switch(stepNumber)
 		{

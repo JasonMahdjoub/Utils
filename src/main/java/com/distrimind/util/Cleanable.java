@@ -51,7 +51,7 @@ import java.lang.reflect.Modifier;
  * when the object becomes unreferenced. If the JVM version is upper to Java 8, then, the Java Cleaner API is used.
  * Otherwise, it is the classical finalize method that is used.
  *
- * Please do not override method {@link #finalize()}. Otherwise, this API will be obsolete.
+ * Please do not override method {@link Object#finalize()}. Otherwise, this API will be obsolete.
  *
  * @author Jason Mahdjoub
  * @version 1.0
