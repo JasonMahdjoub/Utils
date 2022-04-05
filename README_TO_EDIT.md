@@ -41,7 +41,7 @@ Set of Java tools :
 ## With Gradle :
 
 Adapt into your build.gradle file, the next code :
-
+```
         ...
 	dependencies {
 		...
@@ -52,7 +52,9 @@ Adapt into your build.gradle file, the next code :
 
 	}
 	...
+```
 Librairies are available on Maven Central. You can check signatures of dependencies with this [public GPG key](./gpg_key.asc). You can also use the next repository : 
+```
 	...
 	repositories {
 		...
@@ -62,10 +64,11 @@ Librairies are available on Maven Central. You can check signatures of dependenc
 		...
 	}
 	...
+```	
 To know what last version has been uploaded, please refer to versions availables into [this repository](https://artifactory.distri-mind.fr/artifactory/DistriMind-Public/com/distrimind/util/Utils/)
 ## With Maven :
 Adapt into your pom.xml file, the next code :
-
+```
 	...
 	<project>
 		...
@@ -88,17 +91,20 @@ Adapt into your pom.xml file, the next code :
 
 	</project>
 	...
+```	
 Librairies are available on Maven Central. You can check signatures of dependencies with this [public GPG key](./gpg_key.asc). You can also use the next repository : 
+```
+	...
+	<repositories>
 		...
-		<repositories>
-			...
-			<repository>
-				<id>DistriMind-Public</id>
-				<url>https://artifactory.distri-mind.fr:443/artifactory/gradle-release/</url>
-			</repository>
-			...
-		</repositories>
-		...		
+		<repository>
+			<id>DistriMind-Public</id>
+			<url>https://artifactory.distri-mind.fr:443/artifactory/gradle-release/</url>
+		</repository>
+		...
+	</repositories>
+	...		
+```
 To know what last version has been uploaded, please refer to versions availables into [this repository](https://artifactory.distri-mind.fr/artifactory/DistriMind-Public/com/distrimind/util/Utils/)
 
 
