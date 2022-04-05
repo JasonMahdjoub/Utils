@@ -43,7 +43,7 @@ import java.util.Date;
  * Represents the description of program version
  * 
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 1.1
  * @since Utils 1.5
  * @see Version
  */
@@ -68,6 +68,18 @@ public class Description extends AbstractVersion<Description> {
 	 * @param _alpha_beta_version if type is equal to alpha or beta, alpha/beta version
 	 * @param _date the version date (format YYYY-MM-DD, i.e. 2020-10-28))
 	 */
+	public Description(int _major, int _minor, int _revision, Version.Type _type, int _alpha_beta_version, String _date) {
+		super(_major, _minor, _revision, _type, _alpha_beta_version, _date);
+	}
+
+	/**
+	 * @param _major major version
+	 * @param _minor minor version
+	 * @param _revision revision
+	 * @param _type version type (stable, alpha, beta)
+	 * @param _alpha_beta_version if type is equal to alpha or beta, alpha/beta version
+	 * @param _date the version date (format YYYY-MM-DD, i.e. 2020-10-28))
+	 */
 	public Description(short _major, short _minor, short _revision, Version.Type _type, short _alpha_beta_version, String _date) {
 		super(_major, _minor, _revision, _type, _alpha_beta_version, _date);
 	}
@@ -79,7 +91,29 @@ public class Description extends AbstractVersion<Description> {
 	 * @param _alpha_beta_version if type is equal to alpha or beta, alpha/beta version
 	 * @param _date the version date
 	 */
+	public Description(int _major, int _minor, int _revision, Version.Type _type, int _alpha_beta_version, Calendar _date) {
+		super(_major, _minor, _revision, _type, _alpha_beta_version, _date);
+	}
+	/**
+	 * @param _major major version
+	 * @param _minor minor version
+	 * @param _revision revision
+	 * @param _type version type (stable, alpha, beta)
+	 * @param _alpha_beta_version if type is equal to alpha or beta, alpha/beta version
+	 * @param _date the version date
+	 */
 	public Description(short _major, short _minor, short _revision, Version.Type _type, short _alpha_beta_version, Calendar _date) {
+		super(_major, _minor, _revision, _type, _alpha_beta_version, _date);
+	}
+	/**
+	 * @param _major major version
+	 * @param _minor minor version
+	 * @param _revision revision
+	 * @param _type version type (stable, alpha, beta)
+	 * @param _alpha_beta_version if type is equal to alpha or beta, alpha/beta version
+	 * @param _date the version date
+	 */
+	public Description(int _major, int _minor, int _revision, Version.Type _type, int _alpha_beta_version, Date _date) {
 		super(_major, _minor, _revision, _type, _alpha_beta_version, _date);
 	}
 	/**

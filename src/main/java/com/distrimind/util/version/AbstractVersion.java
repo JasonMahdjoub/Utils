@@ -9,7 +9,7 @@ import java.util.Locale;
 
 /**
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 1.1
  * @since MaDKitLanEdition 5.6.0
  */
 @SuppressWarnings("FieldMayBeFinal")
@@ -43,6 +43,34 @@ public abstract class AbstractVersion<V extends AbstractVersion<V>> extends Mult
 	 * @param _alpha_beta_version if type is equal to alpha or beta, alpha/beta version
 	 * @param _date the version date (format YYYY-MM-DD, i.e. 2020-10-28)
 	 */
+	protected AbstractVersion(int _major, int _minor, int _revision, Version.Type _type, int _alpha_beta_version, String _date) {
+		this(toShort(_major), toShort(_minor), toShort(_revision), _type, toShort(_alpha_beta_version), _date);
+	}
+	protected static short toShort(int value)
+	{
+		if (value<Short.MIN_VALUE || value>Short.MAX_VALUE)
+			throw new IllegalArgumentException();
+		return (short)value;
+	}
+	/**
+	 * @param _major major version
+	 * @param _minor minor version
+	 * @param _revision revision
+	 * @param _type version type (stable, alpha, beta)
+	 * @param _alpha_beta_version if type is equal to alpha or beta, alpha/beta version
+	 * @param _date the version date (format YYYY-MM-DD, i.e. 2020-10-28)
+	 */
+	protected AbstractVersion(int _major, int _minor, int _revision, Version.Type _type, short _alpha_beta_version, String _date) {
+		this(toShort(_major), toShort(_minor), toShort(_revision), _type, _alpha_beta_version, _date);
+	}
+	/**
+	 * @param _major major version
+	 * @param _minor minor version
+	 * @param _revision revision
+	 * @param _type version type (stable, alpha, beta)
+	 * @param _alpha_beta_version if type is equal to alpha or beta, alpha/beta version
+	 * @param _date the version date (format YYYY-MM-DD, i.e. 2020-10-28)
+	 */
 	protected AbstractVersion(short _major, short _minor, short _revision, Version.Type _type, short _alpha_beta_version, String _date) {
 		this(_major, _minor, _revision, _type, _alpha_beta_version, Version.parse(_date));
 	}
@@ -54,8 +82,30 @@ public abstract class AbstractVersion<V extends AbstractVersion<V>> extends Mult
 	 * @param _alpha_beta_version if type is equal to alpha or beta, alpha/beta version
 	 * @param _date the version date
 	 */
+	protected AbstractVersion(int _major, int _minor, int _revision, Version.Type _type, int _alpha_beta_version, Calendar _date) {
+		this(toShort(_major), toShort(_minor), toShort(_revision), _type, toShort(_alpha_beta_version), _date);
+	}
+	/**
+	 * @param _major major version
+	 * @param _minor minor version
+	 * @param _revision revision
+	 * @param _type version type (stable, alpha, beta)
+	 * @param _alpha_beta_version if type is equal to alpha or beta, alpha/beta version
+	 * @param _date the version date
+	 */
 	protected AbstractVersion(short _major, short _minor, short _revision, Version.Type _type, short _alpha_beta_version, Calendar _date) {
 		this(_major, _minor, _revision, _type, _alpha_beta_version, _date.getTime());
+	}
+	/**
+	 * @param _major major version
+	 * @param _minor minor version
+	 * @param _revision revision
+	 * @param _type version type (stable, alpha, beta)
+	 * @param _alpha_beta_version if type is equal to alpha or beta, alpha/beta version
+	 * @param _date the version date
+	 */
+	protected AbstractVersion(int _major, int _minor, int _revision, Version.Type _type, int _alpha_beta_version, Date _date) {
+		this(toShort(_major), toShort(_minor), toShort(_revision), _type, toShort(_alpha_beta_version), _date);
 	}
 	/**
 	 * @param _major major version

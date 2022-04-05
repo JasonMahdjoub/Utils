@@ -68,6 +68,12 @@ public class Utils {
 			VERSION.addCreator(new Person("mahdjoub", "jason"))
 					.addDeveloper(new PersonDeveloper("mahdjoub", "jason", "2016-01-04"))
 					.addDescription(
+							new Description(5, 23, 2, Version.Type.STABLE, 0, "2022-04-05")
+									.addItem(INTERNAL_CHANGE, "Add lacking files into generated libraries.")
+									.addItem(INTERNAL_CHANGE, "Add constructors into classes Description and Version.")
+
+					)
+					.addDescription(
 							new Description((short)5, (short)23, (short)1, Version.Type.STABLE, (short)0, "2022-04-05")
 									.addItem(INTERNAL_CHANGE, "Update README files.")
 
@@ -1270,7 +1276,7 @@ public class Utils {
     public static void main(String[] args) throws IOException
 	{
 		String md=VERSION.getMarkdownCode();
-        File f=new File("../changelog.md");
+        File f=new File("changelog.md");
         if (f.exists())
             f.delete();
 		try(FileWriter fr=new FileWriter(f))
@@ -1279,7 +1285,7 @@ public class Utils {
 			fr.flush();
 		}
 		String lastVersion=VERSION.getFileHeadVersion();
-        f=new File("../lastVersion.md");
+        f=new File("lastVersion.md");
         if (f.exists())
             f.delete();
 		try(FileWriter fr=new FileWriter(f))

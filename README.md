@@ -1,6 +1,6 @@
 # Utils
 
-[![CodeQL](https://github.com/JazZ51/Utils/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/JazZ51/Utils/actions/workflows/codeql-analysis.yml)
+[![CodeQL](https://github.com/JasonMahdjoub/Utils/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/JasonMahdjoub/Utils/actions/workflows/codeql-analysis.yml)
 
 Set of Java tools :
 * Decentralized identifier generation (similar to UUID, but with hash possibilities and some enforcement)
@@ -37,10 +37,24 @@ Set of Java tools :
   * Please install the package ethtool, rng-tools, mtr(only debian)
 
 # How to use it ?
+
 ## With Gradle :
 
 Adapt into your build.gradle file, the next code :
+```
+        ...
+	dependencies {
+		...
+		api(group:'com.distrimind.util', name: 'Utils', version: '5.23.2-STABLE')
+		...
+		//choose one of these optional drivers for GnuCrypto algorithms
+			testImplementation(group:'gnu', name: 'Gnu-Crypt', version: '1.3.0')
 
+	}
+	...
+```
+Librairies are available on Maven Central. You can check signatures of dependencies with this [public GPG key](./gpg_key.asc). You can also use the next repository : 
+```
 	...
 	repositories {
 		...
@@ -50,20 +64,12 @@ Adapt into your build.gradle file, the next code :
 		...
 	}
 	...
-	dependencies {
-		...
-		api(group:'com.distrimind.util', name: 'Utils', version: '5.22.4-STABLE')
-		...
-		//choose one of these optional drivers for GnuCrypto algorithms
-			testImplementation(group:'gnu', name: 'Gnu-Crypt', version: '1.3.0')
-
-	}
-	...
-
+```	
 To know what last version has been uploaded, please refer to versions availables into [this repository](https://artifactory.distri-mind.fr/artifactory/DistriMind-Public/com/distrimind/util/Utils/)
 ## With Maven :
 Adapt into your pom.xml file, the next code :
-
+```
+	...
 	<project>
 		...
 		<dependencies>
@@ -71,7 +77,7 @@ Adapt into your pom.xml file, the next code :
 			<dependency>
 				<groupId>com.distrimind.util</groupId>
 				<artifactId>Utils</artifactId>
-				<version>5.22.4-STABLE</version>
+				<version>5.23.2-STABLE</version>
 			</dependency>
 			<!-- choose one of these optional drivers for GnuCrypto algorithms-->
 			<dependency>
@@ -82,17 +88,23 @@ Adapt into your pom.xml file, the next code :
 			...
 		</dependencies>
 		...
-		<repositories>
-			...
-			<repository>
-				<id>DistriMind-Public</id>
-				<url>https://artifactory.distri-mind.fr:443/artifactory/gradle-release/</url>
-			</repository>
-			...
-		</repositories>
 
 	</project>
-
+	...
+```	
+Librairies are available on Maven Central. You can check signatures of dependencies with this [public GPG key](./gpg_key.asc). You can also use the next repository : 
+```
+	...
+	<repositories>
+		...
+		<repository>
+			<id>DistriMind-Public</id>
+			<url>https://artifactory.distri-mind.fr:443/artifactory/gradle-release/</url>
+		</repository>
+		...
+	</repositories>
+	...		
+```
 To know what last version has been uploaded, please refer to versions availables into [this repository](https://artifactory.distri-mind.fr/artifactory/DistriMind-Public/com/distrimind/util/Utils/)
 
 

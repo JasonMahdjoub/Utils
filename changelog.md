@@ -1,6 +1,6 @@
 Utils
 =====
-5.22.4 STABLE (Build: 3906) (from 04/01/2016 to 29/03/2022)
+5.23.2 STABLE (Build: 3954) (from 04/01/2016 to 05/04/2022)
 
 # Creator(s):
 * Jason MAHDJOUB
@@ -9,6 +9,26 @@ Utils
 * Jason MAHDJOUB (Entered in the team at 04/01/2016)
 
 # Changes:
+
+
+### 5.23.2 STABLE (05/04/2022)
+#### Internal change(s)
+* Add lacking files into generated libraries.
+* Add constructors into classes Description and Version.
+
+
+### 5.23.1 STABLE (05/04/2022)
+#### Internal change(s)
+* Update README files.
+
+
+### 5.23.0 STABLE (04/04/2022)
+#### New feature(s)
+* Add interface Cleanable that use Cleanable java API when JVM version is greater than Java 8 and that use standard finalize method otherwise.
+#### Internal change(s)
+* Remove finalize method into all key classes, and make them using Cleanable API
+#### Security fixe(s)
+* Possible bad use of keys, if theses keys have been zeroized. Now an exception is thrown if these keys are used after being zeroized 
 
 
 ### 5.22.4 STABLE (29/03/2022)

@@ -47,7 +47,7 @@ import java.util.*;
  * current version
  * 
  * @author Jason Mahdjoub
- * @version 1.2
+ * @version 1.3
  * @since Utils 1.0
  * @see Description
  * @see Person
@@ -100,6 +100,22 @@ public class Version extends AbstractVersion<Version> {
 		}
 		return false;
 	}
+	/**
+	 *
+	 * @param _program_name the program name
+	 * @param shortProgramName the short program name
+	 * @param _major major version
+	 * @param _minor minor version
+	 * @param _revision revision
+	 * @param _type version type (stable, alpha, beta)
+	 * @param _alpha_beta_version if type is equal to alpha or beta, alpha/beta version
+	 * @param _date_start_project the start project date (format YYYY-MM-DD, i.e. 2020-10-28)
+	 * @param _date_end_project the end project date (format YYYY-MM-DD, i.e. 2020-10-28)
+	 */
+	public Version(String _program_name, String shortProgramName, int _major, int _minor, int _revision, Type _type,
+				   int _alpha_beta_version, String _date_start_project, String _date_end_project) {
+		this(_program_name, shortProgramName, toShort(_major), toShort(_minor), toShort(_revision), _type, toShort(_alpha_beta_version), _date_start_project, _date_end_project);
+	}
 
 	/**
 	 *
@@ -116,6 +132,22 @@ public class Version extends AbstractVersion<Version> {
 	public Version(String _program_name, String shortProgramName, short _major, short _minor, short _revision, Type _type,
 				   short _alpha_beta_version, String _date_start_project, String _date_end_project) {
 		this(_program_name, shortProgramName, _major, _minor, _revision, _type, _alpha_beta_version, parse(_date_start_project), parse(_date_end_project));
+	}
+	/**
+	 *
+	 * @param _program_name the program name
+	 * @param shortProgramName the short program name
+	 * @param _major major version
+	 * @param _minor minor version
+	 * @param _revision revision
+	 * @param _type version type (stable, alpha, beta)
+	 * @param _alpha_beta_version if type is equal to alpha or beta, alpha/beta version
+	 * @param _date_start_project the start project date
+	 * @param _date_end_project the end project date
+	 */
+	public Version(String _program_name, String shortProgramName, int _major, int _minor, int _revision, Type _type,
+				   int _alpha_beta_version, Calendar _date_start_project, Calendar _date_end_project) {
+		this(_program_name, shortProgramName, toShort(_major), toShort(_minor), toShort(_revision), _type, toShort(_alpha_beta_version), _date_start_project, _date_end_project);
 	}
 	/**
 	 *
