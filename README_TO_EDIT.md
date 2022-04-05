@@ -37,19 +37,12 @@ Set of Java tools :
   * Please install the package ethtool, rng-tools, mtr(only debian)
 
 # How to use it ?
+
 ## With Gradle :
 
 Adapt into your build.gradle file, the next code :
 
-	...
-	repositories {
-		...
-		maven {
-	       		url "https://artifactory.distri-mind.fr:443/artifactory/gradle-release/"
-	   	}
-		...
-	}
-	...
+        ...
 	dependencies {
 		...
 		api(group:'com.distrimind.util', name: 'Utils', version: '//PROJECT_VERSION//')
@@ -59,11 +52,21 @@ Adapt into your build.gradle file, the next code :
 
 	}
 	...
-
+Librairies are available on Maven Central. You can check signatures of dependencies with this [public GPG key](./gpg_key.asc). You can also use the next repository : 
+	...
+	repositories {
+		...
+		maven {
+	       		url "https://artifactory.distri-mind.fr:443/artifactory/gradle-release/"
+	   	}
+		...
+	}
+	...
 To know what last version has been uploaded, please refer to versions availables into [this repository](https://artifactory.distri-mind.fr/artifactory/DistriMind-Public/com/distrimind/util/Utils/)
 ## With Maven :
 Adapt into your pom.xml file, the next code :
 
+	...
 	<project>
 		...
 		<dependencies>
@@ -82,6 +85,11 @@ Adapt into your pom.xml file, the next code :
 			...
 		</dependencies>
 		...
+
+	</project>
+	...
+Librairies are available on Maven Central. You can check signatures of dependencies with this [public GPG key](./gpg_key.asc). You can also use the next repository : 
+		...
 		<repositories>
 			...
 			<repository>
@@ -90,9 +98,7 @@ Adapt into your pom.xml file, the next code :
 			</repository>
 			...
 		</repositories>
-
-	</project>
-
+		...		
 To know what last version has been uploaded, please refer to versions availables into [this repository](https://artifactory.distri-mind.fr/artifactory/DistriMind-Public/com/distrimind/util/Utils/)
 
 
