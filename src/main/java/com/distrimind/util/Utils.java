@@ -60,7 +60,6 @@ public class Utils {
 		VERSION = new Version("Utils", "Utils",
 				"2016-01-04");
 		try {
-
 			InputStream is = Utils.class.getResourceAsStream("build.txt");
 			if (is!=null)
 				VERSION.loadBuildNumber(is);
