@@ -44,6 +44,7 @@ import java.security.SecureRandom;
 import java.util.Arrays;
 
 import com.distrimind.bouncycastle.pqc.crypto.newhope.NHPrivateKeyParameters;
+import com.distrimind.util.Cleanable;
 import com.distrimind.util.UtilClassLoader;
 
 /**
@@ -55,8 +56,13 @@ import com.distrimind.util.UtilClassLoader;
 public abstract class AbstractNewHopeKeyAgreement extends KeyAgreement{
 	protected static final class Finalizer extends Cleaner
 	{
-		protected byte[] shared;
+		byte[] shared;
 		private SymmetricSecretKey secretKey=null;
+
+		private Finalizer(Cleanable cleanable) {
+			super(cleanable);
+		}
+
 		@Override
 		protected void performCleanup() {
 			if (shared!=null)
@@ -79,8 +85,8 @@ public abstract class AbstractNewHopeKeyAgreement extends KeyAgreement{
 
 		if (!type.isPostQuantumAlgorithm((short)(agreementSize*8)))
 			throw new IllegalArgumentException("You must use post quantum compatible algorithms");
-		finalizer=new Finalizer();
-		registerCleaner(finalizer);
+		finalizer=new Finalizer(this);
+
 	}
 
 	@Override
@@ -96,8 +102,7 @@ public abstract class AbstractNewHopeKeyAgreement extends KeyAgreement{
 		this.agreementSize=agreementSize;
 		if (!type.isPostQuantumAlgorithm((short)(agreementSize*8)))
 			throw new IllegalArgumentException("You must use post quantum compatible algorithms");
-		finalizer=new Finalizer();
-		registerCleaner(finalizer);
+		finalizer=new Finalizer(this);
 	}
 	
 	public SymmetricSecretKey getDerivedKey()

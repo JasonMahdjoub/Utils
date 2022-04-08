@@ -67,10 +67,16 @@ public class Utils {
 			VERSION.addCreator(new Person("mahdjoub", "jason"))
 					.addDeveloper(new PersonDeveloper("mahdjoub", "jason", "2016-01-04"))
 					.addDescription(
+							new Description(5, 23, 5, Version.Type.STABLE, 0, "2022-04-07")
+									.addItem(INTERNAL_CHANGE, "Alter Cleanable API.")
+									.addItem(BUG_FIX, "Fix NullPointerException into finalizer of NewHopeKeyAgreementServer class.")
+									.addItem(BUG_FIX, "Fix issue with Cleaner on JVM 8. Finalize was not called. JVM greater than Java 8 was not concerned by this issue.")
+									.addItem(BUG_FIX, "Fix dead lock with Cleaner.")
+					)
+					.addDescription(
 							new Description(5, 23, 2, Version.Type.STABLE, 0, "2022-04-05")
 									.addItem(INTERNAL_CHANGE, "Add lacking files into generated libraries.")
 									.addItem(INTERNAL_CHANGE, "Add constructors into classes Description and Version.")
-
 					)
 					.addDescription(
 							new Description((short)5, (short)23, (short)1, Version.Type.STABLE, (short)0, "2022-04-05")

@@ -34,6 +34,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
+import com.distrimind.util.Cleanable;
 import com.distrimind.util.io.Integrity;
 import com.distrimind.util.io.MessageExternalizationException;
 import com.distrimind.bouncycastle.crypto.CryptoException;
@@ -60,6 +61,11 @@ public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
 	{
 		private JPAKEParticipant jpake;
 		private BigInteger keyMaterial;
+
+		private Finalizer(Cleanable cleanable) {
+			super(cleanable);
+		}
+
 		@Override
 		protected void performCleanup() {
 			if (jpake!=null)
@@ -118,12 +124,11 @@ public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
 			throw new NullPointerException("message");
 		if (salt != null && salt.length - offset_salt < len_salt)
 			throw new IllegalArgumentException("salt");
-		finalizer=new Finalizer();
+		finalizer=new Finalizer(this);
 
 		finalizer.jpake = new JPAKEParticipant(getParticipantIDString(participantID), getHashedPassword(message, salt, offset_salt, len_salt), JPAKEPrimeOrderGroups.NIST_3072, new SHA512Digest(),
 				secureRandom);
 		this.finalizer.keyMaterial = null;
-		registerCleaner(finalizer);
 	}
 
 	P2PJPAKESecretMessageExchanger(AbstractSecureRandom secureRandom, byte[] participantID, byte[] message, int offset, int len, byte[] salt,
@@ -136,11 +141,10 @@ public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
 			throw new IllegalArgumentException("message");
 		if (salt != null && salt.length - offset_salt < len_salt)
 			throw new IllegalArgumentException("salt");
-		finalizer=new Finalizer();
+		finalizer=new Finalizer(this);
 		finalizer.jpake = new JPAKEParticipant(getParticipantIDString(participantID), getHashedPassword(message, offset, len, salt, offset_salt, len_salt, messageIsKey), JPAKEPrimeOrderGroups.NIST_3072, new SHA512Digest(),
 				secureRandom);
 		this.finalizer.keyMaterial = null;
-		registerCleaner(finalizer);
 	}
 
 	private static byte[] hashMessage(AbstractMessageDigest messageDigest, byte[] data, int off, int len, byte[] salt,

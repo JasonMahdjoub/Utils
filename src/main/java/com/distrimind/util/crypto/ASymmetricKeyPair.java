@@ -35,6 +35,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
 package com.distrimind.util.crypto;
 
 import com.distrimind.util.Bits;
+import com.distrimind.util.Cleanable;
 import com.distrimind.util.InvalidEncodedValue;
 import com.distrimind.util.data_buffers.WrappedSecretData;
 
@@ -70,6 +71,10 @@ public class ASymmetricKeyPair extends AbstractKeyPair<ASymmetricPrivateKey, ASy
 		private ASymmetricPublicKey publicKey;
 		private transient volatile KeyPair nativeKeyPair;
 		private transient volatile Object gnuKeyPair;
+
+		private Finalizer(Cleanable cleanable) {
+			super(cleanable);
+		}
 
 
 		@Override
@@ -124,7 +129,7 @@ public class ASymmetricKeyPair extends AbstractKeyPair<ASymmetricPrivateKey, ASy
 			throw new NullPointerException("publicKey");
 		if (keySize < 256)
 			throw new IllegalArgumentException("keySize");
-		this.finalizer=new Finalizer();
+		this.finalizer=new Finalizer(this);
 		this.finalizer.privateKey = privateKey;
 		this.finalizer.publicKey = publicKey;
 		this.keySizeBits = keySize;
@@ -132,7 +137,6 @@ public class ASymmetricKeyPair extends AbstractKeyPair<ASymmetricPrivateKey, ASy
 		this.signatureType=null;
 
 		hashCode = privateKey.hashCode() + publicKey.hashCode();
-		registerCleaner(finalizer);
 	}
 
 	public ASymmetricKeyPair(ASymmetricPrivateKey privateKey, ASymmetricPublicKey publicKey) {
@@ -144,7 +148,7 @@ public class ASymmetricKeyPair extends AbstractKeyPair<ASymmetricPrivateKey, ASy
 			throw new IllegalArgumentException();
 		if (privateKey.getEncryptionAlgorithmType()!=publicKey.getEncryptionAlgorithmType())
 			throw new IllegalArgumentException();
-		this.finalizer=new Finalizer();
+		this.finalizer=new Finalizer(this);
 		this.finalizer.privateKey = privateKey;
 		this.finalizer.publicKey = publicKey;
 		this.keySizeBits = publicKey.getKeySizeBits();
@@ -152,7 +156,6 @@ public class ASymmetricKeyPair extends AbstractKeyPair<ASymmetricPrivateKey, ASy
 		this.signatureType=privateKey.getAuthenticatedSignatureAlgorithmType();
 
 		hashCode = privateKey.hashCode() + publicKey.hashCode();
-		registerCleaner(finalizer);
 	}
 
 	public ASymmetricKeyPair getKeyPairWithNewExpirationTime(long timeExpirationUTC)
@@ -169,7 +172,7 @@ public class ASymmetricKeyPair extends AbstractKeyPair<ASymmetricPrivateKey, ASy
 			throw new NullPointerException("keyPair");
 		if (keySize < 256)
 			throw new IllegalArgumentException("keySize");
-		this.finalizer=new Finalizer();
+		this.finalizer=new Finalizer(this);
 		finalizer.privateKey = new ASymmetricPrivateKey(type, GnuFunctions.getPrivateKey(keyPair), keySize);
 		finalizer.publicKey = new ASymmetricPublicKey(type, GnuFunctions.getPublicKey(keyPair), keySize, publicKeyValidityBeginDateUTC, expirationUTC);
 		this.keySizeBits = keySize;
@@ -178,7 +181,6 @@ public class ASymmetricKeyPair extends AbstractKeyPair<ASymmetricPrivateKey, ASy
 
 		hashCode = finalizer.privateKey.hashCode() + finalizer.publicKey.hashCode();
 		this.finalizer.gnuKeyPair=keyPair;
-		registerCleaner(finalizer);
 	}
 
 	ASymmetricKeyPair(ASymmetricEncryptionType type, KeyPair keyPair, int keySize, long publicKeyValidityBeginDateUTC, long expirationUTC) {
@@ -188,7 +190,7 @@ public class ASymmetricKeyPair extends AbstractKeyPair<ASymmetricPrivateKey, ASy
 			throw new NullPointerException("keyPair");
 		if (keySize < 256)
 			throw new IllegalArgumentException("keySize");
-		this.finalizer=new Finalizer();
+		this.finalizer=new Finalizer(this);
 		finalizer.privateKey = new ASymmetricPrivateKey(type, keyPair.getPrivate(), keySize);
 		finalizer.publicKey = new ASymmetricPublicKey(type, keyPair.getPublic(), keySize, publicKeyValidityBeginDateUTC, expirationUTC);
 		this.keySizeBits = keySize;
@@ -197,7 +199,6 @@ public class ASymmetricKeyPair extends AbstractKeyPair<ASymmetricPrivateKey, ASy
 
 		hashCode = finalizer.privateKey.hashCode() + finalizer.publicKey.hashCode();
 		this.finalizer.nativeKeyPair=keyPair;
-		registerCleaner(finalizer);
 	}
 
 	ASymmetricKeyPair(ASymmetricAuthenticatedSignatureType type, ASymmetricPrivateKey privateKey, ASymmetricPublicKey publicKey,
@@ -210,7 +211,7 @@ public class ASymmetricKeyPair extends AbstractKeyPair<ASymmetricPrivateKey, ASy
 			throw new NullPointerException("publicKey");
 		if (keySize < 256)
 			throw new IllegalArgumentException("keySize");
-		this.finalizer=new Finalizer();
+		this.finalizer=new Finalizer(this);
 		this.finalizer.privateKey = privateKey;
 		this.finalizer.publicKey = publicKey;
 		this.keySizeBits = keySize;
@@ -218,7 +219,6 @@ public class ASymmetricKeyPair extends AbstractKeyPair<ASymmetricPrivateKey, ASy
 		this.signatureType=type;
 
 		hashCode = privateKey.hashCode() + publicKey.hashCode();
-		registerCleaner(finalizer);
 	}
 
 	ASymmetricKeyPair(ASymmetricAuthenticatedSignatureType type, Object keyPair, int keySize, long publicKeyValidityBeginDateUTC,
@@ -229,7 +229,7 @@ public class ASymmetricKeyPair extends AbstractKeyPair<ASymmetricPrivateKey, ASy
 			throw new NullPointerException("keyPair");
 		if (keySize < 256)
 			throw new IllegalArgumentException("keySize");
-		this.finalizer=new Finalizer();
+		this.finalizer=new Finalizer(this);
 		finalizer.privateKey = new ASymmetricPrivateKey(type, GnuFunctions.getPrivateKey(keyPair), keySize);
 		finalizer.publicKey = new ASymmetricPublicKey(type, GnuFunctions.getPublicKey(keyPair), keySize, publicKeyValidityBeginDateUTC, expirationUTC);
 		this.keySizeBits = keySize;
@@ -238,7 +238,6 @@ public class ASymmetricKeyPair extends AbstractKeyPair<ASymmetricPrivateKey, ASy
 
 		hashCode = finalizer.privateKey.hashCode() + finalizer.publicKey.hashCode();
 		this.finalizer.gnuKeyPair=keyPair;
-		registerCleaner(finalizer);
 	}
 
 	ASymmetricKeyPair(ASymmetricAuthenticatedSignatureType type, KeyPair keyPair, int keySize, long publicKeyValidityBeginDateUTC, long expirationUTC, boolean xdhKey) {
@@ -248,7 +247,7 @@ public class ASymmetricKeyPair extends AbstractKeyPair<ASymmetricPrivateKey, ASy
 			throw new NullPointerException("keyPair");
 		if (keySize < 256)
 			throw new IllegalArgumentException("keySize");
-		this.finalizer=new Finalizer();
+		this.finalizer=new Finalizer(this);
 		finalizer.privateKey = new ASymmetricPrivateKey(type, keyPair.getPrivate(), keySize, xdhKey);
 		finalizer.publicKey = new ASymmetricPublicKey(type, keyPair.getPublic(), keySize, publicKeyValidityBeginDateUTC, expirationUTC, xdhKey);
 		this.keySizeBits = keySize;
@@ -257,7 +256,6 @@ public class ASymmetricKeyPair extends AbstractKeyPair<ASymmetricPrivateKey, ASy
 
 		hashCode = finalizer.privateKey.hashCode() + finalizer.publicKey.hashCode();
 		this.finalizer.nativeKeyPair=keyPair;
-		registerCleaner(finalizer);
 	}
 
 	public WrappedSecretData encode() {

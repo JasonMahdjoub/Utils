@@ -36,6 +36,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 
 
+import com.distrimind.util.Cleanable;
 import com.distrimind.util.data_buffers.WrappedSecretData;
 import com.distrimind.util.data_buffers.WrappedSecretString;
 
@@ -59,6 +60,14 @@ public class HybridASymmetricPrivateKey extends AbstractKey implements IHybridKe
 	private static final class Finalizer extends Cleaner
 	{
 		private ASymmetricPrivateKey nonPQCPrivateKey, PQCPrivateKey;
+
+		/**
+		 * @param cleanable if given cleanable is different to NULL, register this cleaner to cleanable
+		 */
+		private Finalizer(Cleanable cleanable) {
+			super(cleanable);
+		}
+
 		@Override
 		protected void performCleanup() {
 			nonPQCPrivateKey=null;
@@ -83,10 +92,9 @@ public class HybridASymmetricPrivateKey extends AbstractKey implements IHybridKe
 				&& !PQCPrivateKey.getAuthenticatedSignatureAlgorithmType().isPostQuantumAlgorithm())
 				|| (PQCPrivateKey.getEncryptionAlgorithmType()!=null && !PQCPrivateKey.getEncryptionAlgorithmType().isPostQuantumAlgorithm()))
 			throw new IllegalArgumentException("PQCPrivateKey must be a post quantum algorithm");
-		this.finalizer=new Finalizer();
+		this.finalizer=new Finalizer(this);
 		this.finalizer.nonPQCPrivateKey = nonPQCPrivateKey;
 		this.finalizer.PQCPrivateKey = PQCPrivateKey;
-		registerCleaner(finalizer);
 	}
 	private void checkNotDestroyed()
 	{

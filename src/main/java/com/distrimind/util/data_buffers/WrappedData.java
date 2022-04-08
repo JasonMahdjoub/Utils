@@ -16,6 +16,11 @@ public class WrappedData  {
 	{
 		private byte[] data;
 		protected transient boolean toZeroize;
+
+		protected Finalizer() {
+			super(null);
+		}
+
 		@Override
 		protected void performCleanup() {
 			if (toZeroize) {

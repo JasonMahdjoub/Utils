@@ -35,6 +35,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
 package com.distrimind.util.crypto;
 
 
+import com.distrimind.util.Cleanable;
 import com.distrimind.util.io.Integrity;
 import com.distrimind.util.io.MessageExternalizationException;
 import com.distrimind.bouncycastle.crypto.CryptoException;
@@ -54,10 +55,17 @@ public class NewHopeKeyAgreementServer extends AbstractNewHopeKeyAgreement{
 	private static final class Finalizer extends Cleaner
 	{
 		private ExchangePair exchangePair;
+
+		private Finalizer(Cleanable cleanable) {
+			super(cleanable);
+		}
+
 		@Override
 		protected void performCleanup() {
-			Arrays.fill(exchangePair.getSharedValue(), (byte)0);
-			exchangePair=null;
+			if (exchangePair!=null) {
+				Arrays.fill(exchangePair.getSharedValue(), (byte) 0);
+				exchangePair = null;
+			}
 		}
 	}
 	private final Finalizer finalizer;
@@ -76,8 +84,7 @@ public class NewHopeKeyAgreementServer extends AbstractNewHopeKeyAgreement{
 	protected NewHopeKeyAgreementServer(SymmetricAuthenticatedSignatureType type, short keySizeBits, AbstractSecureRandom randomForKeys) {
 		super(type, (short)(keySizeBits/8));
 		this.randomForKeys=randomForKeys;
-		this.finalizer=new Finalizer();
-		registerCleaner(finalizer);
+		this.finalizer=new Finalizer(this);
 	}
 
 	protected NewHopeKeyAgreementServer(SymmetricEncryptionType type, AbstractSecureRandom randomForKeys) {
@@ -87,8 +94,7 @@ public class NewHopeKeyAgreementServer extends AbstractNewHopeKeyAgreement{
 	protected NewHopeKeyAgreementServer(SymmetricEncryptionType type, short keySizeBits, AbstractSecureRandom randomForKeys) {
 		super(type, (short)(keySizeBits/8));
 		this.randomForKeys=randomForKeys;
-		this.finalizer=new Finalizer();
-		registerCleaner(finalizer);
+		this.finalizer=new Finalizer(this);
 	}
 
 

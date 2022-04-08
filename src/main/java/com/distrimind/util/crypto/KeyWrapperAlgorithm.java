@@ -2,6 +2,7 @@ package com.distrimind.util.crypto;
 
 import com.distrimind.util.AutoZeroizable;
 import com.distrimind.util.Bits;
+import com.distrimind.util.Cleanable;
 import com.distrimind.util.DecentralizedValue;
 import com.distrimind.util.data_buffers.WrappedData;
 import com.distrimind.util.data_buffers.WrappedSecretData;
@@ -27,6 +28,11 @@ public class KeyWrapperAlgorithm extends MultiFormatProperties implements Secure
 		private IASymmetricPublicKey publicKeyForEncryption, publicKeyForSignature;
 		private SymmetricSecretKey secretKeyForSignature;
 		private SymmetricSecretKey secretKeyForEncryption;
+
+		private Finalizer(Cleanable cleanable) {
+			super(cleanable);
+		}
+
 		@Override
 		protected void performCleanup() {
 			publicKeyForEncryption=null;
@@ -52,7 +58,7 @@ public class KeyWrapperAlgorithm extends MultiFormatProperties implements Secure
 	private KeyWrapperAlgorithm()
 	{
 		super(null);
-		finalizer=new Finalizer();
+		finalizer=new Finalizer(this);
 		symmetricKeyWrapperType=null;
 		aSymmetricKeyWrapperType=null;
 		finalizer.secretKeyForEncryption =null;
@@ -61,7 +67,6 @@ public class KeyWrapperAlgorithm extends MultiFormatProperties implements Secure
 		finalizer.publicKeyForEncryption=null;
 		finalizer.publicKeyForSignature=null;
 		mode=0;
-		this.registerCleaner(finalizer);
 	}
 	public KeyWrapperAlgorithm(SymmetricKeyWrapperType symmetricKeyWrapperType, SymmetricSecretKey secretKeyForEncryption) {
 		this(symmetricKeyWrapperType, secretKeyForEncryption, null, null, null, false, false);
@@ -165,7 +170,7 @@ public class KeyWrapperAlgorithm extends MultiFormatProperties implements Secure
 
 		assert includeSecretKeyForSignature || secretKeyForSignature==null;
 		assert includeASymmetricSignature || (privateKeyForSignature==null && publicKeyForSignature==null);
-		finalizer=new Finalizer();
+		finalizer=new Finalizer(this);
 		this.aSymmetricKeyWrapperType = aSymmetricKeyWrapperType;
 		this.finalizer.privateKeyForEncryption=privateKeyForEncryption;
 		this.finalizer.publicKeyForEncryption=publicKeyForEncryption;
@@ -182,7 +187,6 @@ public class KeyWrapperAlgorithm extends MultiFormatProperties implements Secure
 		if (!aSymmetricKeyWrapperType.wrappingIncludeSignature()
 				&& !useSignature())
 			throw new IllegalArgumentException("This key wrapping type and this public key for encryption must be used with a signature algorithm");
-		registerCleaner(finalizer);
 	}
 
 	public KeyWrapperAlgorithm(SymmetricKeyWrapperType symmetricKeyWrapperType, PasswordHashType passwordHashType, WrappedPassword password) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
@@ -364,7 +368,6 @@ public class KeyWrapperAlgorithm extends MultiFormatProperties implements Secure
 	public WrappedEncryptedASymmetricPrivateKey wrap(AbstractSecureRandom random, IASymmetricPrivateKey privateKeyToWrap) throws IOException {
 		if (mode==ENCRYPTION_WITH_ASYMMETRIC_KEY_PAIR && finalizer.publicKeyForEncryption==null)
 			throw new IOException("Public key used for encryption is not available");
-		;
 		try (WrappedSecretData wsd=privateKeyToWrap.encode()){
 			AbstractEncryptionOutputAlgorithm cipher;
 			if (symmetricKeyWrapperType != null) {

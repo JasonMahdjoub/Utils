@@ -68,7 +68,8 @@ public class RandomCacheFileOutputStream extends RandomOutputStream implements C
 		private final File fileName;
 		private RandomOutputStream out;
 
-		private Finalizer(RandomCacheFileCenter randomCacheFileCenter, boolean removeFileWhenClosed, File fileName) {
+		private Finalizer(Cleanable cleanable, RandomCacheFileCenter randomCacheFileCenter, boolean removeFileWhenClosed, File fileName) {
+			super(cleanable);
 			this.randomCacheFileCenter = randomCacheFileCenter;
 			this.removeFileWhenClosed = removeFileWhenClosed;
 			this.fileName = fileName;
@@ -107,9 +108,7 @@ public class RandomCacheFileOutputStream extends RandomOutputStream implements C
 	}
 
 	RandomCacheFileOutputStream(RandomCacheFileCenter randomCacheFileCenter, File fileName, boolean removeFileWhenClosed, RandomFileOutputStream.AccessMode accessMode,int maxBufferSize, int maxBuffersNumber) {
-		this.finalizer=new Finalizer(randomCacheFileCenter, removeFileWhenClosed, fileName);
-
-		this.registerCleaner(finalizer);
+		this.finalizer=new Finalizer(this, randomCacheFileCenter, removeFileWhenClosed, fileName);
 		this.finalizer.out=new RandomByteArrayOutputStream();
 		this.finalizer.fileUsed=false;
 		this.accessMode=accessMode;

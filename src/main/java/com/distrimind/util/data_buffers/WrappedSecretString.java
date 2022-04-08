@@ -15,24 +15,24 @@ public class WrappedSecretString extends WrappedString implements AutoZeroizable
 	protected WrappedSecretString()
 	{
 		super();
-		registerCleaner(finalizer);
+		registerCleanerIfNotDone(finalizer);
 		finalizer.toZeroize=false;
 	}
 	public WrappedSecretString(char[] secretData) {
 		super(secretData);
-		registerCleaner(finalizer);
+		registerCleanerIfNotDone(finalizer);
 		finalizer.toZeroize=true;
 
 	}
 	WrappedSecretString(char[] data, String dataString) {
 		super(data, dataString);
-		registerCleaner(finalizer);
+		registerCleanerIfNotDone(finalizer);
 		finalizer.toZeroize=true;
 
 	}
 	public WrappedSecretString(String secretData) {
 		super(secretData);
-		registerCleaner(finalizer);
+		registerCleanerIfNotDone(finalizer);
 		finalizer.toZeroize=true;
 	}
 
@@ -40,12 +40,12 @@ public class WrappedSecretString extends WrappedString implements AutoZeroizable
 
 	public WrappedSecretString(WrappedString wrappedSecretString) {
 		super(wrappedSecretString);
-		registerCleaner(finalizer);
+		registerCleanerIfNotDone(finalizer);
 		finalizer.toZeroize=true;
 	}
 	public WrappedSecretString(WrappedData wrappedSecretData) {
 		super(wrappedSecretData, true);
-		registerCleaner(finalizer);
+		registerCleanerIfNotDone(finalizer);
 		finalizer.toZeroize=true;
 	}
 

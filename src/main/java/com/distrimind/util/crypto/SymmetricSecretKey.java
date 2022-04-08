@@ -36,6 +36,7 @@ package com.distrimind.util.crypto;
 
 import com.distrimind.bcfips.crypto.Algorithm;
 import com.distrimind.util.Bits;
+import com.distrimind.util.Cleanable;
 import com.distrimind.util.data_buffers.WrappedSecretData;
 import com.distrimind.util.data_buffers.WrappedSecretString;
 
@@ -66,6 +67,11 @@ public class SymmetricSecretKey extends AbstractKey implements ISecretDecentrali
 		private transient Object gnuSecretKey = null;
 
 		private transient com.distrimind.bcfips.crypto.SymmetricSecretKey bcfipsNativeSecretKey=null;
+
+		private Finalizer(Cleanable cleanable) {
+			super(cleanable);
+		}
+
 		@Override
 		protected void performCleanup() {
 			if (secretKey!=null)
@@ -185,8 +191,7 @@ public class SymmetricSecretKey extends AbstractKey implements ISecretDecentrali
 			throw new NullPointerException("type");
 		if (secretKey == null)
 			throw new NullPointerException("secretKey");
-		finalizer=new Finalizer();
-		registerCleaner(finalizer);
+		finalizer=new Finalizer(this);
 		this.finalizer.secretKey=secretKey.clone();
 		switch (type.getAlgorithmName().toUpperCase()) {
 			case "DES":
@@ -217,8 +222,7 @@ public class SymmetricSecretKey extends AbstractKey implements ISecretDecentrali
 			throw new NullPointerException("type");
 		if (secretKey == null)
 			throw new NullPointerException("secretKey");
-		finalizer=new Finalizer();
-		registerCleaner(finalizer);
+		finalizer=new Finalizer(this);
 		this.finalizer.secretKey=secretKey.clone();
 		this.keySizeBits=(short)(secretKey.length*8);
 		this.encryptionType = null;
@@ -284,8 +288,7 @@ public class SymmetricSecretKey extends AbstractKey implements ISecretDecentrali
 	private SymmetricSecretKey(byte[] secretKey, short keySize) {
 		if (secretKey == null)
 			throw new NullPointerException("secretKey");
-		finalizer=new Finalizer();
-		registerCleaner(finalizer);
+		finalizer=new Finalizer(this);
 		this.finalizer.secretKey = secretKey;
 		this.keySizeBits = keySize;
 		hashCode = Arrays.hashCode(this.finalizer.secretKey);

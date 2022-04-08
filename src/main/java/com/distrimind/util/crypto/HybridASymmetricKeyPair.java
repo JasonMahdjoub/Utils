@@ -36,6 +36,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 
 import com.distrimind.util.Bits;
+import com.distrimind.util.Cleanable;
 import com.distrimind.util.InvalidEncodedValue;
 import com.distrimind.util.data_buffers.WrappedData;
 import com.distrimind.util.data_buffers.WrappedSecretData;
@@ -61,6 +62,11 @@ public class HybridASymmetricKeyPair extends AbstractKeyPair<HybridASymmetricPri
 	{
 		private HybridASymmetricPrivateKey privateKey;
 		private HybridASymmetricPublicKey publicKey;
+
+		private Finalizer(Cleanable cleanable) {
+			super(cleanable);
+		}
+
 		@Override
 		protected void performCleanup() {
 			if (privateKey!=null) {
@@ -92,10 +98,9 @@ public class HybridASymmetricKeyPair extends AbstractKeyPair<HybridASymmetricPri
 				&& !PQCKeyPair.getAuthenticatedSignatureAlgorithmType().isPostQuantumAlgorithm())
 				|| (PQCKeyPair.getEncryptionAlgorithmType()!=null && !PQCKeyPair.getEncryptionAlgorithmType().isPostQuantumAlgorithm()))
 			throw new IllegalArgumentException("PQCPrivateKey must be a post quantum algorithm");
-		finalizer=new Finalizer();
+		finalizer=new Finalizer(this);
 		finalizer.privateKey=new HybridASymmetricPrivateKey(nonPQCKeyPair.getASymmetricPrivateKey(), PQCKeyPair.getASymmetricPrivateKey());
 		finalizer.publicKey=new HybridASymmetricPublicKey(nonPQCKeyPair.getASymmetricPublicKey(), PQCKeyPair.getASymmetricPublicKey());
-		registerCleaner(finalizer);
 	}
 	public HybridASymmetricKeyPair(HybridASymmetricPrivateKey privateKey, HybridASymmetricPublicKey publicKey) {
 		if (privateKey==null)
@@ -108,10 +113,9 @@ public class HybridASymmetricKeyPair extends AbstractKeyPair<HybridASymmetricPri
 		if ((privateKey.getPQCPrivateKey().getEncryptionAlgorithmType()==null)!=(publicKey.getPQCPublicKey().getEncryptionAlgorithmType()==null)
 				|| (privateKey.getPQCPrivateKey().getAuthenticatedSignatureAlgorithmType()==null)!=(publicKey.getPQCPublicKey().getAuthenticatedSignatureAlgorithmType()==null))
 			throw new IllegalArgumentException("The given keys must be used both for encryption or both for signature");
-		finalizer=new Finalizer();
+		finalizer=new Finalizer(this);
 		this.finalizer.privateKey=privateKey;
 		this.finalizer.publicKey=publicKey;
-		registerCleaner(finalizer);
 	}
 
 	static HybridASymmetricKeyPair decodeHybridKey(byte[] encoded, int off, int len, boolean fillArrayWithZerosWhenDecoded)

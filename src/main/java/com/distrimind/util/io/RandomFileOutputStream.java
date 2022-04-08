@@ -52,7 +52,7 @@ import java.nio.file.Path;
  * @since Utils 3.27.0
  */
 @SuppressWarnings("NullableProblems")
-public class RandomFileOutputStream extends RandomOutputStream {
+public class RandomFileOutputStream extends RandomOutputStream implements Cleanable{
 	public enum AccessMode {
 		/**
 		 * Open for reading and writing. If the file does not already exist then an
@@ -87,7 +87,8 @@ public class RandomFileOutputStream extends RandomOutputStream {
 		private final RandomAccessFile raf;
 		private boolean closed=false;
 
-		private Finalizer(RandomAccessFile raf) {
+		private Finalizer(Cleanable cleanable, RandomAccessFile raf) {
+			super(cleanable);
 			this.raf = raf;
 		}
 
@@ -120,7 +121,7 @@ public class RandomFileOutputStream extends RandomOutputStream {
 	}
 
 	public RandomFileOutputStream(File f, AccessMode mode) throws FileNotFoundException {
-		finalizer=new Finalizer(new RandomAccessFile(f, mode.getMode()));
+		finalizer=new Finalizer(this, new RandomAccessFile(f, mode.getMode()));
 	}
 
 	public RandomFileOutputStream(File f) throws FileNotFoundException {

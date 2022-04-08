@@ -34,6 +34,8 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
+import com.distrimind.util.Cleanable;
+
 import java.io.IOException;
 
 /**
@@ -46,6 +48,11 @@ public class AggregatedP2PLoginAgreements extends P2PLoginAgreement {
 	private final static class Finalizer extends Cleaner
 	{
 		private P2PLoginAgreement[] loginAgreements;
+
+		private Finalizer(Cleanable cleanable) {
+			super(cleanable);
+		}
+
 		@Override
 		protected void performCleanup() {
 			if (loginAgreements!=null) {
@@ -97,9 +104,8 @@ public class AggregatedP2PLoginAgreements extends P2PLoginAgreement {
 	AggregatedP2PLoginAgreements(P2PLoginAgreement ...loginAgreements)
 	{
 		super(getStepsNumberForReception(loginAgreements), getStepsNumberForSend(loginAgreements));
-		this.finalizer=new Finalizer();
+		this.finalizer=new Finalizer(this);
 		this.finalizer.loginAgreements=loginAgreements;
-		registerCleaner(finalizer);
 	}
 	@Override
 	protected boolean isAgreementProcessValidImpl() {

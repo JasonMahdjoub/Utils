@@ -88,14 +88,23 @@ class CleanerTools {
 			return hashCode;
 		}
 	}
-	private static final Map<WR, Cleanable.Cleaner> cleaners=new HashMap<>();
+	private static final Map<WR, WeakReference<Cleanable.Cleaner>> cleaners=new HashMap<>();
 	static void registerCleaner(Cleanable cleanable, Cleanable.Cleaner cleaner) {
-		Object o1, o2;
+		if (cleanable==null)
+			throw new NullPointerException();
+		if (cleaner==null)
+			throw new NullPointerException();
 		synchronized (CleanerTools.class) {
-
-			Cleanable.Cleaner previousCleaner = cleaners.putIfAbsent(cleaner.reference=new WR(cleanable), cleaner);
+			WeakReference<Cleanable.Cleaner> cleanerWR=new WeakReference<>(cleaner);
+			WeakReference<Cleanable.Cleaner> previousCleaner = cleaners.putIfAbsent(cleaner.reference=new WR(cleanable), cleanerWR);
 			if (previousCleaner != null) {
-				previousCleaner.setNext(cleaner);
+				Cleanable.Cleaner tmp=previousCleaner.get();
+				if (tmp==cleaner)
+					return;
+				if (tmp==null)
+					cleaners.put(cleaner.reference, cleanerWR);
+				else
+					tmp.setNext(cleaner);
 			}
 
 			if (m_create != null) {
@@ -129,35 +138,40 @@ class CleanerTools {
 		Cleanable.Cleaner c;
 		synchronized (CleanerTools.class)
 		{
-			c=cleaners.get(new WR(cleanable));
+			WeakReference<Cleanable.Cleaner> wr=cleaners.get(new WR(cleanable));
+			if (wr!=null)
+				c=wr.get();
+			else
+				c=null;
 		}
 		return c==null || c.isCleaned();
 	}
 
 	static void clean(Cleanable cleanable)
 	{
-		boolean useJavaCleaner=false;
 		Cleanable.Cleaner cleaner;
 		synchronized (CleanerTools.class)
 		{
-			cleaner=cleaners.remove(new WR(cleanable));
+			WeakReference<Cleanable.Cleaner> wr=cleaners.remove(new WR(cleanable));
+			if (wr!=null)
+				cleaner=wr.get();
+			else
+				cleaner=null;
 
-			if (cleaner!=null) {
+		}
+		if (cleaner!=null) {
 
-				if (CleanerTools.m_create !=null && JAVA_CLEANER!=null) {
-					useJavaCleaner=true;
+			if (CleanerTools.m_create !=null && JAVA_CLEANER!=null) {
 
-					try {
-						m_clean.invoke(cleaner.getCleanable());
-					} catch (IllegalAccessException | InvocationTargetException e) {
-						e.printStackTrace();
-					}
+
+				try {
+					m_clean.invoke(cleaner.getCleanable());
+				} catch (IllegalAccessException | InvocationTargetException e) {
+					e.printStackTrace();
 				}
 			}
-		}
-		if (!useJavaCleaner && cleaner!=null)
-		{
-			cleaner.runImpl(false);
+			else
+				cleaner.runImpl(false);
 		}
 
 	}
@@ -166,7 +180,11 @@ class CleanerTools {
 		Cleanable.Cleaner cleaner;
 		synchronized (CleanerTools.class)
 		{
-			cleaner=cleaners.get(new WR(cleanable));
+			WeakReference<Cleanable.Cleaner> wr=cleaners.get(new WR(cleanable));
+			if (wr!=null)
+				cleaner=wr.get();
+			else
+				cleaner=null;
 		}
 		if (cleaner!=null) {
 			cleaner.performCleanup();

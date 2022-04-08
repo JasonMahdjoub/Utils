@@ -42,6 +42,7 @@ import com.distrimind.bcfips.crypto.asymmetric.AsymmetricRSAPrivateKey;
 import com.distrimind.bouncycastle.pqc.jcajce.provider.mceliece.BCMcElieceCCA2PrivateKey;
 import com.distrimind.bouncycastle.pqc.jcajce.provider.mceliece.BCMcEliecePrivateKey;
 import com.distrimind.util.Bits;
+import com.distrimind.util.Cleanable;
 import com.distrimind.util.data_buffers.WrappedSecretData;
 import com.distrimind.util.data_buffers.WrappedSecretString;
 import com.distrimind.util.io.MessageExternalizationException;
@@ -85,6 +86,11 @@ public class ASymmetricPrivateKey extends AbstractKey implements IASymmetricPriv
 
 		private volatile transient Object gnuPrivateKey=null;
 		private volatile transient AsymmetricPrivateKey bouncyCastlePrivateKey=null;
+
+		private Finalizer(Cleanable cleanable) {
+			super(cleanable);
+		}
+
 		@Override
 		protected void performCleanup() {
 			if (privateKey!=null)
@@ -219,11 +225,10 @@ public class ASymmetricPrivateKey extends AbstractKey implements IASymmetricPriv
 			throw new IllegalArgumentException("keySize");
 		if (keySize>MAX_SIZE_IN_BITS_OF_NON_HYBRID_PRIVATE_KEY)
 			throw new IllegalArgumentException("keySize");
-		this.finalizer=new Finalizer();
+		this.finalizer=new Finalizer(this);
 		this.finalizer.privateKey = privateKey;
 		this.keySizeBits = keySize;
 		hashCode = Arrays.hashCode(privateKey);
-		registerCleaner(finalizer);
 	}
 
 	private ASymmetricPrivateKey(Object privateKey, int keySize) {
@@ -233,12 +238,11 @@ public class ASymmetricPrivateKey extends AbstractKey implements IASymmetricPriv
 			throw new IllegalArgumentException("keySize");
 		if (keySize>MAX_SIZE_IN_BITS_OF_NON_HYBRID_PRIVATE_KEY)
 			throw new IllegalArgumentException("keySize");
-		this.finalizer=new Finalizer();
+		this.finalizer=new Finalizer(this);
 		this.finalizer.privateKey = ASymmetricEncryptionType.encodeGnuPrivateKey(privateKey);
 		this.keySizeBits = keySize;
 		hashCode = Arrays.hashCode(this.finalizer.privateKey);
 		this.finalizer.gnuPrivateKey=null;
-		registerCleaner(finalizer);
 	}
 
 

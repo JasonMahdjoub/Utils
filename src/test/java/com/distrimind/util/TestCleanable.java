@@ -50,6 +50,10 @@ public class TestCleanable {
 	static class Finalizer extends Cleanable.Cleaner {
 		final AtomicReference<Long> ref = new AtomicReference<>(null);
 
+		protected Finalizer(Cleanable cleanable) {
+			super(cleanable);
+		}
+
 		@Override
 		public void performCleanup() {
 			ref.set(System.currentTimeMillis());
@@ -67,10 +71,9 @@ public class TestCleanable {
 		final Finalizer f;
 
 		public Example(boolean useSeveralFinalizers) {
-			f = new Finalizer();
-			registerCleaner(f);
+			f = new Finalizer(this);
 			if (useSeveralFinalizers)
-				registerCleaner(new Finalizer());
+				new Finalizer(this);
 		}
 
 		@Override
@@ -116,7 +119,6 @@ public class TestCleanable {
 			}
 			//noinspection UnusedAssignment
 			e = null;
-			System.runFinalization();
 			System.gc();
 
 
@@ -125,7 +127,6 @@ public class TestCleanable {
 			} catch (InterruptedException ex) {
 				ex.printStackTrace();
 			}
-			System.runFinalization();
 			System.gc();
 
 			Assert.assertNotNull(ref.get());

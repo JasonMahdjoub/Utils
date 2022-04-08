@@ -111,6 +111,11 @@ public class BCMcElieceCipher extends AbstractCipher{
 	private final static class PrivateKeyFinalizer extends Cleanable.Cleaner
 	{
 		private McEliecePrivateKeyParameters privateKeyParameters;
+
+		private PrivateKeyFinalizer(Cleanable cleanable) {
+			super(cleanable);
+		}
+
 		@Override
 		protected void performCleanup() {
 			if (privateKeyParameters!=null)
@@ -128,9 +133,8 @@ public class BCMcElieceCipher extends AbstractCipher{
 
 		PrivateKey()
 		{
-			finalizer=new PrivateKeyFinalizer();
+			finalizer=new PrivateKeyFinalizer(this);
 			finalizer.privateKeyParameters=null;
-			registerCleaner(finalizer);
 		}
 
 		public McEliecePrivateKeyParameters getPrivateKeyParameters() {
@@ -140,9 +144,8 @@ public class BCMcElieceCipher extends AbstractCipher{
 		PrivateKey(McEliecePrivateKeyParameters privateKeyParameters) {
 			if (privateKeyParameters==null)
 				throw new NullPointerException();
-			finalizer=new PrivateKeyFinalizer();
+			finalizer=new PrivateKeyFinalizer(this);
 			this.finalizer.privateKeyParameters = privateKeyParameters;
-			registerCleaner(finalizer);
 		}
 
 		@Override
@@ -233,6 +236,11 @@ public class BCMcElieceCipher extends AbstractCipher{
 	private static final class PrivateKeyCAA2Finalizer extends Cleanable.Cleaner
 	{
 		private McElieceCCA2PrivateKeyParameters privateKeyParameters;
+
+		private PrivateKeyCAA2Finalizer(Cleanable cleanable) {
+			super(cleanable);
+		}
+
 		@Override
 		protected void performCleanup() {
 			if (privateKeyParameters!=null)
@@ -253,17 +261,15 @@ public class BCMcElieceCipher extends AbstractCipher{
 
 		PrivateKeyCCA2()
 		{
-			finalizer=new PrivateKeyCAA2Finalizer();
+			finalizer=new PrivateKeyCAA2Finalizer(this);
 			finalizer.privateKeyParameters=null;
-			registerCleaner(finalizer);
 		}
 
 		PrivateKeyCCA2(McElieceCCA2PrivateKeyParameters privateKeyParameters) {
 			if (privateKeyParameters==null)
 				throw new NullPointerException();
-			this.finalizer=new PrivateKeyCAA2Finalizer();
+			this.finalizer=new PrivateKeyCAA2Finalizer(this);
 			this.finalizer.privateKeyParameters = privateKeyParameters;
-			registerCleaner(finalizer);
 		}
 
 		@Override

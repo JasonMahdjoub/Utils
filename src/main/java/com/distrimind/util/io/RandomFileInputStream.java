@@ -56,7 +56,8 @@ public class RandomFileInputStream extends RandomInputStream implements Cleanabl
 		private final RandomAccessFile raf;
 		private boolean closed=false;
 
-		private Finalizer(RandomAccessFile raf) {
+		private Finalizer(Cleanable cleanable, RandomAccessFile raf) {
+			super(cleanable);
 			this.raf = raf;
 		}
 
@@ -87,8 +88,7 @@ public class RandomFileInputStream extends RandomInputStream implements Cleanabl
 	}
 
 	public RandomFileInputStream(File f) throws FileNotFoundException {
-		finalizer=new Finalizer(new RandomAccessFile(f, "r"));
-		registerCleaner(finalizer);
+		finalizer=new Finalizer(this, new RandomAccessFile(f, "r"));
 		this.position=0;
 		this.checkPosition=false;
 	}
@@ -97,8 +97,7 @@ public class RandomFileInputStream extends RandomInputStream implements Cleanabl
 	{
 		if (raf==null)
 			throw new NullPointerException();
-		finalizer=new Finalizer(raf);
-		registerCleaner(finalizer);
+		finalizer=new Finalizer(this, raf);
 		this.position=0;
 		this.checkPosition=true;
 	}

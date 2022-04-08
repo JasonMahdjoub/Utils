@@ -1,6 +1,6 @@
 Utils
 =====
-5.23.2 STABLE (Build: 3954) (from 04/01/2016 to 05/04/2022)
+5.23.5 STABLE (Build: 3988) (from 04/01/2016 to 07/04/2022)
 
 # Creator(s):
 * Jason MAHDJOUB
@@ -9,6 +9,15 @@ Utils
 * Jason MAHDJOUB (Entered in the team at 04/01/2016)
 
 # Changes:
+
+
+### 5.23.5 STABLE (07/04/2022)
+#### Internal change(s)
+* Alter Cleanable API.
+#### Bug fixe(s)
+* Fix NullPointerException into finalizer of NewHopeKeyAgreementServer class.
+* Fix issue with Cleaner on JVM 8. Finalize was not called. JVM greater than Java 8 was not concerned by this issue.
+* Fix dead lock with Cleaner.
 
 
 ### 5.23.2 STABLE (05/04/2022)

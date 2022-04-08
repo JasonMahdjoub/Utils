@@ -1,5 +1,7 @@
 package com.distrimind.util.crypto;
 
+import com.distrimind.util.Cleanable;
+
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
@@ -15,7 +17,8 @@ public class P2PASymmetricSecretMessageExchangerAgreementWithSymmetricSignature 
         private final P2PASymmetricSecretMessageExchangerAgreement p2PASymmetricSecretMessageExchangerAgreement;
         private final P2PLoginWithSymmetricSignature login;
 
-        private Finalizer(P2PASymmetricSecretMessageExchangerAgreement p2PASymmetricSecretMessageExchangerAgreement, P2PLoginWithSymmetricSignature login) {
+        private Finalizer(Cleanable cleanable, P2PASymmetricSecretMessageExchangerAgreement p2PASymmetricSecretMessageExchangerAgreement, P2PLoginWithSymmetricSignature login) {
+            super(cleanable);
             this.p2PASymmetricSecretMessageExchangerAgreement = p2PASymmetricSecretMessageExchangerAgreement;
             this.login = login;
         }
@@ -40,16 +43,14 @@ public class P2PASymmetricSecretMessageExchangerAgreementWithSymmetricSignature 
     P2PASymmetricSecretMessageExchangerAgreementWithSymmetricSignature(AbstractSecureRandom random, char[] message, byte[] salt,
                                                                        int offset_salt, int len_salt, SymmetricSecretKey secretKeyForSignature,MessageDigestType messageDigestType, PasswordHashType passwordHashType, ASymmetricPublicKey myPublicKey) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
         super(secretKeyForSignature==null?2:4, secretKeyForSignature==null?2:4);
-        finalizer=new Finalizer(new P2PASymmetricSecretMessageExchangerAgreement(random, messageDigestType, passwordHashType, myPublicKey, salt, offset_salt, len_salt, message),
+        finalizer=new Finalizer(this, new P2PASymmetricSecretMessageExchangerAgreement(random, messageDigestType, passwordHashType, myPublicKey, salt, offset_salt, len_salt, message),
                 secretKeyForSignature==null?null:new P2PLoginWithSymmetricSignature(secretKeyForSignature, random));
-        registerCleaner(finalizer);
     }
     P2PASymmetricSecretMessageExchangerAgreementWithSymmetricSignature(AbstractSecureRandom random, byte[] message, int offset, int len, byte[] salt,
                                                                        int offset_salt, int len_salt, boolean messageIsKey, SymmetricSecretKey secretKeyForSignature, MessageDigestType messageDigestType, PasswordHashType passwordHashType, ASymmetricPublicKey myPublicKey) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
         super(secretKeyForSignature==null?2:4, secretKeyForSignature==null?2:4);
-        finalizer=new Finalizer(new P2PASymmetricSecretMessageExchangerAgreement(random,messageDigestType, passwordHashType, myPublicKey, salt, offset_salt, len_salt, message, offset, len, messageIsKey),
+        finalizer=new Finalizer(this, new P2PASymmetricSecretMessageExchangerAgreement(random,messageDigestType, passwordHashType, myPublicKey, salt, offset_salt, len_salt, message, offset, len, messageIsKey),
                 secretKeyForSignature==null?null:new P2PLoginWithSymmetricSignature(secretKeyForSignature, random));
-        registerCleaner(finalizer);
     }
     @Override
     protected boolean isAgreementProcessValidImpl() {

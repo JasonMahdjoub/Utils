@@ -44,7 +44,7 @@ import java.lang.reflect.Modifier;
  * Otherwise, it uses standard finalize method.
  *
  * To replace finalize method, your "finalizable" class must inherit this class.
- * Then, a constructor must call the method {@link #registerCleaner(Cleaner)} with a cleaner that
+ * Then, a constructor must call the method {@link #registerCleanerIfNotDone(Cleaner)} with a cleaner that
  * inherit the class {@link Cleaner}, and that must implement the method {@link Cleaner#performCleanup()}
  *
  * If you do not call the method {@link #clean()}, then the garbage collector will call it for you
@@ -57,7 +57,6 @@ import java.lang.reflect.Modifier;
  * @version 1.0
  * @since MaDKitLanEdition 5.23.0
  */
-@SuppressWarnings("deprecation")
 public interface Cleanable extends AutoCloseable {
 
 	abstract class Cleaner implements Runnable
@@ -69,11 +68,19 @@ public interface Cleanable extends AutoCloseable {
 		protected abstract void performCleanup();
 
 
-		protected Cleaner()
+		/**
+		 *
+		 * @param cleanable if given cleanable is different to NULL, register this cleaner to cleanable
+		 */
+		protected Cleaner(Cleanable cleanable)
 		{
 			Class<? extends Cleaner> c=this.getClass();
 			if (c.isMemberClass() && !Modifier.isStatic(c.getModifiers()))
 				throw new IllegalAccessError("The class "+c+" which inherits from class "+Cleaner.class.getName()+" must be static");
+			if (cleanable!=null)
+			{
+				CleanerTools.registerCleaner(cleanable, this);
+			}
 		}
 
 		@Override
@@ -162,7 +169,7 @@ public interface Cleanable extends AutoCloseable {
 	}
 
 
-	default void registerCleaner(Cleanable.Cleaner cleaner)
+	default void registerCleanerIfNotDone(Cleanable.Cleaner cleaner)
 	{
 		CleanerTools.registerCleaner(this, cleaner);
 	}

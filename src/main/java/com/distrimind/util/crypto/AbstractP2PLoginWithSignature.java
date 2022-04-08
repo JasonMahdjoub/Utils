@@ -36,6 +36,7 @@ package com.distrimind.util.crypto;
 
 
 import com.distrimind.bouncycastle.crypto.CryptoException;
+import com.distrimind.util.Cleanable;
 import com.distrimind.util.io.Integrity;
 import com.distrimind.util.io.MessageExternalizationException;
 
@@ -52,6 +53,11 @@ public abstract class AbstractP2PLoginWithSignature extends P2PLoginAgreement {
 	private static final class Finalizer extends Cleaner
 	{
 		private byte[] myMessage, otherMessage=null;
+
+		private Finalizer(Cleanable cleanable) {
+			super(cleanable);
+		}
+
 		@Override
 		protected void performCleanup() {
 			if (myMessage!=null)
@@ -73,12 +79,11 @@ public abstract class AbstractP2PLoginWithSignature extends P2PLoginAgreement {
 		super(2, 2);
 		if (checker==null && signer==null)
 			throw new NullPointerException();
-		this.finalizer=new Finalizer();
+		this.finalizer=new Finalizer(this);
 		finalizer.myMessage=new byte[messageSize];
 		random.nextBytes(finalizer.myMessage);
 		this.signer=signer;
 		this.checker=checker;
-		registerCleaner(finalizer);
 	}
 
 	@Override

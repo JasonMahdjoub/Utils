@@ -36,6 +36,7 @@ package com.distrimind.util.crypto;
 
 import com.distrimind.bouncycastle.crypto.CryptoException;
 import com.distrimind.bouncycastle.jcajce.spec.UserKeyingMaterialSpec;
+import com.distrimind.util.Cleanable;
 import com.distrimind.util.data_buffers.WrappedData;
 import com.distrimind.util.io.Integrity;
 import com.distrimind.util.io.MessageExternalizationException;
@@ -57,6 +58,11 @@ public class EllipticCurveDiffieHellmanAlgorithm extends KeyAgreement {
 	{
 		private SymmetricSecretKey derivedKey;
 		private ASymmetricKeyPair myKeyPair;
+
+		private Finalizer(Cleanable cleanable) {
+			super(cleanable);
+		}
+
 		@Override
 		protected void performCleanup() {
 			if (derivedKey!=null)
@@ -101,7 +107,7 @@ public class EllipticCurveDiffieHellmanAlgorithm extends KeyAgreement {
 			throw new NullPointerException();
 		if (randomForKeys == null)
 			throw new NullPointerException();
-		this.finalizer=new Finalizer();
+		this.finalizer=new Finalizer(this);
 		this.type = type;
 		this.randomForKeys=randomForKeys;
 
@@ -110,7 +116,6 @@ public class EllipticCurveDiffieHellmanAlgorithm extends KeyAgreement {
 
 		reset();
 		generateAndSetKeyPair();
-		registerCleaner(finalizer);
 	}
 
 

@@ -18,25 +18,25 @@ public class WrappedSecretData extends WrappedData implements ISecretValue {
 	{
 		super();
 		finalizer.toZeroize=false;
-		registerCleaner(finalizer);
+		registerCleanerIfNotDone(finalizer);
 	}
 	public WrappedSecretData(WrappedString secretData) throws InvalidEncodedValue {
 		super();
-		registerCleaner(finalizer);
+		registerCleanerIfNotDone(finalizer);
 		setData(Bits.toBytesArrayFromBase64String(secretData.toString(), true));
 	}
 
 
 	public WrappedSecretData(byte[] secretData) {
 		super(secretData);
-		registerCleaner(finalizer);
+		registerCleanerIfNotDone(finalizer);
 		finalizer.toZeroize=true;
 
 	}
 
 	public WrappedSecretData(WrappedData wrappedSecretData) {
 		super(wrappedSecretData.getBytes().clone());
-		registerCleaner(finalizer);
+		registerCleanerIfNotDone(finalizer);
 	}
 
 	protected void setData(byte[] data)

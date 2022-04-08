@@ -221,6 +221,11 @@ public class ServerASymmetricEncryptionAlgorithm implements IEncryptionInputAlgo
 	private final static class ServerFinalizer extends Cleanable.Cleaner
 	{
 		private byte[] buffer=new byte[BUFFER_SIZE];
+
+		private ServerFinalizer(Cleanable cleanable) {
+			super(cleanable);
+		}
+
 		@Override
 		protected void performCleanup() {
 			if (buffer!=null) {
@@ -253,7 +258,7 @@ public class ServerASymmetricEncryptionAlgorithm implements IEncryptionInputAlgo
 				throw new NullPointerException("myKeyPair");
 			if (myPrivateKey.isCleaned())
 				throw new IllegalArgumentException();
-			finalizer=new ServerFinalizer();
+			finalizer=new ServerFinalizer(this);
 			try {
 				this.type = myPrivateKey.getEncryptionAlgorithmType();
 				this.myPrivateKey = myPrivateKey;
@@ -262,7 +267,6 @@ public class ServerASymmetricEncryptionAlgorithm implements IEncryptionInputAlgo
 				maxPlainTextSizeForEncoding = myPrivateKey.getMaxBlockSize();
 				maxEncryptedPartLength = cipher.getOutputSize(maxPlainTextSizeForEncoding);
 				initCipherForDecryption(cipher, null, null);
-				registerCleaner(finalizer);
 			} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
 				throw new IOException();
 			}

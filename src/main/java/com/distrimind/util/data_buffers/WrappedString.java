@@ -18,6 +18,11 @@ public class WrappedString {
 		private char[] chars;
 		private String string;
 		protected transient boolean toZeroize;
+
+		protected Finalizer() {
+			super(null);
+		}
+
 		@Override
 		protected void performCleanup() {
 			if (toZeroize) {

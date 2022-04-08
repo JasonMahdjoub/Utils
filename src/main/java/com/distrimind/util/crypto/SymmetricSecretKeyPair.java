@@ -36,6 +36,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 
 import com.distrimind.util.Bits;
+import com.distrimind.util.Cleanable;
 import com.distrimind.util.data_buffers.WrappedSecretData;
 import com.distrimind.util.data_buffers.WrappedSecretString;
 
@@ -55,6 +56,10 @@ public class SymmetricSecretKeyPair extends AbstractKey implements ISecretDecent
 		private SymmetricSecretKey secretKeyForEncryption;
 		private SymmetricSecretKey secretKeyForSignature;
 
+		private Finalizer(Cleanable cleanable) {
+			super(cleanable);
+		}
+
 		@Override
 		protected void performCleanup() {
 			secretKeyForEncryption = null;
@@ -71,8 +76,7 @@ public class SymmetricSecretKeyPair extends AbstractKey implements ISecretDecent
 			throw new IllegalArgumentException();
 		if (!secretKeyForSignature.useAuthenticatedSignatureAlgorithm())
 			throw new IllegalArgumentException();
-		finalizer=new Finalizer();
-		registerCleaner(finalizer);
+		finalizer=new Finalizer(this);
 		this.finalizer.secretKeyForEncryption = secretKeyForEncryption;
 		this.finalizer.secretKeyForSignature = secretKeyForSignature;
 	}

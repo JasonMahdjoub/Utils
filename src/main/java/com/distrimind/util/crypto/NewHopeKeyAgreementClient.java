@@ -37,6 +37,7 @@ package com.distrimind.util.crypto;
 import java.io.IOException;
 import java.util.Arrays;
 
+import com.distrimind.util.Cleanable;
 import com.distrimind.util.io.Integrity;
 import com.distrimind.util.io.MessageExternalizationException;
 import com.distrimind.bouncycastle.crypto.AsymmetricCipherKeyPair;
@@ -56,6 +57,11 @@ public class NewHopeKeyAgreementClient extends AbstractNewHopeKeyAgreement{
 	private static final class Finalizer extends Cleaner
 	{
 		private NHPrivateKeyParameters priv;
+
+		private Finalizer(Cleanable cleanable) {
+			super(cleanable);
+		}
+
 		@Override
 		protected void performCleanup() {
 			if (priv!=null)
@@ -77,14 +83,12 @@ public class NewHopeKeyAgreementClient extends AbstractNewHopeKeyAgreement{
 	NewHopeKeyAgreementClient(SymmetricAuthenticatedSignatureType type, short keySizeBits, AbstractSecureRandom randomForKeys) {
 		super(type, (short)(keySizeBits/8));
 		this.randomForKeys=randomForKeys;
-		finalizer=new Finalizer();
-		registerCleaner(finalizer);
+		finalizer=new Finalizer(this);
 	}
 	NewHopeKeyAgreementClient(SymmetricEncryptionType type, short keySizeBits, AbstractSecureRandom randomForKeys) {
 		super(type, (short)(keySizeBits/8));
 		this.randomForKeys=randomForKeys;
-		finalizer=new Finalizer();
-		registerCleaner(finalizer);
+		finalizer=new Finalizer(this);
 	}
 
 	@Override

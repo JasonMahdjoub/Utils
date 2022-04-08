@@ -36,6 +36,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 
 import com.distrimind.util.Bits;
+import com.distrimind.util.Cleanable;
 import com.distrimind.util.data_buffers.WrappedSecretData;
 import com.distrimind.util.io.Integrity;
 import com.distrimind.util.io.MessageExternalizationException;
@@ -56,6 +57,11 @@ public class HybridKeyAgreement extends KeyAgreement{
 	{
 		private KeyAgreement nonPQCKeyAgreement, PQCKeyAgreement;
 		private SymmetricSecretKey secretKey=null;
+
+		protected Finalizer(Cleanable cleanable) {
+			super(cleanable);
+		}
+
 		@Override
 		protected void performCleanup() {
 			if (nonPQCKeyAgreement!=null) {
@@ -84,10 +90,9 @@ public class HybridKeyAgreement extends KeyAgreement{
 			throw new IllegalArgumentException();
 		if (!PQCKeyAgreement.isPostQuantumAgreement())
 			throw new IllegalArgumentException();
-		finalizer=new Finalizer();
+		finalizer=new Finalizer(this);
 		this.finalizer.nonPQCKeyAgreement=nonPQCKeyAgreement;
 		this.finalizer.PQCKeyAgreement=PQCKeyAgreement;
-		registerCleaner(finalizer);
 	}
 
 	@Override

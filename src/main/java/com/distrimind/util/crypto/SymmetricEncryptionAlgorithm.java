@@ -34,6 +34,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
+import com.distrimind.util.Cleanable;
 import com.distrimind.util.io.*;
 
 import javax.crypto.Cipher;
@@ -55,6 +56,11 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 	private static final class Finalizer extends Cleaner
 	{
 		private byte[] externalCounter;
+
+		private Finalizer(Cleanable cleanable) {
+			super(cleanable);
+		}
+
 		@Override
 		protected void performCleanup() {
 			if (externalCounter!=null) {
@@ -223,8 +229,7 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 		super(key.getEncryptionAlgorithmType().getCipherInstance(), key.getEncryptionAlgorithmType().getIVSizeBytes());
 		if (key.isCleaned())
 			throw new IllegalArgumentException();
-		finalizer=new Finalizer();
-		registerCleaner(finalizer);
+		finalizer=new Finalizer(this);
 		if (random==null)
 			throw new NullPointerException();
 		this.type = key.getEncryptionAlgorithmType();

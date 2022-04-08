@@ -35,6 +35,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
 package com.distrimind.util.crypto;
 
 import com.distrimind.util.AutoZeroizable;
+import com.distrimind.util.Cleanable;
 import com.distrimind.util.FileTools;
 import com.distrimind.util.io.*;
 
@@ -53,6 +54,11 @@ public abstract class AbstractEncryptionOutputAlgorithm implements AutoZeroizabl
 	protected static final class Finalizer extends Cleaner
 	{
 		byte[] buffer;
+
+		private Finalizer(Cleanable cleanable) {
+			super(cleanable);
+		}
+
 		@Override
 		protected void performCleanup() {
 			if (buffer!=null) {
@@ -94,10 +100,9 @@ public abstract class AbstractEncryptionOutputAlgorithm implements AutoZeroizabl
 	{
 		super();
 		cipher=null;
-		this.finalizer=new Finalizer();
+		this.finalizer=new Finalizer(this);
 		finalizer.buffer=null;
 		iv=null;
-		registerCleaner(finalizer);
 	}
 
 	protected AbstractEncryptionOutputAlgorithm(AbstractCipher cipher, int ivSizeBytes) {
@@ -109,8 +114,7 @@ public abstract class AbstractEncryptionOutputAlgorithm implements AutoZeroizabl
 		}
 		else
 			iv = null;
-		this.finalizer=new Finalizer();
-		this.registerCleaner(finalizer);
+		this.finalizer=new Finalizer(this);
 	}
 
 	protected void initBufferAllocatorArgs() throws IOException {

@@ -1,6 +1,7 @@
 package com.distrimind.util.crypto;
 
 import com.distrimind.bouncycastle.crypto.CryptoException;
+import com.distrimind.util.Cleanable;
 import com.distrimind.util.io.Integrity;
 import com.distrimind.util.io.MessageExternalizationException;
 
@@ -22,6 +23,11 @@ public class P2PASymmetricSecretMessageExchangerAgreement extends P2PLoginAgreem
     {
         private byte[] bytesPassword;
         private char[] charPassword;
+
+        private Finalizer(Cleanable cleanable) {
+            super(cleanable);
+        }
+
         @Override
         protected void performCleanup() {
             if (bytesPassword!=null)
@@ -75,12 +81,11 @@ public class P2PASymmetricSecretMessageExchangerAgreement extends P2PLoginAgreem
     private P2PASymmetricSecretMessageExchangerAgreement(AbstractSecureRandom secureRandom, MessageDigestType messageDigestType, PasswordHashType passwordHashType,
                                                          ASymmetricPublicKey myPublicKey, byte[] salt, int offset_salt, int len_salt) throws NoSuchAlgorithmException, NoSuchProviderException, MessageExternalizationException {
         super(2, 2);
-        finalizer=new Finalizer();
+        finalizer=new Finalizer(this);
         this.p2PASymmetricSecretMessageExchanger = new P2PASymmetricSecretMessageExchanger(secureRandom, messageDigestType, passwordHashType, myPublicKey);
         this.salt=salt;
         this.offset_salt=offset_salt;
         this.length_salt=len_salt;
-        registerCleaner(finalizer);
     }
 
     @Override
