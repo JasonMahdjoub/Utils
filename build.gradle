@@ -71,6 +71,9 @@ repositories {
     mavenCentral()
 
 }
+def javaVersion="8"
+sourceCompatibility = javaVersion
+targetCompatibility= javaVersion
 
 dependencies {
     testImplementation 'org.testng:testng:7.5'
@@ -92,9 +95,7 @@ dependencies {
 
 }
 
-def javaVersion="8"
-sourceCompatibility = javaVersion
-targetCompatibility= javaVersion
+
 
 /*idea {
     project {
