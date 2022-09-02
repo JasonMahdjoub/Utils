@@ -67,6 +67,7 @@ import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.sql.Date;
 import java.util.*;
 import java.util.Map.Entry;
@@ -82,11 +83,11 @@ import java.util.regex.Pattern;
  * class, {@link Class} class, {@link Level} class, {@link Map} class,
  * {@link List} class, {@link URI} class, {@link URL} class, {@link File} class,
  * and all classes that implements this interface.
- * 
+ * <p>
  * Arrays are not already managed.
- * 
+ * <p>
  * All types that are not managed are just not treated into the XML generation.
- * 
+ * <p>
  * 
  * 
  * @author Jason Mahdjoub
@@ -117,7 +118,7 @@ public abstract class MultiFormatProperties implements Cloneable, Serializable {
 	 *             if a problem of XML parse occurs
 	 */
 	public static Document getDOM(File xmlFile) throws SAXException, IOException, ParserConfigurationException {
-		try (final InputStream is = new FileInputStream(xmlFile)) {
+		try (final InputStream is = Files.newInputStream(xmlFile.toPath())) {
 			return getDOM(is);
 		}
 	}
@@ -472,7 +473,7 @@ public abstract class MultiFormatProperties implements Cloneable, Serializable {
 			throw new NullPointerException("document");
 
 		Node n = getRootNode(document);
-		if (n == null || n.getChildNodes() == null)
+		if (n == null)
 			throw new PropertiesParseException(
 					"Impossible to find the node named " + this.getClass().getCanonicalName());
 
@@ -541,7 +542,7 @@ public abstract class MultiFormatProperties implements Cloneable, Serializable {
 	
 	/**
 	 * Load properties from {@link Properties} class.
-	 * 
+	 * <p>
 	 * 
 	 * if one property does not exists, put the value into the free string
 	 * properties returned by {@link #getFreeStringProperties()}.
@@ -928,7 +929,7 @@ public abstract class MultiFormatProperties implements Cloneable, Serializable {
 
 		yaml.setBeanAccess(BeanAccess.FIELD);
 		yaml.setName(this.getClass().getSimpleName());
-		try(OutputStreamWriter fw = new OutputStreamWriter(new FileOutputStream(yaml_file), StandardCharsets.UTF_8))
+		try(OutputStreamWriter fw = new OutputStreamWriter(Files.newOutputStream(yaml_file.toPath()), StandardCharsets.UTF_8))
 		{
 			yaml.dump(this, fw);
 		}
@@ -954,7 +955,7 @@ public abstract class MultiFormatProperties implements Cloneable, Serializable {
 	 */
 	public void loadYAML(File yamlFile) throws IOException {
 		
-		try(InputStreamReader fr=new InputStreamReader(new FileInputStream(yamlFile), StandardCharsets.UTF_8))
+		try(InputStreamReader fr=new InputStreamReader(Files.newInputStream(yamlFile.toPath()), StandardCharsets.UTF_8))
 		{
 			loadYAML(fr);
 		}
@@ -1060,6 +1061,11 @@ public abstract class MultiFormatProperties implements Cloneable, Serializable {
 
         return true;
     }
+
+	@Override
+	public MultiFormatProperties clone() throws CloneNotSupportedException{
+		return (MultiFormatProperties) super.clone();
+	}
 
 
 	private class YamlRepresenting extends Representer
@@ -1208,8 +1214,7 @@ public abstract class MultiFormatProperties implements Cloneable, Serializable {
 	        }
 	    }
 		@Override
-		protected Object newInstance(Class<?> ancestor, org.yaml.snakeyaml.nodes.Node node, boolean tryDefault)
-	            throws InstantiationException {
+		protected Object newInstance(Class<?> ancestor, org.yaml.snakeyaml.nodes.Node node, boolean tryDefault) {
 			
 			super.newInstance(ancestor, node, tryDefault);
 			if (setFirstTime)

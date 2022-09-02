@@ -59,12 +59,14 @@ class WindowsNITools extends NITools {
 		try {
 			if (_network_interface.isLoopback())
 				return Long.MAX_VALUE;
-			Process p ;
+
 			// TODO check compatibility with Vista and Seven
+			ProcessBuilder pb;
 			if (OSVersion.getCurrentOSVersion()!=null && OSVersion.getCurrentOSVersion()==OSVersion.WINDOWS_VISTA)
-				p = Runtime.getRuntime().exec("wmic NIC where \"NetEnabled=true\" get \"InterfaceIndex,Speed\"");
+				pb = new ProcessBuilder("wmic NIC where \"NetEnabled=true\" get \"InterfaceIndex,Speed\"");
 			else
-				p = Runtime.getRuntime().exec("wmic NIC where NetEnabled=true get InterfaceIndex,Speed");
+				pb = new ProcessBuilder("wmic NIC where NetEnabled=true get InterfaceIndex,Speed");
+			Process p=pb.start() ;
 
 			long res = -1;
 			try (InputStreamReader isr = new InputStreamReader(p.getInputStream())) {

@@ -250,7 +250,7 @@ public class P2PASymmetricSecretMessageExchanger {
 					new SymmetricSecretKey(SymmetricEncryptionType.BC_FIPS_AES_GCM,
 							new SecretKeySpec(hashedMessage,
 									SymmetricEncryptionType.BC_FIPS_AES_GCM.getAlgorithmName()),
-							(short) 256));
+							(short) 256), FalseCPUUsageType.ADDITIONAL_CPU_USAGE_AFTER_THE_BLOCK_ENCRYPTION);
 			byte[] res = sea.encode(OutputDataPackagerWithRandomValues.encode(encodedLevel2, encodedLevel2.length));
 			Arrays.fill(hashedMessage, (byte) 0);
 			return res;
@@ -271,7 +271,7 @@ public class P2PASymmetricSecretMessageExchanger {
 				new SymmetricSecretKey(SymmetricEncryptionType.BC_FIPS_AES_GCM,
 						new SecretKeySpec(hashedMessage,
 								SymmetricEncryptionType.BC_FIPS_AES_GCM.getAlgorithmName()),
-						(short) 256));
+						(short) 256), FalseCPUUsageType.ADDITIONAL_CPU_USAGE_AFTER_THE_BLOCK_ENCRYPTION);
 		byte[] v = sea.decode(encodedLevel1, off_encodedlevel1, len_encodedlevel1);
 		try {
 			return InputDataPackagedWithRandomValues.decode(v);

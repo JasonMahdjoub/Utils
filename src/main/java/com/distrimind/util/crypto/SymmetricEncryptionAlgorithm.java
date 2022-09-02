@@ -35,6 +35,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
 package com.distrimind.util.crypto;
 
 import com.distrimind.util.Cleanable;
+import com.distrimind.util.NotYetImplementedException;
 import com.distrimind.util.io.*;
 
 import javax.crypto.Cipher;
@@ -84,6 +85,7 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 	private final boolean supportRandomReadWrite;
 	private final boolean chacha;
 	private final boolean gcm;
+	private final FalseCPUUsageType falseCPUUsageType;
 
 	@Override
 	public boolean isPostQuantumEncryption() {
@@ -156,11 +158,12 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 			nonEncryptedInputStream.seek(0);
 		List<SubStreamParameter> parameters = subStreamParameters.getParameters();
 		byte[][] ivs = hashResultFromEncryptedStream.getIvs();
-		for (byte[] iv : ivs)
-			if (iv==null)
+		for (byte[] iv : ivs) {
+			if (iv == null)
 				throw new IOException();
 			if (iv.length != key.getEncryptionAlgorithmType().getIVSizeBytes())
 				throw new IOException();
+		}
 
 		final int ivSizeWithoutExternalCounter=getIVSizeBytesWithoutExternalCounter();
 		NullRandomOutputStream nullStream=new NullRandomOutputStream();
@@ -216,15 +219,15 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 		}
 	}
 
-	public SymmetricEncryptionAlgorithm(AbstractSecureRandom random, SymmetricSecretKey key)
+	public SymmetricEncryptionAlgorithm(AbstractSecureRandom random, SymmetricSecretKey key, FalseCPUUsageType falseCPUUsageType)
 			throws IOException {
-		this(random, key, (byte)0, true);
+		this(random, key, falseCPUUsageType, (byte)0, true);
 	}
-	public SymmetricEncryptionAlgorithm(AbstractSecureRandom random, SymmetricSecretKey key, byte blockModeCounterBytes)
+	public SymmetricEncryptionAlgorithm(AbstractSecureRandom random, SymmetricSecretKey key, FalseCPUUsageType falseCPUUsageType, byte blockModeCounterBytes)
 			throws IOException {
-		this(random, key, blockModeCounterBytes, false);
+		this(random, key, falseCPUUsageType, blockModeCounterBytes, false);
 	}
-	public SymmetricEncryptionAlgorithm(AbstractSecureRandom random, SymmetricSecretKey key, byte blockModeCounterBytes, boolean internalCounter)
+	public SymmetricEncryptionAlgorithm(AbstractSecureRandom random, SymmetricSecretKey key, FalseCPUUsageType falseCPUUsageType, byte blockModeCounterBytes, boolean internalCounter)
 			throws IOException {
 		super(key.getEncryptionAlgorithmType().getCipherInstance(), key.getEncryptionAlgorithmType().getIVSizeBytes());
 		if (key.isCleaned())
@@ -247,6 +250,14 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 		finalizer.externalCounter=this.internalCounter?null:new byte[blockModeCounterBytes];
 		this.chacha =type.getAlgorithmName().toUpperCase().startsWith(SymmetricEncryptionType.CHACHA20_NO_RANDOM_ACCESS.getAlgorithmName().toUpperCase());
 		this.gcm = type.getBlockMode().equalsIgnoreCase("GCM");
+		this.falseCPUUsageType=falseCPUUsageType;
+		if (falseCPUUsageType==null)
+		{
+			if (isUsingSideChannelMitigation())
+				throw new NullPointerException();
+		}
+		else if (falseCPUUsageType==FalseCPUUsageType.ADDITIONAL_CPU_USAGE_IN_REAL_TIME)
+			throw new NotYetImplementedException();
 
 		this.cipher.init(Cipher.ENCRYPT_MODE, this.key, generateIV());
 
@@ -403,6 +414,26 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 	protected void initCipherForEncryptionWithIv(AbstractCipher cipher, byte[] iv) throws IOException {
 		checkKeysNotCleaned();
 		cipher.init(Cipher.ENCRYPT_MODE, key, iv);
+	}
+
+	@Override
+	protected boolean isPowerMonitoringSideChannelAttackPossible() {
+		return key.getEncryptionAlgorithmType().isPowerMonitoringAttackPossible();
+	}
+
+	@Override
+	protected boolean isTimingSideChannelAttackPossible() {
+		return key.getEncryptionAlgorithmType().isTimingAttackPossibleIntoThisMachine();
+	}
+
+	@Override
+	protected boolean isFrequencySideChannelAttackPossible() {
+		return key.getEncryptionAlgorithmType().isFrequencyAttackPossible();
+	}
+
+	@Override
+	protected FalseCPUUsageType getFalseCPUUsageType() {
+		return falseCPUUsageType;
 	}
 
 	@Override

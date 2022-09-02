@@ -62,36 +62,36 @@ import java.util.Arrays;
  */
 public enum SymmetricEncryptionType {
 
-	AES_CBC_PKCS5Padding("AES", "CBC", "PKCS5Padding", (short) 128, CodeProvider.SunJCE, CodeProvider.SunJCE, SymmetricAuthenticatedSignatureType.HMAC_SHA2_384, com.distrimind.bcfips.crypto.general.AES.ALGORITHM, (short)128, false, (short)118, (short)146, (short)132, (short)148, (short)322, (short)583, true, true, true, true, true, true, (short)16, 1L<<32),
-	AES_GCM("AES", "GCM", "NoPadding", (short) 128, CodeProvider.SunJCE, CodeProvider.SunJCE, null, com.distrimind.bcfips.crypto.general.AES.ALGORITHM, (short)128, true, (short)40, (short)48, (short)58, (short) 58, (short)144, (short)613, true, true, true, true, true, true, (short)12, 1L<<32),
-	AES_CTR("AES", "CTR", "NoPadding", (short) 128, CodeProvider.SunJCE, CodeProvider.SunJCE, SymmetricAuthenticatedSignatureType.HMAC_SHA2_384, com.distrimind.bcfips.crypto.general.AES.ALGORITHM, (short)128, false, (short)126, (short)112, (short)111, (short) 117, (short)560, (short)252, true, true, true, true, true, true, (short)16, 1L<<32),
+	AES_CBC_PKCS5Padding("AES", "CBC", "PKCS5Padding", (short) 128, CodeProvider.SunJCE, CodeProvider.SunJCE, SymmetricAuthenticatedSignatureType.HMAC_SHA2_384, com.distrimind.bcfips.crypto.general.AES.ALGORITHM, (short)128, false, (short)118, (short)146, (short)132, (short)148, (short)322, (short)583, true, true, true, true, true, true, true, (short)16, 1L<<32),
+	AES_GCM("AES", "GCM", "NoPadding", (short) 128, CodeProvider.SunJCE, CodeProvider.SunJCE, null, com.distrimind.bcfips.crypto.general.AES.ALGORITHM, (short)128, true, (short)40, (short)48, (short)58, (short) 58, (short)144, (short)613, true, true, true, true, true, true, true, (short)12, 1L<<32),
+	AES_CTR("AES", "CTR", "NoPadding", (short) 128, CodeProvider.SunJCE, CodeProvider.SunJCE, SymmetricAuthenticatedSignatureType.HMAC_SHA2_384, com.distrimind.bcfips.crypto.general.AES.ALGORITHM, (short)128, false, (short)126, (short)112, (short)111, (short) 117, (short)560, (short)252, true, true, true, true, true, true, true, (short)16, 1L<<32),
 	@Deprecated
-	DES_CBC_PKCS5Padding("DES", "CBC", "PKCS5Padding", (short) 56, (short) 8, CodeProvider.SunJCE, CodeProvider.SunJCE, SymmetricAuthenticatedSignatureType.HMAC_SHA2_384, com.distrimind.bcfips.crypto.general.DES.ALGORITHM, (short)64, false, (short)41, (short)39, (short)40, (short)37, (short)36, (short)45, true, true, true,true, true, true, (short)8, 1L<<32),
+	DES_CBC_PKCS5Padding("DES", "CBC", "PKCS5Padding", (short) 56, (short) 8, CodeProvider.SunJCE, CodeProvider.SunJCE, SymmetricAuthenticatedSignatureType.HMAC_SHA2_384, com.distrimind.bcfips.crypto.general.DES.ALGORITHM, (short)64, false, (short)41, (short)39, (short)40, (short)37, (short)36, (short)45, true, true, true,true, true, true, true, (short)8, 1L<<32),
 	@Deprecated
-	DESede_CBC_PKCS5Padding("DESede", "CBC", "PKCS5Padding", (short) 168, (short) 24, CodeProvider.SunJCE, CodeProvider.SunJCE, SymmetricAuthenticatedSignatureType.HMAC_SHA2_384, com.distrimind.bcfips.crypto.general.DES.ALGORITHM, (short)64, false, (short)16, (short)16, (short)15, (short)15, (short)17, (short)17, true, true, true,true, true, true, (short)8, 1L<<32),
+	DESede_CBC_PKCS5Padding("DESede", "CBC", "PKCS5Padding", (short) 168, (short) 24, CodeProvider.SunJCE, CodeProvider.SunJCE, SymmetricAuthenticatedSignatureType.HMAC_SHA2_384, com.distrimind.bcfips.crypto.general.DES.ALGORITHM, (short)64, false, (short)16, (short)16, (short)15, (short)15, (short)17, (short)17, true, true, true,true, true, true, true, (short)8, 1L<<32),
 	@Deprecated
-	Blowfish_CBC_PKCS5Padding("Blowfish", "CBC", "PKCS5Padding", (short) 128, CodeProvider.SunJCE, CodeProvider.SunJCE, SymmetricAuthenticatedSignatureType.HMAC_SHA2_384, com.distrimind.bcfips.crypto.general.Blowfish.ALGORITHM, (short)64, false, (short)49, (short)51, (short)55, (short)51, (short)69, (short)71, true, true, true, true, false, true, (short)8, 1L<<32),
-	GNU_AES_CBC_PKCS5Padding("AES", "CBC", "PKCS5Padding", (short) 128, CodeProvider.GNU_CRYPTO, CodeProvider.GNU_CRYPTO, SymmetricAuthenticatedSignatureType.BC_FIPS_HMAC_SHA2_512, com.distrimind.bcfips.crypto.general.AES.ALGORITHM, (short)128, false, (short)67, (short)63, (short)63, (short)64, (short)62, (short)4, true, true, true, true, true, true, (short)16, 1L<<32),
-	GNU_TWOFISH_CBC_PKCS5Padding("TWOFISH","CBC", "PKCS5Padding", (short) 128, CodeProvider.GNU_CRYPTO, CodeProvider.GNU_CRYPTO, SymmetricAuthenticatedSignatureType.BC_FIPS_HMAC_SHA2_512, Twofish.ALGORITHM, (short)128, false, (short)57, (short)56, (short)55, (short)55, (short)66, (short)4, true, false, true, true, false, true, (short)16, 1L<<32),
-	GNU_SERPENT_CBC_PKCS5Padding("Serpent", "CBC", "PKCS5Padding", (short) 128, CodeProvider.GNU_CRYPTO, CodeProvider.GNU_CRYPTO, SymmetricAuthenticatedSignatureType.BC_FIPS_HMAC_SHA2_512, Serpent.ALGORITHM, (short)128, false, (short)37, (short)37, (short)35, (short)37, (short)40, (short)4, false, false, false, false, false, false, (short)16, 1L<<32),
-	GNU_ANUBIS_CBC_PKCS5Padding("Anubis", "CBC", "PKCS5Padding", (short) 128, CodeProvider.GNU_CRYPTO, CodeProvider.GNU_CRYPTO, SymmetricAuthenticatedSignatureType.BC_FIPS_HMAC_SHA2_512, null, (short)128, false, (short)61, (short)58, (short)57, (short)57, (short)67, (short)4, false, false, false, false, false, false, (short)16, 1L<<32),
-	GNU_SQUARE_CBC__PKCS5Padding("Square", "CBC", "PKCS5Padding", (short) 128, CodeProvider.GNU_CRYPTO, CodeProvider.GNU_CRYPTO, SymmetricAuthenticatedSignatureType.BC_FIPS_HMAC_SHA2_512, null, (short)128, false, (short)69, (short)67, (short)61, (short)62, (short)84, (short)4, false, false, false, false, false, false, (short)16, 1L<<32),
-	BC_FIPS_AES_CBC_PKCS7Padding("AES", "CBC", "PKCS7Padding", (short) 128, CodeProvider.BCFIPS, CodeProvider.BCFIPS, SymmetricAuthenticatedSignatureType.BC_FIPS_HMAC_SHA2_512, com.distrimind.bcfips.crypto.general.AES.ALGORITHM, (short)128, false, (short)60, (short)75, (short)60, (short)73, (short)76, (short)67, true, true, true, true, true, true, (short)16, 1L<<32),
-	BC_FIPS_AES_GCM("AES", "GCM", "NoPadding", (short) 128, CodeProvider.BCFIPS, CodeProvider.BCFIPS, null, com.distrimind.bcfips.crypto.general.AES.ALGORITHM, (short)128, true, (short)42, (short)48, (short)47, (short)57, (short)54, (short)55, true, true, true, true, true, true, (short)12, 1L<<32),
-	BC_AES_EAX("AES", "EAX", "NoPadding", (short) 128, CodeProvider.BC, CodeProvider.BC, SymmetricAuthenticatedSignatureType.BC_FIPS_HMAC_SHA2_512, com.distrimind.bcfips.crypto.general.AES.ALGORITHM, (short)128, true, (short)36, (short)43, (short)44, (short)39, (short)35, (short)35, true, true, true, true, true, true, (short)16, 1L<<32),
-	BC_FIPS_AES_CTR("AES", "CTR", "NoPadding", (short) 128, CodeProvider.BCFIPS, CodeProvider.BCFIPS, SymmetricAuthenticatedSignatureType.BC_FIPS_HMAC_SHA2_512, com.distrimind.bcfips.crypto.general.AES.ALGORITHM, (short)128, false, (short)50, (short)64, (short)52, (short)65, (short)63, (short)48, true, true, true, true, true, true, (short)16, 1L<<32),
-	BC_TWOFISH_CBC_PKCS7Padding("TWOFISH", "CBC", "PKCS7Padding", (short) 128,CodeProvider.BC, CodeProvider.BC, SymmetricAuthenticatedSignatureType.BC_FIPS_HMAC_SHA2_512, Twofish.ALGORITHM, (short)128, false, (short)45, (short)56, (short)45, (short)57, (short)71, (short)72, true, false, true, true, false, true , (short)16, 1L<<32),
-	BC_TWOFISH_GCM("TWOFISH", "GCM", "NoPadding", (short) 128,CodeProvider.BC, CodeProvider.BC, null, Twofish.ALGORITHM, (short)128, true, (short)35, (short)41, (short)39, (short)46, (short)54, (short)56, true, false, true, true, false, true, (short)12, 1L<<32),
-	BC_TWOFISH_EAX("TWOFISH", "EAX", "NoPadding", (short) 128,CodeProvider.BC, CodeProvider.BC, null, Twofish.ALGORITHM, (short)128, true, (short)27, (short)30, (short)28, (short)31, (short)34, (short)35, true, false, true, true, false, true, (short)16, 1L<<32),
-	BC_TWOFISH_CTR("TWOFISH", "CTR", "NoPadding", (short) 128,CodeProvider.BC, CodeProvider.BC, SymmetricAuthenticatedSignatureType.BC_FIPS_HMAC_SHA2_512, Twofish.ALGORITHM, (short)128, false, (short)35, (short)44, (short)42, (short)50, (short)68, (short)70, true, false, true, true, false, true, (short)16, 1L<<32),
-	BC_SERPENT_CBC_PKCS7Padding("Serpent", "CBC", "PKCS7Padding",(short) 128, CodeProvider.BC, CodeProvider.BC, SymmetricAuthenticatedSignatureType.BC_FIPS_HMAC_SHA2_512, Serpent.ALGORITHM, (short)128, false, (short)40, (short)42,(short)39, (short)41, (short)53, (short)47, false, false, false, false, false, false, (short)16, 1L<<32),
-	BC_SERPENT_CTR("Serpent", "CTR", "NoPadding",(short) 128, CodeProvider.BC, CodeProvider.BC, SymmetricAuthenticatedSignatureType.BC_FIPS_HMAC_SHA2_512, Serpent.ALGORITHM, (short)128, false, (short)33, (short)37,(short)35, (short)40, (short)49, (short)50, false, false, false, false, false, false, (short)16, 1L<<32),
-	BC_SERPENT_GCM("Serpent", "GCM", "NoPadding",(short) 128, CodeProvider.BC, CodeProvider.BC, null, Serpent.ALGORITHM, (short)128, true, (short)31, (short)35, (short)33, (short)38, (short)43, (short)43, false, false, false, false, false, false, (short)12, 1L<<32),
-	BC_SERPENT_EAX("Serpent", "EAX", "NoPadding",(short) 128, CodeProvider.BC, CodeProvider.BC, null, Serpent.ALGORITHM, (short)128, true, (short)22, (short)24, (short)23, (short)24, (short)26, (short)26, false, false, false, false, false, false, (short)16, 1L<<32),
-	CHACHA20_NO_RANDOM_ACCESS("ChaCha20", "", "", (short) 256, CodeProvider.SunJCE, CodeProvider.SunJCE, SymmetricAuthenticatedSignatureType.HMAC_SHA2_384, ChaCha20.ALGORITHM, (short)512, false, (short)113, (short)79, (short)113, (short) 79, (short)278, (short)274, false, false, false,  true, false, false, (short)12, 13_000_000_000L),
-	CHACHA20_POLY1305("ChaCha20-Poly1305", "", "", (short) 256, CodeProvider.SunJCE, CodeProvider.SunJCE, null, ChaCha20.ALGORITHM, (short)512, true, (short)113, (short)79, (short)113, (short) 79, (short)204, (short)192, false, false, false,  true, false, false, (short)12, 13_000_000_000L),
-	BC_CHACHA20_NO_RANDOM_ACCESS("ChaCha20", "", "", (short) 256, CodeProvider.BC, CodeProvider.BC, SymmetricAuthenticatedSignatureType.BC_FIPS_HMAC_SHA2_384, ChaCha20.ALGORITHM, (short)512, false, (short)75, (short)78, (short)75, (short) 78, (short)75, (short)78, false, false, false,  true, false, false, (short)12, 13_000_000_000L),
-	BC_CHACHA20_POLY1305("ChaCha20-Poly1305", "", "", (short) 256, CodeProvider.BC, CodeProvider.BC, null, ChaCha20.ALGORITHM, (short)512, true, (short)114, (short)81, (short)114, (short) 81, (short)114, (short)81, false, false, false,  true, false, false, (short)12, 13_000_000_000L),
+	Blowfish_CBC_PKCS5Padding("Blowfish", "CBC", "PKCS5Padding", (short) 128, CodeProvider.SunJCE, CodeProvider.SunJCE, SymmetricAuthenticatedSignatureType.HMAC_SHA2_384, com.distrimind.bcfips.crypto.general.Blowfish.ALGORITHM, (short)64, false, (short)49, (short)51, (short)55, (short)51, (short)69, (short)71, true, true, true, true, false, true, true, (short)8, 1L<<32),
+	GNU_AES_CBC_PKCS5Padding("AES", "CBC", "PKCS5Padding", (short) 128, CodeProvider.GNU_CRYPTO, CodeProvider.GNU_CRYPTO, SymmetricAuthenticatedSignatureType.BC_FIPS_HMAC_SHA2_512, com.distrimind.bcfips.crypto.general.AES.ALGORITHM, (short)128, false, (short)67, (short)63, (short)63, (short)64, (short)62, (short)4, true, true, true, true, true, true, true, (short)16, 1L<<32),
+	GNU_TWOFISH_CBC_PKCS5Padding("TWOFISH","CBC", "PKCS5Padding", (short) 128, CodeProvider.GNU_CRYPTO, CodeProvider.GNU_CRYPTO, SymmetricAuthenticatedSignatureType.BC_FIPS_HMAC_SHA2_512, Twofish.ALGORITHM, (short)128, false, (short)57, (short)56, (short)55, (short)55, (short)66, (short)4, true, false, true, true, false, true, false, (short)16, 1L<<32),
+	GNU_SERPENT_CBC_PKCS5Padding("Serpent", "CBC", "PKCS5Padding", (short) 128, CodeProvider.GNU_CRYPTO, CodeProvider.GNU_CRYPTO, SymmetricAuthenticatedSignatureType.BC_FIPS_HMAC_SHA2_512, Serpent.ALGORITHM, (short)128, false, (short)37, (short)37, (short)35, (short)37, (short)40, (short)4, false, false, false, false, false, false, false, (short)16, 1L<<32),
+	GNU_ANUBIS_CBC_PKCS5Padding("Anubis", "CBC", "PKCS5Padding", (short) 128, CodeProvider.GNU_CRYPTO, CodeProvider.GNU_CRYPTO, SymmetricAuthenticatedSignatureType.BC_FIPS_HMAC_SHA2_512, null, (short)128, false, (short)61, (short)58, (short)57, (short)57, (short)67, (short)4, false, false, false, false, false, false, false, (short)16, 1L<<32),
+	GNU_SQUARE_CBC__PKCS5Padding("Square", "CBC", "PKCS5Padding", (short) 128, CodeProvider.GNU_CRYPTO, CodeProvider.GNU_CRYPTO, SymmetricAuthenticatedSignatureType.BC_FIPS_HMAC_SHA2_512, null, (short)128, false, (short)69, (short)67, (short)61, (short)62, (short)84, (short)4, false, false, false, false, false, false, false, (short)16, 1L<<32),
+	BC_FIPS_AES_CBC_PKCS7Padding("AES", "CBC", "PKCS7Padding", (short) 128, CodeProvider.BCFIPS, CodeProvider.BCFIPS, SymmetricAuthenticatedSignatureType.BC_FIPS_HMAC_SHA2_512, com.distrimind.bcfips.crypto.general.AES.ALGORITHM, (short)128, false, (short)60, (short)75, (short)60, (short)73, (short)76, (short)67, true, true, true, true, true, true, true, (short)16, 1L<<32),
+	BC_FIPS_AES_GCM("AES", "GCM", "NoPadding", (short) 128, CodeProvider.BCFIPS, CodeProvider.BCFIPS, null, com.distrimind.bcfips.crypto.general.AES.ALGORITHM, (short)128, true, (short)42, (short)48, (short)47, (short)57, (short)54, (short)55, true, true, true, true, true, true, true, (short)12, 1L<<32),
+	BC_AES_EAX("AES", "EAX", "NoPadding", (short) 128, CodeProvider.BC, CodeProvider.BC, SymmetricAuthenticatedSignatureType.BC_FIPS_HMAC_SHA2_512, com.distrimind.bcfips.crypto.general.AES.ALGORITHM, (short)128, true, (short)36, (short)43, (short)44, (short)39, (short)35, (short)35, true, true, true, true, true, true, true, (short)16, 1L<<32),
+	BC_FIPS_AES_CTR("AES", "CTR", "NoPadding", (short) 128, CodeProvider.BCFIPS, CodeProvider.BCFIPS, SymmetricAuthenticatedSignatureType.BC_FIPS_HMAC_SHA2_512, com.distrimind.bcfips.crypto.general.AES.ALGORITHM, (short)128, false, (short)50, (short)64, (short)52, (short)65, (short)63, (short)48, true, true, true, true, true, true, true, (short)16, 1L<<32),
+	BC_TWOFISH_CBC_PKCS7Padding("TWOFISH", "CBC", "PKCS7Padding", (short) 128,CodeProvider.BC, CodeProvider.BC, SymmetricAuthenticatedSignatureType.BC_FIPS_HMAC_SHA2_512, Twofish.ALGORITHM, (short)128, false, (short)45, (short)56, (short)45, (short)57, (short)71, (short)72, true, false, true, true, false, true,true, (short)16, 1L<<32),
+	BC_TWOFISH_GCM("TWOFISH", "GCM", "NoPadding", (short) 128,CodeProvider.BC, CodeProvider.BC, null, Twofish.ALGORITHM, (short)128, true, (short)35, (short)41, (short)39, (short)46, (short)54, (short)56, true, false, true, true, false, true, true, (short)12, 1L<<32),
+	BC_TWOFISH_EAX("TWOFISH", "EAX", "NoPadding", (short) 128,CodeProvider.BC, CodeProvider.BC, null, Twofish.ALGORITHM, (short)128, true, (short)27, (short)30, (short)28, (short)31, (short)34, (short)35, true, false, true, true, false, true, true, (short)16, 1L<<32),
+	BC_TWOFISH_CTR("TWOFISH", "CTR", "NoPadding", (short) 128,CodeProvider.BC, CodeProvider.BC, SymmetricAuthenticatedSignatureType.BC_FIPS_HMAC_SHA2_512, Twofish.ALGORITHM, (short)128, false, (short)35, (short)44, (short)42, (short)50, (short)68, (short)70, true, false, true, true, false, true, true, (short)16, 1L<<32),
+	BC_SERPENT_CBC_PKCS7Padding("Serpent", "CBC", "PKCS7Padding",(short) 128, CodeProvider.BC, CodeProvider.BC, SymmetricAuthenticatedSignatureType.BC_FIPS_HMAC_SHA2_512, Serpent.ALGORITHM, (short)128, false, (short)40, (short)42,(short)39, (short)41, (short)53, (short)47, false, false, false, false, false, false, false, (short)16, 1L<<32),
+	BC_SERPENT_CTR("Serpent", "CTR", "NoPadding",(short) 128, CodeProvider.BC, CodeProvider.BC, SymmetricAuthenticatedSignatureType.BC_FIPS_HMAC_SHA2_512, Serpent.ALGORITHM, (short)128, false, (short)33, (short)37,(short)35, (short)40, (short)49, (short)50, false, false, false, false, false, false, false, (short)16, 1L<<32),
+	BC_SERPENT_GCM("Serpent", "GCM", "NoPadding",(short) 128, CodeProvider.BC, CodeProvider.BC, null, Serpent.ALGORITHM, (short)128, true, (short)31, (short)35, (short)33, (short)38, (short)43, (short)43, false, false, false, false, false, false, false, (short)12, 1L<<32),
+	BC_SERPENT_EAX("Serpent", "EAX", "NoPadding",(short) 128, CodeProvider.BC, CodeProvider.BC, null, Serpent.ALGORITHM, (short)128, true, (short)22, (short)24, (short)23, (short)24, (short)26, (short)26, false, false, false, false, false, false, true, (short)16, 1L<<32),
+	CHACHA20_NO_RANDOM_ACCESS("ChaCha20", "", "", (short) 256, CodeProvider.SunJCE, CodeProvider.SunJCE, SymmetricAuthenticatedSignatureType.HMAC_SHA2_384, ChaCha20.ALGORITHM, (short)512, false, (short)113, (short)79, (short)113, (short) 79, (short)278, (short)274, false, false, false,  true, false, false, false, (short)12, 13_000_000_000L),
+	CHACHA20_POLY1305("ChaCha20-Poly1305", "", "", (short) 256, CodeProvider.SunJCE, CodeProvider.SunJCE, null, ChaCha20.ALGORITHM, (short)512, true, (short)113, (short)79, (short)113, (short) 79, (short)204, (short)192, false, false, false,  true, false, false, false, (short)12, 13_000_000_000L),
+	BC_CHACHA20_NO_RANDOM_ACCESS("ChaCha20", "", "", (short) 256, CodeProvider.BC, CodeProvider.BC, SymmetricAuthenticatedSignatureType.BC_FIPS_HMAC_SHA2_384, ChaCha20.ALGORITHM, (short)512, false, (short)75, (short)78, (short)75, (short) 78, (short)75, (short)78, false, false, false,  true, false, false, false, (short)12, 13_000_000_000L),
+	BC_CHACHA20_POLY1305("ChaCha20-Poly1305", "", "", (short) 256, CodeProvider.BC, CodeProvider.BC, null, ChaCha20.ALGORITHM, (short)512, true, (short)114, (short)81, (short)114, (short) 81, (short)114, (short)81, false, false, false,  true, false, false, false, (short)12, 13_000_000_000L),
 	DEFAULT(AES_CTR);
 	
 
@@ -218,6 +218,7 @@ public enum SymmetricEncryptionType {
 	private final boolean electromagneticAttackPossible;
 	private final boolean acousticAttackPossible;
 	private final boolean dfaAttackPossible;//Differential fault analysis
+	private final boolean frequencyAttackPossible;
 	private final short ivLengthBytes;
 	private long maxIVGenerationWithOneSecretKey;
 	static final boolean invalidOSForChaCha =(OSVersion.getCurrentOSVersion().getOS()!=OS.ANDROID && OS.getCurrentJREVersionByte()<11) || (OSVersion.getCurrentOSVersion().getOS()==OS.ANDROID && OSVersion.getCurrentOSVersion().compareTo(OSVersion.ANDROID_28_P)<0);
@@ -238,15 +239,15 @@ public enum SymmetricEncryptionType {
 							boolean timingAttackPossible,
 							boolean cacheAttackPossible,
 							boolean powerMonitoringAttackPossible, boolean electromagneticAttackPossible, boolean acousticAttackPossible,
-							boolean dfaAttackPossible, short ivLengthBytes, long maxIVGenerationWithOneSecretKey) {
+							boolean dfaAttackPossible, boolean frequencyAttackPossible, short ivLengthBytes, long maxIVGenerationWithOneSecretKey) {
 		this(algorithmName, blockMode, padding, keySizeBits, (short) (keySizeBits / 8), codeProviderForEncryption, codeProviderForKeyGenerator, defaultSignature, bcAlgorithm, blockSize, authenticated, encodingSpeedIndexJava7, decodingSpeedIndexJava7, encodingSpeedIndexJava8, decodingSpeedIndexJava8, encodingSpeedIndexJava9, decodingSpeedIndexJava9,
-				timingAttackPossible, cacheAttackPossible, powerMonitoringAttackPossible, electromagneticAttackPossible, acousticAttackPossible, dfaAttackPossible, ivLengthBytes, maxIVGenerationWithOneSecretKey);
+				timingAttackPossible, cacheAttackPossible, powerMonitoringAttackPossible, electromagneticAttackPossible, acousticAttackPossible, dfaAttackPossible, frequencyAttackPossible, ivLengthBytes, maxIVGenerationWithOneSecretKey);
 	}
 	SymmetricEncryptionType(String algorithmName, String blockMode, String padding, short keySizeBits,
 							short keySizeBytes, CodeProvider codeProviderForEncryption, CodeProvider codeProviderForKeyGenerator, SymmetricAuthenticatedSignatureType defaultSignature, Algorithm bcAlgorithm, short blockSize, boolean authenticated, short encodingSpeedIndexJava7, short decodingSpeedIndexJava7, short encodingSpeedIndexJava8, short decodingSpeedIndexJava8, short encodingSpeedIndexJava9, short decodingSpeedIndexJava9,
 							boolean timingAttackPossible, boolean cacheAttackPossible,
 							boolean powerMonitoringAttackPossible, boolean electromagneticAttackPossible, boolean acousticAttackPossible,
-							boolean dfaAttackPossible, short ivLengthBytes, long maxIVGenerationWithOneSecretKey) {
+							boolean dfaAttackPossible, boolean frequencyAttackPossible, short ivLengthBytes, long maxIVGenerationWithOneSecretKey) {
 		if (algorithmName==null)
 			throw new NullPointerException();
 		this.algorithmName = algorithmName;
@@ -278,15 +279,15 @@ public enum SymmetricEncryptionType {
 		this.electromagneticAttackPossible=electromagneticAttackPossible;
 		this.acousticAttackPossible=acousticAttackPossible;
 		this.dfaAttackPossible=dfaAttackPossible;
+		this.frequencyAttackPossible=frequencyAttackPossible;
 		this.ivLengthBytes = ivLengthBytes;
 		this.maxIVGenerationWithOneSecretKey=maxIVGenerationWithOneSecretKey;
 	}
 
-	@SuppressWarnings("CopyConstructorMissesField")
 	SymmetricEncryptionType(SymmetricEncryptionType type) {
 		this(type.algorithmName, type.blockMode, type.padding, type.keySizeBits, type.keySizeBytes, type.codeProviderForEncryption, type.codeProviderForKeyGenerator,
 				type.defaultSignature, type.bcAlgorithm, type.blockSizeBits, type.authenticated, type.encodingSpeedIndexJava7, type.decodingSpeedIndexJava7, type.encodingSpeedIndexJava8, type.decodingSpeedIndexJava8, type.encodingSpeedIndexJava9, type.decodingSpeedIndexJava9,
-				type.timingAttackPossible, type.cacheAttackPossible, type.powerMonitoringAttackPossible, type.electromagneticAttackPossible, type.acousticAttackPossible, type.dfaAttackPossible, type.ivLengthBytes, type.maxIVGenerationWithOneSecretKey);
+				type.timingAttackPossible, type.cacheAttackPossible, type.powerMonitoringAttackPossible, type.electromagneticAttackPossible, type.acousticAttackPossible, type.dfaAttackPossible, type.frequencyAttackPossible, type.ivLengthBytes, type.maxIVGenerationWithOneSecretKey);
 	}
 
 	public String getAlgorithmName() {
@@ -492,19 +493,19 @@ public enum SymmetricEncryptionType {
 		return /*this.algorithmName.equals(CHACHA20.algorithmName) || */blockMode.equals("CTR");
 	}
 
-	public boolean timingAttackPossibleWithSomeImplementations()
+	public boolean isTimingAttackPossibleWithSomeImplementations()
 	{
 		return timingAttackPossible;
 	}
 
-	public boolean timingAttackPossibleIntoThisMachine()
+	public boolean isTimingAttackPossibleIntoThisMachine()
 	{
 		if (timingAttackPossible)
 		{
 			if (this.algorithmName.equals(AES_CTR.algorithmName) && this.codeProviderForEncryption==CodeProvider.SunJCE && OS.supportAESIntrinsicsAcceleration())
 			{
 				if (OS.getCurrentJREVersionDouble()<1.8 && this.equals(AES_GCM))
-					return BC_FIPS_AES_GCM.timingAttackPossibleIntoThisMachine();
+					return BC_FIPS_AES_GCM.isTimingAttackPossibleIntoThisMachine();
 				return false;
 			}
 			else
@@ -513,7 +514,10 @@ public enum SymmetricEncryptionType {
 		else
 			return false;
 	}
-
+	public boolean isFrequencyAttackPossible()
+	{
+		return frequencyAttackPossible;
+	}
 	public boolean isCacheAttackPossible() {
 		return cacheAttackPossible;
 	}

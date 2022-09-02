@@ -210,6 +210,7 @@ public enum ASymmetricAuthenticatedSignatureType {
 	 * @param keySizeBits the size of the used key in bits
 	 * @return the maximum signature size in bits
 	 */
+	@Deprecated
 	public int getMaximumSignatureSizeBits(int keySizeBits) {
 		return getSignatureSizeBits(keySizeBits);
 	}
@@ -218,6 +219,7 @@ public enum ASymmetricAuthenticatedSignatureType {
 	 * @param keySizeBits the size of the used key in bits
 	 * @return the maximum signature size in bytes
 	 */
+	@Deprecated
 	public int getMaximumSignatureSizeBytes(int keySizeBits) {
 		return getSignatureSizeBits(keySizeBits)/8;
 	}

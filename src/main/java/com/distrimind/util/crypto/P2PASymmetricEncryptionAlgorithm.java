@@ -34,6 +34,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
+import com.distrimind.util.NotYetImplementedException;
 import com.distrimind.util.io.Integrity;
 import com.distrimind.util.io.MessageExternalizationException;
 import com.distrimind.util.io.RandomInputStream;
@@ -55,8 +56,7 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 	private final AbstractEncryptionIOAlgorithm p2pEncryption;
 	private final AbstractKeyPair<?, ?> myKeyPair;
 	private final IASymmetricPublicKey distantPublicKey;
-
-	public P2PASymmetricEncryptionAlgorithm(AbstractKeyPair<?, ?> myKeyPair, IASymmetricPublicKey distantPublicKey)
+	public P2PASymmetricEncryptionAlgorithm(AbstractKeyPair<?, ?> myKeyPair, IASymmetricPublicKey distantPublicKey, FalseCPUUsageType falseCPUUsageType)
 			throws IOException {
 		super();
 		if (distantPublicKey == null)
@@ -71,11 +71,12 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 			throw new IllegalArgumentException();
 		this.myKeyPair=myKeyPair;
 		this.distantPublicKey=distantPublicKey;
+
 		try {
 			if (myKeyPair instanceof HybridASymmetricKeyPair && distantPublicKey instanceof HybridASymmetricPublicKey) {
-				p2pEncryption = new HybridP2PEncryption((HybridASymmetricKeyPair) myKeyPair, (HybridASymmetricPublicKey) distantPublicKey);
+				p2pEncryption = new HybridP2PEncryption((HybridASymmetricKeyPair) myKeyPair, (HybridASymmetricPublicKey) distantPublicKey, falseCPUUsageType);
 			} else if (myKeyPair instanceof ASymmetricKeyPair && distantPublicKey instanceof ASymmetricPublicKey)
-				p2pEncryption = new P2PEncryption((ASymmetricKeyPair) myKeyPair, (ASymmetricPublicKey) distantPublicKey);
+				p2pEncryption = new P2PEncryption((ASymmetricKeyPair) myKeyPair, (ASymmetricPublicKey) distantPublicKey, falseCPUUsageType);
 			else
 				throw new IllegalArgumentException();
 		} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
@@ -84,7 +85,7 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 	}
 	public P2PASymmetricEncryptionAlgorithm(ASymmetricAuthenticatedSignatureType nonPQCSignatureType,
 											ASymmetricAuthenticatedSignatureType PQCSignatureType,
-											HybridASymmetricKeyPair myKeyPair, HybridASymmetricPublicKey distantPublicKey)
+											HybridASymmetricKeyPair myKeyPair, HybridASymmetricPublicKey distantPublicKey, FalseCPUUsageType falseCPUUsageType)
 			throws IOException {
 		super();
 		if (distantPublicKey == null)
@@ -95,11 +96,15 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 			throw new IllegalArgumentException();
 		this.myKeyPair=myKeyPair;
 		this.distantPublicKey=distantPublicKey;
-		p2pEncryption =new HybridP2PEncryption(nonPQCSignatureType, PQCSignatureType, myKeyPair, distantPublicKey);
+		if (falseCPUUsageType==null && isUsingSideChannelMitigation())
+			throw new NullPointerException();
+		else if (falseCPUUsageType==FalseCPUUsageType.ADDITIONAL_CPU_USAGE_IN_REAL_TIME)
+			throw new NotYetImplementedException();
+		p2pEncryption =new HybridP2PEncryption(nonPQCSignatureType, PQCSignatureType, myKeyPair, distantPublicKey, falseCPUUsageType);
 	}
 
 	public P2PASymmetricEncryptionAlgorithm(ASymmetricAuthenticatedSignatureType signatureType, ASymmetricKeyPair myKeyPair,
-						 ASymmetricPublicKey distantPublicKey) throws IOException {
+						 ASymmetricPublicKey distantPublicKey, FalseCPUUsageType falseCPUUsageType) throws IOException {
 		super();
 		if (distantPublicKey.isDestroyed())
 			throw new IllegalArgumentException();
@@ -108,7 +113,7 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 		this.myKeyPair=myKeyPair;
 		this.distantPublicKey=distantPublicKey;
 		try {
-			p2pEncryption =new P2PEncryption(signatureType, myKeyPair, distantPublicKey);
+			p2pEncryption =new P2PEncryption(signatureType, myKeyPair, distantPublicKey, falseCPUUsageType);
 		} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
 			throw new IOException(e);
 		}
@@ -340,6 +345,26 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 		p2pEncryption.encode(is, associatedData, offAD, lenAD, os);
 	}
 
+	@Override
+	protected boolean isPowerMonitoringSideChannelAttackPossible() {
+		return p2pEncryption.isPowerMonitoringSideChannelAttackPossible();
+	}
+
+	@Override
+	protected boolean isTimingSideChannelAttackPossible() {
+		return p2pEncryption.isTimingSideChannelAttackPossible();
+	}
+
+	@Override
+	protected boolean isFrequencySideChannelAttackPossible() {
+		return p2pEncryption.isFrequencySideChannelAttackPossible();
+	}
+
+	@Override
+	protected FalseCPUUsageType getFalseCPUUsageType() {
+		return p2pEncryption.getFalseCPUUsageType();
+	}
+
 
 	@Override
 	protected byte[] readIV(RandomInputStream is, byte[] externalCounter) throws IOException {
@@ -524,10 +549,10 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 		private final HybridASymmetricPublicKey distantPublicKey;
 
 		public HybridP2PEncryption(HybridASymmetricKeyPair myKeyPair,
-							 HybridASymmetricPublicKey distantPublicKey) throws IOException {
+							 HybridASymmetricPublicKey distantPublicKey, FalseCPUUsageType falseCPUUsageType) throws IOException {
 			super();
 			try {
-				nonPQCEncryption=new P2PEncryption(myKeyPair.getNonPQCKeyPair(), distantPublicKey.getNonPQCPublicKey());PQCEncryption=new P2PEncryption(myKeyPair.getPQCKeyPair(), distantPublicKey.getPQCPublicKey());
+				nonPQCEncryption=new P2PEncryption(myKeyPair.getNonPQCKeyPair(), distantPublicKey.getNonPQCPublicKey(), falseCPUUsageType);PQCEncryption=new P2PEncryption(myKeyPair.getPQCKeyPair(), distantPublicKey.getPQCPublicKey(), falseCPUUsageType);
 				if (nonPQCEncryption.includeIV()!=PQCEncryption.includeIV())
 					throw new IllegalArgumentException();
 				this.myKeyPair=myKeyPair;
@@ -550,11 +575,11 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 		public HybridP2PEncryption(ASymmetricAuthenticatedSignatureType nonPQCSignatureType,
 								   ASymmetricAuthenticatedSignatureType PQCSignatureType,
 								   HybridASymmetricKeyPair myKeyPair,
-								   HybridASymmetricPublicKey distantPublicKey) throws IOException {
+								   HybridASymmetricPublicKey distantPublicKey, FalseCPUUsageType falseCPUUsageType) throws IOException {
 			super();
 			try {
-				nonPQCEncryption = new P2PEncryption(nonPQCSignatureType, myKeyPair.getNonPQCKeyPair(), distantPublicKey.getNonPQCPublicKey());
-				PQCEncryption = new P2PEncryption(PQCSignatureType, myKeyPair.getPQCKeyPair(), distantPublicKey.getPQCPublicKey());
+				nonPQCEncryption = new P2PEncryption(nonPQCSignatureType, myKeyPair.getNonPQCKeyPair(), distantPublicKey.getNonPQCPublicKey(), falseCPUUsageType);
+				PQCEncryption = new P2PEncryption(PQCSignatureType, myKeyPair.getPQCKeyPair(), distantPublicKey.getPQCPublicKey(), falseCPUUsageType);
 				if (nonPQCEncryption.includeIV() != PQCEncryption.includeIV())
 					throw new IllegalArgumentException();
 				this.myKeyPair = myKeyPair;
@@ -575,6 +600,26 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 		@Override
 		protected void initCipherForEncryptionWithIv(AbstractCipher cipher, byte[] iv) throws IOException {
 			initCipherForEncryption(cipher );
+		}
+
+		@Override
+		protected boolean isPowerMonitoringSideChannelAttackPossible() {
+			return nonPQCEncryption.isPowerMonitoringSideChannelAttackPossible() || PQCEncryption.isPowerMonitoringSideChannelAttackPossible();
+		}
+
+		@Override
+		protected boolean isTimingSideChannelAttackPossible() {
+			return nonPQCEncryption.isTimingSideChannelAttackPossible() || PQCEncryption.isTimingSideChannelAttackPossible();
+		}
+
+		@Override
+		protected boolean isFrequencySideChannelAttackPossible() {
+			return nonPQCEncryption.isFrequencySideChannelAttackPossible() || PQCEncryption.isFrequencySideChannelAttackPossible();
+		}
+
+		@Override
+		protected FalseCPUUsageType getFalseCPUUsageType() {
+			return nonPQCEncryption.getFalseCPUUsageType();
 		}
 
 		@Override
@@ -693,6 +738,7 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 		private final ASymmetricEncryptionType type;
 
 		private final ASymmetricAuthenticatedSignatureType signatureType;
+		private final FalseCPUUsageType falseCPUUsageType;
 
 		@Override
 		public boolean isPostQuantumEncryption() {
@@ -707,14 +753,14 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 				throw new IllegalAccessError();
 		}
 
-		public P2PEncryption(ASymmetricKeyPair myKeyPair, ASymmetricPublicKey distantPublicKey)
+		public P2PEncryption(ASymmetricKeyPair myKeyPair, ASymmetricPublicKey distantPublicKey, FalseCPUUsageType falseCPUUsageType)
 				throws NoSuchAlgorithmException,
 				NoSuchProviderException, IOException {
-			this(myKeyPair.getEncryptionAlgorithmType().getDefaultSignatureAlgorithm(), myKeyPair, distantPublicKey);
+			this(myKeyPair.getEncryptionAlgorithmType().getDefaultSignatureAlgorithm(), myKeyPair, distantPublicKey, falseCPUUsageType);
 		}
 
 		public P2PEncryption(ASymmetricAuthenticatedSignatureType signatureType, ASymmetricKeyPair myKeyPair,
-												ASymmetricPublicKey distantPublicKey) throws IOException, NoSuchAlgorithmException, NoSuchProviderException {
+												ASymmetricPublicKey distantPublicKey, FalseCPUUsageType falseCPUUsageType) throws IOException, NoSuchAlgorithmException, NoSuchProviderException {
 			super(myKeyPair.getEncryptionAlgorithmType().getCipherInstance(), 0);
 			if (signatureType == null)
 				throw new NullPointerException("signatureType");
@@ -725,6 +771,11 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 			this.myKeyPair = myKeyPair;
 			this.distantPublicKey = distantPublicKey;
 			this.signatureType = signatureType;
+			this.falseCPUUsageType=falseCPUUsageType;
+			if (falseCPUUsageType==null && isUsingSideChannelMitigation())
+				throw new NullPointerException();
+			else if (falseCPUUsageType==FalseCPUUsageType.ADDITIONAL_CPU_USAGE_IN_REAL_TIME)
+				throw new NotYetImplementedException();
 			setMaxPlainTextSizeForEncoding(distantPublicKey.getMaxBlockSize());
 			initBufferAllocatorArgs();
 		}
@@ -732,6 +783,26 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 		@Override
 		protected void initCipherForEncryptionWithIv(AbstractCipher cipher, byte[] iv) throws IOException {
 			initCipherForEncryption(cipher );
+		}
+
+		@Override
+		protected boolean isPowerMonitoringSideChannelAttackPossible() {
+			return true;
+		}
+
+		@Override
+		protected boolean isTimingSideChannelAttackPossible() {
+			return true;
+		}
+
+		@Override
+		protected boolean isFrequencySideChannelAttackPossible() {
+			return true;
+		}
+
+		@Override
+		protected FalseCPUUsageType getFalseCPUUsageType() {
+			return falseCPUUsageType;
 		}
 
 

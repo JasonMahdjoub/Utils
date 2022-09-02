@@ -37,11 +37,15 @@ package com.distrimind.util.crypto;
 import com.distrimind.util.AutoZeroizable;
 import com.distrimind.util.Cleanable;
 import com.distrimind.util.FileTools;
+import com.distrimind.util.NotYetImplementedException;
 import com.distrimind.util.io.*;
 
 import javax.crypto.Cipher;
 import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.util.Arrays;
+import java.util.Random;
 
 /**
  * 
@@ -51,6 +55,7 @@ import java.util.Arrays;
  */
 public abstract class AbstractEncryptionOutputAlgorithm implements AutoZeroizable {
 	final static int BUFFER_SIZE = FileTools.BUFFER_SIZE;
+	public static double DEFAULT_FALSE_CPU_USAGE_PERCENTAGE=0.1;
 	protected static final class Finalizer extends Cleaner
 	{
 		byte[] buffer;
@@ -185,7 +190,26 @@ public abstract class AbstractEncryptionOutputAlgorithm implements AutoZeroizabl
 	public void encode(RandomInputStream is, byte[] associatedData, int offAD, int lenAD, RandomOutputStream os) throws IOException{
 		encode(is, associatedData, offAD, lenAD, os, null);
 	}
+	protected abstract boolean isPowerMonitoringSideChannelAttackPossible();
+	protected abstract boolean isTimingSideChannelAttackPossible();
+	protected abstract boolean isFrequencySideChannelAttackPossible();
 
+	protected abstract FalseCPUUsageType getFalseCPUUsageType();
+
+	public final boolean isUsingSideChannelMitigation()
+	{
+		return isPowerMonitoringSideChannelAttackPossible() || isFrequencySideChannelAttackPossible() || isTimingSideChannelAttackPossible();
+	}
+	protected final double getFalseCPUUsagePercentage()
+	{
+		if (isUsingSideChannelMitigation())
+		{
+			return DEFAULT_FALSE_CPU_USAGE_PERCENTAGE;
+		}
+		else
+			return 0.0;
+
+	}
 	public void encode(RandomInputStream is, byte[] associatedData, int offAD, int lenAD, RandomOutputStream os, byte[] externalCounter) throws IOException {
 
 		try(RandomOutputStream cos = getCipherOutputStreamForEncryption(os, false, associatedData, offAD, lenAD, externalCounter))
@@ -238,13 +262,37 @@ public abstract class AbstractEncryptionOutputAlgorithm implements AutoZeroizabl
 		private int offAD, lenAD;
 		private boolean closeOutputStreamWhenClosingCipherOutputStream;
 
+		private double falseCPUUsagePercentage=0.0;
+
+		private AbstractSecureRandom secureRandom=null;
 
 		CommonCipherOutputStream(RandomOutputStream os, byte[][] manualIvs, byte[] externalCounter, byte[] associatedData, int offAD, int lenAD, boolean closeOutputStreamWhenClosingCipherOutputStream) throws IOException {
 			set(os, manualIvs, externalCounter, associatedData, offAD, lenAD, closeOutputStreamWhenClosingCipherOutputStream);
 		}
 
 		void set(RandomOutputStream os, byte[][] manualIvs, byte[] externalCounter, byte[] associatedData, int offAD, int lenAD, boolean closeOutputStreamWhenClosingCipherOutputStream) throws IOException {
+			final double falseCPUUsagePercentage=getFalseCPUUsagePercentage();
+			final FalseCPUUsageType falseCPUUsageType=getFalseCPUUsageType();
 			checkKeysNotCleaned();
+			if (falseCPUUsagePercentage<0.0)
+				throw new IllegalArgumentException();
+
+
+			if (falseCPUUsagePercentage>0.0) {
+				if (falseCPUUsageType==null)
+					throw new NullPointerException();
+				if (falseCPUUsageType==FalseCPUUsageType.ADDITIONAL_CPU_USAGE_IN_REAL_TIME)
+					throw new NotYetImplementedException();
+				if (secureRandom==null) {
+					try {
+						secureRandom = SecureRandomType.DEFAULT.getInstance(null);
+					} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
+						throw new IOException(e);
+					}
+				}
+			}
+			this.falseCPUUsagePercentage=falseCPUUsagePercentage;
+
 			length=0;
 			currentPos=0;
 			closed=false;
@@ -262,6 +310,7 @@ public abstract class AbstractEncryptionOutputAlgorithm implements AutoZeroizabl
 				os.seek(0);
 		}
 
+
 		private void checkDoFinal(boolean force) throws IOException {
 			if (doFinal && (currentPos%maxPlainTextSizeForEncoding==0 || force))
 			{
@@ -277,7 +326,71 @@ public abstract class AbstractEncryptionOutputAlgorithm implements AutoZeroizabl
 						os.write(finalizer.buffer, 0, s);
 				}
 				doFinal = false;
+				if (falseCPUUsagePercentage>0.0)
+				{
+					//add false CPU using to fix power side channel attack and frequency side channel attack
+					double delta=secureRandom.nextDouble()*(falseCPUUsagePercentage/2.0)-falseCPUUsagePercentage/4.0;
+					long l=Math.min(500_000_000L, (long)(((double)length)*(falseCPUUsagePercentage+delta)));
+
+					if (l>0)
+					{
+						RandomOutputStream os=new NullRandomOutputStream();
+						init(0, os);
+						int inputBufferSize=(int)Math.min(4096,l);
+						final int bl=inputBufferSize+200;
+						if (finalizer.buffer==null || finalizer.buffer.length<bl)
+						{
+							finalizer.buffer=new byte[bl];
+						}
+
+						byte[] b=new byte[inputBufferSize];
+						while (l>0)
+						{
+							Random r=new Random(System.nanoTime());
+							r.nextBytes(b);
+							int s=(int)Math.min(l, inputBufferSize);
+							int s2=cipher.getOutputSize(s);
+							if (finalizer.buffer==null || finalizer.buffer.length<s2) {
+								zeroize();
+								finalizer.buffer = new byte[s2];
+							}
+							cipher.update(b, 0, s, finalizer.buffer);
+							l-=s;
+						}
+						cipher.doFinal();
+					}
+				}
 			}
+		}
+
+		private void init(long round, RandomOutputStream os) throws IOException {
+
+			if (includeIV()) {
+				byte[] iv;
+				if (manualIvs!=null)
+				{
+					if (externalCounter==null)
+						initCipherForEncryptionWithIv(cipher, manualIvs[(int)round]);
+					else {
+						System.arraycopy(manualIvs[(int) round], 0, iv = AbstractEncryptionOutputAlgorithm.this.iv, 0, getIVSizeBytesWithoutExternalCounter());
+						if (useExternalCounter())
+							System.arraycopy(externalCounter, 0, iv, getIVSizeBytesWithoutExternalCounter(), externalCounter.length);
+						initCipherForEncryption(cipher, iv);
+					}
+				}
+				else {
+					iv = initCipherForEncryption(cipher, externalCounter);
+					int ivl=getIVSizeBytesWithoutExternalCounter();
+					os.write(iv, 0, ivl);
+				}
+
+			}
+			else {
+				initCipherForEncryptionWithNullIV(cipher);
+			}
+
+			if (associatedData != null && lenAD > 0)
+				cipher.updateAAD(associatedData, offAD, lenAD);
 		}
 
 		private long checkInit() throws IOException {
@@ -285,32 +398,7 @@ public abstract class AbstractEncryptionOutputAlgorithm implements AutoZeroizabl
 			if (mod == 0) {
 				long round=currentPos/ maxPlainTextSizeForEncoding;
 				checkDoFinal(false);
-				if (includeIV()) {
-					byte[] iv;
-					if (manualIvs!=null)
-					{
-						if (externalCounter==null)
-							initCipherForEncryptionWithIv(cipher, manualIvs[(int)round]);
-						else {
-							System.arraycopy(manualIvs[(int) round], 0, iv = AbstractEncryptionOutputAlgorithm.this.iv, 0, getIVSizeBytesWithoutExternalCounter());
-							if (useExternalCounter())
-								System.arraycopy(externalCounter, 0, iv, getIVSizeBytesWithoutExternalCounter(), externalCounter.length);
-							initCipherForEncryption(cipher, iv);
-						}
-					}
-					else {
-						iv = initCipherForEncryption(cipher, externalCounter);
-						int ivl=getIVSizeBytesWithoutExternalCounter();
-						os.write(iv, 0, ivl);
-					}
-
-				}
-				else {
-					initCipherForEncryptionWithNullIV(cipher);
-				}
-
-				if (associatedData != null && lenAD > 0)
-					cipher.updateAAD(associatedData, offAD, lenAD);
+				init(round,os);
 			}
 			return (int) (maxPlainTextSizeForEncoding-mod);
 		}
@@ -392,8 +480,6 @@ public abstract class AbstractEncryptionOutputAlgorithm implements AutoZeroizabl
 		public void seek(long _pos) throws IOException {
 			if (closed)
 				throw new IOException("Stream closed");
-				/*if (_pos<0 || _pos>length)
-					throw new IllegalArgumentException();*/
 			if (!supportRandomEncryptionAndRandomDecryption())
 				throw new IOException("Random encryption impossible");
 			long round = _pos / maxPlainTextSizeForEncoding;

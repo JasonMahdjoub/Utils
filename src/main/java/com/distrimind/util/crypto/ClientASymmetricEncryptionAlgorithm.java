@@ -53,16 +53,16 @@ public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutpu
 	private final AbstractEncryptionOutputAlgorithm client;
 	private final IASymmetricPublicKey distantPublicKey;
 
-	public ClientASymmetricEncryptionAlgorithm(AbstractSecureRandom random, IASymmetricPublicKey distantPublicKey) throws IOException {
+	public ClientASymmetricEncryptionAlgorithm(AbstractSecureRandom random, IASymmetricPublicKey distantPublicKey, FalseCPUUsageType falseCPUUsageType) throws IOException {
 		super();
 		if (distantPublicKey.isDestroyed())
 			throw new IllegalArgumentException();
 		this.distantPublicKey=distantPublicKey;
 		if (distantPublicKey instanceof HybridASymmetricPublicKey)
-			client=new HybridClient(random, (HybridASymmetricPublicKey)distantPublicKey);
+			client=new HybridClient(random, (HybridASymmetricPublicKey)distantPublicKey, falseCPUUsageType);
 		else {
 			try {
-				client=new Client(random, (ASymmetricPublicKey)distantPublicKey);
+				client=new Client(random, (ASymmetricPublicKey)distantPublicKey, falseCPUUsageType);
 			} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
 				throw new IOException(e);
 			}
@@ -78,11 +78,11 @@ public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutpu
 	private static class HybridClient extends AbstractEncryptionOutputAlgorithm {
 		private final Client nonPQCEncryption, PQCEncryption;
 		private final HybridASymmetricPublicKey hybridASymmetricPublicKey;
-		public HybridClient(AbstractSecureRandom random, HybridASymmetricPublicKey distantPublicKey) throws IOException {
+		public HybridClient(AbstractSecureRandom random, HybridASymmetricPublicKey distantPublicKey, FalseCPUUsageType falseCPUUsageType) throws IOException {
 			super();
 			try {
-				this.nonPQCEncryption=new Client(random, distantPublicKey.getNonPQCPublicKey());
-				this.PQCEncryption=new Client(random, distantPublicKey.getPQCPublicKey());
+				this.nonPQCEncryption=new Client(random, distantPublicKey.getNonPQCPublicKey(), falseCPUUsageType);
+				this.PQCEncryption=new Client(random, distantPublicKey.getPQCPublicKey(), falseCPUUsageType);
 			} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
 				throw new IOException(e);
 			}
@@ -103,6 +103,26 @@ public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutpu
 		@Override
 		protected void initCipherForEncryptionWithIv(AbstractCipher cipher, byte[] iv) throws IOException {
 			initCipherForEncryption(cipher);
+		}
+
+		@Override
+		protected boolean isPowerMonitoringSideChannelAttackPossible() {
+			return nonPQCEncryption.isPowerMonitoringSideChannelAttackPossible() || PQCEncryption.isPowerMonitoringSideChannelAttackPossible();
+		}
+
+		@Override
+		protected boolean isTimingSideChannelAttackPossible() {
+			return nonPQCEncryption.isTimingSideChannelAttackPossible() || PQCEncryption.isTimingSideChannelAttackPossible();
+		}
+
+		@Override
+		protected boolean isFrequencySideChannelAttackPossible() {
+			return nonPQCEncryption.isFrequencySideChannelAttackPossible() || PQCEncryption.isFrequencySideChannelAttackPossible();
+		}
+
+		@Override
+		protected FalseCPUUsageType getFalseCPUUsageType() {
+			return nonPQCEncryption.getFalseCPUUsageType();
 		}
 
 		@Override
@@ -277,6 +297,25 @@ public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutpu
 		client.encode(is, associatedData, offAD, lenAD, os);
 	}
 
+	@Override
+	protected boolean isPowerMonitoringSideChannelAttackPossible() {
+		return this.client.isPowerMonitoringSideChannelAttackPossible();
+	}
+
+	@Override
+	protected boolean isTimingSideChannelAttackPossible() {
+		return client.isTimingSideChannelAttackPossible();
+	}
+
+	@Override
+	protected boolean isFrequencySideChannelAttackPossible() {
+		return client.isFrequencySideChannelAttackPossible();
+	}
+
+	@Override
+	protected FalseCPUUsageType getFalseCPUUsageType() {
+		return client.getFalseCPUUsageType();
+	}
 
 
 	@Override
@@ -358,14 +397,17 @@ public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutpu
 		private final ASymmetricEncryptionType type;
 
 		private final AbstractSecureRandom random;
+		private final FalseCPUUsageType falseCPUUsageType;
 
-		public Client(AbstractSecureRandom random, ASymmetricPublicKey distantPublicKey) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
+		public Client(AbstractSecureRandom random, ASymmetricPublicKey distantPublicKey, FalseCPUUsageType falseCPUUsageType) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
 			super(distantPublicKey.getEncryptionAlgorithmType().getCipherInstance(), 0);
 			this.type = distantPublicKey.getEncryptionAlgorithmType();
 			this.distantPublicKey = distantPublicKey;
 			this.random = random;
+			if (isUsingSideChannelMitigation() && falseCPUUsageType==null)
+				throw new NullPointerException();
+			this.falseCPUUsageType=falseCPUUsageType;
 			setMaxPlainTextSizeForEncoding(distantPublicKey.getMaxBlockSize());
-
 			initCipherForEncryption(this.cipher);
 			initBufferAllocatorArgs();
 		}
@@ -389,6 +431,26 @@ public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutpu
 		@Override
 		protected void initCipherForEncryptionWithIv(AbstractCipher cipher, byte[] iv) throws IOException {
 			this.initCipherForEncryption(cipher);
+		}
+
+		@Override
+		protected boolean isPowerMonitoringSideChannelAttackPossible() {
+			return true;
+		}
+
+		@Override
+		protected boolean isTimingSideChannelAttackPossible() {
+			return true;
+		}
+
+		@Override
+		protected boolean isFrequencySideChannelAttackPossible() {
+			return true;
+		}
+
+		@Override
+		protected FalseCPUUsageType getFalseCPUUsageType() {
+			return falseCPUUsageType;
 		}
 
 		@Override

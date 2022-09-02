@@ -254,7 +254,7 @@ public enum ASymmetricKeyWrapperType {
 				if (name().startsWith("BCPQC_MCELIECE_")) {
 					if (!publicKey.getEncryptionAlgorithmType().name().equals(name()))
 						throw new IllegalArgumentException(publicKey.getEncryptionAlgorithmType().toString()+" ; "+name());
-					ClientASymmetricEncryptionAlgorithm client = new ClientASymmetricEncryptionAlgorithm(random, publicKey);
+					ClientASymmetricEncryptionAlgorithm client = new ClientASymmetricEncryptionAlgorithm(random, publicKey, FalseCPUUsageType.ADDITIONAL_CPU_USAGE_AFTER_THE_BLOCK_ENCRYPTION);
 					WrappedSecretData wsd=keyToWrap.encode();
 					return new WrappedEncryptedSymmetricSecretKey(client.encode(wsd.getBytes()));
 				} else {
@@ -359,7 +359,7 @@ public enum ASymmetricKeyWrapperType {
 				if (!publicKey.getPQCPublicKey().getEncryptionAlgorithmType().name().equals(getPqcWrapper().name()))
 					throw new IllegalArgumentException(publicKey.getPQCPublicKey().getEncryptionAlgorithmType()+" ; "+getPqcWrapper().name());
 				WrappedEncryptedSymmetricSecretKey nonPQCWrap = nonPQCWrapper.wrapKey(random, publicKey.getNonPQCPublicKey(), keyToWrap);
-				ClientASymmetricEncryptionAlgorithm client = new ClientASymmetricEncryptionAlgorithm(random, publicKey.getPQCPublicKey());
+				ClientASymmetricEncryptionAlgorithm client = new ClientASymmetricEncryptionAlgorithm(random, publicKey.getPQCPublicKey(), FalseCPUUsageType.ADDITIONAL_CPU_USAGE_AFTER_THE_BLOCK_ENCRYPTION);
 				return new WrappedEncryptedSymmetricSecretKey(client.encode(nonPQCWrap.getBytes()));
 			}
 		} catch (InvalidKeySpecException | NoSuchAlgorithmException | NoSuchProviderException | InvalidKeyException | InvalidAlgorithmParameterException | NoSuchPaddingException | IllegalBlockSizeException e) {
@@ -531,7 +531,7 @@ public enum ASymmetricKeyWrapperType {
 		Random r=new Random(System.currentTimeMillis());
 		r.nextBytes(encodedKey.getBytes());
 		if (type.name().startsWith("BCPQC_MCELIECE_")) {
-			ClientASymmetricEncryptionAlgorithm client = new ClientASymmetricEncryptionAlgorithm(SecureRandomType.DEFAULT.getInstance(null), publicKey);
+			ClientASymmetricEncryptionAlgorithm client = new ClientASymmetricEncryptionAlgorithm(SecureRandomType.DEFAULT.getInstance(null), publicKey, FalseCPUUsageType.ADDITIONAL_CPU_USAGE_AFTER_THE_BLOCK_ENCRYPTION);
 			return client.encode(encodedKey.getBytes()).length;
 		}
 		AsymmetricRSAPublicKey bcPK = (AsymmetricRSAPublicKey) publicKey.toBouncyCastleKey();

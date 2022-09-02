@@ -36,6 +36,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 
 import com.distrimind.util.Bits;
+import com.distrimind.util.NotYetImplementedException;
 import com.distrimind.util.io.*;
 
 import java.io.IOException;
@@ -131,6 +132,7 @@ public class EncryptionSignatureHashEncoder {
 	private AbstractSecureRandom cipherRandom=null;
 	private static final byte[] emptyTab=new byte[0];
 	private long lastInputStreamLength =-1, lastMaximumOutputLength;
+	private final FalseCPUUsageType falseCPUUsageType;
 	void incrementIVCounter() throws IOException {
 		if (originalSecretKeyForEncryption==null)
 			return;
@@ -145,14 +147,14 @@ public class EncryptionSignatureHashEncoder {
 		}
 	}
 
-	static SymmetricEncryptionAlgorithm reloadCipher(AbstractSecureRandom random, SymmetricSecretKey secretKey, long currentKeyGeneration, byte[] externalCounter) throws IOException {
+	static SymmetricEncryptionAlgorithm reloadCipher(AbstractSecureRandom random, SymmetricSecretKey secretKey, long currentKeyGeneration, byte[] externalCounter, FalseCPUUsageType falseCPUUsageType) throws IOException {
 		try {
 			SymmetricSecretKey sk = currentKeyGeneration==0?secretKey:secretKey.getHashedSecretKey(MessageDigestType.BC_FIPS_SHA3_256, currentKeyGeneration );
 			byte sc=sk.getEncryptionAlgorithmType().getMaxCounterSizeInBytesUsedWithBlockMode();
 			if (externalCounter==null)
-				return new SymmetricEncryptionAlgorithm(random, sk);
+				return new SymmetricEncryptionAlgorithm(random, sk, falseCPUUsageType);
 			else
-				return new SymmetricEncryptionAlgorithm(random, sk, (byte)(Math.min(externalCounter.length, sc)));
+				return new SymmetricEncryptionAlgorithm(random, sk, falseCPUUsageType, (byte)(Math.min(externalCounter.length, sc)));
 		} catch (NoSuchProviderException | NoSuchAlgorithmException e) {
 			throw new IOException(e);
 		}
@@ -164,10 +166,10 @@ public class EncryptionSignatureHashEncoder {
 						|| (externalCounter!=null && cipher.getBlockModeCounterBytes()!=externalCounter.length))
 						|| currentKeyGeneration!=0) ||
 				(cipher==null && originalSecretKeyForEncryption!=null)) {
-			cipher = reloadCipher(cipherRandom, originalSecretKeyForEncryption, currentKeyGeneration, externalCounter);
+			cipher = reloadCipher(cipherRandom, originalSecretKeyForEncryption, currentKeyGeneration, externalCounter, falseCPUUsageType);
 			cleanCache();
 			if (decoder!=null) {
-				decoder.cipher = reloadCipher(cipher.getSecureRandom(), originalSecretKeyForEncryption, currentKeyGeneration, externalCounter);
+				decoder.cipher = reloadCipher(cipher.getSecureRandom(), originalSecretKeyForEncryption, currentKeyGeneration, externalCounter, falseCPUUsageType);
 				decoder.cleanCache();
 			}
 		}
@@ -180,9 +182,16 @@ public class EncryptionSignatureHashEncoder {
 		this.decoder=decoder;
 		return this;
 	}
-
 	public EncryptionSignatureHashEncoder() throws IOException {
+		this(FalseCPUUsageType.ADDITIONAL_CPU_USAGE_AFTER_THE_BLOCK_ENCRYPTION);
+	}
+	public EncryptionSignatureHashEncoder(FalseCPUUsageType falseCPUUsageType) throws IOException {
+		if (falseCPUUsageType==null)
+			throw new NullPointerException();
+		if (falseCPUUsageType==FalseCPUUsageType.ADDITIONAL_CPU_USAGE_IN_REAL_TIME)
+			throw new NotYetImplementedException();
 		limitedRandomOutputStream=new LimitedRandomOutputStream(nullRandomInputStream, 0);
+		this.falseCPUUsageType=falseCPUUsageType;
 	}
 
 	public EncryptionSignatureHashEncoder withRandomInputStream(RandomInputStream inputStream) throws IOException {
@@ -246,10 +255,10 @@ public class EncryptionSignatureHashEncoder {
 	public EncryptionSignatureHashEncoder withSymmetricSecretKeyForEncryption(AbstractSecureRandom random, SymmetricSecretKey symmetricSecretKeyForEncryption, byte externalCounterLength) throws IOException {
 		byte sc=symmetricSecretKeyForEncryption.getEncryptionAlgorithmType().getMaxCounterSizeInBytesUsedWithBlockMode();
 		if (externalCounterLength<=0) {
-			return withCipher(new SymmetricEncryptionAlgorithm(random, symmetricSecretKeyForEncryption));
+			return withCipher(new SymmetricEncryptionAlgorithm(random, symmetricSecretKeyForEncryption, falseCPUUsageType));
 		}
 		else {
-			return withCipher(new SymmetricEncryptionAlgorithm(random, symmetricSecretKeyForEncryption, (byte) Math.min(externalCounterLength, sc)));
+			return withCipher(new SymmetricEncryptionAlgorithm(random, symmetricSecretKeyForEncryption, falseCPUUsageType , (byte) Math.min(externalCounterLength, sc)));
 		}
 	}
 	public EncryptionSignatureHashEncoder withCipher(SymmetricEncryptionAlgorithm cipher) throws IOException {
@@ -808,29 +817,28 @@ public class EncryptionSignatureHashEncoder {
 			AbstractMessageDigest md = subStreamParameters.getMessageDigestType().getMessageDigestInstance();
 			md.reset();
 			long dataLen=inputStream.length();
-			RandomByteArrayOutputStream out=new RandomByteArrayOutputStream(headSize);
-			code=getCode();
-			out.writeByte(code);
-			out.writeShort(currentKeyID);
+			try(RandomByteArrayOutputStream out=new RandomByteArrayOutputStream(headSize)) {
+				code = getCode();
+				out.writeByte(code);
+				out.writeShort(currentKeyID);
 
-			if (cipher==null)
-			{
-				out.writeLong(dataLen);
-				out.flush();
-				RandomInputStream in=new AggregatedRandomInputStreams(new RandomByteArrayInputStream(out.getBytes()), inputStream);
-				byte[] hash=subStreamParameters.partialHash(in, md).digest();
-				return com.distrimind.bouncycastle.util.Arrays.constantTimeAreEqual(hash, hashResultFromEncryptedStream.getHash());
-			}
-			else {
-				out.writeLong(dataLen=cipher.getOutputSizeAfterEncryption(dataLen));
-				out.flush();
+				if (cipher == null) {
+					out.writeLong(dataLen);
+					out.flush();
+					RandomInputStream in = new AggregatedRandomInputStreams(new RandomByteArrayInputStream(out.getBytes()), inputStream);
+					byte[] hash = subStreamParameters.partialHash(in, md).digest();
+					return com.distrimind.bouncycastle.util.Arrays.constantTimeAreEqual(hash, hashResultFromEncryptedStream.getHash());
+				} else {
+					out.writeLong(dataLen = cipher.getOutputSizeAfterEncryption(dataLen));
+					out.flush();
 
-				if (cipher.getType().supportAssociatedData()) {
-					lenAD = computeAssociatedData(dataLen);
-					associatedData=bufferRef;
-					offAD=0;
+					if (cipher.getType().supportAssociatedData()) {
+						lenAD = computeAssociatedData(dataLen);
+						associatedData = bufferRef;
+						offAD = 0;
+					}
+					return cipher.checkPartialHashWithNonEncryptedStream(out.getBytes(), hashResultFromEncryptedStream, subStreamParameters, inputStream, md);
 				}
-				return cipher.checkPartialHashWithNonEncryptedStream(out.getBytes(), hashResultFromEncryptedStream, subStreamParameters, inputStream, md);
 			}
 		} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
 			throw new IOException(e);

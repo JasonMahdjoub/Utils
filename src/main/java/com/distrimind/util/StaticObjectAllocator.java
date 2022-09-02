@@ -56,7 +56,8 @@ public class StaticObjectAllocator<T> {
 	public StaticObjectAllocator(int maxAllocations, Class<? extends T> concernedClass, Class<?> ...constructorParameters) throws NoSuchMethodException, SecurityException
 	{
 		this.maxAllocations=maxAllocations;
-		if (isByteArray=concernedClass.equals(byteArrayClass))
+		isByteArray=concernedClass.equals(byteArrayClass);
+		if (isByteArray)
 			this.constructor=null;
 		else
 			this.constructor=concernedClass.getDeclaredConstructor(constructorParameters);

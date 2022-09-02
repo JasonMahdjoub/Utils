@@ -37,7 +37,6 @@ package com.distrimind.util.harddrive;
 
 import com.distrimind.util.Utils;
 import com.distrimind.util.properties.DocumentBuilderFactoryWithNonDTD;
-import com.distrimind.util.properties.MultiFormatProperties;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
@@ -46,7 +45,10 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
 
 /**
  * 
@@ -80,8 +82,8 @@ class MacOSHardDriveDetect extends UnixHardDriveDetect {
 		try {
             disks=new HashSet<>();
             partitions=new HashSet<>();
-
-			Process p = Runtime.getRuntime().exec("diskutil list -plist");
+			ProcessBuilder pb=new ProcessBuilder("diskutil", "list", "-plist");
+			Process p = pb.start();
 			ArrayList<String> partitionIdentifiers = new ArrayList<>();
 			try {
 				DocumentBuilderFactory dbf= DocumentBuilderFactoryWithNonDTD.newDocumentBuilderFactoryWithNonDTDInstance(true);

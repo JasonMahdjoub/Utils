@@ -124,9 +124,9 @@ public class EncryptionSignatureHashDecoder {
 		try {
 			byte sc=symmetricSecretKeyForEncryption.getEncryptionAlgorithmType().getMaxCounterSizeInBytesUsedWithBlockMode();
 			if (externalCounterLength <= 0)
-				return withCipher(new SymmetricEncryptionAlgorithm(SecureRandomType.DEFAULT.getSingleton(null), symmetricSecretKeyForEncryption));
+				return withCipher(new SymmetricEncryptionAlgorithm(SecureRandomType.DEFAULT.getSingleton(null), symmetricSecretKeyForEncryption, FalseCPUUsageType.ADDITIONAL_CPU_USAGE_AFTER_THE_BLOCK_ENCRYPTION));
 			else
-				return withCipher(new SymmetricEncryptionAlgorithm(SecureRandomType.DEFAULT.getSingleton(null), symmetricSecretKeyForEncryption, (byte)(Math.min(externalCounterLength, sc))));
+				return withCipher(new SymmetricEncryptionAlgorithm(SecureRandomType.DEFAULT.getSingleton(null), symmetricSecretKeyForEncryption, FalseCPUUsageType.ADDITIONAL_CPU_USAGE_AFTER_THE_BLOCK_ENCRYPTION, (byte)(Math.min(externalCounterLength, sc))));
 		} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
 			throw new IOException(e);
 		}
@@ -1213,7 +1213,7 @@ public class EncryptionSignatureHashDecoder {
 				|| (externalCounter==null && cipher.getBlockModeCounterBytes()!=0)
 				|| (externalCounter!=null && cipher.getBlockModeCounterBytes()!=externalCounter.length))) ||
 				(cipher==null && originalSecretKeyForEncryption!=null)) {
-			cipher = EncryptionSignatureHashEncoder.reloadCipher(randomForCipher, originalSecretKeyForEncryption, 0, externalCounter);
+			cipher = EncryptionSignatureHashEncoder.reloadCipher(randomForCipher, originalSecretKeyForEncryption, 0, externalCounter, FalseCPUUsageType.ADDITIONAL_CPU_USAGE_AFTER_THE_BLOCK_ENCRYPTION);
 			cleanCache();
 		}
 	}

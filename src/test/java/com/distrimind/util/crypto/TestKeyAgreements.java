@@ -305,8 +305,8 @@ public class TestKeyAgreements {
 	}
 
 	private void testEncryptionAfterKeyExchange(AbstractSecureRandom random, SymmetricEncryptionType type, SymmetricSecretKey key) throws IllegalStateException, IOException {
-		SymmetricEncryptionAlgorithm algoDistant = new SymmetricEncryptionAlgorithm(random, key);
-		SymmetricEncryptionAlgorithm algoLocal = new SymmetricEncryptionAlgorithm(random, key);
+		SymmetricEncryptionAlgorithm algoDistant = new SymmetricEncryptionAlgorithm(random, key, FalseCPUUsageType.ADDITIONAL_CPU_USAGE_AFTER_THE_BLOCK_ENCRYPTION);
+		SymmetricEncryptionAlgorithm algoLocal = new SymmetricEncryptionAlgorithm(random, key, FalseCPUUsageType.ADDITIONAL_CPU_USAGE_AFTER_THE_BLOCK_ENCRYPTION);
 
 		Random rand = new Random(System.currentTimeMillis());
 

@@ -331,9 +331,9 @@ public class TestASymmetricEncryption {
 		ASymmetricKeyPair kpd = type.getKeyPairGenerator(rand, (short)2048).generateKeyPair();
 		ASymmetricKeyPair kpl = type.getKeyPairGenerator(rand, (short)2048).generateKeyPair();
 		P2PASymmetricEncryptionAlgorithm algoDistant = new P2PASymmetricEncryptionAlgorithm(kpd,
-				kpl.getASymmetricPublicKey());
+				kpl.getASymmetricPublicKey(), FalseCPUUsageType.ADDITIONAL_CPU_USAGE_AFTER_THE_BLOCK_ENCRYPTION);
 		P2PASymmetricEncryptionAlgorithm algoLocal = new P2PASymmetricEncryptionAlgorithm(kpl,
-				kpd.getASymmetricPublicKey());
+				kpd.getASymmetricPublicKey(), FalseCPUUsageType.ADDITIONAL_CPU_USAGE_AFTER_THE_BLOCK_ENCRYPTION);
 
 		testP2PASymetricEncryptionsImpl(rand, type, algoDistant, algoLocal);
 
@@ -352,9 +352,9 @@ public class TestASymmetricEncryption {
 		HybridASymmetricKeyPair kpd=new HybridASymmetricKeyPair(kpdnonpqc, kpdpqc);
 		HybridASymmetricKeyPair kpl=new HybridASymmetricKeyPair(kplnonpqc, kplpqc);
 		P2PASymmetricEncryptionAlgorithm algoDistant = new P2PASymmetricEncryptionAlgorithm(kpd,
-				kpl.getASymmetricPublicKey());
+				kpl.getASymmetricPublicKey(), FalseCPUUsageType.ADDITIONAL_CPU_USAGE_AFTER_THE_BLOCK_ENCRYPTION);
 		P2PASymmetricEncryptionAlgorithm algoLocal = new P2PASymmetricEncryptionAlgorithm(kpl,
-				kpd.getASymmetricPublicKey());
+				kpd.getASymmetricPublicKey(), FalseCPUUsageType.ADDITIONAL_CPU_USAGE_AFTER_THE_BLOCK_ENCRYPTION);
 
 		testP2PASymetricEncryptionsImpl(rand, type, algoDistant, algoLocal);
 
@@ -419,7 +419,7 @@ public class TestASymmetricEncryption {
 		ASymmetricKeyPair kpd = astype.getKeyPairGenerator(rand, (short)1024).generateKeyPair();
 
 		SymmetricSecretKey localKey = stype.getKeyGenerator(rand).generateKey();
-		SymmetricEncryptionAlgorithm algoLocalS = new SymmetricEncryptionAlgorithm(rand, localKey);
+		SymmetricEncryptionAlgorithm algoLocalS = new SymmetricEncryptionAlgorithm(rand, localKey, FalseCPUUsageType.ADDITIONAL_CPU_USAGE_AFTER_THE_BLOCK_ENCRYPTION);
 		ASymmetricKeyWrapperType kw;
 		if (astype.getCodeProviderForEncryption()==CodeProvider.GNU_CRYPTO)
 			kw=ASymmetricKeyWrapperType.GNU_RSA_OAEP_SHA2_384;
@@ -436,7 +436,7 @@ public class TestASymmetricEncryption {
 		Assert.assertEquals(localKey.getAuthenticatedSignatureAlgorithmType(), decryptedKey.getAuthenticatedSignatureAlgorithmType());
 		Assert.assertEquals(localKey.getEncryptionAlgorithmType(), decryptedKey.getEncryptionAlgorithmType());
 		Assert.assertEquals(localKey.getKeySizeBits(), decryptedKey.getKeySizeBits());
-		SymmetricEncryptionAlgorithm algoDistantS = new SymmetricEncryptionAlgorithm(rand, decryptedKey);
+		SymmetricEncryptionAlgorithm algoDistantS = new SymmetricEncryptionAlgorithm(rand, decryptedKey, FalseCPUUsageType.ADDITIONAL_CPU_USAGE_AFTER_THE_BLOCK_ENCRYPTION);
 
 		for (byte[] m : VariousTests.messagesToEncrypt) {
 			byte[] md = algoDistantS.decode(algoLocalS.encode(m));
@@ -469,7 +469,7 @@ public class TestASymmetricEncryption {
 		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getSingleton(null);
 
 		ClientASymmetricEncryptionAlgorithm algoClient = new ClientASymmetricEncryptionAlgorithm(rand,
-				kp.getASymmetricPublicKey());
+				kp.getASymmetricPublicKey(), FalseCPUUsageType.ADDITIONAL_CPU_USAGE_AFTER_THE_BLOCK_ENCRYPTION);
 		ServerASymmetricEncryptionAlgorithm algoServer = new ServerASymmetricEncryptionAlgorithm(kp);
 
 		for (byte[] m : VariousTests.messagesToEncrypt) {

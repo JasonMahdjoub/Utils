@@ -62,12 +62,12 @@ public abstract class AbstractDecentralizedIDGenerator extends AbstractDecentral
 	private static final long serialVersionUID = 478117044055632008L;
 	public static final int MAX_DECENTRALIZED_ID_SIZE_IN_BYTES=17;
 
-	private final static transient long LOCAL_MAC;
-	private final static transient byte []LOCAL_MAC_BYTES;
+	private final static long LOCAL_MAC;
+	private final static byte []LOCAL_MAC_BYTES;
 	//private final static transient long SHORT_LOCAL_MAC;
-	private final static transient byte[] SHORT_LOCAL_MAC_BYTES;
-	protected final static transient AbstractSecureRandom RANDOM;
-	private final static transient AbstractMessageDigest MESSAGE_DIGEST;
+	private final static byte[] SHORT_LOCAL_MAC_BYTES;
+	protected final static AbstractSecureRandom RANDOM;
+	private final static AbstractMessageDigest MESSAGE_DIGEST;
 	
 	
 	static {
