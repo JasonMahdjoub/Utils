@@ -76,7 +76,7 @@ public class AggregatedRandomInputStreams extends RandomInputStream{
 	}
 
 	public AggregatedRandomInputStreams(List<RandomInputStream> inputStreams) throws IOException {
-		this((RandomInputStream[])inputStreams.toArray());
+		this(inputStreams.toArray(new RandomInputStream[0]));
 	}
 
 	@Override
@@ -108,6 +108,7 @@ public class AggregatedRandomInputStreams extends RandomInputStream{
 		throw new IllegalArgumentException();
 	}
 
+	@SuppressWarnings("resource")
 	@Override
 	public long currentPosition() throws IOException {
 		return actualizeCurrentRandomInputStream(false).currentPosition()+posOff;
@@ -151,6 +152,7 @@ public class AggregatedRandomInputStreams extends RandomInputStream{
 		}
 		return ris;
 	}
+	@SuppressWarnings("resource")
 	@Override
 	public void readFully(byte[] tab, int off, int len) throws IOException {
 		if (closed)
@@ -177,6 +179,7 @@ public class AggregatedRandomInputStreams extends RandomInputStream{
 		return new DataInputStream(this).readLine();
 	}
 
+	@SuppressWarnings("resource")
 	@Override
 	public int read() throws IOException {
 		if (closed)
@@ -186,6 +189,7 @@ public class AggregatedRandomInputStreams extends RandomInputStream{
 		return ris.read();
 	}
 
+	@SuppressWarnings("resource")
 	@Override
 	public int read(byte[] tab, int off, int len) throws IOException {
 		if (closed)

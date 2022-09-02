@@ -253,6 +253,7 @@ public enum SymmetricAuthenticatedSignatureType {
 	}
 
 
+	@SuppressWarnings("resource")
 	public static void main(String []args) throws NoSuchProviderException, NoSuchAlgorithmException, IOException {
 		System.out.println(ASymmetricAuthenticatedSignatureType.BC_FIPS_Ed25519.getKeyPairGenerator(SecureRandomType.DEFAULT.getSingleton(null) ).generateKeyPair().getASymmetricPublicKey());
 	}

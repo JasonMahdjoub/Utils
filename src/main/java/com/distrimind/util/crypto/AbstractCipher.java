@@ -50,7 +50,7 @@ import java.nio.ByteBuffer;
 public abstract class AbstractCipher {
 
 	/**
-	 * Finishes a multi-part transformation, and returns the final transformed
+	 * Finishes a multipart transformation, and returns the final transformed
 	 * bytes.
 	 *
 	 * @return The final transformed bytes.
@@ -62,7 +62,7 @@ public abstract class AbstractCipher {
 	public abstract byte[] doFinal() throws IOException;
 
 	/**
-	 * Finishes a multi-part transformation or does an entire transformation on the
+	 * Finishes a multipart transformation or does an entire transformation on the
 	 * input, and returns the transformed bytes.
 	 *
 	 * @param input
@@ -80,7 +80,7 @@ public abstract class AbstractCipher {
 	}
 
 	/**
-	 * Finishes a multi-part transformation and stores the transformed bytes into
+	 * Finishes a multipart transformation and stores the transformed bytes into
 	 * the given array.
 	 *
 	 * @param output
@@ -94,7 +94,7 @@ public abstract class AbstractCipher {
 			throws IOException;
 
 	/**
-	 * Finishes a multi-part transformation or does an entire transformation on the
+	 * Finishes a multipart transformation or does an entire transformation on the
 	 * input, and returns the transformed bytes.
 	 *
 	 * @param input
@@ -116,7 +116,7 @@ public abstract class AbstractCipher {
 	}
 
 	/**
-	 * Finishes a multi-part transformation or transforms a portion of a byte array,
+	 * Finishes a multipart transformation or transforms a portion of a byte array,
 	 * and stores the result in the given byte array.
 	 *
 	 * @param input
@@ -136,7 +136,7 @@ public abstract class AbstractCipher {
 			throws IOException;
 
 	/**
-	 * Finishes a multi-part transformation with, or completely transforms, a byte
+	 * Finishes a multipart transformation with, or completely transforms, a byte
 	 * buffer, and stores the result into the output buffer.
 	 *
 	 * @param input
@@ -284,7 +284,7 @@ public abstract class AbstractCipher {
 	}
 
 	/**
-	 * Continue a multi-part transformation on an entire byte array, returning the
+	 * Continue a multipart transformation on an entire byte array, returning the
 	 * transformed bytes.
 	 *
 	 * @param input
@@ -298,7 +298,7 @@ public abstract class AbstractCipher {
 	}
 
 	/**
-	 * Continue a multi-part transformation on part of a byte array, returning the
+	 * Continue a multipart transformation on part of a byte array, returning the
 	 * transformed bytes.
 	 *
 	 * @param input
@@ -313,7 +313,7 @@ public abstract class AbstractCipher {
 	public abstract byte[] update(byte[] input, int inputOffset, int inputLength) throws IOException;
 
 	/**
-	 * Continue a multi-part transformation on part of a byte array, placing the
+	 * Continue a multipart transformation on part of a byte array, placing the
 	 * transformed bytes into the given array.
 	 *
 	 * @param input
@@ -334,7 +334,7 @@ public abstract class AbstractCipher {
 	}
 
 	/**
-	 * Continue a multi-part transformation on part of a byte array, placing the
+	 * Continue a multipart transformation on part of a byte array, placing the
 	 * transformed bytes into the given array.
 	 *
 	 * @param input
@@ -354,7 +354,7 @@ public abstract class AbstractCipher {
 			throws IOException;
 
 	/**
-	 * Continue a multi-part transformation on a byte buffer, storing the
+	 * Continue a multipart transformation on a byte buffer, storing the
 	 * transformed bytes into another buffer.
 	 *
 	 * @param input

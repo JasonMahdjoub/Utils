@@ -15,7 +15,8 @@ import java.io.IOException;
  */
 public final class WrappedPassword extends WrappedSecretString implements SecureExternalizable {
 	public static final int MAX_CHARS_NUMBER=1000;
-	protected WrappedPassword() {
+	@SuppressWarnings("unused")
+	WrappedPassword() {
 	}
 
 	public WrappedPassword(char[] password) {

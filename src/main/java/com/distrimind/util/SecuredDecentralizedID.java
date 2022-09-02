@@ -41,7 +41,6 @@ import com.distrimind.util.data_buffers.WrappedSecretData;
 import com.distrimind.util.data_buffers.WrappedString;
 import com.distrimind.util.sizeof.ObjectSizer;
 
-import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.util.Arrays;
@@ -98,7 +97,7 @@ public class SecuredDecentralizedID extends AbstractDecentralizedID {
 
 	private final long[] idLongs;
 
-	private transient int hashCode;
+	private final int hashCode;
 
 	public SecuredDecentralizedID(AbstractDecentralizedIDGenerator generator, AbstractSecureRandom rand)
 			throws NoSuchAlgorithmException, NoSuchProviderException {
@@ -224,18 +223,7 @@ public class SecuredDecentralizedID extends AbstractDecentralizedID {
 		return hashCode;
 	}
 
-	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-		try {
-			in.defaultReadObject();
-			hashCode = computeHashCode(idLongs);
-		}
-		catch(ClassNotFoundException | IOException e)
-		{
-			throw e;
-		} catch (Exception e) {
-			throw new IOException(e);
-		}
-	}
+
 
 	@Override
 	public String toString() {

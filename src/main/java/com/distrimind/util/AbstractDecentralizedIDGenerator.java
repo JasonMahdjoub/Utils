@@ -34,17 +34,18 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
+import com.distrimind.util.crypto.AbstractMessageDigest;
+import com.distrimind.util.crypto.AbstractSecureRandom;
+import com.distrimind.util.crypto.MessageDigestType;
+import com.distrimind.util.crypto.SecureRandomType;
+import com.distrimind.util.data_buffers.WrappedData;
+import com.distrimind.util.sizeof.ObjectSizer;
+
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.util.Enumeration;
-
-import com.distrimind.util.crypto.*;
-import com.distrimind.util.data_buffers.WrappedData;
-import com.distrimind.util.sizeof.ObjectSizer;
 
 /**
  * This class represents a unique identifier. Uniqueness is guaranteed over the
@@ -56,10 +57,7 @@ import com.distrimind.util.sizeof.ObjectSizer;
  * 
  */
 public abstract class AbstractDecentralizedIDGenerator extends AbstractDecentralizedID {
-	/**
-	* 
-	*/
-	private static final long serialVersionUID = 478117044055632008L;
+
 	public static final int MAX_DECENTRALIZED_ID_SIZE_IN_BYTES=17;
 
 	private final static long LOCAL_MAC;
@@ -214,7 +212,7 @@ public abstract class AbstractDecentralizedIDGenerator extends AbstractDecentral
 
 	protected final long timestamp;
 	protected final long worker_id_and_sequence;
-	private transient int hashCode;
+	private final int hashCode;
 	public AbstractDecentralizedIDGenerator() {
 		this(true, false);
 	}
@@ -298,11 +296,6 @@ public abstract class AbstractDecentralizedIDGenerator extends AbstractDecentral
 	private int computeHashCode()
 	{
 		return 31 * ((int)(timestamp ^ (timestamp >>> 32))) + ((int)(worker_id_and_sequence ^ (worker_id_and_sequence >>> 32)));
-	}
-	private void readObject(ObjectInputStream aInputStream) throws ClassNotFoundException, IOException
-	{
-		aInputStream.defaultReadObject();
-		hashCode=computeHashCode();
 	}
 
 	AbstractDecentralizedIDGenerator(long timestamp, long work_id_sequence) {

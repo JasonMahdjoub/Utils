@@ -48,7 +48,7 @@ import com.distrimind.util.OSVersion;
 
 /**
  * Class giving a unique hard drive identifier, considering a folder,
- * independently from the current OS.
+ * independently of the current OS.
  * 
  * @author Jason Mahdjoub
  * @version 1.0

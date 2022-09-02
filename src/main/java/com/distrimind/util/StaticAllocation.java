@@ -35,7 +35,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
 package com.distrimind.util;
 
 /**
- * Gives several system functions, independently from current OS running
+ * Gives several system functions, independently of current OS running
  * 
  * @author Jason Mahdjoub
  * @version 1.0
@@ -46,7 +46,7 @@ public class StaticAllocation<T> implements AutoCloseable{
 	private final T instance;
 	volatile boolean used;
 	
-	StaticAllocation(T instance)
+	public StaticAllocation(T instance)
 	{
 		this.instance=instance;
 		used=true;

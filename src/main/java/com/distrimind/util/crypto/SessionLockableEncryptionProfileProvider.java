@@ -18,7 +18,7 @@ public final class SessionLockableEncryptionProfileProvider implements Encryptio
 	private final EncryptionProfileProvider encryptionProfileProvider;
 
 
-	protected SessionLockableEncryptionProfileProvider(EncryptionProfileProvider encryptionProfileProvider, long unlockDurationInMs, boolean permitLiveUnlock) {
+	public SessionLockableEncryptionProfileProvider(EncryptionProfileProvider encryptionProfileProvider, long unlockDurationInMs, boolean permitLiveUnlock) {
 		if (encryptionProfileProvider==null)
 			throw new NullPointerException();
 		if (unlockDurationInMs<MIN_UNLOCK_DURATION_IN_MS)

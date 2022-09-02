@@ -93,10 +93,6 @@ public class SerializationTools {
 	{
 		writeString(oos, convertFileToString(file), sizeMax, supportNull);
 	}
-	/*static void writePath(final SecuredObjectOutputStream oos, Path path, int sizeMax, boolean supportNull) throws IOException
-	{
-		writeString(oos, convertPathToString(path), sizeMax, supportNull);
-	}*/
 	static void writeString(final SecuredObjectOutputStream oos, String s, int sizeMax, boolean supportNull) throws IOException
 	{
 

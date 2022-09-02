@@ -254,9 +254,10 @@ public enum ASymmetricKeyWrapperType {
 				if (name().startsWith("BCPQC_MCELIECE_")) {
 					if (!publicKey.getEncryptionAlgorithmType().name().equals(name()))
 						throw new IllegalArgumentException(publicKey.getEncryptionAlgorithmType().toString()+" ; "+name());
-					ClientASymmetricEncryptionAlgorithm client = new ClientASymmetricEncryptionAlgorithm(random, publicKey, FalseCPUUsageType.ADDITIONAL_CPU_USAGE_AFTER_THE_BLOCK_ENCRYPTION);
-					WrappedSecretData wsd=keyToWrap.encode();
-					return new WrappedEncryptedSymmetricSecretKey(client.encode(wsd.getBytes()));
+					try(ClientASymmetricEncryptionAlgorithm client = new ClientASymmetricEncryptionAlgorithm(random, publicKey, FalseCPUUsageType.ADDITIONAL_CPU_USAGE_AFTER_THE_BLOCK_ENCRYPTION)) {
+						WrappedSecretData wsd = keyToWrap.encode();
+						return new WrappedEncryptedSymmetricSecretKey(client.encode(wsd.getBytes()));
+					}
 				} else {
 					if ( (publicKey.getEncryptionAlgorithmType() != null && ((provider == CodeProvider.GNU_CRYPTO) != (publicKey.getEncryptionAlgorithmType().getCodeProviderForEncryption() == CodeProvider.GNU_CRYPTO)))
 							|| (keyToWrap.getAuthenticatedSignatureAlgorithmType() != null && (provider == CodeProvider.GNU_CRYPTO) != (keyToWrap.getAuthenticatedSignatureAlgorithmType().getCodeProviderForSignature() == CodeProvider.GNU_CRYPTO))
@@ -359,8 +360,10 @@ public enum ASymmetricKeyWrapperType {
 				if (!publicKey.getPQCPublicKey().getEncryptionAlgorithmType().name().equals(getPqcWrapper().name()))
 					throw new IllegalArgumentException(publicKey.getPQCPublicKey().getEncryptionAlgorithmType()+" ; "+getPqcWrapper().name());
 				WrappedEncryptedSymmetricSecretKey nonPQCWrap = nonPQCWrapper.wrapKey(random, publicKey.getNonPQCPublicKey(), keyToWrap);
-				ClientASymmetricEncryptionAlgorithm client = new ClientASymmetricEncryptionAlgorithm(random, publicKey.getPQCPublicKey(), FalseCPUUsageType.ADDITIONAL_CPU_USAGE_AFTER_THE_BLOCK_ENCRYPTION);
-				return new WrappedEncryptedSymmetricSecretKey(client.encode(nonPQCWrap.getBytes()));
+				try(ClientASymmetricEncryptionAlgorithm client = new ClientASymmetricEncryptionAlgorithm(random, publicKey.getPQCPublicKey(), FalseCPUUsageType.ADDITIONAL_CPU_USAGE_AFTER_THE_BLOCK_ENCRYPTION))
+				{
+					return new WrappedEncryptedSymmetricSecretKey(client.encode(nonPQCWrap.getBytes()));
+				}
 			}
 		} catch (InvalidKeySpecException | NoSuchAlgorithmException | NoSuchProviderException | InvalidKeyException | InvalidAlgorithmParameterException | NoSuchPaddingException | IllegalBlockSizeException e) {
 			throw new IOException(e);
@@ -531,8 +534,9 @@ public enum ASymmetricKeyWrapperType {
 		Random r=new Random(System.currentTimeMillis());
 		r.nextBytes(encodedKey.getBytes());
 		if (type.name().startsWith("BCPQC_MCELIECE_")) {
-			ClientASymmetricEncryptionAlgorithm client = new ClientASymmetricEncryptionAlgorithm(SecureRandomType.DEFAULT.getInstance(null), publicKey, FalseCPUUsageType.ADDITIONAL_CPU_USAGE_AFTER_THE_BLOCK_ENCRYPTION);
-			return client.encode(encodedKey.getBytes()).length;
+			try(ClientASymmetricEncryptionAlgorithm client = new ClientASymmetricEncryptionAlgorithm(SecureRandomType.DEFAULT.getInstance(null), publicKey, FalseCPUUsageType.ADDITIONAL_CPU_USAGE_AFTER_THE_BLOCK_ENCRYPTION)) {
+				return client.encode(encodedKey.getBytes()).length;
+			}
 		}
 		AsymmetricRSAPublicKey bcPK = (AsymmetricRSAPublicKey) publicKey.toBouncyCastleKey();
 
@@ -551,27 +555,7 @@ public enum ASymmetricKeyWrapperType {
 		} else
 			return wrapedKey.length+2+SymmetricSecretKey.ENCODED_TYPE_SIZE;
 	}
-	public static void main(String []args) throws NoSuchAlgorithmException, NoSuchProviderException, IOException, InvalidKeySpecException {
-		ASymmetricKeyWrapperType pqctype=ASymmetricKeyWrapperType.BCPQC_MCELIECE_POINTCHEVAL_CCA2_SHA256;
-		ASymmetricKeyWrapperType nonpqctype=ASymmetricKeyWrapperType.BC_FIPS_RSA_OAEP_WITH_PARAMETERS_SHA2_512;
-		ASymmetricKeyPair pqckp=ASymmetricEncryptionType.BCPQC_MCELIECE_POINTCHEVAL_CCA2_SHA256.getKeyPairGenerator(SecureRandomType.DEFAULT.getInstance(null)).generateKeyPair();
-		ASymmetricKeyPair nonpqckp=ASymmetricEncryptionType.RSA_OAEPWithSHA512AndMGF1Padding.getKeyPairGenerator(SecureRandomType.DEFAULT.getInstance(null)).generateKeyPair();
-		System.out.println(getOutputSizeAfterEncryption(pqckp.getASymmetricPublicKey(), pqctype, 64));
-		System.out.println(getOutputSizeAfterEncryption(nonpqckp.getASymmetricPublicKey(), nonpqctype,64));
-		System.out.println(getOutputSizeAfterEncryption(pqckp.getASymmetricPublicKey(), pqctype,getOutputSizeAfterEncryption(nonpqckp.getASymmetricPublicKey(), nonpqctype,64)));
 
-		System.out.println("----------- "+HybridASymmetricPrivateKey.MAX_SIZE_IN_BYTES_OF_PRIVATE_KEY_WITHOUT_RSA_FOR_SIGNATURE);
-		System.out.println(getOutputSizeAfterEncryption(pqckp.getASymmetricPublicKey(), pqctype,HybridASymmetricPrivateKey.MAX_SIZE_IN_BYTES_OF_PRIVATE_KEY_WITHOUT_RSA_FOR_SIGNATURE));
-		System.out.println(getOutputSizeAfterEncryption(nonpqckp.getASymmetricPublicKey(), nonpqctype,HybridASymmetricPrivateKey.MAX_SIZE_IN_BYTES_OF_PRIVATE_KEY_WITHOUT_RSA_FOR_SIGNATURE));
-		System.out.println(getOutputSizeAfterEncryption(pqckp.getASymmetricPublicKey(), pqctype,getOutputSizeAfterEncryption(nonpqckp.getASymmetricPublicKey(), nonpqctype,HybridASymmetricPrivateKey.MAX_SIZE_IN_BYTES_OF_PRIVATE_KEY_WITHOUT_RSA_FOR_SIGNATURE)));
-
-		System.out.println("----------- "+ASymmetricPrivateKey.MAX_SIZE_IN_BYTES_OF_NON_PQC_NON_RSA_NON_HYBRID_PRIVATE_KEY_FOR_SIGNATURE);
-		System.out.println(getOutputSizeAfterEncryption(pqckp.getASymmetricPublicKey(), pqctype,ASymmetricPrivateKey.MAX_SIZE_IN_BYTES_OF_NON_PQC_NON_RSA_NON_HYBRID_PRIVATE_KEY_FOR_SIGNATURE));
-		System.out.println(getOutputSizeAfterEncryption(nonpqckp.getASymmetricPublicKey(), nonpqctype,ASymmetricPrivateKey.MAX_SIZE_IN_BYTES_OF_NON_PQC_NON_RSA_NON_HYBRID_PRIVATE_KEY_FOR_SIGNATURE));
-		System.out.println(getOutputSizeAfterEncryption(pqckp.getASymmetricPublicKey(), pqctype,getOutputSizeAfterEncryption(nonpqckp.getASymmetricPublicKey(), nonpqctype,ASymmetricPrivateKey.MAX_SIZE_IN_BYTES_OF_NON_PQC_NON_RSA_NON_HYBRID_PRIVATE_KEY_FOR_SIGNATURE)));
-
-
-	}
 
 	public static final int MAX_SIZE_IN_BYTES_OF_WRAPPED_SYMMETRIC_SECRET_KEY_WITH_ASYMMETRIC_NON_PQC_ENCRYPTION =768;
 	public static final int MAX_SIZE_IN_BYTES_OF_WRAPPED_SYMMETRIC_SECRET_KEY_WITH_ASYMMETRIC_PQC_ENCRYPTION =512;

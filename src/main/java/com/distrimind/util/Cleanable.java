@@ -42,7 +42,7 @@ import java.lang.reflect.Modifier;
  * This API aims to prevent future deactivation of finalize method calling by the garbage collector.
  * It uses Cleanable java API when JVM version is greater than Java 8.
  * Otherwise, it uses standard finalize method.
- *
+ * <p>
  * To replace finalize method, your "finalizable" class must inherit this class.
  * Then, a constructor must call the method {@link #registerCleanerIfNotDone(Cleaner)} with a cleaner that
  * inherit the class {@link Cleaner}, and that must implement the method {@link Cleaner#performCleanup()}
@@ -50,7 +50,7 @@ import java.lang.reflect.Modifier;
  * If you do not call the method {@link #clean()}, then the garbage collector will call it for you
  * when the object becomes unreferenced. If the JVM version is upper to Java 8, then, the Java Cleaner API is used.
  * Otherwise, it is the classical finalize method that is used.
- *
+ * <p>
  * Please do not override method {@link Object#finalize()}. Otherwise, this API will be obsolete.
  *
  * @author Jason Mahdjoub

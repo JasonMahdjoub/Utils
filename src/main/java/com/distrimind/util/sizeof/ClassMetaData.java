@@ -96,9 +96,9 @@ final class ClassMetaData {
 		}
 	}
 
-	protected static final ClassAccessPrivilegedAction capa = new ClassAccessPrivilegedAction();
+	static final ClassAccessPrivilegedAction capa = new ClassAccessPrivilegedAction();
 
-	protected static final FieldAccessPrivilegedAction fapa = new FieldAccessPrivilegedAction();
+	static final FieldAccessPrivilegedAction fapa = new FieldAccessPrivilegedAction();
 
 	private final Class<?> m_class;
 

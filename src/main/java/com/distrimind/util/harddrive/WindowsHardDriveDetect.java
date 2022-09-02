@@ -38,10 +38,7 @@ package com.distrimind.util.harddrive;
 import com.distrimind.util.Utils;
 
 import java.io.*;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * 
@@ -212,7 +209,7 @@ class WindowsHardDriveDetect extends HardDriveDetect {
         scriptFile.deleteOnExit();
         try (FileWriter fw = new java.io.FileWriter(scriptFile)) {
             StringBuilder sb=new StringBuilder();
-            try(BufferedReader br=new BufferedReader(new InputStreamReader(WindowsHardDriveDetect.class.getResourceAsStream("diskinfo.vbs"))))
+            try(BufferedReader br=new BufferedReader(new InputStreamReader(Objects.requireNonNull(WindowsHardDriveDetect.class.getResourceAsStream("diskinfo.vbs")))))
             {
                 String line;
                 while ((line=br.readLine())!=null)

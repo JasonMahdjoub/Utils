@@ -63,7 +63,7 @@ public class ProgressMonitorParameters extends MultiFormatProperties {
 	 */
 	private int max=0;
 	/**
-	 * Specifies the amount of time to wait before deciding whether or not to popup a progress monitor.
+	 * Specifies the amount of time to wait before deciding whether to pop up a progress monitor.
 	 */
 	private int millisToDecideToPopup=-1;
 	/**

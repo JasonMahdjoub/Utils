@@ -44,7 +44,7 @@ import com.distrimind.util.OS;
 import com.distrimind.util.OSVersion;
 
 /**
- * Class that gives tools for network interfaces, independently from current OS
+ * Class that gives tools for network interfaces, independently of current OS
  * running.
  * 
  * @author Jason Mahdjoub

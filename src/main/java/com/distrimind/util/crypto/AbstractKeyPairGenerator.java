@@ -111,7 +111,7 @@ public abstract class AbstractKeyPairGenerator {
 	 *            the source of randomness.
 	 *
 	 * @throws IOException if the algorithm parameters are invalid
-	 *                
+	 * <p>
 	 *
 	 * @since 1.2
 	 */

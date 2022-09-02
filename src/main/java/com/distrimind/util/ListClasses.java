@@ -44,7 +44,7 @@ public class ListClasses {
 		// We get all CLASSPATH entries
 		String[] entries = System.getProperty("java.class.path").split(System.getProperty("path.separator"));
 
-		// For all these entries, we check if they contains a directory, or a
+		// For all these entries, we check if they contain a directory, or a
 		// jar file
 		for (String entry : entries) {
 

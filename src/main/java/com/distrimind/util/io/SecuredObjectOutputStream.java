@@ -228,12 +228,6 @@ public abstract class SecuredObjectOutputStream extends OutputStream implements 
 	public void writeFile(File file, boolean nullAccepted, int maxCharsNumber) throws IOException {
 		SerializationTools.writeFile(this, file, (int)Math.min(2L*maxCharsNumber, Integer.MAX_VALUE), nullAccepted);
 	}
-	/*public void writePath(Path path, boolean nullAccepted) throws IOException {
-		writePath(path, nullAccepted, SerializationTools.DEFAULT_MAX_FILE_NAME_LENGTH);
-	}
-	public void writePath(Path path, boolean nullAccepted, int maxCharsNumber) throws IOException {
-		SerializationTools.writePath(this, path, (int)Math.min(2L*maxCharsNumber, Integer.MAX_VALUE), nullAccepted);
-	}*/
 	public void writeString(String s, boolean nullAccepted, int maxCharsNumber) throws IOException {
 		SerializationTools.writeString(this, s, (int)Math.min(2L*maxCharsNumber, Integer.MAX_VALUE), nullAccepted);
 	}

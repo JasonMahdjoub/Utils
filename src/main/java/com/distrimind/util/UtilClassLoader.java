@@ -138,16 +138,16 @@ public class UtilClassLoader extends URLClassLoader { // NO_UCD
 	 * new instances, created using {@link java.lang.reflect.Constructor#newInstance(Object...)}} on a class object
 	 * obtained with {@link #loadClass(String)}, will reflect compilation changes
 	 * during run time.
-	 * 
+	 * <p>
 	 * In fact, using {@link #loadClass(String)} on the current MDK class loader
 	 * obtained with {@link #getLoader()} returns the class object corresponding to
 	 * the last compilation of the java code available on the class path.
 	 * Especially, this may return a different version than
 	 * {@link Class#forName(String)} because {@link Class#forName(String)} uses the
 	 * {@link ClassLoader} of the caller's current class which could be different
-	 * than the current one (i.e. the one obtained {@link #getLoader()}) if several
+	 * from the current one (i.e. the one obtained {@link #getLoader()}) if several
 	 * reloads have been done.
-	 * 
+	 * <p>
 	 *
 	 * 
 	 * @param name

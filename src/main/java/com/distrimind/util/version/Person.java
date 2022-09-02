@@ -38,7 +38,7 @@ package com.distrimind.util.version;
 import com.distrimind.util.properties.MultiFormatProperties;
 
 /**
- * Represents a Person participating to a software creation
+ * Represents a Person participating in a software creation
  * 
  * @author Jason Mahdjoub
  * @version 1.0

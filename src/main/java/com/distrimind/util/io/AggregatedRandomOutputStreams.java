@@ -89,6 +89,7 @@ public class AggregatedRandomOutputStreams extends RandomOutputStream {
 		return l;
 	}
 
+	@SuppressWarnings("resource")
 	@Override
 	public void write(int b) throws IOException {
 		RandomOutputStream ros=actualizeCurrentOutputStream(true);
@@ -115,6 +116,7 @@ public class AggregatedRandomOutputStreams extends RandomOutputStream {
 		return ros;
 	}
 
+	@SuppressWarnings("resource")
 	@Override
 	public void write(byte[] tab, int off, int len) throws IOException {
 		if (closed)
@@ -181,6 +183,7 @@ public class AggregatedRandomOutputStreams extends RandomOutputStream {
 		throw new IllegalArgumentException();
 	}
 
+	@SuppressWarnings("resource")
 	@Override
 	public long currentPosition() throws IOException {
 		return actualizeCurrentOutputStream(false).currentPosition()+posOff;

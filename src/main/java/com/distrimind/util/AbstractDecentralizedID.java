@@ -52,10 +52,7 @@ import java.util.regex.Pattern;
  * 
  */
 public abstract class AbstractDecentralizedID extends AbstractDecentralizedValue {
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 9204239435623960497L;
+
 	static final int PRIVATE_MAX_SECURED_DECENTRALIZED_ID_SIZE_IN_BYTES=33;
 	public static final int MAX_DECENTRALIZED_ID_SIZE_IN_BYTES=PRIVATE_MAX_SECURED_DECENTRALIZED_ID_SIZE_IN_BYTES;
 

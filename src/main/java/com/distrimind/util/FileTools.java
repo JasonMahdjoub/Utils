@@ -110,7 +110,7 @@ public final class FileTools {
 	}
 
 	/**
-	 * Copy the content of a an input stream to an output stream
+	 * Copy the content of an input stream to an output stream
 	 * 
 	 * @param source
 	 *            Source file path.
@@ -197,10 +197,6 @@ public final class FileTools {
 			if (list != null) {
 				// Read the files list.
                 for (File tf : list) {
-                    // Create current source File
-                    /*
-                     * File tf = new File(sourceFolder + relatedPath + "/" + list[i].getName());
-                     */
                     // Create current destination File
                     File pf = new File(new File(destinationFolder, relatedPath), tf.getName());
                     if (FileTools.matchString(tf.getAbsolutePath(), regex_exclude, regex_include)) {
@@ -413,12 +409,8 @@ public final class FileTools {
 				if (entry.isDirectory()) {
 					checkFolderRecursive(new File(_directory_dst, entryName));
 				} else {
-					// System.out.println("Extracting: " +entry);
 					int count;
 
-					// write the files to the disk
-					// System.out.println("Extracting: " +new File(_directory_dst,
-					// entry.getName()));
 					File f = new File(_directory_dst, entryName);
 					if (!f.toPath().normalize().startsWith(_directory_dst.toPath()))
 						throw new IOException("Bad zip entry");

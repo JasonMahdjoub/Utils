@@ -34,20 +34,18 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
+import com.distrimind.bouncycastle.crypto.Digest;
+import com.distrimind.bouncycastle.crypto.digests.Blake2bDigest;
+import com.distrimind.bouncycastle.crypto.digests.SHA3Digest;
+import com.distrimind.bouncycastle.crypto.macs.HMac;
+import com.distrimind.bouncycastle.crypto.params.KeyParameter;
+import com.distrimind.util.io.Integrity;
+import com.distrimind.util.io.MessageExternalizationException;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
-
-import com.distrimind.util.io.Integrity;
-import com.distrimind.util.io.MessageExternalizationException;
-import com.distrimind.bouncycastle.crypto.Digest;
-import com.distrimind.bouncycastle.crypto.digests.Blake2bDigest;
-import com.distrimind.bouncycastle.crypto.digests.SHA3Digest;
-import com.distrimind.bcfips.crypto.fips.FipsOutputMACCalculator;
-
-import com.distrimind.bouncycastle.crypto.macs.HMac;
-import com.distrimind.bouncycastle.crypto.params.KeyParameter;
 
 /**
  * 
@@ -82,8 +80,6 @@ public final class BCMac extends AbstractMac {
 	public boolean equals(Object _obj) {
 		if (_obj instanceof BCMac)
 			return mac.equals(((BCMac) _obj).mac);
-		else if (_obj instanceof FipsOutputMACCalculator)
-			return mac.equals(_obj);
 		else
 			return false;
 	}

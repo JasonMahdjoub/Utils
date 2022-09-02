@@ -49,7 +49,7 @@ public abstract class ProgressMonitorFactory {
 	/**
 	 * Constructs a graphic object that shows progress, typically by filling
 	 * in a rectangular bar as the process nears completion.
-	 *
+	 * <p>
 	 *
 	 * @param message a descriptive message that will be shown
 	 *        to the user to indicate what operation is being monitored.
@@ -122,7 +122,7 @@ public abstract class ProgressMonitorFactory {
 	/**
 	 * Constructs a graphic object that shows progress, typically by filling
 	 * in a rectangular bar as the process nears completion.
-	 *
+	 * <p>
 	 *
 	 * @param parameters see {@link ProgressMonitorParameters}
 	 * @return the progress monitor

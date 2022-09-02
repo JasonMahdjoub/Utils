@@ -702,7 +702,7 @@ public class BCCipher extends AbstractCipher {
 		private final boolean isStream;
 
 		/**
-		 * Whether or not we've reached the end of the stream.
+		 * Whether we've reached the end of the stream.
 		 */
 		private boolean eof;
 
@@ -757,7 +757,7 @@ public class BCCipher extends AbstractCipher {
 		}
 
 		/**
-		 * Returns whether or not this input stream supports the long and
+		 * Returns whether this input stream supports the long and
 		 * {@link #reset()} methods; this input stream does not, however, and invariably
 		 * returns <code>false</code>.
 		 *
@@ -845,7 +845,7 @@ public class BCCipher extends AbstractCipher {
 		@Override
 		public synchronized int read(byte[] buf, int off, int len) throws IOException {
 			// CipherInputStream has this wierd implementation where if
-			// the buffer is null, this call is the same as `skip'.
+			// the buffer is null, this call is the same as 'skip'.
 			if (buf == null)
 				return (int) skip(len);
 

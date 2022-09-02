@@ -54,10 +54,6 @@ import java.nio.channels.FileLock;
  * @since Utils 1.0
  */
 public class RenforcedDecentralizedIDGenerator extends AbstractDecentralizedIDGenerator {
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 4279383128706805738L;
 
 	static final String ToStringHead = "RenforcedDecentralizedID";
 	public static RenforcedDecentralizedIDGenerator valueOf(String value) throws InvalidEncodedValue {

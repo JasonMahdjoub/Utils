@@ -189,6 +189,7 @@ public abstract class AbstractKey extends AbstractDecentralizedValue implements 
 	public static AbstractKey decode(WrappedData wrappedData) throws InvalidEncodedValue {
 		AbstractKey k=decode(wrappedData.getBytes(), false);
 		if (k instanceof ISecretDecentralizedValue)
+			//noinspection resource
 			wrappedData.transformToSecretData();
 		return k;
 	}
@@ -321,6 +322,7 @@ public abstract class AbstractKey extends AbstractDecentralizedValue implements 
 			throw new NullPointerException();
 		AbstractKey k=decode(new WrappedSecretData(key));
 		if (k instanceof ISecretDecentralizedValue)
+			//noinspection resource
 			key.transformToSecretString();
 		return k;
 	}

@@ -1,7 +1,5 @@
 package com.distrimind.util;
 
-import java.io.IOException;
-
 /**
  * @author Jason Mahdjoub
  * @version 1.0

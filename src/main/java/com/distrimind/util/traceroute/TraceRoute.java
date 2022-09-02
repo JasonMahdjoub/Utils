@@ -45,7 +45,7 @@ import com.distrimind.util.OSVersion;
 
 /**
  * Class that enables a trace route considering an {@link InetAddress},
- * independently from current OS running.
+ * independently of current OS running.
  * 
  * @author Jason Mahdjoub
  * @version 1.0
@@ -94,7 +94,7 @@ public abstract class TraceRoute {
 	 * 
 	 * @param _ia
 	 *            the host name to trace
-	 * @return a ordered list of {@link InetAddress} (the route packet).
+	 * @return an ordered list of {@link InetAddress} (the route packet).
 	 */
 	public List<InetAddress> tracePath(InetAddress _ia) {
 		return this.tracePath(_ia, -1, -1);
@@ -108,7 +108,7 @@ public abstract class TraceRoute {
 	 *            the host name to trace
 	 * @param depth
 	 *            Specifies the maximum number of hops
-	 * @return a ordered list of {@link InetAddress} (the route packet).
+	 * @return an ordered list of {@link InetAddress} (the route packet).
 	 */
 	public List<InetAddress> tracePath(InetAddress _ia, int depth) {
 		return this.tracePath(_ia, depth, -1);
@@ -124,7 +124,7 @@ public abstract class TraceRoute {
 	 *            Specifies the maximum number of hops
 	 * @param time_out_ms
 	 *            Set the time (in milliseconds) to wait for a response to a probe.
-	 * @return a ordered list of {@link InetAddress} (the route packet). Some
+	 * @return an ordered list of {@link InetAddress} (the route packet). Some
 	 *         elements can be <code>null</code> references if no reply was given by
 	 *         some servers.
 	 */

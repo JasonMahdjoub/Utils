@@ -39,7 +39,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 
 /**
- * Gives several system functions, independently from current OS running
+ * Gives several system functions, independently of current OS running
  * 
  * @author Jason Mahdjoub
  * @version 1.0

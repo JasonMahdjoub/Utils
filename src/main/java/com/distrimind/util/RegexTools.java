@@ -58,18 +58,18 @@ public class RegexTools {
 	 *            the character must be an international character if true (all
 	 *            languages are concerned)
 	 * @param punctuation
-	 *            the character must be include a punctuation :
+	 *            the character must be included a punctuation :
 	 *            <p>!"#$%&amp;'()*+,-./:;&lt;=&gt;?@[\]^_`{|}~</p>
 	 * @param spaceOrTab
 	 *            the character must include space or tab's
 	 * @param exDecimalDigit
-	 *            the character must be an Hexadecimal number
+	 *            the character must be a Hexadecimal number
 	 * @param digit
-	 *            the character must be an decimal number
+	 *            the character must be a decimal number
 	 * @param upperCase
 	 *            the character must be an upper case character
 	 * @param lowerCase
-	 *            the character must be lower case character
+	 *            the character must be lowered case character
 	 * @return the compiled regex
 	 */
 	public static String getRegexCharMatch(boolean latin, boolean greek, boolean internationalChars,

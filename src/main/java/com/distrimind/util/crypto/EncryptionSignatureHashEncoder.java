@@ -484,6 +484,7 @@ public class EncryptionSignatureHashEncoder {
 		return cipherRandom;
 	}
 
+	@SuppressWarnings("resource")
 	public RandomOutputStream getRandomOutputStreamAndGeneratesOnlyHashAndSignatures(final RandomOutputStream originalOutputStream) throws IOException {
 		if (EncryptionSignatureHashEncoder.this.cipher!=null)
 			throw new IllegalArgumentException("Impossible to generate only signatures when using encryption");

@@ -39,7 +39,6 @@ import com.distrimind.util.data_buffers.WrappedData;
 import com.distrimind.util.data_buffers.WrappedSecretData;
 import com.distrimind.util.data_buffers.WrappedString;
 
-import java.io.Serializable;
 import java.util.Collection;
 
 /**
@@ -60,6 +59,7 @@ public interface DecentralizedValue {
 	static DecentralizedValue decode(WrappedData encodedValue) throws InvalidEncodedValue {
 		DecentralizedValue dv=decode(encodedValue.getBytes());
 		if (dv instanceof ISecretDecentralizedValue)
+			//noinspection resource
 			encodedValue.transformToSecretData();
 		return dv;
 	}
@@ -93,6 +93,7 @@ public interface DecentralizedValue {
 			throw new NullPointerException();
 		DecentralizedValue dv=decode(new WrappedSecretData(key));
 		if (dv instanceof ISecretDecentralizedValue)
+			//noinspection resource
 			key.transformToSecretString();
 		return dv;
 	}

@@ -55,7 +55,7 @@ import java.util.Random;
  */
 public abstract class AbstractEncryptionOutputAlgorithm implements AutoZeroizable {
 	final static int BUFFER_SIZE = FileTools.BUFFER_SIZE;
-	public static double DEFAULT_FALSE_CPU_USAGE_PERCENTAGE=0.1;
+	public static final double DEFAULT_FALSE_CPU_USAGE_PERCENTAGE=0.1;
 	protected static final class Finalizer extends Cleaner
 	{
 		byte[] buffer;

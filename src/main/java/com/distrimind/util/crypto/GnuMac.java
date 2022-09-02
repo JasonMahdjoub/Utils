@@ -82,22 +82,22 @@ public final class GnuMac extends AbstractMac {
 	}
 
 	@Override
-	public final GnuMac clone() throws CloneNotSupportedException {
+	public GnuMac clone() throws CloneNotSupportedException {
 		return new GnuMac(GnuFunctions.clone(mac));
 	}
 
 	@Override
-	public final byte[] doFinal() throws IOException {
+	public byte[] doFinal() throws IOException {
 		return GnuFunctions.macDoFinal(mac);
 	}
 
 	@Override
-	public final byte[] doFinal(byte[] _input) throws IOException {
+	public byte[] doFinal(byte[] _input) throws IOException {
 		return GnuFunctions.macDoFinal(mac, _input);
 	}
 
 	@Override
-	public final void doFinal(byte[] _output, int _outOffset) throws IOException {
+	public void doFinal(byte[] _output, int _outOffset) throws IOException {
 		GnuFunctions.macDoFinal(mac, _output, _outOffset);
 	}
 
@@ -107,17 +107,17 @@ public final class GnuMac extends AbstractMac {
 	}
 
 	@Override
-	public final String getAlgorithm() {
+	public String getAlgorithm() {
 		return GnuFunctions.macGetAlgorithm(mac);
 	}
 
 	@Override
-	public final int getMacLengthBytes() {
+	public int getMacLengthBytes() {
 		return GnuFunctions.macGetLengthByes(mac);
 	}
 
 	@Override
-	public final void init(AbstractKey _key) throws IOException {
+	public void init(AbstractKey _key) throws IOException {
 		try {
 			GnuFunctions.macInit(mac, _key);
 		} catch (NoSuchAlgorithmException e) {
@@ -126,27 +126,27 @@ public final class GnuMac extends AbstractMac {
 	}
 
 	@Override
-	public final void reset() {
+	public void reset() {
 		GnuFunctions.macReset(mac);
 	}
 
 	@Override
-	public final void update(byte _input) throws IOException {
+	public void update(byte _input) throws IOException {
 		GnuFunctions.macUpdate(mac, _input);
 	}
 
 	@Override
-	public final void update(byte[] _input) throws IOException {
+	public void update(byte[] _input) throws IOException {
 		GnuFunctions.macUpdate(mac, _input, 0, _input.length);
 	}
 
 	@Override
-	public final void update(byte[] _input, int _offset, int _length) throws IOException {
+	public void update(byte[] _input, int _offset, int _length) throws IOException {
 		GnuFunctions.macUpdate(mac, _input, _offset, _length);
 	}
 
 	@Override
-	public final void update(ByteBuffer _buffer) {
+	public void update(ByteBuffer _buffer) {
 		GnuFunctions.macUpdate(mac, _buffer);
 	}
 }

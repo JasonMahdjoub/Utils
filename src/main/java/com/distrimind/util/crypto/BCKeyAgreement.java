@@ -67,13 +67,13 @@ public final class BCKeyAgreement extends AbstractKeyAgreement{
 	private FipsKDF.AgreementKDFParametersBuilder kdfAlgorithm;
 	private byte[] paramsKeyMaterial;
 	
-	protected BCKeyAgreement(SymmetricAuthenticatedSignatureType signatureType, EllipticCurveDiffieHellmanType type) {
+	BCKeyAgreement(SymmetricAuthenticatedSignatureType signatureType, EllipticCurveDiffieHellmanType type) {
 		super(signatureType);
 		this.type=type;
 		//CodeProvider.ensureProviderLoaded(type.getCodeProvider());
 	}
 	
-	protected BCKeyAgreement(SymmetricEncryptionType encryptionType, EllipticCurveDiffieHellmanType type) {
+	BCKeyAgreement(SymmetricEncryptionType encryptionType, EllipticCurveDiffieHellmanType type) {
 		super(encryptionType);
 		this.type=type;
 		//CodeProvider.ensureProviderLoaded(type.getCodeProvider());
@@ -148,8 +148,10 @@ public final class BCKeyAgreement extends AbstractKeyAgreement{
             secret = key;
         }
 
-        if (encryptionType==null)
-        		return new SymmetricSecretKey(signatureType, new com.distrimind.bcfips.crypto.SymmetricSecretKey(signatureType.getBouncyCastleAlgorithm(), secret), (short)(keySize*8));
+        if (encryptionType==null) {
+			assert signatureType != null;
+			return new SymmetricSecretKey(signatureType, new com.distrimind.bcfips.crypto.SymmetricSecretKey(signatureType.getBouncyCastleAlgorithm(), secret), (short)(keySize*8));
+		}
         else
         		return new SymmetricSecretKey(encryptionType, new com.distrimind.bcfips.crypto.SymmetricSecretKey(encryptionType.getBouncyCastleAlgorithm(), secret), (short)(keySize*8));
 	}

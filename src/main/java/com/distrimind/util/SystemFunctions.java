@@ -49,7 +49,7 @@ import com.distrimind.util.nitools.NITools;
 import com.distrimind.util.traceroute.TraceRoute;
 
 /**
- * Gives several system functions, independently from current OS running
+ * Gives several system functions, independently of current OS running
  * 
  * @author Jason Mahdjoub
  * @version 1.0
@@ -106,7 +106,7 @@ public class SystemFunctions {
 	 * 
 	 * @param _ia
 	 *            the host name to trace
-	 * @return a ordered list of {@link InetAddress} (the route packet).
+	 * @return an ordered list of {@link InetAddress} (the route packet).
 	 */
 	public static List<InetAddress> tracePath(InetAddress _ia) {
 		return TraceRoute.getInstance().tracePath(_ia);
@@ -120,7 +120,7 @@ public class SystemFunctions {
 	 *            the host name to trace
 	 * @param depth
 	 *            Specifies the maximum number of hops
-	 * @return a ordered list of {@link InetAddress} (the route packet).
+	 * @return an ordered list of {@link InetAddress} (the route packet).
 	 */
 	public static List<InetAddress> tracePath(InetAddress _ia, int depth) {
 		return TraceRoute.getInstance().tracePath(_ia, depth);
@@ -136,7 +136,7 @@ public class SystemFunctions {
 	 *            Specifies the maximum number of hops
 	 * @param time_out_ms
 	 *            Set the time (in milliseconds) to wait for a response to a probe.
-	 * @return a ordered list of {@link InetAddress} (the route packet). Some
+	 * @return an ordered list of {@link InetAddress} (the route packet). Some
 	 *         elements can be <code>null</code> references if no reply was given by
 	 *         some servers.
 	 */

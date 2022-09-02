@@ -105,11 +105,11 @@ public abstract class MultiFormatProperties implements Cloneable, Serializable {
 	final transient DefaultMultiFormatObjectParser default_xml_object_parser_instance = new DefaultMultiFormatObjectParser();
 
 	/**
-	 * return the DOM from an xml file.
+	 * return the DOM from a xml file.
 	 * 
 	 * @param xmlFile
 	 *            the file to load
-	 * @return the DOM from an xml file or <code>null</code> if not found or invalid
+	 * @return the DOM from a xml file or <code>null</code> if not found or invalid
 	 * @throws SAXException
 	 *             if a problem of XML parse/load occurs
 	 * @throws IOException
@@ -124,11 +124,11 @@ public abstract class MultiFormatProperties implements Cloneable, Serializable {
 	}
 
 	/**
-	 * return the DOM from an xml file.
+	 * return the DOM from a xml file.
 	 * 
 	 * @param stream
 	 *            the stream to read
-	 * @return the DOM from an xml file or <code>null</code> if not found or invalid
+	 * @return the DOM from a xml file or <code>null</code> if not found or invalid
 	 * @throws SAXException
 	 *             if a problem of XML parse/load occurs
 	 * @throws IOException
@@ -164,9 +164,9 @@ public abstract class MultiFormatProperties implements Cloneable, Serializable {
 		return element_list_class;
 	}
     /**
-     * Convert this properties to a {@link Properties} class format.
+     * Convert these properties to a {@link Properties} class format.
      *
-     * @return this properties converted to a {@link Properties} class format.
+     * @return these properties converted to a {@link Properties} class format.
      * @throws PropertiesParseException if a problem occurs
      */
     public Properties convertToStringProperties() throws PropertiesParseException {
@@ -174,9 +174,9 @@ public abstract class MultiFormatProperties implements Cloneable, Serializable {
     }
 	
 	/**
-	 * Convert this properties to a {@link Properties} class format.
+	 * Convert these properties to a {@link Properties} class format.
 	 * @param referenceProperties the reference properties. If a property is the same between this instance and the given reference, that the properties is not saved into the file
-	 * @return this properties converted to a {@link Properties} class format.
+	 * @return these properties converted to a {@link Properties} class format.
      * @throws PropertiesParseException if a problem occurs
 	 */
 	public Properties convertToStringProperties(MultiFormatProperties referenceProperties) throws PropertiesParseException {
@@ -379,7 +379,7 @@ public abstract class MultiFormatProperties implements Cloneable, Serializable {
 	 * 
 	 * @param _document
 	 *            the document
-	 * @return the root document node, or null if this node does not exists
+	 * @return the root document node, or null if this node does not exist
 	 */
 	public Node getRootNode(Document _document) {
 		for (int i = 0; i < _document.getChildNodes().getLength(); i++) {
@@ -544,7 +544,7 @@ public abstract class MultiFormatProperties implements Cloneable, Serializable {
 	 * Load properties from {@link Properties} class.
 	 * <p>
 	 * 
-	 * if one property does not exists, put the value into the free string
+	 * if one property does not exist, put the value into the free string
 	 * properties returned by {@link #getFreeStringProperties()}.
 	 * 
 	 * @param properties

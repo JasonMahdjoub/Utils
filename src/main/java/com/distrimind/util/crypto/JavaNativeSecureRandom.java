@@ -52,7 +52,7 @@ public final class JavaNativeSecureRandom extends AbstractSecureRandom {
 	 */
 	private static final long serialVersionUID = -1795571548950369446L;
 
-	protected java.security.SecureRandom secureRandom;
+	//java.security.SecureRandom secureRandom;
 
 	private volatile Object secureGnuRandom;
 
