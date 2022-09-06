@@ -162,7 +162,7 @@ public abstract class RandomInputStream extends SecuredObjectInputStream impleme
 		}*/
 	}
 
-	protected static void checkLimits(byte[] b, int off, int len)
+	public static void checkLimits(byte[] b, int off, int len)
 	{
 		if (b==null)
 			throw new NullPointerException();
