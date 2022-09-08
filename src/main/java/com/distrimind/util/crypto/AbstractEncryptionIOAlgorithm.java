@@ -204,17 +204,18 @@ public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOu
 	}
 
 	@Override
-	public CommonCipherInputStream getCipherInputStreamForDecryption(final RandomInputStream is) throws IOException
+	public RandomInputStream getCipherInputStreamForDecryption(final RandomInputStream is) throws IOException
 	{
 		return getCipherInputStreamForDecryption(is, null, 0, 0, null);
 	}
 	@Override
-	public CommonCipherInputStream getCipherInputStreamForDecryption(final RandomInputStream is, byte[] externalCounter) throws IOException
+	public RandomInputStream getCipherInputStreamForDecryption(final RandomInputStream is, byte[] externalCounter) throws IOException
 	{
 		return getCipherInputStreamForDecryption(is, null, 0, 0, externalCounter);
 	}
+
 	@Override
-	public CommonCipherInputStream getCipherInputStreamForDecryption(final RandomInputStream is, final byte[] associatedData, final int offAD, final int lenAD) throws IOException
+	public RandomInputStream getCipherInputStreamForDecryption(final RandomInputStream is, final byte[] associatedData, final int offAD, final int lenAD) throws IOException
 	{
 		return getCipherInputStreamForDecryption(is, associatedData, offAD, lenAD, null);
 	}
@@ -239,13 +240,13 @@ public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOu
 	protected abstract boolean allOutputGeneratedIntoDoFinalFunction();
 
 	@Override
-	public CommonCipherInputStream getCipherInputStreamForDecryption(final RandomInputStream is, final byte[] associatedData, final int offAD, final int lenAD, final byte[] externalCounter)
+	public RandomInputStream getCipherInputStreamForDecryption(final RandomInputStream is, final byte[] associatedData, final int offAD, final int lenAD, final byte[] externalCounter)
 			throws IOException {
 		checkKeysNotCleaned();
 		final AbstractCipher cipher = getCipherInstance();
 
 
-		return new CommonCipherInputStream(allOutputGeneratedIntoDoFinalFunction(), maxEncryptedPartLength, is, includeIV(), iv, getIVSizeBytesWithoutExternalCounter(), getMaxExternalCounterLength(), externalCounter, cipher, associatedData, offAD, lenAD, super.finalizer.buffer, supportRandomEncryptionAndRandomDecryption(), getCounterStepInBytes(), maxPlainTextSizeForEncoding) {
+		CommonCipherInputStream res=new CommonCipherInputStream(allOutputGeneratedIntoDoFinalFunction(), maxEncryptedPartLength, is, includeIV(), iv, getIVSizeBytesWithoutExternalCounter(), getMaxExternalCounterLength(), externalCounter, cipher, associatedData, offAD, lenAD, super.finalizer.buffer, supportRandomEncryptionAndRandomDecryption(), getCounterStepInBytes(), maxPlainTextSizeForEncoding) {
 			@Override
 			protected void initCipherForDecryptionWithIvAndCounter(byte[] iv, int counter) throws IOException {
 				AbstractEncryptionIOAlgorithm.this.initCipherForDecryptionWithIvAndCounter(cipher, iv, counter);
@@ -276,6 +277,10 @@ public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOu
 				return AbstractEncryptionIOAlgorithm.this.getOutputSizeAfterEncryption(lenAD);
 			}
 		};
+		if (isUsingSideChannelMitigation())
+			return getCPUUsageAsDecoyInputStream(res);
+		else
+			return res;
 	}
 
 	static long getOutputSizeAfterDecryption(AbstractCipher cipher, long inputLen, int maxEncryptedPartLength, int IVSizeBytesWithoutExternalCounter, int maxPlainTextSizeForEncoding) throws IOException {

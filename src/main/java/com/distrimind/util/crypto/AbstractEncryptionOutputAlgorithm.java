@@ -37,15 +37,11 @@ package com.distrimind.util.crypto;
 import com.distrimind.util.AutoZeroizable;
 import com.distrimind.util.Cleanable;
 import com.distrimind.util.FileTools;
-import com.distrimind.util.NotYetImplementedException;
 import com.distrimind.util.io.*;
 
 import javax.crypto.Cipher;
 import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
 import java.util.Arrays;
-import java.util.Random;
 
 /**
  * 
@@ -55,7 +51,7 @@ import java.util.Random;
  */
 public abstract class AbstractEncryptionOutputAlgorithm implements AutoZeroizable {
 	final static int BUFFER_SIZE = FileTools.BUFFER_SIZE;
-	public static final double DEFAULT_FALSE_CPU_USAGE_PERCENTAGE=0.05;
+
 	protected static final class Finalizer extends Cleaner
 	{
 		byte[] buffer;
@@ -194,22 +190,13 @@ public abstract class AbstractEncryptionOutputAlgorithm implements AutoZeroizabl
 	protected abstract boolean isTimingSideChannelAttackPossible();
 	protected abstract boolean isFrequencySideChannelAttackPossible();
 
-	protected abstract FalseCPUUsageType getFalseCPUUsageType();
+
 
 	public final boolean isUsingSideChannelMitigation()
 	{
 		return isPowerMonitoringSideChannelAttackPossible() || isFrequencySideChannelAttackPossible() || isTimingSideChannelAttackPossible();
 	}
-	protected final double getFalseCPUUsagePercentage()
-	{
-		if (isUsingSideChannelMitigation())
-		{
-			return DEFAULT_FALSE_CPU_USAGE_PERCENTAGE;
-		}
-		else
-			return 0.0;
 
-	}
 	public void encode(RandomInputStream is, byte[] associatedData, int offAD, int lenAD, RandomOutputStream os, byte[] externalCounter) throws IOException {
 
 		try(RandomOutputStream cos = getCipherOutputStreamForEncryption(os, false, associatedData, offAD, lenAD, externalCounter))
@@ -230,22 +217,35 @@ public abstract class AbstractEncryptionOutputAlgorithm implements AutoZeroizabl
 
 	public abstract boolean supportRandomEncryptionAndRandomDecryption();
 
-	public CommonCipherOutputStream getCipherOutputStreamForEncryption(final RandomOutputStream os, boolean closeOutputStreamWhenClosingCipherOutputStream) throws IOException
+	public RandomOutputStream getCipherOutputStreamForEncryption(final RandomOutputStream os, boolean closeOutputStreamWhenClosingCipherOutputStream) throws IOException
 	{
 		return getCipherOutputStreamForEncryption(os, closeOutputStreamWhenClosingCipherOutputStream, null, 0,0, null);
 	}
-	public CommonCipherOutputStream getCipherOutputStreamForEncryption(final RandomOutputStream os, boolean closeOutputStreamWhenClosingCipherOutputStream, final byte[] associatedData, final int offAD, final int lenAD) throws IOException
+	public RandomOutputStream getCipherOutputStreamForEncryption(final RandomOutputStream os, boolean closeOutputStreamWhenClosingCipherOutputStream, final byte[] associatedData, final int offAD, final int lenAD) throws IOException
 	{
 		return getCipherOutputStreamForEncryption(os, closeOutputStreamWhenClosingCipherOutputStream, associatedData, offAD, lenAD, null);
 	}
-	public CommonCipherOutputStream getCipherOutputStreamForEncryption(final RandomOutputStream os, boolean closeOutputStreamWhenClosingCipherOutputStream, byte[] externalCounter) throws IOException
+	public RandomOutputStream getCipherOutputStreamForEncryption(final RandomOutputStream os, boolean closeOutputStreamWhenClosingCipherOutputStream, byte[] externalCounter) throws IOException
 	{
 		return getCipherOutputStreamForEncryption(os, closeOutputStreamWhenClosingCipherOutputStream, null, 0,0, externalCounter);
 	}
 
-	public CommonCipherOutputStream getCipherOutputStreamForEncryption(final RandomOutputStream os, boolean closeOutputStreamWhenClosingCipherOutputStream, final byte[] associatedData, final int offAD, final int lenAD, final byte[] externalCounter) throws
+	public RandomOutputStream getCipherOutputStreamForEncryption(final RandomOutputStream os, boolean closeOutputStreamWhenClosingCipherOutputStream, final byte[] associatedData, final int offAD, final int lenAD, final byte[] externalCounter) throws
 			IOException{
 		return getCipherOutputStreamForEncryption(os, closeOutputStreamWhenClosingCipherOutputStream, associatedData, offAD, lenAD, externalCounter, null);
+	}
+	protected abstract CPUUsageAsDecoyOutputStream<CommonCipherOutputStream> getCPUUsageAsDecoyOutputStream(CommonCipherOutputStream os) throws IOException;
+	@SuppressWarnings("unchecked")
+	static void set(RandomOutputStream cipherOutputStream, RandomOutputStream os, byte[][] manualIvs, byte[] externalCounter, byte[] associatedData, int offAD, int lenAD, boolean closeOutputStreamWhenClosingCipherOutputStream) throws IOException {
+		if (cipherOutputStream instanceof CPUUsageAsDecoyOutputStream) {
+			CPUUsageAsDecoyOutputStream<CommonCipherOutputStream> o=((CPUUsageAsDecoyOutputStream<CommonCipherOutputStream>) cipherOutputStream);
+			o.reset();
+			o.getDestinationRandomOutputStream()
+					.set(os, manualIvs, externalCounter, associatedData, offAD, lenAD, closeOutputStreamWhenClosingCipherOutputStream);
+		}
+		else
+			((AbstractEncryptionOutputAlgorithm.CommonCipherOutputStream)cipherOutputStream)
+					.set(os, manualIvs, externalCounter, associatedData, offAD, lenAD, closeOutputStreamWhenClosingCipherOutputStream);
 	}
 	class CommonCipherOutputStream extends RandomOutputStream
 	{
@@ -262,36 +262,14 @@ public abstract class AbstractEncryptionOutputAlgorithm implements AutoZeroizabl
 		private int offAD, lenAD;
 		private boolean closeOutputStreamWhenClosingCipherOutputStream;
 
-		private double falseCPUUsagePercentage=0.0;
 
-		private AbstractSecureRandom secureRandom=null;
 
 		CommonCipherOutputStream(RandomOutputStream os, byte[][] manualIvs, byte[] externalCounter, byte[] associatedData, int offAD, int lenAD, boolean closeOutputStreamWhenClosingCipherOutputStream) throws IOException {
 			set(os, manualIvs, externalCounter, associatedData, offAD, lenAD, closeOutputStreamWhenClosingCipherOutputStream);
 		}
 
-		void set(RandomOutputStream os, byte[][] manualIvs, byte[] externalCounter, byte[] associatedData, int offAD, int lenAD, boolean closeOutputStreamWhenClosingCipherOutputStream) throws IOException {
-			final double falseCPUUsagePercentage=getFalseCPUUsagePercentage();
-			final FalseCPUUsageType falseCPUUsageType=getFalseCPUUsageType();
+		protected void set(RandomOutputStream os, byte[][] manualIvs, byte[] externalCounter, byte[] associatedData, int offAD, int lenAD, boolean closeOutputStreamWhenClosingCipherOutputStream) throws IOException {
 			checkKeysNotCleaned();
-			if (falseCPUUsagePercentage<0.0)
-				throw new IllegalArgumentException();
-
-
-			if (falseCPUUsagePercentage>0.0) {
-				if (falseCPUUsageType==null)
-					throw new NullPointerException();
-				if (falseCPUUsageType==FalseCPUUsageType.ADDITIONAL_CPU_USAGE_IN_REAL_TIME)
-					throw new NotYetImplementedException();
-				if (secureRandom==null) {
-					try {
-						secureRandom = SecureRandomType.DEFAULT.getInstance(null);
-					} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
-						throw new IOException(e);
-					}
-				}
-			}
-			this.falseCPUUsagePercentage=falseCPUUsagePercentage;
 
 			length=0;
 			currentPos=0;
@@ -326,40 +304,6 @@ public abstract class AbstractEncryptionOutputAlgorithm implements AutoZeroizabl
 						os.write(finalizer.buffer, 0, s);
 				}
 				doFinal = false;
-				if (falseCPUUsagePercentage>0.0)
-				{
-					//add false CPU using to fix power side channel attack and frequency side channel attack
-					double delta=secureRandom.nextDouble()*(falseCPUUsagePercentage/2.0)-falseCPUUsagePercentage/4.0;
-					long l=Math.min(500_000_000L, (long)(((double)length)*(falseCPUUsagePercentage+delta)));
-
-					if (l>0)
-					{
-						RandomOutputStream os=new NullRandomOutputStream();
-						init(0, os);
-						int inputBufferSize=(int)Math.min(4096,l);
-						final int bl=inputBufferSize+200;
-						if (finalizer.buffer==null || finalizer.buffer.length<bl)
-						{
-							finalizer.buffer=new byte[bl];
-						}
-
-						byte[] b=new byte[inputBufferSize];
-						while (l>0)
-						{
-							Random r=new Random(System.nanoTime());
-							r.nextBytes(b);
-							int s=(int)Math.min(l, inputBufferSize);
-							int s2=cipher.getOutputSize(s);
-							if (finalizer.buffer==null || finalizer.buffer.length<s2) {
-								zeroize();
-								finalizer.buffer = new byte[s2];
-							}
-							cipher.update(b, 0, s, finalizer.buffer);
-							l-=s;
-						}
-						cipher.doFinal();
-					}
-				}
 			}
 		}
 
@@ -499,7 +443,7 @@ public abstract class AbstractEncryptionOutputAlgorithm implements AutoZeroizabl
 				}
 				else {
 					RandomInputStream ris = os.getRandomInputStream();
-					os.getRandomInputStream().seek(p);
+					ris.seek(p);
 					ris.readFully(iv);
 				}
 				if (useExternalCounter()) {
@@ -559,9 +503,13 @@ public abstract class AbstractEncryptionOutputAlgorithm implements AutoZeroizabl
 
 	}
 	protected abstract void checkKeysNotCleaned();
-	protected CommonCipherOutputStream getCipherOutputStreamForEncryption(final RandomOutputStream os, final boolean closeOutputStreamWhenClosingCipherOutputStream, final byte[] associatedData, final int offAD, final int lenAD, final byte[] externalCounter, final byte[][] manualIvs) throws
+	protected RandomOutputStream getCipherOutputStreamForEncryption(final RandomOutputStream os, final boolean closeOutputStreamWhenClosingCipherOutputStream, final byte[] associatedData, final int offAD, final int lenAD, final byte[] externalCounter, final byte[][] manualIvs) throws
 			IOException{
-		return new CommonCipherOutputStream(os, manualIvs, externalCounter, associatedData, offAD, lenAD, closeOutputStreamWhenClosingCipherOutputStream);
+		CommonCipherOutputStream res= new CommonCipherOutputStream(os, manualIvs, externalCounter, associatedData, offAD, lenAD, closeOutputStreamWhenClosingCipherOutputStream);
+		if (isUsingSideChannelMitigation())
+			return new CPUUsageAsDecoyOutputStream<>(res);
+		else
+			return res;
 	}
 
 	public int getMaxPlainTextSizeForEncoding()

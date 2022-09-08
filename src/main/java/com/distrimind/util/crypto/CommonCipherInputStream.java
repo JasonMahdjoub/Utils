@@ -107,7 +107,19 @@ abstract class CommonCipherInputStream extends RandomInputStream {
 		set(is, associatedData, offAD, lenAD, externalCounter);
 	}
 	protected abstract void checkKeysNotCleaned();
-	void set(final RandomInputStream is, final byte[] associatedData, final int offAD, final int lenAD, final byte[] externalCounter) throws IOException {
+	@SuppressWarnings("unchecked")
+	static void set(final RandomInputStream cipherInputStream, final RandomInputStream is, final byte[] associatedData, final int offAD, final int lenAD, final byte[] externalCounter) throws IOException {
+		if (cipherInputStream instanceof CPUUsageAsDecoyInputStream) {
+			CPUUsageAsDecoyInputStream<CommonCipherInputStream> o=((CPUUsageAsDecoyInputStream<CommonCipherInputStream>) cipherInputStream);
+			o.reset();
+			o.getSourceRandomInputStream()
+					.set(is, associatedData, offAD, lenAD, externalCounter);
+		}
+		else
+			((CommonCipherInputStream)cipherInputStream)
+					.set(is, associatedData, offAD, lenAD, externalCounter);
+	}
+	private void set(final RandomInputStream is, final byte[] associatedData, final int offAD, final int lenAD, final byte[] externalCounter) throws IOException {
 		checkKeysNotCleaned();
 		posEncrypted =0;
 		posPlainText=0;

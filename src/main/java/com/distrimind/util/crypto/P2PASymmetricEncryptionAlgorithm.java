@@ -34,7 +34,6 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
-import com.distrimind.util.NotYetImplementedException;
 import com.distrimind.util.io.Integrity;
 import com.distrimind.util.io.MessageExternalizationException;
 import com.distrimind.util.io.RandomInputStream;
@@ -56,7 +55,7 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 	private final AbstractEncryptionIOAlgorithm p2pEncryption;
 	private final AbstractKeyPair<?, ?> myKeyPair;
 	private final IASymmetricPublicKey distantPublicKey;
-	public P2PASymmetricEncryptionAlgorithm(AbstractKeyPair<?, ?> myKeyPair, IASymmetricPublicKey distantPublicKey, FalseCPUUsageType falseCPUUsageType)
+	public P2PASymmetricEncryptionAlgorithm(AbstractKeyPair<?, ?> myKeyPair, IASymmetricPublicKey distantPublicKey)
 			throws IOException {
 		super();
 		if (distantPublicKey == null)
@@ -74,9 +73,9 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 
 		try {
 			if (myKeyPair instanceof HybridASymmetricKeyPair && distantPublicKey instanceof HybridASymmetricPublicKey) {
-				p2pEncryption = new HybridP2PEncryption((HybridASymmetricKeyPair) myKeyPair, (HybridASymmetricPublicKey) distantPublicKey, falseCPUUsageType);
+				p2pEncryption = new HybridP2PEncryption((HybridASymmetricKeyPair) myKeyPair, (HybridASymmetricPublicKey) distantPublicKey);
 			} else if (myKeyPair instanceof ASymmetricKeyPair && distantPublicKey instanceof ASymmetricPublicKey)
-				p2pEncryption = new P2PEncryption((ASymmetricKeyPair) myKeyPair, (ASymmetricPublicKey) distantPublicKey, falseCPUUsageType);
+				p2pEncryption = new P2PEncryption((ASymmetricKeyPair) myKeyPair, (ASymmetricPublicKey) distantPublicKey);
 			else
 				throw new IllegalArgumentException();
 		} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
@@ -85,7 +84,7 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 	}
 	public P2PASymmetricEncryptionAlgorithm(ASymmetricAuthenticatedSignatureType nonPQCSignatureType,
 											ASymmetricAuthenticatedSignatureType PQCSignatureType,
-											HybridASymmetricKeyPair myKeyPair, HybridASymmetricPublicKey distantPublicKey, FalseCPUUsageType falseCPUUsageType)
+											HybridASymmetricKeyPair myKeyPair, HybridASymmetricPublicKey distantPublicKey)
 			throws IOException {
 		super();
 		if (distantPublicKey == null)
@@ -96,15 +95,12 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 			throw new IllegalArgumentException();
 		this.myKeyPair=myKeyPair;
 		this.distantPublicKey=distantPublicKey;
-		if (falseCPUUsageType==null && isUsingSideChannelMitigation())
-			throw new NullPointerException();
-		else if (falseCPUUsageType==FalseCPUUsageType.ADDITIONAL_CPU_USAGE_IN_REAL_TIME)
-			throw new NotYetImplementedException();
-		p2pEncryption =new HybridP2PEncryption(nonPQCSignatureType, PQCSignatureType, myKeyPair, distantPublicKey, falseCPUUsageType);
+
+		p2pEncryption =new HybridP2PEncryption(nonPQCSignatureType, PQCSignatureType, myKeyPair, distantPublicKey);
 	}
 
 	public P2PASymmetricEncryptionAlgorithm(ASymmetricAuthenticatedSignatureType signatureType, ASymmetricKeyPair myKeyPair,
-						 ASymmetricPublicKey distantPublicKey, FalseCPUUsageType falseCPUUsageType) throws IOException {
+						 ASymmetricPublicKey distantPublicKey) throws IOException {
 		super();
 		if (distantPublicKey.isDestroyed())
 			throw new IllegalArgumentException();
@@ -113,7 +109,7 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 		this.myKeyPair=myKeyPair;
 		this.distantPublicKey=distantPublicKey;
 		try {
-			p2pEncryption =new P2PEncryption(signatureType, myKeyPair, distantPublicKey, falseCPUUsageType);
+			p2pEncryption =new P2PEncryption(signatureType, myKeyPair, distantPublicKey);
 		} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
 			throw new IOException(e);
 		}
@@ -148,7 +144,7 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 	}
 
 	@Override
-	public CommonCipherOutputStream getCipherOutputStreamForEncryption(RandomOutputStream os, boolean closeOutputStreamWhenClosingCipherOutputStream, byte[] externalCounter) throws IOException {
+	public RandomOutputStream getCipherOutputStreamForEncryption(RandomOutputStream os, boolean closeOutputStreamWhenClosingCipherOutputStream, byte[] externalCounter) throws IOException {
 
 		return p2pEncryption.getCipherOutputStreamForEncryption(os, closeOutputStreamWhenClosingCipherOutputStream, externalCounter);
 	}
@@ -273,7 +269,7 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 	}
 
 	@Override
-	public CommonCipherInputStream getCipherInputStreamForDecryption(RandomInputStream is) throws IOException {
+	public RandomInputStream getCipherInputStreamForDecryption(RandomInputStream is) throws IOException {
 
 		return p2pEncryption.getCipherInputStreamForDecryption(is);
 	}
@@ -346,23 +342,18 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 	}
 
 	@Override
-	protected boolean isPowerMonitoringSideChannelAttackPossible() {
+	public boolean isPowerMonitoringSideChannelAttackPossible() {
 		return p2pEncryption.isPowerMonitoringSideChannelAttackPossible();
 	}
 
 	@Override
-	protected boolean isTimingSideChannelAttackPossible() {
+	public boolean isTimingSideChannelAttackPossible() {
 		return p2pEncryption.isTimingSideChannelAttackPossible();
 	}
 
 	@Override
-	protected boolean isFrequencySideChannelAttackPossible() {
+	public boolean isFrequencySideChannelAttackPossible() {
 		return p2pEncryption.isFrequencySideChannelAttackPossible();
-	}
-
-	@Override
-	protected FalseCPUUsageType getFalseCPUUsageType() {
-		return p2pEncryption.getFalseCPUUsageType();
 	}
 
 
@@ -372,13 +363,13 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 	}
 
 	@Override
-	public CommonCipherInputStream getCipherInputStreamForDecryption(RandomInputStream is, byte[] externalCounter) throws IOException {
+	public RandomInputStream getCipherInputStreamForDecryption(RandomInputStream is, byte[] externalCounter) throws IOException {
 
 		return p2pEncryption.getCipherInputStreamForDecryption(is, externalCounter);
 	}
 
 	@Override
-	public CommonCipherInputStream getCipherInputStreamForDecryption(RandomInputStream is, byte[] associatedData, int offAD, int lenAD) throws IOException {
+	public RandomInputStream getCipherInputStreamForDecryption(RandomInputStream is, byte[] associatedData, int offAD, int lenAD) throws IOException {
 
 		return p2pEncryption.getCipherInputStreamForDecryption(is, associatedData, offAD, lenAD);
 	}
@@ -422,13 +413,14 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 	}
 
 
+
 	@Override
 	protected void initCipherForEncryptionWithIv(AbstractCipher cipher, byte[] iv) throws IOException {
 		p2pEncryption.initCipherForEncryptionWithIv(cipher, iv);
 	}
 
 	@Override
-	public CommonCipherInputStream getCipherInputStreamForDecryption(RandomInputStream is, byte[] associatedData, int offAD, int lenAD, byte[] externalCounter) throws IOException {
+	public RandomInputStream getCipherInputStreamForDecryption(RandomInputStream is, byte[] associatedData, int offAD, int lenAD, byte[] externalCounter) throws IOException {
 		return p2pEncryption.getCipherInputStreamForDecryption(is, associatedData, offAD, lenAD, externalCounter);
 	}
 
@@ -443,18 +435,23 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 	}
 
 	@Override
-	public CommonCipherOutputStream getCipherOutputStreamForEncryption(RandomOutputStream os, boolean closeOutputStreamWhenClosingCipherOutputStream) throws IOException {
+	public RandomOutputStream getCipherOutputStreamForEncryption(RandomOutputStream os, boolean closeOutputStreamWhenClosingCipherOutputStream) throws IOException {
 		return p2pEncryption.getCipherOutputStreamForEncryption(os, closeOutputStreamWhenClosingCipherOutputStream);
 	}
 
 	@Override
-	public CommonCipherOutputStream getCipherOutputStreamForEncryption(RandomOutputStream os, boolean closeOutputStreamWhenClosingCipherOutputStream, byte[] associatedData, int offAD, int lenAD) throws IOException {
+	public RandomOutputStream getCipherOutputStreamForEncryption(RandomOutputStream os, boolean closeOutputStreamWhenClosingCipherOutputStream, byte[] associatedData, int offAD, int lenAD) throws IOException {
 		return p2pEncryption.getCipherOutputStreamForEncryption(os, closeOutputStreamWhenClosingCipherOutputStream, associatedData, offAD, lenAD);
 	}
 
 	@Override
-	public CommonCipherOutputStream getCipherOutputStreamForEncryption(RandomOutputStream os, boolean closeOutputStreamWhenClosingCipherOutputStream, byte[] associatedData, int offAD, int lenAD, byte[] externalCounter) throws IOException {
+	public RandomOutputStream getCipherOutputStreamForEncryption(RandomOutputStream os, boolean closeOutputStreamWhenClosingCipherOutputStream, byte[] associatedData, int offAD, int lenAD, byte[] externalCounter) throws IOException {
 		return p2pEncryption.getCipherOutputStreamForEncryption(os, closeOutputStreamWhenClosingCipherOutputStream, associatedData, offAD, lenAD, externalCounter);
+	}
+
+	@Override
+	protected CPUUsageAsDecoyOutputStream<CommonCipherOutputStream> getCPUUsageAsDecoyOutputStream(CommonCipherOutputStream os) throws IOException {
+		return p2pEncryption.getCPUUsageAsDecoyOutputStream(os);
 	}
 
 	@Override
@@ -466,7 +463,7 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 	}
 
 	@Override
-	protected CommonCipherOutputStream getCipherOutputStreamForEncryption(RandomOutputStream os, boolean closeOutputStreamWhenClosingCipherOutputStream, byte[] associatedData, int offAD, int lenAD, byte[] externalCounter, byte[][] manualIvs) throws IOException {
+	protected RandomOutputStream getCipherOutputStreamForEncryption(RandomOutputStream os, boolean closeOutputStreamWhenClosingCipherOutputStream, byte[] associatedData, int offAD, int lenAD, byte[] externalCounter, byte[][] manualIvs) throws IOException {
 		checkKeysNotCleaned();
 		return p2pEncryption.getCipherOutputStreamForEncryption(os, closeOutputStreamWhenClosingCipherOutputStream, associatedData, offAD, lenAD, externalCounter, manualIvs);
 	}
@@ -549,10 +546,10 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 		private final HybridASymmetricPublicKey distantPublicKey;
 
 		public HybridP2PEncryption(HybridASymmetricKeyPair myKeyPair,
-							 HybridASymmetricPublicKey distantPublicKey, FalseCPUUsageType falseCPUUsageType) throws IOException {
+							 HybridASymmetricPublicKey distantPublicKey) throws IOException {
 			super();
 			try {
-				nonPQCEncryption=new P2PEncryption(myKeyPair.getNonPQCKeyPair(), distantPublicKey.getNonPQCPublicKey(), falseCPUUsageType);PQCEncryption=new P2PEncryption(myKeyPair.getPQCKeyPair(), distantPublicKey.getPQCPublicKey(), falseCPUUsageType);
+				nonPQCEncryption=new P2PEncryption(myKeyPair.getNonPQCKeyPair(), distantPublicKey.getNonPQCPublicKey());PQCEncryption=new P2PEncryption(myKeyPair.getPQCKeyPair(), distantPublicKey.getPQCPublicKey());
 				if (nonPQCEncryption.includeIV()!=PQCEncryption.includeIV())
 					throw new IllegalArgumentException();
 				this.myKeyPair=myKeyPair;
@@ -575,11 +572,11 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 		public HybridP2PEncryption(ASymmetricAuthenticatedSignatureType nonPQCSignatureType,
 								   ASymmetricAuthenticatedSignatureType PQCSignatureType,
 								   HybridASymmetricKeyPair myKeyPair,
-								   HybridASymmetricPublicKey distantPublicKey, FalseCPUUsageType falseCPUUsageType) throws IOException {
+								   HybridASymmetricPublicKey distantPublicKey) throws IOException {
 			super();
 			try {
-				nonPQCEncryption = new P2PEncryption(nonPQCSignatureType, myKeyPair.getNonPQCKeyPair(), distantPublicKey.getNonPQCPublicKey(), falseCPUUsageType);
-				PQCEncryption = new P2PEncryption(PQCSignatureType, myKeyPair.getPQCKeyPair(), distantPublicKey.getPQCPublicKey(), falseCPUUsageType);
+				nonPQCEncryption = new P2PEncryption(nonPQCSignatureType, myKeyPair.getNonPQCKeyPair(), distantPublicKey.getNonPQCPublicKey());
+				PQCEncryption = new P2PEncryption(PQCSignatureType, myKeyPair.getPQCKeyPair(), distantPublicKey.getPQCPublicKey());
 				if (nonPQCEncryption.includeIV() != PQCEncryption.includeIV())
 					throw new IllegalArgumentException();
 				this.myKeyPair = myKeyPair;
@@ -603,23 +600,18 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 		}
 
 		@Override
-		protected boolean isPowerMonitoringSideChannelAttackPossible() {
+		public boolean isPowerMonitoringSideChannelAttackPossible() {
 			return nonPQCEncryption.isPowerMonitoringSideChannelAttackPossible() || PQCEncryption.isPowerMonitoringSideChannelAttackPossible();
 		}
 
 		@Override
-		protected boolean isTimingSideChannelAttackPossible() {
+		public boolean isTimingSideChannelAttackPossible() {
 			return nonPQCEncryption.isTimingSideChannelAttackPossible() || PQCEncryption.isTimingSideChannelAttackPossible();
 		}
 
 		@Override
-		protected boolean isFrequencySideChannelAttackPossible() {
+		public boolean isFrequencySideChannelAttackPossible() {
 			return nonPQCEncryption.isFrequencySideChannelAttackPossible() || PQCEncryption.isFrequencySideChannelAttackPossible();
-		}
-
-		@Override
-		protected FalseCPUUsageType getFalseCPUUsageType() {
-			return nonPQCEncryption.getFalseCPUUsageType();
 		}
 
 		@Override
@@ -644,6 +636,11 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 		@Override
 		public boolean supportRandomEncryptionAndRandomDecryption() {
 			return false;
+		}
+
+		@Override
+		protected CPUUsageAsDecoyOutputStream<CommonCipherOutputStream> getCPUUsageAsDecoyOutputStream(CommonCipherOutputStream os) throws IOException {
+			return new CPUUsageAsDecoyOutputStream<>(os);
 		}
 
 		@Override
@@ -681,6 +678,7 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 			initCipherForDecryption(cipher);
 		}
 
+
 		@Override
 		protected boolean allOutputGeneratedIntoDoFinalFunction() {
 			return false;
@@ -697,12 +695,12 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 		}
 
 		@Override
-		protected CommonCipherOutputStream getCipherOutputStreamForEncryption(final RandomOutputStream os, boolean closeOutputStreamWhenClosingCipherOutputStream, byte[] associatedData, int offAD, int lenAD, final byte[] externalCounter, byte[][] manualIVs) throws IOException {
+		protected RandomOutputStream getCipherOutputStreamForEncryption(final RandomOutputStream os, boolean closeOutputStreamWhenClosingCipherOutputStream, byte[] associatedData, int offAD, int lenAD, final byte[] externalCounter, byte[][] manualIVs) throws IOException {
 			return nonPQCEncryption.getCipherOutputStreamForEncryption(PQCEncryption.getCipherOutputStreamForEncryption(os, closeOutputStreamWhenClosingCipherOutputStream, associatedData, offAD, lenAD, externalCounter, manualIVs), true, associatedData, offAD, lenAD, externalCounter, manualIVs);
 		}
 
 		@Override
-		public CommonCipherInputStream getCipherInputStreamForDecryption(RandomInputStream is, byte[] associatedData, int offAD, int lenAD, byte[] externalCounter) throws IOException {
+		public RandomInputStream getCipherInputStreamForDecryption(RandomInputStream is, byte[] associatedData, int offAD, int lenAD, byte[] externalCounter) throws IOException {
 			checkKeysNotCleaned();
 			return nonPQCEncryption.getCipherInputStreamForDecryption(PQCEncryption.getCipherInputStreamForDecryption(is, associatedData, offAD, lenAD, externalCounter), associatedData, offAD, lenAD, externalCounter);
 		}
@@ -738,7 +736,6 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 		private final ASymmetricEncryptionType type;
 
 		private final ASymmetricAuthenticatedSignatureType signatureType;
-		private final FalseCPUUsageType falseCPUUsageType;
 
 		@Override
 		public boolean isPostQuantumEncryption() {
@@ -753,14 +750,14 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 				throw new IllegalAccessError();
 		}
 
-		public P2PEncryption(ASymmetricKeyPair myKeyPair, ASymmetricPublicKey distantPublicKey, FalseCPUUsageType falseCPUUsageType)
+		public P2PEncryption(ASymmetricKeyPair myKeyPair, ASymmetricPublicKey distantPublicKey)
 				throws NoSuchAlgorithmException,
 				NoSuchProviderException, IOException {
-			this(myKeyPair.getEncryptionAlgorithmType().getDefaultSignatureAlgorithm(), myKeyPair, distantPublicKey, falseCPUUsageType);
+			this(myKeyPair.getEncryptionAlgorithmType().getDefaultSignatureAlgorithm(), myKeyPair, distantPublicKey);
 		}
 
 		public P2PEncryption(ASymmetricAuthenticatedSignatureType signatureType, ASymmetricKeyPair myKeyPair,
-												ASymmetricPublicKey distantPublicKey, FalseCPUUsageType falseCPUUsageType) throws IOException, NoSuchAlgorithmException, NoSuchProviderException {
+												ASymmetricPublicKey distantPublicKey) throws IOException, NoSuchAlgorithmException, NoSuchProviderException {
 			super(myKeyPair.getEncryptionAlgorithmType().getCipherInstance(), 0);
 			if (signatureType == null)
 				throw new NullPointerException("signatureType");
@@ -771,11 +768,6 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 			this.myKeyPair = myKeyPair;
 			this.distantPublicKey = distantPublicKey;
 			this.signatureType = signatureType;
-			this.falseCPUUsageType=falseCPUUsageType;
-			if (falseCPUUsageType==null && isUsingSideChannelMitigation())
-				throw new NullPointerException();
-			else if (falseCPUUsageType==FalseCPUUsageType.ADDITIONAL_CPU_USAGE_IN_REAL_TIME)
-				throw new NotYetImplementedException();
 			setMaxPlainTextSizeForEncoding(distantPublicKey.getMaxBlockSize());
 			initBufferAllocatorArgs();
 		}
@@ -786,25 +778,19 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 		}
 
 		@Override
-		protected boolean isPowerMonitoringSideChannelAttackPossible() {
+		public boolean isPowerMonitoringSideChannelAttackPossible() {
 			return true;
 		}
 
 		@Override
-		protected boolean isTimingSideChannelAttackPossible() {
+		public boolean isTimingSideChannelAttackPossible() {
 			return true;
 		}
 
 		@Override
-		protected boolean isFrequencySideChannelAttackPossible() {
+		public boolean isFrequencySideChannelAttackPossible() {
 			return true;
 		}
-
-		@Override
-		protected FalseCPUUsageType getFalseCPUUsageType() {
-			return falseCPUUsageType;
-		}
-
 
 		@Override
 		protected void initCipherForEncryptionWithIvAndCounter(AbstractCipher cipher, byte[] iv, int counter) throws IOException {
@@ -840,6 +826,11 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 			return false;
 		}
 
+		@Override
+		protected CPUUsageAsDecoyOutputStream<CommonCipherOutputStream> getCPUUsageAsDecoyOutputStream(CommonCipherOutputStream os) throws IOException {
+			return new CPUUsageAsDecoyOutputStream<>(os);
+		}
+
 		public ASymmetricPublicKey getDistantPublicKey() {
 			return this.distantPublicKey;
 		}
@@ -866,6 +857,7 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 		public void initCipherForDecryptionWithIv(AbstractCipher cipher, byte[] iv) throws IOException {
 			initCipherForDecryption(cipher);
 		}
+
 
 		@Override
 		protected boolean allOutputGeneratedIntoDoFinalFunction() {

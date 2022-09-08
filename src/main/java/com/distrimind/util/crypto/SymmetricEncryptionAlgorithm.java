@@ -35,7 +35,6 @@ knowledge of the CeCILL-C license and that you accept its terms.
 package com.distrimind.util.crypto;
 
 import com.distrimind.util.Cleanable;
-import com.distrimind.util.NotYetImplementedException;
 import com.distrimind.util.io.*;
 
 import javax.crypto.Cipher;
@@ -85,7 +84,7 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 	private final boolean supportRandomReadWrite;
 	private final boolean chacha;
 	private final boolean gcm;
-	private final FalseCPUUsageType falseCPUUsageType;
+
 
 	@Override
 	public boolean isPostQuantumEncryption() {
@@ -117,7 +116,8 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 	}
 
 
-	private void partialHash(RandomInputStream nonEncryptedInputStream, NullRandomOutputStream nullStream, AbstractMessageDigest md, CommonCipherOutputStream os, long pos, long len) throws IOException {
+	@SuppressWarnings("unchecked")
+	private void partialHash(RandomInputStream nonEncryptedInputStream, NullRandomOutputStream nullStream, AbstractMessageDigest md, RandomOutputStream os, long pos, long len) throws IOException {
 		long mod=pos%maxEncryptedPartLength;
 		mod-=getIVSizeBytesWithoutExternalCounter();
 		assert mod>=0;
@@ -137,17 +137,24 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 			l = nonEncryptedInputStream.length();
 		}
 		l-=p;
-		RandomByteArrayOutputStream out=new RandomByteArrayOutputStream((int)l);
-		os.os=out;
-		nonEncryptedInputStream.transferTo(os, l);
-		out.flush();
-		byte[] b=out.getBytes();
-		md.update(b, (int)off,(int)len);
-		if (doFinal) {
-			byte[] f = cipher.doFinal();
-			md.update(f, 0, f.length);
+
+		try(RandomByteArrayOutputStream out=new RandomByteArrayOutputStream((int)l)) {
+			CommonCipherOutputStream cos;
+			if (os instanceof CPUUsageAsDecoyOutputStream)
+				cos=((CPUUsageAsDecoyOutputStream<CommonCipherOutputStream>)os).getDestinationRandomOutputStream();
+			else
+				cos=(CommonCipherOutputStream)os;
+			cos.os = out;
+			nonEncryptedInputStream.transferTo(os, l);
+			out.flush();
+			byte[] b = out.getBytes();
+			md.update(b, (int) off, (int) len);
+			if (doFinal) {
+				byte[] f = cipher.doFinal();
+				md.update(f, 0, f.length);
+			}
+			cos.os = nullStream;
 		}
-		os.os=nullStream;
 	}
 
 	public boolean checkPartialHashWithNonEncryptedStream(byte[] head, SubStreamHashResult hashResultFromEncryptedStream, SubStreamParameters subStreamParameters,
@@ -170,7 +177,7 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 		nullStream.setLength(getOutputSizeAfterEncryption(nonEncryptedInputStream.length()));
 
 
-		try(CommonCipherOutputStream os= getCipherOutputStreamForEncryption(nullStream, false, null, 0, 0, null, ivs)) {
+		try(RandomOutputStream os= getCipherOutputStreamForEncryption(nullStream, false, null, 0, 0, null, ivs)) {
 
 			List<SubStreamParameter> ssp;
 			if (head!=null) {
@@ -219,15 +226,15 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 		}
 	}
 
-	public SymmetricEncryptionAlgorithm(AbstractSecureRandom random, SymmetricSecretKey key, FalseCPUUsageType falseCPUUsageType)
+	public SymmetricEncryptionAlgorithm(AbstractSecureRandom random, SymmetricSecretKey key)
 			throws IOException {
-		this(random, key, falseCPUUsageType, (byte)0, true);
+		this(random, key, (byte)0, true);
 	}
-	public SymmetricEncryptionAlgorithm(AbstractSecureRandom random, SymmetricSecretKey key, FalseCPUUsageType falseCPUUsageType, byte blockModeCounterBytes)
+	public SymmetricEncryptionAlgorithm(AbstractSecureRandom random, SymmetricSecretKey key, byte blockModeCounterBytes)
 			throws IOException {
-		this(random, key, falseCPUUsageType, blockModeCounterBytes, false);
+		this(random, key, blockModeCounterBytes, false);
 	}
-	public SymmetricEncryptionAlgorithm(AbstractSecureRandom random, SymmetricSecretKey key, FalseCPUUsageType falseCPUUsageType, byte blockModeCounterBytes, boolean internalCounter)
+	public SymmetricEncryptionAlgorithm(AbstractSecureRandom random, SymmetricSecretKey key, byte blockModeCounterBytes, boolean internalCounter)
 			throws IOException {
 		super(key.getEncryptionAlgorithmType().getCipherInstance(), key.getEncryptionAlgorithmType().getIVSizeBytes());
 		if (key.isCleaned())
@@ -250,14 +257,6 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 		finalizer.externalCounter=this.internalCounter?null:new byte[blockModeCounterBytes];
 		this.chacha =type.getAlgorithmName().toUpperCase().startsWith(SymmetricEncryptionType.CHACHA20_NO_RANDOM_ACCESS.getAlgorithmName().toUpperCase());
 		this.gcm = type.getBlockMode().equalsIgnoreCase("GCM");
-		this.falseCPUUsageType=falseCPUUsageType;
-		if (falseCPUUsageType==null)
-		{
-			if (isUsingSideChannelMitigation())
-				throw new NullPointerException();
-		}
-		else if (falseCPUUsageType==FalseCPUUsageType.ADDITIONAL_CPU_USAGE_IN_REAL_TIME)
-			throw new NotYetImplementedException();
 
 		this.cipher.init(Cipher.ENCRYPT_MODE, this.key, generateIV());
 
@@ -326,6 +325,11 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 	@Override
 	public boolean supportRandomEncryptionAndRandomDecryption() {
 		return type.supportRandomReadWrite();
+	}
+
+	@Override
+	protected CPUUsageAsDecoyOutputStream<CommonCipherOutputStream> getCPUUsageAsDecoyOutputStream(CommonCipherOutputStream os) throws IOException {
+		return new CPUUsageAsDecoyOutputStream<>(os, key.getEncryptionAlgorithmType(), Cipher.ENCRYPT_MODE);
 	}
 
 	public SymmetricSecretKey getSecretKey() {
@@ -398,6 +402,11 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 	}
 
 	@Override
+	public CPUUsageAsDecoyInputStream<CommonCipherInputStream> getCPUUsageAsDecoyInputStream(CommonCipherInputStream in) throws IOException {
+		return new CPUUsageAsDecoyInputStream<>(in, key.getEncryptionAlgorithmType(), Cipher.DECRYPT_MODE);
+	}
+
+	@Override
 	protected boolean allOutputGeneratedIntoDoFinalFunction() {
 		return gcm || (chacha && type.getAlgorithmName().toUpperCase().contains("POLY1305"));
 	}
@@ -417,24 +426,20 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 	}
 
 	@Override
-	protected boolean isPowerMonitoringSideChannelAttackPossible() {
+	public boolean isPowerMonitoringSideChannelAttackPossible() {
 		return key.getEncryptionAlgorithmType().isPowerMonitoringAttackPossible();
 	}
 
 	@Override
-	protected boolean isTimingSideChannelAttackPossible() {
+	public boolean isTimingSideChannelAttackPossible() {
 		return key.getEncryptionAlgorithmType().isTimingAttackPossibleIntoThisMachine();
 	}
 
 	@Override
-	protected boolean isFrequencySideChannelAttackPossible() {
+	public boolean isFrequencySideChannelAttackPossible() {
 		return key.getEncryptionAlgorithmType().isFrequencyAttackPossible();
 	}
 
-	@Override
-	protected FalseCPUUsageType getFalseCPUUsageType() {
-		return falseCPUUsageType;
-	}
 
 	@Override
 	public byte[] initCipherForEncryption(AbstractCipher cipher, byte[] externalCounter) throws IOException {

@@ -316,7 +316,7 @@ public class ServerASymmetricEncryptionAlgorithm implements IEncryptionInputAlgo
 		}
 
 		@Override
-		public CommonCipherInputStream getCipherInputStreamForDecryption(final RandomInputStream is, final byte[] externalCounter) throws IOException {
+		public RandomInputStream getCipherInputStreamForDecryption(final RandomInputStream is, final byte[] externalCounter) throws IOException {
 			return getCipherInputStreamForDecryption(is, null, 0, 0, externalCounter);
 		}
 
@@ -326,10 +326,10 @@ public class ServerASymmetricEncryptionAlgorithm implements IEncryptionInputAlgo
 				throw new IllegalAccessError();
 		}
 		@Override
-		public CommonCipherInputStream getCipherInputStreamForDecryption(final RandomInputStream is, byte[] associatedData, int offAD, final int lenAD, final byte[] externalCounter)
+		public RandomInputStream getCipherInputStreamForDecryption(final RandomInputStream is, byte[] associatedData, int offAD, final int lenAD, final byte[] externalCounter)
 				throws IOException {
 
-			return new CommonCipherInputStream(false, maxEncryptedPartLength, is, false, null, 0, (byte)0, externalCounter, cipher, associatedData, offAD, lenAD, finalizer.buffer, false, 0, maxPlainTextSizeForEncoding) {
+			CommonCipherInputStream res=new CommonCipherInputStream(false, maxEncryptedPartLength, is, false, null, 0, (byte)0, externalCounter, cipher, associatedData, offAD, lenAD, finalizer.buffer, false, 0, maxPlainTextSizeForEncoding) {
 				@Override
 				protected void initCipherForDecryptionWithIvAndCounter(byte[] iv, int counter) throws IOException {
 					Server.this.initCipherForDecryption(cipher, iv, externalCounter);
@@ -360,6 +360,10 @@ public class ServerASymmetricEncryptionAlgorithm implements IEncryptionInputAlgo
 					return Server.this.getOutputSizeAfterDecryption(length);
 				}
 			};
+			if (isUsingSideChannelMitigation())
+				return getCPUUsageAsDecoyInputStream(res);
+			else
+				return res;
 		}
 		@Override
 		public long getOutputSizeAfterDecryption(long inputLen) throws IOException {
@@ -540,6 +544,7 @@ public class ServerASymmetricEncryptionAlgorithm implements IEncryptionInputAlgo
 	public void initCipherForDecryptionWithIv(AbstractCipher cipher, byte[] iv) throws IOException {
 		initCipherForDecryption(cipher, iv, null);
 	}
+
 
 	@Override
 	public void checkKeysNotCleaned() {

@@ -254,7 +254,7 @@ public enum ASymmetricKeyWrapperType {
 				if (name().startsWith("BCPQC_MCELIECE_")) {
 					if (!publicKey.getEncryptionAlgorithmType().name().equals(name()))
 						throw new IllegalArgumentException(publicKey.getEncryptionAlgorithmType().toString()+" ; "+name());
-					try(ClientASymmetricEncryptionAlgorithm client = new ClientASymmetricEncryptionAlgorithm(random, publicKey, FalseCPUUsageType.ADDITIONAL_CPU_USAGE_AFTER_THE_BLOCK_ENCRYPTION)) {
+					try(ClientASymmetricEncryptionAlgorithm client = new ClientASymmetricEncryptionAlgorithm(random, publicKey)) {
 						WrappedSecretData wsd = keyToWrap.encode();
 						return new WrappedEncryptedSymmetricSecretKey(client.encode(wsd.getBytes()));
 					}
@@ -360,7 +360,7 @@ public enum ASymmetricKeyWrapperType {
 				if (!publicKey.getPQCPublicKey().getEncryptionAlgorithmType().name().equals(getPqcWrapper().name()))
 					throw new IllegalArgumentException(publicKey.getPQCPublicKey().getEncryptionAlgorithmType()+" ; "+getPqcWrapper().name());
 				WrappedEncryptedSymmetricSecretKey nonPQCWrap = nonPQCWrapper.wrapKey(random, publicKey.getNonPQCPublicKey(), keyToWrap);
-				try(ClientASymmetricEncryptionAlgorithm client = new ClientASymmetricEncryptionAlgorithm(random, publicKey.getPQCPublicKey(), FalseCPUUsageType.ADDITIONAL_CPU_USAGE_AFTER_THE_BLOCK_ENCRYPTION))
+				try(ClientASymmetricEncryptionAlgorithm client = new ClientASymmetricEncryptionAlgorithm(random, publicKey.getPQCPublicKey()))
 				{
 					return new WrappedEncryptedSymmetricSecretKey(client.encode(nonPQCWrap.getBytes()));
 				}
@@ -534,7 +534,7 @@ public enum ASymmetricKeyWrapperType {
 		Random r=new Random(System.currentTimeMillis());
 		r.nextBytes(encodedKey.getBytes());
 		if (type.name().startsWith("BCPQC_MCELIECE_")) {
-			try(ClientASymmetricEncryptionAlgorithm client = new ClientASymmetricEncryptionAlgorithm(SecureRandomType.DEFAULT.getInstance(null), publicKey, FalseCPUUsageType.ADDITIONAL_CPU_USAGE_AFTER_THE_BLOCK_ENCRYPTION)) {
+			try(ClientASymmetricEncryptionAlgorithm client = new ClientASymmetricEncryptionAlgorithm(SecureRandomType.DEFAULT.getInstance(null), publicKey)) {
 				return client.encode(encodedKey.getBytes()).length;
 			}
 		}

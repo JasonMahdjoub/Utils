@@ -38,6 +38,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
 import com.distrimind.util.io.RandomInputStream;
 import com.distrimind.util.io.RandomOutputStream;
 
+import javax.crypto.Cipher;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
@@ -48,10 +49,10 @@ import java.util.Random;
  * @version 1.0
  * @since MaDKitLanEdition 5.24.0
  */
-public class FalseCPUUsageOutputStream extends RandomOutputStream {
+public class CPUUsageAsDecoyOutputStream<T extends RandomOutputStream> extends RandomOutputStream {
 
 	public static final double DEFAULT_FALSE_CPU_USAGE_PERCENTAGE=0.05;
-	private final RandomOutputStream out;
+	private final T out;
 	private AbstractCipher cipher;
 
 	private long wroteBytes=0;
@@ -62,31 +63,48 @@ public class FalseCPUUsageOutputStream extends RandomOutputStream {
 	private final byte[] outputBuffer=new byte[BUFFER_SIZE];
 	private final byte[] inputBuffer=new byte[BUFFER_SIZE-200];
 	private final double falseCPUUsagePercentage=DEFAULT_FALSE_CPU_USAGE_PERCENTAGE;
+	private final SymmetricEncryptionType symmetricEncryptionType;
+	private final int opMode;
 
 
 
-
-	private FalseCPUUsageOutputStream(RandomOutputStream out) throws NoSuchAlgorithmException, NoSuchProviderException {
+	public CPUUsageAsDecoyOutputStream(T out) throws IOException {
+		this(out, SymmetricEncryptionType.DEFAULT, Cipher.ENCRYPT_MODE);
+	}
+	public CPUUsageAsDecoyOutputStream(T out, SymmetricEncryptionType symType, int opMode) throws IOException {
 		if (out==null)
 			throw new NullPointerException();
+		if (symType==null)
+			throw new NullPointerException();
 		this.out = out;
-		secureRandom =SecureRandomType.DEFAULT.getSingleton(null);
-	}
-	public FalseCPUUsageOutputStream(RandomOutputStream out, SymmetricEncryptionType symType, int opMode) throws IOException, NoSuchAlgorithmException, NoSuchProviderException {
-		this(out);
-		cipher=symType.getCipherInstance();
+		this.symmetricEncryptionType=symType;
+		this.opMode=opMode;
+		try {
+			secureRandom =SecureRandomType.DEFAULT.getSingleton(null);
 
-		SymmetricSecretKey key=symType.getKeyGenerator(secureRandom).generateKey();
-		byte[] iv=new byte[symType.getIVSizeBytes()];
-		secureRandom.nextBytes(iv);
-		cipher.init(opMode, key, iv);
+		} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
+			throw new IOException(e);
+		}
+		reset();
 	}
+	public void reset() throws IOException {
+		try {
+			cipher=symmetricEncryptionType.getCipherInstance();
+			SymmetricSecretKey key = symmetricEncryptionType.getKeyGenerator(secureRandom).generateKey();
+			byte[] iv=new byte[symmetricEncryptionType.getIVSizeBytes()];
+			secureRandom.nextBytes(iv);
+			cipher.init(opMode, key, iv);
+		} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
+			throw new IOException(e);
+		}
+	}
+
 	private static void writeFakeBytes(AbstractCipher cipher, Random random, long l, byte[] inputBuffer, byte[] outputBuffer) throws IOException {
 		if (l>0)
 		{
-			int inputBufferSize=(int)Math.min(inputBuffer.length,l);
 			while (l>0)
 			{
+				int inputBufferSize=(int)Math.min(inputBuffer.length,l);
 				for (int i = 0; i < inputBufferSize; )
 					for (int rnd = random.nextInt(),
 						 n = Math.min(inputBufferSize - i, Integer.SIZE/Byte.SIZE);
@@ -94,10 +112,10 @@ public class FalseCPUUsageOutputStream extends RandomOutputStream {
 						inputBuffer[i++] = (byte)rnd;
 
 
-				int s2=cipher.getOutputSize(inputBufferSize);
+				/*int s2=cipher.getOutputSize(inputBufferSize);
 				if (outputBuffer==null || outputBuffer.length<s2) {
-					throw new IOException();
-				}
+					throw new IOException("outputBuffer.length="+(outputBuffer==null?null:outputBuffer.length)+", s2="+s2+", inputBufferSize="+inputBufferSize);
+				}*/
 				cipher.update(inputBuffer, 0, inputBufferSize, outputBuffer);
 				l-=inputBufferSize;
 			}
@@ -144,7 +162,7 @@ public class FalseCPUUsageOutputStream extends RandomOutputStream {
 	public void write(byte[] b, int off, int len) throws IOException {
 		RandomInputStream.checkLimits(b,off,len);
 		while (len>0) {
-			int l = len<AbstractEncryptionOutputAlgorithm.BUFFER_SIZE?secureRandom.nextInt((len/16)+1)*16:secureRandom.nextInt((len/128)+1)*128;
+			int l = len<=AbstractEncryptionOutputAlgorithm.BUFFER_SIZE?secureRandom.nextInt((len/16)+1)*16:secureRandom.nextInt((len/128)+1)*128;
 			if (l==0)
 				l=len;
 			long startNano=System.nanoTime();
@@ -190,5 +208,9 @@ public class FalseCPUUsageOutputStream extends RandomOutputStream {
 	@Override
 	public long currentPosition() throws IOException {
 		return out.currentPosition();
+	}
+
+	public T getDestinationRandomOutputStream() {
+		return out;
 	}
 }

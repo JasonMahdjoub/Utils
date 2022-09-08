@@ -53,16 +53,16 @@ public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutpu
 	private final AbstractEncryptionOutputAlgorithm client;
 	private final IASymmetricPublicKey distantPublicKey;
 
-	public ClientASymmetricEncryptionAlgorithm(AbstractSecureRandom random, IASymmetricPublicKey distantPublicKey, FalseCPUUsageType falseCPUUsageType) throws IOException {
+	public ClientASymmetricEncryptionAlgorithm(AbstractSecureRandom random, IASymmetricPublicKey distantPublicKey) throws IOException {
 		super();
 		if (distantPublicKey.isDestroyed())
 			throw new IllegalArgumentException();
 		this.distantPublicKey=distantPublicKey;
 		if (distantPublicKey instanceof HybridASymmetricPublicKey)
-			client=new HybridClient(random, (HybridASymmetricPublicKey)distantPublicKey, falseCPUUsageType);
+			client=new HybridClient(random, (HybridASymmetricPublicKey)distantPublicKey);
 		else {
 			try {
-				client=new Client(random, (ASymmetricPublicKey)distantPublicKey, falseCPUUsageType);
+				client=new Client(random, (ASymmetricPublicKey)distantPublicKey);
 			} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
 				throw new IOException(e);
 			}
@@ -78,11 +78,11 @@ public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutpu
 	private static class HybridClient extends AbstractEncryptionOutputAlgorithm {
 		private final Client nonPQCEncryption, PQCEncryption;
 		private final HybridASymmetricPublicKey hybridASymmetricPublicKey;
-		public HybridClient(AbstractSecureRandom random, HybridASymmetricPublicKey distantPublicKey, FalseCPUUsageType falseCPUUsageType) throws IOException {
+		public HybridClient(AbstractSecureRandom random, HybridASymmetricPublicKey distantPublicKey) throws IOException {
 			super();
 			try {
-				this.nonPQCEncryption=new Client(random, distantPublicKey.getNonPQCPublicKey(), falseCPUUsageType);
-				this.PQCEncryption=new Client(random, distantPublicKey.getPQCPublicKey(), falseCPUUsageType);
+				this.nonPQCEncryption=new Client(random, distantPublicKey.getNonPQCPublicKey());
+				this.PQCEncryption=new Client(random, distantPublicKey.getPQCPublicKey());
 			} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
 				throw new IOException(e);
 			}
@@ -121,11 +121,6 @@ public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutpu
 		}
 
 		@Override
-		protected FalseCPUUsageType getFalseCPUUsageType() {
-			return nonPQCEncryption.getFalseCPUUsageType();
-		}
-
-		@Override
 		protected AbstractCipher getCipherInstance()  {
 			throw new IllegalAccessError();
 		}
@@ -138,6 +133,11 @@ public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutpu
 		@Override
 		public boolean supportRandomEncryptionAndRandomDecryption() {
 			return false;
+		}
+
+		@Override
+		protected CPUUsageAsDecoyOutputStream<CommonCipherOutputStream> getCPUUsageAsDecoyOutputStream(CommonCipherOutputStream os) throws IOException {
+			return new CPUUsageAsDecoyOutputStream<>(os);
 		}
 
 
@@ -173,7 +173,7 @@ public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutpu
 		}
 
 		@Override
-		protected CommonCipherOutputStream getCipherOutputStreamForEncryption(final RandomOutputStream os, boolean closeOutputStreamWhenClosingCipherOutputStream, byte[] associatedData, int offAD, int lenAD, final byte[] externalCounter, byte[][] manualIVs) throws IOException {
+		protected RandomOutputStream getCipherOutputStreamForEncryption(final RandomOutputStream os, boolean closeOutputStreamWhenClosingCipherOutputStream, byte[] associatedData, int offAD, int lenAD, final byte[] externalCounter, byte[][] manualIVs) throws IOException {
 			return nonPQCEncryption.getCipherOutputStreamForEncryption(PQCEncryption.getCipherOutputStreamForEncryption(os, closeOutputStreamWhenClosingCipherOutputStream, associatedData, offAD, lenAD, externalCounter, manualIVs), true, associatedData, offAD, lenAD, externalCounter, manualIVs);
 		}
 
@@ -182,7 +182,7 @@ public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutpu
 
 
 	@Override
-	protected CommonCipherOutputStream getCipherOutputStreamForEncryption(RandomOutputStream os, boolean closeOutputStreamWhenClosingCipherOutputStream, byte[] associatedData, int offAD, int lenAD, byte[] externalCounter, byte[][] manualIvs) throws IOException {
+	protected RandomOutputStream getCipherOutputStreamForEncryption(RandomOutputStream os, boolean closeOutputStreamWhenClosingCipherOutputStream, byte[] associatedData, int offAD, int lenAD, byte[] externalCounter, byte[][] manualIvs) throws IOException {
 		return client.getCipherOutputStreamForEncryption(os, closeOutputStreamWhenClosingCipherOutputStream, associatedData, offAD, lenAD, externalCounter, manualIvs);
 	}
 
@@ -192,18 +192,23 @@ public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutpu
 	}
 
 	@Override
-	public CommonCipherOutputStream getCipherOutputStreamForEncryption(RandomOutputStream os, boolean closeOutputStreamWhenClosingCipherOutputStream) throws IOException {
+	public RandomOutputStream getCipherOutputStreamForEncryption(RandomOutputStream os, boolean closeOutputStreamWhenClosingCipherOutputStream) throws IOException {
 		return client.getCipherOutputStreamForEncryption(os, closeOutputStreamWhenClosingCipherOutputStream);
 	}
 
 	@Override
-	public CommonCipherOutputStream getCipherOutputStreamForEncryption(RandomOutputStream os, boolean closeOutputStreamWhenClosingCipherOutputStream, byte[] associatedData, int offAD, int lenAD) throws IOException {
+	public RandomOutputStream getCipherOutputStreamForEncryption(RandomOutputStream os, boolean closeOutputStreamWhenClosingCipherOutputStream, byte[] associatedData, int offAD, int lenAD) throws IOException {
 		return client.getCipherOutputStreamForEncryption(os, closeOutputStreamWhenClosingCipherOutputStream, associatedData, offAD, lenAD);
 	}
 
 	@Override
-	public CommonCipherOutputStream getCipherOutputStreamForEncryption(RandomOutputStream os, boolean closeOutputStreamWhenClosingCipherOutputStream, byte[] associatedData, int offAD, int lenAD, byte[] externalCounter) throws IOException {
+	public RandomOutputStream getCipherOutputStreamForEncryption(RandomOutputStream os, boolean closeOutputStreamWhenClosingCipherOutputStream, byte[] associatedData, int offAD, int lenAD, byte[] externalCounter) throws IOException {
 		return client.getCipherOutputStreamForEncryption(os, closeOutputStreamWhenClosingCipherOutputStream, associatedData, offAD, lenAD, externalCounter);
+	}
+
+	@Override
+	protected CPUUsageAsDecoyOutputStream<CommonCipherOutputStream> getCPUUsageAsDecoyOutputStream(CommonCipherOutputStream os) throws IOException {
+		return client.getCPUUsageAsDecoyOutputStream(os);
 	}
 
 
@@ -312,11 +317,6 @@ public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutpu
 		return client.isFrequencySideChannelAttackPossible();
 	}
 
-	@Override
-	protected FalseCPUUsageType getFalseCPUUsageType() {
-		return client.getFalseCPUUsageType();
-	}
-
 
 	@Override
 	public AbstractCipher getCipherInstance() throws IOException {
@@ -326,7 +326,7 @@ public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutpu
 	}
 
 	@Override
-	public CommonCipherOutputStream getCipherOutputStreamForEncryption(RandomOutputStream os, boolean closeOutputStreamWhenClosingCipherOutputStream, byte[] externalCounter) throws IOException {
+	public RandomOutputStream getCipherOutputStreamForEncryption(RandomOutputStream os, boolean closeOutputStreamWhenClosingCipherOutputStream, byte[] externalCounter) throws IOException {
 		return client.getCipherOutputStreamForEncryption(os, closeOutputStreamWhenClosingCipherOutputStream, externalCounter);
 	}
 
@@ -397,16 +397,13 @@ public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutpu
 		private final ASymmetricEncryptionType type;
 
 		private final AbstractSecureRandom random;
-		private final FalseCPUUsageType falseCPUUsageType;
 
-		public Client(AbstractSecureRandom random, ASymmetricPublicKey distantPublicKey, FalseCPUUsageType falseCPUUsageType) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
+
+		public Client(AbstractSecureRandom random, ASymmetricPublicKey distantPublicKey) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
 			super(distantPublicKey.getEncryptionAlgorithmType().getCipherInstance(), 0);
 			this.type = distantPublicKey.getEncryptionAlgorithmType();
 			this.distantPublicKey = distantPublicKey;
 			this.random = random;
-			if (isUsingSideChannelMitigation() && falseCPUUsageType==null)
-				throw new NullPointerException();
-			this.falseCPUUsageType=falseCPUUsageType;
 			setMaxPlainTextSizeForEncoding(distantPublicKey.getMaxBlockSize());
 			initCipherForEncryption(this.cipher);
 			initBufferAllocatorArgs();
@@ -449,11 +446,6 @@ public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutpu
 		}
 
 		@Override
-		protected FalseCPUUsageType getFalseCPUUsageType() {
-			return falseCPUUsageType;
-		}
-
-		@Override
 		protected AbstractCipher getCipherInstance() throws IOException {
 			try {
 				return type.getCipherInstance();
@@ -470,6 +462,11 @@ public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutpu
 		@Override
 		public boolean supportRandomEncryptionAndRandomDecryption() {
 			return false;
+		}
+
+		@Override
+		protected CPUUsageAsDecoyOutputStream<CommonCipherOutputStream> getCPUUsageAsDecoyOutputStream(CommonCipherOutputStream os) throws IOException {
+			return new CPUUsageAsDecoyOutputStream<>(os);
 		}
 
 		public ASymmetricPublicKey getDistantPublicKey() {

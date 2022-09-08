@@ -72,4 +72,23 @@ interface IServer {
 			throws IOException;
 	RandomInputStream getCipherInputStreamForDecryption(final RandomInputStream is, byte[] associatedData, int offAD, int lenAD, final byte[] externalCounter) throws IOException;
 	void checkKeysNotCleaned();
+
+	default boolean isPowerMonitoringSideChannelAttackPossible(){
+		return true;
+	}
+	default boolean isFrequencySideChannelAttackPossible(){
+		return true;
+	}
+	default boolean isTimingSideChannelAttackPossible()
+	{
+		return true;
+	}
+	default boolean isUsingSideChannelMitigation()
+	{
+		return isPowerMonitoringSideChannelAttackPossible() || isFrequencySideChannelAttackPossible() || isTimingSideChannelAttackPossible();
+	}
+	default CPUUsageAsDecoyInputStream<CommonCipherInputStream> getCPUUsageAsDecoyInputStream(CommonCipherInputStream in) throws IOException
+	{
+		return new CPUUsageAsDecoyInputStream<>(in);
+	}
 }

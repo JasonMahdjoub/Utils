@@ -65,7 +65,7 @@ public class EncryptionSignatureHashDecoder {
 	static final RandomInputStream nullRandomInputStream=new RandomByteArrayInputStream(new byte[0]);
 	private AbstractMessageDigest defaultMessageDigest=null;
 	private byte[] externalCounter=null;
-	CommonCipherInputStream cipherInputStream=null;
+	RandomInputStream cipherInputStream=null;
 	private SymmetricSecretKey originalSecretKeyForEncryption=null;
 	private EncryptionProfileProvider encryptionProfileProvider =null;
 	private AbstractSecureRandom randomForCipher=null;
@@ -124,9 +124,9 @@ public class EncryptionSignatureHashDecoder {
 		try {
 			byte sc=symmetricSecretKeyForEncryption.getEncryptionAlgorithmType().getMaxCounterSizeInBytesUsedWithBlockMode();
 			if (externalCounterLength <= 0)
-				return withCipher(new SymmetricEncryptionAlgorithm(SecureRandomType.DEFAULT.getSingleton(null), symmetricSecretKeyForEncryption, FalseCPUUsageType.ADDITIONAL_CPU_USAGE_AFTER_THE_BLOCK_ENCRYPTION));
+				return withCipher(new SymmetricEncryptionAlgorithm(SecureRandomType.DEFAULT.getSingleton(null), symmetricSecretKeyForEncryption));
 			else
-				return withCipher(new SymmetricEncryptionAlgorithm(SecureRandomType.DEFAULT.getSingleton(null), symmetricSecretKeyForEncryption, FalseCPUUsageType.ADDITIONAL_CPU_USAGE_AFTER_THE_BLOCK_ENCRYPTION, (byte)(Math.min(externalCounterLength, sc))));
+				return withCipher(new SymmetricEncryptionAlgorithm(SecureRandomType.DEFAULT.getSingleton(null), symmetricSecretKeyForEncryption, (byte)(Math.min(externalCounterLength, sc))));
 		} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
 			throw new IOException(e);
 		}
@@ -722,14 +722,14 @@ public class EncryptionSignatureHashDecoder {
 					if (cipherInputStream==null)
 						cipherInputStream=cipher.getCipherInputStreamForDecryption(limitedRandomInputStream,buffer, 0, lenBuffer, externalCounter );
 					else
-						cipherInputStream.set(limitedRandomInputStream,buffer, 0, lenBuffer, externalCounter );
+						CommonCipherInputStream.set(cipherInputStream, limitedRandomInputStream,buffer, 0, lenBuffer, externalCounter );
 
 				}
 				else {
 					if (cipherInputStream==null)
 						cipherInputStream=cipher.getCipherInputStreamForDecryption(limitedRandomInputStream,null, 0, 0, externalCounter );
 					else
-						cipherInputStream.set(limitedRandomInputStream,null, 0, 0, externalCounter );
+						CommonCipherInputStream.set(cipherInputStream, limitedRandomInputStream,null, 0, 0, externalCounter );
 				}
 				try {
 					assert outputStream!=null;
@@ -1213,7 +1213,7 @@ public class EncryptionSignatureHashDecoder {
 				|| (externalCounter==null && cipher.getBlockModeCounterBytes()!=0)
 				|| (externalCounter!=null && cipher.getBlockModeCounterBytes()!=externalCounter.length))) ||
 				(cipher==null && originalSecretKeyForEncryption!=null)) {
-			cipher = EncryptionSignatureHashEncoder.reloadCipher(randomForCipher, originalSecretKeyForEncryption, 0, externalCounter, FalseCPUUsageType.ADDITIONAL_CPU_USAGE_AFTER_THE_BLOCK_ENCRYPTION);
+			cipher = EncryptionSignatureHashEncoder.reloadCipher(randomForCipher, originalSecretKeyForEncryption, 0, externalCounter);
 			cleanCache();
 		}
 	}

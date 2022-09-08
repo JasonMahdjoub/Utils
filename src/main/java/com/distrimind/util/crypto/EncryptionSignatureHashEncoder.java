@@ -36,7 +36,6 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 
 import com.distrimind.util.Bits;
-import com.distrimind.util.NotYetImplementedException;
 import com.distrimind.util.io.*;
 
 import java.io.IOException;
@@ -115,7 +114,7 @@ public class EncryptionSignatureHashEncoder {
 	private final LimitedRandomOutputStream limitedRandomOutputStream;
 	private static final NullRandomOutputStream nullRandomInputStream=new NullRandomOutputStream();
 	private AbstractMessageDigest defaultMessageDigest=null;
-	private AbstractEncryptionOutputAlgorithm.CommonCipherOutputStream cipherOutputStream;
+	private RandomOutputStream cipherOutputStream;
 	private byte[] externalCounter=null;
 	private Byte code=null;
 	short currentKeyID=-1;
@@ -132,7 +131,7 @@ public class EncryptionSignatureHashEncoder {
 	private AbstractSecureRandom cipherRandom=null;
 	private static final byte[] emptyTab=new byte[0];
 	private long lastInputStreamLength =-1, lastMaximumOutputLength;
-	private final FalseCPUUsageType falseCPUUsageType;
+
 	void incrementIVCounter() throws IOException {
 		if (originalSecretKeyForEncryption==null)
 			return;
@@ -147,14 +146,14 @@ public class EncryptionSignatureHashEncoder {
 		}
 	}
 
-	static SymmetricEncryptionAlgorithm reloadCipher(AbstractSecureRandom random, SymmetricSecretKey secretKey, long currentKeyGeneration, byte[] externalCounter, FalseCPUUsageType falseCPUUsageType) throws IOException {
+	static SymmetricEncryptionAlgorithm reloadCipher(AbstractSecureRandom random, SymmetricSecretKey secretKey, long currentKeyGeneration, byte[] externalCounter) throws IOException {
 		try {
 			SymmetricSecretKey sk = currentKeyGeneration==0?secretKey:secretKey.getHashedSecretKey(MessageDigestType.BC_FIPS_SHA3_256, currentKeyGeneration );
 			byte sc=sk.getEncryptionAlgorithmType().getMaxCounterSizeInBytesUsedWithBlockMode();
 			if (externalCounter==null)
-				return new SymmetricEncryptionAlgorithm(random, sk, falseCPUUsageType);
+				return new SymmetricEncryptionAlgorithm(random, sk);
 			else
-				return new SymmetricEncryptionAlgorithm(random, sk, falseCPUUsageType, (byte)(Math.min(externalCounter.length, sc)));
+				return new SymmetricEncryptionAlgorithm(random, sk, (byte)(Math.min(externalCounter.length, sc)));
 		} catch (NoSuchProviderException | NoSuchAlgorithmException e) {
 			throw new IOException(e);
 		}
@@ -166,10 +165,10 @@ public class EncryptionSignatureHashEncoder {
 						|| (externalCounter!=null && cipher.getBlockModeCounterBytes()!=externalCounter.length))
 						|| currentKeyGeneration!=0) ||
 				(cipher==null && originalSecretKeyForEncryption!=null)) {
-			cipher = reloadCipher(cipherRandom, originalSecretKeyForEncryption, currentKeyGeneration, externalCounter, falseCPUUsageType);
+			cipher = reloadCipher(cipherRandom, originalSecretKeyForEncryption, currentKeyGeneration, externalCounter);
 			cleanCache();
 			if (decoder!=null) {
-				decoder.cipher = reloadCipher(cipher.getSecureRandom(), originalSecretKeyForEncryption, currentKeyGeneration, externalCounter, falseCPUUsageType);
+				decoder.cipher = reloadCipher(cipher.getSecureRandom(), originalSecretKeyForEncryption, currentKeyGeneration, externalCounter);
 				decoder.cleanCache();
 			}
 		}
@@ -183,15 +182,7 @@ public class EncryptionSignatureHashEncoder {
 		return this;
 	}
 	public EncryptionSignatureHashEncoder() throws IOException {
-		this(FalseCPUUsageType.ADDITIONAL_CPU_USAGE_AFTER_THE_BLOCK_ENCRYPTION);
-	}
-	public EncryptionSignatureHashEncoder(FalseCPUUsageType falseCPUUsageType) throws IOException {
-		if (falseCPUUsageType==null)
-			throw new NullPointerException();
-		if (falseCPUUsageType==FalseCPUUsageType.ADDITIONAL_CPU_USAGE_IN_REAL_TIME)
-			throw new NotYetImplementedException();
 		limitedRandomOutputStream=new LimitedRandomOutputStream(nullRandomInputStream, 0);
-		this.falseCPUUsageType=falseCPUUsageType;
 	}
 
 	public EncryptionSignatureHashEncoder withRandomInputStream(RandomInputStream inputStream) throws IOException {
@@ -255,10 +246,10 @@ public class EncryptionSignatureHashEncoder {
 	public EncryptionSignatureHashEncoder withSymmetricSecretKeyForEncryption(AbstractSecureRandom random, SymmetricSecretKey symmetricSecretKeyForEncryption, byte externalCounterLength) throws IOException {
 		byte sc=symmetricSecretKeyForEncryption.getEncryptionAlgorithmType().getMaxCounterSizeInBytesUsedWithBlockMode();
 		if (externalCounterLength<=0) {
-			return withCipher(new SymmetricEncryptionAlgorithm(random, symmetricSecretKeyForEncryption, falseCPUUsageType));
+			return withCipher(new SymmetricEncryptionAlgorithm(random, symmetricSecretKeyForEncryption));
 		}
 		else {
-			return withCipher(new SymmetricEncryptionAlgorithm(random, symmetricSecretKeyForEncryption, falseCPUUsageType , (byte) Math.min(externalCounterLength, sc)));
+			return withCipher(new SymmetricEncryptionAlgorithm(random, symmetricSecretKeyForEncryption , (byte) Math.min(externalCounterLength, sc)));
 		}
 	}
 	public EncryptionSignatureHashEncoder withCipher(SymmetricEncryptionAlgorithm cipher) throws IOException {
@@ -615,13 +606,14 @@ public class EncryptionSignatureHashEncoder {
 						buffer = bufferRef;
 						if (cipherOutputStream == null)
 							cipherOutputStream = cipher.getCipherOutputStreamForEncryption(limitedRandomOutputStream, false, buffer, 0, lenBuffer, externalCounter);
-						else
-							cipherOutputStream.set(limitedRandomOutputStream, null, externalCounter, buffer, 0, lenBuffer, false);
+						else {
+							AbstractEncryptionOutputAlgorithm.set(cipherOutputStream, limitedRandomOutputStream, null, externalCounter, buffer, 0, lenBuffer, false);
+						}
 					} else {
 						if (cipherOutputStream == null)
 							cipherOutputStream = cipher.getCipherOutputStreamForEncryption(limitedRandomOutputStream, false, null, 0, 0, externalCounter);
 						else
-							cipherOutputStream.set(limitedRandomOutputStream, null, externalCounter, null, 0, 0, false);
+							AbstractEncryptionOutputAlgorithm.set(cipherOutputStream, limitedRandomOutputStream, null, externalCounter, null, 0, 0, false);
 					}
 					dataOutputStream=cipherOutputStream;
 				} else {

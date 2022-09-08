@@ -70,7 +70,7 @@ public class Utils {
 							new Description(5, 24, 0, Version.Type.STABLE, 0, "2022-09-02")
 									.addItem(INTERNAL_CHANGE, "Update BouncyCastle to 1.71")
 									.addItem(INTERNAL_CHANGE, "Update BouncyCastle-FIPS to 1.0.2.3")
-									.addItem(SECURITY_FIX, "Add additional CPU usage during encryption using specifics algorithms to limit frequency side channel attacks and power side channel power attacks. Concerned encryption algorithm are referenced into class SymmetricEncryptionType. Encryption that were used to encode little blocks are not concerned by these attacks.")
+									.addItem(SECURITY_FIX, "Add additional CPU usage during encryption using specifics algorithms to limit frequency side channel attacks and power side channel power attacks. Concerned encryption algorithm are referenced into class SymmetricEncryptionType. Encryption that were used to encode little blocks are less concerned by these attacks.")
 									.addItem(INTERNAL_CHANGE, "Clean code")
 					)
 					.addDescription(

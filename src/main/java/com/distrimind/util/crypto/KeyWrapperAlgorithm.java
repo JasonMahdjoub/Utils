@@ -301,7 +301,7 @@ public class KeyWrapperAlgorithm extends MultiFormatProperties implements Secure
 		if (symmetricKeyWrapperType!=null)
 		{
 			if (symmetricKeyWrapperType.getAlgorithmName()==null) {
-				SymmetricEncryptionAlgorithm cipher = new SymmetricEncryptionAlgorithm(random, finalizer.secretKeyForEncryption, FalseCPUUsageType.ADDITIONAL_CPU_USAGE_AFTER_THE_BLOCK_ENCRYPTION);
+				SymmetricEncryptionAlgorithm cipher = new SymmetricEncryptionAlgorithm(random, finalizer.secretKeyForEncryption);
 				WrappedSecretData wsd=secretKeyToWrap.encode();
 				return signSymmetricSecretKey(cipher.encode(wsd.getBytes()));
 			}
@@ -329,7 +329,7 @@ public class KeyWrapperAlgorithm extends MultiFormatProperties implements Secure
 			if (symmetricKeyWrapperType.getAlgorithmName()==null)
 			{
 				try {
-					SymmetricEncryptionAlgorithm cipher = new SymmetricEncryptionAlgorithm(SecureRandomType.DEFAULT.getInstance(null), finalizer.secretKeyForEncryption, FalseCPUUsageType.ADDITIONAL_CPU_USAGE_AFTER_THE_BLOCK_ENCRYPTION);
+					SymmetricEncryptionAlgorithm cipher = new SymmetricEncryptionAlgorithm(SecureRandomType.DEFAULT.getInstance(null), finalizer.secretKeyForEncryption);
 					int off=checkSignature(encryptedSecretKey.getBytes());
 					AbstractKey ak=SymmetricSecretKey.decode(cipher.decode(encryptedSecretKey.getBytes(), off, encryptedSecretKey.getBytes().length-off));
 					encryptedSecretKey.getBytes();//gc delayed
@@ -383,9 +383,9 @@ public class KeyWrapperAlgorithm extends MultiFormatProperties implements Secure
 		if (mode==ENCRYPTION_WITH_ASYMMETRIC_KEY_PAIR && finalizer.publicKeyForEncryption==null)
 			throw new IOException("Public key used for encryption is not available");
 		try (WrappedSecretData wsd=privateKeyToWrap.encode()){
-			try(AbstractEncryptionOutputAlgorithm cipher=(symmetricKeyWrapperType != null)?new SymmetricEncryptionAlgorithm(random, finalizer.secretKeyForEncryption, FalseCPUUsageType.ADDITIONAL_CPU_USAGE_AFTER_THE_BLOCK_ENCRYPTION):new ClientASymmetricEncryptionAlgorithm(random, finalizer.publicKeyForEncryption, FalseCPUUsageType.ADDITIONAL_CPU_USAGE_AFTER_THE_BLOCK_ENCRYPTION)) {
+			try(AbstractEncryptionOutputAlgorithm cipher=(symmetricKeyWrapperType != null)?new SymmetricEncryptionAlgorithm(random, finalizer.secretKeyForEncryption):new ClientASymmetricEncryptionAlgorithm(random, finalizer.publicKeyForEncryption)) {
 				WrappedEncryptedASymmetricPrivateKey res= signASymmetricPrivateKey(cipher.encode(wsd.getBytes()));
-				cipher.getFalseCPUUsageType();
+				cipher.getBlockModeCounterBytes();
 				return res;
 			}
 		}
@@ -401,7 +401,7 @@ public class KeyWrapperAlgorithm extends MultiFormatProperties implements Secure
 		try {
 			IEncryptionInputAlgorithm cipher;
 			if (symmetricKeyWrapperType != null) {
-				cipher=new SymmetricEncryptionAlgorithm(SecureRandomType.DEFAULT.getInstance(null), finalizer.secretKeyForEncryption, FalseCPUUsageType.ADDITIONAL_CPU_USAGE_AFTER_THE_BLOCK_ENCRYPTION);
+				cipher=new SymmetricEncryptionAlgorithm(SecureRandomType.DEFAULT.getInstance(null), finalizer.secretKeyForEncryption);
 			} else {
 				cipher = new ServerASymmetricEncryptionAlgorithm(finalizer.privateKeyForEncryption);
 			}

@@ -64,7 +64,7 @@ public class TestsForSymmetricEncryption {
 		AbstractSecureRandom random = SecureRandomType.DEFAULT.getSingleton(null);
 		SymmetricSecretKey key = type.getKeyGenerator(random).generateKey();
 		Assert.assertEquals(DecentralizedValue.decode(key.encode()), key);
-		new SymmetricEncryptionAlgorithm(random, key, FalseCPUUsageType.ADDITIONAL_CPU_USAGE_AFTER_THE_BLOCK_ENCRYPTION);
+		new SymmetricEncryptionAlgorithm(random, key);
 		Assert.assertEquals(DecentralizedValue.decode(key.encode()), key);
 		Assert.assertEquals(DecentralizedValue.valueOf(key.encodeString()), key);
 		SymmetricSecretKeyPair keyPair=key.getDerivedSecretKeyPair(MessageDigestType.BC_FIPS_SHA3_512, SymmetricAuthenticatedSignatureType.HMAC_SHA2_256);
@@ -117,7 +117,7 @@ public class TestsForSymmetricEncryption {
 		SymmetricEncryptionAlgorithm algoDistant;
 		if (type1.isBlockModeSupportingCounter())
 		{
-			algoDistant = new SymmetricEncryptionAlgorithm(random, key1, FalseCPUUsageType.ADDITIONAL_CPU_USAGE_AFTER_THE_BLOCK_ENCRYPTION, counterSizeBytes, true);
+			algoDistant = new SymmetricEncryptionAlgorithm(random, key1, counterSizeBytes, true);
 			Assert.assertEquals(algoDistant.getBlockModeCounterBytes(), counterSizeBytes);
 			Assert.assertFalse(algoDistant.useExternalCounter());
 			/*Assert.assertEquals(algoDistant.getIVSizeBytesWithExternalCounter(), type1.getIVSizeBytes()-counterSizeBytes);
@@ -127,13 +127,13 @@ public class TestsForSymmetricEncryption {
 		}
 
 
-		algoDistant = new SymmetricEncryptionAlgorithm(random, key1, FalseCPUUsageType.ADDITIONAL_CPU_USAGE_AFTER_THE_BLOCK_ENCRYPTION, counterSizeBytes, false);
+		algoDistant = new SymmetricEncryptionAlgorithm(random, key1, counterSizeBytes, false);
 		algoDistant.setMaxPlainTextSizeForEncoding(1024);
 		Assert.assertEquals(algoDistant.getBlockModeCounterBytes(), counterSizeBytes);
 		Assert.assertEquals(algoDistant.useExternalCounter(), counterSizeBytes>0);
 		Assert.assertEquals(algoDistant.getIVSizeBytesWithExternalCounter(), type1.getIVSizeBytes());
 		Assert.assertEquals(algoDistant.getIVSizeBytesWithoutExternalCounter(), type1.getIVSizeBytes()-counterSizeBytes);
-		SymmetricEncryptionAlgorithm algoLocal = new SymmetricEncryptionAlgorithm(random, key2, FalseCPUUsageType.ADDITIONAL_CPU_USAGE_AFTER_THE_BLOCK_ENCRYPTION, counterSizeBytes, false);
+		SymmetricEncryptionAlgorithm algoLocal = new SymmetricEncryptionAlgorithm(random, key2, counterSizeBytes, false);
 		algoLocal.setMaxPlainTextSizeForEncoding(1024);
 		Assert.assertEquals(algoLocal.getBlockModeCounterBytes(), counterSizeBytes);
 		Assert.assertEquals(algoLocal.useExternalCounter(), counterSizeBytes>0);
