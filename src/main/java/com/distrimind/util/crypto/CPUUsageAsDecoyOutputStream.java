@@ -136,8 +136,8 @@ public final class CPUUsageAsDecoyOutputStream<T extends RandomOutputStream> ext
 			CPUTimeUseInNano+=System.nanoTime()-startNano;
 
 	}
-	static final int MAX_LEN_BEFORE_INJECTING_CPU_USAGE=512*1024;
-	//private static final int MAX_LEN_BEFORE_INJECTING_CPU_USAGE=AbstractEncryptionOutputAlgorithm.BUFFER_SIZE;
+	//static final int MAX_LEN_BEFORE_INJECTING_CPU_USAGE=512*1024;
+	static final int MAX_LEN_BEFORE_INJECTING_CPU_USAGE=AbstractEncryptionOutputAlgorithm.BUFFER_SIZE;
 	private int computeLen(int len)
 	{
 		return len<=MAX_LEN_BEFORE_INJECTING_CPU_USAGE?len:MAX_LEN_BEFORE_INJECTING_CPU_USAGE+random.nextInt(len-MAX_LEN_BEFORE_INJECTING_CPU_USAGE+1);
