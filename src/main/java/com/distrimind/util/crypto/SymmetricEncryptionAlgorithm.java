@@ -329,7 +329,7 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 
 	@Override
 	protected CPUUsageAsDecoyOutputStream<CommonCipherOutputStream> getCPUUsageAsDecoyOutputStream(CommonCipherOutputStream os) throws IOException {
-		return new CPUUsageAsDecoyOutputStream<>(os, key.getEncryptionAlgorithmType(), Cipher.ENCRYPT_MODE);
+		return new CPUUsageAsDecoyOutputStream<>(os, key.getEncryptionAlgorithmType());
 	}
 
 	public SymmetricSecretKey getSecretKey() {
@@ -403,7 +403,7 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 
 	@Override
 	public CPUUsageAsDecoyInputStream<CommonCipherInputStream> getCPUUsageAsDecoyInputStream(CommonCipherInputStream in) throws IOException {
-		return new CPUUsageAsDecoyInputStream<>(in, key.getEncryptionAlgorithmType(), Cipher.DECRYPT_MODE);
+		return new CPUUsageAsDecoyInputStream<>(in, key.getEncryptionAlgorithmType());
 	}
 
 	@Override

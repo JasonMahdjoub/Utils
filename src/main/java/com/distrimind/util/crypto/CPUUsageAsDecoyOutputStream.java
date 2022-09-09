@@ -35,6 +35,7 @@ The fact that you are presently reading this means that you have had
 knowledge of the CeCILL-C license and that you accept its terms.
  */
 
+import com.distrimind.util.Bits;
 import com.distrimind.util.io.RandomInputStream;
 import com.distrimind.util.io.RandomOutputStream;
 
@@ -49,36 +50,33 @@ import java.util.Random;
  * @version 1.0
  * @since MaDKitLanEdition 5.24.0
  */
-public class CPUUsageAsDecoyOutputStream<T extends RandomOutputStream> extends RandomOutputStream {
+public final class CPUUsageAsDecoyOutputStream<T extends RandomOutputStream> extends RandomOutputStream {
 
 	public static final double DEFAULT_FALSE_CPU_USAGE_PERCENTAGE=0.05;
 	private final T out;
 	private AbstractCipher cipher;
 
-	private long wroteBytes=0;
-	private long wroteFakeBytes=0;
+	private long CPUTimeUseInNano=0;
+	private long falseCPUTimeUseInNano=0;
 	private final Random random=new Random(System.nanoTime());
 	private final AbstractSecureRandom secureRandom;
-	final static int BUFFER_SIZE = 4096;
-	private final byte[] outputBuffer=new byte[BUFFER_SIZE];
-	private final byte[] inputBuffer=new byte[BUFFER_SIZE-200];
-	private final double falseCPUUsagePercentage=DEFAULT_FALSE_CPU_USAGE_PERCENTAGE;
+
 	private final SymmetricEncryptionType symmetricEncryptionType;
 	private final int opMode;
 
 
 
 	public CPUUsageAsDecoyOutputStream(T out) throws IOException {
-		this(out, SymmetricEncryptionType.DEFAULT, Cipher.ENCRYPT_MODE);
+		this(out, SymmetricEncryptionType.DEFAULT);
 	}
-	public CPUUsageAsDecoyOutputStream(T out, SymmetricEncryptionType symType, int opMode) throws IOException {
+	public CPUUsageAsDecoyOutputStream(T out, SymmetricEncryptionType symType) throws IOException {
 		if (out==null)
 			throw new NullPointerException();
 		if (symType==null)
 			throw new NullPointerException();
 		this.out = out;
 		this.symmetricEncryptionType=symType;
-		this.opMode=opMode;
+		this.opMode=Cipher.ENCRYPT_MODE;
 		try {
 			secureRandom =SecureRandomType.DEFAULT.getSingleton(null);
 
@@ -99,49 +97,24 @@ public class CPUUsageAsDecoyOutputStream<T extends RandomOutputStream> extends R
 		}
 	}
 
-	private static void writeFakeBytes(AbstractCipher cipher, Random random, long l, byte[] inputBuffer, byte[] outputBuffer) throws IOException {
-		if (l>0)
-		{
-			while (l>0)
-			{
-				int inputBufferSize=(int)Math.min(inputBuffer.length,l);
-				for (int i = 0; i < inputBufferSize; )
-					for (int rnd = random.nextInt(),
-						 n = Math.min(inputBufferSize - i, Integer.SIZE/Byte.SIZE);
-						 n-- > 0; rnd >>= Byte.SIZE)
-						inputBuffer[i++] = (byte)rnd;
+	private final byte[] cache=new byte[4];
+	void writeFakeBytes(long deltaNano) throws IOException {
+		//add false CPU using to fix power side channel attack and frequency side channel attack
+		long startTime=System.nanoTime();
+		CPUTimeUseInNano+=deltaNano;
+		long d=(long)(((double)CPUTimeUseInNano)*(0.75*DEFAULT_FALSE_CPU_USAGE_PERCENTAGE+random.nextDouble()*(DEFAULT_FALSE_CPU_USAGE_PERCENTAGE/2.0)))-falseCPUTimeUseInNano;
+		if (d>0) {
+			while (d > System.nanoTime() - startTime) {
+				Bits.putInt(cache, 0, random.nextInt(32));
+				try {
+					cipher.update(cache);
+				} catch (IOException e) {
+					throw new IOException(e);
+				}
 
-
-				/*int s2=cipher.getOutputSize(inputBufferSize);
-				if (outputBuffer==null || outputBuffer.length<s2) {
-					throw new IOException("outputBuffer.length="+(outputBuffer==null?null:outputBuffer.length)+", s2="+s2+", inputBufferSize="+inputBufferSize);
-				}*/
-				cipher.update(inputBuffer, 0, inputBufferSize, outputBuffer);
-				l-=inputBufferSize;
 			}
 		}
-	}
-
-	@SuppressWarnings("SameParameterValue")
-	static long writeFakeBytes(AbstractCipher cipher, AbstractSecureRandom secureRandom, Random random, long length, long wroteFakeBytes, double falseCPUUsagePercentage, byte[] inputBuffer, byte[] outputBuffer, long encodingDurationInNano) throws IOException {
-		//add false CPU using to fix power side channel attack and frequency side channel attack
-		long startNano=System.nanoTime();
-		double delta=secureRandom.nextDouble()*(falseCPUUsagePercentage/2.0)-falseCPUUsagePercentage/4.0;
-		final long res=Math.max(0, (long)(((double)length)*(falseCPUUsagePercentage+delta))-wroteFakeBytes);
-
-
-		if (res>0)
-		{
-			writeFakeBytes(cipher, random, res, inputBuffer, outputBuffer);
-		}
-		long deltaNano=System.nanoTime()-startNano;
-		double percentageNano=((double)deltaNano)/((double)encodingDurationInNano);
-		double percentageWrote=((double)res)/(double)length;
-		if (percentageNano<percentageWrote*0.9)
-		{
-			writeFakeBytes(cipher, random, ((long)(percentageWrote-percentageNano))*res, inputBuffer, outputBuffer);
-		}
-		return res;
+		falseCPUTimeUseInNano += System.nanoTime() - startTime;
 	}
 
 	@Override
@@ -151,26 +124,35 @@ public class CPUUsageAsDecoyOutputStream<T extends RandomOutputStream> extends R
 
 	@Override
 	public void write(int b) throws IOException {
+
 		long startNano=System.nanoTime();
+
 		out.write(b);
+		if (random.nextInt(CPUUsageAsDecoyOutputStream.MAX_LEN_BEFORE_INJECTING_CPU_USAGE)==0)
+		{
+			writeFakeBytes(System.nanoTime()-startNano);
+		}
+		else
+			CPUTimeUseInNano+=System.nanoTime()-startNano;
 
-		wroteFakeBytes+=writeFakeBytes(cipher, secureRandom, random, ++wroteBytes, wroteFakeBytes, falseCPUUsagePercentage,inputBuffer, outputBuffer, System.nanoTime()-startNano);
-
+	}
+	static final int MAX_LEN_BEFORE_INJECTING_CPU_USAGE=512*1024;
+	//private static final int MAX_LEN_BEFORE_INJECTING_CPU_USAGE=AbstractEncryptionOutputAlgorithm.BUFFER_SIZE;
+	private int computeLen(int len)
+	{
+		return len<=MAX_LEN_BEFORE_INJECTING_CPU_USAGE?len:MAX_LEN_BEFORE_INJECTING_CPU_USAGE+random.nextInt(len-MAX_LEN_BEFORE_INJECTING_CPU_USAGE+1);
 	}
 
 	@Override
 	public void write(byte[] b, int off, int len) throws IOException {
-		RandomInputStream.checkLimits(b,off,len);
 		while (len>0) {
-			int l = len<=AbstractEncryptionOutputAlgorithm.BUFFER_SIZE?secureRandom.nextInt((len/16)+1)*16:secureRandom.nextInt((len/128)+1)*128;
-			if (l==0)
-				l=len;
 			long startNano=System.nanoTime();
+			int l = computeLen(len);
+
 			out.write(b, off, l);
 			off+=l;
 			len-=l;
-			wroteBytes+=l;
-			wroteFakeBytes+=writeFakeBytes(cipher, secureRandom, random, wroteBytes, wroteFakeBytes, falseCPUUsagePercentage,inputBuffer, outputBuffer, System.nanoTime()-startNano);
+			writeFakeBytes(System.nanoTime()-startNano);
 		}
 	}
 
@@ -202,7 +184,7 @@ public class CPUUsageAsDecoyOutputStream<T extends RandomOutputStream> extends R
 	@Override
 	public void close() throws IOException {
 		out.close();
-		cipher.doFinal();
+		//cipher.doFinal();
 	}
 
 	@Override
