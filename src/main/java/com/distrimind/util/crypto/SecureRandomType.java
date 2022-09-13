@@ -235,8 +235,15 @@ public enum SecureRandomType {
 
 	public AbstractSecureRandom getInstance(long seed)
 			throws NoSuchAlgorithmException, NoSuchProviderException {
-		byte[] nonce=new byte[8];
-		Bits.putLong(nonce, 0, seed);
+		byte[] nonce=SecureRandomType.nonce.clone();
+		nonce[0] ^= (byte) (seed >>> 56);
+		nonce[1] ^= (byte) (seed >>> 48);
+		nonce[2] ^= (byte) (seed >>> 40);
+		nonce[3] ^= (byte) (seed >>> 32);
+		nonce[4] ^= (byte) (seed >>> 24);
+		nonce[5] ^= (byte) (seed >>> 16);
+		nonce[6] ^= (byte) (seed >>> 8);
+		nonce[7] ^= (byte) (seed);
 		return getInstance(nonce);
 	}
 
@@ -284,7 +291,7 @@ public enum SecureRandomType {
 		if (result==0)
 			result=result2;
 		//noinspection SpellCheckingInspection
-		nonce=("La piethagore\n" +
+		nonce=("La "+result+"piethagore\n" +
 				"dans le ciel bleu\n" + 
 				"décrit des figures\n" + 
 				"géométriques.\n" + 
@@ -298,7 +305,7 @@ public enum SecureRandomType {
 				"dans le tore du nid elle couve\n" + 
 				"ses œufs parfaitement sphériques,\n" + 
 				"à côté d’un compas en or\n" + 
-				"dérobé à la Castafiore."+result).getBytes();
+				"dérobé à la Castafiore.").getBytes();
 	}
 	
 	private static long getHardwareAddress(byte[] hardwareAddress) {
