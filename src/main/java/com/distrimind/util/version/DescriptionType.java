@@ -44,6 +44,9 @@ public enum DescriptionType {
 	NEW_FEATURE("New feature(s)"),
 	INTERNAL_CHANGE("Internal change(s)"),
 	SECURITY_FIX("Security fixe(s)"),
+	SECURITY_FIX_LOW_SEVERITY("Security fixe(s) with low severity"),
+	SECURITY_FIX_MEDIUM_SEVERITY("Security fixe(s) with medium severity"),
+	SECURITY_FIX_HIGH_SEVERITY("Security fixe(s) with high severity"),
 	BUG_FIX("Bug fixe(s)");
 
 
