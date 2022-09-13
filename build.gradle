@@ -71,9 +71,8 @@ repositories {
     mavenCentral()
 
 }
-def javaVersion="8"
-sourceCompatibility = javaVersion
-targetCompatibility= javaVersion
+sourceCompatibility = "8"
+targetCompatibility= "11"
 
 dependencies {
     testImplementation 'org.testng:testng:7.5'
