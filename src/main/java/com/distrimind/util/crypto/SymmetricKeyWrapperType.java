@@ -89,7 +89,7 @@ public enum SymmetricKeyWrapperType {
 		this(other.algorithmName, other.provider, other.symmetricEncryptionType);
 	}
 
-	SymmetricEncryptionType getSymmetricEncryptionType() {
+	public SymmetricEncryptionType getSymmetricEncryptionType() {
 		return symmetricEncryptionType;
 	}
 
@@ -381,6 +381,25 @@ public enum SymmetricKeyWrapperType {
 	public static final int MAX_SIZE_IN_BYTES_OF_WRAPPED_HYBRID_ASYMMETRIC_PRIVATE_KEY_FOR_SIGNATURE_WITH_SYMMETRIC_ENCRYPTION_AND_WITH_SYMMETRIC_AND_ASYMMETRIC_SIGNATURE =MAX_SIZE_IN_BYTES_OF_WRAPPED_HYBRID_ASYMMETRIC_PRIVATE_KEY_FOR_SIGNATURE_WITH_SYMMETRIC_ENCRYPTION+MAX_SIZE_IN_BYTES_OF_SIGNATURE_META_DATA;
 	public static final int MAX_SIZE_IN_BYTES_OF_WRAPPED_HYBRID_ASYMMETRIC_PRIVATE_KEY_FOR_ENCRYPTION_WITH_SYMMETRIC_ENCRYPTION_AND_WITH_SYMMETRIC_AND_ASYMMETRIC_SIGNATURE =MAX_SIZE_IN_BYTES_OF_WRAPPED_HYBRID_ASYMMETRIC_PRIVATE_KEY_FOR_ENCRYPTION_WITH_SYMMETRIC_ENCRYPTION+MAX_SIZE_IN_BYTES_OF_SIGNATURE_META_DATA;
 	public static final int MAX_SIZE_IN_BYTES_OF_WRAPPED_HYBRID_ASYMMETRIC_PRIVATE_KEY_FOR_SIGNATURE_WITHOUT_RSA_WITH_SYMMETRIC_ENCRYPTION_AND_WITH_SYMMETRIC_AND_ASYMMETRIC_SIGNATURE =MAX_SIZE_IN_BYTES_OF_WRAPPED_HYBRID_ASYMMETRIC_PRIVATE_KEY_FOR_SIGNATURE_WITHOUT_RSA_WITH_SYMMETRIC_ENCRYPTION+MAX_SIZE_IN_BYTES_OF_SIGNATURE_META_DATA;
+
+
+	public static void main(String []arg) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
+		for (SymmetricKeyWrapperType kwt : SymmetricKeyWrapperType.values()) {
+			SymmetricSecretKey mainKey = kwt.getSymmetricEncryptionType().getKeyGenerator(SecureRandomType.DEFAULT.getSingleton(null)).generateKey();
+			for (SymmetricEncryptionType et : SymmetricEncryptionType.values()) {
+				if (et.getAlgorithmName().toLowerCase().contains("aes")
+						|| et.getAlgorithmName().toLowerCase().contains("chacha20")
+						|| et.getAlgorithmName().toLowerCase().contains("twofish")
+						|| et.getAlgorithmName().toLowerCase().contains("serpent")
+						|| et.getAlgorithmName().toLowerCase().contains("anubis")) {
+					for (short keySizeBits : new short[]{128, 256}) {
+						SymmetricSecretKey k = et.getKeyGenerator(SecureRandomType.DEFAULT.getSingleton(null), keySizeBits).generateKey();
+						System.out.println(et + " , " + kwt + ", " + k.getKeySizeBits() + ", " + kwt.wrapKey(mainKey, k, SecureRandomType.DEFAULT.getSingleton(null)).getBytes().length);
+					}
+				}
+			}
+		}
+	}
 
 
 }

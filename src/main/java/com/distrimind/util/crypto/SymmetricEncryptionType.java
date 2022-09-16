@@ -108,9 +108,15 @@ public enum SymmetricEncryptionType {
 	}
 
 	private static final int maxPlainTextSizeForEncoding=(int)((1L<<31)-1024L);
+	private static final int maxPlainTextSizeForEncodingWithSideChannelMitigation=(int)((1L<<31)-1024L);
 
 	public int getMaxPlainTextSizeForEncoding() {
-		return maxPlainTextSizeForEncoding;
+		if (isTimingAttackPossibleWithSomeImplementations()
+		|| isFrequencyAttackPossible()
+		|| isPowerMonitoringAttackPossible())
+			return maxPlainTextSizeForEncodingWithSideChannelMitigation;
+		else
+			return maxPlainTextSizeForEncoding;
 	}
 
 	static Object decodeGnuSecretKey(byte[] encodedSecretKey, String algorithmName) {

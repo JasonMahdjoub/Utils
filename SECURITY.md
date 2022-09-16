@@ -3,9 +3,9 @@
 ## Supported Versions
 
 | Version  | Supported          |
-| -------- | ------------------ |
-| >=5.23.0 | :heavy_check_mark: |
-| <5.23.0  | :x:                |
+|----------| ------------------ |
+| >=5.24.0 | :heavy_check_mark: |
+| <5.24.0  | :x:                |
 
 
 ## Reporting a Vulnerability

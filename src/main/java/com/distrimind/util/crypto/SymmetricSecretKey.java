@@ -330,7 +330,7 @@ public class SymmetricSecretKey extends AbstractKey implements ISecretDecentrali
 	public WrappedSecretData encode() {
 		checkNotDestroyed();
 	    int codedTypeSize=ENCODED_TYPE_SIZE;
-		byte[] tab = new byte[2+codedTypeSize+finalizer.secretKey.length];
+		byte[] tab = new byte[getEncodedKeySizeInBytes(finalizer.secretKey.length)];
 		if (keySizeBits<56)
 		    throw new InternalError();
         if (keySizeBits>maxKeySizeBits(8))
@@ -340,6 +340,11 @@ public class SymmetricSecretKey extends AbstractKey implements ISecretDecentrali
         tab[codedTypeSize+1]=(byte)encodeKeySizeBits(keySizeBits);
         System.arraycopy(finalizer.secretKey, 0, tab, codedTypeSize+2, finalizer.secretKey.length);
         return new WrappedSecretData(tab);
+	}
+
+	public static short getEncodedKeySizeInBytes(int keySizeBytes)
+	{
+		return (short)(2+ENCODED_TYPE_SIZE+keySizeBytes);
 	}
 
 	@Override
@@ -373,6 +378,9 @@ public class SymmetricSecretKey extends AbstractKey implements ISecretDecentrali
 
 	public short getKeySizeBits() {
 		return keySizeBits;
+	}
+	public short getKeySizeBytes() {
+		return (short)(keySizeBits/8);
 	}
 
 	@Override

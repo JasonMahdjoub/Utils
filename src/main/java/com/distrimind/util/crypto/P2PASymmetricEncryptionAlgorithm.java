@@ -375,8 +375,8 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 	}
 
 	@Override
-	protected byte[][] readIvsFromEncryptedStream(RandomInputStream is, int headLengthBytes) throws IOException {
-		return p2pEncryption.readIvsFromEncryptedStream(is, headLengthBytes);
+	protected void readIvsFromEncryptedStream(RandomInputStream is, int headLengthBytes, AbstractWrappedIVs<?> manualIvsAndSecretKeys) throws IOException {
+		p2pEncryption.readIvsFromEncryptedStream(is, headLengthBytes, manualIvsAndSecretKeys);
 	}
 
 	@Override
@@ -412,11 +412,20 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 		p2pEncryption.initCipherForDecryptionWithIv(cipher, iv);
 	}
 
+	@Override
+	protected void initCipherForDecryptionWithIvAndCounter(AbstractCipher cipher, AbstractWrappedIVs<?> wrappedIVAndSecretKey, int counter) throws IOException {
+		p2pEncryption.initCipherForDecryptionWithIvAndCounter(cipher, wrappedIVAndSecretKey, counter);
+	}
 
 
 	@Override
 	protected void initCipherForEncryptionWithIv(AbstractCipher cipher, byte[] iv) throws IOException {
 		p2pEncryption.initCipherForEncryptionWithIv(cipher, iv);
+	}
+
+	@Override
+	protected void initCipherForEncryptionWithIvAndCounter(AbstractCipher cipher, AbstractWrappedIVs<?> wrappedIVAndSecretKey, int counter) throws IOException {
+		p2pEncryption.initCipherForEncryptionWithIvAndCounter(cipher, wrappedIVAndSecretKey, counter);
 	}
 
 	@Override
@@ -463,9 +472,9 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 	}
 
 	@Override
-	protected RandomOutputStream getCipherOutputStreamForEncryption(RandomOutputStream os, boolean closeOutputStreamWhenClosingCipherOutputStream, byte[] associatedData, int offAD, int lenAD, byte[] externalCounter, byte[][] manualIvs) throws IOException {
+	protected RandomOutputStream getCipherOutputStreamForEncryption(RandomOutputStream os, boolean closeOutputStreamWhenClosingCipherOutputStream, byte[] associatedData, int offAD, int lenAD, byte[] externalCounter, final AbstractWrappedIVs<?> manualIvsAndSecretKeys) throws IOException {
 		checkKeysNotCleaned();
-		return p2pEncryption.getCipherOutputStreamForEncryption(os, closeOutputStreamWhenClosingCipherOutputStream, associatedData, offAD, lenAD, externalCounter, manualIvs);
+		return p2pEncryption.getCipherOutputStreamForEncryption(os, closeOutputStreamWhenClosingCipherOutputStream, associatedData, offAD, lenAD, externalCounter, wrappedIVAndSecretKey);
 	}
 
 	@Override
@@ -600,6 +609,11 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 		}
 
 		@Override
+		protected void initCipherForEncryptionWithIvAndCounter(AbstractCipher cipher, AbstractWrappedIVs<?> wrappedIVAndSecretKey, int counter) throws IOException {
+			initCipherForEncryption(cipher );
+		}
+
+		@Override
 		public boolean isPowerMonitoringSideChannelAttackPossible() {
 			return nonPQCEncryption.isPowerMonitoringSideChannelAttackPossible() || PQCEncryption.isPowerMonitoringSideChannelAttackPossible();
 		}
@@ -678,6 +692,11 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 			initCipherForDecryption(cipher);
 		}
 
+		@Override
+		protected void initCipherForDecryptionWithIvAndCounter(AbstractCipher cipher, AbstractWrappedIVs<?> wrappedIVAndSecretKey, int counter) throws IOException {
+			initCipherForDecryption(cipher );
+		}
+
 
 		@Override
 		protected boolean allOutputGeneratedIntoDoFinalFunction() {
@@ -695,8 +714,8 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 		}
 
 		@Override
-		protected RandomOutputStream getCipherOutputStreamForEncryption(final RandomOutputStream os, boolean closeOutputStreamWhenClosingCipherOutputStream, byte[] associatedData, int offAD, int lenAD, final byte[] externalCounter, byte[][] manualIVs) throws IOException {
-			return nonPQCEncryption.getCipherOutputStreamForEncryption(PQCEncryption.getCipherOutputStreamForEncryption(os, closeOutputStreamWhenClosingCipherOutputStream, associatedData, offAD, lenAD, externalCounter, manualIVs), true, associatedData, offAD, lenAD, externalCounter, manualIVs);
+		protected RandomOutputStream getCipherOutputStreamForEncryption(final RandomOutputStream os, boolean closeOutputStreamWhenClosingCipherOutputStream, byte[] associatedData, int offAD, int lenAD, final byte[] externalCounter, final AbstractWrappedIVs<?> manualIvsAndSecretKeys) throws IOException {
+			return nonPQCEncryption.getCipherOutputStreamForEncryption(PQCEncryption.getCipherOutputStreamForEncryption(os, closeOutputStreamWhenClosingCipherOutputStream, associatedData, offAD, lenAD, externalCounter, manualIvsAndSecretKeys), true, associatedData, offAD, lenAD, externalCounter, manualIvsAndSecretKeys);
 		}
 
 		@Override
@@ -758,7 +777,7 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 
 		public P2PEncryption(ASymmetricAuthenticatedSignatureType signatureType, ASymmetricKeyPair myKeyPair,
 												ASymmetricPublicKey distantPublicKey) throws IOException, NoSuchAlgorithmException, NoSuchProviderException {
-			super(myKeyPair.getEncryptionAlgorithmType().getCipherInstance(), 0);
+			super(myKeyPair.getEncryptionAlgorithmType().getCipherInstance(), null, 0);
 			if (signatureType == null)
 				throw new NullPointerException("signatureType");
 			if (distantPublicKey == null)
@@ -774,6 +793,11 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 
 		@Override
 		protected void initCipherForEncryptionWithIv(AbstractCipher cipher, byte[] iv) throws IOException {
+			initCipherForEncryption(cipher );
+		}
+
+		@Override
+		protected void initCipherForEncryptionWithIvAndCounter(AbstractCipher cipher, AbstractWrappedIVs<?> wrappedIVAndSecretKey, int counter) throws IOException {
 			initCipherForEncryption(cipher );
 		}
 
@@ -855,6 +879,11 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 
 		@Override
 		public void initCipherForDecryptionWithIv(AbstractCipher cipher, byte[] iv) throws IOException {
+			initCipherForDecryption(cipher);
+		}
+
+		@Override
+		protected void initCipherForDecryptionWithIvAndCounter(AbstractCipher cipher, AbstractWrappedIVs<?> wrappedIVAndSecretKey, int counter) throws IOException {
 			initCipherForDecryption(cipher);
 		}
 

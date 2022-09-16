@@ -301,9 +301,11 @@ public class KeyWrapperAlgorithm extends MultiFormatProperties implements Secure
 		if (symmetricKeyWrapperType!=null)
 		{
 			if (symmetricKeyWrapperType.getAlgorithmName()==null) {
-				SymmetricEncryptionAlgorithm cipher = new SymmetricEncryptionAlgorithm(random, finalizer.secretKeyForEncryption);
+				SymmetricEncryptionAlgorithm cipher = new SymmetricEncryptionAlgorithm(random, finalizer.secretKeyForEncryption, false);
 				WrappedSecretData wsd=secretKeyToWrap.encode();
-				return signSymmetricSecretKey(cipher.encode(wsd.getBytes()));
+				WrappedEncryptedSymmetricSecretKey res= signSymmetricSecretKey(cipher.encode(wsd.getBytes()));
+				wsd.getBytes();
+				return res;
 			}
 			else {
 				WrappedEncryptedSymmetricSecretKey w=symmetricKeyWrapperType.wrapKey(finalizer.secretKeyForEncryption, secretKeyToWrap, random);
@@ -329,7 +331,7 @@ public class KeyWrapperAlgorithm extends MultiFormatProperties implements Secure
 			if (symmetricKeyWrapperType.getAlgorithmName()==null)
 			{
 				try {
-					SymmetricEncryptionAlgorithm cipher = new SymmetricEncryptionAlgorithm(SecureRandomType.DEFAULT.getInstance(null), finalizer.secretKeyForEncryption);
+					SymmetricEncryptionAlgorithm cipher = new SymmetricEncryptionAlgorithm(SecureRandomType.DEFAULT.getInstance(null), finalizer.secretKeyForEncryption, false);
 					int off=checkSignature(encryptedSecretKey.getBytes());
 					AbstractKey ak=SymmetricSecretKey.decode(cipher.decode(encryptedSecretKey.getBytes(), off, encryptedSecretKey.getBytes().length-off));
 					encryptedSecretKey.getBytes();//gc delayed
@@ -383,7 +385,7 @@ public class KeyWrapperAlgorithm extends MultiFormatProperties implements Secure
 		if (mode==ENCRYPTION_WITH_ASYMMETRIC_KEY_PAIR && finalizer.publicKeyForEncryption==null)
 			throw new IOException("Public key used for encryption is not available");
 		try (WrappedSecretData wsd=privateKeyToWrap.encode()){
-			try(AbstractEncryptionOutputAlgorithm cipher=(symmetricKeyWrapperType != null)?new SymmetricEncryptionAlgorithm(random, finalizer.secretKeyForEncryption):new ClientASymmetricEncryptionAlgorithm(random, finalizer.publicKeyForEncryption)) {
+			try(AbstractEncryptionOutputAlgorithm cipher=(symmetricKeyWrapperType != null)?new SymmetricEncryptionAlgorithm(random, finalizer.secretKeyForEncryption, false):new ClientASymmetricEncryptionAlgorithm(random, finalizer.publicKeyForEncryption)) {
 				WrappedEncryptedASymmetricPrivateKey res= signASymmetricPrivateKey(cipher.encode(wsd.getBytes()));
 				cipher.getBlockModeCounterBytes();
 				return res;
@@ -401,7 +403,7 @@ public class KeyWrapperAlgorithm extends MultiFormatProperties implements Secure
 		try {
 			IEncryptionInputAlgorithm cipher;
 			if (symmetricKeyWrapperType != null) {
-				cipher=new SymmetricEncryptionAlgorithm(SecureRandomType.DEFAULT.getInstance(null), finalizer.secretKeyForEncryption);
+				cipher=new SymmetricEncryptionAlgorithm(SecureRandomType.DEFAULT.getInstance(null), finalizer.secretKeyForEncryption, false);
 			} else {
 				cipher = new ServerASymmetricEncryptionAlgorithm(finalizer.privateKeyForEncryption);
 			}
@@ -517,4 +519,74 @@ public class KeyWrapperAlgorithm extends MultiFormatProperties implements Secure
 			return symmetricKeyWrapperType.isPostQuantumAlgorithm(finalizer.secretKeyForEncryption.getKeySizeBits()) && (finalizer.secretKeyForSignature==null || finalizer.secretKeyForSignature.isPostQuantumKey());
 		}
 	}
+
+	public int getWrappedSymmetricSecretKeySizeInBytes(int keySizeBytes) throws IOException {
+		int encryptedSize;
+		try {
+			if (symmetricKeyWrapperType.getAlgorithmName() == null) {
+
+				SymmetricEncryptionAlgorithm cipher = new SymmetricEncryptionAlgorithm(SecureRandomType.DEFAULT.getSingleton(null), finalizer.secretKeyForEncryption, false);
+				encryptedSize = (int) cipher.getOutputSizeAfterEncryption(SymmetricSecretKey.getEncodedKeySizeInBytes(keySizeBytes));
+
+
+			} else {
+				encryptedSize = 11 + keySizeBytes;
+			}
+
+
+			SymmetricAuthenticatedSignerAlgorithm symSigner = null;
+			if (finalizer.secretKeyForSignature != null) {
+				encryptedSize += finalizer.secretKeyForSignature.getAuthenticatedSignatureAlgorithmType().getSignatureSizeInBits() / 8;
+			}
+
+			if (finalizer.privateKeyForSignature != null) {
+				ASymmetricAuthenticatedSignerAlgorithm signer = new ASymmetricAuthenticatedSignerAlgorithm(finalizer.privateKeyForSignature);
+				signer.init();
+				encryptedSize += signer.getMacLengthBytes() + 2;
+			}
+			return encryptedSize;
+		} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
+			throw new IOException(e);
+		}
+
+
+	}
+
+	public static void main(String []arg) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
+		for (SymmetricKeyWrapperType kwt : SymmetricKeyWrapperType.values()) {
+			SymmetricEncryptionType set;
+			switch (kwt)
+			{
+				case BC_FIPS_AES:case BC_FIPS_AES_WITH_PADDING:case DEFAULT:
+				set=SymmetricEncryptionType.AES_GCM;
+				break;
+				case BC_CHACHA20_POLY1305:
+					set=SymmetricEncryptionType.BC_CHACHA20_POLY1305;
+					break;
+				default:
+					throw new IllegalAccessError();
+			}
+			SymmetricSecretKey mainKey = set.getKeyGenerator(SecureRandomType.DEFAULT.getSingleton(null)).generateKey();
+			for (SymmetricEncryptionType et : SymmetricEncryptionType.values()) {
+				if (et.getCodeProviderForEncryption()==CodeProvider.GNU_CRYPTO)
+					continue;
+				if (et.getAlgorithmName().toLowerCase().contains("aes")
+						|| et.getAlgorithmName().toLowerCase().contains("chacha20")
+						|| et.getAlgorithmName().toLowerCase().contains("twofish")
+						|| et.getAlgorithmName().toLowerCase().contains("serpent")
+						|| et.getAlgorithmName().toLowerCase().contains("anubis")) {
+					for (short keySizeBits : new short[]{128, 256}) {
+						if (et.getAlgorithmName().toLowerCase().contains("chacha20") && keySizeBits<256)
+							continue;
+						SymmetricSecretKey k = et.getKeyGenerator(SecureRandomType.DEFAULT.getSingleton(null), keySizeBits).generateKey();
+						KeyWrapperAlgorithm alg=new KeyWrapperAlgorithm(kwt, mainKey);
+
+						System.out.println(kwt + " , " + et + ", " + k.getKeySizeBits() + ", " + alg.wrap(SecureRandomType.DEFAULT.getSingleton(null), k).getBytes().length+", "+alg.getWrappedSymmetricSecretKeySizeInBytes(keySizeBits/8));
+					}
+				}
+			}
+		}
+	}
+
+
 }

@@ -325,19 +325,21 @@ public class ServerASymmetricEncryptionAlgorithm implements IEncryptionInputAlgo
 			if (myPrivateKey.isCleaned())
 				throw new IllegalAccessError();
 		}
+		public void initCipherForDecryptionWithIvAndCounter(AbstractCipher cipher, AbstractWrappedIVs<?> wrappedIVAndSecretKey, int counter) throws IOException
+		{
+			initCipherForDecryption(cipher, null, null);
+		}
+
 		@Override
 		public RandomInputStream getCipherInputStreamForDecryption(final RandomInputStream is, byte[] associatedData, int offAD, final int lenAD, final byte[] externalCounter)
 				throws IOException {
 
 			CommonCipherInputStream res=new CommonCipherInputStream(false, maxEncryptedPartLength, is, false, null, 0, (byte)0, externalCounter, cipher, associatedData, offAD, lenAD, finalizer.buffer, false, 0, maxPlainTextSizeForEncoding) {
-				@Override
-				protected void initCipherForDecryptionWithIvAndCounter(byte[] iv, int counter) throws IOException {
-					Server.this.initCipherForDecryption(cipher, iv, externalCounter);
-				}
+
 
 				@Override
-				protected void initCipherForDecryptionWithIv(byte[] iv) throws IOException {
-					Server.this.initCipherForDecryption(cipher, iv, null);
+				protected void initCipherForDecryptionWithIvAndCounter(AbstractWrappedIVs<?> wrappedIVAndSecretKey, int counter) throws IOException {
+					Server.this.initCipherForDecryption(cipher, null, null);
 				}
 
 				@Override

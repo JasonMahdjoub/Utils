@@ -34,7 +34,7 @@ same conditions as regards security.
 The fact that you are presently reading this means that you have had
 knowledge of the CeCILL-C license and that you accept its terms.
  */
-import com.distrimind.util.crypto.MessageDigestType;
+import com.distrimind.util.crypto.*;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -46,50 +46,58 @@ import java.util.Arrays;
  */
 public class SubStreamHashResult implements SecureExternalizable {
 	private static final int MAX_HASH_SIZE= MessageDigestType.getMaxDigestLengthInBytes();
-	private static final int MAX_IV_LENGTH=64;
-	private static final int MAX_IV_NUMBERS=Short.MAX_VALUE;
-	private byte[] hash;
-	private byte[][] ivs;
 
-	public SubStreamHashResult(byte[] hash, byte[][] ivs) {
+
+	private byte[] hash;
+	private AbstractWrappedIVs<?> manualIvsAndSecretKeys;
+
+	public SubStreamHashResult(byte[] hash, AbstractWrappedIVs<?> manualIvsAndSecretKeys) {
 		if (hash==null)
 			throw new NullPointerException();
 		if (hash.length>MAX_HASH_SIZE)
 			throw new IllegalArgumentException();
-		if (ivs!=null) {
-			if (ivs.length>MAX_IV_NUMBERS)
-				throw new IllegalArgumentException();
-			for (byte[] iv : ivs)
-				if (iv != null && iv.length > MAX_IV_LENGTH)
-					throw new IllegalArgumentException();
-		}
 		this.hash = hash;
-		this.ivs = ivs;
+		this.manualIvsAndSecretKeys = manualIvsAndSecretKeys;
 	}
 
 	public byte[] getHash() {
 		return hash;
 	}
-
-	public byte[][] getIvs() {
-		return ivs;
+	public AbstractWrappedIVs<?> getManualIvsAndSecretKeys(SymmetricSecretKey mainKey) throws IOException {
+		AbstractSecureRandom secureRandom=null;
+		if (manualIvsAndSecretKeys instanceof WrappedIVsAndSecretKeys)
+		{
+			secureRandom=((WrappedIVsAndSecretKeys) manualIvsAndSecretKeys).getSecureRandom();
+		}
+		return getManualIvsAndSecretKeys(mainKey, secureRandom);
+	}
+	public AbstractWrappedIVs<?> getManualIvsAndSecretKeys(SymmetricSecretKey mainKey, AbstractSecureRandom secureRandom) throws IOException {
+		if (manualIvsAndSecretKeys instanceof WrappedIVsAndSecretKeys)
+		{
+			WrappedIVsAndSecretKeys w=(WrappedIVsAndSecretKeys)manualIvsAndSecretKeys;
+			if (w.getMainKey()==null)
+			{
+				w.setMainKey(mainKey, secureRandom);
+			}
+		}
+		return manualIvsAndSecretKeys;
 	}
 
 	@Override
 	public int getInternalSerializedSize() {
-		return SerializationTools.getInternalSize(hash, MAX_HASH_SIZE)+SerializationTools.getInternalSize(ivs, MAX_IV_NUMBERS);
+		return SerializationTools.getInternalSize(hash, MAX_HASH_SIZE)+SerializationTools.getInternalSize(manualIvsAndSecretKeys);
 	}
 
 	@Override
 	public void writeExternal(SecuredObjectOutputStream out) throws IOException {
 		out.writeBytesArray(hash, false, MAX_HASH_SIZE);
-		out.write2DBytesArray(ivs, true, false, MAX_IV_NUMBERS, MAX_IV_LENGTH);
+		out.writeObject(manualIvsAndSecretKeys, false);
 	}
 
 	@Override
-	public void readExternal(SecuredObjectInputStream in) throws IOException {
+	public void readExternal(SecuredObjectInputStream in) throws IOException, ClassNotFoundException {
 		hash=in.readBytesArray(false, MAX_HASH_SIZE);
-		ivs=in.read2DBytesArray(true, false, MAX_IV_NUMBERS, MAX_IV_LENGTH);
+		manualIvsAndSecretKeys=in.readObject(false);
 	}
 
 	@Override

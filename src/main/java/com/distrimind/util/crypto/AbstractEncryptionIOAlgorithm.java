@@ -52,8 +52,8 @@ public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOu
 		super();
 	}
 
-	protected AbstractEncryptionIOAlgorithm(AbstractCipher cipher, int ivSizeBytes) {
-		super(cipher, ivSizeBytes);
+	protected AbstractEncryptionIOAlgorithm(AbstractCipher cipher, AbstractWrappedIVs<?> wrappedIVAndSecretKey, int ivSizeBytes) {
+		super(cipher, wrappedIVAndSecretKey, ivSizeBytes);
 
 	}
 	@Override
@@ -175,19 +175,10 @@ public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOu
 		if (includeIV()) {
 			if (useExternalCounter() && (externalCounter==null || externalCounter.length!=getBlockModeCounterBytes()))
 				throw new IllegalArgumentException("External counter must have the next pre-defined size ; "+getBlockModeCounterBytes());
-			int sizeWithoutExC=getIVSizeBytesWithoutExternalCounter();
-			int read = is.read(this.iv, 0, sizeWithoutExC);
-			if (read != sizeWithoutExC)
-				throw new IOException("read=" + read + ", iv.length=" + iv.length);
-			if (useExternalCounter())
-			{
-				int j=0;
-				for (int i=sizeWithoutExC;i<this.iv.length;i++)
-				{
-					this.iv[i]=externalCounter[j++];
-				}
-			}
-			return this.iv;
+			assert wrappedIVAndSecretKey != null;
+			wrappedIVAndSecretKey.pushNewElementAndSetCurrentIV(is, externalCounter);
+
+			return wrappedIVAndSecretKey.getCurrentIV();
 		}
 		return null;
 	}
@@ -221,17 +212,17 @@ public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOu
 	}
 	protected abstract void initCipherForDecryptionWithIvAndCounter(AbstractCipher cipher, byte[] iv, int counter) throws IOException ;
 	public abstract void initCipherForDecryptionWithIv(AbstractCipher cipher, byte[] iv) throws IOException ;
-	protected byte[][] readIvsFromEncryptedStream(final RandomInputStream is, int headLengthBytes) throws IOException {
+	protected abstract void initCipherForDecryptionWithIvAndCounter(AbstractCipher cipher, AbstractWrappedIVs<?> wrappedIVAndSecretKey, int counter) throws IOException;
+	protected void readIvsFromEncryptedStream(final RandomInputStream is, int headLengthBytes, AbstractWrappedIVs<?> manualIvsAndSecretKeys) throws IOException {
 		if (includeIV()) {
 			long l = is.length()-headLengthBytes;
-			int nbIv = (int)((l / maxEncryptedPartLength) + (l % maxEncryptedPartLength > 0 ? 1 : 0));
-			byte[][] res = new byte[nbIv][];
-			for (int i = 0; i < nbIv; i++) {
-				is.seek((long)i * (long)maxEncryptedPartLength+(long)headLengthBytes);
-				res[i] = new byte[getIVSizeBytesWithoutExternalCounter()];
-				is.readFully(res[i]);
+			long nbIv = (l / maxEncryptedPartLength) + (l % maxEncryptedPartLength > 0 ? 1 : 0);
+			//byte[][] res = new byte[nbIv][];
+			for (long i = 0; i < nbIv; i++) {
+
+				is.seek(i * (long)maxEncryptedPartLength+(long)headLengthBytes);
+				manualIvsAndSecretKeys.pushNewElement(i, is);
 			}
-			return res;
 		}
 		else
 			throw new IOException();
@@ -246,15 +237,11 @@ public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOu
 		final AbstractCipher cipher = getCipherInstance();
 
 
-		CommonCipherInputStream res=new CommonCipherInputStream(allOutputGeneratedIntoDoFinalFunction(), maxEncryptedPartLength, is, includeIV(), iv, getIVSizeBytesWithoutExternalCounter(), getMaxExternalCounterLength(), externalCounter, cipher, associatedData, offAD, lenAD, super.finalizer.buffer, supportRandomEncryptionAndRandomDecryption(), getCounterStepInBytes(), maxPlainTextSizeForEncoding) {
-			@Override
-			protected void initCipherForDecryptionWithIvAndCounter(byte[] iv, int counter) throws IOException {
-				AbstractEncryptionIOAlgorithm.this.initCipherForDecryptionWithIvAndCounter(cipher, iv, counter);
-			}
+		CommonCipherInputStream res=new CommonCipherInputStream(allOutputGeneratedIntoDoFinalFunction(), maxEncryptedPartLength, is, includeIV(), wrappedIVAndSecretKey, getIVSizeBytesWithoutExternalCounter(), getMaxExternalCounterLength(), externalCounter, cipher, associatedData, offAD, lenAD, super.finalizer.buffer, supportRandomEncryptionAndRandomDecryption(), getCounterStepInBytes(), maxPlainTextSizeForEncoding) {
 
 			@Override
-			protected void initCipherForDecryptionWithIv(byte[] iv) throws IOException {
-				AbstractEncryptionIOAlgorithm.this.initCipherForDecryptionWithIv(cipher, iv);
+			protected void initCipherForDecryptionWithIvAndCounter(AbstractWrappedIVs<?> wrappedIVAndSecretKey, int counter) throws IOException {
+				AbstractEncryptionIOAlgorithm.this.initCipherForDecryptionWithIvAndCounter(cipher, wrappedIVAndSecretKey, counter);
 			}
 
 			@Override
@@ -301,11 +288,7 @@ public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOu
 			return lastAskedOutputSizeAfterDecryption;
 
 		if (cipher.getMode()!= Cipher.DECRYPT_MODE) {
-			if (includeIV() && mustAlterIVForOutputSizeComputation())
-			{
-				iv[0] = (byte) ~iv[0];
-			}
-			initCipherForDecryptionWithIv(cipher, iv);
+			initCipherForDecryptionWithNullIV(cipher);
 		}
 		lastUsedSizeForEncryption=inputLen;
 		return lastAskedOutputSizeAfterDecryption=getOutputSizeAfterDecryption(cipher, inputLen, maxEncryptedPartLength,
@@ -317,5 +300,13 @@ public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOu
 	public abstract void initCipherForDecryption(AbstractCipher cipher, byte[] iv, byte[] externalCounter)
 			throws IOException;
 
-
+	public void initCipherForDecryptionWithNullIV(AbstractCipher cipher)
+			throws IOException
+	{
+		if (includeIV() && mustAlterIVForOutputSizeComputation())
+		{
+			fakeIV[0] = (byte) ~fakeIV[0];
+		}
+		initCipherForEncryptionWithIv(cipher, fakeIV);
+	}
 }

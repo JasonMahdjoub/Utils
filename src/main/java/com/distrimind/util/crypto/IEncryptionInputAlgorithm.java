@@ -76,4 +76,5 @@ public interface IEncryptionInputAlgorithm extends IServer{
 	void initCipherForDecryptionWithIv(AbstractCipher cipher, byte[] iv) throws IOException;
 
 
+
 }
