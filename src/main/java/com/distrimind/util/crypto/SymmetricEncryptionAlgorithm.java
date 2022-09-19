@@ -266,6 +266,7 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 		super(key.getEncryptionAlgorithmType().getCipherInstance(), useDerivedKeys?
 				new WrappedIVsAndSecretKeys(key.getEncryptionAlgorithmType().getIVSizeBytes(), blockModeCounterBytes, key, secureRandomForKeyGeneration):
 				new WrappedIVs(key.getEncryptionAlgorithmType().getIVSizeBytes(), blockModeCounterBytes, secureRandomForKeyGeneration), key.getEncryptionAlgorithmType().getIVSizeBytes());
+
 		this.useDerivedKeys=useDerivedKeys;
 		if (key.isCleaned())
 			throw new IllegalArgumentException();
@@ -346,7 +347,7 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 
 	@Override
 	public boolean supportRandomEncryptionAndRandomDecryption() {
-		return type.supportRandomReadWrite();
+		return supportRandomReadWrite;
 	}
 
 	@Override
@@ -392,7 +393,13 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 	@Override
 	protected void initCipherForEncryptionWithIv(AbstractCipher cipher, byte[] iv) throws IOException {
 		checkKeysNotCleaned();
-		cipher.init(Cipher.ENCRYPT_MODE, key, iv);
+		SymmetricSecretKey k;
+
+		if (useDerivedKeys)
+			k=((WrappedIVsAndSecretKeys)wrappedIVAndSecretKey).getCurrentSecretKey();
+		else
+			k=key;
+		cipher.init(Cipher.ENCRYPT_MODE, k, iv);
 	}
 	@Override
 	protected void initCipherForEncryptionWithIvAndCounter(AbstractCipher cipher, AbstractWrappedIVs<?> wrappedIVAndSecretKey, int counter) throws IOException
@@ -404,7 +411,10 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 			k=((WrappedIVsAndSecretKeys)wrappedIVAndSecretKey).getCurrentSecretKey();
 		else
 			k=key;
-		cipher.init(Cipher.ENCRYPT_MODE, k, wrappedIVAndSecretKey.getCurrentIV(), counter);
+		if (supportRandomReadWrite)
+			cipher.init(Cipher.ENCRYPT_MODE, k, wrappedIVAndSecretKey.getCurrentIV(), counter);
+		else
+			cipher.init(Cipher.ENCRYPT_MODE, k, wrappedIVAndSecretKey.getCurrentIV());
 	}
 	@Override
 	protected void initCipherForDecryptionWithIvAndCounter(AbstractCipher cipher, AbstractWrappedIVs<?> wrappedIVAndSecretKey, int counter) throws IOException {
@@ -414,12 +424,10 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 			k=((WrappedIVsAndSecretKeys)wrappedIVAndSecretKey).getCurrentSecretKey();
 		else
 			k=key;
-		if (!supportRandomReadWrite) {
-
-			cipher.init(Cipher.ENCRYPT_MODE, key, wrappedIVAndSecretKey.getCurrentIV());
-		}
-		else
+		if (supportRandomReadWrite)
 			cipher.init(Cipher.DECRYPT_MODE, k, wrappedIVAndSecretKey.getCurrentIV(), counter);
+		else
+			cipher.init(Cipher.DECRYPT_MODE, k, wrappedIVAndSecretKey.getCurrentIV());
 
 	}
 	@Override
@@ -446,7 +454,7 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 
 
 	@Override
-	public void initCipherForDecryption(AbstractCipher cipher) throws IOException{
+	public void initCipherForDecryption(AbstractCipher cipher) {
 		throw new IllegalAccessError();
 
 	}

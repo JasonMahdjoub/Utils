@@ -316,6 +316,7 @@ public abstract class AbstractEncryptionOutputAlgorithm implements AutoZeroizabl
 		private void init(long round, RandomOutputStream os) throws IOException {
 
 			if (wrappedIVAndSecretKey!=null) {
+				assert includeIV();
 				if (manualIvsAndSecretKeys!=null)
 				{
 					manualIvsAndSecretKeys.setCurrentIV(round, useExternalCounter()?externalCounter:null);
@@ -329,6 +330,7 @@ public abstract class AbstractEncryptionOutputAlgorithm implements AutoZeroizabl
 
 			}
 			else {
+				assert !includeIV();
 				initCipherForEncryptionWithNullIV(cipher);
 			}
 

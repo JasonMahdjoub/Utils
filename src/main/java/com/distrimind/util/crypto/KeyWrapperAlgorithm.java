@@ -305,6 +305,7 @@ public class KeyWrapperAlgorithm extends MultiFormatProperties implements Secure
 				WrappedSecretData wsd=secretKeyToWrap.encode();
 				WrappedEncryptedSymmetricSecretKey res= signSymmetricSecretKey(cipher.encode(wsd.getBytes()));
 				wsd.getBytes();
+
 				return res;
 			}
 			else {
@@ -333,7 +334,7 @@ public class KeyWrapperAlgorithm extends MultiFormatProperties implements Secure
 				try {
 					SymmetricEncryptionAlgorithm cipher = new SymmetricEncryptionAlgorithm(SecureRandomType.DEFAULT.getInstance(null), finalizer.secretKeyForEncryption, false);
 					int off=checkSignature(encryptedSecretKey.getBytes());
-					AbstractKey ak=SymmetricSecretKey.decode(cipher.decode(encryptedSecretKey.getBytes(), off, encryptedSecretKey.getBytes().length-off));
+					AbstractKey ak=SymmetricSecretKey.decode(cipher.decode(encryptedSecretKey.getBytes(), off, encryptedSecretKey.getBytes().length-off), true);
 					encryptedSecretKey.getBytes();//gc delayed
 					if (ak instanceof SymmetricSecretKey)
 						return (SymmetricSecretKey)ak;

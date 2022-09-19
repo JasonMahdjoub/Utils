@@ -133,7 +133,7 @@ public abstract class AbstractWrappedIVs<T extends WrappedIV> implements SecureE
 		T res=generateElement();
 		res.write(os);
 		data.put(lastIndex=index, res);
-		setCurrentIV(generateElement(), externalCounter);
+		setCurrentIV(res, externalCounter);
 	}
 	final void pushNewElement(long index, RandomInputStream in) throws IOException {
 		checkMaxElementNumbers();
