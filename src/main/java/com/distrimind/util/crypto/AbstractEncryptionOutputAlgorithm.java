@@ -165,7 +165,7 @@ public abstract class AbstractEncryptionOutputAlgorithm implements AutoZeroizabl
 		encode(bytes, off, len, associatedData, offAD, lenAD, os, null);
 	}
 
-	protected abstract void initCipherForEncryptionWithIvAndCounter(AbstractCipher cipher, byte[] iv, int counter) throws IOException;
+
 	protected abstract void initCipherForEncryptionWithIv(AbstractCipher cipher, byte[] iv) throws IOException;
 	protected abstract void initCipherForEncryptionWithIvAndCounter(AbstractCipher cipher, AbstractWrappedIVs<?> wrappedIVAndSecretKey, int counter) throws IOException;
 
@@ -241,7 +241,7 @@ public abstract class AbstractEncryptionOutputAlgorithm implements AutoZeroizabl
 		return getCipherOutputStreamForEncryption(os, closeOutputStreamWhenClosingCipherOutputStream, associatedData, offAD, lenAD, externalCounter, null);
 	}
 	protected abstract CPUUsageAsDecoyOutputStream<CommonCipherOutputStream> getCPUUsageAsDecoyOutputStream(CommonCipherOutputStream os) throws IOException;
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({"unchecked", "SameParameterValue"})
 	static void set(RandomOutputStream cipherOutputStream, RandomOutputStream os, AbstractWrappedIVs<?> manualIvsAndSecretKeys, byte[] externalCounter, byte[] associatedData, int offAD, int lenAD, boolean closeOutputStreamWhenClosingCipherOutputStream) throws IOException {
 		if (cipherOutputStream instanceof CPUUsageAsDecoyOutputStream) {
 			CPUUsageAsDecoyOutputStream<CommonCipherOutputStream> o=((CPUUsageAsDecoyOutputStream<CommonCipherOutputStream>) cipherOutputStream);
@@ -515,7 +515,6 @@ public abstract class AbstractEncryptionOutputAlgorithm implements AutoZeroizabl
 		return maxPlainTextSizeForEncoding;
 	}
 
-	@SuppressWarnings("ConstantConditions")
 	void setMaxPlainTextSizeForEncoding(int maxPlainTextSizeForEncoding) throws IOException {
 		initCipherForEncryptionWithNullIV(cipher);
 		this.maxPlainTextSizeForEncoding=maxPlainTextSizeForEncoding;
@@ -558,9 +557,8 @@ public abstract class AbstractEncryptionOutputAlgorithm implements AutoZeroizabl
 
 	protected abstract boolean includeIV();
 	public void initCipherForEncryption(AbstractCipher cipher) throws IOException {
-		initCipherForEncryption(cipher, null);
+		throw new IllegalAccessError();
 	}
-	public abstract byte[] initCipherForEncryption(AbstractCipher cipher, byte[] externalCounter)throws IOException;
 
 	public void initCipherForEncryptionWithNullIV(AbstractCipher cipher)
 			throws IOException

@@ -95,10 +95,6 @@ public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutpu
 			if (hybridASymmetricPublicKey.isDestroyed())
 				throw new IllegalAccessError();
 		}
-		@Override
-		protected void initCipherForEncryptionWithIvAndCounter(AbstractCipher cipher, byte[] iv, int counter) throws IOException {
-			initCipherForEncryption(cipher);
-		}
 
 		@Override
 		protected void initCipherForEncryptionWithIv(AbstractCipher cipher, byte[] iv) throws IOException {
@@ -156,10 +152,6 @@ public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutpu
 			return false;
 		}
 
-		@Override
-		public byte[] initCipherForEncryption(AbstractCipher cipher, byte[] externalCounter) {
-			throw new IllegalAccessError();
-		}
 
 		@Override
 		public void initCipherForEncryptionWithNullIV(AbstractCipher cipher) {
@@ -277,10 +269,6 @@ public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutpu
 		client.encode(bytes, off, len, associatedData, offAD, lenAD, os);
 	}
 
-	@Override
-	protected void initCipherForEncryptionWithIvAndCounter(AbstractCipher cipher, byte[] iv, int counter) throws IOException {
-		client.initCipherForEncryptionWithIvAndCounter(cipher, iv, counter);
-	}
 
 	@Override
 	protected void initCipherForEncryptionWithIv(AbstractCipher cipher, byte[] iv) throws IOException {
@@ -380,10 +368,6 @@ public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutpu
 		client.initCipherForEncryption(cipher);
 	}
 
-	@Override
-	public byte[] initCipherForEncryption(AbstractCipher cipher, byte[] externalCounter) throws IOException {
-		return client.initCipherForEncryption(cipher, externalCounter);
-	}
 
 	@Override
 	public void initCipherForEncryptionWithNullIV(AbstractCipher cipher) throws IOException {
@@ -430,10 +414,6 @@ public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutpu
 			return distantPublicKey.isPostQuantumKey();
 		}
 
-		@Override
-		protected void initCipherForEncryptionWithIvAndCounter(AbstractCipher cipher, byte[] iv, int counter) throws IOException {
-			this.initCipherForEncryption(cipher);
-		}
 
 		@Override
 		protected void initCipherForEncryptionWithIv(AbstractCipher cipher, byte[] iv) throws IOException {
@@ -493,20 +473,18 @@ public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutpu
 			return false;
 		}
 
-		@Override
-		public byte[] initCipherForEncryption(AbstractCipher _cipher, byte[] externalCounter)
-				throws IOException {
-			initCipherForEncryptionWithNullIV(_cipher);
-			return null;
-		}
 
 		@Override
 		public void initCipherForEncryptionWithNullIV(AbstractCipher _cipher)
 				throws IOException {
-			_cipher.init(Cipher.ENCRYPT_MODE, distantPublicKey, random);
+			initCipherForEncryption(cipher);
 
 		}
 
+		@Override
+		public void initCipherForEncryption(AbstractCipher cipher) throws IOException {
+			cipher.init(Cipher.ENCRYPT_MODE, distantPublicKey, random);
+		}
 
 		@Override
 		public int getIVSizeBytesWithExternalCounter() {

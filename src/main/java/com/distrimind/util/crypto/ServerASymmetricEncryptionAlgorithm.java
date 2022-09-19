@@ -86,8 +86,8 @@ public class ServerASymmetricEncryptionAlgorithm implements IEncryptionInputAlgo
 	}
 
 	@Override
-	public void initCipherForDecryption(AbstractCipher cipher, byte[] iv, byte[] externalCounter) throws IOException {
-		server.initCipherForDecryption(cipher, iv, externalCounter);
+	public void initCipherForDecryption(AbstractCipher cipher) throws IOException {
+		server.initCipherForDecryption(cipher);
 	}
 	@Override
 	public AbstractCipher getCipherInstance() throws IOException {
@@ -136,11 +136,12 @@ public class ServerASymmetricEncryptionAlgorithm implements IEncryptionInputAlgo
 			return Math.min(nonPQCEncryption.getMaxPlainTextSizeForEncoding(), PQCEncryption.getMaxPlainTextSizeForEncoding());
 		}
 
-
 		@Override
-		public void initCipherForDecryption(AbstractCipher cipher, byte[] iv, byte[] externalCounter)  {
+		public void initCipherForDecryption(AbstractCipher cipher) throws IOException {
 			throw new IllegalAccessError();
 		}
+
+
 
 		@Override
 		public AbstractCipher getCipherInstance()  {
@@ -266,7 +267,7 @@ public class ServerASymmetricEncryptionAlgorithm implements IEncryptionInputAlgo
 				cipher.init(Cipher.DECRYPT_MODE, myPrivateKey);
 				maxPlainTextSizeForEncoding = myPrivateKey.getMaxBlockSize();
 				maxEncryptedPartLength = cipher.getOutputSize(maxPlainTextSizeForEncoding);
-				initCipherForDecryption(cipher, null, null);
+				initCipherForDecryption(cipher);
 			} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
 				throw new IOException();
 			}
@@ -299,7 +300,7 @@ public class ServerASymmetricEncryptionAlgorithm implements IEncryptionInputAlgo
 		}
 
 		@Override
-		public void initCipherForDecryption(AbstractCipher _cipher, byte[] iv, byte[] externalCounter)
+		public void initCipherForDecryption(AbstractCipher _cipher)
 				throws IOException {
 			_cipher.init(Cipher.DECRYPT_MODE, myPrivateKey);
 		}
@@ -325,10 +326,7 @@ public class ServerASymmetricEncryptionAlgorithm implements IEncryptionInputAlgo
 			if (myPrivateKey.isCleaned())
 				throw new IllegalAccessError();
 		}
-		public void initCipherForDecryptionWithIvAndCounter(AbstractCipher cipher, AbstractWrappedIVs<?> wrappedIVAndSecretKey, int counter) throws IOException
-		{
-			initCipherForDecryption(cipher, null, null);
-		}
+
 
 		@Override
 		public RandomInputStream getCipherInputStreamForDecryption(final RandomInputStream is, byte[] associatedData, int offAD, final int lenAD, final byte[] externalCounter)
@@ -339,12 +337,12 @@ public class ServerASymmetricEncryptionAlgorithm implements IEncryptionInputAlgo
 
 				@Override
 				protected void initCipherForDecryptionWithIvAndCounter(AbstractWrappedIVs<?> wrappedIVAndSecretKey, int counter) throws IOException {
-					Server.this.initCipherForDecryption(cipher, null, null);
+					Server.this.initCipherForDecryption(cipher);
 				}
 
 				@Override
 				protected void initCipherForDecryption() throws IOException {
-					Server.this.initCipherForDecryption(cipher, null, externalCounter);
+					Server.this.initCipherForDecryption(cipher);
 				}
 
 				@Override
@@ -374,7 +372,7 @@ public class ServerASymmetricEncryptionAlgorithm implements IEncryptionInputAlgo
 			if (inputLen==0)
 				return 0;
 			if (cipher.getMode()!=Cipher.DECRYPT_MODE)
-				initCipherForDecryption(cipher, null, null);
+				initCipherForDecryption(cipher);
 			return AbstractEncryptionIOAlgorithm.getOutputSizeAfterDecryption(cipher, inputLen, maxEncryptedPartLength,
 					0,maxPlainTextSizeForEncoding );
 		}
@@ -537,15 +535,9 @@ public class ServerASymmetricEncryptionAlgorithm implements IEncryptionInputAlgo
 			throws IOException {
 		return getCipherInputStreamForDecryption(is, null);
 	}
-	@Override
-	public void initCipherForDecryption(AbstractCipher cipher) throws IOException {
-		initCipherForDecryption(cipher,null,  null);
-	}
 
-	@Override
-	public void initCipherForDecryptionWithIv(AbstractCipher cipher, byte[] iv) throws IOException {
-		initCipherForDecryption(cipher, iv, null);
-	}
+
+
 
 
 	@Override

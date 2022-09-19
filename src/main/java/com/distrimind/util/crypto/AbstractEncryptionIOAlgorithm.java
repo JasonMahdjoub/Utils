@@ -170,18 +170,7 @@ public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOu
 		decode(is, associatedData, offAD, lenAD, os, length, null);
 	}
 	
-	protected byte[] readIV(RandomInputStream is, byte[] externalCounter) throws IOException
-	{
-		if (includeIV()) {
-			if (useExternalCounter() && (externalCounter==null || externalCounter.length!=getBlockModeCounterBytes()))
-				throw new IllegalArgumentException("External counter must have the next pre-defined size ; "+getBlockModeCounterBytes());
-			assert wrappedIVAndSecretKey != null;
-			wrappedIVAndSecretKey.pushNewElementAndSetCurrentIV(is, externalCounter);
 
-			return wrappedIVAndSecretKey.getCurrentIV();
-		}
-		return null;
-	}
 
 
 	@Override
@@ -210,8 +199,8 @@ public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOu
 	{
 		return getCipherInputStreamForDecryption(is, associatedData, offAD, lenAD, null);
 	}
-	protected abstract void initCipherForDecryptionWithIvAndCounter(AbstractCipher cipher, byte[] iv, int counter) throws IOException ;
-	public abstract void initCipherForDecryptionWithIv(AbstractCipher cipher, byte[] iv) throws IOException ;
+
+
 	protected abstract void initCipherForDecryptionWithIvAndCounter(AbstractCipher cipher, AbstractWrappedIVs<?> wrappedIVAndSecretKey, int counter) throws IOException;
 	protected void readIvsFromEncryptedStream(final RandomInputStream is, int headLengthBytes, AbstractWrappedIVs<?> manualIvsAndSecretKeys) throws IOException {
 		if (includeIV()) {
@@ -296,9 +285,7 @@ public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOu
 	}
 
 
-	@Override
-	public abstract void initCipherForDecryption(AbstractCipher cipher, byte[] iv, byte[] externalCounter)
-			throws IOException;
+
 
 	public void initCipherForDecryptionWithNullIV(AbstractCipher cipher)
 			throws IOException

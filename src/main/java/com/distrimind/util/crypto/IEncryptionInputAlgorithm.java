@@ -73,7 +73,7 @@ public interface IEncryptionInputAlgorithm extends IServer{
 	RandomInputStream getCipherInputStreamForDecryption(final RandomInputStream is, final byte[] associatedData, final int offAD, final int lenAD, byte[] externalCounter) throws IOException ;
 
 	void initCipherForDecryption(AbstractCipher cipher) throws IOException;
-	void initCipherForDecryptionWithIv(AbstractCipher cipher, byte[] iv) throws IOException;
+
 
 
 

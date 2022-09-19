@@ -69,9 +69,6 @@ public abstract class AbstractWrappedIVs<T extends WrappedIV> implements SecureE
 		IVSizeBytesWithoutExternalCounter=-1;
 		secureRandom=getDefaultSecureRandom();
 	}
-	AbstractWrappedIVs(int ivSizeBytes, int blockModeCounterBytes) throws IOException {
-		this(ivSizeBytes, blockModeCounterBytes, getDefaultSecureRandom());
-	}
 	AbstractWrappedIVs(int ivSizeBytes, int blockModeCounterBytes, AbstractSecureRandom random)
 	{
 		if (ivSizeBytes<0)
@@ -114,26 +111,22 @@ public abstract class AbstractWrappedIVs<T extends WrappedIV> implements SecureE
 		}
 	}
 
-	abstract T pushNewElement(long index, Object... params) throws IOException;
+
 	abstract T newEmptyWrappedIVInstance();
 
-	final WrappedIV pushNewElementAndSetCurrentIV(RandomInputStream in, byte[] externalCounter) throws IOException {
-		return pushNewElementAndSetCurrentIV(lastIndex+1, in, externalCounter);
-	}
 	protected void checkMaxElementNumbers()  {
 		if (data.size()>=MAX_ELEMENT_NUMBERS)
 			throw new OutOfMemoryError();
 	}
-	final T pushNewElementAndSetCurrentIV(long index, RandomInputStream in, byte[] externalCounter) throws IOException {
+	final void pushNewElementAndSetCurrentIV(long index, RandomInputStream in, byte[] externalCounter) throws IOException {
 		checkMaxElementNumbers();
 		T res=newEmptyWrappedIVInstance();
 		res.readFully(in);
 		data.put(lastIndex=index, res);
 		setCurrentIV(res, externalCounter);
-		return res;
 	}
 	protected abstract T generateElement() throws IOException;
-	final T generateNewElement(long index, RandomOutputStream os, byte[] externalCounter) throws IOException {
+	final void generateNewElement(long index, RandomOutputStream os, byte[] externalCounter) throws IOException {
 		checkMaxElementNumbers();
 		if (data.containsKey(index))
 			throw new IllegalArgumentException();
@@ -141,14 +134,12 @@ public abstract class AbstractWrappedIVs<T extends WrappedIV> implements SecureE
 		res.write(os);
 		data.put(lastIndex=index, res);
 		setCurrentIV(generateElement(), externalCounter);
-		return res;
 	}
-	final T pushNewElement(long index, RandomInputStream in) throws IOException {
+	final void pushNewElement(long index, RandomInputStream in) throws IOException {
 		checkMaxElementNumbers();
 		T res=newEmptyWrappedIVInstance();
 		res.readFully(in);
 		data.put(lastIndex=index, res);
-		return res;
 	}
 	int getIvSizeBytes()
 	{
@@ -160,7 +151,7 @@ public abstract class AbstractWrappedIVs<T extends WrappedIV> implements SecureE
 		return currentIV;
 	}
 
-	abstract int getSerializedElementSizeInBytes() throws IOException;
+	abstract int getSerializedElementSizeInBytes() ;
 
 	public int size()
 	{

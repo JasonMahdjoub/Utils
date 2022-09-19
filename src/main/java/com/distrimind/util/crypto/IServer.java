@@ -50,7 +50,7 @@ interface IServer {
 
 	int getMaxPlainTextSizeForEncoding();
 
-	void initCipherForDecryption(AbstractCipher cipher, byte[] iv, byte[] externalCounter)
+	void initCipherForDecryption(AbstractCipher cipher)
 			throws IOException;
 
 	AbstractCipher getCipherInstance() throws IOException;
