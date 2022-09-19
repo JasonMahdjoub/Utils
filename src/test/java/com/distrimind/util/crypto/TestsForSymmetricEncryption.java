@@ -151,9 +151,9 @@ public class TestsForSymmetricEncryption {
 			int mlength=m.length;
 			long expectedLength=algoLocal.getOutputSizeAfterEncryption(mlength);
 			byte[] encrypted = algoLocal.encode(m, null, counter);
+			System.out.println(algoLocal.getIvAndSecretKeySizeInBytesWithoutExternalCounter());
 
-
-			Assert.assertEquals(encrypted.length, expectedLength, "length=" + m.length);
+			Assert.assertEquals(encrypted.length, expectedLength, "length=" + m.length+", algoLocal.getIvAndSecretKeySizeInBytesWithoutExternalCounter()="+algoLocal.getIvAndSecretKeySizeInBytesWithoutExternalCounter());
 
 			Assert.assertTrue(encrypted.length >= m.length);
 			byte[] decrypted = algoDistant.decode(encrypted, null, counter);

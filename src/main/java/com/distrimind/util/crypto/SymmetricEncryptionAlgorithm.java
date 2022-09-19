@@ -44,6 +44,7 @@ import java.security.NoSuchProviderException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 
 
 /**
@@ -85,7 +86,8 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 	private final boolean chacha;
 	private final boolean gcm;
 	private final boolean useDerivedKeys;
-
+	protected final byte[] fakeIV;
+	private final AbstractSecureRandom secureRandomForKeyGeneration;
 
 	@Override
 	public boolean isPostQuantumEncryption() {
@@ -230,19 +232,19 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 	}
 	SymmetricEncryptionAlgorithm(AbstractSecureRandom random, SymmetricSecretKey key, boolean useDerivedKeys)
 			throws IOException {
-		this(random, key, (byte)0, true, useDerivedKeys);
+		this(random, key, (byte)0, false, useDerivedKeys);
 	}
 	SymmetricEncryptionAlgorithm(AbstractSecureRandom random, AbstractSecureRandom secureRandomForKeyGeneration,SymmetricSecretKey key, boolean useDerivedKeys)
 			throws IOException {
-		this(random, secureRandomForKeyGeneration, key, (byte)0, true, useDerivedKeys);
+		this(random, secureRandomForKeyGeneration, key, (byte)0, false, useDerivedKeys);
 	}
 	public SymmetricEncryptionAlgorithm(AbstractSecureRandom random, SymmetricSecretKey key)
 			throws IOException {
-		this(random, key, false);
+		this(random, key, true);
 	}
 	public SymmetricEncryptionAlgorithm(AbstractSecureRandom random, AbstractSecureRandom secureRandomForKeyGeneration, SymmetricSecretKey key)
 			throws IOException {
-		this(random, secureRandomForKeyGeneration, key, false);
+		this(random, secureRandomForKeyGeneration, key, true);
 	}
 	public SymmetricEncryptionAlgorithm(AbstractSecureRandom random, SymmetricSecretKey key, byte blockModeCounterBytes)
 			throws IOException {
@@ -253,20 +255,23 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 		this(random, secureRandomForKeyGeneration, key, blockModeCounterBytes, false);
 	}
 	public SymmetricEncryptionAlgorithm(AbstractSecureRandom random, SymmetricSecretKey key, byte blockModeCounterBytes, boolean internalCounter) throws IOException {
-		this(random, key, blockModeCounterBytes, internalCounter, false);
+		this(random, key, blockModeCounterBytes, internalCounter, true);
 	}
 	public SymmetricEncryptionAlgorithm(AbstractSecureRandom random, AbstractSecureRandom secureRandomForKeyGeneration, SymmetricSecretKey key, byte blockModeCounterBytes, boolean internalCounter) throws IOException {
-		this(random, secureRandomForKeyGeneration, key, blockModeCounterBytes, internalCounter, false);
+		this(random, secureRandomForKeyGeneration, key, blockModeCounterBytes, internalCounter, true);
 	}
 	SymmetricEncryptionAlgorithm(AbstractSecureRandom random, SymmetricSecretKey key, byte blockModeCounterBytes, boolean internalCounter, boolean useDerivedKeys) throws IOException {
 		this(random,AbstractWrappedIVs.getDefaultSecureRandom(), key, blockModeCounterBytes, internalCounter, useDerivedKeys);
 	}
 	SymmetricEncryptionAlgorithm(AbstractSecureRandom random, AbstractSecureRandom secureRandomForKeyGeneration, SymmetricSecretKey key, byte blockModeCounterBytes, boolean internalCounter, boolean useDerivedKeys)
 			throws IOException {
-		super(key.getEncryptionAlgorithmType().getCipherInstance(), useDerivedKeys?
-				new WrappedIVsAndSecretKeys(key.getEncryptionAlgorithmType().getIVSizeBytes(), blockModeCounterBytes, key, secureRandomForKeyGeneration):
-				new WrappedIVs(key.getEncryptionAlgorithmType().getIVSizeBytes(), blockModeCounterBytes, secureRandomForKeyGeneration), key.getEncryptionAlgorithmType().getIVSizeBytes());
-
+		super(key.getEncryptionAlgorithmType().getCipherInstance(), key.getEncryptionAlgorithmType().getIVSizeBytes());
+		if (secureRandomForKeyGeneration==null)
+			throw new NullPointerException();
+		this.secureRandomForKeyGeneration=secureRandomForKeyGeneration;
+		this.fakeIV=new byte[key.getEncryptionAlgorithmType().getIVSizeBytes()];
+		Random r=new Random(System.nanoTime());
+		r.nextBytes(fakeIV);
 		this.useDerivedKeys=useDerivedKeys;
 		if (key.isCleaned())
 			throw new IllegalArgumentException();
@@ -294,7 +299,13 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 		setMaxPlainTextSizeForEncoding(type.getMaxPlainTextSizeForEncoding());
 		initBufferAllocatorArgs();
 
-		
+	}
+	@Override
+	public AbstractWrappedIVs<?> getWrappedIVAndSecretKeyInstance()
+	{
+		return useDerivedKeys?
+				new WrappedIVsAndSecretKeys(key.getEncryptionAlgorithmType().getIVSizeBytes(), blockModeCounterBytes, key, secureRandomForKeyGeneration):
+				new WrappedIVs(key.getEncryptionAlgorithmType().getIVSizeBytes(), blockModeCounterBytes, secureRandomForKeyGeneration);
 	}
 	@Override
 	protected boolean useDerivedSecretKeys()
@@ -390,17 +401,33 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 	}
 
 
-	@Override
-	protected void initCipherForEncryptionWithIv(AbstractCipher cipher, byte[] iv) throws IOException {
-		checkKeysNotCleaned();
-		SymmetricSecretKey k;
 
-		if (useDerivedKeys)
-			k=((WrappedIVsAndSecretKeys)wrappedIVAndSecretKey).getCurrentSecretKey();
-		else
-			k=key;
-		cipher.init(Cipher.ENCRYPT_MODE, k, iv);
+
+	private void invertFakeIv()
+	{
+		if (mustAlterIVForOutputSizeComputation())
+		{
+			fakeIV[0] = (byte) ~fakeIV[0];
+		}
 	}
+
+	@Override
+	public void initCipherForEncryptionWithNullIV(AbstractCipher cipher)
+			throws IOException
+	{
+		invertFakeIv();
+		cipher.init(Cipher.ENCRYPT_MODE, key, fakeIV);
+
+	}
+	@Override
+	public void initCipherForDecryptionWithNullIV(AbstractCipher cipher)
+			throws IOException
+	{
+		invertFakeIv();
+		cipher.init(Cipher.DECRYPT_MODE, key, fakeIV);
+
+	}
+
 	@Override
 	protected void initCipherForEncryptionWithIvAndCounter(AbstractCipher cipher, AbstractWrappedIVs<?> wrappedIVAndSecretKey, int counter) throws IOException
 	{
@@ -462,4 +489,7 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 	public boolean isInternalCounter() {
 		return internalCounter;
 	}
+
+
+
 }

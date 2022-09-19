@@ -69,7 +69,7 @@ public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutpu
 		}
 	}
 	@Override
-	protected void checkKeysNotCleaned()
+	public void checkKeysNotCleaned()
 	{
 		if (distantPublicKey.isDestroyed())
 			throw new IllegalAccessError();
@@ -90,16 +90,12 @@ public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutpu
 			//setMaxPlainTextSizeForEncoding(Math.min(nonPQCEncryption.getMaxPlainTextSizeForEncoding(), PQCEncryption.getMaxPlainTextSizeForEncoding()));
 		}
 		@Override
-		protected void checkKeysNotCleaned()
+		public void checkKeysNotCleaned()
 		{
 			if (hybridASymmetricPublicKey.isDestroyed())
 				throw new IllegalAccessError();
 		}
 
-		@Override
-		protected void initCipherForEncryptionWithIv(AbstractCipher cipher, byte[] iv) throws IOException {
-			initCipherForEncryption(cipher);
-		}
 
 		@Override
 		protected void initCipherForEncryptionWithIvAndCounter(AbstractCipher cipher, AbstractWrappedIVs<?> wrappedIVAndSecretKey, int counter) throws IOException {
@@ -107,22 +103,22 @@ public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutpu
 		}
 
 		@Override
-		protected boolean isPowerMonitoringSideChannelAttackPossible() {
+		public boolean isPowerMonitoringSideChannelAttackPossible() {
 			return nonPQCEncryption.isPowerMonitoringSideChannelAttackPossible() || PQCEncryption.isPowerMonitoringSideChannelAttackPossible();
 		}
 
 		@Override
-		protected boolean isTimingSideChannelAttackPossible() {
+		public boolean isTimingSideChannelAttackPossible() {
 			return nonPQCEncryption.isTimingSideChannelAttackPossible() || PQCEncryption.isTimingSideChannelAttackPossible();
 		}
 
 		@Override
-		protected boolean isFrequencySideChannelAttackPossible() {
+		public boolean isFrequencySideChannelAttackPossible() {
 			return nonPQCEncryption.isFrequencySideChannelAttackPossible() || PQCEncryption.isFrequencySideChannelAttackPossible();
 		}
 
 		@Override
-		protected AbstractCipher getCipherInstance()  {
+		public AbstractCipher getCipherInstance()  {
 			throw new IllegalAccessError();
 		}
 
@@ -270,10 +266,7 @@ public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutpu
 	}
 
 
-	@Override
-	protected void initCipherForEncryptionWithIv(AbstractCipher cipher, byte[] iv) throws IOException {
-		client.initCipherForEncryptionWithIv(cipher, iv);
-	}
+
 
 	@Override
 	protected void initCipherForEncryptionWithIvAndCounter(AbstractCipher cipher, AbstractWrappedIVs<?> wrappedIVAndSecretKey, int counter) throws IOException {
@@ -301,17 +294,17 @@ public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutpu
 	}
 
 	@Override
-	protected boolean isPowerMonitoringSideChannelAttackPossible() {
+	public boolean isPowerMonitoringSideChannelAttackPossible() {
 		return this.client.isPowerMonitoringSideChannelAttackPossible();
 	}
 
 	@Override
-	protected boolean isTimingSideChannelAttackPossible() {
+	public boolean isTimingSideChannelAttackPossible() {
 		return client.isTimingSideChannelAttackPossible();
 	}
 
 	@Override
-	protected boolean isFrequencySideChannelAttackPossible() {
+	public boolean isFrequencySideChannelAttackPossible() {
 		return client.isFrequencySideChannelAttackPossible();
 	}
 
@@ -394,7 +387,7 @@ public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutpu
 
 
 		public Client(AbstractSecureRandom random, ASymmetricPublicKey distantPublicKey) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
-			super(distantPublicKey.getEncryptionAlgorithmType().getCipherInstance(), null, 0);
+			super(distantPublicKey.getEncryptionAlgorithmType().getCipherInstance(),  0);
 			this.type = distantPublicKey.getEncryptionAlgorithmType();
 			this.distantPublicKey = distantPublicKey;
 			this.random = random;
@@ -403,7 +396,7 @@ public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutpu
 			initBufferAllocatorArgs();
 		}
 		@Override
-		protected void checkKeysNotCleaned()
+		public void checkKeysNotCleaned()
 		{
 			if (distantPublicKey.isDestroyed())
 				throw new IllegalAccessError();
@@ -415,10 +408,6 @@ public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutpu
 		}
 
 
-		@Override
-		protected void initCipherForEncryptionWithIv(AbstractCipher cipher, byte[] iv) throws IOException {
-			this.initCipherForEncryption(cipher);
-		}
 
 		@Override
 		protected void initCipherForEncryptionWithIvAndCounter(AbstractCipher cipher, AbstractWrappedIVs<?> wrappedIVAndSecretKey, int counter) throws IOException {
@@ -426,22 +415,22 @@ public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutpu
 		}
 
 		@Override
-		protected boolean isPowerMonitoringSideChannelAttackPossible() {
+		public boolean isPowerMonitoringSideChannelAttackPossible() {
 			return true;
 		}
 
 		@Override
-		protected boolean isTimingSideChannelAttackPossible() {
+		public boolean isTimingSideChannelAttackPossible() {
 			return true;
 		}
 
 		@Override
-		protected boolean isFrequencySideChannelAttackPossible() {
+		public boolean isFrequencySideChannelAttackPossible() {
 			return true;
 		}
 
 		@Override
-		protected AbstractCipher getCipherInstance() throws IOException {
+		public AbstractCipher getCipherInstance() throws IOException {
 			try {
 				return type.getCipherInstance();
 			} catch (NoSuchAlgorithmException | NoSuchProviderException e) {

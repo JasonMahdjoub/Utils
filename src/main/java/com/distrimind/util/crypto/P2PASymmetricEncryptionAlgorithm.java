@@ -402,10 +402,6 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 	}
 
 
-	@Override
-	protected void initCipherForEncryptionWithIv(AbstractCipher cipher, byte[] iv) throws IOException {
-		p2pEncryption.initCipherForEncryptionWithIv(cipher, iv);
-	}
 
 	@Override
 	protected void initCipherForEncryptionWithIvAndCounter(AbstractCipher cipher, AbstractWrappedIVs<?> wrappedIVAndSecretKey, int counter) throws IOException {
@@ -459,7 +455,7 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 	@Override
 	protected RandomOutputStream getCipherOutputStreamForEncryption(RandomOutputStream os, boolean closeOutputStreamWhenClosingCipherOutputStream, byte[] associatedData, int offAD, int lenAD, byte[] externalCounter, final AbstractWrappedIVs<?> manualIvsAndSecretKeys) throws IOException {
 		checkKeysNotCleaned();
-		return p2pEncryption.getCipherOutputStreamForEncryption(os, closeOutputStreamWhenClosingCipherOutputStream, associatedData, offAD, lenAD, externalCounter, wrappedIVAndSecretKey);
+		return p2pEncryption.getCipherOutputStreamForEncryption(os, closeOutputStreamWhenClosingCipherOutputStream, associatedData, offAD, lenAD, externalCounter, manualIvsAndSecretKeys);
 	}
 
 
@@ -573,11 +569,6 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 
 
 
-
-		@Override
-		protected void initCipherForEncryptionWithIv(AbstractCipher cipher, byte[] iv) throws IOException {
-			initCipherForEncryption(cipher );
-		}
 
 		@Override
 		protected void initCipherForEncryptionWithIvAndCounter(AbstractCipher cipher, AbstractWrappedIVs<?> wrappedIVAndSecretKey, int counter) throws IOException {
@@ -732,7 +723,7 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 
 		public P2PEncryption(ASymmetricAuthenticatedSignatureType signatureType, ASymmetricKeyPair myKeyPair,
 												ASymmetricPublicKey distantPublicKey) throws IOException, NoSuchAlgorithmException, NoSuchProviderException {
-			super(myKeyPair.getEncryptionAlgorithmType().getCipherInstance(), null, 0);
+			super(myKeyPair.getEncryptionAlgorithmType().getCipherInstance(),  0);
 			if (signatureType == null)
 				throw new NullPointerException("signatureType");
 			if (distantPublicKey == null)
@@ -746,10 +737,6 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 			initBufferAllocatorArgs();
 		}
 
-		@Override
-		protected void initCipherForEncryptionWithIv(AbstractCipher cipher, byte[] iv) throws IOException {
-			initCipherForEncryption(cipher );
-		}
 
 		@Override
 		protected void initCipherForEncryptionWithIvAndCounter(AbstractCipher cipher, AbstractWrappedIVs<?> wrappedIVAndSecretKey, int counter) throws IOException {

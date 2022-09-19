@@ -332,7 +332,7 @@ public class ServerASymmetricEncryptionAlgorithm implements IEncryptionInputAlgo
 		public RandomInputStream getCipherInputStreamForDecryption(final RandomInputStream is, byte[] associatedData, int offAD, final int lenAD, final byte[] externalCounter)
 				throws IOException {
 
-			CommonCipherInputStream res=new CommonCipherInputStream(false, maxEncryptedPartLength, is, false, null, 0, (byte)0, externalCounter, cipher, associatedData, offAD, lenAD, finalizer.buffer, false, 0, maxPlainTextSizeForEncoding) {
+			CommonCipherInputStream res=new CommonCipherInputStream(this, false, maxEncryptedPartLength, is, false,  0, (byte)0, externalCounter, cipher, associatedData, offAD, lenAD, finalizer.buffer, false, 0, maxPlainTextSizeForEncoding) {
 
 
 				@Override

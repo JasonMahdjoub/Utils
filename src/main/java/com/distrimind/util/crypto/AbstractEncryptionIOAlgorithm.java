@@ -52,8 +52,8 @@ public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOu
 		super();
 	}
 
-	protected AbstractEncryptionIOAlgorithm(AbstractCipher cipher, AbstractWrappedIVs<?> wrappedIVAndSecretKey, int ivSizeBytes) {
-		super(cipher, wrappedIVAndSecretKey, ivSizeBytes);
+	protected AbstractEncryptionIOAlgorithm(AbstractCipher cipher, int ivSizeBytes) {
+		super(cipher, ivSizeBytes);
 
 	}
 	@Override
@@ -226,7 +226,7 @@ public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOu
 		final AbstractCipher cipher = getCipherInstance();
 
 
-		CommonCipherInputStream res=new CommonCipherInputStream(allOutputGeneratedIntoDoFinalFunction(), maxEncryptedPartLength, is, includeIV(), wrappedIVAndSecretKey, getIVSizeBytesWithoutExternalCounter(), getMaxExternalCounterLength(), externalCounter, cipher, associatedData, offAD, lenAD, super.finalizer.buffer, supportRandomEncryptionAndRandomDecryption(), getCounterStepInBytes(), maxPlainTextSizeForEncoding) {
+		CommonCipherInputStream res=new CommonCipherInputStream(this, allOutputGeneratedIntoDoFinalFunction(), maxEncryptedPartLength, is, includeIV(), getIVSizeBytesWithoutExternalCounter(), getMaxExternalCounterLength(), externalCounter, cipher, associatedData, offAD, lenAD, super.finalizer.buffer, supportRandomEncryptionAndRandomDecryption(), getCounterStepInBytes(), maxPlainTextSizeForEncoding) {
 
 			@Override
 			protected void initCipherForDecryptionWithIvAndCounter(AbstractWrappedIVs<?> wrappedIVAndSecretKey, int counter) throws IOException {
@@ -276,12 +276,13 @@ public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOu
 		if (inputLen==lastUsedSizeForEncryption)
 			return lastAskedOutputSizeAfterDecryption;
 
+		assert cipher != null;
 		if (cipher.getMode()!= Cipher.DECRYPT_MODE) {
 			initCipherForDecryptionWithNullIV(cipher);
 		}
 		lastUsedSizeForEncryption=inputLen;
 		return lastAskedOutputSizeAfterDecryption=getOutputSizeAfterDecryption(cipher, inputLen, maxEncryptedPartLength,
-				getIVSizeBytesWithoutExternalCounter(),maxPlainTextSizeForEncoding );
+				getIvAndSecretKeySizeInBytesWithoutExternalCounter(),maxPlainTextSizeForEncoding );
 	}
 
 
@@ -290,10 +291,6 @@ public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOu
 	public void initCipherForDecryptionWithNullIV(AbstractCipher cipher)
 			throws IOException
 	{
-		if (includeIV() && mustAlterIVForOutputSizeComputation())
-		{
-			fakeIV[0] = (byte) ~fakeIV[0];
-		}
-		initCipherForEncryptionWithIv(cipher, fakeIV);
+		throw new IllegalAccessError();
 	}
 }

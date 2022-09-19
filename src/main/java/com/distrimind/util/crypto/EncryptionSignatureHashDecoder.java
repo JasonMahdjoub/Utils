@@ -722,14 +722,14 @@ public class EncryptionSignatureHashDecoder {
 					if (cipherInputStream==null)
 						cipherInputStream=cipher.getCipherInputStreamForDecryption(limitedRandomInputStream,buffer, 0, lenBuffer, externalCounter );
 					else
-						CommonCipherInputStream.set(cipherInputStream, limitedRandomInputStream,buffer, 0, lenBuffer, externalCounter );
+						CommonCipherInputStream.set(cipher, cipherInputStream, limitedRandomInputStream,buffer, 0, lenBuffer, externalCounter );
 
 				}
 				else {
 					if (cipherInputStream==null)
 						cipherInputStream=cipher.getCipherInputStreamForDecryption(limitedRandomInputStream,null, 0, 0, externalCounter );
 					else
-						CommonCipherInputStream.set(cipherInputStream, limitedRandomInputStream,null, 0, 0, externalCounter );
+						CommonCipherInputStream.set(cipher, cipherInputStream, limitedRandomInputStream,null, 0, 0, externalCounter );
 				}
 				try {
 					assert outputStream!=null;

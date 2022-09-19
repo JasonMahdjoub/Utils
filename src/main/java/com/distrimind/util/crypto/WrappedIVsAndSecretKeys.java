@@ -96,6 +96,10 @@ class WrappedIVAndSecretKey extends WrappedIV
 		this.wrappedIVsAndSecretKeys=null;
 	}
 
+	WrappedIVAndSecretKey(int ivSizeInBytes) {
+		super(ivSizeInBytes);
+	}
+
 	WrappedIVAndSecretKey(WrappedIVsAndSecretKeys wrappedIVsAndSecretKeys) throws IOException {
 		super(generateIV(wrappedIVsAndSecretKeys.getIvSizeBytes(), wrappedIVsAndSecretKeys.getSecureRandom()));
 		try {
@@ -122,11 +126,12 @@ class WrappedIVAndSecretKey extends WrappedIV
 		int s=wrappedIVsAndSecretKeys.getKeyWrapperAlgorithm().getWrappedSymmetricSecretKeySizeInBytes(wrappedIVsAndSecretKeys.getMainKey());
 		encryptedSecretKey=new WrappedEncryptedSymmetricSecretKey(new byte[s]);
 		in.readFully(encryptedSecretKey.getBytes());
+		secretKey=null;
 	}
 	@Override
 	void write(RandomOutputStream out) throws IOException {
 		super.write(out);
-		assert encryptedSecretKey.getBytes().length==wrappedIVsAndSecretKeys.getKeyWrapperAlgorithm().getWrappedSymmetricSecretKeySizeInBytes(wrappedIVsAndSecretKeys.getMainKey());
+		//assert encryptedSecretKey.getBytes().length==wrappedIVsAndSecretKeys.getKeyWrapperAlgorithm().getWrappedSymmetricSecretKeySizeInBytes(wrappedIVsAndSecretKeys.getMainKey());
 		out.write(encryptedSecretKey.getBytes(), 0, encryptedSecretKey.getBytes().length);
 	}
 
@@ -204,7 +209,9 @@ public class WrappedIVsAndSecretKeys extends AbstractWrappedIVs<WrappedIVAndSecr
 
 	@Override
 	WrappedIVAndSecretKey newEmptyWrappedIVInstance() {
-		return new WrappedIVAndSecretKey();
+		WrappedIVAndSecretKey r= new WrappedIVAndSecretKey(getIvSizeBytes());
+		r.setWrappedIVsAndSecretKeys(this);
+		return r;
 	}
 
 	@Override

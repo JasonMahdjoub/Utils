@@ -50,7 +50,7 @@ import java.security.PrivilegedAction;
  * 
  * @author Jason Mahdjoub
  * @version 1.0
- * @since MadkitLanEdition 1.7
+ * @since Utils 1.7
  */
 
 public class ReflectionTools {

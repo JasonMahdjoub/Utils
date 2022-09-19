@@ -112,7 +112,7 @@ public abstract class AbstractWrappedIVs<T extends WrappedIV> implements SecureE
 	}
 
 
-	abstract T newEmptyWrappedIVInstance();
+	abstract T newEmptyWrappedIVInstance() ;
 
 	protected void checkMaxElementNumbers()  {
 		if (data.size()>=MAX_ELEMENT_NUMBERS)
@@ -129,7 +129,7 @@ public abstract class AbstractWrappedIVs<T extends WrappedIV> implements SecureE
 	final void generateNewElement(long index, RandomOutputStream os, byte[] externalCounter) throws IOException {
 		checkMaxElementNumbers();
 		if (data.containsKey(index))
-			throw new IllegalArgumentException();
+			throw new IllegalArgumentException(""+index);
 		T res=generateElement();
 		res.write(os);
 		data.put(lastIndex=index, res);

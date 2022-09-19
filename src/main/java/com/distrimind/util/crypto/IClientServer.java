@@ -6,7 +6,7 @@ jason.mahdjoub@distri-mind.fr
 
 This software (Object Oriented Database (OOD)) is a computer program 
 whose purpose is to manage a local database with the object paradigm 
-and the java language
+and the java language 
 
 This software is governed by the CeCILL-C license under French law and
 abiding by the rules of distribution of free software.  You can  use, 
@@ -35,48 +35,35 @@ The fact that you are presently reading this means that you have had
 knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-import com.distrimind.util.io.RandomInputStream;
-import com.distrimind.util.io.RandomOutputStream;
-
 import java.io.IOException;
 
 /**
  * @author Jason Mahdjoub
- * @version 3.0
- * @since Utils 4.5.0
+ * @version 1.0
+ * @since Utils 5.24.0
  */
-interface IServer extends IClientServer{
-
-
-
-
-	void initCipherForDecryption(AbstractCipher cipher)
-			throws IOException;
-
-
-
-
-
-
-	long getOutputSizeAfterDecryption(long inputLen)
-			throws IOException;
-
-
-	void decode(RandomInputStream is, byte[] associatedData, int offAD, int lenAD, RandomOutputStream os, int length, byte[] externalCounter)
-			throws IOException;
-
-
-
-	RandomInputStream getCipherInputStreamForDecryption(RandomInputStream is, byte[] externalCounter) throws IOException;
-	byte[] decode(byte[] bytes, int off, int len, byte[] associatedData, int offAD, int lenAD, byte[] externalCounter)
-			throws IOException;
-	RandomInputStream getCipherInputStreamForDecryption(final RandomInputStream is, byte[] associatedData, int offAD, int lenAD, final byte[] externalCounter) throws IOException;
-
-
-
-	default CPUUsageAsDecoyInputStream<CommonCipherInputStream> getCPUUsageAsDecoyInputStream(CommonCipherInputStream in) throws IOException
+public interface IClientServer {
+	default AbstractWrappedIVs<?> getWrappedIVAndSecretKeyInstance()
 	{
-		return new CPUUsageAsDecoyInputStream<>(in);
+		return null;
 	}
+	AbstractCipher getCipherInstance() throws IOException;
+	int getMaxPlainTextSizeForEncoding();
+	boolean isPostQuantumEncryption();
+	void checkKeysNotCleaned();
 
+	default boolean isPowerMonitoringSideChannelAttackPossible(){
+		return true;
+	}
+	default boolean isFrequencySideChannelAttackPossible(){
+		return true;
+	}
+	default boolean isTimingSideChannelAttackPossible()
+	{
+		return true;
+	}
+	default boolean isUsingSideChannelMitigation()
+	{
+		return isPowerMonitoringSideChannelAttackPossible() || isFrequencySideChannelAttackPossible() || isTimingSideChannelAttackPossible();
+	}
 }

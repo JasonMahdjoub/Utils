@@ -51,8 +51,6 @@ import java.util.*;
  * @author Fabien Michel
  * @author Jacques Ferber
  * @author Jason Mahdjoub
- * @since MaDKit 4.0
- * @since MadkitLanEdition 1.0
  * @version 6.0
  * 
  */

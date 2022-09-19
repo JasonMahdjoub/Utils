@@ -42,7 +42,6 @@ import com.distrimind.util.io.*;
 import javax.crypto.Cipher;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Random;
 
 /**
  * 
@@ -50,7 +49,7 @@ import java.util.Random;
  * @version 5.0
  * @since Utils 1.5
  */
-public abstract class AbstractEncryptionOutputAlgorithm implements AutoZeroizable {
+public abstract class AbstractEncryptionOutputAlgorithm implements AutoZeroizable, IClientServer {
 	final static int BUFFER_SIZE = FileTools.BUFFER_SIZE;
 
 	protected static final class Finalizer extends Cleaner
@@ -75,13 +74,14 @@ public abstract class AbstractEncryptionOutputAlgorithm implements AutoZeroizabl
 
 	protected int bufferInSize;
 	//protected byte[] bufferOut;
-	protected int maxPlainTextSizeForEncoding;
+	protected int maxPlainTextSizeForEncoding=-1;
 	protected int maxEncryptedPartLength;
 	private final byte[] one=new byte[1];
-	protected final AbstractWrappedIVs<?> wrappedIVAndSecretKey;
+
 	private long previousAskedLengthForEncryption=-1;
 	private long previousOutputSizeAfterEncryption;
-	protected final byte[] fakeIV;
+	private int IvAndSecretKeySizeInBytesWithoutExternalCounter;
+
 	protected boolean useDerivedSecretKeys()
 	{
 		return false;
@@ -107,19 +107,14 @@ public abstract class AbstractEncryptionOutputAlgorithm implements AutoZeroizabl
 		cipher=null;
 		this.finalizer=new Finalizer(this);
 		finalizer.buffer=null;
-		this.wrappedIVAndSecretKey=null;
-		this.fakeIV=null;
+
 	}
 
-	protected AbstractEncryptionOutputAlgorithm(AbstractCipher cipher, AbstractWrappedIVs<?> wrappedIVAndSecretKey, int ivSizeBytes) {
+	protected AbstractEncryptionOutputAlgorithm(AbstractCipher cipher, int ivSizeBytes) {
 		if (cipher == null)
 			throw new NullPointerException("cipher");
 		this.cipher = cipher;
-		this.wrappedIVAndSecretKey=wrappedIVAndSecretKey;
 		this.finalizer=new Finalizer(this);
-		this.fakeIV=new byte[ivSizeBytes];
-		Random r=new Random(System.nanoTime());
-		r.nextBytes(fakeIV);
 	}
 
 	protected void initBufferAllocatorArgs() throws IOException {
@@ -166,7 +161,7 @@ public abstract class AbstractEncryptionOutputAlgorithm implements AutoZeroizabl
 	}
 
 
-	protected abstract void initCipherForEncryptionWithIv(AbstractCipher cipher, byte[] iv) throws IOException;
+
 	protected abstract void initCipherForEncryptionWithIvAndCounter(AbstractCipher cipher, AbstractWrappedIVs<?> wrappedIVAndSecretKey, int counter) throws IOException;
 
 
@@ -192,16 +187,6 @@ public abstract class AbstractEncryptionOutputAlgorithm implements AutoZeroizabl
 	public void encode(RandomInputStream is, byte[] associatedData, int offAD, int lenAD, RandomOutputStream os) throws IOException{
 		encode(is, associatedData, offAD, lenAD, os, null);
 	}
-	protected abstract boolean isPowerMonitoringSideChannelAttackPossible();
-	protected abstract boolean isTimingSideChannelAttackPossible();
-	protected abstract boolean isFrequencySideChannelAttackPossible();
-
-
-
-	public final boolean isUsingSideChannelMitigation()
-	{
-		return isPowerMonitoringSideChannelAttackPossible() || isFrequencySideChannelAttackPossible() || isTimingSideChannelAttackPossible();
-	}
 
 	public void encode(RandomInputStream is, byte[] associatedData, int offAD, int lenAD, RandomOutputStream os, byte[] externalCounter) throws IOException {
 
@@ -211,7 +196,6 @@ public abstract class AbstractEncryptionOutputAlgorithm implements AutoZeroizabl
 		}
 	}
 
-	protected abstract AbstractCipher getCipherInstance() throws IOException;
 	protected static void checkLimits(byte[] b, int off, int len)
 	{
 		if (b==null)
@@ -241,6 +225,7 @@ public abstract class AbstractEncryptionOutputAlgorithm implements AutoZeroizabl
 		return getCipherOutputStreamForEncryption(os, closeOutputStreamWhenClosingCipherOutputStream, associatedData, offAD, lenAD, externalCounter, null);
 	}
 	protected abstract CPUUsageAsDecoyOutputStream<CommonCipherOutputStream> getCPUUsageAsDecoyOutputStream(CommonCipherOutputStream os) throws IOException;
+
 	@SuppressWarnings({"unchecked", "SameParameterValue"})
 	static void set(RandomOutputStream cipherOutputStream, RandomOutputStream os, AbstractWrappedIVs<?> manualIvsAndSecretKeys, byte[] externalCounter, byte[] associatedData, int offAD, int lenAD, boolean closeOutputStreamWhenClosingCipherOutputStream) throws IOException {
 		if (cipherOutputStream instanceof CPUUsageAsDecoyOutputStream) {
@@ -268,6 +253,10 @@ public abstract class AbstractEncryptionOutputAlgorithm implements AutoZeroizabl
 		private int offAD, lenAD;
 		private boolean closeOutputStreamWhenClosingCipherOutputStream;
 
+		private boolean initPossible;
+
+		private AbstractWrappedIVs<?> wrappedIVAndSecretKey;
+
 
 
 		CommonCipherOutputStream(RandomOutputStream os, AbstractWrappedIVs<?> manualIvsAndSecretKeys, byte[] externalCounter, byte[] associatedData, int offAD, int lenAD, boolean closeOutputStreamWhenClosingCipherOutputStream) throws IOException {
@@ -281,6 +270,7 @@ public abstract class AbstractEncryptionOutputAlgorithm implements AutoZeroizabl
 			currentPos=0;
 			closed=false;
 			doFinal=false;
+			initPossible=true;
 			supportRandomAccess=supportRandomEncryptionAndRandomDecryption();
 
 			this.os = os;
@@ -290,6 +280,7 @@ public abstract class AbstractEncryptionOutputAlgorithm implements AutoZeroizabl
 			this.offAD = offAD;
 			this.lenAD = lenAD;
 			this.closeOutputStreamWhenClosingCipherOutputStream = closeOutputStreamWhenClosingCipherOutputStream;
+			wrappedIVAndSecretKey= getWrappedIVAndSecretKeyInstance();
 			if (os.currentPosition()!=0)
 				os.seek(0);
 		}
@@ -314,28 +305,27 @@ public abstract class AbstractEncryptionOutputAlgorithm implements AutoZeroizabl
 		}
 
 		private void init(long round, RandomOutputStream os) throws IOException {
+			if (initPossible) {
+				if (wrappedIVAndSecretKey != null) {
+					assert includeIV();
+					if (manualIvsAndSecretKeys != null) {
+						manualIvsAndSecretKeys.setCurrentIV(round, useExternalCounter() ? externalCounter : null);
+						initCipherForEncryptionWithIvAndCounter(cipher, manualIvsAndSecretKeys, 0);
 
-			if (wrappedIVAndSecretKey!=null) {
-				assert includeIV();
-				if (manualIvsAndSecretKeys!=null)
-				{
-					manualIvsAndSecretKeys.setCurrentIV(round, useExternalCounter()?externalCounter:null);
-					initCipherForEncryptionWithIvAndCounter(cipher, manualIvsAndSecretKeys, 0);
+					} else {
+						wrappedIVAndSecretKey.generateNewElement(round, os, useExternalCounter() ? externalCounter : null);
+						initCipherForEncryptionWithIvAndCounter(cipher, wrappedIVAndSecretKey, 0);
+					}
 
+				} else {
+					assert !includeIV();
+					initCipherForEncryptionWithNullIV(cipher);
 				}
-				else {
-					wrappedIVAndSecretKey.generateNewElement(round, os, useExternalCounter()?externalCounter:null);
-					initCipherForEncryptionWithIvAndCounter(cipher, wrappedIVAndSecretKey, 0);
-				}
 
+				if (associatedData != null && lenAD > 0)
+					cipher.updateAAD(associatedData, offAD, lenAD);
+				initPossible = false;
 			}
-			else {
-				assert !includeIV();
-				initCipherForEncryptionWithNullIV(cipher);
-			}
-
-			if (associatedData != null && lenAD > 0)
-				cipher.updateAAD(associatedData, offAD, lenAD);
 		}
 
 		private long checkInit() throws IOException {
@@ -373,6 +363,7 @@ public abstract class AbstractEncryptionOutputAlgorithm implements AutoZeroizabl
 				}
 				int w=cipher.update(b, off, s, finalizer.buffer, 0);
 				doFinal=true;
+				initPossible=true;
 				currentPos+=s;
 				if (w>0) {
 					os.write(finalizer.buffer, 0, w);
@@ -395,6 +386,7 @@ public abstract class AbstractEncryptionOutputAlgorithm implements AutoZeroizabl
 			++currentPos;
 			int w=cipher.update(one, 0, 1, finalizer.buffer, 0);
 			doFinal=true;
+			initPossible=true;
 			if (w>0) {
 				os.write(finalizer.buffer, 0, w);
 			}
@@ -494,15 +486,19 @@ public abstract class AbstractEncryptionOutputAlgorithm implements AutoZeroizabl
 		public void close() throws IOException {
 			if (closed)
 				return;
-			checkDoFinal(true);
-			flush();
-			if (closeOutputStreamWhenClosingCipherOutputStream)
-				os.close();
-			closed=true;
+			try {
+				checkDoFinal(true);
+			}
+			finally {
+				flush();
+				if (closeOutputStreamWhenClosingCipherOutputStream)
+					os.close();
+				closed=true;
+			}
+
 		}
 
 	}
-	protected abstract void checkKeysNotCleaned();
 	protected RandomOutputStream getCipherOutputStreamForEncryption(final RandomOutputStream os, final boolean closeOutputStreamWhenClosingCipherOutputStream, final byte[] associatedData, final int offAD, final int lenAD, final byte[] externalCounter, final AbstractWrappedIVs<?> manualIvsAndSecretKeys) throws
 			IOException{
 		CommonCipherOutputStream res= new CommonCipherOutputStream(os, manualIvsAndSecretKeys, externalCounter, associatedData, offAD, lenAD, closeOutputStreamWhenClosingCipherOutputStream);
@@ -518,13 +514,22 @@ public abstract class AbstractEncryptionOutputAlgorithm implements AutoZeroizabl
 	}
 
 	void setMaxPlainTextSizeForEncoding(int maxPlainTextSizeForEncoding) throws IOException {
-		initCipherForEncryptionWithNullIV(cipher);
 		this.maxPlainTextSizeForEncoding=maxPlainTextSizeForEncoding;
-		this.maxEncryptedPartLength =cipher.getOutputSize(maxPlainTextSizeForEncoding)+(wrappedIVAndSecretKey==null?getIVSizeBytesWithoutExternalCounter():wrappedIVAndSecretKey.getSerializedElementSizeInBytes());
+		initCipherForEncryptionWithNullIV(cipher);
+		assert cipher != null;
+		AbstractWrappedIVs<?> wrappedIVAndSecretKey=getWrappedIVAndSecretKeyInstance();
+		this.IvAndSecretKeySizeInBytesWithoutExternalCounter=(wrappedIVAndSecretKey==null?getIVSizeBytesWithoutExternalCounter():wrappedIVAndSecretKey.getSerializedElementSizeInBytes());
+
+
+		this.maxEncryptedPartLength =cipher.getOutputSize(maxPlainTextSizeForEncoding)+ this.IvAndSecretKeySizeInBytesWithoutExternalCounter;
 
 	}
 
-	
+	public final int getIvAndSecretKeySizeInBytesWithoutExternalCounter()
+	{
+		assert this.maxPlainTextSizeForEncoding>0;
+		return IvAndSecretKeySizeInBytesWithoutExternalCounter;
+	}
 	public abstract int getIVSizeBytesWithExternalCounter();
 	public final int getIVSizeBytesWithoutExternalCounter()
 	{
@@ -549,7 +554,7 @@ public abstract class AbstractEncryptionOutputAlgorithm implements AutoZeroizabl
 			{
 				initCipherForEncryptionWithNullIV(cipher);
 			}
-			add = cipher.getOutputSize((int)add)+getIVSizeBytesWithoutExternalCounter();
+			add = cipher.getOutputSize((int)add)+getIvAndSecretKeySizeInBytesWithoutExternalCounter();
 		}
 		previousAskedLengthForEncryption=inputLen;
 		return previousOutputSizeAfterEncryption=((inputLen / maxPlainTextSizeForEncoding) * maxEncryptedPartLength)+add;
@@ -565,12 +570,8 @@ public abstract class AbstractEncryptionOutputAlgorithm implements AutoZeroizabl
 	public void initCipherForEncryptionWithNullIV(AbstractCipher cipher)
 			throws IOException
 	{
-		if (includeIV() && mustAlterIVForOutputSizeComputation())
-		{
-			fakeIV[0] = (byte) ~fakeIV[0];
-		}
-		initCipherForEncryptionWithIv(cipher, fakeIV);
+		throw new IllegalAccessError();
 	}
 
-	public abstract boolean isPostQuantumEncryption();
+
 }
