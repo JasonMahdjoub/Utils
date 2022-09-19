@@ -394,8 +394,10 @@ public class TestsForSymmetricEncryption {
 				else
 					keyWrapper = new KeyWrapperAlgorithm(typeWrapper, kp, sks, kps);
 			}
+			int computedSize=keyWrapper.getWrappedSymmetricSecretKeySizeInBytes(sk);
 			Assert.assertTrue(typeWrapper.getAlgorithmName()!=null || kp.getEncryptionAlgorithmType().isAuthenticatedAlgorithm() || sks!=null || kps!=null);
 			WrappedEncryptedSymmetricSecretKey wrappedKey = keyWrapper.wrap(rand, sk);
+			Assert.assertEquals(computedSize, wrappedKey.getBytes().length);
 			SymmetricSecretKey sk2 = keyWrapper.unwrap(wrappedKey);
 			Assert.assertEquals(sk.getKeySizeBits(), sk2.getKeySizeBits());
 			Assert.assertEquals(sk.getAuthenticatedSignatureAlgorithmType(), sk2.getAuthenticatedSignatureAlgorithmType());
@@ -432,6 +434,7 @@ public class TestsForSymmetricEncryption {
 				else
 					keyWrapper = new KeyWrapperAlgorithm(typeWrapper, kp, sks, kps);
 			}
+
 			Assert.assertTrue(typeWrapper.getAlgorithmName()!=null || kp.getEncryptionAlgorithmType().isAuthenticatedAlgorithm() || sks!=null || kps!=null);
 
 			WrappedEncryptedASymmetricPrivateKey wrappedKey=keyWrapper.wrap(rand, sk.getASymmetricPrivateKey());

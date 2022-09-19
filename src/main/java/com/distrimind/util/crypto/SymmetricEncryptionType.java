@@ -227,7 +227,10 @@ public enum SymmetricEncryptionType {
 	private final boolean frequencyAttackPossible;
 	private final short ivLengthBytes;
 	private long maxIVGenerationWithOneSecretKey;
+	private final int additionalBytesWhenKeyEncoded;
 	static final boolean invalidOSForChaCha =(OSVersion.getCurrentOSVersion().getOS()!=OS.ANDROID && OS.getCurrentJREVersionByte()<11) || (OSVersion.getCurrentOSVersion().getOS()==OS.ANDROID && OSVersion.getCurrentOSVersion().compareTo(OSVersion.ANDROID_28_P)<0);
+
+
 
 	public boolean equals(SymmetricEncryptionType o)
 	{
@@ -288,6 +291,7 @@ public enum SymmetricEncryptionType {
 		this.frequencyAttackPossible=frequencyAttackPossible;
 		this.ivLengthBytes = ivLengthBytes;
 		this.maxIVGenerationWithOneSecretKey=maxIVGenerationWithOneSecretKey;
+		this.additionalBytesWhenKeyEncoded =algorithmName.toLowerCase().startsWith("desede")?3:(algorithmName.toLowerCase().startsWith("des")?1:0);
 	}
 
 	SymmetricEncryptionType(SymmetricEncryptionType type) {
@@ -551,5 +555,11 @@ public enum SymmetricEncryptionType {
 	void setMaxIVGenerationWithOneSecretKey(@SuppressWarnings("SameParameterValue") long maxIVGenerationWithOneSecretKey)
 	{
 		this.maxIVGenerationWithOneSecretKey=maxIVGenerationWithOneSecretKey;
+	}
+
+
+	public int getEncodedSymmetricSecretKeySizeBytes(int keySizeBytes)
+	{
+		return keySizeBytes+ additionalBytesWhenKeyEncoded;
 	}
 }

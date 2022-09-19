@@ -119,14 +119,14 @@ class WrappedIVAndSecretKey extends WrappedIV
 	@Override
 	void readFully(RandomInputStream in) throws IOException {
 		super.readFully(in);
-		int s=wrappedIVsAndSecretKeys.getKeyWrapperAlgorithm().getWrappedSymmetricSecretKeySizeInBytes(wrappedIVsAndSecretKeys.getMainKey().getKeySizeBytes());
+		int s=wrappedIVsAndSecretKeys.getKeyWrapperAlgorithm().getWrappedSymmetricSecretKeySizeInBytes(wrappedIVsAndSecretKeys.getMainKey());
 		encryptedSecretKey=new WrappedEncryptedSymmetricSecretKey(new byte[s]);
 		in.readFully(encryptedSecretKey.getBytes());
 	}
 	@Override
 	void write(RandomOutputStream out) throws IOException {
 		super.write(out);
-		assert encryptedSecretKey.getBytes().length==wrappedIVsAndSecretKeys.getKeyWrapperAlgorithm().getWrappedSymmetricSecretKeySizeInBytes(wrappedIVsAndSecretKeys.getMainKey().getKeySizeBytes());
+		assert encryptedSecretKey.getBytes().length==wrappedIVsAndSecretKeys.getKeyWrapperAlgorithm().getWrappedSymmetricSecretKeySizeInBytes(wrappedIVsAndSecretKeys.getMainKey());
 		out.write(encryptedSecretKey.getBytes(), 0, encryptedSecretKey.getBytes().length);
 	}
 
@@ -189,7 +189,7 @@ public class WrappedIVsAndSecretKeys extends AbstractWrappedIVs<WrappedIVAndSecr
 			if (mainKey.getEncryptionAlgorithmType().getIVSizeBytes()!=e.getIv().length)
 				throw new IOException();
 		}
-		elementSizeInBytes =IVSizeBytesWithoutExternalCounter+ keyWrapperAlgorithm.getWrappedSymmetricSecretKeySizeInBytes(mainKey.getKeySizeBytes());
+		elementSizeInBytes =IVSizeBytesWithoutExternalCounter+ keyWrapperAlgorithm.getWrappedSymmetricSecretKeySizeInBytes(mainKey);
 	}
 	WrappedIVsAndSecretKeys(int ivSizeBytes, int blockModeCounterBytes, SymmetricSecretKey mainKey, AbstractSecureRandom secureRandom) {
 		this(ivSizeBytes, blockModeCounterBytes, mainKey, secureRandom, DEFAULT_SYMMETRIC_KEY_WRAPPER_TYPE);
