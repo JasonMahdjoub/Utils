@@ -34,6 +34,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
+import com.distrimind.bcfips.crypto.general.AES;
 import com.distrimind.util.OS;
 import com.distrimind.util.OSVersion;
 import com.distrimind.bcfips.crypto.Algorithm;
@@ -71,11 +72,11 @@ public enum SymmetricEncryptionType {
 	DESede_CBC_PKCS5Padding("DESede", "CBC", "PKCS5Padding", (short) 168, (short) 24, CodeProvider.SunJCE, CodeProvider.SunJCE, SymmetricAuthenticatedSignatureType.HMAC_SHA2_384, com.distrimind.bcfips.crypto.general.DES.ALGORITHM, (short)64, false, (short)16, (short)16, (short)15, (short)15, (short)17, (short)17, true, true, true,true, true, true, true, (short)8, 1L<<32),
 	@Deprecated
 	Blowfish_CBC_PKCS5Padding("Blowfish", "CBC", "PKCS5Padding", (short) 128, CodeProvider.SunJCE, CodeProvider.SunJCE, SymmetricAuthenticatedSignatureType.HMAC_SHA2_384, com.distrimind.bcfips.crypto.general.Blowfish.ALGORITHM, (short)64, false, (short)49, (short)51, (short)55, (short)51, (short)69, (short)71, true, true, true, true, false, true, true, (short)8, 1L<<32),
-	GNU_AES_CBC_PKCS5Padding("AES", "CBC", "PKCS5Padding", (short) 128, CodeProvider.GNU_CRYPTO, CodeProvider.GNU_CRYPTO, SymmetricAuthenticatedSignatureType.BC_FIPS_HMAC_SHA2_512, com.distrimind.bcfips.crypto.general.AES.ALGORITHM, (short)128, false, (short)67, (short)63, (short)63, (short)64, (short)62, (short)4, true, true, true, true, true, true, true, (short)16, 1L<<32),
+	/*GNU_AES_CBC_PKCS5Padding("AES", "CBC", "PKCS5Padding", (short) 128, CodeProvider.GNU_CRYPTO, CodeProvider.GNU_CRYPTO, SymmetricAuthenticatedSignatureType.BC_FIPS_HMAC_SHA2_512, com.distrimind.bcfips.crypto.general.AES.ALGORITHM, (short)128, false, (short)67, (short)63, (short)63, (short)64, (short)62, (short)4, true, true, true, true, true, true, true, (short)16, 1L<<32),
 	GNU_TWOFISH_CBC_PKCS5Padding("TWOFISH","CBC", "PKCS5Padding", (short) 128, CodeProvider.GNU_CRYPTO, CodeProvider.GNU_CRYPTO, SymmetricAuthenticatedSignatureType.BC_FIPS_HMAC_SHA2_512, Twofish.ALGORITHM, (short)128, false, (short)57, (short)56, (short)55, (short)55, (short)66, (short)4, true, false, true, true, false, true, false, (short)16, 1L<<32),
 	GNU_SERPENT_CBC_PKCS5Padding("Serpent", "CBC", "PKCS5Padding", (short) 128, CodeProvider.GNU_CRYPTO, CodeProvider.GNU_CRYPTO, SymmetricAuthenticatedSignatureType.BC_FIPS_HMAC_SHA2_512, Serpent.ALGORITHM, (short)128, false, (short)37, (short)37, (short)35, (short)37, (short)40, (short)4, false, false, false, false, false, false, false, (short)16, 1L<<32),
 	GNU_ANUBIS_CBC_PKCS5Padding("Anubis", "CBC", "PKCS5Padding", (short) 128, CodeProvider.GNU_CRYPTO, CodeProvider.GNU_CRYPTO, SymmetricAuthenticatedSignatureType.BC_FIPS_HMAC_SHA2_512, null, (short)128, false, (short)61, (short)58, (short)57, (short)57, (short)67, (short)4, false, false, false, false, false, false, false, (short)16, 1L<<32),
-	GNU_SQUARE_CBC__PKCS5Padding("Square", "CBC", "PKCS5Padding", (short) 128, CodeProvider.GNU_CRYPTO, CodeProvider.GNU_CRYPTO, SymmetricAuthenticatedSignatureType.BC_FIPS_HMAC_SHA2_512, null, (short)128, false, (short)69, (short)67, (short)61, (short)62, (short)84, (short)4, false, false, false, false, false, false, false, (short)16, 1L<<32),
+	GNU_SQUARE_CBC__PKCS5Padding("Square", "CBC", "PKCS5Padding", (short) 128, CodeProvider.GNU_CRYPTO, CodeProvider.GNU_CRYPTO, SymmetricAuthenticatedSignatureType.BC_FIPS_HMAC_SHA2_512, null, (short)128, false, (short)69, (short)67, (short)61, (short)62, (short)84, (short)4, false, false, false, false, false, false, false, (short)16, 1L<<32),*/
 	BC_FIPS_AES_CBC_PKCS7Padding("AES", "CBC", "PKCS7Padding", (short) 128, CodeProvider.BCFIPS, CodeProvider.BCFIPS, SymmetricAuthenticatedSignatureType.BC_FIPS_HMAC_SHA2_512, com.distrimind.bcfips.crypto.general.AES.ALGORITHM, (short)128, false, (short)60, (short)75, (short)60, (short)73, (short)76, (short)67, true, true, true, true, true, true, true, (short)16, 1L<<32),
 	BC_FIPS_AES_GCM("AES", "GCM", "NoPadding", (short) 128, CodeProvider.BCFIPS, CodeProvider.BCFIPS, null, com.distrimind.bcfips.crypto.general.AES.ALGORITHM, (short)128, true, (short)42, (short)48, (short)47, (short)57, (short)54, (short)55, true, true, true, true, true, true, true, (short)12, 1L<<32),
 	BC_AES_EAX("AES", "EAX", "NoPadding", (short) 128, CodeProvider.BC, CodeProvider.BC, SymmetricAuthenticatedSignatureType.BC_FIPS_HMAC_SHA2_512, com.distrimind.bcfips.crypto.general.AES.ALGORITHM, (short)128, true, (short)36, (short)43, (short)44, (short)39, (short)35, (short)35, true, true, true, true, true, true, true, (short)16, 1L<<32),
@@ -561,6 +562,17 @@ public enum SymmetricEncryptionType {
 	public int getEncodedSymmetricSecretKeySizeBytes(int keySizeBytes)
 	{
 		return keySizeBytes+ additionalBytesWhenKeyEncoded;
+	}
+
+	public SymmetricKeyWrapperType getDefaultSymmetricKeyWrapperType()
+	{
+		if (getCodeProviderForEncryption()==CodeProvider.GNU_CRYPTO)
+			return SymmetricKeyWrapperType.CLASSIC_ENCRYPTION;
+		if (getAlgorithmName().equals(AES_GCM.getAlgorithmName())) {
+			return SymmetricKeyWrapperType.BC_FIPS_AES_WITH_PADDING;
+		}
+		else
+			return SymmetricKeyWrapperType.CLASSIC_ENCRYPTION;
 	}
 
 }

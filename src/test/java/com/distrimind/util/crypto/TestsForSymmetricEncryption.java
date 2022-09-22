@@ -522,10 +522,10 @@ public class TestsForSymmetricEncryption {
 		Object[][] res = new Object[][] {
 				{SymmetricEncryptionType.AES_CBC_PKCS5Padding, SymmetricEncryptionType.BC_FIPS_AES_CBC_PKCS7Padding},
 				{SymmetricEncryptionType.AES_GCM, SymmetricEncryptionType.BC_FIPS_AES_GCM},
-				{SymmetricEncryptionType.GNU_AES_CBC_PKCS5Padding, SymmetricEncryptionType.BC_FIPS_AES_CBC_PKCS7Padding},
+				/*{SymmetricEncryptionType.GNU_AES_CBC_PKCS5Padding, SymmetricEncryptionType.BC_FIPS_AES_CBC_PKCS7Padding},
 				{SymmetricEncryptionType.GNU_TWOFISH_CBC_PKCS5Padding, SymmetricEncryptionType.BC_TWOFISH_CBC_PKCS7Padding},
 				{SymmetricEncryptionType.GNU_SERPENT_CBC_PKCS5Padding, SymmetricEncryptionType.BC_SERPENT_CBC_PKCS7Padding},
-				{SymmetricEncryptionType.GNU_AES_CBC_PKCS5Padding, SymmetricEncryptionType.AES_CBC_PKCS5Padding},
+				{SymmetricEncryptionType.GNU_AES_CBC_PKCS5Padding, SymmetricEncryptionType.AES_CBC_PKCS5Padding},*/
 				{SymmetricEncryptionType.CHACHA20_NO_RANDOM_ACCESS, SymmetricEncryptionType.BC_CHACHA20_NO_RANDOM_ACCESS},
 				{SymmetricEncryptionType.CHACHA20_POLY1305, SymmetricEncryptionType.BC_CHACHA20_POLY1305}
 		};
@@ -539,7 +539,7 @@ public class TestsForSymmetricEncryption {
 		}
 		return res2;
 	}
-	@DataProvider(name = "provideDataForSymetricEncryptions", parallel = false)
+	@DataProvider(name = "provideDataForSymetricEncryptions", parallel = true)
 	public Object[][] provideDataForSymetricEncryptions() {
 		Object[][] res = new Object[SymmetricEncryptionType.values().length][];
 		int i = 0;

@@ -168,7 +168,7 @@ public class WrappedIVsAndSecretKeys extends AbstractWrappedIVs<SymmetricEncrypt
 	@Override
 	public void setAlgorithm(SymmetricEncryptionAlgorithm algorithm) throws IOException {
 		super.setAlgorithm(algorithm);
-		this.keyWrapperAlgorithm=new KeyWrapperAlgorithm(algorithm.getSymmetricKeyWrapperType(), algorithm.getSecretKey());
+		this.keyWrapperAlgorithm=new KeyWrapperAlgorithm(algorithm.getSymmetricKeyWrapperType(), algorithm.getSecretKey(), true);
 		this.symmetricKeyWrapperType=algorithm.getSymmetricKeyWrapperType();
 		for (WrappedIVAndSecretKey e : data.values())
 		{

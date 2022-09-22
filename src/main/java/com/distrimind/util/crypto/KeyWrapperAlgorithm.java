@@ -70,25 +70,28 @@ public class KeyWrapperAlgorithm extends MultiFormatProperties implements Secure
 		mode=0;
 	}
 	public KeyWrapperAlgorithm(SymmetricKeyWrapperType symmetricKeyWrapperType, SymmetricSecretKey secretKeyForEncryption) {
-		this(symmetricKeyWrapperType, secretKeyForEncryption, null, null, null, false, false);
+		this(symmetricKeyWrapperType, secretKeyForEncryption, true);
+	}
+	public KeyWrapperAlgorithm(SymmetricKeyWrapperType symmetricKeyWrapperType, SymmetricSecretKey secretKeyForEncryption, boolean signatureNotNecessary) {
+		this(symmetricKeyWrapperType, secretKeyForEncryption, null, null, null, false, false, signatureNotNecessary);
 	}
 	public KeyWrapperAlgorithm(SymmetricKeyWrapperType symmetricKeyWrapperType, SymmetricSecretKey secretKeyForEncryption, SymmetricSecretKey secretKeyForSignature) {
-		this(symmetricKeyWrapperType, secretKeyForEncryption, secretKeyForSignature, null, null, false, true);
+		this(symmetricKeyWrapperType, secretKeyForEncryption, secretKeyForSignature, null, null, false, true, false);
 	}
 	public KeyWrapperAlgorithm(SymmetricKeyWrapperType symmetricKeyWrapperType, SymmetricSecretKey secretKeyForEncryption, IASymmetricPublicKey publicKeyForSignature) {
-		this(symmetricKeyWrapperType, secretKeyForEncryption, null, publicKeyForSignature, null, true, false);
+		this(symmetricKeyWrapperType, secretKeyForEncryption, null, publicKeyForSignature, null, true, false, false);
 	}
 	public KeyWrapperAlgorithm(SymmetricKeyWrapperType symmetricKeyWrapperType, SymmetricSecretKey secretKeyForEncryption, AbstractKeyPair<?, ?> keyPairForSignature) {
-		this(symmetricKeyWrapperType, secretKeyForEncryption, null, keyPairForSignature.getASymmetricPublicKey(), keyPairForSignature.getASymmetricPrivateKey(), true, false);
+		this(symmetricKeyWrapperType, secretKeyForEncryption, null, keyPairForSignature.getASymmetricPublicKey(), keyPairForSignature.getASymmetricPrivateKey(), true, false, false);
 	}
 	public KeyWrapperAlgorithm(SymmetricKeyWrapperType symmetricKeyWrapperType, SymmetricSecretKey secretKeyForEncryption, SymmetricSecretKey secretKeyForSignature, IASymmetricPublicKey publicKeyForSignature) {
-		this(symmetricKeyWrapperType, secretKeyForEncryption, secretKeyForSignature, publicKeyForSignature, null, true, true);
+		this(symmetricKeyWrapperType, secretKeyForEncryption, secretKeyForSignature, publicKeyForSignature, null, true, true, false);
 	}
 
 	public KeyWrapperAlgorithm(SymmetricKeyWrapperType symmetricKeyWrapperType, SymmetricSecretKey secretKeyForEncryption, SymmetricSecretKey secretKeyForSignature, AbstractKeyPair<?, ?> keyPairForSignature) {
-		this(symmetricKeyWrapperType, secretKeyForEncryption, secretKeyForSignature, keyPairForSignature.getASymmetricPublicKey(), keyPairForSignature.getASymmetricPrivateKey(), true, true);
+		this(symmetricKeyWrapperType, secretKeyForEncryption, secretKeyForSignature, keyPairForSignature.getASymmetricPublicKey(), keyPairForSignature.getASymmetricPrivateKey(), true, true, false);
 	}
-	private KeyWrapperAlgorithm(SymmetricKeyWrapperType symmetricKeyWrapperType, SymmetricSecretKey secretKeyForEncryption, SymmetricSecretKey secretKeyForSignature, IASymmetricPublicKey publicKeyForSignature, IASymmetricPrivateKey privateKeyForSignature, boolean includeASymmetricSignature, boolean includeSecretKeyForSignature) {
+	private KeyWrapperAlgorithm(SymmetricKeyWrapperType symmetricKeyWrapperType, SymmetricSecretKey secretKeyForEncryption, SymmetricSecretKey secretKeyForSignature, IASymmetricPublicKey publicKeyForSignature, IASymmetricPrivateKey privateKeyForSignature, boolean includeASymmetricSignature, boolean includeSecretKeyForSignature, boolean signatureNotNecessary) {
 		this();
 		if (symmetricKeyWrapperType==null)
 			throw new NullPointerException();
@@ -96,14 +99,24 @@ public class KeyWrapperAlgorithm extends MultiFormatProperties implements Secure
 			throw new NullPointerException();
 		if (secretKeyForEncryption.getEncryptionAlgorithmType()==null)
 			throw new IllegalArgumentException();
-		if (!Objects.equals(symmetricKeyWrapperType.getSymmetricEncryptionType().getAlgorithmName(), secretKeyForEncryption.getEncryptionAlgorithmType().getAlgorithmName()))
+		if (symmetricKeyWrapperType!=SymmetricKeyWrapperType.CLASSIC_ENCRYPTION && !Objects.equals(symmetricKeyWrapperType.getSymmetricEncryptionType().getAlgorithmName(), secretKeyForEncryption.getEncryptionAlgorithmType().getAlgorithmName()))
 			throw new IllegalArgumentException("secretKeyForEncryption.getEncryptionAlgorithmType()="+secretKeyForEncryption.getEncryptionAlgorithmType()+", symmetricKeyWrapperType.getSymmetricEncryptionType()="+symmetricKeyWrapperType.getSymmetricEncryptionType());
 		if (publicKeyForSignature ==null && privateKeyForSignature==null && includeASymmetricSignature)
 			throw new NullPointerException();
 		if (includeSecretKeyForSignature && secretKeyForSignature==null)
 			throw new NullPointerException();
-
 		this.symmetricKeyWrapperType = symmetricKeyWrapperType;
+		if (signatureNotNecessary)
+		{
+			SymmetricEncryptionType t=null;
+			if (secretKeyForEncryption.getEncryptionAlgorithmType()==SymmetricEncryptionType.BC_CHACHA20_POLY1305)
+				t=SymmetricEncryptionType.BC_CHACHA20_NO_RANDOM_ACCESS;
+			else if (secretKeyForEncryption.getEncryptionAlgorithmType()==SymmetricEncryptionType.CHACHA20_POLY1305)
+				t=SymmetricEncryptionType.CHACHA20_NO_RANDOM_ACCESS;
+			if (t!=null)
+				secretKeyForEncryption=new SymmetricSecretKey(t, secretKeyForEncryption);
+		}
+
 		this.finalizer.secretKeyForEncryption = secretKeyForEncryption;
 		this.finalizer.secretKeyForSignature=secretKeyForSignature;
 		this.mode=ENCRYPTION_WITH_SYMMETRIC_SECRET_KEY;
@@ -114,7 +127,7 @@ public class KeyWrapperAlgorithm extends MultiFormatProperties implements Secure
 		if (includeSecretKeyForSignature)
 			this.mode+=SIGNATURE_WITH_SYMMETRIC_SECRET_KEY;
 		if (symmetricKeyWrapperType.getAlgorithmName()==null && (secretKeyForEncryption.getEncryptionAlgorithmType()==null ||
-				(!secretKeyForEncryption.getEncryptionAlgorithmType().isAuthenticatedAlgorithm()
+				(!signatureNotNecessary && !secretKeyForEncryption.getEncryptionAlgorithmType().isAuthenticatedAlgorithm()
 						&& !useSignature())))
 			throw new IllegalArgumentException("This key wrapping type and this secret key for encryption must be used with a signature algorithm");
 	}
@@ -567,7 +580,7 @@ public class KeyWrapperAlgorithm extends MultiFormatProperties implements Secure
 				case BC_FIPS_AES:case BC_FIPS_AES_WITH_PADDING:case DEFAULT:
 				set=SymmetricEncryptionType.AES_GCM;
 				break;
-				case BC_CHACHA20_POLY1305:
+				case CLASSIC_ENCRYPTION:
 					set=SymmetricEncryptionType.BC_CHACHA20_POLY1305;
 					break;
 				default:

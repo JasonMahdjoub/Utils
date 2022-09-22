@@ -61,7 +61,7 @@ public enum SymmetricKeyWrapperType {
 
 	BC_FIPS_AES("AESKW", CodeProvider.BCFIPS, SymmetricEncryptionType.AES_GCM),
 	BC_FIPS_AES_WITH_PADDING("AESKWP", CodeProvider.BCFIPS, SymmetricEncryptionType.AES_GCM),
-	BC_CHACHA20_POLY1305(null, CodeProvider.BC, SymmetricEncryptionType.BC_CHACHA20_POLY1305),
+	CLASSIC_ENCRYPTION(null, null, SymmetricEncryptionType.AES_GCM),
 	DEFAULT(BC_FIPS_AES_WITH_PADDING);
 
 	private final String algorithmName;

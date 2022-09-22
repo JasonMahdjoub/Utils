@@ -174,9 +174,11 @@ public class SymmetricSecretKey extends AbstractKey implements ISecretDecentrali
 				new SymmetricSecretKey(signatureType, Arrays.copyOfRange(d, keySizeBytes, keySizeBytes*2)));
 	}
 
-
-	SymmetricSecretKey(SymmetricEncryptionType type, byte[] secretKey, short keySize) {
-		this(secretKey, keySize);
+	SymmetricSecretKey(SymmetricEncryptionType type, SymmetricSecretKey k) {
+		this(type, k.finalizer.secretKey.clone(), k.keySizeBits);
+	}
+	SymmetricSecretKey(SymmetricEncryptionType type, byte[] secretKey, short keySizeBits) {
+		this(secretKey, keySizeBits);
 		if (type == null)
 			throw new NullPointerException("type");
 		this.encryptionType = type;
@@ -186,6 +188,7 @@ public class SymmetricSecretKey extends AbstractKey implements ISecretDecentrali
 	SymmetricSecretKey(SymmetricEncryptionType type, WrappedSecretData secretKey) {
 		this(type, secretKey.getBytes().clone());
 	}
+
 	SymmetricSecretKey(SymmetricEncryptionType type, byte[] secretKey) {
 		if (type == null)
 			throw new NullPointerException("type");
@@ -285,12 +288,12 @@ public class SymmetricSecretKey extends AbstractKey implements ISecretDecentrali
 		this.finalizer.bcfipsNativeSecretKey=new com.distrimind.bcfips.crypto.SymmetricSecretKey(getBouncyCastleAlgorithm(), secretKey.getKeyBytes());
 	}
 
-	private SymmetricSecretKey(byte[] secretKey, short keySize) {
+	private SymmetricSecretKey(byte[] secretKey, short keySizeBits) {
 		if (secretKey == null)
 			throw new NullPointerException("secretKey");
 		finalizer=new Finalizer(this);
 		this.finalizer.secretKey = secretKey;
-		this.keySizeBits = keySize;
+		this.keySizeBits = keySizeBits;
 		hashCode = Arrays.hashCode(this.finalizer.secretKey);
 	}
 
