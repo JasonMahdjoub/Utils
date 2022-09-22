@@ -70,7 +70,7 @@ public class KeyWrapperAlgorithm extends MultiFormatProperties implements Secure
 		mode=0;
 	}
 	public KeyWrapperAlgorithm(SymmetricKeyWrapperType symmetricKeyWrapperType, SymmetricSecretKey secretKeyForEncryption) {
-		this(symmetricKeyWrapperType, secretKeyForEncryption, true);
+		this(symmetricKeyWrapperType, secretKeyForEncryption, false);
 	}
 	public KeyWrapperAlgorithm(SymmetricKeyWrapperType symmetricKeyWrapperType, SymmetricSecretKey secretKeyForEncryption, boolean signatureNotNecessary) {
 		this(symmetricKeyWrapperType, secretKeyForEncryption, null, null, null, false, false, signatureNotNecessary);
@@ -602,7 +602,6 @@ public class KeyWrapperAlgorithm extends MultiFormatProperties implements Secure
 						KeyWrapperAlgorithm alg=new KeyWrapperAlgorithm(kwt, mainKey);
 
 						System.out.println(kwt + " , " + et + ", " + k.getKeySizeBits() + ", " + alg.wrap(SecureRandomType.DEFAULT.getSingleton(null), k).getBytes().length+", "+alg.getWrappedSymmetricSecretKeySizeInBytes(mainKey.getEncryptionAlgorithmType(), keySizeBits/8));
-						System.out.println(Arrays.toString(alg.wrap(SecureRandomType.DEFAULT.getSingleton(null), k).getBytes()));
 					}
 				}
 			}
