@@ -59,8 +59,8 @@ abstract class CommonCipherInputStream extends RandomInputStream {
 	private final int maxEncryptedPartLength;
 	private RandomInputStream is;
 	//private final boolean includeIV;
-	private AbstractWrappedIVs<?> wrappedIVAndSecretKey;
-	private final int IVSizeBytesWithoutExternalCounter;
+	private AbstractWrappedIVs<?, ?> wrappedIVAndSecretKey;
+
 	private byte[] externalCounter;
 	protected AbstractCipher cipher;
 	private byte[] associatedData;
@@ -77,11 +77,11 @@ abstract class CommonCipherInputStream extends RandomInputStream {
 	private boolean initPossible;
 	private final boolean includeIV;
 
-	protected abstract void initCipherForDecryptionWithIvAndCounter(AbstractWrappedIVs<?> wrappedIVAndSecretKey, int counter) throws IOException;
+	protected abstract void initCipherForDecryptionWithIvAndCounter(AbstractWrappedIVs<?, ?> wrappedIVAndSecretKey, int counter) throws IOException;
 	protected abstract void initCipherForDecryption() throws IOException;
 	protected abstract long getOutputSizeAfterDecryption(long inputLength) throws IOException;
 
-	CommonCipherInputStream(IClientServer iEncryptionInputAlgorithm, boolean allInDoFinal, int maxEncryptedPartLength, RandomInputStream is, boolean includeIV, int IVSizeBytesWithoutExternalCounter, byte maxCounterLength, byte[] externalCounter, AbstractCipher cipher, byte[] associatedData, int offAD, int lenAD, byte[] buffer, boolean supportRandomAccess, int counterStepInBytes, int maxPlainTextSizeForEncoding) throws IOException {
+	CommonCipherInputStream(IClientServer iEncryptionInputAlgorithm, boolean allInDoFinal, int maxEncryptedPartLength, RandomInputStream is, boolean includeIV, byte maxCounterLength, byte[] externalCounter, AbstractCipher cipher, byte[] associatedData, int offAD, int lenAD, byte[] buffer, boolean supportRandomAccess, int counterStepInBytes, int maxPlainTextSizeForEncoding) throws IOException {
 		if (maxCounterLength>0) {
 			if (externalCounter == null)
 				throw new NullPointerException("External counter is null");
@@ -95,7 +95,6 @@ abstract class CommonCipherInputStream extends RandomInputStream {
 		this.includeIV=includeIV;
 		this.allInDoFinal=allInDoFinal;
 		this.maxEncryptedPartLength = maxEncryptedPartLength;
-		this.IVSizeBytesWithoutExternalCounter = IVSizeBytesWithoutExternalCounter;
 		this.cipher = cipher;
 		this.buffer = buffer;
 		this.supportRandomAccess = supportRandomAccess;
@@ -152,9 +151,9 @@ abstract class CommonCipherInputStream extends RandomInputStream {
 			{
 				if (initPossible) {
 					if (wrappedIVAndSecretKey != null) {
-						wrappedIVAndSecretKey.pushNewElementAndSetCurrentIV(0, is, externalCounter);
+						wrappedIVAndSecretKey.pushNewElementAndSetCurrentIV(posEncrypted/maxEncryptedPartLength, is, externalCounter);
 						initCipherForDecryptionWithIvAndCounter(wrappedIVAndSecretKey, 0);
-						posEncrypted += IVSizeBytesWithoutExternalCounter;
+						posEncrypted += wrappedIVAndSecretKey.getSerializedElementSizeInBytes();
 					} else {
 						initCipherForDecryption();
 					}
@@ -278,9 +277,12 @@ abstract class CommonCipherInputStream extends RandomInputStream {
 			}
 			s = Math.min(s, len);
 			checkOutputBuffer();
+
 			do {
 				int s3 = Math.min(s, buffer.length);
-				s2 = is.read(buffer, 0, s3);
+				if (s3>0) {
+					s2 = is.read(buffer, 0, s3);
+				}
 
 				if (s2 == -1) {
 					//length=is.currentPosition();
@@ -372,7 +374,7 @@ abstract class CommonCipherInputStream extends RandomInputStream {
 			is.seek(p);
 			wrappedIVAndSecretKey.pushNewElementAndSetCurrentIV(round, is, externalCounter);
 
-			p += counter+IVSizeBytesWithoutExternalCounter;
+			p += counter+wrappedIVAndSecretKey.getSerializedElementSizeInBytes();
 			counter/=counterStepInBytes;
 			is.seek(posEncrypted =p);
 			initCipherForDecryptionWithIvAndCounter(wrappedIVAndSecretKey, (int)counter);

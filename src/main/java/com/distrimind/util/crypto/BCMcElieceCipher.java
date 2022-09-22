@@ -84,7 +84,9 @@ public class BCMcElieceCipher extends AbstractCipher{
 		return mode;
 	}
 
+
 	public BCMcElieceCipher(ASymmetricEncryptionType encryptionType) {
+		super();
 		if (encryptionType==null)
 			throw new NullPointerException();
 		this.encryptionType = encryptionType;
@@ -835,7 +837,7 @@ public class BCMcElieceCipher extends AbstractCipher{
 	}
 
 	@Override
-	public int getOutputSize(int inputLength) throws IllegalStateException {
+	protected int getOutputSize(int inputLength) throws IllegalStateException {
 
 		return inputLength;
 	}

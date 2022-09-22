@@ -79,4 +79,8 @@ interface IServer extends IClientServer{
 		return new CPUUsageAsDecoyInputStream<>(in);
 	}
 
+	@Override
+	default int getIVSizeBytesWithExternalCounter() {
+		return 0;
+	}
 }

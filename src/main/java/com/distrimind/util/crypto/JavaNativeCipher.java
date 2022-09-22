@@ -77,6 +77,7 @@ public final class JavaNativeCipher extends AbstractCipher {
 		this(null, cipher);
 	}
 	JavaNativeCipher(SymmetricEncryptionType type, Cipher cipher) {
+		super();
 		this.type=type;
 		this.cipher = cipher;
 	}
@@ -155,7 +156,7 @@ public final class JavaNativeCipher extends AbstractCipher {
 	}
 
 	@Override
-	public int getOutputSize(int _inputLength) throws IOException {
+	protected int getOutputSize(int _inputLength) throws IOException {
 		try {
 			return cipher.getOutputSize(_inputLength);
 		}
@@ -270,6 +271,5 @@ public final class JavaNativeCipher extends AbstractCipher {
 	public int getMode() {
 		return mode;
 	}
-
 
 }

@@ -58,11 +58,13 @@ public final class GnuCipher extends AbstractCipher {
 		return mode;
 	}
 
+
 	private Object setSecureRandom(AbstractSecureRandom random) {
 	    return random.getGnuSecureRandom();
 	}
 
 	GnuCipher(Object cipher) {
+		super();
 		this.cipher = cipher;
 	}
 
@@ -121,7 +123,7 @@ public final class GnuCipher extends AbstractCipher {
 	}
 
 	@Override
-	public int getOutputSize(int _inputLength) throws IOException {
+	protected int getOutputSize(int _inputLength) throws IOException {
 		return GnuFunctions.cipherGetOutputSize(cipher, _inputLength);
 	}
 

@@ -49,9 +49,9 @@ public class SubStreamHashResult implements SecureExternalizable {
 
 
 	private byte[] hash;
-	private AbstractWrappedIVs<?> manualIvsAndSecretKeys;
+	private AbstractWrappedIVs<?, ?> manualIvsAndSecretKeys;
 
-	public SubStreamHashResult(byte[] hash, AbstractWrappedIVs<?> manualIvsAndSecretKeys) {
+	public SubStreamHashResult(byte[] hash, AbstractWrappedIVs<?, ?> manualIvsAndSecretKeys) {
 		if (hash==null)
 			throw new NullPointerException();
 		if (hash.length>MAX_HASH_SIZE)
@@ -63,22 +63,13 @@ public class SubStreamHashResult implements SecureExternalizable {
 	public byte[] getHash() {
 		return hash;
 	}
-	public AbstractWrappedIVs<?> getManualIvsAndSecretKeys(SymmetricSecretKey mainKey) throws IOException {
-		AbstractSecureRandom secureRandom=null;
-		if (manualIvsAndSecretKeys instanceof WrappedIVsAndSecretKeys)
-		{
-			secureRandom=((WrappedIVsAndSecretKeys) manualIvsAndSecretKeys).getSecureRandom();
-		}
-		return getManualIvsAndSecretKeys(mainKey, secureRandom);
-	}
-	public AbstractWrappedIVs<?> getManualIvsAndSecretKeys(SymmetricSecretKey mainKey, AbstractSecureRandom secureRandom) throws IOException {
+
+	public AbstractWrappedIVs<?, ?> getManualIvsAndSecretKeys(SymmetricEncryptionAlgorithm algorithm) throws IOException {
 		if (manualIvsAndSecretKeys instanceof WrappedIVsAndSecretKeys)
 		{
 			WrappedIVsAndSecretKeys w=(WrappedIVsAndSecretKeys)manualIvsAndSecretKeys;
-			if (w.getMainKey()==null)
-			{
-				w.setMainKey(mainKey, secureRandom);
-			}
+			if (w.getAlgorithm()==null)
+				w.setAlgorithm(algorithm);
 		}
 		return manualIvsAndSecretKeys;
 	}

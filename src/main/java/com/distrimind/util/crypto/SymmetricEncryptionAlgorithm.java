@@ -34,7 +34,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
-import com.distrimind.util.Cleanable;
+
 import com.distrimind.util.io.*;
 
 import javax.crypto.Cipher;
@@ -42,7 +42,6 @@ import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -54,32 +53,18 @@ import java.util.Random;
  * @since Utils 1.4
  */
 public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm {
-	private static final class Finalizer extends Cleaner
-	{
-		private byte[] externalCounter;
 
-		private Finalizer(Cleanable cleanable) {
-			super(cleanable);
-		}
-
-		@Override
-		protected void performCleanup() {
-			if (externalCounter!=null) {
-				Arrays.fill(externalCounter, (byte) 0);
-				externalCounter=null;
-			}
-		}
-	}
+	static final SymmetricKeyWrapperType DEFAULT_SYMMETRIC_KEY_WRAPPER_TYPE=SymmetricKeyWrapperType.BC_FIPS_AES_WITH_PADDING;
 	private final SymmetricSecretKey key;
 
 	private final SymmetricEncryptionType type;
 
-	private final AbstractSecureRandom random;
+	private final AbstractSecureRandom randomForIV;
 	//private byte[] iv;
 	
 	private final byte blockModeCounterBytes;
 	private final boolean internalCounter;
-	private final Finalizer finalizer;
+
 
 	private final int counterStepInBytes;
 	private final boolean supportRandomReadWrite;
@@ -101,7 +86,7 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 			throw new IllegalStateException("Encryption type must support random read and write");
 		try {
 			byte[] hash = subStreamParameters.generateHash(encryptedInputStream);
-			AbstractWrappedIVs<?> manualIvsAndSecretKeys=useDerivedKeys?new WrappedIVsAndSecretKeys():new WrappedIVs();
+			AbstractWrappedIVs<?, ?> manualIvsAndSecretKeys=useDerivedKeys?new WrappedIVsAndSecretKeys():new WrappedIVs();
 			readIvsFromEncryptedStream(encryptedInputStream, headLengthBytes, manualIvsAndSecretKeys);
 			return new SubStreamHashResult(hash, manualIvsAndSecretKeys);
 		} catch (NoSuchProviderException | NoSuchAlgorithmException e) {
@@ -169,7 +154,7 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 		if (nonEncryptedInputStream.currentPosition()!=0)
 			nonEncryptedInputStream.seek(0);
 		List<SubStreamParameter> parameters = subStreamParameters.getParameters();
-		AbstractWrappedIVs<?> manualIvsAndSecretKeys = hashResultFromEncryptedStream.getManualIvsAndSecretKeys(key);
+		AbstractWrappedIVs<?, ?> manualIvsAndSecretKeys = hashResultFromEncryptedStream.getManualIvsAndSecretKeys(this);
 
 		final int ivSizeWithoutExternalCounter=getIVSizeBytesWithoutExternalCounter();
 		NullRandomOutputStream nullStream=new NullRandomOutputStream();
@@ -229,45 +214,47 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 			}
 			return com.distrimind.bouncycastle.util.Arrays.constantTimeAreEqual(md.digest(), hashResultFromEncryptedStream.getHash());
 		}
+
 	}
-	SymmetricEncryptionAlgorithm(AbstractSecureRandom random, SymmetricSecretKey key, boolean useDerivedKeys)
+	SymmetricEncryptionAlgorithm(AbstractSecureRandom randomForIV, SymmetricSecretKey key, boolean useDerivedKeys)
 			throws IOException {
-		this(random, key, (byte)0, false, useDerivedKeys);
+		this(randomForIV, key, (byte)0, false, useDerivedKeys);
 	}
-	SymmetricEncryptionAlgorithm(AbstractSecureRandom random, AbstractSecureRandom secureRandomForKeyGeneration,SymmetricSecretKey key, boolean useDerivedKeys)
+	SymmetricEncryptionAlgorithm(AbstractSecureRandom randomForIV, AbstractSecureRandom secureRandomForKeyGeneration,SymmetricSecretKey key, boolean useDerivedKeys)
 			throws IOException {
-		this(random, secureRandomForKeyGeneration, key, (byte)0, false, useDerivedKeys);
+		this(randomForIV, secureRandomForKeyGeneration, key, (byte)0, false, useDerivedKeys);
 	}
-	public SymmetricEncryptionAlgorithm(AbstractSecureRandom random, SymmetricSecretKey key)
+	public SymmetricEncryptionAlgorithm(AbstractSecureRandom randomForIV, SymmetricSecretKey key)
 			throws IOException {
-		this(random, key, true);
+		this(randomForIV, key, true);
 	}
-	public SymmetricEncryptionAlgorithm(AbstractSecureRandom random, AbstractSecureRandom secureRandomForKeyGeneration, SymmetricSecretKey key)
+	public SymmetricEncryptionAlgorithm(AbstractSecureRandom randomForIV, AbstractSecureRandom secureRandomForKeyGeneration, SymmetricSecretKey key)
 			throws IOException {
-		this(random, secureRandomForKeyGeneration, key, true);
+		this(randomForIV, secureRandomForKeyGeneration, key, true);
 	}
-	public SymmetricEncryptionAlgorithm(AbstractSecureRandom random, SymmetricSecretKey key, byte blockModeCounterBytes)
+	public SymmetricEncryptionAlgorithm(AbstractSecureRandom randomForIV, SymmetricSecretKey key, byte blockModeCounterBytes)
 			throws IOException {
-		this(random, key, blockModeCounterBytes, false);
+		this(randomForIV, key, blockModeCounterBytes, false);
 	}
-	public SymmetricEncryptionAlgorithm(AbstractSecureRandom random, AbstractSecureRandom secureRandomForKeyGeneration, SymmetricSecretKey key, byte blockModeCounterBytes)
+	public SymmetricEncryptionAlgorithm(AbstractSecureRandom randomForIV, AbstractSecureRandom secureRandomForKeyGeneration, SymmetricSecretKey key, byte blockModeCounterBytes)
 			throws IOException {
-		this(random, secureRandomForKeyGeneration, key, blockModeCounterBytes, false);
+		this(randomForIV, secureRandomForKeyGeneration, key, blockModeCounterBytes, false);
 	}
-	public SymmetricEncryptionAlgorithm(AbstractSecureRandom random, SymmetricSecretKey key, byte blockModeCounterBytes, boolean internalCounter) throws IOException {
-		this(random, key, blockModeCounterBytes, internalCounter, true);
+	public SymmetricEncryptionAlgorithm(AbstractSecureRandom randomForIV, SymmetricSecretKey key, byte blockModeCounterBytes, boolean internalCounter) throws IOException {
+		this(randomForIV, key, blockModeCounterBytes, internalCounter, true);
 	}
-	public SymmetricEncryptionAlgorithm(AbstractSecureRandom random, AbstractSecureRandom secureRandomForKeyGeneration, SymmetricSecretKey key, byte blockModeCounterBytes, boolean internalCounter) throws IOException {
-		this(random, secureRandomForKeyGeneration, key, blockModeCounterBytes, internalCounter, true);
+	public SymmetricEncryptionAlgorithm(AbstractSecureRandom randomForIV, AbstractSecureRandom secureRandomForKeyGeneration, SymmetricSecretKey key, byte blockModeCounterBytes, boolean internalCounter) throws IOException {
+		this(randomForIV, secureRandomForKeyGeneration, key, blockModeCounterBytes, internalCounter, true);
 	}
-	SymmetricEncryptionAlgorithm(AbstractSecureRandom random, SymmetricSecretKey key, byte blockModeCounterBytes, boolean internalCounter, boolean useDerivedKeys) throws IOException {
-		this(random,AbstractWrappedIVs.getDefaultSecureRandom(), key, blockModeCounterBytes, internalCounter, useDerivedKeys);
+	SymmetricEncryptionAlgorithm(AbstractSecureRandom randomForIV, SymmetricSecretKey key, byte blockModeCounterBytes, boolean internalCounter, boolean useDerivedKeys) throws IOException {
+		this(randomForIV,AbstractWrappedIVs.getDefaultSecureRandom(), key, blockModeCounterBytes, internalCounter, useDerivedKeys);
 	}
-	SymmetricEncryptionAlgorithm(AbstractSecureRandom random, AbstractSecureRandom secureRandomForKeyGeneration, SymmetricSecretKey key, byte blockModeCounterBytes, boolean internalCounter, boolean useDerivedKeys)
+	SymmetricEncryptionAlgorithm(AbstractSecureRandom randomForIV, AbstractSecureRandom secureRandomForKeyGeneration, SymmetricSecretKey key, byte blockModeCounterBytes, boolean internalCounter, boolean useDerivedKeys)
 			throws IOException {
 		super(key.getEncryptionAlgorithmType().getCipherInstance(), key.getEncryptionAlgorithmType().getIVSizeBytes());
 		if (secureRandomForKeyGeneration==null)
 			throw new NullPointerException();
+
 		this.secureRandomForKeyGeneration=secureRandomForKeyGeneration;
 		this.fakeIV=new byte[key.getEncryptionAlgorithmType().getIVSizeBytes()];
 		Random r=new Random(System.nanoTime());
@@ -275,8 +262,8 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 		this.useDerivedKeys=useDerivedKeys;
 		if (key.isCleaned())
 			throw new IllegalArgumentException();
-		finalizer=new Finalizer(this);
-		if (random==null)
+
+		if (randomForIV ==null)
 			throw new NullPointerException();
 		this.type = key.getEncryptionAlgorithmType();
 		if (!internalCounter && blockModeCounterBytes>type.getMaxCounterSizeInBytesUsedWithBlockMode())
@@ -286,26 +273,26 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 		this.blockModeCounterBytes = blockModeCounterBytes;
 		this.internalCounter = internalCounter || blockModeCounterBytes==0;
 		this.key = key;
-		this.random = random;
+		this.randomForIV = randomForIV;
 		this.counterStepInBytes=type.getBlockSizeBits()/8;
 		this.supportRandomReadWrite=type.supportRandomReadWrite();
 		//iv = new byte[getIVSizeBytesWithExternalCounter()];
-		finalizer.externalCounter=this.internalCounter?null:new byte[blockModeCounterBytes];
+
 		this.chacha =type.getAlgorithmName().toUpperCase().startsWith(SymmetricEncryptionType.CHACHA20_NO_RANDOM_ACCESS.getAlgorithmName().toUpperCase());
 		this.gcm = type.getBlockMode().equalsIgnoreCase("GCM");
 
-		//this.cipher.init(Cipher.ENCRYPT_MODE, this.key, generateIV());
+		initCipherForEncryptionWithNullIV(cipher);
 
 		setMaxPlainTextSizeForEncoding(type.getMaxPlainTextSizeForEncoding());
 		initBufferAllocatorArgs();
 
 	}
+
 	@Override
-	public AbstractWrappedIVs<?> getWrappedIVAndSecretKeyInstance()
-	{
+	public AbstractWrappedIVs<?, ?> getWrappedIVAndSecretKeyInstance() throws IOException {
 		return useDerivedKeys?
-				new WrappedIVsAndSecretKeys(key.getEncryptionAlgorithmType().getIVSizeBytes(), blockModeCounterBytes, key, secureRandomForKeyGeneration):
-				new WrappedIVs(key.getEncryptionAlgorithmType().getIVSizeBytes(), blockModeCounterBytes, secureRandomForKeyGeneration);
+				new WrappedIVsAndSecretKeys(this):
+				new WrappedIVs(this);
 	}
 	@Override
 	protected boolean useDerivedSecretKeys()
@@ -374,9 +361,16 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 		return type;
 	}
 
-	AbstractSecureRandom getSecureRandom()
+	@Override
+	public AbstractSecureRandom getSecureRandomForIV()
 	{
-		return random;
+		return randomForIV;
+	}
+
+	@Override
+	public AbstractSecureRandom getSecureRandomForKeyGeneration()
+	{
+		return secureRandomForKeyGeneration;
 	}
 
 	@Override
@@ -429,7 +423,7 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 	}
 
 	@Override
-	protected void initCipherForEncryptionWithIvAndCounter(AbstractCipher cipher, AbstractWrappedIVs<?> wrappedIVAndSecretKey, int counter) throws IOException
+	protected void initCipherForEncryptionWithIvAndCounter(AbstractCipher cipher, AbstractWrappedIVs<?, ?> wrappedIVAndSecretKey, int counter) throws IOException
 	{
 		checkKeysNotCleaned();
 		SymmetricSecretKey k;
@@ -438,23 +432,28 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 			k=((WrappedIVsAndSecretKeys)wrappedIVAndSecretKey).getCurrentSecretKey();
 		else
 			k=key;
+		if (k.isCleaned())
+			throw new IOException();
+		AbstractWrappedIV<?, ?, ?> iv=wrappedIVAndSecretKey.getCurrentIV();
 		if (supportRandomReadWrite)
-			cipher.init(Cipher.ENCRYPT_MODE, k, wrappedIVAndSecretKey.getCurrentIV(), counter);
-		else
-			cipher.init(Cipher.ENCRYPT_MODE, k, wrappedIVAndSecretKey.getCurrentIV());
+			iv.setCounter(counter);
+		cipher.init(Cipher.ENCRYPT_MODE, k, iv.getIv());
 	}
+
 	@Override
-	protected void initCipherForDecryptionWithIvAndCounter(AbstractCipher cipher, AbstractWrappedIVs<?> wrappedIVAndSecretKey, int counter) throws IOException {
+	protected void initCipherForDecryptionWithIvAndCounter(AbstractCipher cipher, AbstractWrappedIVs<?, ?> wrappedIVAndSecretKey, int counter) throws IOException {
 		checkKeysNotCleaned();
 		SymmetricSecretKey k;
 		if (useDerivedKeys)
 			k=((WrappedIVsAndSecretKeys)wrappedIVAndSecretKey).getCurrentSecretKey();
 		else
 			k=key;
+		if (k.isCleaned())
+			throw new IOException();
+		AbstractWrappedIV<?, ?, ?> iv=wrappedIVAndSecretKey.getCurrentIV();
 		if (supportRandomReadWrite)
-			cipher.init(Cipher.DECRYPT_MODE, k, wrappedIVAndSecretKey.getCurrentIV(), counter);
-		else
-			cipher.init(Cipher.DECRYPT_MODE, k, wrappedIVAndSecretKey.getCurrentIV());
+			iv.setCounter(counter);
+		cipher.init(Cipher.DECRYPT_MODE, k, iv.getIv());
 
 	}
 	@Override
@@ -490,6 +489,9 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 		return internalCounter;
 	}
 
-
+	SymmetricKeyWrapperType getSymmetricKeyWrapperType()
+	{
+		return DEFAULT_SYMMETRIC_KEY_WRAPPER_TYPE;
+	}
 
 }

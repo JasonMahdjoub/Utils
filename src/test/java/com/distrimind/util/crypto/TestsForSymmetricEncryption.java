@@ -151,11 +151,11 @@ public class TestsForSymmetricEncryption {
 			int mlength=m.length;
 			long expectedLength=algoLocal.getOutputSizeAfterEncryption(mlength);
 			byte[] encrypted = algoLocal.encode(m, null, counter);
-			System.out.println(algoLocal.getIvAndSecretKeySizeInBytesWithoutExternalCounter());
 
 			Assert.assertEquals(encrypted.length, expectedLength, "length=" + m.length+", algoLocal.getIvAndSecretKeySizeInBytesWithoutExternalCounter()="+algoLocal.getIvAndSecretKeySizeInBytesWithoutExternalCounter());
 
 			Assert.assertTrue(encrypted.length >= m.length);
+
 			byte[] decrypted = algoDistant.decode(encrypted, null, counter);
 			Assert.assertEquals(decrypted.length, m.length, "Testing size " + type1+", "+type2);
 			Assert.assertEquals(decrypted, m, "Testing " + type1+", "+type2+", useExternalCounter="+algoLocal.useExternalCounter());
@@ -539,7 +539,7 @@ public class TestsForSymmetricEncryption {
 		}
 		return res2;
 	}
-	@DataProvider(name = "provideDataForSymetricEncryptions", parallel = true)
+	@DataProvider(name = "provideDataForSymetricEncryptions", parallel = false)
 	public Object[][] provideDataForSymetricEncryptions() {
 		Object[][] res = new Object[SymmetricEncryptionType.values().length][];
 		int i = 0;

@@ -43,8 +43,7 @@ import java.io.IOException;
  * @since Utils 5.24.0
  */
 public interface IClientServer {
-	default AbstractWrappedIVs<?> getWrappedIVAndSecretKeyInstance()
-	{
+	default AbstractWrappedIVs<?, ?> getWrappedIVAndSecretKeyInstance() throws IOException {
 		return null;
 	}
 	AbstractCipher getCipherInstance() throws IOException;
@@ -65,5 +64,30 @@ public interface IClientServer {
 	default boolean isUsingSideChannelMitigation()
 	{
 		return isPowerMonitoringSideChannelAttackPossible() || isFrequencySideChannelAttackPossible() || isTimingSideChannelAttackPossible();
+	}
+	int getIVSizeBytesWithExternalCounter();
+
+
+
+	default int getIVSizeBytesWithoutExternalCounter()
+	{
+		return getIVSizeBytesWithExternalCounter()-(useExternalCounter()?getBlockModeCounterBytes():0);
+	}
+	default boolean useExternalCounter()
+	{
+		return false;
+	}
+	default byte getBlockModeCounterBytes() {
+		return (byte)0;
+	}
+
+	default AbstractSecureRandom getSecureRandomForIV()
+	{
+		return null;
+	}
+
+	default AbstractSecureRandom getSecureRandomForKeyGeneration()
+	{
+		return null;
 	}
 }

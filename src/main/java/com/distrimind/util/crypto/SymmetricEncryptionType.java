@@ -62,7 +62,7 @@ import java.util.Arrays;
  */
 public enum SymmetricEncryptionType {
 
-	AES_CBC_PKCS5Padding("AES", "CBC", "PKCS5Padding", (short) 128, CodeProvider.SunJCE, CodeProvider.SunJCE, SymmetricAuthenticatedSignatureType.HMAC_SHA2_384, com.distrimind.bcfips.crypto.general.AES.ALGORITHM, (short)128, false, (short)118, (short)146, (short)132, (short)148, (short)322, (short)583, true, true, true, true, true, true, true, (short)16, 1L<<32),
+	AES_CBC_PKCS5Padding("AES", "CBC", "PKCS5Padding", (short) 128, CodeProvider.SunJCE, CodeProvider.SunJCE, SymmetricAuthenticatedSignatureType.HMAC_SHA2_384, com.distrimind.bcfips.crypto.general.AES.ALGORITHM, (short)128, false, (short)118, (short)146, (short)132, (short)148, (short)322, (short)583, true, true, true, true, true, true, true, (short)16,  1L<<32),
 	AES_GCM("AES", "GCM", "NoPadding", (short) 128, CodeProvider.SunJCE, CodeProvider.SunJCE, null, com.distrimind.bcfips.crypto.general.AES.ALGORITHM, (short)128, true, (short)40, (short)48, (short)58, (short) 58, (short)144, (short)613, true, true, true, true, true, true, true, (short)12, 1L<<32),
 	AES_CTR("AES", "CTR", "NoPadding", (short) 128, CodeProvider.SunJCE, CodeProvider.SunJCE, SymmetricAuthenticatedSignatureType.HMAC_SHA2_384, com.distrimind.bcfips.crypto.general.AES.ALGORITHM, (short)128, false, (short)126, (short)112, (short)111, (short) 117, (short)560, (short)252, true, true, true, true, true, true, true, (short)16, 1L<<32),
 	@Deprecated
@@ -250,7 +250,7 @@ public enum SymmetricEncryptionType {
 							boolean powerMonitoringAttackPossible, boolean electromagneticAttackPossible, boolean acousticAttackPossible,
 							boolean dfaAttackPossible, boolean frequencyAttackPossible, short ivLengthBytes, long maxIVGenerationWithOneSecretKey) {
 		this(algorithmName, blockMode, padding, keySizeBits, (short) (keySizeBits / 8), codeProviderForEncryption, codeProviderForKeyGenerator, defaultSignature, bcAlgorithm, blockSize, authenticated, encodingSpeedIndexJava7, decodingSpeedIndexJava7, encodingSpeedIndexJava8, decodingSpeedIndexJava8, encodingSpeedIndexJava9, decodingSpeedIndexJava9,
-				timingAttackPossible, cacheAttackPossible, powerMonitoringAttackPossible, electromagneticAttackPossible, acousticAttackPossible, dfaAttackPossible, frequencyAttackPossible, ivLengthBytes, maxIVGenerationWithOneSecretKey);
+				timingAttackPossible, cacheAttackPossible, powerMonitoringAttackPossible, electromagneticAttackPossible, acousticAttackPossible, dfaAttackPossible, frequencyAttackPossible, ivLengthBytes,  maxIVGenerationWithOneSecretKey);
 	}
 	SymmetricEncryptionType(String algorithmName, String blockMode, String padding, short keySizeBits,
 							short keySizeBytes, CodeProvider codeProviderForEncryption, CodeProvider codeProviderForKeyGenerator, SymmetricAuthenticatedSignatureType defaultSignature, Algorithm bcAlgorithm, short blockSize, boolean authenticated, short encodingSpeedIndexJava7, short decodingSpeedIndexJava7, short encodingSpeedIndexJava8, short decodingSpeedIndexJava8, short encodingSpeedIndexJava9, short decodingSpeedIndexJava9,
@@ -562,4 +562,5 @@ public enum SymmetricEncryptionType {
 	{
 		return keySizeBytes+ additionalBytesWhenKeyEncoded;
 	}
+
 }

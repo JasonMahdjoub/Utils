@@ -168,7 +168,7 @@ public class EncryptionSignatureHashEncoder {
 			cipher = reloadCipher(cipherRandom, originalSecretKeyForEncryption, currentKeyGeneration, externalCounter);
 			cleanCache();
 			if (decoder!=null) {
-				decoder.cipher = reloadCipher(cipher.getSecureRandom(), originalSecretKeyForEncryption, currentKeyGeneration, externalCounter);
+				decoder.cipher = reloadCipher(cipher.getSecureRandomForIV(), originalSecretKeyForEncryption, currentKeyGeneration, externalCounter);
 				decoder.cleanCache();
 			}
 		}
@@ -257,7 +257,7 @@ public class EncryptionSignatureHashEncoder {
 			throw new NullPointerException();
 		this.originalSecretKeyForEncryption=cipher.getSecretKey();
 		this.cipher=null;
-		this.cipherRandom=cipher.getSecureRandom();
+		this.cipherRandom=cipher.getSecureRandomForIV();
 		this.cipherOutputStream=null;
 		this.currentKeyID=0;
 		this.useProvider=false;

@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * @author Jason Mahdjoub
@@ -93,8 +94,10 @@ public class KeyWrapperAlgorithm extends MultiFormatProperties implements Secure
 			throw new NullPointerException();
 		if (secretKeyForEncryption ==null)
 			throw new NullPointerException();
-		if (secretKeyForEncryption.getEncryptionAlgorithmType()!=symmetricKeyWrapperType.getSymmetricEncryptionType())
+		if (secretKeyForEncryption.getEncryptionAlgorithmType()==null)
 			throw new IllegalArgumentException();
+		if (!Objects.equals(symmetricKeyWrapperType.getSymmetricEncryptionType().getAlgorithmName(), secretKeyForEncryption.getEncryptionAlgorithmType().getAlgorithmName()))
+			throw new IllegalArgumentException("secretKeyForEncryption.getEncryptionAlgorithmType()="+secretKeyForEncryption.getEncryptionAlgorithmType()+", symmetricKeyWrapperType.getSymmetricEncryptionType()="+symmetricKeyWrapperType.getSymmetricEncryptionType());
 		if (publicKeyForSignature ==null && privateKeyForSignature==null && includeASymmetricSignature)
 			throw new NullPointerException();
 		if (includeSecretKeyForSignature && secretKeyForSignature==null)
@@ -586,6 +589,7 @@ public class KeyWrapperAlgorithm extends MultiFormatProperties implements Secure
 						KeyWrapperAlgorithm alg=new KeyWrapperAlgorithm(kwt, mainKey);
 
 						System.out.println(kwt + " , " + et + ", " + k.getKeySizeBits() + ", " + alg.wrap(SecureRandomType.DEFAULT.getSingleton(null), k).getBytes().length+", "+alg.getWrappedSymmetricSecretKeySizeInBytes(mainKey.getEncryptionAlgorithmType(), keySizeBits/8));
+						System.out.println(Arrays.toString(alg.wrap(SecureRandomType.DEFAULT.getSingleton(null), k).getBytes()));
 					}
 				}
 			}

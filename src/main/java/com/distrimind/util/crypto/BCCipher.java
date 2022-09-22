@@ -79,15 +79,18 @@ public class BCCipher extends AbstractCipher {
 	public int getMode() {
 		return mode;
 	}
-	
+
+
 	BCCipher(SymmetricEncryptionType type)
 	{
+		super();
 		this.type=type;
 		this.keyWrapperType=null;
 	}
 	
 	BCCipher(SymmetricKeyWrapperType keyWrapperType)
 	{
+		super();
 		this.type=null;
 		this.keyWrapperType=keyWrapperType;
 	}
@@ -199,7 +202,7 @@ public class BCCipher extends AbstractCipher {
 	}
 
 	@Override
-	public int getOutputSize(int inputLength) {
+	protected int getOutputSize(int inputLength) {
 		/*if (type.getBlockMode().toUpperCase().equals("GCM"))
 		{
 			
@@ -211,7 +214,7 @@ public class BCCipher extends AbstractCipher {
 				return inputLength-16-12;
 		}
 		else*/
-			return cipher.getMaxOutputSize(inputLength);
+		return cipher.getMaxOutputSize(inputLength);
 	}
 
 	@Override

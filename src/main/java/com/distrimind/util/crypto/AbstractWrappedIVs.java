@@ -48,15 +48,16 @@ import java.util.Map;
  * @version 1.0
  * @since MaDKitLanEdition 5.24.0
  */
-public abstract class AbstractWrappedIVs<T extends WrappedIV> implements SecureExternalizable {
+public abstract class AbstractWrappedIVs<C extends IClientServer, W extends AbstractWrappedIV<C, ? extends AbstractWrappedIVs<C,W>, W>> implements SecureExternalizable {
 
 	private static final int MAX_ELEMENT_NUMBERS=Short.MAX_VALUE;
-	protected Map<Long, T> data=new HashMap<>();
+	protected Map<Long, W> data=new HashMap<>();
 	protected long lastIndex=-1;
-	private byte[] currentIV;
+	private W currentWrappedIV;
 	protected int IVSizeBytesWithoutExternalCounter;
+	private C algorithm;
 
-	private AbstractSecureRandom secureRandom;
+
 	static AbstractSecureRandom getDefaultSecureRandom() throws IOException {
 		try {
 			return SecureRandomType.DEFAULT_BC_FIPS_APPROVED.getInstance(System.nanoTime());
@@ -65,54 +66,44 @@ public abstract class AbstractWrappedIVs<T extends WrappedIV> implements SecureE
 		}
 	}
 	protected AbstractWrappedIVs() throws IOException {
-		currentIV=null;
+		currentWrappedIV=null;
 		IVSizeBytesWithoutExternalCounter=-1;
-		secureRandom=getDefaultSecureRandom();
 	}
-	AbstractWrappedIVs(int ivSizeBytes, int blockModeCounterBytes, AbstractSecureRandom random)
-	{
-		if (ivSizeBytes<0)
-			throw new IllegalArgumentException();
-		if (blockModeCounterBytes<0)
-			throw new IllegalArgumentException("The external counter size can't be lower than 0");
-		this.currentIV=new byte[ivSizeBytes];
-		this.IVSizeBytesWithoutExternalCounter=ivSizeBytes-blockModeCounterBytes;
-		setSecureRandom(random);
+	AbstractWrappedIVs(C algorithm) throws IOException {
+		setAlgorithm(algorithm);
 	}
 
-	void setSecureRandom(AbstractSecureRandom random)
-	{
-		if (random==null)
+	void setAlgorithm(C algorithm) throws IOException {
+		if (algorithm==null)
 			throw new NullPointerException();
-		this.secureRandom=random;
-	}
+		if (algorithm.getIVSizeBytesWithExternalCounter()<0)
+			throw new IllegalArgumentException();
+		if (algorithm.getBlockModeCounterBytes()<0)
+			throw new IllegalArgumentException("The external counter size can't be lower than 0");
+		this.algorithm=algorithm;
+		if (currentWrappedIV!=null && currentWrappedIV.getIv().length!=algorithm.getIVSizeBytesWithExternalCounter())
+		{
+			throw new IllegalArgumentException();
+		}
+		this.IVSizeBytesWithoutExternalCounter=algorithm.getIVSizeBytesWithoutExternalCounter();
 
-	public AbstractSecureRandom getSecureRandom() {
-		return secureRandom;
 	}
-
-	T getElement(long index)
+	W getElement(long index)
 	{
 		return data.get(index);
 	}
 
-	void setCurrentIV(long index, byte[] externalCounter) throws IOException {
+	void setCurrentIV(long index, RandomOutputStream out, byte[] externalCounter) throws IOException {
 		setCurrentIV(getElement(index), externalCounter);
+		currentWrappedIV.write(out);
 	}
-	protected void setCurrentIV(T res, byte[] externalCounter) throws IOException {
-		if (externalCounter==null)
-		{
-			System.arraycopy(res.getIv(), 0, currentIV, 0, currentIV.length);
-		}
-		else {
-			int l=currentIV.length-externalCounter.length;
-			System.arraycopy(res.getIv(), 0, currentIV, 0, l);
-			System.arraycopy(externalCounter, 0, currentIV, l, externalCounter.length);
-		}
+	protected void setCurrentIV(W res, byte[] externalCounter) throws IOException {
+		res.setExternalCounter(externalCounter);
+		this.currentWrappedIV=res;
 	}
 
 
-	abstract T newEmptyWrappedIVInstance() ;
+	abstract W newEmptyWrappedIVInstance() throws IOException;
 
 	protected void checkMaxElementNumbers()  {
 		if (data.size()>=MAX_ELEMENT_NUMBERS)
@@ -120,35 +111,35 @@ public abstract class AbstractWrappedIVs<T extends WrappedIV> implements SecureE
 	}
 	final void pushNewElementAndSetCurrentIV(long index, RandomInputStream in, byte[] externalCounter) throws IOException {
 		checkMaxElementNumbers();
-		T res=newEmptyWrappedIVInstance();
+		W res=newEmptyWrappedIVInstance();
 		res.readFully(in);
 		data.put(lastIndex=index, res);
 		setCurrentIV(res, externalCounter);
 	}
-	protected abstract T generateElement() throws IOException;
+	protected abstract W generateElement() throws IOException;
 	final void generateNewElement(long index, RandomOutputStream os, byte[] externalCounter) throws IOException {
 		checkMaxElementNumbers();
 		if (data.containsKey(index))
 			throw new IllegalArgumentException(""+index);
-		T res=generateElement();
+		W res=generateElement();
 		res.write(os);
 		data.put(lastIndex=index, res);
 		setCurrentIV(res, externalCounter);
 	}
 	final void pushNewElement(long index, RandomInputStream in) throws IOException {
 		checkMaxElementNumbers();
-		T res=newEmptyWrappedIVInstance();
+		W res=newEmptyWrappedIVInstance();
 		res.readFully(in);
 		data.put(lastIndex=index, res);
 	}
 	int getIvSizeBytes()
 	{
-		return currentIV.length;
+		return algorithm.getIVSizeBytesWithExternalCounter();
 	}
 
-	byte[] getCurrentIV()
+	W getCurrentIV()
 	{
-		return currentIV;
+		return currentWrappedIV;
 	}
 
 	abstract int getSerializedElementSizeInBytes() ;
@@ -161,7 +152,7 @@ public abstract class AbstractWrappedIVs<T extends WrappedIV> implements SecureE
 	@Override
 	public void writeExternal(SecuredObjectOutputStream out) throws IOException {
 		out.writeMap(data, false, MAX_ELEMENT_NUMBERS);
-		out.writeByte(currentIV.length);
+		out.writeByte(getIvSizeBytes());
 		out.writeByte(IVSizeBytesWithoutExternalCounter);
 	}
 
@@ -172,10 +163,11 @@ public abstract class AbstractWrappedIVs<T extends WrappedIV> implements SecureE
 		int s=in.readByte();
 		if (s<0 || s>WrappedIV.MAX_IV_LENGTH)
 			throw new MessageExternalizationException(Integrity.FAIL);
-		currentIV=new byte[s];
+		currentWrappedIV=null;
 		IVSizeBytesWithoutExternalCounter=in.readByte();
-		if (IVSizeBytesWithoutExternalCounter<=0 || IVSizeBytesWithoutExternalCounter>currentIV.length)
+		if (IVSizeBytesWithoutExternalCounter<=0 || IVSizeBytesWithoutExternalCounter>s)
 			throw new MessageExternalizationException(Integrity.FAIL);
+		data.values().forEach(v-> v.setContainer(AbstractWrappedIVs.this));
 
 	}
 
@@ -184,5 +176,10 @@ public abstract class AbstractWrappedIVs<T extends WrappedIV> implements SecureE
 		return SerializationTools.getInternalSize(data, MAX_ELEMENT_NUMBERS)+2;
 	}
 
-	protected abstract Class<T> getDataClass();
+	protected abstract Class<W> getDataClass();
+
+	public C getAlgorithm() {
+		return algorithm;
+	}
+
 }

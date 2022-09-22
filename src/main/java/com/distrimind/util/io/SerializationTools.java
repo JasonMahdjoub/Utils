@@ -2216,6 +2216,18 @@ public class SerializationTools {
 			res+=array.getBytes().length+1;
 		return res;
 	}
+	public static int getInternalSize(WrappedEncryptedSymmetricSecretKey encryptedSecretKey)
+	{
+		return getInternalSize(encryptedSecretKey, WrappedEncryptedSymmetricSecretKey.MAX_SIZE_IN_BYTES_OF_KEY);
+	}
+	public static int getInternalSize(WrappedEncryptedASymmetricPrivateKey encryptedPrivateKey)
+	{
+		return getInternalSize(encryptedPrivateKey, WrappedEncryptedASymmetricPrivateKey.MAX_SIZE_IN_BYTES_OF_KEY);
+	}
+	public static int getInternalSize(WrappedHashedPassword hashedPassword)
+	{
+		return getInternalSize(hashedPassword, WrappedHashedPassword.MAX_SIZE_IN_BYTES_OF_DATA);
+	}
 
 	public static int getInternalSize(Object[] tab, int maxSizeInBytes)
 	{
@@ -2284,6 +2296,22 @@ public class SerializationTools {
 		if (o!=null)
 			res+=o.toString().length()*2+1;
 		return res;
+	}
+	public static int getInternalSize(WrappedEncryptedASymmetricPrivateKeyString wrappedString)
+	{
+		return getInternalSize(wrappedString, WrappedEncryptedASymmetricPrivateKeyString.MAX_CHARS_NUMBER);
+	}
+	public static int getInternalSize(WrappedEncryptedSymmetricSecretKeyString wrappedString)
+	{
+		return getInternalSize(wrappedString, WrappedEncryptedSymmetricSecretKeyString.MAX_CHARS_NUMBER);
+	}
+	public static int getInternalSize(WrappedHashedPasswordString wrappedString)
+	{
+		return getInternalSize(wrappedString, WrappedHashedPasswordString.MAX_CHARS_NUMBER);
+	}
+	public static int getInternalSize(WrappedPassword wrappedString)
+	{
+		return getInternalSize(wrappedString, WrappedPassword.MAX_CHARS_NUMBER);
 	}
 	public static int getInternalSize(File f, int maxCharsNumber)
 	{

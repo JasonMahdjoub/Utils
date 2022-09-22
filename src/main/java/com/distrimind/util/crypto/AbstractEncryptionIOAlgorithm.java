@@ -201,8 +201,8 @@ public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOu
 	}
 
 
-	protected abstract void initCipherForDecryptionWithIvAndCounter(AbstractCipher cipher, AbstractWrappedIVs<?> wrappedIVAndSecretKey, int counter) throws IOException;
-	protected void readIvsFromEncryptedStream(final RandomInputStream is, int headLengthBytes, AbstractWrappedIVs<?> manualIvsAndSecretKeys) throws IOException {
+	protected abstract void initCipherForDecryptionWithIvAndCounter(AbstractCipher cipher, AbstractWrappedIVs<?, ?> wrappedIVAndSecretKey, int counter) throws IOException;
+	protected void readIvsFromEncryptedStream(final RandomInputStream is, int headLengthBytes, AbstractWrappedIVs<?, ?> manualIvsAndSecretKeys) throws IOException {
 		if (includeIV()) {
 			long l = is.length()-headLengthBytes;
 			long nbIv = (l / maxEncryptedPartLength) + (l % maxEncryptedPartLength > 0 ? 1 : 0);
@@ -226,10 +226,10 @@ public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOu
 		final AbstractCipher cipher = getCipherInstance();
 
 
-		CommonCipherInputStream res=new CommonCipherInputStream(this, allOutputGeneratedIntoDoFinalFunction(), maxEncryptedPartLength, is, includeIV(), getIVSizeBytesWithoutExternalCounter(), getMaxExternalCounterLength(), externalCounter, cipher, associatedData, offAD, lenAD, super.finalizer.buffer, supportRandomEncryptionAndRandomDecryption(), getCounterStepInBytes(), maxPlainTextSizeForEncoding) {
+		CommonCipherInputStream res=new CommonCipherInputStream(this, allOutputGeneratedIntoDoFinalFunction(), maxEncryptedPartLength, is, includeIV(),  getMaxExternalCounterLength(), externalCounter, cipher, associatedData, offAD, lenAD, super.finalizer.buffer, supportRandomEncryptionAndRandomDecryption(), getCounterStepInBytes(), maxPlainTextSizeForEncoding) {
 
 			@Override
-			protected void initCipherForDecryptionWithIvAndCounter(AbstractWrappedIVs<?> wrappedIVAndSecretKey, int counter) throws IOException {
+			protected void initCipherForDecryptionWithIvAndCounter(AbstractWrappedIVs<?, ?> wrappedIVAndSecretKey, int counter) throws IOException {
 				AbstractEncryptionIOAlgorithm.this.initCipherForDecryptionWithIvAndCounter(cipher, wrappedIVAndSecretKey, counter);
 			}
 

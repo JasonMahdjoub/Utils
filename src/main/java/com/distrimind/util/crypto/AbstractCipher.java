@@ -49,6 +49,11 @@ import java.nio.ByteBuffer;
  */
 public abstract class AbstractCipher {
 
+
+	protected AbstractCipher() {
+
+	}
+
 	/**
 	 * Finishes a multipart transformation, and returns the final transformed
 	 * bytes.
@@ -190,7 +195,9 @@ public abstract class AbstractCipher {
 	 *             If this instance has not been initialized, or if a
 	 *             <b>doFinal</b> call has already been made.
 	 */
-	public abstract int getOutputSize(int inputLength) throws IOException;
+
+
+	protected abstract int getOutputSize(int inputLength) throws IOException;
 
 	/**
 	 * <p>

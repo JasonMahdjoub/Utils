@@ -35,6 +35,7 @@ The fact that you are presently reading this means that you have had
 knowledge of the CeCILL-C license and that you accept its terms.
  */
 
+import com.distrimind.util.Bits;
 import com.distrimind.util.io.*;
 
 import java.io.IOException;
@@ -44,34 +45,43 @@ import java.io.IOException;
  * @version 1.0
  * @since MaDKitLanEdition 5.24.0
  */
-public class WrappedIV implements SecureExternalizable
+abstract class AbstractWrappedIV<C extends IClientServer, T extends AbstractWrappedIVs<C, W>, W extends AbstractWrappedIV<C, T, W>> implements SecureExternalizable
 {
 	static final int MAX_IV_LENGTH=64;
 	private byte[] iv;
+	protected transient T container;
+	private int ivLengthWithoutExternalCounter;
+	private int originalCounter;
+	private int counterPos;
 
-	protected WrappedIV()
+
+	protected AbstractWrappedIV()
 	{
 		iv=null;
+		container=null;
+		ivLengthWithoutExternalCounter=0;
 	}
 
-	WrappedIV(int ivSizeInBytes)
+	AbstractWrappedIV(T container)
 	{
-		if (ivSizeInBytes>MAX_IV_LENGTH)
-			throw new IllegalArgumentException();
-		this.iv=new byte[ivSizeInBytes];
+		setContainer(container);
+
 	}
-	WrappedIV(byte[] iv)
+	AbstractWrappedIV(byte[] iv, T  container)
 	{
 		if (iv==null)
 			throw new NullPointerException();
-		if (iv.length>MAX_IV_LENGTH)
+		if (iv.length!=container.getIvSizeBytes())
 			throw new IllegalArgumentException();
+
 		this.iv=iv;
+		counterPos=iv.length-4;
+		setContainer(container);
 	}
-	static byte[] generateIV(int ivSizeInBytes, AbstractSecureRandom random)
+	static byte[] generateIV(int ivSizeInBytes, AbstractWrappedIVs<?,?>  container)
 	{
 		byte[] iv=new byte[ivSizeInBytes];
-		random.nextBytes(iv);
+		container.getAlgorithm().getSecureRandomForIV().nextBytes(iv);
 		return iv;
 	}
 
@@ -80,24 +90,78 @@ public class WrappedIV implements SecureExternalizable
 		return iv;
 	}
 	void readFully(RandomInputStream in) throws IOException {
-		in.readFully(iv);
+		in.readFully(iv, 0, this.ivLengthWithoutExternalCounter=container.getAlgorithm().getIVSizeBytesWithoutExternalCounter());
 	}
 	void write(RandomOutputStream out) throws IOException {
-		out.write(iv);
+		out.write(iv, 0, container.getAlgorithm().getIVSizeBytesWithoutExternalCounter());
 	}
 
 	@Override
 	public int getInternalSerializedSize() {
-		return 0;
+		return 2+ivLengthWithoutExternalCounter;
 	}
 
 	@Override
 	public void writeExternal(SecuredObjectOutputStream out) throws IOException {
-		out.writeBytesArray(iv, false, MAX_IV_LENGTH);
+		out.writeUnsignedInt8Bits(iv.length);
+		out.writeUnsignedInt8Bits(ivLengthWithoutExternalCounter);
+		out.write(iv, 0, ivLengthWithoutExternalCounter);
 	}
 
 	@Override
 	public void readExternal(SecuredObjectInputStream in) throws IOException, ClassNotFoundException {
-		iv=in.readBytesArray(false, MAX_IV_LENGTH);
+		int s=in.readUnsignedInt8Bits();
+		if (s<=0 || s>MAX_IV_LENGTH)
+			throw new MessageExternalizationException(Integrity.FAIL);
+		ivLengthWithoutExternalCounter=in.readUnsignedInt8Bits();
+		if (ivLengthWithoutExternalCounter<=0 || ivLengthWithoutExternalCounter>s)
+			throw new MessageExternalizationException(Integrity.FAIL);
+		iv=new byte[s];
+		in.readFully(iv, 0, ivLengthWithoutExternalCounter);
+	}
+	@SuppressWarnings("unchecked")
+	<R extends AbstractWrappedIVs<C, W>> void setContainer(R container)
+	{
+		if (container==null)
+			throw new NullPointerException();
+		this.ivLengthWithoutExternalCounter=container.getAlgorithm().getIVSizeBytesWithoutExternalCounter();
+		if (container.getIvSizeBytes()>MAX_IV_LENGTH)
+			throw new IllegalArgumentException();
+		if (this.ivLengthWithoutExternalCounter<=0 || this.ivLengthWithoutExternalCounter>container.getIvSizeBytes())
+			throw new IllegalArgumentException();
+		this.container=(T)container;
+		if (iv==null) {
+			iv = new byte[container.getIvSizeBytes()];
+			counterPos=iv.length-4;
+		}
+		else if (this.iv.length!=container.getIvSizeBytes())
+			throw new IllegalArgumentException();
+
+
+	}
+
+	void setExternalCounter(byte[] externalCounter) {
+		if (externalCounter!=null)
+		{
+			System.arraycopy(externalCounter, 0, iv, this.ivLengthWithoutExternalCounter, externalCounter.length);
+			originalCounter= Bits.getInt(iv, counterPos);
+		}
+	}
+	void setCounter(int counter)
+	{
+		Bits.putInt(iv, counterPos, originalCounter + counter);
+	}
+}
+public class WrappedIV extends AbstractWrappedIV<IClientServer, WrappedIVs, WrappedIV>
+{
+	protected WrappedIV() {
+	}
+
+	public WrappedIV(WrappedIVs container) {
+		super(container);
+	}
+
+	public WrappedIV(byte[] iv, WrappedIVs container) {
+		super(iv, container);
 	}
 }

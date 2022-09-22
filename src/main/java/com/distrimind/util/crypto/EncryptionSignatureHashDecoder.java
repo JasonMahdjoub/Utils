@@ -145,7 +145,7 @@ public class EncryptionSignatureHashDecoder {
 		if (cipher==null)
 			throw new NullPointerException();
 		this.cipher=null;
-		this.randomForCipher=cipher.getSecureRandom();
+		this.randomForCipher=cipher.getSecureRandomForIV();
 		originalSecretKeyForEncryption=cipher.getSecretKey();
 		reloadCipher();
 		cleanCache();
@@ -617,7 +617,7 @@ public class EncryptionSignatureHashDecoder {
 	}
 	public AbstractSecureRandom getCipherSecureRandom()
 	{
-		return cipher==null?null:cipher.getSecureRandom();
+		return cipher==null?null:cipher.getSecureRandomForIV();
 	}
 	private long decodeAndCheckHashAndSignaturesIfNecessary(final RandomOutputStream outputStream, final boolean sameInputOutputSource, final Reference<Long> positionOfRandomInputStreamAfterDecoding, boolean outputStreamNull) throws IOException {
 		if (outputStream==null && !outputStreamNull)

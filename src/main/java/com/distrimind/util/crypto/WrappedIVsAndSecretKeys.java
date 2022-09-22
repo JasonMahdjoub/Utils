@@ -47,19 +47,19 @@ import java.security.NoSuchProviderException;
  * @since MaDKitLanEdition 5.24.0
  */
 
-class WrappedIVs extends AbstractWrappedIVs<WrappedIV> {
+class WrappedIVs extends AbstractWrappedIVs<IClientServer, WrappedIV> {
 	protected WrappedIVs() throws IOException {
 		super();
 	}
-	WrappedIVs(int ivSizeBytes, int blockModeCounterBytes, AbstractSecureRandom random) {
-		super(ivSizeBytes, blockModeCounterBytes,random);
+	WrappedIVs(IClientServer algorithm) throws IOException {
+		super(algorithm);
 	}
 
 
 
 	@Override
 	WrappedIV newEmptyWrappedIVInstance() {
-		return new WrappedIV(getIvSizeBytes());
+		return new WrappedIV(this);
 	}
 
 	@Override
@@ -74,37 +74,30 @@ class WrappedIVs extends AbstractWrappedIVs<WrappedIV> {
 
 	protected WrappedIV generateElement()
 	{
-		return new WrappedIV(WrappedIV.generateIV(getIvSizeBytes(), getSecureRandom()));
+		return new WrappedIV(WrappedIV.generateIV(getIvSizeBytes(), this), this);
 	}
 
 }
-class WrappedIVAndSecretKey extends WrappedIV
+class WrappedIVAndSecretKey extends AbstractWrappedIV<SymmetricEncryptionAlgorithm, WrappedIVsAndSecretKeys, WrappedIVAndSecretKey>
 {
 	private WrappedEncryptedSymmetricSecretKey encryptedSecretKey;
 	private SymmetricSecretKey secretKey;
-	private WrappedIVsAndSecretKeys wrappedIVsAndSecretKeys;
 
-	void setWrappedIVsAndSecretKeys(WrappedIVsAndSecretKeys wrappedIVsAndSecretKeys) {
-		this.wrappedIVsAndSecretKeys = wrappedIVsAndSecretKeys;
-	}
 
+	@SuppressWarnings("unused")
 	protected WrappedIVAndSecretKey()
 	{
 		super();
 		this.encryptedSecretKey=null;
 		this.secretKey=null;
-		this.wrappedIVsAndSecretKeys=null;
 	}
 
-	WrappedIVAndSecretKey(int ivSizeInBytes) {
-		super(ivSizeInBytes);
-	}
 
 	WrappedIVAndSecretKey(WrappedIVsAndSecretKeys wrappedIVsAndSecretKeys) throws IOException {
-		super(generateIV(wrappedIVsAndSecretKeys.getIvSizeBytes(), wrappedIVsAndSecretKeys.getSecureRandom()));
+		super(generateIV(wrappedIVsAndSecretKeys.getIvSizeBytes(), wrappedIVsAndSecretKeys), wrappedIVsAndSecretKeys);
+
 		try {
-			this.wrappedIVsAndSecretKeys=wrappedIVsAndSecretKeys;
-			this.secretKey=wrappedIVsAndSecretKeys.getMainKey().getEncryptionAlgorithmType().getKeyGenerator(wrappedIVsAndSecretKeys.getSecureRandom(), wrappedIVsAndSecretKeys.getMainKey().getKeySizeBits()).generateKey();
+			this.secretKey=container.getAlgorithm().getSecretKey().getEncryptionAlgorithmType().getKeyGenerator(wrappedIVsAndSecretKeys.getAlgorithm().getSecureRandomForKeyGeneration(), wrappedIVsAndSecretKeys.getAlgorithm().getSecretKey().getKeySizeBits()).generateKey();
 			this.encryptedSecretKey=wrappedIVsAndSecretKeys.wrapKey(secretKey);
 		} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
 			throw new IOException(e);
@@ -114,7 +107,7 @@ class WrappedIVAndSecretKey extends WrappedIV
 
 	SymmetricSecretKey getDecryptedSecretKey() throws IOException {
 		if (secretKey==null)
-			secretKey=wrappedIVsAndSecretKeys.getKeyWrapperAlgorithm().unwrap(encryptedSecretKey);
+			secretKey=container.getKeyWrapperAlgorithm().unwrap(encryptedSecretKey);
 
 		return secretKey;
 	}
@@ -123,7 +116,7 @@ class WrappedIVAndSecretKey extends WrappedIV
 	@Override
 	void readFully(RandomInputStream in) throws IOException {
 		super.readFully(in);
-		int s=wrappedIVsAndSecretKeys.getKeyWrapperAlgorithm().getWrappedSymmetricSecretKeySizeInBytes(wrappedIVsAndSecretKeys.getMainKey());
+		int s=container.getKeyWrapperAlgorithm().getWrappedSymmetricSecretKeySizeInBytes(container.getAlgorithm().getSecretKey());
 		encryptedSecretKey=new WrappedEncryptedSymmetricSecretKey(new byte[s]);
 		in.readFully(encryptedSecretKey.getBytes());
 		secretKey=null;
@@ -146,72 +139,56 @@ class WrappedIVAndSecretKey extends WrappedIV
 		super.readExternal(in);
 		encryptedSecretKey=in.readWrappedEncryptedSymmetricSecretKey(false);
 	}
+	@Override
+	public int getInternalSerializedSize() {
+		return super.getInternalSerializedSize()+SerializationTools.getInternalSize(encryptedSecretKey);
+	}
+
 }
-public class WrappedIVsAndSecretKeys extends AbstractWrappedIVs<WrappedIVAndSecretKey>{
+public class WrappedIVsAndSecretKeys extends AbstractWrappedIVs<SymmetricEncryptionAlgorithm, WrappedIVAndSecretKey>{
 
 
 
-	static final SymmetricKeyWrapperType DEFAULT_SYMMETRIC_KEY_WRAPPER_TYPE=SymmetricKeyWrapperType.BC_FIPS_AES_WITH_PADDING;
 
-	private KeyWrapperAlgorithm keyWrapperAlgorithm;
 
-	private SymmetricSecretKey mainKey;
+
 	private WrappedIVAndSecretKey currentIVAndSecretKey=null;
+	private transient KeyWrapperAlgorithm keyWrapperAlgorithm;
 	private SymmetricKeyWrapperType symmetricKeyWrapperType;
-	private int elementSizeInBytes =0;
+	private int elementSizeInBytes;
 	protected WrappedIVsAndSecretKeys() throws IOException {
 		super();
-
-		mainKey=null;
+		keyWrapperAlgorithm=null;
 		symmetricKeyWrapperType=null;
+		elementSizeInBytes=0;
 	}
-	WrappedIVsAndSecretKeys(int ivSizeBytes, int blockModeCounterBytes, SymmetricSecretKey mainKey, AbstractSecureRandom secureRandom, SymmetricKeyWrapperType symmetricKeyWrapperType) {
-		super(ivSizeBytes, blockModeCounterBytes, secureRandom);
-
-
-		try {
-			setMainKey(mainKey, symmetricKeyWrapperType);
-		} catch (IOException e) {
-			throw new IllegalArgumentException(e);
-		}
+	protected WrappedIVsAndSecretKeys(SymmetricEncryptionAlgorithm algorithm) throws IOException {
+		super(algorithm);
 	}
-
-	public void setMainKey(SymmetricSecretKey mainKey, AbstractSecureRandom secureRandom) throws IOException {
-		setMainKey(mainKey, symmetricKeyWrapperType);
-		setSecureRandom(secureRandom);
-	}
-
-	void setMainKey(SymmetricSecretKey mainKey, SymmetricKeyWrapperType symmetricKeyWrapperType) throws IOException {
-		if (mainKey==null)
-			throw new NullPointerException();
-		if (symmetricKeyWrapperType==null)
-			throw new NullPointerException();
-		this.mainKey=mainKey;
-		this.keyWrapperAlgorithm=new KeyWrapperAlgorithm(symmetricKeyWrapperType, mainKey);
-		this.symmetricKeyWrapperType=symmetricKeyWrapperType;
+	@Override
+	public void setAlgorithm(SymmetricEncryptionAlgorithm algorithm) throws IOException {
+		super.setAlgorithm(algorithm);
+		this.keyWrapperAlgorithm=new KeyWrapperAlgorithm(algorithm.getSymmetricKeyWrapperType(), algorithm.getSecretKey());
+		this.symmetricKeyWrapperType=algorithm.getSymmetricKeyWrapperType();
 		for (WrappedIVAndSecretKey e : data.values())
 		{
-			if (mainKey.getEncryptionAlgorithmType().getIVSizeBytes()!=e.getIv().length)
+			if (algorithm.getSecretKey().getEncryptionAlgorithmType().getIVSizeBytes()!=e.getIv().length)
 				throw new IOException();
 		}
-		elementSizeInBytes =IVSizeBytesWithoutExternalCounter+ keyWrapperAlgorithm.getWrappedSymmetricSecretKeySizeInBytes(mainKey);
+		elementSizeInBytes =IVSizeBytesWithoutExternalCounter+ keyWrapperAlgorithm.getWrappedSymmetricSecretKeySizeInBytes(algorithm.getSecretKey());
 	}
-	WrappedIVsAndSecretKeys(int ivSizeBytes, int blockModeCounterBytes, SymmetricSecretKey mainKey, AbstractSecureRandom secureRandom) {
-		this(ivSizeBytes, blockModeCounterBytes, mainKey, secureRandom, DEFAULT_SYMMETRIC_KEY_WRAPPER_TYPE);
-	}
+
 
 
 	WrappedEncryptedSymmetricSecretKey wrapKey(SymmetricSecretKey secretKeyToEncrypt) throws IOException {
-		return keyWrapperAlgorithm.wrap(getSecureRandom(), secretKeyToEncrypt);
+		return keyWrapperAlgorithm.wrap(getAlgorithm().getSecureRandomForIV(), secretKeyToEncrypt);
 	}
 
 
 
 	@Override
-	WrappedIVAndSecretKey newEmptyWrappedIVInstance() {
-		WrappedIVAndSecretKey r= new WrappedIVAndSecretKey(getIvSizeBytes());
-		r.setWrappedIVsAndSecretKeys(this);
-		return r;
+	WrappedIVAndSecretKey newEmptyWrappedIVInstance() throws IOException {
+		return new WrappedIVAndSecretKey(this);
 	}
 
 	@Override
@@ -240,9 +217,6 @@ public class WrappedIVsAndSecretKeys extends AbstractWrappedIVs<WrappedIVAndSecr
 		return WrappedIVAndSecretKey.class;
 	}
 
-	public SymmetricSecretKey getMainKey() {
-		return mainKey;
-	}
 
 	KeyWrapperAlgorithm getKeyWrapperAlgorithm() {
 		return keyWrapperAlgorithm;
@@ -258,12 +232,7 @@ public class WrappedIVsAndSecretKeys extends AbstractWrappedIVs<WrappedIVAndSecr
 	public void readExternal(SecuredObjectInputStream in) throws IOException, ClassNotFoundException {
 		super.readExternal(in);
 		symmetricKeyWrapperType=in.readEnum(false);
-		keyWrapperAlgorithm=null;
-		mainKey=null;
 		currentIVAndSecretKey=null;
-
-		for (WrappedIVAndSecretKey e : data.values())
-			e.setWrappedIVsAndSecretKeys(this);
 	}
 
 	@Override

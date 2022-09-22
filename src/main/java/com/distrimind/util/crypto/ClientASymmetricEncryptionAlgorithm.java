@@ -98,7 +98,7 @@ public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutpu
 
 
 		@Override
-		protected void initCipherForEncryptionWithIvAndCounter(AbstractCipher cipher, AbstractWrappedIVs<?> wrappedIVAndSecretKey, int counter) throws IOException {
+		protected void initCipherForEncryptionWithIvAndCounter(AbstractCipher cipher, AbstractWrappedIVs<?, ?> wrappedIVAndSecretKey, int counter) throws IOException {
 			initCipherForEncryption(cipher);
 		}
 
@@ -166,7 +166,7 @@ public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutpu
 		}
 
 		@Override
-		protected RandomOutputStream getCipherOutputStreamForEncryption(final RandomOutputStream os, boolean closeOutputStreamWhenClosingCipherOutputStream, byte[] associatedData, int offAD, int lenAD, final byte[] externalCounter, final AbstractWrappedIVs<?> manualIvsAndSecretKeys) throws IOException {
+		protected RandomOutputStream getCipherOutputStreamForEncryption(final RandomOutputStream os, boolean closeOutputStreamWhenClosingCipherOutputStream, byte[] associatedData, int offAD, int lenAD, final byte[] externalCounter, final AbstractWrappedIVs<?, ?> manualIvsAndSecretKeys) throws IOException {
 			return nonPQCEncryption.getCipherOutputStreamForEncryption(PQCEncryption.getCipherOutputStreamForEncryption(os, closeOutputStreamWhenClosingCipherOutputStream, associatedData, offAD, lenAD, externalCounter, manualIvsAndSecretKeys), true, associatedData, offAD, lenAD, externalCounter, manualIvsAndSecretKeys);
 		}
 
@@ -175,7 +175,7 @@ public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutpu
 
 
 	@Override
-	protected RandomOutputStream getCipherOutputStreamForEncryption(RandomOutputStream os, boolean closeOutputStreamWhenClosingCipherOutputStream, byte[] associatedData, int offAD, int lenAD, byte[] externalCounter, AbstractWrappedIVs<?> manualIvsAndSecretKeys) throws IOException {
+	protected RandomOutputStream getCipherOutputStreamForEncryption(RandomOutputStream os, boolean closeOutputStreamWhenClosingCipherOutputStream, byte[] associatedData, int offAD, int lenAD, byte[] externalCounter, AbstractWrappedIVs<?, ?> manualIvsAndSecretKeys) throws IOException {
 		return client.getCipherOutputStreamForEncryption(os, closeOutputStreamWhenClosingCipherOutputStream, associatedData, offAD, lenAD, externalCounter, manualIvsAndSecretKeys);
 	}
 
@@ -269,7 +269,7 @@ public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutpu
 
 
 	@Override
-	protected void initCipherForEncryptionWithIvAndCounter(AbstractCipher cipher, AbstractWrappedIVs<?> wrappedIVAndSecretKey, int counter) throws IOException {
+	protected void initCipherForEncryptionWithIvAndCounter(AbstractCipher cipher, AbstractWrappedIVs<?, ?> wrappedIVAndSecretKey, int counter) throws IOException {
 		client.initCipherForEncryptionWithIvAndCounter(cipher, wrappedIVAndSecretKey, counter);
 	}
 
@@ -410,7 +410,7 @@ public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutpu
 
 
 		@Override
-		protected void initCipherForEncryptionWithIvAndCounter(AbstractCipher cipher, AbstractWrappedIVs<?> wrappedIVAndSecretKey, int counter) throws IOException {
+		protected void initCipherForEncryptionWithIvAndCounter(AbstractCipher cipher, AbstractWrappedIVs<?, ?> wrappedIVAndSecretKey, int counter) throws IOException {
 			this.initCipherForEncryption(cipher);
 		}
 
