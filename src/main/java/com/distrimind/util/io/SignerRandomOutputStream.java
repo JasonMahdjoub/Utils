@@ -35,6 +35,7 @@ The fact that you are presently reading this means that you have had
 knowledge of the CeCILL-C license and that you accept its terms.
  */
 
+import com.distrimind.util.concurrent.PoolExecutor;
 import com.distrimind.util.crypto.AbstractAuthenticatedSignerAlgorithm;
 
 import java.io.IOException;
@@ -48,7 +49,10 @@ public class SignerRandomOutputStream extends DelegatedRandomOutputStream{
 	private AbstractAuthenticatedSignerAlgorithm signer;
 	private final byte[] b=new byte[1];
 	public SignerRandomOutputStream(RandomOutputStream out, AbstractAuthenticatedSignerAlgorithm signer) {
-		super(out);
+		this(out, null, signer);
+	}
+	SignerRandomOutputStream(RandomOutputStream out, PoolExecutor poolExecutor, AbstractAuthenticatedSignerAlgorithm signer) {
+		super(out, poolExecutor);
 		if (signer==null)
 			throw new NullPointerException();
 		this.signer=signer;
