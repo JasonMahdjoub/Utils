@@ -109,7 +109,7 @@ public enum SymmetricEncryptionType {
 	}
 
 	private static final int maxPlainTextSizeForEncoding=(int)((1L<<31)-1024L);
-	private static final int maxPlainTextSizeForEncodingWithSideChannelMitigation=(int)((1L<<31)-1024L);
+	private static final int maxPlainTextSizeForEncodingWithSideChannelMitigation=(int)((1L<<17)-1024L);
 
 	public int getMaxPlainTextSizeForEncoding() {
 		if (isTimingAttackPossibleWithSomeImplementations()
