@@ -86,7 +86,7 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 			throw new IllegalStateException("Encryption type must support random read and write");
 		try {
 			byte[] hash = subStreamParameters.generateHash(encryptedInputStream);
-			AbstractWrappedIVs<?, ?> manualIvsAndSecretKeys=useDerivedKeys?new WrappedIVsAndSecretKeys():new WrappedIVs();
+			AbstractWrappedIVs<?, ?> manualIvsAndSecretKeys=useDerivedKeys?new WrappedIVsAndSecretKeys(this):new WrappedIVs(this);
 			readIvsFromEncryptedStream(encryptedInputStream, headLengthBytes, manualIvsAndSecretKeys);
 			return new SubStreamHashResult(hash, manualIvsAndSecretKeys);
 		} catch (NoSuchProviderException | NoSuchAlgorithmException e) {
@@ -109,7 +109,7 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 	@SuppressWarnings("unchecked")
 	private void partialHash(RandomInputStream nonEncryptedInputStream, NullRandomOutputStream nullStream, AbstractMessageDigest md, RandomOutputStream os, long pos, long len) throws IOException {
 		long mod=pos%maxEncryptedPartLength;
-		mod-=getIVSizeBytesWithoutExternalCounter();
+		mod-=getIvAndSecretKeySizeInBytesWithoutExternalCounter();
 		assert mod>=0;
 		pos=(pos/maxEncryptedPartLength)*maxPlainTextSizeForEncoding+mod;
 		long p=(pos/getCounterStepInBytes())*getCounterStepInBytes();
@@ -156,7 +156,7 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 		List<SubStreamParameter> parameters = subStreamParameters.getParameters();
 		AbstractWrappedIVs<?, ?> manualIvsAndSecretKeys = hashResultFromEncryptedStream.getManualIvsAndSecretKeys(this);
 
-		final int ivSizeWithoutExternalCounter=getIVSizeBytesWithoutExternalCounter();
+		final int ivAndSecretKeySizeWithoutExternalCounter=getIvAndSecretKeySizeInBytesWithoutExternalCounter();
 		NullRandomOutputStream nullStream=new NullRandomOutputStream();
 		nullStream.setLength(getOutputSizeAfterEncryption(nonEncryptedInputStream.length()));
 
@@ -196,7 +196,7 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 				long end = p.getStreamEndExcluded();
 				long round = start / maxEncryptedPartLength;
 				long startIV = round * (long)maxEncryptedPartLength;
-				long endIV = startIV + ivSizeWithoutExternalCounter;
+				long endIV = startIV + ivAndSecretKeySizeWithoutExternalCounter;
 				if (start<endIV) {
 					byte[] e;
 					try(RandomByteArrayOutputStream o=new RandomByteArrayOutputStream())
@@ -493,5 +493,10 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 	{
 		return mainKey.getEncryptionAlgorithmType().getDefaultSymmetricKeyWrapperType();
 	}
-
+	@Override
+	void setMaxPlainTextSizeForEncoding(int maxPlainTextSizeForEncoding) throws IOException {
+		if (maxPlainTextSizeForEncoding%32!=0)
+			throw new IllegalArgumentException();
+		super.setMaxPlainTextSizeForEncoding(maxPlainTextSizeForEncoding);
+	}
 }

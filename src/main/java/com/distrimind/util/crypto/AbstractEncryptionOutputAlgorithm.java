@@ -349,7 +349,7 @@ public abstract class AbstractEncryptionOutputAlgorithm implements AutoZeroizabl
 				long l=checkInit();
 				int s=(int)Math.min(len, l);
 				assert s>0;
-				if (len> bufferInSize) {
+				if (s> bufferInSize) {
 					int outLen = cipher.getOutputSize(s);
 					if (finalizer.buffer.length < outLen) {
 						zeroize();
@@ -516,8 +516,6 @@ public abstract class AbstractEncryptionOutputAlgorithm implements AutoZeroizabl
 	}
 
 	void setMaxPlainTextSizeForEncoding(int maxPlainTextSizeForEncoding) throws IOException {
-		if (maxPlainTextSizeForEncoding%32!=0)
-			throw new IllegalArgumentException();
 		if (maxPlainTextSizeForEncoding<32)
 			throw new IllegalArgumentException();
 		assert cipher != null;

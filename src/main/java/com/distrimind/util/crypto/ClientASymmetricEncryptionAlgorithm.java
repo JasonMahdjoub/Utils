@@ -372,6 +372,74 @@ public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutpu
 		return client.isPostQuantumEncryption();
 	}
 
+
+	@Override
+	public boolean useDerivedSecretKeys() {
+		return client.useDerivedSecretKeys();
+	}
+
+	@Override
+	public void zeroize() {
+		client.zeroize();
+	}
+
+	@Override
+	public void clean() {
+		client.clean();
+	}
+
+	@Override
+	public void destroy() {
+		client.destroy();
+	}
+
+	@Override
+	public boolean isDestroyed() {
+		return client.isDestroyed();
+	}
+
+	@Override
+	public void close() {
+		client.close();
+	}
+
+	@Override
+	public void registerCleanerIfNotDone(Cleaner cleaner) {
+		client.registerCleanerIfNotDone(cleaner);
+	}
+
+	@Override
+	public boolean isCleaned() {
+		return client.isCleaned();
+	}
+
+
+	@Override
+	public AbstractWrappedIVs<?, ?> getWrappedIVAndSecretKeyInstance() throws IOException {
+		return client.getWrappedIVAndSecretKeyInstance();
+	}
+
+	@Override
+	public boolean isUsingSideChannelMitigation() {
+		return client.isUsingSideChannelMitigation();
+	}
+
+	@Override
+	public int getIVSizeBytesWithoutExternalCounter() {
+		return client.getIVSizeBytesWithoutExternalCounter();
+	}
+
+	@Override
+	public AbstractSecureRandom getSecureRandomForIV() {
+		return client.getSecureRandomForIV();
+	}
+
+	@Override
+	public AbstractSecureRandom getSecureRandomForKeyGeneration() {
+		return client.getSecureRandomForKeyGeneration();
+	}
+
+
 	public IASymmetricPublicKey getDistantPublicKey() {
 		if (this.client instanceof Client)
 			return ((Client)client).getDistantPublicKey();
@@ -391,8 +459,9 @@ public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutpu
 			this.type = distantPublicKey.getEncryptionAlgorithmType();
 			this.distantPublicKey = distantPublicKey;
 			this.random = random;
-			setMaxPlainTextSizeForEncoding(distantPublicKey.getMaxBlockSize());
 			initCipherForEncryption(this.cipher);
+			setMaxPlainTextSizeForEncoding(distantPublicKey.getMaxBlockSize());
+
 			initBufferAllocatorArgs();
 		}
 		@Override
@@ -431,6 +500,7 @@ public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutpu
 
 		@Override
 		public AbstractCipher getCipherInstance() throws IOException {
+			checkKeysNotCleaned();
 			try {
 				return type.getCipherInstance();
 			} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
@@ -466,7 +536,7 @@ public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutpu
 		@Override
 		public void initCipherForEncryptionWithNullIV(AbstractCipher _cipher)
 				throws IOException {
-			initCipherForEncryption(cipher);
+			initCipherForEncryption(_cipher);
 
 		}
 

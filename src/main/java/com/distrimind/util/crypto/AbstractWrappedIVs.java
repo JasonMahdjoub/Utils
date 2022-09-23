@@ -73,7 +73,9 @@ public abstract class AbstractWrappedIVs<C extends IClientServer, W extends Abst
 		setAlgorithm(algorithm);
 	}
 
-	void setAlgorithm(C algorithm) throws IOException {
+	abstract void setAlgorithm(IClientServer algorithm) throws IOException;
+
+	protected void setAlgorithmImpl(C algorithm) throws IOException {
 		if (algorithm==null)
 			throw new NullPointerException();
 		if (algorithm.getIVSizeBytesWithExternalCounter()<0)

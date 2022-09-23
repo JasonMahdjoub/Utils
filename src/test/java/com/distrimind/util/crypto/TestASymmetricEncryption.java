@@ -328,11 +328,12 @@ public class TestASymmetricEncryption {
 			NoSuchProviderException, IllegalStateException {
 		System.out.println("Testing " + type);
 		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getSingleton(null);
-		ASymmetricKeyPair kpd = type.getKeyPairGenerator(rand, (short)2048).generateKeyPair();
-		ASymmetricKeyPair kpl = type.getKeyPairGenerator(rand, (short)2048).generateKeyPair();
-		P2PASymmetricEncryptionAlgorithm algoDistant = new P2PASymmetricEncryptionAlgorithm(kpd,
+		ASymmetricKeyPair kpd = type.getKeyPairGenerator(rand, type.name().startsWith("BCPQC_MCELIECE_")?type.getDefaultKeySizeBits():2048).generateKeyPair();
+		ASymmetricKeyPair kpl = type.getKeyPairGenerator(rand, type.name().startsWith("BCPQC_MCELIECE_")?type.getDefaultKeySizeBits():2048).generateKeyPair();
+
+		P2PASymmetricEncryptionAlgorithm algoDistant = new P2PASymmetricEncryptionAlgorithm(rand, kpd,
 				kpl.getASymmetricPublicKey());
-		P2PASymmetricEncryptionAlgorithm algoLocal = new P2PASymmetricEncryptionAlgorithm(kpl,
+		P2PASymmetricEncryptionAlgorithm algoLocal = new P2PASymmetricEncryptionAlgorithm(rand, kpl,
 				kpd.getASymmetricPublicKey());
 
 		testP2PASymetricEncryptionsImpl(rand, type, algoDistant, algoLocal);
@@ -351,9 +352,9 @@ public class TestASymmetricEncryption {
 		ASymmetricKeyPair kplpqc = type.getPQCASymmetricEncryptionType().getKeyPairGenerator(rand, (short)2048).generateKeyPair();
 		HybridASymmetricKeyPair kpd=new HybridASymmetricKeyPair(kpdnonpqc, kpdpqc);
 		HybridASymmetricKeyPair kpl=new HybridASymmetricKeyPair(kplnonpqc, kplpqc);
-		P2PASymmetricEncryptionAlgorithm algoDistant = new P2PASymmetricEncryptionAlgorithm(kpd,
+		P2PASymmetricEncryptionAlgorithm algoDistant = new P2PASymmetricEncryptionAlgorithm(rand, kpd,
 				kpl.getASymmetricPublicKey());
-		P2PASymmetricEncryptionAlgorithm algoLocal = new P2PASymmetricEncryptionAlgorithm(kpl,
+		P2PASymmetricEncryptionAlgorithm algoLocal = new P2PASymmetricEncryptionAlgorithm(rand, kpl,
 				kpd.getASymmetricPublicKey());
 
 		testP2PASymetricEncryptionsImpl(rand, type, algoDistant, algoLocal);

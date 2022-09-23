@@ -307,6 +307,7 @@ public class ServerASymmetricEncryptionAlgorithm implements IEncryptionInputAlgo
 		}
 
 
+
 		@Override
 		public void decode(RandomInputStream is, byte[] associatedData, int offAD, int lenAD, RandomOutputStream os, int length,  byte[] externalCounter)
 				throws IOException {
@@ -547,4 +548,63 @@ public class ServerASymmetricEncryptionAlgorithm implements IEncryptionInputAlgo
 	}
 
 
+	@Override
+	public AbstractWrappedIVs<?, ?> getWrappedIVAndSecretKeyInstance() throws IOException {
+		return server.getWrappedIVAndSecretKeyInstance();
+	}
+
+	@Override
+	public boolean isUsingSideChannelMitigation() {
+		return server.isUsingSideChannelMitigation();
+	}
+
+	@Override
+	public int getIVSizeBytesWithoutExternalCounter() {
+		return server.getIVSizeBytesWithoutExternalCounter();
+	}
+
+	@Override
+	public AbstractSecureRandom getSecureRandomForIV() {
+		return server.getSecureRandomForIV();
+	}
+
+	@Override
+	public AbstractSecureRandom getSecureRandomForKeyGeneration() {
+		return server.getSecureRandomForKeyGeneration();
+	}
+
+	@Override
+	public CPUUsageAsDecoyInputStream<CommonCipherInputStream> getCPUUsageAsDecoyInputStream(CommonCipherInputStream in) throws IOException {
+		return server.getCPUUsageAsDecoyInputStream(in);
+	}
+
+	@Override
+	public boolean isPowerMonitoringSideChannelAttackPossible() {
+		return server.isPowerMonitoringSideChannelAttackPossible();
+	}
+
+	@Override
+	public boolean isFrequencySideChannelAttackPossible() {
+		return server.isFrequencySideChannelAttackPossible();
+	}
+
+	@Override
+	public boolean isTimingSideChannelAttackPossible() {
+		return server.isTimingSideChannelAttackPossible();
+	}
+
+	@Override
+	public boolean useExternalCounter() {
+		return server.useExternalCounter();
+	}
+
+	@Override
+	public byte getBlockModeCounterBytes() {
+		return server.getBlockModeCounterBytes();
+	}
+
+	@Override
+	public int getIVSizeBytesWithExternalCounter() {
+		return server.getIVSizeBytesWithExternalCounter();
+	}
 }

@@ -474,11 +474,11 @@ public enum ASymmetricEncryptionType {
 		}
 
 	}
-	public int getMaxBlockSize(int keySize) {
+	public int getMaxBlockSize(int keySizeBits) {
 		if (name().startsWith("BCPQC_MCELIECE_"))
 			return Integer.MAX_VALUE;
 		else
-			return keySize / 8 - blockSizeDecrement;
+			return keySizeBits / 8 - blockSizeDecrement;
 	}
 
 	public String getPadding() {

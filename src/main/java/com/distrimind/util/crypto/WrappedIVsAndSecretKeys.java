@@ -76,6 +76,11 @@ class WrappedIVs extends AbstractWrappedIVs<IClientServer, WrappedIV> {
 	{
 		return new WrappedIV(WrappedIV.generateIV(getIvSizeBytes(), this), this);
 	}
+	@Override
+	void setAlgorithm(IClientServer algorithm) throws IOException
+	{
+		this.setAlgorithmImpl(algorithm);
+	}
 
 }
 class WrappedIVAndSecretKey extends AbstractWrappedIV<SymmetricEncryptionAlgorithm, WrappedIVsAndSecretKeys, WrappedIVAndSecretKey>
@@ -166,8 +171,18 @@ public class WrappedIVsAndSecretKeys extends AbstractWrappedIVs<SymmetricEncrypt
 		super(algorithm);
 	}
 	@Override
-	public void setAlgorithm(SymmetricEncryptionAlgorithm algorithm) throws IOException {
-		super.setAlgorithm(algorithm);
+	public void setAlgorithm(IClientServer algorithm) throws IOException
+	{
+		if (algorithm instanceof SymmetricEncryptionAlgorithm)
+		{
+			this.setAlgorithmImpl((SymmetricEncryptionAlgorithm) algorithm);
+		}
+		else
+			throw new IllegalArgumentException();
+	}
+	@Override
+	protected void setAlgorithmImpl(SymmetricEncryptionAlgorithm algorithm) throws IOException {
+		super.setAlgorithmImpl(algorithm);
 		this.keyWrapperAlgorithm=new KeyWrapperAlgorithm(algorithm.getSymmetricKeyWrapperType(), algorithm.getSecretKey(), true);
 		this.symmetricKeyWrapperType=algorithm.getSymmetricKeyWrapperType();
 		for (WrappedIVAndSecretKey e : data.values())

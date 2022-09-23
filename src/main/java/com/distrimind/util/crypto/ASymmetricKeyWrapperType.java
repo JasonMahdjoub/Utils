@@ -354,7 +354,7 @@ public enum ASymmetricKeyWrapperType {
 				}
 			} else {
 				if (!isHybrid())
-					throw new IllegalArgumentException();
+					throw new IllegalArgumentException(""+ipublicKey.getClass().getName());
 
 				HybridASymmetricPublicKey publicKey = (HybridASymmetricPublicKey) ipublicKey;
 				if (!publicKey.getPQCPublicKey().getEncryptionAlgorithmType().name().equals(getPqcWrapper().name()))

@@ -65,7 +65,7 @@ public class TestASymmetricSignatures {
 			{
 				for (SymmetricAuthenticatedSignatureType set : SymmetricAuthenticatedSignatureType.values())
 				{
-					if (akpw.getCodeProvider().equals(aet.getCodeProviderForEncryption()) && akpw.getCodeProvider().equals(set.getCodeProviderForSignature()))
+					if (akpw.getCodeProvider()==null || (akpw.getCodeProvider().equals(aet.getCodeProviderForEncryption()) && akpw.getCodeProvider().equals(set.getCodeProviderForSignature())))
 					{
 						Object[] params = new Object[3];
 						params[0]=akpw;
@@ -95,12 +95,17 @@ public class TestASymmetricSignatures {
 	public void testASymmetricKeyWrapperForSignature(ASymmetricKeyWrapperType typeWrapper, ASymmetricEncryptionType asetype, SymmetricAuthenticatedSignatureType ssigtype) throws NoSuchAlgorithmException, IllegalStateException, NoSuchProviderException, IOException, IllegalArgumentException {
 		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getSingleton(null);
 		ASymmetricKeyPair kp=asetype.getKeyPairGenerator(rand, (short)2048).generateKeyPair();
+		if (typeWrapper.isHybrid())
+		{
+			if (typeWrapper.isPostQuantumKeyAlgorithm())
+				return;
+			ASymmetricKeyPair kppqc= ASymmetricEncryptionType.BCPQC_MCELIECE_FUJISAKI_CCA2_SHA256.getKeyPairGenerator(rand, ASymmetricEncryptionType.BCPQC_MCELIECE_FUJISAKI_CCA2_SHA256.getDefaultKeySizeBits(), System.currentTimeMillis(), Long.MAX_VALUE).generateKeyPair();
+			testASymmetricKeyWrapperForSignature(rand, new HybridASymmetricKeyPair(kp, kppqc), typeWrapper, asetype, ssigtype);
+		}
+		else {
+			testASymmetricKeyWrapperForSignature(rand, kp, typeWrapper, asetype, ssigtype);
+		}
 
-		testASymmetricKeyWrapperForSignature(rand, kp, typeWrapper, asetype, ssigtype);
-		if (typeWrapper.isPostQuantumKeyAlgorithm())
-			return;
-		ASymmetricKeyPair kppqc= ASymmetricEncryptionType.BCPQC_MCELIECE_FUJISAKI_CCA2_SHA256.getKeyPairGenerator(rand, ASymmetricEncryptionType.BCPQC_MCELIECE_FUJISAKI_CCA2_SHA256.getDefaultKeySizeBits(), System.currentTimeMillis(), Long.MAX_VALUE).generateKeyPair();
-		testASymmetricKeyWrapperForSignature(rand, new HybridASymmetricKeyPair(kp, kppqc), typeWrapper, asetype, ssigtype);
 	}
 	@SuppressWarnings("deprecation")
 	@Test(dataProvider = "provideDataForASymmetricSignatureTest")
