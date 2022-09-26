@@ -75,6 +75,7 @@ public class Utils {
 									.addItem(INTERNAL_CHANGE, "Clean code")
 									.addItem(INTERNAL_CHANGE, "Improve nonce generator from seed into SecureRandomType")
 									.addItem(INTERNAL_CHANGE, "Target java compatibility is set to Java 11 but source code still use Java 8")
+									.addItem(SECURITY_FIX_LOW_SEVERITY, "Update snakeyaml depedency, and fix CVE-2022-38752, CVE-2022-38751, CVE-2022-38750, CVE-2022-38749")
 					)
 					.addDescription(
 							new Description(5, 23, 5, Version.Type.STABLE, 0, "2022-04-07")
