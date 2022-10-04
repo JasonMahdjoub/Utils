@@ -220,4 +220,10 @@ public class AggregatedRandomInputStreams extends RandomInputStream{
 		} while(len>0);
 		return total;
 	}
+
+	@Override
+	public void flush() throws IOException {
+		for (RandomInputStream r : this.inputStreams)
+			r.flush();
+	}
 }

@@ -36,6 +36,7 @@ package com.distrimind.util.crypto;
 
 import com.distrimind.util.Bits;
 import com.distrimind.util.Reference;
+import com.distrimind.util.concurrent.PoolExecutor;
 import com.distrimind.util.io.*;
 
 import java.io.IOException;
@@ -82,6 +83,7 @@ public class EncryptionSignatureHashDecoder {
 	private final NullRandomOutputStream nullRandomOutputStream=new NullRandomOutputStream();
 	private static final byte[] emptyTab=new byte[0];
 	private long lastInputStreamLength =-1, lastMaximumOutputLength;
+	private PoolExecutor poolExecutor=null;
 	public EncryptionSignatureHashDecoder connectWithEncoder(EncryptionSignatureHashEncoder encoder)
 	{
 		encoder.connectWithDecoder(this);
@@ -139,6 +141,19 @@ public class EncryptionSignatureHashDecoder {
 	public int getAssociatedDataLength()
 	{
 		return lenAD;
+	}
+
+	public EncryptionSignatureHashDecoder withPoolExecutor(PoolExecutor poolExecutor)
+	{
+		if (poolExecutor==null)
+			throw new NullPointerException();
+		this.poolExecutor=poolExecutor;
+		return this;
+	}
+	public EncryptionSignatureHashDecoder withoutPoolExecutor()
+	{
+		this.poolExecutor=null;
+		return this;
 	}
 
 	public EncryptionSignatureHashDecoder withCipher(SymmetricEncryptionAlgorithm cipher) throws IOException {
@@ -557,6 +572,7 @@ public class EncryptionSignatureHashDecoder {
 			decodeAndCheckHashAndSignaturesIfNecessary(out,  false, positionOfRandomInputStreamAfterDecoding, false);
 
 			return new RandomInputStream(){
+
 				final RandomOutputStream rout=out;
 				final RandomInputStream ris=out.getRandomInputStream();
 				@Override
@@ -598,6 +614,12 @@ public class EncryptionSignatureHashDecoder {
 				public void close() throws IOException {
 					rout.close();
 					ris.close();
+				}
+
+				@Override
+				public void flush() throws IOException {
+					rout.flush();
+					ris.flush();
 				}
 			};
 		}
@@ -664,8 +686,12 @@ public class EncryptionSignatureHashDecoder {
 			RandomInputStream inputStream=originalInputStream;
 			if (digest!=null) {
 				digest.reset();
-				if (hashIn==null)
-					hashIn=new HashRandomInputStream(inputStream, digest);
+				if (hashIn==null) {
+					if (cipher!=null && poolExecutor!=null)
+						hashIn = new HashRandomInputStream(inputStream, poolExecutor, false, digest);
+					else
+						hashIn = new HashRandomInputStream(inputStream, digest);
+				}
 				else
 					hashIn.set(inputStream, digest);
 				inputStream = hashIn;
@@ -676,8 +702,12 @@ public class EncryptionSignatureHashDecoder {
 				symmetricChecker.init(originalInputStream.readBytesArray(false, SymmetricAuthenticatedSignatureType.MAX_SYMMETRIC_SIGNATURE_SIZE));
 				if (positionOfRandomInputStreamAfterDecoding!=null)
 					positionOfRandomInputStreamAfterDecoding.set(originalInputStream.currentPosition());
-				if (checkerIn==null)
-					checkerIn=new SignatureCheckerRandomInputStream(inputStream, symmetricChecker);
+				if (checkerIn==null) {
+					if (cipher!=null && poolExecutor!=null)
+						checkerIn = new SignatureCheckerRandomInputStream(inputStream, poolExecutor, false, symmetricChecker);
+					else
+						checkerIn = new SignatureCheckerRandomInputStream(inputStream, symmetricChecker);
+				}
 				else
 					checkerIn.set(inputStream, symmetricChecker);
 				inputStream=checkerIn;
@@ -688,8 +718,12 @@ public class EncryptionSignatureHashDecoder {
 				asymmetricChecker.init(originalInputStream.readBytesArray(false, ASymmetricAuthenticatedSignatureType.MAX_ASYMMETRIC_SIGNATURE_SIZE));
 				if (positionOfRandomInputStreamAfterDecoding!=null)
 					positionOfRandomInputStreamAfterDecoding.set(originalInputStream.currentPosition());
-				if (checkerIn==null)
-					checkerIn=new SignatureCheckerRandomInputStream(inputStream, asymmetricChecker);
+				if (checkerIn==null) {
+					if (cipher!=null && poolExecutor!=null)
+						checkerIn = new SignatureCheckerRandomInputStream(inputStream, poolExecutor, false, asymmetricChecker);
+					else
+						checkerIn = new SignatureCheckerRandomInputStream(inputStream, asymmetricChecker);
+				}
 				else
 					checkerIn.set(inputStream, asymmetricChecker);
 				inputStream=checkerIn;
@@ -734,6 +768,8 @@ public class EncryptionSignatureHashDecoder {
 				try {
 					assert outputStream!=null;
 					res=cipherInputStream.transferTo(outputStream);
+					cipherInputStream.flush();
+
 				}
 				finally {
 					cipherInputStream.close();
@@ -757,7 +793,7 @@ public class EncryptionSignatureHashDecoder {
 					outputStream.write(limitedRandomInputStream);
 					res = limitedRandomInputStream.length();
 				}
-
+				limitedRandomInputStream.flush();
 			}
 			if (buffer==null && (digest!=null || symmetricChecker!=null || asymmetricChecker!=null)) {
 				buffer=this.buffer;

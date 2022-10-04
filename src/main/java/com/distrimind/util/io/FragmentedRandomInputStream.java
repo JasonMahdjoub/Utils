@@ -185,4 +185,10 @@ public class FragmentedRandomInputStream extends RandomInputStream{
 			in.close();
 		closed=true;
 	}
+
+	@Override
+	public void flush() throws IOException {
+		for (RandomInputStream r : this.ins)
+			r.flush();
+	}
 }

@@ -63,6 +63,8 @@ public abstract class SecuredObjectInputStream extends InputStream implements Da
 
 	private SerializationTools.ObjectResolver objectResolver=new SerializationTools.ObjectResolver();
 
+	private byte[] transferBuffer1=null, transferBuffer2=null;
+
 	// public void skipBytes(int _nb) throws InputStreamException;
 	/**
 	 * Returns the current position in this stream.
@@ -289,7 +291,12 @@ public abstract class SecuredObjectInputStream extends InputStream implements Da
 			return 0;
 		Objects.requireNonNull(out, "out");
 		long transferred = 0;
-		byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];
+		if (transferBuffer1==null)
+			transferBuffer1 = new byte[DEFAULT_BUFFER_SIZE];
+		if (transferBuffer2==null)
+			transferBuffer2 = new byte[DEFAULT_BUFFER_SIZE];
+
+		byte[] buffer=transferBuffer1;
 		int read;
 
 		while ((read = this.read(buffer, 0, maxLength>=0?(int)Math.min(maxLength, DEFAULT_BUFFER_SIZE):DEFAULT_BUFFER_SIZE)) >= 0) {
@@ -302,6 +309,10 @@ public abstract class SecuredObjectInputStream extends InputStream implements Da
 				if (maxLength == 0)
 					break;
 			}
+			if (buffer==transferBuffer1)
+				buffer=transferBuffer2;
+			else
+				buffer=transferBuffer1;
 		}
 		return transferred;
 	}

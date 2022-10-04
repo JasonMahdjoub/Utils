@@ -35,6 +35,7 @@ The fact that you are presently reading this means that you have had
 knowledge of the CeCILL-C license and that you accept its terms.
  */
 
+import com.distrimind.util.concurrent.PoolExecutor;
 import com.distrimind.util.crypto.AbstractMessageDigest;
 
 /**
@@ -45,11 +46,16 @@ import com.distrimind.util.crypto.AbstractMessageDigest;
 public class HashRandomInputStream extends DelegatedRandomInputStream{
 	private AbstractMessageDigest messageDigest;
 	public HashRandomInputStream(RandomInputStream in, AbstractMessageDigest messageDigest) {
-		super(in);
+		this(in, null, false, messageDigest);
+	}
+
+	public HashRandomInputStream(RandomInputStream in, PoolExecutor poolExecutor, boolean cloneGivenArrays, AbstractMessageDigest messageDigest) {
+		super(in, poolExecutor, cloneGivenArrays);
 		if (messageDigest==null)
 			throw new NullPointerException();
 		this.messageDigest=messageDigest;
 	}
+
 	public void set(RandomInputStream in, AbstractMessageDigest messageDigest)
 	{
 		set(in);

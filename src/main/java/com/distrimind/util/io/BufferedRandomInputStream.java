@@ -372,6 +372,8 @@ public class BufferedRandomInputStream extends RandomInputStream {
 		in.close();
 	}
 
-
-
+	@Override
+	public void flush() throws IOException {
+		in.flush();
+	}
 }

@@ -36,6 +36,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 
 import com.distrimind.util.Bits;
+import com.distrimind.util.concurrent.PoolExecutor;
 import com.distrimind.util.io.*;
 
 import java.io.IOException;
@@ -132,6 +133,8 @@ public class EncryptionSignatureHashEncoder {
 	private static final byte[] emptyTab=new byte[0];
 	private long lastInputStreamLength =-1, lastMaximumOutputLength;
 
+	private PoolExecutor poolExecutor=null;
+
 	void incrementIVCounter() throws IOException {
 		if (originalSecretKeyForEncryption==null)
 			return;
@@ -157,6 +160,19 @@ public class EncryptionSignatureHashEncoder {
 		} catch (NoSuchProviderException | NoSuchAlgorithmException e) {
 			throw new IOException(e);
 		}
+	}
+
+	public EncryptionSignatureHashEncoder withPoolExecutor(PoolExecutor poolExecutor)
+	{
+		if (poolExecutor==null)
+			throw new NullPointerException();
+		this.poolExecutor=poolExecutor;
+		return this;
+	}
+	public EncryptionSignatureHashEncoder withoutPoolExecutor()
+	{
+		this.poolExecutor=null;
+		return this;
 	}
 
 	void reloadCipher() throws IOException {
@@ -567,22 +583,35 @@ public class EncryptionSignatureHashEncoder {
 					outputStream = originalOutputStream;
 				if (digest != null) {
 					digest.reset();
-					if (hashOut == null)
-						hashOut = new HashRandomOutputStream(outputStream, digest);
+					if (hashOut == null) {
+						if (cipher!=null && poolExecutor!=null)
+							hashOut = new HashRandomOutputStream(outputStream, poolExecutor, false, digest);
+						else
+							hashOut = new HashRandomOutputStream(outputStream, digest);
+					}
 					else
 						hashOut.set(outputStream, digest);
 					outputStream = hashOut;
 				} else if (symmetricSigner != null) {
 					symmetricSigner.init();
-					if (signerOut == null)
-						signerOut = new SignerRandomOutputStream(outputStream, symmetricSigner);
+					if (signerOut == null) {
+						if (cipher!=null && poolExecutor!=null) {
+							signerOut = new SignerRandomOutputStream(outputStream, poolExecutor, false, symmetricSigner);
+						}
+						else
+							signerOut = new SignerRandomOutputStream(outputStream, symmetricSigner);
+					}
 					else
 						signerOut.set(outputStream, symmetricSigner);
 					outputStream = signerOut;
 				} else if (asymmetricSigner != null) {
 					asymmetricSigner.init();
 					if (signerOut == null)
-						signerOut = new SignerRandomOutputStream(outputStream, asymmetricSigner);
+						if (cipher!=null && poolExecutor!=null) {
+							signerOut = new SignerRandomOutputStream(outputStream, poolExecutor, false, asymmetricSigner);
+						}
+						else
+							signerOut = new SignerRandomOutputStream(outputStream, asymmetricSigner);
 					else
 						signerOut.set(outputStream, asymmetricSigner);
 					outputStream = signerOut;
@@ -705,11 +734,10 @@ public class EncryptionSignatureHashEncoder {
 		public void close() throws IOException {
 			if (closed)
 				return;
-			outputStream.flush();
+			dataOutputStream.flush();
 			if (cipher!=null)
 				dataOutputStream.close();
-			else
-				dataOutputStream.flush();
+
 			dataOutputStream=null;
 			if (inputStreamLength<0)
 			{

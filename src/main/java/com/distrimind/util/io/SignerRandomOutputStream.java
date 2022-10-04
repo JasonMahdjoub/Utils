@@ -47,12 +47,13 @@ import java.io.IOException;
  */
 public class SignerRandomOutputStream extends DelegatedRandomOutputStream{
 	private AbstractAuthenticatedSignerAlgorithm signer;
-	private final byte[] b=new byte[1];
+
+
 	public SignerRandomOutputStream(RandomOutputStream out, AbstractAuthenticatedSignerAlgorithm signer) {
-		this(out, null, signer);
+		this(out, null, false, signer);
 	}
-	SignerRandomOutputStream(RandomOutputStream out, PoolExecutor poolExecutor, AbstractAuthenticatedSignerAlgorithm signer) {
-		super(out, poolExecutor);
+	public SignerRandomOutputStream(RandomOutputStream out, PoolExecutor poolExecutor, boolean cloneGivenArrays, AbstractAuthenticatedSignerAlgorithm signer) {
+		super(out, poolExecutor, cloneGivenArrays);
 		if (signer==null)
 			throw new NullPointerException();
 		this.signer=signer;
@@ -67,8 +68,7 @@ public class SignerRandomOutputStream extends DelegatedRandomOutputStream{
 
 	@Override
 	protected void derivedWrite(int b) throws IOException {
-		this.b[0]=(byte)b;
-		derivedWrite(this.b, 0, 1);
+		this.signer.update((byte)b);
 	}
 
 	@Override

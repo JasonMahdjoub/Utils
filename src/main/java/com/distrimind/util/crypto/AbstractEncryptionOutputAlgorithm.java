@@ -52,20 +52,54 @@ import java.util.Arrays;
 public abstract class AbstractEncryptionOutputAlgorithm implements AutoZeroizable, IClientServer {
 	final static int BUFFER_SIZE = FileTools.BUFFER_SIZE;
 
-	protected static final class Finalizer extends Cleaner
+	protected static class Finalizer extends Cleaner
 	{
-		byte[] buffer;
+		private byte[] buffer1=null;
+		private byte[] buffer2=null;
+		private byte[] currentBuffer=null;
 
-		private Finalizer(Cleanable cleanable) {
+		protected Finalizer(Cleanable cleanable) {
 			super(cleanable);
 		}
 
 		@Override
 		protected void performCleanup() {
-			if (buffer!=null) {
-				Arrays.fill(buffer, (byte) 0);
-				buffer = null;
+			if (buffer1!=null) {
+				Arrays.fill(buffer1, (byte) 0);
+				buffer1 = null;
 			}
+			if (buffer2!=null) {
+				Arrays.fill(buffer2, (byte) 0);
+				buffer2 = null;
+			}
+			currentBuffer=null;
+		}
+		void initBuffers(int size)
+		{
+			buffer1=new byte[size];
+			buffer2=new byte[size];
+			currentBuffer=null;
+		}
+		byte[] switchBuffer()
+		{
+			if (currentBuffer==buffer1)
+				return currentBuffer=buffer2;
+			else if (currentBuffer==buffer2)
+				return currentBuffer=buffer1;
+			else
+				return currentBuffer=buffer1;
+		}
+		int getBufferSize()
+		{
+			return buffer1.length;
+		}
+		byte[] switchBuffer(int size)
+		{
+			if (buffer1.length < size) {
+				performCleanup();
+				initBuffers(size);
+			}
+			return switchBuffer();
 		}
 	}
 	protected final Finalizer finalizer;
@@ -101,7 +135,6 @@ public abstract class AbstractEncryptionOutputAlgorithm implements AutoZeroizabl
 		super();
 		cipher=null;
 		this.finalizer=new Finalizer(this);
-		finalizer.buffer=null;
 
 	}
 
@@ -119,7 +152,7 @@ public abstract class AbstractEncryptionOutputAlgorithm implements AutoZeroizabl
 			bol=(int) getOutputSizeAfterEncryption(bufferInSize =4096);
 		}
 		zeroize();
-		finalizer.buffer=new byte[bol];
+		finalizer.initBuffers(bol);
 	}
 	
 
@@ -291,9 +324,10 @@ public abstract class AbstractEncryptionOutputAlgorithm implements AutoZeroizabl
 						os.write(res);
 				}
 				else {
-					int s = cipher.doFinal(finalizer.buffer, 0);
+					byte[] buffer=finalizer.switchBuffer();
+					int s = cipher.doFinal(buffer, 0);
 					if (s > 0)
-						os.write(finalizer.buffer, 0, s);
+						os.write(buffer, 0, s);
 				}
 				doFinal = false;
 			}
@@ -349,19 +383,19 @@ public abstract class AbstractEncryptionOutputAlgorithm implements AutoZeroizabl
 				long l=checkInit();
 				int s=(int)Math.min(len, l);
 				assert s>0;
+				byte[] buffer;
 				if (s> bufferInSize) {
 					int outLen = cipher.getOutputSize(s);
-					if (finalizer.buffer.length < outLen) {
-						zeroize();
-						finalizer.buffer = new byte[outLen];
-					}
+					buffer=finalizer.switchBuffer(outLen);
 				}
-				int w=cipher.update(b, off, s, finalizer.buffer, 0);
+				else
+					buffer=finalizer.switchBuffer();
+				int w=cipher.update(b, off, s, buffer, 0);
 				doFinal=true;
 				initPossible=true;
 				currentPos+=s;
 				if (w>0) {
-					os.write(finalizer.buffer, 0, w);
+					os.write(buffer, 0, w);
 				}
 
 				len-=s;
@@ -379,11 +413,12 @@ public abstract class AbstractEncryptionOutputAlgorithm implements AutoZeroizabl
 			checkInit();
 			one[0]=(byte)b;
 			++currentPos;
-			int w=cipher.update(one, 0, 1, finalizer.buffer, 0);
+			byte[] buffer=finalizer.switchBuffer();
+			int w=cipher.update(one, 0, 1, buffer, 0);
 			doFinal=true;
 			initPossible=true;
 			if (w>0) {
-				os.write(finalizer.buffer, 0, w);
+				os.write(buffer, 0, w);
 			}
 			checkDoFinal(false);
 		}

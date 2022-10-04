@@ -853,7 +853,7 @@ public class PoolExecutor implements ExecutorService {
 	}
 
 
-	private void decrementMaxThreadNumber() {
+	public void decrementMaxThreadNumber() {
 		lock.lock();
 		try
 		{
@@ -874,7 +874,7 @@ public class PoolExecutor implements ExecutorService {
 		}
 		return true;
 	}
-	private void incrementMaxThreadNumber()
+	public void incrementMaxThreadNumber()
 	{
 		lock.lock();
 		try
@@ -892,20 +892,22 @@ public class PoolExecutor implements ExecutorService {
 
 	}
 
-
+	public void waitWithoutIncrementMaxThreadNumbers(LockerCondition locker) throws InterruptedException {
+		synchronized (locker.getLocker()) {
+			while (locker.isLocked() && !locker.isCanceled()) {
+				locker.beforeCycleLocking();
+				locker.getLocker().wait();
+				locker.afterCycleLocking();
+			}
+		}
+	}
 	public boolean wait(LockerCondition locker) throws InterruptedException {
 		Executor executor=getExecutor(Thread.currentThread());
 		if (executor!=null) {
 			incrementMaxThreadNumber();
 
 			try {
-				synchronized (locker.getLocker()) {
-					while (locker.isLocked() && !locker.isCanceled()) {
-						locker.beforeCycleLocking();
-						locker.getLocker().wait();
-						locker.afterCycleLocking();
-					}
-				}
+				waitWithoutIncrementMaxThreadNumbers(locker);
 
 			} finally {
 				decrementMaxThreadNumber();

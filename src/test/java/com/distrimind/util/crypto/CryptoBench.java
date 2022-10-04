@@ -36,16 +36,19 @@ package com.distrimind.util.crypto;
 
 import com.distrimind.util.OS;
 import com.distrimind.util.Timer;
+import com.distrimind.util.concurrent.PoolExecutor;
 import com.distrimind.util.io.LimitedRandomInputStream;
 import com.distrimind.util.io.RandomByteArrayInputStream;
 import com.distrimind.util.io.RandomByteArrayOutputStream;
 import org.testng.annotations.DataProvider;
 
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -57,8 +60,9 @@ import java.util.Random;
  *
  */
 public class CryptoBench {
+	static PoolExecutor poolExecutor=new PoolExecutor(2, Runtime.getRuntime().availableProcessors(), 2000, TimeUnit.MILLISECONDS);
 	@org.testng.annotations.Test(dataProvider="provideDataForTestEncryptionAndSignatureSpeed")
-	public void testEncryptionAndSignatureSpeed(SymmetricEncryptionType type) throws NoSuchAlgorithmException,NoSuchProviderException, IllegalStateException, IOException
+	public void testEncryptionAndSignatureSpeed(SymmetricEncryptionType type, boolean withPoolExecutor) throws NoSuchAlgorithmException,NoSuchProviderException, IllegalStateException, IOException
 	{
 		System.out.println("JRE Version : "+OS.getCurrentJREVersionDouble());
 		byte[] toEncrypt = new byte[1024 * 1024 * 400];
@@ -70,6 +74,8 @@ public class CryptoBench {
 		SymmetricSecretKey secretKeyForEncryption=type.getKeyGenerator(SecureRandomType.FORTUNA_WITH_BC_FIPS_APPROVED_FOR_KEYS.getInstance(null), (type.getDefaultKeySizeBits()==128 && !type.name().equals("GNU_SQUARE_CBC__PKCS5Padding"))?256:type.getDefaultKeySizeBits()).generateKey();
 		EncryptionSignatureHashEncoder encoder=new EncryptionSignatureHashEncoder()
 				.withSymmetricSecretKeyForEncryption(SecureRandomType.FORTUNA_WITH_BC_FIPS_APPROVED.getInstance(null), secretKeyForEncryption);
+		if (withPoolExecutor)
+			encoder.withPoolExecutor(poolExecutor);
 		SymmetricSecretKey secretKeyForSignature=null;
 		SymmetricAuthenticatedSignatureType sigType=type.getDefaultSignatureAlgorithm();
 		if (!type.isAuthenticatedAlgorithm()) {
@@ -78,6 +84,8 @@ public class CryptoBench {
 		}
 		EncryptionSignatureHashDecoder decoder=new EncryptionSignatureHashDecoder()
 				.withSymmetricSecretKeyForEncryption(secretKeyForEncryption);
+		if (withPoolExecutor)
+			decoder.withPoolExecutor(poolExecutor);
 		if (secretKeyForSignature!=null)
 			decoder.withSymmetricSecretKeyForSignature(secretKeyForSignature);
 
@@ -95,7 +103,7 @@ public class CryptoBench {
 		}
 		double ms=timer.getMilliDouble();
 		double speedEncoding=(toEncrypt.length/(ms/1000.0)/1024.0/1024.0);
-		System.out.println(type+" - Encryption speed  : "+speedEncoding+" MiO/s");
+		System.out.println((withPoolExecutor?"With pool executor - ":"")+type+" - Encryption speed  : "+speedEncoding+" MiO/s");
 
 		timer.reset();
 
@@ -109,20 +117,21 @@ public class CryptoBench {
 
 		double speedDecoding=(toEncrypt.length/(ms2/1000.0)/1024.0/1024.0);
 		double averageSpeedEncodingAndDecoding=(speedDecoding+speedEncoding)/2.0;
-		System.out.println(type+"Decryption speed  : "+speedDecoding+" MiO/s");
-		System.out.println(type+"Average encryption and decryption speed  : "+averageSpeedEncodingAndDecoding+" MiO/s");
+		System.out.println((withPoolExecutor?"With pool executor - ":"")+type+"Decryption speed  : "+speedDecoding+" MiO/s");
+		System.out.println((withPoolExecutor?"With pool executor - ":"")+type+"Average encryption and decryption speed  : "+averageSpeedEncodingAndDecoding+" MiO/s");
 	}
 
 	@DataProvider( name="provideDataForTestEncryptionAndSignatureSpeed")
 	public Object[][] provideDataForTestEncryptionAndSignatureSpeed()
 	{
-		Object[][] res = new Object[SymmetricEncryptionType.values().length][1];
-		int index=0;
+		ArrayList<Object[]> res = new ArrayList<>();
 		for (SymmetricEncryptionType t : SymmetricEncryptionType.values())
 		{
-			res[index++][0]=t;
+			res.add(new Object[]{t, false});
+			if (!t.isAuthenticatedAlgorithm())
+				res.add(new Object[]{t, true});
 		}
-		return res;
+		return res.toArray(new Object[0][]);
 	}
 
 

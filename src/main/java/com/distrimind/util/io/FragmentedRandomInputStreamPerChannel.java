@@ -185,4 +185,8 @@ public class FragmentedRandomInputStreamPerChannel extends RandomInputStream {
 		in.close();
 	}
 
+	@Override
+	public void flush() throws IOException {
+		in.flush();
+	}
 }

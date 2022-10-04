@@ -65,7 +65,7 @@ abstract class CommonCipherInputStream extends RandomInputStream {
 	protected AbstractCipher cipher;
 	private byte[] associatedData;
 	private int offAD, lenAD;
-	private final byte[] buffer;
+	private final AbstractEncryptionOutputAlgorithm.Finalizer finalizer;
 	private byte[] outputBuffer;
 	private final boolean supportRandomAccess;
 	private final int counterStepInBytes;
@@ -81,7 +81,7 @@ abstract class CommonCipherInputStream extends RandomInputStream {
 	protected abstract void initCipherForDecryption() throws IOException;
 	protected abstract long getOutputSizeAfterDecryption(long inputLength) throws IOException;
 
-	CommonCipherInputStream(IClientServer iEncryptionInputAlgorithm, boolean allInDoFinal, int maxEncryptedPartLength, RandomInputStream is, boolean includeIV, byte maxCounterLength, byte[] externalCounter, AbstractCipher cipher, byte[] associatedData, int offAD, int lenAD, byte[] buffer, boolean supportRandomAccess, int counterStepInBytes, int maxPlainTextSizeForEncoding) throws IOException {
+	CommonCipherInputStream(IClientServer iEncryptionInputAlgorithm, boolean allInDoFinal, int maxEncryptedPartLength, RandomInputStream is, boolean includeIV, byte maxCounterLength, byte[] externalCounter, AbstractCipher cipher, byte[] associatedData, int offAD, int lenAD, AbstractEncryptionOutputAlgorithm.Finalizer finalizer, boolean supportRandomAccess, int counterStepInBytes, int maxPlainTextSizeForEncoding) throws IOException {
 		if (maxCounterLength>0) {
 			if (externalCounter == null)
 				throw new NullPointerException("External counter is null");
@@ -96,7 +96,7 @@ abstract class CommonCipherInputStream extends RandomInputStream {
 		this.allInDoFinal=allInDoFinal;
 		this.maxEncryptedPartLength = maxEncryptedPartLength;
 		this.cipher = cipher;
-		this.buffer = buffer;
+		this.finalizer = finalizer;
 		this.supportRandomAccess = supportRandomAccess;
 		this.counterStepInBytes = counterStepInBytes;
 		this.maxPlainTextSizeForEncoding = maxPlainTextSizeForEncoding;
@@ -176,7 +176,7 @@ abstract class CommonCipherInputStream extends RandomInputStream {
 	}
 	private void checkOutputBuffer() throws IOException {
 		if (outputBuffer==null)
-			outputBuffer=new byte[128+cipher.getOutputSize(this.buffer.length)];
+			outputBuffer=new byte[128+cipher.getOutputSize(this.finalizer.getBufferSize())];
 	}
 	private void checkDoFinal(boolean endStream) throws IOException {
 		if (doFinal && (posEncrypted %maxEncryptedPartLength==0 || endStream))
@@ -279,6 +279,7 @@ abstract class CommonCipherInputStream extends RandomInputStream {
 			checkOutputBuffer();
 
 			do {
+				byte[] buffer= finalizer.switchBuffer();
 				int s3 = Math.min(s, buffer.length);
 				if (s3>0) {
 					s2 = is.read(buffer, 0, s3);
@@ -421,4 +422,8 @@ abstract class CommonCipherInputStream extends RandomInputStream {
 		return new DataInputStream(this).readLine();
 	}
 
+	@Override
+	public void flush() throws IOException {
+		this.is.flush();
+	}
 }

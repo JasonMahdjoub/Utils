@@ -35,6 +35,7 @@ The fact that you are presently reading this means that you have had
 knowledge of the CeCILL-C license and that you accept its terms.
  */
 
+import com.distrimind.util.concurrent.PoolExecutor;
 import com.distrimind.util.crypto.AbstractAuthenticatedCheckerAlgorithm;
 
 import java.io.IOException;
@@ -47,13 +48,17 @@ import java.io.IOException;
 public class SignatureCheckerRandomInputStream extends DelegatedRandomInputStream{
 
 	private AbstractAuthenticatedCheckerAlgorithm checker;
-	private final byte[] b=new byte[1];
 	public SignatureCheckerRandomInputStream(RandomInputStream in, AbstractAuthenticatedCheckerAlgorithm checker) {
-		super(in);
+		this(in, null,false, checker);
+	}
+
+	public SignatureCheckerRandomInputStream(RandomInputStream in, PoolExecutor poolExecutor, boolean cloneGivenArrays, AbstractAuthenticatedCheckerAlgorithm checker) {
+		super(in, poolExecutor, cloneGivenArrays);
 		if (checker==null)
 			throw new NullPointerException();
 		this.checker=checker;
 	}
+
 	public void set(RandomInputStream in, AbstractAuthenticatedCheckerAlgorithm checker)
 	{
 		set(in);
@@ -69,7 +74,6 @@ public class SignatureCheckerRandomInputStream extends DelegatedRandomInputStrea
 
 	@Override
 	protected void derivedRead(int v) throws IOException {
-		b[0]=(byte)v;
-		derivedRead(b, 0, 1);
+		checker.update((byte)v);
 	}
 }

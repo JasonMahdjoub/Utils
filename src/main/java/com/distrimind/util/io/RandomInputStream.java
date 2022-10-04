@@ -201,4 +201,10 @@ public abstract class RandomInputStream extends SecuredObjectInputStream impleme
 	public long skip(long n) throws IOException {
 		return skipImpl(n);
 	}
+
+
+	public void flush() throws IOException
+	{
+
+	}
 }

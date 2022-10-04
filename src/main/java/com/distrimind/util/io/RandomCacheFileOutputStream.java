@@ -280,6 +280,11 @@ public class RandomCacheFileOutputStream extends RandomOutputStream implements C
 			public String readLine() throws IOException {
 				return in.readLine();
 			}
+
+			@Override
+			public void flush() throws IOException {
+				in.flush();
+			}
 		};
 	}
 

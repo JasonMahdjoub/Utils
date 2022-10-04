@@ -49,11 +49,11 @@ public class HashRandomOutputStream extends DelegatedRandomOutputStream{
 	private AbstractMessageDigest messageDigest;
 
 	public HashRandomOutputStream(RandomOutputStream out, AbstractMessageDigest messageDigest) {
-		this(out, null, messageDigest);
+		this(out, null, false, messageDigest);
 	}
 
-	HashRandomOutputStream(RandomOutputStream out, PoolExecutor pool, AbstractMessageDigest messageDigest) {
-		super(out, pool);
+	public HashRandomOutputStream(RandomOutputStream out, PoolExecutor pool, boolean cloneGivenArrays, AbstractMessageDigest messageDigest) {
+		super(out, pool, cloneGivenArrays);
 		if (messageDigest==null)
 			throw new NullPointerException();
 		this.messageDigest=messageDigest;

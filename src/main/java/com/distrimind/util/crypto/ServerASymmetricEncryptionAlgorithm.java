@@ -42,7 +42,6 @@ import javax.crypto.Cipher;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
-import java.util.Arrays;
 
 
 /**
@@ -220,21 +219,14 @@ public class ServerASymmetricEncryptionAlgorithm implements IEncryptionInputAlgo
 
 	}
 
-	private final static class ServerFinalizer extends Cleanable.Cleaner
+	private final static class ServerFinalizer extends AbstractEncryptionOutputAlgorithm.Finalizer
 	{
-		private byte[] buffer=new byte[BUFFER_SIZE];
 
 		private ServerFinalizer(Cleanable cleanable) {
 			super(cleanable);
+			initBuffers(BUFFER_SIZE);
 		}
 
-		@Override
-		protected void performCleanup() {
-			if (buffer!=null) {
-				Arrays.fill(buffer, (byte) 0);
-				buffer = null;
-			}
-		}
 	}
 	private static class Server implements IServer, AutoZeroizable {
 		private final ServerFinalizer finalizer;
@@ -334,7 +326,7 @@ public class ServerASymmetricEncryptionAlgorithm implements IEncryptionInputAlgo
 		public RandomInputStream getCipherInputStreamForDecryption(final RandomInputStream is, byte[] associatedData, int offAD, final int lenAD, final byte[] externalCounter)
 				throws IOException {
 
-			CommonCipherInputStream res=new CommonCipherInputStream(this, false, maxEncryptedPartLength, is, false,   (byte)0, externalCounter, cipher, associatedData, offAD, lenAD, finalizer.buffer, false, 0, maxPlainTextSizeForEncoding) {
+			CommonCipherInputStream res=new CommonCipherInputStream(this, false, maxEncryptedPartLength, is, false,   (byte)0, externalCounter, cipher, associatedData, offAD, lenAD, finalizer, false, 0, maxPlainTextSizeForEncoding) {
 
 
 				@Override

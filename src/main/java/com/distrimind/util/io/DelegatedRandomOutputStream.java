@@ -35,10 +35,10 @@ The fact that you are presently reading this means that you have had
 knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-import com.distrimind.util.concurrent.LockerCondition;
 import com.distrimind.util.concurrent.PoolExecutor;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 /**
  * @author Jason Mahdjoub
@@ -47,81 +47,210 @@ import java.io.IOException;
  */
 public abstract class DelegatedRandomOutputStream extends RandomOutputStream{
 	protected RandomOutputStream out;
-	private final PoolExecutor pool;
 
-	private volatile IOException exception;
-	private final LC lockerCondition;
-	private byte[] array;
-	private int off, len;
+	private final LC thread;
+	private final boolean cloneArrays;
+
+
+
 
 	public DelegatedRandomOutputStream(RandomOutputStream out) {
-		this(out, null);
+		this(out, null, false);
 	}
-	private class LC extends LockerCondition
+
+	static abstract class AbstractLC
 	{
-		private byte[] a;
-		public LC() {
-			super(DelegatedRandomOutputStream.this);
+		protected byte[] a=null;
+		protected byte[] b=null;
+		protected int offA, offB, lenA, lenB;
+		private boolean releaseArray=false;
+
+		private IOException exception=null;
+		private boolean closed=false;
+
+		public AbstractLC(final PoolExecutor pool) {
+			super();
+			if (pool==null)
+				throw new NullPointerException();
+			pool.execute(()->{
+				pool.incrementMaxThreadNumber();
+				try {
+					for(;;) {
+						try {
+							synchronized (AbstractLC.this) {
+								if (closed)
+									break;
+								while (isLocked()) {
+									if (closed)
+										break;
+									AbstractLC.this.wait();
+								}
+							}
+							derivedArrayAction();
+						} catch (InterruptedException e) {
+							synchronized (AbstractLC.this) {
+								exception = new IOException(e);
+							}
+							break;
+						} catch (IOException e) {
+							synchronized (AbstractLC.this) {
+								exception = e;
+							}
+
+							break;
+						}
+					}
+					synchronized (AbstractLC.this)
+					{
+						a=null;
+						b=null;
+						AbstractLC.this.notify();
+					}
+				}
+				finally {
+					pool.decrementMaxThreadNumber();
+				}
+			});
+		}
+		protected final boolean isClosed()
+		{
+			synchronized (this)
+			{
+				return closed;
+			}
+		}
+
+
+		private boolean isLocked() {
+			if (releaseArray)
+			{
+				releaseArray();
+				releaseArray=false;
+			}
+			if (a!=null) {
+				releaseArray=true;
+				return false;
+			}
+			else
+				return !isClosed();
+		}
+		protected abstract void derivedArrayAction() throws IOException ;
+		protected abstract void derivedByteAction(int b) throws IOException ;
+
+		private void releaseArray()
+		{
+			if (b!=null)
+			{
+				a=b;
+				offA=offB;
+				lenA=lenB;
+				b=null;
+				this.notify();
+			}
+			else {
+				a=null;
+				this.notify();
+			}
+		}
+		final void addByte(int value) throws IOException {
+
+			synchronized (this) {
+				while (a != null) {
+					try {
+						this.wait();
+					} catch (InterruptedException e) {
+						throw new IOException(e);
+					}
+				}
+				derivedByteAction(value);
+			}
+		}
+		final void addArray(byte[] t, int off, int len) throws IOException {
+			synchronized (this)
+			{
+				assert b==null;
+				if (a==null)
+				{
+					a=t;
+					offA=off;
+					lenA=len;
+					this.notify();
+				}
+				else
+				{
+					if (a==t)
+						throw new RuntimeException("The given array is the same than the previous read/write call. Arrays must be switched when cloneArrays is set to false into classes that inherit from DelegatedRandomOutputStream or DelegatedRandomInputStream.");
+					b=t;
+					offB=off;
+					lenB=len;
+					while (b!=null)
+					{
+						try {
+							this.wait();
+						} catch (InterruptedException e) {
+							throw new IOException(e);
+						}
+					}
+				}
+
+			}
+		}
+		final void flush(boolean close) throws IOException {
+
+			synchronized (this)
+			{
+				if (closed)
+					return;
+				try {
+					while (a != null) {
+						try {
+							this.wait();
+						} catch (InterruptedException e) {
+							throw new IOException(e);
+						}
+					}
+					this.notify();
+					if (exception != null)
+						throw exception;
+				}
+				finally {
+					if (close)
+						closed=true;
+				}
+
+			}
+		}
+
+	}
+	private final class LC extends AbstractLC
+	{
+		public LC(PoolExecutor poolExecutor) {
+			super(poolExecutor);
+		}
+
+
+		@Override
+		protected void derivedArrayAction() throws IOException {
+			derivedWrite(a, offA, lenA);
 		}
 
 		@Override
-		public boolean isLocked() {
-			if (array!=null)
-			{
-				a=array;
-				return true;
-			}
-			else
-				return false;
-		}
-		private void releaseArray()
-		{
-			synchronized (DelegatedRandomOutputStream.this)
-			{
-				array=null;
-				a=null;
-				DelegatedRandomOutputStream.this.notify();
-			}
-		}
-		private byte[] getArray()
-		{
-			return a;
+		protected void derivedByteAction(int b) throws IOException {
+			derivedWrite(b);
 		}
 	}
-	DelegatedRandomOutputStream(RandomOutputStream out, PoolExecutor poolExecutor) {
+	DelegatedRandomOutputStream(RandomOutputStream out, PoolExecutor poolExecutor, boolean cloneArrays) {
 		set(out);
-		this.pool=poolExecutor;
 
+		this.cloneArrays=cloneArrays;
 		if (poolExecutor!=null)
 		{
-			lockerCondition=new LC();
-			array=null;
-			poolExecutor.execute(()->{
-				while (!isClosed()) {
-					try {
-						pool.wait(lockerCondition);
-						try {
-							derivedWrite(lockerCondition.getArray(), off, len);
-						}
-						finally {
-							lockerCondition.releaseArray();
-						}
-					} catch (InterruptedException e) {
-						exception=new IOException(e);
-						break;
-					} catch (IOException e) {
-						exception=e;
-						break;
-					}
-				}
-			});
-
+			thread =new LC(poolExecutor);
 		}
 		else
 		{
-			lockerCondition=null;
+			thread =null;
 		}
-		exception=null;
 	}
 
 	protected void set(RandomOutputStream out)
@@ -153,7 +282,7 @@ public abstract class DelegatedRandomOutputStream extends RandomOutputStream{
 
 	@Override
 	public boolean isClosed() {
-		return out.isClosed();
+		return thread==null?out.isClosed(): thread.isClosed();
 	}
 
 	@Override
@@ -162,21 +291,11 @@ public abstract class DelegatedRandomOutputStream extends RandomOutputStream{
 		multiThreadDerivedWrite(b);
 	}
 	private void multiThreadDerivedWrite(int b) throws IOException {
-		if (pool==null)
+		if (thread ==null)
 			derivedWrite(b);
 		else {
-			synchronized (this)
-			{
-				while (array!=null)
-				{
-					try {
-						this.wait();
-					} catch (InterruptedException e) {
-						throw new IOException(e);
-					}
-				}
-				derivedWrite(b);
-			}
+
+			thread.addByte(b);
 		}
 	}
 	protected abstract void derivedWrite(int b) throws IOException ;
@@ -190,27 +309,12 @@ public abstract class DelegatedRandomOutputStream extends RandomOutputStream{
 	}
 
 	private void multiThreadDerivedWrite(byte[] b, int off, int len) throws IOException {
-		if (pool==null)
+		if (thread==null)
 			derivedWrite(b, off, len);
 		else {
-			synchronized (this)
-			{
-				while (array!=null)
-				{
-					try {
-						this.wait();
-					} catch (InterruptedException e) {
-						throw new IOException(e);
-					}
-				}
-				this.off=off;
-				this.len=len;
-				this.array=b;
-				lockerCondition.notifyLocker();
-			}
-
-
-
+			if (cloneArrays)
+				b= Arrays.copyOfRange(b, off, len+off);
+			thread.addArray(b, off, len);
 		}
 	}
 
@@ -218,33 +322,31 @@ public abstract class DelegatedRandomOutputStream extends RandomOutputStream{
 
 	@Override
 	public void close() throws IOException {
-		if (pool!=null) {
+
+		if (thread!=null) {
+
 			synchronized (this)
 			{
 				try {
-					while (array != null) {
-						try {
-							this.wait();
-						} catch (InterruptedException e) {
-							throw new IOException(e);
-						}
-					}
+					thread.flush(true);
 				}
 				finally {
 					out.close();
 				}
-				if (exception != null)
-					throw exception;
+
 			}
 		}
-		else
+		else {
 			out.close();
+		}
 
 	}
 
 	@Override
 	public void flush() throws IOException {
 		out.flush();
+		if (thread !=null)
+			thread.flush(false);
 	}
 
 

@@ -35,8 +35,11 @@ The fact that you are presently reading this means that you have had
 knowledge of the CeCILL-C license and that you accept its terms.
  */
 
+import com.distrimind.util.concurrent.PoolExecutor;
+
 import java.io.DataInputStream;
 import java.io.IOException;
+import java.util.Arrays;
 
 /**
  * @author Jason Mahdjoub
@@ -46,9 +49,43 @@ import java.io.IOException;
 @SuppressWarnings("NullableProblems")
 public abstract class DelegatedRandomInputStream extends RandomInputStream {
 	protected RandomInputStream in;
+	private final LC thread;
+	private final boolean cloneArrays;
+
+
+	private final class LC extends DelegatedRandomOutputStream.AbstractLC
+	{
+		public LC(PoolExecutor poolExecutor) {
+			super(poolExecutor);
+		}
+
+
+		@Override
+		protected void derivedArrayAction() throws IOException {
+			derivedRead(a, offA, lenA);
+		}
+
+		@Override
+		protected void derivedByteAction(int b) throws IOException {
+			derivedRead(b);
+		}
+	}
+
 
 	public DelegatedRandomInputStream(RandomInputStream in)  {
+		this(in, null, false);
+	}
+	DelegatedRandomInputStream(RandomInputStream in, PoolExecutor poolExecutor, boolean cloneArrays)  {
 		set(in);
+		this.cloneArrays=cloneArrays;
+		if (poolExecutor!=null)
+		{
+			thread =new LC(poolExecutor);
+		}
+		else
+		{
+			thread =null;
+		}
 	}
 
 	protected void set(RandomInputStream in)
@@ -75,14 +112,14 @@ public abstract class DelegatedRandomInputStream extends RandomInputStream {
 
 	@Override
 	public boolean isClosed() {
-		return in.isClosed();
+		return thread==null?in.isClosed():thread.isClosed();
 	}
 
 	@Override
 	public void readFully(byte[] tab, int off, int len) throws IOException {
 		checkLimits(tab, off, len);
 		in.readFully(tab, off, len);
-		derivedRead(tab, off, len);
+		multiThreadDerivedRead(tab, off, len);
 	}
 
 	@Override
@@ -108,7 +145,7 @@ public abstract class DelegatedRandomInputStream extends RandomInputStream {
 	@Override
 	public int read() throws IOException {
 		int v= in.read();
-		derivedRead(v);
+		multiThreadDerivedRead(v);
 		return v;
 	}
 
@@ -132,21 +169,59 @@ public abstract class DelegatedRandomInputStream extends RandomInputStream {
 	public int read(byte[] b, int off, int len) throws IOException {
 		checkLimits(b, off, len);
 		int s= in.read(b, off, len);
-		derivedRead(b, off, s);
+		multiThreadDerivedRead(b, off, s);
 		return s;
 	}
 
 	protected abstract void derivedRead(byte[] b, int off, int len) throws IOException;
 	protected abstract void derivedRead(int v) throws IOException;
 
+	private void multiThreadDerivedRead(byte[] b, int off, int len) throws IOException {
+		if (thread==null)
+			derivedRead(b, off, len);
+		else {
+			if (cloneArrays)
+				b= Arrays.copyOfRange(b, off, len+off);
+			thread.addArray(b, off, len);
+
+		}
+	}
+
+	private void multiThreadDerivedRead(int b) throws IOException {
+		if (thread==null)
+			derivedRead(b);
+		else {
+			thread.addByte(b);
+		}
+	}
+
 	@Override
 	public void close() throws IOException {
-		in.close();
+		if (thread!=null) {
+			synchronized (this)
+			{
+				try {
+					thread.flush(true);
+
+				}
+				finally {
+					in.close();
+				}
+			}
+		}
+		else {
+			in.close();
+		}
 	}
 
 	public RandomInputStream getOriginalRandomInputStream()
 	{
 		return in;
 	}
-
+	@Override
+	public void flush() throws IOException {
+		in.flush();
+		if (thread !=null)
+			thread.flush(false);
+	}
 }

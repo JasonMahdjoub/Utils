@@ -210,4 +210,8 @@ public final class CPUUsageAsDecoyInputStream<T extends RandomInputStream> exten
 		return in;
 	}
 
+	@Override
+	public void flush() throws IOException {
+		in.flush();
+	}
 }

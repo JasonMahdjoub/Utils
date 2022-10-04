@@ -50,7 +50,7 @@ import java.util.zip.ZipOutputStream;
  */
 public final class FileTools {
 
-	public static final int BUFFER_SIZE = 128*1024;
+	public static final int BUFFER_SIZE = 64*1024;
 
 	/**
 	 * Check if a specified file path is a folder and create a folder if it does not
