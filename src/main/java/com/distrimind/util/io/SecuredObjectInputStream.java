@@ -37,7 +37,6 @@ knowledge of the CeCILL-C license and that you accept its terms.
 
 
 import com.distrimind.util.AbstractDecentralizedID;
-import com.distrimind.util.FileTools;
 import com.distrimind.util.crypto.*;
 import com.distrimind.util.data_buffers.WrappedData;
 import com.distrimind.util.data_buffers.WrappedString;
@@ -58,7 +57,7 @@ import java.util.Objects;
  * @since Utils 4.4.0
  */
 public abstract class SecuredObjectInputStream extends InputStream implements DataInput  {
-	private static final int DEFAULT_BUFFER_SIZE = FileTools.BUFFER_SIZE;
+	public static final int DEFAULT_BUFFER_SIZE = 16*1024;
 	//private static final int MAX_BUFFER_SIZE = Integer.MAX_VALUE - 8;
 
 	private SerializationTools.ObjectResolver objectResolver=new SerializationTools.ObjectResolver();

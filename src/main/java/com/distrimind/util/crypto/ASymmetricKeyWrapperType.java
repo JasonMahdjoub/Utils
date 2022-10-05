@@ -225,7 +225,7 @@ public enum ASymmetricKeyWrapperType {
 			if (t.ordinal()==ordinal)
 				return t;
 		}
-		throw new InvalidKeyException();
+		throw new InvalidKeyException(""+ordinal);
 	}
 	
 	private OAEPParameters getOAEPParams(byte[] params)

@@ -200,8 +200,6 @@ public class RandomFileOutputStream extends RandomOutputStream implements Cleana
 		finalizer.raf.setLength(_length);
 		position=Math.min(position, _length);
 
-		/*if (p>_length)
-			raf.seek(_length);*/
 	}
 
 	/**

@@ -43,7 +43,6 @@ import com.distrimind.util.io.RandomByteArrayOutputStream;
 import org.testng.annotations.DataProvider;
 
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.util.ArrayList;
@@ -66,7 +65,7 @@ public class CryptoBench {
 	{
 		System.out.println("JRE Version : "+OS.getCurrentJREVersionDouble());
 		byte[] toEncrypt = new byte[1024 * 1024 * 400];
-		int shift=64*1024;
+		int shift=1<<16;
 		Random random=new Random(System.currentTimeMillis());
 		random.nextBytes(toEncrypt);
 
@@ -106,12 +105,14 @@ public class CryptoBench {
 		System.out.println((withPoolExecutor?"With pool executor - ":"")+type+" - Encryption speed  : "+speedEncoding+" MiO/s");
 
 		timer.reset();
-
+		int index=0;
 		for (byte[] message : messages) {
+			int l=Math.min(toEncrypt.length-index, shift);
 			try(RandomByteArrayOutputStream out=new RandomByteArrayOutputStream()) {
 				decoder.withRandomInputStream(new RandomByteArrayInputStream(message))
 						.decodeAndCheckHashAndSignaturesIfNecessary(out);
 			}
+			index+=shift;
 		}
 		double ms2=timer.getMilliDouble();
 

@@ -39,7 +39,6 @@ import com.distrimind.util.concurrent.PoolExecutor;
 
 import java.io.DataInputStream;
 import java.io.IOException;
-import java.util.Arrays;
 
 /**
  * @author Jason Mahdjoub
@@ -50,13 +49,12 @@ import java.util.Arrays;
 public abstract class DelegatedRandomInputStream extends RandomInputStream {
 	protected RandomInputStream in;
 	private final LC thread;
-	private final boolean cloneArrays;
 
 
 	private final class LC extends DelegatedRandomOutputStream.AbstractLC
 	{
-		public LC(PoolExecutor poolExecutor) {
-			super(poolExecutor);
+		public LC(PoolExecutor poolExecutor, boolean cloneArrays) {
+			super(poolExecutor, cloneArrays);
 		}
 
 
@@ -76,16 +74,15 @@ public abstract class DelegatedRandomInputStream extends RandomInputStream {
 		this(in, null, false);
 	}
 	DelegatedRandomInputStream(RandomInputStream in, PoolExecutor poolExecutor, boolean cloneArrays)  {
-		set(in);
-		this.cloneArrays=cloneArrays;
 		if (poolExecutor!=null)
 		{
-			thread =new LC(poolExecutor);
+			thread =new LC(poolExecutor, cloneArrays);
 		}
 		else
 		{
 			thread =null;
 		}
+		set(in);
 	}
 
 	protected void set(RandomInputStream in)
@@ -93,6 +90,8 @@ public abstract class DelegatedRandomInputStream extends RandomInputStream {
 		if (in==null)
 			throw new NullPointerException();
 		this.in = in;
+		if (thread!=null)
+			thread.init();
 	}
 
 	@Override
@@ -102,6 +101,8 @@ public abstract class DelegatedRandomInputStream extends RandomInputStream {
 
 	@Override
 	public void seek(long _pos) throws IOException {
+		if (thread!=null)
+			thread.checkSeekPossible();
 		in.seek(_pos);
 	}
 
@@ -118,6 +119,8 @@ public abstract class DelegatedRandomInputStream extends RandomInputStream {
 	@Override
 	public void readFully(byte[] tab, int off, int len) throws IOException {
 		checkLimits(tab, off, len);
+		if (len==0)
+			return;
 		in.readFully(tab, off, len);
 		multiThreadDerivedRead(tab, off, len);
 	}
@@ -168,7 +171,11 @@ public abstract class DelegatedRandomInputStream extends RandomInputStream {
 	@Override
 	public int read(byte[] b, int off, int len) throws IOException {
 		checkLimits(b, off, len);
+		if (len==0)
+			return 0;
 		int s= in.read(b, off, len);
+		if (s<=0)
+			return s;
 		multiThreadDerivedRead(b, off, s);
 		return s;
 	}
@@ -180,10 +187,7 @@ public abstract class DelegatedRandomInputStream extends RandomInputStream {
 		if (thread==null)
 			derivedRead(b, off, len);
 		else {
-			if (cloneArrays)
-				b= Arrays.copyOfRange(b, off, len+off);
 			thread.addArray(b, off, len);
-
 		}
 	}
 

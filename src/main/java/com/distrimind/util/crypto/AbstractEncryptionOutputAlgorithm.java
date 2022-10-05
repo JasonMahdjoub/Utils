@@ -36,7 +36,6 @@ package com.distrimind.util.crypto;
 
 import com.distrimind.util.AutoZeroizable;
 import com.distrimind.util.Cleanable;
-import com.distrimind.util.FileTools;
 import com.distrimind.util.io.*;
 
 import javax.crypto.Cipher;
@@ -50,7 +49,7 @@ import java.util.Arrays;
  * @since Utils 1.5
  */
 public abstract class AbstractEncryptionOutputAlgorithm implements AutoZeroizable, IClientServer {
-	final static int BUFFER_SIZE = FileTools.BUFFER_SIZE;
+	final static int BUFFER_SIZE = 32*1024;
 
 	protected static class Finalizer extends Cleaner
 	{
@@ -84,8 +83,6 @@ public abstract class AbstractEncryptionOutputAlgorithm implements AutoZeroizabl
 		{
 			if (currentBuffer==buffer1)
 				return currentBuffer=buffer2;
-			else if (currentBuffer==buffer2)
-				return currentBuffer=buffer1;
 			else
 				return currentBuffer=buffer1;
 		}
@@ -95,11 +92,26 @@ public abstract class AbstractEncryptionOutputAlgorithm implements AutoZeroizabl
 		}
 		byte[] switchBuffer(int size)
 		{
-			if (buffer1.length < size) {
-				performCleanup();
-				initBuffers(size);
+			if (currentBuffer==buffer1) {
+
+				if (buffer2.length<size) {
+					currentBuffer = new byte[size];
+					Arrays.fill(buffer2, (byte) 0);
+					buffer2=currentBuffer;
+				}
+				else
+					currentBuffer = buffer2;
 			}
-			return switchBuffer();
+			else {
+				if (buffer1.length<size) {
+					currentBuffer = new byte[size];
+					Arrays.fill(buffer1, (byte) 0);
+					buffer1=currentBuffer;
+				}
+				else
+					currentBuffer = buffer1;
+			}
+			return currentBuffer;
 		}
 	}
 	protected final Finalizer finalizer;

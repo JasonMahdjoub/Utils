@@ -49,7 +49,7 @@ public abstract class DelegatedRandomOutputStream extends RandomOutputStream{
 	protected RandomOutputStream out;
 
 	private final LC thread;
-	private final boolean cloneArrays;
+
 
 
 
@@ -65,15 +65,50 @@ public abstract class DelegatedRandomOutputStream extends RandomOutputStream{
 		protected int offA, offB, lenA, lenB;
 		private boolean releaseArray=false;
 
-		private IOException exception=null;
-		private boolean closed=false;
+		private IOException exception;
+		private boolean closed;
+		private Runnable runnable;
+		private final PoolExecutor poolExecutor;
+		private boolean seekPossible=false;
+		private final boolean cloneArrays;
 
-		public AbstractLC(final PoolExecutor pool) {
+		public AbstractLC(final PoolExecutor pool, boolean cloneArrays) {
 			super();
+
 			if (pool==null)
 				throw new NullPointerException();
-			pool.execute(()->{
-				pool.incrementMaxThreadNumber();
+			this.poolExecutor=pool;
+			this.cloneArrays=cloneArrays;
+		}
+
+		void init()
+		{
+
+			synchronized (this) {
+				if (runnable != null) {
+					if (seekPossible)
+						return;
+					closed = true;
+					do {
+						notifyAll();
+						try {
+							wait();
+						} catch (InterruptedException e) {
+							throw new RuntimeException(e);
+						}
+					} while (runnable != null);
+				}
+
+			}
+			a=null;
+			b=null;
+			releaseArray=false;
+			seekPossible=true;
+
+			exception=null;
+			closed=false;
+			poolExecutor.execute(runnable=()->{
+				poolExecutor.incrementMaxThreadNumber();
 				try {
 					for(;;) {
 						try {
@@ -102,16 +137,19 @@ public abstract class DelegatedRandomOutputStream extends RandomOutputStream{
 					}
 					synchronized (AbstractLC.this)
 					{
+						if (a!=null)
+							System.err.println("Warning, DelegatedRandomOutputStream was not entirely flushed");
 						a=null;
-						b=null;
+						runnable=null;
 						AbstractLC.this.notify();
 					}
 				}
 				finally {
-					pool.decrementMaxThreadNumber();
+					poolExecutor.decrementMaxThreadNumber();
 				}
 			});
 		}
+
 		protected final boolean isClosed()
 		{
 			synchronized (this)
@@ -152,9 +190,11 @@ public abstract class DelegatedRandomOutputStream extends RandomOutputStream{
 				this.notify();
 			}
 		}
+
 		final void addByte(int value) throws IOException {
 
 			synchronized (this) {
+				seekPossible=false;
 				while (a != null) {
 					try {
 						this.wait();
@@ -165,10 +205,17 @@ public abstract class DelegatedRandomOutputStream extends RandomOutputStream{
 				derivedByteAction(value);
 			}
 		}
+		void checkSeekPossible() throws IOException {
+			synchronized (this) {
+				if (!seekPossible)
+					throw new IOException();
+			}
+		}
 		final void addArray(byte[] t, int off, int len) throws IOException {
+			if (cloneArrays)
+				t= Arrays.copyOfRange(t, off, len+off);
 			synchronized (this)
 			{
-				assert b==null;
 				if (a==null)
 				{
 					a=t;
@@ -224,8 +271,8 @@ public abstract class DelegatedRandomOutputStream extends RandomOutputStream{
 	}
 	private final class LC extends AbstractLC
 	{
-		public LC(PoolExecutor poolExecutor) {
-			super(poolExecutor);
+		public LC(PoolExecutor poolExecutor, boolean cloneArrays) {
+			super(poolExecutor, cloneArrays);
 		}
 
 
@@ -240,17 +287,16 @@ public abstract class DelegatedRandomOutputStream extends RandomOutputStream{
 		}
 	}
 	DelegatedRandomOutputStream(RandomOutputStream out, PoolExecutor poolExecutor, boolean cloneArrays) {
-		set(out);
 
-		this.cloneArrays=cloneArrays;
 		if (poolExecutor!=null)
 		{
-			thread =new LC(poolExecutor);
+			thread =new LC(poolExecutor, cloneArrays);
 		}
 		else
 		{
 			thread =null;
 		}
+		set(out);
 	}
 
 	protected void set(RandomOutputStream out)
@@ -258,6 +304,8 @@ public abstract class DelegatedRandomOutputStream extends RandomOutputStream{
 		if (out==null)
 			throw new NullPointerException();
 		this.out = out;
+		if (thread!=null)
+			thread.init();
 	}
 
 	@Override
@@ -272,6 +320,8 @@ public abstract class DelegatedRandomOutputStream extends RandomOutputStream{
 
 	@Override
 	public void seek(long _pos) throws IOException {
+		if (thread!=null)
+			thread.checkSeekPossible();
 		out.seek(_pos);
 	}
 
@@ -304,6 +354,8 @@ public abstract class DelegatedRandomOutputStream extends RandomOutputStream{
 	@Override
 	public void write(byte[] b, int off, int len) throws IOException {
 		RandomInputStream.checkLimits(b, off, len);
+		if (len==0)
+			return;
 		out.write(b, off, len);
 		multiThreadDerivedWrite(b, off, len);
 	}
@@ -312,8 +364,6 @@ public abstract class DelegatedRandomOutputStream extends RandomOutputStream{
 		if (thread==null)
 			derivedWrite(b, off, len);
 		else {
-			if (cloneArrays)
-				b= Arrays.copyOfRange(b, off, len+off);
 			thread.addArray(b, off, len);
 		}
 	}
