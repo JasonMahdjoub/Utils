@@ -136,7 +136,7 @@ public class ServerASymmetricEncryptionAlgorithm implements IEncryptionInputAlgo
 		}
 
 		@Override
-		public void initCipherForDecryption(AbstractCipher cipher) throws IOException {
+		public void initCipherForDecryption(AbstractCipher cipher) {
 			throw new IllegalAccessError();
 		}
 
@@ -326,7 +326,7 @@ public class ServerASymmetricEncryptionAlgorithm implements IEncryptionInputAlgo
 		public RandomInputStream getCipherInputStreamForDecryption(final RandomInputStream is, byte[] associatedData, int offAD, final int lenAD, final byte[] externalCounter)
 				throws IOException {
 
-			CommonCipherInputStream res=new CommonCipherInputStream(this, false, maxEncryptedPartLength, is, false,   (byte)0, externalCounter, cipher, associatedData, offAD, lenAD, finalizer, false, 0, maxPlainTextSizeForEncoding) {
+			CommonCipherInputStream res=new CommonCipherInputStream(this, false, maxEncryptedPartLength, is, false,   (byte)0, externalCounter, cipher, associatedData, offAD, lenAD, finalizer, false, 0, maxPlainTextSizeForEncoding, false) {
 
 
 				@Override

@@ -55,7 +55,7 @@ import java.util.Random;
 public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm {
 
 
-	private final SymmetricSecretKey mainKey;
+	private SymmetricSecretKey mainKey;
 
 	private final SymmetricEncryptionType type;
 
@@ -161,7 +161,7 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 		nullStream.setLength(getOutputSizeAfterEncryption(nonEncryptedInputStream.length()));
 
 
-		try(RandomOutputStream os= getCipherOutputStreamForEncryption(nullStream, false, null, 0, 0, null, manualIvsAndSecretKeys)) {
+		try(RandomOutputStream os= getCipherOutputStreamForEncryption(nullStream, false, null, 0, 0, null, manualIvsAndSecretKeys, false)) {
 
 			List<SubStreamParameter> ssp;
 			if (head!=null) {
@@ -314,6 +314,13 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 		return internalCounter?0:getSecretKey().getEncryptionAlgorithmType().getMaxCounterSizeInBytesUsedWithBlockMode();
 	}
 
+	@Override
+	protected void replaceMainKeyByLastDerivedSecretKey(AbstractWrappedIVs<?, ?> wrappedIVAndSecretKey) throws IOException {
+		if (wrappedIVAndSecretKey instanceof WrappedIVsAndSecretKeys)
+		{
+			mainKey=((WrappedIVAndSecretKey)wrappedIVAndSecretKey.getLastElement()).getDecryptedSecretKey();
+		}
+	}
 
 	@Override
 	public int getIVSizeBytesWithExternalCounter()

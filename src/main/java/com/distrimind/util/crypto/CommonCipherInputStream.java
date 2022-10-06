@@ -76,12 +76,14 @@ abstract class CommonCipherInputStream extends RandomInputStream {
 	private final boolean allInDoFinal;
 	private boolean initPossible;
 	private final boolean includeIV;
+	private boolean replaceMainKeyWhenClosingStream;
+	private SymmetricEncryptionAlgorithm symmetricEncryptionAlgorithm;
 
 	protected abstract void initCipherForDecryptionWithIvAndCounter(AbstractWrappedIVs<?, ?> wrappedIVAndSecretKey, int counter) throws IOException;
 	protected abstract void initCipherForDecryption() throws IOException;
 	protected abstract long getOutputSizeAfterDecryption(long inputLength) throws IOException;
 
-	CommonCipherInputStream(IClientServer iEncryptionInputAlgorithm, boolean allInDoFinal, int maxEncryptedPartLength, RandomInputStream is, boolean includeIV, byte maxCounterLength, byte[] externalCounter, AbstractCipher cipher, byte[] associatedData, int offAD, int lenAD, AbstractEncryptionOutputAlgorithm.Finalizer finalizer, boolean supportRandomAccess, int counterStepInBytes, int maxPlainTextSizeForEncoding) throws IOException {
+	CommonCipherInputStream(IClientServer iEncryptionInputAlgorithm, boolean allInDoFinal, int maxEncryptedPartLength, RandomInputStream is, boolean includeIV, byte maxCounterLength, byte[] externalCounter, AbstractCipher cipher, byte[] associatedData, int offAD, int lenAD, AbstractEncryptionOutputAlgorithm.Finalizer finalizer, boolean supportRandomAccess, int counterStepInBytes, int maxPlainTextSizeForEncoding, boolean replaceMainKeyWhenClosingStream) throws IOException {
 		if (maxCounterLength>0) {
 			if (externalCounter == null)
 				throw new NullPointerException("External counter is null");
@@ -100,35 +102,39 @@ abstract class CommonCipherInputStream extends RandomInputStream {
 		this.supportRandomAccess = supportRandomAccess;
 		this.counterStepInBytes = counterStepInBytes;
 		this.maxPlainTextSizeForEncoding = maxPlainTextSizeForEncoding;
-		set(iEncryptionInputAlgorithm, is, associatedData, offAD, lenAD, externalCounter);
+		set(iEncryptionInputAlgorithm, is, associatedData, offAD, lenAD, externalCounter, replaceMainKeyWhenClosingStream);
 	}
 	protected abstract void checkKeysNotCleaned();
 	@SuppressWarnings("unchecked")
-	static void set(IClientServer iEncryptionInputAlgorithm, final RandomInputStream cipherInputStream, final RandomInputStream is, final byte[] associatedData, @SuppressWarnings("SameParameterValue") final int offAD, final int lenAD, final byte[] externalCounter) throws IOException {
+	static void set(IClientServer iEncryptionInputAlgorithm, final RandomInputStream cipherInputStream, final RandomInputStream is, final byte[] associatedData, @SuppressWarnings("SameParameterValue") final int offAD, final int lenAD, final byte[] externalCounter, boolean replaceMainKeyWhenClosingStream) throws IOException {
 		if (cipherInputStream instanceof CPUUsageAsDecoyInputStream) {
 			CPUUsageAsDecoyInputStream<CommonCipherInputStream> o=((CPUUsageAsDecoyInputStream<CommonCipherInputStream>) cipherInputStream);
 			o.reset();
 			o.getSourceRandomInputStream()
-					.set(iEncryptionInputAlgorithm, is, associatedData, offAD, lenAD, externalCounter);
+					.set(iEncryptionInputAlgorithm, is, associatedData, offAD, lenAD, externalCounter, replaceMainKeyWhenClosingStream);
 		}
 		else
 			((CommonCipherInputStream)cipherInputStream)
-					.set(iEncryptionInputAlgorithm, is, associatedData, offAD, lenAD, externalCounter);
+					.set(iEncryptionInputAlgorithm, is, associatedData, offAD, lenAD, externalCounter, replaceMainKeyWhenClosingStream);
 	}
-	private void set(IClientServer iEncryptionInputAlgorithm, final RandomInputStream is, final byte[] associatedData, final int offAD, final int lenAD, final byte[] externalCounter) throws IOException {
+	private void set(IClientServer iEncryptionInputAlgorithm, final RandomInputStream is, final byte[] associatedData, final int offAD, final int lenAD, final byte[] externalCounter, boolean replaceMainKeyWhenClosingStream) throws IOException {
 		checkKeysNotCleaned();
 		posEncrypted =0;
 		posPlainText=0;
 		closed=false;
 		doFinal=false;
 		initPossible=true;
+		this.replaceMainKeyWhenClosingStream=replaceMainKeyWhenClosingStream;
 		this.is = is;
 		this.externalCounter = externalCounter;
 		this.associatedData = associatedData;
 		this.offAD = offAD;
 		this.lenAD = lenAD;
 		this.outputBuffer=null;
+		if (iEncryptionInputAlgorithm instanceof SymmetricEncryptionAlgorithm)
+			symmetricEncryptionAlgorithm=(SymmetricEncryptionAlgorithm)iEncryptionInputAlgorithm;
 		this.wrappedIVAndSecretKey=iEncryptionInputAlgorithm.getWrappedIVAndSecretKeyInstance();
+
 		if (includeIV == (wrappedIVAndSecretKey == null))
 			throw new IllegalArgumentException(""+includeIV);
 		if (is.currentPosition()!=0)
@@ -411,7 +417,9 @@ abstract class CommonCipherInputStream extends RandomInputStream {
 	public void close() throws IOException {
 		if (closed)
 			return;
-
+		if (replaceMainKeyWhenClosingStream && symmetricEncryptionAlgorithm!=null)
+			symmetricEncryptionAlgorithm.replaceMainKeyByLastDerivedSecretKey(wrappedIVAndSecretKey);
+		wrappedIVAndSecretKey=null;
 		closed=true;
 
 	}

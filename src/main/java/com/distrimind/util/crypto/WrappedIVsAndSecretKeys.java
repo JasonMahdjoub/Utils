@@ -87,7 +87,10 @@ class WrappedIVAndSecretKey extends AbstractWrappedIV<SymmetricEncryptionAlgorit
 {
 	private WrappedEncryptedSymmetricSecretKey encryptedSecretKey;
 	private SymmetricSecretKey secretKey;
-
+	@Override
+	public String toString() {
+		return secretKey.toString();
+	}
 
 	@SuppressWarnings("unused")
 	protected WrappedIVAndSecretKey()
@@ -255,5 +258,8 @@ public class WrappedIVsAndSecretKeys extends AbstractWrappedIVs<SymmetricEncrypt
 		return super.getInternalSerializedSize()+ SerializationTools.getInternalSize(symmetricKeyWrapperType);
 	}
 
-
+	@Override
+	public String toString() {
+		return data.toString();
+	}
 }

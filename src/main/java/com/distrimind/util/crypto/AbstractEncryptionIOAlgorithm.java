@@ -218,15 +218,18 @@ public abstract class AbstractEncryptionIOAlgorithm extends AbstractEncryptionOu
 	}
 
 	protected abstract boolean allOutputGeneratedIntoDoFinalFunction();
-
 	@Override
-	public RandomInputStream getCipherInputStreamForDecryption(final RandomInputStream is, final byte[] associatedData, final int offAD, final int lenAD, final byte[] externalCounter)
+	public RandomInputStream getCipherInputStreamForDecryption(final RandomInputStream is, final byte[] associatedData, final int offAD, final int lenAD, final byte[] externalCounter) throws IOException {
+		return getCipherInputStreamForDecryption(is, associatedData, offAD, lenAD, externalCounter, false);
+	}
+
+	RandomInputStream getCipherInputStreamForDecryption(final RandomInputStream is, final byte[] associatedData, final int offAD, final int lenAD, final byte[] externalCounter, boolean replaceMainKeyWhenClosingStream)
 			throws IOException {
 		checkKeysNotCleaned();
 		final AbstractCipher cipher = getCipherInstance();
 
 
-		CommonCipherInputStream res=new CommonCipherInputStream(this, allOutputGeneratedIntoDoFinalFunction(), maxEncryptedPartLength, is, includeIV(),  getMaxExternalCounterLength(), externalCounter, cipher, associatedData, offAD, lenAD, super.finalizer, supportRandomEncryptionAndRandomDecryption(), getCounterStepInBytes(), maxPlainTextSizeForEncoding) {
+		CommonCipherInputStream res=new CommonCipherInputStream(this, allOutputGeneratedIntoDoFinalFunction(), maxEncryptedPartLength, is, includeIV(),  getMaxExternalCounterLength(), externalCounter, cipher, associatedData, offAD, lenAD, super.finalizer, supportRandomEncryptionAndRandomDecryption(), getCounterStepInBytes(), maxPlainTextSizeForEncoding, replaceMainKeyWhenClosingStream) {
 
 			@Override
 			protected void initCipherForDecryptionWithIvAndCounter(AbstractWrappedIVs<?, ?> wrappedIVAndSecretKey, int counter) throws IOException {

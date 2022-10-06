@@ -184,4 +184,10 @@ public abstract class AbstractWrappedIVs<C extends IClientServer, W extends Abst
 		return algorithm;
 	}
 
+	W getLastElement()
+	{
+		return this.data.entrySet().stream().max(Map.Entry.comparingByKey()).map(Map.Entry::getValue).orElse(null);
+	}
+
+
 }

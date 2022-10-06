@@ -262,21 +262,28 @@ public abstract class AbstractEncryptionOutputAlgorithm implements AutoZeroizabl
 
 	public RandomOutputStream getCipherOutputStreamForEncryption(final RandomOutputStream os, boolean closeOutputStreamWhenClosingCipherOutputStream, final byte[] associatedData, final int offAD, final int lenAD, final byte[] externalCounter) throws
 			IOException{
-		return getCipherOutputStreamForEncryption(os, closeOutputStreamWhenClosingCipherOutputStream, associatedData, offAD, lenAD, externalCounter, null);
+		return getCipherOutputStreamForEncryption(os, closeOutputStreamWhenClosingCipherOutputStream, associatedData, offAD, lenAD, externalCounter,  false);
+	}
+	RandomOutputStream getCipherOutputStreamForEncryption(final RandomOutputStream os, boolean closeOutputStreamWhenClosingCipherOutputStream, final byte[] associatedData, final int offAD, final int lenAD, final byte[] externalCounter, boolean replaceMainKeyWhenClosingStream) throws
+			IOException{
+		return getCipherOutputStreamForEncryption(os, closeOutputStreamWhenClosingCipherOutputStream, associatedData, offAD, lenAD, externalCounter, null, replaceMainKeyWhenClosingStream);
 	}
 	protected abstract CPUUsageAsDecoyOutputStream<CommonCipherOutputStream> getCPUUsageAsDecoyOutputStream(CommonCipherOutputStream os) throws IOException;
 
 	@SuppressWarnings({"unchecked", "SameParameterValue"})
-	static void set(RandomOutputStream cipherOutputStream, RandomOutputStream os, AbstractWrappedIVs<?, ?> manualIvsAndSecretKeys, byte[] externalCounter, byte[] associatedData, int offAD, int lenAD, boolean closeOutputStreamWhenClosingCipherOutputStream) throws IOException {
+	static void set(RandomOutputStream cipherOutputStream, RandomOutputStream os, AbstractWrappedIVs<?, ?> manualIvsAndSecretKeys, byte[] externalCounter, byte[] associatedData, int offAD, int lenAD, boolean closeOutputStreamWhenClosingCipherOutputStream, boolean replaceMainKeyWhenClosingStream) throws IOException {
 		if (cipherOutputStream instanceof CPUUsageAsDecoyOutputStream) {
 			CPUUsageAsDecoyOutputStream<CommonCipherOutputStream> o=((CPUUsageAsDecoyOutputStream<CommonCipherOutputStream>) cipherOutputStream);
 			o.reset();
 			o.getDestinationRandomOutputStream()
-					.set(os, manualIvsAndSecretKeys, externalCounter, associatedData, offAD, lenAD, closeOutputStreamWhenClosingCipherOutputStream);
+					.set(os, manualIvsAndSecretKeys, externalCounter, associatedData, offAD, lenAD, closeOutputStreamWhenClosingCipherOutputStream, replaceMainKeyWhenClosingStream);
 		}
 		else
 			((AbstractEncryptionOutputAlgorithm.CommonCipherOutputStream)cipherOutputStream)
-					.set(os, manualIvsAndSecretKeys, externalCounter, associatedData, offAD, lenAD, closeOutputStreamWhenClosingCipherOutputStream);
+					.set(os, manualIvsAndSecretKeys, externalCounter, associatedData, offAD, lenAD, closeOutputStreamWhenClosingCipherOutputStream, replaceMainKeyWhenClosingStream);
+	}
+	protected void replaceMainKeyByLastDerivedSecretKey(AbstractWrappedIVs<?, ?> wrappedIVAndSecretKey) throws IOException {
+
 	}
 	class CommonCipherOutputStream extends RandomOutputStream
 	{
@@ -296,14 +303,15 @@ public abstract class AbstractEncryptionOutputAlgorithm implements AutoZeroizabl
 		private boolean initPossible;
 
 		private AbstractWrappedIVs<?, ?> wrappedIVAndSecretKey;
+		private boolean replaceMainKeyWhenClosingStream;
 
 
 
-		CommonCipherOutputStream(RandomOutputStream os, AbstractWrappedIVs<?, ?> manualIvsAndSecretKeys, byte[] externalCounter, byte[] associatedData, int offAD, int lenAD, boolean closeOutputStreamWhenClosingCipherOutputStream) throws IOException {
-			set(os, manualIvsAndSecretKeys, externalCounter, associatedData, offAD, lenAD, closeOutputStreamWhenClosingCipherOutputStream);
+		CommonCipherOutputStream(RandomOutputStream os, AbstractWrappedIVs<?, ?> manualIvsAndSecretKeys, byte[] externalCounter, byte[] associatedData, int offAD, int lenAD, boolean closeOutputStreamWhenClosingCipherOutputStream, boolean replaceMainKeyWhenClosingStream) throws IOException {
+			set(os, manualIvsAndSecretKeys, externalCounter, associatedData, offAD, lenAD, closeOutputStreamWhenClosingCipherOutputStream, replaceMainKeyWhenClosingStream);
 		}
 
-		protected void set(RandomOutputStream os, AbstractWrappedIVs<?, ?> manualIvsAndSecretKeys, byte[] externalCounter, byte[] associatedData, int offAD, int lenAD, boolean closeOutputStreamWhenClosingCipherOutputStream) throws IOException {
+		protected void set(RandomOutputStream os, AbstractWrappedIVs<?, ?> manualIvsAndSecretKeys, byte[] externalCounter, byte[] associatedData, int offAD, int lenAD, boolean closeOutputStreamWhenClosingCipherOutputStream, boolean replaceMainKeyWhenClosingStream) throws IOException {
 			checkKeysNotCleaned();
 
 			length=0;
@@ -311,6 +319,7 @@ public abstract class AbstractEncryptionOutputAlgorithm implements AutoZeroizabl
 			closed=false;
 			doFinal=false;
 			initPossible=true;
+			this.replaceMainKeyWhenClosingStream=replaceMainKeyWhenClosingStream;
 			supportRandomAccess=supportRandomEncryptionAndRandomDecryption();
 
 			this.os = os;
@@ -455,6 +464,8 @@ public abstract class AbstractEncryptionOutputAlgorithm implements AutoZeroizabl
 			}
 		}
 
+
+
 		@Override
 		public void seek(long _pos) throws IOException {
 			if (closed)
@@ -540,17 +551,23 @@ public abstract class AbstractEncryptionOutputAlgorithm implements AutoZeroizabl
 			}
 			finally {
 				flush();
+
 				if (closeOutputStreamWhenClosingCipherOutputStream)
 					os.close();
+				if (replaceMainKeyWhenClosingStream)
+				{
+					replaceMainKeyByLastDerivedSecretKey(wrappedIVAndSecretKey);
+				}
+				wrappedIVAndSecretKey=null;
 				closed=true;
 			}
 
 		}
 
 	}
-	protected RandomOutputStream getCipherOutputStreamForEncryption(final RandomOutputStream os, final boolean closeOutputStreamWhenClosingCipherOutputStream, final byte[] associatedData, final int offAD, final int lenAD, final byte[] externalCounter, final AbstractWrappedIVs<?, ?> manualIvsAndSecretKeys) throws
+	protected RandomOutputStream getCipherOutputStreamForEncryption(final RandomOutputStream os, final boolean closeOutputStreamWhenClosingCipherOutputStream, final byte[] associatedData, final int offAD, final int lenAD, final byte[] externalCounter, final AbstractWrappedIVs<?, ?> manualIvsAndSecretKeys, boolean replaceMainKeyWhenClosingStream) throws
 			IOException{
-		CommonCipherOutputStream res= new CommonCipherOutputStream(os, manualIvsAndSecretKeys, externalCounter, associatedData, offAD, lenAD, closeOutputStreamWhenClosingCipherOutputStream);
+		CommonCipherOutputStream res= new CommonCipherOutputStream(os, manualIvsAndSecretKeys, externalCounter, associatedData, offAD, lenAD, closeOutputStreamWhenClosingCipherOutputStream, replaceMainKeyWhenClosingStream);
 		if (isUsingSideChannelMitigation())
 			return new CPUUsageAsDecoyOutputStream<>(res);
 		else

@@ -67,7 +67,7 @@ public class EncryptionSignatureHashDecoder {
 	private AbstractMessageDigest defaultMessageDigest=null;
 	private byte[] externalCounter=null;
 	RandomInputStream cipherInputStream=null;
-	private SymmetricSecretKey originalSecretKeyForEncryption=null;
+	SymmetricSecretKey originalSecretKeyForEncryption=null;
 	private EncryptionProfileProvider encryptionProfileProvider =null;
 	private AbstractSecureRandom randomForCipher=null;
 	private short secretKeyID=-1;
@@ -84,9 +84,24 @@ public class EncryptionSignatureHashDecoder {
 	private static final byte[] emptyTab=new byte[0];
 	private long lastInputStreamLength =-1, lastMaximumOutputLength;
 	private PoolExecutor poolExecutor=null;
+
+	private boolean useAsContinuousNetworkStream=false;
 	public EncryptionSignatureHashDecoder connectWithEncoder(EncryptionSignatureHashEncoder encoder)
 	{
 		encoder.connectWithDecoder(this);
+		return this;
+	}
+
+	/**
+	 * Use as continuous network stream. Main secret key is constantly regenerated.
+	 * @return the current decoder
+	 */
+	@SuppressWarnings("UnusedReturnValue")
+	public EncryptionSignatureHashDecoder useAsContinuousNetworkStream()
+	{
+		if (encryptionProfileProvider!=null)
+			throw new IllegalArgumentException("Cannot use provider and use encoder as network stream");
+		useAsContinuousNetworkStream=true;
 		return this;
 	}
 
@@ -143,6 +158,7 @@ public class EncryptionSignatureHashDecoder {
 		return lenAD;
 	}
 
+	@SuppressWarnings("UnusedReturnValue")
 	public EncryptionSignatureHashDecoder withPoolExecutor(PoolExecutor poolExecutor)
 	{
 		if (poolExecutor==null)
@@ -230,6 +246,8 @@ public class EncryptionSignatureHashDecoder {
 	public EncryptionSignatureHashDecoder withEncryptionProfileProvider(EncryptionProfileProvider encryptionProfileProvider) throws IOException {
 		if (encryptionProfileProvider ==null)
 			throw new NullPointerException();
+		if (useAsContinuousNetworkStream)
+			throw new IllegalArgumentException("Cannot use provider and use encoder as network stream");
 		try {
 			this.randomForCipher=SecureRandomType.DEFAULT.getInstance(null);
 		} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
@@ -754,16 +772,16 @@ public class EncryptionSignatureHashDecoder {
 						System.arraycopy(associatedData, offAD, buffer, EncryptionSignatureHashEncoder.headSize, lenAD);
 					}
 					if (cipherInputStream==null)
-						cipherInputStream=cipher.getCipherInputStreamForDecryption(limitedRandomInputStream,buffer, 0, lenBuffer, externalCounter );
+						cipherInputStream=cipher.getCipherInputStreamForDecryption(limitedRandomInputStream,buffer, 0, lenBuffer, externalCounter, useAsContinuousNetworkStream);
 					else
-						CommonCipherInputStream.set(cipher, cipherInputStream, limitedRandomInputStream,buffer, 0, lenBuffer, externalCounter );
+						CommonCipherInputStream.set(cipher, cipherInputStream, limitedRandomInputStream,buffer, 0, lenBuffer, externalCounter, useAsContinuousNetworkStream);
 
 				}
 				else {
 					if (cipherInputStream==null)
-						cipherInputStream=cipher.getCipherInputStreamForDecryption(limitedRandomInputStream,null, 0, 0, externalCounter );
+						cipherInputStream=cipher.getCipherInputStreamForDecryption(limitedRandomInputStream,null, 0, 0, externalCounter, useAsContinuousNetworkStream );
 					else
-						CommonCipherInputStream.set(cipher, cipherInputStream, limitedRandomInputStream,null, 0, 0, externalCounter );
+						CommonCipherInputStream.set(cipher, cipherInputStream, limitedRandomInputStream,null, 0, 0, externalCounter, useAsContinuousNetworkStream);
 				}
 				try {
 					assert outputStream!=null;
@@ -773,6 +791,13 @@ public class EncryptionSignatureHashDecoder {
 				}
 				finally {
 					cipherInputStream.close();
+					if (cipher!=null && useAsContinuousNetworkStream)
+					{
+						if (originalSecretKeyForEncryption!=null)
+							originalSecretKeyForEncryption=cipher.getSecretKey();
+						if (changeCipherOfEncoder && encoder.originalSecretKeyForEncryption!=null)
+							encoder.originalSecretKeyForEncryption=encoder.cipher.getSecretKey();
+					}
 				}
 
 			}
@@ -873,6 +898,8 @@ public class EncryptionSignatureHashDecoder {
 					outputStream.setLength(curPos);
 				outputStream.flush();
 			}
+
+
 			if (changeCipherOfEncoder)
 			{
 				encoder.cipher=cipher;

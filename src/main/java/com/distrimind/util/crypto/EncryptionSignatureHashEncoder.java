@@ -104,7 +104,7 @@ public class EncryptionSignatureHashEncoder {
 	private byte[] associatedData=null;
 	private int offAD=0;
 	private int lenAD=0;
-	private SymmetricSecretKey originalSecretKeyForEncryption=null;
+	SymmetricSecretKey originalSecretKeyForEncryption=null;
 	private SymmetricAuthenticatedSignerAlgorithm symmetricSigner=null;
 	private ASymmetricAuthenticatedSignerAlgorithm asymmetricSigner=null;
 	private AbstractMessageDigest digest=null;
@@ -134,6 +134,18 @@ public class EncryptionSignatureHashEncoder {
 	private long lastInputStreamLength =-1, lastMaximumOutputLength;
 
 	private PoolExecutor poolExecutor=null;
+	private boolean useAsContinuousNetworkStream=false;
+	/**
+	 * Use as continuous network stream. Main secret key is constantly regenerated.
+	 * @return the current encoder
+	 */
+	public EncryptionSignatureHashEncoder useAsContinuousNetworkStream()
+	{
+		if (useProvider)
+			throw new IllegalArgumentException("Cannot use provider and use encoder as network stream");
+		useAsContinuousNetworkStream=true;
+		return this;
+	}
 
 	void incrementIVCounter() throws IOException {
 		if (originalSecretKeyForEncryption==null)
@@ -233,6 +245,8 @@ public class EncryptionSignatureHashEncoder {
 			throw new NullPointerException();
 		if (encryptionProfileProvider ==null)
 			throw new NullPointerException();
+		if (useAsContinuousNetworkStream)
+			throw new IllegalArgumentException("Cannot use provider and use encoder as network stream");
 		this.cipherRandom=random;
 		this.originalSecretKeyForEncryption=encryptionProfileProvider.getSecretKeyForEncryption(keyID, false);
 		this.cipher=null;
@@ -634,15 +648,15 @@ public class EncryptionSignatureHashEncoder {
 						lenBuffer = computeAssociatedData(dataLen);
 						buffer = bufferRef;
 						if (cipherOutputStream == null)
-							cipherOutputStream = cipher.getCipherOutputStreamForEncryption(limitedRandomOutputStream, false, buffer, 0, lenBuffer, externalCounter);
+							cipherOutputStream = cipher.getCipherOutputStreamForEncryption(limitedRandomOutputStream, false, buffer, 0, lenBuffer, externalCounter, useAsContinuousNetworkStream);
 						else {
-							AbstractEncryptionOutputAlgorithm.set(cipherOutputStream, limitedRandomOutputStream, null, externalCounter, buffer, 0, lenBuffer, false);
+							AbstractEncryptionOutputAlgorithm.set(cipherOutputStream, limitedRandomOutputStream, null, externalCounter, buffer, 0, lenBuffer, false, useAsContinuousNetworkStream);
 						}
 					} else {
 						if (cipherOutputStream == null)
-							cipherOutputStream = cipher.getCipherOutputStreamForEncryption(limitedRandomOutputStream, false, null, 0, 0, externalCounter);
+							cipherOutputStream = cipher.getCipherOutputStreamForEncryption(limitedRandomOutputStream, false, null, 0, 0, externalCounter, useAsContinuousNetworkStream);
 						else
-							AbstractEncryptionOutputAlgorithm.set(cipherOutputStream, limitedRandomOutputStream, null, externalCounter, null, 0, 0, false);
+							AbstractEncryptionOutputAlgorithm.set(cipherOutputStream, limitedRandomOutputStream, null, externalCounter, null, 0, 0, false, useAsContinuousNetworkStream);
 					}
 					dataOutputStream=cipherOutputStream;
 				} else {
@@ -735,8 +749,9 @@ public class EncryptionSignatureHashEncoder {
 			if (closed)
 				return;
 			dataOutputStream.flush();
-			if (cipher!=null)
+			if (cipher!=null) {
 				dataOutputStream.close();
+			}
 
 			dataOutputStream=null;
 			if (inputStreamLength<0)
@@ -804,6 +819,10 @@ public class EncryptionSignatureHashEncoder {
 				originalOutputStream.setLength(this.bytesWritten);
 			}
 			originalOutputStream.flush();
+			if (cipher!=null && useAsContinuousNetworkStream && originalSecretKeyForEncryption!=null)
+			{
+				originalSecretKeyForEncryption=cipher.getSecretKey();
+			}
 			free();
 			closed=true;
 		}

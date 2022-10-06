@@ -40,6 +40,7 @@ import com.distrimind.util.concurrent.PoolExecutor;
 import com.distrimind.util.io.LimitedRandomInputStream;
 import com.distrimind.util.io.RandomByteArrayInputStream;
 import com.distrimind.util.io.RandomByteArrayOutputStream;
+import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 
 import java.io.IOException;
@@ -59,12 +60,25 @@ import java.util.concurrent.TimeUnit;
  *
  */
 public class CryptoBench {
+	private final boolean useAsStream;
+	private final int dataSize;
+
 	static PoolExecutor poolExecutor=new PoolExecutor(2, Runtime.getRuntime().availableProcessors(), 2000, TimeUnit.MILLISECONDS);
+	public CryptoBench()
+	{
+		useAsStream=false;
+		dataSize=1024 * 1024 * 400;
+	}
+	public CryptoBench(boolean useAsStream, int dataSize) {
+		this.useAsStream = useAsStream;
+		this.dataSize=dataSize;
+	}
+
 	@org.testng.annotations.Test(dataProvider="provideDataForTestEncryptionAndSignatureSpeed")
 	public void testEncryptionAndSignatureSpeed(SymmetricEncryptionType type, boolean withPoolExecutor) throws NoSuchAlgorithmException,NoSuchProviderException, IllegalStateException, IOException
 	{
 		System.out.println("JRE Version : "+OS.getCurrentJREVersionDouble());
-		byte[] toEncrypt = new byte[1024 * 1024 * 400];
+		byte[] toEncrypt = new byte[dataSize];
 		int shift=1<<16;
 		Random random=new Random(System.currentTimeMillis());
 		random.nextBytes(toEncrypt);
@@ -75,6 +89,8 @@ public class CryptoBench {
 				.withSymmetricSecretKeyForEncryption(SecureRandomType.FORTUNA_WITH_BC_FIPS_APPROVED.getInstance(null), secretKeyForEncryption);
 		if (withPoolExecutor)
 			encoder.withPoolExecutor(poolExecutor);
+		if (useAsStream)
+			encoder.useAsContinuousNetworkStream();
 		SymmetricSecretKey secretKeyForSignature=null;
 		SymmetricAuthenticatedSignatureType sigType=type.getDefaultSignatureAlgorithm();
 		if (!type.isAuthenticatedAlgorithm()) {
@@ -85,6 +101,8 @@ public class CryptoBench {
 				.withSymmetricSecretKeyForEncryption(secretKeyForEncryption);
 		if (withPoolExecutor)
 			decoder.withPoolExecutor(poolExecutor);
+		if (useAsStream)
+			decoder.useAsContinuousNetworkStream();
 		if (secretKeyForSignature!=null)
 			decoder.withSymmetricSecretKeyForSignature(secretKeyForSignature);
 
@@ -111,7 +129,12 @@ public class CryptoBench {
 			try(RandomByteArrayOutputStream out=new RandomByteArrayOutputStream()) {
 				decoder.withRandomInputStream(new RandomByteArrayInputStream(message))
 						.decodeAndCheckHashAndSignaturesIfNecessary(out);
+				if (useAsStream)
+				{
+					Assert.assertEquals(out.getBytes(), new LimitedRandomInputStream(new RandomByteArrayInputStream(toEncrypt), index, l).readNBytes(l));
+				}
 			}
+
 			index+=shift;
 		}
 		double ms2=timer.getMilliDouble();
