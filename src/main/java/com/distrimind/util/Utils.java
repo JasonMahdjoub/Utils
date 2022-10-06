@@ -78,6 +78,7 @@ public class Utils {
 									.addItem(SECURITY_FIX_LOW_SEVERITY, "Update snakeyaml dependency, and fix CVE-2022-38752, CVE-2022-38751, CVE-2022-38750, CVE-2022-38749")
 									.addItem(NEW_FEATURE, "Add possibility to use several thread with SymmetricSignatureHashEncoder and SymmetricSignatureHashDecoder. Add functions SymmetricSignatureHashEncoder.withPoolExecutor(PoolExecutor) and SymmetricSignatureHashDecoder.withPoolExecutor(PoolExecutor).")
 									.addItem(NEW_FEATURE, "Add possibility to use encoder and decoder as continuous network stream. Main secret key is regenerated after each encoding.")
+									.addItem(NEW_FEATURE, "Add BouncyCastle Sphincs+ asymmetric authenticated signature post quantum algorithms.")
 					)
 					.addDescription(
 							new Description(5, 23, 5, Version.Type.STABLE, 0, "2022-04-07")

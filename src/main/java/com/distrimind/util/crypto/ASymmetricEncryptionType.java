@@ -34,6 +34,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
+import com.distrimind.bouncycastle.pqc.jcajce.provider.sphincsplus.SPHINCSPlusKeyFactorySpi;
 import com.distrimind.util.UtilClassLoader;
 import com.distrimind.util.io.Integrity;
 import com.distrimind.util.io.MessageExternalizationException;
@@ -139,7 +140,12 @@ public enum ASymmetricEncryptionType {
 			throws NoSuchAlgorithmException, InvalidKeySpecException {
 
 		try {
-			if (algorithmType.contains("SPHINCS"))
+			if (algorithmType.startsWith("BCPQC_SPHINCS_PLUS"))
+			{
+				SPHINCSPlusKeyFactorySpi kf=new SPHINCSPlusKeyFactorySpi();
+				return kf.engineGeneratePrivate(new PKCS8EncodedKeySpec(encodedKey));
+			}
+			else if (algorithmType.startsWith("BCPQC_SPHINCS"))
 			{
 				Sphincs256KeyFactorySpi kf=new Sphincs256KeyFactorySpi();
 				return kf.engineGeneratePrivate(new PKCS8EncodedKeySpec(encodedKey));
@@ -173,7 +179,12 @@ public enum ASymmetricEncryptionType {
 		try {
 			//byte[][] parts = Bits.separateEncodingsWithShortSizedTabs(encodedKey);
 
-			if (algorithmType.contains("SPHINCS"))
+			if (algorithmType.startsWith("BCPQC_SPHINCS_PLUS"))
+			{
+				SPHINCSPlusKeyFactorySpi kf=new SPHINCSPlusKeyFactorySpi();
+				return kf.engineGeneratePublic(new X509EncodedKeySpec(encodedKey));
+			}
+			else if (algorithmType.startsWith("BCPQC_SPHINCS"))
 			{
 				Sphincs256KeyFactorySpi kf=new Sphincs256KeyFactorySpi();
 				return kf.engineGeneratePublic(new X509EncodedKeySpec(encodedKey));

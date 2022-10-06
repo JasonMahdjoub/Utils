@@ -53,14 +53,24 @@ import java.security.spec.InvalidKeySpecException;
  */
 public final class JavaNativeSignature extends AbstractSignature {
 	private final Signature signature;
+	private final boolean synchronize;
+	private final ASymmetricAuthenticatedSignatureType typeToSynchronize;
+	private final ASymmetricAuthenticatedSignatureType type;
 
-	JavaNativeSignature(Signature signature) {
+
+	JavaNativeSignature(Signature signature, ASymmetricAuthenticatedSignatureType type) {
 		this.signature = signature;
+		this.type=type;
+		synchronize=type.name().startsWith("BCPQC_SPHINCS_PLUS");
+		if (synchronize)
+			this.typeToSynchronize=ASymmetricAuthenticatedSignatureType.BCPQC_SPHINCS_PLUS_SHA256_FAST;
+		else
+			this.typeToSynchronize=null;
 	}
 
 	@Override
 	public JavaNativeSignature clone() throws CloneNotSupportedException {
-		return new JavaNativeSignature((Signature) signature.clone());
+		return new JavaNativeSignature((Signature) signature.clone(), type);
 	}
 
 	@Override
@@ -112,7 +122,13 @@ public final class JavaNativeSignature extends AbstractSignature {
 	@Override
 	public byte[] sign() throws IOException {
 		try {
-			return signature.sign();
+			if (synchronize) {
+				synchronized (typeToSynchronize) {
+					return signature.sign();
+				}
+			}
+			else
+				return signature.sign();
 		} catch (SignatureException e) {
 			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, e);
 		}
@@ -122,7 +138,13 @@ public final class JavaNativeSignature extends AbstractSignature {
 	@Override
 	public int sign(byte[] _outbuf, int _offset, int _len) throws IOException {
 		try {
-			return signature.sign(_outbuf, _offset, _len);
+			if (synchronize) {
+				synchronized (typeToSynchronize) {
+					return signature.sign(_outbuf, _offset, _len);
+				}
+			}
+			else
+				return signature.sign(_outbuf, _offset, _len);
 		} catch (SignatureException e) {
 			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, e);
 		}
@@ -175,7 +197,13 @@ public final class JavaNativeSignature extends AbstractSignature {
 	@Override
 	public boolean verify(byte[] _signature) throws IOException {
 		try {
-			return signature.verify(_signature);
+			if (synchronize) {
+				synchronized (typeToSynchronize) {
+					return signature.verify(_signature);
+				}
+			}
+			else
+				return signature.verify(_signature);
 		} catch (SignatureException e) {
 			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, e);
 		}
@@ -184,7 +212,13 @@ public final class JavaNativeSignature extends AbstractSignature {
 	@Override
 	public boolean verify(byte[] _signature, int _offset, int _length) throws IOException {
 		try {
-			return signature.verify(_signature, _offset, _length);
+			if (synchronize) {
+				synchronized (typeToSynchronize) {
+					return signature.verify(_signature, _offset, _length);
+				}
+			}
+			else
+				return signature.verify(_signature, _offset, _length);
 		} catch (SignatureException e) {
 			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, e);
 		}

@@ -34,6 +34,10 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
+import com.distrimind.bouncycastle.pqc.crypto.sphincsplus.SPHINCSPlusKeyGenerationParameters;
+import com.distrimind.bouncycastle.pqc.crypto.sphincsplus.SPHINCSPlusKeyPairGenerator;
+import com.distrimind.bouncycastle.pqc.crypto.sphincsplus.SPHINCSPlusParameters;
+import com.distrimind.bouncycastle.pqc.jcajce.spec.SPHINCSPlusParameterSpec;
 import com.distrimind.util.io.Integrity;
 import com.distrimind.util.io.MessageExternalizationException;
 import com.distrimind.bouncycastle.pqc.jcajce.spec.SPHINCS256KeyGenParameterSpec;
@@ -55,14 +59,23 @@ public final class JavaNativeKeyPairGenerator extends AbstractKeyPairGenerator {
 	private int keySizeBits = -1;
 	private long expirationTime = -1;
 	private long publicKeyValidityBeginDateUTC;
+	private final ASymmetricAuthenticatedSignatureType typeToSynchronize;
+	private final boolean synchronize;
 
 	JavaNativeKeyPairGenerator(ASymmetricEncryptionType type, KeyPairGenerator keyPairGenerator) {
 		super(type);
 		this.keyPairGenerator = keyPairGenerator;
+		synchronize=false;
+		typeToSynchronize=null;
 	}
 	JavaNativeKeyPairGenerator(ASymmetricAuthenticatedSignatureType type, KeyPairGenerator keyPairGenerator) {
 		super(type);
 		this.keyPairGenerator = keyPairGenerator;
+		synchronize=type.name().startsWith("BCPQC_SPHINCS_PLUS");
+		if (synchronize)
+			this.typeToSynchronize=ASymmetricAuthenticatedSignatureType.BCPQC_SPHINCS_PLUS_SHA256_FAST;
+		else
+			this.typeToSynchronize=null;
 	}
 
 	private boolean isXDHKey()
@@ -72,7 +85,16 @@ public final class JavaNativeKeyPairGenerator extends AbstractKeyPairGenerator {
 
 	@Override
 	public ASymmetricKeyPair generateKeyPair() {
-		KeyPair kp = keyPairGenerator.generateKeyPair();
+		KeyPair kp;
+		if (synchronize)
+		{
+			synchronized(typeToSynchronize)
+			{
+				kp = keyPairGenerator.generateKeyPair();
+			}
+		}
+		else
+			kp = keyPairGenerator.generateKeyPair();
 		if (encryptionType==null)
 			return new ASymmetricKeyPair(signatureType, kp, keySizeBits, publicKeyValidityBeginDateUTC, expirationTime, isXDHKey());
 		else
@@ -107,7 +129,24 @@ public final class JavaNativeKeyPairGenerator extends AbstractKeyPairGenerator {
 			} else if (signatureType != null && signatureType.getKeyGeneratorAlgorithmName().equals(ASymmetricAuthenticatedSignatureType.BCPQC_SPHINCS256_SHA2_512_256.getKeyGeneratorAlgorithmName())) {
 				this.keySizeBits = signatureType.getDefaultKeySize();
 				keyPairGenerator.initialize(new SPHINCS256KeyGenParameterSpec(SPHINCS256KeyGenParameterSpec.SHA512_256), _random.getJavaNativeSecureRandom());
-			} else if (signatureType == null || signatureType.getCurveName() == null)
+			}
+			else if (signatureType != null && signatureType.getKeyGeneratorAlgorithmName().equals(ASymmetricAuthenticatedSignatureType.BCPQC_SPHINCS_PLUS_SHAKE256_SLOW.getKeyGeneratorAlgorithmName())) {
+				this.keySizeBits = signatureType.getDefaultKeySize();
+				keyPairGenerator.initialize(SPHINCSPlusParameterSpec.shake256_256s, _random.getJavaNativeSecureRandom());
+			}
+			else if (signatureType != null && signatureType.getKeyGeneratorAlgorithmName().equals(ASymmetricAuthenticatedSignatureType.BCPQC_SPHINCS_PLUS_SHAKE256_FAST.getKeyGeneratorAlgorithmName())) {
+				this.keySizeBits = signatureType.getDefaultKeySize();
+				keyPairGenerator.initialize(SPHINCSPlusParameterSpec.shake256_256f, _random.getJavaNativeSecureRandom());
+			}
+			else if (signatureType != null && signatureType.getKeyGeneratorAlgorithmName().equals(ASymmetricAuthenticatedSignatureType.BCPQC_SPHINCS_PLUS_SHA256_SLOW.getKeyGeneratorAlgorithmName())) {
+				this.keySizeBits = signatureType.getDefaultKeySize();
+				keyPairGenerator.initialize(SPHINCSPlusParameterSpec.sha256_256s, _random.getJavaNativeSecureRandom());
+			}
+			else if (signatureType != null && signatureType.getKeyGeneratorAlgorithmName().equals(ASymmetricAuthenticatedSignatureType.BCPQC_SPHINCS_PLUS_SHA256_FAST.getKeyGeneratorAlgorithmName())) {
+				this.keySizeBits = signatureType.getDefaultKeySize();
+				keyPairGenerator.initialize(SPHINCSPlusParameterSpec.sha256_256f, _random.getJavaNativeSecureRandom());
+			}
+			else if (signatureType == null || signatureType.getCurveName() == null)
 				keyPairGenerator.initialize(new RSAKeyGenParameterSpec(keySize, RSAKeyGenParameterSpec.F4), _random.getJavaNativeSecureRandom());
 			else {
 				switch (signatureType.getCurveName()) {

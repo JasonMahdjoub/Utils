@@ -37,10 +37,16 @@ package com.distrimind.util.crypto;
 import com.distrimind.bcfips.crypto.Algorithm;
 import com.distrimind.bcfips.crypto.fips.FipsEC;
 import com.distrimind.bcfips.crypto.fips.FipsRSA;
+import com.distrimind.bouncycastle.pqc.crypto.sphincsplus.SPHINCSPlusKeyPairGenerator;
 import com.distrimind.bouncycastle.pqc.jcajce.provider.sphincs.Sphincs256KeyPairGeneratorSpi;
+import com.distrimind.bouncycastle.pqc.jcajce.provider.sphincsplus.SPHINCSPlusKeyFactorySpi;
+import com.distrimind.bouncycastle.pqc.jcajce.provider.sphincsplus.SPHINCSPlusKeyPairGeneratorSpi;
 
 import java.io.IOException;
-import java.security.*;
+import java.security.KeyPairGenerator;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.Signature;
 
 /**
  * List of signature algorithms
@@ -68,6 +74,10 @@ public enum ASymmetricAuthenticatedSignatureType {
 	BCPQC_SPHINCS256_SHA3_512("SHA3-512withSPHINCS256", "SHA3-256withSPHINCS256", CodeProvider.BCPQC,CodeProvider.BCPQC, 1024, 31536000000L, null, true),
 	BC_FIPS_Ed25519("EdDSA", "Ed25519", CodeProvider.BCFIPS,CodeProvider.BCFIPS, 256, 31536000000L, null, false, "Ed25519"),
 	BC_FIPS_Ed448("EdDSA", "Ed448", CodeProvider.BCFIPS,CodeProvider.BCFIPS, 448, 31536000000L, null, false, "Ed448"),
+	BCPQC_SPHINCS_PLUS_SHA256_SLOW("SPHINCSPLUS", "SPHINCSPLUS", CodeProvider.BCPQC,CodeProvider.BCPQC, 1024, 31536000000L, null, true),
+	BCPQC_SPHINCS_PLUS_SHA256_FAST("SPHINCSPLUS", "SPHINCSPLUS", CodeProvider.BCPQC,CodeProvider.BCPQC, 1024, 31536000000L, null, true),
+	BCPQC_SPHINCS_PLUS_SHAKE256_SLOW("SPHINCSPLUS", "SPHINCSPLUS", CodeProvider.BCPQC,CodeProvider.BCPQC, 1024, 31536000000L, null, true),
+	BCPQC_SPHINCS_PLUS_SHAKE256_FAST("SPHINCSPLUS", "SPHINCSPLUS", CodeProvider.BCPQC,CodeProvider.BCPQC, 1024, 31536000000L, null, true),
 	DEFAULT(BC_FIPS_SHA384withRSAandMGF1);
 
 	private final String signatureAlgorithmName;
@@ -199,10 +209,10 @@ public enum ASymmetricAuthenticatedSignatureType {
 
 			Signature s=Signature.getInstance(signatureAlgorithmName, codeProviderSignature.getCompatibleProvider());
 
-			return new JavaNativeSignature(s);
+			return new JavaNativeSignature(s, this);
 
 		} else {
-			return new JavaNativeSignature(Signature.getInstance(signatureAlgorithmName, codeProviderSignature.getCompatibleProvider()));
+			return new JavaNativeSignature(Signature.getInstance(signatureAlgorithmName, codeProviderSignature.getCompatibleProvider()), this);
 		}
 	}
 	/**
@@ -270,6 +280,8 @@ public enum ASymmetricAuthenticatedSignatureType {
 			return 328000;
 		else if (this==BCPQC_SPHINCS256_SHA3_512)
 			return 328000;
+		else if (this==BCPQC_SPHINCS_PLUS_SHA256_SLOW || this==BCPQC_SPHINCS_PLUS_SHA256_FAST || this==BCPQC_SPHINCS_PLUS_SHAKE256_SLOW || this==BCPQC_SPHINCS_PLUS_SHAKE256_FAST)
+			return 328000;
 		else if (this== ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA256withECDSA_P_256)
 			return 1112;
 		else if (this== ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA384withECDSA_P_384 || this== ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA512withECDSA_P_521)
@@ -328,6 +340,10 @@ public enum ASymmetricAuthenticatedSignatureType {
 				kgp=new Sphincs256KeyPairGeneratorSpi();
 
 			}
+			else if (this.name().startsWith("BCPQC_SPHINCS_PLUS"))
+			{
+				kgp=new SPHINCSPlusKeyPairGeneratorSpi();
+			}
 			else
 				kgp = KeyPairGenerator.getInstance(keyGeneratorAlgorithmName, codeProviderKeyGenerator.getCompatibleProvider());
 			JavaNativeKeyPairGenerator res = new JavaNativeKeyPairGenerator(this, kgp);
@@ -353,7 +369,5 @@ public enum ASymmetricAuthenticatedSignatureType {
 	public boolean isPostQuantumAlgorithm() {
 		return isPostQuantumAlgorithm;
 	}
-
-
 
 }
