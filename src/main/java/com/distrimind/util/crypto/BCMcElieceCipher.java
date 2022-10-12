@@ -35,6 +35,7 @@ The fact that you are presently reading this means that you have had
 knowledge of the CeCILL-C license and that you accept its terms.
  */
 
+import com.distrimind.bouncycastle.pqc.legacy.crypto.mceliece.*;
 import com.distrimind.util.AutoZeroizable;
 import com.distrimind.util.Cleanable;
 import com.distrimind.util.Zeroizable;
@@ -48,11 +49,10 @@ import com.distrimind.bcfips.crypto.Algorithm;
 import com.distrimind.bcfips.crypto.AsymmetricPrivateKey;
 import com.distrimind.bcfips.crypto.AsymmetricPublicKey;
 import com.distrimind.bouncycastle.pqc.crypto.MessageEncryptor;
-import com.distrimind.bouncycastle.pqc.crypto.mceliece.*;
-import com.distrimind.bouncycastle.pqc.math.linearalgebra.GF2Matrix;
-import com.distrimind.bouncycastle.pqc.math.linearalgebra.GF2mField;
-import com.distrimind.bouncycastle.pqc.math.linearalgebra.Permutation;
-import com.distrimind.bouncycastle.pqc.math.linearalgebra.PolynomialGF2mSmallM;
+import com.distrimind.bouncycastle.pqc.legacy.math.linearalgebra.GF2Matrix;
+import com.distrimind.bouncycastle.pqc.legacy.math.linearalgebra.GF2mField;
+import com.distrimind.bouncycastle.pqc.legacy.math.linearalgebra.Permutation;
+import com.distrimind.bouncycastle.pqc.legacy.math.linearalgebra.PolynomialGF2mSmallM;
 
 import javax.crypto.Cipher;
 import java.io.ByteArrayOutputStream;
