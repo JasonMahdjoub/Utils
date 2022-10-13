@@ -34,6 +34,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
+import com.distrimind.bouncycastle.pqc.jcajce.spec.KyberParameterSpec;
 import com.distrimind.bouncycastle.pqc.jcajce.spec.SPHINCS256KeyGenParameterSpec;
 import com.distrimind.bouncycastle.pqc.jcajce.spec.SPHINCSPlusParameterSpec;
 import com.distrimind.util.io.Integrity;
@@ -120,7 +121,36 @@ public final class JavaNativeKeyPairGenerator extends AbstractKeyPairGenerator {
 			this.keySizeBits = keySize;
 			this.expirationTime = expirationTime;
 			this.publicKeyValidityBeginDateUTC=publicKeyValidityBeginDateUTC;
-			if (signatureType != null && signatureType.getKeyGeneratorAlgorithmName().equals(ASymmetricAuthenticatedSignatureType.BCPQC_SPHINCS256_SHA3_512.getKeyGeneratorAlgorithmName())) {
+			if (encryptionType!=null && encryptionType.getAlgorithmName().startsWith("CRYSTALS-Kyber"))
+			{
+				if (encryptionType.getAlgorithmName().endsWith("512"))
+				{
+					keyPairGenerator.initialize(KyberParameterSpec.kyber512, _random);
+				}
+				else if (encryptionType.getAlgorithmName().endsWith("768"))
+				{
+					keyPairGenerator.initialize(KyberParameterSpec.kyber768, _random);
+				}
+				else if (encryptionType.getAlgorithmName().endsWith("1024"))
+				{
+					keyPairGenerator.initialize(KyberParameterSpec.kyber1024, _random);
+				}
+				else if (encryptionType.getAlgorithmName().endsWith("512-AES"))
+				{
+					keyPairGenerator.initialize(KyberParameterSpec.kyber512_aes, _random);
+				}
+				else if (encryptionType.getAlgorithmName().endsWith("768-AES"))
+				{
+					keyPairGenerator.initialize(KyberParameterSpec.kyber768_aes, _random);
+				}
+				else if (encryptionType.getAlgorithmName().endsWith("1024-AES"))
+				{
+					keyPairGenerator.initialize(KyberParameterSpec.kyber1024_aes, _random);
+				}
+				else
+					throw new IllegalAccessError();
+			}
+			else if (signatureType != null && signatureType.getKeyGeneratorAlgorithmName().equals(ASymmetricAuthenticatedSignatureType.BCPQC_SPHINCS256_SHA3_512.getKeyGeneratorAlgorithmName())) {
 				this.keySizeBits = signatureType.getDefaultKeySize();
 				keyPairGenerator.initialize(new SPHINCS256KeyGenParameterSpec(SPHINCS256KeyGenParameterSpec.SHA3_256), _random.getJavaNativeSecureRandom());
 			} else if (signatureType != null && signatureType.getKeyGeneratorAlgorithmName().equals(ASymmetricAuthenticatedSignatureType.BCPQC_SPHINCS256_SHA2_512_256.getKeyGeneratorAlgorithmName())) {

@@ -34,13 +34,12 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
-import com.distrimind.bcfips.crypto.general.AES;
-import com.distrimind.util.OS;
-import com.distrimind.util.OSVersion;
 import com.distrimind.bcfips.crypto.Algorithm;
 import com.distrimind.bcfips.crypto.general.ChaCha20;
 import com.distrimind.bcfips.crypto.general.Serpent;
 import com.distrimind.bcfips.crypto.general.Twofish;
+import com.distrimind.util.OS;
+import com.distrimind.util.OSVersion;
 import com.distrimind.util.data_buffers.WrappedSecretData;
 
 import javax.crypto.Cipher;
@@ -568,7 +567,7 @@ public enum SymmetricEncryptionType {
 	{
 		if (getCodeProviderForEncryption()==CodeProvider.GNU_CRYPTO)
 			return SymmetricKeyWrapperType.CLASSIC_ENCRYPTION;
-		if (getAlgorithmName().equals(AES_GCM.getAlgorithmName())) {
+		else if (getAlgorithmName().equals(AES_GCM.getAlgorithmName())) {
 			return SymmetricKeyWrapperType.BC_FIPS_AES_WITH_PADDING;
 		}
 		else

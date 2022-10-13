@@ -115,7 +115,7 @@ public class RandomByteArrayInputStream extends RandomInputStream {
 		int freeSpace=getFreeSpace();
 		if (freeSpace==0)
 			return -1;
-		int read = Math.min(Math.min(_length, freeSpace), _bytes.length - _offset);
+		int read = Math.min(_length, freeSpace);
 		System.arraycopy(outputStream.bytes, current_pos, _bytes, _offset, read);
 		current_pos += read;
 		return read;
@@ -179,7 +179,6 @@ public class RandomByteArrayInputStream extends RandomInputStream {
 
 	@Override
 	public void readFully(byte[] tab, int off, int len) throws IOException {
-		checkLimits(tab, off, len);
 		if (read(tab,off, len)!=len)
 			throw new EOFException();
 	}

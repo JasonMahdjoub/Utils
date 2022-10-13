@@ -247,7 +247,7 @@ public enum SymmetricKeyWrapperType {
 					} else
 						return new SymmetricSecretKey(encryptionType, cipher.unwrap(keyToUnwrap));
 				} catch (InvalidWrappingException e) {
-					throw new IllegalStateException(e);
+					throw new IllegalStateException("encryptionType="+encryptionType+", keyWrapperType="+this, e);
 				}
 
 

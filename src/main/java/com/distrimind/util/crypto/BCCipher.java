@@ -53,7 +53,7 @@ import java.io.*;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
-
+import java.util.Objects;
 
 
 /**
@@ -490,22 +490,22 @@ public class BCCipher extends AbstractCipher {
 					this.aadStream = readDescriptor.getAADStream();
 			} else if (opMode == Cipher.WRAP_MODE) {
 
-				if (keyWrapperType.equals(SymmetricKeyWrapperType.BC_FIPS_AES)) {
+				if (Objects.equals(keyWrapperType.getAlgorithmName(), SymmetricKeyWrapperType.BC_FIPS_AES.getAlgorithmName())) {
 					FipsAES.KeyWrapOperatorFactory factory = new FipsAES.KeyWrapOperatorFactory();
 					wrapper = factory.createKeyWrapper((SymmetricSecretKey) key.toBouncyCastleKey(), FipsAES.KW);
 
-				} else if (keyWrapperType.equals(SymmetricKeyWrapperType.BC_FIPS_AES_WITH_PADDING)) {
+				} else if (Objects.equals(keyWrapperType.getAlgorithmName(), SymmetricKeyWrapperType.BC_FIPS_AES_WITH_PADDING.getAlgorithmName())) {
 					FipsAES.KeyWrapOperatorFactory factory = new FipsAES.KeyWrapOperatorFactory();
 					wrapper = factory.createKeyWrapper((SymmetricSecretKey) key.toBouncyCastleKey(), FipsAES.KWP);
 				} else
 					throw new IllegalAccessError();
 
 			} else if (opMode == Cipher.UNWRAP_MODE) {
-				if (keyWrapperType.equals(SymmetricKeyWrapperType.BC_FIPS_AES)) {
+				if (Objects.equals(keyWrapperType.getAlgorithmName(), SymmetricKeyWrapperType.BC_FIPS_AES.getAlgorithmName())) {
 					FipsAES.KeyWrapOperatorFactory factory = new FipsAES.KeyWrapOperatorFactory();
 					unWrapper = factory.createKeyUnwrapper((SymmetricSecretKey) key.toBouncyCastleKey(), FipsAES.KW);
 
-				} else if (keyWrapperType.equals(SymmetricKeyWrapperType.BC_FIPS_AES_WITH_PADDING)) {
+				} else if (Objects.equals(keyWrapperType.getAlgorithmName(), SymmetricKeyWrapperType.BC_FIPS_AES_WITH_PADDING.getAlgorithmName())) {
 					FipsAES.KeyWrapOperatorFactory factory = new FipsAES.KeyWrapOperatorFactory();
 					unWrapper = factory.createKeyUnwrapper((SymmetricSecretKey) key.toBouncyCastleKey(), FipsAES.KWP);
 				} else

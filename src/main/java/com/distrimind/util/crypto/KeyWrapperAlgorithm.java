@@ -109,9 +109,9 @@ public class KeyWrapperAlgorithm extends MultiFormatProperties implements Secure
 		if (signatureNotNecessary)
 		{
 			SymmetricEncryptionType t=null;
-			if (secretKeyForEncryption.getEncryptionAlgorithmType()==SymmetricEncryptionType.BC_CHACHA20_POLY1305)
+			if (secretKeyForEncryption.getEncryptionAlgorithmType().equals(SymmetricEncryptionType.BC_CHACHA20_POLY1305))
 				t=SymmetricEncryptionType.BC_CHACHA20_NO_RANDOM_ACCESS;
-			else if (secretKeyForEncryption.getEncryptionAlgorithmType()==SymmetricEncryptionType.CHACHA20_POLY1305)
+			else if (secretKeyForEncryption.getEncryptionAlgorithmType().equals(SymmetricEncryptionType.CHACHA20_POLY1305))
 				t=SymmetricEncryptionType.CHACHA20_NO_RANDOM_ACCESS;
 			if (t!=null)
 				secretKeyForEncryption=new SymmetricSecretKey(t, secretKeyForEncryption);
