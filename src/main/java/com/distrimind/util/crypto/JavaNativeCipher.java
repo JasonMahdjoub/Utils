@@ -78,7 +78,7 @@ public final class JavaNativeCipher extends AbstractCipher {
 	}
 	JavaNativeCipher(SymmetricEncryptionType type, Cipher cipher) {
 		super();
-		this.type=type.getDerivedType();
+		this.type=type==null?null:type.getDerivedType();
 		this.cipher = cipher;
 	}
 

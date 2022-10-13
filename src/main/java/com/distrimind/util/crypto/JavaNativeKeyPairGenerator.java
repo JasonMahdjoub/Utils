@@ -69,7 +69,7 @@ public final class JavaNativeKeyPairGenerator extends AbstractKeyPairGenerator {
 	JavaNativeKeyPairGenerator(ASymmetricAuthenticatedSignatureType type, KeyPairGenerator keyPairGenerator) {
 		super(type);
 		this.keyPairGenerator = keyPairGenerator;
-		synchronize=type.name().startsWith("BCPQC_SPHINCS_PLUS");
+		synchronize=this.signatureType.getSignatureAlgorithmName().equals("SPHINCSPLUS");
 		if (synchronize)
 			this.typeToSynchronize=ASymmetricAuthenticatedSignatureType.BCPQC_SPHINCS_PLUS_SHA256_FAST;
 		else

@@ -428,8 +428,18 @@ public class TestASymmetricEncryption {
 			kw=ASymmetricKeyWrapperType.BCPQC_MCELIECE_FUJISAKI_CCA2_SHA256;
 		else if (astype.name().startsWith("BCPQC_MCELIECE_POINTCHEVAL"))
 			kw=ASymmetricKeyWrapperType.BCPQC_MCELIECE_POINTCHEVAL_CCA2_SHA256;
-		else if (astype.getAlgorithmName().startsWith("CRYSTALS-Kyber"))
-			kw=ASymmetricKeyWrapperType.BCPQC_CRYSTALS_KYBER;
+		else if (astype.getAlgorithmName().equals(ASymmetricEncryptionType.BCPQC_CRYSTALS_KYBER_512.getAlgorithmName()))
+			kw=ASymmetricKeyWrapperType.BCPQC_CRYSTALS_KYBER_512;
+		else if (astype.getAlgorithmName().equals(ASymmetricEncryptionType.BCPQC_CRYSTALS_KYBER_768.getAlgorithmName()))
+			kw=ASymmetricKeyWrapperType.BCPQC_CRYSTALS_KYBER_512;
+		else if (astype.getAlgorithmName().equals(ASymmetricEncryptionType.BCPQC_CRYSTALS_KYBER_1024.getAlgorithmName()))
+			kw=ASymmetricKeyWrapperType.BCPQC_CRYSTALS_KYBER_512;
+		else if (astype.getAlgorithmName().equals(ASymmetricEncryptionType.BCPQC_CRYSTALS_KYBER_512_AES.getAlgorithmName()))
+			kw=ASymmetricKeyWrapperType.BCPQC_CRYSTALS_KYBER_512_AES;
+		else if (astype.getAlgorithmName().equals(ASymmetricEncryptionType.BCPQC_CRYSTALS_KYBER_768_AES.getAlgorithmName()))
+			kw=ASymmetricKeyWrapperType.BCPQC_CRYSTALS_KYBER_512_AES;
+		else if (astype.getAlgorithmName().equals(ASymmetricEncryptionType.BCPQC_CRYSTALS_KYBER_1024_AES.getAlgorithmName()))
+			kw=ASymmetricKeyWrapperType.BCPQC_CRYSTALS_KYBER_512_AES;
 		else
 			kw=ASymmetricKeyWrapperType.BC_FIPS_RSA_OAEP_WITH_SHA3_512;
 

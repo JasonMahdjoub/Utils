@@ -74,27 +74,38 @@ import com.distrimind.util.OS;
 @SuppressWarnings("ConstantConditions")
 public enum ASymmetricKeyWrapperType {
 
-	RSA_OAEP_WITH_SHA2_384("RSA/ECB/OAEPPadding",CodeProvider.SunJCE, false, "SHA-384", FipsSHS.Algorithm.SHA384, false),
-	RSA_OAEP_WITH_PARAMETERS_SHA2_384("RSA/ECB/OAEPPadding",CodeProvider.SunJCE, true, "SHA-384", FipsSHS.Algorithm.SHA384, false),
-	GNU_RSA_OAEP_SHA2_384("RSA/NONE/OAEPPadding",CodeProvider.GNU_CRYPTO, false, "SHA-384", FipsSHS.Algorithm.SHA384, false),
-	RSA_OAEP_SHA2_512("RSA/ECB/OAEPPadding",CodeProvider.SunJCE, false, "SHA-512", FipsSHS.Algorithm.SHA512, false),
-	RSA_OAEP_WITH_PARAMETERS_SHA2_512("RSA/ECB/OAEPPadding",CodeProvider.SunJCE, true, "SHA-512", FipsSHS.Algorithm.SHA512, false),
-	GNU_RSA_OAEP_SHA2_512("RSA/NONE/OAEPPadding",CodeProvider.GNU_CRYPTO, false, "SHA-512", FipsSHS.Algorithm.SHA512, false),
-	BC_FIPS_RSA_OAEP_WITH_SHA2_384("RSA/NONE/OAEPPadding",CodeProvider.BCFIPS, false, "SHA-384", FipsSHS.Algorithm.SHA384, false),
-	BC_FIPS_RSA_OAEP_WITH_PARAMETERS_SHA2_384("RSA/NONE/OAEPPadding",CodeProvider.BCFIPS, true, "SHA-384", FipsSHS.Algorithm.SHA384, false),
-	BC_FIPS_RSA_OAEP_WITH_SHA2_512("RSA/NONE/OAEPPadding",CodeProvider.BCFIPS, false, "SHA-384", FipsSHS.Algorithm.SHA512, false),
-	BC_FIPS_RSA_OAEP_WITH_PARAMETERS_SHA2_512("RSA/NONE/OAEPPadding",CodeProvider.BCFIPS, true, "SHA-384", FipsSHS.Algorithm.SHA512, false),
-	BC_FIPS_RSA_OAEP_WITH_SHA3_384("RSA/NONE/OAEPPadding",CodeProvider.BCFIPS, false, "SHA-384", FipsSHS.Algorithm.SHA3_384, false),
-	BC_FIPS_RSA_OAEP_WITH_PARAMETERS_SHA3_384("RSA/NONE/OAEPPadding",CodeProvider.BCFIPS, true, "SHA-384", FipsSHS.Algorithm.SHA3_384, false),
-	BC_FIPS_RSA_OAEP_WITH_SHA3_512("RSA/NONE/OAEPPadding",CodeProvider.BCFIPS, false, "SHA-384", FipsSHS.Algorithm.SHA3_512, false),
-	BC_FIPS_RSA_OAEP_WITH_PARAMETERS_SHA3_512("RSA/NONE/OAEPPadding",CodeProvider.BCFIPS, true, "SHA-384", FipsSHS.Algorithm.SHA3_512, false),
-	BCPQC_MCELIECE_FUJISAKI_CCA2_SHA256("McElieceFujisaki",CodeProvider.BCPQC, false, "SHA-256", FipsSHS.Algorithm.SHA256, true),
-	BCPQC_MCELIECE_POINTCHEVAL_CCA2_SHA256("McEliecePointCheval",CodeProvider.BCPQC, false, "SHA-256", FipsSHS.Algorithm.SHA256, true),
+	RSA_OAEP_WITH_SHA2_384("RSA/ECB/OAEPPadding",CodeProvider.SunJCE, false, "SHA-384", FipsSHS.Algorithm.SHA384, false, ASymmetricEncryptionType.RSA_OAEPWithSHA384AndMGF1Padding),
+	RSA_OAEP_WITH_PARAMETERS_SHA2_384("RSA/ECB/OAEPPadding",CodeProvider.SunJCE, true, "SHA-384", FipsSHS.Algorithm.SHA384, false, ASymmetricEncryptionType.RSA_OAEPWithSHA384AndMGF1Padding),
+	GNU_RSA_OAEP_SHA2_384("RSA/NONE/OAEPPadding",CodeProvider.GNU_CRYPTO, false, "SHA-384", FipsSHS.Algorithm.SHA384, false, ASymmetricEncryptionType.RSA_OAEPWithSHA384AndMGF1Padding),
+	RSA_OAEP_SHA2_512("RSA/ECB/OAEPPadding",CodeProvider.SunJCE, false, "SHA-512", FipsSHS.Algorithm.SHA512, false, ASymmetricEncryptionType.RSA_OAEPWithSHA512AndMGF1Padding),
+	RSA_OAEP_WITH_PARAMETERS_SHA2_512("RSA/ECB/OAEPPadding",CodeProvider.SunJCE, true, "SHA-512", FipsSHS.Algorithm.SHA512, false, ASymmetricEncryptionType.RSA_OAEPWithSHA512AndMGF1Padding),
+	GNU_RSA_OAEP_SHA2_512("RSA/NONE/OAEPPadding",CodeProvider.GNU_CRYPTO, false, "SHA-512", FipsSHS.Algorithm.SHA512, false, ASymmetricEncryptionType.RSA_OAEPWithSHA512AndMGF1Padding),
+	BC_FIPS_RSA_OAEP_WITH_SHA2_384("RSA/NONE/OAEPPadding",CodeProvider.BCFIPS, false, "SHA-384", FipsSHS.Algorithm.SHA384, false, ASymmetricEncryptionType.RSA_OAEPWithSHA384AndMGF1Padding),
+	BC_FIPS_RSA_OAEP_WITH_PARAMETERS_SHA2_384("RSA/NONE/OAEPPadding",CodeProvider.BCFIPS, true, "SHA-384", FipsSHS.Algorithm.SHA384, false, ASymmetricEncryptionType.RSA_OAEPWithSHA384AndMGF1Padding),
+	BC_FIPS_RSA_OAEP_WITH_SHA2_512("RSA/NONE/OAEPPadding",CodeProvider.BCFIPS, false, "SHA-384", FipsSHS.Algorithm.SHA512, false, ASymmetricEncryptionType.RSA_OAEPWithSHA512AndMGF1Padding),
+	BC_FIPS_RSA_OAEP_WITH_PARAMETERS_SHA2_512("RSA/NONE/OAEPPadding",CodeProvider.BCFIPS, true, "SHA-384", FipsSHS.Algorithm.SHA512, false, ASymmetricEncryptionType.RSA_OAEPWithSHA512AndMGF1Padding),
+	BC_FIPS_RSA_OAEP_WITH_SHA3_384("RSA/NONE/OAEPPadding",CodeProvider.BCFIPS, false, "SHA-384", FipsSHS.Algorithm.SHA3_384, false, ASymmetricEncryptionType.RSA_OAEPWithSHA384AndMGF1Padding),
+	BC_FIPS_RSA_OAEP_WITH_PARAMETERS_SHA3_384("RSA/NONE/OAEPPadding",CodeProvider.BCFIPS, true, "SHA-384", FipsSHS.Algorithm.SHA3_384, false, ASymmetricEncryptionType.RSA_OAEPWithSHA384AndMGF1Padding),
+	BC_FIPS_RSA_OAEP_WITH_SHA3_512("RSA/NONE/OAEPPadding",CodeProvider.BCFIPS, false, "SHA-384", FipsSHS.Algorithm.SHA3_512, false, ASymmetricEncryptionType.RSA_OAEPWithSHA512AndMGF1Padding),
+	BC_FIPS_RSA_OAEP_WITH_PARAMETERS_SHA3_512("RSA/NONE/OAEPPadding",CodeProvider.BCFIPS, true, "SHA-384", FipsSHS.Algorithm.SHA3_512, false, ASymmetricEncryptionType.RSA_OAEPWithSHA512AndMGF1Padding),
+	BCPQC_MCELIECE_FUJISAKI_CCA2_SHA256("McElieceFujisaki",CodeProvider.BCPQC, false, "SHA-256", FipsSHS.Algorithm.SHA256, true, ASymmetricEncryptionType.BCPQC_MCELIECE_FUJISAKI_CCA2_SHA256),
+	BCPQC_MCELIECE_POINTCHEVAL_CCA2_SHA256("McEliecePointCheval",CodeProvider.BCPQC, false, "SHA-256", FipsSHS.Algorithm.SHA256, true, ASymmetricEncryptionType.BCPQC_MCELIECE_POINTCHEVAL_CCA2_SHA256),
 	HYBRID_BCPQC_MCELIECE_FUJISAKI_CCA2_SHA256_AND_RSA_OAEP_WITH_SHA2_384(BCPQC_MCELIECE_FUJISAKI_CCA2_SHA256, RSA_OAEP_WITH_SHA2_384),
 	HYBRID_BCPQC_MCELIECE_FUJISAKI_CCA2_SHA256_AND_RSA_OAEP_WITH_PARAMETERS_SHA2_384(BCPQC_MCELIECE_FUJISAKI_CCA2_SHA256, RSA_OAEP_WITH_PARAMETERS_SHA2_384),
 	HYBRID_BCPQC_MCELIECE_POINTCHEVAL_CCA2_SHA256_AND_RSA_OAEP_WITH_SHA2_384(BCPQC_MCELIECE_POINTCHEVAL_CCA2_SHA256, RSA_OAEP_WITH_SHA2_384),
 	HYBRID_BCPQC_MCELIECE_POINTCHEVAL_CCA2_SHA256_AND_RSA_OAEP_WITH_PARAMETERS_SHA2_384(BCPQC_MCELIECE_POINTCHEVAL_CCA2_SHA256, RSA_OAEP_WITH_PARAMETERS_SHA2_384),
-	BCPQC_CRYSTALS_KYBER("Kyber",CodeProvider.BCPQC, false, "512", null, true),
+	BCPQC_CRYSTALS_KYBER_512("Kyber",CodeProvider.BCPQC, false, "512", null, true, ASymmetricEncryptionType.BCPQC_CRYSTALS_KYBER_512),
+	BCPQC_CRYSTALS_KYBER_768("Kyber",CodeProvider.BCPQC, false, "768", null, true, ASymmetricEncryptionType.BCPQC_CRYSTALS_KYBER_768),
+	BCPQC_CRYSTALS_KYBER_1024("Kyber",CodeProvider.BCPQC, false, "1024", null, true, ASymmetricEncryptionType.BCPQC_CRYSTALS_KYBER_1024),
+	BCPQC_CRYSTALS_KYBER_512_AES("Kyber",CodeProvider.BCPQC, false, "512_AES", null, true, ASymmetricEncryptionType.BCPQC_CRYSTALS_KYBER_512_AES),
+	BCPQC_CRYSTALS_KYBER_768_AES("Kyber",CodeProvider.BCPQC, false, "768_AES", null, true, ASymmetricEncryptionType.BCPQC_CRYSTALS_KYBER_768_AES),
+	BCPQC_CRYSTALS_KYBER_1024_AES("Kyber",CodeProvider.BCPQC, false, "1024_AES", null, true, ASymmetricEncryptionType.BCPQC_CRYSTALS_KYBER_1024_AES),
+	HYBRID_BCPQC_BCPQC_CRYSTALS_KYBER_512_AND_BC_FIPS_RSA_OAEP_WITH_SHA3_512(BCPQC_CRYSTALS_KYBER_512, BC_FIPS_RSA_OAEP_WITH_SHA3_512),
+	HYBRID_BCPQC_BCPQC_CRYSTALS_KYBER_768_AND_BC_FIPS_RSA_OAEP_WITH_SHA3_512(BCPQC_CRYSTALS_KYBER_768, BC_FIPS_RSA_OAEP_WITH_SHA3_512),
+	HYBRID_BCPQC_BCPQC_CRYSTALS_KYBER_1024_AND_BC_FIPS_RSA_OAEP_WITH_SHA3_512(BCPQC_CRYSTALS_KYBER_1024, BC_FIPS_RSA_OAEP_WITH_SHA3_512),
+	HYBRID_BCPQC_BCPQC_CRYSTALS_KYBER_512_AES_AND_BC_FIPS_RSA_OAEP_WITH_SHA3_512(BCPQC_CRYSTALS_KYBER_512_AES, BC_FIPS_RSA_OAEP_WITH_SHA3_512),
+	HYBRID_BCPQC_BCPQC_CRYSTALS_KYBER_768_AES_AND_BC_FIPS_RSA_OAEP_WITH_SHA3_512(BCPQC_CRYSTALS_KYBER_768_AES, BC_FIPS_RSA_OAEP_WITH_SHA3_512),
+	HYBRID_BCPQC_BCPQC_CRYSTALS_KYBER_1024_AES_AND_BC_FIPS_RSA_OAEP_WITH_SHA3_512(BCPQC_CRYSTALS_KYBER_1024_AES, BC_FIPS_RSA_OAEP_WITH_SHA3_512),
 	//BC_FIPS_RSA_KTS_KTM("RSA-KTS-KEM-KWS",CodeProvider.BCFIPS, false),
 	DEFAULT(BC_FIPS_RSA_OAEP_WITH_PARAMETERS_SHA3_384);
 	
@@ -106,6 +117,8 @@ public enum ASymmetricKeyWrapperType {
 	private final String shaAlgorithm;
 	private final FipsDigestAlgorithm bcShaDigestAlgorithm;
 	private final boolean pqc;
+
+	private final ASymmetricEncryptionType aSymmetricEncryptionType;
 	private final ASymmetricKeyWrapperType nonPQCWrapper, pqcWrapper;
 	private final ASymmetricKeyWrapperType derivedType;
 
@@ -123,18 +136,22 @@ public enum ASymmetricKeyWrapperType {
 		this.shaAlgorithm="";
 		this.bcShaDigestAlgorithm=null;
 		this.pqc=true;
+		this.aSymmetricEncryptionType=null;
 		this.nonPQCWrapper=nonPQCWrapper.derivedType;
 		this.pqcWrapper=pqcWrapper.derivedType;
 		this.derivedType= this;
 	}
 
-	ASymmetricKeyWrapperType(String algorithmName, CodeProvider provider, boolean withParameters, String shaAlgorithm, FipsDigestAlgorithm bcShaDigestAlgorithm, boolean pqc) {
+	ASymmetricKeyWrapperType(String algorithmName, CodeProvider provider, boolean withParameters, String shaAlgorithm, FipsDigestAlgorithm bcShaDigestAlgorithm, boolean pqc, ASymmetricEncryptionType aSymmetricEncryptionType) {
+		if (aSymmetricEncryptionType==null)
+			throw new NullPointerException();
 		this.algorithmName = algorithmName;
 		this.provider = provider;
 		this.withParameters=withParameters;
 		this.shaAlgorithm=shaAlgorithm;
 		this.bcShaDigestAlgorithm=bcShaDigestAlgorithm;
 		this.pqc=pqc;
+		this.aSymmetricEncryptionType=aSymmetricEncryptionType;
 		this.nonPQCWrapper=null;
 		this.pqcWrapper=null;
 		this.derivedType=this;
@@ -148,6 +165,7 @@ public enum ASymmetricKeyWrapperType {
 		this.shaAlgorithm=other.shaAlgorithm;
 		this.bcShaDigestAlgorithm=other.bcShaDigestAlgorithm;
 		this.pqc=other.pqc;
+		this.aSymmetricEncryptionType=other.aSymmetricEncryptionType;
 		this.nonPQCWrapper=other.nonPQCWrapper;
 		this.pqcWrapper=other.pqcWrapper;
 		this.derivedType=other;
@@ -241,7 +259,7 @@ public enum ASymmetricKeyWrapperType {
 						.withEncodingParams(params);
 		return OAEPParams;
 	}
-	
+
 	WrappedEncryptedSymmetricSecretKey wrapKey(AbstractSecureRandom random, IASymmetricPublicKey ipublicKey, SymmetricSecretKey keyToWrap)
 			throws IOException {
 		if (ipublicKey.isDestroyed())
@@ -269,9 +287,9 @@ public enum ASymmetricKeyWrapperType {
 							|| (keyToWrap.getEncryptionAlgorithmType() != null && (provider == CodeProvider.GNU_CRYPTO) != (keyToWrap.getEncryptionAlgorithmType().getCodeProviderForEncryption() == CodeProvider.GNU_CRYPTO)))
 						throw new IllegalArgumentException("The keys must come from the same providers");
 
-					if ((algorithmName.equals(BCPQC_CRYSTALS_KYBER.algorithmName) && !publicKey.getEncryptionAlgorithmType().getAlgorithmName().contains(algorithmName))
-							|| (!algorithmName.equals(BCPQC_CRYSTALS_KYBER.algorithmName) && !algorithmName.contains(publicKey.getEncryptionAlgorithmType().getAlgorithmName())))
-						throw new IllegalArgumentException("The key must be compatible with algorithm " + algorithmName);
+					if ((algorithmName.equals(BCPQC_CRYSTALS_KYBER_512.algorithmName) && !publicKey.getEncryptionAlgorithmType().getAlgorithmName().contains(algorithmName))
+							|| (!algorithmName.equals(BCPQC_CRYSTALS_KYBER_512.algorithmName) && !algorithmName.contains(publicKey.getEncryptionAlgorithmType().getAlgorithmName())))
+						throw new IllegalArgumentException("The key must be compatible with algorithm " + algorithmName+", publicKeyEncryptionAlgorithmType="+publicKey.getEncryptionAlgorithmType());
 					if (provider.equals(CodeProvider.GNU_CRYPTO)) {
 						Object c = GnuFunctions.getCipherAlgorithm(algorithmName);
 						GnuFunctions.cipherInitWrapMode(c, publicKey.toGnuKey(), random.getGnuSecureRandom());
@@ -401,9 +419,9 @@ public enum ASymmetricKeyWrapperType {
 					else
 						throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
 				} else {
-					if ((algorithmName.equals(BCPQC_CRYSTALS_KYBER.algorithmName) && !privateKey.getEncryptionAlgorithmType().getAlgorithmName().contains(algorithmName))
-							|| (!algorithmName.equals(BCPQC_CRYSTALS_KYBER.algorithmName) && !algorithmName.contains(privateKey.getEncryptionAlgorithmType().getAlgorithmName())))
-						throw new IllegalArgumentException("The key must be compatible with algorithm " + algorithmName);
+					if ((algorithmName.equals(BCPQC_CRYSTALS_KYBER_512.algorithmName) && !privateKey.getEncryptionAlgorithmType().getAlgorithmName().contains(algorithmName))
+							|| (!algorithmName.equals(BCPQC_CRYSTALS_KYBER_512.algorithmName) && !algorithmName.contains(privateKey.getEncryptionAlgorithmType().getAlgorithmName())))
+						throw new IllegalArgumentException("The key must be compatible with algorithm " + algorithmName+", privateKeyEncryptionAlgorithmType="+privateKey.getEncryptionAlgorithmType());
 					if (isSignatureFromMetaData(keyToUnwrap)) {
 						byte[] ktu = getWrappedKeyFromMetaData(keyToUnwrap);
 						SymmetricSecretKey res = unwrapKey(privateKey, ktu, null, getSignatureTypeFromMetaData(keyToUnwrap), getKeySizeFromMetaData(keyToUnwrap));
@@ -566,6 +584,19 @@ public enum ASymmetricKeyWrapperType {
 
 	public ASymmetricKeyWrapperType getDerivedType() {
 		return derivedType;
+	}
+	public AbstractKeyPairGenerator getKeyPairGenerator(AbstractSecureRandom random)
+			throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
+		return getKeyPairGenerator(random, aSymmetricEncryptionType.getDefaultKeySizeBits(), System.currentTimeMillis(), System.currentTimeMillis() + aSymmetricEncryptionType.getDefaultExpirationTimeMilis());
+	}
+
+	public AbstractKeyPairGenerator getKeyPairGenerator(AbstractSecureRandom random, int keySizeBits)
+			throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
+		return getKeyPairGenerator(random, keySizeBits, System.currentTimeMillis(), System.currentTimeMillis() + aSymmetricEncryptionType.getDefaultExpirationTimeMilis());
+	}
+	public AbstractKeyPairGenerator getKeyPairGenerator(AbstractSecureRandom random, int keySizeBits,
+														long publicKeyValidityBeginDateUTC, long expirationTimeUTC) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
+		return aSymmetricEncryptionType.getKeyPairGenerator(random, keySizeBits,publicKeyValidityBeginDateUTC, expirationTimeUTC);
 	}
 
 	public static final int MAX_SIZE_IN_BYTES_OF_WRAPPED_SYMMETRIC_SECRET_KEY_WITH_ASYMMETRIC_NON_PQC_ENCRYPTION =768;

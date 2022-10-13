@@ -81,6 +81,7 @@ public class Utils {
 									.addItem(NEW_FEATURE, "Add BouncyCastle Sphincs+ asymmetric authenticated signature post quantum algorithms.")
 									.addItem(NEW_FEATURE, "Add Chrystals-Kyber asymmetric key wrappers.")
 									.addItem(INTERNAL_CHANGE, "Encode key types and algorithm types with their derived final type")
+									.addItem(NEW_FEATURE, "Add functions ASymmetricKeyWrapperType.getKeyPairGenerator(...).")
 					)
 					.addDescription(
 							new Description(5, 23, 5, Version.Type.STABLE, 0, "2022-04-07")

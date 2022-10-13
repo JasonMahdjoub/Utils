@@ -131,7 +131,7 @@ public abstract class AbstractSecureRandom extends SecureRandom {
 	}
 	AbstractSecureRandom(AbstractSecureRandomSpi secureRandomSpi, SecureRandomType type) {
 		super(secureRandomSpi, getProvider(type));
-		this.type = type.getDerivedType();
+		this.type = type==null?null:type.getDerivedType();
 		this.secureRandomSpi=secureRandomSpi;
 	}
 

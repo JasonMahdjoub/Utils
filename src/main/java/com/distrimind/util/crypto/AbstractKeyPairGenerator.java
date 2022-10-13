@@ -56,6 +56,7 @@ public abstract class AbstractKeyPairGenerator {
 		this.signatureType=type.getDerivedType();
 	}
 
+
 	/**
 	 * Generates a key pair.
 	 *
