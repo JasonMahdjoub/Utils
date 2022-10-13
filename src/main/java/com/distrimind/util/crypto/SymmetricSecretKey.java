@@ -181,7 +181,7 @@ public class SymmetricSecretKey extends AbstractKey implements ISecretDecentrali
 		this(secretKey, keySizeBits);
 		if (type == null)
 			throw new NullPointerException("type");
-		this.encryptionType = type;
+		this.encryptionType = type.getDerivedType();
 		this.signatureType=null;
 		//Arrays.fill(secretKey, (byte)0);
 	}
@@ -207,7 +207,7 @@ public class SymmetricSecretKey extends AbstractKey implements ISecretDecentrali
 				this.keySizeBits = (short) (secretKey.length * 8);
 				break;
 		}
-		this.encryptionType = type;
+		this.encryptionType = type.getDerivedType();
 		this.signatureType=null;
 		hashCode = Arrays.hashCode(this.finalizer.secretKey);
 		Arrays.fill(secretKey, (byte)0);
@@ -217,7 +217,7 @@ public class SymmetricSecretKey extends AbstractKey implements ISecretDecentrali
 		if (type == null)
 			throw new NullPointerException("type");
 		this.encryptionType = null;
-		this.signatureType=type;
+		this.signatureType=type.getDerivedType();
 		//Arrays.fill(secretKey, (byte)0);
 	}
 	SymmetricSecretKey(SymmetricAuthenticatedSignatureType type, byte[] secretKey) {
@@ -229,7 +229,7 @@ public class SymmetricSecretKey extends AbstractKey implements ISecretDecentrali
 		this.finalizer.secretKey=secretKey.clone();
 		this.keySizeBits=(short)(secretKey.length*8);
 		this.encryptionType = null;
-		this.signatureType=type;
+		this.signatureType=type.getDerivedType();
 		hashCode = Arrays.hashCode(this.finalizer.secretKey);
 		Arrays.fill(secretKey, (byte)0);
 	}
@@ -237,7 +237,7 @@ public class SymmetricSecretKey extends AbstractKey implements ISecretDecentrali
 		this(SymmetricEncryptionType.encodeGnuSecretKey(secretKey), keySize);
 		if (type.getCodeProviderForEncryption() != CodeProvider.GNU_CRYPTO)
 			throw new IllegalAccessError();
-		this.encryptionType = type;
+		this.encryptionType = type.getDerivedType();
 		this.signatureType=null;
 		this.finalizer.gnuSecretKey=secretKey;
 	}
@@ -248,7 +248,7 @@ public class SymmetricSecretKey extends AbstractKey implements ISecretDecentrali
 		if (type.getCodeProviderForSignature() != CodeProvider.GNU_CRYPTO)
 			throw new IllegalAccessError();
 		this.encryptionType = null;
-		this.signatureType=type;
+		this.signatureType=type.getDerivedType();
 		this.finalizer.gnuSecretKey=secretKey;
 	}
 
@@ -256,7 +256,7 @@ public class SymmetricSecretKey extends AbstractKey implements ISecretDecentrali
 		this(SymmetricEncryptionType.encodeSecretKey(secretKey), keySize);
 		if (type.getCodeProviderForEncryption() == CodeProvider.GNU_CRYPTO)
 			throw new IllegalAccessError();
-		this.encryptionType = type;
+		this.encryptionType = type.getDerivedType();
 		this.signatureType=null;
 		this.finalizer.javaNativeSecretKey=secretKey;
 	}
@@ -265,7 +265,7 @@ public class SymmetricSecretKey extends AbstractKey implements ISecretDecentrali
 		if (type.getCodeProviderForSignature() == CodeProvider.GNU_CRYPTO)
 			throw new IllegalAccessError();
 		this.encryptionType = null;
-		this.signatureType=type;
+		this.signatureType=type.getDerivedType();
 		this.finalizer.javaNativeSecretKey=secretKey;
 	}
 	
@@ -273,7 +273,7 @@ public class SymmetricSecretKey extends AbstractKey implements ISecretDecentrali
 		this(SymmetricEncryptionType.encodeSecretKey(secretKey), keySize);
 		if (type.getCodeProviderForEncryption() == CodeProvider.GNU_CRYPTO)
 			throw new IllegalAccessError();
-		this.encryptionType = type;
+		this.encryptionType = type.getDerivedType();
 		this.signatureType=null;
 		
 		this.finalizer.bcfipsNativeSecretKey=new com.distrimind.bcfips.crypto.SymmetricSecretKey(getBouncyCastleAlgorithm(), secretKey.getKeyBytes());
@@ -284,7 +284,7 @@ public class SymmetricSecretKey extends AbstractKey implements ISecretDecentrali
 		if (type.getCodeProviderForSignature() == CodeProvider.GNU_CRYPTO)
 			throw new IllegalAccessError();
 		this.encryptionType = null;
-		this.signatureType=type;
+		this.signatureType=type.getDerivedType();
 		this.finalizer.bcfipsNativeSecretKey=new com.distrimind.bcfips.crypto.SymmetricSecretKey(getBouncyCastleAlgorithm(), secretKey.getKeyBytes());
 	}
 

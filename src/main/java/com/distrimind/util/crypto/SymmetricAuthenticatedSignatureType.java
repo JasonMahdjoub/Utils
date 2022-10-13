@@ -83,9 +83,10 @@ public enum SymmetricAuthenticatedSignatureType {
 	private final MessageDigestType messageDigestType;
 	private final AuthParameters messageDigestAuth;
     private final SymmetricAuthenticatedSignatureType replacer;
-
+	private SymmetricAuthenticatedSignatureType derivedType;
 	public final static int MAX_SYMMETRIC_SIGNATURE_SIZE=64;
 	public final static int MAX_SYMMETRIC_KEY_SIZE=32;
+
 
     public boolean equals(SymmetricAuthenticatedSignatureType type)
 	{
@@ -110,6 +111,7 @@ public enum SymmetricAuthenticatedSignatureType {
         this.messageDigestType=messageDigestType;
         this.messageDigestAuth=messageDigestAuth;
         this.replacer=replacer;
+		this.derivedType=this;
     }
 
 	public SymmetricSecretKey generateSecretKeyFromByteArray(WrappedSecretData wrappedSecretData) throws NoSuchProviderException, NoSuchAlgorithmException {
@@ -135,6 +137,7 @@ public enum SymmetricAuthenticatedSignatureType {
 	SymmetricAuthenticatedSignatureType(SymmetricAuthenticatedSignatureType other) {
 		
 		this(other.algorithmName, other.codeProviderForSignature, other.codeProviderForKeyGenerator, other.keySizeBits, other.keySizeBytes, other.messageDigestType, other.messageDigestAuth, other.replacer);
+		this.derivedType=other;
 	}
 
 	public int getSignatureSizeInBits()
@@ -256,5 +259,9 @@ public enum SymmetricAuthenticatedSignatureType {
 	@SuppressWarnings("resource")
 	public static void main(String []args) throws NoSuchProviderException, NoSuchAlgorithmException, IOException {
 		System.out.println(ASymmetricAuthenticatedSignatureType.BC_FIPS_Ed25519.getKeyPairGenerator(SecureRandomType.DEFAULT.getSingleton(null) ).generateKeyPair().getASymmetricPublicKey());
+	}
+
+	public SymmetricAuthenticatedSignatureType getDerivedType() {
+		return derivedType;
 	}
 }

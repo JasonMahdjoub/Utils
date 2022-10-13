@@ -62,7 +62,7 @@ public final class BCMac extends AbstractMac {
 
 	BCMac(SymmetricAuthenticatedSignatureType type)
 	{
-		this.type=type;
+		this.type=type.getDerivedType();
 
 	}
 	

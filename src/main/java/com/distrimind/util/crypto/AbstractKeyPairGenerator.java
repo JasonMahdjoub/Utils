@@ -48,12 +48,12 @@ public abstract class AbstractKeyPairGenerator {
 	protected final ASymmetricAuthenticatedSignatureType signatureType;
 
 	AbstractKeyPairGenerator(ASymmetricEncryptionType type) {
-		this.encryptionType = type;
+		this.encryptionType = type.getDerivedType();
 		this.signatureType=null;
 	}
 	AbstractKeyPairGenerator(ASymmetricAuthenticatedSignatureType type) {
 		this.encryptionType = null;
-		this.signatureType=type;
+		this.signatureType=type.getDerivedType();
 	}
 
 	/**

@@ -107,6 +107,7 @@ public enum ASymmetricKeyWrapperType {
 	private final FipsDigestAlgorithm bcShaDigestAlgorithm;
 	private final boolean pqc;
 	private final ASymmetricKeyWrapperType nonPQCWrapper, pqcWrapper;
+	private final ASymmetricKeyWrapperType derivedType;
 
 	public boolean equals(ASymmetricKeyWrapperType type)
 	{
@@ -122,8 +123,9 @@ public enum ASymmetricKeyWrapperType {
 		this.shaAlgorithm="";
 		this.bcShaDigestAlgorithm=null;
 		this.pqc=true;
-		this.nonPQCWrapper=nonPQCWrapper;
-		this.pqcWrapper=pqcWrapper;
+		this.nonPQCWrapper=nonPQCWrapper.derivedType;
+		this.pqcWrapper=pqcWrapper.derivedType;
+		this.derivedType= this;
 	}
 
 	ASymmetricKeyWrapperType(String algorithmName, CodeProvider provider, boolean withParameters, String shaAlgorithm, FipsDigestAlgorithm bcShaDigestAlgorithm, boolean pqc) {
@@ -135,6 +137,7 @@ public enum ASymmetricKeyWrapperType {
 		this.pqc=pqc;
 		this.nonPQCWrapper=null;
 		this.pqcWrapper=null;
+		this.derivedType=this;
 	}
 	
 	ASymmetricKeyWrapperType(ASymmetricKeyWrapperType other)
@@ -147,6 +150,7 @@ public enum ASymmetricKeyWrapperType {
 		this.pqc=other.pqc;
 		this.nonPQCWrapper=other.nonPQCWrapper;
 		this.pqcWrapper=other.pqcWrapper;
+		this.derivedType=other;
 	}
 	public boolean isHybrid()
 	{
@@ -560,6 +564,9 @@ public enum ASymmetricKeyWrapperType {
 			return wrapedKey.length+2+SymmetricSecretKey.ENCODED_TYPE_SIZE;
 	}
 
+	public ASymmetricKeyWrapperType getDerivedType() {
+		return derivedType;
+	}
 
 	public static final int MAX_SIZE_IN_BYTES_OF_WRAPPED_SYMMETRIC_SECRET_KEY_WITH_ASYMMETRIC_NON_PQC_ENCRYPTION =768;
 	public static final int MAX_SIZE_IN_BYTES_OF_WRAPPED_SYMMETRIC_SECRET_KEY_WITH_ASYMMETRIC_PQC_ENCRYPTION =512;

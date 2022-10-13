@@ -40,9 +40,6 @@ import com.distrimind.bcfips.crypto.asymmetric.AsymmetricXDHPrivateKey;
 import com.distrimind.bcfips.crypto.asymmetric.AsymmetricXDHPublicKey;
 import com.distrimind.bcfips.crypto.fips.FipsRSA;
 import com.distrimind.bcfips.crypto.general.EdEC;
-import com.distrimind.bouncycastle.pqc.crypto.crystals.kyber.KyberKeyGenerationParameters;
-import com.distrimind.bouncycastle.pqc.crypto.crystals.kyber.KyberKeyPairGenerator;
-import com.distrimind.bouncycastle.pqc.crypto.crystals.kyber.KyberParameters;
 import com.distrimind.bouncycastle.pqc.jcajce.provider.sphincs.Sphincs256KeyFactorySpi;
 import com.distrimind.bouncycastle.pqc.jcajce.provider.sphincsplus.SPHINCSPlusKeyFactorySpi;
 import com.distrimind.util.UtilClassLoader;
@@ -363,6 +360,7 @@ public enum ASymmetricEncryptionType {
 	private final Algorithm bcAlgorithm;
 
 	private final boolean pqc;
+	private ASymmetricEncryptionType derivedType;
 
 	public boolean equals(ASymmetricEncryptionType type)
 	{
@@ -377,6 +375,7 @@ public enum ASymmetricEncryptionType {
 	ASymmetricEncryptionType(ASymmetricEncryptionType type) {
 		this(type.algorithmName, type.blockMode, type.padding, type.signature, type.keySizeBits, type.expirationTimeMilis,
 				type.blockSizeDecrement, type.codeProviderForEncryption, type.codeProviderForKeyGenerator, type.bcAlgorithm, type.pqc);
+		this.derivedType=type;
 	}
 
 	ASymmetricEncryptionType(String algorithmName, String blockMode, String padding,
@@ -393,6 +392,7 @@ public enum ASymmetricEncryptionType {
 		this.expirationTimeMilis = expirationTimeMilis;
 		this.bcAlgorithm=bcAlgorithm;
 		this.pqc=pqc;
+		this.derivedType=this;
 	}
 
 	public String getAlgorithmName() {
@@ -543,5 +543,9 @@ public enum ASymmetricEncryptionType {
 
 	public boolean isPostQuantumAlgorithm() {
 		return pqc;
+	}
+
+	public ASymmetricEncryptionType getDerivedType() {
+		return derivedType;
 	}
 }

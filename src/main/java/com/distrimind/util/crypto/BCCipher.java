@@ -84,7 +84,7 @@ public class BCCipher extends AbstractCipher {
 	BCCipher(SymmetricEncryptionType type)
 	{
 		super();
-		this.type=type;
+		this.type=type.getDerivedType();
 		this.keyWrapperType=null;
 	}
 	
@@ -92,7 +92,7 @@ public class BCCipher extends AbstractCipher {
 	{
 		super();
 		this.type=null;
-		this.keyWrapperType=keyWrapperType;
+		this.keyWrapperType=keyWrapperType.getDerivedType();
 	}
 	
 	@Override

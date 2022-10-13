@@ -50,12 +50,12 @@ public abstract class AbstractKeyGenerator {
 	protected final SymmetricAuthenticatedSignatureType signatureType;
 
 	AbstractKeyGenerator(SymmetricEncryptionType type) {
-		this.encryptionType = type;
+		this.encryptionType = type.getDerivedType();
 		this.signatureType = null;
 	}
 	AbstractKeyGenerator(SymmetricAuthenticatedSignatureType type) {
 		this.encryptionType = null;
-		this.signatureType = type;
+		this.signatureType = type.getDerivedType();
 	}
 
 	/**

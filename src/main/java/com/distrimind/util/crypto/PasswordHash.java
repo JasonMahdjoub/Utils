@@ -88,7 +88,7 @@ public class PasswordHash {
 		if (cost<4 || cost>31)
 			throw new IllegalArgumentException("cost must be greater or equals than 4 and lower or equals than 31");
 
-		this.type = type;
+		this.type = type.getDerivedType();
 		this.random = random;
 		this.cost = cost;
 		this.saltSize = saltSize;

@@ -133,7 +133,7 @@ public class ASymmetricKeyPair extends AbstractKeyPair<ASymmetricPrivateKey, ASy
 		this.finalizer.privateKey = privateKey;
 		this.finalizer.publicKey = publicKey;
 		this.keySizeBits = keySize;
-		this.encryptionType = type;
+		this.encryptionType = type.getDerivedType();
 		this.signatureType=null;
 
 		hashCode = privateKey.hashCode() + publicKey.hashCode();
@@ -152,7 +152,7 @@ public class ASymmetricKeyPair extends AbstractKeyPair<ASymmetricPrivateKey, ASy
 		this.finalizer.privateKey = privateKey;
 		this.finalizer.publicKey = publicKey;
 		this.keySizeBits = publicKey.getKeySizeBits();
-		this.encryptionType = publicKey.getEncryptionAlgorithmType();
+		this.encryptionType = publicKey.getEncryptionAlgorithmType().getDerivedType();
 		this.signatureType=privateKey.getAuthenticatedSignatureAlgorithmType();
 
 		hashCode = privateKey.hashCode() + publicKey.hashCode();
@@ -176,7 +176,7 @@ public class ASymmetricKeyPair extends AbstractKeyPair<ASymmetricPrivateKey, ASy
 		finalizer.privateKey = new ASymmetricPrivateKey(type, GnuFunctions.getPrivateKey(keyPair), keySize);
 		finalizer.publicKey = new ASymmetricPublicKey(type, GnuFunctions.getPublicKey(keyPair), keySize, publicKeyValidityBeginDateUTC, expirationUTC);
 		this.keySizeBits = keySize;
-		this.encryptionType = type;
+		this.encryptionType = type.getDerivedType();
 		this.signatureType=null;
 
 		hashCode = finalizer.privateKey.hashCode() + finalizer.publicKey.hashCode();
@@ -194,7 +194,7 @@ public class ASymmetricKeyPair extends AbstractKeyPair<ASymmetricPrivateKey, ASy
 		finalizer.privateKey = new ASymmetricPrivateKey(type, keyPair.getPrivate(), keySize);
 		finalizer.publicKey = new ASymmetricPublicKey(type, keyPair.getPublic(), keySize, publicKeyValidityBeginDateUTC, expirationUTC);
 		this.keySizeBits = keySize;
-		this.encryptionType = type;
+		this.encryptionType = type.getDerivedType();
 		this.signatureType=null;
 
 		hashCode = finalizer.privateKey.hashCode() + finalizer.publicKey.hashCode();
@@ -216,7 +216,7 @@ public class ASymmetricKeyPair extends AbstractKeyPair<ASymmetricPrivateKey, ASy
 		this.finalizer.publicKey = publicKey;
 		this.keySizeBits = keySize;
 		this.encryptionType = null;
-		this.signatureType=type;
+		this.signatureType=type.getDerivedType();
 
 		hashCode = privateKey.hashCode() + publicKey.hashCode();
 	}
@@ -234,7 +234,7 @@ public class ASymmetricKeyPair extends AbstractKeyPair<ASymmetricPrivateKey, ASy
 		finalizer.publicKey = new ASymmetricPublicKey(type, GnuFunctions.getPublicKey(keyPair), keySize, publicKeyValidityBeginDateUTC, expirationUTC);
 		this.keySizeBits = keySize;
 		this.encryptionType = null;
-		this.signatureType=type;
+		this.signatureType=type.getDerivedType();
 
 		hashCode = finalizer.privateKey.hashCode() + finalizer.publicKey.hashCode();
 		this.finalizer.gnuKeyPair=keyPair;
@@ -252,7 +252,7 @@ public class ASymmetricKeyPair extends AbstractKeyPair<ASymmetricPrivateKey, ASy
 		finalizer.publicKey = new ASymmetricPublicKey(type, keyPair.getPublic(), keySize, publicKeyValidityBeginDateUTC, expirationUTC, xdhKey);
 		this.keySizeBits = keySize;
 		this.encryptionType = null;
-		this.signatureType=type;
+		this.signatureType=type.getDerivedType();
 
 		hashCode = finalizer.privateKey.hashCode() + finalizer.publicKey.hashCode();
 		this.finalizer.nativeKeyPair=keyPair;

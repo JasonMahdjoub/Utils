@@ -152,7 +152,7 @@ public class ASymmetricPrivateKey extends AbstractKey implements IASymmetricPriv
 		this(privateKey, keySize);
 		if (type == null)
 			throw new NullPointerException("type");
-		this.encryptionType = type;
+		this.encryptionType = type.getDerivedType();
 		this.signatureType=null;
 	}
 	ASymmetricPrivateKey(ASymmetricAuthenticatedSignatureType type, byte[] privateKey, int keySize) {
@@ -160,14 +160,14 @@ public class ASymmetricPrivateKey extends AbstractKey implements IASymmetricPriv
 		if (type == null)
 			throw new NullPointerException("type");
 		this.encryptionType = null;
-		this.signatureType=type;
+		this.signatureType=type.getDerivedType();
 	}
 
 	ASymmetricPrivateKey(ASymmetricEncryptionType type, Object privateKey, int keySize) {
 		this(privateKey, keySize);
 		if (type == null)
 			throw new NullPointerException("type");
-		this.encryptionType = type;
+		this.encryptionType = type.getDerivedType();
 		this.signatureType=null;
 		
 	}
@@ -176,7 +176,7 @@ public class ASymmetricPrivateKey extends AbstractKey implements IASymmetricPriv
 		if (type == null)
 			throw new NullPointerException("type");
 		this.encryptionType = null;
-		this.signatureType=type;
+		this.signatureType=type.getDerivedType();
 	}
 
 	ASymmetricPrivateKey(ASymmetricEncryptionType type, PrivateKey privateKey, int keySize) {
@@ -185,7 +185,7 @@ public class ASymmetricPrivateKey extends AbstractKey implements IASymmetricPriv
 			throw new NullPointerException("type");
 		if (type.getCodeProviderForEncryption() == CodeProvider.GNU_CRYPTO)
 			throw new IllegalAccessError();
-		this.encryptionType = type;
+		this.encryptionType = type.getDerivedType();
 		this.signatureType=null;
 	}
 	ASymmetricPrivateKey(ASymmetricEncryptionType type, AsymmetricPrivateKey privateKey, int keySize) {
@@ -194,7 +194,7 @@ public class ASymmetricPrivateKey extends AbstractKey implements IASymmetricPriv
 			throw new NullPointerException("type");
 		if (type.getCodeProviderForEncryption() == CodeProvider.GNU_CRYPTO)
 			throw new IllegalAccessError();
-		this.encryptionType = type;
+		this.encryptionType = type.getDerivedType();
 		this.signatureType=null;
 		this.finalizer.bouncyCastlePrivateKey=privateKey;
 	}
@@ -205,7 +205,7 @@ public class ASymmetricPrivateKey extends AbstractKey implements IASymmetricPriv
 		if (type.getCodeProviderForSignature() == CodeProvider.GNU_CRYPTO)
 			throw new IllegalAccessError();
 		this.encryptionType = null;
-		this.signatureType=type;
+		this.signatureType=type.getDerivedType();
 		this.xdhKey=xdhKey;
 	}
 

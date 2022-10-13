@@ -67,6 +67,7 @@ public enum SymmetricKeyWrapperType {
 	private final String algorithmName;
 	private final CodeProvider provider;
 	private final SymmetricEncryptionType symmetricEncryptionType;
+	private SymmetricKeyWrapperType derivedType;
 
 	public boolean equals(SymmetricKeyWrapperType type)
 	{
@@ -81,12 +82,14 @@ public enum SymmetricKeyWrapperType {
 		this.algorithmName = algorithmName;
 		this.provider = provider;
 		this.symmetricEncryptionType=symmetricEncryptionType;
+		this.derivedType=this;
 	}
 
 
 	SymmetricKeyWrapperType(SymmetricKeyWrapperType other)
 	{
 		this(other.algorithmName, other.provider, other.symmetricEncryptionType);
+		this.derivedType=other;
 	}
 
 	public SymmetricEncryptionType getSymmetricEncryptionType() {
@@ -401,5 +404,7 @@ public enum SymmetricKeyWrapperType {
 		}
 	}
 
-
+	public SymmetricKeyWrapperType getDerivedType() {
+		return derivedType;
+	}
 }

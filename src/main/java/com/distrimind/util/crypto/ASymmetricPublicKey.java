@@ -152,7 +152,7 @@ public class ASymmetricPublicKey extends AbstractKey implements IASymmetricPubli
 		this(publicKey, keySize, publicKeyValidityBeginDateUTC, expirationUTC);
 		if (type == null)
 			throw new NullPointerException("type");
-		this.encryptionType = type;
+		this.encryptionType = type.getDerivedType();
 		this.signatureType=null;
 	}
 	ASymmetricPublicKey(ASymmetricAuthenticatedSignatureType type, byte[] publicKey, int keySize, long publicKeyValidityBeginDateUTC, long expirationUTC) {
@@ -160,7 +160,7 @@ public class ASymmetricPublicKey extends AbstractKey implements IASymmetricPubli
 		if (type == null)
 			throw new NullPointerException("type");
 		this.encryptionType = null;
-		this.signatureType=type;
+		this.signatureType=type.getDerivedType();
 	}
 
 	ASymmetricPublicKey(ASymmetricEncryptionType type, Object publicKey, int keySize,
@@ -169,7 +169,7 @@ public class ASymmetricPublicKey extends AbstractKey implements IASymmetricPubli
 		if (type == null)
 			throw new NullPointerException("type");
 
-		this.encryptionType = type;
+		this.encryptionType = type.getDerivedType();
 		this.signatureType=null;
 	}
 	ASymmetricPublicKey(ASymmetricAuthenticatedSignatureType type, Object publicKey, int keySize,
@@ -179,7 +179,7 @@ public class ASymmetricPublicKey extends AbstractKey implements IASymmetricPubli
 			throw new NullPointerException("type");
 
 		this.encryptionType = null;
-		this.signatureType=type;
+		this.signatureType=type.getDerivedType();
 
 	}
 
@@ -190,7 +190,7 @@ public class ASymmetricPublicKey extends AbstractKey implements IASymmetricPubli
 		if (type.getCodeProviderForEncryption() == CodeProvider.GNU_CRYPTO)
 			throw new IllegalAccessError();
 
-		this.encryptionType = type;
+		this.encryptionType = type.getDerivedType();
 		this.signatureType=null;
 	}
 	ASymmetricPublicKey(ASymmetricEncryptionType type, AsymmetricPublicKey publicKey, int keySize, long publicKeyValidityBeginDateUTC, long expirationUTC) {
@@ -200,7 +200,7 @@ public class ASymmetricPublicKey extends AbstractKey implements IASymmetricPubli
 		if (type.getCodeProviderForEncryption() == CodeProvider.GNU_CRYPTO)
 			throw new IllegalAccessError();
 
-		this.encryptionType = type;
+		this.encryptionType = type.getDerivedType();
 		this.signatureType=null;
 		this.bouncyCastlePublicKey=publicKey;
 	}
@@ -212,7 +212,7 @@ public class ASymmetricPublicKey extends AbstractKey implements IASymmetricPubli
 			throw new IllegalAccessError();
 
 		this.encryptionType = null;
-		this.signatureType=type;
+		this.signatureType=type.getDerivedType();
 		this.xdhKey=xdhKey;
 	}
 	private ASymmetricPublicKey(byte[] publicKey, int keySize, long publicKeyValidityBeginDateUTC, long expirationUTC) {

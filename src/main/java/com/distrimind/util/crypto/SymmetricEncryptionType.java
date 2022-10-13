@@ -228,6 +228,7 @@ public enum SymmetricEncryptionType {
 	private final short ivLengthBytes;
 	private long maxIVGenerationWithOneSecretKey;
 	private final int additionalBytesWhenKeyEncoded;
+	private SymmetricEncryptionType derivedType;
 	static final boolean invalidOSForChaCha =(OSVersion.getCurrentOSVersion().getOS()!=OS.ANDROID && OS.getCurrentJREVersionByte()<11) || (OSVersion.getCurrentOSVersion().getOS()==OS.ANDROID && OSVersion.getCurrentOSVersion().compareTo(OSVersion.ANDROID_28_P)<0);
 
 
@@ -292,12 +293,14 @@ public enum SymmetricEncryptionType {
 		this.ivLengthBytes = ivLengthBytes;
 		this.maxIVGenerationWithOneSecretKey=maxIVGenerationWithOneSecretKey;
 		this.additionalBytesWhenKeyEncoded =algorithmName.toLowerCase().startsWith("desede")?3:(algorithmName.toLowerCase().startsWith("des")?1:0);
+		this.derivedType=this;
 	}
 
 	SymmetricEncryptionType(SymmetricEncryptionType type) {
 		this(type.algorithmName, type.blockMode, type.padding, type.keySizeBits, type.keySizeBytes, type.codeProviderForEncryption, type.codeProviderForKeyGenerator,
 				type.defaultSignature, type.bcAlgorithm, type.blockSizeBits, type.authenticated, type.encodingSpeedIndexJava7, type.decodingSpeedIndexJava7, type.encodingSpeedIndexJava8, type.decodingSpeedIndexJava8, type.encodingSpeedIndexJava9, type.decodingSpeedIndexJava9,
 				type.timingAttackPossible, type.cacheAttackPossible, type.powerMonitoringAttackPossible, type.electromagneticAttackPossible, type.acousticAttackPossible, type.dfaAttackPossible, type.frequencyAttackPossible, type.ivLengthBytes, type.maxIVGenerationWithOneSecretKey);
+		derivedType=type;
 	}
 
 	public String getAlgorithmName() {
@@ -574,4 +577,7 @@ public enum SymmetricEncryptionType {
 			return SymmetricKeyWrapperType.CLASSIC_ENCRYPTION;
 	}
 
+	public SymmetricEncryptionType getDerivedType() {
+		return derivedType;
+	}
 }

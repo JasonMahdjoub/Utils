@@ -34,13 +34,12 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
-import com.distrimind.util.Bits;
-import com.distrimind.util.OS;
-import com.distrimind.util.OSVersion;
-import com.distrimind.util.io.RandomFileInputStream;
 import com.distrimind.bcfips.crypto.EntropySourceProvider;
 import com.distrimind.bcfips.crypto.fips.FipsDRBG;
 import com.distrimind.bcfips.crypto.util.BasicEntropySourceProvider;
+import com.distrimind.util.OS;
+import com.distrimind.util.OSVersion;
+import com.distrimind.util.io.RandomFileInputStream;
 
 import java.io.File;
 import java.io.IOException;
@@ -84,6 +83,7 @@ public enum SecureRandomType {
 	private final boolean needInitialSeed;
 	
 	private static final Map<SecureRandomType, AbstractSecureRandom> singletons=Collections.synchronizedMap(new HashMap<>());
+	private SecureRandomType derivedType;
 
 	public boolean equals(SecureRandomType type)
 	{
@@ -95,6 +95,7 @@ public enum SecureRandomType {
 
 	SecureRandomType(SecureRandomType type) {
 		this(type.algorithmName, type.provider, type.gnuVersion, type.needInitialSeed);
+		this.derivedType=type;
 	}
 	
 	boolean needInitialSeed()
@@ -107,6 +108,7 @@ public enum SecureRandomType {
 		this.provider = provider;
 		this.gnuVersion = gnuVersion;
 		this.needInitialSeed=needInitialSeed;
+		this.derivedType=this;
 	}
 	
 	public String getAlgorithmName()
@@ -532,7 +534,7 @@ public enum SecureRandomType {
 		}
 	}
 
-
-
-	
+	public SecureRandomType getDerivedType() {
+		return derivedType;
+	}
 }

@@ -93,6 +93,7 @@ public enum EllipticCurveDiffieHellmanType {
 	private final FipsDigestAlgorithm fipsDigestAlgorithm;
 	private final FipsKDF.AgreementKDFPRF agreementKDFPRF;
 	private final boolean useKDF;
+	private EllipticCurveDiffieHellmanType derivedType;
 
 	
 	public boolean equals(EllipticCurveDiffieHellmanType t)
@@ -114,7 +115,7 @@ public enum EllipticCurveDiffieHellmanType {
 		this.fipsDigestAlgorithm=fipsDigestAlgorithm;
 		this.agreementKDFPRF=agreementKDFPRF;
 		this.useKDF=useKDF;
-		
+		this.derivedType=this;
 	}
 	
 	public ASymmetricAuthenticatedSignatureType getASymmetricAuthenticatedSignatureType()
@@ -124,6 +125,7 @@ public enum EllipticCurveDiffieHellmanType {
 
 	EllipticCurveDiffieHellmanType(EllipticCurveDiffieHellmanType other) {
 		this(other.keySizeBits, other.ECDHKeySizeBits, other.codeProvider, other.aSymmetricAuthenticatedSignatureType, other.keyAgreementName, other.fipsDigestAlgorithm, other.agreementKDFPRF, other.useKDF);
+		this.derivedType=other;
 	}
 
 	public String getKeyAgreementAlgorithmName()
@@ -197,5 +199,8 @@ public enum EllipticCurveDiffieHellmanType {
 	{
 		return false;
 	}
-	
+
+	public EllipticCurveDiffieHellmanType getDerivedType() {
+		return derivedType;
+	}
 }

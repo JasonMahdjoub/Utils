@@ -37,9 +37,7 @@ package com.distrimind.util.crypto;
 import com.distrimind.bcfips.crypto.Algorithm;
 import com.distrimind.bcfips.crypto.fips.FipsEC;
 import com.distrimind.bcfips.crypto.fips.FipsRSA;
-import com.distrimind.bouncycastle.pqc.crypto.sphincsplus.SPHINCSPlusKeyPairGenerator;
 import com.distrimind.bouncycastle.pqc.jcajce.provider.sphincs.Sphincs256KeyPairGeneratorSpi;
-import com.distrimind.bouncycastle.pqc.jcajce.provider.sphincsplus.SPHINCSPlusKeyFactorySpi;
 import com.distrimind.bouncycastle.pqc.jcajce.provider.sphincsplus.SPHINCSPlusKeyPairGeneratorSpi;
 
 import java.io.IOException;
@@ -95,6 +93,7 @@ public enum ASymmetricAuthenticatedSignatureType {
 	private final boolean isPostQuantumAlgorithm;
 
 	private final String curveName;
+	private ASymmetricAuthenticatedSignatureType derivedType;
 
 	static final int META_DATA_SIZE_IN_BYTES_NON_HYBRID_PUBLIC_KEY=24;
 	public static final int MAX_SIZE_IN_BYTES_OF_NON_PQC_NON_RSA_NON_HYBRID_PUBLIC_KEY_FOR_SIGNATURE =140+META_DATA_SIZE_IN_BYTES_NON_HYBRID_PUBLIC_KEY;
@@ -173,11 +172,12 @@ public enum ASymmetricAuthenticatedSignatureType {
 		this.bcAlgorithm=bcAlgorithm;
 		this.isPostQuantumAlgorithm=isPostQuantumAlgorithm;
 		this.curveName=curveName;
-		
+		this.derivedType=this;
 	}
 
 	ASymmetricAuthenticatedSignatureType(ASymmetricAuthenticatedSignatureType other) {
 		this(other.signatureAlgorithmName, other.keyGeneratorAlgorithmName, other.codeProviderSignature, other.codeProviderKeyGenerator, other.keySizeBits, other.expirationTimeMilis, other.bcAlgorithm, other.isPostQuantumAlgorithm, other.curveName);
+		this.derivedType=other;
 	}
 
 	public String getCurveName() {
@@ -370,4 +370,7 @@ public enum ASymmetricAuthenticatedSignatureType {
 		return isPostQuantumAlgorithm;
 	}
 
+	public ASymmetricAuthenticatedSignatureType getDerivedType() {
+		return derivedType;
+	}
 }

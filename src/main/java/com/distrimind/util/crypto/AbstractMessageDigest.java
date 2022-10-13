@@ -53,7 +53,7 @@ public abstract class AbstractMessageDigest implements Cloneable {
 	protected AbstractMessageDigest(MessageDigestType messageDigestType) {
 		if (messageDigestType==null)
 			throw new NullPointerException();
-		this.messageDigestType = messageDigestType;
+		this.messageDigestType = messageDigestType.getDerivedType();
 	}
 
 	/**

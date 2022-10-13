@@ -89,7 +89,7 @@ public class BCMcElieceCipher extends AbstractCipher{
 		super();
 		if (encryptionType==null)
 			throw new NullPointerException();
-		this.encryptionType = encryptionType;
+		this.encryptionType = encryptionType.getDerivedType();
 		if (!this.encryptionType.name().startsWith("BCPQC_MCELIECE_"))
 			throw new IllegalArgumentException();
 		cca2=this.encryptionType.name().contains("CCA2");

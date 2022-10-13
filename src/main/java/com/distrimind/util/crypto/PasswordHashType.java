@@ -89,7 +89,6 @@ public enum PasswordHashType {
 	
 	private final byte hashLength;
 
-	private PasswordHashType defaultOf;
 
 	private final String algorithmName;
 	
@@ -98,6 +97,7 @@ public enum PasswordHashType {
 	private final FipsDigestAlgorithm fipsDigestAlgorithm;
 	
 	private final byte id;
+	private PasswordHashType derivedType;
 
 	public boolean equals(PasswordHashType type)
 	{
@@ -109,12 +109,12 @@ public enum PasswordHashType {
 
 	PasswordHashType(PasswordHashType type) {
 		this(type.algorithmName, type.hashLength, type.codeProvider, type.fipsDigestAlgorithm, type.id);
-		this.defaultOf = type;
+		this.derivedType = type;
 	}
 
 	PasswordHashType(String algorithmName, byte hashLength, CodeProvider codeProvider, FipsDigestAlgorithm fipsDigestAlgorithm, byte id) {
 		this.hashLength = hashLength;
-		this.defaultOf = null;
+		this.derivedType = this;
 		this.algorithmName = algorithmName;
 		this.codeProvider=codeProvider;
 		this.fipsDigestAlgorithm=fipsDigestAlgorithm;
@@ -145,8 +145,8 @@ public enum PasswordHashType {
 			if (cost < 4 || cost > 31)
 				throw new IllegalArgumentException("cost must be greater or equals than 4 and lower or equals than 31");
 
-			if (defaultOf != null)
-				return defaultOf.hash(data, off, len, salt, cost, hashLength);
+			if (derivedType != this)
+				return derivedType.hash(data, off, len, salt, cost, hashLength);
 
 			if (OSVersion.getCurrentOSVersion() != null && OSVersion.getCurrentOSVersion().getOS() == OS.MAC_OS_X) {
 				if (this == PBKDF2WithHMacSHA2_256)
@@ -255,8 +255,8 @@ public enum PasswordHashType {
 			if (cost < 4 || cost > 31)
 				throw new IllegalArgumentException("cost must be greater or equals than 4 and lower or equals than 31");
 
-			if (defaultOf != null)
-				return defaultOf.hash(password, salt, cost, hashLength);
+			if (derivedType != this)
+				return derivedType.hash(password, salt, cost, hashLength);
 			if (OSVersion.getCurrentOSVersion() != null && OSVersion.getCurrentOSVersion().getOS() == OS.MAC_OS_X) {
 				if (this == PBKDF2WithHMacSHA2_256)
 					return PasswordHashType.BC_FIPS_PBKFD2WithHMacSHA2_256.hash(password, salt, cost, hashLength);
@@ -388,5 +388,9 @@ public enum PasswordHashType {
 		if (size>Byte.MAX_VALUE)
 			throw new IllegalArgumentException();
 		return (byte)size;
+	}
+
+	public PasswordHashType getDerivedType() {
+		return derivedType;
 	}
 }

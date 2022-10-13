@@ -97,6 +97,8 @@ public enum MessageDigestType {
 
 	public static final int MAX_HASH_LENGTH_IN_BYTES =64;
 
+	private MessageDigestType derivedType;
+
 	public boolean equals(MessageDigestType type)
 	{
 		if (type==null)
@@ -107,6 +109,7 @@ public enum MessageDigestType {
 
 	MessageDigestType(MessageDigestType type) {
 		this(type.algorithmName, type.codeProvider, type.digestLengthBits, type.isSecuredForSignature, type.replacer);
+		this.derivedType=type;
 	}
 
 	MessageDigestType(String algorithmName, CodeProvider codeProvider, int digestLengthBits, boolean isSecuredForSignature) {
@@ -119,6 +122,7 @@ public enum MessageDigestType {
 		this.digestLengthBits=digestLengthBits;
 		this.isSecuredForSignature=isSecuredForSignature;
 		this.replacer=replacer;
+		this.derivedType=this;
 	}
 
 	public String getAlgorithmName() {
@@ -158,5 +162,9 @@ public enum MessageDigestType {
 
 	public boolean isSecuredForSignature() {
 		return isSecuredForSignature;
+	}
+
+	public MessageDigestType getDerivedType() {
+		return derivedType;
 	}
 }

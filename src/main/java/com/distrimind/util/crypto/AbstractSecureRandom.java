@@ -124,14 +124,14 @@ public abstract class AbstractSecureRandom extends SecureRandom {
 	private static Provider getProvider(SecureRandomType type)
 	{
 		try {
-			return type!=null?type.getProvider().getCompatibleProvider():null;
+			return type!=null?type.getDerivedType().getProvider().getCompatibleProvider():null;
 		} catch (NoSuchProviderException ignored) {
 			return null;
 		}
 	}
 	AbstractSecureRandom(AbstractSecureRandomSpi secureRandomSpi, SecureRandomType type) {
 		super(secureRandomSpi, getProvider(type));
-		this.type = type;
+		this.type = type.getDerivedType();
 		this.secureRandomSpi=secureRandomSpi;
 	}
 
