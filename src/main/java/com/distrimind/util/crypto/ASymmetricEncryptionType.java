@@ -34,17 +34,20 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
-import com.distrimind.bouncycastle.pqc.jcajce.provider.sphincsplus.SPHINCSPlusKeyFactorySpi;
-import com.distrimind.util.UtilClassLoader;
-import com.distrimind.util.io.Integrity;
-import com.distrimind.util.io.MessageExternalizationException;
 import com.distrimind.bcfips.crypto.Algorithm;
 import com.distrimind.bcfips.crypto.asymmetric.AsymmetricEdDSAPublicKey;
 import com.distrimind.bcfips.crypto.asymmetric.AsymmetricXDHPrivateKey;
 import com.distrimind.bcfips.crypto.asymmetric.AsymmetricXDHPublicKey;
 import com.distrimind.bcfips.crypto.fips.FipsRSA;
 import com.distrimind.bcfips.crypto.general.EdEC;
+import com.distrimind.bouncycastle.pqc.crypto.crystals.kyber.KyberKeyGenerationParameters;
+import com.distrimind.bouncycastle.pqc.crypto.crystals.kyber.KyberKeyPairGenerator;
+import com.distrimind.bouncycastle.pqc.crypto.crystals.kyber.KyberParameters;
 import com.distrimind.bouncycastle.pqc.jcajce.provider.sphincs.Sphincs256KeyFactorySpi;
+import com.distrimind.bouncycastle.pqc.jcajce.provider.sphincsplus.SPHINCSPlusKeyFactorySpi;
+import com.distrimind.util.UtilClassLoader;
+import com.distrimind.util.io.Integrity;
+import com.distrimind.util.io.MessageExternalizationException;
 
 import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
@@ -77,10 +80,10 @@ public enum ASymmetricEncryptionType {
 	/*BCPQC_MCELIECE_SHA256("McEliece", "ECB", "NoPadding", null, (short)2048, 31536000000L, (short)0, CodeProvider.BCPQC, CodeProvider.BCPQC, null, true),
 	BCPQC_MCELIECE_SHA384("McEliece", "ECB", "NoPadding", null, (short)2048, 31536000000L, (short)0, CodeProvider.BCPQC, CodeProvider.BCPQC, null, true),
 	BCPQC_MCELIECE_SHA512("McEliece", "ECB", "NoPadding", null, (short)2048, 31536000000L, (short)0, CodeProvider.BCPQC, CodeProvider.BCPQC, null, true),*/
-	BCPQC_MCELIECE_FUJISAKI_CCA2_SHA256("McElieceFujisaki", "ECB", "NoPadding", ASymmetricAuthenticatedSignatureType.BCPQC_SPHINCS256_SHA3_512, 1048576, 31536000000L, (short)0, CodeProvider.BCPQC, CodeProvider.BCPQC, null, true),
+	BCPQC_MCELIECE_FUJISAKI_CCA2_SHA256("McElieceFujisaki", "ECB", "NoPadding", ASymmetricAuthenticatedSignatureType.BCPQC_SPHINCS_PLUS_SHA256_FAST, 1048576, 31536000000L, (short)0, CodeProvider.BCPQC, CodeProvider.BCPQC, null, true),
 	//BCPQC_MCELIECE_FUJISAKI_CCA2_SHA384("McElieceFujisaki", "ECB", "NoPadding", null, 1048576, 31536000000L, (short)0, CodeProvider.BCPQC, CodeProvider.BCPQC, null, true),
 	//BCPQC_MCELIECE_FUJISAKI_CCA2_SHA512("McElieceFujisaki", "ECB", "NoPadding", null, 1048576, 31536000000L, (short)0, CodeProvider.BCPQC, CodeProvider.BCPQC, null, true),
-	BCPQC_MCELIECE_POINTCHEVAL_CCA2_SHA256("McEliecePointCheval", "ECB", "NoPadding", ASymmetricAuthenticatedSignatureType.BCPQC_SPHINCS256_SHA3_512, 1048576, 31536000000L, (short)0, CodeProvider.BCPQC, CodeProvider.BCPQC, null, true),
+	BCPQC_MCELIECE_POINTCHEVAL_CCA2_SHA256("McEliecePointCheval", "ECB", "NoPadding", ASymmetricAuthenticatedSignatureType.BCPQC_SPHINCS_PLUS_SHA256_FAST, 1048576, 31536000000L, (short)0, CodeProvider.BCPQC, CodeProvider.BCPQC, null, true),
 	//BCPQC_MCELIECE_POINTCHEVAL_CCA2_SHA384("McEliecePointCheval", "ECB", "NoPadding", null, 1048576, 31536000000L, (short)0, CodeProvider.BCPQC, CodeProvider.BCPQC, null, true),
 	//BCPQC_MCELIECE_POINTCHEVAL_CCA2_SHA512("McEliecePointCheval", "ECB", "NoPadding", null,1048576, 31536000000L, (short)0, CodeProvider.BCPQC, CodeProvider.BCPQC, null, true),
 	//BCPQC_MCELIECE_KOBARA_IMAI_CCA2_SHA256("McElieceKobaraImai", "ECB", "NoPadding", null, 1048576, 31536000000L, (short)0, CodeProvider.BCPQC, CodeProvider.BCPQC, null, true),
@@ -88,6 +91,12 @@ public enum ASymmetricEncryptionType {
 	//BCPQC_MCELIECE_KOBARA_IMAI_CCA2_SHA512("McElieceKobaraImai", "ECB", "NoPadding", null, 1048576, 31536000000L, (short)0, CodeProvider.BCPQC, CodeProvider.BCPQC, null, true),
 	//BC_FIPS_RSA_OAEPWithSHA256AndMGF1Padding("RSA", "NONE", "OAEPwithSHA256andMGF1Padding", ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA384withRSAandMGF1, (short) 3072, 31536000000l, (short) 66,CodeProvider.BCFIPS,CodeProvider.BCFIPS, FipsRSA.ALGORITHM),
 	//BC_FIPS_RSA_PKCS1Padding("RSA", "NONE", "PKCS1Padding", ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA384withRSAandMGF1, (short) 3072, 31536000000l, (short) 11,CodeProvider.BCFIPS,CodeProvider.BCFIPS, FipsRSA.ALGORITHM),
+	BCPQC_CRYSTALS_KYBER_512("CRYSTALS-Kyber-512", "ECB", "NoPadding", ASymmetricAuthenticatedSignatureType.BCPQC_SPHINCS_PLUS_SHA256_FAST, 1048576, 31536000000L, (short)0, CodeProvider.BCPQC, CodeProvider.BCPQC, null, true),
+	BCPQC_CRYSTALS_KYBER_768("CRYSTALS-Kyber-768", "ECB", "NoPadding", ASymmetricAuthenticatedSignatureType.BCPQC_SPHINCS_PLUS_SHA256_FAST, 1048576, 31536000000L, (short)0, CodeProvider.BCPQC, CodeProvider.BCPQC, null, true),
+	BCPQC_CRYSTALS_KYBER_1024("CRYSTALS-Kyber-1024", "ECB", "NoPadding", ASymmetricAuthenticatedSignatureType.BCPQC_SPHINCS_PLUS_SHA256_FAST, 1048576, 31536000000L, (short)0, CodeProvider.BCPQC, CodeProvider.BCPQC, null, true),
+	BCPQC_CRYSTALS_KYBER_512_AES("CRYSTALS-Kyber-512-AES", "ECB", "NoPadding", ASymmetricAuthenticatedSignatureType.BCPQC_SPHINCS_PLUS_SHA256_FAST, 1048576, 31536000000L, (short)0, CodeProvider.BCPQC, CodeProvider.BCPQC, null, true),
+	BCPQC_CRYSTALS_KYBER_768_AES("CRYSTALS-Kyber-768-AES", "ECB", "NoPadding", ASymmetricAuthenticatedSignatureType.BCPQC_SPHINCS_PLUS_SHA256_FAST, 1048576, 31536000000L, (short)0, CodeProvider.BCPQC, CodeProvider.BCPQC, null, true),
+	BCPQC_CRYSTALS_KYBER_1024_AES("CRYSTALS-Kyber-1024-AES", "ECB", "NoPadding", ASymmetricAuthenticatedSignatureType.BCPQC_SPHINCS_PLUS_SHA256_FAST, 1048576, 31536000000L, (short)0, CodeProvider.BCPQC, CodeProvider.BCPQC, null, true),
 	DEFAULT(RSA_OAEPWithSHA512AndMGF1Padding);
 
 
@@ -166,6 +175,8 @@ public enum ASymmetricEncryptionType {
 			else
 			{
 				PKCS8EncodedKeySpec pkcsKeySpec = new PKCS8EncodedKeySpec(encodedKey);
+				if (algorithm.startsWith("CRYSTALS-Kyber"))
+					algorithm="Kyber";
 				KeyFactory kf = KeyFactory.getInstance(algorithm);
 				return kf.generatePrivate(pkcsKeySpec);
 			}
@@ -214,6 +225,8 @@ public enum ASymmetricEncryptionType {
 				}
 			}
             X509EncodedKeySpec pubKeySpec = new X509EncodedKeySpec(encodedKey);
+			if (algorithm.startsWith("CRYSTALS-Kyber"))
+				algorithm="Kyber";
             KeyFactory kf = KeyFactory.getInstance(algorithm);
             return kf.generatePublic(pubKeySpec);
 		} catch (IllegalAccessException | InstantiationException | InvocationTargetException e) {
@@ -398,11 +411,18 @@ public enum ASymmetricEncryptionType {
 			return new GnuCipher(GnuFunctions.cipherGetInstance(name));
 		} else if (codeProviderForEncryption == CodeProvider.BCPQC)
 		{
-			if (this.name().startsWith("BCPQC_MCELIECE_"))
+			if (this.getAlgorithmName().startsWith("McEliece"))
 				return new BCMcElieceCipher(this);
+			else if (this.getAlgorithmName().startsWith("CRYSTALS-Kyber"))
+			{
+				try {
+					return new JavaNativeCipher(Cipher.getInstance("Kyber", codeProviderForEncryption.getCompatibleProvider()));
+				} catch (NoSuchPaddingException e) {
+					throw new MessageExternalizationException(Integrity.FAIL, e);
+				}
+			}
 			else
 				throw new IllegalAccessError();
-
 		} else if (codeProviderForEncryption == CodeProvider.BCFIPS || codeProviderForEncryption == CodeProvider.BC) {
 			throw new IllegalAccessError();
 		} else {
@@ -414,7 +434,10 @@ public enum ASymmetricEncryptionType {
 		}
 	}
 
-	
+	public boolean canBeUsedForEncryption()
+	{
+		return !getAlgorithmName().startsWith("CRYSTALS-Kyber");
+	}
 	
 	public int getDefaultKeySizeBits() {
 		return keySizeBits;
@@ -453,13 +476,21 @@ public enum ASymmetricEncryptionType {
 
 			return res;
 		} else if (codeProviderForKeyGenerator == CodeProvider.BCPQC) {
-			if (this.name().startsWith("BCPQC_MCELIECE_"))
+			if (this.getAlgorithmName().startsWith("McEliece"))
 			{
 				AbstractKeyPairGenerator res;
 				if (this.name().contains("CCA2"))
 					res=new BCMcElieceCipher.KeyPairGeneratorCCA2(this);
 				else
 					res=new BCMcElieceCipher.KeyPairGenerator(this);
+				res.initialize(keySizeBits, publicKeyValidityBeginDateUTC, expirationTimeUTC, random);
+				return res;
+			}
+			else if (this.getAlgorithmName().startsWith("CRYSTALS-Kyber"))
+			{
+
+				KeyPairGenerator kgp = KeyPairGenerator.getInstance("Kyber", codeProviderForKeyGenerator.getCompatibleProvider());
+				JavaNativeKeyPairGenerator res = new JavaNativeKeyPairGenerator(this, kgp);
 				res.initialize(keySizeBits, publicKeyValidityBeginDateUTC, expirationTimeUTC, random);
 				return res;
 			}

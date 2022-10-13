@@ -428,6 +428,8 @@ public class TestASymmetricEncryption {
 			kw=ASymmetricKeyWrapperType.BCPQC_MCELIECE_FUJISAKI_CCA2_SHA256;
 		else if (astype.name().startsWith("BCPQC_MCELIECE_POINTCHEVAL"))
 			kw=ASymmetricKeyWrapperType.BCPQC_MCELIECE_POINTCHEVAL_CCA2_SHA256;
+		else if (astype.getAlgorithmName().startsWith("CRYSTALS-Kyber"))
+			kw=ASymmetricKeyWrapperType.BCPQC_CRYSTALS_KYBER;
 		else
 			kw=ASymmetricKeyWrapperType.BC_FIPS_RSA_OAEP_WITH_SHA3_512;
 
@@ -572,14 +574,15 @@ public class TestASymmetricEncryption {
 	}
 	@DataProvider(name = "provideDataForASymetricEncryptions", parallel = true)
 	public Object[][] provideDataForASymetricEncryptions() {
-		Object[][] res = new Object[ASymmetricEncryptionType.values().length][];
-		int i = 0;
+		ArrayList<Object[]> res = new ArrayList<>(ASymmetricEncryptionType.values().length);
 		for (ASymmetricEncryptionType v : ASymmetricEncryptionType.values()) {
+			if (!v.canBeUsedForEncryption())
+				continue;
 			Object[] o = new Object[1];
 			o[0] = v;
-			res[i++] = o;
+			res.add(o);
 		}
-		return res;
+		return res.toArray(new Object[0][]);
 	}
 	@DataProvider(name = "provideDataForHybridEncryptions", parallel = true)
 	public Object[][] provideDataForHybridEncryptions() {
@@ -610,7 +613,11 @@ public class TestASymmetricEncryption {
 		for (ASymmetricEncryptionType v : ASymmetricEncryptionType.values()) {
 			if (v.isPostQuantumAlgorithm())
 				continue;
+			if (!v.canBeUsedForEncryption())
+				continue;
 			for (ASymmetricEncryptionType v2 : ASymmetricEncryptionType.values()) {
+				if (!v2.canBeUsedForEncryption())
+					continue;
 				if (v2.isPostQuantumAlgorithm())
 				{
 					Object[] o = new Object[1];

@@ -94,6 +94,7 @@ public enum ASymmetricKeyWrapperType {
 	HYBRID_BCPQC_MCELIECE_FUJISAKI_CCA2_SHA256_AND_RSA_OAEP_WITH_PARAMETERS_SHA2_384(BCPQC_MCELIECE_FUJISAKI_CCA2_SHA256, RSA_OAEP_WITH_PARAMETERS_SHA2_384),
 	HYBRID_BCPQC_MCELIECE_POINTCHEVAL_CCA2_SHA256_AND_RSA_OAEP_WITH_SHA2_384(BCPQC_MCELIECE_POINTCHEVAL_CCA2_SHA256, RSA_OAEP_WITH_SHA2_384),
 	HYBRID_BCPQC_MCELIECE_POINTCHEVAL_CCA2_SHA256_AND_RSA_OAEP_WITH_PARAMETERS_SHA2_384(BCPQC_MCELIECE_POINTCHEVAL_CCA2_SHA256, RSA_OAEP_WITH_PARAMETERS_SHA2_384),
+	BCPQC_CRYSTALS_KYBER("Kyber",CodeProvider.BCPQC, false, "512", null, true),
 	//BC_FIPS_RSA_KTS_KTM("RSA-KTS-KEM-KWS",CodeProvider.BCFIPS, false),
 	DEFAULT(BC_FIPS_RSA_OAEP_WITH_PARAMETERS_SHA3_384);
 	
@@ -263,7 +264,9 @@ public enum ASymmetricKeyWrapperType {
 							|| (keyToWrap.getAuthenticatedSignatureAlgorithmType() != null && (provider == CodeProvider.GNU_CRYPTO) != (keyToWrap.getAuthenticatedSignatureAlgorithmType().getCodeProviderForSignature() == CodeProvider.GNU_CRYPTO))
 							|| (keyToWrap.getEncryptionAlgorithmType() != null && (provider == CodeProvider.GNU_CRYPTO) != (keyToWrap.getEncryptionAlgorithmType().getCodeProviderForEncryption() == CodeProvider.GNU_CRYPTO)))
 						throw new IllegalArgumentException("The keys must come from the same providers");
-					if (!algorithmName.contains(publicKey.getEncryptionAlgorithmType().getAlgorithmName()))
+
+					if ((algorithmName.equals(BCPQC_CRYSTALS_KYBER.algorithmName) && !publicKey.getEncryptionAlgorithmType().getAlgorithmName().contains(algorithmName))
+							|| (!algorithmName.equals(BCPQC_CRYSTALS_KYBER.algorithmName) && !algorithmName.contains(publicKey.getEncryptionAlgorithmType().getAlgorithmName())))
 						throw new IllegalArgumentException("The key must be compatible with algorithm " + algorithmName);
 					if (provider.equals(CodeProvider.GNU_CRYPTO)) {
 						Object c = GnuFunctions.getCipherAlgorithm(algorithmName);
@@ -394,7 +397,8 @@ public enum ASymmetricKeyWrapperType {
 					else
 						throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
 				} else {
-					if (!algorithmName.contains(privateKey.getEncryptionAlgorithmType().getAlgorithmName()))
+					if ((algorithmName.equals(BCPQC_CRYSTALS_KYBER.algorithmName) && !privateKey.getEncryptionAlgorithmType().getAlgorithmName().contains(algorithmName))
+							|| (!algorithmName.equals(BCPQC_CRYSTALS_KYBER.algorithmName) && !algorithmName.contains(privateKey.getEncryptionAlgorithmType().getAlgorithmName())))
 						throw new IllegalArgumentException("The key must be compatible with algorithm " + algorithmName);
 					if (isSignatureFromMetaData(keyToUnwrap)) {
 						byte[] ktu = getWrappedKeyFromMetaData(keyToUnwrap);
