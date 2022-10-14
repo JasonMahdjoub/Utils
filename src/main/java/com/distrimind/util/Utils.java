@@ -85,6 +85,7 @@ public class Utils {
 									.addItem(NEW_FEATURE, "Add BouncyCastle Chrystals-Dilithium asymmetric authenticated signature post quantum algorithms.")
 									.addItem(NEW_FEATURE, "Add BouncyCastle Falcon asymmetric authenticated signature post quantum algorithms.")
 									.addItem(SECURITY_FIX_LOW_SEVERITY, "Deprecate GNU algorithms because GNU dependency is no more updated into Utils.")
+									.addItem(NEW_FEATURE, "Add key agreement that use key wrapping with class KeyAgreementWithKeyWrapping.")
 					)
 					.addDescription(
 							new Description(5, 23, 5, Version.Type.STABLE, 0, "2022-04-07")

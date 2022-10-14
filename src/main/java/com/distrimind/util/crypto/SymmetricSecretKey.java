@@ -39,6 +39,8 @@ import com.distrimind.util.Bits;
 import com.distrimind.util.Cleanable;
 import com.distrimind.util.data_buffers.WrappedSecretData;
 import com.distrimind.util.data_buffers.WrappedSecretString;
+import com.distrimind.util.io.Integrity;
+import com.distrimind.util.io.MessageExternalizationException;
 
 import javax.crypto.SecretKey;
 import java.security.NoSuchAlgorithmException;
@@ -232,6 +234,22 @@ public class SymmetricSecretKey extends AbstractKey implements ISecretDecentrali
 		this.signatureType=type.getDerivedType();
 		hashCode = Arrays.hashCode(this.finalizer.secretKey);
 		Arrays.fill(secretKey, (byte)0);
+	}
+	public static SymmetricSecretKey getDerivedKey(SymmetricSecretKey key1, SymmetricSecretKey key2) throws MessageExternalizationException {
+		if (key2.getEncryptionAlgorithmType()!=key1.getEncryptionAlgorithmType() || key2.getAuthenticatedSignatureAlgorithmType()!=key1.getAuthenticatedSignatureAlgorithmType())
+			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
+		if (key1.finalizer.secretKey.length!=key2.finalizer.secretKey.length)
+			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
+		byte[] b=key1.finalizer.secretKey.clone();
+		for (int i=0;i<b.length;i++)
+			b[i]^=key2.finalizer.secretKey[i];
+		if (key1.encryptionType==null)
+		{
+			return new SymmetricSecretKey(key1.signatureType, b, key1.keySizeBits);
+		}
+		else {
+			return new SymmetricSecretKey(key1.encryptionType, b, key1.keySizeBits);
+		}
 	}
 	SymmetricSecretKey(SymmetricEncryptionType type, Object secretKey, short keySize) {
 		this(SymmetricEncryptionType.encodeGnuSecretKey(secretKey), keySize);

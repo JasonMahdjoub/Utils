@@ -53,11 +53,23 @@ public enum KeyAgreementType {
 	BC_FIPS_XDH_X25519_WITH_SHA512CKDF(false, false, EllipticCurveDiffieHellmanType.BC_FIPS_XDH_X25519_WITH_SHA512CKDF),
 	BC_FIPS_XDH_X448_WITH_SHA512CKDF(false, false, EllipticCurveDiffieHellmanType.BC_FIPS_XDH_X448_WITH_SHA512CKDF),
 	BCPQC_NEW_HOPE(true, true, null),
+	BC_FIPS_RSA_OAEP_WITH_PARAMETERS_SHA2_384(ASymmetricKeyWrapperType.BC_FIPS_RSA_OAEP_WITH_PARAMETERS_SHA2_384, ASymmetricAuthenticatedSignatureType.BC_FIPS_Ed25519),
+	BC_FIPS_RSA_OAEP_WITH_PARAMETERS_SHA2_512(ASymmetricKeyWrapperType.BC_FIPS_RSA_OAEP_WITH_PARAMETERS_SHA2_512, ASymmetricAuthenticatedSignatureType.BC_FIPS_Ed448),
+	BC_FIPS_RSA_OAEP_WITH_PARAMETERS_SHA3_384(ASymmetricKeyWrapperType.BC_FIPS_RSA_OAEP_WITH_PARAMETERS_SHA3_384, ASymmetricAuthenticatedSignatureType.BC_FIPS_Ed25519),
+	BC_FIPS_RSA_OAEP_WITH_PARAMETERS_SHA3_512(ASymmetricKeyWrapperType.BC_FIPS_RSA_OAEP_WITH_PARAMETERS_SHA3_512, ASymmetricAuthenticatedSignatureType.BC_FIPS_Ed448),
+	BCPQC_CRYSTALS_KYBER_512(ASymmetricKeyWrapperType.BCPQC_CRYSTALS_KYBER_512, ASymmetricAuthenticatedSignatureType.BCPQC_CHRYSTALS_DILITHIUM_2),
+	BCPQC_CRYSTALS_KYBER_768(ASymmetricKeyWrapperType.BCPQC_CRYSTALS_KYBER_768, ASymmetricAuthenticatedSignatureType.BCPQC_CHRYSTALS_DILITHIUM_3),
+	BCPQC_CRYSTALS_KYBER_1024(ASymmetricKeyWrapperType.BCPQC_CRYSTALS_KYBER_1024, ASymmetricAuthenticatedSignatureType.BCPQC_CHRYSTALS_DILITHIUM_5),
+	BCPQC_CRYSTALS_KYBER_512_AES(ASymmetricKeyWrapperType.BCPQC_CRYSTALS_KYBER_512_AES, ASymmetricAuthenticatedSignatureType.BCPQC_CHRYSTALS_DILITHIUM_2),
+	BCPQC_CRYSTALS_KYBER_768_AES(ASymmetricKeyWrapperType.BCPQC_CRYSTALS_KYBER_768_AES, ASymmetricAuthenticatedSignatureType.BCPQC_CHRYSTALS_DILITHIUM_3),
+	BCPQC_CRYSTALS_KYBER_1024_AES(ASymmetricKeyWrapperType.BCPQC_CRYSTALS_KYBER_1024_AES, ASymmetricAuthenticatedSignatureType.BCPQC_CHRYSTALS_DILITHIUM_5),
 	DEFAULT(false, false, EllipticCurveDiffieHellmanType.DEFAULT);
 	
 	private final boolean isPQC;
 	private final boolean isNewHope;
 	private final EllipticCurveDiffieHellmanType ecdhType;
+	private final ASymmetricKeyWrapperType keyWrapperType;
+	private final ASymmetricAuthenticatedSignatureType aSymmetricAuthenticatedSignatureType;
 
 	public boolean equals(KeyAgreementType type)
 	{
@@ -70,8 +82,20 @@ public enum KeyAgreementType {
 		this.isPQC = (ecdhType==null || ecdhType.isPostQuantumAlgorithm()) && isPQC;
 		this.isNewHope = isNewHope;
 		this.ecdhType = ecdhType;
+		this.keyWrapperType=null;
+		this.aSymmetricAuthenticatedSignatureType=null;
 	}
-
+	KeyAgreementType(ASymmetricKeyWrapperType keyWrapperType, ASymmetricAuthenticatedSignatureType aSymmetricAuthenticatedSignatureType) {
+		if (keyWrapperType==null)
+			throw new NullPointerException();
+		if (aSymmetricAuthenticatedSignatureType==null)
+			throw new NullPointerException();
+		this.isPQC = keyWrapperType.isPostQuantumKeyAlgorithm();
+		this.isNewHope = false;
+		this.ecdhType = null;
+		this.keyWrapperType=keyWrapperType;
+		this.aSymmetricAuthenticatedSignatureType=aSymmetricAuthenticatedSignatureType;
+	}
 	public boolean isPostQuantumAlgorithm() {
 		return isPQC;
 	}
@@ -89,7 +113,11 @@ public enum KeyAgreementType {
 	{
 		if (keySizeBits<0)
 			keySizeBits=getDefaultKeySizeBits();
-		if (ecdhType!=null)
+		if (keyWrapperType!=null)
+		{
+			return new KeyAgreementWithKeyWrapping(randomForKeys, keyWrapperType, aSymmetricAuthenticatedSignatureType, keySizeBits, signatureType);
+		}
+		else if (ecdhType!=null)
 			return new EllipticCurveDiffieHellmanAlgorithm(randomForKeys, ecdhType, keySizeBits, keyingMaterial, signatureType);
 		else if (isNewHope)
 		{
@@ -115,7 +143,11 @@ public enum KeyAgreementType {
 	{
 		if (keySizeBits<0)
 			keySizeBits=getDefaultKeySizeBits();
-		if (ecdhType!=null)
+		if (keyWrapperType!=null)
+		{
+			return new KeyAgreementWithKeyWrapping(randomForKeys, keyWrapperType, aSymmetricAuthenticatedSignatureType, keySizeBits, encryptionType);
+		}
+		else if (ecdhType!=null)
 			return new EllipticCurveDiffieHellmanAlgorithm(randomForKeys, ecdhType, keySizeBits, keyingMaterial, encryptionType);
 		else if (isNewHope)
 		{
@@ -141,7 +173,11 @@ public enum KeyAgreementType {
 		if (keySizeBits<0)
 			keySizeBits=getDefaultKeySizeBits();
 
-		if (ecdhType!=null)
+		if (keyWrapperType!=null)
+		{
+			return new KeyAgreementWithKeyWrapping(randomForKeys, keyWrapperType, aSymmetricAuthenticatedSignatureType, keySizeBits, signatureType);
+		}
+		else if (ecdhType!=null)
 			return new EllipticCurveDiffieHellmanAlgorithm(randomForKeys, ecdhType, keySizeBits, keyingMaterial, signatureType);
 		else if (isNewHope)
 		{
@@ -167,7 +203,11 @@ public enum KeyAgreementType {
 		if (keySizeBits<0)
 			keySizeBits=getDefaultKeySizeBits();
 
- 		if (ecdhType!=null)
+		if (keyWrapperType!=null)
+		{
+			return new KeyAgreementWithKeyWrapping(randomForKeys, keyWrapperType, aSymmetricAuthenticatedSignatureType, keySizeBits, encryptionType);
+		}
+		else if (ecdhType!=null)
 			return new EllipticCurveDiffieHellmanAlgorithm(randomForKeys, ecdhType, keySizeBits, keyingMaterial, encryptionType);
 		else if (isNewHope)
 		{
@@ -181,7 +221,7 @@ public enum KeyAgreementType {
 	
 	public short getDefaultKeySizeBits()
 	{
-		if (ecdhType==null)
+		if (ecdhType==null || keyWrapperType!=null)
 			return 256;
 		else
 			return ecdhType.getKeySizeBits();
@@ -189,7 +229,9 @@ public enum KeyAgreementType {
 	
 	public CodeProvider getCodeProvider()
 	{
-		if (ecdhType==null)
+		if (keyWrapperType!=null)
+			return keyWrapperType.getCodeProvider();
+		else if (ecdhType==null)
 			return CodeProvider.BCPQC;
 		else
 			return ecdhType.getCodeProvider();

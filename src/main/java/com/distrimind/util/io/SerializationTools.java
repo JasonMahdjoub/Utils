@@ -248,17 +248,17 @@ public class SerializationTools {
 			if (tab instanceof WrappedEncryptedASymmetricPrivateKey)
 			{
 				type=2;
-				sizeMax=Math.min(WrappedEncryptedASymmetricPrivateKey.MAX_SIZE_IN_BYTES_OF_KEY, sizeMax);
+				//sizeMax=Math.min(WrappedEncryptedASymmetricPrivateKey.MAX_SIZE_IN_BYTES_OF_KEY, sizeMax);
 			}
 			else if (tab instanceof WrappedEncryptedSymmetricSecretKey)
 			{
 				type=3;
-				sizeMax=Math.min(WrappedEncryptedSymmetricSecretKey.MAX_SIZE_IN_BYTES_OF_KEY, sizeMax);
+				//sizeMax=Math.min(WrappedEncryptedSymmetricSecretKey.MAX_SIZE_IN_BYTES_OF_KEY, sizeMax);
 			}
 			else if (tab instanceof WrappedHashedPassword)
 			{
 				type=4;
-				sizeMax=Math.min(WrappedHashedPassword.MAX_SIZE_IN_BYTES_OF_DATA, sizeMax);
+				//sizeMax=Math.min(WrappedHashedPassword.MAX_SIZE_IN_BYTES_OF_DATA, sizeMax);
 			}
 			else if (tab instanceof WrappedSecretData)
 			{
@@ -266,6 +266,7 @@ public class SerializationTools {
 			}
 			writeBytes(oos, tab.getBytes(), 0, tab.getBytes().length, sizeMax, supportNull);
 			oos.writeByte(type);
+			tab.getBytes();//gc delayed
 		}
 	}
 	@SuppressWarnings("SameParameterValue")
@@ -357,15 +358,15 @@ public class SerializationTools {
 			case 1:
 				return new WrappedSecretData(t);
 			case 2:
-				if (t.length>WrappedEncryptedASymmetricPrivateKey.MAX_SIZE_IN_BYTES_OF_KEY)
+				if (t.length>sizeMax)
 					throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
 				return new WrappedEncryptedASymmetricPrivateKey(t);
 			case 3:
-				if (t.length>WrappedEncryptedSymmetricSecretKey.MAX_SIZE_IN_BYTES_OF_KEY)
+				if (t.length>sizeMax)
 					throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
 				return new WrappedEncryptedSymmetricSecretKey(t);
 			case 4:
-				if (t.length>WrappedHashedPassword.MAX_SIZE_IN_BYTES_OF_DATA)
+				if (t.length>sizeMax)
 					throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
 				return new WrappedHashedPassword(t);
 			default:
@@ -1675,7 +1676,7 @@ public class SerializationTools {
 				res=-1;
 		}
 		if (res<-1 || res>maxSize)
-			throw new MessageExternalizationException(Integrity.FAIL);
+			throw new MessageExternalizationException(Integrity.FAIL, "res="+res+"; maxSize="+maxSize);
 		return res;
 	}
 	private static void writeObject(final SecuredObjectOutputStream oos, Object o, int sizeMax, boolean supportNull, boolean OOSreplaceObject) throws IOException
