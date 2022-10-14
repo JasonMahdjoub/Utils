@@ -58,16 +58,16 @@ public class KeyAgreementWithKeyWrapping extends KeyAgreement{
 	private boolean valid=true;
 
 
-	public KeyAgreementWithKeyWrapping(AbstractSecureRandom random, ASymmetricKeyWrapperType aSymmetricKeyWrapperType, ASymmetricAuthenticatedSignatureType aSymmetricAuthenticatedSignatureType, short keySizeBits, SymmetricAuthenticatedSignatureType signatureType) throws NoSuchAlgorithmException, IOException, NoSuchProviderException {
+	KeyAgreementWithKeyWrapping(AbstractSecureRandom random, ASymmetricKeyWrapperType aSymmetricKeyWrapperType, ASymmetricAuthenticatedSignatureType aSymmetricAuthenticatedSignatureType, short keySizeBits, SymmetricAuthenticatedSignatureType signatureType) throws NoSuchAlgorithmException, IOException, NoSuchProviderException {
 		this(random, aSymmetricKeyWrapperType, aSymmetricKeyWrapperType.getKeyPairGenerator(random).generateKeyPair(), aSymmetricAuthenticatedSignatureType.getKeyPairGenerator(random).generateKeyPair(), keySizeBits, signatureType);
 	}
-	public KeyAgreementWithKeyWrapping(AbstractSecureRandom random, ASymmetricKeyWrapperType aSymmetricKeyWrapperType, ASymmetricAuthenticatedSignatureType aSymmetricAuthenticatedSignatureType, short keySizeBits, SymmetricEncryptionType encryptionType) throws NoSuchAlgorithmException, IOException, NoSuchProviderException {
+	KeyAgreementWithKeyWrapping(AbstractSecureRandom random, ASymmetricKeyWrapperType aSymmetricKeyWrapperType, ASymmetricAuthenticatedSignatureType aSymmetricAuthenticatedSignatureType, short keySizeBits, SymmetricEncryptionType encryptionType) throws NoSuchAlgorithmException, IOException, NoSuchProviderException {
 		this(random, aSymmetricKeyWrapperType, aSymmetricKeyWrapperType.getKeyPairGenerator(random).generateKeyPair(), aSymmetricAuthenticatedSignatureType.getKeyPairGenerator(random).generateKeyPair(), keySizeBits, encryptionType);
 	}
-	public KeyAgreementWithKeyWrapping(AbstractSecureRandom random, ASymmetricKeyWrapperType aSymmetricKeyWrapperType, ASymmetricKeyPair keyPairForEncryption, ASymmetricKeyPair keyPairForSignature, short keySizeBits, SymmetricAuthenticatedSignatureType signatureType) throws NoSuchAlgorithmException, NoSuchProviderException{
+	KeyAgreementWithKeyWrapping(AbstractSecureRandom random, ASymmetricKeyWrapperType aSymmetricKeyWrapperType, ASymmetricKeyPair keyPairForEncryption, ASymmetricKeyPair keyPairForSignature, short keySizeBits, SymmetricAuthenticatedSignatureType signatureType) throws NoSuchAlgorithmException, NoSuchProviderException{
 		this(random, aSymmetricKeyWrapperType, keyPairForEncryption, keyPairForSignature, keySizeBits, signatureType, null);
 	}
-	public KeyAgreementWithKeyWrapping(AbstractSecureRandom random, ASymmetricKeyWrapperType aSymmetricKeyWrapperType, ASymmetricKeyPair keyPairForEncryption, ASymmetricKeyPair keyPairForSignature, short keySizeBits, SymmetricEncryptionType encryptionType) throws NoSuchAlgorithmException, NoSuchProviderException {
+	KeyAgreementWithKeyWrapping(AbstractSecureRandom random, ASymmetricKeyWrapperType aSymmetricKeyWrapperType, ASymmetricKeyPair keyPairForEncryption, ASymmetricKeyPair keyPairForSignature, short keySizeBits, SymmetricEncryptionType encryptionType) throws NoSuchAlgorithmException, NoSuchProviderException {
 		this(random, aSymmetricKeyWrapperType, keyPairForEncryption, keyPairForSignature, keySizeBits, null, encryptionType);
 	}
 	@SuppressWarnings({"ConstantConditions", "ConditionCoveredByFurtherCondition"})
