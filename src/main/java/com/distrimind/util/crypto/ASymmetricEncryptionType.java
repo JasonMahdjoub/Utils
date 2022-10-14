@@ -40,6 +40,9 @@ import com.distrimind.bcfips.crypto.asymmetric.AsymmetricXDHPrivateKey;
 import com.distrimind.bcfips.crypto.asymmetric.AsymmetricXDHPublicKey;
 import com.distrimind.bcfips.crypto.fips.FipsRSA;
 import com.distrimind.bcfips.crypto.general.EdEC;
+import com.distrimind.bouncycastle.pqc.jcajce.provider.dilithium.DilithiumKeyFactorySpi;
+import com.distrimind.bouncycastle.pqc.jcajce.provider.dilithium.DilithiumKeyPairGeneratorSpi;
+import com.distrimind.bouncycastle.pqc.jcajce.provider.falcon.FalconKeyFactorySpi;
 import com.distrimind.bouncycastle.pqc.jcajce.provider.sphincs.Sphincs256KeyFactorySpi;
 import com.distrimind.bouncycastle.pqc.jcajce.provider.sphincsplus.SPHINCSPlusKeyFactorySpi;
 import com.distrimind.util.UtilClassLoader;
@@ -151,6 +154,16 @@ public enum ASymmetricEncryptionType {
 				SPHINCSPlusKeyFactorySpi kf=new SPHINCSPlusKeyFactorySpi();
 				return kf.engineGeneratePrivate(new PKCS8EncodedKeySpec(encodedKey));
 			}
+			if (algorithmType.startsWith("BCPQC_CHRYSTALS_DILITHIUM"))
+			{
+				DilithiumKeyFactorySpi kf=new DilithiumKeyFactorySpi();
+				return kf.engineGeneratePrivate(new PKCS8EncodedKeySpec(encodedKey));
+			}
+			if (algorithmType.startsWith("BCPQC_FALCON"))
+			{
+				FalconKeyFactorySpi kf=new FalconKeyFactorySpi();
+				return kf.engineGeneratePrivate(new PKCS8EncodedKeySpec(encodedKey));
+			}
 			else if (algorithmType.startsWith("BCPQC_SPHINCS"))
 			{
 				Sphincs256KeyFactorySpi kf=new Sphincs256KeyFactorySpi();
@@ -174,10 +187,7 @@ public enum ASymmetricEncryptionType {
 				PKCS8EncodedKeySpec pkcsKeySpec = new PKCS8EncodedKeySpec(encodedKey);
 				if (algorithm.startsWith("CRYSTALS-Kyber"))
 					algorithm="Kyber";
-				else if (algorithm.startsWith(ASymmetricAuthenticatedSignatureType.BCPQC_CHRYSTALS_DILITHIUM_5.getSignatureAlgorithmName()))
-					algorithm=ASymmetricAuthenticatedSignatureType.BCPQC_CHRYSTALS_DILITHIUM_5.getSignatureAlgorithmName();
-				else if (algorithm.startsWith(ASymmetricAuthenticatedSignatureType.BCPQC_FALCON_512.getSignatureAlgorithmName()))
-					algorithm=ASymmetricAuthenticatedSignatureType.BCPQC_FALCON_512.getSignatureAlgorithmName();
+
 				KeyFactory kf = KeyFactory.getInstance(algorithm);
 				return kf.generatePrivate(pkcsKeySpec);
 			}
@@ -194,6 +204,16 @@ public enum ASymmetricEncryptionType {
 			if (algorithmType.startsWith("BCPQC_SPHINCS_PLUS"))
 			{
 				SPHINCSPlusKeyFactorySpi kf=new SPHINCSPlusKeyFactorySpi();
+				return kf.engineGeneratePublic(new X509EncodedKeySpec(encodedKey));
+			}
+			if (algorithmType.startsWith("BCPQC_CHRYSTALS_DILITHIUM"))
+			{
+				DilithiumKeyFactorySpi kf=new DilithiumKeyFactorySpi();
+				return kf.engineGeneratePublic(new X509EncodedKeySpec(encodedKey));
+			}
+			if (algorithmType.startsWith("BCPQC_FALCON"))
+			{
+				FalconKeyFactorySpi kf=new FalconKeyFactorySpi();
 				return kf.engineGeneratePublic(new X509EncodedKeySpec(encodedKey));
 			}
 			else if (algorithmType.startsWith("BCPQC_SPHINCS"))
@@ -228,10 +248,7 @@ public enum ASymmetricEncryptionType {
             X509EncodedKeySpec pubKeySpec = new X509EncodedKeySpec(encodedKey);
 			if (algorithm.startsWith("CRYSTALS-Kyber"))
 				algorithm="Kyber";
-			else if (algorithm.startsWith(ASymmetricAuthenticatedSignatureType.BCPQC_CHRYSTALS_DILITHIUM_5.getSignatureAlgorithmName()))
-				algorithm=ASymmetricAuthenticatedSignatureType.BCPQC_CHRYSTALS_DILITHIUM_5.getSignatureAlgorithmName();
-			else if (algorithm.startsWith(ASymmetricAuthenticatedSignatureType.BCPQC_FALCON_512.getSignatureAlgorithmName()))
-				algorithm=ASymmetricAuthenticatedSignatureType.BCPQC_FALCON_512.getSignatureAlgorithmName();
+
             KeyFactory kf = KeyFactory.getInstance(algorithm);
             return kf.generatePublic(pubKeySpec);
 		} catch (IllegalAccessException | InstantiationException | InvocationTargetException e) {
@@ -442,6 +459,7 @@ public enum ASymmetricEncryptionType {
 		}
 	}
 
+	@SuppressWarnings("BooleanMethodIsAlwaysInverted")
 	public boolean canBeUsedForEncryption()
 	{
 		return !getAlgorithmName().startsWith("CRYSTALS-Kyber");
