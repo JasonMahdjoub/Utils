@@ -152,8 +152,8 @@ public class ASymmetricKeyPair extends AbstractKeyPair<ASymmetricPrivateKey, ASy
 		this.finalizer.privateKey = privateKey;
 		this.finalizer.publicKey = publicKey;
 		this.keySizeBits = publicKey.getKeySizeBits();
-		this.encryptionType = publicKey.getEncryptionAlgorithmType().getDerivedType();
-		this.signatureType=privateKey.getAuthenticatedSignatureAlgorithmType();
+		this.encryptionType = publicKey.getEncryptionAlgorithmType();
+		this.signatureType=publicKey.getAuthenticatedSignatureAlgorithmType();
 
 		hashCode = privateKey.hashCode() + publicKey.hashCode();
 	}
