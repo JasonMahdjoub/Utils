@@ -66,6 +66,7 @@ import com.distrimind.util.sizeof.ObjectSizer;
  * @since Utils 1.8
  *
  */
+@SuppressWarnings("DeprecatedIsStillUsed")
 public enum PasswordHashType {
 	PBKDF2WithHmacSHA1("PBKDF2WithHmacSHA1", (byte) 32, CodeProvider.SunJCE, (byte)1),
 	PBKDF2WithHMacSHA2_256("PBKDF2WithHMacSHA256", (byte) 32, CodeProvider.SunJCE, (byte)2),
@@ -74,11 +75,17 @@ public enum PasswordHashType {
 	BC_BCRYPT("BC_BCRYPT", (byte) 24, CodeProvider.SUN, (byte)5),
 	BC_SCRYPT_FOR_LOGIN("SCRYPT", (byte)32, CodeProvider.BC, (byte)6),
 	BC_SCRYPT_FOR_DATA_ENCRYPTION("SCRYPT", (byte)32, CodeProvider.BC, (byte)7),
-	GNU_PBKDF2WithHmacSHA1("PBKDF2WithHMacSHA1", (byte) 32, CodeProvider.GNU_CRYPTO, (byte)8), 
+	@Deprecated
+	GNU_PBKDF2WithHmacSHA1("PBKDF2WithHMacSHA1", (byte) 32, CodeProvider.GNU_CRYPTO, (byte)8),
+	@Deprecated
 	GNU_PBKDF2WithHMacSHA2_256("PBKDF2WithHMacSHA256",(byte) 32, CodeProvider.GNU_CRYPTO, (byte)9),
+	@Deprecated
 	GNU_PBKDF2WithHMacSHA2_384("PBKDF2WithHMacSHA384", (byte) 32, CodeProvider.GNU_CRYPTO, (byte)10),
+	@Deprecated
 	GNU_PBKDF2WithHMacSHA2_512("PBKDF2WithHMacSHA512", (byte) 32, CodeProvider.GNU_CRYPTO, (byte)11),
+	@Deprecated
 	GNU_PBKDF2WithHMacWhirlpool("PBKDF2WithHMacWhirlpool",(byte) 32, CodeProvider.GNU_CRYPTO, (byte)12),
+
 	BC_FIPS_PBKFD2WithHMacSHA2_256("PBKDF2WithHMacSHA2_256",(byte) 32, CodeProvider.BCFIPS, FipsSHS.Algorithm.SHA256_HMAC, (byte)13),
 	BC_FIPS_PBKFD2WithHMacSHA2_384("PBKDF2WithHMacSHA2_384",(byte) 32, CodeProvider.BCFIPS, FipsSHS.Algorithm.SHA384_HMAC, (byte)14),
 	BC_FIPS_PBKFD2WithHMacSHA2_512("PBKDF2WithHMacSHA2_512",(byte) 32, CodeProvider.BCFIPS, FipsSHS.Algorithm.SHA512_HMAC, (byte)15),

@@ -71,11 +71,12 @@ import com.distrimind.util.OS;
  * @version 3.2
  * @since Utils 1.17.0
  */
-@SuppressWarnings("ConstantConditions")
+@SuppressWarnings({"ConstantConditions", "DeprecatedIsStillUsed"})
 public enum ASymmetricKeyWrapperType {
 
 	RSA_OAEP_WITH_SHA2_384("RSA/ECB/OAEPPadding",CodeProvider.SunJCE, false, "SHA-384", FipsSHS.Algorithm.SHA384, false, ASymmetricEncryptionType.RSA_OAEPWithSHA384AndMGF1Padding),
 	RSA_OAEP_WITH_PARAMETERS_SHA2_384("RSA/ECB/OAEPPadding",CodeProvider.SunJCE, true, "SHA-384", FipsSHS.Algorithm.SHA384, false, ASymmetricEncryptionType.RSA_OAEPWithSHA384AndMGF1Padding),
+	@Deprecated
 	GNU_RSA_OAEP_SHA2_384("RSA/NONE/OAEPPadding",CodeProvider.GNU_CRYPTO, false, "SHA-384", FipsSHS.Algorithm.SHA384, false, ASymmetricEncryptionType.RSA_OAEPWithSHA384AndMGF1Padding),
 	RSA_OAEP_SHA2_512("RSA/ECB/OAEPPadding",CodeProvider.SunJCE, false, "SHA-512", FipsSHS.Algorithm.SHA512, false, ASymmetricEncryptionType.RSA_OAEPWithSHA512AndMGF1Padding),
 	RSA_OAEP_WITH_PARAMETERS_SHA2_512("RSA/ECB/OAEPPadding",CodeProvider.SunJCE, true, "SHA-512", FipsSHS.Algorithm.SHA512, false, ASymmetricEncryptionType.RSA_OAEPWithSHA512AndMGF1Padding),

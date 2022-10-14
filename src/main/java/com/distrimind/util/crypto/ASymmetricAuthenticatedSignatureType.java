@@ -56,6 +56,7 @@ import java.util.Random;
  * @version 5.2
  * @since Utils 1.4
  */
+@SuppressWarnings({"DeprecatedIsStillUsed"})
 public enum ASymmetricAuthenticatedSignatureType {
 	@Deprecated
 	SHA1withRSA("SHA1withRSA", "RSA", CodeProvider.SunRsaSign,CodeProvider.SunRsaSign, 3072, 31536000000L, FipsRSA.ALGORITHM, false),
@@ -71,7 +72,9 @@ public enum ASymmetricAuthenticatedSignatureType {
 	BC_FIPS_SHA256withECDSA_P_256("SHA256withECDSA", "EC", CodeProvider.BCFIPS,CodeProvider.BCFIPS, 256, 31536000000L, FipsEC.ALGORITHM, false, "P-256"),
 	BC_FIPS_SHA384withECDSA_P_384("SHA384withECDSA", "EC", CodeProvider.BCFIPS,CodeProvider.BCFIPS, 384, 31536000000L, FipsEC.ALGORITHM, false, "P-384"),
 	BC_FIPS_SHA512withECDSA_P_521("SHA512withECDSA", "EC", CodeProvider.BCFIPS,CodeProvider.BCFIPS, 528, 31536000000L, FipsEC.ALGORITHM, false, "P-521"),
+	@Deprecated
 	BCPQC_SPHINCS256_SHA2_512_256("SHA512withSPHINCS256", "SHA512withSPHINCS256", CodeProvider.BCPQC,CodeProvider.BCPQC, 1024, 31536000000L, null, true),
+	@Deprecated
 	BCPQC_SPHINCS256_SHA3_512("SHA3-512withSPHINCS256", "SHA3-256withSPHINCS256", CodeProvider.BCPQC,CodeProvider.BCPQC, 1024, 31536000000L, null, true),
 	BC_FIPS_Ed25519("EdDSA", "Ed25519", CodeProvider.BCFIPS,CodeProvider.BCFIPS, 256, 31536000000L, null, false, "Ed25519"),
 	BC_FIPS_Ed448("EdDSA", "Ed448", CodeProvider.BCFIPS,CodeProvider.BCFIPS, 448, 31536000000L, null, false, "Ed448"),

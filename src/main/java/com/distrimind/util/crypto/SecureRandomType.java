@@ -53,13 +53,19 @@ import java.util.*;
  * @version 3.0.0
  * @since Utils 2.0
  */
+@SuppressWarnings("DeprecatedIsStillUsed")
 public enum SecureRandomType {
 	SHA1PRNG("SHA1PRNG", CodeProvider.SUN, false, true),
-	GNU_SHA1PRNG("SHA1PRNG", CodeProvider.GNU_CRYPTO, true, true), 
-	GNU_SHA256PRNG("SHA-256PRNG", CodeProvider.GNU_CRYPTO, true, true), 
+	@Deprecated
+	GNU_SHA1PRNG("SHA1PRNG", CodeProvider.GNU_CRYPTO, true, true),
+	@Deprecated
+	GNU_SHA256PRNG("SHA-256PRNG", CodeProvider.GNU_CRYPTO, true, true),
+	@Deprecated
 	GNU_SHA384PRNG("SHA-384PRNG", CodeProvider.GNU_CRYPTO, true, true), 
-	GNU_SHA512PRNG("SHA-512PRNG",CodeProvider.GNU_CRYPTO, true, true), 
+	GNU_SHA512PRNG("SHA-512PRNG",CodeProvider.GNU_CRYPTO, true, true),
+	@Deprecated
 	GNU_WIRLPOOLPRNG("WHIRLPOOLPRNG", CodeProvider.GNU_CRYPTO, true, true),
+	@Deprecated
 	GNU_DEFAULT(GNU_SHA1PRNG),
 	SPEEDIEST(GNU_SHA512PRNG), 
 	NativePRNG("NativePRNG", CodeProvider.SUN, false, false),

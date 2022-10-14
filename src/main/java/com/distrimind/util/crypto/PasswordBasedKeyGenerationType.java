@@ -44,11 +44,16 @@ import java.io.IOException;
  * @since Utils 1.17.0
  */
 public enum PasswordBasedKeyGenerationType {
-	PBKDF2WithHmacSHA1(PasswordHashType.PBKDF2WithHmacSHA1), 
-	GNU_PBKDF2WithHmacSHA1(PasswordHashType.GNU_PBKDF2WithHmacSHA1), 
+	PBKDF2WithHmacSHA1(PasswordHashType.PBKDF2WithHmacSHA1),
+	@Deprecated
+	GNU_PBKDF2WithHmacSHA1(PasswordHashType.GNU_PBKDF2WithHmacSHA1),
+	@Deprecated
 	GNU_PBKDF2WithHMacSHA256(PasswordHashType.GNU_PBKDF2WithHMacSHA2_256),
+	@Deprecated
 	GNU_PBKDF2WithHMacSHA384(PasswordHashType.GNU_PBKDF2WithHMacSHA2_384),
+	@Deprecated
 	GNU_PBKDF2WithHMacSHA512(PasswordHashType.GNU_PBKDF2WithHMacSHA2_512),
+	@Deprecated
 	GNU_PBKDF2WithHMacWhirlpool(PasswordHashType.GNU_PBKDF2WithHMacWhirlpool),
 	BC_FIPS_PBKFD2WithHMacSHA2_256(PasswordHashType.BC_FIPS_PBKFD2WithHMacSHA2_256),
 	BC_FIPS_PBKFD2WithHMacSHA2_384(PasswordHashType.BC_FIPS_PBKFD2WithHMacSHA2_384),

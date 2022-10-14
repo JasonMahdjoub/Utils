@@ -52,9 +52,13 @@ public enum MessageDigestType {
 	SHA2_256("SHA-256", CodeProvider.SUN, 256, true),
 	SHA2_384("SHA-384",	CodeProvider.SUN, 384,true),
 	SHA2_512("SHA-512", CodeProvider.SUN, 512,true),
+	@Deprecated
 	GNU_SHA2_256("SHA-256", CodeProvider.GNU_CRYPTO, 256,true),
+	@Deprecated
 	GNU_SHA2_384("SHA-384", CodeProvider.GNU_CRYPTO, 384,true),
+	@Deprecated
 	GNU_SHA2_512("SHA-512", CodeProvider.GNU_CRYPTO, 512,true),
+	@Deprecated
 	GNU_WHIRLPOOL("WHIRLPOOL", CodeProvider.GNU_CRYPTO, 512,true),
 	BC_FIPS_SHA2_256("SHA-256", CodeProvider.BCFIPS, 256,true),
 	BC_FIPS_SHA2_384("SHA-384",CodeProvider.BCFIPS, 384,true),
