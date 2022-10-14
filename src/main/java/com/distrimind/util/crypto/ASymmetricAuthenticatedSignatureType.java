@@ -37,6 +37,8 @@ package com.distrimind.util.crypto;
 import com.distrimind.bcfips.crypto.Algorithm;
 import com.distrimind.bcfips.crypto.fips.FipsEC;
 import com.distrimind.bcfips.crypto.fips.FipsRSA;
+import com.distrimind.bouncycastle.pqc.jcajce.provider.dilithium.DilithiumKeyPairGeneratorSpi;
+import com.distrimind.bouncycastle.pqc.jcajce.provider.falcon.FalconKeyPairGeneratorSpi;
 import com.distrimind.bouncycastle.pqc.jcajce.provider.sphincs.Sphincs256KeyPairGeneratorSpi;
 import com.distrimind.bouncycastle.pqc.jcajce.provider.sphincsplus.SPHINCSPlusKeyPairGeneratorSpi;
 
@@ -45,6 +47,7 @@ import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.Signature;
+import java.util.Random;
 
 /**
  * List of signature algorithms
@@ -72,10 +75,19 @@ public enum ASymmetricAuthenticatedSignatureType {
 	BCPQC_SPHINCS256_SHA3_512("SHA3-512withSPHINCS256", "SHA3-256withSPHINCS256", CodeProvider.BCPQC,CodeProvider.BCPQC, 1024, 31536000000L, null, true),
 	BC_FIPS_Ed25519("EdDSA", "Ed25519", CodeProvider.BCFIPS,CodeProvider.BCFIPS, 256, 31536000000L, null, false, "Ed25519"),
 	BC_FIPS_Ed448("EdDSA", "Ed448", CodeProvider.BCFIPS,CodeProvider.BCFIPS, 448, 31536000000L, null, false, "Ed448"),
-	BCPQC_SPHINCS_PLUS_SHA256_SLOW("SPHINCSPLUS", "SPHINCSPLUS", CodeProvider.BCPQC,CodeProvider.BCPQC, 1024, 31536000000L, null, true),
-	BCPQC_SPHINCS_PLUS_SHA256_FAST("SPHINCSPLUS", "SPHINCSPLUS", CodeProvider.BCPQC,CodeProvider.BCPQC, 1024, 31536000000L, null, true),
-	BCPQC_SPHINCS_PLUS_SHAKE256_SLOW("SPHINCSPLUS", "SPHINCSPLUS", CodeProvider.BCPQC,CodeProvider.BCPQC, 1024, 31536000000L, null, true),
-	BCPQC_SPHINCS_PLUS_SHAKE256_FAST("SPHINCSPLUS", "SPHINCSPLUS", CodeProvider.BCPQC,CodeProvider.BCPQC, 1024, 31536000000L, null, true),
+	BCPQC_SPHINCS_PLUS_SHA256_SLOW("SPHINCSPLUS", "SPHINCSPLUS", CodeProvider.BCPQC,CodeProvider.BCPQC, 720, 31536000000L, null, true),
+	BCPQC_SPHINCS_PLUS_SHA256_FAST("SPHINCSPLUS", "SPHINCSPLUS", CodeProvider.BCPQC,CodeProvider.BCPQC, 720, 31536000000L, null, true),
+	BCPQC_SPHINCS_PLUS_SHAKE256_SLOW("SPHINCSPLUS", "SPHINCSPLUS", CodeProvider.BCPQC,CodeProvider.BCPQC, 720, 31536000000L, null, true),
+	BCPQC_SPHINCS_PLUS_SHAKE256_FAST("SPHINCSPLUS", "SPHINCSPLUS", CodeProvider.BCPQC,CodeProvider.BCPQC, 720, 31536000000L, null, true),
+	BCPQC_CHRYSTALS_DILITHIUM_2("Dilithium", "Dilithium_2", CodeProvider.BCPQC,CodeProvider.BCPQC, 10768, 31536000000L, null, true),
+	BCPQC_CHRYSTALS_DILITHIUM_3("Dilithium", "Dilithium_3", CodeProvider.BCPQC,CodeProvider.BCPQC, 15888, 31536000000L, null, true),
+	BCPQC_CHRYSTALS_DILITHIUM_5("Dilithium", "Dilithium_5", CodeProvider.BCPQC,CodeProvider.BCPQC, 21008, 31536000000L, null, true),
+	BCPQC_CHRYSTALS_DILITHIUM_2_AES("Dilithium", "Dilithium_2_AES", CodeProvider.BCPQC,CodeProvider.BCPQC, 10768, 31536000000L, null, true),
+	BCPQC_CHRYSTALS_DILITHIUM_3_AES("Dilithium", "Dilithium_3_AES", CodeProvider.BCPQC,CodeProvider.BCPQC, 15888, 31536000000L, null, true),
+	BCPQC_CHRYSTALS_DILITHIUM_5_AES("Dilithium", "Dilithium_5_AES", CodeProvider.BCPQC,CodeProvider.BCPQC, 21008, 31536000000L, null, true),
+	BCPQC_FALCON_512("Falcon", "Falcon512", CodeProvider.BCPQC,CodeProvider.BCPQC, 7376, 31536000000L, null, true),
+	BCPQC_FALCON_1024("Falcon", "Falcon1024", CodeProvider.BCPQC,CodeProvider.BCPQC, 14544, 31536000000L, null, true),
+
 	DEFAULT(BC_FIPS_SHA384withRSAandMGF1);
 
 	private final String signatureAlgorithmName;
@@ -220,7 +232,7 @@ public enum ASymmetricAuthenticatedSignatureType {
 	 * @param keySizeBits the size of the used key in bits
 	 * @return the maximum signature size in bits
 	 */
-	@Deprecated
+
 	public int getMaximumSignatureSizeBits(int keySizeBits) {
 		return getSignatureSizeBits(keySizeBits);
 	}
@@ -229,7 +241,7 @@ public enum ASymmetricAuthenticatedSignatureType {
 	 * @param keySizeBits the size of the used key in bits
 	 * @return the maximum signature size in bytes
 	 */
-	@Deprecated
+
 	public int getMaximumSignatureSizeBytes(int keySizeBits) {
 		return getSignatureSizeBits(keySizeBits)/8;
 	}
@@ -238,6 +250,7 @@ public enum ASymmetricAuthenticatedSignatureType {
 	 * @param keySizeBits the size of the used key in bits
 	 * @return the signature size in bits
 	 */
+	@SuppressWarnings("DeprecatedIsStillUsed")
 	@Deprecated
 	public int getSignatureSizeBits(int keySizeBits) {
 		if (this==BC_FIPS_SHA256withRSAandMGF1 || this== ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA384withRSAandMGF1 || this== ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA512withRSAandMGF1)
@@ -281,7 +294,22 @@ public enum ASymmetricAuthenticatedSignatureType {
 		else if (this==BCPQC_SPHINCS256_SHA3_512)
 			return 328000;
 		else if (this==BCPQC_SPHINCS_PLUS_SHA256_SLOW || this==BCPQC_SPHINCS_PLUS_SHA256_FAST || this==BCPQC_SPHINCS_PLUS_SHAKE256_SLOW || this==BCPQC_SPHINCS_PLUS_SHAKE256_FAST)
-			return 328000;
+			return 238336;
+		else if (this==BCPQC_CHRYSTALS_DILITHIUM_2 || this==BCPQC_CHRYSTALS_DILITHIUM_2_AES) {
+			return 19360;
+		}
+		else if (this==BCPQC_CHRYSTALS_DILITHIUM_3 || this==BCPQC_CHRYSTALS_DILITHIUM_3_AES) {
+			return 26344;
+		}
+		else if (this==BCPQC_CHRYSTALS_DILITHIUM_5 || this==BCPQC_CHRYSTALS_DILITHIUM_5_AES) {
+			return 36760;
+		}
+		else if (this==BCPQC_FALCON_512) {
+			return 5360;
+		}
+		else if (this==BCPQC_FALCON_1024) {
+			return 10320;
+		}
 		else if (this== ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA256withECDSA_P_256)
 			return 1112;
 		else if (this== ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA384withECDSA_P_384 || this== ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA512withECDSA_P_521)
@@ -306,9 +334,6 @@ public enum ASymmetricAuthenticatedSignatureType {
 		}
 		throw new IllegalArgumentException();
 	}
-	/*public int getMaxBlockSize(int keySizeBits) {
-		return keySizeBits / 8 - blockSizeDecrement;
-	}*/
 	public AbstractKeyPairGenerator getKeyPairGenerator(AbstractSecureRandom random)
 			throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
 		return getKeyPairGenerator(random, keySizeBits, System.currentTimeMillis(), System.currentTimeMillis() + expirationTimeMilis);
@@ -340,9 +365,17 @@ public enum ASymmetricAuthenticatedSignatureType {
 				kgp=new Sphincs256KeyPairGeneratorSpi();
 
 			}
-			else if (this.name().startsWith("BCPQC_SPHINCS_PLUS"))
+			else if (this.getKeyGeneratorAlgorithmName().equals(ASymmetricAuthenticatedSignatureType.BCPQC_SPHINCS_PLUS_SHAKE256_SLOW.getKeyGeneratorAlgorithmName()))
 			{
 				kgp=new SPHINCSPlusKeyPairGeneratorSpi();
+			}
+			else if (this.getSignatureAlgorithmName().equals(ASymmetricAuthenticatedSignatureType.BCPQC_CHRYSTALS_DILITHIUM_2.getSignatureAlgorithmName()))
+			{
+				kgp=new DilithiumKeyPairGeneratorSpi();
+			}
+			else if (this.getSignatureAlgorithmName().equals(ASymmetricAuthenticatedSignatureType.BCPQC_FALCON_512.getSignatureAlgorithmName()))
+			{
+				kgp=new FalconKeyPairGeneratorSpi();
 			}
 			else
 				kgp = KeyPairGenerator.getInstance(keyGeneratorAlgorithmName, codeProviderKeyGenerator.getCompatibleProvider());
@@ -372,5 +405,31 @@ public enum ASymmetricAuthenticatedSignatureType {
 
 	public ASymmetricAuthenticatedSignatureType getDerivedType() {
 		return derivedType;
+	}
+	public static void main(String[] args) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
+		Random r=new Random(System.nanoTime());
+		for (ASymmetricAuthenticatedSignatureType t : ASymmetricAuthenticatedSignatureType.values())
+		{
+			try(ASymmetricKeyPair kp=t.getKeyPairGenerator(SecureRandomType.DEFAULT.getSingleton(null)).generateKeyPair())
+			{
+				System.out.println(t+" : ");
+				System.out.println("\tPublic key size in bytes : "+kp.getASymmetricPublicKey().getKeyBytes().getBytes().length);
+				System.out.println("\tPublic key size in bits : "+kp.getASymmetricPublicKey().getKeyBytes().getBytes().length*8);
+				ASymmetricAuthenticatedSignerAlgorithm signer=new ASymmetricAuthenticatedSignerAlgorithm(kp.getASymmetricPrivateKey());
+				int maxSigLength=0;
+				for (int i=0;i<40;i++)
+				{
+					byte[] data=new byte[r.nextInt(4096)+42];
+					r.nextBytes(data);
+					signer.init();
+					signer.update(data);
+					maxSigLength=Math.max(maxSigLength, signer.getSignature().length*8);
+				}
+				System.out.println("\tSignature size in bits : "+maxSigLength);
+
+			}
+
+
+		}
 	}
 }

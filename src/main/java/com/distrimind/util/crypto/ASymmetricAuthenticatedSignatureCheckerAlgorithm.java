@@ -245,7 +245,7 @@ public class ASymmetricAuthenticatedSignatureCheckerAlgorithm extends AbstractAu
 		@Deprecated
 		@Override
 		public int getMacLengthBytes() {
-			return distantPublicKey.getAuthenticatedSignatureAlgorithmType().getSignatureSizeBytes(distantPublicKey.getKeySizeBits());
+			return distantPublicKey.getAuthenticatedSignatureAlgorithmType().getMaximumSignatureSizeBytes(distantPublicKey.getKeySizeBits());
 		}
 
 		@Override

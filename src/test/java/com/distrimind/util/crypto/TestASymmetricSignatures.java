@@ -125,6 +125,8 @@ public class TestASymmetricSignatures {
 			if (kpd3.getAuthenticatedSignatureAlgorithmType() != ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA384withECDSA_P_384
 					&& kpd3.getAuthenticatedSignatureAlgorithmType() != ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA256withECDSA_P_256
 					&& kpd3.getAuthenticatedSignatureAlgorithmType() != ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA512withECDSA_P_521
+					&& kpd3.getAuthenticatedSignatureAlgorithmType() != ASymmetricAuthenticatedSignatureType.BCPQC_FALCON_512
+					&& kpd3.getAuthenticatedSignatureAlgorithmType() != ASymmetricAuthenticatedSignatureType.BCPQC_FALCON_1024
 					/*&& kpd3.getAuthenticatedSignatureAlgorithmType() != ASymmetricAuthenticatedSignatureType.BC_SHA256withECDSA_CURVE_25519
 					&& kpd3.getAuthenticatedSignatureAlgorithmType() != ASymmetricAuthenticatedSignatureType.BC_SHA384withECDSA_CURVE_25519
 					&& kpd3.getAuthenticatedSignatureAlgorithmType() != ASymmetricAuthenticatedSignatureType.BC_SHA512withECDSA_CURVE_25519
@@ -141,9 +143,9 @@ public class TestASymmetricSignatures {
 				&& kpd.getAuthenticatedSignatureAlgorithmType()!=ASymmetricAuthenticatedSignatureType.BC_SHA384withECDSA_CURVE_41417
 				&& kpd.getAuthenticatedSignatureAlgorithmType()!=ASymmetricAuthenticatedSignatureType.BC_SHA512withECDSA_CURVE_41417	*/
 			)
-				Assert.assertEquals(kpd3.getAuthenticatedSignatureAlgorithmType().getSignatureSizeBits(kpd3.getKeySizeBits()), signature.length * 8);
+				Assert.assertEquals(kpd3.getAuthenticatedSignatureAlgorithmType().getMaximumSignatureSizeBits(kpd3.getKeySizeBits()), signature.length * 8);
 			else
-				Assert.assertTrue(kpd3.getAuthenticatedSignatureAlgorithmType().getSignatureSizeBits(kpd3.getKeySizeBits())>= signature.length * 8);
+				Assert.assertTrue(kpd3.getAuthenticatedSignatureAlgorithmType().getMaximumSignatureSizeBits(kpd3.getKeySizeBits())>= signature.length * 8);
 		}
 	}
 

@@ -34,9 +34,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
-import com.distrimind.bouncycastle.pqc.jcajce.spec.KyberParameterSpec;
-import com.distrimind.bouncycastle.pqc.jcajce.spec.SPHINCS256KeyGenParameterSpec;
-import com.distrimind.bouncycastle.pqc.jcajce.spec.SPHINCSPlusParameterSpec;
+import com.distrimind.bouncycastle.pqc.jcajce.spec.*;
 import com.distrimind.util.io.Integrity;
 import com.distrimind.util.io.MessageExternalizationException;
 
@@ -172,6 +170,38 @@ public final class JavaNativeKeyPairGenerator extends AbstractKeyPairGenerator {
 			else if (signatureType != null && signatureType.getKeyGeneratorAlgorithmName().equals(ASymmetricAuthenticatedSignatureType.BCPQC_SPHINCS_PLUS_SHA256_FAST.getKeyGeneratorAlgorithmName())) {
 				this.keySizeBits = signatureType.getDefaultKeySize();
 				keyPairGenerator.initialize(SPHINCSPlusParameterSpec.sha2_256f, _random.getJavaNativeSecureRandom());
+			}
+			else if (signatureType != null && signatureType.getKeyGeneratorAlgorithmName().equals(ASymmetricAuthenticatedSignatureType.BCPQC_CHRYSTALS_DILITHIUM_2.getKeyGeneratorAlgorithmName())) {
+				this.keySizeBits = signatureType.getDefaultKeySize();
+				keyPairGenerator.initialize(DilithiumParameterSpec.dilithium2, _random.getJavaNativeSecureRandom());
+			}
+			else if (signatureType != null && signatureType.getKeyGeneratorAlgorithmName().equals(ASymmetricAuthenticatedSignatureType.BCPQC_CHRYSTALS_DILITHIUM_3.getKeyGeneratorAlgorithmName())) {
+				this.keySizeBits = signatureType.getDefaultKeySize();
+				keyPairGenerator.initialize(DilithiumParameterSpec.dilithium3, _random.getJavaNativeSecureRandom());
+			}
+			else if (signatureType != null && signatureType.getKeyGeneratorAlgorithmName().equals(ASymmetricAuthenticatedSignatureType.BCPQC_CHRYSTALS_DILITHIUM_5.getKeyGeneratorAlgorithmName())) {
+				this.keySizeBits = signatureType.getDefaultKeySize();
+				keyPairGenerator.initialize(DilithiumParameterSpec.dilithium5, _random.getJavaNativeSecureRandom());
+			}
+			else if (signatureType != null && signatureType.getKeyGeneratorAlgorithmName().equals(ASymmetricAuthenticatedSignatureType.BCPQC_CHRYSTALS_DILITHIUM_2_AES.getKeyGeneratorAlgorithmName())) {
+				this.keySizeBits = signatureType.getDefaultKeySize();
+				keyPairGenerator.initialize(DilithiumParameterSpec.dilithium2_aes, _random.getJavaNativeSecureRandom());
+			}
+			else if (signatureType != null && signatureType.getKeyGeneratorAlgorithmName().equals(ASymmetricAuthenticatedSignatureType.BCPQC_CHRYSTALS_DILITHIUM_3_AES.getKeyGeneratorAlgorithmName())) {
+				this.keySizeBits = signatureType.getDefaultKeySize();
+				keyPairGenerator.initialize(DilithiumParameterSpec.dilithium3_aes, _random.getJavaNativeSecureRandom());
+			}
+			else if (signatureType != null && signatureType.getKeyGeneratorAlgorithmName().equals(ASymmetricAuthenticatedSignatureType.BCPQC_CHRYSTALS_DILITHIUM_5_AES.getKeyGeneratorAlgorithmName())) {
+				this.keySizeBits = signatureType.getDefaultKeySize();
+				keyPairGenerator.initialize(DilithiumParameterSpec.dilithium5_aes, _random.getJavaNativeSecureRandom());
+			}
+			else if (signatureType != null && signatureType.getKeyGeneratorAlgorithmName().equals(ASymmetricAuthenticatedSignatureType.BCPQC_FALCON_512.getKeyGeneratorAlgorithmName())) {
+				this.keySizeBits = signatureType.getDefaultKeySize();
+				keyPairGenerator.initialize(FalconParameterSpec.falcon_512, _random.getJavaNativeSecureRandom());
+			}
+			else if (signatureType != null && signatureType.getKeyGeneratorAlgorithmName().equals(ASymmetricAuthenticatedSignatureType.BCPQC_FALCON_1024.getKeyGeneratorAlgorithmName())) {
+				this.keySizeBits = signatureType.getDefaultKeySize();
+				keyPairGenerator.initialize(FalconParameterSpec.falcon_1024, _random.getJavaNativeSecureRandom());
 			}
 			else if (signatureType == null || signatureType.getCurveName() == null)
 				keyPairGenerator.initialize(new RSAKeyGenParameterSpec(keySize, RSAKeyGenParameterSpec.F4), _random.getJavaNativeSecureRandom());

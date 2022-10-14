@@ -174,6 +174,10 @@ public enum ASymmetricEncryptionType {
 				PKCS8EncodedKeySpec pkcsKeySpec = new PKCS8EncodedKeySpec(encodedKey);
 				if (algorithm.startsWith("CRYSTALS-Kyber"))
 					algorithm="Kyber";
+				else if (algorithm.startsWith(ASymmetricAuthenticatedSignatureType.BCPQC_CHRYSTALS_DILITHIUM_5.getSignatureAlgorithmName()))
+					algorithm=ASymmetricAuthenticatedSignatureType.BCPQC_CHRYSTALS_DILITHIUM_5.getSignatureAlgorithmName();
+				else if (algorithm.startsWith(ASymmetricAuthenticatedSignatureType.BCPQC_FALCON_512.getSignatureAlgorithmName()))
+					algorithm=ASymmetricAuthenticatedSignatureType.BCPQC_FALCON_512.getSignatureAlgorithmName();
 				KeyFactory kf = KeyFactory.getInstance(algorithm);
 				return kf.generatePrivate(pkcsKeySpec);
 			}
@@ -224,6 +228,10 @@ public enum ASymmetricEncryptionType {
             X509EncodedKeySpec pubKeySpec = new X509EncodedKeySpec(encodedKey);
 			if (algorithm.startsWith("CRYSTALS-Kyber"))
 				algorithm="Kyber";
+			else if (algorithm.startsWith(ASymmetricAuthenticatedSignatureType.BCPQC_CHRYSTALS_DILITHIUM_5.getSignatureAlgorithmName()))
+				algorithm=ASymmetricAuthenticatedSignatureType.BCPQC_CHRYSTALS_DILITHIUM_5.getSignatureAlgorithmName();
+			else if (algorithm.startsWith(ASymmetricAuthenticatedSignatureType.BCPQC_FALCON_512.getSignatureAlgorithmName()))
+				algorithm=ASymmetricAuthenticatedSignatureType.BCPQC_FALCON_512.getSignatureAlgorithmName();
             KeyFactory kf = KeyFactory.getInstance(algorithm);
             return kf.generatePublic(pubKeySpec);
 		} catch (IllegalAccessException | InstantiationException | InvocationTargetException e) {
