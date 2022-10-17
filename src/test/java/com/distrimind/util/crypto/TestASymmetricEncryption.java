@@ -431,15 +431,41 @@ public class TestASymmetricEncryption {
 		else if (astype.getAlgorithmName().equals(ASymmetricEncryptionType.BCPQC_CRYSTALS_KYBER_512.getAlgorithmName()))
 			kw=ASymmetricKeyWrapperType.BCPQC_CRYSTALS_KYBER_512;
 		else if (astype.getAlgorithmName().equals(ASymmetricEncryptionType.BCPQC_CRYSTALS_KYBER_768.getAlgorithmName()))
-			kw=ASymmetricKeyWrapperType.BCPQC_CRYSTALS_KYBER_512;
+			kw=ASymmetricKeyWrapperType.BCPQC_CRYSTALS_KYBER_768;
 		else if (astype.getAlgorithmName().equals(ASymmetricEncryptionType.BCPQC_CRYSTALS_KYBER_1024.getAlgorithmName()))
-			kw=ASymmetricKeyWrapperType.BCPQC_CRYSTALS_KYBER_512;
+			kw=ASymmetricKeyWrapperType.BCPQC_CRYSTALS_KYBER_1024;
 		else if (astype.getAlgorithmName().equals(ASymmetricEncryptionType.BCPQC_CRYSTALS_KYBER_512_AES.getAlgorithmName()))
 			kw=ASymmetricKeyWrapperType.BCPQC_CRYSTALS_KYBER_512_AES;
 		else if (astype.getAlgorithmName().equals(ASymmetricEncryptionType.BCPQC_CRYSTALS_KYBER_768_AES.getAlgorithmName()))
-			kw=ASymmetricKeyWrapperType.BCPQC_CRYSTALS_KYBER_512_AES;
+			kw=ASymmetricKeyWrapperType.BCPQC_CRYSTALS_KYBER_768_AES;
 		else if (astype.getAlgorithmName().equals(ASymmetricEncryptionType.BCPQC_CRYSTALS_KYBER_1024_AES.getAlgorithmName()))
-			kw=ASymmetricKeyWrapperType.BCPQC_CRYSTALS_KYBER_512_AES;
+			kw=ASymmetricKeyWrapperType.BCPQC_CRYSTALS_KYBER_1024_AES;
+		else if (astype.getAlgorithmName().equals(ASymmetricEncryptionType.BCPQC_NTRU_HPS2048509.getAlgorithmName()))
+			kw=ASymmetricKeyWrapperType.BCPQC_NTRU_HPS2048509;
+		else if (astype.getAlgorithmName().equals(ASymmetricEncryptionType.BCPQC_NTRU_HPS2048677.getAlgorithmName()))
+			kw=ASymmetricKeyWrapperType.BCPQC_NTRU_HPS2048677;
+		else if (astype.getAlgorithmName().equals(ASymmetricEncryptionType.BCPQC_NTRU_HPS4096821.getAlgorithmName()))
+			kw=ASymmetricKeyWrapperType.BCPQC_NTRU_HPS4096821;
+		else if (astype.getAlgorithmName().equals(ASymmetricEncryptionType.BCPQC_NTRU_HRSS701.getAlgorithmName()))
+			kw=ASymmetricKeyWrapperType.BCPQC_NTRU_HRSS701;
+		else if (astype.getAlgorithmName().equals(ASymmetricEncryptionType.BCPQC_SABER_LIGHT_KEM128R3.getAlgorithmName()))
+			kw=ASymmetricKeyWrapperType.BCPQC_SABER_LIGHT_KEM128R3;
+		else if (astype.getAlgorithmName().equals(ASymmetricEncryptionType.BCPQC_SABER_LIGHT_KEM192R3.getAlgorithmName()))
+			kw=ASymmetricKeyWrapperType.BCPQC_SABER_LIGHT_KEM192R3;
+		else if (astype.getAlgorithmName().equals(ASymmetricEncryptionType.BCPQC_SABER_LIGHT_KEM256R3.getAlgorithmName()))
+			kw=ASymmetricKeyWrapperType.BCPQC_SABER_LIGHT_KEM256R3;
+		else if (astype.getAlgorithmName().equals(ASymmetricEncryptionType.BCPQC_SABER_KEM128R3.getAlgorithmName()))
+			kw=ASymmetricKeyWrapperType.BCPQC_SABER_KEM128R3;
+		else if (astype.getAlgorithmName().equals(ASymmetricEncryptionType.BCPQC_SABER_KEM192R3.getAlgorithmName()))
+			kw=ASymmetricKeyWrapperType.BCPQC_SABER_KEM192R3;
+		else if (astype.getAlgorithmName().equals(ASymmetricEncryptionType.BCPQC_SABER_KEM256R3.getAlgorithmName()))
+			kw=ASymmetricKeyWrapperType.BCPQC_SABER_KEM256R3;
+		else if (astype.getAlgorithmName().equals(ASymmetricEncryptionType.BCPQC_SABER_FIRE_KEM128R3.getAlgorithmName()))
+			kw=ASymmetricKeyWrapperType.BCPQC_SABER_FIRE_KEM128R3;
+		else if (astype.getAlgorithmName().equals(ASymmetricEncryptionType.BCPQC_SABER_FIRE_KEM192R3.getAlgorithmName()))
+			kw=ASymmetricKeyWrapperType.BCPQC_SABER_FIRE_KEM192R3;
+		else if (astype.getAlgorithmName().equals(ASymmetricEncryptionType.BCPQC_SABER_FIRE_KEM256R3.getAlgorithmName()))
+			kw=ASymmetricKeyWrapperType.BCPQC_SABER_FIRE_KEM256R3;
 		else
 			kw=ASymmetricKeyWrapperType.BC_FIPS_RSA_OAEP_WITH_SHA3_512;
 
@@ -586,7 +612,7 @@ public class TestASymmetricEncryption {
 	public Object[][] provideDataForASymetricEncryptions() {
 		ArrayList<Object[]> res = new ArrayList<>(ASymmetricEncryptionType.values().length);
 		for (ASymmetricEncryptionType v : ASymmetricEncryptionType.values()) {
-			if (!v.canBeUsedForEncryption())
+			if (!v.isUsableInEncryptionMode())
 				continue;
 			Object[] o = new Object[1];
 			o[0] = v;
@@ -623,10 +649,10 @@ public class TestASymmetricEncryption {
 		for (ASymmetricEncryptionType v : ASymmetricEncryptionType.values()) {
 			if (v.isPostQuantumAlgorithm())
 				continue;
-			if (!v.canBeUsedForEncryption())
+			if (!v.isUsableInEncryptionMode())
 				continue;
 			for (ASymmetricEncryptionType v2 : ASymmetricEncryptionType.values()) {
-				if (!v2.canBeUsedForEncryption())
+				if (!v2.isUsableInEncryptionMode())
 					continue;
 				if (v2.isPostQuantumAlgorithm())
 				{

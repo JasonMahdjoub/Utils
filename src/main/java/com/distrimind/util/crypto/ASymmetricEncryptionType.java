@@ -41,8 +41,9 @@ import com.distrimind.bcfips.crypto.asymmetric.AsymmetricXDHPublicKey;
 import com.distrimind.bcfips.crypto.fips.FipsRSA;
 import com.distrimind.bcfips.crypto.general.EdEC;
 import com.distrimind.bouncycastle.pqc.jcajce.provider.dilithium.DilithiumKeyFactorySpi;
-import com.distrimind.bouncycastle.pqc.jcajce.provider.dilithium.DilithiumKeyPairGeneratorSpi;
 import com.distrimind.bouncycastle.pqc.jcajce.provider.falcon.FalconKeyFactorySpi;
+import com.distrimind.bouncycastle.pqc.jcajce.provider.ntru.NTRUKeyFactorySpi;
+import com.distrimind.bouncycastle.pqc.jcajce.provider.saber.SABERKeyFactorySpi;
 import com.distrimind.bouncycastle.pqc.jcajce.provider.sphincs.Sphincs256KeyFactorySpi;
 import com.distrimind.bouncycastle.pqc.jcajce.provider.sphincsplus.SPHINCSPlusKeyFactorySpi;
 import com.distrimind.util.UtilClassLoader;
@@ -67,7 +68,7 @@ import java.security.spec.X509EncodedKeySpec;
  * @version 4.1
  * @since Utils 1.4
  */
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"unchecked", "BooleanMethodIsAlwaysInverted"})
 public enum ASymmetricEncryptionType {
 	RSA_OAEPWithSHA256AndMGF1Padding("RSA", "ECB", "OAEPWITHSHA-256ANDMGF1PADDING", ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA384withRSA,
 			3072, 31536000000L, (short) 66, CodeProvider.SunJCE,CodeProvider.SunRsaSign, FipsRSA.ALGORITHM, false),
@@ -91,12 +92,25 @@ public enum ASymmetricEncryptionType {
 	//BCPQC_MCELIECE_KOBARA_IMAI_CCA2_SHA512("McElieceKobaraImai", "ECB", "NoPadding", null, 1048576, 31536000000L, (short)0, CodeProvider.BCPQC, CodeProvider.BCPQC, null, true),
 	//BC_FIPS_RSA_OAEPWithSHA256AndMGF1Padding("RSA", "NONE", "OAEPwithSHA256andMGF1Padding", ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA384withRSAandMGF1, (short) 3072, 31536000000l, (short) 66,CodeProvider.BCFIPS,CodeProvider.BCFIPS, FipsRSA.ALGORITHM),
 	//BC_FIPS_RSA_PKCS1Padding("RSA", "NONE", "PKCS1Padding", ASymmetricAuthentifiedSignatureType.BC_FIPS_SHA384withRSAandMGF1, (short) 3072, 31536000000l, (short) 11,CodeProvider.BCFIPS,CodeProvider.BCFIPS, FipsRSA.ALGORITHM),
-	BCPQC_CRYSTALS_KYBER_512("CRYSTALS-Kyber-512", "ECB", "NoPadding", ASymmetricAuthenticatedSignatureType.BCPQC_SPHINCS_PLUS_SHA256_FAST, 834*8, 31536000000L, (short)0, CodeProvider.BCPQC, CodeProvider.BCPQC, null, true),
-	BCPQC_CRYSTALS_KYBER_768("CRYSTALS-Kyber-768", "ECB", "NoPadding", ASymmetricAuthenticatedSignatureType.BCPQC_SPHINCS_PLUS_SHA256_FAST, 1218*8, 31536000000L, (short)0, CodeProvider.BCPQC, CodeProvider.BCPQC, null, true),
-	BCPQC_CRYSTALS_KYBER_1024("CRYSTALS-Kyber-1024", "ECB", "NoPadding", ASymmetricAuthenticatedSignatureType.BCPQC_SPHINCS_PLUS_SHA256_FAST, 1602*8, 31536000000L, (short)0, CodeProvider.BCPQC, CodeProvider.BCPQC, null, true),
-	BCPQC_CRYSTALS_KYBER_512_AES("CRYSTALS-Kyber-512-AES", "ECB", "NoPadding", ASymmetricAuthenticatedSignatureType.BCPQC_SPHINCS_PLUS_SHA256_FAST, 834*8, 31536000000L, (short)0, CodeProvider.BCPQC, CodeProvider.BCPQC, null, true),
-	BCPQC_CRYSTALS_KYBER_768_AES("CRYSTALS-Kyber-768-AES", "ECB", "NoPadding", ASymmetricAuthenticatedSignatureType.BCPQC_SPHINCS_PLUS_SHA256_FAST, 1218*8, 31536000000L, (short)0, CodeProvider.BCPQC, CodeProvider.BCPQC, null, true),
-	BCPQC_CRYSTALS_KYBER_1024_AES("CRYSTALS-Kyber-1024-AES", "ECB", "NoPadding", ASymmetricAuthenticatedSignatureType.BCPQC_SPHINCS_PLUS_SHA256_FAST, 1602*8, 31536000000L, (short)0, CodeProvider.BCPQC, CodeProvider.BCPQC, null, true),
+	BCPQC_CRYSTALS_KYBER_512("CRYSTALS-Kyber-512", "ECB", "NoPadding", ASymmetricAuthenticatedSignatureType.BCPQC_CHRYSTALS_DILITHIUM_2, 6672, 31536000000L, (short)0, CodeProvider.BCPQC, CodeProvider.BCPQC, null, true),
+	BCPQC_CRYSTALS_KYBER_768("CRYSTALS-Kyber-768", "ECB", "NoPadding", ASymmetricAuthenticatedSignatureType.BCPQC_CHRYSTALS_DILITHIUM_3, 9744, 31536000000L, (short)0, CodeProvider.BCPQC, CodeProvider.BCPQC, null, true),
+	BCPQC_CRYSTALS_KYBER_1024("CRYSTALS-Kyber-1024", "ECB", "NoPadding", ASymmetricAuthenticatedSignatureType.BCPQC_CHRYSTALS_DILITHIUM_5, 12816, 31536000000L, (short)0, CodeProvider.BCPQC, CodeProvider.BCPQC, null, true),
+	BCPQC_CRYSTALS_KYBER_512_AES("CRYSTALS-Kyber-512-AES", "ECB", "NoPadding", ASymmetricAuthenticatedSignatureType.BCPQC_CHRYSTALS_DILITHIUM_2_AES, 6672, 31536000000L, (short)0, CodeProvider.BCPQC, CodeProvider.BCPQC, null, true),
+	BCPQC_CRYSTALS_KYBER_768_AES("CRYSTALS-Kyber-768-AES", "ECB", "NoPadding", ASymmetricAuthenticatedSignatureType.BCPQC_CHRYSTALS_DILITHIUM_3_AES, 9744, 31536000000L, (short)0, CodeProvider.BCPQC, CodeProvider.BCPQC, null, true),
+	BCPQC_CRYSTALS_KYBER_1024_AES("CRYSTALS-Kyber-1024-AES", "ECB", "NoPadding", ASymmetricAuthenticatedSignatureType.BCPQC_CHRYSTALS_DILITHIUM_5_AES, 12816, 31536000000L, (short)0, CodeProvider.BCPQC, CodeProvider.BCPQC, null, true),
+	BCPQC_NTRU_HPS2048509("NTRU-hps2048509", "ECB", "NoPadding", ASymmetricAuthenticatedSignatureType.BCPQC_CHRYSTALS_DILITHIUM_2_AES, 5816, 31536000000L, (short)0, CodeProvider.BCPQC, CodeProvider.BCPQC, null, true),
+	BCPQC_NTRU_HPS2048677("NTRU-hps2048677", "ECB", "NoPadding", ASymmetricAuthenticatedSignatureType.BCPQC_CHRYSTALS_DILITHIUM_3_AES, 5816, 31536000000L, (short)0, CodeProvider.BCPQC, CodeProvider.BCPQC, null, true),
+	BCPQC_NTRU_HPS4096821("NTRU-hps4096821", "ECB", "NoPadding", ASymmetricAuthenticatedSignatureType.BCPQC_CHRYSTALS_DILITHIUM_5_AES, 5816, 31536000000L, (short)0, CodeProvider.BCPQC, CodeProvider.BCPQC, null, true),
+	BCPQC_NTRU_HRSS701("NTRU-hrss701", "ECB", "NoPadding", ASymmetricAuthenticatedSignatureType.BCPQC_CHRYSTALS_DILITHIUM_2, 5816, 31536000000L, (short)0, CodeProvider.BCPQC, CodeProvider.BCPQC, null, true),
+	BCPQC_SABER_LIGHT_KEM128R3("SABER-light-kem128r3", "ECB", "NoPadding", ASymmetricAuthenticatedSignatureType.BCPQC_CHRYSTALS_DILITHIUM_2, 8192, 31536000000L, (short)0, CodeProvider.BCPQC, CodeProvider.BCPQC, null, true),
+	BCPQC_SABER_LIGHT_KEM192R3("SABER-light-kem192r3", "ECB", "NoPadding", ASymmetricAuthenticatedSignatureType.BCPQC_CHRYSTALS_DILITHIUM_3, 8192, 31536000000L, (short)0, CodeProvider.BCPQC, CodeProvider.BCPQC, null, true),
+	BCPQC_SABER_LIGHT_KEM256R3("SABER-light-kem256r3", "ECB", "NoPadding", ASymmetricAuthenticatedSignatureType.BCPQC_CHRYSTALS_DILITHIUM_5, 8192, 31536000000L, (short)0, CodeProvider.BCPQC, CodeProvider.BCPQC, null, true),
+	BCPQC_SABER_KEM128R3("SABER-kem128r3", "ECB", "NoPadding", ASymmetricAuthenticatedSignatureType.BCPQC_CHRYSTALS_DILITHIUM_2_AES, 8192, 31536000000L, (short)0, CodeProvider.BCPQC, CodeProvider.BCPQC, null, true),
+	BCPQC_SABER_KEM192R3("SABER-kem192r3", "ECB", "NoPadding", ASymmetricAuthenticatedSignatureType.BCPQC_CHRYSTALS_DILITHIUM_3_AES, 8192, 31536000000L, (short)0, CodeProvider.BCPQC, CodeProvider.BCPQC, null, true),
+	BCPQC_SABER_KEM256R3("SABER-kem256r3", "ECB", "NoPadding", ASymmetricAuthenticatedSignatureType.BCPQC_CHRYSTALS_DILITHIUM_5_AES, 8192, 31536000000L, (short)0, CodeProvider.BCPQC, CodeProvider.BCPQC, null, true),
+	BCPQC_SABER_FIRE_KEM128R3("SABER-fire-kem128r3", "ECB", "NoPadding", ASymmetricAuthenticatedSignatureType.BCPQC_CHRYSTALS_DILITHIUM_2_AES, 8192, 31536000000L, (short)0, CodeProvider.BCPQC, CodeProvider.BCPQC, null, true),
+	BCPQC_SABER_FIRE_KEM192R3("SABER-fire-kem192r3", "ECB", "NoPadding", ASymmetricAuthenticatedSignatureType.BCPQC_CHRYSTALS_DILITHIUM_3_AES, 8192, 31536000000L, (short)0, CodeProvider.BCPQC, CodeProvider.BCPQC, null, true),
+	BCPQC_SABER_FIRE_KEM256R3("SABER-fire-kem256r3", "ECB", "NoPadding", ASymmetricAuthenticatedSignatureType.BCPQC_CHRYSTALS_DILITHIUM_5_AES, 8192, 31536000000L, (short)0, CodeProvider.BCPQC, CodeProvider.BCPQC, null, true),
 	DEFAULT(RSA_OAEPWithSHA512AndMGF1Padding);
 
 
@@ -169,6 +183,16 @@ public enum ASymmetricEncryptionType {
 				Sphincs256KeyFactorySpi kf=new Sphincs256KeyFactorySpi();
 				return kf.engineGeneratePrivate(new PKCS8EncodedKeySpec(encodedKey));
 			}
+			else if (algorithmType.startsWith("BCPQC_NTRU"))
+			{
+				NTRUKeyFactorySpi kf=new NTRUKeyFactorySpi();
+				return kf.engineGeneratePrivate(new PKCS8EncodedKeySpec(encodedKey));
+			}
+			else if (algorithmType.startsWith("BCPQC_SABER"))
+			{
+				SABERKeyFactorySpi kf=new SABERKeyFactorySpi();
+				return kf.engineGeneratePrivate(new PKCS8EncodedKeySpec(encodedKey));
+			}
 			else if (algorithmType.contains(ASymmetricAuthenticatedSignatureType.BC_FIPS_Ed25519.getCurveName()) || algorithmType.contains(ASymmetricAuthenticatedSignatureType.BC_FIPS_Ed448.getCurveName()))
 			{
 				if (xdh)
@@ -219,6 +243,16 @@ public enum ASymmetricEncryptionType {
 			else if (algorithmType.startsWith("BCPQC_SPHINCS"))
 			{
 				Sphincs256KeyFactorySpi kf=new Sphincs256KeyFactorySpi();
+				return kf.engineGeneratePublic(new X509EncodedKeySpec(encodedKey));
+			}
+			else if (algorithmType.startsWith("BCPQC_NTRU"))
+			{
+				NTRUKeyFactorySpi kf=new NTRUKeyFactorySpi();
+				return kf.engineGeneratePublic(new X509EncodedKeySpec(encodedKey));
+			}
+			else if (algorithmType.startsWith("BCPQC_SABER"))
+			{
+				SABERKeyFactorySpi kf=new SABERKeyFactorySpi();
 				return kf.engineGeneratePublic(new X509EncodedKeySpec(encodedKey));
 			}
 			else if (algorithmType.contains(ASymmetricAuthenticatedSignatureType.BC_FIPS_Ed25519.getCurveName()))
@@ -446,6 +480,22 @@ public enum ASymmetricEncryptionType {
 					throw new MessageExternalizationException(Integrity.FAIL, e);
 				}
 			}
+			else if (this.getAlgorithmName().startsWith("NTRU"))
+			{
+				try {
+					return new JavaNativeCipher(Cipher.getInstance("NTRU", codeProviderForEncryption.getCompatibleProvider()));
+				} catch (NoSuchPaddingException e) {
+					throw new MessageExternalizationException(Integrity.FAIL, e);
+				}
+			}
+			else if (this.getAlgorithmName().startsWith("SABER"))
+			{
+				try {
+					return new JavaNativeCipher(Cipher.getInstance("SABER", codeProviderForEncryption.getCompatibleProvider()));
+				} catch (NoSuchPaddingException e) {
+					throw new MessageExternalizationException(Integrity.FAIL, e);
+				}
+			}
 			else
 				throw new IllegalAccessError();
 		} else if (codeProviderForEncryption == CodeProvider.BCFIPS || codeProviderForEncryption == CodeProvider.BC) {
@@ -459,11 +509,7 @@ public enum ASymmetricEncryptionType {
 		}
 	}
 
-	@SuppressWarnings("BooleanMethodIsAlwaysInverted")
-	public boolean canBeUsedForEncryption()
-	{
-		return !getAlgorithmName().startsWith("CRYSTALS-Kyber");
-	}
+
 	
 	public int getDefaultKeySizeBits() {
 		return keySizeBits;
@@ -516,6 +562,20 @@ public enum ASymmetricEncryptionType {
 			{
 
 				KeyPairGenerator kgp = KeyPairGenerator.getInstance("Kyber", codeProviderForKeyGenerator.getCompatibleProvider());
+				JavaNativeKeyPairGenerator res = new JavaNativeKeyPairGenerator(this, kgp);
+				res.initialize(keySizeBits, publicKeyValidityBeginDateUTC, expirationTimeUTC, random);
+				return res;
+			}
+			else if (this.getAlgorithmName().startsWith("NTRU"))
+			{
+				KeyPairGenerator kgp = KeyPairGenerator.getInstance("NTRU", codeProviderForKeyGenerator.getCompatibleProvider());
+				JavaNativeKeyPairGenerator res = new JavaNativeKeyPairGenerator(this, kgp);
+				res.initialize(keySizeBits, publicKeyValidityBeginDateUTC, expirationTimeUTC, random);
+				return res;
+			}
+			else if (this.getAlgorithmName().startsWith("SABER"))
+			{
+				KeyPairGenerator kgp = KeyPairGenerator.getInstance("SABER", codeProviderForKeyGenerator.getCompatibleProvider());
 				JavaNativeKeyPairGenerator res = new JavaNativeKeyPairGenerator(this, kgp);
 				res.initialize(keySizeBits, publicKeyValidityBeginDateUTC, expirationTimeUTC, random);
 				return res;
@@ -575,4 +635,22 @@ public enum ASymmetricEncryptionType {
 		return derivedType;
 	}
 
+	public static void main(String[] args) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
+		for (ASymmetricEncryptionType t : ASymmetricEncryptionType.values())
+		{
+			try(ASymmetricKeyPair kp=t.getKeyPairGenerator(SecureRandomType.DEFAULT.getSingleton(null)).generateKeyPair()) {
+				int s =kp.getASymmetricPublicKey().getKeyBytes().getBytes().length;
+				System.out.println(t + " : \n\tpublic key size in bytes: " + s + "\n\tpublic key size in bits: " + (s * 8));
+			}
+		}
+	}
+
+	public boolean isUsableInWrappingMode()
+	{
+		return !isUsableInEncryptionMode();
+	}
+	public boolean isUsableInEncryptionMode()
+	{
+		return !isPostQuantumAlgorithm() || algorithmName.contains("McEliece");
+	}
 }

@@ -80,6 +80,8 @@ public class Utils {
 									.addItem(NEW_FEATURE, "Add possibility to use encoder and decoder as continuous network stream. Main secret key is regenerated after each encoding.")
 									.addItem(NEW_FEATURE, "Add BouncyCastle Sphincs+ asymmetric authenticated signature post quantum algorithms.")
 									.addItem(NEW_FEATURE, "Add Chrystals-Kyber asymmetric key wrappers.")
+									.addItem(NEW_FEATURE, "Add NTRU asymmetric key wrappers.")
+									.addItem(NEW_FEATURE, "Add SABER asymmetric key wrappers.")
 									.addItem(INTERNAL_CHANGE, "Encode key types and algorithm types with their derived final type")
 									.addItem(NEW_FEATURE, "Add functions ASymmetricKeyWrapperType.getKeyPairGenerator(...).")
 									.addItem(NEW_FEATURE, "Add BouncyCastle Chrystals-Dilithium asymmetric authenticated signature post quantum algorithms.")

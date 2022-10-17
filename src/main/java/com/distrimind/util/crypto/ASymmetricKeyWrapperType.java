@@ -101,12 +101,38 @@ public enum ASymmetricKeyWrapperType {
 	BCPQC_CRYSTALS_KYBER_512_AES("Kyber",CodeProvider.BCPQC, false, "512_AES", null, true, ASymmetricEncryptionType.BCPQC_CRYSTALS_KYBER_512_AES),
 	BCPQC_CRYSTALS_KYBER_768_AES("Kyber",CodeProvider.BCPQC, false, "768_AES", null, true, ASymmetricEncryptionType.BCPQC_CRYSTALS_KYBER_768_AES),
 	BCPQC_CRYSTALS_KYBER_1024_AES("Kyber",CodeProvider.BCPQC, false, "1024_AES", null, true, ASymmetricEncryptionType.BCPQC_CRYSTALS_KYBER_1024_AES),
-	HYBRID_BCPQC_BCPQC_CRYSTALS_KYBER_512_AND_BC_FIPS_RSA_OAEP_WITH_SHA3_512(BCPQC_CRYSTALS_KYBER_512, BC_FIPS_RSA_OAEP_WITH_SHA3_512),
-	HYBRID_BCPQC_BCPQC_CRYSTALS_KYBER_768_AND_BC_FIPS_RSA_OAEP_WITH_SHA3_512(BCPQC_CRYSTALS_KYBER_768, BC_FIPS_RSA_OAEP_WITH_SHA3_512),
-	HYBRID_BCPQC_BCPQC_CRYSTALS_KYBER_1024_AND_BC_FIPS_RSA_OAEP_WITH_SHA3_512(BCPQC_CRYSTALS_KYBER_1024, BC_FIPS_RSA_OAEP_WITH_SHA3_512),
-	HYBRID_BCPQC_BCPQC_CRYSTALS_KYBER_512_AES_AND_BC_FIPS_RSA_OAEP_WITH_SHA3_512(BCPQC_CRYSTALS_KYBER_512_AES, BC_FIPS_RSA_OAEP_WITH_SHA3_512),
-	HYBRID_BCPQC_BCPQC_CRYSTALS_KYBER_768_AES_AND_BC_FIPS_RSA_OAEP_WITH_SHA3_512(BCPQC_CRYSTALS_KYBER_768_AES, BC_FIPS_RSA_OAEP_WITH_SHA3_512),
-	HYBRID_BCPQC_BCPQC_CRYSTALS_KYBER_1024_AES_AND_BC_FIPS_RSA_OAEP_WITH_SHA3_512(BCPQC_CRYSTALS_KYBER_1024_AES, BC_FIPS_RSA_OAEP_WITH_SHA3_512),
+	HYBRID_BCPQC_CRYSTALS_KYBER_512_AND_BC_FIPS_RSA_OAEP_WITH_SHA3_512(BCPQC_CRYSTALS_KYBER_512, BC_FIPS_RSA_OAEP_WITH_SHA3_512),
+	HYBRID_BCPQC_CRYSTALS_KYBER_768_AND_BC_FIPS_RSA_OAEP_WITH_SHA3_512(BCPQC_CRYSTALS_KYBER_768, BC_FIPS_RSA_OAEP_WITH_SHA3_512),
+	HYBRID_BCPQC_CRYSTALS_KYBER_1024_AND_BC_FIPS_RSA_OAEP_WITH_SHA3_512(BCPQC_CRYSTALS_KYBER_1024, BC_FIPS_RSA_OAEP_WITH_SHA3_512),
+	HYBRID_BCPQC_CRYSTALS_KYBER_512_AES_AND_BC_FIPS_RSA_OAEP_WITH_SHA3_512(BCPQC_CRYSTALS_KYBER_512_AES, BC_FIPS_RSA_OAEP_WITH_SHA3_512),
+	HYBRID_BCPQC_CRYSTALS_KYBER_768_AES_AND_BC_FIPS_RSA_OAEP_WITH_SHA3_512(BCPQC_CRYSTALS_KYBER_768_AES, BC_FIPS_RSA_OAEP_WITH_SHA3_512),
+	HYBRID_BCPQC_CRYSTALS_KYBER_1024_AES_AND_BC_FIPS_RSA_OAEP_WITH_SHA3_512(BCPQC_CRYSTALS_KYBER_1024_AES, BC_FIPS_RSA_OAEP_WITH_SHA3_512),
+	BCPQC_NTRU_HPS2048509("NTRU",CodeProvider.BCPQC, false, "512", null, true, ASymmetricEncryptionType.BCPQC_NTRU_HPS2048509),
+	BCPQC_NTRU_HPS2048677("NTRU",CodeProvider.BCPQC, false, "512", null, true, ASymmetricEncryptionType.BCPQC_NTRU_HPS2048677),
+	BCPQC_NTRU_HPS4096821("NTRU",CodeProvider.BCPQC, false, "512", null, true, ASymmetricEncryptionType.BCPQC_NTRU_HPS4096821),
+	BCPQC_NTRU_HRSS701("NTRU",CodeProvider.BCPQC, false, "512", null, true, ASymmetricEncryptionType.BCPQC_NTRU_HRSS701),
+	BCPQC_SABER_LIGHT_KEM128R3("SABER",CodeProvider.BCPQC, false, "512", null, true, ASymmetricEncryptionType.BCPQC_SABER_LIGHT_KEM128R3),
+	BCPQC_SABER_LIGHT_KEM192R3("SABER",CodeProvider.BCPQC, false, "512", null, true, ASymmetricEncryptionType.BCPQC_SABER_LIGHT_KEM192R3),
+	BCPQC_SABER_LIGHT_KEM256R3("SABER",CodeProvider.BCPQC, false, "512", null, true, ASymmetricEncryptionType.BCPQC_SABER_LIGHT_KEM256R3),
+	BCPQC_SABER_KEM128R3("SABER",CodeProvider.BCPQC, false, "512", null, true, ASymmetricEncryptionType.BCPQC_SABER_KEM128R3),
+	BCPQC_SABER_KEM192R3("SABER",CodeProvider.BCPQC, false, "512", null, true, ASymmetricEncryptionType.BCPQC_SABER_KEM192R3),
+	BCPQC_SABER_KEM256R3("SABER",CodeProvider.BCPQC, false, "512", null, true, ASymmetricEncryptionType.BCPQC_SABER_KEM256R3),
+	BCPQC_SABER_FIRE_KEM128R3("SABER",CodeProvider.BCPQC, false, "512", null, true, ASymmetricEncryptionType.BCPQC_SABER_FIRE_KEM128R3),
+	BCPQC_SABER_FIRE_KEM192R3("SABER",CodeProvider.BCPQC, false, "512", null, true, ASymmetricEncryptionType.BCPQC_SABER_FIRE_KEM192R3),
+	BCPQC_SABER_FIRE_KEM256R3("SABER",CodeProvider.BCPQC, false, "512", null, true, ASymmetricEncryptionType.BCPQC_SABER_FIRE_KEM256R3),
+	HYBRID_BCPQC_NTRU_HPS2048509_AND_BC_FIPS_RSA_OAEP_WITH_SHA3_512(BCPQC_NTRU_HPS2048509, BC_FIPS_RSA_OAEP_WITH_SHA3_512),
+	HYBRID_BCPQC_NTRU_HPS2048677_AND_BC_FIPS_RSA_OAEP_WITH_SHA3_512(BCPQC_NTRU_HPS2048677, BC_FIPS_RSA_OAEP_WITH_SHA3_512),
+	HYBRID_BCPQC_NTRU_HPS4096821_AND_BC_FIPS_RSA_OAEP_WITH_SHA3_512(BCPQC_NTRU_HPS4096821, BC_FIPS_RSA_OAEP_WITH_SHA3_512),
+	HYBRID_BCPQC_NTRU_HRSS701_AND_BC_FIPS_RSA_OAEP_WITH_SHA3_512(BCPQC_NTRU_HRSS701, BC_FIPS_RSA_OAEP_WITH_SHA3_512),
+	HYBRID_BCPQC_SABER_LIGHT_KEM128R3_AND_BC_FIPS_RSA_OAEP_WITH_SHA3_512(BCPQC_SABER_LIGHT_KEM128R3, BC_FIPS_RSA_OAEP_WITH_SHA3_512),
+	HYBRID_BCPQC_SABER_LIGHT_KEM192R3_AND_BC_FIPS_RSA_OAEP_WITH_SHA3_512(BCPQC_SABER_LIGHT_KEM192R3, BC_FIPS_RSA_OAEP_WITH_SHA3_512),
+	HYBRID_BCPQC_SABER_LIGHT_KEM256R3_AND_BC_FIPS_RSA_OAEP_WITH_SHA3_512(BCPQC_SABER_LIGHT_KEM256R3, BC_FIPS_RSA_OAEP_WITH_SHA3_512),
+	HYBRID_BCPQC_SABER_KEM128R3_AND_BC_FIPS_RSA_OAEP_WITH_SHA3_512(BCPQC_SABER_KEM128R3, BC_FIPS_RSA_OAEP_WITH_SHA3_512),
+	HYBRID_BCPQC_SABER_KEM192R3_AND_BC_FIPS_RSA_OAEP_WITH_SHA3_512(BCPQC_SABER_KEM192R3, BC_FIPS_RSA_OAEP_WITH_SHA3_512),
+	HYBRID_BCPQC_SABER_KEM256R3_AND_BC_FIPS_RSA_OAEP_WITH_SHA3_512(BCPQC_SABER_KEM256R3, BC_FIPS_RSA_OAEP_WITH_SHA3_512),
+	HYBRID_BCPQC_SABER_FIRE_KEM128R3_AND_BC_FIPS_RSA_OAEP_WITH_SHA3_512(BCPQC_SABER_FIRE_KEM128R3, BC_FIPS_RSA_OAEP_WITH_SHA3_512),
+	HYBRID_BCPQC_SABER_FIRE_KEM192R3_AND_BC_FIPS_RSA_OAEP_WITH_SHA3_512(BCPQC_SABER_FIRE_KEM192R3, BC_FIPS_RSA_OAEP_WITH_SHA3_512),
+	HYBRID_BCPQC_SABER_FIRE_KEM256R3_AND_BC_FIPS_RSA_OAEP_WITH_SHA3_512(BCPQC_SABER_FIRE_KEM256R3, BC_FIPS_RSA_OAEP_WITH_SHA3_512),
 	//BC_FIPS_RSA_KTS_KTM("RSA-KTS-KEM-KWS",CodeProvider.BCFIPS, false),
 	DEFAULT(BC_FIPS_RSA_OAEP_WITH_PARAMETERS_SHA3_384);
 	
@@ -288,9 +314,8 @@ public enum ASymmetricKeyWrapperType {
 							|| (keyToWrap.getEncryptionAlgorithmType() != null && (provider == CodeProvider.GNU_CRYPTO) != (keyToWrap.getEncryptionAlgorithmType().getCodeProviderForEncryption() == CodeProvider.GNU_CRYPTO)))
 						throw new IllegalArgumentException("The keys must come from the same providers");
 
-					if ((algorithmName.equals(BCPQC_CRYSTALS_KYBER_512.algorithmName) && !publicKey.getEncryptionAlgorithmType().getAlgorithmName().contains(algorithmName))
-							|| (!algorithmName.equals(BCPQC_CRYSTALS_KYBER_512.algorithmName) && !algorithmName.contains(publicKey.getEncryptionAlgorithmType().getAlgorithmName())))
-						throw new IllegalArgumentException("The key must be compatible with algorithm " + algorithmName+", publicKeyEncryptionAlgorithmType="+publicKey.getEncryptionAlgorithmType());
+					if (!aSymmetricEncryptionType.getAlgorithmName().equals(publicKey.getEncryptionAlgorithmType().getAlgorithmName()))
+						throw new IllegalArgumentException("The key must be compatible with algorithm " + aSymmetricEncryptionType.getAlgorithmName()+", publicKeyEncryptionAlgorithmType="+publicKey.getEncryptionAlgorithmType());
 					if (provider.equals(CodeProvider.GNU_CRYPTO)) {
 						Object c = GnuFunctions.getCipherAlgorithm(algorithmName);
 						GnuFunctions.cipherInitWrapMode(c, publicKey.toGnuKey(), random.getGnuSecureRandom());
@@ -420,8 +445,7 @@ public enum ASymmetricKeyWrapperType {
 					else
 						throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
 				} else {
-					if ((algorithmName.equals(BCPQC_CRYSTALS_KYBER_512.algorithmName) && !privateKey.getEncryptionAlgorithmType().getAlgorithmName().contains(algorithmName))
-							|| (!algorithmName.equals(BCPQC_CRYSTALS_KYBER_512.algorithmName) && !algorithmName.contains(privateKey.getEncryptionAlgorithmType().getAlgorithmName())))
+					if (!aSymmetricEncryptionType.getAlgorithmName().equals(privateKey.getEncryptionAlgorithmType().getAlgorithmName()))
 						throw new IllegalArgumentException("The key must be compatible with algorithm " + algorithmName+", privateKeyEncryptionAlgorithmType="+privateKey.getEncryptionAlgorithmType());
 					if (isSignatureFromMetaData(keyToUnwrap)) {
 						byte[] ktu = getWrappedKeyFromMetaData(keyToUnwrap);

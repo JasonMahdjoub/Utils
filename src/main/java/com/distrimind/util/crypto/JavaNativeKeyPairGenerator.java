@@ -148,6 +148,51 @@ public final class JavaNativeKeyPairGenerator extends AbstractKeyPairGenerator {
 				else
 					throw new IllegalAccessError();
 			}
+			else if (encryptionType!=null && encryptionType.getAlgorithmName().startsWith("NTRU"))
+			{
+				if (encryptionType.getAlgorithmName().endsWith("ntruhps2048509")) {
+					keyPairGenerator.initialize(NTRUParameterSpec.ntruhps2048509, _random);
+				}
+				else if (encryptionType.getAlgorithmName().endsWith("ntruhps2048677")) {
+					keyPairGenerator.initialize(NTRUParameterSpec.ntruhps2048677, _random);
+				}
+				else if (encryptionType.getAlgorithmName().endsWith("ntruhps4096821")) {
+					keyPairGenerator.initialize(NTRUParameterSpec.ntruhps4096821, _random);
+				}
+				else if (encryptionType.getAlgorithmName().endsWith("ntruhrss701")) {
+					keyPairGenerator.initialize(NTRUParameterSpec.ntruhrss701, _random);
+				}
+			}
+			else if (encryptionType!=null && encryptionType.getAlgorithmName().startsWith("SABER")) {
+				if (encryptionType.getAlgorithmName().endsWith("kem128r3")) {
+					keyPairGenerator.initialize(SABERParameterSpec.saberkem128r3, _random);
+				}
+				else if (encryptionType.getAlgorithmName().endsWith("kem192r3")) {
+					keyPairGenerator.initialize(SABERParameterSpec.saberkem192r3, _random);
+				}
+				else if (encryptionType.getAlgorithmName().endsWith("kem256r3")) {
+					keyPairGenerator.initialize(SABERParameterSpec.saberkem256r3, _random);
+				}
+				else if (encryptionType.getAlgorithmName().endsWith("light-kem128r3")) {
+					keyPairGenerator.initialize(SABERParameterSpec.lightsaberkem128r3, _random);
+				}
+				else if (encryptionType.getAlgorithmName().endsWith("light-kem192r3")) {
+					keyPairGenerator.initialize(SABERParameterSpec.lightsaberkem192r3, _random);
+				}
+				else if (encryptionType.getAlgorithmName().endsWith("light-kem256r3")) {
+					keyPairGenerator.initialize(SABERParameterSpec.lightsaberkem256r3, _random);
+				}
+				else if (encryptionType.getAlgorithmName().endsWith("fire-kem128r3")) {
+					keyPairGenerator.initialize(SABERParameterSpec.firesaberkem128r3, _random);
+				}
+				else if (encryptionType.getAlgorithmName().endsWith("fire-kem192r3")) {
+					keyPairGenerator.initialize(SABERParameterSpec.firesaberkem192r3, _random);
+				}
+				else if (encryptionType.getAlgorithmName().endsWith("fire-kem256r3")) {
+					keyPairGenerator.initialize(SABERParameterSpec.firesaberkem256r3, _random);
+				}
+
+			}
 			else if (signatureType != null && signatureType.getKeyGeneratorAlgorithmName().equals(ASymmetricAuthenticatedSignatureType.BCPQC_SPHINCS256_SHA3_512.getKeyGeneratorAlgorithmName())) {
 				this.keySizeBits = signatureType.getDefaultKeySize();
 				keyPairGenerator.initialize(new SPHINCS256KeyGenParameterSpec(SPHINCS256KeyGenParameterSpec.SHA3_256), _random.getJavaNativeSecureRandom());
