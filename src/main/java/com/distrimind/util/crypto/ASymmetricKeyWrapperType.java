@@ -286,7 +286,28 @@ public enum ASymmetricKeyWrapperType {
 						.withEncodingParams(params);
 		return OAEPParams;
 	}
+	private boolean isCompatibleKey(ASymmetricEncryptionType keyEncryptionType)
+	{
+		return aSymmetricEncryptionType.equals(keyEncryptionType)
+				|| (aSymmetricEncryptionType.getAlgorithmName().equals(ASymmetricEncryptionType.RSA_OAEPWithSHA256AndMGF1Padding.getAlgorithmName())
+					&& aSymmetricEncryptionType.getAlgorithmName().equals(keyEncryptionType.getAlgorithmName()));
+	}
+	static ASymmetricKeyWrapperType getFromAsymmetricEncryptionType(ASymmetricEncryptionType aSymmetricEncryptionType)
+	{
+		for (ASymmetricKeyWrapperType t : ASymmetricKeyWrapperType.values())
+		{
+			if (t.aSymmetricEncryptionType==null)
+				continue;
+			if (t.aSymmetricEncryptionType.getDerivedType()==aSymmetricEncryptionType.getDerivedType())
+				return t;
 
+
+		}
+		if (aSymmetricEncryptionType.getAlgorithmName().equals(ASymmetricEncryptionType.RSA_OAEPWithSHA256AndMGF1Padding.getAlgorithmName()))
+			return ASymmetricKeyWrapperType.BC_FIPS_RSA_OAEP_WITH_SHA3_512;
+
+		return null;
+	}
 	WrappedEncryptedSymmetricSecretKey wrapKey(AbstractSecureRandom random, IASymmetricPublicKey ipublicKey, SymmetricSecretKey keyToWrap)
 			throws IOException {
 		if (ipublicKey.isDestroyed())
@@ -314,8 +335,8 @@ public enum ASymmetricKeyWrapperType {
 							|| (keyToWrap.getEncryptionAlgorithmType() != null && (provider == CodeProvider.GNU_CRYPTO) != (keyToWrap.getEncryptionAlgorithmType().getCodeProviderForEncryption() == CodeProvider.GNU_CRYPTO)))
 						throw new IllegalArgumentException("The keys must come from the same providers");
 
-					if (!aSymmetricEncryptionType.getAlgorithmName().equals(publicKey.getEncryptionAlgorithmType().getAlgorithmName()))
-						throw new IllegalArgumentException("The key must be compatible with algorithm " + aSymmetricEncryptionType.getAlgorithmName()+", publicKeyEncryptionAlgorithmType="+publicKey.getEncryptionAlgorithmType());
+					if (!isCompatibleKey(publicKey.getEncryptionAlgorithmType()))
+						throw new IllegalArgumentException("The key must be compatible with algorithm " + aSymmetricEncryptionType+", publicKeyEncryptionAlgorithmType="+publicKey.getEncryptionAlgorithmType());
 					if (provider.equals(CodeProvider.GNU_CRYPTO)) {
 						Object c = GnuFunctions.getCipherAlgorithm(algorithmName);
 						GnuFunctions.cipherInitWrapMode(c, publicKey.toGnuKey(), random.getGnuSecureRandom());
@@ -445,8 +466,8 @@ public enum ASymmetricKeyWrapperType {
 					else
 						throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
 				} else {
-					if (!aSymmetricEncryptionType.getAlgorithmName().equals(privateKey.getEncryptionAlgorithmType().getAlgorithmName()))
-						throw new IllegalArgumentException("The key must be compatible with algorithm " + algorithmName+", privateKeyEncryptionAlgorithmType="+privateKey.getEncryptionAlgorithmType());
+					if (!isCompatibleKey(privateKey.getEncryptionAlgorithmType()))
+						throw new IllegalArgumentException("The key must be compatible with algorithm " + aSymmetricEncryptionType+", privateKeyEncryptionAlgorithmType="+privateKey.getEncryptionAlgorithmType());
 					if (isSignatureFromMetaData(keyToUnwrap)) {
 						byte[] ktu = getWrappedKeyFromMetaData(keyToUnwrap);
 						SymmetricSecretKey res = unwrapKey(privateKey, ktu, null, getSignatureTypeFromMetaData(keyToUnwrap), getKeySizeFromMetaData(keyToUnwrap));

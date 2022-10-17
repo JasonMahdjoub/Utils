@@ -421,14 +421,14 @@ public class TestASymmetricEncryption {
 
 		SymmetricSecretKey localKey = stype.getKeyGenerator(rand).generateKey();
 		SymmetricEncryptionAlgorithm algoLocalS = new SymmetricEncryptionAlgorithm(rand, localKey);
-		ASymmetricKeyWrapperType kw;
-		if (astype.getCodeProviderForEncryption()==CodeProvider.GNU_CRYPTO)
+		ASymmetricKeyWrapperType kw=astype.getASymmetricKeyWrapperType();
+		/*if (astype.getCodeProviderForEncryption()==CodeProvider.GNU_CRYPTO)
 			kw=ASymmetricKeyWrapperType.GNU_RSA_OAEP_SHA2_384;
 		else if (astype.name().startsWith("BCPQC_MCELIECE_FUJISAKI"))
 			kw=ASymmetricKeyWrapperType.BCPQC_MCELIECE_FUJISAKI_CCA2_SHA256;
 		else if (astype.name().startsWith("BCPQC_MCELIECE_POINTCHEVAL"))
 			kw=ASymmetricKeyWrapperType.BCPQC_MCELIECE_POINTCHEVAL_CCA2_SHA256;
-		else if (astype.getAlgorithmName().equals(ASymmetricEncryptionType.BCPQC_CRYSTALS_KYBER_512.getAlgorithmName()))
+		else if (astype.getAlgorithmParameterSpec()!=null)
 			kw=ASymmetricKeyWrapperType.BCPQC_CRYSTALS_KYBER_512;
 		else if (astype.getAlgorithmName().equals(ASymmetricEncryptionType.BCPQC_CRYSTALS_KYBER_768.getAlgorithmName()))
 			kw=ASymmetricKeyWrapperType.BCPQC_CRYSTALS_KYBER_768;
@@ -467,7 +467,7 @@ public class TestASymmetricEncryption {
 		else if (astype.getAlgorithmName().equals(ASymmetricEncryptionType.BCPQC_SABER_FIRE_KEM256R3.getAlgorithmName()))
 			kw=ASymmetricKeyWrapperType.BCPQC_SABER_FIRE_KEM256R3;
 		else
-			kw=ASymmetricKeyWrapperType.BC_FIPS_RSA_OAEP_WITH_SHA3_512;
+			kw=ASymmetricKeyWrapperType.BC_FIPS_RSA_OAEP_WITH_SHA3_512;*/
 
 
 		WrappedEncryptedSymmetricSecretKey localEncryptedKey = kw.wrapKey(rand, kpd.getASymmetricPublicKey(), localKey);

@@ -34,13 +34,11 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
-import com.distrimind.bouncycastle.pqc.jcajce.spec.*;
 import com.distrimind.util.io.Integrity;
 import com.distrimind.util.io.MessageExternalizationException;
 
 import java.io.IOException;
 import java.security.*;
-import java.security.spec.ECGenParameterSpec;
 import java.security.spec.RSAKeyGenParameterSpec;
 
 /**
@@ -72,6 +70,12 @@ public final class JavaNativeKeyPairGenerator extends AbstractKeyPairGenerator {
 			this.typeToSynchronize=ASymmetricAuthenticatedSignatureType.BCPQC_SPHINCS_PLUS_SHA256_FAST;
 		else
 			this.typeToSynchronize=null;
+	}
+	JavaNativeKeyPairGenerator(EllipticCurveDiffieHellmanType type, KeyPairGenerator keyPairGenerator) {
+		super(type);
+		this.keyPairGenerator = keyPairGenerator;
+		synchronize=false;
+		typeToSynchronize=null;
 	}
 
 	private boolean isXDHKey()
@@ -119,155 +123,25 @@ public final class JavaNativeKeyPairGenerator extends AbstractKeyPairGenerator {
 			this.keySizeBits = keySize;
 			this.expirationTime = expirationTime;
 			this.publicKeyValidityBeginDateUTC=publicKeyValidityBeginDateUTC;
-			if (encryptionType!=null && encryptionType.getAlgorithmName().startsWith("CRYSTALS-Kyber"))
+			if (encryptionType!=null && encryptionType.getAlgorithmParameterSpecForKeyGenerator()!=null)
 			{
-				if (encryptionType.getAlgorithmName().endsWith("512"))
-				{
-					keyPairGenerator.initialize(KyberParameterSpec.kyber512, _random);
-				}
-				else if (encryptionType.getAlgorithmName().endsWith("768"))
-				{
-					keyPairGenerator.initialize(KyberParameterSpec.kyber768, _random);
-				}
-				else if (encryptionType.getAlgorithmName().endsWith("1024"))
-				{
-					keyPairGenerator.initialize(KyberParameterSpec.kyber1024, _random);
-				}
-				else if (encryptionType.getAlgorithmName().endsWith("512-AES"))
-				{
-					keyPairGenerator.initialize(KyberParameterSpec.kyber512_aes, _random);
-				}
-				else if (encryptionType.getAlgorithmName().endsWith("768-AES"))
-				{
-					keyPairGenerator.initialize(KyberParameterSpec.kyber768_aes, _random);
-				}
-				else if (encryptionType.getAlgorithmName().endsWith("1024-AES"))
-				{
-					keyPairGenerator.initialize(KyberParameterSpec.kyber1024_aes, _random);
-				}
+				keyPairGenerator.initialize(encryptionType.getAlgorithmParameterSpecForKeyGenerator(), _random);
+			}
+			else if (ellipticCurveDiffieHellmanType!=null)
+			{
+				keyPairGenerator.initialize(ellipticCurveDiffieHellmanType.getAlgorithmParameterSpecForKeyGenerator(), _random);
+			}
+			else if ((signatureType != null && signatureType.getAlgorithmParameterSpecForKeyGenerator() == null) || (encryptionType!=null))
+				if ((signatureType!=null && signatureType.getKeyGeneratorAlgorithmName().equals(ASymmetricAuthenticatedSignatureType.SHA256withRSA.getKeyGeneratorAlgorithmName()))
+					|| encryptionType!=null)
+					keyPairGenerator.initialize(new RSAKeyGenParameterSpec(keySize, RSAKeyGenParameterSpec.F4), _random.getJavaNativeSecureRandom());
 				else
 					throw new IllegalAccessError();
+			else if (signatureType!=null){
+				keyPairGenerator.initialize(signatureType.getAlgorithmParameterSpecForKeyGenerator(), _random.getJavaNativeSecureRandom());
 			}
-			else if (encryptionType!=null && encryptionType.getAlgorithmName().startsWith("NTRU"))
-			{
-				if (encryptionType.getAlgorithmName().endsWith("ntruhps2048509")) {
-					keyPairGenerator.initialize(NTRUParameterSpec.ntruhps2048509, _random);
-				}
-				else if (encryptionType.getAlgorithmName().endsWith("ntruhps2048677")) {
-					keyPairGenerator.initialize(NTRUParameterSpec.ntruhps2048677, _random);
-				}
-				else if (encryptionType.getAlgorithmName().endsWith("ntruhps4096821")) {
-					keyPairGenerator.initialize(NTRUParameterSpec.ntruhps4096821, _random);
-				}
-				else if (encryptionType.getAlgorithmName().endsWith("ntruhrss701")) {
-					keyPairGenerator.initialize(NTRUParameterSpec.ntruhrss701, _random);
-				}
-			}
-			else if (encryptionType!=null && encryptionType.getAlgorithmName().startsWith("SABER")) {
-				if (encryptionType.getAlgorithmName().endsWith("kem128r3")) {
-					keyPairGenerator.initialize(SABERParameterSpec.saberkem128r3, _random);
-				}
-				else if (encryptionType.getAlgorithmName().endsWith("kem192r3")) {
-					keyPairGenerator.initialize(SABERParameterSpec.saberkem192r3, _random);
-				}
-				else if (encryptionType.getAlgorithmName().endsWith("kem256r3")) {
-					keyPairGenerator.initialize(SABERParameterSpec.saberkem256r3, _random);
-				}
-				else if (encryptionType.getAlgorithmName().endsWith("light-kem128r3")) {
-					keyPairGenerator.initialize(SABERParameterSpec.lightsaberkem128r3, _random);
-				}
-				else if (encryptionType.getAlgorithmName().endsWith("light-kem192r3")) {
-					keyPairGenerator.initialize(SABERParameterSpec.lightsaberkem192r3, _random);
-				}
-				else if (encryptionType.getAlgorithmName().endsWith("light-kem256r3")) {
-					keyPairGenerator.initialize(SABERParameterSpec.lightsaberkem256r3, _random);
-				}
-				else if (encryptionType.getAlgorithmName().endsWith("fire-kem128r3")) {
-					keyPairGenerator.initialize(SABERParameterSpec.firesaberkem128r3, _random);
-				}
-				else if (encryptionType.getAlgorithmName().endsWith("fire-kem192r3")) {
-					keyPairGenerator.initialize(SABERParameterSpec.firesaberkem192r3, _random);
-				}
-				else if (encryptionType.getAlgorithmName().endsWith("fire-kem256r3")) {
-					keyPairGenerator.initialize(SABERParameterSpec.firesaberkem256r3, _random);
-				}
-
-			}
-			else if (signatureType != null && signatureType.getKeyGeneratorAlgorithmName().equals(ASymmetricAuthenticatedSignatureType.BCPQC_SPHINCS256_SHA3_512.getKeyGeneratorAlgorithmName())) {
-				this.keySizeBits = signatureType.getDefaultKeySize();
-				keyPairGenerator.initialize(new SPHINCS256KeyGenParameterSpec(SPHINCS256KeyGenParameterSpec.SHA3_256), _random.getJavaNativeSecureRandom());
-			} else if (signatureType != null && signatureType.getKeyGeneratorAlgorithmName().equals(ASymmetricAuthenticatedSignatureType.BCPQC_SPHINCS256_SHA2_512_256.getKeyGeneratorAlgorithmName())) {
-				this.keySizeBits = signatureType.getDefaultKeySize();
-				keyPairGenerator.initialize(new SPHINCS256KeyGenParameterSpec(SPHINCS256KeyGenParameterSpec.SHA512_256), _random.getJavaNativeSecureRandom());
-			}
-			else if (signatureType != null && signatureType.getKeyGeneratorAlgorithmName().equals(ASymmetricAuthenticatedSignatureType.BCPQC_SPHINCS_PLUS_SHAKE256_SLOW.getKeyGeneratorAlgorithmName())) {
-				this.keySizeBits = signatureType.getDefaultKeySize();
-				keyPairGenerator.initialize(SPHINCSPlusParameterSpec.shake_256s, _random.getJavaNativeSecureRandom());
-			}
-			else if (signatureType != null && signatureType.getKeyGeneratorAlgorithmName().equals(ASymmetricAuthenticatedSignatureType.BCPQC_SPHINCS_PLUS_SHAKE256_FAST.getKeyGeneratorAlgorithmName())) {
-				this.keySizeBits = signatureType.getDefaultKeySize();
-				keyPairGenerator.initialize(SPHINCSPlusParameterSpec.shake_256f, _random.getJavaNativeSecureRandom());
-			}
-			else if (signatureType != null && signatureType.getKeyGeneratorAlgorithmName().equals(ASymmetricAuthenticatedSignatureType.BCPQC_SPHINCS_PLUS_SHA256_SLOW.getKeyGeneratorAlgorithmName())) {
-				this.keySizeBits = signatureType.getDefaultKeySize();
-				keyPairGenerator.initialize(SPHINCSPlusParameterSpec.sha2_256s, _random.getJavaNativeSecureRandom());
-			}
-			else if (signatureType != null && signatureType.getKeyGeneratorAlgorithmName().equals(ASymmetricAuthenticatedSignatureType.BCPQC_SPHINCS_PLUS_SHA256_FAST.getKeyGeneratorAlgorithmName())) {
-				this.keySizeBits = signatureType.getDefaultKeySize();
-				keyPairGenerator.initialize(SPHINCSPlusParameterSpec.sha2_256f, _random.getJavaNativeSecureRandom());
-			}
-			else if (signatureType != null && signatureType.getKeyGeneratorAlgorithmName().equals(ASymmetricAuthenticatedSignatureType.BCPQC_CHRYSTALS_DILITHIUM_2.getKeyGeneratorAlgorithmName())) {
-				this.keySizeBits = signatureType.getDefaultKeySize();
-				keyPairGenerator.initialize(DilithiumParameterSpec.dilithium2, _random.getJavaNativeSecureRandom());
-			}
-			else if (signatureType != null && signatureType.getKeyGeneratorAlgorithmName().equals(ASymmetricAuthenticatedSignatureType.BCPQC_CHRYSTALS_DILITHIUM_3.getKeyGeneratorAlgorithmName())) {
-				this.keySizeBits = signatureType.getDefaultKeySize();
-				keyPairGenerator.initialize(DilithiumParameterSpec.dilithium3, _random.getJavaNativeSecureRandom());
-			}
-			else if (signatureType != null && signatureType.getKeyGeneratorAlgorithmName().equals(ASymmetricAuthenticatedSignatureType.BCPQC_CHRYSTALS_DILITHIUM_5.getKeyGeneratorAlgorithmName())) {
-				this.keySizeBits = signatureType.getDefaultKeySize();
-				keyPairGenerator.initialize(DilithiumParameterSpec.dilithium5, _random.getJavaNativeSecureRandom());
-			}
-			else if (signatureType != null && signatureType.getKeyGeneratorAlgorithmName().equals(ASymmetricAuthenticatedSignatureType.BCPQC_CHRYSTALS_DILITHIUM_2_AES.getKeyGeneratorAlgorithmName())) {
-				this.keySizeBits = signatureType.getDefaultKeySize();
-				keyPairGenerator.initialize(DilithiumParameterSpec.dilithium2_aes, _random.getJavaNativeSecureRandom());
-			}
-			else if (signatureType != null && signatureType.getKeyGeneratorAlgorithmName().equals(ASymmetricAuthenticatedSignatureType.BCPQC_CHRYSTALS_DILITHIUM_3_AES.getKeyGeneratorAlgorithmName())) {
-				this.keySizeBits = signatureType.getDefaultKeySize();
-				keyPairGenerator.initialize(DilithiumParameterSpec.dilithium3_aes, _random.getJavaNativeSecureRandom());
-			}
-			else if (signatureType != null && signatureType.getKeyGeneratorAlgorithmName().equals(ASymmetricAuthenticatedSignatureType.BCPQC_CHRYSTALS_DILITHIUM_5_AES.getKeyGeneratorAlgorithmName())) {
-				this.keySizeBits = signatureType.getDefaultKeySize();
-				keyPairGenerator.initialize(DilithiumParameterSpec.dilithium5_aes, _random.getJavaNativeSecureRandom());
-			}
-			else if (signatureType != null && signatureType.getKeyGeneratorAlgorithmName().equals(ASymmetricAuthenticatedSignatureType.BCPQC_FALCON_512.getKeyGeneratorAlgorithmName())) {
-				this.keySizeBits = signatureType.getDefaultKeySize();
-				keyPairGenerator.initialize(FalconParameterSpec.falcon_512, _random.getJavaNativeSecureRandom());
-			}
-			else if (signatureType != null && signatureType.getKeyGeneratorAlgorithmName().equals(ASymmetricAuthenticatedSignatureType.BCPQC_FALCON_1024.getKeyGeneratorAlgorithmName())) {
-				this.keySizeBits = signatureType.getDefaultKeySize();
-				keyPairGenerator.initialize(FalconParameterSpec.falcon_1024, _random.getJavaNativeSecureRandom());
-			}
-			else if (signatureType == null || signatureType.getCurveName() == null)
-				keyPairGenerator.initialize(new RSAKeyGenParameterSpec(keySize, RSAKeyGenParameterSpec.F4), _random.getJavaNativeSecureRandom());
 			else {
-				switch (signatureType.getCurveName()) {
-					case "P-256":
-					case "P-384":
-					case "P-521":
-						this.keySizeBits = signatureType.getDefaultKeySize();
-						keyPairGenerator.initialize(new ECGenParameterSpec(signatureType.getCurveName()), _random.getJavaNativeSecureRandom());
-						break;
-					case "Ed25519":
-					case "Ed448":
-					case "X25519":
-					case "X448":
-						keyPairGenerator.initialize(signatureType.getDefaultKeySize(), _random.getJavaNativeSecureRandom());
-						break;
-					default:
-						throw new InternalError();
-
-				}
+				throw new IllegalAccessError();
 			}
 
 		}

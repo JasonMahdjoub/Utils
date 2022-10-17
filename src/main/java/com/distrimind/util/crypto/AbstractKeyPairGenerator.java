@@ -46,14 +46,22 @@ import java.io.IOException;
 public abstract class AbstractKeyPairGenerator {
 	protected final ASymmetricEncryptionType encryptionType;
 	protected final ASymmetricAuthenticatedSignatureType signatureType;
+	protected final EllipticCurveDiffieHellmanType ellipticCurveDiffieHellmanType;
 
 	AbstractKeyPairGenerator(ASymmetricEncryptionType type) {
 		this.encryptionType = type.getDerivedType();
 		this.signatureType=null;
+		this.ellipticCurveDiffieHellmanType=null;
 	}
 	AbstractKeyPairGenerator(ASymmetricAuthenticatedSignatureType type) {
 		this.encryptionType = null;
 		this.signatureType=type.getDerivedType();
+		this.ellipticCurveDiffieHellmanType=null;
+	}
+	AbstractKeyPairGenerator(EllipticCurveDiffieHellmanType ellipticCurveDiffieHellmanType) {
+		this.encryptionType = null;
+		this.signatureType=null;
+		this.ellipticCurveDiffieHellmanType=ellipticCurveDiffieHellmanType.getDerivedType();
 	}
 
 

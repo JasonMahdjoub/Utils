@@ -37,16 +37,23 @@ package com.distrimind.util.crypto;
 import com.distrimind.bcfips.crypto.Algorithm;
 import com.distrimind.bcfips.crypto.fips.FipsEC;
 import com.distrimind.bcfips.crypto.fips.FipsRSA;
+import com.distrimind.bcfips.jcajce.spec.EdDSAParameterSpec;
 import com.distrimind.bouncycastle.pqc.jcajce.provider.dilithium.DilithiumKeyPairGeneratorSpi;
 import com.distrimind.bouncycastle.pqc.jcajce.provider.falcon.FalconKeyPairGeneratorSpi;
 import com.distrimind.bouncycastle.pqc.jcajce.provider.sphincs.Sphincs256KeyPairGeneratorSpi;
 import com.distrimind.bouncycastle.pqc.jcajce.provider.sphincsplus.SPHINCSPlusKeyPairGeneratorSpi;
+import com.distrimind.bouncycastle.pqc.jcajce.spec.DilithiumParameterSpec;
+import com.distrimind.bouncycastle.pqc.jcajce.spec.FalconParameterSpec;
+import com.distrimind.bouncycastle.pqc.jcajce.spec.SPHINCS256KeyGenParameterSpec;
+import com.distrimind.bouncycastle.pqc.jcajce.spec.SPHINCSPlusParameterSpec;
 
 import java.io.IOException;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.Signature;
+import java.security.spec.AlgorithmParameterSpec;
+import java.security.spec.ECGenParameterSpec;
 import java.util.Random;
 
 /**
@@ -59,38 +66,37 @@ import java.util.Random;
 @SuppressWarnings({"DeprecatedIsStillUsed"})
 public enum ASymmetricAuthenticatedSignatureType {
 	@Deprecated
-	SHA1withRSA("SHA1withRSA", "RSA", CodeProvider.SunRsaSign,CodeProvider.SunRsaSign, 3072, 31536000000L, FipsRSA.ALGORITHM, false),
-	SHA256withRSA("SHA256withRSA","RSA", CodeProvider.SunRsaSign,CodeProvider.SunRsaSign, 3072, 31536000000L, FipsRSA.ALGORITHM, false),
-	SHA384withRSA("SHA384withRSA", "RSA", CodeProvider.SunRsaSign,CodeProvider.SunRsaSign, 3072, 31536000000L, FipsRSA.ALGORITHM, false),
-	SHA512withRSA("SHA512withRSA", "RSA", CodeProvider.SunRsaSign,CodeProvider.SunRsaSign, 3072, 31536000000L, FipsRSA.ALGORITHM, false),
-	BC_FIPS_SHA256withRSA("SHA256withRSA","RSA", CodeProvider.BCFIPS,CodeProvider.BCFIPS, 3072, 31536000000L, FipsRSA.ALGORITHM, false),
-	BC_FIPS_SHA384withRSA("SHA384withRSA","RSA", CodeProvider.BCFIPS,CodeProvider.BCFIPS, 3072, 31536000000L, FipsRSA.ALGORITHM, false),
-	BC_FIPS_SHA512withRSA("SHA512withRSA", "RSA", CodeProvider.BCFIPS,CodeProvider.BCFIPS, 3072, 31536000000L, FipsRSA.ALGORITHM, false),
-	BC_FIPS_SHA256withRSAandMGF1("SHA256withRSAandMGF1","RSA", CodeProvider.BCFIPS,CodeProvider.BCFIPS, 3072, 31536000000L, FipsRSA.ALGORITHM, false),
-	BC_FIPS_SHA384withRSAandMGF1("SHA384withRSAandMGF1","RSA", CodeProvider.BCFIPS,CodeProvider.BCFIPS, 3072, 31536000000L, FipsRSA.ALGORITHM, false),
-	BC_FIPS_SHA512withRSAandMGF1("SHA512withRSAandMGF1", "RSA", CodeProvider.BCFIPS,CodeProvider.BCFIPS, 3072, 31536000000L, FipsRSA.ALGORITHM, false),
-	BC_FIPS_SHA256withECDSA_P_256("SHA256withECDSA", "EC", CodeProvider.BCFIPS,CodeProvider.BCFIPS, 256, 31536000000L, FipsEC.ALGORITHM, false, "P-256"),
-	BC_FIPS_SHA384withECDSA_P_384("SHA384withECDSA", "EC", CodeProvider.BCFIPS,CodeProvider.BCFIPS, 384, 31536000000L, FipsEC.ALGORITHM, false, "P-384"),
-	BC_FIPS_SHA512withECDSA_P_521("SHA512withECDSA", "EC", CodeProvider.BCFIPS,CodeProvider.BCFIPS, 528, 31536000000L, FipsEC.ALGORITHM, false, "P-521"),
+	SHA1withRSA("SHA1withRSA", "RSA", CodeProvider.SunRsaSign,CodeProvider.SunRsaSign, 3072, 31536000000L, FipsRSA.ALGORITHM, false, null),
+	SHA256withRSA("SHA256withRSA","RSA", CodeProvider.SunRsaSign,CodeProvider.SunRsaSign, 3072, 31536000000L, FipsRSA.ALGORITHM, false, null),
+	SHA384withRSA("SHA384withRSA", "RSA", CodeProvider.SunRsaSign,CodeProvider.SunRsaSign, 3072, 31536000000L, FipsRSA.ALGORITHM, false, null),
+	SHA512withRSA("SHA512withRSA", "RSA", CodeProvider.SunRsaSign,CodeProvider.SunRsaSign, 3072, 31536000000L, FipsRSA.ALGORITHM, false, null),
+	BC_FIPS_SHA256withRSA("SHA256withRSA","RSA", CodeProvider.BCFIPS,CodeProvider.BCFIPS, 3072, 31536000000L, FipsRSA.ALGORITHM, false, null),
+	BC_FIPS_SHA384withRSA("SHA384withRSA","RSA", CodeProvider.BCFIPS,CodeProvider.BCFIPS, 3072, 31536000000L, FipsRSA.ALGORITHM, false, null),
+	BC_FIPS_SHA512withRSA("SHA512withRSA", "RSA", CodeProvider.BCFIPS,CodeProvider.BCFIPS, 3072, 31536000000L, FipsRSA.ALGORITHM, false, null),
+	BC_FIPS_SHA256withRSAandMGF1("SHA256withRSAandMGF1","RSA", CodeProvider.BCFIPS,CodeProvider.BCFIPS, 3072, 31536000000L, FipsRSA.ALGORITHM, false, null),
+	BC_FIPS_SHA384withRSAandMGF1("SHA384withRSAandMGF1","RSA", CodeProvider.BCFIPS,CodeProvider.BCFIPS, 3072, 31536000000L, FipsRSA.ALGORITHM, false, null),
+	BC_FIPS_SHA512withRSAandMGF1("SHA512withRSAandMGF1", "RSA", CodeProvider.BCFIPS,CodeProvider.BCFIPS, 3072, 31536000000L, FipsRSA.ALGORITHM, false, null),
+	BC_FIPS_SHA256withECDSA_P_256("SHA256withECDSA", "EC", CodeProvider.BCFIPS,CodeProvider.BCFIPS, 256, 31536000000L, FipsEC.ALGORITHM, false, new ECGenParameterSpec( "P-256")),
+	BC_FIPS_SHA384withECDSA_P_384("SHA384withECDSA", "EC", CodeProvider.BCFIPS,CodeProvider.BCFIPS, 384, 31536000000L, FipsEC.ALGORITHM, false, new ECGenParameterSpec("P-384")),
+	BC_FIPS_SHA512withECDSA_P_521("SHA512withECDSA", "EC", CodeProvider.BCFIPS,CodeProvider.BCFIPS, 528, 31536000000L, FipsEC.ALGORITHM, false, new ECGenParameterSpec("P-521")),
 	@Deprecated
-	BCPQC_SPHINCS256_SHA2_512_256("SHA512withSPHINCS256", "SHA512withSPHINCS256", CodeProvider.BCPQC,CodeProvider.BCPQC, 1024, 31536000000L, null, true),
+	BCPQC_SPHINCS256_SHA2_512_256("SHA512withSPHINCS256", "SPHINCS256", CodeProvider.BCPQC,CodeProvider.BCPQC, 1024, 31536000000L, null, true, new SPHINCS256KeyGenParameterSpec(SPHINCS256KeyGenParameterSpec.SHA512_256)),
 	@Deprecated
-	BCPQC_SPHINCS256_SHA3_512("SHA3-512withSPHINCS256", "SHA3-256withSPHINCS256", CodeProvider.BCPQC,CodeProvider.BCPQC, 1024, 31536000000L, null, true),
-	BC_FIPS_Ed25519("EdDSA", "Ed25519", CodeProvider.BCFIPS,CodeProvider.BCFIPS, 256, 31536000000L, null, false, "Ed25519"),
-	BC_FIPS_Ed448("EdDSA", "Ed448", CodeProvider.BCFIPS,CodeProvider.BCFIPS, 448, 31536000000L, null, false, "Ed448"),
-	BCPQC_SPHINCS_PLUS_SHA256_SLOW("SPHINCSPLUS", "SPHINCSPLUS", CodeProvider.BCPQC,CodeProvider.BCPQC, 720, 31536000000L, null, true),
-	BCPQC_SPHINCS_PLUS_SHA256_FAST("SPHINCSPLUS", "SPHINCSPLUS", CodeProvider.BCPQC,CodeProvider.BCPQC, 720, 31536000000L, null, true),
-	BCPQC_SPHINCS_PLUS_SHAKE256_SLOW("SPHINCSPLUS", "SPHINCSPLUS", CodeProvider.BCPQC,CodeProvider.BCPQC, 720, 31536000000L, null, true),
-	BCPQC_SPHINCS_PLUS_SHAKE256_FAST("SPHINCSPLUS", "SPHINCSPLUS", CodeProvider.BCPQC,CodeProvider.BCPQC, 720, 31536000000L, null, true),
-	BCPQC_CHRYSTALS_DILITHIUM_2("Dilithium", "Dilithium2", CodeProvider.BCPQC,CodeProvider.BCPQC, 10768, 31536000000L, null, true),
-	BCPQC_CHRYSTALS_DILITHIUM_3("Dilithium", "Dilithium3", CodeProvider.BCPQC,CodeProvider.BCPQC, 15888, 31536000000L, null, true),
-	BCPQC_CHRYSTALS_DILITHIUM_5("Dilithium", "Dilithium5", CodeProvider.BCPQC,CodeProvider.BCPQC, 21008, 31536000000L, null, true),
-	BCPQC_CHRYSTALS_DILITHIUM_2_AES("Dilithium", "Dilithium2-AES", CodeProvider.BCPQC,CodeProvider.BCPQC, 10768, 31536000000L, null, true),
-	BCPQC_CHRYSTALS_DILITHIUM_3_AES("Dilithium", "Dilithium3-AES", CodeProvider.BCPQC,CodeProvider.BCPQC, 15888, 31536000000L, null, true),
-	BCPQC_CHRYSTALS_DILITHIUM_5_AES("Dilithium", "Dilithium5-AES", CodeProvider.BCPQC,CodeProvider.BCPQC, 21008, 31536000000L, null, true),
-	BCPQC_FALCON_512("Falcon", "Falcon512", CodeProvider.BCPQC,CodeProvider.BCPQC, 7376, 31536000000L, null, true),
-	BCPQC_FALCON_1024("Falcon", "Falcon1024", CodeProvider.BCPQC,CodeProvider.BCPQC, 14544, 31536000000L, null, true),
-
+	BCPQC_SPHINCS256_SHA3_512("SHA3-512withSPHINCS256", "SPHINCS256", CodeProvider.BCPQC,CodeProvider.BCPQC, 1024, 31536000000L, null, true, new SPHINCS256KeyGenParameterSpec(SPHINCS256KeyGenParameterSpec.SHA3_256)),
+	BC_FIPS_Ed25519("EdDSA", "Ed25519", CodeProvider.BCFIPS,CodeProvider.BCFIPS, 256, 31536000000L, null, false, new EdDSAParameterSpec("Ed25519")),
+	BC_FIPS_Ed448("EdDSA", "Ed448", CodeProvider.BCFIPS,CodeProvider.BCFIPS, 448, 31536000000L, null, false, new EdDSAParameterSpec("Ed448")),
+	BCPQC_SPHINCS_PLUS_SHA256_SLOW("SPHINCSPLUS", "SPHINCSPLUS", CodeProvider.BCPQC,CodeProvider.BCPQC, 720, 31536000000L, null, true, SPHINCSPlusParameterSpec.sha2_256s),
+	BCPQC_SPHINCS_PLUS_SHA256_FAST("SPHINCSPLUS", "SPHINCSPLUS", CodeProvider.BCPQC,CodeProvider.BCPQC, 720, 31536000000L, null, true, SPHINCSPlusParameterSpec.sha2_256f),
+	BCPQC_SPHINCS_PLUS_SHAKE256_SLOW("SPHINCSPLUS", "SPHINCSPLUS", CodeProvider.BCPQC,CodeProvider.BCPQC, 720, 31536000000L, null, true, SPHINCSPlusParameterSpec.shake_256s),
+	BCPQC_SPHINCS_PLUS_SHAKE256_FAST("SPHINCSPLUS", "SPHINCSPLUS", CodeProvider.BCPQC,CodeProvider.BCPQC, 720, 31536000000L, null, true, SPHINCSPlusParameterSpec.shake_256f),
+	BCPQC_CHRYSTALS_DILITHIUM_2("Dilithium", "Dilithium", CodeProvider.BCPQC,CodeProvider.BCPQC, 10768, 31536000000L, null, true, DilithiumParameterSpec.dilithium2),
+	BCPQC_CHRYSTALS_DILITHIUM_3("Dilithium", "Dilithium", CodeProvider.BCPQC,CodeProvider.BCPQC, 15888, 31536000000L, null, true, DilithiumParameterSpec.dilithium3),
+	BCPQC_CHRYSTALS_DILITHIUM_5("Dilithium", "Dilithium", CodeProvider.BCPQC,CodeProvider.BCPQC, 21008, 31536000000L, null, true, DilithiumParameterSpec.dilithium5),
+	BCPQC_CHRYSTALS_DILITHIUM_2_AES("Dilithium", "Dilithium", CodeProvider.BCPQC,CodeProvider.BCPQC, 10768, 31536000000L, null, true, DilithiumParameterSpec.dilithium2_aes),
+	BCPQC_CHRYSTALS_DILITHIUM_3_AES("Dilithium", "Dilithium", CodeProvider.BCPQC,CodeProvider.BCPQC, 15888, 31536000000L, null, true, DilithiumParameterSpec.dilithium3_aes),
+	BCPQC_CHRYSTALS_DILITHIUM_5_AES("Dilithium", "Dilithium", CodeProvider.BCPQC,CodeProvider.BCPQC, 21008, 31536000000L, null, true, DilithiumParameterSpec.dilithium5_aes),
+	BCPQC_FALCON_512("Falcon", "Falcon", CodeProvider.BCPQC,CodeProvider.BCPQC, 7376, 31536000000L, null, true, FalconParameterSpec.falcon_512),
+	BCPQC_FALCON_1024("Falcon", "Falcon", CodeProvider.BCPQC,CodeProvider.BCPQC, 14544, 31536000000L, null, true, FalconParameterSpec.falcon_1024),
 	DEFAULT(BC_FIPS_SHA384withRSAandMGF1);
 
 	private final String signatureAlgorithmName;
@@ -107,8 +113,8 @@ public enum ASymmetricAuthenticatedSignatureType {
 	
 	private final boolean isPostQuantumAlgorithm;
 
-	private final String curveName;
 	private ASymmetricAuthenticatedSignatureType derivedType;
+	private final AlgorithmParameterSpec algorithmParameterSpecForKeyGenerator;
 
 	static final int META_DATA_SIZE_IN_BYTES_NON_HYBRID_PUBLIC_KEY=24;
 	public static final int MAX_SIZE_IN_BYTES_OF_NON_PQC_NON_RSA_NON_HYBRID_PUBLIC_KEY_FOR_SIGNATURE =140+META_DATA_SIZE_IN_BYTES_NON_HYBRID_PUBLIC_KEY;
@@ -174,10 +180,8 @@ public enum ASymmetricAuthenticatedSignatureType {
 		return expirationTimeMilis;
 	}
 
-	ASymmetricAuthenticatedSignatureType(String signatureAlgorithmName, String keyGeneratorAlgorithmName, CodeProvider codeProviderSignature, CodeProvider codeProviderKeyGenerator, int keySizeBits, long expirationTimeMilis, Algorithm bcAlgorithm, boolean isPostQuantumAlgorithm) {
-		this(signatureAlgorithmName, keyGeneratorAlgorithmName, codeProviderSignature, codeProviderKeyGenerator, keySizeBits, expirationTimeMilis, bcAlgorithm, isPostQuantumAlgorithm, null);
-	}
-	ASymmetricAuthenticatedSignatureType(String signatureAlgorithmName, String keyGeneratorAlgorithmName, CodeProvider codeProviderSignature, CodeProvider codeProviderKeyGenerator, int keySizeBits, long expirationTimeMilis, Algorithm bcAlgorithm, boolean isPostQuantumAlgorithm, String curveName) {
+
+	ASymmetricAuthenticatedSignatureType(String signatureAlgorithmName, String keyGeneratorAlgorithmName, CodeProvider codeProviderSignature, CodeProvider codeProviderKeyGenerator, int keySizeBits, long expirationTimeMilis, Algorithm bcAlgorithm, boolean isPostQuantumAlgorithm, AlgorithmParameterSpec algorithmParameterSpecForKeyGenerator) {
 		this.signatureAlgorithmName = signatureAlgorithmName;
 		this.keyGeneratorAlgorithmName=keyGeneratorAlgorithmName;
 		this.codeProviderSignature = codeProviderSignature;
@@ -186,17 +190,18 @@ public enum ASymmetricAuthenticatedSignatureType {
 		this.expirationTimeMilis=expirationTimeMilis;
 		this.bcAlgorithm=bcAlgorithm;
 		this.isPostQuantumAlgorithm=isPostQuantumAlgorithm;
-		this.curveName=curveName;
+
 		this.derivedType=this;
+		this.algorithmParameterSpecForKeyGenerator = algorithmParameterSpecForKeyGenerator;
 	}
 
 	ASymmetricAuthenticatedSignatureType(ASymmetricAuthenticatedSignatureType other) {
-		this(other.signatureAlgorithmName, other.keyGeneratorAlgorithmName, other.codeProviderSignature, other.codeProviderKeyGenerator, other.keySizeBits, other.expirationTimeMilis, other.bcAlgorithm, other.isPostQuantumAlgorithm, other.curveName);
+		this(other.signatureAlgorithmName, other.keyGeneratorAlgorithmName, other.codeProviderSignature, other.codeProviderKeyGenerator, other.keySizeBits, other.expirationTimeMilis, other.bcAlgorithm, other.isPostQuantumAlgorithm, other.algorithmParameterSpecForKeyGenerator);
 		this.derivedType=other;
 	}
 
-	public String getCurveName() {
-		return curveName;
+	public AlgorithmParameterSpec getAlgorithmParameterSpecForKeyGenerator() {
+		return algorithmParameterSpecForKeyGenerator;
 	}
 
 	public String getSignatureAlgorithmName() {

@@ -36,12 +36,15 @@ package com.distrimind.util.crypto;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
+import java.security.spec.AlgorithmParameterSpec;
+import java.security.spec.ECGenParameterSpec;
 
 import javax.crypto.KeyAgreement;
 
 import com.distrimind.bcfips.crypto.fips.FipsDigestAlgorithm;
 import com.distrimind.bcfips.crypto.fips.FipsKDF;
 import com.distrimind.bcfips.crypto.fips.FipsSHS;
+import com.distrimind.bouncycastle.jce.spec.ECNamedCurveGenParameterSpec;
 
 /**
  * 
@@ -50,39 +53,14 @@ import com.distrimind.bcfips.crypto.fips.FipsSHS;
  * @since Utils 2.10
  */
 public enum EllipticCurveDiffieHellmanType {
-	/*ECDDH_384_AES128((short) 128, (short) 256, CodeProvider.SunRsaSign, ASymmetricAuthenticatedSignatureType.BC_SHA256withECDSA_CURVE_25519, "ECCDHwithSHA384CKDF", null, null, true),
-	ECDDH_384_AES256((short) 256, (short) 384, CodeProvider.SunRsaSign, ASymmetricAuthenticatedSignatureType.BC_SHA384withECDSA_CURVE_25519, "ECCDHwithSHA384CKDF", null, null, true),
-	ECDDH_512_AES256((short) 256, (short) 521, CodeProvider.SunRsaSign, ASymmetricAuthenticatedSignatureType.BC_SHA512withECDSA_CURVE_25519, "ECCDHwithSHA512CKDF", null, null, true),*/
-	BC_FIPS_ECDDH_384_P_384((short) 256, (short) 384, CodeProvider.BCFIPS, ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA384withECDSA_P_384, "ECCDHwithSHA384CKDF", FipsSHS.Algorithm.SHA384, FipsKDF.AgreementKDFPRF.SHA384, true),
-	BC_FIPS_ECDDH_512_P_521((short) 256, (short) 521, CodeProvider.BCFIPS, ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA512withECDSA_P_521, "ECCDHwithSHA512CKDF", FipsSHS.Algorithm.SHA512, FipsKDF.AgreementKDFPRF.SHA512, true),
+	BC_FIPS_ECDDH_384_P_384((short) 256, (short) 384, CodeProvider.BCFIPS, ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA384withECDSA_P_384, "ECCDHwithSHA384CKDF", FipsSHS.Algorithm.SHA384, FipsKDF.AgreementKDFPRF.SHA384, true, new ECGenParameterSpec("P-384")),
+	BC_FIPS_ECDDH_512_P_521((short) 256, (short) 521, CodeProvider.BCFIPS, ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA512withECDSA_P_521, "ECCDHwithSHA512CKDF", FipsSHS.Algorithm.SHA512, FipsKDF.AgreementKDFPRF.SHA512, true, new ECGenParameterSpec("P-521")),
 	/*@SuppressWarnings("deprecation") BC_ECCDH_384_CURVE_25519((short) 256, (short) 384, CodeProvider.BCFIPS, ASymmetricAuthenticatedSignatureType.BC_SHA384withECDSA_CURVE_25519, "ECCDHwithSHA384CKDF", FipsSHS.Algorithm.SHA384, FipsKDF.AgreementKDFPRF.SHA384, true),
 	@SuppressWarnings("deprecation") BC_ECCDH_512_CURVE_25519((short) 256, (short) 521, CodeProvider.BCFIPS, ASymmetricAuthenticatedSignatureType.BC_SHA512withECDSA_CURVE_25519, "ECCDHwithSHA512CKDF", FipsSHS.Algorithm.SHA512, FipsKDF.AgreementKDFPRF.SHA512, true),*/
-	BC_FIPS_XDH_X25519_WITH_SHA384CKDF((short) 256, (short) 521, CodeProvider.BCFIPS, ASymmetricAuthenticatedSignatureType.BC_FIPS_Ed25519, "X25519", FipsSHS.Algorithm.SHA384, FipsKDF.AgreementKDFPRF.SHA384, true),
-	BC_FIPS_XDH_X448_WITH_SHA384CKDF((short) 256, (short) 521, CodeProvider.BCFIPS, ASymmetricAuthenticatedSignatureType.BC_FIPS_Ed448, "X448", FipsSHS.Algorithm.SHA384, FipsKDF.AgreementKDFPRF.SHA384, true),
-	BC_FIPS_XDH_X25519_WITH_SHA512CKDF((short) 256, (short) 521, CodeProvider.BCFIPS, ASymmetricAuthenticatedSignatureType.BC_FIPS_Ed25519, "X25519", FipsSHS.Algorithm.SHA512, FipsKDF.AgreementKDFPRF.SHA512, true),
-	BC_FIPS_XDH_X448_WITH_SHA512CKDF((short) 256, (short) 521, CodeProvider.BCFIPS, ASymmetricAuthenticatedSignatureType.BC_FIPS_Ed448, "X448", FipsSHS.Algorithm.SHA512, FipsKDF.AgreementKDFPRF.SHA512, true),
-	/*BC_ECCDH_384_CURVE_M_221((short) 256, (short) 384, CodeProvider.BCFIPS, ASymmetricAuthenticatedSignatureType.BC_SHA384withECDSA_CURVE_M_221, "ECCDHwithSHA384CKDF", FipsSHS.Algorithm.SHA384, FipsKDF.AgreementKDFPRF.SHA384, true),
-	BC_ECCDH_512_CURVE_M_221((short) 256, (short) 521, CodeProvider.BCFIPS, ASymmetricAuthenticatedSignatureType.BC_SHA512withECDSA_CURVE_M_221, "ECCDHwithSHA512CKDF", FipsSHS.Algorithm.SHA512, FipsKDF.AgreementKDFPRF.SHA512, true),
-	BC_ECCDH_384_CURVE_M_383((short) 256, (short) 384, CodeProvider.BCFIPS, ASymmetricAuthenticatedSignatureType.BC_SHA384withECDSA_CURVE_M_383, "ECCDHwithSHA384CKDF", FipsSHS.Algorithm.SHA384, FipsKDF.AgreementKDFPRF.SHA384, true),
-	BC_ECCDH_512_CURVE_M_383((short) 256, (short) 521, CodeProvider.BCFIPS, ASymmetricAuthenticatedSignatureType.BC_SHA512withECDSA_CURVE_M_383, "ECCDHwithSHA512CKDF", FipsSHS.Algorithm.SHA512, FipsKDF.AgreementKDFPRF.SHA512, true),
-	BC_ECCDH_384_CURVE_M_511((short) 256, (short) 384, CodeProvider.BCFIPS, ASymmetricAuthenticatedSignatureType.BC_SHA384withECDSA_CURVE_M_511, "ECCDHwithSHA384CKDF", FipsSHS.Algorithm.SHA384, FipsKDF.AgreementKDFPRF.SHA384, true),
-	BC_ECCDH_512_CURVE_M_511((short) 256, (short) 521, CodeProvider.BCFIPS, ASymmetricAuthenticatedSignatureType.BC_SHA512withECDSA_CURVE_M_511, "ECCDHwithSHA512CKDF", FipsSHS.Algorithm.SHA512, FipsKDF.AgreementKDFPRF.SHA512, true),
-	BC_ECCDH_384_CURVE_41417((short) 256, (short) 384, CodeProvider.BCFIPS, ASymmetricAuthenticatedSignatureType.BC_SHA384withECDSA_CURVE_41417, "ECCDHwithSHA384CKDF", FipsSHS.Algorithm.SHA384, FipsKDF.AgreementKDFPRF.SHA384, true),
-	BC_ECCDH_512_CURVE_41417((short) 256, (short) 521, CodeProvider.BCFIPS, ASymmetricAuthenticatedSignatureType.BC_SHA512withECDSA_CURVE_41417, "ECCDHwithSHA512CKDF", FipsSHS.Algorithm.SHA512, FipsKDF.AgreementKDFPRF.SHA512, true),*/
-	/*@Deprecated
-	BC_FIPS_ECMQV_384_P_384((short) 256, (short) 384, CodeProvider.BCFIPS, ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA384withECDSA_P_384, "ECMQVwithSHA384CKDF", FipsSHS.Algorithm.SHA384, FipsKDF.AgreementKDFPRF.SHA384, true),
-	@Deprecated
-	BC_FIPS_ECMQV_512_P_521((short) 256, (short) 521, CodeProvider.BCFIPS, ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA512withECDSA_P_521, "ECMQVwithSHA512CKDF", FipsSHS.Algorithm.SHA512, FipsKDF.AgreementKDFPRF.SHA512, true),
-	BC_ECMQV_384_CURVE_25519((short) 256, (short) 384, CodeProvider.BCFIPS, ASymmetricAuthenticatedSignatureType.BC_SHA384withECDSA_CURVE_25519, "ECMQVwithSHA384CKDF", FipsSHS.Algorithm.SHA384, FipsKDF.AgreementKDFPRF.SHA384, true),
-	BC_ECMQV_512_CURVE_25519((short) 256, (short) 521, CodeProvider.BCFIPS, ASymmetricAuthenticatedSignatureType.BC_SHA512withECDSA_CURVE_25519, "ECMQVwithSHA512CKDF", FipsSHS.Algorithm.SHA512, FipsKDF.AgreementKDFPRF.SHA512, true),
-	BC_ECMQV_384_CURVE_M_221((short) 256, (short) 384, CodeProvider.BCFIPS, ASymmetricAuthenticatedSignatureType.BC_SHA384withECDSA_CURVE_M_221, "ECMQVwithSHA384CKDF", FipsSHS.Algorithm.SHA384, FipsKDF.AgreementKDFPRF.SHA384, true),
-	BC_ECMQV_512_CURVE_M_221((short) 256, (short) 521, CodeProvider.BCFIPS, ASymmetricAuthenticatedSignatureType.BC_SHA512withECDSA_CURVE_M_221, "ECMQVwithSHA512CKDF", FipsSHS.Algorithm.SHA512, FipsKDF.AgreementKDFPRF.SHA512, true),
-	BC_ECMQV_384_CURVE_M_383((short) 256, (short) 384, CodeProvider.BCFIPS, ASymmetricAuthenticatedSignatureType.BC_SHA384withECDSA_CURVE_M_383, "ECMQVwithSHA384CKDF", FipsSHS.Algorithm.SHA384, FipsKDF.AgreementKDFPRF.SHA384, true),
-	BC_ECMQV_512_CURVE_M_383((short) 256, (short) 521, CodeProvider.BCFIPS, ASymmetricAuthenticatedSignatureType.BC_SHA512withECDSA_CURVE_M_383, "ECMQVwithSHA512CKDF", FipsSHS.Algorithm.SHA512, FipsKDF.AgreementKDFPRF.SHA512, true),
-	BC_ECMQV_384_CURVE_M_511((short) 256, (short) 384, CodeProvider.BCFIPS, ASymmetricAuthenticatedSignatureType.BC_SHA384withECDSA_CURVE_M_511, "ECMQVwithSHA384CKDF", FipsSHS.Algorithm.SHA384, FipsKDF.AgreementKDFPRF.SHA384, true),
-	BC_ECMQV_512_CURVE_M_511((short) 256, (short) 521, CodeProvider.BCFIPS, ASymmetricAuthenticatedSignatureType.BC_SHA512withECDSA_CURVE_M_511, "ECMQVwithSHA512CKDF", FipsSHS.Algorithm.SHA512, FipsKDF.AgreementKDFPRF.SHA512, true),
-	BC_ECMQV_384_CURVE_41417((short) 256, (short) 384, CodeProvider.BCFIPS, ASymmetricAuthenticatedSignatureType.BC_SHA384withECDSA_CURVE_41417, "ECMQVwithSHA384CKDF", FipsSHS.Algorithm.SHA384, FipsKDF.AgreementKDFPRF.SHA384, true),
-	BC_ECMQV_512_CURVE_41417((short) 256, (short) 521, CodeProvider.BCFIPS, ASymmetricAuthenticatedSignatureType.BC_SHA512withECDSA_CURVE_41417, "ECMQVwithSHA512CKDF", FipsSHS.Algorithm.SHA512, FipsKDF.AgreementKDFPRF.SHA512, true),*/
+	BC_FIPS_XDH_X25519_WITH_SHA384CKDF((short) 256, (short) 521, CodeProvider.BCFIPS, ASymmetricAuthenticatedSignatureType.BC_FIPS_Ed25519, "X25519", FipsSHS.Algorithm.SHA384, FipsKDF.AgreementKDFPRF.SHA384, true, new ECNamedCurveGenParameterSpec("X25519")),
+	BC_FIPS_XDH_X448_WITH_SHA384CKDF((short) 256, (short) 521, CodeProvider.BCFIPS, ASymmetricAuthenticatedSignatureType.BC_FIPS_Ed448, "X448", FipsSHS.Algorithm.SHA384, FipsKDF.AgreementKDFPRF.SHA384, true, new ECNamedCurveGenParameterSpec("X448")),
+	BC_FIPS_XDH_X25519_WITH_SHA512CKDF((short) 256, (short) 521, CodeProvider.BCFIPS, ASymmetricAuthenticatedSignatureType.BC_FIPS_Ed25519, "X25519", FipsSHS.Algorithm.SHA512, FipsKDF.AgreementKDFPRF.SHA512, true, new ECNamedCurveGenParameterSpec("X25519")),
+	BC_FIPS_XDH_X448_WITH_SHA512CKDF((short) 256, (short) 521, CodeProvider.BCFIPS, ASymmetricAuthenticatedSignatureType.BC_FIPS_Ed448, "X448", FipsSHS.Algorithm.SHA512, FipsKDF.AgreementKDFPRF.SHA512, true, new ECNamedCurveGenParameterSpec("X448")),
 	DEFAULT(BC_FIPS_XDH_X448_WITH_SHA512CKDF);
 
 	private final short keySizeBits;
@@ -94,6 +72,7 @@ public enum EllipticCurveDiffieHellmanType {
 	private final FipsKDF.AgreementKDFPRF agreementKDFPRF;
 	private final boolean useKDF;
 	private EllipticCurveDiffieHellmanType derivedType;
+	private final AlgorithmParameterSpec algorithmParameterSpecForKeyGenerator;
 
 	
 	public boolean equals(EllipticCurveDiffieHellmanType t)
@@ -104,9 +83,13 @@ public enum EllipticCurveDiffieHellmanType {
 		return t.codeProvider==codeProvider && t.keySizeBits==keySizeBits && t.ECDHKeySizeBits==ECDHKeySizeBits && aSymmetricAuthenticatedSignatureType ==t.aSymmetricAuthenticatedSignatureType
 				&& keyAgreementName==t.keyAgreementName;
 	}
-	
+
+	public AlgorithmParameterSpec getAlgorithmParameterSpecForKeyGenerator() {
+		return algorithmParameterSpecForKeyGenerator;
+	}
+
 	EllipticCurveDiffieHellmanType(short keySizeBits, short ECDHKeySizeBits,
-								   CodeProvider codeProvider, ASymmetricAuthenticatedSignatureType aSymmetricAuthenticatedSignatureType, String keyAgreementName, FipsDigestAlgorithm fipsDigestAlgorithm, FipsKDF.AgreementKDFPRF agreementKDFPRF, boolean useKDF) {
+								   CodeProvider codeProvider, ASymmetricAuthenticatedSignatureType aSymmetricAuthenticatedSignatureType, String keyAgreementName, FipsDigestAlgorithm fipsDigestAlgorithm, FipsKDF.AgreementKDFPRF agreementKDFPRF, boolean useKDF, AlgorithmParameterSpec algorithmParameterSpecForKeyGenerator) {
 		this.keySizeBits = keySizeBits;
 		this.ECDHKeySizeBits = ECDHKeySizeBits;
 		this.codeProvider = codeProvider;
@@ -116,15 +99,16 @@ public enum EllipticCurveDiffieHellmanType {
 		this.agreementKDFPRF=agreementKDFPRF;
 		this.useKDF=useKDF;
 		this.derivedType=this;
+		this.algorithmParameterSpecForKeyGenerator = algorithmParameterSpecForKeyGenerator;
 	}
 	
-	public ASymmetricAuthenticatedSignatureType getASymmetricAuthenticatedSignatureType()
+	ASymmetricAuthenticatedSignatureType getASymmetricAuthenticatedSignatureType()
 	{
 		return aSymmetricAuthenticatedSignatureType;
 	}
 
 	EllipticCurveDiffieHellmanType(EllipticCurveDiffieHellmanType other) {
-		this(other.keySizeBits, other.ECDHKeySizeBits, other.codeProvider, other.aSymmetricAuthenticatedSignatureType, other.keyAgreementName, other.fipsDigestAlgorithm, other.agreementKDFPRF, other.useKDF);
+		this(other.keySizeBits, other.ECDHKeySizeBits, other.codeProvider, other.aSymmetricAuthenticatedSignatureType, other.keyAgreementName, other.fipsDigestAlgorithm, other.agreementKDFPRF, other.useKDF, other.algorithmParameterSpecForKeyGenerator);
 		this.derivedType=other;
 	}
 

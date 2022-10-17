@@ -142,7 +142,7 @@ public class EllipticCurveDiffieHellmanAlgorithm extends KeyAgreement {
 			else
 				kpg= KeyPairGenerator.getInstance("X25519", CodeProvider.BCFIPS.getCompatibleProvider());
 
-			JavaNativeKeyPairGenerator res = new JavaNativeKeyPairGenerator(t, kpg);
+			JavaNativeKeyPairGenerator res = new JavaNativeKeyPairGenerator(type, kpg);
 			res.initialize(keySize, System.currentTimeMillis(), Long.MAX_VALUE, randomForKeys);
 			kp=res.generateKeyPair();
 

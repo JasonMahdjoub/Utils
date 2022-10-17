@@ -349,7 +349,7 @@ public class ASymmetricPrivateKey extends AbstractKey implements IASymmetricPriv
 		else
 			if (finalizer.nativePrivateKey == null)
 				finalizer.nativePrivateKey = ASymmetricEncryptionType.decodeNativePrivateKey(finalizer.privateKey, encryptionType==null?signatureType.getKeyGeneratorAlgorithmName():encryptionType.getAlgorithmName(),
-					encryptionType==null?signatureType.name():encryptionType.name(), xdhKey);
+					encryptionType==null?signatureType.name():encryptionType.name(), xdhKey, encryptionType==null?signatureType.getCodeProviderForKeyGenerator():encryptionType.getCodeProviderForKeyGenerator());
 
 		return finalizer.nativePrivateKey;
 	}
