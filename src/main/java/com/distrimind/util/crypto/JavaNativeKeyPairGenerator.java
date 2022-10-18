@@ -47,7 +47,7 @@ import java.security.spec.RSAKeyGenParameterSpec;
  * @version 2.0
  * @since Utils 2.0
  */
-public final class JavaNativeKeyPairGenerator extends AbstractKeyPairGenerator {
+public final class JavaNativeKeyPairGenerator extends AbstractKeyPairGenerator<ASymmetricKeyPair> {
 	private final KeyPairGenerator keyPairGenerator;
 
 	private int keySizeBits = -1;
@@ -95,8 +95,13 @@ public final class JavaNativeKeyPairGenerator extends AbstractKeyPairGenerator {
 		}
 		else
 			kp = keyPairGenerator.generateKeyPair();
-		if (encryptionType==null)
-			return new ASymmetricKeyPair(signatureType, kp, keySizeBits, publicKeyValidityBeginDateUTC, expirationTime, isXDHKey());
+		if (encryptionType==null) {
+			if (signatureType == null) {
+				return new ASymmetricKeyPair(ellipticCurveDiffieHellmanType.getASymmetricAuthenticatedSignatureType(), kp, keySizeBits, publicKeyValidityBeginDateUTC, expirationTime, isXDHKey());
+			}
+			else
+				return new ASymmetricKeyPair(signatureType, kp, keySizeBits, publicKeyValidityBeginDateUTC, expirationTime, isXDHKey());
+		}
 		else
 			return new ASymmetricKeyPair(encryptionType, kp, keySizeBits, publicKeyValidityBeginDateUTC, expirationTime);
 	}
