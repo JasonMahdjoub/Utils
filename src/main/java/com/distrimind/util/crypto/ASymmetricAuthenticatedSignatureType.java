@@ -159,7 +159,7 @@ public enum ASymmetricAuthenticatedSignatureType {
 
 
 	public final static int MAX_SIZE_IN_BYTES_OF_NON_PQC_ASYMMETRIC_SIGNATURE =442;
-	public final static int MAX_SIZE_IN_BYTES_PQC_ASYMMETRIC_SIGNATURE =41000;
+	public final static int MAX_SIZE_IN_BYTES_PQC_ASYMMETRIC_SIGNATURE =50000;
 	public final static int MAX_SIZE_IN_BYTES_OF_ASYMMETRIC_SIGNATURE =/*Math.max(MAX_NON_PQC_ASYMMETRIC_SIGNATURE_SIZE, */MAX_SIZE_IN_BYTES_PQC_ASYMMETRIC_SIGNATURE/*)*/;
 
 
@@ -416,6 +416,7 @@ public enum ASymmetricAuthenticatedSignatureType {
 	}
 	public static void main(String[] args) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
 		Random r=new Random(System.nanoTime());
+		int maxSigSizeBits=0;
 		for (ASymmetricAuthenticatedSignatureType t : ASymmetricAuthenticatedSignatureType.values())
 		{
 			try(ASymmetricKeyPair kp=t.getKeyPairGenerator(SecureRandomType.DEFAULT.getSingleton(null)).generateKeyPair())
@@ -434,10 +435,12 @@ public enum ASymmetricAuthenticatedSignatureType {
 					maxSigLength=Math.max(maxSigLength, signer.getSignature().length*8);
 				}
 				System.out.println("\tSignature size in bits : "+maxSigLength);
+				maxSigSizeBits=Math.max(maxSigLength, maxSigSizeBits);
 
 			}
 
 
 		}
+		System.out.println("Maximum signature size in bits : "+maxSigSizeBits);
 	}
 }
