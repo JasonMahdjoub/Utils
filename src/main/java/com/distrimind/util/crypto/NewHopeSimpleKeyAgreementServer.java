@@ -1,10 +1,12 @@
+package com.distrimind.util.crypto;
 /*
-Copyright or © or Copr. Jason Mahdjoub (04/02/2016)
+Copyright or © or Copr. Jason Mahdjoub (01/04/2013)
 
 jason.mahdjoub@distri-mind.fr
 
-This software (Utils) is a computer program whose purpose is to give several kind of tools for developers 
-(ciphers, XML readers, decentralized id generators, etc.).
+This software (Object Oriented Database (OOD)) is a computer program 
+whose purpose is to manage a local database with the object paradigm 
+and the java language 
 
 This software is governed by the CeCILL-C license under French law and
 abiding by the rules of distribution of free software.  You can  use, 
@@ -32,22 +34,30 @@ same conditions as regards security.
 The fact that you are presently reading this means that you have had
 knowledge of the CeCILL-C license and that you accept its terms.
  */
-package com.distrimind.util.crypto;
+
 /**
- * 
  * @author Jason Mahdjoub
  * @version 1.0
- * @since Utils 3.14.0
+ * @since Utils 5.24.0
  */
-public abstract class KeyAgreement extends Agreement {
-
-	protected KeyAgreement(int stepsNumberForReception, int stepsNumberForSend) {
-		super(stepsNumberForReception, stepsNumberForSend);
+class NewHopeSimpleKeyAgreementServer extends AbstractNewHopeKeyAgreementServer implements ISimpleKeyAgreement {
+	NewHopeSimpleKeyAgreementServer(SymmetricAuthenticatedSignatureType symmetricAuthenticatedSignatureType, AbstractSecureRandom randomForKeys) {
+		super(symmetricAuthenticatedSignatureType, null, randomForKeys);
 	}
-	
-	public abstract SymmetricSecretKey getDerivedKey();
 
-	public abstract short getDerivedKeySizeBytes();
+	NewHopeSimpleKeyAgreementServer(SymmetricAuthenticatedSignatureType symmetricAuthenticatedSignatureType, short keySizeBits, AbstractSecureRandom randomForKeys) {
+		super(symmetricAuthenticatedSignatureType, null, keySizeBits, randomForKeys);
+	}
+	NewHopeSimpleKeyAgreementServer(SymmetricEncryptionType symmetricEncryptionType, AbstractSecureRandom randomForKeys) {
+		super(null, symmetricEncryptionType, randomForKeys);
+	}
 
+	NewHopeSimpleKeyAgreementServer(SymmetricEncryptionType symmetricEncryptionType, short keySizeBits, AbstractSecureRandom randomForKeys) {
+		super(null, symmetricEncryptionType, keySizeBits, randomForKeys);
+	}
 
+	@Override
+	public SymmetricSecretKey getDerivedSecretKey() {
+		return super.getDerivedKey();
+	}
 }

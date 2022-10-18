@@ -108,7 +108,7 @@ public class AggregatedP2PLoginAgreements extends P2PLoginAgreement {
 		this.finalizer.loginAgreements=loginAgreements;
 	}
 	@Override
-	protected boolean isAgreementProcessValidImpl() {
+	public boolean isAgreementProcessValidImpl() {
 
 		for (P2PLoginAgreement p : finalizer.loginAgreements) {
 			if (!p.isAgreementProcessValidImpl())

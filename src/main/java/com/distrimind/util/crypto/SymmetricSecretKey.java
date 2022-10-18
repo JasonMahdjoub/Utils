@@ -171,9 +171,11 @@ public class SymmetricSecretKey extends AbstractKey implements ISecretDecentrali
 		md.update(finalizer.secretKey);
 		byte[] d=md.digest();
 		int keySizeBytes=keySizeBits/8;
-		return new SymmetricSecretKeyPair(
+		SymmetricSecretKeyPair r= new SymmetricSecretKeyPair(
 				new SymmetricSecretKey(encryptionType, Arrays.copyOfRange(d, 0, keySizeBytes)),
 				new SymmetricSecretKey(signatureType, Arrays.copyOfRange(d, keySizeBytes, keySizeBytes*2)));
+		Arrays.fill(d, (byte)0);
+		return r;
 	}
 
 	SymmetricSecretKey(SymmetricEncryptionType type, SymmetricSecretKey k) {

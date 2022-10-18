@@ -37,10 +37,7 @@ package com.distrimind.util.crypto;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.security.AccessController;
-import java.security.PrivilegedActionException;
-import java.security.PrivilegedExceptionAction;
-import java.security.SecureRandom;
+import java.security.*;
 import java.util.Arrays;
 
 import com.distrimind.bouncycastle.pqc.crypto.newhope.NHPrivateKeyParameters;
@@ -53,11 +50,12 @@ import com.distrimind.util.UtilClassLoader;
  * @version 1.1
  * @since Utils 3.10.0
  */
-public abstract class AbstractNewHopeKeyAgreement extends KeyAgreement{
+public abstract class AbstractNewHopeKeyAgreement extends Agreement{
 	protected static final class Finalizer extends Cleaner
 	{
 		byte[] shared;
 		private SymmetricSecretKey secretKey=null;
+		private SymmetricSecretKeyPair secretKeyPair=null;
 
 		private Finalizer(Cleanable cleanable) {
 			super(cleanable);
@@ -69,6 +67,7 @@ public abstract class AbstractNewHopeKeyAgreement extends KeyAgreement{
 				Arrays.fill(shared, (byte)0);
 			shared=null;
 			secretKey=null;
+			secretKeyPair=null;
 		}
 	}
 	protected final Finalizer finalizer;
@@ -76,36 +75,35 @@ public abstract class AbstractNewHopeKeyAgreement extends KeyAgreement{
 	private final SymmetricAuthenticatedSignatureType signatureType;
 	protected short agreementSize;
 
-	protected AbstractNewHopeKeyAgreement(SymmetricEncryptionType type, short agreementSize)
-	{
-		super(1, 1);
-		this.encryptionType=type;
-		this.signatureType=null;
-		this.agreementSize=agreementSize;
 
-		if (!type.isPostQuantumAlgorithm((short)(agreementSize*8)))
-			throw new IllegalArgumentException("You must use post quantum compatible algorithms");
-		finalizer=new Finalizer(this);
 
-	}
-
-	@Override
 	public short getDerivedKeySizeBytes() {
 		return agreementSize;
 	}
 	
-	protected AbstractNewHopeKeyAgreement(SymmetricAuthenticatedSignatureType type, short agreementSize)
+	protected AbstractNewHopeKeyAgreement(SymmetricAuthenticatedSignatureType symmetricAuthenticatedSignatureType, SymmetricEncryptionType symmetricEncryptionType, short agreementSize)
 	{
 		super(1, 1);
-		this.encryptionType=null;
-		this.signatureType=type;
+		if (symmetricEncryptionType==null && symmetricAuthenticatedSignatureType==null)
+			throw new NullPointerException();
+		if (this instanceof IDualKeyAgreement)
+		{
+			if (symmetricEncryptionType==null)
+				throw new NullPointerException();
+			if (symmetricAuthenticatedSignatureType==null)
+				throw new NullPointerException();
+		}
+		this.encryptionType=symmetricEncryptionType;
+		this.signatureType=symmetricAuthenticatedSignatureType;
 		this.agreementSize=agreementSize;
-		if (!type.isPostQuantumAlgorithm((short)(agreementSize*8)))
+		if (signatureType!=null && !signatureType.isPostQuantumAlgorithm((short)(agreementSize*8)))
+			throw new IllegalArgumentException("You must use post quantum compatible algorithms");
+		if (encryptionType!=null && !encryptionType.isPostQuantumAlgorithm((short)(agreementSize*8)))
 			throw new IllegalArgumentException("You must use post quantum compatible algorithms");
 		finalizer=new Finalizer(this);
 	}
 	
-	public SymmetricSecretKey getDerivedKey()
+	protected SymmetricSecretKey getDerivedKey()
 	{
 		if (finalizer.secretKey==null)
 		{
@@ -116,6 +114,20 @@ public abstract class AbstractNewHopeKeyAgreement extends KeyAgreement{
 			finalizer.shared=null;
 		}
 		return finalizer.secretKey;
+	}
+	protected SymmetricSecretKeyPair getDerivedKeyPair()
+	{
+
+		if (finalizer.secretKeyPair==null)
+		{
+			SymmetricSecretKey sk=getDerivedKey();
+			try {
+				finalizer.secretKeyPair=sk.getDerivedSecretKeyPair(MessageDigestType.BC_FIPS_SHA3_512, signatureType);
+			} catch (NoSuchProviderException | NoSuchAlgorithmException e) {
+				throw new RuntimeException(e);
+			}
+		}
+		return finalizer.secretKeyPair;
 	}
 
     //static final int POLY_SIZE;

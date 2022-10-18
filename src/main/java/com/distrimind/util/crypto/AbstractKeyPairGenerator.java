@@ -43,7 +43,7 @@ import java.io.IOException;
  * @version 3.0
  * @since Utils 2.0
  */
-public abstract class AbstractKeyPairGenerator {
+public abstract class AbstractKeyPairGenerator<KP extends AbstractKeyPair<?, ?>>{
 	protected final ASymmetricEncryptionType encryptionType;
 	protected final ASymmetricAuthenticatedSignatureType signatureType;
 	protected final EllipticCurveDiffieHellmanType ellipticCurveDiffieHellmanType;
@@ -64,6 +64,11 @@ public abstract class AbstractKeyPairGenerator {
 		this.ellipticCurveDiffieHellmanType=ellipticCurveDiffieHellmanType.getDerivedType();
 	}
 
+	protected AbstractKeyPairGenerator(ASymmetricEncryptionType encryptionType, ASymmetricAuthenticatedSignatureType signatureType, EllipticCurveDiffieHellmanType ellipticCurveDiffieHellmanType) {
+		this.encryptionType = encryptionType;
+		this.signatureType = signatureType;
+		this.ellipticCurveDiffieHellmanType = ellipticCurveDiffieHellmanType;
+	}
 
 	/**
 	 * Generates a key pair.
@@ -80,7 +85,7 @@ public abstract class AbstractKeyPairGenerator {
 	 *
 	 * @return the generated key pair
 	 */
-	public abstract ASymmetricKeyPair generateKeyPair();
+	public abstract KP generateKeyPair();
 
 	/**
 	 * Returns the standard name of the algorithm for this key pair generator. See

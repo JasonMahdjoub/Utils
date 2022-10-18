@@ -35,24 +35,22 @@ The fact that you are presently reading this means that you have had
 knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-import com.distrimind.bouncycastle.pqc.legacy.crypto.mceliece.*;
-import com.distrimind.util.AutoZeroizable;
-import com.distrimind.util.Cleanable;
-import com.distrimind.util.Zeroizable;
-import com.distrimind.util.io.*;
-import com.distrimind.bouncycastle.crypto.AsymmetricCipherKeyPair;
-import com.distrimind.bouncycastle.crypto.Digest;
-import com.distrimind.bouncycastle.crypto.InvalidCipherTextException;
-import com.distrimind.bouncycastle.crypto.digests.*;
-import com.distrimind.bouncycastle.crypto.params.ParametersWithRandom;
 import com.distrimind.bcfips.crypto.Algorithm;
 import com.distrimind.bcfips.crypto.AsymmetricPrivateKey;
 import com.distrimind.bcfips.crypto.AsymmetricPublicKey;
+import com.distrimind.bouncycastle.crypto.AsymmetricCipherKeyPair;
+import com.distrimind.bouncycastle.crypto.InvalidCipherTextException;
+import com.distrimind.bouncycastle.crypto.params.ParametersWithRandom;
 import com.distrimind.bouncycastle.pqc.crypto.MessageEncryptor;
+import com.distrimind.bouncycastle.pqc.legacy.crypto.mceliece.*;
 import com.distrimind.bouncycastle.pqc.legacy.math.linearalgebra.GF2Matrix;
 import com.distrimind.bouncycastle.pqc.legacy.math.linearalgebra.GF2mField;
 import com.distrimind.bouncycastle.pqc.legacy.math.linearalgebra.Permutation;
 import com.distrimind.bouncycastle.pqc.legacy.math.linearalgebra.PolynomialGF2mSmallM;
+import com.distrimind.util.AutoZeroizable;
+import com.distrimind.util.Cleanable;
+import com.distrimind.util.Zeroizable;
+import com.distrimind.util.io.*;
 
 import javax.crypto.Cipher;
 import java.io.ByteArrayOutputStream;
@@ -90,21 +88,19 @@ public class BCMcElieceCipher extends AbstractCipher{
 		if (encryptionType==null)
 			throw new NullPointerException();
 		this.encryptionType = encryptionType.getDerivedType();
-		if (!this.encryptionType.name().startsWith("BCPQC_MCELIECE_"))
+		if (!this.encryptionType.getAlgorithmName().startsWith("McEliece"))
 			throw new IllegalArgumentException();
-		cca2=this.encryptionType.name().contains("CCA2");
+		cca2=this.encryptionType.getDerivedType().name().contains("CCA2");
 	}
 
 
 
 	private MessageEncryptor getMcElieceCipher()
 	{
-		if (encryptionType.name().contains("FUJISAKI"))
+		if (encryptionType.getAlgorithmName().contains("Fujisaki"))
 			return new McElieceFujisakiCipher();
-		else if (encryptionType.name().contains("POINTCHEVAL"))
+		else if (encryptionType.getAlgorithmName().contains("PointCheval"))
 			return new McEliecePointchevalCipher();
-		else if (encryptionType.name().contains("KOBARA_IMAI"))
-			return new McElieceKobaraImaiCipher();
 		else
 			return new McElieceCipher();
 	}
@@ -335,11 +331,11 @@ public class BCMcElieceCipher extends AbstractCipher{
 		public void readExternal(SecuredObjectInputStream in, ASymmetricEncryptionType type) throws IOException {
 			String digest;
 			finalizer.performCleanup();
-			if (type.name().contains("SHA256"))
+			if (type.getDerivedType().name().contains("SHA256"))
 				digest="SHA-256";
-			else if (type.name().contains("SHA384"))
+			else if (type.getDerivedType().name().contains("SHA384"))
 				digest="SHA-384";
-			else if (type.name().contains("SHA512"))
+			else if (type.getDerivedType().name().contains("SHA512"))
 				digest="SHA-512";
 			else
 				throw new IOException();
@@ -555,11 +551,11 @@ public class BCMcElieceCipher extends AbstractCipher{
 		}
 		public void readExternal(SecuredObjectInputStream in, ASymmetricEncryptionType type) throws IOException {
 			String digest;
-			if (type.name().contains("SHA256"))
+			if (type.getDerivedType().name().contains("SHA256"))
 				digest="SHA-256";
-			else if (type.name().contains("SHA384"))
+			else if (type.getDerivedType().name().contains("SHA384"))
 				digest="SHA-384";
-			else if (type.name().contains("SHA512"))
+			else if (type.getDerivedType().name().contains("SHA512"))
 				digest="SHA-512";
 			else
 				throw new IOException();
@@ -581,88 +577,8 @@ public class BCMcElieceCipher extends AbstractCipher{
 		}
 	}
 
-	static class KeyPairGenerator extends AbstractKeyPairGenerator
-	{
-		private McElieceKeyPairGenerator mcElieceKeyPairGenerator=null;
 
-		private final String digest;
-		private int keySize;
-		private long keyExpiration;
-		private long publicKeyValidityBeginDateUTC;
-
-		KeyPairGenerator(ASymmetricEncryptionType encryptionType) {
-			super(encryptionType);
-			if (!this.encryptionType.name().startsWith("BCPQC_MCELIECE_"))
-				throw new IllegalArgumentException();
-			boolean cca2=this.encryptionType.name().contains("CCA2");
-			if (cca2)
-				throw new IllegalAccessError();
-			if (this.encryptionType.name().contains("SHA256"))
-				digest="SHA-256";
-			else if (this.encryptionType.name().contains("SHA384"))
-				digest="SHA-384";
-			else if (this.encryptionType.name().contains("SHA512"))
-				digest="SHA-512";
-			else
-				throw new IllegalArgumentException();
-		}
-		Digest getDigest()
-		{
-			if (digest.equals("SHA-1"))
-			{
-				return new SHA1Digest();
-			}
-			if (digest.equals("SHA-224"))
-			{
-				return new SHA224Digest();
-			}
-			if (digest.equals("SHA-256"))
-			{
-				return new SHA256Digest();
-			}
-			if (digest.equals("SHA-384"))
-			{
-				return new SHA384Digest();
-			}
-			if (digest.equals("SHA-512"))
-			{
-				return new SHA512Digest();
-			}
-
-			throw new IllegalArgumentException("unrecognised digest algorithm: " + digest);
-		}
-		@Override
-		public ASymmetricKeyPair generateKeyPair() {
-			AsymmetricCipherKeyPair res= mcElieceKeyPairGenerator.generateKeyPair();
-			return new ASymmetricKeyPair(new ASymmetricPrivateKey(encryptionType, new PrivateKey((McEliecePrivateKeyParameters) res.getPrivate()), keySize),
-					new ASymmetricPublicKey(encryptionType, new PublicKey((McEliecePublicKeyParameters) res.getPublic()), keySize, publicKeyValidityBeginDateUTC, keyExpiration));
-		}
-
-		@Override
-		public String getAlgorithm() {
-			return encryptionType.getAlgorithmName();
-		}
-
-		@Override
-		public void initialize(int keySize, long publicKeyValidityBeginDateUTC, long expirationTime) throws IOException {
-			try {
-				initialize(keySize, publicKeyValidityBeginDateUTC, expirationTime, SecureRandomType.BC_FIPS_APPROVED_FOR_KEYS.getSingleton(null));
-			} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
-				throw new IOException(e);
-			}
-		}
-
-		@Override
-		public void initialize(int keySize, long publicKeyValidityBeginDateUTC, long expirationTime, AbstractSecureRandom random) {
-			this.keySize= keySize;
-			this.keyExpiration=expirationTime;
-			this.publicKeyValidityBeginDateUTC=publicKeyValidityBeginDateUTC;
-			mcElieceKeyPairGenerator=new McElieceKeyPairGenerator();
-			mcElieceKeyPairGenerator.init(new McElieceKeyGenerationParameters(random, new McElieceParameters(getDigest())));
-		}
-	}
-
-	static class KeyPairGeneratorCCA2 extends AbstractKeyPairGenerator
+	static class KeyPairGeneratorCCA2 extends AbstractKeyPairGenerator<ASymmetricKeyPair>
 	{
 		private McElieceCCA2KeyPairGenerator mcElieceKeyPairGenerator=null;
 
@@ -673,16 +589,16 @@ public class BCMcElieceCipher extends AbstractCipher{
 
 		KeyPairGeneratorCCA2(ASymmetricEncryptionType encryptionType) {
 			super(encryptionType);
-			if (!this.encryptionType.name().startsWith("BCPQC_MCELIECE_"))
+			if (!this.encryptionType.getAlgorithmName().startsWith("McEliece"))
 				throw new IllegalArgumentException();
-			boolean cca2=this.encryptionType.name().contains("CCA2");
+			boolean cca2=this.encryptionType.getDerivedType().name().contains("CCA2");
 			if (!cca2)
 				throw new IllegalAccessError();
-			if (this.encryptionType.name().contains("SHA256"))
+			if (this.encryptionType.getDerivedType().name().contains("SHA256"))
 				digest="SHA-256";
-			else if (this.encryptionType.name().contains("SHA384"))
+			else if (this.encryptionType.getDerivedType().name().contains("SHA384"))
 				digest="SHA-384";
-			else if (this.encryptionType.name().contains("SHA512"))
+			else if (this.encryptionType.getDerivedType().name().contains("SHA512"))
 				digest="SHA-512";
 			else
 				throw new IllegalArgumentException();

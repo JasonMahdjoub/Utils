@@ -87,7 +87,7 @@ public abstract class AbstractP2PLoginWithSignature extends P2PLoginAgreement {
 	}
 
 	@Override
-	protected boolean isAgreementProcessValidImpl() {
+	public boolean isAgreementProcessValidImpl() {
 		return valid;
 	}
 

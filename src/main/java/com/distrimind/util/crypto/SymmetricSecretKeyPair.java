@@ -39,6 +39,7 @@ import com.distrimind.util.Bits;
 import com.distrimind.util.Cleanable;
 import com.distrimind.util.data_buffers.WrappedSecretData;
 import com.distrimind.util.data_buffers.WrappedSecretString;
+import com.distrimind.util.io.MessageExternalizationException;
 
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
@@ -51,6 +52,11 @@ import java.util.Objects;
  * @since Utils 4.7.0
  */
 public class SymmetricSecretKeyPair extends AbstractKey implements ISecretDecentralizedValue{
+	static SymmetricSecretKeyPair getDerivedKey(SymmetricSecretKeyPair key1, SymmetricSecretKeyPair key2) throws MessageExternalizationException {
+		return new SymmetricSecretKeyPair(SymmetricSecretKey.getDerivedKey(key1.getSecretKeyForEncryption(), key2.getSecretKeyForEncryption()),
+				SymmetricSecretKey.getDerivedKey(key1.getSecretKeyForSignature(), key2.getSecretKeyForSignature()));
+	}
+
 	private static final class Finalizer extends Cleaner
 	{
 		private SymmetricSecretKey secretKeyForEncryption;

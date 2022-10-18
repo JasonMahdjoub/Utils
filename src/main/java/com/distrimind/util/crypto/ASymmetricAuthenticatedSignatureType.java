@@ -342,17 +342,17 @@ public enum ASymmetricAuthenticatedSignatureType {
 		}
 		throw new IllegalArgumentException();
 	}
-	public AbstractKeyPairGenerator getKeyPairGenerator(AbstractSecureRandom random)
+	public AbstractKeyPairGenerator<ASymmetricKeyPair> getKeyPairGenerator(AbstractSecureRandom random)
 			throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
 		return getKeyPairGenerator(random, keySizeBits, System.currentTimeMillis(), System.currentTimeMillis() + expirationTimeMilis);
 	}
 
-	public AbstractKeyPairGenerator getKeyPairGenerator(AbstractSecureRandom random, int keySize)
+	public AbstractKeyPairGenerator<ASymmetricKeyPair> getKeyPairGenerator(AbstractSecureRandom random, int keySize)
 			throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
 		return getKeyPairGenerator(random, keySize, System.currentTimeMillis(), System.currentTimeMillis() + expirationTimeMilis);
 	}
 
-	public AbstractKeyPairGenerator getKeyPairGenerator(AbstractSecureRandom random, int keySizeBits,
+	public AbstractKeyPairGenerator<ASymmetricKeyPair> getKeyPairGenerator(AbstractSecureRandom random, int keySizeBits,
 														long publicKeyValidityBeginDateUTC, long expirationTimeUTC) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
 		if (keySizeBits<0)
 			keySizeBits= this.keySizeBits;

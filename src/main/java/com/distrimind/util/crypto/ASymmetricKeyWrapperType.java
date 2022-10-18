@@ -157,6 +157,10 @@ public enum ASymmetricKeyWrapperType {
 		return type.algorithmName==this.algorithmName && type.provider==this.provider && type.shaAlgorithm==this.shaAlgorithm;
 	}
 	ASymmetricKeyWrapperType(ASymmetricKeyWrapperType pqcWrapper, ASymmetricKeyWrapperType nonPQCWrapper) {
+		if (!pqcWrapper.isPostQuantumKeyAlgorithm())
+			throw new IllegalArgumentException();
+		if (nonPQCWrapper.isPostQuantumKeyAlgorithm())
+			throw new IllegalArgumentException();
 		this.algorithmName = "";
 		this.provider = null;
 		this.withParameters=false;
@@ -322,8 +326,8 @@ public enum ASymmetricKeyWrapperType {
 				if (publicKey.getAuthenticatedSignatureAlgorithmType() != null)
 					throw new IllegalArgumentException();
 				//CodeProvider.ensureProviderLoaded(provider);
-				if (name().startsWith("BCPQC_MCELIECE_")) {
-					if (!publicKey.getEncryptionAlgorithmType().name().equals(name()))
+				if (getAlgorithmName().startsWith("McEliece")) {
+					if (!publicKey.getEncryptionAlgorithmType().equals(aSymmetricEncryptionType))
 						throw new IllegalArgumentException(publicKey.getEncryptionAlgorithmType().toString()+" ; "+name());
 					try(ClientASymmetricEncryptionAlgorithm client = new ClientASymmetricEncryptionAlgorithm(random, publicKey)) {
 						WrappedSecretData wsd = keyToWrap.encode();
@@ -402,9 +406,11 @@ public enum ASymmetricKeyWrapperType {
 					throw new IllegalArgumentException(""+ipublicKey.getClass().getName());
 
 				HybridASymmetricPublicKey publicKey = (HybridASymmetricPublicKey) ipublicKey;
-				if (!publicKey.getPQCPublicKey().getEncryptionAlgorithmType().name().equals(getPqcWrapper().name()))
-					throw new IllegalArgumentException(publicKey.getPQCPublicKey().getEncryptionAlgorithmType()+" ; "+getPqcWrapper().name());
-				WrappedEncryptedSymmetricSecretKey nonPQCWrap = pqcWrapper.wrapKey(random, publicKey.getNonPQCPublicKey(), keyToWrap);
+				if (!publicKey.getPQCPublicKey().getEncryptionAlgorithmType().equals(pqcWrapper.aSymmetricEncryptionType))
+					throw new IllegalArgumentException("publicKey.getPQCPublicKey()="+publicKey.getPQCPublicKey()+", pqcWrapper.aSymmetricEncryptionType="+pqcWrapper.aSymmetricEncryptionType);
+				if (!publicKey.getNonPQCPublicKey().getEncryptionAlgorithmType().equals(nonPQCWrapper.aSymmetricEncryptionType))
+					throw new IllegalArgumentException("publicKey.getNonPQCPublicKey()="+publicKey.getNonPQCPublicKey()+", nonPQCWrapper.aSymmetricEncryptionType="+nonPQCWrapper.aSymmetricEncryptionType);
+				WrappedEncryptedSymmetricSecretKey nonPQCWrap = pqcWrapper.wrapKey(random, publicKey.getPQCPublicKey(), keyToWrap);
 
 				try(ClientASymmetricEncryptionAlgorithm client = new ClientASymmetricEncryptionAlgorithm(random, publicKey.getNonPQCPublicKey()))
 				{
@@ -431,7 +437,7 @@ public enum ASymmetricKeyWrapperType {
 				ASymmetricPrivateKey privateKey = (ASymmetricPrivateKey) iPrivateKey;
 				if (name().startsWith("BCPQC_MCELIECE_")) {
 
-					if (!privateKey.getEncryptionAlgorithmType().name().equals(name()))
+					if (!privateKey.getEncryptionAlgorithmType().equals(aSymmetricEncryptionType))
 						throw new IllegalArgumentException();
 					ServerASymmetricEncryptionAlgorithm server = new ServerASymmetricEncryptionAlgorithm(privateKey);
 					AbstractKey res = AbstractKey.decode(server.decode(keyToUnwrap.getBytes()));
@@ -459,11 +465,13 @@ public enum ASymmetricKeyWrapperType {
 				if (!isHybrid())
 					throw new IllegalArgumentException();
 				HybridASymmetricPrivateKey privateKey = (HybridASymmetricPrivateKey) iPrivateKey;
-				if (!privateKey.getNonPQCPrivateKey().getEncryptionAlgorithmType().name().equals(getPqcWrapper().name()))
-					throw new IllegalArgumentException();
+				if (!privateKey.getPQCPrivateKey().getEncryptionAlgorithmType().equals(pqcWrapper.aSymmetricEncryptionType))
+					throw new IllegalArgumentException("privateKey.getPQCPrivateKey()="+privateKey.getPQCPrivateKey()+", pqcWrapper.aSymmetricEncryptionType="+pqcWrapper.aSymmetricEncryptionType);
+				if (!privateKey.getNonPQCPrivateKey().getEncryptionAlgorithmType().equals(nonPQCWrapper.aSymmetricEncryptionType))
+					throw new IllegalArgumentException("privateKey.getNonPQCPrivateKey()="+privateKey.getNonPQCPrivateKey()+", nonPQCWrapper.aSymmetricEncryptionType="+nonPQCWrapper.aSymmetricEncryptionType);
 				ServerASymmetricEncryptionAlgorithm server = new ServerASymmetricEncryptionAlgorithm(privateKey.getNonPQCPrivateKey());
 				byte[] b = server.decode(keyToUnwrap.getBytes());
-				return getNonPQCWrapper().unwrapKey(privateKey.getPQCPrivateKey(), new WrappedEncryptedSymmetricSecretKey(b));
+				return pqcWrapper.unwrapKey(privateKey.getPQCPrivateKey(), new WrappedEncryptedSymmetricSecretKey(b));
 			}
 		} catch (InvalidKeyException e) {
 			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, e);
@@ -567,7 +575,7 @@ public enum ASymmetricKeyWrapperType {
 		WrappedData encodedKey = new WrappedData(new byte[size]);
 		Random r=new Random(System.currentTimeMillis());
 		r.nextBytes(encodedKey.getBytes());
-		if (type.name().startsWith("BCPQC_MCELIECE_")) {
+		if (type.getAlgorithmName().startsWith("McEliece")) {
 			try(ClientASymmetricEncryptionAlgorithm client = new ClientASymmetricEncryptionAlgorithm(SecureRandomType.DEFAULT.getInstance(null), publicKey)) {
 				return client.encode(encodedKey.getBytes()).length;
 			}
@@ -595,12 +603,20 @@ public enum ASymmetricKeyWrapperType {
 	}
 	public AbstractKeyPairGenerator<?> getKeyPairGenerator(AbstractSecureRandom random)
 			throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
-		return getKeyPairGenerator(random, aSymmetricEncryptionType.getDefaultKeySizeBits(), System.currentTimeMillis(), System.currentTimeMillis() + aSymmetricEncryptionType.getDefaultExpirationTimeMilis());
+		if (isHybrid())
+			return new HybridKeyPairGenerator(nonPQCWrapper.aSymmetricEncryptionType.getKeyPairGenerator(random),
+					pqcWrapper.aSymmetricEncryptionType.getKeyPairGenerator(random));
+		else
+			return getKeyPairGenerator(random, aSymmetricEncryptionType.getDefaultKeySizeBits(), System.currentTimeMillis(), System.currentTimeMillis() + aSymmetricEncryptionType.getDefaultExpirationTimeMilis());
 	}
 
 	public AbstractKeyPairGenerator<?> getKeyPairGenerator(AbstractSecureRandom random, int keySizeBits)
 			throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
-		return getKeyPairGenerator(random, keySizeBits, System.currentTimeMillis(), System.currentTimeMillis() + aSymmetricEncryptionType.getDefaultExpirationTimeMilis());
+		if (isHybrid())
+			return new HybridKeyPairGenerator(nonPQCWrapper.aSymmetricEncryptionType.getKeyPairGenerator(random, keySizeBits),
+					pqcWrapper.aSymmetricEncryptionType.getKeyPairGenerator(random, keySizeBits));
+		else
+			return getKeyPairGenerator(random, keySizeBits, System.currentTimeMillis(), System.currentTimeMillis() + aSymmetricEncryptionType.getDefaultExpirationTimeMilis());
 	}
 	public AbstractKeyPairGenerator<?> getKeyPairGenerator(AbstractSecureRandom random, int keySizeBits,
 														long publicKeyValidityBeginDateUTC, long expirationTimeUTC) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {

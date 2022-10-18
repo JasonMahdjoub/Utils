@@ -34,29 +34,27 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
-import java.io.IOException;
-import java.util.Arrays;
 
 import com.distrimind.util.Cleanable;
 import com.distrimind.util.io.Integrity;
 import com.distrimind.util.io.MessageExternalizationException;
-import com.distrimind.bouncycastle.crypto.AsymmetricCipherKeyPair;
 import com.distrimind.bouncycastle.crypto.CryptoException;
-import com.distrimind.bouncycastle.crypto.KeyGenerationParameters;
-import com.distrimind.bouncycastle.pqc.crypto.newhope.NHKeyPairGenerator;
-import com.distrimind.bouncycastle.pqc.crypto.newhope.NHPrivateKeyParameters;
+import com.distrimind.bouncycastle.pqc.crypto.ExchangePair;
 import com.distrimind.bouncycastle.pqc.crypto.newhope.NHPublicKeyParameters;
+
+import java.io.IOException;
+import java.util.Arrays;
 
 /**
  *
  * @author Jason Mahdjoub
- * @version 1.1
+ * @version 1.0
  * @since Utils 3.10.0
  */
-public class NewHopeKeyAgreementClient extends AbstractNewHopeKeyAgreement{
+public abstract class AbstractNewHopeKeyAgreementServer extends AbstractNewHopeKeyAgreement{
 	private static final class Finalizer extends Cleaner
 	{
-		private NHPrivateKeyParameters priv;
+		private ExchangePair exchangePair;
 
 		private Finalizer(Cleanable cleanable) {
 			super(cleanable);
@@ -64,15 +62,9 @@ public class NewHopeKeyAgreementClient extends AbstractNewHopeKeyAgreement{
 
 		@Override
 		protected void performCleanup() {
-			if (priv!=null)
-			{
-				try {
-					short[] f = (short[])fieldSecData.get(priv);
-					Arrays.fill(f, (short)0);
-					priv=null;
-				} catch (IllegalArgumentException | IllegalAccessException e) {
-					e.printStackTrace();
-				}
+			if (exchangePair!=null) {
+				Arrays.fill(exchangePair.getSharedValue(), (byte) 0);
+				exchangePair = null;
 			}
 		}
 	}
@@ -80,49 +72,48 @@ public class NewHopeKeyAgreementClient extends AbstractNewHopeKeyAgreement{
 	private final AbstractSecureRandom randomForKeys;
 
 	private boolean valid=true;
-	NewHopeKeyAgreementClient(SymmetricAuthenticatedSignatureType type, short keySizeBits, AbstractSecureRandom randomForKeys) {
-		super(type, (short)(keySizeBits/8));
-		this.randomForKeys=randomForKeys;
-		finalizer=new Finalizer(this);
-	}
-	NewHopeKeyAgreementClient(SymmetricEncryptionType type, short keySizeBits, AbstractSecureRandom randomForKeys) {
-		super(type, (short)(keySizeBits/8));
-		this.randomForKeys=randomForKeys;
-		finalizer=new Finalizer(this);
-	}
 
 	@Override
 	public boolean isPostQuantumAgreement() {
 		return true;
 	}
 
-	private byte[] getDataPhase1()
+	protected AbstractNewHopeKeyAgreementServer(SymmetricAuthenticatedSignatureType symmetricAuthenticatedSignatureType, SymmetricEncryptionType symmetricEncryptionType, AbstractSecureRandom randomForKeys) {
+		this(symmetricAuthenticatedSignatureType, symmetricEncryptionType, (short)256, randomForKeys);
+	}
+	protected AbstractNewHopeKeyAgreementServer(SymmetricAuthenticatedSignatureType symmetricAuthenticatedSignatureType, SymmetricEncryptionType symmetricEncryptionType, short keySizeBits, AbstractSecureRandom randomForKeys) {
+		super(symmetricAuthenticatedSignatureType, symmetricEncryptionType, (short)(keySizeBits/8));
+		this.randomForKeys=randomForKeys;
+		this.finalizer=new Finalizer(this);
+	}
+
+
+
+	public void setDataPhase1(byte []data)
 	{
 		valid=false;
-		//init key pair
-		NHKeyPairGenerator keyPairEngine = new NHKeyPairGenerator();
+		byte[] sharedValue = new byte[agreementSize];
+		byte[] publicKeyValue = new byte[SENDB_BYTES];
 
-		keyPairEngine.init(new KeyGenerationParameters(randomForKeys, 1024));
-		AsymmetricCipherKeyPair pair = keyPairEngine.generateKeyPair();
-		NHPublicKeyParameters pub = (NHPublicKeyParameters)pair.getPublic();
-		finalizer.priv = (NHPrivateKeyParameters)pair.getPrivate();
+		AbstractNewHopeKeyAgreement.sharedB(randomForKeys, sharedValue, publicKeyValue, data);
 
-		byte[] res=pub.getPubData();
+
+		finalizer.exchangePair=new ExchangePair(new NHPublicKeyParameters(publicKeyValue), sharedValue);
+		super.finalizer.shared=finalizer.exchangePair.getSharedValue();
+		assert super.finalizer.shared!=null;
+		valid=true;
+	}
+
+	public byte[] getDataPhase2()
+	{
+		valid=false;
+		byte[] res= ((NHPublicKeyParameters)finalizer.exchangePair.getPublicKey()).getPubData();
 		valid=true;
 		return res;
 	}
 
-	private void setDataPhase2(byte []data)
-	{
-		//calculate agreement
-		valid=false;
-		super.finalizer.shared = new byte[agreementSize];
-
-		sharedA(super.finalizer.shared, finalizer.priv.getSecData(), data);
-		valid=true;
-	}
 	@Override
-	protected boolean isAgreementProcessValidImpl() {
+	public boolean isAgreementProcessValidImpl() {
 		return valid;
 	}
 	@Override
@@ -132,10 +123,10 @@ public class NewHopeKeyAgreementClient extends AbstractNewHopeKeyAgreement{
 
 		try {
 			if (stepNumber == 0)
-				return getDataPhase1();
+				return getDataPhase2();
 			else {
 				valid = false;
-				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new IllegalAccessException());
+				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN,new IllegalAccessException());
 			}
 		}
 		catch(Exception e)
@@ -143,6 +134,8 @@ public class NewHopeKeyAgreementClient extends AbstractNewHopeKeyAgreement{
 			valid=false;
 			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, e);
 		}
+
+
 	}
 	@Override
 	protected void receiveData(int stepNumber, byte[] data) throws IOException {
@@ -151,7 +144,7 @@ public class NewHopeKeyAgreementClient extends AbstractNewHopeKeyAgreement{
 
 		try {
 			if (stepNumber == 0)
-				setDataPhase2(data);
+				setDataPhase1(data);
 			else
 				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, new IllegalAccessException());
 		}
@@ -163,6 +156,7 @@ public class NewHopeKeyAgreementClient extends AbstractNewHopeKeyAgreement{
 
 
 	}
+
 
 
 }

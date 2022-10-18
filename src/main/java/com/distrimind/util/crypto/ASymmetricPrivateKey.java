@@ -338,7 +338,7 @@ public class ASymmetricPrivateKey extends AbstractKey implements IASymmetricPriv
 	public PrivateKey toJavaNativeKey()
 			throws NoSuchAlgorithmException, InvalidKeySpecException {
 		checkNotDestroyed();
-		if (encryptionType!=null && encryptionType.name().startsWith("BCPQC_MCELIECE_"))
+		if (encryptionType!=null && encryptionType.getAlgorithmName().startsWith("McEliece"))
 		{
 			AsymmetricKey bk=toBouncyCastleKey();
 			if (bk instanceof BCMcElieceCipher.PrivateKeyCCA2)
@@ -367,10 +367,10 @@ public class ASymmetricPrivateKey extends AbstractKey implements IASymmetricPriv
 	@Override
 	public AsymmetricKey toBouncyCastleKey() throws NoSuchAlgorithmException, InvalidKeySpecException {
 		checkNotDestroyed();
-		if (encryptionType!=null && encryptionType.name().startsWith("BCPQC_MCELIECE_"))
+		if (encryptionType!=null && encryptionType.getAlgorithmName().startsWith("McEliece"))
 		{
 			if (finalizer.bouncyCastlePrivateKey==null) {
-				if (encryptionType.name().contains("CCA2")) {
+				if (encryptionType.getDerivedType().name().contains("CCA2")) {
 					BCMcElieceCipher.PrivateKeyCCA2 res = new BCMcElieceCipher.PrivateKeyCCA2();
 					try {
 						res.readExternal(new RandomByteArrayInputStream(this.finalizer.privateKey), encryptionType);

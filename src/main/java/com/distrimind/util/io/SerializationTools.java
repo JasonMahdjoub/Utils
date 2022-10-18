@@ -1107,21 +1107,7 @@ public class SerializationTools {
 		}
 		oos.writeInt(e.ordinal());
 	}
-	static void writeHybridKeyAgreementType(final SecuredObjectOutputStream oos, HybridKeyAgreementType e, @SuppressWarnings("SameParameterValue") boolean supportNull) throws IOException
-	{
-		if (supportNull)
-			oos.writeBoolean(e!=null);
-		if (e==null)
-		{
-			if (!supportNull)
-				throw new IOException();
 
-			return;
-
-		}
-		oos.writeInt(e.getNonPQCKeyAgreementType().ordinal());
-		oos.writeInt(e.getPQCKeyAgreementType().ordinal());
-	}
 	static void writeHybridASymmetricEncryptionType(final SecuredObjectOutputStream oos, HybridASymmetricEncryptionType e, @SuppressWarnings("SameParameterValue") boolean supportNull) throws IOException
 	{
 		if (supportNull)
@@ -1195,45 +1181,7 @@ public class SerializationTools {
 			return null;
 
 	}
-	static HybridKeyAgreementType readHybridKeyAgreementType(final SecuredObjectInputStream ois, @SuppressWarnings("SameParameterValue") boolean supportNull) throws IOException
-	{
-		if (!supportNull || ois.readBoolean())
-		{
-			int kao=ois.readInt();
-			int pqckao=ois.readInt();
-			KeyAgreementType ka=null;
-			for (KeyAgreementType t : KeyAgreementType.values())
-			{
-				if (t.ordinal()==kao)
-				{
-					ka=t;
-					break;
-				}
-			}
-			if (ka==null)
-				throw new MessageExternalizationException(Integrity.FAIL);
-			KeyAgreementType pqcka=null;
-			for (KeyAgreementType t : KeyAgreementType.values())
-			{
-				if (t.ordinal()==pqckao)
-				{
-					pqcka=t;
-					break;
-				}
-			}
-			if (pqcka==null)
-				throw new MessageExternalizationException(Integrity.FAIL);
-			try {
-				return new HybridKeyAgreementType(ka, pqcka);
-			}
-			catch(Exception e)
-			{
-				throw new IOException(e);
-			}
-		}
-		else
-			return null;
-	}
+
 	static HybridASymmetricAuthenticatedSignatureType readHybridASymmetricAuthenticatedSignatureType(final SecuredObjectInputStream ois, @SuppressWarnings("SameParameterValue") boolean supportNull) throws IOException
 	{
 		if (!supportNull || ois.readBoolean())
@@ -1559,8 +1507,7 @@ public class SerializationTools {
 				|| Inet4Address.class.isAssignableFrom(clazz)
 				|| Inet6Address.class.isAssignableFrom(clazz)
 				|| HybridASymmetricAuthenticatedSignatureType.class==clazz
-				|| HybridASymmetricEncryptionType.class==clazz
-				|| HybridKeyAgreementType.class==clazz;
+				|| HybridASymmetricEncryptionType.class==clazz;
 
 	}
 	public static int getObjectCodeSizeBytes()
@@ -1693,13 +1640,13 @@ public class SerializationTools {
 		else {
 			Class<?> clazz=o.getClass();
 			if (o instanceof Collection) {
-				writeObjectCode(oos, 28);
+				writeObjectCode(oos, 27);
 				writeCollection(oos, (Collection<?>) o, sizeMax, false, true);
 			} else if (o instanceof Map) {
 				writeObjectCode(oos, 13);
 				writeMap(oos, (Map<?, ?>) o, sizeMax, false, true, true);
 			} else if (clazz == FilePermissions.class) {
-				writeObjectCode(oos, 27);
+				writeObjectCode(oos, 26);
 				((FilePermissions) o).writeExternal(oos);
 			} else if (o instanceof SecureExternalizableWithoutInnerSizeControl && (id = identifiersPerClasses.get(o.getClass())) != null) {
 				if (OOSreplaceObject) {
@@ -1761,61 +1708,58 @@ public class SerializationTools {
 			} else if (clazz == Date.class) {
 				writeObjectCode(oos, 15);
 				writeDate(oos, (Date) o, false);
-			} else if (o instanceof HybridKeyAgreementType) {
-				writeObjectCode(oos, 16);
-				writeHybridKeyAgreementType(oos, (HybridKeyAgreementType) o, false);
 			} else if (o instanceof HybridASymmetricAuthenticatedSignatureType) {
-				writeObjectCode(oos, 17);
+				writeObjectCode(oos, 16);
 				writeHybridASymmetricAuthenticatedSignatureType(oos, (HybridASymmetricAuthenticatedSignatureType) o, false);
 			} else if (o instanceof HybridASymmetricEncryptionType) {
-				writeObjectCode(oos, 18);
+				writeObjectCode(oos, 17);
 				writeHybridASymmetricEncryptionType(oos, (HybridASymmetricEncryptionType) o, false);
 			} else if (clazz == Long.class) {
-				writeObjectCode(oos, 19);
+				writeObjectCode(oos, 18);
 				oos.writeLong(((Long) o));
 			} else if (clazz == Byte.class) {
-				writeObjectCode(oos, 20);
+				writeObjectCode(oos, 19);
 				oos.write(((Byte) o));
 			} else if (clazz == Short.class) {
-				writeObjectCode(oos, 21);
+				writeObjectCode(oos, 20);
 				oos.writeShort(((Short) o));
 			} else if (clazz == Integer.class) {
-				writeObjectCode(oos, 22);
+				writeObjectCode(oos, 21);
 				oos.writeInt(((Integer) o));
 			} else if (clazz == Character.class) {
-				writeObjectCode(oos, 23);
+				writeObjectCode(oos, 22);
 				oos.writeChar(((Character) o));
 			} else if (clazz==Boolean.class) {
-				writeObjectCode(oos, 24);
+				writeObjectCode(oos, 23);
 				oos.writeBoolean(((Boolean) o));
 			} else if (clazz==Float.class) {
-				writeObjectCode(oos, 25);
+				writeObjectCode(oos, 24);
 				oos.writeFloat(((Float) o));
 			} else if (clazz==Double.class) {
-				writeObjectCode(oos, 26);
+				writeObjectCode(oos, 25);
 				oos.writeDouble(((Double) o));
 			} else if (clazz==BigDecimal.class) {
-				writeObjectCode(oos, 29);
+				writeObjectCode(oos, 28);
 				writeBigDecimal(oos, (BigDecimal)o, false);
 			} else if (clazz==BigInteger.class) {
-				writeObjectCode(oos, 30);
+				writeObjectCode(oos, 29);
 				writeBigInteger(oos, (BigInteger)o, false);
 			}else if (clazz==char[].class) {
-				writeObjectCode(oos, 31);
+				writeObjectCode(oos, 30);
 				writeChars(oos, (char[])o, sizeMax,false);
 			} else if (File.class.isAssignableFrom(clazz)) {
-				writeObjectCode(oos, 32);
+				writeObjectCode(oos, 31);
 				writeFile(oos, (File)o, sizeMax,false);
 			} /*else if (pathClass!=null && pathClass.isAssignableFrom(clazz)) {
 				writeObjectCode(oos, 33);
 				writePath(oos, (Path)o, sizeMax,false);
 			} */
 			else if (clazz == WrappedData.class) {
-				writeObjectCode(oos, 33);
+				writeObjectCode(oos, 32);
 				writeWrappedData(oos, (WrappedData) o, sizeMax, false);
 			}
 			else if (clazz == WrappedString.class) {
-				writeObjectCode(oos, 34);
+				writeObjectCode(oos, 33);
 				writeWrappedString(oos, (WrappedString) o, sizeMax, false);
 			}else
 			{
@@ -1887,51 +1831,49 @@ public class SerializationTools {
 				case 15:
 					return readDate(ois, false);
 				case 16:
-					return readHybridKeyAgreementType(ois, false);
-				case 17:
 					return readHybridASymmetricAuthenticatedSignatureType(ois, false);
-				case 18:
+				case 17:
 					return readHybridASymmetricEncryptionType(ois, false);
-				case 19:
+				case 18:
 					return ois.readLong();
-				case 20:
+				case 19:
 					return ois.readByte();
-				case 21:
+				case 20:
 					return ois.readShort();
-				case 22:
+				case 21:
 					return ois.readInt();
-				case 23:
+				case 22:
 					return ois.readChar();
-				case 24:
+				case 23:
 					return ois.readBoolean();
-				case 25:
+				case 24:
 					return ois.readFloat();
-				case 26:
+				case 25:
 					return ois.readDouble();
-				case 27: {
+				case 26: {
 					FilePermissions fp=FilePermissions.from();
 					fp.readExternal(ois);
 					return fp;
 				}
-				case 28: {
+				case 27: {
 					return readCollection(ois, sizeMax, false, true);
 				}
-				case 29: {
+				case 28: {
 					return readBigDecimal(ois, false);
 				}
-				case 30: {
+				case 29: {
 					return readBigInteger(ois, false);
 				}
-				case 31: {
+				case 30: {
 					return readChars(ois, sizeMax,false);
 				}
-				case 32: {
+				case 31: {
 					return readFile(ois, sizeMax,false);
 				}
-				case 33: {
+				case 32: {
 					return readWrappedData(ois, false, sizeMax);
 				}
-				case 34: {
+				case 33: {
 					return readWrappedString(ois, sizeMax, false);
 				}
 				/*case 33: {
@@ -1945,7 +1887,7 @@ public class SerializationTools {
 		
 	}
 
-	private static final short lastObjectCode=34;
+	private static final short lastObjectCode=33;
 	private static final short classesStartIndex=lastObjectCode+1;
 	private static short classesEndIndex=0;
 	private static short enumsStartIndex=0;
@@ -2106,13 +2048,6 @@ public class SerializationTools {
 		{
 			res+=getInternalSize(inetAddress.getAddress(), MAX_SIZE_INET_ADDRESS);
 		}
-		return res;
-	}
-	public static int getInternalSize(HybridKeyAgreementType v)
-	{
-		int res=1;
-		if (v!=null)
-			res+=8;
 		return res;
 	}
 	public static int getInternalSize(HybridASymmetricAuthenticatedSignatureType v)
@@ -2375,8 +2310,6 @@ public class SerializationTools {
 				res += getInternalSize((Class<?>) o);
 			} else if (clazz == Date.class) {
 				res += getInternalSize((Date) o);
-			} else if (o instanceof HybridKeyAgreementType) {
-				res += getInternalSize((HybridKeyAgreementType) o);
 			} else if (o instanceof HybridASymmetricAuthenticatedSignatureType) {
 				res += getInternalSize((HybridASymmetricAuthenticatedSignatureType) o);
 			} else if (o instanceof HybridASymmetricEncryptionType) {

@@ -36,24 +36,41 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 
 import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
 
 /**
  * @author Jason Mahdjoub
  * @version 1.0
  * @since Utils 5.24.0
  */
-class EllipticCurveDiffieHellmanAlgorithm extends AbstractEllipticCurveDiffieHellmanAlgorithm implements ISimpleKeyAgreement {
-	EllipticCurveDiffieHellmanAlgorithm(AbstractSecureRandom randomForKeys, EllipticCurveDiffieHellmanType type, short keySizeBits, byte[] keyingMaterial, SymmetricAuthenticatedSignatureType signatureType) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
-		super(randomForKeys, type, keySizeBits, keyingMaterial, signatureType, null);
-	}
-	EllipticCurveDiffieHellmanAlgorithm(AbstractSecureRandom randomForKeys, EllipticCurveDiffieHellmanType type, short keySizeBits, byte[] keyingMaterial, SymmetricEncryptionType encryptionType) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
-		super(randomForKeys, type, keySizeBits, keyingMaterial, null, encryptionType);
+public class HybridKeyPairGenerator extends AbstractKeyPairGenerator<HybridASymmetricKeyPair>{
+	private final AbstractKeyPairGenerator<ASymmetricKeyPair> nonPQCKeyPairGenerator, PQCKeyPairGenerator;
+	HybridKeyPairGenerator(AbstractKeyPairGenerator<ASymmetricKeyPair> nonPQCKeyPairGenerator, AbstractKeyPairGenerator<ASymmetricKeyPair> PQCKeyPairGenerator) {
+		super(nonPQCKeyPairGenerator.encryptionType, nonPQCKeyPairGenerator.signatureType, nonPQCKeyPairGenerator.ellipticCurveDiffieHellmanType);
+		if ((nonPQCKeyPairGenerator.encryptionType == null) != (PQCKeyPairGenerator.encryptionType == null)
+			|| (nonPQCKeyPairGenerator.signatureType == null) != (PQCKeyPairGenerator.signatureType == null)
+			|| (nonPQCKeyPairGenerator.ellipticCurveDiffieHellmanType == null) != (PQCKeyPairGenerator.ellipticCurveDiffieHellmanType == null))
+			throw new IllegalArgumentException();
+		this.nonPQCKeyPairGenerator=nonPQCKeyPairGenerator;
+		this.PQCKeyPairGenerator=PQCKeyPairGenerator;
 	}
 
 	@Override
-	public SymmetricSecretKey getDerivedSecretKey() {
-		return super.getDerivedKey();
+	public HybridASymmetricKeyPair generateKeyPair() {
+		return new HybridASymmetricKeyPair(nonPQCKeyPairGenerator.generateKeyPair(), PQCKeyPairGenerator.generateKeyPair());
+	}
+
+	@Override
+	public String getAlgorithm() {
+		return "HybridKeyPairGenerator[nonPQCKeyPairGenerator="+nonPQCKeyPairGenerator.getAlgorithm()+", PQCKeyPairGenerator="+PQCKeyPairGenerator.getAlgorithm()+"]";
+	}
+
+	@Override
+	public void initialize(int keySize, long publicKeyValidityBeginDateUTC, long expirationTime) throws IOException {
+		throw new IllegalAccessError();
+	}
+
+	@Override
+	public void initialize(int keySize, long publicKeyValidityBeginDateUTC, long expirationTime, AbstractSecureRandom random) throws IOException {
+		throw new IllegalAccessError();
 	}
 }

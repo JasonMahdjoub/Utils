@@ -431,19 +431,19 @@ public enum ASymmetricEncryptionType {
 		return signature;
 	}
 
-	public AbstractKeyPairGenerator getKeyPairGenerator(AbstractSecureRandom random)
+	public AbstractKeyPairGenerator<ASymmetricKeyPair> getKeyPairGenerator(AbstractSecureRandom random)
 			throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
 		return getKeyPairGenerator(random, keySizeBits, System.currentTimeMillis(), System.currentTimeMillis() + expirationTimeMilis);
 	}
 
-	public AbstractKeyPairGenerator getKeyPairGenerator(AbstractSecureRandom random, int keySizeBits)
+	public AbstractKeyPairGenerator<ASymmetricKeyPair> getKeyPairGenerator(AbstractSecureRandom random, int keySizeBits)
 			throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
 		return getKeyPairGenerator(random, keySizeBits, System.currentTimeMillis(), System.currentTimeMillis() + expirationTimeMilis);
 	}
 	long getDefaultExpirationTimeMilis() {
 		return expirationTimeMilis;
 	}
-	public AbstractKeyPairGenerator getKeyPairGenerator(AbstractSecureRandom random, int keySizeBits,
+	public AbstractKeyPairGenerator<ASymmetricKeyPair> getKeyPairGenerator(AbstractSecureRandom random, int keySizeBits,
 			long publicKeyValidityBeginDateUTC, long expirationTimeUTC) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
 		if (keySizeBits<0)
 			keySizeBits= this.keySizeBits;
@@ -458,7 +458,7 @@ public enum ASymmetricEncryptionType {
 		} else if (codeProviderForKeyGenerator == CodeProvider.BCPQC) {
 			if (this.getAlgorithmName().startsWith("McEliece"))
 			{
-				AbstractKeyPairGenerator res=new BCMcElieceCipher.KeyPairGeneratorCCA2(this);
+				AbstractKeyPairGenerator<ASymmetricKeyPair> res=new BCMcElieceCipher.KeyPairGeneratorCCA2(this);
 				res.initialize(keySizeBits, publicKeyValidityBeginDateUTC, expirationTimeUTC, random);
 				return res;
 			}

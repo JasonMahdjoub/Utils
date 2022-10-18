@@ -41,7 +41,7 @@ package com.distrimind.util.crypto;
  * @version 2.0
  * @since Utils 2.0
  */
-public final class GnuKeyPairGenerator extends AbstractKeyPairGenerator {
+public final class GnuKeyPairGenerator extends AbstractKeyPairGenerator<ASymmetricKeyPair> {
 	private final Object keyPairGenerator;
 
 	private int keySize = -1;

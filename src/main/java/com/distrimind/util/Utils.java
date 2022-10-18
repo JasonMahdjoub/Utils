@@ -67,7 +67,7 @@ public class Utils {
 			VERSION.addCreator(new Person("mahdjoub", "jason"))
 					.addDeveloper(new PersonDeveloper("mahdjoub", "jason", "2016-01-04"))
 					.addDescription(
-							new Description(5, 24, 0, Version.Type.STABLE, 0, "2022-10-14")
+							new Description(5, 24, 0, Version.Type.STABLE, 0, "2022-10-18")
 									.addItem(INTERNAL_CHANGE, "Update BouncyCastle to 1.71")
 									.addItem(INTERNAL_CHANGE, "Update BouncyCastle-FIPS to 1.0.2.3")
 									.addItem(SECURITY_FIX_MEDIUM_SEVERITY, "Add additional CPU usage during encryption using specifics algorithms to limit frequency side channel attacks and power side channel power attacks. Concerned encryption algorithm are referenced into class SymmetricEncryptionType. Asymmetric encryption are also concerned. Encryption that were used to encode little blocks are less concerned by these attacks.")
@@ -88,6 +88,7 @@ public class Utils {
 									.addItem(NEW_FEATURE, "Add BouncyCastle Falcon asymmetric authenticated signature post quantum algorithms.")
 									.addItem(SECURITY_FIX_LOW_SEVERITY, "Deprecate GNU algorithms because GNU dependency is no more updated into Utils.")
 									.addItem(NEW_FEATURE, "Add key agreement that use key wrapping with class KeyAgreementWithKeyWrapping.")
+									.addItem(NEW_FEATURE, "Reorganise architecture of key agreements, and hybrid key agreements. Permit key agreement that generates both secret key for encryption and secret key for signature.")
 					)
 					.addDescription(
 							new Description(5, 23, 5, Version.Type.STABLE, 0, "2022-04-07")

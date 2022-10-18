@@ -388,7 +388,7 @@ public class ASymmetricPublicKey extends AbstractKey implements IASymmetricPubli
 	public PublicKey toJavaNativeKey()
 			throws NoSuchAlgorithmException, InvalidKeySpecException {
 		checkNotDestroyed();
-		if (encryptionType!=null && encryptionType.name().startsWith("BCPQC_MCELIECE_"))
+		if (encryptionType!=null && encryptionType.getAlgorithmName().startsWith("McEliece"))
 		{
 			AsymmetricKey bk=toBouncyCastleKey();
 			if (bk instanceof BCMcElieceCipher.PublicKeyCCA2)
@@ -417,10 +417,10 @@ public class ASymmetricPublicKey extends AbstractKey implements IASymmetricPubli
 	@Override
 	public AsymmetricKey toBouncyCastleKey() throws NoSuchAlgorithmException, InvalidKeySpecException {
 		checkNotDestroyed();
-		if (encryptionType!=null && encryptionType.name().startsWith("BCPQC_MCELIECE_"))
+		if (encryptionType!=null && encryptionType.getAlgorithmName().startsWith("McEliece"))
 		{
 			if (bouncyCastlePublicKey==null) {
-				if (encryptionType.name().contains("CCA2")) {
+				if (encryptionType.getDerivedType().name().contains("CCA2")) {
 					BCMcElieceCipher.PublicKeyCCA2 res = new BCMcElieceCipher.PublicKeyCCA2();
 					try {
 						res.readExternal(new RandomByteArrayInputStream(this.publicKey), encryptionType);

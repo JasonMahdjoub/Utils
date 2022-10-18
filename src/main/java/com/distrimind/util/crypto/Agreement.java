@@ -49,7 +49,7 @@ import java.io.IOException;
  * @version 1.1
  * @since Utils 3.0
  */
-public abstract class Agreement implements AutoZeroizable {
+public abstract class Agreement implements IAgreement {
 	static final int messageSize=128;
 	static final int acceptableCommonBits=96*8;
 	static final int acceptableCommonLinearBytes =messageSize/2;
@@ -105,28 +105,34 @@ public abstract class Agreement implements AutoZeroizable {
 		this.stepsNumberForSend=stepsNumberForSend;
 	}
 
+	@Override
 	public int getActualStepForReceptionIndex()
 	{
 		return actualStepForReception;
 	}
+	@Override
 	public int getActualStepForSendIndex()
 	{
 		return actualStepForSend;
 	}
 
+	@Override
 	public int getStepsNumberForReception()
 	{
 		return stepsNumberForReception;
 	}
+	@Override
 	public int getStepsNumberForSend()
 	{
 		return stepsNumberForSend;
 	}
 
+	@Override
 	public boolean hasFinishedSend()
 	{
 		return stepsNumberForSend==actualStepForSend || !isAgreementProcessValidImpl();
 	}
+	@Override
 	public boolean hasFinishedReception()
 	{
 		return stepsNumberForReception==actualStepForReception || !isAgreementProcessValidImpl();
@@ -137,7 +143,7 @@ public abstract class Agreement implements AutoZeroizable {
 		return hasFinishedReception() && hasFinishedSend() && isAgreementProcessValidImpl();
 	}
 
-	protected abstract boolean isAgreementProcessValidImpl();
+	public abstract boolean isAgreementProcessValidImpl();
 
 	public byte[] getDataToSend() throws IOException
 	{

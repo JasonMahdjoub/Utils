@@ -184,7 +184,7 @@ public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
 	}
 
 	@Override
-	protected boolean isAgreementProcessValidImpl() {
+	public boolean isAgreementProcessValidImpl() {
 		if (this.getActualStepForReceptionIndex()==this.getStepsNumberForReception() && this.getActualStepForSendIndex()==this.getStepsNumberForSend() && finalizer.jpake.getState() != JPAKEParticipant.STATE_ROUND_3_VALIDATED)
 			return false;
 		return valid;

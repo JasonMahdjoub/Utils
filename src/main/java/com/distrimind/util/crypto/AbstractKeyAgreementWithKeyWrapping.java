@@ -46,32 +46,23 @@ import java.security.NoSuchProviderException;
  * @version 1.0
  * @since Utils 5.24.0
  */
-public class KeyAgreementWithKeyWrapping extends KeyAgreement{
-	private final ASymmetricKeyPair myKeyPairForEncryption, myKeyPairForSignature;
-	private ASymmetricPublicKey otherPublicKeyForEncryption =null, otherPublicKeyForSignature=null;
+public abstract class AbstractKeyAgreementWithKeyWrapping<PubKey extends IASymmetricPublicKey, PrivKey extends IASymmetricPrivateKey, KP extends AbstractKeyPair<PrivKey, PubKey>> extends Agreement{
+	private final KP myKeyPairForEncryption, myKeyPairForSignature;
+	private PubKey otherPublicKeyForEncryption =null, otherPublicKeyForSignature=null;
 
 	private final int keySizeBits;
-	private final SymmetricSecretKey mySecretKey;
-	private SymmetricSecretKey generatedSecretKey;
+	private final SymmetricSecretKey mySecretKey, mySecretKeyForSignature;
+	private SymmetricSecretKey generatedSecretKey, generatedSecretKeyForSignature;
 	private final ASymmetricKeyWrapperType aSymmetricKeyWrapperType;
 	private final AbstractSecureRandom random;
 	private boolean valid=true;
 
 
-	KeyAgreementWithKeyWrapping(AbstractSecureRandom random, ASymmetricKeyWrapperType aSymmetricKeyWrapperType, ASymmetricAuthenticatedSignatureType aSymmetricAuthenticatedSignatureType, short keySizeBits, SymmetricAuthenticatedSignatureType signatureType) throws NoSuchAlgorithmException, IOException, NoSuchProviderException {
-		this(random, aSymmetricKeyWrapperType, aSymmetricKeyWrapperType.getKeyPairGenerator(random).generateKeyPair(), aSymmetricAuthenticatedSignatureType.getKeyPairGenerator(random).generateKeyPair(), keySizeBits, signatureType);
-	}
-	KeyAgreementWithKeyWrapping(AbstractSecureRandom random, ASymmetricKeyWrapperType aSymmetricKeyWrapperType, ASymmetricAuthenticatedSignatureType aSymmetricAuthenticatedSignatureType, short keySizeBits, SymmetricEncryptionType encryptionType) throws NoSuchAlgorithmException, IOException, NoSuchProviderException {
-		this(random, aSymmetricKeyWrapperType, aSymmetricKeyWrapperType.getKeyPairGenerator(random).generateKeyPair(), aSymmetricAuthenticatedSignatureType.getKeyPairGenerator(random).generateKeyPair(), keySizeBits, encryptionType);
-	}
-	KeyAgreementWithKeyWrapping(AbstractSecureRandom random, ASymmetricKeyWrapperType aSymmetricKeyWrapperType, ASymmetricKeyPair keyPairForEncryption, ASymmetricKeyPair keyPairForSignature, short keySizeBits, SymmetricAuthenticatedSignatureType signatureType) throws NoSuchAlgorithmException, NoSuchProviderException{
-		this(random, aSymmetricKeyWrapperType, keyPairForEncryption, keyPairForSignature, keySizeBits, signatureType, null);
-	}
-	KeyAgreementWithKeyWrapping(AbstractSecureRandom random, ASymmetricKeyWrapperType aSymmetricKeyWrapperType, ASymmetricKeyPair keyPairForEncryption, ASymmetricKeyPair keyPairForSignature, short keySizeBits, SymmetricEncryptionType encryptionType) throws NoSuchAlgorithmException, NoSuchProviderException {
-		this(random, aSymmetricKeyWrapperType, keyPairForEncryption, keyPairForSignature, keySizeBits, null, encryptionType);
-	}
+
+
+
 	@SuppressWarnings({"ConstantConditions", "ConditionCoveredByFurtherCondition"})
-	private KeyAgreementWithKeyWrapping(AbstractSecureRandom random, ASymmetricKeyWrapperType aSymmetricKeyWrapperType, ASymmetricKeyPair keyPairForEncryption, ASymmetricKeyPair keyPairForSignature, short keySizeBits, SymmetricAuthenticatedSignatureType signatureType, SymmetricEncryptionType encryptionType) throws NoSuchAlgorithmException, NoSuchProviderException{
+	protected AbstractKeyAgreementWithKeyWrapping(AbstractSecureRandom random, ASymmetricKeyWrapperType aSymmetricKeyWrapperType, KP keyPairForEncryption, KP keyPairForSignature, short keySizeBits, SymmetricAuthenticatedSignatureType signatureType, SymmetricEncryptionType encryptionType) throws NoSuchAlgorithmException, NoSuchProviderException{
 		super(2, 2);
 		if (keyPairForEncryption==null)
 			throw new NullPointerException();
@@ -99,15 +90,22 @@ public class KeyAgreementWithKeyWrapping extends KeyAgreement{
 		this.keySizeBits=keySizeBits;
 		this.aSymmetricKeyWrapperType=aSymmetricKeyWrapperType;
 		this.random=random;
-		if (encryptionType==null)
-			mySecretKey=signatureType.getKeyGenerator(random, keySizeBits).generateKey();
-		else
-			mySecretKey=encryptionType.getKeyGenerator(random, keySizeBits).generateKey();
+		if (encryptionType!=null) {
+			mySecretKey = encryptionType.getKeyGenerator(random, keySizeBits).generateKey();
+			if (signatureType != null)
+				mySecretKeyForSignature = signatureType.getKeyGenerator(random, keySizeBits).generateKey();
+			else
+				mySecretKeyForSignature=null;
+		}
+		else {
+			mySecretKey = signatureType.getKeyGenerator(random, keySizeBits).generateKey();
+			mySecretKeyForSignature=null;
+		}
 
 	}
 
 	@Override
-	protected boolean isAgreementProcessValidImpl() {
+	public boolean isAgreementProcessValidImpl() {
 		return valid;
 	}
 
@@ -134,6 +132,12 @@ public class KeyAgreementWithKeyWrapping extends KeyAgreement{
 					try(RandomByteArrayOutputStream out=new RandomByteArrayOutputStream()) {
 						try (KeyWrapperAlgorithm kw = new KeyWrapperAlgorithm(aSymmetricKeyWrapperType, otherPublicKeyForEncryption, myKeyPairForSignature.getASymmetricPrivateKey())) {
 							out.writeWrappedData(kw.wrap(random, mySecretKey), false);
+						}
+						if (mySecretKeyForSignature!=null)
+						{
+							try (KeyWrapperAlgorithm kw = new KeyWrapperAlgorithm(aSymmetricKeyWrapperType, otherPublicKeyForEncryption, myKeyPairForSignature.getASymmetricPrivateKey())) {
+								out.writeWrappedData(kw.wrap(random, mySecretKeyForSignature), false);
+							}
 						}
 						out.flush();
 						return out.getBytes();
@@ -197,6 +201,13 @@ public class KeyAgreementWithKeyWrapping extends KeyAgreement{
 							SymmetricSecretKey otherSecretKey = kw.unwrap(in.readWrappedEncryptedSymmetricSecretKey(false));
 							generatedSecretKey = SymmetricSecretKey.getDerivedKey(mySecretKey, otherSecretKey);
 						}
+						if (mySecretKeyForSignature!=null)
+						{
+							try (KeyWrapperAlgorithm kw = new KeyWrapperAlgorithm(aSymmetricKeyWrapperType, myKeyPairForEncryption.getASymmetricPrivateKey(), otherPublicKeyForSignature)) {
+								SymmetricSecretKey otherSecretKey = kw.unwrap(in.readWrappedEncryptedSymmetricSecretKey(false));
+								generatedSecretKeyForSignature = SymmetricSecretKey.getDerivedKey(mySecretKeyForSignature, otherSecretKey);
+							}
+						}
 					}
 					break;
 
@@ -216,13 +227,16 @@ public class KeyAgreementWithKeyWrapping extends KeyAgreement{
 		return myKeyPairForEncryption.isPostQuantumKey();
 	}
 
-	@Override
-	public SymmetricSecretKey getDerivedKey() {
+
+	protected SymmetricSecretKey getDerivedKey() {
 		return generatedSecretKey;
 	}
 
-	@Override
 	public short getDerivedKeySizeBytes() {
 		return (short)(keySizeBits/8);
+	}
+	protected SymmetricSecretKeyPair getDerivedSecretKeyPair()
+	{
+		return new SymmetricSecretKeyPair(generatedSecretKey, generatedSecretKeyForSignature);
 	}
 }

@@ -61,7 +61,7 @@ public final class JavaNativeSignature extends AbstractSignature {
 	JavaNativeSignature(Signature signature, ASymmetricAuthenticatedSignatureType type) {
 		this.signature = signature;
 		this.type=type.getDerivedType();
-		synchronize=type.name().startsWith("BCPQC_SPHINCS_PLUS");
+		synchronize=type.getSignatureAlgorithmName().equals(ASymmetricAuthenticatedSignatureType.BCPQC_SPHINCS_PLUS_SHA256_FAST.getSignatureAlgorithmName());
 		if (synchronize)
 			this.typeToSynchronize=ASymmetricAuthenticatedSignatureType.BCPQC_SPHINCS_PLUS_SHA256_FAST;
 		else

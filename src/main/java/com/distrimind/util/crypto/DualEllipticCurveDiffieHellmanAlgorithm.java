@@ -44,16 +44,13 @@ import java.security.NoSuchProviderException;
  * @version 1.0
  * @since Utils 5.24.0
  */
-class EllipticCurveDiffieHellmanAlgorithm extends AbstractEllipticCurveDiffieHellmanAlgorithm implements ISimpleKeyAgreement {
-	EllipticCurveDiffieHellmanAlgorithm(AbstractSecureRandom randomForKeys, EllipticCurveDiffieHellmanType type, short keySizeBits, byte[] keyingMaterial, SymmetricAuthenticatedSignatureType signatureType) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
-		super(randomForKeys, type, keySizeBits, keyingMaterial, signatureType, null);
-	}
-	EllipticCurveDiffieHellmanAlgorithm(AbstractSecureRandom randomForKeys, EllipticCurveDiffieHellmanType type, short keySizeBits, byte[] keyingMaterial, SymmetricEncryptionType encryptionType) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
-		super(randomForKeys, type, keySizeBits, keyingMaterial, null, encryptionType);
+class DualEllipticCurveDiffieHellmanAlgorithm extends AbstractEllipticCurveDiffieHellmanAlgorithm implements IDualKeyAgreement{
+	DualEllipticCurveDiffieHellmanAlgorithm(AbstractSecureRandom randomForKeys, EllipticCurveDiffieHellmanType type, short keySizeBits, byte[] keyingMaterial, SymmetricAuthenticatedSignatureType signatureType, SymmetricEncryptionType encryptionType) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
+		super(randomForKeys, type, keySizeBits, keyingMaterial, signatureType, encryptionType);
 	}
 
 	@Override
-	public SymmetricSecretKey getDerivedSecretKey() {
-		return super.getDerivedKey();
+	public SymmetricSecretKeyPair getDerivedSecretKeyPair() {
+		return super.getDerivedSecretKeyPair();
 	}
 }

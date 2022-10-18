@@ -89,7 +89,7 @@ public class P2PASymmetricSecretMessageExchangerAgreement extends P2PLoginAgreem
     }
 
     @Override
-    protected boolean isAgreementProcessValidImpl() {
+    public boolean isAgreementProcessValidImpl() {
         return valid;
     }
 

@@ -51,18 +51,7 @@ import java.util.Random;
  * @since MaDKitLanEdition 4.7.0
  */
 public class TestKeyAgreements {
-	@Test(invocationCount = 5, dataProvider = "provideDataForHybridKeyAgreementsSignature")
-	public void testKeyAgreementsForSignature(HybridKeyAgreementType keyAgreementType, SymmetricAuthenticatedSignatureType type)
-			throws Exception {
-		AbstractSecureRandom random = SecureRandomType.DEFAULT.getSingleton(null);
-		byte[] keyingMaterial=new byte[100];
-		random.nextBytes(keyingMaterial);
 
-		KeyAgreement client=keyAgreementType.getKeyAgreementClient(random, type, (short)256, keyingMaterial);
-		KeyAgreement server=keyAgreementType.getKeyAgreementServer(random, type, (short)256, keyingMaterial);
-
-		testKeyAgreementsForSignature(client, server, type);
-	}
 
 	@Test(invocationCount = 5, dataProvider = "provideDataForKeyAgreementsSignature")
 	public void testKeyAgreementsForSignature(KeyAgreementType keyAgreementType, SymmetricAuthenticatedSignatureType type)
@@ -71,12 +60,12 @@ public class TestKeyAgreements {
 		byte[] keyingMaterial=new byte[100];
 		random.nextBytes(keyingMaterial);
 
-		KeyAgreement client=keyAgreementType.getKeyAgreementClient(random, type, (short)256, keyingMaterial);
-		KeyAgreement server=keyAgreementType.getKeyAgreementServer(random, type, (short)256, keyingMaterial);
+		ISimpleKeyAgreement client=keyAgreementType.getKeyAgreementClient(random, type, (short)256, keyingMaterial);
+		ISimpleKeyAgreement server=keyAgreementType.getKeyAgreementServer(random, type, (short)256, keyingMaterial);
 
 		testKeyAgreementsForSignature(client, server, type);
 	}
-	public void testKeyAgreementsForSignature(KeyAgreement client, KeyAgreement server, SymmetricAuthenticatedSignatureType type)
+	public void testKeyAgreementsForSignature(ISimpleKeyAgreement client, ISimpleKeyAgreement server, SymmetricAuthenticatedSignatureType type)
 			throws Exception {
 
 		do
@@ -100,9 +89,9 @@ public class TestKeyAgreements {
 		Assert.assertTrue(client.hasFinishedSend());
 		Assert.assertTrue(server.hasFinishedReception());
 
-		if (client instanceof HybridKeyAgreement)
+		if (client instanceof AbstractHybridKeyAgreement)
 		{
-			HybridKeyAgreement ka=(HybridKeyAgreement)client;
+			AbstractHybridKeyAgreement<?> ka=(AbstractHybridKeyAgreement<?>)client;
 			Assert.assertTrue(ka.getPQCKeyAgreement().isAgreementProcessValidImpl());
 			Assert.assertTrue(ka.getNonPQCKeyAgreement().isAgreementProcessValidImpl());
 			Assert.assertTrue(ka.getPQCKeyAgreement().hasFinishedSend());
@@ -112,9 +101,9 @@ public class TestKeyAgreements {
 			Assert.assertTrue(ka.getPQCKeyAgreement().isAgreementProcessValid());
 			Assert.assertTrue(ka.getNonPQCKeyAgreement().isAgreementProcessValid());
 		}
-		if (server instanceof HybridKeyAgreement)
+		if (server instanceof AbstractHybridKeyAgreement)
 		{
-			HybridKeyAgreement ka=(HybridKeyAgreement)server;
+			AbstractHybridKeyAgreement<?> ka=(AbstractHybridKeyAgreement<?>)server;
 			Assert.assertTrue(ka.getPQCKeyAgreement().isAgreementProcessValidImpl());
 			Assert.assertTrue(ka.getNonPQCKeyAgreement().isAgreementProcessValidImpl());
 			Assert.assertTrue(ka.getPQCKeyAgreement().hasFinishedSend());
@@ -130,8 +119,8 @@ public class TestKeyAgreements {
 
 
 
-		SymmetricSecretKey keyClient=client.getDerivedKey();
-		SymmetricSecretKey keyServer=server.getDerivedKey();
+		SymmetricSecretKey keyClient=client.getDerivedSecretKey();
+		SymmetricSecretKey keyServer=server.getDerivedSecretKey();
 
 
 		Assert.assertEquals(keyClient,keyServer);
@@ -145,23 +134,54 @@ public class TestKeyAgreements {
 		byte[] keyingMaterial=new byte[100];
 		random.nextBytes(keyingMaterial);
 
-		KeyAgreement client=keyAgreementType.getKeyAgreementClient(random, type, (short)256, keyingMaterial);
-		KeyAgreement server=keyAgreementType.getKeyAgreementServer(random, type, (short)256, keyingMaterial);
+		ISimpleKeyAgreement client=keyAgreementType.getKeyAgreementClient(random, type, (short)256, keyingMaterial);
+		ISimpleKeyAgreement server=keyAgreementType.getKeyAgreementServer(random, type, (short)256, keyingMaterial);
 		testKeyAgreementsForEncryption(client, server, type);
 	}
-	@Test(invocationCount = 5, dataProvider = "provideDataForHybridKeyAgreementsEncryption")
-	public void testHybridKeyAgreementsForEncryption(HybridKeyAgreementType keyAgreementType, SymmetricEncryptionType type)
+	@Test(invocationCount = 5, dataProvider = "provideDataForKeyAgreementsEncryptionAndSignature")
+	public void testKeyAgreementsForEncryptionAndSignature(KeyAgreementType keyAgreementType, SymmetricAuthenticatedSignatureType symmetricAuthenticatedSignatureType, SymmetricEncryptionType symmetricEncryptionType)
 			throws Exception {
 		AbstractSecureRandom random = SecureRandomType.DEFAULT.getSingleton(null);
 		byte[] keyingMaterial=new byte[100];
 		random.nextBytes(keyingMaterial);
 
-		KeyAgreement client=keyAgreementType.getKeyAgreementClient(random, type, (short)256, keyingMaterial);
-		KeyAgreement server=keyAgreementType.getKeyAgreementServer(random, type, (short)256, keyingMaterial);
-		testKeyAgreementsForEncryption(client, server, type);
+		IDualKeyAgreement client=keyAgreementType.getDualKeyAgreementClient(random, symmetricAuthenticatedSignatureType, symmetricEncryptionType, (short)256, keyingMaterial);
+		IDualKeyAgreement server=keyAgreementType.getDualKeyAgreementServer(random, symmetricAuthenticatedSignatureType, symmetricEncryptionType, (short)256, keyingMaterial);
+
+		do
+		{
+			if (!client.hasFinishedSend())
+			{
+				byte[] clientData=client.getDataToSend();
+
+				server.receiveData(clientData);
+
+			}
+			if (!server.hasFinishedSend())
+			{
+				byte[] serverData=server.getDataToSend();
+
+				client.receiveData(serverData);
+
+			}
+		} while(!server.hasFinishedReception() || !server.hasFinishedSend() || !client.hasFinishedReception() || !client.hasFinishedSend() );
+
+		Assert.assertTrue(client.isAgreementProcessValid());
+		Assert.assertTrue(server.isAgreementProcessValid());
+
+		SymmetricSecretKeyPair keyClient=client.getDerivedSecretKeyPair();
+		SymmetricSecretKeyPair keyServer=server.getDerivedSecretKeyPair();
+
+
+		Assert.assertEquals(keyClient,keyServer);
+		Assert.assertEquals(keyClient.getSecretKeyForEncryption().getKeySizeBits(), 256);
+		Assert.assertEquals(keyClient.getSecretKeyForSignature().getKeySizeBits(), 256);
+		testEncryptionAfterKeyExchange(random, keyClient.getSecretKeyForEncryption().getEncryptionAlgorithmType(), keyClient.getSecretKeyForEncryption());
+		testSignatureAfterKeyExchange(keyClient.getSecretKeyForSignature(), keyServer.getSecretKeyForSignature());
 	}
 
-	public void testKeyAgreementsForEncryption(KeyAgreement client, KeyAgreement server, SymmetricEncryptionType type)
+
+	public void testKeyAgreementsForEncryption(ISimpleKeyAgreement client, ISimpleKeyAgreement server, SymmetricEncryptionType type)
 			throws Exception {
 		AbstractSecureRandom random = SecureRandomType.DEFAULT.getSingleton(null);
 
@@ -186,8 +206,8 @@ public class TestKeyAgreements {
 		Assert.assertTrue(client.isAgreementProcessValid());
 		Assert.assertTrue(server.isAgreementProcessValid());
 
-		SymmetricSecretKey keyClient=client.getDerivedKey();
-		SymmetricSecretKey keyServer=server.getDerivedKey();
+		SymmetricSecretKey keyClient=client.getDerivedSecretKey();
+		SymmetricSecretKey keyServer=server.getDerivedSecretKey();
 
 
 		Assert.assertEquals(keyClient,keyServer);
@@ -208,6 +228,37 @@ public class TestKeyAgreements {
 		}
 	}
 
+	@DataProvider(name = "provideDataForKeyAgreementsEncryptionAndSignature", parallel = true)
+	public Object[][] provideDataForKeyAgreementsEncryptionAndSignature() {
+		ArrayList<Object[]> l=new ArrayList<>();
+
+
+		for (KeyAgreementType type : KeyAgreementType.values()) {
+			for (SymmetricAuthenticatedSignatureType etype : SymmetricAuthenticatedSignatureType.values())
+			{
+				if (!type.isPostQuantumAlgorithm() || etype.isPostQuantumAlgorithm((short)256))
+				{
+					for (SymmetricEncryptionType setype : SymmetricEncryptionType.values())
+					{
+						if (setype.isPostQuantumAlgorithm((short)256) && setype.getCodeProviderForEncryption()!=CodeProvider.GNU_CRYPTO)
+						{
+							Object[] o = new Object[3];
+							o[0]=type;
+							o[1]=etype;
+							o[2]=setype;
+							l.add(o);
+						}
+					}
+				}
+			}
+
+		}
+		Object[][] res = new Object[l.size()][];
+		int index=0;
+		for (Object[] o : l)
+			res[index++]=o;
+		return res;
+	}
 	@DataProvider(name = "provideDataForKeyAgreementsEncryption", parallel = true)
 	public Object[][] provideDataForKeyAgreementsEncryption() {
 		ArrayList<Object[]> l=new ArrayList<>();
@@ -225,36 +276,9 @@ public class TestKeyAgreements {
 				}
 			}
 		}
-		Object[][] res = new Object[l.size()][];
-		int index=0;
-		for (Object[] o : l)
-			res[index++]=o;
-		return res;
+		return l.toArray(new Object[0][]);
 	}
-	@DataProvider(name = "provideDataForHybridKeyAgreementsEncryption", parallel = true)
-	public Object[][] provideDataForHybridKeyAgreementsEncryption() {
-		ArrayList<Object[]> l=new ArrayList<>();
 
-
-		for (KeyAgreementType type : KeyAgreementType.values()) {
-			if (type.isPostQuantumAlgorithm())
-				continue;
-			for (KeyAgreementType type2 : KeyAgreementType.values()) {
-				if (!type2.isPostQuantumAlgorithm())
-					continue;
-				Object[] o = new Object[2];
-				o[0]=new HybridKeyAgreementType(type, type2);
-				o[1]=SymmetricEncryptionType.AES_CBC_PKCS5Padding;
-				l.add(o);
-
-			}
-		}
-		Object[][] res = new Object[l.size()][];
-		int index=0;
-		for (Object[] o : l)
-			res[index++]=o;
-		return res;
-	}
 	@DataProvider(name = "provideDataForKeyAgreementsSignature", parallel = true)
 	public Object[][] provideDataForKeyAgreementsSignature() {
 		ArrayList<Object[]> l=new ArrayList<>();
@@ -279,30 +303,7 @@ public class TestKeyAgreements {
 		return res;
 	}
 
-	@DataProvider(name = "provideDataForHybridKeyAgreementsSignature", parallel = true)
-	public Object[][] provideDataForHybridKeyAgreementsSignature() {
-		ArrayList<Object[]> l=new ArrayList<>();
 
-
-		for (KeyAgreementType type : KeyAgreementType.values()) {
-			if (type.isPostQuantumAlgorithm())
-				continue;
-			for (KeyAgreementType type2 : KeyAgreementType.values()) {
-				if (!type2.isPostQuantumAlgorithm())
-					continue;
-
-				Object[] o = new Object[2];
-				o[0]=new HybridKeyAgreementType(type, type2);
-				o[1]= SymmetricAuthenticatedSignatureType.HMAC_SHA2_384;
-				l.add(o);
-			}
-		}
-		Object[][] res = new Object[l.size()][];
-		int index=0;
-		for (Object[] o : l)
-			res[index++]=o;
-		return res;
-	}
 
 	private void testEncryptionAfterKeyExchange(AbstractSecureRandom random, SymmetricEncryptionType type, SymmetricSecretKey key) throws IllegalStateException, IOException {
 		SymmetricEncryptionAlgorithm algoDistant = new SymmetricEncryptionAlgorithm(random, key);

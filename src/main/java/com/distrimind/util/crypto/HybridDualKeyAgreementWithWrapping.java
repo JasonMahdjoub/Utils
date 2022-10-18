@@ -44,16 +44,23 @@ import java.security.NoSuchProviderException;
  * @version 1.0
  * @since Utils 5.24.0
  */
-class EllipticCurveDiffieHellmanAlgorithm extends AbstractEllipticCurveDiffieHellmanAlgorithm implements ISimpleKeyAgreement {
-	EllipticCurveDiffieHellmanAlgorithm(AbstractSecureRandom randomForKeys, EllipticCurveDiffieHellmanType type, short keySizeBits, byte[] keyingMaterial, SymmetricAuthenticatedSignatureType signatureType) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
-		super(randomForKeys, type, keySizeBits, keyingMaterial, signatureType, null);
+class HybridDualKeyAgreementWithWrapping extends AbstractKeyAgreementWithKeyWrapping<HybridASymmetricPublicKey, HybridASymmetricPrivateKey, HybridASymmetricKeyPair> implements IDualKeyAgreement{
+
+	HybridDualKeyAgreementWithWrapping(AbstractSecureRandom random, ASymmetricKeyWrapperType aSymmetricKeyWrapperType, ASymmetricAuthenticatedSignatureType nonPQCaSymmetricAuthenticatedSignatureType, ASymmetricAuthenticatedSignatureType PQCaSymmetricAuthenticatedSignatureType, short keySizeBits, SymmetricAuthenticatedSignatureType signatureType, SymmetricEncryptionType encryptionType) throws NoSuchAlgorithmException, IOException, NoSuchProviderException {
+		this(random, aSymmetricKeyWrapperType, HybridKeyAgreementWithSimpleKeyWrapping.generateKeyPair(aSymmetricKeyWrapperType, random),
+				new HybridASymmetricKeyPair(nonPQCaSymmetricAuthenticatedSignatureType.getKeyPairGenerator(random).generateKeyPair(), PQCaSymmetricAuthenticatedSignatureType.getKeyPairGenerator(random).generateKeyPair()),
+				keySizeBits, signatureType, encryptionType);
 	}
-	EllipticCurveDiffieHellmanAlgorithm(AbstractSecureRandom randomForKeys, EllipticCurveDiffieHellmanType type, short keySizeBits, byte[] keyingMaterial, SymmetricEncryptionType encryptionType) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
-		super(randomForKeys, type, keySizeBits, keyingMaterial, null, encryptionType);
+	HybridDualKeyAgreementWithWrapping(AbstractSecureRandom random, ASymmetricKeyWrapperType aSymmetricKeyWrapperType, HybridASymmetricKeyPair keyPairForEncryption, HybridASymmetricKeyPair keyPairForSignature, short keySizeBits, SymmetricAuthenticatedSignatureType signatureType, SymmetricEncryptionType encryptionType) throws NoSuchAlgorithmException, NoSuchProviderException {
+		super(random, aSymmetricKeyWrapperType, keyPairForEncryption, keyPairForSignature, keySizeBits, signatureType, encryptionType);
+		if (signatureType==null)
+			throw new NullPointerException();
+		if (encryptionType==null)
+			throw new NullPointerException();
 	}
 
 	@Override
-	public SymmetricSecretKey getDerivedSecretKey() {
-		return super.getDerivedKey();
+	public SymmetricSecretKeyPair getDerivedSecretKeyPair() {
+		return super.getDerivedSecretKeyPair();
 	}
 }

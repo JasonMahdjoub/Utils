@@ -35,25 +35,18 @@ The fact that you are presently reading this means that you have had
 knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-
 /**
  * @author Jason Mahdjoub
  * @version 1.0
  * @since Utils 5.24.0
  */
-class EllipticCurveDiffieHellmanAlgorithm extends AbstractEllipticCurveDiffieHellmanAlgorithm implements ISimpleKeyAgreement {
-	EllipticCurveDiffieHellmanAlgorithm(AbstractSecureRandom randomForKeys, EllipticCurveDiffieHellmanType type, short keySizeBits, byte[] keyingMaterial, SymmetricAuthenticatedSignatureType signatureType) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
-		super(randomForKeys, type, keySizeBits, keyingMaterial, signatureType, null);
-	}
-	EllipticCurveDiffieHellmanAlgorithm(AbstractSecureRandom randomForKeys, EllipticCurveDiffieHellmanType type, short keySizeBits, byte[] keyingMaterial, SymmetricEncryptionType encryptionType) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
-		super(randomForKeys, type, keySizeBits, keyingMaterial, null, encryptionType);
+class DualNewHopeKeyAgreementClient extends AbstractNewHopeKeyAgreementClient implements IDualKeyAgreement{
+	DualNewHopeKeyAgreementClient(SymmetricAuthenticatedSignatureType symmetricAuthenticatedSignatureType, SymmetricEncryptionType symmetricEncryptionType, short keySizeBits, AbstractSecureRandom randomForKeys) {
+		super(symmetricAuthenticatedSignatureType, symmetricEncryptionType, keySizeBits, randomForKeys);
 	}
 
 	@Override
-	public SymmetricSecretKey getDerivedSecretKey() {
-		return super.getDerivedKey();
+	public SymmetricSecretKeyPair getDerivedSecretKeyPair() {
+		return super.getDerivedKeyPair();
 	}
 }

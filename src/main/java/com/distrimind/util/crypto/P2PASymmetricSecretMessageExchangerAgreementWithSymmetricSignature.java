@@ -53,7 +53,7 @@ public class P2PASymmetricSecretMessageExchangerAgreementWithSymmetricSignature 
                 secretKeyForSignature==null?null:new P2PLoginWithSymmetricSignature(secretKeyForSignature, random));
     }
     @Override
-    protected boolean isAgreementProcessValidImpl() {
+    public boolean isAgreementProcessValidImpl() {
 
         return finalizer.p2PASymmetricSecretMessageExchangerAgreement.isAgreementProcessValidImpl() && (finalizer.login==null || finalizer.login.isAgreementProcessValidImpl());
     }
