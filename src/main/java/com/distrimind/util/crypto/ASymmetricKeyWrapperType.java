@@ -71,7 +71,7 @@ import com.distrimind.util.OS;
  * @version 3.2
  * @since Utils 1.17.0
  */
-@SuppressWarnings({"ConstantConditions", "DeprecatedIsStillUsed"})
+@SuppressWarnings({"ConstantConditions", "BooleanMethodIsAlwaysInverted"})
 public enum ASymmetricKeyWrapperType {
 
 	RSA_OAEP_WITH_SHA2_384("RSA/ECB/OAEPPadding",CodeProvider.SunJCE, false, "SHA-384", FipsSHS.Algorithm.SHA384, false, ASymmetricEncryptionType.RSA_OAEPWithSHA384AndMGF1Padding),
@@ -355,22 +355,6 @@ public enum ASymmetricKeyWrapperType {
 
 							OAEPParameters OAEPParams = getOAEPParams(PSource.PSpecified.DEFAULT.getValue());
 
-			/*if (this.algorithmName.equals(BC_FIPS_RSA_KTS_KTM.algorithmName))
-			{
-				OAEPKTSParameters OAEPKTSParams=FipsRSA.KTS_OAEP
-						.withOAEPParameters(OAEPParams)
-						.withKeySizeInBits(256)
-						.withMacKeySizeInBits(256);
-
-				FipsRSA.KTSOperatorFactory wrapFact=new FipsRSA.KTSOperatorFactory(random);
-				wrapFact.createGenerator
-				FipsEncapsulatingSecretGenerator<FipsRSA.KTSParameters> wrapper=wrapFact.createGenerator(bcPK, OAEPKTSParams)
-						.withSecureRandom(random);
-
-
-			}
-			else
-			{*/
 							FipsRSA.KeyWrapOperatorFactory wrapFact = new FipsRSA.KeyWrapOperatorFactory();
 							KeyWrapperUsingSecureRandom<FipsRSA.WrapParameters> wrapper =
 									wrapFact.createKeyWrapper(bcPK, OAEPParams)
@@ -390,12 +374,6 @@ public enum ASymmetricKeyWrapperType {
 							return new WrappedEncryptedSymmetricSecretKey(res);
 
 						}
-		/*if (OSValidator.getCurrentOS()==OSValidator.MACOS && (this==RSA_OAEP || this==ASymmetricKeyWrapperType.RSA_OAEP_WITH_PARAMETERS))
-		{
-			CodeProvider.ensureBouncyCastleProviderLoaded();
-
-			c=javax.crypto.Cipher.getInstance(algorithmName, CodeProvider.BCFIPS.getCompatibleProviderName());
-		}*/
 						else
 							c = javax.crypto.Cipher.getInstance(algorithmName, provider.getCompatibleProvider());
 
@@ -410,11 +388,6 @@ public enum ASymmetricKeyWrapperType {
 							Arrays.fill(wrapedKey, (byte)0);
 							return new WrappedEncryptedSymmetricSecretKey(res);
 						}
-		/*else if (this.algorithmName.equals(BC_FIPS_RSA_KTS_KTM.algorithmName))
-		{
-			c.init(javax.crypto.Cipher.WRAP_MODE, publicKey.toJavaNativeKey(), new KTSParameterSpec.Builder(NISTObjectIdentifiers.id_aes256_wrap.getId(),256).build(), random);
-			return wrapKeyWithMetaData(c.wrap(keyToWrap.toJavaNativeKey()), keyToWrap);
-		}*/
 						else {
 							c.init(javax.crypto.Cipher.WRAP_MODE, publicKey.toJavaNativeKey(), random);
 							byte[] wrappedKey=c.wrap(keyToWrap.toJavaNativeKey());
@@ -431,8 +404,9 @@ public enum ASymmetricKeyWrapperType {
 				HybridASymmetricPublicKey publicKey = (HybridASymmetricPublicKey) ipublicKey;
 				if (!publicKey.getPQCPublicKey().getEncryptionAlgorithmType().name().equals(getPqcWrapper().name()))
 					throw new IllegalArgumentException(publicKey.getPQCPublicKey().getEncryptionAlgorithmType()+" ; "+getPqcWrapper().name());
-				WrappedEncryptedSymmetricSecretKey nonPQCWrap = nonPQCWrapper.wrapKey(random, publicKey.getNonPQCPublicKey(), keyToWrap);
-				try(ClientASymmetricEncryptionAlgorithm client = new ClientASymmetricEncryptionAlgorithm(random, publicKey.getPQCPublicKey()))
+				WrappedEncryptedSymmetricSecretKey nonPQCWrap = pqcWrapper.wrapKey(random, publicKey.getNonPQCPublicKey(), keyToWrap);
+
+				try(ClientASymmetricEncryptionAlgorithm client = new ClientASymmetricEncryptionAlgorithm(random, publicKey.getNonPQCPublicKey()))
 				{
 					return new WrappedEncryptedSymmetricSecretKey(client.encode(nonPQCWrap.getBytes()));
 				}
@@ -485,11 +459,11 @@ public enum ASymmetricKeyWrapperType {
 				if (!isHybrid())
 					throw new IllegalArgumentException();
 				HybridASymmetricPrivateKey privateKey = (HybridASymmetricPrivateKey) iPrivateKey;
-				if (!privateKey.getPQCPrivateKey().getEncryptionAlgorithmType().name().equals(getPqcWrapper().name()))
+				if (!privateKey.getNonPQCPrivateKey().getEncryptionAlgorithmType().name().equals(getPqcWrapper().name()))
 					throw new IllegalArgumentException();
-				ServerASymmetricEncryptionAlgorithm server = new ServerASymmetricEncryptionAlgorithm(privateKey.getPQCPrivateKey());
+				ServerASymmetricEncryptionAlgorithm server = new ServerASymmetricEncryptionAlgorithm(privateKey.getNonPQCPrivateKey());
 				byte[] b = server.decode(keyToUnwrap.getBytes());
-				return getNonPQCWrapper().unwrapKey(privateKey.getNonPQCPrivateKey(), new WrappedEncryptedSymmetricSecretKey(b));
+				return getNonPQCWrapper().unwrapKey(privateKey.getPQCPrivateKey(), new WrappedEncryptedSymmetricSecretKey(b));
 			}
 		} catch (InvalidKeyException e) {
 			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, e);
@@ -501,7 +475,6 @@ public enum ASymmetricKeyWrapperType {
 			throw new IllegalArgumentException();
 
 		try {
-			//CodeProvider.ensureProviderLoaded(getCodeProvider());
 			if ((privateKey.getAuthenticatedSignatureAlgorithmType() != null && ((provider == CodeProvider.GNU_CRYPTO) != (privateKey.getAuthenticatedSignatureAlgorithmType().getCodeProviderForSignature() == CodeProvider.GNU_CRYPTO)))
 					|| (privateKey.getEncryptionAlgorithmType() != null && ((provider == CodeProvider.GNU_CRYPTO) != (privateKey.getEncryptionAlgorithmType().getCodeProviderForEncryption() == CodeProvider.GNU_CRYPTO)))
 					|| (encryptionType != null && (provider == CodeProvider.GNU_CRYPTO) != (encryptionType.getCodeProviderForEncryption() == CodeProvider.GNU_CRYPTO))
@@ -546,12 +519,6 @@ public enum ASymmetricKeyWrapperType {
 					return (SymmetricSecretKey) AbstractKey.decode(unWrapper.unwrap(wrappedKey, 0, wrappedKey.length));
 
 				}
-/*if (OSValidator.getCurrentOS()==OSValidator.MACOS && (this==RSA_OAEP || this==ASymmetricKeyWrapperType.RSA_OAEP_WITH_PARAMETERS))
-{
-	CodeProvider.ensureBouncyCastleProviderLoaded();
-
-	c=javax.crypto.Cipher.getInstance(algorithmName, CodeProvider.BCFIPS.getCompatibleProviderName());
-}*/
 				else
 					c = javax.crypto.Cipher.getInstance(algorithmName, provider.getCompatibleProvider());
 
@@ -563,11 +530,6 @@ public enum ASymmetricKeyWrapperType {
 					algorithmParameters.init(tmp[1]);
 					c.init(Cipher.UNWRAP_MODE, privateKey.toJavaNativeKey(), algorithmParameters);
 				}
-/*else if (this.algorithmName.equals(BC_FIPS_RSA_KTS_KTM.algorithmName))
-{
-	wrappedKey=keyToUnwrap;
-	c.init(Cipher.UNWRAP_MODE, privateKey.toJavaNativeKey(), new KTSParameterSpec.Builder(NISTObjectIdentifiers.id_aes256_wrap.getId(),256).build());
-}*/
 				else {
 					wrappedKey = keyToUnwrap;
 					c.init(Cipher.UNWRAP_MODE, privateKey.toJavaNativeKey());
@@ -631,18 +593,22 @@ public enum ASymmetricKeyWrapperType {
 	public ASymmetricKeyWrapperType getDerivedType() {
 		return derivedType;
 	}
-	public AbstractKeyPairGenerator getKeyPairGenerator(AbstractSecureRandom random)
+	public AbstractKeyPairGenerator<?> getKeyPairGenerator(AbstractSecureRandom random)
 			throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
 		return getKeyPairGenerator(random, aSymmetricEncryptionType.getDefaultKeySizeBits(), System.currentTimeMillis(), System.currentTimeMillis() + aSymmetricEncryptionType.getDefaultExpirationTimeMilis());
 	}
 
-	public AbstractKeyPairGenerator getKeyPairGenerator(AbstractSecureRandom random, int keySizeBits)
+	public AbstractKeyPairGenerator<?> getKeyPairGenerator(AbstractSecureRandom random, int keySizeBits)
 			throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
 		return getKeyPairGenerator(random, keySizeBits, System.currentTimeMillis(), System.currentTimeMillis() + aSymmetricEncryptionType.getDefaultExpirationTimeMilis());
 	}
-	public AbstractKeyPairGenerator getKeyPairGenerator(AbstractSecureRandom random, int keySizeBits,
+	public AbstractKeyPairGenerator<?> getKeyPairGenerator(AbstractSecureRandom random, int keySizeBits,
 														long publicKeyValidityBeginDateUTC, long expirationTimeUTC) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
-		return aSymmetricEncryptionType.getKeyPairGenerator(random, keySizeBits,publicKeyValidityBeginDateUTC, expirationTimeUTC);
+		if (isHybrid())
+			return new HybridKeyPairGenerator(nonPQCWrapper.aSymmetricEncryptionType.getKeyPairGenerator(random, keySizeBits,publicKeyValidityBeginDateUTC, expirationTimeUTC),
+					pqcWrapper.aSymmetricEncryptionType.getKeyPairGenerator(random, keySizeBits,publicKeyValidityBeginDateUTC, expirationTimeUTC));
+		else
+			return aSymmetricEncryptionType.getKeyPairGenerator(random, keySizeBits,publicKeyValidityBeginDateUTC, expirationTimeUTC);
 	}
 
 	public static final int MAX_SIZE_IN_BYTES_OF_WRAPPED_SYMMETRIC_SECRET_KEY_WITH_ASYMMETRIC_NON_PQC_ENCRYPTION =768;
