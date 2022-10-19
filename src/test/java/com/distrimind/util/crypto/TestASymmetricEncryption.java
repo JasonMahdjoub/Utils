@@ -37,6 +37,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
 
 import com.distrimind.util.DecentralizedValue;
 import com.distrimind.util.data_buffers.WrappedData;
+import com.distrimind.util.data_buffers.WrappedSecretData;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -51,7 +52,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
-
 /**
  * @author Jason Mahdjoub
  * @version 1.0
@@ -65,19 +65,17 @@ public class TestASymmetricEncryption {
 		int index=0;
 		for (ASymmetricKeyWrapperType akpw : ASymmetricKeyWrapperType.values())
 		{
-			for (ASymmetricEncryptionType aet : ASymmetricEncryptionType.values())
-			{
-				for (ASymmetricAuthenticatedSignatureType ast : ASymmetricAuthenticatedSignatureType.values()) {
+			for (ASymmetricAuthenticatedSignatureType ast : ASymmetricAuthenticatedSignatureType.values()) {
 
-					if ((akpw.isHybrid() && akpw.getNonPQCWrapper().getCodeProvider().equals(aet.getCodeProviderForEncryption()) && akpw.getNonPQCWrapper().getCodeProvider().equals(SymmetricEncryptionType.DEFAULT.getCodeProviderForEncryption())) || (!akpw.isHybrid() && akpw.getCodeProvider().equals(aet.getCodeProviderForEncryption()) && akpw.getCodeProvider().equals(SymmetricEncryptionType.DEFAULT.getCodeProviderForEncryption()))) {
-						Object[] params = new Object[5];
-						params[0] = akpw;
-						params[1] = aet;
-						params[2] = ast;
-						params[3] = SymmetricEncryptionType.DEFAULT;
-						params[4] = SymmetricAuthenticatedSignatureType.DEFAULT;
-						res[index++] = params;
-					}
+				if ((akpw.isHybrid() && akpw.getNonPQCWrapper().getCodeProvider().equals(SymmetricEncryptionType.DEFAULT.getCodeProviderForEncryption()))
+						|| (!akpw.isHybrid() &&  akpw.getCodeProvider().equals(SymmetricEncryptionType.DEFAULT.getCodeProviderForEncryption())))
+				{
+					Object[] params = new Object[4];
+					params[0] = akpw;
+					params[1] = ast;
+					params[2] = SymmetricEncryptionType.DEFAULT;
+					params[3] = SymmetricAuthenticatedSignatureType.DEFAULT;
+					res[index++] = params;
 				}
 			}
 		}
@@ -143,31 +141,24 @@ public class TestASymmetricEncryption {
 
 	}
 	@Test(dataProvider= "provideDataKeyWrapperForSymmetricSecretKey")
-	public void testKeyWrapperForSymmetricKey(ASymmetricKeyWrapperType typeWrapper, ASymmetricEncryptionType asetype, ASymmetricAuthenticatedSignatureType asstype, SymmetricEncryptionType seetype, SymmetricAuthenticatedSignatureType sestype)
+	public void testKeyWrapperForSymmetricKey(ASymmetricKeyWrapperType typeWrapper, ASymmetricAuthenticatedSignatureType asstype, SymmetricEncryptionType seetype, SymmetricAuthenticatedSignatureType sestype)
 			throws NoSuchAlgorithmException, IllegalStateException, NoSuchProviderException, IOException, IllegalArgumentException {
 		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getSingleton(null);
-		ASymmetricKeyPair kpe=asetype.getKeyPairGenerator(rand, (short)2048).generateKeyPair();
+		AbstractKeyPair<?, ?> kpe=typeWrapper.getKeyPairGenerator(rand, (short)2048).generateKeyPair();
 
 		SymmetricSecretKey secretKeyForSignature=sestype.getKeyGenerator(rand).generateKey();
 		ASymmetricKeyPair keyPairForSignature=asstype.getKeyPairGenerator(rand).generateKeyPair();
-		ASymmetricKeyPair kppqc=null;
-		if (typeWrapper.isHybrid())
-		{
-			if (typeWrapper.getPqcWrapper()==ASymmetricKeyWrapperType.BCPQC_MCELIECE_FUJISAKI_CCA2_SHA256)
-				kppqc= ASymmetricEncryptionType.BCPQC_MCELIECE_FUJISAKI_CCA2_SHA256.getKeyPairGenerator(rand).generateKeyPair();
-			else
-				kppqc= ASymmetricEncryptionType.BCPQC_MCELIECE_POINTCHEVAL_CCA2_SHA256.getKeyPairGenerator(rand).generateKeyPair();
-		}
 
-		ASymmetricKeyPair keyPairForSignaturePQC=ASymmetricAuthenticatedSignatureType.BCPQC_SPHINCS256_SHA2_512_256.getKeyPairGenerator(rand).generateKeyPair();
-		testASymmetricKeyWrapperForEncryption(rand, kpe,kppqc, null, typeWrapper, asetype, seetype, null);
-		testASymmetricKeyWrapperForEncryption(rand, kpe,kppqc, null, typeWrapper, asetype, seetype, secretKeyForSignature);
-		testASymmetricKeyWrapperForEncryption(rand, kpe,kppqc, keyPairForSignature, typeWrapper, asetype, seetype, null);
-		testASymmetricKeyWrapperForEncryption(rand, kpe,kppqc, keyPairForSignature, typeWrapper, asetype, seetype, secretKeyForSignature);
+
+		ASymmetricKeyPair keyPairForSignaturePQC=ASymmetricAuthenticatedSignatureType.BCPQC_CHRYSTALS_DILITHIUM_5.getKeyPairGenerator(rand).generateKeyPair();
+		testASymmetricKeyWrapperForEncryption(rand, kpe, null, typeWrapper, seetype, null);
+		testASymmetricKeyWrapperForEncryption(rand, kpe, null, typeWrapper,  seetype, secretKeyForSignature);
+		testASymmetricKeyWrapperForEncryption(rand, kpe, keyPairForSignature, typeWrapper,  seetype, null);
+		testASymmetricKeyWrapperForEncryption(rand, kpe, keyPairForSignature, typeWrapper,  seetype, secretKeyForSignature);
 		if (keyPairForSignature.isPostQuantumKey() || kpe.isPostQuantumKey())
 			return;
-		testASymmetricKeyWrapperForEncryption(rand, kpe,kppqc, new HybridASymmetricKeyPair(keyPairForSignature, keyPairForSignaturePQC), typeWrapper, asetype, seetype, null);
-		testASymmetricKeyWrapperForEncryption(rand, kpe,kppqc, new HybridASymmetricKeyPair(keyPairForSignature, keyPairForSignaturePQC), typeWrapper, asetype, seetype, secretKeyForSignature);
+		testASymmetricKeyWrapperForEncryption(rand, kpe, new HybridASymmetricKeyPair(keyPairForSignature, keyPairForSignaturePQC), typeWrapper,  seetype, null);
+		testASymmetricKeyWrapperForEncryption(rand, kpe, new HybridASymmetricKeyPair(keyPairForSignature, keyPairForSignaturePQC), typeWrapper,  seetype, secretKeyForSignature);
 
 
 		/*testASymmetricKeyWrapperForEncryption(rand, new HybridASymmetricKeyPair(kpe, kppqc), null, typeWrapper, asetype, seetype, null);
@@ -192,7 +183,7 @@ public class TestASymmetricEncryption {
 		if (keyPairForSignature.isPostQuantumKey() || kp.isPostQuantumKey())
 			return;
 		ASymmetricKeyPair kppqc= ASymmetricEncryptionType.BCPQC_MCELIECE_FUJISAKI_CCA2_SHA256.getKeyPairGenerator(rand, ASymmetricEncryptionType.BCPQC_MCELIECE_FUJISAKI_CCA2_SHA256.getDefaultKeySizeBits(), System.currentTimeMillis(), Long.MAX_VALUE).generateKeyPair();
-		ASymmetricKeyPair keyPairForSignaturePQC=ASymmetricAuthenticatedSignatureType.BCPQC_SPHINCS256_SHA2_512_256.getKeyPairGenerator(rand).generateKeyPair();
+		ASymmetricKeyPair keyPairForSignaturePQC=ASymmetricAuthenticatedSignatureType.BCPQC_CHRYSTALS_DILITHIUM_5.getKeyPairGenerator(rand).generateKeyPair();
 		testASymmetricKeyWrapperForEncryption(rand, new HybridASymmetricKeyPair(kp, kppqc), null, typeWrapper, asetype, asetypeToCode, null);
 		testASymmetricKeyWrapperForEncryption(rand, new HybridASymmetricKeyPair(kp, kppqc), null, typeWrapper, asetype, asetypeToCode, secretKeyForSignature);
 		testASymmetricKeyWrapperForEncryption(rand, new HybridASymmetricKeyPair(kp, kppqc), new HybridASymmetricKeyPair(keyPairForSignature, keyPairForSignaturePQC), typeWrapper, asetype, asetypeToCode, null);
@@ -214,23 +205,17 @@ public class TestASymmetricEncryption {
 		if (keyPairForSignature.isPostQuantumKey() || kp.isPostQuantumKey())
 			return;
 		ASymmetricKeyPair kppqc= ASymmetricEncryptionType.BCPQC_MCELIECE_FUJISAKI_CCA2_SHA256.getKeyPairGenerator(rand, ASymmetricEncryptionType.BCPQC_MCELIECE_FUJISAKI_CCA2_SHA256.getDefaultKeySizeBits(), System.currentTimeMillis(), Long.MAX_VALUE).generateKeyPair();
-		ASymmetricKeyPair keyPairForSignaturePQC=ASymmetricAuthenticatedSignatureType.BCPQC_SPHINCS256_SHA2_512_256.getKeyPairGenerator(rand).generateKeyPair();
+		ASymmetricKeyPair keyPairForSignaturePQC=ASymmetricAuthenticatedSignatureType.BCPQC_CHRYSTALS_DILITHIUM_5.getKeyPairGenerator(rand).generateKeyPair();
 		testASymmetricKeyWrapperForEncryption(rand, new HybridASymmetricKeyPair(kp, kppqc), null, typeWrapper, asetype, asstypeToCode, null);
 		testASymmetricKeyWrapperForEncryption(rand, new HybridASymmetricKeyPair(kp, kppqc), null, typeWrapper, asetype, asstypeToCode, secretKeyForSignature);
 		testASymmetricKeyWrapperForEncryption(rand, new HybridASymmetricKeyPair(kp, kppqc), new HybridASymmetricKeyPair(keyPairForSignature, keyPairForSignaturePQC), typeWrapper, asetype, asstypeToCode, null);
 		testASymmetricKeyWrapperForEncryption(rand, new HybridASymmetricKeyPair(kp, kppqc), new HybridASymmetricKeyPair(keyPairForSignature, keyPairForSignaturePQC), typeWrapper, asetype, asstypeToCode, secretKeyForSignature);
 	}
 
-	public void testASymmetricKeyWrapperForEncryption(AbstractSecureRandom rand, ASymmetricKeyPair nonpqckpe, ASymmetricKeyPair pqckpe, AbstractKeyPair<?,?> kps,  ASymmetricKeyWrapperType typeWrapper, ASymmetricEncryptionType asetype, SymmetricEncryptionType setype, SymmetricSecretKey secretKeyForSignature)
+	public void testASymmetricKeyWrapperForEncryption(AbstractSecureRandom rand, AbstractKeyPair<?, ?> kpe, AbstractKeyPair<?,?> kps,  ASymmetricKeyWrapperType typeWrapper, SymmetricEncryptionType setype, SymmetricSecretKey secretKeyForSignature)
 			throws NoSuchAlgorithmException, IllegalStateException, NoSuchProviderException, IOException, IllegalArgumentException {
 		SymmetricSecretKey sk= setype.getKeyGenerator(rand, setype.getDefaultKeySizeBits()).generateKey();
-		AbstractKeyPair<?, ?> kpe;
-		if (typeWrapper.isHybrid())
-		{
-			kpe=new HybridASymmetricKeyPair(nonpqckpe, pqckpe);
-		}
-		else
-			kpe=nonpqckpe;
+
 		KeyWrapperAlgorithm keyWrapper;
 		try {
 			if (secretKeyForSignature != null) {
@@ -266,9 +251,9 @@ public class TestASymmetricEncryption {
 	public void testASymmetricKeyWrapperForEncryption(AbstractSecureRandom rand, AbstractKeyPair<?,?> kpe, AbstractKeyPair<?,?> kps,  ASymmetricKeyWrapperType typeWrapper, ASymmetricEncryptionType asetype, ASymmetricEncryptionType asetypeToCode, SymmetricSecretKey secretKeyForSignature)
 			throws NoSuchAlgorithmException, IllegalStateException, NoSuchProviderException, IOException, IllegalArgumentException, InvalidKeySpecException {
 
-		AbstractKeyPair<?, ?> kpToCode= asetypeToCode.getKeyPairGenerator(rand, asetypeToCode.getDefaultKeySizeBits()).generateKeyPair();
+
 		KeyWrapperAlgorithm keyWrapper;
-		try {
+		try(AbstractKeyPair<?, ?> kpToCode= asetypeToCode.getKeyPairGenerator(rand, asetypeToCode.getDefaultKeySizeBits()).generateKeyPair()) {
 			if (secretKeyForSignature != null) {
 				if (kps == null)
 					keyWrapper = new KeyWrapperAlgorithm(typeWrapper, kpe, secretKeyForSignature);
@@ -283,9 +268,10 @@ public class TestASymmetricEncryption {
 			Assert.assertTrue(secretKeyForSignature!=null || kps!=null || typeWrapper.wrappingIncludeSignature());
 			WrappedEncryptedASymmetricPrivateKey wrappedKey=keyWrapper.wrap(rand, kpToCode.getASymmetricPrivateKey());
 			IASymmetricPrivateKey kp2=keyWrapper.unwrap(wrappedKey);
-			WrappedData wd=kpToCode.getASymmetricPrivateKey().encode();
-			Assert.assertEquals(wd.getBytes(), kp2.encode().getBytes());
-			Assert.assertEquals(kpToCode.getASymmetricPrivateKey().toJavaNativeKey().getEncoded(), kp2.toJavaNativeKey().getEncoded());
+			try(WrappedSecretData wd=kpToCode.getASymmetricPrivateKey().encode()) {
+				Assert.assertEquals(wd.getBytes(), kp2.encode().getBytes());
+				Assert.assertEquals(kpToCode.getASymmetricPrivateKey().toJavaNativeKey().getEncoded(), kp2.toJavaNativeKey().getEncoded());
+			}
 		}
 		catch (IllegalArgumentException ignored)
 		{
@@ -295,9 +281,8 @@ public class TestASymmetricEncryption {
 	}
 	public void testASymmetricKeyWrapperForEncryption(AbstractSecureRandom rand, AbstractKeyPair<?,?> kpe, AbstractKeyPair<?,?> kps,  ASymmetricKeyWrapperType typeWrapper, ASymmetricEncryptionType asetype, ASymmetricAuthenticatedSignatureType asstypeToCode, SymmetricSecretKey secretKeyForSignature)
 			throws NoSuchAlgorithmException, IllegalStateException, NoSuchProviderException, IOException, IllegalArgumentException, InvalidKeySpecException {
-		AbstractKeyPair<?, ?> kpToCode= asstypeToCode.getKeyPairGenerator(rand).generateKeyPair();
 		KeyWrapperAlgorithm keyWrapper;
-		try {
+		try(AbstractKeyPair<?, ?> kpToCode= asstypeToCode.getKeyPairGenerator(rand).generateKeyPair()) {
 			if (secretKeyForSignature != null) {
 				if (kps == null)
 					keyWrapper = new KeyWrapperAlgorithm(typeWrapper, kpe, secretKeyForSignature);
@@ -417,74 +402,29 @@ public class TestASymmetricEncryption {
 			NoSuchProviderException, IllegalStateException, IllegalArgumentException {
 		System.out.println("Testing " + astype + "/" + stype);
 		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getSingleton(null);
-		ASymmetricKeyPair kpd = astype.getKeyPairGenerator(rand, (short)1024).generateKeyPair();
+		try(ASymmetricKeyPair kpd = astype.getKeyPairGenerator(rand, (short)1024).generateKeyPair()) {
 
-		SymmetricSecretKey localKey = stype.getKeyGenerator(rand).generateKey();
-		SymmetricEncryptionAlgorithm algoLocalS = new SymmetricEncryptionAlgorithm(rand, localKey);
-		ASymmetricKeyWrapperType kw=astype.getASymmetricKeyWrapperType();
-		/*if (astype.getCodeProviderForEncryption()==CodeProvider.GNU_CRYPTO)
-			kw=ASymmetricKeyWrapperType.GNU_RSA_OAEP_SHA2_384;
-		else if (astype.name().startsWith("BCPQC_MCELIECE_FUJISAKI"))
-			kw=ASymmetricKeyWrapperType.BCPQC_MCELIECE_FUJISAKI_CCA2_SHA256;
-		else if (astype.name().startsWith("BCPQC_MCELIECE_POINTCHEVAL"))
-			kw=ASymmetricKeyWrapperType.BCPQC_MCELIECE_POINTCHEVAL_CCA2_SHA256;
-		else if (astype.getAlgorithmParameterSpec()!=null)
-			kw=ASymmetricKeyWrapperType.BCPQC_CRYSTALS_KYBER_512;
-		else if (astype.getAlgorithmName().equals(ASymmetricEncryptionType.BCPQC_CRYSTALS_KYBER_768.getAlgorithmName()))
-			kw=ASymmetricKeyWrapperType.BCPQC_CRYSTALS_KYBER_768;
-		else if (astype.getAlgorithmName().equals(ASymmetricEncryptionType.BCPQC_CRYSTALS_KYBER_1024.getAlgorithmName()))
-			kw=ASymmetricKeyWrapperType.BCPQC_CRYSTALS_KYBER_1024;
-		else if (astype.getAlgorithmName().equals(ASymmetricEncryptionType.BCPQC_CRYSTALS_KYBER_512_AES.getAlgorithmName()))
-			kw=ASymmetricKeyWrapperType.BCPQC_CRYSTALS_KYBER_512_AES;
-		else if (astype.getAlgorithmName().equals(ASymmetricEncryptionType.BCPQC_CRYSTALS_KYBER_768_AES.getAlgorithmName()))
-			kw=ASymmetricKeyWrapperType.BCPQC_CRYSTALS_KYBER_768_AES;
-		else if (astype.getAlgorithmName().equals(ASymmetricEncryptionType.BCPQC_CRYSTALS_KYBER_1024_AES.getAlgorithmName()))
-			kw=ASymmetricKeyWrapperType.BCPQC_CRYSTALS_KYBER_1024_AES;
-		else if (astype.getAlgorithmName().equals(ASymmetricEncryptionType.BCPQC_NTRU_HPS2048509.getAlgorithmName()))
-			kw=ASymmetricKeyWrapperType.BCPQC_NTRU_HPS2048509;
-		else if (astype.getAlgorithmName().equals(ASymmetricEncryptionType.BCPQC_NTRU_HPS2048677.getAlgorithmName()))
-			kw=ASymmetricKeyWrapperType.BCPQC_NTRU_HPS2048677;
-		else if (astype.getAlgorithmName().equals(ASymmetricEncryptionType.BCPQC_NTRU_HPS4096821.getAlgorithmName()))
-			kw=ASymmetricKeyWrapperType.BCPQC_NTRU_HPS4096821;
-		else if (astype.getAlgorithmName().equals(ASymmetricEncryptionType.BCPQC_NTRU_HRSS701.getAlgorithmName()))
-			kw=ASymmetricKeyWrapperType.BCPQC_NTRU_HRSS701;
-		else if (astype.getAlgorithmName().equals(ASymmetricEncryptionType.BCPQC_SABER_LIGHT_KEM128R3.getAlgorithmName()))
-			kw=ASymmetricKeyWrapperType.BCPQC_SABER_LIGHT_KEM128R3;
-		else if (astype.getAlgorithmName().equals(ASymmetricEncryptionType.BCPQC_SABER_LIGHT_KEM192R3.getAlgorithmName()))
-			kw=ASymmetricKeyWrapperType.BCPQC_SABER_LIGHT_KEM192R3;
-		else if (astype.getAlgorithmName().equals(ASymmetricEncryptionType.BCPQC_SABER_LIGHT_KEM256R3.getAlgorithmName()))
-			kw=ASymmetricKeyWrapperType.BCPQC_SABER_LIGHT_KEM256R3;
-		else if (astype.getAlgorithmName().equals(ASymmetricEncryptionType.BCPQC_SABER_KEM128R3.getAlgorithmName()))
-			kw=ASymmetricKeyWrapperType.BCPQC_SABER_KEM128R3;
-		else if (astype.getAlgorithmName().equals(ASymmetricEncryptionType.BCPQC_SABER_KEM192R3.getAlgorithmName()))
-			kw=ASymmetricKeyWrapperType.BCPQC_SABER_KEM192R3;
-		else if (astype.getAlgorithmName().equals(ASymmetricEncryptionType.BCPQC_SABER_KEM256R3.getAlgorithmName()))
-			kw=ASymmetricKeyWrapperType.BCPQC_SABER_KEM256R3;
-		else if (astype.getAlgorithmName().equals(ASymmetricEncryptionType.BCPQC_SABER_FIRE_KEM128R3.getAlgorithmName()))
-			kw=ASymmetricKeyWrapperType.BCPQC_SABER_FIRE_KEM128R3;
-		else if (astype.getAlgorithmName().equals(ASymmetricEncryptionType.BCPQC_SABER_FIRE_KEM192R3.getAlgorithmName()))
-			kw=ASymmetricKeyWrapperType.BCPQC_SABER_FIRE_KEM192R3;
-		else if (astype.getAlgorithmName().equals(ASymmetricEncryptionType.BCPQC_SABER_FIRE_KEM256R3.getAlgorithmName()))
-			kw=ASymmetricKeyWrapperType.BCPQC_SABER_FIRE_KEM256R3;
-		else
-			kw=ASymmetricKeyWrapperType.BC_FIPS_RSA_OAEP_WITH_SHA3_512;*/
+			SymmetricSecretKey localKey = stype.getKeyGenerator(rand).generateKey();
+			SymmetricEncryptionAlgorithm algoLocalS = new SymmetricEncryptionAlgorithm(rand, localKey);
+			ASymmetricKeyWrapperType kw = astype.getASymmetricKeyWrapperType();
 
 
-		WrappedEncryptedSymmetricSecretKey localEncryptedKey = kw.wrapKey(rand, kpd.getASymmetricPublicKey(), localKey);
-		SymmetricSecretKey decryptedKey=kw.unwrapKey(kpd.getASymmetricPrivateKey(), localEncryptedKey);
-		Assert.assertEquals(localKey.getAuthenticatedSignatureAlgorithmType(), decryptedKey.getAuthenticatedSignatureAlgorithmType());
-		Assert.assertEquals(localKey.getEncryptionAlgorithmType(), decryptedKey.getEncryptionAlgorithmType());
-		Assert.assertEquals(localKey.getKeySizeBits(), decryptedKey.getKeySizeBits());
-		SymmetricEncryptionAlgorithm algoDistantS = new SymmetricEncryptionAlgorithm(rand, decryptedKey);
+			WrappedEncryptedSymmetricSecretKey localEncryptedKey = kw.wrapKey(rand, kpd.getASymmetricPublicKey(), localKey);
+			SymmetricSecretKey decryptedKey = kw.unwrapKey(kpd.getASymmetricPrivateKey(), localEncryptedKey);
+			Assert.assertEquals(localKey.getAuthenticatedSignatureAlgorithmType(), decryptedKey.getAuthenticatedSignatureAlgorithmType());
+			Assert.assertEquals(localKey.getEncryptionAlgorithmType(), decryptedKey.getEncryptionAlgorithmType());
+			Assert.assertEquals(localKey.getKeySizeBits(), decryptedKey.getKeySizeBits());
+			SymmetricEncryptionAlgorithm algoDistantS = new SymmetricEncryptionAlgorithm(rand, decryptedKey);
 
-		for (byte[] m : VariousTests.messagesToEncrypt) {
-			byte[] md = algoDistantS.decode(algoLocalS.encode(m));
-			Assert.assertEquals(md.length, m.length, "Testing size " + astype + "/" + stype);
-			Assert.assertEquals(md, m, "Testing " + astype + "/" + stype);
+			for (byte[] m : VariousTests.messagesToEncrypt) {
+				byte[] md = algoDistantS.decode(algoLocalS.encode(m));
+				Assert.assertEquals(md.length, m.length, "Testing size " + astype + "/" + stype);
+				Assert.assertEquals(md, m, "Testing " + astype + "/" + stype);
 
-			md = algoLocalS.decode(algoDistantS.encode(m));
-			Assert.assertEquals(md.length, m.length, "Testing size " + astype + "/" + stype);
-			Assert.assertEquals(md, m, "Testing " + astype + "/" + stype);
+				md = algoLocalS.decode(algoDistantS.encode(m));
+				Assert.assertEquals(md.length, m.length, "Testing size " + astype + "/" + stype);
+				Assert.assertEquals(md, m, "Testing " + astype + "/" + stype);
+			}
 		}
 
 	}
@@ -507,31 +447,30 @@ public class TestASymmetricEncryption {
 			NoSuchProviderException, IllegalStateException {
 		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getSingleton(null);
 
-		ClientASymmetricEncryptionAlgorithm algoClient = new ClientASymmetricEncryptionAlgorithm(rand,
-				kp.getASymmetricPublicKey());
-		ServerASymmetricEncryptionAlgorithm algoServer = new ServerASymmetricEncryptionAlgorithm(kp);
+		try(ClientASymmetricEncryptionAlgorithm algoClient = new ClientASymmetricEncryptionAlgorithm(rand,kp.getASymmetricPublicKey())) {
+			ServerASymmetricEncryptionAlgorithm algoServer = new ServerASymmetricEncryptionAlgorithm(kp);
 
-		for (byte[] m : VariousTests.messagesToEncrypt) {
-			byte[] encodedBytes = algoClient.encode(m);
-			Assert.assertTrue(encodedBytes.length>0, ""+m.length);
-			if (!kp.isPostQuantumKey())
-				Assert.assertEquals(encodedBytes.length, algoClient.getOutputSizeAfterEncryption(m.length));
-			byte[] decodedBytes = algoServer.decode(encodedBytes);
-			Assert.assertEquals(decodedBytes, m);
+			for (byte[] m : VariousTests.messagesToEncrypt) {
+				byte[] encodedBytes = algoClient.encode(m);
+				Assert.assertTrue(encodedBytes.length > 0, "" + m.length);
+				if (!kp.isPostQuantumKey())
+					Assert.assertEquals(encodedBytes.length, algoClient.getOutputSizeAfterEncryption(m.length));
+				byte[] decodedBytes = algoServer.decode(encodedBytes);
+				Assert.assertEquals(decodedBytes, m);
 
-			int off = rand.nextInt(15);
-			int size = m.length;
-			size -= rand.nextInt(15) + off;
+				int off = rand.nextInt(15);
+				int size = m.length;
+				size -= rand.nextInt(15) + off;
 
-			encodedBytes = algoClient.encode(m, off, size);
-			if (!kp.isPostQuantumKey())
-				Assert.assertEquals(encodedBytes.length, algoClient.getOutputSizeAfterEncryption(size));
-			decodedBytes = algoServer.decode(encodedBytes);
-			for (int i = 0; i < size; i++)
-				Assert.assertEquals(decodedBytes[i], m[i + off]);
+				encodedBytes = algoClient.encode(m, off, size);
+				if (!kp.isPostQuantumKey())
+					Assert.assertEquals(encodedBytes.length, algoClient.getOutputSizeAfterEncryption(size));
+				decodedBytes = algoServer.decode(encodedBytes);
+				for (int i = 0; i < size; i++)
+					Assert.assertEquals(decodedBytes[i], m[i + off]);
 
+			}
 		}
-
 	}
 
 	@Test(dataProvider = "provideDataForASymetricEncryptions", dependsOnMethods = { "testASymmetricKeyPairEncodingForEncryption" })
@@ -677,88 +616,87 @@ public class TestASymmetricEncryption {
 		System.out.println("Testing ASymmetricSecretMessageExchanger " + type);
 		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getSingleton(null);
 		for (short keySize = 2048; keySize <= 4096; keySize += 1024) {
-			ASymmetricKeyPair kpd = type.getKeyPairGenerator(rand, keySize).generateKeyPair();
-			ASymmetricKeyPair kpl = type.getKeyPairGenerator(rand, keySize).generateKeyPair();
+			try(ASymmetricKeyPair kpd = type.getKeyPairGenerator(rand, keySize).generateKeyPair();ASymmetricKeyPair kpl = type.getKeyPairGenerator(rand, keySize).generateKeyPair();) {
 
-			P2PASymmetricSecretMessageExchanger algoLocal = new P2PASymmetricSecretMessageExchanger(rand,
-					kpl.getASymmetricPublicKey());
-			P2PASymmetricSecretMessageExchanger algoDistant = new P2PASymmetricSecretMessageExchanger(rand,
-					kpd.getASymmetricPublicKey());
-			algoLocal.setDistantPublicKey(algoDistant.encodeMyPublicKey().getBytes());
-			algoDistant.setDistantPublicKey(algoLocal.encodeMyPublicKey().getBytes());
-			algoLocal.setCost((byte)11);
-			algoDistant.setCost((byte)11);
+				P2PASymmetricSecretMessageExchanger algoLocal = new P2PASymmetricSecretMessageExchanger(rand,
+						kpl.getASymmetricPublicKey());
+				P2PASymmetricSecretMessageExchanger algoDistant = new P2PASymmetricSecretMessageExchanger(rand,
+						kpd.getASymmetricPublicKey());
+				algoLocal.setDistantPublicKey(algoDistant.encodeMyPublicKey().getBytes());
+				algoDistant.setDistantPublicKey(algoLocal.encodeMyPublicKey().getBytes());
+				algoLocal.setCost((byte) 11);
+				algoDistant.setCost((byte) 11);
 
-			byte[] falseMessage = new byte[10];
-			rand.nextBytes(falseMessage);
+				byte[] falseMessage = new byte[10];
+				rand.nextBytes(falseMessage);
 
-			for (byte[] m : VariousTests.messagesToEncrypt) {
-				byte[] localCrypt = algoLocal.encode(m, VariousTests.salt, true);
+				for (byte[] m : VariousTests.messagesToEncrypt) {
+					byte[] localCrypt = algoLocal.encode(m, VariousTests.salt, true);
+					Assert.assertTrue(localCrypt.length != 0);
+					Assert.assertTrue(algoDistant.verifyDistantMessage(m, VariousTests.salt, localCrypt, true));
+					Assert.assertFalse(algoDistant.verifyDistantMessage(m, VariousTests.salt, falseMessage, true));
+					Assert.assertFalse(algoDistant.verifyDistantMessage(falseMessage, VariousTests.salt, localCrypt, true));
+
+					byte[] distantCrypt = algoDistant.encode(m, VariousTests.salt, true);
+					Assert.assertTrue(distantCrypt.length != 0);
+					Assert.assertTrue(algoLocal.verifyDistantMessage(m, VariousTests.salt, distantCrypt, true));
+					Assert.assertFalse(algoLocal.verifyDistantMessage(m, VariousTests.salt, falseMessage, true));
+					Assert.assertFalse(algoLocal.verifyDistantMessage(falseMessage, VariousTests.salt, distantCrypt, true));
+				}
+
+				for (byte[] m : VariousTests.messagesToEncrypt) {
+					byte[] localCrypt = algoLocal.encode(m, VariousTests.salt, false);
+					Assert.assertTrue(localCrypt.length != 0);
+					Assert.assertTrue(algoDistant.verifyDistantMessage(m, VariousTests.salt, localCrypt, false));
+					Assert.assertFalse(algoDistant.verifyDistantMessage(m, VariousTests.salt, falseMessage, false));
+					Assert.assertFalse(algoDistant.verifyDistantMessage(falseMessage, VariousTests.salt, localCrypt, false));
+
+					byte[] distantCrypt = algoDistant.encode(m, VariousTests.salt, false);
+					Assert.assertTrue(distantCrypt.length != 0);
+					Assert.assertTrue(algoLocal.verifyDistantMessage(m, VariousTests.salt, distantCrypt, false));
+					Assert.assertFalse(algoLocal.verifyDistantMessage(m, VariousTests.salt, falseMessage, false));
+					Assert.assertFalse(algoLocal.verifyDistantMessage(falseMessage, VariousTests.salt, distantCrypt, false));
+				}
+				for (byte[] m : VariousTests.messagesToEncrypt) {
+					byte[] localCrypt = algoLocal.encode(m, null, true);
+					Assert.assertTrue(localCrypt.length != 0);
+					Assert.assertTrue(algoDistant.verifyDistantMessage(m, null, localCrypt, true));
+					Assert.assertFalse(algoDistant.verifyDistantMessage(m, null, falseMessage, true));
+					Assert.assertFalse(algoDistant.verifyDistantMessage(falseMessage, null, localCrypt, true));
+
+					byte[] distantCrypt = algoDistant.encode(m, null, true);
+					Assert.assertTrue(distantCrypt.length != 0);
+					Assert.assertTrue(algoLocal.verifyDistantMessage(m, null, distantCrypt, true));
+					Assert.assertFalse(algoLocal.verifyDistantMessage(m, null, falseMessage, true));
+					Assert.assertFalse(algoLocal.verifyDistantMessage(falseMessage, null, distantCrypt, true));
+				}
+				for (byte[] m : VariousTests.messagesToEncrypt) {
+					byte[] localCrypt = algoLocal.encode(m, null, false);
+					Assert.assertTrue(localCrypt.length != 0);
+					Assert.assertTrue(algoDistant.verifyDistantMessage(m, null, localCrypt, false));
+					Assert.assertFalse(algoDistant.verifyDistantMessage(m, null, falseMessage, false));
+					Assert.assertFalse(algoDistant.verifyDistantMessage(falseMessage, null, localCrypt, false));
+
+					byte[] distantCrypt = algoDistant.encode(m, null, false);
+					Assert.assertTrue(distantCrypt.length != 0);
+					Assert.assertTrue(algoLocal.verifyDistantMessage(m, null, distantCrypt, false));
+					Assert.assertFalse(algoLocal.verifyDistantMessage(m, null, falseMessage, false));
+					Assert.assertFalse(algoLocal.verifyDistantMessage(falseMessage, null, distantCrypt, false));
+				}
+				String password = "password";
+				String falsePassword = "falsePassword";
+				byte[] localCrypt = algoLocal.encode(password, VariousTests.salt);
 				Assert.assertTrue(localCrypt.length != 0);
-				Assert.assertTrue(algoDistant.verifyDistantMessage(m, VariousTests.salt, localCrypt, true));
-				Assert.assertFalse(algoDistant.verifyDistantMessage(m, VariousTests.salt, falseMessage, true));
-				Assert.assertFalse(algoDistant.verifyDistantMessage(falseMessage, VariousTests.salt, localCrypt, true));
+				Assert.assertTrue(algoDistant.verifyDistantMessage(password, VariousTests.salt, localCrypt));
+				Assert.assertFalse(algoDistant.verifyDistantMessage(password, VariousTests.salt, falseMessage));
+				Assert.assertFalse(algoDistant.verifyDistantMessage(falsePassword, VariousTests.salt, localCrypt));
 
-				byte[] distantCrypt = algoDistant.encode(m, VariousTests.salt, true);
+				byte[] distantCrypt = algoDistant.encode(password, VariousTests.salt);
 				Assert.assertTrue(distantCrypt.length != 0);
-				Assert.assertTrue(algoLocal.verifyDistantMessage(m, VariousTests.salt, distantCrypt, true));
-				Assert.assertFalse(algoLocal.verifyDistantMessage(m, VariousTests.salt, falseMessage, true));
-				Assert.assertFalse(algoLocal.verifyDistantMessage(falseMessage, VariousTests.salt, distantCrypt, true));
+				Assert.assertTrue(algoLocal.verifyDistantMessage(password, VariousTests.salt, distantCrypt));
+				Assert.assertFalse(algoLocal.verifyDistantMessage(password, VariousTests.salt, falseMessage));
+				Assert.assertFalse(algoLocal.verifyDistantMessage(falsePassword, VariousTests.salt, distantCrypt));
 			}
-
-			for (byte[] m : VariousTests.messagesToEncrypt) {
-				byte[] localCrypt = algoLocal.encode(m, VariousTests.salt, false);
-				Assert.assertTrue(localCrypt.length != 0);
-				Assert.assertTrue(algoDistant.verifyDistantMessage(m, VariousTests.salt, localCrypt, false));
-				Assert.assertFalse(algoDistant.verifyDistantMessage(m, VariousTests.salt, falseMessage, false));
-				Assert.assertFalse(algoDistant.verifyDistantMessage(falseMessage, VariousTests.salt, localCrypt, false));
-
-				byte[] distantCrypt = algoDistant.encode(m, VariousTests.salt, false);
-				Assert.assertTrue(distantCrypt.length != 0);
-				Assert.assertTrue(algoLocal.verifyDistantMessage(m, VariousTests.salt, distantCrypt, false));
-				Assert.assertFalse(algoLocal.verifyDistantMessage(m, VariousTests.salt, falseMessage, false));
-				Assert.assertFalse(algoLocal.verifyDistantMessage(falseMessage, VariousTests.salt, distantCrypt, false));
-			}
-			for (byte[] m : VariousTests.messagesToEncrypt) {
-				byte[] localCrypt = algoLocal.encode(m, null, true);
-				Assert.assertTrue(localCrypt.length != 0);
-				Assert.assertTrue(algoDistant.verifyDistantMessage(m, null, localCrypt, true));
-				Assert.assertFalse(algoDistant.verifyDistantMessage(m, null, falseMessage, true));
-				Assert.assertFalse(algoDistant.verifyDistantMessage(falseMessage, null, localCrypt, true));
-
-				byte[] distantCrypt = algoDistant.encode(m, null, true);
-				Assert.assertTrue(distantCrypt.length != 0);
-				Assert.assertTrue(algoLocal.verifyDistantMessage(m, null, distantCrypt, true));
-				Assert.assertFalse(algoLocal.verifyDistantMessage(m, null, falseMessage, true));
-				Assert.assertFalse(algoLocal.verifyDistantMessage(falseMessage, null, distantCrypt, true));
-			}
-			for (byte[] m : VariousTests.messagesToEncrypt) {
-				byte[] localCrypt = algoLocal.encode(m, null, false);
-				Assert.assertTrue(localCrypt.length != 0);
-				Assert.assertTrue(algoDistant.verifyDistantMessage(m, null, localCrypt, false));
-				Assert.assertFalse(algoDistant.verifyDistantMessage(m, null, falseMessage, false));
-				Assert.assertFalse(algoDistant.verifyDistantMessage(falseMessage, null, localCrypt, false));
-
-				byte[] distantCrypt = algoDistant.encode(m, null, false);
-				Assert.assertTrue(distantCrypt.length != 0);
-				Assert.assertTrue(algoLocal.verifyDistantMessage(m, null, distantCrypt, false));
-				Assert.assertFalse(algoLocal.verifyDistantMessage(m, null, falseMessage, false));
-				Assert.assertFalse(algoLocal.verifyDistantMessage(falseMessage, null, distantCrypt, false));
-			}
-			String password = "password";
-			String falsePassword = "falsePassword";
-			byte[] localCrypt = algoLocal.encode(password, VariousTests.salt);
-			Assert.assertTrue(localCrypt.length != 0);
-			Assert.assertTrue(algoDistant.verifyDistantMessage(password, VariousTests.salt, localCrypt));
-			Assert.assertFalse(algoDistant.verifyDistantMessage(password, VariousTests.salt, falseMessage));
-			Assert.assertFalse(algoDistant.verifyDistantMessage(falsePassword, VariousTests.salt, localCrypt));
-
-			byte[] distantCrypt = algoDistant.encode(password, VariousTests.salt);
-			Assert.assertTrue(distantCrypt.length != 0);
-			Assert.assertTrue(algoLocal.verifyDistantMessage(password, VariousTests.salt, distantCrypt));
-			Assert.assertFalse(algoLocal.verifyDistantMessage(password, VariousTests.salt, falseMessage));
-			Assert.assertFalse(algoLocal.verifyDistantMessage(falsePassword, VariousTests.salt, distantCrypt));
-
 		}
 	}
 

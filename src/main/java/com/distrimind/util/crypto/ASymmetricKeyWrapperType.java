@@ -404,17 +404,26 @@ public enum ASymmetricKeyWrapperType {
 			} else {
 				if (!isHybrid())
 					throw new IllegalArgumentException(""+ipublicKey.getClass().getName());
-
 				HybridASymmetricPublicKey publicKey = (HybridASymmetricPublicKey) ipublicKey;
 				if (!publicKey.getPQCPublicKey().getEncryptionAlgorithmType().equals(pqcWrapper.aSymmetricEncryptionType))
-					throw new IllegalArgumentException("publicKey.getPQCPublicKey()="+publicKey.getPQCPublicKey()+", pqcWrapper.aSymmetricEncryptionType="+pqcWrapper.aSymmetricEncryptionType);
+					throw new IllegalArgumentException("publicKey.getPQCPublicKey()=" + publicKey.getPQCPublicKey().getEncryptionAlgorithmType() + ", pqcWrapper.aSymmetricEncryptionType=" + pqcWrapper.aSymmetricEncryptionType);
 				if (!publicKey.getNonPQCPublicKey().getEncryptionAlgorithmType().equals(nonPQCWrapper.aSymmetricEncryptionType))
-					throw new IllegalArgumentException("publicKey.getNonPQCPublicKey()="+publicKey.getNonPQCPublicKey()+", nonPQCWrapper.aSymmetricEncryptionType="+nonPQCWrapper.aSymmetricEncryptionType);
-				WrappedEncryptedSymmetricSecretKey nonPQCWrap = pqcWrapper.wrapKey(random, publicKey.getPQCPublicKey(), keyToWrap);
+					throw new IllegalArgumentException("publicKey.getNonPQCPublicKey()=" + publicKey.getNonPQCPublicKey().getEncryptionAlgorithmType() + ", nonPQCWrapper.aSymmetricEncryptionType=" + nonPQCWrapper.aSymmetricEncryptionType);
+				if (!pqcWrapper.aSymmetricEncryptionType.isUsableInEncryptionMode()) {
 
-				try(ClientASymmetricEncryptionAlgorithm client = new ClientASymmetricEncryptionAlgorithm(random, publicKey.getNonPQCPublicKey()))
+					WrappedEncryptedSymmetricSecretKey nonPQCWrap = pqcWrapper.wrapKey(random, publicKey.getPQCPublicKey(), keyToWrap);
+
+					try (ClientASymmetricEncryptionAlgorithm client = new ClientASymmetricEncryptionAlgorithm(random, publicKey.getNonPQCPublicKey())) {
+						return new WrappedEncryptedSymmetricSecretKey(client.encode(nonPQCWrap.getBytes()));
+					}
+				}
+				else
 				{
-					return new WrappedEncryptedSymmetricSecretKey(client.encode(nonPQCWrap.getBytes()));
+					WrappedEncryptedSymmetricSecretKey nonPQCWrap = nonPQCWrapper.wrapKey(random, publicKey.getNonPQCPublicKey(), keyToWrap);
+
+					try (ClientASymmetricEncryptionAlgorithm client = new ClientASymmetricEncryptionAlgorithm(random, publicKey.getPQCPublicKey())) {
+						return new WrappedEncryptedSymmetricSecretKey(client.encode(nonPQCWrap.getBytes()));
+					}
 				}
 			}
 		} catch (InvalidKeySpecException | NoSuchAlgorithmException | NoSuchProviderException | InvalidKeyException | InvalidAlgorithmParameterException | NoSuchPaddingException | IllegalBlockSizeException e) {
@@ -466,12 +475,20 @@ public enum ASymmetricKeyWrapperType {
 					throw new IllegalArgumentException();
 				HybridASymmetricPrivateKey privateKey = (HybridASymmetricPrivateKey) iPrivateKey;
 				if (!privateKey.getPQCPrivateKey().getEncryptionAlgorithmType().equals(pqcWrapper.aSymmetricEncryptionType))
-					throw new IllegalArgumentException("privateKey.getPQCPrivateKey()="+privateKey.getPQCPrivateKey()+", pqcWrapper.aSymmetricEncryptionType="+pqcWrapper.aSymmetricEncryptionType);
+					throw new IllegalArgumentException("privateKey.getPQCPrivateKey()=" + privateKey.getPQCPrivateKey().getEncryptionAlgorithmType() + ", pqcWrapper.aSymmetricEncryptionType=" + pqcWrapper.aSymmetricEncryptionType);
 				if (!privateKey.getNonPQCPrivateKey().getEncryptionAlgorithmType().equals(nonPQCWrapper.aSymmetricEncryptionType))
-					throw new IllegalArgumentException("privateKey.getNonPQCPrivateKey()="+privateKey.getNonPQCPrivateKey()+", nonPQCWrapper.aSymmetricEncryptionType="+nonPQCWrapper.aSymmetricEncryptionType);
-				ServerASymmetricEncryptionAlgorithm server = new ServerASymmetricEncryptionAlgorithm(privateKey.getNonPQCPrivateKey());
-				byte[] b = server.decode(keyToUnwrap.getBytes());
-				return pqcWrapper.unwrapKey(privateKey.getPQCPrivateKey(), new WrappedEncryptedSymmetricSecretKey(b));
+					throw new IllegalArgumentException("privateKey.getNonPQCPrivateKey()=" + privateKey.getNonPQCPrivateKey().getEncryptionAlgorithmType() + ", nonPQCWrapper.aSymmetricEncryptionType=" + nonPQCWrapper.aSymmetricEncryptionType);
+				if (!pqcWrapper.aSymmetricEncryptionType.isUsableInEncryptionMode()) {
+
+					ServerASymmetricEncryptionAlgorithm server = new ServerASymmetricEncryptionAlgorithm(privateKey.getNonPQCPrivateKey());
+					byte[] b = server.decode(keyToUnwrap.getBytes());
+					return pqcWrapper.unwrapKey(privateKey.getPQCPrivateKey(), new WrappedEncryptedSymmetricSecretKey(b));
+				}
+				else {
+					ServerASymmetricEncryptionAlgorithm server = new ServerASymmetricEncryptionAlgorithm(privateKey.getPQCPrivateKey());
+					byte[] b = server.decode(keyToUnwrap.getBytes());
+					return nonPQCWrapper.unwrapKey(privateKey.getNonPQCPrivateKey(), new WrappedEncryptedSymmetricSecretKey(b));
+				}
 			}
 		} catch (InvalidKeyException e) {
 			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, e);

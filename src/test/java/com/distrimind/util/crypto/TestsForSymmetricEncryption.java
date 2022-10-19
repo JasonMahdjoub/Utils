@@ -513,7 +513,8 @@ public class TestsForSymmetricEncryption {
 		r.nextBytes(salt);
 		SymmetricSecretKey key1=derivationType.derivativeKey(password.toCharArray(), salt, (byte)7, encryptionType);
 		Assert.assertEquals(key1.getKeySizeBits(), encryptionType.getDefaultKeySizeBits());
-		Assert.assertEquals(key1.getEncryptionAlgorithmType(), encryptionType);
+		Assert.assertEquals(key1.getEncryptionAlgorithmType(), encryptionType.getDerivedType());
+		Assert.assertTrue(key1.getEncryptionAlgorithmType().equals(encryptionType));
 		Assert.assertEquals(key1.encode(), derivationType.derivativeKey(password.toCharArray(), salt, (byte)7, encryptionType).encode());
 		Assert.assertNotEquals(key1.encode(), derivationType.derivativeKey(invalidPassword.toCharArray(), salt,(byte) 7, encryptionType).encode());
 	}

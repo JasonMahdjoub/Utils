@@ -1,6 +1,6 @@
 Utils
 =====
-5.24.0 STABLE (Build: 4630) (from 04/01/2016 to 06/10/2022)
+5.24.0 STABLE (Build: 4795) (from 04/01/2016 to 19/10/2022)
 
 # Creator(s):
 * Jason MAHDJOUB
@@ -11,19 +11,29 @@ Utils
 # Changes:
 
 
-### 5.24.0 STABLE (06/10/2022)
+### 5.24.0 STABLE (19/10/2022)
 #### New feature(s)
 * Add possibility to use several thread with SymmetricSignatureHashEncoder and SymmetricSignatureHashDecoder. Add functions SymmetricSignatureHashEncoder.withPoolExecutor(PoolExecutor) and SymmetricSignatureHashDecoder.withPoolExecutor(PoolExecutor).
 * Add possibility to use encoder and decoder as continuous network stream. Main secret key is regenerated after each encoding.
 * Add BouncyCastle Sphincs+ asymmetric authenticated signature post quantum algorithms.
+* Add Chrystals-Kyber asymmetric key wrappers.
+* Add NTRU asymmetric key wrappers.
+* Add SABER asymmetric key wrappers.
+* Add functions ASymmetricKeyWrapperType.getKeyPairGenerator(...).
+* Add BouncyCastle Chrystals-Dilithium asymmetric authenticated signature post quantum algorithms.
+* Add BouncyCastle Falcon asymmetric authenticated signature post quantum algorithms.
+* Add key agreement that use key wrapping with class KeyAgreementWithKeyWrapping.
+* Reorganise architecture of key agreements, and hybrid key agreements. Permit key agreement that generates both secret key for encryption and secret key for signature.
 #### Internal change(s)
 * Update BouncyCastle to 1.71
 * Update BouncyCastle-FIPS to 1.0.2.3
 * Clean code
 * Improve nonce generator from seed into SecureRandomType
 * Target java compatibility is set to Java 11 but source code still use Java 8
+* Encode key types and algorithm types with their derived final type
 #### Security fixe(s) with low severity
 * Update snakeyaml dependency, and fix CVE-2022-38752, CVE-2022-38751, CVE-2022-38750, CVE-2022-38749
+* Deprecate GNU algorithms because GNU dependency is no more updated into Utils.
 #### Security fixe(s) with medium severity
 * Add additional CPU usage during encryption using specifics algorithms to limit frequency side channel attacks and power side channel power attacks. Concerned encryption algorithm are referenced into class SymmetricEncryptionType. Asymmetric encryption are also concerned. Encryption that were used to encode little blocks are less concerned by these attacks.
 * Generate new keys during encryption after using the same key with a predefined quantity of data to limit frequency side channel attacks and power side channel power attacks. Concerned encryption algorithm are referenced into class SymmetricEncryptionType. Asymmetric encryption are also concerned. Encryption that were used to encode little blocks are less concerned by these attacks.

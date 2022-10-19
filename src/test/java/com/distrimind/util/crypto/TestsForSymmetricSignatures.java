@@ -151,7 +151,8 @@ public class TestsForSymmetricSignatures {
 		r.nextBytes(salt);
 		SymmetricSecretKey key1=derivationType.derivativeKey(password.toCharArray(), salt, (byte)7, signatureType);
 		Assert.assertEquals(key1.getKeySizeBits(), signatureType.getDefaultKeySizeBits());
-		Assert.assertEquals(key1.getAuthenticatedSignatureAlgorithmType(), signatureType);
+		Assert.assertEquals(key1.getAuthenticatedSignatureAlgorithmType(), signatureType.getDerivedType());
+		Assert.assertTrue(key1.getAuthenticatedSignatureAlgorithmType().equals(signatureType));
 		Assert.assertEquals(key1.encode(), derivationType.derivativeKey(password.toCharArray(), salt, (byte)7, signatureType).encode());
 		Assert.assertNotEquals(key1.encode(), derivationType.derivativeKey(invalidPassword.toCharArray(), salt, (byte)7, signatureType).encode());
 	}
