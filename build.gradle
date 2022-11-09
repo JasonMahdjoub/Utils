@@ -73,7 +73,7 @@ repositories {
 }
 def javaVersion="8"
 sourceCompatibility = javaVersion
-targetCompatibility= "8"
+targetCompatibility= javaVersion
 
 dependencies {
     testImplementation 'org.testng:testng:7.5'
