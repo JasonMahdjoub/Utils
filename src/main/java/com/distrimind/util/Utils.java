@@ -1,5 +1,5 @@
 /*
-Copyright or © or Copr. Jason Mahdjoub (04/02/2016)
+Copyright or © or Corp. Jason Mahdjoub (04/02/2016)
 
 jason.mahdjoub@distri-mind.fr
 
@@ -66,6 +66,10 @@ public class Utils {
 
 			VERSION.addCreator(new Person("mahdjoub", "jason"))
 					.addDeveloper(new PersonDeveloper("mahdjoub", "jason", "2016-01-04"))
+					.addDescription(
+							new Description(5, 24, 1, Version.Type.STABLE, 0, "2022-12-15")
+									.addItem(INTERNAL_CHANGE, "Fix spelling errors")
+					)
 					.addDescription(
 							new Description(5, 24, 0, Version.Type.STABLE, 0, "2022-10-19")
 									.addItem(INTERNAL_CHANGE, "Update BouncyCastle to 1.71")

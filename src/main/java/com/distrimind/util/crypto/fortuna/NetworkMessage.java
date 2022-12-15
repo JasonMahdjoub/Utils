@@ -2,7 +2,7 @@
  * MadKitLanEdition (created by Jason MAHDJOUB (jason.mahdjoub@distri-mind.fr)) Copyright (c)
  * 2015 is a fork of MadKit and MadKitGroupExtension.
  *
- * Copyright or © or Copr. Jason Mahdjoub, Fabien Michel, Olivier Gutknecht, Jacques Ferber (1997)
+ * Copyright or © or Corp. Jason Mahdjoub, Fabien Michel, Olivier Gutknecht, Jacques Ferber (1997)
  *
  * jason.mahdjoub@distri-mind.fr
  * fmichel@lirmm.fr
