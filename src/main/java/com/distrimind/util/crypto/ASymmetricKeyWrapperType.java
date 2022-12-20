@@ -329,9 +329,13 @@ public enum ASymmetricKeyWrapperType {
 				if (getAlgorithmName().startsWith("McEliece")) {
 					if (!publicKey.getEncryptionAlgorithmType().equals(aSymmetricEncryptionType))
 						throw new IllegalArgumentException(publicKey.getEncryptionAlgorithmType().toString()+" ; "+name());
-					try(ClientASymmetricEncryptionAlgorithm client = new ClientASymmetricEncryptionAlgorithm(random, publicKey)) {
+					ClientASymmetricEncryptionAlgorithm client = new ClientASymmetricEncryptionAlgorithm(random, publicKey);
+					try {
 						WrappedSecretData wsd = keyToWrap.encode();
 						return new WrappedEncryptedSymmetricSecretKey(client.encode(wsd.getBytes()));
+					}
+					finally {
+						client.clean();
 					}
 				} else {
 					if ( (publicKey.getEncryptionAlgorithmType() != null && ((provider == CodeProvider.GNU_CRYPTO) != (publicKey.getEncryptionAlgorithmType().getCodeProviderForEncryption() == CodeProvider.GNU_CRYPTO)))
@@ -413,16 +417,23 @@ public enum ASymmetricKeyWrapperType {
 
 					WrappedEncryptedSymmetricSecretKey nonPQCWrap = pqcWrapper.wrapKey(random, publicKey.getPQCPublicKey(), keyToWrap);
 
-					try (ClientASymmetricEncryptionAlgorithm client = new ClientASymmetricEncryptionAlgorithm(random, publicKey.getNonPQCPublicKey())) {
+					ClientASymmetricEncryptionAlgorithm client = new ClientASymmetricEncryptionAlgorithm(random, publicKey.getNonPQCPublicKey());
+					try  {
 						return new WrappedEncryptedSymmetricSecretKey(client.encode(nonPQCWrap.getBytes()));
+					}
+					finally {
+						client.clean();
 					}
 				}
 				else
 				{
 					WrappedEncryptedSymmetricSecretKey nonPQCWrap = nonPQCWrapper.wrapKey(random, publicKey.getNonPQCPublicKey(), keyToWrap);
-
-					try (ClientASymmetricEncryptionAlgorithm client = new ClientASymmetricEncryptionAlgorithm(random, publicKey.getPQCPublicKey())) {
+					ClientASymmetricEncryptionAlgorithm client = new ClientASymmetricEncryptionAlgorithm(random, publicKey.getPQCPublicKey());
+					try  {
 						return new WrappedEncryptedSymmetricSecretKey(client.encode(nonPQCWrap.getBytes()));
+					}
+					finally {
+						client.clean();
 					}
 				}
 			}
@@ -593,8 +604,12 @@ public enum ASymmetricKeyWrapperType {
 		Random r=new Random(System.currentTimeMillis());
 		r.nextBytes(encodedKey.getBytes());
 		if (type.getAlgorithmName().startsWith("McEliece")) {
-			try(ClientASymmetricEncryptionAlgorithm client = new ClientASymmetricEncryptionAlgorithm(SecureRandomType.DEFAULT.getInstance(null), publicKey)) {
+			ClientASymmetricEncryptionAlgorithm client = new ClientASymmetricEncryptionAlgorithm(SecureRandomType.DEFAULT.getInstance(null), publicKey);
+			try {
 				return client.encode(encodedKey.getBytes()).length;
+			}
+			finally {
+				client.clean();
 			}
 		}
 		AsymmetricRSAPublicKey bcPK = (AsymmetricRSAPublicKey) publicKey.toBouncyCastleKey();

@@ -525,9 +525,13 @@ public enum ASymmetricEncryptionType {
 	public static void main(String[] args) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
 		for (ASymmetricEncryptionType t : ASymmetricEncryptionType.values())
 		{
-			try(ASymmetricKeyPair kp=t.getKeyPairGenerator(SecureRandomType.DEFAULT.getSingleton(null)).generateKeyPair()) {
+			ASymmetricKeyPair kp=t.getKeyPairGenerator(SecureRandomType.DEFAULT.getSingleton(null)).generateKeyPair();
+			try {
 				int s =kp.getASymmetricPublicKey().getKeyBytes().getBytes().length;
 				System.out.println(t + " : \n\tpublic key size in bytes: " + s + "\n\tpublic key size in bits: " + (s * 8));
+			}
+			finally {
+				kp.clean();
 			}
 		}
 	}

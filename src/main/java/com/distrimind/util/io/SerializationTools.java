@@ -452,9 +452,12 @@ public class SerializationTools {
 			return;
 			
 		}
-
-		try(WrappedSecretData sd=keyPair.encode()) {
+		WrappedSecretData sd=keyPair.encode();
+		try {
 			writeBytes(oos, sd.getBytes(), AbstractKeyPair.MAX_SIZE_IN_BYTES_OF_KEY_PAIR, false);
+		}
+		finally {
+			sd.clean();
 		}
 	}
 

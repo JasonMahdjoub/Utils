@@ -253,7 +253,8 @@ public class TestASymmetricEncryption {
 
 
 		KeyWrapperAlgorithm keyWrapper;
-		try(AbstractKeyPair<?, ?> kpToCode= asetypeToCode.getKeyPairGenerator(rand, asetypeToCode.getDefaultKeySizeBits()).generateKeyPair()) {
+		AbstractKeyPair<?, ?> kpToCode= asetypeToCode.getKeyPairGenerator(rand, asetypeToCode.getDefaultKeySizeBits()).generateKeyPair();
+		try {
 			if (secretKeyForSignature != null) {
 				if (kps == null)
 					keyWrapper = new KeyWrapperAlgorithm(typeWrapper, kpe, secretKeyForSignature);
@@ -268,21 +269,22 @@ public class TestASymmetricEncryption {
 			Assert.assertTrue(secretKeyForSignature!=null || kps!=null || typeWrapper.wrappingIncludeSignature());
 			WrappedEncryptedASymmetricPrivateKey wrappedKey=keyWrapper.wrap(rand, kpToCode.getASymmetricPrivateKey());
 			IASymmetricPrivateKey kp2=keyWrapper.unwrap(wrappedKey);
-			try(WrappedSecretData wd=kpToCode.getASymmetricPrivateKey().encode()) {
-				Assert.assertEquals(wd.getBytes(), kp2.encode().getBytes());
-				Assert.assertEquals(kpToCode.getASymmetricPrivateKey().toJavaNativeKey().getEncoded(), kp2.toJavaNativeKey().getEncoded());
-			}
+			WrappedSecretData wd=kpToCode.getASymmetricPrivateKey().encode();
+			Assert.assertEquals(wd.getBytes(), kp2.encode().getBytes());
+			Assert.assertEquals(kpToCode.getASymmetricPrivateKey().toJavaNativeKey().getEncoded(), kp2.toJavaNativeKey().getEncoded());
 		}
 		catch (IllegalArgumentException ignored)
 		{
 			Assert.assertTrue(secretKeyForSignature==null && kps==null && !typeWrapper.wrappingIncludeSignature());
+			kpToCode.clean();
 		}
 
 	}
 	public void testASymmetricKeyWrapperForEncryption(AbstractSecureRandom rand, AbstractKeyPair<?,?> kpe, AbstractKeyPair<?,?> kps,  ASymmetricKeyWrapperType typeWrapper, ASymmetricEncryptionType asetype, ASymmetricAuthenticatedSignatureType asstypeToCode, SymmetricSecretKey secretKeyForSignature)
 			throws NoSuchAlgorithmException, IllegalStateException, NoSuchProviderException, IOException, IllegalArgumentException, InvalidKeySpecException {
 		KeyWrapperAlgorithm keyWrapper;
-		try(AbstractKeyPair<?, ?> kpToCode= asstypeToCode.getKeyPairGenerator(rand).generateKeyPair()) {
+		AbstractKeyPair<?, ?> kpToCode= asstypeToCode.getKeyPairGenerator(rand).generateKeyPair();
+		try {
 			if (secretKeyForSignature != null) {
 				if (kps == null)
 					keyWrapper = new KeyWrapperAlgorithm(typeWrapper, kpe, secretKeyForSignature);
@@ -303,6 +305,7 @@ public class TestASymmetricEncryption {
 		catch (IllegalArgumentException ignored)
 		{
 			Assert.assertTrue(secretKeyForSignature==null && kps==null && !typeWrapper.wrappingIncludeSignature());
+			kpToCode.clean();
 		}
 
 	}
@@ -402,7 +405,8 @@ public class TestASymmetricEncryption {
 			NoSuchProviderException, IllegalStateException, IllegalArgumentException {
 		System.out.println("Testing " + astype + "/" + stype);
 		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getSingleton(null);
-		try(ASymmetricKeyPair kpd = astype.getKeyPairGenerator(rand, (short)1024).generateKeyPair()) {
+		ASymmetricKeyPair kpd = astype.getKeyPairGenerator(rand, (short)1024).generateKeyPair();
+		try {
 
 			SymmetricSecretKey localKey = stype.getKeyGenerator(rand).generateKey();
 			SymmetricEncryptionAlgorithm algoLocalS = new SymmetricEncryptionAlgorithm(rand, localKey);
@@ -426,7 +430,9 @@ public class TestASymmetricEncryption {
 				Assert.assertEquals(md, m, "Testing " + astype + "/" + stype);
 			}
 		}
-
+		finally {
+			kpd.clean();
+		}
 	}
 	@Test(dataProvider = "provideDataForHybridASymetricEncryptions")
 	public void testClientServerASymetricEncryptions(HybridASymmetricEncryptionType type)
@@ -446,8 +452,8 @@ public class TestASymmetricEncryption {
 			IOException,
 			NoSuchProviderException, IllegalStateException {
 		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getSingleton(null);
-
-		try(ClientASymmetricEncryptionAlgorithm algoClient = new ClientASymmetricEncryptionAlgorithm(rand,kp.getASymmetricPublicKey())) {
+		ClientASymmetricEncryptionAlgorithm algoClient = new ClientASymmetricEncryptionAlgorithm(rand,kp.getASymmetricPublicKey());
+		try {
 			ServerASymmetricEncryptionAlgorithm algoServer = new ServerASymmetricEncryptionAlgorithm(kp);
 
 			for (byte[] m : VariousTests.messagesToEncrypt) {
@@ -470,6 +476,9 @@ public class TestASymmetricEncryption {
 					Assert.assertEquals(decodedBytes[i], m[i + off]);
 
 			}
+		}
+		finally {
+			algoClient.clean();
 		}
 	}
 
@@ -616,7 +625,8 @@ public class TestASymmetricEncryption {
 		System.out.println("Testing ASymmetricSecretMessageExchanger " + type);
 		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getSingleton(null);
 		for (short keySize = 2048; keySize <= 4096; keySize += 1024) {
-			try(ASymmetricKeyPair kpd = type.getKeyPairGenerator(rand, keySize).generateKeyPair();ASymmetricKeyPair kpl = type.getKeyPairGenerator(rand, keySize).generateKeyPair();) {
+			ASymmetricKeyPair kpd = type.getKeyPairGenerator(rand, keySize).generateKeyPair();ASymmetricKeyPair kpl = type.getKeyPairGenerator(rand, keySize).generateKeyPair();
+			try {
 
 				P2PASymmetricSecretMessageExchanger algoLocal = new P2PASymmetricSecretMessageExchanger(rand,
 						kpl.getASymmetricPublicKey());
@@ -696,6 +706,9 @@ public class TestASymmetricEncryption {
 				Assert.assertTrue(algoLocal.verifyDistantMessage(password, VariousTests.salt, distantCrypt));
 				Assert.assertFalse(algoLocal.verifyDistantMessage(password, VariousTests.salt, falseMessage));
 				Assert.assertFalse(algoLocal.verifyDistantMessage(falsePassword, VariousTests.salt, distantCrypt));
+			}
+			finally {
+				kpd.clean();
 			}
 		}
 	}

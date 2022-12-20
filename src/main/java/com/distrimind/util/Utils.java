@@ -71,6 +71,7 @@ public class Utils {
 									.addItem(INTERNAL_CHANGE, "Fix spelling errors")
 									.addItem(BUG_FIX, "Fix issues with multi thread encryption and signature")
 									.addItem(SECURITY_FIX_LOW_SEVERITY, "Fix CodeQL error with RSA key size not checked.")
+									.addItem(INTERNAL_CHANGE, "Interface Cleanable do not inherit anymore the interface AutoCloseable")
 					)
 					.addDescription(
 							new Description(5, 24, 0, Version.Type.STABLE, 0, "2022-10-19")

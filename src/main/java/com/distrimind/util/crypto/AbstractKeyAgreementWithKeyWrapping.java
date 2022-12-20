@@ -130,13 +130,21 @@ public abstract class AbstractKeyAgreementWithKeyWrapping<PubKey extends IASymme
 					}
 				case 1:
 					try(RandomByteArrayOutputStream out=new RandomByteArrayOutputStream()) {
-						try (KeyWrapperAlgorithm kw = new KeyWrapperAlgorithm(aSymmetricKeyWrapperType, otherPublicKeyForEncryption, myKeyPairForSignature.getASymmetricPrivateKey())) {
+						KeyWrapperAlgorithm kw = new KeyWrapperAlgorithm(aSymmetricKeyWrapperType, otherPublicKeyForEncryption, myKeyPairForSignature.getASymmetricPrivateKey());
+						try {
 							out.writeWrappedData(kw.wrap(random, mySecretKey), false);
+						}
+						finally {
+							kw.clean();
 						}
 						if (mySecretKeyForSignature!=null)
 						{
-							try (KeyWrapperAlgorithm kw = new KeyWrapperAlgorithm(aSymmetricKeyWrapperType, otherPublicKeyForEncryption, myKeyPairForSignature.getASymmetricPrivateKey())) {
+							kw = new KeyWrapperAlgorithm(aSymmetricKeyWrapperType, otherPublicKeyForEncryption, myKeyPairForSignature.getASymmetricPrivateKey());
+							try  {
 								out.writeWrappedData(kw.wrap(random, mySecretKeyForSignature), false);
+							}
+							finally {
+								kw.clean();
 							}
 						}
 						out.flush();
@@ -197,15 +205,23 @@ public abstract class AbstractKeyAgreementWithKeyWrapping<PubKey extends IASymme
 				case 1:
 					try(RandomByteArrayInputStream in=new RandomByteArrayInputStream(data))
 					{
-						try (KeyWrapperAlgorithm kw = new KeyWrapperAlgorithm(aSymmetricKeyWrapperType, myKeyPairForEncryption.getASymmetricPrivateKey(), otherPublicKeyForSignature)) {
+						KeyWrapperAlgorithm kw = new KeyWrapperAlgorithm(aSymmetricKeyWrapperType, myKeyPairForEncryption.getASymmetricPrivateKey(), otherPublicKeyForSignature);
+						try  {
 							SymmetricSecretKey otherSecretKey = kw.unwrap(in.readWrappedEncryptedSymmetricSecretKey(false));
 							generatedSecretKey = SymmetricSecretKey.getDerivedKey(mySecretKey, otherSecretKey);
 						}
+						finally {
+							kw.clean();
+						}
 						if (mySecretKeyForSignature!=null)
 						{
-							try (KeyWrapperAlgorithm kw = new KeyWrapperAlgorithm(aSymmetricKeyWrapperType, myKeyPairForEncryption.getASymmetricPrivateKey(), otherPublicKeyForSignature)) {
+							kw = new KeyWrapperAlgorithm(aSymmetricKeyWrapperType, myKeyPairForEncryption.getASymmetricPrivateKey(), otherPublicKeyForSignature);
+							try {
 								SymmetricSecretKey otherSecretKey = kw.unwrap(in.readWrappedEncryptedSymmetricSecretKey(false));
 								generatedSecretKeyForSignature = SymmetricSecretKey.getDerivedKey(mySecretKeyForSignature, otherSecretKey);
+							}
+							finally {
+								kw.clean();
 							}
 						}
 					}

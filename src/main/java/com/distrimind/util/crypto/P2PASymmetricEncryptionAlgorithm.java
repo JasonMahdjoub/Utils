@@ -683,10 +683,6 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 		return p2pEncryption.isDestroyed();
 	}
 
-	@Override
-	public void close() {
-		p2pEncryption.close();
-	}
 
 	@Override
 	public void registerCleanerIfNotDone(Cleaner cleaner) {

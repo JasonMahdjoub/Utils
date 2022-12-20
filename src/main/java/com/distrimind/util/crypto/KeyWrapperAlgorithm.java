@@ -363,11 +363,15 @@ public class KeyWrapperAlgorithm extends MultiFormatProperties implements Secure
 			else {
 				int off=checkSignature(encryptedSecretKey.getBytes());
 				if (off>0) {
-					try(WrappedEncryptedSymmetricSecretKey e2 = new WrappedEncryptedSymmetricSecretKey(Arrays.copyOfRange(encryptedSecretKey.getBytes(), off, encryptedSecretKey.getBytes().length))) {
+					WrappedEncryptedSymmetricSecretKey e2 = new WrappedEncryptedSymmetricSecretKey(Arrays.copyOfRange(encryptedSecretKey.getBytes(), off, encryptedSecretKey.getBytes().length));
+					try {
 						encryptedSecretKey.getBytes();//gc delayed
 						SymmetricSecretKey symmetricSecretKey = symmetricKeyWrapperType.unwrapKey(finalizer.secretKeyForEncryption, e2);
 						e2.getBytes();//gc delayed
 						return symmetricSecretKey;
+					}
+					finally {
+						e2.clean();
 					}
 				}
 				else {
@@ -381,11 +385,15 @@ public class KeyWrapperAlgorithm extends MultiFormatProperties implements Secure
 		{
 			int off=checkSignature(encryptedSecretKey.getBytes());
 			if (off>0) {
-				try(WrappedEncryptedSymmetricSecretKey e2 = new WrappedEncryptedSymmetricSecretKey(Arrays.copyOfRange(encryptedSecretKey.getBytes(), off, encryptedSecretKey.getBytes().length)))
+				WrappedEncryptedSymmetricSecretKey e2 = new WrappedEncryptedSymmetricSecretKey(Arrays.copyOfRange(encryptedSecretKey.getBytes(), off, encryptedSecretKey.getBytes().length));
+				try
 				{
 					SymmetricSecretKey res= aSymmetricKeyWrapperType.unwrapKey(finalizer.privateKeyForEncryption, e2);
 					e2.getBytes();//gc delayed
 					return res;
+				}
+				finally {
+					e2.clean();
 				}
 			}
 			else {
@@ -401,12 +409,20 @@ public class KeyWrapperAlgorithm extends MultiFormatProperties implements Secure
 	public WrappedEncryptedASymmetricPrivateKey wrap(AbstractSecureRandom random, IASymmetricPrivateKey privateKeyToWrap) throws IOException {
 		if (mode==ENCRYPTION_WITH_ASYMMETRIC_KEY_PAIR && finalizer.publicKeyForEncryption==null)
 			throw new IOException("Public key used for encryption is not available");
-		try (WrappedSecretData wsd=privateKeyToWrap.encode()){
-			try(AbstractEncryptionOutputAlgorithm cipher=(symmetricKeyWrapperType != null)?new SymmetricEncryptionAlgorithm(random, finalizer.secretKeyForEncryption, false):new ClientASymmetricEncryptionAlgorithm(random, finalizer.publicKeyForEncryption)) {
+		WrappedSecretData wsd=privateKeyToWrap.encode();
+		try{
+			AbstractEncryptionOutputAlgorithm cipher=(symmetricKeyWrapperType != null)?new SymmetricEncryptionAlgorithm(random, finalizer.secretKeyForEncryption, false):new ClientASymmetricEncryptionAlgorithm(random, finalizer.publicKeyForEncryption);
+			try {
 				WrappedEncryptedASymmetricPrivateKey res= signASymmetricPrivateKey(cipher.encode(wsd.getBytes()));
 				cipher.getBlockModeCounterBytes();
 				return res;
 			}
+			finally {
+				cipher.clean();
+			}
+		}
+		finally {
+			wsd.clean();
 		}
 	}
 	public IASymmetricPrivateKey unwrap(WrappedEncryptedASymmetricPrivateKeyString privateKeyToUnwrap) throws IOException {

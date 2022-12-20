@@ -419,7 +419,8 @@ public enum ASymmetricAuthenticatedSignatureType {
 		int maxSigSizeBits=0;
 		for (ASymmetricAuthenticatedSignatureType t : ASymmetricAuthenticatedSignatureType.values())
 		{
-			try(ASymmetricKeyPair kp=t.getKeyPairGenerator(SecureRandomType.DEFAULT.getSingleton(null)).generateKeyPair())
+			ASymmetricKeyPair kp=t.getKeyPairGenerator(SecureRandomType.DEFAULT.getSingleton(null)).generateKeyPair();
+			try
 			{
 				System.out.println(t+" : ");
 				System.out.println("\tPublic key size in bytes : "+kp.getASymmetricPublicKey().getKeyBytes().getBytes().length);
@@ -436,7 +437,9 @@ public enum ASymmetricAuthenticatedSignatureType {
 				}
 				System.out.println("\tSignature size in bits : "+maxSigLength);
 				maxSigSizeBits=Math.max(maxSigLength, maxSigSizeBits);
-
+			}
+			finally {
+				kp.clean();
 			}
 
 

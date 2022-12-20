@@ -27,8 +27,4 @@ public interface AutoZeroizable extends Zeroizable, Cleanable {
 	{
 		return isCleaned();
 	}
-	@Override
-	default void close() {
-		clean();
-	}
 }

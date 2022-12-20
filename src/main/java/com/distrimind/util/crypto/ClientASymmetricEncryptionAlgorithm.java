@@ -398,10 +398,6 @@ public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutpu
 		return client.isDestroyed();
 	}
 
-	@Override
-	public void close() {
-		client.close();
-	}
 
 	@Override
 	public void registerCleanerIfNotDone(Cleaner cleaner) {
