@@ -70,10 +70,10 @@ public abstract class DelegatedRandomInputStream extends RandomInputStream {
 	}
 
 
-	public DelegatedRandomInputStream(RandomInputStream in)  {
+	public DelegatedRandomInputStream(RandomInputStream in) throws IOException {
 		this(in, null, false);
 	}
-	DelegatedRandomInputStream(RandomInputStream in, PoolExecutor poolExecutor, boolean cloneArrays)  {
+	DelegatedRandomInputStream(RandomInputStream in, PoolExecutor poolExecutor, boolean cloneArrays) throws IOException {
 		if (poolExecutor!=null)
 		{
 			thread =new LC(poolExecutor, cloneArrays);
@@ -85,13 +85,20 @@ public abstract class DelegatedRandomInputStream extends RandomInputStream {
 		set(in);
 	}
 
-	protected void set(RandomInputStream in)
+	public boolean isMultiThreaded()
 	{
+		return thread!=null;
+	}
+
+	protected void set(RandomInputStream in) throws IOException {
 		if (in==null)
 			throw new NullPointerException();
+		this.flush();
 		this.in = in;
-		if (thread!=null)
+		if (thread!=null) {
 			thread.init();
+			assert !thread.isClosed();
+		}
 	}
 
 	@Override
@@ -224,8 +231,11 @@ public abstract class DelegatedRandomInputStream extends RandomInputStream {
 	}
 	@Override
 	public void flush() throws IOException {
-		in.flush();
-		if (thread !=null)
+		if (in!=null) {
+			in.flush();
+		}
+		if (thread != null)
 			thread.flush(false);
+
 	}
 }

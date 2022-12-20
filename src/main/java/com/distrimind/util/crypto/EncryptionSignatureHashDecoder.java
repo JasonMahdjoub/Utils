@@ -441,18 +441,25 @@ public class EncryptionSignatureHashDecoder {
 	}
 
 	private void freeAll() throws IOException {
-		if (checkerIn!=null)
-			checkerIn.set(EncryptionSignatureHashDecoder.nullRandomInputStream, symmetricChecker==null?asymmetricChecker:symmetricChecker);
-		if (hashIn!=null)
-			hashIn.set(EncryptionSignatureHashDecoder.nullRandomInputStream, digest==null?defaultMessageDigest:digest);
+		if (checkerIn!=null) {
+			checkerIn.set(EncryptionSignatureHashDecoder.nullRandomInputStream, symmetricChecker == null ? asymmetricChecker : symmetricChecker);
+		}
+		if (hashIn!=null) {
+			hashIn.set(EncryptionSignatureHashDecoder.nullRandomInputStream, digest == null ? defaultMessageDigest : digest);
+		}
+		randomByteArrayOutputStream.flush();
+		randomOutputStream.flush();
 		randomByteArrayOutputStream.init(emptyTab);
 		randomOutputStream.init(randomByteArrayOutputStream, 0);
 		freeLimitedRandomInputStream();
 	}
 	private void freeLimitedRandomInputStream() throws IOException {
 		changeCipherOfEncoder=false;
+		limitedRandomInputStream.flush();
 		limitedRandomInputStream.init(EncryptionSignatureHashDecoder.nullRandomInputStream, 0);
+		randomByteArrayInputStream.flush();
 		randomByteArrayInputStream.init(emptyTab);
+		limitedRandomInputStream2.flush();
 		limitedRandomInputStream2.init(randomByteArrayInputStream, 0 );
 	}
 
@@ -704,14 +711,15 @@ public class EncryptionSignatureHashDecoder {
 			RandomInputStream inputStream=originalInputStream;
 			if (digest!=null) {
 				digest.reset();
-				if (hashIn==null) {
+				if (hashIn==null || (cipher!=null && poolExecutor!=null)!=hashIn.isMultiThreaded()) {
 					if (cipher!=null && poolExecutor!=null)
 						hashIn = new HashRandomInputStream(inputStream, poolExecutor, false, digest);
 					else
 						hashIn = new HashRandomInputStream(inputStream, digest);
 				}
-				else
+				else {
 					hashIn.set(inputStream, digest);
+				}
 				inputStream = hashIn;
 			}
 			else if (symmetricChecker!=null)
@@ -720,7 +728,7 @@ public class EncryptionSignatureHashDecoder {
 				symmetricChecker.init(originalInputStream.readBytesArray(false, SymmetricAuthenticatedSignatureType.MAX_SYMMETRIC_SIGNATURE_SIZE));
 				if (positionOfRandomInputStreamAfterDecoding!=null)
 					positionOfRandomInputStreamAfterDecoding.set(originalInputStream.currentPosition());
-				if (checkerIn==null) {
+				if (checkerIn==null || (cipher!=null && poolExecutor!=null)!=checkerIn.isMultiThreaded()) {
 					if (cipher!=null && poolExecutor!=null)
 						checkerIn = new SignatureCheckerRandomInputStream(inputStream, poolExecutor, false, symmetricChecker);
 					else
@@ -736,7 +744,7 @@ public class EncryptionSignatureHashDecoder {
 				asymmetricChecker.init(originalInputStream.readBytesArray(false, ASymmetricAuthenticatedSignatureType.MAX_SIZE_IN_BYTES_OF_ASYMMETRIC_SIGNATURE));
 				if (positionOfRandomInputStreamAfterDecoding!=null)
 					positionOfRandomInputStreamAfterDecoding.set(originalInputStream.currentPosition());
-				if (checkerIn==null) {
+				if (checkerIn==null || (cipher!=null && poolExecutor!=null)!=checkerIn.isMultiThreaded()) {
 					if (cipher!=null && poolExecutor!=null)
 						checkerIn = new SignatureCheckerRandomInputStream(inputStream, poolExecutor, false, asymmetricChecker);
 					else
@@ -747,7 +755,7 @@ public class EncryptionSignatureHashDecoder {
 				inputStream=checkerIn;
 			} else if (positionOfRandomInputStreamAfterDecoding!=null)
 				positionOfRandomInputStreamAfterDecoding.set(EncryptionSignatureHashEncoder.headSize+dataLen);
-
+			assert !inputStream.isClosed();
 			try {
 				limitedRandomInputStream.init(inputStream, EncryptionSignatureHashEncoder.headSize, dataLen);
 			}
@@ -786,8 +794,6 @@ public class EncryptionSignatureHashDecoder {
 				try {
 					assert outputStream!=null;
 					res=cipherInputStream.transferTo(outputStream);
-					cipherInputStream.flush();
-
 				}
 				finally {
 					cipherInputStream.close();
@@ -838,7 +844,7 @@ public class EncryptionSignatureHashDecoder {
 				byte[] asymSign=null;
 				if (symmetricChecker!=null)
 				{
-					symSign=inputStream.readBytesArray(false, SymmetricAuthenticatedSignatureType.MAX_SYMMETRIC_SIGNATURE_SIZE);
+					symSign=originalInputStream.readBytesArray(false, SymmetricAuthenticatedSignatureType.MAX_SYMMETRIC_SIGNATURE_SIZE);
 					digest.reset();
 					digest.update(hash);
 					digest.update(symSign);
@@ -846,13 +852,13 @@ public class EncryptionSignatureHashDecoder {
 				}
 				if (asymmetricChecker!=null)
 				{
-					asymSign=inputStream.readBytesArray(false, ASymmetricAuthenticatedSignatureType.MAX_SIZE_IN_BYTES_OF_ASYMMETRIC_SIGNATURE);
+					asymSign=originalInputStream.readBytesArray(false, ASymmetricAuthenticatedSignatureType.MAX_SIZE_IN_BYTES_OF_ASYMMETRIC_SIGNATURE);
 					digest.reset();
 					digest.update(hash2);
 					digest.update(asymSign);
 					hash3=digest.digest();
 				}
-				byte[] hashToCheck=inputStream.readBytesArray(false, MessageDigestType.MAX_HASH_LENGTH_IN_BYTES);
+				byte[] hashToCheck=originalInputStream.readBytesArray(false, MessageDigestType.MAX_HASH_LENGTH_IN_BYTES);
 				if (positionOfRandomInputStreamAfterDecoding!=null)
 					positionOfRandomInputStreamAfterDecoding.set(originalInputStream.currentPosition());
 				if (!com.distrimind.bouncycastle.util.Arrays.constantTimeAreEqual(hash3, hashToCheck))

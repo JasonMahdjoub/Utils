@@ -433,6 +433,8 @@ public class EncryptionSignatureHashEncoder {
 		try
 		{
 			inputStream.transferTo(ros);
+			if (cipher!=null && poolExecutor!=null)
+				inputStream.flush();
 		}
 		finally {
 			ros.close();
@@ -597,7 +599,7 @@ public class EncryptionSignatureHashEncoder {
 					outputStream = originalOutputStream;
 				if (digest != null) {
 					digest.reset();
-					if (hashOut == null) {
+					if (hashOut == null || (cipher!=null && poolExecutor!=null)!=hashOut.isMultiThreaded()) {
 						if (cipher!=null && poolExecutor!=null)
 							hashOut = new HashRandomOutputStream(outputStream, poolExecutor, false, digest);
 						else
@@ -608,7 +610,7 @@ public class EncryptionSignatureHashEncoder {
 					outputStream = hashOut;
 				} else if (symmetricSigner != null) {
 					symmetricSigner.init();
-					if (signerOut == null) {
+					if (signerOut == null || (cipher!=null && poolExecutor!=null)!=signerOut.isMultiThreaded()) {
 						if (cipher!=null && poolExecutor!=null) {
 							signerOut = new SignerRandomOutputStream(outputStream, poolExecutor, false, symmetricSigner);
 						}
@@ -620,7 +622,7 @@ public class EncryptionSignatureHashEncoder {
 					outputStream = signerOut;
 				} else if (asymmetricSigner != null) {
 					asymmetricSigner.init();
-					if (signerOut == null)
+					if (signerOut == null || (cipher!=null && poolExecutor!=null)!=signerOut.isMultiThreaded())
 						if (cipher!=null && poolExecutor!=null) {
 							signerOut = new SignerRandomOutputStream(outputStream, poolExecutor, false, asymmetricSigner);
 						}
@@ -748,10 +750,12 @@ public class EncryptionSignatureHashEncoder {
 		public void close() throws IOException {
 			if (closed)
 				return;
-			dataOutputStream.flush();
+
 			if (cipher!=null) {
 				dataOutputStream.close();
 			}
+			else
+				dataOutputStream.flush();
 
 			dataOutputStream=null;
 			if (inputStreamLength<0)

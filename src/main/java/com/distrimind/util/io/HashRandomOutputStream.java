@@ -48,19 +48,18 @@ import java.io.IOException;
 public class HashRandomOutputStream extends DelegatedRandomOutputStream{
 	private AbstractMessageDigest messageDigest;
 
-	public HashRandomOutputStream(RandomOutputStream out, AbstractMessageDigest messageDigest) {
+	public HashRandomOutputStream(RandomOutputStream out, AbstractMessageDigest messageDigest) throws IOException {
 		this(out, null, false, messageDigest);
 	}
 
-	public HashRandomOutputStream(RandomOutputStream out, PoolExecutor pool, boolean cloneGivenArrays, AbstractMessageDigest messageDigest) {
+	public HashRandomOutputStream(RandomOutputStream out, PoolExecutor pool, boolean cloneGivenArrays, AbstractMessageDigest messageDigest) throws IOException {
 		super(out, pool, cloneGivenArrays);
 		if (messageDigest==null)
 			throw new NullPointerException();
 		this.messageDigest=messageDigest;
 	}
 
-	public void set(RandomOutputStream out, AbstractMessageDigest messageDigest)
-	{
+	public void set(RandomOutputStream out, AbstractMessageDigest messageDigest) throws IOException {
 		set(out);
 		if (messageDigest==null)
 			throw new NullPointerException();

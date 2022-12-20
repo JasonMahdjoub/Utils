@@ -346,9 +346,20 @@ public abstract class AbstractEncryptionOutputAlgorithm implements AutoZeroizabl
 				}
 				else {
 					byte[] buffer=finalizer.switchBuffer();
-					int s = cipher.doFinal(buffer, 0);
+					int s;
+					try {
+						 s = cipher.doFinal(buffer, 0);
+
+					}
+					catch (IOException e)
+					{
+						finalizer.switchBuffer();
+						throw e;
+					}
 					if (s > 0)
 						os.write(buffer, 0, s);
+					else
+						finalizer.switchBuffer();
 				}
 				doFinal = false;
 			}
@@ -411,13 +422,23 @@ public abstract class AbstractEncryptionOutputAlgorithm implements AutoZeroizabl
 				}
 				else
 					buffer=finalizer.switchBuffer();
-				int w=cipher.update(b, off, s, buffer, 0);
+				int w;
+				try {
+					w = cipher.update(b, off, s, buffer, 0);
+				}
+				catch (IOException e)
+				{
+					finalizer.switchBuffer();
+					throw e;
+				}
 				doFinal=true;
 				initPossible=true;
 				currentPos+=s;
 				if (w>0) {
 					os.write(buffer, 0, w);
 				}
+				else
+					finalizer.switchBuffer();
 
 				len-=s;
 				off+=s;
@@ -435,12 +456,22 @@ public abstract class AbstractEncryptionOutputAlgorithm implements AutoZeroizabl
 			one[0]=(byte)b;
 			++currentPos;
 			byte[] buffer=finalizer.switchBuffer();
-			int w=cipher.update(one, 0, 1, buffer, 0);
+			int w;
+			try {
+				w = cipher.update(one, 0, 1, buffer, 0);
+			}
+			catch (IOException e)
+			{
+				finalizer.switchBuffer();
+				throw e;
+			}
 			doFinal=true;
 			initPossible=true;
 			if (w>0) {
 				os.write(buffer, 0, w);
 			}
+			else
+				finalizer.switchBuffer();
 			checkDoFinal(false);
 		}
 

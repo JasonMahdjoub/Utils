@@ -49,17 +49,16 @@ public class SignerRandomOutputStream extends DelegatedRandomOutputStream{
 	private AbstractAuthenticatedSignerAlgorithm signer;
 
 
-	public SignerRandomOutputStream(RandomOutputStream out, AbstractAuthenticatedSignerAlgorithm signer) {
+	public SignerRandomOutputStream(RandomOutputStream out, AbstractAuthenticatedSignerAlgorithm signer) throws IOException {
 		this(out, null, false, signer);
 	}
-	public SignerRandomOutputStream(RandomOutputStream out, PoolExecutor poolExecutor, boolean cloneGivenArrays, AbstractAuthenticatedSignerAlgorithm signer) {
+	public SignerRandomOutputStream(RandomOutputStream out, PoolExecutor poolExecutor, boolean cloneGivenArrays, AbstractAuthenticatedSignerAlgorithm signer) throws IOException {
 		super(out, poolExecutor, cloneGivenArrays);
 		if (signer==null)
 			throw new NullPointerException();
 		this.signer=signer;
 	}
-	public void set(RandomOutputStream out, AbstractAuthenticatedSignerAlgorithm signer)
-	{
+	public void set(RandomOutputStream out, AbstractAuthenticatedSignerAlgorithm signer) throws IOException {
 		set(out);
 		if (signer==null)
 			throw new NullPointerException();

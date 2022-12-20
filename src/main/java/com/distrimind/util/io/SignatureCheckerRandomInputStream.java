@@ -48,19 +48,18 @@ import java.io.IOException;
 public class SignatureCheckerRandomInputStream extends DelegatedRandomInputStream{
 
 	private AbstractAuthenticatedCheckerAlgorithm checker;
-	public SignatureCheckerRandomInputStream(RandomInputStream in, AbstractAuthenticatedCheckerAlgorithm checker) {
+	public SignatureCheckerRandomInputStream(RandomInputStream in, AbstractAuthenticatedCheckerAlgorithm checker) throws IOException {
 		this(in, null,false, checker);
 	}
 
-	public SignatureCheckerRandomInputStream(RandomInputStream in, PoolExecutor poolExecutor, boolean cloneGivenArrays, AbstractAuthenticatedCheckerAlgorithm checker) {
+	public SignatureCheckerRandomInputStream(RandomInputStream in, PoolExecutor poolExecutor, boolean cloneGivenArrays, AbstractAuthenticatedCheckerAlgorithm checker) throws IOException {
 		super(in, poolExecutor, cloneGivenArrays);
 		if (checker==null)
 			throw new NullPointerException();
 		this.checker=checker;
 	}
 
-	public void set(RandomInputStream in, AbstractAuthenticatedCheckerAlgorithm checker)
-	{
+	public void set(RandomInputStream in, AbstractAuthenticatedCheckerAlgorithm checker) throws IOException {
 		set(in);
 		if (checker==null)
 			throw new NullPointerException();

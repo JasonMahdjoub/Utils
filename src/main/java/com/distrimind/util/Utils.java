@@ -69,6 +69,7 @@ public class Utils {
 					.addDescription(
 							new Description(5, 24, 1, Version.Type.STABLE, 0, "2022-12-15")
 									.addItem(INTERNAL_CHANGE, "Fix spelling errors")
+									.addItem(INTERNAL_CHANGE, "Fix issues with multi thread encryption and signature")
 					)
 					.addDescription(
 							new Description(5, 24, 0, Version.Type.STABLE, 0, "2022-10-19")

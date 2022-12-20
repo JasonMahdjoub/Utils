@@ -38,6 +38,8 @@ knowledge of the CeCILL-C license and that you accept its terms.
 import com.distrimind.util.concurrent.PoolExecutor;
 import com.distrimind.util.crypto.AbstractMessageDigest;
 
+import java.io.IOException;
+
 /**
  * @author Jason Mahdjoub
  * @version 1.0
@@ -45,19 +47,18 @@ import com.distrimind.util.crypto.AbstractMessageDigest;
  */
 public class HashRandomInputStream extends DelegatedRandomInputStream{
 	private AbstractMessageDigest messageDigest;
-	public HashRandomInputStream(RandomInputStream in, AbstractMessageDigest messageDigest) {
+	public HashRandomInputStream(RandomInputStream in, AbstractMessageDigest messageDigest) throws IOException {
 		this(in, null, false, messageDigest);
 	}
 
-	public HashRandomInputStream(RandomInputStream in, PoolExecutor poolExecutor, boolean cloneGivenArrays, AbstractMessageDigest messageDigest) {
+	public HashRandomInputStream(RandomInputStream in, PoolExecutor poolExecutor, boolean cloneGivenArrays, AbstractMessageDigest messageDigest) throws IOException {
 		super(in, poolExecutor, cloneGivenArrays);
 		if (messageDigest==null)
 			throw new NullPointerException();
 		this.messageDigest=messageDigest;
 	}
 
-	public void set(RandomInputStream in, AbstractMessageDigest messageDigest)
-	{
+	public void set(RandomInputStream in, AbstractMessageDigest messageDigest) throws IOException {
 		set(in);
 		if (messageDigest==null)
 			throw new NullPointerException();

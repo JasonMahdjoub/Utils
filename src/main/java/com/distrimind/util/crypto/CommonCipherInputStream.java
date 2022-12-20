@@ -288,11 +288,19 @@ abstract class CommonCipherInputStream extends RandomInputStream {
 				byte[] buffer= finalizer.switchBuffer();
 				int s3 = Math.min(s, buffer.length);
 				if (s3>0) {
-					s2 = is.read(buffer, 0, s3);
+					try {
+						s2 = is.read(buffer, 0, s3);
+					}
+					catch (IOException e)
+					{
+						finalizer.switchBuffer();
+						throw e;
+					}
 				}
 
 				if (s2 == -1) {
 					//length=is.currentPosition();
+					finalizer.switchBuffer();
 					checkDoFinal(true);
 					s = readOutputBuffer(b, off, len);
 					total += s;
@@ -308,14 +316,25 @@ abstract class CommonCipherInputStream extends RandomInputStream {
 				posEncrypted += s2;
 
 				if (s2 > 0) {
-					int w = cipher.update(buffer, 0, s2, b, off);
-					posPlainText += w;
-					total += w;
-					off += w;
-					len -= w;
-					doFinal = true;
-					initPossible = true;
+					try {
+						int w = cipher.update(buffer, 0, s2, b, off);
+
+
+						posPlainText += w;
+						total += w;
+						off += w;
+						len -= w;
+						doFinal = true;
+						initPossible = true;
+					}
+					catch (IOException e)
+					{
+						finalizer.switchBuffer();
+						throw e;
+					}
 				}
+				else
+					finalizer.switchBuffer();
 
 				s -= s2;
 
@@ -417,6 +436,7 @@ abstract class CommonCipherInputStream extends RandomInputStream {
 	public void close() throws IOException {
 		if (closed)
 			return;
+		flush();
 		if (replaceMainKeyWhenClosingStream && symmetricEncryptionAlgorithm!=null)
 			symmetricEncryptionAlgorithm.replaceMainKeyByLastDerivedSecretKey(wrappedIVAndSecretKey);
 		wrappedIVAndSecretKey=null;
