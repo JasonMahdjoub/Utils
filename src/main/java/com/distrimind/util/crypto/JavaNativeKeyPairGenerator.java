@@ -138,8 +138,11 @@ public final class JavaNativeKeyPairGenerator extends AbstractKeyPairGenerator<A
 			}
 			else if ((signatureType != null && signatureType.getAlgorithmParameterSpecForKeyGenerator() == null) || (encryptionType!=null))
 				if ((signatureType!=null && signatureType.getKeyGeneratorAlgorithmName().equals(ASymmetricAuthenticatedSignatureType.SHA256withRSA.getKeyGeneratorAlgorithmName()))
-					|| encryptionType!=null)
+					|| encryptionType!=null) {
+					if (keySize < 2048)
+						throw new IOException("This key size (" + keySize + ") is less than the recommended key size of 2048 bits");
 					keyPairGenerator.initialize(new RSAKeyGenParameterSpec(keySize, RSAKeyGenParameterSpec.F4), _random.getJavaNativeSecureRandom());
+				}
 				else
 					throw new IllegalAccessError();
 			else if (signatureType!=null){
