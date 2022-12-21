@@ -1,8 +1,8 @@
 package com.distrimind.util.crypto.fortuna;
 
 
-import com.distrimind.util.OS;
-import com.distrimind.util.OSVersion;
+import com.distrimind.util.systeminfo.OS;
+import com.distrimind.util.systeminfo.OSVersion;
 import com.distrimind.util.concurrent.ScheduledPoolExecutor;
 import com.distrimind.util.crypto.AbstractSecureRandom;
 import com.distrimind.util.crypto.SecureRandomType;

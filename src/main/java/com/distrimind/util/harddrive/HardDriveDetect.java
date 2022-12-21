@@ -42,8 +42,8 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
-import com.distrimind.util.OS;
-import com.distrimind.util.OSVersion;
+import com.distrimind.util.systeminfo.OS;
+import com.distrimind.util.systeminfo.OSVersion;
 
 
 /**

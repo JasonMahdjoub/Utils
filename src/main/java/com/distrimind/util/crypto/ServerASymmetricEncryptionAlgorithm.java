@@ -571,18 +571,18 @@ public class ServerASymmetricEncryptionAlgorithm implements IEncryptionInputAlgo
 	}
 
 	@Override
-	public boolean isPowerMonitoringSideChannelAttackPossible() {
-		return server.isPowerMonitoringSideChannelAttackPossible();
+	public boolean isPowerMonitoringSideChannelAttackMitigationActivated() {
+		return server.isPowerMonitoringSideChannelAttackMitigationActivated();
 	}
 
 	@Override
-	public boolean isFrequencySideChannelAttackPossible() {
-		return server.isFrequencySideChannelAttackPossible();
+	public boolean isFrequencySideChannelAttackMitigationActivated() {
+		return server.isFrequencySideChannelAttackMitigationActivated();
 	}
 
 	@Override
-	public boolean isTimingSideChannelAttackPossible() {
-		return server.isTimingSideChannelAttackPossible();
+	public boolean isTimingSideChannelAttackMitigationActivated() {
+		return server.isTimingSideChannelAttackMitigationActivated();
 	}
 
 	@Override

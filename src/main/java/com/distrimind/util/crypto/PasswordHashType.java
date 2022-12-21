@@ -43,7 +43,7 @@ import java.util.Arrays;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 
-import com.distrimind.util.OSVersion;
+import com.distrimind.util.systeminfo.OSVersion;
 import com.distrimind.util.io.Integrity;
 import com.distrimind.util.io.MessageExternalizationException;
 import com.distrimind.bcfips.crypto.PasswordBasedDeriver;
@@ -55,7 +55,7 @@ import com.distrimind.bouncycastle.crypto.generators.BCrypt;
 import com.distrimind.bouncycastle.crypto.generators.SCrypt;
 
 import com.distrimind.util.Bits;
-import com.distrimind.util.OS;
+import com.distrimind.util.systeminfo.OS;
 import com.distrimind.util.sizeof.ObjectSizer;
 
 

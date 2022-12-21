@@ -35,8 +35,8 @@ knowledge of the CeCILL-C license and that you accept its terms.
 
 package com.distrimind.util.harddrive;
 
-import com.distrimind.util.OS;
-import com.distrimind.util.OSVersion;
+import com.distrimind.util.systeminfo.OS;
+import com.distrimind.util.systeminfo.OSVersion;
 import com.distrimind.util.io.*;
 
 import java.io.File;

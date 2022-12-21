@@ -38,19 +38,19 @@ import com.distrimind.bcfips.crypto.Algorithm;
 import com.distrimind.bcfips.crypto.general.ChaCha20;
 import com.distrimind.bcfips.crypto.general.Serpent;
 import com.distrimind.bcfips.crypto.general.Twofish;
-import com.distrimind.util.OS;
-import com.distrimind.util.OSVersion;
+import com.distrimind.util.systeminfo.OS;
+import com.distrimind.util.systeminfo.OSVersion;
 import com.distrimind.util.data_buffers.WrappedSecretData;
+import com.distrimind.util.systeminfo.State;
+import com.distrimind.util.systeminfo.SystemInfo;
 
 import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.IOException;
-import java.security.AccessController;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
-import java.security.PrivilegedAction;
 import java.util.Arrays;
 
 /**
@@ -111,12 +111,53 @@ public enum SymmetricEncryptionType {
 	private static final int maxPlainTextSizeForEncodingWithSideChannelMitigation=(int)((1L<<17)-1024L);
 
 	public int getMaxPlainTextSizeForEncoding() {
-		if (isTimingAttackPossibleWithSomeImplementations()
-		|| isFrequencyAttackPossible()
-		|| isPowerMonitoringAttackPossible())
+		if (isSideChannelMitigationEnabled())
 			return maxPlainTextSizeForEncodingWithSideChannelMitigation;
 		else
 			return maxPlainTextSizeForEncoding;
+	}
+
+	boolean isSideChannelMitigationEnabled()
+	{
+		return isPowerMonitoringAttackMitigationActivated() || isFrequencyAttackMitigationActivated() || isTimingAttackMitigationActivated();
+	}
+
+	boolean isTimingAttackMitigationActivated()
+	{
+		State state=SystemInfo.getInstance().getTimingAttackMitigationState();
+		if (state==State.ENABLED)
+			return true;
+		else if (state==State.DISABLED)
+			return false;
+		else
+		{
+			return isTimingAttackPossibleWithSomeImplementations() && SystemInfo.getInstance().isTimingAttackPossibleIntoCurrentCPU();
+		}
+	}
+	boolean isFrequencyAttackMitigationActivated()
+	{
+		State state=SystemInfo.getInstance().getFrequencyAttackMitigationState();
+		if (state==State.ENABLED)
+			return true;
+		else if (state==State.DISABLED)
+			return false;
+		else
+		{
+			return isFrequencyAttackPossible() && SystemInfo.getInstance().isFrequencyAttackPossibleIntoCurrentCPU();
+		}
+	}
+
+	boolean isPowerMonitoringAttackMitigationActivated()
+	{
+		State state=SystemInfo.getInstance().getPowerMonitoringAttackMitigationState();
+		if (state==State.ENABLED)
+			return true;
+		else if (state==State.DISABLED)
+			return false;
+		else
+		{
+			return isPowerMonitoringAttackPossible() && SystemInfo.getInstance().isPowerMonitoringAttackPossibleIntoCurrentCPU();
+		}
 	}
 
 	static Object decodeGnuSecretKey(byte[] encodedSecretKey, String algorithmName) {
@@ -169,7 +210,7 @@ public enum SymmetricEncryptionType {
 	
 	static byte[] encodeSecretKey(final com.distrimind.bcfips.crypto.SymmetricSecretKey key)
 	{
-		return AccessController.doPrivileged((PrivilegedAction<byte[]>) key::getKeyBytes);
+		return key.getKeyBytes();
 	}
 
 	static SymmetricEncryptionType valueOf(int ordinal) throws IllegalArgumentException {

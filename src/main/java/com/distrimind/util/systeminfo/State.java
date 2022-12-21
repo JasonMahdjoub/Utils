@@ -1,10 +1,12 @@
+package com.distrimind.util.systeminfo;
 /*
-Copyright or © or Corp. Jason Mahdjoub (04/02/2016)
+Copyright or © or Corp. Jason Mahdjoub (01/04/2013)
 
 jason.mahdjoub@distri-mind.fr
 
-This software (Utils) is a computer program whose purpose is to give several kind of tools for developers 
-(ciphers, XML readers, decentralized id generators, etc.).
+This software (Object Oriented Database (OOD)) is a computer program 
+whose purpose is to manage a local database with the object paradigm 
+and the java language 
 
 This software is governed by the CeCILL-C license under French law and
 abiding by the rules of distribution of free software.  You can  use, 
@@ -32,39 +34,14 @@ same conditions as regards security.
 The fact that you are presently reading this means that you have had
 knowledge of the CeCILL-C license and that you accept its terms.
  */
-package com.distrimind.util.crypto;
-
-import com.distrimind.util.systeminfo.OS;
-import com.distrimind.util.systeminfo.OSVersion;
-
-import java.security.AccessController;
-import java.security.PrivilegedAction;
-import java.security.Provider;
 
 /**
- * 
  * @author Jason Mahdjoub
  * @version 1.0
- * @since Utils 3.2.0
+ * @since Utils 5.24.1
  */
-class UtilsSecurityProvider extends Provider{
-
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -3275390505194228559L;
-	
-	static final String providerName=UtilsSecurityProvider.class.getSimpleName();
-	
-	UtilsSecurityProvider() {
-		super(providerName, 1.0, "Provider destined to override default java secure random by a non native blocking secure random.");
-		if (OSVersion.getCurrentOSVersion().getOS()!= OS.ANDROID) {
-			AccessController.doPrivileged((PrivilegedAction<Void>) () -> {
-				put("SecureRandom.DEFAULT", NativeNonBlockingSecureRandom.Spi.class.getName());
-				return null;
-			});
-		}
-	}
-
-	
+public enum State {
+	ENABLED,
+	DISABLED,
+	DEFAULT
 }

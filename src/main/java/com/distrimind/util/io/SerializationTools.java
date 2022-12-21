@@ -45,6 +45,8 @@ import com.distrimind.util.data_buffers.WrappedSecretData;
 import com.distrimind.util.data_buffers.WrappedSecretString;
 import com.distrimind.util.data_buffers.WrappedString;
 import com.distrimind.util.harddrive.FilePermissions;
+import com.distrimind.util.systeminfo.OS;
+import com.distrimind.util.systeminfo.OSVersion;
 
 import java.io.File;
 import java.io.IOException;

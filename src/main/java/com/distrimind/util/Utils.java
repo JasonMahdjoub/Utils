@@ -72,6 +72,8 @@ public class Utils {
 									.addItem(BUG_FIX, "Fix issues with multi thread encryption and signature")
 									.addItem(SECURITY_FIX_LOW_SEVERITY, "Fix CodeQL error with RSA key size not checked.")
 									.addItem(INTERNAL_CHANGE, "Interface Cleanable do not inherit anymore the interface AutoCloseable")
+									.addItem(NEW_FEATURE, "Add class SystemInfo")
+									.addItem(NEW_FEATURE, "Enable or disable side channel attacks accord to CPU type and permit to manually disable/enable mitigation through system properties")
 					)
 					.addDescription(
 							new Description(5, 24, 0, Version.Type.STABLE, 0, "2022-10-19")

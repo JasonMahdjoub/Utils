@@ -33,7 +33,9 @@ The fact that you are presently reading this means that you have had
 knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-package com.distrimind.util;
+package com.distrimind.util.systeminfo;
+
+import com.distrimind.util.UtilClassLoader;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -44,7 +46,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import static com.distrimind.util.OSVersion.getCurrentOSVersion;
+import static com.distrimind.util.systeminfo.OSVersion.getCurrentOSVersion;
 
 /**
  * Set of functions giving information about the current running OS

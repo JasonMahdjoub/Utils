@@ -35,8 +35,8 @@ The fact that you are presently reading this means that you have had
 knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-import com.distrimind.util.OS;
-import com.distrimind.util.OSVersion;
+import com.distrimind.util.systeminfo.OS;
+import com.distrimind.util.systeminfo.OSVersion;
 import com.distrimind.util.UtilClassLoader;
 
 import java.io.*;

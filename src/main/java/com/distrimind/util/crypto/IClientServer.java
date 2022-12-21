@@ -35,6 +35,9 @@ The fact that you are presently reading this means that you have had
 knowledge of the CeCILL-C license and that you accept its terms.
  */
 
+import com.distrimind.util.systeminfo.State;
+import com.distrimind.util.systeminfo.SystemInfo;
+
 import java.io.IOException;
 
 /**
@@ -51,19 +54,43 @@ public interface IClientServer {
 	boolean isPostQuantumEncryption();
 	void checkKeysNotCleaned();
 
-	default boolean isPowerMonitoringSideChannelAttackPossible(){
-		return true;
+	default boolean isPowerMonitoringSideChannelAttackMitigationActivated(){
+		State state=SystemInfo.getInstance().getPowerMonitoringAttackMitigationState();
+		if (state==State.ENABLED)
+			return true;
+		else if (state==State.DISABLED)
+			return false;
+		else
+		{
+			return SystemInfo.getInstance().isPowerMonitoringAttackPossibleIntoCurrentCPU();
+		}
 	}
-	default boolean isFrequencySideChannelAttackPossible(){
-		return true;
+	default boolean isFrequencySideChannelAttackMitigationActivated(){
+		State state= SystemInfo.getInstance().getFrequencyAttackMitigationState();
+		if (state==State.ENABLED)
+			return true;
+		else if (state==State.DISABLED)
+			return false;
+		else
+		{
+			return SystemInfo.getInstance().isFrequencyAttackPossibleIntoCurrentCPU();
+		}
 	}
-	default boolean isTimingSideChannelAttackPossible()
+	default boolean isTimingSideChannelAttackMitigationActivated()
 	{
-		return true;
+		State state=SystemInfo.getInstance().getTimingAttackMitigationState();
+		if (state==State.ENABLED)
+			return true;
+		else if (state==State.DISABLED)
+			return false;
+		else
+		{
+			return SystemInfo.getInstance().isTimingAttackPossibleIntoCurrentCPU();
+		}
 	}
 	default boolean isUsingSideChannelMitigation()
 	{
-		return isPowerMonitoringSideChannelAttackPossible() || isFrequencySideChannelAttackPossible() || isTimingSideChannelAttackPossible();
+		return isPowerMonitoringSideChannelAttackMitigationActivated() || isFrequencySideChannelAttackMitigationActivated() || isTimingSideChannelAttackMitigationActivated();
 	}
 	int getIVSizeBytesWithExternalCounter();
 

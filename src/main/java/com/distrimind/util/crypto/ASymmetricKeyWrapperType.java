@@ -45,7 +45,7 @@ import javax.crypto.*;
 import javax.crypto.spec.OAEPParameterSpec;
 import javax.crypto.spec.PSource;
 
-import com.distrimind.util.OSVersion;
+import com.distrimind.util.systeminfo.OSVersion;
 import com.distrimind.util.data_buffers.WrappedData;
 import com.distrimind.util.data_buffers.WrappedSecretData;
 import com.distrimind.util.io.Integrity;
@@ -62,7 +62,7 @@ import com.distrimind.bcfips.crypto.fips.FipsRSA.OAEPParameters;
 import com.distrimind.bcfips.crypto.fips.FipsRSA.WrapParameters;
 
 import com.distrimind.util.Bits;
-import com.distrimind.util.OS;
+import com.distrimind.util.systeminfo.OS;
 
 
 /**

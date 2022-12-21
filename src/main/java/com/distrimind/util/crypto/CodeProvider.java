@@ -36,13 +36,13 @@ package com.distrimind.util.crypto;
 
 import java.security.*;
 
-import com.distrimind.util.OSVersion;
+import com.distrimind.util.systeminfo.OSVersion;
 import com.distrimind.bouncycastle.crypto.CryptoServicesRegistrar;
 import com.distrimind.bcfips.jcajce.provider.BouncyCastleFipsProvider;
 import com.distrimind.bouncycastle.jce.provider.BouncyCastleProvider;
 import com.distrimind.bouncycastle.pqc.jcajce.provider.BouncyCastlePQCProvider;
 
-import com.distrimind.util.OS;
+import com.distrimind.util.systeminfo.OS;
 
 /**
  * List of asymmetric encryption algorithms

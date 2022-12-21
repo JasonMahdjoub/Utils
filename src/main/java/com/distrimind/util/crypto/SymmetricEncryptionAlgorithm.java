@@ -464,18 +464,18 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 
 	}
 	@Override
-	public boolean isPowerMonitoringSideChannelAttackPossible() {
-		return mainKey.getEncryptionAlgorithmType().isPowerMonitoringAttackPossible();
+	public boolean isPowerMonitoringSideChannelAttackMitigationActivated() {
+		return mainKey.getEncryptionAlgorithmType().isPowerMonitoringAttackMitigationActivated();
 	}
 
 	@Override
-	public boolean isTimingSideChannelAttackPossible() {
-		return mainKey.getEncryptionAlgorithmType().isTimingAttackPossibleIntoThisMachine();
+	public boolean isTimingSideChannelAttackMitigationActivated() {
+		return mainKey.getEncryptionAlgorithmType().isTimingAttackMitigationActivated();
 	}
 
 	@Override
-	public boolean isFrequencySideChannelAttackPossible() {
-		return mainKey.getEncryptionAlgorithmType().isFrequencyAttackPossible();
+	public boolean isFrequencySideChannelAttackMitigationActivated() {
+		return mainKey.getEncryptionAlgorithmType().isFrequencyAttackMitigationActivated();
 	}
 
 

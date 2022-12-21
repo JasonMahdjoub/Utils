@@ -32,7 +32,9 @@ same conditions as regards security.
 The fact that you are presently reading this means that you have had
 knowledge of the CeCILL-C license and that you accept its terms.
  */
-package com.distrimind.util;
+package com.distrimind.util.systeminfo;
+
+import com.distrimind.util.UtilClassLoader;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -148,7 +150,7 @@ public enum OSVersion {
     private static int getAndroidVersionInt()
     {
         try {
-            Class<?> versionClass=UtilClassLoader.getLoader().loadClass("android.os.Build$VERSION");
+            Class<?> versionClass= UtilClassLoader.getLoader().loadClass("android.os.Build$VERSION");
             return (int)versionClass.getDeclaredField("SDK_INT").get(null);
         } catch (ClassNotFoundException | IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException e) {
             return 0;

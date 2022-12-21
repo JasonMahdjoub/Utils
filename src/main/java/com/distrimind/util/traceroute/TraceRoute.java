@@ -40,8 +40,8 @@ import java.net.UnknownHostException;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
-import com.distrimind.util.OS;
-import com.distrimind.util.OSVersion;
+import com.distrimind.util.systeminfo.OS;
+import com.distrimind.util.systeminfo.OSVersion;
 
 /**
  * Class that enables a trace route considering an {@link InetAddress},

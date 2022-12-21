@@ -39,7 +39,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.NetworkInterface;
 
-import com.distrimind.util.OSVersion;
+import com.distrimind.util.systeminfo.OSVersion;
 import com.distrimind.util.Utils;
 
 /**

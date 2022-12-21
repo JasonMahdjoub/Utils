@@ -312,18 +312,18 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 	}
 
 	@Override
-	public boolean isPowerMonitoringSideChannelAttackPossible() {
-		return p2pEncryption.isPowerMonitoringSideChannelAttackPossible();
+	public boolean isPowerMonitoringSideChannelAttackMitigationActivated() {
+		return p2pEncryption.isPowerMonitoringSideChannelAttackMitigationActivated();
 	}
 
 	@Override
-	public boolean isTimingSideChannelAttackPossible() {
-		return p2pEncryption.isTimingSideChannelAttackPossible();
+	public boolean isTimingSideChannelAttackMitigationActivated() {
+		return p2pEncryption.isTimingSideChannelAttackMitigationActivated();
 	}
 
 	@Override
-	public boolean isFrequencySideChannelAttackPossible() {
-		return p2pEncryption.isFrequencySideChannelAttackPossible();
+	public boolean isFrequencySideChannelAttackMitigationActivated() {
+		return p2pEncryption.isFrequencySideChannelAttackMitigationActivated();
 	}
 
 
@@ -533,18 +533,18 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 		}
 
 		@Override
-		public boolean isPowerMonitoringSideChannelAttackPossible() {
-			return nonPQCEncryption.isPowerMonitoringSideChannelAttackPossible() || PQCEncryption.isPowerMonitoringSideChannelAttackPossible();
+		public boolean isPowerMonitoringSideChannelAttackMitigationActivated() {
+			return nonPQCEncryption.isPowerMonitoringSideChannelAttackMitigationActivated() || PQCEncryption.isPowerMonitoringSideChannelAttackMitigationActivated();
 		}
 
 		@Override
-		public boolean isTimingSideChannelAttackPossible() {
-			return nonPQCEncryption.isTimingSideChannelAttackPossible() || PQCEncryption.isTimingSideChannelAttackPossible();
+		public boolean isTimingSideChannelAttackMitigationActivated() {
+			return nonPQCEncryption.isTimingSideChannelAttackMitigationActivated() || PQCEncryption.isTimingSideChannelAttackMitigationActivated();
 		}
 
 		@Override
-		public boolean isFrequencySideChannelAttackPossible() {
-			return nonPQCEncryption.isFrequencySideChannelAttackPossible() || PQCEncryption.isFrequencySideChannelAttackPossible();
+		public boolean isFrequencySideChannelAttackMitigationActivated() {
+			return nonPQCEncryption.isFrequencySideChannelAttackMitigationActivated() || PQCEncryption.isFrequencySideChannelAttackMitigationActivated();
 		}
 
 
@@ -771,17 +771,17 @@ public class P2PASymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgori
 		}
 
 		@Override
-		public boolean isPowerMonitoringSideChannelAttackPossible() {
+		public boolean isPowerMonitoringSideChannelAttackMitigationActivated() {
 			return true;
 		}
 
 		@Override
-		public boolean isTimingSideChannelAttackPossible() {
+		public boolean isTimingSideChannelAttackMitigationActivated() {
 			return true;
 		}
 
 		@Override
-		public boolean isFrequencySideChannelAttackPossible() {
+		public boolean isFrequencySideChannelAttackMitigationActivated() {
 			return true;
 		}
 

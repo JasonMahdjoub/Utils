@@ -103,18 +103,18 @@ public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutpu
 		}
 
 		@Override
-		public boolean isPowerMonitoringSideChannelAttackPossible() {
-			return nonPQCEncryption.isPowerMonitoringSideChannelAttackPossible() || PQCEncryption.isPowerMonitoringSideChannelAttackPossible();
+		public boolean isPowerMonitoringSideChannelAttackMitigationActivated() {
+			return nonPQCEncryption.isPowerMonitoringSideChannelAttackMitigationActivated() || PQCEncryption.isPowerMonitoringSideChannelAttackMitigationActivated();
 		}
 
 		@Override
-		public boolean isTimingSideChannelAttackPossible() {
-			return nonPQCEncryption.isTimingSideChannelAttackPossible() || PQCEncryption.isTimingSideChannelAttackPossible();
+		public boolean isTimingSideChannelAttackMitigationActivated() {
+			return nonPQCEncryption.isTimingSideChannelAttackMitigationActivated() || PQCEncryption.isTimingSideChannelAttackMitigationActivated();
 		}
 
 		@Override
-		public boolean isFrequencySideChannelAttackPossible() {
-			return nonPQCEncryption.isFrequencySideChannelAttackPossible() || PQCEncryption.isFrequencySideChannelAttackPossible();
+		public boolean isFrequencySideChannelAttackMitigationActivated() {
+			return nonPQCEncryption.isFrequencySideChannelAttackMitigationActivated() || PQCEncryption.isFrequencySideChannelAttackMitigationActivated();
 		}
 
 		@Override
@@ -294,18 +294,18 @@ public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutpu
 	}
 
 	@Override
-	public boolean isPowerMonitoringSideChannelAttackPossible() {
-		return this.client.isPowerMonitoringSideChannelAttackPossible();
+	public boolean isPowerMonitoringSideChannelAttackMitigationActivated() {
+		return this.client.isPowerMonitoringSideChannelAttackMitigationActivated();
 	}
 
 	@Override
-	public boolean isTimingSideChannelAttackPossible() {
-		return client.isTimingSideChannelAttackPossible();
+	public boolean isTimingSideChannelAttackMitigationActivated() {
+		return client.isTimingSideChannelAttackMitigationActivated();
 	}
 
 	@Override
-	public boolean isFrequencySideChannelAttackPossible() {
-		return client.isFrequencySideChannelAttackPossible();
+	public boolean isFrequencySideChannelAttackMitigationActivated() {
+		return client.isFrequencySideChannelAttackMitigationActivated();
 	}
 
 
@@ -479,20 +479,8 @@ public class ClientASymmetricEncryptionAlgorithm extends AbstractEncryptionOutpu
 			this.initCipherForEncryption(cipher);
 		}
 
-		@Override
-		public boolean isPowerMonitoringSideChannelAttackPossible() {
-			return true;
-		}
 
-		@Override
-		public boolean isTimingSideChannelAttackPossible() {
-			return true;
-		}
 
-		@Override
-		public boolean isFrequencySideChannelAttackPossible() {
-			return true;
-		}
 
 		@Override
 		public AbstractCipher getCipherInstance() throws IOException {

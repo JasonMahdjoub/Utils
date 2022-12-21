@@ -34,21 +34,6 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
-import com.distrimind.util.OS;
-import com.distrimind.util.Timer;
-import com.distrimind.util.concurrent.PoolExecutor;
-import com.distrimind.util.io.LimitedRandomInputStream;
-import com.distrimind.util.io.RandomByteArrayInputStream;
-import com.distrimind.util.io.RandomByteArrayOutputStream;
-import org.testng.annotations.DataProvider;
-
-import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.util.ArrayList;
-import java.util.Random;
-import java.util.concurrent.TimeUnit;
-
 
 /**
  * Set of functions giving information about the current running OS

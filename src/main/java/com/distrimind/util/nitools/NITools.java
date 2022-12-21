@@ -40,8 +40,8 @@ import java.net.SocketException;
 import java.util.Enumeration;
 import java.util.concurrent.atomic.AtomicReference;
 
-import com.distrimind.util.OS;
-import com.distrimind.util.OSVersion;
+import com.distrimind.util.systeminfo.OS;
+import com.distrimind.util.systeminfo.OSVersion;
 
 /**
  * Class that gives tools for network interfaces, independently of current OS

@@ -37,8 +37,8 @@ package com.distrimind.util.crypto;
 import com.distrimind.bcfips.crypto.EntropySourceProvider;
 import com.distrimind.bcfips.crypto.fips.FipsDRBG;
 import com.distrimind.bcfips.crypto.util.BasicEntropySourceProvider;
-import com.distrimind.util.OS;
-import com.distrimind.util.OSVersion;
+import com.distrimind.util.systeminfo.OS;
+import com.distrimind.util.systeminfo.OSVersion;
 import com.distrimind.util.io.RandomFileInputStream;
 
 import java.io.File;
