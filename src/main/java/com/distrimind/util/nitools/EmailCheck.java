@@ -34,6 +34,8 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.nitools;
 
+import com.distrimind.util.nitools.DNSCheck;
+
 import java.util.regex.Pattern;
 
 /**

@@ -35,13 +35,12 @@ knowledge of the CeCILL-C license and that you accept its terms.
 
 package com.distrimind.util.nitools;
 
+import com.distrimind.util.systeminfo.OS;
+import com.distrimind.util.systeminfo.OSVersion;
+
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.Enumeration;
-import java.util.concurrent.atomic.AtomicReference;
-
-import com.distrimind.util.systeminfo.OS;
-import com.distrimind.util.systeminfo.OSVersion;
 
 /**
  * Class that gives tools for network interfaces, independently of current OS
@@ -53,31 +52,25 @@ import com.distrimind.util.systeminfo.OSVersion;
  * 
  */
 public abstract class NITools {
-	private static final AtomicReference<NITools> instance = new AtomicReference<>();
-
+	private static final NITools instance = getNIToolsInstance();
+	private static NITools getNIToolsInstance()
+	{
+		if (OSVersion.getCurrentOSVersion()!=null && OSVersion.getCurrentOSVersion().getOS()==OS.LINUX)
+			return new LinuxNITools();
+		else if (OSVersion.getCurrentOSVersion()!=null && OSVersion.getCurrentOSVersion().getOS()==OS.WINDOWS
+				&& !OSVersion.WINDOWS_XP.getLowerOrEqualsVersions().contains(OSVersion.getCurrentOSVersion()))
+			return new WindowsNITools();// TODO see for
+		else if (OSVersion.getCurrentOSVersion()!=null && OSVersion.getCurrentOSVersion().getOS()==OS.MAC_OS_X)
+			return new MacOSXNITools();
+		else
+			return new DefaultNITools();
+	}
 	/**
 	 * 
 	 * @return a unique instance of TraceRoute
 	 */
 	public static NITools getInstance() {
-		if (instance.get() == null) {
-			synchronized (instance) {
-				if (instance.get() == null) {
-					if (OSVersion.getCurrentOSVersion()!=null && OSVersion.getCurrentOSVersion().getOS()==OS.LINUX)
-						instance.set(new LinuxNITools());
-					else if (OSVersion.getCurrentOSVersion()!=null && OSVersion.getCurrentOSVersion().getOS()==OS.WINDOWS
-							&& !OSVersion.WINDOWS_XP.getLowerOrEqualsVersions().contains(OSVersion.getCurrentOSVersion()))
-						instance.set(new WindowsNITools());// TODO see for
-					// Windows XP
-					// compatibility
-					else if (OSVersion.getCurrentOSVersion()!=null && OSVersion.getCurrentOSVersion().getOS()==OS.MAC_OS_X)
-						instance.set(new MacOSXNITools());
-					else
-						instance.set(new DefaultNITools());
-				}
-			}
-		}
-		return instance.get();
+		return instance;
 	}
 
 	public static void main(String[] args) throws SocketException {

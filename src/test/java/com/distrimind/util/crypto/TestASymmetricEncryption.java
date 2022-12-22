@@ -405,7 +405,7 @@ public class TestASymmetricEncryption {
 			NoSuchProviderException, IllegalStateException, IllegalArgumentException {
 		System.out.println("Testing " + astype + "/" + stype);
 		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getSingleton(null);
-		ASymmetricKeyPair kpd = astype.getKeyPairGenerator(rand, (short)1024).generateKeyPair();
+		ASymmetricKeyPair kpd = astype.getKeyPairGenerator(rand, (short)2048).generateKeyPair();
 		try {
 
 			SymmetricSecretKey localKey = stype.getKeyGenerator(rand).generateKey();
@@ -500,7 +500,7 @@ public class TestASymmetricEncryption {
 	}
 	private ASymmetricKeyPair generateKeyPair(ASymmetricEncryptionType type) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
 		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getSingleton(null);
-		return type.getKeyPairGenerator(rand, (short)1024).generateKeyPair();
+		return type.getKeyPairGenerator(rand, (short)2048).generateKeyPair();
 	}
 
 

@@ -35,13 +35,12 @@ knowledge of the CeCILL-C license and that you accept its terms.
 
 package com.distrimind.util.traceroute;
 
+import com.distrimind.util.systeminfo.OS;
+import com.distrimind.util.systeminfo.OSVersion;
+
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
-
-import com.distrimind.util.systeminfo.OS;
-import com.distrimind.util.systeminfo.OSVersion;
 
 /**
  * Class that enables a trace route considering an {@link InetAddress},
@@ -54,28 +53,15 @@ import com.distrimind.util.systeminfo.OSVersion;
  */
 public abstract class TraceRoute {
 
-	private static final AtomicReference<TraceRoute> instance = new AtomicReference<>();
+	private static final TraceRoute instance=getTraceRouteInstance();
+
 
 	/**
 	 * 
 	 * @return a unique instance of TraceRoute
 	 */
 	public static TraceRoute getInstance() {
-		if (instance.get() == null) {
-			synchronized (instance) {
-				if (instance.get() == null) {
-					if (OSVersion.getCurrentOSVersion()!=null && OSVersion.getCurrentOSVersion().getOS()==OS.LINUX)
-						instance.set(new LinuxTraceRoute());
-					else if (OSVersion.getCurrentOSVersion()!=null && OSVersion.getCurrentOSVersion().getOS()==OS.WINDOWS)
-						instance.set(new WindowsTraceRoute());
-					else if (OSVersion.getCurrentOSVersion()!=null && OSVersion.getCurrentOSVersion().getOS()==OS.MAC_OS_X)
-						instance.set(new MacOSTraceRoute());
-					else
-						instance.set(new DefaultTraceRoute());
-				}
-			}
-		}
-		return instance.get();
+		return instance;
 	}
 
 	public static void main(String[] args) throws UnknownHostException {
@@ -129,5 +115,15 @@ public abstract class TraceRoute {
 	 *         some servers.
 	 */
 	public abstract List<InetAddress> tracePath(InetAddress _ia, int depth, int time_out_ms);
-
+	private static TraceRoute getTraceRouteInstance()
+	{
+		if (OSVersion.getCurrentOSVersion()!=null && OSVersion.getCurrentOSVersion().getOS()==OS.LINUX)
+			return new LinuxTraceRoute();
+		else if (OSVersion.getCurrentOSVersion()!=null && OSVersion.getCurrentOSVersion().getOS()==OS.WINDOWS)
+			return new WindowsTraceRoute();
+		else if (OSVersion.getCurrentOSVersion()!=null && OSVersion.getCurrentOSVersion().getOS()==OS.MAC_OS_X)
+			return new MacOSTraceRoute();
+		else
+			return new DefaultTraceRoute();
+	}
 }

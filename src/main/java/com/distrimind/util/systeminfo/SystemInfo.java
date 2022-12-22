@@ -35,8 +35,6 @@ The fact that you are presently reading this means that you have had
 knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-import java.util.concurrent.atomic.AtomicReference;
-
 /**
  * @author Jason Mahdjoub
  * @version 1.0
@@ -69,17 +67,10 @@ public class SystemInfo {
 		powerMonitoringAttackMitigationState=getState(System.getProperty("powerMonitoringAttackMitigationState"));
 
 	}
-	private static final AtomicReference<SystemInfo> instance=new AtomicReference<>(null);
+	private static final SystemInfo instance=new SystemInfo();
 	public static SystemInfo getInstance()
 	{
-		if (instance.get()==null)
-		{
-			synchronized (instance)
-			{
-				instance.set(new SystemInfo());
-			}
-		}
-		return instance.get();
+		return instance;
 	}
 	public boolean isFrequencyAttackPossibleIntoCurrentCPU()
 	{
