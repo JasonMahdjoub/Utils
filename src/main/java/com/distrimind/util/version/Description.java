@@ -50,11 +50,6 @@ import java.util.Date;
 @SuppressWarnings("FieldMayBeFinal")
 public class Description extends AbstractVersion<Description> {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -5480559682819518935L;
-
 	private final ArrayList<DescriptionItem> items = new ArrayList<>();
 
 	protected Description() {

@@ -47,10 +47,6 @@ import com.distrimind.util.properties.MultiFormatProperties;
  * @see PersonDeveloper
  */
 public class Person extends MultiFormatProperties{
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 6907388594593576340L;
 
 	protected String lastName, firstName;
 

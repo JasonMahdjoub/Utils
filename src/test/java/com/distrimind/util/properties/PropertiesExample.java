@@ -59,11 +59,6 @@ import java.util.logging.Level;
  */
 public class PropertiesExample extends MultiFormatProperties {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -569461229020640634L;
-
 	private final static String[] strings = { "sfdg", "fdgdg", "bjf", "fsgh", "hlqoit" };
 
 	public static boolean equals(Object o1, Object o2) {
@@ -355,7 +350,7 @@ public class PropertiesExample extends MultiFormatProperties {
 		version = Utils.VERSION;
 		AbstractSecureRandom random = SecureRandomType.DEFAULT.getSingleton(null);
 		secretKey = SymmetricEncryptionType.DEFAULT.getKeyGenerator(random).generateKey();
-		keyPair = ASymmetricEncryptionType.DEFAULT.getKeyPairGenerator(random, (short) 1024).generateKeyPair();
+		keyPair = ASymmetricEncryptionType.DEFAULT.getKeyPairGenerator(random, (short) 2048).generateKeyPair();
 		privateKey = keyPair.getASymmetricPrivateKey();
 		publicKey = keyPair.getASymmetricPublicKey();
 		decentralizedId = new DecentralizedIDGenerator();

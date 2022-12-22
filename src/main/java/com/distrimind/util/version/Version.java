@@ -59,10 +59,6 @@ public class Version extends AbstractVersion<Version> {
 		ALPHA, BETA, RELEASE_CANDIDATE, STABLE
 	}
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -183708465780440306L;
 
 	private Date projectStartDate;
 

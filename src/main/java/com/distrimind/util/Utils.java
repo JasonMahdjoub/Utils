@@ -67,13 +67,14 @@ public class Utils {
 			VERSION.addCreator(new Person("mahdjoub", "jason"))
 					.addDeveloper(new PersonDeveloper("mahdjoub", "jason", "2016-01-04"))
 					.addDescription(
-							new Description(5, 24, 1, Version.Type.STABLE, 0, "2022-12-20")
+							new Description(5, 24, 1, Version.Type.STABLE, 0, "2022-12-22")
 									.addItem(INTERNAL_CHANGE, "Fix spelling errors")
 									.addItem(BUG_FIX, "Fix issues with multi thread encryption and signature")
 									.addItem(SECURITY_FIX_LOW_SEVERITY, "Fix CodeQL error with RSA key size not checked.")
 									.addItem(INTERNAL_CHANGE, "Interface Cleanable do not inherit anymore the interface AutoCloseable")
 									.addItem(NEW_FEATURE, "Add class SystemInfo")
 									.addItem(NEW_FEATURE, "Enable or disable side channel attacks accord to CPU type and permit to manually disable/enable mitigation through system properties")
+									.addItem(INTERNAL_CHANGE, "MultiFormatProperties implements now SecureExternalizable instead of Serializable interface")
 					)
 					.addDescription(
 							new Description(5, 24, 0, Version.Type.STABLE, 0, "2022-10-19")

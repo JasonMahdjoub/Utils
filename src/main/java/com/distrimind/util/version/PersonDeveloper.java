@@ -51,10 +51,6 @@ import java.util.Locale;
  */
 @SuppressWarnings("FieldMayBeFinal")
 public class PersonDeveloper extends Person implements Comparable<PersonDeveloper>{
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 6519819432111179436L;
 
 	private Date developmentBeginDate;
 

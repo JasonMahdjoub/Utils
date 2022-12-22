@@ -52,18 +52,23 @@ import java.util.Properties;
  */
 public class TestProperties {
 	@DataProvider(name = "getPropertiesExample")
-	Object[][] getPropertiesExample() throws IOException,
-			NoSuchAlgorithmException, NoSuchProviderException {
-		PropertiesExample[][] res = new PropertiesExample[100][];
-		res[0] = new PropertiesExample[] { new PropertiesExample(null) };
-		for (int i = 1; i < res.length; i++) {
-			PropertiesExample pe = new PropertiesExample(null);
-			pe.generateValues();
-			res[i] = new PropertiesExample[] { pe };
+	Object[][] getPropertiesExample() throws Exception {
+		try {
+			PropertiesExample[][] res = new PropertiesExample[100][];
+			res[0] = new PropertiesExample[]{new PropertiesExample(null)};
+			for (int i = 1; i < res.length; i++) {
+				PropertiesExample pe = new PropertiesExample(null);
+				pe.generateValues();
+				res[i] = new PropertiesExample[]{pe};
+			}
+
+			return res;
 		}
-
-		return res;
-
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			throw e;
+		}
 	}
 
 	@Test

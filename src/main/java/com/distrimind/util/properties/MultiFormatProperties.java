@@ -37,6 +37,7 @@ package com.distrimind.util.properties;
 
 import com.distrimind.util.AbstractDecentralizedID;
 import com.distrimind.util.UtilClassLoader;
+import com.distrimind.util.io.*;
 import org.w3c.dom.*;
 import org.xml.sax.SAXException;
 import org.yaml.snakeyaml.DumperOptions;
@@ -95,12 +96,8 @@ import java.util.regex.Pattern;
  * @since Utils 1.0
  *
  */
-public abstract class MultiFormatProperties implements Cloneable, Serializable {
+public abstract class MultiFormatProperties implements SecureExternalizable, Cloneable {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 6821595638425166680L;
 
 	final transient DefaultMultiFormatObjectParser default_xml_object_parser_instance = new DefaultMultiFormatObjectParser();
 
@@ -936,14 +933,7 @@ public abstract class MultiFormatProperties implements Cloneable, Serializable {
 		
 	}
 	
-	private DumperOptions getDumperOptions()
-	{
-		DumperOptions options = new DumperOptions();
-		options.setAllowUnicode(true);
-		options.setAllowReadOnlyProperties(false);
-		options.setIndent(4);
-		return options;
-	}
+
 	
 	/**
 	 * Load properties from an YAML file
@@ -1066,13 +1056,24 @@ public abstract class MultiFormatProperties implements Cloneable, Serializable {
 	public MultiFormatProperties clone() throws CloneNotSupportedException{
 		return (MultiFormatProperties) super.clone();
 	}
-
+	private static DumperOptions getDumperOptions()
+	{
+		DumperOptions res=new DumperOptions();
+		res.setAllowUnicode(true);
+		res.setAllowReadOnlyProperties(false);
+		res.setLineBreak(DumperOptions.LineBreak.UNIX);
+		res.setIndent(2);
+		res.setDefaultFlowStyle(DumperOptions.FlowStyle.AUTO);
+		return res;
+	}
 
 	private class YamlRepresenting extends Representer
 	{
 		final MultiFormatProperties mfp;
 		YamlRepresenting(MultiFormatProperties mfp)
 		{
+			super(getDumperOptions());
+
 		    if (mfp!=null && mfp.getClass()==MultiFormatProperties.this.getClass())
 			    this.mfp=mfp;
 		    else
@@ -1647,4 +1648,82 @@ public abstract class MultiFormatProperties implements Cloneable, Serializable {
 		}
 	}
 
+	@Override
+	public int getInternalSerializedSize() {
+		Class<?> c = this.getClass();
+		int res=1;
+		while (c != Object.class) {
+			for (Field field : c.getDeclaredFields()) {
+				if (isValid(field)) {
+					field.setAccessible(true);
+
+					try {
+						Object o=field.get(this);
+						res+=1
+								+SerializationTools.getInternalSize(field.getName(), SerializationTools.MAX_FIELD_NAME_LENGTH)
+								+SerializationTools.getInternalSize(o, SerializationTools.getDefaultSizeMax(o));
+					} catch (IllegalArgumentException | IllegalAccessException | DOMException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+			c = c.getSuperclass();
+		}
+		return res;
+	}
+
+
+	@Override
+	public void writeExternal(SecuredObjectOutputStream out) throws IOException {
+		Class<?> c = this.getClass();
+		while (c != Object.class) {
+			for (Field field : c.getDeclaredFields()) {
+				if (isValid(field)) {
+					field.setAccessible(true);
+					try {
+						out.writeBoolean(true);
+						out.writeString(field.getName(), false, SerializationTools.MAX_FIELD_NAME_LENGTH);
+						out.writeObject(field.get(this), true);
+					} catch (IllegalArgumentException | IllegalAccessException | DOMException e) {
+						throw new IOException("Impossible read the field " + field.getName(), e);
+					}
+				}
+			}
+			c = c.getSuperclass();
+		}
+		out.writeBoolean(false);
+	}
+
+	private Field getField(String fieldName)
+	{
+		Class<?> c = this.getClass();
+		while (c != Object.class) {
+			for (Field field : c.getDeclaredFields()) {
+				if (isValid(field)) {
+					if (field.getName().equals(fieldName))
+						return field;
+				}
+				else
+					return null;
+			}
+			c = c.getSuperclass();
+		}
+		return null;
+	}
+
+	@Override
+	public void readExternal(SecuredObjectInputStream in) throws IOException, ClassNotFoundException {
+		while (in.readBoolean())
+		{
+			String fieldName=in.readString(false, SerializationTools.MAX_FIELD_NAME_LENGTH);
+			Field field=getField(fieldName);
+			if (field==null)
+				throw new MessageExternalizationException(Integrity.FAIL);
+			try {
+				field.set(this, in.readObject(true));
+			} catch (IllegalAccessException e) {
+				throw new IOException(e);
+			}
+		}
+	}
 }

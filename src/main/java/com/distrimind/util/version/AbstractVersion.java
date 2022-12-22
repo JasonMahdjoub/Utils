@@ -15,11 +15,6 @@ import java.util.Locale;
 @SuppressWarnings("FieldMayBeFinal")
 public abstract class AbstractVersion<V extends AbstractVersion<V>> extends MultiFormatProperties implements Comparable<V> {
 
-	/**
-	 *
-	 */
-	private static final long serialVersionUID = -5480559682819518935L;
-
 	protected short major;
 
 	protected short minor;

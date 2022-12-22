@@ -48,6 +48,7 @@ import com.distrimind.util.harddrive.FilePermissions;
 import com.distrimind.util.systeminfo.OS;
 import com.distrimind.util.systeminfo.OSVersion;
 
+import java.io.Externalizable;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
@@ -77,6 +78,7 @@ public class SerializationTools {
 	private static final int MAX_CHAR_BUFFER_SIZE=Short.MAX_VALUE*5;
 	private static final int MAX_SIZE_INET_ADDRESS=20;
 	public static final int DEFAULT_MAX_FILE_NAME_LENGTH=4096;
+	public static final int MAX_FIELD_NAME_LENGTH=512;
 
 	static void writeChars(final SecuredObjectOutputStream oos, char []s, int sizeMax, boolean supportNull) throws IOException
 	{
@@ -1631,8 +1633,40 @@ public class SerializationTools {
 			throw new MessageExternalizationException(Integrity.FAIL, "res="+res+"; maxSize="+maxSize);
 		return res;
 	}
+	public static int getDefaultSizeMax(Object o)
+	{
+		if (o==null)
+		{
+			return 8192;
+		}
+		else {
+			return getDefaultSizeMax(o.getClass());
+		}
+	}
+	public static int getDefaultSizeMax(Class<?> objectType)
+	{
+		if (Collection.class.isAssignableFrom(objectType)) {
+			return 1048576;
+		} else if (Map.class.isAssignableFrom(objectType)) {
+			return 1048576;
+		} else if (objectType == String.class || objectType==char[].class || objectType == WrappedString.class) {
+			return 8192;
+		} else if (objectType == byte[].class || objectType == WrappedData.class || objectType == byte[][].class) {
+			return 1048576;
+		}  else if (SecureExternalizable[].class.isAssignableFrom(objectType)) {
+			return 524288;
+		} else if (Object[].class.isAssignableFrom(objectType)) {
+			return 1048576;
+		}else if (File.class.isAssignableFrom(objectType)) {
+			return 4096;
+		}
+		else
+			return -1;
+	}
 	private static void writeObject(final SecuredObjectOutputStream oos, Object o, int sizeMax, boolean supportNull, boolean OOSreplaceObject) throws IOException
 	{
+		if (sizeMax==-1)
+			sizeMax=getDefaultSizeMax(o);
 		Short id;
 
 		if (o==null)
@@ -1808,14 +1842,24 @@ public class SerializationTools {
 				case 1:
 					return readExternalizable(ois, false);
 				case 2:
+					if (sizeMax==-1)
+						sizeMax=getDefaultSizeMax(String.class);
 					return readString(ois, sizeMax, false);
 				case 3:
+					if (sizeMax==-1)
+						sizeMax=getDefaultSizeMax(byte[].class);
 					return readBytes(ois, false, sizeMax);
 				case 4:
+					if (sizeMax==-1)
+						sizeMax=getDefaultSizeMax(byte[][].class);
 					return readBytes2D(ois, sizeMax, sizeMax, false, false);
 				case 5:
+					if (sizeMax==-1)
+						sizeMax=getDefaultSizeMax(Externalizable[].class);
 					return readExternalizables(ois, sizeMax, false);
 				case 6:
+					if (sizeMax==-1)
+						sizeMax=getDefaultSizeMax(Object[].class);
 					return readObjects(ois, sizeMax, false);
 				case 7:
 					return readInetSocketAddress(ois, false);
@@ -1830,6 +1874,8 @@ public class SerializationTools {
 				case 12:
 					return readEnum(ois, false);
 				case 13:
+					if (sizeMax==-1)
+						sizeMax=getDefaultSizeMax(Map.class);
 					return readMap(ois, sizeMax, false, true, true);
 				case 14:
 					return readClass(ois, false, Object.class);
@@ -1861,6 +1907,8 @@ public class SerializationTools {
 					return fp;
 				}
 				case 27: {
+					if (sizeMax==-1)
+						sizeMax=getDefaultSizeMax(Collection.class);
 					return readCollection(ois, sizeMax, false, true);
 				}
 				case 28: {
@@ -1870,15 +1918,23 @@ public class SerializationTools {
 					return readBigInteger(ois, false);
 				}
 				case 30: {
+					if (sizeMax==-1)
+						sizeMax=getDefaultSizeMax(char[].class);
 					return readChars(ois, sizeMax,false);
 				}
 				case 31: {
+					if (sizeMax==-1)
+						sizeMax=getDefaultSizeMax(File.class);
 					return readFile(ois, sizeMax,false);
 				}
 				case 32: {
+					if (sizeMax==-1)
+						sizeMax=getDefaultSizeMax(WrappedData.class);
 					return readWrappedData(ois, false, sizeMax);
 				}
 				case 33: {
+					if (sizeMax==-1)
+						sizeMax=getDefaultSizeMax(WrappedString.class);
 					return readWrappedString(ois, sizeMax, false);
 				}
 				/*case 33: {
