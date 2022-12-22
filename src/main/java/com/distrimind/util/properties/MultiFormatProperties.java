@@ -1683,7 +1683,8 @@ public abstract class MultiFormatProperties implements SecureExternalizable, Clo
 					try {
 						out.writeBoolean(true);
 						out.writeString(field.getName(), false, SerializationTools.MAX_FIELD_NAME_LENGTH);
-						out.writeObject(field.get(this), true);
+						Object o=field.get(this);
+						out.writeObject(o, true, SerializationTools.getDefaultSizeMax(o));
 					} catch (IllegalArgumentException | IllegalAccessException | DOMException e) {
 						throw new IOException("Impossible read the field " + field.getName(), e);
 					}

@@ -1665,8 +1665,6 @@ public class SerializationTools {
 	}
 	private static void writeObject(final SecuredObjectOutputStream oos, Object o, int sizeMax, boolean supportNull, boolean OOSreplaceObject) throws IOException
 	{
-		if (sizeMax==-1)
-			sizeMax=getDefaultSizeMax(o);
 		Short id;
 
 		if (o==null)
