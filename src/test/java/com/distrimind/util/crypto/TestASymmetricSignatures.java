@@ -222,7 +222,7 @@ public class TestASymmetricSignatures {
 				|| 	type== ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA256withECDSA_P_256
 				|| type== ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA512withECDSA_P_521;
 
-		return type.getKeyPairGenerator(rand, isECDSA?type.getDefaultKeySize():(short)1024).generateKeyPair();
+		return type.getKeyPairGenerator(rand, isECDSA?type.getDefaultKeySize():(short)2048).generateKeyPair();
 	}
 
 	static void testASymmetricKeyExpirationTimeChange(ASymmetricKeyPair keyPair)
@@ -484,7 +484,7 @@ public class TestASymmetricSignatures {
 			throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
 		System.out.println("Testing HybridASymmetricKeyPairEncoding " + type);
 
-		HybridASymmetricKeyPair kpd=type.generateKeyPair(SecureRandomType.DEFAULT.getSingleton(null), 1024 );
+		HybridASymmetricKeyPair kpd=type.generateKeyPair(SecureRandomType.DEFAULT.getSingleton(null), 2048 );
 
 		WrappedData b = kpd.encode(false);
 		HybridASymmetricKeyPair kpd2=(HybridASymmetricKeyPair) DecentralizedValue.decode(b);

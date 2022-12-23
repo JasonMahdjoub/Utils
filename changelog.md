@@ -1,6 +1,6 @@
 Utils
 =====
-5.24.0 STABLE (Build: 4810) (from 04/01/2016 to 19/10/2022)
+5.24.1 STABLE (Build: 4896) (from 04/01/2016 to 22/12/2022)
 
 # Creator(s):
 * Jason MAHDJOUB
@@ -9,6 +9,20 @@ Utils
 * Jason MAHDJOUB (Entered in the team at 04/01/2016)
 
 # Changes:
+
+
+### 5.24.1 STABLE (22/12/2022)
+#### New feature(s)
+* Add class SystemInfo
+* Enable or disable side channel attacks accord to CPU type and permit to manually disable/enable mitigation through system properties
+#### Internal change(s)
+* Fix spelling errors
+* Interface Cleanable do not inherit anymore the interface AutoCloseable
+* MultiFormatProperties implements now SecureExternalizable instead of Serializable interface
+#### Security fixe(s) with low severity
+* Fix CodeQL error with RSA key size not checked.
+#### Bug fixe(s)
+* Fix issues with multi thread encryption and signature
 
 
 ### 5.24.0 STABLE (19/10/2022)
