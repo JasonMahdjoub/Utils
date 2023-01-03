@@ -141,25 +141,6 @@ public abstract class RandomInputStream extends SecuredObjectInputStream impleme
 			return;
 		if (skipImpl(n)!=n)
 			throw new EOFException();
-		/*long l=length();
-		if (n<0 || n+currentPosition()>l)
-			throw new IllegalArgumentException();
-
-		if (n > 0) {
-			long ns = skip(n);
-			//noinspection ConstantConditions
-			if (ns >= 0 && ns < n) {
-				n -= ns;
-				while (n > 0 && read() != -1) {
-					n--;
-				}
-				if (n != 0) {
-					throw new EOFException();
-				}
-			} else if (ns != n) {
-				throw new IOException("Unable to skip exactly");
-			}
-		}*/
 	}
 
 	public static void checkLimits(byte[] b, int off, int len)

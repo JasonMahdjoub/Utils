@@ -99,12 +99,9 @@ public class BufferedRandomOutputStream extends RandomOutputStream{
 	}
 
 	private void changePosition(int bufferIndex, long newPos) throws IOException {
-		//assert endPositions[bufferIndex]==0;
 		if (newPos==-1) {
 			positions[bufferIndex]=-1;
 
-			/*if (bufferIndex==currentBufferIndex)
-				throw new InternalError();*/
 			return;
 		}
 		else {
@@ -157,8 +154,6 @@ public class BufferedRandomOutputStream extends RandomOutputStream{
 				changePosition(bufferIndex, newPos);
 
 			}
-			/*else
-				throw new InternalError();*/
 
 		}
 		else {
@@ -194,8 +189,6 @@ public class BufferedRandomOutputStream extends RandomOutputStream{
 		out.setLength(newLength);
 		if (currentPosition>newLength) {
 			seek(newLength);
-			/*currentPosition = newLength;
-			checkOverlapping();*/
 		}
 
 
@@ -324,12 +317,6 @@ public class BufferedRandomOutputStream extends RandomOutputStream{
 					long p=positions[i];
 
 					if (p!=-1) {
-						/*if (p >= currentPosition && p < newPos)
-							flush(i, (int)(newPos-p), -1, -1);
-						else if (p<currentPosition && p+maxBufferSize>currentPosition)
-						{
-							flush(i, 0, -1, (int)(currentPosition-p));
-						}*/
 						if (isOverlapped(p, currentPosition, len))
 							flush(i, p);
 					}
@@ -353,8 +340,6 @@ public class BufferedRandomOutputStream extends RandomOutputStream{
 				flush(currentBufferIndex, currentPosition);
 				curPos = 0;
 			}
-			/*else if (curPos>maxBufferSize)
-				throw new InternalError();*/
 		}
 	}
 

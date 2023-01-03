@@ -192,13 +192,6 @@ class CleanerTools {
 
 	}
 
-	/*static boolean isCleanersEmpty()
-	{
-		synchronized (CleanerTools.class)
-		{
-			return cleaners.isEmpty();
-		}
-	}*/
 	static boolean doesCleanersContainsThisClass(Class<? extends Cleanable.Cleaner> clazz)
 	{
 		synchronized (CleanerTools.class)

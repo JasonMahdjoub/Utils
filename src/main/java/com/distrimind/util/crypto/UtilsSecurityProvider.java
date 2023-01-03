@@ -37,8 +37,6 @@ package com.distrimind.util.crypto;
 import com.distrimind.util.systeminfo.OS;
 import com.distrimind.util.systeminfo.OSVersion;
 
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.security.Provider;
 
 /**
@@ -56,13 +54,12 @@ class UtilsSecurityProvider extends Provider{
 	
 	static final String providerName=UtilsSecurityProvider.class.getSimpleName();
 	
+	@SuppressWarnings("deprecation")
 	UtilsSecurityProvider() {
 		super(providerName, 1.0, "Provider destined to override default java secure random by a non native blocking secure random.");
+
 		if (OSVersion.getCurrentOSVersion().getOS()!= OS.ANDROID) {
-			AccessController.doPrivileged((PrivilegedAction<Void>) () -> {
-				put("SecureRandom.DEFAULT", NativeNonBlockingSecureRandom.Spi.class.getName());
-				return null;
-			});
+			put("SecureRandom.DEFAULT", NativeNonBlockingSecureRandom.Spi.class.getName());
 		}
 	}
 

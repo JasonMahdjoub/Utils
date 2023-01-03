@@ -158,15 +158,6 @@ public enum OSVersion {
         }
     }
 
-    /*private static String getAndroidVersion()
-    {
-        try {
-            Class<?> versionClass=UtilClassLoader.getLoader().loadClass("android.os.Build.VERSION");
-            return (String)versionClass.getDeclaredField("RELEASE").get(null);
-        } catch (ClassNotFoundException | IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException e) {
-            return null;
-        }
-    }*/
 
     static private final OSVersion currentOS;
     static final String OS_VERSION = (System.getProperty("os.name") + " " + System.getProperty("os.version")).toLowerCase();

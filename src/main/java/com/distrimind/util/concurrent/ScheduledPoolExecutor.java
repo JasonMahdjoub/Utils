@@ -92,10 +92,6 @@ public class ScheduledPoolExecutor extends PoolExecutor implements ScheduledExec
 			super(callable);
 			start=System.nanoTime()+unit.toNanos(initialDelay);
 		}
-		/*public SF(SF<T> o, long start) {
-			super(o);
-			this.start=start;
-		}*/
 
 		@Override
 		public long getDelay(TimeUnit unit) {
@@ -145,10 +141,6 @@ public class ScheduledPoolExecutor extends PoolExecutor implements ScheduledExec
 			super(callable, initialDelay, unit);
 			this.delay=unit.toNanos(delay);
 		}
-		/*public DelayedSF(DelayedSF<T> o) {
-			super(o, System.nanoTime()+o.delay);
-			this.delay=o.delay;
-		}*/
 
 		@Override
 		boolean repeat()
@@ -175,10 +167,6 @@ public class ScheduledPoolExecutor extends PoolExecutor implements ScheduledExec
 			super(callable, initialDelay, unit);
 			this.period=unit.toNanos(period);
 		}
-		/*public RatedSF(RatedSF<T> o) {
-			super(o, Math.min(o.start+o.period, System.nanoTime()));
-			this.period=o.period;
-		}*/
 
 		@Override
 		boolean repeat()

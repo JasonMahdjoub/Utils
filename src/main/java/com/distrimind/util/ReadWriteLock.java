@@ -76,8 +76,6 @@ public class ReadWriteLock {
 
 	private final Map<Thread, Integer> readingThreads = new HashMap<>();
 
-	// private ReentrantLock lock=new ReentrantLock(true);
-	// private Condition cannotContinue=lock.newCondition();
 
 	private int writeRequests = 0;
 

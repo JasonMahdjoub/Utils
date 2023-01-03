@@ -129,19 +129,5 @@ public class WrappedString {
 	public WrappedData toWrappedData() throws InvalidEncodedValue {
 		return new WrappedData(this);
 	}
-	/*private static final Field valueField;
-	static
-	{
-		Field f=null;
-		try {
-			final Field f2=String.class.getDeclaredField("value");
-			f2.setAccessible(true);
-			f=f2;
-
-		} catch (NoSuchFieldException e) {
-			e.printStackTrace();
-		}
-		valueField=f;
-	}*/
 
 }

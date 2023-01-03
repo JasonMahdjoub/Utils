@@ -370,51 +370,6 @@ public class Version extends AbstractVersion<Version> {
 
 		return s.toString();
 	}
-	/*public JFrame getJFrame() {
-		if (frame == null) {
-			final JFrame f = frame = new JFrame("About " + programName);
-			f.add(new JPanel(new BorderLayout()));
-			JPanel ps = new JPanel(new FlowLayout(FlowLayout.CENTER));
-			JButton b = new JButton("Close");
-			b.addMouseListener(new MouseListener() {
-
-				@Override
-				public void mouseClicked(MouseEvent _e) {
-					f.setVisible(false);
-
-				}
-
-				@Override
-				public void mouseEntered(MouseEvent _e) {
-
-				}
-
-				@Override
-				public void mouseExited(MouseEvent _e) {
-				}
-
-				@Override
-				public void mousePressed(MouseEvent _e) {
-				}
-
-				@Override
-				public void mouseReleased(MouseEvent _e) {
-				}
-			});
-			f.add(ps, BorderLayout.SOUTH);
-			ps.add(b);
-
-			JLabel j = new JLabel(this.getHTMLCode());
-			j.setAlignmentY(Component.TOP_ALIGNMENT);
-			JScrollPane scrollPane = new JScrollPane(j);
-			scrollPane.getVerticalScrollBar().setUnitIncrement(15);
-			scrollPane.setAlignmentY(Component.TOP_ALIGNMENT);
-			f.add(scrollPane, BorderLayout.CENTER);
-			f.setSize(800, 600);
-			f.setResizable(false);
-		}
-		return frame;
-	}*/
 
 	public String getProgramName() {
 		return programName;
@@ -469,9 +424,6 @@ public class Version extends AbstractVersion<Version> {
 		}
 	}
 
-	/*public void screenVersion() {
-		getJFrame().setVisible(true);
-	}*/
 
 	public void setBuildNumber(int _build_number) {
 		buildNumber = _build_number;
@@ -507,8 +459,4 @@ public class Version extends AbstractVersion<Version> {
 		appendVersionPart(s, buildNumber);
 		return s.toString();
 	}
-	/*public static void main(String args[])
-	{
-		Utils.VERSION.screenVersion();
-	}*/
 }

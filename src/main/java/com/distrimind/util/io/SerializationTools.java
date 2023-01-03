@@ -154,10 +154,6 @@ public class SerializationTools {
 	{
 		return convertStringToFile(readString(ois, sizeMax, supportNull));
 	}
-	/*static Path readPath(final SecuredObjectInputStream ois, int sizeMax, boolean supportNull) throws IOException
-	{
-		return convertStringToPath(readString(ois, sizeMax, supportNull));
-	}*/
 	static String readString(final SecuredObjectInputStream ois, int sizeMax, boolean supportNull) throws IOException
 	{
 		int size=readSize(ois, sizeMax);
@@ -1467,17 +1463,6 @@ public class SerializationTools {
 		}
 		return isSerializableType(clazz);
 	}
-	/*private static final Class<?> pathClass;
-	static
-	{
-		Class<?> c=null;
-		try {
-			c=UtilClassLoader.getLoader().loadClass("java.nio.file.Path");
-		} catch (ClassNotFoundException ignored) {
-
-		}
-		pathClass=c;
-	}*/
 
 	public static boolean isSerializableType(Class<?> clazz)
 	{
@@ -1935,9 +1920,6 @@ public class SerializationTools {
 						sizeMax=getDefaultSizeMax(WrappedString.class);
 					return readWrappedString(ois, sizeMax, false);
 				}
-				/*case 33: {
-					return readPath(ois, sizeMax,false);
-				}*/
 
 				default:
 					throw new MessageExternalizationException(Integrity.FAIL);
@@ -2316,14 +2298,6 @@ public class SerializationTools {
 	{
 		return getInternalSize(f, DEFAULT_MAX_FILE_NAME_LENGTH);
 	}
-	/*public static int getInternalSize(Path p, int maxCharsNumber)
-	{
-		return getInternalSize(p.toString(), maxCharsNumber);
-	}*/
-	/*public static int getInternalSize(Path p)
-	{
-		return getInternalSize(p, DEFAULT_MAX_FILE_NAME_LENGTH);
-	}*/
 
 	public static int getInternalSize(Object o, int sizeMax)
 	{
@@ -2446,14 +2420,6 @@ public class SerializationTools {
 	{
 		return new File(convertUniversalPathToLocalFile(fileString));
 	}
-	/*static String convertPathToString(Path file)
-	{
-		return convertLocalFileToUniversalPath(file.toString());
-	}
-	static Path convertStringToPath(String fileString)
-	{
-		return FileSystems.getDefault().getPath(convertUniversalPathToLocalFile(fileString));
-	}*/
 
 	static String convertLocalFileToUniversalPath(String file)
 	{

@@ -76,11 +76,7 @@ public class FragmentedRandomInputStream extends RandomInputStream{
 			this.pos=0;
 		else {
 			seek(0);
-			/*this.pos=ins[0].currentPosition();
-			for (int i = 1; i < ins.length; i++)
-				this.pos += ins[i].currentPosition();*/
 		}
-		//this.sindex=(int)(pos%ins.length);
 	}
 
 	public FragmentedStreamParameters getParameters() {
@@ -159,7 +155,6 @@ public class FragmentedRandomInputStream extends RandomInputStream{
 
 	@Override
 	public void readFully(byte[] tab, int off, int len) throws IOException {
-		//noinspection ResultOfMethodCallIgnored
 		read(tab, off, len, true);
 	}
 

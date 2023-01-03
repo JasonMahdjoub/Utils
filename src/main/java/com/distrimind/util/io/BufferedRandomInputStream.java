@@ -100,13 +100,6 @@ public class BufferedRandomInputStream extends RandomInputStream {
 					currentBufferIndex = i;
 					break;
 				}
-				/*else if (_pos>p-maxBufferSize && _pos<p)
-				{
-					currentBuffer = buffers[i];
-					currentBufferIndex = i;
-					positions[i]=_pos;
-					break;
-				}*/
 			}
 		}
 	}

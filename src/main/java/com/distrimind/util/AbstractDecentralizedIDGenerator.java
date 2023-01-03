@@ -164,10 +164,6 @@ public abstract class AbstractDecentralizedIDGenerator extends AbstractDecentral
 			{
 				if (hardwareAddress2!=null)
 					hardwareAddress=hardwareAddress2;
-				/*else {
-					hardwareAddress = new byte[48];
-					random.nextBytes(hardwareAddress);
-				}*/
 			}
 			if (hardwareAddress!=null) {
 				digestion48=new byte[6];

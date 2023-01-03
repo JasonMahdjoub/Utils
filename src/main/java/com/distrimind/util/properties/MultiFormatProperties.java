@@ -730,8 +730,6 @@ public abstract class MultiFormatProperties implements SecureExternalizable, Clo
 				Collection<Object> collection=initCollection(type);
 
 
-				// Class<?> element_list_class= (Class<?>) ((ParameterizedType)
-				// field.getGenericType()).getActualTypeArguments()[0];
 				NodeList node_list = node.getChildNodes();
 				for (int i = 0; i < node_list.getLength(); i++) {
 					Node n = node_list.item(i);
@@ -1227,18 +1225,6 @@ public abstract class MultiFormatProperties implements SecureExternalizable, Clo
 			}
 		}
 
-		/*private void removeCalendar(Map<Tag, Class<?>> m)
-        {
-            for (Iterator<Map.Entry<Tag, Class<?>>> it=m.entrySet().iterator();it.hasNext();)
-            {
-                try {
-                    if (Calendar.class.isAssignableFrom(UtilClassLoader.getLoader().loadClass(it.next().getKey().getClassName())))
-                        it.remove();
-                } catch (ClassNotFoundException e) {
-                    e.printStackTrace();
-                }
-            }
-        }*/
 		private void init (AbstractMultiFormatObjectParser parser)
 		{
 
@@ -1285,23 +1271,6 @@ public abstract class MultiFormatProperties implements SecureExternalizable, Clo
 			}
 		}
 		
-		/*private class RootConstruct extends ConstructMapping
-		{
-			private boolean root=true;
-			@Override
-			 protected Object createEmptyJavaBean(MappingNode node) {
-		            if (root)
-		            {
-		            	root=false;
-		            	return MultiFormatProperties.this;
-		            }
-		            else
-		            {
-		            	return super.createEmptyJavaBean(node);
-		            }
-		        }
-		}
-	*/
 	}
 	
 	
