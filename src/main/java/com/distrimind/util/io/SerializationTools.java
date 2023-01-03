@@ -73,7 +73,7 @@ import java.util.concurrent.*;
  */
 
 public class SerializationTools {
-	private static final int MAX_CHAR_BUFFER_SIZE=Short.MAX_VALUE*5;
+
 	private static final int MAX_SIZE_INET_ADDRESS=20;
 	public static final int DEFAULT_MAX_FILE_NAME_LENGTH=4096;
 	public static final int MAX_FIELD_NAME_LENGTH=512;
@@ -109,10 +109,25 @@ public class SerializationTools {
 		writeSize(oos, false, s.length()*2, sizeMax);
 		oos.writeChars(s);
 	}
+	static void writeString(final SecuredObjectOutputStream oos, StringBuilder s, int sizeMax, boolean supportNull) throws IOException
+	{
+
+		if (s==null)
+		{
+			if (!supportNull)
+				throw new IOException();
+			writeSize(oos, true, 0, sizeMax);
+			return;
+
+		}
+		writeSize(oos, false, s.length()*2, sizeMax);
+		for (int i=0;i<s.length();i++)
+			oos.writeChar(s.charAt(i));
+	}
 	static void writeWrappedString(final SecuredObjectOutputStream oos, WrappedString s, int sizeMax, boolean supportNull) throws IOException
 	{
 		if (s==null)
-			writeString(oos, null, sizeMax, supportNull);
+			writeString(oos, (StringBuilder) null, sizeMax, supportNull);
 		else
 		{
 			int type=0;
@@ -140,14 +155,14 @@ public class SerializationTools {
 			{
 				type=1;
 			}
-			writeString(oos, s.toString(), sizeMax, supportNull);
+			writeString(oos, s.toStringBuilder(), sizeMax, supportNull);
 			oos.writeByte(type);
 		}
 
 	}
-	private static final Object stringLocker=new Object();
+
 	
-	private static char[] chars=null;
+
 	static File readFile(final SecuredObjectInputStream ois, int sizeMax, boolean supportNull) throws IOException
 	{
 		char[] c=readString(ois, sizeMax, supportNull);
@@ -167,25 +182,11 @@ public class SerializationTools {
 		if (size%2==1)
 			throw new MessageExternalizationException(Integrity.FAIL);
 		size/=2;
-		if (sizeMax<MAX_CHAR_BUFFER_SIZE)
-		{
-			synchronized(stringLocker)
-			{
-				if (chars==null || chars.length<sizeMax)
-					chars=new char[sizeMax];
-				for (int i=0;i<size;i++)
-					chars[i]=ois.readChar();
-				return chars;
-			}
-		}
-		else
-		{
-			char []chars=new char[size];
-			for (int i=0;i<size;i++)
-				chars[i]=ois.readChar();
-			return chars;
 
-		}
+		char []chars=new char[size];
+		for (int i=0;i<size;i++)
+			chars[i]=ois.readChar();
+		return chars;
 	}
 	static WrappedString readWrappedString(final SecuredObjectInputStream ois, int sizeMax, boolean supportNull) throws IOException
 	{
@@ -1824,7 +1825,7 @@ public class SerializationTools {
 				case 2:
 					if (sizeMax==-1)
 						sizeMax=getDefaultSizeMax(String.class);
-					return readString(ois, sizeMax, false);
+					return new String(Objects.requireNonNull(readString(ois, sizeMax, false)));
 				case 3:
 					if (sizeMax==-1)
 						sizeMax=getDefaultSizeMax(byte[].class);

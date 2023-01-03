@@ -298,7 +298,10 @@ public abstract class SecuredObjectInputStream extends InputStream implements Da
 		return SerializationTools.readFile(this, (int)Math.min(2L*maxCharsNumber, Integer.MAX_VALUE), nullAccepted);
 	}
 	public String readString(boolean nullAccepted, int maxCharsNumber) throws IOException {
-		return new String(Objects.requireNonNull(SerializationTools.readString(this, (int) Math.min(2L * maxCharsNumber, Integer.MAX_VALUE), nullAccepted)));
+		char[] c=SerializationTools.readString(this, (int) Math.min(2L * maxCharsNumber, Integer.MAX_VALUE), nullAccepted);
+		if (c==null)
+			return null;
+		return new String(c);
 	}
 	public BigInteger readBigInteger(boolean nullAccepted) throws IOException {
 		return SerializationTools.readBigInteger(this, nullAccepted);
@@ -325,7 +328,7 @@ public abstract class SecuredObjectInputStream extends InputStream implements Da
 			for (T e : res)
 			{
 				if (e!=null && !elementsClass.isAssignableFrom(e.getClass()))
-					throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
+					throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, "elementClass="+elementsClass+", found="+e.getClass());
 			}
 			return res;
 
