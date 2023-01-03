@@ -57,8 +57,8 @@ import static org.testng.Assert.*;
  *
  */
 public final class testDataBufferLong extends testDataBuffer {
-	protected static final int size = 50;
-	protected static long[] tab = null;
+	private static final int size = 50;
+	private static long[] tab = null;
 
 	public static long[] getTab(int _size) {
 		long[] res = new long[_size];
@@ -71,7 +71,7 @@ public final class testDataBufferLong extends testDataBuffer {
 	}
 
 	@BeforeClass
-	public static void init() {
+	public void init() {
 		tab = getTab(size);
 	}
 

@@ -56,9 +56,9 @@ import static org.testng.Assert.*;
  * @since Utils 3.4
  *
  */
-public class testDataBufferUnsignedByte extends testDataBuffer {
-	protected static final int size = 50;
-	protected static byte[] tab = null;
+public final class testDataBufferUnsignedByte extends testDataBuffer {
+	private static final int size = 50;
+	private static byte[] tab = null;
 
 	public static byte[] getTab(int _size) {
 		byte[] res = new byte[_size];
@@ -71,7 +71,7 @@ public class testDataBufferUnsignedByte extends testDataBuffer {
 	}
 
 	@BeforeClass
-	public static void init() {
+	public void init() {
 		tab = getTab(size);
 	}
 

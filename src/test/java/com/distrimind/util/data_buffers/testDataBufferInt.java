@@ -56,8 +56,8 @@ import static org.testng.Assert.*;
  *
  */
 public final class testDataBufferInt extends testDataBuffer {
-	protected static final int size = 50;
-	protected static int[] tab = null;
+	private static final int size = 50;
+	private static int[] tab = null;
 
 	public static int[] getTab(int _size) {
 		int[] res = new int[_size];
@@ -70,7 +70,7 @@ public final class testDataBufferInt extends testDataBuffer {
 	}
 
 	@BeforeClass
-	public static void init() {
+	public void init() {
 		tab = getTab(size);
 	}
 
