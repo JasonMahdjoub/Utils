@@ -445,24 +445,21 @@ public enum SecureRandomType {
 		else if (OSVersion.getCurrentOSVersion()!=null && OSVersion.getCurrentOSVersion().getOS().isUnix())
 		{
 			
-			AccessController.doPrivileged((PrivilegedAction<Void>) () -> {
-					synchronized(NativeNonBlockingSecureRandom.class)
-					{
-						File randomSource=getURandomPath();
 
-						try (RandomFileInputStream in = new RandomFileInputStream(randomSource)) {
-							in.readFully(buffer);
-							return null;
-						}
-						catch(IOException e)
-						{
-							e.printStackTrace();
-						}
-						getDefaultNativeNonBlockingSeedSingleton().nextBytes(buffer);
-					}
+			synchronized(NativeNonBlockingSecureRandom.class)
+			{
+				File randomSource=getURandomPath();
 
-				return null;
-			});
+				try (RandomFileInputStream in = new RandomFileInputStream(randomSource)) {
+					in.readFully(buffer);
+					getDefaultNativeNonBlockingSeedSingleton().nextBytes(buffer);
+				}
+				catch(IOException e)
+				{
+					e.printStackTrace();
+				}
+
+			}
 
 		}
 		else
@@ -515,20 +512,19 @@ public enum SecureRandomType {
 				}
 			}
 				
-			return AccessController.doPrivileged((PrivilegedAction<byte[]>) () -> {
-				synchronized (NativeNonBlockingSecureRandom.class) {
-					File randomSource = getURandomPath();
 
-					try (RandomFileInputStream in = new RandomFileInputStream(randomSource)) {
-						byte[] buffer = new byte[numBytes];
-						in.readFully(buffer);
-						return buffer;
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-					return getDefaultNativeNonBlockingSeedSingleton().generateSeed(numBytes);
+			synchronized (NativeNonBlockingSecureRandom.class) {
+				File randomSource = getURandomPath();
+
+				try (RandomFileInputStream in = new RandomFileInputStream(randomSource)) {
+					byte[] buffer = new byte[numBytes];
+					in.readFully(buffer);
+					return buffer;
+				} catch (IOException e) {
+					e.printStackTrace();
 				}
-			});
+				return getDefaultNativeNonBlockingSeedSingleton().generateSeed(numBytes);
+			}
 
 		}
 		else

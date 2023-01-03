@@ -45,10 +45,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.*;
 import java.nio.ByteBuffer;
-import java.security.AccessController;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.security.PrivilegedAction;
 import java.security.spec.InvalidKeySpecException;
 
 /**
@@ -232,11 +230,9 @@ class GnuFunctions {
 
 
 
-						AccessController.doPrivileged((PrivilegedAction<Void>) () -> {
-							secureRandomFromSpiConstructor.setAccessible(true);
-							macUpdateByteBuffer.setAccessible(true);
-							return null;
-						});
+
+						secureRandomFromSpiConstructor.setAccessible(true);
+						macUpdateByteBuffer.setAccessible(true);
 
 
 					} catch (NoSuchMethodException | ClassNotFoundException | NoSuchFieldException | IllegalAccessException e) {
@@ -1287,9 +1283,10 @@ class GnuFunctions {
 			else if (method.equals(engineNextBytes))
 				if (initialized)
 					secureRandom.engineNextBytes((byte[])args[0]);
+			else if (method.equals(engineGenerateSeed))
+					secureRandom.engineGenerateSeed((int)args[0]);
 			else
-			if (method.equals(engineGenerateSeed))
-				secureRandom.engineGenerateSeed((int)args[0]);
+				throw new IllegalAccessError();
 			return null;
 		}
 	}

@@ -205,14 +205,13 @@ public abstract class AbstractNewHopeKeyAgreement extends Agreement{
     private static Method getMethod(final Class<?> c, final String method_name, final Class<?>... parameters) {
 		try {
 			
-			return AccessController.doPrivileged((PrivilegedExceptionAction<Method>) () -> {
-				Method m = c.getDeclaredMethod(method_name, parameters);
-				m.setAccessible(true);
-				return m;
-			});
+
+			Method m = c.getDeclaredMethod(method_name, parameters);
+			m.setAccessible(true);
+			return m;
 
 				
-		} catch (SecurityException | PrivilegedActionException  e) {
+		} catch (SecurityException | NoSuchMethodException e) {
 			System.err.println("Impossible to access to the function " + method_name + " of the class "
 					+ c.getCanonicalName()
 					+ ". This is an inner bug of MadKitLanEdition. Please contact the developers. Impossible to continue. See the next error :");
@@ -228,14 +227,13 @@ public abstract class AbstractNewHopeKeyAgreement extends Agreement{
 	private static Field getField(final Class<?> c, final String method_name) {
 		try {
 			
-			return AccessController.doPrivileged((PrivilegedExceptionAction<Field>) () -> {
-				Field m = c.getDeclaredField(method_name);
-				m.setAccessible(true);
-				return m;
-			});
+
+			Field m = c.getDeclaredField(method_name);
+			m.setAccessible(true);
+			return m;
 
 				
-		} catch (SecurityException | PrivilegedActionException  e) {
+		} catch (SecurityException | NoSuchFieldException e) {
 			e.printStackTrace();
 			System.exit(-1);
 			return null;

@@ -34,8 +34,6 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util;
 
-import java.io.Closeable;
-import java.io.IOException;
 import java.lang.reflect.Modifier;
 
 /**
@@ -58,6 +56,7 @@ import java.lang.reflect.Modifier;
  * @version 1.0
  * @since MaDKitLanEdition 5.23.0
  */
+@SuppressWarnings("removal")
 public interface Cleanable {
 
 	abstract class Cleaner implements Runnable
@@ -160,7 +159,6 @@ public interface Cleanable {
 		}
 
 
-		@SuppressWarnings("deprecation")
 		protected final void finalize()
 		{
 			if (CleanerTools.m_create==null) {

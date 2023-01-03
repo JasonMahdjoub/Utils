@@ -60,8 +60,6 @@ import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.util.*;
 import java.util.concurrent.*;
 
@@ -1329,12 +1327,8 @@ public class SerializationTools {
 			Constructor<?> c=constructors.get(clazz);
 			if (c==null)
 			{
-				final Constructor<?> cons=clazz.getDeclaredConstructor();
-				c=AccessController.doPrivileged((PrivilegedAction<Constructor<?>>) () -> {
-
-					cons.setAccessible(true);
-					return cons;
-				});
+				c=clazz.getDeclaredConstructor();
+				c.setAccessible(true);
 				constructors.put(clazz, c);
 			}
 			return c;

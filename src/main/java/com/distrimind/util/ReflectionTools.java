@@ -42,8 +42,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 
 /**
  * 
@@ -68,25 +66,25 @@ public class ReflectionTools {
 	}
 
 	public static Method getMethod(final Class<?> c, final String method_name, final Class<?>... parameters) {
-		return AccessController.doPrivileged((PrivilegedAction<Method>) () -> {
-			try {
 
-				Method m = c.getDeclaredMethod(method_name, parameters);
-				m.setAccessible(true);
-				return m;
-			} catch (SecurityException | NoSuchMethodException e) {
-				System.err.println("Impossible to access to the function " + method_name + " of the class "
-						+ c.getCanonicalName()
-						+ ". This is an inner bug. Please contact the developers. Impossible to continue. See the next error :");
-				e.printStackTrace();
-				System.exit(-1);
-				return null;
-			}
-		});
+		try {
+
+			Method m = c.getDeclaredMethod(method_name, parameters);
+			m.setAccessible(true);
+			return m;
+		} catch (SecurityException | NoSuchMethodException e) {
+			System.err.println("Impossible to access to the function " + method_name + " of the class "
+					+ c.getCanonicalName()
+					+ ". This is an inner bug. Please contact the developers. Impossible to continue. See the next error :");
+			e.printStackTrace();
+			System.exit(-1);
+			return null;
+		}
+
 		
 	}
 	public static Field getField(final Class<?> c, final String field_name) {
-		return AccessController.doPrivileged((PrivilegedAction<Field>) () -> {
+
 			try {
 
 				Field f = c.getDeclaredField(field_name);
@@ -100,11 +98,10 @@ public class ReflectionTools {
 				System.exit(-1);
 				return null;
 			}
-		});
 
 	}
 	public static <E> Constructor<E> getConstructor(final Class<E> c, final Class<?>... parameters) {
-		return AccessController.doPrivileged((PrivilegedAction<Constructor<E>>) () -> {
+
 			try {
 				Constructor<E> m = c.getDeclaredConstructor(parameters);
 				m.setAccessible(true);
@@ -116,7 +113,7 @@ public class ReflectionTools {
 				System.exit(-1);
 				return null;
 			}
-		});
+
 		
 	}
 

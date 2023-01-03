@@ -526,14 +526,12 @@ public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
 	private static Field getField(final Class<?> c, final String fieldName) {
 		try {
 
-			return AccessController.doPrivileged((PrivilegedExceptionAction<Field>) () -> {
-				Field m = c.getDeclaredField(fieldName);
-				m.setAccessible(true);
-				return m;
-			});
 
+			Field m = c.getDeclaredField(fieldName);
+			m.setAccessible(true);
+			return m;
 
-		} catch (SecurityException | PrivilegedActionException  e) {
+		} catch (SecurityException | NoSuchFieldException e) {
 			e.printStackTrace();
 			System.exit(-1);
 			return null;

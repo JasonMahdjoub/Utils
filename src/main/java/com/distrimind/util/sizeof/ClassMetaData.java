@@ -38,8 +38,6 @@ package com.distrimind.util.sizeof;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.security.AccessController;
-import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -122,12 +120,7 @@ final class ClassMetaData {
 			Field[] fields;
 			synchronized (capa) {
 				capa.setContext(m_class);
-				try {
-					fields = (Field[]) AccessController.doPrivileged(capa);
-				} catch (PrivilegedActionException e) {
-					throw new RuntimeException(
-							"could not access declared fields of class " + m_class.getName() + ": " + e.getException());
-				}
+				fields=(Field[])capa.run();
 			}
 			ArrayList<Field> fields_to_avoid = null;
 			for (Field f : fields) {
@@ -152,16 +145,9 @@ final class ClassMetaData {
 				if (fieldType.isPrimitive()) {
 					m_size += ObjectSizer.getPrimitiveSize(fieldType);
 				} else {
-					//if (!f.isAccessible()) {
-						synchronized (fapa) {
-							fapa.setContext(f);
-							try {
-								AccessController.doPrivileged(fapa);
-							} catch (PrivilegedActionException e) {
-								throw new RuntimeException(
-										"could not make field " + f + " accessible: " + e.getException());
-							}
-						//}
+					synchronized (fapa) {
+						fapa.setContext(f);
+						fapa.run();
 					}
 					m_size += ObjectSizer.OBJREF_SIZE;
 
@@ -222,7 +208,7 @@ final class ClassMetaData {
 		return getSizeBytes(_instance, visited, -1);
 	}
 
-	protected int getSizeBytes(Object _instance, LinkedList<Object> visited, int depth) {
+	private int getSizeBytes(Object _instance, LinkedList<Object> visited, int depth) {
 		if (_instance == null)
 			return 0;
 		for (Object o : visited)

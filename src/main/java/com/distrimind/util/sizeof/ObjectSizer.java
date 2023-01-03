@@ -49,7 +49,7 @@ public class ObjectSizer {
 
 	}
 
-	protected static final HashMap<Class<?>, ClassMetaData> m_class_meta_data_cache = new HashMap<>();
+	private static final HashMap<Class<?>, ClassMetaData> m_class_meta_data_cache = new HashMap<>();
 
 	public static final int OBJECT_SHELL_SIZE_32 = 8; // java.lang.Object shell
 	// size in bytes
@@ -105,7 +105,7 @@ public class ObjectSizer {
 		// try {
 		System.gc();
 		// Thread.sleep(fSLEEP_INTERVAL);
-		System.runFinalization();
+		//System.runFinalization();
 		// Thread.sleep(fSLEEP_INTERVAL);
 		// }
 		// catch (InterruptedException ex){
@@ -113,7 +113,7 @@ public class ObjectSizer {
 		// }
 	}
 
-	protected static ClassMetaData getClassMetaData(Class<?> o) {
+	static ClassMetaData getClassMetaData(Class<?> o) {
 		ClassMetaData res = m_class_meta_data_cache.get(o);
 		if (res == null) {
 			res = new ClassMetaData(o);
