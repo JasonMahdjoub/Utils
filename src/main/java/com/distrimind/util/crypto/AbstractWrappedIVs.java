@@ -48,12 +48,13 @@ import java.util.Map;
  * @version 1.0
  * @since MaDKitLanEdition 5.24.0
  */
-public abstract class AbstractWrappedIVs<C extends IClientServer, W extends AbstractWrappedIV<C, ? extends AbstractWrappedIVs<C,W>, W>> implements SecureExternalizable {
+@SuppressWarnings("unchecked")
+public abstract class AbstractWrappedIVs<C extends IClientServer, W > implements SecureExternalizable {
 
 	private static final int MAX_ELEMENT_NUMBERS=Short.MAX_VALUE;
-	protected Map<Long, W> data=new HashMap<>();
+	protected Map<Long, AbstractWrappedIV<C, ?, ?>> data=new HashMap<>();
 	protected long lastIndex=-1;
-	private W currentWrappedIV;
+	private AbstractWrappedIV<C, ?, ?> currentWrappedIV;
 	protected int IVSizeBytesWithoutExternalCounter;
 	private C algorithm;
 
@@ -90,18 +91,23 @@ public abstract class AbstractWrappedIVs<C extends IClientServer, W extends Abst
 		this.IVSizeBytesWithoutExternalCounter=algorithm.getIVSizeBytesWithoutExternalCounter();
 
 	}
-	W getElement(long index)
+
+	AbstractWrappedIV<C, ?, ?> getElement(long index)
 	{
 		return data.get(index);
 	}
 
 	void setCurrentIV(long index, RandomOutputStream out, byte[] externalCounter) throws IOException {
-		setCurrentIV(getElement(index), externalCounter);
+		setCurrentIVImpl(getElement(index), externalCounter);
 		currentWrappedIV.write(out);
 	}
+	private void setCurrentIVImpl(AbstractWrappedIV<C, ?, ?> res, byte[] externalCounter) throws IOException {
+		setCurrentIV((W)res, externalCounter);
+	}
 	protected void setCurrentIV(W res, byte[] externalCounter) throws IOException {
-		res.setExternalCounter(externalCounter);
-		this.currentWrappedIV=res;
+
+		((AbstractWrappedIV<C, ?, ?>)res).setExternalCounter(externalCounter);
+		this.currentWrappedIV=((AbstractWrappedIV<C, ?, ?>)res);
 	}
 
 
@@ -113,24 +119,24 @@ public abstract class AbstractWrappedIVs<C extends IClientServer, W extends Abst
 	}
 	final void pushNewElementAndSetCurrentIV(long index, RandomInputStream in, byte[] externalCounter) throws IOException {
 		checkMaxElementNumbers();
-		W res=newEmptyWrappedIVInstance();
+		AbstractWrappedIV<C, ?, ?> res=(AbstractWrappedIV<C, ?, ?>)newEmptyWrappedIVInstance();
 		res.readFully(in);
 		data.put(lastIndex=index, res);
-		setCurrentIV(res, externalCounter);
+		setCurrentIVImpl(res, externalCounter);
 	}
 	protected abstract W generateElement() throws IOException;
 	final void generateNewElement(long index, RandomOutputStream os, byte[] externalCounter) throws IOException {
 		checkMaxElementNumbers();
 		if (data.containsKey(index))
 			throw new IllegalArgumentException(""+index);
-		W res=generateElement();
+		AbstractWrappedIV<C, ?, ?> res=(AbstractWrappedIV<C, ?, ?>)generateElement();
 		res.write(os);
 		data.put(lastIndex=index, res);
-		setCurrentIV(res, externalCounter);
+		setCurrentIVImpl(res, externalCounter);
 	}
 	final void pushNewElement(long index, RandomInputStream in) throws IOException {
 		checkMaxElementNumbers();
-		W res=newEmptyWrappedIVInstance();
+		AbstractWrappedIV<C, ?, ?> res=(AbstractWrappedIV<C, ?, ?>)newEmptyWrappedIVInstance();
 		res.readFully(in);
 		data.put(lastIndex=index, res);
 	}
@@ -139,7 +145,7 @@ public abstract class AbstractWrappedIVs<C extends IClientServer, W extends Abst
 		return algorithm.getIVSizeBytesWithExternalCounter();
 	}
 
-	W getCurrentIV()
+	AbstractWrappedIV<C, ?, ?> getCurrentIV()
 	{
 		return currentWrappedIV;
 	}
@@ -160,7 +166,7 @@ public abstract class AbstractWrappedIVs<C extends IClientServer, W extends Abst
 
 	@Override
 	public void readExternal(SecuredObjectInputStream in) throws IOException, ClassNotFoundException {
-		data=in.readMap(false, MAX_ELEMENT_NUMBERS, Long.class, getDataClass());
+		data=(Map<Long, AbstractWrappedIV<C, ?, ?>>)in.readMap(false, MAX_ELEMENT_NUMBERS, Long.class, getDataClass());
 		lastIndex=data.keySet().stream().max(Long::compare).orElse(-1L);
 		int s=in.readByte();
 		if (s<0 || s>WrappedIV.MAX_IV_LENGTH)
@@ -184,7 +190,7 @@ public abstract class AbstractWrappedIVs<C extends IClientServer, W extends Abst
 		return algorithm;
 	}
 
-	W getLastElement()
+	AbstractWrappedIV<C, ?, ?> getLastElement()
 	{
 		return this.data.entrySet().stream().max(Map.Entry.comparingByKey()).map(Map.Entry::getValue).orElse(null);
 	}

@@ -1,4 +1,3 @@
-package com.distrimind.util.crypto;
 /*
 Copyright or © or Corp. Jason Mahdjoub (01/04/2013)
 
@@ -34,24 +33,27 @@ same conditions as regards security.
 The fact that you are presently reading this means that you have had
 knowledge of the CeCILL-C license and that you accept its terms.
  */
-
-/**
- * @author Jason Mahdjoub
- * @version 1.0
- * @since MaDKitLanEdition 5.24.0
- */
-
-public class WrappedIV extends AbstractWrappedIV<IClientServer, WrappedIVs, WrappedIV>
-{
-	@SuppressWarnings("unused")
-	protected WrappedIV() {
-	}
-
-	WrappedIV(WrappedIVs container) {
-		super(container);
-	}
-
-	WrappedIV(byte[] iv, WrappedIVs container) {
-		super(iv, container);
-	}
+module com.distrimind.util {
+	requires com.distrimind.bouncycastle.core;
+	requires com.distrimind.bouncycastle.prov;
+	requires com.distrimind.bcfips;
+	requires transitive java.naming;
+	requires transitive java.xml;
+	requires org.yaml.snakeyaml;
+	//requires java.logging;
+	requires static java.desktop;
+	requires java.management;
+	exports com.distrimind.util;
+	exports com.distrimind.util.io;
+	exports com.distrimind.util.crypto;
+	exports com.distrimind.util.concurrent;
+	exports com.distrimind.util.version;
+	exports com.distrimind.util.properties;
+	exports com.distrimind.util.systeminfo;
+	exports com.distrimind.util.data_buffers;
+	exports com.distrimind.util.harddrive;
+	exports com.distrimind.util.nitools;
+	exports com.distrimind.util.progress_monitors;
+	exports com.distrimind.util.sizeof;
+	exports com.distrimind.util.traceroute;
 }

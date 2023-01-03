@@ -44,7 +44,7 @@ import java.net.URI;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.logging.Level;
+
 import java.util.regex.Pattern;
 
 
@@ -88,7 +88,6 @@ public class DefaultMultiFormatObjectParser extends AbstractMultiFormatObjectPar
 				File.class,
 				URL.class,
 				URI.class,
-				Level.class,
 				InetAddress.class,
 				Inet4Address.class,
 				byte[].class,
@@ -106,6 +105,12 @@ public class DefaultMultiFormatObjectParser extends AbstractMultiFormatObjectPar
 		} catch (ClassNotFoundException ignored) {
 
 		}
+		try {
+			sc.add(UtilClassLoader.getLoader().loadClass("java.util.logging.Level"));
+		} catch (ClassNotFoundException ignored) {
+
+		}
+
 		supportedClasses=new Class<?>[sc.size()];
 		int i=0;
 		for (Class<?> c : sc)
@@ -251,7 +256,7 @@ public class DefaultMultiFormatObjectParser extends AbstractMultiFormatObjectPar
 			return object.toString();
 		} else if (field_type == URI.class) {
 			return object.toString();
-		} else if (field_type == Level.class) {
+		} else if (field_type.getName().equals("java.util.logging.Level")) {
 			return object.toString();
 		} else if (field_type == InetAddress.class || field_type == Inet4Address.class
 				|| field_type == Inet6Address.class) {
@@ -404,8 +409,10 @@ public class DefaultMultiFormatObjectParser extends AbstractMultiFormatObjectPar
 			return new URL(nodeValue);
 		} else if (field_type == URI.class) {
 			return new URI(nodeValue);
-		} else if (field_type == Level.class) {
-			return Level.parse(nodeValue);
+		} else if (field_type.getName().equals("java.util.logging.Level")) {
+			return UtilClassLoader.getLoader().loadClass("java.util.logging.Level")
+					.getDeclaredMethod("parse", String.class)
+					.invoke(null, nodeValue);
 		} else if (field_type == InetAddress.class) {
 			return InetAddress.getByName(nodeValue);
 		} else if (field_type == Inet4Address.class) {

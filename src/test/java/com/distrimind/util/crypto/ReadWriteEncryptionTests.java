@@ -40,7 +40,6 @@ import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
@@ -52,7 +51,7 @@ import java.util.Random;
  * @version 1.1
  * @since Utils 4.16.0
  */
-public class TestReadWriteEncryption {
+public class ReadWriteEncryptionTests {
 
 	@DataProvider(name = "provideParameters", parallel = true)
 	public Object[][] provideParameters() throws NoSuchProviderException, NoSuchAlgorithmException, IOException {

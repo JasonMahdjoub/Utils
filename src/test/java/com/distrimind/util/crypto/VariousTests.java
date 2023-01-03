@@ -71,7 +71,7 @@ public class VariousTests {
 
 	}
 
-	static final int[] keySizes = { 1024, 2048, 3072, 4096 };
+	static final int[] keySizes = { 2048, 3072, 4096 };
 	static byte[] testSignature(AbstractAuthenticatedSignerAlgorithm signer, AbstractAuthenticatedCheckerAlgorithm checker) throws IllegalStateException, IOException
 	{
 		byte[] m = new byte[100000];

@@ -50,7 +50,7 @@ import java.util.Random;
  * @version 1.0
  * @since MaDKitLanEdition 4.7.0
  */
-public class TestKeyAgreements {
+public class KeyAgreementsTests {
 
 
 	@Test(invocationCount = 5, dataProvider = "provideDataForKeyAgreementsSignature")

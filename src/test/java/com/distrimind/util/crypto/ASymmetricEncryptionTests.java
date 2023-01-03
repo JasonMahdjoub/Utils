@@ -57,7 +57,7 @@ import java.util.ArrayList;
  * @version 1.0
  * @since Utils 4.7.0
  */
-public class TestASymmetricEncryption {
+public class ASymmetricEncryptionTests {
 	@DataProvider(name="provideDataKeyWrapperForSymmetricSecretKey", parallel=true)
 	public Object[][] provideDataKeyWrapperForSymmetricSecretKey()
 	{
@@ -496,7 +496,7 @@ public class TestASymmetricEncryption {
 	}
 	@Test(dataProvider = "provideDataForASymetricEncryptions")
 	public void testASymmetricKeyExpirationTimeChange(ASymmetricEncryptionType type) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
-		TestASymmetricSignatures.testASymmetricKeyExpirationTimeChange(generateKeyPair(type));
+		ASymmetricSignaturesTests.testASymmetricKeyExpirationTimeChange(generateKeyPair(type));
 	}
 	private ASymmetricKeyPair generateKeyPair(ASymmetricEncryptionType type) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
 		AbstractSecureRandom rand = SecureRandomType.DEFAULT.getSingleton(null);

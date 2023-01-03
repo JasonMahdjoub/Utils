@@ -55,7 +55,7 @@ import java.util.Random;
  * @version 1.0
  * @since Utils 4.7.0
  */
-public class TestsForSymmetricEncryption {
+public class SymmetricEncryptionTests {
 	@Test(dataProvider = "provideDataForSymetricEncryptions")
 	public void testSecretKeyEncoding(SymmetricEncryptionType type) throws NoSuchAlgorithmException,
 			NoSuchProviderException,
@@ -179,7 +179,7 @@ public class TestsForSymmetricEncryption {
 			byte[] md = decrypted;
 			Assert.assertEquals(md.length, m.length, "Testing size " + type1+", "+type2);
 			Assert.assertEquals(md, m, "Testing " + type1+", "+type2);
-			mlength=m.length;
+
 			encrypted = algoDistant.encode(m, null, counter);
 			Assert.assertEquals(encrypted.length, algoDistant.getOutputSizeAfterEncryption(mlength));
 			Assert.assertTrue(encrypted.length >= m.length);
@@ -272,21 +272,28 @@ public class TestsForSymmetricEncryption {
 
 	@DataProvider(name = "getSymmetricSecretKeysToTestForSecretKeyWrappingWithPassword", parallel = true)
 	public Object[][] getSymmetricSecretKeysToTestForSecretKeyEncryptionWithPassword() throws NoSuchProviderException, NoSuchAlgorithmException {
-		Object[][]res=new Object[4*SymmetricKeyWrapperType.values().length][2];
-		int index=0;
-		for (boolean encryption : new boolean[]{true, false}) {
-			for (short keySize : new short[]{128, 256}) {
-				for (SymmetricKeyWrapperType t : SymmetricKeyWrapperType.values()) {
-					res[index][0]=t;
-					if (encryption) {
-						res[index++][1] = SymmetricEncryptionType.AES_CBC_PKCS5Padding.getKeyGenerator(SecureRandomType.DEFAULT.getSingleton(null), keySize).generateKey();
-					} else {
-						res[index++][1] = SymmetricAuthenticatedSignatureType.HMAC_SHA2_256.getKeyGenerator(SecureRandomType.DEFAULT.getSingleton(null), keySize).generateKey();
+		try {
+			Object[][] res = new Object[4 * SymmetricKeyWrapperType.values().length][2];
+			int index = 0;
+			for (boolean encryption : new boolean[]{true, false}) {
+				for (short keySize : new short[]{128, 256}) {
+					for (SymmetricKeyWrapperType t : SymmetricKeyWrapperType.values()) {
+						res[index][0] = t;
+						if (encryption) {
+							res[index++][1] = SymmetricEncryptionType.AES_CBC_PKCS5Padding.getKeyGenerator(SecureRandomType.DEFAULT.getSingleton(null), keySize).generateKey();
+						} else {
+							res[index++][1] = SymmetricAuthenticatedSignatureType.HMAC_SHA2_256.getKeyGenerator(SecureRandomType.DEFAULT.getSingleton(null), keySize).generateKey();
+						}
 					}
 				}
 			}
+			return res;
 		}
-		return res;
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			throw e;
+		}
 	}
 	@DataProvider(name="provideDataWrapperForSymmetricSecretKey", parallel = true)
 	public Object[][] provideDataWrapperForSymmetricSecretKey()

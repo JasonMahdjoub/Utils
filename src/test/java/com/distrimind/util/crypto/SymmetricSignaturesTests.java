@@ -51,7 +51,7 @@ import java.util.Random;
  * @version 1.0
  * @since Utils 4.7.0
  */
-public class TestsForSymmetricSignatures {
+public class SymmetricSignaturesTests {
 	@Test(dataProvider = "provideDataForSymmetricSignatureTest")
 	public void testSymmetricSignatures(SymmetricAuthenticatedSignatureType type, SymmetricSecretKey secretKey)
 			throws NoSuchAlgorithmException,

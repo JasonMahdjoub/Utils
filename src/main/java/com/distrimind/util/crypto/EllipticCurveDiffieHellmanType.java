@@ -34,18 +34,16 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 package com.distrimind.util.crypto;
 
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.spec.AlgorithmParameterSpec;
-import java.security.spec.ECGenParameterSpec;
-
-import javax.crypto.KeyAgreement;
-
 import com.distrimind.bcfips.crypto.fips.FipsDigestAlgorithm;
 import com.distrimind.bcfips.crypto.fips.FipsKDF;
 import com.distrimind.bcfips.crypto.fips.FipsSHS;
 import com.distrimind.bcfips.jcajce.spec.XDHParameterSpec;
-import com.distrimind.bouncycastle.jce.spec.ECNamedCurveGenParameterSpec;
+
+import javax.crypto.KeyAgreement;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.spec.AlgorithmParameterSpec;
+import java.security.spec.ECGenParameterSpec;
 
 /**
  * 

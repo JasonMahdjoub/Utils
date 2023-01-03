@@ -54,14 +54,14 @@
 	<test name="testCrypto">
 		<classes>
 			<class name="com.distrimind.util.crypto.VariousTests" />
-			<class name="com.distrimind.util.crypto.TestMessageDigests" />
-			<class name="com.distrimind.util.crypto.TestEncoderAndDecoderAsStreams" />
-			<class name="com.distrimind.util.crypto.TestsForSymmetricEncryption" />
-			<class name="com.distrimind.util.crypto.TestsForSymmetricSignatures" />
-			<class name="com.distrimind.util.crypto.TestASymmetricSignatures" />
-			<class name="com.distrimind.util.crypto.TestASymmetricEncryption" />
-			<class name="com.distrimind.util.crypto.TestKeyAgreements" />
-			<class name="com.distrimind.util.crypto.TestReadWriteEncryption" />
+			<class name="com.distrimind.util.crypto.MessageDigestsTests" />
+			<class name="com.distrimind.util.crypto.EncoderAndDecoderAsStreamsTests" />
+			<class name="com.distrimind.util.crypto.SymmetricEncryptionTests" />
+			<class name="com.distrimind.util.crypto.SymmetricSignaturesTests" />
+			<class name="com.distrimind.util.crypto.ASymmetricSignaturesTests" />
+			<class name="com.distrimind.util.crypto.ASymmetricEncryptionTests" />
+			<class name="com.distrimind.util.crypto.KeyAgreementsTests" />
+			<class name="com.distrimind.util.crypto.ReadWriteEncryptionTests" />
 
 		</classes>
 	</test>

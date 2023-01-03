@@ -49,7 +49,7 @@ import java.security.SecureRandom;
  * @version 1.0
  * @since Utils 4.7.0
  */
-public class TestMessageDigests {
+public class MessageDigestsTests {
 	@Test(dataProvider = "provideMessageDigestType")
 	public void testMessageDigest(MessageDigestType type) throws NoSuchAlgorithmException, NoSuchProviderException {
 		System.out.println("Testing message digest " + type);

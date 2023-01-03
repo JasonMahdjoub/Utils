@@ -35,124 +35,19 @@ The fact that you are presently reading this means that you have had
 knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-import com.distrimind.util.io.*;
+import com.distrimind.util.io.SecuredObjectInputStream;
+import com.distrimind.util.io.SecuredObjectOutputStream;
+import com.distrimind.util.io.SerializationTools;
 
 import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
+
 
 /**
  * @author Jason Mahdjoub
- * @version 1.0
+ * @version 1.1
  * @since MaDKitLanEdition 5.24.0
  */
 
-class WrappedIVs extends AbstractWrappedIVs<IClientServer, WrappedIV> {
-	protected WrappedIVs() throws IOException {
-		super();
-	}
-	WrappedIVs(IClientServer algorithm) throws IOException {
-		super(algorithm);
-	}
-
-
-
-	@Override
-	WrappedIV newEmptyWrappedIVInstance() {
-		return new WrappedIV(this);
-	}
-
-	@Override
-	int getSerializedElementSizeInBytes() {
-		return IVSizeBytesWithoutExternalCounter;
-	}
-
-	@Override
-	protected Class<WrappedIV> getDataClass() {
-		return WrappedIV.class;
-	}
-
-	protected WrappedIV generateElement()
-	{
-		return new WrappedIV(WrappedIV.generateIV(getIvSizeBytes(), this), this);
-	}
-	@Override
-	void setAlgorithm(IClientServer algorithm) throws IOException
-	{
-		this.setAlgorithmImpl(algorithm);
-	}
-
-}
-class WrappedIVAndSecretKey extends AbstractWrappedIV<SymmetricEncryptionAlgorithm, WrappedIVsAndSecretKeys, WrappedIVAndSecretKey>
-{
-	private WrappedEncryptedSymmetricSecretKey encryptedSecretKey;
-	private SymmetricSecretKey secretKey;
-	@Override
-	public String toString() {
-		return secretKey.toString();
-	}
-
-	@SuppressWarnings("unused")
-	protected WrappedIVAndSecretKey()
-	{
-		super();
-		this.encryptedSecretKey=null;
-		this.secretKey=null;
-	}
-
-
-	WrappedIVAndSecretKey(WrappedIVsAndSecretKeys wrappedIVsAndSecretKeys) throws IOException {
-		super(generateIV(wrappedIVsAndSecretKeys.getIvSizeBytes(), wrappedIVsAndSecretKeys), wrappedIVsAndSecretKeys);
-
-		try {
-			this.secretKey=container.getAlgorithm().getSecretKey().getEncryptionAlgorithmType().getKeyGenerator(wrappedIVsAndSecretKeys.getAlgorithm().getSecureRandomForKeyGeneration(), wrappedIVsAndSecretKeys.getAlgorithm().getSecretKey().getKeySizeBits()).generateKey();
-			this.encryptedSecretKey=wrappedIVsAndSecretKeys.wrapKey(secretKey);
-		} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
-			throw new IOException(e);
-		}
-	}
-
-
-	SymmetricSecretKey getDecryptedSecretKey() throws IOException {
-		if (secretKey==null)
-			secretKey=container.getKeyWrapperAlgorithm().unwrap(encryptedSecretKey);
-
-		return secretKey;
-	}
-
-
-	@Override
-	void readFully(RandomInputStream in) throws IOException {
-		super.readFully(in);
-		int s=container.getKeyWrapperAlgorithm().getWrappedSymmetricSecretKeySizeInBytes(container.getAlgorithm().getSecretKey());
-		encryptedSecretKey=new WrappedEncryptedSymmetricSecretKey(new byte[s]);
-		in.readFully(encryptedSecretKey.getBytes());
-		secretKey=null;
-	}
-	@Override
-	void write(RandomOutputStream out) throws IOException {
-		super.write(out);
-		//assert encryptedSecretKey.getBytes().length==wrappedIVsAndSecretKeys.getKeyWrapperAlgorithm().getWrappedSymmetricSecretKeySizeInBytes(wrappedIVsAndSecretKeys.getMainKey());
-		out.write(encryptedSecretKey.getBytes(), 0, encryptedSecretKey.getBytes().length);
-	}
-
-	@Override
-	public void writeExternal(SecuredObjectOutputStream out) throws IOException {
-		super.writeExternal(out);
-		out.writeWrappedData(encryptedSecretKey, false);
-	}
-
-	@Override
-	public void readExternal(SecuredObjectInputStream in) throws IOException, ClassNotFoundException {
-		super.readExternal(in);
-		encryptedSecretKey=in.readWrappedEncryptedSymmetricSecretKey(false);
-	}
-	@Override
-	public int getInternalSerializedSize() {
-		return super.getInternalSerializedSize()+SerializationTools.getInternalSize(encryptedSecretKey);
-	}
-
-}
 public class WrappedIVsAndSecretKeys extends AbstractWrappedIVs<SymmetricEncryptionAlgorithm, WrappedIVAndSecretKey>{
 
 
@@ -188,8 +83,9 @@ public class WrappedIVsAndSecretKeys extends AbstractWrappedIVs<SymmetricEncrypt
 		super.setAlgorithmImpl(algorithm);
 		this.keyWrapperAlgorithm=new KeyWrapperAlgorithm(algorithm.getSymmetricKeyWrapperType(), algorithm.getSecretKey(), true);
 		this.symmetricKeyWrapperType=algorithm.getSymmetricKeyWrapperType();
-		for (WrappedIVAndSecretKey e : data.values())
+		for (AbstractWrappedIV<?, ?, ?> ea : data.values())
 		{
+			WrappedIVAndSecretKey e=(WrappedIVAndSecretKey)ea;
 			if (algorithm.getSecretKey().getEncryptionAlgorithmType().getIVSizeBytes()!=e.getIv().length)
 				throw new IOException();
 		}

@@ -69,11 +69,11 @@ import java.net.URI;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.sql.Date;
+
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Level;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -81,7 +81,7 @@ import java.util.regex.Pattern;
  * This interface enable to partially serialize/deserialize classes that
  * implements the current interface, in order to produce an XML file. The
  * managed types are all the primitive types, {@link String} class, {@link Date}
- * class, {@link Class} class, {@link Level} class, {@link Map} class,
+ * class, {@link Class} class, {@link Map} class,
  * {@link List} class, {@link URI} class, {@link URL} class, {@link File} class,
  * and all classes that implements this interface.
  * <p>
@@ -1163,7 +1163,7 @@ public abstract class MultiFormatProperties implements SecureExternalizable, Clo
 			return new Tag(Tag.PREFIX+"file");
 		else if (Class.class==clazz)
 			return new Tag(Tag.PREFIX+"class");
-		else if (Level.class==clazz)
+		else if (clazz.getName().equals("java.util.logging.Level"))
 			return new Tag(Tag.PREFIX+"logLevel");
 		else
 			return new Tag(clazz);
