@@ -91,7 +91,7 @@ abstract class AbstractHybridKeyAgreement<KA extends IKeyAgreement> extends Agre
 			throw new IllegalArgumentException();
 		if (!PQCKeyAgreement.isPostQuantumAgreement())
 			throw new IllegalArgumentException();
-		finalizer=new Finalizer<KA>(this);
+		finalizer= new Finalizer<>(this);
 		this.finalizer.nonPQCKeyAgreement=nonPQCKeyAgreement;
 		this.finalizer.PQCKeyAgreement=PQCKeyAgreement;
 	}

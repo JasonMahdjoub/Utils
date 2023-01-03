@@ -227,10 +227,9 @@ abstract class CommonCipherInputStream extends RandomInputStream {
 			System.arraycopy(outputBuffer, outputBufferIndex, b, off, s);
 			posPlainText+=s;
 			outputBufferLength-=s;
-			if (outputBufferLength<=0)
+			if (outputBufferLength==0)
 			{
 				outputBufferIndex =0;
-				outputBufferLength =0;
 			}
 			else
 				outputBufferIndex +=s;

@@ -360,29 +360,27 @@ public class CircularArrayList<E> extends AbstractList<E> implements List<E>, De
 
 	@Override
 	public Iterator<E> descendingIterator() {
-		return new Iterator<E>() {
-			int index=size;
+		return new Iterator<>() {
+			int index = size;
 
 
 			@Override
 			public boolean hasNext() {
-				return index>0;
+				return index > 0;
 			}
 
 			@Override
 			public E next() {
 				if (hasNext()) {
-					return (E) array[(--index+position)%array.length];
-				}
-				else
-				{
+					return (E) array[(--index + position) % array.length];
+				} else {
 					throw new NoSuchElementException();
 				}
 			}
 
 			@Override
 			public void remove() {
-				if( size==0)
+				if (size == 0)
 					throw new UnsupportedOperationException();
 				CircularArrayList.this.remove(index);
 			}

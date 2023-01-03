@@ -36,7 +36,6 @@ package com.distrimind.util.crypto;
 
 
 import com.distrimind.bouncycastle.crypto.CryptoException;
-import com.distrimind.util.AutoZeroizable;
 import com.distrimind.util.Bits;
 import com.distrimind.util.io.Integrity;
 import com.distrimind.util.io.MessageExternalizationException;

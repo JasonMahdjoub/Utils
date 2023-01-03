@@ -78,7 +78,6 @@ public class ASymmetricPublicKey extends AbstractKey implements IASymmetricPubli
 	private static final int MAX_SIZE_IN_BITS_OF_NON_HYBRID_PUBLIC_KEY = MAX_SIZE_IN_BYTES_OF_NON_HYBRID_PUBLIC_KEY*8;
 
 
-	// private final PublicKey publicKey;
 	private byte[] publicKey;
 
 	private final int keySizeBits;

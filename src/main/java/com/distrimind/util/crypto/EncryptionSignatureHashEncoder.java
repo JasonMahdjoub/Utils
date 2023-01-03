@@ -430,14 +430,10 @@ public class EncryptionSignatureHashEncoder {
 		if (inputStream.length()<=0)
 			throw new IllegalArgumentException();
 		ROSForEncryption ros=getRandomOutputStream(originalOutputStream, inputStream.length(), false);
-		try
-		{
+		try (ros) {
 			inputStream.transferTo(ros);
-			if (cipher!=null && poolExecutor!=null)
+			if (cipher != null && poolExecutor != null)
 				inputStream.flush();
-		}
-		finally {
-			ros.close();
 		}
 		return ros.bytesWritten;
 	}
@@ -490,12 +486,8 @@ public class EncryptionSignatureHashEncoder {
 		randomByteArrayOutputStream.init(data);
 		randomOutputStream.init(randomByteArrayOutputStream, dataOff-EncryptionSignatureHashEncoder.headSize, data.length-dataOff+EncryptionSignatureHashEncoder.headSize);
 		ROSForEncryption ros=getRandomOutputStream(randomOutputStream, dataLen, true);
-		try
-		{
+		try (ros) {
 			inputStream.transferTo(ros);
-		}
-		finally {
-			ros.close();
 		}
 		return (int)ros.bytesWritten;
 	}

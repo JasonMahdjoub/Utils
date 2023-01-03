@@ -285,7 +285,7 @@ public abstract class AbstractEncryptionOutputAlgorithm implements AutoZeroizabl
 	protected void replaceMainKeyByLastDerivedSecretKey(AbstractWrappedIVs<?, ?> wrappedIVAndSecretKey) throws IOException {
 
 	}
-	class CommonCipherOutputStream extends RandomOutputStream
+	protected class CommonCipherOutputStream extends RandomOutputStream
 	{
 		long length;
 		long currentPos;

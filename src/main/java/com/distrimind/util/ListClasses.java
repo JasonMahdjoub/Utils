@@ -31,7 +31,7 @@ public class ListClasses {
 	 * 
 	 * @param _package
 	 *            the name of the considered package
-	 * @return the list of classes
+	 * @return the set of classes
 
 	 */
 	public static Set<Class<?>> getClasses(Package _package) {
@@ -78,7 +78,7 @@ public class ListClasses {
 	 *            the considered directory
 	 * @param _package
 	 *            the package name
-	 * @return the list of classes
+	 * @return the set of classes
 	 */
 	private static Set<Class<?>> processDirectory(File _directory, Package _package) {
 		Set<Class<?>> classes = new HashSet<>();
@@ -122,7 +122,7 @@ public class ListClasses {
 	 *            the considered jar file
 	 * @param _package
 	 *            the package name
-	 * @return the list of classes
+	 * @return the set of classes
 	 *
 	 */
 	private static Set<Class<?>> processJar(File _jar_file, Package _package) {
