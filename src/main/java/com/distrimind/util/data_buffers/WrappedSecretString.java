@@ -24,19 +24,31 @@ public class WrappedSecretString extends WrappedString implements AutoZeroizable
 		finalizer.toZeroize=true;
 
 	}
-	WrappedSecretString(char[] data, String dataString) {
+
+	WrappedSecretString(char[] data, StringBuilder dataString) {
 		super(data, dataString);
 		registerCleanerIfNotDone(finalizer);
 		finalizer.toZeroize=true;
 
 	}
+	@Deprecated
 	public WrappedSecretString(String secretData) {
 		super(secretData);
 		registerCleanerIfNotDone(finalizer);
 		finalizer.toZeroize=true;
 	}
+	public WrappedSecretString(StringBuilder secretData) {
+		super(secretData);
+		registerCleanerIfNotDone(finalizer);
+		finalizer.toZeroize=true;
+	}
 
-
+	@Override
+	@Deprecated
+	public String toString()
+	{
+		return super.toString();
+	}
 
 	public WrappedSecretString(WrappedString wrappedSecretString) {
 		super(wrappedSecretString);

@@ -25,7 +25,13 @@ public final class WrappedPassword extends WrappedSecretString implements Secure
 			throw new IllegalArgumentException();
 	}
 
+	@Deprecated
 	public WrappedPassword(String password) {
+		super(password);
+		if (password.length()>MAX_CHARS_NUMBER)
+			throw new IllegalArgumentException();
+	}
+	public WrappedPassword(StringBuilder password) {
 		super(password);
 		if (password.length()>MAX_CHARS_NUMBER)
 			throw new IllegalArgumentException();

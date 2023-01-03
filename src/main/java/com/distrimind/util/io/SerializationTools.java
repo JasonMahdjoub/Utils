@@ -150,9 +150,12 @@ public class SerializationTools {
 	private static char[] chars=null;
 	static File readFile(final SecuredObjectInputStream ois, int sizeMax, boolean supportNull) throws IOException
 	{
-		return convertStringToFile(readString(ois, sizeMax, supportNull));
+		char[] c=readString(ois, sizeMax, supportNull);
+
+		assert c != null;
+		return convertStringToFile(new String(c));
 	}
-	static String readString(final SecuredObjectInputStream ois, int sizeMax, boolean supportNull) throws IOException
+	static char[] readString(final SecuredObjectInputStream ois, int sizeMax, boolean supportNull) throws IOException
 	{
 		int size=readSize(ois, sizeMax);
 		if (size==-1)
@@ -172,7 +175,7 @@ public class SerializationTools {
 					chars=new char[sizeMax];
 				for (int i=0;i<size;i++)
 					chars[i]=ois.readChar();
-				return new String(chars, 0, size);
+				return chars;
 			}
 		}
 		else
@@ -180,13 +183,13 @@ public class SerializationTools {
 			char []chars=new char[size];
 			for (int i=0;i<size;i++)
 				chars[i]=ois.readChar();
-			return new String(chars, 0, size);
-			
+			return chars;
+
 		}
 	}
 	static WrappedString readWrappedString(final SecuredObjectInputStream ois, int sizeMax, boolean supportNull) throws IOException
 	{
-		String s=readString(ois, sizeMax, supportNull);
+		char[] s=readString(ois, sizeMax, supportNull);
 		if (s==null)
 			return null;
 		else
@@ -199,19 +202,19 @@ public class SerializationTools {
 				case 1:
 					return new WrappedSecretString(s);
 				case 2:
-					if (s.length()>WrappedEncryptedASymmetricPrivateKeyString.MAX_CHARS_NUMBER)
+					if (s.length>WrappedEncryptedASymmetricPrivateKeyString.MAX_CHARS_NUMBER)
 						throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
 					return new WrappedEncryptedASymmetricPrivateKeyString(s);
 				case 3:
-					if (s.length()>WrappedEncryptedSymmetricSecretKeyString.MAX_CHARS_NUMBER)
+					if (s.length>WrappedEncryptedSymmetricSecretKeyString.MAX_CHARS_NUMBER)
 						throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
 					return new WrappedEncryptedSymmetricSecretKeyString(s);
 				case 4:
-					if (s.length()>WrappedHashedPasswordString.MAX_CHARS_NUMBER)
+					if (s.length>WrappedHashedPasswordString.MAX_CHARS_NUMBER)
 						throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
 					return new WrappedHashedPasswordString(s);
 				case 5:
-					if (s.length()>WrappedPassword.MAX_CHARS_NUMBER)
+					if (s.length>WrappedPassword.MAX_CHARS_NUMBER)
 						throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
 					return new WrappedPassword(s);
 				default:
@@ -1160,7 +1163,7 @@ public class SerializationTools {
 					throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
 			}
 			else if (code==1){
-				String clazzString = SerializationTools.readString(ois, MAX_CLASS_LENGTH, false);
+				String clazzString = new String(Objects.requireNonNull(SerializationTools.readString(ois, MAX_CLASS_LENGTH, false)));
 
 				Class<?> c = UtilClassLoader.getLoader().loadClass(clazzString, false);
 				if (!c.isEnum())
@@ -1351,7 +1354,7 @@ public class SerializationTools {
 			Class<?> c;
 			boolean doubleCheck = rootClass != Object.class;
 			if (code==1) {
-				String clazz = SerializationTools.readString(objectInput, MAX_CLASS_LENGTH, false);
+				String clazz = new String(Objects.requireNonNull(SerializationTools.readString(objectInput, MAX_CLASS_LENGTH, false)));
 
 
 				c = objectInput.getObjectResolver().resolveClass(clazz, !doubleCheck);

@@ -19,7 +19,13 @@ public class WrappedEncryptedASymmetricPrivateKeyString extends WrappedSecretStr
 			throw new IllegalArgumentException();
 	}
 
+	@Deprecated
 	public WrappedEncryptedASymmetricPrivateKeyString(String secretData) {
+		super(secretData);
+		if (secretData.length()>MAX_CHARS_NUMBER)
+			throw new IllegalArgumentException();
+	}
+	public WrappedEncryptedASymmetricPrivateKeyString(StringBuilder secretData) {
 		super(secretData);
 		if (secretData.length()>MAX_CHARS_NUMBER)
 			throw new IllegalArgumentException();

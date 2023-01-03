@@ -16,7 +16,7 @@ public class WrappedString {
 	protected static class Finalizer extends Cleanable.Cleaner
 	{
 		private char[] chars;
-		private String string;
+		private StringBuilder string;
 		protected transient boolean toZeroize;
 
 		protected Finalizer() {
@@ -47,10 +47,11 @@ public class WrappedString {
 			throw new NullPointerException();
 		finalizer=new Finalizer();
 		this.finalizer.chars =data;
-		this.finalizer.string=new String(this.finalizer.chars);
-
+		this.finalizer.string=new StringBuilder();
+		this.finalizer.string.append(this.finalizer.chars);
 	}
-	WrappedString(char[] data, String dataString) {
+
+	WrappedString(char[] data, StringBuilder dataString) {
 		if (data==null)
 			throw new NullPointerException();
 		if (dataString==null)
@@ -65,12 +66,23 @@ public class WrappedString {
 			throw new NullPointerException();
 		finalizer=new Finalizer();
 		this.finalizer.chars =secretData.toCharArray();
+		this.finalizer.string=new StringBuilder();
+		this.finalizer.string.append(secretData);
+	}
+	public WrappedString(StringBuilder secretData) {
+		if (secretData==null)
+			throw new NullPointerException();
+		finalizer=new Finalizer();
+		this.finalizer.chars=new char[secretData.length()];
+		for (int i=0;i<secretData.length();i++)
+			this.finalizer.chars[i]=secretData.charAt(i);
 		this.finalizer.string=secretData;
 	}
 	protected void setChars(char[] chars)
 	{
 		this.finalizer.chars=chars;
-		this.finalizer.string=new String(chars);
+		this.finalizer.string=new StringBuilder();
+		this.finalizer.string.append(chars);
 		this.secretString=null;
 	}
 
@@ -82,23 +94,28 @@ public class WrappedString {
 	protected WrappedString(WrappedData wrappedSecretData, boolean zeroiseIntermediateArrays) {
 		finalizer=new Finalizer();
 		this.finalizer.string= Bits.toBase64String(wrappedSecretData.getBytes(), zeroiseIntermediateArrays);
-		this.finalizer.chars=this.finalizer.string.toCharArray();
+		this.finalizer.chars=new char[this.finalizer.string.length()];
+		for (int i=0;i<this.finalizer.string.length();i++)
+			this.finalizer.chars[i]=this.finalizer.string.charAt(i);
 	}
 	public WrappedString(WrappedData wrappedSecretData) {
 		this(wrappedSecretData,false);
 	}
 
-	public static void zeroizeString(String secretData)
+	public static void zeroizeString(StringBuilder secretData)
 	{
-		/*try {
-			byte[] t=(byte[])valueField.get(secretData);
-			Arrays.fill(t, (byte)0);
-		} catch (IllegalAccessException e) {
-			e.printStackTrace();
-		}*/
+		if (secretData!=null) {
+			for (int i = 0; i < secretData.length(); i++)
+				secretData.setCharAt(i, '0');
+		}
 	}
 	@Override
 	public String toString()
+	{
+		return finalizer.string.toString();
+	}
+
+	public StringBuilder toStringBuilder()
 	{
 		return finalizer.string;
 	}
@@ -108,7 +125,7 @@ public class WrappedString {
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
 		WrappedString that = (WrappedString) o;
-		return finalizer.string.equals(that.finalizer.string);
+		return Arrays.equals(finalizer.chars, that.finalizer.chars);
 	}
 
 	@Override

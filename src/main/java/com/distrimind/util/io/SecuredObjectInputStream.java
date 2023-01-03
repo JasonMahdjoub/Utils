@@ -298,7 +298,7 @@ public abstract class SecuredObjectInputStream extends InputStream implements Da
 		return SerializationTools.readFile(this, (int)Math.min(2L*maxCharsNumber, Integer.MAX_VALUE), nullAccepted);
 	}
 	public String readString(boolean nullAccepted, int maxCharsNumber) throws IOException {
-		return SerializationTools.readString(this, (int)Math.min(2L*maxCharsNumber, Integer.MAX_VALUE), nullAccepted);
+		return new String(Objects.requireNonNull(SerializationTools.readString(this, (int) Math.min(2L * maxCharsNumber, Integer.MAX_VALUE), nullAccepted)));
 	}
 	public BigInteger readBigInteger(boolean nullAccepted) throws IOException {
 		return SerializationTools.readBigInteger(this, nullAccepted);

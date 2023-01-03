@@ -98,10 +98,18 @@ public interface DecentralizedValue {
 		return dv;
 	}
 
-
+	default StringBuilder toShortStringBuilder()
+	{
+		StringBuilder res=new StringBuilder();
+		res.append(getShortClassName())
+			.append("[..")
+				.append(encode().toShortData(8).toWrappedString().toStringBuilder())
+				.append("..]");
+		return res;
+	}
 	default String toShortString()
 	{
-		return getShortClassName()+"[.."+encode().toShortData(8).toWrappedString().toString()+"..]";
+		return toShortStringBuilder().toString();
 	}
 
 	String getShortClassName();

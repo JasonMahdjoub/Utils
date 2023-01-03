@@ -19,7 +19,13 @@ public class WrappedHashedPasswordString extends WrappedSecretString {
 			throw new NullPointerException();
 	}
 
+	@Deprecated
 	public WrappedHashedPasswordString(String secretData) {
+		super(secretData);
+		if (secretData.length()>MAX_CHARS_NUMBER)
+			throw new NullPointerException();
+	}
+	public WrappedHashedPasswordString(StringBuilder secretData) {
 		super(secretData);
 		if (secretData.length()>MAX_CHARS_NUMBER)
 			throw new NullPointerException();
