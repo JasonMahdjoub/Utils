@@ -261,7 +261,8 @@ public enum ASymmetricAuthenticatedSignatureType {
 	@SuppressWarnings("DeprecatedIsStillUsed")
 	@Deprecated
 	public int getSignatureSizeBits(int keySizeBits) {
-		if (this==BC_FIPS_SHA256withRSAandMGF1 || this== ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA384withRSAandMGF1 || this== ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA512withRSAandMGF1)
+		ASymmetricAuthenticatedSignatureType dt=this.getDerivedType();
+		if (dt==BC_FIPS_SHA256withRSAandMGF1 || dt== ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA384withRSAandMGF1 || dt== ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA512withRSAandMGF1)
 			return keySizeBits+464;
 		/*else if (this==BC_SHA256withECDSA_CURVE_25519)
 			return 560;
@@ -269,9 +270,9 @@ public enum ASymmetricAuthenticatedSignatureType {
 			return 560;
 		else if (this==BC_SHA512withECDSA_CURVE_25519)
 			return 560;*/
-		else if (this== BC_FIPS_Ed448)
+		else if (dt== BC_FIPS_Ed448)
 			return 912;
-		else if (this== BC_FIPS_Ed25519)
+		else if (dt== BC_FIPS_Ed25519)
 			return 512;
 		/*else if (this==BC_SHA256withECDSA_CURVE_41417)
 			return 560;
@@ -297,30 +298,30 @@ public enum ASymmetricAuthenticatedSignatureType {
 			return 560;
 		else if (this==BC_SHA512withECDSA_CURVE_M_221)
 			return 560;*/
-		else if (this==BCPQC_SPHINCS256_SHA2_512_256)
+		else if (dt==BCPQC_SPHINCS256_SHA2_512_256)
 			return 328000;
-		else if (this==BCPQC_SPHINCS256_SHA3_512)
+		else if (dt==BCPQC_SPHINCS256_SHA3_512)
 			return 328000;
-		else if (this==BCPQC_SPHINCS_PLUS_SHA256_SLOW || this==BCPQC_SPHINCS_PLUS_SHA256_FAST || this==BCPQC_SPHINCS_PLUS_SHAKE256_SLOW || this==BCPQC_SPHINCS_PLUS_SHAKE256_FAST)
+		else if (dt==BCPQC_SPHINCS_PLUS_SHA256_SLOW || dt==BCPQC_SPHINCS_PLUS_SHA256_FAST || dt==BCPQC_SPHINCS_PLUS_SHAKE256_SLOW || dt==BCPQC_SPHINCS_PLUS_SHAKE256_FAST)
 			return 238336;
-		else if (this==BCPQC_CHRYSTALS_DILITHIUM_2 || this==BCPQC_CHRYSTALS_DILITHIUM_2_AES) {
+		else if (dt==BCPQC_CHRYSTALS_DILITHIUM_2 || dt==BCPQC_CHRYSTALS_DILITHIUM_2_AES) {
 			return 19360;
 		}
-		else if (this==BCPQC_CHRYSTALS_DILITHIUM_3 || this==BCPQC_CHRYSTALS_DILITHIUM_3_AES) {
+		else if (dt==BCPQC_CHRYSTALS_DILITHIUM_3 || dt==BCPQC_CHRYSTALS_DILITHIUM_3_AES) {
 			return 26344;
 		}
-		else if (this==BCPQC_CHRYSTALS_DILITHIUM_5 || this==BCPQC_CHRYSTALS_DILITHIUM_5_AES) {
+		else if (dt==BCPQC_CHRYSTALS_DILITHIUM_5 || dt==BCPQC_CHRYSTALS_DILITHIUM_5_AES) {
 			return 36760;
 		}
-		else if (this==BCPQC_FALCON_512) {
+		else if (dt==BCPQC_FALCON_512) {
 			return 5360;
 		}
-		else if (this==BCPQC_FALCON_1024) {
+		else if (dt==BCPQC_FALCON_1024) {
 			return 10320;
 		}
-		else if (this== ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA256withECDSA_P_256)
+		else if (dt== ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA256withECDSA_P_256)
 			return 1112;
-		else if (this== ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA384withECDSA_P_384 || this== ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA512withECDSA_P_521)
+		else if (dt== ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA384withECDSA_P_384 || dt== ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA512withECDSA_P_521)
 			return 1104;
 		return keySizeBits;
 	}

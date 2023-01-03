@@ -198,13 +198,13 @@ public class ASymmetricAuthenticatedSignerAlgorithm extends AbstractAuthenticate
 				includeParameter = false;
 
 				if (type == ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA256withRSAandMGF1) {
-					((JavaNativeSignature) signature).getSignature().setParameter(new PSSParameterSpec("SHA-256", "MGF1", new MGF1ParameterSpec("SHA-256"), 20, PSSParameterSpec.TRAILER_FIELD_BC));
+					((JavaNativeSignature) signature).getSignature().setParameter(new PSSParameterSpec("SHA-256", "MGF1", new MGF1ParameterSpec("SHA-256"), 32, PSSParameterSpec.TRAILER_FIELD_BC));
 					includeParameter = true;
 				} else if (type == ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA384withRSAandMGF1) {
-					((JavaNativeSignature) signature).getSignature().setParameter(new PSSParameterSpec("SHA-384", "MGF1", new MGF1ParameterSpec("SHA-384"), 20, PSSParameterSpec.TRAILER_FIELD_BC));
+					((JavaNativeSignature) signature).getSignature().setParameter(new PSSParameterSpec("SHA-384", "MGF1", new MGF1ParameterSpec("SHA-384"), 32, PSSParameterSpec.TRAILER_FIELD_BC));
 					includeParameter = true;
 				} else if (type == ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA512withRSAandMGF1) {
-					((JavaNativeSignature) signature).getSignature().setParameter(new PSSParameterSpec("SHA-512", "MGF1", new MGF1ParameterSpec("SHA-512"), 20, PSSParameterSpec.TRAILER_FIELD_BC));
+					((JavaNativeSignature) signature).getSignature().setParameter(new PSSParameterSpec("SHA-512", "MGF1", new MGF1ParameterSpec("SHA-512"), 32, PSSParameterSpec.TRAILER_FIELD_BC));
 					includeParameter = true;
 				}
 			} catch (InvalidAlgorithmParameterException e) {
