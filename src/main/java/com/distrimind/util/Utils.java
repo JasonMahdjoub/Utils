@@ -70,6 +70,7 @@ public class Utils {
 							new Description(5, 24, 2, Version.Type.STABLE, 0, "2023-01-03")
 									.addItem(INTERNAL_CHANGE, "Change language level to Java 11")
 									.addItem(INTERNAL_CHANGE, "Update dependencies")
+									.addItem(INTERNAL_CHANGE, "Clean code")
 
 					)
 					.addDescription(

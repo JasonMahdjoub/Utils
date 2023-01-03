@@ -293,6 +293,7 @@ public class DefaultMultiFormatObjectParser extends AbstractMultiFormatObjectPar
 	/**
 	 * {@inheritDoc}
 	 */
+	@SuppressWarnings("deprecation")
 	@Override
 	public Object convertStringToObject(Class<?> field_type, String nodeValue) throws Exception {
 		if (nodeValue == null)

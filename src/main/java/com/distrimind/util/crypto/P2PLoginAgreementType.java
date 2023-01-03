@@ -74,7 +74,7 @@ public enum P2PLoginAgreementType {
 		return PasswordHashType.PBKDF2WithHMacSHA2_512;
 	}
 
-	@SuppressWarnings("resource")
+
 	private ASymmetricPublicKey generateASymmetricPublicKey(AbstractSecureRandom random) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
 		return ASymmetricEncryptionType.DEFAULT.getKeyPairGenerator(random).generateKeyPair().getASymmetricPublicKey();
 	}

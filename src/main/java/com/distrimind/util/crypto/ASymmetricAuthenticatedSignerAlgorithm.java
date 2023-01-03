@@ -178,7 +178,6 @@ public class ASymmetricAuthenticatedSignerAlgorithm extends AbstractAuthenticate
 				throw new IllegalAccessError();
 		}
 
-		@SuppressWarnings("deprecation")
 		public Signer(ASymmetricPrivateKey localPrivateKey) throws NoSuchAlgorithmException, NoSuchProviderException {
 			if (localPrivateKey == null)
 				throw new NullPointerException("localPrivateKey");

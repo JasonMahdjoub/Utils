@@ -55,12 +55,14 @@ public class GnuKeyGenerator extends AbstractKeyGenerator {
 		this.keyGenerator = keyGenerator;
 	}
 
-	@SuppressWarnings("ConstantConditions")
+
 	@Override
 	public SymmetricSecretKey generateKey() {
-		if (encryptionType==null)
+		if (encryptionType==null) {
+			assert signatureType != null;
 			return new SymmetricSecretKey(signatureType, GnuFunctions.keyGeneratorGeneratorKey(keyGenerator),
 				keySize < 0 ? signatureType.getDefaultKeySizeBits() : keySize);
+		}
 		else
 			return new SymmetricSecretKey(encryptionType, GnuFunctions.keyGeneratorGeneratorKey(keyGenerator),
 					keySize < 0 ? encryptionType.getDefaultKeySizeBits() : keySize);

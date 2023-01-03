@@ -88,7 +88,6 @@ public class FragmentedRandomInputStreamPerChannel extends RandomInputStream {
 
 	@Override
 	public void readFully(byte[] tab, int off, int len) throws IOException {
-		//noinspection ResultOfMethodCallIgnored
 		read(tab, off, len, true);
 	}
 

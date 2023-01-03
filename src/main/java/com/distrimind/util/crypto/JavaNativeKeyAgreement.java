@@ -101,12 +101,13 @@ public final class JavaNativeKeyAgreement extends AbstractKeyAgreement {
 	}
 
 
-	@SuppressWarnings("ConstantConditions")
+
     @Override
 	public SymmetricSecretKey generateSecretKey(short keySize)
 			throws IOException {
 		try {
 			if (encryptionType == null) {
+				assert signatureType != null;
 				return new SymmetricSecretKey(signatureType, this.keyAgreement.generateSecret("AES[" + keySize + "]"), keySize);
 			} else
 				return new SymmetricSecretKey(encryptionType, this.keyAgreement.generateSecret(encryptionType.getAlgorithmName() + "[" + keySize + "]"), keySize);

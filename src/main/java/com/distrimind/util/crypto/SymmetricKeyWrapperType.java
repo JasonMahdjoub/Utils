@@ -220,7 +220,7 @@ public enum SymmetricKeyWrapperType {
 			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, e);
 		}
 	}
-	@SuppressWarnings("ConstantConditions")
+
 	private SymmetricSecretKey unwrapKey(SymmetricSecretKey key, byte[] keyToUnwrap, SymmetricEncryptionType encryptionType, SymmetricAuthenticatedSignatureType signatureType, short keySize) throws IOException {
 		if (key.isCleaned())
 			throw new IllegalArgumentException();
@@ -236,6 +236,7 @@ public enum SymmetricKeyWrapperType {
 				Object cipher = GnuFunctions.cipherGetInstance(algorithmName);
 				GnuFunctions.cipherInit(cipher, Cipher.UNWRAP_MODE, key.toGnuKey());
 				if (encryptionType == null) {
+					assert signatureType != null;
 					return new SymmetricSecretKey(signatureType, GnuFunctions.cipherUnwrap(cipher, keyToUnwrap, signatureType.getAlgorithmName()), keySize);
 				} else
 					return new SymmetricSecretKey(encryptionType, GnuFunctions.cipherUnwrap(cipher, keyToUnwrap, encryptionType.getAlgorithmName()), keySize);
@@ -261,6 +262,7 @@ public enum SymmetricKeyWrapperType {
 
 				cipher.init(Cipher.UNWRAP_MODE, key.toJavaNativeKey());
 				if (encryptionType == null) {
+					assert signatureType != null;
 					return new SymmetricSecretKey(signatureType, (javax.crypto.SecretKey) cipher.unwrap(keyToUnwrap, signatureType.getAlgorithmName(), javax.crypto.Cipher.SECRET_KEY), keySize);
 				} else
 					return new SymmetricSecretKey(encryptionType, (javax.crypto.SecretKey) cipher.unwrap(keyToUnwrap, encryptionType.getAlgorithmName(), javax.crypto.Cipher.SECRET_KEY), keySize);

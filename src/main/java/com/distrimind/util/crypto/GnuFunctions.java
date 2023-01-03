@@ -1275,14 +1275,16 @@ class GnuFunctions {
 
 		@Override
 		public Object invoke(Object proxy, Method method, Object[] args)  {
+
 			if (method.equals(engineSetSeed))
 			{
 				if (initialized)
 					secureRandom.engineSetSeed((byte[])args[0]);
 			}
-			else if (method.equals(engineNextBytes))
+			else if (method.equals(engineNextBytes)) {
 				if (initialized)
-					secureRandom.engineNextBytes((byte[])args[0]);
+					secureRandom.engineNextBytes((byte[]) args[0]);
+			}
 			else if (method.equals(engineGenerateSeed))
 					secureRandom.engineGenerateSeed((int)args[0]);
 			else

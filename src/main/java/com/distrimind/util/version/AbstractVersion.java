@@ -12,7 +12,6 @@ import java.util.Locale;
  * @version 1.1
  * @since MaDKitLanEdition 5.6.0
  */
-@SuppressWarnings("FieldMayBeFinal")
 public abstract class AbstractVersion<V extends AbstractVersion<V>> extends MultiFormatProperties implements Comparable<V> {
 
 	protected short major;

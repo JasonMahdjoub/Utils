@@ -47,7 +47,6 @@ import java.util.Date;
  * @since Utils 1.5
  * @see Version
  */
-@SuppressWarnings("FieldMayBeFinal")
 public class Description extends AbstractVersion<Description> {
 
 	private final ArrayList<DescriptionItem> items = new ArrayList<>();

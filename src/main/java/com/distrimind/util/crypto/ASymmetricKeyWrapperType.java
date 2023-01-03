@@ -71,7 +71,7 @@ import com.distrimind.util.systeminfo.OS;
  * @version 3.2
  * @since Utils 1.17.0
  */
-@SuppressWarnings({"ConstantConditions", "BooleanMethodIsAlwaysInverted"})
+@SuppressWarnings("BooleanMethodIsAlwaysInverted")
 public enum ASymmetricKeyWrapperType {
 
 	RSA_OAEP_WITH_SHA2_384("RSA/ECB/OAEPPadding",CodeProvider.SunJCE, false, "SHA-384", FipsSHS.Algorithm.SHA384, false, ASymmetricEncryptionType.RSA_OAEPWithSHA384AndMGF1Padding),
@@ -521,6 +521,7 @@ public enum ASymmetricKeyWrapperType {
 				GnuFunctions.cipherInitUnwrapMode(c, privateKey.toGnuKey());
 				if (encryptionType == null) {
 
+					assert signatureType != null;
 					return new SymmetricSecretKey(signatureType, GnuFunctions.cipherUnwrap(c, keyToUnwrap, signatureType.getAlgorithmName()), keySize);
 				} else {
 
@@ -571,6 +572,7 @@ public enum ASymmetricKeyWrapperType {
 					c.init(Cipher.UNWRAP_MODE, privateKey.toJavaNativeKey());
 				}
 				if (encryptionType == null) {
+					assert signatureType != null;
 					return new SymmetricSecretKey(signatureType, (javax.crypto.SecretKey) c.unwrap(wrappedKey, signatureType.getAlgorithmName(), javax.crypto.Cipher.SECRET_KEY), keySize);
 				} else {
 					return new SymmetricSecretKey(encryptionType, (javax.crypto.SecretKey) c.unwrap(wrappedKey, encryptionType.getAlgorithmName(), javax.crypto.Cipher.SECRET_KEY), keySize);

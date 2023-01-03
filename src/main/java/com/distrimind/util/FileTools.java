@@ -465,7 +465,7 @@ public final class FileTools {
 		}
 	}
 
-	@SuppressWarnings("ConstantConditions")
+
     private static void zipDirectory(ZipOutputStream out, File _directory, String base_directory) throws IOException {
 
         File[] files =_directory.listFiles();
@@ -476,13 +476,13 @@ public final class FileTools {
 			// System.out.println("Adding: "+files[i]);
 			if (f.isDirectory()) {
 				ZipEntry entry = new ZipEntry(
-						transformToDirectory(getRelativePath(base_directory, f.getAbsolutePath())));
+						transformToDirectory(Objects.requireNonNull(getRelativePath(base_directory, f.getAbsolutePath()))));
 				out.putNextEntry(entry);
 				zipDirectory(out, f, base_directory);
 			} else {
 
 				try(FileInputStream fi = new FileInputStream(f)) {
-					ZipEntry entry = new ZipEntry(getRelativePath(base_directory, f.getAbsolutePath()));
+					ZipEntry entry = new ZipEntry(Objects.requireNonNull(getRelativePath(base_directory, f.getAbsolutePath())));
 					out.putNextEntry(entry);
 					int count;
 					while ((count = fi.read(data, 0, data.length)) != -1) {

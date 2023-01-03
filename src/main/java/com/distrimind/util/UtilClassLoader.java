@@ -109,7 +109,6 @@ public class UtilClassLoader extends URLClassLoader { // NO_UCD
 		if (classesToReload != null && classesToReload.contains(name)) {
 			c = findLoadedClass(name);
 			if (c != null) {
-				@SuppressWarnings("resource")
 				UtilClassLoader mcl = new UtilClassLoader(getURLs(), this, classesToReload);
 				classesToReload.remove(name);
 				c = mcl.loadClass(name, resolve);

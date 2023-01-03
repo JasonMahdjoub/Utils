@@ -62,7 +62,7 @@ import java.util.Objects;
  * @version 3.0
  * @since Utils 3.10.0
  */
-@SuppressWarnings("ConstantConditions")
+
 public class BCCipher extends AbstractCipher {
 
 	final SymmetricEncryptionType type;
