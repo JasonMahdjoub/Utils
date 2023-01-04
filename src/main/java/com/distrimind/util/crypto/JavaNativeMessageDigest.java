@@ -63,13 +63,13 @@ public final class JavaNativeMessageDigest extends AbstractMessageDigest {
 	}
 
 	@Override
-	public byte[] digest() {
-		return messageDigest.digest();
+	public HashValue digest() {
+		return HashValue.from(getMessageDigestType(), messageDigest.digest());
 	}
 
 	@Override
-	public byte[] digest(byte[] _input) {
-		return messageDigest.digest(_input);
+	public HashValue digest(byte[] _input) {
+		return HashValue.from(getMessageDigestType(), messageDigest.digest(_input));
 	}
 
 	@Override

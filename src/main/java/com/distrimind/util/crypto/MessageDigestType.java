@@ -93,7 +93,7 @@ public enum MessageDigestType {
 
 	private final CodeProvider codeProvider;
 	
-	private final int digestLengthBits;
+	private final int digestLengthBits, digestLengthBytes;
 
 	private final MessageDigestType replacer;
 
@@ -126,6 +126,7 @@ public enum MessageDigestType {
 		this.digestLengthBits=digestLengthBits;
 		this.isSecuredForSignature=isSecuredForSignature;
 		this.replacer=replacer;
+		this.digestLengthBytes=this.digestLengthBits/8;
 		this.derivedType=this;
 	}
 
@@ -136,6 +137,11 @@ public enum MessageDigestType {
 	public int getDigestLengthInBits()
 	{
 		return digestLengthBits;
+	}
+
+	public int getDigestLengthInBytes()
+	{
+		return digestLengthBytes;
 	}
 	
 	public AbstractMessageDigest getMessageDigestInstance() throws NoSuchAlgorithmException, NoSuchProviderException {

@@ -67,6 +67,11 @@ public class Utils {
 			VERSION.addCreator(new Person("mahdjoub", "jason"))
 					.addDeveloper(new PersonDeveloper("mahdjoub", "jason", "2016-01-04"))
 					.addDescription(
+							new Description(5, 25, 0, Version.Type.STABLE, 0, "2023-01-04")
+									.addItem(NEW_FEATURE, "Add HashValue class")
+
+					)
+					.addDescription(
 							new Description(5, 24, 2, Version.Type.STABLE, 0, "2023-01-03")
 									.addItem(INTERNAL_CHANGE, "Change language level to Java 11")
 									.addItem(INTERNAL_CHANGE, "Update dependencies")

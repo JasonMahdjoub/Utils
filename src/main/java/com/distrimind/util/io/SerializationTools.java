@@ -1941,7 +1941,8 @@ public class SerializationTools {
 						SubStreamParameter.class,
 						SubStreamParameters.class,
 						FragmentedStreamParameters.class,
-						KeyWrapperAlgorithm.class)),
+						KeyWrapperAlgorithm.class,
+						HashValue.class)),
 				new ArrayList<>(Arrays.asList(
 						MessageDigestType.class,
 						SecureRandomType.class,

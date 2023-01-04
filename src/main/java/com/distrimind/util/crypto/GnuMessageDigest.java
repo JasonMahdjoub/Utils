@@ -57,13 +57,13 @@ public final class GnuMessageDigest extends AbstractMessageDigest {
 	}
 
 	@Override
-	public byte[] digest() {
-		return GnuFunctions.digestDigest(messageDigest);
+	public HashValue digest() {
+		return HashValue.from(getMessageDigestType(), GnuFunctions.digestDigest(messageDigest));
 	}
 
 	@Override
-	public byte[] digest(byte[] _input) {
-		return GnuFunctions.digestDigest(messageDigest, _input);
+	public HashValue digest(byte[] _input) {
+		return HashValue.from(getMessageDigestType(), GnuFunctions.digestDigest(messageDigest, _input));
 	}
 
 	@Override
