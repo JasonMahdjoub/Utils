@@ -69,6 +69,7 @@ public class Utils {
 					.addDescription(
 							new Description(5, 25, 0, Version.Type.STABLE, 0, "2023-01-04")
 									.addItem(NEW_FEATURE, "Add HashValue class")
+									.addItem(NEW_FEATURE, "Add MessageDigestAlgorithmType enum")
 
 					)
 					.addDescription(

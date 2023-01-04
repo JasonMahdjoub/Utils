@@ -1960,7 +1960,8 @@ public class SerializationTools {
 						P2PLoginAgreementType.class,
 						PasswordBasedKeyGenerationType.class,
 						OS.class,
-						OSVersion.class)));
+						OSVersion.class,
+						MessageDigestAlgorithmType.class)));
 	}
 
 	public static void addPredefinedClasses(List<Class<? extends SecureExternalizableWithoutInnerSizeControl>> cls, List<Class<? extends Enum<?>>> enms)

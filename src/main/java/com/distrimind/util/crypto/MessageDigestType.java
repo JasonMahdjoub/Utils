@@ -46,38 +46,38 @@ import java.security.NoSuchProviderException;
  */
 public enum MessageDigestType {
 	@Deprecated
-	MD5("MD5", CodeProvider.SUN, 128, false),
+	MD5("MD5", CodeProvider.SUN, MessageDigestAlgorithmType.MD5),
 	@Deprecated
-	SHA1("SHA", CodeProvider.SUN, 160, false),
-	SHA2_256("SHA-256", CodeProvider.SUN, 256, true),
-	SHA2_384("SHA-384",	CodeProvider.SUN, 384,true),
-	SHA2_512("SHA-512", CodeProvider.SUN, 512,true),
+	SHA1("SHA", CodeProvider.SUN, MessageDigestAlgorithmType.SHA1),
+	SHA2_256("SHA-256", CodeProvider.SUN, MessageDigestAlgorithmType.SHA2_256),
+	SHA2_384("SHA-384",	CodeProvider.SUN, MessageDigestAlgorithmType.SHA2_384),
+	SHA2_512("SHA-512", CodeProvider.SUN, MessageDigestAlgorithmType.SHA2_512),
 	@Deprecated
-	GNU_SHA2_256("SHA-256", CodeProvider.GNU_CRYPTO, 256,true),
+	GNU_SHA2_256("SHA-256", CodeProvider.GNU_CRYPTO, MessageDigestAlgorithmType.SHA2_256),
 	@Deprecated
-	GNU_SHA2_384("SHA-384", CodeProvider.GNU_CRYPTO, 384,true),
+	GNU_SHA2_384("SHA-384", CodeProvider.GNU_CRYPTO, MessageDigestAlgorithmType.SHA2_384),
 	@Deprecated
-	GNU_SHA2_512("SHA-512", CodeProvider.GNU_CRYPTO, 512,true),
+	GNU_SHA2_512("SHA-512", CodeProvider.GNU_CRYPTO, MessageDigestAlgorithmType.SHA2_512),
 	@Deprecated
-	GNU_WHIRLPOOL("WHIRLPOOL", CodeProvider.GNU_CRYPTO, 512,true),
-	BC_FIPS_SHA2_256("SHA-256", CodeProvider.BCFIPS, 256,true),
-	BC_FIPS_SHA2_384("SHA-384",CodeProvider.BCFIPS, 384,true),
-	BC_FIPS_SHA2_512("SHA-512", CodeProvider.BCFIPS, 512,true),
-	BC_FIPS_SHA2_512_224("SHA-512/224", CodeProvider.BCFIPS, 224,true),
-	BC_FIPS_SHA2_512_256("SHA-512/256", CodeProvider.BCFIPS, 256,true),
-	BC_FIPS_SHA3_256("SHA3-256", CodeProvider.BCFIPS, 256,true),
-	BC_FIPS_SHA3_384("SHA3-384",CodeProvider.BCFIPS, 384,true),
-	BC_FIPS_SHA3_512("SHA3-512", CodeProvider.BCFIPS, 512,true),
-	BC_WHIRLPOOL("WHIRLPOOL",CodeProvider.BC, 512,true),
-	BC_BLAKE2B_160("BLAKE2B-160", CodeProvider.BC, 160, false),
-	BC_BLAKE2B_256("BLAKE2B-256", CodeProvider.BC, 256,true),
-	BC_BLAKE2B_384("BLAKE2B-384", CodeProvider.BC, 384,true),
-	BC_BLAKE2B_512("BLAKE2B-512", CodeProvider.BC, 512,true),
-    SHA2_512_224("SHA-512/224", CodeProvider.SUN, 224,false, BC_FIPS_SHA2_512_224),
-    SHA2_512_256("SHA-512/256",	CodeProvider.SUN, 256,true, BC_FIPS_SHA2_512_256),
-	SHA3_256("SHA3-256", CodeProvider.SUN, 256,true, BC_FIPS_SHA3_256),
-	SHA3_384("SHA3-384",	CodeProvider.SUN, 384,true, BC_FIPS_SHA3_384),
-	SHA3_512("SHA3-512", CodeProvider.SUN, 512,true, BC_FIPS_SHA3_512),
+	GNU_WHIRLPOOL("WHIRLPOOL", CodeProvider.GNU_CRYPTO, MessageDigestAlgorithmType.WHIRLPOOL),
+	BC_FIPS_SHA2_256("SHA-256", CodeProvider.BCFIPS, MessageDigestAlgorithmType.SHA2_256),
+	BC_FIPS_SHA2_384("SHA-384",CodeProvider.BCFIPS, MessageDigestAlgorithmType.SHA2_384),
+	BC_FIPS_SHA2_512("SHA-512", CodeProvider.BCFIPS, MessageDigestAlgorithmType.SHA2_512),
+	BC_FIPS_SHA2_512_224("SHA-512/224", CodeProvider.BCFIPS, MessageDigestAlgorithmType.SHA2_512_224),
+	BC_FIPS_SHA2_512_256("SHA-512/256", CodeProvider.BCFIPS, MessageDigestAlgorithmType.SHA2_512_256),
+	BC_FIPS_SHA3_256("SHA3-256", CodeProvider.BCFIPS, MessageDigestAlgorithmType.SHA3_256),
+	BC_FIPS_SHA3_384("SHA3-384",CodeProvider.BCFIPS, MessageDigestAlgorithmType.SHA3_384),
+	BC_FIPS_SHA3_512("SHA3-512", CodeProvider.BCFIPS, MessageDigestAlgorithmType.SHA3_512),
+	BC_WHIRLPOOL("WHIRLPOOL",CodeProvider.BC, MessageDigestAlgorithmType.WHIRLPOOL),
+	BC_BLAKE2B_160("BLAKE2B-160", CodeProvider.BC, MessageDigestAlgorithmType.BLAKE2B_160),
+	BC_BLAKE2B_256("BLAKE2B-256", CodeProvider.BC, MessageDigestAlgorithmType.BLAKE2B_256),
+	BC_BLAKE2B_384("BLAKE2B-384", CodeProvider.BC, MessageDigestAlgorithmType.BLAKE2B_384),
+	BC_BLAKE2B_512("BLAKE2B-512", CodeProvider.BC, MessageDigestAlgorithmType.BLAKE2B_512),
+    SHA2_512_224("SHA-512/224", CodeProvider.SUN, MessageDigestAlgorithmType.SHA2_512_224, BC_FIPS_SHA2_512_224),
+    SHA2_512_256("SHA-512/256",	CodeProvider.SUN, MessageDigestAlgorithmType.SHA2_512_256, BC_FIPS_SHA2_512_256),
+	SHA3_256("SHA3-256", CodeProvider.SUN, MessageDigestAlgorithmType.SHA3_256, BC_FIPS_SHA3_256),
+	SHA3_384("SHA3-384",	CodeProvider.SUN, MessageDigestAlgorithmType.SHA3_384, BC_FIPS_SHA3_384),
+	SHA3_512("SHA3-512", CodeProvider.SUN, MessageDigestAlgorithmType.SHA3_512, BC_FIPS_SHA3_512),
 	DEFAULT(SHA2_384);
 
 
@@ -93,13 +93,13 @@ public enum MessageDigestType {
 
 	private final CodeProvider codeProvider;
 	
-	private final int digestLengthBits, digestLengthBytes;
+	private final MessageDigestAlgorithmType type;
 
 	private final MessageDigestType replacer;
 
-	private final boolean isSecuredForSignature;
 
-	public static final int MAX_HASH_LENGTH_IN_BYTES =64;
+
+	public static final int MAX_HASH_LENGTH_IN_BYTES =MessageDigestAlgorithmType.MAX_HASH_LENGTH_IN_BYTES;
 
 	private MessageDigestType derivedType;
 
@@ -112,22 +112,24 @@ public enum MessageDigestType {
 	}
 
 	MessageDigestType(MessageDigestType type) {
-		this(type.algorithmName, type.codeProvider, type.digestLengthBits, type.isSecuredForSignature, type.replacer);
+		this(type.algorithmName, type.codeProvider, type.type, type.replacer);
 		this.derivedType=type;
 	}
 
-	MessageDigestType(String algorithmName, CodeProvider codeProvider, int digestLengthBits, boolean isSecuredForSignature) {
-		this(algorithmName, codeProvider, digestLengthBits, isSecuredForSignature, null);
+	MessageDigestType(String algorithmName, CodeProvider codeProvider, MessageDigestAlgorithmType type) {
+		this(algorithmName, codeProvider, type, null);
 	}
 
-	MessageDigestType(String algorithmName, CodeProvider codeProvider, int digestLengthBits, boolean isSecuredForSignature, MessageDigestType replacer) {
+	MessageDigestType(String algorithmName, CodeProvider codeProvider, MessageDigestAlgorithmType type, MessageDigestType replacer) {
 		this.algorithmName = algorithmName;
 		this.codeProvider = codeProvider;
-		this.digestLengthBits=digestLengthBits;
-		this.isSecuredForSignature=isSecuredForSignature;
+		this.type=type;
 		this.replacer=replacer;
-		this.digestLengthBytes=this.digestLengthBits/8;
 		this.derivedType=this;
+	}
+	public MessageDigestAlgorithmType getMessageDigestAlgorithmType()
+	{
+		return type;
 	}
 
 	public String getAlgorithmName() {
@@ -136,12 +138,12 @@ public enum MessageDigestType {
 
 	public int getDigestLengthInBits()
 	{
-		return digestLengthBits;
+		return type.getDigestLengthInBits();
 	}
 
 	public int getDigestLengthInBytes()
 	{
-		return digestLengthBytes;
+		return type.getDigestLengthInBytes();
 	}
 	
 	public AbstractMessageDigest getMessageDigestInstance() throws NoSuchAlgorithmException, NoSuchProviderException {
@@ -167,11 +169,11 @@ public enum MessageDigestType {
 	}
 
 	public boolean isPostQuantumAlgorithm() {
-		return isSecuredForSignature && digestLengthBits>=384;
+		return type.isPostQuantumAlgorithm();
 	}
 
 	public boolean isSecuredForSignature() {
-		return isSecuredForSignature;
+		return type.isSecuredForSignature();
 	}
 
 	public MessageDigestType getDerivedType() {

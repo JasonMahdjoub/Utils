@@ -19,11 +19,11 @@ import java.util.Objects;
  */
 public final class HashValue implements SecureExternalizable {
 	private byte[] digest;
-	private MessageDigestType type;
+	private MessageDigestAlgorithmType type;
 	private transient String base64String=null;
 	private Integer hashCode=null;
 
-	private HashValue(MessageDigestType type, byte[] digest) {
+	private HashValue(MessageDigestAlgorithmType type, byte[] digest) {
 		if (digest==null)
 			throw new NullPointerException();
 		if (type==null)
@@ -31,7 +31,7 @@ public final class HashValue implements SecureExternalizable {
 		if (type.getDigestLengthInBytes()!=digest.length)
 			throw new IllegalArgumentException();
 		this.digest = digest;
-		this.type = type.getDerivedType();
+		this.type = type;
 		//noinspection ConstantValue
 		assert type.ordinal()<256;
 	}
@@ -45,8 +45,11 @@ public final class HashValue implements SecureExternalizable {
 		}
 		return hashCode;
 	}
-
 	public static HashValue from(MessageDigestType type, byte[] digest)
+	{
+		return new HashValue(type.getDerivedType().getMessageDigestAlgorithmType(), digest);
+	}
+	public static HashValue from(MessageDigestAlgorithmType type, byte[] digest)
 	{
 		return new HashValue(type, digest);
 	}
@@ -84,7 +87,7 @@ public final class HashValue implements SecureExternalizable {
 	public static HashValue fromBase64String(String digest) throws IOException {
 		byte[] e=Base64.getUrlDecoder().decode(digest);
 		int o=e[0] & 0xFF;
-		for (MessageDigestType t : MessageDigestType.values())
+		for (MessageDigestAlgorithmType t : MessageDigestAlgorithmType.values())
 		{
 			if (t.ordinal()==o)
 			{
@@ -112,7 +115,6 @@ public final class HashValue implements SecureExternalizable {
 		hashCode=null;
 		base64String=null;
 		type=in.readEnum(false);
-		type=type.getDerivedType();
 		int s=type.getDigestLengthInBytes();
 		digest=new byte[s];
 		in.readFully(digest);
@@ -123,7 +125,7 @@ public final class HashValue implements SecureExternalizable {
 		return digest;
 	}
 
-	public MessageDigestType getType()
+	public MessageDigestAlgorithmType getType()
 	{
 		return type;
 	}
