@@ -135,7 +135,7 @@ public class SymmetricSecretKey extends AbstractKey implements ISecretDecentrali
 			md.update(encryptionType==null?signatureType.name().getBytes():encryptionType.name().getBytes());
 			md.update(customApplicationCode);
 		}
-		byte[] k=md.digest();
+		byte[] k=md.digest().getHashArray();
 		if (k.length>finalizer.secretKey.length)
 		{
 			byte[] k2=new byte[finalizer.secretKey.length];
@@ -169,7 +169,7 @@ public class SymmetricSecretKey extends AbstractKey implements ISecretDecentrali
 		AbstractMessageDigest md = messageDigestType.getMessageDigestInstance();
 		md.reset();
 		md.update(finalizer.secretKey);
-		byte[] d=md.digest();
+		byte[] d=md.digest().getHashArray();
 		int keySizeBytes=keySizeBits/8;
 		SymmetricSecretKeyPair r= new SymmetricSecretKeyPair(
 				new SymmetricSecretKey(encryptionType, Arrays.copyOfRange(d, 0, keySizeBytes)),
@@ -189,9 +189,9 @@ public class SymmetricSecretKey extends AbstractKey implements ISecretDecentrali
 		this.signatureType=null;
 		//Arrays.fill(secretKey, (byte)0);
 	}
-	SymmetricSecretKey(SymmetricEncryptionType type, WrappedSecretData secretKey) {
+	/*SymmetricSecretKey(SymmetricEncryptionType type, WrappedSecretData secretKey) {
 		this(type, secretKey.getBytes().clone());
-	}
+	}*/
 
 	SymmetricSecretKey(SymmetricEncryptionType type, byte[] secretKey) {
 		if (type == null)

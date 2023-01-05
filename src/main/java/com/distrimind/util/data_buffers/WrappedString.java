@@ -93,7 +93,7 @@ public class WrappedString {
 	}
 	protected WrappedString(WrappedData wrappedSecretData, boolean zeroiseIntermediateArrays) {
 		finalizer=new Finalizer();
-		this.finalizer.string= Bits.toBase64String(wrappedSecretData.getBytes(), zeroiseIntermediateArrays);
+		this.finalizer.string= Bits.toBase64String(wrappedSecretData.getBytes(), true, zeroiseIntermediateArrays);
 		this.finalizer.chars=new char[this.finalizer.string.length()];
 		for (int i=0;i<this.finalizer.string.length();i++)
 			this.finalizer.chars[i]=this.finalizer.string.charAt(i);

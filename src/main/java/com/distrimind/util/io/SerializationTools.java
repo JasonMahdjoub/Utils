@@ -156,6 +156,7 @@ public class SerializationTools {
 				type=1;
 			}
 			writeString(oos, s.toStringBuilder(), sizeMax, supportNull);
+			s.toStringBuilder();
 			oos.writeByte(type);
 		}
 
@@ -1942,7 +1943,7 @@ public class SerializationTools {
 						SubStreamParameters.class,
 						FragmentedStreamParameters.class,
 						KeyWrapperAlgorithm.class,
-						HashValue.class)),
+						HashValueWrapper.class)),
 				new ArrayList<>(Arrays.asList(
 						MessageDigestType.class,
 						SecureRandomType.class,

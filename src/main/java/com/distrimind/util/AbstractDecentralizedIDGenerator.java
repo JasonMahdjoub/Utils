@@ -167,7 +167,7 @@ public abstract class AbstractDecentralizedIDGenerator extends AbstractDecentral
 			}
 			if (hardwareAddress!=null) {
 				digestion48=new byte[6];
-				byte[] digestion256 = messageDigest.digest(hardwareAddress);
+				byte[] digestion256 = messageDigest.digest(hardwareAddress).getHashArray();
 				byte[] digestion64 = new byte[8];
 				for (int i = 0; i < 8; i++)
 					digestion64[i] = (byte) (digestion256[i] ^ digestion256[i + 8] ^ digestion256[i + 16] ^ digestion256[i + 24]);
@@ -237,7 +237,7 @@ public abstract class AbstractDecentralizedIDGenerator extends AbstractDecentral
 				Bits.putLong(ts, 0, timestamp);
 				Bits.putShort(ts, 8, getNewSequence());
 				MESSAGE_DIGEST.update(ts);
-				digestion256=MESSAGE_DIGEST.digest();
+				digestion256=MESSAGE_DIGEST.digest().getHashArray();
 			}
 			this.timestamp=Bits.getLong(digestion256, 0);
 			worker_id_and_sequence=Bits.getLong(digestion256, 8);
@@ -265,7 +265,7 @@ public abstract class AbstractDecentralizedIDGenerator extends AbstractDecentral
 						RANDOM.nextBytes(r);
 						MESSAGE_DIGEST.update(r, 0, 4);
 					}
-					digestion256=MESSAGE_DIGEST.digest();
+					digestion256=MESSAGE_DIGEST.digest().getHashArray();
 					
 					
 					

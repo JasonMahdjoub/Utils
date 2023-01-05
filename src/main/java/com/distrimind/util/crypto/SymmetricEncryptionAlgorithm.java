@@ -85,7 +85,7 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 		if (!getType().supportRandomReadWrite())
 			throw new IllegalStateException("Encryption type must support random read and write");
 		try {
-			byte[] hash = subStreamParameters.generateHash(encryptedInputStream);
+			HashValueWrapper hash = subStreamParameters.generateHash(encryptedInputStream);
 			AbstractWrappedIVs<?, ?> manualIvsAndSecretKeys=useDerivedKeys?new WrappedIVsAndSecretKeys(this):new WrappedIVs(this);
 			readIvsFromEncryptedStream(encryptedInputStream, headLengthBytes, manualIvsAndSecretKeys);
 			return new SubStreamHashResult(hash, manualIvsAndSecretKeys);
@@ -212,7 +212,7 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 					partialHash(nonEncryptedInputStream, nullStream, md, os, start, end - start);
 				}
 			}
-			return com.distrimind.bouncycastle.util.Arrays.constantTimeAreEqual(md.digest(), hashResultFromEncryptedStream.getHash());
+			return md.digest().equals(hashResultFromEncryptedStream.getHash());
 		}
 
 	}

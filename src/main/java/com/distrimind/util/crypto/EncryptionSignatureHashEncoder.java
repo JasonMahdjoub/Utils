@@ -763,16 +763,16 @@ public class EncryptionSignatureHashEncoder {
 			if (digest!=null) {
 				digest.update(code);
 				digest.update(buffer, 0, headSizeMinusOne);
-				byte []hash = digest.digest();
+				HashValueWrapper hash = digest.digest();
 
 				if (symmetricSigner != null) {
 					symmetricSigner.init();
 					if (associatedData!=null)
 						symmetricSigner.update(associatedData, offAD, lenAD);
-					symmetricSigner.update(hash);
+					symmetricSigner.update(hash.getHashArray());
 					byte[] signature = symmetricSigner.getSignature();
 					digest.reset();
-					digest.update(hash);
+					digest.update(hash.getHashArray());
 					digest.update(signature);
 					hash=digest.digest();
 					originalOutputStream.writeBytesArray(signature, false, SymmetricAuthenticatedSignatureType.MAX_SYMMETRIC_SIGNATURE_SIZE);
@@ -780,15 +780,15 @@ public class EncryptionSignatureHashEncoder {
 
 				if (asymmetricSigner != null) {
 					asymmetricSigner.init();
-					asymmetricSigner.update(hash);
+					asymmetricSigner.update(hash.getHashArray());
 					byte[] signature = asymmetricSigner.getSignature();
 					digest.reset();
-					digest.update(hash);
+					digest.update(hash.getHashArray());
 					digest.update(signature);
 					hash=digest.digest();
 					originalOutputStream.writeBytesArray(signature, false, ASymmetricAuthenticatedSignatureType.MAX_SIZE_IN_BYTES_OF_ASYMMETRIC_SIGNATURE);
 				}
-				originalOutputStream.writeBytesArray(hash, false, MessageDigestType.MAX_HASH_LENGTH_IN_BYTES);
+				originalOutputStream.writeObject(hash, false);
 			} else if (symmetricSigner!=null)
 			{
 				if (lenBuffer<=headSizeMinusOne)
@@ -862,8 +862,8 @@ public class EncryptionSignatureHashEncoder {
 					out.writeLong(dataLen);
 					out.flush();
 					RandomInputStream in = new AggregatedRandomInputStreams(new RandomByteArrayInputStream(out.getBytes()), inputStream);
-					byte[] hash = subStreamParameters.partialHash(in, md).digest();
-					return com.distrimind.bouncycastle.util.Arrays.constantTimeAreEqual(hash, hashResultFromEncryptedStream.getHash());
+					HashValueWrapper hash = subStreamParameters.partialHash(in, md).digest();
+					return hash.equals(hashResultFromEncryptedStream.getHash());
 				} else {
 					out.writeLong(dataLen = cipher.getOutputSizeAfterEncryption(dataLen));
 					out.flush();

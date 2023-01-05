@@ -35,10 +35,7 @@ The fact that you are presently reading this means that you have had
 knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-import com.distrimind.util.crypto.AbstractMessageDigest;
-import com.distrimind.util.crypto.AbstractSecureRandom;
-import com.distrimind.util.crypto.MessageDigestType;
-import com.distrimind.util.crypto.SymmetricSecretKey;
+import com.distrimind.util.crypto.*;
 
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
@@ -156,7 +153,7 @@ public class SubStreamParameters implements SecureExternalizable {
 			sorted=true;
 		}
 	}
-	public byte[] generateHash(RandomInputStream inputStream) throws IOException, NoSuchProviderException, NoSuchAlgorithmException {
+	public HashValueWrapper generateHash(RandomInputStream inputStream) throws IOException, NoSuchProviderException, NoSuchAlgorithmException {
 		AbstractMessageDigest messageDigest=messageDigestType.getMessageDigestInstance();
 		messageDigest.reset();
 		return partialHash(inputStream, messageDigest).digest();

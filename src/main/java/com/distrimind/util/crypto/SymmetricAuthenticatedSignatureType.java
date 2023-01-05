@@ -123,7 +123,7 @@ public enum SymmetricAuthenticatedSignatureType {
 			throw new IllegalArgumentException();
 		AbstractMessageDigest md=(keySizeBits>256?MessageDigestType.SHA3_512:MessageDigestType.SHA3_256).getMessageDigestInstance();
 		md.update(wrappedSecretData.getBytes());
-		byte[] d=md.digest();
+		byte[] d=md.digest().getHashArray();
 		return new SymmetricSecretKey(this, Arrays.copyOfRange(d, 0, keySizeBits/8), keySizeBits);
 	}
 	

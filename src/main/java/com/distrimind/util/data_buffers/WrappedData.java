@@ -51,7 +51,7 @@ public class WrappedData  {
 	public WrappedData(WrappedString secretData) throws InvalidEncodedValue {
 		super();
 		finalizer=new Finalizer();
-		setData(Bits.toBytesArrayFromBase64String(secretData.toStringBuilder(), false));
+		setData(Bits.toBytesArrayFromBase64String(secretData.toStringBuilder(), true, false));
 	}
 	public byte[] getBytes() {
 		return finalizer.data;

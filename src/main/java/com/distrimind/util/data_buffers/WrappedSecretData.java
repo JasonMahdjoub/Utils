@@ -23,7 +23,7 @@ public class WrappedSecretData extends WrappedData implements ISecretValue {
 	public WrappedSecretData(WrappedString secretData) throws InvalidEncodedValue {
 		super();
 		registerCleanerIfNotDone(finalizer);
-		setData(Bits.toBytesArrayFromBase64String(secretData.toStringBuilder(), true));
+		setData(Bits.toBytesArrayFromBase64String(secretData.toStringBuilder(), true, true));
 	}
 
 

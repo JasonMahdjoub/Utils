@@ -49,7 +49,7 @@ import java.io.IOException;
  * @since Utils 5.0.0
  */
 @SuppressWarnings("NullableProblems")
-abstract class CommonCipherInputStream extends RandomInputStream {
+public abstract class CommonCipherInputStream extends RandomInputStream {
 	private long posEncrypted;
 	private long posPlainText;
 	private boolean closed;

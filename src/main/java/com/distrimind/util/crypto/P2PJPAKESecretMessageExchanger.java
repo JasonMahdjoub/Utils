@@ -92,15 +92,15 @@ public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
 
 
 	private char[] getHashedPassword(char[] message, byte[] salt, int offset_salt, int len_salt) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
-		byte[] m = hashMessage(MessageDigestType.BC_FIPS_SHA3_256.getMessageDigestInstance(), message, salt,
+		HashValueWrapper m = hashMessage(MessageDigestType.BC_FIPS_SHA3_256.getMessageDigestInstance(), message, salt,
 				offset_salt, len_salt, PasswordHashType.BC_BCRYPT, (byte)15);
-		return convertToChar(m);
+		return convertToChar(m.getHashArray());
 	}
 	private char[] getHashedPassword(byte[] message, int offset, int len, byte[] salt, int offset_salt, int len_salt, boolean messageIsKey) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
-		byte[] m = hashMessage(MessageDigestType.BC_FIPS_SHA3_256.getMessageDigestInstance(), message, offset, len,
+		HashValueWrapper m = hashMessage(MessageDigestType.BC_FIPS_SHA3_256.getMessageDigestInstance(), message, offset, len,
 				salt, offset_salt, len_salt, messageIsKey ? null : PasswordHashType.BC_FIPS_PBKFD2WithHMacSHA2_512, messageIsKey?(byte)6:(byte)15);
-		char[] res=convertToChar(m);
-		Arrays.fill(m, (byte)0);
+		char[] res=convertToChar(m.getHashArray());
+		Arrays.fill(m.getHashArray(), (byte)0);
 		return res;
 	}
 
@@ -147,8 +147,8 @@ public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
 		this.finalizer.keyMaterial = null;
 	}
 
-	private static byte[] hashMessage(AbstractMessageDigest messageDigest, byte[] data, int off, int len, byte[] salt,
-									  int offset_salt, int len_salt, PasswordHashType passwordHashType, byte cost)
+	private static HashValueWrapper hashMessage(AbstractMessageDigest messageDigest, byte[] data, int off, int len, byte[] salt,
+												int offset_salt, int len_salt, PasswordHashType passwordHashType, byte cost)
 			throws IOException {
 		if (passwordHashType != null && salt != null && len_salt > 0) {
 			byte[] s = new byte[len_salt];
@@ -164,8 +164,8 @@ public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
 	}
 
 	@SuppressWarnings("SameParameterValue")
-	private static byte[] hashMessage(AbstractMessageDigest messageDigest, char[] password, byte[] salt,
-									  int offset_salt, int len_salt, PasswordHashType passwordHashType, byte cost)
+	private static HashValueWrapper hashMessage(AbstractMessageDigest messageDigest, char[] password, byte[] salt,
+												int offset_salt, int len_salt, PasswordHashType passwordHashType, byte cost)
 			throws IOException {
 		if (salt != null && len_salt > 0) {
 			byte[] s = new byte[len_salt];

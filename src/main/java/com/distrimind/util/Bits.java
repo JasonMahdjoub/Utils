@@ -251,42 +251,102 @@ public class Bits {
 		}
 		return res;
 	}
-	public static StringBuilder toBase64String(byte[] bytes, boolean zeroiseIntermediateArrays)
+	public static StringBuilder toBase64String(byte[] bytes,boolean addChecksum, boolean zeroiseIntermediateArrays)
 	{
-		byte[] d= Bits.getByteArrayWithCheckSum(bytes);
+		byte[] d;
+		if (addChecksum)
+			d= Bits.getByteArrayWithCheckSum(bytes);
+		else
+			d=bytes;
 		byte[] e=Base64.getUrlEncoder().encode(d);
-		char[] chars=new char[e.length];
-		for (int i=0;i<chars.length;i++)
-			chars[i]=(char)(e[i] & 0xff);
-		StringBuilder res=new StringBuilder();
-		res.append(chars);
+		StringBuilder res=new StringBuilder(e.length);
+		for (byte b : e) res.append((char) (b & 0xff));
+
 		if (zeroiseIntermediateArrays) {
-			Arrays.fill(d, (byte) 0);
+			if (addChecksum)
+				Arrays.fill(d, (byte) 0);
 			Arrays.fill(e, (byte)0);
-			Arrays.fill(chars, '0');
 		}
 		return res;
 	}
-	public static StringBuilder toBase64String(byte[] bytes)
-	{
-		return toBase64String(bytes, false);
+	private static final String hexValues = "0123456789ABCDEF";
+	public static StringBuilder toBase16String(byte[] bytes,boolean addChecksum) {
+		return toBase16String(bytes, addChecksum, false);
 	}
-	public static byte[] toBytesArrayFromBase64String(String base64String) throws InvalidEncodedValue {
-		return toBytesArrayFromBase64String(base64String, false);
+	public static StringBuilder toBase16String(byte[] bytes,boolean addChecksum, boolean zeroiseIntermediateArrays) {
+		byte[] e;
+		if (addChecksum)
+		{
+			e=Bits.getByteArrayWithCheckSum(bytes);
+		}
+		else
+			e=bytes;
+		StringBuilder res = new StringBuilder(e.length);
+		for (byte b : e) {
+			int v = b & 0xFF;
+			res.append(hexValues.charAt(v >>> 4));
+			res.append(hexValues.charAt(v & 0x0F));
+		}
+		if (zeroiseIntermediateArrays && addChecksum)
+			Arrays.fill(e, (byte)0);
+		return res;
 	}
-	public static byte[] toBytesArrayFromBase64String(char[] base64String) throws InvalidEncodedValue {
-		return toBytesArrayFromBase64String(base64String, false);
+	public static byte[] toBytesArrayFromBase16String(CharSequence base16String, boolean containsCheckSum) throws InvalidEncodedValue {
+		return toBytesArrayFromBase16String(base16String, containsCheckSum, false);
 	}
 
-	public static byte[] toBytesArrayFromBase64String(char[] base64String, boolean zeroiseIntermediateArrays) throws InvalidEncodedValue {
+	public static byte[] toBytesArrayFromBase16String(CharSequence base16String, boolean containsCheckSum, boolean zeroiseIntermediateArrays) throws InvalidEncodedValue {
+		if (base16String.length()%2!=0)
+			throw new IllegalArgumentException();
+		byte[] e=new byte[base16String.length()/2];
+		for (int i=0;i<base16String.length();i+=2)
+		{
+			int v1=hexValues.indexOf(base16String.charAt(i));
+			if (v1<0)
+				throw new InvalidEncodedValue();
+			int v2=hexValues.indexOf(base16String.charAt(i+1));
+			if (v2<0)
+				throw new InvalidEncodedValue();
+
+			e[i/2]=(byte) ((v1 << 4) + v2);
+		}
+		if (containsCheckSum) {
+			byte[] res = Bits.checkByteArrayAndReturnsItWithoutCheckSum(e);
+			if (zeroiseIntermediateArrays) {
+				Arrays.fill(e, (byte) 0);
+			}
+			return res;
+		}
+		else
+			return e;
+
+	}
+	public static StringBuilder toBase64String(byte[] bytes, boolean containsCheckSum)
+	{
+		return toBase64String(bytes, containsCheckSum, false);
+	}
+	public static byte[] toBytesArrayFromBase64String(String base64String, boolean containsCheckSum) throws InvalidEncodedValue {
+		return toBytesArrayFromBase64String(base64String, containsCheckSum, false);
+	}
+	public static byte[] toBytesArrayFromBase64String(char[] base64String, boolean containsCheckSum) throws InvalidEncodedValue {
+		return toBytesArrayFromBase64String(base64String, containsCheckSum, false);
+	}
+
+	public static byte[] toBytesArrayFromBase64String(char[] base64String, boolean containsCheckSum, boolean zeroiseIntermediateArrays) throws InvalidEncodedValue {
 		try {
 			byte[] e=new byte[base64String.length];
 			for (int i=0;i<e.length;i++)
 				e[i]=(byte)base64String[i];
 			byte[] d = Base64.getUrlDecoder().decode(e);
-			byte[] res = Bits.checkByteArrayAndReturnsItWithoutCheckSum(d);
+
+			byte[] res;
+			if (containsCheckSum)
+				res= Bits.checkByteArrayAndReturnsItWithoutCheckSum(d);
+			else
+				res=d;
 			if (zeroiseIntermediateArrays) {
-				Arrays.fill(d, (byte) 0);
+				if (containsCheckSum)
+					Arrays.fill(d, (byte) 0);
 				Arrays.fill(e, (byte)0);
 			}
 			return res;
@@ -296,11 +356,15 @@ public class Bits {
 			throw new InvalidEncodedValue(e);
 		}
 	}
-	public static byte[] toBytesArrayFromBase64String(String base64String, boolean zeroiseIntermediateArrays) throws InvalidEncodedValue {
+	public static byte[] toBytesArrayFromBase64String(String base64String, boolean containsCheckSum, boolean zeroiseIntermediateArrays) throws InvalidEncodedValue {
 		try {
 			byte[] d = Base64.getUrlDecoder().decode(base64String);
-			byte[] res = Bits.checkByteArrayAndReturnsItWithoutCheckSum(d);
-			if (zeroiseIntermediateArrays) {
+			byte[] res;
+			if (containsCheckSum)
+				res= Bits.checkByteArrayAndReturnsItWithoutCheckSum(d);
+			else
+				res=d;
+			if (zeroiseIntermediateArrays && containsCheckSum) {
 				Arrays.fill(d, (byte) 0);
 			}
 			return res;
@@ -310,15 +374,20 @@ public class Bits {
 			throw new InvalidEncodedValue(e);
 		}
 	}
-	public static byte[] toBytesArrayFromBase64String(StringBuilder base64String, boolean zeroiseIntermediateArrays) throws InvalidEncodedValue {
+	public static byte[] toBytesArrayFromBase64String(StringBuilder base64String, boolean containsCheckSum, boolean zeroiseIntermediateArrays) throws InvalidEncodedValue {
 		try {
 			byte[] e=new byte[base64String.length()];
 			for (int i=0;i<e.length;i++)
 				e[i]=(byte)base64String.charAt(i);
 			byte[] d = Base64.getUrlDecoder().decode(e);
-			byte[] res = Bits.checkByteArrayAndReturnsItWithoutCheckSum(d);
+			byte[] res;
+			if (containsCheckSum)
+				res= Bits.checkByteArrayAndReturnsItWithoutCheckSum(d);
+			else
+				res=d;
 			if (zeroiseIntermediateArrays) {
-				Arrays.fill(d, (byte) 0);
+				if (containsCheckSum)
+					Arrays.fill(d, (byte) 0);
 				Arrays.fill(e, (byte) 0);
 			}
 			return res;

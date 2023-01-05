@@ -837,16 +837,16 @@ public class EncryptionSignatureHashDecoder {
 			if (digest!=null) {
 				digest.update(code);
 				digest.update(buffer, 0, EncryptionSignatureHashEncoder.headSizeMinusOne);
-				byte[] hash = digest.digest();
-				byte[] hash2=hash;
-				byte[] hash3=hash;
+				HashValueWrapper hash = digest.digest();
+				HashValueWrapper hash2=hash;
+				HashValueWrapper hash3=hash;
 				byte[] symSign=null;
 				byte[] asymSign=null;
 				if (symmetricChecker!=null)
 				{
 					symSign=originalInputStream.readBytesArray(false, SymmetricAuthenticatedSignatureType.MAX_SYMMETRIC_SIGNATURE_SIZE);
 					digest.reset();
-					digest.update(hash);
+					digest.update(hash.getHashArray());
 					digest.update(symSign);
 					hash3=hash2=digest.digest();
 				}
@@ -854,14 +854,14 @@ public class EncryptionSignatureHashDecoder {
 				{
 					asymSign=originalInputStream.readBytesArray(false, ASymmetricAuthenticatedSignatureType.MAX_SIZE_IN_BYTES_OF_ASYMMETRIC_SIGNATURE);
 					digest.reset();
-					digest.update(hash2);
+					digest.update(hash2.getHashArray());
 					digest.update(asymSign);
 					hash3=digest.digest();
 				}
-				byte[] hashToCheck=originalInputStream.readBytesArray(false, MessageDigestType.MAX_HASH_LENGTH_IN_BYTES);
+				HashValueWrapper hashToCheck=originalInputStream.readObject(false);
 				if (positionOfRandomInputStreamAfterDecoding!=null)
 					positionOfRandomInputStreamAfterDecoding.set(originalInputStream.currentPosition());
-				if (!com.distrimind.bouncycastle.util.Arrays.constantTimeAreEqual(hash3, hashToCheck))
+				if (!hash3.equals(hashToCheck))
 					throw new MessageExternalizationException(Integrity.FAIL);
 
 				if (symmetricChecker!=null) {
@@ -869,7 +869,7 @@ public class EncryptionSignatureHashDecoder {
 					symmetricChecker.init(symSign, 0, symSign.length);
 					if (associatedData!=null)
 						symmetricChecker.update(associatedData, offAD, lenAD);
-					symmetricChecker.update(hash);
+					symmetricChecker.update(hash.getHashArray());
 					if (!symmetricChecker.verify())
 						throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
 				}
@@ -877,7 +877,7 @@ public class EncryptionSignatureHashDecoder {
 				if (asymmetricChecker!=null) {
 					assert asymSign != null;
 					asymmetricChecker.init(asymSign, 0, asymSign.length);
-					asymmetricChecker.update(hash2);
+					asymmetricChecker.update(hash2.getHashArray());
 					if (!asymmetricChecker.verify())
 						throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
 				}
@@ -914,7 +914,7 @@ public class EncryptionSignatureHashDecoder {
 			}
 			return res;
 		}
-		catch(NoSuchAlgorithmException | NoSuchProviderException e)
+		catch(NoSuchAlgorithmException | NoSuchProviderException | ClassNotFoundException e)
 		{
 			throw new IOException(e);
 		}
@@ -975,9 +975,9 @@ public class EncryptionSignatureHashDecoder {
 				digest.update(buffer, 0, EncryptionSignatureHashEncoder.headSizeMinusOne);
 
 
-				byte[] hash = digest.digest();
-				byte[] hash2=hash;
-				byte[] hash3=hash;
+				HashValueWrapper hash = digest.digest();
+				HashValueWrapper hash2=hash;
+				HashValueWrapper hash3=hash;
 				byte[] asymSign=null;
 				if (symmetricChecker!=null)
 				{
@@ -986,8 +986,8 @@ public class EncryptionSignatureHashDecoder {
 					symmetricChecker.init(symSign);
 					if (associatedData!=null)
 						symmetricChecker.update(associatedData, offAD, lenAD);
-					symmetricChecker.update(hash);
-					digest.update(hash);
+					symmetricChecker.update(hash.getHashArray());
+					digest.update(hash.getHashArray());
 					digest.update(symSign);
 					hash3=hash2=digest.digest();
 				}
@@ -995,12 +995,12 @@ public class EncryptionSignatureHashDecoder {
 				{
 					asymSign=inputStream.readBytesArray(false, ASymmetricAuthenticatedSignatureType.MAX_SIZE_IN_BYTES_OF_ASYMMETRIC_SIGNATURE);
 					digest.reset();
-					digest.update(hash2);
+					digest.update(hash2.getHashArray());
 					digest.update(asymSign);
 					hash3=digest.digest();
 				}
-				byte[] hashToCheck=inputStream.readBytesArray(false, MessageDigestType.MAX_HASH_LENGTH_IN_BYTES);
-				if (!com.distrimind.bouncycastle.util.Arrays.constantTimeAreEqual(hash3, hashToCheck))
+				HashValueWrapper hashToCheck=inputStream.readObject(false);
+				if (!hash3.equals(hashToCheck))
 					return Integrity.FAIL;
 
 				if (symmetricChecker!=null) {
@@ -1009,7 +1009,7 @@ public class EncryptionSignatureHashDecoder {
 				}
 
 				if (asymmetricChecker!=null) {
-					if (!asymmetricChecker.verify(hash2, asymSign))
+					if (!asymmetricChecker.verify(hash2.getHashArray(), asymSign))
 						return Integrity.FAIL_AND_CANDIDATE_TO_BAN;
 				}
 				return Integrity.OK;
@@ -1050,7 +1050,8 @@ public class EncryptionSignatureHashDecoder {
 		} catch (MessageExternalizationException e)
 		{
 			return e.getIntegrity();
-		} catch(NoSuchAlgorithmException | NoSuchProviderException | IllegalArgumentException | IOException | NullPointerException e)
+		} catch(NoSuchAlgorithmException | NoSuchProviderException | IllegalArgumentException | IOException |
+				NullPointerException | ClassNotFoundException e)
 		{
 			return Integrity.FAIL;
 		}
@@ -1101,15 +1102,15 @@ public class EncryptionSignatureHashDecoder {
 				digest.update(buffer, 0, EncryptionSignatureHashEncoder.headSizeMinusOne);
 
 
-				byte[] hash = digest.digest();
-				byte[] hash2=hash;
-				byte[] hash3=hash;
+				HashValueWrapper hash = digest.digest();
+				HashValueWrapper hash2=hash;
+				HashValueWrapper hash3=hash;
 				byte[] asymSign=null;
 				if (symCheckOK)
 				{
 					byte[] symSign=inputStream.readBytesArray(false, SymmetricAuthenticatedSignatureType.MAX_SYMMETRIC_SIGNATURE_SIZE);
 					digest.reset();
-					digest.update(hash);
+					digest.update(hash.getHashArray());
 					digest.update(symSign);
 					hash3=hash2=digest.digest();
 				}
@@ -1117,16 +1118,16 @@ public class EncryptionSignatureHashDecoder {
 				{
 					asymSign=inputStream.readBytesArray(false, ASymmetricAuthenticatedSignatureType.MAX_SIZE_IN_BYTES_OF_ASYMMETRIC_SIGNATURE);
 					digest.reset();
-					digest.update(hash2);
+					digest.update(hash2.getHashArray());
 					digest.update(asymSign);
 					hash3=digest.digest();
 				}
-				byte[] hashToCheck=inputStream.readBytesArray(false, MessageDigestType.MAX_HASH_LENGTH_IN_BYTES);
-				if (!com.distrimind.bouncycastle.util.Arrays.constantTimeAreEqual(hash3, hashToCheck))
+				HashValueWrapper hashToCheck=inputStream.readObject(false);
+				if (!hash3.equals(hashToCheck))
 					return Integrity.FAIL;
 
 				if (asymmetricChecker!=null) {
-					if (!asymmetricChecker.verify(hash2, asymSign))
+					if (!asymmetricChecker.verify(hash2.getHashArray(), asymSign))
 						return Integrity.FAIL_AND_CANDIDATE_TO_BAN;
 				}
 
@@ -1151,7 +1152,8 @@ public class EncryptionSignatureHashDecoder {
 		} catch (MessageExternalizationException e)
 		{
 			return e.getIntegrity();
-		} catch(NoSuchAlgorithmException | NoSuchProviderException | IllegalArgumentException | IOException | NullPointerException e)
+		} catch(NoSuchAlgorithmException | NoSuchProviderException | IllegalArgumentException | IOException |
+				NullPointerException | ClassNotFoundException e)
 		{
 			return Integrity.FAIL;
 		}

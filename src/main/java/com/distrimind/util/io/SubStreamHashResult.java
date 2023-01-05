@@ -34,10 +34,10 @@ same conditions as regards security.
 The fact that you are presently reading this means that you have had
 knowledge of the CeCILL-C license and that you accept its terms.
  */
+
 import com.distrimind.util.crypto.*;
 
 import java.io.IOException;
-import java.util.Arrays;
 
 /**
  * @author Jason Mahdjoub
@@ -48,19 +48,17 @@ public class SubStreamHashResult implements SecureExternalizable {
 	private static final int MAX_HASH_SIZE= MessageDigestType.getMaxDigestLengthInBytes();
 
 
-	private byte[] hash;
+	private HashValueWrapper hash;
 	private AbstractWrappedIVs<?, ?> manualIvsAndSecretKeys;
 
-	public SubStreamHashResult(byte[] hash, AbstractWrappedIVs<?, ?> manualIvsAndSecretKeys) {
+	public SubStreamHashResult(HashValueWrapper hash, AbstractWrappedIVs<?, ?> manualIvsAndSecretKeys) {
 		if (hash==null)
 			throw new NullPointerException();
-		if (hash.length>MAX_HASH_SIZE)
-			throw new IllegalArgumentException();
 		this.hash = hash;
 		this.manualIvsAndSecretKeys = manualIvsAndSecretKeys;
 	}
 
-	public byte[] getHash() {
+	public HashValueWrapper getHash() {
 		return hash;
 	}
 
@@ -81,13 +79,13 @@ public class SubStreamHashResult implements SecureExternalizable {
 
 	@Override
 	public void writeExternal(SecuredObjectOutputStream out) throws IOException {
-		out.writeBytesArray(hash, false, MAX_HASH_SIZE);
+		out.writeObject(hash, false);
 		out.writeObject(manualIvsAndSecretKeys, false);
 	}
 
 	@Override
 	public void readExternal(SecuredObjectInputStream in) throws IOException, ClassNotFoundException {
-		hash=in.readBytesArray(false, MAX_HASH_SIZE);
+		hash=in.readObject(false);
 		manualIvsAndSecretKeys=in.readObject(false);
 	}
 
@@ -96,11 +94,11 @@ public class SubStreamHashResult implements SecureExternalizable {
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
 		SubStreamHashResult that = (SubStreamHashResult) o;
-		return com.distrimind.bouncycastle.util.Arrays.constantTimeAreEqual(hash, that.hash);
+		return hash.equals(that.hash);
 	}
 
 	@Override
 	public int hashCode() {
-		return Arrays.hashCode(hash);
+		return hash.hashCode();
 	}
 }

@@ -129,7 +129,7 @@ public class SecuredDecentralizedID extends AbstractDecentralizedID {
 			messageDigest.update(idBytes);
 			messageDigest.update(salt);
 
-			byte[] id = messageDigest.digest();
+			byte[] id = messageDigest.digest().getHashArray();
 			size = id.length / sizeLong;
 			int mod = id.length % sizeLong;
 			if (mod > 0)
