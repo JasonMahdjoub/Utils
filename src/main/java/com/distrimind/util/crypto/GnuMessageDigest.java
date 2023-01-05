@@ -57,13 +57,13 @@ public final class GnuMessageDigest extends AbstractMessageDigest {
 	}
 
 	@Override
-	public HashValueWrapper digest() {
-		return HashValueWrapper.from(getMessageDigestType(), GnuFunctions.digestDigest(messageDigest));
+	public WrappedHashedValue digest() {
+		return WrappedHashedValue.from(getMessageDigestType(), GnuFunctions.digestDigest(messageDigest));
 	}
 
 	@Override
-	public HashValueWrapper digest(byte[] _input) {
-		return HashValueWrapper.from(getMessageDigestType(), GnuFunctions.digestDigest(messageDigest, _input));
+	public WrappedHashedValue digest(byte[] _input) {
+		return WrappedHashedValue.from(getMessageDigestType(), GnuFunctions.digestDigest(messageDigest, _input));
 	}
 
 	@Override

@@ -270,8 +270,9 @@ public class ASymmetricPublicKey extends AbstractKey implements IASymmetricPubli
 
 	@Override
 	public WrappedString encodeString() {
-		return new WrappedString(encode());
+		return encode().toWrappedString();
 	}
+
 
 	@Override
 	public WrappedData encode(boolean includeTimes)

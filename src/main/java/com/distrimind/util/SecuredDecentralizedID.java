@@ -38,6 +38,7 @@ import com.distrimind.util.crypto.AbstractMessageDigest;
 import com.distrimind.util.crypto.AbstractSecureRandom;
 import com.distrimind.util.crypto.MessageDigestType;
 import com.distrimind.util.data_buffers.WrappedSecretData;
+import com.distrimind.util.data_buffers.WrappedSecretString;
 import com.distrimind.util.data_buffers.WrappedString;
 import com.distrimind.util.sizeof.ObjectSizer;
 
@@ -104,6 +105,10 @@ public class SecuredDecentralizedID extends AbstractDecentralizedID {
 		this(getDefaultMessageDigestInstance(), generator, rand);
 	}
 
+	@Override
+	public WrappedSecretString encodeString() {
+		return encode().toWrappedString();
+	}
 	@SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
 	public SecuredDecentralizedID(AbstractMessageDigest messageDigest, AbstractDecentralizedIDGenerator generator,
 								  AbstractSecureRandom rand) {

@@ -94,7 +94,7 @@ public abstract class AbstractMessageDigest implements Cloneable {
 	 *
 	 * @return a byte array representing the message digest.
 	 */
-	public abstract HashValueWrapper digest();
+	public abstract WrappedHashedValue digest();
 
 	/**
 	 * Computes a final update using the input array of bytes, then computes a final
@@ -105,7 +105,7 @@ public abstract class AbstractMessageDigest implements Cloneable {
 	 *            an array of bytes to perform final update with.
 	 * @return a byte array representing the message digest.
 	 */
-	public abstract HashValueWrapper digest(byte[] input);
+	public abstract WrappedHashedValue digest(byte[] input);
 
 	/**
 	 * Computes the final digest of the stored bytes and returns the result.

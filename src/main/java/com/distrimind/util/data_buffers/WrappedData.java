@@ -57,8 +57,7 @@ public class WrappedData  {
 		return finalizer.data;
 	}
 
-	protected void setData(byte[] data)
-	{
+	protected void setData(byte[] data) throws InvalidEncodedValue {
 		if (data==null)
 			throw new NullPointerException();
 		this.finalizer.data=data;

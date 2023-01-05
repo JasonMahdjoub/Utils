@@ -83,10 +83,6 @@ public abstract class AbstractDecentralizedID extends AbstractDecentralizedValue
 		return decode(bytes, off, len, false);
 	}
 
-	@Override
-	public final WrappedString encodeString() {
-		return new WrappedString(encode());
-	}
 
 	public static AbstractDecentralizedID decode(byte[] bytes, int off, int len, boolean fillArrayWithZerosWhenDecoded) throws InvalidEncodedValue {
 

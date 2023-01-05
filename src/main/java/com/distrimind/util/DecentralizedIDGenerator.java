@@ -94,6 +94,10 @@ public class DecentralizedIDGenerator extends AbstractDecentralizedIDGenerator {
 	public String toString() {
 		return ToStringHead + "[" + getTimeStamp() + ";" + getWorkerID() + ";" + getSequenceID() + "]";
 	}
+	@Override
+	public WrappedString encodeString() {
+		return encode().toWrappedString();
+	}
 
 	public UUID getUUID()
 	{

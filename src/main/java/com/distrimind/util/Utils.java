@@ -68,7 +68,8 @@ public class Utils {
 					.addDeveloper(new PersonDeveloper("mahdjoub", "jason", "2016-01-04"))
 					.addDescription(
 							new Description(5, 25, 0, Version.Type.STABLE, 0, "2023-01-04")
-									.addItem(NEW_FEATURE, "Add HashValue class")
+									.addItem(NEW_FEATURE, "Add WrappedHashedValue class")
+									.addItem(NEW_FEATURE, "Add WrappedHashedValueInBase64StringFormat class")
 									.addItem(NEW_FEATURE, "Add MessageDigestAlgorithmType enum")
 
 					)

@@ -78,8 +78,7 @@ public class WrappedString {
 			this.finalizer.chars[i]=secretData.charAt(i);
 		this.finalizer.string=secretData;
 	}
-	protected void setChars(char[] chars)
-	{
+	protected void setChars(char[] chars) throws InvalidEncodedValue {
 		this.finalizer.chars=chars;
 		this.finalizer.string=new StringBuilder();
 		this.finalizer.string.append(chars);

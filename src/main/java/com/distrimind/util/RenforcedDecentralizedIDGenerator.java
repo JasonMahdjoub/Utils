@@ -59,6 +59,12 @@ public class RenforcedDecentralizedIDGenerator extends AbstractDecentralizedIDGe
 	public static RenforcedDecentralizedIDGenerator valueOf(String value) throws InvalidEncodedValue {
 		return valueOf(new WrappedString(value));
 	}
+
+	@Override
+	public WrappedString encodeString() {
+		return encode().toWrappedString();
+	}
+
 	public static RenforcedDecentralizedIDGenerator valueOf(WrappedString value) throws InvalidEncodedValue {
 		AbstractDecentralizedID res = AbstractDecentralizedID.valueOf(value);
 		if (res instanceof RenforcedDecentralizedIDGenerator) {

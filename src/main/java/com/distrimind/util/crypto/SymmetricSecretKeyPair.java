@@ -39,6 +39,7 @@ import com.distrimind.util.Bits;
 import com.distrimind.util.Cleanable;
 import com.distrimind.util.data_buffers.WrappedSecretData;
 import com.distrimind.util.data_buffers.WrappedSecretString;
+import com.distrimind.util.data_buffers.WrappedString;
 import com.distrimind.util.io.MessageExternalizationException;
 
 import java.security.Key;
@@ -101,7 +102,10 @@ public class SymmetricSecretKeyPair extends AbstractKey implements ISecretDecent
 	public int hashCode() {
 		return Objects.hash(finalizer.secretKeyForEncryption, finalizer.secretKeyForSignature);
 	}
-
+	@Override
+	public WrappedSecretString encodeString() {
+		return encode().toWrappedString();
+	}
 	public SymmetricSecretKey getSecretKeyForEncryption() {
 		return finalizer.secretKeyForEncryption;
 	}
@@ -145,10 +149,6 @@ public class SymmetricSecretKeyPair extends AbstractKey implements ISecretDecent
 
 	}
 
-	@Override
-	public WrappedSecretString encodeString() {
-		return new WrappedSecretString(encode());
-	}
 
 	public SymmetricSecretKeyPair getHashedSecretKeyPair(MessageDigestType messageDigestType, long customApplicationCode) throws NoSuchProviderException, NoSuchAlgorithmException {
 		byte[] tab=new byte[8];

@@ -153,7 +153,7 @@ public class SubStreamParameters implements SecureExternalizable {
 			sorted=true;
 		}
 	}
-	public HashValueWrapper generateHash(RandomInputStream inputStream) throws IOException, NoSuchProviderException, NoSuchAlgorithmException {
+	public WrappedHashedValue generateHash(RandomInputStream inputStream) throws IOException, NoSuchProviderException, NoSuchAlgorithmException {
 		AbstractMessageDigest messageDigest=messageDigestType.getMessageDigestInstance();
 		messageDigest.reset();
 		return partialHash(inputStream, messageDigest).digest();

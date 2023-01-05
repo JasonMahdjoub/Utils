@@ -85,7 +85,7 @@ public class SymmetricEncryptionAlgorithm extends AbstractEncryptionIOAlgorithm 
 		if (!getType().supportRandomReadWrite())
 			throw new IllegalStateException("Encryption type must support random read and write");
 		try {
-			HashValueWrapper hash = subStreamParameters.generateHash(encryptedInputStream);
+			WrappedHashedValue hash = subStreamParameters.generateHash(encryptedInputStream);
 			AbstractWrappedIVs<?, ?> manualIvsAndSecretKeys=useDerivedKeys?new WrappedIVsAndSecretKeys(this):new WrappedIVs(this);
 			readIvsFromEncryptedStream(encryptedInputStream, headLengthBytes, manualIvsAndSecretKeys);
 			return new SubStreamHashResult(hash, manualIvsAndSecretKeys);

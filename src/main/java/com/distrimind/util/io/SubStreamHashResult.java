@@ -48,17 +48,17 @@ public class SubStreamHashResult implements SecureExternalizable {
 	private static final int MAX_HASH_SIZE= MessageDigestType.getMaxDigestLengthInBytes();
 
 
-	private HashValueWrapper hash;
+	private WrappedHashedValue hash;
 	private AbstractWrappedIVs<?, ?> manualIvsAndSecretKeys;
 
-	public SubStreamHashResult(HashValueWrapper hash, AbstractWrappedIVs<?, ?> manualIvsAndSecretKeys) {
+	public SubStreamHashResult(WrappedHashedValue hash, AbstractWrappedIVs<?, ?> manualIvsAndSecretKeys) {
 		if (hash==null)
 			throw new NullPointerException();
 		this.hash = hash;
 		this.manualIvsAndSecretKeys = manualIvsAndSecretKeys;
 	}
 
-	public HashValueWrapper getHash() {
+	public WrappedHashedValue getHash() {
 		return hash;
 	}
 

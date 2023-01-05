@@ -763,7 +763,7 @@ public class EncryptionSignatureHashEncoder {
 			if (digest!=null) {
 				digest.update(code);
 				digest.update(buffer, 0, headSizeMinusOne);
-				HashValueWrapper hash = digest.digest();
+				WrappedHashedValue hash = digest.digest();
 
 				if (symmetricSigner != null) {
 					symmetricSigner.init();
@@ -862,7 +862,7 @@ public class EncryptionSignatureHashEncoder {
 					out.writeLong(dataLen);
 					out.flush();
 					RandomInputStream in = new AggregatedRandomInputStreams(new RandomByteArrayInputStream(out.getBytes()), inputStream);
-					HashValueWrapper hash = subStreamParameters.partialHash(in, md).digest();
+					WrappedHashedValue hash = subStreamParameters.partialHash(in, md).digest();
 					return hash.equals(hashResultFromEncryptedStream.getHash());
 				} else {
 					out.writeLong(dataLen = cipher.getOutputSizeAfterEncryption(dataLen));

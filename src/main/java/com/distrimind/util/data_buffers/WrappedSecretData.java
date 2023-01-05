@@ -39,8 +39,8 @@ public class WrappedSecretData extends WrappedData implements ISecretValue {
 		registerCleanerIfNotDone(finalizer);
 	}
 
-	protected void setData(byte[] data)
-	{
+	@Override
+	protected void setData(byte[] data) throws InvalidEncodedValue {
 		finalizer.performCleanup();
 		finalizer.toZeroize=true;
 		super.setData(data);

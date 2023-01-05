@@ -62,8 +62,7 @@ public class WrappedSecretString extends WrappedString implements AutoZeroizable
 	}
 
 
-	protected void setChars(char[] chars)
-	{
+	protected void setChars(char[] chars) throws InvalidEncodedValue {
 		finalizer.performCleanup();
 		finalizer.toZeroize=true;
 		super.setChars(chars);

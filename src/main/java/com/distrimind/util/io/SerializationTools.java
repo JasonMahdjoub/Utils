@@ -109,7 +109,7 @@ public class SerializationTools {
 		writeSize(oos, false, s.length()*2, sizeMax);
 		oos.writeChars(s);
 	}
-	static void writeString(final SecuredObjectOutputStream oos, StringBuilder s, int sizeMax, boolean supportNull) throws IOException
+	static void writeString(final SecuredObjectOutputStream oos, StringBuilder s, int sizeMax, @SuppressWarnings("SameParameterValue") boolean supportNull) throws IOException
 	{
 
 		if (s==null)
@@ -124,40 +124,46 @@ public class SerializationTools {
 		for (int i=0;i<s.length();i++)
 			oos.writeChar(s.charAt(i));
 	}
+
 	static void writeWrappedString(final SecuredObjectOutputStream oos, WrappedString s, int sizeMax, boolean supportNull) throws IOException
 	{
-		if (s==null)
-			writeString(oos, (StringBuilder) null, sizeMax, supportNull);
+		if (s==null) {
+			if (!supportNull)
+				throw new IOException();
+			oos.writeByte(-1);
+		}
 		else
 		{
 			int type=0;
 			if (s instanceof WrappedEncryptedASymmetricPrivateKeyString)
 			{
 				type=2;
-				sizeMax=Math.min(WrappedEncryptedASymmetricPrivateKeyString.MAX_CHARS_NUMBER, sizeMax);
 			}
 			else if (s instanceof WrappedEncryptedSymmetricSecretKeyString)
 			{
 				type=3;
-				sizeMax=Math.min(WrappedEncryptedSymmetricSecretKeyString.MAX_CHARS_NUMBER, sizeMax);
 			}
 			else if (s instanceof WrappedHashedPasswordString)
 			{
 				type=4;
-				sizeMax=Math.min(WrappedHashedPasswordString.MAX_CHARS_NUMBER, sizeMax);
 			}
 			else if (s instanceof WrappedPassword)
 			{
 				type=5;
-				sizeMax=Math.min(WrappedPassword.MAX_CHARS_NUMBER, sizeMax);
+			}
+			else if (s instanceof WrappedHashedValueInBase64StringFormat)
+			{
+				type=6;
 			}
 			else if (s instanceof WrappedSecretString)
 			{
 				type=1;
 			}
-			writeString(oos, s.toStringBuilder(), sizeMax, supportNull);
-			s.toStringBuilder();
+			sizeMax=getWrappedStringMaxSize(type, sizeMax);
 			oos.writeByte(type);
+			writeString(oos, s.toStringBuilder(), sizeMax, false);
+			s.toStringBuilder();
+
 		}
 
 	}
@@ -189,36 +195,67 @@ public class SerializationTools {
 			chars[i]=ois.readChar();
 		return chars;
 	}
+	static int getWrappedStringMaxSize(int type, int maxSize)
+	{
+		if (maxSize==-1)
+			maxSize=Integer.MAX_VALUE;
+		int res;
+		switch (type)
+		{
+			case 2:
+				res=Math.min(maxSize, WrappedEncryptedASymmetricPrivateKeyString.MAX_CHARS_NUMBER);
+				break;
+			case 3:
+				res=Math.min(maxSize, WrappedEncryptedSymmetricSecretKeyString.MAX_CHARS_NUMBER);
+				break;
+			case 4:
+				res=Math.min(maxSize, WrappedHashedPasswordString.MAX_CHARS_NUMBER);
+				break;
+			case 5:
+				res=Math.min(maxSize, WrappedPassword.MAX_CHARS_NUMBER);
+				break;
+			case 6:
+				res=Math.min(maxSize, WrappedHashedValueInBase64StringFormat.MAX_CHARS_NUMBER);
+				break;
+			default:
+				res=maxSize;
+				break;
+		}
+		if (res==Integer.MAX_VALUE)
+			throw new IllegalArgumentException();
+		return res;
+	}
 	static WrappedString readWrappedString(final SecuredObjectInputStream ois, int sizeMax, boolean supportNull) throws IOException
 	{
-		char[] s=readString(ois, sizeMax, supportNull);
+		byte type=ois.readByte();
+		if (type==-1)
+		{
+			if (!supportNull)
+				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
+			return null;
+		}
+		else if (type<-1)
+			throw new MessageExternalizationException(Integrity.FAIL);
+		sizeMax=getWrappedStringMaxSize(type, sizeMax);
+		char[] s=readString(ois, sizeMax, false);
 		if (s==null)
 			return null;
 		else
 		{
-			int type=ois.read();
-			if (type<0)
-				throw new MessageExternalizationException(Integrity.FAIL);
 			switch (type)
 			{
 				case 1:
 					return new WrappedSecretString(s);
 				case 2:
-					if (s.length>WrappedEncryptedASymmetricPrivateKeyString.MAX_CHARS_NUMBER)
-						throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
 					return new WrappedEncryptedASymmetricPrivateKeyString(s);
 				case 3:
-					if (s.length>WrappedEncryptedSymmetricSecretKeyString.MAX_CHARS_NUMBER)
-						throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
 					return new WrappedEncryptedSymmetricSecretKeyString(s);
 				case 4:
-					if (s.length>WrappedHashedPasswordString.MAX_CHARS_NUMBER)
-						throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
 					return new WrappedHashedPasswordString(s);
 				case 5:
-					if (s.length>WrappedPassword.MAX_CHARS_NUMBER)
-						throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
 					return new WrappedPassword(s);
+				case 6:
+					return new WrappedHashedValueInBase64StringFormat(s);
 				default:
 					return new WrappedString(s);
 			}
@@ -243,8 +280,11 @@ public class SerializationTools {
 	}
 	static void writeWrappedData(final SecuredObjectOutputStream oos, WrappedData tab, int sizeMax, boolean supportNull) throws IOException
 	{
-		if (tab==null)
-			writeBytes(oos, null, 0, 0, sizeMax, supportNull);
+		if (tab==null) {
+			if (!supportNull)
+				throw new IOException();
+			oos.writeByte(-1);
+		}
 		else
 		{
 			int type=0;
@@ -267,8 +307,12 @@ public class SerializationTools {
 			{
 				type=1;
 			}
-			writeBytes(oos, tab.getBytes(), 0, tab.getBytes().length, sizeMax, supportNull);
+			else if (tab instanceof WrappedHashedValue)
+				type=5;
 			oos.writeByte(type);
+			sizeMax=getWrappedDataMaxSize(type, sizeMax);
+			writeBytes(oos, tab.getBytes(), 0, tab.getBytes().length, sizeMax, false);
+
 			tab.getBytes();//gc delayed
 		}
 	}
@@ -348,30 +392,61 @@ public class SerializationTools {
 
 		return ois.readFully(size);
 	}
+	private static int getWrappedDataMaxSize(int type, int maxSize)
+	{
+		if (maxSize==-1)
+			maxSize=Integer.MAX_VALUE;
+		int res;
+		switch (type)
+		{
+			case 2:
+				res=Math.min(WrappedEncryptedASymmetricPrivateKey.MAX_SIZE_IN_BYTES_OF_KEY, maxSize);
+				break;
+			case 3:
+				res=Math.min(WrappedEncryptedSymmetricSecretKey.MAX_SIZE_IN_BYTES_OF_KEY, maxSize);
+				break;
+			case 4:
+				res=Math.min(WrappedHashedPassword.MAX_SIZE_IN_BYTES_OF_DATA, maxSize);
+				break;
+			case 5:
+				res=Math.min(WrappedHashedValue.MAX_SIZE_IN_BYTES_OF_HASHED_VALUE, maxSize);
+				break;
+			default:
+				res=maxSize;
+				break;
+		}
+		if (res==Integer.MAX_VALUE)
+			throw new IllegalArgumentException();
+		return res;
+	}
 	static WrappedData readWrappedData(final SecuredObjectInputStream ois, boolean supportNull, int sizeMax) throws IOException
 	{
-		byte[] t=readBytes(ois, supportNull, sizeMax);
-		if (t==null)
+		byte type=ois.readByte();
+		if (type==-1)
+		{
+			if (!supportNull)
+				throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
 			return null;
-		int type=ois.read();
-		if (type<0)
+		}
+		else if (type<-1)
 			throw new MessageExternalizationException(Integrity.FAIL);
+
+
+		sizeMax=getWrappedDataMaxSize(type, sizeMax);
+		byte[] t=readBytes(ois, false, sizeMax);
+		assert t!=null;
 		switch (type)
 		{
 			case 1:
 				return new WrappedSecretData(t);
 			case 2:
-				if (t.length>sizeMax)
-					throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
 				return new WrappedEncryptedASymmetricPrivateKey(t);
 			case 3:
-				if (t.length>sizeMax)
-					throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
 				return new WrappedEncryptedSymmetricSecretKey(t);
 			case 4:
-				if (t.length>sizeMax)
-					throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN);
 				return new WrappedHashedPassword(t);
+			case 5:
+				return WrappedHashedValue.fromEncodedArray(t);
 			default:
 				return new WrappedData(t);
 		}
@@ -1942,8 +2017,7 @@ public class SerializationTools {
 						SubStreamParameter.class,
 						SubStreamParameters.class,
 						FragmentedStreamParameters.class,
-						KeyWrapperAlgorithm.class,
-						HashValueWrapper.class)),
+						KeyWrapperAlgorithm.class)),
 				new ArrayList<>(Arrays.asList(
 						MessageDigestType.class,
 						SecureRandomType.class,

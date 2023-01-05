@@ -837,9 +837,9 @@ public class EncryptionSignatureHashDecoder {
 			if (digest!=null) {
 				digest.update(code);
 				digest.update(buffer, 0, EncryptionSignatureHashEncoder.headSizeMinusOne);
-				HashValueWrapper hash = digest.digest();
-				HashValueWrapper hash2=hash;
-				HashValueWrapper hash3=hash;
+				WrappedHashedValue hash = digest.digest();
+				WrappedHashedValue hash2=hash;
+				WrappedHashedValue hash3=hash;
 				byte[] symSign=null;
 				byte[] asymSign=null;
 				if (symmetricChecker!=null)
@@ -858,7 +858,7 @@ public class EncryptionSignatureHashDecoder {
 					digest.update(asymSign);
 					hash3=digest.digest();
 				}
-				HashValueWrapper hashToCheck=originalInputStream.readObject(false);
+				WrappedHashedValue hashToCheck=originalInputStream.readObject(false);
 				if (positionOfRandomInputStreamAfterDecoding!=null)
 					positionOfRandomInputStreamAfterDecoding.set(originalInputStream.currentPosition());
 				if (!hash3.equals(hashToCheck))
@@ -975,9 +975,9 @@ public class EncryptionSignatureHashDecoder {
 				digest.update(buffer, 0, EncryptionSignatureHashEncoder.headSizeMinusOne);
 
 
-				HashValueWrapper hash = digest.digest();
-				HashValueWrapper hash2=hash;
-				HashValueWrapper hash3=hash;
+				WrappedHashedValue hash = digest.digest();
+				WrappedHashedValue hash2=hash;
+				WrappedHashedValue hash3=hash;
 				byte[] asymSign=null;
 				if (symmetricChecker!=null)
 				{
@@ -999,7 +999,7 @@ public class EncryptionSignatureHashDecoder {
 					digest.update(asymSign);
 					hash3=digest.digest();
 				}
-				HashValueWrapper hashToCheck=inputStream.readObject(false);
+				WrappedHashedValue hashToCheck=inputStream.readObject(false);
 				if (!hash3.equals(hashToCheck))
 					return Integrity.FAIL;
 
@@ -1102,9 +1102,9 @@ public class EncryptionSignatureHashDecoder {
 				digest.update(buffer, 0, EncryptionSignatureHashEncoder.headSizeMinusOne);
 
 
-				HashValueWrapper hash = digest.digest();
-				HashValueWrapper hash2=hash;
-				HashValueWrapper hash3=hash;
+				WrappedHashedValue hash = digest.digest();
+				WrappedHashedValue hash2=hash;
+				WrappedHashedValue hash3=hash;
 				byte[] asymSign=null;
 				if (symCheckOK)
 				{
@@ -1122,7 +1122,7 @@ public class EncryptionSignatureHashDecoder {
 					digest.update(asymSign);
 					hash3=digest.digest();
 				}
-				HashValueWrapper hashToCheck=inputStream.readObject(false);
+				WrappedHashedValue hashToCheck=inputStream.readObject(false);
 				if (!hash3.equals(hashToCheck))
 					return Integrity.FAIL;
 

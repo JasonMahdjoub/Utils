@@ -84,6 +84,10 @@ public class HybridASymmetricPublicKey extends AbstractKey implements IHybridKey
 			throw new IllegalAccessError();
 	}
 	@Override
+	public WrappedString encodeString() {
+		return encode().toWrappedString();
+	}
+	@Override
 	public boolean useEncryptionAlgorithm() {
 		return getNonPQCPublicKey().getEncryptionAlgorithmType()!=null;
 	}
@@ -124,10 +128,6 @@ public class HybridASymmetricPublicKey extends AbstractKey implements IHybridKey
 		return encode(true);
 	}
 
-	@Override
-	public WrappedString encodeString() {
-		return new WrappedString(encode());
-	}
 
 	@Override
 	public WrappedData encode(boolean includeTimes)

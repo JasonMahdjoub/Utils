@@ -63,13 +63,13 @@ public final class JavaNativeMessageDigest extends AbstractMessageDigest {
 	}
 
 	@Override
-	public HashValueWrapper digest() {
-		return HashValueWrapper.from(getMessageDigestType(), messageDigest.digest());
+	public WrappedHashedValue digest() {
+		return WrappedHashedValue.from(getMessageDigestType(), messageDigest.digest());
 	}
 
 	@Override
-	public HashValueWrapper digest(byte[] _input) {
-		return HashValueWrapper.from(getMessageDigestType(), messageDigest.digest(_input));
+	public WrappedHashedValue digest(byte[] _input) {
+		return WrappedHashedValue.from(getMessageDigestType(), messageDigest.digest(_input));
 	}
 
 	@Override
