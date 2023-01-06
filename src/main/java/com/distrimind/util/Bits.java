@@ -301,10 +301,10 @@ public class Bits {
 		byte[] e=new byte[base16String.length()/2];
 		for (int i=0;i<base16String.length();i+=2)
 		{
-			int v1=hexValues.indexOf(base16String.charAt(i));
+			int v1=hexValues.indexOf(Character.toUpperCase(base16String.charAt(i)));
 			if (v1<0)
 				throw new InvalidEncodedValue();
-			int v2=hexValues.indexOf(base16String.charAt(i+1));
+			int v2=hexValues.indexOf(Character.toUpperCase(base16String.charAt(i+1)));
 			if (v2<0)
 				throw new InvalidEncodedValue();
 

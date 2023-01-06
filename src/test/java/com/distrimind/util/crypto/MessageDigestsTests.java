@@ -35,6 +35,7 @@ The fact that you are presently reading this means that you have had
 knowledge of the CeCILL-C license and that you accept its terms.
  */
 
+import com.distrimind.util.data_buffers.WrappedSecretString;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -56,11 +57,29 @@ public class MessageDigestsTests {
 
 		AbstractMessageDigest md = type.getMessageDigestInstance();
 		for (byte[] m : VariousTests.messagesToEncrypt) {
-			byte[] b1 = md.digest(m);
+			WrappedHashedValue b1 = md.digest(m);
 			md.reset();
-			byte[] b2 = md.digest(m);
-
+			WrappedHashedValue b2 = md.digest(m);
 			Assert.assertEquals(b1, b2);
+			Assert.assertEquals(b1.toString(), b2.toString());
+			Assert.assertEquals(b1.hashCode(), b2.hashCode());
+			Assert.assertEquals(b1.getHashInBase16StringFormat().toString(), b2.getHashInBase16StringFormat().toString());
+			Assert.assertEquals(b1.getHashInBase64StringFormat().toString(), b2.getHashInBase64StringFormat().toString());
+			WrappedHashedValueInBase64StringFormat bs1=b1.toWrappedString();
+			WrappedHashedValueInBase64StringFormat bs2=b2.toWrappedString();
+			Assert.assertEquals(bs1, bs2);
+			Assert.assertEquals(bs1.toString(), bs2.toString());
+			Assert.assertEquals(bs1.hashCode(), bs2.hashCode());
+
+
+			System.out.println(b1);
+			System.out.println(b1.hashCode());
+			System.out.println(b1.getHashInBase16StringFormat());
+			System.out.println(b1.getHashInBase64StringFormat());
+			System.out.println(bs1);
+			System.out.println(bs1.hashCode());
+			Assert.assertEquals(bs1.toString(), b1.toString());
+			Assert.assertEquals(bs1.hashCode(), b1.hashCode());
 
 		}
 

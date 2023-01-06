@@ -79,7 +79,7 @@ public final class WrappedHashedValue extends WrappedData {
 	{
 		if (hashCode==null)
 		{
-			hashCode=Objects.hash(type, Arrays.hashCode(getBytes()));
+			hashCode=Objects.hash(type, Arrays.hashCode(getHashArray()));
 		}
 		return hashCode;
 	}
@@ -113,7 +113,7 @@ public final class WrappedHashedValue extends WrappedData {
 		if (o.getClass()== WrappedHashedValue.class)
 		{
 			WrappedHashedValue d=(WrappedHashedValue) o;
-			return d.type==type && com.distrimind.bouncycastle.util.Arrays.constantTimeAreEqual(d.getBytes(), getBytes());
+			return type==d.type && com.distrimind.bouncycastle.util.Arrays.constantTimeAreEqual(d.getHashArray(), getHashArray());
 		}
 		return false;
 	}
@@ -121,7 +121,7 @@ public final class WrappedHashedValue extends WrappedData {
 	public StringBuilder getHashInBase64StringFormat()
 	{
 		if (base64String==null) {
-			base64String=Bits.toBase64String(getBytes(), false);
+			base64String=Bits.toBase64String(getHashArray(), false);
 		}
 		return base64String;
 	}
@@ -137,7 +137,7 @@ public final class WrappedHashedValue extends WrappedData {
 	public StringBuilder getHashInBase16StringFormat()
 	{
 		if (base16String==null)
-			base16String=Bits.toBase16String(getBytes(), false);
+			base16String=Bits.toBase16String(getHashArray(), false);
 		return base16String;
 	}
 
