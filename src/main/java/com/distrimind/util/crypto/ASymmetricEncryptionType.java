@@ -36,11 +36,15 @@ package com.distrimind.util.crypto;
 
 import com.distrimind.bcfips.crypto.Algorithm;
 import com.distrimind.bcfips.crypto.fips.FipsRSA;
+import com.distrimind.bcfips.jcajce.interfaces.EdDSAKey;
+import com.distrimind.bcfips.util.encoders.Hex;
 import com.distrimind.bouncycastle.pqc.jcajce.spec.KyberParameterSpec;
 import com.distrimind.bouncycastle.pqc.jcajce.spec.NTRUParameterSpec;
 import com.distrimind.bouncycastle.pqc.jcajce.spec.SABERParameterSpec;
 import com.distrimind.util.io.Integrity;
 import com.distrimind.util.io.MessageExternalizationException;
+import com.distrimind.util.systeminfo.OS;
+import com.distrimind.util.systeminfo.OSVersion;
 
 import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
@@ -50,6 +54,7 @@ import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
+import java.util.Arrays;
 
 /**
  * List of asymmetric encryption algorithms
@@ -143,22 +148,23 @@ public enum ASymmetricEncryptionType {
 			throws NoSuchAlgorithmException, InvalidKeySpecException {
 
 		try {
-
-			/*if (algorithmType.contains("Ed25519") || algorithmType.contains("Ed448") || algorithmType.contains("X25519") || algorithmType.contains("X448"))
+			if (OS.getCurrentJREVersionByte()<15 && !xdh
+					&& codeProvider==ASymmetricAuthenticatedSignatureType.Ed448.getCodeProviderForKeyGenerator())
 			{
-				if (xdh)
-				{
-					AsymmetricXDHPrivateKey k=new AsymmetricXDHPrivateKey(encodedKey);
-					return constructorProvXDHPrivateKey.newInstance(k);
+				ASymmetricAuthenticatedSignatureType t=null;
+				if (algorithmType.equals(ASymmetricAuthenticatedSignatureType.Ed448.name())) {
+					t = ASymmetricAuthenticatedSignatureType.BC_FIPS_Ed448;
 				}
-				else {
-					PKCS8EncodedKeySpec pkcsKeySpec = new PKCS8EncodedKeySpec(encodedKey);
-					KeyFactory kf = KeyFactory.getInstance(algorithm, codeProvider.getCompatibleProvider());
-					return kf.generatePrivate(pkcsKeySpec);
+				else if (algorithmType.equals(ASymmetricAuthenticatedSignatureType.Ed25519.name())) {
+					t = ASymmetricAuthenticatedSignatureType.BC_FIPS_Ed25519;
+				}
+				if (t!=null)
+				{
+					algorithmType = t.name();
+					codeProvider=t.getCodeProviderForKeyGenerator();
+					algorithm=t.getKeyGeneratorAlgorithmName();
 				}
 			}
-			else
-			{*/
 			if (xdh)
 			{
 				if (algorithm.equals("Ed25519")) {
@@ -173,13 +179,11 @@ public enum ASymmetricEncryptionType {
 				}
 			}
 
-				PKCS8EncodedKeySpec pkcsKeySpec = new PKCS8EncodedKeySpec(encodedKey);
+			PKCS8EncodedKeySpec pkcsKeySpec = new PKCS8EncodedKeySpec(encodedKey);
 
-				KeyFactory kf = KeyFactory.getInstance(algorithm, codeProvider.getCompatibleProvider());
-				return kf.generatePrivate(pkcsKeySpec);
-			//}
+			KeyFactory kf = KeyFactory.getInstance(algorithm, codeProvider.getCompatibleProvider());
+			return kf.generatePrivate(pkcsKeySpec);
 		} catch (InvalidKeySpecException | NoSuchProviderException e) {
-			System.err.println(algorithm+" ; "+xdh+";"+codeProvider);
 			throw new InvalidKeySpecException(e);
 		}
 	}
@@ -187,17 +191,49 @@ public enum ASymmetricEncryptionType {
 	static PublicKey decodeNativePublicKey(byte[] encodedKey, String algorithm, String algorithmType, boolean xdh, CodeProvider codeProvider)
 			throws NoSuchAlgorithmException, InvalidKeySpecException {
 		try {
+			if (OS.getCurrentJREVersionByte()<15 && !xdh
+					&& codeProvider==ASymmetricAuthenticatedSignatureType.Ed448.getCodeProviderForKeyGenerator())
+			{
+				ASymmetricAuthenticatedSignatureType t=null;
+				if (algorithmType.equals(ASymmetricAuthenticatedSignatureType.Ed448.name())) {
+					t = ASymmetricAuthenticatedSignatureType.BC_FIPS_Ed448;
+				}
+				else if (algorithmType.equals(ASymmetricAuthenticatedSignatureType.Ed25519.name())) {
+					t = ASymmetricAuthenticatedSignatureType.BC_FIPS_Ed25519;
+				}
+				if (t!=null)
+				{
+					algorithmType = t.name();
+					codeProvider=t.getCodeProviderForKeyGenerator();
+					algorithm=t.getKeyGeneratorAlgorithmName();
+				}
+			}
 			if (xdh)
 			{
 				if (algorithm.equals("Ed25519")) {
-					if (!algorithmType.contains("Ed25519"))
-						throw new InvalidKeySpecException(algorithmType);
 					algorithm = "X25519";
 				}
 				else if (algorithm.equals("Ed448")) {
 					if (!algorithmType.contains("Ed448"))
 						throw new InvalidKeySpecException(algorithmType);
 					algorithm = "X448";
+				}
+			}
+			else {
+				if (codeProvider==ASymmetricAuthenticatedSignatureType.BC_FIPS_Ed448.getCodeProviderForKeyGenerator()) {
+					if (algorithm.equals("Ed25519")) {
+						byte[] e = new byte[Ed25519Prefix.length + encodedKey.length];
+
+						System.arraycopy(Ed25519Prefix, 0, e, 0, Ed25519Prefix.length);
+						System.arraycopy(encodedKey, 0, e, Ed25519Prefix.length, encodedKey.length);
+						encodedKey = e;
+					} else if (algorithm.equals("Ed448")) {
+						byte[] e = new byte[Ed448Prefix.length + encodedKey.length];
+
+						System.arraycopy(Ed448Prefix, 0, e, 0, Ed448Prefix.length);
+						System.arraycopy(encodedKey, 0, e, Ed448Prefix.length, encodedKey.length);
+						encodedKey = e;
+					}
 				}
 			}
             X509EncodedKeySpec pubKeySpec = new X509EncodedKeySpec(encodedKey);
@@ -222,8 +258,8 @@ public enum ASymmetricEncryptionType {
 	}
 	@SuppressWarnings("unused")
 	static byte[] encodePrivateKey(PrivateKey key, ASymmetricAuthenticatedSignatureType type, boolean xdh) {
+
 		return key.getEncoded();
-		//return Bits.concateEncodingWithShortSizedTabs(key.getAlgorithm().encode(), key.getEncoded());
 	}
 
 	static byte[] encodeGnuPublicKey(Object key) {
@@ -237,10 +273,20 @@ public enum ASymmetricEncryptionType {
 	}
 
 
+	private static final byte[] Ed25519Prefix = Hex.decode("302a300506032b6570032100");
+	private static final byte[] Ed448Prefix = Hex.decode("3043300506032b6571033a00");
 
 	@SuppressWarnings("unused")
 	static byte[] encodePublicKey(PublicKey key, ASymmetricAuthenticatedSignatureType type, boolean xdh)  {
-
+		if (!xdh) {
+			if (type == ASymmetricAuthenticatedSignatureType.BC_FIPS_Ed25519) {
+				byte[] k = key.getEncoded();
+				return Arrays.copyOfRange(k, Ed25519Prefix.length, k.length);
+			} else if (type == ASymmetricAuthenticatedSignatureType.BC_FIPS_Ed448) {
+				byte[] k = key.getEncoded();
+				return Arrays.copyOfRange(k, Ed448Prefix.length, k.length);
+			}
+		}
 
 		return key.getEncoded();
 
