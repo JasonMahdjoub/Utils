@@ -33,7 +33,14 @@ public final class WrappedHashedValue extends WrappedData {
 		assert type.ordinal()<256;
 	}
 	private WrappedHashedValue(MessageDigestAlgorithmType type, byte[] digest) {
-		this(type, digest, getSerializedArray(type, digest));
+		super();
+		if (type.getDigestLengthInBytes()!=digest.length)
+			throw new IllegalArgumentException();
+		assert digest.length<=MessageDigestAlgorithmType.MAX_HASH_LENGTH_IN_BYTES;
+		this.type = type;
+		this.digest=digest;
+		//noinspection ConstantValue
+		assert type.ordinal()<256;
 	}
 	private WrappedHashedValue(byte[] encoded) throws InvalidEncodedValue {
 		super();
@@ -65,6 +72,21 @@ public final class WrappedHashedValue extends WrappedData {
 
 
 	}
+
+	@Override
+	public byte[] getBytes() {
+		byte[] r=super.getBytes();
+		if (r==null) {
+			r=getSerializedArray(type, digest);
+			try {
+				super.setData(r);
+			} catch (InvalidEncodedValue e) {
+				throw new RuntimeException(e);
+			}
+		}
+		return r;
+	}
+
 	public static WrappedHashedValue fromEncodedArray(byte[] e) throws InvalidEncodedValue {
 		return new WrappedHashedValue(e);
 	}

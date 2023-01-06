@@ -68,7 +68,7 @@ public class WrappedData  {
 	public WrappedSecretData transformToSecretData()
 	{
 		if (secretData==null)
-			secretData=new WrappedSecretData(finalizer.data);
+			secretData=new WrappedSecretData(getBytes());
 		return secretData;
 	}
 
@@ -77,7 +77,7 @@ public class WrappedData  {
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
 		WrappedData that = (WrappedData) o;
-		return Arrays.equals(finalizer.data, that.finalizer.data);
+		return Arrays.equals(getBytes(), that.getBytes());
 	}
 
 	public WrappedString toWrappedString()
@@ -89,18 +89,19 @@ public class WrappedData  {
 	{
 		if (bytesNumber<=0)
 			throw new IllegalArgumentException();
-		if (this.finalizer.data==null)
+		byte[] t=getBytes();
+		if (t==null)
 			return this;
-		if (bytesNumber>=this.finalizer.data.length)
+		if (bytesNumber>=t.length)
 			return this;
-		int step=this.finalizer.data.length/bytesNumber;
+		int step=t.length/bytesNumber;
 		byte[] res=new byte[bytesNumber];
-		System.arraycopy(this.finalizer.data, 0, res, 0, res.length);
-		for (int i=step;i<this.finalizer.data.length;)
+		System.arraycopy(t, 0, res, 0, res.length);
+		for (int i=step;i<t.length;)
 		{
-			int s=Math.min(this.finalizer.data.length-i, res.length);
+			int s=Math.min(t.length-i, res.length);
 			for (int j=0;j<s;j++)
-				res[j]^=this.finalizer.data[i++];
+				res[j]^=t[i++];
 		}
 		if (this instanceof WrappedSecretData)
 			return new WrappedSecretData(res);
@@ -110,6 +111,6 @@ public class WrappedData  {
 
 	@Override
 	public int hashCode() {
-		return Arrays.hashCode(finalizer.data);
+		return Arrays.hashCode(getBytes());
 	}
 }
