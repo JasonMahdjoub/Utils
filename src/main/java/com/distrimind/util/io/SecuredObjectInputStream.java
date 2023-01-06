@@ -359,6 +359,12 @@ public abstract class SecuredObjectInputStream extends InputStream implements Da
 			throw new MessageExternalizationException(Integrity.FAIL_AND_CANDIDATE_TO_BAN, e);
 		}
 	}
+	public WrappedHashedValue readWrappedHashedValue(boolean nullAccepted) throws IOException{
+		return readWrappedData(nullAccepted, WrappedHashedValue.MAX_SIZE_IN_BYTES_OF_HASHED_VALUE);
+	}
+	public WrappedHashedValueInBase64StringFormat readWrappedHashedValueInBase64StringFormat(boolean nullAccepted) throws IOException{
+		return readWrappedString(nullAccepted, WrappedHashedValueInBase64StringFormat.MAX_CHARS_NUMBER);
+	}
 	public WrappedEncryptedASymmetricPrivateKey readWrappedEncryptedASymmetricPrivateKey(boolean nullAccepted) throws IOException{
 		return readWrappedData(nullAccepted, WrappedEncryptedASymmetricPrivateKey.MAX_SIZE_IN_BYTES_OF_KEY);
 	}

@@ -247,6 +247,9 @@ public abstract class SecuredObjectOutputStream extends OutputStream implements 
 	public void writeWrappedData(WrappedEncryptedASymmetricPrivateKey wrappedData, boolean nullAccepted) throws IOException {
 		writeWrappedData(wrappedData,nullAccepted, WrappedEncryptedASymmetricPrivateKey.MAX_SIZE_IN_BYTES_OF_KEY);
 	}
+	public void writeWrappedData(WrappedHashedValue wrappedHashedValue, boolean nullAccepted) throws IOException {
+		writeWrappedData(wrappedHashedValue,nullAccepted, WrappedHashedValue.MAX_SIZE_IN_BYTES_OF_HASHED_VALUE);
+	}
 	public void writeWrappedData(WrappedEncryptedSymmetricSecretKey wrappedData, boolean nullAccepted) throws IOException {
 		writeWrappedData(wrappedData,nullAccepted, WrappedEncryptedSymmetricSecretKey.MAX_SIZE_IN_BYTES_OF_KEY);
 	}
@@ -258,6 +261,9 @@ public abstract class SecuredObjectOutputStream extends OutputStream implements 
 	}
 	public void writeWrappedString(WrappedEncryptedASymmetricPrivateKeyString wrappedString, boolean nullAccepted) throws IOException {
 		writeWrappedString(wrappedString, nullAccepted, WrappedEncryptedASymmetricPrivateKeyString.MAX_CHARS_NUMBER);
+	}
+	public void writeWrappedString(WrappedHashedValueInBase64StringFormat wrappedHashedValue, boolean nullAccepted) throws IOException {
+		writeWrappedString(wrappedHashedValue, nullAccepted, WrappedHashedValueInBase64StringFormat.MAX_CHARS_NUMBER);
 	}
 	public void writeWrappedString(WrappedEncryptedSymmetricSecretKeyString wrappedString, boolean nullAccepted) throws IOException {
 		writeWrappedString(wrappedString, nullAccepted, WrappedEncryptedSymmetricSecretKeyString.MAX_CHARS_NUMBER);
