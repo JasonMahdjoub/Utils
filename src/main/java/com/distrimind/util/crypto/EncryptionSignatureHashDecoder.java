@@ -858,7 +858,7 @@ public class EncryptionSignatureHashDecoder {
 					digest.update(asymSign);
 					hash3=digest.digest();
 				}
-				WrappedHashedValue hashToCheck=originalInputStream.readObject(false);
+				WrappedHashedValue hashToCheck=WrappedHashedValue.from(digest.getMessageDigestType(), originalInputStream.readBytesArray(false, digest.getMessageDigestType().getDigestLengthInBytes()));
 				if (positionOfRandomInputStreamAfterDecoding!=null)
 					positionOfRandomInputStreamAfterDecoding.set(originalInputStream.currentPosition());
 				if (!hash3.equals(hashToCheck))
@@ -914,7 +914,7 @@ public class EncryptionSignatureHashDecoder {
 			}
 			return res;
 		}
-		catch(NoSuchAlgorithmException | NoSuchProviderException | ClassNotFoundException e)
+		catch(NoSuchAlgorithmException | NoSuchProviderException e)
 		{
 			throw new IOException(e);
 		}
@@ -999,7 +999,7 @@ public class EncryptionSignatureHashDecoder {
 					digest.update(asymSign);
 					hash3=digest.digest();
 				}
-				WrappedHashedValue hashToCheck=inputStream.readObject(false);
+				WrappedHashedValue hashToCheck=WrappedHashedValue.from(digest.getMessageDigestType(), inputStream.readBytesArray(false, digest.getMessageDigestType().getDigestLengthInBytes()));
 				if (!hash3.equals(hashToCheck))
 					return Integrity.FAIL;
 
@@ -1051,7 +1051,7 @@ public class EncryptionSignatureHashDecoder {
 		{
 			return e.getIntegrity();
 		} catch(NoSuchAlgorithmException | NoSuchProviderException | IllegalArgumentException | IOException |
-				NullPointerException | ClassNotFoundException e)
+				NullPointerException  e)
 		{
 			return Integrity.FAIL;
 		}
@@ -1122,7 +1122,7 @@ public class EncryptionSignatureHashDecoder {
 					digest.update(asymSign);
 					hash3=digest.digest();
 				}
-				WrappedHashedValue hashToCheck=inputStream.readObject(false);
+				WrappedHashedValue hashToCheck=WrappedHashedValue.from(digest.getMessageDigestType(), inputStream.readBytesArray(false, digest.getMessageDigestType().getDigestLengthInBytes()));
 				if (!hash3.equals(hashToCheck))
 					return Integrity.FAIL;
 
@@ -1153,7 +1153,7 @@ public class EncryptionSignatureHashDecoder {
 		{
 			return e.getIntegrity();
 		} catch(NoSuchAlgorithmException | NoSuchProviderException | IllegalArgumentException | IOException |
-				NullPointerException | ClassNotFoundException e)
+				NullPointerException  e)
 		{
 			return Integrity.FAIL;
 		}

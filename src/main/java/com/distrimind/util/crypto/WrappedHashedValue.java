@@ -16,7 +16,7 @@ import java.util.Objects;
  * @since Utils 5.25.0
  */
 public final class WrappedHashedValue extends WrappedData {
-	public static final int MAX_SIZE_IN_BYTES_OF_HASHED_VALUE=MessageDigestAlgorithmType.MAX_HASH_LENGTH_IN_BYTES+2;
+	public static final int MAX_SIZE_IN_BYTES_OF_HASHED_VALUE=MessageDigestAlgorithmType.MAX_HASH_LENGTH_IN_BYTES+1;
 	private MessageDigestAlgorithmType type;
 	private byte[] digest;
 	private transient StringBuilder base64String=null, base16String=null;
@@ -54,11 +54,11 @@ public final class WrappedHashedValue extends WrappedData {
 		{
 			if (t.ordinal()==o)
 			{
-				if (type.getDigestLengthInBytes()!=data.length-1)
+				if (t.getDigestLengthInBytes()!=data.length-1)
 					throw new InvalidEncodedValue();
 				super.setData(data);
 				this.type = t;
-				this.digest=Arrays.copyOfRange(data, 1, data.length-1);
+				this.digest=Arrays.copyOfRange(data, 1, data.length);
 				this.base16String=null;
 				this.base64String=null;
 				this.toString=null;

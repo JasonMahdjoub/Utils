@@ -1849,11 +1849,11 @@ public class SerializationTools {
 				writeObjectCode(oos, 33);
 				writePath(oos, (Path)o, sizeMax,false);
 			} */
-			else if (clazz == WrappedData.class) {
+			else if (WrappedData.class.isAssignableFrom(clazz)) {
 				writeObjectCode(oos, 32);
 				writeWrappedData(oos, (WrappedData) o, sizeMax, false);
 			}
-			else if (clazz == WrappedString.class) {
+			else if (WrappedString.class.isAssignableFrom(clazz)) {
 				writeObjectCode(oos, 33);
 				writeWrappedString(oos, (WrappedString) o, sizeMax, false);
 			}else

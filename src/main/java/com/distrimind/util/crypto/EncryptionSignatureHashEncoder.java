@@ -788,7 +788,7 @@ public class EncryptionSignatureHashEncoder {
 					hash=digest.digest();
 					originalOutputStream.writeBytesArray(signature, false, ASymmetricAuthenticatedSignatureType.MAX_SIZE_IN_BYTES_OF_ASYMMETRIC_SIGNATURE);
 				}
-				originalOutputStream.writeObject(hash, false);
+				originalOutputStream.writeBytesArray(hash.getHashArray(), false, hash.getType().getDigestLengthInBytes());
 			} else if (symmetricSigner!=null)
 			{
 				if (lenBuffer<=headSizeMinusOne)
