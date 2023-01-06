@@ -183,6 +183,7 @@ public abstract class MultiFormatProperties implements SecureExternalizable, Clo
 			for (Field f : c.getDeclaredFields()) {
 				if (!isValid(f))
 					continue;
+
 				f.setAccessible(true);
                 try {
                     if (canExclude(referenceProperties, f, f.get(this)))

@@ -38,7 +38,6 @@ package com.distrimind.util.sizeof;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.security.PrivilegedExceptionAction;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -50,33 +49,6 @@ import java.util.LinkedList;
  * @since Utils 1.5
  */
 final class ClassMetaData {
-	protected static final class ClassAccessPrivilegedAction implements PrivilegedExceptionAction<Object> {
-		private Class<?> m_cls;
-
-		@Override
-		public Object run()  {
-			return m_cls.getDeclaredFields();
-		}
-
-		public void setContext(final Class<?> cls) {
-			m_cls = cls;
-		}
-	}
-
-	protected static final class FieldAccessPrivilegedAction implements PrivilegedExceptionAction<Object> {
-		private Field m_field;
-
-		@Override
-		public Object run()  {
-			m_field.setAccessible(true);
-
-			return null;
-		}
-
-		public void setContext(final Field field) {
-			m_field = field;
-		}
-	}
 
 	protected static class PersonalField {
 		public final Field m_field;
@@ -93,10 +65,6 @@ final class ClassMetaData {
 			m_depth = _depth;
 		}
 	}
-
-	static final ClassAccessPrivilegedAction capa = new ClassAccessPrivilegedAction();
-
-	static final FieldAccessPrivilegedAction fapa = new FieldAccessPrivilegedAction();
 
 	private final Class<?> m_class;
 
@@ -118,10 +86,7 @@ final class ClassMetaData {
 			m_size = ObjectSizer.OBJECT_SHELL_SIZE;
 
 			Field[] fields;
-			synchronized (capa) {
-				capa.setContext(m_class);
-				fields=(Field[])capa.run();
-			}
+			fields=m_class.getDeclaredFields();
 			ArrayList<Field> fields_to_avoid = null;
 			for (Field f : fields) {
 				if ((f.getModifiers() & Modifier.STATIC) != 0 && (f.getModifiers() & Modifier.PUBLIC) != 0) {
@@ -142,13 +107,11 @@ final class ClassMetaData {
 				if ((f.getModifiers() & Modifier.STATIC) != 0)
 					continue;
 				Class<?> fieldType = f.getType();
+
 				if (fieldType.isPrimitive()) {
 					m_size += ObjectSizer.getPrimitiveSize(fieldType);
 				} else {
-					synchronized (fapa) {
-						fapa.setContext(f);
-						fapa.run();
-					}
+					f.setAccessible(true);
 					m_size += ObjectSizer.OBJREF_SIZE;
 
 					if (fields_to_avoid == null || !fields_to_avoid.contains(f)) {

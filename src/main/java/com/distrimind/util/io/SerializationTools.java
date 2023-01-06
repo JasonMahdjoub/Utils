@@ -1407,8 +1407,7 @@ public class SerializationTools {
 			Constructor<?> c=constructors.get(clazz);
 			if (c==null)
 			{
-				c=clazz.getDeclaredConstructor();
-				c.setAccessible(true);
+				c=ReflectionTools.getConstructor(clazz);
 				constructors.put(clazz, c);
 			}
 			return c;

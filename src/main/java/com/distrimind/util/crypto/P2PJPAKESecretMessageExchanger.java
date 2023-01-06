@@ -35,6 +35,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
 package com.distrimind.util.crypto;
 
 import com.distrimind.util.Cleanable;
+import com.distrimind.util.ReflectionTools;
 import com.distrimind.util.io.Integrity;
 import com.distrimind.util.io.MessageExternalizationException;
 import com.distrimind.bouncycastle.crypto.CryptoException;
@@ -520,21 +521,6 @@ public class P2PJPAKESecretMessageExchanger extends P2PLoginAgreement {
 	private static final Field jpakeFieldPassword;
 	static
 	{
-		jpakeFieldPassword=getField(JPAKEParticipant.class, "password");
-	}
-	@SuppressWarnings("SameParameterValue")
-	private static Field getField(final Class<?> c, final String fieldName) {
-		try {
-
-
-			Field m = c.getDeclaredField(fieldName);
-			m.setAccessible(true);
-			return m;
-
-		} catch (SecurityException | NoSuchFieldException e) {
-			e.printStackTrace();
-			System.exit(-1);
-			return null;
-		}
+		jpakeFieldPassword= ReflectionTools.getField(JPAKEParticipant.class, "password");
 	}
 }

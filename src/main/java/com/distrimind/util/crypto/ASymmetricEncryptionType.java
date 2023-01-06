@@ -35,24 +35,16 @@ knowledge of the CeCILL-C license and that you accept its terms.
 package com.distrimind.util.crypto;
 
 import com.distrimind.bcfips.crypto.Algorithm;
-import com.distrimind.bcfips.crypto.asymmetric.AsymmetricEdDSAPublicKey;
-import com.distrimind.bcfips.crypto.asymmetric.AsymmetricXDHPrivateKey;
-import com.distrimind.bcfips.crypto.asymmetric.AsymmetricXDHPublicKey;
 import com.distrimind.bcfips.crypto.fips.FipsRSA;
-import com.distrimind.bcfips.crypto.general.EdEC;
 import com.distrimind.bouncycastle.pqc.jcajce.spec.KyberParameterSpec;
 import com.distrimind.bouncycastle.pqc.jcajce.spec.NTRUParameterSpec;
 import com.distrimind.bouncycastle.pqc.jcajce.spec.SABERParameterSpec;
-import com.distrimind.util.UtilClassLoader;
 import com.distrimind.util.io.Integrity;
 import com.distrimind.util.io.MessageExternalizationException;
 
 import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
 import java.io.IOException;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.security.*;
 import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.InvalidKeySpecException;
@@ -66,7 +58,7 @@ import java.security.spec.X509EncodedKeySpec;
  * @version 4.1
  * @since Utils 1.4
  */
-@SuppressWarnings({"unchecked", "BooleanMethodIsAlwaysInverted"})
+@SuppressWarnings({"BooleanMethodIsAlwaysInverted"})
 public enum ASymmetricEncryptionType {
 	RSA_OAEPWithSHA256AndMGF1Padding("RSA", "ECB", "OAEPWITHSHA-256ANDMGF1PADDING", ASymmetricAuthenticatedSignatureType.BC_FIPS_SHA384withRSA,
 			3072, 31536000000L, (short) 66, CodeProvider.SunJCE,CodeProvider.SunRsaSign, FipsRSA.ALGORITHM, false, null),
@@ -152,7 +144,7 @@ public enum ASymmetricEncryptionType {
 
 		try {
 
-			if (algorithmType.contains("Ed25519") || algorithmType.contains("Ed448") || algorithmType.contains("X25519") || algorithmType.contains("X448"))
+			/*if (algorithmType.contains("Ed25519") || algorithmType.contains("Ed448") || algorithmType.contains("X25519") || algorithmType.contains("X448"))
 			{
 				if (xdh)
 				{
@@ -166,13 +158,28 @@ public enum ASymmetricEncryptionType {
 				}
 			}
 			else
+			{*/
+			if (xdh)
 			{
+				if (algorithm.equals("Ed25519")) {
+					if (!algorithmType.contains("Ed25519"))
+						throw new InvalidKeySpecException(algorithmType);
+					algorithm = "X25519";
+				}
+				else if (algorithm.equals("Ed448")) {
+					if (!algorithmType.contains("Ed448"))
+						throw new InvalidKeySpecException(algorithmType);
+					algorithm = "X448";
+				}
+			}
+
 				PKCS8EncodedKeySpec pkcsKeySpec = new PKCS8EncodedKeySpec(encodedKey);
 
 				KeyFactory kf = KeyFactory.getInstance(algorithm, codeProvider.getCompatibleProvider());
 				return kf.generatePrivate(pkcsKeySpec);
-			}
-		} catch (InvalidKeySpecException | NoSuchProviderException | IOException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
+			//}
+		} catch (InvalidKeySpecException | NoSuchProviderException e) {
+			System.err.println(algorithm+" ; "+xdh+";"+codeProvider);
 			throw new InvalidKeySpecException(e);
 		}
 	}
@@ -180,37 +187,24 @@ public enum ASymmetricEncryptionType {
 	static PublicKey decodeNativePublicKey(byte[] encodedKey, String algorithm, String algorithmType, boolean xdh, CodeProvider codeProvider)
 			throws NoSuchAlgorithmException, InvalidKeySpecException {
 		try {
-			//byte[][] parts = Bits.separateEncodingsWithShortSizedTabs(encodedKey);
-
-			if (algorithmType.contains("Ed25519") || algorithmType.contains("X25519"))
+			if (xdh)
 			{
-				if (xdh)
-				{
-					AsymmetricXDHPublicKey k = new AsymmetricXDHPublicKey(EdEC.Algorithm.X25519, encodedKey);
-					return constructorProvXDHPublicKey.newInstance(k);
+				if (algorithm.equals("Ed25519")) {
+					if (!algorithmType.contains("Ed25519"))
+						throw new InvalidKeySpecException(algorithmType);
+					algorithm = "X25519";
 				}
-				else {
-					AsymmetricEdDSAPublicKey k = new AsymmetricEdDSAPublicKey(EdEC.Algorithm.Ed25519, encodedKey);
-					return constructorProvEdDSAPublicKey.newInstance(k);
-				}
-			}
-			else if (algorithmType.contains("Ed448") || algorithmType.contains("X448"))
-			{
-				if (xdh)
-				{
-					AsymmetricXDHPublicKey k = new AsymmetricXDHPublicKey(EdEC.Algorithm.X448, encodedKey);
-					return constructorProvXDHPublicKey.newInstance(k);
-				}
-				else {
-					AsymmetricEdDSAPublicKey k = new AsymmetricEdDSAPublicKey(EdEC.Algorithm.Ed448, encodedKey);
-					return constructorProvEdDSAPublicKey.newInstance(k);
+				else if (algorithm.equals("Ed448")) {
+					if (!algorithmType.contains("Ed448"))
+						throw new InvalidKeySpecException(algorithmType);
+					algorithm = "X448";
 				}
 			}
             X509EncodedKeySpec pubKeySpec = new X509EncodedKeySpec(encodedKey);
 
             KeyFactory kf = KeyFactory.getInstance(algorithm, codeProvider.getCompatibleProvider());
             return kf.generatePublic(pubKeySpec);
-		} catch (IllegalAccessException | InstantiationException | InvocationTargetException | NoSuchProviderException e) {
+		} catch (NoSuchProviderException e) {
 			throw new InvalidKeySpecException(e);
 		}
 
@@ -243,73 +237,9 @@ public enum ASymmetricEncryptionType {
 	}
 
 
-	private static final Field provEdDSAPublicKeyBaseKey;
-	private static final Field provXDHPublicKeyBaseKey;
-	private static final Constructor<PublicKey> constructorProvEdDSAPublicKey;
-	private static final Constructor<PublicKey> constructorProvXDHPublicKey;
-	private static final Constructor<PrivateKey> constructorProvXDHPrivateKey;
-	static
-	{
-		Field tmpProvEdDSAPublicKeyBaseKey=null;
-		Field tmpProvXDHPublicKeyBaseKey=null;
-		Constructor<PublicKey> tmpConstructorProvEdDSAPublicKey=null;
-		Constructor<PublicKey> tmpConstructorProvXDHPublicKey=null;
-		Constructor<PrivateKey> tmpConstructorProvXDHPrivateKey=null;
 
-		try {
-
-			tmpProvEdDSAPublicKeyBaseKey= UtilClassLoader.getLoader().loadClass("com.distrimind.bcfips.jcajce.provider.ProvEdDSAPublicKey").getDeclaredField("baseKey");
-			tmpProvEdDSAPublicKeyBaseKey.setAccessible(true);
-			tmpProvXDHPublicKeyBaseKey=UtilClassLoader.getLoader().loadClass("com.distrimind.bcfips.jcajce.provider.ProvXDHPublicKey").getDeclaredField("baseKey");
-			tmpProvXDHPublicKeyBaseKey.setAccessible(true);
-
-			tmpConstructorProvEdDSAPublicKey= (Constructor<PublicKey>) UtilClassLoader.getLoader().loadClass("com.distrimind.bcfips.jcajce.provider.ProvEdDSAPublicKey").getDeclaredConstructor(AsymmetricEdDSAPublicKey.class);
-			tmpConstructorProvEdDSAPublicKey.setAccessible(true);
-
-			tmpConstructorProvXDHPublicKey= (Constructor<PublicKey>) UtilClassLoader.getLoader().loadClass("com.distrimind.bcfips.jcajce.provider.ProvXDHPublicKey").getDeclaredConstructor(AsymmetricXDHPublicKey.class);
-			tmpConstructorProvXDHPublicKey.setAccessible(true);
-
-			tmpConstructorProvXDHPrivateKey= (Constructor<PrivateKey>) UtilClassLoader.getLoader().loadClass("com.distrimind.bcfips.jcajce.provider.ProvXDHPrivateKey").getDeclaredConstructor(AsymmetricXDHPrivateKey.class);
-			tmpConstructorProvXDHPrivateKey.setAccessible(true);
-
-		} catch (NoSuchFieldException | NoSuchMethodException | ClassNotFoundException e) {
-			e.printStackTrace();
-			System.exit(-1);
-		}
-		provEdDSAPublicKeyBaseKey =tmpProvEdDSAPublicKeyBaseKey;
-		provXDHPublicKeyBaseKey =tmpProvXDHPublicKeyBaseKey;
-		constructorProvEdDSAPublicKey=tmpConstructorProvEdDSAPublicKey;
-		constructorProvXDHPublicKey=tmpConstructorProvXDHPublicKey;
-		constructorProvXDHPrivateKey=tmpConstructorProvXDHPrivateKey;
-
-
-	}
-
+	@SuppressWarnings("unused")
 	static byte[] encodePublicKey(PublicKey key, ASymmetricAuthenticatedSignatureType type, boolean xdh)  {
-
-		if (type == ASymmetricAuthenticatedSignatureType.BC_FIPS_Ed25519 || type == ASymmetricAuthenticatedSignatureType.BC_FIPS_Ed448) {
-			if (xdh)
-			{
-				AsymmetricXDHPublicKey k = null;
-				try {
-					k = (AsymmetricXDHPublicKey) provXDHPublicKeyBaseKey.get(key);
-				} catch (IllegalAccessException e) {
-					e.printStackTrace();
-					System.exit(-1);
-				}
-				return k.getPublicData();
-			}
-			else {
-				AsymmetricEdDSAPublicKey k = null;
-				try {
-					k = (AsymmetricEdDSAPublicKey) provEdDSAPublicKeyBaseKey.get(key);
-				} catch (IllegalAccessException e) {
-					e.printStackTrace();
-					System.exit(-1);
-				}
-				return k.getPublicData();
-			}
-		}
 
 
 		return key.getEncoded();

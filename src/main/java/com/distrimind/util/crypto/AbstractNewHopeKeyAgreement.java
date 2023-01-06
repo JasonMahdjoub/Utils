@@ -42,6 +42,7 @@ import java.util.Arrays;
 
 import com.distrimind.bouncycastle.pqc.crypto.newhope.NHPrivateKeyParameters;
 import com.distrimind.util.Cleanable;
+import com.distrimind.util.ReflectionTools;
 import com.distrimind.util.UtilClassLoader;
 
 /**
@@ -147,8 +148,7 @@ public abstract class AbstractNewHopeKeyAgreement extends Agreement{
     		
 	    		try
 	    		{
-	    			Field f=newHopeClass.getDeclaredField("SENDB_BYTES");
-	    			f.setAccessible(true);
+	    			Field f= ReflectionTools.getField(newHopeClass, "SENDB_BYTES");
 	    			sendBBytes=f.getInt(null);
 	    		}
 	    		catch(Exception e)
@@ -165,9 +165,9 @@ public abstract class AbstractNewHopeKeyAgreement extends Agreement{
     		//POLY_SIZE=polySize;
     		SENDB_BYTES=sendBBytes;
     		Class<?> bClass=byte[].class;
-    		methodShareA=getMethod(newHopeClass, "sharedA", bClass,short[].class,bClass);
-    		methodShareB=getMethod(newHopeClass, "sharedB", SecureRandom.class, bClass,bClass,bClass );
-    		fieldSecData=getField(NHPrivateKeyParameters.class, "secData");
+    		methodShareA=ReflectionTools.getMethod(newHopeClass, "sharedA", bClass,short[].class,bClass);
+    		methodShareB=ReflectionTools.getMethod(newHopeClass, "sharedB", SecureRandom.class, bClass,bClass,bClass );
+    		fieldSecData=ReflectionTools.getField(NHPrivateKeyParameters.class, "secData");
     		
     }
 	
@@ -202,41 +202,7 @@ public abstract class AbstractNewHopeKeyAgreement extends Agreement{
 		}
 	}
     
-    private static Method getMethod(final Class<?> c, final String method_name, final Class<?>... parameters) {
-		try {
-			
-
-			Method m = c.getDeclaredMethod(method_name, parameters);
-			m.setAccessible(true);
-			return m;
-
-				
-		} catch (SecurityException | NoSuchMethodException e) {
-			System.err.println("Impossible to access to the function " + method_name + " of the class "
-					+ c.getCanonicalName()
-					+ ". This is an inner bug of MadKitLanEdition. Please contact the developers. Impossible to continue. See the next error :");
-			e.printStackTrace();
-			System.exit(-1);
-			return null;
-		}
-	}
 
     
     
-    @SuppressWarnings("SameParameterValue")
-	private static Field getField(final Class<?> c, final String method_name) {
-		try {
-			
-
-			Field m = c.getDeclaredField(method_name);
-			m.setAccessible(true);
-			return m;
-
-				
-		} catch (SecurityException | NoSuchFieldException e) {
-			e.printStackTrace();
-			System.exit(-1);
-			return null;
-		}
-	}
 }
