@@ -1,6 +1,6 @@
 Utils
 =====
-5.24.2 STABLE (Build: 4950) (from 04/01/2016 to 03/01/2023)
+5.25.0 STABLE (Build: 5033) (from 04/01/2016 to 06/01/2023)
 
 # Creator(s):
 * Jason MAHDJOUB
@@ -9,6 +9,14 @@ Utils
 * Jason MAHDJOUB (Entered in the team at 04/01/2016)
 
 # Changes:
+
+
+### 5.25.0 STABLE (06/01/2023)
+#### New feature(s)
+* Add WrappedHashedValue class
+* Add WrappedHashedValueInBase64StringFormat class
+* Add MessageDigestAlgorithmType enum
+* Add Ed25519 and Ed448 java native implementations
 
 
 ### 5.24.2 STABLE (03/01/2023)

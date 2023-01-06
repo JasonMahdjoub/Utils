@@ -144,6 +144,11 @@ public enum SymmetricAuthenticatedSignatureType {
 	{
 		return messageDigestType.getDigestLengthInBits();
 	}
+
+	public int getSignatureSizeInBytes()
+	{
+		return messageDigestType.getDigestLengthInBytes();
+	}
 	
 	public MessageDigestType getMessageDigestType()
 	{

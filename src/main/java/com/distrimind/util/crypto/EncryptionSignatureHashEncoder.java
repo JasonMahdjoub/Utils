@@ -775,7 +775,8 @@ public class EncryptionSignatureHashEncoder {
 					digest.update(hash.getHashArray());
 					digest.update(signature);
 					hash=digest.digest();
-					originalOutputStream.writeBytesArray(signature, false, SymmetricAuthenticatedSignatureType.MAX_SYMMETRIC_SIGNATURE_SIZE);
+					assert symmetricSigner.getSecretKey().getAuthenticatedSignatureAlgorithmType().getSignatureSizeInBytes()==signature.length;
+					originalOutputStream.write(signature);
 				}
 
 				if (asymmetricSigner != null) {
@@ -788,7 +789,7 @@ public class EncryptionSignatureHashEncoder {
 					hash=digest.digest();
 					originalOutputStream.writeBytesArray(signature, false, ASymmetricAuthenticatedSignatureType.MAX_SIZE_IN_BYTES_OF_ASYMMETRIC_SIGNATURE);
 				}
-				originalOutputStream.writeBytesArray(hash.getHashArray(), false, hash.getType().getDigestLengthInBytes());
+				originalOutputStream.write(hash.getHashArray());
 			} else if (symmetricSigner!=null)
 			{
 				if (lenBuffer<=headSizeMinusOne)
@@ -797,7 +798,8 @@ public class EncryptionSignatureHashEncoder {
 				if (lenBuffer<=headSizeMinusOne && associatedData!=null)
 					symmetricSigner.update(associatedData, offAD, lenAD);
 				byte[] signature = symmetricSigner.getSignature();
-				originalOutputStream.writeBytesArray(signature, false, SymmetricAuthenticatedSignatureType.MAX_SYMMETRIC_SIGNATURE_SIZE);
+				assert symmetricSigner.getSecretKey().getAuthenticatedSignatureAlgorithmType().getSignatureSizeInBytes()==signature.length;
+				originalOutputStream.write(signature);
 			} else if (asymmetricSigner!=null)
 			{
 				asymmetricSigner.update(code);
@@ -921,14 +923,13 @@ public class EncryptionSignatureHashEncoder {
 		long res=headSize;
 
 		if (symmetricSigner!=null) {
-			res += symmetricSigner.getMacLengthBytes() + SerializationTools.getSizeCoderSize(SymmetricAuthenticatedSignatureType.MAX_SYMMETRIC_KEY_SIZE);
+			res += symmetricSigner.getMacLengthBytes();
 		}
 		if(asymmetricSigner!=null) {
 			res += asymmetricSigner.getMacLengthBytes() + SerializationTools.getSizeCoderSize(ASymmetricAuthenticatedSignatureType.MAX_SIZE_IN_BYTES_OF_ASYMMETRIC_SIGNATURE);
 		}
 		if (digest!=null || (asymmetricSigner!=null && symmetricSigner!=null))
 		{
-			res+=SerializationTools.getSizeCoderSize(MessageDigestType.MAX_HASH_LENGTH_IN_BYTES);
 			if (digest==null) {
 				res+=defaultMessageType.getDigestLengthInBits() / 8;
 			}

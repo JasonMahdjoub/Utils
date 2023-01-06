@@ -725,7 +725,8 @@ public class EncryptionSignatureHashDecoder {
 			else if (symmetricChecker!=null)
 			{
 				originalInputStream.seek(EncryptionSignatureHashEncoder.headSize+dataLen);
-				symmetricChecker.init(originalInputStream.readBytesArray(false, SymmetricAuthenticatedSignatureType.MAX_SYMMETRIC_SIGNATURE_SIZE));
+				byte[] symSign=originalInputStream.readNBytes(symmetricChecker.getSecretKey().getAuthenticatedSignatureAlgorithmType().getSignatureSizeInBytes());
+				symmetricChecker.init(symSign);
 				if (positionOfRandomInputStreamAfterDecoding!=null)
 					positionOfRandomInputStreamAfterDecoding.set(originalInputStream.currentPosition());
 				if (checkerIn==null || (cipher!=null && poolExecutor!=null)!=checkerIn.isMultiThreaded()) {
@@ -844,7 +845,8 @@ public class EncryptionSignatureHashDecoder {
 				byte[] asymSign=null;
 				if (symmetricChecker!=null)
 				{
-					symSign=originalInputStream.readBytesArray(false, SymmetricAuthenticatedSignatureType.MAX_SYMMETRIC_SIGNATURE_SIZE);
+
+					symSign=originalInputStream.readNBytes(symmetricChecker.getSecretKey().getAuthenticatedSignatureAlgorithmType().getSignatureSizeInBytes());
 					digest.reset();
 					digest.update(hash.getHashArray());
 					digest.update(symSign);
@@ -858,7 +860,7 @@ public class EncryptionSignatureHashDecoder {
 					digest.update(asymSign);
 					hash3=digest.digest();
 				}
-				WrappedHashedValue hashToCheck=WrappedHashedValue.from(digest.getMessageDigestType(), originalInputStream.readBytesArray(false, digest.getMessageDigestType().getDigestLengthInBytes()));
+				WrappedHashedValue hashToCheck=WrappedHashedValue.from(digest.getMessageDigestType(), originalInputStream.readNBytes(digest.getMessageDigestType().getDigestLengthInBytes()));
 				if (positionOfRandomInputStreamAfterDecoding!=null)
 					positionOfRandomInputStreamAfterDecoding.set(originalInputStream.currentPosition());
 				if (!hash3.equals(hashToCheck))
@@ -981,7 +983,7 @@ public class EncryptionSignatureHashDecoder {
 				byte[] asymSign=null;
 				if (symmetricChecker!=null)
 				{
-					byte[] symSign=inputStream.readBytesArray(false, SymmetricAuthenticatedSignatureType.MAX_SYMMETRIC_SIGNATURE_SIZE);
+					byte[] symSign=inputStream.readNBytes(symmetricChecker.getSecretKey().getAuthenticatedSignatureAlgorithmType().getSignatureSizeInBytes());
 					digest.reset();
 					symmetricChecker.init(symSign);
 					if (associatedData!=null)
@@ -999,7 +1001,7 @@ public class EncryptionSignatureHashDecoder {
 					digest.update(asymSign);
 					hash3=digest.digest();
 				}
-				WrappedHashedValue hashToCheck=WrappedHashedValue.from(digest.getMessageDigestType(), inputStream.readBytesArray(false, digest.getMessageDigestType().getDigestLengthInBytes()));
+				WrappedHashedValue hashToCheck=WrappedHashedValue.from(digest.getMessageDigestType(), inputStream.readNBytes(digest.getMessageDigestType().getDigestLengthInBytes()));
 				if (!hash3.equals(hashToCheck))
 					return Integrity.FAIL;
 
@@ -1018,7 +1020,8 @@ public class EncryptionSignatureHashDecoder {
 			{
 
 				inputStream.seek(dataPos+dataLen);
-				symmetricChecker.init(inputStream.readBytesArray(false, SymmetricAuthenticatedSignatureType.MAX_SYMMETRIC_SIGNATURE_SIZE));
+				byte[] symSign=inputStream.readNBytes(symmetricChecker.getSecretKey().getAuthenticatedSignatureAlgorithmType().getSignatureSizeInBytes());
+				symmetricChecker.init(symSign);
 				limitedRandomInputStream.init(inputStream, dataPos, dataLen);
 				symmetricChecker.update(limitedRandomInputStream);
 				symmetricChecker.update(code);
@@ -1108,7 +1111,7 @@ public class EncryptionSignatureHashDecoder {
 				byte[] asymSign=null;
 				if (symCheckOK)
 				{
-					byte[] symSign=inputStream.readBytesArray(false, SymmetricAuthenticatedSignatureType.MAX_SYMMETRIC_SIGNATURE_SIZE);
+					byte[] symSign=inputStream.readNBytes(symmetricChecker.getSecretKey().getAuthenticatedSignatureAlgorithmType().getSignatureSizeInBytes());
 					digest.reset();
 					digest.update(hash.getHashArray());
 					digest.update(symSign);
@@ -1122,7 +1125,7 @@ public class EncryptionSignatureHashDecoder {
 					digest.update(asymSign);
 					hash3=digest.digest();
 				}
-				WrappedHashedValue hashToCheck=WrappedHashedValue.from(digest.getMessageDigestType(), inputStream.readBytesArray(false, digest.getMessageDigestType().getDigestLengthInBytes()));
+				WrappedHashedValue hashToCheck=WrappedHashedValue.from(digest.getMessageDigestType(), inputStream.readNBytes(digest.getMessageDigestType().getDigestLengthInBytes()));
 				if (!hash3.equals(hashToCheck))
 					return Integrity.FAIL;
 
@@ -1208,14 +1211,13 @@ public class EncryptionSignatureHashDecoder {
 		long res=EncryptionSignatureHashEncoder.headSize;
 
 		if (symmetricChecker!=null) {
-			res += symmetricChecker.getMacLengthBytes() + SerializationTools.getSizeCoderSize(SymmetricAuthenticatedSignatureType.MAX_SYMMETRIC_SIGNATURE_SIZE);
+			res += symmetricChecker.getMacLengthBytes() ;
 		}
 		if(asymmetricChecker!=null) {
 			res += asymmetricChecker.getMacLengthBytes() + SerializationTools.getSizeCoderSize(ASymmetricAuthenticatedSignatureType.MAX_SIZE_IN_BYTES_OF_ASYMMETRIC_SIGNATURE);
 		}
 		if (digest!=null || (symmetricChecker!=null && asymmetricChecker!=null))
 		{
-			res+=SerializationTools.getSizeCoderSize(MessageDigestType.MAX_HASH_LENGTH_IN_BYTES);
 			if (digest==null) {
 				res+=EncryptionSignatureHashEncoder.defaultMessageType.getDigestLengthInBits() / 8;
 			}
