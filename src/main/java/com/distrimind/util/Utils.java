@@ -67,10 +67,11 @@ public class Utils {
 			VERSION.addCreator(new Person("mahdjoub", "jason"))
 					.addDeveloper(new PersonDeveloper("mahdjoub", "jason", "2016-01-04"))
 					.addDescription(
-							new Description(5, 25, 0, Version.Type.STABLE, 0, "2023-01-04")
+							new Description(5, 25, 0, Version.Type.STABLE, 0, "2023-01-06")
 									.addItem(NEW_FEATURE, "Add WrappedHashedValue class")
 									.addItem(NEW_FEATURE, "Add WrappedHashedValueInBase64StringFormat class")
 									.addItem(NEW_FEATURE, "Add MessageDigestAlgorithmType enum")
+									.addItem(NEW_FEATURE, "Add Ed25519 and Ed448 java native implementations")
 
 					)
 					.addDescription(

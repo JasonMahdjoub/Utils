@@ -46,6 +46,8 @@ import com.distrimind.bouncycastle.pqc.jcajce.spec.DilithiumParameterSpec;
 import com.distrimind.bouncycastle.pqc.jcajce.spec.FalconParameterSpec;
 import com.distrimind.bouncycastle.pqc.jcajce.spec.SPHINCS256KeyGenParameterSpec;
 import com.distrimind.bouncycastle.pqc.jcajce.spec.SPHINCSPlusParameterSpec;
+import com.distrimind.util.systeminfo.OS;
+import com.distrimind.util.systeminfo.OSVersion;
 
 import java.io.IOException;
 import java.security.KeyPairGenerator;
@@ -54,6 +56,7 @@ import java.security.NoSuchProviderException;
 import java.security.Signature;
 import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.ECGenParameterSpec;
+import java.security.spec.NamedParameterSpec;
 import java.util.Random;
 
 /**
@@ -97,6 +100,8 @@ public enum ASymmetricAuthenticatedSignatureType {
 	BCPQC_CHRYSTALS_DILITHIUM_5_AES("Dilithium", "Dilithium", CodeProvider.BCPQC,CodeProvider.BCPQC, 21008, 31536000000L, null, true, DilithiumParameterSpec.dilithium5_aes),
 	BCPQC_FALCON_512("Falcon", "Falcon", CodeProvider.BCPQC,CodeProvider.BCPQC, 7376, 31536000000L, null, true, FalconParameterSpec.falcon_512),
 	BCPQC_FALCON_1024("Falcon", "Falcon", CodeProvider.BCPQC,CodeProvider.BCPQC, 14544, 31536000000L, null, true, FalconParameterSpec.falcon_1024),
+	Ed25519("Ed25519", "Ed25519", CodeProvider.SunEC,CodeProvider.SunEC, 256, 31536000000L, null, false, new NamedParameterSpec("Ed25519")),
+	Ed448("Ed448", "Ed448", CodeProvider.SunEC,CodeProvider.SunEC, 448, 31536000000L, null, false, new NamedParameterSpec("Ed448")),
 	DEFAULT(BC_FIPS_SHA384withRSAandMGF1);
 
 	private final String signatureAlgorithmName;
@@ -232,6 +237,11 @@ public enum ASymmetricAuthenticatedSignatureType {
 			return new JavaNativeSignature(s, this);
 
 		} else {
+			if (this.getDerivedType()==Ed448 && OS.getCurrentJREVersionByte()<15)
+				return BC_FIPS_Ed448.getSignatureInstance();
+			if (this.getDerivedType()==Ed25519 && OS.getCurrentJREVersionByte()<15)
+				return BC_FIPS_Ed25519.getSignatureInstance();
+
 			return new JavaNativeSignature(Signature.getInstance(signatureAlgorithmName, codeProviderSignature.getCompatibleProvider()), this);
 		}
 	}
@@ -270,9 +280,9 @@ public enum ASymmetricAuthenticatedSignatureType {
 			return 560;
 		else if (this==BC_SHA512withECDSA_CURVE_25519)
 			return 560;*/
-		else if (dt== BC_FIPS_Ed448)
+		else if (dt== BC_FIPS_Ed448 || dt==Ed448)
 			return 912;
-		else if (dt== BC_FIPS_Ed25519)
+		else if (dt== BC_FIPS_Ed25519 || dt==Ed25519)
 			return 512;
 		/*else if (this==BC_SHA256withECDSA_CURVE_41417)
 			return 560;
@@ -393,6 +403,10 @@ public enum ASymmetricAuthenticatedSignatureType {
 
 			return res;
 		} else {
+			if (this.getDerivedType()==Ed448 && OS.getCurrentJREVersionByte()<15)
+				return BC_FIPS_Ed448.getKeyPairGenerator(random, keySizeBits, publicKeyValidityBeginDateUTC, expirationTimeUTC);
+			if (this.getDerivedType()==Ed25519 && OS.getCurrentJREVersionByte()<15)
+				return BC_FIPS_Ed25519.getKeyPairGenerator(random, keySizeBits, publicKeyValidityBeginDateUTC, expirationTimeUTC);
 			KeyPairGenerator kgp = KeyPairGenerator.getInstance(keyGeneratorAlgorithmName, codeProviderKeyGenerator.getCompatibleProvider());
 
 			JavaNativeKeyPairGenerator res = new JavaNativeKeyPairGenerator(this, kgp);
@@ -417,6 +431,7 @@ public enum ASymmetricAuthenticatedSignatureType {
 	}
 	public static void main(String[] args) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
 		Random r=new Random(System.nanoTime());
+		System.out.println(OSVersion.getCurrentOSVersion());
 		int maxSigSizeBits=0;
 		for (ASymmetricAuthenticatedSignatureType t : ASymmetricAuthenticatedSignatureType.values())
 		{
