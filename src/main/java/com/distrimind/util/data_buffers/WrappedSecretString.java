@@ -6,7 +6,7 @@ import com.distrimind.util.AutoZeroizable;
 
 /**
  * @author Jason Mahdjoub
- * @version 1.1
+ * @version 1.2
  * @since Utils 5.10.0
  */
 public class WrappedSecretString extends WrappedString implements AutoZeroizable, ISecretValue {
@@ -76,18 +76,16 @@ public class WrappedSecretString extends WrappedString implements AutoZeroizable
 	public WrappedSecretString transformToSecretString() {
 		return this;
 	}
-	public static boolean constantTimeAreEqual(String expected, String supplied)
+	public static boolean constantTimeAreEqual(CharSequence expected, CharSequence supplied)
 	{
 		if (expected==null || supplied==null)
 			return false;
-		//noinspection StringEquality
 		if (expected == supplied)
 		{
 			return true;
 		}
 
-		//noinspection ManualMinMaxCalculation
-		int len = (expected.length() < supplied.length()) ? expected.length() : supplied.length();
+		int len = Math.min(expected.length(), supplied.length());
 
 		int nonEqual = expected.length() ^ supplied.length();
 
@@ -97,7 +95,6 @@ public class WrappedSecretString extends WrappedString implements AutoZeroizable
 		}
 		for (int i = len; i < supplied.length(); i++)
 		{
-			//noinspection PointlessBitwiseExpression
 			nonEqual |= (supplied.charAt(i) ^ ~supplied.charAt(i));
 		}
 

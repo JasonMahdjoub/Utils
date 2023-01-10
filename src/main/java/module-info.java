@@ -37,8 +37,8 @@ module com.distrimind.util {
 	requires com.distrimind.bouncycastle.core;
 	requires com.distrimind.bouncycastle.prov;
 	requires com.distrimind.bcfips;
-	requires transitive java.naming;
-	requires transitive java.xml;
+	requires java.naming;
+	requires java.xml;
 	requires org.yaml.snakeyaml;
 	//requires java.logging;
 	requires static java.desktop;

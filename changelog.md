@@ -1,6 +1,6 @@
 Utils
 =====
-5.25.0 STABLE (Build: 5033) (from 04/01/2016 to 06/01/2023)
+5.25.2 STABLE (Build: 5041) (from 04/01/2016 to 10/01/2023)
 
 # Creator(s):
 * Jason MAHDJOUB
@@ -9,6 +9,16 @@ Utils
 * Jason MAHDJOUB (Entered in the team at 04/01/2016)
 
 # Changes:
+
+
+### 5.25.2 STABLE (10/01/2023)
+#### Internal change(s)
+* Make WrappedSecretString.constantTimeAreEqual(...) function more generic, and use CharSequence values instead of String
+
+
+### 5.25.1 STABLE (09/01/2023)
+#### Internal change(s)
+* Add transitives rules into module-info file
 
 
 ### 5.25.0 STABLE (06/01/2023)

@@ -67,6 +67,16 @@ public class Utils {
 			VERSION.addCreator(new Person("mahdjoub", "jason"))
 					.addDeveloper(new PersonDeveloper("mahdjoub", "jason", "2016-01-04"))
 					.addDescription(
+							new Description(5, 25, 2, Version.Type.STABLE, 0, "2023-01-10")
+									.addItem(INTERNAL_CHANGE, "Make WrappedSecretString.constantTimeAreEqual(...) function more generic, and use CharSequence values instead of String")
+
+					)
+					.addDescription(
+							new Description(5, 25, 1, Version.Type.STABLE, 0, "2023-01-09")
+									.addItem(INTERNAL_CHANGE, "Add transitives rules into module-info file")
+
+					)
+					.addDescription(
 							new Description(5, 25, 0, Version.Type.STABLE, 0, "2023-01-06")
 									.addItem(NEW_FEATURE, "Add WrappedHashedValue class")
 									.addItem(NEW_FEATURE, "Add WrappedHashedValueInBase64StringFormat class")
